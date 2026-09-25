@@ -92,7 +92,7 @@
 
 **Rules.** MTG-01 an action owned by a Discipline is routed to that discipline's lead for attention and appears in the DL's My Work; MTG-02 external-party actions generate no external notification; they appear in Weekly Coordination "Waiting on client / external"; MTG-03 "Convert to task" creates a task pre-filled from the action and links them; the action then tracks the task's completion; MTG-04 Weekly Coordination in meeting mode can create actions inline against the current meeting record.
 
-**Not built.** Agendas, minutes authoring, attendance, calendar integration, recurring meeting series.
+**Not built.** Agendas, minutes authoring, attendance, automatic calendar synchronisation, recurring meeting series. A meeting may link to a first-release calendar event (§36.5).
 
 ---
 
@@ -205,7 +205,7 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 ---
 
-### 12.15 Resource / Workload View [Phase 2]
+### 12.15 Resource / Workload View [First release under §36]
 
 **Purpose.** Give supervisors and PMs a defensible, cross-project view of who is carrying how much, who has capacity, and where deadlines collide — without pretending estimates are precise.
 
@@ -219,7 +219,7 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 3. Indicators: **Over-assigned** when `load_pct > 110%` in the current or next week; **Under-assigned** when `load_pct < 40%` for the next 2 weeks *and* `unestimated_task_count = 0` (never call someone under-assigned when their work is unestimated); **Deadline cluster** when ≥ 3 tasks across ≥ 2 projects are due within any 3-day window in the next 14 days.
 4. The screen always shows the unestimated count next to the hours so the reader can judge reliability, and states the method in a help popover.
 
-**What it deliberately does not do.** Timesheet reconciliation, actuals vs. estimate, leave/holiday calendars (Phase 3, or import from HR), utilisation targets, resource levelling, forecasting beyond 8 weeks, or capacity planning by role.
+**What it deliberately does not do.** The first-release workload calculation does not subtract logged actual task hours from estimates or treat them as an approved timesheet (§36.8). It also does not use leave/holiday calendars (Phase 3, or import from HR), utilisation targets, resource levelling, forecasts beyond 8 weeks, or capacity planning by role.
 
 **Views.** Person × week grid (heat-shaded load with the number visible) with expandable rows: Person → Project → Tasks (with due dates). Filters: supervisor, discipline, office, project, date range. Sort by load, overdue count, task count. Export.
 
@@ -227,9 +227,9 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 ### 12.16 Gantt / Timeline
 
-**Purpose.** A visual sense of sequence and proximity — what is coming, in what order, and how deliverables relate to milestones. Not a scheduling tool.
+**Purpose.** A visual sense of sequence and proximity — what is coming, in what order, and how deliverables relate to milestones. First-release manual date changes are permitted with confirmation (§36.4); the view is not an automatic scheduling engine.
 
-**Supported [MVP-Recommended]**
+**Supported [MVP-Required]**
 - Horizontal time axis with week and month zoom; today line; project start/target dates.
 - Milestones as diamonds on a top lane, coloured by status, labelled with name and date; slip shown as a hollow diamond at the original date when different.
 - Deliverables as bars from `start_date` (or `created_at` if no start) to `due_date`, grouped by discipline (collapsible), with progress fill and status colour; Overdue bars extend to today with a hatched segment.
@@ -237,11 +237,12 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 - Filters: discipline, milestone, status, show/hide completed.
 - Print-friendly rendering (browser print CSS).
 
-**Supported [Phase 2]**
+**Supported [MVP-Required under §36]**
 - Tasks as thin bars under their deliverable (collapsible).
 - Dependency arrows between tasks (and derived deliverable dependencies), highlighted when unsatisfied and overdue.
 - Drag a bar or diamond to change dates, with a confirmation dialog showing the change and (for milestones) the optional cascade (M-04). Dates are the only thing that changes; nothing else is recalculated.
 - Baseline (original) dates shown as ghost bars.
+- A selected set of permitted projects appears as expandable project groups, each with tasks, deliverables, and milestones; date navigation preserves that scope. Cross-project dependencies are not inferred or created.
 
 **Not supported [Out of Scope]**
 - Automatic scheduling, critical path, float/slack, resource levelling, calendars/working-time, lag/lead (P2 at most), constraint types beyond Finish-to-Start, cost or earned value, import/export of MS Project or P6 files.
@@ -253,3 +254,54 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 ### 12.17 Dashboards and My Work
 
 Module-level behaviour for the Project Dashboard, Portfolio Dashboard, and My Work is fully specified in their screen specifications (§13.1, §13.12, §13.10) because they are composed entirely of the modules above. The shared principle: every number on a dashboard is a link to the filtered list that produced it, and every colour has a visible reason.
+
+---
+
+### 12.18 Project Assignments, Following, and My Staff
+
+**Purpose.** Make project assignment do two things without anyone configuring it: everyone assigned to a project receives all of that project's updates, and every manager can see their direct reports — which projects each person is on, in what role, and what they are carrying, waiting on, and holding up — and staff them on projects.
+
+**Users.** Everyone (following); Supervisors (their supervised staff, §8.8); Executives and System Administrators (all staff).
+
+**Definitions**
+
+- **Project assignment** is membership of the project team (`ProjectMember`, any project role), including Discipline Leads and reviewers auto-added under TM-06. There is no separate assignment entity: the project team is the assignment list.
+- **Following** is a per-user, per-project subscription with one of three levels:
+
+| Level | What the user receives for that project |
+|---|---|
+| **All activity** | Everything in *My items only*, plus every logged change on the project made by someone else (creates, status changes, assignments, date changes, dependency changes, deliverable issues, decisions, milestone changes, comments), shown in the Following feed and summarised in the daily digest. |
+| **My items only** | The standard notifications of §17.2 for items the user is assigned, reviews, owns, or watches, and @mentions. This is also the behaviour for users who do not follow the project. |
+| **Muted** | Only direct assignments to the user (task, review, decision ownership) and @mentions. |
+
+- **Supervised staff** means the supervisor's direct reports (§8.8).
+
+**Inputs.** `ProjectFollow`: `user_id`, `project_id`, `level` (AllActivity, MyItemsOnly, Muted), `source` (Assignment = set by the system on team assignment; Manual = set or changed by the user), `last_seen_at` (Following feed read marker), `created_at`, `updated_at`. One row per user per project.
+
+**Outputs.** Follow control in the project header; Following tab in the Notification Centre (§13.17); Project updates and My staff digest sections (§17.3); My Staff page (§13.19); Staff Assignments report (§19).
+
+**Business rules**
+
+- ASG-01 **Assignment turns following on.** When a user is added to a project team as PM, Discipline Lead, Team Member, or Viewer, a follow is created at **All activity** with source Assignment. A user auto-added only as Reviewer (TM-06) gets **My items only**, because they are there for one review. An existing follow with source Assignment is raised to All activity when the user gains a role other than Reviewer; a follow with source Manual is never changed by the system.
+- ASG-02 **The user's choice sticks.** Users may change their level or unfollow at any time; any change sets source to Manual. Nobody can set another user's follow level (PMs cannot force following, §17.1).
+- ASG-03 **Manual following.** Any user who can view a project may follow it (source Manual), for example an Executive tracking a key project. Restricted projects (§8.7) can only be followed by users who can view them.
+- ASG-04 **Leaving a team.** When a user is removed from a project team, a follow with source Assignment is deleted; a Manual follow is kept while the user can still view the project. Losing view access deletes any follow.
+- ASG-05 **Feed contents.** The Following feed is the Activity History (§13.14) of the user's followed projects at All activity, excluding the user's own actions and filtered by current permissions at read time. It is read from `activity_log`; the Hub does not write a `Notification` row per change per follower. Entries sharing a `correlation_id` (bulk actions, cascades, template instantiation; G-10) collapse into one entry with a count. Unread means after the project's `last_seen_at`; unread counts use the notification centre's polling (§17.6).
+- ASG-06 **No duplicates.** An event that already produced a personal notification for the user (§17.2) is shown in the feed with a "notified" marker but is not counted again as unread or repeated in the Project updates digest section.
+- ASG-07 **Project status.** Setup: changes are recorded but produce no unread counts or digest content, and on activation every follower's `last_seen_at` is set to the activation time so set-up work does not arrive as a flood. On Hold: the feed continues; the digest section is suppressed (§17.3). Archived and Cancelled: follows are kept but produce nothing.
+- ASG-08 **Staff scope.** A Supervisor's staff is their direct reports: active users whose `supervisor_id` is the supervisor, read at request time with no hierarchy traversal. Inactive users are hidden from My Staff by default ("show inactive" toggle); their open work is still flagged by A-18.
+- ASG-09 **What managers see.** For each person in scope: their permitted project assignments (project, roles, primary discipline, date added), their permitted My Work read-only (§13.10), and counts from permitted materialised state rows — open tasks, overdue, blocked, blocking others, reviews waiting on them, owned deliverables due within 14 days, last activity. Work on Restricted projects the manager cannot view is excluded from the list and counts (§36.1).
+- ASG-10 **What managers can do.** Reassign tasks owned by their direct reports (§8.5.1), and staff them on projects: add a direct report to the team of any project the supervisor can view (Setup, Active, or On Hold) as Team Member with a primary discipline, or remove them from it (the TM-04 reassignment prompt applies to their open items). Each staffing change notifies the project's PM in-app and is logged with the supervisor as actor. Everything else about the team — other roles, Discipline Leads, and people who are not the supervisor's direct reports — stays with the PM (§12.2), who can also remove anyone a supervisor added.
+- ASG-11 **Staff assignment notices.** When someone else adds a person to or removes them from a project, or makes them a Discipline Lead, the person's supervisor receives an in-app notification and sees the change in the next digest's My staff section. Supervisors do not receive every change on their staff's work; the person's row in My Staff is the drill-down.
+
+**Permissions.** Follow, unfollow, and change level: any user, for their own follows on projects they can view. My Staff: Supervisors (supervised staff); Executives and System Administrators (any scope, including all staff). Staffing: Supervisors add or remove their direct reports as Team Members (ASG-10); all other team changes remain PM-only. Project Managers without the Supervisor role see their project members through the Team tab as today.
+
+**UI behaviour.** The project header shows a follow control ("Following: All activity ▾") with the tooltip "You follow this project because you are on the team." The "Added to a project" notification says the user now follows the project and how to change the level. My Work → My Projects shows each project's follow level with inline change. The Following tab and the My Staff page are specified in §13.17 and §13.19.
+
+**Dependencies.** Project Team (§12.2), Activity Log (§20), Notifications (§17), My Work (§13.10), supervisor data (§8.8, §23.6).
+
+**Edge cases.** E-25 to E-29.
+
+**Acceptance criteria.** AC-ASG-01 … AC-ASG-09.
+
+> **Design note.** "Everyone on the project gets all updates" is implemented as a feed over the activity log rather than as notifications, because the log is already written in the same transaction as every change (§20.3). All updates therefore cost one table and one query instead of a notification row per member per change, and immediate email stays reserved for events that need a response (§17.1). Assignment switches following on because being on the team is the strongest signal of interest; the three levels exist because a discipline lead on ten projects will want All activity on two of them and Muted on the rest.

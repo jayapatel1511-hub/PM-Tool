@@ -25,13 +25,14 @@ Each module is specified with purpose, users, inputs, outputs, business rules, p
 | `phase_id` | FK Phase | No | Current phase; PM-set. |
 | `start_date` | date | Recommended | |
 | `target_completion_date` | date | Recommended | |
+| `priority` | enum Low/Medium/High/Critical | Yes | Default Medium; primary PM may change it for the project board (§36.2). |
 | `visibility` | enum Open/Restricted | Yes (default Open) | §8.7 |
 | `internal_notes` | text (long) | No | Not shown on portfolio; visible to project members and management. |
 | `coordination_day` | weekday | No | Day the weekly coordination meeting is held; drives the "this week" window (Recommendation). |
 | `health_override`, `health_override_note`, `health_override_by`, `health_override_at`, `health_override_expires_at` | see §16.4 | No | |
 | `created_from_template_id`, `template_version` | FK / int | No | Set on template instantiation. |
 | `important_links` | child rows (`ProjectLink`: title, url, link_type) | No | SharePoint site, Teams channel, network folder, client portal. |
-| Derived | `health_computed`, `next_milestone`, `next_submission_milestone`, task/deliverable/decision counts, discipline summaries, `last_coordination_reviewed_at` | — | Computed |
+| Derived | `health_computed`, `progress_pct`, `next_milestone`, `next_submission_milestone`, task/deliverable/decision counts, discipline summaries, `last_coordination_reviewed_at` | — | Project progress is Complete tasks / non-Cancelled tasks, or unknown when there are none (§36.2). |
 
 **Outputs.** Project header (used on every project screen), project card in list, portfolio row, dashboard metrics, activity log entries.
 
@@ -39,7 +40,7 @@ Each module is specified with purpose, users, inputs, outputs, business rules, p
 
 **Permissions.** §8.5.1 create; §8.5.2 edit/status/archive.
 
-**UI behaviour.** Create-project dialog is a two-step form (identity → team & disciplines) with an option "Start from template" (P2). Project header shows key, name, client, PM, phase, status pill, health pill (with "why" popover), next milestone with countdown, and quick links. Status change opens a confirmation dialog with reason field and consequence text ("Putting this project on hold will stop overdue and attention evaluation for 42 open tasks.").
+**UI behaviour.** Create-project dialog is a two-step form (identity → team & disciplines) with an option "Start from template" (P2). Project header shows key, name, client, PM, phase, status pill, health pill (with "why" popover), next milestone with countdown, quick links, and the user's follow control (§12.18). Status change opens a confirmation dialog with reason field and consequence text ("Putting this project on hold will stop overdue and attention evaluation for 42 open tasks.").
 
 **Dependencies.** Users/Org reference data; Teams & Disciplines; Health (§16).
 
@@ -66,9 +67,9 @@ Discipline Lead is not stored on `ProjectMember`; it is derived from `ProjectDis
 
 **Outputs.** Team list; discipline chips with lead; discipline summary table: per discipline → open tasks, overdue, blocked, waiting, deliverables due in next 14 days, next due item, DL name, and a discipline status colour derived by the same rules as project health but scoped to the discipline's items (§16.6).
 
-**Business rules.** TM-01 a user appears once per project; TM-02 a discipline appears once per project; TM-03 the primary PM cannot be removed from the team (change the PM first); TM-04 removing a member who owns open items prompts for reassignment (bulk reassign dialog) or leaves items assigned with an "Inactive on project" indicator (PM's choice, logged); TM-05 removing a discipline is only allowed if it has no non-cancelled deliverables or tasks (otherwise deactivate: hidden from pickers, existing items retained); TM-06 assigning work to a non-member auto-adds them as Team Member (task) or Reviewer (review) and notifies the PM (in-app).
+**Business rules.** TM-01 a user appears once per project; TM-02 a discipline appears once per project; TM-03 the primary PM cannot be removed from the team (change the PM first); TM-04 removing a member who owns open items prompts for reassignment (bulk reassign dialog) or leaves items assigned with an "Inactive on project" indicator (choice of the PM, or of the Supervisor removing their direct report; logged); TM-05 removing a discipline is only allowed if it has no non-cancelled deliverables or tasks (otherwise deactivate: hidden from pickers, existing items retained); TM-06 assigning work to a non-member auto-adds them as Team Member (task) or Reviewer (review) and notifies the PM (in-app).
 
-**Permissions.** PM only for changes.
+**Permissions.** PM for all changes; Supervisors may add or remove their direct reports as Team Members (§12.18 ASG-10).
 
 **UI behaviour.** Team tab with two panels: Disciplines (with lead picker) and Members (with role checkboxes and primary discipline). People picker searches active users by name/email; shows office and job title. Adding a lead who is not on the team adds them in one action.
 
@@ -292,7 +293,7 @@ Lag/lead days: **[Phase 2]**. In MVP, represent a waiting period (e.g., client r
 | D-15 | **Decision block** (Recommended; requires thin Decision Register): a task linked to a Decision (via ItemLink with relation `blocked_by_decision`) whose status is Pending/Under Review/Deferred and whose `required_by_date` < today is Blocked with the decision listed as blocker. A linked decision that is not yet overdue shows as Waiting. |
 | D-16 | Adding a dependency where the predecessor is already Complete is allowed (documents the relationship) and has no effect. |
 | D-17 | Adding a dependency to a successor that is already Complete is allowed with a warning. |
-| D-18 | **Derived deliverable dependency** (Recommended): Deliverable B "depends on" Deliverable A if any task in B has a predecessor in A (A ≠ B). Shown read-only on both deliverables and on the Timeline (P2 arrows). |
+| D-18 | **Derived deliverable dependency** (Recommended): Deliverable B "depends on" Deliverable A if any task in B has a predecessor in A (A ≠ B). Shown read-only on both deliverables and on the first-release Timeline arrows (§36.4). |
 
 **Outputs.** Blockers list on task; "Blocking N" chip; chain view (predecessors up, successors down); affected milestones; dashboard "Blocked" count; attention items A-02, A-03; notifications.
 

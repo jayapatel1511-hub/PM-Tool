@@ -30,6 +30,8 @@ This specification uses a small set of consistent labels. They matter, because t
 
 Canonical status names, role names, and threshold names are defined once in Section 10 (Core Data Model) and used verbatim everywhere else. If a later section appears to contradict Section 10, Section 10 wins and the later section should be corrected.
 
+**Visual-reference boundary.** The user confirmed the six workspace views in §36 and task-hour entry under Time as first-release *functional* requirements. `Coordination Hub v2.dc.html` (preserved in `docs/reference/coordination-hub-v2/`) is the only downloaded UI prototype to use for visual cues. Its appearance, placement, sample content, interactions, and old release badges are illustrative, not a design specification or authority for product behavior. The six-panel image records the confirmed feature scope but does not prescribe the finished design. Requirements and acceptance criteria in this document and the feature packets govern implementation; visual decisions require design review.
+
 ---
 
 ## 1. Executive Summary
@@ -52,10 +54,12 @@ The product is built entirely from structured data and deterministic rules. Ever
 - A Project Dashboard, a personal My Work page, and a Weekly Coordination view designed to run a multidisciplinary coordination meeting directly from the application.
 - A thin Decision Register, because decisions are the most common non-task blocker in design projects. (Recommended for MVP; see Section 27 for the rationale and the fallback if it is cut.)
 - Comments with @mentions, document links to SharePoint/Teams/network folders, a full activity log, in-app and email notifications, and corporate single sign-on.
+- Project assignment that doubles as a subscription: everyone assigned to a project follows it and receives all of its updates (in-app feed and daily digest), and a My Staff page where every manager sees their direct reports' assignments and work and staffs them on projects.
+- The six-view visual workspace in §36: grouped project board, cross-project task board and Gantt, team calendar, overview dashboard, and personal My Work, with functional navigation, saved views, and task-hour entry under Time in the first release.
 
 **What comes later**
 
-Risk and Issue registers, Meeting Actions, Project Templates, the Resource/Workload view, the Portfolio Dashboard, an improved Gantt, and saved views are Phase 2. Teams and SharePoint integration, ERP/Vantagepoint integration, and financial or utilisation data are Phase 3.
+Risk and Issue registers, Meeting Actions, and Project Templates are Phase 2. The Resource/Workload view, Portfolio Dashboard, improved Gantt, and saved views move into the first release under §36. Teams and SharePoint integration, ERP/Vantagepoint integration, and financial or utilisation data are Phase 3.
 
 **Recommended technical approach**
 
@@ -129,13 +133,13 @@ Success is measured by coordination outcomes, not feature counts:
 - A **system of record for coordination**: who owns what, when it is due, what it depends on, and what state it is in.
 - A **meeting tool**: the Weekly Coordination view is designed to be projected and walked through.
 - A **personal work queue**: My Work is designed to be the one list a person opens each morning.
-- A **visibility layer for management**: the Portfolio Dashboard and Resource View (Phase 2) answer "which projects need help" and "who needs help".
+- A **visibility layer for management**: the first-release Portfolio Dashboard and Resource View answer "which projects need help" and "who needs help".
 
 ### 3.2 What the Hub is not
 
 - Not a scheduling engine. It does not compute critical paths, level resources, or auto-shift dates.
 - Not a document management system. It links to documents; it does not store them.
-- Not a timesheet, accounting, or ERP system.
+- Not a payroll timesheet, accounting, or ERP system. The first-release Time view records actual hours against tasks (§36.8), without billing or approval workflows.
 - Not a replacement for Teams, email, or the engineering tools in which the actual work is produced.
 - Not an AI product. Nothing in the base product depends on or includes AI.
 
@@ -202,7 +206,7 @@ The following are deliberately not goals of this product, at any phase. See Sect
 
 - Replacing Primavera P6, Microsoft Project, or any CPM scheduling tool.
 - Replacing SharePoint, Teams, OneDrive, or a document management system.
-- Tracking time, costs, budgets, invoices, or payroll.
+- Tracking billable rates, costs, budgets, invoices, or payroll. Actual task hours are tracked under §36.8.
 - Performing or automating engineering calculations or engineering decisions.
 - Providing AI assistants, summaries, recommendations, or predictions.
 - Serving external clients as system users (external parties are referenced, not logged in, until at least Phase 3).
@@ -249,14 +253,14 @@ Personas are composites used to make design decisions. Names are illustrative. M
 - **Role:** Manages 12 civil staff across many projects. Not a member of most project teams.
 - **Goals:** See each person's load across projects; spot overloaded staff and overlapping deadlines; know who has capacity when a PM asks for help; reassign work when someone is away or leaves.
 - **Frustrations:** No cross-project view without asking each PM. Estimates are unreliable but something is better than nothing.
-- **Uses:** Resource View (Phase 2); Portfolio Dashboard filtered by discipline; My Work of supervised staff (read).
+- **Uses:** My Staff for their direct reports (assignments, work, staffing); first-release Resource View; Portfolio Dashboard filtered by discipline; My Work of supervised staff (read).
 
 ### 7.6 Lena — Executive / Regional Manager
 
 - **Role:** Responsible for a region or business unit with 40–100 active projects.
 - **Goals:** Which projects are at risk this week and why; which PMs need support; upcoming submissions across the portfolio.
 - **Frustrations:** Health reported by PMs is optimistic and inconsistent. No single place to see it.
-- **Uses:** Portfolio Dashboard (Phase 2); Project Dashboard (read); reports export.
+- **Uses:** First-release Portfolio Dashboard; Project Dashboard (read); reports export.
 
 ### 7.7 Jordan — System Administrator
 

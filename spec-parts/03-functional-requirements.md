@@ -31,7 +31,7 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-PRJ-03 | PM can edit project information, links, phase, and internal notes. | R | §12.1 |
 | FR-PRJ-04 | PM can change project status per the transition rules; status changes are logged and, where relevant, require a reason. | R | §12.1, §15 |
 | FR-PRJ-05 | Projects display computed health and, optionally, a PM override with note and expiry. | R | §16 |
-| FR-PRJ-06 | Project list supports search, filters (status, PM, client, office, phase, discipline, health), sorting, and column selection. | R | §13.2 |
+| FR-PRJ-06 | Project list and grouped board support search, filters, sorting, column selection, PM owner, priority, target completion due date, and derived progress. | R | §13.2, §36.2 |
 | FR-PRJ-07 | Complete projects can be archived; archived projects are read-only and excluded from default lists but remain searchable. | R | §12.1, §35 |
 | FR-PRJ-08 | A per-project `visibility` flag (Open/Restricted) exists in the schema and is enforced; UI control shipped only if required. | Rec | §8.7 |
 | FR-TEAM-01 | PM manages the project team: add/remove members, set project roles, set a member's primary discipline. | R | §12.2 |
@@ -78,7 +78,7 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-TSK-07 | Manual block with type and reason can be set and cleared; while set, the task is Blocked. | R | §12.6 |
 | FR-TSK-08 | Collaborators and watchers can be added to a task; collaborators may update progress/status; watchers receive notifications only. | Rec | §12.5 |
 | FR-TSK-09 | Task list supports filters (status, assignee, reviewer, discipline, deliverable, milestone, priority, due window, indicators), sorting, grouping, column selection, and bulk actions (assign, due date shift, status). | R | §13.3 |
-| FR-TSK-10 | Kanban board by status with swimlanes by discipline, deliverable, or assignee; drag respects transition rules. | R | §13.4 |
+| FR-TSK-10 | Four-lane Kanban across selected projects, with project-labelled cards, swimlanes, counts, add controls, and guarded transitions. | R | §13.4, §36.3 |
 | FR-TSK-11 | Tasks are soft-deleted; deletion is logged with a snapshot; dependencies are removed and affected users notified. | R | §12.5 |
 | FR-TSK-12 | Completed tasks can be reopened with a reason; successors are re-evaluated. | R | §15 T-14 |
 | FR-TSK-13 | Due-date change count is tracked and shown when ≥ 3. | Rec | §12.5 |
@@ -134,22 +134,22 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-ATT-03 | Attention items are visible on the Project Dashboard, Weekly Coordination, My Work (for items the user owns), and Portfolio (counts). | R | §13 |
 | FR-HLT-01 | Project health is computed per §16 and recomputed on relevant changes and nightly. | R | §16 |
 | FR-HLT-02 | PM may override health with a mandatory note; override expires after `health_override_expiry_days`; both computed and reported health are visible. | R | §16.4 |
-| FR-HLT-03 | Daily health snapshots are stored for trend display. | Rec (store) / P2 (display) | §16.5 |
+| FR-HLT-03 | Daily health snapshots are stored and displayed for the first-release portfolio trend. | R | §16.5, §36.6 |
 | FR-DASH-01 | Project Dashboard per §13.1. | R | §13.1 |
 | FR-WC-01 | Weekly Coordination view per §13.9 with agenda sections, "since last review" delta, inline updates, and "mark reviewed". | R | §13.9 |
 | FR-WC-02 | Export of the coordination summary as text/markdown to clipboard. | Rec | §13.9 |
-| FR-MYW-01 | My Work per §13.10 with sections, filters, sorting, and grouping. | R | §13.10 |
-| FR-PORT-01 | Portfolio Dashboard per §13.12. | P2 | §13.12 |
-| FR-RES-01 | Resource / Workload View per §12.15 and §13.11. | P2 | §12.15 |
+| FR-MYW-01 | My Work per §13.10 with existing sections plus Today, Upcoming, Overdue, Completed, Inbox, and saved creator/assignee views. | R | §13.10, §36.7 |
+| FR-PORT-01 | Portfolio Dashboard per §13.12, plus first-release overview requirements in §36.6. | R | §13.12, §36.6 |
+| FR-RES-01 | Resource / Workload View per §12.15 and §13.11, available in the first release. | R | §12.15, §36.8 |
 
 ### 11.10 Views, timeline, templates
 
 | ID | Requirement | Class | Detail |
 |---|---|---|---|
-| FR-VIEW-01 | Timeline showing milestones and deliverables with today line, progress fill, and status colour; read-only. | Rec | §12.16 |
-| FR-VIEW-02 | Tasks on timeline, dependency arrows, drag-to-reschedule with confirmation. | P2 | §12.16 |
+| FR-VIEW-01 | Timeline showing milestones and deliverables with today line, progress fill, and status colour. | R | §12.16, §36.4 |
+| FR-VIEW-02 | Tasks on timeline, dependency arrows, drag-to-reschedule with confirmation. | R | §12.16, §36.4 |
 | FR-VIEW-03 | Activity History view per project and per item. | R | §13.14, §20 |
-| FR-VIEW-04 | Saved views (personal and project-shared filter/sort/column presets). | P2 | §18.4 |
+| FR-VIEW-04 | Saved views (personal and project-shared filter/sort/column presets). | R | §18.4, §36.7 |
 | FR-TPL-01 | Project Templates with disciplines, milestones, deliverables, tasks, dependencies, and relative date offsets; instantiation with a date wizard; snapshot semantics. | P2 | §12.14 |
 | FR-TPL-02 | "Add from template" to append a discipline pack to an existing project. | P2 | §12.14 |
 
@@ -163,7 +163,7 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-NOT-04 | Microsoft Teams notifications. | P3 | §26 |
 | FR-SRCH-01 | Global search across project number/name, client, tasks, deliverables, milestones, decisions, and people; results grouped by type; permission-filtered. | R | §18 |
 | FR-SRCH-02 | Direct key lookup (typing `1234-T0042` opens the item). | R | §18 |
-| FR-RPT-01 | Deterministic reports per §19 with CSV/XLSX export. | R (core set) / P2 (portfolio and workload reports) | §19 |
+| FR-RPT-01 | Deterministic reports per §19 with CSV/XLSX export, including first-release portfolio and workload reports. | R (core, portfolio, workload) / P2 (later registers) | §19, §36 |
 | FR-AUD-01 | Immutable activity log for creates, updates (field-level), status changes, assignments, date changes, deletions, decision changes, and health overrides. | R | §20 |
 | FR-AUD-02 | Item-level history tab and project-level Activity History with filters. | R | §13.14 |
 | FR-AUD-03 | Export of activity log for a project. | Rec | §20 |
@@ -176,3 +176,20 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-ADM-02 | "Reassign work" tool listing all open items owned by an inactive or departing user, with bulk reassignment. | Rec | §32 |
 | FR-ADM-03 | Health and notification settings screen. | R | §13.15 |
 | FR-ADM-04 | Template administration. | P2 | §12.14 |
+
+### 11.13 Assignments, following, and staff visibility
+
+| ID | Requirement | Class | Detail |
+|---|---|---|---|
+| FR-ASG-01 | Adding a user to a project team makes them follow the project: at **All activity** as PM, Discipline Lead, Team Member, or Viewer; at **My items only** when auto-added only as Reviewer. A follow level the user has set themselves is never changed. | R | §12.18 ASG-01 |
+| FR-ASG-02 | Users set their own follow level per project (All activity, My items only, Muted) or unfollow, from the project header and My Work → My Projects. Any user who can view a project may follow it. | R | §12.18 |
+| FR-ASG-03 | The Notification Centre has a Following tab listing every change by others on projects the user follows at All activity, with unread counts per project. | R | §12.18, §13.17 |
+| FR-ASG-04 | The daily digest includes a Project updates section for followed projects. | R | §17.3 |
+| FR-ASG-05 | Supervisors have a My Staff page listing their direct reports with project assignments, roles, and work counts; Executives and Admins can widen the scope to all staff. | R | §13.19 |
+| FR-ASG-06 | From My Staff, a Supervisor can open a direct report's My Work (read-only), reassign their tasks, and staff them on projects: add them to a project team as Team Member or remove them; the project's PM is notified. | R | §8.5, §12.18 ASG-10 |
+| FR-ASG-07 | A person's supervisor is notified (in-app and in the My staff digest section) when someone else adds them to or removes them from a project, or makes them a Discipline Lead. | Rec | §17.2, §17.3 |
+| FR-ASG-08 | Staff Assignments report (person, project, role, primary discipline, added on) with CSV/XLSX export, scoped to the user's staff. | Rec | §19 |
+
+### 11.14 Six-view visual workspace
+
+The first-release requirements FR-VIS-01 through FR-VIS-10 and acceptance criteria AC-VIS-01 through AC-VIS-08 are specified in §36. They extend the existing project, task, portfolio, resource, saved-view, and task-hour requirements without replacing their permission or workflow rules.

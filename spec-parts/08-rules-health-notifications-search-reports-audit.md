@@ -106,6 +106,10 @@ C-01 to C-08 as in §12.8; DOC-01 to DOC-04 as in §12.7.
 
 **Example 3 — Due-soon override.** T0042 due 2026-09-17, today 2026-09-14, T0031 incomplete but not overdue (due 2026-09-16). `due − today = 3 ≤ task_due_soon_days (5)` → T0042 Blocked (D-06 c) even though the predecessor is not yet overdue; this is the "you will not make it" signal.
 
+### 15.13 Assignment and following rules (ASG)
+
+ASG-01 to ASG-11 as in §12.18.
+
 ---
 
 ## 16. Project Health Logic
@@ -171,7 +175,7 @@ The "Why?" popover lists each input that is non-zero with its value and the colo
 
 ### 16.5 Health snapshots
 
-Nightly, for every Active project, store `ProjectHealthSnapshot` (`project_id`, `date`, `computed_health`, `reported_health`, the input values). This is cheap (one row per project per day) and enables the Portfolio trend sparkline and "how long has this been red" without recomputing history. Storing is MVP-Recommended; display is Phase 2.
+Nightly, for every Active project, store `ProjectHealthSnapshot` (`project_id`, `date`, `computed_health`, `reported_health`, the input values). This enables the first-release Portfolio trend sparkline and "how long has this been red" without recomputing history. Storing and display are required for the first release under §36.
 
 ### 16.6 Discipline status
 
@@ -193,6 +197,7 @@ Health and milestone status are recomputed (a) on demand when a dashboard/portfo
 - Every notification links to the item and states the project.
 - Users can turn any channel off per event type; PMs cannot force notifications on others.
 - Nothing is sent to external parties in MVP.
+- **Following is how "all updates" works.** Being assigned to a project follows it (§12.18). Following at All activity delivers every change others make on the project to the in-app Following feed and the daily digest, never as one email per change.
 
 ### 17.2 Event catalogue and defaults
 
@@ -226,20 +231,24 @@ Channels: **App** = in-app notification centre; **Email** = immediate email; **D
 | Health override set/expired | PM | ● | | |
 | Work reassigned away from you | Previous assignee | ● | | |
 | Predecessor of your task was deleted / dependency removed | Successor assignee | ● | | |
+| Any change by someone else on a project you follow at All activity | Followers | ● (Following tab) | | ● (Project updates) |
+| Someone else added one of your direct reports to or removed them from a project, or made them Discipline Lead | Supervisor | ● | | ● (My staff) |
+| A Supervisor added or removed one of their direct reports on your project team | PM | ● | | ● |
 
 ### 17.3 Daily digest
 
-One email per user per day at `digest_send_time_local` (default 07:00), only if there is content. Sections, each capped at 10 rows with "and n more" linking to My Work: Overdue (mine) · Due in the next N days (mine) · Blocked (mine) with blockers · Reviews waiting on me · Decisions I own/requested due or overdue · For PMs and DLs: attention items Critical/Warning per project · Milestones approaching in my projects. Subject line: "Hub digest — 3 overdue, 2 reviews, 1 blocked". No digest for projects in Setup/On Hold. Weekend digests are suppressed by default (Recommendation).
+One email per user per day at `digest_send_time_local` (default 07:00), only if there is content. Sections, each capped at 10 rows with "and n more" linking to My Work: Overdue (mine) · Due in the next N days (mine) · Blocked (mine) with blockers · Reviews waiting on me · Decisions I own/requested due or overdue · For PMs and DLs: attention items Critical/Warning per project · Milestones approaching in my projects · **Project updates**: for each project followed at All activity, counts of changes by type since the last digest and the five most important (status, assignment, date, deliverable issued, decision), linking to the Following tab · **For Supervisors — My staff**: direct reports with overdue or blocked work or reviews waiting beyond `review_stale_days`, and assignment changes made by others since the last digest. Subject line: "Hub digest — 3 overdue, 2 reviews, 1 blocked" (plus "· 14 project updates" when that section has content). No digest for projects in Setup/On Hold. Weekend digests are suppressed by default (Recommendation).
 
 ### 17.4 Preferences
 
-Per user: each event type → App / Email / Off (Digest is a single on/off with time). Per project mute (App and Email off for that project except assignment and mention) — Recommendation. Defaults are set by Admin (Settings) and applied to new users; changes to defaults do not overwrite existing user choices.
+Per user: each event type → App / Email / Off (Digest is a single on/off with time). Per project follow level (§12.18): All activity, My items only, or Muted (App and Email off for that project except direct assignments and mentions). Defaults are set by Admin (Settings) and applied to new users; changes to defaults do not overwrite existing user choices.
 
 ### 17.5 Suppression and de-duplication
 
 - No self-notifications.
 - Collapse: multiple changes to the same item by the same actor within 5 minutes produce one in-app notification ("Marc updated 1234-T0042 (3 changes)").
 - Digest de-dup: an item appears once per digest in its most severe section.
+- Following de-dup: an event that already produced a personal notification for the user is not counted again in the Following feed's unread count or the Project updates digest section (ASG-06).
 - Immediate emails for the same event on the same item to the same user are not repeated within 24 hours (e.g., A-03 first detection only).
 - Bulk actions produce one notification per recipient summarising the affected items, not one per item.
 - Template instantiation in Setup status sends assignment notifications only when the project is activated (batched per user: "You were assigned 12 tasks on 1234").
@@ -275,7 +284,7 @@ PostgreSQL full-text search (`tsvector` columns maintained by trigger or applica
 
 Every list endpoint accepts filters as query parameters (§25.5). The UI's filter bar maps one-to-one to these parameters so URLs are shareable and reproducible. Filter operators: equals / in-list (enums, IDs), date range (`dueFrom`, `dueTo`), boolean indicators (`overdue=true`, `blocked=true`), text `q` within the list. Filters combine with AND; multi-value fields are OR within the field.
 
-### 18.4 Saved views [Phase 2]
+### 18.4 Saved views [First release under §36]
 
 `SavedView`: `owner_id`, `scope` (Personal | Project), `project_id` (nullable), `list_type` (Tasks, Deliverables, Decisions, Projects…), `name`, `filters` (JSON), `sort`, `columns`, `group_by`, `is_default`. Personal views appear in the user's view switcher; Project views (created by PM/DL) appear for all project members. Views store filter definitions, not results.
 
@@ -298,12 +307,14 @@ All reports are deterministic queries over current data (or snapshots where note
 | Review Queue | reviewer, project(s) | Key, task/deliverable, assignee, ready since, days waiting, round | My / All | MVP |
 | Stale Work | project(s), days | Key, task, assignee, last activity, days | Project / All | MVP |
 | Project Activity Log | project, date range, action types | Timestamp, actor, action, item, change | Project | MVP (Rec) |
-| Projects At Risk | office, PM, health | Project, PM, computed/reported health, why, next submission | Portfolio | P2 |
+| Staff Assignments | scope (direct reports / all staff), discipline, office, project, role | Person, project, project status, role(s), primary discipline, added on, added by, open and overdue tasks on the project | Staff | MVP (Rec) |
+| Projects At Risk | office, PM, health | Project, PM, computed/reported health, why, next submission | Portfolio | First release (§36) |
 | Open Issues / High Risks | project(s), severity | Register rows | Project / All | P2 |
 | Meeting Actions Outstanding | project, owner type | Action rows | Project | P2 |
-| Workload by Employee | supervisor, discipline, weeks | Person, week columns (hours/capacity), open tasks, unestimated, overdue | Resources | P2 |
-| Workload by Discipline | office, weeks | Discipline, week columns aggregated | Resources | P2 |
-| Health History | project(s), date range | Date, computed, reported (from snapshots) | Portfolio | P2 |
+| Workload by Employee | supervisor, discipline, weeks | Person, week columns (hours/capacity), open tasks, unestimated, overdue | Resources | First release (§36) |
+| Workload by Discipline | office, weeks | Discipline, week columns aggregated | Resources | First release (§36) |
+| Health History | project(s), date range | Date, computed, reported (from snapshots) | Portfolio | First release (§36) |
+| Task Hours | project(s), task, person, work-date range | Work date, person, project, task, actual hours, note, total hours | My / Project / Staff (permission-filtered) | First release (§36.8) |
 | Attention Items Export | project(s), severity | Rule, severity, item, why, owner, age | Project / All | P2 |
 
 **Export rules.** CSV is UTF-8 with BOM (Excel-friendly); XLSX has a header row, frozen pane, date-typed columns, and a "Parameters" sheet recording filters and generation time. Exports are limited to 50,000 rows per request (larger runs split by project). Exports are logged (who exported which report when) but not their content.
@@ -328,7 +339,7 @@ All reports are deterministic queries over current data (or snapshots where note
 | Attention | Snooze set/expired |
 | Admin | Reference data changes; threshold changes; system role changes; user activation/deactivation |
 | Access (minimal) | Sign-in events (success), export events |
-| Not logged | Views/reads of items; comment body edits within the 15-minute window (only "edited" flag); search queries |
+| Not logged | Views/reads of items; comment body edits within the 15-minute window (only "edited" flag); search queries; follow level changes and feed read markers (personal preferences) |
 
 ### 20.2 Structure
 

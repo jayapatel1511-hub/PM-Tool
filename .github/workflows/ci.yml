@@ -1,0 +1,39 @@
+# Build, test and scan on every pull request and push to main (§23.7, Q15: the repository is on GitHub).
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+permissions: { contents: read }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:17-alpine
+        env: { POSTGRES_DB: hub, POSTGRES_USER: hub, POSTGRES_HOST_AUTH_METHOD: trust }
+        ports: ["55432:5432"]
+        options: --health-cmd "pg_isready -U hub" --health-interval 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: "10.0.x" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: npm, cache-dependency-path: web/package-lock.json }
+      - run: dotnet restore Hub.slnx
+      - run: dotnet build Hub.slnx --no-restore -c Release
+      - name: Tests with coverage (rules engine ≥ 95 % branches, services ≥ 70 %)
+        run: dotnet test Hub.slnx --no-build -c Release --collect:"XPlat Code Coverage" --results-directory coverage
+      - run: python3 tools/coverage_gate.py coverage
+      - name: Vulnerable NuGet packages
+        run: dotnet list Hub.slnx package --vulnerable --include-transitive | tee vuln.txt && ! grep -q "Critical" vuln.txt
+      - run: npm ci
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+      - name: Lint, including accessibility rules (§22, packet 011 FR-002)
+        run: npm run lint
+        working-directory: web
+      - run: npm audit --audit-level=critical --omit=dev
+        working-directory: web
+      - name: Specification is current and fully traced
+        run: python3 tools/trace_spec.py --check

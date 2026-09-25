@@ -1,0 +1,109 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Design tokens. Visual cues from docs/reference/coordination-hub-v2 (navy frame, blue accent);
+   typography follows §13.0: one system sans-serif stack, 13–14 px tables, 16 px body text. */
+:root {
+  --radius: 0.5rem;
+  --background: #f4f6f9;
+  --foreground: #1b2230;
+  --card: #ffffff;
+  --card-foreground: #1b2230;
+  --popover: #ffffff;
+  --popover-foreground: #1b2230;
+  --primary: #1d55d0;
+  --primary-foreground: #ffffff;
+  --secondary: #eceff4;
+  --secondary-foreground: #1b2230;
+  --muted: #f2f4f7;
+  --muted-foreground: #555f6f;
+  --accent: #eaf1fe;
+  --accent-foreground: #1a48ad;
+  --destructive: #b42318;
+  --border: #e2e6ec;
+  --input: #cbd2dc;
+  --ring: #2563eb;
+
+  --frame: #1b2230;
+  --frame-foreground: #e4e8ee;
+  --frame-muted: #9aa4b2;
+  --frame-active: #2563eb;
+
+  /* Status colour language (§13.0); always paired with text and an icon. */
+  --ok: #177d43;         --ok-bg: #e7f7ed;
+  --warn: #8a5300;       --warn-bg: #fff4e0;
+  --bad: #b42318;        --bad-bg: #fdecea;
+  --idle: #555f6f;       --idle-bg: #eceff4;
+  --done: #1a48ad;       --done-bg: #eaf1fe;
+  --work: #3730a3;       --work-bg: #eef0ff;
+}
+
+@media (prefers-contrast: more) {
+  :root { --border: #6b7585; --muted-foreground: #1b2230; --input: #3a4351; }
+}
+
+@theme inline {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-frame: var(--frame);
+  --color-frame-foreground: var(--frame-foreground);
+  --color-frame-muted: var(--frame-muted);
+  --color-frame-active: var(--frame-active);
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-bad: var(--bad);
+  --color-bad-bg: var(--bad-bg);
+  --color-idle: var(--idle);
+  --color-idle-bg: var(--idle-bg);
+  --color-done: var(--done);
+  --color-done-bg: var(--done-bg);
+  --color-work: var(--work);
+  --color-work-bg: var(--work-bg);
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  html { font-size: 16px; }
+  body { @apply bg-background text-foreground antialiased; font-size: 14px; line-height: 1.45; }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .prose-body { font-size: 16px; line-height: 1.55; }
+  .key { font-family: var(--font-mono); font-size: 12px; letter-spacing: -0.01em; }
+}
+
+/* Windows high-contrast (forced colours) drops box-shadow rings: keep keyboard focus visible with a system colour. */
+@media (forced-colors: active) {
+  :focus-visible { outline: 2px solid CanvasText !important; outline-offset: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+}

@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root{
+--color-bg:#f4f6f9;--color-surface:#eceff4;--color-text:#1b2230;--color-divider:#e2e6ec;
+--color-accent:#2563eb;--color-accent-100:#eaf1fe;--color-accent-200:#d5e3fc;--color-accent-300:#b0cbf9;--color-accent-400:#6f9cf2;--color-accent-500:#3b74ee;--color-accent-600:#1d55d0;--color-accent-700:#1a48ad;--color-accent-800:#173c8c;--color-accent-900:#12295c;
+--color-accent-2:#16a34a;--color-accent-2-100:#e7f7ed;--color-accent-2-200:#d1f0dc;--color-accent-2-300:#dbe7ff;--color-accent-2-400:#86d4a3;--color-accent-2-500:#3fb96c;--color-accent-2-600:#22a55a;--color-accent-2-700:#177d43;--color-accent-2-800:#115e33;--color-accent-2-900:#1a3d8f;
+--color-neutral-100:#ffffff;--color-neutral-200:#f2f4f7;--color-neutral-300:#e4e8ee;--color-neutral-400:#cbd2dc;--color-neutral-500:#9aa4b2;--color-neutral-600:#6b7585;--color-neutral-700:#555f6f;--color-neutral-800:#3a4351;--color-neutral-900:#1b2230;
+--font-heading:"Public Sans",system-ui,sans-serif;--font-body:"Public Sans",system-ui,sans-serif;
+--shadow-sm:0 1px 2px rgba(16,24,40,.06),0 0 0 1px rgba(16,24,40,.05);--shadow-md:0 4px 12px rgba(16,24,40,.08),0 0 0 1px rgba(16,24,40,.05);--shadow-lg:0 16px 40px rgba(16,24,40,.16);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:14px;line-height:1.5}
+:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px}

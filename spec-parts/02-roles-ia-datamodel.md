@@ -17,7 +17,7 @@ Effective permission for any action = the union of what the user's system roles 
 |---|---|---|---|
 | **System Administrator** | Configure the system: users, roles, disciplines, clients, offices, deliverable types, phases, thresholds, templates. Can unarchive projects and perform data corrections. | All projects (read and write) | IT / application admin (2–3 people) |
 | **Executive** | Portfolio-level visibility. | Read all projects, portfolio dashboard, reports, resource view | Regional/business unit managers |
-| **Supervisor** | Staff workload visibility and reassignment for the people they supervise. | Read all projects; Resource View for supervised staff; may reassign tasks owned by supervised staff | Group/department managers |
+| **Supervisor** | Visibility of their staff (direct reports, §8.8): project assignments, work, and workload; staffing them on projects and reassigning their tasks. | Read all projects; My Staff page (§13.19) and first-release Resource View for supervised staff; may add or remove supervised staff on project teams as Team Members and reassign tasks they own | Group/department managers |
 | **Project Manager** | May create projects and becomes PM of projects they create. | Read all projects (subject to 8.7); write only where they hold a project role | Staff designated as PMs |
 | **Standard User** | Default for every employee. | Read all projects (subject to 8.7); write only where they hold a project role | All staff |
 | **Read Only** | View-only account. Cannot comment or edit. | Read all projects (subject to 8.7) | Auditors, temporary staff, contractors (TBD) |
@@ -63,14 +63,16 @@ Legend: **Y** = allowed; **O** = allowed for own items only (see 8.6); **D** = a
 | Create a project | Y | — | — | Y | — | — |
 | View Portfolio Dashboard | Y | Y | Y | Y (own projects by default; all with filter) | — | — |
 | View Resource / Workload View | Y | Y (all) | Y (supervised staff, plus all in read) | Y (members of own projects) | — | — |
+| View My Staff page (staff assignments and work, §13.19) | Y (all staff) | Y (all staff) | Y (supervised staff) | — | — | — |
 | Reassign tasks across projects for supervised staff | Y | — | Y | — | — | — |
+| Add or remove supervised staff on a project team (as Team Member) | Y | — | Y | — | — | — |
 | Manage users, system roles, offices, disciplines, clients, deliverable types, phases | Y | — | — | — | — | — |
 | Manage project templates | Y | — | — | Y (Recommendation: also allow "Template Editor" as an Admin-granted flag) | — | — |
 | Manage organisation thresholds and notification defaults | Y | — | — | — | — | — |
 | Unarchive a project | Y | — | — | — | — | — |
 | View all activity history | Y | Y | Y | Y | Y (projects they can view) | Y |
 | Export reports | Y | Y | Y | Y | Y (own projects) | Y |
-| Manage own notification preferences and saved views | Y | Y | Y | Y | Y | Y |
+| Manage own notification preferences, project follow levels, and saved views | Y | Y | Y | Y | Y | Y |
 
 #### 8.5.2 Project-level actions
 
@@ -80,7 +82,7 @@ Legend: **Y** = allowed; **O** = allowed for own items only (see 8.6); **D** = a
 | Edit project information (name, client, description, dates, phase, links) | Y | — | — | — | — |
 | Change project status (Active, On Hold, Complete, Cancelled) | Y | — | — | — | — |
 | Archive project | Y (Complete → Archived) | — | — | — | — |
-| Manage project team and roles | Y | — | — | — | — |
+| Manage project team and roles (Supervisors may also add or remove their direct reports as Team Members, §8.5.1) | Y | — | — | — | — |
 | Add/remove disciplines, set Discipline Lead | Y | — | — | — | — |
 | Set/clear health override | Y | — | — | — | — |
 | Create / edit / delete milestone; change milestone date | Y | — | — | — | — |
@@ -90,6 +92,9 @@ Legend: **Y** = allowed; **O** = allowed for own items only (see 8.6); **D** = a
 | Change deliverable status | Y | D | O (owner, except Issued/Accepted — Recommendation: PM or DL only) | — | — |
 | Delete / cancel deliverable | Y | D (if no completed tasks) | — | — | — |
 | Create task | Y | D | Y (in own discipline; Recommendation) | — | — |
+| Create / edit / cancel calendar event tied to project | Y | O (event owner) | O (event owner) | O (event owner) | — |
+| View task-hour entries | Y (project) | D | O (own entries) | O (own entries) | — |
+| Add / edit / delete task-hour entries | Y (correct with reason) | D (own entries) | O (own entries) | O (own entries) | — |
 | Edit task fields | Y | D | O (assignee/collaborator/creator) | — | — |
 | Assign / reassign task | Y | D | O (creator may assign at creation) | — | — |
 | Change task status | Y | D | O (assignee/collaborator: Not Started → In Progress → Ready for Review; On Hold with reason) | O (reviewer: In Review, Revision Required, Complete) | — |
@@ -117,6 +122,7 @@ Ownership extends role permissions on individual items regardless of project rol
 - **Reviewer** of a task or deliverable: transition In Review → Revision Required / Complete (task) or In Review → Revision Required / Ready to Issue (deliverable); comment.
 - **Owner** of a deliverable, decision, risk, issue, or action: edit the item and change its status (within rules).
 - **Creator** of an item: edit it until someone else has acted on it (status change, comment by another user, assignment accepted); delete it if it is Not Started/Pending and has no links.
+- **Owner of a task-hour entry**: edit or soft-delete that entry while its project is editable; this does not grant permission to change the task itself. A project PM may correct another person's entry only with a logged reason (§36.8).
 
 ### 8.7 Visibility model
 
@@ -129,8 +135,8 @@ Ownership extends role permissions on individual items regardless of project rol
 | Layer | Mechanism |
 |---|---|
 | System roles | Recommendation: map from Entra ID security groups at sign-in (`HUB-Admins`, `HUB-Executives`, `HUB-Supervisors`, `HUB-ProjectManagers`, `HUB-ReadOnly`), with an in-app override table for exceptions. Standard User is implicit for any authenticated employee. See Section 23.6. |
-| Supervisor → staff relationship | Recommendation: `User.supervisor_id` maintained by System Administrators in the Hub (or synchronised from Entra ID `manager` attribute if populated — **TBD**). |
-| Project roles | Assigned in-app by the PM on the Project Team screen. Creating a project makes the creator its PM. Setting a Discipline Lead grants the DL role for that discipline. Assigning a reviewer who is not on the team grants Reviewer automatically. |
+| Supervisor → staff relationship | Recommendation: `User.supervisor_id` maintained by System Administrators in the Hub (or synchronised from Entra ID `manager` attribute if populated — **TBD**). **Supervised staff** means the supervisor's direct reports: active users whose `supervisor_id` is the supervisor (decided, Q19). This definition applies wherever the specification says "supervised staff" (My Staff, read access to My Work, staffing, reassignment, Resource View). |
+| Project roles | Assigned in-app by the PM on the Project Team screen; Supervisors may also add or remove their direct reports as Team Members (§12.18). Creating a project makes the creator its PM. Setting a Discipline Lead grants the DL role for that discipline. Assigning a reviewer who is not on the team grants Reviewer automatically. Every assignment to a project team also makes the person follow the project, so they receive its updates (§12.18). |
 
 ### 8.9 Permission principles for implementation
 
@@ -200,16 +206,21 @@ Global navigation (persistent left rail or top bar; desktop-first):
 |---|---|---|
 | **My Work** (landing page) | My Tasks, My Reviews, My Deliverables, Waiting on Others, Blocking Others, My Projects, Upcoming Milestones | Everyone |
 | **Projects** | Project list (search, filter); opens a project workspace | Everyone |
-| **Portfolio** (Phase 2) | Portfolio Dashboard, Projects At Risk | Executives, Supervisors, PMs |
-| **Resources** (Phase 2) | Resource / Workload View | Supervisors, Executives, PMs |
+| **Portfolio** (first release) | Portfolio Dashboard, Projects At Risk | Executives, Supervisors, PMs |
+| **Resources** (first release) | Resource / Workload View | Supervisors, Executives, PMs |
+| **My Staff** | The user's direct reports with their project assignments and work counts; staffing them on projects (§13.19) | Supervisors, Executives, Admins |
 | **Reports** | Deterministic report list with export | Everyone (scoped) |
-| **Notifications** | In-app notification centre | Everyone |
+| **Notifications** | In-app notification centre: personal notifications and the Following feed of followed projects | Everyone |
 | **Admin** | Users & roles, Disciplines, Clients, Offices, Deliverable Types, Phases, Templates, Settings | System Administrators |
 | Global search | Always visible search box | Everyone |
+
+For the first-release visual workspace (§36), the shell also presents Home (overview), Boards, Tasks, Calendar, Files, Time, and Team as direct routes into the corresponding permitted views. Workload is a first-release route for authorised users. A navigation item appears only when it has a working destination; Time opens task-hour entry (§36.8).
 
 Project workspace navigation (tabs within a project):
 
 `Dashboard · Weekly Coordination · Tasks (List / Board) · Deliverables · Milestones · Timeline · Decisions · Risks (P2) · Issues (P2) · Meetings & Actions (P2) · Team & Disciplines · Activity · Settings`
+
+The workspace view switcher additionally presents Board/List, Timeline, Workload, Dashboard, Files, and Calendar for the selected permitted project set (§36.1). It preserves that selection across views.
 
 ### 9.5 Identifiers
 
@@ -239,10 +250,10 @@ This section defines the conceptual model and all canonical vocabulary. The phys
 | Organisation | `User`, `Office`, `Discipline`, `Client`, `ExternalParty`, `DeliverableType`, `Phase`, `OrgSetting` | Reference data managed by System Administrators |
 | Access | `UserSystemRole`, `ProjectMember` (with project role), `ProjectDiscipline` (with lead) | See Section 8 |
 | Project | `Project`, `ProjectLink` (important links), `ProjectHealthSnapshot` (daily) | |
-| Work | `Milestone`, `Deliverable`, `Task`, `TaskDependency`, `TaskParticipant` | Core hierarchy |
+| Work | `Milestone`, `Deliverable`, `Task`, `TaskDependency`, `TaskParticipant`, `TaskTimeEntry` | Core hierarchy and first-release actual hours (§36.8) |
 | Registers | `Decision` (MVP-thin), `Risk` (P2), `Issue` (P2), `Meeting` (P2), `MeetingAction` (P2), `ItemLink` | `ItemLink` is a generic relation between any two items |
 | Collaboration | `Comment`, `Mention`, `DocumentLink` | Polymorphic target (item type + id) |
-| System | `ActivityLog`, `Notification`, `NotificationPreference`, `AttentionSnooze`, `SavedView` (P2) | |
+| System | `ActivityLog`, `Notification`, `NotificationPreference`, `ProjectFollow`, `AttentionSnooze`, `SavedView` | `ProjectFollow` records who follows which project and at what level (§12.18); saved views are first-release scope (§36.7) |
 | Templates | `ProjectTemplate`, `TemplateDiscipline`, `TemplateMilestone`, `TemplateDeliverable`, `TemplateTask`, `TemplateDependency` (P2) | Snapshot-copied into projects |
 
 ### 10.2 Canonical statuses
@@ -368,7 +379,7 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 | `chain_depth_limit` | 10 | Maximum depth for dependency chain display |
 | `allow_self_review` | false | Whether assignee may be their own reviewer |
 | `complete_project_edit_window_days` | 30 | Days a Complete project stays editable by PM before Archive is suggested |
-| `default_weekly_capacity_hours` | 40 | Resource View (P2); **TBD** |
+| `default_weekly_capacity_hours` | 40 | First-release Resource View; **TBD** |
 | `org_time_zone` | **TBD** | "Today" for date rules (Recommendation: single organisation time zone in MVP) |
 | `digest_send_time_local` | 07:00 | Daily digest |
 
@@ -377,6 +388,7 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 | Scale | Values | Notes |
 |---|---|---|
 | Task/Deliverable priority | `Low`, `Medium`, `High`, `Critical` | Default Medium. Priority affects sorting and attention severity; it never changes rules. |
+| Project priority | `Low`, `Medium`, `High`, `Critical` | Default Medium; PM-set for the Projects board (§36.2). It does not replace project health. |
 | Decision impact if delayed | `Low`, `Medium`, `High` | Free-text impact description also required. |
 | Risk probability (P2) | 1 Low, 2 Medium, 3 High | |
 | Risk impact (P2) | 1 Low, 2 Medium, 3 High | |
@@ -387,6 +399,7 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 ### 10.6 Date and time conventions
 
 - Due dates, start dates, milestone dates, required-by dates are **calendar dates** (no time component). Stored as `DATE`.
+- First-release calendar events (§36.5) have explicit start and end timestamps in the organisation time zone. Date-only deadline projections remain all-day; no time is invented for them.
 - Timestamps (created, updated, completed, issued, activity) are stored in UTC (`TIMESTAMPTZ`) and displayed in the user's browser time zone.
 - "Today" for rule evaluation is the current date in `org_time_zone`. A project-level time-zone override is a future capability.
 - "Within N days" means `date − today ≤ N` and `date ≥ today`.
@@ -406,4 +419,5 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 | Decision — Items (ItemLink) | many : many | Decision ↔ Task/Deliverable/Milestone |
 | Comment / DocumentLink / ActivityLog — Item | many : 1 polymorphic | `item_type` + `item_id`, plus `project_id` for scoping and permissions |
 | Template → Project | snapshot copy | Project records `template_id` and `template_version`; later template changes do not propagate |
-| User — User (supervisor) | many : 1 | Drives Supervisor scope |
+| User — User (supervisor) | many : 1 | Drives Supervisor scope: direct reports (§8.8) |
+| User — Project (ProjectFollow) | many : many | One row per user per project; created automatically on team assignment (§12.18) |

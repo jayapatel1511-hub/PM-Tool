@@ -14,6 +14,7 @@ public static class AllocationEndpoints
     public sealed record EditBody(Guid RequestId, int RowVersion, Guid PersonId, string Purpose, DateOnly FromDate, DateOnly ThroughDate,
         decimal PlannedHours, DayInput[] Days, LinkInput[] Links, string Reason);
     public sealed record CancelBody(Guid RequestId, int RowVersion, string Reason);
+    public sealed record AvailabilityBody(int ExpectedRowVersion, decimal AvailableHours, string Category);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -22,6 +23,48 @@ public static class AllocationEndpoints
         api.MapPost("/projects/{projectId:guid}/allocations", Create).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/edit", Edit).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/cancel", Cancel).WithMetadata(new Coordination.AtomicCommand());
+        api.MapGet("/users/{personId:guid}/availability", Availability);
+        api.MapPut("/users/{personId:guid}/availability/{date}", SetAvailability);
+    }
+
+    static async Task<object> Availability(Guid personId, DateOnly from, DateOnly through, HubDb db, Access access)
+    {
+        Check.That(from != default && through >= from && through.DayNumber - from.DayNumber <= 366, "through", "error.date_range");
+        var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == personId && u.IsActive) ?? throw ApiException.NotFound();
+        if (!(access.Actor.Id == personId || access.Actor.Admin || (access.Actor.Supervisor && person.SupervisorId == access.Actor.Id)))
+            throw ApiException.NotFound();
+        return await db.AvailabilityOverrides.AsNoTracking().Where(x => x.PersonId == personId && x.WorkDate >= from && x.WorkDate <= through)
+            .OrderBy(x => x.WorkDate).Select(x => new { x.WorkDate, x.AvailableHours, x.Category, x.RowVersion }).ToListAsync();
+    }
+
+    static async Task<object> SetAvailability(Guid personId, DateOnly date, AvailabilityBody body, HubDb db, Access access)
+    {
+        Check.That(date != default, "date", "error.required");
+        Check.That(body.AvailableHours is >= 0 and <= 24, "availableHours", "error.invalid");
+        Check.OneOf(body.Category, AvailabilityCategory.All, "category");
+        return await Tx.Run(db, async () =>
+        {
+            // A person row serializes availability and confirmations across projects.
+            await db.Database.SqlQueryRaw<Guid>("SELECT id AS \"Value\" FROM hub.app_user WHERE id = {0} FOR UPDATE", personId).ToListAsync();
+            var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == personId && u.IsActive) ?? throw ApiException.NotFound();
+            Access.Demand(Permissions.ActOnStaff(access.Actor, person.SupervisorId));
+            var row = await db.AvailabilityOverrides.SingleOrDefaultAsync(x => x.PersonId == personId && x.WorkDate == date);
+            var existing = row is not null;
+            if (row is null)
+            {
+                if (body.ExpectedRowVersion != 0) throw ApiException.Conflict("concurrency_conflict", "coord.stale");
+                row = new PersonAvailabilityOverride { PersonId = personId, WorkDate = date };
+                db.AvailabilityOverrides.Add(row);
+            }
+            else Coordination.Version(row, body.ExpectedRowVersion);
+            row.AvailableHours = body.AvailableHours; row.Category = body.Category;
+            if (existing) db.Entry(row).Property(x => x.AvailableHours).IsModified = true;
+            var version = await db.PersonDateVersions.SingleOrDefaultAsync(v => v.PersonId == personId && v.WorkDate == date);
+            if (version is null) db.PersonDateVersions.Add(new PersonDateVersion { PersonId = personId, WorkDate = date });
+            else db.Entry(version).Property(v => v.WorkDate).IsModified = true;
+            await db.SaveChangesAsync();
+            return new { row.WorkDate, row.AvailableHours, row.Category, row.RowVersion };
+        });
     }
 
     static async Task<object> List(Guid projectId, Access access, HubDb db)

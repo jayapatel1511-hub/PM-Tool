@@ -58,4 +58,26 @@ public sealed class AllocationApiTests(HubFactory f)
             AllocationPurpose.Production, day, day, 4, [], [new("Task", task.G("id"), day)], null))).Json(400);
         Assert.Empty(f.Db(db => db.Allocations.Where(a => a.ProjectId == project.Id).ToList()));
     }
+
+    [Fact]
+    public async Task Supervisor_sets_private_day_capacity_with_expected_version()
+    {
+        var alex = data.User(TestData.Alex);
+        var day = new DateOnly(2026, 10, 6);
+        var path = $"/api/v1/users/{alex}/availability/{day:yyyy-MM-dd}";
+        await (await f.As(TestData.Pm).Put(path, new AllocationEndpoints.AvailabilityBody(0, 4, AvailabilityCategory.Reduced))).Json(403);
+        var first = await (await f.As(TestData.Sam).Put(path,
+            new AllocationEndpoints.AvailabilityBody(0, 4, AvailabilityCategory.Reduced))).Json();
+        Assert.Equal(4, first["availableHours"]!.GetValue<decimal>());
+        var visible = await (await f.As(TestData.Alex).GetAsync($"/api/v1/users/{alex}/availability?from={day:yyyy-MM-dd}&through={day:yyyy-MM-dd}")).Json();
+        Assert.Single(visible.AsArray());
+        await (await f.As(TestData.Rita).GetAsync($"/api/v1/users/{alex}/availability?from={day:yyyy-MM-dd}&through={day:yyyy-MM-dd}")).Json(404);
+        var second = await (await f.As(TestData.Sam).Put(path,
+            new AllocationEndpoints.AvailabilityBody(first.I("rowVersion"), 6, AvailabilityCategory.Additional))).Json();
+        Assert.Equal(6, second["availableHours"]!.GetValue<decimal>());
+        await (await f.As(TestData.Sam).Put(path,
+            new AllocationEndpoints.AvailabilityBody(first.I("rowVersion"), 3, AvailabilityCategory.Reduced))).Json(409);
+        Assert.Equal(1, f.Db(db => db.PersonDateVersions.Count(v => v.PersonId == alex && v.WorkDate == day)));
+        Assert.Equal(6, f.Db(db => db.AvailabilityOverrides.Single(v => v.PersonId == alex && v.WorkDate == day).AvailableHours));
+    }
 }

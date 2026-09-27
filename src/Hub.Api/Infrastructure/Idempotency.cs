@@ -11,6 +11,9 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
 
     public async Task Invoke(HttpContext ctx, HubDb db, CurrentUser me, TimeProvider clock)
     {
+        // Handoff commands use an atomic, permission-checked receipt in their own transaction.
+        if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.HandoffEndpoints.AtomicCommand>() is not null)
+        { await next(ctx); return; }
         var key = ctx.Request.Headers["Idempotency-Key"].FirstOrDefault()?.Trim();
         if (!HttpMethods.IsPost(ctx.Request.Method) || string.IsNullOrEmpty(key) || !me.Resolved) { await next(ctx); return; }
         Check.That(key.Length <= 100, "Idempotency-Key", "error.too_long", 100);

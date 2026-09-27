@@ -51,6 +51,10 @@ public static class AuditRules
         [typeof(ExternalParty)] = ["Name", "Organisation", "Email", "Role", "IsClient", "Notes", "IsActive"],
         [typeof(Milestone)] = ["Name", "MilestoneType", "Date", "Description", "ProjectDisciplineId", "CompletesPhaseId", "IsClientFacing",
             "IsComplete", "CompletedDate", "IsCancelled", "CancelledReason", "DeletedAt"],
+        [typeof(Handoff)] = ["Title", "SourceDeliverableId", "SourceRowVersion", "DeclaredRevision", "SourceUrl", "SendingDisciplineId", "ReceivingDisciplineId",
+            "SendingOwnerId", "ReceivingOwnerId", "TargetTaskId", "TargetDeliverableId", "IntendedUse", "AcceptanceCriteria", "NeededBy", "PromisedBy",
+            "Status", "CurrentRevisionId", "IncorporatedRevisionId", "DeletedAt"],
+        [typeof(SourceRevision)] = ["DeliverableId", "SourceRowVersion", "SourceKey", "Title", "Revision", "Url"],
         [typeof(Deliverable)] = ["Name", "ProjectDisciplineId", "DeliverableTypeId", "Description", "OwnerId", "ReviewerId", "MilestoneId",
             "StartDate", "DueDate", "Priority", "Status", "Revision", "IssuedDate", "IssuedTo", "TransmittalUrl", "AcceptedDate",
             "OnHoldReason", "CancelledReason", "RequiresReview", "DeletedAt"],
@@ -79,6 +83,7 @@ public static class AuditRules
     static readonly Dictionary<string, string> FieldCategory = new()
     {
         ["Status"] = "status", ["IsComplete"] = "status", ["IsCancelled"] = "status", ["CancelledAt"] = "status",
+        ["SendingOwnerId"] = "assignment", ["ReceivingOwnerId"] = "assignment", ["NeededBy"] = "date", ["PromisedBy"] = "date",
         ["AssigneeId"] = "assignment", ["ReviewerId"] = "assignment", ["OwnerId"] = "assignment", ["OwnerUserId"] = "assignment",
         ["OwnerExternalPartyId"] = "assignment", ["OwnerDisciplineId"] = "assignment", ["LeadUserId"] = "assignment",
         ["ProjectManagerId"] = "assignment", ["Roles"] = "assignment", ["UserId"] = "assignment",

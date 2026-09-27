@@ -41,6 +41,8 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
 
         foreach (var u in users)
         {
+            if (eventType == NotificationEvents.HandoffChanged && item.ProjectId is { } handoffProject
+                && !await EmailProjectAccess.Allowed(db, u.Id, [handoffProject])) continue;
             if (muted.Contains(u.Id) && !def.DirectAssignment) continue;
             var pref = prefs.GetValueOrDefault(u.Id);
             var app = pref?.InApp ?? defaults.App;
@@ -74,6 +76,7 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
                 db.Emails.Add(new EmailMessage
                 {
                     UserId = u.Id, ToAddress = u.Email, Subject = subject, Kind = "Immediate", DedupKey = dedup, CreatedAt = now, NextAttemptAt = now,
+                    RequiredProjectIds = eventType == NotificationEvents.HandoffChanged && item.ProjectId is { } scopedProject ? [scopedProject] : [],
                     BodyText = $"{title}{(body is null ? "" : "\n\n" + body)}{link}\n\n{Text.Get("email.footer")}",
                 });
             }

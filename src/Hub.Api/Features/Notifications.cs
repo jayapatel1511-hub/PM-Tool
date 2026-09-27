@@ -43,9 +43,11 @@ public static class NotificationEndpoints
         // the stamp changes — a notification arrives or is read, a followed project changes, or a read marker moves.
         api.MapGet("/me/notifications/pulse", async (HubDb db, Access access, CurrentUser me) =>
         {
-            var unread = await db.Notifications.CountAsync(n => n.UserId == me.Id && n.ReadAt == null);
-            var latest = await db.Notifications.Where(n => n.UserId == me.Id).MaxAsync(n => (DateTimeOffset?)n.CreatedAt);
-            var follows = await db.Follows.AsNoTracking().Where(f => f.UserId == me.Id && f.Level != FollowLevel.Muted).Select(f => new { f.ProjectId, f.LastSeenAt }).ToListAsync();
+            var visible = access.VisibleProjectIds();
+            var permitted = db.Notifications.Where(n => n.UserId == me.Id && (n.ProjectId == null || visible.Contains(n.ProjectId.Value)));
+            var unread = await permitted.CountAsync(n => n.ReadAt == null);
+            var latest = await permitted.MaxAsync(n => (DateTimeOffset?)n.CreatedAt);
+            var follows = await db.Follows.AsNoTracking().Where(f => f.UserId == me.Id && f.Level != FollowLevel.Muted && visible.Contains(f.ProjectId)).Select(f => new { f.ProjectId, f.LastSeenAt }).ToListAsync();
             var ids = follows.Select(f => (Guid?)f.ProjectId).ToList();
             var activity = ids.Count == 0 ? null : await db.ActivityLog.Where(a => ids.Contains(a.ProjectId) && a.ActorUserId != me.Id).MaxAsync(a => (DateTimeOffset?)a.OccurredAt);
             var seen = follows.Max(f => f.LastSeenAt);

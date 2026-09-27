@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronDown, ChevronRight, Link2, Plus, Send, X } from 'lucide-react'
 import { Fragment, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
@@ -296,6 +296,7 @@ function DeliverablePanel({ id }: PanelProps) {
           </DropdownMenu>
           <PriorityBadge priority={d.priority} />
           <div className="ml-auto flex gap-1.5">
+            {can && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/handoffs?source=${d.id}`}>{t('handoff.new')}</Link></Button>}
             <RaiseSlot projectId={d.projectId} targetType="Deliverable" targetId={d.id} targetKey={d.key} targetName={d.name} disciplineId={d.projectDisciplineId} />
             {perms.issue && <Button size="sm" onClick={() => setIssuing(true)}><Send className="size-3.5" />{t('deliverable.issue')}</Button>}
           </div>

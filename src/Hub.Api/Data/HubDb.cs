@@ -35,6 +35,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<Milestone> Milestones => Set<Milestone>();
     public DbSet<Deliverable> Deliverables => Set<Deliverable>();
     public DbSet<DeliverableIssue> DeliverableIssues => Set<DeliverableIssue>();
+    public DbSet<Handoff> Handoffs => Set<Handoff>();
+    public DbSet<SourceRevision> SourceRevisions => Set<SourceRevision>();
+    public DbSet<HandoffRevision> HandoffRevisions => Set<HandoffRevision>();
+    public DbSet<HandoffReceiptEvent> HandoffReceiptEvents => Set<HandoffReceiptEvent>();
+    public DbSet<HandoffCommand> HandoffCommands => Set<HandoffCommand>();
     public DbSet<WorkTask> Tasks => Set<WorkTask>();
     public DbSet<TaskDependency> Dependencies => Set<TaskDependency>();
     public DbSet<DeliverableDependency> DeliverableDependencies => Set<DeliverableDependency>();
@@ -364,6 +369,39 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.Entity<ProjectTemplate>().HasIndex(x => x.FamilyId);
 
         // Optimistic concurrency on every mutable entity (G-07).
+        Item<Handoff>(mb, e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.Status, x.NeededBy }).HasFilter("deleted_at IS NULL");
+            e.HasIndex(x => x.ReceivingOwnerId);
+            e.HasIndex(x => x.SendingOwnerId);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_handoff_status", $"status IN ({In(HandoffStatus.All)})");
+                t.HasCheckConstraint("ck_handoff_target", "(target_task_id IS NULL) <> (target_deliverable_id IS NULL)");
+            });
+        });
+        Fk<Handoff, Deliverable>(mb, x => x.SourceDeliverableId);
+        Fk<Handoff, WorkTask>(mb, x => x.TargetTaskId);
+        Fk<Handoff, Deliverable>(mb, x => x.TargetDeliverableId);
+        Fk<Handoff, AppUser>(mb, x => x.SendingOwnerId);
+        Fk<Handoff, AppUser>(mb, x => x.ReceivingOwnerId);
+        Fk<Handoff, ProjectDiscipline>(mb, x => x.SendingDisciplineId);
+        Fk<Handoff, ProjectDiscipline>(mb, x => x.ReceivingDisciplineId);
+        // CurrentRevisionId is set in the same transaction after its immutable snapshot is inserted.
+        Fk<Handoff, HandoffRevision>(mb, x => x.CurrentRevisionId);
+        Fk<Handoff, HandoffRevision>(mb, x => x.IncorporatedRevisionId);
+        mb.Entity<SourceRevision>().HasIndex(x => new { x.ProjectId, x.IdentityHash }).IsUnique();
+        Fk<SourceRevision, Project>(mb, x => x.ProjectId);
+        Fk<SourceRevision, Deliverable>(mb, x => x.DeliverableId);
+        Fk<HandoffRevision, Handoff>(mb, x => x.HandoffId);
+        Fk<HandoffRevision, SourceRevision>(mb, x => x.SourceRevisionId);
+        Fk<HandoffRevision, HandoffRevision>(mb, x => x.PreviousRevisionId);
+        Fk<HandoffReceiptEvent, Handoff>(mb, x => x.HandoffId);
+        Fk<HandoffReceiptEvent, HandoffRevision>(mb, x => x.RevisionId);
+        mb.Entity<HandoffReceiptEvent>().HasIndex(x => new { x.HandoffId, x.CreatedAt });
+        mb.Entity<HandoffCommand>().HasIndex(x => new { x.ProjectId, x.ActorId, x.RequestId }).IsUnique();
+        Fk<HandoffCommand, Handoff>(mb, x => x.HandoffId);
+
         foreach (var et in mb.Model.GetEntityTypes().Where(t => typeof(Audited).IsAssignableFrom(t.ClrType)))
             et.FindProperty(nameof(Audited.RowVersion))!.IsConcurrencyToken = true;
 
@@ -459,6 +497,9 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         foreach (var entry in ChangeTracker.Entries().ToList())
         {
             if (entry.State is EntityState.Unchanged or EntityState.Detached) continue;
+            if (entry.State is EntityState.Modified or EntityState.Deleted
+                && entry.Entity is SourceRevision or HandoffRevision or HandoffReceiptEvent or HandoffCommand)
+                throw new InvalidOperationException("Published handoff evidence is immutable.");
             if (entry.Entity is Audited a)
             {
                 if (entry.State == EntityState.Added) { a.CreatedAt = now; a.CreatedBy ??= audit.ActorId; }

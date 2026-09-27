@@ -41,6 +41,44 @@ public sealed record OwnedFacts(Guid? OwnerId, Guid? CreatedBy, Guid? Discipline
 /// The permission matrix of §8.5 as pure functions of (actor, roles, memberships, item) (§8.9 principle 3).
 public static class Permissions
 {
+    // Packet 025: management rights never imply permission to sign another person's receipt.
+    static Allow HandoffGate(Actor a, ProjectContext p) => !a.IsActive || !CanView(a, p)
+        ? Allow.No("perm.not_member") : Writable(a, p);
+
+    public static Allow CreateHandoff(Actor a, ProjectContext p, Guid sendingDiscipline, Guid receivingDiscipline, Guid? sourceOwner)
+    {
+        var gate = HandoffGate(a, p); if (!gate) return gate;
+        return IsPM(a, p) || IsDL(p, sendingDiscipline) || IsDL(p, receivingDiscipline)
+            || (a.Id == sourceOwner && p.IsMember && p.PrimaryDisciplineId == sendingDiscipline)
+            ? Allow.Yes : Allow.No("handoff.create_permission");
+    }
+
+    public static Allow AssignHandoff(Actor a, ProjectContext p, HandoffFacts h)
+    {
+        var gate = HandoffGate(a, p); if (!gate) return gate;
+        return IsPM(a, p) || IsDL(p, h.SendingDisciplineId) || IsDL(p, h.ReceivingDisciplineId)
+            ? Allow.Yes : Allow.No("perm.pm_or_dl");
+    }
+
+    public static Allow EditHandoff(Actor a, ProjectContext p, HandoffFacts h)
+    {
+        var gate = HandoffGate(a, p); if (!gate) return gate;
+        if (!HandoffRules.Editable(h.Status)) return Allow.No("handoff.fixed");
+        return a.Id == h.SendingOwnerId || AssignHandoff(a, p, h) ? Allow.Yes : Allow.No("handoff.sender");
+    }
+
+    public static Allow HandoffTransition(Actor a, ProjectContext p, HandoffFacts h, string to, bool allowSelfReview)
+    {
+        var gate = HandoffGate(a, p); if (!gate) return gate;
+        if (!HandoffRules.Step(h.Status, to)) return Allow.No("handoff.illegal_transition");
+        if (to == HandoffStatus.Cancelled) return AssignHandoff(a, p, h);
+        if (to == HandoffStatus.Submitted) return a.Id == h.SendingOwnerId ? Allow.Yes : Allow.No("handoff.sender");
+        if (a.Id != h.ReceivingOwnerId) return Allow.No("handoff.receiver");
+        if (to is HandoffStatus.Accepted or HandoffStatus.Incorporated && !allowSelfReview && HandoffRules.SelfReceipt(h))
+            return Allow.No("handoff.self_receipt");
+        return Allow.Yes;
+    }
+
     // ---------- System level (§8.5.1) ----------
 
     public static Allow CreateProject(Actor a) => a.ReadOnly ? Allow.No("perm.read_only") : a.Admin || a.SystemPM ? Allow.Yes : Allow.No("perm.create_project");

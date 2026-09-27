@@ -176,6 +176,7 @@ public class Project : Audited, IAuditable
     public int NextRiskSeq { get; set; } = 1;
     public int NextIssueSeq { get; set; } = 1;
     public int NextActionSeq { get; set; } = 1;
+    public int NextHandoffSeq { get; set; } = 1;
     public string? ExternalSource { get; set; }
     public string? ExternalId { get; set; }
     public string AuditType => ItemType.Project;
@@ -312,6 +313,92 @@ public class Deliverable : ProjectItem, IAuditable
     public string? AuditKey => Key;
     public string? AuditName => Name;
     public Guid? AuditDisciplineId => ProjectDisciplineId;
+}
+
+/// A manually registered immutable reference, shared with the later review/change packets.
+public class SourceRevision : Audited, IAuditable
+{
+    public Guid ProjectId { get; set; }
+    public Guid DeliverableId { get; set; }
+    public int SourceRowVersion { get; set; }
+    public string IdentityHash { get; set; } = "";
+    public string SourceKey { get; set; } = "";
+    public string Title { get; set; } = "";
+    public string Revision { get; set; } = "";
+    public string Url { get; set; } = "";
+    public string AuditType => "SourceRevision";
+    public Guid? AuditProjectId => ProjectId;
+    public string? AuditKey => SourceKey;
+    public string? AuditName => Title;
+}
+
+/// One receipt per receiving owner and purpose. The sender is accountable for delivery.
+public class Handoff : ProjectItem, IAuditable
+{
+    public string Title { get; set; } = "";
+    public Guid SourceDeliverableId { get; set; }
+    public int SourceRowVersion { get; set; }
+    public string DeclaredRevision { get; set; } = "";
+    public string SourceUrl { get; set; } = "";
+    public Guid SendingDisciplineId { get; set; }
+    public Guid ReceivingDisciplineId { get; set; }
+    public Guid SendingOwnerId { get; set; }
+    public Guid ReceivingOwnerId { get; set; }
+    public Guid? TargetTaskId { get; set; }
+    public Guid? TargetDeliverableId { get; set; }
+    public string IntendedUse { get; set; } = "";
+    public string AcceptanceCriteria { get; set; } = "";
+    public DateOnly NeededBy { get; set; }
+    public DateOnly? PromisedBy { get; set; }
+    public string Status { get; set; } = HandoffStatus.Draft;
+    public Guid? CurrentRevisionId { get; set; }
+    public Guid? IncorporatedRevisionId { get; set; }
+    public string AuditType => "Handoff";
+    public Guid? AuditProjectId => ProjectId;
+    public string? AuditKey => Key;
+    public string? AuditName => Title;
+    public Guid? AuditDisciplineId => SendingDisciplineId;
+}
+
+/// Submission snapshots keep the actual sender, scope, dates and criteria after reassignment or resubmission.
+public class HandoffRevision : Audited
+{
+    public Guid ProjectId { get; set; }
+    public Guid HandoffId { get; set; }
+    public Guid SourceRevisionId { get; set; }
+    public Guid? PreviousRevisionId { get; set; }
+    public Guid SendingOwnerId { get; set; }
+    public Guid ReceivingOwnerId { get; set; }
+    public string IntendedUse { get; set; } = "";
+    public string AcceptanceCriteria { get; set; } = "";
+    public DateOnly NeededBy { get; set; }
+    public DateOnly PromisedBy { get; set; }
+    public Guid? TargetTaskId { get; set; }
+    public Guid? TargetDeliverableId { get; set; }
+    public string? Response { get; set; }
+}
+
+public class HandoffReceiptEvent : Audited
+{
+    public Guid ProjectId { get; set; }
+    public Guid HandoffId { get; set; }
+    public Guid? RevisionId { get; set; }
+    public string FromStatus { get; set; } = "";
+    public string ToStatus { get; set; } = "";
+    public string? Reason { get; set; }
+    public string? CriteriaOutcome { get; set; }
+}
+
+/// Transactional receipts make concurrent and later retries safe; no confidential response body is cached.
+public class HandoffCommand : Entity
+{
+    public Guid ProjectId { get; set; }
+    public Guid ActorId { get; set; }
+    public Guid RequestId { get; set; }
+    public string PayloadHash { get; set; } = "";
+    public Guid HandoffId { get; set; }
+    public int ResultVersion { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }
 
 public class DeliverableIssue : Entity
@@ -660,6 +747,8 @@ public class Notification : Entity
 
 public class EmailMessage : Entity
 {
+    public Guid[] RequiredProjectIds { get; set; } = [];
+    public DateTimeOffset? SuppressedAt { get; set; }
     public Guid? UserId { get; set; }
     public string ToAddress { get; set; } = "";
     public string Subject { get; set; } = "";

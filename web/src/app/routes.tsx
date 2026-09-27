@@ -18,6 +18,7 @@ import { TaskPage } from '@/pages/projects/TaskPanel'
 import { DecisionsTab } from '@/pages/projects/Decisions'
 import { IssuesTab, RisksTab } from '@/pages/projects/Registers'
 import { MeetingsTab } from '@/pages/projects/Meetings'
+import { HandoffsTab } from '@/pages/projects/Handoffs'
 import { TimelineTab } from '@/pages/projects/Timeline'
 import '@/pages/projects/CopyStructure'
 import '@/pages/projects/FromTemplate'
@@ -76,6 +77,7 @@ export const routes: RouteObject[] = [
       { index: true, element: <Navigate to={PROJECT_HOME} replace /> },
       { path: 'dashboard', element: <DashboardTab /> },
       { path: 'coordination', element: <CoordinationTab /> },
+      { path: 'handoffs', element: <HandoffsTab /> },
       { path: 'tasks', element: <TasksTab /> },
       { path: 'board', element: <BoardTab /> },
       { path: 'milestones', element: <MilestonesTab /> },

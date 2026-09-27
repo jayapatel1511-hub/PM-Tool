@@ -100,6 +100,30 @@ public sealed class ReviewChangeTests(HubFactory f)
         Assert.Equal(3, f.Db(db => db.ReviewFindings.Count(x => x.PackageId == id)));
     }
     [Fact]
+    public async Task Removing_a_manifest_deliverable_requires_impact_review_and_releases_its_issue_gate()
+    {
+        var s = await New();
+        var second = await Post(TestData.Marc, Root(s) + "/deliverables", new {
+            name = "Second survey", projectDisciplineId = s.Civil, deliverableTypeId = await data.DeliverableType(),
+            ownerId = data.User(TestData.Alex), revision = "A", requiresReview = false }, 201);
+        var secondId = second.G("id");
+        var secondRevision = await Post(TestData.Alex, Root(s) + "/source-revisions", Registration(s with { Deliverable = secondId }));
+        var created = await Post(TestData.Marc, Root(s) + "/reviews", ReviewBody(s) with {
+            SourceRevisionIds = [s.Revision, secondRevision.G("id")] });
+        var id = created.G("id");
+        await ReviewAction(s, id, "start");
+
+        var round = new ReviewEndpoints.RoundBody(Guid.NewGuid(), Version<ReviewPackage>(id), "One survey remains",
+            [s.Revision], Assignments(s), "Second survey left the review scope", null);
+        await Post(TestData.Marc, Root(s) + $"/reviews/{id}/rounds", round, 403);
+        await Post(TestData.Pm, Root(s) + $"/reviews/{id}/rounds", round with { RequestId = Guid.NewGuid() }, 400);
+        await Post(TestData.Pm, Root(s) + $"/reviews/{id}/rounds", round with {
+            RequestId = Guid.NewGuid(), RemovalImpact = "Second survey now has a separate issue path" });
+
+        Assert.Null(f.Db(db => db.Deliverables.Single(d => d.Id == secondId).RequiredReviewPackageId));
+        Assert.Equal(id, f.Db(db => db.Deliverables.Single(d => d.Id == s.Deliverable).RequiredReviewPackageId));
+    }
+    [Fact]
     public async Task AC_MRV_04_authorship_and_reviewer_reassignment_cannot_bypass_independence()
     {
         var s = await New(); var bad = ReviewBody(s) with { Assignments = [new(s.Civil, data.User(TestData.Alex), new(2026, 9, 18))] };

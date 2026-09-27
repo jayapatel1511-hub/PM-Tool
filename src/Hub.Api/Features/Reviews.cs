@@ -140,6 +140,13 @@ public static class ReviewEndpoints
             }
             var round = await BuildRound(db, project, p, body.Purpose, body.SourceRevisionIds, body.Assignments!, reason, body.RemovalImpact, (await settings.Get(db)).AllowSelfReview);
             var manifest = db.ReviewManifestItems.Local.Where(m => m.RoundId == round.Id).ToList();
+            var oldDeliverables = await db.ReviewManifestItems.Where(m => m.RoundId == old.Id).Select(m => m.DeliverableId).ToListAsync();
+            var newDeliverables = manifest.Select(m => m.DeliverableId).ToHashSet();
+            var removedDeliverables = oldDeliverables.Where(d => !newDeliverables.Contains(d)).ToArray();
+            if (removedDeliverables.Length > 0) {
+                Access.Demand(Permissions.ManageTeam(access.Actor, ctx));
+                Check.Required(body.RemovalImpact, "removalImpact", 4000);
+            }
             foreach (var f in await db.ReviewFindings.Where(f => f.RoundId == old.Id && (f.Status != FindingStatus.VerifiedClosed && (f.Status != FindingStatus.Withdrawn || f.Severity == "Blocking" && f.WithdrawalAcknowledgedBy == null))).ToListAsync()) {
                 var source = await Coordination.Revision(db, project.Id, f.SourceRevisionId);
                 db.ReviewFindings.Add(new ReviewFinding { ProjectId = project.Id, PackageId = p.Id, RoundId = round.Id, CarriedFromId = f.Id,
@@ -148,6 +155,11 @@ public static class ReviewEndpoints
             }
             old.Status = ReviewStatus.Superseded; db.Audit.Note(old, reason: reason);
             await db.SaveChangesAsync(); p.CurrentRoundId = round.Id; p.RoundNumber = round.Number; p.Purpose = round.Purpose; p.Status = ReviewStatus.Draft;
+            if (p.RequiredForIssue) foreach (var deliverableId in removedDeliverables) {
+                var d = await db.Deliverables.SingleAsync(d => d.Id == deliverableId);
+                if (d.RequiredReviewPackageId != p.Id) continue;
+                d.RequiredReviewPackageId = null; db.Audit.Note(d, reason: reason);
+            }
             if (p.RequiredForIssue) foreach (var m in manifest) {
                 var d = await db.Deliverables.SingleAsync(d => d.Id == m.DeliverableId);
                 Check.That(d.Status is not (DeliverableStatus.Issued or DeliverableStatus.Accepted), "sourceRevisionIds", "review.issued");

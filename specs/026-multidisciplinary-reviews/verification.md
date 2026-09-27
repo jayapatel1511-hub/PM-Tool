@@ -35,4 +35,8 @@ Packet 031 still supplies the design-basis/requirement adapters. Real browser-to
 
 ## Verification history
 
+Pre-merge review found that removing a deliverable from a new round left its old required-review gate attached, so Ready to Issue and issue would search for a manifest entry that no longer existed. The new-round command now requires team-management authority and a recorded removal impact for a dropped deliverable, then clears only gates still owned by that package. A PostgreSQL API regression test covers both refusals and both resulting gates. The focused review/change and handoff API tests passed: 21 passed, zero failed or skipped.
+
+Superseding a source revision blocks approval and issue against the old manifest until a coordinator explicitly starts a new round. Automatic new-round creation on publication has not been verified or implemented; AC-MRV-03 remains a full-acceptance gap under T006.
+
 The first run (36318491151) passed 370 of 371 tests. A new retry test expected HTTP 400, while the existing business-rule convention correctly returned 422. Its expectation was corrected without changing the rule. Run 36318803727 passed all 372 tests, including the added handoff/change regression. Final run 36319125624 passed all 373 tests, additionally covering preserved response authorship after reassignment and scanning the active nested assessment dialog.

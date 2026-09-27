@@ -65,6 +65,24 @@ public static class Permissions
         return IsPM(a, p) || IsDL(p, discipline) ? Allow.Yes : Allow.No("perm.pm_or_dl");
     }
 
+    public static Allow CreateSubmission(Actor a, ProjectContext p)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return IsPM(a, p) || IsAnyDL(p) ? Allow.Yes : Allow.No("perm.pm_or_dl");
+    }
+    public static Allow CoordinateSubmission(Actor a, ProjectContext p, Guid coordinator)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return a.Id == coordinator && p.IsMember ? Allow.Yes : Allow.No("perm.owner");
+    }
+    public static Allow SignSubmissionCheck(Actor a, ProjectContext p, Guid owner)
+        => NamedCoordinationAction(a, p, owner);
+    public static Allow AuthoriseSubmission(Actor a, ProjectContext p)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return IsPM(a, p) ? Allow.Yes : Allow.No("perm.pm");
+    }
+
     // Packet 025: management rights never imply permission to sign another person's receipt.
     static Allow HandoffGate(Actor a, ProjectContext p) => !a.IsActive || !CanView(a, p)
         ? Allow.No("perm.not_member") : Writable(a, p);

@@ -21,6 +21,18 @@ public static class SubmissionCheckKind
 
 public static class SubmissionRules
 {
-    public static bool Ready(IEnumerable<(bool Required, string Status)> checks) => checks.All(c => !c.Required || c.Status == SubmissionCheckStatus.Pass || c.Status == SubmissionCheckStatus.NotApplicable);
+    public static bool Ready(IEnumerable<(bool Required, string Status)> checks)
+    {
+        var rows = checks.ToArray();
+        return rows.Length > 0 && rows.All(c => !c.Required || c.Status == SubmissionCheckStatus.Pass);
+    }
+    public static bool Step(string from, string to) => (from, to) switch {
+        (SubmissionStatus.Draft, SubmissionStatus.Checking) => true,
+        (SubmissionStatus.Checking, SubmissionStatus.Ready) => true,
+        (SubmissionStatus.Ready, SubmissionStatus.Checking) => true,
+        (SubmissionStatus.Checking or SubmissionStatus.Ready, SubmissionStatus.Issued) => true,
+        (SubmissionStatus.Issued, SubmissionStatus.Superseded) => true,
+        (SubmissionStatus.Draft or SubmissionStatus.Checking or SubmissionStatus.Ready, SubmissionStatus.Cancelled) => true,
+        _ => false };
     public static bool CanIssue(string status, bool ready) => (status is SubmissionStatus.Checking or SubmissionStatus.Ready) && ready;
 }

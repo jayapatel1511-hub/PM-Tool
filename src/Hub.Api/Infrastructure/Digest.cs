@@ -21,7 +21,7 @@ public static class Digest
     const int Cap = 10;
 
     /// Sections a person can switch off (FR-002, packet 020), in digest order.
-    public static readonly string[] SectionCodes = ["overdue", "dueSoon", "blocked", "reviews", "decisions", "handoffs", "attention", "milestones", "staff", "updates"];
+    public static readonly string[] SectionCodes = ["overdue", "dueSoon", "blocked", "reviews", "decisions", "handoffs", "reviewPackages", "changes", "attention", "milestones", "staff", "updates"];
     static readonly string[] ImportantCategories = ["status", "assignment", "date", "decision"];
 
     /// Active projects the person can see: open ones, and restricted ones they belong to (§8.7); Setup and On Hold are left out.
@@ -146,7 +146,14 @@ public static class Digest
             && h.Status != HandoffStatus.Incorporated && h.Status != HandoffStatus.Cancelled).OrderBy(h => h.NeededBy).ToListAsync();
         var handoffs = Make("handoffs", handoffRows.Select(h => new Row(h.Id, h.Key, h.Title, Num(h.ProjectId),
             Text.Get("handoff.digest_detail", h.Status, D(h.NeededBy)), $"{baseUrl}/projects/{Num(h.ProjectId)}/handoffs?panel=Handoff:{h.Id}")));
-        var sections = new List<Section> { overdue, dueSoon, blocked, reviews, decisionRows, handoffs, attentionRows, milestones, staff }.Where(x => x.Total > 0).ToList();
+        var packages = await db.ReviewPackages.AsNoTracking().Where(p => pids.Contains(p.ProjectId) && (p.Status == ReviewStatus.InReview || p.Status == ReviewStatus.ChangesRequired)
+            && (p.CoordinatorId == userId || db.DisciplineReviews.Any(a => a.RoundId == p.CurrentRoundId && a.ReviewerId == userId && a.Status != DisciplineReviewStatus.Approved)
+                || db.ReviewFindings.Any(f => f.RoundId == p.CurrentRoundId && (f.ResolverId == userId || f.VerifierId == userId) && (f.Status == FindingStatus.Open || f.Status == FindingStatus.Responded)))).ToListAsync();
+        var reviewPackages = Make("reviewPackages", packages.Select(p => new Row(p.Id, p.Key, p.Title, Num(p.ProjectId), Text.Get("review.digest_detail", p.Status, p.RoundNumber), $"{baseUrl}/projects/{Num(p.ProjectId)}/reviews?panel=ReviewPackage:{p.Id}")));
+        var notices = await db.ChangeNotices.AsNoTracking().Where(c => pids.Contains(c.ProjectId) && c.Status == ChangeStatus.Open
+            && (c.OwnerId == userId || db.ChangeAssessments.Any(a => a.ChangeNoticeId == c.Id && (a.OwnerId == userId || a.ReviewerId == userId) && a.Status != AssessmentStatus.Resolved))).OrderBy(c => c.AssessmentDueDate).ToListAsync();
+        var changes = Make("changes", notices.Select(c => new Row(c.Id, c.Key, c.Title, Num(c.ProjectId), Text.Get("change.digest_detail", c.Status, D(c.AssessmentDueDate)), $"{baseUrl}/projects/{Num(c.ProjectId)}/changes?panel=ChangeNotice:{c.Id}")));
+        var sections = new List<Section> { overdue, dueSoon, blocked, reviews, decisionRows, handoffs, reviewPackages, changes, attentionRows, milestones, staff }.Where(x => x.Total > 0).ToList();
         if (sections.Count == 0 && updates.Count == 0) return null; // AC-NOT-04: nothing to say, nothing sent
 
         var parts = new List<string>();

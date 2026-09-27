@@ -40,6 +40,18 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<HandoffRevision> HandoffRevisions => Set<HandoffRevision>();
     public DbSet<HandoffReceiptEvent> HandoffReceiptEvents => Set<HandoffReceiptEvent>();
     public DbSet<HandoffCommand> HandoffCommands => Set<HandoffCommand>();
+    public DbSet<CoordinationCommand> CoordinationCommands => Set<CoordinationCommand>();
+    public DbSet<ReviewPackage> ReviewPackages => Set<ReviewPackage>();
+    public DbSet<ReviewRound> ReviewRounds => Set<ReviewRound>();
+    public DbSet<ReviewManifestItem> ReviewManifestItems => Set<ReviewManifestItem>();
+    public DbSet<DisciplineReview> DisciplineReviews => Set<DisciplineReview>();
+    public DbSet<ReviewFinding> ReviewFindings => Set<ReviewFinding>();
+    public DbSet<FindingEvent> FindingEvents => Set<FindingEvent>();
+    public DbSet<SourceHead> SourceHeads => Set<SourceHead>();
+    public DbSet<InputUse> InputUses => Set<InputUse>();
+    public DbSet<InputAdoption> InputAdoptions => Set<InputAdoption>();
+    public DbSet<ChangeNotice> ChangeNotices => Set<ChangeNotice>();
+    public DbSet<ChangeAssessment> ChangeAssessments => Set<ChangeAssessment>();
     public DbSet<WorkTask> Tasks => Set<WorkTask>();
     public DbSet<TaskDependency> Dependencies => Set<TaskDependency>();
     public DbSet<DeliverableDependency> DeliverableDependencies => Set<DeliverableDependency>();
@@ -402,6 +414,72 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.Entity<HandoffCommand>().HasIndex(x => new { x.ProjectId, x.ActorId, x.RequestId }).IsUnique();
         Fk<HandoffCommand, Handoff>(mb, x => x.HandoffId);
 
+        Item<ReviewPackage>(mb, e => { e.HasIndex(x => new { x.ProjectId, x.Status }); e.ToTable(t => t.HasCheckConstraint("ck_review_package_status", $"status IN ({In(ReviewStatus.All)})")); });
+        Item<ChangeNotice>(mb, e => { e.HasIndex(x => new { x.ProjectId, x.Status }); e.ToTable(t => t.HasCheckConstraint("ck_change_notice_status", $"status IN ({In(ChangeStatus.All)})")); });
+        mb.Entity<CoordinationCommand>().HasIndex(x => new { x.ProjectId, x.ActorId, x.RequestId }).IsUnique();
+        mb.Entity<ReviewRound>().HasIndex(x => new { x.PackageId, x.Number }).IsUnique();
+        mb.Entity<ReviewManifestItem>().HasIndex(x => new { x.RoundId, x.DeliverableId }).IsUnique();
+        mb.Entity<DisciplineReview>().HasIndex(x => new { x.RoundId, x.ProjectDisciplineId }).IsUnique();
+        mb.Entity<DisciplineReview>().ToTable(t => t.HasCheckConstraint("ck_discipline_review_status", $"status IN ({In(DisciplineReviewStatus.All)})"));
+        mb.Entity<ReviewFinding>().HasIndex(x => new { x.RoundId, x.Status });
+        mb.Entity<ReviewFinding>().ToTable(t => { t.HasCheckConstraint("ck_review_finding_status", $"status IN ({In(FindingStatus.All)})"); t.HasCheckConstraint("ck_review_finding_severity", "severity IN ('Blocking', 'Advisory')"); });
+        mb.Entity<SourceHead>().HasIndex(x => new { x.ProjectId, x.Identity }).IsUnique();
+        mb.Entity<InputUse>().HasIndex(x => new { x.ProjectId, x.TargetType, x.TargetId, x.SourceIdentity }).IsUnique();
+        mb.Entity<InputUse>().ToTable(t => t.HasCheckConstraint("ck_input_use_type", "target_type IN ('Task', 'Deliverable')"));
+        mb.Entity<ChangeAssessment>().HasIndex(x => new { x.ChangeNoticeId, x.TargetType, x.TargetId }).IsUnique();
+        mb.Entity<ChangeAssessment>().ToTable(t => t.HasCheckConstraint("ck_change_assessment_status", $"status IN ({In(AssessmentStatus.All)})"));
+        mb.Entity<ChangeNotice>().HasIndex(x => x.NewRevisionId).IsUnique();
+        Fk<ReviewPackage, ReviewRound>(mb, x => x.CurrentRoundId);
+        Fk<ReviewPackage, AppUser>(mb, x => x.CoordinatorId);
+        Fk<ReviewPackage, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<Deliverable, ReviewPackage>(mb, x => x.RequiredReviewPackageId);
+        Fk<ReviewRound, ReviewPackage>(mb, x => x.PackageId);
+        Fk<ReviewManifestItem, ReviewRound>(mb, x => x.RoundId);
+        Fk<ReviewManifestItem, SourceRevision>(mb, x => x.SourceRevisionId);
+        Fk<ReviewManifestItem, Deliverable>(mb, x => x.DeliverableId);
+        Fk<DisciplineReview, ReviewRound>(mb, x => x.RoundId);
+        Fk<DisciplineReview, AppUser>(mb, x => x.ReviewerId);
+        Fk<DisciplineReview, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<ReviewFinding, ReviewPackage>(mb, x => x.PackageId);
+        Fk<ReviewFinding, ReviewRound>(mb, x => x.RoundId);
+        Fk<ReviewFinding, ReviewFinding>(mb, x => x.CarriedFromId);
+        Fk<ReviewFinding, SourceRevision>(mb, x => x.SourceRevisionId);
+        Fk<ReviewFinding, AppUser>(mb, x => x.ResolverId);
+        Fk<ReviewFinding, AppUser>(mb, x => x.VerifierId);
+        Fk<FindingEvent, ReviewFinding>(mb, x => x.FindingId);
+        Fk<SourceRevision, SourceRevision>(mb, x => x.SupersedesId);
+        Fk<SourceHead, SourceRevision>(mb, x => x.CurrentRevisionId);
+        Fk<InputUse, SourceRevision>(mb, x => x.SourceRevisionId);
+        Fk<InputAdoption, InputUse>(mb, x => x.InputUseId);
+        Fk<InputAdoption, SourceRevision>(mb, x => x.SourceRevisionId);
+        Fk<ChangeNotice, SourceRevision>(mb, x => x.OldRevisionId);
+        Fk<ChangeNotice, SourceRevision>(mb, x => x.NewRevisionId);
+        Fk<ChangeNotice, AppUser>(mb, x => x.OwnerId);
+        Fk<ChangeAssessment, ChangeNotice>(mb, x => x.ChangeNoticeId);
+        Fk<ChangeAssessment, InputUse>(mb, x => x.InputUseId);
+        Fk<ChangeAssessment, Handoff>(mb, x => x.HandoffId);
+        Fk<ChangeAssessment, SourceRevision>(mb, x => x.RevisionUsedId);
+        Fk<ChangeAssessment, WorkTask>(mb, x => x.CorrectionTaskId);
+        Fk<ChangeAssessment, AppUser>(mb, x => x.OwnerId);
+        Fk<ChangeAssessment, AppUser>(mb, x => x.ReviewerId);
+        Fk<SourceHead, AppUser>(mb, x => x.OwnerId);
+        Fk<SourceHead, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<InputUse, AppUser>(mb, x => x.OwnerId);
+        Fk<ReviewFinding, AppUser>(mb, x => x.OriginatorId);
+        Fk<ReviewFinding, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<ChangeNotice, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<CoordinationCommand, Project>(mb, x => x.ProjectId);
+        Fk<ReviewRound, Project>(mb, x => x.ProjectId);
+        Fk<ReviewManifestItem, Project>(mb, x => x.ProjectId);
+        Fk<DisciplineReview, Project>(mb, x => x.ProjectId);
+        Fk<ReviewFinding, Project>(mb, x => x.ProjectId);
+        Fk<FindingEvent, Project>(mb, x => x.ProjectId);
+        Fk<SourceHead, Project>(mb, x => x.ProjectId);
+        Fk<InputUse, Project>(mb, x => x.ProjectId);
+        Fk<InputAdoption, Project>(mb, x => x.ProjectId);
+        Fk<ChangeAssessment, Project>(mb, x => x.ProjectId);
+
+
         foreach (var et in mb.Model.GetEntityTypes().Where(t => typeof(Audited).IsAssignableFrom(t.ClrType)))
             et.FindProperty(nameof(Audited.RowVersion))!.IsConcurrencyToken = true;
 
@@ -490,6 +568,24 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
     {
         ChangeTracker.DetectChanges();
+        var authorship = ChangeTracker.Entries().Where(e =>
+            e.Entity is WorkTask && (e.State == EntityState.Added || e.State == EntityState.Modified && (e.Property("AssigneeId").IsModified || e.Property("DeliverableId").IsModified))
+            || e.Entity is Deliverable && (e.State == EntityState.Added || e.State == EntityState.Modified && e.Property("OwnerId").IsModified)).ToList();
+        if (authorship.Count > 0) {
+            if (Database.CurrentTransaction == null) return await Tx.Run(this, () => SaveChangesAsync(ct));
+            foreach (var projectId in authorship.Select(e => ((ProjectItem)e.Entity).ProjectId).Distinct().Order()) await Coordination.Lock(this, projectId);
+            var settings = await Settings.FirstOrDefaultAsync(x => x.Key == "allow_self_review", ct);
+            var allowSelf = settings != null && JsonSerializer.Deserialize<bool>(settings.Value);
+            if (!allowSelf) foreach (var e in authorship) {
+                var deliverableId = e.Entity is WorkTask t ? t.DeliverableId : ((Deliverable)e.Entity).Id;
+                if (deliverableId == null) continue;
+                var owners = e.Entity is WorkTask task ? new[] { task.AssigneeId, task.CreatedBy ?? (e.State == EntityState.Added ? audit.ActorId : null) } : new[] { ((Deliverable)e.Entity).OwnerId, ((Deliverable)e.Entity).CreatedBy ?? (e.State == EntityState.Added ? audit.ActorId : null) };
+                var ids = owners.OfType<Guid>().ToArray();
+                Check.That(!await DisciplineReviews.AnyAsync(a => ids.Contains(a.ReviewerId)
+                    && ReviewPackages.Any(p => p.CurrentRoundId == a.RoundId && p.Status != ReviewStatus.Cancelled && p.Status != ReviewStatus.Superseded)
+                    && ReviewManifestItems.Any(m => m.RoundId == a.RoundId && m.DeliverableId == deliverableId), ct), "ownerId", "review.independent");
+            }
+        }
         var now = clock.GetUtcNow();
         if (await FollowTasks(now, ct)) ChangeTracker.DetectChanges();
         var projects = new HashSet<Guid>();
@@ -498,8 +594,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         {
             if (entry.State is EntityState.Unchanged or EntityState.Detached) continue;
             if (entry.State is EntityState.Modified or EntityState.Deleted
-                && entry.Entity is SourceRevision or HandoffRevision or HandoffReceiptEvent or HandoffCommand)
-                throw new InvalidOperationException("Published handoff evidence is immutable.");
+                && entry.Entity is SourceRevision or HandoffRevision or HandoffReceiptEvent or HandoffCommand or CoordinationCommand or ReviewManifestItem or FindingEvent or InputAdoption)
+                throw new InvalidOperationException("Published coordination evidence is immutable.");
             if (entry.Entity is Audited a)
             {
                 if (entry.State == EntityState.Added) { a.CreatedAt = now; a.CreatedBy ??= audit.ActorId; }

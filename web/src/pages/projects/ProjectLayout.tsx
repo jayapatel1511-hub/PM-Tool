@@ -24,6 +24,8 @@ export const PROJECT_TABS: { path: string | ((p: ProjectDetail) => string); labe
   { path: 'dashboard', label: 'ptab.dashboard' },
   { path: 'coordination', label: 'ptab.coordination' },
   { path: 'handoffs', label: 'ptab.handoffs' },
+  { path: 'reviews', label: 'ptab.reviews' },
+  { path: 'changes', label: 'ptab.changes' },
   { path: 'tasks', label: 'ptab.tasks' },
   { path: 'board', label: 'ptab.board' },
   { path: 'deliverables', label: 'ptab.deliverables' },

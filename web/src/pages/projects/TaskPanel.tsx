@@ -88,6 +88,7 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
           <PriorityBadge priority={r.priority} />
           <span className="text-xs text-muted-foreground">{d.project.projectNumber}</span>
           {perms.edit.ok && <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/handoffs?targetTask=${r.id}`}>{t('handoff.new')}</Link></Button>}
+          <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/changes?target=Task:${r.id}`}>{t('change.inputs')}</Link></Button>
           {perms.isReviewer && (
             <div className="ml-auto flex gap-1.5">
               {r.status === 'Ready for Review' && find('In Review') && <Button size="sm" onClick={() => act('In Review')}>{t('task.startReview')}</Button>}

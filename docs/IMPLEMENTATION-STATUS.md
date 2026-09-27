@@ -1,6 +1,12 @@
 # Implementation status
 
-## 2026-09-27 handoff foundation
+## 2026-09-27 reviews and revision/change foundation
+
+Packets 026–027 now add preserved review rounds and revision manifests, discipline decisions, independently verified findings, required deliverable issue gates, source registrations, explicit supersession, input-use history and deduplicated change assessments. Project screens, search, exports, activity and scoped notifications/digests are connected. The handoff A → B impact scenario (AC-HND-03) is covered.
+
+Implementation commit `d2be91138487d17cf4d903b040dd31640a14b89e` passed [CI run 36319125624](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/36319125624): 373 tests, zero failures/skips, 97.6% domain branch coverage, 91.5% service line coverage, frontend build/lint and mocked-API Chromium workflow/axe checks. See [026 verification](../specs/026-multidisciplinary-reviews/verification.md) and [027 verification](../specs/027-revision-change-impact/verification.md). No merge or deployment; full acceptance, operational checks, packet 031 design-basis/requirement adapters and packets 028–033 remain pending. The final commit only updates status/verification documents.
+
+## 2026-09-27 handoff foundation (historical)
 
 Packet 025 now has backend/domain records, an additive migration, project-scoped commands and UI, immutable submission and receipt history, named-owner permissions, search/export and scoped notifications. CI passed 360 tests, coverage gates and the mocked-API Chromium workflow/accessibility checks; details and limits are in [the packet verification record](../specs/025-discipline-handoffs/verification.md). This is an initial build increment, not full acceptance or deployment. Packet 027 change-impact integration (AC-HND-03), production hardening and packets 026–033 remain pending.
 

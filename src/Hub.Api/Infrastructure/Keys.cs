@@ -12,6 +12,7 @@ public static class Keys
         ["task"] = ("next_task_seq", "T", 4), ["deliverable"] = ("next_deliverable_seq", "D", 3),
         ["milestone"] = ("next_milestone_seq", "M", 2), ["decision"] = ("next_decision_seq", "DEC", 2),
         ["risk"] = ("next_risk_seq", "R", 2), ["issue"] = ("next_issue_seq", "I", 2), ["action"] = ("next_action_seq", "A", 2),
+        ["review"] = ("next_review_seq", "RV", 3), ["change"] = ("next_change_seq", "CH", 3),
         ["handoff"] = ("next_handoff_seq", "H", 3),
     };
 

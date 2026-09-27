@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test:handoffs": "node tests/handoffs.cjs"
+    "test:handoffs": "node tests/handoffs.cjs",
+    "test:coordination": "node tests/reviews-changes.cjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.23.0",

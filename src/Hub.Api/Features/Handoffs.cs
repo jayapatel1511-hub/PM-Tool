@@ -193,14 +193,7 @@ public static class HandoffEndpoints
             {
                 Check.That(h.PromisedBy is not null, "promisedBy", "error.required");
                 var source = await Source(db, p.Id, h.SourceDeliverableId, h.SourceRowVersion);
-                var hash = Hash(new { source.Id, source.RowVersion, h.DeclaredRevision, h.SourceUrl });
-                var registered = await db.SourceRevisions.FirstOrDefaultAsync(r => r.ProjectId == p.Id && r.IdentityHash == hash);
-                if (registered is null)
-                {
-                    registered = new SourceRevision { ProjectId = p.Id, DeliverableId = source.Id, SourceRowVersion = source.RowVersion,
-                        IdentityHash = hash, SourceKey = source.Key, Title = source.Name, Revision = h.DeclaredRevision, Url = h.SourceUrl };
-                    db.SourceRevisions.Add(registered);
-                }
+                var registered = await Coordination.Snapshot(db, p, source, h.DeclaredRevision, h.SourceUrl);
                 var revision = new HandoffRevision { ProjectId = p.Id, HandoffId = h.Id, SourceRevisionId = registered.Id,
                     PreviousRevisionId = h.CurrentRevisionId, SendingOwnerId = h.SendingOwnerId, ReceivingOwnerId = h.ReceivingOwnerId,
                     IntendedUse = h.IntendedUse, AcceptanceCriteria = h.AcceptanceCriteria, NeededBy = h.NeededBy, PromisedBy = h.PromisedBy!.Value,
@@ -215,6 +208,14 @@ public static class HandoffEndpoints
             if (body.ToStatus == HandoffStatus.Incorporated)
             {
                 outcome = Check.Required(body.CriteriaOutcome, "criteriaOutcome", 4000);
+                var receipt = await db.HandoffRevisions.SingleAsync(r => r.Id == h.CurrentRevisionId);
+                var sourceRevision = await Coordination.Revision(db, p.Id, receipt.SourceRevisionId);
+                var head = await Coordination.Head(db, sourceRevision);
+                if (head != null && head.CurrentRevisionId != sourceRevision.Id)
+                    Check.That(await db.ChangeAssessments.AnyAsync(a => a.ProjectId == p.Id && a.TargetId == (h.TargetTaskId ?? h.TargetDeliverableId) && a.RevisionUsedId == sourceRevision.Id && a.RetentionApprovedBy != null && a.RetainOldRevision && db.ChangeNotices.Any(c => c.Id == a.ChangeNoticeId && c.NewRevisionId == head.CurrentRevisionId)), "revision", "change.retention");
+                var target = await Coordination.Target(db, p, h.TargetTaskId != null ? "Task" : "Deliverable", h.TargetTaskId ?? h.TargetDeliverableId!.Value);
+                Check.That(target.Status is not (DeliverableStatus.Issued or DeliverableStatus.Accepted), "targetId", "review.issued");
+                await Coordination.Adopt(db, p, target, sourceRevision, h.IntendedUse, outcome, access.Me.Id, clock.GetUtcNow());
                 h.IncorporatedRevisionId = h.CurrentRevisionId;
             }
             db.HandoffReceiptEvents.Add(new HandoffReceiptEvent { ProjectId = p.Id, HandoffId = h.Id, RevisionId = h.CurrentRevisionId,
@@ -330,6 +331,8 @@ public static class HandoffEndpoints
                 Assign = Permission(Permissions.AssignHandoff(access.Actor, ctx, facts)),
                 Transitions = HandoffStatus.All.Where(to => HandoffRules.Step(h.Status, to)).Select(to => new {
                     To = to, Permission = Permission(Permissions.HandoffTransition(access.Actor, ctx, facts, to, settings.AllowSelfReview)) }) },
+            ChangeAssessments = await db.ChangeAssessments.Where(a => a.ProjectId == projectId && (a.HandoffId == id || a.TargetId == (h.TargetTaskId ?? h.TargetDeliverableId)))
+                .Join(db.ChangeNotices, a => a.ChangeNoticeId, c => c.Id, (a, c) => new { a.Id, a.Status, a.ChangeNoticeId, c.Key, c.Title, NoticeStatus = c.Status }).ToListAsync(),
             History = await db.HandoffReceiptEvents.AsNoTracking().Where(e => e.HandoffId == h.Id).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id)
                 .Select(e => new { e.Id, e.FromStatus, e.ToStatus, e.RevisionId, e.Reason, e.CriteriaOutcome, e.CreatedAt, e.CreatedBy,
                     Actor = db.Users.Where(u => u.Id == e.CreatedBy).Select(u => u.DisplayName).FirstOrDefault() }).ToListAsync(),

@@ -163,4 +163,3 @@ resource alertRules 'Microsoft.Insights/scheduledQueryRules@2023-03-15-preview' 
     actions: { actionGroups: [ operators.id ] }
   }
 }]
-

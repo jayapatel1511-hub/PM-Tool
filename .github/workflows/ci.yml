@@ -39,6 +39,16 @@ jobs:
       - name: Handoff UI workflow and dialog accessibility (mocked API)
         run: npm run test:handoffs
         working-directory: web
+      - name: Review and revision change UI workflows and accessibility (mocked API)
+        run: npm run test:coordination
+        working-directory: web
+      - name: Coordination browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-change-browser-evidence
+          path: web/test-results/coordination
+          if-no-files-found: ignore
       - name: Handoff browser evidence
         if: always()
         uses: actions/upload-artifact@v4

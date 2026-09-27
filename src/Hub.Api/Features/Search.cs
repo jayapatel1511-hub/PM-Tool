@@ -11,7 +11,7 @@ namespace Hub.Api.Features;
 /// ones included only for their members, as everywhere); archived and cancelled projects on request.
 public static partial class SearchEndpoints
 {
-    public static readonly string[] Groups = ["projects", "tasks", "deliverables", "milestones", "decisions", "handoffs", "comments", "people"];
+    public static readonly string[] Groups = ["projects", "tasks", "deliverables", "milestones", "decisions", "handoffs", "reviews", "changes", "comments", "people"];
 
     [GeneratedRegex(@"@\[([^\]]+)\]\([0-9a-fA-F-]{36}\)")]
     private static partial Regex Mention();
@@ -27,7 +27,7 @@ public static partial class SearchEndpoints
         return (start > 0 ? "…" : "") + plain[start..end].Trim() + (end < plain.Length ? "…" : "");
     }
 
-    [GeneratedRegex(@"^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H)\d+$", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H|RV|CH)\d+$", RegexOptions.IgnoreCase)]
     public static partial Regex KeyPattern();
 
     public static void Map(RouteGroupBuilder api) => api.MapGet("/search", Search);
@@ -114,6 +114,18 @@ public static partial class SearchEndpoints
                     ProjectNumber = db.Projects.Where(p => p.Id == h.ProjectId).Select(p => p.ProjectNumber).First(),
                     Owner = db.Users.Where(u => u.Id == h.ReceivingOwnerId).Select(u => u.DisplayName).FirstOrDefault() }).ToListAsync();
         }
+        if (want.Contains("reviews")) {
+            var rq = db.ReviewPackages.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Title, contains, @"\")));
+            counts["reviews"] = await rq.CountAsync();
+            groups["reviews"] = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenByDescending(x => x.UpdatedAt))
+                .Select(x => new { x.Id, x.Key, Name = x.Title, x.Status, ProjectNumber = db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First() }).ToListAsync();
+        }
+        if (want.Contains("changes")) {
+            var rq = db.ChangeNotices.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Title, contains, @"\")));
+            counts["changes"] = await rq.CountAsync();
+            groups["changes"] = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenByDescending(x => x.UpdatedAt))
+                .Select(x => new { x.Id, x.Key, Name = x.Title, x.Status, ProjectNumber = db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First() }).ToListAsync();
+        }
         if (want.Contains("comments")) // FR-004: never deleted ones
         {
             var cq = db.Comments.AsNoTracking().Where(c => c.DeletedAt == null && ids.Contains(c.ProjectId) && EF.Functions.ILike(c.Body, contains, @"\"));
@@ -178,6 +190,8 @@ public static partial class SearchEndpoints
             ?? await db.Issues.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = ItemType.Issue, t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync()
             ?? await db.Actions.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = ItemType.Action, t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync()
             ?? await db.Handoffs.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "Handoff", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
+        hit ??= await db.ReviewPackages.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "ReviewPackage", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
+        hit ??= await db.ChangeNotices.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "ChangeNotice", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
         if (hit is null) return null;
         return new { hit.type, id = (Guid?)hit.Id, projectNumber = await db.Projects.Where(p => p.Id == hit.ProjectId).Select(p => p.ProjectNumber).FirstAsync(), hit.Key };
     }

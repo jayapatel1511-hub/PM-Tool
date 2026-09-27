@@ -60,8 +60,14 @@ public sealed class SubmissionApiTests(HubFactory f)
         var snapshot = f.Db(db => db.SubmissionIssues.Single(i => i.PackageId == id).ManifestSnapshot);
         Assert.Contains("grading-a.pdf", snapshot);
         Assert.Equal("A", JsonNode.Parse(snapshot)![0]!["revision"]!.GetValue<string>());
+        var notice = f.Db(db => db.Notifications.Single(n => n.UserId == data.User(TestData.Marc) &&
+            n.EventType == NotificationEvents.SubmissionChanged && n.ItemId == id && n.ActorUserId == data.User(TestData.Pm)));
+        Assert.Equal($"/projects/{project.ProjectNumber}/submissions?panel=SubmissionPackage:{id}", notice.LinkPath);
+        var noticesBeforeRetry = f.Db(db => db.Notifications.Count(n => n.EventType == NotificationEvents.SubmissionChanged && n.ItemId == id));
         await Post(TestData.Pm, path + "/issue", currentIssue);
         Assert.Single(f.Db(db => db.SubmissionIssues.Where(i => i.PackageId == id).ToList()));
+        Assert.Equal(noticesBeforeRetry, f.Db(db => db.Notifications.Count(n => n.EventType == NotificationEvents.SubmissionChanged && n.ItemId == id)));
+        Assert.False(f.Db(db => db.Notifications.Any(n => n.UserId == data.User(TestData.Rita) && n.ItemId == id)));
         Assert.Equal(snapshot, f.Db(db => db.SubmissionIssues.Single(i => i.PackageId == id).ManifestSnapshot));
 
         var successor = await Post(TestData.Marc, root + "/submissions", new SubmissionEndpoints.CreateBody(Guid.NewGuid(), "Corrected design package", "Permit review", "Municipality",

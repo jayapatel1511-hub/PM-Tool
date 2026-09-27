@@ -73,6 +73,13 @@ public static class SubmissionEndpoints
     static async Task<SubmissionPackage> Load(HubDb db, Guid projectId, Guid id) =>
         await db.SubmissionPackages.SingleOrDefaultAsync(p => p.ProjectId == projectId && p.Id == id) ?? throw ApiException.NotFound();
 
+    static Task NotifyChanged(Notifier notify, Project project, SubmissionPackage package, params Guid?[] additionalRecipients) =>
+        notify.Send(NotificationEvents.SubmissionChanged,
+            new Guid?[] { project.ProjectManagerId, package.CoordinatorId }.Concat(additionalRecipients),
+            new NotifyItem(project.Id, "SubmissionPackage", package.Id, package.Key,
+                $"/projects/{project.ProjectNumber}/submissions?panel=SubmissionPackage:{package.Id}", project.ProjectNumber),
+            Text.Get("notify.submission_changed", package.Key, package.Status));
+
     static async Task AddVersion(HubDb db, Project project, SubmissionPackage package, ManifestInput[] manifest, OptionalCheckInput[] optionals)
     {
         Check.That(manifest is { Length: > 0 and <= 200 } && manifest.Select(m => m.SourceRevisionId).Distinct().Count() == manifest.Length, "manifest", "review.manifest");
@@ -118,7 +125,7 @@ public static class SubmissionEndpoints
         return (manifest, optionals);
     }
 
-    static Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "submission.create", body }, access, db, clock, async (project, ctx) => {
             Access.Demand(Permissions.CreateSubmission(access.Actor, ctx));
             await Coordination.Person(db, project, body.CoordinatorId, "coordinatorId");
@@ -135,10 +142,11 @@ public static class SubmissionEndpoints
             (package.Seq, package.Key) = await Keys.Next(db, project.Id, project.ProjectNumber, "submission");
             db.SubmissionPackages.Add(package);
             await AddVersion(db, project, package, body.Manifest, body.OptionalChecks);
+            await NotifyChanged(notify, project, package);
             return package;
         });
 
-    static Task<Coordination.Result> ReplaceManifest(Guid projectId, Guid id, ManifestBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> ReplaceManifest(Guid projectId, Guid id, ManifestBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "submission.manifest", id, body }, access, db, clock, async (project, ctx) => {
             var package = await Load(db, project.Id, id); Coordination.Version(package, body.RowVersion);
             Access.Demand(Permissions.CoordinateSubmission(access.Actor, ctx, package.CoordinatorId));
@@ -147,10 +155,10 @@ public static class SubmissionEndpoints
             var (_, prior) = await PreviousVersion(db, package);
             package.ManifestVersion++; package.Status = SubmissionStatus.Checking;
             await AddVersion(db, project, package, body.Manifest, prior);
-            db.Audit.Note(package, reason: reason); return package;
+            db.Audit.Note(package, reason: reason); await NotifyChanged(notify, project, package); return package;
         });
 
-    static Task<Coordination.Result> Edit(Guid projectId, Guid id, EditBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> Edit(Guid projectId, Guid id, EditBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "submission.edit", id, body }, access, db, clock, async (project, ctx) => {
             var package = await Load(db, project.Id, id); Coordination.Version(package, body.RowVersion);
             Access.Demand(Permissions.CoordinateSubmission(access.Actor, ctx, package.CoordinatorId));
@@ -163,10 +171,10 @@ public static class SubmissionEndpoints
             package.MilestoneId = body.MilestoneId; package.TargetDate = body.TargetDate;
             package.ManifestVersion++; package.Status = SubmissionStatus.Checking;
             await AddVersion(db, project, package, previous.Manifest, previous.Optionals);
-            db.Audit.Note(package, reason: Check.Reason(body.Reason)); return package;
+            db.Audit.Note(package, reason: Check.Reason(body.Reason)); await NotifyChanged(notify, project, package); return package;
         });
 
-    static Task<Coordination.Result> Assign(Guid projectId, Guid id, AssignBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> Assign(Guid projectId, Guid id, AssignBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "submission.assign", id, body }, access, db, clock, async (project, ctx) => {
             var package = await Load(db, project.Id, id); Coordination.Version(package, body.RowVersion);
             Access.Demand(Permissions.AuthoriseSubmission(access.Actor, ctx));
@@ -174,14 +182,15 @@ public static class SubmissionEndpoints
             await Coordination.Person(db, project, body.CoordinatorId, "coordinatorId");
             Check.That(body.CoordinatorId != package.CoordinatorId, "coordinatorId", "error.duplicate");
             var reason = Check.Reason(body.Reason);
+            var previousCoordinatorId = package.CoordinatorId;
             package.CoordinatorId = body.CoordinatorId;
             await Invalidate(db, package, reason);
             foreach (var check in await db.SubmissionChecks.Where(c => c.PackageId == id && c.ManifestVersion == package.ManifestVersion && c.Kind != SubmissionCheckKind.Applicability).ToListAsync())
                 check.OwnerId = body.CoordinatorId;
-            db.Audit.Note(package, reason: reason); return package;
+            db.Audit.Note(package, reason: reason); await NotifyChanged(notify, project, package, previousCoordinatorId); return package;
         });
 
-    static Task<Coordination.Result> Start(Guid projectId, Guid id, StartBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> Start(Guid projectId, Guid id, StartBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "submission.start", id, body }, access, db, clock, async (project, ctx) => {
             var package = await Load(db, project.Id, id); Coordination.Version(package, body.RowVersion);
             Access.Demand(Permissions.CoordinateSubmission(access.Actor, ctx, package.CoordinatorId));
@@ -189,10 +198,14 @@ public static class SubmissionEndpoints
             package.Status = SubmissionStatus.Checking;
             await db.SaveChangesAsync();
             if ((await SubmissionReadiness.Evaluate(db, package)).Ready) package.Status = SubmissionStatus.Ready;
-            db.Audit.Note(package, reason: body.Reason); return package;
+            db.Audit.Note(package, reason: body.Reason);
+            var owners = await db.SubmissionChecks.Where(c => c.PackageId == id && c.ManifestVersion == package.ManifestVersion && c.Kind == SubmissionCheckKind.Applicability)
+                .Select(c => (Guid?)c.OwnerId).Distinct().ToArrayAsync();
+            await NotifyChanged(notify, project, package, owners);
+            return package;
         });
 
-    static Task<Coordination.Result> CheckCommand(Guid projectId, Guid id, Guid checkId, CheckBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> CheckCommand(Guid projectId, Guid id, Guid checkId, CheckBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "submission.check", id, checkId, body }, access, db, clock, async (project, ctx) => {
             var package = await Load(db, project.Id, id); Coordination.Version(package, body.PackageRowVersion);
             Check.That(package.Status is SubmissionStatus.Checking or SubmissionStatus.Ready, "status", "review.frozen");
@@ -211,10 +224,10 @@ public static class SubmissionEndpoints
             package.Status = SubmissionStatus.Checking;
             await db.SaveChangesAsync();
             if ((await SubmissionReadiness.Evaluate(db, package)).Ready) package.Status = SubmissionStatus.Ready;
-            db.Audit.Note(check, reason: check.Reason); return check;
+            db.Audit.Note(check, reason: check.Reason); await NotifyChanged(notify, project, package); return check;
         });
 
-    static Task<Coordination.Result> AssignCheck(Guid projectId, Guid id, Guid checkId, CheckAssignBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> AssignCheck(Guid projectId, Guid id, Guid checkId, CheckAssignBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "submission.check.assign", id, checkId, body }, access, db, clock, async (project, ctx) => {
             var package = await Load(db, project.Id, id); Coordination.Version(package, body.PackageRowVersion);
             Access.Demand(Permissions.AuthoriseSubmission(access.Actor, ctx));
@@ -225,13 +238,16 @@ public static class SubmissionEndpoints
             await Coordination.Person(db, project, body.OwnerId);
             Check.That(body.OwnerId != check.OwnerId, "ownerId", "error.duplicate");
             var reason = Check.Reason(body.Reason);
+            var previousOwnerId = check.OwnerId;
             check.OwnerId = body.OwnerId; check.Status = SubmissionCheckStatus.Pending; check.EvidenceUrl = null;
             check.ApprovedAt = null; check.ApprovedBy = null; check.Reason = null;
             package.Status = SubmissionStatus.Checking;
-            db.Audit.Note(check, reason: reason); db.Audit.Note(package, reason: reason); return check;
+            db.Audit.Note(check, reason: reason); db.Audit.Note(package, reason: reason);
+            await NotifyChanged(notify, project, package, previousOwnerId, check.OwnerId);
+            return check;
         });
 
-    static Task<Coordination.Result> Issue(Guid projectId, Guid id, IssueBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> Issue(Guid projectId, Guid id, IssueBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "submission.issue", id, body }, access, db, clock, async (project, ctx) => {
             var package = await Load(db, project.Id, id); Coordination.Version(package, body.RowVersion);
             Access.Demand(Permissions.AuthoriseSubmission(access.Actor, ctx));
@@ -256,15 +272,16 @@ public static class SubmissionEndpoints
                 Check.That(old.Status == SubmissionStatus.Issued, "supersedesPackageId", "coord.reference");
                 old.Status = SubmissionStatus.Superseded; db.Audit.Note(old, reason: body.Reason);
             }
-            db.Audit.Note(package, reason: body.Reason); return package;
+            db.Audit.Note(package, reason: body.Reason); await NotifyChanged(notify, project, package); return package;
         });
 
-    static Task<Coordination.Result> Cancel(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> Cancel(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "submission.cancel", id, body }, access, db, clock, async (project, ctx) => {
             var package = await Load(db, project.Id, id); Coordination.Version(package, body.RowVersion);
             Access.Demand(Permissions.AuthoriseSubmission(access.Actor, ctx));
             Check.That(SubmissionRules.Step(package.Status, SubmissionStatus.Cancelled), "status", "review.frozen");
-            package.Status = SubmissionStatus.Cancelled; db.Audit.Note(package, reason: Check.Reason(body.Reason)); return package;
+            package.Status = SubmissionStatus.Cancelled; db.Audit.Note(package, reason: Check.Reason(body.Reason));
+            await NotifyChanged(notify, project, package); return package;
         });
 
     static async Task<object> List(Guid projectId, int? page, int? pageSize, Access access, HubDb db)

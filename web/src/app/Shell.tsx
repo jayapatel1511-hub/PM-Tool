@@ -42,7 +42,7 @@ export function Shell() {
       <a href="#content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-card focus:p-2">{t('app.skip')}</a>
       <nav aria-label={t('nav.main')} className={cn('hidden shrink-0 flex-col bg-frame text-frame-foreground md:flex', collapsed ? 'w-14' : 'w-14 xl:w-52')}>
         <div className="flex h-12 items-center gap-2 px-3 font-semibold">
-          <span aria-hidden className="grid size-7 place-items-center rounded-md bg-frame-active text-xs text-white">CH</span>
+          <span aria-hidden className="grid size-7 place-items-center rounded-md bg-frame-active text-xs text-white">T</span>
           <span className={cn('truncate', collapsed ? 'hidden' : 'hidden xl:inline')}>{t('app.name')}</span>
         </div>
         <ul className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">

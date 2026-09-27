@@ -248,7 +248,7 @@ export const en: Record<string, string> = {
   'handoff.action.Clarification Requested': 'Request clarification', 'handoff.action.Returned': 'Return input', 'handoff.action.Cancelled': 'Cancel handoff',
   'notify.HandoffChanged': 'Handoff updates', 'prefs.event.HandoffChanged': 'Handoff updates', 'digest.section.handoffs': 'Discipline handoffs',
   'event.HandoffChanged': 'Handoff updates', 'prefs.section.handoffs': 'Discipline handoffs',
-  'app.name': 'Coordination Hub',
+  'app.name': 'Tuesday',
   'rel.today': 'today',
   'rel.tomorrow': 'tomorrow',
   'rel.yesterday': 'yesterday',

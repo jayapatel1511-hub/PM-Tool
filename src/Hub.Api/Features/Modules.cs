@@ -45,6 +45,7 @@ public static class HubModules
         ReassignEndpoints.Map(api);
         PortfolioEndpoints.Map(api);
         WorkloadEndpoints.Map(api);
+        AllocationEndpoints.Map(api);
         TimelineEndpoints.Map(api);
         ViewEndpoints.Map(api);
         CalendarEndpoints.Map(api);

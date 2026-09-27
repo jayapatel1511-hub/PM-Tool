@@ -66,6 +66,7 @@ public static class ActivityEndpoints
         ItemType.Risk => await db.Risks.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
         ItemType.Issue => await db.Issues.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
         ItemType.Action => await db.Actions.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
+        "Handoff" => await db.Handoffs.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
         ItemType.Project => await db.Projects.Where(x => x.Id == id).Select(x => (Guid?)x.Id).FirstOrDefaultAsync(),
         _ => null,
     };

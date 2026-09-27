@@ -1,8 +1,19 @@
 # Verification: Discipline Handoffs and Acceptance
 
-**Date**: 2026-09-26
-**State**: Specification and implementation plan only. No application implementation, migration, runtime test, deployment or pilot execution performed for this packet.
+**Date**: 2026-09-27
+**State**: Foundation implementation written; verification in progress. Not deployed or pilot accepted.
 
-Documentation validation is recorded in `docs/coordination-spec-validation.md`. Product acceptance scenarios AC-HND-01, AC-HND-02, AC-HND-03, AC-HND-04, AC-HND-05 are **not run**. All implementation tasks remain unchecked.
+Implemented the handoff workflow, immutable submission/source snapshots, receiver evidence, owner reassignment, transactional command receipts, project UI, search, filters, saved views, CSV/XLSX export, audit history and scoped notifications/digests. Generated the additive `DisciplineHandoffs` EF migration; existing projects start the handoff sequence at 1.
 
-The implementation change must replace this paragraph with actual commands, environments and pass/fail/unrun results; do not inherit historical results from the original 24 packets.
+Executed locally on .NET SDK 10.0.401 / runtime 10.0.12 and Node 24.19.0:
+
+- Backend solution compilation passed (existing test-analyser warnings remain).
+- Domain test run passed: 193 tests, zero failures, zero skipped. This includes the handoff transition/permission tests and the pre-existing domain suite.
+- `npm run build` and `npm run lint` passed. Existing bundle-size, CSS selector and lint warnings remain.
+- EF migration generation passed. PostgreSQL migration execution and API integration scenarios are not yet verified in this record.
+
+The local environment has no usable PostgreSQL service and cannot switch operating-system users. The repository's CI PostgreSQL service is the intended integration validation environment for this branch. API tests cover AC-HND-01/02/04/05, duplicate requests, stale versions, immutable evidence, lifecycle/access refusals and scoped email suppression. Their existence is not a passing result.
+
+AC-HND-03 remains deferred until packet 027 supplies explicit revision supersession and impact assessments. A changed source-record warning and preserved old snapshot do not satisfy that scenario. Full browser/accessibility, concurrency load, performance, operational hardening and pilot acceptance remain pending until their actual results are added. No deployment or production-readiness claim is made.
+
+The earlier documentation-only validation in `docs/coordination-spec-validation.md` is historical and does not validate this runtime change.

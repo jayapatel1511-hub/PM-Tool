@@ -1,6 +1,6 @@
 # Implementation Plan: Discipline Handoffs and Acceptance
 
-**Date**: 2026-09-26 | **Status**: Proposed implementation plan; no application changes in this specification commit.
+**Date**: 2026-09-26 | **Status**: Foundation implementation in progress, authorised by Jay's request to start building from the accepted specifications.
 
 ## Approach
 
@@ -27,6 +27,14 @@ Build immutable revision references as shared foundations for 026/027. AC-HND-03
 - `tests/Hub.Tests/Api/HandoffsTests.cs`
 - Existing notification, report and search modules only for this packet's events and permission-filtered metadata.
 - An existing file with the named responsibility is extended rather than replaced; exact additions are reviewed in the implementation diff.
+
+### Resolved implementation boundaries (2026-09-27)
+
+The existing registration point is `src/Hub.Api/Features/Modules.cs`; project navigation is in `web/src/pages/projects/ProjectLayout.tsx`. Extend those existing files. Supporting changes are limited to `Infrastructure/Audit.cs`, `Keys.cs`, `Idempotency.cs`, `Notify.cs`, `Email.cs`, `Digest.cs`; `Features/Activity.cs`, `Search.cs`, `Views.cs`, `Notifications.cs`; `Hub.Domain/Settings.cs`; and `web/src/components/hub/search.tsx`. Existing deliverable/task panels gain prefilled handoff links. These integrate the packet with existing audit, search, export, saved views and notification functions, without new infrastructure.
+
+Commands use a project-row transaction lock and an immutable request receipt to prevent concurrent duplicate writes. Submitted references, purpose/criteria and receipt events are append-only. A source share lock and expected source version prevent a draft from silently taking a newly edited source. A receiving task/deliverable stays independent of the handoff state. Scoped notification email and digests recheck project access before delivery.
+
+The initial increment supports one target work item per handoff and separate receipts for separate receiving disciplines. Broader source supersession and explicit impact assessment are still packet 027; AC-HND-03 remains deferred. The build is not production-ready until the verification record's outstanding checks pass.
 
 ## Constitution check (design review, not executed proof)
 

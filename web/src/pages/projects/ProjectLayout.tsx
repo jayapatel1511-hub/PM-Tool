@@ -23,6 +23,7 @@ export const useCurrentProject = () => useContext(Ctx)!
 export const PROJECT_TABS: { path: string | ((p: ProjectDetail) => string); label: string; show?: (p: ProjectDetail, me: Me) => boolean }[] = [
   { path: 'dashboard', label: 'ptab.dashboard' },
   { path: 'coordination', label: 'ptab.coordination' },
+  { path: 'handoffs', label: 'ptab.handoffs' },
   { path: 'tasks', label: 'ptab.tasks' },
   { path: 'board', label: 'ptab.board' },
   { path: 'deliverables', label: 'ptab.deliverables' },

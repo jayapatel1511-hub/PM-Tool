@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Ban, Check, Eye, EyeOff, GitBranch, Link2, Plus, RotateCcw, Trash2, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Spinner, selectCls } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
@@ -87,6 +87,7 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
           </DropdownMenu>
           <PriorityBadge priority={r.priority} />
           <span className="text-xs text-muted-foreground">{d.project.projectNumber}</span>
+          {perms.edit.ok && <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/handoffs?targetTask=${r.id}`}>{t('handoff.new')}</Link></Button>}
           {perms.isReviewer && (
             <div className="ml-auto flex gap-1.5">
               {r.status === 'Ready for Review' && find('In Review') && <Button size="sm" onClick={() => act('In Review')}>{t('task.startReview')}</Button>}

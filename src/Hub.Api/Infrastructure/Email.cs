@@ -63,11 +63,13 @@ public sealed class EmailJob : IJob
         var db = sp.GetRequiredService<HubDb>();
         var sender = sp.GetRequiredService<IEmailSender>();
         var now = sp.GetRequiredService<TimeProvider>().GetUtcNow();
-        var batch = await db.Emails.Where(e => e.SentAt == null && e.Attempts < 8 && (e.NextAttemptAt == null || e.NextAttemptAt <= now))
+        var batch = await db.Emails.Where(e => e.SentAt == null && e.SuppressedAt == null && e.Attempts < 8 && (e.NextAttemptAt == null || e.NextAttemptAt <= now))
             .OrderBy(e => e.CreatedAt).Take(100).ToListAsync(ct);
         int sent = 0, failed = 0;
         foreach (var m in batch)
         {
+            if (m.RequiredProjectIds.Length > 0 && (m.UserId is not { } uid || !await EmailProjectAccess.Allowed(db, uid, m.RequiredProjectIds)))
+            { m.SuppressedAt = now; m.LastError = "ProjectAccessRemoved"; continue; }
             try { await sender.Send(m, ct); m.SentAt = now; sent++; }
             catch (Exception e) when (!ct.IsCancellationRequested)
             {
@@ -76,5 +78,20 @@ public sealed class EmailJob : IJob
         }
         await db.SaveChangesAsync(ct);
         return new { sent, failed };
+    }
+}
+
+/// Recheck scoped handoff/digest emails just before delivery; the queue is not an access grant.
+public static class EmailProjectAccess
+{
+    public static async Task<bool> Allowed(HubDb db, Guid userId, Guid[] projectIds)
+    {
+        if (!await db.Users.AnyAsync(u => u.Id == userId && u.IsActive)) return false;
+        var elevated = await db.UserRoles.AnyAsync(r => r.UserId == userId && (r.Role == SystemRole.Admin || r.Role == SystemRole.Executive));
+        var ids = projectIds.Distinct().ToArray();
+        return await db.Projects.CountAsync(p => ids.Contains(p.Id)
+            && p.Status != ProjectStatus.Archived && p.Status != ProjectStatus.Cancelled
+            && (elevated || p.Visibility != Visibility.Restricted || p.ProjectManagerId == userId
+                || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == userId && m.RemovedAt == null))) == ids.Length;
     }
 }

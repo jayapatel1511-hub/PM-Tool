@@ -15,12 +15,13 @@ public static class Digest
     public sealed record Row(Guid ItemId, string? Key, string Name, string Project, string Detail, string Link);
     public sealed record Section(string Code, List<Row> Rows, int Total);
     public sealed record Updates(string ProjectNumber, string ProjectName, int Count, Dictionary<string, int> ByType, List<string> Top);
-    public sealed record Result(string Subject, string Body, List<Section> Sections, List<Updates> ProjectUpdates);
+    public sealed record Result(string Subject, string Body, List<Section> Sections, List<Updates> ProjectUpdates)
+    { public Guid[] RequiredProjectIds { get; init; } = []; }
 
     const int Cap = 10;
 
     /// Sections a person can switch off (FR-002, packet 020), in digest order.
-    public static readonly string[] SectionCodes = ["overdue", "dueSoon", "blocked", "reviews", "decisions", "attention", "milestones", "staff", "updates"];
+    public static readonly string[] SectionCodes = ["overdue", "dueSoon", "blocked", "reviews", "decisions", "handoffs", "attention", "milestones", "staff", "updates"];
     static readonly string[] ImportantCategories = ["status", "assignment", "date", "decision"];
 
     /// Active projects the person can see: open ones, and restricted ones they belong to (§8.7); Setup and On Hold are left out.
@@ -140,7 +141,12 @@ public static class Digest
                 top.Select(x => { dynamic v = x; return $"{v.ActorName ?? Text.Get("common.system")} {Text.Get($"digest.action.{v.Action}")} {v.ItemKey} {v.ItemName}: {v.Summary}".Trim(); }).ToList()));
         }
 
-        var sections = new List<Section> { overdue, dueSoon, blocked, reviews, decisionRows, attentionRows, milestones, staff }.Where(x => x.Total > 0).ToList();
+        var handoffRows = await db.Handoffs.AsNoTracking().Where(h => pids.Contains(h.ProjectId)
+            && (h.SendingOwnerId == userId || h.ReceivingOwnerId == userId)
+            && h.Status != HandoffStatus.Incorporated && h.Status != HandoffStatus.Cancelled).OrderBy(h => h.NeededBy).ToListAsync();
+        var handoffs = Make("handoffs", handoffRows.Select(h => new Row(h.Id, h.Key, h.Title, Num(h.ProjectId),
+            Text.Get("handoff.digest_detail", h.Status, D(h.NeededBy)), $"{baseUrl}/projects/{Num(h.ProjectId)}/handoffs?panel=Handoff:{h.Id}")));
+        var sections = new List<Section> { overdue, dueSoon, blocked, reviews, decisionRows, handoffs, attentionRows, milestones, staff }.Where(x => x.Total > 0).ToList();
         if (sections.Count == 0 && updates.Count == 0) return null; // AC-NOT-04: nothing to say, nothing sent
 
         var parts = new List<string>();
@@ -172,7 +178,7 @@ public static class Digest
             body.AppendLine($"  {Text.Get("digest.following")} {baseUrl}/notifications?tab=following").AppendLine();
         }
         body.AppendLine(Text.Get("digest.footer", $"{baseUrl}/my-work", $"{baseUrl}/preferences"));
-        return new Result(subject, body.ToString(), sections, updates);
+        return new Result(subject, body.ToString(), sections, updates) { RequiredProjectIds = [.. pids] };
     }
 
     static string Blockers(string? json)
@@ -215,7 +221,7 @@ public sealed class DigestJob : IJob
             var digest = await Digest.Build(db, u.Id, u.DisplayName.Split(' ')[0], today, pref?.LastDigestAt ?? now.AddDays(-1), now, s, baseUrl, off);
             if (digest is not null && !string.IsNullOrEmpty(u.Email))
             {
-                db.Emails.Add(new EmailMessage { UserId = u.Id, ToAddress = u.Email, Subject = digest.Subject, BodyText = digest.Body, Kind = "Digest",
+                db.Emails.Add(new EmailMessage { UserId = u.Id, ToAddress = u.Email, Subject = digest.Subject, BodyText = digest.Body, Kind = "Digest", RequiredProjectIds = digest.RequiredProjectIds,
                     DedupKey = $"digest:{u.Id}:{today:yyyy-MM-dd}", CreatedAt = now, NextAttemptAt = now });
                 sent++;
             }

@@ -11,7 +11,7 @@ namespace Hub.Api.Features;
 /// ones included only for their members, as everywhere); archived and cancelled projects on request.
 public static partial class SearchEndpoints
 {
-    public static readonly string[] Groups = ["projects", "tasks", "deliverables", "milestones", "decisions", "comments", "people"];
+    public static readonly string[] Groups = ["projects", "tasks", "deliverables", "milestones", "decisions", "handoffs", "comments", "people"];
 
     [GeneratedRegex(@"@\[([^\]]+)\]\([0-9a-fA-F-]{36}\)")]
     private static partial Regex Mention();
@@ -27,7 +27,7 @@ public static partial class SearchEndpoints
         return (start > 0 ? "…" : "") + plain[start..end].Trim() + (end < plain.Length ? "…" : "");
     }
 
-    [GeneratedRegex(@"^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A)\d+$", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H)\d+$", RegexOptions.IgnoreCase)]
     public static partial Regex KeyPattern();
 
     public static void Map(RouteGroupBuilder api) => api.MapGet("/search", Search);
@@ -104,6 +104,16 @@ public static partial class SearchEndpoints
                 .ThenBy(d => db.Projects.Any(p => p.Id == d.ProjectId && p.Status == ProjectStatus.Active) ? 0 : 1).ThenByDescending(d => d.LastActivityAt))
                 .Select(d => new { d.Id, d.Key, Name = d.Subject, d.Status, d.RequiredByDate, ProjectNumber = db.Projects.Where(p => p.Id == d.ProjectId).Select(p => p.ProjectNumber).First() }).ToListAsync();
         }
+        if (want.Contains("handoffs"))
+        {
+            var hq = db.Handoffs.AsNoTracking().Where(h => ids.Contains(h.ProjectId)
+                && (EF.Functions.ILike(h.Key, contains, @"\") || EF.Functions.ILike(h.Title, contains, @"\")));
+            counts["handoffs"] = await hq.CountAsync();
+            groups["handoffs"] = await Page(hq.OrderBy(h => h.Key.ToLower() == lower ? 0 : 1).ThenBy(h => h.NeededBy))
+                .Select(h => new { h.Id, h.Key, Name = h.Title, h.Status, DueDate = h.NeededBy,
+                    ProjectNumber = db.Projects.Where(p => p.Id == h.ProjectId).Select(p => p.ProjectNumber).First(),
+                    Owner = db.Users.Where(u => u.Id == h.ReceivingOwnerId).Select(u => u.DisplayName).FirstOrDefault() }).ToListAsync();
+        }
         if (want.Contains("comments")) // FR-004: never deleted ones
         {
             var cq = db.Comments.AsNoTracking().Where(c => c.DeletedAt == null && ids.Contains(c.ProjectId) && EF.Functions.ILike(c.Body, contains, @"\"));
@@ -166,7 +176,8 @@ public static partial class SearchEndpoints
             ?? await db.Decisions.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = ItemType.Decision, t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync()
             ?? await db.Risks.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = ItemType.Risk, t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync()
             ?? await db.Issues.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = ItemType.Issue, t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync()
-            ?? await db.Actions.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = ItemType.Action, t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
+            ?? await db.Actions.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = ItemType.Action, t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync()
+            ?? await db.Handoffs.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "Handoff", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
         if (hit is null) return null;
         return new { hit.type, id = (Guid?)hit.Id, projectNumber = await db.Projects.Where(p => p.Id == hit.ProjectId).Select(p => p.ProjectNumber).FirstAsync(), hit.Key };
     }

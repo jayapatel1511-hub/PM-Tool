@@ -57,6 +57,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<SubmissionCheck> SubmissionChecks => Set<SubmissionCheck>();
     public DbSet<CheckEvidence> CheckEvidences => Set<CheckEvidence>();
     public DbSet<SubmissionIssue> SubmissionIssues => Set<SubmissionIssue>();
+    public DbSet<PersonAvailabilityOverride> AvailabilityOverrides => Set<PersonAvailabilityOverride>();
+    public DbSet<ResourceAllocation> Allocations => Set<ResourceAllocation>();
+    public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
+    public DbSet<AllocationWorkLink> AllocationWorkLinks => Set<AllocationWorkLink>();
+    public DbSet<PersonDateVersion> PersonDateVersions => Set<PersonDateVersion>();
     public DbSet<WorkTask> Tasks => Set<WorkTask>();
     public DbSet<TaskDependency> Dependencies => Set<TaskDependency>();
     public DbSet<DeliverableDependency> DeliverableDependencies => Set<DeliverableDependency>();
@@ -429,6 +434,41 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.Entity<SubmissionIssue>().HasIndex(x => x.PackageId).IsUnique();
         mb.Entity<SubmissionIssue>().Property(x => x.ManifestSnapshot).HasColumnType("jsonb");
         mb.Entity<SubmissionIssue>().Property(x => x.CheckSnapshot).HasColumnType("jsonb");
+        mb.Entity<PersonAvailabilityOverride>(e =>
+        {
+            e.HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
+            e.Property(x => x.AvailableHours).HasPrecision(9, 3);
+            e.ToTable(t => { t.HasCheckConstraint("ck_availability_hours", "available_hours >= 0"); t.HasCheckConstraint("ck_availability_category", $"category IN ({In(AvailabilityCategory.All)})"); });
+        });
+        mb.Entity<ResourceAllocation>(e =>
+        {
+            e.HasIndex(x => new { x.PersonId, x.FromDate, x.ThroughDate });
+            e.HasIndex(x => new { x.ProjectId, x.Status });
+            e.Property(x => x.PlannedHours).HasPrecision(9, 3);
+            e.Property(x => x.ConfirmationSnapshot).HasColumnType("jsonb");
+            e.ToTable(t => { t.HasCheckConstraint("ck_allocation_dates", "through_date >= from_date"); t.HasCheckConstraint("ck_allocation_hours", "planned_hours > 0"); t.HasCheckConstraint("ck_allocation_status", $"status IN ({In(AllocationStatus.All)})"); t.HasCheckConstraint("ck_allocation_purpose", $"purpose IN ({In(AllocationPurpose.All)})"); });
+        });
+        mb.Entity<AllocationDayOverride>(e =>
+        {
+            e.HasIndex(x => new { x.AllocationId, x.WorkDate }).IsUnique();
+            e.Property(x => x.Hours).HasPrecision(9, 3);
+            e.ToTable(t => t.HasCheckConstraint("ck_allocation_day_hours", "hours >= 0"));
+        });
+        mb.Entity<AllocationWorkLink>(e =>
+        {
+            e.HasIndex(x => new { x.PersonId, x.WorkType, x.WorkId, x.WorkDate }).IsUnique().HasFilter("released_at IS NULL");
+            e.HasIndex(x => x.AllocationId);
+            e.ToTable(t => t.HasCheckConstraint("ck_allocation_work_type", "work_type IN ('Task', 'Review')"));
+        });
+        mb.Entity<PersonDateVersion>().HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
+        Fk<PersonAvailabilityOverride, AppUser>(mb, x => x.PersonId);
+        Fk<ResourceAllocation, Project>(mb, x => x.ProjectId);
+        Fk<ResourceAllocation, AppUser>(mb, x => x.PersonId);
+        Fk<ResourceAllocation, AppUser>(mb, x => x.ConfirmedBy);
+        Fk<AllocationDayOverride, ResourceAllocation>(mb, x => x.AllocationId);
+        Fk<AllocationWorkLink, ResourceAllocation>(mb, x => x.AllocationId);
+        Fk<AllocationWorkLink, AppUser>(mb, x => x.PersonId);
+        Fk<PersonDateVersion, AppUser>(mb, x => x.PersonId);
         mb.Entity<CoordinationCommand>().HasIndex(x => new { x.ProjectId, x.ActorId, x.RequestId }).IsUnique();
         mb.Entity<ReviewRound>().HasIndex(x => new { x.PackageId, x.Number }).IsUnique();
         mb.Entity<ReviewManifestItem>().HasIndex(x => new { x.RoundId, x.DeliverableId }).IsUnique();

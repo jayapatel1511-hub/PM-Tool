@@ -28,6 +28,8 @@ public static class AllocationEndpoints
         api.MapPost("/projects/{projectId:guid}/allocations", Create).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/edit", Edit).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/cancel", Cancel).WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/decline", Decline).WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/complete", Complete).WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/users/{personId:guid}/availability", Availability);
         api.MapPut("/users/{personId:guid}/availability/{date}", SetAvailability);
         api.MapGet("/projects/{projectId:guid}/allocations/{id:guid}/confirmation-preview", ConfirmationPreview);
@@ -347,6 +349,40 @@ public static class AllocationEndpoints
             foreach (var link in await db.AllocationWorkLinks.Where(l => l.AllocationId == id && l.ReleasedAt == null).ToListAsync())
                 link.ReleasedAt = clock.GetUtcNow();
             if (wasConfirmed) await TouchDates(db, a.PersonId, Enumerable.Range(0, a.ThroughDate.DayNumber - a.FromDate.DayNumber + 1)
+                .Select(i => a.FromDate.AddDays(i)));
+            db.Audit.Note(a, reason: Check.Reason(body.Reason));
+            return a;
+        });
+
+    static Task<Coordination.Result> Decline(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "allocation.decline", id, body }, access, db, clock, async (project, ctx) =>
+        {
+            var a = await db.Allocations.FirstOrDefaultAsync(a => a.ProjectId == project.Id && a.Id == id) ?? throw ApiException.NotFound();
+            Coordination.Version(a, body.RowVersion);
+            var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == a.PersonId && u.IsActive) ?? throw ApiException.NotFound();
+            Access.Demand(Permissions.ConfirmAllocation(access.Actor, ctx, person.SupervisorId));
+            Check.That(AllocationRules.Step(a.Status, AllocationStatus.Declined), "status", "error.invalid");
+            a.Status = AllocationStatus.Declined;
+            foreach (var link in await db.AllocationWorkLinks.Where(l => l.AllocationId == id && l.ReleasedAt == null).ToListAsync())
+                link.ReleasedAt = clock.GetUtcNow();
+            db.Audit.Note(a, reason: Check.Reason(body.Reason));
+            return a;
+        });
+
+    static Task<Coordination.Result> Complete(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "allocation.complete", id, body }, access, db, clock, async (project, ctx) =>
+        {
+            var a = await db.Allocations.FirstOrDefaultAsync(a => a.ProjectId == project.Id && a.Id == id) ?? throw ApiException.NotFound();
+            Coordination.Version(a, body.RowVersion);
+            Access.Demand(Permissions.ProposeAllocation(access.Actor, ctx));
+            Access.Demand(Permissions.IsPM(access.Actor, ctx) || a.CreatedBy == access.Actor.Id
+                ? Allow.Yes : Allow.No("perm.owner"));
+            Check.That(AllocationRules.Step(a.Status, AllocationStatus.Completed), "status", "error.invalid");
+            await LockPerson(db, a.PersonId);
+            a.Status = AllocationStatus.Completed;
+            foreach (var link in await db.AllocationWorkLinks.Where(l => l.AllocationId == id && l.ReleasedAt == null).ToListAsync())
+                link.ReleasedAt = clock.GetUtcNow();
+            await TouchDates(db, a.PersonId, Enumerable.Range(0, a.ThroughDate.DayNumber - a.FromDate.DayNumber + 1)
                 .Select(i => a.FromDate.AddDays(i)));
             db.Audit.Note(a, reason: Check.Reason(body.Reason));
             return a;

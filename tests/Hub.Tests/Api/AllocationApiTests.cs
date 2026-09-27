@@ -61,6 +61,38 @@ public sealed class AllocationApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Supervisor_declines_and_pm_completes_with_links_and_versions_released()
+    {
+        var project = await data.Project();
+        var personId = data.User(TestData.Alex);
+        var day = new DateOnly(2026, 9, 14);
+        var task = await data.NewTask(project.Id, extra: new { assigneeId = personId, estimatedHours = 4m, startDate = day, dueDate = day });
+        var root = $"/api/v1/projects/{project.Id}/allocations";
+        var create = new AllocationEndpoints.CreateBody(Guid.NewGuid(), personId, AllocationPurpose.Production, day, day, 4,
+            [], [new("Task", task.G("id"), day)], null);
+        var proposed = await (await f.As(TestData.Pm).Post(root, create)).Json();
+        var path = $"{root}/{proposed.G("id")}";
+        var decline = new AllocationEndpoints.CancelBody(Guid.NewGuid(), proposed.I("rowVersion"), "Use another plan");
+        await (await f.As(TestData.Pm).Post(path + "/decline", decline)).Json(403);
+        await (await f.As(TestData.Sam).Post(path + "/decline", decline)).Json();
+        Assert.Equal(AllocationStatus.Declined, f.Db(db => db.Allocations.Single(a => a.Id == proposed.G("id")).Status));
+        Assert.Empty(f.Db(db => db.AllocationWorkLinks.Where(l => l.AllocationId == proposed.G("id") && l.ReleasedAt == null).ToList()));
+        var next = await (await f.As(TestData.Pm).Post(root, create with { RequestId = Guid.NewGuid() })).Json();
+        var nextPath = $"{root}/{next.G("id")}";
+        var preview = await (await f.As(TestData.Sam).GetAsync(nextPath + "/confirmation-preview")).Json();
+        var confirmed = await (await f.As(TestData.Sam).Post(nextPath + "/confirm", new AllocationEndpoints.ConfirmBody(
+            Guid.NewGuid(), next.I("rowVersion"), [new(day, preview["days"]![0]!["dateVersion"]!.GetValue<int>())], null))).Json();
+        var priorDateVersion = f.Db(db => db.PersonDateVersions.Single(v => v.PersonId == personId && v.WorkDate == day).RowVersion);
+        var complete = new AllocationEndpoints.CancelBody(Guid.NewGuid(), confirmed.I("rowVersion"), "Allocation period closed");
+        await (await f.As(TestData.Sam).Post(nextPath + "/complete", complete)).Json(403);
+        await (await f.As(TestData.Pm).Post(nextPath + "/complete", complete)).Json();
+        Assert.Equal(AllocationStatus.Completed, f.Db(db => db.Allocations.Single(a => a.Id == next.G("id")).Status));
+        Assert.Empty(f.Db(db => db.AllocationWorkLinks.Where(l => l.AllocationId == next.G("id") && l.ReleasedAt == null).ToList()));
+        Assert.True(f.Db(db => db.PersonDateVersions.Single(v => v.PersonId == personId && v.WorkDate == day).RowVersion) > priorDateVersion);
+        await (await f.As(TestData.Pm).Post(nextPath + "/complete", complete with { RequestId = Guid.NewGuid() })).Json(409);
+    }
+
+    [Fact]
     public async Task Supervisor_sets_private_day_capacity_with_expected_version()
     {
         var alex = data.User(TestData.Alex);

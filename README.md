@@ -52,6 +52,13 @@ In Development, `Auth:Mode` is `Development`: there is no Entra sign-in; the SPA
 `X-Dev-User: <email>`. This mode is refused in any other environment. Seeded people include jordan (Admin), lena
 (Executive), priya and marc (PMs), sam (Supervisor), alex, jill, diane, omar and rita (Read Only), all `@hub.test`.
 
+For a review database with fictional people and projects, set `Seed:ReviewDemo=true` (environment variable
+`Seed__ReviewDemo=true`) in Development or Staging. This adds Taylor (PM and supervisor), Jay (civil PM and supervisor)
+and Yagmur (PM reporting to Taylor), plus three clearly labelled demo projects. The seed is opt-in and idempotent:
+later starts leave review edits intact. It is refused in Production. In Staging, reviewers sign in with their own
+Entra accounts; the `@hub.test` people are sample records and cannot sign in there. Use a separate review database and
+keep it for successive preview releases. Do not move its data into production.
+
 ## Checks
 
 ```bash
@@ -129,6 +136,7 @@ secrets live in Key Vault.
 | `Csp:ConnectSrc` | empty | Extra `connect-src` origins for the content security policy (Application Insights) |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | unset | Send requests, dependencies and logs to Application Insights |
 | `Seed:DevUsers` | `true` in Development | Seed the development people |
+| `Seed:ReviewDemo` | `false` | Add synthetic review people and projects in Development or Staging only; requires a separate review database |
 
 Organisation thresholds and defaults (due-soon days, stale days, health percentages, working days, digest time and so
 on) are not configuration: Admins change them in the application under **Admin → Settings**, and every change is logged.

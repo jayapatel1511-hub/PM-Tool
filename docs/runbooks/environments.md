@@ -4,6 +4,12 @@ Development, test and production are separate Azure resource groups with separat
 Production data is never copied into development or test; the synthetic data in `tools/scale/seed.sql` exists for load
 tests. Each environment can be rebuilt from its definitions in under a day.
 
+For a review preview, use a dedicated non-production database and explicitly set `Seed__ReviewDemo=true`. The app adds
+clearly marked fictional people and projects once and keeps reviewer edits on later releases. `Seed:ReviewDemo` is
+refused in Production; do not restore the review database into production. Hosted Staging still uses Entra sign-in for
+real reviewers, while the `@hub.test` people are sample records only. Development sign-in must stay local or behind a
+separate access gate, because its identity header is not suitable for an open Internet site.
+
 ## What defines an environment
 
 | Part | Where |

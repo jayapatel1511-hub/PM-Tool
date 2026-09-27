@@ -21,7 +21,8 @@ public sealed class TestClock : TimeProvider
 /// One PostgreSQL database per test run, migrated once; tests create their own uniquely named data.
 public sealed class HubFactory : WebApplicationFactory<Program>
 {
-    public static readonly string Database = "hub_test_" + Guid.NewGuid().ToString("N")[..8];
+    public bool ReviewDemo { get; set; }
+    public string Database { get; } = "hub_test_" + Guid.NewGuid().ToString("N")[..8];
     public TestClock Clock { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder b)
@@ -35,6 +36,7 @@ public sealed class HubFactory : WebApplicationFactory<Program>
         b.UseEnvironment("Testing");
         b.UseSetting("ConnectionStrings:Hub", $"Host=localhost;Port=55432;Database={Database};Username=hub;Include Error Detail=true");
         b.UseSetting("Auth:Mode", "Development");
+        b.UseSetting("Seed:ReviewDemo", ReviewDemo.ToString());
         b.UseSetting("Jobs:Enabled", "false");
         b.UseSetting("Evaluation:Worker", "false");
         b.UseSetting("RateLimit:PerMinute", "100000");

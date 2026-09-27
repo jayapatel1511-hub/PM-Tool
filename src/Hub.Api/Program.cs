@@ -108,6 +108,10 @@ if (AuthSetup.DevAuthAllowed(app.Environment, cfg))
     app.MapGet("/api/dev/users", async (HubDb db) => await db.Users.Where(u => u.IsActive).OrderBy(u => u.DisplayName)
         .Select(u => new { u.Email, u.DisplayName, u.JobTitle, Roles = u.Roles.Select(r => r.Role) }).ToListAsync()).AllowAnonymous();
 
+var reviewDemo = cfg.GetValue<bool>("Seed:ReviewDemo");
+if (reviewDemo && !(app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsEnvironment("Testing")))
+    throw new InvalidOperationException("Seed:ReviewDemo is permitted only in Development, Staging or Testing.");
+
 if (cfg["Db:Migrate"] != "false")
 {
     using var scope = app.Services.CreateScope();
@@ -119,6 +123,8 @@ if (cfg["Db:Migrate"] != "false")
         await Seed.DevUsers(db);
         await ReferenceTemplate.Seed(db); // Appendix A, for trying the template wizard
     }
+    if (reviewDemo)
+        await ReviewDemoSeed.Seed(db, scope.ServiceProvider.GetRequiredService<TimeProvider>());
 }
 
 app.Run();

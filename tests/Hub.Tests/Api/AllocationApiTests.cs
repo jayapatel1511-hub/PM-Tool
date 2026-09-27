@@ -80,6 +80,9 @@ public sealed class AllocationApiTests(HubFactory f)
             new AllocationEndpoints.AvailabilityBody(first.I("rowVersion"), 3, AvailabilityCategory.Reduced))).Json(409);
         Assert.Equal(1, f.Db(db => db.PersonDateVersions.Count(v => v.PersonId == alex && v.WorkDate == day)));
         Assert.Equal(6, f.Db(db => db.AvailabilityOverrides.Single(v => v.PersonId == alex && v.WorkDate == day).AvailableHours));
+        var grid = await (await f.As(TestData.Sam).GetAsync("/api/v1/workload?from=2026-10-05")).Json();
+        var cell = grid["people"]!.AsArray().Single(p => p!.G("id") == alex)!["cells"]![0]!;
+        Assert.Equal(38, cell["available"]!.GetValue<decimal>());
     }
 
     [Fact]
@@ -124,6 +127,17 @@ public sealed class AllocationApiTests(HubFactory f)
         var confirmedFirst = await (await f.As(TestData.Sam).Post(firstPath + "/confirm", confirmFirst)).Json();
         var replay = await (await f.As(TestData.Sam).Post(firstPath + "/confirm", confirmFirst)).Json();
         Assert.Equal(confirmedFirst.I("rowVersion"), replay.I("rowVersion"));
+        var grid = await (await f.As(TestData.Sam).GetAsync("/api/v1/workload")).Json();
+        var cell = grid["people"]!.AsArray().Single(p => p!.G("id") == personId)!["cells"]![0]!;
+        Assert.Equal(11, cell["hours"]!.GetValue<decimal>());
+        Assert.Equal(12, cell["confirmed"]!.GetValue<decimal>());
+        Assert.Equal(1, cell["proposed"]!.GetValue<decimal>());
+        Assert.Equal(15, cell["committed"]!.GetValue<decimal>());
+        Assert.Equal(40, cell["available"]!.GetValue<decimal>());
+        var csv = await (await f.As(TestData.Sam).GetAsync("/api/v1/workload/export?format=csv")).Content.ReadAsStringAsync();
+        Assert.Contains("Confirmed reservation (h)", csv);
+        Assert.Contains("Committed load (h)", csv);
+        Assert.Contains("Partial project scope", csv);
         await (await f.As(TestData.Sam).Post(secondPath + "/confirm",
             new AllocationEndpoints.ConfirmBody(Guid.NewGuid(), second.I("rowVersion"), Versions(staleSecond), "Approved overlap"))).Json(409);
         var fresh = await (await f.As(TestData.Sam).GetAsync(secondPath + "/confirmation-preview")).Json();

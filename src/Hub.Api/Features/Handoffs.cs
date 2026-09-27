@@ -156,7 +156,7 @@ public static class HandoffEndpoints
                 await IndependentAssignment(db, h, body.SendingOwnerId, body.ReceivingOwnerId, (await store.Get(db)).AllowSelfReview);
             }
             if (h.CurrentRevisionId is not null)
-                Check.That(h.IntendedUse == body.IntendedUse.Trim() && h.AcceptanceCriteria == body.AcceptanceCriteria.Trim()
+                Check.That(h.IntendedUse == body.IntendedUse?.Trim() && h.AcceptanceCriteria == body.AcceptanceCriteria?.Trim()
                     && h.TargetTaskId == body.TargetTaskId && h.TargetDeliverableId == body.TargetDeliverableId && h.ReceivingDisciplineId == body.ReceivingDisciplineId,
                     "intendedUse", "handoff.fixed_purpose");
             var source = await Source(db, p.Id, h.SourceDeliverableId, body.SourceRowVersion);
@@ -333,7 +333,7 @@ public static class HandoffEndpoints
             History = await db.HandoffReceiptEvents.AsNoTracking().Where(e => e.HandoffId == h.Id).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id)
                 .Select(e => new { e.Id, e.FromStatus, e.ToStatus, e.RevisionId, e.Reason, e.CriteriaOutcome, e.CreatedAt, e.CreatedBy,
                     Actor = db.Users.Where(u => u.Id == e.CreatedBy).Select(u => u.DisplayName).FirstOrDefault() }).ToListAsync(),
-            Revisions = await db.HandoffRevisions.AsNoTracking().Where(r => r.HandoffId == h.Id).OrderBy(r => r.CreatedAt)
+            Revisions = await db.HandoffRevisions.AsNoTracking().Where(r => r.HandoffId == h.Id).OrderBy(r => r.CreatedAt).ThenBy(r => r.Id)
                 .Join(db.SourceRevisions, r => r.SourceRevisionId, s => s.Id, (r, s) => new { r.Id, r.PreviousRevisionId,
                     r.IntendedUse, r.AcceptanceCriteria, r.NeededBy, r.PromisedBy, r.SendingOwnerId, r.ReceivingOwnerId,
                     r.TargetTaskId, r.TargetDeliverableId, r.Response, r.CreatedAt, r.CreatedBy,

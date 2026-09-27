@@ -202,7 +202,9 @@ public sealed class HandoffsTests(HubFactory f)
         await f.DbAsync(async db => {
             var member = await db.ProjectMembers.FirstAsync(m => m.ProjectId == s.Project.Id && m.UserId == owner); member.RemovedAt = f.Clock.GetUtcNow();
             var source = await db.Deliverables.FirstAsync(d => d.Id == s.Source.G("id")); source.Revision = "B";
-            db.Emails.Add(new EmailMessage { UserId = owner, ToAddress = "alex@hub.test", Subject = "Handoff", RequiredProjectIds = [s.Project.Id], CreatedAt = f.Clock.GetUtcNow() });
+            // The shared test database can already contain over one batch of queued emails.
+            // Put this fixture first so one worker run actually exercises its delivery guard.
+            db.Emails.Add(new EmailMessage { UserId = owner, ToAddress = "alex@hub.test", Subject = "Handoff", RequiredProjectIds = [s.Project.Id], CreatedAt = DateTimeOffset.MinValue });
             return await db.SaveChangesAsync();
         });
         Assert.False(await f.DbAsync(db => EmailProjectAccess.Allowed(db, owner, [s.Project.Id])));

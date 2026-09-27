@@ -178,6 +178,7 @@ public class Project : Audited, IAuditable
     public int NextActionSeq { get; set; } = 1;
     public int NextHandoffSeq { get; set; } = 1;
     public int NextReviewSeq { get; set; } = 1;
+    public int NextSubmissionSeq { get; set; } = 1;
     public int NextChangeSeq { get; set; } = 1;
     public string? ExternalSource { get; set; }
     public string? ExternalId { get; set; }

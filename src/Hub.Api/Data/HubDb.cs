@@ -52,6 +52,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<InputAdoption> InputAdoptions => Set<InputAdoption>();
     public DbSet<ChangeNotice> ChangeNotices => Set<ChangeNotice>();
     public DbSet<ChangeAssessment> ChangeAssessments => Set<ChangeAssessment>();
+    public DbSet<SubmissionPackage> SubmissionPackages => Set<SubmissionPackage>();
+    public DbSet<SubmissionManifestItem> SubmissionManifestItems => Set<SubmissionManifestItem>();
+    public DbSet<SubmissionCheck> SubmissionChecks => Set<SubmissionCheck>();
+    public DbSet<CheckEvidence> CheckEvidences => Set<CheckEvidence>();
+    public DbSet<SubmissionIssue> SubmissionIssues => Set<SubmissionIssue>();
     public DbSet<WorkTask> Tasks => Set<WorkTask>();
     public DbSet<TaskDependency> Dependencies => Set<TaskDependency>();
     public DbSet<DeliverableDependency> DeliverableDependencies => Set<DeliverableDependency>();
@@ -416,6 +421,14 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
 
         Item<ReviewPackage>(mb, e => { e.HasIndex(x => new { x.ProjectId, x.Status }); e.ToTable(t => t.HasCheckConstraint("ck_review_package_status", $"status IN ({In(ReviewStatus.All)})")); });
         Item<ChangeNotice>(mb, e => { e.HasIndex(x => new { x.ProjectId, x.Status }); e.ToTable(t => t.HasCheckConstraint("ck_change_notice_status", $"status IN ({In(ChangeStatus.All)})")); });
+        Item<SubmissionPackage>(mb, e => { e.HasIndex(x => new { x.ProjectId, x.Status }); e.ToTable(t => t.HasCheckConstraint("ck_submission_package_status", $"status IN ({In(SubmissionStatus.All)})")); });
+        mb.Entity<SubmissionManifestItem>().HasIndex(x => new { x.PackageId, x.ManifestVersion, x.DeliverableId }).IsUnique();
+        mb.Entity<SubmissionCheck>().HasIndex(x => new { x.PackageId, x.ManifestVersion, x.Kind, x.SourceId }).IsUnique();
+        mb.Entity<SubmissionCheck>().HasIndex(x => new { x.PackageId, x.ManifestVersion, x.Kind }).IsUnique().HasFilter("source_id IS NULL");
+        mb.Entity<SubmissionCheck>().ToTable(t => { t.HasCheckConstraint("ck_submission_check_status", $"status IN ({In(SubmissionCheckStatus.All)})"); t.HasCheckConstraint("ck_submission_check_kind", $"kind IN ({In(SubmissionCheckKind.All)})"); t.HasCheckConstraint("ck_submission_check_waiver", "status <> 'Not Applicable' OR (kind = 'Applicability' AND required = false AND reason IS NOT NULL AND evidence_url IS NOT NULL AND approved_by IS NOT NULL AND approved_at IS NOT NULL)"); });
+        mb.Entity<SubmissionIssue>().HasIndex(x => x.PackageId).IsUnique();
+        mb.Entity<SubmissionIssue>().Property(x => x.ManifestSnapshot).HasColumnType("jsonb");
+        mb.Entity<SubmissionIssue>().Property(x => x.CheckSnapshot).HasColumnType("jsonb");
         mb.Entity<CoordinationCommand>().HasIndex(x => new { x.ProjectId, x.ActorId, x.RequestId }).IsUnique();
         mb.Entity<ReviewRound>().HasIndex(x => new { x.PackageId, x.Number }).IsUnique();
         mb.Entity<ReviewManifestItem>().HasIndex(x => new { x.RoundId, x.DeliverableId }).IsUnique();
@@ -462,6 +475,20 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<ChangeAssessment, WorkTask>(mb, x => x.CorrectionTaskId);
         Fk<ChangeAssessment, AppUser>(mb, x => x.OwnerId);
         Fk<ChangeAssessment, AppUser>(mb, x => x.ReviewerId);
+        Fk<SubmissionPackage, AppUser>(mb, x => x.CoordinatorId);
+        Fk<SubmissionPackage, Milestone>(mb, x => x.MilestoneId);
+        Fk<SubmissionPackage, SubmissionPackage>(mb, x => x.SupersedesPackageId);
+        Fk<SubmissionManifestItem, SubmissionPackage>(mb, x => x.PackageId);
+        Fk<SubmissionManifestItem, Deliverable>(mb, x => x.DeliverableId);
+        Fk<SubmissionManifestItem, SourceRevision>(mb, x => x.SourceRevisionId);
+        Fk<SubmissionManifestItem, ReviewRound>(mb, x => x.ReviewRoundId);
+        Fk<SubmissionCheck, SubmissionPackage>(mb, x => x.PackageId);
+        Fk<SubmissionCheck, AppUser>(mb, x => x.OwnerId);
+        Fk<SubmissionCheck, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<SubmissionCheck, AppUser>(mb, x => x.ApprovedBy);
+        Fk<CheckEvidence, SubmissionCheck>(mb, x => x.CheckId);
+        Fk<SubmissionIssue, SubmissionPackage>(mb, x => x.PackageId);
+        Fk<SubmissionIssue, AppUser>(mb, x => x.AuthorisedBy);
         Fk<SourceHead, AppUser>(mb, x => x.OwnerId);
         Fk<SourceHead, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
         Fk<InputUse, AppUser>(mb, x => x.OwnerId);
@@ -478,6 +505,10 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<InputUse, Project>(mb, x => x.ProjectId);
         Fk<InputAdoption, Project>(mb, x => x.ProjectId);
         Fk<ChangeAssessment, Project>(mb, x => x.ProjectId);
+        Fk<SubmissionManifestItem, Project>(mb, x => x.ProjectId);
+        Fk<SubmissionCheck, Project>(mb, x => x.ProjectId);
+        Fk<CheckEvidence, Project>(mb, x => x.ProjectId);
+        Fk<SubmissionIssue, Project>(mb, x => x.ProjectId);
 
 
         foreach (var et in mb.Model.GetEntityTypes().Where(t => typeof(Audited).IsAssignableFrom(t.ClrType)))

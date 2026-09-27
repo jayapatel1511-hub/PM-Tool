@@ -1,6 +1,6 @@
 # Review release gates — 2026-09-27
 
-Branch `codex/pm-review-release`, commit `51e6bdd` and draft PR #13. This record is for the current increment; update it when later packets or environment checks change the evidence.
+Branch `codex/pm-review-release` and draft PR #13. This record is for the current increment; update it when later packets or environment checks change the evidence.
 
 | Gate | Result | Evidence and limit |
 |---|---|---|
@@ -11,8 +11,8 @@ Branch `codex/pm-review-release`, commit `51e6bdd` and draft PR #13. This record
 | Local browser-to-API review preview | PASS | On macOS, started the API with `Seed__ReviewDemo=true` against a separate persistent `hub_review_local` PostgreSQL database, plus the Vite SPA. Taylor signed in through Development auth; DEMO-101 dashboard, Reviews and Settings loaded from the API. Edited DEMO-101's synthetic name in Settings; the browser showed Saved and the name persisted after API restart and page reload. This proves only the exercised local paths, not deployed Entra behavior. |
 | Review database isolation | UNPROVEN | `infra/env/review.bicepparam` compiles and selects separate `hub-review-*` resources. No Azure review resource group or database exists under this check; Azure CLI is not signed in. Never restore this database into production. |
 | Packets 025–027 full acceptance | UNPROVEN | Foundation CI and the packet 026 automatic new-round regression pass. Real browser/API workflows for all packet scenarios, populated migration rehearsal and manual accessibility remain open. |
-| Packets 028–033 | FAIL | Packet 028 has a schema foundation only; its commands, UI and acceptance remain open, as do packets 029–033. All are required before review-release readiness. |
-| Packet 028 schema foundation | PASS | Additive EF migration applied to `hub_review_local`; verified waiver, status and kind constraints, uniqueness for source-less checks, and immutable issue triggers. Domain and API build passed. Commands, UI and acceptance scenarios remain unimplemented. |
+| Packets 028–033 | FAIL | Packet 028 has schema and domain rules; its commands, UI and acceptance remain open, as do packets 029–033. All are required before review-release readiness. |
+| Packet 028 foundation | PASS | Additive EF migration applied to `hub_review_local`; verified waiver, status and kind constraints, uniqueness for source-less checks, and immutable issue triggers. Domain authority/readiness tests passed 3/3. Commands, UI and acceptance scenarios remain unimplemented. |
 | Review deployment and individual sign-in | BLOCKED | Individual password accounts are the chosen interim mode, but PM-Tool has not implemented them. No Azure account or deployed host was available. The local Development identity picker is only for synthetic review checks. |
 | Azure pilot Entra sign-in | BLOCKED | Company tenant app registrations and a deployed Azure host were unavailable; real tenant sign-in remains a later pilot gate. |
 | `pm.engcalchub.com` | BLOCKED | `dig` returned no A/CNAME answer and HTTPS could not resolve the host from this Mac; hosting and access controls are also unverified. Do not use it as an application URL yet. |

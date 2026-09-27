@@ -2,16 +2,25 @@
 
 Development, test, review and production are separate Azure resource groups with separate Entra app registrations (§21, FR-007).
 Production data is never copied into development, test or review; the synthetic data in `tools/scale/seed.sql` exists for load
-tests. Each environment can be rebuilt from its definitions in under a day.
+tests. Keep the review database when releasing new preview builds.
 
 For a review preview, deploy `infra/env/review.bicepparam` to a dedicated review resource group. Its
 `hub-review-pg` database persists across preview releases; `infra/main.bicep` sets `Seed__ReviewDemo=true` only there. The app adds
 clearly marked fictional people and projects once and keeps reviewer edits on later releases. `Seed:ReviewDemo` is
-refused in Production; do not restore the review database into production. Hosted Staging still uses Entra sign-in for
-real reviewers, while the `@hub.test` people are sample records only. Development sign-in must stay local or behind a
-separate access gate, because its identity header is not suitable for an open Internet site.
-Use the review environment's own Entra app registrations and grant access only to the intended reviewers. Synthetic
-`@hub.test` people are reserved records and cannot acquire a real Entra identity through email matching. Keep
+refused in Production; do not restore the review database into production. The review app uses `LocalPassword`
+authentication with a separate ID and verifier for each reviewer until company Entra sign-in is available. Development
+identity headers are never accepted in Staging. Review credentials map to existing active `AppUser` IDs; they cannot
+create users or grant project roles. The review-only `review-users` Key Vault secret contains a JSON `users` array in
+the format produced by `scripts/add-review-credential.py`; create and verify that secret before starting the review app.
+The secret must not enter Git, terminal logs or a deployment package. The Azure template denies every inbound
+review IP by default; supply approved `reviewAllowedCidrs` before reviewers access it. Bootstrap the new vault with
+an owner-only file containing `{ "users": [] }` using `az keyvault secret set --vault-name hub-review-kv --name review-users --file <private-file>`.
+This lets the app seed the separate review database while no login is possible. Query the seeded active `AppUser` IDs
+through the authorised database admin connection, then run `scripts/add-review-credential.py` for each reviewer using
+an owner-only JSON file outside the repository. Replace the Key Vault secret from that file and restart the app so it
+loads the new verifiers. Persist `/home/hub-review-keys` across preview releases so signed-in sessions survive an app
+restart. The final Azure pilot must switch to Entra
+and exercise real tenant sign-in. Synthetic `@hub.test` people are reserved records. Keep
 `pm.engcalchub.com` unassigned until DNS, hosting, and access controls are verified for the intended environment.
 
 ## What defines an environment
@@ -22,7 +31,7 @@ Use the review environment's own Entra app registrations and grant access only t
 | Database schema | EF Core migrations in `src/Hub.Api/Data/Migrations`, applied when the app starts |
 | Reference data (disciplines, types, settings defaults) | `src/Hub.Api/Data/Seed.cs`, applied at start |
 | Application | the CI build of `main` (`.github/workflows/ci.yml`) |
-| Secrets | Key Vault only (for example an SMTP relay password if that mail route is used); the database has no password |
+| Secrets | Key Vault for review password verifiers and any mail relay password; the database has no password |
 
 ## Rebuild
 

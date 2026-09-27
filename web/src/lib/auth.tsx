@@ -1,13 +1,14 @@
 import { createStandardPublicClientApplication, type IPublicClientApplication } from '@azure/msal-browser'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { api, configureApi, get } from '@/lib/api'
 import { setDateContext } from '@/lib/format'
 import { t } from '@/lib/i18n'
 
-// Sign-in is Microsoft Entra ID only (FR-AUTH-01): authorization code flow with PKCE and silent token
-// renewal through MSAL. A user picker exists only when the API runs in Development mode.
+// Entra uses PKCE through MSAL. The isolated review deployment uses individual
+// password accounts and an HttpOnly cookie until company identity is ready.
 
 export interface Me {
   id: string
@@ -40,14 +41,15 @@ const DEV_KEY = 'hub.devUser'
 const ACTIVITY_KEY = 'hub.lastActivity'
 const SIGNIN_KEY = 'hub.signedIn'
 
-interface Config { authMode: 'Development' | 'Entra'; entra: { clientId?: string; tenantId?: string; apiScope?: string } }
+interface Config { authMode: 'Development' | 'LocalPassword' | 'Entra'; entra: { clientId?: string; tenantId?: string; apiScope?: string } }
 
 let msal: IPublicClientApplication | null = null
 
 export function AuthGate({ children }: { children: ReactNode }) {
-  const [ready, setReady] = useState<'loading' | 'dev-pick' | 'ready' | 'error'>('loading')
+  const [ready, setReady] = useState<'loading' | 'dev-pick' | 'local-login' | 'ready' | 'error'>('loading')
   const [idleNotice, setIdleNotice] = useState(false)
   const cfg = useRef<Config | null>(null)
+  const qc = useQueryClient()
 
   useEffect(() => {
     let cancelled = false
@@ -59,6 +61,12 @@ export function AuthGate({ children }: { children: ReactNode }) {
         if (c.authMode === 'Development') {
           configureApi(async (): Promise<Record<string, string>> => { const u = sessionStorage.getItem(DEV_KEY); return u ? { 'X-Dev-User': u } : {} }, () => { sessionStorage.removeItem(DEV_KEY); setReady('dev-pick') })
           if (!cancelled) setReady(sessionStorage.getItem(DEV_KEY) ? 'ready' : 'dev-pick')
+          return
+        }
+        if (c.authMode === 'LocalPassword') {
+          configureApi(async () => ({}), () => { qc.removeQueries({ queryKey: ['me'] }); setReady('local-login') })
+          try { await get<Me>('me'); if (!cancelled) setReady('ready') }
+          catch { if (!cancelled) setReady('local-login') }
           return
         }
         msal = await createStandardPublicClientApplication({
@@ -84,16 +92,37 @@ export function AuthGate({ children }: { children: ReactNode }) {
       }
     })()
     return () => { cancelled = true }
-  }, [])
+  }, [qc])
 
   if (ready === 'loading') return <Splash text={t('auth.signingIn')} />
   if (ready === 'error') return <Splash text={t('app.error')} />
   if (ready === 'dev-pick') return <DevPicker idle={idleNotice} onPick={(email) => { sessionStorage.setItem(DEV_KEY, email); touch(); setReady('ready') }} />
+  if (ready === 'local-login') return <LocalLogin idle={idleNotice} onSignedIn={() => { qc.removeQueries({ queryKey: ['me'] }); touch(); setReady('ready') }} />
   return <Signed onSignOut={() => {
     sessionStorage.removeItem(SIGNIN_KEY)
     if (cfg.current?.authMode === 'Development') { sessionStorage.removeItem(DEV_KEY); setReady('dev-pick') }
+    else if (cfg.current?.authMode === 'LocalPassword') { api('auth/local/sign-out', { method: 'POST' }).catch(() => {}).finally(() => { qc.removeQueries({ queryKey: ['me'] }); setReady('local-login') }) }
     else msal?.logoutRedirect()
   }}>{children}</Signed>
+}
+
+function LocalLogin({ onSignedIn, idle }: { onSignedIn: () => void; idle: boolean }) {
+  const [userName, setUserName] = useState(''), [password, setPassword] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState(false)
+  async function submit(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setError(false)
+    try { await api('auth/local/sign-in', { method: 'POST', body: { userName, password } }); setPassword(''); onSignedIn() }
+    catch { setError(true); setPassword('') }
+    finally { setBusy(false) }
+  }
+  return <main className="grid min-h-screen place-items-center bg-frame p-4"><form onSubmit={submit} className="w-full max-w-sm space-y-3 rounded-xl bg-card p-6 shadow-xl">
+    <h1 className="text-xl font-semibold">{t('auth.localTitle')}</h1>
+    <p className="text-sm text-muted-foreground">{t('auth.localHint')}</p>
+    {idle && <p className="rounded-md bg-warn-bg p-2 text-sm text-warn">{t('auth.idle', { hours: 8 })}</p>}
+    <div className="space-y-1"><label className="block text-sm font-medium" htmlFor="local-user">{t('auth.userId')}</label><Input id="local-user" autoComplete="username" required maxLength={64} value={userName} onChange={e => setUserName(e.target.value)} /></div>
+    <div className="space-y-1"><label className="block text-sm font-medium" htmlFor="local-password">{t('auth.password')}</label><Input id="local-password" type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} /></div>
+    {error && <p role="alert" className="text-sm text-destructive">{t('auth.localFailed')}</p>}
+    <Button className="w-full" disabled={busy} type="submit">{t('auth.signIn')}</Button>
+  </form></main>
 }
 
 function Signed({ children, onSignOut }: { children: ReactNode; onSignOut: () => void }) {

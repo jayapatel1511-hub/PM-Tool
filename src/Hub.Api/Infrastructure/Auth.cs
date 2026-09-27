@@ -4,6 +4,8 @@ using Hub.Api.Data;
 using Hub.Domain;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -33,6 +35,10 @@ public sealed class CurrentUser
 public static class AuthSetup
 {
     public const string DevScheme = "Dev";
+    public const string LocalScheme = "LocalPassword";
+
+    public static bool LocalAuthAllowed(IHostEnvironment env, IConfiguration cfg) =>
+        (env.IsDevelopment() || env.IsStaging() || env.IsEnvironment("Testing")) && cfg["Auth:Mode"] == LocalScheme;
 
     public static bool DevAuthAllowed(IHostEnvironment env, IConfiguration cfg) =>
         (env.IsDevelopment() || env.IsEnvironment("Testing")) && cfg["Auth:Mode"] == "Development";
@@ -40,9 +46,37 @@ public static class AuthSetup
     public static void AddHubAuth(this WebApplicationBuilder b)
     {
         var dev = DevAuthAllowed(b.Environment, b.Configuration);
-        var auth = b.Services.AddAuthentication(dev ? DevScheme : JwtBearerDefaults.AuthenticationScheme);
+        var local = LocalAuthAllowed(b.Environment, b.Configuration);
+        if (b.Configuration["Auth:Mode"] == LocalScheme && !local)
+            throw new InvalidOperationException("LocalPassword authentication is permitted only in Development, Staging or Testing.");
+        if (local)
+        {
+            var file = b.Configuration["Auth:Local:UsersFile"];
+            var json = b.Configuration["Auth:Local:UsersJson"];
+            var keys = b.Configuration["Auth:Local:KeyDirectory"];
+            if (string.IsNullOrWhiteSpace(keys) || string.IsNullOrWhiteSpace(file) == string.IsNullOrWhiteSpace(json))
+                throw new InvalidOperationException("LocalPassword requires exactly one credential source and a persistent data protection key directory.");
+            b.Services.AddSingleton(new LocalPasswordStore(json ?? file!, json is not null));
+            Directory.CreateDirectory(keys);
+            if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(keys, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            b.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keys));
+        }
+        var auth = b.Services.AddAuthentication(dev ? DevScheme : local ? LocalScheme : JwtBearerDefaults.AuthenticationScheme);
         if (dev)
             auth.AddScheme<AuthenticationSchemeOptions, DevAuthHandler>(DevScheme, _ => { });
+        else if (local)
+            auth.AddCookie(LocalScheme, o =>
+            {
+                o.Cookie.Name = "__Host-hub-review";
+                o.Cookie.HttpOnly = true;
+                o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                o.Cookie.SameSite = SameSiteMode.Strict;
+                o.Cookie.Path = "/";
+                o.ExpireTimeSpan = TimeSpan.FromHours(8);
+                o.SlidingExpiration = false;
+                o.Events.OnRedirectToLogin = c => { c.Response.StatusCode = 401; return Task.CompletedTask; };
+                o.Events.OnRedirectToAccessDenied = c => { c.Response.StatusCode = 403; return Task.CompletedTask; };
+            });
         else
             auth.AddJwtBearer(o =>
             {
@@ -98,9 +132,13 @@ public sealed class ProvisioningMiddleware(RequestDelegate next)
             var name = ctx.User.FindFirst("name")?.Value ?? email;
             if (string.IsNullOrEmpty(oid)) { ctx.Response.StatusCode = 401; return; }
 
-            var user = await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.EntraObjectId == oid)
+            var isLocal = ctx.User.Identity.AuthenticationType == AuthSetup.LocalScheme;
+            var localId = isLocal && Guid.TryParse(ctx.User.FindFirst("local_user_id")?.Value, out var parsed) ? parsed : Guid.Empty;
+            var user = isLocal ? await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == localId) :
+                await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.EntraObjectId == oid)
                 ?? await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.EntraObjectId == null && u.Email == email);
             var isDev = ctx.User.Identity.AuthenticationType == AuthSetup.DevScheme;
+            if (isLocal && (user is null || !user.IsActive)) { ctx.Response.StatusCode = 401; return; }
             if (user is null)
             {
                 user = new AppUser { EntraObjectId = oid, Email = email, DisplayName = name, IsActive = true };
@@ -110,12 +148,12 @@ public sealed class ProvisioningMiddleware(RequestDelegate next)
             }
             else
             {
-                user.EntraObjectId ??= oid;
+                if (!isLocal) user.EntraObjectId ??= oid;
                 // Matched by directory identity, so an email change in the directory updates the Hub (edge case).
-                if (!string.IsNullOrEmpty(email) && user.Email != email) user.Email = email;
-                if (!isDev && user.DisplayName != name) user.DisplayName = name;
+                if (!isLocal && !string.IsNullOrEmpty(email) && user.Email != email) user.Email = email;
+                if (!isDev && !isLocal && user.DisplayName != name) user.DisplayName = name;
             }
-            if (!isDev || ctx.User.HasClaim(c => c.Type == "dev_roles_present"))
+            if (!isLocal && (!isDev || ctx.User.HasClaim(c => c.Type == "dev_roles_present")))
                 SyncGroupRoles(db, user, ctx.User.FindAll("roles").Select(c => c.Value));
             if (db.ChangeTracker.HasChanges())
             {

@@ -20,6 +20,8 @@ param dbAdminGroupObjectId string
 param dbAdminGroupName string
 @description('Operators alerted on errors, job failures, delayed evaluation and late digests (§22). Empty: no alert rules are deployed.')
 param operatorEmail string = ''
+@description('Reviewer public CIDR ranges. Review denies all inbound traffic until an authorised range is supplied.')
+param reviewAllowedCidrs array = []
 
 var name = 'hub-${env}'
 
@@ -96,10 +98,22 @@ resource app 'Microsoft.Web/sites@2023-12-01' = {
       ftpsState: 'Disabled'
       alwaysOn: true
       healthCheckPath: '/health'
+      ipSecurityRestrictionsDefaultAction: env == 'review' ? 'Deny' : 'Allow'
+      ipSecurityRestrictions: [for (cidr, i) in reviewAllowedCidrs: {
+        ipAddress: cidr
+        action: 'Allow'
+        priority: 100 + i
+        name: 'reviewer-${i}'
+      }]
       appSettings: [
         { name: 'ASPNETCORE_ENVIRONMENT', value: env == 'prod' ? 'Production' : 'Staging' }
         { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: insights.properties.ConnectionString }
-        { name: 'Auth__Mode', value: 'Entra' }
+        { name: 'Auth__Mode', value: env == 'review' ? 'LocalPassword' : 'Entra' }
+        // Review sign-in uses individual password verifiers stored as a Key Vault secret, never in Bicep or Git.
+        // Provision review-users in this vault before starting the review app. An unresolved reference fails startup.
+        { name: 'Auth__Local__UsersJson', value: env == 'review' ? '@Microsoft.KeyVault(VaultName=${vault.name};SecretName=review-users)' : '' }
+        { name: 'Auth__Local__KeyDirectory', value: env == 'review' ? '/home/hub-review-keys' : '' }
+        { name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', value: env == 'review' ? 'true' : 'false' }
         { name: 'Auth__Entra__TenantId', value: entraTenantId }
         { name: 'Auth__Entra__Audience', value: apiAudience }
         { name: 'Auth__Entra__SpaClientId', value: spaClientId }

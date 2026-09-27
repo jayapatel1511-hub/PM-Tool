@@ -17,7 +17,9 @@ public sealed class SubmissionApiTests(HubFactory f)
     [Fact]
     public async Task Issue_rechecks_fingerprint_and_preserves_the_first_snapshot()
     {
-        var project = await data.Project(); var root = $"/api/v1/projects/{project.Id}";
+        var project = await data.Project();
+        await f.DbAsync(async db => { var row = await db.Projects.SingleAsync(p => p.Id == project.Id); row.Visibility = Visibility.Restricted; await db.SaveChangesAsync(); return 0; });
+        var root = $"/api/v1/projects/{project.Id}";
         var civil = data.ProjectDiscipline(project.Id, "Civil");
         var milestone = await Post(TestData.Pm, root + "/milestones", new MilestoneEndpoints.CreateBody("Design submission", MilestoneType.DesignSubmission, new DateOnly(2026, 10, 15), null, null, null, true), 201);
         var deliverable = await Post(TestData.Marc, root + "/deliverables", new { name = "Site grading", projectDisciplineId = civil,
@@ -72,6 +74,11 @@ public sealed class SubmissionApiTests(HubFactory f)
         Assert.Equal(SubmissionStatus.Superseded, f.Db(db => db.SubmissionPackages.Single(p => p.Id == id).Status));
         Assert.Equal(snapshot, f.Db(db => db.SubmissionIssues.Single(i => i.PackageId == id).ManifestSnapshot));
         Assert.Equal("https://example.test/transmittal-1", f.Db(db => db.SubmissionIssues.Single(i => i.PackageId == id).TransmittalUrl));
+        var export = await Get(TestData.Pm, path + "/export");
+        Assert.Equal("A", export["manifest"]![0]!["revision"]!.GetValue<string>());
+        Assert.Equal("https://example.test/transmittal-1", export["issueHistory"]![0]!["issue"]!["transmittalUrl"]!.GetValue<string>());
+        Assert.Equal(nextId.ToString(), export["successorIssues"]![0]!["id"]!.GetValue<string>());
+        await (await f.As(TestData.Rita).GetAsync(path + "/export")).Json(404);
         await Assert.ThrowsAsync<DbUpdateException>(() => f.DbAsync(async db => {
             var first = await db.SubmissionIssues.SingleAsync(i => i.PackageId == id);
             first.TransmittalUrl = "https://example.test/rewritten";

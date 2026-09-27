@@ -25,6 +25,7 @@ public static class SubmissionEndpoints
     {
         api.MapGet("/projects/{projectId:guid}/submissions", List);
         api.MapGet("/projects/{projectId:guid}/submissions/{id:guid}", Detail);
+        api.MapGet("/projects/{projectId:guid}/submissions/{id:guid}/export", Export);
         api.MapPost("/projects/{projectId:guid}/submissions", Create).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/submissions/{id:guid}/manifest", ReplaceManifest).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/submissions/{id:guid}/edit", Edit).WithMetadata(new Coordination.AtomicCommand());
@@ -296,5 +297,34 @@ public static class SubmissionEndpoints
             Issue = await db.SubmissionIssues.SingleOrDefaultAsync(i => i.PackageId == id),
             CanCoordinate = Permissions.CoordinateSubmission(access.Actor, ctx, package.CoordinatorId).Ok,
             CanAuthorise = Permissions.AuthoriseSubmission(access.Actor, ctx).Ok };
+    }
+
+    static async Task<IResult> Export(Guid projectId, Guid id, Access access, HubDb db, TimeProvider clock)
+    {
+        await access.Project(projectId, false);
+        var package = await Load(db, projectId, id);
+        var manifest = await db.SubmissionManifestItems.AsNoTracking().Where(m => m.PackageId == id).OrderBy(m => m.ManifestVersion).ThenBy(m => m.DeliverableId)
+            .Join(db.SourceRevisions, m => m.SourceRevisionId, s => s.Id, (m, s) => new { m.ManifestVersion, m.DeliverableId, m.SourceRevisionId, m.ReviewRoundId, m.Required,
+                s.SourceKey, s.Title, s.Revision, s.Url, s.SourceSystem, s.ExternalIdentifier }).ToListAsync();
+        var checks = await db.SubmissionChecks.AsNoTracking().Where(c => c.PackageId == id).OrderBy(c => c.ManifestVersion).ThenBy(c => c.Kind).ThenBy(c => c.Id).ToListAsync();
+        var checkIds = checks.Select(c => c.Id).ToArray();
+        var evidence = await db.CheckEvidences.AsNoTracking().Where(e => checkIds.Contains(e.CheckId)).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync();
+        var related = new List<object>();
+        var seen = new HashSet<Guid>();
+        Guid? ancestor = id;
+        while (ancestor is { } aid && seen.Add(aid))
+        {
+            var row = await db.SubmissionPackages.AsNoTracking().SingleOrDefaultAsync(p => p.Id == aid && p.ProjectId == projectId);
+            if (row is null) break;
+            var issue = await db.SubmissionIssues.AsNoTracking().SingleOrDefaultAsync(i => i.PackageId == aid);
+            related.Add(new { row.Id, row.Key, row.Status, row.SupersedesPackageId, Issue = issue });
+            ancestor = row.SupersedesPackageId;
+        }
+        var successors = await db.SubmissionPackages.AsNoTracking().Where(p => p.ProjectId == projectId && p.SupersedesPackageId == id)
+            .Join(db.SubmissionIssues.AsNoTracking(), p => p.Id, i => i.PackageId, (p, i) => new { p.Id, p.Key, p.Status, p.SupersedesPackageId, Issue = i }).ToListAsync();
+        var readiness = package.Status is SubmissionStatus.Issued or SubmissionStatus.Superseded or SubmissionStatus.Cancelled ? null : await SubmissionReadiness.Evaluate(db, package);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(new { ExportedAt = clock.GetUtcNow(), Package = package, Manifest = manifest, Checks = checks,
+            Evidence = evidence, Unresolved = readiness?.Blockers, IssueHistory = related, SuccessorIssues = successors }, JsonOpts.Web);
+        return Results.File(bytes, "application/json", $"{package.Key}-submission.json");
     }
 }

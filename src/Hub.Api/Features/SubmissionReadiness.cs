@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
 
-public sealed record SubmissionBlocker(string Kind, Guid? SourceId, Guid? DisciplineId, Guid? OwnerId, string Code, string Message);
+public sealed record SubmissionBlocker(string Kind, Guid? SourceId, Guid? DisciplineId, Guid? OwnerId, string Code, string Message, string? SourcePath);
 public sealed record SubmissionReadinessResult(bool Ready, string Fingerprint, IReadOnlyList<SubmissionBlocker> Blockers);
 
 /// <summary>Reads live source state inside the caller's project transaction. A stored Pass never overrides a derived blocker.</summary>
@@ -19,10 +19,12 @@ public static class SubmissionReadiness
             .OrderBy(c => c.Kind).ThenBy(c => c.SourceId).ToListAsync();
         var blockers = new List<SubmissionBlocker>();
         var facts = new List<object>();
-        void Block(string kind, Guid? source, Guid? discipline, Guid? owner, string code) => blockers.Add(new(kind, source, discipline, owner, code, Text.Get(code)));
+        var project = await db.Projects.SingleAsync(p => p.Id == package.ProjectId);
+        string WorkPath(Guid id) => $"/projects/{project.ProjectNumber}/deliverables?panel=Deliverable:{id}";
+        void Block(string kind, Guid? source, Guid? discipline, Guid? owner, string code, string? path = null) => blockers.Add(new(kind, source, discipline, owner, code, Text.Get(code), path));
         if (manifest.Count == 0) Block(SubmissionCheckKind.Deliverable, null, null, package.CoordinatorId, "submission.empty_manifest");
         if (checks.Count == 0) Block(SubmissionCheckKind.Applicability, null, null, package.CoordinatorId, "submission.empty_checks");
-        var eligible = (await Coordination.People(db, await db.Projects.SingleAsync(p => p.Id == package.ProjectId)).Select(u => u.Id).ToListAsync()).ToHashSet();
+        var eligible = (await Coordination.People(db, project).Select(u => u.Id).ToListAsync()).ToHashSet();
         if (!eligible.Contains(package.CoordinatorId)) Block(SubmissionCheckKind.Access, null, null, package.CoordinatorId, "submission.coordinator_inactive");
         foreach (var check in checks)
         {
@@ -40,19 +42,19 @@ public static class SubmissionReadiness
             var deliverable = await db.Deliverables.IgnoreQueryFilters().AsNoTracking().SingleOrDefaultAsync(d => d.Id == item.DeliverableId && d.ProjectId == package.ProjectId);
             var revision = await db.SourceRevisions.AsNoTracking().SingleOrDefaultAsync(r => r.Id == item.SourceRevisionId && r.ProjectId == package.ProjectId && r.DeliverableId == item.DeliverableId);
             if (deliverable is null || deliverable.DeletedAt is not null || deliverable.Status == DeliverableStatus.Cancelled)
-            { Block(SubmissionCheckKind.Deliverable, item.DeliverableId, null, null, "submission.deliverable_missing"); continue; }
+            { Block(SubmissionCheckKind.Deliverable, item.DeliverableId, null, null, "submission.deliverable_missing", WorkPath(item.DeliverableId)); continue; }
             facts.Add(new { item.Id, ManifestRowVersion = item.RowVersion, item.SourceRevisionId, item.ReviewRoundId, DeliverableRowVersion = deliverable.RowVersion, deliverable.Status, deliverable.RequiresReview });
-            if (revision is null) { Block(SubmissionCheckKind.CurrentRevision, item.SourceRevisionId, deliverable.ProjectDisciplineId, deliverable.OwnerId, "submission.revision_missing"); continue; }
+            if (revision is null) { Block(SubmissionCheckKind.CurrentRevision, item.SourceRevisionId, deliverable.ProjectDisciplineId, deliverable.OwnerId, "submission.revision_missing", WorkPath(item.DeliverableId)); continue; }
             var head = await Coordination.Head(db, revision);
             facts.Add(new { revision.Id, revision.RowVersion, revision.Revision, HeadId = head?.CurrentRevisionId, HeadVersion = head?.RowVersion });
             if (head is null || head.CurrentRevisionId != revision.Id)
-                Block(SubmissionCheckKind.CurrentRevision, revision.Id, deliverable.ProjectDisciplineId, deliverable.OwnerId, "submission.revision_changed");
+                Block(SubmissionCheckKind.CurrentRevision, revision.Id, deliverable.ProjectDisciplineId, deliverable.OwnerId, "submission.revision_changed", WorkPath(item.DeliverableId));
             if (!Uri.TryCreate(revision.Url, UriKind.Absolute, out var uri) || uri.Scheme is not ("https" or "http"))
-                Block(SubmissionCheckKind.Access, revision.Id, deliverable.ProjectDisciplineId, deliverable.OwnerId, "submission.source_link_invalid");
+                Block(SubmissionCheckKind.Access, revision.Id, deliverable.ProjectDisciplineId, deliverable.OwnerId, "submission.source_link_invalid", WorkPath(item.DeliverableId));
             var review = deliverable.RequiredReviewPackageId is { } reviewId
                 ? await db.ReviewPackages.AsNoTracking().SingleOrDefaultAsync(r => r.Id == reviewId && r.ProjectId == package.ProjectId) : null;
             if (deliverable.RequiresReview && (review is null || review.Status != ReviewStatus.Approved || review.CurrentRoundId != item.ReviewRoundId))
-                Block(SubmissionCheckKind.IndependentReview, deliverable.Id, deliverable.ProjectDisciplineId, deliverable.ReviewerId, "submission.review_not_current");
+                Block(SubmissionCheckKind.IndependentReview, deliverable.Id, deliverable.ProjectDisciplineId, deliverable.ReviewerId, "submission.review_not_current", review is null ? WorkPath(deliverable.Id) : $"/projects/{project.ProjectNumber}/reviews?panel=ReviewPackage:{review.Id}");
             if (review is not null)
             {
                 facts.Add(new { review.Id, review.RowVersion, review.CurrentRoundId, review.Status });
@@ -61,16 +63,16 @@ public static class SubmissionReadiness
                     var round = await db.ReviewRounds.AsNoTracking().SingleOrDefaultAsync(r => r.Id == roundId);
                     facts.Add(new { RoundId = roundId, RoundVersion = round?.RowVersion, RoundStatus = round?.Status });
                     if (round is null || round.Status != ReviewStatus.Approved)
-                        Block(SubmissionCheckKind.IndependentReview, deliverable.Id, deliverable.ProjectDisciplineId, deliverable.ReviewerId, "submission.review_round_not_approved");
+                        Block(SubmissionCheckKind.IndependentReview, deliverable.Id, deliverable.ProjectDisciplineId, deliverable.ReviewerId, "submission.review_round_not_approved", $"/projects/{project.ProjectNumber}/reviews?panel=ReviewPackage:{review.Id}");
                     foreach (var assignment in await db.DisciplineReviews.AsNoTracking().Where(a => a.RoundId == roundId).OrderBy(a => a.Id).ToListAsync())
                         facts.Add(new { assignment.Id, assignment.RowVersion, assignment.Status, assignment.ReviewerId });
                     if (!await db.ReviewManifestItems.AnyAsync(m => m.RoundId == roundId && m.DeliverableId == item.DeliverableId && m.SourceRevisionId == revision.Id))
-                        Block(SubmissionCheckKind.IndependentReview, deliverable.Id, deliverable.ProjectDisciplineId, deliverable.ReviewerId, "submission.review_manifest_mismatch");
+                        Block(SubmissionCheckKind.IndependentReview, deliverable.Id, deliverable.ProjectDisciplineId, deliverable.ReviewerId, "submission.review_manifest_mismatch", $"/projects/{project.ProjectNumber}/reviews?panel=ReviewPackage:{review.Id}");
                     foreach (var finding in await db.ReviewFindings.AsNoTracking().Where(f => f.RoundId == roundId).OrderBy(f => f.Id).ToListAsync())
                     {
                         facts.Add(new { finding.Id, finding.RowVersion, finding.Status, finding.WithdrawalAcknowledgedBy });
                         if (ReviewRules.BlockingOpen(finding.Severity, finding.Status, finding.WithdrawalAcknowledgedBy is not null))
-                            Block(SubmissionCheckKind.BlockingFindings, finding.Id, finding.ProjectDisciplineId, finding.ResolverId, "submission.blocking_finding");
+                            Block(SubmissionCheckKind.BlockingFindings, finding.Id, finding.ProjectDisciplineId, finding.ResolverId, "submission.blocking_finding", $"/projects/{project.ProjectNumber}/reviews?panel=ReviewPackage:{review.Id}");
                     }
                 }
             }
@@ -82,7 +84,7 @@ public static class SubmissionReadiness
         {
             facts.Add(new { handoff.Id, handoff.RowVersion, handoff.Status, handoff.CurrentRevisionId });
             if (handoff.Status is not (HandoffStatus.Accepted or HandoffStatus.Incorporated))
-                Block(SubmissionCheckKind.Handoff, handoff.Id, handoff.ReceivingDisciplineId, handoff.ReceivingOwnerId, "submission.handoff_pending");
+                Block(SubmissionCheckKind.Handoff, handoff.Id, handoff.ReceivingDisciplineId, handoff.ReceivingOwnerId, "submission.handoff_pending", $"/projects/{project.ProjectNumber}/handoffs?panel=Handoff:{handoff.Id}");
         }
         foreach (var assessment in await db.ChangeAssessments.AsNoTracking().Where(a => a.ProjectId == package.ProjectId &&
             (a.TargetType == "Deliverable" && ids.Contains(a.TargetId) || a.TargetType == "Task" && taskIds.Contains(a.TargetId)) &&
@@ -90,7 +92,7 @@ public static class SubmissionReadiness
         {
             facts.Add(new { assessment.Id, assessment.RowVersion, assessment.Status, assessment.RevisionUsedId, assessment.EvidenceUrl, assessment.RetentionApprovedBy });
             if (!ChangeRules.Complete(assessment.Status, !string.IsNullOrWhiteSpace(assessment.EvidenceUrl), assessment.RetainOldRevision, assessment.RetentionApprovedBy is not null))
-                Block(SubmissionCheckKind.ChangeAssessment, assessment.Id, null, assessment.OwnerId, "submission.change_pending");
+                Block(SubmissionCheckKind.ChangeAssessment, assessment.Id, null, assessment.OwnerId, "submission.change_pending", $"/projects/{project.ProjectNumber}/changes?panel=ChangeNotice:{assessment.ChangeNoticeId}");
         }
         foreach (var input in await db.InputUses.AsNoTracking().Where(u => u.ProjectId == package.ProjectId &&
             (u.TargetType == "Deliverable" && ids.Contains(u.TargetId) || u.TargetType == "Task" && taskIds.Contains(u.TargetId))).OrderBy(u => u.Id).ToListAsync())
@@ -98,7 +100,7 @@ public static class SubmissionReadiness
             var head = await db.SourceHeads.AsNoTracking().SingleOrDefaultAsync(h => h.ProjectId == package.ProjectId && h.Identity == input.SourceIdentity);
             facts.Add(new { input.Id, input.RowVersion, input.SourceRevisionId, HeadRevisionId = head?.CurrentRevisionId });
             if (head is null || head.CurrentRevisionId != input.SourceRevisionId)
-                Block(SubmissionCheckKind.CurrentRevision, input.Id, null, input.OwnerId, "submission.input_changed");
+                Block(SubmissionCheckKind.CurrentRevision, input.Id, null, input.OwnerId, "submission.input_changed", $"/projects/{project.ProjectNumber}/changes");
         }
         return new SubmissionReadinessResult(blockers.Count == 0, Coordination.Hash(new { package.Id, package.RowVersion, package.ManifestVersion, Facts = facts }), blockers);
     }

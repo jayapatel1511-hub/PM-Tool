@@ -21,6 +21,7 @@ import { MeetingsTab } from '@/pages/projects/Meetings'
 import { ReviewsTab } from '@/pages/projects/Reviews'
 import { ChangesTab } from '@/pages/projects/Changes'
 import { HandoffsTab } from '@/pages/projects/Handoffs'
+import { SubmissionsTab } from '@/pages/projects/Submissions'
 import { TimelineTab } from '@/pages/projects/Timeline'
 import '@/pages/projects/CopyStructure'
 import '@/pages/projects/FromTemplate'
@@ -82,6 +83,7 @@ export const routes: RouteObject[] = [
       { path: 'handoffs', element: <HandoffsTab /> },
       { path: 'reviews', element: <ReviewsTab /> },
       { path: 'changes', element: <ChangesTab /> },
+      { path: 'submissions', element: <SubmissionsTab /> },
       { path: 'tasks', element: <TasksTab /> },
       { path: 'board', element: <BoardTab /> },
       { path: 'milestones', element: <MilestonesTab /> },

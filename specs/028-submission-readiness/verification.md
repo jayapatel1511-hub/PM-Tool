@@ -1,7 +1,7 @@
 # Verification: Submission Readiness and Issue Manifest
 
 **Date**: 2026-09-27
-**State**: API and domain implementation in progress. Product acceptance is not complete.
+**State**: API, domain, and initial project screen implemented. Product acceptance is not complete.
 
 ## Evidence run in the isolated Mac worktree
 
@@ -12,7 +12,9 @@
 - AC-SUB-03: a superseding package retained the first issue's A manifest and original transmittal. A database update to the first issue failed under the immutability trigger.
 - AC-SUB-04: changing a checklist check after the PM's read made the old readiness fingerprint return 409. Retrying the same successful Issue command did not create a duplicate issue row.
 - AC-SUB-05: the mandatory blocker waiver attempt returned 400. A non-PM optional Not Applicable attempt returned 403; the PM recorded a reason and evidence, after which the named owner could record Pass.
+- The focused 17-test set passed again after adding the export and source paths. The API export test checked manifest and issue data and returned 404 for a caller outside a restricted project.
+- `npm run build` passed with Vite CSS and chunk warnings. The local browser signed in as synthetic Taylor and loaded DEMO-101's Submissions page, its empty state, and New submission form. No deliverable revision existed in that local project's register, so an end-to-end browser issue was not exercised.
 
 ## Remaining acceptance
 
-The current API still needs per-submission export, notifications and the accessible project screen. Metadata editing exists but has not had a dedicated scenario run. Source-change invalidation is covered for revision publication and required review changes; handoff and design-basis changes are re-evaluated at Issue but their stored status and evidence invalidation hooks still need completion. Read Only, restricted-project, inactive-owner, soft-deletion, simultaneous finalisation and browser cases are not yet fully run. No Azure deployment, Entra sign-in, company pilot or production result is implied by these local tests.
+Notifications and a complete browser workflow remain. Metadata editing exists but has not had a dedicated scenario run. Source-change invalidation is covered for revision publication and required review changes; handoff and design-basis changes are re-evaluated at Issue but their stored status and evidence invalidation hooks still need completion. Read Only, inactive-owner, soft-deletion and simultaneous finalisation cases are not yet fully run. Accessibility needs a keyboard walkthrough. No Azure deployment, Entra sign-in, company pilot or production result is implied by these local tests.

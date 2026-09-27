@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { get, post } from '@/lib/api'
 import { fmtDate, today } from '@/lib/format'
@@ -45,45 +46,68 @@ export function AllocationsTab() {
   </Page>
 }
 
-function Proposal({ base, options, close, done }: { base: string; options: CoordOptions; close: () => void; done: (id: string) => void }) {
-  const [purpose, setPurpose] = useState<'Production' | 'Review'>('Production')
-  const [personId, setPersonId] = useState(''), [fromDate, setFromDate] = useState(today()), [throughDate, setThroughDate] = useState(today())
-  const [workDate, setWorkDate] = useState(today()), [plannedHours, setPlannedHours] = useState(''), [workId, setWorkId] = useState(''), [reviewHours, setReviewHours] = useState('')
+type LinkDraft = { key: string; workId: string; workDate: string; reviewHours: string }
+type DayDraft = { key: string; workDate: string; hours: string }
+function Proposal({ base, options, close, done, existing }: { base: string; options: CoordOptions; close: () => void; done: (id: string) => void; existing?: Detail }) {
+  const [purpose, setPurpose] = useState<'Production' | 'Review'>((existing?.purpose as 'Production' | 'Review') ?? 'Production')
+  const [personId, setPersonId] = useState(existing?.personId ?? ''), [fromDate, setFromDate] = useState(existing?.fromDate ?? today()), [throughDate, setThroughDate] = useState(existing?.throughDate ?? today())
+  const [plannedHours, setPlannedHours] = useState(existing ? String(existing.plannedHours) : '')
+  const [links, setLinks] = useState<LinkDraft[]>(() => existing?.links.map(l => ({ key: crypto.randomUUID(), workId: l.workId, workDate: l.workDate, reviewHours: l.reviewHours == null ? '' : String(l.reviewHours) })) ??
+    [{ key: crypto.randomUUID(), workId: '', workDate: today(), reviewHours: '' }])
+  const [days, setDays] = useState<DayDraft[]>(() => existing?.days.map(d => ({ key: crypto.randomUUID(), workDate: d.workDate, hours: String(d.hours) })) ?? [])
+  const [reason, setReason] = useState('')
   const reviewOptions = useQuery({ queryKey: ['allocation-review-options', base], queryFn: () => get<ReviewOption[]>(`${base}/review-options`) })
   const tasks = options.tasks.filter(w => w.ownerId === personId && !['Complete', 'Cancelled', 'On Hold'].includes(w.status))
   const reviews = (reviewOptions.data ?? []).filter(r => r.reviewerId === personId)
   const choices = purpose === 'Production' ? tasks.map(w => ({ value: w.id, label: `${w.key} · ${w.name}` })) :
     reviews.map(r => ({ value: r.id, label: `${r.packageKey} · ${r.packageTitle} · ${fmtDate(r.dueDate)}` }))
-  return <CommandForm path={base} title={t('allocation.new')} hint={t('allocation.proposalHint')} onClose={close} onDone={done}
-    payload={() => ({ personId, purpose, fromDate, throughDate, plannedHours: Number(plannedHours), days: [],
-      links: [{ workType: purpose === 'Production' ? 'Task' : 'Review', workId, workDate,
-        reviewHours: purpose === 'Review' ? Number(reviewHours) : null }] })}>
-    <SelectField label={t('allocation.purpose')} value={purpose} onChange={v => { setPurpose(v as 'Production' | 'Review'); setWorkId('') }}
+  const updateLink = (key: string, change: Partial<LinkDraft>) => setLinks(rows => rows.map(row => row.key === key ? { ...row, ...change } : row))
+  const updateDay = (key: string, change: Partial<DayDraft>) => setDays(rows => rows.map(row => row.key === key ? { ...row, ...change } : row))
+  return <CommandForm path={existing ? `${base}/${existing.id}/edit` : base} title={t(existing ? 'allocation.edit' : 'allocation.new')}
+    hint={t(existing?.status === 'Confirmed' ? 'allocation.editConfirmedHint' : 'allocation.proposalHint')} onClose={close} onDone={done}
+    payload={() => ({ ...(existing ? { rowVersion: existing.rowVersion, reason } : {}), personId, purpose, fromDate, throughDate,
+      plannedHours: Number(plannedHours), days: days.map(d => ({ workDate: d.workDate, hours: Number(d.hours) })),
+      links: links.map(l => ({ workType: purpose === 'Production' ? 'Task' : 'Review', workId: l.workId, workDate: l.workDate,
+        reviewHours: purpose === 'Review' ? Number(l.reviewHours) : null })) })}>
+    <SelectField label={t('allocation.purpose')} value={purpose} onChange={v => { setPurpose(v as 'Production' | 'Review'); setLinks([{ key: crypto.randomUUID(), workId: '', workDate: fromDate, reviewHours: '' }]) }}
       choices={[{ value: 'Production', label: t('allocation.purpose.Production') }, { value: 'Review', label: t('allocation.purpose.Review') }]} />
-    <SelectField label={t('workload.person')} value={personId} onChange={v => { setPersonId(v); setWorkId('') }} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
+    <SelectField label={t('workload.person')} value={personId} onChange={v => { setPersonId(v); setLinks([{ key: crypto.randomUUID(), workId: '', workDate: fromDate, reviewHours: '' }]) }} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
     {purpose === 'Review' && reviewOptions.error && <ErrorBanner error={reviewOptions.error} retry={() => reviewOptions.refetch()} />}
-    <SelectField label={t(purpose === 'Production' ? 'allocation.task' : 'allocation.reviewAssignment')} value={workId} onChange={setWorkId} choices={choices} />
     {!choices.length && personId && <p className="text-sm text-muted-foreground">{t(purpose === 'Production' ? 'allocation.noTasks' : 'allocation.noReviews')}</p>}
     <div className="grid gap-3 sm:grid-cols-2"><Field label={t('allocation.from')} htmlFor="allocation-from"><Input id="allocation-from" type="date" required value={fromDate} onChange={e => setFromDate(e.target.value)} /></Field>
       <Field label={t('allocation.through')} htmlFor="allocation-through"><Input id="allocation-through" type="date" required min={fromDate} value={throughDate} onChange={e => setThroughDate(e.target.value)} /></Field></div>
-    <div className="grid gap-3 sm:grid-cols-2"><Field label={t('allocation.linkDate')} htmlFor="allocation-work"><Input id="allocation-work" type="date" required min={fromDate} max={throughDate} value={workDate} onChange={e => setWorkDate(e.target.value)} /></Field>
-      <Field label={t('allocation.hours')} htmlFor="allocation-hours"><Input id="allocation-hours" type="number" required min="0.01" max="10000" step="0.01" value={plannedHours} onChange={e => setPlannedHours(e.target.value)} /></Field></div>
-    {purpose === 'Review' && <Field label={t('allocation.reviewEffort')} htmlFor="allocation-review-hours"><Input id="allocation-review-hours" type="number" required min="0.01" max="10000" step="0.01" value={reviewHours} onChange={e => setReviewHours(e.target.value)} /></Field>}
+    <Field label={t('allocation.hours')} htmlFor="allocation-hours"><Input id="allocation-hours" type="number" required min="0.01" max="10000" step="0.01" value={plannedHours} onChange={e => setPlannedHours(e.target.value)} /></Field>
+    <fieldset className="space-y-3 rounded border p-3"><legend className="px-1 font-medium">{t('allocation.linked')}</legend>{links.map((l, i) => <div className="space-y-3 rounded border p-3" key={l.key}>
+      <SelectField label={`${t(purpose === 'Production' ? 'allocation.task' : 'allocation.reviewAssignment')} ${i + 1}`} value={l.workId} onChange={workId => updateLink(l.key, { workId })} choices={choices} />
+      <div className="grid gap-3 sm:grid-cols-2"><Field label={t('allocation.linkDate')} htmlFor={`allocation-work-${l.key}`}><Input id={`allocation-work-${l.key}`} type="date" required min={fromDate} max={throughDate} value={l.workDate} onChange={e => updateLink(l.key, { workDate: e.target.value })} /></Field>
+        {purpose === 'Review' && <Field label={t('allocation.reviewEffort')} htmlFor={`allocation-review-hours-${l.key}`}><Input id={`allocation-review-hours-${l.key}`} type="number" required min="0.01" max="10000" step="0.01" value={l.reviewHours} onChange={e => updateLink(l.key, { reviewHours: e.target.value })} /></Field>}</div>
+      {links.length > 1 && <Button type="button" size="sm" variant="outline" onClick={() => setLinks(rows => rows.filter(row => row.key !== l.key))}>{t('allocation.removeLink')}</Button>}
+    </div>)}<Button type="button" size="sm" variant="outline" disabled={links.length >= 500} onClick={() => setLinks(rows => [...rows, { key: crypto.randomUUID(), workId: '', workDate: fromDate, reviewHours: '' }])}>{t('allocation.addLink')}</Button></fieldset>
+    <fieldset className="space-y-3 rounded border p-3"><legend className="px-1 font-medium">{t('allocation.daySplits')}</legend><p className="text-xs text-muted-foreground">{t('allocation.daySplitsHint')}</p>{days.map((d, i) => <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]" key={d.key}>
+      <Field label={`${t('allocation.date')} ${i + 1}`} htmlFor={`allocation-day-${d.key}`}><Input id={`allocation-day-${d.key}`} type="date" required min={fromDate} max={throughDate} value={d.workDate} onChange={e => updateDay(d.key, { workDate: e.target.value })} /></Field>
+      <Field label={t('allocation.hours')} htmlFor={`allocation-day-hours-${d.key}`}><Input id={`allocation-day-hours-${d.key}`} type="number" required min="0" max="10000" step="0.01" value={d.hours} onChange={e => updateDay(d.key, { hours: e.target.value })} /></Field>
+      <Button type="button" size="sm" variant="outline" className="self-end" onClick={() => setDays(rows => rows.filter(row => row.key !== d.key))}>{t('allocation.removeDay')}</Button>
+    </div>)}<Button type="button" size="sm" variant="outline" disabled={days.length >= 366} onClick={() => setDays(rows => [...rows, { key: crypto.randomUUID(), workDate: fromDate, hours: '' }])}>{t('allocation.addDay')}</Button></fieldset>
+    {existing && <Field label={t('common.reason')} htmlFor="allocation-reason"><Textarea id="allocation-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
   </CommandForm>
 }
 
 function AllocationDetail({ base, id, projectNumber, options, close, refresh }: { base: string; id: string; projectNumber: string; options?: CoordOptions; close: () => void; refresh: () => void }) {
   const [preview, setPreview] = useState<Preview | null>(null), [action, setAction] = useState<'confirm' | 'decline' | 'cancel' | 'complete' | null>(null)
+  const [editing, setEditing] = useState(false)
   const [error, setError] = useState<unknown>(null)
   const detail = useQuery({ queryKey: ['allocation-detail', base, id], queryFn: () => get<Detail>(`${base}/${id}`) })
   const row = detail.data
   const done = () => { setAction(null); setPreview(null); setError(null); detail.refetch(); refresh() }
   const startConfirm = async () => { setError(null); try { setPreview(await get<Preview>(`${base}/${id}/confirmation-preview`)); setAction('confirm') } catch (e) { setError(e) } }
+  if (editing && row && options) return <Proposal base={base} options={options} existing={row} close={() => setEditing(false)} done={() => { setEditing(false); done() }} />
   return <Dialog open onOpenChange={o => !o && close()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
       <DialogHeader><DialogTitle>{t('allocation.detail')}</DialogTitle></DialogHeader>
       {detail.isPending ? <Loading rows={4} /> : detail.error ? <ErrorBanner error={detail.error} retry={() => detail.refetch()} /> : row && <div className="space-y-4 text-sm">
         <p>{row.personName} · {t(`allocation.purpose.${row.purpose}`)} · {row.status}</p>
         <p>{fmtDate(row.fromDate)}–{fmtDate(row.throughDate)} · {row.plannedHours} {t('allocation.hours')}</p>
+        {row.days.length > 0 && <section><h3 className="font-medium">{t('allocation.daySplits')}</h3><ul className="mt-1 space-y-1">{row.days.map(d =>
+          <li key={d.workDate}>{fmtDate(d.workDate)} · {d.hours} {t('allocation.hours')}</li>)}</ul></section>}
         <h3 className="font-medium">{t('allocation.linked')}</h3><ul className="space-y-2">{row.links.map(l => <li key={`${l.workType}:${l.workId}:${l.workDate}`}>
           {l.workType === 'Review' ? <Link className="text-primary underline" to={`/projects/${projectNumber}/reviews${l.reviewPackageId ? `?panel=ReviewPackage:${l.reviewPackageId}` : ''}`}>{t('allocation.reviewAssignment')}</Link> :
             options ? <WorkLink options={options} type={l.workType} id={l.workId} number={projectNumber} /> :
@@ -92,6 +116,7 @@ function AllocationDetail({ base, id, projectNumber, options, close, refresh }: 
         <div className="flex flex-wrap gap-2">{row.status === 'Proposed' && row.canConfirm && <><Button size="sm" onClick={startConfirm}>{t('allocation.reviewCapacity')}</Button>
           <Button size="sm" variant="outline" onClick={() => setAction('decline')}>{t('allocation.decline')}</Button></>}
           {row.canManage && ['Proposed', 'Confirmed'].includes(row.status) && <Button size="sm" variant="outline" onClick={() => setAction('cancel')}>{t('allocation.cancel')}</Button>}
+          {row.canManage && options && ['Proposed', 'Confirmed'].includes(row.status) && <Button size="sm" variant="outline" onClick={() => setEditing(true)}>{t('allocation.edit')}</Button>}
           {row.canManage && row.status === 'Confirmed' && <Button size="sm" variant="outline" onClick={() => setAction('complete')}>{t('allocation.complete')}</Button>}
         </div>{error != null && <ErrorBanner error={error} />}
       </div>}

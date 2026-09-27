@@ -216,9 +216,9 @@ public static class AllocationEndpoints
         var actor = access.Actor;
         var manager = Permissions.IsPM(actor, ctx);
         return await db.Allocations.AsNoTracking().Where(a => a.ProjectId == projectId &&
-                (manager || a.CreatedBy == actor.Id || (ctx.IsMember && (actor.Supervisor || actor.Admin) &&
+                (manager || a.CreatedBy == actor.Id || ((actor.Supervisor || actor.Admin) &&
                     db.Users.Any(u => u.Id == a.PersonId && (actor.Admin || u.SupervisorId == actor.Id)))))
-            .OrderBy(a => a.FromDate).Select(a => new { a.Id, a.PersonId, a.Purpose, a.FromDate, a.ThroughDate,
+            .OrderBy(a => a.FromDate).Select(a => new { a.Id, a.PersonId, PersonName = db.Users.Where(u => u.Id == a.PersonId).Select(u => u.DisplayName).FirstOrDefault(), a.Purpose, a.FromDate, a.ThroughDate,
                 a.PlannedHours, a.Status, a.RowVersion }).ToListAsync();
     }
 
@@ -228,10 +228,14 @@ public static class AllocationEndpoints
         var actor = access.Actor;
         var manager = Permissions.IsPM(actor, ctx);
         var a = await db.Allocations.AsNoTracking().FirstOrDefaultAsync(a => a.ProjectId == projectId && a.Id == id &&
-            (manager || a.CreatedBy == actor.Id || (ctx.IsMember && (actor.Supervisor || actor.Admin) &&
+            (manager || a.CreatedBy == actor.Id || ((actor.Supervisor || actor.Admin) &&
                 db.Users.Any(u => u.Id == a.PersonId && (actor.Admin || u.SupervisorId == actor.Id))))) ?? throw ApiException.NotFound();
-        return new { a.Id, a.ProjectId, a.PersonId, a.Purpose, a.FromDate, a.ThroughDate, a.PlannedHours, a.Status,
-            a.ConfirmedBy, a.ConfirmedAt, OverCapacityWarningRecorded = a.OverCapacityReason != null, a.RowVersion,
+        var supervisorId = await db.Users.Where(u => u.Id == a.PersonId).Select(u => u.SupervisorId).FirstOrDefaultAsync();
+        var canConfirm = Permissions.ConfirmAllocation(actor, ctx, supervisorId).Ok;
+        var canManage = Permissions.ProposeAllocation(actor, ctx).Ok && (manager || a.CreatedBy == actor.Id);
+        return new { a.Id, a.ProjectId, a.PersonId, PersonName = await db.Users.Where(u => u.Id == a.PersonId).Select(u => u.DisplayName).FirstOrDefaultAsync(),
+            a.Purpose, a.FromDate, a.ThroughDate, a.PlannedHours, a.Status,
+            a.ConfirmedBy, a.ConfirmedAt, OverCapacityWarningRecorded = a.OverCapacityReason != null, a.RowVersion, CanConfirm = canConfirm, CanManage = canManage,
             Days = await db.AllocationDayOverrides.AsNoTracking().Where(d => d.AllocationId == id).OrderBy(d => d.WorkDate)
                 .Select(d => new { d.WorkDate, d.Hours }).ToListAsync(),
             Links = await db.AllocationWorkLinks.AsNoTracking().Where(l => l.AllocationId == id && l.ReleasedAt == null)

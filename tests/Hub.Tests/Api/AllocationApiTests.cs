@@ -11,6 +11,23 @@ public sealed class AllocationApiTests(HubFactory f)
 {
     readonly TestData data = new(f);
 
+    async Task<(Guid Id, string Email)> FreshReport(Guid? projectId = null)
+    {
+        var email = $"allocation-{Guid.NewGuid():N}@hub.test";
+        await (await f.As(email).GetAsync("/api/v1/me")).Json();
+        var personId = data.User(email);
+        await f.DbAsync(async db =>
+        {
+            var person = await db.Users.SingleAsync(u => u.Id == personId);
+            person.SupervisorId = data.User(TestData.Sam);
+            if (projectId is { } pid) db.ProjectMembers.Add(new ProjectMember { ProjectId = pid, UserId = personId,
+                Roles = [ProjectRole.TeamMember], AddedAt = f.Clock.GetUtcNow() });
+            await db.SaveChangesAsync();
+            return 0;
+        });
+        return (personId, email);
+    }
+
     [Fact]
     public async Task Proposed_allocation_is_scoped_versioned_retry_safe_and_releases_its_link()
     {
@@ -30,6 +47,14 @@ public sealed class AllocationApiTests(HubFactory f)
         Assert.Single(f.Db(db => db.Allocations.Where(a => a.Id == id).ToList()));
         var detail = await (await f.As(TestData.Pm).GetAsync($"{root}/{id}")).Json();
         Assert.Equal(AllocationStatus.Proposed, detail.S("status"));
+        Assert.False(detail["canConfirm"]!.GetValue<bool>());
+        Assert.True(detail["canManage"]!.GetValue<bool>());
+        var supervisorDetail = await (await f.As(TestData.Sam).GetAsync($"{root}/{id}")).Json();
+        Assert.True(supervisorDetail["canConfirm"]!.GetValue<bool>());
+        Assert.False(supervisorDetail["canManage"]!.GetValue<bool>());
+        Assert.False(string.IsNullOrWhiteSpace(supervisorDetail.S("personName")));
+        var supervisorList = await (await f.As(TestData.Sam).GetAsync(root)).Json();
+        Assert.Contains(supervisorList.AsArray(), a => a!.G("id") == id && !string.IsNullOrWhiteSpace(a.S("personName")));
         await (await f.As(TestData.Alex).GetAsync($"{root}/{id}")).Json(404);
         var updated = await (await f.As(TestData.Pm).Post($"{root}/{id}/edit",
             new AllocationEndpoints.EditBody(Guid.NewGuid(), first.I("rowVersion"), alex, AllocationPurpose.Production,
@@ -64,7 +89,7 @@ public sealed class AllocationApiTests(HubFactory f)
     public async Task Supervisor_declines_and_pm_completes_with_links_and_versions_released()
     {
         var project = await data.Project();
-        var personId = data.User(TestData.Alex);
+        var personId = (await FreshReport(project.Id)).Id;
         var day = new DateOnly(2026, 9, 14);
         var task = await data.NewTask(project.Id, extra: new { assigneeId = personId, estimatedHours = 4m, startDate = day, dueDate = day });
         var root = $"/api/v1/projects/{project.Id}/allocations";
@@ -95,14 +120,14 @@ public sealed class AllocationApiTests(HubFactory f)
     [Fact]
     public async Task Supervisor_sets_private_day_capacity_with_expected_version()
     {
-        var alex = data.User(TestData.Alex);
+        var (alex, email) = await FreshReport();
         var day = new DateOnly(2026, 10, 6);
         var path = $"/api/v1/users/{alex}/availability/{day:yyyy-MM-dd}";
         await (await f.As(TestData.Pm).Put(path, new AllocationEndpoints.AvailabilityBody(0, 4, AvailabilityCategory.Reduced))).Json(403);
         var first = await (await f.As(TestData.Sam).Put(path,
             new AllocationEndpoints.AvailabilityBody(0, 4, AvailabilityCategory.Reduced))).Json();
         Assert.Equal(4, first["availableHours"]!.GetValue<decimal>());
-        var visible = await (await f.As(TestData.Alex).GetAsync($"/api/v1/users/{alex}/availability?from={day:yyyy-MM-dd}&through={day:yyyy-MM-dd}")).Json();
+        var visible = await (await f.As(email).GetAsync($"/api/v1/users/{alex}/availability?from={day:yyyy-MM-dd}&through={day:yyyy-MM-dd}")).Json();
         Assert.Single(visible.AsArray());
         await (await f.As(TestData.Rita).GetAsync($"/api/v1/users/{alex}/availability?from={day:yyyy-MM-dd}&through={day:yyyy-MM-dd}")).Json(404);
         var second = await (await f.As(TestData.Sam).Put(path,

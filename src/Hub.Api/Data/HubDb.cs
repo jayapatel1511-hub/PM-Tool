@@ -57,6 +57,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<SubmissionCheck> SubmissionChecks => Set<SubmissionCheck>();
     public DbSet<CheckEvidence> CheckEvidences => Set<CheckEvidence>();
     public DbSet<SubmissionIssue> SubmissionIssues => Set<SubmissionIssue>();
+    public DbSet<DesignBasisEntry> DesignBasisEntries => Set<DesignBasisEntry>();
+    public DbSet<DesignBasisVersion> DesignBasisVersions => Set<DesignBasisVersion>();
+    public DbSet<BasisUse> BasisUses => Set<BasisUse>();
+    public DbSet<BasisConflict> BasisConflicts => Set<BasisConflict>();
+    public DbSet<BasisAssumptionDisposition> BasisAssumptionDispositions => Set<BasisAssumptionDisposition>();
     public DbSet<PersonAvailabilityOverride> AvailabilityOverrides => Set<PersonAvailabilityOverride>();
     public DbSet<ResourceAllocation> Allocations => Set<ResourceAllocation>();
     public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
@@ -434,6 +439,52 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.Entity<SubmissionIssue>().HasIndex(x => x.PackageId).IsUnique();
         mb.Entity<SubmissionIssue>().Property(x => x.ManifestSnapshot).HasColumnType("jsonb");
         mb.Entity<SubmissionIssue>().Property(x => x.CheckSnapshot).HasColumnType("jsonb");
+        Item<DesignBasisEntry>(mb, e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.ProjectDisciplineId, x.Kind, x.Title });
+            e.ToTable(t => t.HasCheckConstraint("ck_basis_entry_kind", $"kind IN ({In(BasisKind.All)})"));
+        });
+        mb.Entity<DesignBasisVersion>(e =>
+        {
+            e.HasIndex(x => new { x.EntryId, x.Number }).IsUnique();
+            e.HasIndex(x => new { x.ProjectId, x.Status });
+            e.Property(x => x.NumericValue).HasPrecision(18, 6);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_basis_version_status", $"status IN ({In(BasisStatus.All)})");
+                t.HasCheckConstraint("ck_basis_numeric_units", "status NOT IN ('Confirmed', 'Superseded') OR numeric_value IS NULL OR (units IS NOT NULL AND length(trim(units)) > 0)");
+                t.HasCheckConstraint("ck_basis_confirmed_evidence", "status <> 'Confirmed' OR (source_url IS NOT NULL AND confirmation_rationale IS NOT NULL AND confirmed_by IS NOT NULL AND confirmed_at IS NOT NULL)");
+                t.HasCheckConstraint("ck_basis_version_number", "number > 0");
+            });
+        });
+        mb.Entity<BasisUse>(e =>
+        {
+            e.HasIndex(x => new { x.VersionId, x.TargetType, x.TargetId }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_basis_use_target", "target_type IN ('Task', 'Deliverable')"));
+        });
+        mb.Entity<BasisConflict>(e =>
+        {
+            e.HasIndex(x => new { x.LeftVersionId, x.RightVersionId }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_basis_conflict_order", "left_version_id < right_version_id"));
+        });
+        mb.Entity<BasisAssumptionDisposition>(e => e.HasIndex(x => new { x.VersionId, x.ExpiresOn }));
+        Fk<DesignBasisEntry, AppUser>(mb, x => x.OwnerId);
+        Fk<DesignBasisEntry, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<DesignBasisEntry, AppUser>(mb, x => x.IndependentApproverId);
+        Fk<DesignBasisEntry, DesignBasisVersion>(mb, x => x.CurrentVersionId);
+        Fk<DesignBasisVersion, DesignBasisEntry>(mb, x => x.EntryId);
+        Fk<DesignBasisVersion, DesignBasisVersion>(mb, x => x.SupersedesVersionId);
+        Fk<DesignBasisVersion, Decision>(mb, x => x.DecisionId);
+        Fk<DesignBasisVersion, AppUser>(mb, x => x.ConfirmedBy);
+        Fk<BasisUse, DesignBasisVersion>(mb, x => x.VersionId);
+        Fk<BasisUse, AppUser>(mb, x => x.OwnerId);
+        Fk<BasisConflict, DesignBasisVersion>(mb, x => x.LeftVersionId);
+        Fk<BasisConflict, DesignBasisVersion>(mb, x => x.RightVersionId);
+        Fk<BasisConflict, DesignBasisVersion>(mb, x => x.ResolutionVersionId);
+        Fk<BasisConflict, AppUser>(mb, x => x.ResolvedBy);
+        Fk<BasisAssumptionDisposition, DesignBasisVersion>(mb, x => x.VersionId);
+        Fk<BasisAssumptionDisposition, AppUser>(mb, x => x.OwnerId);
+        Fk<BasisAssumptionDisposition, AppUser>(mb, x => x.ApprovedBy);
         mb.Entity<PersonAvailabilityOverride>(e =>
         {
             e.HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
@@ -551,6 +602,10 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<SubmissionCheck, Project>(mb, x => x.ProjectId);
         Fk<CheckEvidence, Project>(mb, x => x.ProjectId);
         Fk<SubmissionIssue, Project>(mb, x => x.ProjectId);
+        Fk<DesignBasisVersion, Project>(mb, x => x.ProjectId);
+        Fk<BasisUse, Project>(mb, x => x.ProjectId);
+        Fk<BasisConflict, Project>(mb, x => x.ProjectId);
+        Fk<BasisAssumptionDisposition, Project>(mb, x => x.ProjectId);
 
 
         foreach (var et in mb.Model.GetEntityTypes().Where(t => typeof(Audited).IsAssignableFrom(t.ClrType)))

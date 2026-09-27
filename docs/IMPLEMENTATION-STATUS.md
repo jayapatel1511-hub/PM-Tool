@@ -2,7 +2,7 @@
 
 ## 2026-09-27 handoff foundation
 
-Packet 025 now has backend/domain records, an additive migration, project-scoped commands and UI, immutable submission and receipt history, named-owner permissions, search/export and scoped notifications. Validation is in progress in [the packet verification record](../specs/025-discipline-handoffs/verification.md). This is an initial build increment, not full acceptance or deployment. Packet 027 change-impact integration (AC-HND-03), production hardening and packets 026–033 remain pending.
+Packet 025 now has backend/domain records, an additive migration, project-scoped commands and UI, immutable submission and receipt history, named-owner permissions, search/export and scoped notifications. CI passed 360 tests, coverage gates and the mocked-API Chromium workflow/accessibility checks; details and limits are in [the packet verification record](../specs/025-discipline-handoffs/verification.md). This is an initial build increment, not full acceptance or deployment. Packet 027 change-impact integration (AC-HND-03), production hardening and packets 026–033 remain pending.
 
 ## 2026-09-26 approved scope expansion (historical)
 

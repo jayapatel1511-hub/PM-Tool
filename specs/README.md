@@ -72,7 +72,7 @@ Jay accepted the full scope on 2026-09-26. All implementation tasks remain unche
 
 | Packet | Delivers | Depends on | Status |
 |---|---|---|---|
-| [025-discipline-handoffs](025-discipline-handoffs/spec.md) | Discipline Handoffs and Acceptance | 002–006, 009 | Handoff foundation built; verification and impact integration pending |
+| [025-discipline-handoffs](025-discipline-handoffs/spec.md) | Discipline Handoffs and Acceptance | 002–006, 009 | Handoff foundation built; CI passed; full acceptance/impact integration pending |
 | [026-multidisciplinary-reviews](026-multidisciplinary-reviews/spec.md) | Multidisciplinary Reviews and Comment Closure | 003, 004, 006, 009 | Specified; implementation pending |
 | [027-revision-change-impact](027-revision-change-impact/spec.md) | Revision Awareness and Change Impact | 003–006, 009, 025 | Specified; implementation pending |
 | [028-submission-readiness](028-submission-readiness/spec.md) | Submission Readiness and Issue Manifest | 003, 006, 009, 025–027 | Specified; implementation pending |

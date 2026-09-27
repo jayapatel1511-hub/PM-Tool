@@ -1,6 +1,6 @@
 # Implementation Plan: Multidisciplinary Reviews and Comment Closure
 
-**Date**: 2026-09-26 | **Status**: Implementation in progress, authorised by Jay on 2026-09-27.
+**Date**: 2026-09-26 | **Status**: Foundation implemented; automated checks passed. Authorised by Jay on 2026-09-27; full acceptance remains pending.
 
 ## Approach
 

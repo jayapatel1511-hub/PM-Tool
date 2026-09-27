@@ -1,6 +1,6 @@
 # Tasks: Revision Awareness and Change Impact
 
-The foundation implementation is written. Automated validation is in progress in draft PR #3. Full acceptance, including real browser-to-API and operational checks, remains pending; see `verification.md`.
+The foundation implementation is written and automated validation passed in draft PR #3. Full acceptance, including real browser-to-API and operational checks, remains pending; see `verification.md`.
 
 - [x] T001 Add canonical records, constraints and an additive migration in `src/Hub.Api/Data/` (FR-CHG-01, FR-CHG-02, FR-CHG-03, FR-CHG-04, FR-CHG-05, FR-CHG-06, FR-CHG-07).
 - [x] T002 Implement pure transitions/derived rules in `src/Hub.Domain/Changes.cs` and permission cases in `Permissions.cs` (FR-MDC-01, FR-MDC-02, FR-MDC-03, FR-MDC-04, FR-MDC-05, FR-MDC-06, FR-MDC-07, FR-MDC-08).

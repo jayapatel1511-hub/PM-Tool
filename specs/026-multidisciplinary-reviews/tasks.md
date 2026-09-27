@@ -1,6 +1,6 @@
 # Tasks: Multidisciplinary Reviews and Comment Closure
 
-The foundation implementation is written. Automated validation is in progress in draft PR #3. Full acceptance, including real browser-to-API and operational checks, remains pending; see `verification.md`.
+The foundation implementation is written and automated validation passed in draft PR #3. Full acceptance, including real browser-to-API and operational checks, remains pending; see `verification.md`.
 
 - [x] T001 Add canonical records, constraints and an additive migration in `src/Hub.Api/Data/` (FR-MRV-01, FR-MRV-02, FR-MRV-03, FR-MRV-04, FR-MRV-05, FR-MRV-06, FR-MRV-07).
 - [x] T002 Implement pure transitions/derived rules in `src/Hub.Domain/Reviews.cs` and permission cases in `Permissions.cs` (FR-MDC-01, FR-MDC-02, FR-MDC-03, FR-MDC-04, FR-MDC-05, FR-MDC-06, FR-MDC-07, FR-MDC-08).

@@ -1,7 +1,7 @@
 # Tuesday — multidisciplinary coordination design
 
 **Date:** 2026-09-26
-**Status:** Approved feature scope; proposed implementation design. Packets 025–033 are not implemented by this change.
+**Status:** Approved feature scope and implementation design. Foundations for packets 025–027 are implemented; full acceptance and packets 028–033 remain pending. See packet verification records.
 
 This document translates the approved coordination requirements into a consistent experience. The product specification remains authoritative, with §10 defining canonical vocabulary and §8 defining permissions. Source amendments are `spec-parts/12-multidisciplinary-coordination.md` and `spec-parts/13-design-inputs-readiness-location.md`. The [packet index](specs/README.md) supplies implementation order and [research notes](docs/research/multidisciplinary-coordination.md) explain the recommendations.
 
@@ -92,6 +92,6 @@ Workload presents these separately: available hours, confirmed reserved hours, p
 | Readiness and submissions | 032, 028 | Explicit ready work, original weekly promises and current issue gates |
 | Location and integrated view | 033, 030 | One issue per physical problem and reconciled discipline coordination |
 
-These increments cover all approved features. The order is dependency-driven, not a promise of duration or release date. All new runtime tasks remain pending. The 50-person pilot can enable each increment after its acceptance and existing hardening gates pass; participant count is not evidence of concurrency capacity.
+These increments cover all approved features. The order is dependency-driven, not a promise of duration or release date. Foundation tasks for 025–027 are implemented; remaining packet tasks and full acceptance are tracked in the packet index. The 50-person pilot can enable each increment after its acceptance and existing hardening gates pass; participant count is not evidence of concurrency capacity.
 
 No prior implementation-completion percentage applies to the enlarged 33-packet scope. The [validation record](docs/coordination-spec-validation.md) distinguishes documentation checks from application verification.

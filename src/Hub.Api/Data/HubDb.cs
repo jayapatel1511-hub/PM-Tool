@@ -579,7 +579,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             if (!allowSelf) foreach (var e in authorship) {
                 var deliverableId = e.Entity is WorkTask t ? t.DeliverableId : ((Deliverable)e.Entity).Id;
                 if (deliverableId == null) continue;
-                var owners = e.Entity is WorkTask task ? new[] { task.AssigneeId, task.CreatedBy ?? audit.ActorId } : new[] { ((Deliverable)e.Entity).OwnerId, ((Deliverable)e.Entity).CreatedBy ?? audit.ActorId };
+                var owners = e.Entity is WorkTask task ? new[] { task.AssigneeId, task.CreatedBy ?? (e.State == EntityState.Added ? audit.ActorId : null) } : new[] { ((Deliverable)e.Entity).OwnerId, ((Deliverable)e.Entity).CreatedBy ?? (e.State == EntityState.Added ? audit.ActorId : null) };
                 var ids = owners.OfType<Guid>().ToArray();
                 Check.That(!await DisciplineReviews.AnyAsync(a => ids.Contains(a.ReviewerId)
                     && ReviewPackages.Any(p => p.CurrentRoundId == a.RoundId && p.Status != ReviewStatus.Cancelled && p.Status != ReviewStatus.Superseded)

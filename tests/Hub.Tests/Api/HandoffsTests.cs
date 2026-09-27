@@ -50,6 +50,31 @@ public sealed class HandoffsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task AC_HND_03_publishing_B_keeps_incorporated_A_and_creates_one_pending_assessment()
+    {
+        var s = await New(); var hid = (await Create(s)).G("id");
+        await Move(s, hid, TestData.Alex, HandoffStatus.Submitted);
+        await Move(s, hid, TestData.Omar, HandoffStatus.Accepted, outcome: "Survey criteria checked");
+        await Move(s, hid, TestData.Omar, HandoffStatus.Incorporated, outcome: "Revision A incorporated into receiving design");
+        var head = f.Db(db => db.SourceHeads.AsNoTracking().Single(h => h.ProjectId == s.Project.Id));
+        var notice = await (await f.As(TestData.Alex).Post($"/api/v1/projects/{s.Project.Id}/source-revisions", new ChangeEndpoints.RegisterBody(
+            Guid.NewGuid(), s.Source.G("id"), f.Db(db => db.Deliverables.Single(d => d.Id == s.Source.G("id")).RowVersion),
+            data.ProjectDiscipline(s.Project.Id, "Civil"), data.User(TestData.Alex), "Deliverable", "survey", "Survey basis", "B", "https://example.test/survey-B.pdf", "Survey team", "Service corridor", null,
+            head.CurrentRevisionId, head.RowVersion, "Updated corridor tie-in", new DateOnly(2026,9,14), new DateOnly(2026,9,18)))).Json();
+        await (await f.As(TestData.Alex).Post($"/api/v1/projects/{s.Project.Id}/changes/{notice.G("id")}/publish", new ChangeEndpoints.PublishBody(Guid.NewGuid(), notice.I("rowVersion"), head.RowVersion, null))).Json();
+        var detail = await Detail(s, hid);
+        Assert.Equal(HandoffStatus.Incorporated, detail["row"]!.S("status"));
+        Assert.Equal("A", detail["revisions"]![0]!["source"]!.S("revision"));
+        Assert.Equal(3, detail["history"]!.AsArray().Count);
+        Assert.Single(detail["changeAssessments"]!.AsArray());
+        Assert.Equal(AssessmentStatus.Pending, detail["changeAssessments"]![0]!.S("status"));
+        var a = f.Db(db => db.ChangeAssessments.Single(a => a.ChangeNoticeId == notice.G("id")));
+        Assert.Equal(hid, a.HandoffId); Assert.NotNull(a.InputUseId);
+        Assert.Equal(head.CurrentRevisionId, f.Db(db => db.InputUses.Single(u => u.Id == a.InputUseId).SourceRevisionId));
+        Assert.Equal(TaskStatuses.NotStarted, f.Db(db => db.Tasks.Single(t => t.Id == s.Target.G("id")).Status));
+    }
+
+    [Fact]
     public async Task AC_HND_01_02_usable_acceptance_and_incorporation_preserve_dates_tasks_and_evidence()
     {
         var s = await New(); var h = await Create(s); var id = h.G("id");

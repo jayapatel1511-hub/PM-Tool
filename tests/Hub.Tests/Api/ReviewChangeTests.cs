@@ -62,6 +62,8 @@ public sealed class ReviewChangeTests(HubFactory f)
         await Decide(s, id, s.Civil, TestData.Marc, expected: 403); // coordinator cannot sign
         await Decide(s, id, s.Civil, TestData.Pm);
         Assert.NotEqual(ReviewStatus.Approved, f.Db(db => db.ReviewPackages.Single(p => p.Id == id).Status));
+        await Post(TestData.Marc, $"/api/v1/deliverables/{s.Deliverable}/transition", new { rowVersion = Version<Deliverable>(s.Deliverable), toStatus = DeliverableStatus.InProgress });
+        await Post(TestData.Marc, $"/api/v1/deliverables/{s.Deliverable}/transition", new { rowVersion = Version<Deliverable>(s.Deliverable), toStatus = DeliverableStatus.ReadyToIssue }, 400);
         var issue = new { rowVersion = Version<Deliverable>(s.Deliverable), revision = "A", confirmOpenTasks = true };
         await Post(TestData.Marc, $"/api/v1/deliverables/{s.Deliverable}/issue", issue, 400);
         await Decide(s, id, s.Electrical, TestData.Omar);
@@ -155,7 +157,7 @@ public sealed class ReviewChangeTests(HubFactory f)
         var current = f.Db(db => db.SourceHeads.Single(h => h.ProjectId == s.P.Id).CurrentRevisionId);
         await Adopt(s, t, current, s.Revision, expected: 409);
         Assert.Equal(s.Revision, f.Db(db => db.InputUses.Single(u => u.TargetId == t).SourceRevisionId));
-        await Post(TestData.Alex, Root(s) + $"/changes/{notice}/publish", body with { AdditionalTargets = [] }, 400); // request ID cannot change meaning
+        await Post(TestData.Alex, Root(s) + $"/changes/{notice}/publish", body with { AdditionalTargets = [] }, 422); // request ID cannot change meaning
         var stale = Registration(s, "C", current); var c1 = await Post(TestData.Alex, Root(s) + "/source-revisions", stale); var c2 = await Post(TestData.Alex, Root(s) + "/source-revisions", stale with { RequestId = Guid.NewGuid(), Revision = "AA", Url = "https://example.test/AA.pdf" });
         await Publish(s, c1.G("id")); await Publish(s, c2.G("id"), expected: 409);
         Assert.Equal(ChangeStatus.Draft, f.Db(db => db.ChangeNotices.Single(c => c.Id == c2.G("id")).Status));

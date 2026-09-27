@@ -1,5 +1,16 @@
 // English interface text. Keys are grouped by area; `value.*` translates canonical stored names.
 export const en: Record<string, string> = {
+  "value.Withdrawn": "Withdrawn",
+  "value.Verified Closed": "Verified Closed",
+  "value.Responded": "Responded",
+  "value.Advisory": "Advisory",
+  "value.Blocking": "Blocking",
+  "value.Clarification Needed": "Clarification Needed",
+  "value.Update Required": "Update Required",
+  "value.Unaffected": "Unaffected",
+  "value.Pending Assessment": "Pending Assessment",
+  "value.Superseded": "Superseded",
+  "value.Approved": "Approved",
   "change.receiptPreserved": "The original receipt still records the revision incorporated. A later revision requires its own impact assessment.",
   "ptab.reviews": "Reviews",
   "ptab.changes": "Changes",

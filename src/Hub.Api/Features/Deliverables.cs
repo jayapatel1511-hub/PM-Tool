@@ -363,7 +363,7 @@ public static class DeliverableEndpoints
         var issued = body.IssuedDate ?? today;
         Check.That(issued <= today, "issuedDate", "milestone.future_completion");
         if (body.TransmittalUrl is { Length: > 0 } tu) Check.That(Links.IsValid(tu), "transmittalUrl", "link.invalid");
-        await ReviewEndpoints.Gate(db, p, d, Check.Optional(body.Revision, "revision", 50), (await store.Get(db)).AllowSelfReview);
+        await ReviewEndpoints.Gate(db, p, d, Check.Optional(body.Revision, "revision", 50), (await store.Get(db)).AllowSelfReview, Check.Optional(body.TransmittalUrl, "transmittalUrl", 2000));
         var now = clock.GetUtcNow();
         d.Status = DeliverableStatus.Issued;
         d.IssuedDate = issued;

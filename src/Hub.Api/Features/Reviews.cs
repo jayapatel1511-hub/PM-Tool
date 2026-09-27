@@ -228,14 +228,14 @@ public static class ReviewEndpoints
             db.Audit.Note(f, reason: reason); db.FindingEvents.Add(new FindingEvent { ProjectId = project.Id, FindingId = f.Id, Action = body.Action, Reason = reason, EvidenceUrl = body.EvidenceUrl });
             await Recompute(db, project, p, self); await Notify(db, notify, project, p, [f.ResolverId, f.VerifierId, p.CoordinatorId]); return f;
         });
-    public static async Task Gate(HubDb db, Project project, Deliverable deliverable, string? issuingRevision, bool allowSelf)
+    public static async Task Gate(HubDb db, Project project, Deliverable deliverable, string? issuingRevision, bool allowSelf, string? issuingUrl = null)
     {
         if (deliverable.RequiredReviewPackageId is not { } pid) return;
         var p = await Load(db, project.Id, pid);
         Check.That(p.Status == ReviewStatus.Approved, "requiredReviewPackageId", "review.gate");
         await ValidateRound(db, project, p, allowSelf);
         var revision = await db.ReviewManifestItems.Where(m => m.RoundId == p.CurrentRoundId && m.DeliverableId == deliverable.Id).Join(db.SourceRevisions, m => m.SourceRevisionId, r => r.Id, (m, r) => r).SingleOrDefaultAsync();
-        Check.That(revision != null && revision.Revision == (issuingRevision ?? deliverable.Revision), "revision", "review.gate_revision");
+        Check.That(revision != null && revision.Revision == (issuingRevision ?? deliverable.Revision) && (issuingUrl == null || revision.Url == issuingUrl), "revision", "review.gate_revision");
     }
     static IQueryable<ReviewPackage> Query(HubDb db, Guid project, Filter f, Guid actor)
     {
@@ -252,7 +252,7 @@ public static class ReviewEndpoints
         var rows = await query.Select(p => new { P = p, OutstandingDisciplines = db.DisciplineReviews.Count(a => a.RoundId == p.CurrentRoundId && a.Status != DisciplineReviewStatus.Approved),
             BlockingFindings = db.ReviewFindings.Count(f => f.RoundId == p.CurrentRoundId && f.Severity == "Blocking" && f.Status != FindingStatus.VerifiedClosed && (f.Status != FindingStatus.Withdrawn || f.Severity == "Blocking" && f.WithdrawalAcknowledgedBy == null)),
             Started = db.ReviewRounds.Where(r => r.Id == p.CurrentRoundId).Select(r => r.StartedAt).FirstOrDefault() }).ToListAsync();
-        return rows.Select(x => (object)new { x.P.Id, x.P.Key, x.P.Title, x.P.Status, x.P.CoordinatorId, x.P.RoundNumber, x.P.RowVersion, x.OutstandingDisciplines, x.BlockingFindings, WaitingDays = x.Started is { } start && x.OutstandingDisciplines > 0 ? Math.Max(0, (int)(now - start).TotalDays) : 0 }).ToList();
+        return rows.Select(x => (object)new { x.P.Id, x.P.Key, x.P.Title, x.P.Status, x.P.CoordinatorId, x.P.RoundNumber, x.P.RowVersion, x.OutstandingDisciplines, x.BlockingFindings, WaitingDays = x.Started is { } start && (x.P.Status == ReviewStatus.InReview || x.P.Status == ReviewStatus.ChangesRequired) ? Math.Max(0, (int)(now - start).TotalDays) : 0 }).ToList();
     }
     static async Task<object> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db, TimeProvider clock)
     { await access.Project(projectId, false); var q = Query(db, projectId, filter, access.Me.Id); var (pg, size) = Http.Paging(page, pageSize); return new Page<object>(await Rows(db, q.Skip((pg - 1) * size).Take(size), clock.GetUtcNow()), pg, size, await q.CountAsync()); }

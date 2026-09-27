@@ -14,6 +14,7 @@ public static class Keys
         ["risk"] = ("next_risk_seq", "R", 2), ["issue"] = ("next_issue_seq", "I", 2), ["action"] = ("next_action_seq", "A", 2),
         ["review"] = ("next_review_seq", "RV", 3), ["change"] = ("next_change_seq", "CH", 3),
         ["submission"] = ("next_submission_seq", "SUB", 3),
+        ["basis"] = ("next_basis_seq", "B", 3),
         ["handoff"] = ("next_handoff_seq", "H", 3),
     };
 

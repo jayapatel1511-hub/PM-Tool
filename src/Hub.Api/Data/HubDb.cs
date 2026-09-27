@@ -62,6 +62,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<BasisUse> BasisUses => Set<BasisUse>();
     public DbSet<BasisConflict> BasisConflicts => Set<BasisConflict>();
     public DbSet<BasisAssumptionDisposition> BasisAssumptionDispositions => Set<BasisAssumptionDisposition>();
+    public DbSet<BasisImpactAssessment> BasisImpactAssessments => Set<BasisImpactAssessment>();
     public DbSet<PersonAvailabilityOverride> AvailabilityOverrides => Set<PersonAvailabilityOverride>();
     public DbSet<ResourceAllocation> Allocations => Set<ResourceAllocation>();
     public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
@@ -468,6 +469,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.ToTable(t => t.HasCheckConstraint("ck_basis_conflict_order", "left_version_id < right_version_id"));
         });
         mb.Entity<BasisAssumptionDisposition>(e => e.HasIndex(x => new { x.VersionId, x.ExpiresOn }));
+        mb.Entity<BasisImpactAssessment>(e =>
+        {
+            e.HasIndex(x => new { x.BasisUseId, x.NewVersionId }).IsUnique();
+            e.HasIndex(x => new { x.ProjectId, x.Status });
+            e.ToTable(t => t.HasCheckConstraint("ck_basis_impact_status", $"status IN ({In(AssessmentStatus.All)})"));
+        });
         Fk<DesignBasisEntry, AppUser>(mb, x => x.OwnerId);
         Fk<DesignBasisEntry, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
         Fk<DesignBasisEntry, AppUser>(mb, x => x.IndependentApproverId);
@@ -485,6 +492,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<BasisAssumptionDisposition, DesignBasisVersion>(mb, x => x.VersionId);
         Fk<BasisAssumptionDisposition, AppUser>(mb, x => x.OwnerId);
         Fk<BasisAssumptionDisposition, AppUser>(mb, x => x.ApprovedBy);
+        Fk<BasisImpactAssessment, BasisUse>(mb, x => x.BasisUseId);
+        Fk<BasisImpactAssessment, DesignBasisVersion>(mb, x => x.OldVersionId);
+        Fk<BasisImpactAssessment, DesignBasisVersion>(mb, x => x.NewVersionId);
+        Fk<BasisImpactAssessment, AppUser>(mb, x => x.OwnerId);
+        Fk<BasisImpactAssessment, AppUser>(mb, x => x.DecidedBy);
         mb.Entity<PersonAvailabilityOverride>(e =>
         {
             e.HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
@@ -606,6 +618,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<BasisUse, Project>(mb, x => x.ProjectId);
         Fk<BasisConflict, Project>(mb, x => x.ProjectId);
         Fk<BasisAssumptionDisposition, Project>(mb, x => x.ProjectId);
+        Fk<BasisImpactAssessment, Project>(mb, x => x.ProjectId);
 
 
         foreach (var et in mb.Model.GetEntityTypes().Where(t => typeof(Audited).IsAssignableFrom(t.ClrType)))

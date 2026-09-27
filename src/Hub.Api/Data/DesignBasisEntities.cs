@@ -71,3 +71,17 @@ public class BasisAssumptionDisposition : CoordinationRecord
     public string Reason { get; set; } = "";
     public override string AuditType => "BasisAssumptionDisposition";
 }
+
+public class BasisImpactAssessment : CoordinationRecord
+{
+    public Guid BasisUseId { get; set; }
+    public Guid OldVersionId { get; set; }
+    public Guid NewVersionId { get; set; }
+    public Guid OwnerId { get; set; }
+    public string Status { get; set; } = AssessmentStatus.Pending;
+    public string? Rationale { get; set; }
+    public string? EvidenceUrl { get; set; }
+    public Guid? DecidedBy { get; set; }
+    public DateTimeOffset? DecidedAt { get; set; }
+    public override string AuditType => "BasisImpactAssessment";
+}

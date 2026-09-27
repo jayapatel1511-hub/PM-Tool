@@ -180,6 +180,7 @@ public class Project : Audited, IAuditable
     public int NextReviewSeq { get; set; } = 1;
     public int NextSubmissionSeq { get; set; } = 1;
     public int NextChangeSeq { get; set; } = 1;
+    public int NextBasisSeq { get; set; } = 1;
     public string? ExternalSource { get; set; }
     public string? ExternalId { get; set; }
     public string AuditType => ItemType.Project;

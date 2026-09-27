@@ -7,6 +7,30 @@ namespace Hub.Tests.Api;
 public sealed class ReviewDemoSeedTests
 {
     [Fact]
+    public async Task Review_seed_refuses_to_take_over_an_existing_directory_identity()
+    {
+        using var f = new HubFactory();
+        using var client = f.CreateClient();
+        await f.DbAsync(async db =>
+        {
+            db.Users.Add(new AppUser
+            {
+                DisplayName = "Existing directory person", Email = "taylor@hub.test",
+                EntraObjectId = Guid.NewGuid().ToString(), IsActive = true,
+            });
+            await db.SaveChangesAsync();
+            return 0;
+        });
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => f.DbAsync(async db =>
+        {
+            await ReviewDemoSeed.Seed(db, f.Clock);
+            return 0;
+        }));
+        Assert.Equal(0, f.Db(db => db.Projects.Count(p => p.ExternalSource == ReviewDemoSeed.Source)));
+    }
+
+    [Fact]
     public async Task Opt_in_review_seed_keeps_personas_projects_and_reviewer_edits_on_restart()
     {
         using var f = new HubFactory { ReviewDemo = true };
@@ -16,6 +40,7 @@ public sealed class ReviewDemoSeedTests
             .Where(u => new[] { "taylor@hub.test", "jay@hub.test", "yagmur@hub.test" }.Contains(u.Email))
             .ToDictionary(u => u.Email));
         Assert.Equal(3, people.Count);
+        Assert.All(people.Values, u => Assert.Equal("dev-" + u.Email, u.EntraObjectId));
         Assert.Equal(people["taylor@hub.test"].Id, people["yagmur@hub.test"].SupervisorId);
         Assert.Null(people["jay@hub.test"].SupervisorId);
         Assert.All(people.Values, u => Assert.Contains(u.Roles, r => r.Role == SystemRole.ProjectManager));
@@ -41,6 +66,7 @@ public sealed class ReviewDemoSeedTests
             project.ProjectNumber = "REVIEW-101";
             var report = await db.Users.FirstAsync(u => u.Email == "yagmur@hub.test");
             report.SupervisorId = null;
+            report.EntraObjectId = null; // Earlier seed versions left this vulnerable to email matching.
             await db.SaveChangesAsync();
             await ReviewDemoSeed.Seed(db, f.Clock);
             return 0;
@@ -48,6 +74,7 @@ public sealed class ReviewDemoSeedTests
         Assert.Equal("Edited by reviewer (Demo)", f.Db(db => db.Projects.Single(p => p.Id == first.Id).Name));
         Assert.Equal("REVIEW-101", f.Db(db => db.Projects.Single(p => p.Id == first.Id).ProjectNumber));
         Assert.Null(f.Db(db => db.Users.Single(u => u.Email == "yagmur@hub.test").SupervisorId));
+        Assert.Equal("dev-yagmur@hub.test", f.Db(db => db.Users.Single(u => u.Email == "yagmur@hub.test").EntraObjectId));
         Assert.Equal(3, f.Db(db => db.Projects.Count(p => p.ExternalSource == ReviewDemoSeed.Source)));
         Assert.Equal(3, f.Db(db => db.Users.Count(u => u.Email == "taylor@hub.test" || u.Email == "jay@hub.test" || u.Email == "yagmur@hub.test")));
 

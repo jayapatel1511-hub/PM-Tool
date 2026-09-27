@@ -3,7 +3,7 @@
 // Deploy per environment: az deployment group create -g <rg> -f infra/main.bicep -p infra/env/<env>.bicepparam
 targetScope = 'resourceGroup'
 
-@allowed(['dev', 'test', 'prod'])
+@allowed(['dev', 'test', 'review', 'prod'])
 param env string
 param location string = resourceGroup().location
 param appSku string = 'P1v3'
@@ -104,6 +104,9 @@ resource app 'Microsoft.Web/sites@2023-12-01' = {
         { name: 'Auth__Entra__Audience', value: apiAudience }
         { name: 'Auth__Entra__SpaClientId', value: spaClientId }
         { name: 'Auth__Entra__ApiScope', value: apiScope }
+        // The review resource group and database persist across preview releases.
+        // Production never receives this opt-in setting or the review database.
+        { name: 'Seed__ReviewDemo', value: env == 'review' ? 'true' : 'false' }
         // The app's managed identity signs in to PostgreSQL; no database password exists (§21).
         { name: 'Db__UseManagedIdentity', value: 'true' }
         { name: 'ConnectionStrings__Hub', value: 'Host=${db.properties.fullyQualifiedDomainName};Database=hub;Username=${name}-app;Ssl Mode=Require' }

@@ -1,14 +1,18 @@
 # Runbook: environments
 
-Development, test and production are separate Azure resource groups with separate Entra app registrations (§21, FR-007).
-Production data is never copied into development or test; the synthetic data in `tools/scale/seed.sql` exists for load
+Development, test, review and production are separate Azure resource groups with separate Entra app registrations (§21, FR-007).
+Production data is never copied into development, test or review; the synthetic data in `tools/scale/seed.sql` exists for load
 tests. Each environment can be rebuilt from its definitions in under a day.
 
-For a review preview, use a dedicated non-production database and explicitly set `Seed__ReviewDemo=true`. The app adds
+For a review preview, deploy `infra/env/review.bicepparam` to a dedicated review resource group. Its
+`hub-review-pg` database persists across preview releases; `infra/main.bicep` sets `Seed__ReviewDemo=true` only there. The app adds
 clearly marked fictional people and projects once and keeps reviewer edits on later releases. `Seed:ReviewDemo` is
 refused in Production; do not restore the review database into production. Hosted Staging still uses Entra sign-in for
 real reviewers, while the `@hub.test` people are sample records only. Development sign-in must stay local or behind a
 separate access gate, because its identity header is not suitable for an open Internet site.
+Use the review environment's own Entra app registrations and grant access only to the intended reviewers. Synthetic
+`@hub.test` people are reserved records and cannot acquire a real Entra identity through email matching. Keep
+`pm.engcalchub.com` unassigned until DNS, hosting, and access controls are verified for the intended environment.
 
 ## What defines an environment
 

@@ -23,8 +23,18 @@ public static class ReviewDemoSeed
         async Task<(AppUser User, bool Added)> Person(string name, string email, string title, params string[] roles)
         {
             var existing = await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Email == email);
-            if (existing is not null) return (existing, false);
-            var user = new AppUser { DisplayName = name, Email = email, JobTitle = title, OfficeId = office.Id };
+            // Provisioning may attach an Entra account to a user with a matching email and no object ID.
+            // Reserve a non-Entra ID for demo people, including records created by earlier seed versions.
+            // Development auth uses this reserved ID; real Entra object IDs are GUIDs.
+            var demoId = "dev-" + email;
+            if (existing is not null)
+            {
+                if (existing.EntraObjectId is null) existing.EntraObjectId = demoId;
+                if (existing.EntraObjectId != demoId)
+                    throw new InvalidOperationException($"Synthetic review email {email} is already linked to another identity.");
+                return (existing, false);
+            }
+            var user = new AppUser { DisplayName = name, Email = email, JobTitle = title, OfficeId = office.Id, EntraObjectId = demoId };
             foreach (var role in roles)
                 user.Roles.Add(new UserSystemRole { UserId = user.Id, Role = role, Source = RoleSource.Manual, GrantedAt = now });
             db.Users.Add(user);

@@ -52,12 +52,14 @@ In Development, `Auth:Mode` is `Development`: there is no Entra sign-in; the SPA
 `X-Dev-User: <email>`. This mode is refused in any other environment. Seeded people include jordan (Admin), lena
 (Executive), priya and marc (PMs), sam (Supervisor), alex, jill, diane, omar and rita (Read Only), all `@hub.test`.
 
-For a review database with fictional people and projects, set `Seed:ReviewDemo=true` (environment variable
-`Seed__ReviewDemo=true`) in Development or Staging. This adds Taylor (PM and supervisor), Jay (civil PM and supervisor)
+For a persistent review database with fictional people and projects, deploy `infra/env/review.bicepparam`
+in its own Azure resource group and use its separate Entra registrations. The review environment sets
+`Seed__ReviewDemo=true`. Local Development can set the same flag for previewing the data. This adds Taylor (PM and supervisor), Jay (civil PM and supervisor)
 and Yagmur (PM reporting to Taylor), plus three clearly labelled demo projects. The seed is opt-in and idempotent:
 later starts leave review edits intact. It is refused in Production. In Staging, reviewers sign in with their own
 Entra accounts; the `@hub.test` people are sample records and cannot sign in there. Use a separate review database and
 keep it for successive preview releases. Do not move its data into production.
+The sample `@hub.test` records have reserved development identities; real Entra accounts cannot claim them by matching email.
 
 ## Checks
 

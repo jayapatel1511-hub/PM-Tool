@@ -1,0 +1,101 @@
+# Feature packets
+
+The whole product specification is written here as Spec Kit feature packets: 18 for the first release and
+6 for Phase 2. The user's confirmation of the six pictured views moved the Portfolio, Workload, improved Timeline,
+saved views, and three new workspace/calendar/task-hour packets into the first release (§36). Each folder holds a `spec.md` in Spec Kit's format and a quality checklist;
+`plan.md`, `tasks.md`, and `verification.md` are added as each packet is planned and built.
+
+- Product specification: [`Engineering-Project-Coordination-Hub-Specification.md`](../Engineering-Project-Coordination-Hub-Specification.md).
+  It remains the source of truth (constitution, principle IV); every packet requirement cites the
+  specification ID it comes from, written like *(FR-TSK-03, R-01)*.
+- Coverage: [TRACEABILITY.md](TRACEABILITY.md) lists every ID in the specification
+  with the packets that cite it. `python3 tools/trace_spec.py --check` fails if any ID or section
+  is left without a packet.
+- Visual context: use only [Coordination Hub V2](../docs/reference/coordination-hub-v2/README.md) as a downloaded UI visual clue. The [six-panel image](../docs/reference/six-view-workspace.png) records user-confirmed feature scope; the older [wireframes](../Engineering-Project-Coordination-Hub-UI-Mockups.md) provide historical detail. The product specification and packets govern behavior and acceptance, not mockup layout.
+- Rules for all work: [constitution](../.specify/memory/constitution.md) and
+  [workflow](../docs/SPEC-KIT-WORKFLOW.md)
+
+## Cross-packet rule
+
+Packets are built in order, and some behaviour spans packets. A scenario that mentions a
+notification, a computed indicator, an attention item, or health is fully verifiable once packets
+005 (rules engine) and 006 (notifications) are implemented; until then, the packet verifies the
+recorded change and its activity-log entry. Each packet's Assumptions name the packets it relies
+on.
+
+## First-release packets
+
+Order follows the revised build sequence in §35.2. Start a packet only when the packets it
+depends on are implemented and verified.
+
+| Packet | Delivers | Depends on | Status |
+|---|---|---|---|
+| [001-platform-foundations](001-platform-foundations/spec.md) | Corporate sign-in, users and system roles, reference data and settings, the application frame, the activity log | Decisions Q1–Q3, Q6, Q7, Q15 | Built and verified |
+| [002-projects-and-teams](002-projects-and-teams/spec.md) | Projects and their lifecycle, project roles and permissions, teams and discipline leads, item keys, project list | 001 | Built and verified |
+| [003-milestones-and-deliverables](003-milestones-and-deliverables/spec.md) | Milestones, date changes and completion; the deliverables register with review and issue | 002 | Built and verified |
+| [004-tasks-and-review](004-tasks-and-review/spec.md) | Tasks, the review workflow, collaborators, manual blocks, bulk actions, task list, task panel, board | 003 | Built and verified |
+| [005-dependencies-and-rules-engine](005-dependencies-and-rules-engine/spec.md) | Dependencies; every indicator, milestone status, deliverable progress, health with override, attention items | 004 | Built and verified |
+| [006-collaboration-and-notifications](006-collaboration-and-notifications/spec.md) | Comments, document links, notification centre, emails, daily digest, project following | 005 | Built and verified |
+| [007-coordination-surfaces](007-coordination-surfaces/spec.md) | Project Dashboard, Weekly Coordination with meeting mode, My Work, My Staff with staffing | 005, 006 | Built and verified |
+| [008-decision-register](008-decision-register/spec.md) | Decisions with external owners, decision blocks, record, defer, cancel, reopen | 005 | Built and verified |
+| [009-search-filters-reports](009-search-filters-reports/spec.md) | Global search and key lookup, the shared filter bar, reports and exports, Activity History | 004 | Built and verified |
+| [010-timeline-and-extras](010-timeline-and-extras/spec.md) | Baseline timeline, milestone cascade, copy project structure, reassign work for leavers | 005 | Built and verified |
+| [016-portfolio-dashboard](016-portfolio-dashboard/spec.md) | Portfolio of projects needing help, both health values, trends, portfolio reports | 005, 007 | Built and verified |
+| [017-resource-workload-view](017-resource-workload-view/spec.md) | 8-week workload grid, overload and cluster flags, rebalancing, workload reports | 004, 005 | Built and verified |
+| [018-timeline-scheduling](018-timeline-scheduling/spec.md) | Tasks and arrows on the timeline, drag with confirmation, baselines, cascade to tasks | 005, 010 | Built and verified |
+| [019-saved-views-and-board-ordering](019-saved-views-and-board-ordering/spec.md) | Personal and project views, manual card order | 004, 009 | Built and verified |
+| [023-team-calendar](023-team-calendar/spec.md) | Week/Month/Agenda, deadlines, event creation, visibility | 001–004, 006 | Built and verified |
+| [024-task-time-entries](024-task-time-entries/spec.md) | Time route, task-hour entry, edits and corrections, permission-filtered totals and export | 001, 002, 004, 009 | Built and verified |
+| [022-six-view-workspace](022-six-view-workspace/spec.md) | Grouped project board, cross-project board and Gantt, overview dashboard, My Work views, shared navigation and scope | 002, 004–007, 009–010, 016–019, 023–024 | Built and verified |
+| [011-hardening-and-pilot](011-hardening-and-pilot/spec.md) | Accessibility, scale, reliability, security readiness, support material, the eight-week pilot | 001–010, 016–019, 022–024 | Built and verified |
+
+## Phase 2 packets
+
+Planned for after the MVP pilot (§28), in roughly this order; all six are built and verified. Implemented versus
+unverified for every packet: [docs/IMPLEMENTATION-STATUS.md](../docs/IMPLEMENTATION-STATUS.md).
+
+| Packet | Delivers | Depends on | Status |
+|---|---|---|---|
+| [012-project-templates](012-project-templates/spec.md) | Templates, instantiation with a date wizard, add-from-template, snapshot semantics | 002–006 | Built and verified |
+| [013-register-enhancements](013-register-enhancements/spec.md) | Client export of open decisions, bulk linking, decision log, deliverable issue history | 003, 008 | Built and verified; defaults to confirm |
+| [014-risk-and-issue-registers](014-risk-and-issue-registers/spec.md) | Risk and issue registers, A-07, the issue input to health | 005–007 | Built and verified |
+| [015-meeting-actions](015-meeting-actions/spec.md) | Meetings and actions, capture in meeting mode, routing, convert to task | 007, 008 | Built and verified |
+| [020-notification-and-search-enhancements](020-notification-and-search-enhancements/spec.md) | Weekly PM summary, digest sections, live unread counts, search in descriptions and comments | 006, 009 | Built and verified; defaults to confirm |
+| [021-dependency-lag-and-working-days](021-dependency-lag-and-working-days/spec.md) | Deliverable dependencies, dependency lag, working-day calendars | 005 | Built and verified; defaults to confirm |
+
+"Confirm details" marks packets whose source in the specification is a single line; their
+specs fill the gaps with defaults listed under Assumptions. Run `/speckit-clarify` on them before
+planning.
+
+## Phase 3: not yet packets
+
+The specification lists these as designed for, not built (§29), with too little detail to specify
+without inventing requirements. Each becomes a packet after discovery: Microsoft Teams
+notifications (FR-NOT-04), SharePoint document picking, ERP or Vantagepoint project sync,
+read-only project financials, utilisation and resource planning from HR data, client or external
+access, advanced portfolio reporting, per-project threshold overrides, a personal calendar feed,
+and a second interface language if not done earlier. Cross-project dependencies (FR-DEP-10) are
+also Phase 3.
+
+## Decisions to settle before planning 001
+
+These come from §34 of the specification. Each has a default the plan can use if it is not
+decided, but the plan records which one it assumed. Q19 (direct reports only) and Q21
+(enter task hours under Time) are decided.
+
+| Decision | Default if undecided |
+|---|---|
+| Q1 Backend: ASP.NET Core or Node.js with TypeScript | ASP.NET Core on the current LTS release. The specification says .NET 8, but its support ends in November 2026. |
+| Q2 System roles: Entra app roles on security groups, in-app, or both | App roles on groups, plus in-app additions |
+| Q3 Graph permissions for directory sync and the service mailbox | Request both; fall back to manual deactivation and another mail service |
+| Q6 Organisation time zone and date format | One organisation time zone; ISO dates |
+| Q7 Bilingual interface | Strings externalised; English only at launch |
+| Q15 CI/CD platform | Whichever the organisation already uses |
+| Q21 Time menu: task-hour entry or reserved route | Decided: enter task hours in the first release (§36.8) |
+
+## Next step
+
+```text
+/speckit-plan SPECIFY_FEATURE_DIRECTORY=specs/001-platform-foundations
+Plan packet 001 only. Record which §34 decisions you assumed. Do not write application code.
+```

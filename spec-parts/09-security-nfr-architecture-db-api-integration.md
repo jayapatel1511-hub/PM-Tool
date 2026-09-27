@@ -87,7 +87,7 @@ Targets are realistic for an internal business application. Items marked TBD nee
 | Fit for one API + jobs | Excellent (WebJobs or in-process hosted services) | Good (scale-to-zero not needed) | Over-engineered |
 | Recommendation | **Preferred** for MVP | Revisit if containerised workloads multiply | Not recommended |
 
-**Supporting libraries (Recommendation, not mandatory)**: UI kit — Fluent UI React v9 (Microsoft look, accessible) or a headless kit with in-house styling; tables — TanStack Table with virtualisation; data fetching — TanStack Query; forms — React Hook Form + Zod; routing — React Router; charts — none beyond a small SVG milestone strip and sparkline; timeline — in-house SVG or a small MIT-licensed Gantt component; backend validation — FluentValidation; OpenAPI — Swashbuckle/NSwag with generated TypeScript client.
+**Supporting libraries (Recommendation, not mandatory)**: UI kit — Fluent UI React v9 (Microsoft look, accessible) or a headless kit with in-house styling; tables — TanStack Table with virtualisation; data fetching — TanStack Query; forms — React Hook Form + Zod; routing — React Router; charts — accessible SVG milestone strip, sparkline, and first-release overview task charts (§36.6); timeline — in-house SVG or a small MIT-licensed Gantt component; backend validation — FluentValidation; OpenAPI — Swashbuckle/NSwag with generated TypeScript client.
 
 ### 23.3 Modular monolith structure
 
@@ -98,13 +98,14 @@ One deployable API with clear internal module boundaries (separate projects/asse
 | `Identity` | Token validation, user provisioning, system roles, Graph sync |
 | `Organisation` | Offices, disciplines, clients, project types, phases, deliverable types, settings |
 | `Projects` | Project, links, members, project disciplines, status lifecycle, health override |
-| `Work` | Milestones, deliverables, tasks, dependencies, collaborators, keys/sequences |
+| `Work` | Milestones, deliverables, tasks, dependencies, collaborators, task-hour entries, keys/sequences |
+| `Workspace` | Named project selections, cross-project board and timeline queries, dashboard layout, calendar events and deadline projections (§36) |
 | `Registers` | Decisions, external parties; P2 risks, issues, meetings, actions; item links |
 | `Collaboration` | Comments, mentions, watchers, document links |
 | `Evaluation` | Pure rules (indicators, milestone status, health, attention) + state materialisation + change detection |
 | `Notifications` | Event → notification mapping, preferences, in-app store, email rendering and sending, digest |
 | `Templates` (P2) | Template CRUD and instantiation |
-| `Reporting` | Report queries, exports, portfolio, workload (P2) |
+| `Reporting` | Report queries, exports, first-release portfolio and workload views |
 | `Audit` | Activity logging, history queries |
 | `Search` | FTS indexing and query |
 
@@ -245,6 +246,8 @@ Only the important fields are listed; standard audit columns are implied.
 | `external_party` | Client and third-party contacts (no login) | `project_id`, `name`, `organisation`, `email`, `role`, `is_client`, `notes`, `is_active` | `id` | → `project` |
 | `project_health_snapshot` | Daily health history | `project_id`, `snapshot_date`, `computed_health`, `reported_health`, `inputs` (jsonb) | `id`; unique(`project_id`,`snapshot_date`) | → `project` |
 
+The first-release Projects board (§36.2) adds `priority` (Low/Medium/High/Critical, default Medium) to `project`. `progress_pct` is derived at read time or materialised by the existing rules engine from Complete / non-Cancelled tasks; it is nullable when the denominator is zero. It is never stored as a PM-entered project status.
+
 #### Work
 
 | Entity | Purpose | Key fields | PK | FKs / relationships |
@@ -252,9 +255,22 @@ Only the important fields are listed; standard audit columns are implied.
 | `milestone` | Dated checkpoints | `project_id`, `key`, `seq`, `name`, `milestone_type`, `date`, `original_date`, `description`, `project_discipline_id`, `completes_phase_id`, `is_client_facing`, `is_complete`, `completed_date`, `is_cancelled`, `cancelled_reason`, `sort_order`, `search_vector`, soft-delete | `id`; unique(`project_id`,`seq`) | → `project`, `project_discipline`, `phase` |
 | `deliverable` | Engineering deliverables | `project_id`, `key`, `seq`, `name`, `project_discipline_id`, `deliverable_type_id`, `description`, `owner_id`, `reviewer_id`, `milestone_id`, `start_date`, `due_date`, `priority`, `status`, `previous_status`, `revision`, `issued_date`, `issued_to`, `accepted_date`, `on_hold_reason`, `cancelled_reason`, `requires_review`, `template_deliverable_id`, `last_activity_at`, `search_vector`, soft-delete, `row_version` | `id`; unique(`project_id`,`seq`) | → `project`, `project_discipline`, `deliverable_type`, `app_user` (owner, reviewer), `milestone` |
 | `task` | Units of work | `project_id`, `key`, `seq`, `name`, `description`, `project_discipline_id`, `deliverable_id`, `milestone_id`, `assignee_id`, `reviewer_id`, `requires_review`, `priority`, `start_date`, `due_date`, `status`, `previous_status`, `progress_pct`, `estimated_hours`, `manual_block_type`, `manual_block_reason`, `manual_block_set_at`, `manual_block_set_by`, `on_hold_reason`, `cancelled_reason`, `review_round`, `due_date_change_count`, `last_activity_at`, `completed_at`, `sort_order`, `template_task_id`, `search_vector`, soft-delete, `row_version` | `id`; unique(`project_id`,`seq`) | → `project`, `project_discipline`, `deliverable`, `milestone`, `app_user` (assignee, reviewer). CHECK: `milestone_id IS NULL OR deliverable_id IS NULL`; CHECK `progress_pct IN (0,10,…,100)`; CHECK `start_date <= due_date` |
+| `task_time_entry` | Actual hours recorded against one task | `project_id`, `task_id`, `user_id`, `work_date`, `hours` (positive decimal, ≤ 24), `note`, `created_at`, `updated_at`, `deleted_at`, `row_version` | `id` | → `project`, `task`, `app_user`; daily total ≤ 24 enforced transactionally across a user's non-deleted entries |
 | `task_dependency` | Finish-to-Start edges | `project_id`, `predecessor_task_id`, `successor_task_id`, `dependency_type` (FinishToStart), `note`, `created_by`, `created_at` | `id`; unique(`predecessor_task_id`,`successor_task_id`) | → `task` ×2 (cascade on task hard-delete only); CHECK `predecessor_task_id <> successor_task_id`. Acyclicity enforced in application (graph check inside the transaction with the project's edges locked). |
 | `task_collaborator` | Additional contributors | `task_id`, `user_id`, `added_at` | `id`; unique(`task_id`,`user_id`) | → `task` (cascade), `app_user` |
 | `item_watcher` | Users following an item | `project_id`, `item_type`, `item_id`, `user_id`, `source` (Mention, Manual, Assignment) | `id`; unique(`item_type`,`item_id`,`user_id`) | → `app_user`; polymorphic item |
+
+#### Visual workspace and calendar (first release, §36)
+
+| Entity | Purpose | Key fields | PK | FKs / relationships |
+|---|---|---|---|---|
+| `workspace` | User-owned named project scope | `name`, `owner_id`, `created_at` | `id` | → `app_user`; selections show only currently permitted projects |
+| `workspace_project` | Project selection | `workspace_id`, `project_id`, `sort_order` | `id`; unique(`workspace_id`,`project_id`) | → `workspace`, `project` |
+| `calendar_event` | Meeting, Site Work, or Internal Task event | `project_id` (nullable for Internal Task), `type`, `title`, `start_at`, `end_at`, `org_time_zone`, `owner_id`, `location`, `description`, `visibility`, `cancelled_at`, `row_version` | `id` | → `project`, `app_user`; CHECK `end_at > start_at` |
+| `dashboard_layout` | Personal order and visibility of fixed widgets | `user_id`, `widget_ids_and_order` (jsonb), `updated_at` | `user_id` | → `app_user` |
+
+Deadline calendar entries are projections from tasks, deliverables, and milestones, not copied event rows. The four board lanes are projections of canonical task status, and their counts use the same permission-filtered query as the task lists.
+The first-release Created by Me view (§36.7) requires `task.created_by_id`, retained independently of assignment changes and linked to `app_user`.
 
 #### Registers
 
@@ -282,7 +298,7 @@ Only the important fields are listed; standard audit columns are implied.
 | `activity_log` | Immutable audit | per §20.2 | `id` (uuid v7, time-ordered) | indexes (`project_id`,`occurred_at desc`), (`item_type`,`item_id`,`occurred_at desc`), (`actor_user_id`,`occurred_at desc`) |
 | `notification` | In-app notifications | `user_id`, `event_type`, `project_id`, `item_type`, `item_id`, `item_key`, `title`, `body`, `link_path`, `collapse_key`, `created_at`, `read_at`, `emailed_at`, `digest_included_at` | `id` | → `app_user`; index (`user_id`,`read_at`,`created_at desc`) |
 | `notification_preference` | Per-user, per-event channels | `user_id`, `event_type`, `in_app`, `email` | `id`; unique(`user_id`,`event_type`) | → `app_user` |
-| `project_mute` | Per-user project mute | `user_id`, `project_id`, `muted_at` | `id`; unique | → `app_user`, `project` |
+| `project_follow` | Per-user project following; the Muted level replaces a separate mute table (§12.18) | `user_id`, `project_id`, `level` (AllActivity, MyItemsOnly, Muted), `source` (Assignment, Manual), `last_seen_at` (Following feed read marker), `created_at`, `updated_at` | `id`; unique(`user_id`,`project_id`) | → `app_user`, `project` (cascade) |
 | `outbox_event` | Transactional outbox | `id`, `event_type`, `payload` (jsonb), `created_at`, `processed_at`, `attempts`, `last_error` | `id` | index on (`processed_at`) where null |
 | `task_state` | Materialised derived state | `task_id`, `project_id`, `is_overdue`, `days_overdue`, `is_due_soon`, `is_waiting`, `is_blocked`, `blocked_since`, `blocked_by` (jsonb: tasks/decisions/manual), `is_blocking`, `blocking_count`, `is_stale`, `is_unassigned`, `is_missing_due_date`, `is_date_inconsistent`, `inconsistency_detail`, `affected_milestone_ids` (uuid[]), `evaluated_at` | `task_id` | → `task` (cascade) |
 | `deliverable_state` | Materialised derived state | `deliverable_id`, `project_id`, `progress_pct`, `task_total`, `task_complete`, `task_open`, `task_overdue`, `task_blocked`, `estimated_hours_total`, `remaining_hours`, `is_overdue`, `is_due_soon`, `is_at_risk`, `is_unassigned`, `is_date_inconsistent`, `slip_days`, `derived_predecessor_ids`, `derived_successor_ids`, `evaluated_at` | `deliverable_id` | → `deliverable` (cascade) |
@@ -291,7 +307,7 @@ Only the important fields are listed; standard audit columns are implied.
 | `attention_item` | Current attention items | `project_id`, `rule_id`, `item_type`, `item_id`, `item_key`, `severity`, `message`, `route_to_user_ids` (uuid[]), `first_detected_at`, `last_evaluated_at`, `sort_key` | `id`; unique(`rule_id`,`item_type`,`item_id`) | → `project` |
 | `attention_snooze` | Snoozes | `project_id`, `rule_id`, `item_type`, `item_id`, `snoozed_by`, `snoozed_until`, `note`, `created_at` | `id` | → `project`, `app_user` |
 | `job_run` | Background job history | `job_name`, `started_at`, `finished_at`, `status`, `details` (jsonb) | `id` | — |
-| `saved_view` [P2] | Saved list configurations | `owner_id`, `scope`, `project_id`, `list_type`, `name`, `filters` (jsonb), `sort`, `columns`, `group_by`, `is_default` | `id` | → `app_user`, `project` |
+| `saved_view` | First-release saved list configurations | `owner_id`, `scope`, `project_id`, `list_type`, `name`, `filters` (jsonb), `sort`, `columns`, `group_by`, `is_default` | `id` | → `app_user`, `project` |
 
 #### Templates [P2]
 
@@ -349,6 +365,8 @@ erDiagram
   DELIVERABLE ||--o{ DOCUMENT_LINK : has
   PROJECT ||--o{ ACTIVITY_LOG : records
   APP_USER ||--o{ NOTIFICATION : receives
+  APP_USER ||--o{ PROJECT_FOLLOW : follows
+  PROJECT ||--o{ PROJECT_FOLLOW : followed_by
   TASK ||--|| TASK_STATE : materialised
   DELIVERABLE ||--|| DELIVERABLE_STATE : materialised
   MILESTONE ||--|| MILESTONE_STATE : materialised
@@ -362,12 +380,15 @@ erDiagram
 - `task (project_id, status) WHERE deleted_at IS NULL`; `task (assignee_id, status) WHERE deleted_at IS NULL`; `task (reviewer_id, status)`; `task (deliverable_id)`; `task (due_date) WHERE deleted_at IS NULL AND status NOT IN ('Complete','Cancelled')`.
 - `task_state (project_id, is_blocked)`, `(project_id, is_overdue)`, `(is_blocking)`; My Work queries join `task` with `task_state` by `task_id`.
 - `task_dependency (successor_task_id)`, `(predecessor_task_id)`.
+- `task_time_entry (user_id, work_date) WHERE deleted_at IS NULL`, `(project_id, work_date) WHERE deleted_at IS NULL`, `(task_id, work_date) WHERE deleted_at IS NULL`.
 - `deliverable (project_id, status)`, `(milestone_id)`, `(owner_id, status)`.
 - `milestone (project_id, date)`.
 - `decision (project_id, status)`, `(required_by_date) WHERE status IN ('Pending','Under Review','Deferred')`.
 - `comment (item_type, item_id, created_at)`; `document_link (item_type, item_id)`; `item_link` both directions.
 - `activity_log (project_id, occurred_at DESC)`, `(item_type, item_id, occurred_at DESC)`.
 - `notification (user_id, read_at, created_at DESC)`.
+- `project_follow (user_id)`, `(project_id, level)`; `app_user (supervisor_id)` for My Staff's direct-report lookup.
+- `workspace (owner_id, name)` unique per user; `workspace_project (workspace_id, sort_order)`; `calendar_event (project_id, start_at)`, `(owner_id, start_at)` for scoped calendar queries.
 - GIN on `search_vector` columns; `pg_trgm` GIN on `project.project_number`, `project.name`, `task.name`, `deliverable.name`.
 
 ### 24.5 Constraints worth stating
@@ -377,6 +398,7 @@ erDiagram
 - `project_member.roles` non-empty and within allowed values (CHECK).
 - `task_dependency` acyclicity: application-enforced with `SELECT … FOR UPDATE` on the project row to serialise edge insertions per project, then a DFS over the project's edges.
 - Per-project sequence counters (`next_*_seq`) incremented under the same project row lock, guaranteeing gap-free, unique keys without a global sequence per project.
+- A user cannot be their own supervisor: CHECK `supervisor_id <> id`.
 
 ### 24.6 Migrations and data volume
 
@@ -460,16 +482,18 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET /me/work` | My Work aggregate (sections with counts and top rows) | any |
 | `GET /me/tasks`, `/me/reviews`, `/me/deliverables`, `/me/decisions`, `/me/attention` | Section lists with filters | any |
 | `GET /me/notifications`, `POST /me/notifications:markRead`, `PATCH /me/preferences` | Notification centre and preferences | any |
+| `GET /me/following`, `GET /me/feed?projectId=…&since=…`, `POST /me/feed:markRead` | Followed projects, Following feed, feed read markers | any |
 | `GET /projects` | Project list with filters/sort | any (visibility-filtered) |
 | `POST /projects` | Create project | Project.Create |
 | `GET /projects/{id}` | Project header and summary (includes `state`) | Project.View |
 | `PATCH /projects/{id}` | Edit project fields | Project.Edit |
 | `POST /projects/{id}:transition` | `{ toStatus, reason, closeout: {…} }` | Project.ChangeStatus |
 | `POST /projects/{id}:healthOverride`, `DELETE …` | Set/clear override | Project.Edit |
+| `POST /projects/{id}:follow` `{ level }`, `POST /projects/{id}:unfollow` | Set own follow level; unfollow | Project.View |
 | `GET /projects/{id}/dashboard` | Dashboard payload (state, counts, attention top-10, discipline table, recent activity) | Project.View |
 | `GET /projects/{id}/coordination?asOf=…` | Weekly Coordination sections | Project.View |
 | `POST /projects/{id}/coordination:markReviewed` | Stamp review | Coordination.Run |
-| `GET/POST/PATCH/DELETE /projects/{id}/members[/{memberId}]` | Team | Project.ManageTeam |
+| `GET/POST/PATCH/DELETE /projects/{id}/members[/{memberId}]` | Team | Project.ManageTeam; Staff.Assign for POST/DELETE of a Supervisor's direct report as Team Member |
 | `GET/POST/PATCH /projects/{id}/disciplines[/{pdId}]` | Project disciplines and leads | Project.ManageTeam |
 | `GET/POST /projects/{id}/milestones`, `GET/PATCH/DELETE /milestones/{id}` | Milestones | Milestone.* |
 | `POST /milestones/{id}:changeDate` | `{ newDate, reason, cascadeDeliverables: bool }` returns preview if `dryRun=true` | Milestone.Edit |
@@ -484,6 +508,8 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET /tasks/{id}/dependencies`, `POST …`, `DELETE /dependencies/{depId}` | Dependencies | Dependency.Manage |
 | `GET /tasks/{id}/chain?depth=10` | Transitive predecessors/successors with states | Task.View |
 | `POST /projects/{id}/tasks:bulk` | `{ taskIds[], operation: assign \| shiftDueDates \| setPriority \| setDeliverable \| transition, params, reason }` → per-row results | per row |
+| `GET/POST /time/entries`, `GET/PATCH/DELETE /time/entries/{id}` | Own task-hour entries and permitted project/staff review; filtered totals and soft deletion (§36.8) | Time.Own / Project.PM / Discipline.Lead / Staff.View |
+| `GET /tasks/{id}/time`, `GET /projects/{id}/time` | Permission-filtered actual-hour totals and entries; export uses the Task Hours report | Task.View / Project.View with time-entry scope |
 | `GET/POST /projects/{id}/decisions`, `GET/PATCH /decisions/{id}`, `POST /decisions/{id}:decide`, `:defer`, `:cancel`, `:reopen` | Decisions | Decision.* |
 | `GET/POST /projects/{id}/externalParties` | External parties | Project.View / Project.Edit |
 | `GET/POST /items/{type}/{id}/comments`, `PATCH/DELETE /comments/{id}` | Comments | Comment.* |
@@ -491,9 +517,14 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET/POST/DELETE /items/{type}/{id}/watchers` | Watchers | any member |
 | `GET /projects/{id}/attention`, `POST /attention/{id}:snooze` | Attention items | Project.View / Attention.Snooze |
 | `GET /projects/{id}/activity`, `GET /items/{type}/{id}/activity` | Activity history | Project.View |
-| `GET /projects/{id}/timeline` | Timeline payload (milestones, deliverables, P2 tasks and edges) | Project.View |
+| `GET /projects/{id}/timeline` | Timeline payload (milestones, deliverables, tasks, and edges) | Project.View |
 | `GET /search?q=…&types=…&includeArchived=false` | Global search | any |
-| `GET /portfolio` [P2], `GET /resources/workload` [P2] | Cross-project views | Portfolio.View / Workload.View |
+| `GET /portfolio`, `GET /resources/workload` | First-release cross-project views | Portfolio.View / Workload.View |
+| `GET/POST /workspaces`, `GET/PATCH/DELETE /workspaces/{id}` | User-owned named project selections; read filters inaccessible projects | Workspace.Own |
+| `GET /workspaces/{id}/board`, `/timeline`, `/dashboard` | Permission-filtered cross-project views (§36) | Project.View per included project |
+| `GET /calendar`, `GET/POST /calendar/events`, `GET/PATCH/DELETE /calendar/events/{id}` | Week/Month/Agenda entries and owned calendar events (§36.5) | Calendar.View / Event.Own / Project.PM |
+| `GET /staff?scope=direct\|all` | My Staff rows with assignments and work counts | Staff.View (Supervisor; `all` for Executive/Admin) |
+| `GET /users/{id}/assignments`, `GET /users/{id}/work` | A staff member's project assignments and My Work (read-only) | Staff.View (person in scope) |
 | `GET /reports`, `GET /reports/{name}?…`, `GET /reports/{name}/export?format=csv\|xlsx` | Reports | scoped |
 | `GET/POST/PATCH /admin/users`, `/admin/disciplines`, `/admin/clients`, `/admin/offices`, `/admin/deliverableTypes`, `/admin/phases`, `/admin/projectTypes`, `/admin/settings` | Administration | Admin |
 | `GET /admin/users/{id}/openWork`, `POST /admin/users/{id}:reassignAll` | Reassign work tool | Admin / Supervisor (scoped) |

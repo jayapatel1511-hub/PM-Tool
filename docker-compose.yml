@@ -1,0 +1,14 @@
+# Local development database only; bound to 127.0.0.1 with trust auth so no credential is stored anywhere.
+# Azure uses PostgreSQL Flexible Server with Entra (managed identity) authentication (infra/main.bicep).
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: hub
+      POSTGRES_USER: hub
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports: ["127.0.0.1:55432:5432"]
+    shm_size: 256mb # parallel queries need more than Docker's default 64 MB of shared memory under load (packet 011)
+    volumes: ["hub-db:/var/lib/postgresql/data"]
+volumes:
+  hub-db:

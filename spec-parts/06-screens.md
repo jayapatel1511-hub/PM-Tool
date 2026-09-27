@@ -4,7 +4,7 @@
 
 These conventions apply to every screen and should be implemented once as a design system.
 
-**Layout.** Persistent left navigation rail (collapsible to icons) with: My Work, Projects, Portfolio (P2), Resources (P2), Reports, Notifications, Admin. Top bar: global search, quick-create (Task, Decision), notification bell with unread count, user menu. Content area max-width unconstrained on desktop (tables benefit from width). Project screens show a **project header** (key, name, client, PM, phase, status pill, health pill, next milestone countdown, links) and project tabs beneath it.
+**Layout.** Persistent left navigation rail (collapsible to icons) with: Home, My Work, Boards, Projects, Tasks, Calendar, Files, Time, Reports, Team, Portfolio, Resources, Notifications, Admin, filtered by role as in §36.1; More holds permitted lower-frequency routes. Top bar: global search, permission-filtered quick-create (Project, Task, Decision, Event), notification bell with unread count, user menu. Content area max-width unconstrained on desktop (tables benefit from width). Project screens show a **project header** (key, name, client, PM, phase, status pill, health pill, next milestone countdown, links, follow control) and project tabs beneath it. Time opens the task-hour view (§13.20, §36.8).
 
 **Density.** Tables default to compact rows (32–36 px), with a user toggle for comfortable rows. Typography: a single sans-serif system stack; 13–14 px table text; 16 px body. No decorative imagery.
 
@@ -23,7 +23,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 **Interaction.** Detail views open as a right-side panel (approximately 560 px) over lists and boards, with a "open full page" control; URL updates so panels are deep-linkable. Inline edit on click for text fields and dropdowns in detail panels; explicit Save is not required except in multi-field dialogs (create forms, status changes with reason). Every destructive or consequential action (delete, cancel, status change with side-effects, milestone date change with cascade) uses a confirmation dialog that states the consequence in numbers. Undo toast for reassign and status changes for 10 seconds where the change has no side-effects on other users' notifications (Recommendation: skip undo in MVP if it complicates notifications).
 
-**Filters.** Filter bar above every list with: quick chips (Mine, Overdue, Blocked, Due this week, Unassigned), a "+ Filter" menu for all fields, active filters shown as removable tokens, and "Clear". Filter state is encoded in the URL. Saved views are Phase 2.
+**Filters.** Filter bar above every list with: quick chips (Mine, Overdue, Blocked, Due this week, Unassigned), a "+ Filter" menu for all fields, active filters shown as removable tokens, and "Clear". Filter state is encoded in the URL. Saved views are first-release requirements (§36.7).
 
 **Sorting and grouping.** Click column headers to sort (with secondary sort by due date, then key). "Group by" control on lists (Discipline, Deliverable, Milestone, Assignee, Status, Due bucket).
 
@@ -81,7 +81,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 **Users.** Everyone.
 
-**Information.** Table: Project number · Name · Client · PM · Office · Phase · Status · Health · Next milestone (name, date) · Overdue tasks · Blocked tasks · My role (for current user) · Last activity. Default filter: Status in (Active, Setup, On Hold) and "My projects" for users who have project roles; "All projects" toggle.
+**Information.** Table: Project number · Name · Client · PM · Office · Phase · Status · Health · Priority · Target completion/due · Progress · Next milestone (name, date) · Overdue tasks · Blocked tasks · My role (for current user) · Last activity. The first-release compact board presentation groups Active and Upcoming/Planning with counts and shows Owner (PM), status, priority, due, and progress (§36.2). Default filter: Status in (Active, Setup, On Hold) and "My projects" for users who have project roles; "All projects" toggle.
 
 **Primary actions.** Create project (PM system role/Admin); open project; star/favourite (Recommendation) for personal ordering.
 
@@ -117,7 +117,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 #### 13.3.1 Task Detail Panel
 
-**Sections (top to bottom).** Header (key, name, status pill/menu, indicator chips, "open full page", close). Blockers box (only when Waiting/Blocked): list of blockers with links and "Start anyway" note; affected milestones. Fields grid: Assignee, Reviewer, Requires review, Priority, Discipline, Deliverable, Milestone (derived or direct), Start, Due (with change count when ≥ 3), Progress slider (10% steps), Estimated hours. Description. Dependencies: Depends on / Blocks lists with add/remove and "Show chain". Manual block: set/clear with type and reason. Collaborators and watchers. Document links (own and inherited from deliverable). Tabs: Comments · History.
+**Sections (top to bottom).** Header (key, name, status pill/menu, indicator chips, "open full page", close). Blockers box (only when Waiting/Blocked): list of blockers with links and "Start anyway" note; affected milestones. Fields grid: Assignee, Reviewer, Requires review, Priority, Discipline, Deliverable, Milestone (derived or direct), Start, Due (with change count when ≥ 3), Progress slider (10% steps), Estimated hours, Actual hours total with Add Time (§36.8). Description. Dependencies: Depends on / Blocks lists with add/remove and "Show chain". Manual block: set/clear with type and reason. Collaborators and watchers. Document links (own and inherited from deliverable). Tabs: Comments · History.
 
 **Behaviour.** Autosave per field with subtle confirmation; status transitions through the pill menu with reason dialogs where required; review outcomes through explicit "Approve" and "Request revision" buttons visible to the reviewer when In Review.
 
@@ -125,35 +125,35 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 ### 13.4 Kanban Board
 
-**Purpose.** A visual flow view for a discipline or a deliverable; useful for DLs and teams who think in columns.
+**Purpose.** A visual flow view for a discipline, deliverable, project, or selected set of permitted projects; useful for DLs and teams who think in columns.
 
 **Users.** DLs, team members.
 
-**Information.** Columns = task statuses: Not Started · In Progress · Ready for Review · In Review · Revision Required · Complete (collapsed by default showing last 14 days) with On Hold and Cancelled available as collapsed side columns. Card: key, name, assignee initials, due date (coloured if overdue/due soon), indicator icons (blocked chain, review, stale), deliverable chip, priority marker. Column header shows count.
+**Information.** Default visible lanes = To Do · In Progress · Review · Done, mapping to the canonical statuses in §36.3; the exact canonical status remains visible on review cards. On Hold and Cancelled are accessible through filters/side columns. Card: key, name, project chip when multiple projects are selected, assignee initials, due date (coloured if overdue/due soon), indicator icons (blocked chain, review, stale, comments), deliverable chip, priority marker. Column header shows count.
 
 **Primary actions.** Drag between columns (transition rules enforced; invalid drop shows why and snaps back; transitions needing a reason open the dialog on drop); create card in a column; open panel; swimlane toggle.
 
 **Filters.** Same as Task List; board is typically scoped by Discipline or Deliverable via filter.
 
-**Sorting.** Within a column: due date (default), priority, or manual (manual order persists per column per project — Recommendation: defer manual ordering to P2).
+**Sorting.** Within a column: due date (default), priority, or manual; manual order persists per project or named workspace in the first release (§36.3).
 
 **Swimlanes.** None (default), Discipline, Deliverable, Assignee.
 
 **Navigation.** Card → panel. Deliverable chip → deliverable panel.
 
-**UX.** No WIP limits, no card colours by custom label, no automation. Board and List share the same filter state so switching views keeps context.
+**UX.** No WIP limits, no card colours by custom label, no automation. Board and List share the same filter and project scope so switching views keeps context. Manual card ordering is required for the first release (§36.3).
 
 ---
 
 ### 13.5 Timeline (Gantt)
 
-**Purpose.** See milestones and deliverables in time; spot crowding before submissions.
+**Purpose.** See tasks, milestones, and deliverables across the selected permitted projects in time; spot crowding before submissions.
 
 **Users.** PM, DLs, Executives.
 
-**Information.** Per §12.16: milestone lane, discipline groups, deliverable bars with progress; (P2) tasks and dependency arrows.
+**Information.** Per §12.16 and §36.4: project groups, milestone diamonds, discipline/deliverable hierarchy, task bars with progress, dependency arrows, today line, and an Unscheduled list.
 
-**Primary actions.** Zoom (week/month/quarter); expand/collapse disciplines; click to open panel; print; (P2) drag to reschedule.
+**Primary actions.** Zoom (week/month/quarter); expand/collapse projects and disciplines; click to open panel; print; authorised drag to reschedule with preview and confirmation.
 
 **Filters.** Discipline, milestone, status, hide completed, date range.
 
@@ -161,7 +161,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 **Navigation.** Elements → panels; milestone → Milestone view.
 
-**UX.** Today line always visible; labels never overlap (truncate with tooltip); overdue segments hatched; legend visible. The Timeline is read-only in MVP and says so.
+**UX.** Today line always visible; labels never overlap (truncate with tooltip); overdue segments hatched; legend visible. Date changes follow the guards in §36.4.
 
 ---
 
@@ -273,7 +273,7 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 | Waiting on Others | My tasks that are Waiting or Blocked, with the blocker and its owner |
 | Blocking Others | My tasks that are Blocking Others, with the successors and their owners |
 | My Decisions | Decisions I own or requested that are open |
-| My Projects | Projects where I hold any role, with my role(s), health, next milestone |
+| My Projects | Projects where I hold any role or that I follow, with my role(s), follow level (changeable inline, §12.18), health, next milestone |
 | Upcoming Milestones | Milestones in my projects within 30 days |
 | Recently completed by me | Last 14 days (collapsed) |
 
@@ -287,9 +287,11 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 
 **UX.** Overdue and due-today items are visually first. The page works well at tablet width because most actions are status and progress changes. On phones, My Tasks and My Reviews are the primary tabs.
 
+The first-release personal presentation adds Today, Upcoming, Overdue, Completed, Inbox, and saved views My Tasks, Assigned to Me, and Created by Me, with task/project/due/priority columns and guarded completion controls (§36.7). It retains the sections above.
+
 ---
 
-### 13.11 Resource / Workload View [Phase 2]
+### 13.11 Resource / Workload View [First release under §36]
 
 **Purpose.** Cross-project workload per person, per §12.15.
 
@@ -307,7 +309,7 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 
 ---
 
-### 13.12 Portfolio Dashboard [Phase 2]
+### 13.12 Portfolio Dashboard [First release under §36]
 
 **Purpose.** Which projects need help this week, and why.
 
@@ -322,6 +324,8 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 **Sorting.** Default health severity then next submission date.
 
 **UX.** Health "why" is always available; reported health that differs from computed is shown as two pills ("Computed: Yellow · Reported: Green — note by PM, 3 days ago") so optimism is visible, not hidden.
+
+Home also provides the first-release overview dashboard in §36.6: five headline metrics, two task charts, Upcoming Deadlines, a date-range control, and a personal Edit Dashboard layout control. This overview does not replace the project dashboard's attention sections.
 
 ---
 
@@ -375,9 +379,9 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 
 **Purpose.** In-app list of notifications with unread state.
 
-**Information.** Grouped by day; each: icon by type, text ("Marc assigned you 1234-T0042 Update grading plan"), project, time; unread dot. Filter: unread, type, project. Actions: mark read, mark all read, open item, open preferences.
+**Information.** Two tabs. **Notifications** (personal): grouped by day; each: icon by type, text ("Marc assigned you 1234-T0042 Update grading plan"), project, time; unread dot. Filter: unread, type, project. Actions: mark read, mark all read, open item, open preferences. **Following**: changes by others on projects the user follows at All activity (§12.18), grouped by project then day and rendered like Activity History ("Marc changed 1234-T0042 due date 2026-09-10 → 2026-09-17 — client extension"), with an unread count per project, "mark project as read", and an "important only" filter (status, assignment, date, deletion, decision, milestone).
 
-**Preferences page.** Per event type: In-app / Email / Off; daily digest on/off and time; per-project mute (Recommendation).
+**Preferences page.** Per event type: In-app / Email / Off; daily digest on/off and time; per-project follow level (All activity / My items only / Muted, §12.18).
 
 ---
 
@@ -386,3 +390,40 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 **Purpose.** Run the deterministic reports in §19 with filters and export.
 
 **Information.** Report catalogue with description; parameter form; results table (same components as lists); export CSV/XLSX; "open as filtered list" where the report maps to a list.
+
+---
+
+### 13.19 My Staff
+
+**Purpose.** Show a manager their direct reports on one page — who is assigned to which projects in what role, and who is overloaded, blocked, or holding up others — and let them staff people on projects without going through each PM.
+
+**Intended users.** Supervisors (their direct reports, §8.8); Executives and System Administrators (can switch the scope to all staff).
+
+**Information displayed (top to bottom)**
+
+1. **Scope bar**: My direct reports (default) · All staff (Executives and Admins only). Filters: office, discipline, project, indicator (has overdue, has blocked, blocking others, reviews waiting), show inactive.
+2. **Summary tiles** (each a link to the filtered table): Staff · Project assignments · Staff with overdue work · Staff with blocked work · Reviews waiting longer than `review_stale_days`.
+3. **Staff table**, one row per person: Name · Job title · Office · Projects (count) · Roles (chips such as "PM 1 · DL 3 · Team 4 · Reviewer 2") · Open tasks · Overdue · Blocked · Blocking others · Reviews waiting on them · Deliverables owned due ≤ 14 d · Last activity. Every count links to that person's My Work section, filtered.
+4. **Expanded row — assignments**: one line per project the person is on: project number and name, health pill, role(s), primary discipline, added on, their open and overdue tasks on that project, next due item. Each line has **Remove from project** (Supervisor; Team Member role only). The row has **Assign to project**, which opens a picker of projects the supervisor can view in Setup, Active, or On Hold, and a primary-discipline picker (ASG-10).
+
+**Primary actions.** Assign to project and remove from project (Supervisor, direct reports, ASG-10); open the person's My Work (read-only); open a project; reassign a task (Supervisor, direct reports); export via the Staff Assignments report (§19).
+
+**Sorting.** Default: Overdue descending, then Blocked descending, then name. Any column sortable.
+
+**Navigation.** Person → their My Work (read-only); project → Project Dashboard; counts → filtered lists. Scope and filters are encoded in the URL.
+
+**Key UX considerations.** Counts only, no hours on this screen: hours and capacity belong to the first-release Resource View, which reuses this page's scope and adds the week grid. Work on Restricted projects the viewer cannot see is excluded (ASG-09, §36.1). Counts come from the same permitted materialised state as My Work, so a person's row reconciles with their permitted My Work. On phones the table becomes a read-only card list.
+
+---
+
+### 13.20 Time / Task Hours [First release]
+
+**Purpose.** Record actual effort against tasks without turning the Hub into a billing or payroll timesheet (§36.8).
+
+**Users.** Project members enter their own hours. PMs and Discipline Leads review permitted project/discipline entries; Supervisors review direct reports within projects they may view.
+
+**Information.** A Today/This week summary above a dated list: Work date · Project · Task key/name · Hours · Note · Entered by. Daily and weekly totals are sums of non-deleted entries, not estimates. Filters cover project, task, person (for authorised reviewers), and date range. Task and project totals are visible from their details.
+
+**Primary actions.** Add Time against a permitted task; edit or soft-delete own entry; PM correction with a required reason; export the filtered list. The form defaults the work date to today and never substitutes another user's identity. An invalid or over-24-hour day shows a field error. Entries on Completed tasks are allowed while the project remains editable; Archived and Cancelled projects are read-only.
+
+**Navigation.** Task → task panel; project → project dashboard; Time remains a direct global route. The responsive view preserves the same fields and permission rules.

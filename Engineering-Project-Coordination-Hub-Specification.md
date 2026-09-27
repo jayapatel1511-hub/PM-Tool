@@ -30,6 +30,8 @@ This specification uses a small set of consistent labels. They matter, because t
 
 Canonical status names, role names, and threshold names are defined once in Section 10 (Core Data Model) and used verbatim everywhere else. If a later section appears to contradict Section 10, Section 10 wins and the later section should be corrected.
 
+**Visual-reference boundary.** The user confirmed the six workspace views in §36 and task-hour entry under Time as first-release *functional* requirements. `Coordination Hub v2.dc.html` (preserved in `docs/reference/coordination-hub-v2/`) is the only downloaded UI prototype to use for visual cues. Its appearance, placement, sample content, interactions, and old release badges are illustrative, not a design specification or authority for product behavior. The six-panel image records the confirmed feature scope but does not prescribe the finished design. Requirements and acceptance criteria in this document and the feature packets govern implementation; visual decisions require design review.
+
 ---
 
 ## Table of Contents
@@ -74,6 +76,7 @@ Canonical status names, role names, and threshold names are defined once in Sect
 - [Appendix A — Reference Example: Municipal Infrastructure Design template and "DCC Dundurn Roads"](#appendix-a-reference-example-municipal-infrastructure-design-template-and-dcc-dundurn-roads)
 - [Appendix B — Glossary](#appendix-b-glossary)
 - [Appendix C — Status Transition Diagrams](#appendix-c-status-transition-diagrams)
+- [36. Six-View Visual Workspace Requirements](#36-six-view-visual-workspace-requirements)
 
 ---
 
@@ -97,10 +100,12 @@ The product is built entirely from structured data and deterministic rules. Ever
 - A Project Dashboard, a personal My Work page, and a Weekly Coordination view designed to run a multidisciplinary coordination meeting directly from the application.
 - A thin Decision Register, because decisions are the most common non-task blocker in design projects. (Recommended for MVP; see Section 27 for the rationale and the fallback if it is cut.)
 - Comments with @mentions, document links to SharePoint/Teams/network folders, a full activity log, in-app and email notifications, and corporate single sign-on.
+- Project assignment that doubles as a subscription: everyone assigned to a project follows it and receives all of its updates (in-app feed and daily digest), and a My Staff page where every manager sees their direct reports' assignments and work and staffs them on projects.
+- The six-view visual workspace in §36: grouped project board, cross-project task board and Gantt, team calendar, overview dashboard, and personal My Work, with functional navigation, saved views, and task-hour entry under Time in the first release.
 
 **What comes later**
 
-Risk and Issue registers, Meeting Actions, Project Templates, the Resource/Workload view, the Portfolio Dashboard, an improved Gantt, and saved views are Phase 2. Teams and SharePoint integration, ERP/Vantagepoint integration, and financial or utilisation data are Phase 3.
+Risk and Issue registers, Meeting Actions, and Project Templates are Phase 2. The Resource/Workload view, Portfolio Dashboard, improved Gantt, and saved views move into the first release under §36. Teams and SharePoint integration, ERP/Vantagepoint integration, and financial or utilisation data are Phase 3.
 
 **Recommended technical approach**
 
@@ -174,13 +179,13 @@ Success is measured by coordination outcomes, not feature counts:
 - A **system of record for coordination**: who owns what, when it is due, what it depends on, and what state it is in.
 - A **meeting tool**: the Weekly Coordination view is designed to be projected and walked through.
 - A **personal work queue**: My Work is designed to be the one list a person opens each morning.
-- A **visibility layer for management**: the Portfolio Dashboard and Resource View (Phase 2) answer "which projects need help" and "who needs help".
+- A **visibility layer for management**: the first-release Portfolio Dashboard and Resource View answer "which projects need help" and "who needs help".
 
 ### 3.2 What the Hub is not
 
 - Not a scheduling engine. It does not compute critical paths, level resources, or auto-shift dates.
 - Not a document management system. It links to documents; it does not store them.
-- Not a timesheet, accounting, or ERP system.
+- Not a payroll timesheet, accounting, or ERP system. The first-release Time view records actual hours against tasks (§36.8), without billing or approval workflows.
 - Not a replacement for Teams, email, or the engineering tools in which the actual work is produced.
 - Not an AI product. Nothing in the base product depends on or includes AI.
 
@@ -247,7 +252,7 @@ The following are deliberately not goals of this product, at any phase. See Sect
 
 - Replacing Primavera P6, Microsoft Project, or any CPM scheduling tool.
 - Replacing SharePoint, Teams, OneDrive, or a document management system.
-- Tracking time, costs, budgets, invoices, or payroll.
+- Tracking billable rates, costs, budgets, invoices, or payroll. Actual task hours are tracked under §36.8.
 - Performing or automating engineering calculations or engineering decisions.
 - Providing AI assistants, summaries, recommendations, or predictions.
 - Serving external clients as system users (external parties are referenced, not logged in, until at least Phase 3).
@@ -294,14 +299,14 @@ Personas are composites used to make design decisions. Names are illustrative. M
 - **Role:** Manages 12 civil staff across many projects. Not a member of most project teams.
 - **Goals:** See each person's load across projects; spot overloaded staff and overlapping deadlines; know who has capacity when a PM asks for help; reassign work when someone is away or leaves.
 - **Frustrations:** No cross-project view without asking each PM. Estimates are unreliable but something is better than nothing.
-- **Uses:** Resource View (Phase 2); Portfolio Dashboard filtered by discipline; My Work of supervised staff (read).
+- **Uses:** My Staff for their direct reports (assignments, work, staffing); first-release Resource View; Portfolio Dashboard filtered by discipline; My Work of supervised staff (read).
 
 ### 7.6 Lena — Executive / Regional Manager
 
 - **Role:** Responsible for a region or business unit with 40–100 active projects.
 - **Goals:** Which projects are at risk this week and why; which PMs need support; upcoming submissions across the portfolio.
 - **Frustrations:** Health reported by PMs is optimistic and inconsistent. No single place to see it.
-- **Uses:** Portfolio Dashboard (Phase 2); Project Dashboard (read); reports export.
+- **Uses:** First-release Portfolio Dashboard; Project Dashboard (read); reports export.
 
 ### 7.7 Jordan — System Administrator
 
@@ -334,7 +339,7 @@ Effective permission for any action = the union of what the user's system roles 
 |---|---|---|---|
 | **System Administrator** | Configure the system: users, roles, disciplines, clients, offices, deliverable types, phases, thresholds, templates. Can unarchive projects and perform data corrections. | All projects (read and write) | IT / application admin (2–3 people) |
 | **Executive** | Portfolio-level visibility. | Read all projects, portfolio dashboard, reports, resource view | Regional/business unit managers |
-| **Supervisor** | Staff workload visibility and reassignment for the people they supervise. | Read all projects; Resource View for supervised staff; may reassign tasks owned by supervised staff | Group/department managers |
+| **Supervisor** | Visibility of their staff (direct reports, §8.8): project assignments, work, and workload; staffing them on projects and reassigning their tasks. | Read all projects; My Staff page (§13.19) and first-release Resource View for supervised staff; may add or remove supervised staff on project teams as Team Members and reassign tasks they own | Group/department managers |
 | **Project Manager** | May create projects and becomes PM of projects they create. | Read all projects (subject to 8.7); write only where they hold a project role | Staff designated as PMs |
 | **Standard User** | Default for every employee. | Read all projects (subject to 8.7); write only where they hold a project role | All staff |
 | **Read Only** | View-only account. Cannot comment or edit. | Read all projects (subject to 8.7) | Auditors, temporary staff, contractors (TBD) |
@@ -380,14 +385,16 @@ Legend: **Y** = allowed; **O** = allowed for own items only (see 8.6); **D** = a
 | Create a project | Y | — | — | Y | — | — |
 | View Portfolio Dashboard | Y | Y | Y | Y (own projects by default; all with filter) | — | — |
 | View Resource / Workload View | Y | Y (all) | Y (supervised staff, plus all in read) | Y (members of own projects) | — | — |
+| View My Staff page (staff assignments and work, §13.19) | Y (all staff) | Y (all staff) | Y (supervised staff) | — | — | — |
 | Reassign tasks across projects for supervised staff | Y | — | Y | — | — | — |
+| Add or remove supervised staff on a project team (as Team Member) | Y | — | Y | — | — | — |
 | Manage users, system roles, offices, disciplines, clients, deliverable types, phases | Y | — | — | — | — | — |
 | Manage project templates | Y | — | — | Y (Recommendation: also allow "Template Editor" as an Admin-granted flag) | — | — |
 | Manage organisation thresholds and notification defaults | Y | — | — | — | — | — |
 | Unarchive a project | Y | — | — | — | — | — |
 | View all activity history | Y | Y | Y | Y | Y (projects they can view) | Y |
 | Export reports | Y | Y | Y | Y | Y (own projects) | Y |
-| Manage own notification preferences and saved views | Y | Y | Y | Y | Y | Y |
+| Manage own notification preferences, project follow levels, and saved views | Y | Y | Y | Y | Y | Y |
 
 #### 8.5.2 Project-level actions
 
@@ -397,7 +404,7 @@ Legend: **Y** = allowed; **O** = allowed for own items only (see 8.6); **D** = a
 | Edit project information (name, client, description, dates, phase, links) | Y | — | — | — | — |
 | Change project status (Active, On Hold, Complete, Cancelled) | Y | — | — | — | — |
 | Archive project | Y (Complete → Archived) | — | — | — | — |
-| Manage project team and roles | Y | — | — | — | — |
+| Manage project team and roles (Supervisors may also add or remove their direct reports as Team Members, §8.5.1) | Y | — | — | — | — |
 | Add/remove disciplines, set Discipline Lead | Y | — | — | — | — |
 | Set/clear health override | Y | — | — | — | — |
 | Create / edit / delete milestone; change milestone date | Y | — | — | — | — |
@@ -407,6 +414,9 @@ Legend: **Y** = allowed; **O** = allowed for own items only (see 8.6); **D** = a
 | Change deliverable status | Y | D | O (owner, except Issued/Accepted — Recommendation: PM or DL only) | — | — |
 | Delete / cancel deliverable | Y | D (if no completed tasks) | — | — | — |
 | Create task | Y | D | Y (in own discipline; Recommendation) | — | — |
+| Create / edit / cancel calendar event tied to project | Y | O (event owner) | O (event owner) | O (event owner) | — |
+| View task-hour entries | Y (project) | D | O (own entries) | O (own entries) | — |
+| Add / edit / delete task-hour entries | Y (correct with reason) | D (own entries) | O (own entries) | O (own entries) | — |
 | Edit task fields | Y | D | O (assignee/collaborator/creator) | — | — |
 | Assign / reassign task | Y | D | O (creator may assign at creation) | — | — |
 | Change task status | Y | D | O (assignee/collaborator: Not Started → In Progress → Ready for Review; On Hold with reason) | O (reviewer: In Review, Revision Required, Complete) | — |
@@ -434,6 +444,7 @@ Ownership extends role permissions on individual items regardless of project rol
 - **Reviewer** of a task or deliverable: transition In Review → Revision Required / Complete (task) or In Review → Revision Required / Ready to Issue (deliverable); comment.
 - **Owner** of a deliverable, decision, risk, issue, or action: edit the item and change its status (within rules).
 - **Creator** of an item: edit it until someone else has acted on it (status change, comment by another user, assignment accepted); delete it if it is Not Started/Pending and has no links.
+- **Owner of a task-hour entry**: edit or soft-delete that entry while its project is editable; this does not grant permission to change the task itself. A project PM may correct another person's entry only with a logged reason (§36.8).
 
 ### 8.7 Visibility model
 
@@ -446,8 +457,8 @@ Ownership extends role permissions on individual items regardless of project rol
 | Layer | Mechanism |
 |---|---|
 | System roles | Recommendation: map from Entra ID security groups at sign-in (`HUB-Admins`, `HUB-Executives`, `HUB-Supervisors`, `HUB-ProjectManagers`, `HUB-ReadOnly`), with an in-app override table for exceptions. Standard User is implicit for any authenticated employee. See Section 23.6. |
-| Supervisor → staff relationship | Recommendation: `User.supervisor_id` maintained by System Administrators in the Hub (or synchronised from Entra ID `manager` attribute if populated — **TBD**). |
-| Project roles | Assigned in-app by the PM on the Project Team screen. Creating a project makes the creator its PM. Setting a Discipline Lead grants the DL role for that discipline. Assigning a reviewer who is not on the team grants Reviewer automatically. |
+| Supervisor → staff relationship | Recommendation: `User.supervisor_id` maintained by System Administrators in the Hub (or synchronised from Entra ID `manager` attribute if populated — **TBD**). **Supervised staff** means the supervisor's direct reports: active users whose `supervisor_id` is the supervisor (decided, Q19). This definition applies wherever the specification says "supervised staff" (My Staff, read access to My Work, staffing, reassignment, Resource View). |
+| Project roles | Assigned in-app by the PM on the Project Team screen; Supervisors may also add or remove their direct reports as Team Members (§12.18). Creating a project makes the creator its PM. Setting a Discipline Lead grants the DL role for that discipline. Assigning a reviewer who is not on the team grants Reviewer automatically. Every assignment to a project team also makes the person follow the project, so they receive its updates (§12.18). |
 
 ### 8.9 Permission principles for implementation
 
@@ -517,16 +528,21 @@ Global navigation (persistent left rail or top bar; desktop-first):
 |---|---|---|
 | **My Work** (landing page) | My Tasks, My Reviews, My Deliverables, Waiting on Others, Blocking Others, My Projects, Upcoming Milestones | Everyone |
 | **Projects** | Project list (search, filter); opens a project workspace | Everyone |
-| **Portfolio** (Phase 2) | Portfolio Dashboard, Projects At Risk | Executives, Supervisors, PMs |
-| **Resources** (Phase 2) | Resource / Workload View | Supervisors, Executives, PMs |
+| **Portfolio** (first release) | Portfolio Dashboard, Projects At Risk | Executives, Supervisors, PMs |
+| **Resources** (first release) | Resource / Workload View | Supervisors, Executives, PMs |
+| **My Staff** | The user's direct reports with their project assignments and work counts; staffing them on projects (§13.19) | Supervisors, Executives, Admins |
 | **Reports** | Deterministic report list with export | Everyone (scoped) |
-| **Notifications** | In-app notification centre | Everyone |
+| **Notifications** | In-app notification centre: personal notifications and the Following feed of followed projects | Everyone |
 | **Admin** | Users & roles, Disciplines, Clients, Offices, Deliverable Types, Phases, Templates, Settings | System Administrators |
 | Global search | Always visible search box | Everyone |
+
+For the first-release visual workspace (§36), the shell also presents Home (overview), Boards, Tasks, Calendar, Files, Time, and Team as direct routes into the corresponding permitted views. Workload is a first-release route for authorised users. A navigation item appears only when it has a working destination; Time opens task-hour entry (§36.8).
 
 Project workspace navigation (tabs within a project):
 
 `Dashboard · Weekly Coordination · Tasks (List / Board) · Deliverables · Milestones · Timeline · Decisions · Risks (P2) · Issues (P2) · Meetings & Actions (P2) · Team & Disciplines · Activity · Settings`
+
+The workspace view switcher additionally presents Board/List, Timeline, Workload, Dashboard, Files, and Calendar for the selected permitted project set (§36.1). It preserves that selection across views.
 
 ### 9.5 Identifiers
 
@@ -556,10 +572,10 @@ This section defines the conceptual model and all canonical vocabulary. The phys
 | Organisation | `User`, `Office`, `Discipline`, `Client`, `ExternalParty`, `DeliverableType`, `Phase`, `OrgSetting` | Reference data managed by System Administrators |
 | Access | `UserSystemRole`, `ProjectMember` (with project role), `ProjectDiscipline` (with lead) | See Section 8 |
 | Project | `Project`, `ProjectLink` (important links), `ProjectHealthSnapshot` (daily) | |
-| Work | `Milestone`, `Deliverable`, `Task`, `TaskDependency`, `TaskParticipant` | Core hierarchy |
+| Work | `Milestone`, `Deliverable`, `Task`, `TaskDependency`, `TaskParticipant`, `TaskTimeEntry` | Core hierarchy and first-release actual hours (§36.8) |
 | Registers | `Decision` (MVP-thin), `Risk` (P2), `Issue` (P2), `Meeting` (P2), `MeetingAction` (P2), `ItemLink` | `ItemLink` is a generic relation between any two items |
 | Collaboration | `Comment`, `Mention`, `DocumentLink` | Polymorphic target (item type + id) |
-| System | `ActivityLog`, `Notification`, `NotificationPreference`, `AttentionSnooze`, `SavedView` (P2) | |
+| System | `ActivityLog`, `Notification`, `NotificationPreference`, `ProjectFollow`, `AttentionSnooze`, `SavedView` | `ProjectFollow` records who follows which project and at what level (§12.18); saved views are first-release scope (§36.7) |
 | Templates | `ProjectTemplate`, `TemplateDiscipline`, `TemplateMilestone`, `TemplateDeliverable`, `TemplateTask`, `TemplateDependency` (P2) | Snapshot-copied into projects |
 
 ### 10.2 Canonical statuses
@@ -685,7 +701,7 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 | `chain_depth_limit` | 10 | Maximum depth for dependency chain display |
 | `allow_self_review` | false | Whether assignee may be their own reviewer |
 | `complete_project_edit_window_days` | 30 | Days a Complete project stays editable by PM before Archive is suggested |
-| `default_weekly_capacity_hours` | 40 | Resource View (P2); **TBD** |
+| `default_weekly_capacity_hours` | 40 | First-release Resource View; **TBD** |
 | `org_time_zone` | **TBD** | "Today" for date rules (Recommendation: single organisation time zone in MVP) |
 | `digest_send_time_local` | 07:00 | Daily digest |
 
@@ -694,6 +710,7 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 | Scale | Values | Notes |
 |---|---|---|
 | Task/Deliverable priority | `Low`, `Medium`, `High`, `Critical` | Default Medium. Priority affects sorting and attention severity; it never changes rules. |
+| Project priority | `Low`, `Medium`, `High`, `Critical` | Default Medium; PM-set for the Projects board (§36.2). It does not replace project health. |
 | Decision impact if delayed | `Low`, `Medium`, `High` | Free-text impact description also required. |
 | Risk probability (P2) | 1 Low, 2 Medium, 3 High | |
 | Risk impact (P2) | 1 Low, 2 Medium, 3 High | |
@@ -704,6 +721,7 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 ### 10.6 Date and time conventions
 
 - Due dates, start dates, milestone dates, required-by dates are **calendar dates** (no time component). Stored as `DATE`.
+- First-release calendar events (§36.5) have explicit start and end timestamps in the organisation time zone. Date-only deadline projections remain all-day; no time is invented for them.
 - Timestamps (created, updated, completed, issued, activity) are stored in UTC (`TIMESTAMPTZ`) and displayed in the user's browser time zone.
 - "Today" for rule evaluation is the current date in `org_time_zone`. A project-level time-zone override is a future capability.
 - "Within N days" means `date − today ≤ N` and `date ≥ today`.
@@ -723,7 +741,8 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 | Decision — Items (ItemLink) | many : many | Decision ↔ Task/Deliverable/Milestone |
 | Comment / DocumentLink / ActivityLog — Item | many : 1 polymorphic | `item_type` + `item_id`, plus `project_id` for scoping and permissions |
 | Template → Project | snapshot copy | Project records `template_id` and `template_version`; later template changes do not propagate |
-| User — User (supervisor) | many : 1 | Drives Supervisor scope |
+| User — User (supervisor) | many : 1 | Drives Supervisor scope: direct reports (§8.8) |
+| User — Project (ProjectFollow) | many : many | One row per user per project; created automatically on team assignment (§12.18) |
 
 
 ## 11. Functional Requirements
@@ -759,7 +778,7 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-PRJ-03 | PM can edit project information, links, phase, and internal notes. | R | §12.1 |
 | FR-PRJ-04 | PM can change project status per the transition rules; status changes are logged and, where relevant, require a reason. | R | §12.1, §15 |
 | FR-PRJ-05 | Projects display computed health and, optionally, a PM override with note and expiry. | R | §16 |
-| FR-PRJ-06 | Project list supports search, filters (status, PM, client, office, phase, discipline, health), sorting, and column selection. | R | §13.2 |
+| FR-PRJ-06 | Project list and grouped board support search, filters, sorting, column selection, PM owner, priority, target completion due date, and derived progress. | R | §13.2, §36.2 |
 | FR-PRJ-07 | Complete projects can be archived; archived projects are read-only and excluded from default lists but remain searchable. | R | §12.1, §35 |
 | FR-PRJ-08 | A per-project `visibility` flag (Open/Restricted) exists in the schema and is enforced; UI control shipped only if required. | Rec | §8.7 |
 | FR-TEAM-01 | PM manages the project team: add/remove members, set project roles, set a member's primary discipline. | R | §12.2 |
@@ -806,7 +825,7 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-TSK-07 | Manual block with type and reason can be set and cleared; while set, the task is Blocked. | R | §12.6 |
 | FR-TSK-08 | Collaborators and watchers can be added to a task; collaborators may update progress/status; watchers receive notifications only. | Rec | §12.5 |
 | FR-TSK-09 | Task list supports filters (status, assignee, reviewer, discipline, deliverable, milestone, priority, due window, indicators), sorting, grouping, column selection, and bulk actions (assign, due date shift, status). | R | §13.3 |
-| FR-TSK-10 | Kanban board by status with swimlanes by discipline, deliverable, or assignee; drag respects transition rules. | R | §13.4 |
+| FR-TSK-10 | Four-lane Kanban across selected projects, with project-labelled cards, swimlanes, counts, add controls, and guarded transitions. | R | §13.4, §36.3 |
 | FR-TSK-11 | Tasks are soft-deleted; deletion is logged with a snapshot; dependencies are removed and affected users notified. | R | §12.5 |
 | FR-TSK-12 | Completed tasks can be reopened with a reason; successors are re-evaluated. | R | §15 T-14 |
 | FR-TSK-13 | Due-date change count is tracked and shown when ≥ 3. | Rec | §12.5 |
@@ -862,22 +881,22 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-ATT-03 | Attention items are visible on the Project Dashboard, Weekly Coordination, My Work (for items the user owns), and Portfolio (counts). | R | §13 |
 | FR-HLT-01 | Project health is computed per §16 and recomputed on relevant changes and nightly. | R | §16 |
 | FR-HLT-02 | PM may override health with a mandatory note; override expires after `health_override_expiry_days`; both computed and reported health are visible. | R | §16.4 |
-| FR-HLT-03 | Daily health snapshots are stored for trend display. | Rec (store) / P2 (display) | §16.5 |
+| FR-HLT-03 | Daily health snapshots are stored and displayed for the first-release portfolio trend. | R | §16.5, §36.6 |
 | FR-DASH-01 | Project Dashboard per §13.1. | R | §13.1 |
 | FR-WC-01 | Weekly Coordination view per §13.9 with agenda sections, "since last review" delta, inline updates, and "mark reviewed". | R | §13.9 |
 | FR-WC-02 | Export of the coordination summary as text/markdown to clipboard. | Rec | §13.9 |
-| FR-MYW-01 | My Work per §13.10 with sections, filters, sorting, and grouping. | R | §13.10 |
-| FR-PORT-01 | Portfolio Dashboard per §13.12. | P2 | §13.12 |
-| FR-RES-01 | Resource / Workload View per §12.15 and §13.11. | P2 | §12.15 |
+| FR-MYW-01 | My Work per §13.10 with existing sections plus Today, Upcoming, Overdue, Completed, Inbox, and saved creator/assignee views. | R | §13.10, §36.7 |
+| FR-PORT-01 | Portfolio Dashboard per §13.12, plus first-release overview requirements in §36.6. | R | §13.12, §36.6 |
+| FR-RES-01 | Resource / Workload View per §12.15 and §13.11, available in the first release. | R | §12.15, §36.8 |
 
 ### 11.10 Views, timeline, templates
 
 | ID | Requirement | Class | Detail |
 |---|---|---|---|
-| FR-VIEW-01 | Timeline showing milestones and deliverables with today line, progress fill, and status colour; read-only. | Rec | §12.16 |
-| FR-VIEW-02 | Tasks on timeline, dependency arrows, drag-to-reschedule with confirmation. | P2 | §12.16 |
+| FR-VIEW-01 | Timeline showing milestones and deliverables with today line, progress fill, and status colour. | R | §12.16, §36.4 |
+| FR-VIEW-02 | Tasks on timeline, dependency arrows, drag-to-reschedule with confirmation. | R | §12.16, §36.4 |
 | FR-VIEW-03 | Activity History view per project and per item. | R | §13.14, §20 |
-| FR-VIEW-04 | Saved views (personal and project-shared filter/sort/column presets). | P2 | §18.4 |
+| FR-VIEW-04 | Saved views (personal and project-shared filter/sort/column presets). | R | §18.4, §36.7 |
 | FR-TPL-01 | Project Templates with disciplines, milestones, deliverables, tasks, dependencies, and relative date offsets; instantiation with a date wizard; snapshot semantics. | P2 | §12.14 |
 | FR-TPL-02 | "Add from template" to append a discipline pack to an existing project. | P2 | §12.14 |
 
@@ -891,7 +910,7 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-NOT-04 | Microsoft Teams notifications. | P3 | §26 |
 | FR-SRCH-01 | Global search across project number/name, client, tasks, deliverables, milestones, decisions, and people; results grouped by type; permission-filtered. | R | §18 |
 | FR-SRCH-02 | Direct key lookup (typing `1234-T0042` opens the item). | R | §18 |
-| FR-RPT-01 | Deterministic reports per §19 with CSV/XLSX export. | R (core set) / P2 (portfolio and workload reports) | §19 |
+| FR-RPT-01 | Deterministic reports per §19 with CSV/XLSX export, including first-release portfolio and workload reports. | R (core, portfolio, workload) / P2 (later registers) | §19, §36 |
 | FR-AUD-01 | Immutable activity log for creates, updates (field-level), status changes, assignments, date changes, deletions, decision changes, and health overrides. | R | §20 |
 | FR-AUD-02 | Item-level history tab and project-level Activity History with filters. | R | §13.14 |
 | FR-AUD-03 | Export of activity log for a project. | Rec | §20 |
@@ -904,6 +923,23 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-ADM-02 | "Reassign work" tool listing all open items owned by an inactive or departing user, with bulk reassignment. | Rec | §32 |
 | FR-ADM-03 | Health and notification settings screen. | R | §13.15 |
 | FR-ADM-04 | Template administration. | P2 | §12.14 |
+
+### 11.13 Assignments, following, and staff visibility
+
+| ID | Requirement | Class | Detail |
+|---|---|---|---|
+| FR-ASG-01 | Adding a user to a project team makes them follow the project: at **All activity** as PM, Discipline Lead, Team Member, or Viewer; at **My items only** when auto-added only as Reviewer. A follow level the user has set themselves is never changed. | R | §12.18 ASG-01 |
+| FR-ASG-02 | Users set their own follow level per project (All activity, My items only, Muted) or unfollow, from the project header and My Work → My Projects. Any user who can view a project may follow it. | R | §12.18 |
+| FR-ASG-03 | The Notification Centre has a Following tab listing every change by others on projects the user follows at All activity, with unread counts per project. | R | §12.18, §13.17 |
+| FR-ASG-04 | The daily digest includes a Project updates section for followed projects. | R | §17.3 |
+| FR-ASG-05 | Supervisors have a My Staff page listing their direct reports with project assignments, roles, and work counts; Executives and Admins can widen the scope to all staff. | R | §13.19 |
+| FR-ASG-06 | From My Staff, a Supervisor can open a direct report's My Work (read-only), reassign their tasks, and staff them on projects: add them to a project team as Team Member or remove them; the project's PM is notified. | R | §8.5, §12.18 ASG-10 |
+| FR-ASG-07 | A person's supervisor is notified (in-app and in the My staff digest section) when someone else adds them to or removes them from a project, or makes them a Discipline Lead. | Rec | §17.2, §17.3 |
+| FR-ASG-08 | Staff Assignments report (person, project, role, primary discipline, added on) with CSV/XLSX export, scoped to the user's staff. | Rec | §19 |
+
+### 11.14 Six-view visual workspace
+
+The first-release requirements FR-VIS-01 through FR-VIS-10 and acceptance criteria AC-VIS-01 through AC-VIS-08 are specified in §36. They extend the existing project, task, portfolio, resource, saved-view, and task-hour requirements without replacing their permission or workflow rules.
 
 
 ## 12. Module Specifications
@@ -933,13 +969,14 @@ Each module is specified with purpose, users, inputs, outputs, business rules, p
 | `phase_id` | FK Phase | No | Current phase; PM-set. |
 | `start_date` | date | Recommended | |
 | `target_completion_date` | date | Recommended | |
+| `priority` | enum Low/Medium/High/Critical | Yes | Default Medium; primary PM may change it for the project board (§36.2). |
 | `visibility` | enum Open/Restricted | Yes (default Open) | §8.7 |
 | `internal_notes` | text (long) | No | Not shown on portfolio; visible to project members and management. |
 | `coordination_day` | weekday | No | Day the weekly coordination meeting is held; drives the "this week" window (Recommendation). |
 | `health_override`, `health_override_note`, `health_override_by`, `health_override_at`, `health_override_expires_at` | see §16.4 | No | |
 | `created_from_template_id`, `template_version` | FK / int | No | Set on template instantiation. |
 | `important_links` | child rows (`ProjectLink`: title, url, link_type) | No | SharePoint site, Teams channel, network folder, client portal. |
-| Derived | `health_computed`, `next_milestone`, `next_submission_milestone`, task/deliverable/decision counts, discipline summaries, `last_coordination_reviewed_at` | — | Computed |
+| Derived | `health_computed`, `progress_pct`, `next_milestone`, `next_submission_milestone`, task/deliverable/decision counts, discipline summaries, `last_coordination_reviewed_at` | — | Project progress is Complete tasks / non-Cancelled tasks, or unknown when there are none (§36.2). |
 
 **Outputs.** Project header (used on every project screen), project card in list, portfolio row, dashboard metrics, activity log entries.
 
@@ -947,7 +984,7 @@ Each module is specified with purpose, users, inputs, outputs, business rules, p
 
 **Permissions.** §8.5.1 create; §8.5.2 edit/status/archive.
 
-**UI behaviour.** Create-project dialog is a two-step form (identity → team & disciplines) with an option "Start from template" (P2). Project header shows key, name, client, PM, phase, status pill, health pill (with "why" popover), next milestone with countdown, and quick links. Status change opens a confirmation dialog with reason field and consequence text ("Putting this project on hold will stop overdue and attention evaluation for 42 open tasks.").
+**UI behaviour.** Create-project dialog is a two-step form (identity → team & disciplines) with an option "Start from template" (P2). Project header shows key, name, client, PM, phase, status pill, health pill (with "why" popover), next milestone with countdown, quick links, and the user's follow control (§12.18). Status change opens a confirmation dialog with reason field and consequence text ("Putting this project on hold will stop overdue and attention evaluation for 42 open tasks.").
 
 **Dependencies.** Users/Org reference data; Teams & Disciplines; Health (§16).
 
@@ -974,9 +1011,9 @@ Discipline Lead is not stored on `ProjectMember`; it is derived from `ProjectDis
 
 **Outputs.** Team list; discipline chips with lead; discipline summary table: per discipline → open tasks, overdue, blocked, waiting, deliverables due in next 14 days, next due item, DL name, and a discipline status colour derived by the same rules as project health but scoped to the discipline's items (§16.6).
 
-**Business rules.** TM-01 a user appears once per project; TM-02 a discipline appears once per project; TM-03 the primary PM cannot be removed from the team (change the PM first); TM-04 removing a member who owns open items prompts for reassignment (bulk reassign dialog) or leaves items assigned with an "Inactive on project" indicator (PM's choice, logged); TM-05 removing a discipline is only allowed if it has no non-cancelled deliverables or tasks (otherwise deactivate: hidden from pickers, existing items retained); TM-06 assigning work to a non-member auto-adds them as Team Member (task) or Reviewer (review) and notifies the PM (in-app).
+**Business rules.** TM-01 a user appears once per project; TM-02 a discipline appears once per project; TM-03 the primary PM cannot be removed from the team (change the PM first); TM-04 removing a member who owns open items prompts for reassignment (bulk reassign dialog) or leaves items assigned with an "Inactive on project" indicator (choice of the PM, or of the Supervisor removing their direct report; logged); TM-05 removing a discipline is only allowed if it has no non-cancelled deliverables or tasks (otherwise deactivate: hidden from pickers, existing items retained); TM-06 assigning work to a non-member auto-adds them as Team Member (task) or Reviewer (review) and notifies the PM (in-app).
 
-**Permissions.** PM only for changes.
+**Permissions.** PM for all changes; Supervisors may add or remove their direct reports as Team Members (§12.18 ASG-10).
 
 **UI behaviour.** Team tab with two panels: Disciplines (with lead picker) and Members (with role checkboxes and primary discipline). People picker searches active users by name/email; shows office and job title. Adding a lead who is not on the team adds them in one action.
 
@@ -1200,7 +1237,7 @@ Lag/lead days: **[Phase 2]**. In MVP, represent a waiting period (e.g., client r
 | D-15 | **Decision block** (Recommended; requires thin Decision Register): a task linked to a Decision (via ItemLink with relation `blocked_by_decision`) whose status is Pending/Under Review/Deferred and whose `required_by_date` < today is Blocked with the decision listed as blocker. A linked decision that is not yet overdue shows as Waiting. |
 | D-16 | Adding a dependency where the predecessor is already Complete is allowed (documents the relationship) and has no effect. |
 | D-17 | Adding a dependency to a successor that is already Complete is allowed with a warning. |
-| D-18 | **Derived deliverable dependency** (Recommended): Deliverable B "depends on" Deliverable A if any task in B has a predecessor in A (A ≠ B). Shown read-only on both deliverables and on the Timeline (P2 arrows). |
+| D-18 | **Derived deliverable dependency** (Recommended): Deliverable B "depends on" Deliverable A if any task in B has a predecessor in A (A ≠ B). Shown read-only on both deliverables and on the first-release Timeline arrows (§36.4). |
 
 **Outputs.** Blockers list on task; "Blocking N" chip; chain view (predecessors up, successors down); affected milestones; dashboard "Blocked" count; attention items A-02, A-03; notifications.
 
@@ -1309,7 +1346,7 @@ Lag/lead days: **[Phase 2]**. In MVP, represent a waiting period (e.g., client r
 
 **Rules.** MTG-01 an action owned by a Discipline is routed to that discipline's lead for attention and appears in the DL's My Work; MTG-02 external-party actions generate no external notification; they appear in Weekly Coordination "Waiting on client / external"; MTG-03 "Convert to task" creates a task pre-filled from the action and links them; the action then tracks the task's completion; MTG-04 Weekly Coordination in meeting mode can create actions inline against the current meeting record.
 
-**Not built.** Agendas, minutes authoring, attendance, calendar integration, recurring meeting series.
+**Not built.** Agendas, minutes authoring, attendance, automatic calendar synchronisation, recurring meeting series. A meeting may link to a first-release calendar event (§36.5).
 
 ---
 
@@ -1422,7 +1459,7 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 ---
 
-### 12.15 Resource / Workload View [Phase 2]
+### 12.15 Resource / Workload View [First release under §36]
 
 **Purpose.** Give supervisors and PMs a defensible, cross-project view of who is carrying how much, who has capacity, and where deadlines collide — without pretending estimates are precise.
 
@@ -1436,7 +1473,7 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 3. Indicators: **Over-assigned** when `load_pct > 110%` in the current or next week; **Under-assigned** when `load_pct < 40%` for the next 2 weeks *and* `unestimated_task_count = 0` (never call someone under-assigned when their work is unestimated); **Deadline cluster** when ≥ 3 tasks across ≥ 2 projects are due within any 3-day window in the next 14 days.
 4. The screen always shows the unestimated count next to the hours so the reader can judge reliability, and states the method in a help popover.
 
-**What it deliberately does not do.** Timesheet reconciliation, actuals vs. estimate, leave/holiday calendars (Phase 3, or import from HR), utilisation targets, resource levelling, forecasting beyond 8 weeks, or capacity planning by role.
+**What it deliberately does not do.** The first-release workload calculation does not subtract logged actual task hours from estimates or treat them as an approved timesheet (§36.8). It also does not use leave/holiday calendars (Phase 3, or import from HR), utilisation targets, resource levelling, forecasts beyond 8 weeks, or capacity planning by role.
 
 **Views.** Person × week grid (heat-shaded load with the number visible) with expandable rows: Person → Project → Tasks (with due dates). Filters: supervisor, discipline, office, project, date range. Sort by load, overdue count, task count. Export.
 
@@ -1444,9 +1481,9 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 ### 12.16 Gantt / Timeline
 
-**Purpose.** A visual sense of sequence and proximity — what is coming, in what order, and how deliverables relate to milestones. Not a scheduling tool.
+**Purpose.** A visual sense of sequence and proximity — what is coming, in what order, and how deliverables relate to milestones. First-release manual date changes are permitted with confirmation (§36.4); the view is not an automatic scheduling engine.
 
-**Supported [MVP-Recommended]**
+**Supported [MVP-Required]**
 - Horizontal time axis with week and month zoom; today line; project start/target dates.
 - Milestones as diamonds on a top lane, coloured by status, labelled with name and date; slip shown as a hollow diamond at the original date when different.
 - Deliverables as bars from `start_date` (or `created_at` if no start) to `due_date`, grouped by discipline (collapsible), with progress fill and status colour; Overdue bars extend to today with a hatched segment.
@@ -1454,11 +1491,12 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 - Filters: discipline, milestone, status, show/hide completed.
 - Print-friendly rendering (browser print CSS).
 
-**Supported [Phase 2]**
+**Supported [MVP-Required under §36]**
 - Tasks as thin bars under their deliverable (collapsible).
 - Dependency arrows between tasks (and derived deliverable dependencies), highlighted when unsatisfied and overdue.
 - Drag a bar or diamond to change dates, with a confirmation dialog showing the change and (for milestones) the optional cascade (M-04). Dates are the only thing that changes; nothing else is recalculated.
 - Baseline (original) dates shown as ghost bars.
+- A selected set of permitted projects appears as expandable project groups, each with tasks, deliverables, and milestones; date navigation preserves that scope. Cross-project dependencies are not inferred or created.
 
 **Not supported [Out of Scope]**
 - Automatic scheduling, critical path, float/slack, resource levelling, calendars/working-time, lag/lead (P2 at most), constraint types beyond Finish-to-Start, cost or earned value, import/export of MS Project or P6 files.
@@ -1471,6 +1509,57 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 Module-level behaviour for the Project Dashboard, Portfolio Dashboard, and My Work is fully specified in their screen specifications (§13.1, §13.12, §13.10) because they are composed entirely of the modules above. The shared principle: every number on a dashboard is a link to the filtered list that produced it, and every colour has a visible reason.
 
+---
+
+### 12.18 Project Assignments, Following, and My Staff
+
+**Purpose.** Make project assignment do two things without anyone configuring it: everyone assigned to a project receives all of that project's updates, and every manager can see their direct reports — which projects each person is on, in what role, and what they are carrying, waiting on, and holding up — and staff them on projects.
+
+**Users.** Everyone (following); Supervisors (their supervised staff, §8.8); Executives and System Administrators (all staff).
+
+**Definitions**
+
+- **Project assignment** is membership of the project team (`ProjectMember`, any project role), including Discipline Leads and reviewers auto-added under TM-06. There is no separate assignment entity: the project team is the assignment list.
+- **Following** is a per-user, per-project subscription with one of three levels:
+
+| Level | What the user receives for that project |
+|---|---|
+| **All activity** | Everything in *My items only*, plus every logged change on the project made by someone else (creates, status changes, assignments, date changes, dependency changes, deliverable issues, decisions, milestone changes, comments), shown in the Following feed and summarised in the daily digest. |
+| **My items only** | The standard notifications of §17.2 for items the user is assigned, reviews, owns, or watches, and @mentions. This is also the behaviour for users who do not follow the project. |
+| **Muted** | Only direct assignments to the user (task, review, decision ownership) and @mentions. |
+
+- **Supervised staff** means the supervisor's direct reports (§8.8).
+
+**Inputs.** `ProjectFollow`: `user_id`, `project_id`, `level` (AllActivity, MyItemsOnly, Muted), `source` (Assignment = set by the system on team assignment; Manual = set or changed by the user), `last_seen_at` (Following feed read marker), `created_at`, `updated_at`. One row per user per project.
+
+**Outputs.** Follow control in the project header; Following tab in the Notification Centre (§13.17); Project updates and My staff digest sections (§17.3); My Staff page (§13.19); Staff Assignments report (§19).
+
+**Business rules**
+
+- ASG-01 **Assignment turns following on.** When a user is added to a project team as PM, Discipline Lead, Team Member, or Viewer, a follow is created at **All activity** with source Assignment. A user auto-added only as Reviewer (TM-06) gets **My items only**, because they are there for one review. An existing follow with source Assignment is raised to All activity when the user gains a role other than Reviewer; a follow with source Manual is never changed by the system.
+- ASG-02 **The user's choice sticks.** Users may change their level or unfollow at any time; any change sets source to Manual. Nobody can set another user's follow level (PMs cannot force following, §17.1).
+- ASG-03 **Manual following.** Any user who can view a project may follow it (source Manual), for example an Executive tracking a key project. Restricted projects (§8.7) can only be followed by users who can view them.
+- ASG-04 **Leaving a team.** When a user is removed from a project team, a follow with source Assignment is deleted; a Manual follow is kept while the user can still view the project. Losing view access deletes any follow.
+- ASG-05 **Feed contents.** The Following feed is the Activity History (§13.14) of the user's followed projects at All activity, excluding the user's own actions and filtered by current permissions at read time. It is read from `activity_log`; the Hub does not write a `Notification` row per change per follower. Entries sharing a `correlation_id` (bulk actions, cascades, template instantiation; G-10) collapse into one entry with a count. Unread means after the project's `last_seen_at`; unread counts use the notification centre's polling (§17.6).
+- ASG-06 **No duplicates.** An event that already produced a personal notification for the user (§17.2) is shown in the feed with a "notified" marker but is not counted again as unread or repeated in the Project updates digest section.
+- ASG-07 **Project status.** Setup: changes are recorded but produce no unread counts or digest content, and on activation every follower's `last_seen_at` is set to the activation time so set-up work does not arrive as a flood. On Hold: the feed continues; the digest section is suppressed (§17.3). Archived and Cancelled: follows are kept but produce nothing.
+- ASG-08 **Staff scope.** A Supervisor's staff is their direct reports: active users whose `supervisor_id` is the supervisor, read at request time with no hierarchy traversal. Inactive users are hidden from My Staff by default ("show inactive" toggle); their open work is still flagged by A-18.
+- ASG-09 **What managers see.** For each person in scope: their permitted project assignments (project, roles, primary discipline, date added), their permitted My Work read-only (§13.10), and counts from permitted materialised state rows — open tasks, overdue, blocked, blocking others, reviews waiting on them, owned deliverables due within 14 days, last activity. Work on Restricted projects the manager cannot view is excluded from the list and counts (§36.1).
+- ASG-10 **What managers can do.** Reassign tasks owned by their direct reports (§8.5.1), and staff them on projects: add a direct report to the team of any project the supervisor can view (Setup, Active, or On Hold) as Team Member with a primary discipline, or remove them from it (the TM-04 reassignment prompt applies to their open items). Each staffing change notifies the project's PM in-app and is logged with the supervisor as actor. Everything else about the team — other roles, Discipline Leads, and people who are not the supervisor's direct reports — stays with the PM (§12.2), who can also remove anyone a supervisor added.
+- ASG-11 **Staff assignment notices.** When someone else adds a person to or removes them from a project, or makes them a Discipline Lead, the person's supervisor receives an in-app notification and sees the change in the next digest's My staff section. Supervisors do not receive every change on their staff's work; the person's row in My Staff is the drill-down.
+
+**Permissions.** Follow, unfollow, and change level: any user, for their own follows on projects they can view. My Staff: Supervisors (supervised staff); Executives and System Administrators (any scope, including all staff). Staffing: Supervisors add or remove their direct reports as Team Members (ASG-10); all other team changes remain PM-only. Project Managers without the Supervisor role see their project members through the Team tab as today.
+
+**UI behaviour.** The project header shows a follow control ("Following: All activity ▾") with the tooltip "You follow this project because you are on the team." The "Added to a project" notification says the user now follows the project and how to change the level. My Work → My Projects shows each project's follow level with inline change. The Following tab and the My Staff page are specified in §13.17 and §13.19.
+
+**Dependencies.** Project Team (§12.2), Activity Log (§20), Notifications (§17), My Work (§13.10), supervisor data (§8.8, §23.6).
+
+**Edge cases.** E-25 to E-29.
+
+**Acceptance criteria.** AC-ASG-01 … AC-ASG-09.
+
+> **Design note.** "Everyone on the project gets all updates" is implemented as a feed over the activity log rather than as notifications, because the log is already written in the same transaction as every change (§20.3). All updates therefore cost one table and one query instead of a notification row per member per change, and immediate email stays reserved for events that need a response (§17.1). Assignment switches following on because being on the team is the strongest signal of interest; the three levels exist because a discipline lead on ten projects will want All activity on two of them and Muted on the rest.
+
 
 ## 13. Detailed Screen Specifications
 
@@ -1478,7 +1567,7 @@ Module-level behaviour for the Project Dashboard, Portfolio Dashboard, and My Wo
 
 These conventions apply to every screen and should be implemented once as a design system.
 
-**Layout.** Persistent left navigation rail (collapsible to icons) with: My Work, Projects, Portfolio (P2), Resources (P2), Reports, Notifications, Admin. Top bar: global search, quick-create (Task, Decision), notification bell with unread count, user menu. Content area max-width unconstrained on desktop (tables benefit from width). Project screens show a **project header** (key, name, client, PM, phase, status pill, health pill, next milestone countdown, links) and project tabs beneath it.
+**Layout.** Persistent left navigation rail (collapsible to icons) with: Home, My Work, Boards, Projects, Tasks, Calendar, Files, Time, Reports, Team, Portfolio, Resources, Notifications, Admin, filtered by role as in §36.1; More holds permitted lower-frequency routes. Top bar: global search, permission-filtered quick-create (Project, Task, Decision, Event), notification bell with unread count, user menu. Content area max-width unconstrained on desktop (tables benefit from width). Project screens show a **project header** (key, name, client, PM, phase, status pill, health pill, next milestone countdown, links, follow control) and project tabs beneath it. Time opens the task-hour view (§13.20, §36.8).
 
 **Density.** Tables default to compact rows (32–36 px), with a user toggle for comfortable rows. Typography: a single sans-serif system stack; 13–14 px table text; 16 px body. No decorative imagery.
 
@@ -1497,7 +1586,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 **Interaction.** Detail views open as a right-side panel (approximately 560 px) over lists and boards, with a "open full page" control; URL updates so panels are deep-linkable. Inline edit on click for text fields and dropdowns in detail panels; explicit Save is not required except in multi-field dialogs (create forms, status changes with reason). Every destructive or consequential action (delete, cancel, status change with side-effects, milestone date change with cascade) uses a confirmation dialog that states the consequence in numbers. Undo toast for reassign and status changes for 10 seconds where the change has no side-effects on other users' notifications (Recommendation: skip undo in MVP if it complicates notifications).
 
-**Filters.** Filter bar above every list with: quick chips (Mine, Overdue, Blocked, Due this week, Unassigned), a "+ Filter" menu for all fields, active filters shown as removable tokens, and "Clear". Filter state is encoded in the URL. Saved views are Phase 2.
+**Filters.** Filter bar above every list with: quick chips (Mine, Overdue, Blocked, Due this week, Unassigned), a "+ Filter" menu for all fields, active filters shown as removable tokens, and "Clear". Filter state is encoded in the URL. Saved views are first-release requirements (§36.7).
 
 **Sorting and grouping.** Click column headers to sort (with secondary sort by due date, then key). "Group by" control on lists (Discipline, Deliverable, Milestone, Assignee, Status, Due bucket).
 
@@ -1555,7 +1644,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 **Users.** Everyone.
 
-**Information.** Table: Project number · Name · Client · PM · Office · Phase · Status · Health · Next milestone (name, date) · Overdue tasks · Blocked tasks · My role (for current user) · Last activity. Default filter: Status in (Active, Setup, On Hold) and "My projects" for users who have project roles; "All projects" toggle.
+**Information.** Table: Project number · Name · Client · PM · Office · Phase · Status · Health · Priority · Target completion/due · Progress · Next milestone (name, date) · Overdue tasks · Blocked tasks · My role (for current user) · Last activity. The first-release compact board presentation groups Active and Upcoming/Planning with counts and shows Owner (PM), status, priority, due, and progress (§36.2). Default filter: Status in (Active, Setup, On Hold) and "My projects" for users who have project roles; "All projects" toggle.
 
 **Primary actions.** Create project (PM system role/Admin); open project; star/favourite (Recommendation) for personal ordering.
 
@@ -1591,7 +1680,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 #### 13.3.1 Task Detail Panel
 
-**Sections (top to bottom).** Header (key, name, status pill/menu, indicator chips, "open full page", close). Blockers box (only when Waiting/Blocked): list of blockers with links and "Start anyway" note; affected milestones. Fields grid: Assignee, Reviewer, Requires review, Priority, Discipline, Deliverable, Milestone (derived or direct), Start, Due (with change count when ≥ 3), Progress slider (10% steps), Estimated hours. Description. Dependencies: Depends on / Blocks lists with add/remove and "Show chain". Manual block: set/clear with type and reason. Collaborators and watchers. Document links (own and inherited from deliverable). Tabs: Comments · History.
+**Sections (top to bottom).** Header (key, name, status pill/menu, indicator chips, "open full page", close). Blockers box (only when Waiting/Blocked): list of blockers with links and "Start anyway" note; affected milestones. Fields grid: Assignee, Reviewer, Requires review, Priority, Discipline, Deliverable, Milestone (derived or direct), Start, Due (with change count when ≥ 3), Progress slider (10% steps), Estimated hours, Actual hours total with Add Time (§36.8). Description. Dependencies: Depends on / Blocks lists with add/remove and "Show chain". Manual block: set/clear with type and reason. Collaborators and watchers. Document links (own and inherited from deliverable). Tabs: Comments · History.
 
 **Behaviour.** Autosave per field with subtle confirmation; status transitions through the pill menu with reason dialogs where required; review outcomes through explicit "Approve" and "Request revision" buttons visible to the reviewer when In Review.
 
@@ -1599,35 +1688,35 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 ### 13.4 Kanban Board
 
-**Purpose.** A visual flow view for a discipline or a deliverable; useful for DLs and teams who think in columns.
+**Purpose.** A visual flow view for a discipline, deliverable, project, or selected set of permitted projects; useful for DLs and teams who think in columns.
 
 **Users.** DLs, team members.
 
-**Information.** Columns = task statuses: Not Started · In Progress · Ready for Review · In Review · Revision Required · Complete (collapsed by default showing last 14 days) with On Hold and Cancelled available as collapsed side columns. Card: key, name, assignee initials, due date (coloured if overdue/due soon), indicator icons (blocked chain, review, stale), deliverable chip, priority marker. Column header shows count.
+**Information.** Default visible lanes = To Do · In Progress · Review · Done, mapping to the canonical statuses in §36.3; the exact canonical status remains visible on review cards. On Hold and Cancelled are accessible through filters/side columns. Card: key, name, project chip when multiple projects are selected, assignee initials, due date (coloured if overdue/due soon), indicator icons (blocked chain, review, stale, comments), deliverable chip, priority marker. Column header shows count.
 
 **Primary actions.** Drag between columns (transition rules enforced; invalid drop shows why and snaps back; transitions needing a reason open the dialog on drop); create card in a column; open panel; swimlane toggle.
 
 **Filters.** Same as Task List; board is typically scoped by Discipline or Deliverable via filter.
 
-**Sorting.** Within a column: due date (default), priority, or manual (manual order persists per column per project — Recommendation: defer manual ordering to P2).
+**Sorting.** Within a column: due date (default), priority, or manual; manual order persists per project or named workspace in the first release (§36.3).
 
 **Swimlanes.** None (default), Discipline, Deliverable, Assignee.
 
 **Navigation.** Card → panel. Deliverable chip → deliverable panel.
 
-**UX.** No WIP limits, no card colours by custom label, no automation. Board and List share the same filter state so switching views keeps context.
+**UX.** No WIP limits, no card colours by custom label, no automation. Board and List share the same filter and project scope so switching views keeps context. Manual card ordering is required for the first release (§36.3).
 
 ---
 
 ### 13.5 Timeline (Gantt)
 
-**Purpose.** See milestones and deliverables in time; spot crowding before submissions.
+**Purpose.** See tasks, milestones, and deliverables across the selected permitted projects in time; spot crowding before submissions.
 
 **Users.** PM, DLs, Executives.
 
-**Information.** Per §12.16: milestone lane, discipline groups, deliverable bars with progress; (P2) tasks and dependency arrows.
+**Information.** Per §12.16 and §36.4: project groups, milestone diamonds, discipline/deliverable hierarchy, task bars with progress, dependency arrows, today line, and an Unscheduled list.
 
-**Primary actions.** Zoom (week/month/quarter); expand/collapse disciplines; click to open panel; print; (P2) drag to reschedule.
+**Primary actions.** Zoom (week/month/quarter); expand/collapse projects and disciplines; click to open panel; print; authorised drag to reschedule with preview and confirmation.
 
 **Filters.** Discipline, milestone, status, hide completed, date range.
 
@@ -1635,7 +1724,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 **Navigation.** Elements → panels; milestone → Milestone view.
 
-**UX.** Today line always visible; labels never overlap (truncate with tooltip); overdue segments hatched; legend visible. The Timeline is read-only in MVP and says so.
+**UX.** Today line always visible; labels never overlap (truncate with tooltip); overdue segments hatched; legend visible. Date changes follow the guards in §36.4.
 
 ---
 
@@ -1747,7 +1836,7 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 | Waiting on Others | My tasks that are Waiting or Blocked, with the blocker and its owner |
 | Blocking Others | My tasks that are Blocking Others, with the successors and their owners |
 | My Decisions | Decisions I own or requested that are open |
-| My Projects | Projects where I hold any role, with my role(s), health, next milestone |
+| My Projects | Projects where I hold any role or that I follow, with my role(s), follow level (changeable inline, §12.18), health, next milestone |
 | Upcoming Milestones | Milestones in my projects within 30 days |
 | Recently completed by me | Last 14 days (collapsed) |
 
@@ -1761,9 +1850,11 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 
 **UX.** Overdue and due-today items are visually first. The page works well at tablet width because most actions are status and progress changes. On phones, My Tasks and My Reviews are the primary tabs.
 
+The first-release personal presentation adds Today, Upcoming, Overdue, Completed, Inbox, and saved views My Tasks, Assigned to Me, and Created by Me, with task/project/due/priority columns and guarded completion controls (§36.7). It retains the sections above.
+
 ---
 
-### 13.11 Resource / Workload View [Phase 2]
+### 13.11 Resource / Workload View [First release under §36]
 
 **Purpose.** Cross-project workload per person, per §12.15.
 
@@ -1781,7 +1872,7 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 
 ---
 
-### 13.12 Portfolio Dashboard [Phase 2]
+### 13.12 Portfolio Dashboard [First release under §36]
 
 **Purpose.** Which projects need help this week, and why.
 
@@ -1796,6 +1887,8 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 **Sorting.** Default health severity then next submission date.
 
 **UX.** Health "why" is always available; reported health that differs from computed is shown as two pills ("Computed: Yellow · Reported: Green — note by PM, 3 days ago") so optimism is visible, not hidden.
+
+Home also provides the first-release overview dashboard in §36.6: five headline metrics, two task charts, Upcoming Deadlines, a date-range control, and a personal Edit Dashboard layout control. This overview does not replace the project dashboard's attention sections.
 
 ---
 
@@ -1849,9 +1942,9 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 
 **Purpose.** In-app list of notifications with unread state.
 
-**Information.** Grouped by day; each: icon by type, text ("Marc assigned you 1234-T0042 Update grading plan"), project, time; unread dot. Filter: unread, type, project. Actions: mark read, mark all read, open item, open preferences.
+**Information.** Two tabs. **Notifications** (personal): grouped by day; each: icon by type, text ("Marc assigned you 1234-T0042 Update grading plan"), project, time; unread dot. Filter: unread, type, project. Actions: mark read, mark all read, open item, open preferences. **Following**: changes by others on projects the user follows at All activity (§12.18), grouped by project then day and rendered like Activity History ("Marc changed 1234-T0042 due date 2026-09-10 → 2026-09-17 — client extension"), with an unread count per project, "mark project as read", and an "important only" filter (status, assignment, date, deletion, decision, milestone).
 
-**Preferences page.** Per event type: In-app / Email / Off; daily digest on/off and time; per-project mute (Recommendation).
+**Preferences page.** Per event type: In-app / Email / Off; daily digest on/off and time; per-project follow level (All activity / My items only / Muted, §12.18).
 
 ---
 
@@ -1860,6 +1953,43 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 **Purpose.** Run the deterministic reports in §19 with filters and export.
 
 **Information.** Report catalogue with description; parameter form; results table (same components as lists); export CSV/XLSX; "open as filtered list" where the report maps to a list.
+
+---
+
+### 13.19 My Staff
+
+**Purpose.** Show a manager their direct reports on one page — who is assigned to which projects in what role, and who is overloaded, blocked, or holding up others — and let them staff people on projects without going through each PM.
+
+**Intended users.** Supervisors (their direct reports, §8.8); Executives and System Administrators (can switch the scope to all staff).
+
+**Information displayed (top to bottom)**
+
+1. **Scope bar**: My direct reports (default) · All staff (Executives and Admins only). Filters: office, discipline, project, indicator (has overdue, has blocked, blocking others, reviews waiting), show inactive.
+2. **Summary tiles** (each a link to the filtered table): Staff · Project assignments · Staff with overdue work · Staff with blocked work · Reviews waiting longer than `review_stale_days`.
+3. **Staff table**, one row per person: Name · Job title · Office · Projects (count) · Roles (chips such as "PM 1 · DL 3 · Team 4 · Reviewer 2") · Open tasks · Overdue · Blocked · Blocking others · Reviews waiting on them · Deliverables owned due ≤ 14 d · Last activity. Every count links to that person's My Work section, filtered.
+4. **Expanded row — assignments**: one line per project the person is on: project number and name, health pill, role(s), primary discipline, added on, their open and overdue tasks on that project, next due item. Each line has **Remove from project** (Supervisor; Team Member role only). The row has **Assign to project**, which opens a picker of projects the supervisor can view in Setup, Active, or On Hold, and a primary-discipline picker (ASG-10).
+
+**Primary actions.** Assign to project and remove from project (Supervisor, direct reports, ASG-10); open the person's My Work (read-only); open a project; reassign a task (Supervisor, direct reports); export via the Staff Assignments report (§19).
+
+**Sorting.** Default: Overdue descending, then Blocked descending, then name. Any column sortable.
+
+**Navigation.** Person → their My Work (read-only); project → Project Dashboard; counts → filtered lists. Scope and filters are encoded in the URL.
+
+**Key UX considerations.** Counts only, no hours on this screen: hours and capacity belong to the first-release Resource View, which reuses this page's scope and adds the week grid. Work on Restricted projects the viewer cannot see is excluded (ASG-09, §36.1). Counts come from the same permitted materialised state as My Work, so a person's row reconciles with their permitted My Work. On phones the table becomes a read-only card list.
+
+---
+
+### 13.20 Time / Task Hours [First release]
+
+**Purpose.** Record actual effort against tasks without turning the Hub into a billing or payroll timesheet (§36.8).
+
+**Users.** Project members enter their own hours. PMs and Discipline Leads review permitted project/discipline entries; Supervisors review direct reports within projects they may view.
+
+**Information.** A Today/This week summary above a dated list: Work date · Project · Task key/name · Hours · Note · Entered by. Daily and weekly totals are sums of non-deleted entries, not estimates. Filters cover project, task, person (for authorised reviewers), and date range. Task and project totals are visible from their details.
+
+**Primary actions.** Add Time against a permitted task; edit or soft-delete own entry; PM correction with a required reason; export the filtered list. The form defaults the work date to today and never substitutes another user's identity. An invalid or over-24-hour day shows a field error. Entries on Completed tasks are allowed while the project remains editable; Archived and Cancelled projects are read-only.
+
+**Navigation.** Task → task panel; project → project dashboard; Time remains a direct global route. The responsive view preserves the same fields and permission rules.
 
 
 ## 14. User Workflows
@@ -2037,7 +2167,7 @@ Each workflow states the actor, trigger, steps, system response, exceptions, and
 
 ---
 
-### Workflow 10 — Supervisor reviews staff workload [Phase 2]
+### Workflow 10 — Supervisor reviews staff workload [First release under §36]
 
 **Actor.** Supervisor (Civil group). **Trigger.** Weekly resourcing check or PM request for help.
 
@@ -2049,7 +2179,7 @@ Each workflow states the actor, trigger, steps, system response, exceptions, and
 
 **System response.** Reassignment notifies both people and the PM; workload grid recomputes; the change is logged with actor Supervisor.
 
-**Exceptions.** Task belongs to a Restricted project the supervisor cannot see → row shows "Restricted project" with hours only; reassignment must be done by the PM. Person on leave → not modelled in MVP/P2 (Phase 3 or manual capacity override).
+**Exceptions.** Task belongs to a Restricted project the supervisor cannot see → its row and hours are excluded from this supervisor's grid and export; reassignment must be done by a PM who can see the project. Person on leave → not modelled in the first release or Phase 2 (Phase 3 or manual capacity override).
 
 **Result.** Load is rebalanced with a traceable change; estimates gaps are visible.
 
@@ -2106,6 +2236,25 @@ Each workflow states the actor, trigger, steps, system response, exceptions, and
 **Exceptions.** A correction is needed after archive (E-11) → Admin unarchives (→ Complete), PM edits with reasons, PM re-archives; all logged. Project Cancelled instead → same read-only behaviour with Cancelled status.
 
 **Result.** History is preserved, searchable, and immutable; the portfolio only shows live work.
+
+---
+
+### Workflow 14 — Manager assigns a direct report to a project
+
+**Actor.** Supervisor (Sam, Alex's manager); team member (Alex); PM of project 1234 (Priya). **Trigger.** Priya asks Sam for a civil designer on 1234.
+
+**Steps.**
+1. Sam opens My Staff, sees Alex has room (3 projects, nothing overdue), clicks **Assign to project**, and picks 1234 with primary discipline Civil. (Priya could do the same from the project's Team tab.)
+2. Alex opens the "Added to 1234 DCC Dundurn Roads" notification, which says they now follow the project at All activity.
+3. During the week, every change others make on 1234 appears in Alex's Following tab. The next morning's digest summarises it under Project updates ("1234: 6 status changes, 2 due-date changes, 1 deliverable issued").
+4. A month later, Alex, now on six projects, sets 1234 to My items only from the project header.
+5. Sam opens My Staff: Alex shows 6 projects, 2 overdue, 1 blocked. Sam expands Alex's row to see the assignments, opens Alex's My Work (read-only), sees the blocked task and its blocker, and reassigns one overdue task to Jill.
+
+**System response.** Step 1 creates the team membership (logged with Sam as actor) and a follow at All activity with source Assignment (ASG-01); Alex receives the "Added to a project" notification and Priya an in-app notice "Sam added Alex to 1234 as Team Member" (ASG-10); Sam gets no notice for his own action. Step 4 sets Alex's follow to My items only with source Manual, so later role changes on 1234 never reset it (ASG-02). Step 5's reassignment notifies Alex, Jill, and the PM and is logged with Sam as actor.
+
+**Exceptions.** Alex had already set a follow level on 1234 → it is unchanged (ASG-01). Priya later removes Alex from 1234 → the Assignment follow is deleted (ASG-04) and Sam is notified (ASG-11). Sam tries to make Alex the Civil Discipline Lead → not offered; Discipline Leads are set by the PM (ASG-10). 1234 is Restricted and Sam is not a member → Sam cannot pick it in Assign to project; if Alex is already on it, Sam sees Alex's counts with the project shown as "Restricted project" (ASG-09).
+
+**Result.** Managers staff and oversee their direct reports without going through each PM, PMs are told about every change to their team, and being assigned to a project is the subscription to its updates.
 
 
 ## 15. Business Rules
@@ -2216,6 +2365,10 @@ C-01 to C-08 as in §12.8; DOC-01 to DOC-04 as in §12.7.
 
 **Example 3 — Due-soon override.** T0042 due 2026-09-17, today 2026-09-14, T0031 incomplete but not overdue (due 2026-09-16). `due − today = 3 ≤ task_due_soon_days (5)` → T0042 Blocked (D-06 c) even though the predecessor is not yet overdue; this is the "you will not make it" signal.
 
+### 15.13 Assignment and following rules (ASG)
+
+ASG-01 to ASG-11 as in §12.18.
+
 ---
 
 ## 16. Project Health Logic
@@ -2281,7 +2434,7 @@ The "Why?" popover lists each input that is non-zero with its value and the colo
 
 ### 16.5 Health snapshots
 
-Nightly, for every Active project, store `ProjectHealthSnapshot` (`project_id`, `date`, `computed_health`, `reported_health`, the input values). This is cheap (one row per project per day) and enables the Portfolio trend sparkline and "how long has this been red" without recomputing history. Storing is MVP-Recommended; display is Phase 2.
+Nightly, for every Active project, store `ProjectHealthSnapshot` (`project_id`, `date`, `computed_health`, `reported_health`, the input values). This enables the first-release Portfolio trend sparkline and "how long has this been red" without recomputing history. Storing and display are required for the first release under §36.
 
 ### 16.6 Discipline status
 
@@ -2303,6 +2456,7 @@ Health and milestone status are recomputed (a) on demand when a dashboard/portfo
 - Every notification links to the item and states the project.
 - Users can turn any channel off per event type; PMs cannot force notifications on others.
 - Nothing is sent to external parties in MVP.
+- **Following is how "all updates" works.** Being assigned to a project follows it (§12.18). Following at All activity delivers every change others make on the project to the in-app Following feed and the daily digest, never as one email per change.
 
 ### 17.2 Event catalogue and defaults
 
@@ -2336,20 +2490,24 @@ Channels: **App** = in-app notification centre; **Email** = immediate email; **D
 | Health override set/expired | PM | ● | | |
 | Work reassigned away from you | Previous assignee | ● | | |
 | Predecessor of your task was deleted / dependency removed | Successor assignee | ● | | |
+| Any change by someone else on a project you follow at All activity | Followers | ● (Following tab) | | ● (Project updates) |
+| Someone else added one of your direct reports to or removed them from a project, or made them Discipline Lead | Supervisor | ● | | ● (My staff) |
+| A Supervisor added or removed one of their direct reports on your project team | PM | ● | | ● |
 
 ### 17.3 Daily digest
 
-One email per user per day at `digest_send_time_local` (default 07:00), only if there is content. Sections, each capped at 10 rows with "and n more" linking to My Work: Overdue (mine) · Due in the next N days (mine) · Blocked (mine) with blockers · Reviews waiting on me · Decisions I own/requested due or overdue · For PMs and DLs: attention items Critical/Warning per project · Milestones approaching in my projects. Subject line: "Hub digest — 3 overdue, 2 reviews, 1 blocked". No digest for projects in Setup/On Hold. Weekend digests are suppressed by default (Recommendation).
+One email per user per day at `digest_send_time_local` (default 07:00), only if there is content. Sections, each capped at 10 rows with "and n more" linking to My Work: Overdue (mine) · Due in the next N days (mine) · Blocked (mine) with blockers · Reviews waiting on me · Decisions I own/requested due or overdue · For PMs and DLs: attention items Critical/Warning per project · Milestones approaching in my projects · **Project updates**: for each project followed at All activity, counts of changes by type since the last digest and the five most important (status, assignment, date, deliverable issued, decision), linking to the Following tab · **For Supervisors — My staff**: direct reports with overdue or blocked work or reviews waiting beyond `review_stale_days`, and assignment changes made by others since the last digest. Subject line: "Hub digest — 3 overdue, 2 reviews, 1 blocked" (plus "· 14 project updates" when that section has content). No digest for projects in Setup/On Hold. Weekend digests are suppressed by default (Recommendation).
 
 ### 17.4 Preferences
 
-Per user: each event type → App / Email / Off (Digest is a single on/off with time). Per project mute (App and Email off for that project except assignment and mention) — Recommendation. Defaults are set by Admin (Settings) and applied to new users; changes to defaults do not overwrite existing user choices.
+Per user: each event type → App / Email / Off (Digest is a single on/off with time). Per project follow level (§12.18): All activity, My items only, or Muted (App and Email off for that project except direct assignments and mentions). Defaults are set by Admin (Settings) and applied to new users; changes to defaults do not overwrite existing user choices.
 
 ### 17.5 Suppression and de-duplication
 
 - No self-notifications.
 - Collapse: multiple changes to the same item by the same actor within 5 minutes produce one in-app notification ("Marc updated 1234-T0042 (3 changes)").
 - Digest de-dup: an item appears once per digest in its most severe section.
+- Following de-dup: an event that already produced a personal notification for the user is not counted again in the Following feed's unread count or the Project updates digest section (ASG-06).
 - Immediate emails for the same event on the same item to the same user are not repeated within 24 hours (e.g., A-03 first detection only).
 - Bulk actions produce one notification per recipient summarising the affected items, not one per item.
 - Template instantiation in Setup status sends assignment notifications only when the project is activated (batched per user: "You were assigned 12 tasks on 1234").
@@ -2385,7 +2543,7 @@ PostgreSQL full-text search (`tsvector` columns maintained by trigger or applica
 
 Every list endpoint accepts filters as query parameters (§25.5). The UI's filter bar maps one-to-one to these parameters so URLs are shareable and reproducible. Filter operators: equals / in-list (enums, IDs), date range (`dueFrom`, `dueTo`), boolean indicators (`overdue=true`, `blocked=true`), text `q` within the list. Filters combine with AND; multi-value fields are OR within the field.
 
-### 18.4 Saved views [Phase 2]
+### 18.4 Saved views [First release under §36]
 
 `SavedView`: `owner_id`, `scope` (Personal | Project), `project_id` (nullable), `list_type` (Tasks, Deliverables, Decisions, Projects…), `name`, `filters` (JSON), `sort`, `columns`, `group_by`, `is_default`. Personal views appear in the user's view switcher; Project views (created by PM/DL) appear for all project members. Views store filter definitions, not results.
 
@@ -2408,12 +2566,14 @@ All reports are deterministic queries over current data (or snapshots where note
 | Review Queue | reviewer, project(s) | Key, task/deliverable, assignee, ready since, days waiting, round | My / All | MVP |
 | Stale Work | project(s), days | Key, task, assignee, last activity, days | Project / All | MVP |
 | Project Activity Log | project, date range, action types | Timestamp, actor, action, item, change | Project | MVP (Rec) |
-| Projects At Risk | office, PM, health | Project, PM, computed/reported health, why, next submission | Portfolio | P2 |
+| Staff Assignments | scope (direct reports / all staff), discipline, office, project, role | Person, project, project status, role(s), primary discipline, added on, added by, open and overdue tasks on the project | Staff | MVP (Rec) |
+| Projects At Risk | office, PM, health | Project, PM, computed/reported health, why, next submission | Portfolio | First release (§36) |
 | Open Issues / High Risks | project(s), severity | Register rows | Project / All | P2 |
 | Meeting Actions Outstanding | project, owner type | Action rows | Project | P2 |
-| Workload by Employee | supervisor, discipline, weeks | Person, week columns (hours/capacity), open tasks, unestimated, overdue | Resources | P2 |
-| Workload by Discipline | office, weeks | Discipline, week columns aggregated | Resources | P2 |
-| Health History | project(s), date range | Date, computed, reported (from snapshots) | Portfolio | P2 |
+| Workload by Employee | supervisor, discipline, weeks | Person, week columns (hours/capacity), open tasks, unestimated, overdue | Resources | First release (§36) |
+| Workload by Discipline | office, weeks | Discipline, week columns aggregated | Resources | First release (§36) |
+| Health History | project(s), date range | Date, computed, reported (from snapshots) | Portfolio | First release (§36) |
+| Task Hours | project(s), task, person, work-date range | Work date, person, project, task, actual hours, note, total hours | My / Project / Staff (permission-filtered) | First release (§36.8) |
 | Attention Items Export | project(s), severity | Rule, severity, item, why, owner, age | Project / All | P2 |
 
 **Export rules.** CSV is UTF-8 with BOM (Excel-friendly); XLSX has a header row, frozen pane, date-typed columns, and a "Parameters" sheet recording filters and generation time. Exports are limited to 50,000 rows per request (larger runs split by project). Exports are logged (who exported which report when) but not their content.
@@ -2438,7 +2598,7 @@ All reports are deterministic queries over current data (or snapshots where note
 | Attention | Snooze set/expired |
 | Admin | Reference data changes; threshold changes; system role changes; user activation/deactivation |
 | Access (minimal) | Sign-in events (success), export events |
-| Not logged | Views/reads of items; comment body edits within the 15-minute window (only "edited" flag); search queries |
+| Not logged | Views/reads of items; comment body edits within the 15-minute window (only "edited" flag); search queries; follow level changes and feed read markers (personal preferences) |
 
 ### 20.2 Structure
 
@@ -2547,7 +2707,7 @@ Targets are realistic for an internal business application. Items marked TBD nee
 | Fit for one API + jobs | Excellent (WebJobs or in-process hosted services) | Good (scale-to-zero not needed) | Over-engineered |
 | Recommendation | **Preferred** for MVP | Revisit if containerised workloads multiply | Not recommended |
 
-**Supporting libraries (Recommendation, not mandatory)**: UI kit — Fluent UI React v9 (Microsoft look, accessible) or a headless kit with in-house styling; tables — TanStack Table with virtualisation; data fetching — TanStack Query; forms — React Hook Form + Zod; routing — React Router; charts — none beyond a small SVG milestone strip and sparkline; timeline — in-house SVG or a small MIT-licensed Gantt component; backend validation — FluentValidation; OpenAPI — Swashbuckle/NSwag with generated TypeScript client.
+**Supporting libraries (Recommendation, not mandatory)**: UI kit — Fluent UI React v9 (Microsoft look, accessible) or a headless kit with in-house styling; tables — TanStack Table with virtualisation; data fetching — TanStack Query; forms — React Hook Form + Zod; routing — React Router; charts — accessible SVG milestone strip, sparkline, and first-release overview task charts (§36.6); timeline — in-house SVG or a small MIT-licensed Gantt component; backend validation — FluentValidation; OpenAPI — Swashbuckle/NSwag with generated TypeScript client.
 
 ### 23.3 Modular monolith structure
 
@@ -2558,13 +2718,14 @@ One deployable API with clear internal module boundaries (separate projects/asse
 | `Identity` | Token validation, user provisioning, system roles, Graph sync |
 | `Organisation` | Offices, disciplines, clients, project types, phases, deliverable types, settings |
 | `Projects` | Project, links, members, project disciplines, status lifecycle, health override |
-| `Work` | Milestones, deliverables, tasks, dependencies, collaborators, keys/sequences |
+| `Work` | Milestones, deliverables, tasks, dependencies, collaborators, task-hour entries, keys/sequences |
+| `Workspace` | Named project selections, cross-project board and timeline queries, dashboard layout, calendar events and deadline projections (§36) |
 | `Registers` | Decisions, external parties; P2 risks, issues, meetings, actions; item links |
 | `Collaboration` | Comments, mentions, watchers, document links |
 | `Evaluation` | Pure rules (indicators, milestone status, health, attention) + state materialisation + change detection |
 | `Notifications` | Event → notification mapping, preferences, in-app store, email rendering and sending, digest |
 | `Templates` (P2) | Template CRUD and instantiation |
-| `Reporting` | Report queries, exports, portfolio, workload (P2) |
+| `Reporting` | Report queries, exports, first-release portfolio and workload views |
 | `Audit` | Activity logging, history queries |
 | `Search` | FTS indexing and query |
 
@@ -2705,6 +2866,8 @@ Only the important fields are listed; standard audit columns are implied.
 | `external_party` | Client and third-party contacts (no login) | `project_id`, `name`, `organisation`, `email`, `role`, `is_client`, `notes`, `is_active` | `id` | → `project` |
 | `project_health_snapshot` | Daily health history | `project_id`, `snapshot_date`, `computed_health`, `reported_health`, `inputs` (jsonb) | `id`; unique(`project_id`,`snapshot_date`) | → `project` |
 
+The first-release Projects board (§36.2) adds `priority` (Low/Medium/High/Critical, default Medium) to `project`. `progress_pct` is derived at read time or materialised by the existing rules engine from Complete / non-Cancelled tasks; it is nullable when the denominator is zero. It is never stored as a PM-entered project status.
+
 #### Work
 
 | Entity | Purpose | Key fields | PK | FKs / relationships |
@@ -2712,9 +2875,22 @@ Only the important fields are listed; standard audit columns are implied.
 | `milestone` | Dated checkpoints | `project_id`, `key`, `seq`, `name`, `milestone_type`, `date`, `original_date`, `description`, `project_discipline_id`, `completes_phase_id`, `is_client_facing`, `is_complete`, `completed_date`, `is_cancelled`, `cancelled_reason`, `sort_order`, `search_vector`, soft-delete | `id`; unique(`project_id`,`seq`) | → `project`, `project_discipline`, `phase` |
 | `deliverable` | Engineering deliverables | `project_id`, `key`, `seq`, `name`, `project_discipline_id`, `deliverable_type_id`, `description`, `owner_id`, `reviewer_id`, `milestone_id`, `start_date`, `due_date`, `priority`, `status`, `previous_status`, `revision`, `issued_date`, `issued_to`, `accepted_date`, `on_hold_reason`, `cancelled_reason`, `requires_review`, `template_deliverable_id`, `last_activity_at`, `search_vector`, soft-delete, `row_version` | `id`; unique(`project_id`,`seq`) | → `project`, `project_discipline`, `deliverable_type`, `app_user` (owner, reviewer), `milestone` |
 | `task` | Units of work | `project_id`, `key`, `seq`, `name`, `description`, `project_discipline_id`, `deliverable_id`, `milestone_id`, `assignee_id`, `reviewer_id`, `requires_review`, `priority`, `start_date`, `due_date`, `status`, `previous_status`, `progress_pct`, `estimated_hours`, `manual_block_type`, `manual_block_reason`, `manual_block_set_at`, `manual_block_set_by`, `on_hold_reason`, `cancelled_reason`, `review_round`, `due_date_change_count`, `last_activity_at`, `completed_at`, `sort_order`, `template_task_id`, `search_vector`, soft-delete, `row_version` | `id`; unique(`project_id`,`seq`) | → `project`, `project_discipline`, `deliverable`, `milestone`, `app_user` (assignee, reviewer). CHECK: `milestone_id IS NULL OR deliverable_id IS NULL`; CHECK `progress_pct IN (0,10,…,100)`; CHECK `start_date <= due_date` |
+| `task_time_entry` | Actual hours recorded against one task | `project_id`, `task_id`, `user_id`, `work_date`, `hours` (positive decimal, ≤ 24), `note`, `created_at`, `updated_at`, `deleted_at`, `row_version` | `id` | → `project`, `task`, `app_user`; daily total ≤ 24 enforced transactionally across a user's non-deleted entries |
 | `task_dependency` | Finish-to-Start edges | `project_id`, `predecessor_task_id`, `successor_task_id`, `dependency_type` (FinishToStart), `note`, `created_by`, `created_at` | `id`; unique(`predecessor_task_id`,`successor_task_id`) | → `task` ×2 (cascade on task hard-delete only); CHECK `predecessor_task_id <> successor_task_id`. Acyclicity enforced in application (graph check inside the transaction with the project's edges locked). |
 | `task_collaborator` | Additional contributors | `task_id`, `user_id`, `added_at` | `id`; unique(`task_id`,`user_id`) | → `task` (cascade), `app_user` |
 | `item_watcher` | Users following an item | `project_id`, `item_type`, `item_id`, `user_id`, `source` (Mention, Manual, Assignment) | `id`; unique(`item_type`,`item_id`,`user_id`) | → `app_user`; polymorphic item |
+
+#### Visual workspace and calendar (first release, §36)
+
+| Entity | Purpose | Key fields | PK | FKs / relationships |
+|---|---|---|---|---|
+| `workspace` | User-owned named project scope | `name`, `owner_id`, `created_at` | `id` | → `app_user`; selections show only currently permitted projects |
+| `workspace_project` | Project selection | `workspace_id`, `project_id`, `sort_order` | `id`; unique(`workspace_id`,`project_id`) | → `workspace`, `project` |
+| `calendar_event` | Meeting, Site Work, or Internal Task event | `project_id` (nullable for Internal Task), `type`, `title`, `start_at`, `end_at`, `org_time_zone`, `owner_id`, `location`, `description`, `visibility`, `cancelled_at`, `row_version` | `id` | → `project`, `app_user`; CHECK `end_at > start_at` |
+| `dashboard_layout` | Personal order and visibility of fixed widgets | `user_id`, `widget_ids_and_order` (jsonb), `updated_at` | `user_id` | → `app_user` |
+
+Deadline calendar entries are projections from tasks, deliverables, and milestones, not copied event rows. The four board lanes are projections of canonical task status, and their counts use the same permission-filtered query as the task lists.
+The first-release Created by Me view (§36.7) requires `task.created_by_id`, retained independently of assignment changes and linked to `app_user`.
 
 #### Registers
 
@@ -2742,7 +2918,7 @@ Only the important fields are listed; standard audit columns are implied.
 | `activity_log` | Immutable audit | per §20.2 | `id` (uuid v7, time-ordered) | indexes (`project_id`,`occurred_at desc`), (`item_type`,`item_id`,`occurred_at desc`), (`actor_user_id`,`occurred_at desc`) |
 | `notification` | In-app notifications | `user_id`, `event_type`, `project_id`, `item_type`, `item_id`, `item_key`, `title`, `body`, `link_path`, `collapse_key`, `created_at`, `read_at`, `emailed_at`, `digest_included_at` | `id` | → `app_user`; index (`user_id`,`read_at`,`created_at desc`) |
 | `notification_preference` | Per-user, per-event channels | `user_id`, `event_type`, `in_app`, `email` | `id`; unique(`user_id`,`event_type`) | → `app_user` |
-| `project_mute` | Per-user project mute | `user_id`, `project_id`, `muted_at` | `id`; unique | → `app_user`, `project` |
+| `project_follow` | Per-user project following; the Muted level replaces a separate mute table (§12.18) | `user_id`, `project_id`, `level` (AllActivity, MyItemsOnly, Muted), `source` (Assignment, Manual), `last_seen_at` (Following feed read marker), `created_at`, `updated_at` | `id`; unique(`user_id`,`project_id`) | → `app_user`, `project` (cascade) |
 | `outbox_event` | Transactional outbox | `id`, `event_type`, `payload` (jsonb), `created_at`, `processed_at`, `attempts`, `last_error` | `id` | index on (`processed_at`) where null |
 | `task_state` | Materialised derived state | `task_id`, `project_id`, `is_overdue`, `days_overdue`, `is_due_soon`, `is_waiting`, `is_blocked`, `blocked_since`, `blocked_by` (jsonb: tasks/decisions/manual), `is_blocking`, `blocking_count`, `is_stale`, `is_unassigned`, `is_missing_due_date`, `is_date_inconsistent`, `inconsistency_detail`, `affected_milestone_ids` (uuid[]), `evaluated_at` | `task_id` | → `task` (cascade) |
 | `deliverable_state` | Materialised derived state | `deliverable_id`, `project_id`, `progress_pct`, `task_total`, `task_complete`, `task_open`, `task_overdue`, `task_blocked`, `estimated_hours_total`, `remaining_hours`, `is_overdue`, `is_due_soon`, `is_at_risk`, `is_unassigned`, `is_date_inconsistent`, `slip_days`, `derived_predecessor_ids`, `derived_successor_ids`, `evaluated_at` | `deliverable_id` | → `deliverable` (cascade) |
@@ -2751,7 +2927,7 @@ Only the important fields are listed; standard audit columns are implied.
 | `attention_item` | Current attention items | `project_id`, `rule_id`, `item_type`, `item_id`, `item_key`, `severity`, `message`, `route_to_user_ids` (uuid[]), `first_detected_at`, `last_evaluated_at`, `sort_key` | `id`; unique(`rule_id`,`item_type`,`item_id`) | → `project` |
 | `attention_snooze` | Snoozes | `project_id`, `rule_id`, `item_type`, `item_id`, `snoozed_by`, `snoozed_until`, `note`, `created_at` | `id` | → `project`, `app_user` |
 | `job_run` | Background job history | `job_name`, `started_at`, `finished_at`, `status`, `details` (jsonb) | `id` | — |
-| `saved_view` [P2] | Saved list configurations | `owner_id`, `scope`, `project_id`, `list_type`, `name`, `filters` (jsonb), `sort`, `columns`, `group_by`, `is_default` | `id` | → `app_user`, `project` |
+| `saved_view` | First-release saved list configurations | `owner_id`, `scope`, `project_id`, `list_type`, `name`, `filters` (jsonb), `sort`, `columns`, `group_by`, `is_default` | `id` | → `app_user`, `project` |
 
 #### Templates [P2]
 
@@ -2809,6 +2985,8 @@ erDiagram
   DELIVERABLE ||--o{ DOCUMENT_LINK : has
   PROJECT ||--o{ ACTIVITY_LOG : records
   APP_USER ||--o{ NOTIFICATION : receives
+  APP_USER ||--o{ PROJECT_FOLLOW : follows
+  PROJECT ||--o{ PROJECT_FOLLOW : followed_by
   TASK ||--|| TASK_STATE : materialised
   DELIVERABLE ||--|| DELIVERABLE_STATE : materialised
   MILESTONE ||--|| MILESTONE_STATE : materialised
@@ -2822,12 +3000,15 @@ erDiagram
 - `task (project_id, status) WHERE deleted_at IS NULL`; `task (assignee_id, status) WHERE deleted_at IS NULL`; `task (reviewer_id, status)`; `task (deliverable_id)`; `task (due_date) WHERE deleted_at IS NULL AND status NOT IN ('Complete','Cancelled')`.
 - `task_state (project_id, is_blocked)`, `(project_id, is_overdue)`, `(is_blocking)`; My Work queries join `task` with `task_state` by `task_id`.
 - `task_dependency (successor_task_id)`, `(predecessor_task_id)`.
+- `task_time_entry (user_id, work_date) WHERE deleted_at IS NULL`, `(project_id, work_date) WHERE deleted_at IS NULL`, `(task_id, work_date) WHERE deleted_at IS NULL`.
 - `deliverable (project_id, status)`, `(milestone_id)`, `(owner_id, status)`.
 - `milestone (project_id, date)`.
 - `decision (project_id, status)`, `(required_by_date) WHERE status IN ('Pending','Under Review','Deferred')`.
 - `comment (item_type, item_id, created_at)`; `document_link (item_type, item_id)`; `item_link` both directions.
 - `activity_log (project_id, occurred_at DESC)`, `(item_type, item_id, occurred_at DESC)`.
 - `notification (user_id, read_at, created_at DESC)`.
+- `project_follow (user_id)`, `(project_id, level)`; `app_user (supervisor_id)` for My Staff's direct-report lookup.
+- `workspace (owner_id, name)` unique per user; `workspace_project (workspace_id, sort_order)`; `calendar_event (project_id, start_at)`, `(owner_id, start_at)` for scoped calendar queries.
 - GIN on `search_vector` columns; `pg_trgm` GIN on `project.project_number`, `project.name`, `task.name`, `deliverable.name`.
 
 ### 24.5 Constraints worth stating
@@ -2837,6 +3018,7 @@ erDiagram
 - `project_member.roles` non-empty and within allowed values (CHECK).
 - `task_dependency` acyclicity: application-enforced with `SELECT … FOR UPDATE` on the project row to serialise edge insertions per project, then a DFS over the project's edges.
 - Per-project sequence counters (`next_*_seq`) incremented under the same project row lock, guaranteeing gap-free, unique keys without a global sequence per project.
+- A user cannot be their own supervisor: CHECK `supervisor_id <> id`.
 
 ### 24.6 Migrations and data volume
 
@@ -2920,16 +3102,18 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET /me/work` | My Work aggregate (sections with counts and top rows) | any |
 | `GET /me/tasks`, `/me/reviews`, `/me/deliverables`, `/me/decisions`, `/me/attention` | Section lists with filters | any |
 | `GET /me/notifications`, `POST /me/notifications:markRead`, `PATCH /me/preferences` | Notification centre and preferences | any |
+| `GET /me/following`, `GET /me/feed?projectId=…&since=…`, `POST /me/feed:markRead` | Followed projects, Following feed, feed read markers | any |
 | `GET /projects` | Project list with filters/sort | any (visibility-filtered) |
 | `POST /projects` | Create project | Project.Create |
 | `GET /projects/{id}` | Project header and summary (includes `state`) | Project.View |
 | `PATCH /projects/{id}` | Edit project fields | Project.Edit |
 | `POST /projects/{id}:transition` | `{ toStatus, reason, closeout: {…} }` | Project.ChangeStatus |
 | `POST /projects/{id}:healthOverride`, `DELETE …` | Set/clear override | Project.Edit |
+| `POST /projects/{id}:follow` `{ level }`, `POST /projects/{id}:unfollow` | Set own follow level; unfollow | Project.View |
 | `GET /projects/{id}/dashboard` | Dashboard payload (state, counts, attention top-10, discipline table, recent activity) | Project.View |
 | `GET /projects/{id}/coordination?asOf=…` | Weekly Coordination sections | Project.View |
 | `POST /projects/{id}/coordination:markReviewed` | Stamp review | Coordination.Run |
-| `GET/POST/PATCH/DELETE /projects/{id}/members[/{memberId}]` | Team | Project.ManageTeam |
+| `GET/POST/PATCH/DELETE /projects/{id}/members[/{memberId}]` | Team | Project.ManageTeam; Staff.Assign for POST/DELETE of a Supervisor's direct report as Team Member |
 | `GET/POST/PATCH /projects/{id}/disciplines[/{pdId}]` | Project disciplines and leads | Project.ManageTeam |
 | `GET/POST /projects/{id}/milestones`, `GET/PATCH/DELETE /milestones/{id}` | Milestones | Milestone.* |
 | `POST /milestones/{id}:changeDate` | `{ newDate, reason, cascadeDeliverables: bool }` returns preview if `dryRun=true` | Milestone.Edit |
@@ -2944,6 +3128,8 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET /tasks/{id}/dependencies`, `POST …`, `DELETE /dependencies/{depId}` | Dependencies | Dependency.Manage |
 | `GET /tasks/{id}/chain?depth=10` | Transitive predecessors/successors with states | Task.View |
 | `POST /projects/{id}/tasks:bulk` | `{ taskIds[], operation: assign \| shiftDueDates \| setPriority \| setDeliverable \| transition, params, reason }` → per-row results | per row |
+| `GET/POST /time/entries`, `GET/PATCH/DELETE /time/entries/{id}` | Own task-hour entries and permitted project/staff review; filtered totals and soft deletion (§36.8) | Time.Own / Project.PM / Discipline.Lead / Staff.View |
+| `GET /tasks/{id}/time`, `GET /projects/{id}/time` | Permission-filtered actual-hour totals and entries; export uses the Task Hours report | Task.View / Project.View with time-entry scope |
 | `GET/POST /projects/{id}/decisions`, `GET/PATCH /decisions/{id}`, `POST /decisions/{id}:decide`, `:defer`, `:cancel`, `:reopen` | Decisions | Decision.* |
 | `GET/POST /projects/{id}/externalParties` | External parties | Project.View / Project.Edit |
 | `GET/POST /items/{type}/{id}/comments`, `PATCH/DELETE /comments/{id}` | Comments | Comment.* |
@@ -2951,9 +3137,14 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET/POST/DELETE /items/{type}/{id}/watchers` | Watchers | any member |
 | `GET /projects/{id}/attention`, `POST /attention/{id}:snooze` | Attention items | Project.View / Attention.Snooze |
 | `GET /projects/{id}/activity`, `GET /items/{type}/{id}/activity` | Activity history | Project.View |
-| `GET /projects/{id}/timeline` | Timeline payload (milestones, deliverables, P2 tasks and edges) | Project.View |
+| `GET /projects/{id}/timeline` | Timeline payload (milestones, deliverables, tasks, and edges) | Project.View |
 | `GET /search?q=…&types=…&includeArchived=false` | Global search | any |
-| `GET /portfolio` [P2], `GET /resources/workload` [P2] | Cross-project views | Portfolio.View / Workload.View |
+| `GET /portfolio`, `GET /resources/workload` | First-release cross-project views | Portfolio.View / Workload.View |
+| `GET/POST /workspaces`, `GET/PATCH/DELETE /workspaces/{id}` | User-owned named project selections; read filters inaccessible projects | Workspace.Own |
+| `GET /workspaces/{id}/board`, `/timeline`, `/dashboard` | Permission-filtered cross-project views (§36) | Project.View per included project |
+| `GET /calendar`, `GET/POST /calendar/events`, `GET/PATCH/DELETE /calendar/events/{id}` | Week/Month/Agenda entries and owned calendar events (§36.5) | Calendar.View / Event.Own / Project.PM |
+| `GET /staff?scope=direct\|all` | My Staff rows with assignments and work counts | Staff.View (Supervisor; `all` for Executive/Admin) |
+| `GET /users/{id}/assignments`, `GET /users/{id}/work` | A staff member's project assignments and My Work (read-only) | Staff.View (person in scope) |
 | `GET /reports`, `GET /reports/{name}?…`, `GET /reports/{name}/export?format=csv\|xlsx` | Reports | scoped |
 | `GET/POST/PATCH /admin/users`, `/admin/disciplines`, `/admin/clients`, `/admin/offices`, `/admin/deliverableTypes`, `/admin/phases`, `/admin/projectTypes`, `/admin/settings` | Administration | Admin |
 | `GET /admin/users/{id}/openWork`, `POST /admin/users/{id}:reassignAll` | Reassign work tool | Admin / Supervisor (scoped) |
@@ -3072,21 +3263,24 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 | SSO (Entra ID) | **MVP-Required** | No local passwords; frictionless adoption. Feasible with standard libraries. |
 | Activity history | **MVP-Required** | Engineering traceability; cheap when built in from the start, painful to retrofit. |
 | Global search + list filtering | **MVP-Required** | Basic usability at 100+ projects. |
-| Kanban board | **MVP-Required (thin)** | Low cost on top of the task list; teams expect it. No swimlane customisation beyond the three groupings. |
+| Kanban board | **MVP-Required** | Four visible lanes across selected projects with project-labelled cards and guarded transitions (§36.3). |
 | Thin Decision Register + External Parties | **MVP-Recommended** | Decisions are the top non-task blocker in design projects and the register is one entity. Fallback documented in §12.9. |
-| Timeline (milestones + deliverables, read-only) | **MVP-Recommended** | Visual crowding before submissions is a common PM question; read-only keeps it small. |
+| Timeline (milestones, deliverables, tasks, and dependencies) | **MVP-Required** | The user-confirmed §36 scope includes the cross-project Gantt and guarded date dragging in the first release. |
 | Milestone original date / slip; due-date change count | **MVP-Recommended** | Two columns each; strong deterministic signals. |
-| Health snapshots (store only) | **MVP-Recommended** | One row/project/day; enables P2 trends without backfill. |
+| Health snapshots and portfolio trend | **MVP-Required** | One row/project/day; the first-release Portfolio view requires the trend. |
 | Attention snooze | **MVP-Recommended** | Prevents the attention list from being ignored because it is cluttered by known items. |
 | Restricted project visibility (schema + enforcement) | **MVP-Recommended** | Cheap now, expensive later; UI toggle only if the business confirms. |
 | Core reports with CSV/XLSX export | **MVP-Required (core set)** | People will ask for Excel on day one. |
 | Reassign-work tool for leavers | **MVP-Recommended** | Turnover is certain; the alternative is manual reassignment task by task. |
+| Project following on assignment (Following feed, Project updates digest) | **MVP-Required** | Requested by the business: being assigned to a project means receiving all of its updates. Cheap because the feed reads the activity log that is already written. |
+| My Staff page (direct reports, with staffing) | **MVP-Required** | Managers see their direct reports' assignments and work and staff them on projects without going through each PM. Hours-based load is in the first-release Resource View. |
 | Project templates | **Phase 2** | High value but the template editor is a significant UI; MVP projects can be set up manually or by cloning a project (**Recommendation: include "clone project structure" as a cheap MVP stopgap** — copies disciplines, milestones (undated), deliverables, tasks (unassigned), and dependencies from an existing project). |
 | Risk / Issue registers, Meeting Actions | **Phase 2** | Valuable but not needed to answer the core question; can be represented in MVP by tasks and comments. |
-| Resource / Workload view | **Phase 2** | Depends on estimated hours being populated, which requires MVP adoption first. |
-| Portfolio dashboard | **Phase 2** | Requires enough Active projects in the system to be meaningful; the Project List with health column covers the interim. |
-| Saved views | **Phase 2** | URL-encoded filters cover MVP. |
-| Tasks/dependencies on the timeline, drag to reschedule | **Phase 2** | Scheduling-adjacent; risk of scope creep. |
+| Resource / Workload view | **MVP-Required** | Workload is a visible first-release view (§36.8); missing estimates remain explicit. |
+| Portfolio and overview dashboards | **MVP-Required** | The overview with metrics, charts, deadlines, and personal layout editing is in the image (§36.6). |
+| Saved views and manual board order | **MVP-Required** | Both are needed for the pictured personal and board workflows (§36.3, §36.7). |
+| Team calendar and cross-project views | **MVP-Required** | Week/Month/Agenda, event creation, multi-project board and Gantt are in the image (§36). |
+| Task-hour entry under Time | **MVP-Required** | The user confirmed that the image's Time route records actual hours against tasks (§36.8). |
 
 ### 27.2 MVP feature list
 
@@ -3100,15 +3294,17 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 7. Tasks: CRUD; workflow with review; single assignee; collaborators/watchers; progress; manual block; soft delete; reopen; bulk actions.
 8. Dependencies: Finish-to-Start; cycle prevention; Waiting/Blocked/Blocking; chain view; affected milestones; auto-unblock notifications.
 9. Rules engine and materialised state; attention engine; project and discipline health; overrides.
-10. Screens: Project List, Project Dashboard, Task List, Task Panel, Kanban, Deliverables Register, Milestone View, Weekly Coordination (with meeting mode and mark reviewed), My Work, Activity History, Notification Centre, Admin, Team & Settings, Reports.
+10. Screens: Project List and grouped Projects Board, Project Dashboard, Overview Dashboard, Task List, cross-project Kanban and Gantt, Team Calendar, Files link library, Task Panel, Deliverables Register, Milestone View, Weekly Coordination (with meeting mode and mark reviewed), My Work, My Staff, Portfolio, Resource/Workload, Activity History, Notification Centre (with Following tab), Admin, Team & Settings, Reports (§36).
 11. Comments, mentions, watchers, document links.
 12. Notifications: in-app, immediate email, daily digest, preferences.
 13. Global search, list filters, sorting, grouping, column chooser, exports.
 14. Activity log on all specified changes; item and project history.
 15. Core reports (§19 MVP rows).
+16. Assignments and following: follow on team assignment, follow levels, Following feed, Project updates digest section, My Staff page for direct reports, with staffing (§12.18).
+17. Six-view visual workspace: named project scope, project priority and derived progress, four-lane task board, task-level Gantt, calendar events, overview widgets and charts, saved personal views, functional navigation, and task-hour entry under Time (§36).
 
 **Recommended (ship if schedule allows; each independently cuttable)**
-Thin Decision Register + External Parties; read-only Timeline; slip and due-change tracking; health snapshots; attention snooze; Restricted visibility enforcement; reassign-work tool; clone project structure; "Copy summary" on Weekly Coordination; milestone date cascade to deliverables.
+Thin Decision Register + External Parties; slip and due-change tracking; attention snooze; Restricted visibility enforcement; reassign-work tool; clone project structure; "Copy summary" on Weekly Coordination; milestone date cascade to deliverables; staff assignment notices and My staff digest section for supervisors; Staff Assignments report. The six pictured views are required, not cuttable.
 
 ### 27.3 Explicitly not in MVP (and the consequence)
 
@@ -3116,31 +3312,27 @@ Thin Decision Register + External Parties; read-only Timeline; slip and due-chan
 |---|---|
 | Templates | Projects built manually or cloned from a reference project. |
 | Risks, Issues, Meeting Actions | Tracked as tasks/comments or outside the Hub. |
-| Portfolio Dashboard | Executives use Project List sorted by health plus Projects At Risk report (P2) — interim: Project List. |
-| Resource View | Supervisors use "Tasks by assignee" filter across projects (My Work read for supervised staff). |
-| Tasks on the timeline; drag scheduling | Dates edited in lists/panels. |
-| Saved views | Bookmark URLs. |
 | Teams notifications | Email and in-app only. |
 
 ---
 
 ## 28. Phase 2 Scope
 
-Ordered by recommended sequence; each item lists what it depends on.
+Original item numbers are retained for historical packet citations. Items marked moved are first-release scope under §27 and §36, not Phase 2 work.
 
 1. **Project Templates** (§12.14) — depends on stable MVP data model; replaces "clone project". Includes "Add from template".
 2. **Decision Register enhancements** (if thin register shipped): decision history view, bulk link, client-facing export of open decisions.
 3. **Risk Register and Issue Register** (§12.10) — adds attention rule A-07 and Red health input.
 4. **Meeting Actions** (§12.11) — integrates with Weekly Coordination meeting mode (create actions inline; "Convert to task").
-5. **Portfolio Dashboard** (§13.12) — uses health snapshots for trends; Projects At Risk and Health History reports.
-6. **Resource / Workload View** (§12.15, §13.11) — requires estimated hours adoption; Workload reports.
-7. **Improved Timeline** — tasks, dependency arrows, drag-to-reschedule with confirmation, baseline ghosts, milestone cascade to tasks.
-8. **Saved views** (§18.4) — personal and project-shared.
-9. **Advanced notifications** — weekly PM summary email; per-project mute; digest content preferences; server-sent events for live unread counts.
+5. **Moved to first release:** Portfolio Dashboard (§13.12, §36.6).
+6. **Moved to first release:** Resource / Workload View (§12.15, §13.11, §36.8).
+7. **Moved to first release:** Improved Timeline with tasks, arrows, guarded dragging, and baseline ghosts (§36.4).
+8. **Moved to first release:** Saved views (§18.4, §36.7).
+9. **Advanced notifications** — weekly PM summary email; digest content preferences; server-sent events for live unread counts. (Per-project mute ships in MVP as the Muted follow level, §12.18.)
 10. **Explicit deliverable-to-deliverable dependencies**; dependency lag days.
 11. **Working-day calendars** for thresholds (statutory holidays by office).
 12. **Search over descriptions and comments**.
-13. **Kanban manual ordering** within columns.
+13. **Moved to first release:** Kanban manual ordering (§36.3).
 
 ---
 
@@ -3150,7 +3342,7 @@ Ordered by recommended sequence; each item lists what it depends on.
 2. **SharePoint integration** — browse and pick documents from the project library (Graph); still no storage in the Hub.
 3. **ERP / Vantagepoint integration** — inbound project master data sync (**TBD**: capabilities, licensing, ownership of fields). Nothing is assumed about ERP capabilities in this specification.
 4. **Project financial information (read-only display)** — only if sourced from ERP; the Hub never becomes a financial system.
-5. **Utilisation / resource planning** — availability from HR/leave systems, capacity by role, longer horizons; still not levelling or timesheets.
+5. **Utilisation / resource planning** — availability from HR/leave systems, capacity by role, longer horizons; still no levelling or payroll timesheets.
 6. **Client / external actions** — optional read-only external access or emailed action lists to external parties (security review required).
 7. **Advanced portfolio reporting** — cross-office comparisons, discipline throughput, submission on-time rates from snapshots.
 8. **Advanced administration** — per-project threshold overrides; template analytics; bulk data tools.
@@ -3168,7 +3360,7 @@ No AI features are planned in any phase of this specification.
 | AI assistants, LLM features, automated summaries, AI task extraction, recommendations, predictions, "smart" scheduling | Product constraint; the product must be fully deterministic and explainable. |
 | Accounting, invoicing, budgets, cost tracking, earned value | Financial systems of record exist; the Hub coordinates work, not money. |
 | Payroll, HR records, leave management | Not a coordination concern. |
-| Timesheets or time tracking of any kind | Duplicates ERP/timesheet systems; poisons task estimates with compliance behaviour. |
+| Payroll or billable timesheet approval, billing rates, invoicing, and payroll submission | Actual hours are recorded against tasks in the first-release Time view (§36.8), but the Hub does not replace financial or payroll systems. |
 | Full ERP or CRM functionality | — |
 | CPM scheduling, critical path, float, resource levelling, baselining beyond original dates, MS Project/P6 import-export | Primavera/Project replacement is a non-goal. |
 | CAD/BIM authoring, model viewing, drawing mark-up | Engineering tools do this. |
@@ -3332,8 +3524,8 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 
 - **AC-NOT-01** Given a user is assigned a task by someone else, Then they receive one in-app notification and one email within 2 minutes.
 - **AC-NOT-02** Given a user changes their own task's status, Then they receive no notification.
-- **AC-NOT-03** Given a user has 2 overdue tasks, 1 review waiting, and 1 blocked task at 07:00 in the organisation time zone, Then they receive one digest email with those sections and the subject "Hub digest — 2 overdue, 1 review, 1 blocked".
-- **AC-NOT-04** Given a user has nothing due, overdue, blocked, or awaiting review, Then no digest is sent.
+- **AC-NOT-03** Given a user with no new project updates has 2 overdue tasks, 1 review waiting, and 1 blocked task at 07:00 in the organisation time zone, Then they receive one digest email with those sections and the subject "Hub digest — 2 overdue, 1 review, 1 blocked".
+- **AC-NOT-04** Given a user has nothing due, overdue, blocked, or awaiting review, and no project updates or staff changes to report, Then no digest is sent.
 - **AC-NOT-05** Given a user turns off email for "Comment on an item you own/watch", Then comments still create in-app notifications and no emails.
 - **AC-NOT-06** Given a PM bulk-reassigns 12 tasks to one user, Then that user receives a single notification summarising 12 tasks.
 - **AC-NOT-07** Given a project in Setup with 40 tasks assigned during setup, When the project is activated, Then each assignee receives one batched assignment notification.
@@ -3347,6 +3539,18 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 - **AC-AUD-02** Given a task is deleted, Then the project Activity History shows the deletion with a snapshot summary (key, name, assignee, status, due) and the removed dependencies.
 - **AC-AUD-03** Given the system expires a health override, Then the log entry shows actor System.
 - **AC-AUD-04** Given any user, Then no UI or API path exists to edit or delete an activity log row (verified by API surface review and database role permissions).
+
+### 31.16 Assignments, following, and My Staff (AC-ASG)
+
+- **AC-ASG-01** Given a PM adds Alex to project 1234 as a Team Member, Then Alex follows 1234 at All activity with source Assignment, and Alex's "Added to a project" notification states that they now follow it; Given Diane is auto-added only as Reviewer, Then she follows at My items only.
+- **AC-ASG-02** Given Alex follows 1234 at All activity, When Marc changes a task due date on 1234, Then the change appears in Alex's Following tab within 60 seconds and counts as unread for 1234; When Alex changes a task themselves, Then it is not counted as unread.
+- **AC-ASG-03** Given Alex set 1234 to My items only, When the PM later changes Alex's project role, Then Alex's level is still My items only.
+- **AC-ASG-04** Given Alex's follow on 1234 has source Assignment, When Alex is removed from the team, Then the follow is deleted; Given Alex had set the level themselves (source Manual) and 1234 is Open, Then it is kept.
+- **AC-ASG-05** Given Alex follows 1234 at All activity and others made 9 changes on it yesterday, one of which assigned Alex a task, Then the 07:00 digest's Project updates section counts 8 changes for 1234, and the assignment appears only in its personal notification.
+- **AC-ASG-06** Given a PM bulk-shifts 40 due dates on 1234, Then Alex's Following tab shows one collapsed entry for the 40 changes, not 40 entries.
+- **AC-ASG-07** Given Sam supervises Alex and Lena supervises Sam, When Sam opens My Staff, Then Alex appears with project count, roles, open, overdue, blocked, blocking others, and reviews waiting; When Lena opens My Staff, Then Sam appears and Alex does not; Given a Standard User without the Supervisor role calls `GET /staff`, Then 403.
+- **AC-ASG-08** Given Alex has 2 tasks on a Restricted project that Sam cannot view, When Sam opens My Staff, Then those tasks are absent from Alex's counts and expanded assignments, so Sam cannot infer restricted work from this screen (§36.1).
+- **AC-ASG-09** Given Sam supervises Alex, When Sam assigns Alex to project 1301 from My Staff with primary discipline Civil, Then Alex is a Team Member of 1301 following it at All activity, the PM of 1301 receives an in-app notification naming Sam, and the change is logged with Sam as actor; When Sam tries to add Jill, who does not report to him, or to make Alex a Discipline Lead, Then the action is not offered and the API returns 403.
 
 ---
 
@@ -3378,6 +3582,11 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | E-22 | **Very large project (5,000+ tasks)** | Whole-project evaluation still completes within seconds; lists are virtualised and paginated; Kanban warns above 500 cards and suggests filtering. |
 | E-23 | **Two PMs edit Weekly Coordination items simultaneously** | Optimistic concurrency per item; conflicts surfaced inline; no locking. |
 | E-24 | **Deliverable issued, then client returns comments** | Set status Revision Required (from Issued, PM/DL) with a comment; `issued_date`/`revision` retained; the next issue records the new revision; P2 issue history lists both. |
+| E-25 | **Employee moves to another manager** | The `supervisor_id` change (Admin or directory sync) takes effect immediately for My Staff and reassignment scope; the previous supervisor loses read access to that person's My Work; logged as an Admin change. |
+| E-26 | **Supervisor data missing** | Users with no supervisor appear only in the All staff scope and in an Admin "No supervisor" filter so the gap gets fixed; nobody can staff them from My Staff until a supervisor is set. |
+| E-27 | **Person on many projects gets too many updates** | Per-project follow levels (ASG-02); the digest groups updates by project and caps each at five rows; the Following tab has an "important only" filter; the system never overrides a level the user has set. |
+| E-28 | **Follower loses access to a Restricted project** | The follow is deleted (ASG-04), and because the feed is permission-filtered at read time, that project's entries disappear from the Following tab immediately. |
+| E-29 | **Supervisor removes a direct report who owns open work on a project** | The TM-04 prompt runs for the supervisor as it would for the PM: reassign the person's open items within the project or leave them assigned with an "Inactive on project" indicator; the PM is notified with the list of affected items; all logged. |
 
 ---
 
@@ -3386,12 +3595,14 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | Risk | Impact | Mitigation |
 |---|---|---|
 | **Adoption**: team members do not update tasks, so indicators are wrong and PMs stop trusting the tool. | High | My Work as the single list; minimal required fields; weekly coordination run from the tool creates the habit; digest reminders; pilot with 2–3 motivated PMs; measure update frequency. |
-| **Data quality**: missing due dates, unassigned tasks, no estimates. | Medium | Attention rules A-08/A-09/A-13 make gaps visible; Resource View (P2) shows unestimated counts rather than hiding them; templates (P2) seed structure. |
+| **Data quality**: missing due dates, unassigned tasks, no estimates. | Medium | Attention rules A-08/A-09/A-13 make gaps visible; the first-release Resource View shows unestimated counts rather than hiding them; templates (P2) seed structure. |
 | **Notification fatigue** leads to filters that hide everything. | Medium | Digest-first defaults; transition-based immediate notifications only; per-user preferences; monitor unsubscribe rates in pilot and adjust defaults. |
 | **Rule tuning**: thresholds produce too many or too few attention items. | Medium | All thresholds configurable; start with defaults; review attention volume per project weekly during pilot; keep the rule set small. |
 | **Over-reliance on health colours** by management. | Medium | Computed and reported shown together; "why" always available; override expiry; training message: health summarises indicators, it does not predict. |
 | **Permission model perceived as restrictive** (e.g., DL cannot move a milestone). | Low | Clear hover explanations; PMs can grant roles quickly; revisit after pilot rather than pre-emptively loosening. |
 | **Entra/Graph permission approvals** delay SSO or sync. | Medium | Start the IT approval process in the discovery sprint; SSO works without Graph; sync has a documented fallback. |
+| **Supervisor data is incomplete** (Entra `manager` not populated), so My Staff shows the wrong people and the wrong managers can staff them. | Medium | Sync `manager` from Entra where populated (Q3); Admin maintenance otherwise; "No supervisor" filter for Admins. |
+| **Staffing conflicts**: a supervisor adds or removes people on a project without the PM's agreement. | Low | The PM is notified of every change (ASG-10); supervisors can only add their own direct reports as Team Members; the PM controls all other roles and can remove anyone. |
 | **Email deliverability** (spam filtering of digests). | Low | Send from a corporate mailbox via Graph; SPF/DKIM already handled by Exchange Online; plain formatting. |
 | **Evaluation performance** at higher-than-assumed scale. | Low | Whole-project evaluation is O(items) per project; per-project debounce; profile in test with synthetic 5,000-task projects; state tables keep reads cheap. |
 | **Time-zone and working-day expectations** differ by office. | Low | Calendar days and one organisation time zone in MVP, stated plainly; working-day calendars in P2. |
@@ -3425,6 +3636,9 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | Q16 | Pilot group and success metrics | Rollout plan | 3 PMs, 6 projects, 8 weeks |
 | Q17 | Idle session timeout | Security vs convenience | 8 hours |
 | Q18 | Weekly capacity default and whether under-assignment should be shown (P2) | Workload view sensitivity | 40 h; show with caveats |
+| Q19 | Manager staff scope | Who sees and staffs whose work; only as good as the supervisor data (Q3) | **Decided:** direct reports only; Executives and Admins can view all staff |
+| Q20 | Default follow level when a user is assigned to a project | Update volume vs. visibility | **Decided:** All activity (My items only for reviewer-only members), delivered in-app and in the daily digest, never one email per change |
+| Q21 | Meaning of the Time navigation entry in the six-view image: task-hour entry or reserved route | Determines whether §3.2, §6, §12.15, and §30's time-tracking exclusion changes, and whether a new first-release workflow and packet are needed | **Decided by user:** enter actual hours against tasks in the first release; no billing or payroll workflow is implied. |
 
 ---
 
@@ -3434,12 +3648,12 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 
 | Stage | Purpose | Exit criteria |
 |---|---|---|
-| **0. Discovery & design sprint** | Confirm decisions Q1–Q13; wireframes for My Work, Project Dashboard, Task List/Panel, Weekly Coordination; validate rules with 3 PMs using real project data on paper; finalise discipline and deliverable type lists | Decisions recorded as ADRs; wireframes approved; test data set prepared (DCC Dundurn Roads-style project) |
+| **0. Discovery & design sprint** | Confirm decisions Q1–Q13 and Q21; validate the §36 functional flows with 3 PMs using representative project data; use the V2 prototype only as a visual clue while designing and testing the actual screens; finalise discipline and deliverable type lists | Decisions recorded as ADRs; functional flows and proposed screen designs reviewed; test data set prepared (DCC Dundurn Roads-style project) |
 | **1. Foundations** | Repo, CI/CD, IaC, environments, SSO end-to-end, user provisioning, admin reference data, activity log framework, design system skeleton | A user can sign in, see their name, and an Admin can maintain disciplines |
 | **2. Core structure** | Projects, team, disciplines, milestones, deliverables, tasks (CRUD, workflow, review), comments, links | A project can be fully built by hand and worked through review |
 | **3. Dependencies and rules** | Dependencies, evaluation module, state tables, outbox worker, indicators, milestone status, health, attention engine, nightly jobs | Worked examples in §15.12 pass as automated tests and show correctly in the UI |
 | **4. Coordination surfaces** | Project Dashboard, My Work, Weekly Coordination (with meeting mode), Kanban, Milestone view, Deliverables Register polish, search, filters, exports | A PM can run a coordination meeting on the test project without leaving the app |
-| **5. Notifications and recommended items** | In-app centre, email, digest, preferences; Decision Register; Timeline; snooze; reassign tool; clone project | Pilot readiness |
+| **5. Visual workspace and notifications** | Six pictured views (§36), task-hour entry, portfolio, resource grid, saved views, task-level Gantt, team calendar, in-app centre, email, digest, preferences; recommended Decision Register and extras | Every first-release visual acceptance scenario AC-VIS-01 through AC-VIS-08 passes before pilot |
 | **6. Hardening and pilot** | Accessibility audit, performance test with synthetic scale, security review, runbooks, training material; pilot with 3 PMs for 8 weeks; threshold tuning | Pilot success metrics met; go/no-go for organisation rollout |
 | **7. General availability** | Rollout by office/group; support process; backlog triage for Phase 2 | — |
 
@@ -3456,12 +3670,13 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | **E6 Dependencies** | Edge CRUD, cycle detection, chain endpoint, UI sections | E5 | M |
 | **E7 Evaluation Engine** | Pure rules (indicators, milestone status, deliverable progress/at-risk, health, attention), state tables, outbox worker, nightly/15-min jobs, snapshots, snooze; "why" popovers; indicator chips wired to state | E6 | XL |
 | **E8 Collaboration** | Comments, mentions, watchers, document links, status notes | E5 | M |
-| **E9 Notifications** | Event mapping, in-app centre, preferences, email adapter (Graph/ACS), digest, suppression/collapse | E7, E8 | L |
-| **E10 Coordination Surfaces** | Project Dashboard, My Work, Weekly Coordination (+ meeting mode, mark reviewed, copy summary), discipline summaries | E7, E8 | XL |
+| **E9 Notifications** | Event mapping, in-app centre, preferences, email adapter (Graph/ACS), digest, suppression/collapse; project following (follow on assignment, levels), Following feed, Project updates and My staff digest sections | E7, E8 | L |
+| **E10 Coordination Surfaces** | Project Dashboard, My Work, Weekly Coordination (+ meeting mode, mark reviewed, copy summary), discipline summaries, My Staff (including staffing) | E7, E8 | XL |
 | **E11 Decisions & External Parties** (Rec) | Decision CRUD/lifecycle, external parties, item links, decision-block rule, register screen, dashboard/coordination integration | E7 | M |
 | **E12 Search, Filters, Reports** | FTS indexing, global search, key lookup, filter bar/URL state, group-by, column chooser, core reports, CSV/XLSX export | E5 (usable earlier for projects) | M |
-| **E13 Timeline & Extras** (Rec) | Read-only Timeline, clone project structure, reassign-work tool, milestone cascade | E7 | M |
-| **E14 Hardening & Pilot** | Accessibility, performance, security review, runbooks, training, pilot support, threshold tuning | All | M |
+| **E13 Timeline & Extras** | Baseline Timeline, clone project structure, reassign-work tool, milestone cascade | E7 | M |
+| **E15 Six-View Workspace** | Projects board, cross-project board/Gantt, calendar, overview, My Work views, portfolio, workload, saved views, task-hour entry, §36 functional acceptance | E5, E7, E9, E10, E12, E13 | Re-estimate |
+| **E14 Hardening & Pilot** | Accessibility, performance, security review, runbooks, training, pilot support, threshold tuning | E0–E13, E15 | Re-estimate |
 
 ```mermaid
 flowchart TD
@@ -3480,19 +3695,26 @@ flowchart TD
   E8 --> E10
   E7 --> E11[E11 Decisions (Rec)]
   E5 --> E12[E12 Search, Filters, Reports]
-  E7 --> E13[E13 Timeline & Extras (Rec)]
+  E7 --> E13[E13 Timeline & Extras]
+  E5 --> E15[E15 Six-View Workspace]
+  E7 --> E15
+  E9 --> E15
+  E10 --> E15
+  E12 --> E15
+  E13 --> E15
   E9 --> E14[E14 Hardening & Pilot]
   E10 --> E14
   E11 --> E14
   E12 --> E14
   E13 --> E14
+  E15 --> E14
 ```
 
-**Parallelisation.** With two developers, E2 runs alongside E1; E8 and E12 can proceed while E7 is built; front-end work on E10 can start against mocked state payloads once E7's contracts are fixed. **Assumption:** a team of 2–3 developers plus a part-time designer delivers Stages 1–5 in roughly 5–7 months; this is a planning assumption, not a commitment, and depends on Q1 and team availability.
+**Parallelisation.** With two developers, E2 runs alongside E1; E8 and E12 can proceed while E7 is built; front-end work on E10 can start against mocked state payloads once E7's contracts are fixed. The previous 5–7 month estimate no longer applies after the first-release scope expansion in §36. Re-estimate Stages 1–5 and pilot readiness in packet plans.
 
 ### 35.3 Phase 2 sequence
 
-Templates → Risks/Issues → Meeting Actions → Portfolio Dashboard → Resource View → Improved Timeline → Saved views → Advanced notifications → Deliverable dependencies/lag → Working-day calendars.
+Templates → Risks/Issues → Meeting Actions → Advanced notifications → Deliverable dependencies/lag → Working-day calendars → additional portfolio and workload analysis.
 
 ---
 
@@ -3510,6 +3732,7 @@ Only decisions that materially affect architecture, functionality, security, or 
 8. **Thin Decision Register in MVP** — yes or no; changes Workflow 11 and the blocked-by-decision rule. (Q8)
 9. **Availability, HA, and backup retention targets** — database tier and cost. (Q9)
 10. **Pilot group and success metrics** — defines what "done" means for MVP. (Q16)
+11. **Supervisor data source** — whether supervisor links come from Entra `manager` or are maintained in the Hub. My Staff and manager staffing are only as good as this data. (Q3; scope decided as direct reports, Q19)
 
 Everything else in Section 34 has a workable default and can be decided during development.
 
@@ -3519,8 +3742,8 @@ Everything else in Section 34 has a workable default and can be decided during d
 
 | Feature | Why it sounds useful | Why not yet | Revisit when |
 |---|---|---|---|
-| **Time tracking / actual hours on tasks** | "We could compare estimate vs actual." | Duplicates the timesheet system; turns a coordination tool into a compliance tool; corrupts estimates. | Never in the Hub; read-only ERP display in P3 at most. |
-| **Drag-to-reschedule Gantt with auto-shifting successors** | Feels like "real" scheduling. | Auto-shifting is CPM scheduling by another name; hides decisions behind drag gestures; huge testing surface. | P2 for manual drag with confirmation only; auto-shift never. |
+| **Payroll or billable timesheet approval** | Logged task hours could be reused. | Approval, billing rates, invoicing, and payroll need separate source and control decisions. | Outside the first-release task-hour entry (§36.8). |
+| **Gantt auto-shifting successors** | Feels like "real" scheduling. | Auto-shifting is CPM scheduling by another name; hides decisions behind drag gestures; huge testing surface. | Manual date drag with confirmation is first release (§36.4); auto-shift is not planned. |
 | **Custom fields and custom statuses per project** | Every PM has a special case. | Breaks deterministic rules and cross-project reporting; permanent complexity. | Only if a concrete, organisation-wide need survives two release cycles. |
 | **Automation rule builder ("when X then Y")** | "Let PMs automate their own workflows." | The built-in rules are the product; a builder makes behaviour unpredictable and unsupportable. | Not planned. |
 | **Subtasks / nested task trees / checklists** | "Some tasks have steps." | Deliverable → Task already provides one level; nesting invites 10-item to-do lists that nobody coordinates. | Simple checklists in P2 only if pilot shows real demand. |
@@ -3530,9 +3753,7 @@ Everything else in Section 34 has a workable default and can be decided during d
 | **Teams bot / chat commands** | "Update a task from Teams." | Integration surface before the core is stable. | P3, after Teams notifications prove valuable. |
 | **Recurring tasks** | "Weekly site visit." | Adds scheduling semantics; engineering coordination work is rarely truly recurring. | Reconsider only with evidence. |
 | **Per-project threshold overrides** | "Our project is different." | Makes portfolio comparisons meaningless; tune org defaults instead. | P3 at most. |
-| **Portfolio dashboard in MVP** | Executives want it first. | Meaningless until many Active projects exist with maintained data; Project List with health covers the interim. | P2. |
-| **Resource view in MVP** | Supervisors want it first. | Depends on estimates that will not exist until the tool is adopted; would show noise. | P2. |
-| **Dark mode, themes, personalised dashboards** | Polish. | Zero coordination value; costs design time. | After GA if requested. |
+| **Dark mode, themes, custom dashboard widget builder** | Polish and unlimited customisation. | The first release already lets users reorder or hide fixed overview widgets (§36.6); new widget definitions require separate metrics and permission rules. | After GA if requested. |
 | **Cross-project dependencies** | "Project B waits on Project A's survey." | Rare; complicates permissions and evaluation; can be represented by a decision or manual block with a link. | P3 if a pattern emerges. |
 | **Email-to-task, calendar sync** | Convenience. | Integration before adoption. | P3 (ICS feed is the cheap version). |
 | **Report builder / pivot tables** | "Let managers build their own." | Excel export already provides this; a builder is a product in itself. | Not planned. |
@@ -3643,12 +3864,15 @@ Survey: Issue topographic base plan
 | Discipline | An engineering practice area (Civil, Electrical…); an ownership dimension for deliverables and tasks. |
 | Discipline Lead (DL) | The person accountable for a discipline's work on a project. |
 | External Party | A client or third-party contact referenced as an owner of decisions/actions without a system login. |
+| Following | A per-user subscription to a project's updates at one of three levels (All activity, My items only, Muted); turned on automatically when the user is assigned to the project team. |
 | Health | Green/Yellow/Red/Grey summary of deterministic indicators for a project or discipline; may be overridden by the PM with a note for a limited time. |
 | Item key | Human-readable identifier such as `1234-T0042`. |
 | Milestone | A dated project checkpoint, especially a design submission; status derived from targeted deliverables. |
+| My Staff | The page where a manager sees their direct reports' project assignments and work signals and staffs them on projects. |
 | Predecessor / Successor | In a dependency, the task that must finish first / the task that waits. |
 | Slip | Days between a milestone's (or deliverable's) original date and current date. |
 | Stale | Derived indicator: active work with no update for longer than the stale threshold. |
+| Supervised staff | A supervisor's direct reports: users whose supervisor is them. |
 | Waiting | Derived indicator: a task has an incomplete predecessor but is not yet a problem. |
 | Weekly Coordination | The screen and agenda used to run a project's multidisciplinary coordination meeting. |
 
@@ -3711,3 +3935,62 @@ stateDiagram-v2
 ---
 
 *End of specification.*
+
+
+## 36. Six-View Visual Workspace Requirements
+
+The user confirmed the six workspace views pictured in the supplied image as **first-release functional requirements**, and separately confirmed task-hour entry under Time. The requirements and acceptance cases below define the required behavior. Names, people, dates, counts, percentages, exact component placement, colours, typography, spacing, pixels, and icons in the image are illustrative. The downloaded `Coordination Hub v2.dc.html` prototype in `docs/reference/coordination-hub-v2/` is the **only UI mockup to use as a visual clue**; it is not a design specification or source of release scope. Its Phase 2 badges and read-only Timeline do not override the user's first-release decisions. Existing permissions, audit logging, accessibility, and canonical item status rules still apply. Where an earlier section calls one of these capabilities Phase 2 or excludes required behavior, this section and the amended §27 take precedence.
+
+### 36.1 Navigation and shared view controls
+
+**FR-VIS-01 [MVP-Required].** The desktop shell exposes Home, My Work, Boards, Projects, Tasks, Calendar, Files, Time, Reports, and Team, subject to role permissions; More holds permitted lower-frequency routes. Home opens the overview dashboard; Boards opens the selected projects' Kanban; Tasks opens their combined task list; Team lists the members and roles of the selected projects with a link to each project Team screen. Project or workspace tabs expose the available Board/List, Timeline, Workload, Dashboard, Files, and Calendar views. Search, notifications, account controls, quick-create, filters, grouping, sorting, date navigation, and add controls are functional where shown. New Item offers only types the user may create, including Project, Task, and Event; the share control copies a deep link that retains view, permitted project scope, and filters, and always rechecks the recipient's access. The plus tab opens the view switcher. A visible tab must lead to a working view; unavailable role-restricted areas are hidden rather than dead links. Time opens the task-hour view in §36.8.
+
+**FR-VIS-02 [MVP-Required].** A workspace selector supports a user's permitted projects and a user-owned named set of projects such as “Atlantic Civil.” Board, timeline, calendar, dashboard, and My Work preserve the selected project scope when switching views. A project-specific view remains available. Restricted projects and items are never exposed through aggregates, search, cards, calendar entries, or exports to an unauthorised viewer.
+
+### 36.2 Modern project board
+
+**FR-VIS-03 [MVP-Required].** The Projects board shows compact, selectable project rows grouped at least into Active and Upcoming/Planning, with group counts and columns for name, owner (primary PM), lifecycle status, priority, due date, and progress. Users may search, filter, sort, group, choose columns, open a project, and create a project when authorised. The default due date is target completion; an absent date is shown as “—”, never as today. Project priority is Low, Medium, High, or Critical, defaults to Medium, and is PM-editable. Progress is a read-only percentage of Complete tasks among non-Cancelled tasks, rounded down to a whole percent; it is “—” when there are no non-Cancelled tasks. It is not a substitute for computed health. The image's Planning, In Progress, and On Track pills are presentation labels: Planning maps to Setup, In Progress maps to Active, and On Track represents Green health and must appear alongside the lifecycle status rather than replace it. Group counts and progress use the same underlying records as the project list.
+
+### 36.3 Cross-project task board
+
+**FR-VIS-04 [MVP-Required].** The task board supports one project or the selected set of projects, with four visible lanes, counts, add-task controls, and cards showing name, project, assignee, due date, priority, and comment and dependency indicators when present. To Do contains Not Started; In Progress contains In Progress; Review contains Ready for Review, In Review, and Revision Required with the exact status visible on each card; Done contains Complete. On Hold and Cancelled remain available through explicit filters and are never silently treated as Done. Moving a card across lanes invokes a permitted canonical transition; when multiple destination statuses are possible the user chooses one, and review guards and reason dialogs still apply. A user may open a task from its card, filter the board, and switch to a list without losing scope or filters. Cards from different projects carry an unambiguous project label. Manual order within a lane persists per project for all its members or per user-owned named workspace for that user.
+
+### 36.4 Cross-project Gantt
+
+**FR-VIS-05 [MVP-Required].** The Timeline shows selected permitted projects as expandable groups and their tasks as dated bars, with deliverables and milestones available in the hierarchy. It shows a today line, dated axis, week/month/quarter zoom, previous/next navigation, a visible date range, progress fill, milestone diamonds, and arrows for existing dependencies. Arrows are limited to dependencies the product permits; the view does not create cross-project dependencies or calculate a critical path. A bar or row opens its item. An authorised date drag previews the old and new dates and any explicitly selected cascade before saving; cancelling changes nothing. Undated items remain discoverable in an “Unscheduled” list. The project, task, and milestone names and dates reconcile with their lists.
+
+### 36.5 Team calendar
+
+**FR-VIS-06 [MVP-Required].** Calendar provides Week, Month, and Agenda views, today and previous/next controls, and toggles for Project Deadlines, Meetings, Site Work, and Internal Tasks. Project deadlines are all-day projections of permitted task, deliverable, and milestone due dates; moving or editing one follows that source item's permission and date-change rules. The other three types are calendar events with title, type, project (required for Meeting and Site Work, optional for Internal Task), start, end, organisation time zone, owner, optional location/description, and visibility. Visibility is Project (available to users who may view that project) or Private (owner only); an Internal Task event without a project is Private. Events may be created, edited, and cancelled by their owner or a PM of their project; changes are logged. The New Event action opens a form, and clicking an event opens its detail. Time conflicts may overlap but are visually distinct. Calendar entries cannot reveal restricted project names to unauthorised users. Meeting records from §12.11 may link to an event but do not automatically create one; events do not silently create tasks or meetings.
+
+### 36.6 Overview dashboard
+
+**FR-VIS-07 [MVP-Required].** Home opens an overview dashboard for the selected permitted projects. It shows tiles for Active Projects, Open Tasks, Overdue Tasks, On Track percentage, and Team Members; charts for Tasks by Status and Tasks by Project; and an Upcoming Deadlines list. Every number and chart segment opens the filtered records behind it. Open Tasks exclude Complete and Cancelled. On Track is Green computed health divided by Active projects with evaluated health, displayed with its numerator and denominator; when none qualify it is “—”. Team Members counts distinct active assigned users in the selected projects. The four chart buckets use the same task-status mapping as §36.3. The selected date range filters the Upcoming Deadlines list and any explicitly time-bounded chart, while snapshot totals state that they are current values. An Edit Dashboard control lets each user reorder or hide the fixed widgets and restore the default layout; it does not permit changing metric definitions. Existing per-project dashboards remain available and keep their engineering attention content.
+
+### 36.7 Personal My Work
+
+**FR-VIS-08 [MVP-Required].** My Work provides Today, Upcoming, Overdue, and Completed task views; an Inbox with unread personal notifications; and saved views including My Tasks, Assigned to Me, and Created by Me. Each task row shows completion control, task, project, due date, and priority, and supports opening the task and adding a task. Today includes tasks due on the organisation's current date; Upcoming means later-dated open tasks; Overdue uses the existing overdue rule; Completed shows tasks completed by the user in the last 14 days by default, with date filtering. Assigned to Me uses assignee, Created by Me uses creator, and My Tasks uses assignee or collaborator; the labels therefore have distinct, documented membership. A completion control follows review and permission guards rather than bypassing them. The existing attention, reviews, deliverables, blocker, decision, project, and milestone sections remain reachable. Saved views retain filters, sort, columns, and grouping and open with current data.
+
+### 36.8 Files, Workload, and Time entry
+
+**FR-VIS-09 [MVP-Required].** Files opens a project-scoped list of the existing document links, grouped by project and linked item, with search, type filter, add-link permission, and Copy path for network locations. This remains a link library; the Hub does not upload or store files. Workload opens the existing person-by-week resource view for authorised users, now in the first release. Time opens the task-hour view below.
+
+**FR-VIS-10 [MVP-Required].** Time lets a project member record actual effort against a permitted task as a work date, positive decimal hours (up to 24 per entry), and optional note; the user is the entry owner and cannot enter hours under another person's identity. Multiple entries for one task and date are allowed, but a user's total across all tasks on one date cannot exceed 24 hours. The Time view shows the user's entries and daily/weekly totals, with project, task, and date filters and a quick Add Time action. A PM or Discipline Lead may view entries on their project or discipline; a Supervisor may view entries for direct reports only on projects they can see, without exposing restricted project details. The entry owner may edit or delete their own entries while the project is editable; a PM may correct an entry on their project with a required reason. Deletion is soft. Every creation, change, correction, and deletion is attributed and logged. Completed tasks may receive a late entry while their project remains editable; Archived or Cancelled projects do not accept entries. Totals by task and project are read-only sums of non-deleted entries and export with the visible filters. Actual hours do not automatically change task estimates, progress, health, remaining workload, invoices, or payroll. Clock timers, approval chains, billing rates, and payroll submission are outside this task-hour requirement.
+
+### 36.9 First-release acceptance
+
+**AC-VIS-01.** Given five Active and three Setup projects, the Projects board groups them with counts 5 and 3, shows the PM as owner and the target completion date as due, and shows “—” progress for a project with no tasks.
+
+**AC-VIS-02.** Given permitted tasks from three projects in one workspace, the board displays them in the correct four lanes with project labels; moving a review-required task to Done cannot bypass its reviewer.
+
+**AC-VIS-03.** Given dated tasks, milestones, and dependencies in two permitted projects, the Gantt shows both project groups, bars, diamonds, arrows, and today; a cancelled drag changes no dates.
+
+**AC-VIS-04.** Given a deadline, a meeting, a site visit, and an internal task event in one week, each appears under its toggle in Week and Agenda, and a user without access to the project sees none of its details.
+
+**AC-VIS-05.** Given selected projects with known task statuses and health, every dashboard tile and chart reconciles with the filtered lists; changing the date range changes Upcoming Deadlines without changing current snapshot totals.
+
+**AC-VIS-06.** Given a task created by Alex but assigned to Jill, it appears in Alex's Created by Me and Jill's Assigned to Me, with no false assignment in Alex's view; a review-required task cannot be completed from its checkbox without review.
+
+**AC-VIS-07.** Every visible view tab and global navigation item opens its defined view, preserves permitted scope where applicable, and remains keyboard operable at desktop and tablet widths.
+
+**AC-VIS-08.** Given Alex records 2.5 and 1.25 hours on a permitted task on the same date, Time shows two entries and a 3.75-hour total; Jill cannot edit them, a PM correction requires a reason, an entry taking Alex above 24 hours that date is refused, and deleting one entry updates totals while preserving an audit record. Neither entry changes the task's estimate or progress.

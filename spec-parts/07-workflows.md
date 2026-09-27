@@ -173,7 +173,7 @@ Each workflow states the actor, trigger, steps, system response, exceptions, and
 
 ---
 
-### Workflow 10 — Supervisor reviews staff workload [Phase 2]
+### Workflow 10 — Supervisor reviews staff workload [First release under §36]
 
 **Actor.** Supervisor (Civil group). **Trigger.** Weekly resourcing check or PM request for help.
 
@@ -185,7 +185,7 @@ Each workflow states the actor, trigger, steps, system response, exceptions, and
 
 **System response.** Reassignment notifies both people and the PM; workload grid recomputes; the change is logged with actor Supervisor.
 
-**Exceptions.** Task belongs to a Restricted project the supervisor cannot see → row shows "Restricted project" with hours only; reassignment must be done by the PM. Person on leave → not modelled in MVP/P2 (Phase 3 or manual capacity override).
+**Exceptions.** Task belongs to a Restricted project the supervisor cannot see → its row and hours are excluded from this supervisor's grid and export; reassignment must be done by a PM who can see the project. Person on leave → not modelled in the first release or Phase 2 (Phase 3 or manual capacity override).
 
 **Result.** Load is rebalanced with a traceable change; estimates gaps are visible.
 
@@ -242,3 +242,22 @@ Each workflow states the actor, trigger, steps, system response, exceptions, and
 **Exceptions.** A correction is needed after archive (E-11) → Admin unarchives (→ Complete), PM edits with reasons, PM re-archives; all logged. Project Cancelled instead → same read-only behaviour with Cancelled status.
 
 **Result.** History is preserved, searchable, and immutable; the portfolio only shows live work.
+
+---
+
+### Workflow 14 — Manager assigns a direct report to a project
+
+**Actor.** Supervisor (Sam, Alex's manager); team member (Alex); PM of project 1234 (Priya). **Trigger.** Priya asks Sam for a civil designer on 1234.
+
+**Steps.**
+1. Sam opens My Staff, sees Alex has room (3 projects, nothing overdue), clicks **Assign to project**, and picks 1234 with primary discipline Civil. (Priya could do the same from the project's Team tab.)
+2. Alex opens the "Added to 1234 DCC Dundurn Roads" notification, which says they now follow the project at All activity.
+3. During the week, every change others make on 1234 appears in Alex's Following tab. The next morning's digest summarises it under Project updates ("1234: 6 status changes, 2 due-date changes, 1 deliverable issued").
+4. A month later, Alex, now on six projects, sets 1234 to My items only from the project header.
+5. Sam opens My Staff: Alex shows 6 projects, 2 overdue, 1 blocked. Sam expands Alex's row to see the assignments, opens Alex's My Work (read-only), sees the blocked task and its blocker, and reassigns one overdue task to Jill.
+
+**System response.** Step 1 creates the team membership (logged with Sam as actor) and a follow at All activity with source Assignment (ASG-01); Alex receives the "Added to a project" notification and Priya an in-app notice "Sam added Alex to 1234 as Team Member" (ASG-10); Sam gets no notice for his own action. Step 4 sets Alex's follow to My items only with source Manual, so later role changes on 1234 never reset it (ASG-02). Step 5's reassignment notifies Alex, Jill, and the PM and is logged with Sam as actor.
+
+**Exceptions.** Alex had already set a follow level on 1234 → it is unchanged (ASG-01). Priya later removes Alex from 1234 → the Assignment follow is deleted (ASG-04) and Sam is notified (ASG-11). Sam tries to make Alex the Civil Discipline Lead → not offered; Discipline Leads are set by the PM (ASG-10). 1234 is Restricted and Sam is not a member → Sam cannot pick it in Assign to project; if Alex is already on it, Sam sees Alex's counts with the project shown as "Restricted project" (ASG-09).
+
+**Result.** Managers staff and oversee their direct reports without going through each PM, PMs are told about every change to their team, and being assigned to a project is the subscription to its updates.

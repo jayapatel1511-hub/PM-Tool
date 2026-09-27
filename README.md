@@ -12,7 +12,7 @@ tasks and verification. What is built and what still needs a real environment to
 
 ## Approved coordination expansion
 
-The nine additions approved on 2026-09-26 are captured in packets **025–033**: handoffs, multidisciplinary reviews, revision/change impact, submission readiness, dated resource allocations, discipline coordination, design basis/assumptions, ready-to-start planning/weekly commitments, and location-linked issues. They are **specified and planned, not implemented** in this change. The earlier 24-packet runtime and its verification limitations remain documented below.
+The nine additions approved on 2026-09-26 are captured in packets **025–033**: handoffs, multidisciplinary reviews, revision/change impact, submission readiness, dated resource allocations, discipline coordination, design basis/assumptions, ready-to-start planning/weekly commitments, and location-linked issues. Packet **025 now has an initial handoff implementation** on this branch. Full packet acceptance (including the packet 027 impact integration) and implementation of **026–033 remain pending**. See [handoff verification](specs/025-discipline-handoffs/verification.md). The earlier 24-packet runtime and its verification limitations remain documented below.
 
 Start with [DESIGN.md](DESIGN.md), the [packet index](specs/README.md), the [research rationale](docs/research/multidisciplinary-coordination.md) and the [validation record](docs/coordination-spec-validation.md). “Tuesday” is the product name in these planning documents; application branding still displays Coordination Hub until a separately implemented change.
 

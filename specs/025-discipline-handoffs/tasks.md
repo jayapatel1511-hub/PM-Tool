@@ -1,6 +1,6 @@
 # Tasks: Discipline Handoffs and Acceptance
 
-All tasks are pending. This list is the proposed build scope; this commit contains specifications only.
+The first implementation increment delivers T001–T005 foundations. Final packet acceptance remains pending under T006; see verification.md for actual evidence and deferred scope.
 
 - [ ] T001 Add canonical records, constraints and an additive migration in `src/Hub.Api/Data/` (FR-HND-01, FR-HND-02, FR-HND-03, FR-HND-04, FR-HND-05, FR-HND-06, FR-HND-07).
 - [ ] T002 Implement pure transitions/derived rules in `src/Hub.Domain/Handoffs.cs` and permission cases in `Permissions.cs` (FR-MDC-01, FR-MDC-02, FR-MDC-03, FR-MDC-04, FR-MDC-05, FR-MDC-06, FR-MDC-07, FR-MDC-08).

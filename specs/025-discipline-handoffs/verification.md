@@ -17,3 +17,7 @@ The local environment has no usable PostgreSQL service and cannot switch operati
 AC-HND-03 remains deferred until packet 027 supplies explicit revision supersession and impact assessments. A changed source-record warning and preserved old snapshot do not satisfy that scenario. Full browser/accessibility, concurrency load, performance, operational hardening and pilot acceptance remain pending until their actual results are added. No deployment or production-readiness claim is made.
 
 The earlier documentation-only validation in `docs/coordination-spec-validation.md` is historical and does not validate this runtime change.
+
+First CI run (36287819927) migrated PostgreSQL and ran 360 tests: 358 passed, two failed because the new test fixture incorrectly supplied visibility to the create endpoint. The fixture now explicitly sets and asserts restricted visibility; the next CI run must validate that repair. No permission assertion was weakened.
+
+A pinned Playwright workflow test now runs in CI (`npm run test:handoffs`) using mocked API responses. It exercises form prefills, create/submit/accept/incorporate, command IDs, JavaScript errors and WCAG 2.1 A/AA axe checks on the two dialogs. Local Chromium downloads returned truncated archives, so no local browser result is claimed. Full browser-to-real-API testing and manual keyboard/screen-reader review remain outstanding.

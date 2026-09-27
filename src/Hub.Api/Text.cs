@@ -21,6 +21,7 @@ public static class Text
         ["handoff.reference_unavailable"] = "The referenced work or discipline is unavailable, cancelled or outside this project/receiving discipline.",
         ["handoff.source_changed"] = "The source record changed. Refresh and confirm its revision before submitting.",
         ["handoff.notification"] = "{0}: {1} — {2}",
+        ["handoff.reassigned"] = "{0}: {1} — handoff owners reassigned",
         ["handoff.digest_detail"] = "{0}; needed by {1}",
         ["digest.section.handoffs"] = "Discipline handoffs",
         ["digest.subject_handoffs"] = "{0} discipline handoffs",

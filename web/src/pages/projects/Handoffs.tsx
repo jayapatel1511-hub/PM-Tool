@@ -51,7 +51,7 @@ export function HandoffsTab() {
   const list = useQuery({ queryKey: ['handoffs', p.id, filters, page], queryFn: () => get<{ items: Row[]; totalCount: number; pageSize: number }>(`projects/${p.id}/handoffs${qs({ ...filters, page })}`) })
   const options = useQuery({ queryKey: ['handoff-options', p.id], queryFn: () => get<Options>(`projects/${p.id}/handoffs/options`) })
   const panel = sp.get('panel')?.startsWith('Handoff:') ? sp.get('panel')!.slice(8) : null
-  const setFilter = (key: string, value: string) => { const next = new URLSearchParams(sp); value ? next.set(key, value) : next.delete(key); next.delete('page'); setSp(next) }
+  const setFilter = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); next.delete('page'); setSp(next) }
   const refresh = () => { qc.invalidateQueries({ queryKey: ['handoffs', p.id] }); qc.invalidateQueries({ queryKey: ['handoff-detail', p.id] }); qc.invalidateQueries({ queryKey: ['handoff-options', p.id] }); qc.invalidateQueries({ queryKey: ['search'] }) }
   const open = (id: string) => { const next = new URLSearchParams(sp); next.set('panel', `Handoff:${id}`); setSp(next) }
   const close = () => { const next = new URLSearchParams(sp); next.delete('panel'); setSp(next) }

@@ -41,8 +41,8 @@ public static class HandoffEndpoints
     static async Task<Handoff> Load(HubDb db, Guid projectId, Guid id) =>
         await db.Handoffs.FirstOrDefaultAsync(h => h.ProjectId == projectId && h.Id == id) ?? throw ApiException.NotFound();
     static async Task<HandoffFacts> Facts(HubDb db, Handoff h) => new(h.SendingDisciplineId, h.ReceivingDisciplineId,
-        h.SendingOwnerId, h.ReceivingOwnerId, h.Status, h.CurrentRevisionId is { } r
-            ? await db.HandoffRevisions.Where(x => x.Id == r).Select(x => x.CreatedBy).FirstAsync() : null);
+        h.SendingOwnerId, h.ReceivingOwnerId, h.Status,
+        await db.HandoffRevisions.AnyAsync(r => r.HandoffId == h.Id && r.CreatedBy == h.ReceivingOwnerId) ? h.ReceivingOwnerId : null);
 
     // One project-row lock serialises handoff writes and duplicate commands. Audit, immutable evidence,
     // notification queue and the command receipt commit together. Read access is checked before locking.
@@ -140,7 +140,7 @@ public static class HandoffEndpoints
         return Results.Created($"/api/v1/projects/{projectId}/handoffs/{result.Id}", result);
     }
 
-    static async Task<CommandResult> Edit(Guid projectId, Guid id, DraftBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
+    static async Task<CommandResult> Edit(Guid projectId, Guid id, DraftBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         body = body with { RowVersion = Http.IfMatch(http, body.RowVersion) };
         return await Command(projectId, body.RequestId, new { operation = "draft", id, body }, access, db, clock, async (p, ctx) =>
@@ -151,7 +151,10 @@ public static class HandoffEndpoints
             await Http.CheckVersion(db, http, h, body.RowVersion);
             Check.That(h.SourceDeliverableId == body.SourceDeliverableId, "sourceDeliverableId", "handoff.fixed_source");
             if (h.SendingOwnerId != body.SendingOwnerId || h.ReceivingOwnerId != body.ReceivingOwnerId)
-            { Access.Demand(Permissions.AssignHandoff(access.Actor, ctx, facts)); Check.Reason(body.Reason); }
+            {
+                Access.Demand(Permissions.AssignHandoff(access.Actor, ctx, facts)); Check.Reason(body.Reason);
+                await IndependentAssignment(db, h, body.SendingOwnerId, body.ReceivingOwnerId, (await store.Get(db)).AllowSelfReview);
+            }
             if (h.CurrentRevisionId is not null)
                 Check.That(h.IntendedUse == body.IntendedUse.Trim() && h.AcceptanceCriteria == body.AcceptanceCriteria.Trim()
                     && h.TargetTaskId == body.TargetTaskId && h.TargetDeliverableId == body.TargetDeliverableId && h.ReceivingDisciplineId == body.ReceivingDisciplineId,
@@ -225,7 +228,13 @@ public static class HandoffEndpoints
         });
     }
 
-    static async Task<CommandResult> Assign(Guid projectId, Guid id, AssignBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task IndependentAssignment(HubDb db, Handoff h, Guid sender, Guid receiver, bool allowSelfReview)
+    {
+        Check.That(allowSelfReview || (sender != receiver && !await db.HandoffRevisions.AnyAsync(r => r.HandoffId == h.Id && r.CreatedBy == receiver)),
+            "receivingOwnerId", "handoff.self_receipt");
+    }
+
+    static async Task<CommandResult> Assign(Guid projectId, Guid id, AssignBody body, HttpContext http, Access access, HubDb db, SettingsStore store, Notifier notify, TimeProvider clock)
     {
         body = body with { RowVersion = Http.IfMatch(http, body.RowVersion) };
         return await Command(projectId, body.RequestId, new { operation = "assign", id, body }, access, db, clock, async (p, ctx) =>
@@ -237,10 +246,12 @@ public static class HandoffEndpoints
             Check.That(h.Status is not (HandoffStatus.Cancelled or HandoffStatus.Incorporated), "status", "handoff.fixed");
             var reason = Check.Reason(body.Reason);
             await Owners(db, p, body.SendingOwnerId, body.ReceivingOwnerId);
-            var next = facts with { SendingOwnerId = body.SendingOwnerId, ReceivingOwnerId = body.ReceivingOwnerId };
-            Check.That((await store.Get(db)).AllowSelfReview || !HandoffRules.SelfReceipt(next), "receivingOwnerId", "handoff.self_receipt");
+            await IndependentAssignment(db, h, body.SendingOwnerId, body.ReceivingOwnerId, (await store.Get(db)).AllowSelfReview);
             (h.SendingOwnerId, h.ReceivingOwnerId) = (body.SendingOwnerId, body.ReceivingOwnerId);
             db.Audit.Note(h, reason: reason);
+            await notify.Send(NotificationEvents.HandoffChanged, new Guid?[] { h.SendingOwnerId, h.ReceivingOwnerId },
+                new NotifyItem(p.Id, "Handoff", h.Id, h.Key, $"/projects/{p.ProjectNumber}/handoffs?panel=Handoff:{h.Id}", p.ProjectNumber),
+                Text.Get("handoff.reassigned", h.Key, h.Title));
             return h;
         });
     }

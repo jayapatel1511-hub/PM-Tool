@@ -18,7 +18,18 @@ public sealed class HandoffsTests(HubFactory f)
 
     async Task<Setup> New(bool restricted = false)
     {
-        var p = await data.Project(tweak: b => b["visibility"] = restricted ? Visibility.Restricted : Visibility.Open);
+        var p = await data.Project();
+        if (restricted)
+        {
+            // Visibility is set after creation; CreateBody deliberately has no visibility field.
+            await f.DbAsync(async db => {
+                var project = await db.Projects.FirstAsync(x => x.Id == p.Id);
+                project.Visibility = Visibility.Restricted;
+                return await db.SaveChangesAsync();
+            });
+            p.Visibility = Visibility.Restricted;
+            Assert.Equal(Visibility.Restricted, f.Db(db => db.Projects.First(x => x.Id == p.Id).Visibility));
+        }
         var source = await (await f.As(TestData.Marc).Post($"/api/v1/projects/{p.Id}/deliverables", new {
             name = "Survey basis", projectDisciplineId = data.ProjectDiscipline(p.Id, "Civil"), deliverableTypeId = await data.DeliverableType(),
             ownerId = data.User(TestData.Alex), revision = "A", transmittalUrl = "https://example.test/survey-A.pdf" })).Json(201);
@@ -162,6 +173,12 @@ public sealed class HandoffsTests(HubFactory f)
         await (await f.As(TestData.Pm).Post(Path(s.Project.Id, id) + "/assign", allowed)).Json();
         Assert.Equal(data.User(TestData.Alex), (await Detail(s, id))["revisions"]![0]!.G("createdBy"));
         Assert.Contains("Replacing both owners", f.Db(db => db.ActivityLog.Where(a => a.ItemId == id).Select(a => a.Reason).ToList()));
+        await Move(s, id, TestData.Omar, HandoffStatus.Returned, reason: "Please verify the replacement input");
+        await Move(s, id, TestData.Marc, HandoffStatus.Submitted, reason: "Replacement input independently checked");
+        var latest = f.Db(db => db.Handoffs.First(h => h.Id == id).RowVersion);
+        // Changing the latest submitter must not erase the earlier sender's involvement.
+        await (await f.As(TestData.Pm).Post(Path(s.Project.Id, id) + "/assign",
+            illegal with { RequestId = Guid.NewGuid(), RowVersion = latest })).Json(400);
     }
 
     [Theory]

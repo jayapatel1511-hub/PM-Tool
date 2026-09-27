@@ -33,6 +33,19 @@ jobs:
       - name: Lint, including accessibility rules (§22, packet 011 FR-002)
         run: npm run lint
         working-directory: web
+      - name: Install Chromium for handoff UI checks
+        run: npx playwright install --with-deps chromium --only-shell
+        working-directory: web
+      - name: Handoff UI workflow and dialog accessibility (mocked API)
+        run: npm run test:handoffs
+        working-directory: web
+      - name: Handoff browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: handoff-browser-evidence
+          path: web/test-results/handoffs
+          if-no-files-found: ignore
       - run: npm audit --audit-level=critical --omit=dev
         working-directory: web
       - name: Specification is current and fully traced

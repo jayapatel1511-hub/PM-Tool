@@ -1,7 +1,7 @@
 # Engineering Project Coordination Hub
 
 This repository holds the product specification, UI mockups, and Spec Kit setup for the Hub, an
-internal web app for coordinating multidisciplinary engineering projects. Application code is present; the approved coordination expansion in packets 025–033 remains specification-only.
+internal web app for coordinating multidisciplinary engineering projects. Application code is present; packet 025 now has a handoff foundation implementation; its final acceptance and packets 026–033 remain pending. See the packet verification record.
 
 ## Sources of truth
 

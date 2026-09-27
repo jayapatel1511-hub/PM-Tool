@@ -143,6 +143,44 @@ public sealed class AllocationApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Simultaneous_cross_project_confirmation_accepts_only_one_stale_date_version()
+    {
+        var firstProject = await data.Project();
+        var secondProject = await data.Project();
+        var personId = (await FreshReport(firstProject.Id)).Id;
+        await f.DbAsync(async db =>
+        {
+            db.ProjectMembers.Add(new ProjectMember { ProjectId = secondProject.Id, UserId = personId,
+                Roles = [ProjectRole.TeamMember], AddedAt = f.Clock.GetUtcNow() });
+            await db.SaveChangesAsync();
+            return 0;
+        });
+        var day = new DateOnly(2026, 9, 14);
+        async Task<(string Path, int Version, int DateVersion)> Proposal(Guid projectId)
+        {
+            var task = await data.NewTask(projectId, extra: new { assigneeId = personId, estimatedHours = 6m, startDate = day, dueDate = day });
+            var root = $"/api/v1/projects/{projectId}/allocations";
+            var created = await (await f.As(TestData.Pm).Post(root, new AllocationEndpoints.CreateBody(Guid.NewGuid(), personId,
+                AllocationPurpose.Production, day, day, 6, [], [new("Task", task.G("id"), day)], null))).Json();
+            var path = $"{root}/{created.G("id")}";
+            var preview = await (await f.As(TestData.Sam).GetAsync(path + "/confirmation-preview")).Json();
+            return (path, created.I("rowVersion"), preview["days"]![0]!["dateVersion"]!.GetValue<int>());
+        }
+        var first = await Proposal(firstProject.Id);
+        var second = await Proposal(secondProject.Id);
+        Assert.Equal(first.DateVersion, second.DateVersion);
+        async Task<System.Net.HttpStatusCode> Confirm((string Path, int Version, int DateVersion) row)
+        {
+            var response = await f.As(TestData.Sam).Post(row.Path + "/confirm", new AllocationEndpoints.ConfirmBody(
+                Guid.NewGuid(), row.Version, [new(day, row.DateVersion)], "Approved overlapping demand"));
+            return response.StatusCode;
+        }
+        var outcomes = await Task.WhenAll(Confirm(first), Confirm(second));
+        Assert.Equal(new[] { System.Net.HttpStatusCode.OK, System.Net.HttpStatusCode.Conflict }, outcomes.Order());
+        Assert.Equal(1, f.Db(db => db.Allocations.Count(a => a.PersonId == personId && a.Status == AllocationStatus.Confirmed)));
+    }
+
+    [Fact]
     public async Task Confirmation_deduplicates_task_demand_and_rejects_stale_competing_date()
     {
         var project = await data.Project();

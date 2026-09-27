@@ -82,3 +82,9 @@ A PM or lead reviews entries in their scope; a supervisor reviews direct reports
 - This is task effort capture, not an official payroll or billing timesheet. No timer, approval, billing rate, or payroll submission is specified.
 - Depends on packets 001 (identity and audit framework), 002 (project lifecycle and permissions), 004 (tasks), and 009 (filters and export). Packet 011 hardens and verifies it before the pilot.
 - Q21 is decided: the Time route is functional in the first release. Any future finance integration requires a separate requirement and review.
+
+## Coordination expansion amendment — 2026-09-26
+
+Packet 029 allocations and packet 032 weekly commitments remain separate from actual-hour entry (§37.6, §38.2). No automatic deduction of actual hours from reservations/estimates or payroll approval is introduced.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

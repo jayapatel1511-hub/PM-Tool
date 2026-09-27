@@ -120,3 +120,9 @@ meeting, and in the report.
 
 - Depends on packets 005 (attention and health), 006 (comments), and 007 (surfaces). A-07 and the issue input to health activate with this packet.
 - Who may edit follows §8.5.2: the PM and leads raise and edit; team members raise and edit their own.
+
+## Coordination expansion amendment — 2026-09-26
+
+Packet 033 extends the same Issue ID with location/document-revision context and independent verification (§38.3). Preserve existing Issue vocabulary, permissions and audit; do not create a parallel issue register.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

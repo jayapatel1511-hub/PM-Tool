@@ -98,3 +98,9 @@ The Files view is a searchable library of external document links. Workload open
 - Depends on packets 002, 004, 005, 006, 007, 009, 010, 016, 017, 018, 019, 023, and 024. Their work is part of the first release under §27 and §36, despite older packet creation text describing some as Phase 2.
 - The screenshot's names, dates, figures, avatars, colours, and layout are illustrative; the six view types and behaviors in §36 are required. V2 is the sole downloaded UI visual reference, and its old Phase 2 badges or read-only Timeline do not set release scope.
 - Canonical status transitions from §10 and server-side permissions from §8 remain authoritative. The four board lanes are presentation groups.
+
+## Coordination expansion amendment — 2026-09-26
+
+The existing workspace scope persists into the discipline coordination projection (§37.7). Approved but unimplemented packets do not create active tabs or dead controls; source records remain permission filtered.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

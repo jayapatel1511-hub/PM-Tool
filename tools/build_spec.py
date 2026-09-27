@@ -64,10 +64,12 @@ def body_html(md):
         prev = line
     body = "\n".join(out)
     body = re.sub(r"(?m)^(\|.*)$", lambda m: m.group(1).replace("\\|", "ZZPIPEZZ"), body)
-    h = subprocess.run(["pandoc", "-f", "gfm", "-t", "html", "--wrap=preserve", "--syntax-highlighting=none"],
+    h = subprocess.run(["pandoc", "-f", "gfm", "-t", "html", "--wrap=preserve", "--no-highlight"],
                        input=body, capture_output=True, text=True, check=True).stdout
 
     h = h.replace("︎", "").replace("ZZPIPEZZ", "\\|")
+    # Older pandoc releases add row classes; keep the generated tables version-independent.
+    h = re.sub(r'<tr class="(?:header|odd|even)">', '<tr>', h)
     h = re.sub(r"ZZSP(\d)ZZ", lambda m: " " * int(m.group(1)), h)
     h = re.sub(r'<pre class="(?!mermaid)([\w-]+)"><code>', r'<pre><code class="language-\1">', h)
     h = re.sub(r'(<h[234] id=")([^"]+)"', lambda m: m.group(1) + re.sub(r"-{2,}", "-", m.group(2)) + '"', h)

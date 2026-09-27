@@ -107,3 +107,9 @@ both issues are listed.
 
 - The specification names these enhancements in one line (§28 item 2 and FR-DEL-08); the details above are reasonable defaults to confirm with `/speckit-clarify` before planning.
 - Depends on packets 003 and 008.
+
+## Coordination expansion amendment — 2026-09-26
+
+Existing revision, issued-to and transmittal links remain. Packets 027/028 add explicit revision-use and immutable submission manifests (§37.4, §37.5); they do not create a document-management or transmission service.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

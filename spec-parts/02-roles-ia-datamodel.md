@@ -147,6 +147,35 @@ Ownership extends role permissions on individual items regardless of project rol
 
 ---
 
+### 8.10 Multidisciplinary coordination permissions
+
+These actions extend the existing matrix for packets 025–033. Existing access/lifecycle checks are applied first, including the Read Only veto and restricted-project membership. A system role does not bypass a project visibility restriction. Scope-qualified ownership is an additional right, never an exception to a refusal.
+
+| Action | Authorised actor after existing write/access gates |
+|---|---|
+| Create/assign handoff | PM, source/receiving Discipline Lead, or permitted source-work owner within their discipline |
+| Submit/respond to handoff | Named sending owner; PM/lead may reassign with reason |
+| Accept/incorporate handoff | Named receiving owner; self-review setting governs same-person exception |
+| Coordinate review package | PM or responsible Discipline Lead; may assign coordinator |
+| Technical review approval | Named discipline reviewer, with independent-review checks |
+| Respond to/verify review finding | Resolution owner responds; originator or authorised independent replacement verifies |
+| Publish source revision/change | PM, responsible Discipline Lead or source deliverable owner |
+| Assess changed input | Named receiving-work owner; PM/lead approves retention of an old revision |
+| Issue submission package | PM, after transactional recheck of manifest and mandatory gates |
+| Propose allocation | PM or Discipline Lead within the project |
+| Confirm allocation/change availability | Supervisor for direct reports, or Admin; no added access to restricted project details |
+| Propose design basis/assumption | Project member within their discipline; PM/lead assigns owner |
+| Confirm design basis | Responsible Discipline Lead or explicitly assigned independent approver |
+| Approve Proceed under Assumption | PM or responsible Discipline Lead, with fixed scope and expiry |
+| Propose/verify constraint removal | Named removal owner proposes; affected work owner verifies |
+| Commit weekly output | Named performer; meeting chair may propose only |
+| Resolve/verify location issue | Existing Issue owner proposes; independent designated verifier verifies |
+| View coordination, sources and export | Existing permitted project viewer; source-system access is checked separately when opening external links |
+
+Reassignment is attributed, reasoned and version checked, retains earlier signatures/decisions, and reruns self-review and access invariants. No proxy approval is implied by manager, coordinator or administrator status. Common refusal/notification rules: §37.1.
+
+---
+
 ## 9. Information Architecture
 
 ### 9.1 Evaluation of the proposed hierarchy
@@ -421,3 +450,35 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 | Template → Project | snapshot copy | Project records `template_id` and `template_version`; later template changes do not propagate |
 | User — User (supervisor) | many : 1 | Drives Supervisor scope: direct reports (§8.8) |
 | User — Project (ProjectFollow) | many : many | One row per user per project; created automatically on team assignment (§12.18) |
+
+### 10.8 Multidisciplinary coordination vocabulary and records
+
+This is the canonical extension to §10 for the approved nine-packet amendment (§37, §38). Existing task/deliverable/project states do not change. Readiness, handoff acceptance, review approval and document issue are distinct concepts. This amendment adds metadata and workflow evidence; it does not implement a file-versioning service.
+
+| Record | Canonical states or representation | Key relationships/invariants |
+|---|---|---|
+| Handoff / receipt | Draft, Submitted, Clarification Requested, Returned, Accepted, Incorporated, Cancelled | One sending owner, one receiving owner per receipt, exact source revision, target work, intended use, criteria, needed/promised dates; revision-specific acceptance |
+| Review package | Draft, In Review, Changes Required, Approved, Superseded, Cancelled | One coordinator, immutable round manifest, required discipline assignments |
+| Discipline review | Pending, In Review, Changes Required, Approved | One reviewer per discipline and round; approval of exact revisions |
+| Review finding | Open, Responded, Verified Closed, Withdrawn | One resolver and separate verification attribution; Blocking or Advisory severity |
+| Source revision | Immutable registered snapshot with explicit supersedes link | Existing DeliverableIssue or external source ID/URL/revision, source-check provenance; supersedes graph acyclic |
+| Input use | Versioned adoption link | Consumer work, source/basis revision, intended use, adopting actor and time |
+| Change notice | Draft, Open, Closed, Cancelled | One owner, old/new references, stated scope; publication moves Draft to Open; closure needs completed assessments; cancellation needs PM/lead reason and preserves impacts |
+| Change assessment | Pending Assessment, Unaffected, Update Required, Clarification Needed, Resolved | One affected owner per consumer/change; rationale, correction task and verification; acknowledgement separate |
+| Submission | Draft, Checking, Ready, Issued, Superseded, Cancelled | Coordinator, milestone, fixed manifest and issue snapshot; issued record immutable |
+| Submission check | Pending, Pass, Fail, Not Applicable | Evidence, responsible checker, applicability reason; mandatory gates cannot be waived |
+| Resource allocation | Proposed, Confirmed, Declined, Cancelled, Completed | One person/project, production or review purpose, dates/hours; linked work unique per person/date slice |
+| Availability override | Date and available decimal hours | One person/date; replaces default daily capacity; no sensitive leave details |
+| Design basis entry/version | Proposed, Confirmed, Superseded, Withdrawn | Criterion or Assumption, scope, value/statement, units, owner, source and affected consumers; confirmed versions immutable |
+| Readiness | Needs Assessment, Not Ready, Ready, Proceed under Assumption | Derived from named requirements/constraints; not a task status or permission grant |
+| Constraint | Open, Resolution Proposed, Verified Removed, Cancelled | One removal owner, affected work, needed date, source and verifier; existing issue/decision may be linked |
+| Weekly output commitment | Proposed, Committed, Met, Not Met, Withdrawn | Performer, immutable original output/criteria/date snapshot and attributed later changes |
+| Location-linked issue | Existing Issue status vocabulary (§10.2) | Extend existing Issue; source revision, station/area/asset context and one resolution owner |
+| Issue verification | Resolution Proposed, Verified, Rejected | Evidence and independent verifying owner; separate from Issue status |
+| Discipline coordination view | Permission-filtered projection | No independent copy of underlying work or workflow status |
+
+Readiness precedence is Needs Assessment for missing/unknown applicable checks, then Not Ready for known unsatisfied required checks; the UI always lists all reasons. Ready requires every applicable check satisfied. Proceed under Assumption is available only when the remaining unsatisfied inputs are covered by valid, scoped, unexpired authorised assumptions and no non-overridable gate is failed. A known failure alongside an unknown check remains visible even when the headline is Needs Assessment.
+
+New records use stable UUIDs and readable per-project keys where they appear as standalone items: Handoff H, Review RV, Change CH, Submission SUB, Basis B, Constraint CT and Commitment WC. Existing Issue keys remain unchanged. Prefixes do not alter existing item sequences; deleted keys are never reused. New records carry project, owner, created/updated attribution, row version and soft-deletion fields as applicable. Immutable published snapshots use append-only superseding records rather than edits or deletes. Source references must remain same-project; use a unique source/version identity and unique change/consumer assignment to deduplicate.
+
+Add `coordination_lookahead_weeks` to organisation settings, default 3 and allowed range 1–12. Existing working-day calendars, weekly capacity and workload warning thresholds continue to apply. Submission checks and readiness constraints are purpose-specific records, not arbitrary checklists inside tasks or a custom workflow builder. Physical tables and migrations are designed in each packet before application implementation.

@@ -188,3 +188,9 @@ remove them from the team; confirm the feed, digest, and follow rules at each st
 - Microsoft Teams notifications are Phase 3 (FR-NOT-04) and not part of this set of packets.
 - The staff notices and the digest's My staff section for supervisors are specified in packet 007 (FR-ASG-07). The weekly PM summary, digest content preferences, and live unread counts are Phase 2 (packet 020).
 - Events raised by later packets (decisions, milestones) use the channels defined here, following the cross-packet rule in `specs/README.md`.
+
+## Coordination expansion amendment — 2026-09-26
+
+Packets 025–033 reuse source links, activity history and notification/digest preferences (§37.1). Registered revision metadata is distinct from external file storage. Recipient visibility is checked at composition and delivery under FR-MDC-02.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

@@ -3,7 +3,7 @@
 This repository uses [GitHub Spec Kit](https://github.com/github/spec-kit) 1.0.8 to build the
 Engineering Project Coordination Hub in small, reviewable packets. [CLAUDE.md](../CLAUDE.md) is
 the entry point, the [constitution](../.specify/memory/constitution.md) holds the rules, and
-[specs/README.md](../specs/README.md) indexes the 24 packets that hold the whole product
+[specs/README.md](../specs/README.md) indexes the 33 packets that hold the whole product
 specification in Spec Kit form, including the first-release six-view amendment (§36).
 
 ## What to tell an agent

@@ -1,8 +1,7 @@
 # Engineering Project Coordination Hub
 
 This repository holds the product specification, UI mockups, and Spec Kit setup for the Hub, an
-internal web app for coordinating multidisciplinary engineering projects. There is no
-application code yet.
+internal web app for coordinating multidisciplinary engineering projects. Application code is present; the approved coordination expansion in packets 025–033 remains specification-only.
 
 ## Sources of truth
 
@@ -15,7 +14,7 @@ application code yet.
   six-panel image records confirmed feature scope; older wireframes are historical detail.
   The product specification and packets govern behavior and acceptance.
 - `.specify/memory/constitution.md`: the rules every change follows.
-- `specs/`: the whole specification as Spec Kit packets 001–024, indexed in `specs/README.md`.
+- `specs/`: the whole specification as Spec Kit packets 001–033, indexed in `specs/README.md`.
   `specs/TRACEABILITY.md` maps every specification ID to its packets; regenerate it with
   `python3 tools/trace_spec.py` (`--check` fails on any gap).
 

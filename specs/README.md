@@ -1,7 +1,6 @@
 # Feature packets
 
-The whole product specification is written here as Spec Kit feature packets: 18 for the first release and
-6 for Phase 2. The user's confirmation of the six pictured views moved the Portfolio, Workload, improved Timeline,
+The product specification has 33 Spec Kit packets: the original 18 first-release and 6 Phase 2 packets, plus 9 approved coordination additions (025–033) that are specified but not implemented. The user's confirmation of the six pictured views moved the Portfolio, Workload, improved Timeline,
 saved views, and three new workspace/calendar/task-hour packets into the first release (§36). Each folder holds a `spec.md` in Spec Kit's format and a quality checklist;
 `plan.md`, `tasks.md`, and `verification.md` are added as each packet is planned and built.
 
@@ -67,12 +66,30 @@ unverified for every packet: [docs/IMPLEMENTATION-STATUS.md](../docs/IMPLEMENTAT
 specs fill the gaps with defaults listed under Assumptions. Run `/speckit-clarify` on them before
 planning.
 
+## Approved coordination additions — not implemented
+
+Jay accepted the full scope on 2026-09-26. All implementation tasks remain unchecked. Each folder includes a specification, implementation plan, tasks, quality checklist and honest verification status. The common permissions/model contract is in §8.10, §10.8 and §37.1; feature behaviour is in §37–§38. [DESIGN.md](../DESIGN.md) defines the intended experience.
+
+| Packet | Delivers | Depends on | Status |
+|---|---|---|---|
+| [025-discipline-handoffs](025-discipline-handoffs/spec.md) | Discipline Handoffs and Acceptance | 002–006, 009 | Specified; implementation pending |
+| [026-multidisciplinary-reviews](026-multidisciplinary-reviews/spec.md) | Multidisciplinary Reviews and Comment Closure | 003, 004, 006, 009 | Specified; implementation pending |
+| [027-revision-change-impact](027-revision-change-impact/spec.md) | Revision Awareness and Change Impact | 003–006, 009, 025 | Specified; implementation pending |
+| [028-submission-readiness](028-submission-readiness/spec.md) | Submission Readiness and Issue Manifest | 003, 006, 009, 025–027 | Specified; implementation pending |
+| [029-dated-capacity-allocations](029-dated-capacity-allocations/spec.md) | Dated Capacity and Project Allocations | 002, 004, 006, 009, 017, 021 | Specified; implementation pending |
+| [030-discipline-coordination-view](030-discipline-coordination-view/spec.md) | Discipline Coordination View | 007, 009, 019, 022, 025–029, 031–033 | Specified; implementation pending |
+| [031-design-basis-assumptions](031-design-basis-assumptions/spec.md) | Shared Design Basis and Assumptions | 002–004, 006, 008, 009, 027 | Specified; implementation pending |
+| [032-readiness-weekly-commitments](032-readiness-weekly-commitments/spec.md) | Ready-to-Start Planning and Weekly Commitments | 004–009, 021, 025, 027, 029, 031 | Specified; implementation pending |
+| [033-location-linked-issues](033-location-linked-issues/spec.md) | Location-Linked Coordination Issues | 003, 006, 009, 014, 026, 027 | Specified; implementation pending |
+
+Implementation order: 025/026 → 027 → 029/031 → 032/028 → 033 → integrated 030. Slashes indicate independent prerequisites, not authorisation to start sub-agents. The discipline view can expose accepted sections incrementally; its final acceptance requires the whole integrated flow.
+
 ## Phase 3: not yet packets
 
 The specification lists these as designed for, not built (§29), with too little detail to specify
 without inventing requirements. Each becomes a packet after discovery: Microsoft Teams
 notifications (FR-NOT-04), SharePoint document picking, ERP or Vantagepoint project sync,
-read-only project financials, utilisation and resource planning from HR data, client or external
+read-only project financials, HR-sourced utilisation and resource planning (manual dated allocations are now packet 029), client or external
 access, advanced portfolio reporting, per-project threshold overrides, a personal calendar feed,
 and a second interface language if not done earlier. Cross-project dependencies (FR-DEP-10) are
 also Phase 3.
@@ -95,7 +112,4 @@ decided, but the plan records which one it assumed. Q19 (direct reports only) an
 
 ## Next step
 
-```text
-/speckit-plan SPECIFY_FEATURE_DIRECTORY=specs/001-platform-foundations
-Plan packet 001 only. Record which §34 decisions you assumed. Do not write application code.
-```
+Review the new packet plans and begin an explicitly requested implementation increment at packet 025 or 026, respecting the dependency order and the existing hardening findings. Application acceptance for packets 025–033 is not yet run. Do not reuse the original 24-packet completion claim for the expanded product.

@@ -195,3 +195,9 @@ product exists to prevent.
 - Derived indicators are specified in packet 005: Overdue, Due Soon, Waiting, Blocked, Blocking Others, Stale, Unassigned, No Due Date, and Date Inconsistent (FR-TSK-06, T-03, T-05, T-06, T-07, R-05, AC-TSK-01, AC-TSK-04, AC-TSK-05, AC-TSK-06, AC-TSK-10, AC-REV-03), as are dependencies and deleting a task that has them (AC-TSK-09, D-09).
 - Notifications named here, including the reviewer's notification (AC-REV-01), are delivered by packet 006; the review queue on My Work is in packet 007; the filter bar and exports for the list are in packet 009.
 - Kanban manual ordering within columns is Phase 2 (packet 019).
+
+## Coordination expansion amendment — 2026-09-26
+
+One task assignee and the existing task review remain. Packet 026 adds discipline review assignments to a fixed review package, not multiple task assignees (§37.3). Packet 032 adds a separate readiness/commitment record (§38.2); task state changes retain existing guards.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

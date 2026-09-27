@@ -1,0 +1,195 @@
+{
+  "date": "2026-09-26",
+  "status": "specified-not-implemented",
+  "packets": [
+    {
+      "packet": "025",
+      "path": "specs/025-discipline-handoffs",
+      "section": "37.2",
+      "requirements": [
+        "FR-HND-01",
+        "FR-HND-02",
+        "FR-HND-03",
+        "FR-HND-04",
+        "FR-HND-05",
+        "FR-HND-06",
+        "FR-HND-07"
+      ],
+      "acceptance": [
+        "AC-HND-01",
+        "AC-HND-02",
+        "AC-HND-03",
+        "AC-HND-04",
+        "AC-HND-05"
+      ]
+    },
+    {
+      "packet": "026",
+      "path": "specs/026-multidisciplinary-reviews",
+      "section": "37.3",
+      "requirements": [
+        "FR-MRV-01",
+        "FR-MRV-02",
+        "FR-MRV-03",
+        "FR-MRV-04",
+        "FR-MRV-05",
+        "FR-MRV-06",
+        "FR-MRV-07"
+      ],
+      "acceptance": [
+        "AC-MRV-01",
+        "AC-MRV-02",
+        "AC-MRV-03",
+        "AC-MRV-04",
+        "AC-MRV-05"
+      ]
+    },
+    {
+      "packet": "027",
+      "path": "specs/027-revision-change-impact",
+      "section": "37.4",
+      "requirements": [
+        "FR-CHG-01",
+        "FR-CHG-02",
+        "FR-CHG-03",
+        "FR-CHG-04",
+        "FR-CHG-05",
+        "FR-CHG-06",
+        "FR-CHG-07"
+      ],
+      "acceptance": [
+        "AC-CHG-01",
+        "AC-CHG-02",
+        "AC-CHG-03",
+        "AC-CHG-04",
+        "AC-CHG-05"
+      ]
+    },
+    {
+      "packet": "028",
+      "path": "specs/028-submission-readiness",
+      "section": "37.5",
+      "requirements": [
+        "FR-SUB-01",
+        "FR-SUB-02",
+        "FR-SUB-03",
+        "FR-SUB-04",
+        "FR-SUB-05",
+        "FR-SUB-06",
+        "FR-SUB-07"
+      ],
+      "acceptance": [
+        "AC-SUB-01",
+        "AC-SUB-02",
+        "AC-SUB-03",
+        "AC-SUB-04",
+        "AC-SUB-05"
+      ]
+    },
+    {
+      "packet": "029",
+      "path": "specs/029-dated-capacity-allocations",
+      "section": "37.6",
+      "requirements": [
+        "FR-CAP-01",
+        "FR-CAP-02",
+        "FR-CAP-03",
+        "FR-CAP-04",
+        "FR-CAP-05",
+        "FR-CAP-06",
+        "FR-CAP-07"
+      ],
+      "acceptance": [
+        "AC-CAP-01",
+        "AC-CAP-02",
+        "AC-CAP-03",
+        "AC-CAP-04",
+        "AC-CAP-05"
+      ]
+    },
+    {
+      "packet": "030",
+      "path": "specs/030-discipline-coordination-view",
+      "section": "37.7",
+      "requirements": [
+        "FR-DCV-01",
+        "FR-DCV-02",
+        "FR-DCV-03",
+        "FR-DCV-04",
+        "FR-DCV-05",
+        "FR-DCV-06",
+        "FR-DCV-07"
+      ],
+      "acceptance": [
+        "AC-DCV-01",
+        "AC-DCV-02",
+        "AC-DCV-03",
+        "AC-DCV-04",
+        "AC-DCV-05"
+      ]
+    },
+    {
+      "packet": "031",
+      "path": "specs/031-design-basis-assumptions",
+      "section": "38.1",
+      "requirements": [
+        "FR-BAS-01",
+        "FR-BAS-02",
+        "FR-BAS-03",
+        "FR-BAS-04",
+        "FR-BAS-05",
+        "FR-BAS-06",
+        "FR-BAS-07"
+      ],
+      "acceptance": [
+        "AC-BAS-01",
+        "AC-BAS-02",
+        "AC-BAS-03",
+        "AC-BAS-04",
+        "AC-BAS-05"
+      ]
+    },
+    {
+      "packet": "032",
+      "path": "specs/032-readiness-weekly-commitments",
+      "section": "38.2",
+      "requirements": [
+        "FR-RDY-01",
+        "FR-RDY-02",
+        "FR-RDY-03",
+        "FR-RDY-04",
+        "FR-RDY-05",
+        "FR-RDY-06",
+        "FR-RDY-07"
+      ],
+      "acceptance": [
+        "AC-RDY-01",
+        "AC-RDY-02",
+        "AC-RDY-03",
+        "AC-RDY-04",
+        "AC-RDY-05"
+      ]
+    },
+    {
+      "packet": "033",
+      "path": "specs/033-location-linked-issues",
+      "section": "38.3",
+      "requirements": [
+        "FR-LOC-01",
+        "FR-LOC-02",
+        "FR-LOC-03",
+        "FR-LOC-04",
+        "FR-LOC-05",
+        "FR-LOC-06",
+        "FR-LOC-07"
+      ],
+      "acceptance": [
+        "AC-LOC-01",
+        "AC-LOC-02",
+        "AC-LOC-03",
+        "AC-LOC-04",
+        "AC-LOC-05"
+      ]
+    }
+  ]
+}

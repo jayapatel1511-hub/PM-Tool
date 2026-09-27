@@ -77,6 +77,8 @@ Canonical status names, role names, and threshold names are defined once in Sect
 - [Appendix B — Glossary](#appendix-b-glossary)
 - [Appendix C — Status Transition Diagrams](#appendix-c-status-transition-diagrams)
 - [36. Six-View Visual Workspace Requirements](#36-six-view-visual-workspace-requirements)
+- [37. Multidisciplinary Coordination Amendment](#37-multidisciplinary-coordination-amendment)
+- [38. Design Inputs, Readiness and Location Context](#38-design-inputs-readiness-and-location-context)
 
 ---
 
@@ -139,7 +141,7 @@ Today this knowledge lives in the PM's head, in a spreadsheet, in a Planner boar
 
 ### 2.2 Why existing tools do not fit
 
-Generic tools (Planner, Trello, Asana, Monday.com, Smartsheet) treat all work as flat tasks or cards. They have no concept of a discipline, a deliverable, a design submission, a technical review, or a decision that blocks a package. Schedule tools (Primavera P6, Microsoft Project) model dependencies well but are heavyweight, require scheduling expertise, and are not something a design team updates daily. The result is that the coordination question is answered by people compiling status, not by the system.
+[Inference] Tuesday is intended to differentiate through predefined engineering coordination workflows. General work-management platforms can support hierarchy, dependencies, reviews and configurable workflows; differentiation should be evaluated on the built-in discipline, deliverable, submission and decision relationships, not a claim that competitors only offer flat cards. Schedule tools (Primavera P6, Microsoft Project) model dependencies well but are heavyweight, require scheduling expertise, and are not something a design team updates daily. The result is that the coordination question is answered by people compiling status, not by the system.
 
 ### 2.3 Concrete pains this product addresses
 
@@ -469,6 +471,35 @@ Ownership extends role permissions on individual items regardless of project rol
 
 ---
 
+### 8.10 Multidisciplinary coordination permissions
+
+These actions extend the existing matrix for packets 025–033. Existing access/lifecycle checks are applied first, including the Read Only veto and restricted-project membership. A system role does not bypass a project visibility restriction. Scope-qualified ownership is an additional right, never an exception to a refusal.
+
+| Action | Authorised actor after existing write/access gates |
+|---|---|
+| Create/assign handoff | PM, source/receiving Discipline Lead, or permitted source-work owner within their discipline |
+| Submit/respond to handoff | Named sending owner; PM/lead may reassign with reason |
+| Accept/incorporate handoff | Named receiving owner; self-review setting governs same-person exception |
+| Coordinate review package | PM or responsible Discipline Lead; may assign coordinator |
+| Technical review approval | Named discipline reviewer, with independent-review checks |
+| Respond to/verify review finding | Resolution owner responds; originator or authorised independent replacement verifies |
+| Publish source revision/change | PM, responsible Discipline Lead or source deliverable owner |
+| Assess changed input | Named receiving-work owner; PM/lead approves retention of an old revision |
+| Issue submission package | PM, after transactional recheck of manifest and mandatory gates |
+| Propose allocation | PM or Discipline Lead within the project |
+| Confirm allocation/change availability | Supervisor for direct reports, or Admin; no added access to restricted project details |
+| Propose design basis/assumption | Project member within their discipline; PM/lead assigns owner |
+| Confirm design basis | Responsible Discipline Lead or explicitly assigned independent approver |
+| Approve Proceed under Assumption | PM or responsible Discipline Lead, with fixed scope and expiry |
+| Propose/verify constraint removal | Named removal owner proposes; affected work owner verifies |
+| Commit weekly output | Named performer; meeting chair may propose only |
+| Resolve/verify location issue | Existing Issue owner proposes; independent designated verifier verifies |
+| View coordination, sources and export | Existing permitted project viewer; source-system access is checked separately when opening external links |
+
+Reassignment is attributed, reasoned and version checked, retains earlier signatures/decisions, and reruns self-review and access invariants. No proxy approval is implied by manager, coordinator or administrator status. Common refusal/notification rules: §37.1.
+
+---
+
 ## 9. Information Architecture
 
 ### 9.1 Evaluation of the proposed hierarchy
@@ -743,6 +774,38 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 | Template → Project | snapshot copy | Project records `template_id` and `template_version`; later template changes do not propagate |
 | User — User (supervisor) | many : 1 | Drives Supervisor scope: direct reports (§8.8) |
 | User — Project (ProjectFollow) | many : many | One row per user per project; created automatically on team assignment (§12.18) |
+
+### 10.8 Multidisciplinary coordination vocabulary and records
+
+This is the canonical extension to §10 for the approved nine-packet amendment (§37, §38). Existing task/deliverable/project states do not change. Readiness, handoff acceptance, review approval and document issue are distinct concepts. This amendment adds metadata and workflow evidence; it does not implement a file-versioning service.
+
+| Record | Canonical states or representation | Key relationships/invariants |
+|---|---|---|
+| Handoff / receipt | Draft, Submitted, Clarification Requested, Returned, Accepted, Incorporated, Cancelled | One sending owner, one receiving owner per receipt, exact source revision, target work, intended use, criteria, needed/promised dates; revision-specific acceptance |
+| Review package | Draft, In Review, Changes Required, Approved, Superseded, Cancelled | One coordinator, immutable round manifest, required discipline assignments |
+| Discipline review | Pending, In Review, Changes Required, Approved | One reviewer per discipline and round; approval of exact revisions |
+| Review finding | Open, Responded, Verified Closed, Withdrawn | One resolver and separate verification attribution; Blocking or Advisory severity |
+| Source revision | Immutable registered snapshot with explicit supersedes link | Existing DeliverableIssue or external source ID/URL/revision, source-check provenance; supersedes graph acyclic |
+| Input use | Versioned adoption link | Consumer work, source/basis revision, intended use, adopting actor and time |
+| Change notice | Draft, Open, Closed, Cancelled | One owner, old/new references, stated scope; publication moves Draft to Open; closure needs completed assessments; cancellation needs PM/lead reason and preserves impacts |
+| Change assessment | Pending Assessment, Unaffected, Update Required, Clarification Needed, Resolved | One affected owner per consumer/change; rationale, correction task and verification; acknowledgement separate |
+| Submission | Draft, Checking, Ready, Issued, Superseded, Cancelled | Coordinator, milestone, fixed manifest and issue snapshot; issued record immutable |
+| Submission check | Pending, Pass, Fail, Not Applicable | Evidence, responsible checker, applicability reason; mandatory gates cannot be waived |
+| Resource allocation | Proposed, Confirmed, Declined, Cancelled, Completed | One person/project, production or review purpose, dates/hours; linked work unique per person/date slice |
+| Availability override | Date and available decimal hours | One person/date; replaces default daily capacity; no sensitive leave details |
+| Design basis entry/version | Proposed, Confirmed, Superseded, Withdrawn | Criterion or Assumption, scope, value/statement, units, owner, source and affected consumers; confirmed versions immutable |
+| Readiness | Needs Assessment, Not Ready, Ready, Proceed under Assumption | Derived from named requirements/constraints; not a task status or permission grant |
+| Constraint | Open, Resolution Proposed, Verified Removed, Cancelled | One removal owner, affected work, needed date, source and verifier; existing issue/decision may be linked |
+| Weekly output commitment | Proposed, Committed, Met, Not Met, Withdrawn | Performer, immutable original output/criteria/date snapshot and attributed later changes |
+| Location-linked issue | Existing Issue status vocabulary (§10.2) | Extend existing Issue; source revision, station/area/asset context and one resolution owner |
+| Issue verification | Resolution Proposed, Verified, Rejected | Evidence and independent verifying owner; separate from Issue status |
+| Discipline coordination view | Permission-filtered projection | No independent copy of underlying work or workflow status |
+
+Readiness precedence is Needs Assessment for missing/unknown applicable checks, then Not Ready for known unsatisfied required checks; the UI always lists all reasons. Ready requires every applicable check satisfied. Proceed under Assumption is available only when the remaining unsatisfied inputs are covered by valid, scoped, unexpired authorised assumptions and no non-overridable gate is failed. A known failure alongside an unknown check remains visible even when the headline is Needs Assessment.
+
+New records use stable UUIDs and readable per-project keys where they appear as standalone items: Handoff H, Review RV, Change CH, Submission SUB, Basis B, Constraint CT and Commitment WC. Existing Issue keys remain unchanged. Prefixes do not alter existing item sequences; deleted keys are never reused. New records carry project, owner, created/updated attribution, row version and soft-deletion fields as applicable. Immutable published snapshots use append-only superseding records rather than edits or deletes. Source references must remain same-project; use a unique source/version identity and unique change/consumer assignment to deduplicate.
+
+Add `coordination_lookahead_weeks` to organisation settings, default 3 and allowed range 1–12. Existing working-day calendars, weekly capacity and workload warning thresholds continue to apply. Submission checks and readiness constraints are purpose-specific records, not arbitrary checklists inside tasks or a custom workflow builder. Physical tables and migrations are designed in each packet before application implementation.
 
 
 ## 11. Functional Requirements
@@ -3242,6 +3305,8 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 
 ## 27. MVP Scope
 
+**2026-09-26 amendment:** The existing first-release set below is the 24-packet implementation baseline. Jay has also approved all nine coordination additions in §37–§38 (packets 025–033). They are specified, not built. Release in accepted increments within the 50-person pilot; do not claim completion of the expanded scope based on the older packet status. §38.4 defines the dependency order.
+
 ### 27.1 Critical evaluation of the candidate MVP list
 
 | Candidate | Decision | Rationale |
@@ -3342,7 +3407,7 @@ Original item numbers are retained for historical packet citations. Items marked
 2. **SharePoint integration** — browse and pick documents from the project library (Graph); still no storage in the Hub.
 3. **ERP / Vantagepoint integration** — inbound project master data sync (**TBD**: capabilities, licensing, ownership of fields). Nothing is assumed about ERP capabilities in this specification.
 4. **Project financial information (read-only display)** — only if sourced from ERP; the Hub never becomes a financial system.
-5. **Utilisation / resource planning** — availability from HR/leave systems, capacity by role, longer horizons; still no levelling or payroll timesheets.
+5. **Utilisation / resource planning** — availability from HR/leave systems, capacity by role, longer horizons; still no levelling or payroll timesheets. Manual dated capacity overrides and confirmed production/review allocations are now approved in §37.6; HR integration remains Phase 3.
 6. **Client / external actions** — optional read-only external access or emailed action lists to external parties (security review required).
 7. **Advanced portfolio reporting** — cross-office comparisons, discipline throughput, submission on-time rates from snapshots.
 8. **Advanced administration** — per-project threshold overrides; template analytics; bulk data tools.
@@ -3363,8 +3428,8 @@ No AI features are planned in any phase of this specification.
 | Payroll or billable timesheet approval, billing rates, invoicing, and payroll submission | Actual hours are recorded against tasks in the first-release Time view (§36.8), but the Hub does not replace financial or payroll systems. |
 | Full ERP or CRM functionality | — |
 | CPM scheduling, critical path, float, resource levelling, baselining beyond original dates, MS Project/P6 import-export | Primavera/Project replacement is a non-goal. |
-| CAD/BIM authoring, model viewing, drawing mark-up | Engineering tools do this. |
-| Document management: file storage, versioning, check-in/out, transmittals | SharePoint/DMS does this; the Hub links. |
+| CAD/BIM authoring, model viewing, drawing mark-up | Engineering tools do this. Location metadata and links to external markups/viewpoints are approved in §38.3; no embedded authoring/viewer is added. |
+| Document management: file storage, file versioning, check-in/out, sending transmittals | SharePoint/DMS remains the file system of record. Registered revision metadata, revision-use tracking and immutable submission manifests are approved in §37.4–§37.5; Tuesday stores references and coordination evidence only. |
 | Email client features, reply-by-email, Teams/chat replacement | Use Teams and Outlook; the Hub links by item key. |
 | Engineering calculations or automated engineering decisions | Professional responsibility remains with engineers. |
 | Custom fields builder, custom statuses/workflows per project, automation rule builder | Complexity that undermines consistency of the coordination rules. |
@@ -3373,7 +3438,7 @@ No AI features are planned in any phase of this specification.
 | Multi-tenant SaaS packaging | Single organisation. |
 | Gamification, badges, streaks, leaderboards | Professional tool; would distort behaviour. |
 | Public API for third parties, outbound webhooks | No demonstrated need; revisit with integration requests. |
-| Recurring tasks, subtasks/nested task trees, checklists inside tasks | Deliverable → Task is the hierarchy; nesting further invites task-tracker sprawl. Checklists may be reconsidered in P2 if a real need appears. |
+| Recurring tasks, subtasks/nested task trees, generic checklists inside tasks | Deliverable → Task remains the hierarchy. The approved submission checks (§37.5) and ready-to-start constraints (§38.2) are specific coordination records linked to work, not a generic checklist builder. |
 | Multiple assignees per task | Violates single-accountability principle; collaborators cover the real need. |
 
 ---
@@ -3633,7 +3698,7 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | Q13 | Who can create projects (PM role holders only vs all staff) | Governance vs friction | PM system role holders and Admins |
 | Q14 | Retention policy for archived projects and logs | Storage, compliance | Indefinite |
 | Q15 | CI/CD platform (GitHub Actions vs Azure DevOps) | Tooling alignment | Whichever the organisation already uses |
-| Q16 | Pilot group and success metrics | Rollout plan | 3 PMs, 6 projects, 8 weeks |
+| Q16 | Pilot group and success metrics | Rollout plan | **Decided:** 50 people. Proposed operational default remains 3 PMs, 6 projects, 8 weeks, subject to project selection; the 50-person count is not a concurrency or server-capacity claim. |
 | Q17 | Idle session timeout | Security vs convenience | 8 hours |
 | Q18 | Weekly capacity default and whether under-assignment should be shown (P2) | Workload view sensitivity | 40 h; show with caveats |
 | Q19 | Manager staff scope | Who sees and staffs whose work; only as good as the supervisor data (Q3) | **Decided:** direct reports only; Executives and Admins can view all staff |
@@ -3654,7 +3719,7 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | **3. Dependencies and rules** | Dependencies, evaluation module, state tables, outbox worker, indicators, milestone status, health, attention engine, nightly jobs | Worked examples in §15.12 pass as automated tests and show correctly in the UI |
 | **4. Coordination surfaces** | Project Dashboard, My Work, Weekly Coordination (with meeting mode), Kanban, Milestone view, Deliverables Register polish, search, filters, exports | A PM can run a coordination meeting on the test project without leaving the app |
 | **5. Visual workspace and notifications** | Six pictured views (§36), task-hour entry, portfolio, resource grid, saved views, task-level Gantt, team calendar, in-app centre, email, digest, preferences; recommended Decision Register and extras | Every first-release visual acceptance scenario AC-VIS-01 through AC-VIS-08 passes before pilot |
-| **6. Hardening and pilot** | Accessibility audit, performance test with synthetic scale, security review, runbooks, training material; pilot with 3 PMs for 8 weeks; threshold tuning | Pilot success metrics met; go/no-go for organisation rollout |
+| **6. Hardening and pilot** | Accessibility audit, performance test with synthetic scale, security review, runbooks, training material; 50-person pilot (proposed 3 PMs, 6 projects, 8 weeks); accepted coordination increments (§38.4); threshold tuning | Pilot success metrics met; go/no-go for organisation rollout |
 | **7. General availability** | Rollout by office/group; support process; backlog triage for Phase 2 | — |
 
 ### 35.2 Recommended MVP Build Order (epics and dependencies)
@@ -3994,3 +4059,309 @@ The user confirmed the six workspace views pictured in the supplied image as **f
 **AC-VIS-07.** Every visible view tab and global navigation item opens its defined view, preserves permitted scope where applicable, and remains keyboard operable at desktop and tablet widths.
 
 **AC-VIS-08.** Given Alex records 2.5 and 1.25 hours on a permitted task on the same date, Time shows two entries and a 3.75-hour total; Jill cannot edit them, a PM correction requires a reason, an entry taking Alex above 24 hours that date is refused, and deleting one entry updates totals while preserving an audit record. Neither entry changes the task's estimate or progress.
+
+
+## 37. Multidisciplinary Coordination Amendment
+
+Approved scope: Jay requested all six coordination additions and their researched refinements on 2026-09-26. This section records the product contract; implementation and acceptance remain pending. The product name is Tuesday; existing Hub code namespaces and filenames remain technical identifiers. The earlier 24 packets remain the implementation baseline, not evidence that packets 025–033 are built.
+
+### 37.1 Shared rules and release boundary
+
+All nine additions are approved product scope. The initial 50-person pilot may stage capabilities only after their own acceptance checks pass; a disabled packet remains explicitly unbuilt. This is not a production-readiness or ISO/BCF-compliance claim. Existing security, performance, independent-review and operational gates remain applicable. Section 10.8 supplies canonical entities and states; §8.10 supplies permissions. No new health rule is implied by a feature label.
+
+- **FR-MDC-01.** Every new record MUST belong to one project (except a person availability override), have one accountable owner, a stable ID, a row version and an immutable activity history. Child assignments each have their own single owner; multiple reviewers do not create multiple task assignees. Existing task, deliverable and project status names remain unchanged.
+
+- **FR-MDC-02.** Every command, query, aggregate, export and notification MUST enforce current server-side permissions and project lifecycle restrictions. Read Only is a veto on mutations; Archived and Cancelled projects are read-only; Complete follows the existing PM-only edit rule. Ownership never bypasses these restrictions. Recheck recipient access before composing confidential content and again before queued delivery; external parties have no account or outgoing notification.
+
+- **FR-MDC-03.** All mutable writes, including bulk operations, MUST compare the versions the caller read. Conflicts return the affected record without overwriting newer work. Cross-record approval, publication and issue operations MUST be transactional and retry-safe. Assignment cannot create membership through a refused or empty operation, and reassignment must recheck independent-review rules.
+
+- **FR-MDC-04.** All relationships in this amendment MUST remain within a project. A workspace may aggregate permitted projects but must not create cross-project dependencies. Deleted and superseded records remain available in authorised history; broken, deleted or inaccessible required references produce an explicit unresolved condition rather than an accepted state.
+
+- **FR-MDC-05.** The product MUST retain document links and revision metadata only. An external reference records source system, stable source ID where available, URL/path, declared revision, registered-by and registered-at. Label the revision as manually registered unless verified through an authorised connector. A mutable URL is not proof of exact file contents or of the latest revision. No CAD/BIM viewer, file hosting, engineering calculation, AI or model parsing is added.
+
+- **FR-MDC-06.** Lists MUST support scoped filtering, pagination, saved views and export; exports reconcile with the same permitted records. Controls are keyboard accessible, use text alongside colour, and use externalised strings. Notifications reuse existing preferences and digests; transitions create one deduplicated event per recipient and actionable item, not one event per dashboard.
+
+- **FR-MDC-07.** All derived readiness and change flags MUST show their contributing records and rule. These additions do not silently change task progress, project health, due dates or logged actual hours. New attention items reuse the existing routing/digest mechanism and remain separate from health until an explicit health rule is specified.
+
+- **FR-MDC-08.** Required owners/reviewers/receivers MUST be active and permitted to access the project. Removal or deactivation retains historical attribution and creates an actionable unassigned/inactive warning; replacement requires an authorised, audited command. No approval is inferred from silence. Project hold suspends overdue escalation under existing rules while retaining the pending workflow.
+
+### 37.2 Discipline Handoffs and Acceptance
+
+A receiving discipline can identify, accept and incorporate the exact input it needs for a defined purpose.
+
+- **FR-HND-01.** A handoff MUST record the sending and receiving disciplines, one sending owner, one receiving owner, source deliverable/revision, at least one receiving task or deliverable, intended use, acceptance criteria, needed-by date and promised date. Drafts may omit a promised date; submission requires it. A sender promising after the needed-by date generates a visible mismatch without silently changing either date.
+
+- **FR-HND-02.** The sender submits a fixed revision. The receiver may accept it for the stated use, request clarification or return it with a reason. Acceptance records the receiver, time, purpose and criteria outcome. Incorporation is a separate receiver action recording the target work and revision actually used; acceptance is not technical approval or a transfer of professional responsibility.
+
+- **FR-HND-03.** Canonical transitions MUST be Draft → Submitted; Submitted → Accepted, Clarification Requested or Returned; Clarification Requested/Returned → Submitted with a response and revision; Accepted → Incorporated. A sender cannot accept their own handoff unless the existing self-review setting explicitly permits that same-person case. PM/lead cancellation requires a reason; prior transitions remain in history.
+
+- **FR-HND-04.** A newer source revision MUST NOT overwrite acceptance of the earlier revision. Register it as a new handoff revision linked to the old one and initiate change assessment under packet 027. The receiver explicitly adopts or retains the prior revision with a documented disposition. Partial input is accepted only for a named limited purpose and scope; another purpose requires another handoff.
+
+- **FR-HND-05.** The sender owns delivery and response; the receiver owns acceptance and incorporation. The PM or relevant Discipline Lead may assign these roles but cannot silently sign on their behalf. Multiple receiving disciplines get separate handoff records or child receipts with separate owners and states.
+
+- **FR-HND-06.** Incoming and outgoing lists MUST distinguish promised, submitted, accepted and incorporated information, with overdue-by-needed-date and awaiting-response reasons. Existing task dependencies remain effective; accepting a handoff alone does not complete a task or unblock a separate unresolved dependency.
+
+- **FR-HND-07.** Handoff creation from a deliverable/task MUST prefill permitted project, discipline, source and target references. The form asks only for missing fields. Repeating a submitted command returns the existing result and does not create duplicate receipts or notifications.
+
+**Acceptance criteria**
+
+- **AC-HND-01.** Given a Survey handoff promised after Civil needs it, when it is submitted, then both dates and the mismatch are visible to both owners without changing the task dates.
+
+- **AC-HND-02.** Given revision A is submitted, when the named Civil receiver accepts it, then the handoff is Accepted but not Incorporated and the downstream task is not marked Complete.
+
+- **AC-HND-03.** Given revision A has been incorporated, when revision B is registered, then A remains the recorded input and the receiver sees a pending assessment for B.
+
+- **AC-HND-04.** Given a receiver returns a handoff without a reason or a sender tries to accept it, then the operation is refused unless the same-person setting explicitly allows the latter; authorised acceptance is attributed to its actual actor.
+
+- **AC-HND-05.** Given two disciplines receive one source package, when only one accepts, then the other receipt remains pending; a restricted-project viewer cannot see either receipt in search, aggregate or export.
+
+### 37.3 Multidisciplinary Reviews and Comment Closure
+
+Each required discipline reviews a fixed package revision and unresolved comments remain visible through correction and verification.
+
+- **FR-MRV-01.** A review package MUST identify one coordinator, a fixed manifest of deliverable revisions, the required disciplines, one reviewer per discipline, review due dates and the review purpose. The coordinator starts a round only when required reviewers and referenced revisions exist and are accessible.
+
+- **FR-MRV-02.** A discipline review assignment MUST use Pending, In Review, Changes Required or Approved. The reviewer records their result for that round and revision set. The package uses Draft, In Review, Changes Required, Approved, Superseded or Cancelled; only all required current-round assignments Approved and all blocking comments Verified Closed allow Approved.
+
+- **FR-MRV-03.** Each review comment MUST have an originator, one resolution owner, affected discipline/deliverable/revision, severity (Blocking or Advisory), response and evidence link. Its states are Open, Responded, Verified Closed and Withdrawn. The resolver records Responded; the originator verifies closure or returns it to Open with a reason. PM reassignment of verification requires a reason and an independent permitted reviewer.
+
+- **FR-MRV-04.** Independent-review checks MUST apply to the work author/assignee and assigned reviewers on creation, replacement, bulk reassignment and final approval. The existing allow_self_review setting governs explicit exceptions. Package coordination rights alone do not grant technical approval rights.
+
+- **FR-MRV-05.** Changing a manifest revision, required discipline or blocking criterion after review starts MUST create a new round. Preserve earlier comments and approvals; mark affected assignments Pending and carry unresolved comments forward with provenance. A recorded mapping may carry unaffected approvals forward, with reviewer acknowledgement of the new scope; never silently reuse approval of different content.
+
+- **FR-MRV-06.** The package list MUST show outstanding disciplines, review workload, unresolved blocking comments and elapsed waiting time. Review completion remains separate from the deliverable Issued and Accepted lifecycle. Where a deliverable requires this package, its Ready to Issue command rechecks current review approval.
+
+- **FR-MRV-07.** A required discipline cannot be removed to bypass open findings: removal requires PM reason, impact review and a new round. Withdrawing a comment requires its originator or a PM-designated independent verifier, a reason and retained history; a blocking finding requires the coordinator to acknowledge the withdrawal.
+
+**Acceptance criteria**
+
+- **AC-MRV-01.** Given Civil and Structural have approved but Electrical is Pending, then the package cannot be Approved or satisfy a required submission review gate.
+
+- **AC-MRV-02.** Given the resolver responds to a blocking comment, then it remains open for verification until the originator or authorised independent replacement verifies closure.
+
+- **AC-MRV-03.** Given an approved review references revision A, when revision B replaces an affected item, then affected approvals become pending in a new round and A remains in history.
+
+- **AC-MRV-04.** Given a reassignment would make the author their own reviewer while self-review is disabled, then the entire reassignment/approval operation is refused without partial changes.
+
+- **AC-MRV-05.** Given a required discipline is removed, then a reason and new round are required, and its earlier comments/approvals remain inspectable by authorised users.
+
+### 37.4 Revision Awareness and Change Impact
+
+People can identify the revision they used and make an explicit disposition when linked information changes.
+
+- **FR-CHG-01.** A source revision MUST have a stable internal ID, declared external identifier/revision, title, issuer, registration time, link and scope. Published registrations are immutable snapshots; corrections create a replacement with a reason. Do not lexically sort revision labels to infer recency: an authorised explicit supersedes relationship defines the registered sequence, without cycles.
+
+- **FR-CHG-02.** An InputUse link MUST record a receiving task/deliverable, its owner, source revision, intended use and adoption time. Multiple source documents are allowed. Registering a new revision never overwrites an InputUse link or claims that the source system has no newer information.
+
+- **FR-CHG-03.** Publishing a change notice MUST require one owner, old/new revision or changed design-basis entry, a human-authored description, effective date, affected scope and assessment due date. Identify recipients by explicit InputUse/handoff/requirement relationships; allow an authorised owner to add known affected work. Display the detection boundary: unlinked work is not assessed.
+
+- **FR-CHG-04.** Each affected owner MUST disposition the notice as Pending Assessment, Unaffected, Update Required or Clarification Needed, with rationale and evidence. Update Required creates or links a single-owner follow-up task and estimated effort/date impact; the reviewer verifies completion before Resolved. Retaining an older revision requires a recorded reason and approval from the PM or responsible Discipline Lead.
+
+- **FR-CHG-05.** The notice is closed only after every required assessment is Unaffected with evidence (and approval where retaining an older revision) or Resolved with verified correction. Cancelling a correction task does not resolve an Update Required assessment; it needs a new evidenced, authorised disposition. No response remains pending. Acknowledgement means the notice was seen, not that an engineering impact assessment was completed.
+
+- **FR-CHG-06.** Change propagation MUST be deterministic, bounded to explicit relationships and deduplicated per change/target. Show downstream linked items as potentially affected until assessed; do not automatically revise designs, dates, task completion or technical conclusions. Concurrent publication and adoption must recheck referenced versions.
+
+- **FR-CHG-07.** The interface MUST show Current registered revision, Revision used and Assessment status together, with manual-registration/source-check timestamps. Closed projects retain history; later changes cannot mutate their issued records. Reopening or a permitted new change process is required.
+
+**Acceptance criteria**
+
+- **AC-CHG-01.** Given three items record use of revision A, when B explicitly supersedes A, then exactly those three receive pending assessments and unrelated/unlinked work is not claimed as checked.
+
+- **AC-CHG-02.** Given an owner acknowledges a notice but has not assessed it, then Pending Assessment remains and closure is refused.
+
+- **AC-CHG-03.** Given a receiver retains A with authorised rationale, then InputUse remains A, the assessment records that disposition and B remains the current registered source revision.
+
+- **AC-CHG-04.** Given two simultaneous adoption/publication commands based on stale versions, then a conflict is returned and no mixed revision/approval snapshot is committed.
+
+- **AC-CHG-05.** Given an Update Required assessment links a correction task, then the notice stays open until correction and verification are recorded; no due date changes automatically.
+
+### 37.5 Submission Readiness and Issue Manifest
+
+A submission is assembled from explicit revisions and accountable checks, with evidence for every readiness gate.
+
+- **FR-SUB-01.** A submission package MUST have one accountable coordinator, one existing milestone, purpose, recipient reference, target date and a manifest of required deliverable revisions. A template may supply the checklist, but each project takes its own versioned snapshot.
+
+- **FR-SUB-02.** Each checklist item MUST identify one checking owner, evidence or a derived source rule, and whether it is required. Required checks include required deliverables present, current required multidisciplinary reviews approved, blocking findings verified closed, required handoffs accepted for the purpose, and outstanding change assessments resolved. Show individual blockers; a percentage must not imply Ready.
+
+- **FR-SUB-03.** States MUST be Draft, Checking, Ready, Issued, Superseded and Cancelled. Ready is derived from all required current checks Pass or an allowed approved Not Applicable. Draft → Checking is coordinator-controlled; Checking/Ready → Issued requires an authorised PM command. Issued is an immutable manifest snapshot linked to the actual external transmittal reference.
+
+- **FR-SUB-04.** Only the PM may approve Not Applicable with reason and evidence on an optional applicability check. Required independent review, current revision identity, access checks and unresolved blocking findings cannot be waived through this checklist. A conditional submission requires a separate purpose and explicit applicable criteria; never relabel failed mandatory criteria as passed.
+
+- **FR-SUB-05.** Changes to the manifest, linked review round, accepted input or applicable design basis MUST invalidate affected readiness evidence and return an unissued package to Checking. Issued manifests remain unchanged; publish a superseding package for corrections and retain both histories.
+
+- **FR-SUB-06.** Issue MUST re-evaluate the manifest and all required checks in one transaction using expected versions. A change during checking returns a conflict or explicit blocker; no issue is recorded against stale sign-offs. Record who authorised issue, when, declared destination and external transmittal link; this does not send files or create a legal signature.
+
+- **FR-SUB-07.** The readiness screen MUST group blockers by discipline and owner and allow opening the source item. A per-submission export includes revision manifest, evidence, unresolved items, exceptions and issue history within the caller access scope.
+
+**Acceptance criteria**
+
+- **AC-SUB-01.** Given every checklist row except an Electrical blocking review finding passes, then the package is Checking and Issue is refused with that source finding.
+
+- **AC-SUB-02.** Given a Ready package references revision A, when an affected deliverable changes to B, then the unissued package returns to Checking and affected approvals are invalidated.
+
+- **AC-SUB-03.** Given revision A was issued, when B is issued later, then the first manifest still shows A, its original authorisation and its original transmittal reference.
+
+- **AC-SUB-04.** Given an owner changes a required review while the PM issues from a stale screen, then the issue transaction is refused without recording a partial issued manifest.
+
+- **AC-SUB-05.** Given a PM tries to waive an unresolved blocking finding using Not Applicable, then the command is refused; a genuinely inapplicable optional check requires recorded justification.
+
+### 37.6 Dated Capacity and Project Allocations
+
+Supervisors can confirm production and review commitments for defined dates without double-counting the existing task forecast.
+
+- **FR-CAP-01.** A PM or Discipline Lead may propose an allocation with one person, project, production/review purpose, inclusive date range, positive planned hours and linked tasks or review assignments. The person supervisor or Admin confirms it. States are Proposed, Confirmed, Declined, Cancelled and Completed; changing person, dates or hours after confirmation returns it to Proposed.
+
+- **FR-CAP-02.** A person availability override MUST record date, available hours and a non-sensitive category; the supervisor for direct reports or Admin edits it. Store no leave reason, diagnosis or HR document. The override replaces that day capacity, not subtracts twice. Otherwise distribute the existing weekly capacity over that calendar working days; holidays contribute zero unless an explicit override supplies hours.
+
+- **FR-CAP-03.** Spread allocation hours over eligible days within its inclusive range using the person calendar, with explicit per-day overrides available. Store decimal hours; reject negative values, inverted ranges and a positive allocation with no eligible days. Preserve exact totals and apply display rounding only after aggregation.
+
+- **FR-CAP-04.** The grid MUST show available capacity, confirmed reservations, proposed requests and the existing remaining-work forecast separately. To calculate committed load, use max(reservation hours, linked remaining-work hours) for each confirmed allocation plus unlinked remaining-work hours, per person/week. A task/review estimate may belong to at most one allocation for the same person/date slice. Proposed requests are separate scenario demand, never confirmed load.
+
+- **FR-CAP-05.** Allocation changes MUST not modify task estimates, progress, due dates, payroll or actual-hour entries. Use the existing workload thresholds and explain missing estimates. Review effort is explicit review-assignment demand, not duplicated production-task effort. Allocation is a staffing commitment, not evidence of work completion.
+
+- **FR-CAP-06.** Supervisors see direct reports only within existing project permissions; PMs see their permitted project requests. If other assignments are outside the viewer scope, label visible totals as partial and do not claim complete spare capacity. Do not expose restricted project names, hours, counts or existence through aggregate differences.
+
+- **FR-CAP-07.** Over-capacity confirmation MUST warn with the exact dates/hours and require a supervisor reason; it does not silently level or reschedule work. Conflicting simultaneous edits use expected versions, and confirmation records the current capacity/commitment snapshot for audit. A calendar/capacity change recomputes the warning without silently cancelling commitments.
+
+**Acceptance criteria**
+
+- **AC-CAP-01.** Given a confirmed 12-hour reservation and 8 linked estimated remaining hours in one week, then committed load is 12 hours, not 20; a separate unlinked 3-hour task makes it 15.
+
+- **AC-CAP-02.** Given a day capacity override of 4 hours, then that day shows 4 hours regardless of the normal daily capacity and no leave reason is visible.
+
+- **AC-CAP-03.** Given a confirmed request changes dates, then confirmation is withdrawn to Proposed and the supervisor must confirm the new range.
+
+- **AC-CAP-04.** Given a PM can see only some of a person work, then the screen labels the visible workload partial and does not infer spare capacity from hidden work.
+
+- **AC-CAP-05.** Given two stale competing confirmations, then the second must refresh the affected person/date version before confirming; a resulting overload requires an explicit reason.
+
+### 37.7 Discipline Coordination View
+
+A discipline lead can work through incoming inputs, outgoing promises, revisions in use, changes and ready work from one scoped view.
+
+- **FR-DCV-01.** The view MUST answer five questions through fixed sections: What do we owe? What are we waiting for? Which revision are we using? What changed? What can we start? Include pending reviews, upcoming submissions and staffing conflicts as contextual filters and source links.
+
+- **FR-DCV-02.** The default is the user discipline and permitted workspace projects; allow explicit project, discipline, owner and date filters. Every row identifies its project and underlying stable item. Scope persists across drill-down and return, and a saved view stores filters/columns rather than a copy of data.
+
+- **FR-DCV-03.** Incoming handoffs distinguish submitted, accepted and incorporated; outgoing handoffs show promised versus needed dates. Change rows show Pending Assessment separately from acknowledgement. Readiness rows display remaining constraints, and submission rows show the exact failing checks.
+
+- **FR-DCV-04.** Every count and export MUST reconcile with the same filtered source records at the same evaluation timestamp. Show evaluation freshness. Cross-project totals omit restricted work and never describe a partial view as an organisation-wide total.
+
+- **FR-DCV-05.** Inline actions MUST invoke the same domain commands as the owning screen, with permission/refusal reasons, version checks and required evidence. Viewing, discussing or marking a meeting reviewed cannot close a review finding, accept a handoff or approve technical work.
+
+- **FR-DCV-06.** Meeting mode MUST let the chair group related rows by blocker or source change, assign an action and set its date without duplicating existing tasks. Reuse meeting actions and existing notifications. Preserve prior weekly commitment snapshots while discussing a later week.
+
+- **FR-DCV-07.** Place this capability under existing Coordination/Weekly Coordination and My Work. Render only implemented, authorised sections; show explicit unavailable capability messaging during staged rollout. Status text, keyboard navigation, a print view and direct source-item links are required.
+
+**Acceptance criteria**
+
+- **AC-DCV-01.** Given three tasks wait on one source handoff, then the view shows one blocker group with three linked tasks and clicking the count opens those same tasks.
+
+- **AC-DCV-02.** Given only one project in a workspace is permitted, then rows, counts, search, print and export contain only that project.
+
+- **AC-DCV-03.** Given an owner opens an item from a saved discipline view and returns, then project/discipline/date scope is preserved with refreshed current data.
+
+- **AC-DCV-04.** Given the chair marks the coordination meeting reviewed, then no handoff, technical review, change assessment or commitment is automatically approved or closed.
+
+- **AC-DCV-05.** Given one source change has several linked actions, then capture action reuses an existing linked action when selected and never silently creates duplicate work.
+
+
+## 38. Design Inputs, Readiness and Location Context
+
+Approved scope: Jay accepted all three researched additions on 2026-09-26. Detailed behaviour below is the proposed implementation contract; it requires acceptance testing, not further feature-selection approval. Apply all shared safeguards in §37.1 and canonical vocabulary in §10.8.
+
+### 38.1 Shared Design Basis and Assumptions
+
+Teams can see the current approved criterion or explicit assumption and identify the work that relies on it.
+
+- **FR-BAS-01.** An entry MUST identify its kind (Criterion or Assumption), title, one accountable owner, responsible discipline, applicable location/system scope, value or statement, units when numeric, source link/revision, confirmation due date when provisional and linked consuming tasks/deliverables. Distinguish authority/client requirements from project assumptions; free-text content is not an engineering calculation.
+
+- **FR-BAS-02.** Use Proposed, Confirmed, Superseded and Withdrawn. Only the responsible Discipline Lead or an explicitly assigned independent approver may confirm an entry, with source evidence and rationale. The existing self-review setting applies. An unconfirmed assumption can be used only through the explicit Proceed under Assumption readiness disposition with approval, owner and expiry; it must never display as confirmed.
+
+- **FR-BAS-03.** Confirmed entries are immutable versions. Changing value, units, scope or source produces a proposed replacement with an explicit supersedes link. Confirmation of the replacement invokes change assessment for every linked consumer; the former version remains in historical InputUse records.
+
+- **FR-BAS-04.** Each consumer MUST identify the exact basis version it uses. Highlight consumers using a superseded or withdrawn version and require assessment rather than silently updating it. Relationships must be acyclic and limited to the same project. A missing source is an explicit data-quality condition.
+
+- **FR-BAS-05.** A source decision may confirm or change a basis entry, but the records retain distinct purposes and linked histories. Reopening a decision creates an assessment requirement; it does not silently unconfirm every downstream design.
+
+- **FR-BAS-06.** Duplicate entries with the same title, scope and discipline MUST prompt the user to inspect existing entries before creating another. Conflicting confirmed values remain visible with an unresolved conflict; do not choose a value automatically. Conflict resolution creates an authorised replacement and retains the competing histories.
+
+- **FR-BAS-07.** The register MUST filter by discipline, scope, kind, status, overdue confirmation and affected work; show source evidence, current registered version and version used. Export retains units and provenance. Templates may suggest entries as Proposed only; project confirmation never transfers from a template.
+
+**Acceptance criteria**
+
+- **AC-BAS-01.** Given Civil and Structural use confirmed basis version A, when B is confirmed, then both consumers require impact assessment and their recorded version remains A until explicitly adopted.
+
+- **AC-BAS-02.** Given a numeric criterion has no units, then confirmation is refused; a narrative criterion does not require invented units.
+
+- **AC-BAS-03.** Given an assumption is still Proposed, then ordinary Ready is unavailable for dependent work; authorised Proceed under Assumption records scope, approver and expiry.
+
+- **AC-BAS-04.** Given two confirmed values conflict in the same scope, then the register displays the conflict and does not silently select the newer value.
+
+- **AC-BAS-05.** Given a template is copied into a new project, then its basis entries are Proposed and no approval, source-use acknowledgement or technical sign-off is inherited.
+
+### 38.2 Ready-to-Start Planning and Weekly Commitments
+
+An owner commits to a defined output after checking inputs, decisions, assumptions and available production/review capacity.
+
+- **FR-RDY-01.** For a task or deliverable, readiness MUST separately evaluate required handoffs, predecessor rules, required decisions, basis conflicts/assumptions, assigned production owner and confirmed production/review availability where those resources are required. The PM or responsible Discipline Lead records applicability with reason. Missing or unassessed inputs yield Needs Assessment, not Ready.
+
+- **FR-RDY-02.** Use derived readiness states Needs Assessment, Not Ready, Ready and Proceed under Assumption. Preserve the existing task workflow separately. The owner records Intended Output and completion criteria. A permitted task start that is not Ready requires an explicit warning acknowledgement, reason and PM/lead authorisation; review, access and lifecycle guards cannot be bypassed.
+
+- **FR-RDY-03.** A constraint MUST have a category, one removal owner, removal-needed-by date, affected work and source evidence. States are Open, Resolution Proposed, Verified Removed and Cancelled. The affected work owner verifies removal; the removal owner response alone is not verification. Use links to existing decisions/issues/handoffs rather than duplicate records when they already represent the constraint.
+
+- **FR-RDY-04.** Proceed under Assumption MUST link a specific Proposed assumption version, state the limited work allowed, name the approving PM/lead, record risk and expiry and identify the responsible verifier. Expiry or a changed assumption returns readiness to assessment. Mandatory technical review and unresolved blocking review or submission gates cannot be overridden.
+
+- **FR-RDY-05.** A weekly plan MUST snapshot owner-approved output commitments, target dates, linked work, criteria and readiness at the project coordination-week boundary. The responsible performer explicitly commits; a chair may propose but cannot silently commit another person. States are Proposed, Committed, Met, Not Met and Withdrawn. Later changes retain the original promise and add an attributed reason.
+
+- **FR-RDY-06.** At week close, the owner records Met only with completion evidence matching the original criteria; otherwise record Not Met with a reason such as missing input, decision delay, changed scope or unavailable capacity. Withdrawal after commitment stays in the original snapshot. New scope is a separate commitment, not an edit that erases the earlier outcome.
+
+- **FR-RDY-07.** The screen MUST show the coming three-week window by default (organisation setting), constraints to remove, ready outputs and weekly promises; allow other permitted dates. Display any completion ratio with numerator/denominator and the fixed committed snapshot; record later withdrawals separately and do not use the result as an individual productivity ranking. Link to the existing Weekly Coordination meeting.
+
+**Acceptance criteria**
+
+- **AC-RDY-01.** Given a task is due next week but its required handoff is Submitted and not Accepted, then readiness is Not Ready with the handoff as its reason.
+
+- **AC-RDY-02.** Given the removal owner proposes that a constraint is resolved, then readiness remains blocked until the affected work owner verifies the evidence.
+
+- **AC-RDY-03.** Given an authorised assumption expires, then Proceed under Assumption becomes Needs Assessment and the original approval remains in history.
+
+- **AC-RDY-04.** Given five outputs were committed and one is withdrawn after the snapshot, then the original five remain inspectable and the withdrawal cannot erase the original promise or alter the denominator silently.
+
+- **AC-RDY-05.** Given a meeting chair proposes an output for another person, then it remains Proposed until that performer confirms; task completion and technical review guards still apply.
+
+### 38.3 Location-Linked Coordination Issues
+
+A coordination issue identifies the affected physical area and exact drawing/model reference so disciplines can resolve and verify the same problem.
+
+- **FR-LOC-01.** Extend the existing Issue record with optional structured location references: site area, building/level/room, asset/system, or alignment and start/end station with units. Drawing/model references MUST include identifier, declared revision and external source link. Allow multiple references when one issue spans boundaries; require at least one location or drawing/model reference for a Coordination issue.
+
+- **FR-LOC-02.** Location fields MUST retain the project coordinate/station convention; validate end station at or after start within the same alignment and units. A coordinate requires a declared coordinate reference system and units. Do not infer datums, convert coordinates or interpret engineering geometry.
+
+- **FR-LOC-03.** Keep one resolution owner and identify affected disciplines plus one independent verifying owner. Reuse the existing Issue status vocabulary; a new verification record captures Resolution Proposed, Verified or Rejected. Resolving a Coordination issue requires evidence and verification; creator/PM can appoint a replacement verifier with reason, subject to self-review rules.
+
+- **FR-LOC-04.** Store links to external markups, screenshots and model viewpoints. Include source revision in the issue context and retain historical references after resolution. A changed referenced revision creates a pending impact check; the issue owner/verifier decides whether to reopen through the existing workflow.
+
+- **FR-LOC-05.** Filter and group by location, discipline, drawing/model, revision, owner and verification status. The same issue ID appears in the project register, review package and coordination view; linking it to another view must not create a duplicate issue.
+
+- **FR-LOC-06.** When location or document access is restricted, apply existing project and source permissions without fetching external file bytes automatically. Show unavailable evidence explicitly; a broken link cannot satisfy a required verification check. Exports include only permitted metadata.
+
+- **FR-LOC-07.** BCF import/export is a deferred interoperability follow-up, not part of this initial implementation. Preserve optional external topic ID, model element GUID and viewpoint URL metadata now without claiming BCF conformance. A later packet requires validated file/API contracts, permission mapping and round-trip acceptance cases before enabling exchange.
+
+**Acceptance criteria**
+
+- **AC-LOC-01.** Given a Civil/Utilities issue concerns a station range and drawing revision A, then both disciplines see the same issue ID, exact range/units and source reference.
+
+- **AC-LOC-02.** Given a resolver supplies a correction, then the Coordination issue cannot become Resolved until the independent verifier records verification evidence.
+
+- **AC-LOC-03.** Given drawing B supersedes A, then the closed issue retains A and receives an impact check; it is not silently reopened or marked unaffected.
+
+- **AC-LOC-04.** Given an issue is linked from a review package and the discipline view, then editing its owner updates the single existing record and creates one audit event.
+
+- **AC-LOC-05.** Given station end precedes start or a coordinate omits its reference system, then validation refuses the location entry; no coordinate conversion is guessed.
+
+### 38.4 Delivery sequence and evidence
+
+Implement prerequisites before dependent commands: 025 and 026; 027; 029 and 031; 032 and 028; 033; then complete the integrated 030 view. Packet 030 may add sections incrementally but is not accepted until all nine workflows reconcile. This dependency order refines the user-facing priority order; it does not change which capabilities were approved. Carry the 50-person pilot scenario and the existing 011 hardening gates across every increment. Record failed, passed and unrun checks separately, retain the original 24-packet evidence as historical, and re-estimate delivery after the new scope rather than reuse earlier release percentages.
+
+Packets 025/026 establish immutable revision references; 027 extends those same records with source registration, InputUse and impact commands. The 025 change-impact integration scenario AC-HND-03 is verified after 027, so foundation delivery is not full packet acceptance. Packet 027 supports deliverable/external-source changes first; 031 adds the design-basis source adapter to the same assessment mechanism. This staged integration must not create duplicate revision stores or circular implementation prerequisites.

@@ -140,3 +140,9 @@ History and the project Activity History.
 - The activity log is recorded by packet 001; derived indicators used as filters come from packet 005.
 - Search over descriptions and comments (packet 020) and register reports (packets 014 and 015) are Phase 2. Saved views (019), portfolio reports (016), and workload reports (017) are first-release scope under §36.
 - Search uses the organisation's own data store; no external search service is assumed (§18.2).
+
+## Coordination expansion amendment — 2026-09-26
+
+Add permission-filtered metadata search, list/export support and exact source-count reconciliation for packets 025–033 (§37.1). Do not expose source file bytes or inaccessible-project counts.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

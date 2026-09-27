@@ -93,7 +93,7 @@ Today this knowledge lives in the PM's head, in a spreadsheet, in a Planner boar
 
 ### 2.2 Why existing tools do not fit
 
-Generic tools (Planner, Trello, Asana, Monday.com, Smartsheet) treat all work as flat tasks or cards. They have no concept of a discipline, a deliverable, a design submission, a technical review, or a decision that blocks a package. Schedule tools (Primavera P6, Microsoft Project) model dependencies well but are heavyweight, require scheduling expertise, and are not something a design team updates daily. The result is that the coordination question is answered by people compiling status, not by the system.
+[Inference] Tuesday is intended to differentiate through predefined engineering coordination workflows. General work-management platforms can support hierarchy, dependencies, reviews and configurable workflows; differentiation should be evaluated on the built-in discipline, deliverable, submission and decision relationships, not a claim that competitors only offer flat cards. Schedule tools (Primavera P6, Microsoft Project) model dependencies well but are heavyweight, require scheduling expertise, and are not something a design team updates daily. The result is that the coordination question is answered by people compiling status, not by the system.
 
 ### 2.3 Concrete pains this product addresses
 

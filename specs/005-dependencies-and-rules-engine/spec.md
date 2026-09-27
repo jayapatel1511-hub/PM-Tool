@@ -210,3 +210,9 @@ update; advance the date past a due date and confirm the overnight changes.
 - Notifications signalled here are delivered by packet 006; the surfaces that show these results are in packet 007. Decision blocks need packet 008.
 - The worked examples in §15.12 are part of this packet's acceptance tests, and rules-engine coverage follows the constitution's quality gates (T1).
 - Cross-project dependencies are Phase 3 (FR-DEP-10) and not part of this set of packets.
+
+## Coordination expansion amendment — 2026-09-26
+
+Packets 025, 027, 031 and 032 add explainable input-use, change-assessment and readiness conditions (§37.2, §37.4, §38.1, §38.2). Existing dependency rules are not replaced. New flags do not change health, progress or dates without a separately specified rule (FR-MDC-07).
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

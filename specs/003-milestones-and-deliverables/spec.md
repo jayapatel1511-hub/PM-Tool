@@ -154,3 +154,9 @@ table shows "2 of 5 issued" and expands to the deliverables.
 - The optional cascade that shifts deliverables when a milestone moves (FR-MS-05, M-04, AC-MS-05) is specified in packet 010; multiple issue records per deliverable (FR-DEL-08) is Phase 2 in packet 013.
 - Notifications named here are delivered by packet 006, following the cross-packet rule in `specs/README.md`.
 - Deliverable types are the Admin-maintained list from packet 001.
+
+## Coordination expansion amendment — 2026-09-26
+
+Required multidisciplinary review packages and submission checks add explicit gates before Ready to Issue/Issue where configured (§37.3, §37.5). Existing canonical deliverable states and DeliverableIssue history remain. No file transmission is introduced.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

@@ -112,3 +112,9 @@ action; the action then follows the task's completion.
 ## Assumptions
 
 - Depends on packets 007 (Weekly Coordination and My Work) and 008 (external parties).
+
+## Coordination expansion amendment — 2026-09-26
+
+Packet 030 reuses meeting actions for coordination follow-up; packet 032 adds performer-confirmed output commitments (§37.7, §38.2). A chair proposing an action does not commit work for another person, and copied meeting summaries do not change source states.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

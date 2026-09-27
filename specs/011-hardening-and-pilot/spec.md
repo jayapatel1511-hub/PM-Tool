@@ -136,7 +136,7 @@ written material.
 
 ### Functional Requirements
 
-- **FR-001**: The pilot MUST run with the agreed group (default: 3 PMs, 6 projects, 8 weeks), measure goals G1–G6 weekly, and end with a recorded go/no-go decision. *(§5.1, §35.1, Q16)*
+- **FR-001**: The pilot MUST run with the agreed group (confirmed 50 people; proposed default: 3 PMs, 6 projects, 8 weeks), measure goals G1–G6 weekly, and end with a recorded go/no-go decision. *(§5.1, §35.1, Q16)*
 - **FR-002**: Every MVP screen MUST pass automated WCAG 2.1 AA checks in every change and a manual audit before general availability. *(§22)*
 - **FR-003**: The core flows MUST work in the supported browsers. *(§22, Q10)*
 - **FR-004**: The service MUST be available at least 99.5 % of business hours each month across the organisation's time zones. *(§22, Q9)*
@@ -171,6 +171,10 @@ written material.
 
 ## Assumptions
 
-- Open decisions use the specification's defaults: 99.5 % business-hours availability, 14 days of point-in-time restore, and no zone-redundant high availability (Q9); the browsers listed above (Q10); indefinite retention (Q14); a pilot of 3 PMs, 6 projects, and 8 weeks (Q16). Log retention of 30 to 90 days is still to be decided.
+- Open decisions use the specification's defaults: 99.5 % business-hours availability, 14 days of point-in-time restore, and no zone-redundant high availability (Q9); the browsers listed above (Q10); indefinite retention (Q14); 50 pilot participants, with a proposed mix of 3 PMs, 6 projects, and 8 weeks (Q16). Log retention of 30 to 90 days is still to be decided.
 - Whether a penetration test is required before rollout is an organisation decision (§21).
 - This packet hardens the first-release set in `specs/README.md`, including packets 016–019 and 022–024; it adds no new product behaviour.
+
+## Coordination expansion acceptance amendment — 2026-09-26
+
+The 50-person pilot may stage approved packets 025–033 only after their packet acceptance checks and the existing access, review, concurrency, accessibility and operational gates pass. See §37.1, §38.4 and `docs/pilot/pilot-plan.md`. Packet 011 historical evidence does not cover these unimplemented additions. This amendment records planned validation, not completed pilot execution.

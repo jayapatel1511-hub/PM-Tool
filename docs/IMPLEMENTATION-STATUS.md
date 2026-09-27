@@ -1,5 +1,13 @@
 # Implementation status
 
+## 2026-09-26 approved scope expansion
+
+Packets **025–033** are now specified and planned, with all application implementation tasks pending. They cover the nine multidisciplinary coordination additions in §37–§38. Documentation checks are recorded in [coordination-spec-validation.md](coordination-spec-validation.md). No new runtime acceptance test, deployment, sign-in, email or pilot result is claimed by this change.
+
+The historical 2026-09-25 report below covers **the original 24 packets only**. Its statement “all 24” does not mean all 33 packets now exist in the application. Review findings from later source audits and the original environment gates remain outstanding unless independently verified in an implementation change.
+
+## Historical 24-packet report
+
 As of 2026-09-25. Everything below was checked on a development Mac against PostgreSQL 17 in Docker; nothing has been
 deployed, pushed or committed. "Verified" means an automated test and, for screens, a check in a real browser; the
 last section lists what cannot be proven without the organisation's tenant, Azure environment, people or time.

@@ -1,4 +1,4 @@
-# Engineering Project Coordination Hub
+# Tuesday — Engineering Project Coordination Hub
 
 An internal web application for coordinating multidisciplinary engineering projects: projects and teams, milestones,
 deliverables, tasks with review, dependencies, a rules engine for indicators, health and attention items, Weekly
@@ -6,9 +6,15 @@ Coordination, decisions, risks and issues, meeting actions, templates, a workspa
 Timeline, Files, Team), a team calendar, task hours, reports, notifications and an append-only activity history.
 
 The product specification is [`Engineering-Project-Coordination-Hub-Specification.md`](Engineering-Project-Coordination-Hub-Specification.md)
-(built from `spec-parts/`). It is written as 24 Spec Kit packets in [`specs/`](specs/README.md), each with its plan,
+(built from `spec-parts/`). It is written as 33 Spec Kit packets in [`specs/`](specs/README.md), each with its plan,
 tasks and verification. What is built and what still needs a real environment to prove is in
 [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md).
+
+## Approved coordination expansion
+
+The nine additions approved on 2026-09-26 are captured in packets **025–033**: handoffs, multidisciplinary reviews, revision/change impact, submission readiness, dated resource allocations, discipline coordination, design basis/assumptions, ready-to-start planning/weekly commitments, and location-linked issues. They are **specified and planned, not implemented** in this change. The earlier 24-packet runtime and its verification limitations remain documented below.
+
+Start with [DESIGN.md](DESIGN.md), the [packet index](specs/README.md), the [research rationale](docs/research/multidisciplinary-coordination.md) and the [validation record](docs/coordination-spec-validation.md). “Tuesday” is the product name in these planning documents; application branding still displays Coordination Hub until a separately implemented change.
 
 ## Repository
 

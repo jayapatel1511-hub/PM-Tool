@@ -1,11 +1,11 @@
 # Pilot plan
 
-Default group (Q16): **3 PMs, 6 real projects, 8 weeks**, then a recorded go/no-go decision (§5.1, §35.1). The pilot
+Confirmed participant count (Q16): **50 people**. Proposed operational default: **3 PMs, 6 real projects, 8 weeks**, then a recorded go/no-go decision (§5.1, §35.1); choose the actual PM/project mix with the sponsor. The pilot
 starts only after AC-VIS-01 to AC-VIS-08 pass on the integrated build and the threat-model walkthrough is done.
 
 ## Before week 1
 
-- Choose the three PMs and six projects; set up the projects, teams and disciplines with them (a copy of structure saves time).
+- Select the 50 participants and confirm the proposed three PMs/six projects; set up the projects, teams and disciplines with them (a copy of structure saves time).
 - A 30-minute walkthrough for each team (`docs/user-guide.md`); note who completes the core actions unaided (G6).
 - Create a named workspace "Pilot" containing the six projects for the sponsor and the Hub team.
 
@@ -45,3 +45,21 @@ and conditions such as the organisation's penetration-test requirement (T-18) an
 
 The Hub team answers pilot questions the same day through one channel; a local champion per office carries the rollout
 after the pilot. Tickets record the screen, item key and time — never comment text or client documents.
+
+## Coordination expansion scenarios
+
+Packets 025–033 are specification-only. Include a packet in the pilot only after its own application acceptance and the existing hardening gates pass; record enabled capabilities for each pilot week. The participant count does not certify 50 simultaneous sessions or a server size.
+
+Use representative permitted project data to walk through these end-to-end scenarios:
+
+1. A sender submits an input, the receiving discipline accepts it for a purpose, then records incorporation of that exact revision.
+2. A newer registered revision triggers assessment; one consumer is unaffected, another needs corrected work. Preserve the older issued history.
+3. Two disciplines review a package; a blocking comment is answered and independently verified before submission readiness passes.
+4. A Ready submission becomes Checking when an affected revision changes; a stale issue attempt is refused.
+5. A supervisor confirms production and review allocations; demonstrate overlap handling and visibility of partial workload.
+6. A shared design assumption is used with an explicit expiry, then confirmed or changed with linked impact assessments.
+7. An upcoming output is not ready because an input is missing; a removal owner resolves the constraint, the consumer verifies it, and the performer commits the output for the week.
+8. An issue identifies a drawing revision and station/area context; two disciplines work on the same issue and an independent verifier confirms resolution.
+9. The discipline view reconciles all of the above with the source screens and permission-filtered exports.
+
+Record observed usefulness, time-consuming fields, missed handoffs and unclear responsibility as pilot feedback. Do not claim a productivity improvement or change existing success targets without actual evidence. Continue the existing weekly review and go/no-go process.

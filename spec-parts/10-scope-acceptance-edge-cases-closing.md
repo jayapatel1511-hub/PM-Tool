@@ -1,5 +1,7 @@
 ## 27. MVP Scope
 
+**2026-09-26 amendment:** The existing first-release set below is the 24-packet implementation baseline. Jay has also approved all nine coordination additions in §37–§38 (packets 025–033). They are specified, not built. Release in accepted increments within the 50-person pilot; do not claim completion of the expanded scope based on the older packet status. §38.4 defines the dependency order.
+
 ### 27.1 Critical evaluation of the candidate MVP list
 
 | Candidate | Decision | Rationale |
@@ -100,7 +102,7 @@ Original item numbers are retained for historical packet citations. Items marked
 2. **SharePoint integration** — browse and pick documents from the project library (Graph); still no storage in the Hub.
 3. **ERP / Vantagepoint integration** — inbound project master data sync (**TBD**: capabilities, licensing, ownership of fields). Nothing is assumed about ERP capabilities in this specification.
 4. **Project financial information (read-only display)** — only if sourced from ERP; the Hub never becomes a financial system.
-5. **Utilisation / resource planning** — availability from HR/leave systems, capacity by role, longer horizons; still no levelling or payroll timesheets.
+5. **Utilisation / resource planning** — availability from HR/leave systems, capacity by role, longer horizons; still no levelling or payroll timesheets. Manual dated capacity overrides and confirmed production/review allocations are now approved in §37.6; HR integration remains Phase 3.
 6. **Client / external actions** — optional read-only external access or emailed action lists to external parties (security review required).
 7. **Advanced portfolio reporting** — cross-office comparisons, discipline throughput, submission on-time rates from snapshots.
 8. **Advanced administration** — per-project threshold overrides; template analytics; bulk data tools.
@@ -121,8 +123,8 @@ No AI features are planned in any phase of this specification.
 | Payroll or billable timesheet approval, billing rates, invoicing, and payroll submission | Actual hours are recorded against tasks in the first-release Time view (§36.8), but the Hub does not replace financial or payroll systems. |
 | Full ERP or CRM functionality | — |
 | CPM scheduling, critical path, float, resource levelling, baselining beyond original dates, MS Project/P6 import-export | Primavera/Project replacement is a non-goal. |
-| CAD/BIM authoring, model viewing, drawing mark-up | Engineering tools do this. |
-| Document management: file storage, versioning, check-in/out, transmittals | SharePoint/DMS does this; the Hub links. |
+| CAD/BIM authoring, model viewing, drawing mark-up | Engineering tools do this. Location metadata and links to external markups/viewpoints are approved in §38.3; no embedded authoring/viewer is added. |
+| Document management: file storage, file versioning, check-in/out, sending transmittals | SharePoint/DMS remains the file system of record. Registered revision metadata, revision-use tracking and immutable submission manifests are approved in §37.4–§37.5; Tuesday stores references and coordination evidence only. |
 | Email client features, reply-by-email, Teams/chat replacement | Use Teams and Outlook; the Hub links by item key. |
 | Engineering calculations or automated engineering decisions | Professional responsibility remains with engineers. |
 | Custom fields builder, custom statuses/workflows per project, automation rule builder | Complexity that undermines consistency of the coordination rules. |
@@ -131,7 +133,7 @@ No AI features are planned in any phase of this specification.
 | Multi-tenant SaaS packaging | Single organisation. |
 | Gamification, badges, streaks, leaderboards | Professional tool; would distort behaviour. |
 | Public API for third parties, outbound webhooks | No demonstrated need; revisit with integration requests. |
-| Recurring tasks, subtasks/nested task trees, checklists inside tasks | Deliverable → Task is the hierarchy; nesting further invites task-tracker sprawl. Checklists may be reconsidered in P2 if a real need appears. |
+| Recurring tasks, subtasks/nested task trees, generic checklists inside tasks | Deliverable → Task remains the hierarchy. The approved submission checks (§37.5) and ready-to-start constraints (§38.2) are specific coordination records linked to work, not a generic checklist builder. |
 | Multiple assignees per task | Violates single-accountability principle; collaborators cover the real need. |
 
 ---
@@ -391,7 +393,7 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | Q13 | Who can create projects (PM role holders only vs all staff) | Governance vs friction | PM system role holders and Admins |
 | Q14 | Retention policy for archived projects and logs | Storage, compliance | Indefinite |
 | Q15 | CI/CD platform (GitHub Actions vs Azure DevOps) | Tooling alignment | Whichever the organisation already uses |
-| Q16 | Pilot group and success metrics | Rollout plan | 3 PMs, 6 projects, 8 weeks |
+| Q16 | Pilot group and success metrics | Rollout plan | **Decided:** 50 people. Proposed operational default remains 3 PMs, 6 projects, 8 weeks, subject to project selection; the 50-person count is not a concurrency or server-capacity claim. |
 | Q17 | Idle session timeout | Security vs convenience | 8 hours |
 | Q18 | Weekly capacity default and whether under-assignment should be shown (P2) | Workload view sensitivity | 40 h; show with caveats |
 | Q19 | Manager staff scope | Who sees and staffs whose work; only as good as the supervisor data (Q3) | **Decided:** direct reports only; Executives and Admins can view all staff |
@@ -412,7 +414,7 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | **3. Dependencies and rules** | Dependencies, evaluation module, state tables, outbox worker, indicators, milestone status, health, attention engine, nightly jobs | Worked examples in §15.12 pass as automated tests and show correctly in the UI |
 | **4. Coordination surfaces** | Project Dashboard, My Work, Weekly Coordination (with meeting mode), Kanban, Milestone view, Deliverables Register polish, search, filters, exports | A PM can run a coordination meeting on the test project without leaving the app |
 | **5. Visual workspace and notifications** | Six pictured views (§36), task-hour entry, portfolio, resource grid, saved views, task-level Gantt, team calendar, in-app centre, email, digest, preferences; recommended Decision Register and extras | Every first-release visual acceptance scenario AC-VIS-01 through AC-VIS-08 passes before pilot |
-| **6. Hardening and pilot** | Accessibility audit, performance test with synthetic scale, security review, runbooks, training material; pilot with 3 PMs for 8 weeks; threshold tuning | Pilot success metrics met; go/no-go for organisation rollout |
+| **6. Hardening and pilot** | Accessibility audit, performance test with synthetic scale, security review, runbooks, training material; 50-person pilot (proposed 3 PMs, 6 projects, 8 weeks); accepted coordination increments (§38.4); threshold tuning | Pilot success metrics met; go/no-go for organisation rollout |
 | **7. General availability** | Rollout by office/group; support process; backlog triage for Phase 2 | — |
 
 ### 35.2 Recommended MVP Build Order (epics and dependencies)

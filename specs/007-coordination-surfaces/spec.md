@@ -161,3 +161,9 @@ notifications and log entries.
 - Supervisor scope is direct reports only (decided, Q19).
 - The product's non-goals apply to every surface here (§3.2, §6): no scheduling engine, document storage, billing/payroll timesheets, or AI. Task-hour entry is first-release scope in packet 024 (§36.8).
 - The Staff Assignments report is specified with the other reports in packet 009 (FR-ASG-08).
+
+## Coordination expansion amendment — 2026-09-26
+
+Packet 030 extends Weekly Coordination/My Work with incoming/outgoing handoffs, revision-use and impact checks, readiness and fixed weekly commitments (§37.7, §38.2). Marking a meeting reviewed is not an approval or a change to those source workflows.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

@@ -116,3 +116,9 @@ the Hub.
 - Depends on task estimates (§27.1); the view is first-release scope under §36.8 and must show missing estimates explicitly rather than implying spare capacity.
 - Supervisor scope is direct reports (Q19). Showing under-assignment follows the specification's default of showing it with caveats (Q18).
 - Working days are Monday to Friday until working-day calendars arrive (packet 021).
+
+## Coordination expansion amendment — 2026-09-26
+
+Packet 029 explicitly adds manual dated availability and confirmed project/review allocations (§37.6), extending the earlier fixed weekly-capacity boundary. Keep estimated demand, reservations, actual hours and partial visibility distinct; apply FR-CAP-04 to avoid double-counting linked work. HR integration remains deferred.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

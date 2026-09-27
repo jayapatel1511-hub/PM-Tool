@@ -128,3 +128,9 @@ project is untouched.
 - Appendix A is the reference template and acceptance example; offsets there are illustrative defaults PMs overtype.
 - Whether PMs may edit templates without the Template Editor flag follows the specification's recommendation: Admins and flagged users only.
 - Depends on the MVP packets 002–006.
+
+## Coordination expansion amendment — 2026-09-26
+
+Templates may suggest handoff criteria, review disciplines, submission checks and Proposed design-basis entries (§37.2, §37.3, §37.5, §38.1). No confirmation, reviewer approval, incorporated revision or weekly commitment is inherited from a template.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

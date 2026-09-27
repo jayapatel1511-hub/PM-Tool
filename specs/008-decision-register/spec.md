@@ -118,3 +118,9 @@ confirm the linked tasks, notifications, and history at each step.
 - The blocking and attention behaviour is computed by packet 005 (D-15, A-04); notifications are delivered by packet 006.
 - External parties are project-scoped in the MVP (§12.9 recommendation).
 - A decision history view, bulk linking, and a client-facing export of open decisions are Phase 2 (packet 013).
+
+## Coordination expansion amendment — 2026-09-26
+
+Packet 031 may link a decision to a design-basis version (§38.1). A decision outcome and the current basis consumed by each discipline remain separate records; reopening a decision requires assessment, not silent downstream status changes.
+
+This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.

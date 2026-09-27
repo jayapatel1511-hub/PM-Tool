@@ -41,7 +41,7 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
 
         foreach (var u in users)
         {
-            if (eventType is NotificationEvents.HandoffChanged or NotificationEvents.ReviewPackageChanged or NotificationEvents.ChangeImpact && item.ProjectId is { } handoffProject
+            if (eventType is NotificationEvents.HandoffChanged or NotificationEvents.ReviewPackageChanged or NotificationEvents.ChangeImpact or NotificationEvents.AllocationChanged && item.ProjectId is { } handoffProject
                 && !await EmailProjectAccess.Allowed(db, u.Id, [handoffProject])) continue;
             if (muted.Contains(u.Id) && !def.DirectAssignment) continue;
             var pref = prefs.GetValueOrDefault(u.Id);
@@ -76,7 +76,7 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
                 db.Emails.Add(new EmailMessage
                 {
                     UserId = u.Id, ToAddress = u.Email, Subject = subject, Kind = "Immediate", DedupKey = dedup, CreatedAt = now, NextAttemptAt = now,
-                    RequiredProjectIds = eventType is NotificationEvents.HandoffChanged or NotificationEvents.ReviewPackageChanged or NotificationEvents.ChangeImpact && item.ProjectId is { } scopedProject ? [scopedProject] : [],
+                    RequiredProjectIds = eventType is NotificationEvents.HandoffChanged or NotificationEvents.ReviewPackageChanged or NotificationEvents.ChangeImpact or NotificationEvents.AllocationChanged && item.ProjectId is { } scopedProject ? [scopedProject] : [],
                     BodyText = $"{title}{(body is null ? "" : "\n\n" + body)}{link}\n\n{Text.Get("email.footer")}",
                 });
             }

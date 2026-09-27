@@ -24,6 +24,7 @@ public static class AllocationEndpoints
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/allocations", List);
+        api.MapGet("/projects/{projectId:guid}/allocations/review-options", ReviewOptions);
         api.MapGet("/projects/{projectId:guid}/allocations/{id:guid}", Detail);
         api.MapPost("/projects/{projectId:guid}/allocations", Create).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/edit", Edit).WithMetadata(new Coordination.AtomicCommand());
@@ -34,6 +35,17 @@ public static class AllocationEndpoints
         api.MapPut("/users/{personId:guid}/availability/{date}", SetAvailability);
         api.MapGet("/projects/{projectId:guid}/allocations/{id:guid}/confirmation-preview", ConfirmationPreview);
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/confirm", Confirm).WithMetadata(new Coordination.AtomicCommand());
+    }
+
+    static async Task NotifyChanged(HubDb db, Notifier notify, Project project, ResourceAllocation a)
+    {
+        var person = await db.Users.Where(u => u.Id == a.PersonId)
+            .Select(u => new { u.DisplayName, u.SupervisorId }).FirstAsync();
+        await notify.Send(NotificationEvents.AllocationChanged,
+            [project.ProjectManagerId, a.CreatedBy, person.SupervisorId],
+            new NotifyItem(project.Id, "ResourceAllocation", a.Id, null,
+                $"/projects/{project.ProjectNumber}/allocations?allocation={a.Id}", project.ProjectNumber),
+            Text.Get("notify.allocation_changed", person.DisplayName, a.Status));
     }
 
     static async Task LockPerson(HubDb db, Guid personId) =>
@@ -144,7 +156,7 @@ public static class AllocationEndpoints
         return new { a.Id, a.RowVersion, Days = await Capacity(db, access, a, store, clock) };
     }
 
-    static Task<Coordination.Result> Confirm(Guid projectId, Guid id, ConfirmBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
+    static Task<Coordination.Result> Confirm(Guid projectId, Guid id, ConfirmBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "allocation.confirm", id, body }, access, db, clock, async (project, ctx) =>
         {
             var a = await db.Allocations.FirstOrDefaultAsync(a => a.ProjectId == project.Id && a.Id == id) ?? throw ApiException.NotFound();
@@ -167,6 +179,7 @@ public static class AllocationEndpoints
             a.ConfirmationSnapshot = JsonSerializer.Serialize(days, JsonOpts.Web);
             await TouchDates(db, person.Id, days.Select(d => d.Date));
             db.Audit.Note(a, reason: a.OverCapacityReason is null ? null : "Over-capacity reason recorded");
+            await NotifyChanged(db, notify, project, a);
             return a;
         });
 
@@ -222,6 +235,21 @@ public static class AllocationEndpoints
                 a.PlannedHours, a.Status, a.RowVersion }).ToListAsync();
     }
 
+    static async Task<object> ReviewOptions(Guid projectId, Access access, HubDb db)
+    {
+        var (_, ctx) = await access.Project(projectId, false);
+        Access.Demand(Permissions.ProposeAllocation(access.Actor, ctx));
+        return await db.DisciplineReviews.AsNoTracking().Where(r => r.ProjectId == projectId
+            && r.Status != DisciplineReviewStatus.Approved
+            && db.ReviewPackages.Any(p => p.ProjectId == projectId && p.CurrentRoundId == r.RoundId
+                && p.Status != ReviewStatus.Cancelled && p.Status != ReviewStatus.Superseded && p.Status != ReviewStatus.Approved))
+            .OrderBy(r => r.DueDate).Select(r => new { r.Id, r.ReviewerId, r.DueDate,
+                PackageId = db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Id).FirstOrDefault(),
+                PackageKey = db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Key).FirstOrDefault(),
+                PackageTitle = db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Title).FirstOrDefault() })
+            .ToListAsync();
+    }
+
     static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
     {
         var (_, ctx) = await access.Project(projectId, false);
@@ -239,7 +267,9 @@ public static class AllocationEndpoints
             Days = await db.AllocationDayOverrides.AsNoTracking().Where(d => d.AllocationId == id).OrderBy(d => d.WorkDate)
                 .Select(d => new { d.WorkDate, d.Hours }).ToListAsync(),
             Links = await db.AllocationWorkLinks.AsNoTracking().Where(l => l.AllocationId == id && l.ReleasedAt == null)
-                .OrderBy(l => l.WorkDate).Select(l => new { l.WorkType, l.WorkId, l.WorkDate, l.ReviewHours }).ToListAsync() };
+                .OrderBy(l => l.WorkDate).Select(l => new { l.WorkType, l.WorkId, l.WorkDate, l.ReviewHours,
+                    ReviewPackageId = l.WorkType == "Review" ? db.ReviewPackages.Where(p => db.DisciplineReviews.Any(r => r.Id == l.WorkId && r.RoundId == p.CurrentRoundId))
+                        .Select(p => (Guid?)p.Id).FirstOrDefault() : null }).ToListAsync() };
     }
 
     static async Task Validate(HubDb db, Project p, Guid personId, string purpose, DateOnly from, DateOnly through,
@@ -274,16 +304,16 @@ public static class AllocationEndpoints
             else if (link.WorkType == "Review")
             {
                 Check.That(purpose == AllocationPurpose.Review && link.ReviewHours is > 0 and <= 10000 && await db.DisciplineReviews.AnyAsync(r => r.Id == link.WorkId
-                    && r.ProjectId == p.Id && r.ReviewerId == personId && db.ReviewPackages.Any(pkg =>
+                    && r.ProjectId == p.Id && r.ReviewerId == personId && r.Status != DisciplineReviewStatus.Approved && db.ReviewPackages.Any(pkg =>
                         pkg.ProjectId == p.Id && pkg.CurrentRoundId == r.RoundId
-                        && pkg.Status != ReviewStatus.Cancelled && pkg.Status != ReviewStatus.Superseded)),
+                        && pkg.Status != ReviewStatus.Cancelled && pkg.Status != ReviewStatus.Superseded && pkg.Status != ReviewStatus.Approved)),
                     "links", "coord.reference");
             }
             else throw ApiException.Invalid("links", "error.invalid");
         }
     }
 
-    static Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
+    static Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "allocation.create", body }, access, db, clock, async (project, ctx) =>
         {
             Access.Demand(Permissions.ProposeAllocation(access.Actor, ctx));
@@ -298,10 +328,11 @@ public static class AllocationEndpoints
                 db.AllocationWorkLinks.Add(new AllocationWorkLink { AllocationId = a.Id, PersonId = a.PersonId,
                     WorkType = link.WorkType, WorkId = link.WorkId, WorkDate = link.WorkDate, ReviewHours = link.ReviewHours });
             db.Audit.Note(a, reason: body.Reason);
+            await NotifyChanged(db, notify, project, a);
             return a;
         });
 
-    static Task<Coordination.Result> Edit(Guid projectId, Guid id, EditBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
+    static Task<Coordination.Result> Edit(Guid projectId, Guid id, EditBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "allocation.edit", id, body }, access, db, clock, async (project, ctx) =>
         {
             var a = await db.Allocations.FirstOrDefaultAsync(a => a.ProjectId == project.Id && a.Id == id) ?? throw ApiException.NotFound();
@@ -335,10 +366,11 @@ public static class AllocationEndpoints
             // A child-only edit must invalidate the allocation version seen by another editor.
             db.Entry(a).Property(x => x.PlannedHours).IsModified = true;
             db.Audit.Note(a, reason: Check.Reason(body.Reason));
+            await NotifyChanged(db, notify, project, a);
             return a;
         });
 
-    static Task<Coordination.Result> Cancel(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> Cancel(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "allocation.cancel", id, body }, access, db, clock, async (project, ctx) =>
         {
             var a = await db.Allocations.FirstOrDefaultAsync(a => a.ProjectId == project.Id && a.Id == id) ?? throw ApiException.NotFound();
@@ -355,10 +387,11 @@ public static class AllocationEndpoints
             if (wasConfirmed) await TouchDates(db, a.PersonId, Enumerable.Range(0, a.ThroughDate.DayNumber - a.FromDate.DayNumber + 1)
                 .Select(i => a.FromDate.AddDays(i)));
             db.Audit.Note(a, reason: Check.Reason(body.Reason));
+            await NotifyChanged(db, notify, project, a);
             return a;
         });
 
-    static Task<Coordination.Result> Decline(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> Decline(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "allocation.decline", id, body }, access, db, clock, async (project, ctx) =>
         {
             var a = await db.Allocations.FirstOrDefaultAsync(a => a.ProjectId == project.Id && a.Id == id) ?? throw ApiException.NotFound();
@@ -370,10 +403,11 @@ public static class AllocationEndpoints
             foreach (var link in await db.AllocationWorkLinks.Where(l => l.AllocationId == id && l.ReleasedAt == null).ToListAsync())
                 link.ReleasedAt = clock.GetUtcNow();
             db.Audit.Note(a, reason: Check.Reason(body.Reason));
+            await NotifyChanged(db, notify, project, a);
             return a;
         });
 
-    static Task<Coordination.Result> Complete(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock) =>
+    static Task<Coordination.Result> Complete(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "allocation.complete", id, body }, access, db, clock, async (project, ctx) =>
         {
             var a = await db.Allocations.FirstOrDefaultAsync(a => a.ProjectId == project.Id && a.Id == id) ?? throw ApiException.NotFound();
@@ -389,6 +423,7 @@ public static class AllocationEndpoints
             await TouchDates(db, a.PersonId, Enumerable.Range(0, a.ThroughDate.DayNumber - a.FromDate.DayNumber + 1)
                 .Select(i => a.FromDate.AddDays(i)));
             db.Audit.Note(a, reason: Check.Reason(body.Reason));
+            await NotifyChanged(db, notify, project, a);
             return a;
         });
 }

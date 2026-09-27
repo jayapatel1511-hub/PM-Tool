@@ -45,6 +45,9 @@ public sealed class AllocationApiTests(HubFactory f)
         var replay = await (await f.As(TestData.Pm).Post(root, create)).Json();
         Assert.Equal(id, replay.G("id"));
         Assert.Single(f.Db(db => db.Allocations.Where(a => a.Id == id).ToList()));
+        var supervisorId = data.User(TestData.Sam);
+        var notice = f.Db(db => db.Notifications.Single(n => n.UserId == supervisorId && n.EventType == NotificationEvents.AllocationChanged && n.ItemId == id));
+        Assert.Contains($"allocation={id}", notice.LinkPath ?? "");
         var detail = await (await f.As(TestData.Pm).GetAsync($"{root}/{id}")).Json();
         Assert.Equal(AllocationStatus.Proposed, detail.S("status"));
         Assert.False(detail["canConfirm"]!.GetValue<bool>());
@@ -83,6 +86,11 @@ public sealed class AllocationApiTests(HubFactory f)
         await (await f.As(TestData.Pm).Post(root, new AllocationEndpoints.CreateBody(Guid.NewGuid(), data.User(TestData.Alex),
             AllocationPurpose.Production, day, day, 4, [], [new("Task", task.G("id"), day)], null))).Json(400);
         Assert.Empty(f.Db(db => db.Allocations.Where(a => a.ProjectId == project.Id).ToList()));
+        var restrictedTask = await data.NewTask(project.Id, extra: new { assigneeId = data.User(TestData.Alex), estimatedHours = 4m, dueDate = day });
+        var hidden = await (await f.As(TestData.Pm).Post(root, new AllocationEndpoints.CreateBody(Guid.NewGuid(), data.User(TestData.Alex),
+            AllocationPurpose.Production, day, day, 4, [], [new("Task", restrictedTask.G("id"), day)], null))).Json();
+        var supervisorId = data.User(TestData.Sam);
+        Assert.False(f.Db(db => db.Notifications.Any(n => n.UserId == supervisorId && n.ItemId == hidden.G("id"))));
     }
 
     [Fact]

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
@@ -13,12 +13,15 @@ import { CommandForm, SelectField, type CoordOptions, WorkLink } from './Coordin
 import { useCurrentProject } from './ProjectLayout'
 
 type Allocation = { id: string; personId: string; personName: string; purpose: string; fromDate: string; throughDate: string; plannedHours: number; status: string; rowVersion: number }
-type Detail = Allocation & { links: { workType: string; workId: string; workDate: string; reviewHours?: number }[]; days: { workDate: string; hours: number }[]; overCapacityWarningRecorded: boolean; canConfirm: boolean; canManage: boolean }
+type Detail = Allocation & { links: { workType: string; workId: string; workDate: string; reviewHours?: number; reviewPackageId?: string }[]; days: { workDate: string; hours: number }[]; overCapacityWarningRecorded: boolean; canConfirm: boolean; canManage: boolean }
 type Preview = { id: string; rowVersion: number; days: { date: string; availableHours: number; confirmedHours: number; proposedHours: number; resultingHours: number; overByHours: number; dateVersion: number }[] }
+type ReviewOption = { id: string; reviewerId: string; dueDate: string; packageId: string; packageKey: string; packageTitle: string }
 
 export function AllocationsTab() {
   const project = useCurrentProject(), qc = useQueryClient()
-  const [selected, setSelected] = useState<string | null>(null), [adding, setAdding] = useState(false)
+  const [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false)
+  const selected = sp.get('allocation')
+  const open = (id: string | null) => { const next = new URLSearchParams(sp); if (id) next.set('allocation', id); else next.delete('allocation'); setSp(next) }
   const base = `projects/${project.id}/allocations`
   const list = useQuery({ queryKey: ['allocations', project.id], queryFn: () => get<Allocation[]>(base) })
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
@@ -32,30 +35,40 @@ export function AllocationsTab() {
         <caption className="sr-only">{t('allocation.title')}</caption><thead className="bg-muted/60"><tr>
           {[t('workload.person'), t('allocation.purpose'), t('allocation.dates'), t('allocation.hours'), t('common.status')].map(h => <th key={h} scope="col" className="p-3">{h}</th>)}
         </tr></thead><tbody>{list.data.map(a => <tr key={a.id} className="border-t">
-          <td className="p-3"><button className="text-left font-medium text-primary underline" onClick={() => setSelected(a.id)}>{a.personName}</button></td>
+          <td className="p-3"><button className="text-left font-medium text-primary underline" onClick={() => open(a.id)}>{a.personName}</button></td>
           <td className="p-3">{t(`allocation.purpose.${a.purpose}`)}</td><td className="p-3 whitespace-nowrap">{fmtDate(a.fromDate)}–{fmtDate(a.throughDate)}</td>
           <td className="p-3 tabular-nums">{a.plannedHours}</td><td className="p-3">{a.status}</td>
         </tr>)}</tbody></table></div>}
-    {adding && options.data && <Proposal base={base} options={options.data} close={() => setAdding(false)} done={id => { setAdding(false); refresh(); setSelected(id) }} />}
+    {adding && options.data && <Proposal base={base} options={options.data} close={() => setAdding(false)} done={id => { setAdding(false); refresh(); open(id) }} />}
     {selected && <AllocationDetail base={base} id={selected} projectNumber={project.projectNumber} options={options.data}
-      close={() => setSelected(null)} refresh={refresh} />}
+      close={() => open(null)} refresh={refresh} />}
   </Page>
 }
 
 function Proposal({ base, options, close, done }: { base: string; options: CoordOptions; close: () => void; done: (id: string) => void }) {
+  const [purpose, setPurpose] = useState<'Production' | 'Review'>('Production')
   const [personId, setPersonId] = useState(''), [fromDate, setFromDate] = useState(today()), [throughDate, setThroughDate] = useState(today())
-  const [workDate, setWorkDate] = useState(today()), [plannedHours, setPlannedHours] = useState(''), [taskId, setTaskId] = useState('')
+  const [workDate, setWorkDate] = useState(today()), [plannedHours, setPlannedHours] = useState(''), [workId, setWorkId] = useState(''), [reviewHours, setReviewHours] = useState('')
+  const reviewOptions = useQuery({ queryKey: ['allocation-review-options', base], queryFn: () => get<ReviewOption[]>(`${base}/review-options`) })
   const tasks = options.tasks.filter(w => w.ownerId === personId && !['Complete', 'Cancelled', 'On Hold'].includes(w.status))
+  const reviews = (reviewOptions.data ?? []).filter(r => r.reviewerId === personId)
+  const choices = purpose === 'Production' ? tasks.map(w => ({ value: w.id, label: `${w.key} · ${w.name}` })) :
+    reviews.map(r => ({ value: r.id, label: `${r.packageKey} · ${r.packageTitle} · ${fmtDate(r.dueDate)}` }))
   return <CommandForm path={base} title={t('allocation.new')} hint={t('allocation.proposalHint')} onClose={close} onDone={done}
-    payload={() => ({ personId, purpose: 'Production', fromDate, throughDate, plannedHours: Number(plannedHours), days: [],
-      links: [{ workType: 'Task', workId: taskId, workDate }] })}>
-    <SelectField label={t('workload.person')} value={personId} onChange={v => { setPersonId(v); setTaskId('') }} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
-    <SelectField label={t('allocation.task')} value={taskId} onChange={setTaskId} choices={tasks.map(w => ({ value: w.id, label: `${w.key} · ${w.name}` }))} />
-    {!tasks.length && personId && <p className="text-sm text-muted-foreground">{t('allocation.noTasks')}</p>}
+    payload={() => ({ personId, purpose, fromDate, throughDate, plannedHours: Number(plannedHours), days: [],
+      links: [{ workType: purpose === 'Production' ? 'Task' : 'Review', workId, workDate,
+        reviewHours: purpose === 'Review' ? Number(reviewHours) : null }] })}>
+    <SelectField label={t('allocation.purpose')} value={purpose} onChange={v => { setPurpose(v as 'Production' | 'Review'); setWorkId('') }}
+      choices={[{ value: 'Production', label: t('allocation.purpose.Production') }, { value: 'Review', label: t('allocation.purpose.Review') }]} />
+    <SelectField label={t('workload.person')} value={personId} onChange={v => { setPersonId(v); setWorkId('') }} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
+    {purpose === 'Review' && reviewOptions.error && <ErrorBanner error={reviewOptions.error} retry={() => reviewOptions.refetch()} />}
+    <SelectField label={t(purpose === 'Production' ? 'allocation.task' : 'allocation.reviewAssignment')} value={workId} onChange={setWorkId} choices={choices} />
+    {!choices.length && personId && <p className="text-sm text-muted-foreground">{t(purpose === 'Production' ? 'allocation.noTasks' : 'allocation.noReviews')}</p>}
     <div className="grid gap-3 sm:grid-cols-2"><Field label={t('allocation.from')} htmlFor="allocation-from"><Input id="allocation-from" type="date" required value={fromDate} onChange={e => setFromDate(e.target.value)} /></Field>
       <Field label={t('allocation.through')} htmlFor="allocation-through"><Input id="allocation-through" type="date" required min={fromDate} value={throughDate} onChange={e => setThroughDate(e.target.value)} /></Field></div>
     <div className="grid gap-3 sm:grid-cols-2"><Field label={t('allocation.linkDate')} htmlFor="allocation-work"><Input id="allocation-work" type="date" required min={fromDate} max={throughDate} value={workDate} onChange={e => setWorkDate(e.target.value)} /></Field>
       <Field label={t('allocation.hours')} htmlFor="allocation-hours"><Input id="allocation-hours" type="number" required min="0.01" max="10000" step="0.01" value={plannedHours} onChange={e => setPlannedHours(e.target.value)} /></Field></div>
+    {purpose === 'Review' && <Field label={t('allocation.reviewEffort')} htmlFor="allocation-review-hours"><Input id="allocation-review-hours" type="number" required min="0.01" max="10000" step="0.01" value={reviewHours} onChange={e => setReviewHours(e.target.value)} /></Field>}
   </CommandForm>
 }
 
@@ -72,7 +85,7 @@ function AllocationDetail({ base, id, projectNumber, options, close, refresh }: 
         <p>{row.personName} · {t(`allocation.purpose.${row.purpose}`)} · {row.status}</p>
         <p>{fmtDate(row.fromDate)}–{fmtDate(row.throughDate)} · {row.plannedHours} {t('allocation.hours')}</p>
         <h3 className="font-medium">{t('allocation.linked')}</h3><ul className="space-y-2">{row.links.map(l => <li key={`${l.workType}:${l.workId}:${l.workDate}`}>
-          {l.workType === 'Review' ? <Link className="text-primary underline" to={`/projects/${projectNumber}/reviews`}>{t('allocation.reviewAssignment')}</Link> :
+          {l.workType === 'Review' ? <Link className="text-primary underline" to={`/projects/${projectNumber}/reviews${l.reviewPackageId ? `?panel=ReviewPackage:${l.reviewPackageId}` : ''}`}>{t('allocation.reviewAssignment')}</Link> :
             options ? <WorkLink options={options} type={l.workType} id={l.workId} number={projectNumber} /> :
               <Link className="text-primary underline" to={`/projects/${projectNumber}/tasks?panel=Task:${l.workId}`}>{t('allocation.openTask')}</Link>} · {fmtDate(l.workDate)}{l.reviewHours != null && ` · ${l.reviewHours} h`}
         </li>)}</ul>

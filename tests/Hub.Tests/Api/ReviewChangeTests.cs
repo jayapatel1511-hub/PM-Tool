@@ -34,6 +34,27 @@ public sealed class ReviewChangeTests(HubFactory f)
     }
     async Task<JsonNode> ReviewAction(Setup s, Guid id, string action, int expected = 200) => await Post(TestData.Marc, Root(s) + $"/reviews/{id}/action", new ReviewEndpoints.ActionBody(Guid.NewGuid(), Version<ReviewPackage>(id), action, "Confirmed package scope"), expected);
     Guid Assignment(Guid package, Guid discipline) => f.Db(db => db.DisciplineReviews.Single(a => a.ProjectDisciplineId == discipline && db.ReviewPackages.Any(p => p.Id == package && p.CurrentRoundId == a.RoundId)).Id);
+
+    [Fact]
+    public async Task Review_allocation_options_link_current_assignment_and_explicit_effort()
+    {
+        var setup = await New();
+        var packageId = await Review(setup);
+        var assignmentId = Assignment(packageId, setup.Electrical);
+        var basePath = Root(setup) + "/allocations";
+        var options = await Get(TestData.Pm, basePath + "/review-options");
+        Assert.Contains(options.AsArray(), row => row!.G("id") == assignmentId && row.G("packageId") == packageId);
+        await (await f.As(TestData.Rita).GetAsync(basePath + "/review-options")).Json(403);
+        var date = new DateOnly(2026, 9, 17);
+        var allocation = await Post(TestData.Pm, basePath, new AllocationEndpoints.CreateBody(Guid.NewGuid(), data.User(TestData.Omar),
+            AllocationPurpose.Review, date, date, 4, [], [new("Review", assignmentId, date, 3)], null));
+        var detail = await Get(TestData.Pm, basePath + $"/{allocation.G("id")}");
+        Assert.Equal(packageId, detail["links"]![0]!.G("reviewPackageId"));
+        Assert.Equal(3, detail["links"]![0]!["reviewHours"]!.GetValue<decimal>());
+        var grid = await (await f.As(TestData.Lena).GetAsync("/api/v1/workload")).Json();
+        var person = grid["people"]!.AsArray().Single(p => p!.G("id") == data.User(TestData.Omar))!;
+        Assert.Equal(4, person["cells"]![0]!["proposed"]!.GetValue<decimal>());
+    }
     async Task Decide(Setup s, Guid id, Guid discipline, string who, string state = DisciplineReviewStatus.Approved, int expected = 200)
     {
         var aid = Assignment(id, discipline); await Post(who, Root(s) + $"/reviews/{id}/assignments/{aid}/decision", new ReviewEndpoints.DecisionBody(Guid.NewGuid(), Version<DisciplineReview>(aid), state, "Checked against the registered revision manifest"), expected);

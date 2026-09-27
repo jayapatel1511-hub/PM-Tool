@@ -410,6 +410,7 @@ public static class Text
         ["col.forecast"] = "Forecast (h)", ["col.available"] = "Available (h)", ["col.confirmed"] = "Confirmed reservation (h)",
         ["col.proposed"] = "Proposed request (h)", ["col.committed"] = "Committed load (h)", ["col.partialScope"] = "Scope",
         ["workload.partial"] = "Partial project scope", ["workload.complete"] = "All permitted projects",
+        ["notify.allocation_changed"] = "Allocation for {0} is {1}",
         ["col.noDueDate"] = "No due date (h)", ["col.unestimated"] = "Unestimated", ["col.projectCount"] = "Projects", ["col.indicator"] = "Indicator",
         ["col.peopleCount"] = "People", ["col.week"] = "Week",
         ["workload.over"] = "Over-assigned", ["workload.under"] = "Under-assigned", ["workload.ok"] = "OK", ["workload.cluster"] = "Deadline cluster",

@@ -48,6 +48,8 @@ public class AllocationWorkLink : Audited, IAuditable
     public string WorkType { get; set; } = "Task";
     public Guid WorkId { get; set; }
     public DateOnly WorkDate { get; set; }
+    // Review assignments have no task estimate; the request supplies their explicit dated demand.
+    public decimal? ReviewHours { get; set; }
     public DateTimeOffset? ReleasedAt { get; set; }
     public string AuditType => "AllocationWorkLink";
     public Guid? AuditProjectId => null;

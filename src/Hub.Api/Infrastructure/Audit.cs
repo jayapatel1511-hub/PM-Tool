@@ -65,7 +65,7 @@ public static class AuditRules
         [typeof(PersonAvailabilityOverride)] = ["PersonId", "WorkDate", "AvailableHours", "Category"],
         [typeof(ResourceAllocation)] = ["PersonId", "Purpose", "FromDate", "ThroughDate", "PlannedHours", "Status", "ConfirmedBy", "ConfirmedAt", "OverCapacityReason", "ConfirmationSnapshot"],
         [typeof(AllocationDayOverride)] = ["AllocationId", "WorkDate", "Hours"],
-        [typeof(AllocationWorkLink)] = ["AllocationId", "PersonId", "WorkType", "WorkId", "WorkDate", "ReleasedAt"],
+        [typeof(AllocationWorkLink)] = ["AllocationId", "PersonId", "WorkType", "WorkId", "WorkDate", "ReviewHours", "ReleasedAt"],
         [typeof(Handoff)] = ["Title", "SourceDeliverableId", "SourceRowVersion", "DeclaredRevision", "SourceUrl", "SendingDisciplineId", "ReceivingDisciplineId",
             "SendingOwnerId", "ReceivingOwnerId", "TargetTaskId", "TargetDeliverableId", "IntendedUse", "AcceptanceCriteria", "NeededBy", "PromisedBy",
             "Status", "CurrentRevisionId", "IncorporatedRevisionId", "DeletedAt"],

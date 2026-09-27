@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Hub.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Hub.Api.Data.Migrations
 {
     [DbContext(typeof(HubDb))]
-    partial class HubDbModelSnapshot : ModelSnapshot
+    [Migration("20260927223041_AllocationReviewEffort")]
+    partial class AllocationReviewEffort
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

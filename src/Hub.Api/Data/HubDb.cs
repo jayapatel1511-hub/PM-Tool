@@ -458,7 +458,9 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         {
             e.HasIndex(x => new { x.PersonId, x.WorkType, x.WorkId, x.WorkDate }).IsUnique().HasFilter("released_at IS NULL");
             e.HasIndex(x => x.AllocationId);
-            e.ToTable(t => t.HasCheckConstraint("ck_allocation_work_type", "work_type IN ('Task', 'Review')"));
+            e.Property(x => x.ReviewHours).HasPrecision(9, 3);
+            e.ToTable(t => { t.HasCheckConstraint("ck_allocation_work_type", "work_type IN ('Task', 'Review')");
+                t.HasCheckConstraint("ck_allocation_review_hours", "(work_type = 'Task' AND review_hours IS NULL) OR (work_type = 'Review' AND ((review_hours IS NOT NULL AND review_hours > 0) OR (released_at IS NOT NULL AND review_hours IS NULL)))"); });
         });
         mb.Entity<PersonDateVersion>().HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
         Fk<PersonAvailabilityOverride, AppUser>(mb, x => x.PersonId);

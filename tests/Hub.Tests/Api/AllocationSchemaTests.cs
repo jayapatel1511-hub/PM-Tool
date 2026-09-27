@@ -75,5 +75,15 @@ public sealed class AllocationSchemaTests(HubFactory f)
             await db.SaveChangesAsync();
             return 0;
         }));
+        await Assert.ThrowsAsync<DbUpdateException>(() => f.DbAsync(async db =>
+        {
+            db.AllocationWorkLinks.Add(new AllocationWorkLink
+            {
+                AllocationId = allocation.Id, PersonId = personId, WorkType = "Review",
+                WorkId = Guid.NewGuid(), WorkDate = day,
+            });
+            await db.SaveChangesAsync();
+            return 0;
+        }));
     }
 }

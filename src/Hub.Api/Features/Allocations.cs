@@ -8,7 +8,7 @@ namespace Hub.Api.Features;
 public static class AllocationEndpoints
 {
     public sealed record DayInput(DateOnly WorkDate, decimal Hours);
-    public sealed record LinkInput(string WorkType, Guid WorkId, DateOnly WorkDate);
+    public sealed record LinkInput(string WorkType, Guid WorkId, DateOnly WorkDate, decimal? ReviewHours = null);
     public sealed record CreateBody(Guid RequestId, Guid PersonId, string Purpose, DateOnly FromDate, DateOnly ThroughDate,
         decimal PlannedHours, DayInput[] Days, LinkInput[] Links, string? Reason);
     public sealed record EditBody(Guid RequestId, int RowVersion, Guid PersonId, string Purpose, DateOnly FromDate, DateOnly ThroughDate,
@@ -92,7 +92,7 @@ public static class AllocationEndpoints
             Days = await db.AllocationDayOverrides.AsNoTracking().Where(d => d.AllocationId == id).OrderBy(d => d.WorkDate)
                 .Select(d => new { d.WorkDate, d.Hours }).ToListAsync(),
             Links = await db.AllocationWorkLinks.AsNoTracking().Where(l => l.AllocationId == id && l.ReleasedAt == null)
-                .OrderBy(l => l.WorkDate).Select(l => new { l.WorkType, l.WorkId, l.WorkDate }).ToListAsync() };
+                .OrderBy(l => l.WorkDate).Select(l => new { l.WorkType, l.WorkId, l.WorkDate, l.ReviewHours }).ToListAsync() };
     }
 
     static async Task Validate(HubDb db, Project p, Guid personId, string purpose, DateOnly from, DateOnly through,
@@ -118,7 +118,7 @@ public static class AllocationEndpoints
             Check.That(link.WorkId != Guid.Empty, "links", "error.invalid");
             if (link.WorkType == "Task")
             {
-                Check.That(purpose == AllocationPurpose.Production && await db.Tasks.AnyAsync(t => t.Id == link.WorkId
+                Check.That(purpose == AllocationPurpose.Production && link.ReviewHours is null && await db.Tasks.AnyAsync(t => t.Id == link.WorkId
                     && t.ProjectId == p.Id && t.AssigneeId == personId
                     && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold
                     && t.DeletedAt == null),
@@ -126,7 +126,7 @@ public static class AllocationEndpoints
             }
             else if (link.WorkType == "Review")
             {
-                Check.That(purpose == AllocationPurpose.Review && await db.DisciplineReviews.AnyAsync(r => r.Id == link.WorkId
+                Check.That(purpose == AllocationPurpose.Review && link.ReviewHours is > 0 and <= 10000 && await db.DisciplineReviews.AnyAsync(r => r.Id == link.WorkId
                     && r.ProjectId == p.Id && r.ReviewerId == personId && db.ReviewPackages.Any(pkg =>
                         pkg.ProjectId == p.Id && pkg.CurrentRoundId == r.RoundId
                         && pkg.Status != ReviewStatus.Cancelled && pkg.Status != ReviewStatus.Superseded)),
@@ -149,7 +149,7 @@ public static class AllocationEndpoints
                 db.AllocationDayOverrides.Add(new AllocationDayOverride { AllocationId = a.Id, WorkDate = day.WorkDate, Hours = day.Hours });
             foreach (var link in body.Links)
                 db.AllocationWorkLinks.Add(new AllocationWorkLink { AllocationId = a.Id, PersonId = a.PersonId,
-                    WorkType = link.WorkType, WorkId = link.WorkId, WorkDate = link.WorkDate });
+                    WorkType = link.WorkType, WorkId = link.WorkId, WorkDate = link.WorkDate, ReviewHours = link.ReviewHours });
             db.Audit.Note(a, reason: body.Reason);
             return a;
         });
@@ -176,7 +176,7 @@ public static class AllocationEndpoints
                 db.AllocationDayOverrides.Add(new AllocationDayOverride { AllocationId = a.Id, WorkDate = day.WorkDate, Hours = day.Hours });
             foreach (var link in body.Links)
                 db.AllocationWorkLinks.Add(new AllocationWorkLink { AllocationId = a.Id, PersonId = body.PersonId,
-                    WorkType = link.WorkType, WorkId = link.WorkId, WorkDate = link.WorkDate });
+                    WorkType = link.WorkType, WorkId = link.WorkId, WorkDate = link.WorkDate, ReviewHours = link.ReviewHours });
             a.PersonId = body.PersonId; a.Purpose = body.Purpose; a.FromDate = body.FromDate; a.ThroughDate = body.ThroughDate;
             a.PlannedHours = body.PlannedHours; a.Status = AllocationRules.AfterMaterialEdit(a.Status);
             a.ConfirmedBy = null; a.ConfirmedAt = null; a.OverCapacityReason = null; a.ConfirmationSnapshot = null;

@@ -115,6 +115,20 @@ public sealed class ReviewChangeTests(HubFactory f)
         Assert.All(f.Db(db => db.Tasks.Where(t => tasks.Contains(t.Id)).Select(t => t.AssigneeId).ToList()), x => Assert.Equal(data.User(TestData.Alex), x));
     }
     [Fact]
+    public async Task Reassigning_a_resolver_does_not_make_their_old_response_independent_evidence()
+    {
+        var s = await New(); var id = await Review(s); var finding = await Finding(s, id);
+        await FindingAction(s, id, finding, TestData.Marc, "assignResolver", owner: data.User(TestData.Pm));
+        await FindingAction(s, id, finding, TestData.Pm, FindingStatus.Responded, "https://example.test/prior-response.pdf");
+        await FindingAction(s, id, finding, TestData.Marc, "assignResolver", owner: data.User(TestData.Alex));
+        var row = f.Db(db => db.ReviewFindings.Single(f => f.Id == finding));
+        Assert.Equal(FindingStatus.Open, row.Status); Assert.Null(row.Response); Assert.Null(row.EvidenceUrl);
+        await FindingAction(s, id, finding, TestData.Pm, "assignVerifier", owner: data.User(TestData.Pm), expected: 400);
+        var responder = data.User(TestData.Pm);
+        Assert.True(f.Db(db => db.FindingEvents.Any(e => e.FindingId == finding && e.Action == FindingStatus.Responded && e.CreatedBy == responder)));
+    }
+
+    [Fact]
     public async Task Withdrawal_needs_named_verifier_then_coordinator_ack_and_has_history()
     {
         var s = await New(); var id = await Review(s); var finding = await Finding(s, id);

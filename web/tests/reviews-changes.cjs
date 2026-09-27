@@ -36,7 +36,7 @@ const requests=[],errors=[],violations=[];
   else throw new Error(`Unmocked endpoint ${method} ${p}`);
   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(data)});
  });
- async function axe(label){await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});const v=await page.evaluate(()=>axe.run(document.querySelector('[role="dialog"]'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}}));violations.push({label,violations:v.violations.map(v=>({id:v.id,impact:v.impact,targets:v.nodes.map(n=>n.target)}))});await page.screenshot({path:path.join(out,`${label}.png`),fullPage:true});}
+ async function axe(label){await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});const v=await page.evaluate(()=>axe.run([...document.querySelectorAll('[role="dialog"]')].at(-1),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}}));violations.push({label,violations:v.violations.map(v=>({id:v.id,impact:v.impact,targets:v.nodes.map(n=>n.target)}))});await page.screenshot({path:path.join(out,`${label}.png`),fullPage:true});}
  await page.goto('http://127.0.0.1:5174/projects/P-DEMO/reviews');await page.getByRole('button',{name:'New review package',exact:true}).click();
  await page.getByLabel('Title',{exact:true}).fill('Survey interface review');await page.getByLabel('Coordinator',{exact:true}).last().selectOption(actor);await page.getByLabel('Review purpose and scope',{exact:true}).fill('Verify the service alignment');
  await page.getByLabel('P-DEMO-D001 · A · Survey corridor',{exact:true}).check();await page.getByRole('checkbox',{name:'Electrical',exact:true}).check();await page.getByLabel('Reviewer',{exact:true}).selectOption(actor);

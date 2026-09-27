@@ -44,6 +44,16 @@ public static class ReviewEndpoints
         foreach (var item in manifest) authors.UnionWith(await Coordination.Authors(db, item.DeliverableId));
         return authors.ToArray();
     }
+    static async Task<Guid[]> FindingAuthors(HubDb db, ReviewFinding finding)
+    {
+        var ids = new HashSet<Guid>(); var seen = new HashSet<Guid>(); ReviewFinding? cursor = finding;
+        while (cursor != null && seen.Add(cursor.Id)) {
+            ids.UnionWith(await Authors(db, cursor.RoundId)); ids.Add(cursor.ResolverId);
+            ids.UnionWith((await db.FindingEvents.Where(e => e.FindingId == cursor.Id && e.Action == FindingStatus.Responded).Select(e => e.CreatedBy).ToListAsync()).OfType<Guid>());
+            cursor = cursor.CarriedFromId is { } prior ? await db.ReviewFindings.SingleAsync(f => f.Id == prior) : null;
+        }
+        return ids.ToArray();
+    }
     static async Task Independent(HubDb db, Project project, Guid reviewer, Guid[] authors, bool allowSelf)
     { await Coordination.Person(db, project, reviewer, "reviewerId"); Check.That(ReviewRules.Independent(reviewer, authors, allowSelf), "reviewerId", "review.independent"); }
     static async Task ValidateRound(HubDb db, Project project, ReviewPackage package, bool allowSelf)
@@ -207,12 +217,12 @@ public static class ReviewEndpoints
                 var person = body.OwnerId ?? throw ApiException.Invalid("ownerId", "error.required"); await Coordination.Person(db, project, person);
                 Check.That(f.Status is FindingStatus.Open or FindingStatus.Responded, "status", "review.frozen");
                 if (body.Action == "assignVerifier") {
-                    var authors = (await Authors(db, f.RoundId)).Concat([f.ResolverId]).ToArray();
+                    var authors = await FindingAuthors(db, f);
                     await Independent(db, project, person, authors, self);
                     Check.That(await db.ProjectMembers.AnyAsync(m => m.ProjectId == project.Id && m.UserId == person && m.RemovedAt == null && m.Roles.Contains(ProjectRole.Reviewer))
                         || await db.DisciplineReviews.AnyAsync(a => a.RoundId == f.RoundId && a.ReviewerId == person), "ownerId", "review.named_reviewer");
                     f.VerifierId = person;
-                } else { Check.That(ReviewRules.Independent(f.VerifierId, [person], self), "ownerId", "review.independent"); f.ResolverId = person; }
+                } else { Check.That(ReviewRules.Independent(f.VerifierId, [person], self), "ownerId", "review.independent"); f.ResolverId = person; f.Status = FindingStatus.Open; f.Response = null; f.EvidenceUrl = null; }
             } else if (body.Action == "acknowledgeWithdrawal") {
                 Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, p.CoordinatorId)); await Coordination.Person(db, project, p.CoordinatorId);
                 Check.That(f.Status == FindingStatus.Withdrawn && f.Severity == "Blocking", "status", "review.frozen"); f.WithdrawalAcknowledgedBy = access.Me.Id;
@@ -220,7 +230,7 @@ public static class ReviewEndpoints
                 Check.That(ReviewRules.FindingStep(f.Status, body.Action), "status", "review.finding_transition");
                 var actor = body.Action == FindingStatus.Responded ? f.ResolverId : f.VerifierId;
                 Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, actor)); await Coordination.Person(db, project, actor);
-                if (body.Action != FindingStatus.Responded) await Independent(db, project, actor, (await Authors(db, f.RoundId)).Concat([f.ResolverId]).ToArray(), self);
+                if (body.Action != FindingStatus.Responded) await Independent(db, project, actor, await FindingAuthors(db, f), self);
                 if (body.Action == FindingStatus.Responded) { f.Response = reason; f.EvidenceUrl = Coordination.Url(body.EvidenceUrl); }
                 if (body.Action == FindingStatus.VerifiedClosed) Check.That(f.Response != null && f.EvidenceUrl != null, "evidenceUrl", "error.required");
                 f.Status = body.Action;

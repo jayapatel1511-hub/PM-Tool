@@ -158,7 +158,7 @@ public static class ChangeEndpoints
                 Check.Reason(body.Rationale); Check.That(body.OwnerId == w.OwnerId, "ownerId", "change.work_owner"); await Coordination.Person(db, p, w.OwnerId);
                 var reviewer = body.ReviewerId ?? throw ApiException.Invalid("reviewerId", "error.required"); await Coordination.Person(db, p, reviewer, "reviewerId");
                 Check.That(ReviewRules.Independent(reviewer, [w.OwnerId], self), "reviewerId", "review.independent");
-                a.OwnerId = w.OwnerId; a.ReviewerId = reviewer; a.Status = AssessmentStatus.Pending; a.RetentionApprovedBy = null; a.RetentionReason = null; a.VerifiedBy = null; a.VerifiedAt = null;
+                a.OwnerId = w.OwnerId; a.ReviewerId = reviewer; a.Status = AssessmentStatus.Pending; a.AcknowledgedAt = null; a.RetentionApprovedBy = null; a.RetentionReason = null; a.VerifiedBy = null; a.VerifiedAt = null;
             } else if (body.Action == "approveRetention") {
                 Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, w.DisciplineId)); await Coordination.Person(db, p, access.Me.Id);
                 Check.That(a.OwnerId == w.OwnerId && a.RetainOldRevision && a.Status is AssessmentStatus.Unaffected or AssessmentStatus.UpdateRequired, "status", "change.retention");

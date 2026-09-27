@@ -177,6 +177,8 @@ public class Project : Audited, IAuditable
     public int NextIssueSeq { get; set; } = 1;
     public int NextActionSeq { get; set; } = 1;
     public int NextHandoffSeq { get; set; } = 1;
+    public int NextReviewSeq { get; set; } = 1;
+    public int NextChangeSeq { get; set; } = 1;
     public string? ExternalSource { get; set; }
     public string? ExternalId { get; set; }
     public string AuditType => ItemType.Project;
@@ -281,6 +283,8 @@ public class Milestone : ProjectItem, IAuditable
 
 public class Deliverable : ProjectItem, IAuditable
 {
+    public Guid? RequiredReviewPackageId { get; set; }
+
     public string Name { get; set; } = "";
     public Guid ProjectDisciplineId { get; set; }
     public Guid DeliverableTypeId { get; set; }
@@ -319,8 +323,16 @@ public class Deliverable : ProjectItem, IAuditable
 public class SourceRevision : Audited, IAuditable
 {
     public Guid ProjectId { get; set; }
-    public Guid DeliverableId { get; set; }
+    public Guid? DeliverableId { get; set; }
     public int SourceRowVersion { get; set; }
+    public string SourceIdentity { get; set; } = "";
+    public string SourceSystem { get; set; } = "Manual";
+    public string ExternalIdentifier { get; set; } = "";
+    public string Issuer { get; set; } = "";
+    public string Scope { get; set; } = "";
+    public DateTimeOffset? SourceCheckedAt { get; set; }
+    public Guid? SupersedesId { get; set; }
+    public Guid[] AuthorIds { get; set; } = [];
     public string IdentityHash { get; set; } = "";
     public string SourceKey { get; set; } = "";
     public string Title { get; set; } = "";

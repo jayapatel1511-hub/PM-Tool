@@ -23,6 +23,8 @@ public static class ViewEndpoints
     public static readonly Dictionary<string, string[]> Lists = new()
     {
         ["tasks"] = TaskKeys,
+        ["reviews"] = ["q", "status", "ownerId", "disciplineId", "mine"],
+        ["changes"] = ["q", "status", "ownerId", "mine"],
         ["handoffs"] = ["q", "status", "direction", "disciplineId", "overdue"],
         ["board"] = [.. TaskKeys, "swim", "side"],
         ["deliverables"] = ["q", "disciplineId", "status", "milestoneId", "ownerId", "typeId", "indicator", "dueFrom", "dueTo", "requiresReview", "group", "sort", "cols"],

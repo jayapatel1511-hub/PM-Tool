@@ -29,6 +29,7 @@ type Row = {
 }
 type Permit = { ok: boolean; reason?: string }
 type Detail = {
+  changeAssessments?: { id: string; status: string; changeNoticeId: string; key: string; title: string; noticeStatus: string }[]
   row: Row; permissions: { edit: Permit; assign: Permit; transitions: { to: string; permission: Permit }[] }
   history: { id: string; fromStatus: string; toStatus: string; reason?: string; criteriaOutcome?: string; actor: string; createdAt: string; revisionId?: string }[]
   revisions: { id: string; intendedUse: string; acceptanceCriteria: string; createdAt: string; response?: string; source: { revision: string; url: string; sourceKey: string; createdAt: string } }[]
@@ -182,6 +183,7 @@ function HandoffDetail({ projectId, projectNumber, id, options, onClose, refresh
       <section><h3 className="text-sm font-medium">{t('handoff.purpose')}</h3><p className="whitespace-pre-wrap text-sm">{d.row.intendedUse}</p></section>
       <section><h3 className="text-sm font-medium">{t('handoff.criteria')}</h3><p className="whitespace-pre-wrap text-sm">{d.row.acceptanceCriteria}</p></section>
       <a href={d.row.sourceUrl} target="_blank" rel="noreferrer noopener" className="text-sm text-primary underline">{t('handoff.openSource')}</a><p className="text-xs text-muted-foreground">{t('handoff.manualRevision')}</p>
+      {!!d.changeAssessments?.length && <section className="rounded border p-3 text-sm"><h3 className="font-medium">{t('change.assessments')}</h3><p className="mt-1 text-muted-foreground">{t('change.receiptPreserved')}</p>{d.changeAssessments.map(a => <p className="mt-2" key={a.id}><Link className="text-primary underline" to={`/projects/${projectNumber}/changes?panel=ChangeNotice:${a.changeNoticeId}`}>{a.key} · {a.title}</Link> · {tv(a.status)} · {tv(a.noticeStatus)}</p>)}</section>}
       <section className="border-t pt-3"><h3 className="font-medium">{t('handoff.history')}</h3>{!d.history.length && <p className="text-sm text-muted-foreground">{t('handoff.noHistory')}</p>}
         <ol className="mt-2 space-y-3">{d.history.map(e => <li key={e.id} className="rounded border p-3 text-sm"><div className="font-medium">{tv(e.fromStatus)} → {tv(e.toStatus)}</div><p className="text-xs text-muted-foreground">{e.actor} · {new Date(e.createdAt).toLocaleString()}</p>{e.reason && <p className="mt-1 whitespace-pre-wrap">{e.reason}</p>}{e.criteriaOutcome && <p className="mt-1 whitespace-pre-wrap">{e.criteriaOutcome}</p>}<p className="text-xs text-muted-foreground">{t('handoff.revision')}: {d.revisions.find(r => r.id === e.revisionId)?.source.revision ?? '—'}</p></li>)}</ol>
       </section>

@@ -41,6 +41,30 @@ public sealed record OwnedFacts(Guid? OwnerId, Guid? CreatedBy, Guid? Discipline
 /// The permission matrix of §8.5 as pure functions of (actor, roles, memberships, item) (§8.9 principle 3).
 public static class Permissions
 {
+    // Shared packet 026/027 gates. Management does not confer a named technical signature.
+    public static Allow CoordinationWrite(Actor a, ProjectContext p) => !a.IsActive || !CanView(a, p)
+        ? Allow.No("perm.not_member") : Writable(a, p);
+    public static Allow CoordinateReview(Actor a, ProjectContext p, Guid discipline, Guid? coordinator = null)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return IsPM(a, p) || IsDL(p, discipline) || (coordinator == a.Id && p.IsMember) ? Allow.Yes : Allow.No("perm.pm_or_dl");
+    }
+    public static Allow PublishSource(Actor a, ProjectContext p, Guid discipline, Guid? owner)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return IsPM(a, p) || IsDL(p, discipline) || (owner == a.Id && p.IsMember) ? Allow.Yes : Allow.No("perm.pm_or_dl");
+    }
+    public static Allow NamedCoordinationAction(Actor a, ProjectContext p, Guid owner)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return a.Id == owner && p.IsMember ? Allow.Yes : Allow.No("perm.owner");
+    }
+    public static Allow ManageCoordination(Actor a, ProjectContext p, Guid discipline)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return IsPM(a, p) || IsDL(p, discipline) ? Allow.Yes : Allow.No("perm.pm_or_dl");
+    }
+
     // Packet 025: management rights never imply permission to sign another person's receipt.
     static Allow HandoffGate(Actor a, ProjectContext p) => !a.IsActive || !CanView(a, p)
         ? Allow.No("perm.not_member") : Writable(a, p);

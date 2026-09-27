@@ -1,8 +1,9 @@
-# Verification: Revision Awareness and Change Impact
+# Verification: Revision awareness and change impact
 
-**Date**: 2026-09-26
-**State**: Specification and implementation plan only. No application implementation, migration, runtime test, deployment or pilot execution performed for this packet.
+Implementation in progress, authorised 2026-09-27. Stacked on packet 025's handoff branch. No deployment or merge.
 
-Documentation validation is recorded in `docs/coordination-spec-validation.md`. Product acceptance scenarios AC-CHG-01, AC-CHG-02, AC-CHG-03, AC-CHG-04, AC-CHG-05 are **not run**. All implementation tasks remain unchecked.
+The commands, additive schema migration, project screens, source links, search, saved filters, exports, notifications and digest sections are written. Review issue gates and authored-work reassignment checks are shared with the existing work lifecycle. Revision publication leaves task dates and completion unchanged; adoption and assessments are explicit.
 
-The implementation change must replace this paragraph with actual commands, environments and pass/fail/unrun results; do not inherit historical results from the original 24 packets.
+Local checks so far: .NET compilation succeeded; 207 domain tests passed; frontend TypeScript/Vite build and lint succeeded (warnings remain). Full PostgreSQL API acceptance tests and Chromium dialog/workflow checks are pending CI. The browser tests use a mocked API and do not constitute real browser-to-API end-to-end evidence.
+
+Do not treat this record as production acceptance. Final tested commit and actual remaining limitations will be recorded after CI.

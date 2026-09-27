@@ -82,7 +82,7 @@ public static class DeliverableEndpoints
         var list = await q.OrderBy(d => d.DueDate == null).ThenBy(d => d.DueDate).ThenBy(d => d.Seq).Select(d => new
         {
             d.Id, d.ProjectId, d.Key, d.Name, d.ProjectDisciplineId, d.DeliverableTypeId, d.OwnerId, d.ReviewerId, d.MilestoneId, d.StartDate, d.DueDate,
-            d.OriginalDueDate, d.OriginalStartDate, d.Priority, d.Status, d.Revision, d.IssuedDate, d.IssuedTo, d.RequiresReview, d.RowVersion, d.CreatedAt, d.LastActivityAt,
+            d.OriginalDueDate, d.OriginalStartDate, d.Priority, d.Status, d.Revision, d.IssuedDate, d.IssuedTo, d.RequiresReview, d.RequiredReviewPackageId, d.RowVersion, d.CreatedAt, d.LastActivityAt,
             Discipline = db.ProjectDisciplines.Where(x => x.Id == d.ProjectDisciplineId).Select(x => new { x.Discipline!.Name, x.Discipline.Colour, x.SortOrder }).FirstOrDefault(),
             Type = db.DeliverableTypes.Where(x => x.Id == d.DeliverableTypeId).Select(x => x.Name).FirstOrDefault(),
             Owner = db.Users.Where(u => u.Id == d.OwnerId).Select(u => new { u.DisplayName, u.IsActive }).FirstOrDefault(),
@@ -98,7 +98,7 @@ public static class DeliverableEndpoints
         return list.Select(d => (object)new
         {
             d.Id, d.ProjectId, d.Key, d.Name, d.ProjectDisciplineId, d.DeliverableTypeId, d.OwnerId, d.ReviewerId, d.MilestoneId, d.StartDate, d.DueDate,
-            d.OriginalDueDate, d.OriginalStartDate, d.Priority, d.Status, d.Revision, d.IssuedDate, d.IssuedTo, d.RequiresReview, d.RowVersion, d.CreatedAt, d.LastActivityAt,
+            d.OriginalDueDate, d.OriginalStartDate, d.Priority, d.Status, d.Revision, d.IssuedDate, d.IssuedTo, d.RequiresReview, d.RequiredReviewPackageId, d.RowVersion, d.CreatedAt, d.LastActivityAt,
             DisciplineName = d.Discipline?.Name, DisciplineColour = d.Discipline?.Colour, DisciplineOrder = d.Discipline?.SortOrder ?? 0, TypeName = d.Type,
             OwnerName = d.Owner?.DisplayName, OwnerActive = d.Owner?.IsActive ?? true, ReviewerName = d.Reviewer?.DisplayName,
             MilestoneKey = d.Milestone?.Key, MilestoneName = d.Milestone?.Name, MilestoneDate = d.Milestone?.Date,
@@ -294,6 +294,10 @@ public static class DeliverableEndpoints
 
     static async Task<IResult> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, TimeProvider clock, SettingsStore store)
     {
+        var projectId = await db.Deliverables.Where(d => d.Id == id).Select(d => (Guid?)d.ProjectId).FirstOrDefaultAsync() ?? throw ApiException.NotFound();
+        await access.Project(projectId, false);
+        return await Tx.Run(db, async () => {
+        await Coordination.Lock(db, projectId);
         var (d, p, ctx) = await Load(db, access, id);
         await Http.CheckVersion(db, http, d, body.RowVersion);
         var from = d.Status;
@@ -306,6 +310,7 @@ public static class DeliverableEndpoints
         if (to == DeliverableStatus.InReview && d.ReviewerId is null) throw ApiException.Invalid("reviewerId", "deliverable.reviewer_required"); // DL-04
         string? reason = Workflow.DeliverableNeedsReason(to) ? Check.Reason(body.Reason) : body.Reason?.Trim();
         ProjectEndpoints.CorrectionReason(p, reason);
+        if (to == DeliverableStatus.ReadyToIssue) await ReviewEndpoints.Gate(db, p, d, null, (await store.Get(db)).AllowSelfReview);
         var now = clock.GetUtcNow();
         if (to == DeliverableStatus.OnHold) { d.PreviousStatus = from; d.OnHoldReason = reason; }
         if (to == DeliverableStatus.Cancelled) { d.PreviousStatus = from; d.CancelledReason = reason; }
@@ -331,11 +336,16 @@ public static class DeliverableEndpoints
             await notify.Send(NotificationEvents.ReviewRequested, d.ReviewerId, Item(p, d), Text.Get("notify.deliverable_review", await notify.ActorName(), d.Key, d.Name));
         await db.SaveChangesAsync();
         return Results.Ok(new { d.Id, d.Status, d.RowVersion });
+        });
     }
 
     /// DL-05, DL-06, AC-DEL-05: issue records date, revision and recipient; open tasks need confirmation and stay open.
     static async Task<IResult> Issue(Guid id, IssueBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock, CurrentUser me)
     {
+        var projectId = await db.Deliverables.Where(d => d.Id == id).Select(d => (Guid?)d.ProjectId).FirstOrDefaultAsync() ?? throw ApiException.NotFound();
+        await access.Project(projectId, false);
+        return await Tx.Run(db, async () => {
+        await Coordination.Lock(db, projectId);
         var (d, p, ctx) = await Load(db, access, id);
         await Http.CheckVersion(db, http, d, body.RowVersion);
         var facts = await Facts(db, d);
@@ -353,6 +363,7 @@ public static class DeliverableEndpoints
         var issued = body.IssuedDate ?? today;
         Check.That(issued <= today, "issuedDate", "milestone.future_completion");
         if (body.TransmittalUrl is { Length: > 0 } tu) Check.That(Links.IsValid(tu), "transmittalUrl", "link.invalid");
+        await ReviewEndpoints.Gate(db, p, d, Check.Optional(body.Revision, "revision", 50), (await store.Get(db)).AllowSelfReview);
         var now = clock.GetUtcNow();
         d.Status = DeliverableStatus.Issued;
         d.IssuedDate = issued;
@@ -367,6 +378,7 @@ public static class DeliverableEndpoints
         db.Audit.Note(d, action: "Issued", reason: open.Count > 0 ? Text.Get("deliverable.issued_with_open", string.Join(", ", open.Select(o => o.Key))) : null);
         await db.SaveChangesAsync();
         return Results.Ok(new { d.Id, d.Status, d.RowVersion, openTasks = open });
+        });
     }
 
     static async Task<IResult> Delete(Guid id, Access access, HubDb db, TimeProvider clock, CurrentUser me)

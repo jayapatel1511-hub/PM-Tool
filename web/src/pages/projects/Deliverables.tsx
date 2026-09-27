@@ -31,6 +31,7 @@ import { useTable } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
 
 export interface DeliverableRow {
+  requiredReviewPackageId?: string
   id: string; projectId: string; key: string; name: string; projectDisciplineId: string; deliverableTypeId: string; ownerId?: string; reviewerId?: string
   milestoneId?: string; startDate?: string; dueDate?: string; originalDueDate?: string; originalStartDate?: string; priority: string; status: string; revision?: string; issuedDate?: string
   issuedTo?: string; requiresReview: boolean; rowVersion: number; createdAt: string; disciplineName?: string; disciplineColour?: string; disciplineOrder: number
@@ -297,6 +298,8 @@ function DeliverablePanel({ id }: PanelProps) {
           <PriorityBadge priority={d.priority} />
           <div className="ml-auto flex gap-1.5">
             {can && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/handoffs?source=${d.id}`}>{t('handoff.new')}</Link></Button>}
+            <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/changes?target=Deliverable:${d.id}`}>{t('change.inputs')}</Link></Button>
+            {d.requiredReviewPackageId && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/reviews?panel=ReviewPackage:${d.requiredReviewPackageId}`}>{t('review.issueGate')}</Link></Button>}
             <RaiseSlot projectId={d.projectId} targetType="Deliverable" targetId={d.id} targetKey={d.key} targetName={d.name} disciplineId={d.projectDisciplineId} />
             {perms.issue && <Button size="sm" onClick={() => setIssuing(true)}><Send className="size-3.5" />{t('deliverable.issue')}</Button>}
           </div>

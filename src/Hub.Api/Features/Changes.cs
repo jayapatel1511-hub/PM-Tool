@@ -113,6 +113,7 @@ public static class ChangeEndpoints
             head.CurrentRevisionId = next.Id; c.Status = ChangeStatus.Open; c.PublishedAt = clock.GetUtcNow();
             await db.SaveChangesAsync();
             await ReviewEndpoints.AdvanceForPublishedRevision(db, notify, p, await Coordination.Revision(db, p.Id, c.OldRevisionId), next);
+            await SubmissionEndpoints.InvalidateForPublishedRevision(db, p.Id, c.OldRevisionId);
             await Notify(notify, p, c, await db.ChangeAssessments.Where(a => a.ChangeNoticeId == c.Id).Select(a => a.OwnerId).ToListAsync()); return c;
         });
     static Task<Coordination.Result> Adopt(Guid projectId, AdoptBody body, Access access, HubDb db, TimeProvider clock) =>

@@ -27,6 +27,7 @@ public sealed class SubmissionTests
         Assert.False(Permissions.CoordinateSubmission(Person(pm), ctx, coordinator));
         Assert.True(Permissions.AuthoriseSubmission(Person(pm), ctx));
         Assert.False(Permissions.AuthoriseSubmission(Person(coordinator), ctx));
+        Assert.False(Permissions.AuthoriseSubmission(Person(outsider, SystemRole.Admin), ctx));
         Assert.True(Permissions.SignSubmissionCheck(Person(owner), ctx, owner));
         Assert.False(Permissions.SignSubmissionCheck(Person(pm), ctx, owner));
         Assert.False(Permissions.CreateSubmission(Person(outsider), ctx));

@@ -149,6 +149,7 @@ public static class ReviewEndpoints
         var status = ReviewRules.PackageStatus(states, findings.Any(f => ReviewRules.BlockingOpen(f.Severity, f.Status, f.WithdrawalAcknowledgedBy != null)));
         if (status == ReviewStatus.Approved) await ValidateRound(db, project, package, allowSelf);
         package.Status = r.Status = status;
+        await SubmissionEndpoints.InvalidateForReviewPackage(db, project.Id, package.Id);
     }
     static Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, SettingsStore settings, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "review.create", body }, access, db, clock, async (project, ctx) => {
@@ -193,6 +194,7 @@ public static class ReviewEndpoints
             }
             old.Status = ReviewStatus.Superseded; db.Audit.Note(old, reason: reason);
             await db.SaveChangesAsync(); p.CurrentRoundId = round.Id; p.RoundNumber = round.Number; p.Purpose = round.Purpose; p.Status = ReviewStatus.Draft;
+            await SubmissionEndpoints.InvalidateForReviewPackage(db, project.Id, p.Id);
             if (p.RequiredForIssue) foreach (var deliverableId in removedDeliverables) {
                 var d = await db.Deliverables.SingleAsync(d => d.Id == deliverableId);
                 if (d.RequiredReviewPackageId != p.Id) continue;

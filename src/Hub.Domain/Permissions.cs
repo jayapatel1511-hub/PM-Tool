@@ -80,7 +80,7 @@ public static class Permissions
     public static Allow AuthoriseSubmission(Actor a, ProjectContext p)
     {
         var gate = CoordinationWrite(a, p); if (!gate) return gate;
-        return IsPM(a, p) ? Allow.Yes : Allow.No("perm.pm");
+        return p.PrimaryPmId == a.Id || p.Has(ProjectRole.PM) ? Allow.Yes : Allow.No("perm.pm");
     }
 
     // Packet 025: management rights never imply permission to sign another person's receipt.

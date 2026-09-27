@@ -101,6 +101,44 @@ public static class ReviewEndpoints
     }
     static async Task Notify(HubDb db, Notifier notify, Project project, ReviewPackage p, IEnumerable<Guid> owners) =>
         await notify.Send(NotificationEvents.ReviewPackageChanged, owners.Select(x => (Guid?)x), new NotifyItem(project.Id, "ReviewPackage", p.Id, p.Key, $"/projects/{project.ProjectNumber}/reviews?panel=ReviewPackage:{p.Id}", project.ProjectNumber), Text.Get("review.notification", p.Key, p.Title, p.Status));
+
+    // A published replacement changes the reviewed content. Start a fresh round in the
+    // publication transaction so no current approval can continue to refer to the old head.
+    public static async Task AdvanceForPublishedRevision(HubDb db, Notifier notify, Project project, SourceRevision oldRevision, SourceRevision newRevision)
+    {
+        var affected = await db.ReviewManifestItems.Where(m => m.ProjectId == project.Id && m.SourceRevisionId == oldRevision.Id)
+            .Join(db.ReviewPackages, m => m.RoundId, p => p.CurrentRoundId, (m, p) => new { m, p })
+            .Where(x => x.p.Status != ReviewStatus.Cancelled && x.p.Status != ReviewStatus.Superseded).ToListAsync();
+        foreach (var affectedRound in affected)
+        {
+            var package = affectedRound.p;
+            var oldRound = await db.ReviewRounds.SingleAsync(r => r.Id == package.CurrentRoundId);
+            var round = new ReviewRound { ProjectId = project.Id, PackageId = package.Id, Number = package.RoundNumber + 1,
+                Purpose = oldRound.Purpose, Reason = $"Source revision {oldRevision.Revision} replaced by {newRevision.Revision}" };
+            db.ReviewRounds.Add(round);
+            foreach (var item in await db.ReviewManifestItems.Where(m => m.RoundId == oldRound.Id).ToListAsync())
+            {
+                var changed = item.SourceRevisionId == oldRevision.Id;
+                db.ReviewManifestItems.Add(new ReviewManifestItem { ProjectId = project.Id, RoundId = round.Id,
+                    DeliverableId = item.DeliverableId, SourceRevisionId = changed ? newRevision.Id : item.SourceRevisionId,
+                    AuthorIds = changed ? newRevision.AuthorIds.Concat(await Coordination.Authors(db, item.DeliverableId)).Distinct().ToArray() : item.AuthorIds });
+            }
+            var reviewers = await db.DisciplineReviews.Where(a => a.RoundId == oldRound.Id).ToListAsync();
+            foreach (var assignment in reviewers)
+                db.DisciplineReviews.Add(new DisciplineReview { ProjectId = project.Id, RoundId = round.Id,
+                    ProjectDisciplineId = assignment.ProjectDisciplineId, ReviewerId = assignment.ReviewerId, DueDate = assignment.DueDate });
+            foreach (var finding in await db.ReviewFindings.Where(f => f.RoundId == oldRound.Id &&
+                (f.Status != FindingStatus.VerifiedClosed && (f.Status != FindingStatus.Withdrawn || f.Severity == "Blocking" && f.WithdrawalAcknowledgedBy == null))).ToListAsync())
+                db.ReviewFindings.Add(new ReviewFinding { ProjectId = project.Id, PackageId = package.Id, RoundId = round.Id,
+                    CarriedFromId = finding.Id, SourceRevisionId = finding.SourceRevisionId == oldRevision.Id ? newRevision.Id : finding.SourceRevisionId,
+                    ProjectDisciplineId = finding.ProjectDisciplineId, OriginatorId = finding.OriginatorId, ResolverId = finding.ResolverId,
+                    VerifierId = finding.VerifierId, Text = finding.Text, Severity = finding.Severity });
+            oldRound.Status = ReviewStatus.Superseded;
+            package.CurrentRoundId = round.Id; package.RoundNumber = round.Number; package.Status = ReviewStatus.Draft;
+            db.Audit.Note(oldRound, reason: round.Reason); db.Audit.Note(package, reason: round.Reason);
+            await Notify(db, notify, project, package, reviewers.Select(a => a.ReviewerId).Append(package.CoordinatorId).Distinct());
+        }
+    }
     static async Task Recompute(HubDb db, Project project, ReviewPackage package, bool allowSelf)
     {
         await db.SaveChangesAsync();

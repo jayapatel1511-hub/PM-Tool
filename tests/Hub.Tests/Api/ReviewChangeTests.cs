@@ -78,20 +78,41 @@ public sealed class ReviewChangeTests(HubFactory f)
         Assert.Equal(2, f.Db(db => db.FindingEvents.Count(e => e.FindingId == finding)));
     }
     [Fact]
+    public async Task AC_MRV_03_approved_round_is_replaced_on_publication_without_reusing_approvals()
+    {
+        var s = await New(); var id = await Review(s);
+        await Decide(s, id, s.Civil, TestData.Pm);
+        await Decide(s, id, s.Electrical, TestData.Omar);
+        Assert.Equal(ReviewStatus.Approved, f.Db(db => db.ReviewPackages.Single(p => p.Id == id).Status));
+        var oldRound = f.Db(db => db.ReviewPackages.Single(p => p.Id == id).CurrentRoundId!.Value);
+
+        var notice = await Notice(s); await Publish(s, notice);
+        var current = f.Db(db => db.ReviewPackages.Single(p => p.Id == id));
+        Assert.Equal(ReviewStatus.Draft, current.Status);
+        Assert.Equal(2, current.RoundNumber);
+        Assert.Equal(ReviewStatus.Superseded, f.Db(db => db.ReviewRounds.Single(r => r.Id == oldRound).Status));
+        Assert.Equal(2, f.Db(db => db.DisciplineReviews.Count(a => a.RoundId == oldRound && a.Status == DisciplineReviewStatus.Approved)));
+        Assert.Equal(2, f.Db(db => db.DisciplineReviews.Count(a => a.RoundId == current.CurrentRoundId && a.Status == DisciplineReviewStatus.Pending)));
+        var revisionB = f.Db(db => db.ChangeNotices.Single(c => c.Id == notice).NewRevisionId);
+        Assert.Equal(revisionB, f.Db(db => db.ReviewManifestItems.Single(m => m.RoundId == current.CurrentRoundId).SourceRevisionId));
+    }
+
+    [Fact]
     public async Task AC_MRV_03_05_new_revision_resets_decisions_and_carries_findings_without_erasing_history()
     {
         var s = await New(); var id = await Review(s); var finding = await Finding(s, id);
         await Decide(s, id, s.Civil, TestData.Pm); var oldRound = f.Db(db => db.ReviewPackages.Single(p => p.Id == id).CurrentRoundId!.Value);
         var notice = await Notice(s); await Publish(s, notice); var revisionB = f.Db(db => db.ChangeNotices.Single(c => c.Id == notice).NewRevisionId);
-        await Decide(s, id, s.Electrical, TestData.Omar, expected: 400); // A is superseded
-        var round = new ReviewEndpoints.RoundBody(Guid.NewGuid(), Version<ReviewPackage>(id), "Updated corridor check", [revisionB], Assignments(s), "Updated source revision", null);
-        await Post(TestData.Marc, Root(s) + $"/reviews/{id}/rounds", round);
+        Assert.Equal(ReviewStatus.Superseded, f.Db(db => db.ReviewRounds.Single(r => r.Id == oldRound).Status));
+        Assert.Equal(revisionB, f.Db(db => db.ReviewManifestItems.Single(m => m.RoundId == db.ReviewPackages.Single(p => p.Id == id).CurrentRoundId).SourceRevisionId));
+        await Decide(s, id, s.Electrical, TestData.Omar, expected: 400); // New round needs an explicit start and fresh decisions.
         var detail = await Get(TestData.Omar, Root(s) + $"/reviews/{id}");
         Assert.Equal(2, detail["rounds"]!.AsArray().Count); Assert.Equal("Draft", detail["package"]!.S("status"));
         Assert.True(f.Db(db => db.DisciplineReviews.Where(a => a.RoundId == oldRound).Any(a => a.Status == DisciplineReviewStatus.Approved)));
         Assert.Equal(2, f.Db(db => db.DisciplineReviews.Count(a => a.RoundId != oldRound && db.ReviewRounds.Any(r => r.Id == a.RoundId && r.PackageId == id) && a.Status == DisciplineReviewStatus.Pending)));
         Assert.True(f.Db(db => db.ReviewFindings.Any(x => x.CarriedFromId == finding && x.SourceRevisionId == revisionB && x.Status == FindingStatus.Open)));
         await FindingAction(s, id, finding, TestData.Alex, FindingStatus.Responded, "https://example.test/fixed.pdf", expected: 404);
+        var round = new ReviewEndpoints.RoundBody(Guid.NewGuid(), Version<ReviewPackage>(id), "Updated corridor check", [revisionB], Assignments(s), "Scope update", null);
         var removal = round with { RequestId = Guid.NewGuid(), RowVersion = Version<ReviewPackage>(id), Assignments = [Assignments(s)[0]], RemovalImpact = "Electrical finding remains assigned and blocking" };
         await Post(TestData.Marc, Root(s) + $"/reviews/{id}/rounds", removal, 403);
         await Post(TestData.Pm, Root(s) + $"/reviews/{id}/rounds", removal with { RemovalImpact = null }, 400);
@@ -237,6 +258,6 @@ public sealed class ReviewChangeTests(HubFactory f)
         await Post(TestData.Rita, Root(s) + "/reviews", draft, 404);
         await f.DbAsync(async db => { var p = await db.Projects.SingleAsync(p => p.Id == s.P.Id); p.Status = ProjectStatus.Archived; return await db.SaveChangesAsync(); });
         await ReviewAction(s, review, "cancel", 403);
-        Assert.Equal(2, (await Get(TestData.Pm, Root(s) + $"/reviews/{review}"))["assignments"]!.AsArray().Count);
+        Assert.Equal(4, (await Get(TestData.Pm, Root(s) + $"/reviews/{review}"))["assignments"]!.AsArray().Count);
     }
 }

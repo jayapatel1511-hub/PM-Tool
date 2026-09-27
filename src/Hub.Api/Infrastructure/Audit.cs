@@ -63,7 +63,7 @@ public static class AuditRules
         [typeof(ChangeNotice)] = ["Title", "OwnerId", "ProjectDisciplineId", "OldRevisionId", "NewRevisionId", "Description", "Scope", "EffectiveDate", "AssessmentDueDate", "Status", "PublishedAt"],
         [typeof(ChangeAssessment)] = ["ChangeNoticeId", "TargetType", "TargetId", "OwnerId", "ReviewerId", "InputUseId", "HandoffId", "RevisionUsedId", "Status", "AcknowledgedAt", "Rationale", "EvidenceUrl", "CorrectionTaskId", "EffortImpactHours", "DateImpactDays", "RetainOldRevision", "RetentionApprovedBy", "RetentionReason", "VerifiedBy", "VerifiedAt"],
         [typeof(PersonAvailabilityOverride)] = ["PersonId", "WorkDate", "AvailableHours", "Category"],
-        [typeof(ResourceAllocation)] = ["PersonId", "Purpose", "FromDate", "ThroughDate", "PlannedHours", "Status", "ConfirmedBy", "ConfirmedAt", "OverCapacityReason", "ConfirmationSnapshot"],
+        [typeof(ResourceAllocation)] = ["PersonId", "Purpose", "FromDate", "ThroughDate", "PlannedHours", "Status", "ConfirmedBy", "ConfirmedAt"],
         [typeof(AllocationDayOverride)] = ["AllocationId", "WorkDate", "Hours"],
         [typeof(AllocationWorkLink)] = ["AllocationId", "PersonId", "WorkType", "WorkId", "WorkDate", "ReviewHours", "ReleasedAt"],
         [typeof(Handoff)] = ["Title", "SourceDeliverableId", "SourceRowVersion", "DeclaredRevision", "SourceUrl", "SendingDisciplineId", "ReceivingDisciplineId",

@@ -242,5 +242,14 @@ public sealed class LocationIssueTests(HubFactory f)
         {
             verifierId = d.User(TestData.Marc), status = "Proposed", note = "PM appoints independent verifier", rowVersion = await IssueVersion(pmId)
         }).Result.Json(201);
+        var replacementAttempt = await f.As(TestData.Alex).Post($"/api/v1/issues/{pmId}/verification", new
+        {
+            verifierId = d.User(TestData.Omar), status = "Proposed", note = "Owner cannot replace an appointment", rowVersion = await IssueVersion(pmId)
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, replacementAttempt.StatusCode);
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{pmId}/verification", new
+        {
+            verifierId = d.User(TestData.Omar), status = "Proposed", note = "PM replaces the independent verifier", rowVersion = await IssueVersion(pmId)
+        }).Result.Json(201);
     }
 }

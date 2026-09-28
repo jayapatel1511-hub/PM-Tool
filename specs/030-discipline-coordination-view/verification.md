@@ -7,6 +7,12 @@ Documentation validation is recorded in `docs/coordination-spec-validation.md`. 
 
 This is a staged UI increment and does not close packet 030.
 
+## Meeting action capture and reuse increment (2026-09-28)
+
+Project meeting mode can capture an action against a blocked handoff or an open change. The action records an explicit same-project source link and the currently available affected task or deliverable links. Active actions appear beside that source in project and My Work coordination views, with a route to the action; its detail panel links back to the source and affected work. Sharing a task alone does not associate an unrelated action with a handoff or change. Deleted change assessment targets are omitted from new action links and counted as unavailable in the projection. The My Work CSV includes the same linked action and unavailable-target rows shown by its evaluated browser snapshot.
+
+The combined PostgreSQL suite passed 440/440, a focused handoff rerun with action-detail link assertions passed 25/25, and the frontend production build and lint passed with existing warnings. Source-link permissions, project boundaries and exclusion of completed handoff blockers were exercised in focused tests. Populated deployed browser capture/reuse, retry behavior, saved-view return, print and export inspection, and full AC-DCV-01 through 05 remain **UNPROVEN**. This increment does not close packet 030.
+
 ## Scope and drill-down increment
 
 The project Coordination view now exposes an owner and handoff date scope in the URL. The owner filter uses the existing project team and source register filters; handoff incoming/outgoing rows are classified by the selected discipline side or selected/current owner rather than by the API's signed-in-only direction filter. Rows open their exact source panel. Counts from truncated handoff/change previews display a `+` marker, and the view discloses the 100-row limit and that dates do not filter changes, reviews or basis uses. The source registers can have broader scope than the preview, especially for handoffs, so count/export reconciliation and saved-view return are still **UNPROVEN**. Local browser showed the owner selection and mapped change/review register URLs; no populated handoff row was available for a browser drill-down. Frontend build and lint passed with pre-existing warnings. This increment still does not satisfy AC-DCV-01 through 05.

@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Building2, CalendarDays, ExternalLink, ListPlus, Plus, Users } from 'lucide-react'
 import { useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
@@ -35,8 +35,11 @@ interface Perm { ok: boolean; reason?: string | null }
 interface ActionDetail {
   action: ActionRow; meeting: { id: string; title: string; meetingDate: string; meetingType: string; notesLink?: string }
   task?: { id: string; key: string; name: string; status: string } | null; decision?: { id: string; key: string; subject: string; status: string } | null; taskDisciplineId?: string | null
+  links: { id: string; targetType: string; targetId: string; key: string; name: string; status?: string | null }[]
   permissions: { edit: Perm; transitions: { to: string; ok: boolean; reason?: string | null }[]; convert: boolean; comment: boolean }
 }
+
+const ACTION_LINK_ROUTES: Record<string, string> = { Task: 'tasks', Deliverable: 'deliverables', Milestone: 'milestones', Handoff: 'handoffs', ChangeNotice: 'changes' }
 
 const TYPES = ['Coordination', 'Client', 'Design Review', 'Site', 'Other']
 const STATUSES = ['Open', 'In Progress', 'Complete', 'Cancelled']
@@ -376,6 +379,10 @@ function ActionPanel({ id }: PanelProps) {
         <FieldRow label={t('common.due')}><InlineDate value={a.dueDate} disabled={!can} onSave={(v) => save({ dueDate: v })} /></FieldRow>
         {q.data.task && !a.converted && <FieldRow label={t('action.relatedTask')}><button className="px-2 py-1.5 text-left hover:underline" onClick={() => openPanel('Task', q.data.task!.id)}><Key>{q.data.task.key}</Key> {q.data.task.name}</button></FieldRow>}
         {q.data.decision && <FieldRow label={t('action.relatedDecision')}><button className="px-2 py-1.5 text-left hover:underline" onClick={() => openPanel('Decision', q.data.decision!.id)}><Key>{q.data.decision.key}</Key> {q.data.decision.subject}</button></FieldRow>}
+        {q.data.links?.length > 0 && <FieldRow label={t('decision.links')}><ul className="space-y-1 px-2 py-1.5">{q.data.links.map(link => {
+          const route = ACTION_LINK_ROUTES[link.targetType]
+          return route && <li key={link.id}><Link className="text-primary underline" to={`/projects/${a.projectNumber}/${route}?panel=${encodeURIComponent(`${link.targetType}:${link.targetId}`)}`}><Key>{link.key}</Key> {link.name}</Link>{link.status && <> · <StatusPill status={link.status} /></>}</li>
+        })}</ul></FieldRow>}
       </div>
       <TabBar tabs={[...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'comments' && <CommentsSlot type="Action" id={a.id} projectId={a.projectId} />}

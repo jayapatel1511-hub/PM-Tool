@@ -67,6 +67,25 @@ public sealed class HandoffsTests(HubFactory f)
         Assert.Equal(3, group["taskIds"]!.AsArray().Count);
         Assert.Equal(new[] { s.Target.G("id"), second.G("id"), third.G("id") }.OrderBy(id => id),
             group["taskIds"]!.AsArray().Select(id => Guid.Parse(id!.GetValue<string>())).OrderBy(id => id));
+        var meeting = await (await f.As(TestData.Pm).Post($"/api/v1/projects/{s.Project.Id}/meetings/current", new { })).Json();
+        var action = await (await f.As(TestData.Pm).Post($"/api/v1/meetings/{meeting.G("id")}/actions", new {
+            text = "Resolve the survey input for Electrical", ownerType = "User", ownerUserId = data.User(TestData.Omar),
+            dueDate = "2026-09-18", relatedTaskId = s.Target.G("id"),
+            links = new[] { new { targetType = ItemType.Handoff, targetId = handoff.G("id") },
+                new { targetType = ItemType.Task, targetId = second.G("id") }, new { targetType = ItemType.Task, targetId = third.G("id") } }
+        })).Json(201);
+        await (await f.As(TestData.Pm).Post($"/api/v1/meetings/{meeting.G("id")}/actions", new {
+            text = "Separate task follow-up", ownerType = "User", ownerUserId = data.User(TestData.Omar),
+            relatedTaskId = s.Target.G("id")
+        })).Json(201); // sharing a task does not make an action belong to this handoff
+        var withAction = await (await f.As(TestData.Omar).GetAsync(url)).Json();
+        var linked = Assert.Single(withAction["linkedActions"]!.AsArray());
+        Assert.Equal(action.G("id"), linked!.G("id"));
+        Assert.Equal(handoff.G("id"), linked.G("sourceId"));
+        var actionDetail = await (await f.As(TestData.Omar).GetAsync($"/api/v1/actions/{action.G("id")}")).Json();
+        Assert.Contains(actionDetail["links"]!.AsArray(), row => row!.S("targetType") == ItemType.Handoff && row.G("targetId") == handoff.G("id"));
+        Assert.Equal(3, actionDetail["links"]!.AsArray().Count);
+        await (await f.As(TestData.Rita).GetAsync(url)).Json(404);
         await Move(s, handoff.G("id"), TestData.Alex, HandoffStatus.Submitted);
         var electrical = await (await f.As(TestData.Omar).GetAsync(url)).Json();
         Assert.Empty(electrical["outgoing"]!.AsArray());
@@ -77,6 +96,7 @@ public sealed class HandoffsTests(HubFactory f)
         await Move(s, handoff.G("id"), TestData.Omar, HandoffStatus.Accepted, outcome: "Input reviewed for use");
         var accepted = await (await f.As(TestData.Omar).GetAsync(url)).Json();
         Assert.Empty(accepted["blockerGroups"]!.AsArray());
+        Assert.Empty(accepted["linkedActions"]!.AsArray());
     }
 
     [Fact]

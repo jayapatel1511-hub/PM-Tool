@@ -17,11 +17,19 @@ type InputUse = { id: string; targetType: string; targetId: string; sourceRevisi
 type BlockerGroup = { handoffId: string; handoffKey: string; taskIds: string[]; taskKeys: string[] }
 type Startability = { id: string; targetType: 'Task' | 'Deliverable'; targetId: string; key: string; name: string;
   dueDate: string | null; state: string; blocked: string[]; unknown: string[] }
+type LinkedAction = { id: string; key: string; text: string; status: string; dueDate: string | null;
+  sourceType: 'Handoff' | 'ChangeNotice'; sourceId: string; targetType: 'Task' | 'Deliverable'; targetId: string }
+type ChangeTarget = { changeNoticeId: string; targetType: 'Task' | 'Deliverable'; targetId: string }
+type UnavailableChangeTarget = { changeNoticeId: string; count: number }
 type Data = { handoffs: Handoff[]; changes: Change[]; reviews: Review[]; linkedIssues: LinkedIssue[]; uses: InputUse[]; blockerGroups: BlockerGroup[]; usesTotal: number; linkedIssuesTotal: number; handoffsTotal: number; changesTotal: number; reviewsTotal: number; evaluatedAt: string;
-  startability: Startability[]; startabilityReadyTotal: number; startabilityFrom: string; startabilityTo: string }
+  startability: Startability[]; startabilityReadyTotal: number; startabilityFrom: string; startabilityTo: string;
+  linkedActions: LinkedAction[]; changeTargets: ChangeTarget[]; unavailableChangeTargets: UnavailableChangeTarget[] }
 
 /** Packet 030's five-question coordination projection over the existing registers. */
-export function DisciplineCoordinationView({ project, disciplineId }: { project: ProjectDetail; disciplineId?: string }) {
+export function DisciplineCoordinationView({ project, disciplineId, meeting, canCapture, onCapture }: {
+  project: ProjectDetail; disciplineId?: string; meeting?: boolean; canCapture?: boolean;
+  onCapture?: (label: string, links: { targetType: string; targetId: string }[]) => void
+}) {
   const me = useMe()
   const openPanel = useItemPanel()
   const [sp, setSp] = useSearchParams()
@@ -76,6 +84,9 @@ export function DisciplineCoordinationView({ project, disciplineId }: { project:
   )
   const items = (rows: { id: string; key: string; text: string; detail?: string }[], register: string) => rows.length ? <ul className="space-y-1">{rows.slice(0, 4).map((r) => <li key={r.id}><Link className="underline" to={registerUrl(register, `${register === 'handoffs' ? 'Handoff' : 'ChangeNotice'}:${r.id}`)}>{r.key}</Link> <span>{r.text}</span>{r.detail && <span className="text-muted-foreground"> · {r.detail}</span>}</li>)}</ul> : <p className="text-muted-foreground">{t('dcv.none')}</p>
   const linkedIssueItems = d.linkedIssues.slice(0, 4)
+  const existingActions = (sourceType: LinkedAction['sourceType'], sourceId: string) => d.linkedActions.filter(a => a.sourceType === sourceType && a.sourceId === sourceId)
+  const actionLinks = (rows: LinkedAction[]) => rows.length > 0 && <ul className="mt-1 space-y-1">{rows.map(a =>
+    <li key={a.id}>Existing action: <Link className="text-primary underline" to={registerUrl('meetings', `Action:${a.id}`)}>{a.key}</Link> · {a.text} · {tv(a.status)}{a.dueDate && ` · ${fmtDate(a.dueDate)}`}</li>)}</ul>
   return <section aria-labelledby="dcv-title" className="rounded-lg border border-primary/20 bg-primary/5 p-4">
     <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><div><h2 id="dcv-title" className="text-lg font-semibold">{t('dcv.title')}</h2><p className="text-sm text-muted-foreground">{t('dcv.subtitle')}</p><p role="status" className="mt-1 text-xs text-muted-foreground">{t('dcv.scopeNote')}</p></div><span className="text-xs text-muted-foreground">{t('dcv.clientRefresh', { when: new Date(d.evaluatedAt).toLocaleTimeString() })}</span></div>
     {filters}
@@ -84,7 +95,18 @@ export function DisciplineCoordinationView({ project, disciplineId }: { project:
       {card('owe', t('dcv.owe'), outgoing.length, items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: `${tv(h.status)} · ${fmtDate(h.promisedBy ?? h.neededBy)}` })), 'handoffs'), 'handoffs')}
       {card('waiting', t('dcv.waiting'), incoming.length, items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: tv(h.status) })), 'handoffs'), 'handoffs')}
       {card('using', `${t('dcv.using')} · ${t('dcv.projectWide')}`, d.usesTotal, d.uses.length ? <p>{t('dcv.usingHint', { n: d.usesTotal })}</p> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
-      {card('changed', `${t('dcv.changed')}${ownerId ? '' : ` · ${t('dcv.projectWide')}`}`, openChanges.length, items(openChanges.map((c) => ({ id: c.id, key: c.key, text: c.title, detail: `${tv(c.status)} · ${c.pendingAssessments} ${t('dcv.assessments')}` })), 'changes'), 'changes')}
+      {card('changed', `${t('dcv.changed')}${ownerId ? '' : ` · ${t('dcv.projectWide')}`}`, openChanges.length,
+        openChanges.length ? <ul className="space-y-2">{openChanges.map(c => <li key={c.id}>
+          <Link className="underline" to={registerUrl('changes', `ChangeNotice:${c.id}`)}>{c.key}</Link> · {c.title} · {tv(c.status)} · {c.pendingAssessments} {t('dcv.assessments')}
+          {actionLinks(existingActions('ChangeNotice', c.id))}
+          {d.unavailableChangeTargets.filter(target => target.changeNoticeId === c.id).map(target =>
+            <p key={target.changeNoticeId} role="status">{target.count} assessment target{target.count === 1 ? '' : 's'} unavailable; the action can still link to this change.</p>)}
+          {meeting && canCapture && onCapture &&
+            <button type="button" className="no-print text-primary underline" onClick={() => onCapture(c.key,
+              [{ targetType: 'ChangeNotice', targetId: c.id },
+                ...d.changeTargets.filter(target => target.changeNoticeId === c.id).map(target => ({ targetType: target.targetType, targetId: target.targetId }))])}>
+              {existingActions('ChangeNotice', c.id).length ? 'Create separate action' : 'Capture action'}</button>}
+        </li>)}</ul> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
       {card('start', `${t('dcv.start')}${ownerId || disciplineId ? '' : ` · ${t('dcv.projectWide')}`}`, d.startabilityReadyTotal,
         <><p className="text-xs text-muted-foreground">{d.startabilityReadyTotal} Ready of {d.startability.length} assessed · due {d.startabilityFrom} to {d.startabilityTo}</p>
           {d.startability.length ? <ul className="mt-1 space-y-1">{d.startability.slice(0, 4).map(r => <li key={r.id}>
@@ -109,7 +131,12 @@ export function DisciplineCoordinationView({ project, disciplineId }: { project:
     </section>
     {d.blockerGroups.length > 0 && <section aria-labelledby="dcv-blockers" className="mt-3 rounded-md border bg-card p-3">
       <h2 id="dcv-blockers" className="font-medium">{t('dcv.waiting')}</h2>
-      <ul className="mt-2 space-y-1 text-sm">{d.blockerGroups.map(group => <li key={group.handoffId}><Link className="font-medium text-primary underline" to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · {group.taskKeys.length} linked tasks ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})</li>)}</ul>
+      <ul className="mt-2 space-y-2 text-sm">{d.blockerGroups.map(group => <li key={group.handoffId}><Link className="font-medium text-primary underline" to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · {group.taskKeys.length} linked tasks ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})
+        {actionLinks(existingActions('Handoff', group.handoffId))}
+        {meeting && canCapture && onCapture && <button type="button" className="no-print text-primary underline" onClick={() => onCapture(group.handoffKey,
+          [{ targetType: 'Handoff', targetId: group.handoffId }, ...group.taskIds.map(id => ({ targetType: 'Task', targetId: id }))])}>
+          {existingActions('Handoff', group.handoffId).length ? 'Create separate action' : 'Capture action'}</button>}
+      </li>)}</ul>
     </section>}
   </section>
 }

@@ -175,6 +175,34 @@ public static class DisciplineCoordinationEndpoints
         var useRows = await uses.OrderByDescending(u => u.AdoptedAt).ThenBy(u => u.Id).ToListAsync();
         var startability = await Startability(projectId, disciplineId, ownerId, from, to, today,
             lookaheadDays, evaluatedAt, db, settings);
+        var changeIds = changeRows.Select(c => c.Id).ToArray();
+        var assessmentTargets = await scopedAssessments.Where(a => changeIds.Contains(a.ChangeNoticeId))
+            .Select(a => new { a.ChangeNoticeId, a.TargetType, a.TargetId,
+                Available = (a.TargetType == ItemType.Task && db.Tasks.Any(t => t.Id == a.TargetId && t.ProjectId == projectId && t.DeletedAt == null)) ||
+                    (a.TargetType == ItemType.Deliverable && db.Deliverables.Any(d => d.Id == a.TargetId && d.ProjectId == projectId && d.DeletedAt == null)) })
+            .ToListAsync();
+        var changeTargets = assessmentTargets.Where(a => a.Available).ToList();
+        var unavailableChangeTargets = assessmentTargets.Where(a => !a.Available)
+            .GroupBy(a => a.ChangeNoticeId).Select(g => new { ChangeNoticeId = g.Key, Count = g.Count() }).ToList();
+        var linkedActions = new List<object>();
+        var blockerIds = blockerGroups.Select(g => g.HandoffId).ToArray();
+        if (blockerIds.Length > 0 || changeIds.Length > 0)
+        {
+            var links = await db.ItemLinks.AsNoTracking().Where(l => l.ProjectId == projectId && l.DeletedAt == null &&
+                l.SourceType == ItemType.Action && ((l.TargetType == ItemType.Handoff && blockerIds.Contains(l.TargetId)) ||
+                    (l.TargetType == ItemType.ChangeNotice && changeIds.Contains(l.TargetId))))
+                .Select(l => new { l.SourceId, l.TargetType, l.TargetId }).ToListAsync();
+            var linkedIds = links.Select(l => l.SourceId).Distinct().ToArray();
+            var actions = await db.Actions.AsNoTracking().Where(a => a.ProjectId == projectId &&
+                (a.Status == ActionStatus.Open || a.Status == ActionStatus.InProgress) &&
+                linkedIds.Contains(a.Id))
+                .OrderBy(a => a.DueDate).ThenBy(a => a.Key)
+                .Select(a => new { a.Id, a.Key, a.Text, a.Status, a.DueDate }).ToListAsync();
+            foreach (var link in links.DistinctBy(l => (l.SourceId, l.TargetType, l.TargetId)))
+                if (actions.FirstOrDefault(a => a.Id == link.SourceId) is { } action)
+                    linkedActions.Add(new { action.Id, action.Key, action.Text, action.Status, action.DueDate,
+                        SourceType = link.TargetType, SourceId = link.TargetId });
+        }
 
         return new
         {
@@ -183,6 +211,8 @@ public static class DisciplineCoordinationEndpoints
             Outgoing = outgoing,
             Incoming = incoming,
             Changes = changeRows,
+            ChangeTargets = changeTargets,
+            UnavailableChangeTargets = unavailableChangeTargets,
             Reviews = reviewRows,
             LinkedIssues = issueRows,
             Uses = useRows,
@@ -196,6 +226,7 @@ public static class DisciplineCoordinationEndpoints
             StartabilityFrom = startability.From,
             StartabilityTo = startability.To,
             StartabilityReadyTotal = startability.Rows.Count(r => r.State == ReadinessState.Ready),
+            LinkedActions = linkedActions,
         };
     }
 

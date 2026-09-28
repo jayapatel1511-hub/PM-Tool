@@ -50,15 +50,36 @@ public sealed class ReviewChangeTests(HubFactory f)
     {
         var setup = await New();
         var target = await Target(setup);
+        var deletedTarget = await Target(setup);
         await Adopt(setup, target, setup.Revision, setup.Revision);
+        await Adopt(setup, deletedTarget, setup.Revision, setup.Revision);
         var noticeId = await Notice(setup);
         await Publish(setup, noticeId);
+        await f.DbAsync(async db => {
+            var task = await db.Tasks.SingleAsync(t => t.Id == deletedTarget);
+            task.DeletedAt = f.Clock.GetUtcNow();
+            await db.SaveChangesAsync(); return 0;
+        });
+        var meeting = await Post(TestData.Pm, Root(setup) + "/meetings/current", new { });
+        var action = await Post(TestData.Pm, $"/api/v1/meetings/{meeting.G("id")}/actions", new {
+            text = "Check the revised alignment", ownerType = "User", ownerUserId = data.User(TestData.Omar),
+            dueDate = "2026-09-18", relatedTaskId = target,
+            links = new[] { new { targetType = ItemType.ChangeNotice, targetId = noticeId } }
+        }, 201);
 
         var electrical = await Get(TestData.Omar,
             $"/api/v1/projects/{setup.P.Id}/discipline-coordination?disciplineId={setup.Electrical}&ownerId={data.User(TestData.Omar)}");
         var notice = Assert.Single(electrical["changes"]!.AsArray());
         Assert.Equal(noticeId, notice!.G("id"));
         Assert.Equal(1, notice["pendingAssessments"]!.GetValue<int>());
+        Assert.Single(electrical["changeTargets"]!.AsArray());
+        Assert.Equal(target, electrical["changeTargets"]![0]!.G("targetId"));
+        var ownerOnly = await Get(TestData.Omar,
+            $"/api/v1/projects/{setup.P.Id}/discipline-coordination?ownerId={data.User(TestData.Omar)}");
+        Assert.Equal(1, Assert.Single(ownerOnly["unavailableChangeTargets"]!.AsArray())!["count"]!.GetValue<int>());
+        var linked = Assert.Single(electrical["linkedActions"]!.AsArray());
+        Assert.Equal(action.G("id"), linked!.G("id"));
+        Assert.Equal(noticeId, linked.G("sourceId"));
         var civil = await Get(TestData.Alex,
             $"/api/v1/projects/{setup.P.Id}/discipline-coordination?disciplineId={setup.Civil}");
         Assert.Contains(civil["changes"]!.AsArray(), row => row!.G("id") == noticeId);

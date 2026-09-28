@@ -9,10 +9,14 @@ type Handoff = Item & { sendingOwnerId: string; receivingOwnerId: string; sendin
 type Group = { handoffId: string; handoffKey: string; taskIds: string[]; taskKeys: string[] }
 type Startability = { id: string; targetType: 'Task' | 'Deliverable'; targetId: string; key: string; name: string;
   dueDate: string | null; state: string; blocked: string[]; unknown: string[] }
-type ProjectProjection = { id: string; projectNumber: string; name: string; data: {
+type LinkedAction = { id: string; key: string; text: string; status: string; dueDate: string | null;
+  sourceType: 'Handoff' | 'ChangeNotice'; sourceId: string }
+type UnavailableChangeTarget = { changeNoticeId: string; count: number }
+type ProjectProjection = { id: string; projectNumber: string; name: string; disciplineId: string | null; data: {
   handoffs: Handoff[]; outgoing: Handoff[]; incoming: Handoff[]; changes: Item[]; reviews: Item[];
   linkedIssues: Item[]; uses: { id: string }[]; blockerGroups: Group[];
-  startability: Startability[]; startabilityReadyTotal: number; startabilityFrom: string; startabilityTo: string
+  startability: Startability[]; startabilityReadyTotal: number; startabilityFrom: string; startabilityTo: string;
+  linkedActions: LinkedAction[]; unavailableChangeTargets: UnavailableChangeTarget[]
 } }
 type Choice = { id: string; name?: string; projectNumber?: string; displayName?: string }
 type Projection = { evaluatedAt: string; projects: ProjectProjection[]; projectChoices: Choice[];
@@ -39,6 +43,10 @@ function downloadCsv(projection: Projection) {
     for (const group of rows.blockerGroups) add(number, 'BlockerGroup', group.handoffId, group.handoffKey, group.taskKeys.join('; '), '')
     for (const row of rows.startability) add(number, 'Startability', row.targetId, row.key,
       `${row.name}${row.blocked.length ? ` · blocked: ${row.blocked.join('; ')}` : ''}${row.unknown.length ? ` · unknown: ${row.unknown.join('; ')}` : ''}`, row.state)
+    for (const row of rows.linkedActions) add(number, 'Linked Action', row.id, row.key,
+      `${row.text} · ${row.sourceType}:${row.sourceId}`, row.status)
+    for (const row of rows.unavailableChangeTargets) add(number, 'Unavailable Assessment Targets', row.changeNoticeId,
+      '', String(row.count), '')
   }
   const blob = new Blob([`\ufeff${lines.join('\n')}\n`], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
@@ -73,6 +81,10 @@ export function WorkspaceCoordination() {
   const item = (project: ProjectProjection, path: string, prefix: string, row: Item) =>
     <li key={row.id}><Link className="text-primary underline" to={`/projects/${project.projectNumber}/${path}?panel=${prefix}:${row.id}`}>
       {project.projectNumber} · {row.key}</Link> · {row.title} · {row.status}</li>
+  const actionsFor = (project: ProjectProjection, type: LinkedAction['sourceType'], id: string) =>
+    project.data.linkedActions.filter(action => action.sourceType === type && action.sourceId === id)
+      .map(action => <li key={action.id}>Existing action: <Link className="text-primary underline" to={`/projects/${project.projectNumber}/meetings?panel=Action:${action.id}`}>
+        {action.key}</Link> · {action.text} · {action.status}{action.dueDate && ` · due ${action.dueDate}`}</li>)
   return <Page title="Coordination" subtitle="Current coordination across permitted workspace projects">
     <p className="no-print flex gap-4"><button type="button" className="text-primary underline" onClick={() => downloadCsv(data)}>Export these evaluated records as CSV</button>
       <button type="button" className="text-primary underline" onClick={() => window.print()}>Print this view</button></p>
@@ -100,10 +112,17 @@ export function WorkspaceCoordination() {
           {project.data.blockerGroups.length > 0 && <h4>Linked task blockers</h4>}<ul>{project.data.blockerGroups.map(g =>
           <li key={g.handoffId}><Link className="text-primary underline" to={`/projects/${project.projectNumber}/handoffs?panel=Handoff:${g.handoffId}`}>{g.handoffKey}</Link>
             {' · '}{g.taskIds.length} linked tasks: {g.taskIds.map((id, index) => <span key={id}>{index > 0 && ', '}
-              <Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{g.taskKeys[index]}</Link></span>)}</li>)}</ul></section>
+              <Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{g.taskKeys[index]}</Link></span>)}
+            <ul>{actionsFor(project, 'Handoff', g.handoffId)}</ul></li>)}</ul></section>
         <section><h3>Which revision are we using? ({project.data.uses.length})</h3>
           <Link className="text-primary underline" to={`/projects/${project.projectNumber}/coordination`}>Open source revisions</Link></section>
-        <section><h3>What changed? ({project.data.changes.length})</h3><ul>{project.data.changes.map(c => item(project, 'changes', 'ChangeNotice', c))}</ul></section>
+        <section><h3>What changed? ({project.data.changes.length})</h3><ul>{project.data.changes.map(c => <li key={c.id}>
+          <Link className="text-primary underline" to={`/projects/${project.projectNumber}/changes?panel=ChangeNotice:${c.id}`}>
+            {project.projectNumber} · {c.key}</Link> · {c.title} · {c.status}
+          <ul>{actionsFor(project, 'ChangeNotice', c.id)}</ul>
+          {project.data.unavailableChangeTargets.filter(target => target.changeNoticeId === c.id).map(target =>
+            <p key={target.changeNoticeId} role="status">{target.count} assessment target{target.count === 1 ? '' : 's'} unavailable</p>)}
+        </li>)}</ul></section>
         <section><h3>What can we start? ({project.data.startabilityReadyTotal} Ready of {project.data.startability.length} assessed)</h3>
           <p className="text-xs text-muted-foreground">Assessed work due {project.data.startabilityFrom} through {project.data.startabilityTo}; live checks evaluated with this view.</p>
           <ul>{project.data.startability.map(row => <li key={row.id}>
@@ -117,6 +136,8 @@ export function WorkspaceCoordination() {
       </div>
       {project.data.reviews.length > 0 && <p>{project.data.reviews.length} review packages · <Link className="text-primary underline" to={`/projects/${project.projectNumber}/reviews`}>Open reviews</Link></p>}
       {project.data.linkedIssues.length > 0 && <p>{project.data.linkedIssues.length} linked issues · <Link className="text-primary underline" to={`/projects/${project.projectNumber}/issues`}>Open issues</Link></p>}
+      <p><Link className="text-primary underline" to={`/projects/${project.projectNumber}/coordination${qs({ meeting: '1', discipline: project.disciplineId, owner: ownerId, from, to })}`}>
+        Open project meeting mode to assign or update an action</Link></p>
     </section>)}
     {data.projects.length === 0 && <p>No permitted projects match these filters.</p>}
   </Page>

@@ -74,7 +74,8 @@ export function CoordinationTab() {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [creating, setCreating] = useState(false)
   const [recording, setRecording] = useState<{ id: string; key: string } | null>(null)
-  const [capturing, setCapturing] = useState<{ taskId?: string; decisionId?: string; label?: string; ownerId?: string; ownerName?: string } | null>(null)
+  const [capturing, setCapturing] = useState<{ taskId?: string; decisionId?: string; label?: string; ownerId?: string; ownerName?: string;
+    links?: { targetType: string; targetId: string }[] } | null>(null)
   const reload = () => { q.refetch(); qc.invalidateQueries({ queryKey: ['p', p.id] }) }
   const actions = useTaskActions(reload, (id, key, what) => setLog((l) => [...l, { id, key, what, at: new Date().toISOString() }]))
   const touched = useMemo(() => new Set(log.map((x) => x.id)), [log])
@@ -249,7 +250,8 @@ export function CoordinationTab() {
         </div>
       </div>
       {p.status !== 'Active' && <div role="status" className="rounded-md border bg-idle-bg px-3 py-2 text-sm text-idle">{t('wc.notActive', { status: tv(p.status) })}</div>}
-      <DisciplineCoordinationView project={p} disciplineId={disciplineId} />
+      <DisciplineCoordinationView project={p} disciplineId={disciplineId} meeting={meeting} canCapture={canCapture}
+        onCapture={(label, links) => setCapturing({ label, links })} />
       <div className="grid gap-4 lg:grid-cols-[12rem_1fr]">
         <nav aria-label={t('wc.index')} className="no-print hidden lg:block">
           <ol className="sticky top-2 space-y-0.5 text-sm">
@@ -286,6 +288,7 @@ export function CoordinationTab() {
       {creating && <CreateTask p={p} deliverables={lists.deliverables} milestones={lists.milestones} defaults={{ projectDisciplineId: disciplineId }}
         onClose={(id) => { setCreating(false); if (id) { setLog((l) => [...l, { id, key: t('wc.newTask'), what: t('wc.created'), at: new Date().toISOString() }]); reload() } }} />}
       {capturing && <ActionForm projectId={p.id} related={capturing.label ? { taskId: capturing.taskId, decisionId: capturing.decisionId, label: capturing.label } : undefined}
+        links={capturing.links}
         defaultOwner={capturing.ownerId ? { type: 'User', userId: capturing.ownerId, userName: capturing.ownerName } : undefined}
         onClose={(created) => { setCapturing(null); if (created) { setLog((l) => [...l, { id: created.id, key: created.key, what: t('wc.actionAdded', { text: created.text }), at: new Date().toISOString() }]); reload() } }} />}
       {actions.dialogs}

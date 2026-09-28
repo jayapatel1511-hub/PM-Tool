@@ -166,6 +166,7 @@ public static class ItemType
         Comment = "Comment", DocumentLink = "DocumentLink", Dependency = "Dependency", Member = "Member",
         Discipline = "Discipline", ExternalParty = "ExternalParty", User = "User", ReferenceData = "ReferenceData",
         Setting = "Setting", TimeEntry = "TimeEntry", CalendarEvent = "CalendarEvent", Template = "Template",
+        Handoff = "Handoff", ChangeNotice = "ChangeNotice",
         Report = "Report", Snooze = "Snooze", ProjectLink = "ProjectLink", Holiday = "Holiday";
     // Items that can carry comments (C-01; Phase 2 registers included).
     public static readonly string[] Commentable = [Task, Deliverable, Milestone, Decision, Risk, Issue, Action];

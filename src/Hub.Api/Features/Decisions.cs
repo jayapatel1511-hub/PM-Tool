@@ -18,6 +18,7 @@ public static class DecisionEndpoints
 
     internal static readonly string[] Open = [DecisionStatus.Pending, DecisionStatus.UnderReview, DecisionStatus.Deferred];
     static readonly string[] LinkTargets = [ItemType.Task, ItemType.Deliverable, ItemType.Milestone];
+    static readonly string[] ActionLinkTargets = [.. LinkTargets, ItemType.Handoff, ItemType.ChangeNotice];
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -197,15 +198,19 @@ public static class DecisionEndpoints
         return await NewLink(db, access, p, ItemType.Decision, d.Id, d.Key, l.TargetType, l.TargetId, relation);
     }
 
-    /// A register item's link to a task, deliverable or milestone of the same project, logged as "Linked".
+    /// A register item's link to a same-project source, logged as "Linked". Meeting actions
+    /// may also name a handoff or change notice directly so reuse cannot be inferred from
+    /// coincidentally shared work targets.
     internal static async Task<ItemLink> NewLink(HubDb db, Access access, Project p, string sourceType, Guid sourceId, string sourceKey, string targetType, Guid targetId, string relation)
     {
-        Check.OneOf(targetType, LinkTargets, "targetType");
+        Check.OneOf(targetType, sourceType == ItemType.Action ? ActionLinkTargets : LinkTargets, "targetType");
         var found = targetType switch
         {
             ItemType.Task => await db.Tasks.AnyAsync(t => t.Id == targetId && t.ProjectId == p.Id),
             ItemType.Deliverable => await db.Deliverables.AnyAsync(t => t.Id == targetId && t.ProjectId == p.Id),
-            _ => await db.Milestones.AnyAsync(t => t.Id == targetId && t.ProjectId == p.Id),
+            ItemType.Milestone => await db.Milestones.AnyAsync(t => t.Id == targetId && t.ProjectId == p.Id),
+            ItemType.Handoff => await db.Handoffs.AnyAsync(h => h.Id == targetId && h.ProjectId == p.Id),
+            _ => await db.ChangeNotices.AnyAsync(c => c.Id == targetId && c.ProjectId == p.Id),
         };
         Check.That(found, "targetId", "decision.other_project");
         if (await db.ItemLinks.AnyAsync(x => x.SourceId == sourceId && x.TargetId == targetId)) throw ApiException.Conflict("link_exists", "decision.link_exists");
@@ -216,15 +221,17 @@ public static class DecisionEndpoints
         return link;
     }
 
-    /// The linked tasks, deliverables and milestones of a register item, oldest link first, with their status, date and person.
+    /// The linked sources of a register item, oldest link first, with their status and date.
     internal static async Task<List<object>> LinkRows(HubDb db, Guid sourceId)
     {
-        var links = await db.ItemLinks.AsNoTracking().Where(l => l.SourceId == sourceId && LinkTargets.Contains(l.TargetType)).OrderBy(l => l.CreatedAt).ToListAsync();
+        var links = await db.ItemLinks.AsNoTracking().Where(l => l.SourceId == sourceId && l.DeletedAt == null && ActionLinkTargets.Contains(l.TargetType)).OrderBy(l => l.CreatedAt).ToListAsync();
         var ids = links.Select(l => l.TargetId).ToList();
         var targets = (await db.Tasks.AsNoTracking().Where(t => ids.Contains(t.Id))
                 .Select(t => new Target(t.Id, t.Key, t.Name, t.Status, t.DueDate, db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault())).ToListAsync())
             .Concat(await db.Deliverables.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new Target(x.Id, x.Key, x.Name, x.Status, x.DueDate, null)).ToListAsync())
             .Concat(await db.Milestones.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new Target(x.Id, x.Key, x.Name, null, x.Date, null)).ToListAsync())
+            .Concat(await db.Handoffs.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new Target(x.Id, x.Key, x.Title, x.Status, x.NeededBy, null)).ToListAsync())
+            .Concat(await db.ChangeNotices.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new Target(x.Id, x.Key, x.Title, x.Status, x.AssessmentDueDate, null)).ToListAsync())
             .ToDictionary(x => x.Id);
         return [.. links.Where(l => targets.ContainsKey(l.TargetId)).Select(l => targets[l.TargetId] is var t
             ? (object)new { l.Id, l.TargetType, l.TargetId, l.Relation, t.Key, t.Name, t.Status, t.Date, t.Person } : null!)];

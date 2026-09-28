@@ -135,6 +135,7 @@ public static class HandoffEndpoints
             await Fill(db, p, h, body, source);
             (h.Seq, h.Key) = await Keys.Next(db, p.Id, p.ProjectNumber, "handoff");
             db.Handoffs.Add(h);
+            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId);
             return h;
         });
         return Results.Created($"/api/v1/projects/{projectId}/handoffs/{result.Id}", result);
@@ -162,7 +163,12 @@ public static class HandoffEndpoints
             var source = await Source(db, p.Id, h.SourceDeliverableId, body.SourceRowVersion);
             if (h.SendingDisciplineId != source.ProjectDisciplineId || h.ReceivingDisciplineId != body.ReceivingDisciplineId)
                 Access.Demand(Permissions.CreateHandoff(access.Actor, ctx, source.ProjectDisciplineId, body.ReceivingDisciplineId, source.OwnerId));
+            var oldTargetTaskId = h.TargetTaskId;
+            var oldTargetDeliverableId = h.TargetDeliverableId;
             await Fill(db, p, h, body, source);
+            if (oldTargetTaskId != h.TargetTaskId || oldTargetDeliverableId != h.TargetDeliverableId)
+                await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, oldTargetTaskId, oldTargetDeliverableId);
+            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId);
             db.Audit.Note(h, reason: body.Reason);
             ProjectEndpoints.CorrectionReason(p, body.Reason);
             return h;
@@ -221,6 +227,7 @@ public static class HandoffEndpoints
             db.HandoffReceiptEvents.Add(new HandoffReceiptEvent { ProjectId = p.Id, HandoffId = h.Id, RevisionId = h.CurrentRevisionId,
                 FromStatus = h.Status, ToStatus = body.ToStatus, Reason = reason, CriteriaOutcome = outcome });
             h.Status = body.ToStatus;
+            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId);
             db.Audit.Note(h, reason: reason);
             await notify.Send(NotificationEvents.HandoffChanged, new Guid?[] { h.SendingOwnerId, h.ReceivingOwnerId },
                 new NotifyItem(p.Id, "Handoff", h.Id, h.Key, $"/projects/{p.ProjectNumber}/handoffs?panel=Handoff:{h.Id}", p.ProjectNumber),
@@ -249,6 +256,7 @@ public static class HandoffEndpoints
             await Owners(db, p, body.SendingOwnerId, body.ReceivingOwnerId);
             await IndependentAssignment(db, h, body.SendingOwnerId, body.ReceivingOwnerId, (await store.Get(db)).AllowSelfReview);
             (h.SendingOwnerId, h.ReceivingOwnerId) = (body.SendingOwnerId, body.ReceivingOwnerId);
+            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId);
             db.Audit.Note(h, reason: reason);
             await notify.Send(NotificationEvents.HandoffChanged, new Guid?[] { h.SendingOwnerId, h.ReceivingOwnerId },
                 new NotifyItem(p.Id, "Handoff", h.Id, h.Key, $"/projects/{p.ProjectNumber}/handoffs?panel=Handoff:{h.Id}", p.ProjectNumber),

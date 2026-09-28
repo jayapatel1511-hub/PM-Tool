@@ -191,6 +191,7 @@ public static class DesignBasisEndpoints
                 if (!await db.BasisConflicts.AnyAsync(c => c.LeftVersionId == left && c.RightVersionId == right))
                     db.BasisConflicts.Add(new BasisConflict { ProjectId = project.Id, LeftVersionId = left, RightVersionId = right });
             }
+            await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id);
             return version;
         });
 
@@ -226,6 +227,7 @@ public static class DesignBasisEndpoints
             }
             db.Audit.Note(version, action: "Withdrawn", reason: reason);
             db.Audit.Note(entry, reason: reason);
+            await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id);
             return version;
         });
 

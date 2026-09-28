@@ -14,6 +14,8 @@ public static class ReadinessEndpoints
         Guid RemovalOwnerId, DateOnly NeededBy, string SourceUrl);
     public sealed record ConstraintMoveBody(Guid RequestId, int RowVersion, string ToState, string Reason,
         string? EvidenceUrl);
+    public sealed record ExceptionBody(Guid RequestId, int AssessmentRowVersion, Guid BasisVersionId,
+        int BasisVersionRowVersion, Guid VerifierId, string LimitedWork, string Risk, DateOnly ExpiresOn);
     static readonly string[] ConstraintCategories = ["Handoff", "Decision", "Basis", "Capacity", "Review", "Scope", "Other"];
 
     // Source-backed checks are recomputed at read/command time. Manual applicability remains useful for
@@ -72,6 +74,7 @@ public static class ReadinessEndpoints
                 "Linked decisions are current source evidence.");
         }
 
+        Guid? exceptionBasisVersionId = null;
         var allUses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == project.Id && u.TargetType == targetType && u.TargetId == targetId)
             .Join(db.DesignBasisVersions.AsNoTracking(), u => u.VersionId, v => v.Id,
                 (u, v) => new { u.Id, u.VersionId, u.CreatedAt, v.EntryId }).ToListAsync();
@@ -87,6 +90,15 @@ public static class ReadinessEndpoints
                 .AnyAsync(c => !c.Resolved);
             var pendingImpact = await db.BasisImpactAssessments.AsNoTracking().AnyAsync(a => a.ProjectId == project.Id &&
                 useIds.Contains(a.BasisUseId) && a.Status == AssessmentStatus.Pending);
+            var proposed = versions.Where(v => v.Status == BasisStatus.Proposed).ToList();
+            if (versions.Count == currentUses.Count && proposed.Count == 1 && !conflicts && !pendingImpact &&
+                versions.All(v => v.Status == BasisStatus.Confirmed || v.Id == proposed[0].Id))
+            {
+                var candidate = proposed[0];
+                if (await db.DesignBasisEntries.AsNoTracking().AnyAsync(e => e.ProjectId == project.Id &&
+                    e.Id == candidate.EntryId && e.Kind == BasisKind.Assumption))
+                    exceptionBasisVersionId = candidate.Id;
+            }
             Source(ReadinessCheckCode.Basis, true, versions.Count == currentUses.Count && !conflicts && !pendingImpact &&
                 versions.All(v => v.Status == BasisStatus.Confirmed),
                 "Linked basis uses and conflicts are current source evidence.");
@@ -113,7 +125,15 @@ public static class ReadinessEndpoints
             if (code is not null) Source(code, true, false, "An active linked constraint blocks this check.");
         }
 
-        var result = ReadinessRules.Evaluate(checks.Values.Select(c => new ReadinessCheck(c.Code, c.Applies, c.Satisfied)), null, today);
+        var latestException = await db.ReadinessExceptions.AsNoTracking().Where(e => e.ProjectId == project.Id &&
+            e.AssessmentId == assessment.Id).OrderByDescending(e => e.CreatedAt).ThenByDescending(e => e.Id).FirstOrDefaultAsync();
+        ReadinessPermission? permission = null;
+        if (latestException is not null)
+            permission = new ReadinessPermission(true, latestException.ExpiresOn,
+                exceptionBasisVersionId == latestException.BasisVersionId && activeConstraints.Count == 0,
+                latestException.VerifierId != target.OwnerId && await Coordination.People(db, project)
+                    .AnyAsync(u => u.Id == latestException.VerifierId), latestException.LimitedWork, latestException.Risk);
+        var result = ReadinessRules.Evaluate(checks.Values.Select(c => new ReadinessCheck(c.Code, c.Applies, c.Satisfied)), permission, today);
         var openConstraint = await db.WorkConstraints.AsNoTracking().AnyAsync(c => c.ProjectId == project.Id &&
             c.TargetType == targetType && c.TargetId == targetId &&
             (c.State == ConstraintState.Open || c.State == ConstraintState.ResolutionProposed));
@@ -129,6 +149,8 @@ public static class ReadinessEndpoints
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}", Create)
             .WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/checks/{code}/applicability", SetApplicability)
+            .WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/exceptions", ApproveException)
             .WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", Constraints);
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", AddConstraint)
@@ -190,6 +212,46 @@ public static class ReadinessEndpoints
                 return check;
             });
 
+    static Task<Coordination.Result> ApproveException(Guid projectId, string targetType, Guid targetId,
+        ExceptionBody body, Access access, HubDb db, TimeProvider clock) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "readiness.exception", targetType, targetId, body },
+            access, db, clock, async (project, ctx) =>
+            {
+                var target = await Coordination.Target(db, project, targetType, targetId);
+                Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, target.DisciplineId));
+                var assessment = await db.ReadinessAssessments.SingleOrDefaultAsync(a => a.ProjectId == project.Id &&
+                    a.TargetType == target.Type && a.TargetId == target.Id) ?? throw ApiException.NotFound();
+                Coordination.Version(assessment, body.AssessmentRowVersion);
+                Check.That(assessment.OwnerId == target.OwnerId, "ownerId", "coord.stale");
+                var version = await db.DesignBasisVersions.SingleOrDefaultAsync(v => v.ProjectId == project.Id &&
+                    v.Id == body.BasisVersionId) ?? throw ApiException.NotFound();
+                Coordination.Version(version, body.BasisVersionRowVersion);
+                var entry = await db.DesignBasisEntries.SingleAsync(e => e.ProjectId == project.Id && e.Id == version.EntryId);
+                Check.That(entry.Kind == BasisKind.Assumption && version.Status == BasisStatus.Proposed,
+                    "basisVersionId", "basis.assumption");
+                var latestUse = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == project.Id &&
+                    u.TargetType == target.Type && u.TargetId == target.Id &&
+                    db.DesignBasisVersions.Any(v => v.Id == u.VersionId && v.EntryId == entry.Id))
+                    .OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).FirstOrDefaultAsync();
+                Check.That(latestUse?.VersionId == version.Id, "basisVersionId", "basis.assumption");
+                await Coordination.Person(db, project, body.VerifierId, "verifierId");
+                Check.That(body.VerifierId != target.OwnerId && body.VerifierId != access.Me.Id,
+                    "verifierId", "coord.separation");
+                var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+                Check.That(body.ExpiresOn >= today, "expiresOn", "basis.assumption");
+                Check.That(await db.BasisAssumptionDispositions.AnyAsync(d => d.ProjectId == project.Id &&
+                    d.VersionId == version.Id && d.OwnerId == target.OwnerId && d.ExpiresOn >= body.ExpiresOn &&
+                    d.ApprovedBy != target.OwnerId && d.Scope.ToLower() == version.Scope.ToLower()),
+                    "basisVersionId", "basis.assumption");
+                var row = new ReadinessException { ProjectId = project.Id, AssessmentId = assessment.Id,
+                    BasisVersionId = version.Id, ApprovedBy = access.Me.Id, VerifierId = body.VerifierId,
+                    LimitedWork = Check.Required(body.LimitedWork, "limitedWork", 2000),
+                    Risk = Check.Required(body.Risk, "risk", 2000), ExpiresOn = body.ExpiresOn };
+                db.ReadinessExceptions.Add(row);
+                db.Audit.Note(row);
+                return row;
+            });
+
     static async Task<object> Detail(Guid projectId, string targetType, Guid targetId, Access access, HubDb db, TimeProvider clock,
         SettingsStore settings)
     {
@@ -201,7 +263,9 @@ public static class ReadinessEndpoints
             c.AssessmentId == assessment.Id).OrderBy(c => c.Code).ToListAsync();
         var result = await EvaluateCurrent(db, project, targetType, targetId, assessment, checks,
             clock.Today(await settings.Get(db)), clock.GetUtcNow());
-        return new { Assessment = assessment, Checks = checks, result.Unknown, result.Blocked };
+        return new { Assessment = assessment, Checks = checks, result.Unknown, result.Blocked,
+            Exceptions = await db.ReadinessExceptions.AsNoTracking().Where(e => e.ProjectId == projectId &&
+                e.AssessmentId == assessment.Id).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync() };
     }
 
     static async Task<object> Constraints(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)

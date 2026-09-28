@@ -59,6 +59,36 @@ public static class SubmissionEndpoints
             await Invalidate(db, package, "Required review changed");
     }
 
+    /// <summary>Invalidates unissued packages whose manifest contains a handoff target.</summary>
+    public static async Task InvalidateForHandoff(HubDb db, Guid projectId, Guid? targetTaskId, Guid? targetDeliverableId)
+    {
+        var packageIds = await db.SubmissionManifestItems.Where(m => m.ProjectId == projectId &&
+            (m.DeliverableId == targetDeliverableId || targetTaskId != null && db.Tasks.Any(t => t.Id == targetTaskId && t.DeliverableId == m.DeliverableId)))
+            .Where(m => db.SubmissionPackages.Any(p => p.Id == m.PackageId && p.ManifestVersion == m.ManifestVersion &&
+                (p.Status == SubmissionStatus.Draft || p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready)))
+            .Select(m => m.PackageId).Distinct().ToListAsync();
+        foreach (var package in await db.SubmissionPackages.Where(p => p.ProjectId == projectId && packageIds.Contains(p.Id) &&
+            (p.Status == SubmissionStatus.Draft || p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready)).ToListAsync())
+            await Invalidate(db, package, "Handoff changed");
+    }
+
+    /// <summary>Invalidates unissued packages whose manifest contains work using a changed basis entry.</summary>
+    public static async Task InvalidateForDesignBasisEntry(HubDb db, Guid projectId, Guid entryId)
+    {
+        var uses = await db.BasisUses.Where(u => u.ProjectId == projectId && db.DesignBasisVersions.Any(v => v.Id == u.VersionId && v.EntryId == entryId))
+            .Select(u => new { u.TargetType, u.TargetId }).ToListAsync();
+        var deliverables = uses.Where(u => u.TargetType == "Deliverable").Select(u => u.TargetId).ToArray();
+        var tasks = uses.Where(u => u.TargetType == "Task").Select(u => u.TargetId).ToArray();
+        var packageIds = await db.SubmissionManifestItems.Where(m => m.ProjectId == projectId &&
+            (deliverables.Contains(m.DeliverableId) || db.Tasks.Any(t => tasks.Contains(t.Id) && t.DeliverableId == m.DeliverableId)))
+            .Where(m => db.SubmissionPackages.Any(p => p.Id == m.PackageId && p.ManifestVersion == m.ManifestVersion &&
+                (p.Status == SubmissionStatus.Draft || p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready)))
+            .Select(m => m.PackageId).Distinct().ToListAsync();
+        foreach (var package in await db.SubmissionPackages.Where(p => p.ProjectId == projectId && packageIds.Contains(p.Id) &&
+            (p.Status == SubmissionStatus.Draft || p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready)).ToListAsync())
+            await Invalidate(db, package, "Applicable design basis changed");
+    }
+
     static async Task Invalidate(HubDb db, SubmissionPackage package, string reason)
     {
         package.Status = SubmissionStatus.Checking;

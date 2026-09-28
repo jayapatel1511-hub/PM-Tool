@@ -111,6 +111,11 @@ public sealed class LocationIssueTests(HubFactory f)
         Assert.Equal(HttpStatusCode.OK, resolved.StatusCode);
         Assert.Single((await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{id}/locations").Result.Json()).AsArray());
         Assert.Equal(2, (await f.As(TestData.Rita).GetAsync($"/api/v1/issues/{id}/documents").Result.Json()).AsArray().Count);
+        var export = System.Text.Encoding.UTF8.GetString(await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues/export?format=csv")).Content.ReadAsByteArrayAsync());
+        Assert.Contains("Location", export);
+        Assert.Contains("Road-A", export);
+        Assert.Contains("C-101 rev B", export);
+        Assert.Contains("Verified", export);
 
         var unavailable = await Issue(p.Id);
         var unavailableId = unavailable.G("id");

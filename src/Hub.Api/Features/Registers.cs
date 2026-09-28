@@ -36,6 +36,8 @@ public static class RegisterEndpoints
         new("key", "key", "key"), new("title", "title"), new("status", "status"), new("severity", "severity"), new("ownerName", "owner"), new("raisedByName", "raisedBy"),
         new("disciplineName", "discipline"), new("dateRaised", "dateRaised", "date"), new("targetResolutionDate", "targetDate", "date"),
         new("daysOverdue", "daysOverdue", "number"), new("resolvedDate", "resolvedDate", "date"), new("resolution", "resolution"), new("originRiskKey", "originRisk"),
+        new("locationSummary", "locationSummary", Label: "Location"), new("documentSummary", "documentSummary", Label: "References"),
+        new("verificationStatus", "verificationStatus", Label: "Verification"),
     ];
 
     public static void Map(RouteGroupBuilder api)
@@ -317,14 +319,26 @@ public static class RegisterEndpoints
             DisciplineName = db.ProjectDisciplines.Where(x => x.Id == i.ProjectDisciplineId).Select(x => x.Discipline!.Name).FirstOrDefault(),
             OriginRiskKey = db.Risks.Where(x => x.Id == i.OriginRiskId).Select(x => x.Key).FirstOrDefault(),
         }).ToListAsync();
+        var issueIds = rows.Select(i => i.Id).ToArray();
+        var locations = await db.IssueLocations.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
+        var documents = await db.IssueDocumentReferences.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
+        var verifications = await db.IssueVerifications.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
         return [.. rows.OrderBy(i => Registers.Weight(i.Severity)).ThenBy(i => i.TargetResolutionDate ?? DateOnly.MaxValue).ThenBy(i => i.Seq)
             .Select(i =>
             {
                 var late = Registers.IssueOverdueDays(i.Status, i.TargetResolutionDate, today);
+                var issueLocations = locations.Where(x => x.IssueId == i.Id).OrderBy(x => x.CreatedAt).ToList();
+                var issueDocuments = documents.Where(x => x.IssueId == i.Id).OrderBy(x => x.CreatedAt).ToList();
+                var issueVerification = verifications.Where(x => x.IssueId == i.Id).OrderByDescending(x => x.IssueRowVersion)
+                    .ThenByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id).FirstOrDefault();
                 return (object)new
                 {
                     i.Id, i.ProjectId, i.Key, i.Title, i.Status, i.RaisedById, i.RaisedByName, i.OwnerId, i.OwnerName, i.Severity, i.DateRaised, i.TargetResolutionDate,
                     IsOverdue = late > 0, DaysOverdue = late, i.Resolution, i.ResolvedDate, i.OriginRiskId, i.OriginRiskKey, i.ProjectDisciplineId, i.DisciplineName,
+                    LocationSummary = string.Join("; ", issueLocations.Select(x => string.Join(" · ", new[] { x.Kind, x.SiteArea, x.Building, x.Level, x.Room, x.AssetSystem, x.Alignment,
+                        x.StartStation is { } start ? $"{start}-{x.EndStation} {x.StationUnits}" : null, x.CoordinateX is { } coordinateX ? $"({coordinateX}, {x.CoordinateY}{(x.CoordinateZ is { } z ? $", {z}" : "")}) {x.CoordinateReferenceSystem} {x.CoordinateUnits}" : null }.Where(v => !string.IsNullOrWhiteSpace(v))))),
+                    DocumentSummary = string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
+                    VerificationStatus = issueVerification?.Status,
                     i.RowVersion, i.LastActivityAt,
                 };
             })];

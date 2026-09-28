@@ -170,4 +170,66 @@ public sealed class SubmissionApiTests(HubFactory f)
             blocked["readiness"]!["fingerprint"]!.GetValue<string>(), "Municipality", "https://example.test/transmittal", null), 422);
         Assert.Empty(f.Db(db => db.SubmissionIssues.Where(i => i.PackageId == id).ToList()));
     }
+
+    [Fact]
+    public async Task Handoff_change_invalidates_unissued_submission_checks_and_evidence()
+    {
+        var project = await data.Project(); var root = $"/api/v1/projects/{project.Id}";
+        var civil = data.ProjectDiscipline(project.Id, "Civil");
+        var milestone = await Post(TestData.Pm, root + "/milestones", new MilestoneEndpoints.CreateBody("Handoff issue", MilestoneType.DesignSubmission, new DateOnly(2026, 10, 15), null, null, null, true), 201);
+        var deliverable = await Post(TestData.Marc, root + "/deliverables", new { name = "Handoff target", projectDisciplineId = civil,
+            deliverableTypeId = await data.DeliverableType(), ownerId = data.User(TestData.Alex), revision = "A", requiresReview = false }, 201);
+        var did = deliverable.G("id");
+        var revision = await Post(TestData.Alex, root + "/source-revisions", new ChangeEndpoints.RegisterBody(Guid.NewGuid(), did, Version<Deliverable>(did), civil, data.User(TestData.Alex),
+            "Deliverable", "handoff-target", "Handoff target", "A", "https://example.test/handoff-target.pdf", "Design team", "Submission", null, null, null, null, null, null));
+        var created = await Post(TestData.Marc, root + "/submissions", new SubmissionEndpoints.CreateBody(Guid.NewGuid(), "Handoff package", "Permit", "Municipality",
+            data.User(TestData.Marc), milestone.G("id"), new DateOnly(2026, 10, 15), [new(revision.G("id"))], [], null, null));
+        var packageId = created.G("id");
+        var checkId = await f.DbAsync(async db => {
+            var package = await db.SubmissionPackages.SingleAsync(p => p.Id == packageId);
+            package.Status = SubmissionStatus.Ready;
+            var check = await db.SubmissionChecks.FirstAsync(c => c.PackageId == packageId);
+            check.Status = SubmissionCheckStatus.Pass; check.EvidenceUrl = "https://example.test/evidence";
+            db.CheckEvidences.Add(new CheckEvidence { ProjectId = project.Id, CheckId = check.Id, EvidenceUrl = check.EvidenceUrl, Note = "verified" });
+            await db.SaveChangesAsync(); return check.Id;
+        });
+        var handoff = await Post(TestData.Marc, root + "/handoffs", new HandoffEndpoints.DraftBody(Guid.NewGuid(), "Target handoff", did,
+            Version<Deliverable>(did), "A", "https://example.test/handoff.pdf", civil, data.User(TestData.Alex), data.User(TestData.Marc),
+            null, did, "Use in package", "Accepted", new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 1), null, null), 201);
+        var handoffId = handoff.G("id");
+        Assert.Equal(SubmissionStatus.Checking, f.Db(db => db.SubmissionPackages.Single(p => p.Id == packageId).Status));
+        Assert.Equal(SubmissionCheckStatus.Pending, f.Db(db => db.SubmissionChecks.Single(c => c.Id == checkId).Status));
+        await f.DbAsync(async db => {
+            var package = await db.SubmissionPackages.SingleAsync(p => p.Id == packageId); package.Status = SubmissionStatus.Ready;
+            var check = await db.SubmissionChecks.SingleAsync(c => c.Id == checkId); check.Status = SubmissionCheckStatus.Pass;
+            check.EvidenceUrl = "https://example.test/evidence-again";
+            return await db.SaveChangesAsync();
+        });
+        await Post(TestData.Marc, root + $"/handoffs/{handoffId}/transition", new HandoffEndpoints.MoveBody(Guid.NewGuid(), HandoffStatus.Cancelled,
+            Version<Handoff>(handoffId), "Handoff source changed", null));
+        Assert.Equal(SubmissionStatus.Checking, f.Db(db => db.SubmissionPackages.Single(p => p.Id == packageId).Status));
+        var checkAfter = f.Db(db => db.SubmissionChecks.Single(c => c.Id == checkId));
+        Assert.Equal(SubmissionCheckStatus.Pending, checkAfter.Status); Assert.Null(checkAfter.EvidenceUrl);
+
+        var basis = await Post(TestData.Marc, root + "/design-basis", new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion,
+            "Handoff basis", data.User(TestData.Alex), civil, null,
+            new DesignBasisEndpoints.VersionInput("Service", "Initial basis", 10, "kPa", "Manual", "basis-1", "https://example.test/basis-1", "A", null, null), "Initial basis"));
+        var basisId = basis.G("id");
+        var basisVersionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == basisId).Id);
+        await Post(TestData.Marc, root + $"/design-basis/{basisId}/versions/{basisVersionId}/confirm",
+            new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(basisId), Version<DesignBasisVersion>(basisVersionId), "Confirmed initial basis"));
+        await Post(TestData.Alex, root + $"/design-basis/{basisId}/uses", new DesignBasisEndpoints.UseBody(Guid.NewGuid(), basisVersionId, "Deliverable", did, "Submission basis"));
+        await f.DbAsync(async db => {
+            var package = await db.SubmissionPackages.SingleAsync(p => p.Id == packageId); package.Status = SubmissionStatus.Ready;
+            var check = await db.SubmissionChecks.FirstAsync(c => c.PackageId == packageId); check.Status = SubmissionCheckStatus.Pass; check.EvidenceUrl = "https://example.test/evidence-2";
+            return await db.SaveChangesAsync();
+        });
+        await Post(TestData.Marc, root + $"/design-basis/{basisId}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
+            Version<DesignBasisEntry>(basisId), Version<DesignBasisVersion>(basisVersionId),
+            new DesignBasisEndpoints.VersionInput("Service", "Updated basis", 11, "kPa", "Manual", "basis-2", "https://example.test/basis-2", "B", null, null), "Basis changed"));
+        var proposedBasisVersionId = f.Db(db => db.DesignBasisVersions.Where(v => v.EntryId == basisId && v.Status == BasisStatus.Proposed).Select(v => v.Id).Single());
+        await Post(TestData.Marc, root + $"/design-basis/{basisId}/versions/{proposedBasisVersionId}/confirm",
+            new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(basisId), Version<DesignBasisVersion>(proposedBasisVersionId), "Confirmed updated basis"));
+        Assert.Equal(SubmissionStatus.Checking, f.Db(db => db.SubmissionPackages.Single(p => p.Id == packageId).Status));
+    }
 }

@@ -11,6 +11,78 @@ public sealed class ReadinessApiTests(HubFactory f)
     readonly TestData data = new(f);
 
     [Fact]
+    public async Task Scoped_assumption_exception_expires_without_erasing_approval()
+    {
+        var savedClock = f.Clock.Now;
+        try
+        {
+            var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
+            var project = await data.Project();
+            var owner = data.User(TestData.Alex);
+            var civil = data.ProjectDiscipline(project.Id, "Civil");
+            var task = await data.NewTask(project.Id, extra: new { assigneeId = owner });
+            var taskId = task.G("id");
+            var taskVersion = f.Db(db => db.Tasks.Single(t => t.Id == taskId).RowVersion);
+            var basisRoot = $"/api/v1/projects/{project.Id}/design-basis";
+            var input = new DesignBasisEndpoints.VersionInput("Synthetic grading", "Assume utility depth", null,
+                null, null, null, null, null, today.AddDays(3), null);
+            var entry = await (await f.As(TestData.Pm).Post(basisRoot,
+                new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Assumption, "Utility depth for readiness",
+                    owner, civil, data.User(TestData.Marc), input, null))).Json();
+            var entryId = entry.G("id");
+            var version = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == entryId));
+            var proceedPath = $"{basisRoot}/{entryId}/versions/{version.Id}/proceed";
+            await (await f.As(TestData.Marc).Post(proceedPath,
+                new DesignBasisEndpoints.DispositionBody(Guid.NewGuid(), version.RowVersion, input.Scope,
+                    owner, today.AddDays(5), "Limited preliminary work"))).Json();
+            await (await f.As(TestData.Alex).Post($"{basisRoot}/{entryId}/uses",
+                new DesignBasisEndpoints.UseBody(Guid.NewGuid(), version.Id, "Task", taskId,
+                    "Preliminary layout under assumption"))).Json();
+            var path = $"/api/v1/projects/{project.Id}/readiness/Task/{taskId}";
+            var assessment = await (await f.As(TestData.Alex).Post(path,
+                new ReadinessEndpoints.CreateBody(Guid.NewGuid(), taskVersion, "Preliminary layout",
+                    "Layout reviewed against utility evidence"))).Json();
+            await f.DbAsync(async db =>
+            {
+                foreach (var check in await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.G("id")).ToListAsync())
+                {
+                    check.Applies = check.Code is ReadinessCheckCode.Basis or ReadinessCheckCode.ProductionOwner;
+                    check.Satisfied = check.Applies == true ? check.Code == ReadinessCheckCode.ProductionOwner : null;
+                }
+                await db.SaveChangesAsync();
+                return 0;
+            });
+            Assert.Equal(ReadinessState.NotReady, (await (await f.As(TestData.Alex).GetAsync(path)).Json())["assessment"]!.S("state"));
+            var body = new ReadinessEndpoints.ExceptionBody(Guid.NewGuid(), assessment.I("rowVersion"),
+                version.Id, version.RowVersion, data.User(TestData.Marc), "Only preliminary grading layout",
+                "Utility location could alter grading", today.AddDays(1));
+            await (await f.As(TestData.Alex).Post(path + "/exceptions", body)).Json(403);
+            await (await f.As(TestData.Pm).Post(path + "/exceptions", body with
+            { RequestId = Guid.NewGuid(), AssessmentRowVersion = -1 })).Json(409);
+            var approved = await (await f.As(TestData.Pm).Post(path + "/exceptions", body)).Json();
+            Assert.Equal(approved.G("id"), (await (await f.As(TestData.Pm).Post(path + "/exceptions", body)).Json()).G("id"));
+            var permitted = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+            Assert.Equal(ReadinessState.ProceedUnderAssumption, permitted["assessment"]!.S("state"));
+            Assert.Single(permitted["exceptions"]!.AsArray());
+            f.Clock.Now = savedClock.AddDays(2);
+            var expired = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+            Assert.Equal(ReadinessState.NeedsAssessment, expired["assessment"]!.S("state"));
+            Assert.Single(expired["exceptions"]!.AsArray());
+            f.Clock.Now = savedClock;
+            await f.DbAsync(async db =>
+            {
+                (await db.DesignBasisVersions.SingleAsync(v => v.Id == version.Id)).Status = BasisStatus.Superseded;
+                await db.SaveChangesAsync();
+                return 0;
+            });
+            var changed = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+            Assert.Equal(ReadinessState.NeedsAssessment, changed["assessment"]!.S("state"));
+            Assert.Single(changed["exceptions"]!.AsArray());
+        }
+        finally { f.Clock.Now = savedClock; }
+    }
+
+    [Fact]
     public async Task Detail_recomputes_linked_predecessor_instead_of_cached_ready_state()
     {
         var project = await data.Project();

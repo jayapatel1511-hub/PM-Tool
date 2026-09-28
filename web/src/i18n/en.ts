@@ -67,6 +67,7 @@ export const en: Record<string, string> = {
   "submissions.general": "Project-wide",
   "submissions.ready": "Every required current check passes. A PM can authorise the issue after confirming the external transmittal.",
   "submissions.checks": "Checklist and evidence",
+  "submissions.livePass": "Pass (live source check)",
   "submissions.version": "Manifest version {n}",
   "submissions.start": "Start checking",
   "submissions.replaceManifest": "Replace manifest",

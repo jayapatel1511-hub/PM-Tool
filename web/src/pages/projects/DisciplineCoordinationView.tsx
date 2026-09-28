@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router'
 import type { ReactNode } from 'react'
 import { ErrorBanner, Loading } from '@/components/hub/common'
+import { useItemPanel } from '@/components/hub/panel-host'
 import { useMe } from '@/lib/auth'
 import { get, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
@@ -11,13 +12,15 @@ import type { ProjectDetail } from '@/lib/types'
 type Handoff = { id: string; key: string; title: string; status: string; neededBy: string; promisedBy?: string; targetKey?: string; sendingOwnerId: string; receivingOwnerId: string; sendingDisciplineId: string; receivingDisciplineId: string }
 type Change = { id: string; key: string; title: string; status: string; pendingAssessments: number; ownerId?: string }
 type Review = { id: string; key: string; title: string; status: string; outstandingDisciplines: number; blockingFindings: number; coordinatorId?: string }
+type LinkedIssue = { id: string; key: string; title: string; status: string; ownerId?: string | null; ownerName?: string | null; projectDisciplineId?: string | null }
 type InputUse = { id: string; targetType: string; targetId: string; sourceRevisionId: string }
 type Page<T> = { items: T[]; totalCount?: number }
-type Data = { handoffs: Handoff[]; changes: Change[]; reviews: Review[]; uses: InputUse[]; usesTotal: number; partial: boolean; handoffsPartial: boolean; changesPartial: boolean; fetchedAt: string }
+type Data = { handoffs: Handoff[]; changes: Change[]; reviews: Review[]; linkedIssues: LinkedIssue[]; uses: InputUse[]; usesTotal: number; linkedIssuesTotal: number; partial: boolean; handoffsPartial: boolean; changesPartial: boolean; linkedIssuesPartial: boolean; fetchedAt: string }
 
 /** Packet 030's five-question coordination projection over the existing registers. */
 export function DisciplineCoordinationView({ project, disciplineId }: { project: ProjectDetail; disciplineId?: string }) {
   const me = useMe()
+  const openPanel = useItemPanel()
   const [sp, setSp] = useSearchParams()
   const ownerId = sp.get('owner') ?? ''
   const from = sp.get('from') ?? ''
@@ -33,17 +36,20 @@ export function DisciplineCoordinationView({ project, disciplineId }: { project:
     queryKey: ['p', project.id, 'discipline-coordination', disciplineId, ownerId, from, to],
     queryFn: async (): Promise<Data> => {
       const scope = disciplineId ? { disciplineId } : {}
-      const [handoffs, changes, reviews, uses] = await Promise.all([
+      const [handoffs, changes, reviews, linkedIssues, uses] = await Promise.all([
         get<Page<Handoff>>(`projects/${project.id}/handoffs${qs({ ...scope, pageSize: 100 })}`),
         get<Page<Change>>(`projects/${project.id}/changes${qs({ pageSize: 100, ...(ownerId ? { ownerId } : {}) })}`),
         get<Page<Review>>(`projects/${project.id}/reviews${qs({ pageSize: 100, ...(ownerId ? { ownerId } : {}), ...(disciplineId ? { disciplineId } : {}) })}`),
+        get<Page<LinkedIssue>>(`projects/${project.id}/reviews/linked-issues${qs({ pageSize: 100, ...(ownerId ? { ownerId } : {}), ...(disciplineId ? { disciplineId } : {}) })}`),
         get<Page<InputUse>>(`projects/${project.id}/input-uses${qs({ pageSize: 100 })}`),
       ])
-      return { handoffs: handoffs.items, changes: changes.items, reviews: reviews.items, uses: uses.items,
+      return { handoffs: handoffs.items, changes: changes.items, reviews: reviews.items, linkedIssues: linkedIssues.items, uses: uses.items,
         usesTotal: uses.totalCount ?? uses.items.length,
+        linkedIssuesTotal: linkedIssues.totalCount ?? linkedIssues.items.length,
         handoffsPartial: (handoffs.totalCount ?? handoffs.items.length) > handoffs.items.length,
         changesPartial: (changes.totalCount ?? changes.items.length) > changes.items.length,
-        partial: [handoffs, changes, reviews, uses].some((x) => (x.totalCount ?? x.items.length) > x.items.length), fetchedAt: new Date().toISOString() }
+        linkedIssuesPartial: (linkedIssues.totalCount ?? linkedIssues.items.length) > linkedIssues.items.length,
+        partial: [handoffs, changes, reviews, linkedIssues, uses].some((x) => (x.totalCount ?? x.items.length) > x.items.length), fetchedAt: new Date().toISOString() }
     },
   })
   if (q.isPending) return <Loading rows={2} />
@@ -76,6 +82,7 @@ export function DisciplineCoordinationView({ project, disciplineId }: { project:
     </section>
   )
   const items = (rows: { id: string; key: string; text: string; detail?: string }[], register: string) => rows.length ? <ul className="space-y-1">{rows.slice(0, 4).map((r) => <li key={r.id}><Link className="underline" to={registerUrl(register, `${register === 'handoffs' ? 'Handoff' : 'ChangeNotice'}:${r.id}`)}>{r.key}</Link> <span>{r.text}</span>{r.detail && <span className="text-muted-foreground"> · {r.detail}</span>}</li>)}</ul> : <p className="text-muted-foreground">{t('dcv.none')}</p>
+  const linkedIssueItems = d.linkedIssues.slice(0, 4)
   return <section aria-labelledby="dcv-title" className="rounded-lg border border-primary/20 bg-primary/5 p-4">
     <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><div><h2 id="dcv-title" className="text-lg font-semibold">{t('dcv.title')}</h2><p className="text-sm text-muted-foreground">{t('dcv.subtitle')}</p><p role="status" className="mt-1 text-xs text-muted-foreground">{t('dcv.scopeNote')}</p></div><span className="text-xs text-muted-foreground">{t('dcv.clientRefresh', { when: new Date(d.fetchedAt).toLocaleTimeString() })}</span></div>
     <div className="mb-3 flex flex-wrap items-end gap-3 rounded border bg-background/60 p-3" aria-label="Coordination scope">
@@ -94,5 +101,19 @@ export function DisciplineCoordinationView({ project, disciplineId }: { project:
       {card('changed', `${t('dcv.changed')}${ownerId ? '' : ` · ${t('dcv.projectWide')}`}`, d.changesPartial ? `${openChanges.length}+` : openChanges.length, items(openChanges.map((c) => ({ id: c.id, key: c.key, text: c.title, detail: `${tv(c.status)} · ${c.pendingAssessments} ${t('dcv.assessments')}` })), 'changes'), 'changes')}
       {card('start', `${t('dcv.start')}${ownerId || disciplineId ? '' : ` · ${t('dcv.projectWide')}`}`, '—', <p role="status">{t('dcv.startUnavailable', { n: openReviews.length })}</p>, 'reviews')}
     </div>
+    <section aria-labelledby="dcv-linked-issues" className="mt-3 rounded-md border bg-card p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id="dcv-linked-issues" className="font-medium">{t('dcv.linkedIssues')}</h2>
+        <span className="rounded-full bg-muted px-2 text-sm tabular-nums">{d.linkedIssuesPartial ? `${linkedIssueItems.length}+` : d.linkedIssuesTotal}</span>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">{t('dcv.linkedIssuesHint')}</p>
+      {linkedIssueItems.length ? <ul className="mt-2 divide-y rounded border">{linkedIssueItems.map((issue) => <li key={issue.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 text-sm">
+        <Link className="font-medium text-primary underline" to={`/projects/${project.projectNumber}/issues?panel=Issue:${issue.id}`} aria-label={t('dcv.openLinkedIssue', { key: issue.key })}>{issue.key}</Link>
+        <button type="button" className="min-w-[12rem] flex-1 text-left hover:underline" onClick={() => openPanel('Issue', issue.id)}>{issue.title}</button>
+        <span className="text-muted-foreground">{tv(issue.status)}</span>
+        <span className="text-muted-foreground">{issue.ownerName ?? issue.ownerId ?? t('dcv.ownerUnavailable')}</span>
+      </li>)}</ul> : <p className="mt-2 text-sm text-muted-foreground">{t('dcv.none')}</p>}
+      {d.linkedIssuesPartial && <p role="status" className="mt-2 text-xs text-warn">{t('dcv.linkedIssuesPartial')}</p>}
+    </section>
   </section>
 }

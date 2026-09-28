@@ -71,6 +71,7 @@ public class ReviewFinding : CoordinationRecord
     public Guid PackageId { get; set; }
     public Guid RoundId { get; set; }
     public Guid? CarriedFromId { get; set; }
+    public Guid? IssueId { get; set; }
     public Guid SourceRevisionId { get; set; }
     public Guid ProjectDisciplineId { get; set; }
     public Guid OriginatorId { get; set; }

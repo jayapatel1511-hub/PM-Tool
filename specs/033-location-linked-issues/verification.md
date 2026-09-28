@@ -3,7 +3,7 @@
 **Date**: 2026-09-26
 **State**: Backend and scoped UI slices implemented in the isolated review worktree. Deployed acceptance and pilot execution remain unproven.
 
-Documentation validation is recorded in `docs/coordination-spec-validation.md`. AC-LOC-01, AC-LOC-02 and AC-LOC-03 have focused API evidence; AC-LOC-04 and AC-LOC-05 remain unproven end-to-end. Deployed UI, export reconciliation, notifications and browser flows remain unproven.
+Documentation validation is recorded in `docs/coordination-spec-validation.md`. AC-LOC-01 through AC-LOC-04 have focused API evidence; AC-LOC-05 has pure-rule coverage. Deployed UI, export reconciliation, notifications and browser flows remain unproven.
 
 ## Executed evidence
 
@@ -21,6 +21,7 @@ Documentation validation is recorded in `docs/coordination-spec-validation.md`. 
 - UNPROVEN — deployed browser operation and keyboard/accessibility. The register/export increment below has local evidence, with deployed reconciliation still open.
 - PASS — local PostgreSQL AC-LOC-03: a published revision created a pending check for the resolved issue while retaining revision A; an unrelated source with the same identifier and revision was excluded by its different source URL. Owner and verifier each recorded a disposition; same-request retry was idempotent and an unrelated member was forbidden. The decision command uses the project lock, row version and atomic command log. `dotnet test --filter 'FullyQualifiedName~ReviewChangeTests|FullyQualifiedName~LocationIssueTests'` passed 15/15. EF reported no pending model changes after rebuilding. The issue detail UI has a two-person decision form; TypeScript and lint passed with existing warnings.
 - UNPROVEN — deployed AC-LOC-03 browser flow, notification delivery and concurrent finalisation under separate live requests.
+- PASS — local PostgreSQL AC-LOC-04: a review finding links an existing issue ID; the current-round discipline view returns that same ID and owner, with one issue row. Editing its owner produced exactly one Issue activity entry, and both the review link and discipline projection kept the same ID. Cross-project linkage and Read Only creation were refused, a stale owner edit conflicted, and a published source replacement carried the issue link into the new review round. The additive `ReviewFindingIssueLink` migration has no pending model changes. The review finding form and discipline view now link to the existing issue panel; frontend production build passed. Deployed browser behavior is UNPROVEN.
 - UNPROVEN — deployed review environment, homedev browser-to-API flow, backup/restore, real tenant sign-in, pilot and production acceptance.
 
 ## Register increment

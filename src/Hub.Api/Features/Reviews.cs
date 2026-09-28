@@ -14,7 +14,7 @@ public static class ReviewEndpoints
     public sealed record ActionBody(Guid RequestId, int RowVersion, string Action, string? Reason);
     public sealed record DecisionBody(Guid RequestId, int RowVersion, string Status, string Rationale);
     public sealed record ReassignBody(Guid RequestId, int RowVersion, Guid OwnerId, string Reason);
-    public sealed record FindingBody(Guid RequestId, int RowVersion, Guid SourceRevisionId, Guid ProjectDisciplineId, Guid ResolverId, string Text, string Severity);
+    public sealed record FindingBody(Guid RequestId, int RowVersion, Guid SourceRevisionId, Guid ProjectDisciplineId, Guid ResolverId, string Text, string Severity, Guid? IssueId = null);
     public sealed record FindingAction(Guid RequestId, int RowVersion, string Action, string Reason, string? EvidenceUrl, Guid? OwnerId);
     public sealed record Filter(string? Q, string? Status, Guid? OwnerId, Guid? DisciplineId, bool? Mine);
     static readonly Col[] Columns = [new("key", "key"), new("title", "name"), new("status", "status"), new("roundNumber", "round"), new("outstandingDisciplines", "reviewOutstanding"), new("blockingFindings", "reviewBlocking"), new("waitingDays", "reviewWaiting")];
@@ -23,6 +23,7 @@ public static class ReviewEndpoints
     {
         api.MapGet("/projects/{projectId:guid}/reviews", List);
         api.MapGet("/projects/{projectId:guid}/reviews/options", Options);
+        api.MapGet("/projects/{projectId:guid}/reviews/linked-issues", LinkedIssues);
         api.MapGet("/projects/{projectId:guid}/reviews/export", ExportRows);
         api.MapGet("/projects/{projectId:guid}/reviews/{id:guid}", Detail);
         api.MapPost("/projects/{projectId:guid}/reviews", Create).WithMetadata(new Coordination.AtomicCommand());
@@ -130,7 +131,7 @@ public static class ReviewEndpoints
             foreach (var finding in await db.ReviewFindings.Where(f => f.RoundId == oldRound.Id &&
                 (f.Status != FindingStatus.VerifiedClosed && (f.Status != FindingStatus.Withdrawn || f.Severity == "Blocking" && f.WithdrawalAcknowledgedBy == null))).ToListAsync())
                 db.ReviewFindings.Add(new ReviewFinding { ProjectId = project.Id, PackageId = package.Id, RoundId = round.Id,
-                    CarriedFromId = finding.Id, SourceRevisionId = finding.SourceRevisionId == oldRevision.Id ? newRevision.Id : finding.SourceRevisionId,
+                    CarriedFromId = finding.Id, IssueId = finding.IssueId, SourceRevisionId = finding.SourceRevisionId == oldRevision.Id ? newRevision.Id : finding.SourceRevisionId,
                     ProjectDisciplineId = finding.ProjectDisciplineId, OriginatorId = finding.OriginatorId, ResolverId = finding.ResolverId,
                     VerifierId = finding.VerifierId, Text = finding.Text, Severity = finding.Severity });
             oldRound.Status = ReviewStatus.Superseded;
@@ -189,6 +190,7 @@ public static class ReviewEndpoints
             foreach (var f in await db.ReviewFindings.Where(f => f.RoundId == old.Id && (f.Status != FindingStatus.VerifiedClosed && (f.Status != FindingStatus.Withdrawn || f.Severity == "Blocking" && f.WithdrawalAcknowledgedBy == null))).ToListAsync()) {
                 var source = await Coordination.Revision(db, project.Id, f.SourceRevisionId);
                 db.ReviewFindings.Add(new ReviewFinding { ProjectId = project.Id, PackageId = p.Id, RoundId = round.Id, CarriedFromId = f.Id,
+                    IssueId = f.IssueId,
                     SourceRevisionId = manifest.FirstOrDefault(m => m.DeliverableId == source.DeliverableId)?.SourceRevisionId ?? f.SourceRevisionId,
                     ProjectDisciplineId = f.ProjectDisciplineId, OriginatorId = f.OriginatorId, ResolverId = f.ResolverId, VerifierId = f.VerifierId, Text = f.Text, Severity = f.Severity });
             }
@@ -254,8 +256,10 @@ public static class ReviewEndpoints
             Check.That(await db.ReviewManifestItems.AnyAsync(m => m.RoundId == round.Id && m.SourceRevisionId == body.SourceRevisionId), "sourceRevisionId", "coord.reference");
             Check.That(ReviewRules.Independent(access.Me.Id, [body.ResolverId], (await settings.Get(db)).AllowSelfReview), "resolverId", "review.independent");
             Check.OneOf(body.Severity, ["Blocking", "Advisory"], "severity");
+            if (body.IssueId is { } linkedIssue)
+                Check.That(await db.Issues.AnyAsync(i => i.Id == linkedIssue && i.ProjectId == project.Id), "issueId", "coord.reference");
             var f = new ReviewFinding { ProjectId = project.Id, PackageId = p.Id, RoundId = round.Id, SourceRevisionId = body.SourceRevisionId, ProjectDisciplineId = body.ProjectDisciplineId,
-                OriginatorId = access.Me.Id, VerifierId = access.Me.Id, ResolverId = body.ResolverId, Text = Check.Required(body.Text, "text", 4000), Severity = body.Severity };
+                IssueId = body.IssueId, OriginatorId = access.Me.Id, VerifierId = access.Me.Id, ResolverId = body.ResolverId, Text = Check.Required(body.Text, "text", 4000), Severity = body.Severity };
             db.ReviewFindings.Add(f); await Recompute(db, project, p, (await settings.Get(db)).AllowSelfReview); await Notify(db, notify, project, p, [f.ResolverId]); return f;
         });
     static Task<Coordination.Result> FindingCommand(Guid projectId, Guid id, Guid findingId, FindingAction body, Access access, HubDb db, SettingsStore settings, Notifier notify, TimeProvider clock) =>
@@ -318,6 +322,22 @@ public static class ReviewEndpoints
     }
     static async Task<object> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db, TimeProvider clock)
     { await access.Project(projectId, false); var q = Query(db, projectId, filter, access.Me.Id); var (pg, size) = Http.Paging(page, pageSize); return new Page<object>(await Rows(db, q.Skip((pg - 1) * size).Take(size), clock.GetUtcNow()), pg, size, await q.CountAsync()); }
+    static async Task<object> LinkedIssues(Guid projectId, Guid? disciplineId, Guid? ownerId, int? page, int? pageSize, Access access, HubDb db)
+    {
+        await access.Project(projectId, false);
+        var q = db.Issues.AsNoTracking().Where(i => i.ProjectId == projectId &&
+            db.ReviewFindings.Any(f => f.ProjectId == projectId && f.IssueId == i.Id &&
+                db.ReviewPackages.Any(p => p.Id == f.PackageId && p.ProjectId == projectId && p.CurrentRoundId == f.RoundId) &&
+                (disciplineId == null || f.ProjectDisciplineId == disciplineId || i.ProjectDisciplineId == disciplineId)));
+        if (ownerId is { } owner) q = q.Where(i => i.OwnerId == owner);
+        var (pg, size) = Http.Paging(page, pageSize);
+        var total = await q.CountAsync();
+        var rows = await q.OrderBy(i => i.Key).Skip((pg - 1) * size).Take(size)
+            .Select(i => new { i.Id, i.Key, i.Title, i.Status, i.OwnerId,
+                OwnerName = db.Users.Where(u => u.Id == i.OwnerId).Select(u => u.DisplayName).FirstOrDefault(),
+                i.ProjectDisciplineId }).ToListAsync();
+        return new { Items = rows, TotalCount = total, Page = pg, PageSize = size };
+    }
     static async Task<object> Options(Guid projectId, Access access, HubDb db) => await ChangeEndpoints.Options(projectId, access, db);
     static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
     {

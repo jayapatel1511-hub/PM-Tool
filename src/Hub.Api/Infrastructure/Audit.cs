@@ -55,7 +55,7 @@ public static class AuditRules
         [typeof(ReviewRound)] = ["PackageId", "Number", "Purpose", "Reason", "RemovalImpact", "StartedAt", "Status"],
         [typeof(ReviewManifestItem)] = ["RoundId", "SourceRevisionId", "DeliverableId", "AuthorIds"],
         [typeof(DisciplineReview)] = ["RoundId", "ProjectDisciplineId", "ReviewerId", "DueDate", "Status", "Rationale", "DecidedAt", "DecidedBy"],
-        [typeof(ReviewFinding)] = ["PackageId", "RoundId", "CarriedFromId", "SourceRevisionId", "ProjectDisciplineId", "OriginatorId", "ResolverId", "VerifierId", "Text", "Severity", "Status", "Response", "EvidenceUrl", "WithdrawalAcknowledgedBy"],
+        [typeof(ReviewFinding)] = ["PackageId", "RoundId", "CarriedFromId", "IssueId", "SourceRevisionId", "ProjectDisciplineId", "OriginatorId", "ResolverId", "VerifierId", "Text", "Severity", "Status", "Response", "EvidenceUrl", "WithdrawalAcknowledgedBy"],
         [typeof(FindingEvent)] = ["FindingId", "Action", "Reason", "EvidenceUrl"],
         [typeof(SourceHead)] = ["Identity", "CurrentRevisionId", "OwnerId", "ProjectDisciplineId"],
         [typeof(InputUse)] = ["TargetType", "TargetId", "OwnerId", "SourceIdentity", "SourceRevisionId", "IntendedUse", "AdoptedAt", "AdoptedBy"],

@@ -59,7 +59,7 @@ public sealed class ReviewChangeTests(HubFactory f)
     {
         var aid = Assignment(id, discipline); await Post(who, Root(s) + $"/reviews/{id}/assignments/{aid}/decision", new ReviewEndpoints.DecisionBody(Guid.NewGuid(), Version<DisciplineReview>(aid), state, "Checked against the registered revision manifest"), expected);
     }
-    async Task<Guid> Finding(Setup s, Guid id, string severity = "Blocking") => (await Post(TestData.Omar, Root(s) + $"/reviews/{id}/findings", new ReviewEndpoints.FindingBody(Guid.NewGuid(), Version<ReviewPackage>(id), s.Revision, s.Electrical, data.User(TestData.Alex), "Verify service clearance", severity))).G("id");
+    async Task<Guid> Finding(Setup s, Guid id, string severity = "Blocking", Guid? issueId = null) => (await Post(TestData.Omar, Root(s) + $"/reviews/{id}/findings", new ReviewEndpoints.FindingBody(Guid.NewGuid(), Version<ReviewPackage>(id), s.Revision, s.Electrical, data.User(TestData.Alex), "Verify service clearance", severity, issueId))).G("id");
     async Task FindingAction(Setup s, Guid id, Guid finding, string who, string action, string? evidence = null, Guid? owner = null, int expected = 200) => await Post(who, Root(s) + $"/reviews/{id}/findings/{finding}/action", new ReviewEndpoints.FindingAction(Guid.NewGuid(), Version<ReviewFinding>(finding), action, "Checked and recorded supporting evidence", evidence, owner), expected);
     async Task<Guid> Notice(Setup s, string revision = "B", Guid? old = null)
     { return (await Post(TestData.Alex, Root(s) + "/source-revisions", Registration(s, revision, old ?? s.Revision))).G("id"); }
@@ -140,6 +140,39 @@ public sealed class ReviewChangeTests(HubFactory f)
         await Post(TestData.Pm, Root(s) + $"/reviews/{id}/rounds", removal);
         Assert.Equal(3, f.Db(db => db.ReviewRounds.Count(r => r.PackageId == id)));
         Assert.Equal(3, f.Db(db => db.ReviewFindings.Count(x => x.PackageId == id)));
+    }
+
+    [Fact]
+    public async Task AC_LOC_04_linked_review_and_discipline_view_share_one_issue_and_owner_audit()
+    {
+        var s = await New();
+        var issue = await Post(TestData.Alex, Root(s) + "/issues", new { title = "Shared service clearance", severity = "High", ownerId = data.User(TestData.Alex), projectDisciplineId = s.Civil }, 201);
+        var issueId = issue.G("id");
+        var reviewId = await Review(s);
+        var otherProject = await data.Project();
+        var otherIssue = await Post(TestData.Pm, $"/api/v1/projects/{otherProject.Id}/issues", new { title = "Other project issue", severity = "High", ownerId = data.User(TestData.Pm) }, 201);
+        var linkBody = new ReviewEndpoints.FindingBody(Guid.NewGuid(), Version<ReviewPackage>(reviewId), s.Revision, s.Electrical,
+            data.User(TestData.Alex), "Verify service clearance", "Blocking", otherIssue.G("id"));
+        await Post(TestData.Omar, Root(s) + $"/reviews/{reviewId}/findings", linkBody, 400);
+        await Post(TestData.Rita, Root(s) + $"/reviews/{reviewId}/findings", linkBody with { IssueId = issueId, RequestId = Guid.NewGuid() }, 403);
+        var findingId = await Finding(s, reviewId, issueId: issueId);
+        var detail = await Get(TestData.Omar, Root(s) + $"/reviews/{reviewId}");
+        Assert.Equal(issueId, detail["findings"]!.AsArray().Single(x => x!.G("id") == findingId)!.G("issueId"));
+        var linked = await Get(TestData.Omar, Root(s) + $"/reviews/linked-issues?disciplineId={s.Electrical}");
+        Assert.Equal(issueId, linked["items"]!.AsArray().Single()!.G("id"));
+        Assert.Equal(1, linked.I("totalCount"));
+        Assert.Equal(1, f.Db(db => db.Issues.Count(i => i.Id == issueId)));
+        var before = f.Db(db => db.ActivityLog.Count(a => a.ItemId == issueId && a.ItemType == "Issue"));
+        var oldVersion = Version<Issue>(issueId);
+        (await f.As(TestData.Pm).Patch($"/api/v1/issues/{issueId}", new { ownerId = data.User(TestData.Pm) }, oldVersion)).EnsureSuccessStatusCode();
+        Assert.Equal(System.Net.HttpStatusCode.Conflict, (await f.As(TestData.Pm).Patch($"/api/v1/issues/{issueId}", new { ownerId = data.User(TestData.Marc) }, oldVersion)).StatusCode);
+        linked = await Get(TestData.Omar, Root(s) + $"/reviews/linked-issues?disciplineId={s.Electrical}");
+        Assert.Equal(data.User(TestData.Pm), linked["items"]!.AsArray().Single()!.G("ownerId"));
+        Assert.Equal(before + 1, f.Db(db => db.ActivityLog.Count(a => a.ItemId == issueId && a.ItemType == "Issue")));
+        Assert.Equal(1, f.Db(db => db.Issues.Count(i => i.Id == issueId)));
+        var notice = await Notice(s); await Publish(s, notice);
+        var currentRound = f.Db(db => db.ReviewPackages.Single(p => p.Id == reviewId).CurrentRoundId);
+        Assert.Equal(issueId, f.Db(db => db.ReviewFindings.Single(x => x.RoundId == currentRound && x.CarriedFromId == findingId).IssueId));
     }
 
     [Fact]

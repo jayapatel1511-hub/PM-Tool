@@ -690,6 +690,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.VerifierId);
         Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.OwnerDecidedBy);
         Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.VerifierDecidedBy);
+        Fk<ReviewFinding, Issue>(mb, x => x.IssueId);
         Fk<SubmissionPackage, AppUser>(mb, x => x.CoordinatorId);
         Fk<SubmissionPackage, Milestone>(mb, x => x.MilestoneId);
         Fk<SubmissionPackage, SubmissionPackage>(mb, x => x.SupersedesPackageId);

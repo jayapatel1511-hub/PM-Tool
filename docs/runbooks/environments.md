@@ -1,6 +1,8 @@
 # Runbook: environments
 
-Development, test, review and production are separate Azure resource groups with separate Entra app registrations (§21, FR-007).
+The current temporary review/pilot host is homedev; its deployment and data boundary are in
+[`homedev-review.md`](homedev-review.md). The Azure design below remains the target for the later company move.
+At that point, development, test, review and production use separate Azure resource groups and Entra app registrations (§21, FR-007).
 Production data is never copied into development, test or review; the synthetic data in `tools/scale/seed.sql` exists for load
 tests. Keep the review database when releasing new preview builds.
 

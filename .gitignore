@@ -15,3 +15,8 @@ src/Hub.Api/wwwroot/
 .DS_Store
 .specify/feature.json
 *.local.json
+.runtime/
+data/backups/
+incoming/
+releases/
+__pycache__/

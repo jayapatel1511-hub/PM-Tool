@@ -1,0 +1,19 @@
+FROM node:24-alpine AS web
+WORKDIR /work
+COPY web/package.json web/package-lock.json web/
+RUN cd web && npm ci
+COPY web/ web/
+RUN mkdir -p src/Hub.Api && cd web && npm run build
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /work
+COPY src/ src/
+COPY --from=web /work/src/Hub.Api/wwwroot/ src/Hub.Api/wwwroot/
+RUN dotnet publish src/Hub.Api/Hub.Api.csproj -c Release -o /out
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+WORKDIR /app
+COPY --from=build /out/ ./
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "Hub.Api.dll"]

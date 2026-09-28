@@ -8,7 +8,9 @@ using Hub.Api.Features;
 using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 using Npgsql;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 var cfg = builder.Configuration;
@@ -69,6 +71,23 @@ builder.Services.AddOpenApi();
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase);
 
 var app = builder.Build();
+
+// The homedev review origin is bound to loopback behind a local Cloudflare Tunnel.
+// Trust only that local hop, and only its original scheme, for HTTPS and Origin checks.
+if (app.Environment.IsStaging() && cfg.GetValue<bool>("Hosting:LocalTunnelProxy"))
+{
+    if (!IPAddress.TryParse(cfg["Hosting:LocalTunnelProxyAddress"], out var proxyAddress))
+        throw new InvalidOperationException("Hosting:LocalTunnelProxyAddress must identify the review bridge gateway.");
+    var forwarded = new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedProto,
+        ForwardLimit = 1
+    };
+    forwarded.KnownProxies.Add(IPAddress.Loopback);
+    forwarded.KnownProxies.Add(IPAddress.IPv6Loopback);
+    forwarded.KnownProxies.Add(proxyAddress);
+    app.UseForwardedHeaders(forwarded);
+}
 
 app.UseMiddleware<ProblemMiddleware>();
 app.UseMiddleware<SecurityHeaders>();

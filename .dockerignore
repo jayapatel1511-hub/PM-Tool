@@ -1,0 +1,13 @@
+.git
+.runtime
+data
+incoming
+releases
+**/bin
+**/obj
+**/node_modules
+src/Hub.Api/wwwroot
+web/test-results
+web/playwright-report
+coverage
+TestResults

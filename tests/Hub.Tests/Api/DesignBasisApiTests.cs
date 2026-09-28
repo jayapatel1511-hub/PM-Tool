@@ -93,6 +93,15 @@ public sealed class DesignBasisApiTests(HubFactory f)
         Assert.DoesNotContain(supersededFilter["items"]!.AsArray(), row => row!.G("id") == id);
         var confirmedFilter = await (await f.As(TestData.Pm).GetAsync(root + "?status=Confirmed")).Json();
         Assert.Contains(confirmedFilter["items"]!.AsArray(), row => row!.G("id") == id);
+        var scoped = await (await f.As(TestData.Pm).GetAsync(root + $"?kind=Criterion&scope=Pier&affectedWorkId={task.G("id")}")).Json();
+        Assert.Contains(scoped["items"]!.AsArray(), row => row!.G("id") == id);
+        var notOverdue = await (await f.As(TestData.Pm).GetAsync(root + "?overdue=true")).Json();
+        Assert.DoesNotContain(notOverdue["items"]!.AsArray(), row => row!.G("id") == id);
+        var export = await f.As(TestData.Pm).GetAsync(root + "/export?kind=Criterion&scope=Pier&format=csv");
+        export.EnsureSuccessStatusCode();
+        var csv = await export.Content.ReadAsStringAsync();
+        Assert.Contains("kPa", csv); Assert.Contains("GEO-1", csv); Assert.Contains("Geotechnical report", csv);
+        await (await f.As(TestData.Rita).GetAsync(root + "/export?format=csv")).Json(404);
         var competing = create with { RequestId = Guid.NewGuid(), Version = b with { NumericValue = 150 } };
         await Post(TestData.Pm, root, competing, 409);
         var second = await Post(TestData.Pm, root, competing with { RequestId = Guid.NewGuid(), InspectedDuplicateId = id });
@@ -124,10 +133,12 @@ public sealed class DesignBasisApiTests(HubFactory f)
         var owner = data.User(TestData.Alex);
         var root = $"/api/v1/projects/{project.Id}/design-basis";
         var input = new DesignBasisEndpoints.VersionInput("Site grading", "Assume existing utility depth", null, null,
-            null, null, null, null, new DateOnly(2026, 10, 5), null);
+            null, null, null, null, new DateOnly(2020, 1, 1), null);
         var entry = await Post(TestData.Pm, root, new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Assumption,
             "Utility depth", owner, civil, data.User(TestData.Marc), input, null));
         var id = entry.G("id");
+        var overdue = await (await f.As(TestData.Pm).GetAsync(root + "?overdue=true")).Json();
+        Assert.Contains(overdue["items"]!.AsArray(), row => row!.G("id") == id);
         var versionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == id).Id);
         var task = await data.NewTask(project.Id, extra: new { assigneeId = owner });
         var use = new DesignBasisEndpoints.UseBody(Guid.NewGuid(), versionId, "Task", task.G("id"), "Preliminary layout");

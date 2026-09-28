@@ -3,6 +3,7 @@ using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using System.Text.Json;
 
 namespace Hub.Api.Features;
 
@@ -24,10 +25,22 @@ public static class DesignBasisEndpoints
         int NewVersionRowVersion, int TargetRowVersion, string Action, string Rationale, string EvidenceUrl);
     public sealed record ConflictSide(Guid VersionId, string EntryKey, string Scope, string Statement,
         decimal? NumericValue, string? Units);
+    public sealed record Filter(string? Kind, string? Status, Guid? DisciplineId, string? Scope,
+        bool? Overdue, Guid? AffectedWorkId);
+    static readonly Col[] ExportColumns = [new("key", "key"), new("title", "name"),
+        new("kind", "kind", Label: "Kind"), new("discipline", "discipline"),
+        new("owner", "owner", Label: "Owner"), new("version", "revision", Label: "Version"),
+        new("status", "status"), new("scope", "scope", Label: "Scope"),
+        new("statement", "statement", Label: "Value or statement"), new("numericValue", "value", "number", "Numeric value"),
+        new("units", "units", Label: "Units"), new("sourceSystem", "sourceSystem", Label: "Source system"),
+        new("stableSourceId", "sourceId", Label: "Stable source ID"), new("sourceUrl", "sourceUrl", Label: "Source URL"),
+        new("declaredRevision", "declaredRevision", Label: "Declared source revision"),
+        new("confirmationDueDate", "due", "date", "Confirmation due date")];
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/design-basis", List);
+        api.MapGet("/projects/{projectId:guid}/design-basis/export", ExportRows);
         api.MapGet("/projects/{projectId:guid}/design-basis/{id:guid}", Detail);
         api.MapPost("/projects/{projectId:guid}/design-basis", Create).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/propose", Propose).WithMetadata(new Coordination.AtomicCommand());
@@ -263,16 +276,35 @@ public static class DesignBasisEndpoints
             return impact;
         });
 
-    static async Task<object> List(Guid projectId, string? kind, string? status, Guid? disciplineId,
-        int? page, int? pageSize, Access access, HubDb db)
+    static IQueryable<DesignBasisEntry> Query(Guid projectId, Filter filter, HubDb db, DateOnly today)
     {
-        await access.Project(projectId, false);
         var query = db.DesignBasisEntries.AsNoTracking().Where(e => e.ProjectId == projectId);
-        if (kind is not null) { Check.OneOf(kind, BasisKind.All, "kind"); query = query.Where(e => e.Kind == kind); }
-        if (disciplineId is { } did) query = query.Where(e => e.ProjectDisciplineId == did);
-        if (status is not null) { Check.OneOf(status, BasisStatus.All, "status"); query = query.Where(e =>
+        if (filter.Kind is { } kind) { Check.OneOf(kind, BasisKind.All, "kind"); query = query.Where(e => e.Kind == kind); }
+        if (filter.DisciplineId is { } did) query = query.Where(e => e.ProjectDisciplineId == did);
+        if (filter.Status is { } status) { Check.OneOf(status, BasisStatus.All, "status"); query = query.Where(e =>
             db.DesignBasisVersions.Where(v => v.EntryId == e.Id).OrderByDescending(v => v.Number)
                 .Select(v => v.Status).FirstOrDefault() == status); }
+        if (!string.IsNullOrWhiteSpace(filter.Scope))
+        {
+            var scope = filter.Scope.Trim().ToLower();
+            query = query.Where(e => (db.DesignBasisVersions.Where(v => v.EntryId == e.Id)
+                .OrderByDescending(v => v.Number).Select(v => v.Scope).FirstOrDefault() ?? "")
+                .ToLower().Contains(scope));
+        }
+        if (filter.Overdue == true) query = query.Where(e => db.DesignBasisVersions.Any(v => v.EntryId == e.Id &&
+            v.Status == BasisStatus.Proposed && v.ConfirmationDueDate < today &&
+            !db.DesignBasisVersions.Any(later => later.EntryId == e.Id && later.Number > v.Number)));
+        if (filter.AffectedWorkId is { } targetId) query = query.Where(e =>
+            db.DesignBasisVersions.Any(v => v.EntryId == e.Id &&
+                db.BasisUses.Any(u => u.VersionId == v.Id && u.TargetId == targetId)));
+        return query;
+    }
+
+    static async Task<object> List(Guid projectId, [AsParameters] Filter filter,
+        int? page, int? pageSize, Access access, HubDb db, TimeProvider clock)
+    {
+        await access.Project(projectId, false);
+        var query = Query(projectId, filter, db, DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime));
         var (pg, size) = Http.Paging(page, pageSize);
         var entries = await query.OrderBy(e => e.Seq).Skip((pg - 1) * size).Take(size)
             .Select(e => new { e.Id, e.Key, e.Title, e.Kind, e.OwnerId, e.ProjectDisciplineId, e.IndependentApproverId,
@@ -294,6 +326,33 @@ public static class DesignBasisEndpoints
                     (c.LeftVersionId == v.Id || c.RightVersionId == v.Id))) };
         }).ToList();
         return new Page<object>(rows, pg, size, await query.CountAsync());
+    }
+
+    static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format,
+        HttpContext http, Access access, HubDb db, SettingsStore settings, TimeProvider clock)
+    {
+        var (project, _) = await access.Project(projectId, false);
+        var entries = await Query(projectId, filter, db, DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime))
+            .OrderBy(e => e.Seq).Take(Export.MaxRows + 1).ToListAsync();
+        if (entries.Count > Export.MaxRows) throw ApiException.Rule("export_too_large", "export.too_large", null, Export.MaxRows);
+        var ids = entries.Select(e => e.Id).ToArray();
+        var versions = await db.DesignBasisVersions.AsNoTracking().Where(v => v.ProjectId == projectId && ids.Contains(v.EntryId))
+            .ToListAsync();
+        var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == projectId)
+            .Join(db.Disciplines, pd => pd.DisciplineId, d => d.Id, (pd, d) => new { pd.Id, d.Name })
+            .ToDictionaryAsync(d => d.Id, d => d.Name);
+        var ownerIds = entries.Select(e => e.OwnerId).Distinct().ToArray();
+        var owners = await db.Users.AsNoTracking().Where(u => ownerIds.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id, u => u.DisplayName);
+        var rows = entries.SelectMany(e => versions.Where(v => v.EntryId == e.Id).OrderBy(v => v.Number)
+            .Select(v => new { e.Key, e.Title, e.Kind,
+                Discipline = disciplines.GetValueOrDefault(e.ProjectDisciplineId),
+                Owner = owners.GetValueOrDefault(e.OwnerId), Version = v.Number, v.Status, v.Scope, v.Statement,
+                v.NumericValue, v.Units, v.SourceSystem, v.StableSourceId, v.SourceUrl, v.DeclaredRevision,
+                v.ConfirmationDueDate })).ToList();
+        return await ExportFile.Send(db, settings, format, $"{project.ProjectNumber} design basis", ExportColumns,
+            JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http),
+            project.Id, $"{project.ProjectNumber}-design-basis", clock);
     }
 
     static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db, SettingsStore settings)

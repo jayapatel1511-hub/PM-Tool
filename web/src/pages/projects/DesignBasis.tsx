@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ErrorBanner, Field, Loading, Page } from '@/components/hub/common'
+import { ExportMenu } from '@/components/hub/export'
 import { ApiError, get, post } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
@@ -46,18 +47,23 @@ export function DesignBasisTab() {
   const project = useCurrentProject(), qc = useQueryClient(), [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false)
   const selected = sp.get('basis'), page = Math.max(1, Number(sp.get('page')) || 1)
   const kind = sp.get('kind') ?? '', status = sp.get('status') ?? '', discipline = sp.get('discipline') ?? ''
+  const scope = sp.get('scope') ?? '', overdue = sp.get('overdue') ?? '', affectedWorkId = sp.get('affectedWorkId') ?? ''
   const set = (name: string, value: string) => setSp(p => { const next = new URLSearchParams(p); if (value) next.set(name, value); else next.delete(name);
     if (name !== 'basis') next.delete('page'); return next })
   const base = `projects/${project.id}/design-basis`
   const canCreate = project.permissions.isPm || project.permissions.leadOf.length > 0
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
   const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => get<Team>(`projects/${project.id}/team`) })
-  const list = useQuery({ queryKey: ['design-basis', project.id, page, kind, status, discipline],
-    queryFn: () => get<{ items: EntryRow[]; pageSize: number; totalCount: number }>(`${base}?page=${page}${kind ? `&kind=${encodeURIComponent(kind)}` : ''}${status ? `&status=${encodeURIComponent(status)}` : ''}${discipline ? `&disciplineId=${encodeURIComponent(discipline)}` : ''}`) })
+  const filters = { kind, status, disciplineId: discipline, scope, overdue, affectedWorkId }
+  const params = new URLSearchParams({ page: String(page) })
+  for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value)
+  const list = useQuery({ queryKey: ['design-basis', project.id, page, filters],
+    queryFn: () => get<{ items: EntryRow[]; pageSize: number; totalCount: number }>(`${base}?${params}`) })
   const refresh = () => { qc.invalidateQueries({ queryKey: ['design-basis', project.id] }); qc.invalidateQueries({ queryKey: ['design-basis-detail', project.id] }) }
   const name = (id?: string) => team.data?.members.find(m => m.userId === id)?.displayName ?? t('coord.unavailable')
   return <Page title={t('basis.title')} subtitle={t('basis.subtitle')}
-    actions={canCreate && <Button size="sm" onClick={() => setAdding(true)}>{t('basis.new')}</Button>}>
+    actions={<><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-design-basis`} />
+      {canCreate && <Button size="sm" onClick={() => setAdding(true)}>{t('basis.new')}</Button>}</>}>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
     <div className="flex flex-wrap gap-3 rounded border p-3">
       <SelectField label={t('basis.kind')} value={kind} onChange={v => set('kind', v)} required={false}
@@ -66,6 +72,10 @@ export function DesignBasisTab() {
         choices={['Proposed', 'Confirmed', 'Superseded', 'Withdrawn'].map(value => ({ value, label: value }))} />
       <SelectField label={t('basis.discipline')} value={discipline} onChange={v => set('discipline', v)} required={false}
         choices={project.disciplines.map(d => ({ value: d.id, label: d.name }))} />
+      <Field label={t('basis.scope')} htmlFor="basis-scope-filter"><Input id="basis-scope-filter" type="search" value={scope} onChange={e => set('scope', e.target.value)} /></Field>
+      {options.data && <SelectField label={t('basis.affectedWork')} value={affectedWorkId} onChange={v => set('affectedWorkId', v)}
+        required={false} choices={workChoices(options.data)} />}
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={overdue === 'true'} onChange={e => set('overdue', e.target.checked ? 'true' : '')} />{t('basis.overdueOnly')}</label>
     </div>
     {list.isPending ? <Loading rows={4} /> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.items.length ?
       <p className="rounded border p-8 text-center text-muted-foreground">{t('basis.empty')}</p> :

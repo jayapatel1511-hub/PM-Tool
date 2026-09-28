@@ -36,6 +36,7 @@ export const en: Record<string, string> = {
   "basis.impactHint": "The consumer can adopt the new version. A discipline lead can record that the change does not affect this work, with evidence.",
   "basis.decision": "Decision", "basis.adopt": "Adopt new version", "basis.unaffected": "Unaffected by change",
   "basis.evidence": "Evidence link", "basis.targetUnavailable": "The linked work is unavailable. Refresh before deciding.",
+  "basis.affectedWork": "Affected task or deliverable", "basis.overdueOnly": "Overdue confirmation only",
   "notify.AllocationChanged": "Allocation updates", "prefs.event.AllocationChanged": "Allocation updates", "event.AllocationChanged": "Allocation updates",
   "value.Checking": "Checking",
   "value.Ready": "Ready",

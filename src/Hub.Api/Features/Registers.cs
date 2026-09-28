@@ -18,6 +18,12 @@ public static class RegisterEndpoints
     public sealed record RiskMove(string ToStatus, string? Reason, Guid? IssueId, IssueBody? Issue, int? RowVersion);
     public sealed record IssueMove(string ToStatus, string? Reason, string? Resolution, DateOnly? ResolvedDate, int? RowVersion);
     public sealed record RegisterQuery(string? Status, string? Severity, Guid? OwnerId, Guid? DisciplineId, string? Indicator, string? Q);
+    public sealed record IssueLocationBody(string Kind, string? SiteArea, string? Building, string? Level, string? Room, string? AssetSystem,
+        string? Alignment, decimal? StartStation, decimal? EndStation, string? StationUnits, decimal? CoordinateX, decimal? CoordinateY,
+        decimal? CoordinateZ, string? CoordinateReferenceSystem, string? CoordinateUnits, int RowVersion);
+    public sealed record IssueDocumentBody(string Kind, string Identifier, string Revision, string SourceUrl, string? ExternalTopicId,
+        string? ModelElementGuid, string? ViewpointUrl, bool IsAvailable, int RowVersion);
+    public sealed record IssueVerificationBody(Guid VerifierId, string Status, string? EvidenceUrl, string? Note, int RowVersion);
 
     static readonly Col[] RiskCols =
     [
@@ -59,6 +65,12 @@ public static class RegisterEndpoints
         api.MapGet("/issues/{id}", GetIssue);
         api.MapPatch("/issues/{id:guid}", EditIssue);
         api.MapPost("/issues/{id:guid}/transition", MoveIssue);
+        api.MapGet("/issues/{id:guid}/locations", ListIssueLocations);
+        api.MapPost("/issues/{id:guid}/locations", AddIssueLocation);
+        api.MapGet("/issues/{id:guid}/documents", ListIssueDocuments);
+        api.MapPost("/issues/{id:guid}/documents", AddIssueDocument);
+        api.MapGet("/issues/{id:guid}/verification", ListIssueVerification);
+        api.MapPost("/issues/{id:guid}/verification", AddIssueVerification);
         api.MapPost("/issues/{id:guid}/links", async (Guid id, DecisionEndpoints.LinkInput body, Access access, HubDb db) =>
         {
             var (i, p, ctx) = await LoadIssue(db, access, id);
@@ -428,6 +440,15 @@ public static class RegisterEndpoints
         var (from, to) = (i.Status, body.ToStatus);
         if (!Workflow.IssueStep(from, to)) throw ApiException.Rule("illegal_transition", "issue.illegal_transition", null, from, to);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(i)));
+        if (to == IssueStatus.Resolved && (await db.IssueLocations.AnyAsync(x => x.IssueId == i.Id) || await db.IssueDocumentReferences.AnyAsync(x => x.IssueId == i.Id)))
+        {
+            Check.That(await db.IssueDocumentReferences.Where(x => x.IssueId == i.Id).AllAsync(x => x.IsAvailable), "document", "issue.document_unavailable");
+            var latestReferenceVersion = await db.IssueLocations.Where(x => x.IssueId == i.Id).Select(x => (int?)x.IssueRowVersion)
+                .Concat(db.IssueDocumentReferences.Where(x => x.IssueId == i.Id).Select(x => (int?)x.IssueRowVersion)).MaxAsync() ?? 0;
+            var latestVerification = await db.IssueVerifications.Where(x => x.IssueId == i.Id).OrderByDescending(x => x.IssueRowVersion).FirstOrDefaultAsync();
+            var current = latestVerification?.Status == IssueVerificationStatus.Verified && latestVerification.IssueRowVersion > latestReferenceVersion;
+            Check.That(current, "verification", "issue.verification_required");
+        }
         var today = clock.Today(await store.Get(db));
         var reason = string.IsNullOrWhiteSpace(body.Reason) ? null : body.Reason.Trim();
         switch (to)
@@ -453,5 +474,92 @@ public static class RegisterEndpoints
         db.Audit.Note(i, action: to == IssueStatus.Resolved ? "Resolved" : from == IssueStatus.Resolved ? "Reopened" : null, reason: reason);
         await db.SaveChangesAsync();
         return Results.Ok(new { i.Id, i.Status, i.RowVersion });
+    }
+    static async Task<List<object>> ListIssueLocations(Guid id, Access access, HubDb db)
+    {
+        await LoadIssue(db, access, id);
+        return await db.IssueLocations.AsNoTracking().Where(x => x.IssueId == id).OrderBy(x => x.CreatedAt)
+            .Select(x => (object)new { x.Id, x.Kind, x.SiteArea, x.Building, x.Level, x.Room, x.AssetSystem, x.Alignment, x.StartStation, x.EndStation,
+                x.StationUnits, x.CoordinateX, x.CoordinateY, x.CoordinateZ, x.CoordinateReferenceSystem, x.CoordinateUnits, x.RowVersion }).ToListAsync();
+    }
+
+    static async Task<IResult> AddIssueLocation(Guid id, IssueLocationBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
+    {
+        var (issue, project, ctx) = await LoadIssue(db, access, id);
+        Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(issue)));
+        await Http.CheckVersion(db, http, issue, body.RowVersion);
+        try { Registers.ValidateIssueLocation(body.Kind, body.Alignment, body.StartStation, body.EndStation, body.StationUnits, body.CoordinateX, body.CoordinateY, body.CoordinateReferenceSystem, body.CoordinateUnits); }
+        catch (ArgumentException ex) { throw ApiException.Invalid("location", "issue.location_invalid", ex.Message); }
+        var now = clock.GetUtcNow();
+        issue.LastActivityAt = now; db.Entry(issue).Property(x => x.LastActivityAt).IsModified = true;
+        var row = new IssueLocation { ProjectId = project.Id, IssueId = issue.Id, IssueRowVersion = issue.RowVersion + 1, Kind = body.Kind, SiteArea = Check.Optional(body.SiteArea, "siteArea", 500),
+            Building = Check.Optional(body.Building, "building", 200), Level = Check.Optional(body.Level, "level", 100), Room = Check.Optional(body.Room, "room", 100),
+            AssetSystem = Check.Optional(body.AssetSystem, "assetSystem", 300), Alignment = Check.Optional(body.Alignment, "alignment", 300), StartStation = body.StartStation,
+            EndStation = body.EndStation, StationUnits = Check.Optional(body.StationUnits, "stationUnits", 40), CoordinateX = body.CoordinateX, CoordinateY = body.CoordinateY,
+            CoordinateZ = body.CoordinateZ, CoordinateReferenceSystem = Check.Optional(body.CoordinateReferenceSystem, "coordinateReferenceSystem", 100),
+            CoordinateUnits = Check.Optional(body.CoordinateUnits, "coordinateUnits", 40), CreatedAt = now, UpdatedAt = now, CreatedBy = access.Me.Id, UpdatedBy = access.Me.Id };
+        db.IssueLocations.Add(row); db.Audit.Note(row); await db.SaveChangesAsync();
+        return Results.Created($"/api/v1/issue-locations/{row.Id}", new { row.Id, row.RowVersion });
+    }
+
+    static async Task<List<object>> ListIssueDocuments(Guid id, Access access, HubDb db)
+    {
+        await LoadIssue(db, access, id);
+        return await db.IssueDocumentReferences.AsNoTracking().Where(x => x.IssueId == id).OrderBy(x => x.CreatedAt)
+            .Select(x => (object)new { x.Id, x.Kind, x.Identifier, x.Revision, x.SourceUrl, x.ExternalTopicId, x.ModelElementGuid, x.ViewpointUrl, x.IsAvailable, x.RowVersion }).ToListAsync();
+    }
+
+    static async Task<IResult> AddIssueDocument(Guid id, IssueDocumentBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
+    {
+        var (issue, project, ctx) = await LoadIssue(db, access, id);
+        Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(issue)));
+        await Http.CheckVersion(db, http, issue, body.RowVersion);
+        try { Registers.ValidateIssueDocument(body.Kind, body.Identifier, body.Revision, body.SourceUrl); }
+        catch (ArgumentException ex) { throw ApiException.Invalid("document", "issue.document_invalid", ex.Message); }
+        var identifier = Check.Required(body.Identifier, "identifier", 300); var revision = Check.Required(body.Revision, "revision", 100); var url = Coordination.Url(body.SourceUrl);
+        if (await db.IssueDocumentReferences.AnyAsync(x => x.IssueId == id && x.Identifier == identifier && x.Revision == revision)) throw ApiException.Conflict("duplicate_reference", "error.duplicate");
+        var now = clock.GetUtcNow();
+        issue.LastActivityAt = now; db.Entry(issue).Property(x => x.LastActivityAt).IsModified = true;
+        var row = new IssueDocumentReference { ProjectId = project.Id, IssueId = id, IssueRowVersion = issue.RowVersion + 1, Kind = body.Kind, Identifier = identifier, Revision = revision, SourceUrl = url,
+            ExternalTopicId = Check.Optional(body.ExternalTopicId, "externalTopicId", 300), ModelElementGuid = Check.Optional(body.ModelElementGuid, "modelElementGuid", 300),
+            ViewpointUrl = string.IsNullOrWhiteSpace(body.ViewpointUrl) ? null : Coordination.Url(body.ViewpointUrl), IsAvailable = body.IsAvailable,
+            CreatedAt = now, UpdatedAt = now, CreatedBy = access.Me.Id, UpdatedBy = access.Me.Id };
+        db.IssueDocumentReferences.Add(row); db.Audit.Note(row); await db.SaveChangesAsync();
+        return Results.Created($"/api/v1/issue-document-references/{row.Id}", new { row.Id, row.RowVersion });
+    }
+
+    static async Task<List<object>> ListIssueVerification(Guid id, Access access, HubDb db)
+    {
+        await LoadIssue(db, access, id);
+        return await db.IssueVerifications.AsNoTracking().Where(x => x.IssueId == id).OrderByDescending(x => x.CreatedAt)
+            .Select(x => (object)new { x.Id, x.VerifierId, x.Status, x.EvidenceUrl, x.Note, x.VerifiedAt, x.RowVersion }).ToListAsync();
+    }
+
+    static async Task<IResult> AddIssueVerification(Guid id, IssueVerificationBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
+    {
+        var (issue, project, ctx) = await LoadIssue(db, access, id);
+        await Http.CheckVersion(db, http, issue, body.RowVersion);
+        Check.OneOf(body.Status, IssueVerificationStatus.All, "status");
+        Check.That(body.VerifierId != issue.OwnerId && body.VerifierId != issue.CreatedBy && body.VerifierId != issue.RaisedById,
+            "verifierId", "issue.verifier_independent");
+        await Coordination.Person(db, project, body.VerifierId, "verifierId");
+        if (body.Status is IssueVerificationStatus.Verified or IssueVerificationStatus.Rejected)
+        {
+            Access.Demand(Permissions.Writable(access.Actor, ctx));
+            Check.That(body.VerifierId == access.Me.Id, "verifierId", "issue.verifier_must_submit");
+            var appointment = await db.IssueVerifications.Where(x => x.IssueId == id && x.Status == IssueVerificationStatus.Proposed)
+                .OrderByDescending(x => x.IssueRowVersion).Select(x => (Guid?)x.VerifierId).FirstOrDefaultAsync();
+            Check.That(appointment == access.Me.Id, "verifierId", "issue.verifier_not_appointed");
+        }
+        else { Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(issue))); Check.Reason(body.Note); }
+        var evidence = string.IsNullOrWhiteSpace(body.EvidenceUrl) ? null : Coordination.Url(body.EvidenceUrl);
+        if (body.Status == IssueVerificationStatus.Verified) Check.That(evidence is not null, "evidenceUrl", "error.required");
+        var now = clock.GetUtcNow();
+        issue.LastActivityAt = now; db.Entry(issue).Property(x => x.LastActivityAt).IsModified = true;
+        var row = new IssueVerification { ProjectId = project.Id, IssueId = id, IssueRowVersion = issue.RowVersion + 1, VerifierId = body.VerifierId, Status = body.Status, EvidenceUrl = evidence,
+            Note = Check.Optional(body.Note, "note", 4000), VerifiedAt = body.Status == IssueVerificationStatus.Verified ? now : null,
+            CreatedAt = now, UpdatedAt = now, CreatedBy = access.Me.Id, UpdatedBy = access.Me.Id };
+        db.IssueVerifications.Add(row); db.Audit.Note(row, reason: row.Note); await db.SaveChangesAsync();
+        return Results.Created($"/api/v1/issue-verifications/{row.Id}", new { row.Id, row.RowVersion });
     }
 }

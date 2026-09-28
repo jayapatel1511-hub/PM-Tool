@@ -1,0 +1,153 @@
+using System.Net;
+using System.Text.Json.Nodes;
+using Microsoft.EntityFrameworkCore;
+
+namespace Hub.Tests.Api;
+
+[Collection("api")]
+public sealed class LocationIssueTests(HubFactory f)
+{
+    readonly TestData d = new(f);
+
+    async Task<JsonNode> Issue(Guid projectId, string owner = TestData.Alex) =>
+        await f.As(TestData.Alex).Post($"/api/v1/projects/{projectId}/issues", new
+        {
+            title = "Synthetic utility clash", description = "Coordination issue for location workflow", severity = "High",
+            ownerId = d.User(owner), projectDisciplineId = d.ProjectDiscipline(projectId, "Civil")
+        }).Result.Json(201);
+    Task<int> IssueVersion(Guid id) => f.DbAsync(db => db.Issues.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync());
+
+    [Fact]
+    public async Task Location_document_and_independent_verification_are_scoped_and_gate_resolution()
+    {
+        var p = await d.Project();
+        var issue = await Issue(p.Id);
+        var id = issue.G("id");
+
+        var badStation = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", new
+        {
+            kind = "Alignment", alignment = "Road-A", startStation = 20, endStation = 10, stationUnits = "m"
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, badStation.StatusCode);
+
+        var location = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", new
+        {
+            kind = "Alignment", alignment = "Road-A", startStation = 10, endStation = 20, stationUnits = "m", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        Assert.NotEqual(Guid.Empty, location.G("id"));
+        var staleLocation = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", new
+        {
+            kind = "SiteArea", siteArea = "North", rowVersion = 0
+        });
+        Assert.Equal(HttpStatusCode.Conflict, staleLocation.StatusCode);
+
+        var missingCrs = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", new
+        {
+            kind = "Coordinate", coordinateX = 1, coordinateY = 2, coordinateUnits = "m", rowVersion = await IssueVersion(id)
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, missingCrs.StatusCode);
+
+        var document = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/documents", new
+        {
+            kind = "Drawing", identifier = "C-101", revision = "A", sourceUrl = "https://review.example.test/c-101", isAvailable = true, rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        Assert.NotEqual(Guid.Empty, document.G("id"));
+        Assert.Equal(HttpStatusCode.Conflict, (await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/documents", new
+        {
+            kind = "Drawing", identifier = "C-101", revision = "A", sourceUrl = "https://review.example.test/c-101", isAvailable = true, rowVersion = await IssueVersion(id)
+        })).StatusCode);
+
+        var unresolved = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Utility alignment coordinated", rowVersion = await f.DbAsync(db => db.Issues.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync())
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, unresolved.StatusCode);
+
+        var namedByPm = await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/1", note = "Independent synthetic review", rowVersion = await IssueVersion(id)
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, namedByPm.StatusCode);
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Appoint Marc as independent verifier", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        var verify = await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/1", note = "Independent synthetic review", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        Assert.NotEqual(Guid.Empty, verify.G("id"));
+
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/documents", new
+        {
+            kind = "Drawing", identifier = "C-101", revision = "B", sourceUrl = "https://review.example.test/c-101-b", isAvailable = true, rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        var staleVerification = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Should require a fresh verification", rowVersion = await f.DbAsync(db => db.Issues.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync())
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, staleVerification.StatusCode);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/1b", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+
+        var resolved = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Utility alignment coordinated", rowVersion = await f.DbAsync(db => db.Issues.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync())
+        });
+        Assert.Equal(HttpStatusCode.OK, resolved.StatusCode);
+        Assert.Single((await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{id}/locations").Result.Json()).AsArray());
+        Assert.Equal(2, (await f.As(TestData.Rita).GetAsync($"/api/v1/issues/{id}/documents").Result.Json()).AsArray().Count);
+
+        var unavailable = await Issue(p.Id);
+        var unavailableId = unavailable.G("id");
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{unavailableId}/documents", new
+        {
+            kind = "Drawing", identifier = "C-202", revision = "B", sourceUrl = "https://review.example.test/c-202", isAvailable = false, rowVersion = await IssueVersion(unavailableId)
+        }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{unavailableId}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Appoint Marc for unavailable evidence", rowVersion = await IssueVersion(unavailableId)
+        }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{unavailableId}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/2", rowVersion = await IssueVersion(unavailableId)
+        }).Result.Json(201);
+        var unavailableResolution = await f.As(TestData.Alex).Post($"/api/v1/issues/{unavailableId}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Should remain blocked", rowVersion = await f.DbAsync(db => db.Issues.Where(x => x.Id == unavailableId).Select(x => x.RowVersion).FirstAsync())
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, unavailableResolution.StatusCode);
+    }
+
+    [Fact]
+    public async Task Appointed_non_owner_verifier_decides_and_latest_rejection_blocks_resolution()
+    {
+        var p = await d.Project();
+        var issue = await Issue(p.Id);
+        var id = issue.G("id");
+        async Task<int> Version() => await f.DbAsync(db => db.Issues.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync());
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", new
+        {
+            kind = "SiteArea", siteArea = "Synthetic test area", rowVersion = await Version()
+        }).Result.Json(201);
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Omar), status = "Proposed", note = "Appoint other discipline lead", rowVersion = await Version()
+        }).Result.Json(201);
+        await f.As(TestData.Omar).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Omar), status = "Verified", evidenceUrl = "https://review.example.test/verify/om-1", rowVersion = await Version()
+        }).Result.Json(201);
+        await f.As(TestData.Omar).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Omar), status = "Rejected", note = "Evidence no longer sufficient", rowVersion = await Version()
+        }).Result.Json(201);
+        var blocked = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Must not resolve after rejection", rowVersion = await Version()
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, blocked.StatusCode);
+    }
+}

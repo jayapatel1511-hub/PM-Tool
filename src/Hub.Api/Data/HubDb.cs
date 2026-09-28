@@ -86,6 +86,9 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<ItemLink> ItemLinks => Set<ItemLink>();
     public DbSet<Risk> Risks => Set<Risk>();
     public DbSet<Issue> Issues => Set<Issue>();
+    public DbSet<IssueLocation> IssueLocations => Set<IssueLocation>();
+    public DbSet<IssueDocumentReference> IssueDocumentReferences => Set<IssueDocumentReference>();
+    public DbSet<IssueVerification> IssueVerifications => Set<IssueVerification>();
     public DbSet<Meeting> Meetings => Set<Meeting>();
     public DbSet<MeetingAction> Actions => Set<MeetingAction>();
     public DbSet<Comment> Comments => Set<Comment>();
@@ -314,6 +317,30 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             t.HasCheckConstraint("ck_risk_status", $"status IN ({In(RiskStatus.All)})");
         }));
         Item<Issue>(mb, e => e.ToTable(t => t.HasCheckConstraint("ck_issue_status", $"status IN ({In(IssueStatus.All)})")));
+        mb.Entity<IssueLocation>(e =>
+        {
+            e.HasIndex(x => new { x.IssueId, x.CreatedAt });
+            e.Property(x => x.StartStation).HasPrecision(18, 6);
+            e.Property(x => x.EndStation).HasPrecision(18, 6);
+            e.Property(x => x.CoordinateX).HasPrecision(18, 6);
+            e.Property(x => x.CoordinateY).HasPrecision(18, 6);
+            e.Property(x => x.CoordinateZ).HasPrecision(18, 6);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_issue_location_kind", $"kind IN ({In(Hub.Domain.Registers.IssueLocationKinds)})");
+                t.HasCheckConstraint("ck_issue_location_station_order", "end_station IS NULL OR start_station IS NULL OR end_station >= start_station");
+            });
+        });
+        mb.Entity<IssueDocumentReference>(e =>
+        {
+            e.HasIndex(x => new { x.IssueId, x.Identifier, x.Revision }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_issue_document_kind", $"kind IN ({In(Hub.Domain.Registers.IssueDocumentKinds)})"));
+        });
+        mb.Entity<IssueVerification>(e =>
+        {
+            e.HasIndex(x => new { x.IssueId, x.CreatedAt });
+            e.ToTable(t => t.HasCheckConstraint("ck_issue_verification_status", $"status IN ({In(IssueVerificationStatus.All)})"));
+        });
         mb.Entity<Meeting>(e => { e.HasQueryFilter(x => x.DeletedAt == null); e.HasIndex(x => new { x.ProjectId, x.MeetingDate }); });
         Item<MeetingAction>(mb, e => e.ToTable(t => t.HasCheckConstraint("ck_action_status", $"status IN ({In(ActionStatus.All)})")));
         Fk<MeetingAction, Meeting>(mb, x => x.MeetingId);
@@ -676,6 +703,13 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<BasisConflict, Project>(mb, x => x.ProjectId);
         Fk<BasisAssumptionDisposition, Project>(mb, x => x.ProjectId);
         Fk<BasisImpactAssessment, Project>(mb, x => x.ProjectId);
+        Fk<IssueLocation, Project>(mb, x => x.ProjectId);
+        Fk<IssueLocation, Issue>(mb, x => x.IssueId);
+        Fk<IssueDocumentReference, Project>(mb, x => x.ProjectId);
+        Fk<IssueDocumentReference, Issue>(mb, x => x.IssueId);
+        Fk<IssueVerification, Project>(mb, x => x.ProjectId);
+        Fk<IssueVerification, Issue>(mb, x => x.IssueId);
+        Fk<IssueVerification, AppUser>(mb, x => x.VerifierId);
         Fk<ReadinessAssessment, Project>(mb, x => x.ProjectId);
         Fk<ReadinessCheckRecord, Project>(mb, x => x.ProjectId);
         Fk<WorkConstraint, Project>(mb, x => x.ProjectId);

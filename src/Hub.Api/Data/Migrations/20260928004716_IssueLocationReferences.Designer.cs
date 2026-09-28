@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Hub.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Hub.Api.Data.Migrations
 {
     [DbContext(typeof(HubDb))]
-    partial class HubDbModelSnapshot : ModelSnapshot
+    [Migration("20260928004716_IssueLocationReferences")]
+    partial class IssueLocationReferences
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3706,10 +3709,6 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("issue_id");
 
-                    b.Property<int>("IssueRowVersion")
-                        .HasColumnType("integer")
-                        .HasColumnName("issue_row_version");
-
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasColumnType("text")
@@ -3825,10 +3824,6 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("issue_id");
 
-                    b.Property<int>("IssueRowVersion")
-                        .HasColumnType("integer")
-                        .HasColumnName("issue_row_version");
-
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasColumnType("text")
@@ -3911,10 +3906,6 @@ namespace Hub.Api.Data.Migrations
                     b.Property<Guid>("IssueId")
                         .HasColumnType("uuid")
                         .HasColumnName("issue_id");
-
-                    b.Property<int>("IssueRowVersion")
-                        .HasColumnType("integer")
-                        .HasColumnName("issue_row_version");
 
                     b.Property<string>("Note")
                         .HasColumnType("text")

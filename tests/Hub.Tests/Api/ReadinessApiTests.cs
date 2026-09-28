@@ -104,6 +104,78 @@ public sealed class ReadinessApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Readiness_review_gate_rechecks_required_package_and_current_round()
+    {
+        var project = await data.Project();
+        var disciplineId = data.ProjectDiscipline(project.Id, "Civil");
+        var deliverable = await (await f.As(TestData.Marc).Post($"/api/v1/projects/{project.Id}/deliverables", new
+        {
+            name = "Review gated package", projectDisciplineId = disciplineId, deliverableTypeId = await data.DeliverableType(),
+            ownerId = data.User(TestData.Alex), requiresReview = true
+        })).Json(201);
+        var deliverableId = deliverable.G("id");
+        var path = $"/api/v1/projects/{project.Id}/readiness/Deliverable/{deliverableId}";
+        var targetVersion = f.Db(db => db.Deliverables.Single(d => d.Id == deliverableId).RowVersion);
+        var assessment = await (await f.As(TestData.Alex).Post(path,
+            new ReadinessEndpoints.CreateBody(Guid.NewGuid(), targetVersion, "Issue package", "Required review is approved"))).Json();
+        await f.DbAsync(async db =>
+        {
+            foreach (var check in await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.G("id")).ToListAsync())
+            {
+                check.Applies = check.Code == ReadinessCheckCode.ProductionOwner;
+                check.Satisfied = check.Applies == true;
+            }
+            await db.SaveChangesAsync(); return 0;
+        });
+        var missingPackage = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.NotReady, missingPackage["assessment"]!.S("state"));
+        Assert.False(missingPackage["checks"]!.AsArray().Single(c => c!.S("code") == ReadinessCheckCode.ReviewGate)!["satisfied"]!.GetValue<bool>());
+        Guid packageId = Guid.Empty;
+        await f.DbAsync(async db =>
+        {
+            var package = new ReviewPackage { ProjectId = project.Id, Key = "REV-GATE", Seq = 1, Title = "Required review",
+                Purpose = "Confirm the package", CoordinatorId = data.User(TestData.Marc), ProjectDisciplineId = disciplineId,
+                Status = ReviewStatus.ChangesRequired, RoundNumber = 1, RequiredForIssue = true };
+            var round = new ReviewRound { ProjectId = project.Id, PackageId = package.Id, Number = 1, Purpose = package.Purpose,
+                Status = ReviewStatus.ChangesRequired };
+            db.ReviewPackages.Add(package);
+            await db.SaveChangesAsync();
+            db.ReviewRounds.Add(round);
+            await db.SaveChangesAsync();
+            package.CurrentRoundId = round.Id; packageId = package.Id;
+            (await db.Deliverables.SingleAsync(d => d.Id == deliverableId)).RequiredReviewPackageId = package.Id;
+            await db.SaveChangesAsync(); return 0;
+        });
+        var blocked = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.NotReady, blocked["assessment"]!.S("state"));
+        var blockedGate = blocked["checks"]!.AsArray().Single(c => c!.S("code") == ReadinessCheckCode.ReviewGate)!;
+        Assert.True(blockedGate["applies"]!.GetValue<bool>());
+        Assert.False(blockedGate["satisfied"]!.GetValue<bool>());
+
+        await f.DbAsync(async db =>
+        {
+            (await db.ReviewPackages.SingleAsync(p => p.Id == packageId)).Status = ReviewStatus.Approved;
+            (await db.ReviewRounds.SingleAsync(r => r.PackageId == packageId)).Status = ReviewStatus.Approved;
+            await db.SaveChangesAsync(); return 0;
+        });
+        var approved = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.Ready, approved["assessment"]!.S("state"));
+        var clearedGate = approved["checks"]!.AsArray().Single(c => c!.S("code") == ReadinessCheckCode.ReviewGate)!;
+        Assert.True(clearedGate["satisfied"]!.GetValue<bool>());
+
+        await f.DbAsync(async db =>
+        {
+            var work = await db.Deliverables.SingleAsync(d => d.Id == deliverableId);
+            work.RequiresReview = false; work.RequiredReviewPackageId = null;
+            var manualGate = await db.ReadinessChecks.SingleAsync(c => c.AssessmentId == assessment.G("id") && c.Code == ReadinessCheckCode.ReviewGate);
+            manualGate.Applies = true; manualGate.Satisfied = false; manualGate.Reason = "Manual review remains required";
+            await db.SaveChangesAsync(); return 0;
+        });
+        var manuallyRequired = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.NotReady, manuallyRequired["assessment"]!.S("state"));
+    }
+
+    [Fact]
     public async Task Production_capacity_counts_confirmed_reservation_and_day_override()
     {
         var project = await data.Project();

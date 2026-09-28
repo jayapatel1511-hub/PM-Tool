@@ -109,6 +109,30 @@ public static class ReadinessEndpoints
             target.OwnerId != Guid.Empty && await Coordination.People(db, project).AnyAsync(u => u.Id == target.OwnerId),
             "The linked production owner is current source evidence.");
 
+        // A required review package is a live source gate. The stored readiness check cannot
+        // preserve Ready after the package or its current round moves back to review.
+        var reviewRequirement = targetType == "Deliverable"
+            ? await db.Deliverables.AsNoTracking().Where(d => d.Id == targetId && d.ProjectId == project.Id)
+                .Select(d => new { d.RequiresReview, d.RequiredReviewPackageId }).SingleAsync()
+            : null;
+        var requiredReviewPackageId = reviewRequirement?.RequiredReviewPackageId;
+        if (requiredReviewPackageId is { } packageId)
+        {
+            var review = await db.ReviewPackages.AsNoTracking().Where(p => p.Id == packageId && p.ProjectId == project.Id)
+                .Select(p => new { p.Status, p.CurrentRoundId }).SingleOrDefaultAsync();
+            var round = review?.CurrentRoundId is { } roundId
+                ? await db.ReviewRounds.AsNoTracking().Where(r => r.Id == roundId && r.ProjectId == project.Id && r.PackageId == packageId)
+                    .Select(r => r.Status).SingleOrDefaultAsync()
+                : null;
+            Source(ReadinessCheckCode.ReviewGate, true,
+                review?.Status == ReviewStatus.Approved && round == ReviewStatus.Approved,
+                "The required review package and current round are current source evidence.");
+        }
+        else if (reviewRequirement?.RequiresReview == true)
+            Source(ReadinessCheckCode.ReviewGate, true, false,
+                "A required review package has not been linked in this project scope.");
+        // Without a canonical package requirement, retain the PM/lead applicability decision.
+
         var capacity = await ProductionCapacity(db, project, targetType, targetId, today, now, settings);
         if (!(capacity.Satisfied is null && checks.TryGetValue(ReadinessCheckCode.ProductionCapacity, out var capacityRecord) && capacityRecord.Applies == false))
             Source(ReadinessCheckCode.ProductionCapacity, capacity.Applies, capacity.Satisfied, capacity.Reason);

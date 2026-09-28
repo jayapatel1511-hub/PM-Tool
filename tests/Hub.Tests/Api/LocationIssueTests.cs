@@ -152,7 +152,7 @@ public sealed class LocationIssueTests(HubFactory f)
         {
             kind = "Drawing", identifier = "C-202", revision = "B", sourceUrl = "https://review.example.test/c-202", isAvailable = false, rowVersion = await IssueVersion(unavailableId)
         }).Result.Json(201);
-        await f.As(TestData.Marc).Post($"/api/v1/issues/{unavailableId}/verification", new
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{unavailableId}/verification", new
         {
             verifierId = d.User(TestData.Marc), status = "Proposed", note = "Appoint Marc for unavailable evidence", rowVersion = await IssueVersion(unavailableId)
         }).Result.Json(201);
@@ -199,5 +199,48 @@ public sealed class LocationIssueTests(HubFactory f)
             toStatus = "Resolved", resolution = "Must not resolve after rejection", rowVersion = await Version()
         });
         Assert.Equal(HttpStatusCode.BadRequest, blocked.StatusCode);
+    }
+
+    [Fact]
+    public async Task Only_creator_or_pm_can_propose_an_independent_verifier()
+    {
+        var p = await d.Project();
+        var creatorIssue = await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/issues", new
+        {
+            title = "Creator appointment authorization", severity = "Medium", ownerId = d.User(TestData.Omar),
+            projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil")
+        }).Result.Json(201);
+        var creatorId = creatorIssue.G("id");
+
+        var ownerAttempt = await f.As(TestData.Omar).Post($"/api/v1/issues/{creatorId}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Owner cannot appoint", rowVersion = await IssueVersion(creatorId)
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, ownerAttempt.StatusCode);
+        var leadAttempt = await f.As(TestData.Marc).Post($"/api/v1/issues/{creatorId}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Discipline lead cannot appoint", rowVersion = await IssueVersion(creatorId)
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, leadAttempt.StatusCode);
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{creatorId}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Creator appoints independent verifier", rowVersion = await IssueVersion(creatorId)
+        }).Result.Json(201);
+
+        var pmIssue = await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/issues", new
+        {
+            title = "PM appointment authorization", severity = "Medium", ownerId = d.User(TestData.Alex),
+            projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil")
+        }).Result.Json(201);
+        var pmId = pmIssue.G("id");
+        var nonCreatorOwnerAttempt = await f.As(TestData.Alex).Post($"/api/v1/issues/{pmId}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Owner cannot replace PM appointment", rowVersion = await IssueVersion(pmId)
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, nonCreatorOwnerAttempt.StatusCode);
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{pmId}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "PM appoints independent verifier", rowVersion = await IssueVersion(pmId)
+        }).Result.Json(201);
     }
 }

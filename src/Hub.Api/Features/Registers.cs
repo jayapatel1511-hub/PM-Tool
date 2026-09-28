@@ -622,7 +622,14 @@ public static class RegisterEndpoints
         Check.That(body.VerifierId != issue.OwnerId && body.VerifierId != issue.CreatedBy && body.VerifierId != issue.RaisedById,
             "verifierId", "issue.verifier_independent");
         await Coordination.Person(db, project, body.VerifierId, "verifierId");
-        if (body.Status is IssueVerificationStatus.Verified or IssueVerificationStatus.Rejected)
+        if (body.Status == IssueVerificationStatus.Proposed)
+        {
+            Access.Demand(Permissions.Writable(access.Actor, ctx));
+            Access.Demand(Permissions.IsPM(access.Actor, ctx) || issue.CreatedBy == access.Me.Id
+                ? Allow.Yes : Allow.No("perm.owner"));
+            Check.Reason(body.Note);
+        }
+        else
         {
             Access.Demand(Permissions.Writable(access.Actor, ctx));
             Check.That(body.VerifierId == access.Me.Id, "verifierId", "issue.verifier_must_submit");
@@ -631,7 +638,6 @@ public static class RegisterEndpoints
             Check.That(latest?.Status == IssueVerificationStatus.Proposed && latest.VerifierId == access.Me.Id,
                 "verifierId", "issue.verifier_not_appointed");
         }
-        else { Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(issue))); Check.Reason(body.Note); }
         var evidence = string.IsNullOrWhiteSpace(body.EvidenceUrl) ? null : Coordination.Url(body.EvidenceUrl);
         if (body.Status == IssueVerificationStatus.Verified) Check.That(evidence is not null, "evidenceUrl", "error.required");
         var now = clock.GetUtcNow();

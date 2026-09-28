@@ -21,11 +21,12 @@ public static class ReadinessEndpoints
     // Source-backed checks are recomputed at read/command time. Manual applicability remains useful for
     // checks without a canonical source, but it cannot keep a linked source in a stale Ready state.
     public static async Task<ReadinessResult> EvaluateCurrent(HubDb db, Project project, string targetType,
-        Guid targetId, ReadinessAssessment assessment, IReadOnlyList<ReadinessCheckRecord> records, DateOnly today, DateTimeOffset now)
+        Guid targetId, ReadinessAssessment assessment, IReadOnlyList<ReadinessCheckRecord> records, DateOnly today, DateTimeOffset now,
+        SettingsStore? settings = null)
     {
         var target = await Coordination.Target(db, project, targetType, targetId, false);
         var checks = records.ToDictionary(x => x.Code, StringComparer.Ordinal);
-        void Source(string code, bool applies, bool satisfied, string reason)
+        void Source(string code, bool applies, bool? satisfied, string reason)
         {
             if (!checks.TryGetValue(code, out var row)) return;
             row.Applies = applies; row.Satisfied = satisfied; row.Reason = reason;
@@ -108,6 +109,10 @@ public static class ReadinessEndpoints
             target.OwnerId != Guid.Empty && await Coordination.People(db, project).AnyAsync(u => u.Id == target.OwnerId),
             "The linked production owner is current source evidence.");
 
+        var capacity = await ProductionCapacity(db, project, targetType, targetId, today, now, settings);
+        if (!(capacity.Satisfied is null && checks.TryGetValue(ReadinessCheckCode.ProductionCapacity, out var capacityRecord) && capacityRecord.Applies == false))
+            Source(ReadinessCheckCode.ProductionCapacity, capacity.Applies, capacity.Satisfied, capacity.Reason);
+
         var activeConstraints = await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == project.Id &&
             c.TargetType == targetType && c.TargetId == targetId &&
             c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled).Select(c => c.Category).ToListAsync();
@@ -141,6 +146,119 @@ public static class ReadinessEndpoints
             [.. result.Blocked, "Constraint"]);
         assessment.State = result.State; assessment.EvaluatedAt = now;
         return result;
+    }
+
+    /// Evaluates the assigned production owner's capacity over the target's authoritative due-date window.
+    /// Missing owner, dates, or estimates remain unknown. Confirmed reservations use their dated spread and
+    /// allocation day overrides; availability overrides replace the normal daily capacity.
+    public sealed record CapacityEvaluation(bool Applies, bool? Satisfied, string Reason);
+
+    public static async Task<CapacityEvaluation> ProductionCapacity(HubDb db, Project project, string targetType,
+        Guid targetId, DateOnly today, DateTimeOffset now) => await ProductionCapacity(db, project, targetType, targetId, today, now, null);
+
+    static async Task<CapacityEvaluation> ProductionCapacity(HubDb db, Project project, string targetType,
+        Guid targetId, DateOnly today, DateTimeOffset now, SettingsStore? suppliedSettings)
+    {
+        // The overload is intended for direct callers; Detail supplies the configured store below through
+        // the current evaluator's normal settings path. Keep this source check deterministic in tests.
+        var orgSettings = suppliedSettings is null
+            ? OrgSettings.From((await db.Settings.AsNoTracking().ToListAsync()).ToDictionary(r => r.Key,
+                r => System.Text.Json.JsonDocument.Parse(r.Value).RootElement.Clone()))
+            : await suppliedSettings.Get(db);
+        var defaultWeekly = orgSettings.DefaultWeeklyCapacityHours;
+        var ownerAndWindow = targetType == "Task"
+            ? await db.Tasks.AsNoTracking().Where(t => t.Id == targetId && t.ProjectId == project.Id && t.DeletedAt == null)
+                .Select(t => new { OwnerId = t.AssigneeId, t.StartDate, t.DueDate, t.EstimatedHours, t.ProgressPct })
+                .SingleOrDefaultAsync()
+            : await db.Deliverables.AsNoTracking().Where(d => d.Id == targetId && d.ProjectId == project.Id && d.DeletedAt == null)
+                .Select(d => new { OwnerId = d.OwnerId, d.StartDate, d.DueDate, EstimatedHours = (decimal?)null, ProgressPct = 0 })
+                .SingleOrDefaultAsync();
+        if (ownerAndWindow is null || ownerAndWindow.OwnerId is not { } owner || owner == Guid.Empty ||
+            ownerAndWindow.DueDate is not { } due || due < today)
+            return new(true, null, "Production capacity needs an active owner and a current target date.");
+
+        var person = await db.Users.AsNoTracking().Where(u => u.Id == owner && u.IsActive)
+            .Select(u => new { u.Id, u.OfficeId, u.WeeklyCapacityHours }).SingleOrDefaultAsync();
+        if (person is null || !await Coordination.People(db, project).AnyAsync(u => u.Id == owner))
+            return new(true, null, "Production capacity needs a current project owner.");
+
+        var sourceTasks = targetType == "Task"
+            ? await db.Tasks.AsNoTracking().Where(t => t.Id == targetId && t.EstimatedHours != null)
+                .Select(t => new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate)).ToListAsync()
+            : await db.Tasks.AsNoTracking().Where(t => t.DeliverableId == targetId && t.AssigneeId == owner &&
+                    t.DeletedAt == null && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
+                .Select(t => new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate)).ToListAsync();
+        if (sourceTasks.Count == 0 && targetType == "Deliverable")
+            return new(false, null, "Production capacity does not apply because this deliverable has no open production tasks.");
+        if (sourceTasks.Count == 0 || sourceTasks.Any(t => t.EstimatedHours is null))
+            return new(true, null, "Production capacity is unknown until the required production estimate is recorded.");
+
+        var through = due;
+        if (through > today.AddDays(366))
+            return new(true, null, "Production capacity needs a bounded target date window.");
+        var sourceTaskIds = sourceTasks.Select(t => t.TaskId).ToHashSet();
+        var hasOtherDemand = await db.Tasks.AsNoTracking().AnyAsync(t => t.AssigneeId == owner && t.DeletedAt == null &&
+            !sourceTaskIds.Contains(t.Id) && t.ProgressPct < 100 &&
+            t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold &&
+            t.DueDate != null && (t.StartDate == null || t.StartDate <= through));
+        if (hasOtherDemand)
+            return new(true, null, "Production capacity is unknown until the owner's other active workload is in scope.");
+
+        var holidays = orgSettings.WorkingDaysEnabled
+            ? await db.Holidays.AsNoTracking().Where(h => h.OfficeId == null || h.OfficeId == person.OfficeId)
+                .Select(h => h.Date).ToListAsync()
+            : [];
+        var calendar = new WorkCalendar(holidays);
+        var overrides = await db.AvailabilityOverrides.AsNoTracking().Where(o => o.PersonId == owner &&
+            o.WorkDate >= today && o.WorkDate <= through).ToDictionaryAsync(o => o.WorkDate, o => o.AvailableHours);
+        var availableByDay = new Dictionary<DateOnly, decimal>();
+        for (var day = today; day <= through; day = day.AddDays(1))
+            availableByDay[day] = AllocationRules.DailyCapacity(day, person.WeeklyCapacityHours ?? defaultWeekly, calendar,
+                overrides.TryGetValue(day, out var hours) ? hours : null);
+
+        var allocations = await db.Allocations.AsNoTracking().Where(a => a.PersonId == owner &&
+            a.Status == AllocationStatus.Confirmed && a.FromDate <= through && a.ThroughDate >= today).ToListAsync();
+        // A project-scoped readiness result must not infer spare capacity from assignments whose
+        // visibility has not been established. Keep the result unknown rather than leaking or
+        // silently under-counting another project's commitment.
+        if (allocations.Any(a => a.ProjectId != project.Id))
+            return new(true, null, "Production capacity is unknown while other confirmed allocations are outside this readiness scope.");
+        var allocationIds = allocations.Select(a => a.Id).ToArray();
+        var taskDemand = sourceTasks.ToDictionary(t => t.TaskId,
+            t => Workload.SpreadDays(t, today, calendar).ByDay);
+        var demandByDay = taskDemand.Values.SelectMany(days => days).Where(x => x.Key <= through)
+            .GroupBy(x => x.Key).ToDictionary(g => g.Key, g => g.Sum(x => x.Value));
+        var links = await db.AllocationWorkLinks.AsNoTracking().Where(l => allocationIds.Contains(l.AllocationId) &&
+            l.ReleasedAt == null && l.WorkType == "Task" && sourceTaskIds.Contains(l.WorkId)).ToListAsync();
+        var dayOverrides = await db.AllocationDayOverrides.AsNoTracking().Where(o => allocationIds.Contains(o.AllocationId))
+            .ToListAsync();
+        var reservationByDay = new Dictionary<DateOnly, decimal>();
+        var linkedReservationByDay = new Dictionary<DateOnly, decimal>();
+        var linkedAllocationDays = links.Select(l => (l.AllocationId, l.WorkDate)).ToHashSet();
+        foreach (var allocation in allocations)
+        {
+            var explicitDays = dayOverrides.Where(o => o.AllocationId == allocation.Id)
+                .ToDictionary(o => o.WorkDate, o => o.Hours);
+            IReadOnlyDictionary<DateOnly, decimal> spread;
+            try { spread = AllocationRules.Spread(allocation.FromDate, allocation.ThroughDate, allocation.PlannedHours, calendar, explicitDays); }
+            catch (ArgumentException) { return new(true, null, "Production capacity needs reassessment after a calendar change."); }
+            foreach (var (day, hours) in spread.Where(x => x.Key >= today && x.Key <= through))
+            {
+                reservationByDay[day] = reservationByDay.GetValueOrDefault(day) + hours;
+                if (linkedAllocationDays.Contains((allocation.Id, day)))
+                    linkedReservationByDay[day] = linkedReservationByDay.GetValueOrDefault(day) + hours;
+            }
+        }
+        var linkedByDay = links.DistinctBy(l => (l.WorkId, l.WorkDate)).GroupBy(l => l.WorkDate).ToDictionary(g => g.Key,
+            g => g.Sum(l => taskDemand.GetValueOrDefault(l.WorkId)?.GetValueOrDefault(l.WorkDate) ?? 0m));
+        // The target estimate is already included in demand. Subtract linked target demand once
+        // per day from the aggregate reservations, even if competing allocations link the target.
+        var satisfied = availableByDay.All(x => demandByDay.GetValueOrDefault(x.Key) +
+            reservationByDay.GetValueOrDefault(x.Key) - Math.Min(linkedReservationByDay.GetValueOrDefault(x.Key),
+                linkedByDay.GetValueOrDefault(x.Key)) <= x.Value);
+        return new(true, satisfied, satisfied
+            ? "Confirmed reservations fit within the owner's dated production capacity."
+            : "Confirmed reservations and the required production estimate exceed the owner's dated capacity.");
     }
 
     public static void Map(RouteGroupBuilder api)
@@ -262,7 +380,7 @@ public static class ReadinessEndpoints
         var checks = await db.ReadinessChecks.AsNoTracking().Where(c => c.ProjectId == projectId &&
             c.AssessmentId == assessment.Id).OrderBy(c => c.Code).ToListAsync();
         var result = await EvaluateCurrent(db, project, targetType, targetId, assessment, checks,
-            clock.Today(await settings.Get(db)), clock.GetUtcNow());
+            clock.Today(await settings.Get(db)), clock.GetUtcNow(), settings);
         return new { Assessment = assessment, Checks = checks, result.Unknown, result.Blocked,
             Exceptions = await db.ReadinessExceptions.AsNoTracking().Where(e => e.ProjectId == projectId &&
                 e.AssessmentId == assessment.Id).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync() };

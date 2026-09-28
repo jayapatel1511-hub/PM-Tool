@@ -11,6 +11,75 @@ public sealed class ReadinessApiTests(HubFactory f)
     readonly TestData data = new(f);
 
     [Fact]
+    public async Task Production_capacity_distinguishes_available_unavailable_and_unknown()
+    {
+        var project = await data.Project();
+        var owner = data.User(TestData.Marc);
+        var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
+        var task = await data.NewTask(project.Id, extra: new { assigneeId = owner, startDate = today, dueDate = today.AddDays(2), estimatedHours = 8m });
+        var taskId = task.G("id");
+        var available = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Task", taskId, today, f.Clock.Now));
+        await f.DbAsync(async db => { (await db.Tasks.SingleAsync(t => t.Id == taskId)).EstimatedHours = 80m; await db.SaveChangesAsync(); return 0; });
+        var unavailable = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Task", taskId, today, f.Clock.Now));
+        await f.DbAsync(async db => { (await db.Tasks.SingleAsync(t => t.Id == taskId)).EstimatedHours = null; await db.SaveChangesAsync(); return 0; });
+        var unknown = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Task", taskId, today, f.Clock.Now));
+
+        Assert.True(available.Applies);
+        Assert.Equal(true, available.Satisfied);
+        Assert.Equal(false, unavailable.Satisfied);
+        Assert.Null(unknown.Satisfied);
+
+        await f.DbAsync(async db =>
+        {
+            (await db.Tasks.SingleAsync(t => t.Id == taskId)).EstimatedHours = 8m;
+            db.AvailabilityOverrides.Add(new PersonAvailabilityOverride { PersonId = owner, WorkDate = today,
+                AvailableHours = 0m, Category = AvailabilityCategory.Unavailable });
+            await db.SaveChangesAsync(); return 0;
+        });
+        var blockedToday = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Task", taskId, today, f.Clock.Now));
+        Assert.Equal(false, blockedToday.Satisfied);
+    }
+
+    [Fact]
+    public async Task Production_capacity_counts_confirmed_reservation_and_day_override()
+    {
+        var project = await data.Project();
+        var owner = data.User(TestData.Omar);
+        var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
+        var task = await data.NewTask(project.Id, as_: TestData.Omar,
+            extra: new { assigneeId = owner, startDate = today, dueDate = today, estimatedHours = 4m }, discipline: "Electrical");
+        var allocation = new ResourceAllocation { ProjectId = project.Id, PersonId = owner, FromDate = today,
+            ThroughDate = today, PlannedHours = 4m, Status = AllocationStatus.Confirmed };
+        await f.DbAsync(async db =>
+        {
+            db.Allocations.Add(allocation);
+            db.AvailabilityOverrides.Add(new PersonAvailabilityOverride { PersonId = owner, WorkDate = today,
+                AvailableHours = 4m, Category = AvailabilityCategory.Reduced });
+            db.AllocationDayOverrides.Add(new AllocationDayOverride { AllocationId = allocation.Id, WorkDate = today, Hours = 4m });
+            db.AllocationWorkLinks.Add(new AllocationWorkLink { AllocationId = allocation.Id, PersonId = owner,
+                WorkType = "Task", WorkId = task.G("id"), WorkDate = today });
+            await db.SaveChangesAsync();
+            return 0;
+        });
+
+        var result = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Task", task.G("id"), today, f.Clock.Now));
+        Assert.True(result.Satisfied == true, result.Reason);
+
+        var competing = new ResourceAllocation { ProjectId = project.Id, PersonId = owner, FromDate = today,
+            ThroughDate = today, PlannedHours = 4m, Status = AllocationStatus.Confirmed };
+        await f.DbAsync(async db =>
+        {
+            db.Allocations.Add(competing);
+            db.AllocationDayOverrides.Add(new AllocationDayOverride { AllocationId = competing.Id, WorkDate = today, Hours = 4m });
+            await db.SaveChangesAsync();
+            return 0;
+        });
+        result = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Task", task.G("id"), today, f.Clock.Now));
+        Assert.Equal(false, result.Satisfied);
+        Assert.Contains("exceed", result.Reason, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task Scoped_assumption_exception_expires_without_erasing_approval()
     {
         var savedClock = f.Clock.Now;
@@ -87,7 +156,9 @@ public sealed class ReadinessApiTests(HubFactory f)
     {
         var project = await data.Project();
         var predecessor = await data.NewTask(project.Id, extra: new { assigneeId = data.User(TestData.Alex) });
-        var successor = await data.NewTask(project.Id, extra: new { assigneeId = data.User(TestData.Alex) });
+        var successor = await data.NewTask(project.Id, extra: new { assigneeId = data.User(TestData.Alex),
+            startDate = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime),
+            dueDate = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime).AddDays(2), estimatedHours = 4m });
         await f.DbAsync(async db =>
         {
             db.Dependencies.Add(new TaskDependency { ProjectId = project.Id, PredecessorTaskId = predecessor.G("id"), SuccessorTaskId = successor.G("id"), CreatedAt = DateTimeOffset.UtcNow });
@@ -227,7 +298,8 @@ public sealed class ReadinessApiTests(HubFactory f)
         var detail = await (await f.As(TestData.Alex).GetAsync(path)).Json();
         Assert.Equal(ReadinessState.NeedsAssessment, detail["assessment"]!.S("state"));
         Assert.Equal(ReadinessCheckCode.All.Length, detail["checks"]!.AsArray().Count);
-        Assert.All(detail["checks"]!.AsArray().Where(c => c!.S("code") != ReadinessCheckCode.ProductionOwner),
+        Assert.All(detail["checks"]!.AsArray().Where(c => c!.S("code") != ReadinessCheckCode.ProductionOwner &&
+            c.S("code") != ReadinessCheckCode.ProductionCapacity),
             c => { Assert.Null(c!["applies"]); Assert.Null(c["satisfied"]); });
         var handoff = detail["checks"]!.AsArray().Single(c => c!.S("code") == ReadinessCheckCode.Handoff)!;
         var productionOwner = detail["checks"]!.AsArray().Single(c => c!.S("code") == ReadinessCheckCode.ProductionOwner)!;

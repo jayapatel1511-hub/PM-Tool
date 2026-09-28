@@ -11,6 +11,71 @@ public sealed class ReadinessApiTests(HubFactory f)
     readonly TestData data = new(f);
 
     [Fact]
+    public async Task Detail_recomputes_linked_predecessor_instead_of_cached_ready_state()
+    {
+        var project = await data.Project();
+        var predecessor = await data.NewTask(project.Id, extra: new { assigneeId = data.User(TestData.Alex) });
+        var successor = await data.NewTask(project.Id, extra: new { assigneeId = data.User(TestData.Alex) });
+        await f.DbAsync(async db =>
+        {
+            db.Dependencies.Add(new TaskDependency { ProjectId = project.Id, PredecessorTaskId = predecessor.G("id"), SuccessorTaskId = successor.G("id"), CreatedAt = DateTimeOffset.UtcNow });
+            await db.SaveChangesAsync(); return 0;
+        });
+        var id = successor.G("id");
+        var version = f.Db(db => db.Tasks.Single(t => t.Id == id).RowVersion);
+        var path = $"/api/v1/projects/{project.Id}/readiness/Task/{id}";
+        var assessment = await (await f.As(TestData.Alex).Post(path,
+            new ReadinessEndpoints.CreateBody(Guid.NewGuid(), version, "Output", "Criteria"))).Json();
+        await f.DbAsync(async db =>
+        {
+            var checks = await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.G("id")).ToListAsync();
+            foreach (var check in checks) { check.Applies = true; check.Satisfied = true; }
+            (await db.ReadinessAssessments.SingleAsync(a => a.Id == assessment.G("id"))).State = ReadinessState.Ready;
+            await db.SaveChangesAsync(); return 0;
+        });
+        var detail = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.NotReady, detail["assessment"]!.S("state"));
+        var predecessorCheck = detail["checks"]!.AsArray().Single(c => c!["code"]!.GetValue<string>() == ReadinessCheckCode.Predecessor)!;
+        Assert.True(predecessorCheck["applies"]!.GetValue<bool>());
+        Assert.False(predecessorCheck["satisfied"]!.GetValue<bool>());
+        var monday = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+        monday = monday.AddDays(-((int)monday.DayOfWeek + 6) % 7);
+        var commitments = $"/api/v1/projects/{project.Id}/weekly-commitments";
+        var proposal = await (await f.As(TestData.Pm).Post($"{commitments}/Task/{id}",
+            new WeeklyCommitmentsEndpoints.ProposeBody(Guid.NewGuid(), version, monday, monday.AddDays(2),
+                "Blocked successor output", "Predecessor complete"))).Json();
+        await (await f.As(TestData.Alex).Post($"{commitments}/{proposal.G("id")}/transition",
+            new WeeklyCommitmentsEndpoints.MoveBody(Guid.NewGuid(), proposal.I("rowVersion"),
+                CommitmentState.Committed, "Cannot sign a blocked output", null))).Json(400);
+        await f.DbAsync(async db =>
+        {
+            (await db.Dependencies.SingleAsync(d => d.SuccessorTaskId == id)).DeletedAt = DateTimeOffset.UtcNow;
+            await db.SaveChangesAsync(); return 0;
+        });
+        var withoutDeletedLink = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.Ready, withoutDeletedLink["assessment"]!.S("state"));
+        var constraintId = Guid.NewGuid();
+        await f.DbAsync(async db =>
+        {
+            db.WorkConstraints.Add(new WorkConstraint { Id = constraintId, ProjectId = project.Id,
+                TargetType = "Task", TargetId = id, Category = "Handoff", Description = "Await source confirmation",
+                RemovalOwnerId = data.User(TestData.Pm), AffectedOwnerId = data.User(TestData.Alex),
+                NeededBy = monday.AddDays(2), SourceUrl = "https://example.test/source",
+                State = ConstraintState.ResolutionProposed });
+            await db.SaveChangesAsync(); return 0;
+        });
+        var proposedRemoval = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.NotReady, proposedRemoval["assessment"]!.S("state"));
+        await f.DbAsync(async db =>
+        {
+            (await db.WorkConstraints.SingleAsync(c => c.Id == constraintId)).State = ConstraintState.VerifiedRemoved;
+            await db.SaveChangesAsync(); return 0;
+        });
+        var verifiedRemoval = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.Ready, verifiedRemoval["assessment"]!.S("state"));
+    }
+
+    [Fact]
     public async Task Chair_proposal_requires_performer_confirmation_and_snapshot_retains_withdrawal()
     {
         var project = await data.Project();
@@ -85,9 +150,12 @@ public sealed class ReadinessApiTests(HubFactory f)
         var detail = await (await f.As(TestData.Alex).GetAsync(path)).Json();
         Assert.Equal(ReadinessState.NeedsAssessment, detail["assessment"]!.S("state"));
         Assert.Equal(ReadinessCheckCode.All.Length, detail["checks"]!.AsArray().Count);
-        Assert.All(detail["checks"]!.AsArray(), c => { Assert.Null(c!["applies"]); Assert.Null(c["satisfied"]); });
+        Assert.All(detail["checks"]!.AsArray().Where(c => c!.S("code") != ReadinessCheckCode.ProductionOwner),
+            c => { Assert.Null(c!["applies"]); Assert.Null(c["satisfied"]); });
         var handoff = detail["checks"]!.AsArray().Single(c => c!.S("code") == ReadinessCheckCode.Handoff)!;
         var productionOwner = detail["checks"]!.AsArray().Single(c => c!.S("code") == ReadinessCheckCode.ProductionOwner)!;
+        Assert.True(productionOwner["applies"]!.GetValue<bool>());
+        Assert.True(productionOwner["satisfied"]!.GetValue<bool>());
         await (await f.As(TestData.Pm).Post(path + "/checks/Production%20Owner/applicability",
             new ReadinessEndpoints.ApplicabilityBody(Guid.NewGuid(), detail["assessment"]!.I("rowVersion"),
                 productionOwner.I("rowVersion"), false, "No owner claimed", null))).Json(400);

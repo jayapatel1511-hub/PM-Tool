@@ -16,6 +16,96 @@ public static class ReadinessEndpoints
         string? EvidenceUrl);
     static readonly string[] ConstraintCategories = ["Handoff", "Decision", "Basis", "Capacity", "Review", "Scope", "Other"];
 
+    // Source-backed checks are recomputed at read/command time. Manual applicability remains useful for
+    // checks without a canonical source, but it cannot keep a linked source in a stale Ready state.
+    public static async Task<ReadinessResult> EvaluateCurrent(HubDb db, Project project, string targetType,
+        Guid targetId, ReadinessAssessment assessment, IReadOnlyList<ReadinessCheckRecord> records, DateOnly today, DateTimeOffset now)
+    {
+        var target = await Coordination.Target(db, project, targetType, targetId, false);
+        var checks = records.ToDictionary(x => x.Code, StringComparer.Ordinal);
+        void Source(string code, bool applies, bool satisfied, string reason)
+        {
+            if (!checks.TryGetValue(code, out var row)) return;
+            row.Applies = applies; row.Satisfied = satisfied; row.Reason = reason;
+        }
+
+        var handoffs = await db.Handoffs.AsNoTracking().Where(h => h.ProjectId == project.Id &&
+            (targetType == "Task" ? h.TargetTaskId == targetId : h.TargetDeliverableId == targetId) &&
+            h.Status != HandoffStatus.Cancelled).Select(h => h.Status).ToListAsync();
+        if (handoffs.Count > 0)
+            Source(ReadinessCheckCode.Handoff, true, handoffs.All(s => s is HandoffStatus.Accepted or HandoffStatus.Incorporated),
+                "Linked handoffs are current source evidence.");
+
+        if (targetType == "Task")
+        {
+            var predecessorIds = await db.Dependencies.AsNoTracking().Where(d => d.ProjectId == project.Id &&
+                d.SuccessorTaskId == targetId && d.DeletedAt == null).Select(d => d.PredecessorTaskId).Distinct().ToListAsync();
+            if (predecessorIds.Count > 0)
+            {
+                var predecessors = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == project.Id &&
+                    predecessorIds.Contains(t.Id)).Select(t => t.Status).ToListAsync();
+                Source(ReadinessCheckCode.Predecessor, true, predecessors.Count == predecessorIds.Count &&
+                    predecessors.All(s => s == TaskStatuses.Complete), "Linked predecessor tasks are current source evidence.");
+            }
+        }
+        else
+        {
+            var predecessorIds = await db.DeliverableDependencies.AsNoTracking().Where(d => d.ProjectId == project.Id &&
+                d.SuccessorDeliverableId == targetId && d.DeletedAt == null).Select(d => d.PredecessorDeliverableId).Distinct().ToListAsync();
+            if (predecessorIds.Count > 0)
+            {
+                var predecessors = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == project.Id &&
+                    predecessorIds.Contains(d.Id)).Select(d => d.Status).ToListAsync();
+                Source(ReadinessCheckCode.Predecessor, true, predecessors.Count == predecessorIds.Count &&
+                    predecessors.All(s => s is DeliverableStatus.Issued or DeliverableStatus.Accepted),
+                    "Linked predecessor deliverables are current source evidence.");
+            }
+        }
+
+        var decisionIds = await db.ItemLinks.AsNoTracking().Where(l => l.ProjectId == project.Id && l.DeletedAt == null && l.TargetType == targetType &&
+            l.TargetId == targetId && l.SourceType == ItemType.Decision && l.Relation == ItemRelation.BlockedByDecision)
+            .Select(l => l.SourceId).Distinct().ToListAsync();
+        if (decisionIds.Count > 0)
+        {
+            var statuses = await db.Decisions.AsNoTracking().Where(d => decisionIds.Contains(d.Id)).Select(d => d.Status).ToListAsync();
+            Source(ReadinessCheckCode.Decision, true, statuses.Count == decisionIds.Count && statuses.All(s => s == DecisionStatus.Decided),
+                "Linked decisions are current source evidence.");
+        }
+
+        var allUses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == project.Id && u.TargetType == targetType && u.TargetId == targetId)
+            .Join(db.DesignBasisVersions.AsNoTracking(), u => u.VersionId, v => v.Id,
+                (u, v) => new { u.Id, u.VersionId, u.CreatedAt, v.EntryId }).ToListAsync();
+        var currentUses = allUses.GroupBy(u => u.EntryId)
+            .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()).ToList();
+        if (currentUses.Count > 0)
+        {
+            var useIds = currentUses.Select(u => u.Id).ToArray();
+            var versionIds = currentUses.Select(u => u.VersionId).ToArray();
+            var versions = await db.DesignBasisVersions.AsNoTracking().Where(v => versionIds.Contains(v.Id)).ToListAsync();
+            var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => c.ProjectId == project.Id &&
+                (versionIds.Contains(c.LeftVersionId) || versionIds.Contains(c.RightVersionId)))
+                .AnyAsync(c => !c.Resolved);
+            var pendingImpact = await db.BasisImpactAssessments.AsNoTracking().AnyAsync(a => a.ProjectId == project.Id &&
+                useIds.Contains(a.BasisUseId) && a.Status == AssessmentStatus.Pending);
+            Source(ReadinessCheckCode.Basis, true, versions.Count == currentUses.Count && !conflicts && !pendingImpact &&
+                versions.All(v => v.Status == BasisStatus.Confirmed),
+                "Linked basis uses and conflicts are current source evidence.");
+        }
+
+        Source(ReadinessCheckCode.ProductionOwner, true,
+            target.OwnerId != Guid.Empty && await Coordination.People(db, project).AnyAsync(u => u.Id == target.OwnerId),
+            "The linked production owner is current source evidence.");
+
+        var result = ReadinessRules.Evaluate(checks.Values.Select(c => new ReadinessCheck(c.Code, c.Applies, c.Satisfied)), null, today);
+        var openConstraint = await db.WorkConstraints.AsNoTracking().AnyAsync(c => c.ProjectId == project.Id &&
+            c.TargetType == targetType && c.TargetId == targetId &&
+            (c.State == ConstraintState.Open || c.State == ConstraintState.ResolutionProposed));
+        if (openConstraint) result = new ReadinessResult(ReadinessState.NotReady, result.Unknown,
+            [.. result.Blocked, "Constraint"]);
+        assessment.State = result.State; assessment.EvaluatedAt = now;
+        return result;
+    }
+
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}", Detail);
@@ -83,15 +173,18 @@ public static class ReadinessEndpoints
                 return check;
             });
 
-    static async Task<object> Detail(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)
+    static async Task<object> Detail(Guid projectId, string targetType, Guid targetId, Access access, HubDb db, TimeProvider clock,
+        SettingsStore settings)
     {
-        await access.Project(projectId, false);
+        var (project, _) = await access.Project(projectId, false);
         Check.OneOf(targetType, ["Task", "Deliverable"], "targetType");
         var assessment = await db.ReadinessAssessments.AsNoTracking().SingleOrDefaultAsync(a =>
             a.ProjectId == projectId && a.TargetType == targetType && a.TargetId == targetId) ?? throw ApiException.NotFound();
         var checks = await db.ReadinessChecks.AsNoTracking().Where(c => c.ProjectId == projectId &&
             c.AssessmentId == assessment.Id).OrderBy(c => c.Code).ToListAsync();
-        return new { Assessment = assessment, Checks = checks };
+        var result = await EvaluateCurrent(db, project, targetType, targetId, assessment, checks,
+            clock.Today(await settings.Get(db)), clock.GetUtcNow());
+        return new { Assessment = assessment, Checks = checks, result.Unknown, result.Blocked };
     }
 
     static async Task<object> Constraints(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)

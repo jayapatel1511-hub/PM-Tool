@@ -49,7 +49,7 @@ public static class WeeklyCommitmentsEndpoints
             });
 
     static Task<Coordination.Result> Move(Guid projectId, Guid id, MoveBody body, Access access, HubDb db,
-        TimeProvider clock) =>
+        TimeProvider clock, SettingsStore settings) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "commitment.transition", id, body },
             access, db, clock, async (project, ctx) =>
             {
@@ -68,12 +68,11 @@ public static class WeeklyCommitmentsEndpoints
                     Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, row.PerformerId));
                     var assessment = await db.ReadinessAssessments.SingleOrDefaultAsync(a => a.ProjectId == project.Id &&
                         a.TargetType == row.TargetType && a.TargetId == row.TargetId);
-                    Check.That(assessment is not null && assessment.OwnerId == row.PerformerId &&
-                        assessment.State == ReadinessState.Ready,
+                    Check.That(assessment is not null && assessment.OwnerId == row.PerformerId,
                         "readiness", "coord.transition");
                     var checks = await db.ReadinessChecks.AsNoTracking().Where(c => c.AssessmentId == assessment!.Id).ToListAsync();
-                    var evaluated = ReadinessRules.Evaluate(checks.Select(c => new ReadinessCheck(c.Code, c.Applies, c.Satisfied)),
-                        null, DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime));
+                    var evaluated = await ReadinessEndpoints.EvaluateCurrent(db, project, row.TargetType, row.TargetId,
+                        assessment!, checks, clock.Today(await settings.Get(db)), clock.GetUtcNow());
                     Check.That(evaluated.State == ReadinessState.Ready, "readiness", "coord.transition");
                     Check.That(!await db.WorkConstraints.AnyAsync(c => c.ProjectId == project.Id &&
                         c.TargetType == row.TargetType && c.TargetId == row.TargetId &&

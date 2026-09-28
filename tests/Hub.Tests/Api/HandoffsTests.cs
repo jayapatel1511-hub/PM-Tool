@@ -50,6 +50,31 @@ public sealed class HandoffsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Submitted_handoff_keeps_source_derived_readiness_not_ready_until_accepted()
+    {
+        var s = await New(); var handoffId = (await Create(s)).G("id");
+        var targetId = s.Target.G("id");
+        var targetVersion = f.Db(db => db.Tasks.Single(t => t.Id == targetId).RowVersion);
+        var path = $"/api/v1/projects/{s.Project.Id}/readiness/Task/{targetId}";
+        var assessment = await (await f.As(TestData.Omar).Post(path,
+            new ReadinessEndpoints.CreateBody(Guid.NewGuid(), targetVersion, "Electrical service alignment",
+                "Alignment checked against the accepted survey"))).Json();
+        await f.DbAsync(async db =>
+        {
+            var checks = await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.G("id")).ToListAsync();
+            foreach (var check in checks) { check.Applies = true; check.Satisfied = true; }
+            await db.SaveChangesAsync(); return 0;
+        });
+        await Move(s, handoffId, TestData.Alex, HandoffStatus.Submitted);
+        var submitted = await (await f.As(TestData.Omar).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.NotReady, submitted["assessment"]!.S("state"));
+        Assert.Contains(ReadinessCheckCode.Handoff, submitted["blocked"]!.AsArray().Select(x => x!.GetValue<string>()));
+        await Move(s, handoffId, TestData.Omar, HandoffStatus.Accepted, outcome: "Survey criteria met");
+        var accepted = await (await f.As(TestData.Omar).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.Ready, accepted["assessment"]!.S("state"));
+    }
+
+    [Fact]
     public async Task AC_HND_03_publishing_B_keeps_incorporated_A_and_creates_one_pending_assessment()
     {
         var s = await New(); var hid = (await Create(s)).G("id");

@@ -183,7 +183,7 @@ public static class ReadinessEndpoints
             return new(true, null, "Production capacity needs a current project owner.");
 
         var sourceTasks = targetType == "Task"
-            ? await db.Tasks.AsNoTracking().Where(t => t.Id == targetId && t.EstimatedHours != null)
+            ? await db.Tasks.AsNoTracking().Where(t => t.Id == targetId && t.ProjectId == project.Id && t.EstimatedHours != null)
                 .Select(t => new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate)).ToListAsync()
             : await db.Tasks.AsNoTracking().Where(t => t.DeliverableId == targetId && t.AssigneeId == owner &&
                     t.DeletedAt == null && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
@@ -196,6 +196,8 @@ public static class ReadinessEndpoints
         var through = due;
         if (through > today.AddDays(366))
             return new(true, null, "Production capacity needs a bounded target date window.");
+        if (sourceTasks.Any(t => t.DueDate is null || t.DueDate > through || t.StartDate > through))
+            return new(true, null, "Production capacity is unknown until all required production work is dated within the target window.");
         var sourceTaskIds = sourceTasks.Select(t => t.TaskId).ToHashSet();
         var hasOtherDemand = await db.Tasks.AsNoTracking().AnyAsync(t => t.AssigneeId == owner && t.DeletedAt == null &&
             !sourceTaskIds.Contains(t.Id) && t.ProgressPct < 100 &&
@@ -222,7 +224,7 @@ public static class ReadinessEndpoints
         // visibility has not been established. Keep the result unknown rather than leaking or
         // silently under-counting another project's commitment.
         if (allocations.Any(a => a.ProjectId != project.Id))
-            return new(true, null, "Production capacity is unknown while other confirmed allocations are outside this readiness scope.");
+            return new(true, null, "Production capacity is unknown while confirmed reservations are outside this readiness scope.");
         var allocationIds = allocations.Select(a => a.Id).ToArray();
         var taskDemand = sourceTasks.ToDictionary(t => t.TaskId,
             t => Workload.SpreadDays(t, today, calendar).ByDay);
@@ -271,6 +273,7 @@ public static class ReadinessEndpoints
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/exceptions", ApproveException)
             .WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", Constraints);
+        api.MapGet("/projects/{projectId:guid}/readiness/window", Window);
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", AddConstraint)
             .WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints/{constraintId:guid}/transition", MoveConstraint)
@@ -392,6 +395,59 @@ public static class ReadinessEndpoints
         await Coordination.Target(db, project, targetType, targetId, false);
         return await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
             c.TargetType == targetType && c.TargetId == targetId).OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt).ToListAsync();
+    }
+
+    static async Task<object> Window(Guid projectId, DateOnly? from, DateOnly? to, Access access, HubDb db,
+        SettingsStore settings, TimeProvider clock)
+    {
+        var (project, _) = await access.Project(projectId, false);
+        var org = await settings.Get(db);
+        var first = from ?? clock.Today(org);
+        var defaultDays = org.CoordinationLookaheadWeeks * 7 - 1;
+        Check.That(to.HasValue || first.DayNumber <= DateOnly.MaxValue.DayNumber - defaultDays, "from", "error.invalid");
+        var last = to ?? first.AddDays(defaultDays);
+        Check.That(last >= first && last.DayNumber - first.DayNumber <= 83, "to", "error.invalid");
+
+        var constraintsQuery = db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
+            c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled &&
+            c.NeededBy <= last);
+        var constraintsTotal = await constraintsQuery.CountAsync();
+        var constraints = await constraintsQuery.OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt).Take(500).ToListAsync();
+
+        var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId && t.DeletedAt == null &&
+            t.DueDate >= first && t.DueDate <= last && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
+            .Select(t => new { t.Id, t.Key, t.Name, t.DueDate, OwnerId = t.AssigneeId, t.ProjectDisciplineId })
+            .ToListAsync();
+        var deliverables = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == projectId && d.DeletedAt == null &&
+            d.DueDate >= first && d.DueDate <= last && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled && d.Status != DeliverableStatus.OnHold)
+            .Select(d => new { d.Id, d.Key, d.Name, d.DueDate, OwnerId = d.OwnerId, d.ProjectDisciplineId })
+            .ToListAsync();
+        var assessments = await db.ReadinessAssessments.AsNoTracking().Where(a => a.ProjectId == projectId &&
+            ((a.TargetType == "Task" && tasks.Select(t => t.Id).Contains(a.TargetId)) ||
+             (a.TargetType == "Deliverable" && deliverables.Select(d => d.Id).Contains(a.TargetId))))
+            .ToListAsync();
+        var checks = await db.ReadinessChecks.AsNoTracking().Where(c => c.ProjectId == projectId &&
+            assessments.Select(a => a.Id).Contains(c.AssessmentId)).ToListAsync();
+        var today = clock.Today(org);
+        var ready = new List<object>();
+        foreach (var assessment in assessments)
+        {
+            var result = await EvaluateCurrent(db, project, assessment.TargetType, assessment.TargetId, assessment,
+                checks.Where(c => c.AssessmentId == assessment.Id).ToList(), today, clock.GetUtcNow(), settings);
+            if (result.State != ReadinessState.Ready) continue;
+            if (assessment.TargetType == "Task" && tasks.SingleOrDefault(t => t.Id == assessment.TargetId) is { } task)
+                ready.Add(new { assessment.Id, TargetType = assessment.TargetType, TargetId = task.Id, task.Key, task.Name,
+                    task.DueDate, OwnerId = task.OwnerId, DisciplineId = task.ProjectDisciplineId,
+                    assessment.IntendedOutput, assessment.CompletionCriteria, State = result.State });
+            else if (assessment.TargetType == "Deliverable" && deliverables.SingleOrDefault(d => d.Id == assessment.TargetId) is { } deliverable)
+                ready.Add(new { assessment.Id, TargetType = assessment.TargetType, TargetId = deliverable.Id, deliverable.Key, deliverable.Name,
+                    deliverable.DueDate, OwnerId = deliverable.OwnerId, DisciplineId = deliverable.ProjectDisciplineId,
+                    assessment.IntendedOutput, assessment.CompletionCriteria, State = result.State });
+        }
+        var readyTotal = ready.Count;
+        return new { From = first, To = last, Constraints = constraints, ConstraintsTotal = constraintsTotal,
+            ConstraintsTruncated = constraintsTotal > constraints.Count, ReadyOutputs = ready.Take(500),
+            ReadyOutputsTotal = readyTotal, ReadyOutputsTruncated = readyTotal > 500 };
     }
 
     static Task<Coordination.Result> AddConstraint(Guid projectId, string targetType, Guid targetId,

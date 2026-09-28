@@ -39,7 +39,8 @@ export interface IssueRow {
   id: string; projectId: string; key: string; title: string; status: string; raisedById: string; raisedByName?: string; ownerId: string; ownerName?: string
   severity: string; dateRaised: string; targetResolutionDate?: string; isOverdue: boolean; daysOverdue: number; resolution?: string; resolvedDate?: string
   originRiskId?: string; originRiskKey?: string; projectDisciplineId?: string; disciplineName?: string; rowVersion: number
-  locationSummary?: string; documentSummary?: string; verificationStatus?: string
+  locationSummary?: string; documentSummary?: string; documentIdentifiers?: string[]; documentRevisions?: string[]; verificationStatus?: string
+  groupLabel?: string
 }
 interface Perm { ok: boolean; reason?: string | null }
 interface LinkRow { id: string; targetType: string; targetId: string; key: string; name: string; status?: string; date?: string; person?: string }
@@ -128,16 +129,25 @@ function owners(rows: { ownerId: string; ownerName?: string }[] | undefined): [s
   return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]))
 }
 
-function RegisterTable<T extends { id: string }>({ table, rows, loading, empty, hot }: {
-  table: { visible: Column<T>[]; header: (c: Column<T>) => React.ReactNode; cell: (c: Column<T>, r: T) => React.ReactNode }; rows: T[]; loading: boolean; empty: React.ReactNode; hot: (r: T) => boolean
+function RegisterTable<T extends { id: string }>({ table, rows, loading, empty, hot, groupBy }: {
+  table: { visible: Column<T>[]; header: (c: Column<T>) => React.ReactNode; cell: (c: Column<T>, r: T) => React.ReactNode }; rows: T[]; loading: boolean; empty: React.ReactNode; hot: (r: T) => boolean; groupBy?: (r: T) => string
 }) {
   if (loading) return <Loading rows={6} />
   if (!rows.length) return <div className="rounded-lg border bg-card">{empty}</div>
+  const groups: { label: string; items: T[] }[] = []
+  for (const row of rows) {
+    const label = groupBy?.(row) ?? ''
+    if (groups.at(-1)?.label !== label) groups.push({ label, items: [] })
+    groups.at(-1)!.items.push(row)
+  }
   return (
     <div className="overflow-x-auto rounded-lg border bg-card">
       <table className="w-full text-[13px]">
         <thead className="bg-muted/60 text-left text-xs text-muted-foreground"><tr>{table.visible.map(table.header)}</tr></thead>
-        <tbody>{rows.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted/30', hot(r) && 'bg-bad-bg/30')}>{table.visible.map((c) => table.cell(c, r))}</tr>)}</tbody>
+        {groups.map((group, index) => <tbody key={`${index}-${group.label}`}>
+          {groupBy && <tr className="border-t bg-muted/30"><th colSpan={table.visible.length} scope="rowgroup" className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground">{group.label}</th></tr>}
+          {group.items.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted/30', hot(r) && 'bg-bad-bg/30')}>{table.visible.map((c) => table.cell(c, r))}</tr>)}
+        </tbody>)}
       </table>
     </div>
   )
@@ -184,8 +194,9 @@ export function IssuesTab() {
   const f = useFilters()
   const [sp, setSp] = useSearchParams()
   const issueFilters = { ...f.filters, location: sp.get('location'), document: sp.get('document'),
-    revision: sp.get('revision'), verification: sp.get('verification') }
-  const sourceFilterActive = ['location', 'document', 'revision', 'verification'].some((key) => sp.has(key))
+    revision: sp.get('revision'), verification: sp.get('verification'), alignment: sp.get('alignment'),
+    stationFrom: sp.get('stationFrom'), stationTo: sp.get('stationTo'), stationUnits: sp.get('stationUnits') }
+  const sourceFilterActive = ['location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits'].some((key) => sp.has(key))
   const setSourceFilter = (key: string, value: string) => {
     const next = new URLSearchParams(sp)
     if (value) next.set(key, value); else next.delete(key)
@@ -193,7 +204,7 @@ export function IssuesTab() {
   }
   const clearSourceFilters = () => {
     const next = new URLSearchParams(sp)
-    for (const key of ['location', 'document', 'revision', 'verification']) next.delete(key)
+    for (const key of ['location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits', 'group']) next.delete(key)
     setSp(next, { replace: true })
   }
   const openPanel = useItemPanel()
@@ -218,6 +229,20 @@ export function IssuesTab() {
       r.verificationStatus === 'None' ? t('issue.noVerification') : r.verificationStatus === 'Stale' ? t('issue.staleVerification') :
         r.verificationStatus ? <StatusPill status={r.verificationStatus} /> : t('common.dash') },
   ], q.data ?? [], (r) => [r.targetResolutionDate, r.key])
+  const group = sp.get('group')
+  const groupBy = group === 'document' || group === 'revision' ? (r: IssueRow) => r.groupLabel || t('common.dash')
+    : group === 'location' ? (r: IssueRow) => r.locationSummary || t('issue.noLocationGroup')
+    : group === 'discipline' ? (r: IssueRow) => r.disciplineName || t('register.noDiscipline')
+      : group === 'owner' ? (r: IssueRow) => r.ownerName || t('common.dash')
+        : group === 'verification' ? (r: IssueRow) => r.verificationStatus || t('issue.noVerification') : undefined
+  const expandedRows = group === 'document' || group === 'revision'
+    ? table.sorted.flatMap((row) => {
+      const labels = group === 'document' ? row.documentIdentifiers : row.documentRevisions
+      return (labels?.length ? labels : [group === 'document' ? t('issue.noDocumentGroup') : t('issue.noRevisionGroup')])
+        .map((groupLabel) => ({ ...row, groupLabel }))
+    }) : table.sorted
+  // Array.sort is stable, so the register's selected sort order remains intact within each group.
+  const displayRows = groupBy ? [...expandedRows].sort((a, b) => groupBy(a).localeCompare(groupBy(b))) : expandedRows
   const can = p.permissions.raiseRegister
   return (
     <Page title={t('ptab.issues')} subtitle={t('issue.subtitle')}
@@ -234,6 +259,14 @@ export function IssuesTab() {
           placeholder={t('issue.filterDocument')} aria-label={t('issue.filterDocument')} />
         <Input className="h-8 w-28" type="search" value={issueFilters.revision ?? ''} onChange={(e) => setSourceFilter('revision', e.target.value)}
           placeholder={t('issue.filterRevision')} aria-label={t('issue.filterRevision')} />
+        <Input className="h-8 w-32" type="search" value={issueFilters.alignment ?? ''} onChange={(e) => setSourceFilter('alignment', e.target.value)}
+          placeholder={t('issue.filterAlignment')} aria-label={t('issue.filterAlignment')} />
+        <Input className="h-8 w-24" type="number" value={issueFilters.stationFrom ?? ''} onChange={(e) => setSourceFilter('stationFrom', e.target.value)}
+          placeholder={t('issue.stationFrom')} aria-label={t('issue.stationFrom')} />
+        <Input className="h-8 w-24" type="number" value={issueFilters.stationTo ?? ''} onChange={(e) => setSourceFilter('stationTo', e.target.value)}
+          placeholder={t('issue.stationTo')} aria-label={t('issue.stationTo')} />
+        <Input className="h-8 w-20" value={issueFilters.stationUnits ?? ''} onChange={(e) => setSourceFilter('stationUnits', e.target.value)}
+          placeholder={t('issue.stationUnits')} aria-label={t('issue.stationUnits')} />
         <select className="h-8 rounded-md border bg-card px-2 text-sm" value={issueFilters.verification ?? ''}
           onChange={(e) => setSourceFilter('verification', e.target.value)} aria-label={t('issue.filterVerification')}>
           <option value="">{t('issue.anyVerification')}</option>
@@ -241,11 +274,17 @@ export function IssuesTab() {
           <option value="Stale">{t('issue.staleVerification')}</option>
           <option value="None">{t('issue.noVerification')}</option>
         </select>
+        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={group ?? ''} onChange={(e) => setSourceFilter('group', e.target.value)} aria-label={t('issue.groupBy')}>
+          <option value="">{t('common.noGroup')}</option><option value="location">{t('issue.groupLocation')}</option>
+          <option value="discipline">{t('issue.groupDiscipline')}</option><option value="owner">{t('issue.groupOwner')}</option>
+          <option value="document">{t('issue.groupDocument')}</option><option value="revision">{t('issue.groupRevision')}</option>
+          <option value="verification">{t('issue.groupVerification')}</option>
+        </select>
         {sourceFilterActive && <button type="button" className="px-2 text-xs text-muted-foreground hover:text-foreground"
           onClick={clearSourceFilters}>{t('common.clear')}</button>}
       </div>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      <RegisterTable table={table} rows={table.sorted} loading={q.isPending} hot={(r) => r.isOverdue || (r.severity === 'High' && ['Open', 'In Progress'].includes(r.status))}
+      <RegisterTable table={table} rows={displayRows} loading={q.isPending} groupBy={groupBy} hot={(r) => r.isOverdue || (r.severity === 'High' && ['Open', 'In Progress'].includes(r.status))}
         empty={<Empty action={can.ok && !f.active && !sourceFilterActive && <Button onClick={() => setRaising(true)}>{t('issue.new')}</Button>}>{f.active || sourceFilterActive ? t('register.noMatch') : t('issue.empty')}</Empty>} />
       {raising && <IssueForm projectId={p.id} onClose={() => setRaising(false)} />}
     </Page>

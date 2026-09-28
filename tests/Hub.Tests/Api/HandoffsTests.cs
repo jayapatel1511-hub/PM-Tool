@@ -62,7 +62,11 @@ public sealed class HandoffsTests(HubFactory f)
         await f.DbAsync(async db =>
         {
             var checks = await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.G("id")).ToListAsync();
-            foreach (var check in checks) { check.Applies = true; check.Satisfied = true; }
+            foreach (var check in checks)
+            {
+                check.Applies = check.Code != ReadinessCheckCode.ProductionCapacity;
+                check.Satisfied = check.Applies == true ? true : null;
+            }
             await db.SaveChangesAsync(); return 0;
         });
         await Move(s, handoffId, TestData.Alex, HandoffStatus.Submitted);

@@ -18,7 +18,8 @@ public static class RegisterEndpoints
     public sealed record RiskMove(string ToStatus, string? Reason, Guid? IssueId, IssueBody? Issue, int? RowVersion);
     public sealed record IssueMove(string ToStatus, string? Reason, string? Resolution, DateOnly? ResolvedDate, int? RowVersion);
     public sealed record RegisterQuery(string? Status, string? Severity, Guid? OwnerId, Guid? DisciplineId, string? Indicator, string? Q,
-        string? Location = null, string? Document = null, string? Revision = null, string? Verification = null);
+        string? Location = null, string? Document = null, string? Revision = null, string? Verification = null,
+        string? Alignment = null, decimal? StationFrom = null, decimal? StationTo = null, string? StationUnits = null);
     public sealed record IssueLocationBody(string Kind, string? SiteArea, string? Building, string? Level, string? Room, string? AssetSystem,
         string? Alignment, decimal? StartStation, decimal? EndStation, string? StationUnits, decimal? CoordinateX, decimal? CoordinateY,
         decimal? CoordinateZ, string? CoordinateReferenceSystem, string? CoordinateUnits, int RowVersion);
@@ -306,6 +307,16 @@ public static class RegisterEndpoints
                  EF.Functions.ILike(x.Level ?? "", term) || EF.Functions.ILike(x.Room ?? "", term) || EF.Functions.ILike(x.AssetSystem ?? "", term) ||
                  EF.Functions.ILike(x.Alignment ?? "", term) || EF.Functions.ILike(x.CoordinateReferenceSystem ?? "", term))));
         }
+        Check.That(f.StationFrom is null || f.StationTo is null || f.StationFrom <= f.StationTo, "stationTo", "issue.stationRangeInvalid");
+        if (!string.IsNullOrWhiteSpace(f.Alignment) || f.StationFrom is not null || f.StationTo is not null || !string.IsNullOrWhiteSpace(f.StationUnits))
+        {
+            var alignment = f.Alignment?.Trim();
+            q = q.Where(i => db.IssueLocations.Any(x => x.IssueId == i.Id &&
+                (string.IsNullOrWhiteSpace(alignment) || EF.Functions.ILike(x.Alignment ?? "", alignment)) &&
+                (string.IsNullOrWhiteSpace(f.StationUnits) || x.StationUnits == f.StationUnits) &&
+                (!f.StationFrom.HasValue || (x.EndStation.HasValue && x.EndStation.Value >= f.StationFrom.Value)) &&
+                (!f.StationTo.HasValue || (x.StartStation.HasValue && x.StartStation.Value <= f.StationTo.Value))));
+        }
         if (!string.IsNullOrWhiteSpace(f.Document))
         {
             var term = $"%{f.Document.Trim()}%";
@@ -366,6 +377,10 @@ public static class RegisterEndpoints
                     LocationSummary = string.Join("; ", issueLocations.Select(x => string.Join(" · ", new[] { x.Kind, x.SiteArea, x.Building, x.Level, x.Room, x.AssetSystem, x.Alignment,
                         x.StartStation is { } start ? $"{start}-{x.EndStation} {x.StationUnits}" : null, x.CoordinateX is { } coordinateX ? $"({coordinateX}, {x.CoordinateY}{(x.CoordinateZ is { } z ? $", {z}" : "")}) {x.CoordinateReferenceSystem} {x.CoordinateUnits}" : null }.Where(v => !string.IsNullOrWhiteSpace(v))))),
                     DocumentSummary = string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
+                    DocumentIdentifiers = issueDocuments.Select(x => x.Identifier).Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
+                    DocumentRevisions = issueDocuments.Select(x => x.Revision).Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
                     VerificationStatus = verificationStatus,
                     i.RowVersion, i.LastActivityAt,
                 } };

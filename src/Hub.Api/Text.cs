@@ -68,6 +68,7 @@ public static class Text
         ["change.estimate"] = "Enter an effort estimate of zero or more hours and a date impact in days.",
         ["change.correction_owner"] = "The correction task must belong to the accountable owner of the affected work.",
         ["issue.location_invalid"] = "Enter a valid location with the required alignment, station or coordinate details.",
+        ["issue.stationRangeInvalid"] = "The station range must end at or after it starts.",
         ["issue.document_invalid"] = "Enter a document type, identifier, revision and source link.",
         ["issue.verifier_independent"] = "The issue owner cannot verify their own resolution.",
         ["issue.verifier_must_submit"] = "Only the named verifier can record this verification decision.",

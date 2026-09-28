@@ -10,11 +10,74 @@ public sealed class ReadinessApiTests(HubFactory f)
 {
     readonly TestData data = new(f);
 
+    async Task<Guid> IsolatedOwner(Project project)
+    {
+        var disciplineId = data.ProjectDiscipline(project.Id, "Civil");
+        var user = new AppUser { Email = $"capacity-{Guid.NewGuid():N}@hub.test", DisplayName = "Capacity test owner",
+            OfficeId = project.OfficeId, WeeklyCapacityHours = 40m };
+        await f.DbAsync(async db =>
+        {
+            db.Users.Add(user);
+            db.ProjectMembers.Add(new ProjectMember { ProjectId = project.Id, UserId = user.Id,
+                Roles = [ProjectRole.TeamMember], PrimaryDisciplineId = disciplineId });
+            await db.SaveChangesAsync(); return 0;
+        });
+        return user.Id;
+    }
+
+    [Fact]
+    public async Task Readiness_window_rechecks_ready_output_and_exposes_same_project_constraint()
+    {
+        var project = await data.Project();
+        var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
+        var path = $"/api/v1/projects/{project.Id}/readiness/window?from={today:yyyy-MM-dd}&to={today.AddDays(6):yyyy-MM-dd}";
+        var target = await data.NewTask(project.Id, extra: new { assigneeId = data.User(TestData.Marc),
+            startDate = today, dueDate = today.AddDays(2), estimatedHours = 4m });
+        var targetId = target.G("id");
+        var targetVersion = f.Db(db => db.Tasks.Single(t => t.Id == targetId).RowVersion);
+        var assessment = await (await f.As(TestData.Marc).Post($"/api/v1/projects/{project.Id}/readiness/Task/{targetId}",
+            new ReadinessEndpoints.CreateBody(Guid.NewGuid(), targetVersion, "Site layout", "Drawing checked"))).Json();
+        await f.DbAsync(async db =>
+        {
+            var checks = await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.G("id")).ToListAsync();
+            foreach (var check in checks)
+            {
+                check.Applies = check.Code != ReadinessCheckCode.ProductionCapacity;
+                check.Satisfied = check.Applies == true ? true : null;
+            }
+            (await db.ReadinessAssessments.SingleAsync(a => a.Id == assessment.G("id"))).State = ReadinessState.Ready;
+            await db.SaveChangesAsync(); return 0;
+        });
+        var ready = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(1, ready["readyOutputsTotal"]!.GetValue<int>());
+        Assert.Equal(targetId, ready["readyOutputs"]!.AsArray().Single()!.G("targetId"));
+
+        await f.DbAsync(async db =>
+        {
+            db.WorkConstraints.Add(new WorkConstraint { ProjectId = project.Id, TargetType = "Task", TargetId = targetId,
+                Category = "Handoff", Description = "Await survey", RemovalOwnerId = data.User(TestData.Alex),
+                AffectedOwnerId = data.User(TestData.Marc), NeededBy = today.AddDays(-1),
+                SourceUrl = "https://example.test/survey", State = ConstraintState.Open });
+            await db.SaveChangesAsync(); return 0;
+        });
+        var blocked = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(1, blocked["constraintsTotal"]!.GetValue<int>());
+        Assert.Equal(0, blocked["readyOutputsTotal"]!.GetValue<int>());
+        Assert.False(blocked["constraintsTruncated"]!.GetValue<bool>());
+        Assert.False(blocked["readyOutputsTruncated"]!.GetValue<bool>());
+        await f.DbAsync(async db =>
+        {
+            (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted;
+            await db.SaveChangesAsync(); return 0;
+        });
+        await (await f.As(TestData.Rita).GetAsync(path)).Json(404);
+    }
+
     [Fact]
     public async Task Production_capacity_distinguishes_available_unavailable_and_unknown()
     {
         var project = await data.Project();
-        var owner = data.User(TestData.Marc);
+        var owner = await IsolatedOwner(project);
         var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
         var task = await data.NewTask(project.Id, extra: new { assigneeId = owner, startDate = today, dueDate = today.AddDays(2), estimatedHours = 8m });
         var taskId = task.G("id");
@@ -44,10 +107,10 @@ public sealed class ReadinessApiTests(HubFactory f)
     public async Task Production_capacity_counts_confirmed_reservation_and_day_override()
     {
         var project = await data.Project();
-        var owner = data.User(TestData.Omar);
+        var owner = await IsolatedOwner(project);
         var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
-        var task = await data.NewTask(project.Id, as_: TestData.Omar,
-            extra: new { assigneeId = owner, startDate = today, dueDate = today, estimatedHours = 4m }, discipline: "Electrical");
+        var task = await data.NewTask(project.Id,
+            extra: new { assigneeId = owner, startDate = today, dueDate = today, estimatedHours = 4m });
         var allocation = new ResourceAllocation { ProjectId = project.Id, PersonId = owner, FromDate = today,
             ThroughDate = today, PlannedHours = 4m, Status = AllocationStatus.Confirmed };
         await f.DbAsync(async db =>
@@ -77,6 +140,45 @@ public sealed class ReadinessApiTests(HubFactory f)
         result = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Task", task.G("id"), today, f.Clock.Now));
         Assert.Equal(false, result.Satisfied);
         Assert.Contains("exceed", result.Reason, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Production_capacity_keeps_other_project_demand_and_undated_deliverable_work_unknown()
+    {
+        var project = await data.Project();
+        var owner = await IsolatedOwner(project);
+        var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
+        var task = await data.NewTask(project.Id, extra: new { assigneeId = owner,
+            startDate = today, dueDate = today, estimatedHours = 4m });
+        var other = await data.Project();
+        var otherDisciplineId = data.ProjectDiscipline(other.Id, "Civil");
+        await f.DbAsync(async db =>
+        {
+            db.ProjectMembers.Add(new ProjectMember { ProjectId = other.Id, UserId = owner,
+                Roles = [ProjectRole.TeamMember], PrimaryDisciplineId = otherDisciplineId });
+            await db.SaveChangesAsync(); return 0;
+        });
+        await data.NewTask(other.Id, extra: new { assigneeId = owner,
+            startDate = today, dueDate = today, estimatedHours = 8m });
+        var crossProject = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Task", task.G("id"), today, f.Clock.Now));
+        Assert.Null(crossProject.Satisfied);
+        Assert.Contains("other active workload", crossProject.Reason, StringComparison.OrdinalIgnoreCase);
+
+        var deliverableOwner = await IsolatedOwner(project);
+        var disciplineId = data.ProjectDiscipline(project.Id, "Civil");
+        var typeId = await data.DeliverableType();
+        var deliverable = new Deliverable { ProjectId = project.Id, Key = "D" + Guid.NewGuid().ToString("N")[..8],
+            Name = "Undated production", ProjectDisciplineId = disciplineId, DeliverableTypeId = typeId,
+            OwnerId = deliverableOwner, DueDate = today.AddDays(1) };
+        var linked = new WorkTask { ProjectId = project.Id, Key = "T" + Guid.NewGuid().ToString("N")[..8],
+            Name = "Required layout", ProjectDisciplineId = disciplineId, DeliverableId = deliverable.Id,
+            AssigneeId = deliverableOwner, EstimatedHours = 80m };
+        await f.DbAsync(async db => { db.Deliverables.Add(deliverable); db.Tasks.Add(linked); await db.SaveChangesAsync(); return 0; });
+        var undated = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Deliverable", deliverable.Id, today, f.Clock.Now));
+        Assert.Null(undated.Satisfied);
+        await f.DbAsync(async db => { (await db.Tasks.SingleAsync(t => t.Id == linked.Id)).DueDate = today.AddDays(2); await db.SaveChangesAsync(); return 0; });
+        var afterDeadline = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Deliverable", deliverable.Id, today, f.Clock.Now));
+        Assert.Null(afterDeadline.Satisfied);
     }
 
     [Fact]
@@ -172,7 +274,11 @@ public sealed class ReadinessApiTests(HubFactory f)
         await f.DbAsync(async db =>
         {
             var checks = await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.G("id")).ToListAsync();
-            foreach (var check in checks) { check.Applies = true; check.Satisfied = true; }
+            foreach (var check in checks)
+            {
+                check.Applies = check.Code != ReadinessCheckCode.ProductionCapacity;
+                check.Satisfied = check.Applies == true ? true : null;
+            }
             (await db.ReadinessAssessments.SingleAsync(a => a.Id == assessment.G("id"))).State = ReadinessState.Ready;
             await db.SaveChangesAsync(); return 0;
         });

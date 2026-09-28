@@ -39,6 +39,13 @@ public sealed class LocationIssueTests(HubFactory f)
             kind = "Alignment", alignment = "Road-A", startStation = 10, endStation = 20, stationUnits = "m", rowVersion = await IssueVersion(id)
         }).Result.Json(201);
         Assert.NotEqual(Guid.Empty, location.G("id"));
+        var overlap = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues?alignment=Road-A&stationFrom=15&stationTo=25&stationUnits=m")).Json();
+        Assert.Contains(overlap.AsArray(), row => row!.G("id") == id);
+        var outside = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues?alignment=Road-A&stationFrom=21&stationTo=30&stationUnits=m")).Json();
+        Assert.DoesNotContain(outside.AsArray(), row => row!.G("id") == id);
+        Assert.Equal(HttpStatusCode.BadRequest, (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues?stationFrom=30&stationTo=20")).StatusCode);
+        var stationExport = System.Text.Encoding.UTF8.GetString(await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues/export?format=csv&alignment=Road-A&stationFrom=15&stationTo=25&stationUnits=m")).Content.ReadAsByteArrayAsync());
+        Assert.Contains(issue.S("key"), stationExport);
         var staleLocation = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", new
         {
             kind = "SiteArea", siteArea = "North", rowVersion = 0
@@ -97,6 +104,9 @@ public sealed class LocationIssueTests(HubFactory f)
         Assert.Equal(HttpStatusCode.BadRequest, staleVerification.StatusCode);
         var staleRows = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues?verification=Stale")).Json();
         Assert.Contains(staleRows.AsArray(), row => row!.G("id") == id && row.S("verificationStatus") == "Stale");
+        var groupedSource = Assert.Single(staleRows.AsArray().Where(row => row!.G("id") == id))!;
+        Assert.Equal(new[] { "C-101" }, groupedSource["documentIdentifiers"]!.AsArray().Select(value => value!.GetValue<string>()));
+        Assert.Equal(new[] { "A", "B" }, groupedSource["documentRevisions"]!.AsArray().Select(value => value!.GetValue<string>()));
         var verifiedRows = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues?verification=Verified")).Json();
         Assert.DoesNotContain(verifiedRows.AsArray(), row => row!.G("id") == id);
         var staleExport = System.Text.Encoding.UTF8.GetString(await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues/export?format=csv&verification=Stale")).Content.ReadAsByteArrayAsync());

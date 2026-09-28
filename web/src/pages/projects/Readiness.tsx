@@ -18,6 +18,9 @@ type Commitment = {
 }
 type Snapshot = { id: string; weekStart: string; capturedAt: string; committedCount: number; met: number; withdrawn: number }
 type Weekly = { commitments: Commitment[]; total: number; truncated: boolean; snapshots: Snapshot[] }
+type Constraint = { id: string; targetType: string; targetId: string; description: string; category: string; neededBy: string; sourceUrl: string }
+type ReadyOutput = { id: string; targetType: string; targetId: string; key: string; name: string; dueDate: string | null; intendedOutput: string; completionCriteria: string; state: string }
+type Aggregate = { constraints: Constraint[]; constraintsTotal: number; constraintsTruncated: boolean; readyOutputs: ReadyOutput[]; readyOutputsTotal: number; readyOutputsTruncated: boolean }
 
 function monday(d: string) {
   const day = (new Date(`${d}T00:00:00Z`).getUTCDay() + 6) % 7
@@ -56,11 +59,15 @@ export function ReadinessTab() {
   }, [from, to])
   const invalidWindow = weeks.length === 0 || weeks.length > 12
   const q = useQuery({
-    queryKey: ['p', p.id, 'weekly-commitments', weeks],
+    queryKey: ['p', p.id, 'readiness-window', from, to, weeks],
     enabled: !invalidWindow,
     queryFn: async () => {
-      const pages = await Promise.all(weeks.map((week) => get<Weekly>(`projects/${p.id}/weekly-commitments?weekStart=${week}`)))
+      const [aggregate, ...pages] = await Promise.all([
+        get<Aggregate>(`projects/${p.id}/readiness/window?from=${from}&to=${to}`),
+        ...weeks.map((week) => get<Weekly>(`projects/${p.id}/weekly-commitments?weekStart=${week}`)),
+      ])
       return {
+        ...aggregate,
         commitments: pages.flatMap((page) => page.commitments),
         total: pages.reduce((n, page) => n + page.total, 0),
         truncated: pages.some((page) => page.truncated),
@@ -69,7 +76,15 @@ export function ReadinessTab() {
       }
     },
   })
-  if (invalidWindow) return <Page title={t('readiness.title')} subtitle={t('readiness.subtitle')}><div role="alert" className="rounded border border-bad/30 bg-bad-bg px-3 py-2 text-sm text-bad">{t('readiness.invalidWindow')}</div></Page>
+  const filters = <div className="flex flex-wrap items-end gap-2 rounded-lg border bg-card p-3">
+    <label className="text-xs text-muted-foreground">{t('readiness.from')}<Input type="date" className="mt-1 h-8 w-36" value={from} onChange={(e) => set('from', e.target.value)} /></label>
+    <label className="text-xs text-muted-foreground">{t('readiness.to')}<Input type="date" className="mt-1 h-8 w-36" value={to} onChange={(e) => set('to', e.target.value)} /></label>
+    <Button size="sm" variant="ghost" onClick={reset}>{t('common.clear')}</Button>
+    <span className="ml-auto text-xs text-muted-foreground">{t('readiness.windowNote', { n: lookahead })}</span>
+  </div>
+  if (invalidWindow) return <Page title={t('readiness.title')} subtitle={t('readiness.subtitle')}>
+    {filters}<div role="alert" className="rounded border border-bad/30 bg-bad-bg px-3 py-2 text-sm text-bad">{t('readiness.invalidWindow')}</div>
+  </Page>
   if (q.isPending) return <Loading rows={8} />
   if (q.error) return <div className="p-6"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const data = q.data
@@ -81,18 +96,21 @@ export function ReadinessTab() {
     <Page title={t('readiness.title')} subtitle={t('readiness.subtitle')} actions={
       <Button asChild variant="outline" size="sm"><Link to={`${base}/coordination?meeting=1`}><CalendarCheck className="size-4" />{t('readiness.meeting')}</Link></Button>
     }>
-      <div className="flex flex-wrap items-end gap-2 rounded-lg border bg-card p-3">
-        <label className="text-xs text-muted-foreground">{t('readiness.from')}<Input type="date" className="mt-1 h-8 w-36" value={from} onChange={(e) => set('from', e.target.value)} /></label>
-        <label className="text-xs text-muted-foreground">{t('readiness.to')}<Input type="date" className="mt-1 h-8 w-36" value={to} onChange={(e) => set('to', e.target.value)} /></label>
-        <Button size="sm" variant="ghost" onClick={reset}>{t('common.clear')}</Button>
-        <span className="ml-auto text-xs text-muted-foreground">{t('readiness.windowNote', { n: lookahead })}</span>
-      </div>
+      {filters}
       <div className="grid gap-4 md:grid-cols-2">
-        <Section title={t('readiness.constraints')} id="constraints">
-          <p className="px-4 py-4 text-sm text-muted-foreground">{t('readiness.unavailableAggregate')}</p>
+        <Section title={t('readiness.constraints')} id="constraints" count={data.constraintsTotal}>
+          {data.constraintsTruncated && <p role="status" className="border-b border-warn/30 bg-warn-bg px-4 py-2 text-xs text-warn">{t('readiness.aggregateTruncated')}</p>}
+          {data.constraints.length === 0 ? <p className="px-4 py-4 text-sm text-muted-foreground">{t('readiness.noConstraints')}</p> : <ul className="divide-y">{data.constraints.map((c) => <li key={c.id} className="px-4 py-3 text-sm">
+            <Link className="font-medium text-primary hover:underline" to={`${base}/${c.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${c.targetType}:${c.targetId}`}>{c.category} · {c.targetType}</Link>
+            <p className="mt-1">{c.description}</p><p className="text-xs text-muted-foreground">{fmtDate(c.neededBy)} · <a className="underline" href={c.sourceUrl} target="_blank" rel="noreferrer">{t('readiness.source')}</a></p>
+          </li>)}</ul>}
         </Section>
-        <Section title={t('readiness.readyOutputs')} id="ready-outputs">
-          <p className="px-4 py-4 text-sm text-muted-foreground">{t('readiness.unavailableAggregate')}</p>
+        <Section title={t('readiness.readyOutputs')} id="ready-outputs" count={data.readyOutputsTotal}>
+          {data.readyOutputsTruncated && <p role="status" className="border-b border-warn/30 bg-warn-bg px-4 py-2 text-xs text-warn">{t('readiness.aggregateTruncated')}</p>}
+          {data.readyOutputs.length === 0 ? <p className="px-4 py-4 text-sm text-muted-foreground">{t('readiness.noReadyOutputs')}</p> : <ul className="divide-y">{data.readyOutputs.map((o) => <li key={o.id} className="px-4 py-3 text-sm">
+            <Link className="font-medium text-primary hover:underline" to={`${base}/${o.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${o.targetType}:${o.targetId}`}>{o.key} · {o.name}</Link>
+            <p className="mt-1">{o.intendedOutput}</p><p className="text-xs text-muted-foreground">{o.dueDate ? fmtDate(o.dueDate) : t('readiness.noDueDate')} · {o.completionCriteria}</p>
+          </li>)}</ul>}
         </Section>
       </div>
       {data.truncated && <div role="status" className="rounded border border-warn/30 bg-warn-bg px-3 py-2 text-sm text-warn">{t('readiness.truncated', { n: data.total })}</div>}

@@ -89,6 +89,7 @@ export const en: Record<string, string> = {
   "coord.choose": "Choose…",
   "coord.saved": "Saved",
   "coord.commandHint": "Confirm the scope and record your decision. Your name and the time are recorded.",
+  "coord.refusalReasons": "Reasons this action was refused",
   "coord.stale": "This record changed. Close this form, refresh the record and review the latest information before trying again.",
   "coord.confirm": "Confirm",
   "coord.evidence": "Open evidence",

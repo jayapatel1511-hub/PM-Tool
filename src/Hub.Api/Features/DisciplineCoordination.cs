@@ -125,11 +125,19 @@ public static class DisciplineCoordinationEndpoints
                 TaskKeys = active.Select(id => taskKeys[id]).ToArray() };
         }).ToList();
 
+        var scopedAssessments = db.ChangeAssessments.AsNoTracking().Where(a => a.ProjectId == projectId);
+        if (disciplineId is { } assessmentDiscipline)
+            scopedAssessments = scopedAssessments.Where(a =>
+                (a.TargetType == "Task" && db.Tasks.Any(t => t.Id == a.TargetId && t.ProjectId == projectId && t.ProjectDisciplineId == assessmentDiscipline)) ||
+                (a.TargetType == "Deliverable" && db.Deliverables.Any(d => d.Id == a.TargetId && d.ProjectId == projectId && d.ProjectDisciplineId == assessmentDiscipline)));
+        if (ownerId is { } assessmentOwner) scopedAssessments = scopedAssessments.Where(a => a.OwnerId == assessmentOwner);
         var changes = db.ChangeNotices.AsNoTracking().Where(c => c.ProjectId == projectId);
-        if (disciplineId is { } changeDiscipline) changes = changes.Where(c => c.ProjectDisciplineId == changeDiscipline);
-        if (ownerId is { } changeOwner) changes = changes.Where(c => c.OwnerId == changeOwner);
+        if (disciplineId is { } changeDiscipline) changes = changes.Where(c => c.ProjectDisciplineId == changeDiscipline ||
+            scopedAssessments.Any(a => a.ChangeNoticeId == c.Id));
+        if (ownerId is { } changeOwner) changes = changes.Where(c => c.OwnerId == changeOwner ||
+            scopedAssessments.Any(a => a.ChangeNoticeId == c.Id));
         var changeRows = await changes.OrderBy(c => c.AssessmentDueDate).ThenBy(c => c.Key)
-            .Select(c => new { c.Id, c.Key, c.Title, c.Status, c.OwnerId, PendingAssessments = db.ChangeAssessments.Count(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending) })
+            .Select(c => new { c.Id, c.Key, c.Title, c.Status, c.OwnerId, PendingAssessments = scopedAssessments.Count(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending) })
             .ToListAsync();
 
         var reviews = db.ReviewPackages.AsNoTracking().Where(p => p.ProjectId == projectId);

@@ -46,6 +46,25 @@ public sealed class ReviewChangeTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Coordination_shows_cross_discipline_change_to_assessment_owner()
+    {
+        var setup = await New();
+        var target = await Target(setup);
+        await Adopt(setup, target, setup.Revision, setup.Revision);
+        var noticeId = await Notice(setup);
+        await Publish(setup, noticeId);
+
+        var electrical = await Get(TestData.Omar,
+            $"/api/v1/projects/{setup.P.Id}/discipline-coordination?disciplineId={setup.Electrical}&ownerId={data.User(TestData.Omar)}");
+        var notice = Assert.Single(electrical["changes"]!.AsArray());
+        Assert.Equal(noticeId, notice!.G("id"));
+        Assert.Equal(1, notice["pendingAssessments"]!.GetValue<int>());
+        var civil = await Get(TestData.Alex,
+            $"/api/v1/projects/{setup.P.Id}/discipline-coordination?disciplineId={setup.Civil}");
+        Assert.Contains(civil["changes"]!.AsArray(), row => row!.G("id") == noticeId);
+    }
+
+    [Fact]
     public async Task Review_allocation_options_link_current_assignment_and_explicit_effort()
     {
         var setup = await New();

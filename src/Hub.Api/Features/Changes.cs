@@ -195,6 +195,7 @@ public static class ChangeEndpoints
                     if (a.Status == AssessmentStatus.UpdateRequired) {
                         var tid = body.CorrectionTaskId ?? throw ApiException.Invalid("correctionTaskId", "error.required"); var task = await Coordination.Target(db, p, "Task", tid);
                         if (task.RowVersion != body.CorrectionTaskRowVersion) throw ApiException.Conflict("task_changed", "coord.stale", new { currentRowVersion = task.RowVersion });
+                        Check.That(task.OwnerId == a.OwnerId, "correctionTaskId", "change.correction_owner");
                         Check.That(body.EffortImpactHours is >= 0 && body.DateImpactDays is not null, "effortImpactHours", "change.estimate");
                         a.CorrectionTaskId = tid; a.EffortImpactHours = body.EffortImpactHours; a.DateImpactDays = body.DateImpactDays;
                     }

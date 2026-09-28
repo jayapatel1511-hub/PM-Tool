@@ -246,7 +246,9 @@ public sealed class ReviewChangeTests(HubFactory f)
     public async Task AC_CHG_05_update_needs_completed_correction_and_independent_verification()
     {
         var s = await New(); var t = await Target(s); await Adopt(s, t, s.Revision, s.Revision); var notice = await Notice(s); await Publish(s, notice);
-        var aid = Assessment(notice, t); var correction = await Target(s);
+        var aid = Assessment(notice, t); var wrongOwnerCorrection = await Target(s, TestData.Alex);
+        await Assess(s, notice, aid, TestData.Omar, "disposition", AssessmentStatus.UpdateRequired, wrongOwnerCorrection, expected: 400);
+        var correction = await Target(s);
         await Assess(s, notice, aid, TestData.Omar, "disposition", AssessmentStatus.UpdateRequired, correction);
         await Assess(s, notice, aid, TestData.Omar, "adopt");
         await Assess(s, notice, aid, TestData.Pm, "resolve", correction: correction, expected: 400); await Close(s, notice, 400);

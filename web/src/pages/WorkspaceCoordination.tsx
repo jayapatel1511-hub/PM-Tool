@@ -91,17 +91,17 @@ export function WorkspaceCoordination() {
     <p className="no-print flex gap-4"><button type="button" className="text-primary underline" onClick={() => downloadCsv(data)}>Export these evaluated records as CSV</button>
       <button type="button" className="text-primary underline" onClick={() => window.print()}>Print this view</button></p>
     <div className="no-print flex flex-wrap gap-3 rounded border p-3">
-      <label>Project<select className="ml-2 rounded border p-1" value={projectId} onChange={e => set('projectId', e.target.value)}>
+      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-project">Project</label><select id="workspace-coordination-project" className="rounded border p-1" value={projectId} onChange={e => set('projectId', e.target.value)}>
         <option value="">All permitted projects</option>{data.projectChoices.map(p => <option key={p.id} value={p.id}>{p.projectNumber}</option>)}
-      </select></label>
-      <label>Discipline<select className="ml-2 rounded border p-1" value={disciplineId} onChange={e => set('disciplineId', e.target.value)}>
+      </select></span>
+      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-discipline">Discipline</label><select id="workspace-coordination-discipline" className="rounded border p-1" value={disciplineId} onChange={e => set('disciplineId', e.target.value)}>
         <option value="">My project disciplines</option>{data.disciplines.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-      </select></label>
-      <label>Owner<select className="ml-2 rounded border p-1" value={ownerId} onChange={e => set('ownerId', e.target.value)}>
+      </select></span>
+      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-owner">Owner</label><select id="workspace-coordination-owner" className="rounded border p-1" value={ownerId} onChange={e => set('ownerId', e.target.value)}>
         <option value="">All owners</option>{data.owners.map(o => <option key={o.id} value={o.id}>{o.displayName}</option>)}
-      </select></label>
-      <label>From<input className="ml-2 rounded border p-1" type="date" value={from} onChange={e => set('from', e.target.value)} /></label>
-      <label>To<input className="ml-2 rounded border p-1" type="date" value={to} onChange={e => set('to', e.target.value)} /></label>
+      </select></span>
+      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-from">From</label><input id="workspace-coordination-from" className="rounded border p-1" type="date" value={from} onChange={e => set('from', e.target.value)} /></span>
+      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-to">To</label><input id="workspace-coordination-to" className="rounded border p-1" type="date" value={to} onChange={e => set('to', e.target.value)} /></span>
     </div>
     <p role="status" className="text-xs text-muted-foreground">Evaluated {new Date(data.evaluatedAt).toLocaleString()} · {data.projects.length} permitted projects. Date filters apply to handoffs and startability.</p>
     {data.projects.map(project => <section key={project.id} className="space-y-3 rounded border p-4" aria-labelledby={`coord-${project.id}`}>

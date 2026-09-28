@@ -146,9 +146,22 @@ public sealed class HandoffsTests(HubFactory f)
         var submitted = await (await f.As(TestData.Omar).GetAsync(path)).Json();
         Assert.Equal(ReadinessState.NotReady, submitted["assessment"]!.S("state"));
         Assert.Contains(ReadinessCheckCode.Handoff, submitted["blocked"]!.AsArray().Select(x => x!.GetValue<string>()));
+        await data.NewTask(s.Project.Id, TestData.Omar, new { assigneeId = data.User(TestData.Omar), dueDate = "2026-09-20" }, "Electrical"); // unassessed work is not Ready
+        var coordinationUrl = $"/api/v1/projects/{s.Project.Id}/discipline-coordination?disciplineId={data.ProjectDiscipline(s.Project.Id, "Electrical")}&ownerId={data.User(TestData.Omar)}&from=2026-09-14&to=2026-09-20";
+        var blocked = await (await f.As(TestData.Omar).GetAsync(coordinationUrl)).Json();
+        var blockedRow = Assert.Single(blocked["startability"]!.AsArray());
+        Assert.Equal(targetId, blockedRow!.G("targetId"));
+        Assert.Equal(ReadinessState.NotReady, blockedRow.S("state"));
+        Assert.Contains(ReadinessCheckCode.Handoff, blockedRow["blocked"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Equal(0, blocked["startabilityReadyTotal"]!.GetValue<int>());
         await Move(s, handoffId, TestData.Omar, HandoffStatus.Accepted, outcome: "Survey criteria met");
         var accepted = await (await f.As(TestData.Omar).GetAsync(path)).Json();
         Assert.Equal(ReadinessState.Ready, accepted["assessment"]!.S("state"));
+        var ready = await (await f.As(TestData.Omar).GetAsync(coordinationUrl)).Json();
+        Assert.Equal(ReadinessState.Ready, Assert.Single(ready["startability"]!.AsArray())!.S("state"));
+        Assert.Equal(1, ready["startabilityReadyTotal"]!.GetValue<int>());
+        await (await f.As(TestData.Omar).GetAsync($"/api/v1/projects/{s.Project.Id}/discipline-coordination?to=2026-09-10")).Json();
+        await (await f.As(TestData.Omar).GetAsync($"/api/v1/projects/{s.Project.Id}/discipline-coordination?from=2026-09-20&to=2026-09-14")).Json(400);
     }
 
     [Fact]

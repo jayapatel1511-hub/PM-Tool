@@ -17,16 +17,18 @@ public static class DisciplineCoordinationEndpoints
     }
 
     static async Task<object> Get(Guid projectId, Guid? disciplineId, Guid? ownerId, DateOnly? from, DateOnly? to,
-        Access access, HubDb db, TimeProvider clock)
+        Access access, HubDb db, TimeProvider clock, SettingsStore settings)
     {
         await using var snapshot = await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         await access.Project(projectId, track: false);
-        return await Build(projectId, disciplineId, ownerId, from, to, access.Me.Id, db, clock.GetUtcNow());
+        var org = await settings.Get(db);
+        return await Build(projectId, disciplineId, ownerId, from, to, access.Me.Id, db, clock.GetUtcNow(),
+            clock.Today(org), org.CoordinationLookaheadWeeks * 7 - 1, settings);
     }
 
     static async Task<object> Workspace(Guid? projectId, Guid? disciplineId, Guid? ownerId, DateOnly? from, DateOnly? to,
         string? scopeKind, string? scopeProjectIds, Guid? scopeWorkspaceId,
-        Access access, HubDb db, TimeProvider clock)
+        Access access, HubDb db, TimeProvider clock, SettingsStore settings)
     {
         await using var snapshot = await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         var visible = access.VisibleProjects().AsNoTracking().Where(p => p.Status != ProjectStatus.Archived && p.Status != ProjectStatus.Cancelled);
@@ -63,6 +65,8 @@ public static class DisciplineCoordinationEndpoints
             .Select(u => new { u.Id, u.DisplayName }).ToListAsync();
         var rows = new List<object>();
         var evaluatedAt = clock.GetUtcNow();
+        var org = await settings.Get(db);
+        var today = clock.Today(org);
         foreach (var project in projects)
         {
             var localDiscipline = disciplineId is { } globalDiscipline
@@ -71,14 +75,15 @@ public static class DisciplineCoordinationEndpoints
                 : memberships.FirstOrDefault(m => m.ProjectId == project.Id)?.PrimaryDisciplineId;
             if (disciplineId is not null && localDiscipline is null) continue;
             rows.Add(new { project.Id, project.ProjectNumber, project.Name, DisciplineId = localDiscipline,
-                Data = await Build(project.Id, localDiscipline, ownerId, from, to, access.Me.Id, db, evaluatedAt) });
+                Data = await Build(project.Id, localDiscipline, ownerId, from, to, access.Me.Id, db, evaluatedAt, today,
+                    org.CoordinationLookaheadWeeks * 7 - 1, settings) });
         }
         return new { EvaluatedAt = evaluatedAt, ActorId = access.Me.Id, Projects = rows, ProjectChoices = choices, Disciplines = disciplineChoices, Owners = owners,
             Scope = projectId is null ? "Workspace" : "Project" };
     }
 
     static async Task<object> Build(Guid projectId, Guid? disciplineId, Guid? ownerId, DateOnly? from, DateOnly? to,
-        Guid actorId, HubDb db, DateTimeOffset evaluatedAt)
+        Guid actorId, HubDb db, DateTimeOffset evaluatedAt, DateOnly today, int lookaheadDays, SettingsStore settings)
     {
 
         var handoffs = db.Handoffs.AsNoTracking().Where(h => h.ProjectId == projectId);
@@ -168,6 +173,8 @@ public static class DisciplineCoordinationEndpoints
             uses = uses.Where(u => targetIds.Contains(u.TargetId));
         }
         var useRows = await uses.OrderByDescending(u => u.AdoptedAt).ThenBy(u => u.Id).ToListAsync();
+        var startability = await Startability(projectId, disciplineId, ownerId, from, to, today,
+            lookaheadDays, evaluatedAt, db, settings);
 
         return new
         {
@@ -185,6 +192,69 @@ public static class DisciplineCoordinationEndpoints
             ChangesTotal = changeRows.Count,
             ReviewsTotal = reviewRows.Count,
             BlockerGroups = blockerGroups,
+            Startability = startability.Rows,
+            StartabilityFrom = startability.From,
+            StartabilityTo = startability.To,
+            StartabilityReadyTotal = startability.Rows.Count(r => r.State == ReadinessState.Ready),
         };
+    }
+
+    public sealed record StartabilityRow(Guid Id, string TargetType, Guid TargetId, string Key, string Name,
+        DateOnly? DueDate, Guid? OwnerId, Guid DisciplineId, string State, string[] Blocked, string[] Unknown);
+    sealed record StartabilityWindow(DateOnly From, DateOnly To, List<StartabilityRow> Rows);
+
+    // Re-evaluate stored assessments against their live source checks inside the same snapshot
+    // as the other coordination rows. An absent assessment is never reported as Ready.
+    static async Task<StartabilityWindow> Startability(Guid projectId, Guid? disciplineId, Guid? ownerId,
+        DateOnly? from, DateOnly? to, DateOnly today, int lookaheadDays, DateTimeOffset evaluatedAt,
+        HubDb db, SettingsStore settings)
+    {
+        // A to-only filter may point into the past. Keep the historical handoff view
+        // valid and evaluate readiness in the lookahead window ending on that date.
+        var first = from ?? (to is { } upper && upper < today
+            ? DateOnly.FromDayNumber(Math.Max(0, upper.DayNumber - lookaheadDays)) : today);
+        Check.That(to.HasValue || first.DayNumber <= DateOnly.MaxValue.DayNumber - lookaheadDays, "from", "error.invalid");
+        var last = to ?? first.AddDays(lookaheadDays);
+        Check.That(last >= first, "to", "error.invalid");
+        var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId && t.DeletedAt == null &&
+            t.DueDate >= first && t.DueDate <= last && t.Status != TaskStatuses.Complete &&
+            t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold &&
+            (disciplineId == null || t.ProjectDisciplineId == disciplineId) &&
+            (ownerId == null || t.AssigneeId == ownerId))
+            .Select(t => new { t.Id, t.Key, t.Name, t.DueDate, OwnerId = t.AssigneeId, DisciplineId = t.ProjectDisciplineId })
+            .ToListAsync();
+        var deliverables = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == projectId && d.DeletedAt == null &&
+            d.DueDate >= first && d.DueDate <= last && d.Status != DeliverableStatus.Issued &&
+            d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled &&
+            d.Status != DeliverableStatus.OnHold &&
+            (disciplineId == null || d.ProjectDisciplineId == disciplineId) &&
+            (ownerId == null || d.OwnerId == ownerId))
+            .Select(d => new { d.Id, d.Key, d.Name, d.DueDate, d.OwnerId, DisciplineId = d.ProjectDisciplineId })
+            .ToListAsync();
+        var taskIds = tasks.Select(t => t.Id).ToArray();
+        var deliverableIds = deliverables.Select(d => d.Id).ToArray();
+        var assessments = await db.ReadinessAssessments.AsNoTracking().Where(a => a.ProjectId == projectId &&
+            ((a.TargetType == "Task" && taskIds.Contains(a.TargetId)) ||
+             (a.TargetType == "Deliverable" && deliverableIds.Contains(a.TargetId))))
+            .ToListAsync();
+        var assessmentIds = assessments.Select(a => a.Id).ToArray();
+        var checks = await db.ReadinessChecks.AsNoTracking().Where(c => c.ProjectId == projectId &&
+            assessmentIds.Contains(c.AssessmentId)).ToListAsync();
+        var project = await db.Projects.AsNoTracking().SingleAsync(p => p.Id == projectId);
+        var rows = new List<StartabilityRow>();
+        foreach (var assessment in assessments)
+        {
+            var result = await ReadinessEndpoints.EvaluateCurrent(db, project, assessment.TargetType,
+                assessment.TargetId, assessment, checks.Where(c => c.AssessmentId == assessment.Id).ToList(),
+                today, evaluatedAt, settings);
+            if (assessment.TargetType == "Task" && tasks.SingleOrDefault(t => t.Id == assessment.TargetId) is { } task)
+                rows.Add(new(assessment.Id, "Task", task.Id, task.Key, task.Name, task.DueDate,
+                    task.OwnerId, task.DisciplineId, result.State, result.Blocked, result.Unknown));
+            else if (assessment.TargetType == "Deliverable" && deliverables.SingleOrDefault(d => d.Id == assessment.TargetId) is { } deliverable)
+                rows.Add(new(assessment.Id, "Deliverable", deliverable.Id, deliverable.Key, deliverable.Name,
+                    deliverable.DueDate, deliverable.OwnerId, deliverable.DisciplineId,
+                    result.State, result.Blocked, result.Unknown));
+        }
+        return new(first, last, rows.OrderBy(r => r.DueDate).ThenBy(r => r.Key).ToList());
     }
 }

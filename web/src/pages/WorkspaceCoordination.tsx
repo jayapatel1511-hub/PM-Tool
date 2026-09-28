@@ -7,9 +7,12 @@ import { get, qs } from '@/lib/api'
 type Item = { id: string; key: string; title: string; status: string }
 type Handoff = Item & { sendingOwnerId: string; receivingOwnerId: string; sendingDisciplineId: string; receivingDisciplineId: string }
 type Group = { handoffId: string; handoffKey: string; taskIds: string[]; taskKeys: string[] }
+type Startability = { id: string; targetType: 'Task' | 'Deliverable'; targetId: string; key: string; name: string;
+  dueDate: string | null; state: string; blocked: string[]; unknown: string[] }
 type ProjectProjection = { id: string; projectNumber: string; name: string; data: {
   handoffs: Handoff[]; outgoing: Handoff[]; incoming: Handoff[]; changes: Item[]; reviews: Item[];
-  linkedIssues: Item[]; uses: { id: string }[]; blockerGroups: Group[]
+  linkedIssues: Item[]; uses: { id: string }[]; blockerGroups: Group[];
+  startability: Startability[]; startabilityReadyTotal: number; startabilityFrom: string; startabilityTo: string
 } }
 type Choice = { id: string; name?: string; projectNumber?: string; displayName?: string }
 type Projection = { evaluatedAt: string; projects: ProjectProjection[]; projectChoices: Choice[];
@@ -34,6 +37,8 @@ function downloadCsv(projection: Projection) {
     for (const row of rows.linkedIssues) add(number, 'Issue', row.id, row.key, row.title, row.status)
     for (const row of rows.uses) add(number, 'InputUse', row.id, '', '', '')
     for (const group of rows.blockerGroups) add(number, 'BlockerGroup', group.handoffId, group.handoffKey, group.taskKeys.join('; '), '')
+    for (const row of rows.startability) add(number, 'Startability', row.targetId, row.key,
+      `${row.name}${row.blocked.length ? ` · blocked: ${row.blocked.join('; ')}` : ''}${row.unknown.length ? ` · unknown: ${row.unknown.join('; ')}` : ''}`, row.state)
   }
   const blob = new Blob([`\ufeff${lines.join('\n')}\n`], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
@@ -59,14 +64,19 @@ export function WorkspaceCoordination() {
     enabled: scope.ready,
     queryFn: () => get<Projection>(`discipline-coordination${qs({ ...scopeParams, projectId, disciplineId, ownerId, from, to })}`) })
   if (q.isPending) return <Page title="Coordination"><Loading rows={5} /></Page>
-  if (q.error) return <Page title="Coordination"><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
+  if (q.error) return <Page title="Coordination"><div className="flex flex-wrap gap-3 rounded border p-3">
+    <label>From<input className="ml-2 rounded border p-1" type="date" value={from} onChange={e => set('from', e.target.value)} /></label>
+    <label>To<input className="ml-2 rounded border p-1" type="date" value={to} onChange={e => set('to', e.target.value)} /></label>
+    <button type="button" className="text-primary underline" onClick={() => setSp(new URLSearchParams(), { replace: true })}>Clear filters</button>
+  </div><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
   const data = q.data
   const item = (project: ProjectProjection, path: string, prefix: string, row: Item) =>
     <li key={row.id}><Link className="text-primary underline" to={`/projects/${project.projectNumber}/${path}?panel=${prefix}:${row.id}`}>
       {project.projectNumber} · {row.key}</Link> · {row.title} · {row.status}</li>
   return <Page title="Coordination" subtitle="Current coordination across permitted workspace projects">
-    <p><button type="button" className="text-primary underline" onClick={() => downloadCsv(data)}>Export these evaluated records as CSV</button></p>
-    <div className="flex flex-wrap gap-3 rounded border p-3">
+    <p className="no-print flex gap-4"><button type="button" className="text-primary underline" onClick={() => downloadCsv(data)}>Export these evaluated records as CSV</button>
+      <button type="button" className="text-primary underline" onClick={() => window.print()}>Print this view</button></p>
+    <div className="no-print flex flex-wrap gap-3 rounded border p-3">
       <label>Project<select className="ml-2 rounded border p-1" value={projectId} onChange={e => set('projectId', e.target.value)}>
         <option value="">All permitted projects</option>{data.projectChoices.map(p => <option key={p.id} value={p.id}>{p.projectNumber}</option>)}
       </select></label>
@@ -79,7 +89,7 @@ export function WorkspaceCoordination() {
       <label>From<input className="ml-2 rounded border p-1" type="date" value={from} onChange={e => set('from', e.target.value)} /></label>
       <label>To<input className="ml-2 rounded border p-1" type="date" value={to} onChange={e => set('to', e.target.value)} /></label>
     </div>
-    <p role="status" className="text-xs text-muted-foreground">Evaluated {new Date(data.evaluatedAt).toLocaleString()} · {data.projects.length} permitted projects. Date filters apply to handoffs.</p>
+    <p role="status" className="text-xs text-muted-foreground">Evaluated {new Date(data.evaluatedAt).toLocaleString()} · {data.projects.length} permitted projects. Date filters apply to handoffs and startability.</p>
     {data.projects.map(project => <section key={project.id} className="space-y-3 rounded border p-4" aria-labelledby={`coord-${project.id}`}>
       <h2 id={`coord-${project.id}`} className="font-semibold">{project.projectNumber} · {project.name}</h2>
       <div className="grid gap-3 md:grid-cols-2">
@@ -94,8 +104,16 @@ export function WorkspaceCoordination() {
         <section><h3>Which revision are we using? ({project.data.uses.length})</h3>
           <Link className="text-primary underline" to={`/projects/${project.projectNumber}/coordination`}>Open source revisions</Link></section>
         <section><h3>What changed? ({project.data.changes.length})</h3><ul>{project.data.changes.map(c => item(project, 'changes', 'ChangeNotice', c))}</ul></section>
-        <section><h3>What can we start?</h3><p>Readiness assessment is available in each project.</p>
-          <Link className="text-primary underline" to={`/projects/${project.projectNumber}/coordination`}>Open project coordination</Link></section>
+        <section><h3>What can we start? ({project.data.startabilityReadyTotal} Ready of {project.data.startability.length} assessed)</h3>
+          <p className="text-xs text-muted-foreground">Assessed work due {project.data.startabilityFrom} through {project.data.startabilityTo}; live checks evaluated with this view.</p>
+          <ul>{project.data.startability.map(row => <li key={row.id}>
+            <Link className="text-primary underline" to={`/projects/${project.projectNumber}/${row.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${row.targetType}:${row.targetId}`}>
+              {project.projectNumber} · {row.key}</Link> · {row.name} · {row.state}
+            {row.blocked.length > 0 && <span> · Blocked: {row.blocked.join(', ')}</span>}
+            {row.unknown.length > 0 && <span> · Unknown: {row.unknown.join(', ')}</span>}
+          </li>)}</ul>
+          {project.data.startability.length === 0 && <p>No assessed work is due in this window.</p>}
+          <Link className="text-primary underline" to={`/projects/${project.projectNumber}/readiness`}>Open project readiness</Link></section>
       </div>
       {project.data.reviews.length > 0 && <p>{project.data.reviews.length} review packages · <Link className="text-primary underline" to={`/projects/${project.projectNumber}/reviews`}>Open reviews</Link></p>}
       {project.data.linkedIssues.length > 0 && <p>{project.data.linkedIssues.length} linked issues · <Link className="text-primary underline" to={`/projects/${project.projectNumber}/issues`}>Open issues</Link></p>}

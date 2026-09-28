@@ -18,6 +18,7 @@ public static class ChangeEndpoints
     public sealed record AssessmentBody(Guid RequestId, int RowVersion, string Action, string? Status, string? Rationale, string? EvidenceUrl, Guid? CorrectionTaskId,
         int? CorrectionTaskRowVersion, decimal? EffortImpactHours, int? DateImpactDays, Guid? OwnerId, Guid? ReviewerId, int? TargetRowVersion,
         int? InputUseRowVersion, Guid? ExpectedCurrentRevisionId);
+    public sealed record IssueImpactBody(Guid RequestId, int RowVersion, string Disposition, string Reason);
     public sealed record Filter(string? Q, string? Status, Guid? OwnerId, bool? Mine);
     static readonly Col[] Columns = [new("key", "key"), new("title", "name"), new("status", "status"), new("assessmentDueDate", "due", "date"), new("pendingAssessments", "changePending"), new("scope", "changeScope")];
     public static void Map(RouteGroupBuilder api)
@@ -32,6 +33,8 @@ public static class ChangeEndpoints
         api.MapPost("/projects/{projectId:guid}/changes/{id:guid}/publish", Publish).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/changes/{id:guid}/action", NoticeCommand).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/changes/{id:guid}/assessments/{assessmentId:guid}", Assess).WithMetadata(new Coordination.AtomicCommand());
+        api.MapGet("/issues/{id:guid}/reference-impacts", ListIssueImpacts);
+        api.MapPost("/issues/{id:guid}/reference-impacts/{impactId:guid}", DecideIssueImpact).WithMetadata(new Coordination.AtomicCommand());
     }
     static async Task<ChangeNotice> Load(HubDb db, Guid project, Guid id) => await db.ChangeNotices.SingleOrDefaultAsync(c => c.ProjectId == project && c.Id == id) ?? throw ApiException.NotFound();
     static void HeadVersion(SourceHead head, int? version) => Coordination.Version(head, version);
@@ -85,6 +88,30 @@ public static class ChangeEndpoints
         db.ChangeAssessments.Add(new ChangeAssessment { ProjectId = p.Id, ChangeNoticeId = notice.Id, TargetType = type, TargetId = id, OwnerId = work.OwnerId,
             ReviewerId = reviewer, RevisionUsedId = revision, InputUseId = use, HandoffId = handoff });
     }
+    static async Task<Guid[]> CreateIssueImpacts(HubDb db, Project p, SourceRevision oldRevision, SourceRevision newRevision, TimeProvider clock, Guid actor)
+    {
+        var recipients = new HashSet<Guid>();
+        // A drawing number and revision can occur in more than one source. Only an exact
+        // registered source link establishes that this reference was superseded.
+        var documents = await db.IssueDocumentReferences.Where(d => d.ProjectId == p.Id && d.Revision == oldRevision.Revision && d.SourceUrl == oldRevision.Url &&
+            (d.Identifier == oldRevision.ExternalIdentifier || d.Identifier == oldRevision.SourceKey) &&
+            db.Issues.Any(i => i.Id == d.IssueId && i.Status == IssueStatus.Resolved)).ToListAsync();
+        foreach (var document in documents)
+        {
+            var exists = await db.IssueReferenceImpactAssessments.AnyAsync(a => a.IssueId == document.IssueId && a.DocumentReferenceId == document.Id &&
+                a.PreviousRevisionId == oldRevision.Id && a.CurrentRevisionId == newRevision.Id);
+            if (exists) continue;
+            var issue = await db.Issues.SingleAsync(i => i.Id == document.IssueId);
+            var verifier = await db.IssueVerifications.Where(v => v.IssueId == issue.Id).OrderByDescending(v => v.IssueRowVersion).FirstOrDefaultAsync();
+            var impact = new IssueReferenceImpactAssessment { ProjectId = p.Id, IssueId = issue.Id, DocumentReferenceId = document.Id,
+                PreviousRevisionId = oldRevision.Id, CurrentRevisionId = newRevision.Id, OwnerId = issue.OwnerId,
+                VerifierId = verifier?.VerifierId, Status = IssueReferenceImpactStatus.Pending, CreatedAt = clock.GetUtcNow(), UpdatedAt = clock.GetUtcNow(), CreatedBy = actor, UpdatedBy = actor };
+            db.IssueReferenceImpactAssessments.Add(impact); db.Audit.Note(impact, reason: "Source revision superseded");
+            recipients.Add(issue.OwnerId);
+            if (verifier is not null) recipients.Add(verifier.VerifierId);
+        }
+        return [.. recipients];
+    }
     static Task<Coordination.Result> Publish(Guid projectId, Guid id, PublishBody body, Access access, HubDb db, Notifier notify, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "change.publish", id, body }, access, db, clock, async (p, ctx) => {
             var c = await Load(db, p.Id, id); Coordination.Version(c, body.RowVersion); Check.That(c.Status == ChangeStatus.Draft, "status", "change.draft");
@@ -111,10 +138,12 @@ public static class ChangeEndpoints
                 await AddAssessment(db, p, c, w.Type, w.Id, c.OldRevisionId, null, null);
             }
             head.CurrentRevisionId = next.Id; c.Status = ChangeStatus.Open; c.PublishedAt = clock.GetUtcNow();
+            var issueImpactRecipients = await CreateIssueImpacts(db, p, await Coordination.Revision(db, p.Id, c.OldRevisionId), next, clock, access.Me.Id);
             await db.SaveChangesAsync();
             await ReviewEndpoints.AdvanceForPublishedRevision(db, notify, p, await Coordination.Revision(db, p.Id, c.OldRevisionId), next);
             await SubmissionEndpoints.InvalidateForPublishedRevision(db, p.Id, c.OldRevisionId);
-            await Notify(notify, p, c, await db.ChangeAssessments.Where(a => a.ChangeNoticeId == c.Id).Select(a => a.OwnerId).ToListAsync()); return c;
+            await Notify(notify, p, c, (await db.ChangeAssessments.Where(a => a.ChangeNoticeId == c.Id).Select(a => a.OwnerId).ToListAsync())
+                .Concat(issueImpactRecipients).Distinct()); return c;
         });
     static Task<Coordination.Result> Adopt(Guid projectId, AdoptBody body, Access access, HubDb db, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "input.adopt", body }, access, db, clock, async (p, ctx) => {
@@ -262,5 +291,53 @@ public static class ChangeEndpoints
     {
         var (p, _) = await access.Project(projectId, false); var rows = await Rows(db, Query(db, projectId, filter, access.Me.Id).Take(Export.MaxRows + 1));
         return await ExportFile.Send(db, store, format, Text.Get("export.changes", p.ProjectNumber), Columns, JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http), p.Id, $"{p.ProjectNumber}-changes", clock);
+    }
+    static async Task<object> ListIssueImpacts(Guid id, Access access, HubDb db)
+    {
+        var (_, project, _) = await RegisterEndpoints.LoadIssue(db, access, id);
+        var impacts = await db.IssueReferenceImpactAssessments.AsNoTracking().Where(a => a.ProjectId == project.Id && a.IssueId == id)
+            .OrderByDescending(a => a.CreatedAt).ThenBy(a => a.Id).ToListAsync();
+        var documentIds = impacts.Select(a => a.DocumentReferenceId).Distinct().ToArray();
+        var revisionIds = impacts.SelectMany(a => new[] { a.PreviousRevisionId, a.CurrentRevisionId }).Distinct().ToArray();
+        var documents = await db.IssueDocumentReferences.AsNoTracking().Where(d => d.ProjectId == project.Id && d.IssueId == id && documentIds.Contains(d.Id))
+            .ToDictionaryAsync(d => d.Id);
+        var revisions = await db.SourceRevisions.AsNoTracking().Where(r => r.ProjectId == project.Id && revisionIds.Contains(r.Id))
+            .ToDictionaryAsync(r => r.Id);
+        return impacts.Select(a => new { a.Id, a.DocumentReferenceId, a.PreviousRevisionId, a.CurrentRevisionId, a.OwnerId, a.VerifierId, a.Status,
+            a.OwnerDisposition, a.OwnerReason, a.VerifierDisposition, a.VerifierReason, a.OwnerDecidedAt, a.VerifierDecidedAt, a.RowVersion,
+            DocumentReference = documents.TryGetValue(a.DocumentReferenceId, out var d) ? new { d.Identifier, d.Revision, d.Kind } : null,
+            PreviousRevision = revisions.TryGetValue(a.PreviousRevisionId, out var old) ? new { old.SourceKey, old.ExternalIdentifier, old.Revision } : null,
+            CurrentRevision = revisions.TryGetValue(a.CurrentRevisionId, out var current) ? new { current.SourceKey, current.ExternalIdentifier, current.Revision } : null }).ToList();
+    }
+    static async Task<Coordination.Result> DecideIssueImpact(Guid id, Guid impactId, IssueImpactBody body, Access access, HubDb db, TimeProvider clock)
+    {
+        var (_, project, _) = await RegisterEndpoints.LoadIssue(db, access, id);
+        return await Coordination.Run(project.Id, body.RequestId, new { operation = "issue.reference_impact", id, impactId, body }, access, db, clock, async (p, _) => {
+            var issue = await db.Issues.SingleOrDefaultAsync(i => i.ProjectId == p.Id && i.Id == id) ?? throw ApiException.NotFound();
+            var impact = await db.IssueReferenceImpactAssessments.SingleOrDefaultAsync(a => a.ProjectId == p.Id && a.IssueId == id && a.Id == impactId)
+                ?? throw ApiException.NotFound();
+            Coordination.Version(impact, body.RowVersion);
+            Check.That(impact.Status == IssueReferenceImpactStatus.Pending, "status", "issue.reference_impact_pending");
+            Check.OneOf(body.Disposition, IssueReferenceImpactDisposition.All, "disposition");
+            var reason = Check.Reason(body.Reason);
+            var now = clock.GetUtcNow();
+            if (access.Me.Id == impact.OwnerId && issue.OwnerId == access.Me.Id)
+            {
+                Check.That(impact.OwnerDisposition is null, "disposition", "issue.reference_impact_decided");
+                impact.OwnerDisposition = body.Disposition; impact.OwnerReason = reason; impact.OwnerDecidedBy = access.Me.Id; impact.OwnerDecidedAt = now;
+            }
+            else if (impact.VerifierId == access.Me.Id && issue.OwnerId != access.Me.Id)
+            {
+                Check.That(impact.VerifierDisposition is null, "disposition", "issue.reference_impact_decided");
+                impact.VerifierDisposition = body.Disposition; impact.VerifierReason = reason; impact.VerifierDecidedBy = access.Me.Id; impact.VerifierDecidedAt = now;
+            }
+            else throw ApiException.Forbidden("perm.edit");
+            if (impact.OwnerDisposition != null && impact.VerifierDisposition != null)
+                impact.Status = impact.OwnerDisposition == IssueReferenceImpactDisposition.Reopen || impact.VerifierDisposition == IssueReferenceImpactDisposition.Reopen
+                    ? IssueReferenceImpactStatus.ReopenRequested : IssueReferenceImpactStatus.Unaffected;
+            impact.UpdatedAt = now; impact.UpdatedBy = access.Me.Id;
+            db.Audit.Note(impact, action: impact.Status == IssueReferenceImpactStatus.ReopenRequested ? "ReopenRequested" : impact.Status == IssueReferenceImpactStatus.Unaffected ? "Unaffected" : null, reason: reason);
+            return impact;
+        });
     }
 }

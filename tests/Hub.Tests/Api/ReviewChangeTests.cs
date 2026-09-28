@@ -141,6 +141,55 @@ public sealed class ReviewChangeTests(HubFactory f)
         Assert.Equal(3, f.Db(db => db.ReviewRounds.Count(r => r.PackageId == id)));
         Assert.Equal(3, f.Db(db => db.ReviewFindings.Count(x => x.PackageId == id)));
     }
+
+    [Fact]
+    public async Task AC_LOC_03_published_source_revision_creates_two_party_impact_for_closed_issue()
+    {
+        var s = await New();
+        var issue = await Post(TestData.Alex, Root(s) + "/issues", new { title = "Closed source reference", severity = "High", ownerId = data.User(TestData.Alex), projectDisciplineId = s.Civil }, 201);
+        var issueId = issue.G("id");
+        int IssueVersion() => f.Db(db => db.Issues.Single(i => i.Id == issueId).RowVersion);
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/documents", new { kind = "Drawing", identifier = "survey", revision = "A", sourceUrl = "https://example.test/A.pdf", isAvailable = true, rowVersion = IssueVersion() }, 201);
+        await Post(TestData.Pm, $"/api/v1/issues/{issueId}/verification", new { verifierId = data.User(TestData.Marc), status = "Proposed", note = "Appoint independent verifier", rowVersion = IssueVersion() }, 201);
+        await Post(TestData.Marc, $"/api/v1/issues/{issueId}/verification", new { verifierId = data.User(TestData.Marc), status = "Verified", evidenceUrl = "https://example.test/evidence", rowVersion = IssueVersion() }, 201);
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/transition", new { toStatus = "Resolved", resolution = "Closed against revision A", rowVersion = IssueVersion() });
+
+        var unrelated = await Post(TestData.Alex, Root(s) + "/issues", new { title = "Different source with same drawing number", severity = "High", ownerId = data.User(TestData.Alex), projectDisciplineId = s.Civil }, 201);
+        var unrelatedId = unrelated.G("id");
+        int UnrelatedVersion() => f.Db(db => db.Issues.Single(i => i.Id == unrelatedId).RowVersion);
+        await Post(TestData.Alex, $"/api/v1/issues/{unrelatedId}/documents", new { kind = "Drawing", identifier = "survey", revision = "A", sourceUrl = "https://different.example.test/A.pdf", isAvailable = true, rowVersion = UnrelatedVersion() }, 201);
+        await Post(TestData.Pm, $"/api/v1/issues/{unrelatedId}/verification", new { verifierId = data.User(TestData.Marc), status = "Proposed", note = "Appoint independent verifier", rowVersion = UnrelatedVersion() }, 201);
+        await Post(TestData.Marc, $"/api/v1/issues/{unrelatedId}/verification", new { verifierId = data.User(TestData.Marc), status = "Verified", evidenceUrl = "https://example.test/evidence", rowVersion = UnrelatedVersion() }, 201);
+        await Post(TestData.Alex, $"/api/v1/issues/{unrelatedId}/transition", new { toStatus = "Resolved", resolution = "Different source", rowVersion = UnrelatedVersion() });
+
+        var notice = await Notice(s);
+        await Publish(s, notice);
+        Assert.Empty((await Get(TestData.Alex, $"/api/v1/issues/{unrelatedId}/reference-impacts")).AsArray());
+        var impacts = await Get(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts");
+        Assert.Single(impacts.AsArray());
+        Assert.Equal("Pending", impacts.AsArray()[0]!.S("status"));
+        var impactId = impacts.AsArray()[0]!.G("id");
+        var ownerDisposition = new ChangeEndpoints.IssueImpactBody(Guid.NewGuid(), impacts.AsArray()[0]!.I("rowVersion"), "Unaffected", "Owner reviewed superseding revision");
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts/{impactId}", ownerDisposition);
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts/{impactId}", ownerDisposition);
+        var pending = await Get(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts");
+        Assert.Equal("Pending", pending.AsArray()[0]!.S("status"));
+        Assert.Equal("Unaffected", pending.AsArray()[0]!.S("ownerDisposition"));
+        await Post(TestData.Omar, $"/api/v1/issues/{issueId}/reference-impacts/{impactId}",
+            new ChangeEndpoints.IssueImpactBody(Guid.NewGuid(), pending.AsArray()[0]!.I("rowVersion"), "Unaffected", "Unrelated member"), 403);
+        (await f.As(TestData.Pm).Patch($"/api/v1/issues/{issueId}", new { ownerId = data.User(TestData.Omar) }, IssueVersion())).EnsureSuccessStatusCode();
+        var reassigned = await Get(TestData.Omar, $"/api/v1/issues/{issueId}/reference-impacts");
+        Assert.Equal(data.User(TestData.Omar), reassigned.AsArray()[0]!.G("ownerId"));
+        Assert.Null(reassigned.AsArray()[0]!["ownerDisposition"]);
+        await Post(TestData.Omar, $"/api/v1/issues/{issueId}/reference-impacts/{impactId}",
+            new ChangeEndpoints.IssueImpactBody(Guid.NewGuid(), reassigned.AsArray()[0]!.I("rowVersion"), "Unaffected", "New owner reviewed superseding revision"));
+        pending = await Get(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts");
+        var verifierDisposition = new ChangeEndpoints.IssueImpactBody(Guid.NewGuid(), pending.AsArray()[0]!.I("rowVersion"), "Unaffected", "Independent verifier reviewed superseding revision");
+        await Post(TestData.Marc, $"/api/v1/issues/{issueId}/reference-impacts/{impactId}", verifierDisposition);
+        var final = await Get(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts");
+        Assert.Equal("Unaffected", final.AsArray()[0]!.S("status"));
+        Assert.Equal("A", f.Db(db => db.IssueDocumentReferences.Single(d => d.IssueId == issueId).Revision));
+    }
     [Fact]
     public async Task Removing_a_manifest_deliverable_requires_impact_review_and_releases_its_issue_gate()
     {

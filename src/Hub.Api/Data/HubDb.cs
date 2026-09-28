@@ -89,6 +89,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<IssueLocation> IssueLocations => Set<IssueLocation>();
     public DbSet<IssueDocumentReference> IssueDocumentReferences => Set<IssueDocumentReference>();
     public DbSet<IssueVerification> IssueVerifications => Set<IssueVerification>();
+    public DbSet<IssueReferenceImpactAssessment> IssueReferenceImpactAssessments => Set<IssueReferenceImpactAssessment>();
     public DbSet<Meeting> Meetings => Set<Meeting>();
     public DbSet<MeetingAction> Actions => Set<MeetingAction>();
     public DbSet<Comment> Comments => Set<Comment>();
@@ -341,6 +342,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         {
             e.HasIndex(x => new { x.IssueId, x.CreatedAt });
             e.ToTable(t => t.HasCheckConstraint("ck_issue_verification_status", $"status IN ({In(IssueVerificationStatus.All)})"));
+        });
+        mb.Entity<IssueReferenceImpactAssessment>(e =>
+        {
+            e.HasIndex(x => new { x.IssueId, x.DocumentReferenceId, x.PreviousRevisionId, x.CurrentRevisionId }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_issue_reference_impact_status", $"status IN ({In(IssueReferenceImpactStatus.All)})"));
         });
         mb.Entity<Meeting>(e => { e.HasQueryFilter(x => x.DeletedAt == null); e.HasIndex(x => new { x.ProjectId, x.MeetingDate }); });
         Item<MeetingAction>(mb, e => e.ToTable(t => t.HasCheckConstraint("ck_action_status", $"status IN ({In(ActionStatus.All)})")));
@@ -676,6 +682,14 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<ChangeAssessment, WorkTask>(mb, x => x.CorrectionTaskId);
         Fk<ChangeAssessment, AppUser>(mb, x => x.OwnerId);
         Fk<ChangeAssessment, AppUser>(mb, x => x.ReviewerId);
+        Fk<IssueReferenceImpactAssessment, Issue>(mb, x => x.IssueId);
+        Fk<IssueReferenceImpactAssessment, IssueDocumentReference>(mb, x => x.DocumentReferenceId);
+        Fk<IssueReferenceImpactAssessment, SourceRevision>(mb, x => x.PreviousRevisionId);
+        Fk<IssueReferenceImpactAssessment, SourceRevision>(mb, x => x.CurrentRevisionId);
+        Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.OwnerId);
+        Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.VerifierId);
+        Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.OwnerDecidedBy);
+        Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.VerifierDecidedBy);
         Fk<SubmissionPackage, AppUser>(mb, x => x.CoordinatorId);
         Fk<SubmissionPackage, Milestone>(mb, x => x.MilestoneId);
         Fk<SubmissionPackage, SubmissionPackage>(mb, x => x.SupersedesPackageId);

@@ -466,6 +466,22 @@ public static class RegisterEndpoints
         {
             var o = patch.Id("ownerId") ?? throw ApiException.Invalid("ownerId", "error.required");
             await DeliverableEndpoints.ActivePerson(db, o, "ownerId");
+            if (i.OwnerId != o)
+            {
+                Check.That(!await db.IssueReferenceImpactAssessments.AnyAsync(a => a.IssueId == i.Id && a.Status == IssueReferenceImpactStatus.Pending && a.VerifierId == o),
+                    "ownerId", "issue.verifier_independent");
+                foreach (var impact in await db.IssueReferenceImpactAssessments.Where(a => a.IssueId == i.Id && a.Status == IssueReferenceImpactStatus.Pending).ToListAsync())
+                {
+                    impact.OwnerId = o;
+                    impact.OwnerDisposition = null;
+                    impact.OwnerReason = null;
+                    impact.OwnerDecidedBy = null;
+                    impact.OwnerDecidedAt = null;
+                    impact.UpdatedAt = clock.GetUtcNow();
+                    impact.UpdatedBy = access.Me.Id;
+                    db.Audit.Note(impact, reason: "Issue owner reassigned");
+                }
+            }
             i.OwnerId = o;
             await team.EnsureMember(p, o, ProjectRole.TeamMember);
         }
@@ -484,6 +500,8 @@ public static class RegisterEndpoints
         var (from, to) = (i.Status, body.ToStatus);
         if (!Workflow.IssueStep(from, to)) throw ApiException.Rule("illegal_transition", "issue.illegal_transition", null, from, to);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(i)));
+        if (from == IssueStatus.Resolved && to == IssueStatus.InProgress)
+            Check.That(!await db.IssueReferenceImpactAssessments.AnyAsync(a => a.IssueId == i.Id && a.Status == IssueReferenceImpactStatus.Pending), "impact", "issue.reference_impact_pending");
         if (to == IssueStatus.Resolved && (await db.IssueLocations.AnyAsync(x => x.IssueId == i.Id) || await db.IssueDocumentReferences.AnyAsync(x => x.IssueId == i.Id)))
         {
             Check.That(await db.IssueDocumentReferences.Where(x => x.IssueId == i.Id).AllAsync(x => x.IsAvailable), "document", "issue.document_unavailable");

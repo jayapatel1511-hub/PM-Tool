@@ -65,3 +65,18 @@ public static class IssueVerificationStatus
     public const string Proposed = "Proposed", Verified = "Verified", Rejected = "Rejected";
     public static readonly string[] All = [Proposed, Verified, Rejected];
 }
+
+public static class IssueReferenceImpactStatus
+{
+    public const string Pending = "Pending";
+    public const string Unaffected = "Unaffected";
+    public const string ReopenRequested = "ReopenRequested";
+    public static readonly string[] All = [Pending, Unaffected, ReopenRequested];
+}
+
+public static class IssueReferenceImpactDisposition
+{
+    public const string Unaffected = "Unaffected";
+    public const string Reopen = "Reopen";
+    public static readonly string[] All = [Unaffected, Reopen];
+}

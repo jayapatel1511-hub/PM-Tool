@@ -3,7 +3,7 @@ import { ListPlus, OctagonAlert, Plus, ShieldAlert, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
+import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Section, Spinner, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
@@ -49,6 +49,14 @@ interface IssueDetail extends Detail { issue: IssueRow; originRisk?: { id: strin
 interface IssueLocation { id: string; kind: string; siteArea?: string; building?: string; level?: string; room?: string; assetSystem?: string; alignment?: string; startStation?: number; endStation?: number; stationUnits?: string; coordinateX?: number; coordinateY?: number; coordinateZ?: number; coordinateReferenceSystem?: string; coordinateUnits?: string; rowVersion: number }
 interface IssueDocument { id: string; kind: string; identifier: string; revision: string; sourceUrl: string; externalTopicId?: string; modelElementGuid?: string; viewpointUrl?: string; isAvailable: boolean; rowVersion: number }
 interface IssueVerification { id: string; verifierId: string; status: string; evidenceUrl?: string; note?: string; verifiedAt?: string; rowVersion: number }
+interface IssueReferenceImpact {
+  id: string; documentReferenceId: string; previousRevisionId: string; currentRevisionId: string; ownerId: string; verifierId?: string | null
+  status: 'Pending' | 'Unaffected' | 'ReopenRequested'; ownerDisposition?: 'Unaffected' | 'Reopen' | null; verifierDisposition?: 'Unaffected' | 'Reopen' | null
+  ownerDecidedAt?: string | null; verifierDecidedAt?: string | null; ownerReason?: string | null; verifierReason?: string | null; rowVersion: number
+  previousRevision?: { sourceKey?: string; externalIdentifier?: string; revision?: string } | null
+  currentRevision?: { sourceKey?: string; externalIdentifier?: string; revision?: string } | null
+  documentReference?: { identifier?: string; revision?: string; kind?: string } | null
+}
 type Target = { type: 'Task' | 'Deliverable'; id: string; key: string; name: string }
 
 const RISK_STATUSES = ['Open', 'Monitoring', 'Closed', 'Realised']
@@ -625,6 +633,7 @@ function IssuePanel({ id }: PanelProps) {
         <FieldRow label={t('issue.target')}><InlineDate value={i.targetResolutionDate} disabled={!can} onSave={(v) => save({ targetResolutionDate: v })} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={i.projectDisciplineId} allowEmpty options={disciplines} disabled={!can} onSave={(v) => save({ projectDisciplineId: v || null })} title={t('common.discipline')} /></FieldRow>
         <IssueMetadata issue={i} canEdit={can} onChanged={refresh} />
+        <IssueReferenceImpacts issue={i} />
       </div>
       <TabBar tabs={[{ id: 'links' as const, label: t('decision.links'), count: q.data.links.length }, ...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'links' && <Links links={q.data.links} canEdit={can} projectId={i.projectId} onChange={refresh} onAdd={(x) => post(`issues/${i.id}/links`, { targetType: x.targetType, targetId: x.targetId })} />}
@@ -637,6 +646,58 @@ function IssuePanel({ id }: PanelProps) {
         confirmLabel={t('issue.reopen')} onConfirm={(reason) => go('In Progress', reason)} />}
     </div>
   )
+}
+
+function IssueReferenceImpacts({ issue }: { issue: IssueRow }) {
+  const me = useMe()
+  const q = useQuery({ queryKey: ['issue-reference-impacts', issue.id], queryFn: () => get<IssueReferenceImpact[]>(`issues/${issue.id}/reference-impacts`) })
+  const [reason, setReason] = useState<Record<string, string>>({})
+  const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState<unknown>(null)
+  const decide = async (impact: IssueReferenceImpact, disposition: 'Unaffected' | 'Reopen') => {
+    setBusy(impact.id); setError(null)
+    try {
+      const text = reason[impact.id]?.trim() ?? ''
+      if (text.length < 5) { setError(new ApiError(400, { detail: t('issue.referenceImpactReasonRequired') })); return }
+      await post(`issues/${issue.id}/reference-impacts/${impact.id}`, { requestId: crypto.randomUUID(), rowVersion: impact.rowVersion, disposition, reason: text })
+      await q.refetch(); setReason((x) => ({ ...x, [impact.id]: '' })); toast.success(t('issue.referenceImpactSaved'))
+    } catch (e) { setError(e) } finally { setBusy(null) }
+  }
+  if (q.isPending) return <div className="mt-4"><Loading rows={2} /></div>
+  if (q.error) return <div className="mt-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
+  const impacts = q.data ?? []
+  return <Section id="issue-reference-impacts" title={t('issue.referenceImpacts')} count={impacts.length} className="mt-4">
+    <div className="space-y-3 p-3">
+      <p className="text-sm text-muted-foreground">{t('issue.referenceImpactsHint')}</p>
+      {error != null ? <ErrorBanner error={error} retry={() => setError(null)} /> : null}
+      {!impacts.length && <p className="text-sm text-muted-foreground">{t('issue.noReferenceImpacts')}</p>}
+      {impacts.map((impact) => {
+        const isOwner = impact.ownerId === me.id, isVerifier = impact.verifierId === me.id
+        const canDecide = impact.status === 'Pending' && ((isOwner && !impact.ownerDisposition) || (isVerifier && !impact.verifierDisposition))
+        const previous = impact.previousRevision, current = impact.currentRevision
+        const source = impact.documentReference?.identifier || previous?.externalIdentifier || t('issue.referenceSourceUnavailable')
+        const previousLabel = [previous?.sourceKey, previous?.revision].filter(Boolean).join(' · ') || t('issue.referenceRevisionUnavailable')
+        const currentLabel = [current?.sourceKey, current?.revision].filter(Boolean).join(' · ') || t('issue.referenceRevisionUnavailable')
+        return <article key={impact.id} className="space-y-2 rounded border p-3" aria-labelledby={`impact-${impact.id}`}>
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 id={`impact-${impact.id}`} className="font-medium">{source}</h4>
+            <StatusPill status={impact.status} />
+            {impact.ownerDisposition && <Chip tone="idle">{t('issue.ownerDisposition')}: {impact.ownerDisposition}</Chip>}
+            {impact.verifierDisposition && <Chip tone="idle">{t('issue.verifierDisposition')}: {impact.verifierDisposition}</Chip>}
+          </div>
+          <p className="text-sm">{t('issue.referenceChanged', { previous: previousLabel, current: currentLabel })}</p>
+          {impact.ownerReason && <p className="text-sm text-muted-foreground">{t('issue.ownerDisposition')}: {impact.ownerReason}</p>}
+          {impact.verifierReason && <p className="text-sm text-muted-foreground">{t('issue.verifierDisposition')}: {impact.verifierReason}</p>}
+          {canDecide && <div className="space-y-2" aria-label={t('issue.referenceImpactDecision')}>
+            <label htmlFor={`impact-reason-${impact.id}`} className="text-sm font-medium">{t('issue.referenceImpactReasonLabel')}</label>
+            <Textarea id={`impact-reason-${impact.id}`} value={reason[impact.id] ?? ''} onChange={(e) => setReason((x) => ({ ...x, [impact.id]: e.target.value }))} placeholder={t('issue.referenceImpactReason')} rows={2} />
+            <div className="flex flex-wrap gap-2"><Button type="button" disabled={busy === impact.id} onClick={() => decide(impact, 'Unaffected')}>{t('issue.referenceUnaffected')}</Button><Button type="button" variant="outline" disabled={busy === impact.id} onClick={() => decide(impact, 'Reopen')}>{t('issue.referenceReopen')}</Button>{busy === impact.id && <Spinner />}</div>
+          </div>}
+          {!canDecide && impact.status === 'Pending' && <p className="text-sm text-muted-foreground">{t(isOwner || isVerifier ? 'issue.referenceImpactWaiting' : 'issue.referenceImpactAssigned')}</p>}
+        </article>
+      })}
+    </div>
+  </Section>
 }
 
 function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit: boolean; onChanged: () => void }) {

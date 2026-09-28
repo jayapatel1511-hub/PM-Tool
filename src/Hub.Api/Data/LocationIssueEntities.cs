@@ -53,3 +53,24 @@ public sealed class IssueVerification : CoordinationRecord
     public DateTimeOffset? VerifiedAt { get; set; }
     public override string AuditType => "IssueVerification";
 }
+
+/// Records the required owner and independent verifier disposition when a linked source revision changes.
+public sealed class IssueReferenceImpactAssessment : CoordinationRecord
+{
+    public Guid IssueId { get; set; }
+    public Guid DocumentReferenceId { get; set; }
+    public Guid PreviousRevisionId { get; set; }
+    public Guid CurrentRevisionId { get; set; }
+    public Guid OwnerId { get; set; }
+    public Guid? VerifierId { get; set; }
+    public string Status { get; set; } = IssueReferenceImpactStatus.Pending;
+    public string? OwnerDisposition { get; set; }
+    public string? OwnerReason { get; set; }
+    public Guid? OwnerDecidedBy { get; set; }
+    public DateTimeOffset? OwnerDecidedAt { get; set; }
+    public string? VerifierDisposition { get; set; }
+    public string? VerifierReason { get; set; }
+    public Guid? VerifierDecidedBy { get; set; }
+    public DateTimeOffset? VerifierDecidedAt { get; set; }
+    public override string AuditType => "IssueReferenceImpactAssessment";
+}

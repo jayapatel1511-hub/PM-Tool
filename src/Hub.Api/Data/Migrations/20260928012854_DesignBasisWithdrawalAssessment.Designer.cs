@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Hub.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Hub.Api.Data.Migrations
 {
     [DbContext(typeof(HubDb))]
-    partial class HubDbModelSnapshot : ModelSnapshot
+    [Migration("20260928012854_DesignBasisWithdrawalAssessment")]
+    partial class DesignBasisWithdrawalAssessment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -739,10 +742,6 @@ namespace Hub.Api.Data.Migrations
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("updated_by");
-
-                    b.Property<Guid?>("WithdrawalVersionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("withdrawal_version_id");
 
                     b.HasKey("Id")
                         .HasName("pk_basis_impact_assessment");
@@ -7661,82 +7660,6 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("template_dependency", "hub");
                 });
 
-            modelBuilder.Entity("Hub.Api.Data.TemplateDesignBasis", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("DeclaredRevision")
-                        .HasColumnType("text")
-                        .HasColumnName("declared_revision");
-
-                    b.Property<string>("Kind")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("kind");
-
-                    b.Property<decimal?>("NumericValue")
-                        .HasColumnType("numeric")
-                        .HasColumnName("numeric_value");
-
-                    b.Property<string>("Scope")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("scope");
-
-                    b.Property<string>("SourceSystem")
-                        .HasColumnType("text")
-                        .HasColumnName("source_system");
-
-                    b.Property<string>("SourceUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("source_url");
-
-                    b.Property<string>("StableSourceId")
-                        .HasColumnType("text")
-                        .HasColumnName("stable_source_id");
-
-                    b.Property<string>("Statement")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("statement");
-
-                    b.Property<Guid>("TemplateDisciplineId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("template_discipline_id");
-
-                    b.Property<Guid>("TemplateId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("template_id");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("title");
-
-                    b.Property<string>("Units")
-                        .HasColumnType("text")
-                        .HasColumnName("units");
-
-                    b.HasKey("Id")
-                        .HasName("pk_template_design_basis");
-
-                    b.HasIndex("TemplateDisciplineId")
-                        .HasDatabaseName("ix_template_design_basis_template_discipline_id");
-
-                    b.HasIndex("TemplateId", "TemplateDisciplineId")
-                        .HasDatabaseName("ix_template_design_basis_template_id_template_discipline_id");
-
-                    b.ToTable("template_design_basis", "hub", t =>
-                        {
-                            t.HasCheckConstraint("ck_template_basis_kind", "kind IN ('Criterion','Assumption')");
-
-                            t.HasCheckConstraint("ck_template_basis_numeric_units", "numeric_value IS NULL OR (units IS NOT NULL AND length(trim(units)) > 0)");
-                        });
-                });
-
             modelBuilder.Entity("Hub.Api.Data.TemplateDiscipline", b =>
                 {
                     b.Property<Guid>("Id")
@@ -9989,23 +9912,6 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_task_time_entry_app_user_user_id");
-                });
-
-            modelBuilder.Entity("Hub.Api.Data.TemplateDesignBasis", b =>
-                {
-                    b.HasOne("Hub.Api.Data.TemplateDiscipline", null)
-                        .WithMany()
-                        .HasForeignKey("TemplateDisciplineId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_template_design_basis_template_disciplines_template_discipli~");
-
-                    b.HasOne("Hub.Api.Data.ProjectTemplate", null)
-                        .WithMany()
-                        .HasForeignKey("TemplateId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_template_design_basis_project_template_template_id");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.UserSystemRole", b =>

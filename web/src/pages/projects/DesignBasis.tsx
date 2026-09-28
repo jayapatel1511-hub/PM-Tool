@@ -24,8 +24,8 @@ type Version = { id: string; entryId: string; number: number; status: string; sc
   confirmedBy?: string; confirmedAt?: string; confirmationRationale?: string }
 type Detail = { entry: Entry; versions: { version: Version; sourceMissing: boolean }[];
   uses: { id: string; versionId: string; targetType: string; targetId: string; intendedUse: string; ownerId: string; rowVersion: number; isCurrent: boolean }[];
-  impacts: { id: string; basisUseId: string; oldVersionId: string; newVersionId: string; status: string; ownerId: string; rowVersion: number; rationale?: string; evidenceUrl?: string }[];
-  conflicts: { id: string; resolved: boolean; left: { versionId: string; entryKey: string; scope: string; statement: string; numericValue?: number; units?: string };
+  impacts: { id: string; basisUseId: string; oldVersionId: string; newVersionId?: string; withdrawalVersionId?: string; status: string; ownerId: string; rowVersion: number; rationale?: string; evidenceUrl?: string }[];
+  conflicts: { id: string; resolved: boolean; rowVersion: number; left: { versionId: string; entryKey: string; scope: string; statement: string; numericValue?: number; units?: string };
     right: { versionId: string; entryKey: string; scope: string; statement: string; numericValue?: number; units?: string } }[];
   dispositions: { id: string; versionId: string; scope: string; ownerId: string; approvedBy: string; expiresOn: string; reason: string }[];
   canManage: boolean; canConfirm: boolean }
@@ -156,8 +156,10 @@ function BasisForm({ base, number, options, onClose, onDone, existing }: { base:
 function BasisDetail({ base, id, number, options, name, close, refresh }: { base: string; id: string; number: string;
   options?: CoordOptions; name: (id?: string) => string; close: () => void; refresh: () => void }) {
   const q = useQuery({ queryKey: ['design-basis-detail', base, id], queryFn: () => get<Detail>(`${base}/${id}`) })
-  const [action, setAction] = useState<'propose' | 'confirm' | 'proceed' | 'use' | null>(null)
+  const [action, setAction] = useState<'propose' | 'confirm' | 'proceed' | 'use' | 'withdraw' | 'resolveConflict' | null>(null)
   const [selectedImpact, setSelectedImpact] = useState<string | null>(null)
+  const [selectedVersion, setSelectedVersion] = useState<Version | null>(null)
+  const [selectedConflict, setSelectedConflict] = useState<string | null>(null)
   const row = q.data, current = row?.versions.find(v => v.version.id === row.entry.currentVersionId)?.version
   const proposed = row?.versions.find(v => v.version.status === 'Proposed')?.version
   const done = () => { setAction(null); setSelectedImpact(null); refresh(); q.refetch() }
@@ -178,6 +180,7 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
           <div key={v.id} className="rounded border p-3"><p className="font-medium">{t('basis.version')} {v.number} · {tv(v.status)}{row.entry.currentVersionId === v.id && ` · ${t('basis.current')}`}</p>
             <p>{t('basis.scope')}: {v.scope}</p><p className="whitespace-pre-wrap">{v.statement}{v.numericValue != null && ` · ${v.numericValue} ${v.units ?? ''}`}</p>
             {sourceMissing && <p className="text-warn">{t('basis.missingSource')}</p>}
+            {row.canManage && (v.status === 'Proposed' || v.status === 'Confirmed') && <Button size="sm" variant="outline" onClick={() => { setSelectedVersion(v); setAction('withdraw') }}>{t('basis.withdraw')}</Button>}
             <p>{t('basis.manual')}{v.sourceSystem && ` · ${v.sourceSystem}`}{v.stableSourceId && ` · ${v.stableSourceId}`}{v.declaredRevision && ` · ${t('basis.revision')}: ${v.declaredRevision}`}</p>
             {v.sourceUrl && <a className="text-primary underline" href={v.sourceUrl} target="_blank" rel="noopener noreferrer">{t('basis.sourceUrl')}</a>}
             {v.confirmationDueDate && <p>{t('basis.due')}: {fmtDate(v.confirmationDueDate)}</p>}
@@ -188,7 +191,9 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
           {row.conflicts.filter(c => !c.resolved).map(c => <div key={c.id} className="rounded border border-warn p-2">
             <p>{c.left.entryKey}: {c.left.numericValue ?? c.left.statement} {c.left.units ?? ''}</p>
             <p>{c.right.entryKey}: {c.right.numericValue ?? c.right.statement} {c.right.units ?? ''}</p>
-            <p>{t('basis.scope')}: {c.left.scope}</p></div>)}</section>
+            <p>{t('basis.scope')}: {c.left.scope}</p>
+            {row.canManage && row.versions.some(v => v.version.id === c.left.versionId || v.version.id === c.right.versionId) && <Button size="sm" variant="outline" onClick={() => { setSelectedConflict(c.id); setAction('resolveConflict') }}>{t('basis.resolveConflict')}</Button>}
+          </div>)}</section>
         <section><h3 className="font-medium">{t('basis.uses')} ({row.uses.length})</h3><ul className="mt-2 space-y-2">{row.uses.map(u =>
           <li key={u.id} className="rounded border p-2">{options ? <WorkLink options={options} type={u.targetType} id={u.targetId} number={number} /> :
             <Link className="text-primary underline" to={`/projects/${number}/${u.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${u.targetType}:${u.targetId}`}>{u.targetType}</Link>}
@@ -196,7 +201,7 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
             {u.isCurrent && row.versions.find(v => v.version.id === u.versionId)?.version.status === 'Superseded' &&
               <strong className="ml-2 text-warn">{t('basis.supersededUse')}</strong>} · {u.intendedUse}</li>)}</ul></section>
         <section><h3 className="font-medium">{t('basis.impacts')} ({row.impacts.length})</h3><ul className="mt-2 space-y-2">{row.impacts.map(i =>
-          <li key={i.id} className="rounded border p-2">{tv(i.status)} · {name(i.ownerId)} · {t('basis.version')} {row.versions.find(v => v.version.id === i.oldVersionId)?.version.number} → {row.versions.find(v => v.version.id === i.newVersionId)?.version.number}
+          <li key={i.id} className="rounded border p-2">{tv(i.status)} · {name(i.ownerId)} · {t('basis.version')} {row.versions.find(v => v.version.id === i.oldVersionId)?.version.number} → {i.newVersionId ? row.versions.find(v => v.version.id === i.newVersionId)?.version.number : i.withdrawalVersionId ? t('basis.withdrawn') : t('basis.decisionReopened')}
             {i.rationale && <p>{t('basis.reason')}: {i.rationale}</p>}{i.evidenceUrl && <a className="text-primary underline" href={i.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
             {i.status === 'Pending' && options && row.uses.find(u => u.id === i.basisUseId)?.isCurrent &&
               (() => { const u = row.uses.find(u => u.id === i.basisUseId)!; return !!workRef(options, u.targetType, u.targetId) })() &&
@@ -212,24 +217,53 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
       options={options} close={() => setAction(null)} done={done} />}
     {row && action === 'use' && options && <UseForm base={base} id={id} versions={row.versions.map(v => v.version)}
       currentId={current?.id} options={options} close={() => setAction(null)} done={done} />}
+    {row && action === 'withdraw' && selectedVersion && <WithdrawForm base={base} id={id} entry={row.entry} version={selectedVersion}
+      close={() => { setAction(null); setSelectedVersion(null) }} done={done} />}
+    {row && action === 'resolveConflict' && selectedConflict && <ConflictForm base={base} conflict={row.conflicts.find(c => c.id === selectedConflict)!} entry={row.entry}
+      versions={row.versions.map(v => v.version)} close={() => { setAction(null); setSelectedConflict(null) }} done={done} />}
     {row && selectedImpact && options && <ImpactForm base={base} id={id} number={number} row={row} impactId={selectedImpact}
       options={options} close={() => setSelectedImpact(null)} done={done} />}
   </>
 }
 
+function WithdrawForm({ base, id, entry, version, close, done }: { base: string; id: string; entry: Entry; version: Version; close: () => void; done: () => void }) {
+  const [reason, setReason] = useState('')
+  return <CommandForm path={`${base}/${id}/versions/${version.id}/withdraw`} title={t('basis.withdraw')} hint={t('basis.withdrawHint')} onClose={close} onDone={done}
+    payload={() => ({ entryRowVersion: entry.rowVersion, versionRowVersion: version.rowVersion, reason })}>
+    <p>{t('basis.version')} {version.number} · {tv(version.status)}</p>
+    <Field label={t('basis.reason')} htmlFor="basis-withdraw-reason"><Textarea id="basis-withdraw-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>
+  </CommandForm>
+}
+
+function ConflictForm({ base, conflict, entry, versions, close, done }: { base: string; conflict: Detail['conflicts'][number]; entry: Entry; versions: Version[]; close: () => void; done: () => void }) {
+  const candidates = versions.filter(v => v.status === 'Confirmed' &&
+    v.id !== conflict.left.versionId && v.id !== conflict.right.versionId &&
+    (v.supersedesVersionId === conflict.left.versionId || v.supersedesVersionId === conflict.right.versionId))
+  const [resolutionVersionId, setResolutionVersionId] = useState(candidates[0]?.id ?? '')
+  const [rationale, setRationale] = useState('')
+  const resolution = candidates.find(v => v.id === resolutionVersionId)
+  return <CommandForm path={`${base}/conflicts/${conflict.id}/resolve`} title={t('basis.resolveConflict')} hint={t('basis.resolveConflictHint')} onClose={close} onDone={done}
+    payload={() => ({ conflictRowVersion: conflict.rowVersion, resolutionVersionId, resolutionVersionRowVersion: resolution?.rowVersion, rationale })}>
+    <SelectField label={t('basis.resolutionVersion')} value={resolutionVersionId} onChange={setResolutionVersionId}
+      choices={candidates.map(v => ({ value: v.id, label: `${t('basis.version')} ${v.number}` }))} />
+    <p className="text-xs text-muted-foreground">{entry.title}</p>
+    <Field label={t('basis.reason')} htmlFor="basis-conflict-reason"><Textarea id="basis-conflict-reason" required minLength={5} value={rationale} onChange={e => setRationale(e.target.value)} /></Field>
+  </CommandForm>
+}
+
 function ImpactForm({ base, id, number, row, impactId, options, close, done }: { base: string; id: string; number: string; row: Detail;
   impactId: string; options: CoordOptions; close: () => void; done: () => void }) {
   const impact = row.impacts.find(i => i.id === impactId)!, use = row.uses.find(u => u.id === impact.basisUseId)!
-  const next = row.versions.find(v => v.version.id === impact.newVersionId)!.version
+  const next = impact.newVersionId ? row.versions.find(v => v.version.id === impact.newVersionId)?.version : undefined
   const target = workRef(options, use.targetType, use.targetId)
-  const canAdopt = options.actorId === use.ownerId, canUnaffected = row.canManage && options.actorId !== use.ownerId
+  const canAdopt = !!next && options.actorId === use.ownerId, canUnaffected = row.canManage && options.actorId !== use.ownerId
   const [decision, setDecision] = useState(canAdopt ? 'Adopt' : 'Unaffected')
   const [rationale, setRationale] = useState(''), [evidenceUrl, setEvidenceUrl] = useState('')
   return <CommandForm path={`${base}/${id}/impacts/${impactId}/decide`} title={t('basis.decideImpact')}
     hint={t('basis.impactHint')} onClose={close} onDone={done}
     payload={() => ({ assessmentRowVersion: impact.rowVersion, basisUseRowVersion: use.rowVersion,
-      newVersionRowVersion: next.rowVersion, targetRowVersion: target?.rowVersion, action: decision, rationale, evidenceUrl })}>
-    <p>{t('basis.version')} {row.versions.find(v => v.version.id === impact.oldVersionId)?.version.number} → {next.number}</p>
+      newVersionRowVersion: next?.rowVersion, targetRowVersion: target?.rowVersion, action: decision, rationale, evidenceUrl })}>
+    <p>{t('basis.version')} {row.versions.find(v => v.version.id === impact.oldVersionId)?.version.number} → {next ? next.number : impact.withdrawalVersionId ? t('basis.withdrawn') : t('basis.decisionReopened')}</p>
     {target ? <WorkLink options={options} type={use.targetType} id={use.targetId} number={number} /> : <p>{t('coord.unavailable')}</p>}
     <SelectField label={t('basis.decision')} value={decision} onChange={setDecision}
       choices={[...(canAdopt ? [{ value: 'Adopt', label: t('basis.adopt') }] : []),

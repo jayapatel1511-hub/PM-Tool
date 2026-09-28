@@ -112,6 +112,14 @@ public sealed class DesignBasisApiTests(HubFactory f)
         Assert.Single(f.Db(db => db.BasisConflicts.Where(c => !c.Resolved &&
             (c.LeftVersionId == bId || c.RightVersionId == bId) &&
             (c.LeftVersionId == otherVersionId || c.RightVersionId == otherVersionId)).ToList()));
+        var conflict = f.Db(db => db.BasisConflicts.Single(c => !c.Resolved &&
+            (c.LeftVersionId == bId || c.RightVersionId == bId) &&
+            (c.LeftVersionId == otherVersionId || c.RightVersionId == otherVersionId)));
+        var resolvePath = $"{root}/conflicts/{conflict.Id}/resolve";
+        await Post(TestData.Rita, resolvePath, new DesignBasisEndpoints.ResolveConflictBody(Guid.NewGuid(),
+            conflict.RowVersion, otherVersionId, Version<DesignBasisVersion>(otherVersionId), "Marc selected the reviewed peer basis"), 404);
+        await Post(TestData.Marc, resolvePath, new DesignBasisEndpoints.ResolveConflictBody(Guid.NewGuid(),
+            conflict.RowVersion, otherVersionId, Version<DesignBasisVersion>(otherVersionId), "Peer basis is not a replacement"), 400);
         await (await f.As(TestData.Rita).GetAsync($"{root}/{id}")).Json(404);
         var c = await Post(TestData.Marc, $"{root}/{id}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
             Version<DesignBasisEntry>(id), Version<DesignBasisVersion>(bId), b with { NumericValue = 130, DeclaredRevision = "C" },
@@ -123,6 +131,15 @@ public sealed class DesignBasisApiTests(HubFactory f)
             i.OldVersionId == versionId && i.NewVersionId == cId && i.Status == AssessmentStatus.Pending).ToList()));
         Assert.Single(f.Db(db => db.BasisImpactAssessments.Where(i => i.OldVersionId == bId &&
             i.NewVersionId == cId && i.Status == AssessmentStatus.Pending).ToList()));
+        var resolved = await Post(TestData.Marc, resolvePath, new DesignBasisEndpoints.ResolveConflictBody(Guid.NewGuid(),
+            conflict.RowVersion, cId, Version<DesignBasisVersion>(cId), "Revision C is the authorised replacement"));
+        Assert.Equal(conflict.Id, resolved.G("id"));
+        var savedConflict = f.Db(db => db.BasisConflicts.Single(c => c.Id == conflict.Id));
+        Assert.True(savedConflict.Resolved);
+        Assert.Equal(cId, savedConflict.ResolutionVersionId);
+        Assert.Equal(data.User(TestData.Marc), savedConflict.ResolvedBy);
+        await Post(TestData.Marc, resolvePath, new DesignBasisEndpoints.ResolveConflictBody(Guid.NewGuid(),
+            conflict.RowVersion, cId, Version<DesignBasisVersion>(cId), "Duplicate resolution"), 409);
     }
 
     [Fact]
@@ -151,5 +168,108 @@ public sealed class DesignBasisApiTests(HubFactory f)
         await Post(TestData.Alex, $"{root}/{id}/uses", use with { RequestId = Guid.NewGuid() });
         Assert.Equal(BasisStatus.Proposed, f.Db(db => db.DesignBasisVersions.Single(v => v.Id == versionId).Status));
         Assert.Single(f.Db(db => db.BasisAssumptionDispositions.Where(d => d.VersionId == versionId && d.OwnerId == owner).ToList()));
+    }
+
+    [Fact]
+    public async Task Withdrawal_marks_confirmed_basis_with_consumers_and_requires_assessment()
+    {
+        var project = await data.Project();
+        var civil = data.ProjectDiscipline(project.Id, "Civil");
+        var owner = data.User(TestData.Alex);
+        var root = $"/api/v1/projects/{project.Id}/design-basis";
+        var input = new DesignBasisEndpoints.VersionInput("Bridge / Pier 1", "Allowable bearing pressure", 100, "kPa",
+            "Geotechnical report", "GEO-W-1", "https://example.test/geotech", "A", new DateOnly(2026, 10, 5), null);
+        var created = await Post(TestData.Pm, root, new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion,
+            "Withdrawal criterion", owner, civil, data.User(TestData.Marc), input, null));
+        var entryId = created.G("id");
+        var versionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == entryId).Id);
+        await Post(TestData.Marc, $"{root}/{entryId}/versions/{versionId}/confirm",
+            new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(entryId),
+                Version<DesignBasisVersion>(versionId), "Source checked"));
+        var proposed = await Post(TestData.Marc, $"{root}/{entryId}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
+            Version<DesignBasisEntry>(entryId), Version<DesignBasisVersion>(versionId), input with { DeclaredRevision = "B", NumericValue = 110 },
+            "Candidate replacement"));
+        var proposedId = proposed.G("id");
+        await Post(TestData.Marc, $"{root}/{entryId}/versions/{versionId}/withdraw",
+            new DesignBasisEndpoints.WithdrawBody(Guid.NewGuid(), Version<DesignBasisEntry>(entryId),
+                Version<DesignBasisVersion>(versionId), "Must resolve proposed replacement first"), 400);
+        await Post(TestData.Marc, $"{root}/{entryId}/versions/{proposedId}/withdraw",
+            new DesignBasisEndpoints.WithdrawBody(Guid.NewGuid(), Version<DesignBasisEntry>(entryId),
+                Version<DesignBasisVersion>(proposedId), "Candidate replacement withdrawn"));
+        var task = await data.NewTask(project.Id, extra: new { assigneeId = owner });
+        var use = await Post(TestData.Alex, $"{root}/{entryId}/uses", new DesignBasisEndpoints.UseBody(Guid.NewGuid(), versionId,
+            "Task", task.G("id"), "Foundation sizing"));
+        await Post(TestData.Marc, $"{root}/{entryId}/versions/{versionId}/withdraw",
+            new DesignBasisEndpoints.WithdrawBody(Guid.NewGuid(), Version<DesignBasisEntry>(entryId),
+                Version<DesignBasisVersion>(versionId), "Geotechnical basis withdrawn pending replacement"));
+        var saved = f.Db(db => new
+        {
+            Entry = db.DesignBasisEntries.Single(e => e.Id == entryId),
+            Version = db.DesignBasisVersions.Single(v => v.Id == versionId),
+            Assessments = db.BasisImpactAssessments.Where(a => a.BasisUseId == use.G("id")).ToList()
+        });
+        Assert.Null(saved.Entry.CurrentVersionId);
+        Assert.Equal(BasisStatus.Withdrawn, saved.Version.Status);
+        var assessment = Assert.Single(saved.Assessments);
+        Assert.Null(assessment.NewVersionId);
+        Assert.Equal(AssessmentStatus.Pending, assessment.Status);
+        await Post(TestData.Alex, $"{root}/{entryId}/uses", new DesignBasisEndpoints.UseBody(Guid.NewGuid(), versionId,
+            "Task", task.G("id"), "Should be blocked"), 400);
+    }
+
+    [Fact]
+    public async Task Proposed_basis_can_be_withdrawn_without_consumer_assessment()
+    {
+        var project = await data.Project();
+        var civil = data.ProjectDiscipline(project.Id, "Civil");
+        var owner = data.User(TestData.Alex);
+        var root = $"/api/v1/projects/{project.Id}/design-basis";
+        var input = new DesignBasisEndpoints.VersionInput("Site grading", "Assume existing utility depth", null, null,
+            null, null, null, null, new DateOnly(2026, 10, 5), null);
+        var created = await Post(TestData.Pm, root, new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Assumption,
+            "Withdrawn assumption", owner, civil, data.User(TestData.Marc), input, null));
+        var entryId = created.G("id");
+        var versionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == entryId).Id);
+        await Post(TestData.Marc, $"{root}/{entryId}/versions/{versionId}/withdraw",
+            new DesignBasisEndpoints.WithdrawBody(Guid.NewGuid(), Version<DesignBasisEntry>(entryId),
+                Version<DesignBasisVersion>(versionId), "Assumption no longer applicable"));
+        Assert.Equal(BasisStatus.Withdrawn, f.Db(db => db.DesignBasisVersions.Single(v => v.Id == versionId).Status));
+        Assert.Empty(f.Db(db => db.BasisImpactAssessments.Where(a => a.OldVersionId == versionId).ToList()));
+    }
+
+    [Fact]
+    public async Task Reopening_linked_decision_creates_consumer_assessment()
+    {
+        var project = await data.Project();
+        var civil = data.ProjectDiscipline(project.Id, "Civil");
+        var owner = data.User(TestData.Alex);
+        var root = $"/api/v1/projects/{project.Id}/design-basis";
+        var decision = await (await f.As(TestData.Pm).Post($"/api/v1/projects/{project.Id}/decisions", new
+        {
+            subject = "Confirm linked bearing basis", description = "Basis source decision", ownerUserId = owner,
+            requiredByDate = "2026-10-01", impactLevel = "Medium", impactDescription = "Design depends on this decision"
+        })).Json(201);
+        var decisionId = decision.G("id");
+        var input = new DesignBasisEndpoints.VersionInput("Bridge / Pier 1", "Allowable bearing pressure", 100, "kPa",
+            "Geotechnical report", "GEO-D-1", "https://example.test/geotech", "A", new DateOnly(2026, 10, 5), decisionId);
+        var created = await Post(TestData.Pm, root, new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion,
+            "Decision linked criterion", owner, civil, data.User(TestData.Marc), input, null));
+        var entryId = created.G("id");
+        var versionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == entryId).Id);
+        await Post(TestData.Marc, $"{root}/{entryId}/versions/{versionId}/confirm",
+            new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(entryId),
+                Version<DesignBasisVersion>(versionId), "Source checked"));
+        var task = await data.NewTask(project.Id, extra: new { assigneeId = owner });
+        var use = await Post(TestData.Alex, $"{root}/{entryId}/uses", new DesignBasisEndpoints.UseBody(Guid.NewGuid(), versionId,
+            "Task", task.G("id"), "Foundation sizing"));
+        var transition = $"/api/v1/decisions/{decisionId}/transition";
+        await (await f.As(TestData.Pm).Post(transition, new { toStatus = "Decided", decisionText = "Use the linked basis", decisionDate = "2026-09-14", rowVersion = f.Db(db => db.Decisions.Single(d => d.Id == decisionId).RowVersion) })).Json(200);
+        await (await f.As(TestData.Pm).Post(transition, new { toStatus = "Pending", reason = "Source decision requires revalidation", rowVersion = f.Db(db => db.Decisions.Single(d => d.Id == decisionId).RowVersion) })).Json(200);
+        var assessment = f.Db(db => db.BasisImpactAssessments.Single(a => a.BasisUseId == use.G("id")));
+        Assert.Equal(versionId, assessment.OldVersionId);
+        Assert.Null(assessment.NewVersionId);
+        Assert.Equal(AssessmentStatus.Pending, assessment.Status);
+        await (await f.As(TestData.Pm).Post(transition, new { toStatus = "Decided", decisionText = "Revalidated linked basis", decisionDate = "2026-09-14", rowVersion = f.Db(db => db.Decisions.Single(d => d.Id == decisionId).RowVersion) })).Json(200);
+        Assert.Single(f.Db(db => db.BasisImpactAssessments.Where(a => a.BasisUseId == use.G("id") && a.NewVersionId == null).ToList()));
     }
 }

@@ -76,7 +76,8 @@ public class BasisImpactAssessment : CoordinationRecord
 {
     public Guid BasisUseId { get; set; }
     public Guid OldVersionId { get; set; }
-    public Guid NewVersionId { get; set; }
+    public Guid? NewVersionId { get; set; }
+    public Guid? WithdrawalVersionId { get; set; }
     public Guid OwnerId { get; set; }
     public string Status { get; set; } = AssessmentStatus.Pending;
     public string? Rationale { get; set; }

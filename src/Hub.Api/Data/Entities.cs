@@ -1025,6 +1025,22 @@ public class ProjectTemplate : Audited, IAuditable
 
 public class TemplateDiscipline : Entity { public Guid TemplateId { get; set; } public Guid DisciplineId { get; set; } public int SortOrder { get; set; } public bool IsDefaultIncluded { get; set; } = true; }
 
+public class TemplateDesignBasis : Entity
+{
+    public Guid TemplateId { get; set; }
+    public Guid TemplateDisciplineId { get; set; }
+    public string Kind { get; set; } = BasisKind.Assumption;
+    public string Title { get; set; } = "";
+    public string Scope { get; set; } = "";
+    public string Statement { get; set; } = "";
+    public decimal? NumericValue { get; set; }
+    public string? Units { get; set; }
+    public string? SourceSystem { get; set; }
+    public string? StableSourceId { get; set; }
+    public string? SourceUrl { get; set; }
+    public string? DeclaredRevision { get; set; }
+}
+
 public class TemplateMilestone : Entity
 {
     public Guid TemplateId { get; set; }

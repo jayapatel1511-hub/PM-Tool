@@ -114,6 +114,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<DashboardLayout> DashboardLayouts => Set<DashboardLayout>();
     public DbSet<ProjectTemplate> Templates => Set<ProjectTemplate>();
     public DbSet<TemplateDiscipline> TemplateDisciplines => Set<TemplateDiscipline>();
+    public DbSet<TemplateDesignBasis> TemplateDesignBases => Set<TemplateDesignBasis>();
     public DbSet<TemplateMilestone> TemplateMilestones => Set<TemplateMilestone>();
     public DbSet<TemplateDeliverable> TemplateDeliverables => Set<TemplateDeliverable>();
     public DbSet<TemplateTask> TemplateTasks => Set<TemplateTask>();
@@ -429,6 +430,17 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         });
         mb.Entity<DashboardLayout>(e => { e.HasKey(x => x.UserId); e.Property(x => x.Widgets).HasColumnType("jsonb"); });
         mb.Entity<ProjectTemplate>().HasIndex(x => x.FamilyId);
+        mb.Entity<TemplateDesignBasis>(e =>
+        {
+            e.HasIndex(x => new { x.TemplateId, x.TemplateDisciplineId });
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_template_basis_kind", $"kind IN ({In(BasisKind.All)})");
+                t.HasCheckConstraint("ck_template_basis_numeric_units", "numeric_value IS NULL OR (units IS NOT NULL AND length(trim(units)) > 0)");
+            });
+        });
+        Fk<TemplateDesignBasis, ProjectTemplate>(mb, x => x.TemplateId);
+        Fk<TemplateDesignBasis, TemplateDiscipline>(mb, x => x.TemplateDisciplineId);
 
         // Optimistic concurrency on every mutable entity (G-07).
         Item<Handoff>(mb, e =>

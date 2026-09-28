@@ -375,6 +375,29 @@ public static class DecisionEndpoints
         d.StatusChangedAt = now;
         d.LastActivityAt = now;
         db.Audit.Note(d, action: from == DecisionStatus.Decided ? "Reopened" : to switch { DecisionStatus.Decided => "Decided", DecisionStatus.Deferred => "Deferred", _ => null }, reason: reason);
+        if (from == DecisionStatus.Decided && to == DecisionStatus.Pending)
+        {
+            var linkedVersionIds = await db.DesignBasisVersions
+                .Where(v => v.ProjectId == d.ProjectId && v.DecisionId == d.Id && v.Status == BasisStatus.Confirmed)
+                .Select(v => v.Id).ToListAsync();
+            if (linkedVersionIds.Count > 0)
+            {
+                var linkedUses = await db.BasisUses.Where(u => u.ProjectId == d.ProjectId && linkedVersionIds.Contains(u.VersionId)).ToListAsync();
+                foreach (var use in linkedUses.GroupBy(u => new { u.TargetType, u.TargetId })
+                    .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()))
+                {
+                    if (!await db.BasisImpactAssessments.AnyAsync(a => a.ProjectId == d.ProjectId &&
+                        a.BasisUseId == use.Id && a.OldVersionId == use.VersionId && a.NewVersionId == null &&
+                        a.Status == AssessmentStatus.Pending))
+                    {
+                        var assessment = new BasisImpactAssessment { ProjectId = d.ProjectId, BasisUseId = use.Id,
+                            OldVersionId = use.VersionId, NewVersionId = null, OwnerId = use.OwnerId };
+                        db.BasisImpactAssessments.Add(assessment);
+                        db.Audit.Note(assessment, action: "DecisionReopened", reason: reason);
+                    }
+                }
+            }
+        }
         if (to == DecisionStatus.Decided) // §17.2: linked task assignees (unless unticked, FR-011) and the requester
         {
             List<Guid?> assignees = body.NotifyAssignees == false ? [] : await db.ItemLinks.Where(l => l.SourceId == d.Id && l.TargetType == ItemType.Task)

@@ -42,6 +42,38 @@ public sealed class TemplatesTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Template_basis_suggestions_copy_as_proposed_without_approval_or_links()
+    {
+        var tid = await Reference();
+        var civil = await d.Discipline("Civil");
+        var templateDiscipline = await f.DbAsync(db => db.TemplateDisciplines.FirstAsync(x => x.TemplateId == tid && x.DisciplineId == civil));
+        await f.DbAsync(async db =>
+        {
+            db.TemplateDesignBases.Add(new TemplateDesignBasis { TemplateId = tid, TemplateDisciplineId = templateDiscipline.Id,
+                Kind = BasisKind.Criterion, Title = "Template bearing criterion", Scope = "Bridge / Pier 1",
+                Statement = "Allowable bearing pressure", NumericValue = 100, Units = "kPa",
+                SourceSystem = "Template source", StableSourceId = "TPL-GEO-1", SourceUrl = "https://example.test/template", DeclaredRevision = "A" });
+            await db.SaveChangesAsync();
+            return 0;
+        });
+        var (res, number) = await FromTemplate(tid, ["Project Management", "Civil"]);
+        var project = await res.Json(201);
+        var pid = project.G("id");
+        var basis = await f.DbAsync(db => db.DesignBasisEntries.Where(x => x.ProjectId == pid).SingleAsync());
+        var version = await f.DbAsync(db => db.DesignBasisVersions.SingleAsync(x => x.EntryId == basis.Id));
+        Assert.Equal(BasisStatus.Proposed, version.Status);
+        Assert.Equal("Template bearing criterion", basis.Title);
+        Assert.Equal(U(TestData.Marc), basis.OwnerId);
+        Assert.Null(basis.CurrentVersionId);
+        Assert.Null(version.DecisionId);
+        Assert.Null(version.ConfirmedBy);
+        Assert.Null(version.ConfirmedAt);
+        Assert.Equal(100, version.NumericValue);
+        Assert.Equal("https://example.test/template", version.SourceUrl);
+        Assert.DoesNotContain(version.Id, await f.DbAsync(db => db.BasisUses.Where(x => x.ProjectId == pid).Select(x => x.VersionId).ToListAsync()));
+    }
+
+    [Fact]
     public async Task Appendix_A_creates_the_stated_structure_in_setup() // US2 scenarios 1 and 3, SC-002, FR-004, FR-006, FR-008
     {
         var tid = await Reference();

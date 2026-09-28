@@ -18,6 +18,10 @@ Documentation validation is recorded in `docs/coordination-spec-validation.md`. 
 
 - PASS — scoped issue location, document reference and appointed-verifier forms built with the frontend production build. API guards require a site area or building for a location.
 - PASS — local synthetic browser on port 5084: Taylor raised DEMO-101-I01, saved a site area and drawing revision, appointed Yagmur, and all records survived reload. Yagmur signed in separately through Development auth, saw the issue without owner actions, and recorded Verified with a synthetic evidence link. An initial attempt to appoint Marc failed because he was outside DEMO-101; the picker was then changed to use the same eligible project people as the API. Frontend build and lint passed after that correction. This is local synthetic evidence, not the deployed individual-password flow.
-- UNPROVEN — deployed browser operation, keyboard/accessibility and register/export integration.
+- UNPROVEN — deployed browser operation and keyboard/accessibility. The register/export increment below has local evidence, with deployed reconciliation still open.
 - UNPROVEN — changed revision impact checks, audit/notification deduplication and concurrent finalisation.
 - UNPROVEN — deployed review environment, homedev browser-to-API flow, backup/restore, real tenant sign-in, pilot and production acceptance.
+
+## Register increment
+
+The project issue list API and CSV/XLSX export now include structured location, document/revision/availability and latest verification summaries. The register displays location and verification status by default and offers document references as a selectable column. A focused PostgreSQL test checked the CSV headers, location, revision and Verified status; the combined set passed 38/38. Location/document/revision/verification filtering and grouping, changed-revision impact, deployed browser/export reconciliation and full packet acceptance remain UNPROVEN.

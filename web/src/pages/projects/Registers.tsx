@@ -39,6 +39,7 @@ export interface IssueRow {
   id: string; projectId: string; key: string; title: string; status: string; raisedById: string; raisedByName?: string; ownerId: string; ownerName?: string
   severity: string; dateRaised: string; targetResolutionDate?: string; isOverdue: boolean; daysOverdue: number; resolution?: string; resolvedDate?: string
   originRiskId?: string; originRiskKey?: string; projectDisciplineId?: string; disciplineName?: string; rowVersion: number
+  locationSummary?: string; documentSummary?: string; verificationStatus?: string
 }
 interface Perm { ok: boolean; reason?: string | null }
 interface LinkRow { id: string; targetType: string; targetId: string; key: string; name: string; status?: string; date?: string; person?: string }
@@ -189,6 +190,9 @@ export function IssuesTab() {
       cell: (r) => <span className={cn(r.isOverdue && 'font-medium text-bad')}>{fmtDate(r.targetResolutionDate)}{r.isOverdue && ` · ${t('ind.overdueD', { n: r.daysOverdue })}`}</span> },
     { id: 'raisedBy', label: t('issue.raisedBy'), optional: true, sort: (r) => r.raisedByName, className: 'whitespace-nowrap', cell: (r) => r.raisedByName },
     { id: 'origin', label: t('issue.fromRisk'), optional: true, cell: (r) => r.originRiskId ? <button onClick={() => openPanel('Risk', r.originRiskId!)} className="hover:underline"><Key>{r.originRiskKey}</Key></button> : null },
+    { id: 'location', label: t('issue.locations'), sort: (r) => r.locationSummary, className: 'min-w-48', cell: (r) => r.locationSummary || t('common.dash') },
+    { id: 'documents', label: t('issue.documentReferences'), optional: true, sort: (r) => r.documentSummary, className: 'min-w-48', cell: (r) => r.documentSummary || t('common.dash') },
+    { id: 'verification', label: t('issue.verificationFlow'), sort: (r) => r.verificationStatus, className: 'whitespace-nowrap', cell: (r) => r.verificationStatus ? <StatusPill status={r.verificationStatus} /> : t('common.dash') },
   ], q.data ?? [], (r) => [r.targetResolutionDate, r.key])
   const can = p.permissions.raiseRegister
   return (

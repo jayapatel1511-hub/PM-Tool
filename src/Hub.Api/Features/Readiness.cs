@@ -202,7 +202,7 @@ public static class ReadinessEndpoints
         var hasOtherDemand = await db.Tasks.AsNoTracking().AnyAsync(t => t.AssigneeId == owner && t.DeletedAt == null &&
             !sourceTaskIds.Contains(t.Id) && t.ProgressPct < 100 &&
             t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold &&
-            t.DueDate != null && (t.StartDate == null || t.StartDate <= through));
+            (t.DueDate == null || t.StartDate == null || t.StartDate <= through));
         if (hasOtherDemand)
             return new(true, null, "Production capacity is unknown until the owner's other active workload is in scope.");
 

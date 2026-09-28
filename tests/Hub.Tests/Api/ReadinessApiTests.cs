@@ -158,11 +158,14 @@ public sealed class ReadinessApiTests(HubFactory f)
                 Roles = [ProjectRole.TeamMember], PrimaryDisciplineId = otherDisciplineId });
             await db.SaveChangesAsync(); return 0;
         });
-        await data.NewTask(other.Id, extra: new { assigneeId = owner,
+        var otherTask = await data.NewTask(other.Id, extra: new { assigneeId = owner,
             startDate = today, dueDate = today, estimatedHours = 8m });
         var crossProject = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Task", task.G("id"), today, f.Clock.Now));
         Assert.Null(crossProject.Satisfied);
         Assert.Contains("other active workload", crossProject.Reason, StringComparison.OrdinalIgnoreCase);
+        await f.DbAsync(async db => { (await db.Tasks.SingleAsync(t => t.Id == otherTask.G("id"))).DueDate = null; await db.SaveChangesAsync(); return 0; });
+        var undatedOtherProject = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Task", task.G("id"), today, f.Clock.Now));
+        Assert.Null(undatedOtherProject.Satisfied);
 
         var deliverableOwner = await IsolatedOwner(project);
         var disciplineId = data.ProjectDiscipline(project.Id, "Civil");

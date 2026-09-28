@@ -54,6 +54,13 @@ public static class CommitmentState
     public static readonly string[] All = [Proposed, Committed, Met, NotMet, Withdrawn];
 }
 
+public static class ConstraintState
+{
+    public const string Open = "Open", ResolutionProposed = "Resolution Proposed", VerifiedRemoved = "Verified Removed",
+        Cancelled = "Cancelled";
+    public static readonly string[] All = [Open, ResolutionProposed, VerifiedRemoved, Cancelled];
+}
+
 public sealed record WeeklyOutcome(int Met, int SnapshotCommitted, int Withdrawn);
 
 public static class WeeklyCommitmentRules

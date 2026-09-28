@@ -63,6 +63,13 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<BasisConflict> BasisConflicts => Set<BasisConflict>();
     public DbSet<BasisAssumptionDisposition> BasisAssumptionDispositions => Set<BasisAssumptionDisposition>();
     public DbSet<BasisImpactAssessment> BasisImpactAssessments => Set<BasisImpactAssessment>();
+    public DbSet<ReadinessAssessment> ReadinessAssessments => Set<ReadinessAssessment>();
+    public DbSet<ReadinessCheckRecord> ReadinessChecks => Set<ReadinessCheckRecord>();
+    public DbSet<WorkConstraint> WorkConstraints => Set<WorkConstraint>();
+    public DbSet<ReadinessException> ReadinessExceptions => Set<ReadinessException>();
+    public DbSet<WeeklyPlanSnapshot> WeeklyPlanSnapshots => Set<WeeklyPlanSnapshot>();
+    public DbSet<OutputCommitment> OutputCommitments => Set<OutputCommitment>();
+    public DbSet<OutputCommitmentEvent> OutputCommitmentEvents => Set<OutputCommitmentEvent>();
     public DbSet<PersonAvailabilityOverride> AvailabilityOverrides => Set<PersonAvailabilityOverride>();
     public DbSet<ResourceAllocation> Allocations => Set<ResourceAllocation>();
     public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
@@ -497,6 +504,56 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<BasisImpactAssessment, DesignBasisVersion>(mb, x => x.NewVersionId);
         Fk<BasisImpactAssessment, AppUser>(mb, x => x.OwnerId);
         Fk<BasisImpactAssessment, AppUser>(mb, x => x.DecidedBy);
+        mb.Entity<ReadinessAssessment>(e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.TargetType, x.TargetId }).IsUnique();
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_readiness_target", "target_type IN ('Task', 'Deliverable')");
+                t.HasCheckConstraint("ck_readiness_state", $"state IN ({In(ReadinessState.All)})");
+            });
+        });
+        mb.Entity<ReadinessCheckRecord>(e =>
+        {
+            e.HasIndex(x => new { x.AssessmentId, x.Code }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_readiness_check_code", $"code IN ({In(ReadinessCheckCode.All)})"));
+        });
+        mb.Entity<WorkConstraint>(e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.TargetType, x.TargetId, x.State });
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_work_constraint_target", "target_type IN ('Task', 'Deliverable')");
+                t.HasCheckConstraint("ck_work_constraint_state", $"state IN ({In(ConstraintState.All)})");
+            });
+        });
+        mb.Entity<WeeklyPlanSnapshot>(e => e.HasIndex(x => new { x.ProjectId, x.WeekStart }).IsUnique());
+        mb.Entity<OutputCommitment>(e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.WeekStart, x.PerformerId });
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_commitment_target", "target_type IN ('Task', 'Deliverable')");
+                t.HasCheckConstraint("ck_commitment_state", $"state IN ({In(CommitmentState.All)})");
+                t.HasCheckConstraint("ck_commitment_readiness", $"readiness_at_commit IN ({In(ReadinessState.All)})");
+            });
+        });
+        mb.Entity<OutputCommitmentEvent>(e => e.HasIndex(x => new { x.CommitmentId, x.CreatedAt }));
+        Fk<ReadinessAssessment, AppUser>(mb, x => x.OwnerId);
+        Fk<ReadinessCheckRecord, ReadinessAssessment>(mb, x => x.AssessmentId);
+        Fk<ReadinessCheckRecord, AppUser>(mb, x => x.RecordedBy);
+        Fk<WorkConstraint, AppUser>(mb, x => x.RemovalOwnerId);
+        Fk<WorkConstraint, AppUser>(mb, x => x.AffectedOwnerId);
+        Fk<WorkConstraint, AppUser>(mb, x => x.VerifiedBy);
+        Fk<ReadinessException, ReadinessAssessment>(mb, x => x.AssessmentId);
+        Fk<ReadinessException, DesignBasisVersion>(mb, x => x.BasisVersionId);
+        Fk<ReadinessException, AppUser>(mb, x => x.ApprovedBy);
+        Fk<ReadinessException, AppUser>(mb, x => x.VerifierId);
+        Fk<WeeklyPlanSnapshot, AppUser>(mb, x => x.CapturedBy);
+        Fk<OutputCommitment, WeeklyPlanSnapshot>(mb, x => x.SnapshotId);
+        Fk<OutputCommitment, AppUser>(mb, x => x.PerformerId);
+        Fk<OutputCommitmentEvent, OutputCommitment>(mb, x => x.CommitmentId);
+        Fk<OutputCommitmentEvent, AppUser>(mb, x => x.ActorId);
         mb.Entity<PersonAvailabilityOverride>(e =>
         {
             e.HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
@@ -619,6 +676,13 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<BasisConflict, Project>(mb, x => x.ProjectId);
         Fk<BasisAssumptionDisposition, Project>(mb, x => x.ProjectId);
         Fk<BasisImpactAssessment, Project>(mb, x => x.ProjectId);
+        Fk<ReadinessAssessment, Project>(mb, x => x.ProjectId);
+        Fk<ReadinessCheckRecord, Project>(mb, x => x.ProjectId);
+        Fk<WorkConstraint, Project>(mb, x => x.ProjectId);
+        Fk<ReadinessException, Project>(mb, x => x.ProjectId);
+        Fk<WeeklyPlanSnapshot, Project>(mb, x => x.ProjectId);
+        Fk<OutputCommitment, Project>(mb, x => x.ProjectId);
+        Fk<OutputCommitmentEvent, Project>(mb, x => x.ProjectId);
 
 
         foreach (var et in mb.Model.GetEntityTypes().Where(t => typeof(Audited).IsAssignableFrom(t.ClrType)))

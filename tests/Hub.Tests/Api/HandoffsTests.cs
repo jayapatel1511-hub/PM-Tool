@@ -43,6 +43,79 @@ public sealed class HandoffsTests(HubFactory f)
     async Task<JsonNode> Create(Setup s, HandoffEndpoints.DraftBody? body = null) =>
         await (await f.As(TestData.Marc).Post(Path(s.Project.Id), body ?? s.Body)).Json(201);
     async Task<JsonNode> Detail(Setup s, Guid id, string who = TestData.Alex) => await (await f.As(who).GetAsync(Path(s.Project.Id, id))).Json();
+
+    [Fact]
+    public async Task Discipline_coordination_reconciles_source_rows_and_counts_at_one_evaluation()
+    {
+        var s = await New(restricted: true);
+        var handoff = await Create(s);
+        var second = await data.NewTask(s.Project.Id, TestData.Omar, new { assigneeId = data.User(TestData.Omar) }, "Electrical");
+        var third = await data.NewTask(s.Project.Id, TestData.Omar, new { assigneeId = data.User(TestData.Omar) }, "Electrical");
+        await (await f.As(TestData.Pm).Post($"/api/v1/tasks/{second.G("id")}/dependencies",
+            new { predecessorTaskId = s.Target.G("id") })).Json(201);
+        await (await f.As(TestData.Pm).Post($"/api/v1/tasks/{third.G("id")}/dependencies",
+            new { predecessorTaskId = second.G("id") })).Json(201);
+        var url = $"/api/v1/projects/{s.Project.Id}/discipline-coordination?disciplineId={data.ProjectDiscipline(s.Project.Id, "Electrical")}";
+        await (await f.As(TestData.Rita).GetAsync(url)).Json(404);
+        var result = await (await f.As(TestData.Omar).GetAsync(url)).Json();
+        Assert.Equal(1, result!["handoffsTotal"]!.GetValue<int>());
+        Assert.Equal(1, result["handoffs"]!.AsArray().Count);
+        Assert.Equal(handoff.G("id"), result["handoffs"]!.AsArray()[0]!.G("id"));
+        Assert.NotNull(result["evaluatedAt"]);
+        var group = Assert.Single(result["blockerGroups"]!.AsArray());
+        Assert.Equal(handoff.G("id"), group!.G("handoffId"));
+        Assert.Equal(3, group["taskIds"]!.AsArray().Count);
+        Assert.Equal(new[] { s.Target.G("id"), second.G("id"), third.G("id") }.OrderBy(id => id),
+            group["taskIds"]!.AsArray().Select(id => Guid.Parse(id!.GetValue<string>())).OrderBy(id => id));
+        await Move(s, handoff.G("id"), TestData.Alex, HandoffStatus.Submitted);
+        var electrical = await (await f.As(TestData.Omar).GetAsync(url)).Json();
+        Assert.Empty(electrical["outgoing"]!.AsArray());
+        Assert.Single(electrical["incoming"]!.AsArray());
+        var civil = await (await f.As(TestData.Alex).GetAsync($"/api/v1/projects/{s.Project.Id}/discipline-coordination?disciplineId={data.ProjectDiscipline(s.Project.Id, "Civil")}")).Json();
+        Assert.Single(civil["outgoing"]!.AsArray());
+        Assert.Empty(civil["incoming"]!.AsArray());
+        await Move(s, handoff.G("id"), TestData.Omar, HandoffStatus.Accepted, outcome: "Input reviewed for use");
+        var accepted = await (await f.As(TestData.Omar).GetAsync(url)).Json();
+        Assert.Empty(accepted["blockerGroups"]!.AsArray());
+    }
+
+    [Fact]
+    public async Task Workspace_coordination_omits_restricted_projects_without_membership()
+    {
+        var visible = await New(restricted: true);
+        var hidden = await New(restricted: true);
+        var shownHandoff = await Create(visible);
+        await Create(hidden);
+        await f.DbAsync(async db => {
+            var membership = await db.ProjectMembers.SingleAsync(m => m.ProjectId == hidden.Project.Id &&
+                m.UserId == data.User(TestData.Alex));
+            membership.RemovedAt = DateTimeOffset.UtcNow;
+            await db.SaveChangesAsync();
+            return 0;
+        });
+        var result = await (await f.As(TestData.Alex).GetAsync("/api/v1/discipline-coordination")).Json();
+        var projects = result["projects"]!.AsArray();
+        Assert.Contains(projects, p => p!.G("id") == visible.Project.Id &&
+            p["data"]!["handoffs"]!.AsArray().Any(h => h!.G("id") == shownHandoff.G("id")));
+        Assert.DoesNotContain(projects, p => p!.G("id") == hidden.Project.Id);
+        Assert.DoesNotContain(result["projectChoices"]!.AsArray(), p => p!.G("id") == hidden.Project.Id);
+        await (await f.As(TestData.Alex).GetAsync($"/api/v1/discipline-coordination?projectId={hidden.Project.Id}"))
+            .Json(404);
+        var selectedUrl = $"/api/v1/discipline-coordination?scopeKind=set&scopeProjectIds={visible.Project.Id}";
+        var selected = await (await f.As(TestData.Alex).GetAsync(selectedUrl)).Json();
+        Assert.Single(selected["projects"]!.AsArray());
+        Assert.Single(selected["projectChoices"]!.AsArray());
+        var workspace = await (await f.As(TestData.Alex).Post("/api/v1/workspaces",
+            new { name = "Coordination test", projectIds = new[] { visible.Project.Id } })).Json(201);
+        var named = await (await f.As(TestData.Alex).GetAsync(
+            $"/api/v1/discipline-coordination?scopeKind=workspace&scopeWorkspaceId={workspace.G("id")}&scopeProjectIds={hidden.Project.Id}"))
+            .Json();
+        Assert.Single(named["projects"]!.AsArray());
+        Assert.Equal(visible.Project.Id, named["projects"]![0]!.G("id"));
+        await (await f.As(TestData.Pm).GetAsync(
+            $"/api/v1/discipline-coordination?scopeKind=workspace&scopeWorkspaceId={workspace.G("id")}"))
+            .Json(404);
+    }
     async Task<JsonNode> Move(Setup s, Guid id, string who, string to, string? reason = null, string? outcome = null, int expect = 200)
     {
         var v = f.Db(db => db.Handoffs.First(h => h.Id == id).RowVersion);

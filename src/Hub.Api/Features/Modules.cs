@@ -37,6 +37,7 @@ public static class HubModules
         DocumentLinkEndpoints.Map(api);
         NotificationEndpoints.Map(api);
         DashboardEndpoints.Map(api);
+        DisciplineCoordinationEndpoints.Map(api);
         MyWorkEndpoints.Map(api);
         DecisionEndpoints.Map(api);
         SearchEndpoints.Map(api);

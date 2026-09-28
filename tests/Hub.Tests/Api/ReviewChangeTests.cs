@@ -36,6 +36,16 @@ public sealed class ReviewChangeTests(HubFactory f)
     Guid Assignment(Guid package, Guid discipline) => f.Db(db => db.DisciplineReviews.Single(a => a.ProjectDisciplineId == discipline && db.ReviewPackages.Any(p => p.Id == package && p.CurrentRoundId == a.RoundId)).Id);
 
     [Fact]
+    public async Task Coordination_includes_review_assigned_to_other_discipline()
+    {
+        var setup = await New();
+        var packageId = await Review(setup);
+        var electrical = await Get(TestData.Omar,
+            $"/api/v1/projects/{setup.P.Id}/discipline-coordination?disciplineId={setup.Electrical}");
+        Assert.Contains(electrical["reviews"]!.AsArray(), row => row!.G("id") == packageId);
+    }
+
+    [Fact]
     public async Task Review_allocation_options_link_current_assignment_and_explicit_effort()
     {
         var setup = await New();

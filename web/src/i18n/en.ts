@@ -1360,7 +1360,7 @@ export const en: Record<string, string> = {
   'team.onePerson': '{n} person', 'team.nPeople': '{n} people', 'team.search': 'Search people', 'team.none': 'No active members in these projects.', 'team.person': 'Person',
   'team.rolesByProject': 'Projects and roles', 'team.leadOf': 'Lead: {name}',
   'mywork.views': 'My Work views', 'mywork.tab.overview': 'Overview', 'mywork.tab.today': 'Today', 'mywork.tab.upcoming': 'Upcoming', 'mywork.tab.overdue': 'Overdue',
-  'mywork.tab.completed': 'Completed', 'mywork.tab.inbox': 'Inbox', 'mywork.show': 'Show',
+  'mywork.tab.completed': 'Completed', 'mywork.tab.inbox': 'Inbox', 'mywork.tab.coordination': 'Coordination', 'mywork.show': 'Show',
   'mywork.who.mine': 'My Tasks', 'mywork.who.assigned': 'Assigned to Me', 'mywork.who.created': 'Created by Me',
   'mywork.who.mine.about': 'Tasks you are assigned to or collaborate on.', 'mywork.who.assigned.about': 'Tasks where you are the assignee.', 'mywork.who.created.about': 'Tasks you created, whoever does them.',
   'mywork.empty.today': 'Nothing due today.', 'mywork.empty.upcoming': 'No later-dated open tasks.', 'mywork.empty.overdue': 'Nothing overdue.',

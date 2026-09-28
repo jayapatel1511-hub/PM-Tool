@@ -19,6 +19,7 @@ import type { DeliverableRow } from './Deliverables'
 import { ActionForm, ActionOwner, type ActionRow } from './Meetings'
 import { useCurrentProject } from './ProjectLayout'
 import { CreateTask, StatusMenu, TaskIndicators, useProjectLists, useTaskActions, useTaskHints, type Blocker, type TaskRow } from './Tasks'
+import { DisciplineCoordinationView } from './DisciplineCoordinationView'
 
 interface Milestone { id: string; key: string; name: string; date: string; daysRemaining: number; status?: string; deliverableTotal: number; deliverableIssued: number; taskTotal: number; taskComplete: number }
 interface Decision { id: string; key: string; subject: string; status: string; requiredByDate: string; impactLevel: string; ownerName?: string; isOverdue: boolean; daysOverdue: number; blocking: number }
@@ -248,6 +249,7 @@ export function CoordinationTab() {
         </div>
       </div>
       {p.status !== 'Active' && <div role="status" className="rounded-md border bg-idle-bg px-3 py-2 text-sm text-idle">{t('wc.notActive', { status: tv(p.status) })}</div>}
+      <DisciplineCoordinationView project={p} disciplineId={disciplineId} />
       <div className="grid gap-4 lg:grid-cols-[12rem_1fr]">
         <nav aria-label={t('wc.index')} className="no-print hidden lg:block">
           <ol className="sticky top-2 space-y-0.5 text-sm">

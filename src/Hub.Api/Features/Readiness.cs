@@ -10,6 +10,11 @@ public static class ReadinessEndpoints
     public sealed record CreateBody(Guid RequestId, int TargetRowVersion, string IntendedOutput, string CompletionCriteria);
     public sealed record ApplicabilityBody(Guid RequestId, int AssessmentRowVersion, int CheckRowVersion,
         bool Applies, string Reason, string? EvidenceUrl);
+    public sealed record ConstraintBody(Guid RequestId, int TargetRowVersion, string Category, string Description,
+        Guid RemovalOwnerId, DateOnly NeededBy, string SourceUrl);
+    public sealed record ConstraintMoveBody(Guid RequestId, int RowVersion, string ToState, string Reason,
+        string? EvidenceUrl);
+    static readonly string[] ConstraintCategories = ["Handoff", "Decision", "Basis", "Capacity", "Review", "Scope", "Other"];
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -17,6 +22,11 @@ public static class ReadinessEndpoints
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}", Create)
             .WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/checks/{code}/applicability", SetApplicability)
+            .WithMetadata(new Coordination.AtomicCommand());
+        api.MapGet("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", Constraints);
+        api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", AddConstraint)
+            .WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints/{constraintId:guid}/transition", MoveConstraint)
             .WithMetadata(new Coordination.AtomicCommand());
     }
 
@@ -55,6 +65,8 @@ public static class ReadinessEndpoints
                     a.TargetType == target.Type && a.TargetId == target.Id) ?? throw ApiException.NotFound();
                 Coordination.Version(assessment, body.AssessmentRowVersion);
                 Check.OneOf(code, ReadinessCheckCode.All, "code");
+                if (code == ReadinessCheckCode.ProductionOwner)
+                    Check.That(body.Applies, "applies", "error.required");
                 var check = await db.ReadinessChecks.SingleOrDefaultAsync(c => c.ProjectId == project.Id &&
                     c.AssessmentId == assessment.Id && c.Code == code) ?? throw ApiException.NotFound();
                 Coordination.Version(check, body.CheckRowVersion);
@@ -81,4 +93,73 @@ public static class ReadinessEndpoints
             c.AssessmentId == assessment.Id).OrderBy(c => c.Code).ToListAsync();
         return new { Assessment = assessment, Checks = checks };
     }
+
+    static async Task<object> Constraints(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)
+    {
+        var (project, _) = await access.Project(projectId, false);
+        await Coordination.Target(db, project, targetType, targetId, false);
+        return await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
+            c.TargetType == targetType && c.TargetId == targetId).OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt).ToListAsync();
+    }
+
+    static Task<Coordination.Result> AddConstraint(Guid projectId, string targetType, Guid targetId,
+        ConstraintBody body, Access access, HubDb db, TimeProvider clock) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "constraint.create", targetType, targetId, body },
+            access, db, clock, async (project, ctx) =>
+            {
+                var target = await Coordination.Target(db, project, targetType, targetId);
+                if (target.RowVersion != body.TargetRowVersion)
+                    throw ApiException.Conflict("concurrency_conflict", "coord.stale");
+                var ownerAction = Permissions.NamedCoordinationAction(access.Actor, ctx, target.OwnerId);
+                if (!ownerAction.Ok) Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, target.DisciplineId));
+                await Coordination.Person(db, project, body.RemovalOwnerId, "removalOwnerId");
+                Check.That(body.RemovalOwnerId != target.OwnerId, "removalOwnerId", "coord.separation");
+                Check.OneOf(body.Category, ConstraintCategories, "category");
+                var row = new WorkConstraint { ProjectId = project.Id, TargetType = target.Type, TargetId = target.Id,
+                    Category = body.Category, Description = Check.Required(body.Description, "description", 2000),
+                    RemovalOwnerId = body.RemovalOwnerId, AffectedOwnerId = target.OwnerId,
+                    NeededBy = body.NeededBy, SourceUrl = Coordination.Url(body.SourceUrl) };
+                db.WorkConstraints.Add(row);
+                db.Audit.Note(row);
+                return row;
+            });
+
+    static Task<Coordination.Result> MoveConstraint(Guid projectId, string targetType, Guid targetId,
+        Guid constraintId, ConstraintMoveBody body, Access access, HubDb db, TimeProvider clock) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "constraint.transition", targetType, targetId, constraintId, body },
+            access, db, clock, async (project, ctx) =>
+            {
+                var target = await Coordination.Target(db, project, targetType, targetId);
+                var row = await db.WorkConstraints.SingleOrDefaultAsync(c => c.Id == constraintId &&
+                    c.ProjectId == project.Id && c.TargetType == target.Type && c.TargetId == target.Id)
+                    ?? throw ApiException.NotFound();
+                Coordination.Version(row, body.RowVersion);
+                Check.OneOf(body.ToState, ConstraintState.All, "toState");
+                var reason = Check.Reason(body.Reason);
+                if (body.ToState == ConstraintState.ResolutionProposed)
+                {
+                    Check.That(row.State == ConstraintState.Open, "toState", "coord.transition");
+                    Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, row.RemovalOwnerId));
+                    row.ResolutionEvidenceUrl = Coordination.Url(body.EvidenceUrl);
+                }
+                else if (body.ToState == ConstraintState.VerifiedRemoved)
+                {
+                    Check.That(row.State == ConstraintState.ResolutionProposed, "toState", "coord.transition");
+                    Check.That(target.OwnerId == row.AffectedOwnerId, "affectedOwnerId", "coord.stale");
+                    Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, row.AffectedOwnerId));
+                    Check.That(row.ResolutionEvidenceUrl is not null, "evidenceUrl", "error.required");
+                    row.VerifiedBy = access.Me.Id;
+                    row.VerifiedAt = clock.GetUtcNow();
+                }
+                else if (body.ToState == ConstraintState.Cancelled)
+                {
+                    Check.That(row.State == ConstraintState.Open || row.State == ConstraintState.ResolutionProposed,
+                        "toState", "coord.transition");
+                    Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, target.DisciplineId));
+                }
+                else throw ApiException.Invalid("toState", "coord.transition");
+                row.State = body.ToState;
+                db.Audit.Note(row, reason: reason);
+                return row;
+            });
 }

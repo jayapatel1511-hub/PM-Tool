@@ -9,6 +9,7 @@ import { get } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { Chip, StatusPill } from '@/components/hub/pills'
+import { useMe } from '@/lib/auth'
 import { useCurrentProject } from './ProjectLayout'
 
 type Commitment = {
@@ -32,10 +33,11 @@ function dateValue(d: string) {
 /** Packet 032 read-only readiness window. Source-backed readiness aggregation is not yet exposed by the API. */
 export function ReadinessTab() {
   const p = useCurrentProject()
+  const lookahead = useMe().settings.coordinationLookaheadWeeks
   const [sp, setSp] = useSearchParams()
   const defaultFrom = monday(today())
   const from = sp.get('from') ?? defaultFrom
-  const to = sp.get('to') ?? addDays(defaultFrom, 20)
+  const to = sp.get('to') ?? addDays(defaultFrom, lookahead * 7 - 1)
   const set = (key: string, value: string) => {
     const next = new URLSearchParams(sp)
     if (value) next.set(key, value); else next.delete(key)
@@ -83,7 +85,7 @@ export function ReadinessTab() {
         <label className="text-xs text-muted-foreground">{t('readiness.from')}<Input type="date" className="mt-1 h-8 w-36" value={from} onChange={(e) => set('from', e.target.value)} /></label>
         <label className="text-xs text-muted-foreground">{t('readiness.to')}<Input type="date" className="mt-1 h-8 w-36" value={to} onChange={(e) => set('to', e.target.value)} /></label>
         <Button size="sm" variant="ghost" onClick={reset}>{t('common.clear')}</Button>
-        <span className="ml-auto text-xs text-muted-foreground">{t('readiness.windowNote')}</span>
+        <span className="ml-auto text-xs text-muted-foreground">{t('readiness.windowNote', { n: lookahead })}</span>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <Section title={t('readiness.constraints')} id="constraints">

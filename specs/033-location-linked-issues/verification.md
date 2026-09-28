@@ -1,7 +1,7 @@
 # Verification: Location-Linked Coordination Issues
 
 **Date**: 2026-09-26
-**State**: Backend slice implemented in the isolated review worktree. UI integration, deployed acceptance, and pilot execution remain unproven.
+**State**: Backend and scoped UI slices implemented in the isolated review worktree. Deployed acceptance and pilot execution remain unproven.
 
 Documentation validation is recorded in `docs/coordination-spec-validation.md`. AC-LOC-01 and AC-LOC-02 have focused API evidence; AC-LOC-03, AC-LOC-04 and AC-LOC-05 remain unproven end-to-end. UI, export reconciliation, notifications and deployed browser flows remain unproven.
 
@@ -16,6 +16,7 @@ Documentation validation is recorded in `docs/coordination-spec-validation.md`. 
 
 ## Remaining evidence
 
-- UNPROVEN — frontend forms, keyboard/accessibility and register/export integration.
+- PASS — scoped issue location, document reference and appointed-verifier forms built with the frontend production build. API guards require a site area or building for a location.
+- UNPROVEN — browser operation, keyboard/accessibility and register/export integration.
 - UNPROVEN — changed revision impact checks, audit/notification deduplication and concurrent finalisation.
 - UNPROVEN — deployed review environment, homedev browser-to-API flow, backup/restore, real tenant sign-in, pilot and production acceptance.

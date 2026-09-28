@@ -15,6 +15,8 @@ public static class DesignBasisEndpoints
     public sealed record CreateBody(Guid RequestId, string Kind, string Title, Guid OwnerId,
         Guid ProjectDisciplineId, Guid? IndependentApproverId, VersionInput Version, string? Reason,
         Guid? InspectedDuplicateId = null);
+    public sealed record AssignBody(Guid RequestId, int EntryRowVersion, Guid OwnerId,
+        Guid? IndependentApproverId, string Reason);
     public sealed record ProposeBody(Guid RequestId, int EntryRowVersion, int CurrentVersionRowVersion,
         VersionInput Version, string Reason);
     public sealed record ConfirmBody(Guid RequestId, int EntryRowVersion, int VersionRowVersion, string Rationale);
@@ -46,6 +48,7 @@ public static class DesignBasisEndpoints
         api.MapGet("/projects/{projectId:guid}/design-basis/export", ExportRows);
         api.MapGet("/projects/{projectId:guid}/design-basis/{id:guid}", Detail);
         api.MapPost("/projects/{projectId:guid}/design-basis", Create).WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/assign", Assign).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/propose", Propose).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/versions/{versionId:guid}/confirm", Confirm).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/versions/{versionId:guid}/withdraw", Withdraw)
@@ -86,7 +89,8 @@ public static class DesignBasisEndpoints
     static Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "basis.create", body }, access, db, clock, async (project, ctx) =>
         {
-            Access.Demand(Permissions.CreateBasis(access.Actor, ctx));
+            Access.Demand(Permissions.CreateBasis(access.Actor, ctx, body.ProjectDisciplineId,
+                body.OwnerId, body.IndependentApproverId));
             Check.OneOf(body.Kind, BasisKind.All, "kind");
             await Coordination.Discipline(db, project.Id, body.ProjectDisciplineId);
             await Coordination.Person(db, project, body.OwnerId);
@@ -129,6 +133,23 @@ public static class DesignBasisEndpoints
             db.DesignBasisVersions.Add(next);
             db.Audit.Note(next, reason: Check.Reason(body.Reason));
             return next;
+        });
+
+    static Task<Coordination.Result> Assign(Guid projectId, Guid id, AssignBody body, Access access, HubDb db, TimeProvider clock) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "basis.assign", id, body }, access, db, clock, async (project, ctx) =>
+        {
+            var entry = await Entry(db, project.Id, id);
+            Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId));
+            Coordination.Version(entry, body.EntryRowVersion);
+            Check.That(entry.CurrentVersionId is null && await db.DesignBasisVersions.AnyAsync(v =>
+                v.EntryId == entry.Id && v.Status == BasisStatus.Proposed), "entryId", "basis.current");
+            await Coordination.Person(db, project, body.OwnerId);
+            if (body.IndependentApproverId is { } approver)
+                await Coordination.Person(db, project, approver, "independentApproverId");
+            entry.OwnerId = body.OwnerId;
+            entry.IndependentApproverId = body.IndependentApproverId;
+            db.Audit.Note(entry, reason: Check.Reason(body.Reason));
+            return entry;
         });
 
     static Task<Coordination.Result> Confirm(Guid projectId, Guid id, Guid versionId, ConfirmBody body,

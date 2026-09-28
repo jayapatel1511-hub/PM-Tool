@@ -29,7 +29,7 @@ type Detail = { entry: Entry; versions: { version: Version; sourceMissing: boole
     right: { versionId: string; entryKey: string; scope: string; statement: string; numericValue?: number; units?: string } }[];
   dispositions: { id: string; versionId: string; scope: string; ownerId: string; approvedBy: string; expiresOn: string; reason: string }[];
   canManage: boolean; canConfirm: boolean }
-type Team = { members: { userId: string; displayName: string }[] }
+type Team = { members: { userId: string; displayName: string; primaryDisciplineId?: string }[] }
 type VersionDraft = { scope: string; statement: string; numericValue: string; units: string; sourceSystem: string;
   stableSourceId: string; sourceUrl: string; declaredRevision: string; confirmationDueDate: string }
 const blank: VersionDraft = { scope: '', statement: '', numericValue: '', units: '', sourceSystem: '', stableSourceId: '',
@@ -51,9 +51,14 @@ export function DesignBasisTab() {
   const set = (name: string, value: string) => setSp(p => { const next = new URLSearchParams(p); if (value) next.set(name, value); else next.delete(name);
     if (name !== 'basis') next.delete('page'); return next })
   const base = `projects/${project.id}/design-basis`
-  const canCreate = project.permissions.isPm || project.permissions.leadOf.length > 0
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
   const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => get<Team>(`projects/${project.id}/team`) })
+  const memberDisciplineId = team.data?.members.find(m => m.userId === options.data?.actorId)?.primaryDisciplineId
+  const canAssign = project.permissions.isPm || project.permissions.leadOf.length > 0
+  const allowedDisciplines = project.permissions.isPm ? project.disciplines.map(d => d.id)
+    : project.permissions.leadOf.length ? project.permissions.leadOf
+      : memberDisciplineId && project.myRoles.includes('TeamMember') ? [memberDisciplineId] : []
+  const canCreate = !!options.data?.canWrite && allowedDisciplines.length > 0
   const filters = { kind, status, disciplineId: discipline, scope, overdue, affectedWorkId }
   const params = new URLSearchParams({ page: String(page) })
   for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value)
@@ -88,7 +93,8 @@ export function DesignBasisTab() {
       </table></div>}
     {list.data && <div className="flex items-center justify-end gap-3"><Button size="sm" variant="outline" disabled={page <= 1} onClick={() => set('page', String(page - 1))}>{t('handoff.previous')}</Button>
       <span>{t('handoff.page', { n: page })}</span><Button size="sm" variant="outline" disabled={page * list.data.pageSize >= list.data.totalCount} onClick={() => set('page', String(page + 1))}>{t('handoff.next')}</Button></div>}
-    {adding && options.data && <BasisForm base={base} number={project.projectNumber} options={options.data} onClose={() => setAdding(false)} onDone={id => { setAdding(false); refresh(); set('basis', id) }} />}
+    {adding && options.data && <BasisForm base={base} number={project.projectNumber} options={options.data}
+      allowedDisciplines={allowedDisciplines} canAssign={canAssign} onClose={() => setAdding(false)} onDone={id => { setAdding(false); refresh(); set('basis', id) }} />}
     {selected && <BasisDetail base={base} id={selected} number={project.projectNumber} options={options.data} name={name}
       close={() => set('basis', '')} refresh={refresh} />}
   </Page>
@@ -110,12 +116,12 @@ function VersionFields({ draft, setDraft }: { draft: VersionDraft; setDraft: (v:
   </div>
 }
 
-function BasisForm({ base, number, options, onClose, onDone, existing }: { base: string; number: string; options: CoordOptions;
-  onClose: () => void; onDone: (id: string) => void; existing?: Detail }) {
+function BasisForm({ base, number, options, onClose, onDone, existing, allowedDisciplines, canAssign = true }: { base: string; number: string; options: CoordOptions;
+  onClose: () => void; onDone: (id: string) => void; existing?: Detail; allowedDisciplines?: string[]; canAssign?: boolean }) {
   const current = existing?.versions.find(v => v.version.id === existing.entry.currentVersionId)?.version
   const [kind, setKind] = useState(existing?.entry.kind ?? 'Assumption'), [title, setTitle] = useState(existing?.entry.title ?? '')
   const [ownerId, setOwnerId] = useState(existing?.entry.ownerId ?? options.actorId)
-  const [disciplineId, setDisciplineId] = useState(existing?.entry.projectDisciplineId ?? '')
+  const [disciplineId, setDisciplineId] = useState(existing?.entry.projectDisciplineId ?? (allowedDisciplines?.length === 1 ? allowedDisciplines[0] : ''))
   const [approverId, setApproverId] = useState(existing?.entry.independentApproverId ?? '')
   const [draft, setDraft] = useState<VersionDraft>(() => fromVersion(current))
   const [reason, setReason] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null)
@@ -140,9 +146,10 @@ function BasisForm({ base, number, options, onClose, onDone, existing }: { base:
     <form onSubmit={submit} className="space-y-4"><fieldset disabled={busy} className="space-y-4">
       {!existing && <><SelectField label={t('basis.kind')} value={kind} onChange={setKind} choices={[{ value: 'Criterion', label: t('basis.criterion') }, { value: 'Assumption', label: t('basis.assumption') }]} />
         <Field label={t('coord.title')} htmlFor="basis-title"><Input id="basis-title" required maxLength={200} value={title} onChange={e => setTitle(e.target.value)} /></Field>
-        <SelectField label={t('basis.owner')} value={ownerId} onChange={setOwnerId} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
-        <SelectField label={t('basis.discipline')} value={disciplineId} onChange={setDisciplineId} choices={options.disciplines.map(d => ({ value: d.id, label: d.name }))} />
-        <SelectField label={t('basis.approver')} value={approverId} onChange={setApproverId} required={false} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} /></>}
+        {canAssign && <SelectField label={t('basis.owner')} value={ownerId} onChange={setOwnerId} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />}
+        <SelectField label={t('basis.discipline')} value={disciplineId} onChange={setDisciplineId}
+          choices={options.disciplines.filter(d => !allowedDisciplines || allowedDisciplines.includes(d.id)).map(d => ({ value: d.id, label: d.name }))} />
+        {canAssign && <SelectField label={t('basis.approver')} value={approverId} onChange={setApproverId} required={false} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />}</>}
       <VersionFields draft={draft} setDraft={setDraft} />
       {existing && <Field label={t('basis.reason')} htmlFor="basis-reason"><Textarea id="basis-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
       {duplicateId && !existing && <div className="space-y-2 rounded border border-warn p-3 text-sm"><p>{t('basis.duplicate')}</p>
@@ -156,7 +163,7 @@ function BasisForm({ base, number, options, onClose, onDone, existing }: { base:
 function BasisDetail({ base, id, number, options, name, close, refresh }: { base: string; id: string; number: string;
   options?: CoordOptions; name: (id?: string) => string; close: () => void; refresh: () => void }) {
   const q = useQuery({ queryKey: ['design-basis-detail', base, id], queryFn: () => get<Detail>(`${base}/${id}`) })
-  const [action, setAction] = useState<'propose' | 'confirm' | 'proceed' | 'use' | 'withdraw' | 'resolveConflict' | null>(null)
+  const [action, setAction] = useState<'assign' | 'propose' | 'confirm' | 'proceed' | 'use' | 'withdraw' | 'resolveConflict' | null>(null)
   const [selectedImpact, setSelectedImpact] = useState<string | null>(null)
   const [selectedVersion, setSelectedVersion] = useState<Version | null>(null)
   const [selectedConflict, setSelectedConflict] = useState<string | null>(null)
@@ -172,6 +179,7 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
       <div className="space-y-5 text-sm">
         <p>{row.entry.kind} · {t('basis.owner')}: {name(row.entry.ownerId)} · {t('basis.discipline')}: {options?.disciplines.find(d => d.id === row.entry.projectDisciplineId)?.name ?? t('coord.unavailable')}</p>
         <div className="flex flex-wrap gap-2">{row.canManage && current && !proposed && options && <Button size="sm" variant="outline" onClick={() => setAction('propose')}>{t('basis.propose')}</Button>}
+          {row.canManage && !current && proposed && options && <Button size="sm" variant="outline" onClick={() => setAction('assign')}>{t('basis.owner')}</Button>}
           {row.canConfirm && proposed && <Button size="sm" onClick={() => setAction('confirm')}>{t('basis.confirm')}</Button>}
           {row.canManage && row.entry.kind === 'Assumption' && proposed && <Button size="sm" variant="outline" onClick={() => setAction('proceed')}>{t('basis.proceed')}</Button>}
           {options?.canWrite && [...options.tasks, ...options.deliverables].some(w => w.ownerId === options.actorId) && (current || proposed) &&
@@ -211,6 +219,8 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
           <li key={d.id} className="rounded border p-2">{d.scope} · {name(d.ownerId)} · {t('basis.expiry')}: {fmtDate(d.expiresOn)} · {d.reason}</li>)}</ul></section>}
       </div>}
   </DialogContent></Dialog>
+    {row && action === 'assign' && options && <AssignForm base={base} entry={row.entry} options={options}
+      close={() => setAction(null)} done={done} />}
     {row && action === 'confirm' && proposed && <ConfirmForm base={base} id={id} entry={row.entry} version={proposed}
       close={() => setAction(null)} done={done} />}
     {row && action === 'proceed' && proposed && options && <ProceedForm base={base} id={id} version={proposed}
@@ -224,6 +234,22 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
     {row && selectedImpact && options && <ImpactForm base={base} id={id} number={number} row={row} impactId={selectedImpact}
       options={options} close={() => setSelectedImpact(null)} done={done} />}
   </>
+}
+
+function AssignForm({ base, entry, options, close, done }: { base: string; entry: Entry; options: CoordOptions;
+  close: () => void; done: () => void }) {
+  const [ownerId, setOwnerId] = useState(entry.ownerId)
+  const [approverId, setApproverId] = useState(entry.independentApproverId ?? '')
+  const [reason, setReason] = useState('')
+  return <CommandForm path={`${base}/${entry.id}/assign`} title={t('basis.owner')} onClose={close} onDone={done}
+    payload={() => ({ entryRowVersion: entry.rowVersion, ownerId, independentApproverId: approverId || null, reason })}>
+    <SelectField label={t('basis.owner')} value={ownerId} onChange={setOwnerId}
+      choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
+    <SelectField label={t('basis.approver')} value={approverId} onChange={setApproverId} required={false}
+      choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
+    <Field label={t('basis.reason')} htmlFor="basis-assign-reason"><Textarea id="basis-assign-reason" required minLength={5}
+      value={reason} onChange={e => setReason(e.target.value)} /></Field>
+  </CommandForm>
 }
 
 function WithdrawForm({ base, id, entry, version, close, done }: { base: string; id: string; entry: Entry; version: Version; close: () => void; done: () => void }) {

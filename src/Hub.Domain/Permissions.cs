@@ -70,10 +70,12 @@ public static class Permissions
         var gate = CoordinationWrite(a, p); if (!gate) return gate;
         return IsPM(a, p) || IsAnyDL(p) ? Allow.Yes : Allow.No("perm.pm_or_dl");
     }
-    public static Allow CreateBasis(Actor a, ProjectContext p)
+    public static Allow CreateBasis(Actor a, ProjectContext p, Guid disciplineId, Guid ownerId, Guid? approverId)
     {
         var gate = CoordinationWrite(a, p); if (!gate) return gate;
-        return IsPM(a, p) || IsAnyDL(p) ? Allow.Yes : Allow.No("perm.pm_or_dl");
+        if (IsPM(a, p) || IsDL(p, disciplineId)) return Allow.Yes;
+        return p.Has(ProjectRole.TeamMember) && p.PrimaryDisciplineId == disciplineId &&
+            ownerId == a.Id && approverId is null ? Allow.Yes : Allow.No("perm.dl_own");
     }
     public static Allow ProposeAllocation(Actor a, ProjectContext p)
     {

@@ -14,6 +14,37 @@ public sealed class DesignBasisApiTests(HubFactory f)
     int Version<T>(Guid id) where T : Audited => f.Db(db => db.Set<T>().AsNoTracking().Single(x => x.Id == id).RowVersion);
 
     [Fact]
+    public async Task Member_can_propose_only_own_discipline_and_cannot_assign_another_owner_or_approver()
+    {
+        var project = await data.Project();
+        var civil = data.ProjectDiscipline(project.Id, "Civil");
+        var electrical = data.ProjectDiscipline(project.Id, "Electrical");
+        var alex = data.User(TestData.Alex);
+        var root = $"/api/v1/projects/{project.Id}/design-basis";
+        var body = new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Assumption,
+            "Member proposed level", alex, civil, null,
+            new DesignBasisEndpoints.VersionInput("Level 1", "Proposed level", null, null,
+                null, null, null, null, new DateOnly(2026, 10, 5), null), null);
+        await Post(TestData.Alex, root, body with { RequestId = Guid.NewGuid(), ProjectDisciplineId = electrical }, 403);
+        await Post(TestData.Alex, root, body with { RequestId = Guid.NewGuid(), OwnerId = data.User(TestData.Marc) }, 403);
+        await Post(TestData.Alex, root, body with { RequestId = Guid.NewGuid(), IndependentApproverId = data.User(TestData.Marc) }, 403);
+        var entry = await Post(TestData.Alex, root, body);
+        Assert.Equal(alex, f.Db(db => db.DesignBasisEntries.Single(x => x.Id == entry.G("id")).OwnerId));
+        var versionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == entry.G("id")).Id);
+        await Post(TestData.Alex, $"{root}/{entry.G("id")}/versions/{versionId}/confirm",
+            new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(entry.G("id")),
+                Version<DesignBasisVersion>(versionId), "Self approval"), 400);
+        var assignPath = $"{root}/{entry.G("id")}/assign";
+        var assignment = new DesignBasisEndpoints.AssignBody(Guid.NewGuid(), Version<DesignBasisEntry>(entry.G("id")),
+            data.User(TestData.Pm), data.User(TestData.Marc), "Lead assigned a new accountable owner");
+        await Post(TestData.Alex, assignPath, assignment, 403);
+        await Post(TestData.Omar, assignPath, assignment with { RequestId = Guid.NewGuid() }, 403);
+        await Post(TestData.Marc, assignPath, assignment);
+        Assert.Equal(data.User(TestData.Pm), f.Db(db => db.DesignBasisEntries.Single(x => x.Id == entry.G("id")).OwnerId));
+        await Post(TestData.Marc, assignPath, assignment with { RequestId = Guid.NewGuid() }, 409);
+    }
+
+    [Fact]
     public async Task Confirmation_preserves_exact_uses_and_creates_assessments_for_replacement()
     {
         var project = await data.Project();

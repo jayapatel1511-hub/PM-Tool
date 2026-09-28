@@ -142,6 +142,15 @@ public sealed class ReadinessApiTests(HubFactory f)
             await db.SaveChangesAsync();
             db.ReviewRounds.Add(round);
             await db.SaveChangesAsync();
+            var source = new SourceRevision { ProjectId = project.Id, DeliverableId = deliverableId,
+                SourceRowVersion = 1, SourceIdentity = $"readiness-{Guid.NewGuid():N}",
+                SourceKey = "REVIEW-SOURCE", ExternalIdentifier = "REV-A", Issuer = "Synthetic review",
+                Scope = "Readiness gate", Title = "Review source", Revision = "A", Url = "https://review.example.test/rev-a",
+                IdentityHash = Guid.NewGuid().ToString("N") };
+            db.SourceRevisions.Add(source);
+            await db.SaveChangesAsync();
+            db.ReviewManifestItems.Add(new ReviewManifestItem { ProjectId = project.Id, RoundId = round.Id,
+                DeliverableId = deliverableId, SourceRevisionId = source.Id, AuthorIds = [data.User(TestData.Alex)] });
             package.CurrentRoundId = round.Id; packageId = package.Id;
             (await db.Deliverables.SingleAsync(d => d.Id == deliverableId)).RequiredReviewPackageId = package.Id;
             await db.SaveChangesAsync(); return 0;
@@ -254,6 +263,69 @@ public sealed class ReadinessApiTests(HubFactory f)
         await f.DbAsync(async db => { (await db.Tasks.SingleAsync(t => t.Id == linked.Id)).DueDate = today.AddDays(2); await db.SaveChangesAsync(); return 0; });
         var afterDeadline = await f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, "Deliverable", deliverable.Id, today, f.Clock.Now));
         Assert.Null(afterDeadline.Satisfied);
+    }
+
+    [Fact]
+    public async Task Review_capacity_requires_confirmed_dated_links_and_rechecks_overload()
+    {
+        var project = await data.Project();
+        var reviewer = await IsolatedOwner(project);
+        var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
+        var disciplineId = data.ProjectDiscipline(project.Id, "Civil");
+        var deliverable = new Deliverable { ProjectId = project.Id, Key = "D" + Guid.NewGuid().ToString("N")[..8],
+            Name = "Capacity reviewed deliverable", ProjectDisciplineId = disciplineId, DeliverableTypeId = await data.DeliverableType(),
+            OwnerId = data.User(TestData.Alex), DueDate = today, RequiresReview = true };
+        var package = new ReviewPackage { ProjectId = project.Id, Key = "R" + Guid.NewGuid().ToString("N")[..8], Seq = 1,
+            Title = "Capacity review", Purpose = "Check capacity", CoordinatorId = data.User(TestData.Marc), ProjectDisciplineId = disciplineId,
+            Status = ReviewStatus.InReview, RoundNumber = 1, RequiredForIssue = true };
+        var round = new ReviewRound { ProjectId = project.Id, PackageId = package.Id, Number = 1, Purpose = package.Purpose, Status = ReviewStatus.InReview };
+        var assignment = new DisciplineReview { ProjectId = project.Id, RoundId = round.Id, ProjectDisciplineId = disciplineId,
+            ReviewerId = reviewer, DueDate = today, Status = DisciplineReviewStatus.Pending };
+        var allocation = new ResourceAllocation { ProjectId = project.Id, PersonId = reviewer, Purpose = AllocationPurpose.Review,
+            FromDate = today, ThroughDate = today, PlannedHours = 4m, Status = AllocationStatus.Confirmed };
+        await f.DbAsync(async db =>
+        {
+            db.Deliverables.Add(deliverable); db.ReviewPackages.Add(package); await db.SaveChangesAsync();
+            db.ReviewRounds.Add(round); await db.SaveChangesAsync();
+            package.CurrentRoundId = round.Id; db.DisciplineReviews.Add(assignment); deliverable.RequiredReviewPackageId = package.Id;
+            db.Allocations.Add(allocation); await db.SaveChangesAsync();
+            db.AllocationDayOverrides.Add(new AllocationDayOverride { AllocationId = allocation.Id, WorkDate = today, Hours = 4m });
+            db.AllocationWorkLinks.Add(new AllocationWorkLink { AllocationId = allocation.Id, PersonId = reviewer, WorkType = "Review",
+                WorkId = assignment.Id, WorkDate = today, ReviewHours = 4m });
+            db.AvailabilityOverrides.Add(new PersonAvailabilityOverride { PersonId = reviewer, WorkDate = today,
+                AvailableHours = 8m, Category = AvailabilityCategory.Additional });
+            await db.SaveChangesAsync(); return 0;
+        });
+
+        var fit = await f.DbAsync(db => ReadinessEndpoints.ReviewCapacity(db, project, "Deliverable", deliverable.Id, today));
+        Assert.Equal(true, fit.Satisfied);
+        await f.DbAsync(async db =>
+        {
+            var competing = new ResourceAllocation { ProjectId = project.Id, PersonId = reviewer, Purpose = AllocationPurpose.Production,
+                FromDate = today, ThroughDate = today, PlannedHours = 2m, Status = AllocationStatus.Confirmed };
+            db.Allocations.Add(competing);
+            db.AllocationDayOverrides.Add(new AllocationDayOverride { AllocationId = competing.Id, WorkDate = today, Hours = 2m });
+            var overrideRow = await db.AvailabilityOverrides.SingleAsync(o => o.PersonId == reviewer && o.WorkDate == today);
+            overrideRow.AvailableHours = 7m; overrideRow.Category = AvailabilityCategory.Reduced;
+            await db.SaveChangesAsync(); return 0;
+        });
+        var competingFits = await f.DbAsync(db => ReadinessEndpoints.ReviewCapacity(db, project, "Deliverable", deliverable.Id, today));
+        Assert.Equal(true, competingFits.Satisfied); // 4 review + 2 competing, not 4 added to each allocation.
+        await f.DbAsync(async db =>
+        {
+            var overrideRow = await db.AvailabilityOverrides.SingleAsync(o => o.PersonId == reviewer && o.WorkDate == today);
+            overrideRow.AvailableHours = 5m;
+            await db.SaveChangesAsync(); return 0;
+        });
+        var overload = await f.DbAsync(db => ReadinessEndpoints.ReviewCapacity(db, project, "Deliverable", deliverable.Id, today));
+        Assert.Equal(false, overload.Satisfied);
+        await f.DbAsync(async db =>
+        {
+            db.AllocationWorkLinks.RemoveRange(db.AllocationWorkLinks.Where(l => l.WorkId == assignment.Id));
+            await db.SaveChangesAsync(); return 0;
+        });
+        var missing = await f.DbAsync(db => ReadinessEndpoints.ReviewCapacity(db, project, "Deliverable", deliverable.Id, today));
+        Assert.Null(missing.Satisfied);
     }
 
     [Fact]

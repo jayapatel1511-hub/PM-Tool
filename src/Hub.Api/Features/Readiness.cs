@@ -124,8 +124,11 @@ public static class ReadinessEndpoints
                 ? await db.ReviewRounds.AsNoTracking().Where(r => r.Id == roundId && r.ProjectId == project.Id && r.PackageId == packageId)
                     .Select(r => r.Status).SingleOrDefaultAsync()
                 : null;
+            var containsTarget = review?.CurrentRoundId is { } currentRoundId &&
+                await db.ReviewManifestItems.AsNoTracking().AnyAsync(m => m.ProjectId == project.Id &&
+                    m.RoundId == currentRoundId && m.DeliverableId == targetId);
             Source(ReadinessCheckCode.ReviewGate, true,
-                review?.Status == ReviewStatus.Approved && round == ReviewStatus.Approved,
+                review?.Status == ReviewStatus.Approved && round == ReviewStatus.Approved && containsTarget,
                 "The required review package and current round are current source evidence.");
         }
         else if (reviewRequirement?.RequiresReview == true)
@@ -136,6 +139,11 @@ public static class ReadinessEndpoints
         var capacity = await ProductionCapacity(db, project, targetType, targetId, today, now, settings);
         if (!(capacity.Satisfied is null && checks.TryGetValue(ReadinessCheckCode.ProductionCapacity, out var capacityRecord) && capacityRecord.Applies == false))
             Source(ReadinessCheckCode.ProductionCapacity, capacity.Applies, capacity.Satisfied, capacity.Reason);
+
+        var reviewCapacity = await ReviewCapacity(db, project, targetType, targetId, today, settings);
+        var hasCanonicalReviewRequirement = reviewRequirement?.RequiresReview == true && reviewRequirement.RequiredReviewPackageId is not null;
+        if (hasCanonicalReviewRequirement)
+            Source(ReadinessCheckCode.ReviewCapacity, reviewCapacity.Applies, reviewCapacity.Satisfied, reviewCapacity.Reason);
 
         var activeConstraints = await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == project.Id &&
             c.TargetType == targetType && c.TargetId == targetId &&
@@ -176,6 +184,130 @@ public static class ReadinessEndpoints
     /// Missing owner, dates, or estimates remain unknown. Confirmed reservations use their dated spread and
     /// allocation day overrides; availability overrides replace the normal daily capacity.
     public sealed record CapacityEvaluation(bool Applies, bool? Satisfied, string Reason);
+
+    /// Evaluates dated confirmed review allocations for every active assignment in a required package.
+    /// Review effort is never inferred from package or assignment status. Missing, stale, or ambiguous
+    /// links remain unknown so a readiness result cannot become Ready from incomplete review evidence.
+    public static async Task<CapacityEvaluation> ReviewCapacity(HubDb db, Project project, string targetType,
+        Guid targetId, DateOnly today, SettingsStore? suppliedSettings = null)
+    {
+        if (targetType != "Deliverable")
+            return new(false, null, "Review capacity does not apply without a required review package.");
+
+        var requirement = await db.Deliverables.AsNoTracking().Where(d => d.Id == targetId && d.ProjectId == project.Id && d.DeletedAt == null)
+            .Select(d => new { d.RequiresReview, d.RequiredReviewPackageId }).SingleOrDefaultAsync();
+        if (requirement is null || !requirement.RequiresReview)
+            return new(false, null, "Review capacity does not apply without a required review package.");
+        if (requirement.RequiredReviewPackageId is null)
+            return new(true, null, "Review capacity is unknown until the required review package is linked.");
+
+        var settings = suppliedSettings is null
+            ? OrgSettings.From((await db.Settings.AsNoTracking().ToListAsync()).ToDictionary(r => r.Key,
+                r => System.Text.Json.JsonDocument.Parse(r.Value).RootElement.Clone()))
+            : await suppliedSettings.Get(db);
+        var package = await db.ReviewPackages.AsNoTracking().Where(p => p.Id == requirement.RequiredReviewPackageId && p.ProjectId == project.Id)
+            .Select(p => new { p.Id, p.CurrentRoundId, p.Status }).SingleOrDefaultAsync();
+        if (package?.CurrentRoundId is not { } roundId)
+            return new(true, null, "Review capacity is unknown until the required package has a current round.");
+        if (!await db.ReviewRounds.AsNoTracking().AnyAsync(r => r.Id == roundId && r.ProjectId == project.Id && r.PackageId == package.Id))
+            return new(true, null, "Review capacity is unknown until the required package points to a current round in this project.");
+
+        var activeStatuses = new[] { DisciplineReviewStatus.Pending, DisciplineReviewStatus.InReview, DisciplineReviewStatus.ChangesRequired };
+        var assignments = await db.DisciplineReviews.AsNoTracking().Where(a => a.ProjectId == project.Id && a.RoundId == roundId &&
+            activeStatuses.Contains(a.Status)).ToListAsync();
+        if (assignments.Count == 0)
+            return new(false, null, "Review capacity does not apply because the current round has no active review assignments.");
+        if (assignments.Any(a => a.ReviewerId == Guid.Empty || a.DueDate < today))
+            return new(true, null, "Review capacity is unknown until every active assignment has a current reviewer and date.");
+
+        var reviewers = assignments.Select(a => a.ReviewerId).Distinct().ToArray();
+        var people = await db.Users.AsNoTracking().Where(u => reviewers.Contains(u.Id) && u.IsActive)
+            .Select(u => new { u.Id, u.OfficeId, u.WeeklyCapacityHours }).ToDictionaryAsync(u => u.Id);
+        var currentMembers = await db.ProjectMembers.AsNoTracking().Where(m => m.ProjectId == project.Id && reviewers.Contains(m.UserId))
+            .Select(m => m.UserId).ToListAsync();
+        if (people.Count != reviewers.Length || reviewers.Any(id => !people.ContainsKey(id) || !currentMembers.Contains(id)))
+            return new(true, null, "Review capacity is unknown until every active review assignment has a current project reviewer.");
+
+        var assignmentIds = assignments.Select(a => a.Id).ToHashSet();
+        var links = await db.AllocationWorkLinks.AsNoTracking().Where(l => l.WorkType == "Review" && l.ReleasedAt == null &&
+            assignmentIds.Contains(l.WorkId)).ToListAsync();
+        if (links.Count == 0 || links.Any(l => l.ReviewHours is not > 0 || l.WorkDate < today))
+            return new(true, null, "Review capacity is unknown until every active review assignment has a dated allocation link.");
+        if (links.GroupBy(l => (l.WorkId, l.WorkDate)).Any(g => g.Count() != 1))
+            return new(true, null, "Review capacity is unknown while review allocation links are duplicated for a date.");
+
+        var assignmentById = assignments.ToDictionary(a => a.Id);
+        if (links.Any(l => !assignmentById.TryGetValue(l.WorkId, out var assignment) ||
+            l.PersonId != assignment!.ReviewerId || l.WorkDate > assignment.DueDate))
+            return new(true, null, "Review capacity is unknown until review allocation links match the active reviewer dates.");
+        if (assignments.Any(a => !links.Any(l => l.WorkId == a.Id)))
+            return new(true, null, "Review capacity is unknown until every active review assignment has a dated allocation link.");
+
+        var allocationIds = links.Select(l => l.AllocationId).Distinct().ToArray();
+        var allocations = await db.Allocations.AsNoTracking().Where(a => allocationIds.Contains(a.Id)).ToListAsync();
+        if (allocations.Count != allocationIds.Length || allocations.Any(a => a.Status != AllocationStatus.Confirmed ||
+            a.Purpose != AllocationPurpose.Review || a.ProjectId != project.Id || a.FromDate > a.ThroughDate))
+            return new(true, null, "Review capacity is unknown until all review links point to confirmed in-scope review allocations.");
+        var allocationById = allocations.ToDictionary(a => a.Id);
+        if (links.Any(l => !allocationById.TryGetValue(l.AllocationId, out var allocation) ||
+            allocation!.PersonId != l.PersonId || l.WorkDate < allocation.FromDate || l.WorkDate > allocation.ThroughDate))
+            return new(true, null, "Review capacity is unknown until review links match the confirmed reviewer and allocation dates.");
+
+        var maxDue = assignments.Max(a => a.DueDate);
+        if (maxDue > today.AddDays(366))
+            return new(true, null, "Review capacity needs a bounded assignment date window.");
+        var allReviewerAllocations = await db.Allocations.AsNoTracking().Where(a => reviewers.Contains(a.PersonId) &&
+            a.Status == AllocationStatus.Confirmed && a.FromDate <= maxDue && a.ThroughDate >= today).ToListAsync();
+        if (allReviewerAllocations.Any(a => a.ProjectId != project.Id))
+            return new(true, null, "Review capacity is unknown while confirmed reviewer reservations are outside this readiness scope.");
+        var nullableReviewers = reviewers.Select(id => (Guid?)id).ToArray();
+        var activeTasks = await db.Tasks.AsNoTracking().AnyAsync(t => nullableReviewers.Contains(t.AssigneeId) && t.DeletedAt == null &&
+            t.ProgressPct < 100 && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold);
+        if (activeTasks)
+            return new(true, null, "Review capacity is unknown while reviewer production workload is not isolated.");
+
+        var holidaysByOffice = new Dictionary<Guid, IReadOnlyList<DateOnly>>();
+        var reservations = new Dictionary<Guid, IReadOnlyDictionary<DateOnly, decimal>>();
+        foreach (var allocation in allReviewerAllocations)
+        {
+            if (!people.TryGetValue(allocation.PersonId, out var person))
+                return new(true, null, "Review capacity is unknown until every reviewer remains active.");
+            var officeKey = person.OfficeId ?? Guid.Empty;
+            if (!holidaysByOffice.TryGetValue(officeKey, out var holidays))
+            {
+                holidays = settings.WorkingDaysEnabled
+                    ? await db.Holidays.AsNoTracking().Where(h => h.OfficeId == null || h.OfficeId == person.OfficeId).Select(h => h.Date).ToListAsync()
+                    : [];
+                holidaysByOffice[officeKey] = holidays;
+            }
+            var calendar = new WorkCalendar(holidays);
+            var overrides = await db.AllocationDayOverrides.AsNoTracking().Where(o => o.AllocationId == allocation.Id)
+                .ToDictionaryAsync(o => o.WorkDate, o => o.Hours);
+            try { reservations[allocation.Id] = AllocationRules.Spread(allocation.FromDate, allocation.ThroughDate, allocation.PlannedHours, calendar, overrides); }
+            catch (ArgumentException) { return new(true, null, "Review capacity needs reassessment after a calendar or allocation change."); }
+        }
+
+        var capacityOverrides = await db.AvailabilityOverrides.AsNoTracking().Where(o => reviewers.Contains(o.PersonId) &&
+            o.WorkDate >= today && o.WorkDate <= maxDue).ToListAsync();
+        var linkDemand = links.GroupBy(l => (l.AllocationId, l.WorkDate)).ToDictionary(g => g.Key, g => g.Sum(l => l.ReviewHours!.Value));
+        foreach (var reviewer in reviewers)
+        {
+            var person = people[reviewer];
+            var holidays = holidaysByOffice[person.OfficeId ?? Guid.Empty];
+            var calendar = new WorkCalendar(holidays);
+            var overrides = capacityOverrides.Where(o => o.PersonId == reviewer).ToDictionary(o => o.WorkDate, o => o.AvailableHours);
+            for (var day = today; day <= maxDue; day = day.AddDays(1))
+            {
+                var available = AllocationRules.DailyCapacity(day, person.WeeklyCapacityHours ?? settings.DefaultWeeklyCapacityHours, calendar,
+                    overrides.TryGetValue(day, out var exact) ? exact : null);
+                var committed = allReviewerAllocations.Where(a => a.PersonId == reviewer).Sum(a =>
+                    Math.Max(reservations[a.Id].GetValueOrDefault(day), linkDemand.GetValueOrDefault((a.Id, day))));
+                if (committed > available)
+                    return new(true, false, "Confirmed review allocations exceed a reviewer's dated capacity.");
+            }
+        }
+        return new(true, true, "Confirmed review allocations fit within each reviewer's dated capacity.");
+    }
 
     public static async Task<CapacityEvaluation> ProductionCapacity(HubDb db, Project project, string targetType,
         Guid targetId, DateOnly today, DateTimeOffset now) => await ProductionCapacity(db, project, targetType, targetId, today, now, null);

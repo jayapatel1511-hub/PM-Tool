@@ -17,6 +17,7 @@ Documentation validation is recorded in `docs/coordination-spec-validation.md`. 
 ## Remaining evidence
 
 - PASS — scoped issue location, document reference and appointed-verifier forms built with the frontend production build. API guards require a site area or building for a location.
-- UNPROVEN — browser operation, keyboard/accessibility and register/export integration.
+- PASS — local synthetic browser on port 5084: Taylor raised DEMO-101-I01, saved a site area and drawing revision, appointed Yagmur, and all records survived reload. Yagmur signed in separately through Development auth, saw the issue without owner actions, and recorded Verified with a synthetic evidence link. An initial attempt to appoint Marc failed because he was outside DEMO-101; the picker was then changed to use the same eligible project people as the API. Frontend build and lint passed after that correction. This is local synthetic evidence, not the deployed individual-password flow.
+- UNPROVEN — deployed browser operation, keyboard/accessibility and register/export integration.
 - UNPROVEN — changed revision impact checks, audit/notification deduplication and concurrent finalisation.
 - UNPROVEN — deployed review environment, homedev browser-to-API flow, backup/restore, real tenant sign-in, pilot and production acceptance.

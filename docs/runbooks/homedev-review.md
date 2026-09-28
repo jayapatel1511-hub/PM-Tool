@@ -17,7 +17,27 @@ This is the temporary review and pilot host chosen while Azure is unavailable. I
 4. Before changing the app, run `scripts/backup-homedev-review.sh` and verify the dump is nonempty. Then activate the new image with `sudo env RELEASE_SHA="$revision" docker compose --env-file .runtime/review.env -f hosting/homedev.compose.yml up -d --no-build`. Confirm the database volume identity and that the migration/seed finishes. Keep the prior tagged image and release path for rollback.
 5. Probe the private origin with `Host: pm.engcalchub.com` and `X-Forwarded-Proto: https` from homedev. Check `/health`, anonymous `/api/v1/me` denial, unsafe request Origin denial, and local sign-in for a designated synthetic reviewer. A wrong password must fail; never print a cookie or verifier.
 6. Only after origin checks, create a dedicated `pm-tool` Cloudflare named tunnel with ingress for `pm.engcalchub.com` to `http://127.0.0.1:3080`, a final `http_status:404` rule, and a user systemd service. Route DNS with `cloudflared tunnel route dns pm-tool pm.engcalchub.com`. Verify the resulting CNAME, HTTPS, host restriction, unauthenticated response, individual login, logout and browser-to-API writes from outside the origin. Do not edit another app's tunnel or DNS route.
-7. Verify the version, migration list, logs without secrets, resource limits, and review data persistence after an API restart and a later image replacement. Run `scripts/restore-homedev-review-drill.sh <private-dump-path>`; it restores into a new temporary database, checks the project table, and removes that temporary database. The Workspace path, including private dumps and the key directory, is in the encrypted Mac restic backup scope; test retrieval. The operator must take a dump before each release and on a scheduled cadence until a root-owned automatic backup job is designed and verified. Record times and results in the release gates.
+7. Verify the version, migration list, logs without secrets, resource limits, and review data persistence after an API restart and a later image replacement. Run `scripts/restore-homedev-review-drill.sh <private-dump-path>`; it restores into a new temporary database, checks the project table, and removes that temporary database. The Workspace path, including private dumps and the key directory, is in the encrypted Mac restic backup scope; test retrieval. Install and prove the daily database timer below. Record times and results in the release gates.
+
+## Daily review database dump
+
+The timer runs at 22:00 UTC, before the Mac's 20:30 Halifax off-host restic schedule in either daylight or standard time. It is a separate local dump; its success does **not** prove that the off-host schedule ran. The helper is copied to a root-owned path because systemd must not execute a script from the user-writable release tree as root. It targets only the `pm-tool-review-db-1` container and writes a mode-600 archive into the existing user-owned, mode-700 `data/backups` directory.
+
+After reviewing the helper in the exact release, install and exercise it from homedev with Jay's interactive sudo. Do this only after the private review database is healthy:
+
+```bash
+sudo install -D -o root -g root -m 0755 hosting/pm-tool-review-backup-root.sh /usr/local/libexec/pm-tool-review-backup
+sudo install -o root -g root -m 0644 hosting/pm-tool-review-backup.service /etc/systemd/system/pm-tool-review-backup.service
+sudo install -o root -g root -m 0644 hosting/pm-tool-review-backup.timer /etc/systemd/system/pm-tool-review-backup.timer
+sudo systemctl daemon-reload
+sudo systemd-analyze verify /etc/systemd/system/pm-tool-review-backup.service /etc/systemd/system/pm-tool-review-backup.timer
+sudo systemctl start pm-tool-review-backup.service
+sudo systemctl status pm-tool-review-backup.service --no-pager
+sudo systemctl enable --now pm-tool-review-backup.timer
+systemctl list-timers pm-tool-review-backup.timer --all
+```
+
+Check that the new archive is nonempty, owner-only, and listed by `pg_restore`; then restore **that archive** into an isolated temporary review database with the drill script. Confirm the timer's next run and inspect the first automatic run. Keep manual pre-release dumps regardless of the timer. The existing Mac restic job is currently failing, so fix and recheck that job and retrieve a newly scheduled dump from the encrypted repository before counting off-host backup as operational. Preserve archives until a retention policy and recovery point target are approved; do not copy them into production.
 
 At the first private activation, revision `1c59e334b42822510dd0181f83e5dadc7bbe8282` started the API on loopback port 3080 and a healthy dedicated PostgreSQL container. The named Cloudflare tunnel configuration was validated, but the tunnel was not started and DNS was not routed. Three synthetic verifier mappings and a temporary private handoff file were prepared afterward; the API still needs a restart to load them. Recheck this state before using the runbook.
 

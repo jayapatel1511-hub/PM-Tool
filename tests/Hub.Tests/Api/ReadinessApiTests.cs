@@ -299,6 +299,13 @@ public sealed class ReadinessApiTests(HubFactory f)
 
         var fit = await f.DbAsync(db => ReadinessEndpoints.ReviewCapacity(db, project, "Deliverable", deliverable.Id, today));
         Assert.Equal(true, fit.Satisfied);
+        var otherProject = await data.Project();
+        var outside = new ResourceAllocation { ProjectId = otherProject.Id, PersonId = reviewer, Purpose = AllocationPurpose.Review,
+            FromDate = today, ThroughDate = today, PlannedHours = 1m, Status = AllocationStatus.Confirmed };
+        await f.DbAsync(async db => { db.Allocations.Add(outside); await db.SaveChangesAsync(); return 0; });
+        var outOfScope = await f.DbAsync(db => ReadinessEndpoints.ReviewCapacity(db, project, "Deliverable", deliverable.Id, today));
+        Assert.Null(outOfScope.Satisfied);
+        await f.DbAsync(async db => { db.Allocations.Remove(await db.Allocations.SingleAsync(a => a.Id == outside.Id)); await db.SaveChangesAsync(); return 0; });
         await f.DbAsync(async db =>
         {
             var competing = new ResourceAllocation { ProjectId = project.Id, PersonId = reviewer, Purpose = AllocationPurpose.Production,

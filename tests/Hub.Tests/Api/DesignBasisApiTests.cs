@@ -58,6 +58,10 @@ public sealed class DesignBasisApiTests(HubFactory f)
         Assert.Equal(versionId, f.Db(db => db.BasisUses.Single(u => u.Id == use.G("id")).VersionId));
         Assert.Single(f.Db(db => db.BasisImpactAssessments.Where(i => i.BasisUseId == use.G("id") &&
             i.OldVersionId == versionId && i.NewVersionId == bId && i.Status == AssessmentStatus.Pending).ToList()));
+        var supersededFilter = await (await f.As(TestData.Pm).GetAsync(root + "?status=Superseded")).Json();
+        Assert.DoesNotContain(supersededFilter["items"]!.AsArray(), row => row!.G("id") == id);
+        var confirmedFilter = await (await f.As(TestData.Pm).GetAsync(root + "?status=Confirmed")).Json();
+        Assert.Contains(confirmedFilter["items"]!.AsArray(), row => row!.G("id") == id);
         var competing = create with { RequestId = Guid.NewGuid(), Version = b with { NumericValue = 150 } };
         await Post(TestData.Pm, root, competing, 409);
         var second = await Post(TestData.Pm, root, competing with { RequestId = Guid.NewGuid(), InspectedDuplicateId = id });

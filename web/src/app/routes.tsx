@@ -23,6 +23,7 @@ import { ChangesTab } from '@/pages/projects/Changes'
 import { HandoffsTab } from '@/pages/projects/Handoffs'
 import { SubmissionsTab } from '@/pages/projects/Submissions'
 import { AllocationsTab } from '@/pages/projects/Allocations'
+import { DesignBasisTab } from '@/pages/projects/DesignBasis'
 import { TimelineTab } from '@/pages/projects/Timeline'
 import '@/pages/projects/CopyStructure'
 import '@/pages/projects/FromTemplate'
@@ -86,6 +87,7 @@ export const routes: RouteObject[] = [
       { path: 'changes', element: <ChangesTab /> },
       { path: 'submissions', element: <SubmissionsTab /> },
       { path: 'allocations', element: <AllocationsTab /> },
+      { path: 'design-basis', element: <DesignBasisTab /> },
       { path: 'tasks', element: <TasksTab /> },
       { path: 'board', element: <BoardTab /> },
       { path: 'milestones', element: <MilestonesTab /> },

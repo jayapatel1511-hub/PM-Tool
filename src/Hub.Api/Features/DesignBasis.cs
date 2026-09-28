@@ -20,6 +20,8 @@ public static class DesignBasisEndpoints
     public sealed record UseBody(Guid RequestId, Guid VersionId, string TargetType, Guid TargetId, string IntendedUse);
     public sealed record DispositionBody(Guid RequestId, int VersionRowVersion, string Scope, Guid OwnerId,
         DateOnly ExpiresOn, string Reason);
+    public sealed record ConflictSide(Guid VersionId, string EntryKey, string Scope, string Statement,
+        decimal? NumericValue, string? Units);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -214,15 +216,33 @@ public static class DesignBasisEndpoints
         var query = db.DesignBasisEntries.AsNoTracking().Where(e => e.ProjectId == projectId);
         if (kind is not null) { Check.OneOf(kind, BasisKind.All, "kind"); query = query.Where(e => e.Kind == kind); }
         if (disciplineId is { } did) query = query.Where(e => e.ProjectDisciplineId == did);
-        if (status is not null) { Check.OneOf(status, BasisStatus.All, "status"); query = query.Where(e => db.DesignBasisVersions.Any(v => v.EntryId == e.Id && v.Status == status)); }
+        if (status is not null) { Check.OneOf(status, BasisStatus.All, "status"); query = query.Where(e =>
+            db.DesignBasisVersions.Where(v => v.EntryId == e.Id).OrderByDescending(v => v.Number)
+                .Select(v => v.Status).FirstOrDefault() == status); }
         var (pg, size) = Http.Paging(page, pageSize);
-        var rows = await query.OrderBy(e => e.Seq).Skip((pg - 1) * size).Take(size)
+        var entries = await query.OrderBy(e => e.Seq).Skip((pg - 1) * size).Take(size)
             .Select(e => new { e.Id, e.Key, e.Title, e.Kind, e.OwnerId, e.ProjectDisciplineId, e.IndependentApproverId,
                 e.CurrentVersionId, e.RowVersion }).ToListAsync();
-        return new Page<object>(rows.Cast<object>().ToList(), pg, size, await query.CountAsync());
+        var entryIds = entries.Select(e => e.Id).ToArray();
+        var versions = await db.DesignBasisVersions.AsNoTracking().Where(v => entryIds.Contains(v.EntryId))
+            .Select(v => new { v.Id, v.EntryId, v.Number, v.Status, v.Scope, v.ConfirmationDueDate }).ToListAsync();
+        var conflictIds = versions.Select(v => v.Id).ToArray();
+        var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => !c.Resolved &&
+            (conflictIds.Contains(c.LeftVersionId) || conflictIds.Contains(c.RightVersionId))).ToListAsync();
+        var rows = entries.Select(e =>
+        {
+            var current = versions.FirstOrDefault(v => v.Id == e.CurrentVersionId);
+            var latest = versions.Where(v => v.EntryId == e.Id).OrderByDescending(v => v.Number).FirstOrDefault();
+            return (object)new { e.Id, e.Key, e.Title, e.Kind, e.OwnerId, e.ProjectDisciplineId, e.CurrentVersionId,
+                e.RowVersion, CurrentStatus = current?.Status, CurrentScope = current?.Scope,
+                LatestStatus = latest?.Status, LatestVersionId = latest?.Id, latest?.ConfirmationDueDate,
+                ConflictCount = conflicts.Count(c => versions.Any(v => v.EntryId == e.Id &&
+                    (c.LeftVersionId == v.Id || c.RightVersionId == v.Id))) };
+        }).ToList();
+        return new Page<object>(rows, pg, size, await query.CountAsync());
     }
 
-    static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
+    static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db, SettingsStore settings)
     {
         var (_, ctx) = await access.Project(projectId, false);
         var entry = await Entry(db, projectId, id);
@@ -233,13 +253,26 @@ public static class DesignBasisEndpoints
         var impacts = await db.BasisImpactAssessments.AsNoTracking().Where(a => a.ProjectId == projectId && ids.Contains(a.OldVersionId)).ToListAsync();
         var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => c.ProjectId == projectId &&
             (ids.Contains(c.LeftVersionId) || ids.Contains(c.RightVersionId))).ToListAsync();
+        var conflictVersionIds = conflicts.SelectMany(c => new[] { c.LeftVersionId, c.RightVersionId }).Distinct().ToArray();
+        var conflictVersions = await db.DesignBasisVersions.AsNoTracking().Where(v => conflictVersionIds.Contains(v.Id)).ToDictionaryAsync(v => v.Id);
+        var conflictEntryIds = conflictVersions.Values.Select(v => v.EntryId).Distinct().ToArray();
+        var conflictKeys = await db.DesignBasisEntries.AsNoTracking().Where(e => conflictEntryIds.Contains(e.Id))
+            .ToDictionaryAsync(e => e.Id, e => e.Key);
+        ConflictSide Side(Guid versionId)
+        {
+            var v = conflictVersions[versionId];
+            return new ConflictSide(v.Id, conflictKeys.GetValueOrDefault(v.EntryId) ?? "", v.Scope,
+                v.Statement, v.NumericValue, v.Units);
+        }
         var dispositions = await db.BasisAssumptionDispositions.AsNoTracking().Where(d => d.ProjectId == projectId && ids.Contains(d.VersionId)).ToListAsync();
         return new { Entry = entry, Versions = versions.Select(v => new { Version = v,
                 SourceMissing = string.IsNullOrWhiteSpace(v.SourceUrl) || string.IsNullOrWhiteSpace(v.SourceSystem) || string.IsNullOrWhiteSpace(v.DeclaredRevision) }),
-            Uses = uses, Impacts = impacts, Conflicts = conflicts,
+            Uses = uses, Impacts = impacts, Conflicts = conflicts.Select(c => new { c.Id, c.Resolved,
+                Left = Side(c.LeftVersionId), Right = Side(c.RightVersionId) }),
             Dispositions = dispositions,
             CanManage = Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId).Ok,
             CanConfirm = Permissions.CoordinationWrite(access.Actor, ctx).Ok &&
-                (Permissions.IsDL(ctx, entry.ProjectDisciplineId) || entry.IndependentApproverId == access.Me.Id) };
+                (Permissions.IsDL(ctx, entry.ProjectDisciplineId) || entry.IndependentApproverId == access.Me.Id) &&
+                ((await settings.Get(db)).AllowSelfReview || access.Me.Id != entry.OwnerId) };
     }
 }

@@ -96,6 +96,23 @@ public static class ReadinessEndpoints
             target.OwnerId != Guid.Empty && await Coordination.People(db, project).AnyAsync(u => u.Id == target.OwnerId),
             "The linked production owner is current source evidence.");
 
+        var activeConstraints = await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == project.Id &&
+            c.TargetType == targetType && c.TargetId == targetId &&
+            c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled).Select(c => c.Category).ToListAsync();
+        foreach (var category in activeConstraints.Distinct())
+        {
+            var code = category switch
+            {
+                "Handoff" => ReadinessCheckCode.Handoff,
+                "Decision" => ReadinessCheckCode.Decision,
+                "Basis" => ReadinessCheckCode.Basis,
+                "Capacity" => ReadinessCheckCode.ProductionCapacity,
+                "Review" => ReadinessCheckCode.ReviewGate,
+                _ => null,
+            };
+            if (code is not null) Source(code, true, false, "An active linked constraint blocks this check.");
+        }
+
         var result = ReadinessRules.Evaluate(checks.Values.Select(c => new ReadinessCheck(c.Code, c.Applies, c.Satisfied)), null, today);
         var openConstraint = await db.WorkConstraints.AsNoTracking().AnyAsync(c => c.ProjectId == project.Id &&
             c.TargetType == targetType && c.TargetId == targetId &&

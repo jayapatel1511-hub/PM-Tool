@@ -1,61 +1,98 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import type { ReactNode } from 'react'
 import { ErrorBanner, Loading } from '@/components/hub/common'
+import { useMe } from '@/lib/auth'
 import { get, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 
-type Handoff = { id: string; key: string; title: string; status: string; neededBy: string; promisedBy?: string; targetKey?: string }
-type Change = { id: string; key: string; title: string; status: string; pendingAssessments: number }
-type Review = { id: string; key: string; title: string; status: string; outstandingDisciplines: number; blockingFindings: number }
+type Handoff = { id: string; key: string; title: string; status: string; neededBy: string; promisedBy?: string; targetKey?: string; sendingOwnerId: string; receivingOwnerId: string; sendingDisciplineId: string; receivingDisciplineId: string }
+type Change = { id: string; key: string; title: string; status: string; pendingAssessments: number; ownerId?: string }
+type Review = { id: string; key: string; title: string; status: string; outstandingDisciplines: number; blockingFindings: number; coordinatorId?: string }
 type InputUse = { id: string; targetType: string; targetId: string; sourceRevisionId: string }
 type Page<T> = { items: T[]; totalCount?: number }
-type Data = { handoffs: Handoff[]; changes: Change[]; reviews: Review[]; uses: InputUse[]; usesTotal: number; partial: boolean; fetchedAt: string }
+type Data = { handoffs: Handoff[]; changes: Change[]; reviews: Review[]; uses: InputUse[]; usesTotal: number; partial: boolean; handoffsPartial: boolean; changesPartial: boolean; fetchedAt: string }
 
 /** Packet 030's five-question coordination projection over the existing registers. */
 export function DisciplineCoordinationView({ project, disciplineId }: { project: ProjectDetail; disciplineId?: string }) {
+  const me = useMe()
+  const [sp, setSp] = useSearchParams()
+  const ownerId = sp.get('owner') ?? ''
+  const from = sp.get('from') ?? ''
+  const to = sp.get('to') ?? ''
+  const setScope = (name: string, value: string) => setSp(p => {
+    const next = new URLSearchParams(p)
+    if (value) next.set(name, value); else next.delete(name)
+    return next
+  }, { replace: true })
+  const clearScope = () => setSp(p => { const next = new URLSearchParams(p); ['owner', 'from', 'to'].forEach(name => next.delete(name)); return next }, { replace: true })
+  const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => get<{ members: { userId: string; displayName: string }[] }>(`projects/${project.id}/team`), staleTime: 60_000 })
   const q = useQuery({
-    queryKey: ['p', project.id, 'discipline-coordination', disciplineId],
+    queryKey: ['p', project.id, 'discipline-coordination', disciplineId, ownerId, from, to],
     queryFn: async (): Promise<Data> => {
       const scope = disciplineId ? { disciplineId } : {}
-      const [outgoing, incoming, changes, reviews, uses] = await Promise.all([
-        get<Page<Handoff>>(`projects/${project.id}/handoffs${qs({ ...scope, direction: 'outgoing', pageSize: 100 })}`),
-        get<Page<Handoff>>(`projects/${project.id}/handoffs${qs({ ...scope, direction: 'incoming', pageSize: 100 })}`),
-        get<Page<Change>>(`projects/${project.id}/changes${qs({ pageSize: 100 })}`),
-        get<Page<Review>>(`projects/${project.id}/reviews${qs({ pageSize: 100 })}`),
+      const [handoffs, changes, reviews, uses] = await Promise.all([
+        get<Page<Handoff>>(`projects/${project.id}/handoffs${qs({ ...scope, pageSize: 100 })}`),
+        get<Page<Change>>(`projects/${project.id}/changes${qs({ pageSize: 100, ...(ownerId ? { ownerId } : {}) })}`),
+        get<Page<Review>>(`projects/${project.id}/reviews${qs({ pageSize: 100, ...(ownerId ? { ownerId } : {}), ...(disciplineId ? { disciplineId } : {}) })}`),
         get<Page<InputUse>>(`projects/${project.id}/input-uses${qs({ pageSize: 100 })}`),
       ])
-      const totals = [outgoing, incoming, changes, reviews, uses].map((x) => x.totalCount ?? x.items.length)
-      return { handoffs: [...outgoing.items, ...incoming.items], changes: changes.items, reviews: reviews.items, uses: uses.items, usesTotal: totals[4],
-        partial: [outgoing, incoming, changes, reviews, uses].some((x) => (x.totalCount ?? x.items.length) > x.items.length), fetchedAt: new Date().toISOString() }
+      return { handoffs: handoffs.items, changes: changes.items, reviews: reviews.items, uses: uses.items,
+        usesTotal: uses.totalCount ?? uses.items.length,
+        handoffsPartial: (handoffs.totalCount ?? handoffs.items.length) > handoffs.items.length,
+        changesPartial: (changes.totalCount ?? changes.items.length) > changes.items.length,
+        partial: [handoffs, changes, reviews, uses].some((x) => (x.totalCount ?? x.items.length) > x.items.length), fetchedAt: new Date().toISOString() }
     },
   })
   if (q.isPending) return <Loading rows={2} />
   if (q.error) return <ErrorBanner error={q.error} retry={() => q.refetch()} />
   const d = q.data
-  const outgoing = d.handoffs.filter((h) => h.status !== 'Cancelled' && h.status !== 'Incorporated' && (h.promisedBy || h.status === 'Draft'))
-  const incoming = d.handoffs.filter((h) => ['Submitted', 'Clarification Requested', 'Returned', 'Accepted'].includes(h.status))
+  const scopedOwnerId = ownerId || me.id
+  const inDateScope = (h: Handoff) => (!from || (h.promisedBy ?? h.neededBy) >= from) && (!to || (h.promisedBy ?? h.neededBy) <= to)
+  const outgoing = d.handoffs.filter((h) => h.status !== 'Cancelled' && h.status !== 'Incorporated' && (h.promisedBy || h.status === 'Draft') &&
+    (disciplineId ? h.sendingDisciplineId === disciplineId : h.sendingOwnerId === scopedOwnerId) && (!ownerId || h.sendingOwnerId === ownerId) && inDateScope(h))
+  const incoming = d.handoffs.filter((h) => ['Submitted', 'Clarification Requested', 'Returned', 'Accepted'].includes(h.status) &&
+    (disciplineId ? h.receivingDisciplineId === disciplineId : h.receivingOwnerId === scopedOwnerId) && (!ownerId || h.receivingOwnerId === ownerId) && inDateScope(h))
   const openChanges = d.changes.filter((c) => c.status === 'Open' || c.pendingAssessments > 0)
   const openReviews = d.reviews.filter((r) => !['Approved', 'Cancelled', 'Superseded'].includes(r.status))
-  const link = (path: string, label: string) => <Link className="text-xs font-medium text-primary underline" to={`/projects/${project.projectNumber}/${path}`}>{label}</Link>
+  const registerUrl = (pathname: string, panel?: string) => {
+    const params = new URLSearchParams()
+    if (panel) params.set('panel', panel)
+    if (ownerId && pathname !== 'handoffs') params.set('ownerId', ownerId)
+    if (disciplineId && pathname !== 'changes') params.set('disciplineId', disciplineId)
+    if (sp.get('discipline')) params.set('discipline', sp.get('discipline')!)
+    if (from) params.set('from', from)
+    if (to) params.set('to', to)
+    const suffix = params.size ? `?${params}` : ''
+    return `/projects/${project.projectNumber}/${pathname}${suffix}`
+  }
+  const link = (path: string, label: string) => <Link className="text-xs font-medium text-primary underline" to={registerUrl(path)}>{label}</Link>
   const card = (id: string, title: string, count: number | string, content: ReactNode, href: string) => (
     <section aria-labelledby={`dcv-${id}`} className="rounded-md border bg-card p-3">
       <div className="flex items-center justify-between gap-2"><h2 id={`dcv-${id}`} className="font-medium">{title}</h2><span className="rounded-full bg-muted px-2 text-sm tabular-nums">{count}</span></div>
       <div className="mt-2 text-sm">{content}</div><div className="mt-2">{link(href, t('dcv.openRegister'))}</div>
     </section>
   )
-  const items = (rows: { id: string; key: string; text: string; detail?: string }[], register: string) => rows.length ? <ul className="space-y-1">{rows.slice(0, 4).map((r) => <li key={r.id}><Link className="underline" to={`/projects/${project.projectNumber}/${register}?q=${encodeURIComponent(r.key)}`}>{r.key}</Link> <span>{r.text}</span>{r.detail && <span className="text-muted-foreground"> · {r.detail}</span>}</li>)}</ul> : <p className="text-muted-foreground">{t('dcv.none')}</p>
+  const items = (rows: { id: string; key: string; text: string; detail?: string }[], register: string) => rows.length ? <ul className="space-y-1">{rows.slice(0, 4).map((r) => <li key={r.id}><Link className="underline" to={registerUrl(register, `${register === 'handoffs' ? 'Handoff' : 'ChangeNotice'}:${r.id}`)}>{r.key}</Link> <span>{r.text}</span>{r.detail && <span className="text-muted-foreground"> · {r.detail}</span>}</li>)}</ul> : <p className="text-muted-foreground">{t('dcv.none')}</p>
   return <section aria-labelledby="dcv-title" className="rounded-lg border border-primary/20 bg-primary/5 p-4">
     <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><div><h2 id="dcv-title" className="text-lg font-semibold">{t('dcv.title')}</h2><p className="text-sm text-muted-foreground">{t('dcv.subtitle')}</p><p role="status" className="mt-1 text-xs text-muted-foreground">{t('dcv.scopeNote')}</p></div><span className="text-xs text-muted-foreground">{t('dcv.clientRefresh', { when: new Date(d.fetchedAt).toLocaleTimeString() })}</span></div>
+    <div className="mb-3 flex flex-wrap items-end gap-3 rounded border bg-background/60 p-3" aria-label="Coordination scope">
+      <span className="self-center text-xs text-muted-foreground">Project: <strong>{project.projectNumber}</strong>{disciplineId ? ` · ${project.disciplines.find(x => x.id === disciplineId)?.name ?? 'Selected discipline'}` : ''}</span>
+      <label className="text-xs">Owner<select className="mt-1 block rounded border bg-background px-2 py-1 text-sm" value={ownerId} onChange={e => setScope('owner', e.target.value)}><option value="">All permitted owners</option>{team.data?.members.map(m => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></label>
+      <label className="text-xs">From<input className="mt-1 block rounded border bg-background px-2 py-1 text-sm" type="date" value={from} onChange={e => setScope('from', e.target.value)} /></label>
+      <label className="text-xs">To<input className="mt-1 block rounded border bg-background px-2 py-1 text-sm" type="date" value={to} onChange={e => setScope('to', e.target.value)} /></label>
+      {(ownerId || from || to) && <button type="button" className="px-2 py-1 text-xs text-primary underline" onClick={clearScope}>Clear scope</button>}
+    </div>
+    {(from || to) && <p role="status" className="mb-3 rounded border border-warn/30 bg-warn-bg px-3 py-2 text-xs text-warn">Date scope filters handoff due/promised dates. Changes, reviews, and input uses do not expose compatible date fields.</p>}
     {d.partial && <p role="status" className="mb-3 rounded border border-warn/30 bg-warn-bg px-3 py-2 text-xs text-warn">{t('dcv.partial')}</p>}
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-      {card('owe', t('dcv.owe'), outgoing.length, items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: `${tv(h.status)} · ${fmtDate(h.promisedBy ?? h.neededBy)}` })), 'handoffs'), 'handoffs?direction=outgoing')}
-      {card('waiting', t('dcv.waiting'), incoming.length, items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: tv(h.status) })), 'handoffs'), 'handoffs?direction=incoming')}
+      {card('owe', t('dcv.owe'), d.handoffsPartial ? `${outgoing.length}+` : outgoing.length, items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: `${tv(h.status)} · ${fmtDate(h.promisedBy ?? h.neededBy)}` })), 'handoffs'), 'handoffs')}
+      {card('waiting', t('dcv.waiting'), d.handoffsPartial ? `${incoming.length}+` : incoming.length, items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: tv(h.status) })), 'handoffs'), 'handoffs')}
       {card('using', `${t('dcv.using')} · ${t('dcv.projectWide')}`, d.usesTotal, d.uses.length ? <p>{t('dcv.usingHint', { n: d.usesTotal })}</p> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
-      {card('changed', `${t('dcv.changed')} · ${t('dcv.projectWide')}`, openChanges.length, items(openChanges.map((c) => ({ id: c.id, key: c.key, text: c.title, detail: `${tv(c.status)} · ${c.pendingAssessments} ${t('dcv.assessments')}` })), 'changes'), 'changes?status=Open')}
-      {card('start', `${t('dcv.start')} · ${t('dcv.projectWide')}`, '—', <p role="status">{t('dcv.startUnavailable', { n: openReviews.length })}</p>, 'reviews')}
+      {card('changed', `${t('dcv.changed')}${ownerId ? '' : ` · ${t('dcv.projectWide')}`}`, d.changesPartial ? `${openChanges.length}+` : openChanges.length, items(openChanges.map((c) => ({ id: c.id, key: c.key, text: c.title, detail: `${tv(c.status)} · ${c.pendingAssessments} ${t('dcv.assessments')}` })), 'changes'), 'changes')}
+      {card('start', `${t('dcv.start')}${ownerId || disciplineId ? '' : ` · ${t('dcv.projectWide')}`}`, '—', <p role="status">{t('dcv.startUnavailable', { n: openReviews.length })}</p>, 'reviews')}
     </div>
   </section>
 }

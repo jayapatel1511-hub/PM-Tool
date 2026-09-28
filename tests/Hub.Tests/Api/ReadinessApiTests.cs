@@ -66,6 +66,9 @@ public sealed class ReadinessApiTests(HubFactory f)
         });
         var proposedRemoval = await (await f.As(TestData.Alex).GetAsync(path)).Json();
         Assert.Equal(ReadinessState.NotReady, proposedRemoval["assessment"]!.S("state"));
+        var blockedHandoff = proposedRemoval["checks"]!.AsArray().Single(c => c!.S("code") == ReadinessCheckCode.Handoff)!;
+        Assert.True(blockedHandoff["applies"]!.GetValue<bool>());
+        Assert.False(blockedHandoff["satisfied"]!.GetValue<bool>());
         await f.DbAsync(async db =>
         {
             (await db.WorkConstraints.SingleAsync(c => c.Id == constraintId)).State = ConstraintState.VerifiedRemoved;
@@ -73,6 +76,8 @@ public sealed class ReadinessApiTests(HubFactory f)
         });
         var verifiedRemoval = await (await f.As(TestData.Alex).GetAsync(path)).Json();
         Assert.Equal(ReadinessState.Ready, verifiedRemoval["assessment"]!.S("state"));
+        var clearedHandoff = verifiedRemoval["checks"]!.AsArray().Single(c => c!.S("code") == ReadinessCheckCode.Handoff)!;
+        Assert.True(clearedHandoff["satisfied"]!.GetValue<bool>());
     }
 
     [Fact]

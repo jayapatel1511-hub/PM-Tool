@@ -174,9 +174,23 @@ export function RisksTab() {
 export function IssuesTab() {
   const p = useCurrentProject()
   const f = useFilters()
+  const [sp, setSp] = useSearchParams()
+  const issueFilters = { ...f.filters, location: sp.get('location'), document: sp.get('document'),
+    revision: sp.get('revision'), verification: sp.get('verification') }
+  const sourceFilterActive = ['location', 'document', 'revision', 'verification'].some((key) => sp.has(key))
+  const setSourceFilter = (key: string, value: string) => {
+    const next = new URLSearchParams(sp)
+    if (value) next.set(key, value); else next.delete(key)
+    setSp(next, { replace: true })
+  }
+  const clearSourceFilters = () => {
+    const next = new URLSearchParams(sp)
+    for (const key of ['location', 'document', 'revision', 'verification']) next.delete(key)
+    setSp(next, { replace: true })
+  }
   const openPanel = useItemPanel()
   const [raising, setRaising] = useState(false)
-  const q = useQuery({ queryKey: ['p', p.id, 'issues', f.filters], queryFn: () => get<IssueRow[]>(`projects/${p.id}/issues${qs(f.filters)}`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'issues', issueFilters], queryFn: () => get<IssueRow[]>(`projects/${p.id}/issues${qs(issueFilters)}`) })
   const table = useTable<IssueRow>('hub.issueColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (r) => r.key, className: 'whitespace-nowrap', cell: (r) => <Key>{r.key}</Key> },
     { id: 'title', label: t('register.title'), fixed: true, sort: (r) => r.title.toLowerCase(), className: 'min-w-[14rem] font-medium',
@@ -192,20 +206,39 @@ export function IssuesTab() {
     { id: 'origin', label: t('issue.fromRisk'), optional: true, cell: (r) => r.originRiskId ? <button onClick={() => openPanel('Risk', r.originRiskId!)} className="hover:underline"><Key>{r.originRiskKey}</Key></button> : null },
     { id: 'location', label: t('issue.locations'), sort: (r) => r.locationSummary, className: 'min-w-48', cell: (r) => r.locationSummary || t('common.dash') },
     { id: 'documents', label: t('issue.documentReferences'), optional: true, sort: (r) => r.documentSummary, className: 'min-w-48', cell: (r) => r.documentSummary || t('common.dash') },
-    { id: 'verification', label: t('issue.verificationFlow'), sort: (r) => r.verificationStatus, className: 'whitespace-nowrap', cell: (r) => r.verificationStatus ? <StatusPill status={r.verificationStatus} /> : t('common.dash') },
+    { id: 'verification', label: t('issue.verificationFlow'), sort: (r) => r.verificationStatus, className: 'whitespace-nowrap', cell: (r) =>
+      r.verificationStatus === 'None' ? t('issue.noVerification') : r.verificationStatus === 'Stale' ? t('issue.staleVerification') :
+        r.verificationStatus ? <StatusPill status={r.verificationStatus} /> : t('common.dash') },
   ], q.data ?? [], (r) => [r.targetResolutionDate, r.key])
   const can = p.permissions.raiseRegister
   return (
     <Page title={t('ptab.issues')} subtitle={t('issue.subtitle')}
       actions={<>
-        <ExportMenu path={`projects/${p.id}/issues/export`} params={f.filters} name={`${p.projectNumber}-issues`} />
+        <ExportMenu path={`projects/${p.id}/issues/export`} params={issueFilters} name={`${p.projectNumber}-issues`} />
         {can.ok && <Button onClick={() => setRaising(true)}><Plus className="size-4" />{t('issue.new')}</Button>}
       </>}>
       {!can.ok && can.reason && <p className="text-sm text-muted-foreground">{can.reason}</p>}
       <FilterBar f={f} statuses={ISSUE_STATUSES} open="Open,In Progress" indicator={['overdue', 'ind.overdue']} owners={owners(q.data)} disciplines={p.disciplines} menu={table.menu} />
+      <div role="group" aria-label={t('issue.sourceFilters')} className="flex flex-wrap items-center gap-2">
+        <Input className="h-8 w-40" type="search" value={issueFilters.location ?? ''} onChange={(e) => setSourceFilter('location', e.target.value)}
+          placeholder={t('issue.filterLocation')} aria-label={t('issue.filterLocation')} />
+        <Input className="h-8 w-40" type="search" value={issueFilters.document ?? ''} onChange={(e) => setSourceFilter('document', e.target.value)}
+          placeholder={t('issue.filterDocument')} aria-label={t('issue.filterDocument')} />
+        <Input className="h-8 w-28" type="search" value={issueFilters.revision ?? ''} onChange={(e) => setSourceFilter('revision', e.target.value)}
+          placeholder={t('issue.filterRevision')} aria-label={t('issue.filterRevision')} />
+        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={issueFilters.verification ?? ''}
+          onChange={(e) => setSourceFilter('verification', e.target.value)} aria-label={t('issue.filterVerification')}>
+          <option value="">{t('issue.anyVerification')}</option>
+          {['Proposed', 'Verified', 'Rejected'].map((status) => <option key={status} value={status}>{tv(status)}</option>)}
+          <option value="Stale">{t('issue.staleVerification')}</option>
+          <option value="None">{t('issue.noVerification')}</option>
+        </select>
+        {sourceFilterActive && <button type="button" className="px-2 text-xs text-muted-foreground hover:text-foreground"
+          onClick={clearSourceFilters}>{t('common.clear')}</button>}
+      </div>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       <RegisterTable table={table} rows={table.sorted} loading={q.isPending} hot={(r) => r.isOverdue || (r.severity === 'High' && ['Open', 'In Progress'].includes(r.status))}
-        empty={<Empty action={can.ok && !f.active && <Button onClick={() => setRaising(true)}>{t('issue.new')}</Button>}>{f.active ? t('register.noMatch') : t('issue.empty')}</Empty>} />
+        empty={<Empty action={can.ok && !f.active && !sourceFilterActive && <Button onClick={() => setRaising(true)}>{t('issue.new')}</Button>}>{f.active || sourceFilterActive ? t('register.noMatch') : t('issue.empty')}</Empty>} />
       {raising && <IssueForm projectId={p.id} onClose={() => setRaising(false)} />}
     </Page>
   )

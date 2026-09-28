@@ -95,6 +95,14 @@ public sealed class LocationIssueTests(HubFactory f)
             toStatus = "Resolved", resolution = "Should require a fresh verification", rowVersion = await f.DbAsync(db => db.Issues.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync())
         });
         Assert.Equal(HttpStatusCode.BadRequest, staleVerification.StatusCode);
+        var staleRows = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues?verification=Stale")).Json();
+        Assert.Contains(staleRows.AsArray(), row => row!.G("id") == id && row.S("verificationStatus") == "Stale");
+        var verifiedRows = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues?verification=Verified")).Json();
+        Assert.DoesNotContain(verifiedRows.AsArray(), row => row!.G("id") == id);
+        var staleExport = System.Text.Encoding.UTF8.GetString(await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues/export?format=csv&verification=Stale")).Content.ReadAsByteArrayAsync());
+        Assert.Contains(issue.S("key"), staleExport);
+        var verifiedExport = System.Text.Encoding.UTF8.GetString(await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues/export?format=csv&verification=Verified")).Content.ReadAsByteArrayAsync());
+        Assert.DoesNotContain(issue.S("key"), verifiedExport);
         await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
         {
             verifierId = d.User(TestData.Marc), status = "Proposed", note = "Recheck drawing revision B", rowVersion = await IssueVersion(id)
@@ -116,9 +124,20 @@ public sealed class LocationIssueTests(HubFactory f)
         Assert.Contains("Road-A", export);
         Assert.Contains("C-101 rev B", export);
         Assert.Contains("Verified", export);
+        foreach (var filter in new[] { "location=Road-A", "document=C-101", "revision=B", "verification=Verified" })
+        {
+            var filtered = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues?{filter}")).Json();
+            Assert.Single(filtered.AsArray());
+            Assert.Equal(id, filtered.AsArray()[0]!.G("id"));
+        }
+        var revisionExport = System.Text.Encoding.UTF8.GetString(await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues/export?format=csv&revision=B")).Content.ReadAsByteArrayAsync());
+        Assert.Contains("C-101 rev B", revisionExport);
+        Assert.Contains("C-101 rev A", revisionExport); // historical references remain inspectable on the filtered issue
 
         var unavailable = await Issue(p.Id);
         var unavailableId = unavailable.G("id");
+        var noneVerification = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues?verification=None")).Json();
+        Assert.Contains(noneVerification.AsArray(), row => row!.G("id") == unavailableId);
         await f.As(TestData.Alex).Post($"/api/v1/issues/{unavailableId}/documents", new
         {
             kind = "Drawing", identifier = "C-202", revision = "B", sourceUrl = "https://review.example.test/c-202", isAvailable = false, rowVersion = await IssueVersion(unavailableId)

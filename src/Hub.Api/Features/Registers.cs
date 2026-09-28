@@ -17,7 +17,8 @@ public static class RegisterEndpoints
         DateOnly? TargetResolutionDate, Guid? ProjectDisciplineId, DecisionEndpoints.LinkInput[]? Links);
     public sealed record RiskMove(string ToStatus, string? Reason, Guid? IssueId, IssueBody? Issue, int? RowVersion);
     public sealed record IssueMove(string ToStatus, string? Reason, string? Resolution, DateOnly? ResolvedDate, int? RowVersion);
-    public sealed record RegisterQuery(string? Status, string? Severity, Guid? OwnerId, Guid? DisciplineId, string? Indicator, string? Q);
+    public sealed record RegisterQuery(string? Status, string? Severity, Guid? OwnerId, Guid? DisciplineId, string? Indicator, string? Q,
+        string? Location = null, string? Document = null, string? Revision = null, string? Verification = null);
     public sealed record IssueLocationBody(string Kind, string? SiteArea, string? Building, string? Level, string? Room, string? AssetSystem,
         string? Alignment, decimal? StartStation, decimal? EndStation, string? StationUnits, decimal? CoordinateX, decimal? CoordinateY,
         decimal? CoordinateZ, string? CoordinateReferenceSystem, string? CoordinateUnits, int RowVersion);
@@ -297,6 +298,26 @@ public static class RegisterEndpoints
         if (f.OwnerId is { } o) q = q.Where(i => i.OwnerId == o);
         if (f.DisciplineId is { } d) q = q.Where(i => i.ProjectDisciplineId == d);
         if (!string.IsNullOrWhiteSpace(f.Q)) { var term = $"%{f.Q.Trim()}%"; q = q.Where(i => EF.Functions.ILike(i.Title, term) || EF.Functions.ILike(i.Key, term)); }
+        if (!string.IsNullOrWhiteSpace(f.Location))
+        {
+            var term = $"%{f.Location.Trim()}%";
+            q = q.Where(i => db.IssueLocations.Any(x => x.IssueId == i.Id &&
+                (EF.Functions.ILike(x.Kind, term) || EF.Functions.ILike(x.SiteArea ?? "", term) || EF.Functions.ILike(x.Building ?? "", term) ||
+                 EF.Functions.ILike(x.Level ?? "", term) || EF.Functions.ILike(x.Room ?? "", term) || EF.Functions.ILike(x.AssetSystem ?? "", term) ||
+                 EF.Functions.ILike(x.Alignment ?? "", term) || EF.Functions.ILike(x.CoordinateReferenceSystem ?? "", term))));
+        }
+        if (!string.IsNullOrWhiteSpace(f.Document))
+        {
+            var term = $"%{f.Document.Trim()}%";
+            q = q.Where(i => db.IssueDocumentReferences.Any(x => x.IssueId == i.Id &&
+                (EF.Functions.ILike(x.Kind, term) || EF.Functions.ILike(x.Identifier, term) || EF.Functions.ILike(x.ExternalTopicId ?? "", term) ||
+                 EF.Functions.ILike(x.ModelElementGuid ?? "", term))));
+        }
+        if (!string.IsNullOrWhiteSpace(f.Revision))
+        {
+            var term = $"%{f.Revision.Trim()}%";
+            q = q.Where(i => db.IssueDocumentReferences.Any(x => x.IssueId == i.Id && EF.Functions.ILike(x.Revision, term)));
+        }
         foreach (var ind in Http.List(f.Indicator))
             q = ind switch
             {
@@ -304,11 +325,11 @@ public static class RegisterEndpoints
                 "overdue" => q.Where(i => (i.Status == IssueStatus.Open || i.Status == IssueStatus.InProgress) && i.TargetResolutionDate < today),
                 _ => q,
             };
-        return await IssueRows(db, q, today);
+        return await IssueRows(db, q, today, Http.List(f.Verification));
     }
 
     /// Default sort (§13.13): severity descending, then target resolution date, then key.
-    public static async Task<List<object>> IssueRows(HubDb db, IQueryable<Issue> q, DateOnly today)
+    public static async Task<List<object>> IssueRows(HubDb db, IQueryable<Issue> q, DateOnly today, string[]? verification = null)
     {
         var rows = await q.Select(i => new
         {
@@ -323,25 +344,34 @@ public static class RegisterEndpoints
         var locations = await db.IssueLocations.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
         var documents = await db.IssueDocumentReferences.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
         var verifications = await db.IssueVerifications.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
-        return [.. rows.OrderBy(i => Registers.Weight(i.Severity)).ThenBy(i => i.TargetResolutionDate ?? DateOnly.MaxValue).ThenBy(i => i.Seq)
+        var locationsByIssue = locations.ToLookup(x => x.IssueId);
+        var documentsByIssue = documents.ToLookup(x => x.IssueId);
+        var verificationsByIssue = verifications.ToLookup(x => x.IssueId);
+        var results = rows.OrderBy(i => Registers.Weight(i.Severity)).ThenBy(i => i.TargetResolutionDate ?? DateOnly.MaxValue).ThenBy(i => i.Seq)
             .Select(i =>
             {
                 var late = Registers.IssueOverdueDays(i.Status, i.TargetResolutionDate, today);
-                var issueLocations = locations.Where(x => x.IssueId == i.Id).OrderBy(x => x.CreatedAt).ToList();
-                var issueDocuments = documents.Where(x => x.IssueId == i.Id).OrderBy(x => x.CreatedAt).ToList();
-                var issueVerification = verifications.Where(x => x.IssueId == i.Id).OrderByDescending(x => x.IssueRowVersion)
+                var issueLocations = locationsByIssue[i.Id].OrderBy(x => x.CreatedAt).ToList();
+                var issueDocuments = documentsByIssue[i.Id].OrderBy(x => x.CreatedAt).ToList();
+                var issueVerification = verificationsByIssue[i.Id].OrderByDescending(x => x.IssueRowVersion)
                     .ThenByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id).FirstOrDefault();
-                return (object)new
+                var latestReferenceVersion = issueLocations.Select(x => x.IssueRowVersion)
+                    .Concat(issueDocuments.Select(x => x.IssueRowVersion)).DefaultIfEmpty(0).Max();
+                var verificationStatus = issueVerification is null ? "None" :
+                    issueVerification.IssueRowVersion <= latestReferenceVersion ? "Stale" : issueVerification.Status;
+                return new { VerificationStatus = verificationStatus, Row = (object)new
                 {
                     i.Id, i.ProjectId, i.Key, i.Title, i.Status, i.RaisedById, i.RaisedByName, i.OwnerId, i.OwnerName, i.Severity, i.DateRaised, i.TargetResolutionDate,
                     IsOverdue = late > 0, DaysOverdue = late, i.Resolution, i.ResolvedDate, i.OriginRiskId, i.OriginRiskKey, i.ProjectDisciplineId, i.DisciplineName,
                     LocationSummary = string.Join("; ", issueLocations.Select(x => string.Join(" · ", new[] { x.Kind, x.SiteArea, x.Building, x.Level, x.Room, x.AssetSystem, x.Alignment,
                         x.StartStation is { } start ? $"{start}-{x.EndStation} {x.StationUnits}" : null, x.CoordinateX is { } coordinateX ? $"({coordinateX}, {x.CoordinateY}{(x.CoordinateZ is { } z ? $", {z}" : "")}) {x.CoordinateReferenceSystem} {x.CoordinateUnits}" : null }.Where(v => !string.IsNullOrWhiteSpace(v))))),
                     DocumentSummary = string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
-                    VerificationStatus = issueVerification?.Status,
+                    VerificationStatus = verificationStatus,
                     i.RowVersion, i.LastActivityAt,
-                };
-            })];
+                } };
+            });
+        return [.. results.Where(x => verification is null || verification.Length == 0 ||
+            verification.Contains(x.VerificationStatus, StringComparer.OrdinalIgnoreCase)).Select(x => x.Row)];
     }
 
     static async Task<IResult> CreateIssue(Guid id, IssueBody body, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me)

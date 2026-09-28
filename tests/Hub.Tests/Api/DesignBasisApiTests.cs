@@ -48,6 +48,9 @@ public sealed class DesignBasisApiTests(HubFactory f)
             "Task", task.G("id"), "Foundation sizing"), 403);
         var use = await Post(TestData.Alex, $"{root}/{id}/uses", new DesignBasisEndpoints.UseBody(Guid.NewGuid(), versionId,
             "Task", task.G("id"), "Foundation sizing"));
+        var secondTask = await data.NewTask(project.Id, extra: new { assigneeId = owner });
+        var secondUse = await Post(TestData.Alex, $"{root}/{id}/uses", new DesignBasisEndpoints.UseBody(Guid.NewGuid(), versionId,
+            "Task", secondTask.G("id"), "Check adjacent foundation"));
         var b = a with { NumericValue = 125, Units = "kPa", DeclaredRevision = "B" };
         var proposed = await Post(TestData.Marc, $"{root}/{id}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
             Version<DesignBasisEntry>(id), Version<DesignBasisVersion>(versionId), b, "New geotechnical report"));
@@ -58,6 +61,34 @@ public sealed class DesignBasisApiTests(HubFactory f)
         Assert.Equal(versionId, f.Db(db => db.BasisUses.Single(u => u.Id == use.G("id")).VersionId));
         Assert.Single(f.Db(db => db.BasisImpactAssessments.Where(i => i.BasisUseId == use.G("id") &&
             i.OldVersionId == versionId && i.NewVersionId == bId && i.Status == AssessmentStatus.Pending).ToList()));
+        await Post(TestData.Marc, $"{root}/{id}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
+            Version<DesignBasisEntry>(id), Version<DesignBasisVersion>(bId), b with { NumericValue = 130, DeclaredRevision = "C" },
+            "Further revised report"), 400);
+        var impact = f.Db(db => db.BasisImpactAssessments.Single(i => i.BasisUseId == use.G("id")));
+        var taskVersion = f.Db(db => db.Tasks.Single(t => t.Id == task.G("id")).RowVersion);
+        var decidePath = $"{root}/{id}/impacts/{impact.Id}/decide";
+        var adopt = new DesignBasisEndpoints.ImpactBody(Guid.NewGuid(), Version<BasisImpactAssessment>(impact.Id),
+            Version<BasisUse>(use.G("id")), Version<DesignBasisVersion>(bId), taskVersion,
+            "Adopt", "Foundation sizing revised to report B", "https://example.test/review-B");
+        await Post(TestData.Pm, decidePath, adopt, 403);
+        await Post(TestData.Alex, decidePath, adopt with { RequestId = Guid.NewGuid(), TargetRowVersion = taskVersion - 1 }, 409);
+        await Post(TestData.Alex, decidePath, adopt);
+        await Post(TestData.Alex, decidePath, adopt);
+        Assert.Equal(AssessmentStatus.Resolved, f.Db(db => db.BasisImpactAssessments.Single(i => i.Id == impact.Id).Status));
+        Assert.Equal(2, f.Db(db => db.BasisUses.Count(u => u.TargetId == task.G("id") &&
+            (u.VersionId == versionId || u.VersionId == bId))));
+        var detail = await (await f.As(TestData.Alex).GetAsync($"{root}/{id}")).Json();
+        Assert.Equal(bId, detail["uses"]!.AsArray().Single(u => u!.G("targetId") == task.G("id") &&
+            u["isCurrent"]!.GetValue<bool>())!.G("versionId"));
+        var secondImpact = f.Db(db => db.BasisImpactAssessments.Single(i => i.BasisUseId == secondUse.G("id")));
+        var unaffected = new DesignBasisEndpoints.ImpactBody(Guid.NewGuid(), Version<BasisImpactAssessment>(secondImpact.Id),
+            Version<BasisUse>(secondUse.G("id")), Version<DesignBasisVersion>(bId),
+            f.Db(db => db.Tasks.Single(t => t.Id == secondTask.G("id")).RowVersion), "Unaffected",
+            "Adjacent foundation remains outside revised area", "https://example.test/area-check");
+        await Post(TestData.Alex, $"{root}/{id}/impacts/{secondImpact.Id}/decide", unaffected, 403);
+        await Post(TestData.Marc, $"{root}/{id}/impacts/{secondImpact.Id}/decide", unaffected with { RequestId = Guid.NewGuid() });
+        Assert.Equal(AssessmentStatus.Unaffected, f.Db(db => db.BasisImpactAssessments.Single(i => i.Id == secondImpact.Id).Status));
+        Assert.Equal(versionId, f.Db(db => db.BasisUses.Single(u => u.Id == secondUse.G("id")).VersionId));
         var supersededFilter = await (await f.As(TestData.Pm).GetAsync(root + "?status=Superseded")).Json();
         Assert.DoesNotContain(supersededFilter["items"]!.AsArray(), row => row!.G("id") == id);
         var confirmedFilter = await (await f.As(TestData.Pm).GetAsync(root + "?status=Confirmed")).Json();
@@ -73,6 +104,16 @@ public sealed class DesignBasisApiTests(HubFactory f)
             (c.LeftVersionId == bId || c.RightVersionId == bId) &&
             (c.LeftVersionId == otherVersionId || c.RightVersionId == otherVersionId)).ToList()));
         await (await f.As(TestData.Rita).GetAsync($"{root}/{id}")).Json(404);
+        var c = await Post(TestData.Marc, $"{root}/{id}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
+            Version<DesignBasisEntry>(id), Version<DesignBasisVersion>(bId), b with { NumericValue = 130, DeclaredRevision = "C" },
+            "Further revised report"));
+        var cId = c.G("id");
+        await Post(TestData.Marc, $"{root}/{id}/versions/{cId}/confirm", new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(),
+            Version<DesignBasisEntry>(id), Version<DesignBasisVersion>(cId), "Revision C reviewed"));
+        Assert.Single(f.Db(db => db.BasisImpactAssessments.Where(i => i.BasisUseId == secondUse.G("id") &&
+            i.OldVersionId == versionId && i.NewVersionId == cId && i.Status == AssessmentStatus.Pending).ToList()));
+        Assert.Single(f.Db(db => db.BasisImpactAssessments.Where(i => i.OldVersionId == bId &&
+            i.NewVersionId == cId && i.Status == AssessmentStatus.Pending).ToList()));
     }
 
     [Fact]

@@ -20,6 +20,8 @@ public static class DesignBasisEndpoints
     public sealed record UseBody(Guid RequestId, Guid VersionId, string TargetType, Guid TargetId, string IntendedUse);
     public sealed record DispositionBody(Guid RequestId, int VersionRowVersion, string Scope, Guid OwnerId,
         DateOnly ExpiresOn, string Reason);
+    public sealed record ImpactBody(Guid RequestId, int AssessmentRowVersion, int BasisUseRowVersion,
+        int NewVersionRowVersion, int TargetRowVersion, string Action, string Rationale, string EvidenceUrl);
     public sealed record ConflictSide(Guid VersionId, string EntryKey, string Scope, string Statement,
         decimal? NumericValue, string? Units);
 
@@ -32,6 +34,8 @@ public static class DesignBasisEndpoints
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/versions/{versionId:guid}/confirm", Confirm).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/uses", LinkUse).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/versions/{versionId:guid}/proceed", ProceedUnderAssumption)
+            .WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/impacts/{impactId:guid}/decide", DecideImpact)
             .WithMetadata(new Coordination.AtomicCommand());
     }
 
@@ -92,10 +96,12 @@ public static class DesignBasisEndpoints
             var entry = await Entry(db, project.Id, id);
             Coordination.Version(entry, body.EntryRowVersion);
             Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId));
-            Check.That(entry.CurrentVersionId is not null, "entryId", "basis.current");
-            var current = await Version(db, project.Id, id, entry.CurrentVersionId.Value);
+            if (entry.CurrentVersionId is not { } currentId) throw ApiException.Invalid("entryId", "basis.current");
+            var current = await Version(db, project.Id, id, currentId);
             Coordination.Version(current, body.CurrentVersionRowVersion);
             Check.That(current.Status == BasisStatus.Confirmed, "entryId", "basis.current");
+            Check.That(!await db.BasisImpactAssessments.AnyAsync(a => a.ProjectId == project.Id &&
+                a.NewVersionId == current.Id && a.Status == AssessmentStatus.Pending), "entryId", "basis.current");
             Check.That(!await db.DesignBasisVersions.AnyAsync(v => v.EntryId == id && v.Status == BasisStatus.Proposed), "entryId", "basis.proposed");
             await ValidateSource(db, project, body.Version);
             var nextNumber = await db.DesignBasisVersions.Where(v => v.EntryId == id).MaxAsync(v => v.Number) + 1;
@@ -141,9 +147,13 @@ public static class DesignBasisEndpoints
             db.Audit.Note(version, reason: body.Rationale); db.Audit.Note(entry, reason: body.Rationale);
             if (prior is not null)
             {
-                foreach (var use in await db.BasisUses.Where(u => u.ProjectId == project.Id && u.VersionId == prior.Id).ToListAsync())
+                var entryVersionIds = await db.DesignBasisVersions.Where(v => v.ProjectId == project.Id && v.EntryId == id)
+                    .Select(v => v.Id).ToListAsync();
+                var uses = await db.BasisUses.Where(u => u.ProjectId == project.Id && entryVersionIds.Contains(u.VersionId)).ToListAsync();
+                foreach (var use in uses.GroupBy(u => new { u.TargetType, u.TargetId })
+                    .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()))
                     db.BasisImpactAssessments.Add(new BasisImpactAssessment { ProjectId = project.Id,
-                        BasisUseId = use.Id, OldVersionId = prior.Id, NewVersionId = version.Id, OwnerId = use.OwnerId });
+                        BasisUseId = use.Id, OldVersionId = use.VersionId, NewVersionId = version.Id, OwnerId = use.OwnerId });
             }
             var peers = await db.DesignBasisEntries.AsNoTracking().Where(e => e.ProjectId == project.Id && e.Id != id &&
                 e.Kind == entry.Kind && e.ProjectDisciplineId == entry.ProjectDisciplineId &&
@@ -209,6 +219,50 @@ public static class DesignBasisEndpoints
             return use;
         });
 
+    static Task<Coordination.Result> DecideImpact(Guid projectId, Guid id, Guid impactId, ImpactBody body,
+        Access access, HubDb db, TimeProvider clock, SettingsStore settings) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "basis.impact", id, impactId, body }, access, db, clock, async (project, ctx) =>
+        {
+            var entry = await Entry(db, project.Id, id);
+            var impact = await db.BasisImpactAssessments.SingleOrDefaultAsync(a => a.Id == impactId && a.ProjectId == project.Id)
+                ?? throw ApiException.NotFound();
+            Coordination.Version(impact, body.AssessmentRowVersion);
+            Check.That(impact.Status == AssessmentStatus.Pending, "status", "basis.current");
+            var old = await Version(db, project.Id, id, impact.OldVersionId);
+            var next = await Version(db, project.Id, id, impact.NewVersionId);
+            Coordination.Version(next, body.NewVersionRowVersion);
+            Check.That(old.Status == BasisStatus.Superseded && next.Status == BasisStatus.Confirmed &&
+                entry.CurrentVersionId == next.Id && old.Number < next.Number, "versionId", "basis.current");
+            var use = await db.BasisUses.SingleOrDefaultAsync(u => u.Id == impact.BasisUseId && u.ProjectId == project.Id)
+                ?? throw ApiException.NotFound();
+            Coordination.Version(use, body.BasisUseRowVersion);
+            Check.That(use.VersionId == old.Id && use.OwnerId == impact.OwnerId, "basisUseId", "basis.current");
+            var target = await Coordination.Target(db, project, use.TargetType, use.TargetId);
+            if (target.RowVersion != body.TargetRowVersion || target.OwnerId != use.OwnerId)
+                throw ApiException.Conflict("concurrency_conflict", "coord.stale");
+            Check.OneOf(body.Action, ["Adopt", "Unaffected"], "action");
+            if (body.Action == "Adopt") Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, use.OwnerId));
+            else
+            {
+                Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId));
+                Check.That((await settings.Get(db)).AllowSelfReview || access.Me.Id != use.OwnerId,
+                    "approverId", "basis.independent");
+            }
+            impact.Rationale = Check.Reason(body.Rationale);
+            impact.EvidenceUrl = Coordination.Url(body.EvidenceUrl);
+            impact.DecidedBy = access.Me.Id; impact.DecidedAt = clock.GetUtcNow();
+            impact.Status = body.Action == "Adopt" ? AssessmentStatus.Resolved : AssessmentStatus.Unaffected;
+            if (body.Action == "Adopt")
+            {
+                Check.That(!await db.BasisUses.AnyAsync(u => u.ProjectId == project.Id && u.VersionId == next.Id &&
+                    u.TargetType == use.TargetType && u.TargetId == use.TargetId), "basisUseId", "basis.duplicate");
+                db.BasisUses.Add(new BasisUse { ProjectId = project.Id, VersionId = next.Id, TargetType = use.TargetType,
+                    TargetId = use.TargetId, OwnerId = use.OwnerId, IntendedUse = use.IntendedUse });
+            }
+            db.Audit.Note(impact, reason: impact.Rationale);
+            return impact;
+        });
+
     static async Task<object> List(Guid projectId, string? kind, string? status, Guid? disciplineId,
         int? page, int? pageSize, Access access, HubDb db)
     {
@@ -250,6 +304,8 @@ public static class DesignBasisEndpoints
             .OrderBy(v => v.Number).ToListAsync();
         var ids = versions.Select(v => v.Id).ToArray();
         var uses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == projectId && ids.Contains(u.VersionId)).ToListAsync();
+        var currentUseIds = uses.GroupBy(u => new { u.TargetType, u.TargetId })
+            .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First().Id).ToHashSet();
         var impacts = await db.BasisImpactAssessments.AsNoTracking().Where(a => a.ProjectId == projectId && ids.Contains(a.OldVersionId)).ToListAsync();
         var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => c.ProjectId == projectId &&
             (ids.Contains(c.LeftVersionId) || ids.Contains(c.RightVersionId))).ToListAsync();
@@ -267,7 +323,8 @@ public static class DesignBasisEndpoints
         var dispositions = await db.BasisAssumptionDispositions.AsNoTracking().Where(d => d.ProjectId == projectId && ids.Contains(d.VersionId)).ToListAsync();
         return new { Entry = entry, Versions = versions.Select(v => new { Version = v,
                 SourceMissing = string.IsNullOrWhiteSpace(v.SourceUrl) || string.IsNullOrWhiteSpace(v.SourceSystem) || string.IsNullOrWhiteSpace(v.DeclaredRevision) }),
-            Uses = uses, Impacts = impacts, Conflicts = conflicts.Select(c => new { c.Id, c.Resolved,
+            Uses = uses.Select(u => new { u.Id, u.VersionId, u.TargetType, u.TargetId, u.OwnerId, u.IntendedUse,
+                u.RowVersion, IsCurrent = currentUseIds.Contains(u.Id) }), Impacts = impacts, Conflicts = conflicts.Select(c => new { c.Id, c.Resolved,
                 Left = Side(c.LeftVersionId), Right = Side(c.RightVersionId) }),
             Dispositions = dispositions,
             CanManage = Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId).Ok,

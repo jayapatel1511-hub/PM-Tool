@@ -10,7 +10,7 @@ import { ErrorBanner, Field, Loading, Page } from '@/components/hub/common'
 import { ApiError, get, post } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
-import { CommandForm, SelectField, type CoordOptions, workChoices, WorkLink } from './CoordinationForms'
+import { CommandForm, SelectField, type CoordOptions, workChoices, workRef, WorkLink } from './CoordinationForms'
 import { useCurrentProject } from './ProjectLayout'
 
 type EntryRow = { id: string; key: string; title: string; kind: string; ownerId: string; projectDisciplineId: string;
@@ -22,8 +22,8 @@ type Version = { id: string; entryId: string; number: number; status: string; sc
   declaredRevision?: string; confirmationDueDate?: string; rowVersion: number; supersedesVersionId?: string;
   confirmedBy?: string; confirmedAt?: string; confirmationRationale?: string }
 type Detail = { entry: Entry; versions: { version: Version; sourceMissing: boolean }[];
-  uses: { id: string; versionId: string; targetType: string; targetId: string; intendedUse: string; ownerId: string }[];
-  impacts: { id: string; basisUseId: string; oldVersionId: string; newVersionId: string; status: string; ownerId: string }[];
+  uses: { id: string; versionId: string; targetType: string; targetId: string; intendedUse: string; ownerId: string; rowVersion: number; isCurrent: boolean }[];
+  impacts: { id: string; basisUseId: string; oldVersionId: string; newVersionId: string; status: string; ownerId: string; rowVersion: number; rationale?: string; evidenceUrl?: string }[];
   conflicts: { id: string; resolved: boolean; left: { versionId: string; entryKey: string; scope: string; statement: string; numericValue?: number; units?: string };
     right: { versionId: string; entryKey: string; scope: string; statement: string; numericValue?: number; units?: string } }[];
   dispositions: { id: string; versionId: string; scope: string; ownerId: string; approvedBy: string; expiresOn: string; reason: string }[];
@@ -147,9 +147,10 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
   options?: CoordOptions; name: (id?: string) => string; close: () => void; refresh: () => void }) {
   const q = useQuery({ queryKey: ['design-basis-detail', base, id], queryFn: () => get<Detail>(`${base}/${id}`) })
   const [action, setAction] = useState<'propose' | 'confirm' | 'proceed' | 'use' | null>(null)
+  const [selectedImpact, setSelectedImpact] = useState<string | null>(null)
   const row = q.data, current = row?.versions.find(v => v.version.id === row.entry.currentVersionId)?.version
   const proposed = row?.versions.find(v => v.version.status === 'Proposed')?.version
-  const done = () => { setAction(null); refresh(); q.refetch() }
+  const done = () => { setAction(null); setSelectedImpact(null); refresh(); q.refetch() }
   if (action === 'propose' && row && options) return <BasisForm base={base} number={number} options={options} existing={row}
     onClose={() => setAction(null)} onDone={done} />
   return <><Dialog open onOpenChange={o => !o && close()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
@@ -181,9 +182,16 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
         <section><h3 className="font-medium">{t('basis.uses')} ({row.uses.length})</h3><ul className="mt-2 space-y-2">{row.uses.map(u =>
           <li key={u.id} className="rounded border p-2">{options ? <WorkLink options={options} type={u.targetType} id={u.targetId} number={number} /> :
             <Link className="text-primary underline" to={`/projects/${number}/${u.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${u.targetType}:${u.targetId}`}>{u.targetType}</Link>}
-            {' · '}{t('basis.version')} {row.versions.find(v => v.version.id === u.versionId)?.version.number ?? '?'} · {u.intendedUse}</li>)}</ul></section>
+            {' · '}{t('basis.version')} {row.versions.find(v => v.version.id === u.versionId)?.version.number ?? '?'} · {u.isCurrent ? t('basis.currentUse') : t('basis.historicalUse')}
+            {u.isCurrent && row.versions.find(v => v.version.id === u.versionId)?.version.status === 'Superseded' &&
+              <strong className="ml-2 text-warn">{t('basis.supersededUse')}</strong>} · {u.intendedUse}</li>)}</ul></section>
         <section><h3 className="font-medium">{t('basis.impacts')} ({row.impacts.length})</h3><ul className="mt-2 space-y-2">{row.impacts.map(i =>
-          <li key={i.id} className="rounded border p-2">{tv(i.status)} · {name(i.ownerId)} · {t('basis.version')} {row.versions.find(v => v.version.id === i.oldVersionId)?.version.number} → {row.versions.find(v => v.version.id === i.newVersionId)?.version.number}</li>)}</ul></section>
+          <li key={i.id} className="rounded border p-2">{tv(i.status)} · {name(i.ownerId)} · {t('basis.version')} {row.versions.find(v => v.version.id === i.oldVersionId)?.version.number} → {row.versions.find(v => v.version.id === i.newVersionId)?.version.number}
+            {i.rationale && <p>{t('basis.reason')}: {i.rationale}</p>}{i.evidenceUrl && <a className="text-primary underline" href={i.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
+            {i.status === 'Pending' && options && row.uses.find(u => u.id === i.basisUseId)?.isCurrent &&
+              (() => { const u = row.uses.find(u => u.id === i.basisUseId)!; return !!workRef(options, u.targetType, u.targetId) })() &&
+              (options.actorId === i.ownerId || row.canManage) &&
+              <Button size="sm" variant="outline" onClick={() => setSelectedImpact(i.id)}>{t('basis.decideImpact')}</Button>}</li>)}</ul></section>
         {row.dispositions.length > 0 && <section><h3 className="font-medium">{t('basis.proceed')}</h3><ul>{row.dispositions.map(d =>
           <li key={d.id} className="rounded border p-2">{d.scope} · {name(d.ownerId)} · {t('basis.expiry')}: {fmtDate(d.expiresOn)} · {d.reason}</li>)}</ul></section>}
       </div>}
@@ -194,7 +202,32 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
       options={options} close={() => setAction(null)} done={done} />}
     {row && action === 'use' && options && <UseForm base={base} id={id} versions={row.versions.map(v => v.version)}
       currentId={current?.id} options={options} close={() => setAction(null)} done={done} />}
+    {row && selectedImpact && options && <ImpactForm base={base} id={id} number={number} row={row} impactId={selectedImpact}
+      options={options} close={() => setSelectedImpact(null)} done={done} />}
   </>
+}
+
+function ImpactForm({ base, id, number, row, impactId, options, close, done }: { base: string; id: string; number: string; row: Detail;
+  impactId: string; options: CoordOptions; close: () => void; done: () => void }) {
+  const impact = row.impacts.find(i => i.id === impactId)!, use = row.uses.find(u => u.id === impact.basisUseId)!
+  const next = row.versions.find(v => v.version.id === impact.newVersionId)!.version
+  const target = workRef(options, use.targetType, use.targetId)
+  const canAdopt = options.actorId === use.ownerId, canUnaffected = row.canManage && options.actorId !== use.ownerId
+  const [decision, setDecision] = useState(canAdopt ? 'Adopt' : 'Unaffected')
+  const [rationale, setRationale] = useState(''), [evidenceUrl, setEvidenceUrl] = useState('')
+  return <CommandForm path={`${base}/${id}/impacts/${impactId}/decide`} title={t('basis.decideImpact')}
+    hint={t('basis.impactHint')} onClose={close} onDone={done}
+    payload={() => ({ assessmentRowVersion: impact.rowVersion, basisUseRowVersion: use.rowVersion,
+      newVersionRowVersion: next.rowVersion, targetRowVersion: target?.rowVersion, action: decision, rationale, evidenceUrl })}>
+    <p>{t('basis.version')} {row.versions.find(v => v.version.id === impact.oldVersionId)?.version.number} → {next.number}</p>
+    {target ? <WorkLink options={options} type={use.targetType} id={use.targetId} number={number} /> : <p>{t('coord.unavailable')}</p>}
+    <SelectField label={t('basis.decision')} value={decision} onChange={setDecision}
+      choices={[...(canAdopt ? [{ value: 'Adopt', label: t('basis.adopt') }] : []),
+        ...(canUnaffected ? [{ value: 'Unaffected', label: t('basis.unaffected') }] : [])]} />
+    <Field label={t('basis.reason')} htmlFor="basis-impact-reason"><Textarea id="basis-impact-reason" required minLength={5} value={rationale} onChange={e => setRationale(e.target.value)} /></Field>
+    <Field label={t('basis.evidence')} htmlFor="basis-impact-evidence"><Input id="basis-impact-evidence" type="url" required value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} /></Field>
+    {!target && <p className="text-warn">{t('basis.targetUnavailable')}</p>}
+  </CommandForm>
 }
 
 function ProceedForm({ base, id, version, options, close, done }: { base: string; id: string; version: Version;

@@ -27,6 +27,7 @@ const ICON: Record<string, LucideIcon> = {
   BlockingOverdue: AlertTriangle, DueDateChanged: CalendarClock, CommentOnItem: MessageSquare, Mention: AtSign, DecisionAssigned: Scale,
   DecisionOverdue: Scale, DecisionRecorded: Scale, MilestoneStatus: Flag, MilestoneDateChanged: Flag, AddedToProject: Users, BecameDisciplineLead: Users,
   AttentionCritical: AlertTriangle, HealthOverride: Activity, MemberAutoAdded: Users, StaffAssignment: Users, SupervisorStaffing: Users,
+  IssueVerifierAssigned: Eye, IssueVerificationOutcome: CheckCircle2,
 }
 export const eventIcon = (code: string) => ICON[code] ?? Bell
 

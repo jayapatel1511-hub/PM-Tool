@@ -614,7 +614,7 @@ public static class RegisterEndpoints
             .Select(x => (object)new { x.Id, x.VerifierId, x.Status, x.EvidenceUrl, x.Note, x.VerifiedAt, x.RowVersion }).ToListAsync();
     }
 
-    static async Task<IResult> AddIssueVerification(Guid id, IssueVerificationBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
+    static async Task<IResult> AddIssueVerification(Guid id, IssueVerificationBody body, HttpContext http, Access access, HubDb db, TimeProvider clock, Notifier notify)
     {
         var (issue, project, ctx) = await LoadIssue(db, access, id);
         await Http.CheckVersion(db, http, issue, body.RowVersion);
@@ -640,12 +640,26 @@ public static class RegisterEndpoints
         }
         var evidence = string.IsNullOrWhiteSpace(body.EvidenceUrl) ? null : Coordination.Url(body.EvidenceUrl);
         if (body.Status == IssueVerificationStatus.Verified) Check.That(evidence is not null, "evidenceUrl", "error.required");
-        var now = clock.GetUtcNow();
-        issue.LastActivityAt = now; db.Entry(issue).Property(x => x.LastActivityAt).IsModified = true;
-        var row = new IssueVerification { ProjectId = project.Id, IssueId = id, IssueRowVersion = issue.RowVersion + 1, VerifierId = body.VerifierId, Status = body.Status, EvidenceUrl = evidence,
-            Note = Check.Optional(body.Note, "note", 4000), VerifiedAt = body.Status == IssueVerificationStatus.Verified ? now : null,
-            CreatedAt = now, UpdatedAt = now, CreatedBy = access.Me.Id, UpdatedBy = access.Me.Id };
-        db.IssueVerifications.Add(row); db.Audit.Note(row, reason: row.Note); await db.SaveChangesAsync();
+        var row = await Tx.Run(db, async () =>
+        {
+            var now = clock.GetUtcNow();
+            issue.LastActivityAt = now; db.Entry(issue).Property(x => x.LastActivityAt).IsModified = true;
+            var created = new IssueVerification { ProjectId = project.Id, IssueId = id, IssueRowVersion = issue.RowVersion + 1, VerifierId = body.VerifierId, Status = body.Status, EvidenceUrl = evidence,
+                Note = Check.Optional(body.Note, "note", 4000), VerifiedAt = body.Status == IssueVerificationStatus.Verified ? now : null,
+                CreatedAt = now, UpdatedAt = now, CreatedBy = access.Me.Id, UpdatedBy = access.Me.Id };
+            db.IssueVerifications.Add(created); db.Audit.Note(created, reason: created.Note);
+            var item = new NotifyItem(project.Id, ItemType.Issue, issue.Id, issue.Key,
+                $"/projects/{project.ProjectNumber}/issues?panel=Issue:{issue.Id}", project.ProjectNumber);
+            if (body.Status == IssueVerificationStatus.Proposed)
+                await notify.Send(NotificationEvents.IssueVerifierAssigned, body.VerifierId, item,
+                    Text.Get("notify.issue_verification_requested", issue.Key));
+            else
+                await notify.Send(NotificationEvents.IssueVerificationOutcome,
+                    new Guid?[] { issue.OwnerId, issue.CreatedBy, project.ProjectManagerId }, item,
+                    Text.Get("notify.issue_verification_outcome", issue.Key, body.Status));
+            await db.SaveChangesAsync();
+            return created;
+        });
         return Results.Created($"/api/v1/issue-verifications/{row.Id}", new { row.Id, row.RowVersion });
     }
 }

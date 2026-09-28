@@ -154,7 +154,8 @@ public static class NotificationEvents
         DependencyRemoved = "DependencyRemoved", StaffAssignment = "StaffAssignment", SupervisorStaffing = "SupervisorStaffing",
         MemberAutoAdded = "MemberAutoAdded", DeliverableOwned = "DeliverableOwned", ActionAssigned = "ActionAssigned",
         TaskChanged = "TaskChanged", HandoffChanged = "HandoffChanged", ReviewPackageChanged = "ReviewPackageChanged", ChangeImpact = "ChangeImpact",
-        AllocationChanged = "AllocationChanged", SubmissionChanged = "SubmissionChanged";
+        AllocationChanged = "AllocationChanged", SubmissionChanged = "SubmissionChanged",
+        IssueVerifierAssigned = "IssueVerifierAssigned", IssueVerificationOutcome = "IssueVerificationOutcome";
 
     public static readonly NotificationEventDef[] All =
     [
@@ -170,6 +171,7 @@ public static class NotificationEvents
         new(TaskChanged, true, false),
         new(HandoffChanged, true, false, true), new(ReviewPackageChanged, true, false, true), new(ChangeImpact, true, false, true),
         new(AllocationChanged, true, false), new(SubmissionChanged, true, false),
+        new(IssueVerifierAssigned, true, false, true), new(IssueVerificationOutcome, true, false),
     ];
 
     public static NotificationEventDef Get(string code) => All.First(e => e.Code == code);

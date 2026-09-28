@@ -41,6 +41,7 @@ export const en: Record<string, string> = {
   "basis.evidence": "Evidence link", "basis.targetUnavailable": "The linked work is unavailable. Refresh before deciding.",
   "basis.affectedWork": "Affected task or deliverable", "basis.overdueOnly": "Overdue confirmation only",
   "notify.AllocationChanged": "Allocation updates", "prefs.event.AllocationChanged": "Allocation updates", "event.AllocationChanged": "Allocation updates",
+  "event.IssueVerifierAssigned": "Issue verification assignments", "event.IssueVerificationOutcome": "Issue verification outcomes",
   "value.Checking": "Checking",
   "value.Ready": "Ready",
   "value.Not Applicable": "Not applicable",

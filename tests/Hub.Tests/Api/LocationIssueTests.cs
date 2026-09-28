@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json.Nodes;
+using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Tests.Api;
@@ -16,6 +17,53 @@ public sealed class LocationIssueTests(HubFactory f)
             ownerId = d.User(owner), projectDisciplineId = d.ProjectDiscipline(projectId, "Civil")
         }).Result.Json(201);
     Task<int> IssueVersion(Guid id) => f.DbAsync(db => db.Issues.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync());
+
+    [Fact]
+    public async Task Verifier_notifications_recheck_restricted_project_access_at_enqueue_and_delivery()
+    {
+        var project = await d.Project();
+        var issue = await Issue(project.Id);
+        var issueId = issue.G("id");
+        var verifierId = d.User(TestData.Marc);
+        var ownerId = d.User(TestData.Alex);
+        (await f.As(TestData.Marc).Put($"/api/v1/me/preferences/events/{Hub.Domain.NotificationEvents.IssueVerifierAssigned}",
+            new { app = true, email = true })).EnsureSuccessStatusCode();
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{issueId}/verification", new
+        {
+            verifierId, status = "Proposed", note = "Appoint independent verifier", rowVersion = await IssueVersion(issueId)
+        }).Result.Json(201);
+        var queuedId = f.Db(db => db.Emails.Single(e => e.UserId == verifierId &&
+            e.DedupKey == $"{Hub.Domain.NotificationEvents.IssueVerifierAssigned}:{issueId}:{verifierId}").Id);
+        Assert.Equal(new[] { project.Id }, f.Db(db => db.Emails.Single(e => e.Id == queuedId).RequiredProjectIds));
+        await f.DbAsync(async db =>
+        {
+            var p = await db.Projects.SingleAsync(p => p.Id == project.Id);
+            p.Visibility = Hub.Domain.Visibility.Restricted;
+            var owner = await db.ProjectMembers.SingleAsync(m => m.ProjectId == project.Id && m.UserId == ownerId);
+            owner.RemovedAt = f.Clock.GetUtcNow();
+            return await db.SaveChangesAsync();
+        });
+        Assert.False(await f.DbAsync(db => EmailProjectAccess.Allowed(db, ownerId, [project.Id])));
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{issueId}/verification", new
+        {
+            verifierId, status = "Verified", evidenceUrl = "https://review.example.test/verify/access", rowVersion = await IssueVersion(issueId)
+        }).Result.Json(201);
+        Assert.False(f.Db(db => db.Notifications.Any(n => n.ItemId == issueId && n.UserId == ownerId &&
+            n.EventType == Hub.Domain.NotificationEvents.IssueVerificationOutcome)));
+        await f.DbAsync(async db =>
+        {
+            var member = await db.ProjectMembers.SingleAsync(m => m.ProjectId == project.Id && m.UserId == verifierId);
+            member.RemovedAt = f.Clock.GetUtcNow();
+            var queued = await db.Emails.SingleAsync(e => e.Id == queuedId);
+            queued.CreatedAt = DateTimeOffset.MinValue; // put this fixture first in the shared worker batch
+            return await db.SaveChangesAsync();
+        });
+        Assert.False(await f.DbAsync(db => EmailProjectAccess.Allowed(db, verifierId, [project.Id])));
+        await f.RunJob<EmailJob>();
+        var email = f.Db(db => db.Emails.Single(e => e.Id == queuedId));
+        Assert.Null(email.SentAt);
+        Assert.NotNull(email.SuppressedAt);
+    }
 
     [Fact]
     public async Task Location_document_and_independent_verification_are_scoped_and_gate_resolution()
@@ -83,15 +131,24 @@ public sealed class LocationIssueTests(HubFactory f)
         {
             verifierId = d.User(TestData.Marc), status = "Proposed", note = "Appoint Marc as independent verifier", rowVersion = await IssueVersion(id)
         }).Result.Json(201);
-        var verify = await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
+        Assert.Equal(1, f.Db(db => db.Notifications.Where(n => n.ItemId == id &&
+            n.EventType == Hub.Domain.NotificationEvents.IssueVerifierAssigned && n.UserId == d.User(TestData.Marc)).Sum(n => n.Count)));
+        var verifyVersion = await IssueVersion(id);
+        var attempts = await Task.WhenAll(Enumerable.Range(0, 2).Select(_ => f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
         {
-            verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/1", note = "Independent synthetic review", rowVersion = await IssueVersion(id)
-        }).Result.Json(201);
+            verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/1", note = "Independent synthetic review", rowVersion = verifyVersion
+        })));
+        Assert.Equal(new[] { HttpStatusCode.Created, HttpStatusCode.Conflict }, attempts.Select(a => a.StatusCode).OrderBy(x => x));
+        var verify = await attempts.Single(a => a.StatusCode == HttpStatusCode.Created).Json(201);
         Assert.NotEqual(Guid.Empty, verify.G("id"));
+        Assert.Equal(1, f.Db(db => db.Notifications.Where(n => n.ItemId == id &&
+            n.EventType == Hub.Domain.NotificationEvents.IssueVerificationOutcome && n.UserId == d.User(TestData.Alex)).Sum(n => n.Count)));
         Assert.Equal(HttpStatusCode.BadRequest, (await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
         {
             verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/repeat", rowVersion = await IssueVersion(id)
         })).StatusCode);
+        Assert.Equal(1, f.Db(db => db.Notifications.Where(n => n.ItemId == id &&
+            n.EventType == Hub.Domain.NotificationEvents.IssueVerificationOutcome && n.UserId == d.User(TestData.Alex)).Sum(n => n.Count)));
 
         await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/documents", new
         {

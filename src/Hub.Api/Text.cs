@@ -423,6 +423,8 @@ public static class Text
         ["workload.partial"] = "Partial project scope", ["workload.complete"] = "All permitted projects",
         ["notify.allocation_changed"] = "Allocation for {0} is {1}",
         ["notify.submission_changed"] = "Submission {0} is {1}",
+        ["notify.issue_verification_requested"] = "Verify the proposed resolution for issue {0}",
+        ["notify.issue_verification_outcome"] = "Issue {0} verification was {1}",
         ["basis.duplicate"] = "A basis entry with this title, discipline and scope already exists. Inspect it before creating another.",
         ["basis.units"] = "Numeric design criteria need explicit units before confirmation.",
         ["basis.independent"] = "A responsible Discipline Lead or assigned independent approver must confirm this version.",

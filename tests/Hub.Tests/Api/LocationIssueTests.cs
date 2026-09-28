@@ -29,6 +29,10 @@ public sealed class LocationIssueTests(HubFactory f)
             kind = "Alignment", alignment = "Road-A", startStation = 20, endStation = 10, stationUnits = "m"
         });
         Assert.Equal(HttpStatusCode.BadRequest, badStation.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", new
+        {
+            kind = "Building", rowVersion = await IssueVersion(id)
+        })).StatusCode);
 
         var location = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", new
         {
@@ -77,6 +81,10 @@ public sealed class LocationIssueTests(HubFactory f)
             verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/1", note = "Independent synthetic review", rowVersion = await IssueVersion(id)
         }).Result.Json(201);
         Assert.NotEqual(Guid.Empty, verify.G("id"));
+        Assert.Equal(HttpStatusCode.BadRequest, (await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/repeat", rowVersion = await IssueVersion(id)
+        })).StatusCode);
 
         await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/documents", new
         {
@@ -87,6 +95,10 @@ public sealed class LocationIssueTests(HubFactory f)
             toStatus = "Resolved", resolution = "Should require a fresh verification", rowVersion = await f.DbAsync(db => db.Issues.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync())
         });
         Assert.Equal(HttpStatusCode.BadRequest, staleVerification.StatusCode);
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Recheck drawing revision B", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
         await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
         {
             verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/1b", rowVersion = await IssueVersion(id)
@@ -139,6 +151,10 @@ public sealed class LocationIssueTests(HubFactory f)
         await f.As(TestData.Omar).Post($"/api/v1/issues/{id}/verification", new
         {
             verifierId = d.User(TestData.Omar), status = "Verified", evidenceUrl = "https://review.example.test/verify/om-1", rowVersion = await Version()
+        }).Result.Json(201);
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Omar), status = "Proposed", note = "Recheck proposed resolution", rowVersion = await Version()
         }).Result.Json(201);
         await f.As(TestData.Omar).Post($"/api/v1/issues/{id}/verification", new
         {

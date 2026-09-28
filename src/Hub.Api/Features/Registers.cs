@@ -490,6 +490,8 @@ public static class RegisterEndpoints
         await Http.CheckVersion(db, http, issue, body.RowVersion);
         try { Registers.ValidateIssueLocation(body.Kind, body.Alignment, body.StartStation, body.EndStation, body.StationUnits, body.CoordinateX, body.CoordinateY, body.CoordinateReferenceSystem, body.CoordinateUnits); }
         catch (ArgumentException ex) { throw ApiException.Invalid("location", "issue.location_invalid", ex.Message); }
+        if (body.Kind == "SiteArea") Check.That(!string.IsNullOrWhiteSpace(body.SiteArea), "siteArea", "error.required");
+        if (body.Kind == "Building") Check.That(!string.IsNullOrWhiteSpace(body.Building), "building", "error.required");
         var now = clock.GetUtcNow();
         issue.LastActivityAt = now; db.Entry(issue).Property(x => x.LastActivityAt).IsModified = true;
         var row = new IssueLocation { ProjectId = project.Id, IssueId = issue.Id, IssueRowVersion = issue.RowVersion + 1, Kind = body.Kind, SiteArea = Check.Optional(body.SiteArea, "siteArea", 500),
@@ -531,7 +533,7 @@ public static class RegisterEndpoints
     static async Task<List<object>> ListIssueVerification(Guid id, Access access, HubDb db)
     {
         await LoadIssue(db, access, id);
-        return await db.IssueVerifications.AsNoTracking().Where(x => x.IssueId == id).OrderByDescending(x => x.CreatedAt)
+        return await db.IssueVerifications.AsNoTracking().Where(x => x.IssueId == id).OrderByDescending(x => x.IssueRowVersion)
             .Select(x => (object)new { x.Id, x.VerifierId, x.Status, x.EvidenceUrl, x.Note, x.VerifiedAt, x.RowVersion }).ToListAsync();
     }
 
@@ -547,9 +549,10 @@ public static class RegisterEndpoints
         {
             Access.Demand(Permissions.Writable(access.Actor, ctx));
             Check.That(body.VerifierId == access.Me.Id, "verifierId", "issue.verifier_must_submit");
-            var appointment = await db.IssueVerifications.Where(x => x.IssueId == id && x.Status == IssueVerificationStatus.Proposed)
-                .OrderByDescending(x => x.IssueRowVersion).Select(x => (Guid?)x.VerifierId).FirstOrDefaultAsync();
-            Check.That(appointment == access.Me.Id, "verifierId", "issue.verifier_not_appointed");
+            var latest = await db.IssueVerifications.Where(x => x.IssueId == id)
+                .OrderByDescending(x => x.IssueRowVersion).Select(x => new { x.Status, x.VerifierId }).FirstOrDefaultAsync();
+            Check.That(latest?.Status == IssueVerificationStatus.Proposed && latest.VerifierId == access.Me.Id,
+                "verifierId", "issue.verifier_not_appointed");
         }
         else { Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(issue))); Check.Reason(body.Note); }
         var evidence = string.IsNullOrWhiteSpace(body.EvidenceUrl) ? null : Coordination.Url(body.EvidenceUrl);

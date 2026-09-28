@@ -16,6 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
+import { useMe } from '@/lib/auth'
 import { ApiError, del, get, patch, post, qs } from '@/lib/api'
 import { fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
@@ -44,6 +45,9 @@ interface LinkRow { id: string; targetType: string; targetId: string; key: strin
 interface Detail { description?: string; project: { id: string; projectNumber: string; name: string }; links: LinkRow[]; permissions: { edit: Perm; transitions: { to: string; ok: boolean; reason?: string | null }[]; comment: boolean } }
 interface RiskDetail extends Detail { risk: RiskRow; realisedIssue?: { id: string; key: string; title: string; status: string } | null }
 interface IssueDetail extends Detail { issue: IssueRow; originRisk?: { id: string; key: string; title: string; status: string } | null }
+interface IssueLocation { id: string; kind: string; siteArea?: string; building?: string; level?: string; room?: string; assetSystem?: string; alignment?: string; startStation?: number; endStation?: number; stationUnits?: string; coordinateX?: number; coordinateY?: number; coordinateZ?: number; coordinateReferenceSystem?: string; coordinateUnits?: string; rowVersion: number }
+interface IssueDocument { id: string; kind: string; identifier: string; revision: string; sourceUrl: string; externalTopicId?: string; modelElementGuid?: string; viewpointUrl?: string; isAvailable: boolean; rowVersion: number }
+interface IssueVerification { id: string; verifierId: string; status: string; evidenceUrl?: string; note?: string; verifiedAt?: string; rowVersion: number }
 type Target = { type: 'Task' | 'Deliverable'; id: string; key: string; name: string }
 
 const RISK_STATUSES = ['Open', 'Monitoring', 'Closed', 'Realised']
@@ -583,6 +587,7 @@ function IssuePanel({ id }: PanelProps) {
         <FieldRow label={t('issue.dateRaised')}><InlineDate value={i.dateRaised} disabled={!can} onSave={(v) => save({ dateRaised: v })} /></FieldRow>
         <FieldRow label={t('issue.target')}><InlineDate value={i.targetResolutionDate} disabled={!can} onSave={(v) => save({ targetResolutionDate: v })} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={i.projectDisciplineId} allowEmpty options={disciplines} disabled={!can} onSave={(v) => save({ projectDisciplineId: v || null })} title={t('common.discipline')} /></FieldRow>
+        <IssueMetadata issue={i} canEdit={can} onChanged={refresh} />
       </div>
       <TabBar tabs={[{ id: 'links' as const, label: t('decision.links'), count: q.data.links.length }, ...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'links' && <Links links={q.data.links} canEdit={can} projectId={i.projectId} onChange={refresh} onAdd={(x) => post(`issues/${i.id}/links`, { targetType: x.targetType, targetId: x.targetId })} />}
@@ -595,6 +600,77 @@ function IssuePanel({ id }: PanelProps) {
         confirmLabel={t('issue.reopen')} onConfirm={(reason) => go('In Progress', reason)} />}
     </div>
   )
+}
+
+function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit: boolean; onChanged: () => void }) {
+  const me = useMe()
+  const locations = useQuery({ queryKey: ['issue-locations', issue.id], queryFn: () => get<IssueLocation[]>(`issues/${issue.id}/locations`) })
+  const documents = useQuery({ queryKey: ['issue-documents', issue.id], queryFn: () => get<IssueDocument[]>(`issues/${issue.id}/documents`) })
+  const verification = useQuery({ queryKey: ['issue-verification', issue.id], queryFn: () => get<IssueVerification[]>(`issues/${issue.id}/verification`) })
+  const [kind, setKind] = useState('SiteArea'); const [siteArea, setSiteArea] = useState(''); const [building, setBuilding] = useState(''); const [level, setLevel] = useState(''); const [room, setRoom] = useState(''); const [assetSystem, setAssetSystem] = useState(''); const [alignment, setAlignment] = useState(''); const [start, setStart] = useState(''); const [end, setEnd] = useState(''); const [units, setUnits] = useState('m'); const [coordinateX, setCoordinateX] = useState(''); const [coordinateY, setCoordinateY] = useState(''); const [coordinateZ, setCoordinateZ] = useState(''); const [coordinateCrs, setCoordinateCrs] = useState(''); const [coordinateUnits, setCoordinateUnits] = useState('m')
+  const [docKind, setDocKind] = useState('Drawing'); const [identifier, setIdentifier] = useState(''); const [revision, setRevision] = useState(''); const [sourceUrl, setSourceUrl] = useState(''); const [externalTopicId, setExternalTopicId] = useState(''); const [modelElementGuid, setModelElementGuid] = useState(''); const [viewpointUrl, setViewpointUrl] = useState(''); const [available, setAvailable] = useState(true)
+  const [verifier, setVerifier] = useState<string | null>(null); const [note, setNote] = useState(''); const [evidence, setEvidence] = useState(''); const [busy, setBusy] = useState(false)
+  const reload = async () => { await Promise.all([locations.refetch(), documents.refetch(), verification.refetch()]); onChanged() }
+  const submit = async (path: string, body: Record<string, unknown>) => { setBusy(true); try { await post(path, { ...body, rowVersion: issue.rowVersion }, issue.rowVersion); await reload(); toast.success(t('issue.metadataSaved')) } catch (e) { toast.error(errorText(e)) } finally { setBusy(false) } }
+  const addLocation = () => {
+    if (kind === 'SiteArea' && !siteArea.trim()) { toast.error(t('issue.locationRequired')); return }
+    if (kind === 'Building' && !building.trim()) { toast.error(t('issue.locationRequired')); return }
+    if (kind === 'Alignment' && (!alignment.trim() || !start || !end || !units.trim())) { toast.error(t('issue.alignmentRequired')); return }
+    if (kind === 'Coordinate' && (!coordinateX || !coordinateY || !coordinateCrs.trim() || !coordinateUnits.trim())) { toast.error(t('issue.coordinateRequired')); return }
+    const numberOrNull = (value: string) => value.trim() ? Number(value) : null
+    if ([coordinateX, coordinateY, coordinateZ, start, end].some((value) => value.trim() && !Number.isFinite(Number(value)))) { toast.error(t('issue.numberRequired')); return }
+    submit(`issues/${issue.id}/locations`, { kind,
+      siteArea: siteArea || null,
+      building: kind === 'Building' ? building || null : null,
+      level: kind === 'Building' ? level || null : null,
+      room: kind === 'Building' ? room || null : null,
+      assetSystem: assetSystem || null,
+      alignment: kind === 'Alignment' ? alignment || null : null,
+      startStation: kind === 'Alignment' ? numberOrNull(start) : null,
+      endStation: kind === 'Alignment' ? numberOrNull(end) : null,
+      stationUnits: kind === 'Alignment' ? units || null : null,
+      coordinateX: kind === 'Coordinate' ? numberOrNull(coordinateX) : null,
+      coordinateY: kind === 'Coordinate' ? numberOrNull(coordinateY) : null,
+      coordinateZ: kind === 'Coordinate' ? numberOrNull(coordinateZ) : null,
+      coordinateReferenceSystem: kind === 'Coordinate' ? coordinateCrs || null : null,
+      coordinateUnits: kind === 'Coordinate' ? coordinateUnits || null : null })
+  }
+  const addDocument = () => {
+    if (!identifier.trim() || !revision.trim() || !sourceUrl.trim()) { toast.error(t('issue.documentRequired')); return }
+    submit(`issues/${issue.id}/documents`, { kind: docKind, identifier, revision, sourceUrl, externalTopicId: externalTopicId || null, modelElementGuid: modelElementGuid || null, viewpointUrl: viewpointUrl || null, isAvailable: available })
+  }
+  const appoint = () => verifier && submit(`issues/${issue.id}/verification`, { verifierId: verifier, status: 'Proposed', note })
+  const decide = (v: IssueVerification, status: 'Verified' | 'Rejected') => submit(`issues/${issue.id}/verification`, { verifierId: v.verifierId, status, evidenceUrl: evidence || null, note })
+  const latestVerification = verification.data?.[0]
+  return <section className="mt-4 space-y-3 rounded-lg border bg-card p-3" aria-labelledby="issue-metadata-title">
+    <h3 id="issue-metadata-title" className="font-semibold">{t('issue.locationEvidence')}</h3>
+    <div className="space-y-2">
+      <div className="text-sm font-medium">{t('issue.locations')}</div>
+      {(locations.data ?? []).map((x) => <div key={x.id} className="rounded border p-2 text-sm"><Chip tone="idle">{x.kind}</Chip> <span>{[x.siteArea, x.building, x.level, x.room, x.assetSystem, x.alignment].filter(Boolean).join(' · ')}</span>{x.startStation != null && ` · ${x.startStation}–${x.endStation} ${x.stationUnits ?? ''}`}{x.coordinateX != null && ` · (${x.coordinateX}, ${x.coordinateY}${x.coordinateZ != null ? `, ${x.coordinateZ}` : ''}) ${x.coordinateReferenceSystem ?? ''} ${x.coordinateUnits ?? ''}`}</div>)}
+      {!locations.data?.length && <p className="text-sm text-muted-foreground">{t('issue.noLocations')}</p>}
+      {canEdit && <div className="grid gap-2 md:grid-cols-4">
+        <select className={selectCls} value={kind} onChange={(e) => setKind(e.target.value)} aria-label={t('issue.locationKind')}><option>SiteArea</option><option>Building</option><option>Alignment</option><option>Coordinate</option></select>
+        <Input value={siteArea} onChange={(e) => setSiteArea(e.target.value)} placeholder={t('issue.siteArea')} aria-label={t('issue.siteArea')} />
+        <Input value={building} onChange={(e) => setBuilding(e.target.value)} placeholder={t('issue.building')} aria-label={t('issue.building')} />
+        <Input value={level} onChange={(e) => setLevel(e.target.value)} placeholder={t('issue.level')} aria-label={t('issue.level')} />
+        <Input value={room} onChange={(e) => setRoom(e.target.value)} placeholder={t('issue.room')} aria-label={t('issue.room')} />
+        <Input value={assetSystem} onChange={(e) => setAssetSystem(e.target.value)} placeholder={t('issue.assetSystem')} aria-label={t('issue.assetSystem')} />
+        {(kind === 'Alignment' || kind === 'Building') && <><Input value={alignment} onChange={(e) => setAlignment(e.target.value)} placeholder={t('issue.alignment')} aria-label={t('issue.alignment')} /><Input value={start} onChange={(e) => setStart(e.target.value)} type="number" placeholder={t('issue.startStation')} aria-label={t('issue.startStation')} /><Input value={end} onChange={(e) => setEnd(e.target.value)} type="number" placeholder={t('issue.endStation')} aria-label={t('issue.endStation')} /><Input value={units} onChange={(e) => setUnits(e.target.value)} placeholder={t('issue.units')} aria-label={t('issue.units')} /></>}
+        {kind === 'Coordinate' && <><Input value={coordinateX} onChange={(e) => setCoordinateX(e.target.value)} type="number" placeholder={t('issue.coordinateX')} aria-label={t('issue.coordinateX')} /><Input value={coordinateY} onChange={(e) => setCoordinateY(e.target.value)} type="number" placeholder={t('issue.coordinateY')} aria-label={t('issue.coordinateY')} /><Input value={coordinateZ} onChange={(e) => setCoordinateZ(e.target.value)} type="number" placeholder={t('issue.coordinateZ')} aria-label={t('issue.coordinateZ')} /><Input value={coordinateCrs} onChange={(e) => setCoordinateCrs(e.target.value)} placeholder={t('issue.coordinateCrs')} aria-label={t('issue.coordinateCrs')} /><Input value={coordinateUnits} onChange={(e) => setCoordinateUnits(e.target.value)} placeholder={t('issue.coordinateUnits')} aria-label={t('issue.coordinateUnits')} /></>}
+        <Button type="button" disabled={busy} onClick={addLocation}>{t('common.add')}</Button>
+      </div>}
+    </div>
+    <div className="space-y-2">
+      <div className="text-sm font-medium">{t('issue.documentReferences')}</div>
+      {(documents.data ?? []).map((x) => <div key={x.id} className="rounded border p-2 text-sm"><Chip tone={x.isAvailable ? 'done' : 'bad'}>{x.isAvailable ? t('issue.available') : t('issue.unavailable')}</Chip> {x.kind} · <strong>{x.identifier}</strong> · {t('issue.revision')} {x.revision} · {x.isAvailable ? <a className="underline" href={x.sourceUrl} target="_blank" rel="noreferrer">{t('issue.openSource')}</a> : <span className="text-muted-foreground">{t('issue.sourceUnavailable')}</span>} {(x.externalTopicId || x.modelElementGuid || x.viewpointUrl) && <span className="block text-muted-foreground">{x.externalTopicId && `${t('issue.externalTopic')} ${x.externalTopicId}`} {x.modelElementGuid && ` · ${t('issue.modelGuid')} ${x.modelElementGuid}`} {x.viewpointUrl && <> · <a className="underline" href={x.viewpointUrl} target="_blank" rel="noreferrer">{t('issue.viewpoint')}</a></>}</span>}</div>)}
+      {canEdit && <div className="grid gap-2 md:grid-cols-4"><select className={selectCls} value={docKind} onChange={(e) => setDocKind(e.target.value)} aria-label={t('issue.documentKind')}><option>Drawing</option><option>Model</option><option>Markup</option><option>Screenshot</option></select><Input value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder={t('issue.identifier')} aria-label={t('issue.identifier')} /><Input value={revision} onChange={(e) => setRevision(e.target.value)} placeholder={t('issue.revision')} aria-label={t('issue.revision')} /><Input value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} placeholder={t('issue.sourceUrl')} aria-label={t('issue.sourceUrl')} /><Input value={externalTopicId} onChange={(e) => setExternalTopicId(e.target.value)} placeholder={t('issue.externalTopic')} aria-label={t('issue.externalTopic')} /><Input value={modelElementGuid} onChange={(e) => setModelElementGuid(e.target.value)} placeholder={t('issue.modelGuid')} aria-label={t('issue.modelGuid')} /><Input value={viewpointUrl} onChange={(e) => setViewpointUrl(e.target.value)} placeholder={t('issue.viewpointUrl')} aria-label={t('issue.viewpointUrl')} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={available} onChange={(e) => setAvailable(e.target.checked)} />{t('issue.available')}</label><Button type="button" disabled={busy} onClick={addDocument}>{t('common.add')}</Button></div>}
+    </div>
+    <div className="space-y-2">
+      <div className="text-sm font-medium">{t('issue.verificationFlow')}</div>
+      {(verification.data ?? []).map((v) => <div key={v.id} className="rounded border p-2 text-sm"><StatusPill status={v.status} /> {v.verifierId === me.id && <span>{t('issue.assignedToYou')}</span>} {v.note && <span className="text-muted-foreground">· {v.note}</span>}{v.id === latestVerification?.id && v.status === 'Proposed' && v.verifierId === me.id && <div className="mt-2 flex gap-2"><Input value={evidence} onChange={(e) => setEvidence(e.target.value)} placeholder={t('issue.evidenceUrl')} aria-label={t('issue.evidenceUrl')} /><Button type="button" disabled={busy} onClick={() => decide(v, 'Verified')}>{t('issue.verify')}</Button><Button type="button" variant="outline" disabled={busy} onClick={() => decide(v, 'Rejected')}>{t('issue.reject')}</Button></div>}</div>)}
+      {canEdit && latestVerification?.status !== 'Proposed' && <div className="grid gap-2 md:grid-cols-3"><PeoplePicker value={verifier} onChange={(id) => setVerifier(id)} label={t('issue.verifier')} /><Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('issue.appointmentReason')} aria-label={t('issue.appointmentReason')} /><Button type="button" disabled={busy || !verifier || !note.trim()} onClick={appoint}>{t('issue.appointVerifier')}</Button></div>}
+    </div>
+  </section>
 }
 
 PANELS.Risk = { component: RiskPanel }

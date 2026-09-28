@@ -37,6 +37,8 @@ public static class ViewEndpoints
         ["workspace-tasks"] = [.. TaskKeys, "projects", "ws", "projectId"],
         ["workspace-board"] = [.. TaskKeys, "projects", "ws", "projectId", "swim", "side"],
         ["mywork"] = ["tab", "who", "projects", "ws", "project", "discipline", "status", "priority", "from", "to", "hideWaiting", "sort"],
+        ["coordination"] = ["discipline", "owner", "from", "to"],
+        ["workspace-coordination"] = ["tab", "projects", "ws", "projectId", "disciplineId", "ownerId", "from", "to"],
     };
 
     public static void Map(RouteGroupBuilder api)
@@ -165,7 +167,9 @@ public static class ViewEndpoints
             var ok = k switch
             {
                 "disciplineId" when projectId is not null => await Count(db.ProjectDisciplines.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.IsActive).Select(x => x.Id), ids),
+                "discipline" when projectId is not null => await Count(db.ProjectDisciplines.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.IsActive).Select(x => x.Id), ids),
                 "disciplineId" => await Count(db.Disciplines.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
+                "owner" when projectId is not null => await Count(db.Users.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "deliverableId" => await Count(db.Deliverables.Where(x => ids.Contains(x.Id)).Select(x => x.Id), ids),
                 "milestoneId" => await Count(db.Milestones.Where(x => ids.Contains(x.Id) && !x.IsCancelled).Select(x => x.Id), ids),
                 "assigneeId" or "ownerId" or "pmId" or "supervisorId" => await Count(db.Users.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids)

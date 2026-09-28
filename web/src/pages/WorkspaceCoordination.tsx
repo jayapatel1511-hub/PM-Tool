@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router'
 import { ErrorBanner, Loading, Page } from '@/components/hub/common'
+import { ViewMenu } from '@/components/hub/views'
 import { useScope } from '@/components/hub/workspace'
 import { get, qs } from '@/lib/api'
 
@@ -85,7 +86,8 @@ export function WorkspaceCoordination() {
     project.data.linkedActions.filter(action => action.sourceType === type && action.sourceId === id)
       .map(action => <li key={action.id}>Existing action: <Link className="text-primary underline" to={`/projects/${project.projectNumber}/meetings?panel=Action:${action.id}`}>
         {action.key}</Link> · {action.text} · {action.status}{action.dueDate && ` · due ${action.dueDate}`}</li>)
-  return <Page title="Coordination" subtitle="Current coordination across permitted workspace projects">
+  return <Page title="Coordination" subtitle="Current coordination across permitted workspace projects"
+    actions={<ViewMenu listType="workspace-coordination" extra={() => ({ ...scope.params, tab: 'coordination' })} fixed={{ tab: 'coordination' }} />}>
     <p className="no-print flex gap-4"><button type="button" className="text-primary underline" onClick={() => downloadCsv(data)}>Export these evaluated records as CSV</button>
       <button type="button" className="text-primary underline" onClick={() => window.print()}>Print this view</button></p>
     <div className="no-print flex flex-wrap gap-3 rounded border p-3">

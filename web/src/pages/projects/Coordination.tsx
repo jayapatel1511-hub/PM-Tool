@@ -7,6 +7,7 @@ import { AttentionPanel } from '@/components/hub/attention'
 import { ErrorBanner, Loading } from '@/components/hub/common'
 import { InlineDate } from '@/components/hub/fields'
 import { useItemPanel } from '@/components/hub/panel-host'
+import { ViewMenu } from '@/components/hub/views'
 import { PeoplePicker } from '@/components/hub/people'
 import { HealthPill, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -235,6 +236,7 @@ export function CoordinationTab() {
           </p>
         </div>
         <div className="no-print flex flex-wrap items-center gap-2">
+          <ViewMenu listType="coordination" projectId={p.id} />
           {!meeting && (
             <select className="h-8 rounded-md border bg-card px-2 text-sm" value={disciplineId ?? ''} onChange={(e) => set('discipline', e.target.value || undefined)} aria-label={t('dash.scope')}>
               <option value="">{t('dash.allDisciplines')}</option>{p.disciplines.filter((d) => d.isActive).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}

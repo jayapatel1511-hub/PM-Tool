@@ -72,6 +72,35 @@ public sealed class ViewsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Coordination_views_restore_filters_without_copying_rows_or_crossing_project_scope()
+    {
+        var p = await d.Project();
+        var other = await d.Project();
+        var civil = d.ProjectDiscipline(p.Id, "Civil");
+        var filters = new Dictionary<string, string> { ["discipline"] = civil.ToString(), ["owner"] = U(TestData.Alex).ToString(),
+            ["from"] = "2026-09-28", ["to"] = "2026-10-05", ["meeting"] = "1", ["panel"] = "Handoff:old" };
+        (await f.As(TestData.Alex).Post("/api/v1/views", new { name = "Civil coordination", listType = "coordination", projectId = p.Id,
+            @params = filters, isDefault = true })).EnsureSuccessStatusCode();
+        var opened = (await Views(TestData.Alex, p.Id, "coordination"))["views"]!.AsArray().Single()!;
+        Assert.Equal(civil.ToString(), opened["params"]!.S("discipline"));
+        Assert.Equal(U(TestData.Alex).ToString(), opened["params"]!.S("owner"));
+        Assert.Equal("2026-09-28", opened["params"]!.S("from"));
+        Assert.Null(opened["params"]!["meeting"]);
+        Assert.Null(opened["params"]!["panel"]);
+        Assert.Empty((await Views(TestData.Alex, other.Id, "coordination"))["views"]!.AsArray());
+
+        (await f.As(TestData.Alex).Post("/api/v1/views", new { name = "My coordination", listType = "workspace-coordination",
+            @params = new Dictionary<string, string> { ["tab"] = "coordination", ["projects"] = p.Id.ToString(), ["projectId"] = p.Id.ToString(),
+                ["disciplineId"] = (await d.Discipline("Civil")).ToString(), ["ownerId"] = U(TestData.Alex).ToString(), ["from"] = "2026-09-28" } })).EnsureSuccessStatusCode();
+        var workspace = (await f.As(TestData.Alex).GetAsync("/api/v1/views?listType=workspace-coordination").Result.Json())["views"]!.AsArray().Single()!;
+        Assert.Equal("coordination", workspace["params"]!.S("tab"));
+        Assert.Equal(p.Id.ToString(), workspace["params"]!.S("projects"));
+        Assert.Equal(p.Id.ToString(), workspace["params"]!.S("projectId"));
+        Assert.Equal((await d.Discipline("Civil")).ToString(), workspace["params"]!.S("disciplineId"));
+        Assert.Empty((await f.As(TestData.Jill).GetAsync("/api/v1/views?listType=workspace-coordination").Result.Json())["views"]!.AsArray());
+    }
+
+    [Fact]
     public async Task Manual_board_order_is_shared_by_the_team() // FR-004, US3, SC-002
     {
         var p = await d.Project();

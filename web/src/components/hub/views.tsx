@@ -26,7 +26,7 @@ function current(sp: URLSearchParams, extra?: Record<string, string | undefined>
 
 /** Saved views (§18.4, FR-VIEW-04): switch, save, share with the project (PM and leads), set a default, delete. The default
  *  applies when the list opens without parameters, so a shared link always wins. */
-export function ViewMenu({ listType, projectId, extra }: { listType: string; projectId?: string; extra?: () => Record<string, string | undefined> }) {
+export function ViewMenu({ listType, projectId, extra, fixed }: { listType: string; projectId?: string; extra?: () => Record<string, string | undefined>; fixed?: Record<string, string> }) {
   const [sp, setSp] = useSearchParams()
   const qc = useQueryClient()
   const key = ['views', listType, projectId ?? null]
@@ -35,7 +35,7 @@ export function ViewMenu({ listType, projectId, extra }: { listType: string; pro
   const applied = useRef(false)
   const active = q.data?.views.find((v) => v.id === sp.get('view'))
   const apply = (v: SavedView, replace = false) => {
-    const n = new URLSearchParams({ ...v.params, view: v.id })
+    const n = new URLSearchParams({ ...v.params, ...fixed, view: v.id })
     const panel = sp.get('panel')
     if (panel) n.set('panel', panel)
     setSp(n, { replace })
@@ -44,7 +44,7 @@ export function ViewMenu({ listType, projectId, extra }: { listType: string; pro
   useEffect(() => {
     if (applied.current || !q.data) return
     applied.current = true
-    const empty = [...sp.keys()].every((k) => k === 'panel')
+    const empty = [...sp.keys()].every((k) => k === 'panel' || (fixed?.[k] !== undefined && sp.get(k) === fixed[k]))
     const def = q.data.views.find((v) => v.isDefault)
     if (empty && def) apply(def, true)
   }, [q.data]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -77,7 +77,7 @@ export function ViewMenu({ listType, projectId, extra }: { listType: string; pro
             {!active.isDefault && active.scope === 'Personal' && <DropdownMenuItem onSelect={() => run(() => patch(`views/${active.id}`, { isDefault: true }, active.rowVersion), t('views.madeDefault', { name: active.name }))}>{t('views.makeDefault')}</DropdownMenuItem>}
             <DropdownMenuItem className="text-bad" onSelect={() => run(async () => { await del(`views/${active.id}`); const n = new URLSearchParams(sp); n.delete('view'); setSp(n, { replace: true }) }, t('views.deleted', { name: active.name }))}>{t('views.delete')}</DropdownMenuItem>
           </>}
-          {sp.get('view') && <DropdownMenuItem onSelect={() => { const n = new URLSearchParams(); const panel = sp.get('panel'); if (panel) n.set('panel', panel); setSp(n) }}>{t('views.clear')}</DropdownMenuItem>}
+          {sp.get('view') && <DropdownMenuItem onSelect={() => { const n = new URLSearchParams(fixed); const panel = sp.get('panel'); if (panel) n.set('panel', panel); setSp(n) }}>{t('views.clear')}</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
       {saving && <SaveDialog listType={listType} projectId={projectId} canShare={!!q.data?.canShare} params={current(sp, extra?.())}

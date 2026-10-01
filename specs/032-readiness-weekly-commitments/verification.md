@@ -283,3 +283,30 @@ Global search now has "Readiness constraints" and "Weekly promises" groups, matc
 - a non-member of the restricted project getting zero counts, no exact match and 404, while a member still finds the record.
 
 `npm --prefix web run build` and `npm --prefix web run lint` passed (88 warnings before and after; none new). `tools/trace_spec.py --check`: 0 not cited.
+
+## Browser rehearsal: weeks, gate, links, export and search — 2026-10-01
+
+Ran in real Chrome (Playwright 1.61, `channel: 'chrome'`, Development sign-in) against my own database `hub_agent_week`, with the API at 127.0.0.1:5093 and synthetic review demo data. The database was dropped afterwards. DEMO-101's coordination day was set to Wednesday.
+
+**PASS:**
+- **Week picker:** the page showed Wednesday weeks (2026-09-30, 10-07, 10-14) with the earlier Monday promise in its own recorded "Week of 2026-10-05" section. The week-start field had `min` 2026-09-30, `step` 7 and the hint "Weeks start on Wednesday". A Thursday was blocked by native validation ("nearest valid values are 2026-10-07 and 2026-10-14"). A Wednesday proposal saved into "Week of 2026-10-07".
+- **Submission Gate:** as the Civil lead, linking a package that lists the task's own deliverable was refused with the specific message. Linking the geotechnical package made the task Not Ready (Draft). After the package was started and issued through the API, reopening the inspector showed Ready. Removing the link with a reason gave Needs Assessment and kept the removal history (who, when, why).
+- **Constraint link:** a constraint linked to DEMO-101-DEC01 showed CT003, the linked decision and its Pending status. The link opened the decision panel.
+- **Export:** the promise, constraint and ready-output downloads matched the page: both recorded weeks, CT003 with "DEC01 … (Pending)", and no ready rows while CT003 is open.
+- **Search:** "storm outfall" listed CT003 under Readiness constraints. The hit opened the readiness inspector on DEMO-101-T0001, and closing it cleared the link. Entering "demo-101-wc002" in the top search opened that promise.
+- **Accessibility:** axe (WCAG 2.0/2.1 A/AA) on the settled propose, link-package, remove-link, record-constraint, inspector, promise and search views found 0 violations. Remaining "incomplete" items were the Radix focus guards and contrast on aria-hidden status glyphs. One contrast violation appeared only while the global "Saved" toast was on screen; it was not present once the toast had cleared.
+- **Console:** no JavaScript errors from the readiness views, apart from the expected 400 for the refused link.
+
+**Fixed during the rehearsal:**
+- Timestamps in the inspector, constraint verification and promise history repeated the date (`fmtDate` followed by `fmtTime`, which already includes the date).
+- Promise rows now show their WC key.
+
+**Outside this packet:** the Decisions page requested `/api/v1/projects//external-parties` (404) when opened from a deep link.
+
+**Final checks:**
+- `dotnet build Hub.slnx` succeeded.
+- The full suite passed 525/525.
+- `tools/trace_spec.py --check`: 0 not cited.
+- `npm --prefix web run build` and `npm --prefix web run lint` passed (exit 0, 88 warnings, none new), and `git diff --check` passed.
+
+**UNPROVEN:** manual assistive-technology review, deployed authentication, and keyboard-only operation of the new forms (they use native controls and the existing dialog primitives).

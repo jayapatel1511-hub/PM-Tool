@@ -82,7 +82,7 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
       <StatusPill status={q.data.assessment.state} />
       <p>{t('readiness.performer')}: {personName(options, q.data.assessment.ownerId)}</p>
       <p>{t('readiness.output')}: {q.data.assessment.intendedOutput}</p><p>{t('readiness.criteria')}: {q.data.assessment.completionCriteria}</p>
-      <p className="text-xs text-muted-foreground">{t('readiness.evaluated')}: {fmtDate(q.data.assessment.evaluatedAt)} {fmtTime(q.data.assessment.evaluatedAt)}</p>
+      <p className="text-xs text-muted-foreground">{t('readiness.evaluated')}: {fmtTime(q.data.assessment.evaluatedAt)}</p>
       {q.data.unknown.length > 0 && <p>{t('readiness.unknown')}: {q.data.unknown.map(tv).join(', ')}</p>}
       {q.data.blocked.length > 0 && <p>{t('readiness.blocked')}: {q.data.blocked.map(tv).join(', ')}</p>}
       <ul className="space-y-2">{q.data.checks.map(c => <li key={c.id} className="space-y-2 rounded border p-3">
@@ -126,7 +126,7 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
           <p>{t('readiness.removalOwner')}: {personName(options, c.removalOwnerId)}</p><p>{t('readiness.affectedOwner')}: {personName(options, c.affectedOwnerId)}</p>
           <a className="text-primary underline" href={c.sourceUrl} target="_blank" rel="noopener noreferrer">{t('readiness.constraintSource')}</a>
           {c.resolutionEvidenceUrl && <p><a className="text-primary underline" href={c.resolutionEvidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a></p>}
-          {c.verifiedBy && <p>{t('readiness.verifiedBy')}: {personName(options, c.verifiedBy)} · {fmtDate(c.verifiedAt)} {fmtTime(c.verifiedAt)}</p>}
+          {c.verifiedBy && <p>{t('readiness.verifiedBy')}: {personName(options, c.verifiedBy)} · {fmtTime(c.verifiedAt)}</p>}
           <div className="flex flex-wrap gap-2">
             {options.canWrite && c.state === 'Open' && c.removalOwnerId === options.actorId && <Button size="sm" onClick={() => setMoving({ row: c, state: 'Resolution Proposed' })}>{t('readiness.proposeResolution')}</Button>}
             {options.canWrite && c.state === 'Resolution Proposed' && c.affectedOwnerId === options.actorId && work.ownerId === c.affectedOwnerId && <Button size="sm" onClick={() => setMoving({ row: c, state: 'Verified Removed' })}>{t('readiness.verifyRemoval')}</Button>}

@@ -18,7 +18,7 @@ import { ReadinessInspector } from './ReadinessForms'
 import { ExportMenu } from '@/components/hub/export'
 
 type Commitment = {
-  id: string; targetType: string; targetId: string; performerId: string; weekStart: string; targetDate: string
+  id: string; key: string; targetType: string; targetId: string; performerId: string; weekStart: string; targetDate: string
   intendedOutput: string; completionCriteria: string; state: string; snapshotId?: string | null; readinessAtCommit?: string | null
   rowVersion: number; completionEvidenceUrl?: string
 }
@@ -148,7 +148,7 @@ export function ReadinessTab() {
             {snapshot.withdrawn > 0 && <span>{t('readiness.withdrawn', { n: snapshot.withdrawn })}</span>}
           </div>}
           {rows.length === 0 ? <p className="px-4 py-3 text-sm text-muted-foreground">{t('readiness.noWeekCommitments')}</p> : <ul className="divide-y">{rows.map((c) => <li key={c.id} className="flex flex-wrap items-start gap-3 px-4 py-3 text-sm">
-            <div className="min-w-0 flex-1"><Link className="font-medium text-primary hover:underline" to={workLink(c)}>{c.targetType} <span className="font-mono text-xs">{c.targetId.slice(0, 8)}</span></Link><p className="mt-1">{c.intendedOutput}</p><p className="text-xs text-muted-foreground">{t('readiness.criteria')}: {c.completionCriteria}</p></div>
+            <div className="min-w-0 flex-1"><span className="mr-2 font-mono text-xs text-muted-foreground">{c.key}</span><Link className="font-medium text-primary hover:underline" to={workLink(c)}>{c.targetType} <span className="font-mono text-xs">{c.targetId.slice(0, 8)}</span></Link><p className="mt-1">{c.intendedOutput}</p><p className="text-xs text-muted-foreground">{t('readiness.criteria')}: {c.completionCriteria}</p></div>
             <div className="flex shrink-0 flex-wrap items-center gap-2"><span className="text-xs text-muted-foreground">{fmtDate(c.targetDate)}</span><StatusPill status={c.state} />{c.readinessAtCommit ? <Chip tone={c.readinessAtCommit === 'Ready' ? 'done' : 'idle'}>{tv(c.readinessAtCommit)}</Chip> : <Chip tone="idle">{t('readiness.notRecorded')}</Chip>}</div>
             <Button size="sm" variant="outline" onClick={() => set('promise', c.id)}>{t('readiness.reviewPromise')}</Button>
           </li>)}</ul>}
@@ -221,7 +221,7 @@ function PromiseDetail({ projectId, id, options, close, done }: { projectId: str
       </div>
       <h3 className="font-medium">{t('readiness.promiseHistory')}</h3>
       <ul className="space-y-2">{q.data.events.map(e => <li key={e.id} className="rounded border p-3">
-        <p>{tv(e.fromState)} → {tv(e.toState)} · {personName(options, e.actorId)} · {fmtDate(e.createdAt)} {fmtTime(e.createdAt)}</p>
+        <p>{tv(e.fromState)} → {tv(e.toState)} · {personName(options, e.actorId)} · {fmtTime(e.createdAt)}</p>
         <p>{e.reason}</p>{e.evidenceUrl && <a className="text-primary underline" href={e.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
       </li>)}</ul>
     </div>}

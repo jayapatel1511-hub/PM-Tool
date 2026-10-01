@@ -74,3 +74,12 @@ public sealed class IssueReferenceImpactAssessment : CoordinationRecord
     public DateTimeOffset? VerifierDecidedAt { get; set; }
     public override string AuditType => "IssueReferenceImpactAssessment";
 }
+
+/// FR-LOC-03: a project discipline affected by the issue, alongside its single resolution owner and primary discipline.
+public sealed class IssueAffectedDiscipline : CoordinationRecord, IAuditable
+{
+    public Guid IssueId { get; set; }
+    public Guid ProjectDisciplineId { get; set; }
+    public override string AuditType => "IssueAffectedDiscipline";
+    public Guid? AuditDisciplineId => ProjectDisciplineId;
+}

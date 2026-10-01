@@ -14,7 +14,7 @@ public static class RegisterEndpoints
     public sealed record RiskBody(string Title, string? Description, Guid? OwnerId, int? Probability, int? Impact, string? Mitigation, string? TriggerIndicator,
         DateOnly? ReviewDate, Guid? ProjectDisciplineId, DecisionEndpoints.LinkInput[]? Links);
     public sealed record IssueBody(string Title, string? Description, Guid? RaisedById, Guid? OwnerId, string? Severity, DateOnly? DateRaised,
-        DateOnly? TargetResolutionDate, Guid? ProjectDisciplineId, DecisionEndpoints.LinkInput[]? Links);
+        DateOnly? TargetResolutionDate, Guid? ProjectDisciplineId, DecisionEndpoints.LinkInput[]? Links, Guid[]? AffectedDisciplineIds = null);
     public sealed record RiskMove(string ToStatus, string? Reason, Guid? IssueId, IssueBody? Issue, int? RowVersion);
     public sealed record IssueMove(string ToStatus, string? Reason, string? Resolution, DateOnly? ResolvedDate, int? RowVersion);
     public sealed record RegisterQuery(string? Status, string? Severity, Guid? OwnerId, Guid? DisciplineId, string? Indicator, string? Q,
@@ -36,7 +36,7 @@ public static class RegisterEndpoints
     static readonly Col[] IssueCols =
     [
         new("key", "key", "key"), new("title", "title"), new("status", "status"), new("severity", "severity"), new("ownerName", "owner"), new("raisedByName", "raisedBy"),
-        new("disciplineName", "discipline"), new("dateRaised", "dateRaised", "date"), new("targetResolutionDate", "targetDate", "date"),
+        new("disciplineName", "discipline"), new("affectedDisciplineSummary", "affectedDisciplines", Label: "Affected disciplines"), new("dateRaised", "dateRaised", "date"), new("targetResolutionDate", "targetDate", "date"),
         new("daysOverdue", "daysOverdue", "number"), new("resolvedDate", "resolvedDate", "date"), new("resolution", "resolution"), new("originRiskKey", "originRisk"),
         new("locationSummary", "locationSummary", Label: "Location"), new("documentSummary", "documentSummary", Label: "References"),
         new("verificationStatus", "verificationStatus", Label: "Verification"),
@@ -119,9 +119,9 @@ public static class RegisterEndpoints
         return v!.Value;
     }
 
-    static async Task<Guid?> Discipline(HubDb db, Guid projectId, Guid? id)
+    static async Task<Guid?> Discipline(HubDb db, Guid projectId, Guid? id, string field = "projectDisciplineId")
     {
-        if (id is { } d) Check.That(await db.ProjectDisciplines.AnyAsync(x => x.Id == d && x.ProjectId == projectId && x.IsActive), "projectDisciplineId", "error.not_found");
+        if (id is { } d) Check.That(await db.ProjectDisciplines.AnyAsync(x => x.Id == d && x.ProjectId == projectId && x.IsActive), field, "error.not_found");
         return id;
     }
 
@@ -297,7 +297,8 @@ public static class RegisterEndpoints
         var st = Http.List(f.Status); if (st.Length > 0) q = q.Where(i => st.Contains(i.Status));
         var sev = Http.List(f.Severity); if (sev.Length > 0) q = q.Where(i => sev.Contains(i.Severity));
         if (f.OwnerId is { } o) q = q.Where(i => i.OwnerId == o);
-        if (f.DisciplineId is { } d) q = q.Where(i => i.ProjectDisciplineId == d);
+        // AC-LOC-01: each affected discipline sees the same issue as its primary discipline.
+        if (f.DisciplineId is { } d) q = q.Where(i => i.ProjectDisciplineId == d || db.IssueAffectedDisciplines.Any(x => x.IssueId == i.Id && x.ProjectDisciplineId == d));
         if (!string.IsNullOrWhiteSpace(f.Q)) { var term = $"%{f.Q.Trim()}%"; q = q.Where(i => EF.Functions.ILike(i.Title, term) || EF.Functions.ILike(i.Key, term)); }
         if (!string.IsNullOrWhiteSpace(f.Location))
         {
@@ -355,6 +356,9 @@ public static class RegisterEndpoints
         var locations = await db.IssueLocations.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
         var documents = await db.IssueDocumentReferences.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
         var verifications = await db.IssueVerifications.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
+        var affectedByIssue = (await db.IssueAffectedDisciplines.AsNoTracking().Where(x => issueIds.Contains(x.IssueId))
+            .Select(x => new { x.IssueId, x.ProjectDisciplineId, Name = db.ProjectDisciplines.Where(pd => pd.Id == x.ProjectDisciplineId).Select(pd => pd.Discipline!.Name).FirstOrDefault() ?? "" })
+            .ToListAsync()).OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToLookup(x => x.IssueId);
         var locationsByIssue = locations.ToLookup(x => x.IssueId);
         var documentsByIssue = documents.ToLookup(x => x.IssueId);
         var verificationsByIssue = verifications.ToLookup(x => x.IssueId);
@@ -370,12 +374,16 @@ public static class RegisterEndpoints
                     .Concat(issueDocuments.Select(x => x.IssueRowVersion)).DefaultIfEmpty(0).Max();
                 var verificationStatus = issueVerification is null ? "None" :
                     issueVerification.IssueRowVersion <= latestReferenceVersion ? "Stale" : issueVerification.Status;
+                var locationLabels = issueLocations.Select(x => string.Join(" · ", new[] { x.Kind, x.SiteArea, x.Building, x.Level, x.Room, x.AssetSystem, x.Alignment,
+                    x.StartStation is { } start ? $"{start}-{x.EndStation} {x.StationUnits}" : null, x.CoordinateX is { } coordinateX ? $"({coordinateX}, {x.CoordinateY}{(x.CoordinateZ is { } z ? $", {z}" : "")}) {x.CoordinateReferenceSystem} {x.CoordinateUnits}" : null }.Where(v => !string.IsNullOrWhiteSpace(v)))).ToArray();
+                var affected = affectedByIssue[i.Id].ToList();
                 return new { VerificationStatus = verificationStatus, Row = (object)new
                 {
                     i.Id, i.ProjectId, i.Key, i.Title, i.Status, i.RaisedById, i.RaisedByName, i.OwnerId, i.OwnerName, i.Severity, i.DateRaised, i.TargetResolutionDate,
                     IsOverdue = late > 0, DaysOverdue = late, i.Resolution, i.ResolvedDate, i.OriginRiskId, i.OriginRiskKey, i.ProjectDisciplineId, i.DisciplineName,
-                    LocationSummary = string.Join("; ", issueLocations.Select(x => string.Join(" · ", new[] { x.Kind, x.SiteArea, x.Building, x.Level, x.Room, x.AssetSystem, x.Alignment,
-                        x.StartStation is { } start ? $"{start}-{x.EndStation} {x.StationUnits}" : null, x.CoordinateX is { } coordinateX ? $"({coordinateX}, {x.CoordinateY}{(x.CoordinateZ is { } z ? $", {z}" : "")}) {x.CoordinateReferenceSystem} {x.CoordinateUnits}" : null }.Where(v => !string.IsNullOrWhiteSpace(v))))),
+                    LocationLabels = locationLabels, LocationSummary = string.Join("; ", locationLabels),
+                    AffectedDisciplineIds = affected.Select(x => x.ProjectDisciplineId).ToArray(), AffectedDisciplineNames = affected.Select(x => x.Name).ToArray(),
+                    AffectedDisciplineSummary = string.Join("; ", affected.Select(x => x.Name)),
                     DocumentSummary = string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
                     DocumentIdentifiers = issueDocuments.Select(x => x.Identifier).Distinct(StringComparer.OrdinalIgnoreCase)
                         .OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
@@ -423,9 +431,28 @@ public static class RegisterEndpoints
             StatusChangedAt = now, LastActivityAt = now,
         };
         db.Issues.Add(i);
+        await SetAffectedDisciplines(db, i, b.AffectedDisciplineIds ?? []);
         foreach (var l in b.Links ?? []) await DecisionEndpoints.NewLink(db, access, p, ItemType.Issue, i.Id, i.Key, l.TargetType, l.TargetId, ItemRelation.Related);
         await team.EnsureMember(p, owner, ProjectRole.TeamMember);
         return i;
+    }
+
+    /// FR-LOC-03: replace the issue's affected disciplines; newly added ones must be active disciplines of the same project,
+    /// while an already-linked discipline that was later deactivated may stay.
+    static async Task SetAffectedDisciplines(HubDb db, Issue i, IReadOnlyCollection<Guid> ids)
+    {
+        var wanted = ids.Distinct().ToHashSet();
+        var existing = db.Entry(i).State == EntityState.Added ? [] : await db.IssueAffectedDisciplines.Where(x => x.IssueId == i.Id).ToListAsync();
+        var removed = existing.Where(x => !wanted.Contains(x.ProjectDisciplineId)).ToList();
+        var added = wanted.Except(existing.Select(x => x.ProjectDisciplineId)).ToList();
+        // A relation-only edit still bumps the issue version so concurrent edits conflict.
+        if (db.Entry(i).State != EntityState.Added && (removed.Count > 0 || added.Count > 0)) db.Entry(i).Property(x => x.LastActivityAt).IsModified = true;
+        db.IssueAffectedDisciplines.RemoveRange(removed);
+        foreach (var d in added)
+        {
+            await Discipline(db, i.ProjectId, d, "affectedDisciplineIds");
+            db.IssueAffectedDisciplines.Add(new IssueAffectedDiscipline { ProjectId = i.ProjectId, IssueId = i.Id, ProjectDisciplineId = d });
+        }
     }
 
     static async Task<object> GetIssue(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
@@ -476,6 +503,14 @@ public static class RegisterEndpoints
             i.Resolution = Check.Required(patch.Str("resolution"), "resolution", 8000); // ISS-02 still holds
         }
         if (patch.Has("projectDisciplineId")) i.ProjectDisciplineId = await Discipline(db, i.ProjectId, patch.Id("projectDisciplineId"));
+        if (patch.Has("affectedDisciplineIds"))
+        {
+            var raw = patch.Raw.GetProperty("affectedDisciplineIds");
+            Check.That(raw.ValueKind is JsonValueKind.Array or JsonValueKind.Null, "affectedDisciplineIds", "error.validation");
+            var ids = raw.ValueKind == JsonValueKind.Null ? [] : raw.EnumerateArray()
+                .Select(x => x.ValueKind == JsonValueKind.String && Guid.TryParse(x.GetString(), out var g) ? g : throw ApiException.Invalid("affectedDisciplineIds", "error.not_found")).ToArray();
+            await SetAffectedDisciplines(db, i, ids);
+        }
         if (patch.Has("raisedById")) { var rb = patch.Id("raisedById") ?? throw ApiException.Invalid("raisedById", "error.required"); await DeliverableEndpoints.ActivePerson(db, rb, "raisedById"); i.RaisedById = rb; }
         if (patch.Has("ownerId"))
         {

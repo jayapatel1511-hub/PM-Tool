@@ -328,7 +328,8 @@ public static class ReviewEndpoints
         var q = db.Issues.AsNoTracking().Where(i => i.ProjectId == projectId &&
             db.ReviewFindings.Any(f => f.ProjectId == projectId && f.IssueId == i.Id &&
                 db.ReviewPackages.Any(p => p.Id == f.PackageId && p.ProjectId == projectId && p.CurrentRoundId == f.RoundId) &&
-                (disciplineId == null || f.ProjectDisciplineId == disciplineId || i.ProjectDisciplineId == disciplineId)));
+                (disciplineId == null || f.ProjectDisciplineId == disciplineId || i.ProjectDisciplineId == disciplineId ||
+                    db.IssueAffectedDisciplines.Any(x => x.IssueId == i.Id && x.ProjectDisciplineId == disciplineId))));
         if (ownerId is { } owner) q = q.Where(i => i.OwnerId == owner);
         var (pg, size) = Http.Paging(page, pageSize);
         var total = await q.CountAsync();

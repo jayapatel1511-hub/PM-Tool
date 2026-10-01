@@ -284,7 +284,8 @@ public static class TeamEndpoints
                 || await db.Deliverables.IgnoreQueryFilters().AnyAsync(d => d.ProjectDisciplineId == pdId && d.DeletedAt == null && d.Status != DeliverableStatus.Cancelled);
             if (used) throw ApiException.Rule("discipline_in_use", "team.discipline_in_use");
             if (await db.Tasks.IgnoreQueryFilters().AnyAsync(t => t.ProjectDisciplineId == pdId) || await db.Deliverables.IgnoreQueryFilters().AnyAsync(d => d.ProjectDisciplineId == pdId)
-                || await db.ProjectMembers.AnyAsync(m => m.PrimaryDisciplineId == pdId) || await db.Milestones.IgnoreQueryFilters().AnyAsync(m => m.ProjectDisciplineId == pdId))
+                || await db.ProjectMembers.AnyAsync(m => m.PrimaryDisciplineId == pdId) || await db.Milestones.IgnoreQueryFilters().AnyAsync(m => m.ProjectDisciplineId == pdId)
+                || await db.IssueAffectedDisciplines.AnyAsync(x => x.ProjectDisciplineId == pdId))
                 pd.IsActive = false; // referenced by history: deactivate rather than delete
             else db.ProjectDisciplines.Remove(pd);
             await db.SaveChangesAsync();

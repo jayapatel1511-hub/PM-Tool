@@ -89,6 +89,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<IssueLocation> IssueLocations => Set<IssueLocation>();
     public DbSet<IssueDocumentReference> IssueDocumentReferences => Set<IssueDocumentReference>();
     public DbSet<IssueVerification> IssueVerifications => Set<IssueVerification>();
+    public DbSet<IssueAffectedDiscipline> IssueAffectedDisciplines => Set<IssueAffectedDiscipline>();
     public DbSet<IssueReferenceImpactAssessment> IssueReferenceImpactAssessments => Set<IssueReferenceImpactAssessment>();
     public DbSet<Meeting> Meetings => Set<Meeting>();
     public DbSet<MeetingAction> Actions => Set<MeetingAction>();
@@ -343,6 +344,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.HasIndex(x => new { x.IssueId, x.CreatedAt });
             e.ToTable(t => t.HasCheckConstraint("ck_issue_verification_status", $"status IN ({In(IssueVerificationStatus.All)})"));
         });
+        mb.Entity<IssueAffectedDiscipline>(e => e.HasIndex(x => new { x.IssueId, x.ProjectDisciplineId }).IsUnique());
         mb.Entity<IssueReferenceImpactAssessment>(e =>
         {
             e.HasIndex(x => new { x.IssueId, x.DocumentReferenceId, x.PreviousRevisionId, x.CurrentRevisionId }).IsUnique();
@@ -737,6 +739,9 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<IssueVerification, Project>(mb, x => x.ProjectId);
         Fk<IssueVerification, Issue>(mb, x => x.IssueId);
         Fk<IssueVerification, AppUser>(mb, x => x.VerifierId);
+        Fk<IssueAffectedDiscipline, Project>(mb, x => x.ProjectId);
+        Fk<IssueAffectedDiscipline, Issue>(mb, x => x.IssueId);
+        Fk<IssueAffectedDiscipline, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
         Fk<ReadinessAssessment, Project>(mb, x => x.ProjectId);
         Fk<ReadinessCheckRecord, Project>(mb, x => x.ProjectId);
         Fk<WorkConstraint, Project>(mb, x => x.ProjectId);

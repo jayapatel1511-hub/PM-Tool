@@ -1237,6 +1237,7 @@ export const en: Record<string, string> = {
   'issue.sourceFilters': 'Issue source filters', 'issue.filterLocation': 'Location', 'issue.filterDocument': 'Drawing or model ID',
   'issue.filterRevision': 'Revision', 'issue.filterVerification': 'Verification status', 'issue.filterAlignment': 'Alignment',
   'issue.stationFrom': 'From station', 'issue.stationTo': 'To station', 'issue.stationUnits': 'Units', 'issue.groupBy': 'Group issues by',
+  'issue.affectedDisciplines': 'Affected disciplines', 'issue.affectedDisciplinesNone': 'No affected disciplines recorded.',
   'issue.groupLocation': 'Group by location', 'issue.groupDiscipline': 'Group by discipline', 'issue.groupOwner': 'Group by owner',
   'issue.groupVerification': 'Group by verification', 'issue.groupDocument': 'Group by drawing or model',
   'issue.groupRevision': 'Group by revision', 'issue.noLocationGroup': 'No structured location',

@@ -39,7 +39,8 @@ export interface IssueRow {
   id: string; projectId: string; key: string; title: string; status: string; raisedById: string; raisedByName?: string; ownerId: string; ownerName?: string
   severity: string; dateRaised: string; targetResolutionDate?: string; isOverdue: boolean; daysOverdue: number; resolution?: string; resolvedDate?: string
   originRiskId?: string; originRiskKey?: string; projectDisciplineId?: string; disciplineName?: string; rowVersion: number
-  locationSummary?: string; documentSummary?: string; documentIdentifiers?: string[]; documentRevisions?: string[]; verificationStatus?: string
+  locationSummary?: string; locationLabels?: string[]; affectedDisciplineIds?: string[]; affectedDisciplineNames?: string[]; affectedDisciplineSummary?: string
+  documentSummary?: string; documentIdentifiers?: string[]; documentRevisions?: string[]; verificationStatus?: string
   groupLabel?: string
 }
 interface Perm { ok: boolean; reason?: string | null }
@@ -218,6 +219,7 @@ export function IssuesTab() {
     { id: 'status', label: t('common.status'), sort: (r) => r.status, cell: (r) => <StatusPill status={r.status} /> },
     { id: 'owner', label: t('common.owner'), sort: (r) => r.ownerName, className: 'whitespace-nowrap', cell: (r) => r.ownerName },
     { id: 'discipline', label: t('common.discipline'), sort: (r) => r.disciplineName, className: 'whitespace-nowrap', cell: (r) => r.disciplineName ?? t('common.dash') },
+    { id: 'affected', label: t('issue.affectedDisciplines'), optional: true, sort: (r) => r.affectedDisciplineSummary, className: 'min-w-40', cell: (r) => r.affectedDisciplineSummary || t('common.dash') },
     { id: 'raised', label: t('issue.dateRaised'), sort: (r) => r.dateRaised, className: 'whitespace-nowrap', cell: (r) => fmtDate(r.dateRaised) },
     { id: 'target', label: t('issue.target'), sort: (r) => r.targetResolutionDate, className: 'whitespace-nowrap',
       cell: (r) => <span className={cn(r.isOverdue && 'font-medium text-bad')}>{fmtDate(r.targetResolutionDate)}{r.isOverdue && ` · ${t('ind.overdueD', { n: r.daysOverdue })}`}</span> },
@@ -230,16 +232,21 @@ export function IssuesTab() {
         r.verificationStatus ? <StatusPill status={r.verificationStatus} /> : t('common.dash') },
   ], q.data ?? [], (r) => [r.targetResolutionDate, r.key])
   const group = sp.get('group')
-  const groupBy = group === 'document' || group === 'revision' ? (r: IssueRow) => r.groupLabel || t('common.dash')
-    : group === 'location' ? (r: IssueRow) => r.locationSummary || t('issue.noLocationGroup')
-    : group === 'discipline' ? (r: IssueRow) => r.disciplineName || t('register.noDiscipline')
-      : group === 'owner' ? (r: IssueRow) => r.ownerName || t('common.dash')
-        : group === 'verification' ? (r: IssueRow) => r.verificationStatus || t('issue.noVerification') : undefined
-  const expandedRows = group === 'document' || group === 'revision'
+  // An issue appears once under each of its locations, disciplines (primary and affected), documents or revisions.
+  const multiGroup: Record<string, [(r: IssueRow) => (string | undefined)[] | undefined, string]> = {
+    location: [(r) => r.locationLabels, t('issue.noLocationGroup')],
+    discipline: [(r) => [r.disciplineName, ...(r.affectedDisciplineNames ?? [])], t('register.noDiscipline')],
+    document: [(r) => r.documentIdentifiers, t('issue.noDocumentGroup')],
+    revision: [(r) => r.documentRevisions, t('issue.noRevisionGroup')],
+  }
+  const multi = group ? multiGroup[group] : undefined
+  const groupBy = multi ? (r: IssueRow) => r.groupLabel || t('common.dash')
+    : group === 'owner' ? (r: IssueRow) => r.ownerName || t('common.dash')
+      : group === 'verification' ? (r: IssueRow) => r.verificationStatus || t('issue.noVerification') : undefined
+  const expandedRows = multi
     ? table.sorted.flatMap((row) => {
-      const labels = group === 'document' ? row.documentIdentifiers : row.documentRevisions
-      return (labels?.length ? labels : [group === 'document' ? t('issue.noDocumentGroup') : t('issue.noRevisionGroup')])
-        .map((groupLabel) => ({ ...row, groupLabel }))
+      const labels = [...new Set(multi[0](row)?.filter((x): x is string => !!x))]
+      return (labels.length ? labels : [multi[1]]).map((groupLabel) => ({ ...row, groupLabel }))
     }) : table.sorted
   // Array.sort is stable, so the register's selected sort order remains intact within each group.
   const displayRows = groupBy ? [...expandedRows].sort((a, b) => groupBy(a).localeCompare(groupBy(b))) : expandedRows
@@ -671,6 +678,18 @@ function IssuePanel({ id }: PanelProps) {
         <FieldRow label={t('issue.dateRaised')}><InlineDate value={i.dateRaised} disabled={!can} onSave={(v) => save({ dateRaised: v })} /></FieldRow>
         <FieldRow label={t('issue.target')}><InlineDate value={i.targetResolutionDate} disabled={!can} onSave={(v) => save({ targetResolutionDate: v })} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={i.projectDisciplineId} allowEmpty options={disciplines} disabled={!can} onSave={(v) => save({ projectDisciplineId: v || null })} title={t('common.discipline')} /></FieldRow>
+        <FieldRow label={t('issue.affectedDisciplines')}>
+          <fieldset className="flex flex-wrap gap-x-3 gap-y-1 text-sm" disabled={!can} title={perm.edit.reason ?? undefined}>
+            <legend className="sr-only">{t('issue.affectedDisciplines')}</legend>
+            {(project.data?.disciplines ?? []).filter((d) => i.affectedDisciplineIds?.includes(d.id) || (d.isActive && d.id !== i.projectDisciplineId)).map((d) => {
+              const on = i.affectedDisciplineIds?.includes(d.id) ?? false
+              return <label key={d.id} className="inline-flex items-center gap-1">
+                <input type="checkbox" checked={on} onChange={() => save({ affectedDisciplineIds: on ? i.affectedDisciplineIds!.filter((x) => x !== d.id) : [...(i.affectedDisciplineIds ?? []), d.id] })} />
+                {d.name}</label>
+            })}
+            {!can && !i.affectedDisciplineIds?.length && <span className="text-muted-foreground">{t('issue.affectedDisciplinesNone')}</span>}
+          </fieldset>
+        </FieldRow>
         <IssueMetadata issue={i} canEdit={can} onChanged={refresh} />
         <IssueReferenceImpacts issue={i} />
       </div>

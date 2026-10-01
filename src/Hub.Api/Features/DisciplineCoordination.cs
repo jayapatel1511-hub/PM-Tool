@@ -158,7 +158,8 @@ public static class DisciplineCoordinationEndpoints
         var linkedIssues = db.Issues.AsNoTracking().Where(i => i.ProjectId == projectId &&
             db.ReviewFindings.Any(f => f.ProjectId == projectId && f.IssueId == i.Id &&
                 db.ReviewPackages.Any(p => p.Id == f.PackageId && p.CurrentRoundId == f.RoundId) &&
-                (disciplineId == null || f.ProjectDisciplineId == disciplineId || i.ProjectDisciplineId == disciplineId)));
+                (disciplineId == null || f.ProjectDisciplineId == disciplineId || i.ProjectDisciplineId == disciplineId ||
+                    db.IssueAffectedDisciplines.Any(x => x.IssueId == i.Id && x.ProjectDisciplineId == disciplineId))));
         if (ownerId is { } issueOwner) linkedIssues = linkedIssues.Where(i => i.OwnerId == issueOwner);
         var issueRows = await linkedIssues.OrderBy(i => i.Key)
             .Select(i => new { i.Id, i.Key, i.Title, i.Status, i.OwnerId, OwnerName = db.Users.Where(u => u.Id == i.OwnerId).Select(u => u.DisplayName).FirstOrDefault(), i.ProjectDisciplineId })

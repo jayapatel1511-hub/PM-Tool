@@ -62,6 +62,7 @@ public static class AuditRules
         [typeof(InputAdoption)] = ["InputUseId", "SourceRevisionId", "IntendedUse", "Reason"],
         [typeof(ChangeNotice)] = ["Title", "OwnerId", "ProjectDisciplineId", "OldRevisionId", "NewRevisionId", "Description", "Scope", "EffectiveDate", "AssessmentDueDate", "Status", "PublishedAt"],
         [typeof(ChangeAssessment)] = ["ChangeNoticeId", "TargetType", "TargetId", "OwnerId", "ReviewerId", "InputUseId", "HandoffId", "RevisionUsedId", "Status", "AcknowledgedAt", "Rationale", "EvidenceUrl", "CorrectionTaskId", "EffortImpactHours", "DateImpactDays", "RetainOldRevision", "RetentionApprovedBy", "RetentionReason", "VerifiedBy", "VerifiedAt"],
+        [typeof(IssueAffectedDiscipline)] = ["IssueId", "ProjectDisciplineId"],
         [typeof(IssueReferenceImpactAssessment)] = ["IssueId", "DocumentReferenceId", "PreviousRevisionId", "CurrentRevisionId", "OwnerId", "VerifierId", "Status", "OwnerDisposition", "OwnerReason", "OwnerDecidedBy", "OwnerDecidedAt", "VerifierDisposition", "VerifierReason", "VerifierDecidedBy", "VerifierDecidedAt"],
         [typeof(PersonAvailabilityOverride)] = ["PersonId", "WorkDate", "AvailableHours", "Category"],
         [typeof(ResourceAllocation)] = ["PersonId", "Purpose", "FromDate", "ThroughDate", "PlannedHours", "Status", "ConfirmedBy", "ConfirmedAt"],

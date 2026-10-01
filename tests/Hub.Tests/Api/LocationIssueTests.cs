@@ -309,4 +309,65 @@ public sealed class LocationIssueTests(HubFactory f)
             verifierId = d.User(TestData.Omar), status = "Proposed", note = "PM replaces the independent verifier", rowVersion = await IssueVersion(pmId)
         }).Result.Json(201);
     }
+
+    [Fact]
+    public async Task Affected_disciplines_share_one_issue_across_discipline_views_and_exports()
+    {
+        var p = await d.Project();
+        var civil = d.ProjectDiscipline(p.Id, "Civil");
+        var electrical = d.ProjectDiscipline(p.Id, "Electrical");
+        var other = await d.Project();
+        var foreign = d.ProjectDiscipline(other.Id, "Electrical");
+        Assert.Equal(HttpStatusCode.BadRequest, (await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/issues", new
+        {
+            title = "Foreign discipline", severity = "High", projectDisciplineId = civil, affectedDisciplineIds = new[] { foreign }
+        })).StatusCode);
+        var created = await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/issues", new
+        {
+            title = "Duct bank crosses feeder", severity = "High", projectDisciplineId = civil, affectedDisciplineIds = new[] { electrical, electrical }
+        }).Result.Json(201);
+        var id = created.G("id");
+        var key = created.S("key");
+        foreach (var location in new object[]
+        {
+            new { kind = "Alignment", alignment = "Road-A", startStation = 10, endStation = 20, stationUnits = "m", rowVersion = await IssueVersion(id) },
+            new { kind = "SiteArea", siteArea = "North yard", rowVersion = await IssueVersion(id) + 1 },
+        })
+            await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", location).Result.Json(201);
+
+        // AC-LOC-01: the Civil lead and the Electrical lead both see the same issue ID with its exact range and both locations.
+        foreach (var (who, discipline) in new[] { (TestData.Marc, civil), (TestData.Omar, electrical) })
+        {
+            var rows = (await f.As(who).GetAsync($"/api/v1/projects/{p.Id}/issues?disciplineId={discipline}").Result.Json()).AsArray();
+            var row = Assert.Single(rows)!;
+            Assert.Equal(key, row.S("key"));
+            Assert.Equal(new[] { "Electrical" }, row["affectedDisciplineNames"]!.AsArray().Select(x => x!.GetValue<string>()));
+            Assert.Equal(2, row["locationLabels"]!.AsArray().Count);
+            Assert.Contains("Road-A", row.S("locationSummary"));
+        }
+        var detail = await f.As(TestData.Rita).GetAsync($"/api/v1/issues/{id}").Result.Json();
+        Assert.Equal(electrical, detail["issue"]!["affectedDisciplineIds"]!.AsArray().Single()!.GetValue<Guid>());
+        var csv = System.Text.Encoding.UTF8.GetString(await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues/export?format=csv&disciplineId={electrical}")).Content.ReadAsByteArrayAsync());
+        Assert.Contains("Affected disciplines", csv);
+        Assert.Contains(key, csv);
+
+        // Existing issue edit permission, version check and audit apply to the relation.
+        var version = await IssueVersion(id);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Rita).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = Array.Empty<Guid>() }, version)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Omar).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = Array.Empty<Guid>() }, version)).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await f.As(TestData.Alex).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = Array.Empty<Guid>() }, version - 1)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await f.As(TestData.Alex).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = new[] { foreign } }, version)).StatusCode);
+        (await f.As(TestData.Alex).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = Array.Empty<Guid>() }, version)).EnsureSuccessStatusCode();
+        Assert.Equal(version + 1, await IssueVersion(id));
+        Assert.Empty((await f.As(TestData.Omar).GetAsync($"/api/v1/projects/{p.Id}/issues?disciplineId={electrical}").Result.Json()).AsArray());
+        Assert.Equal(1, f.Db(db => db.ActivityLog.Count(a => a.ItemType == "IssueAffectedDiscipline" && a.Action == "Removed" && a.ProjectId == p.Id)));
+        (await f.As(TestData.Pm).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = new[] { electrical } }, version + 1)).EnsureSuccessStatusCode();
+        Assert.Single((await f.As(TestData.Omar).GetAsync($"/api/v1/projects/{p.Id}/issues?disciplineId={electrical}").Result.Json()).AsArray());
+
+        // A restricted project hides the issue from non-members regardless of discipline.
+        await f.DbAsync(async db => { (await db.Projects.SingleAsync(x => x.Id == p.Id)).Visibility = Hub.Domain.Visibility.Restricted; return await db.SaveChangesAsync(); });
+        Assert.False((await f.As(TestData.Rita).GetAsync($"/api/v1/projects/{p.Id}/issues?disciplineId={electrical}")).IsSuccessStatusCode);
+        Assert.False((await f.As(TestData.Rita).GetAsync($"/api/v1/issues/{id}")).IsSuccessStatusCode);
+        Assert.Single((await f.As(TestData.Omar).GetAsync($"/api/v1/projects/{p.Id}/issues?disciplineId={electrical}").Result.Json()).AsArray());
+    }
 }

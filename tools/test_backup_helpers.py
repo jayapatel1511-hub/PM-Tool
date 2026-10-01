@@ -69,6 +69,47 @@ class BackupHelperTests(unittest.TestCase):
                     exec(compile(source, 'backup-helper', 'exec'), {})
                 docker.assert_not_called()
 
+    def test_batch_backup_and_restore_do_not_forward_terminal_stdin(self):
+        with tempfile.TemporaryDirectory(dir=Path(tempfile.gettempdir()).resolve()) as name:
+            sandbox = Path(name)
+            (sandbox / 'hosting').mkdir()
+            (sandbox / '.runtime').mkdir()
+            (sandbox / 'hosting' / 'homedev.compose.yml').write_text('services: {}\n')
+            (sandbox / '.runtime' / 'review.env').write_text('DB=synthetic\n')
+            fake_bin = sandbox / 'bin'
+            fake_bin.mkdir()
+            (fake_bin / 'sudo').write_text('#!/usr/bin/env python3\nimport os, sys\nos.execvp(sys.argv[1], sys.argv[1:])\n')
+            (fake_bin / 'docker').write_text("""#!/usr/bin/env python3
+import os, sys
+root = os.environ['FAKE_IO']
+name = ' '.join(sys.argv[1:])
+safe = str(len(os.listdir(root))) + '.stdin'
+payload = sys.stdin.buffer.read()
+open(os.path.join(root, safe), 'wb').write(payload)
+if 'pg_dump' in sys.argv:
+    sys.stdout.buffer.write(b'synthetic-dump')
+elif 'psql' in sys.argv:
+    sys.stdout.write('2\\n')
+""")
+            (fake_bin / 'sudo').chmod(0o755)
+            (fake_bin / 'docker').chmod(0o755)
+            io_dir = sandbox / 'io'
+            io_dir.mkdir()
+            env = {**os.environ, 'PATH': str(fake_bin) + os.pathsep + os.environ['PATH'], 'FAKE_IO': str(io_dir)}
+            backup = ROOT / 'scripts/backup-homedev-review.sh'
+            restore = ROOT / 'scripts/restore-homedev-review-drill.sh'
+            terminal = b'terminal-input-must-not-reach-batch-container'
+            backed_up = subprocess.run(['bash', str(backup)], cwd=sandbox, env=env, input=terminal, capture_output=True)
+            self.assertEqual(backed_up.returncode, 0, backed_up.stderr.decode())
+            dump = next((sandbox / 'data/backups').glob('*.dump'))
+            self.assertEqual(dump.read_bytes(), b'synthetic-dump')
+            restored = subprocess.run(['bash', str(restore), str(dump)], cwd=sandbox, env=env, input=terminal, capture_output=True)
+            self.assertEqual(restored.returncode, 0, restored.stderr.decode())
+            payloads = [p.read_bytes() for p in io_dir.glob('*.stdin')]
+            self.assertIn(b'synthetic-dump', payloads)  # pg_restore receives the explicit dump file.
+            self.assertNotIn(terminal, payloads)
+            self.assertEqual(payloads.count(b''), 4)  # pg_dump, createdb, psql and cleanup receive no terminal input.
+
 
 if __name__ == '__main__':
     unittest.main()

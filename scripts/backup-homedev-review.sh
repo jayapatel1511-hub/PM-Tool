@@ -14,7 +14,7 @@ target="data/backups/hub-review-${stamp}.dump"
 temp=$(mktemp "${target}.partial.XXXXXX")
 trap 'rm -f "$temp"' EXIT
 sudo docker compose --env-file .runtime/review.env -f hosting/homedev.compose.yml exec -T db \
-  pg_dump -U hub_review -d hub_review -Fc --no-owner --no-privileges > "$temp"
+  pg_dump -U hub_review -d hub_review -Fc --no-owner --no-privileges </dev/null > "$temp"
 [[ -s "$temp" ]] || { echo 'Review database dump is empty.' >&2; exit 1; }
 sudo docker compose --env-file .runtime/review.env -f hosting/homedev.compose.yml exec -T db \
   pg_restore --list < "$temp" > /dev/null

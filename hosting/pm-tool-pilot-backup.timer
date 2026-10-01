@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily PM-Tool pilot database dump before off-host backup
+
+[Timer]
+OnCalendar=*-*-* 22:15:00 UTC
+Persistent=true
+Unit=pm-tool-pilot-backup.service
+
+[Install]
+WantedBy=timers.target

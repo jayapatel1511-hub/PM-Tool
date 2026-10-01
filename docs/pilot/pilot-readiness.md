@@ -46,14 +46,14 @@ restore a `hub-review-*` dump into it.
 
 | # | Part | Review value | Pilot requirement | Owner | Status |
 |---|---|---|---|---|---|
-| H1 | Compose project | `name: pm-tool-review`, image `pm-tool-review:<sha>` | own file and project, for example `pm-tool-pilot` | agent | UNPROVEN (not written) |
-| H2 | Database | volume `pm-tool-review-db`; database and user `hub_review` | new volume, database, user and password | agent | UNPROVEN |
+| H1 | Compose project | `name: pm-tool-review`, image `pm-tool-review:<sha>` | own file and project, for example `pm-tool-pilot` | agent | UNPROVEN: written as `hosting/homedev-pilot.compose.yml` (project `pm-tool-pilot`, image `pm-tool-pilot:<sha>`); `docker compose config` validated with dummy values; not run |
+| H2 | Database | volume `pm-tool-review-db`; database and user `hub_review` | new volume, database, user and password | agent | UNPROVEN: volume `pm-tool-pilot-db`, database/user `hub_pilot`, password from `.runtime/pilot.env`; not run |
 | H3 | Seed | `Seed__ReviewDemo: "true"` | `"false"`. After first start, `SELECT count(*) FROM hub.app_user WHERE email LIKE '%@hub.test'` and `SELECT count(*) FROM hub.project WHERE external_source = 'ReviewDemo'` both return 0 | agent | UNPROVEN |
-| H4 | Environment | `ASPNETCORE_ENVIRONMENT: Staging` | stays Staging: local-password sign-in is refused in Production ([Auth.cs][auth] line 62) | agent | UNPROVEN |
-| H5 | Bridge network and trusted proxy | subnet `172.30.245.0/28`; its gateway `172.30.245.1` is also `Hosting__LocalTunnelProxyAddress` | own unused /28; proxy address equals the new gateway | agent | UNPROVEN |
-| H6 | Loopback port | `127.0.0.1:3080` | own free loopback port | agent | UNPROVEN |
+| H4 | Environment | `ASPNETCORE_ENVIRONMENT: Staging` | stays Staging: local-password sign-in is refused in Production ([Auth.cs][auth] line 62) | agent | UNPROVEN: set in the pilot compose file |
+| H5 | Bridge network and trusted proxy | subnet `172.30.245.0/28`; its gateway `172.30.245.1` is also `Hosting__LocalTunnelProxyAddress` | own unused /28; proxy address equals the new gateway | agent | UNPROVEN: `172.30.246.0/28`, proxy `172.30.246.1`; no homedev route used that subnet on 2026-10-01 |
+| H6 | Loopback port | `127.0.0.1:3080` | own free loopback port | agent | UNPROVEN: `127.0.0.1:3081`, free on homedev on 2026-10-01 |
 | H7 | Private runtime | `.runtime/review.env`, `review-users.json`, `keys/` and `data/backups/`, shared by all review releases | separate owner-only runtime and backup directories | agent | UNPROVEN |
-| H8 | Scripts and units | init, activate, backup, restore drill and verify scripts; the root backup helper accepts only `pm-tool-review-db-1` and the review backup path ([helper]) | pilot variants that refuse review containers, volumes and dumps | agent | UNPROVEN |
+| H8 | Scripts and units | init, activate, backup, restore drill and verify scripts; the root backup helper accepts only `pm-tool-review-db-1` and the review backup path ([helper]) | pilot variants that refuse review containers, volumes and dumps | agent | UNPROVEN: root helper `hosting/pm-tool-pilot-backup-root.sh` (accepts only `pm-tool-pilot-db-1` on volume `pm-tool-pilot-db`, writes `hub-pilot-*.dump` to the pilot directory) with its service and 22:15 UTC timer; activation/verify scripts still assume review names; nothing installed |
 | H9 | Hostname | review sets `AllowedHosts` and `Email__BaseUrl` to `pm.engcalchub.com`; one hostname routes to one origin | decide which stack `pm.engcalchub.com` serves during the pilot; the other gets another hostname in the `pm-tool` tunnel or stays loopback-only | Jay | UNPROVEN (undecided) |
 | H10 | Capacity | each stack limits the database and the API to 1 GiB each; homedev has about 7.2 GiB RAM shared with other services (platform guide) | measure with both stacks running, or stop the review stack during the pilot | agent + Jay | UNPROVEN |
 | H11 | Releases | [homedev runbook][homedev]: reviewed full SHA, CI pass, dump first, previous image kept | the same, announced in the support channel and run outside business hours | agent + Jay | UNPROVEN |

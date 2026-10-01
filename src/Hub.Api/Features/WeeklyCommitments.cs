@@ -198,7 +198,7 @@ public static class WeeklyCommitmentsEndpoints
             c.WeekStart, c.TargetDate, c.IntendedOutput, c.CompletionCriteria, c.State, c.ReadinessAtCommit,
             SnapshotAt = c.SnapshotId is { } s ? snapshots.GetValueOrDefault(s) : (DateTimeOffset?)null, c.CompletionEvidenceUrl });
         return await ExportFile.Send(db, settings, format, Text.Get("export.weeklyCommitments", project.ProjectNumber), ExportColumns,
-            JsonSerializer.SerializeToNode(data, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http), project.Id,
+            JsonSerializer.SerializeToNode(data, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access), project.Id,
             $"{project.ProjectNumber}-weekly-commitments", clock);
     }
 

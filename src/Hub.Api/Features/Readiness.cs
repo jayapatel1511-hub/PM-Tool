@@ -726,7 +726,7 @@ public static class ReadinessEndpoints
         var (project, _) = await access.Project(projectId, false);
         Check.OneOf(list, ["constraints", "ready"], "list");
         var window = await WindowData(project, from, to, db, settings, clock);
-        var filters = await ListExportEndpoints.Filters(db, http);
+        var filters = await ListExportEndpoints.Filters(db, http, access);
         async Task<Dictionary<Guid, string>> Names(IEnumerable<Guid> ids)
         {
             var set = ids.Distinct().ToArray();

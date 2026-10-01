@@ -4,6 +4,7 @@ import { ErrorBanner, Loading, Page } from '@/components/hub/common'
 import { ViewMenu } from '@/components/hub/views'
 import { useScope } from '@/components/hub/workspace'
 import { get, qs } from '@/lib/api'
+import { plural, t } from '@/lib/i18n'
 
 type Item = { id: string; key: string; title: string; status: string }
 type Handoff = Item & { sendingOwnerId: string; receivingOwnerId: string; sendingDisciplineId: string; receivingDisciplineId: string }
@@ -72,11 +73,11 @@ export function WorkspaceCoordination() {
   const q = useQuery({ queryKey: ['workspace-coordination', scope.kind, scope.api, projectId, disciplineId, ownerId, from, to],
     enabled: scope.ready,
     queryFn: () => get<Projection>(`discipline-coordination${qs({ ...scopeParams, projectId, disciplineId, ownerId, from, to })}`) })
-  if (q.isPending) return <Page title="Coordination"><Loading rows={5} /></Page>
-  if (q.error) return <Page title="Coordination"><div className="flex flex-wrap gap-3 rounded border p-3">
-    <label>From<input className="ml-2 rounded border p-1" type="date" value={from} onChange={e => set('from', e.target.value)} /></label>
-    <label>To<input className="ml-2 rounded border p-1" type="date" value={to} onChange={e => set('to', e.target.value)} /></label>
-    <button type="button" className="text-primary underline" onClick={() => setSp(new URLSearchParams(), { replace: true })}>Clear filters</button>
+  if (q.isPending) return <Page title={t('dcv.ws.title')}><Loading rows={5} /></Page>
+  if (q.error) return <Page title={t('dcv.ws.title')}><div className="flex flex-wrap gap-3 rounded border p-3">
+    <label>{t('common.from')}<input className="ml-2 rounded border p-1" type="date" value={from} onChange={e => set('from', e.target.value)} /></label>
+    <label>{t('common.to')}<input className="ml-2 rounded border p-1" type="date" value={to} onChange={e => set('to', e.target.value)} /></label>
+    <button type="button" className="text-primary underline" onClick={() => setSp(new URLSearchParams(), { replace: true })}>{t('dcv.ws.clearFilters')}</button>
   </div><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
   const data = q.data
   const item = (project: ProjectProjection, path: string, prefix: string, row: Item) =>
@@ -84,63 +85,63 @@ export function WorkspaceCoordination() {
       {project.projectNumber} · {row.key}</Link> · {row.title} · {row.status}</li>
   const actionsFor = (project: ProjectProjection, type: LinkedAction['sourceType'], id: string) =>
     project.data.linkedActions.filter(action => action.sourceType === type && action.sourceId === id)
-      .map(action => <li key={action.id}>Existing action: <Link className="text-primary underline" to={`/projects/${project.projectNumber}/meetings?panel=Action:${action.id}`}>
-        {action.key}</Link> · {action.text} · {action.status}{action.dueDate && ` · due ${action.dueDate}`}</li>)
-  return <Page title="Coordination" subtitle="Current coordination across permitted workspace projects"
+      .map(action => <li key={action.id}>{t('dcv.existingAction')} <Link className="text-primary underline" to={`/projects/${project.projectNumber}/meetings?panel=Action:${action.id}`}>
+        {action.key}</Link> · {action.text} · {action.status}{action.dueDate && ` · ${t('dcv.actionDue', { date: action.dueDate })}`}</li>)
+  return <Page title={t('dcv.ws.title')} subtitle={t('dcv.ws.subtitle')}
     actions={<ViewMenu listType="workspace-coordination" extra={() => ({ ...scope.params, tab: 'coordination' })} fixed={{ tab: 'coordination' }} />}>
-    <p className="no-print flex gap-4"><button type="button" className="text-primary underline" onClick={() => downloadCsv(data)}>Export these evaluated records as CSV</button>
-      <button type="button" className="text-primary underline" onClick={() => window.print()}>Print this view</button></p>
+    <p className="no-print flex gap-4"><button type="button" className="text-primary underline" onClick={() => downloadCsv(data)}>{t('dcv.ws.exportCsv')}</button>
+      <button type="button" className="text-primary underline" onClick={() => window.print()}>{t('dcv.ws.printView')}</button></p>
     <div className="no-print flex flex-wrap gap-3 rounded border p-3">
-      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-project">Project</label><select id="workspace-coordination-project" className="rounded border p-1" value={projectId} onChange={e => set('projectId', e.target.value)}>
-        <option value="">All permitted projects</option>{data.projectChoices.map(p => <option key={p.id} value={p.id}>{p.projectNumber}</option>)}
+      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-project">{t('common.project')}</label><select id="workspace-coordination-project" className="rounded border p-1" value={projectId} onChange={e => set('projectId', e.target.value)}>
+        <option value="">{t('dcv.ws.allPermittedProjects')}</option>{data.projectChoices.map(p => <option key={p.id} value={p.id}>{p.projectNumber}</option>)}
       </select></span>
-      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-discipline">Discipline</label><select id="workspace-coordination-discipline" className="rounded border p-1" value={disciplineId} onChange={e => set('disciplineId', e.target.value)}>
-        <option value="">My project disciplines</option>{data.disciplines.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-discipline">{t('common.discipline')}</label><select id="workspace-coordination-discipline" className="rounded border p-1" value={disciplineId} onChange={e => set('disciplineId', e.target.value)}>
+        <option value="">{t('dcv.ws.myProjectDisciplines')}</option>{data.disciplines.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
       </select></span>
-      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-owner">Owner</label><select id="workspace-coordination-owner" className="rounded border p-1" value={ownerId} onChange={e => set('ownerId', e.target.value)}>
-        <option value="">All owners</option>{data.owners.map(o => <option key={o.id} value={o.id}>{o.displayName}</option>)}
+      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-owner">{t('common.owner')}</label><select id="workspace-coordination-owner" className="rounded border p-1" value={ownerId} onChange={e => set('ownerId', e.target.value)}>
+        <option value="">{t('dcv.ws.allOwners')}</option>{data.owners.map(o => <option key={o.id} value={o.id}>{o.displayName}</option>)}
       </select></span>
-      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-from">From</label><input id="workspace-coordination-from" className="rounded border p-1" type="date" value={from} onChange={e => set('from', e.target.value)} /></span>
-      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-to">To</label><input id="workspace-coordination-to" className="rounded border p-1" type="date" value={to} onChange={e => set('to', e.target.value)} /></span>
+      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-from">{t('common.from')}</label><input id="workspace-coordination-from" className="rounded border p-1" type="date" value={from} onChange={e => set('from', e.target.value)} /></span>
+      <span className="flex items-center gap-2"><label htmlFor="workspace-coordination-to">{t('common.to')}</label><input id="workspace-coordination-to" className="rounded border p-1" type="date" value={to} onChange={e => set('to', e.target.value)} /></span>
     </div>
-    <p role="status" className="text-xs text-muted-foreground">Evaluated {new Date(data.evaluatedAt).toLocaleString()} · {data.projects.length} permitted projects. Date filters apply to handoffs and startability.</p>
+    <p role="status" className="text-xs text-muted-foreground">{t('dcv.ws.evaluated', { when: new Date(data.evaluatedAt).toLocaleString(), n: data.projects.length })}</p>
     {data.projects.map(project => <section key={project.id} className="space-y-3 rounded border p-4" aria-labelledby={`coord-${project.id}`}>
       <h2 id={`coord-${project.id}`} className="font-semibold">{project.projectNumber} · {project.name}</h2>
       <div className="grid gap-3 md:grid-cols-2">
-        <section><h3>What do we owe? ({project.data.outgoing.length})</h3>
+        <section><h3>{t('dcv.owe')} ({project.data.outgoing.length})</h3>
           <ul>{project.data.outgoing.map(h => item(project, 'handoffs', 'Handoff', h))}</ul></section>
-        <section><h3>What are we waiting for? ({project.data.incoming.length})</h3>
+        <section><h3>{t('dcv.waiting')} ({project.data.incoming.length})</h3>
           <ul>{project.data.incoming.map(h => item(project, 'handoffs', 'Handoff', h))}</ul>
-          {project.data.blockerGroups.length > 0 && <h4>Linked task blockers</h4>}<ul>{project.data.blockerGroups.map(g =>
+          {project.data.blockerGroups.length > 0 && <h4>{t('dcv.ws.linkedTaskBlockers')}</h4>}<ul>{project.data.blockerGroups.map(g =>
           <li key={g.handoffId}><Link className="text-primary underline" to={`/projects/${project.projectNumber}/handoffs?panel=Handoff:${g.handoffId}`}>{g.handoffKey}</Link>
-            {' · '}{g.taskIds.length} linked tasks: {g.taskIds.map((id, index) => <span key={id}>{index > 0 && ', '}
+            {' · '}{t('dcv.linkedTasks', { n: g.taskIds.length })}: {g.taskIds.map((id, index) => <span key={id}>{index > 0 && ', '}
               <Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{g.taskKeys[index]}</Link></span>)}
             <ul>{actionsFor(project, 'Handoff', g.handoffId)}</ul></li>)}</ul></section>
-        <section><h3>Which revision are we using? ({project.data.uses.length})</h3>
-          <Link className="text-primary underline" to={`/projects/${project.projectNumber}/coordination`}>Open source revisions</Link></section>
-        <section><h3>What changed? ({project.data.changes.length})</h3><ul>{project.data.changes.map(c => <li key={c.id}>
+        <section><h3>{t('dcv.using')} ({project.data.uses.length})</h3>
+          <Link className="text-primary underline" to={`/projects/${project.projectNumber}/coordination`}>{t('dcv.ws.openSourceRevisions')}</Link></section>
+        <section><h3>{t('dcv.changed')} ({project.data.changes.length})</h3><ul>{project.data.changes.map(c => <li key={c.id}>
           <Link className="text-primary underline" to={`/projects/${project.projectNumber}/changes?panel=ChangeNotice:${c.id}`}>
             {project.projectNumber} · {c.key}</Link> · {c.title} · {c.status}
           <ul>{actionsFor(project, 'ChangeNotice', c.id)}</ul>
           {project.data.unavailableChangeTargets.filter(target => target.changeNoticeId === c.id).map(target =>
-            <p key={target.changeNoticeId} role="status">{target.count} assessment target{target.count === 1 ? '' : 's'} unavailable</p>)}
+            <p key={target.changeNoticeId} role="status">{plural(target.count, 'dcv.targetUnavailableOne', 'dcv.targetUnavailableMany')}</p>)}
         </li>)}</ul></section>
-        <section><h3>What can we start? ({project.data.startabilityReadyTotal} Ready of {project.data.startability.length} assessed)</h3>
-          <p className="text-xs text-muted-foreground">Assessed work due {project.data.startabilityFrom} through {project.data.startabilityTo}; live checks evaluated with this view.</p>
+        <section><h3>{t('dcv.start')} ({t('dcv.readyOfAssessed', { ready: project.data.startabilityReadyTotal, n: project.data.startability.length })})</h3>
+          <p className="text-xs text-muted-foreground">{t('dcv.ws.assessedWindow', { from: project.data.startabilityFrom, to: project.data.startabilityTo })}</p>
           <ul>{project.data.startability.map(row => <li key={row.id}>
             <Link className="text-primary underline" to={`/projects/${project.projectNumber}/${row.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${row.targetType}:${row.targetId}`}>
               {project.projectNumber} · {row.key}</Link> · {row.name} · {row.state}
-            {row.blocked.length > 0 && <span> · Blocked: {row.blocked.join(', ')}</span>}
-            {row.unknown.length > 0 && <span> · Unknown: {row.unknown.join(', ')}</span>}
+            {row.blocked.length > 0 && <span> · {t('dcv.blocked', { list: row.blocked.join(', ') })}</span>}
+            {row.unknown.length > 0 && <span> · {t('dcv.unknown', { list: row.unknown.join(', ') })}</span>}
           </li>)}</ul>
-          {project.data.startability.length === 0 && <p>No assessed work is due in this window.</p>}
-          <Link className="text-primary underline" to={`/projects/${project.projectNumber}/readiness`}>Open project readiness</Link></section>
+          {project.data.startability.length === 0 && <p>{t('dcv.noAssessedWork')}</p>}
+          <Link className="text-primary underline" to={`/projects/${project.projectNumber}/readiness`}>{t('dcv.ws.openReadiness')}</Link></section>
       </div>
-      {project.data.reviews.length > 0 && <p>{project.data.reviews.length} review packages · <Link className="text-primary underline" to={`/projects/${project.projectNumber}/reviews`}>Open reviews</Link></p>}
-      {project.data.linkedIssues.length > 0 && <p>{project.data.linkedIssues.length} linked issues · <Link className="text-primary underline" to={`/projects/${project.projectNumber}/issues`}>Open issues</Link></p>}
+      {project.data.reviews.length > 0 && <p>{t('dcv.ws.reviewPackages', { n: project.data.reviews.length })} · <Link className="text-primary underline" to={`/projects/${project.projectNumber}/reviews`}>{t('dcv.ws.openReviews')}</Link></p>}
+      {project.data.linkedIssues.length > 0 && <p>{t('dcv.ws.linkedIssues', { n: project.data.linkedIssues.length })} · <Link className="text-primary underline" to={`/projects/${project.projectNumber}/issues`}>{t('dcv.ws.openIssues')}</Link></p>}
       <p><Link className="text-primary underline" to={`/projects/${project.projectNumber}/coordination${qs({ meeting: '1', discipline: project.disciplineId, owner: ownerId, from, to })}`}>
-        Open project meeting mode to assign or update an action</Link></p>
+        {t('dcv.ws.openMeetingMode')}</Link></p>
     </section>)}
-    {data.projects.length === 0 && <p>No permitted projects match these filters.</p>}
+    {data.projects.length === 0 && <p>{t('dcv.ws.noProjects')}</p>}
   </Page>
 }

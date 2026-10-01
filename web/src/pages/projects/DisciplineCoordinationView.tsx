@@ -6,7 +6,7 @@ import { useItemPanel } from '@/components/hub/panel-host'
 import { useMe } from '@/lib/auth'
 import { get, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { plural, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 
 type Handoff = { id: string; key: string; title: string; status: string; neededBy: string; promisedBy?: string; targetKey?: string; sendingOwnerId: string; receivingOwnerId: string; sendingDisciplineId: string; receivingDisciplineId: string }
@@ -47,15 +47,15 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     queryKey: ['p', project.id, 'discipline-coordination', disciplineId, ownerId, from, to],
     queryFn: () => get<Data>(`projects/${project.id}/discipline-coordination${qs({ disciplineId, ownerId, from, to })}`),
   })
-  const filters = <div className="mb-3 flex flex-wrap items-end gap-3 rounded border bg-background/60 p-3" aria-label="Coordination scope">
-    <span className="self-center text-xs text-muted-foreground">Project: <strong>{project.projectNumber}</strong>{disciplineId ? ` · ${project.disciplines.find(x => x.id === disciplineId)?.name ?? 'Selected discipline'}` : ''}</span>
-    <label className="text-xs">Owner<select className="mt-1 block rounded border bg-background px-2 py-1 text-sm" value={ownerId} onChange={e => setScope('owner', e.target.value)}><option value="">All permitted owners</option>{team.data?.members.map(m => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></label>
-    <label className="text-xs">From<input className="mt-1 block rounded border bg-background px-2 py-1 text-sm" type="date" value={from} onChange={e => setScope('from', e.target.value)} /></label>
-    <label className="text-xs">To<input className="mt-1 block rounded border bg-background px-2 py-1 text-sm" type="date" value={to} onChange={e => setScope('to', e.target.value)} /></label>
-    {(ownerId || from || to) && <button type="button" className="px-2 py-1 text-xs text-primary underline" onClick={clearScope}>Clear scope</button>}
+  const filters = <div className="mb-3 flex flex-wrap items-end gap-3 rounded border bg-background/60 p-3" aria-label={t('dcv.scopeLabel')}>
+    <span className="self-center text-xs text-muted-foreground">{t('dcv.projectPrefix')} <strong>{project.projectNumber}</strong>{disciplineId ? ` · ${project.disciplines.find(x => x.id === disciplineId)?.name ?? t('dcv.selectedDiscipline')}` : ''}</span>
+    <label className="text-xs">{t('common.owner')}<select className="mt-1 block rounded border bg-background px-2 py-1 text-sm" value={ownerId} onChange={e => setScope('owner', e.target.value)}><option value="">{t('dcv.allPermittedOwners')}</option>{team.data?.members.map(m => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></label>
+    <label className="text-xs">{t('common.from')}<input className="mt-1 block rounded border bg-background px-2 py-1 text-sm" type="date" value={from} onChange={e => setScope('from', e.target.value)} /></label>
+    <label className="text-xs">{t('common.to')}<input className="mt-1 block rounded border bg-background px-2 py-1 text-sm" type="date" value={to} onChange={e => setScope('to', e.target.value)} /></label>
+    {(ownerId || from || to) && <button type="button" className="px-2 py-1 text-xs text-primary underline" onClick={clearScope}>{t('dcv.clearScope')}</button>}
   </div>
   if (q.isPending) return <Loading rows={2} />
-  if (q.error) return <section aria-label="Coordination scope">{filters}<ErrorBanner error={q.error} retry={() => q.refetch()} /></section>
+  if (q.error) return <section aria-label={t('dcv.scopeLabel')}>{filters}<ErrorBanner error={q.error} retry={() => q.refetch()} /></section>
   const d = q.data
   const scopedOwnerId = ownerId || me.id
   const inDateScope = (h: Handoff) => (!from || (h.promisedBy ?? h.neededBy) >= from) && (!to || (h.promisedBy ?? h.neededBy) <= to)
@@ -86,11 +86,11 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   const linkedIssueItems = d.linkedIssues.slice(0, 4)
   const existingActions = (sourceType: LinkedAction['sourceType'], sourceId: string) => d.linkedActions.filter(a => a.sourceType === sourceType && a.sourceId === sourceId)
   const actionLinks = (rows: LinkedAction[]) => rows.length > 0 && <ul className="mt-1 space-y-1">{rows.map(a =>
-    <li key={a.id}>Existing action: <Link className="text-primary underline" to={registerUrl('meetings', `Action:${a.id}`)}>{a.key}</Link> · {a.text} · {tv(a.status)}{a.dueDate && ` · ${fmtDate(a.dueDate)}`}</li>)}</ul>
+    <li key={a.id}>{t('dcv.existingAction')} <Link className="text-primary underline" to={registerUrl('meetings', `Action:${a.id}`)}>{a.key}</Link> · {a.text} · {tv(a.status)}{a.dueDate && ` · ${fmtDate(a.dueDate)}`}</li>)}</ul>
   return <section aria-labelledby="dcv-title" className="rounded-lg border border-primary/20 bg-primary/5 p-4">
     <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><div><h2 id="dcv-title" className="text-lg font-semibold">{t('dcv.title')}</h2><p className="text-sm text-muted-foreground">{t('dcv.subtitle')}</p><p role="status" className="mt-1 text-xs text-muted-foreground">{t('dcv.scopeNote')}</p></div><span className="text-xs text-muted-foreground">{t('dcv.clientRefresh', { when: new Date(d.evaluatedAt).toLocaleTimeString() })}</span></div>
     {filters}
-    {(from || to) && <p role="status" className="mb-3 rounded border border-warn/30 bg-warn-bg px-3 py-2 text-xs text-warn">Date scope filters handoff due/promised dates and assessed work due dates. Changes, reviews, and input uses do not expose compatible date fields.</p>}
+    {(from || to) && <p role="status" className="mb-3 rounded border border-warn/30 bg-warn-bg px-3 py-2 text-xs text-warn">{t('dcv.dateScopeNote')}</p>}
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
       {card('owe', t('dcv.owe'), outgoing.length, items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: `${tv(h.status)} · ${fmtDate(h.promisedBy ?? h.neededBy)}` })), 'handoffs'), 'handoffs')}
       {card('waiting', t('dcv.waiting'), incoming.length, items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: tv(h.status) })), 'handoffs'), 'handoffs')}
@@ -100,20 +100,20 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
           <Link className="underline" to={registerUrl('changes', `ChangeNotice:${c.id}`)}>{c.key}</Link> · {c.title} · {tv(c.status)} · {c.pendingAssessments} {t('dcv.assessments')}
           {actionLinks(existingActions('ChangeNotice', c.id))}
           {d.unavailableChangeTargets.filter(target => target.changeNoticeId === c.id).map(target =>
-            <p key={target.changeNoticeId} role="status">{target.count} assessment target{target.count === 1 ? '' : 's'} unavailable; the action can still link to this change.</p>)}
+            <p key={target.changeNoticeId} role="status">{plural(target.count, 'dcv.targetUnavailableOneLinkable', 'dcv.targetUnavailableManyLinkable')}</p>)}
           {meeting && canCapture && onCapture &&
             <button type="button" className="no-print text-primary underline" onClick={() => onCapture(c.key,
               [{ targetType: 'ChangeNotice', targetId: c.id },
                 ...d.changeTargets.filter(target => target.changeNoticeId === c.id).map(target => ({ targetType: target.targetType, targetId: target.targetId }))])}>
-              {existingActions('ChangeNotice', c.id).length ? 'Create separate action' : 'Capture action'}</button>}
+              {existingActions('ChangeNotice', c.id).length ? t('dcv.createSeparateAction') : t('dcv.captureAction')}</button>}
         </li>)}</ul> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
       {card('start', `${t('dcv.start')}${ownerId || disciplineId ? '' : ` · ${t('dcv.projectWide')}`}`, d.startabilityReadyTotal,
-        <><p className="text-xs text-muted-foreground">{d.startabilityReadyTotal} Ready of {d.startability.length} assessed · due {d.startabilityFrom} to {d.startabilityTo}</p>
+        <><p className="text-xs text-muted-foreground">{t('dcv.readySummary', { ready: d.startabilityReadyTotal, n: d.startability.length, from: d.startabilityFrom, to: d.startabilityTo })}</p>
           {d.startability.length ? <ul className="mt-1 space-y-1">{d.startability.slice(0, 4).map(r => <li key={r.id}>
             <Link className="underline" to={registerUrl(r.targetType === 'Task' ? 'tasks' : 'deliverables', `${r.targetType}:${r.targetId}`)}>{r.key}</Link> · {r.name} · {tv(r.state)}
-            {r.blocked.length > 0 && <span> · Blocked: {r.blocked.join(', ')}</span>}{r.unknown.length > 0 && <span> · Unknown: {r.unknown.join(', ')}</span>}
-          </li>)}</ul> : <p>No assessed work is due in this window.</p>}
-          {d.startability.length > 4 && <p>Showing 4 of {d.startability.length} assessed items. Open readiness for more.</p>}</>, 'readiness')}
+            {r.blocked.length > 0 && <span> · {t('dcv.blocked', { list: r.blocked.join(', ') })}</span>}{r.unknown.length > 0 && <span> · {t('dcv.unknown', { list: r.unknown.join(', ') })}</span>}
+          </li>)}</ul> : <p>{t('dcv.noAssessedWork')}</p>}
+          {d.startability.length > 4 && <p>{t('dcv.showingAssessed', { n: d.startability.length })}</p>}</>, 'readiness')}
     </div>
     <section aria-labelledby="dcv-linked-issues" className="mt-3 rounded-md border bg-card p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -131,11 +131,11 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     </section>
     {d.blockerGroups.length > 0 && <section aria-labelledby="dcv-blockers" className="mt-3 rounded-md border bg-card p-3">
       <h2 id="dcv-blockers" className="font-medium">{t('dcv.waiting')}</h2>
-      <ul className="mt-2 space-y-2 text-sm">{d.blockerGroups.map(group => <li key={group.handoffId}><Link className="font-medium text-primary underline" to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · {group.taskKeys.length} linked tasks ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})
+      <ul className="mt-2 space-y-2 text-sm">{d.blockerGroups.map(group => <li key={group.handoffId}><Link className="font-medium text-primary underline" to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · {t('dcv.linkedTasks', { n: group.taskKeys.length })} ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})
         {actionLinks(existingActions('Handoff', group.handoffId))}
         {meeting && canCapture && onCapture && <button type="button" className="no-print text-primary underline" onClick={() => onCapture(group.handoffKey,
           [{ targetType: 'Handoff', targetId: group.handoffId }, ...group.taskIds.map(id => ({ targetType: 'Task', targetId: id }))])}>
-          {existingActions('Handoff', group.handoffId).length ? 'Create separate action' : 'Capture action'}</button>}
+          {existingActions('Handoff', group.handoffId).length ? t('dcv.createSeparateAction') : t('dcv.captureAction')}</button>}
       </li>)}</ul>
     </section>}
   </section>

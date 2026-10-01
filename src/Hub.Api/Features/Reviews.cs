@@ -162,6 +162,7 @@ public static class ReviewEndpoints
             await db.SaveChangesAsync(); p.CurrentRoundId = r.Id; p.RoundNumber = r.Number;
             if (body.RequiredForIssue) {
                 foreach (var d in await db.Deliverables.Where(d => db.ReviewManifestItems.Any(m => m.RoundId == r.Id && m.DeliverableId == d.Id)).ToListAsync()) {
+                    Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, d.ProjectDisciplineId));
                     Check.That(d.Status is not (DeliverableStatus.Issued or DeliverableStatus.Accepted), "sourceRevisionIds", "review.issued");
                     if (d.RequiredReviewPackageId != null) { Access.Demand(Permissions.ManageTeam(access.Actor, ctx)); Check.Reason(body.Reason); }
                     d.RequiredReviewPackageId = p.Id; db.Audit.Note(d, reason: body.Reason);
@@ -200,10 +201,12 @@ public static class ReviewEndpoints
             if (p.RequiredForIssue) foreach (var deliverableId in removedDeliverables) {
                 var d = await db.Deliverables.SingleAsync(d => d.Id == deliverableId);
                 if (d.RequiredReviewPackageId != p.Id) continue;
+                Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, d.ProjectDisciplineId));
                 d.RequiredReviewPackageId = null; db.Audit.Note(d, reason: reason);
             }
             if (p.RequiredForIssue) foreach (var m in manifest) {
                 var d = await db.Deliverables.SingleAsync(d => d.Id == m.DeliverableId);
+                Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, d.ProjectDisciplineId));
                 Check.That(d.Status is not (DeliverableStatus.Issued or DeliverableStatus.Accepted), "sourceRevisionIds", "review.issued");
                 Check.That(d.RequiredReviewPackageId == null || d.RequiredReviewPackageId == p.Id, "sourceRevisionIds", "review.other_gate");
                 d.RequiredReviewPackageId = p.Id; db.Audit.Note(d, reason: reason);

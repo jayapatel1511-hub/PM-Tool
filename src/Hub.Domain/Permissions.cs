@@ -81,7 +81,7 @@ public static class Permissions
     public static Allow ConfirmBasis(Actor a, ProjectContext p, Guid disciplineId, Guid? approverId)
     {
         var gate = CoordinationWrite(a, p); if (!gate) return gate;
-        return IsDL(p, disciplineId) || approverId == a.Id ? Allow.Yes : Allow.No("basis.independent");
+        return IsDL(p, disciplineId) || p.IsMember && approverId == a.Id ? Allow.Yes : Allow.No("basis.independent");
     }
     public static Allow ProposeAllocation(Actor a, ProjectContext p)
     {

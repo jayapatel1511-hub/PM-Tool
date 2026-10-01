@@ -55,6 +55,8 @@ public static class ChangeEndpoints
                 sourceVersion = w.RowVersion; sourceKey = w.Key; authors = await Coordination.Authors(db, deliverable);
             } else Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, body.ProjectDisciplineId));
             var head = await db.SourceHeads.SingleOrDefaultAsync(h => h.ProjectId == p.Id && h.Identity == identity);
+            if (head is not null && body.DeliverableId is null)
+                Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, head.ProjectDisciplineId));
             SourceRevision? previous = null;
             if (body.SupersedesId is { } old) {
                 previous = await Coordination.Revision(db, p.Id, old); Check.That(Coordination.Identity(previous) == identity, "supersedesId", "change.same_source");
@@ -118,6 +120,7 @@ public static class ChangeEndpoints
             var next = await Coordination.Revision(db, p.Id, c.NewRevisionId); var head = await Coordination.Head(db, next) ?? throw ApiException.Invalid("source", "coord.reference");
             var publisherOwner = next.DeliverableId is { } sourceId ? (await Coordination.Target(db, p, "Deliverable", sourceId)).OwnerId : head.OwnerId;
             Access.Demand(Permissions.PublishSource(access.Actor, ctx, c.ProjectDisciplineId, publisherOwner)); await Coordination.Person(db, p, c.OwnerId); await Coordination.Discipline(db, p.Id, c.ProjectDisciplineId);
+            Access.Demand(Permissions.PublishSource(access.Actor, ctx, head.ProjectDisciplineId, head.OwnerId));
             HeadVersion(head, body.HeadRowVersion);
             if (head.CurrentRevisionId != c.OldRevisionId) throw ApiException.Conflict("source_changed", "change.current", new { currentRevisionId = head.CurrentRevisionId, currentRowVersion = head.RowVersion });
             if (next.DeliverableId is { } source) {

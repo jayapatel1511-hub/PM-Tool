@@ -36,6 +36,30 @@ public sealed class ReviewChangeTests(HubFactory f)
     Guid Assignment(Guid package, Guid discipline) => f.Db(db => db.DisciplineReviews.Single(a => a.ProjectDisciplineId == discipline && db.ReviewPackages.Any(p => p.Id == package && p.CurrentRoundId == a.RoundId)).Id);
 
     [Fact]
+    public async Task Another_discipline_lead_cannot_set_a_deliverable_issue_gate()
+    {
+        var s = await New();
+        var body = ReviewBody(s) with { ProjectDisciplineId = s.Electrical, CoordinatorId = data.User(TestData.Omar) };
+        await Post(TestData.Omar, Root(s) + "/reviews", body, 403);
+        Assert.Null(f.Db(db => db.Deliverables.Single(d => d.Id == s.Deliverable).RequiredReviewPackageId));
+        Assert.False(f.Db(db => db.ReviewPackages.Any(p => p.ProjectId == s.P.Id)));
+    }
+
+    [Fact]
+    public async Task External_source_supersession_requires_the_existing_head_discipline()
+    {
+        var s = await New();
+        var body = Registration(s) with { DeliverableId = null, DeliverableRowVersion = null, OwnerId = data.User(TestData.Marc), SourceSystem = "External", ExternalIdentifier = "civil-survey" };
+        var first = await Post(TestData.Marc, Root(s) + "/source-revisions", body);
+        var head = f.Db(db => db.SourceHeads.Single(h => h.ProjectId == s.P.Id && h.CurrentRevisionId == first.G("id")));
+        var next = body with { RequestId = Guid.NewGuid(), Revision = "B", Url = "https://example.test/B.pdf", SupersedesId = first.G("id"), HeadRowVersion = head.RowVersion,
+            ProjectDisciplineId = s.Electrical, OwnerId = data.User(TestData.Omar), Description = "Attempt discipline relabelling", EffectiveDate = new(2026, 9, 14), AssessmentDueDate = new(2026, 9, 18) };
+        await Post(TestData.Omar, Root(s) + "/source-revisions", next, 403);
+        Assert.Equal(first.G("id"), f.Db(db => db.SourceHeads.Single(h => h.Id == head.Id).CurrentRevisionId));
+        Assert.False(f.Db(db => db.ChangeNotices.Any(c => c.ProjectId == s.P.Id)));
+    }
+
+    [Fact]
     public async Task Coordination_includes_review_assigned_to_other_discipline()
     {
         var setup = await New();

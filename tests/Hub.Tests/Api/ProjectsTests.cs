@@ -147,6 +147,23 @@ public sealed class ProjectsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Supervisor_reassigns_only_to_a_project_member_or_direct_report()
+    {
+        var p = await d.Project();
+        var source = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Alex) && m.RemovedAt == null));
+        var task = await d.NewTask(p.Id, TestData.Pm, new { assigneeId = d.User(TestData.Alex) });
+
+        var outsider = await f.As(TestData.Sam).DeleteAsync($"/api/v1/projects/{p.Id}/members/{source.Id}?reassignTo={d.User(TestData.Diane)}&reason=Staffing%20change");
+        Assert.Equal(HttpStatusCode.Forbidden, outsider.StatusCode);
+        Assert.Equal(d.User(TestData.Alex), await f.DbAsync(db => db.Tasks.Where(t => t.Id == task.G("id")).Select(t => t.AssigneeId).SingleAsync()));
+
+        var directReport = await f.As(TestData.Sam).DeleteAsync($"/api/v1/projects/{p.Id}/members/{source.Id}?reassignTo={d.User(TestData.Jill)}&reason=Staffing%20change");
+        Assert.Equal(HttpStatusCode.OK, directReport.StatusCode);
+        Assert.Equal(d.User(TestData.Jill), await f.DbAsync(db => db.Tasks.Where(t => t.Id == task.G("id")).Select(t => t.AssigneeId).SingleAsync()));
+        Assert.True(await f.DbAsync(db => db.ProjectMembers.AnyAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Jill) && m.RemovedAt == null)));
+    }
+
+    [Fact]
     public async Task Project_number_changes_are_admin_only() // P-07
     {
         var p = await d.Project();

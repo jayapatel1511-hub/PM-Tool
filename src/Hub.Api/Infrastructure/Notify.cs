@@ -41,8 +41,11 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
 
         foreach (var u in users)
         {
-            if (NotificationEvents.ProjectScoped.Contains(eventType) && item.ProjectId is { } handoffProject
-                && !await EmailProjectAccess.Allowed(db, u.Id, [handoffProject])) continue;
+            // Project creation emits membership/lead notices before the new project is flushed.
+            // Existing projects must pass the current-access check; the queued email is still
+            // locked to the project and rechecked by EmailJob before delivery.
+            if (item.ProjectId is { } projectId && await db.Projects.AnyAsync(p => p.Id == projectId)
+                && !await EmailProjectAccess.Allowed(db, u.Id, [projectId])) continue;
             if (muted.Contains(u.Id) && !def.DirectAssignment) continue;
             var pref = prefs.GetValueOrDefault(u.Id);
             var app = pref?.InApp ?? defaults.App;
@@ -76,7 +79,7 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
                 db.Emails.Add(new EmailMessage
                 {
                     UserId = u.Id, ToAddress = u.Email, Subject = subject, Kind = "Immediate", DedupKey = dedup, CreatedAt = now, NextAttemptAt = now,
-                    RequiredProjectIds = NotificationEvents.ProjectScoped.Contains(eventType) && item.ProjectId is { } scopedProject ? [scopedProject] : [],
+                    RequiredProjectIds = item.ProjectId is { } scopedProject ? [scopedProject] : [],
                     BodyText = $"{title}{(body is null ? "" : "\n\n" + body)}{link}\n\n{Text.Get("email.footer")}",
                 });
             }

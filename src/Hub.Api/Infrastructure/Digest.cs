@@ -119,7 +119,8 @@ public static class Digest
                 int od = work.Count(w => w.UserId == r.Id && w.IsOverdue), bl = work.Count(w => w.UserId == r.Id && w.IsBlocked), rv = stalled.Count(x => x == r.Id);
                 if (od + bl + rv > 0) staffRows.Add(new Row(r.Id, null, r.DisplayName, "", Text.Get("digest.staff_detail", od, bl, rv), $"{baseUrl}/my-work?userId={r.Id}"));
             }
-            staffRows.AddRange((await db.Notifications.AsNoTracking().Where(n => n.UserId == userId && n.EventType == NotificationEvents.StaffAssignment && n.CreatedAt > since)
+            staffRows.AddRange((await db.Notifications.AsNoTracking().Where(n => n.UserId == userId && n.EventType == NotificationEvents.StaffAssignment && n.CreatedAt > since
+                    && (n.ProjectId == null || pids.Contains(n.ProjectId.Value)))
                 .OrderByDescending(n => n.CreatedAt).ToListAsync()).Select(n => new Row(n.Id, null, n.Title, "", "", $"{baseUrl}{n.LinkPath}")));
         }
         var staff = Make("staff", staffRows);
@@ -250,14 +251,19 @@ public static class WeeklySummary
 {
     public sealed record Part(Guid ProjectId, string ProjectNumber, string Name, string Computed, string Reported, string? NextSubmission, DateOnly? NextSubmissionDate,
         int Overdue, int Blocked, int DecisionsOverdue, List<string> Attention, int Changes, Dictionary<string, int> ChangesByType);
-    public sealed record Result(string Subject, string Body, List<Part> Projects);
+    public sealed record Result(string Subject, string Body, List<Part> Projects)
+    { public Guid[] RequiredProjectIds { get; init; } = []; }
 
     static readonly string[] Important = ["status", "assignment", "date", "decision"];
 
     /// Active projects the person manages: as the project's PM or with the PM role on its team.
     public static IQueryable<Project> Managed(HubDb db, Guid userId) =>
         db.Projects.AsNoTracking().Where(p => p.Status == ProjectStatus.Active && (p.ProjectManagerId == userId
-            || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == userId && m.RemovedAt == null && m.Roles.Contains(ProjectRole.PM))));
+            || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == userId && m.RemovedAt == null && m.Roles.Contains(ProjectRole.PM)))
+            && (p.Visibility != Visibility.Restricted
+                || p.ProjectManagerId == userId
+                || db.UserRoles.Any(r => r.UserId == userId && (r.Role == SystemRole.Admin || r.Role == SystemRole.Executive))
+                || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == userId && m.RemovedAt == null)));
 
     public static async Task<Result?> Build(HubDb db, Guid userId, string firstName, DateOnly today, DateTimeOffset since, DateTimeOffset now, OrgSettings s, string baseUrl)
     {
@@ -303,7 +309,7 @@ public static class WeeklySummary
             body.AppendLine($"  {baseUrl}/projects/{x.ProjectNumber}/dashboard").AppendLine();
         }
         body.AppendLine(Text.Get("weekly.footer", $"{baseUrl}/preferences"));
-        return new Result(subject, body.ToString(), parts);
+        return new Result(subject, body.ToString(), parts) { RequiredProjectIds = [.. projects.Select(p => p.Id)] };
     }
 }
 
@@ -347,7 +353,7 @@ public sealed class WeeklySummaryJob : IJob
             var summary = await WeeklySummary.Build(db, u.Id, u.DisplayName.Split(' ')[0], today, pref?.LastWeeklySummaryAt ?? now.AddDays(-7), now, s, baseUrl);
             if (summary is not null && !string.IsNullOrEmpty(u.Email))
             {
-                db.Emails.Add(new EmailMessage { UserId = u.Id, ToAddress = u.Email, Subject = summary.Subject, BodyText = summary.Body, Kind = "WeeklySummary",
+                db.Emails.Add(new EmailMessage { UserId = u.Id, ToAddress = u.Email, Subject = summary.Subject, BodyText = summary.Body, Kind = "WeeklySummary", RequiredProjectIds = summary.RequiredProjectIds,
                     DedupKey = $"weekly:{u.Id}:{today:yyyy-MM-dd}", CreatedAt = now, NextAttemptAt = now });
                 sent++;
             }

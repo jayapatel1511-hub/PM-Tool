@@ -1,9 +1,11 @@
 using System.Net;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
+using Hub.Api.Features;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Hub.Tests.Api;
 
@@ -276,6 +278,38 @@ public sealed class CollaborationTests(HubFactory f)
             await f.RunJob<DigestJob>();
             Assert.Equal(1, await f.DbAsync(db => db.Emails.CountAsync(e => e.UserId == me && e.Kind == "Digest")));
         });
+    }
+
+    [Fact]
+    public async Task Project_notifications_and_staff_digest_rows_require_current_project_access()
+    {
+        var hidden = await d.Project();
+        await f.DbAsync(async db =>
+        {
+            var p = await db.Projects.SingleAsync(x => x.Id == hidden.Id);
+            p.Visibility = Visibility.Restricted;
+            db.Notifications.Add(new Notification { UserId = U(TestData.Sam), EventType = NotificationEvents.StaffAssignment, ProjectId = hidden.Id,
+                Title = "Secret staffing change", LinkPath = $"/projects/{hidden.ProjectNumber}", CreatedAt = f.Clock.Now, UpdatedAt = f.Clock.Now });
+            await db.SaveChangesAsync();
+            return 0;
+        });
+
+        using var scope = f.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<HubDb>();
+        var audit = scope.ServiceProvider.GetRequiredService<AuditContext>();
+        audit.ActorId = U(TestData.Pm);
+        audit.ActorType = "User";
+        var notifier = scope.ServiceProvider.GetRequiredService<Notifier>();
+        await notifier.Send(NotificationEvents.TaskAssigned, U(TestData.Jill), TeamService.Item(hidden), "Secret assignment");
+        await db.SaveChangesAsync();
+
+        Assert.False(await f.DbAsync(db => db.Notifications.AnyAsync(n => n.UserId == U(TestData.Jill) && n.Title == "Secret assignment")));
+        Assert.False(await f.DbAsync(db => db.Emails.AnyAsync(e => e.UserId == U(TestData.Jill) && e.Subject == "Secret assignment")));
+
+        var result = await Digest.Build(db, U(TestData.Sam), "Sam", DateOnly.FromDateTime(f.Clock.Now.DateTime), f.Clock.Now.AddDays(-1), f.Clock.Now,
+            new OrgSettings(), "");
+        Assert.DoesNotContain(result?.Sections.SelectMany(x => x.Rows) ?? [], row => row.Name == "Secret staffing change");
+        Assert.DoesNotContain(hidden.Id, result?.RequiredProjectIds ?? []);
     }
 
     [Fact]

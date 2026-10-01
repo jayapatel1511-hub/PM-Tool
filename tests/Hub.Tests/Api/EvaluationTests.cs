@@ -5,6 +5,7 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Hub.Tests.Api;
 
@@ -25,6 +26,36 @@ public sealed class EvaluationTests(HubFactory f)
 
     Task<List<AttentionItem>> Attention(Guid projectId) => f.DbAsync(db => db.Attention.Where(a => a.ProjectId == projectId).ToListAsync());
     Task<TaskState> State(JsonNode t) => f.DbAsync(db => db.TaskStates.FirstAsync(s => s.TaskId == t.G("id")));
+
+    [Fact]
+    public async Task Concurrent_first_evaluations_materialise_each_snapshot_once()
+    {
+        var project = await d.Project();
+        await d.NewTask(project.Id, TestData.Pm, new { assigneeId = U(TestData.Alex) });
+        await d.NewTask(project.Id, TestData.Pm, new { assigneeId = U(TestData.Alex) });
+
+        var evaluations = Enumerable.Range(0, 8).Select(async _ =>
+        {
+            using var scope = f.Services.CreateScope();
+            scope.ServiceProvider.GetRequiredService<AuditContext>().AsSystem();
+            await scope.ServiceProvider.GetRequiredService<EvaluationService>().EvaluateProject(project.Id, notifyTransitions: false);
+        });
+        await Task.WhenAll(evaluations);
+
+        var counts = f.Db(db => new
+        {
+            Tasks = db.TaskStates.Count(s => s.ProjectId == project.Id),
+            Deliverables = db.DeliverableStates.Count(s => s.ProjectId == project.Id),
+            Milestones = db.MilestoneStates.Count(s => s.ProjectId == project.Id),
+            Decisions = db.DecisionStates.Count(s => s.ProjectId == project.Id),
+            Projects = db.ProjectStates.Count(s => s.ProjectId == project.Id),
+        });
+        Assert.Equal(2, counts.Tasks);
+        Assert.Equal(0, counts.Deliverables);
+        Assert.Equal(0, counts.Milestones);
+        Assert.Equal(0, counts.Decisions);
+        Assert.Equal(1, counts.Projects);
+    }
 
     [Fact]
     public async Task Dependency_sides_cycle_refusal_and_chain() // AC-DEP-01, AC-DEP-02, AC-DEP-07

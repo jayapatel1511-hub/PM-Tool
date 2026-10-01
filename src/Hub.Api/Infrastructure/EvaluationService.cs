@@ -13,6 +13,12 @@ public sealed class EvaluationService(HubDb db, SettingsStore store, TimeProvide
 
     public async Task<EvalResult?> EvaluateProject(Guid projectId, bool notifyTransitions = true, CancellationToken ct = default)
     {
+        // First-load evaluations can arrive concurrently from several reads or outbox events. Serialize
+        // the complete read/evaluate/materialise unit per project so missing snapshot rows cannot race
+        // into duplicate primary-key inserts. The project row is already the coordination lock used by
+        // other project-wide commands and is held until every state/attention write is committed.
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        await Coordination.Lock(db, projectId);
         var p = await db.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.Id == projectId, ct);
         if (p is null) return null;
         var s = await store.Get(db);
@@ -160,6 +166,7 @@ public sealed class EvaluationService(HubDb db, SettingsStore store, TimeProvide
             catch (Exception e) { log.LogError(e, "Transition notices failed for project {ProjectId}", projectId); }
             await db.SaveChangesAsync(ct);
         }
+        await tx.CommitAsync(ct);
         return r;
     }
 

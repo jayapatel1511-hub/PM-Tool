@@ -534,7 +534,7 @@ public static class ReadinessEndpoints
             });
 
     static Task<Coordination.Result> SetApplicability(Guid projectId, string targetType, Guid targetId, string code,
-        ApplicabilityBody body, Access access, HubDb db, TimeProvider clock) =>
+        ApplicabilityBody body, Access access, HubDb db, TimeProvider clock, SettingsStore settingsStore) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "readiness.applicability", targetType, targetId, code, body },
             access, db, clock, async (project, ctx) =>
             {
@@ -554,9 +554,9 @@ public static class ReadinessEndpoints
                 check.EvidenceUrl = string.IsNullOrWhiteSpace(body.EvidenceUrl) ? null : Coordination.Url(body.EvidenceUrl);
                 check.RecordedBy = access.Me.Id;
                 var checks = await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.Id).ToListAsync();
-                assessment.State = ReadinessRules.Evaluate(checks.Select(c => new ReadinessCheck(c.Code, c.Applies, c.Satisfied)),
-                    null, DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime)).State;
-                assessment.EvaluatedAt = clock.GetUtcNow();
+                var settings = await settingsStore.Get(db);
+                await EvaluateCurrent(db, project, target.Type, target.Id, assessment, checks,
+                    clock.Today(settings), clock.GetUtcNow(), settingsStore);
                 db.Audit.Note(check, reason: check.Reason);
                 db.Audit.Note(assessment, reason: check.Reason);
                 return check;

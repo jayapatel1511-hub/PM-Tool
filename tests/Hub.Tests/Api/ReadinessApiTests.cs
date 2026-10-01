@@ -484,6 +484,48 @@ public sealed class ReadinessApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Applicability_after_first_live_read_does_not_restore_cached_ready_state()
+    {
+        var project = await data.Project();
+        var predecessor = await data.NewTask(project.Id, extra: new { assigneeId = data.User(TestData.Alex) });
+        var successor = await data.NewTask(project.Id, extra: new { assigneeId = data.User(TestData.Alex) });
+        var successorId = successor.G("id");
+        var assessmentId = Guid.NewGuid();
+        await f.DbAsync(async db =>
+        {
+            db.Dependencies.Add(new TaskDependency { ProjectId = project.Id, PredecessorTaskId = predecessor.G("id"), SuccessorTaskId = successorId });
+            db.ReadinessAssessments.Add(new ReadinessAssessment { Id = assessmentId, ProjectId = project.Id, TargetType = "Task", TargetId = successorId,
+                OwnerId = data.User(TestData.Alex), IntendedOutput = "Successor output", CompletionCriteria = "Predecessor complete", State = ReadinessState.Ready });
+            foreach (var code in ReadinessCheckCode.All)
+                db.ReadinessChecks.Add(new ReadinessCheckRecord { ProjectId = project.Id, AssessmentId = assessmentId, Code = code,
+                    Applies = code is not (ReadinessCheckCode.ProductionCapacity or ReadinessCheckCode.SubmissionGate),
+                    Satisfied = code is not (ReadinessCheckCode.ProductionCapacity or ReadinessCheckCode.SubmissionGate) });
+            await db.SaveChangesAsync();
+            return 0;
+        });
+
+        var path = $"/api/v1/projects/{project.Id}/readiness/Task/{successorId}";
+        var first = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.NotReady, first["assessment"]!.S("state"));
+        var rows = f.Db(db => new
+        {
+            Assessment = db.ReadinessAssessments.Single(a => a.Id == assessmentId),
+            Gate = db.ReadinessChecks.Single(c => c.AssessmentId == assessmentId && c.Code == ReadinessCheckCode.SubmissionGate),
+        });
+
+        await (await f.As(TestData.Pm).Post($"{path}/checks/{Uri.EscapeDataString(ReadinessCheckCode.SubmissionGate)}/applicability",
+            new ReadinessEndpoints.ApplicabilityBody(Guid.NewGuid(), rows.Assessment.RowVersion, rows.Gate.RowVersion, false, "No prerequisite package applies", null))).Json();
+
+        var saved = f.Db(db => new
+        {
+            Assessment = db.ReadinessAssessments.Single(a => a.Id == assessmentId),
+            Predecessor = db.ReadinessChecks.Single(c => c.AssessmentId == assessmentId && c.Code == ReadinessCheckCode.Predecessor),
+        });
+        Assert.Equal(ReadinessState.NotReady, saved.Assessment.State);
+        Assert.False(saved.Predecessor.Satisfied);
+    }
+
+    [Fact]
     public async Task Chair_proposal_requires_performer_confirmation_and_snapshot_retains_withdrawal()
     {
         var project = await data.Project();

@@ -131,3 +131,61 @@ A domain test confirms an assumption permission cannot override an unissued or u
 Three existing fixtures that stored Applies/Satisfied = true for an unlinked gate now mark it Not Applicable: `ReadinessApiTests` (two) and `HandoffsTests` (one). The API cannot produce that stored state. `tools/trace_spec.py --check`: 0 not cited. `npm --prefix web run build` and `npm --prefix web run lint` passed.
 
 **UNPROVEN:** browser rehearsal of the prerequisite inspector, and a notice to the work owner when a linked package is issued (not sent; §17 has no readiness entry).
+## FR-RDY-02 task start authorisation — 2026-10-01
+
+Jay's 032–033 decision is now enforced in the shared `TaskEndpoints.ApplyTransition`, so it applies to direct `/tasks/{id}/transition` and bulk `transition`. A start is Not Started onto a path through In Progress, including a one-step Complete. If readiness is Not Ready or Needs Assessment, the start needs the starter's `acknowledgeReadiness`, a reason of at least 5 characters and a PM/Discipline Lead authorisation. Work never assessed counts as Needs Assessment, and an evaluator refusal (such as an invalid owner) is treated the same way with its message. The guard runs after the existing review, access, lifecycle and reason guards and reuses `ReadinessEndpoints.EvaluateCurrent` read-only; `Readiness.cs` and `WeeklyCommitments.cs` are unchanged.
+- **Refusal:** a 422 `start_authorisation_required` problem names the readiness state and reasons. It lists `needs` (`acknowledgement`, `reason`, `authorisation`) and says whether the caller may authorise.
+- **Inline:** a PM or lead starter authorises inline.
+- **Recorded:** a PM or lead can record an authorisation in advance (`POST /tasks/{id}/start-authorisations`, retry-safe). `GET /tasks/{id}/start-readiness` shows the current state and the usable authorisation.
+- **Binding:** an authorisation is bound to the readiness state and reason codes it acknowledged and is used by exactly one start.
+
+Ready and Proceed under Assumption start normally. Bulk start reports each refusal and starts none of the refused tasks. A refused bulk row also drops any authorisation it would have used or recorded. The `TaskStartAuthorisation` entity and its additive migration `20261001211215_TaskStartAuthorisation` record the authoriser, reason, readiness state, unknown and blocked codes, creation time, starter and start time. A database trigger rejects edits to that content, deletion, and changes after use. `dotnet ef migrations has-pending-model-changes` reported no drift.
+
+The frontend handles every start through `useTaskActions`: the task panel/list status control, board drop including keyboard drag, My Work and the progress offer. On this refusal it opens a readiness dialog showing:
+- the readiness state;
+- the blocking and unknown checks;
+- any usable authorisation;
+- an acknowledgement checkbox (focused once loaded);
+- a reason field.
+
+A PM/lead starts inline. A performer starts only with a recorded authorisation, and otherwise sees who must authorise. A PM or lead has an Authorise start control on a Not Started task's panel. The bulk UI offers no status transition, so bulk start is API-only. Labels are in the `tasks.startAuth*` block.
+
+**PASS (local slice):**
+- **API tests:** the new `TaskStartTests` passed 7/7. They cover the following:
+  - never-assessed performer refusal and needs;
+  - PM/lead-only authorisation needing acknowledgement and a reason;
+  - starter acknowledgement still required;
+  - single use after cancel/restore;
+  - lead inline authorisation;
+  - access, Read Only and review guards answering first;
+  - a one-step Complete counting as a start;
+  - an other-discipline lead refused;
+  - stale-readiness authorisation refused;
+  - Ready and Proceed under Assumption starting without authorisation;
+  - bulk per-task refusal and lead bulk start;
+  - trigger immutability.
+- **Full suite:** `dotnet test tests/Hub.Tests` passed 520/520 on the final code. Existing tests were not weakened. `TestData.Move` now retries a `start_authorisation_required` refusal by recording the project PM's authorisation and acknowledging with a reason, as a user would; passing `acknowledgeReadiness` opts out.
+- **Frontend:** `npm --prefix web run build` passed; `npm --prefix web run lint` exited 0 with 0 errors and 88 warnings, none in the new file. `git diff --check` passed.
+- **`test:coordination`:** passed with installed Chrome, 0 errors and zero violations in 5 axe scans.
+- **Fresh database:** `hub_agent_exception` with `Seed__ReviewDemo=true` migrated through the new migration and seeded DEMO-101–103.
+- **Browser (Playwright Chrome, port 5091):**
+  - Yagmur, a team member, starting an unassessed synthetic Civil task saw Needs Assessment and that no authorisation existed, with no start button; the task stayed Not Started.
+  - Jay, the Civil lead, recorded an authorisation from the task panel; the record button stayed disabled until acknowledgement and reason were given.
+  - Yagmur then saw Jay's authorisation, acknowledged, gave a reason and started; the task was In Progress with the authorisation used by Yagmur and her reason in the activity log.
+  - Taylor, the PM, moved a PM-discipline task to In Progress by keyboard on the board and authorised inline.
+  - When readiness became Ready while Jay's dialog was open, the dialog showed the server's 422 refusal and the refreshed Ready state.
+  - Ready work then started with no dialog and no authorisation.
+  - A keyboard-only authorisation (Tab, Space, typing, Enter) saved.
+  - Settled axe WCAG 2.1 A/AA scans of the five dialog states above had zero violations, with one incomplete contrast item each. A separate keyboard-run inspection identified these items as the aria-hidden status glyph and a dialog description whose background overlaps the overlay.
+  - The only console errors were the expected 422 refusals.
+- **Cleanup:** the API was stopped and `hub_agent_exception` was dropped.
+
+**NOT PASSING (pre-existing):** `test:handoffs` hard-codes the bundled Playwright browser, so it was run with a preload that substitutes installed Chrome. It fails a colour-contrast assertion in the handoff draft dialog. The identical failure occurs on base `00c7f9a` without these changes. That test does not exercise task starts.
+
+**UNPROVEN:**
+- A PM/lead authoriser who later loses that role still leaves a usable unused authorisation.
+- A bulk start UI does not exist.
+- Manual assistive-technology review.
+- Deployed authentication.
+- Notifications for recorded authorisations (none are sent).
+- Complete packet acceptance.

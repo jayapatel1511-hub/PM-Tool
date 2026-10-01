@@ -71,6 +71,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<OutputCommitment> OutputCommitments => Set<OutputCommitment>();
     public DbSet<OutputCommitmentEvent> OutputCommitmentEvents => Set<OutputCommitmentEvent>();
     public DbSet<ReadinessSubmissionPrerequisite> ReadinessSubmissionPrerequisites => Set<ReadinessSubmissionPrerequisite>();
+    public DbSet<TaskStartAuthorisation> TaskStartAuthorisations => Set<TaskStartAuthorisation>();
     public DbSet<PersonAvailabilityOverride> AvailabilityOverrides => Set<PersonAvailabilityOverride>();
     public DbSet<ResourceAllocation> Allocations => Set<ResourceAllocation>();
     public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
@@ -758,6 +759,21 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<WeeklyPlanSnapshot, Project>(mb, x => x.ProjectId);
         Fk<OutputCommitment, Project>(mb, x => x.ProjectId);
         Fk<OutputCommitmentEvent, Project>(mb, x => x.ProjectId);
+        // FR-RDY-02 task start authorisations (TaskStartAuthorisation migration).
+        mb.Entity<TaskStartAuthorisation>(e =>
+        {
+            e.HasIndex(x => new { x.TaskId, x.CreatedAt });
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_task_start_authorisation_readiness",
+                    $"readiness_at_authorisation IN ({In([ReadinessState.NotReady, ReadinessState.NeedsAssessment])})");
+                t.HasCheckConstraint("ck_task_start_authorisation_start", "(started_by IS NULL) = (started_at IS NULL)");
+            });
+        });
+        Fk<TaskStartAuthorisation, Project>(mb, x => x.ProjectId);
+        Fk<TaskStartAuthorisation, WorkTask>(mb, x => x.TaskId);
+        Fk<TaskStartAuthorisation, AppUser>(mb, x => x.AuthorisedBy);
+        Fk<TaskStartAuthorisation, AppUser>(mb, x => x.StartedBy);
 
 
         foreach (var et in mb.Model.GetEntityTypes().Where(t => typeof(Audited).IsAssignableFrom(t.ClrType)))

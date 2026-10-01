@@ -28,6 +28,7 @@ import type { MilestoneRow } from './Milestones'
 import { useCurrentProject } from './ProjectLayout'
 import { ExportMenu } from '@/components/hub/export'
 import { ViewMenu } from '@/components/hub/views'
+import { StartAuthorisationDialog, type StartRequest } from './TaskStart'
 
 // ---------- Shapes (GET /projects/{id}/tasks, /tasks/{id}) ----------
 
@@ -112,12 +113,16 @@ export function useTaskHints(p: Pick<ProjectDetail, 'status' | 'permissions'>) {
   }
 }
 
+/** FR-RDY-02: the server refused a start that is not Ready until it is acknowledged, reasoned and authorised. */
+const needsStartAuthorisation = (e: unknown) => e instanceof ApiError && e.code === 'start_authorisation_required'
+
 /** Saves, transitions and the follow-up offers shared by the list, board and panel (T-16 reasons, T-20 progress offers, G-07 conflicts). */
 /** `onSaved` hears about every change that was actually saved, including ones completed in a dialog (meeting tray, §12.13). */
 export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key: string, what: string) => void) {
   const [ask, setAsk] = useState<{ title: string; run: (reason: string) => Promise<unknown> } | null>(null)
   const [moving, setMoving] = useState<MoveRequest | null>(null)
   const [offer, setOffer] = useState<{ id: string; key: string; rowVersion: number; to: string } | null>(null)
+  const [starting, setStarting] = useState<StartRequest | null>(null)
 
   const save = async (r: { id: string; key: string; rowVersion: number }, body: Record<string, unknown>): Promise<number | null> => {
     try {
@@ -140,9 +145,15 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
   /** true when saved, false when refused, null when a dialog opened to collect what the move needs. */
   const move = async (m: MoveRequest): Promise<boolean | null> => {
     if (m.needsReason || m.to === 'Revision Required' || m.needsReviewer) { setMoving(m); return null }
-    try { await post(`tasks/${m.id}/transition`, { toStatus: m.to, rowVersion: m.rowVersion }); onSaved?.(m.id, m.key, `→ ${tv(m.to)}`); onChanged(); return true }
-    catch (e) { toast.error(Object.values((e as ApiError).fieldErrors ?? {})[0]?.[0] ?? errorText(e)); onChanged(); return false }
+    const body = { toStatus: m.to, rowVersion: m.rowVersion }
+    try { await post(`tasks/${m.id}/transition`, body); onSaved?.(m.id, m.key, `→ ${tv(m.to)}`); onChanged(); return true }
+    catch (e) {
+      if (needsStartAuthorisation(e)) { setStarting({ id: m.id, key: m.key, to: m.to, body }); return null } // FR-RDY-02
+      toast.error(Object.values((e as ApiError).fieldErrors ?? {})[0]?.[0] ?? errorText(e)); onChanged(); return false
+    }
   }
+  /** A PM or Discipline Lead records a start authorisation that the performer uses (FR-RDY-02). */
+  const authoriseStart = (r: { id: string; key: string }) => setStarting({ id: r.id, key: r.key })
 
   // FR-010: progress above 0 on a Not Started task offers In Progress; 100 offers Complete or Ready for Review.
   const setProgress = async (r: TaskRow, pct: number) => {
@@ -156,7 +167,13 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
   const dialogs = (
     <>
       {ask && <ConfirmDialog open title={ask.title} body={t('task.reasonBody')} reason onOpenChange={(o) => !o && setAsk(null)} onConfirm={(reason) => ask.run(reason)} />}
-      {moving && <TransitionDialog m={moving} onClose={(done) => { const m = moving; setMoving(null); if (done) { onSaved?.(m.id, m.key, `→ ${tv(m.to)}`); onChanged() } }} />}
+      {moving && <TransitionDialog m={moving} onStart={(body) => setStarting({ id: moving.id, key: moving.key, to: moving.to, body })}
+        onClose={(done) => { const m = moving; setMoving(null); if (done) { onSaved?.(m.id, m.key, `→ ${tv(m.to)}`); onChanged() } }} />}
+      {starting && <StartAuthorisationDialog req={starting} onClose={(done) => {
+        const st = starting; setStarting(null)
+        if (done && st.to) onSaved?.(st.id, st.key, `→ ${tv(st.to)}`)
+        if (done) onChanged()
+      }} />}
       {offer && (
         <ConfirmDialog open title={t('task.offerTitle', { key: offer.key, to: tv(offer.to) })} confirmLabel={tv(offer.to)} onOpenChange={(o) => !o && setOffer(null)}
           onConfirm={async () => {
@@ -170,7 +187,7 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
       )}
     </>
   )
-  return { save, move, setProgress, dialogs }
+  return { save, move, setProgress, authoriseStart, dialogs }
 }
 
 /** A short description of a saved change for the meeting tray. */
@@ -181,7 +198,7 @@ function describe(body: Record<string, unknown>): string {
 }
 
 /** Status change with the reason, review comment, reviewer or status note it needs (R-03, AC-TSK-03, G-09, C-08). */
-export function TransitionDialog({ m, onClose }: { m: MoveRequest; onClose: (done: boolean) => void }) {
+export function TransitionDialog({ m, onClose, onStart }: { m: MoveRequest; onClose: (done: boolean) => void; onStart?: (body: Record<string, unknown>) => void }) {
   const revision = m.to === 'Revision Required'
   const [comment, setComment] = useState('')
   const [reviewer, setReviewer] = useState<string | null>(null)
@@ -190,7 +207,9 @@ export function TransitionDialog({ m, onClose }: { m: MoveRequest; onClose: (don
       body={m.via ? t('task.via', { via: tv(m.via) }) : undefined} confirmLabel={tv(m.to)}
       reason={m.needsReason ? true : undefined} busy={(revision && !comment.trim()) || (!!m.needsReviewer && !reviewer)}
       onConfirm={async (reason) => {
-        await post(`tasks/${m.id}/transition`, { toStatus: m.to, reason: reason || undefined, comment: comment.trim() || undefined, reviewerId: reviewer ?? undefined, rowVersion: m.rowVersion })
+        const body = { toStatus: m.to, reason: reason || undefined, comment: comment.trim() || undefined, reviewerId: reviewer ?? undefined, rowVersion: m.rowVersion }
+        try { await post(`tasks/${m.id}/transition`, body) }
+        catch (e) { if (onStart && needsStartAuthorisation(e)) { onStart(body); return } throw e } // FR-RDY-02: the readiness dialog takes over
         onClose(true)
       }}>
       {m.needsReviewer && <Field label={t('field.ReviewerId')} hint={t('task.reviewerNeeded')}><PeoplePicker value={reviewer} onChange={setReviewer} /></Field>}

@@ -11,7 +11,7 @@ public static class TaskEndpoints
 {
     public sealed record CreateBody(string Name, string? Description, Guid? ProjectDisciplineId, Guid? DeliverableId, Guid? MilestoneId, Guid? AssigneeId,
         Guid? ReviewerId, bool? RequiresReview, string? Priority, DateOnly? StartDate, DateOnly? DueDate, decimal? EstimatedHours, Guid[]? DependsOn);
-    public sealed record TransitionBody(string ToStatus, string? Reason, string? Comment, Guid? ReviewerId, int? RowVersion);
+    public sealed record TransitionBody(string ToStatus, string? Reason, string? Comment, Guid? ReviewerId, int? RowVersion, bool? AcknowledgeReadiness = null);
     public sealed record BlockBody(string Type, string Reason, int? RowVersion);
     public sealed record UserBody(Guid UserId);
     public sealed record BulkBody(Guid[] TaskIds, string Operation, JsonElement? Params, string? Reason);
@@ -39,6 +39,7 @@ public static class TaskEndpoints
         api.MapGet("/tasks/{id}", Get);
         api.MapPatch("/tasks/{id:guid}", Edit);
         api.MapPost("/tasks/{id:guid}/transition", Transition);
+        TaskStartEndpoints.Map(api);
         api.MapPost("/tasks/{id:guid}/block", SetBlock);
         api.MapPost("/tasks/{id:guid}/unblock", ClearBlock);
         api.MapPost("/tasks/{id:guid}/collaborators", AddCollaborator);
@@ -220,6 +221,7 @@ public static class TaskEndpoints
                 Transitions = transitions, CompleteHint = notAllowedComplete, IsReviewer = t.ReviewerId == a.Id,
                 Dependencies = Permissions.ManageDependency(a, ctx, facts, facts).Ok, EnterTime = Permissions.EnterTime(a, ctx).Ok,
                 NeedsReason = p.Status == ProjectStatus.Complete, AllowSelfReview = s.AllowSelfReview,
+                AuthoriseStart = t.Status == TaskStatuses.NotStarted && Permissions.ManageCoordination(a, ctx, t.ProjectDisciplineId).Ok,
             },
         };
     }
@@ -350,7 +352,8 @@ public static class TaskEndpoints
         Check.OneOf(body.ToStatus, TaskStatuses.All, "toStatus");
         var s = await store.Get(db);
         var warnings = new List<string>();
-        await ApplyTransition(db, access, ctx, p, t, body.ToStatus, body.Reason, body.Comment, body.ReviewerId, s, clock, team, warnings);
+        await ApplyTransition(db, access, ctx, p, t, body.ToStatus, body.Reason, body.Comment, body.ReviewerId, s, clock, team, warnings,
+            body.AcknowledgeReadiness == true, store);
         await db.SaveChangesAsync();
         await TransitionNotices(notify, p, t, body.Comment);
         await db.SaveChangesAsync();
@@ -358,7 +361,8 @@ public static class TaskEndpoints
     }
 
     public static async Task ApplyTransition(HubDb db, Access access, ProjectContext ctx, Project p, WorkTask t, string to, string? reason, string? comment,
-        Guid? reviewerId, OrgSettings s, TimeProvider clock, TeamService team, List<string> warnings)
+        Guid? reviewerId, OrgSettings s, TimeProvider clock, TeamService team, List<string> warnings,
+        bool acknowledgeReadiness = false, SettingsStore? store = null)
     {
         var from = t.Status;
         if (from == to) return;
@@ -389,6 +393,10 @@ public static class TaskEndpoints
         if (to == TaskStatuses.ReadyForReview && t.ReviewerId is null) throw ApiException.Invalid("reviewerId", "task.reviewer_required"); // AC-TSK-03
         if (Workflow.TaskNeedsReason(from, to)) reason = Check.Reason(reason);
         ProjectEndpoints.CorrectionReason(p, reason);
+        // FR-RDY-02: a start that is not Ready needs acknowledgement, a reason and PM/lead authorisation, checked only
+        // after the review, access and lifecycle guards above so it cannot stand in for any of them.
+        if (TaskStartEndpoints.IsStart(from, path))
+            await TaskStartEndpoints.Guard(db, access, ctx, p, t, acknowledgeReadiness, reason, s, store, clock);
         var now = clock.GetUtcNow();
         var authorId = db.Audit.ActorId!.Value;
         if (from == TaskStatuses.NotStarted && path.Contains(TaskStatuses.InProgress))
@@ -639,13 +647,21 @@ public static class TaskEndpoints
                         break;
                     case "hold": await ApplyTransition(db, access, ctx, p, t, TaskStatuses.OnHold, reason, null, null, s, clock, team, warnings); break;
                     case "cancel": await ApplyTransition(db, access, ctx, p, t, TaskStatuses.Cancelled, reason, null, null, s, clock, team, warnings); break;
-                    case "transition": await ApplyTransition(db, access, ctx, p, t, prm.Str("toStatus")!, reason, null, null, s, clock, team, warnings); break;
+                    case "transition": await ApplyTransition(db, access, ctx, p, t, prm.Str("toStatus")!, reason, null, null, s, clock, team, warnings,
+                        prm.Bool("acknowledgeReadiness") == true, store); break;
                 }
                 t.LastActivityAt = clock.GetUtcNow();
                 if (t.StartDate is { } s1 && t.DueDate is { } d1 && s1 > d1) throw ApiException.Invalid("dueDate", "deliverable.start_after_due");
                 updated.Add(t);
             }
-            catch (ApiException e) { db.ChangeTracker.Entries().Where(x => x.Entity == t).ToList().ForEach(x => x.Reload()); skipped.Add(new { t.Id, t.Key, reason = e.Message }); }
+            catch (ApiException e)
+            {
+                // A refused task keeps nothing from this attempt, including a start authorisation it would have used or recorded.
+                foreach (var x in db.ChangeTracker.Entries().Where(x => x.Entity == t
+                    || x.Entity is TaskStartAuthorisation sa && sa.TaskId == t.Id && x.State != EntityState.Unchanged).ToList())
+                    if (x.State == EntityState.Added) x.State = EntityState.Detached; else x.Reload();
+                skipped.Add(new { t.Id, t.Key, reason = e.Message });
+            }
         }
         if (assignee is { } newA) await team.EnsureMember(p, newA, ProjectRole.TeamMember);
         await db.SaveChangesAsync();

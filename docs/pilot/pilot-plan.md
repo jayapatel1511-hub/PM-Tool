@@ -2,6 +2,7 @@
 
 Confirmed participant count (Q16): **50 people**. Proposed operational default: **3 PMs, 6 real projects, 8 weeks**, then a recorded go/no-go decision (§5.1, §35.1); choose the actual PM/project mix with the sponsor. The pilot
 starts only after AC-VIS-01 to AC-VIS-08 pass on the integrated build and the threat-model walkthrough is done.
+Hosting, accounts, approvals, backups and monitoring for the homedev pilot are tracked in [pilot-readiness.md](pilot-readiness.md).
 
 ## Before week 1
 

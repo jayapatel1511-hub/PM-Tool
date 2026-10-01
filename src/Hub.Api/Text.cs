@@ -415,6 +415,7 @@ public static class Text
         ["action.illegal_transition"] = "An action cannot move from {0} to {1}.", ["action.follows_task"] = "This action follows its task {0}; change the task instead.",
         ["action.follows_task_edit"] = "This action follows the task it became; that link stays.", ["action.convert_open"] = "Only an open action can become a task.",
         ["action.already_converted"] = "This action is already a task.", ["action.converted_from"] = "From action {0} of {1} ({2}).",
+        ["action.reuse_open"] = "Only an open action can be reused; create a separate action instead.", ["action.reuse_source"] = "Choose the handoff or change this action is reused for.",
         ["notify.action_assigned"] = "{0} gave you action {1} {2}", ["notify.action_discipline"] = "{0} gave the {3} discipline action {1} {2}",
         ["notify.action_no_lead"] = "{0} gave the {3} discipline action {1} {2}; the discipline has no lead",
         ["export.actions"] = "Meeting actions {0}", ["col.actionText"] = "Action", ["col.meeting"] = "Meeting", ["col.meetingDate"] = "Meeting date", ["col.ownerType"] = "Owner type",

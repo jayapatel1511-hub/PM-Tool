@@ -28,7 +28,7 @@ type Data = { handoffs: Handoff[]; changes: Change[]; reviews: Review[]; linkedI
 /** Packet 030's five-question coordination projection over the existing registers. */
 export function DisciplineCoordinationView({ project, disciplineId, meeting, canCapture, onCapture }: {
   project: ProjectDetail; disciplineId?: string; meeting?: boolean; canCapture?: boolean;
-  onCapture?: (label: string, links: { targetType: string; targetId: string }[]) => void
+  onCapture?: (label: string, links: { targetType: string; targetId: string }[], linkedActionIds: string[]) => void
 }) {
   const me = useMe()
   const openPanel = useItemPanel()
@@ -102,10 +102,11 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
           {d.unavailableChangeTargets.filter(target => target.changeNoticeId === c.id).map(target =>
             <p key={target.changeNoticeId} role="status">{plural(target.count, 'dcv.targetUnavailableOneLinkable', 'dcv.targetUnavailableManyLinkable')}</p>)}
           {meeting && canCapture && onCapture &&
-            <button type="button" className="no-print text-primary underline" onClick={() => onCapture(c.key,
+            <button type="button" className="no-print text-primary underline" aria-label={t('dcv.reuseCaptureFor', { key: c.key })} onClick={() => onCapture(c.key,
               [{ targetType: 'ChangeNotice', targetId: c.id },
-                ...d.changeTargets.filter(target => target.changeNoticeId === c.id).map(target => ({ targetType: target.targetType, targetId: target.targetId }))])}>
-              {existingActions('ChangeNotice', c.id).length ? t('dcv.createSeparateAction') : t('dcv.captureAction')}</button>}
+                ...d.changeTargets.filter(target => target.changeNoticeId === c.id).map(target => ({ targetType: target.targetType, targetId: target.targetId }))],
+              existingActions('ChangeNotice', c.id).map(a => a.id))}>
+              {t('dcv.captureAction')}</button>}
         </li>)}</ul> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
       {card('start', `${t('dcv.start')}${ownerId || disciplineId ? '' : ` · ${t('dcv.projectWide')}`}`, d.startabilityReadyTotal,
         <><p className="text-xs text-muted-foreground">{t('dcv.readySummary', { ready: d.startabilityReadyTotal, n: d.startability.length, from: d.startabilityFrom, to: d.startabilityTo })}</p>
@@ -133,9 +134,10 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
       <h2 id="dcv-blockers" className="font-medium">{t('dcv.waiting')}</h2>
       <ul className="mt-2 space-y-2 text-sm">{d.blockerGroups.map(group => <li key={group.handoffId}><Link className="font-medium text-primary underline" to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · {t('dcv.linkedTasks', { n: group.taskKeys.length })} ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})
         {actionLinks(existingActions('Handoff', group.handoffId))}
-        {meeting && canCapture && onCapture && <button type="button" className="no-print text-primary underline" onClick={() => onCapture(group.handoffKey,
-          [{ targetType: 'Handoff', targetId: group.handoffId }, ...group.taskIds.map(id => ({ targetType: 'Task', targetId: id }))])}>
-          {existingActions('Handoff', group.handoffId).length ? t('dcv.createSeparateAction') : t('dcv.captureAction')}</button>}
+        {meeting && canCapture && onCapture && <button type="button" className="no-print text-primary underline" aria-label={t('dcv.reuseCaptureFor', { key: group.handoffKey })} onClick={() => onCapture(group.handoffKey,
+          [{ targetType: 'Handoff', targetId: group.handoffId }, ...group.taskIds.map(id => ({ targetType: 'Task', targetId: id }))],
+          existingActions('Handoff', group.handoffId).map(a => a.id))}>
+          {t('dcv.captureAction')}</button>}
       </li>)}</ul>
     </section>}
   </section>

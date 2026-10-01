@@ -27,9 +27,10 @@ type Constraint = { id: string; targetType: string; targetId: string; descriptio
 type ReadyOutput = { id: string; targetType: string; targetId: string; key: string; name: string; dueDate: string | null; intendedOutput: string; completionCriteria: string; state: string }
 type Aggregate = { constraints: Constraint[]; constraintsTotal: number; constraintsTruncated: boolean; readyOutputs: ReadyOutput[]; readyOutputsTotal: number; readyOutputsTruncated: boolean }
 
-function monday(d: string) {
-  const day = (new Date(`${d}T00:00:00Z`).getUTCDay() + 6) % 7
-  return addDays(d, -day)
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+/** FR-RDY-05: promise weeks start on the project's coordination day (Monday when unset). */
+function weekStart(d: string, day: string) {
+  return addDays(d, -((new Date(`${d}T00:00:00Z`).getUTCDay() - DAYS.indexOf(day) + 7) % 7))
 }
 
 function dateValue(d: string) {
@@ -46,7 +47,8 @@ export function ReadinessTab() {
   const options = useQuery({ queryKey: ['coord-options', p.id], queryFn: () => get<CoordOptions>(`projects/${p.id}/changes/options`) })
   const lookahead = useMe().settings.coordinationLookaheadWeeks
   const [sp, setSp] = useSearchParams()
-  const defaultFrom = monday(today())
+  const day = DAYS.includes(p.coordinationDay ?? '') ? p.coordinationDay! : 'Monday'
+  const defaultFrom = weekStart(today(), day)
   const from = sp.get('from') ?? defaultFrom
   const to = sp.get('to') ?? addDays(defaultFrom, lookahead * 7 - 1)
   const set = (key: string, value: string) => {
@@ -60,29 +62,23 @@ export function ReadinessTab() {
     const fromValue = dateValue(from)
     const toValue = dateValue(to)
     if (fromValue === null || toValue === null || toValue < fromValue || toValue - fromValue > 83 * 86400000) return []
-    const first = monday(from)
-    const last = monday(to)
+    const first = weekStart(from, day)
+    const last = weekStart(to, day)
     const result: string[] = []
     for (let w = first; w <= last; w = addDays(w, 7)) result.push(w)
     return result
-  }, [from, to])
+  }, [from, to, day])
   const invalidWindow = weeks.length === 0 || weeks.length > 12
   const q = useQuery({
-    queryKey: ['p', p.id, 'readiness-window', from, to, weeks],
+    queryKey: ['p', p.id, 'readiness-window', from, to],
     enabled: !invalidWindow,
     queryFn: async () => {
-      const [aggregate, ...pages] = await Promise.all([
+      // A promise due in the window starts at most six days earlier; rows keep the week start they were recorded with.
+      const [aggregate, weekly] = await Promise.all([
         get<Aggregate>(`projects/${p.id}/readiness/window?from=${from}&to=${to}`),
-        ...weeks.map((week) => get<Weekly>(`projects/${p.id}/weekly-commitments?weekStart=${week}`)),
+        get<Weekly>(`projects/${p.id}/weekly-commitments?from=${addDays(from, -6)}&to=${to}`),
       ])
-      return {
-        ...aggregate,
-        commitments: pages.flatMap((page) => page.commitments),
-        total: pages.reduce((n, page) => n + page.total, 0),
-        truncated: pages.some((page) => page.truncated),
-        truncatedWeeks: pages.filter((page) => page.truncated).map((page) => page.commitments[0]?.weekStart).filter((week): week is string => !!week),
-        snapshots: pages.flatMap((page) => page.snapshots),
-      }
+      return { ...aggregate, ...weekly }
     },
   })
   const filters = <div className="flex flex-wrap items-end gap-2 rounded-lg border bg-card p-3">
@@ -99,6 +95,8 @@ export function ReadinessTab() {
   const data = q.data
   const shown = data.commitments.filter((c) => c.targetDate >= from && c.targetDate <= to)
   const snapshotByWeek = new Map(data.snapshots.map((s) => [s.weekStart, s]))
+  // Weeks recorded on an earlier coordination day are shown beside the current ones, never re-dated.
+  const sections = [...new Set([...weeks, ...shown.map((c) => c.weekStart), ...data.snapshots.map((s) => s.weekStart)])].sort()
   const base = `/projects/${p.projectNumber}`
   const workLink = (c: Commitment) => `${base}/${c.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${c.targetType}:${c.targetId}`
   return (
@@ -127,7 +125,7 @@ export function ReadinessTab() {
       </div>
       {data.truncated && <div role="status" className="rounded border border-warn/30 bg-warn-bg px-3 py-2 text-sm text-warn">{t('readiness.truncated', { n: data.total })}</div>}
       {shown.length === 0 && !data.truncated && <div className="rounded-lg border bg-card"><Empty>{t('readiness.empty')}</Empty></div>}
-      {weeks.map((week) => {
+      {sections.map((week) => {
         const rows = shown.filter((c) => c.weekStart === week)
         const snapshot = snapshotByWeek.get(week)
         return <Section key={week} title={t('readiness.week', { date: fmtDate(week) })} count={rows.length}>
@@ -137,8 +135,7 @@ export function ReadinessTab() {
             <span>{t('readiness.met', { n: snapshot.met, total: snapshot.committedCount })}</span>
             {snapshot.withdrawn > 0 && <span>{t('readiness.withdrawn', { n: snapshot.withdrawn })}</span>}
           </div>}
-          {data.truncatedWeeks.includes(week) && <p role="status" className="border-b border-warn/30 bg-warn-bg px-4 py-2 text-xs text-warn">{t('readiness.weekTruncated')}</p>}
-          {rows.length === 0 ? <p className="px-4 py-3 text-sm text-muted-foreground">{t(data.truncatedWeeks.includes(week) ? 'readiness.weekTruncated' : 'readiness.noWeekCommitments')}</p> : <ul className="divide-y">{rows.map((c) => <li key={c.id} className="flex flex-wrap items-start gap-3 px-4 py-3 text-sm">
+          {rows.length === 0 ? <p className="px-4 py-3 text-sm text-muted-foreground">{t('readiness.noWeekCommitments')}</p> : <ul className="divide-y">{rows.map((c) => <li key={c.id} className="flex flex-wrap items-start gap-3 px-4 py-3 text-sm">
             <div className="min-w-0 flex-1"><Link className="font-medium text-primary hover:underline" to={workLink(c)}>{c.targetType} <span className="font-mono text-xs">{c.targetId.slice(0, 8)}</span></Link><p className="mt-1">{c.intendedOutput}</p><p className="text-xs text-muted-foreground">{t('readiness.criteria')}: {c.completionCriteria}</p></div>
             <div className="flex shrink-0 flex-wrap items-center gap-2"><span className="text-xs text-muted-foreground">{fmtDate(c.targetDate)}</span><StatusPill status={c.state} />{c.readinessAtCommit ? <Chip tone={c.readinessAtCommit === 'Ready' ? 'done' : 'idle'}>{tv(c.readinessAtCommit)}</Chip> : <Chip tone="idle">{t('readiness.notRecorded')}</Chip>}</div>
             <Button size="sm" variant="outline" onClick={() => set('promise', c.id)}>{t('readiness.reviewPromise')}</Button>
@@ -146,7 +143,8 @@ export function ReadinessTab() {
         </Section>
       })}
       <p className="text-xs text-muted-foreground"><ExternalLink className="mr-1 inline size-3" aria-hidden />{t('readiness.sourceNote')}</p>
-      {proposing && options.data && <ProposePromise projectId={p.id} options={options.data} week={weeks[0]} close={() => setProposing(false)} done={done} />}
+      {proposing && options.data && <ProposePromise projectId={p.id} options={options.data} week={weeks[0]} day={day}
+        complete={p.status === 'Complete'} close={() => setProposing(false)} done={done} />}
       {inspecting && options.data && <ReadinessInspector projectId={p.id} options={options.data} close={() => setInspecting(false)} done={done} />}
       {snapshotWeek && <SnapshotForm projectId={p.id} week={snapshotWeek} close={() => setSnapshotWeek(null)} done={done} />}
       {sp.get('promise') && options.data && <PromiseDetail projectId={p.id} id={sp.get('promise')!} options={options.data}
@@ -155,22 +153,25 @@ export function ReadinessTab() {
   )
 }
 
-function ProposePromise({ projectId, options, week, close, done }: { projectId: string; options: CoordOptions; week: string; close: () => void; done: () => void }) {
-  const [target, setTarget] = useState(''), [weekStart, setWeekStart] = useState(week), [targetDate, setTargetDate] = useState(week)
-  const [output, setOutput] = useState(''), [criteria, setCriteria] = useState('')
+function ProposePromise({ projectId, options, week, day, complete, close, done }: { projectId: string; options: CoordOptions; week: string; day: string
+  complete: boolean; close: () => void; done: () => void }) {
+  const [target, setTarget] = useState(''), [start, setStart] = useState(week), [targetDate, setTargetDate] = useState(week)
+  const [output, setOutput] = useState(''), [criteria, setCriteria] = useState(''), [reason, setReason] = useState('')
   const [type, id] = target.split(':'), work = workRef(options, type, id)
   const eligible = { ...options, tasks: options.tasks.filter(w => w.ownerId === options.actorId || options.manageDisciplineIds.includes(w.projectDisciplineId)),
     deliverables: options.deliverables.filter(w => w.ownerId === options.actorId || options.manageDisciplineIds.includes(w.projectDisciplineId)) }
   return <CommandForm path={`projects/${projectId}/weekly-commitments/${type}/${id}`} title={t('readiness.propose')}
     hint={t('readiness.proposeHint')} onClose={close} onDone={done} submitLabel={t('common.save')}
-    payload={() => { if (!work) throw new Error(t('coord.unavailable')); return { targetRowVersion: work.rowVersion, weekStart, targetDate,
-      intendedOutput: output, completionCriteria: criteria } }}>
+    payload={() => { if (!work) throw new Error(t('coord.unavailable')); return { targetRowVersion: work.rowVersion, weekStart: start, targetDate,
+      intendedOutput: output, completionCriteria: criteria, reason: reason || null } }}>
     <SelectField label={t('readiness.work')} value={target} onChange={setTarget} choices={workChoices(eligible)} />
     {work && <p>{t('readiness.performer')}: {personName(options, work.ownerId)}</p>}
-    <Field label={t('readiness.weekStart')} htmlFor="promise-week"><Input id="promise-week" type="date" required value={weekStart} onChange={e => { setWeekStart(e.target.value); setTargetDate(e.target.value) }} /></Field>
-    <Field label={t('readiness.targetDate')} htmlFor="promise-date"><Input id="promise-date" type="date" required min={weekStart} max={dateValue(weekStart) === null ? undefined : addDays(weekStart, 6)} value={targetDate} onChange={e => setTargetDate(e.target.value)} /></Field>
+    <Field label={t('readiness.weekStart')} htmlFor="promise-week" hint={t('readiness.weekStartHint', { day: t(`day.${day}`) })}>
+      <Input id="promise-week" type="date" required min={week} step={7} value={start} onChange={e => { setStart(e.target.value); setTargetDate(e.target.value) }} /></Field>
+    <Field label={t('readiness.targetDate')} htmlFor="promise-date"><Input id="promise-date" type="date" required min={start} max={dateValue(start) === null ? undefined : addDays(start, 6)} value={targetDate} onChange={e => setTargetDate(e.target.value)} /></Field>
     <Field label={t('readiness.output')} htmlFor="promise-output"><Textarea id="promise-output" required maxLength={2000} value={output} onChange={e => setOutput(e.target.value)} /></Field>
     <Field label={t('readiness.criteria')} htmlFor="promise-criteria"><Textarea id="promise-criteria" required maxLength={2000} value={criteria} onChange={e => setCriteria(e.target.value)} /></Field>
+    {complete && <Field label={t('common.reason')} htmlFor="promise-reason" hint={t('settings.correctionHint')}><Textarea id="promise-reason" required minLength={5} maxLength={4000} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
   </CommandForm>
 }
 

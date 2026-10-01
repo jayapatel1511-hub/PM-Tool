@@ -434,6 +434,7 @@ public static class Text
         ["notify.basis_withdrawn"] = "Design basis {0} was withdrawn; assess the impact on your work",
         ["notify.basis_decision_reopened"] = "Decision {0} was reopened; assess the design basis your work uses",
         ["notify.basis_conflict"] = "Design basis {0} conflicts with another confirmed value",
+        ["readiness.week_start"] = "A coordination week for this project starts on {0}.",
         ["basis.duplicate"] = "A basis entry with this title, discipline and scope already exists. Inspect it before creating another.",
         ["basis.units"] = "Numeric design criteria need explicit units before confirmation.",
         ["basis.independent"] = "A responsible Discipline Lead or assigned independent approver must confirm this version.",

@@ -55,7 +55,7 @@ public sealed class CoordinationLifecycleSweepTests(HubFactory f)
                 Day.AddDays(7), "https://example.test/constraint"),
             w => $"/api/v1/projects/{w.P.Id}/readiness/Task/{w.Task}/constraints"),
         ["032 weekly promise propose"] = new(TestData.Alex, 200, w => $"/api/v1/projects/{w.P.Id}/weekly-commitments/Task/{w.Task}",
-            w => new WeeklyCommitmentsEndpoints.ProposeBody(Guid.NewGuid(), Version<WorkTask>(w.Task), Day.AddDays(7), Day.AddDays(9), "Layout output", "Layout checked"),
+            w => new WeeklyCommitmentsEndpoints.ProposeBody(Guid.NewGuid(), Version<WorkTask>(w.Task), Day.AddDays(7), Day.AddDays(9), "Layout output", "Layout checked", Reason),
             w => $"/api/v1/projects/{w.P.Id}/weekly-commitments"),
         ["033 issue location add"] = new(TestData.Alex, 201, w => $"/api/v1/issues/{w.Issue}/locations",
             w => new { kind = "SiteArea", siteArea = "North", rowVersion = Version<Issue>(w.Issue) },
@@ -89,8 +89,6 @@ public sealed class CoordinationLifecycleSweepTests(HubFactory f)
     {
         var cmd = Commands()[command];
         var (who, status, expect) = Cases[scenario];
-        // Run demands a reason on Complete; the weekly promise body has no reason/rationale/description field to carry one.
-        if (command == "032 weekly promise propose" && scenario == "Complete, PM") expect = 400;
         var w = await New();
         var body = cmd.Body(w);
         await SetStatus(w, status);
@@ -98,7 +96,6 @@ public sealed class CoordinationLifecycleSweepTests(HubFactory f)
         var response = await f.As(who ?? cmd.Actor).Post(cmd.Path(w), body);
         Assert.True((int)response.StatusCode == (expect == 0 ? cmd.Success : expect),
             $"{command} / {scenario}: expected {(expect == 0 ? cmd.Success : expect)}, got {(int)response.StatusCode} {await response.Content.ReadAsStringAsync()}");
-        if (expect == 400) Assert.NotNull((await response.Json(400))["errors"]?["reason"]);
 
         // Reads stay available: lifecycle restrictions and the Read Only role veto writes, not the register or the 030 projection.
         foreach (var reader in who == TestData.Rita ? [TestData.Pm, TestData.Rita] : new[] { TestData.Pm })

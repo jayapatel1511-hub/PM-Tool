@@ -38,6 +38,7 @@ param emailBaseUrl string = ''
 param emailMode string = 'Log'
 param emailFrom string = ''
 param emailSmtpHost string = ''
+param emailSmtpUser string = ''
 param emailSmtpPort string = '587'
 param smtpPasswordSecretName string = ''
 param graphDirectorySync bool = false
@@ -46,7 +47,7 @@ param graphMailbox string = ''
 param graphManagedIdentityClientId string = ''
 @description('Optional Entra group object ID for operator Key Vault Secrets Officer access.')
 param operatorGroupObjectId string = ''
-@description('Enable a disabled-by-default staging slot for controlled cutover.')
+@description('Prepare a disabled-by-default staging slot only; its separate identity still needs vault and PostgreSQL grants before cutover.')
 param enableDeploymentSlot bool = false
 @description('Operators alerted on errors, job failures, delayed evaluation and late digests (§22). Empty: no alert rules are deployed.')
 param operatorEmail string = ''
@@ -78,6 +79,7 @@ var appSettings = [
   { name: 'Email__From', value: emailFrom }
   { name: 'Email__BaseUrl', value: emailBaseUrl }
   { name: 'Email__Smtp__Host', value: emailSmtpHost }
+  { name: 'Email__Smtp__User', value: emailSmtpUser }
   { name: 'Email__Smtp__Port', value: emailSmtpPort }
   { name: 'Email__Smtp__Password', value: empty(smtpPasswordSecretName) ? '' : '@Microsoft.KeyVault(VaultName=${vault.name};SecretName=${smtpPasswordSecretName})' }
   // The review resource group and database persist across preview releases.
@@ -204,6 +206,9 @@ resource appHostnameBinding 'Microsoft.Web/sites/hostNameBindings@2023-12-01' = 
   }
 }
 
+// This slot has a separate system-assigned identity. It intentionally reuses the reviewed app settings, including the
+// main app's database username, until a company-approved slot identity, Key Vault grant and PostgreSQL principal exist.
+// It is a prepared resource only; enabling it does not establish blue/green readiness.
 resource appSlot 'Microsoft.Web/sites/slots@2023-12-01' = if (enableDeploymentSlot) {
   parent: app
   name: 'staging'

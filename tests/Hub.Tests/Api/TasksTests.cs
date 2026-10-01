@@ -12,6 +12,28 @@ public sealed class TasksTests(HubFactory f)
     readonly TestData d = new(f);
 
     [Fact]
+    public async Task Same_status_transition_still_requires_authority()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex) });
+        var before = await f.DbAsync(db => db.Notifications.CountAsync(n => n.ItemId == t.G("id")));
+        var response = await f.As(TestData.Diane).Post($"/api/v1/tasks/{t.G("id")}/transition",
+            new { toStatus = TaskStatuses.NotStarted, rowVersion = await d.TaskVersion(t) });
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(before, await f.DbAsync(db => db.Notifications.CountAsync(n => n.ItemId == t.G("id"))));
+    }
+
+    [Fact]
+    public async Task Read_only_assignee_cannot_add_collaborators()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Rita) });
+        var response = await f.As(TestData.Rita).Post($"/api/v1/tasks/{t.G("id")}/collaborators", new { userId = d.User(TestData.Jill) });
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.False(await f.DbAsync(db => db.Collaborators.AnyAsync(c => c.TaskId == t.G("id") && c.UserId == d.User(TestData.Jill))));
+    }
+
+    [Fact]
     public async Task Refused_bulk_assignment_cannot_add_a_member_to_a_restricted_project()
     {
         (await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true })).EnsureSuccessStatusCode();

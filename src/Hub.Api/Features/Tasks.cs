@@ -58,6 +58,7 @@ public static class TaskEndpoints
             var pid = await ActivityEndpoints.ItemProject(db, type, id) ?? throw ApiException.NotFound();
             var (_, ctx) = await access.Project(pid, track: false);
             Access.Demand(body.UserId == access.Me.Id ? Allow.Yes : Permissions.Comment(access.Actor, ctx));
+            if (!await EmailProjectAccess.Allowed(db, body.UserId, [pid])) throw ApiException.NotFound();
             await Watch(db, pid, type, id, body.UserId, "Manual");
             await db.SaveChangesAsync();
             return Results.NoContent();
@@ -352,10 +353,11 @@ public static class TaskEndpoints
         Check.OneOf(body.ToStatus, TaskStatuses.All, "toStatus");
         var s = await store.Get(db);
         var warnings = new List<string>();
+        var previousStatus = t.Status;
         await ApplyTransition(db, access, ctx, p, t, body.ToStatus, body.Reason, body.Comment, body.ReviewerId, s, clock, team, warnings,
             body.AcknowledgeReadiness == true, store);
         await db.SaveChangesAsync();
-        await TransitionNotices(notify, p, t, body.Comment);
+        if (t.Status != previousStatus) await TransitionNotices(notify, p, t, body.Comment);
         await db.SaveChangesAsync();
         return Results.Ok(new { t.Id, t.Status, t.RowVersion, t.ProgressPct, t.ReviewRound, warnings });
     }
@@ -365,7 +367,11 @@ public static class TaskEndpoints
         bool acknowledgeReadiness = false, SettingsStore? store = null)
     {
         var from = t.Status;
-        if (from == to) return;
+        if (from == to)
+        {
+            Access.Demand(Permissions.TaskTransition(access.Actor, ctx, await Facts(db, t), from, to));
+            return;
+        }
         var a = access.Actor;
         // AC-TSK-03: a reviewer can be chosen in the same step as Ready for Review.
         if (reviewerId is { } rid && to is TaskStatuses.ReadyForReview or TaskStatuses.Complete && t.RequiresReview && t.ReviewerId != rid)
@@ -494,6 +500,7 @@ public static class TaskEndpoints
     static async Task<IResult> AddCollaborator(Guid id, UserBody body, Access access, HubDb db, TeamService team, Notifier notify, TimeProvider clock)
     {
         var (t, p, ctx) = await Load(db, access, id);
+        Access.Demand(Permissions.Writable(access.Actor, ctx));
         var facts = await Facts(db, t);
         Access.Demand(Permissions.AssignTask(access.Actor, ctx, facts).Ok || t.AssigneeId == access.Me.Id ? Allow.Yes : Allow.No("perm.task_assign"));
         await DeliverableEndpoints.ActivePerson(db, body.UserId, "userId");
@@ -511,6 +518,7 @@ public static class TaskEndpoints
     static async Task<IResult> RemoveCollaborator(Guid id, Guid userId, Access access, HubDb db)
     {
         var (t, _, ctx) = await Load(db, access, id);
+        Access.Demand(Permissions.Writable(access.Actor, ctx));
         var facts = await Facts(db, t);
         Access.Demand(Permissions.AssignTask(access.Actor, ctx, facts).Ok || t.AssigneeId == access.Me.Id || userId == access.Me.Id ? Allow.Yes : Allow.No("perm.task_assign"));
         var c = await db.Collaborators.FirstOrDefaultAsync(x => x.TaskId == id && x.UserId == userId);

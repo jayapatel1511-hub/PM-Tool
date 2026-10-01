@@ -70,6 +70,10 @@ if creds:
     check("sign-out", s == 204, f"HTTP {s}")
     s, _, _ = call("GET", "/api/v1/me", cookie=cleared or None)
     check("/me after sign-out denied", s == 401, f"HTTP {s}")
+    s, _, _ = call("GET", "/api/v1/me", cookie=cookie)
+    # The API is stateless (spec §21 session management): sign-out clears the browser cookie but a copied
+    # cookie stays valid until its 8-hour absolute expiry. Reported, not counted as a failure.
+    print(f"INFO copied cookie replayed after sign-out — HTTP {s}")
 
 print("RESULT", "PASS" if failures == 0 else f"FAIL ({failures})")
 sys.exit(1 if failures else 0)

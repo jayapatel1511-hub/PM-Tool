@@ -43,6 +43,7 @@ public static class TemplateEndpoints
         api.MapGet("/templates/{id:guid}", async (Guid id, Access access, HubDb db) => await Read(await Visible(db, access, id), db, access));
         api.MapPut("/templates/{id:guid}/structure", Save);
         api.MapPost("/templates/{id:guid}/design-basis", AddBasisSuggestion);
+        api.MapDelete("/templates/{id:guid}/design-basis/{suggestionId:guid}", RemoveBasisSuggestion);
         api.MapPost("/templates/{id:guid}/draft", NewDraft);
         api.MapPost("/templates/{id:guid}/publish", Publish);
         api.MapPost("/templates/{id:guid}/retire", async (Guid id, Access access, HubDb db) =>
@@ -82,15 +83,18 @@ public static class TemplateEndpoints
         api.MapPost("/projects/{id:guid}/template-packs", AddPack);
     }
 
+    /// Basis suggestions (031 FR-BAS-07) change only on a Draft, one at a time; each is logged on the template, whose
+    /// version moves as it does when the structure is saved. There is no edit: remove and add again.
     static async Task<IResult> AddBasisSuggestion(Guid id, BasisSuggestionBody body, Access access, HubDb db)
     {
         Editor(access);
         var template = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
-        Check.That(template.Status == TemplateStatus.Draft, "templateId", "template.not_draft");
+        if (template.Status != TemplateStatus.Draft) throw ApiException.Rule("template_not_draft", "template.not_draft");
         Check.OneOf(body.Kind, BasisKind.All, "kind");
         Check.Required(body.Title, "title", 200);
         Check.Required(body.Scope, "scope", 500);
         Check.Required(body.Statement, "statement", 4000);
+        Check.That(body.NumericValue is null || !string.IsNullOrWhiteSpace(body.Units), "units", "template.basis_units");
         Check.That(await db.TemplateDisciplines.AnyAsync(x => x.Id == body.TemplateDisciplineId && x.TemplateId == id),
             "templateDisciplineId", "template.bad_discipline");
         if (body.SourceUrl is not null) Coordination.Url(body.SourceUrl);
@@ -99,8 +103,23 @@ public static class TemplateEndpoints
             NumericValue = body.NumericValue, Units = body.Units?.Trim(), SourceSystem = body.SourceSystem?.Trim(),
             StableSourceId = body.StableSourceId?.Trim(), SourceUrl = body.SourceUrl?.Trim(), DeclaredRevision = body.DeclaredRevision?.Trim() };
         db.TemplateDesignBases.Add(suggestion);
+        template.UpdatedAt = DateTimeOffset.UtcNow;
+        db.Audit.Note(template, action: "BasisSuggestionAdded", reason: suggestion.Title);
         await db.SaveChangesAsync();
         return Results.Created($"/api/v1/templates/{id}/design-basis/{suggestion.Id}", new { suggestion.Id });
+    }
+
+    static async Task<IResult> RemoveBasisSuggestion(Guid id, Guid suggestionId, Access access, HubDb db)
+    {
+        Editor(access);
+        var template = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
+        if (template.Status != TemplateStatus.Draft) throw ApiException.Rule("template_not_draft", "template.not_draft");
+        var suggestion = await db.TemplateDesignBases.FirstOrDefaultAsync(x => x.Id == suggestionId && x.TemplateId == id) ?? throw ApiException.NotFound();
+        db.TemplateDesignBases.Remove(suggestion);
+        template.UpdatedAt = DateTimeOffset.UtcNow;
+        db.Audit.Note(template, action: "BasisSuggestionRemoved", reason: suggestion.Title);
+        await db.SaveChangesAsync();
+        return Results.NoContent();
     }
 
     // ---------- Reading ----------
@@ -185,6 +204,7 @@ public static class TemplateEndpoints
 
     static async Task ClearChildren(HubDb db, Guid id)
     {
+        await db.TemplateDesignBases.Where(x => x.TemplateId == id).ExecuteDeleteAsync(); // they reference the disciplines
         await db.TemplateDependencies.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
         await db.TemplateTasks.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
         await db.TemplateDeliverables.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
@@ -265,6 +285,20 @@ public static class TemplateEndpoints
         Check.That(deps.All(d => d.PredecessorTemplateTaskId != d.SuccessorTemplateTaskId) && deps.DistinctBy(d => (d.PredecessorTemplateTaskId, d.SuccessorTemplateTaskId)).Count() == deps.Count, "dependencies", "template.bad_dependency");
         Check.That(!HasCycle(deps), "dependencies", "template.cycle");
 
+        // Basis suggestions move to their discipline's new row. Removing a discipline that still has suggestions is refused
+        // until they are removed, so a save never drops one silently; one added meanwhile moves the version, refusing this save.
+        var basis = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == id).ToListAsync();
+        var was = await db.TemplateDisciplines.AsNoTracking().Where(x => x.TemplateId == id).ToDictionaryAsync(x => x.Id, x => x.DisciplineId);
+        var stranded = basis.GroupBy(b => was[b.TemplateDisciplineId]).Where(g => !byDiscipline.ContainsKey(g.Key)).ToList();
+        if (stranded.Count > 0)
+        {
+            var ids = stranded.Select(g => g.Key).ToList();
+            var names = await db.Disciplines.Where(x => ids.Contains(x.Id)).ToDictionaryAsync(x => x.Id, x => x.Name);
+            throw new ApiException(400, "validation", Text.Get("error.validation"), new Dictionary<string, string[]>
+                { ["disciplines"] = stranded.Select(g => Text.Get("template.basis_in_use", names[g.Key], g.Count())).ToArray() });
+        }
+        foreach (var b in basis) b.TemplateDisciplineId = byDiscipline[was[b.TemplateDisciplineId]];
+
         await Tx.Run(db, async () =>
         {
             await ClearChildren(db, id);
@@ -273,6 +307,7 @@ public static class TemplateEndpoints
             db.TemplateDeliverables.AddRange(deliverables);
             db.TemplateTasks.AddRange(tasks);
             db.TemplateDependencies.AddRange(deps);
+            db.TemplateDesignBases.AddRange(basis);
             t.UpdatedAt = DateTimeOffset.UtcNow; // the header carries the draft's version even when only children changed
             db.Audit.Note(t, action: "StructureSaved");
             return await db.SaveChangesAsync();

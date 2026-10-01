@@ -92,15 +92,72 @@ public sealed class TemplatesTests(HubFactory f)
             scope = "Site / storm sewers", statement = "Minor system return period", numericValue = 5m, units = "years", sourceUrl = "https://example.test/standard",
         };
         Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Pm).Post($"/api/v1/templates/{id}/design-basis", body)).StatusCode);
+        var unitless = await (await admin.Post($"/api/v1/templates/{id}/design-basis", body with { units = " " })).Json(400);
+        Assert.Equal("A numeric value needs its units.", unitless["errors"]!["units"]![0]!.GetValue<string>());
         var added = await (await admin.Post($"/api/v1/templates/{id}/design-basis", body)).Json(201);
 
-        var listed = (await Template(id, TestData.Admin))["basisSuggestions"]!.AsArray().Single()!;
+        var tpl = await Template(id, TestData.Admin);
+        var listed = tpl["basisSuggestions"]!.AsArray().Single()!;
         Assert.Equal((added.G("id"), civil, "Design storm", 5m, "years"), (listed.G("id"), listed.G("disciplineId"), listed.S("title"), listed["numericValue"]!.GetValue<decimal>(), listed.S("units")));
-        (await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = saved.I("rowVersion") })).EnsureSuccessStatusCode();
-        Assert.Equal(HttpStatusCode.BadRequest, (await admin.Post($"/api/v1/templates/{id}/design-basis", body)).StatusCode); // only Drafts change
+        Assert.True(tpl.I("rowVersion") > saved.I("rowVersion")); // a suggestion moves the Draft's version, like a structure save
+        Assert.Equal("Design storm", await f.DbAsync(db => db.ActivityLog.Where(a => a.ItemId == id && a.Action == "BasisSuggestionAdded").Select(a => a.Reason).SingleAsync()));
+        (await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = tpl.I("rowVersion") })).EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, (await admin.Post($"/api/v1/templates/{id}/design-basis", body)).StatusCode); // only Drafts change
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, (await admin.DeleteAsync($"/api/v1/templates/{id}/design-basis/{added.S("id")}")).StatusCode);
         Assert.Single((await Template(id))["basisSuggestions"]!.AsArray()); // the wizard's PM sees what a project would copy
         var draft = await (await admin.Post($"/api/v1/templates/{id}/draft", new { })).Json(201);
         Assert.Equal("Design storm", (await Template(draft.G("id"), TestData.Admin))["basisSuggestions"]!.AsArray().Single()!.S("title")); // the next Draft keeps them
+    }
+
+    [Fact]
+    public async Task Draft_saves_keep_basis_suggestions_and_refuse_to_drop_their_discipline() // 031 FR-BAS-07, 012 FR-001
+    {
+        var admin = f.As(TestData.Admin);
+        var civil = await d.Discipline("Civil");
+        var geo = await d.Discipline("Geotechnical");
+        var id = (await (await admin.Post("/api/v1/templates", new { name = "Basis Save " + Guid.NewGuid().ToString("N")[..4] })).Json(201)).G("id");
+        async Task<HttpResponseMessage> Save(string name, params Guid[] disciplines) => await admin.Put($"/api/v1/templates/{id}/structure", new
+        {
+            rowVersion = (await Template(id, TestData.Admin)).I("rowVersion"), header = new { name, description = (string?)null, projectTypeId = (Guid?)null },
+            disciplines = disciplines.Select(x => new { disciplineId = x, isDefaultIncluded = true }),
+            milestones = new[] { new { @ref = "m1", name = "Kickoff", milestoneType = "Kickoff", anchor = "ProjectStart", offset = (int?)5, completesPhaseId = (Guid?)null, isClientFacing = false } },
+            deliverables = Array.Empty<object>(), tasks = Array.Empty<object>(), dependencies = Array.Empty<object>(),
+        });
+        static Guid Row(JsonNode tpl, Guid discipline) => tpl["disciplines"]!.AsArray().Single(x => x!.G("disciplineId") == discipline)!.G("templateDisciplineId");
+        async Task<JsonNode> Add(Guid discipline, string title) => await (await admin.Post($"/api/v1/templates/{id}/design-basis", new
+        {
+            templateDisciplineId = Row(await Template(id, TestData.Admin), discipline), kind = BasisKind.Assumption, title, scope = "Site", statement = "Groundwater is below 3 m",
+        })).Json(201);
+        (await Save("Basis Save", civil, geo)).EnsureSuccessStatusCode();
+        var added = await Add(civil, "Groundwater level");
+
+        // A save that keeps Civil moves its suggestion to Civil's new row.
+        var resaved = await (await Save("Basis Save", geo, civil)).Json();
+        var kept = resaved["basisSuggestions"]!.AsArray().Single()!;
+        Assert.Equal((added.G("id"), civil), (kept.G("id"), kept.G("disciplineId")));
+        Assert.Equal(Row(resaved, civil), await f.DbAsync(db => db.TemplateDesignBases.Where(x => x.TemplateId == id).Select(x => x.TemplateDisciplineId).SingleAsync()));
+
+        // Dropping Civil while a suggestion uses it is refused, naming it, and nothing changes, not even the header.
+        var refused = await (await Save("Renamed", geo)).Json(400);
+        Assert.Equal("Civil has design basis suggestions (1). Remove those suggestions first.", refused["errors"]!["disciplines"]![0]!.GetValue<string>());
+        var after = await Template(id, TestData.Admin);
+        Assert.Equal(("Basis Save", resaved.I("rowVersion"), 2, 1), (after.S("name"), after.I("rowVersion"), after["disciplines"]!.AsArray().Count, after["basisSuggestions"]!.AsArray().Count));
+
+        // Only editors remove a suggestion; then Civil can go.
+        var path = $"/api/v1/templates/{id}/design-basis/{added.S("id")}";
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Pm).DeleteAsync(path)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await admin.DeleteAsync($"/api/v1/templates/{id}/design-basis/{Guid.NewGuid()}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await admin.DeleteAsync(path)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await admin.DeleteAsync(path)).StatusCode);
+        (await Save("Basis Save", geo)).EnsureSuccessStatusCode();
+        Assert.Equal(new[] { "BasisSuggestionAdded", "BasisSuggestionRemoved" }, (await f.DbAsync(db => db.ActivityLog
+            .Where(a => a.ItemType == ItemType.Template && a.ItemId == id && a.Action.StartsWith("BasisSuggestion")).Select(a => a.Action).ToListAsync())).Order());
+
+        // A Draft with suggestions can still be discarded, and they go with it.
+        await Add(geo, "Bearing stratum");
+        Assert.Equal(HttpStatusCode.NoContent, (await admin.DeleteAsync($"/api/v1/templates/{id}")).StatusCode);
+        Assert.False(await f.DbAsync(db => db.TemplateDesignBases.AnyAsync(x => x.TemplateId == id)));
+        Assert.False(await f.DbAsync(db => db.Templates.AnyAsync(x => x.Id == id)));
     }
 
     [Fact]

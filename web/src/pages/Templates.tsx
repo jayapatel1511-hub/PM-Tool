@@ -105,6 +105,7 @@ export function TemplatePage() {
   const [dirty, setDirty] = useState(false)
   const [err, setErr] = useState<unknown>(null)
   const [confirm, setConfirm] = useState<'retire' | 'discard' | null>(null)
+  const [removingBasis, setRemovingBasis] = useState<Basis | null>(null)
   const [addingBasis, setAddingBasis] = useState(false)
   const [start, setStart] = useState('')
   useEffect(() => { if (q.data) { setD(q.data); setDirty(false) } }, [q.data])
@@ -297,7 +298,8 @@ export function TemplatePage() {
           <ul className="divide-y text-sm">
             {d.basisSuggestions.map((b) => (
               <li key={b.id} className="space-y-0.5 px-4 py-2">
-                <p><span className="font-medium">{b.title}</span> <span className="text-xs text-muted-foreground">{t(b.kind === 'Criterion' ? 'basis.criterion' : 'basis.assumption')} · {disciplines.get(b.disciplineId)}</span></p>
+                <p className="flex items-start gap-2"><span className="min-w-0 flex-1"><span className="font-medium">{b.title}</span> <span className="text-xs text-muted-foreground">{t(b.kind === 'Criterion' ? 'basis.criterion' : 'basis.assumption')} · {disciplines.get(b.disciplineId)}</span></span>
+                  {edit && rowBtn(`${t('common.remove')} ${b.title}`, () => setRemovingBasis(b), <Trash2 className="size-3.5" />, dirty)}</p>
                 <p className="text-xs text-muted-foreground">{t('basis.scope')}: {b.scope}</p>
                 <p className="whitespace-pre-wrap">{b.statement}{b.numericValue != null && ` · ${b.numericValue} ${b.units ?? ''}`}</p>
                 {(b.sourceSystem || b.stableSourceId || b.declaredRevision || b.sourceUrl) && <p className="text-xs text-muted-foreground">
@@ -352,6 +354,15 @@ export function TemplatePage() {
             if (confirm === 'retire') { await post(`templates/${id}/retire`, {}); refresh() }
             else { await del(`templates/${id}`); qc.invalidateQueries({ queryKey: ['templates'] }); navigate('/templates') }
             setConfirm(null)
+          }} />
+      )}
+      {removingBasis && (
+        <ConfirmDialog open destructive title={t('common.remove')} body={removingBasis.title} confirmLabel={t('common.remove')}
+          onOpenChange={(o) => !o && setRemovingBasis(null)}
+          onConfirm={async () => {
+            await del(`templates/${id}/design-basis/${removingBasis.id}`)
+            setRemovingBasis(null)
+            refresh()
           }} />
       )}
     </Page>

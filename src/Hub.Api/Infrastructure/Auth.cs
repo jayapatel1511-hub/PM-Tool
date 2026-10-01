@@ -37,6 +37,17 @@ public static class AuthSetup
     public const string DevScheme = "Dev";
     public const string LocalScheme = "LocalPassword";
 
+    /// Sign-in throttling key. Behind the homedev tunnel every request arrives from the bridge
+    /// gateway, so Cloudflare's client address keeps the limit per person rather than shared by all.
+    public static string ClientKey(HttpContext ctx, System.Net.IPAddress? tunnelProxy)
+    {
+        var remote = ctx.Connection.RemoteIpAddress;
+        if (tunnelProxy is not null && remote is not null && (remote.IsIPv4MappedToIPv6 ? remote.MapToIPv4() : remote).Equals(tunnelProxy)
+            && ctx.Request.Headers["CF-Connecting-IP"] is [{ Length: > 0 } client])
+            return "cf:" + client;
+        return remote?.ToString() ?? "unknown";
+    }
+
     public static bool LocalAuthAllowed(IHostEnvironment env, IConfiguration cfg) =>
         (env.IsDevelopment() || env.IsStaging() || env.IsEnvironment("Testing")) && cfg["Auth:Mode"] == LocalScheme;
 

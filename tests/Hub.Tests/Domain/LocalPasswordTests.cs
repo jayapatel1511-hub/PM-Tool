@@ -50,4 +50,23 @@ public sealed class LocalPasswordTests
         }
         finally { File.Delete(path); }
     }
+
+    [Fact]
+    public void Sign_in_throttle_uses_cloudflare_client_only_from_the_trusted_tunnel_hop()
+    {
+        var proxy = System.Net.IPAddress.Parse("172.30.245.1");
+        Microsoft.AspNetCore.Http.DefaultHttpContext Req(string remote, string? cf)
+        {
+            var ctx = new Microsoft.AspNetCore.Http.DefaultHttpContext();
+            ctx.Connection.RemoteIpAddress = System.Net.IPAddress.Parse(remote);
+            if (cf is not null) ctx.Request.Headers["CF-Connecting-IP"] = cf;
+            return ctx;
+        }
+        Assert.Equal("cf:203.0.113.7", AuthSetup.ClientKey(Req("172.30.245.1", "203.0.113.7"), proxy));
+        Assert.Equal("cf:203.0.113.7", AuthSetup.ClientKey(Req("::ffff:172.30.245.1", "203.0.113.7"), proxy));
+        Assert.NotEqual(AuthSetup.ClientKey(Req("172.30.245.1", "203.0.113.7"), proxy), AuthSetup.ClientKey(Req("172.30.245.1", "198.51.100.9"), proxy));
+        Assert.Equal("10.0.0.5", AuthSetup.ClientKey(Req("10.0.0.5", "203.0.113.7"), proxy)); // spoofed header from an untrusted hop
+        Assert.Equal("172.30.245.1", AuthSetup.ClientKey(Req("172.30.245.1", "203.0.113.7"), null)); // tunnel mode off
+        Assert.Equal("172.30.245.1", AuthSetup.ClientKey(Req("172.30.245.1", null), proxy));
+    }
 }

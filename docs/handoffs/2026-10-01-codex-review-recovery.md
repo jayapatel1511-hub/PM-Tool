@@ -104,3 +104,31 @@ backup safety harness because `/private/tmp` does not exist on Ubuntu. The harne
 standard temporary directory, retaining the no-symlink path defense; backup and pilot checks pass 3/3 each on Mac.
 Full CI remains required on this portability correction. The application/deployment sources are unchanged from
 `4361c71`, which is staged inactive; Jay is SSH-connected and can build without activating the running app.
+
+
+## Passing release CI and terminal-input guard
+
+**PASS:** complete CI on `d4dc1ef03b5efef1e703dc0a470f025ade2ca058`
+([36941498789](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/36941498789)): 569/569 application tests,
+96.7% rules branch / 93.6% service line coverage, operational checks, frontend build/lint, all three browser workflow
+suites, dependency gates and specification traceability. Jay built the image on homedev and started activation.
+
+The first activation stopped at the pre-release dump, with a zero-byte partial dump and the Compose process stopped
+by terminal job control. At that observation `current` was still `1c59e33`; no new API activation had occurred.
+The operator was instructed to interrupt and rerun with noninteractive input and private log capture:
+
+```bash
+set -o pipefail
+umask 077
+bash scripts/activate-homedev-review.sh d4dc1ef03b5efef1e703dc0a470f025ade2ca058 --install-timer </dev/null 2>&1 | tee data/activation-d4dc1ef.log
+```
+
+Sudo continues prompting at the controlling terminal; no password is collected. Computer Use rejected access to
+Terminal for safety reasons, so the interrupt/rerun requires Jay's keyboard. Do not use alternate UI automation.
+
+The maintained source fix is `047aabb`: batch dump/create/query/cleanup commands explicitly read `/dev/null`, while
+both `pg_restore` calls retain the explicit dump-file input. A fake-sudo/fake-Docker stdin regression plus existing
+backup and pilot guards pass **7/7** locally; shell syntax passes. This fix changes operational scripts and tests only;
+application/frontend/image build sources are identical to the fully passing `d4dc1ef` candidate. Its complete CI is
+still required separately. Keep deployment, automatic-timer proof, public hostname and browser acceptance open
+until observed; the image build and passing CI do not override the stopped activation.

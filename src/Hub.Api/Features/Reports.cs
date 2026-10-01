@@ -460,7 +460,7 @@ public static class ReportEndpoints
     {
         var id = c.Id("projectId") ?? throw ApiException.Invalid("projectId", "error.required");
         var (p, _) = await c.Access.Project(id, track: false);
-        var logs = await ActivityEndpoints.Filter(c.Db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == id), c.Date("from"), c.Date("to"), null, null, c.Str("category"), null, null)
+        var logs = await ActivityEndpoints.Filter(await ActivityEndpoints.Visible(c.Db, c.Access, id), c.Date("from"), c.Date("to"), null, null, c.Str("category"), null, null)
             .OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Take(Export.MaxRows + 1).ToListAsync();
         var rows = Json(await ActivityEndpoints.Render(c.Db, logs));
         foreach (var r in rows)

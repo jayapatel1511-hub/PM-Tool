@@ -1002,7 +1002,7 @@ public class CalendarEvent : Audited, IAuditable
     public DateTimeOffset? CancelledAt { get; set; }
     public Guid? CancelledBy { get; set; }
     public string AuditType => ItemType.CalendarEvent;
-    public Guid? AuditProjectId => ProjectId;
+    public Guid? AuditProjectId => Visibility == EventVisibility.Private ? null : ProjectId;
     public string? AuditKey => null;
     public string? AuditName => Title;
 }

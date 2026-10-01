@@ -115,7 +115,7 @@ public static class ListExportEndpoints
             Guid? actorId, string? itemType, string? category, Guid? disciplineId, bool? importantOnly) =>
         {
             var (p, _) = await access.Project(id, track: false);
-            var logs = await ActivityEndpoints.Filter(db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == id), from, to, actorId, itemType, category, disciplineId, importantOnly)
+            var logs = await ActivityEndpoints.Filter(await ActivityEndpoints.Visible(db, access, id), from, to, actorId, itemType, category, disciplineId, importantOnly)
                 .OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Take(Export.MaxRows + 1).ToListAsync();
             var rows = Json(await ActivityEndpoints.Render(db, logs));
             foreach (var r in rows) r!["item"] = $"{r["itemKey"]?.GetValue<string>()} {r["itemName"]?.GetValue<string>()}".Trim();

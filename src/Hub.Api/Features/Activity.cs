@@ -19,7 +19,7 @@ public static class ActivityEndpoints
         {
             await access.Project(id, track: false);
             var (pg, size) = Http.Paging(page, pageSize);
-            var q = Filter(db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == id), from, to, actorId, itemType, category, disciplineId, importantOnly);
+            var q = Filter(await Visible(db, access, id), from, to, actorId, itemType, category, disciplineId, importantOnly);
             var total = await q.CountAsync();
             var rows = await q.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Skip((pg - 1) * size).Take(size).ToListAsync();
             return new Page<object>(await Render(db, rows), pg, size, total);
@@ -33,13 +33,28 @@ public static class ActivityEndpoints
             // The item's own rows plus comments, links, hours and dependencies that name it by key ("T1 → T2", "deleted with T1").
             // A project's own history is its rows only: the project number is part of every item key.
             var key = type == ItemType.Project ? null : await db.ActivityLog.Where(a => a.ItemId == id && a.ItemKey != null).Select(a => a.ItemKey).FirstOrDefaultAsync();
-            var q = db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == projectId && (a.ItemId == id || (key != null && a.ItemId != id
+            var q = (await Visible(db, access, projectId)).Where(a => (a.ItemId == id || (key != null && a.ItemId != id
                 && ((a.ItemType != ItemType.Dependency && a.ItemKey == key)
                     || (a.ItemType == ItemType.Dependency && (a.ItemKey!.StartsWith(key + " ") || a.ItemKey.EndsWith(" " + key)))))));
             var total = await q.CountAsync();
             var rows = await q.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Skip((pg - 1) * size).Take(size).ToListAsync();
             return new Page<object>(await Render(db, rows), pg, size, total);
         });
+    }
+
+    /// Apply the source records' privacy boundaries to every project/item history and export, including old log rows.
+    public static async Task<IQueryable<ActivityLog>> Visible(HubDb db, Access access, Guid projectId)
+    {
+        var (_, ctx) = await access.Project(projectId, false);
+        var actor = access.Actor;
+        var pm = Permissions.IsPM(actor, ctx);
+        var leads = ctx.LeadDisciplineIds.ToArray();
+        var entries = db.TimeEntries.IgnoreQueryFilters().Where(e => e.ProjectId == projectId &&
+            (e.UserId == actor.Id || pm || db.Tasks.IgnoreQueryFilters().Any(t => t.Id == e.TaskId && leads.Contains(t.ProjectDisciplineId))
+                || actor.Supervisor && db.Users.Any(u => u.Id == e.UserId && u.SupervisorId == actor.Id))).Select(e => (Guid?)e.Id);
+        return db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == projectId
+            && (a.ItemType != ItemType.TimeEntry || entries.Contains(a.ItemId))
+            && (a.ItemType != ItemType.CalendarEvent || !db.CalendarEvents.Any(e => e.Id == a.ItemId && e.Visibility == EventVisibility.Private)));
     }
 
     public static IQueryable<ActivityLog> Filter(IQueryable<ActivityLog> q, DateOnly? from, DateOnly? to, Guid? actorId, string? itemType,

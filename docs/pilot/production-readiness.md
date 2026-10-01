@@ -72,7 +72,7 @@ before cutover use the default host.
 | Secret | Environment | Purpose | Status |
 |---|---|---|---|
 | `review-users` | review only | JSON verifier list read through `Auth__Local__UsersJson`; the app fails to start if the reference does not resolve | UNPROVEN: Key Vault resolution unverified (T-12) |
-| SMTP relay password | any, only with `Email__Mode=Smtp` | relay login; no template setting references it yet (T3) | UNPROVEN |
+| SMTP relay username/password | any, only with `Email__Mode=Smtp` | `Email__Smtp__User` is template-owned; `Email__Smtp__Password` uses the Key Vault reference named by `smtpPasswordSecretName`. Secret resolution and relay delivery remain unverified (T3) | UNPROVEN |
 | none for the database or Entra | prod | the database uses the managed identity; Entra IDs are public values | — |
 
 A rotation schedule for any secret (FR-009; §21 TBD) is owned by company IT and UNPROVEN.

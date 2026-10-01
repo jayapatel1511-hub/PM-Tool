@@ -157,7 +157,8 @@ public static class NotificationEvents
         AllocationChanged = "AllocationChanged", SubmissionChanged = "SubmissionChanged",
         IssueVerifierAssigned = "IssueVerifierAssigned", IssueVerificationOutcome = "IssueVerificationOutcome",
         ConstraintAction = "ConstraintAction", ConstraintOutcome = "ConstraintOutcome",
-        CommitmentProposed = "CommitmentProposed", CommitmentChanged = "CommitmentChanged";
+        CommitmentProposed = "CommitmentProposed", CommitmentChanged = "CommitmentChanged",
+        BasisImpactPending = "BasisImpactPending", BasisConflictRaised = "BasisConflictRaised";
 
     public static readonly NotificationEventDef[] All =
     [
@@ -176,12 +177,14 @@ public static class NotificationEvents
         new(IssueVerifierAssigned, true, false, true), new(IssueVerificationOutcome, true, false),
         new(ConstraintAction, true, false, true), new(ConstraintOutcome, true, false),
         new(CommitmentProposed, true, false, true), new(CommitmentChanged, true, false),
+        new(BasisImpactPending, true, false, true), new(BasisConflictRaised, true, false),
     ];
 
     /// Coordination events whose recipients must hold current project access when the notice is composed and
     /// again when its email is delivered (FR-MDC-02).
     public static readonly HashSet<string> ProjectScoped = [HandoffChanged, ReviewPackageChanged, ChangeImpact, AllocationChanged,
-        SubmissionChanged, IssueVerifierAssigned, IssueVerificationOutcome, ConstraintAction, ConstraintOutcome, CommitmentProposed, CommitmentChanged];
+        SubmissionChanged, IssueVerifierAssigned, IssueVerificationOutcome, ConstraintAction, ConstraintOutcome, CommitmentProposed, CommitmentChanged,
+        BasisImpactPending, BasisConflictRaised];
 
     public static NotificationEventDef Get(string code) => All.First(e => e.Code == code);
 }

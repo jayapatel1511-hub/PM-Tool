@@ -389,6 +389,7 @@ public static class DecisionEndpoints
                 .Select(v => v.Id).ToListAsync();
             if (linkedVersionIds.Count > 0)
             {
+                var owners = new List<Guid?>();
                 var linkedUses = await db.BasisUses.Where(u => u.ProjectId == d.ProjectId && linkedVersionIds.Contains(u.VersionId)).ToListAsync();
                 foreach (var use in linkedUses.GroupBy(u => new { u.TargetType, u.TargetId })
                     .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()))
@@ -401,8 +402,12 @@ public static class DecisionEndpoints
                             OldVersionId = use.VersionId, NewVersionId = null, OwnerId = use.OwnerId };
                         db.BasisImpactAssessments.Add(assessment);
                         db.Audit.Note(assessment, action: "DecisionReopened", reason: reason);
+                        owners.Add(use.OwnerId);
                     }
                 }
+                // FR-BAS-05: the reopen asks consumers to assess; it does not unconfirm their basis.
+                await notify.Send(NotificationEvents.BasisImpactPending, owners, Item(p, d) with { Link = $"/projects/{p.ProjectNumber}/design-basis" },
+                    Text.Get("notify.basis_decision_reopened", d.Key));
             }
         }
         if (to == DecisionStatus.Decided) // §17.2: linked task assignees (unless unticked, FR-011) and the requester

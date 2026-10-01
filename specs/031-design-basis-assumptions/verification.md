@@ -62,3 +62,17 @@ Focused PostgreSQL DesignBasisApiTests passed 7/7, including refused edit withou
 Create, edit and replacement forms now offer an optional Source decision selector populated from the existing permission-scoped project decision register. Existing links remain in the draft while options load or fail. Selecting a decision records a relationship without transferring approval. Frontend build/lint passed. Local Chrome selected the synthetic source decision for B001, saved and reloaded; the persistent API retained the decision ID and the assumption remained Proposed. No JavaScript errors occurred. The first axe scan had an inconclusive contrast check; a repeated settled-form scan had zero violations and zero incomplete checks.
 
 Focused PostgreSQL DesignBasisApiTests passed 7/7 with added negative source-reference coverage: creation and proposal edits refused another project's decision, creation left no entry and the refused edit retained its original source decision. This is local synthetic evidence; deployed sign-in, complete permission/lifecycle/concurrency coverage and full packet acceptance remain open.
+
+## Design basis notifications — 2026-10-01
+
+Two catalogue events, App on and Email off by default; Admin defaults and per-user preferences still apply. `BasisImpactPending` is a direct event. It goes to consumer owners whose impact assessment is created when a replacement is confirmed (FR-BAS-03, AC-BAS-01), when the current version is withdrawn (FR-BAS-04), or when a linked source decision is reopened from Decided to Pending (FR-BAS-05). `BasisConflictRaised` goes to the owners of both entries when confirmation records a new unresolved conflict (FR-BAS-06, AC-BAS-04). Each command sends one notice per recipient and item, however many assessments it creates for that person (FR-MDC-06, §17.5). Basis commands queue the notice inside the `Coordination.Run` transaction. The decision reopen queues it in the same `SaveChanges` as the assessment. Refused, stale or replayed commands therefore add none, and the actor never receives one. Both events join the project-scoped set, so recipient access is rechecked when the notice is composed and again when queued email is delivered (FR-MDC-02, FR-MDC-03). §17.2 has no design-basis rows, so these recipients and defaults are authored choices.
+
+**PASS (local):** `dotnet build Hub.slnx` succeeded. `dotnet test --filter "DesignBasis|Readiness|Decision"` passed 48/48, including the new `DesignBasisNotificationTests` at 4/4. The new tests show:
+- A consumer with two affected uses receives one notice. The confirming lead receives none.
+- A 409 stale confirm, a 403 withdrawal and a replayed confirm add no notice. A rejected repeat of the decision reopen also adds none.
+- A consumer removed from a restricted project still gets an assessment but no notice.
+- A conflict notifies both entry owners and not the actor.
+
+`tools/trace_spec.py --check`: 0 not cited. `npm --prefix web run build` and `lint` passed.
+
+**UNPROVEN:** email delivery through the worker, digest inclusion and how the notices look in the browser. Entry creation, owner/approver assignment, proposals, edits, Proceed under Assumption, impact decisions and conflict resolution send no notice.

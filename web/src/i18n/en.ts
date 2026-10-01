@@ -44,6 +44,8 @@ export const en: Record<string, string> = {
   "event.IssueVerifierAssigned": "Issue verification assignments", "event.IssueVerificationOutcome": "Issue verification outcomes",
   "event.ConstraintAction": "Constraint removal and verification requests", "event.ConstraintOutcome": "Constraint outcomes",
   "event.CommitmentProposed": "Weekly commitments proposed for you", "event.CommitmentChanged": "Weekly commitment updates",
+  "event.BasisImpactPending": "Design basis impact assessments", "event.BasisConflictRaised": "Design basis conflicts",
+  "event.SubmissionChanged": "Submission updates",
   "value.Checking": "Checking",
   "value.Ready": "Ready",
   "value.Not Applicable": "Not applicable",

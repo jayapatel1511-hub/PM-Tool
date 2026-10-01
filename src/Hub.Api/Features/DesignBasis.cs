@@ -66,6 +66,12 @@ public static class DesignBasisEndpoints
             .WithMetadata(new Coordination.AtomicCommand());
     }
 
+    // Queued inside the command transaction: one notice per recipient and entry; refused, stale or replayed
+    // commands add none, and recipients must still hold project access (FR-MDC-02, FR-MDC-03, FR-MDC-06).
+    static Task Notify(Notifier notify, Project project, DesignBasisEntry entry, string eventType, IEnumerable<Guid?> recipients, string title) =>
+        notify.Send(eventType, recipients, new NotifyItem(project.Id, "DesignBasisEntry", entry.Id, entry.Key,
+            $"/projects/{project.ProjectNumber}/design-basis", project.ProjectNumber), title);
+
     static async Task<DesignBasisEntry> Entry(HubDb db, Guid projectId, Guid id) =>
         await db.DesignBasisEntries.SingleOrDefaultAsync(e => e.ProjectId == projectId && e.Id == id) ?? throw ApiException.NotFound();
 
@@ -199,7 +205,7 @@ public static class DesignBasisEndpoints
         });
 
     static Task<Coordination.Result> Confirm(Guid projectId, Guid id, Guid versionId, ConfirmBody body,
-        Access access, HubDb db, TimeProvider clock, SettingsStore settings) =>
+        Access access, HubDb db, TimeProvider clock, SettingsStore settings, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "basis.confirm", id, versionId, body }, access, db, clock, async (project, ctx) =>
         {
             var entry = await Entry(db, project.Id, id);
@@ -237,10 +243,15 @@ public static class DesignBasisEndpoints
                 var entryVersionIds = await db.DesignBasisVersions.Where(v => v.ProjectId == project.Id && v.EntryId == id)
                     .Select(v => v.Id).ToListAsync();
                 var uses = await db.BasisUses.Where(u => u.ProjectId == project.Id && entryVersionIds.Contains(u.VersionId)).ToListAsync();
+                var owners = new List<Guid?>();
                 foreach (var use in uses.GroupBy(u => new { u.TargetType, u.TargetId })
                     .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()))
+                {
                     db.BasisImpactAssessments.Add(new BasisImpactAssessment { ProjectId = project.Id,
                         BasisUseId = use.Id, OldVersionId = use.VersionId, NewVersionId = version.Id, OwnerId = use.OwnerId });
+                    owners.Add(use.OwnerId);
+                }
+                await Notify(notify, project, entry, NotificationEvents.BasisImpactPending, owners, Text.Get("notify.basis_replaced", entry.Key));
             }
             var peers = await db.DesignBasisEntries.AsNoTracking().Where(e => e.ProjectId == project.Id && e.Id != id &&
                 e.Kind == entry.Kind && e.ProjectDisciplineId == entry.ProjectDisciplineId &&
@@ -249,6 +260,7 @@ public static class DesignBasisEndpoints
                     e => e.Id, v => v.EntryId, (e, v) => v).ToListAsync();
             static string Value(DesignBasisVersion v) => v.NumericValue is { } number
                 ? $"{number.ToString(CultureInfo.InvariantCulture)} {v.Units?.Trim()}" : v.Statement;
+            var conflictOwners = new List<Guid?>();
             foreach (var peer in peers.Where(peer => BasisRules.ValuesConflict(entry.Kind, entry.Kind,
                 BasisStatus.Confirmed, peer.Status, entry.ProjectDisciplineId, entry.ProjectDisciplineId,
                 entry.Title, entry.Title, version.Scope, peer.Scope, Value(version), Value(peer))))
@@ -256,14 +268,20 @@ public static class DesignBasisEndpoints
                 var left = version.Id.CompareTo(peer.Id) < 0 ? version.Id : peer.Id;
                 var right = left == version.Id ? peer.Id : version.Id;
                 if (!await db.BasisConflicts.AnyAsync(c => c.LeftVersionId == left && c.RightVersionId == right))
+                {
                     db.BasisConflicts.Add(new BasisConflict { ProjectId = project.Id, LeftVersionId = left, RightVersionId = right });
+                    conflictOwners.Add(await db.DesignBasisEntries.Where(e => e.Id == peer.EntryId).Select(e => e.OwnerId).FirstAsync());
+                }
             }
+            if (conflictOwners.Count > 0)
+                await Notify(notify, project, entry, NotificationEvents.BasisConflictRaised, [entry.OwnerId, .. conflictOwners],
+                    Text.Get("notify.basis_conflict", entry.Key));
             await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id);
             return version;
         });
 
     static Task<Coordination.Result> Withdraw(Guid projectId, Guid id, Guid versionId, WithdrawBody body,
-        Access access, HubDb db, TimeProvider clock) =>
+        Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "basis.withdraw", id, versionId, body }, access, db, clock, async (project, ctx) =>
         {
             var entry = await Entry(db, project.Id, id);
@@ -283,14 +301,19 @@ public static class DesignBasisEndpoints
                 var ids = await db.DesignBasisVersions.Where(v => v.ProjectId == project.Id && v.EntryId == id)
                     .Select(v => v.Id).ToListAsync();
                 var uses = await db.BasisUses.Where(u => u.ProjectId == project.Id && ids.Contains(u.VersionId)).ToListAsync();
+                var owners = new List<Guid?>();
                 foreach (var use in uses.GroupBy(u => new { u.TargetType, u.TargetId })
                     .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()))
                     if (!await db.BasisImpactAssessments.AnyAsync(a => a.ProjectId == project.Id && a.BasisUseId == use.Id &&
                         a.OldVersionId == use.VersionId && a.WithdrawalVersionId == version.Id &&
                         a.NewVersionId == null && a.Status == AssessmentStatus.Pending))
+                    {
                         db.BasisImpactAssessments.Add(new BasisImpactAssessment { ProjectId = project.Id,
                             BasisUseId = use.Id, OldVersionId = use.VersionId, NewVersionId = null,
                             WithdrawalVersionId = version.Id, OwnerId = use.OwnerId });
+                        owners.Add(use.OwnerId);
+                    }
+                await Notify(notify, project, entry, NotificationEvents.BasisImpactPending, owners, Text.Get("notify.basis_withdrawn", entry.Key));
             }
             db.Audit.Note(version, action: "Withdrawn", reason: reason);
             db.Audit.Note(entry, reason: reason);

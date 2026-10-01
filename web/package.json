@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test:handoffs": "node tests/handoffs.cjs",
-    "test:coordination": "node tests/reviews-changes.cjs"
+    "test:coordination": "node tests/reviews-changes.cjs",
+    "test:design-basis": "node tests/design-basis.cjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.23.0",

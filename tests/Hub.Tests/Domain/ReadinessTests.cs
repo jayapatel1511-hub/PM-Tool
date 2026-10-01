@@ -36,6 +36,16 @@ public sealed class ReadinessTests
     }
 
     [Fact]
+    public void Assumption_permission_cannot_override_an_unissued_submission_gate()
+    {
+        var permit = new ReadinessPermission(true, Today, true, true, "Preliminary layout", "Confirm utility depth");
+        var gated = Set(ReadinessCheckCode.Basis, true, false).Select(x => x.Code == ReadinessCheckCode.SubmissionGate ? x with { Satisfied = false } : x);
+        Assert.Equal(ReadinessState.NotReady, ReadinessRules.Evaluate(gated, permit, Today).State);
+        var unknown = Set(ReadinessCheckCode.Basis, true, false).Select(x => x.Code == ReadinessCheckCode.SubmissionGate ? x with { Satisfied = null } : x);
+        Assert.Equal(ReadinessState.NeedsAssessment, ReadinessRules.Evaluate(unknown, permit, Today).State);
+    }
+
+    [Fact]
     public void Snapshot_keeps_withdrawn_promise_in_denominator_and_requires_performer_commit()
     {
         var owner = Guid.NewGuid(); var chair = Guid.NewGuid();

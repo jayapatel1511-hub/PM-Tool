@@ -16,6 +16,8 @@ public static class ReadinessEndpoints
         string? EvidenceUrl);
     public sealed record ExceptionBody(Guid RequestId, int AssessmentRowVersion, Guid BasisVersionId,
         int BasisVersionRowVersion, Guid VerifierId, string LimitedWork, string Risk, DateOnly ExpiresOn);
+    public sealed record PrerequisiteBody(Guid RequestId, int TargetRowVersion, Guid PackageId, string Reason);
+    public sealed record PrerequisiteRemoveBody(Guid RequestId, int RowVersion, string Reason);
     static readonly string[] ConstraintCategories = ["Handoff", "Decision", "Basis", "Capacity", "Review", "Scope", "Other"];
 
     // Source-backed checks are recomputed at read/command time. Manual applicability remains useful for
@@ -135,6 +137,13 @@ public static class ReadinessEndpoints
             Source(ReadinessCheckCode.ReviewGate, true, false,
                 "A required review package has not been linked in this project scope.");
         // Without a canonical package requirement, retain the PM/lead applicability decision.
+
+        // Jay's Submission Gate (2026-10-01): every linked prerequisite package must be Issued. With no link, a reasoned
+        // Not Applicable stands and anything else stays unknown; satisfaction is never taken from a stored record.
+        var gate = await SubmissionGate(db, project.Id, targetType, targetId);
+        if (gate is not null) Source(ReadinessCheckCode.SubmissionGate, true, gate.Value.Satisfied, gate.Value.Reason);
+        else if (checks.TryGetValue(ReadinessCheckCode.SubmissionGate, out var gateRecord) && gateRecord.Applies == true)
+            Source(ReadinessCheckCode.SubmissionGate, true, null, "No prerequisite submission package is linked.");
 
         var capacity = await ProductionCapacity(db, project, targetType, targetId, today, now, settings);
         if (!(capacity.Satisfied is null && checks.TryGetValue(ReadinessCheckCode.ProductionCapacity, out var capacityRecord) && capacityRecord.Applies == false))
@@ -434,6 +443,52 @@ public static class ReadinessEndpoints
             .WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints/{constraintId:guid}/transition", MoveConstraint)
             .WithMetadata(new Coordination.AtomicCommand());
+        api.MapGet("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/submission-prerequisites", Prerequisites);
+        api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/submission-prerequisites", AddPrerequisite)
+            .WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/submission-prerequisites/{linkId:guid}/remove", RemovePrerequisite)
+            .WithMetadata(new Coordination.AtomicCommand());
+    }
+
+    // A Superseded package is followed to the successor whose issue superseded it; anything else is final.
+    static async Task<SubmissionPackage?> EffectivePackage(HubDb db, Guid projectId, Guid packageId)
+    {
+        var package = await db.SubmissionPackages.AsNoTracking().SingleOrDefaultAsync(p => p.ProjectId == projectId && p.Id == packageId);
+        for (var seen = new HashSet<Guid>(); package is { Status: SubmissionStatus.Superseded } && seen.Add(package.Id);)
+        {
+            var id = package.Id;
+            var next = await db.SubmissionPackages.AsNoTracking().Where(p => p.ProjectId == projectId && p.SupersedesPackageId == id &&
+                (p.Status == SubmissionStatus.Issued || p.Status == SubmissionStatus.Superseded)).OrderByDescending(p => p.CreatedAt).FirstOrDefaultAsync();
+            if (next is null) break;
+            package = next;
+        }
+        return package;
+    }
+
+    // The output's own deliverable: the deliverable itself, or the deliverable a task belongs to.
+    static async Task<Guid?> OwnDeliverable(HubDb db, string targetType, Guid targetId) => targetType == "Task"
+        ? await db.Tasks.AsNoTracking().Where(t => t.Id == targetId).Select(t => t.DeliverableId).SingleOrDefaultAsync()
+        : targetId;
+
+    static async Task<bool> ContainsOutput(HubDb db, SubmissionPackage package, Guid? deliverableId) => deliverableId is { } id &&
+        await db.SubmissionManifestItems.AsNoTracking().AnyAsync(m => m.PackageId == package.Id && m.ManifestVersion == package.ManifestVersion && m.DeliverableId == id);
+
+    /// Null without an active link. A link whose current package now lists the output itself cannot gate it, so it is unknown.
+    static async Task<(bool? Satisfied, string Reason)?> SubmissionGate(HubDb db, Guid projectId, string targetType, Guid targetId)
+    {
+        var links = await db.ReadinessSubmissionPrerequisites.AsNoTracking().Where(l => l.ProjectId == projectId &&
+            l.TargetType == targetType && l.TargetId == targetId && l.RemovedAt == null).Select(l => l.PackageId).ToListAsync();
+        if (links.Count == 0) return null;
+        var deliverableId = await OwnDeliverable(db, targetType, targetId);
+        var (issued, selfGating) = (true, false);
+        foreach (var link in links)
+        {
+            var package = await EffectivePackage(db, projectId, link);
+            issued &= package?.Status == SubmissionStatus.Issued;
+            selfGating |= package is null || await ContainsOutput(db, package, deliverableId);
+        }
+        return selfGating ? (null, "A linked submission package now lists this output; remove or replace the link.")
+            : issued ? (true, "Every linked submission package is Issued.") : (false, "A linked submission package is not Issued.");
     }
 
     static Task<Coordination.Result> Create(Guid projectId, string targetType, Guid targetId, CreateBody body,
@@ -680,4 +735,70 @@ public static class ReadinessEndpoints
         Guid?[] recipients, string title) =>
         notify.Send(eventType, recipients, new NotifyItem(project.Id, "WorkConstraint", row.Id, target.Key,
             $"/projects/{project.ProjectNumber}/readiness", project.ProjectNumber), title);
+
+    static async Task<object> Prerequisites(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)
+    {
+        var (project, _) = await access.Project(projectId, false);
+        var target = await Coordination.Target(db, project, targetType, targetId, false);
+        var deliverableId = await OwnDeliverable(db, target.Type, target.Id);
+        var links = await db.ReadinessSubmissionPrerequisites.AsNoTracking().Where(l => l.ProjectId == projectId &&
+            l.TargetType == target.Type && l.TargetId == target.Id).OrderBy(l => l.CreatedAt).ThenBy(l => l.Id).ToListAsync();
+        var rows = new List<object>();
+        foreach (var link in links)
+        {
+            var package = await db.SubmissionPackages.AsNoTracking().Where(p => p.ProjectId == projectId && p.Id == link.PackageId)
+                .Select(p => new { p.Id, p.Key, p.Title, p.Status }).SingleAsync();
+            var effective = await EffectivePackage(db, projectId, link.PackageId);
+            rows.Add(new { link.Id, link.RowVersion, link.PackageId, link.Reason, link.CreatedAt, link.CreatedBy,
+                link.RemovedAt, link.RemovedBy, link.RemovalReason, Package = package,
+                Effective = effective is null ? null : new { effective.Id, effective.Key, effective.Title, effective.Status },
+                ListsOutput = effective is not null && await ContainsOutput(db, effective, deliverableId) });
+        }
+        return rows;
+    }
+
+    static Task<Coordination.Result> AddPrerequisite(Guid projectId, string targetType, Guid targetId,
+        PrerequisiteBody body, Access access, HubDb db, TimeProvider clock) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "readiness.prerequisite.add", targetType, targetId, body },
+            access, db, clock, async (project, ctx) =>
+            {
+                var target = await Coordination.Target(db, project, targetType, targetId);
+                if (target.RowVersion != body.TargetRowVersion)
+                    throw ApiException.Conflict("concurrency_conflict", "coord.stale");
+                Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, target.DisciplineId));
+                var reason = Check.Reason(body.Reason);
+                var package = await db.SubmissionPackages.AsNoTracking().SingleOrDefaultAsync(p => p.ProjectId == project.Id && p.Id == body.PackageId)
+                    ?? throw ApiException.Invalid("packageId", "coord.reference");
+                // The output's own submission never gates itself, including through the successor the gate would follow.
+                var deliverableId = await OwnDeliverable(db, target.Type, target.Id);
+                var effective = await EffectivePackage(db, project.Id, package.Id);
+                Check.That(!await ContainsOutput(db, package, deliverableId) && !await ContainsOutput(db, effective!, deliverableId),
+                    "packageId", "readiness.prerequisite_self");
+                if (await db.ReadinessSubmissionPrerequisites.AnyAsync(l => l.ProjectId == project.Id && l.TargetType == target.Type &&
+                    l.TargetId == target.Id && l.PackageId == package.Id && l.RemovedAt == null))
+                    throw ApiException.Conflict("prerequisite_exists", "error.duplicate");
+                var row = new ReadinessSubmissionPrerequisite { ProjectId = project.Id, TargetType = target.Type,
+                    TargetId = target.Id, PackageId = package.Id, Reason = reason };
+                db.ReadinessSubmissionPrerequisites.Add(row);
+                db.Audit.Note(row, reason: reason);
+                return row;
+            });
+
+    static Task<Coordination.Result> RemovePrerequisite(Guid projectId, string targetType, Guid targetId, Guid linkId,
+        PrerequisiteRemoveBody body, Access access, HubDb db, TimeProvider clock) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "readiness.prerequisite.remove", targetType, targetId, linkId, body },
+            access, db, clock, async (project, ctx) =>
+            {
+                var target = await Coordination.Target(db, project, targetType, targetId);
+                Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, target.DisciplineId));
+                var row = await db.ReadinessSubmissionPrerequisites.SingleOrDefaultAsync(l => l.Id == linkId && l.ProjectId == project.Id &&
+                    l.TargetType == target.Type && l.TargetId == target.Id) ?? throw ApiException.NotFound();
+                Coordination.Version(row, body.RowVersion);
+                Check.That(row.RemovedAt is null, "linkId", "coord.transition");
+                row.RemovalReason = Check.Reason(body.Reason);
+                row.RemovedAt = clock.GetUtcNow();
+                row.RemovedBy = access.Me.Id;
+                db.Audit.Note(row, action: "Removed", reason: row.RemovalReason);
+                return row;
+            });
 }

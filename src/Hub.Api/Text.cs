@@ -435,6 +435,7 @@ public static class Text
         ["notify.basis_decision_reopened"] = "Decision {0} was reopened; assess the design basis your work uses",
         ["notify.basis_conflict"] = "Design basis {0} conflicts with another confirmed value",
         ["readiness.week_start"] = "A coordination week for this project starts on {0}.",
+        ["readiness.prerequisite_self"] = "This package lists the work's own deliverable, so it cannot be a prerequisite for that work.",
         ["basis.duplicate"] = "A basis entry with this title, discipline and scope already exists. Inspect it before creating another.",
         ["basis.units"] = "Numeric design criteria need explicit units before confirmation.",
         ["basis.independent"] = "A responsible Discipline Lead or assigned independent approver must confirm this version.",

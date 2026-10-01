@@ -145,7 +145,7 @@ export function ReadinessTab() {
       <p className="text-xs text-muted-foreground"><ExternalLink className="mr-1 inline size-3" aria-hidden />{t('readiness.sourceNote')}</p>
       {proposing && options.data && <ProposePromise projectId={p.id} options={options.data} week={weeks[0]} day={day}
         complete={p.status === 'Complete'} close={() => setProposing(false)} done={done} />}
-      {inspecting && options.data && <ReadinessInspector projectId={p.id} options={options.data} close={() => setInspecting(false)} done={done} />}
+      {inspecting && options.data && <ReadinessInspector projectId={p.id} number={p.projectNumber} options={options.data} close={() => setInspecting(false)} done={done} />}
       {snapshotWeek && <SnapshotForm projectId={p.id} week={snapshotWeek} close={() => setSnapshotWeek(null)} done={done} />}
       {sp.get('promise') && options.data && <PromiseDetail projectId={p.id} id={sp.get('promise')!} options={options.data}
         close={() => set('promise', '')} done={done} />}

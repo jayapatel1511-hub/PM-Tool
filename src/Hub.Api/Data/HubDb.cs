@@ -70,6 +70,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<WeeklyPlanSnapshot> WeeklyPlanSnapshots => Set<WeeklyPlanSnapshot>();
     public DbSet<OutputCommitment> OutputCommitments => Set<OutputCommitment>();
     public DbSet<OutputCommitmentEvent> OutputCommitmentEvents => Set<OutputCommitmentEvent>();
+    public DbSet<ReadinessSubmissionPrerequisite> ReadinessSubmissionPrerequisites => Set<ReadinessSubmissionPrerequisite>();
     public DbSet<PersonAvailabilityOverride> AvailabilityOverrides => Set<PersonAvailabilityOverride>();
     public DbSet<ResourceAllocation> Allocations => Set<ResourceAllocation>();
     public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
@@ -586,6 +587,14 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             });
         });
         mb.Entity<OutputCommitmentEvent>(e => e.HasIndex(x => new { x.CommitmentId, x.CreatedAt }));
+        mb.Entity<ReadinessSubmissionPrerequisite>(e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.TargetType, x.TargetId, x.PackageId }).IsUnique().HasFilter("removed_at IS NULL");
+            e.ToTable(t => t.HasCheckConstraint("ck_readiness_prerequisite_target", "target_type IN ('Task', 'Deliverable')"));
+        });
+        Fk<ReadinessSubmissionPrerequisite, Project>(mb, x => x.ProjectId);
+        Fk<ReadinessSubmissionPrerequisite, SubmissionPackage>(mb, x => x.PackageId);
+        Fk<ReadinessSubmissionPrerequisite, AppUser>(mb, x => x.RemovedBy);
         Fk<ReadinessAssessment, AppUser>(mb, x => x.OwnerId);
         Fk<ReadinessCheckRecord, ReadinessAssessment>(mb, x => x.AssessmentId);
         Fk<ReadinessCheckRecord, AppUser>(mb, x => x.RecordedBy);

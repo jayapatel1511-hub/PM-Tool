@@ -105,3 +105,29 @@ This implements Jay's FR-RDY-05 decision: a promise week starts on the project's
 `tools/trace_spec.py --check`: 0 not cited. `npm --prefix web run build` and `npm --prefix web run lint` passed, with lint at exit 0.
 
 **UNPROVEN:** browser rehearsal of the changed week picker and the mixed-week sections.
+
+## Submission Gate prerequisite packages — 2026-10-01
+
+This implements Jay's Submission Gate decision (`docs/decisions.md`). A PM or the responsible Discipline Lead links a task or deliverable to a prerequisite submission package in the same project and gives a reason, through `Coordination.Run`. That makes each link retry-safe, version-checked against the target, audited and lifecycle/Read Only guarded. Removing a link needs the link's row version and a reason. The row stays in history with who removed it, when and why. New table `readiness_submission_prerequisite` (migration `ReadinessSubmissionPrerequisite`, additive) has a unique index on active links only. A package is refused when its current manifest lists the target deliverable or the task's deliverable, including through the successor the gate would follow. A package from another project is refused.
+
+Evaluation is live on every readiness read and command, so a package status change takes effect on the next read. The gate passes only when every active link's package is Issued. A Superseded package is followed to the successor whose issue superseded it. Cancelled, Draft, Checking or Ready packages leave the gate Not Ready. With no link, a reasoned Not Applicable stands; otherwise the gate stays unknown (Needs Assessment), and a stored satisfied value is ignored. A link whose current package later lists the output becomes unknown, not Ready. Proceed under Assumption cannot override the gate. The readiness inspector lists links with the linked and current package status, any self-listing warning and removal history. PM/lead users can add or remove links with a reason.
+
+**PASS (local):** `dotnet build Hub.slnx` succeeded. `dotnet test --filter "Readiness|Submission|CoordinationLifecycleSweep|WeeklyCommitment"` passed 96/96. `HandoffsTests` passed 25/25, and the full suite passed 520/520.
+
+The new `ReadinessSubmissionGateTests` (3/3) cover:
+- an unlinked gate: unknown at first, Ready with a reasoned Not Applicable, and unknown again after Applies, even with a stored satisfied value;
+- a Draft link leaving the work Not Ready;
+- a retried link returning the same link, and a duplicate refused with 409;
+- API issue making the work Ready; an unissued successor not changing that; issuing the successor marking the original Superseded with the gate following it;
+- a cancelled linked package leaving the work Not Ready;
+- removal: stale 409, performer 403, then success; a repeat removal refused with 400, history retained;
+- performer, other-discipline lead, Read Only and Archived links refused with 403; a stale target refused with 409; a foreign package refused with 400;
+- self-listing refused with 400 for a deliverable and for its task;
+- a lead allowed to link;
+- a later self-listing turning the gate unknown.
+
+A domain test confirms an assumption permission cannot override an unissued or unknown gate. Mutating the Issued rule or the supersession following failed the new tests.
+
+Three existing fixtures that stored Applies/Satisfied = true for an unlinked gate now mark it Not Applicable: `ReadinessApiTests` (two) and `HandoffsTests` (one). The API cannot produce that stored state. `tools/trace_spec.py --check`: 0 not cited. `npm --prefix web run build` and `npm --prefix web run lint` passed.
+
+**UNPROVEN:** browser rehearsal of the prerequisite inspector, and a notice to the work owner when a linked package is issued (not sent; §17 has no readiness entry).

@@ -56,6 +56,20 @@ public class ReadinessException : CoordinationRecord
     public override string AuditType => "ReadinessException";
 }
 
+/// Jay's Submission Gate relationship (2026-10-01): work waits on prerequisite submission packages in its own
+/// project. Removal keeps the row, its reason and who removed it.
+public class ReadinessSubmissionPrerequisite : CoordinationRecord
+{
+    public string TargetType { get; set; } = "";
+    public Guid TargetId { get; set; }
+    public Guid PackageId { get; set; }
+    public string Reason { get; set; } = "";
+    public DateTimeOffset? RemovedAt { get; set; }
+    public Guid? RemovedBy { get; set; }
+    public string? RemovalReason { get; set; }
+    public override string AuditType => "ReadinessSubmissionPrerequisite";
+}
+
 public class WeeklyPlanSnapshot : CoordinationRecord
 {
     public DateOnly WeekStart { get; set; }

@@ -157,7 +157,7 @@ public sealed class HandoffsTests(HubFactory f)
             var checks = await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.G("id")).ToListAsync();
             foreach (var check in checks)
             {
-                check.Applies = check.Code != ReadinessCheckCode.ProductionCapacity;
+                check.Applies = check.Code is not (ReadinessCheckCode.ProductionCapacity or ReadinessCheckCode.SubmissionGate); // an unlinked gate is never satisfied
                 check.Satisfied = check.Applies == true ? true : null;
             }
             await db.SaveChangesAsync(); return 0;

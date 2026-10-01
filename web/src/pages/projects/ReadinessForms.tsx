@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -22,8 +23,11 @@ type BasisDetail = { entry: { key: string; title: string }; versions: { version:
 type Assumption = { key: string; title: string; version: BasisVersion; eligible: boolean; disposedUntil?: string }
 type Constraint = { id: string; rowVersion: number; category: string; description: string; removalOwnerId: string; affectedOwnerId: string;
   neededBy: string; sourceUrl: string; state: string; resolutionEvidenceUrl?: string; verifiedBy?: string; verifiedAt?: string }
+type PackageRef = { id: string; key: string; title: string; status: string }
+type Prerequisite = { id: string; rowVersion: number; packageId: string; reason: string; createdAt: string; createdBy?: string; removedAt?: string
+  removedBy?: string; removalReason?: string; package: PackageRef; effective: PackageRef | null; listsOutput: boolean }
 
-export function ReadinessInspector({ projectId, options, close, done }: { projectId: string; options: CoordOptions; close: () => void; done: () => void }) {
+export function ReadinessInspector({ projectId, number, options, close, done }: { projectId: string; number: string; options: CoordOptions; close: () => void; done: () => void }) {
   const [target, setTarget] = useState(''), [creating, setCreating] = useState(false), [editing, setEditing] = useState<Check | null>(null)
   const [raising, setRaising] = useState(false), [moving, setMoving] = useState<{ row: Constraint; state: string } | null>(null)
   const [type, id] = target.split(':'), work = workRef(options, type, id)
@@ -32,7 +36,9 @@ export function ReadinessInspector({ projectId, options, close, done }: { projec
     queryFn: async () => { try { return await get<Detail>(path) } catch (e) { if (e instanceof ApiError && e.status === 404) return null; throw e } } })
   const constraints = useQuery({ queryKey: ['readiness-constraints', projectId, type, id], enabled: !!work,
     queryFn: () => get<Constraint[]>(`${path}/constraints`) })
-  const [excepting, setExcepting] = useState(false)
+  const [excepting, setExcepting] = useState(false), [linking, setLinking] = useState(false), [unlinking, setUnlinking] = useState<Prerequisite | null>(null)
+  const prerequisites = useQuery({ queryKey: ['readiness-prerequisites', projectId, type, id], enabled: !!work,
+    queryFn: () => get<Prerequisite[]>(`${path}/submission-prerequisites`) })
   // The exception references a basis version; resolve keys, scope and eligibility from the design-basis register.
   const assumptions = useQuery({ queryKey: ['readiness-assumptions', projectId, type, id], enabled: !!q.data,
     queryFn: async () => {
@@ -46,7 +52,8 @@ export function ReadinessInspector({ projectId, options, close, done }: { projec
         return { key: d.entry.key, title: d.entry.title, version, disposedUntil, eligible: current && version.status === 'Proposed' && !!disposedUntil && disposedUntil >= today() }
       }))
     } })
-  const changed = () => { setCreating(false); setEditing(null); setRaising(false); setMoving(null); setExcepting(false); q.refetch(); constraints.refetch(); assumptions.refetch(); done() }
+  const changed = () => { setCreating(false); setEditing(null); setRaising(false); setMoving(null); setExcepting(false); setLinking(false); setUnlinking(null)
+    q.refetch(); constraints.refetch(); assumptions.refetch(); prerequisites.refetch(); done() }
   const canCreate = options.canWrite && work?.ownerId === options.actorId
   const canAssess = options.canWrite && work && options.manageDisciplineIds.includes(work.projectDisciplineId)
   if (creating && work) return <CreateAssessment path={path} rowVersion={work.rowVersion} close={() => setCreating(false)} done={changed} />
@@ -55,6 +62,10 @@ export function ReadinessInspector({ projectId, options, close, done }: { projec
   if (raising && work) return <RaiseConstraint path={`${path}/constraints`} work={work} options={options} close={() => setRaising(false)} done={changed} />
   if (excepting && q.data && work) return <ApproveException path={`${path}/exceptions`} assessment={q.data.assessment} work={work} options={options}
     candidates={assumptions.data?.filter(a => a.eligible) ?? []} close={() => setExcepting(false)} done={changed} />
+  if (linking && work) return <LinkPrerequisite path={`${path}/submission-prerequisites`} projectId={projectId} work={work}
+    linked={prerequisites.data?.filter(l => !l.removedAt).map(l => l.packageId) ?? []} close={() => setLinking(false)} done={changed} />
+  if (unlinking) return <RemovePrerequisite path={`${path}/submission-prerequisites/${unlinking.id}/remove`} row={unlinking}
+    close={() => setUnlinking(null)} done={changed} />
   if (moving) return <MoveConstraint path={`${path}/constraints/${moving.row.id}/transition`} row={moving.row} state={moving.state}
     close={() => setMoving(null)} done={changed} />
   return <Dialog open onOpenChange={o => !o && close()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
@@ -115,7 +126,45 @@ export function ReadinessInspector({ projectId, options, close, done }: { projec
           </div>
         </li>)}</ul>}
     </section>}
+    {work && <section className="space-y-3 text-sm" aria-labelledby="readiness-prerequisites">
+      <h3 id="readiness-prerequisites" className="font-medium">{t('readiness.prerequisites')}</h3>
+      <p className="text-xs text-muted-foreground">{t('readiness.prerequisitesHint')}</p>
+      {canAssess && <Button size="sm" variant="outline" onClick={() => setLinking(true)}>{t('readiness.addPrerequisite')}</Button>}
+      {prerequisites.isPending ? <Loading rows={2} /> : prerequisites.error ? <ErrorBanner error={prerequisites.error} retry={() => prerequisites.refetch()} /> :
+        prerequisites.data?.length === 0 ? <p>{t('readiness.noPrerequisites')}</p> :
+        <ul className="space-y-2">{prerequisites.data?.map(l => <li key={l.id} className="space-y-1 rounded border p-3">
+          <p className="font-medium"><Link className="text-primary underline" to={`/projects/${number}/submissions?panel=SubmissionPackage:${l.packageId}`}>{l.package.key} · {l.package.title}</Link></p>
+          <p className="flex flex-wrap items-center gap-2"><StatusPill status={l.package.status} />
+            {l.effective && l.effective.id !== l.package.id && <>{t('readiness.prerequisiteCurrent')}: {l.effective.key} <StatusPill status={l.effective.status} /></>}</p>
+          {l.listsOutput && <p role="status" className="text-warn">{t('readiness.prerequisiteListsOutput')}</p>}
+          <p>{l.reason}</p>
+          <p className="text-xs text-muted-foreground">{t('readiness.linkedBy')}: {personName(options, l.createdBy)} · {fmtDate(l.createdAt)}</p>
+          {l.removedAt ? <p>{t('readiness.prerequisiteRemoved')}: {personName(options, l.removedBy)} · {fmtDate(l.removedAt)} · {l.removalReason}</p>
+            : canAssess && <Button size="sm" variant="outline" onClick={() => setUnlinking(l)}>{t('readiness.removePrerequisite')}</Button>}
+        </li>)}</ul>}
+    </section>}
   </DialogContent></Dialog>
+}
+
+function LinkPrerequisite({ path, projectId, work, linked, close, done }: { path: string; projectId: string; work: WorkRef; linked: string[]; close: () => void; done: () => void }) {
+  const packages = useQuery({ queryKey: ['submission-choices', projectId], queryFn: () => get<{ items: PackageRef[] }>(`projects/${projectId}/submissions?pageSize=200`) })
+  const [packageId, setPackage] = useState(''), [reason, setReason] = useState('')
+  return <CommandForm path={path} title={t('readiness.addPrerequisite')} hint={t('readiness.prerequisitesHint')} onClose={close} onDone={done}
+    submitLabel={t('readiness.addPrerequisite')} payload={() => ({ targetRowVersion: work.rowVersion, packageId, reason })}>
+    {packages.isPending ? <Loading rows={1} /> : packages.error ? <ErrorBanner error={packages.error} retry={() => packages.refetch()} /> :
+      <SelectField label={t('readiness.prerequisitePackage')} value={packageId} onChange={setPackage}
+        choices={packages.data.items.filter(p => !linked.includes(p.id)).map(p => ({ value: p.id, label: `${p.key} · ${p.title} · ${tv(p.status)}` }))} />}
+    <Field label={t('basis.reason')} htmlFor="prerequisite-reason"><Textarea id="prerequisite-reason" required minLength={5} maxLength={4000} value={reason} onChange={e => setReason(e.target.value)} /></Field>
+  </CommandForm>
+}
+
+function RemovePrerequisite({ path, row, close, done }: { path: string; row: Prerequisite; close: () => void; done: () => void }) {
+  const [reason, setReason] = useState('')
+  return <CommandForm path={path} title={t('readiness.removePrerequisite')} hint={t('readiness.prerequisitesHint')} onClose={close} onDone={done}
+    submitLabel={t('readiness.removePrerequisite')} payload={() => ({ rowVersion: row.rowVersion, reason })}>
+    <p>{row.package.key} · {row.package.title}</p>
+    <Field label={t('basis.reason')} htmlFor="prerequisite-remove-reason"><Textarea id="prerequisite-remove-reason" required minLength={5} maxLength={4000} value={reason} onChange={e => setReason(e.target.value)} /></Field>
+  </CommandForm>
 }
 
 function RaiseConstraint({ path, work, options, close, done }: { path: string; work: WorkRef; options: CoordOptions; close: () => void; done: () => void }) {

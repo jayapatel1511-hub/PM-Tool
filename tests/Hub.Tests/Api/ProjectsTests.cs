@@ -11,6 +11,19 @@ public sealed class ProjectsTests(HubFactory f)
     readonly TestData d = new(f);
 
     [Fact]
+    public async Task Newly_added_restricted_member_receives_the_membership_notice()
+    {
+        var admin = f.As(TestData.Admin);
+        await admin.Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true });
+        try {
+            var p = await d.Project();
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}", new { visibility = "Restricted" }, d.Version(p.Id))).EnsureSuccessStatusCode();
+            await (await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/members", new { userId = d.User(TestData.Diane), roles = new[] { "Reviewer" } })).Json(201);
+            Assert.True(f.Db(db => db.Notifications.Any(n => n.ProjectId == p.Id && n.UserId == d.User(TestData.Diane) && n.EventType == NotificationEvents.AddedToProject)));
+        } finally { await admin.Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }); }
+    }
+
+    [Fact]
     public async Task Duplicate_numbers_are_refused_in_any_case_with_a_link() // AC-PRJ-01
     {
         var p = await d.Project(activate: false);

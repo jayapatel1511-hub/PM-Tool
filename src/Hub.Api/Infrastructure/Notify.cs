@@ -45,6 +45,8 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
             // Existing projects must pass the current-access check; the queued email is still
             // locked to the project and rechecked by EmailJob before delivery.
             if (item.ProjectId is { } projectId && await db.Projects.AnyAsync(p => p.Id == projectId)
+                && !db.ProjectMembers.Local.Any(m => m.ProjectId == projectId && m.UserId == u.Id && m.RemovedAt == null
+                    && db.Entry(m).State == EntityState.Added)
                 && !await EmailProjectAccess.Allowed(db, u.Id, [projectId])) continue;
             if (muted.Contains(u.Id) && !def.DirectAssignment) continue;
             var pref = prefs.GetValueOrDefault(u.Id);

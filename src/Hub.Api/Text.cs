@@ -425,6 +425,8 @@ public static class Text
         ["template.empty"] = "Add at least one milestone or deliverable before publishing.",
         ["template.unavailable"] = "This template has been retired or replaced since you chose it. Choose a published template and try again.",
         ["template.one_source"] = "Start from a template or from another project, not both.",
+        ["template.basis_units"] = "A numeric value needs its units.",
+        ["template.basis_in_use"] = "{0} has design basis suggestions ({1}). Remove those suggestions first.",
         ["template.created_reason"] = "From {0} v{1}: {2} milestones, {3} deliverables, {4} tasks, {5} dependencies",
         ["template.pack_reason"] = "From {0} v{1}: {2} deliverables and {3} tasks",
         ["report.pilot-measures"] = "Pilot measures", ["report.pilot-measures.about"] = "Weekly readings of the pilot goals on chosen projects: coordination reviews, tasks without an owner or due date, blocked tasks, and people updating task status.",

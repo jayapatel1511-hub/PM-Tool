@@ -14,6 +14,7 @@ import { Chip, StatusPill } from '@/components/hub/pills'
 import { useMe } from '@/lib/auth'
 import { useCurrentProject } from './ProjectLayout'
 import { CommandForm, SelectField, personName, workChoices, workRef, type CoordOptions } from './CoordinationForms'
+import { ReadinessInspector } from './ReadinessForms'
 
 type Commitment = {
   id: string; targetType: string; targetId: string; performerId: string; weekStart: string; targetDate: string
@@ -41,6 +42,7 @@ function dateValue(d: string) {
 export function ReadinessTab() {
   const p = useCurrentProject()
   const qc = useQueryClient(), [proposing, setProposing] = useState(false), [snapshotWeek, setSnapshotWeek] = useState<string | null>(null)
+  const [inspecting, setInspecting] = useState(false)
   const options = useQuery({ queryKey: ['coord-options', p.id], queryFn: () => get<CoordOptions>(`projects/${p.id}/changes/options`) })
   const lookahead = useMe().settings.coordinationLookaheadWeeks
   const [sp, setSp] = useSearchParams()
@@ -101,7 +103,8 @@ export function ReadinessTab() {
   const workLink = (c: Commitment) => `${base}/${c.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${c.targetType}:${c.targetId}`
   return (
     <Page title={t('readiness.title')} subtitle={t('readiness.subtitle')} actions={
-      <>{options.data?.canWrite && <Button size="sm" onClick={() => setProposing(true)}>{t('readiness.propose')}</Button>}
+      <>{options.data && <Button size="sm" variant="outline" onClick={() => setInspecting(true)}>{t('readiness.inspect')}</Button>}
+      {options.data?.canWrite && <Button size="sm" onClick={() => setProposing(true)}>{t('readiness.propose')}</Button>}
       <Button asChild variant="outline" size="sm"><Link to={`${base}/coordination?meeting=1`}><CalendarCheck className="size-4" />{t('readiness.meeting')}</Link></Button></>
     }>
       {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
@@ -144,6 +147,7 @@ export function ReadinessTab() {
       })}
       <p className="text-xs text-muted-foreground"><ExternalLink className="mr-1 inline size-3" aria-hidden />{t('readiness.sourceNote')}</p>
       {proposing && options.data && <ProposePromise projectId={p.id} options={options.data} week={weeks[0]} close={() => setProposing(false)} done={done} />}
+      {inspecting && options.data && <ReadinessInspector projectId={p.id} options={options.data} close={() => setInspecting(false)} done={done} />}
       {snapshotWeek && <SnapshotForm projectId={p.id} week={snapshotWeek} close={() => setSnapshotWeek(null)} done={done} />}
       {sp.get('promise') && options.data && <PromiseDetail projectId={p.id} id={sp.get('promise')!} options={options.data}
         close={() => set('promise', '')} done={done} />}

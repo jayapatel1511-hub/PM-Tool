@@ -40,13 +40,13 @@ deployment.
 
 | # | Gap | Source | Owner | Status |
 |---|---|---|---|---|
-| T1 | No PostgreSQL firewall rule, VNet integration or private endpoint, so neither the app nor the administrators' group has a network path to the server. §21 requires private networking or a firewall limited to App Service outbound addresses; §23.7 names private endpoint or VNet integration | `db` resource; [§21, §23.7][spec09] | agent | OPEN |
-| T2 | No custom hostname or certificate. `pm.engcalchub.com` appears nowhere in `infra/`; the app answers only on its default host | `app` resource, `appHostName` output | agent | OPEN |
-| T3 | Production app settings missing: `Email__BaseUrl` (empty, so email links are relative, [Notify.cs][notify] line 40), `AllowedHosts` (`*` in [appsettings.json][appsettings]), the mail route and directory sync (`Email__*`, `Graph__*`). A template deployment sets the whole app-settings list, so values set by hand ([environments][env] rebuild step 4, [restore] step 5) are replaced on the next deployment. Make them parameters | `app` `appSettings` | agent | OPEN |
-| T4 | No availability test on `/health` and no database CPU alert ([§22 monitoring, §23.8][spec09]); only the three log alerts | alert section | agent | OPEN |
-| T5 | Operators have no Key Vault role: the RBAC vault grants only the app's identity, so writing `review-users` or a mail secret needs Key Vault Secrets Officer assigned outside the template | `vaultReader` | agent + company IT | OPEN |
-| T6 | Fixed names `hub-<env>-app`, `-pg` and `-kv` must be globally unique and may already be taken; purge protection keeps a deleted vault's name reserved through soft-delete retention. Add a name suffix parameter if needed | `name` variable | agent | UNPROVEN |
-| T7 | No deployment slot (blue/green is a recommendation in §23.7); the cutover below assumes none | `app` | agent | OPEN |
+| T1 | Optional App Service VNet integration and PostgreSQL private endpoint/private DNS resources are now supported, with public database access disabled only when the app subnet, private endpoint subnet and private DNS zone are supplied together. The environment files intentionally leave those company network inputs empty, so no path is claimed yet | `appSubnetResourceId`, `dbPrivateEndpointSubnetResourceId`, `dbPrivateDnsZoneResourceId`, `db` resources; [§21, §23.7][spec09] | agent + company IT | BLOCKED: network IDs and private DNS design are required |
+| T2 | Optional verified hostname binding with an existing App Service certificate thumbprint is now supported. `pm.engcalchub.com` remains unbound until DNS, certificate and hostname verification are approved | `appHostname`, `appCertificateThumbprint`, `appHostnameBinding` | agent + company IT | BLOCKED: DNS and certificate inputs are required |
+| T3 | The complete production app-setting contract is now template-owned: `AllowedHosts`, `Email__*`, `Graph__*`, and the Key Vault reference for an SMTP password. Values remain empty or disabled until the company supplies the approved hostname, mail route and Graph registration | `appSettings` and parameters | agent + company IT | BLOCKED: company configuration and secret names are required |
+| T4 | Added an Application Insights `/health` availability test, availability query alert and PostgreSQL CPU-above-80% metric alert. They are gated on `operatorEmail`, which remains empty until an operator route is approved | `availabilityTest`, `dbCpuAlert`, alert section | agent + company IT | BLOCKED: operator route and deployed-fire evidence are required |
+| T5 | Added optional Key Vault Secrets Officer assignment for an operator Entra group; the group ID remains empty so no access is granted by default | `operatorGroupObjectId`, `operatorVaultReader` | agent + company IT | BLOCKED: company operator group is required |
+| T6 | Added an optional `nameSuffix` parameter for globally unique App Service, PostgreSQL, Key Vault, plan, and alert names. The default remains unchanged and uniqueness is still unverified | `nameSuffix`, `name` variable | agent + company IT | UNPROVEN |
+| T7 | Added a disabled-by-default `staging` App Service slot using the same reviewed settings and health check. Enabling it still requires the deployment/cutover decision and managed-identity database access review | `enableDeploymentSlot`, `appSlot` | agent + company IT | BLOCKED: CI/CD and cutover choice are required |
 | T8 | Key Vault uses `subscription().tenantId`; PostgreSQL and the API use `entraTenantId`. Deploy into a subscription of the company tenant | `vault`, `db` | company IT | UNPROVEN |
 
 ## 3. Hostname and Entra registrations
@@ -84,7 +84,7 @@ A rotation schedule for any secret (FR-009; §21 TBD) is owned by company IT and
 | D1 | PITR for 14 days without geo-redundant backup (Q9). Geo-redundant backup can be chosen only when the server is created, so decide before the first deployment | company IT | UNPROVEN |
 | D2 | No high availability (Q9 default: 99.5 % of business hours) | company IT | UNPROVEN |
 | D3 | Restore drill before go-live and every quarter, against RPO 15 minutes and RTO 8 hours ([restore], FR-005) | agent + company IT | BLOCKED: no Azure environment; the drill record is empty |
-| D4 | [restore] step 5 sets `ConnectionStrings__Hub` by hand; the next template deployment resets it to the original server (T3) | agent | OPEN |
+| D4 | The template now owns `ConnectionStrings__Hub`; a restore still requires the approved target host to be supplied through the deployment parameters or a reviewed deployment override | app `appSettings` | agent + company IT | BLOCKED: restore target and deployment procedure are not approved |
 
 ## 6. Pilot data: migrate or start fresh
 
@@ -128,7 +128,7 @@ Rollback:
 | P1 | Company subscription and resource groups | company IT | BLOCKED: unavailable ([gates], Azure pilot Entra sign-in) |
 | P2 | Entra registrations, groups and consent (R1–R5) | company IT | BLOCKED |
 | P3 | Parameter values filled, including `operatorEmail` | company IT + agent | BLOCKED: every value is empty in `infra/env/*.bicepparam` |
-| P4 | Template gaps T1–T8 fixed and reviewed | agent | OPEN |
+| P4 | Template hooks for T1–T7 are implemented and compile-checked; T1–T5 and T7 remain blocked on company inputs, T6/T8 remain unproven, and deployment review is outstanding | agent + company IT | BLOCKED |
 | P5 | Template compiles | agent | PASS: local compile 2026-10-01 (§1); also [packet 011 verification][v011] |
 | P6 | `what-if` and deployment; managed-identity database access; Key Vault reference resolution (T-12) | agent + company IT | BLOCKED: needs P1–P3; deployment unverified ([implementation status][status]) |
 | P7 | HTTPS redirection, HSTS and host handling behind App Service; the homedev forwarded-header handling is Staging-only ([Program.cs][program] lines 79–92) | agent | UNPROVEN ([gates], homedev proxy origin handling) |

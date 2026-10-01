@@ -7,26 +7,34 @@ import { Textarea } from '@/components/ui/textarea'
 import { ErrorBanner, Field, Loading } from '@/components/hub/common'
 import { StatusPill } from '@/components/hub/pills'
 import { ApiError, get } from '@/lib/api'
-import { fmtDate, fmtTime } from '@/lib/format'
+import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
-import { CommandForm, SelectField, personName, workChoices, workRef, type CoordOptions } from './CoordinationForms'
+import { CommandForm, SelectField, personName, workChoices, workRef, type CoordOptions, type WorkRef } from './CoordinationForms'
 
 type Assessment = { id: string; rowVersion: number; ownerId: string; state: string; intendedOutput: string; completionCriteria: string; evaluatedAt: string }
 type Check = { id: string; rowVersion: number; code: string; applies: boolean | null; satisfied: boolean | null; reason?: string; evidenceUrl?: string; recordedBy?: string }
 type Detail = { assessment: Assessment; checks: Check[]; unknown: string[]; blocked: string[] }
+type Constraint = { id: string; rowVersion: number; category: string; description: string; removalOwnerId: string; affectedOwnerId: string;
+  neededBy: string; sourceUrl: string; state: string; resolutionEvidenceUrl?: string; verifiedBy?: string; verifiedAt?: string }
 
 export function ReadinessInspector({ projectId, options, close, done }: { projectId: string; options: CoordOptions; close: () => void; done: () => void }) {
   const [target, setTarget] = useState(''), [creating, setCreating] = useState(false), [editing, setEditing] = useState<Check | null>(null)
+  const [raising, setRaising] = useState(false), [moving, setMoving] = useState<{ row: Constraint; state: string } | null>(null)
   const [type, id] = target.split(':'), work = workRef(options, type, id)
   const path = `projects/${projectId}/readiness/${type}/${id}`
   const q = useQuery({ queryKey: ['readiness-detail', projectId, type, id], enabled: !!work,
     queryFn: async () => { try { return await get<Detail>(path) } catch (e) { if (e instanceof ApiError && e.status === 404) return null; throw e } } })
-  const changed = () => { setCreating(false); setEditing(null); q.refetch(); done() }
+  const constraints = useQuery({ queryKey: ['readiness-constraints', projectId, type, id], enabled: !!work,
+    queryFn: () => get<Constraint[]>(`${path}/constraints`) })
+  const changed = () => { setCreating(false); setEditing(null); setRaising(false); setMoving(null); q.refetch(); constraints.refetch(); done() }
   const canCreate = options.canWrite && work?.ownerId === options.actorId
   const canAssess = options.canWrite && work && options.manageDisciplineIds.includes(work.projectDisciplineId)
   if (creating && work) return <CreateAssessment path={path} rowVersion={work.rowVersion} close={() => setCreating(false)} done={changed} />
   if (editing && q.data) return <Applicability path={`${path}/checks/${encodeURIComponent(editing.code)}/applicability`} check={editing}
     assessmentVersion={q.data.assessment.rowVersion} close={() => setEditing(null)} done={changed} />
+  if (raising && work) return <RaiseConstraint path={`${path}/constraints`} work={work} options={options} close={() => setRaising(false)} done={changed} />
+  if (moving) return <MoveConstraint path={`${path}/constraints/${moving.row.id}/transition`} row={moving.row} state={moving.state}
+    close={() => setMoving(null)} done={changed} />
   return <Dialog open onOpenChange={o => !o && close()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
     <DialogHeader><DialogTitle>{t('readiness.inspect')}</DialogTitle><DialogDescription>{t('readiness.inspectHint')}</DialogDescription></DialogHeader>
     <SelectField label={t('readiness.work')} value={target} onChange={v => { setTarget(v); setEditing(null) }} choices={workChoices(options)} />
@@ -49,7 +57,47 @@ export function ReadinessInspector({ projectId, options, close, done }: { projec
         {canAssess && <Button size="sm" variant="outline" onClick={() => setEditing(c)}>{t('readiness.recordApplicability')} · {tv(c.code)}</Button>}
       </li>)}</ul>
     </div>)}
+    {work && <section className="space-y-3 text-sm" aria-label={t('readiness.constraints')}>
+      <h3 className="font-medium">{t('readiness.constraints')}</h3>
+      {(canCreate || canAssess) && <Button size="sm" variant="outline" onClick={() => setRaising(true)}>{t('readiness.raiseConstraint')}</Button>}
+      {constraints.isPending ? <Loading rows={3} /> : constraints.error ? <ErrorBanner error={constraints.error} retry={() => constraints.refetch()} /> : constraints.data?.length === 0 ? <p>{t('readiness.noWorkConstraints')}</p> :
+        <ul className="space-y-2">{constraints.data?.map(c => <li key={c.id} className="space-y-2 rounded border p-3">
+          <StatusPill status={c.state} /><p className="font-medium">{c.description}</p><p>{tv(c.category)} · {fmtDate(c.neededBy)}</p>
+          <p>{t('readiness.removalOwner')}: {personName(options, c.removalOwnerId)}</p><p>{t('readiness.affectedOwner')}: {personName(options, c.affectedOwnerId)}</p>
+          <a className="text-primary underline" href={c.sourceUrl} target="_blank" rel="noopener noreferrer">{t('readiness.constraintSource')}</a>
+          {c.resolutionEvidenceUrl && <p><a className="text-primary underline" href={c.resolutionEvidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a></p>}
+          {c.verifiedBy && <p>{t('readiness.verifiedBy')}: {personName(options, c.verifiedBy)} · {fmtDate(c.verifiedAt)} {fmtTime(c.verifiedAt)}</p>}
+          <div className="flex flex-wrap gap-2">
+            {options.canWrite && c.state === 'Open' && c.removalOwnerId === options.actorId && <Button size="sm" onClick={() => setMoving({ row: c, state: 'Resolution Proposed' })}>{t('readiness.proposeResolution')}</Button>}
+            {options.canWrite && c.state === 'Resolution Proposed' && c.affectedOwnerId === options.actorId && work.ownerId === c.affectedOwnerId && <Button size="sm" onClick={() => setMoving({ row: c, state: 'Verified Removed' })}>{t('readiness.verifyRemoval')}</Button>}
+            {canAssess && ['Open', 'Resolution Proposed'].includes(c.state) && <Button size="sm" variant="outline" onClick={() => setMoving({ row: c, state: 'Cancelled' })}>{t('readiness.cancelConstraint')}</Button>}
+          </div>
+        </li>)}</ul>}
+    </section>}
   </DialogContent></Dialog>
+}
+
+function RaiseConstraint({ path, work, options, close, done }: { path: string; work: WorkRef; options: CoordOptions; close: () => void; done: () => void }) {
+  const [category, setCategory] = useState(''), [description, setDescription] = useState(''), [removalOwnerId, setOwner] = useState(''), [neededBy, setNeeded] = useState(today()), [sourceUrl, setSource] = useState('')
+  return <CommandForm path={path} title={t('readiness.raiseConstraint')} hint={t('readiness.constraintHint')} onClose={close} onDone={done}
+    payload={() => ({ targetRowVersion: work.rowVersion, category, description, removalOwnerId, neededBy, sourceUrl })}>
+    <SelectField label={t('readiness.category')} value={category} onChange={setCategory} choices={['Handoff', 'Decision', 'Basis', 'Capacity', 'Review', 'Scope', 'Other'].map(v => ({ value: v, label: tv(v) }))} />
+    <Field label={t('readiness.constraintDescription')} htmlFor="constraint-description"><Textarea id="constraint-description" required maxLength={2000} value={description} onChange={e => setDescription(e.target.value)} /></Field>
+    <SelectField label={t('readiness.removalOwner')} value={removalOwnerId} onChange={setOwner} choices={options.people.filter(p => p.id !== work.ownerId).map(p => ({ value: p.id, label: p.displayName }))} />
+    <Field label={t('readiness.neededBy')} htmlFor="constraint-needed"><Input id="constraint-needed" required type="date" value={neededBy} onChange={e => setNeeded(e.target.value)} /></Field>
+    <Field label={t('readiness.constraintSource')} htmlFor="constraint-source"><Input id="constraint-source" required type="url" value={sourceUrl} onChange={e => setSource(e.target.value)} /></Field>
+  </CommandForm>
+}
+
+function MoveConstraint({ path, row, state, close, done }: { path: string; row: Constraint; state: string; close: () => void; done: () => void }) {
+  const [reason, setReason] = useState(''), [evidenceUrl, setEvidence] = useState('')
+  const title = t(state === 'Resolution Proposed' ? 'readiness.proposeResolution' : state === 'Verified Removed' ? 'readiness.verifyRemoval' : 'readiness.cancelConstraint')
+  return <CommandForm path={path} title={title} hint={t('readiness.resolutionHint')} onClose={close} onDone={done} submitLabel={title}
+    payload={() => ({ rowVersion: row.rowVersion, toState: state, reason, evidenceUrl: evidenceUrl || null })}>
+    <p>{row.description}</p>{row.resolutionEvidenceUrl && <a className="text-primary underline" href={row.resolutionEvidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
+    <Field label={t('basis.reason')} htmlFor="constraint-reason"><Textarea id="constraint-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>
+    {state === 'Resolution Proposed' && <Field label={t('basis.evidence')} htmlFor="constraint-evidence"><Input id="constraint-evidence" required type="url" value={evidenceUrl} onChange={e => setEvidence(e.target.value)} /></Field>}
+  </CommandForm>
 }
 
 function CreateAssessment({ path, rowVersion, close, done }: { path: string; rowVersion: number; close: () => void; done: () => void }) {

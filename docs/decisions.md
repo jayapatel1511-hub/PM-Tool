@@ -83,6 +83,8 @@ changes, `spec-parts/`.
   otherwise the gate is Needs Assessment. Proceed under Assumption cannot override it (FR-RDY-04).
 - **FR-LOC-01 Coordination issue.** An explicit `Coordination` issue type chosen at creation. Only
   Coordination issues require at least one location or drawing/model reference and independent
-  verification before resolution. Existing issues keep their current type.
+  verification before resolution. Issues had no type before; to keep existing behaviour, the
+  migration marks issues that already carry a location or drawing/model reference as Coordination
+  (their verification gate is unchanged) and all others as General.
 - **FR-RDY-05 commitment week.** Weekly promise weeks start on each project's `CoordinationDay`.
   Existing rows keep their recorded week start.

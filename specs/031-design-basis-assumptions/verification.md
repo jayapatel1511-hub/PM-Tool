@@ -94,3 +94,30 @@ Isolated worktree `codex/pm-verify-031` at `5325e6c`. The frontend production bu
 - **axe and browser errors:** axe WCAG 2.1 A/AA found 0 violations across 22 settled states (register, forms and detail). The incomplete results were all colour contrast (overlapping dialog layers and icon glyphs), plus one aria-hidden-focus in the decision reopen dialog. In the browser, the decision panel deep link requests `/api/v1/projects//external-parties` (404) before the decision loads. Closing a dialog opened from state (New basis entry, basis detail) with Escape leaves focus on `<body>`. The other errors were the expected 409 and 400 responses above.
 
 Packet 031 remains **UNPROVEN** for product acceptance. The impact-decision control, the affected-work filter and the withdrawn-use highlight need fixes and a rerun. Not run: email and digest delivery, restricted-project and lifecycle-status repeats, Proceed under Assumption in the browser, template copy, assistive technology and other viewport sizes.
+
+## Template basis suggestions UI
+
+**Date**: 2026-10-01 · branch `codex/pm-tmpl`, parent `70e47bd`
+
+The template page now lists a version's design basis suggestions: kind, discipline, scope, value and units, and source. Admins and Template Editors can add one to a Draft through a form. Add is disabled while structure edits are unsaved, because the refresh after adding would drop them. Published and retired versions, and non-editors, see the list read-only. The template read returns `basisSuggestions` and each discipline's `templateDisciplineId`, which the add endpoint takes; Save ignores the extra field. The create-from-template summary counts the suggestions for ticked disciplines. It states that they are copied as Proposed, not confirmed, not approved and not linked to work, and how many are left out with unticked disciplines, as the server does (FR-BAS-07, AC-BAS-05). The API has no edit or remove for a suggestion, so the UI offers neither.
+
+**PASS (local):** `dotnet build Hub.slnx` had 0 errors. `dotnet test --filter FullyQualifiedName~TemplatesTests` passed 6/6. The new `Editors_add_basis_suggestions_to_drafts_and_the_template_lists_them` shows:
+- A PM gets 403. An Admin gets 201 on a Draft.
+- The read lists the suggestion with its discipline and units.
+- Publishing makes the version refuse further suggestions with 400.
+- The wizard's PM can read the suggestions, and the next Draft keeps them.
+
+`npm --prefix web run build` passed. `lint` had 0 errors and 88 warnings, the same count as before the change.
+
+The browser check used headless Chrome with Playwright, the API on port 5098 and database `hub_agent_tmpl`, which was dropped afterwards. As Admin, jordan started a Draft of Municipal Infrastructure Design v1:
+- The form refused a numeric value without units before sending any request.
+- Two suggestions were added: a Civil criterion of 5 years with source metadata, and a Transportation assumption.
+- The Draft was published as v2 without a structure save. Add was absent on v2.
+
+As PM, priya saw the list read-only with no Add, and her direct POST got 403. Her wizard summary showed 1 suggestion copied and 1 not copied; ticking Transportation changed it to 2 copied. The project was then created with the default disciplines. It had exactly one entry, B001: Proposed, with no current version, confirmation, decision, use or disposition. The value of 5 years and the source were kept. axe (wcag2a/2aa/21aa) found 0 violations on the add dialog, the editor page and wizard step 2. The project register also had 0 once the creation toast had faded; the only hit was colour contrast on that toast. There were no JavaScript errors. At 390 px the suggestion list wraps without overflow; the page's existing milestone, deliverable and task tables still overflow.
+
+**FAIL (backend, not changed here):**
+- Once a Draft has a suggestion, `PUT /templates/{id}/structure` and `DELETE /templates/{id}` return 500. The PostgreSQL error is 23503: `ClearChildren` deletes `template_discipline` rows that the RESTRICT foreign key from `template_design_basis` still references. `NewDraft` copies suggestions, so every later Draft of the family has the same fault. This was seen in the browser and through the API.
+- `POST /templates/{id}/design-basis` with a numeric value and no units returns 500 from `ck_template_basis_numeric_units`; only the form prevents this.
+
+**UNPROVEN:** deployed sign-in, concurrent edits, keyboard-only operation and full packet acceptance.

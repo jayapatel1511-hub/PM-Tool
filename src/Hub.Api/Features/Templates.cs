@@ -154,11 +154,15 @@ public static class TemplateEndpoints
         var disc = p.Disciplines.ToDictionary(d => d.Id, d => d.DisciplineId);
         var family = await db.Templates.AsNoTracking().Where(x => x.FamilyId == t.FamilyId).OrderByDescending(x => x.Version)
             .Select(x => new { x.Id, x.Version, x.Status, x.PublishedAt }).ToListAsync();
+        var basis = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == t.Id).OrderBy(x => x.Id).ToListAsync();
         return new
         {
             t.Id, t.FamilyId, t.Name, t.Description, t.ProjectTypeId, t.Version, t.Status, t.PublishedAt, t.RowVersion, CanEdit = IsEditor(access) && t.Status == TemplateStatus.Draft,
             Family = family,
-            Disciplines = p.Disciplines.Select(d => new DisciplineIn(d.DisciplineId, d.IsDefaultIncluded)),
+            // TemplateDisciplineId is what a basis suggestion is added against; Save ignores it.
+            Disciplines = p.Disciplines.Select(d => new { d.DisciplineId, d.IsDefaultIncluded, TemplateDisciplineId = d.Id }),
+            BasisSuggestions = basis.Select(b => new { b.Id, DisciplineId = disc[b.TemplateDisciplineId], b.Kind, b.Title, b.Scope, b.Statement,
+                b.NumericValue, b.Units, b.SourceSystem, b.StableSourceId, b.SourceUrl, b.DeclaredRevision }),
             Milestones = p.Milestones.Select(m => new MilestoneIn(m.Id.ToString(), m.Name, m.MilestoneType, m.Anchor, m.OffsetDaysFromAnchor, m.CompletesPhaseId, m.IsClientFacing)),
             Deliverables = p.Deliverables.Select(d => new DeliverableIn(d.Id.ToString(), disc[d.TemplateDisciplineId], d.Name, d.DeliverableTypeId, d.TemplateMilestoneId?.ToString(), d.DueOffsetDays, d.RequiresReview, d.Description)),
             Tasks = p.Tasks.Select(k => new TaskIn(k.Id.ToString(), disc[k.TemplateDisciplineId], k.TemplateDeliverableId?.ToString(), k.Name, k.Description, k.RequiresReview, k.Priority, k.EstimatedHours, k.DueOffsetDays, k.AssignToRole)),

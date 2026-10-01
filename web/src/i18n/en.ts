@@ -1512,4 +1512,11 @@ export const en: Record<string, string> = {
   'tpl.templateMilestone': 'Template milestone', 'tpl.projectMilestone': 'Project milestone', 'tpl.mapFor': 'Project milestone for {name}', 'tpl.leaveUndated': 'None (leave undated)',
   'tpl.addPackButton': 'Add discipline', 'tpl.packAdded': 'Added to {name} — deliverables: {d}, tasks: {k}',
   'tpl.origin': 'Template', 'tpl.originText': 'Created from {name}, version {v}. Later versions of the template do not change this project.', 'tpl.aTemplate': 'a template',
+  // Template design basis suggestions (packet 031, FR-BAS-07, AC-BAS-05)
+  'templates.basisTitle': 'Design basis suggestions', 'templates.basisAdd': 'Add suggestion', 'templates.basisNone': 'No design basis suggestions.',
+  'templates.basisHint': 'A project made from this template gets each suggestion as a Proposed design basis entry. Confirmation, approval and links to work are never copied.',
+  'templates.basisSaveFirst': 'Save your changes before adding a suggestion.', 'templates.basisUnitsRequired': 'Enter the units of the numeric value.',
+  'templates.basisCopiedOne': '{n} design basis suggestion is copied as a Proposed entry: not confirmed, not approved and not linked to any work.',
+  'templates.basisCopied': '{n} design basis suggestions are copied as Proposed entries: not confirmed, not approved and not linked to any work.',
+  'templates.basisSkipped': 'Not copied because their discipline is not ticked: {n}.',
 }

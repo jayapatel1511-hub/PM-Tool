@@ -10,14 +10,14 @@ import { Input } from '@/components/ui/input'
 import { useReference } from '@/hooks/data'
 import { ApiError, get, post } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { plural, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { ProjectDetail } from '@/lib/types'
 import { CREATE_SOURCES, type CreateContext } from './CreateProject'
 import { SETTINGS_SECTIONS } from './ProjectSettings'
 
 export interface TemplateRow { id: string; familyId: string; name: string; description?: string; version?: number; status: string; milestones: number; deliverables: number; tasks: number; projects: number }
-interface TemplateDetail { id: string; disciplines: { disciplineId: string; isDefaultIncluded: boolean }[] }
+interface TemplateDetail { id: string; disciplines: { disciplineId: string; isDefaultIncluded: boolean }[]; basisSuggestions: { disciplineId: string }[] }
 interface Preview {
   milestones: { id: string; name: string; milestoneType: string; date?: string | null; source: 'Contract' | 'Offset' | 'None' }[]
   counts: { milestones: number; deliverables: number; tasks: number; dependencies: number }; undated: { milestones: number; deliverables: number; tasks: number }
@@ -92,16 +92,21 @@ function TemplateSource({ value, onChange, ctx }: { value: Value; onChange: (v: 
   )
 }
 
-/** The last step's summary (FR-005): what will be created, and what will be undated. */
+/** The last step's summary (FR-005): what will be created, and what will be undated. Basis suggestions of the chosen
+ *  disciplines are copied as Proposed only (031 FR-BAS-07, AC-BAS-05); the others are left out, as on the server. */
 function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateContext }) {
   const preview = usePreview(value, ctx)
+  const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => get<TemplateDetail>(`templates/${value!.templateId}`) })
   const p = preview.data
   if (!p) return null
   const undated = p.undated.milestones + p.undated.deliverables + p.undated.tasks
+  const basis = detail.data?.basisSuggestions ?? []
+  const copied = basis.filter((b) => ctx.disciplines.some((d) => d.disciplineId === b.disciplineId)).length
   return (
     <section aria-labelledby="tpl-summary" className="rounded-md border bg-muted/30 p-3 text-sm">
       <h3 id="tpl-summary" className="font-semibold">{t('tpl.summary')}</h3>
       <p>{t('tpl.creates', { m: p.counts.milestones, d: p.counts.deliverables, k: p.counts.tasks, x: p.counts.dependencies })}</p>
+      {basis.length > 0 && <p>{plural(copied, 'templates.basisCopiedOne', 'templates.basisCopied')}{copied < basis.length && ` ${t('templates.basisSkipped', { n: basis.length - copied })}`}</p>}
       {undated > 0 && <p className="text-warn" role="status">{t('tpl.undatedWarning', { m: p.undated.milestones, d: p.undated.deliverables, k: p.undated.tasks })}</p>}
       <p className="text-xs text-muted-foreground">{t('tpl.setupNote')}</p>
     </section>

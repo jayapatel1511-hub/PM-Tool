@@ -74,6 +74,36 @@ public sealed class TemplatesTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Editors_add_basis_suggestions_to_drafts_and_the_template_lists_them() // 031 FR-BAS-07, 012 US1 scenario 3
+    {
+        var admin = f.As(TestData.Admin);
+        var civil = await d.Discipline("Civil");
+        var t = await (await admin.Post("/api/v1/templates", new { name = "Storm Sewer " + Guid.NewGuid().ToString("N")[..4] })).Json(201);
+        var id = t.G("id");
+        var saved = await (await admin.Put($"/api/v1/templates/{id}/structure", new
+        {
+            rowVersion = t.I("rowVersion"), disciplines = new[] { new { disciplineId = civil, isDefaultIncluded = true } },
+            milestones = new[] { new { @ref = "m1", name = "Kickoff", milestoneType = "Kickoff", anchor = "ProjectStart", offset = (int?)5, completesPhaseId = (Guid?)null, isClientFacing = false } },
+            deliverables = Array.Empty<object>(), tasks = Array.Empty<object>(), dependencies = Array.Empty<object>(),
+        })).Json();
+        var body = new
+        {
+            templateDisciplineId = saved["disciplines"]!.AsArray().Single()!.G("templateDisciplineId"), kind = BasisKind.Criterion, title = "Design storm",
+            scope = "Site / storm sewers", statement = "Minor system return period", numericValue = 5m, units = "years", sourceUrl = "https://example.test/standard",
+        };
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Pm).Post($"/api/v1/templates/{id}/design-basis", body)).StatusCode);
+        var added = await (await admin.Post($"/api/v1/templates/{id}/design-basis", body)).Json(201);
+
+        var listed = (await Template(id, TestData.Admin))["basisSuggestions"]!.AsArray().Single()!;
+        Assert.Equal((added.G("id"), civil, "Design storm", 5m, "years"), (listed.G("id"), listed.G("disciplineId"), listed.S("title"), listed["numericValue"]!.GetValue<decimal>(), listed.S("units")));
+        (await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = saved.I("rowVersion") })).EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.BadRequest, (await admin.Post($"/api/v1/templates/{id}/design-basis", body)).StatusCode); // only Drafts change
+        Assert.Single((await Template(id))["basisSuggestions"]!.AsArray()); // the wizard's PM sees what a project would copy
+        var draft = await (await admin.Post($"/api/v1/templates/{id}/draft", new { })).Json(201);
+        Assert.Equal("Design storm", (await Template(draft.G("id"), TestData.Admin))["basisSuggestions"]!.AsArray().Single()!.S("title")); // the next Draft keeps them
+    }
+
+    [Fact]
     public async Task Appendix_A_creates_the_stated_structure_in_setup() // US2 scenarios 1 and 3, SC-002, FR-004, FR-006, FR-008
     {
         var tid = await Reference();

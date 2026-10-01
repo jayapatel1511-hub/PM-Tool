@@ -30,3 +30,24 @@ Allocation create/edit/confirm/decline/cancel/complete commands now raise an in-
 The proposal screen now offers Production and Review. Review options include only current, non-approved review assignments; the form requires explicit linked review hours and the detail can link back to the current review package. A focused PostgreSQL test created an active review package, proposed 4 reserved hours against 3 explicit review hours, verified the package source link, and saw 4 proposed hours on the workload grid. Read Only access to proposal options returned 403. The local synthetic browser showed the Review choice and the correct empty state for DEMO-101, which has no active review assignment for the selected people; it did not submit a Review-purpose proposal there. The combined local PostgreSQL suite passed 401/401 and the frontend build and lint passed after these changes. The editor still lacks multi-link proposals, per-day splits and material edits; a real supervisor confirmation browser session remains UNPROVEN.
 
 The project form now supports multiple linked work rows, explicit per-day hour overrides, and versioned material edits with a required reason. A confirmed edit explains that it returns to Proposed. The detail screen shows saved day overrides. In the local synthetic browser, Taylor edited an existing DEMO-101 Production proposal from 4 to 5 hours, added a 5-hour override on 2026-09-29, supplied a reason, and saw the saved Proposed detail. After reload, both the total and day override remained visible. The frontend build and lint passed, with existing lint warnings. This exercises one linked task and one day in the local browser; multiple links, a Review-purpose submission, supervisor confirmation, pointer interaction, and deployed flows remain UNPROVEN.
+
+## Browser acceptance rehearsal — 2026-10-01
+
+This used the same isolated build and `hub_agent_verify` database as the packet 031 rehearsal, in real Chrome with no mocks.
+
+- **Proposal (PASS):** in the browser, Jay (Civil Discipline Lead) proposed a 20-hour Production allocation for Yagmur for 5–9 Oct 2026. It had three linked work rows (T0003 on 5 Oct, T0004 on 6 Oct, T0003 on 7 Oct) and a 6-hour day split on 8 Oct. The saved detail listed all three links and the split. Jay could cancel or edit, but could not confirm or decline.
+- **Stale confirmation (PASS):** Taylor, Yagmur's supervisor, opened Review capacity and saw five dated rows. While that dialog was open, Jordan (Admin) set Yagmur's 6 Oct availability to 2 h (Reduced) from the Workload screen. Taylor's stale confirmation was refused with "This record changed…", and the allocation stayed Proposed.
+- **Recomputed warning (PASS):** reopening the review showed 6 Oct at 2 h available and 6.32 h over. Confirm stayed disabled until a reason was entered, and the confirmation recorded the over-capacity warning.
+- **Later change, FR-CAP-07 (PASS):** a 7 Oct Unavailable override changed that week in the Workload grid from 47.3/34 h to 47.3/26 h and showed Over-assigned. The allocation stayed Confirmed.
+- **Arithmetic, FR-CAP-04 (PASS):** the weekly figure reconciles: the 20 h reserved exceeds the 8.8 h linked, plus 27.3 h unlinked.
+
+**Defects:**
+- The capacity preview's scroll container fails axe `scrollable-region-focusable` (serious, `web/src/pages/projects/Allocations.tsx:134`).
+- The preview shows unrounded hours such as 7.216783216783217 (`Allocations.tsx:136-137`), against FR-CAP-03's display rounding.
+- The proposal form repeats an unnumbered "Linked work date" label on every row and uses "Hours" for both planned hours and day splits.
+- The allocation detail shows neither the over-capacity warning recorded at confirmation nor the recomputed overload, so the change appears only in the Workload grid.
+- Closing Propose allocation with Escape leaves focus on `<body>`.
+
+Other axe scans found 0 violations. The only browser error was the expected stale-confirmation 409.
+
+This run covers the multi-link proposal, supervisor confirmation, pointer operation and FR-CAP-07 recomputation locally. Not run: a Review-purpose submission, simultaneous cross-project confirmation in the browser, AC-CAP-04 privacy with a restricted project, notifications or email in the browser, and deployed flows. AC-CAP acceptance remains **UNPROVEN** until the accessibility defects are fixed.

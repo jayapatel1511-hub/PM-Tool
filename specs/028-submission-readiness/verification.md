@@ -30,3 +30,16 @@ Self-review found that a Ready package still rendered the pre-issue stored `Pend
 ## Handoff and basis invalidation increment
 
 Handoff creation, draft edits (including both old and new targets), transitions and reassignment now invalidate related unissued submission checks and clear their current evidence in the same project transaction. Confirming or withdrawing a design-basis version does the same for packages containing linked work. Issued snapshots remain unchanged. The combined `SubmissionApiTests|ReadinessApiTests|LocationIssueTests|DesignBasisApiTests|HandoffsTests` PostgreSQL set passed 38/38, including a real Handoff create and transition and a basis replacement confirmation. This does not yet prove every retargeting race, an end-to-end browser issue, notifications for source-triggered invalidations or full packet acceptance.
+
+## Keyboard walkthrough — 2026-10-01
+
+This used the same isolated build and `hub_agent_verify` database as the packet 031 rehearsal, in real Chrome, using only the keyboard: Tab, Shift+Tab, Enter, Space, Escape and type-ahead. Setup used the API and is not under test: a current D001 P01 revision and an approved review by Yagmur that is required for issue.
+
+- **Create (PASS):** Jay (coordinator and Civil lead) reached New submission after 50 Tab stops; a skip link is present. Enter opened the form with focus in Title, and 40 more Tabs stayed inside the dialog. Jay filled every field from the keyboard, choosing the milestone by type-ahead and the manifest item with Space, then saved with Enter. DEMO-101-SUB001 opened with focus inside the detail.
+- **Checking (PASS):** starting checking from a nested dialog left focus in the detail, which then showed Ready with live-pass checks. Escape from Edit submission returned focus to the detail. Jay had no Record issue action.
+- **Issue (PASS):** Taylor (PM) opened the package from its row and recorded Issue with an `example.test` transmittal. The Issued record appeared, and focus stayed in the detail.
+- **Focus, naming and axe (PASS):** all 177 focus stops had a visible ring and an accessible name. axe WCAG 2.1 A/AA found 0 violations across seven settled states (incomplete: colour contrast only). There were no browser errors.
+
+**FAIL (focus return):** Escape on the New submission form and on the package detail left focus on `<body>`, so a keyboard user has to start again from the top of the page (WCAG 2.4.3). New basis entry, the basis detail and Propose allocation behave the same way. The Radix Export menu, which has a trigger, does return focus. The likely cause is that these dialogs are mounted from state without a `DialogTrigger`, so Radix's close auto-focus targets a trigger that does not exist (`web/src/components/ui/dialog.tsx` and callers such as `Submissions.tsx:42-43`).
+
+No keyboard trap or unlabeled control was found. Not run: a screen reader, other viewport sizes and deployed sign-in.

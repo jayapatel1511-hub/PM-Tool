@@ -293,7 +293,7 @@ public static class ChangeEndpoints
     static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var (p, _) = await access.Project(projectId, false); var rows = await Rows(db, Query(db, projectId, filter, access.Me.Id).Take(Export.MaxRows + 1));
-        return await ExportFile.Send(db, store, format, Text.Get("export.changes", p.ProjectNumber), Columns, JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http), p.Id, $"{p.ProjectNumber}-changes", clock);
+        return await ExportFile.Send(db, store, format, Text.Get("export.changes", p.ProjectNumber), Columns, JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access), p.Id, $"{p.ProjectNumber}-changes", clock);
     }
     static async Task<object> ListIssueImpacts(Guid id, Access access, HubDb db)
     {

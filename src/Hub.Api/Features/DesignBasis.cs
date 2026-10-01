@@ -531,7 +531,7 @@ public static class DesignBasisEndpoints
                 v.NumericValue, v.Units, v.SourceSystem, v.StableSourceId, v.SourceUrl, v.DeclaredRevision,
                 v.ConfirmationDueDate })).ToList();
         return await ExportFile.Send(db, settings, format, $"{project.ProjectNumber} design basis", ExportColumns,
-            JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http),
+            JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access),
             project.Id, $"{project.ProjectNumber}-design-basis", clock);
     }
 

@@ -62,7 +62,7 @@ public static class RegisterEndpoints
         {
             var (p, _) = await access.Project(id, track: false);
             var rows = JsonSerializer.SerializeToNode(await RiskList(id, f, access, db, store, clock), JsonOpts.Web)!.AsArray();
-            return await ExportFile.Send(db, store, format, Text.Get("export.risks", p.ProjectNumber), RiskCols, rows, await ListExportEndpoints.Filters(db, http), p.Id, $"{p.ProjectNumber}-risks", clock);
+            return await ExportFile.Send(db, store, format, Text.Get("export.risks", p.ProjectNumber), RiskCols, rows, await ListExportEndpoints.Filters(db, http, access), p.Id, $"{p.ProjectNumber}-risks", clock);
         });
 
         api.MapGet("/projects/{id:guid}/issues", IssueList);
@@ -88,7 +88,7 @@ public static class RegisterEndpoints
         {
             var (p, _) = await access.Project(id, track: false);
             var rows = JsonSerializer.SerializeToNode(await IssueList(id, f, access, db, store, clock), JsonOpts.Web)!.AsArray();
-            return await ExportFile.Send(db, store, format, Text.Get("export.issues", p.ProjectNumber), IssueCols, rows, await ListExportEndpoints.Filters(db, http), p.Id, $"{p.ProjectNumber}-issues", clock);
+            return await ExportFile.Send(db, store, format, Text.Get("export.issues", p.ProjectNumber), IssueCols, rows, await ListExportEndpoints.Filters(db, http, access), p.Id, $"{p.ProjectNumber}-issues", clock);
         });
     }
 

@@ -44,7 +44,7 @@ public static class MeetingEndpoints
         {
             var (p, _) = await access.Project(id, track: false);
             var rows = JsonSerializer.SerializeToNode(await List(id, f, access, db, store, clock), JsonOpts.Web)!.AsArray();
-            return await ExportFile.Send(db, store, format, Text.Get("export.actions", p.ProjectNumber), ActionCols, rows, await ListExportEndpoints.Filters(db, http), p.Id, $"{p.ProjectNumber}-actions", clock);
+            return await ExportFile.Send(db, store, format, Text.Get("export.actions", p.ProjectNumber), ActionCols, rows, await ListExportEndpoints.Filters(db, http, access), p.Id, $"{p.ProjectNumber}-actions", clock);
         });
     }
 

@@ -358,6 +358,6 @@ public static class HandoffEndpoints
         var today = clock.Today(await store.Get(db));
         var rows = await Rows(db, Query(db, p, filter, access.Me.Id, today).Take(Export.MaxRows + 1), p, today);
         return await ExportFile.Send(db, store, format, Text.Get("export.handoffs", p.ProjectNumber), Columns,
-            JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http), p.Id, $"{p.ProjectNumber}-handoffs", clock);
+            JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access), p.Id, $"{p.ProjectNumber}-handoffs", clock);
     }
 }

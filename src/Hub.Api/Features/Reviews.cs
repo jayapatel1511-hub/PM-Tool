@@ -357,6 +357,6 @@ public static class ReviewEndpoints
     static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var (project, _) = await access.Project(projectId, false); var rows = await Rows(db, Query(db, projectId, filter, access.Me.Id).Take(Export.MaxRows + 1), clock.GetUtcNow());
-        return await ExportFile.Send(db, store, format, Text.Get("export.reviews", project.ProjectNumber), Columns, JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http), project.Id, $"{project.ProjectNumber}-reviews", clock);
+        return await ExportFile.Send(db, store, format, Text.Get("export.reviews", project.ProjectNumber), Columns, JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access), project.Id, $"{project.ProjectNumber}-reviews", clock);
     }
 }

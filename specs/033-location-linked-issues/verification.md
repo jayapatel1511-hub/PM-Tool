@@ -55,3 +55,29 @@ FR-LOC-03 affected disciplines are now an additive `issue_affected_discipline` r
 - PASS — `python3 tools/trace_spec.py --check`; frontend production build and lint (exit 0, existing warnings only).
 - PASS — local synthetic Chrome (Development auth, throwaway DB, since dropped): DEMO-101-I01 with two site areas appeared under both location groups, and under Civil and Project Management when grouped by discipline; the `group` URL survived reload; the affected-discipline checkbox in the issue panel saved and reloaded with no JavaScript errors.
 - UNPROVEN — notifications to affected disciplines, dashboard discipline counts (still primary discipline only), keyboard/assistive-technology review and deployed behaviour. The Coordination issue type and its required-reference rule await a product decision.
+
+## Coordination issue type and reference audit (2026-10-01)
+
+Per Jay's FR-LOC-01 decision, issues now carry an explicit type, General or Coordination, chosen at creation or when a risk is realised (default General). Migration `20261001211638_CoordinationIssueType` adds `issue.issue_type` (default General) with a check constraint, then marks every existing issue that already has a location or document reference as Coordination, so the existing verification gate is unchanged; all other issues are General. The type appears in the register (column and URL filter), the issue detail panel, list/export (`issueType` filter and "Issue type" column) and the create and realise forms.
+
+- Reference rule: the spec text puts no time limit on "require at least one location or drawing/model reference for a Coordination issue", so it is applied in the strictest form. A Coordination issue cannot be created without one: the create and realise bodies accept its first locations and drawing/model references, validated in the same transaction. A General issue can become Coordination only once it has a reference, and resolution re-checks this. References cannot be removed, so the rule holds after creation. Any document reference counts: each one already records a drawing/model identifier, declared revision and source link, and this matches the backfill.
+- Resolution gate: only Coordination issues need current independent verification and available references before Resolved. The old inference from "has a location or document reference" is gone, so a General issue with references resolves without verification.
+- Type change: requires the existing register edit permission and If-Match, and only the PM or the issue owner may change the type (the raiser, discipline lead and Read Only users are refused). It is allowed only while the issue is Open or In Progress, so a closed issue keeps the type it was resolved under. Coordination→General is refused once any verification record exists, so an appointed or rejected verification cannot be bypassed. A concurrent appointment and type change conflict on the issue row version.
+- Audit: `IssueLocation`, `IssueDocumentReference` and `IssueVerification` now have audit field lists (and `Issue` audits `IssueType`), so their writes produce activity rows. These rows carry the issue key, so they appear in the issue's History tab, and their item types and fields have interface labels.
+- Seed: the review demo seed creates no issues. A manually raised DEMO-101-I01 with a site area and drawing reference becomes Coordination through the backfill, so no seed change was needed.
+- UI fix: the resolve dialog now shows field-level gate messages (verification, reference, impact) that it previously hid.
+
+Evidence:
+- PASS — `dotnet build Hub.slnx`; `dotnet ef migrations has-pending-model-changes`: none after the new migration.
+- PASS — PostgreSQL `LocationIssueTests` 9/9 with four new cases:
+  - creation refused with no reference, an invalid reference or an unknown type, and nothing partly created;
+  - list, filter, export and detail;
+  - Coordination resolution blocked until Verified, while a General issue with a location resolves;
+  - risk realisation follows the same rule;
+  - type-change permissions, If-Match conflict, reference requirement, verification lock, closed-issue lock and audit row;
+  - location, reference and verification activity rows reach the issue history;
+  - the migration's own Down/Up operations, re-run in a rolled-back transaction, mark located and Markup-referenced issues Coordination and a plain one General.
+- PASS — focused `LocationIssueTests|RegistersApiTests|SchemaTests` 16/16; full local suite 518/518.
+- PASS — `python3 tools/trace_spec.py --check`; frontend production build and lint (exit 0, 88 existing warnings, none in `Registers.tsx`).
+- PASS — local Chrome on a throwaway database (since dropped). The previous build (`bfd6a12`) raised DEMO-101-I01 with a site area and drawing, plus a plain DEMO-101-I02. Starting the new build on that populated database applied the backfill and re-ran the review demo seed without error. I01 then showed Coordination and I02 General, and the Coordination filter returned only I01. Raising a Coordination issue without its first location was refused with no issue created, and the API refused one without any reference (400 `reference`). With a site area it was raised as DEMO-101-I03 Coordination. I02 resolved without verification. Resolving the backfilled I01 was refused with the verification-required message, and it stayed Open. No JavaScript errors.
+- UNPROVEN — deployed behaviour, keyboard and assistive-technology review of the new form controls, and notification changes (none were made).

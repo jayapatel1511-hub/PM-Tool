@@ -624,6 +624,7 @@ public class Issue : ProjectItem, IAuditable
     public string? Resolution { get; set; }
     public DateOnly? ResolvedDate { get; set; }
     public string Status { get; set; } = IssueStatus.Open;
+    public string IssueType { get; set; } = Domain.IssueType.General;
     public Guid? OriginRiskId { get; set; }
     public Guid? ProjectDisciplineId { get; set; }
     public DateTimeOffset? StatusChangedAt { get; set; }

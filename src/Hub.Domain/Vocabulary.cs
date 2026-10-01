@@ -82,6 +82,13 @@ public static class IssueStatus
     public static bool IsOpen(string s) => s is Open or InProgress;
 }
 
+/// FR-LOC-01: a Coordination issue needs a location or drawing/model reference and independent verification to resolve.
+public static class IssueType
+{
+    public const string General = "General", Coordination = "Coordination";
+    public static readonly string[] All = [General, Coordination];
+}
+
 public static class ActionStatus
 {
     public const string Open = "Open", InProgress = "In Progress", Complete = "Complete", Cancelled = "Cancelled";

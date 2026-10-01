@@ -321,7 +321,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             t.HasCheckConstraint("ck_risk_scores", "probability BETWEEN 1 AND 3 AND impact BETWEEN 1 AND 3");
             t.HasCheckConstraint("ck_risk_status", $"status IN ({In(RiskStatus.All)})");
         }));
-        Item<Issue>(mb, e => e.ToTable(t => t.HasCheckConstraint("ck_issue_status", $"status IN ({In(IssueStatus.All)})")));
+        Item<Issue>(mb, e => e.ToTable(t =>
+        {
+            t.HasCheckConstraint("ck_issue_status", $"status IN ({In(IssueStatus.All)})");
+            t.HasCheckConstraint("ck_issue_type", $"issue_type IN ({In(IssueType.All)})");
+        }));
         mb.Entity<IssueLocation>(e =>
         {
             e.HasIndex(x => new { x.IssueId, x.CreatedAt });

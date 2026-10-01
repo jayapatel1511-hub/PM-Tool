@@ -2,6 +2,8 @@ using System.Net;
 using System.Text.Json.Nodes;
 using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Hub.Tests.Api;
 
@@ -14,7 +16,8 @@ public sealed class LocationIssueTests(HubFactory f)
         await f.As(TestData.Alex).Post($"/api/v1/projects/{projectId}/issues", new
         {
             title = "Synthetic utility clash", description = "Coordination issue for location workflow", severity = "High",
-            ownerId = d.User(owner), projectDisciplineId = d.ProjectDiscipline(projectId, "Civil")
+            ownerId = d.User(owner), projectDisciplineId = d.ProjectDiscipline(projectId, "Civil"),
+            issueType = "Coordination", locations = new[] { new { kind = "SiteArea", siteArea = "Synthetic yard" } }
         }).Result.Json(201);
     Task<int> IssueVersion(Guid id) => f.DbAsync(db => db.Issues.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync());
 
@@ -184,7 +187,7 @@ public sealed class LocationIssueTests(HubFactory f)
             toStatus = "Resolved", resolution = "Utility alignment coordinated", rowVersion = await f.DbAsync(db => db.Issues.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync())
         });
         Assert.Equal(HttpStatusCode.OK, resolved.StatusCode);
-        Assert.Single((await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{id}/locations").Result.Json()).AsArray());
+        Assert.Equal(2, (await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{id}/locations").Result.Json()).AsArray().Count);
         Assert.Equal(2, (await f.As(TestData.Rita).GetAsync($"/api/v1/issues/{id}/documents").Result.Json()).AsArray().Count);
         var export = System.Text.Encoding.UTF8.GetString(await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues/export?format=csv")).Content.ReadAsByteArrayAsync());
         Assert.Contains("Location", export);
@@ -369,5 +372,179 @@ public sealed class LocationIssueTests(HubFactory f)
         Assert.False((await f.As(TestData.Rita).GetAsync($"/api/v1/projects/{p.Id}/issues?disciplineId={electrical}")).IsSuccessStatusCode);
         Assert.False((await f.As(TestData.Rita).GetAsync($"/api/v1/issues/{id}")).IsSuccessStatusCode);
         Assert.Single((await f.As(TestData.Omar).GetAsync($"/api/v1/projects/{p.Id}/issues?disciplineId={electrical}").Result.Json()).AsArray());
+    }
+
+    [Fact]
+    public async Task Coordination_issue_needs_a_reference_at_creation_and_verification_to_resolve()
+    {
+        var p = await d.Project();
+        var alex = f.As(TestData.Alex);
+        var root = $"/api/v1/projects/{p.Id}/issues";
+        // FR-LOC-01: refused without a reference, with an invalid one or with an unknown type; nothing is partly created.
+        var missing = await alex.Post(root, new { title = "Clash without reference", severity = "High", issueType = "Coordination" });
+        Assert.Equal(HttpStatusCode.BadRequest, missing.StatusCode);
+        Assert.Contains("\"reference\"", await missing.Content.ReadAsStringAsync());
+        Assert.Equal(HttpStatusCode.BadRequest, (await alex.Post(root, new
+        {
+            title = "Clash with reversed stations", severity = "High", issueType = "Coordination",
+            locations = new[] { new { kind = "Alignment", alignment = "Road-B", startStation = 30, endStation = 10, stationUnits = "m" } }
+        })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await alex.Post(root, new { title = "Unknown type", severity = "High", issueType = "Clash" })).StatusCode);
+        Assert.False(f.Db(db => db.Issues.Any(i => i.ProjectId == p.Id)));
+
+        var coordination = await alex.Post(root, new
+        {
+            title = "Duct clashes at gridline C", severity = "High", issueType = "Coordination",
+            documents = new[] { new { kind = "Drawing", identifier = "C-300", revision = "A", sourceUrl = "https://review.example.test/c-300", isAvailable = true } }
+        }).Result.Json(201);
+        var cid = coordination.G("id");
+        var general = await alex.Post(root, new { title = "Site office printer offline", severity = "Low" }).Result.Json(201);
+        var gid = general.G("id");
+        Assert.Equal("Coordination", (await alex.GetAsync($"/api/v1/issues/{cid}").Result.Json())["issue"]!.S("issueType"));
+        Assert.Equal("General", (await alex.GetAsync($"/api/v1/issues/{gid}").Result.Json())["issue"]!.S("issueType"));
+        Assert.Equal("C-300", Assert.Single((await alex.GetAsync($"/api/v1/issues/{cid}/documents").Result.Json()).AsArray())!.S("identifier"));
+        Assert.Equal(cid, Assert.Single((await alex.GetAsync($"{root}?issueType=Coordination").Result.Json()).AsArray())!.G("id"));
+        Assert.Equal(gid, Assert.Single((await alex.GetAsync($"{root}?issueType=General").Result.Json()).AsArray())!.G("id"));
+        var csv = System.Text.Encoding.UTF8.GetString(await (await f.As(TestData.Pm).GetAsync($"{root}/export?format=csv&issueType=Coordination")).Content.ReadAsByteArrayAsync());
+        Assert.Contains("Issue type", csv);
+        Assert.Contains(coordination.S("key"), csv);
+        Assert.DoesNotContain(general.S("key"), csv);
+
+        // AC-LOC-02: only the Coordination issue waits for independent verification; a General issue may carry references and still resolve.
+        Assert.Equal(HttpStatusCode.BadRequest, (await alex.Post($"/api/v1/issues/{cid}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Duct lowered", rowVersion = await IssueVersion(cid)
+        })).StatusCode);
+        await alex.Post($"/api/v1/issues/{gid}/locations", new { kind = "SiteArea", siteArea = "Site office", rowVersion = await IssueVersion(gid) }).Result.Json(201);
+        (await alex.Post($"/api/v1/issues/{gid}/transition", new { toStatus = "Resolved", resolution = "Printer replaced", rowVersion = await IssueVersion(gid) })).EnsureSuccessStatusCode();
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{cid}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Independent clash check", rowVersion = await IssueVersion(cid)
+        }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{cid}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/verify/c-300", rowVersion = await IssueVersion(cid)
+        }).Result.Json(201);
+        (await alex.Post($"/api/v1/issues/{cid}/transition", new { toStatus = "Resolved", resolution = "Duct lowered", rowVersion = await IssueVersion(cid) })).EnsureSuccessStatusCode();
+
+        // A realised risk follows the same creation rule.
+        var risk = await alex.Post($"/api/v1/projects/{p.Id}/risks", new { title = "Crossing may clash", probability = 2, impact = 2 }).Result.Json(201);
+        var riskId = risk.G("id");
+        Assert.Equal(HttpStatusCode.BadRequest, (await alex.Post($"/api/v1/risks/{riskId}/transition", new
+        {
+            toStatus = "Realised", issue = new { title = "Realised crossing clash", severity = "High", issueType = "Coordination" }, rowVersion = risk.I("rowVersion")
+        })).StatusCode);
+        var realised = await alex.Post($"/api/v1/risks/{riskId}/transition", new
+        {
+            toStatus = "Realised", rowVersion = risk.I("rowVersion"),
+            issue = new { title = "Realised crossing clash", severity = "High", issueType = "Coordination", locations = new[] { new { kind = "Building", building = "Pump house" } } }
+        }).Result.Json();
+        Assert.Equal("Coordination", f.Db(db => db.Issues.Single(i => i.Id == realised.G("issueId")).IssueType));
+    }
+
+    [Fact]
+    public async Task Issue_type_change_is_pm_or_owner_only_and_keeps_an_appointed_verification()
+    {
+        var p = await d.Project();
+        var issue = await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/issues", new
+        {
+            title = "Conduit crossing", severity = "Medium", ownerId = d.User(TestData.Omar), projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil")
+        }).Result.Json(201);
+        var id = issue.G("id");
+        var toCoordination = new { issueType = "Coordination" };
+        var version = await IssueVersion(id);
+        // The raiser and the discipline lead may edit the issue, but only the PM or the owner changes its type; Read Only edits nothing.
+        foreach (var who in new[] { TestData.Alex, TestData.Marc, TestData.Rita })
+            Assert.Equal(HttpStatusCode.Forbidden, (await f.As(who).Patch($"/api/v1/issues/{id}", toCoordination, version)).StatusCode);
+        Assert.False((await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{id}").Result.Json())["permissions"]!["changeType"]!["ok"]!.GetValue<bool>());
+        Assert.True((await f.As(TestData.Omar).GetAsync($"/api/v1/issues/{id}").Result.Json())["permissions"]!["changeType"]!["ok"]!.GetValue<bool>());
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, (await f.As(TestData.Omar).Patch($"/api/v1/issues/{id}", toCoordination, version)).StatusCode);
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", new { kind = "SiteArea", siteArea = "Substation yard", rowVersion = version }).Result.Json(201);
+        Assert.Equal(HttpStatusCode.Conflict, (await f.As(TestData.Omar).Patch($"/api/v1/issues/{id}", toCoordination, version)).StatusCode);
+        version = await IssueVersion(id);
+        (await f.As(TestData.Omar).Patch($"/api/v1/issues/{id}", toCoordination, version)).EnsureSuccessStatusCode();
+        Assert.Equal(version + 1, await IssueVersion(id));
+        Assert.Equal("Coordination", f.Db(db => db.Issues.Single(i => i.Id == id).IssueType));
+        Assert.Single(f.Db(db => db.ActivityLog.Where(a => a.ItemId == id && a.ItemType == "Issue" && a.Action != "Created").ToList()),
+            a => a.Changes.Contains("\"IssueType\"") && a.Changes.Contains("\"Coordination\""));
+
+        // Without verification records the PM may set it back; once a verifier is appointed it stays Coordination.
+        (await f.As(TestData.Pm).Patch($"/api/v1/issues/{id}", new { issueType = "General" }, await IssueVersion(id))).EnsureSuccessStatusCode();
+        (await f.As(TestData.Pm).Patch($"/api/v1/issues/{id}", toCoordination, await IssueVersion(id))).EnsureSuccessStatusCode();
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Appoint independent verifier", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, (await f.As(TestData.Pm).Patch($"/api/v1/issues/{id}", new { issueType = "General" }, await IssueVersion(id))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await f.As(TestData.Omar).Post($"/api/v1/issues/{id}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Cannot bypass verification", rowVersion = await IssueVersion(id)
+        })).StatusCode);
+
+        // A closed issue keeps the type it was resolved under.
+        var closed = await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/issues", new { title = "Closed general issue", severity = "Low" }).Result.Json(201);
+        var closedId = closed.G("id");
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{closedId}/locations", new { kind = "SiteArea", siteArea = "Laydown", rowVersion = await IssueVersion(closedId) }).Result.Json(201);
+        (await f.As(TestData.Pm).Post($"/api/v1/issues/{closedId}/transition", new { toStatus = "Resolved", resolution = "Moved", rowVersion = await IssueVersion(closedId) })).EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, (await f.As(TestData.Pm).Patch($"/api/v1/issues/{closedId}", toCoordination, await IssueVersion(closedId))).StatusCode);
+    }
+
+    [Fact]
+    public async Task Location_reference_and_verification_writes_reach_the_issue_history()
+    {
+        var p = await d.Project();
+        var issue = await Issue(p.Id);
+        var id = issue.G("id");
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/documents", new
+        {
+            kind = "Model", identifier = "M-01", revision = "3", sourceUrl = "https://review.example.test/m-01", isAvailable = true, rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Independent model check", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        var rows = f.Db(db => db.ActivityLog.Where(a => a.ProjectId == p.Id && a.ItemKey == issue.S("key") && a.ItemType != "Issue")
+            .Select(a => new { a.ItemType, a.Action, a.ActorUserId, a.Reason }).ToList());
+        Assert.Contains(rows, r => r.ItemType == "IssueLocation" && r.Action == "Created" && r.ActorUserId == d.User(TestData.Alex));
+        Assert.Contains(rows, r => r.ItemType == "IssueDocumentReference" && r.Action == "Created" && r.ActorUserId == d.User(TestData.Alex));
+        Assert.Contains(rows, r => r.ItemType == "IssueVerification" && r.Action == "Created" && r.ActorUserId == d.User(TestData.Pm) && r.Reason == "Independent model check");
+        var history = await f.As(TestData.Rita).GetAsync($"/api/v1/items/Issue/{id}/activity").Result.Json();
+        Assert.Superset(new HashSet<string> { "Issue", "IssueLocation", "IssueDocumentReference", "IssueVerification" },
+            history["items"]!.AsArray().Select(x => x!.S("itemType")).ToHashSet());
+    }
+
+    [Fact]
+    public async Task Issue_type_migration_marks_issues_that_already_have_references_as_coordination()
+    {
+        var p = await d.Project();
+        async Task<Guid> Legacy(string title) =>
+            (await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/issues", new { title, severity = "Low" }).Result.Json(201)).G("id");
+        var located = await Legacy("Legacy located issue");
+        var referenced = await Legacy("Legacy markup issue");
+        var plain = await Legacy("Legacy plain issue");
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{located}/locations", new { kind = "SiteArea", siteArea = "Legacy yard", rowVersion = 0 }).Result.Json(201);
+        await f.As(TestData.Alex).Post($"/api/v1/issues/{referenced}/documents", new
+        {
+            kind = "Markup", identifier = "MK-1", revision = "1", sourceUrl = "https://review.example.test/mk-1", isAvailable = true, rowVersion = 0
+        }).Result.Json(201);
+        var migration = new Hub.Api.Data.Migrations.CoordinationIssueType();
+        var types = await f.DbAsync(async db =>
+        {
+            // Re-run the migration's own Down and Up operations over these rows inside a rolled-back transaction,
+            // so the shared test database keeps its schema and data.
+            var generator = db.GetService<IMigrationsSqlGenerator>();
+            await using var tx = await db.Database.BeginTransactionAsync();
+            foreach (var command in generator.Generate(migration.DownOperations).Concat(generator.Generate(migration.UpOperations)))
+                await db.Database.ExecuteSqlRawAsync(command.CommandText);
+            var result = new Dictionary<Guid, string>();
+            foreach (var issueId in new[] { located, referenced, plain })
+                result[issueId] = await db.Database.SqlQueryRaw<string>("SELECT issue_type AS \"Value\" FROM hub.issue WHERE id = {0}", issueId).SingleAsync();
+            await tx.RollbackAsync();
+            return result;
+        });
+        Assert.Equal("Coordination", types[located]);
+        Assert.Equal("Coordination", types[referenced]);
+        Assert.Equal("General", types[plain]);
+        Assert.Equal("General", f.Db(db => db.Issues.Single(i => i.Id == located).IssueType)); // rolled back
     }
 }

@@ -81,3 +81,25 @@ Evidence:
 - PASS — `python3 tools/trace_spec.py --check`; frontend production build and lint (exit 0, 88 existing warnings, none in `Registers.tsx`).
 - PASS — local Chrome on a throwaway database (since dropped). The previous build (`bfd6a12`) raised DEMO-101-I01 with a site area and drawing, plus a plain DEMO-101-I02. Starting the new build on that populated database applied the backfill and re-ran the review demo seed without error. I01 then showed Coordination and I02 General, and the Coordination filter returned only I01. Raising a Coordination issue without its first location was refused with no issue created, and the API refused one without any reference (400 `reference`). With a site area it was raised as DEMO-101-I03 Coordination. I02 resolved without verification. Resolving the backfilled I01 was refused with the verification-required message, and it stayed Open. No JavaScript errors.
 - UNPROVEN — deployed behaviour, keyboard and assistive-technology review of the new form controls, and notification changes (none were made).
+
+## Affected-discipline notices, discipline views and impact settlement (2026-10-01)
+
+- Notices: new event `IssueAffectedDiscipline` ("Issues affecting your discipline"; default in app on, email off; not a direct assignment, so a muted follow suppresses it). It goes to the lead of each newly affected discipline when an issue is raised, realised from a risk or edited. It follows FR-LOC-03 (affected disciplines are identified so they can resolve the same problem), the §17.1 rule to notify people of changes others make to their work, and FR-MDC-06 (existing preferences, one deduplicated event per recipient). It is ProjectScoped: access is rechecked when the notice is composed and again before email delivery (FR-MDC-02). The notice is queued in the same transaction as the change, never goes to the actor, and is sent once per recipient per command even when one person leads several newly affected disciplines. A refused, stale or repeated command adds no notice. Removing a discipline sends nothing. Affected-discipline additions and removals now carry the issue key, so they appear in the issue history.
+- Discipline views: Weekly Coordination section 10 (`/projects/{id}/coordination?disciplineId=`) now lists open issues for their primary discipline and each affected discipline, once per view, matching the register filter. Unchanged on purpose:
+  - rules-engine discipline health and A-07 routing stay on the primary discipline, because FR-MDC-07 forbids silently changing health;
+  - the project dashboard issue counts are project-wide, not discipline-scoped.
+- Unavailable reference: the spec (FR-LOC-04, FR-LOC-06, AC-LOC-03) defines no way to restore or replace an unavailable reference on an open Coordination issue. Impact checks cover changed revisions on closed issues only. Nothing was implemented; this needs a product decision.
+- Fixed a related dead end: FR-LOC-04 says "the issue owner/verifier decides". An impact check on an issue resolved without a verifier (now possible for General issues) waited forever for a verifier and blocked reopening. The owner's decision now settles it when there is no verifier.
+
+Evidence:
+- PASS — `dotnet build Hub.slnx`; `dotnet ef migrations has-pending-model-changes`: none (no migration in this increment).
+- PASS — PostgreSQL `LocationIssueTests` 11/11, two new:
+  - notice to the lead, none to the actor or an unaffected lead, link path, project-scoped email;
+  - no self-notice when the owner adds his own discipline; stale (409), Read Only (403) and repeated commands add nothing;
+  - one notice per recipient per command when one person leads two newly affected disciplines;
+  - nothing for a lead who lost restricted-project access;
+  - the coordination dashboard lists the shared issue once under each discipline.
+- PASS — new `ReviewChangeTests` case: a General issue resolved without verification and then superseded becomes ReopenRequested on the owner's decision and can be reopened. It fails without the fix. The existing two-party AC-LOC-03 case still passes.
+- PASS — full local suite 535/535; `python3 tools/trace_spec.py --check`; frontend production build and lint (exit 0, 88 existing warnings).
+- PASS — local Chrome on a throwaway review-demo database (since dropped). Taylor raised a General issue under Project Management and marked Civil affected in the panel. Jay, the Civil lead, got one "Issue DEMO-101-I02 affects your discipline" notice, which opened the issue panel. His preferences listed the new event, and Weekly Coordination filtered to Civil showed the issue. Taylor, the actor, got no affected-discipline notice. No JavaScript errors.
+- UNPROVEN — deployed delivery, digest presentation and keyboard/assistive-technology review.

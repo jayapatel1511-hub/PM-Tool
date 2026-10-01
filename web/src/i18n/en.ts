@@ -1257,6 +1257,7 @@ export const en: Record<string, string> = {
   'issue.typeHint': 'A Coordination issue needs a location or drawing/model reference, and independent verification before it can be resolved.',
   'issue.firstReference': 'First location or drawing/model reference',
   'issue.referenceByLocation': 'Location', 'issue.referenceByDocument': 'Drawing or model reference',
+  'event.IssueAffectedDiscipline': 'Issues affecting your discipline',
   'value.General': 'General', 'value.Coordination': 'Coordination',
   'itemType.IssueLocation': 'Issue location', 'itemType.IssueDocumentReference': 'Drawing or model reference',
   'itemType.IssueVerification': 'Independent verification', 'itemType.IssueAffectedDiscipline': 'Affected discipline',

@@ -274,6 +274,25 @@ public sealed class ReviewChangeTests(HubFactory f)
         Assert.Equal("A", f.Db(db => db.IssueDocumentReferences.Single(d => d.IssueId == issueId).Revision));
     }
     [Fact]
+    public async Task General_issue_without_a_verifier_settles_its_reference_impact_on_the_owner_decision()
+    {
+        var s = await New();
+        var issue = await Post(TestData.Alex, Root(s) + "/issues", new { title = "General source reference", severity = "Low", ownerId = data.User(TestData.Alex), projectDisciplineId = s.Civil }, 201);
+        var issueId = issue.G("id");
+        int IssueVersion() => f.Db(db => db.Issues.Single(i => i.Id == issueId).RowVersion);
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/documents", new { kind = "Drawing", identifier = "survey", revision = "A", sourceUrl = "https://example.test/A.pdf", isAvailable = true, rowVersion = IssueVersion() }, 201);
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/transition", new { toStatus = "Resolved", resolution = "Closed without coordination verification", rowVersion = IssueVersion() });
+        await Publish(s, await Notice(s));
+        var impact = Assert.Single((await Get(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts")).AsArray())!;
+        Assert.Null(impact["verifierId"]);
+        // FR-LOC-04: with no verifier the owner's decision settles the check, so the existing reopen workflow is not blocked forever.
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts/{impact.G("id")}",
+            new ChangeEndpoints.IssueImpactBody(Guid.NewGuid(), impact.I("rowVersion"), "Reopen", "Revision B moves the corridor"));
+        Assert.Equal("ReopenRequested", Assert.Single((await Get(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts")).AsArray())!.S("status"));
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/transition", new { toStatus = "In Progress", reason = "Revision B moves the corridor", rowVersion = IssueVersion() });
+        Assert.Equal(IssueStatus.InProgress, f.Db(db => db.Issues.Single(i => i.Id == issueId).Status));
+    }
+    [Fact]
     public async Task Removing_a_manifest_deliverable_requires_impact_review_and_releases_its_issue_gate()
     {
         var s = await New();

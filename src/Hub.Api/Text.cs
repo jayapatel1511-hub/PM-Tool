@@ -441,6 +441,7 @@ public static class Text
         ["notify.submission_changed"] = "Submission {0} is {1}",
         ["notify.issue_verification_requested"] = "Verify the proposed resolution for issue {0}",
         ["notify.issue_verification_outcome"] = "Issue {0} verification was {1}",
+        ["notify.issue_affected_discipline"] = "Issue {0} affects your discipline: {1}",
         ["notify.constraint_assigned"] = "Remove the {0} constraint on {1}",
         ["notify.constraint_proposed"] = "Verify the proposed removal of the {0} constraint on {1}",
         ["notify.constraint_outcome"] = "The {0} constraint on {1} is {2}",

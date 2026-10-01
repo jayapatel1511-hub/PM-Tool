@@ -332,7 +332,9 @@ public static class ChangeEndpoints
                 impact.VerifierDisposition = body.Disposition; impact.VerifierReason = reason; impact.VerifierDecidedBy = access.Me.Id; impact.VerifierDecidedAt = now;
             }
             else throw ApiException.Forbidden("perm.edit");
-            if (impact.OwnerDisposition != null && impact.VerifierDisposition != null)
+            // FR-LOC-04: the owner and, when the issue has one, its verifier decide; an issue resolved without verification
+            // (a General issue) is decided by its owner alone instead of waiting for a verifier who does not exist.
+            if (impact.OwnerDisposition != null && (impact.VerifierId == null || impact.VerifierDisposition != null))
                 impact.Status = impact.OwnerDisposition == IssueReferenceImpactDisposition.Reopen || impact.VerifierDisposition == IssueReferenceImpactDisposition.Reopen
                     ? IssueReferenceImpactStatus.ReopenRequested : IssueReferenceImpactStatus.Unaffected;
             impact.UpdatedAt = now; impact.UpdatedBy = access.Me.Id;

@@ -547,4 +547,77 @@ public sealed class LocationIssueTests(HubFactory f)
         Assert.Equal("General", types[plain]);
         Assert.Equal("General", f.Db(db => db.Issues.Single(i => i.Id == located).IssueType)); // rolled back
     }
+
+    [Fact]
+    public async Task Affected_discipline_leads_get_one_project_scoped_notice_per_command()
+    {
+        var p = await d.Project();
+        var civil = d.ProjectDiscipline(p.Id, "Civil");
+        var electrical = d.ProjectDiscipline(p.Id, "Electrical");
+        var (marc, omar) = (d.User(TestData.Marc), d.User(TestData.Omar));
+        var code = Hub.Domain.NotificationEvents.IssueAffectedDiscipline;
+        Assert.Contains(code, Hub.Domain.NotificationEvents.ProjectScoped);
+        (await f.As(TestData.Omar).Put($"/api/v1/me/preferences/events/{code}", new { app = true, email = true })).EnsureSuccessStatusCode();
+        int Notices(Guid user, Guid issueId) => f.Db(db => db.Notifications.Where(n => n.UserId == user && n.ItemId == issueId && n.EventType == code).Sum(n => n.Count));
+
+        // Raised with Electrical affected: its lead hears once, in app and by project-scoped email; Civil's lead and the actor do not.
+        var issue = await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/issues", new
+        {
+            title = "Feeder crosses the culvert", severity = "High", ownerId = marc, affectedDisciplineIds = new[] { electrical }
+        }).Result.Json(201);
+        var id = issue.G("id");
+        Assert.Equal(1, Notices(omar, id));
+        Assert.Equal(0, Notices(marc, id));
+        Assert.Equal(0, Notices(d.User(TestData.Alex), id));
+        Assert.Equal($"/projects/{p.ProjectNumber}/issues?panel=Issue:{id}", f.Db(db => db.Notifications.Single(n => n.UserId == omar && n.ItemId == id).LinkPath));
+        Assert.Equal(new[] { p.Id }, f.Db(db => db.Emails.Single(e => e.UserId == omar && e.DedupKey == $"{code}:{id}:{omar}").RequiredProjectIds));
+
+        // The owner adds the discipline he leads: no self-notice. A stale, refused or repeated command adds nothing.
+        var version = await IssueVersion(id);
+        (await f.As(TestData.Marc).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = new[] { electrical, civil } }, version)).EnsureSuccessStatusCode();
+        Assert.Equal(0, Notices(marc, id));
+        Assert.Equal(HttpStatusCode.Conflict, (await f.As(TestData.Marc).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = new[] { civil } }, version)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Rita).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = Array.Empty<Guid>() }, await IssueVersion(id))).StatusCode);
+        (await f.As(TestData.Marc).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = new[] { electrical, civil } }, await IssueVersion(id))).EnsureSuccessStatusCode();
+        Assert.Equal(1, Notices(omar, id));
+
+        // One notice per recipient per command, even when one person leads both newly affected disciplines.
+        (await f.As(TestData.Pm).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = Array.Empty<Guid>() }, await IssueVersion(id))).EnsureSuccessStatusCode();
+        await f.DbAsync(async db => { (await db.ProjectDisciplines.SingleAsync(x => x.Id == civil)).LeadUserId = omar; return await db.SaveChangesAsync(); });
+        (await f.As(TestData.Pm).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = new[] { electrical, civil } }, await IssueVersion(id))).EnsureSuccessStatusCode();
+        Assert.Equal(2, Notices(omar, id));
+        Assert.Equal(2, f.Db(db => db.Notifications.Count(n => n.UserId == omar && n.ItemId == id && n.EventType == code)));
+
+        // A lead who no longer has access to the restricted project hears nothing.
+        (await f.As(TestData.Pm).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = Array.Empty<Guid>() }, await IssueVersion(id))).EnsureSuccessStatusCode();
+        await f.DbAsync(async db =>
+        {
+            (await db.Projects.SingleAsync(x => x.Id == p.Id)).Visibility = Hub.Domain.Visibility.Restricted;
+            foreach (var m in await db.ProjectMembers.Where(m => m.ProjectId == p.Id && m.UserId == omar).ToListAsync()) m.RemovedAt = f.Clock.GetUtcNow();
+            return await db.SaveChangesAsync();
+        });
+        Assert.False(await f.DbAsync(db => EmailProjectAccess.Allowed(db, omar, [p.Id])));
+        (await f.As(TestData.Pm).Patch($"/api/v1/issues/{id}", new { affectedDisciplineIds = new[] { electrical } }, await IssueVersion(id))).EnsureSuccessStatusCode();
+        Assert.Equal(2, Notices(omar, id));
+    }
+
+    [Fact]
+    public async Task Coordination_dashboard_lists_an_issue_once_under_its_primary_and_each_affected_discipline()
+    {
+        var p = await d.Project();
+        var civil = d.ProjectDiscipline(p.Id, "Civil");
+        var electrical = d.ProjectDiscipline(p.Id, "Electrical");
+        var root = $"/api/v1/projects/{p.Id}/issues";
+        var shared = (await f.As(TestData.Alex).Post(root, new
+        {
+            title = "Shared corridor clash", severity = "High", projectDisciplineId = civil, affectedDisciplineIds = new[] { electrical, civil }
+        }).Result.Json(201)).G("id");
+        var civilOnly = (await f.As(TestData.Alex).Post(root, new { title = "Civil kerb issue", severity = "Low", projectDisciplineId = civil }).Result.Json(201)).G("id");
+        async Task<Guid[]> Listed(Guid? discipline) =>
+            [.. (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/coordination{(discipline is { } x ? $"?disciplineId={x}" : "")}").Result.Json())["issues"]!
+                .AsArray().Select(row => row!.G("id"))];
+        Assert.Equal(new[] { shared, civilOnly }.Order(), (await Listed(civil)).Order());
+        Assert.Equal(new[] { shared }, await Listed(electrical));
+        Assert.Equal(new[] { shared, civilOnly }.Order(), (await Listed(null)).Order());
+    }
 }

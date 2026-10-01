@@ -192,7 +192,9 @@ public static class DashboardEndpoints
 
         var heldTasks = sc.Tasks(("status", TaskStatuses.OnHold));
         var heldDels = sc.Deliverables(status: DeliverableStatus.OnHold);
-        var issues = await db.Issues.AsNoTracking().Where(i => i.ProjectId == id && (i.Status == IssueStatus.Open || i.Status == IssueStatus.InProgress) && (disciplineId == null || i.ProjectDisciplineId == disciplineId))
+        // As in the issue register, a discipline sees the issues it leads or is affected by, each once (AC-LOC-01).
+        var issues = await db.Issues.AsNoTracking().Where(i => i.ProjectId == id && (i.Status == IssueStatus.Open || i.Status == IssueStatus.InProgress)
+                && (disciplineId == null || i.ProjectDisciplineId == disciplineId || db.IssueAffectedDisciplines.Any(x => x.IssueId == i.Id && x.ProjectDisciplineId == disciplineId)))
             .OrderByDescending(i => i.Severity == Impact.High).ThenBy(i => i.TargetResolutionDate).Select(i => new { i.Id, i.Key, i.Title, i.Status, i.Severity, i.TargetResolutionDate }).ToListAsync();
         var high = RegisterEndpoints.Scores([Impact.High]); // RSK-01
         var risks = await db.Risks.AsNoTracking().Where(r => r.ProjectId == id && (r.Status == RiskStatus.Open || r.Status == RiskStatus.Monitoring) && high.Contains(r.Probability * r.Impact)

@@ -255,7 +255,7 @@ public static class RegisterEndpoints
     }
 
     /// RSK-03: Realised needs the issue it became, new or existing; the link is kept on both (realised issue, origin risk).
-    static async Task<IResult> MoveRisk(Guid id, RiskMove body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me)
+    static async Task<IResult> MoveRisk(Guid id, RiskMove body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me, Notifier notify)
     {
         var (r, p, ctx) = await LoadRisk(db, access, id);
         await Http.CheckVersion(db, http, r, body.RowVersion);
@@ -272,7 +272,7 @@ public static class RegisterEndpoints
             if (to == RiskStatus.Realised)
             {
                 issue = body.IssueId is { } iid ? await db.Issues.FirstOrDefaultAsync(x => x.Id == iid && x.ProjectId == p.Id) ?? throw ApiException.Invalid("issueId", "error.not_found")
-                    : body.Issue is { } b ? await NewIssue(db, access, team, p, b, me.Id, today, clock.GetUtcNow()) : throw ApiException.Invalid("issueId", "risk.realised_needs_issue");
+                    : body.Issue is { } b ? await NewIssue(db, access, team, notify, p, b, me.Id, today, clock.GetUtcNow()) : throw ApiException.Invalid("issueId", "risk.realised_needs_issue");
                 Check.That(issue.OriginRiskId is null || issue.OriginRiskId == r.Id, "issueId", "risk.issue_has_origin");
                 issue.OriginRiskId = r.Id;
                 r.RealisedIssueId = issue.Id;
@@ -399,21 +399,21 @@ public static class RegisterEndpoints
             verification.Contains(x.VerificationStatus, StringComparer.OrdinalIgnoreCase)).Select(x => x.Row)];
     }
 
-    static async Task<IResult> CreateIssue(Guid id, IssueBody body, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me)
+    static async Task<IResult> CreateIssue(Guid id, IssueBody body, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me, Notifier notify)
     {
         var (p, ctx) = await access.Project(id);
         Access.Demand(Permissions.RaiseRegisterItem(access.Actor, ctx));
         var today = clock.Today(await store.Get(db));
         var i = await Tx.Run(db, async () =>
         {
-            var i = await NewIssue(db, access, team, p, body, me.Id, today, clock.GetUtcNow());
+            var i = await NewIssue(db, access, team, notify, p, body, me.Id, today, clock.GetUtcNow());
             await db.SaveChangesAsync();
             return i;
         });
         return Results.Created($"/api/v1/issues/{i.Id}", new { i.Id, i.Key, i.RowVersion });
     }
 
-    static async Task<Issue> NewIssue(HubDb db, Access access, TeamService team, Project p, IssueBody b, Guid me, DateOnly today, DateTimeOffset now)
+    static async Task<Issue> NewIssue(HubDb db, Access access, TeamService team, Notifier notify, Project p, IssueBody b, Guid me, DateOnly today, DateTimeOffset now)
     {
         var owner = b.OwnerId ?? me;
         await DeliverableEndpoints.ActivePerson(db, owner, "ownerId");
@@ -442,7 +442,7 @@ public static class RegisterEndpoints
         // References saved with the new issue carry its first version (0), so any later verification is newer than them.
         foreach (var l in locations) db.Audit.Note(db.IssueLocations.Add(Location(i, l, 0)).Entity, key: i.Key);
         foreach (var d in documents) db.Audit.Note(db.IssueDocumentReferences.Add(Document(i, d, 0)).Entity, key: i.Key);
-        await SetAffectedDisciplines(db, i, b.AffectedDisciplineIds ?? []);
+        await SetAffectedDisciplines(db, notify, p, i, b.AffectedDisciplineIds ?? []);
         foreach (var l in b.Links ?? []) await DecisionEndpoints.NewLink(db, access, p, ItemType.Issue, i.Id, i.Key, l.TargetType, l.TargetId, ItemRelation.Related);
         await team.EnsureMember(p, owner, ProjectRole.TeamMember);
         return i;
@@ -450,7 +450,7 @@ public static class RegisterEndpoints
 
     /// FR-LOC-03: replace the issue's affected disciplines; newly added ones must be active disciplines of the same project,
     /// while an already-linked discipline that was later deactivated may stay.
-    static async Task SetAffectedDisciplines(HubDb db, Issue i, IReadOnlyCollection<Guid> ids)
+    static async Task SetAffectedDisciplines(HubDb db, Notifier notify, Project p, Issue i, IReadOnlyCollection<Guid> ids)
     {
         var wanted = ids.Distinct().ToHashSet();
         var existing = db.Entry(i).State == EntityState.Added ? [] : await db.IssueAffectedDisciplines.Where(x => x.IssueId == i.Id).ToListAsync();
@@ -458,12 +458,19 @@ public static class RegisterEndpoints
         var added = wanted.Except(existing.Select(x => x.ProjectDisciplineId)).ToList();
         // A relation-only edit still bumps the issue version so concurrent edits conflict.
         if (db.Entry(i).State != EntityState.Added && (removed.Count > 0 || added.Count > 0)) db.Entry(i).Property(x => x.LastActivityAt).IsModified = true;
+        foreach (var r in removed) db.Audit.Note(r, key: i.Key);
         db.IssueAffectedDisciplines.RemoveRange(removed);
         foreach (var d in added)
         {
             await Discipline(db, i.ProjectId, d, "affectedDisciplineIds");
-            db.IssueAffectedDisciplines.Add(new IssueAffectedDiscipline { ProjectId = i.ProjectId, IssueId = i.Id, ProjectDisciplineId = d });
+            db.Audit.Note(db.IssueAffectedDisciplines.Add(new IssueAffectedDiscipline { ProjectId = i.ProjectId, IssueId = i.Id, ProjectDisciplineId = d }).Entity, key: i.Key);
         }
+        if (added.Count == 0) return;
+        // FR-LOC-03, FR-MDC-06: each newly affected discipline's lead gets one notice per command, queued in this transaction;
+        // the queue applies preferences, current project access and no self-notification.
+        var leads = await db.ProjectDisciplines.Where(x => added.Contains(x.Id)).Select(x => x.LeadUserId).ToListAsync();
+        await notify.Send(NotificationEvents.IssueAffectedDiscipline, leads, new NotifyItem(p.Id, ItemType.Issue, i.Id, i.Key,
+            $"/projects/{p.ProjectNumber}/issues?panel=Issue:{i.Id}", p.ProjectNumber), Text.Get("notify.issue_affected_discipline", i.Key, i.Title));
     }
 
     /// FR-LOC-01: within the register edit gate, only the PM or the issue owner changes an issue's type.
@@ -499,7 +506,7 @@ public static class RegisterEndpoints
         };
     }
 
-    static async Task<IResult> EditIssue(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock)
+    static async Task<IResult> EditIssue(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, Notifier notify)
     {
         var (i, p, ctx) = await LoadIssue(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(i)));
@@ -531,7 +538,7 @@ public static class RegisterEndpoints
             Check.That(raw.ValueKind is JsonValueKind.Array or JsonValueKind.Null, "affectedDisciplineIds", "error.validation");
             var ids = raw.ValueKind == JsonValueKind.Null ? [] : raw.EnumerateArray()
                 .Select(x => x.ValueKind == JsonValueKind.String && Guid.TryParse(x.GetString(), out var g) ? g : throw ApiException.Invalid("affectedDisciplineIds", "error.not_found")).ToArray();
-            await SetAffectedDisciplines(db, i, ids);
+            await SetAffectedDisciplines(db, notify, p, i, ids);
         }
         if (patch.Has("issueType") && patch.Str("issueType") is var type && type != i.IssueType)
         {

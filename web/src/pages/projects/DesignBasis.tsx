@@ -126,6 +126,11 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
   const [draft, setDraft] = useState<VersionDraft>(() => fromVersion(current))
   const [reason, setReason] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null)
   const [duplicateId, setDuplicateId] = useState(''), [inspected, setInspected] = useState(false)
+  const decisions = useQuery({ queryKey: ['basis-decision-options', base],
+    queryFn: () => get<{ id: string; key: string; subject: string; status: string }[]>(base.replace(/\/design-basis$/, '/decisions')) })
+  const decisionChoices = decisions.data?.map(d => ({ value: d.id, label: `${d.key} · ${d.subject} · ${tv(d.status)}` })) ?? []
+  if (draft.decisionId && !decisionChoices.some(d => d.value === draft.decisionId))
+    decisionChoices.push({ value: draft.decisionId, label: t('coord.unavailable') })
   const receipt = useRef<{ signature: string; requestId: string } | null>(null)
   const submit = async (event: React.FormEvent) => {
     event.preventDefault(); setError(null); setBusy(true)
@@ -152,6 +157,9 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
           choices={options.disciplines.filter(d => !allowedDisciplines || allowedDisciplines.includes(d.id)).map(d => ({ value: d.id, label: d.name }))} />
         {canAssign && <SelectField label={t('basis.approver')} value={approverId} onChange={setApproverId} required={false} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />}</>}
       <VersionFields draft={draft} setDraft={setDraft} />
+      {decisions.error && <ErrorBanner error={decisions.error} retry={() => decisions.refetch()} />}
+      <SelectField label={t('basis.sourceDecision')} value={draft.decisionId}
+        onChange={decisionId => setDraft(v => ({ ...v, decisionId }))} required={false} choices={decisionChoices} />
       {existing && <Field label={t('basis.reason')} htmlFor="basis-reason"><Textarea id="basis-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
       {duplicateId && <div className="space-y-2 rounded border border-warn p-3 text-sm"><p>{t('basis.duplicate')}</p>
         <Link className="text-primary underline" to={`/projects/${number}/design-basis?basis=${duplicateId}`} target="_blank" rel="noopener noreferrer">{t('basis.openExisting')}</Link>

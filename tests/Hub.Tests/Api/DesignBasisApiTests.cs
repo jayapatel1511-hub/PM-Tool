@@ -326,12 +326,25 @@ public sealed class DesignBasisApiTests(HubFactory f)
             requiredByDate = "2026-10-01", impactLevel = "Medium", impactDescription = "Design depends on this decision"
         })).Json(201);
         var decisionId = decision.G("id");
+        var foreignProject = await data.Project();
+        var foreignDecision = await (await f.As(TestData.Pm).Post($"/api/v1/projects/{foreignProject.Id}/decisions", new
+        {
+            subject = "Foreign project source", description = "Cannot link across projects", ownerUserId = owner,
+            requiredByDate = "2026-10-01", impactLevel = "Medium", impactDescription = "Reference validation"
+        })).Json(201);
         var input = new DesignBasisEndpoints.VersionInput("Bridge / Pier 1", "Allowable bearing pressure", 100, "kPa",
             "Geotechnical report", "GEO-D-1", "https://example.test/geotech", "A", new DateOnly(2026, 10, 5), decisionId);
+        await Post(TestData.Pm, root, new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion,
+            "Invalid foreign source", owner, civil, data.User(TestData.Marc), input with { DecisionId = foreignDecision.G("id") }, null), 400);
+        Assert.False(f.Db(db => db.DesignBasisEntries.Any(e => e.ProjectId == project.Id && e.Title == "Invalid foreign source")));
         var created = await Post(TestData.Pm, root, new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion,
             "Decision linked criterion", owner, civil, data.User(TestData.Marc), input, null));
         var entryId = created.G("id");
         var versionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == entryId).Id);
+        await Post(TestData.Alex, $"{root}/{entryId}/versions/{versionId}/edit", new DesignBasisEndpoints.EditProposedBody(
+            Guid.NewGuid(), Version<DesignBasisEntry>(entryId), Version<DesignBasisVersion>(versionId),
+            input with { DecisionId = foreignDecision.G("id") }, "Try to link a foreign source decision"), 400);
+        Assert.Equal(decisionId, f.Db(db => db.DesignBasisVersions.Single(v => v.Id == versionId).DecisionId));
         await Post(TestData.Marc, $"{root}/{entryId}/versions/{versionId}/confirm",
             new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(entryId),
                 Version<DesignBasisVersion>(versionId), "Source checked"));

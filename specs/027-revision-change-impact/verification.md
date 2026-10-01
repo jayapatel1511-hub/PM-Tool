@@ -42,3 +42,8 @@ The first run (36318491151) passed 370 of 371 tests. A new retry test expected H
 ## Local synthetic browser-to-API change check
 
 Jay published DEMO-101 P02 as a replacement for P01 in a real local Chrome/API session. The resulting change notice was Open with one Pending Assessment on Taylor's linked task. The prior handoff remained Incorporated with its one submitted revision and three transition receipts. Taylor acknowledged the notice through a separate browser session; API readback showed `acknowledgedAt` set while the disposition remained Pending Assessment. Jay's attempted close returned HTTP 400 with the server's `assessments` reason and left the notice open. The shared coordination command dialog initially hid that reason behind a generic banner; it now displays the server's field messages, and the same browser refusal shows the actionable reason. Frontend build/lint passed after this fix; a settled-dialog axe WCAG 2.1 A/AA scan found zero violations or incomplete checks. Assessment disposition, retention/adoption, correction verification, a deployed browser run and full packet acceptance remain **UNPROVEN**.
+
+
+## 2026-10-01 Codex recovery checkpoint
+
+External-source supersession and publication now check authority over the existing source head, not just the discipline supplied in the request. Regression refused relabelling a Civil source by the Electrical lead and preserved the head; integrated review/change tests passed 19/19. Mocked source-replacement/assessment workflow passed; deployed acceptance remains UNPROVEN.

@@ -121,3 +121,8 @@ As PM, priya saw the list read-only with no Add, and her direct POST got 403. He
 - `POST /templates/{id}/design-basis` with a numeric value and no units returns 500 from `ck_template_basis_numeric_units`; only the form prevents this.
 
 **UNPROVEN:** deployed sign-in, concurrent edits, keyboard-only operation and full packet acceptance.
+
+
+## 2026-10-01 Codex recovery checkpoint
+
+Recovered template basis suggestions, draft preservation/remapping and validation, Pending Assessment actions, GUID filters, withdrawal visibility and focus restoration were integrated. The mocked design-basis browser regression passed with five list queries, one impact decision and zero unmocked GETs. A removed appointed approver no longer has confirmation authority on an open project (domain sweep 18/18). Deployed and company engineering acceptance remain UNPROVEN.

@@ -43,3 +43,8 @@ This used the same isolated build and `hub_agent_verify` database as the packet 
 **FAIL (focus return):** Escape on the New submission form and on the package detail left focus on `<body>`, so a keyboard user has to start again from the top of the page (WCAG 2.4.3). New basis entry, the basis detail and Propose allocation behave the same way. The Radix Export menu, which has a trigger, does return focus. The likely cause is that these dialogs are mounted from state without a `DialogTrigger`, so Radix's close auto-focus targets a trigger that does not exist (`web/src/components/ui/dialog.tsx` and callers such as `Submissions.tsx:42-43`).
 
 No keyboard trap or unlabeled control was found. Not run: a screen reader, other viewport sizes and deployed sign-in.
+
+
+## 2026-10-01 Codex recovery checkpoint
+
+Constraint/promise keys, generic links, export and search commits were integrated. The combined PostgreSQL suite passed 563/563 before the later readiness applicability/export privacy commits. Populated local review-copy migration rehearsal applied 22 to 27 migrations without changing project/task/constraint/promise counts. This is local synthetic evidence, not company submission acceptance.

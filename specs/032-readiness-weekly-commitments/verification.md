@@ -310,3 +310,8 @@ Ran in real Chrome (Playwright 1.61, `channel: 'chrome'`, Development sign-in) a
 - `npm --prefix web run build` and `npm --prefix web run lint` passed (exit 0, 88 warnings, none new), and `git diff --check` passed.
 
 **UNPROVEN:** manual assistive-technology review, deployed authentication, and keyboard-only operation of the new forms (they use native controls and the existing dialog primitives).
+
+
+## 2026-10-01 Codex recovery checkpoint
+
+Constraint/promise keys, links, export/search and notification text were integrated. Live Chrome against the isolated populated local review copy showed the constraint key, retained Verified Removed/evidence, opened the prerequisite inspector, returned focus on Escape and withheld Sign promise from the chair. Migration rehearsal preserved 3 projects, 7 tasks, 1 constraint and 1 promise with 27 migrations. Applicability now recomputes live checks using the organisation date; combined checks are recorded separately. Hosted performer/supervisor acceptance remains UNPROVEN.

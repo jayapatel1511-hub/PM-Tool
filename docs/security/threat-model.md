@@ -13,6 +13,22 @@ activity history, notification and digest content, access tokens, and review-onl
 password) · App ↔ Microsoft Graph (directory read, mail send) · App ↔ Key Vault (RBAC) · App → Application Insights ·
 GitHub Actions → build artefacts.
 
+## Homedev review and pilot boundary
+
+For Staging on homedev: browser ↔ Cloudflare edge (TLS) ↔ dedicated named tunnel ↔ loopback Docker API ↔ dedicated
+PostgreSQL volume. The review and company pilot use separate volumes, runtime files, ports, subnets and backups.
+The API runs as uid 1000. Cookie sign-in trusts forwarded protocol and Cloudflare client IP only from the configured
+bridge gateway; the public hostname and unsafe-request Origin are constrained. Individual password verifiers and the
+persistent cookie key ring stay outside Git. Rotation/removal of a verifier invalidates that person's existing sessions.
+A configured local Admin bootstrap is an operator privilege: use it only in the private runtime file and remove it once
+the first Admin has been created. Company data requires company approval for the home host and Cloudflare boundary.
+
+Repository checks cover project auto-membership authority, project-scoped notification/outbox filtering, current source
+and review discipline authority, stale appointed basis approvers, and private time/calendar activity exports. These are
+local regression results; an operator/company walkthrough, deployment verification and any required penetration test
+remain separate gates. The root dump helpers use directory/file descriptors and reject symlink paths before privileged
+writes; local regression tests do not prove the installed timer or off-host recovery.
+
 ## Findings
 
 | ID | Threat | Where | Mitigation | Status |

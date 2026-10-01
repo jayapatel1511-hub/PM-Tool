@@ -51,3 +51,8 @@ The first run (36318491151) passed 370 of 371 tests. A new retry test expected H
 ## Local synthetic browser-to-API review and replacement check
 
 Against the current local API and persistent `hub_review_local` database, synthetic Jay created and started required DEMO-101-RV001 with source P01 and Project Management reviewer Yagmur. Yagmur used a separate Development-auth browser session to record an Approved decision. API readback showed the package, round and assignment Approved with one manifest entry. Jay then published replacement source P02 through the real browser. The API opened a fresh Draft round with a Pending assignment and preserved the earlier Approved assignment in the Superseded round. Browser JavaScript errors were zero. This exercises one local review/revision path; it does not prove deployed individual-password sign-in, all permission and concurrency cases, populated migration rehearsal or pilot acceptance.
+
+
+## 2026-10-01 Codex recovery checkpoint
+
+Current source/review discipline authority is enforced when setting or changing required deliverable gates. A regression refuses another discipline lead attaching a gate and confirms the command rolls back. Review/change API tests passed 19/19; mocked review browser flow and dialog axe checks passed. Company reviewer acceptance remains UNPROVEN.

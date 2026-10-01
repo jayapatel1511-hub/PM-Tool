@@ -46,3 +46,8 @@ The documentation-only checks in `docs/coordination-spec-validation.md` remain h
 ## Local synthetic browser-to-API check on the review branch
 
 Against the current local API and persistent `hub_review_local` database, a real Chrome session signed in as synthetic Jay through Development auth and created DEMO-101-H001 from the existing P01 source deliverable to Taylor's coordination task. Jay submitted it; a separate Taylor browser session accepted it with criteria evidence and then recorded incorporation. API readback showed Incorporated, three transition receipts, one retained submitted revision and an incorporated revision link. The browser reported zero JavaScript errors. After the detail dialog reached full opacity, an axe WCAG 2.1 A/AA scan found zero violations or incomplete checks. This confirms the exercised local path with synthetic data. It does not verify interim password sign-in, homedev deployment, other packet scenarios, source replacement, manual assistive-technology use or company acceptance.
+
+
+## 2026-10-01 Codex recovery checkpoint
+
+The integrated handoff browser workflow (create, submit, accept, incorporate) passed with mocked API responses, no page errors and no settled-dialog axe violations. The harness now supports installed Chrome and waits for dialog animations before contrast checks. This does not prove the current homedev release.

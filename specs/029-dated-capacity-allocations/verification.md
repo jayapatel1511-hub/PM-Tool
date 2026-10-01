@@ -51,3 +51,8 @@ This used the same isolated build and `hub_agent_verify` database as the packet 
 Other axe scans found 0 violations. The only browser error was the expected stale-confirmation 409.
 
 This run covers the multi-link proposal, supervisor confirmation, pointer operation and FR-CAP-07 recomputation locally. Not run: a Review-purpose submission, simultaneous cross-project confirmation in the browser, AC-CAP-04 privacy with a restricted project, notifications or email in the browser, and deployed flows. AC-CAP acceptance remains **UNPROVEN** until the accessibility defects are fixed.
+
+
+## 2026-10-01 Codex recovery checkpoint
+
+Recovered allocation dialog sizing, hour display and overload warning changes were integrated with the browser-recovery commit. The combined PostgreSQL suite passed 563/563. Live supervisor confirmation and company workload acceptance remain UNPROVEN.

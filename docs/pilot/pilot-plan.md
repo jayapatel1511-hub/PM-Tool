@@ -49,7 +49,7 @@ after the pilot. Tickets record the screen, item key and time — never comment 
 
 ## Coordination expansion scenarios
 
-Packets 025–033 are specification-only. Include a packet in the pilot only after its own application acceptance and the existing hardening gates pass; record enabled capabilities for each pilot week. The participant count does not certify 50 simultaneous sessions or a server size.
+Packets 025–033 have repository implementations with local synthetic checks; full application acceptance remains incomplete. Include a packet in the pilot only after its own application acceptance and the existing hardening gates pass; record enabled capabilities for each pilot week. The participant count does not certify 50 simultaneous sessions or a server size.
 
 Use representative permitted project data to walk through these end-to-end scenarios:
 

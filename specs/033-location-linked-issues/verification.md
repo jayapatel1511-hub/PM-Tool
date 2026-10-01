@@ -103,3 +103,8 @@ Evidence:
 - PASS — full local suite 535/535; `python3 tools/trace_spec.py --check`; frontend production build and lint (exit 0, 88 existing warnings).
 - PASS — local Chrome on a throwaway review-demo database (since dropped). Taylor raised a General issue under Project Management and marked Civil affected in the panel. Jay, the Civil lead, got one "Issue DEMO-101-I02 affects your discipline" notice, which opened the issue panel. His preferences listed the new event, and Weekly Coordination filtered to Civil showed the issue. Taylor, the actor, got no affected-discipline notice. No JavaScript errors.
 - UNPROVEN — deployed delivery, digest presentation and keyboard/assistive-technology review.
+
+
+## 2026-10-01 Codex recovery checkpoint
+
+Recovered grouping places one handoff blocker above its affected tasks, with live source/action links. Focused handoff/grouping checks passed 14/14 and the combined PostgreSQL suite passed 563/563 before subsequent readiness/export additions. Full location workflow, source/register reconciliation, print/export and company engineering acceptance remain UNPROVEN.

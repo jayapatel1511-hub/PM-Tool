@@ -2,8 +2,8 @@
 
 Checklist for moving from the synthetic review release to the company pilot on homedev. It lists what must be true
 and who proves it; it is not a readiness claim. Run the pilot itself with the [pilot plan][plan]; the later Azure move is
-in [production readiness][prod]. Homedev was unreachable over SSH at both 2026-10-01 checkpoints ([gates]); recheck its
-state before acting on any row.
+in [production readiness][prod]. Homedev is reachable again at the latest 2026-10-01 checkpoint; it still runs the first private review release.
+Recheck its state before acting on any row ([gates]).
 
 **Decisions in force (Jay):** homedev hosts the synthetic review release and the company pilot until Azure is
 available, at `pm.engcalchub.com` through a dedicated Cloudflare named tunnel. Pilot users get individual

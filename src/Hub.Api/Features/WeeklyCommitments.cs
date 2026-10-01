@@ -15,6 +15,7 @@ public static class WeeklyCommitmentsEndpoints
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/weekly-commitments", List);
+        api.MapGet("/projects/{projectId:guid}/weekly-commitments/{id:guid}", Detail);
         api.MapPost("/projects/{projectId:guid}/weekly-commitments/{targetType}/{targetId:guid}", Propose)
             .WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/weekly-commitments/{id:guid}/transition", Move)
@@ -130,6 +131,24 @@ public static class WeeklyCommitmentsEndpoints
                 db.Audit.Note(snapshot, reason: body.Reason);
                 return snapshot;
             });
+
+    static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
+    {
+        var (_, ctx) = await access.Project(projectId, false);
+        var row = await db.OutputCommitments.AsNoTracking().SingleOrDefaultAsync(c => c.ProjectId == projectId && c.Id == id)
+            ?? throw ApiException.NotFound();
+        var own = Permissions.NamedCoordinationAction(access.Actor, ctx, row.PerformerId).Ok;
+        var manage = Permissions.ManageCoordination(access.Actor, ctx, Guid.Empty).Ok;
+        var openWeek = !await db.WeeklyPlanSnapshots.AnyAsync(s => s.ProjectId == projectId && s.WeekStart == row.WeekStart);
+        var proposed = row.State == CommitmentState.Proposed && row.SnapshotId is null;
+        var closable = row.State == CommitmentState.Committed && row.SnapshotId is not null;
+        var events = await db.OutputCommitmentEvents.AsNoTracking().Where(e => e.ProjectId == projectId && e.CommitmentId == id)
+            .OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync();
+        return new { Commitment = row, Events = events,
+            CanCommit = own && proposed && openWeek, CanRecordMet = own && closable,
+            CanRecordNotMet = (own || manage) && closable,
+            CanWithdraw = own && proposed || (own || manage) && closable };
+    }
 
     static async Task<object> List(Guid projectId, DateOnly? weekStart, Access access, HubDb db)
     {

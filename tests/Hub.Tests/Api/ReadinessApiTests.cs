@@ -499,6 +499,14 @@ public sealed class ReadinessApiTests(HubFactory f)
         var row = await (await f.As(TestData.Pm).Post($"{root}/Task/{taskId}", proposal)).Json();
         Assert.Equal(row.G("id"), (await (await f.As(TestData.Pm).Post($"{root}/Task/{taskId}", proposal)).Json()).G("id"));
         Assert.Equal(CommitmentState.Proposed, f.Db(db => db.OutputCommitments.Single(c => c.Id == row.G("id")).State));
+        var promiseDetail = root + $"/{row.G("id")}";
+        var chairDetail = await (await f.As(TestData.Pm).GetAsync(promiseDetail)).Json();
+        Assert.False(chairDetail["canCommit"]!.GetValue<bool>());
+        var performerDetail = await (await f.As(TestData.Alex).GetAsync(promiseDetail)).Json();
+        Assert.True(performerDetail["canCommit"]!.GetValue<bool>());
+        var readOnlyDetail = await (await f.As(TestData.Rita).GetAsync(promiseDetail)).Json();
+        Assert.False(readOnlyDetail["canCommit"]!.GetValue<bool>());
+        Assert.False(readOnlyDetail["canWithdraw"]!.GetValue<bool>());
         var move = $"{root}/{row.G("id")}/transition";
         var commit = new WeeklyCommitmentsEndpoints.MoveBody(Guid.NewGuid(), row.I("rowVersion"),
             CommitmentState.Committed, "Performer accepts the defined output", null);
@@ -535,6 +543,13 @@ public sealed class ReadinessApiTests(HubFactory f)
         Assert.Equal(0, outcome.I("met"));
         Assert.Single(f.Db(db => db.OutputCommitmentEvents.Where(e => e.CommitmentId == row.G("id") &&
             e.ToState == CommitmentState.Withdrawn).ToList()));
+        var history = await (await f.As(TestData.Pm).GetAsync(promiseDetail)).Json();
+        Assert.Equal(2, history["events"]!.AsArray().Count);
+        Assert.False(history["canCommit"]!.GetValue<bool>());
+        Assert.False(history["canRecordMet"]!.GetValue<bool>());
+        await f.DbAsync(async db => { (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted;
+            await db.SaveChangesAsync(); return 0; });
+        await (await f.As(TestData.Rita).GetAsync(promiseDetail)).Json(404);
     }
 
     [Fact]

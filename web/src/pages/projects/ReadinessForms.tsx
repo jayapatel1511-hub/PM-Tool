@@ -13,7 +13,13 @@ import { CommandForm, SelectField, personName, workChoices, workRef, type CoordO
 
 type Assessment = { id: string; rowVersion: number; ownerId: string; state: string; intendedOutput: string; completionCriteria: string; evaluatedAt: string }
 type Check = { id: string; rowVersion: number; code: string; applies: boolean | null; satisfied: boolean | null; reason?: string; evidenceUrl?: string; recordedBy?: string }
-type Detail = { assessment: Assessment; checks: Check[]; unknown: string[]; blocked: string[] }
+type RdyException = { id: string; basisVersionId: string; approvedBy: string; verifierId: string; limitedWork: string; risk: string; expiresOn: string; createdAt: string }
+type Detail = { assessment: Assessment; checks: Check[]; unknown: string[]; blocked: string[]; exceptions: RdyException[] }
+type BasisVersion = { id: string; number: number; status: string; scope: string; rowVersion: number }
+type BasisDetail = { entry: { key: string; title: string }; versions: { version: BasisVersion }[];
+  uses: { versionId: string; targetType: string; targetId: string; isCurrent: boolean }[];
+  dispositions: { versionId: string; ownerId: string; approvedBy: string; scope: string; expiresOn: string }[] }
+type Assumption = { key: string; title: string; version: BasisVersion; eligible: boolean; disposedUntil?: string }
 type Constraint = { id: string; rowVersion: number; category: string; description: string; removalOwnerId: string; affectedOwnerId: string;
   neededBy: string; sourceUrl: string; state: string; resolutionEvidenceUrl?: string; verifiedBy?: string; verifiedAt?: string }
 
@@ -26,13 +32,29 @@ export function ReadinessInspector({ projectId, options, close, done }: { projec
     queryFn: async () => { try { return await get<Detail>(path) } catch (e) { if (e instanceof ApiError && e.status === 404) return null; throw e } } })
   const constraints = useQuery({ queryKey: ['readiness-constraints', projectId, type, id], enabled: !!work,
     queryFn: () => get<Constraint[]>(`${path}/constraints`) })
-  const changed = () => { setCreating(false); setEditing(null); setRaising(false); setMoving(null); q.refetch(); constraints.refetch(); done() }
+  const [excepting, setExcepting] = useState(false)
+  // The exception references a basis version; resolve keys, scope and eligibility from the design-basis register.
+  const assumptions = useQuery({ queryKey: ['readiness-assumptions', projectId, type, id], enabled: !!q.data,
+    queryFn: async () => {
+      const base = `projects/${projectId}/design-basis`
+      const page = await get<{ items: { id: string }[] }>(`${base}?kind=Assumption&affectedWorkId=${id}&pageSize=200`)
+      const details = await Promise.all(page.items.map(e => get<BasisDetail>(`${base}/${e.id}`)))
+      return details.flatMap(d => d.versions.map(({ version }): Assumption => {
+        const disposedUntil = d.dispositions.filter(x => x.versionId === version.id && x.ownerId === work?.ownerId && x.approvedBy !== work?.ownerId &&
+          x.scope.toLowerCase() === version.scope.toLowerCase()).map(x => x.expiresOn).sort().pop()
+        const current = d.uses.some(u => u.isCurrent && u.versionId === version.id && u.targetType === type && u.targetId === id)
+        return { key: d.entry.key, title: d.entry.title, version, disposedUntil, eligible: current && version.status === 'Proposed' && !!disposedUntil && disposedUntil >= today() }
+      }))
+    } })
+  const changed = () => { setCreating(false); setEditing(null); setRaising(false); setMoving(null); setExcepting(false); q.refetch(); constraints.refetch(); assumptions.refetch(); done() }
   const canCreate = options.canWrite && work?.ownerId === options.actorId
   const canAssess = options.canWrite && work && options.manageDisciplineIds.includes(work.projectDisciplineId)
   if (creating && work) return <CreateAssessment path={path} rowVersion={work.rowVersion} close={() => setCreating(false)} done={changed} />
   if (editing && q.data) return <Applicability path={`${path}/checks/${encodeURIComponent(editing.code)}/applicability`} check={editing}
     assessmentVersion={q.data.assessment.rowVersion} close={() => setEditing(null)} done={changed} />
   if (raising && work) return <RaiseConstraint path={`${path}/constraints`} work={work} options={options} close={() => setRaising(false)} done={changed} />
+  if (excepting && q.data && work) return <ApproveException path={`${path}/exceptions`} assessment={q.data.assessment} work={work} options={options}
+    candidates={assumptions.data?.filter(a => a.eligible) ?? []} close={() => setExcepting(false)} done={changed} />
   if (moving) return <MoveConstraint path={`${path}/constraints/${moving.row.id}/transition`} row={moving.row} state={moving.state}
     close={() => setMoving(null)} done={changed} />
   return <Dialog open onOpenChange={o => !o && close()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
@@ -56,6 +78,25 @@ export function ReadinessInspector({ projectId, options, close, done }: { projec
         {c.recordedBy && <p className="text-xs text-muted-foreground">{t('readiness.recordedBy')}: {personName(options, c.recordedBy)}</p>}
         {canAssess && <Button size="sm" variant="outline" onClick={() => setEditing(c)}>{t('readiness.recordApplicability')} · {tv(c.code)}</Button>}
       </li>)}</ul>
+      <section className="space-y-3" aria-labelledby="readiness-exceptions">
+        <h3 id="readiness-exceptions" className="font-medium">{t('readiness.exceptions')}</h3>
+        {assumptions.error && <ErrorBanner error={assumptions.error} retry={() => assumptions.refetch()} />}
+        {q.data.exceptions.length === 0 ? <p>{t('readiness.exceptionNone')}</p> : <ul className="space-y-2">{[...q.data.exceptions].reverse().map((x, i) => {
+          const basis = assumptions.data?.find(a => a.version.id === x.basisVersionId)
+          const status = x.expiresOn < today() ? 'readiness.exceptionExpired' : i === 0 && q.data!.assessment.state === 'Proceed under Assumption' ? 'readiness.exceptionActive' : 'readiness.exceptionInactive'
+          return <li key={x.id} className="space-y-1 rounded border p-3">
+            <p className="font-medium">{t(status)}</p>
+            <p>{t('readiness.exceptionBasis')}: {basis ? `${basis.key} · ${t('basis.version')} ${basis.version.number} · ${basis.title}` : t('coord.unavailable')}</p>
+            {basis && <p>{t('basis.scope')}: {basis.version.scope}</p>}
+            <p>{t('readiness.exceptionLimitedWork')}: {x.limitedWork}</p><p>{t('readiness.exceptionRisk')}: {x.risk}</p>
+            <p>{t('basis.approvedBy')}: {personName(options, x.approvedBy)} · {fmtDate(x.createdAt)}</p>
+            <p>{t('readiness.exceptionVerifier')}: {personName(options, x.verifierId)}</p><p>{t('basis.expiry')}: {fmtDate(x.expiresOn)}</p>
+          </li>
+        })}</ul>}
+        {canAssess && (assumptions.isPending ? <Loading rows={1} /> : assumptions.data?.some(a => a.eligible)
+          ? <Button size="sm" variant="outline" onClick={() => setExcepting(true)}>{t('readiness.exceptionApprove')}</Button>
+          : !assumptions.error && <p className="text-xs text-muted-foreground">{t('readiness.exceptionIneligible')}</p>)}
+      </section>
     </div>)}
     {work && <section className="space-y-3 text-sm" aria-label={t('readiness.constraints')}>
       <h3 className="font-medium">{t('readiness.constraints')}</h3>
@@ -117,5 +158,26 @@ function Applicability({ path, check, assessmentVersion, close, done }: { path: 
       { value: 'true', label: t('readiness.applies') }, ...(check.code === 'Production Owner' ? [] : [{ value: 'false', label: t('readiness.notApplicable') }])]} />
     <Field label={t('basis.reason')} htmlFor="applicability-reason"><Textarea id="applicability-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>
     <Field label={t('basis.evidence')} htmlFor="applicability-evidence"><Input id="applicability-evidence" type="url" value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} /></Field>
+  </CommandForm>
+}
+
+function ApproveException({ path, assessment, work, options, candidates, close, done }: { path: string; assessment: Assessment; work: WorkRef;
+  options: CoordOptions; candidates: Assumption[]; close: () => void; done: () => void }) {
+  const [versionId, setVersion] = useState(candidates.length === 1 ? candidates[0].version.id : ''), [verifierId, setVerifier] = useState('')
+  const [limitedWork, setLimited] = useState(''), [risk, setRisk] = useState(''), [expiresOn, setExpiry] = useState('')
+  const chosen = candidates.find(c => c.version.id === versionId)
+  return <CommandForm path={path} title={t('readiness.exceptionApprove')} hint={t('readiness.exceptionHint')} onClose={close} onDone={done}
+    submitLabel={t('readiness.exceptionApprove')}
+    payload={() => ({ assessmentRowVersion: assessment.rowVersion, basisVersionId: versionId, basisVersionRowVersion: chosen?.version.rowVersion ?? 0,
+      verifierId, limitedWork, risk, expiresOn })}>
+    <SelectField label={t('readiness.exceptionBasis')} value={versionId} onChange={setVersion}
+      choices={candidates.map(c => ({ value: c.version.id, label: `${c.key} · ${t('basis.version')} ${c.version.number} · ${c.title}` }))} />
+    {chosen && <p>{t('basis.scope')}: {chosen.version.scope} · {t('readiness.exceptionDisposedUntil', { date: fmtDate(chosen.disposedUntil) })}</p>}
+    <Field label={t('readiness.exceptionLimitedWork')} htmlFor="exception-limited"><Textarea id="exception-limited" required maxLength={2000} value={limitedWork} onChange={e => setLimited(e.target.value)} /></Field>
+    <Field label={t('readiness.exceptionRisk')} htmlFor="exception-risk"><Textarea id="exception-risk" required maxLength={2000} value={risk} onChange={e => setRisk(e.target.value)} /></Field>
+    <SelectField label={t('readiness.exceptionVerifier')} value={verifierId} onChange={setVerifier}
+      choices={options.people.filter(p => p.id !== work.ownerId && p.id !== options.actorId).map(p => ({ value: p.id, label: p.displayName }))} />
+    <Field label={t('basis.expiry')} htmlFor="exception-expiry"><Input id="exception-expiry" required type="date" min={today()} max={chosen?.disposedUntil}
+      value={expiresOn} onChange={e => setExpiry(e.target.value)} /></Field>
   </CommandForm>
 }

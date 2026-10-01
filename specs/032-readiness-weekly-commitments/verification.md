@@ -189,3 +189,58 @@ A PM/lead starts inline. A performer starts only with a recorded authorisation, 
 - Deployed authentication.
 - Notifications for recorded authorisations (none are sent).
 - Complete packet acceptance.
+
+## Task start authorisation follow-ups — 2026-10-01
+
+**Use-time authority.** A recorded authorisation is now usable only while its authoriser is still an active user who can write in the project and is its PM or the task discipline's Lead. This is checked when the authorisation is used, with the shared `Permissions.ManageCoordination` rule applied to the authoriser's current roles and project standing. If the authority has lapsed, the record stays unused in history. The start is refused with a 422 that names the authoriser and why the record can no longer be used, and the problem includes `unusableAuthorisationId`. `GET /tasks/{id}/start-readiness` returns the same record as `unusableAuthorisation`, and the readiness dialog shows it as a warning above the "ask the PM or Discipline Lead" message. A current PM or lead can still start inline or record a new authorisation.
+
+**Notice.** Recording an authorisation in advance (`POST /tasks/{id}/start-authorisations`) now queues `TaskStartAuthorised` for the task's assignee inside the command transaction.
+- **Defaults:** in-app on, email off, direct assignment, and included in `ProjectScoped`. The defaults mirror the other packet 032 action notices.
+- **Content:** the title names the authoriser, task and readiness state; the body is the reason; the link opens the task panel.
+- **Recipients:** the actor is never notified, and a refused or replayed command adds nothing. A starting PM/lead's inline authorisation sends no notice.
+- **Authoriser at start:** I did not add a notice telling the authoriser when the performer starts. §17.1 reserves immediate notices for events that need a response or unblock someone, and never notifies people about their own actions. §17.2 has no such event. Under FR-ASG-01/03, PMs and Discipline Leads follow their projects at All activity, so the start and its reason already appear in their Following tab and digest Project updates. FR-MDC-06 asks for one deduplicated event per recipient and actionable item. The start gives the authoriser nothing to act on.
+
+**Review demo seed and documented synthetic flows (finding; seed unchanged).** The seed creates each DEMO project's T0001 directly as In Progress. Each T0002 is Not Started and never assessed, and is assigned to that project's PM: Taylor for DEMO-101, Jay for DEMO-102, Yagmur for DEMO-103. The PM starts it with an inline acknowledgement and reason. None of the documented flows starts a task:
+- **Handoff H001 (draft → submit → accept → incorporate):** only needs a non-cancelled target task in the receiving discipline.
+- **P01 review and independent approval:** acts on deliverable revisions.
+- **P02 publication → change assessment acknowledge/close refusal:** neither step changes task status.
+- **Submission readiness/issue:** gates on handoffs, assessments, inputs and reviews; issuing with open tasks only asks for confirmation.
+- **Weekly signing:** needs Ready readiness, not a start.
+
+A start becomes necessary only if a reviewer carries a change assessment through Update Required → Resolved → Close. That path needs the assessment owner's correction task to be Complete (`ChangeRules.CorrectionReady`). A new correction task is never assessed. Its PM or lead owner authorises inline; any other owner is told to ask a PM or lead, who has "Authorise start" on the task panel, and that owner is now notified when the authorisation is recorded. Instrumented diagnostic run (instrumentation removed before commit): of the coordination test classes, only `ReviewChangeTests.AC_CHG_05` used the authorised start path; the handoff, submission, readiness and review-seed tests never started a task.
+
+**Test helper.** With the authorisation API now notifying the performer, `TestData.Move`'s authorised retry briefly broke the existing `CollaborationTests.Assignment_notifies_in_app_and_by_email_but_never_the_actor`. Recording the PM's authorisation through the API notified Alex, and that test expects only TaskAssigned. The retry now writes the project PM's authorisation for the exact reported readiness directly to the database. The start still goes through the server guard, including the use-time authority check. The API command, its checks and its notice are covered only in `TaskStartTests`. No existing test was edited.
+
+**PASS (local slice):**
+- **Focused:** `TaskStartTests` passed 9/9. The 2 new tests cover:
+  - a lead role moved away or a deactivated authoriser making the record unusable, with the refusal message and the unusable view;
+  - reactivation making the same record usable again;
+  - the performer's single notice and project-scoped email when email is enabled;
+  - no notice for the actor or for refused (403/400) and replayed commands;
+  - no notice for an inline lead start;
+  - nothing for a performer removed from a restricted project.
+- **Mutation check:** dropping the event from `ProjectScoped` made the notice test fail.
+- **Full suite:** `dotnet test tests/Hub.Tests` passed 534/534 on the final code.
+- **Other checks:**
+  - `python3 tools/trace_spec.py --check` reported 612 IDs and 236 sections, with 0 not cited.
+  - `npm --prefix web run build` passed.
+  - `npm --prefix web run lint` exited 0 with 0 errors and 88 warnings.
+  - `git diff --check` passed.
+- **Browser:** a fresh `hub_agent_exception` with `Seed__ReviewDemo=true` applied all 26 migrations. Playwright Chrome on port 5091 ran this flow on a synthetic Civil task for Yagmur:
+  - Jay recorded an authorisation from the task panel.
+  - Yagmur's notification centre showed "Jay authorised starting DEMO-101-T0003 … while it is Needs Assessment" with the reason. Opening it went to the task panel, where the readiness dialog showed Jay's authorisation.
+  - After Taylor moved the Civil lead to herself, Yagmur's dialog showed the "can no longer be used" warning with no start control. The API reported `unusableAuthorisation` by Jay, and the task stayed Not Started.
+  - With Jay restored as lead, Yagmur started under the same authorisation.
+  - Yagmur, PM of DEMO-103, started the seeded never-assessed DEMO-103-T0002 inline.
+  - The database showed one notice, for Yagmur only, and both authorisations used.
+  - Settled axe WCAG 2.1 A/AA scans had zero violations (incomplete contrast items only).
+  - The only console errors were the expected 422 refusals.
+- **Cleanup:** the API was stopped and `hub_agent_exception` was dropped. `hub_review_local` was not used.
+
+**UNPROVEN:**
+- The persistent `hub_review_local` data itself was not inspected; the findings come from the seed code, a fresh seed and the flow code and tests.
+- No UI for bulk start.
+- Manual assistive-technology review.
+- Deployed authentication.
+- Email delivery of the new event when a user enables it (the queueing was tested; the delivery job was not run).
+- Complete packet acceptance.

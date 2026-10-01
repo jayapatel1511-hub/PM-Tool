@@ -19,8 +19,9 @@ export interface StartRequest { id: string; key: string; to?: string; body?: Rec
 interface StartReadiness {
   readinessState: string; assessed: boolean; unknown: string[]; blocked: string[]; note?: string | null
   needsAuthorisation: boolean; canAuthorise: boolean
-  authorisation?: { id: string; authorisedByName?: string | null; reason: string; createdAt: string } | null
+  authorisation?: Authorisation | null; unusableAuthorisation?: Authorisation | null
 }
+interface Authorisation { id: string; authorisedByName?: string | null; reason: string; createdAt: string }
 
 /** Readiness warning for a start that is Not Ready or Needs Assessment: the starter acknowledges it and gives a reason;
  *  a PM or Discipline Lead authorises inline, anyone else needs the authorisation recorded for this readiness. */
@@ -58,6 +59,7 @@ export function StartAuthorisationDialog({ req, onClose }: { req: StartRequest; 
             {r.unknown.length > 0 && <p>{t('tasks.startAuthUnknown', { list: r.unknown.map(tv).join(', ') })}</p>}
             {!r.needsAuthorisation ? <p role="status">{t(starting ? 'tasks.startAuthNowReady' : 'tasks.startAuthNotNeeded', { state: tv(r.readinessState) })}</p> : <>
               {r.authorisation && <p>{t('tasks.startAuthExisting', { name: r.authorisation.authorisedByName ?? t('coord.unavailable'), date: fmtDate(r.authorisation.createdAt), reason: r.authorisation.reason })}</p>}
+              {r.unusableAuthorisation && <p className="text-warn">{t('tasks.startAuthUnusable', { name: r.unusableAuthorisation.authorisedByName ?? t('coord.unavailable'), date: fmtDate(r.unusableAuthorisation.createdAt) })}</p>}
               {!permitted && <p role="status" className="text-warn">{t('tasks.startAuthAsk')}</p>}
               {permitted && <>
                 <div className="flex items-start gap-2">

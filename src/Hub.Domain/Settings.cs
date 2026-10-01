@@ -158,8 +158,8 @@ public static class NotificationEvents
         IssueVerifierAssigned = "IssueVerifierAssigned", IssueVerificationOutcome = "IssueVerificationOutcome",
         ConstraintAction = "ConstraintAction", ConstraintOutcome = "ConstraintOutcome",
         CommitmentProposed = "CommitmentProposed", CommitmentChanged = "CommitmentChanged",
-        BasisImpactPending = "BasisImpactPending", BasisConflictRaised = "BasisConflictRaised";
-    /// FR-LOC-03: the lead of a discipline newly identified as affected by an issue.
+        BasisImpactPending = "BasisImpactPending", BasisConflictRaised = "BasisConflictRaised",
+        TaskStartAuthorised = "TaskStartAuthorised";
     public const string IssueAffectedDiscipline = "IssueAffectedDiscipline";
 
     public static readonly NotificationEventDef[] All =
@@ -181,6 +181,7 @@ public static class NotificationEvents
         new(CommitmentProposed, true, false, true), new(CommitmentChanged, true, false),
         new(BasisImpactPending, true, false, true), new(BasisConflictRaised, true, false),
         new(IssueAffectedDiscipline, true, false),
+        new(TaskStartAuthorised, true, false, true),
     ];
 
     /// Coordination events whose recipients must hold current project access when the notice is composed and
@@ -188,7 +189,7 @@ public static class NotificationEvents
     public static readonly HashSet<string> ProjectScoped = [HandoffChanged, ReviewPackageChanged, ChangeImpact, AllocationChanged,
         SubmissionChanged, IssueVerifierAssigned, IssueVerificationOutcome, ConstraintAction, ConstraintOutcome, CommitmentProposed, CommitmentChanged,
         BasisImpactPending, BasisConflictRaised,
-        IssueAffectedDiscipline];
+        IssueAffectedDiscipline, TaskStartAuthorised];
 
     public static NotificationEventDef Get(string code) => All.First(e => e.Code == code);
 }

@@ -20,6 +20,8 @@ public sealed class TaskStartTests(HubFactory f)
     List<TaskStartAuthorisation> Authorisations(Guid id) =>
         f.Db(db => db.TaskStartAuthorisations.AsNoTracking().Where(a => a.TaskId == id).OrderBy(a => a.CreatedAt).ToList());
     Task<JsonNode> View(string who, Guid id) => f.As(who).GetAsync($"/api/v1/tasks/{id}/start-readiness").Result.Json();
+    int Notices(Guid taskId, Guid userId) => f.Db(db => db.Notifications
+        .Where(n => n.ItemId == taskId && n.EventType == NotificationEvents.TaskStartAuthorised && n.UserId == userId).Sum(n => n.Count));
 
     async Task<JsonNode> Assess(Guid projectId, Guid taskId, string owner = TestData.Alex)
     {
@@ -147,6 +149,100 @@ public sealed class TaskStartTests(HubFactory f)
         Assert.Equal(["authorisation"], Needs(stale));
         Assert.Contains("needs assessment: ", stale.S("detail"));
         Assert.Null(Assert.Single(Authorisations(id)).StartedAt);
+    }
+
+    [Fact]
+    public async Task Authorisation_is_unusable_once_its_authoriser_is_no_longer_an_active_pm_or_lead()
+    {
+        var p = await data.Project();
+        var civil = data.ProjectDiscipline(p.Id, "Civil");
+        var lead = $"lead-{Guid.NewGuid():N}@hub.test";
+        await (await f.As(lead).GetAsync("/api/v1/me")).Json(); // just-in-time provisioning of an isolated lead
+        var leadId = data.User(lead);
+        Task<int> SetLead(Guid who) => f.DbAsync(async db =>
+        {
+            (await db.ProjectDisciplines.SingleAsync(d => d.Id == civil)).LeadUserId = who;
+            return await db.SaveChangesAsync();
+        });
+        Task<int> SetActive(bool active) => f.DbAsync(async db =>
+        {
+            (await db.Users.SingleAsync(u => u.Id == leadId)).IsActive = active;
+            return await db.SaveChangesAsync();
+        });
+        await SetLead(leadId);
+        var t = await data.NewTask(p.Id, extra: new { assigneeId = data.User(TestData.Alex) });
+        var id = t.G("id");
+        var recorded = await data.AuthoriseStart(t, lead, reason: "Lead authorises the early survey");
+        var ack = new { acknowledgeReadiness = true, reason = "Starting under the lead's authorisation" };
+
+        // The lead role moves on: the authorisation stays recorded but cannot be used, and the refusal says why.
+        await SetLead(data.User(TestData.Marc));
+        var moved = await data.Move(TestData.Alex, t, TaskStatuses.InProgress, ack, expect: 422);
+        Assert.Equal(["authorisation"], Needs(moved));
+        Assert.Equal(recorded.G("id"), moved.G("unusableAuthorisationId"));
+        Assert.Contains("can no longer be used because they are no longer an active Project Manager or Discipline Lead", moved.S("detail"));
+        var view = await View(TestData.Alex, id);
+        Assert.Null(view["authorisation"]);
+        Assert.Equal(recorded.G("id"), view["unusableAuthorisation"]!.G("id"));
+
+        // Lead again but deactivated: still unusable. Reactivated, it is usable at the moment of use.
+        await SetLead(leadId);
+        await SetActive(false);
+        try { Assert.Equal(["authorisation"], Needs(await data.Move(TestData.Alex, t, TaskStatuses.InProgress, ack, expect: 422))); }
+        finally { await SetActive(true); }
+        Assert.Null(Assert.Single(Authorisations(id)).StartedAt);
+        await data.Move(TestData.Alex, t, TaskStatuses.InProgress, ack);
+        var row = Assert.Single(Authorisations(id));
+        Assert.Equal((recorded.G("id"), leadId, data.User(TestData.Alex)), (row.Id, row.AuthorisedBy, row.StartedBy!.Value));
+    }
+
+    [Fact]
+    public async Task Recorded_authorisation_notifies_the_performer_once_and_only_with_project_access()
+    {
+        var p = await data.Project();
+        var alex = data.User(TestData.Alex);
+        await (await f.As(TestData.Alex).Put($"/api/v1/me/preferences/events/{NotificationEvents.TaskStartAuthorised}",
+            new { app = true, email = true })).Json(204);
+        var t = await data.NewTask(p.Id, extra: new { assigneeId = alex });
+        var id = t.G("id");
+        var path = $"/api/v1/tasks/{id}/start-authorisations";
+        var body = new TaskStartEndpoints.AuthoriseBody(Guid.NewGuid(), true, "Survey crew is on site this week");
+
+        // Refused commands queue nothing.
+        await (await f.As(TestData.Alex).Post(path, body)).Json(403);
+        await (await f.As(TestData.Pm).Post(path, body with { RequestId = Guid.NewGuid(), Acknowledged = false })).Json(400);
+        Assert.Equal(0, Notices(id, alex));
+
+        // One notice and one project-scoped email for the performer, none for the actor; a retried command adds none.
+        var first = await (await f.As(TestData.Pm).Post(path, body)).Json();
+        Assert.Equal(first.G("id"), (await (await f.As(TestData.Pm).Post(path, body)).Json()).G("id"));
+        Assert.Equal(1, Notices(id, alex));
+        Assert.Equal(0, Notices(id, data.User(TestData.Pm)));
+        var notice = f.Db(db => db.Notifications.AsNoTracking().Single(n => n.ItemId == id && n.EventType == NotificationEvents.TaskStartAuthorised));
+        Assert.Contains("authorised starting", notice.Title);
+        Assert.Contains("Needs Assessment", notice.Title);
+        Assert.Equal("Survey crew is on site this week", notice.Body);
+        Assert.Equal($"/projects/{p.ProjectNumber}/tasks?panel=Task:{id}", notice.LinkPath);
+        var email = Assert.Single(f.Db(db => db.Emails.AsNoTracking().Where(e => e.UserId == alex && e.DedupKey == $"{NotificationEvents.TaskStartAuthorised}:{id}:{alex}").ToList()));
+        Assert.Equal([p.Id], email.RequiredProjectIds);
+
+        // A lead's inline authorisation while starting is not an advance authorisation, so it sends nothing.
+        var inline = await data.NewTask(p.Id, extra: new { assigneeId = alex });
+        await data.Move(TestData.Marc, inline, TaskStatuses.InProgress, new { acknowledgeReadiness = true, reason = "Lead starts it now" });
+        Assert.Equal(0, Notices(inline.G("id"), alex));
+
+        // Removed from a restricted project, the performer receives neither a notice nor an email.
+        var hidden = await data.NewTask(p.Id, extra: new { assigneeId = alex });
+        await f.DbAsync(async db =>
+        {
+            (await db.Projects.SingleAsync(x => x.Id == p.Id)).Visibility = Visibility.Restricted;
+            (await db.ProjectMembers.SingleAsync(m => m.ProjectId == p.Id && m.UserId == alex)).RemovedAt = f.Clock.GetUtcNow();
+            return await db.SaveChangesAsync();
+        });
+        await data.AuthoriseStart(hidden, TestData.Pm, reason: "Authorised after the team change");
+        Assert.Single(Authorisations(hidden.G("id")));
+        Assert.Equal(0, Notices(hidden.G("id"), alex));
+        Assert.False(f.Db(db => db.Emails.Any(e => e.UserId == alex && e.DedupKey == $"{NotificationEvents.TaskStartAuthorised}:{hidden.G("id")}:{alex}")));
     }
 
     [Fact]

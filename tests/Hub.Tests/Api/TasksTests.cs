@@ -12,6 +12,28 @@ public sealed class TasksTests(HubFactory f)
     readonly TestData d = new(f);
 
     [Fact]
+    public async Task Refused_bulk_assignment_cannot_add_a_member_to_a_restricted_project()
+    {
+        (await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true })).EnsureSuccessStatusCode();
+        try
+        {
+            var p = await d.Project();
+            var t = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex) });
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}", new { visibility = "Restricted" }, d.Version(p.Id))).EnsureSuccessStatusCode();
+            var outsider = d.User(TestData.Jill);
+            var result = await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/tasks/bulk",
+                new { taskIds = new[] { t.G("id") }, operation = "assign", @params = new { assigneeId = outsider } }).Result.Json();
+            Assert.Single(result["skipped"]!.AsArray());
+            Assert.False(await f.DbAsync(db => db.ProjectMembers.AnyAsync(m => m.ProjectId == p.Id && m.UserId == outsider && m.RemovedAt == null)));
+            Assert.Equal(d.User(TestData.Alex), await f.DbAsync(db => db.Tasks.Where(x => x.Id == t.G("id")).Select(x => x.AssigneeId).SingleAsync()));
+        }
+        finally
+        {
+            (await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false })).EnsureSuccessStatusCode();
+        }
+    }
+
+    [Fact]
     public async Task Assigning_a_non_member_adds_them_and_tells_the_pm() // AC-TEAM-01, TM-06
     {
         var p = await d.Project();

@@ -663,7 +663,7 @@ public static class TaskEndpoints
                 skipped.Add(new { t.Id, t.Key, reason = e.Message });
             }
         }
-        if (assignee is { } newA) await team.EnsureMember(p, newA, ProjectRole.TeamMember);
+        if (updated.Count > 0 && assignee is { } newA) await team.EnsureMember(p, newA, ProjectRole.TeamMember);
         await db.SaveChangesAsync();
         // One summary notification per recipient, not one per task (§17.5, AC-NOT-06).
         var actor = await notify.ActorName();

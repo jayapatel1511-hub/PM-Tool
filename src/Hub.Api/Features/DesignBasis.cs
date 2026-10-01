@@ -18,9 +18,9 @@ public static class DesignBasisEndpoints
     public sealed record AssignBody(Guid RequestId, int EntryRowVersion, Guid OwnerId,
         Guid? IndependentApproverId, string Reason);
     public sealed record ProposeBody(Guid RequestId, int EntryRowVersion, int CurrentVersionRowVersion,
-        VersionInput Version, string Reason);
+        VersionInput Version, string Reason, Guid? InspectedDuplicateId = null);
     public sealed record EditProposedBody(Guid RequestId, int EntryRowVersion, int VersionRowVersion,
-        VersionInput Version, string Reason);
+        VersionInput Version, string Reason, Guid? InspectedDuplicateId = null);
     public sealed record ConfirmBody(Guid RequestId, int EntryRowVersion, int VersionRowVersion, string Rationale);
     public sealed record WithdrawBody(Guid RequestId, int EntryRowVersion, int VersionRowVersion, string Reason);
     public sealed record UseBody(Guid RequestId, Guid VersionId, string TargetType, Guid TargetId, string IntendedUse);
@@ -90,6 +90,17 @@ public static class DesignBasisEndpoints
         DecisionId = input.DecisionId,
     };
 
+    static async Task InspectDuplicate(HubDb db, Guid projectId, string kind, string title, Guid disciplineId,
+        string scope, Guid? excludeEntryId, Guid? inspectedId)
+    {
+        var duplicate = await db.DesignBasisEntries.Where(e => e.ProjectId == projectId && e.Id != excludeEntryId &&
+            e.ProjectDisciplineId == disciplineId && e.Kind == kind && e.Title.ToLower() == title.ToLower() &&
+            db.DesignBasisVersions.Any(v => v.EntryId == e.Id && v.Scope.ToLower() == scope.ToLower() && v.Status != BasisStatus.Withdrawn))
+            .OrderBy(e => e.Id).Select(e => (Guid?)e.Id).FirstOrDefaultAsync();
+        if (duplicate is { } existingId && inspectedId != existingId)
+            throw ApiException.Conflict("basis_duplicate", "basis.duplicate", new { existingId });
+    }
+
     static Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "basis.create", body }, access, db, clock, async (project, ctx) =>
         {
@@ -102,12 +113,7 @@ public static class DesignBasisEndpoints
             await ValidateSource(db, project, body.Version);
             var title = Check.Required(body.Title, "title", 200);
             var scope = Check.Required(body.Version.Scope, "scope", 500);
-            var duplicate = await db.DesignBasisEntries.Where(e => e.ProjectId == project.Id && e.ProjectDisciplineId == body.ProjectDisciplineId &&
-                e.Kind == body.Kind && e.Title.ToLower() == title.ToLower() &&
-                db.DesignBasisVersions.Any(v => v.EntryId == e.Id && v.Scope.ToLower() == scope.ToLower() && v.Status != BasisStatus.Withdrawn))
-                .Select(e => (Guid?)e.Id).FirstOrDefaultAsync();
-            if (duplicate is { } existingId && body.InspectedDuplicateId != existingId)
-                throw ApiException.Conflict("basis_duplicate", "basis.duplicate", new { existingId });
+            await InspectDuplicate(db, project.Id, body.Kind, title, body.ProjectDisciplineId, scope, null, body.InspectedDuplicateId);
             var entry = new DesignBasisEntry { ProjectId = project.Id, Kind = body.Kind, Title = title,
                 OwnerId = body.OwnerId, ProjectDisciplineId = body.ProjectDisciplineId,
                 IndependentApproverId = body.IndependentApproverId };
@@ -132,6 +138,8 @@ public static class DesignBasisEndpoints
                 a.NewVersionId == current.Id && a.Status == AssessmentStatus.Pending), "entryId", "basis.current");
             Check.That(!await db.DesignBasisVersions.AnyAsync(v => v.EntryId == id && v.Status == BasisStatus.Proposed), "entryId", "basis.proposed");
             await ValidateSource(db, project, body.Version);
+            await InspectDuplicate(db, project.Id, entry.Kind, entry.Title, entry.ProjectDisciplineId,
+                Check.Required(body.Version.Scope, "scope", 500), entry.Id, body.InspectedDuplicateId);
             var nextNumber = await db.DesignBasisVersions.Where(v => v.EntryId == id).MaxAsync(v => v.Number) + 1;
             var next = NewVersion(project, id, nextNumber, current.Id, body.Version);
             db.DesignBasisVersions.Add(next);
@@ -155,6 +163,8 @@ public static class DesignBasisEndpoints
                     !await db.BasisAssumptionDispositions.AnyAsync(d => d.ProjectId == project.Id && d.VersionId == versionId),
                     "versionId", "basis.edit_linked");
                 await ValidateSource(db, project, body.Version);
+                await InspectDuplicate(db, project.Id, entry.Kind, entry.Title, entry.ProjectDisciplineId,
+                    Check.Required(body.Version.Scope, "scope", 500), entry.Id, body.InspectedDuplicateId);
                 var revised = NewVersion(project, id, version.Number, version.SupersedesVersionId, body.Version);
                 version.Scope = revised.Scope;
                 version.Statement = revised.Statement;

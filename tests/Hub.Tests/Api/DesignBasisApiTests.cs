@@ -14,6 +14,37 @@ public sealed class DesignBasisApiTests(HubFactory f)
     int Version<T>(Guid id) where T : Audited => f.Db(db => db.Set<T>().AsNoTracking().Single(x => x.Id == id).RowVersion);
 
     [Fact]
+    public async Task Scope_edit_and_replacement_require_inspection_of_another_duplicate_entry()
+    {
+        var project = await data.Project();
+        var civil = data.ProjectDiscipline(project.Id, "Civil");
+        var root = $"/api/v1/projects/{project.Id}/design-basis";
+        var input = new DesignBasisEndpoints.VersionInput("Area A", "Narrative requirement", null, null,
+            "Synthetic report", "SYN-DUP", "https://example.test/source", "A", null, null);
+        var create = new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion, "Shared criterion",
+            data.User(TestData.Alex), civil, data.User(TestData.Marc), input, null);
+        var original = await Post(TestData.Pm, root, create);
+        var other = await Post(TestData.Pm, root, create with { RequestId = Guid.NewGuid(), Version = input with { Scope = "Area B" } });
+        var id = other.G("id");
+        var versionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == id).Id);
+        var editPath = $"{root}/{id}/versions/{versionId}/edit";
+        var edit = new DesignBasisEndpoints.EditProposedBody(Guid.NewGuid(), Version<DesignBasisEntry>(id),
+            Version<DesignBasisVersion>(versionId), input, "Correct the proposed scope");
+        var refusal = await Post(TestData.Alex, editPath, edit, 409);
+        Assert.Equal(original.G("id"), refusal.G("existingId"));
+        Assert.Equal("Area B", f.Db(db => db.DesignBasisVersions.Single(v => v.Id == versionId).Scope));
+        await Post(TestData.Alex, editPath, edit with { RequestId = Guid.NewGuid(), InspectedDuplicateId = original.G("id") });
+        await Post(TestData.Marc, $"{root}/{id}/versions/{versionId}/confirm", new DesignBasisEndpoints.ConfirmBody(
+            Guid.NewGuid(), Version<DesignBasisEntry>(id), Version<DesignBasisVersion>(versionId), "Narrative source checked"));
+        var propose = new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(), Version<DesignBasisEntry>(id),
+            Version<DesignBasisVersion>(versionId), input with { DeclaredRevision = "B" }, "Updated source revision");
+        await Post(TestData.Marc, $"{root}/{id}/propose", propose, 409);
+        Assert.Equal(1, f.Db(db => db.DesignBasisVersions.Count(v => v.EntryId == id)));
+        await Post(TestData.Marc, $"{root}/{id}/propose", propose with { RequestId = Guid.NewGuid(), InspectedDuplicateId = original.G("id") });
+        Assert.Equal(2, f.Db(db => db.DesignBasisVersions.Count(v => v.EntryId == id)));
+    }
+
+    [Fact]
     public async Task Member_can_propose_only_own_discipline_and_cannot_assign_another_owner_or_approver()
     {
         var project = await data.Project();
@@ -163,7 +194,7 @@ public sealed class DesignBasisApiTests(HubFactory f)
         await (await f.As(TestData.Rita).GetAsync($"{root}/{id}")).Json(404);
         var c = await Post(TestData.Marc, $"{root}/{id}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
             Version<DesignBasisEntry>(id), Version<DesignBasisVersion>(bId), b with { NumericValue = 130, DeclaredRevision = "C" },
-            "Further revised report"));
+            "Further revised report", otherId));
         var cId = c.G("id");
         await Post(TestData.Marc, $"{root}/{id}/versions/{cId}/confirm", new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(),
             Version<DesignBasisEntry>(id), Version<DesignBasisVersion>(cId), "Revision C reviewed"));

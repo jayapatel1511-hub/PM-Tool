@@ -116,9 +116,9 @@ function VersionFields({ draft, setDraft }: { draft: VersionDraft; setDraft: (v:
   </div>
 }
 
-function BasisForm({ base, number, options, onClose, onDone, existing, allowedDisciplines, canAssign = true }: { base: string; number: string; options: CoordOptions;
-  onClose: () => void; onDone: (id: string) => void; existing?: Detail; allowedDisciplines?: string[]; canAssign?: boolean }) {
-  const current = existing?.versions.find(v => v.version.id === existing.entry.currentVersionId)?.version
+function BasisForm({ base, number, options, onClose, onDone, existing, editing, allowedDisciplines, canAssign = true }: { base: string; number: string; options: CoordOptions;
+  onClose: () => void; onDone: (id: string) => void; existing?: Detail; editing?: Version; allowedDisciplines?: string[]; canAssign?: boolean }) {
+  const current = editing ?? existing?.versions.find(v => v.version.id === existing.entry.currentVersionId)?.version
   const [kind, setKind] = useState(existing?.entry.kind ?? 'Assumption'), [title, setTitle] = useState(existing?.entry.title ?? '')
   const [ownerId, setOwnerId] = useState(existing?.entry.ownerId ?? options.actorId)
   const [disciplineId, setDisciplineId] = useState(existing?.entry.projectDisciplineId ?? (allowedDisciplines?.length === 1 ? allowedDisciplines[0] : ''))
@@ -129,20 +129,21 @@ function BasisForm({ base, number, options, onClose, onDone, existing, allowedDi
   const receipt = useRef<{ signature: string; requestId: string } | null>(null)
   const submit = async (event: React.FormEvent) => {
     event.preventDefault(); setError(null); setBusy(true)
-    const body = existing ? { entryRowVersion: existing.entry.rowVersion, currentVersionRowVersion: current!.rowVersion,
-      version: payloadVersion(draft), reason } : { kind, title, ownerId, projectDisciplineId: disciplineId,
+    const body = existing ? { entryRowVersion: existing.entry.rowVersion,
+      ...(editing ? { versionRowVersion: editing.rowVersion } : { currentVersionRowVersion: current!.rowVersion }),
+      version: payloadVersion(draft), reason, inspectedDuplicateId: inspected ? duplicateId : null } : { kind, title, ownerId, projectDisciplineId: disciplineId,
       independentApproverId: approverId || null, version: payloadVersion(draft), reason: null,
       inspectedDuplicateId: inspected ? duplicateId : null }
     const signature = JSON.stringify(body)
     if (!receipt.current || receipt.current.signature !== signature) receipt.current = { signature, requestId: crypto.randomUUID() }
-    try { const result = await post<{ id: string }>(existing ? `${base}/${existing.entry.id}/propose` : base,
+    try { const result = await post<{ id: string }>(existing ? editing ? `${base}/${existing.entry.id}/versions/${editing.id}/edit` : `${base}/${existing.entry.id}/propose` : base,
       { ...body, requestId: receipt.current.requestId })
       toast.success(t('coord.saved')); onDone(existing?.entry.id ?? result.id)
     } catch (e) { setError(e); if (e instanceof ApiError && e.code === 'basis_duplicate' && typeof e.body.existingId === 'string') {
       setDuplicateId(e.body.existingId); setInspected(false) } } finally { setBusy(false) }
   }
   return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-    <DialogHeader><DialogTitle>{t(existing ? 'basis.propose' : 'basis.new')}</DialogTitle><DialogDescription>{t('basis.subtitle')}</DialogDescription></DialogHeader>
+    <DialogHeader><DialogTitle>{t(editing ? 'basis.editProposed' : existing ? 'basis.propose' : 'basis.new')}</DialogTitle><DialogDescription>{t('basis.subtitle')}</DialogDescription></DialogHeader>
     <form onSubmit={submit} className="space-y-4"><fieldset disabled={busy} className="space-y-4">
       {!existing && <><SelectField label={t('basis.kind')} value={kind} onChange={setKind} choices={[{ value: 'Criterion', label: t('basis.criterion') }, { value: 'Assumption', label: t('basis.assumption') }]} />
         <Field label={t('coord.title')} htmlFor="basis-title"><Input id="basis-title" required maxLength={200} value={title} onChange={e => setTitle(e.target.value)} /></Field>
@@ -152,7 +153,7 @@ function BasisForm({ base, number, options, onClose, onDone, existing, allowedDi
         {canAssign && <SelectField label={t('basis.approver')} value={approverId} onChange={setApproverId} required={false} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />}</>}
       <VersionFields draft={draft} setDraft={setDraft} />
       {existing && <Field label={t('basis.reason')} htmlFor="basis-reason"><Textarea id="basis-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
-      {duplicateId && !existing && <div className="space-y-2 rounded border border-warn p-3 text-sm"><p>{t('basis.duplicate')}</p>
+      {duplicateId && <div className="space-y-2 rounded border border-warn p-3 text-sm"><p>{t('basis.duplicate')}</p>
         <Link className="text-primary underline" to={`/projects/${number}/design-basis?basis=${duplicateId}`} target="_blank" rel="noopener noreferrer">{t('basis.openExisting')}</Link>
         <label className="flex gap-2"><input type="checkbox" checked={inspected} onChange={e => setInspected(e.target.checked)} />{t('basis.inspected')}</label></div>}
     </fieldset>{error != null && <ErrorBanner error={error} />}
@@ -172,6 +173,8 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
   const done = () => { setAction(null); setSelectedImpact(null); refresh(); q.refetch() }
   if (action === 'propose' && row && options) return <BasisForm base={base} number={number} options={options} existing={row}
     onClose={() => setAction(null)} onDone={done} />
+  if (action === 'edit' && row && options && selectedVersion) return <BasisForm base={base} number={number} options={options}
+    existing={row} editing={selectedVersion} onClose={() => setAction(null)} onDone={done} />
   return <><Dialog open onOpenChange={o => !o && close()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
     <DialogHeader><DialogTitle>{row ? `${row.entry.key} · ${row.entry.title}` : t('basis.title')}</DialogTitle>
       <DialogDescription>{t('basis.subtitle')}</DialogDescription></DialogHeader>
@@ -226,8 +229,6 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
   </DialogContent></Dialog>
     {row && action === 'assign' && options && <AssignForm base={base} entry={row.entry} options={options}
       close={() => setAction(null)} done={done} />}
-    {row && action === 'edit' && selectedVersion && <EditProposedForm base={base} entry={row.entry} version={selectedVersion}
-      close={() => { setAction(null); setSelectedVersion(null) }} done={done} />}
     {row && action === 'confirm' && proposed && <ConfirmForm base={base} id={id} entry={row.entry} version={proposed}
       close={() => setAction(null)} done={done} />}
     {row && action === 'proceed' && proposed && options && <ProceedForm base={base} id={id} version={proposed}
@@ -241,20 +242,6 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
     {row && selectedImpact && options && <ImpactForm base={base} id={id} number={number} row={row} impactId={selectedImpact}
       options={options} close={() => setSelectedImpact(null)} done={done} />}
   </>
-}
-
-function EditProposedForm({ base, entry, version, close, done }: { base: string; entry: Entry; version: Version;
-  close: () => void; done: () => void }) {
-  const [draft, setDraft] = useState<VersionDraft>(() => fromVersion(version))
-  const [reason, setReason] = useState('')
-  return <CommandForm path={`${base}/${entry.id}/versions/${version.id}/edit`} title={t('basis.editProposed')}
-    onClose={close} onDone={done} submitLabel={t('common.save')}
-    payload={() => ({ entryRowVersion: entry.rowVersion, versionRowVersion: version.rowVersion,
-      version: payloadVersion(draft), reason })}>
-    <VersionFields draft={draft} setDraft={setDraft} />
-    <Field label={t('basis.reason')} htmlFor="basis-edit-reason"><Textarea id="basis-edit-reason" required minLength={5}
-      value={reason} onChange={e => setReason(e.target.value)} /></Field>
-  </CommandForm>
 }
 
 function AssignForm({ base, entry, options, close, done }: { base: string; entry: Entry; options: CoordOptions;

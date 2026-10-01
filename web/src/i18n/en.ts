@@ -27,7 +27,7 @@ export const en: Record<string, string> = {
   "basis.pending": "Latest proposal", "basis.conflicts": "Unresolved conflicts", "basis.uses": "Consuming work", "basis.impacts": "Impact assessments",
   "basis.confirm": "Confirm version", "basis.propose": "Propose replacement", "basis.editProposed": "Edit proposal", "basis.proceed": "Proceed under assumption", "basis.linkUse": "Link consuming work",
   "basis.withdraw": "Withdraw version", "basis.withdrawn": "Withdrawn", "basis.withdrawHint": "Withdrawal preserves existing consumer links and creates an assessment for each affected use.",
-  "basis.decisionReopened": "Source decision reopened", "basis.resolveConflict": "Resolve conflict", "basis.resolveConflictHint": "Select the confirmed basis and record the authorized rationale for resolving this conflict.",
+  "basis.sourceDecision": "Source decision", "basis.decisionReopened": "Source decision reopened", "basis.resolveConflict": "Resolve conflict", "basis.resolveConflictHint": "Select the confirmed basis and record the authorized rationale for resolving this conflict.",
   "basis.resolutionVersion": "Resolution version",
   "basis.confirmHint": "Confirmation fixes this version. A replacement requires a new proposal and impact assessment for linked work.",
   "basis.proceedHint": "This permits use of the unconfirmed assumption only for the named owner and scope until its expiry. It does not confirm the assumption.",

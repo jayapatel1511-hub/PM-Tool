@@ -194,6 +194,8 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
             {row.canManage && (v.status === 'Proposed' || v.status === 'Confirmed') && <Button size="sm" variant="outline" onClick={() => { setSelectedVersion(v); setAction('withdraw') }}>{t('basis.withdraw')}</Button>}
             <p>{t('basis.manual')}{v.sourceSystem && ` · ${v.sourceSystem}`}{v.stableSourceId && ` · ${v.stableSourceId}`}{v.declaredRevision && ` · ${t('basis.revision')}: ${v.declaredRevision}`}</p>
             {v.sourceUrl && <a className="text-primary underline" href={v.sourceUrl} target="_blank" rel="noopener noreferrer">{t('basis.sourceUrl')}</a>}
+            {v.decisionId && <p><Link className="text-primary underline"
+              to={`/projects/${number}/decisions?panel=Decision:${v.decisionId}`}>{t('basis.sourceDecision')}</Link></p>}
             {v.confirmationDueDate && <p>{t('basis.due')}: {fmtDate(v.confirmationDueDate)}</p>}
             {v.confirmedAt && <p>{t('basis.confirm')}: {name(v.confirmedBy)} · {fmtDate(v.confirmedAt)} · {v.confirmationRationale}</p>}
           </div>)}</div></section>

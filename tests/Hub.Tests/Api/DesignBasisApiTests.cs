@@ -64,11 +64,20 @@ public sealed class DesignBasisApiTests(HubFactory f)
         var confirmPath = $"{root}/{id}/versions/{versionId}/confirm";
         await Post(TestData.Marc, confirmPath, new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(id),
             Version<DesignBasisVersion>(versionId), "Geotechnical source checked"), 400);
-        await f.DbAsync(async db => { (await db.DesignBasisVersions.SingleAsync(v => v.Id == versionId)).Units = "kPa";
-            await db.SaveChangesAsync(); return 0; });
+        var editPath = $"{root}/{id}/versions/{versionId}/edit";
+        var edit = new DesignBasisEndpoints.EditProposedBody(Guid.NewGuid(), Version<DesignBasisEntry>(id),
+            Version<DesignBasisVersion>(versionId), a with { Units = "kPa" }, "Add units from the source report");
+        await Post(TestData.Rita, editPath, edit with { RequestId = Guid.NewGuid() }, 404);
+        await Post(TestData.Omar, editPath, edit with { RequestId = Guid.NewGuid() }, 403);
+        await Post(TestData.Alex, editPath, edit);
+        await Post(TestData.Alex, editPath, edit);
+        await Post(TestData.Alex, editPath, edit with { RequestId = Guid.NewGuid() }, 409);
+        Assert.Equal("kPa", f.Db(db => db.DesignBasisVersions.Single(v => v.Id == versionId).Units));
         var confirm = new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(),
             Version<DesignBasisEntry>(id), Version<DesignBasisVersion>(versionId), "Geotechnical source checked");
         var confirmed = await Post(TestData.Marc, confirmPath, confirm);
+        await Post(TestData.Alex, editPath, edit with { RequestId = Guid.NewGuid(),
+            EntryRowVersion = Version<DesignBasisEntry>(id), VersionRowVersion = Version<DesignBasisVersion>(versionId) }, 400);
         Assert.Equal(versionId, confirmed.G("id"));
         Assert.Equal(versionId, (await Post(TestData.Marc, confirmPath, confirm)).G("id"));
         await Post(TestData.Marc, confirmPath, confirm with { RequestId = Guid.NewGuid() }, 409);
@@ -197,6 +206,11 @@ public sealed class DesignBasisApiTests(HubFactory f)
         await Post(TestData.Marc, proceedPath, new DesignBasisEndpoints.DispositionBody(Guid.NewGuid(),
             Version<DesignBasisVersion>(versionId), "Site grading", owner, new DateOnly(2027, 1, 1), "Confirm before issue"));
         await Post(TestData.Alex, $"{root}/{id}/uses", use with { RequestId = Guid.NewGuid() });
+        await Post(TestData.Alex, $"{root}/{id}/versions/{versionId}/edit",
+            new DesignBasisEndpoints.EditProposedBody(Guid.NewGuid(), Version<DesignBasisEntry>(id),
+                Version<DesignBasisVersion>(versionId), input with { Statement = "Changed after approval" },
+                "Try to alter an approved assumption"), 400);
+        Assert.Equal(input.Statement, f.Db(db => db.DesignBasisVersions.Single(v => v.Id == versionId).Statement));
         Assert.Equal(BasisStatus.Proposed, f.Db(db => db.DesignBasisVersions.Single(v => v.Id == versionId).Status));
         Assert.Single(f.Db(db => db.BasisAssumptionDispositions.Where(d => d.VersionId == versionId && d.OwnerId == owner).ToList()));
     }

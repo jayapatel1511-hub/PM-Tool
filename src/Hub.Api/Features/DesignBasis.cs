@@ -19,6 +19,8 @@ public static class DesignBasisEndpoints
         Guid? IndependentApproverId, string Reason);
     public sealed record ProposeBody(Guid RequestId, int EntryRowVersion, int CurrentVersionRowVersion,
         VersionInput Version, string Reason);
+    public sealed record EditProposedBody(Guid RequestId, int EntryRowVersion, int VersionRowVersion,
+        VersionInput Version, string Reason);
     public sealed record ConfirmBody(Guid RequestId, int EntryRowVersion, int VersionRowVersion, string Rationale);
     public sealed record WithdrawBody(Guid RequestId, int EntryRowVersion, int VersionRowVersion, string Reason);
     public sealed record UseBody(Guid RequestId, Guid VersionId, string TargetType, Guid TargetId, string IntendedUse);
@@ -50,6 +52,8 @@ public static class DesignBasisEndpoints
         api.MapPost("/projects/{projectId:guid}/design-basis", Create).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/assign", Assign).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/propose", Propose).WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/versions/{versionId:guid}/edit", EditProposed)
+            .WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/versions/{versionId:guid}/confirm", Confirm).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/design-basis/{id:guid}/versions/{versionId:guid}/withdraw", Withdraw)
             .WithMetadata(new Coordination.AtomicCommand());
@@ -134,6 +138,38 @@ public static class DesignBasisEndpoints
             db.Audit.Note(next, reason: Check.Reason(body.Reason));
             return next;
         });
+
+    static Task<Coordination.Result> EditProposed(Guid projectId, Guid id, Guid versionId, EditProposedBody body,
+        Access access, HubDb db, TimeProvider clock) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "basis.edit-proposed", id, versionId, body }, access, db, clock,
+            async (project, ctx) =>
+            {
+                var entry = await Entry(db, project.Id, id);
+                var version = await Version(db, project.Id, id, versionId);
+                Coordination.Version(entry, body.EntryRowVersion);
+                Coordination.Version(version, body.VersionRowVersion);
+                var ownerAction = Permissions.NamedCoordinationAction(access.Actor, ctx, entry.OwnerId);
+                if (!ownerAction.Ok) Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId));
+                Check.That(version.Status == BasisStatus.Proposed, "versionId", "basis.proposed");
+                Check.That(!await db.BasisUses.AnyAsync(u => u.ProjectId == project.Id && u.VersionId == versionId) &&
+                    !await db.BasisAssumptionDispositions.AnyAsync(d => d.ProjectId == project.Id && d.VersionId == versionId),
+                    "versionId", "basis.edit_linked");
+                await ValidateSource(db, project, body.Version);
+                var revised = NewVersion(project, id, version.Number, version.SupersedesVersionId, body.Version);
+                version.Scope = revised.Scope;
+                version.Statement = revised.Statement;
+                version.NumericValue = revised.NumericValue;
+                version.Units = revised.Units;
+                version.SourceSystem = revised.SourceSystem;
+                version.StableSourceId = revised.StableSourceId;
+                version.SourceUrl = revised.SourceUrl;
+                version.DeclaredRevision = revised.DeclaredRevision;
+                version.ConfirmationDueDate = revised.ConfirmationDueDate;
+                version.DecisionId = revised.DecisionId;
+                db.Audit.Note(version, reason: Check.Reason(body.Reason));
+                await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id);
+                return version;
+            });
 
     static Task<Coordination.Result> Assign(Guid projectId, Guid id, AssignBody body, Access access, HubDb db, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "basis.assign", id, body }, access, db, clock, async (project, ctx) =>
@@ -499,6 +535,8 @@ public static class DesignBasisEndpoints
                 Left = Side(c.LeftVersionId), Right = Side(c.RightVersionId) }),
             Dispositions = dispositions,
             CanManage = Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId).Ok,
+            CanEditProposed = Permissions.NamedCoordinationAction(access.Actor, ctx, entry.OwnerId).Ok ||
+                Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId).Ok,
             CanConfirm = Permissions.CoordinationWrite(access.Actor, ctx).Ok &&
                 (Permissions.IsDL(ctx, entry.ProjectDisciplineId) || entry.IndependentApproverId == access.Me.Id) &&
                 ((await settings.Get(db)).AllowSelfReview || access.Me.Id != entry.OwnerId) };

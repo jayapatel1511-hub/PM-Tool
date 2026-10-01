@@ -429,6 +429,7 @@ public static class Text
         ["basis.units"] = "Numeric design criteria need explicit units before confirmation.",
         ["basis.independent"] = "A responsible Discipline Lead or assigned independent approver must confirm this version.",
         ["basis.proposed"] = "This basis version is not an active proposal.",
+        ["basis.edit_linked"] = "This proposal has an approved assumption disposition or consuming work. Withdraw it and create a new proposal instead of changing the recorded basis.",
         ["basis.current"] = "This basis version is no longer the current registered version.",
         ["basis.source"] = "Source evidence and rationale are required for confirmation.",
         ["basis.assumption"] = "An unconfirmed assumption needs an approved, unexpired disposition before use.",

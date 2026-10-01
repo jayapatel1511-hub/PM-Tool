@@ -35,3 +35,8 @@ Branch `codex/pm-review-release` and draft PR #13. This record is for the curren
 Jay chose individual user IDs and passwords for the review release until the Azure identity move, and homedev with `pm.engcalchub.com` for the review/pilot host. The Dashboard's local verifier was a reference; PM-Tool now has a separate `LocalPassword` mode with per-user PBKDF2 verifiers. It maps each credential to a distinct active `AppUser` and keeps project permissions intact. Passwords and verifier files stay out of Git, logs and synthetic seed data. Entra sign-in remains an explicit later Azure pilot gate. The homedev hostname is not live until DNS, hosting and access controls are verified.
 
 Continue the unfinished 031 requirements and the 032–033 implementation, then integrate the composed 030 view. Repeat the combined review after integration, then run the environment gates before changing this record to readiness.
+
+## 2026-10-01 checkpoint
+
+- **PASS, local packet 031 correction slice:** The API now permits an authorised, version-checked edit of an unused Proposed basis version and refuses edits after confirmation or provisional approval and use. Focused PostgreSQL API tests passed 6/6; frontend build and lint passed. In Chrome, synthetic `DEMO-101-B002` gained `m`, was confirmed, and retained the value and status after reload with no Edit proposal action. This is local Development-auth evidence, not full packet or deployed acceptance.
+- **BLOCKED, homedev observation:** SSH to the configured homedev address timed out on 2026-10-01. The latest verified `current` symlink remains the older `1c59e33` release and the backup timer was not installed at that observation. Do not infer the current server state from the timeout; recheck when connectivity returns.

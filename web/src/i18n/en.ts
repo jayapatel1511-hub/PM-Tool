@@ -25,7 +25,7 @@ export const en: Record<string, string> = {
   "basis.manual": "Manually registered revision", "basis.missingSource": "Source metadata incomplete", "basis.current": "Current registered version",
   "basis.notConfirmed": "Not confirmed",
   "basis.pending": "Latest proposal", "basis.conflicts": "Unresolved conflicts", "basis.uses": "Consuming work", "basis.impacts": "Impact assessments",
-  "basis.confirm": "Confirm version", "basis.propose": "Propose replacement", "basis.proceed": "Proceed under assumption", "basis.linkUse": "Link consuming work",
+  "basis.confirm": "Confirm version", "basis.propose": "Propose replacement", "basis.editProposed": "Edit proposal", "basis.proceed": "Proceed under assumption", "basis.linkUse": "Link consuming work",
   "basis.withdraw": "Withdraw version", "basis.withdrawn": "Withdrawn", "basis.withdrawHint": "Withdrawal preserves existing consumer links and creates an assessment for each affected use.",
   "basis.decisionReopened": "Source decision reopened", "basis.resolveConflict": "Resolve conflict", "basis.resolveConflictHint": "Select the confirmed basis and record the authorized rationale for resolving this conflict.",
   "basis.resolutionVersion": "Resolution version",

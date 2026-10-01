@@ -28,7 +28,7 @@ type Detail = { entry: Entry; versions: { version: Version; sourceMissing: boole
   conflicts: { id: string; resolved: boolean; rowVersion: number; left: { versionId: string; entryKey: string; scope: string; statement: string; numericValue?: number; units?: string };
     right: { versionId: string; entryKey: string; scope: string; statement: string; numericValue?: number; units?: string } }[];
   dispositions: { id: string; versionId: string; scope: string; ownerId: string; approvedBy: string; expiresOn: string; reason: string }[];
-  canManage: boolean; canConfirm: boolean }
+  canManage: boolean; canEditProposed: boolean; canConfirm: boolean }
 type Team = { members: { userId: string; displayName: string; primaryDisciplineId?: string }[] }
 type VersionDraft = { scope: string; statement: string; numericValue: string; units: string; sourceSystem: string;
   stableSourceId: string; sourceUrl: string; declaredRevision: string; confirmationDueDate: string }
@@ -163,7 +163,7 @@ function BasisForm({ base, number, options, onClose, onDone, existing, allowedDi
 function BasisDetail({ base, id, number, options, name, close, refresh }: { base: string; id: string; number: string;
   options?: CoordOptions; name: (id?: string) => string; close: () => void; refresh: () => void }) {
   const q = useQuery({ queryKey: ['design-basis-detail', base, id], queryFn: () => get<Detail>(`${base}/${id}`) })
-  const [action, setAction] = useState<'assign' | 'propose' | 'confirm' | 'proceed' | 'use' | 'withdraw' | 'resolveConflict' | null>(null)
+  const [action, setAction] = useState<'assign' | 'propose' | 'edit' | 'confirm' | 'proceed' | 'use' | 'withdraw' | 'resolveConflict' | null>(null)
   const [selectedImpact, setSelectedImpact] = useState<string | null>(null)
   const [selectedVersion, setSelectedVersion] = useState<Version | null>(null)
   const [selectedConflict, setSelectedConflict] = useState<string | null>(null)
@@ -188,6 +188,9 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
           <div key={v.id} className="rounded border p-3"><p className="font-medium">{t('basis.version')} {v.number} · {tv(v.status)}{row.entry.currentVersionId === v.id && ` · ${t('basis.current')}`}</p>
             <p>{t('basis.scope')}: {v.scope}</p><p className="whitespace-pre-wrap">{v.statement}{v.numericValue != null && ` · ${v.numericValue} ${v.units ?? ''}`}</p>
             {sourceMissing && <p className="text-warn">{t('basis.missingSource')}</p>}
+            {row.canEditProposed && v.status === 'Proposed' && !row.uses.some(u => u.versionId === v.id) &&
+              !row.dispositions.some(d => d.versionId === v.id) && <Button size="sm" variant="outline"
+                onClick={() => { setSelectedVersion(v); setAction('edit') }}>{t('basis.editProposed')}</Button>}
             {row.canManage && (v.status === 'Proposed' || v.status === 'Confirmed') && <Button size="sm" variant="outline" onClick={() => { setSelectedVersion(v); setAction('withdraw') }}>{t('basis.withdraw')}</Button>}
             <p>{t('basis.manual')}{v.sourceSystem && ` · ${v.sourceSystem}`}{v.stableSourceId && ` · ${v.stableSourceId}`}{v.declaredRevision && ` · ${t('basis.revision')}: ${v.declaredRevision}`}</p>
             {v.sourceUrl && <a className="text-primary underline" href={v.sourceUrl} target="_blank" rel="noopener noreferrer">{t('basis.sourceUrl')}</a>}
@@ -221,6 +224,8 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
   </DialogContent></Dialog>
     {row && action === 'assign' && options && <AssignForm base={base} entry={row.entry} options={options}
       close={() => setAction(null)} done={done} />}
+    {row && action === 'edit' && selectedVersion && <EditProposedForm base={base} entry={row.entry} version={selectedVersion}
+      close={() => { setAction(null); setSelectedVersion(null) }} done={done} />}
     {row && action === 'confirm' && proposed && <ConfirmForm base={base} id={id} entry={row.entry} version={proposed}
       close={() => setAction(null)} done={done} />}
     {row && action === 'proceed' && proposed && options && <ProceedForm base={base} id={id} version={proposed}
@@ -234,6 +239,20 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
     {row && selectedImpact && options && <ImpactForm base={base} id={id} number={number} row={row} impactId={selectedImpact}
       options={options} close={() => setSelectedImpact(null)} done={done} />}
   </>
+}
+
+function EditProposedForm({ base, entry, version, close, done }: { base: string; entry: Entry; version: Version;
+  close: () => void; done: () => void }) {
+  const [draft, setDraft] = useState<VersionDraft>(() => fromVersion(version))
+  const [reason, setReason] = useState('')
+  return <CommandForm path={`${base}/${entry.id}/versions/${version.id}/edit`} title={t('basis.editProposed')}
+    onClose={close} onDone={done} submitLabel={t('common.save')}
+    payload={() => ({ entryRowVersion: entry.rowVersion, versionRowVersion: version.rowVersion,
+      version: payloadVersion(draft), reason })}>
+    <VersionFields draft={draft} setDraft={setDraft} />
+    <Field label={t('basis.reason')} htmlFor="basis-edit-reason"><Textarea id="basis-edit-reason" required minLength={5}
+      value={reason} onChange={e => setReason(e.target.value)} /></Field>
+  </CommandForm>
 }
 
 function AssignForm({ base, entry, options, close, done }: { base: string; entry: Entry; options: CoordOptions;

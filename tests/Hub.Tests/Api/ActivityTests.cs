@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using Hub.Domain;
+using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Tests.Api;
@@ -50,6 +51,43 @@ public sealed class ActivityTests(HubFactory f)
         Assert.Contains(owner["items"]!.AsArray(), row => row!.G("itemId") == entry.G("id"));
         var pm = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/activity?itemType=TimeEntry").Result.Json();
         Assert.Contains(pm["items"]!.AsArray(), row => row!.G("itemId") == entry.G("id"));
+    }
+
+    [Fact]
+    public async Task Dashboard_following_and_daily_digest_hide_private_time_notes()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id, TestData.Pm, new { assigneeId = d.User(TestData.Alex) });
+        const string secret = "Private dashboard digest note regression marker";
+        await f.As(TestData.Alex).Post("/api/v1/time", new { taskId = t.G("id"), workDate = "2026-09-14", hours = 1m, note = secret }).Result.Json(201);
+        (await f.As(TestData.Diane).Put($"/api/v1/projects/{p.Id}/follow", new { level = FollowLevel.AllActivity })).EnsureSuccessStatusCode();
+
+        var dashboard = await f.As(TestData.Diane).GetAsync($"/api/v1/projects/{p.Id}/dashboard").Result.Json();
+        Assert.DoesNotContain(secret, dashboard.ToJsonString());
+        var following = await f.As(TestData.Diane).GetAsync($"/api/v1/me/following?projectId={p.Id}").Result.Json();
+        Assert.DoesNotContain(secret, following.ToJsonString());
+        var digest = await f.DbAsync(db => Digest.Build(db, d.User(TestData.Diane), "Diane", DateOnly.FromDateTime(f.Clock.Now.DateTime), f.Clock.Now.AddDays(-1), f.Clock.Now, new OrgSettings(), ""));
+        Assert.DoesNotContain(secret, digest?.Body ?? "");
+    }
+
+    [Fact]
+    public async Task Weekly_summary_excludes_legacy_private_calendar_activity()
+    {
+        var p = await d.Project();
+        const string secret = "Private weekly summary calendar regression marker";
+        var eventRow = await f.As(TestData.Alex).Post("/api/v1/calendar/events", new { projectId = p.Id, type = "Meeting", title = secret,
+            start = "2026-09-14T09:00", end = "2026-09-14T10:00", visibility = "Private" }).Result.Json(201);
+        var since = f.Clock.Now;
+        await f.DbAsync(async db =>
+        {
+            db.ActivityLog.Add(new Hub.Api.Data.ActivityLog { ProjectId = p.Id, ItemType = ItemType.CalendarEvent, ItemId = eventRow.G("id"),
+                ItemName = secret, Action = "Created", ActorUserId = d.User(TestData.Alex), ActorType = "User", Categories = ["status"],
+                OccurredAt = since.AddMinutes(1) });
+            return await db.SaveChangesAsync();
+        });
+        var summary = await f.DbAsync(db => WeeklySummary.Build(db, d.User(TestData.Pm), "PM", DateOnly.FromDateTime(since.DateTime), since, since.AddMinutes(2), new OrgSettings(), ""));
+        Assert.Equal(0, summary!.Projects.Single(x => x.ProjectId == p.Id).Changes);
+        Assert.DoesNotContain(secret, summary.Body);
     }
 
     [Fact]

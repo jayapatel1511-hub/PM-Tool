@@ -61,7 +61,7 @@ public static class DashboardEndpoints
         var milestones = await MilestoneRows(db, id, today, 5);
         var dueThisWeek = sc.Tasks(("dueThisWeek", "true"));
         var blocked = sc.Tasks(("blocked", "true"));
-        var activity = ActivityEndpoints.Filter(db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == id), null, null, null, null, null, disciplineId, importantOnly);
+        var activity = ActivityEndpoints.Filter(await ActivityEndpoints.Visible(db, access, id), null, null, null, null, null, disciplineId, importantOnly);
         var recent = await activity.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Take(15).ToListAsync();
         var disciplines = JsonSerializer.Deserialize<List<JsonElement>>(state?.DisciplineStates ?? "[]", JsonOpts.Web) ?? [];
         if (disciplineId is { } dsc) disciplines = disciplines.Where(x => x.GetProperty("disciplineId").GetGuid() == dsc).ToList();

@@ -131,7 +131,7 @@ public static class Digest
             : await db.Follows.Where(f => f.UserId == userId && f.Level == FollowLevel.AllActivity && pids.Contains(f.ProjectId)).Select(f => f.ProjectId).ToListAsync();
         foreach (var pid in followed.OrderBy(Num))
         {
-            var rows = await db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == pid && a.OccurredAt > since && a.ActorUserId != userId && a.ActorUserId != null)
+            var rows = await (await VisibleActivity(db, userId, pid)).Where(a => a.OccurredAt > since && a.ActorUserId != null && a.ActorUserId != userId)
                 .OrderByDescending(a => a.OccurredAt).Take(2000).ToListAsync();
             var notified = await NotificationEndpoints.NotifiedKeys(db, userId, rows);
             rows = rows.Where(r => r.CorrelationId is not { } c || !notified.Contains(c.ToString())).ToList();
@@ -187,6 +187,26 @@ public static class Digest
         }
         body.AppendLine(Text.Get("digest.footer", $"{baseUrl}/my-work", $"{baseUrl}/preferences"));
         return new Result(subject, body.ToString(), sections, updates) { RequiredProjectIds = [.. pids] };
+    }
+
+    /// Apply the same source-level privacy boundary as project activity reads when no request Access is available.
+    internal static async Task<IQueryable<ActivityLog>> VisibleActivity(HubDb db, Guid userId, Guid projectId)
+    {
+        var isAdmin = await db.UserRoles.AnyAsync(r => r.UserId == userId && r.Role == SystemRole.Admin);
+        var isSupervisor = await db.UserRoles.AnyAsync(r => r.UserId == userId && r.Role == SystemRole.Supervisor);
+        var isPm = isAdmin || await db.Projects.AnyAsync(p => p.Id == projectId && p.ProjectManagerId == userId)
+            || await db.ProjectMembers.AnyAsync(m => m.ProjectId == projectId && m.UserId == userId && m.RemovedAt == null && m.Roles.Contains(ProjectRole.PM));
+        var leadDisciplineIds = await db.ProjectDisciplines.Where(d => d.ProjectId == projectId && d.LeadUserId == userId).Select(d => d.Id).ToListAsync();
+        var directReportIds = isSupervisor
+            ? await db.Users.Where(u => u.SupervisorId == userId).Select(u => u.Id).ToListAsync()
+            : [];
+        var entries = db.TimeEntries.IgnoreQueryFilters().Where(e => e.ProjectId == projectId &&
+            (e.UserId == userId || isPm ||
+             (leadDisciplineIds.Count > 0 && db.Tasks.IgnoreQueryFilters().Any(t => t.Id == e.TaskId && leadDisciplineIds.Contains(t.ProjectDisciplineId))) ||
+             (directReportIds.Count > 0 && directReportIds.Contains(e.UserId)))).Select(e => (Guid?)e.Id);
+        return db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == projectId
+            && (a.ItemType != ItemType.TimeEntry || entries.Contains(a.ItemId))
+            && (a.ItemType != ItemType.CalendarEvent || !db.CalendarEvents.Any(e => e.Id == a.ItemId && e.Visibility == EventVisibility.Private)));
     }
 
     static string Blockers(string? json)
@@ -283,7 +303,7 @@ public static class WeeklySummary
             var attention = (await db.Attention.AsNoTracking().Where(a => a.ProjectId == p.Id && (a.Severity == Severity.Critical || a.Severity == Severity.Warning)).ToListAsync())
                 .Where(a => !snoozed.Contains((a.RuleId, a.ItemId))).OrderBy(a => Severity.Rank(a.Severity)).ThenByDescending(a => a.DaysOverdueOrBlocked).Take(5)
                 .Select(a => $"{a.Severity} {a.RuleId} {a.ItemKey} {a.ItemName}: {a.Message}".Replace("  ", " ")).ToList();
-            var changes = await db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == p.Id && a.OccurredAt > since && a.ActorUserId != null && a.ActorUserId != userId)
+            var changes = await (await Digest.VisibleActivity(db, userId, p.Id)).Where(a => a.OccurredAt > since && a.ActorUserId != null && a.ActorUserId != userId)
                 .Select(a => a.Categories).ToListAsync();
             var byType = changes.GroupBy(c => c.FirstOrDefault(x => Important.Contains(x)) ?? "other").ToDictionary(g => g.Key, g => g.Count());
             parts.Add(new Part(p.Id, p.ProjectNumber, p.Name, computed, reported, sub?.Name, sub?.Date, await Tasks("overdue"), await Tasks("blocked"),

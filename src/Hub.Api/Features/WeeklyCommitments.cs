@@ -27,7 +27,7 @@ public static class WeeklyCommitmentsEndpoints
     static void Week(DateOnly date) => Check.That(date.DayOfWeek == DayOfWeek.Monday, "weekStart", "error.invalid");
 
     static Task<Coordination.Result> Propose(Guid projectId, string targetType, Guid targetId, ProposeBody body,
-        Access access, HubDb db, TimeProvider clock) =>
+        Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "commitment.propose", targetType, targetId, body },
             access, db, clock, async (project, ctx) =>
             {
@@ -46,11 +46,14 @@ public static class WeeklyCommitmentsEndpoints
                     CompletionCriteria = Check.Required(body.CompletionCriteria, "completionCriteria", 2000) };
                 db.OutputCommitments.Add(row);
                 db.Audit.Note(row);
+                // A chair's proposal stays Proposed until the performer confirms (AC-RDY-05); the performer's own proposal sends nothing.
+                await NotifyCommitment(notify, project, target.Key, row, NotificationEvents.CommitmentProposed, [row.PerformerId],
+                    Text.Get("notify.commitment_proposed", target.Key));
                 return row;
             });
 
     static Task<Coordination.Result> Move(Guid projectId, Guid id, MoveBody body, Access access, HubDb db,
-        TimeProvider clock, SettingsStore settings) =>
+        TimeProvider clock, SettingsStore settings, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "commitment.transition", id, body },
             access, db, clock, async (project, ctx) =>
             {
@@ -109,8 +112,19 @@ public static class WeeklyCommitmentsEndpoints
                     EvidenceUrl = string.IsNullOrWhiteSpace(body.EvidenceUrl) ? null : Coordination.Url(body.EvidenceUrl),
                     ActorId = access.Me.Id });
                 db.Audit.Note(row, reason: reason);
+                var key = row.TargetType == "Task"
+                    ? await db.Tasks.Where(t => t.Id == row.TargetId).Select(t => t.Key).FirstAsync()
+                    : await db.Deliverables.Where(d => d.Id == row.TargetId).Select(d => d.Key).FirstAsync();
+                await NotifyCommitment(notify, project, key, row, NotificationEvents.CommitmentChanged, [row.PerformerId, row.CreatedBy],
+                    Text.Get("notify.commitment_changed", key, row.State));
                 return row;
             });
+
+    // Queued inside the command transaction: a refused, conflicting or replayed command adds no notice (FR-MDC-03, FR-MDC-06).
+    static Task NotifyCommitment(Notifier notify, Project project, string key, OutputCommitment row, string eventType,
+        Guid?[] recipients, string title) =>
+        notify.Send(eventType, recipients, new NotifyItem(project.Id, "OutputCommitment", row.Id, key,
+            $"/projects/{project.ProjectNumber}/readiness", project.ProjectNumber), title);
 
     static Task<Coordination.Result> Snapshot(Guid projectId, SnapshotBody body, Access access, HubDb db,
         TimeProvider clock) =>

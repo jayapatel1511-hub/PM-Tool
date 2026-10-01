@@ -607,7 +607,7 @@ public static class ReadinessEndpoints
     }
 
     static Task<Coordination.Result> AddConstraint(Guid projectId, string targetType, Guid targetId,
-        ConstraintBody body, Access access, HubDb db, TimeProvider clock) =>
+        ConstraintBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "constraint.create", targetType, targetId, body },
             access, db, clock, async (project, ctx) =>
             {
@@ -625,11 +625,13 @@ public static class ReadinessEndpoints
                     NeededBy = body.NeededBy, SourceUrl = Coordination.Url(body.SourceUrl) };
                 db.WorkConstraints.Add(row);
                 db.Audit.Note(row);
+                await NotifyConstraint(notify, project, target, row, NotificationEvents.ConstraintAction, [row.RemovalOwnerId],
+                    Text.Get("notify.constraint_assigned", row.Category, target.Key));
                 return row;
             });
 
     static Task<Coordination.Result> MoveConstraint(Guid projectId, string targetType, Guid targetId,
-        Guid constraintId, ConstraintMoveBody body, Access access, HubDb db, TimeProvider clock) =>
+        Guid constraintId, ConstraintMoveBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "constraint.transition", targetType, targetId, constraintId, body },
             access, db, clock, async (project, ctx) =>
             {
@@ -664,6 +666,18 @@ public static class ReadinessEndpoints
                 else throw ApiException.Invalid("toState", "coord.transition");
                 row.State = body.ToState;
                 db.Audit.Note(row, reason: reason);
+                if (row.State == ConstraintState.ResolutionProposed)
+                    await NotifyConstraint(notify, project, target, row, NotificationEvents.ConstraintAction, [row.AffectedOwnerId],
+                        Text.Get("notify.constraint_proposed", row.Category, target.Key));
+                else
+                    await NotifyConstraint(notify, project, target, row, NotificationEvents.ConstraintOutcome,
+                        [row.RemovalOwnerId, row.AffectedOwnerId], Text.Get("notify.constraint_outcome", row.Category, target.Key, row.State));
                 return row;
             });
+
+    // Queued inside the command transaction: a refused, conflicting or replayed command adds no notice (FR-MDC-03, FR-MDC-06).
+    static Task NotifyConstraint(Notifier notify, Project project, Coordination.Work target, WorkConstraint row, string eventType,
+        Guid?[] recipients, string title) =>
+        notify.Send(eventType, recipients, new NotifyItem(project.Id, "WorkConstraint", row.Id, target.Key,
+            $"/projects/{project.ProjectNumber}/readiness", project.ProjectNumber), title);
 }

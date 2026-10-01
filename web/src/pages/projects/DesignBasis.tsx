@@ -21,7 +21,7 @@ type Entry = EntryRow & { independentApproverId?: string }
 type Version = { id: string; entryId: string; number: number; status: string; scope: string; statement: string;
   numericValue?: number; units?: string; sourceSystem?: string; stableSourceId?: string; sourceUrl?: string;
   declaredRevision?: string; confirmationDueDate?: string; rowVersion: number; supersedesVersionId?: string;
-  confirmedBy?: string; confirmedAt?: string; confirmationRationale?: string }
+  confirmedBy?: string; confirmedAt?: string; confirmationRationale?: string; decisionId?: string }
 type Detail = { entry: Entry; versions: { version: Version; sourceMissing: boolean }[];
   uses: { id: string; versionId: string; targetType: string; targetId: string; intendedUse: string; ownerId: string; rowVersion: number; isCurrent: boolean }[];
   impacts: { id: string; basisUseId: string; oldVersionId: string; newVersionId?: string; withdrawalVersionId?: string; status: string; ownerId: string; rowVersion: number; rationale?: string; evidenceUrl?: string }[];
@@ -31,17 +31,17 @@ type Detail = { entry: Entry; versions: { version: Version; sourceMissing: boole
   canManage: boolean; canEditProposed: boolean; canConfirm: boolean }
 type Team = { members: { userId: string; displayName: string; primaryDisciplineId?: string }[] }
 type VersionDraft = { scope: string; statement: string; numericValue: string; units: string; sourceSystem: string;
-  stableSourceId: string; sourceUrl: string; declaredRevision: string; confirmationDueDate: string }
+  stableSourceId: string; sourceUrl: string; declaredRevision: string; confirmationDueDate: string; decisionId: string }
 const blank: VersionDraft = { scope: '', statement: '', numericValue: '', units: '', sourceSystem: '', stableSourceId: '',
-  sourceUrl: '', declaredRevision: '', confirmationDueDate: '' }
+  sourceUrl: '', declaredRevision: '', confirmationDueDate: '', decisionId: '' }
 const fromVersion = (v?: Version): VersionDraft => v ? { scope: v.scope, statement: v.statement,
   numericValue: v.numericValue == null ? '' : String(v.numericValue), units: v.units ?? '', sourceSystem: v.sourceSystem ?? '',
   stableSourceId: v.stableSourceId ?? '', sourceUrl: v.sourceUrl ?? '', declaredRevision: v.declaredRevision ?? '',
-  confirmationDueDate: v.confirmationDueDate ?? '' } : { ...blank }
+  confirmationDueDate: v.confirmationDueDate ?? '', decisionId: v.decisionId ?? '' } : { ...blank }
 const payloadVersion = (v: VersionDraft) => ({ scope: v.scope, statement: v.statement,
   numericValue: v.numericValue === '' ? null : Number(v.numericValue), units: v.units || null, sourceSystem: v.sourceSystem || null,
   stableSourceId: v.stableSourceId || null, sourceUrl: v.sourceUrl || null, declaredRevision: v.declaredRevision || null,
-  confirmationDueDate: v.confirmationDueDate || null, decisionId: null })
+  confirmationDueDate: v.confirmationDueDate || null, decisionId: v.decisionId || null })
 
 export function DesignBasisTab() {
   const project = useCurrentProject(), qc = useQueryClient(), [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false)

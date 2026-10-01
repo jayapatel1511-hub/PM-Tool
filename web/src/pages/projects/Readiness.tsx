@@ -15,6 +15,7 @@ import { useMe } from '@/lib/auth'
 import { useCurrentProject } from './ProjectLayout'
 import { CommandForm, SelectField, personName, workChoices, workRef, type CoordOptions } from './CoordinationForms'
 import { ReadinessInspector } from './ReadinessForms'
+import { ExportMenu } from '@/components/hub/export'
 
 type Commitment = {
   id: string; targetType: string; targetId: string; performerId: string; weekStart: string; targetDate: string
@@ -103,19 +104,22 @@ export function ReadinessTab() {
     <Page title={t('readiness.title')} subtitle={t('readiness.subtitle')} actions={
       <>{options.data && <Button size="sm" variant="outline" onClick={() => setInspecting(true)}>{t('readiness.inspect')}</Button>}
       {options.data?.canWrite && <Button size="sm" onClick={() => setProposing(true)}>{t('readiness.propose')}</Button>}
+      <ExportMenu path={`projects/${p.id}/weekly-commitments/export`} params={{ from, to }} name={`${p.projectNumber}-weekly-commitments`} label={t('readiness.exportPromises')} />
       <Button asChild variant="outline" size="sm"><Link to={`${base}/coordination?meeting=1`}><CalendarCheck className="size-4" />{t('readiness.meeting')}</Link></Button></>
     }>
       {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
       {filters}
       <div className="grid gap-4 md:grid-cols-2">
-        <Section title={t('readiness.constraints')} id="constraints" count={data.constraintsTotal}>
+        <Section title={t('readiness.constraints')} id="constraints" count={data.constraintsTotal}
+          actions={<ExportMenu path={`projects/${p.id}/readiness/window/export`} params={{ from, to, list: 'constraints' }} name={`${p.projectNumber}-readiness-constraints`} />}>
           {data.constraintsTruncated && <p role="status" className="border-b border-warn/30 bg-warn-bg px-4 py-2 text-xs text-warn">{t('readiness.aggregateTruncated')}</p>}
           {data.constraints.length === 0 ? <p className="px-4 py-4 text-sm text-muted-foreground">{t('readiness.noConstraints')}</p> : <ul className="divide-y">{data.constraints.map((c) => <li key={c.id} className="px-4 py-3 text-sm">
             <Link className="font-medium text-primary hover:underline" to={`${base}/${c.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${c.targetType}:${c.targetId}`}>{c.category} · {c.targetType}</Link>
             <p className="mt-1">{c.description}</p><p className="text-xs text-muted-foreground">{fmtDate(c.neededBy)} · <a className="underline" href={c.sourceUrl} target="_blank" rel="noreferrer">{t('readiness.source')}</a></p>
           </li>)}</ul>}
         </Section>
-        <Section title={t('readiness.readyOutputs')} id="ready-outputs" count={data.readyOutputsTotal}>
+        <Section title={t('readiness.readyOutputs')} id="ready-outputs" count={data.readyOutputsTotal}
+          actions={<ExportMenu path={`projects/${p.id}/readiness/window/export`} params={{ from, to, list: 'ready' }} name={`${p.projectNumber}-ready-outputs`} />}>
           {data.readyOutputsTruncated && <p role="status" className="border-b border-warn/30 bg-warn-bg px-4 py-2 text-xs text-warn">{t('readiness.aggregateTruncated')}</p>}
           {data.readyOutputs.length === 0 ? <p className="px-4 py-4 text-sm text-muted-foreground">{t('readiness.noReadyOutputs')}</p> : <ul className="divide-y">{data.readyOutputs.map((o) => <li key={o.id} className="px-4 py-3 text-sm">
             <Link className="font-medium text-primary hover:underline" to={`${base}/${o.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${o.targetType}:${o.targetId}`}>{o.key} · {o.name}</Link>

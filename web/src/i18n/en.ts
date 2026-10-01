@@ -878,6 +878,7 @@ export const en: Record<string, string> = {
   'readiness.recordApplicability': 'Record applicability', 'readiness.applicabilityHint': 'Record why this input is required or not applicable. Current linked sources can still require an input or block readiness. The production owner is always required.',
   'readiness.propose': 'Propose promise', 'readiness.proposeHint': 'A proposal stays Proposed until the named performer signs it. Signing requires current Ready inputs and no open constraint.',
   'readiness.work': 'Linked work', 'readiness.performer': 'Performer', 'readiness.weekStart': 'Week start', 'readiness.prerequisites': 'Prerequisite submissions',
+  'readiness.exportPromises': 'Export promises',
   'readiness.linkedType': 'Existing record this constraint represents (optional)', 'readiness.linkedRecord': 'Linked record',
   'readiness.prerequisitesHint': 'The Submission Gate passes only when every linked package is Issued. A superseded package is followed to the package that replaced it. A package that lists this output cannot gate it, and Proceed under Assumption cannot override the gate.',
   'readiness.addPrerequisite': 'Link prerequisite package', 'readiness.removePrerequisite': 'Remove link', 'readiness.prerequisitePackage': 'Submission package',

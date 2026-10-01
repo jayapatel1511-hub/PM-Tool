@@ -252,7 +252,7 @@ FR-RDY-03 asks for links to existing decisions, issues and handoffs, and §10.8 
 
 §10.8 also requires readable per-project keys: constraints now take `CT` keys and promises `WC` keys from project counters inside the command transaction. Migration `ReadinessConstraintLinksAndKeys` is additive. It numbers existing rows per project in creation order (padded to three digits, never truncated) and starts each counter after the highest number.
 
-**PASS (local):** `dotnet build Hub.slnx` succeeded. `dotnet test --filter "Readiness|WeeklyCommitment|CoordinationLifecycleSweep"` passed 90/90, including the new `ReadinessConstraintLinksTests` 2/2. The new tests cover:
+**PASS (local):** `dotnet build Hub.slnx` succeeded. `dotnet test --filter "Readiness|WeeklyCommitment|CoordinationLifecycleSweep"` passed 90/90, including the new `ReadinessConstraintLinkTests` 2/2. The new tests cover:
 - refused links (foreign, missing id, unknown type, deleted issue);
 - a retry neither duplicating nor taking a key, giving keys CT001/CT002;
 - Read Only users seeing the linked decision;
@@ -261,3 +261,13 @@ FR-RDY-03 asks for links to existing decisions, issues and handoffs, and §10.8 
 - promise keys WC001/WC002 with a refused proposal taking no key.
 
 **Backfill on my own database:** `hub_agent_week` (API on 127.0.0.1:5093) assigned DEMO-101-CT001/CT002 and WC001 at runtime. I then ran `dotnet ef database update` back to `20261001212053_ReadinessSubmissionPrerequisite`: the columns were dropped and the rows kept. Re-applying restored the same keys in creation order, set the counters to 3 and 2 (1 for projects without rows), and the commitment history guard allowed the key update on a Committed row (inside a transaction that was rolled back). `npm --prefix web run build` and `npm --prefix web run lint` passed.
+
+## Readiness exports — 2026-10-01
+
+FR-MDC-06 export for the readiness page. All three exports produce CSV or XLSX through the existing `ExportFile` helper, which also logs the export:
+- `readiness/window/export?from&to&list=constraints|ready` uses the same window query as the page, now shared as `WindowData`. Constraints are listed with key, work, category, description, owners by name, needed-by, state, linked record (with its status) and source. Ready outputs are listed with key, work, type, owner, discipline, due date, output, criteria and state.
+- `weekly-commitments/export?from&to` lists the promises due in the window that the page shows: key, work, performer, recorded week start, target date, output, criteria, state, readiness at commitment, snapshot time and evidence.
+
+Each export is scoped to the project. A restricted project returns 404 to non-members. The window span stays within 84 days, and an unknown list returns 400. The page has an export menu on the constraint and ready-output sections and an "Export promises" menu in the header. `ExportMenu` gained an optional label. Ready outputs are now ordered by due date and key.
+
+**PASS (local):** `dotnet build Hub.slnx` succeeded. `ReadinessExportTests` passed 1/1: the ready export matched the window's ready output, the constraint export matched the window keys (linked decision label, owner name, cancelled constraint excluded), the promise export kept the in-window promise and excluded the later one, XLSX returned 200, an over-long span and an unknown list returned 400, and a restricted project returned 404 to Read Only. `dotnet test --filter "Readiness|WeeklyCommitment|CoordinationLifecycleSweep|DisciplineCoordination"` passed 91/91. `npm --prefix web run build` and `npm --prefix web run lint` passed.

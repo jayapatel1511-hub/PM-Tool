@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -454,6 +455,7 @@ public static class ReadinessEndpoints
         api.MapGet("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", Constraints);
         api.MapGet("/projects/{projectId:guid}/readiness/link-options", LinkOptions);
         api.MapGet("/projects/{projectId:guid}/readiness/window", Window);
+        api.MapGet("/projects/{projectId:guid}/readiness/window/export", ExportWindow);
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", AddConstraint)
             .WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints/{constraintId:guid}/transition", MoveConstraint)
@@ -637,10 +639,15 @@ public static class ReadinessEndpoints
         return await Linkable(db, projectId, type).Take(500).ToListAsync();
     }
 
-    static async Task<object> Window(Guid projectId, DateOnly? from, DateOnly? to, Access access, HubDb db,
-        SettingsStore settings, TimeProvider clock)
+    public sealed record ReadyOutput(Guid Id, string TargetType, Guid TargetId, string Key, string Name, DateOnly? DueDate,
+        Guid? OwnerId, Guid DisciplineId, string IntendedOutput, string CompletionCriteria, string State);
+
+    /// The readiness window behind both the page and its exports (FR-RDY-07, FR-MDC-06): open constraints needed by the end of
+    /// the window, and work due in it whose current evaluation is Ready.
+    static async Task<(DateOnly First, DateOnly Last, IQueryable<WorkConstraint> Constraints, List<ReadyOutput> Ready)> WindowData(
+        Project project, DateOnly? from, DateOnly? to, HubDb db, SettingsStore settings, TimeProvider clock)
     {
-        var (project, _) = await access.Project(projectId, false);
+        var projectId = project.Id;
         var org = await settings.Get(db);
         var first = from ?? clock.Today(org);
         var defaultDays = org.CoordinationLookaheadWeeks * 7 - 1;
@@ -648,11 +655,9 @@ public static class ReadinessEndpoints
         var last = to ?? first.AddDays(defaultDays);
         Check.That(last >= first && last.DayNumber - first.DayNumber <= 83, "to", "error.invalid");
 
-        var constraintsQuery = db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
+        var constraints = db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
             c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled &&
-            c.NeededBy <= last);
-        var constraintsTotal = await constraintsQuery.CountAsync();
-        var constraints = await constraintsQuery.OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt).Take(500).ToListAsync();
+            c.NeededBy <= last).OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt);
 
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId && t.DeletedAt == null &&
             t.DueDate >= first && t.DueDate <= last && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
@@ -669,26 +674,87 @@ public static class ReadinessEndpoints
         var checks = await db.ReadinessChecks.AsNoTracking().Where(c => c.ProjectId == projectId &&
             assessments.Select(a => a.Id).Contains(c.AssessmentId)).ToListAsync();
         var today = clock.Today(org);
-        var ready = new List<object>();
+        var ready = new List<ReadyOutput>();
         foreach (var assessment in assessments)
         {
             var result = await EvaluateCurrent(db, project, assessment.TargetType, assessment.TargetId, assessment,
                 checks.Where(c => c.AssessmentId == assessment.Id).ToList(), today, clock.GetUtcNow(), settings);
             if (result.State != ReadinessState.Ready) continue;
             if (assessment.TargetType == "Task" && tasks.SingleOrDefault(t => t.Id == assessment.TargetId) is { } task)
-                ready.Add(new { assessment.Id, TargetType = assessment.TargetType, TargetId = task.Id, task.Key, task.Name,
-                    task.DueDate, OwnerId = task.OwnerId, DisciplineId = task.ProjectDisciplineId,
-                    assessment.IntendedOutput, assessment.CompletionCriteria, State = result.State });
+                ready.Add(new(assessment.Id, assessment.TargetType, task.Id, task.Key, task.Name, task.DueDate, task.OwnerId,
+                    task.ProjectDisciplineId, assessment.IntendedOutput, assessment.CompletionCriteria, result.State));
             else if (assessment.TargetType == "Deliverable" && deliverables.SingleOrDefault(d => d.Id == assessment.TargetId) is { } deliverable)
-                ready.Add(new { assessment.Id, TargetType = assessment.TargetType, TargetId = deliverable.Id, deliverable.Key, deliverable.Name,
-                    deliverable.DueDate, OwnerId = deliverable.OwnerId, DisciplineId = deliverable.ProjectDisciplineId,
-                    assessment.IntendedOutput, assessment.CompletionCriteria, State = result.State });
+                ready.Add(new(assessment.Id, assessment.TargetType, deliverable.Id, deliverable.Key, deliverable.Name, deliverable.DueDate,
+                    deliverable.OwnerId, deliverable.ProjectDisciplineId, assessment.IntendedOutput, assessment.CompletionCriteria, result.State));
         }
-        var readyTotal = ready.Count;
-        return new { From = first, To = last, Constraints = constraints, ConstraintsTotal = constraintsTotal,
-            ConstraintsTruncated = constraintsTotal > constraints.Count, ReadyOutputs = ready.Take(500),
+        return (first, last, constraints, [.. ready.OrderBy(r => r.DueDate).ThenBy(r => r.Key)]);
+    }
+
+    static async Task<object> Window(Guid projectId, DateOnly? from, DateOnly? to, Access access, HubDb db,
+        SettingsStore settings, TimeProvider clock)
+    {
+        var (project, _) = await access.Project(projectId, false);
+        var window = await WindowData(project, from, to, db, settings, clock);
+        var constraintsTotal = await window.Constraints.CountAsync();
+        var constraints = await window.Constraints.Take(500).ToListAsync();
+        var readyTotal = window.Ready.Count;
+        return new { From = window.First, To = window.Last, Constraints = constraints, ConstraintsTotal = constraintsTotal,
+            ConstraintsTruncated = constraintsTotal > constraints.Count, ReadyOutputs = window.Ready.Take(500),
             ReadyOutputsTotal = readyTotal, ReadyOutputsTruncated = readyTotal > 500 };
     }
+
+    static readonly Col[] ConstraintColumns = [new("key", "key"), new("work", "item"), new("category", "constraintCategory"),
+        new("description", "description"), new("removalOwner", "removalOwner"), new("affectedOwner", "affectedOwner"),
+        new("neededBy", "neededBy", "date"), new("state", "status"), new("linked", "linkedRecord"), new("sourceUrl", "sourceEvidence")];
+    static readonly Col[] ReadyColumns = [new("key", "key"), new("name", "name"), new("targetType", "type"), new("owner", "owner"),
+        new("discipline", "discipline"), new("dueDate", "due", "date"), new("intendedOutput", "intendedOutput"),
+        new("completionCriteria", "completionCriteria"), new("state", "readiness")];
+
+    /// FR-MDC-06: the page's constraint or ready-output list as a file, from the same window query and permission scope.
+    static async Task<IResult> ExportWindow(Guid projectId, DateOnly? from, DateOnly? to, string list, string? format, HttpContext http,
+        Access access, HubDb db, SettingsStore settings, TimeProvider clock)
+    {
+        var (project, _) = await access.Project(projectId, false);
+        Check.OneOf(list, ["constraints", "ready"], "list");
+        var window = await WindowData(project, from, to, db, settings, clock);
+        var filters = await ListExportEndpoints.Filters(db, http);
+        async Task<Dictionary<Guid, string>> Names(IEnumerable<Guid> ids)
+        {
+            var set = ids.Distinct().ToArray();
+            return await db.Users.AsNoTracking().Where(u => set.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
+        }
+        if (list == "ready")
+        {
+            var users = await Names(window.Ready.Where(r => r.OwnerId != null).Select(r => r.OwnerId!.Value));
+            var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == projectId)
+                .Join(db.Disciplines, pd => pd.DisciplineId, d => d.Id, (pd, d) => new { pd.Id, d.Name }).ToDictionaryAsync(d => d.Id, d => d.Name);
+            var ready = window.Ready.Select(r => new { r.Key, r.Name, r.TargetType, Owner = r.OwnerId is { } o ? users.GetValueOrDefault(o) : null,
+                Discipline = disciplines.GetValueOrDefault(r.DisciplineId), r.DueDate, r.IntendedOutput, r.CompletionCriteria, r.State });
+            return await ExportFile.Send(db, settings, format, Text.Get("export.readyOutputs", project.ProjectNumber), ReadyColumns,
+                JsonSerializer.SerializeToNode(ready, JsonOpts.Web)!.AsArray(), filters, project.Id, $"{project.ProjectNumber}-ready-outputs", clock);
+        }
+        var rows = await window.Constraints.Take(Export.MaxRows + 1).ToListAsync();
+        var people = await Names(rows.SelectMany(r => new[] { r.RemovalOwnerId, r.AffectedOwnerId }));
+        var work = await WorkLabels(db, projectId, rows.Select(r => r.TargetId).ToArray());
+        var linked = await LinkedLabels(db, projectId, rows.Where(r => r.LinkedId != null).Select(r => r.LinkedId!.Value).ToArray());
+        var constraints = rows.Select(c => new { c.Key, Work = work.GetValueOrDefault(c.TargetId), c.Category, c.Description,
+            RemovalOwner = people.GetValueOrDefault(c.RemovalOwnerId), AffectedOwner = people.GetValueOrDefault(c.AffectedOwnerId), c.NeededBy, c.State,
+            Linked = c.LinkedId is { } id ? linked.GetValueOrDefault(id) ?? Text.Get("readiness.linked_unavailable") : null, c.SourceUrl });
+        return await ExportFile.Send(db, settings, format, Text.Get("export.readinessConstraints", project.ProjectNumber), ConstraintColumns,
+            JsonSerializer.SerializeToNode(constraints, JsonOpts.Web)!.AsArray(), filters, project.Id, $"{project.ProjectNumber}-readiness-constraints", clock);
+    }
+
+    /// "KEY Name" for the tasks and deliverables a readiness export lists.
+    public static async Task<Dictionary<Guid, string>> WorkLabels(HubDb db, Guid projectId, Guid[] ids) =>
+        (await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId && ids.Contains(t.Id)).Select(t => new { t.Id, Label = t.Key + " " + t.Name }).ToListAsync())
+        .Concat(await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == projectId && ids.Contains(d.Id)).Select(d => new { d.Id, Label = d.Key + " " + d.Name }).ToListAsync())
+        .ToDictionary(x => x.Id, x => x.Label);
+
+    static async Task<Dictionary<Guid, string>> LinkedLabels(HubDb db, Guid projectId, Guid[] ids) =>
+        (await db.Decisions.AsNoTracking().Where(d => d.ProjectId == projectId && ids.Contains(d.Id)).Select(d => new { d.Id, Label = d.Key + " " + d.Subject + " (" + d.Status + ")" }).ToListAsync())
+        .Concat(await db.Issues.AsNoTracking().Where(i => i.ProjectId == projectId && ids.Contains(i.Id)).Select(i => new { i.Id, Label = i.Key + " " + i.Title + " (" + i.Status + ")" }).ToListAsync())
+        .Concat(await db.Handoffs.AsNoTracking().Where(h => h.ProjectId == projectId && ids.Contains(h.Id)).Select(h => new { h.Id, Label = h.Key + " " + h.Title + " (" + h.Status + ")" }).ToListAsync())
+        .ToDictionary(x => x.Id, x => x.Label);
 
     static Task<Coordination.Result> AddConstraint(Guid projectId, string targetType, Guid targetId,
         ConstraintBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>

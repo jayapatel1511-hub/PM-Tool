@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -15,6 +16,7 @@ public static class WeeklyCommitmentsEndpoints
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/weekly-commitments", List);
+        api.MapGet("/projects/{projectId:guid}/weekly-commitments/export", ExportRows);
         api.MapGet("/projects/{projectId:guid}/weekly-commitments/{id:guid}", Detail);
         api.MapPost("/projects/{projectId:guid}/weekly-commitments/{targetType}/{targetId:guid}", Propose)
             .WithMetadata(new Coordination.AtomicCommand());
@@ -172,6 +174,32 @@ public static class WeeklyCommitmentsEndpoints
             CanCommit = own && proposed && openWeek, CanRecordMet = own && closable,
             CanRecordNotMet = (own || manage) && closable,
             CanWithdraw = own && proposed || (own || manage) && closable };
+    }
+
+    static readonly Col[] ExportColumns = [new("key", "key"), new("work", "item"), new("performer", "performer"),
+        new("weekStart", "weekStart", "date"), new("targetDate", "promiseTargetDate", "date"), new("intendedOutput", "intendedOutput"),
+        new("completionCriteria", "completionCriteria"), new("state", "status"), new("readinessAtCommit", "readinessAtCommit"),
+        new("snapshotAt", "snapshotAt", "datetime"), new("completionEvidenceUrl", "completionEvidence")];
+
+    /// FR-MDC-06: the promises the readiness page shows for a window (those due in it), with their recorded week and snapshot.
+    static async Task<IResult> ExportRows(Guid projectId, DateOnly from, DateOnly to, string? format, HttpContext http, Access access,
+        HubDb db, SettingsStore settings, TimeProvider clock)
+    {
+        var (project, _) = await access.Project(projectId, false);
+        Check.That(to >= from && to.DayNumber - from.DayNumber <= 83, "to", "error.invalid");
+        var rows = await db.OutputCommitments.AsNoTracking().Where(c => c.ProjectId == projectId && c.TargetDate >= from && c.TargetDate <= to)
+            .OrderBy(c => c.WeekStart).ThenBy(c => c.TargetDate).ThenBy(c => c.CreatedAt).Take(Export.MaxRows + 1).ToListAsync();
+        var performers = rows.Select(r => r.PerformerId).Distinct().ToArray();
+        var names = await db.Users.AsNoTracking().Where(u => performers.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
+        var work = await ReadinessEndpoints.WorkLabels(db, projectId, rows.Select(r => r.TargetId).ToArray());
+        var snapshotIds = rows.Where(r => r.SnapshotId != null).Select(r => r.SnapshotId!.Value).Distinct().ToArray();
+        var snapshots = await db.WeeklyPlanSnapshots.AsNoTracking().Where(s => snapshotIds.Contains(s.Id)).ToDictionaryAsync(s => s.Id, s => s.CapturedAt);
+        var data = rows.Select(c => new { c.Key, Work = work.GetValueOrDefault(c.TargetId), Performer = names.GetValueOrDefault(c.PerformerId),
+            c.WeekStart, c.TargetDate, c.IntendedOutput, c.CompletionCriteria, c.State, c.ReadinessAtCommit,
+            SnapshotAt = c.SnapshotId is { } s ? snapshots.GetValueOrDefault(s) : (DateTimeOffset?)null, c.CompletionEvidenceUrl });
+        return await ExportFile.Send(db, settings, format, Text.Get("export.weeklyCommitments", project.ProjectNumber), ExportColumns,
+            JsonSerializer.SerializeToNode(data, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http), project.Id,
+            $"{project.ProjectNumber}-weekly-commitments", clock);
     }
 
     /// One recorded week (`weekStart`) or every recorded week start within `from`..`to`, so weeks recorded on an

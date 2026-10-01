@@ -45,13 +45,13 @@ class BackupHelperTests(unittest.TestCase):
         self.assertEqual(protected.read_bytes(), b'untouched')
 
     def test_verified_dump_is_published(self):
-        with tempfile.TemporaryDirectory(dir='/private/tmp') as name:
+        with tempfile.TemporaryDirectory(dir=Path(tempfile.gettempdir()).resolve()) as name:
             folder = Path(name) / 'backups'
             folder.mkdir(mode=0o700)
             self.run_helper(folder)
 
     def test_replaced_partial_cannot_redirect_validation_or_chown(self):
-        with tempfile.TemporaryDirectory(dir='/private/tmp') as name:
+        with tempfile.TemporaryDirectory(dir=Path(tempfile.gettempdir()).resolve()) as name:
             folder = Path(name) / 'backups'
             folder.mkdir(mode=0o700)
             self.run_helper(folder, attack=True)
@@ -59,7 +59,7 @@ class BackupHelperTests(unittest.TestCase):
 
     def test_parent_symlink_is_refused(self):
         source = (ROOT / 'hosting/pm-tool-review-backup-root.sh').read_text().split("<<'BACKUP_PY'\n", 1)[1].rsplit('BACKUP_PY', 1)[0]
-        with tempfile.TemporaryDirectory(dir='/private/tmp') as name:
+        with tempfile.TemporaryDirectory(dir=Path(tempfile.gettempdir()).resolve()) as name:
             actual = Path(name) / 'actual'
             actual.mkdir(mode=0o700)
             link = Path(name) / 'alias'

@@ -95,3 +95,12 @@ per-project UNION chain. The single-project history/export path delegates to the
 Following unread counts retain their per-project 1,000-row SQL bound. Independent source review found no permission
 regression; focused activity/notification tests passed 15/15, including a new many-followed-project pulse case.
 The corrected commit still requires complete exact-head CI before activation.
+
+
+Corrected-query CI on `4361c716f248b3d387e0a793627d9cd2fe2b3713`
+([36940877076](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/36940877076)) passed **569/569**
+application tests, no skips, with **96.7%** rules branch and **93.6%** service line coverage. It then failed the new
+backup safety harness because `/private/tmp` does not exist on Ubuntu. The harness now resolves the platform's
+standard temporary directory, retaining the no-symlink path defense; backup and pilot checks pass 3/3 each on Mac.
+Full CI remains required on this portability correction. The application/deployment sources are unchanged from
+`4361c71`, which is staged inactive; Jay is SSH-connected and can build without activating the running app.

@@ -271,3 +271,15 @@ FR-MDC-06 export for the readiness page. All three exports produce CSV or XLSX t
 Each export is scoped to the project. A restricted project returns 404 to non-members. The window span stays within 84 days, and an unknown list returns 400. The page has an export menu on the constraint and ready-output sections and an "Export promises" menu in the header. `ExportMenu` gained an optional label. Ready outputs are now ordered by due date and key.
 
 **PASS (local):** `dotnet build Hub.slnx` succeeded. `ReadinessExportTests` passed 1/1: the ready export matched the window's ready output, the constraint export matched the window keys (linked decision label, owner name, cancelled constraint excluded), the promise export kept the in-window promise and excluded the later one, XLSX returned 200, an over-long span and an unknown list returned 400, and a restricted project returned 404 to Read Only. `dotnet test --filter "Readiness|WeeklyCommitment|CoordinationLifecycleSweep|DisciplineCoordination"` passed 91/91. `npm --prefix web run build` and `npm --prefix web run lint` passed.
+
+## Readiness search — 2026-10-01
+
+Global search now has "Readiness constraints" and "Weekly promises" groups, matching by CT/WC key, constraint description or promise output. They use the same visible-project set and ranking as handoffs, reviews and changes, so a restricted project stays hidden from non-members. An exact CT or WC key opens the record: results link to `/projects/{number}/readiness?panel=WorkConstraint:{id}`, which opens the constraint's work in the inspector through a new project-scoped `readiness/constraints/{id}` lookup, or `?panel=OutputCommitment:{id}`, which opens the promise. The backend and SPA key patterns now accept CT and WC.
+
+**PASS (local):** `dotnet build Hub.slnx` succeeded. `ReadinessSearchTests` passed 1/1, and with `SearchReportsTests|NotificationSearchTests` 12/12 passed. The test covers:
+- text hits for one constraint and one promise, with key, project and status;
+- exact lower-case CT and WC keys returning the record type and id;
+- the lookup locating the constraint's work;
+- a non-member of the restricted project getting zero counts, no exact match and 404, while a member still finds the record.
+
+`npm --prefix web run build` and `npm --prefix web run lint` passed (88 warnings before and after; none new). `tools/trace_spec.py --check`: 0 not cited.

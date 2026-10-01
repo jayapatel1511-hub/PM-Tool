@@ -31,8 +31,9 @@ type PackageRef = { id: string; key: string; title: string; status: string }
 type Prerequisite = { id: string; rowVersion: number; packageId: string; reason: string; createdAt: string; createdBy?: string; removedAt?: string
   removedBy?: string; removalReason?: string; package: PackageRef; effective: PackageRef | null; listsOutput: boolean }
 
-export function ReadinessInspector({ projectId, number, options, close, done }: { projectId: string; number: string; options: CoordOptions; close: () => void; done: () => void }) {
-  const [target, setTarget] = useState(''), [creating, setCreating] = useState(false), [editing, setEditing] = useState<Check | null>(null)
+export function ReadinessInspector({ projectId, number, options, initial, close, done }: { projectId: string; number: string; options: CoordOptions
+  initial?: string; close: () => void; done: () => void }) {
+  const [target, setTarget] = useState(initial ?? ''), [creating, setCreating] = useState(false), [editing, setEditing] = useState<Check | null>(null)
   const [raising, setRaising] = useState(false), [moving, setMoving] = useState<{ row: Constraint; state: string } | null>(null)
   const [type, id] = target.split(':'), work = workRef(options, type, id)
   const path = `projects/${projectId}/readiness/${type}/${id}`

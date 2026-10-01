@@ -454,6 +454,7 @@ public static class ReadinessEndpoints
             .WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", Constraints);
         api.MapGet("/projects/{projectId:guid}/readiness/link-options", LinkOptions);
+        api.MapGet("/projects/{projectId:guid}/readiness/constraints/{id:guid}", ConstraintById);
         api.MapGet("/projects/{projectId:guid}/readiness/window", Window);
         api.MapGet("/projects/{projectId:guid}/readiness/window/export", ExportWindow);
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", AddConstraint)
@@ -630,6 +631,14 @@ public static class ReadinessEndpoints
                 c.LinkedType, c.LinkedId, c.CreatedAt, c.CreatedBy,
                 Linked = c.LinkedType is { } type ? await Linkable(db, projectId, type, c.LinkedId).FirstOrDefaultAsync() : null });
         return result;
+    }
+
+    /// Where a constraint found by key or search lives, so its work's inspector can open.
+    static async Task<object> ConstraintById(Guid projectId, Guid id, Access access, HubDb db)
+    {
+        await access.Project(projectId, false);
+        return await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId && c.Id == id)
+            .Select(c => new { c.Id, c.Key, c.TargetType, c.TargetId }).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
     }
 
     static async Task<List<LinkedRecord>> LinkOptions(Guid projectId, string type, Access access, HubDb db)

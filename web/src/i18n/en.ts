@@ -91,6 +91,7 @@ export const en: Record<string, string> = {
   "itemType.ChangeNotice": "Change notice",
   "search.group.reviews": "Reviews",
   "search.group.changes": "Change notices",
+  "search.group.constraints": "Readiness constraints", "search.group.commitments": "Weekly promises",
   "coord.unavailable": "Unavailable or no longer a participant",
   "coord.choose": "Choose…",
   "coord.saved": "Saved",

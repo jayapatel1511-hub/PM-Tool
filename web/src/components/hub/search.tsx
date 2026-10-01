@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Briefcase, CheckSquare, Flag, FileText, MessageSquare, Scale, Search, User, type LucideIcon } from 'lucide-react'
+import { Briefcase, CalendarCheck, CheckSquare, Flag, FileText, Link2Off, MessageSquare, Scale, Search, User, type LucideIcon } from 'lucide-react'
 import { useEffect, useId, useMemo, useState, type RefObject } from 'react'
 import { useNavigate } from 'react-router'
 import { ShellSlots } from '@/app/slots'
@@ -8,7 +8,7 @@ import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
-export const GROUPS = ['projects', 'tasks', 'deliverables', 'milestones', 'decisions', 'handoffs', 'reviews', 'changes', 'comments', 'people'] as const
+export const GROUPS = ['projects', 'tasks', 'deliverables', 'milestones', 'decisions', 'handoffs', 'reviews', 'changes', 'constraints', 'commitments', 'comments', 'people'] as const
 export type Group = (typeof GROUPS)[number]
 export interface SearchResult {
   q: string; exact: { type: string; id?: string | null; projectNumber: string; key: string } | null
@@ -17,10 +17,11 @@ export interface SearchResult {
 export interface Hit { id: string; icon: LucideIcon; key?: string; title: string; sub: string; href: string | null; match?: string | null }
 
 /** Item keys such as 1234-T0042 open the item directly (§18.1, FR-SRCH-02). */
-export const KEY_PATTERN = /^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H)\d+$/i
-const TAB: Record<string, string> = { Task: 'tasks', Deliverable: 'deliverables', Milestone: 'milestones', Decision: 'decisions', Risk: 'risks', Issue: 'issues', Action: 'meetings', Handoff: 'handoffs', ReviewPackage: 'reviews', ChangeNotice: 'changes' }
-const TYPE: Record<string, string> = { tasks: 'Task', deliverables: 'Deliverable', milestones: 'Milestone', decisions: 'Decision', handoffs: 'Handoff', reviews: 'ReviewPackage', changes: 'ChangeNotice' }
-const ICON: Record<Group, LucideIcon> = { projects: Briefcase, tasks: CheckSquare, deliverables: FileText, milestones: Flag, decisions: Scale, comments: MessageSquare, people: User, handoffs: FileText, reviews: FileText, changes: FileText }
+export const KEY_PATTERN = /^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H|CT|WC)\d+$/i
+const TAB: Record<string, string> = { Task: 'tasks', Deliverable: 'deliverables', Milestone: 'milestones', Decision: 'decisions', Risk: 'risks', Issue: 'issues', Action: 'meetings', Handoff: 'handoffs', ReviewPackage: 'reviews', ChangeNotice: 'changes',
+  WorkConstraint: 'readiness', OutputCommitment: 'readiness' }
+const TYPE: Record<string, string> = { tasks: 'Task', deliverables: 'Deliverable', milestones: 'Milestone', decisions: 'Decision', handoffs: 'Handoff', reviews: 'ReviewPackage', changes: 'ChangeNotice', constraints: 'WorkConstraint', commitments: 'OutputCommitment' }
+const ICON: Record<Group, LucideIcon> = { projects: Briefcase, tasks: CheckSquare, deliverables: FileText, milestones: Flag, decisions: Scale, comments: MessageSquare, people: User, handoffs: FileText, reviews: FileText, changes: FileText, constraints: Link2Off, commitments: CalendarCheck }
 
 export function itemHref(type: string, projectNumber: string, id?: string | null) {
   const base = `/projects/${encodeURIComponent(projectNumber)}`

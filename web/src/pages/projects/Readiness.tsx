@@ -58,6 +58,13 @@ export function ReadinessTab() {
     setSp(next, { replace: true })
   }
   const reset = () => setSp(new URLSearchParams(), { replace: true })
+  const clear = (...keys: string[]) => { const next = new URLSearchParams(sp); for (const key of keys) next.delete(key); setSp(next, { replace: true }) }
+  // Search and key links open a promise or a constraint's work inspector: ?panel=OutputCommitment:id or WorkConstraint:id.
+  const panel = sp.get('panel') ?? ''
+  const promiseId = sp.get('promise') ?? (panel.startsWith('OutputCommitment:') ? panel.slice(17) : null)
+  const constraintId = panel.startsWith('WorkConstraint:') ? panel.slice(15) : null
+  const linked = useQuery({ queryKey: ['readiness-constraint', p.id, constraintId], enabled: !!constraintId,
+    queryFn: () => get<{ targetType: string; targetId: string }>(`projects/${p.id}/readiness/constraints/${constraintId}`) })
   const done = () => { setProposing(false); setSnapshotWeek(null); qc.invalidateQueries({ queryKey: ['p', p.id, 'readiness-window'] }); qc.invalidateQueries({ queryKey: ['weekly-promise', p.id] }) }
   const weeks = useMemo(() => {
     const fromValue = dateValue(from)
@@ -108,6 +115,7 @@ export function ReadinessTab() {
       <Button asChild variant="outline" size="sm"><Link to={`${base}/coordination?meeting=1`}><CalendarCheck className="size-4" />{t('readiness.meeting')}</Link></Button></>
     }>
       {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
+      {linked.error && <ErrorBanner error={linked.error} />}
       {filters}
       <div className="grid gap-4 md:grid-cols-2">
         <Section title={t('readiness.constraints')} id="constraints" count={data.constraintsTotal}
@@ -149,10 +157,12 @@ export function ReadinessTab() {
       <p className="text-xs text-muted-foreground"><ExternalLink className="mr-1 inline size-3" aria-hidden />{t('readiness.sourceNote')}</p>
       {proposing && options.data && <ProposePromise projectId={p.id} options={options.data} week={weeks[0]} day={day}
         complete={p.status === 'Complete'} close={() => setProposing(false)} done={done} />}
-      {inspecting && options.data && <ReadinessInspector projectId={p.id} number={p.projectNumber} options={options.data} close={() => setInspecting(false)} done={done} />}
+      {(inspecting || linked.data) && options.data && <ReadinessInspector projectId={p.id} number={p.projectNumber} options={options.data}
+        initial={linked.data && !inspecting ? `${linked.data.targetType}:${linked.data.targetId}` : undefined}
+        close={() => { setInspecting(false); clear('panel') }} done={done} />}
       {snapshotWeek && <SnapshotForm projectId={p.id} week={snapshotWeek} close={() => setSnapshotWeek(null)} done={done} />}
-      {sp.get('promise') && options.data && <PromiseDetail projectId={p.id} id={sp.get('promise')!} options={options.data}
-        close={() => set('promise', '')} done={done} />}
+      {promiseId && options.data && <PromiseDetail projectId={p.id} id={promiseId} options={options.data}
+        close={() => clear('promise', 'panel')} done={done} />}
     </Page>
   )
 }

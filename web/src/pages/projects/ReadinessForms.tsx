@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ErrorBanner, Field, Loading } from '@/components/hub/common'
 import { StatusPill } from '@/components/hub/pills'
 import { ApiError, get } from '@/lib/api'
+import { itemHref } from '@/components/hub/search'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { CommandForm, SelectField, personName, workChoices, workRef, type CoordOptions, type WorkRef } from './CoordinationForms'
@@ -21,8 +22,11 @@ type BasisDetail = { entry: { key: string; title: string }; versions: { version:
   uses: { versionId: string; targetType: string; targetId: string; isCurrent: boolean }[];
   dispositions: { versionId: string; ownerId: string; approvedBy: string; scope: string; expiresOn: string }[] }
 type Assumption = { key: string; title: string; version: BasisVersion; eligible: boolean; disposedUntil?: string }
-type Constraint = { id: string; rowVersion: number; category: string; description: string; removalOwnerId: string; affectedOwnerId: string;
-  neededBy: string; sourceUrl: string; state: string; resolutionEvidenceUrl?: string; verifiedBy?: string; verifiedAt?: string }
+type LinkedRecord = { type: string; id: string; key: string; title: string; status: string }
+type Constraint = { id: string; key: string; rowVersion: number; category: string; description: string; removalOwnerId: string; affectedOwnerId: string;
+  neededBy: string; sourceUrl: string; state: string; resolutionEvidenceUrl?: string; verifiedBy?: string; verifiedAt?: string
+  linkedType?: string; linked?: LinkedRecord | null }
+const LINK_TYPES = ['Decision', 'Issue', 'Handoff']
 type PackageRef = { id: string; key: string; title: string; status: string }
 type Prerequisite = { id: string; rowVersion: number; packageId: string; reason: string; createdAt: string; createdBy?: string; removedAt?: string
   removedBy?: string; removalReason?: string; package: PackageRef; effective: PackageRef | null; listsOutput: boolean }
@@ -59,7 +63,7 @@ export function ReadinessInspector({ projectId, number, options, close, done }: 
   if (creating && work) return <CreateAssessment path={path} rowVersion={work.rowVersion} close={() => setCreating(false)} done={changed} />
   if (editing && q.data) return <Applicability path={`${path}/checks/${encodeURIComponent(editing.code)}/applicability`} check={editing}
     assessmentVersion={q.data.assessment.rowVersion} close={() => setEditing(null)} done={changed} />
-  if (raising && work) return <RaiseConstraint path={`${path}/constraints`} work={work} options={options} close={() => setRaising(false)} done={changed} />
+  if (raising && work) return <RaiseConstraint path={`${path}/constraints`} projectId={projectId} work={work} options={options} close={() => setRaising(false)} done={changed} />
   if (excepting && q.data && work) return <ApproveException path={`${path}/exceptions`} assessment={q.data.assessment} work={work} options={options}
     candidates={assumptions.data?.filter(a => a.eligible) ?? []} close={() => setExcepting(false)} done={changed} />
   if (linking && work) return <LinkPrerequisite path={`${path}/submission-prerequisites`} projectId={projectId} work={work}
@@ -114,7 +118,10 @@ export function ReadinessInspector({ projectId, number, options, close, done }: 
       {(canCreate || canAssess) && <Button size="sm" variant="outline" onClick={() => setRaising(true)}>{t('readiness.raiseConstraint')}</Button>}
       {constraints.isPending ? <Loading rows={3} /> : constraints.error ? <ErrorBanner error={constraints.error} retry={() => constraints.refetch()} /> : constraints.data?.length === 0 ? <p>{t('readiness.noWorkConstraints')}</p> :
         <ul className="space-y-2">{constraints.data?.map(c => <li key={c.id} className="space-y-2 rounded border p-3">
-          <StatusPill status={c.state} /><p className="font-medium">{c.description}</p><p>{tv(c.category)} · {fmtDate(c.neededBy)}</p>
+          <StatusPill status={c.state} /><p className="font-medium"><span className="mr-2 font-mono text-xs text-muted-foreground">{c.key}</span>{c.description}</p><p>{tv(c.category)} · {fmtDate(c.neededBy)}</p>
+          {c.linkedType && <p className="flex flex-wrap items-center gap-2">{t('readiness.linkedRecord')}: {c.linked
+            ? <><Link className="text-primary underline" to={itemHref(c.linked.type, number, c.linked.id)}>{tv(c.linked.type)} {c.linked.key} · {c.linked.title}</Link><StatusPill status={c.linked.status} /></>
+            : t('coord.unavailable')}</p>}
           <p>{t('readiness.removalOwner')}: {personName(options, c.removalOwnerId)}</p><p>{t('readiness.affectedOwner')}: {personName(options, c.affectedOwnerId)}</p>
           <a className="text-primary underline" href={c.sourceUrl} target="_blank" rel="noopener noreferrer">{t('readiness.constraintSource')}</a>
           {c.resolutionEvidenceUrl && <p><a className="text-primary underline" href={c.resolutionEvidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a></p>}
@@ -167,15 +174,24 @@ function RemovePrerequisite({ path, row, close, done }: { path: string; row: Pre
   </CommandForm>
 }
 
-function RaiseConstraint({ path, work, options, close, done }: { path: string; work: WorkRef; options: CoordOptions; close: () => void; done: () => void }) {
+function RaiseConstraint({ path, projectId, work, options, close, done }: { path: string; projectId: string; work: WorkRef; options: CoordOptions; close: () => void; done: () => void }) {
   const [category, setCategory] = useState(''), [description, setDescription] = useState(''), [removalOwnerId, setOwner] = useState(''), [neededBy, setNeeded] = useState(today()), [sourceUrl, setSource] = useState('')
+  const [linkedType, setLinkedType] = useState(''), [linkedId, setLinkedId] = useState('')
+  const records = useQuery({ queryKey: ['readiness-link-options', projectId, linkedType], enabled: !!linkedType,
+    queryFn: () => get<LinkedRecord[]>(`projects/${projectId}/readiness/link-options?type=${linkedType}`) })
   return <CommandForm path={path} title={t('readiness.raiseConstraint')} hint={t('readiness.constraintHint')} onClose={close} onDone={done}
-    payload={() => ({ targetRowVersion: work.rowVersion, category, description, removalOwnerId, neededBy, sourceUrl })}>
+    payload={() => ({ targetRowVersion: work.rowVersion, category, description, removalOwnerId, neededBy, sourceUrl,
+      linkedType: linkedType || null, linkedId: linkedType ? linkedId : null })}>
     <SelectField label={t('readiness.category')} value={category} onChange={setCategory} choices={['Handoff', 'Decision', 'Basis', 'Capacity', 'Review', 'Scope', 'Other'].map(v => ({ value: v, label: tv(v) }))} />
     <Field label={t('readiness.constraintDescription')} htmlFor="constraint-description"><Textarea id="constraint-description" required maxLength={2000} value={description} onChange={e => setDescription(e.target.value)} /></Field>
     <SelectField label={t('readiness.removalOwner')} value={removalOwnerId} onChange={setOwner} choices={options.people.filter(p => p.id !== work.ownerId).map(p => ({ value: p.id, label: p.displayName }))} />
     <Field label={t('readiness.neededBy')} htmlFor="constraint-needed"><Input id="constraint-needed" required type="date" value={neededBy} onChange={e => setNeeded(e.target.value)} /></Field>
     <Field label={t('readiness.constraintSource')} htmlFor="constraint-source"><Input id="constraint-source" required type="url" value={sourceUrl} onChange={e => setSource(e.target.value)} /></Field>
+    <SelectField label={t('readiness.linkedType')} value={linkedType} onChange={v => { setLinkedType(v); setLinkedId('') }} required={false}
+      choices={LINK_TYPES.map(v => ({ value: v, label: tv(v) }))} />
+    {linkedType && (records.isPending ? <Loading rows={1} /> : records.error ? <ErrorBanner error={records.error} retry={() => records.refetch()} />
+      : <SelectField label={t('readiness.linkedRecord')} value={linkedId} onChange={setLinkedId}
+        choices={(records.data ?? []).map(r => ({ value: r.id, label: `${r.key} · ${r.title} · ${tv(r.status)}` }))} />)}
   </CommandForm>
 }
 

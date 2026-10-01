@@ -16,6 +16,7 @@ public static class Keys
         ["submission"] = ("next_submission_seq", "SUB", 3),
         ["basis"] = ("next_basis_seq", "B", 3),
         ["handoff"] = ("next_handoff_seq", "H", 3),
+        ["constraint"] = ("next_constraint_seq", "CT", 3), ["commitment"] = ("next_commitment_seq", "WC", 3), // §10.8
     };
 
     public static async Task<(int Seq, string Key)> Next(HubDb db, Guid projectId, string projectNumber, string kind)

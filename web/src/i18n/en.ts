@@ -878,6 +878,7 @@ export const en: Record<string, string> = {
   'readiness.recordApplicability': 'Record applicability', 'readiness.applicabilityHint': 'Record why this input is required or not applicable. Current linked sources can still require an input or block readiness. The production owner is always required.',
   'readiness.propose': 'Propose promise', 'readiness.proposeHint': 'A proposal stays Proposed until the named performer signs it. Signing requires current Ready inputs and no open constraint.',
   'readiness.work': 'Linked work', 'readiness.performer': 'Performer', 'readiness.weekStart': 'Week start', 'readiness.prerequisites': 'Prerequisite submissions',
+  'readiness.linkedType': 'Existing record this constraint represents (optional)', 'readiness.linkedRecord': 'Linked record',
   'readiness.prerequisitesHint': 'The Submission Gate passes only when every linked package is Issued. A superseded package is followed to the package that replaced it. A package that lists this output cannot gate it, and Proceed under Assumption cannot override the gate.',
   'readiness.addPrerequisite': 'Link prerequisite package', 'readiness.removePrerequisite': 'Remove link', 'readiness.prerequisitePackage': 'Submission package',
   'readiness.noPrerequisites': 'No prerequisite package is linked. Without a link, the gate stays unassessed unless a lead records a reasoned Not applicable.',
@@ -1068,7 +1069,7 @@ export const en: Record<string, string> = {
   'board.chooseTitle': 'Which review status for {key}?', 'board.chooseBody': 'The Review lane holds three statuses; choose the one that applies.',
   'board.aPick': 'Picked up {name}.', 'board.aOver': '{name} is over {lane}.', 'board.aDrop': 'Dropped {name} on {lane}.', 'board.aCancel': 'Stopped moving {name}.',
   'action.CollaboratorAdded': 'Collaborator added', 'action.CollaboratorRemoved': 'Collaborator removed', 'action.SnoozeExpired': 'Snooze ended',
-  'value.Client': 'Client', 'value.External Party': 'External Party', 'value.Internal': 'Internal', 'value.Decision': 'Decision', 'value.Information': 'Information', 'value.Other': 'Other',
+  'value.Client': 'Client', 'value.External Party': 'External Party', 'value.Internal': 'Internal', 'value.Decision': 'Decision', 'value.Issue': 'Issue', 'value.Handoff': 'Handoff', 'value.Information': 'Information', 'value.Other': 'Other',
   // Health, attention and rule values (packet 005)
   'health.whyTitle': 'Why is health {health}?', 'health.override': 'Override', 'health.changeOverride': 'Change override', 'health.overrideTitle': 'Report a different health',
   'health.overrideBody': 'Computed health is {computed}. Your reported colour is shown beside it, with your note, until it expires.',

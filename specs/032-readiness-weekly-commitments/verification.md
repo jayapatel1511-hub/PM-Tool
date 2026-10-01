@@ -244,3 +244,20 @@ A start becomes necessary only if a reviewer carries a change assessment through
 - Deployed authentication.
 - Email delivery of the new event when a user enables it (the queueing was tested; the delivery job was not run).
 - Complete packet acceptance.
+
+
+## Constraint links and readable keys — 2026-10-01
+
+FR-RDY-03 asks for links to existing decisions, issues and handoffs, and §10.8 says an "existing issue/decision may be linked". A constraint can now record one optional typed link (`linkedType` plus `linkedId`, either Decision, Issue or Handoff) to a same-project, non-deleted record. The link is checked inside the same retry-safe command, and a database check enforces both-or-neither and the type list. The inspector form offers the project's records from a new read endpoint, `readiness/link-options` (project read access, up to 500 per type). The constraint list shows the linked record's key, title and current status, with navigation to it; a deleted or missing record shows as unavailable. The linked record's outcome is displayed only. The spec says the affected owner verifies removal (AC-RDY-02), so nothing proposes or verifies automatically. Source evidence stays required.
+
+§10.8 also requires readable per-project keys: constraints now take `CT` keys and promises `WC` keys from project counters inside the command transaction. Migration `ReadinessConstraintLinksAndKeys` is additive. It numbers existing rows per project in creation order (padded to three digits, never truncated) and starts each counter after the highest number.
+
+**PASS (local):** `dotnet build Hub.slnx` succeeded. `dotnet test --filter "Readiness|WeeklyCommitment|CoordinationLifecycleSweep"` passed 90/90, including the new `ReadinessConstraintLinksTests` 2/2. The new tests cover:
+- refused links (foreign, missing id, unknown type, deleted issue);
+- a retry neither duplicating nor taking a key, giving keys CT001/CT002;
+- Read Only users seeing the linked decision;
+- a decided decision showing as Decided while the constraint stays Open;
+- link options limited to the project, with an unknown type refused (400) and a restricted project refused for Read Only (404);
+- promise keys WC001/WC002 with a refused proposal taking no key.
+
+**Backfill on my own database:** `hub_agent_week` (API on 127.0.0.1:5093) assigned DEMO-101-CT001/CT002 and WC001 at runtime. I then ran `dotnet ef database update` back to `20261001212053_ReadinessSubmissionPrerequisite`: the columns were dropped and the rows kept. Re-applying restored the same keys in creation order, set the counters to 3 and 2 (1 for projects without rows), and the commitment history guard allowed the key update on a Committed row (inside a transaction that was rolled back). `npm --prefix web run build` and `npm --prefix web run lint` passed.

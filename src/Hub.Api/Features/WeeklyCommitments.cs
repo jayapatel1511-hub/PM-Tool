@@ -53,6 +53,7 @@ public static class WeeklyCommitmentsEndpoints
                     TargetId = target.Id, PerformerId = target.OwnerId, WeekStart = body.WeekStart,
                     TargetDate = body.TargetDate, IntendedOutput = Check.Required(body.IntendedOutput, "intendedOutput", 2000),
                     CompletionCriteria = Check.Required(body.CompletionCriteria, "completionCriteria", 2000) };
+                (row.Seq, row.Key) = await Keys.Next(db, project.Id, project.ProjectNumber, "commitment");
                 db.OutputCommitments.Add(row);
                 db.Audit.Note(row, reason: Check.Optional(body.Reason, "reason"));
                 // A chair's proposal stays Proposed until the performer confirms (AC-RDY-05); the performer's own proposal sends nothing.

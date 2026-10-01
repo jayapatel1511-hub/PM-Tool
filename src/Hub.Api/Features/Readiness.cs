@@ -11,7 +11,7 @@ public static class ReadinessEndpoints
     public sealed record ApplicabilityBody(Guid RequestId, int AssessmentRowVersion, int CheckRowVersion,
         bool Applies, string Reason, string? EvidenceUrl);
     public sealed record ConstraintBody(Guid RequestId, int TargetRowVersion, string Category, string Description,
-        Guid RemovalOwnerId, DateOnly NeededBy, string SourceUrl);
+        Guid RemovalOwnerId, DateOnly NeededBy, string SourceUrl, string? LinkedType = null, Guid? LinkedId = null);
     public sealed record ConstraintMoveBody(Guid RequestId, int RowVersion, string ToState, string Reason,
         string? EvidenceUrl);
     public sealed record ExceptionBody(Guid RequestId, int AssessmentRowVersion, Guid BasisVersionId,
@@ -19,6 +19,20 @@ public static class ReadinessEndpoints
     public sealed record PrerequisiteBody(Guid RequestId, int TargetRowVersion, Guid PackageId, string Reason);
     public sealed record PrerequisiteRemoveBody(Guid RequestId, int RowVersion, string Reason);
     static readonly string[] ConstraintCategories = ["Handoff", "Decision", "Basis", "Capacity", "Review", "Scope", "Other"];
+    static readonly string[] LinkTypes = [ItemType.Decision, ItemType.Issue, ItemType.Handoff];
+    public sealed record LinkedRecord(string Type, Guid Id, string Key, string Title, string Status);
+
+    // FR-RDY-03: a constraint points at the same-project decision, issue or handoff that already represents it instead of
+    // duplicating it. Deleted records drop out through the soft-deletion query filters, so a stale link reads as unavailable.
+    static IQueryable<LinkedRecord> Linkable(HubDb db, Guid projectId, string type, Guid? id = null) => type switch
+    {
+        ItemType.Decision => db.Decisions.AsNoTracking().Where(d => d.ProjectId == projectId && (id == null || d.Id == id))
+            .OrderByDescending(d => d.Seq).Select(d => new LinkedRecord(ItemType.Decision, d.Id, d.Key, d.Subject, d.Status)),
+        ItemType.Issue => db.Issues.AsNoTracking().Where(i => i.ProjectId == projectId && (id == null || i.Id == id))
+            .OrderByDescending(i => i.Seq).Select(i => new LinkedRecord(ItemType.Issue, i.Id, i.Key, i.Title, i.Status)),
+        _ => db.Handoffs.AsNoTracking().Where(h => h.ProjectId == projectId && (id == null || h.Id == id))
+            .OrderByDescending(h => h.Seq).Select(h => new LinkedRecord(ItemType.Handoff, h.Id, h.Key, h.Title, h.Status)),
+    };
 
     // Source-backed checks are recomputed at read/command time. Manual applicability remains useful for
     // checks without a canonical source, but it cannot keep a linked source in a stale Ready state.
@@ -438,6 +452,7 @@ public static class ReadinessEndpoints
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/exceptions", ApproveException)
             .WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", Constraints);
+        api.MapGet("/projects/{projectId:guid}/readiness/link-options", LinkOptions);
         api.MapGet("/projects/{projectId:guid}/readiness/window", Window);
         api.MapPost("/projects/{projectId:guid}/readiness/{targetType}/{targetId:guid}/constraints", AddConstraint)
             .WithMetadata(new Coordination.AtomicCommand());
@@ -604,8 +619,22 @@ public static class ReadinessEndpoints
     {
         var (project, _) = await access.Project(projectId, false);
         await Coordination.Target(db, project, targetType, targetId, false);
-        return await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
+        var rows = await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
             c.TargetType == targetType && c.TargetId == targetId).OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt).ToListAsync();
+        var result = new List<object>();
+        foreach (var c in rows)
+            result.Add(new { c.Id, c.Key, c.RowVersion, c.TargetType, c.TargetId, c.Category, c.Description, c.RemovalOwnerId,
+                c.AffectedOwnerId, c.NeededBy, c.SourceUrl, c.State, c.ResolutionEvidenceUrl, c.VerifiedBy, c.VerifiedAt,
+                c.LinkedType, c.LinkedId, c.CreatedAt, c.CreatedBy,
+                Linked = c.LinkedType is { } type ? await Linkable(db, projectId, type, c.LinkedId).FirstOrDefaultAsync() : null });
+        return result;
+    }
+
+    static async Task<List<LinkedRecord>> LinkOptions(Guid projectId, string type, Access access, HubDb db)
+    {
+        await access.Project(projectId, false);
+        Check.OneOf(type, LinkTypes, "type");
+        return await Linkable(db, projectId, type).Take(500).ToListAsync();
     }
 
     static async Task<object> Window(Guid projectId, DateOnly? from, DateOnly? to, Access access, HubDb db,
@@ -674,10 +703,18 @@ public static class ReadinessEndpoints
                 await Coordination.Person(db, project, body.RemovalOwnerId, "removalOwnerId");
                 Check.That(body.RemovalOwnerId != target.OwnerId, "removalOwnerId", "coord.separation");
                 Check.OneOf(body.Category, ConstraintCategories, "category");
+                Check.That(body.LinkedType is null == body.LinkedId is null, "linkedId", "error.required");
+                if (body.LinkedType is { } linkedType)
+                {
+                    Check.OneOf(linkedType, LinkTypes, "linkedType");
+                    Check.That(await Linkable(db, project.Id, linkedType, body.LinkedId).AnyAsync(), "linkedId", "coord.reference");
+                }
                 var row = new WorkConstraint { ProjectId = project.Id, TargetType = target.Type, TargetId = target.Id,
                     Category = body.Category, Description = Check.Required(body.Description, "description", 2000),
                     RemovalOwnerId = body.RemovalOwnerId, AffectedOwnerId = target.OwnerId,
-                    NeededBy = body.NeededBy, SourceUrl = Coordination.Url(body.SourceUrl) };
+                    NeededBy = body.NeededBy, SourceUrl = Coordination.Url(body.SourceUrl),
+                    LinkedType = body.LinkedType, LinkedId = body.LinkedId };
+                (row.Seq, row.Key) = await Keys.Next(db, project.Id, project.ProjectNumber, "constraint");
                 db.WorkConstraints.Add(row);
                 db.Audit.Note(row);
                 await NotifyConstraint(notify, project, target, row, NotificationEvents.ConstraintAction, [row.RemovalOwnerId],

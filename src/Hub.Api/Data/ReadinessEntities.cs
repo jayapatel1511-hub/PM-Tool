@@ -28,6 +28,8 @@ public class ReadinessCheckRecord : CoordinationRecord
 
 public class WorkConstraint : CoordinationRecord
 {
+    public int Seq { get; set; }
+    public string Key { get; set; } = "";
     public string TargetType { get; set; } = "";
     public Guid TargetId { get; set; }
     public string Category { get; set; } = "";
@@ -40,7 +42,11 @@ public class WorkConstraint : CoordinationRecord
     public string? ResolutionEvidenceUrl { get; set; }
     public Guid? VerifiedBy { get; set; }
     public DateTimeOffset? VerifiedAt { get; set; }
+    /// FR-RDY-03: the existing decision, issue or handoff that already represents this constraint, when there is one.
+    public string? LinkedType { get; set; }
+    public Guid? LinkedId { get; set; }
     public override string AuditType => "WorkConstraint";
+    public override string? AuditKey => Key;
     public override string? AuditName => Description;
 }
 
@@ -81,6 +87,8 @@ public class WeeklyPlanSnapshot : CoordinationRecord
 
 public class OutputCommitment : CoordinationRecord
 {
+    public int Seq { get; set; }
+    public string Key { get; set; } = "";
     public Guid? SnapshotId { get; set; }
     public string TargetType { get; set; } = "";
     public Guid TargetId { get; set; }
@@ -93,6 +101,7 @@ public class OutputCommitment : CoordinationRecord
     public string State { get; set; } = CommitmentState.Proposed;
     public string? CompletionEvidenceUrl { get; set; }
     public override string AuditType => "OutputCommitment";
+    public override string? AuditKey => Key;
     public override string? AuditName => IntendedOutput;
 }
 

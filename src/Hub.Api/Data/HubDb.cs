@@ -574,16 +574,21 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.Entity<WorkConstraint>(e =>
         {
             e.HasIndex(x => new { x.ProjectId, x.TargetType, x.TargetId, x.State });
+            e.HasIndex(x => new { x.ProjectId, x.Seq }).IsUnique();
+            e.HasIndex(x => x.Key);
             e.ToTable(t =>
             {
                 t.HasCheckConstraint("ck_work_constraint_target", "target_type IN ('Task', 'Deliverable')");
                 t.HasCheckConstraint("ck_work_constraint_state", $"state IN ({In(ConstraintState.All)})");
+                t.HasCheckConstraint("ck_work_constraint_link", "(linked_type IS NULL) = (linked_id IS NULL) AND (linked_type IS NULL OR linked_type IN ('Decision', 'Issue', 'Handoff'))");
             });
         });
         mb.Entity<WeeklyPlanSnapshot>(e => e.HasIndex(x => new { x.ProjectId, x.WeekStart }).IsUnique());
         mb.Entity<OutputCommitment>(e =>
         {
             e.HasIndex(x => new { x.ProjectId, x.WeekStart, x.PerformerId });
+            e.HasIndex(x => new { x.ProjectId, x.Seq }).IsUnique();
+            e.HasIndex(x => x.Key);
             e.ToTable(t =>
             {
                 t.HasCheckConstraint("ck_commitment_target", "target_type IN ('Task', 'Deliverable')");

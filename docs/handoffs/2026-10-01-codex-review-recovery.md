@@ -50,7 +50,7 @@ check GitHub rather than treating this historical link as exact-head evidence.
 | Full packet acceptance | UNPROVEN | Remaining populated/deployed/manual acceptance is in packet verification records |
 | Draft PR #13 | Open, unmerged | Preserve draft until acceptance/review gates warrant changing it |
 | Review activation | BLOCKED | SSH reachable; `current` remains `releases/1c59e334b42822510dd0181f83e5dadc7bbe8282`; Docker requires Jay's interactive sudo |
-| Public review hostname | BLOCKED | `pm.engcalchub.com` has no DNS answer; `pm-tool-tunnel.service` is inactive |
+| Public review hostname | BLOCKED | `pm.engcalchub.com` has no DNS answer; `pm-tool-tunnel.service` is not installed (unit inventory rechecked) |
 | Backup timer / off-host schedule | UNPROVEN / FAIL | Root helper code hardened; installed timer, automatic run and retrieval still need proof; prior off-host job failed |
 | Company pilot | Prepared, not accepted | Separate runtime initializer/volume/stack; real users, approvals, backup/operations and acceptance remain open |
 | Production | Prepared, not deployed | Bicep main + all 4 parameter files compile; network/hostname/mail/monitoring contracts added; company inputs and live Azure gates remain blocked |
@@ -75,3 +75,23 @@ Only after those gates pass, activate the dedicated user tunnel and DNS route an
 For company pilot preparation use `docs/pilot/pilot-readiness.md` and the separate initializer; never copy review DB,
 verifiers or key ring into the pilot or production. Azure template/slot preparation does not prove identity grants,
 network access, certificate binding, mail delivery, what-if, recovery or cutover. Keep those gates explicit.
+
+
+## Final CI failure caught before activation (23:19 UTC)
+
+The exact-head run for `640089033549c7dc9a7e0ed591d8b703f26d7407`
+([36939454729](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/36939454729)) failed:
+567 passed, one failed, zero skipped. The initial notification pulse hit Npgsql's read timeout.
+Local 568/568 evidence above is retained but does not override this CI failure. Activation is withheld while the
+Following activity query is investigated and corrected; no timeout increase or ignored failure is accepted.
+
+That source tree was transferred into an inactive homedev release directory while CI ran. The shared runtime/data
+links remain in place and `current` still points to `1c59e334b42822510dd0181f83e5dadc7bbe8282`; its private health
+probe passed. Jay is available at his laptop for the eventual interactive sudo step. The dedicated tunnel config
+validated, but the user unit inventory contains no `pm-tool-tunnel.service`; installation remains after private gates.
+
+The correction is committed as `0a61df2`: a set-based multi-project source-privacy query replaces the growing
+per-project UNION chain. The single-project history/export path delegates to the same predicate after its 404 check.
+Following unread counts retain their per-project 1,000-row SQL bound. Independent source review found no permission
+regression; focused activity/notification tests passed 15/15, including a new many-followed-project pulse case.
+The corrected commit still requires complete exact-head CI before activation.

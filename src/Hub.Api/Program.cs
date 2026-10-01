@@ -51,6 +51,8 @@ if (!string.IsNullOrEmpty(cfg["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
     builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 builder.AddHubAuth();
+var tunnelProxy = builder.Environment.IsStaging() && cfg.GetValue<bool>("Hosting:LocalTunnelProxy")
+    && IPAddress.TryParse(cfg["Hosting:LocalTunnelProxyAddress"], out var configuredTunnelProxy) ? configuredTunnelProxy : null;
 builder.Services.AddRateLimiter(o =>
 {
     // §21: a per-user limit protects the API from runaway clients.
@@ -62,10 +64,8 @@ builder.Services.AddRateLimiter(o =>
         return ValueTask.CompletedTask;
     };
     o.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
-        RateLimitPartition.GetFixedWindowLimiter(ctx.User.FindFirst("oid")?.Value ?? ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+        RateLimitPartition.GetFixedWindowLimiter(ctx.User.FindFirst("oid")?.Value ?? AuthSetup.ClientKey(ctx, tunnelProxy),
             _ => new FixedWindowRateLimiterOptions { PermitLimit = int.TryParse(cfg["RateLimit:PerMinute"], out var n) ? n : 600, Window = TimeSpan.FromMinutes(1) }));
-    var tunnelProxy = builder.Environment.IsStaging() && cfg.GetValue<bool>("Hosting:LocalTunnelProxy")
-        && IPAddress.TryParse(cfg["Hosting:LocalTunnelProxyAddress"], out var tp) ? tp : null;
     o.AddPolicy("local-sign-in", ctx => RateLimitPartition.GetFixedWindowLimiter(AuthSetup.ClientKey(ctx, tunnelProxy),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(1) }));
 });
@@ -134,9 +134,10 @@ if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
 {
     api.MapPost("/auth/local/sign-in", async (LocalPasswordStore store, HubDb db, HttpContext ctx, LocalSignIn input) =>
     {
-        var id = input.UserName is { Length: > 0 } && input.Password is { Length: > 0 } ? store.Verify(input.UserName, input.Password) : null;
+        string? stamp = null;
+        var id = input.UserName is { Length: > 0 } && input.Password is { Length: > 0 } ? store.Verify(input.UserName, input.Password, out stamp) : null;
         if (id is null || !await db.Users.AnyAsync(u => u.Id == id && u.IsActive)) return Results.Unauthorized();
-        var claims = new[] { new Claim("oid", $"local:{id}"), new Claim("local_user_id", id.ToString()!) };
+        var claims = new[] { new Claim("oid", $"local:{id}"), new Claim("local_user_id", id.ToString()!), new Claim(AuthSetup.StampClaim, stamp!) };
         await ctx.SignInAsync(AuthSetup.LocalScheme, new ClaimsPrincipal(new ClaimsIdentity(claims, AuthSetup.LocalScheme)));
         return Results.NoContent();
     }).AllowAnonymous().RequireRateLimiting("local-sign-in");
@@ -173,6 +174,7 @@ if (cfg["Db:Migrate"] != "false")
     }
     if (reviewDemo)
         await ReviewDemoSeed.Seed(db, scope.ServiceProvider.GetRequiredService<TimeProvider>());
+    await AuthSetup.BootstrapAdmins(db, cfg, app.Environment, app.Logger);
 }
 
 app.Run();

@@ -66,7 +66,76 @@ public sealed class LocalPasswordTests
         Assert.Equal("cf:203.0.113.7", AuthSetup.ClientKey(Req("::ffff:172.30.245.1", "203.0.113.7"), proxy));
         Assert.NotEqual(AuthSetup.ClientKey(Req("172.30.245.1", "203.0.113.7"), proxy), AuthSetup.ClientKey(Req("172.30.245.1", "198.51.100.9"), proxy));
         Assert.Equal("10.0.0.5", AuthSetup.ClientKey(Req("10.0.0.5", "203.0.113.7"), proxy)); // spoofed header from an untrusted hop
+        Assert.Equal("172.30.245.1", AuthSetup.ClientKey(Req("172.30.245.1", "not-an-ip"), proxy));
+        var multiple = Req("172.30.245.1", "203.0.113.7"); multiple.Request.Headers["CF-Connecting-IP"] = new[] { "203.0.113.7", "198.51.100.9" };
+        Assert.Equal("172.30.245.1", AuthSetup.ClientKey(multiple, proxy));
         Assert.Equal("172.30.245.1", AuthSetup.ClientKey(Req("172.30.245.1", "203.0.113.7"), null)); // tunnel mode off
         Assert.Equal("172.30.245.1", AuthSetup.ClientKey(Req("172.30.245.1", null), proxy));
+    }
+
+    [Fact]
+    public void Bootstrap_admin_list_reads_email_and_name_pairs_and_refuses_typos()
+    {
+        Assert.Equal(new[] { ("a@x.test", "Ann Admin"), ("b@x.test", "Bo") },
+            AuthSetup.ParseBootstrapAdmins(" a@x.test | Ann Admin ; b@x.test|Bo; A@X.TEST|Repeated ;"));
+        Assert.Empty(AuthSetup.ParseBootstrapAdmins(" ; "));
+        foreach (var typo in new[] { "a@x.test", "a@x.test|", "no-at-sign|Name", "a@@x.test|Name", "a b@x.test|Name", "@x.test|Name", "a@|Name", "a@x.test|Name|Extra" })
+            Assert.Throws<InvalidOperationException>(() => AuthSetup.ParseBootstrapAdmins(typo));
+    }
+
+    static object Login(Guid id, string userName, string password)
+    {
+        var salt = RandomNumberGenerator.GetBytes(16);
+        var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, LocalPasswordStore.Iterations, HashAlgorithmName.SHA256, 32);
+        return new { userId = id.ToString(), userName, salt = Convert.ToHexStringLower(salt), hash = Convert.ToHexStringLower(hash) };
+    }
+
+    /// An operator edit; the clock step makes the change certain on file systems with coarse timestamps.
+    static void Rewrite(string path, string json)
+    {
+        var before = File.GetLastWriteTimeUtc(path);
+        File.WriteAllText(path, json);
+        File.SetLastWriteTimeUtc(path, before.AddSeconds(1));
+    }
+
+    [Fact]
+    public void Changed_verifier_file_is_reread_and_rotation_or_removal_moves_only_that_persons_stamp()
+    {
+        var taylor = Guid.NewGuid(); var jay = Guid.NewGuid();
+        var jayLogin = Login(jay, "jay", "second synthetic password");
+        static string Users(params object[] users) => JsonSerializer.Serialize(new { users });
+        var path = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllText(path, Users(Login(taylor, "taylor", "first synthetic password"), jayLogin));
+            var store = new LocalPasswordStore(path);
+            Assert.Equal(taylor, store.Verify("taylor", "first synthetic password", out var issued));
+            Assert.Equal(issued, store.Stamp(taylor));
+            var jayStamp = store.Stamp(jay);
+            Assert.NotNull(jayStamp);
+
+            Rewrite(path, Users(Login(taylor, "taylor", "rotated synthetic password"), jayLogin)); // no restart
+            Assert.Null(store.Verify("taylor", "first synthetic password"));
+            Assert.Equal(taylor, store.Verify("taylor", "rotated synthetic password", out var rotated));
+            Assert.NotEqual(issued, rotated);
+            Assert.Equal(rotated, store.Stamp(taylor));
+            Assert.Equal(jayStamp, store.Stamp(jay)); // other people's sessions are untouched
+
+            Rewrite(path, Users(jayLogin));
+            Assert.Null(store.Stamp(taylor));
+            Assert.Null(store.Verify("taylor", "rotated synthetic password"));
+
+            Rewrite(path, "{ not json"); // a broken edit admits no one rather than keeping removed logins alive
+            Assert.Null(store.Stamp(jay));
+            Rewrite(path, Users(jayLogin));
+            Assert.Equal(jayStamp, store.Stamp(jay));
+            if (!OperatingSystem.IsWindows())
+            {
+                File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.OtherRead);
+                Rewrite(path, Users(jayLogin));
+                Assert.Null(store.Stamp(jay)); // no longer private
+            }
+        }
+        finally { File.Delete(path); }
     }
 }

@@ -22,6 +22,8 @@ public sealed class TestClock : TimeProvider
 public sealed class HubFactory : WebApplicationFactory<Program>
 {
     public bool ReviewDemo { get; set; }
+    /// Host settings applied after the defaults, for example local-password sign-in.
+    public Dictionary<string, string> Settings { get; } = [];
     public string Database { get; } = "hub_test_" + Guid.NewGuid().ToString("N")[..8];
     public TestClock Clock { get; } = new();
 
@@ -40,6 +42,7 @@ public sealed class HubFactory : WebApplicationFactory<Program>
         b.UseSetting("Jobs:Enabled", "false");
         b.UseSetting("Evaluation:Worker", "false");
         b.UseSetting("RateLimit:PerMinute", "100000");
+        foreach (var (key, value) in Settings) b.UseSetting(key, value);
         b.ConfigureServices(s =>
         {
             s.RemoveAll<TimeProvider>();

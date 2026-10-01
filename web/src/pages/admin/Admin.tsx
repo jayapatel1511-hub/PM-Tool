@@ -233,12 +233,15 @@ export function Users() {
   const everyone = useQuery({ queryKey: ['admin', 'users', 'all'], queryFn: () => get<UserRow[]>('admin/users?inactive=true') })
   const ref = useQuery({ queryKey: ['reference'], queryFn: () => get('reference') })
   const [edit, setEdit] = useState<UserRow | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [handoff, setHandoff] = useState<{ id: string; email: string; displayName: string } | null>(null)
   const name = (id?: string) => everyone.data?.find((u) => u.id === id)?.displayName ?? t('common.dash')
   const refresh = () => qc.invalidateQueries({ queryKey: ['admin', 'users'] })
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-semibold">{t('admin.users')}</h2>
-      <p className="text-sm text-muted-foreground">{t('admin.usersIntro')}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-lg font-semibold">{t('admin.users')}</h2>
+        <p className="text-sm text-muted-foreground">{t('admin.usersIntro')}</p></div>
+        <Button size="sm" onClick={() => setCreating(true)}><Plus className="size-4" />{t('admin.createUser')}</Button></div>
       <div className="flex flex-wrap items-center gap-3">
         <Input className="h-8 w-64" placeholder={t('common.search')} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t('common.search')} />
         <label className="flex items-center gap-2 text-sm"><Checkbox checked={inactive} onCheckedChange={(c) => setInactive(!!c)} />{t('common.showInactive')}</label>
@@ -272,8 +275,47 @@ export function Users() {
         </div>
       )}
       {edit && <UserDialog user={edit} users={everyone.data ?? []} offices={ref.data?.offices ?? []} onClose={() => { setEdit(null); refresh() }} />}
+      {creating && <CreateUserDialog users={everyone.data ?? []} offices={ref.data?.offices ?? []}
+        onClose={() => setCreating(false)} onCreated={(created) => { setCreating(false); setHandoff(created); refresh() }} />}
+      {handoff && <CredentialHandoff user={handoff} onClose={() => setHandoff(null)} />}
     </div>
   )
+}
+
+function CreateUserDialog({ users, offices, onClose, onCreated }: { users: UserRow[]; offices: { id: string; name: string; isActive: boolean }[];
+  onClose: () => void; onCreated: (user: { id: string; email: string; displayName: string }) => void }) {
+  const [form, setForm] = useState({ email: '', displayName: '', jobTitle: '', officeId: '', supervisorId: '' })
+  const [err, setErr] = useState<unknown>(null), [busy, setBusy] = useState(false)
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault(); setErr(null); setBusy(true)
+    try {
+      const result = await post<{ id: string }>('admin/users', { ...form, officeId: form.officeId || null, supervisorId: form.supervisorId || null })
+      toast.success(t('common.saved')); onCreated({ id: result.id, email: form.email.trim(), displayName: form.displayName.trim() })
+    } catch (e) { setErr(e) } finally { setBusy(false) }
+  }
+  return <Dialog open onOpenChange={(o) => !o && !busy && onClose()}>
+    <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>{t('admin.createUser')}</DialogTitle></DialogHeader>
+      <form className="space-y-3" onSubmit={submit}><fieldset disabled={busy} className="space-y-3">
+        <Field label={t('admin.email')} htmlFor="new-user-email" error={(err as ApiError)?.fieldErrors?.email}><Input id="new-user-email" type="email" required maxLength={200} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+        <Field label={t('common.name')} htmlFor="new-user-name" error={(err as ApiError)?.fieldErrors?.displayName}><Input id="new-user-name" required maxLength={200} value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} /></Field>
+        <Field label={t('admin.jobTitle')} htmlFor="new-user-title"><Input id="new-user-title" maxLength={200} value={form.jobTitle} onChange={(e) => setForm({ ...form, jobTitle: e.target.value })} /></Field>
+        <Field label={t('admin.office')} htmlFor="new-user-office"><select id="new-user-office" className={selectCls} value={form.officeId} onChange={(e) => setForm({ ...form, officeId: e.target.value })}><option value="">{t('common.none')}</option>{offices.filter((o) => o.isActive).map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}</select></Field>
+        <Field label={t('admin.supervisor')} htmlFor="new-user-supervisor"><select id="new-user-supervisor" className={selectCls} value={form.supervisorId} onChange={(e) => setForm({ ...form, supervisorId: e.target.value })}><option value="">{t('admin.noSupervisor')}</option>{users.filter((u) => u.isActive).map((u) => <option key={u.id} value={u.id}>{u.displayName}</option>)}</select></Field>
+        {err != null && <ErrorBanner error={err} />}
+      </fieldset><DialogFooter><Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{t('common.save')}</Button></DialogFooter></form>
+    </DialogContent>
+  </Dialog>
+}
+
+function CredentialHandoff({ user, onClose }: { user: { id: string; email: string; displayName: string }; onClose: () => void }) {
+  return <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>{t('admin.credentialHandoff')}</DialogTitle></DialogHeader>
+      <div className="space-y-3 text-sm"><p>{t('admin.credentialHandoffIntro')}</p>
+        <dl className="grid gap-2 rounded border p-3"><div><dt className="font-medium">{t('admin.email')}</dt><dd>{user.email}</dd></div><div><dt className="font-medium">{t('auth.userId')}</dt><dd className="break-all font-mono text-xs">{user.id}</dd></div></dl>
+        <p>{t('admin.credentialHandoffSteps')}</p><p className="text-warn">{t('admin.credentialHandoffWarning')}</p></div>
+      <DialogFooter><Button onClick={onClose}>{t('common.close')}</Button></DialogFooter>
+    </DialogContent>
+  </Dialog>
 }
 
 function UserDialog({ user, users, offices, onClose }: { user: UserRow; users: UserRow[]; offices: any[]; onClose: () => void }) {

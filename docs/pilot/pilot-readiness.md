@@ -53,7 +53,7 @@ restore a `hub-review-*` dump into it.
 | H5 | Bridge network and trusted proxy | subnet `172.30.245.0/28`; its gateway `172.30.245.1` is also `Hosting__LocalTunnelProxyAddress` | own unused /28; proxy address equals the new gateway | agent | UNPROVEN: `172.30.246.0/28`, proxy `172.30.246.1`; no homedev route used that subnet on 2026-10-01 |
 | H6 | Loopback port | `127.0.0.1:3080` | own free loopback port | agent | UNPROVEN: `127.0.0.1:3081`, free on homedev on 2026-10-01 |
 | H7 | Private runtime | `.runtime/review.env`, `review-users.json`, `keys/` and `data/backups/`, shared by all review releases | separate owner-only runtime and backup directories | agent | UNPROVEN |
-| H8 | Scripts and units | init, activate, backup, restore drill and verify scripts; the root backup helper accepts only `pm-tool-review-db-1` and the review backup path ([helper]) | pilot variants that refuse review containers, volumes and dumps | agent | UNPROVEN: root helper `hosting/pm-tool-pilot-backup-root.sh` (accepts only `pm-tool-pilot-db-1` on volume `pm-tool-pilot-db`, writes `hub-pilot-*.dump` to the pilot directory) with its service and 22:15 UTC timer; activation/verify scripts still assume review names; nothing installed |
+| H8 | Scripts and units | init, activate, backup, restore drill and verify scripts; the root backup helper accepts only `pm-tool-review-db-1` and the review backup path ([helper]) | pilot variants that refuse review containers, volumes and dumps | agent | PARTIAL: isolated initializer `scripts/init-homedev-pilot.py` passed private/no-overwrite/review-runtime refusal checks; root helper `hosting/pm-tool-pilot-backup-root.sh` (accepts only `pm-tool-pilot-db-1` on volume `pm-tool-pilot-db`, writes `hub-pilot-*.dump` to the pilot directory) with its service and 22:15 UTC timer; activation/verify scripts still assume review names; nothing installed |
 | H9 | Hostname | review sets `AllowedHosts` and `Email__BaseUrl` to `pm.engcalchub.com`; one hostname routes to one origin | decide which stack `pm.engcalchub.com` serves during the pilot; the other gets another hostname in the `pm-tool` tunnel or stays loopback-only | Jay | UNPROVEN (undecided) |
 | H10 | Capacity | each stack limits the database and the API to 1 GiB each; homedev has about 7.2 GiB RAM shared with other services (platform guide) | measure with both stacks running, or stop the review stack during the pilot | agent + Jay | UNPROVEN |
 | H11 | Releases | [homedev runbook][homedev]: reviewed full SHA, CI pass, dump first, previous image kept | the same, announced in the support channel and run outside business hours | agent + Jay | UNPROVEN |
@@ -67,14 +67,14 @@ and the review seed's three people hold no Admin role.
 
 | # | Item | Owner | Status |
 |---|---|---|---|
-| U1 | A reviewed provisioning path for real users and the first Admin, written to the activity log. Store each person's Entra sign-in name (UPN) as their email and leave the Entra object ID empty, so a later Entra sign-in claims the same record ([Auth.cs][auth] line 150) | agent (code change after Jay approves) | OPEN: no mechanism exists; blocks the pilot |
+| U1 | A reviewed provisioning path for real users and the first Admin, written to the activity log. Store each person's Entra sign-in name (UPN) as their email and leave the Entra object ID empty, so a later Entra sign-in claims the same record ([Auth.cs][auth] line 150) | agent | IMPLEMENTED LOCALLY: audited Staging local-Admin bootstrap and Admin create-user endpoint/UI; live browser/company provisioning acceptance remains UNPROVEN |
 | U2 | Participant list (name, UPN, office, system role) from the sponsor | Jay | UNPROVEN |
-| U3 | One login per person with a random password: `scripts/bootstrap-review-credentials.py` for the first batch (it requires an empty verifier file), `scripts/add-review-credential.py` afterwards (12+ characters). At most 64 logins ([LocalPasswordStore.cs][store] line 34). Restart the API to load changes | Jay | UNPROVEN |
+| U3 | One login per person with a random password: `scripts/bootstrap-review-credentials.py` for the first batch (it requires an empty verifier file), `scripts/add-review-credential.py` afterwards (12+ characters). At most 64 logins ([LocalPasswordStore.cs][store] line 34). File changes are reloaded; verifier rotation/removal ends prior sessions on their next request | Jay | UNPROVEN |
 | U4 | Private delivery: one person per message through a company-approved channel, never group chats, tickets or shared mailboxes. Delete the handoff file after delivery; record the delivery date, not the password | Jay | UNPROVEN |
 | U5 | Rotation on suspected exposure or request: remove the entry, add a new one, restart. There is no rotation tool. An existing session stays valid for up to 8 hours (absolute expiry, [Auth.cs][auth] lines 86–87) unless the person is deactivated | Jay (agent may script it) | UNPROVEN |
 | U6 | Offboarding: (1) Admin → Users, clear Active; the next request with an existing cookie is refused ([Auth.cs][auth] line 152); (2) Reassign work ([admin guide][admin]); (3) remove the verifier and restart. Reactivating within 8 hours revives an old cookie, so rotate first. Leavers are not detected automatically (`Graph__DirectorySync: "false"`); the sponsor reports them | Jay + company IT | UNPROVEN |
 | U7 | Sign-in allows 5 attempts a minute per client address ([Program.cs][program] line 70); people behind one office address share that limit. Confirm egress addresses or accept occasional 429 retries | company IT + agent | UNPROVEN |
-| U8 | Walkthrough and user guide explain ID and password sign-in (the [user guide](../user-guide.md) says "organisation account") | agent | UNPROVEN |
+| U8 | Walkthrough and user guide explain ID and password sign-in (the [user guide](../user-guide.md) now explains individual local IDs and passwords) | agent | UNPROVEN |
 
 ## 5. Backup and recovery
 
@@ -154,3 +154,20 @@ The participant count does not certify 50 simultaneous sessions or a server size
 [admincs]: ../../src/Hub.Api/Features/Admin.cs
 [spec09]: ../../spec-parts/09-security-nfr-architecture-db-api-integration.md
 [spec10]: ../../spec-parts/10-scope-acceptance-edge-cases-closing.md
+
+
+## Prepare the first pilot Admin (operator step, after company gates)
+
+Keep the pilot base separate from `/home/jaypatel04/Workspace/Projects/pm-tool`; use the dedicated
+`pm-tool-pilot` base, its own `.runtime`, data and release links. Run `scripts/init-homedev-pilot.py` with
+`--runtime` pointing to that new private `.runtime` and the approved first Admin's `--admin-email` (UPN) and
+`--admin-name`. It creates `pilot.env`, an empty `pilot-users.json`, and an independent key ring; it refuses existing
+review/pilot credential files or keys. The hostname is the designated `pm.engcalchub.com`; no DNS cutover is performed.
+
+Start only the separate pilot Compose stack after the review and company gates pass. Startup audits the first Admin
+and provides its GUID in the database. Use `scripts/add-review-credential.py <pilot-users-file> <user-guid> <individual-id>`
+to set that person's password privately; despite the helper name it writes only the explicit file passed. Sign in as
+Admin and create the remaining people in Users & roles, provisioning each GUID independently. Remove
+`Auth__Local__BootstrapAdmins` from the private env file after bootstrap. Never restore a review dump or copy its
+verifier/key files. Initializer regressions pass locally; the real company database, installed timer, pilot activation,
+mail and browser-to-host acceptance remain UNPROVEN.

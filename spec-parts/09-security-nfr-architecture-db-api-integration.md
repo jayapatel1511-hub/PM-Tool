@@ -101,10 +101,11 @@ One deployable API with clear internal module boundaries (separate projects/asse
 | `Work` | Milestones, deliverables, tasks, dependencies, collaborators, keys/sequences |
 | `Registers` | Decisions, external parties; P2 risks, issues, meetings, actions; item links |
 | `Collaboration` | Comments, mentions, watchers, document links |
+| `Resources` | Capacity, leave, allocations, visibility filtering (Draft is enforced here, not in the UI), conflict rules RES-08…13 and `resource_conflict` materialisation |
 | `Evaluation` | Pure rules (indicators, milestone status, health, attention) + state materialisation + change detection |
 | `Notifications` | Event → notification mapping, preferences, in-app store, email rendering and sending, digest |
 | `Templates` (P2) | Template CRUD and instantiation |
-| `Reporting` | Report queries, exports, portfolio, workload (P2) |
+| `Reporting` | Report queries, exports, workload, portfolio (P2) |
 | `Audit` | Activity logging, history queries |
 | `Search` | FTS indexing and query |
 
@@ -223,7 +224,7 @@ Only the important fields are listed; standard audit columns are implied.
 
 | Entity | Purpose | Key fields | PK | FKs / relationships |
 |---|---|---|---|---|
-| `app_user` | Employees who can use the Hub | `entra_object_id` (unique), `email` (unique), `display_name`, `job_title`, `office_id`, `supervisor_id`, `is_active`, `weekly_capacity_hours`, `last_sign_in_at` | `id` | `office_id → office`; `supervisor_id → app_user` (self) |
+| `app_user` | Employees who can use the Hub | `entra_object_id` (unique), `email` (unique), `display_name`, `job_title`, `office_id`, `supervisor_id`, `discipline_id`, `skills` (text[]), `is_active`, `last_sign_in_at` | `id` | `office_id → office`; `supervisor_id → app_user` (self); `discipline_id → discipline`. Capacity lives in `person_capacity`. |
 | `user_system_role` | System roles per user | `user_id`, `role` (Admin, Executive, Supervisor, ProjectManager, ReadOnly), `source` (Group, Manual), `granted_by`, `granted_at` | `id`; unique(`user_id`,`role`) | `user_id → app_user` |
 | `office` | Offices | `name`, `code`, `time_zone`, `is_active` | `id` | — |
 | `discipline` | Organisation discipline list | `name`, `code`, `colour`, `sort_order`, `is_active` | `id` | — |
@@ -274,6 +275,17 @@ Only the important fields are listed; standard audit columns are implied.
 | `comment` | Comments on items | `project_id`, `item_type`, `item_id`, `author_id`, `body`, `comment_kind`, `review_round`, `created_at`, `edited_at`, `deleted_at`, `deleted_by` | `id` | → `project`, `app_user`; polymorphic item; index (`item_type`,`item_id`,`created_at`) |
 | `comment_mention` | Users mentioned in a comment | `comment_id`, `user_id` | `id`; unique | → `comment` (cascade), `app_user` |
 | `document_link` | Links to documents | `project_id`, `item_type` (Project, Deliverable, Task), `item_id`, `title`, `url`, `link_type`, `added_by`, `added_at`, `deleted_at` | `id` | polymorphic item |
+
+#### Resources
+
+| Table | Purpose | Key columns | PK / uniqueness | FKs and constraints |
+|---|---|---|---|---|
+| `person_capacity` | Weekly capacity history | `user_id`, `effective_from` (date), `weekly_capacity_hours` (numeric(4,1)), `working_days` (smallint[] 1–7), `set_by`, `set_at` | `id`; unique(`user_id`,`effective_from`) | → `app_user`. Replaces the single `app_user.weekly_capacity_hours` column from v1.0 (drop it). |
+| `leave` | Planned absence | `user_id`, `start_date`, `end_date`, `hours_per_day` (null = full day), `note`, `created_by`, `created_at`, `deleted_at` | `id` | → `app_user`; CHECK `start_date <= end_date` |
+| `allocation` | Planning layer rows | `user_id`, `created_by`, `owner_kind` (Employee, Manager), `hours_per_week` (numeric(4,1)), `start_week` (date, Monday), `end_week` (date, Monday), `label`, `source_category`, `project_id` (nullable), `project_discipline_id` (nullable), `confidence` (Confirmed, Expected, Possible), `visibility` (Draft, Published, Confirmed), `notes`, `last_confirmed_at`, `created_at`, `updated_at`, `deleted_at`, `row_version` | `id` | → `app_user` ×2, `project`, `project_discipline` (both `ON DELETE SET NULL`). CHECK `start_week <= end_week`; CHECK `extract(isodow from start_week) = 1`; CHECK `hours_per_week > 0 AND hours_per_week = round(hours_per_week*2)/2`; CHECK `(owner_kind = 'Employee') = (visibility = 'Confirmed' AND created_by = user_id) OR owner_kind = 'Manager'`. Index (`user_id`,`start_week`,`end_week`); index (`created_by`) where `visibility = 'Draft'`. |
+| `allocation_week` | Materialised expansion of allocations to weeks for fast aggregation (rebuilt per allocation on write) | `allocation_id`, `user_id`, `week`, `hours`, `confidence`, `visibility`, `created_by`, `source_category` | PK(`allocation_id`,`week`) | → `allocation` (cascade). Index (`user_id`,`week`). Every totals query reads this table with a visibility predicate: `visibility <> 'Draft' OR created_by = :viewer`. |
+| `person_week_state` | Materialised per person-week figures | `user_id`, `week`, `capacity_hours`, `leave_hours`, `confirmed_hours`, `expected_hours`, `possible_hours`, `task_estimate_hours`, `unestimated_task_count`, `evaluated_at` | PK(`user_id`,`week`) | → `app_user`. Excludes Draft hours; viewers add their own drafts at read time from `allocation_week`. |
+| `resource_conflict` | Current conflicts (RES-08…13) | `rule_id`, `user_id`, `week`, `severity`, `message`, `route_to_user_ids` (uuid[]), `involved_allocation_ids` (uuid[]), `first_detected_at`, `last_evaluated_at` | `id`; unique(`rule_id`,`user_id`,`week`) | → `app_user`. Snoozes reuse `attention_snooze` with `project_id` null and `item_type = 'PersonWeek'`. |
 
 #### System
 
@@ -460,6 +472,17 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET /me/work` | My Work aggregate (sections with counts and top rows) | any |
 | `GET /me/tasks`, `/me/reviews`, `/me/deliverables`, `/me/decisions`, `/me/attention` | Section lists with filters | any |
 | `GET /me/notifications`, `POST /me/notifications:markRead`, `PATCH /me/preferences` | Notification centre and preferences | any |
+| `GET /me/week?from=&weeks=` | My Week strip (own row, Drafts excluded) | any |
+| `GET /manager/home?supervisorId=&weeks=` | Manager Home cards | Resources.ViewTeam |
+| `GET /people`, `GET /people/{id}` | People list and profile | any |
+| `GET/POST /people/{id}/capacity`, `GET/POST/PATCH/DELETE /people/{id}/leave[/{leaveId}]` | Capacity history and leave | Resources.EditPerson (self for leave) |
+| `GET /resources/planner?supervisorId=&disciplineId=&from=&weeks=&includeDrafts=` | Grid payload: people × weeks with per-band hours, remaining, indicators; Drafts only for the caller | Resources.View |
+| `GET /resources/planner/{userId}/{week}` | Contribution list for one cell | Resources.View |
+| `POST /allocations` | Create (quick add sends `{ userId, week, text }`; full form sends all fields) | Allocation.Create (self or supervised) |
+| `PATCH /allocations/{id}`, `DELETE /allocations/{id}` | Edit / delete (creator only) | Allocation.Edit |
+| `POST /allocations/{id}:transition` | `{ toVisibility }` | Allocation.Edit (Manager-owned only) |
+| `POST /allocations/{id}:confirmStillValid`, `:copy`, `:move` | Reset staleness; copy; `{ userId?, startWeek?, endWeek? }` | Allocation.Edit |
+| `GET /resources/conflicts?supervisorId=&from=&weeks=`, `POST /resources/conflicts/{id}:snooze` | Conflict list and snooze | Resources.View |
 | `GET /projects` | Project list with filters/sort | any (visibility-filtered) |
 | `POST /projects` | Create project | Project.Create |
 | `GET /projects/{id}` | Project header and summary (includes `state`) | Project.View |

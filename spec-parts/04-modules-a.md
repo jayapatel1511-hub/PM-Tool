@@ -191,7 +191,7 @@ Discipline Lead is not stored on `ProjectMember`; it is derived from `ProjectDis
 | `due_date` | date | Recommended | |
 | `status` | enum §10.2 | Yes | default Not Started |
 | `progress_pct` | int 0–100 step 10 | Yes | default 0 |
-| `estimated_hours` | decimal | No | Used by deliverable weighting and Resource View. |
+| `estimated_hours` | decimal | No | Used by deliverable weighting and the planner's task-estimate context column (§12.15.8). Never counted as planned hours. |
 | `manual_block_type` | enum: Client, External Party, Internal, Decision, Information, Other | No | |
 | `manual_block_reason` | text | Required when type set | |
 | `manual_block_set_at` | timestamp | auto | Drives "blocked for N days". |

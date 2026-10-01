@@ -1,13 +1,13 @@
 # Engineering Project Coordination Hub
 
-## Product Specification — Version 1.0 (Draft for Review)
+## Product Specification — Version 1.1 (Draft for Review)
 
 | Item | Value |
 |---|---|
 | Document | Product and Implementation Specification |
-| Product | Engineering Project Coordination Hub (working name; "the Hub" in this document) |
-| Version | 1.0 — Draft for stakeholder review |
-| Date | 2026-09-15 |
+| Product | Engineering Project Coordination Hub (working name; "the Hub" in this document; candidate product name **Tuesday**, see Section 34) |
+| Version | 1.1 — Draft for stakeholder review |
+| Date | 2026-10-01 (v1.0: 2026-09-15) |
 | Status | Ready for architecture review, wireframing, and ticket breakdown |
 | Audience | Product owner, engineering team, UX design, IT security, pilot project managers |
 
@@ -27,6 +27,13 @@ This specification uses a small set of consistent labels. They matter, because t
 | **Recommendation:** | A recommendation by the authors, not a stated requirement. The business may choose otherwise. |
 | **Assumption:** | An architectural or business assumption made to keep the specification concrete. Must be validated. |
 | **TBD — Business Decision Required** | Information that only the company can provide. The specification is written so that development can proceed around it where possible. |
+
+**Change log**
+
+| Version | Date | Change |
+|---|---|---|
+| 1.0 | 2026-09-15 | Initial draft. |
+| 1.1 | 2026-10-01 | Resource planning promoted from a derived Phase 2 view to an MVP engine owned by managers: weekly person × week allocations, employee- and manager-owned entries, Draft/Published/Confirmed visibility, Confirmed/Expected/Possible confidence, leave, capacity, conflict rules, Manager Home, People area. Sections 1, 8, 9.4, 10, 11.9, 11.13, 12.15, 13.10, 13.11, 13.19, 13.20, 15.13, 23.3, 24.2, 25.7, 27–29, 34 amended. Source: `docs/Tuesday-Consolidated-Product-Scope.md` and `docs/Feature-Gap-Have-vs-Adopt.md`. |
 
 Canonical status names, role names, and threshold names are defined once in Section 10 (Core Data Model) and used verbatim everywhere else. If a later section appears to contradict Section 10, Section 10 wins and the later section should be corrected.
 
@@ -52,10 +59,11 @@ The product is built entirely from structured data and deterministic rules. Ever
 - A Project Dashboard, a personal My Work page, and a Weekly Coordination view designed to run a multidisciplinary coordination meeting directly from the application.
 - A thin Decision Register, because decisions are the most common non-task blocker in design projects. (Recommended for MVP; see Section 27 for the rationale and the fallback if it is cut.)
 - Comments with @mentions, document links to SharePoint/Teams/network folders, a full activity log, in-app and email notifications, and corporate single sign-on.
+- A **Weekly Resource Planner**: a manager-owned planning layer of person × week allocations that is informed by project data but not controlled by it. Managers and employees record hours against projects and against work that lives outside the Hub (proposals, admin, training, small projects, leave). Allocations carry a visibility state (Private Draft, Published, Confirmed) and a confidence (Confirmed, Expected, Possible). Deterministic rules flag over- and under-allocation, overlapping plans from two managers, leave conflicts and stale plans. A Manager Home exception dashboard answers "where does my team need attention" in about 30 seconds.
 
 **What comes later**
 
-Risk and Issue registers, Meeting Actions, Project Templates, the Resource/Workload view, the Portfolio Dashboard, an improved Gantt, and saved views are Phase 2. Teams and SharePoint integration, ERP/Vantagepoint integration, and financial or utilisation data are Phase 3.
+Risk and Issue registers, Meeting Actions, Project Templates, the Portfolio Dashboard, role-level long-term demand planning, an improved Gantt, and saved views are Phase 2. Teams and SharePoint integration, ERP/Vantagepoint integration, and financial or utilisation data are Phase 3.
 
 **Recommended technical approach**
 
@@ -129,7 +137,7 @@ Success is measured by coordination outcomes, not feature counts:
 - A **system of record for coordination**: who owns what, when it is due, what it depends on, and what state it is in.
 - A **meeting tool**: the Weekly Coordination view is designed to be projected and walked through.
 - A **personal work queue**: My Work is designed to be the one list a person opens each morning.
-- A **visibility layer for management**: the Portfolio Dashboard and Resource View (Phase 2) answer "which projects need help" and "who needs help".
+- A **visibility layer for management**: Manager Home and the Weekly Resource Planner answer "who needs help" and "where is capacity"; the Portfolio Dashboard (Phase 2) answers "which projects need help".
 
 ### 3.2 What the Hub is not
 
@@ -249,7 +257,7 @@ Personas are composites used to make design decisions. Names are illustrative. M
 - **Role:** Manages 12 civil staff across many projects. Not a member of most project teams.
 - **Goals:** See each person's load across projects; spot overloaded staff and overlapping deadlines; know who has capacity when a PM asks for help; reassign work when someone is away or leaves.
 - **Frustrations:** No cross-project view without asking each PM. Estimates are unreliable but something is better than nothing.
-- **Uses:** Resource View (Phase 2); Portfolio Dashboard filtered by discipline; My Work of supervised staff (read).
+- **Uses:** Manager Home; Weekly Resource Planner (plans supervised staff, publishes and confirms allocations); People; Portfolio Dashboard filtered by discipline (Phase 2); My Work of supervised staff (read).
 
 ### 7.6 Lena — Executive / Regional Manager
 

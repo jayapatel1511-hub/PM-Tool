@@ -4,7 +4,7 @@
 
 These conventions apply to every screen and should be implemented once as a design system.
 
-**Layout.** Persistent left navigation rail (collapsible to icons) with: My Work, Projects, Portfolio (P2), Resources (P2), Reports, Notifications, Admin. Top bar: global search, quick-create (Task, Decision), notification bell with unread count, user menu. Content area max-width unconstrained on desktop (tables benefit from width). Project screens show a **project header** (key, name, client, PM, phase, status pill, health pill, next milestone countdown, links) and project tabs beneath it.
+**Layout.** Persistent left navigation rail (collapsible to icons) with: Home, Projects, People, Resources, Insights, Notifications, Admin (§9.4). Top bar: global search, quick-create (Task, Decision), notification bell with unread count, user menu. Content area max-width unconstrained on desktop (tables benefit from width). Project screens show a **project header** (key, name, client, PM, phase, status pill, health pill, next milestone countdown, links) and project tabs beneath it.
 
 **Density.** Tables default to compact rows (32–36 px), with a user toggle for comfortable rows. Typography: a single sans-serif system stack; 13–14 px table text; 16 px body. No decorative imagery.
 
@@ -59,7 +59,7 @@ Status pills always contain the status text. Indicators are small chips with an 
    - (P2) Issues: Open · High
    - (P2) Risks: High
 5. **PM Attention** panel: top 10 attention items with severity icon, item key/name, "why", owner, age, and quick actions (open, snooze). "Show all (23)".
-6. **Discipline progress** table: Discipline · Lead · Status colour · Open · Overdue · Blocked · Deliverables due ≤ 14 d · Next due item. Rows link to Task List filtered by discipline.
+6. **Discipline progress** table: Discipline · Lead · Status colour · Last update (most recent activity on the discipline's items; flagged when older than `task_stale_days`) · Open · Overdue · Blocked · Deliverables due ≤ 14 d · Next due item · Planned staffing this week (sum of Published/Confirmed allocations linked to the project discipline; "—" when none). Rows link to Task List filtered by discipline.
 7. **Due this week / Blocked** two-column lists (top 8 each) with links.
 8. **Recent activity**: last 15 activity entries (who did what to which item, when) with filter to "important only" (status, assignment, date, deletion).
 
@@ -275,6 +275,7 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 | My Decisions | Decisions I own or requested that are open |
 | My Projects | Projects where I hold any role, with my role(s), health, next milestone |
 | Upcoming Milestones | Milestones in my projects within 30 days |
+| My Week | Capacity strip for the next 6 weeks (§12.15): capacity, planned hours by source and confidence, remaining; my own entries and Published/Confirmed manager allocations; quick add for my own entries (FR-RES-07). Private Drafts are never shown here. |
 | Recently completed by me | Last 14 days (collapsed) |
 
 **Primary actions.** Change status/progress inline; open panel; add comment; start review; quick-create task (into a chosen project).
@@ -289,21 +290,21 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 
 ---
 
-### 13.11 Resource / Workload View [Phase 2]
+### 13.11 Weekly Resource Planner
 
-**Purpose.** Cross-project workload per person, per §12.15.
+**Purpose.** The Supervisor's working surface for §12.15. See capacity, add what you need, adjust in place.
 
-**Users.** Supervisors, Executives, PMs (their members).
+**Users.** Supervisors (write for supervised staff), Executives (read), PMs (read, members of own projects), employees (own row via My Work › My Week).
 
-**Information.** Grid: rows = people (grouped by supervisor or discipline), columns = next 8 weeks; cell = assigned hours / capacity with heat shading and the number; row summary: projects, open tasks, unestimated tasks, overdue, deadline cluster flag, indicator (Over/OK/Under). Expand row → Project → tasks (key, name, due, est., remaining).
+**Information.** Grid: rows = people (grouped by supervisor, then discipline); columns = ISO weeks for `planning_horizon_weeks` (default 12), today's week first and highlighted. Cell shows remaining capacity large and planned/capacity small, heat-shaded by indicator; a thin stacked bar shows confirmed / expected / possible. Row header: name, role, discipline, capacity, leave badge for weeks with leave. Row expands to one sub-row per allocation (block spanning its weeks, labelled, coloured by source category, hatched if Draft, dotted if Possible) plus a Leave sub-row and an optional "task estimates" context sub-row (§12.15.8). Column footer: team totals and count of conflicts per week.
 
-**Primary actions.** Reassign task (Supervisor for supervised staff; PM within project); set a person's capacity override (Supervisor/Admin); export.
+**Primary actions.** Quick add in any cell (FR-RES-07). Drag block edge to extend/shorten; drag block to another week or person. Click block → Allocation side panel: hours, label, source, project link, discipline, start/end week, repeat for N weeks, confidence, visibility (Draft / Publish / Confirm as one segmented control), notes, "still valid", move to person, copy, convert to task assignment (creates a task in the linked project and keeps the allocation), delete. Click a cell total → contribution list (§12.15.7). Record leave. Set capacity. Export CSV.
 
-**Filters.** Supervisor, discipline, office, project, indicator, date range.
+**Filters.** Supervisor, discipline, office, person, source category, confidence, visibility (mine: include drafts), indicator (over / under / overlap / leave / stale), project.
 
-**Sorting.** Load desc (default), overdue, name.
+**Sorting.** Remaining capacity ascending in the selected week (default), name, conflicts.
 
-**UX.** Method popover explains the calculation and its limits in plain language; unestimated counts sit beside hours so nobody over-reads the numbers.
+**UX.** Keyboard first: arrow keys move between cells, Enter opens quick add, Esc cancels, Tab into the panel. Warnings are coloured cells and a side list, never modal dialogs. A Draft block is visibly private (lock icon, hatch). The method popover states in plain language what is counted, what is not, and that task estimates are context only. Works at laptop width; read-only at tablet width.
 
 ---
 
@@ -351,7 +352,7 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 
 ### 13.15 Administration Screens
 
-**Users & Roles.** List of users (from sign-in provisioning and sync) with system roles, supervisor, office, active state, last sign-in; edit system roles (if in-app assignment is used), supervisor, capacity (P2); "Reassign work" tool for a user (lists all open items across projects with bulk reassignment, Rec).
+**Users & Roles.** List of users (from sign-in provisioning and sync) with system roles, supervisor, office, active state, last sign-in; edit system roles (if in-app assignment is used), supervisor, discipline, capacity and working days (§12.15.2); "Reassign work" tool for a user (lists all open items across projects with bulk reassignment, Rec).
 
 **Reference data.** Disciplines, Clients, Offices, Deliverable Types, Phases, Project Types, Milestone types are fixed enum (no admin). Each list: add, edit, deactivate (never hard-delete when referenced), reorder.
 
@@ -386,3 +387,46 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 **Purpose.** Run the deterministic reports in §19 with filters and export.
 
 **Information.** Report catalogue with description; parameter form; results table (same components as lists); export CSV/XLSX; "open as filtered list" where the report maps to a list.
+
+---
+
+### 13.19 Manager Home
+
+**Purpose.** The Supervisor's landing page: an exception dashboard that answers "where does my team need attention" in about 30 seconds. Decisions, not utilisation percentages.
+
+**Users.** Supervisors (own supervised staff); Executives (all, filterable by supervisor or discipline).
+
+**Information (cards with counts; each row links to the planner or project)**
+
+| Card | Content |
+|---|---|
+| People needing attention | Over-allocated (with the two or three largest contributors named), significantly Under-allocated, returning from leave this week, Leave Conflicts |
+| Planning conflicts | Overlapping Plans: person, week, managers involved, hours each |
+| Upcoming pressure | Weeks within the horizon where team confirmed + expected hours exceed team capacity; Deliverable Pressure items |
+| Needs confirmation | Stale allocations (mine) and Published allocations older than `allocation_stale_days` |
+| Projects needing attention | For projects where supervised staff are members: disciplines with stale updates (A-10 / §16.6), major deliverables due within `milestone_approaching_days` |
+| My Work | Collapsed; the user's own §13.10 sections |
+
+Each line is phrased as a reason, not a number: "Jillian — 46 h planned vs 37.5 h in W42; two deliverables due" rather than "Jillian 123 %". Where the data supports it, a hint follows: "Bennett has 18 h remaining in W42".
+
+**Primary actions.** Open planner at the person-week; "still valid"; publish/confirm from the stale list; snooze a conflict for N days with a note (same mechanism as attention snooze, ATT-03).
+
+**Filters.** Supervisor (Executives), discipline, horizon (4 / 8 / 12 weeks).
+
+**UX.** Empty cards collapse to one line ("No overlapping plans"). The page is deliberately short; it should fit on one laptop screen when the team is healthy.
+
+---
+
+### 13.20 People and Person Profile
+
+**Purpose.** A lightweight resource profile per person. The Hub is not an HR system; this screen stores only what planning and delivery need.
+
+**Users.** Everyone (read); Supervisors edit capacity, leave and manager allocations for supervised staff; the person edits their own skills, leave and employee allocations; System Administrators edit everything.
+
+**People list.** Name, role (job title), discipline, office, supervisor, capacity, this-week remaining, indicator. Filters: discipline, office, supervisor, skill. Search by name.
+
+**Person Profile.** Header: name, job title, discipline, office, supervisor, system roles, capacity and working days, skills (free-text tags). Sections: **My Week strip** for the horizon (same component as §13.10 My Week; shows Drafts only to their creator); **Allocations** list (filterable by source, confidence, visibility); **Leave** (list and add); **Project roles** (projects, roles, disciplines); **Open work** (tasks and deliverables, read-only summary linking to My Work).
+
+**Primary actions.** Quick add allocation (self, or Supervisor for supervised staff); record leave; set capacity (Supervisor/Admin); edit skills (self/Admin).
+
+**UX.** No performance data, no history of utilisation, no comparison between people. Skills are tags for search in Phase 2 (skills-based resource search); in MVP they are display only.

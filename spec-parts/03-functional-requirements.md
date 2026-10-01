@@ -140,7 +140,8 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-WC-02 | Export of the coordination summary as text/markdown to clipboard. | Rec | §13.9 |
 | FR-MYW-01 | My Work per §13.10 with sections, filters, sorting, and grouping. | R | §13.10 |
 | FR-PORT-01 | Portfolio Dashboard per §13.12. | P2 | §13.12 |
-| FR-RES-01 | Resource / Workload View per §12.15 and §13.11. | P2 | §12.15 |
+| FR-RES-01 | Weekly Resource Planner per §12.15 and §13.11. | R | §12.15 |
+| FR-MGR-01 | Manager Home exception dashboard per §13.19. | R | §13.19 |
 
 ### 11.10 Views, timeline, templates
 
@@ -167,6 +168,27 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-AUD-01 | Immutable activity log for creates, updates (field-level), status changes, assignments, date changes, deletions, decision changes, and health overrides. | R | §20 |
 | FR-AUD-02 | Item-level history tab and project-level Activity History with filters. | R | §13.14 |
 | FR-AUD-03 | Export of activity log for a project. | Rec | §20 |
+
+### 11.13 Resource planning
+
+| ID | Requirement | Class | Detail |
+|---|---|---|---|
+| FR-RES-02 | Each person has a weekly capacity (default `default_weekly_capacity_hours`, per-person override) and working days; Supervisors edit for supervised staff. | R | §12.15.2 |
+| FR-RES-03 | Leave can be recorded by the person or their Supervisor as a date range with full-day or hours-per-day; it reduces weekly capacity and appears as a `Leave` source row. | R | §12.15.2 |
+| FR-RES-04 | An allocation records person, hours per week, start week, end week, label, source category, optional project and discipline, confidence, visibility, notes. `project_id` may be null. | R | §12.15.3 |
+| FR-RES-05 | Employees create allocations for themselves; they are employee-owned and always Confirmed visibility. | R | §12.15.4 |
+| FR-RES-06 | Supervisors create allocations for supervised staff; they are manager-owned and default to Draft visibility and Expected confidence. | R | §12.15.4 |
+| FR-RES-07 | Quick add: clicking a person-week cell and typing `<hours> h <label>` then Enter creates a one-week allocation with all other fields defaulted. No other field is required. | R | §12.15.5 |
+| FR-RES-08 | An allocation can be extended or shortened by editing `end_week`, repeated across N weeks, copied, and dragged to another week or person (drag = edit `start_week`/`end_week` or `person_id`, respecting permissions). | R | §12.15.6 |
+| FR-RES-09 | Visibility transitions Draft ↔ Published ↔ Confirmed are a single action by the creating manager; Published and Confirmed notify the employee. | R | §10.2 |
+| FR-RES-10 | Every person-week shows capacity, planned hours per confidence band, remaining capacity, and a drill-down listing every allocation and leave entry contributing to the total, with its source category and owner. | R | §12.15.7 |
+| FR-RES-11 | Project-derived demand (remaining task hours per §12.15.8) is shown as a separate context column, never summed into planned hours. | Rec | §12.15.8 |
+| FR-RES-12 | Conflict rules RES-08…RES-13 (§15.13) are evaluated per person-week nightly and on any allocation, leave or capacity change; results are materialised in `ResourceConflict` and shown as non-blocking warnings. | R | §15.13 |
+| FR-RES-13 | Overlapping Plans reports to every manager involved; no manager's allocation is changed automatically. | R | §15.13 |
+| FR-RES-14 | Stale allocations are shown as "needs confirmation"; a one-click "still valid" action resets `last_confirmed_at`. | R | §15.13 |
+| FR-RES-15 | Allocation, leave and capacity changes are written to the activity log; visibility transitions and conflicts raise notifications per §17.2. | R | §17, §20 |
+| FR-RES-16 | Role-level long-term demand ("one civil technologist in January") without a named person. | P2 | §12.15.9 |
+| FR-RES-17 | Planned vs actual effort comparison. | P3 | §29 |
 
 ### 11.12 Administration
 

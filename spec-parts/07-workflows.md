@@ -173,21 +173,39 @@ Each workflow states the actor, trigger, steps, system response, exceptions, and
 
 ---
 
-### Workflow 10 — Supervisor reviews staff workload [Phase 2]
+### Workflow 10 — Supervisor plans the team's weeks
 
-**Actor.** Supervisor (Civil group). **Trigger.** Weekly resourcing check or PM request for help.
+**Actor.** Supervisor (Civil group, 12 people). **Trigger.** Monday planning, a new proposal, or a PM asking for help.
 
 **Steps.**
-1. Open Resources → filter Supervisor = me → 8-week grid.
-2. Sort by load; identify Alex at 140% next week with a deadline cluster (3 tasks due 2026-09-24/25 across 2 projects) and Jill at 25% with no unestimated tasks.
-3. Expand Alex → see tasks by project; open 1234-T0058; reassign to Jill (Supervisor permission for supervised staff) with a comment.
-4. Note tasks without estimates for the DLs to fill in.
+1. Open Home → Manager Home shows: 1 Over-allocated (Alex, W42, 46 h / 37.5 h, two deliverables due), 1 Under-allocated (Jill, W42–W43, 12 h), 1 Overlapping Plans (Sam, W44: me 16 h, Environmental manager 16 h, 20 h confirmed), 2 allocations need confirmation.
+2. Click Alex W42 → planner opens on that cell; the contribution list shows 30 h Confirmed (project 1234, DL-published), 8 h Expected (my Draft "proposal support"), 8 h employee-added "small client project". Drag my 8 h Draft block from Alex to Jill (same week). Totals recompute; Alex's warning clears; Jill shows 20 h.
+3. In Jill's W42 cell type `12 h Hwy 7 review support` and Enter; set "Repeat for 3 weeks" in the side panel; Publish. Jill is notified.
+4. Open the Sam W44 conflict → see "Environmental manager has planned 16 h". Message them outside the Hub; they drop to 8 h. Conflict clears on their save.
+5. Click "still valid" on the two stale allocations.
 
-**System response.** Reassignment notifies both people and the PM; workload grid recomputes; the change is logged with actor Supervisor.
+**System response.** Every change is one allocation write, logged with actor Supervisor; `person_week_state` and `resource_conflict` recompute for the affected people and weeks; notifications per §17.2.
 
-**Exceptions.** Task belongs to a Restricted project the supervisor cannot see → row shows "Restricted project" with hours only; reassignment must be done by the PM. Person on leave → not modelled in MVP/P2 (Phase 3 or manual capacity override).
+**Exceptions.** Jill has leave on Thursday W43 → capacity 30 h; the repeated allocation is accepted, Leave Conflict fires only if Published/Confirmed hours exceed 30 h. Alex's 8 h employee-added entry cannot be edited by the Supervisor → comment on it instead. Sam's other manager's Draft label is never shown → only "16 h planned by another manager".
 
-**Result.** Load is rebalanced with a traceable change; estimates gaps are visible.
+**Result.** The team's next six weeks are realistic, every total is traceable to its rows, and no manager overwrote another's plan. Time spent: a few minutes, no spreadsheet.
+
+---
+
+### Workflow 10b — Employee records non-project work and leave
+
+**Actor.** Team member. **Trigger.** Asked to help on a proposal for two weeks; booked a week off.
+
+**Steps.**
+1. Open My Work › My Week → W42 cell → type `10 h proposal support`, Enter; W43 same.
+2. People → my profile → Leave → add 2026-11-02 to 2026-11-06, full days.
+3. My Week now shows W45 capacity 0 h with a Leave row; the Supervisor sees the drop immediately.
+
+**System response.** Two employee-owned allocations (Confirmed visibility) and one leave record; Supervisor notified of leave; conflicts recomputed.
+
+**Exceptions.** Supervisor had a Published 16 h allocation in W45 → Leave Conflict reported to both; the Supervisor moves or shortens it.
+
+**Result.** The person's weekly picture includes work that is not a Hub project, so they do not look idle.
 
 ---
 

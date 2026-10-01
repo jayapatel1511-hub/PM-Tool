@@ -17,7 +17,7 @@ Effective permission for any action = the union of what the user's system roles 
 |---|---|---|---|
 | **System Administrator** | Configure the system: users, roles, disciplines, clients, offices, deliverable types, phases, thresholds, templates. Can unarchive projects and perform data corrections. | All projects (read and write) | IT / application admin (2–3 people) |
 | **Executive** | Portfolio-level visibility. | Read all projects, portfolio dashboard, reports, resource view | Regional/business unit managers |
-| **Supervisor** | Staff workload visibility and reassignment for the people they supervise. | Read all projects; Resource View for supervised staff; may reassign tasks owned by supervised staff | Group/department managers |
+| **Supervisor** (resource / team manager) | Staff workload visibility, reassignment, and **resource planning** for the people they supervise. Owns the manager planning layer (§12.15): creates, publishes and confirms allocations for supervised staff. | Read all projects; Weekly Resource Planner for supervised staff (write) and all staff (read, published allocations only); may reassign tasks owned by supervised staff | Group/department managers, discipline managers |
 | **Project Manager** | May create projects and becomes PM of projects they create. | Read all projects (subject to 8.7); write only where they hold a project role | Staff designated as PMs |
 | **Standard User** | Default for every employee. | Read all projects (subject to 8.7); write only where they hold a project role | All staff |
 | **Read Only** | View-only account. Cannot comment or edit. | Read all projects (subject to 8.7) | Auditors, temporary staff, contractors (TBD) |
@@ -42,7 +42,7 @@ Employee **Marc**:
 
 | Context | Role(s) | What Marc can do |
 |---|---|---|
-| System | Supervisor (Civil group), Project Manager, Standard User | See all projects; see Resource View for the 12 civil staff; create projects |
+| System | Supervisor (Civil group), Project Manager, Standard User | See all projects; plan the 12 civil staff in the Weekly Resource Planner; create projects |
 | Project 1234 (DCC Dundurn Roads) | Discipline Lead — Civil | Manage all Civil deliverables/tasks on 1234; cannot move 1234's milestones |
 | Project 1301 | PM | Everything on 1301 |
 | Project 1187 | Team Member (assigned 3 tasks) | Update own tasks, comment |
@@ -62,7 +62,13 @@ Legend: **Y** = allowed; **O** = allowed for own items only (see 8.6); **D** = a
 | View project list and any project (subject to 8.7) | Y | Y | Y | Y | Y | Y |
 | Create a project | Y | — | — | Y | — | — |
 | View Portfolio Dashboard | Y | Y | Y | Y (own projects by default; all with filter) | — | — |
-| View Resource / Workload View | Y | Y (all) | Y (supervised staff, plus all in read) | Y (members of own projects) | — | — |
+| View Weekly Resource Planner (published and confirmed allocations) | Y | Y (all) | Y (all) | Y (members of own projects) | Y (self only, via My Work) | — |
+| View Private Draft allocations | Y (data correction only, logged) | — | O (creator only) | — | — | — |
+| Create / edit / delete manager allocations for a person | Y | — | Y (supervised staff) | — | — | — |
+| Publish / confirm / unpublish a manager allocation | Y | — | O (creator) | — | — | — |
+| Create / edit / delete own employee allocations and own leave | Y | Y | Y | Y | Y | — |
+| Record leave for a supervised person | Y | — | Y | — | — | — |
+| Set a person's weekly capacity and working days | Y | — | Y (supervised staff) | — | — | — |
 | Reassign tasks across projects for supervised staff | Y | — | Y | — | — | — |
 | Manage users, system roles, offices, disciplines, clients, deliverable types, phases | Y | — | — | — | — | — |
 | Manage project templates | Y | — | — | Y (Recommendation: also allow "Template Editor" as an Admin-granted flag) | — | — |
@@ -117,12 +123,15 @@ Ownership extends role permissions on individual items regardless of project rol
 - **Reviewer** of a task or deliverable: transition In Review → Revision Required / Complete (task) or In Review → Revision Required / Ready to Issue (deliverable); comment.
 - **Owner** of a deliverable, decision, risk, issue, or action: edit the item and change its status (within rules).
 - **Creator** of an item: edit it until someone else has acted on it (status change, comment by another user, assignment accepted); delete it if it is Not Started/Pending and has no links.
+- **Creator** of an allocation (§12.15): the only user who may edit or delete it, and (for manager allocations) change its visibility. An employee may comment on a Published or Confirmed allocation but not edit it; if they disagree they add their own entry. A Supervisor may not edit an employee-owned entry. A System Administrator may edit any allocation for data correction; the change is logged. This is the "coordinate without taking control of someone else's content" principle.
 
 ### 8.7 Visibility model
 
 **Assumption:** All active employees may view all projects (open-by-default). This is typical in consulting firms, maximises coordination value, and keeps the permission model simple.
 
 **TBD — Business Decision Required:** whether some projects must be **restricted** (e.g., confidential clients, litigation support, M&A due diligence). If yes, the design accommodates a per-project `visibility` flag (`Open` | `Restricted`), where Restricted projects are visible only to project members, System Administrators, and Executives. This is cheap to add at the data-model level and should be included in the schema from day one even if the UI control ships later. Recommendation: include the column and enforce it in the authorisation layer in MVP; expose the toggle only if the business confirms the need.
+
+**Private Draft allocations are the one exception to open-by-default.** A manager allocation in `Draft` visibility is visible only to its creator (and to System Administrators for data correction). It is excluded from the employee's My Work, from other managers' planner views, from totals shown to anyone but the creator, and from search. It is **included** in the creator's own totals and in the overlapping-plans conflict rule (RES-10), which reports the conflict to both managers without revealing the other manager's draft details beyond "another manager has planned N h". Enforcement is in the authorisation layer and in every query that aggregates hours, not in the UI.
 
 ### 8.8 How roles are assigned
 
@@ -198,11 +207,11 @@ Global navigation (persistent left rail or top bar; desktop-first):
 
 | Area | Contents | Audience |
 |---|---|---|
-| **My Work** (landing page) | My Tasks, My Reviews, My Deliverables, Waiting on Others, Blocking Others, My Projects, Upcoming Milestones | Everyone |
+| **Home** (landing page) | Role-based: Supervisors land on Manager Home (§13.19); everyone else lands on My Work (§13.10). A user with both sees Manager Home with a My Work tab. | Everyone |
 | **Projects** | Project list (search, filter); opens a project workspace | Everyone |
-| **Portfolio** (Phase 2) | Portfolio Dashboard, Projects At Risk | Executives, Supervisors, PMs |
-| **Resources** (Phase 2) | Resource / Workload View | Supervisors, Executives, PMs |
-| **Reports** | Deterministic report list with export | Everyone (scoped) |
+| **People** | People directory and Person Profile (§13.20): role, discipline, skills, manager, capacity, leave, current allocations | Everyone (read; edit per §8.5.1) |
+| **Resources** | Weekly Resource Planner (§13.11) | Supervisors, Executives, PMs (members of own projects); employees see their own row |
+| **Insights** | Reports (§19) and, in Phase 2, the Portfolio Dashboard and Projects At Risk | Everyone (scoped) |
 | **Notifications** | In-app notification centre | Everyone |
 | **Admin** | Users & roles, Disciplines, Clients, Offices, Deliverable Types, Phases, Templates, Settings | System Administrators |
 | Global search | Always visible search box | Everyone |
@@ -242,6 +251,7 @@ This section defines the conceptual model and all canonical vocabulary. The phys
 | Work | `Milestone`, `Deliverable`, `Task`, `TaskDependency`, `TaskParticipant` | Core hierarchy |
 | Registers | `Decision` (MVP-thin), `Risk` (P2), `Issue` (P2), `Meeting` (P2), `MeetingAction` (P2), `ItemLink` | `ItemLink` is a generic relation between any two items |
 | Collaboration | `Comment`, `Mention`, `DocumentLink` | Polymorphic target (item type + id) |
+| Resources | `Allocation`, `Leave`, `PersonCapacity`, `ResourceConflict` (materialised) | Manager-owned planning layer; see Section 12.15. `Allocation.project_id` is nullable: planning works for work that is not a Hub project. |
 | System | `ActivityLog`, `Notification`, `NotificationPreference`, `AttentionSnooze`, `SavedView` (P2) | |
 | Templates | `ProjectTemplate`, `TemplateDiscipline`, `TemplateMilestone`, `TemplateDeliverable`, `TemplateTask`, `TemplateDependency` (P2) | Snapshot-copied into projects |
 
@@ -323,6 +333,26 @@ Transitions are defined in Section 15 (rules T-10 to T-14). **Blocked is not a s
 
 `Open` → `In Progress` → `Complete`; `Cancelled`.
 
+#### Allocation visibility (manager allocations only)
+
+`Draft` → `Published` → `Confirmed`. Employee allocations are always `Confirmed`. Leave is always visible to the person, their supervisor and planner readers.
+
+| Status | Meaning |
+|---|---|
+| **Draft** | Private to the creating manager. Scenario planning, reserving capacity. Not shown to the employee. |
+| **Published** | Visible to the employee and to planner readers as a proposed assignment. Still adjustable. |
+| **Confirmed** | Part of the employee's normal planned workload. |
+
+Transitions are a single manager action in either direction (no approval workflow). `Confirmed` → `Draft` is allowed but logged and notifies the employee.
+
+#### Allocation confidence
+
+`Confirmed` · `Expected` · `Possible`. Independent of visibility: a manager may publish an `Expected` allocation to warn an employee of likely work. Totals are always shown per band (e.g. 30 h confirmed · 10 h expected · 8 h possible), never as one blended number.
+
+#### Allocation source category
+
+`MajorProject` (linked Hub project) · `OtherProject` (work outside the Hub) · `Proposal` · `BusinessDevelopment` · `Training` · `Admin` · `Supervision` · `InternalInitiative` · `FieldWork` · `Leave` (system-generated from `Leave`) · `Other`. Fixed list in MVP; labels are free text.
+
 #### Project health
 
 `Green` (On Track) · `Yellow` (Attention Required) · `Red` (At Risk / Critical) · `Grey` (Not Evaluated). Computed per Section 16, with optional PM override.
@@ -344,6 +374,12 @@ Indicators are computed, never stored as the primary status (they may be cached)
 | **Date Inconsistent** | Task, Deliverable | Task due after its deliverable's due date; deliverable due after its milestone date; successor starts before predecessor is due. |
 | **Slipped** | Milestone, Deliverable | Current date is later than original (baseline) date; shows days of slip. |
 | **Inactive Owner** | Task, Deliverable, Decision | Owner's user account is inactive. |
+| **Over-allocated** | Person-week | Confirmed + Expected hours (all visible sources, plus the viewer's own drafts) exceed capacity by more than `allocation_over_pct`. |
+| **Under-allocated** | Person-week | Confirmed + Expected + Possible hours are below `allocation_under_pct` of capacity for `allocation_under_weeks` consecutive weeks, and the person has no unestimated open tasks due in those weeks. |
+| **Overlapping Plans** | Person-week | Two or more managers have allocations (any visibility) on the same person-week whose sum plus other commitments exceeds capacity. |
+| **Leave Conflict** | Person-week | A Published or Confirmed allocation overlaps recorded leave such that remaining capacity is negative. |
+| **Stale Allocation** | Allocation | Not confirmed or edited for longer than `allocation_stale_days` while its weeks are in the future. Displayed as "needs confirmation". |
+| **Deliverable Pressure** | Person-week | A deliverable due in the week has an owner or task assignees who are Over-allocated that week. |
 
 > **Design note.** Why "Blocked" is an indicator and not a status: a blocked task is still *In Progress* or *Not Started* from a workflow point of view. If Blocked replaced the workflow status, unblocking it would require guessing which status to restore, and reporting would lose the distinction between "not started because blocked" and "half done and blocked". Modelling Blocked as a computed flag with an explicit list of blockers means it appears and disappears automatically as predecessors complete, and the workflow status is never corrupted. The same reasoning applies to Overdue.
 
@@ -368,7 +404,13 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 | `chain_depth_limit` | 10 | Maximum depth for dependency chain display |
 | `allow_self_review` | false | Whether assignee may be their own reviewer |
 | `complete_project_edit_window_days` | 30 | Days a Complete project stays editable by PM before Archive is suggested |
-| `default_weekly_capacity_hours` | 40 | Resource View (P2); **TBD** |
+| `default_weekly_capacity_hours` | 37.5 | Weekly Resource Planner; per-person override in `PersonCapacity` |
+| `planning_horizon_weeks` | 12 | Weeks shown in the planner (6–26 allowed) |
+| `allocation_over_pct` | 105% | Over-allocated indicator; rule RES-08 |
+| `allocation_under_pct` | 50% | Under-allocated indicator; rule RES-09 |
+| `allocation_under_weeks` | 2 | Consecutive weeks before Under-allocated fires |
+| `allocation_stale_days` | 28 | Stale Allocation indicator; rule RES-12 |
+| `allocation_max_hours_per_week` | 80 | Upper bound accepted by quick add (warning above capacity, hard stop above this) |
 | `org_time_zone` | **TBD** | "Today" for date rules (Recommendation: single organisation time zone in MVP) |
 | `digest_send_time_local` | 07:00 | Daily digest |
 

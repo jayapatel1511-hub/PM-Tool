@@ -205,23 +205,83 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 ---
 
-### 12.15 Resource / Workload View [Phase 2]
+### 12.15 Weekly Resource Planner [MVP-Required]
 
-**Purpose.** Give supervisors and PMs a defensible, cross-project view of who is carrying how much, who has capacity, and where deadlines collide — without pretending estimates are precise.
+**Purpose.** Give Supervisors a realistic, explainable weekly picture of who is doing what over the next 6–12 weeks, and let them plan in one or two interactions. The planner is the Hub's **resource engine**. It is informed by project data but **not controlled by it**: project workflows never create, move or delete allocations. The manager owns the planning decision.
 
-**Calculation (transparent and stated on the screen)**
+**Principles (from the product scope).** Fast first, control second. Explain every number. Show uncertainty. Flag, don't block. Support reality: work outside the Hub must appear, or someone with three small projects and a proposal looks idle.
 
-1. For each open task (not Complete/Cancelled/On Hold) with an assignee:
-   - `remaining_hours = estimated_hours × (1 − progress_pct/100)` if `estimated_hours` is set; otherwise the task is counted in an "unestimated" bucket and contributes no hours.
-   - Window = from `max(start_date, today)` to `due_date`. If `due_date < today` (overdue), the entire remainder lands in the current week. If `due_date` is null, remaining hours are shown in a "no due date" bucket and not spread.
-   - Spread `remaining_hours` evenly across working days (Mon–Fri) in the window; sum per ISO week.
-2. Per user per week: `assigned_hours`, `capacity_hours` (user override or `default_weekly_capacity_hours`), `load_pct = assigned / capacity`, `unestimated_task_count`, `overdue_count`, `task_count`, `project_count`.
-3. Indicators: **Over-assigned** when `load_pct > 110%` in the current or next week; **Under-assigned** when `load_pct < 40%` for the next 2 weeks *and* `unestimated_task_count = 0` (never call someone under-assigned when their work is unestimated); **Deadline cluster** when ≥ 3 tasks across ≥ 2 projects are due within any 3-day window in the next 14 days.
-4. The screen always shows the unestimated count next to the hours so the reader can judge reliability, and states the method in a help popover.
+#### 12.15.1 What the planner is not
 
-**What it deliberately does not do.** Timesheet reconciliation, actuals vs. estimate, leave/holiday calendars (Phase 3, or import from HR), utilisation targets, resource levelling, forecasting beyond 8 weeks, or capacity planning by role.
+Not a timesheet, not actuals, not payroll, not resource levelling, not a scheduler. It never assigns people automatically.
 
-**Views.** Person × week grid (heat-shaded load with the number visible) with expandable rows: Person → Project → Tasks (with due dates). Filters: supervisor, discipline, office, project, date range. Sort by load, overdue count, task count. Export.
+#### 12.15.2 Capacity and leave
+
+- Each person has `weekly_capacity_hours` (default `default_weekly_capacity_hours` = 37.5) and `working_days` (default Mon–Fri). Stored in `PersonCapacity` with `effective_from` so a change to part-time does not rewrite history.
+- `Leave` is a date range per person with full-day or hours-per-day. The system derives a `Leave` source row per affected week and reduces that week's capacity. No HR integration in MVP; leave is typed in by the person or their Supervisor.
+
+#### 12.15.3 Allocation
+
+One row = one block of recurring weekly hours for one person.
+
+| Field | Notes |
+|---|---|
+| `person_id` | Required. |
+| `created_by_id`, `owner_kind` | `Employee` (self-created) or `Manager`. Determines edit rights (§8.6). |
+| `hours_per_week` | Required. 0.5 h steps. Warning above capacity; hard stop above `allocation_max_hours_per_week`. |
+| `start_week`, `end_week` | ISO week (Monday date). Quick add sets both to the clicked week. |
+| `label` | Required free text ("proposal support", "Hwy 7 small project"). |
+| `source_category` | §10.2 list. Quick add defaults to `OtherProject` unless a project is linked. |
+| `project_id`, `project_discipline_id` | Optional. Linking a project sets `MajorProject` and lets the Project Dashboard show staffing. |
+| `confidence` | Confirmed / Expected / Possible. Employee entries default Confirmed; manager entries default Expected. |
+| `visibility` | Draft / Published / Confirmed (manager entries only). Employee entries are always Confirmed. |
+| `notes` | Optional. |
+| `last_confirmed_at` | Set on create, on edit, and by "still valid". Drives Stale Allocation. |
+
+#### 12.15.4 Two owners, one grid
+
+- **Employee-added work.** Any employee adds entries to their own row: "10 h proposal support", "3 h admin", "6 h small project". Employee-owned; a Supervisor sees them but cannot edit them.
+- **Manager planning.** A Supervisor adds entries to supervised staff. Default is a Private Draft so the manager can scenario-plan without creating expectations. Publish when the work is likely; Confirm when it is real. Manager-owned; the employee can comment but not edit.
+
+Neither owner overwrites the other. Both appear in the same weekly total, each labelled with its owner and source.
+
+#### 12.15.5 Quick add
+
+1. Click a person-week cell (or press Enter on a focused cell).
+2. Type `8 h proposal support` (also accepts `8h`, `8 — proposal support`, `~8 h upcoming review`; a leading `~` sets confidence Possible).
+3. Press Enter.
+
+Result: a one-week allocation with defaults from 12.15.3. Nothing else is asked. Everything else lives in the optional side panel (§13.11): visibility, confidence, start/end week, repeat, category, project link, notes, move to another person, convert to a task assignment.
+
+#### 12.15.6 Repeat, extend, drag
+
+An allocation spanning weeks is one row, not N copies. Extend or shorten by dragging the block's edge or editing `end_week`. Drag the block to another week to shift both dates; drag to another person to change `person_id` (permission-checked). "Repeat for N weeks" sets `end_week`. Copy creates a new row with the same fields.
+
+#### 12.15.7 Explainable totals
+
+Per person-week the planner shows capacity, planned hours by confidence band, remaining capacity (`capacity − confirmed − expected`), and an indicator. Clicking the total lists every contributing row: owner, label, source, hours, confidence, visibility. A viewer never sees a number they cannot decompose. Private Drafts appear only in their creator's view and totals (§8.7).
+
+#### 12.15.8 Project-derived demand (context, not load) [MVP-Recommended]
+
+The v1.0 calculation is retained as a **context column**: for each open task with `estimated_hours`, spread remaining hours over working days between `max(start_date, today)` and `due_date`, sum per ISO week per assignee; overdue remainder lands in the current week; unestimated tasks are counted, not spread. Show it beside planned hours as "task estimates: 14 h (3 unestimated)". It is never added to planned hours. It exists to prompt the manager ("the Hub thinks this person has 14 h of task work next week and you have planned 0 h against that project").
+
+#### 12.15.9 Horizon and precision
+
+Near term (0–6 weeks): person-level hours. Mid term (6–12 weeks): same model, Expected/Possible dominate. Beyond the horizon the planner does not pretend to know; **role-level demand** ("one civil technologist in January") is Phase 2 (FR-RES-16).
+
+#### 12.15.10 Conflicts
+
+Rules RES-08…RES-13 (§15.13) run nightly and on change. Results are warnings in the grid and on Manager Home. Nothing is blocked. Overlapping Plans tells each manager "another manager has planned N h on this person in week W" and leaves resolution to them.
+
+#### 12.15.11 Connected workflows
+
+| Trigger elsewhere in the Hub | Effect in the planner |
+|---|---|
+| PM moves a deliverable earlier | Deliverable Pressure may fire for the week; manager decides whether to re-plan. Nothing moves automatically. |
+| Employee records leave | Capacity drops; Leave Conflict may fire against Published/Confirmed allocations. |
+| Supervisor reassigns a task | No allocation change (tasks are not load). The context column updates. |
+| Manager publishes an allocation linked to a project | Project Dashboard discipline summary shows planned staffing hours for the week. |
+| Allocation references a project not in the Hub | Nothing; that is the point. Label and `OtherProject` carry it. |
 
 ---
 

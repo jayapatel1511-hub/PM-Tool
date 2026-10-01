@@ -108,6 +108,30 @@ C-01 to C-08 as in §12.8; DOC-01 to DOC-04 as in §12.7.
 
 ---
 
+### 15.13 Resource planning rules (RES)
+
+| ID | Rule |
+|---|---|
+| RES-01 | A week is identified by its ISO Monday date. `start_week ≤ end_week`. An allocation contributes `hours_per_week` to every week in its range. |
+| RES-02 | `hours_per_week` is a multiple of 0.5, greater than 0, and at most `allocation_max_hours_per_week`. Values above the person's capacity are accepted with a warning. |
+| RES-03 | Weekly capacity for a person-week = `PersonCapacity.weekly_capacity_hours` effective for that week − leave hours in that week. Leave hours for a full day = capacity ÷ number of working days. Capacity may not go below 0. |
+| RES-04 | Employee-owned allocations have `visibility = Confirmed` and `owner_kind = Employee`; only the person may edit or delete them. Manager-owned allocations may be edited, deleted or re-scoped only by their creator (plus Sys Admin, logged). |
+| RES-05 | Visibility transitions are single actions by the creator. `Draft → Published`, `Published → Confirmed`, `Confirmed → Published`, `Published → Draft`, `Confirmed → Draft`. Transitions out of Draft notify the person; `→ Draft` from a visible state notifies the person that a planned assignment was withdrawn. |
+| RES-06 | A Draft allocation is returned only to its creator and System Administrators. It is excluded from everyone else's totals, lists, search and notifications, except as stated in RES-10. |
+| RES-07 | Planned hours per person-week are reported per confidence band. `remaining = capacity − confirmed − expected`. Possible hours are shown but not subtracted. For the viewer, their own Draft allocations are included in these figures; other managers' Drafts are not. |
+| RES-08 | **Over-allocated** when `(confirmed + expected) > capacity × allocation_over_pct`, using visibility rules from RES-07 for the viewer. Severity Warning; Critical when more than 1.5 × capacity. |
+| RES-09 | **Under-allocated** when `(confirmed + expected + possible) < capacity × allocation_under_pct` for `allocation_under_weeks` consecutive weeks starting at or after the current week, **and** the person has no open task without `estimated_hours` due in those weeks. Severity Info. Never fires for weeks with leave covering 50 % or more of capacity. |
+| RES-10 | **Overlapping Plans** when manager allocations from two or more distinct creators (any visibility) exist on the same person-week and `Σ all allocations (any visibility) + leave > capacity`. Reported to every creator involved, naming the other managers and their hours but not their labels or notes. Not reported to the person unless all involved allocations are Published or Confirmed. No allocation is changed. |
+| RES-11 | **Leave Conflict** when leave hours in a week > 0 and `(confirmed + expected, Published or Confirmed only) > capacity` for that week. Reported to the person and to creators of the involved allocations. |
+| RES-12 | **Stale Allocation** when `end_week ≥ current week` and `now − last_confirmed_at > allocation_stale_days`. Any edit, visibility change, or "still valid" resets `last_confirmed_at`. Shown as "needs confirmation"; totals still include it. |
+| RES-13 | **Deliverable Pressure** when a deliverable not Issued/Accepted/Cancelled is due in week W and its owner, or any assignee of its open tasks, is Over-allocated in W. Reported to the deliverable's PM and the person's Supervisor. |
+| RES-14 | Conflicts are materialised in `resource_conflict` keyed by (`rule_id`, `person_id`, `week`); they persist while the condition holds and disappear when it clears. Snooze follows ATT-03. |
+| RES-15 | Evaluation runs on every allocation, leave or capacity write (for the affected person and weeks) and nightly for all people within the horizon. |
+| RES-16 | Project workflows never create, modify or delete allocations. Deleting or archiving a project sets `project_id` to null on its allocations and keeps the label; the source becomes `OtherProject`. Deactivating a user keeps their allocations read-only and lists them in the Reassign Work tool (FR-ADM-02). |
+| RES-17 | Task `estimated_hours` are never added to planned hours. They feed the context column only (§12.15.8). |
+
+---
+
 ## 16. Project Health Logic
 
 ### 16.1 Principles
@@ -226,6 +250,13 @@ Channels: **App** = in-app notification centre; **Email** = immediate email; **D
 | Health override set/expired | PM | ● | | |
 | Work reassigned away from you | Previous assignee | ● | | |
 | Predecessor of your task was deleted / dependency removed | Successor assignee | ● | | |
+| Manager allocation published or confirmed for you | Person | ● | | ● |
+| Manager allocation withdrawn (visible → Draft) or deleted | Person | ● | | |
+| Leave recorded for you by your Supervisor | Person | ● | ● | |
+| Overlapping Plans on someone you supervise (RES-10) | Managers involved | ● | | ● |
+| Over-allocated / Leave Conflict on someone you supervise (RES-08, RES-11) | Supervisor | ● | | ● |
+| Deliverable Pressure (RES-13) | PM, Supervisor | ● | | ● |
+| Your allocation needs confirmation (RES-12) | Creator | | | ● |
 
 ### 17.3 Daily digest
 
@@ -301,7 +332,9 @@ All reports are deterministic queries over current data (or snapshots where note
 | Projects At Risk | office, PM, health | Project, PM, computed/reported health, why, next submission | Portfolio | P2 |
 | Open Issues / High Risks | project(s), severity | Register rows | Project / All | P2 |
 | Meeting Actions Outstanding | project, owner type | Action rows | Project | P2 |
-| Workload by Employee | supervisor, discipline, weeks | Person, week columns (hours/capacity), open tasks, unestimated, overdue | Resources | P2 |
+| Workload by Person | supervisor, discipline, weeks, include possible | Person, week columns (confirmed / expected / possible / capacity / remaining), leave, conflicts; Drafts only for the caller | Resources | MVP |
+| Team Capacity | supervisor or discipline, weeks | Week columns: capacity, confirmed, expected, possible, remaining, people over, people under | Resources | MVP |
+| Allocations by Source | supervisor, discipline, weeks, source category | Hours per source category per week; lists allocations with no linked project | Resources | MVP |
 | Workload by Discipline | office, weeks | Discipline, week columns aggregated | Resources | P2 |
 | Health History | project(s), date range | Date, computed, reported (from snapshots) | Portfolio | P2 |
 | Attention Items Export | project(s), severity | Rule, severity, item, why, owner, age | Project / All | P2 |

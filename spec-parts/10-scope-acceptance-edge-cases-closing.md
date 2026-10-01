@@ -32,7 +32,7 @@
 | Reassign-work tool for leavers | **MVP-Recommended** | Turnover is certain; the alternative is manual reassignment task by task. |
 | Project templates | **Phase 2** | High value but the template editor is a significant UI; MVP projects can be set up manually or by cloning a project (**Recommendation: include "clone project structure" as a cheap MVP stopgap** — copies disciplines, milestones (undated), deliverables, tasks (unassigned), and dependencies from an existing project). |
 | Risk / Issue registers, Meeting Actions | **Phase 2** | Valuable but not needed to answer the core question; can be represented in MVP by tasks and comments. |
-| Resource / Workload view | **Phase 2** | Depends on estimated hours being populated, which requires MVP adoption first. |
+| Weekly Resource Planner | **MVP-Required** | Changed in v1.1. The v1.0 view derived load from task estimates and so had to wait for estimates to be populated. The planner now takes manually entered allocations as the source of load, so it is useful from day one and is the feature most likely to retire the managers' spreadsheets. Task estimates remain a context column. |
 | Portfolio dashboard | **Phase 2** | Requires enough Active projects in the system to be meaningful; the Project List with health column covers the interim. |
 | Saved views | **Phase 2** | URL-encoded filters cover MVP. |
 | Tasks/dependencies on the timeline, drag to reschedule | **Phase 2** | Scheduling-adjacent; risk of scope creep. |
@@ -54,10 +54,13 @@
 12. Notifications: in-app, immediate email, daily digest, preferences.
 13. Global search, list filters, sorting, grouping, column chooser, exports.
 14. Activity log on all specified changes; item and project history.
-15. Core reports (§19 MVP rows).
+15. Core reports (§19 MVP rows), plus the Workload by Person and Team Capacity reports.
+16. Resource planning (§12.15): `PersonCapacity`, `Leave`, `Allocation` with owner, source category, confidence and visibility; server-side Draft filtering; quick add; repeat, extend, drag, copy; explainable per-band totals; conflict rules RES-08…RES-13 materialised and notified.
+17. Screens: Weekly Resource Planner (§13.11), Manager Home (§13.19), People and Person Profile (§13.20), My Week strip on My Work (§13.10).
+18. Thin Decision Register (§12.9) — promoted from Recommended; the product scope lists decisions in every role's view.
 
 **Recommended (ship if schedule allows; each independently cuttable)**
-Thin Decision Register + External Parties; read-only Timeline; slip and due-change tracking; health snapshots; attention snooze; Restricted visibility enforcement; reassign-work tool; clone project structure; "Copy summary" on Weekly Coordination; milestone date cascade to deliverables.
+External Parties; project-derived demand context column (§12.15.8); Deliverable Pressure rule RES-13; thin Risk and Issue registers (same pattern as Decisions); read-only Timeline; slip and due-change tracking; health snapshots; attention snooze; Restricted visibility enforcement; reassign-work tool; clone project structure; "Copy summary" on Weekly Coordination; milestone date cascade to deliverables.
 
 ### 27.3 Explicitly not in MVP (and the consequence)
 
@@ -66,7 +69,8 @@ Thin Decision Register + External Parties; read-only Timeline; slip and due-chan
 | Templates | Projects built manually or cloned from a reference project. |
 | Risks, Issues, Meeting Actions | Tracked as tasks/comments or outside the Hub. |
 | Portfolio Dashboard | Executives use Project List sorted by health plus Projects At Risk report (P2) — interim: Project List. |
-| Resource View | Supervisors use "Tasks by assignee" filter across projects (My Work read for supervised staff). |
+| Role-level long-term demand | Managers plan named people only; beyond 12 weeks they plan outside the Hub. |
+| HR / leave system import | Leave is typed in by the person or Supervisor. |
 | Tasks on the timeline; drag scheduling | Dates edited in lists/panels. |
 | Saved views | Bookmark URLs. |
 | Teams notifications | Email and in-app only. |
@@ -82,7 +86,7 @@ Ordered by recommended sequence; each item lists what it depends on.
 3. **Risk Register and Issue Register** (§12.10) — adds attention rule A-07 and Red health input.
 4. **Meeting Actions** (§12.11) — integrates with Weekly Coordination meeting mode (create actions inline; "Convert to task").
 5. **Portfolio Dashboard** (§13.12) — uses health snapshots for trends; Projects At Risk and Health History reports.
-6. **Resource / Workload View** (§12.15, §13.11) — requires estimated hours adoption; Workload reports.
+6. **Resource planning extensions** — role-level long-term demand without a named person (FR-RES-16); skills-based search on Person Profile tags; capacity and staffing-pressure trends on the Portfolio Dashboard from `person_week_state` history; project-derived demand context column if cut from MVP.
 7. **Improved Timeline** — tasks, dependency arrows, drag-to-reschedule with confirmation, baseline ghosts, milestone cascade to tasks.
 8. **Saved views** (§18.4) — personal and project-shared.
 9. **Advanced notifications** — weekly PM summary email; per-project mute; digest content preferences; server-sent events for live unread counts.
@@ -99,7 +103,7 @@ Ordered by recommended sequence; each item lists what it depends on.
 2. **SharePoint integration** — browse and pick documents from the project library (Graph); still no storage in the Hub.
 3. **ERP / Vantagepoint integration** — inbound project master data sync (**TBD**: capabilities, licensing, ownership of fields). Nothing is assumed about ERP capabilities in this specification.
 4. **Project financial information (read-only display)** — only if sourced from ERP; the Hub never becomes a financial system.
-5. **Utilisation / resource planning** — availability from HR/leave systems, capacity by role, longer horizons; still not levelling or timesheets.
+5. **Resource planning integrations** — leave and availability import from HR systems; planned vs actual effort from timesheet data (FR-RES-17), for planning improvement only, never individual performance tracking; still not levelling or timesheets in the Hub.
 6. **Client / external actions** — optional read-only external access or emailed action lists to external parties (security review required).
 7. **Advanced portfolio reporting** — cross-office comparisons, discipline throughput, submission on-time rates from snapshots.
 8. **Advanced administration** — per-project threshold overrides; template analytics; bulk data tools.
@@ -299,6 +303,23 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 
 ---
 
+### 31.16 Resource planning (AC-RES)
+
+- **AC-RES-01** Given a Supervisor focuses a supervised person's week cell and types `8 h proposal support` then Enter, Then one allocation exists for that person and week with 8.0 h, label "proposal support", source `OtherProject`, confidence Expected, visibility Draft, and no other field was required.
+- **AC-RES-02** Given the allocation from AC-RES-01 is Draft, When the person opens My Work › My Week, Then the week total excludes the 8 h and the allocation is not listed; When another Supervisor opens the planner, Then the same holds.
+- **AC-RES-03** Given the creator publishes the allocation, Then the person receives an in-app notification and the 8 h appears in their My Week as Expected; the activity log records the transition.
+- **AC-RES-04** Given a person with capacity 37.5 h, 30 h Confirmed and 10 h Expected in week W, Then the planner shows remaining −2.5 h, Over-allocated fires at Warning severity, and the contribution list for the cell shows every allocation with owner, label, source, hours, confidence and visibility.
+- **AC-RES-05** Given manager A has 16 h Draft and manager B has 16 h Draft on the same person-week with 20 h Confirmed and capacity 37.5 h, Then RES-10 fires for both A and B, each sees "another manager has planned 16 h", neither sees the other's label, the person sees nothing, and no allocation changed.
+- **AC-RES-06** Given an employee adds `6 h small project` to their own row, Then the allocation is employee-owned, visibility Confirmed, and their Supervisor can view but receives a permission error on edit.
+- **AC-RES-07** Given an allocation spanning weeks 1–3, When the creator drags its right edge to week 6, Then `end_week` is week 6, there is still exactly one allocation row, and each of weeks 1–6 shows its hours.
+- **AC-RES-08** Given a person records 2 days of leave in week W (5 working days, 37.5 h), Then capacity for W is 22.5 h, a Leave source row of 15 h is shown, and any Published/Confirmed allocations exceeding 22.5 h raise Leave Conflict.
+- **AC-RES-09** Given an allocation whose `last_confirmed_at` is older than `allocation_stale_days` and whose `end_week` is in the future, Then it is marked "needs confirmation" in the planner and on Manager Home; When the creator clicks "still valid", Then the flag clears.
+- **AC-RES-10** Given a task with 14 h estimated and no allocation against its project for the assignee next week, Then the planner's context column shows "task estimates: 14 h" and planned hours remain unchanged.
+- **AC-RES-11** Given a project is archived, Then its allocations keep their label and hours, `project_id` is null, and the source category is `OtherProject`.
+- **AC-RES-12** Given a Supervisor with 12 supervised people over a 12-week horizon, Then the planner payload returns in under 1.5 s at the 95th percentile with 500 allocations, and Manager Home in under 2 s.
+
+---
+
 ## 32. Edge Cases and Recommended Handling
 
 | ID | Edge case | Handling |
@@ -335,7 +356,7 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | Risk | Impact | Mitigation |
 |---|---|---|
 | **Adoption**: team members do not update tasks, so indicators are wrong and PMs stop trusting the tool. | High | My Work as the single list; minimal required fields; weekly coordination run from the tool creates the habit; digest reminders; pilot with 2–3 motivated PMs; measure update frequency. |
-| **Data quality**: missing due dates, unassigned tasks, no estimates. | Medium | Attention rules A-08/A-09/A-13 make gaps visible; Resource View (P2) shows unestimated counts rather than hiding them; templates (P2) seed structure. |
+| **Data quality**: missing due dates, unassigned tasks, no estimates. | Medium | Attention rules A-08/A-09/A-13 make gaps visible; the planner's context column shows unestimated counts rather than hiding them; templates (P2) seed structure. |
 | **Notification fatigue** leads to filters that hide everything. | Medium | Digest-first defaults; transition-based immediate notifications only; per-user preferences; monitor unsubscribe rates in pilot and adjust defaults. |
 | **Rule tuning**: thresholds produce too many or too few attention items. | Medium | All thresholds configurable; start with defaults; review attention volume per project weekly during pilot; keep the rule set small. |
 | **Over-reliance on health colours** by management. | Medium | Computed and reported shown together; "why" always available; override expiry; training message: health summarises indicators, it does not predict. |
@@ -373,7 +394,12 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | Q15 | CI/CD platform (GitHub Actions vs Azure DevOps) | Tooling alignment | Whichever the organisation already uses |
 | Q16 | Pilot group and success metrics | Rollout plan | 3 PMs, 6 projects, 8 weeks |
 | Q17 | Idle session timeout | Security vs convenience | 8 hours |
-| Q18 | Weekly capacity default and whether under-assignment should be shown (P2) | Workload view sensitivity | 40 h; show with caveats |
+| Q18 | Weekly capacity default | Planner | 37.5 h (product scope §12); org setting |
+| Q19 | Product name in the UI: "Hub" or "Tuesday"? | Branding, URL `pm.engcalchub.com`, Entra app name | Tuesday, pending confirmation; this document keeps "the Hub" until renamed |
+| Q20 | May an employee edit a Published or Confirmed manager allocation? | Trust model §8.6 | No; comment only, or add their own entry |
+| Q21 | Does Confirmed visibility need the employee to accept? | Workflow weight | No; manager action only (product scope §17) |
+| Q22 | Should other managers see that a Draft exists on a person (count only), or nothing until RES-10 fires? | Cross-team transparency vs private planning | Nothing until RES-10 fires |
+| Q23 | Minimum horizon for Under-allocated to be meaningful during pilot (`allocation_under_weeks`) | Noise on Manager Home | 2 weeks; raise to 3 if noisy |
 
 ---
 
@@ -383,11 +409,12 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 
 | Stage | Purpose | Exit criteria |
 |---|---|---|
-| **0. Discovery & design sprint** | Confirm decisions Q1–Q13; wireframes for My Work, Project Dashboard, Task List/Panel, Weekly Coordination; validate rules with 3 PMs using real project data on paper; finalise discipline and deliverable type lists | Decisions recorded as ADRs; wireframes approved; test data set prepared (DCC Dundurn Roads-style project) |
+| **0. Discovery & design sprint** | Confirm decisions Q1–Q13 and Q18–Q23; wireframes for My Work, Project Dashboard, Task List/Panel, Weekly Coordination, Weekly Resource Planner, Manager Home; validate rules with 3 PMs using real project data on paper; finalise discipline and deliverable type lists | Decisions recorded as ADRs; wireframes approved; test data set prepared (DCC Dundurn Roads-style project) |
 | **1. Foundations** | Repo, CI/CD, IaC, environments, SSO end-to-end, user provisioning, admin reference data, activity log framework, design system skeleton | A user can sign in, see their name, and an Admin can maintain disciplines |
 | **2. Core structure** | Projects, team, disciplines, milestones, deliverables, tasks (CRUD, workflow, review), comments, links | A project can be fully built by hand and worked through review |
 | **3. Dependencies and rules** | Dependencies, evaluation module, state tables, outbox worker, indicators, milestone status, health, attention engine, nightly jobs | Worked examples in §15.12 pass as automated tests and show correctly in the UI |
 | **4. Coordination surfaces** | Project Dashboard, My Work, Weekly Coordination (with meeting mode), Kanban, Milestone view, Deliverables Register polish, search, filters, exports | A PM can run a coordination meeting on the test project without leaving the app |
+| **4b. Resource planning** | Capacity, leave, allocations, planner grid with quick add and drag, Draft filtering, conflict rules, Manager Home, People; can start in parallel with stage 3 because it does not depend on the task evaluation engine | A Supervisor plans a 12-person team for 12 weeks from a spreadsheet export in under an hour, and AC-RES-01…12 pass |
 | **5. Notifications and recommended items** | In-app centre, email, digest, preferences; Decision Register; Timeline; snooze; reassign tool; clone project | Pilot readiness |
 | **6. Hardening and pilot** | Accessibility audit, performance test with synthetic scale, security review, runbooks, training material; pilot with 3 PMs for 8 weeks; threshold tuning | Pilot success metrics met; go/no-go for organisation rollout |
 | **7. General availability** | Rollout by office/group; support process; backlog triage for Phase 2 | — |
@@ -410,6 +437,7 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | **E11 Decisions & External Parties** (Rec) | Decision CRUD/lifecycle, external parties, item links, decision-block rule, register screen, dashboard/coordination integration | E7 | M |
 | **E12 Search, Filters, Reports** | FTS indexing, global search, key lookup, filter bar/URL state, group-by, column chooser, core reports, CSV/XLSX export | E5 (usable earlier for projects) | M |
 | **E13 Timeline & Extras** (Rec) | Read-only Timeline, clone project structure, reassign-work tool, milestone cascade | E7 | M |
+| **E15 Resource Planning** | `person_capacity`, `leave`, `allocation`, `allocation_week`, `person_week_state`, `resource_conflict`; quick-add parser; visibility enforcement in the Resources module and every aggregate query; rules RES-01…17; planner grid (keyboard, drag, side panel); My Week strip; Manager Home; People and Person Profile; workload reports; notifications for allocation events | E1, E2 (data); E7 for context column and Deliverable Pressure; E9 for notifications; E10 for dashboard staffing column | XL |
 | **E14 Hardening & Pilot** | Accessibility, performance, security review, runbooks, training, pilot support, threshold tuning | All | M |
 
 ```mermaid
@@ -435,13 +463,18 @@ flowchart TD
   E11 --> E14
   E12 --> E14
   E13 --> E14
+  E1 --> E15[E15 Resource Planning]
+  E2 --> E15
+  E7 -.context column.-> E15
+  E9 --> E15
+  E15 --> E14
 ```
 
 **Parallelisation.** With two developers, E2 runs alongside E1; E8 and E12 can proceed while E7 is built; front-end work on E10 can start against mocked state payloads once E7's contracts are fixed. **Assumption:** a team of 2–3 developers plus a part-time designer delivers Stages 1–5 in roughly 5–7 months; this is a planning assumption, not a commitment, and depends on Q1 and team availability.
 
 ### 35.3 Phase 2 sequence
 
-Templates → Risks/Issues → Meeting Actions → Portfolio Dashboard → Resource View → Improved Timeline → Saved views → Advanced notifications → Deliverable dependencies/lag → Working-day calendars.
+Templates → Risks/Issues → Meeting Actions → Portfolio Dashboard → Resource planning extensions → Improved Timeline → Saved views → Advanced notifications → Deliverable dependencies/lag → Working-day calendars.
 
 ---
 

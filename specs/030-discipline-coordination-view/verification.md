@@ -35,3 +35,9 @@ In a separate local Chrome session against the same API and persistent synthetic
 ## 2026-10-01 Codex recovery checkpoint
 
 Meeting action reuse is a versioned idempotent command adding only missing source/affected-work links, with no repeated action notification. Recovered focused MeetingActions tests passed 7/7; handoff/grouping tests passed 14/14. A live Chrome-to-API rehearsal on the isolated persistent local review copy reused an action for DEMO-101-CH001, retained the link and default selection after reload, and created zero new actions. Full populated print/export/saved-view and deployed acceptance remain UNPROVEN.
+
+### Final local projection rehearsal
+
+The live Chrome CSV contained exactly the 4 records of the tested server projection and its evaluation timestamp.
+Print media hid export/print controls and generated a PDF. This closes those bounded local checks; full visual print,
+restricted/large populated browser reconciliation, saved-view and current hosted acceptance remain UNPROVEN.

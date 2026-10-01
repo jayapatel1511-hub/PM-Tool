@@ -315,3 +315,11 @@ Ran in real Chrome (Playwright 1.61, `channel: 'chrome'`, Development sign-in) a
 ## 2026-10-01 Codex recovery checkpoint
 
 Constraint/promise keys, links, export/search and notification text were integrated. Live Chrome against the isolated populated local review copy showed the constraint key, retained Verified Removed/evidence, opened the prerequisite inspector, returned focus on Escape and withheld Sign promise from the chair. Migration rehearsal preserved 3 projects, 7 tasks, 1 constraint and 1 promise with 27 migrations. Applicability now recomputes live checks using the organisation date; combined checks are recorded separately. Hosted performer/supervisor acceptance remains UNPROVEN.
+
+### Final local lifecycle rehearsal
+
+The isolated live Chrome/API rehearsal completed performer signatures with Ready-at-signature, snapshot freeze and
+Met/Not Met/Withdrawn closure. Reload retained history and Met evidence; withdrawal kept the original denominator at
+3. The applicability setup was explicitly synthetic and carried reasons/evidence, so it proves workflow behavior only.
+The complete integrated suite then passed 568/568. Real hosted password, populated company and engineering acceptance
+remain UNPROVEN; see the current recovery checkpoint.

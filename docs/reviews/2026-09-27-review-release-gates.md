@@ -64,3 +64,14 @@ Rederived at resume: branch `codex/pm-review-release` at `414ac9e`, draft PR #13
 - **BLOCKED, public hostname:** named tunnel `pm-tool` exists with no connections; `pm.engcalchub.com` has no DNS answer. Publish only after activation and the timer pass.
 - **FAIL, off-host scheduled backup:** the Mac whole-host restic export has failed since 2026-09-21; the 50 GB Workspace export (40 GB dashboard data) exceeds the job's 2-hour limit. A PM-Tool-only encrypted off-host copy needs Jay's approval; it was not configured.
 - **Decisions recorded** in `docs/decisions.md` (FR-RDY-02 task-start gate, Submission Gate relationship, explicit Coordination issue type with backfill, coordination-day weeks).
+
+## 2026-10-01 Codex recovery checkpoint
+
+Latest re-derived implementation and acceptance evidence is in
+[the recovery checkpoint](../handoffs/2026-10-01-codex-review-recovery.md). The combined local suite passed 568/568,
+coverage gates passed, and the live synthetic performer/signature/snapshot/outcome and action-reuse/CSV/print-control
+rehearsals passed. The final security review found and repaired dashboard/following/digest activity privacy paths.
+Earlier CI `a8cd339` passed; later heads require their own exact-head CI. Homedev is reachable but still runs
+`1c59e33`, requires interactive sudo for activation, and has no public DNS/tunnel. No merge, current review deployment,
+company pilot acceptance or production deployment is claimed. The local HTTPS password browser rehearsal was blocked
+by certificate trust; current hosted password/browser acceptance remains unproven.

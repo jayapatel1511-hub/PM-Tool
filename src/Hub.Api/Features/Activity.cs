@@ -45,15 +45,26 @@ public static class ActivityEndpoints
     /// Apply the source records' privacy boundaries to every project/item history and export, including old log rows.
     public static async Task<IQueryable<ActivityLog>> Visible(HubDb db, Access access, Guid projectId)
     {
-        var (_, ctx) = await access.Project(projectId, false);
+        await access.Project(projectId, false); // preserve restricted-project 404 semantics before bulk filtering
+        return Visible(db, access, new[] { projectId });
+    }
+
+    /// Apply the same source privacy boundary to several already-authorized projects in one SQL query.
+    public static IQueryable<ActivityLog> Visible(HubDb db, Access access, IReadOnlyCollection<Guid> projectIds)
+    {
         var actor = access.Actor;
-        var pm = Permissions.IsPM(actor, ctx);
-        var leads = ctx.LeadDisciplineIds.ToArray();
-        var entries = db.TimeEntries.IgnoreQueryFilters().Where(e => e.ProjectId == projectId &&
-            (e.UserId == actor.Id || pm || db.Tasks.IgnoreQueryFilters().Any(t => t.Id == e.TaskId && leads.Contains(t.ProjectDisciplineId))
-                || actor.Supervisor && db.Users.Any(u => u.Id == e.UserId && u.SupervisorId == actor.Id))).Select(e => (Guid?)e.Id);
-        return db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == projectId
-            && (a.ItemType != ItemType.TimeEntry || entries.Contains(a.ItemId))
+        var visibleProjects = access.VisibleProjectIds().Where(id => projectIds.Contains(id));
+        var pmProjects = db.Projects.Where(p => visibleProjects.Contains(p.Id) &&
+            (actor.Admin || p.ProjectManagerId == actor.Id || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == actor.Id && m.RemovedAt == null && m.Roles.Contains(ProjectRole.PM))))
+            .Select(p => p.Id);
+        var leadTasks = db.Tasks.IgnoreQueryFilters().Where(t => visibleProjects.Contains(t.ProjectId)
+            && db.ProjectDisciplines.Any(d => d.Id == t.ProjectDisciplineId && d.ProjectId == t.ProjectId && d.LeadUserId == actor.Id)).Select(t => t.Id);
+        var directReports = db.Users.Where(u => u.SupervisorId == actor.Id).Select(u => u.Id);
+        var visibleEntries = db.TimeEntries.IgnoreQueryFilters().Where(e => visibleProjects.Contains(e.ProjectId) &&
+            (e.UserId == actor.Id || pmProjects.Contains(e.ProjectId) || leadTasks.Contains(e.TaskId)
+                || actor.Supervisor && directReports.Contains(e.UserId))).Select(e => e.Id);
+        return db.ActivityLog.AsNoTracking().Where(a => a.ProjectId != null && visibleProjects.Contains(a.ProjectId.Value)
+            && (a.ItemType != ItemType.TimeEntry || visibleEntries.Select(id => (Guid?)id).Contains(a.ItemId))
             && (a.ItemType != ItemType.CalendarEvent || !db.CalendarEvents.Any(e => e.Id == a.ItemId && e.Visibility == EventVisibility.Private)));
     }
 

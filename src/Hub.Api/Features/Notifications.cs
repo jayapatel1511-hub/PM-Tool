@@ -49,7 +49,7 @@ public static class NotificationEndpoints
             var latest = await permitted.MaxAsync(n => (DateTimeOffset?)n.CreatedAt);
             var follows = await db.Follows.AsNoTracking().Where(f => f.UserId == me.Id && f.Level != FollowLevel.Muted && visible.Contains(f.ProjectId)).Select(f => new { f.ProjectId, f.LastSeenAt }).ToListAsync();
             var ids = follows.Select(f => f.ProjectId).ToList();
-            var activity = ids.Count == 0 ? null : await (await VisibleFollowed(db, access, ids, me.Id)).MaxAsync(a => (DateTimeOffset?)a.OccurredAt);
+            var activity = ids.Count == 0 ? null : await VisibleFollowed(db, access, ids, me.Id).MaxAsync(a => (DateTimeOffset?)a.OccurredAt);
             var seen = follows.Max(f => f.LastSeenAt);
             return new { Stamp = $"{unread}:{latest?.UtcTicks}:{activity?.UtcTicks}:{seen?.UtcTicks}" };
         });
@@ -174,7 +174,7 @@ public static class NotificationEndpoints
             var (pg, size) = Http.Paging(page, pageSize ?? 100);
             var followed = await Followed(db, access, me.Id);
             var ids = followed.Where(f => projectId is null || f.ProjectId == projectId).Select(f => f.ProjectId).ToList();
-            var q = ActivityEndpoints.Filter(await VisibleFollowed(db, access, ids, me.Id),
+            var q = ActivityEndpoints.Filter(VisibleFollowed(db, access, ids, me.Id),
                 null, null, null, null, null, null, importantOnly);
             var total = await q.CountAsync();
             var rows = await q.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Skip((pg - 1) * size).Take(size).ToListAsync();
@@ -251,14 +251,6 @@ public static class NotificationEndpoints
         return result;
     }
 
-    static async Task<IQueryable<ActivityLog>> VisibleFollowed(HubDb db, Access access, IEnumerable<Guid> projectIds, Guid userId)
-    {
-        IQueryable<ActivityLog>? query = null;
-        foreach (var projectId in projectIds.Distinct())
-        {
-            var visible = (await ActivityEndpoints.Visible(db, access, projectId)).Where(a => a.ActorUserId != userId);
-            query = query is null ? visible : query.Concat(visible);
-        }
-        return query ?? db.ActivityLog.AsNoTracking().Where(_ => false);
-    }
+    static IQueryable<ActivityLog> VisibleFollowed(HubDb db, Access access, IEnumerable<Guid> projectIds, Guid userId) =>
+        ActivityEndpoints.Visible(db, access, projectIds.Distinct().ToArray()).Where(a => a.ActorUserId != userId);
 }

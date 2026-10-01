@@ -150,6 +150,18 @@ public sealed class NotificationSearchTests(HubFactory f)
     }
 
     [Fact]
+    public async Task The_pulse_scopes_many_followed_projects_in_one_activity_query()
+    {
+        var alex = f.As(TestData.Alex);
+        for (var i = 0; i < 12; i++)
+        {
+            var p = await d.Project();
+            (await alex.Put($"/api/v1/projects/{p.Id}/follow", new { level = FollowLevel.AllActivity })).EnsureSuccessStatusCode();
+        }
+        (await alex.GetAsync("/api/v1/me/notifications/pulse")).EnsureSuccessStatusCode();
+    }
+
+    [Fact]
     public async Task Search_finds_descriptions_and_live_comments_within_what_the_person_may_see() // US4, FR-004, §18.1
     {
         var p = await d.Project();

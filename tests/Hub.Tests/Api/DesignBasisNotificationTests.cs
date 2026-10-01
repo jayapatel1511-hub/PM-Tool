@@ -17,6 +17,8 @@ public sealed class DesignBasisNotificationTests(HubFactory f)
     int Version<T>(Guid id) where T : Audited => f.Db(db => db.Set<T>().AsNoTracking().Single(x => x.Id == id).RowVersion);
     int Notices(Guid itemId, string eventType, Guid userId) => f.Db(db => db.Notifications
         .Where(n => n.ItemId == itemId && n.EventType == eventType && n.UserId == userId).Sum(n => n.Count));
+    string? Link(Guid itemId, string eventType, Guid userId) => f.Db(db => db.Notifications
+        .Where(n => n.ItemId == itemId && n.EventType == eventType && n.UserId == userId).Select(n => n.LinkPath).Single());
 
     static readonly DesignBasisEndpoints.VersionInput Input = new("Bridge / Pier 1", "Allowable bearing pressure", 100, "kPa",
         "Geotechnical report", "GEO-N-1", "https://example.test/geotech", "A", new DateOnly(2026, 10, 5), null);
@@ -79,6 +81,7 @@ public sealed class DesignBasisNotificationTests(HubFactory f)
         await Post(TestData.Marc, confirmPath, confirm);
         Assert.Equal(2, f.Db(db => db.BasisImpactAssessments.Count(i => i.NewVersionId == b && i.OwnerId == alex)));
         Assert.Equal(1, Notices(entry, NotificationEvents.BasisImpactPending, alex));
+        Assert.Equal($"/projects/{project.ProjectNumber}/design-basis?basis={entry}", Link(entry, NotificationEvents.BasisImpactPending, alex));
         Assert.Equal(0, Notices(entry, NotificationEvents.BasisImpactPending, jill));
         Assert.Equal(0, Notices(entry, NotificationEvents.BasisImpactPending, marc));
         Assert.Single(f.Db(db => db.BasisImpactAssessments.Where(i => i.NewVersionId == b && i.OwnerId == jill).ToList()));
@@ -117,10 +120,15 @@ public sealed class DesignBasisNotificationTests(HubFactory f)
         await (await f.As(TestData.Pm).Post(transition, new { toStatus = "Decided", decisionText = "Use the basis", decisionDate = "2026-09-14", rowVersion = DecisionVersion() })).Json(200);
         var decided = DecisionVersion();
         await (await f.As(TestData.Pm).Post(transition, new { toStatus = "Pending", reason = "Revalidate source", rowVersion = decided })).Json(200);
-        Assert.Equal(1, Notices(decisionId, NotificationEvents.BasisImpactPending, alex));
-        Assert.Equal(0, Notices(decisionId, NotificationEvents.BasisImpactPending, data.User(TestData.Pm)));
+        // The notice names the decision and opens the affected entry, like the other basis notices.
+        Assert.Equal(1, Notices(entry, NotificationEvents.BasisImpactPending, alex));
+        Assert.Equal($"/projects/{project.ProjectNumber}/design-basis?basis={entry}", Link(entry, NotificationEvents.BasisImpactPending, alex));
+        var (decisionKey, entryKey) = f.Db(db => (db.Decisions.Single(d => d.Id == decisionId).Key, db.DesignBasisEntries.Single(e => e.Id == entry).Key));
+        var title = f.Db(db => db.Notifications.Single(n => n.ItemId == entry && n.UserId == alex && n.EventType == NotificationEvents.BasisImpactPending).Title);
+        Assert.Contains(decisionKey, title); Assert.Contains(entryKey, title);
+        Assert.Equal(0, Notices(entry, NotificationEvents.BasisImpactPending, data.User(TestData.Pm)));
         Assert.False((await f.As(TestData.Pm).Post(transition, new { toStatus = "Pending", reason = "Revalidate source", rowVersion = decided })).IsSuccessStatusCode);
-        Assert.Equal(1, Notices(decisionId, NotificationEvents.BasisImpactPending, alex));
+        Assert.Equal(1, Notices(entry, NotificationEvents.BasisImpactPending, alex));
     }
 
     [Fact]

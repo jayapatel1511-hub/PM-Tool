@@ -56,15 +56,19 @@ public sealed class DesignBasisApiTests(HubFactory f)
             "Member proposed level", alex, civil, null,
             new DesignBasisEndpoints.VersionInput("Level 1", "Proposed level", null, null,
                 null, null, null, null, new DateOnly(2026, 10, 5), null), null);
-        await Post(TestData.Alex, root, body with { RequestId = Guid.NewGuid(), ProjectDisciplineId = electrical }, 403);
+        var otherDiscipline = await Post(TestData.Alex, root, body with { RequestId = Guid.NewGuid(), ProjectDisciplineId = electrical }, 403);
+        Assert.Contains("Electrical lead", (string)otherDiscipline["detail"]!);
         await Post(TestData.Alex, root, body with { RequestId = Guid.NewGuid(), OwnerId = data.User(TestData.Marc) }, 403);
         await Post(TestData.Alex, root, body with { RequestId = Guid.NewGuid(), IndependentApproverId = data.User(TestData.Marc) }, 403);
         var entry = await Post(TestData.Alex, root, body);
         Assert.Equal(alex, f.Db(db => db.DesignBasisEntries.Single(x => x.Id == entry.G("id")).OwnerId));
         var versionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == entry.G("id")).Id);
-        await Post(TestData.Alex, $"{root}/{entry.G("id")}/versions/{versionId}/confirm",
-            new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(entry.G("id")),
-                Version<DesignBasisVersion>(versionId), "Self approval"), 400);
+        // Neither the responsible lead nor an appointed approver: a permission refusal (§25.6), before field checks.
+        foreach (var who in new[] { TestData.Alex, TestData.Pm })
+            await Post(who, $"{root}/{entry.G("id")}/versions/{versionId}/confirm",
+                new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(entry.G("id")),
+                    Version<DesignBasisVersion>(versionId), "Unauthorised approval"), 403);
+        Assert.Equal(BasisStatus.Proposed, f.Db(db => db.DesignBasisVersions.Single(v => v.Id == versionId).Status));
         var assignPath = $"{root}/{entry.G("id")}/assign";
         var assignment = new DesignBasisEndpoints.AssignBody(Guid.NewGuid(), Version<DesignBasisEntry>(entry.G("id")),
             data.User(TestData.Pm), data.User(TestData.Marc), "Lead assigned a new accountable owner");
@@ -166,6 +170,14 @@ public sealed class DesignBasisApiTests(HubFactory f)
         Assert.Contains(confirmedFilter["items"]!.AsArray(), row => row!.G("id") == id);
         var scoped = await (await f.As(TestData.Pm).GetAsync(root + $"?kind=Criterion&scope=Pier&affectedWorkId={task.G("id")}")).Json();
         Assert.Contains(scoped["items"]!.AsArray(), row => row!.G("id") == id);
+        // A malformed filter value is a field error, not the binder's raw message (list and export alike).
+        foreach (var path in new[] { root, root + "/export" })
+        {
+            var malformed = await (await f.As(TestData.Pm).GetAsync(path + $"?affectedWorkId=Task:{task.G("id")}")).Json(400);
+            Assert.Equal("validation", (string)malformed["code"]!);
+            Assert.NotNull(malformed["errors"]!["affectedWorkId"]);
+            Assert.DoesNotContain("Failed to bind", malformed.ToJsonString());
+        }
         var notOverdue = await (await f.As(TestData.Pm).GetAsync(root + "?overdue=true")).Json();
         Assert.DoesNotContain(notOverdue["items"]!.AsArray(), row => row!.G("id") == id);
         var export = await f.As(TestData.Pm).GetAsync(root + "/export?kind=Criterion&scope=Pier&format=csv");

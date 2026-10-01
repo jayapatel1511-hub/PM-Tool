@@ -68,9 +68,10 @@ public static class DesignBasisEndpoints
 
     // Queued inside the command transaction: one notice per recipient and entry; refused, stale or replayed
     // commands add none, and recipients must still hold project access (FR-MDC-02, FR-MDC-03, FR-MDC-06).
-    static Task Notify(Notifier notify, Project project, DesignBasisEntry entry, string eventType, IEnumerable<Guid?> recipients, string title) =>
+    // The link opens the affected entry in the register (`?basis=`), not just the register.
+    internal static Task Notify(Notifier notify, Project project, DesignBasisEntry entry, string eventType, IEnumerable<Guid?> recipients, string title) =>
         notify.Send(eventType, recipients, new NotifyItem(project.Id, "DesignBasisEntry", entry.Id, entry.Key,
-            $"/projects/{project.ProjectNumber}/design-basis", project.ProjectNumber), title);
+            $"/projects/{project.ProjectNumber}/design-basis?basis={entry.Id}", project.ProjectNumber), title);
 
     static async Task<DesignBasisEntry> Entry(HubDb db, Guid projectId, Guid id) =>
         await db.DesignBasisEntries.SingleOrDefaultAsync(e => e.ProjectId == projectId && e.Id == id) ?? throw ApiException.NotFound();
@@ -110,8 +111,9 @@ public static class DesignBasisEndpoints
     static Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "basis.create", body }, access, db, clock, async (project, ctx) =>
         {
-            Access.Demand(Permissions.CreateBasis(access.Actor, ctx, body.ProjectDisciplineId,
-                body.OwnerId, body.IndependentApproverId));
+            var create = Permissions.CreateBasis(access.Actor, ctx, body.ProjectDisciplineId, body.OwnerId, body.IndependentApproverId);
+            if (!create) throw ApiException.Forbidden(create.Why!, create.Arg ?? await db.ProjectDisciplines
+                .Where(d => d.Id == body.ProjectDisciplineId && d.ProjectId == project.Id).Select(d => d.Discipline!.Name).FirstOrDefaultAsync() ?? "");
             Check.OneOf(body.Kind, BasisKind.All, "kind");
             await Coordination.Discipline(db, project.Id, body.ProjectDisciplineId);
             await Coordination.Person(db, project, body.OwnerId);
@@ -212,10 +214,7 @@ public static class DesignBasisEndpoints
             Coordination.Version(entry, body.EntryRowVersion);
             var version = await Version(db, project.Id, id, versionId);
             Coordination.Version(version, body.VersionRowVersion);
-            var write = Permissions.CoordinationWrite(access.Actor, ctx);
-            Access.Demand(write);
-            Check.That(Permissions.IsDL(ctx, entry.ProjectDisciplineId) || entry.IndependentApproverId == access.Me.Id,
-                "approverId", "basis.independent");
+            Access.Demand(Permissions.ConfirmBasis(access.Actor, ctx, entry.ProjectDisciplineId, entry.IndependentApproverId));
             var self = (await settings.Get(db)).AllowSelfReview;
             Check.That(self || access.Me.Id != entry.OwnerId, "approverId", "basis.independent");
             Check.That(!string.IsNullOrWhiteSpace(version.SourceSystem) &&
@@ -570,8 +569,7 @@ public static class DesignBasisEndpoints
             CanManage = Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId).Ok,
             CanEditProposed = Permissions.NamedCoordinationAction(access.Actor, ctx, entry.OwnerId).Ok ||
                 Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId).Ok,
-            CanConfirm = Permissions.CoordinationWrite(access.Actor, ctx).Ok &&
-                (Permissions.IsDL(ctx, entry.ProjectDisciplineId) || entry.IndependentApproverId == access.Me.Id) &&
+            CanConfirm = Permissions.ConfirmBasis(access.Actor, ctx, entry.ProjectDisciplineId, entry.IndependentApproverId).Ok &&
                 ((await settings.Get(db)).AllowSelfReview || access.Me.Id != entry.OwnerId) };
     }
 }

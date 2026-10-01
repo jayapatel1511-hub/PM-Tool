@@ -10,12 +10,14 @@ import { Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { get, post, qs } from '@/lib/api'
 import { fmtDate, fmtTime, localIso, today, addDays } from '@/lib/format'
+import { en } from '@/i18n/en'
 import { t } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
-const EVENTS = ['TaskAssigned', 'ReviewRequested', 'ReviewOutcome', 'Mention', 'CommentOnItem', 'TaskBlocked', 'TaskUnblocked', 'DueDateChanged',
-  'MilestoneStatus', 'MilestoneDateChanged', 'DecisionAssigned', 'DecisionOverdue', 'AddedToProject', 'AttentionCritical']
+// Every event with a label (the same `event.*` table Preferences uses), so new events appear in the filter automatically.
+const EVENTS = Object.keys(en).filter((k) => k.startsWith('event.')).map((k) => k.slice(6))
+  .sort((a, b) => t(`event.${a}`).localeCompare(t(`event.${b}`)))
 
 /** "Today", "Yesterday" or the date, for grouping by day (§13.17). */
 function dayLabel(ts: string) {

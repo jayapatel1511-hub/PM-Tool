@@ -43,6 +43,19 @@ const payloadVersion = (v: VersionDraft) => ({ scope: v.scope, statement: v.stat
   stableSourceId: v.stableSourceId || null, sourceUrl: v.sourceUrl || null, declaredRevision: v.declaredRevision || null,
   confirmationDueDate: v.confirmationDueDate || null, decisionId: v.decisionId || null })
 
+/** FR-BAS-04: flag current work that still relies on a replaced or withdrawn version. */
+const staleUse = (status?: string) => status === 'Superseded' || status === 'Withdrawn'
+  ? <strong className="ml-2 text-warn">{t(status === 'Withdrawn' ? 'basis.withdrawnUse' : 'basis.supersededUse')}</strong> : null
+
+/** What this actor may record on a pending assessment, mirroring DecideImpact: the consumer adopts a confirmed
+ *  replacement; an independent PM or discipline lead records Unaffected. */
+function impactActions(row: Detail, o: CoordOptions, i: Detail['impacts'][number]): ('Adopt' | 'Unaffected')[] {
+  const use = row.uses.find(u => u.id === i.basisUseId)
+  if (i.status !== 'Pending Assessment' || !use?.isCurrent || !workRef(o, use.targetType, use.targetId)) return []
+  return [...(i.newVersionId && o.actorId === use.ownerId ? ['Adopt' as const] : []),
+    ...(row.canManage && o.actorId !== use.ownerId ? ['Unaffected' as const] : [])]
+}
+
 export function DesignBasisTab() {
   const project = useCurrentProject(), qc = useQueryClient(), [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false)
   const selected = sp.get('basis'), page = Math.max(1, Number(sp.get('page')) || 1)
@@ -79,7 +92,7 @@ export function DesignBasisTab() {
         choices={project.disciplines.map(d => ({ value: d.id, label: d.name }))} />
       <Field label={t('basis.scope')} htmlFor="basis-scope-filter"><Input id="basis-scope-filter" type="search" value={scope} onChange={e => set('scope', e.target.value)} /></Field>
       {options.data && <SelectField label={t('basis.affectedWork')} value={affectedWorkId} onChange={v => set('affectedWorkId', v)}
-        required={false} choices={workChoices(options.data)} />}
+        required={false} choices={[...options.data.tasks, ...options.data.deliverables].map(w => ({ value: w.id, label: `${w.key} · ${w.name}` }))} />}
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={overdue === 'true'} onChange={e => set('overdue', e.target.checked ? 'true' : '')} />{t('basis.overdueOnly')}</label>
     </div>
     {list.isPending ? <Loading rows={4} /> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.items.length ?
@@ -222,14 +235,11 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
           <li key={u.id} className="rounded border p-2">{options ? <WorkLink options={options} type={u.targetType} id={u.targetId} number={number} /> :
             <Link className="text-primary underline" to={`/projects/${number}/${u.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${u.targetType}:${u.targetId}`}>{u.targetType}</Link>}
             {' · '}{t('basis.version')} {row.versions.find(v => v.version.id === u.versionId)?.version.number ?? '?'} · {u.isCurrent ? t('basis.currentUse') : t('basis.historicalUse')}
-            {u.isCurrent && row.versions.find(v => v.version.id === u.versionId)?.version.status === 'Superseded' &&
-              <strong className="ml-2 text-warn">{t('basis.supersededUse')}</strong>} · {u.intendedUse}</li>)}</ul></section>
+            {u.isCurrent && staleUse(row.versions.find(v => v.version.id === u.versionId)?.version.status)} · {u.intendedUse}</li>)}</ul></section>
         <section><h3 className="font-medium">{t('basis.impacts')} ({row.impacts.length})</h3><ul className="mt-2 space-y-2">{row.impacts.map(i =>
           <li key={i.id} className="rounded border p-2">{tv(i.status)} · {name(i.ownerId)} · {t('basis.version')} {row.versions.find(v => v.version.id === i.oldVersionId)?.version.number} → {i.newVersionId ? row.versions.find(v => v.version.id === i.newVersionId)?.version.number : i.withdrawalVersionId ? t('basis.withdrawn') : t('basis.decisionReopened')}
             {i.rationale && <p>{t('basis.reason')}: {i.rationale}</p>}{i.evidenceUrl && <a className="text-primary underline" href={i.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
-            {i.status === 'Pending' && options && row.uses.find(u => u.id === i.basisUseId)?.isCurrent &&
-              (() => { const u = row.uses.find(u => u.id === i.basisUseId)!; return !!workRef(options, u.targetType, u.targetId) })() &&
-              (options.actorId === i.ownerId || row.canManage) &&
+            {options && impactActions(row, options, i).length > 0 &&
               <Button size="sm" variant="outline" onClick={() => setSelectedImpact(i.id)}>{t('basis.decideImpact')}</Button>}</li>)}</ul></section>
         {row.dispositions.length > 0 && <section><h3 className="font-medium">{t('basis.proceed')}</h3><ul>{row.dispositions.map(d =>
           <li key={d.id} className="rounded border p-2">{d.scope} · {name(d.ownerId)} · {t('basis.expiry')}: {fmtDate(d.expiresOn)} · {d.reason}</li>)}</ul></section>}
@@ -297,9 +307,8 @@ function ImpactForm({ base, id, number, row, impactId, options, close, done }: {
   impactId: string; options: CoordOptions; close: () => void; done: () => void }) {
   const impact = row.impacts.find(i => i.id === impactId)!, use = row.uses.find(u => u.id === impact.basisUseId)!
   const next = impact.newVersionId ? row.versions.find(v => v.version.id === impact.newVersionId)?.version : undefined
-  const target = workRef(options, use.targetType, use.targetId)
-  const canAdopt = !!next && options.actorId === use.ownerId, canUnaffected = row.canManage && options.actorId !== use.ownerId
-  const [decision, setDecision] = useState(canAdopt ? 'Adopt' : 'Unaffected')
+  const target = workRef(options, use.targetType, use.targetId), actions = impactActions(row, options, impact)
+  const [decision, setDecision] = useState<string>(actions[0] ?? '')
   const [rationale, setRationale] = useState(''), [evidenceUrl, setEvidenceUrl] = useState('')
   return <CommandForm path={`${base}/${id}/impacts/${impactId}/decide`} title={t('basis.decideImpact')}
     hint={t('basis.impactHint')} onClose={close} onDone={done}
@@ -308,8 +317,7 @@ function ImpactForm({ base, id, number, row, impactId, options, close, done }: {
     <p>{t('basis.version')} {row.versions.find(v => v.version.id === impact.oldVersionId)?.version.number} → {next ? next.number : impact.withdrawalVersionId ? t('basis.withdrawn') : t('basis.decisionReopened')}</p>
     {target ? <WorkLink options={options} type={use.targetType} id={use.targetId} number={number} /> : <p>{t('coord.unavailable')}</p>}
     <SelectField label={t('basis.decision')} value={decision} onChange={setDecision}
-      choices={[...(canAdopt ? [{ value: 'Adopt', label: t('basis.adopt') }] : []),
-        ...(canUnaffected ? [{ value: 'Unaffected', label: t('basis.unaffected') }] : [])]} />
+      choices={actions.map(a => ({ value: a, label: t(a === 'Adopt' ? 'basis.adopt' : 'basis.unaffected') }))} />
     <Field label={t('basis.reason')} htmlFor="basis-impact-reason"><Textarea id="basis-impact-reason" required minLength={5} value={rationale} onChange={e => setRationale(e.target.value)} /></Field>
     <Field label={t('basis.evidence')} htmlFor="basis-impact-evidence"><Input id="basis-impact-evidence" type="url" required value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} /></Field>
     {!target && <p className="text-warn">{t('basis.targetUnavailable')}</p>}

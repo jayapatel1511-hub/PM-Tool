@@ -77,6 +77,12 @@ public static class Permissions
         return p.Has(ProjectRole.TeamMember) && p.PrimaryDisciplineId == disciplineId &&
             ownerId == a.Id && approverId is null ? Allow.Yes : Allow.No("perm.dl_own");
     }
+    /// FR-BAS-02: only the responsible Discipline Lead or the appointed independent approver confirms a basis version.
+    public static Allow ConfirmBasis(Actor a, ProjectContext p, Guid disciplineId, Guid? approverId)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return IsDL(p, disciplineId) || approverId == a.Id ? Allow.Yes : Allow.No("basis.independent");
+    }
     public static Allow ProposeAllocation(Actor a, ProjectContext p)
     {
         var gate = CoordinationWrite(a, p); if (!gate) return gate;

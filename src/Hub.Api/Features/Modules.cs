@@ -7,6 +7,8 @@ public static class HubModules
 {
     public static void AddServices(IServiceCollection s, IConfiguration cfg)
     {
+        // A malformed route or query value reaches ProblemMiddleware as a problem body in every environment (§25.6).
+        s.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(o => o.ThrowOnBadRequest = true);
         s.AddScoped<Notifier>();
         s.AddScoped<TeamService>();
         s.AddScoped<IProjectCreateHook, CopyStructureHook>();

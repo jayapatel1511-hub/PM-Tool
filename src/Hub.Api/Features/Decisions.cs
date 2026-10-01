@@ -384,14 +384,16 @@ public static class DecisionEndpoints
         db.Audit.Note(d, action: from == DecisionStatus.Decided ? "Reopened" : to switch { DecisionStatus.Decided => "Decided", DecisionStatus.Deferred => "Deferred", _ => null }, reason: reason);
         if (from == DecisionStatus.Decided && to == DecisionStatus.Pending)
         {
-            var linkedVersionIds = await db.DesignBasisVersions
+            var linked = await db.DesignBasisVersions
                 .Where(v => v.ProjectId == d.ProjectId && v.DecisionId == d.Id && v.Status == BasisStatus.Confirmed)
-                .Select(v => v.Id).ToListAsync();
-            if (linkedVersionIds.Count > 0)
+                .ToDictionaryAsync(v => v.Id, v => v.EntryId);
+            if (linked.Count > 0)
             {
-                var owners = new List<Guid?>();
-                var linkedUses = await db.BasisUses.Where(u => u.ProjectId == d.ProjectId && linkedVersionIds.Contains(u.VersionId)).ToListAsync();
-                foreach (var use in linkedUses.GroupBy(u => new { u.TargetType, u.TargetId })
+                var versionIds = linked.Keys.ToList();
+                var owners = new Dictionary<Guid, List<Guid?>>();
+                var linkedUses = await db.BasisUses.Where(u => u.ProjectId == d.ProjectId && versionIds.Contains(u.VersionId)).ToListAsync();
+                // Each entry's current use per consuming item, as replacement and withdrawal assess it.
+                foreach (var use in linkedUses.GroupBy(u => new { Entry = linked[u.VersionId], u.TargetType, u.TargetId })
                     .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()))
                 {
                     if (!await db.BasisImpactAssessments.AnyAsync(a => a.ProjectId == d.ProjectId &&
@@ -402,12 +404,16 @@ public static class DecisionEndpoints
                             OldVersionId = use.VersionId, NewVersionId = null, OwnerId = use.OwnerId };
                         db.BasisImpactAssessments.Add(assessment);
                         db.Audit.Note(assessment, action: "DecisionReopened", reason: reason);
-                        owners.Add(use.OwnerId);
+                        if (!owners.TryGetValue(linked[use.VersionId], out var recipients)) owners[linked[use.VersionId]] = recipients = [];
+                        recipients.Add(use.OwnerId);
                     }
                 }
-                // FR-BAS-05: the reopen asks consumers to assess; it does not unconfirm their basis.
-                await notify.Send(NotificationEvents.BasisImpactPending, owners, Item(p, d) with { Link = $"/projects/{p.ProjectNumber}/design-basis" },
-                    Text.Get("notify.basis_decision_reopened", d.Key));
+                // FR-BAS-05: the reopen asks consumers to assess; it does not unconfirm their basis. The notice names the
+                // decision and opens the affected entry, so it is sent once per entry like the other basis notices.
+                var entryIds = owners.Keys.ToList();
+                foreach (var entry in await db.DesignBasisEntries.Where(e => entryIds.Contains(e.Id)).OrderBy(e => e.Seq).ToListAsync())
+                    await DesignBasisEndpoints.Notify(notify, p, entry, NotificationEvents.BasisImpactPending, owners[entry.Id],
+                        Text.Get("notify.basis_decision_reopened", d.Key, entry.Key));
             }
         }
         if (to == DecisionStatus.Decided) // §17.2: linked task assignees (unless unticked, FR-011) and the requester

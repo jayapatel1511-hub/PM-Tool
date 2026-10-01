@@ -69,4 +69,4 @@ export function localIso(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export const hours = (h: number | null | undefined) => (h == null ? t('common.dash') : `${Number(h).toFixed(Number(h) % 1 ? 2 : 0).replace(/0$/, '')} h`)
+export const hours = (h: number | null | undefined) => (h == null ? t('common.dash') : `${Number(h).toFixed(2).replace(/\.?0+$/, '')} h`)

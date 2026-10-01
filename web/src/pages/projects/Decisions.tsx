@@ -52,7 +52,7 @@ const IMPACTS = ['High', 'Medium', 'Low']
 const IMPACT_TONE = { High: 'bad', Medium: 'warn', Low: 'idle' } as const
 const FILTERS = ['q', 'status', 'ownerId', 'ownerType', 'impact', 'requiredFrom', 'requiredTo', 'blocking', 'indicator'] as const
 
-const useParties = (projectId: string) => useQuery({ queryKey: ['p', projectId, 'parties'], queryFn: () => get<Party[]>(`projects/${projectId}/external-parties`) })
+const useParties = (projectId: string) => useQuery({ queryKey: ['p', projectId, 'parties'], queryFn: () => get<Party[]>(`projects/${projectId}/external-parties`), enabled: !!projectId })
 
 function Impact({ level }: { level: string }) {
   return <Chip tone={IMPACT_TONE[level as keyof typeof IMPACT_TONE] ?? 'idle'}>{tv(level)}</Chip>

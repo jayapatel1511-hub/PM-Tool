@@ -1,6 +1,6 @@
 # Homedev review release
 
-This is the temporary review and pilot host chosen while Azure is unavailable. It is a **Staging** deployment with clearly fictional seed people/projects and individual local-password IDs. The separate `pm-tool-review-db` volume survives image replacements. Never attach it to a production app or restore its dump into production. Azure infrastructure and real Entra sign-in remain later pilot/production gates.
+Homedev hosts review, company pilot and production under Jay's 2026-10-01 clarification; no Azure deployment or new paid service is part of this release. This review stack is a **Staging** deployment with clearly fictional seed people/projects and individual local-password IDs. The separate `pm-tool-review-db` volume survives image replacements. Never attach it to a company app or restore its dump into pilot or production. Company hosting and authentication acceptance remain required; Azure and Entra are optional future work.
 
 ## Boundaries
 
@@ -49,4 +49,20 @@ If a release fails, keep writes closed, switch to the previous image/release and
 
 ## Gate status at authoring
 
-Homedev Docker startup, loopback health, anonymous denial, host restriction and unsafe Origin denial passed for the first private revision. A private `pg_dump` archive was restored into a separate temporary database on the same homedev PostgreSQL server; live/restored row counts matched, and the archive was retained under the owner-only `data/backups/` directory. That dump was also stored as encrypted Mac restic snapshot `224a6c27`; a temporary retrieval matched its SHA-256 and was removed. The existing scheduled whole-host backup is **FAIL**: its last successful snapshot is 2026-09-20 and the latest fixed-LAN SSH export failed on 2026-09-28. Credential sign-in, public tunnel/DNS, deployed browser flow, uptime and company pilot remain **UNPROVEN**. Azure Entra sign-in is **BLOCKED** until company tenant and Azure hosting are available.
+Homedev Docker startup, loopback health, anonymous denial, host restriction and unsafe Origin denial passed for the first private revision. A private `pg_dump` archive was restored into a separate temporary database on the same homedev PostgreSQL server; live/restored row counts matched, and the archive was retained under the owner-only `data/backups/` directory. That dump was also stored as encrypted Mac restic snapshot `224a6c27`; a temporary retrieval matched its SHA-256 and was removed. The existing scheduled whole-host backup is **FAIL**: its last successful snapshot is 2026-09-20 and the latest fixed-LAN SSH export failed on 2026-09-28. Credential sign-in, public tunnel/DNS, deployed browser flow, uptime and company pilot remain **UNPROVEN**. Azure Entra sign-in is outside the current homedev release scope; individual-password hosted acceptance remains required.
+
+
+## Verifier replacement in the container
+
+The application reloads a changed verifier file and binds cookies to the current verifier stamp. Credential helpers
+atomically replace the host file. Because Compose mounts that individual file, recreate the API container after a
+replacement to ensure the new host inode is mounted. From the exact prepared review release (substitute its reviewed
+full SHA; do not print the expanded real Compose configuration):
+
+```bash
+sudo env RELEASE_SHA=<full-sha> docker compose --env-file .runtime/review.env -f hosting/homedev.compose.yml up -d --no-deps --no-build --force-recreate api </dev/null
+```
+
+The database and persistent key directory are retained. Verify the old cookie is refused, the new individual password
+works, and other people's sessions still work. Do not mark rotation accepted solely because the JSON was edited.
+For the separate pilot, use its own compose file, pilot runtime and pilot release SHA; never pass review settings.

@@ -38,7 +38,7 @@ paths, private files and restart steps are in `docs/runbooks/homedev-review.md`.
    types the new password twice at the hidden prompt. It is never displayed.
    - Login IDs: 1–64 letters, numbers, dots, underscores, `@` or hyphens; not case-sensitive; one per person.
    - Passwords: at least 12 characters, no line breaks. At most 64 accounts.
-3. Restart the review API so it loads the new account (runbook).
+3. Recreate the review API container after replacing its mounted verifier file (runbook). The application reloads file changes, but an atomic host-file replacement must also become visible through the container mount.
 4. Give the password to the person privately, once, separately from their login ID.
 
 Never put a password, the credential file or its contents in the repository, a ticket, chat, email or a document. The
@@ -47,11 +47,10 @@ credential file must stay private to its owner; if it is not, or it contains a d
 ### Withdraw access
 
 - Clear **Active** on the person in **Users & roles**. Their next request is refused, even in a session already open.
-- Removing their login from the credential file only stops new sign-ins, after the next API restart. A session already
-  open lasts up to 8 hours from sign-in, and signing out ends it only in that browser.
+- Removing or rotating a person's verifier refuses both new sign-ins and their existing cookies on the next request once the API sees the updated file. Recreate the container after an atomic host-file replacement; the eight-hour expiry is an upper bound, not a revocation delay. Signing out clears the cookie in that browser.
 - The script refuses a person or login ID that is already mapped. To replace a forgotten or exposed password, an
-  operator removes that person's entry from the private credential file, adds a new one with the script and restarts
-  the API.
+  operator removes that person's entry from the private credential file, adds a new one with the script and recreates
+  the API container so the new file is mounted.
 
 Sign-in allows five attempts per minute from one address. The person sees "User ID or password is incorrect." either
 way.

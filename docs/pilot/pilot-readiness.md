@@ -1,14 +1,15 @@
 # Pilot readiness: homedev company pilot
 
 Checklist for moving from the synthetic review release to the company pilot on homedev. It lists what must be true
-and who proves it; it is not a readiness claim. Run the pilot itself with the [pilot plan][plan]; the later Azure move is
-in [production readiness][prod]. Homedev is reachable again at the latest 2026-10-01 checkpoint; it still runs the first private review release.
+and who proves it; it is not a readiness claim. Run the pilot itself with the [pilot plan][plan]; homedev production
+is covered by [production readiness][prod]. Homedev is reachable again at the latest 2026-10-01 checkpoint; it still runs the first private review release.
 Recheck its state before acting on any row ([gates]).
 
-**Decisions in force (Jay):** homedev hosts the synthetic review release and the company pilot until Azure is
-available, at `pm.engcalchub.com` through a dedicated Cloudflare named tunnel. Pilot users get individual
-local-password accounts (PBKDF2 verifiers in an owner-only file outside Git) until Entra is available. Production is
-Azure with Entra sign-in. The review database is never restored into the pilot or production. Email is
+**Decisions in force (Jay, clarified 2026-10-01):** homedev hosts review, company pilot and production at
+`pm.engcalchub.com` through the existing Cloudflare tunnel infrastructure. No Azure deployment or new paid service
+is part of this release. Users get individual local-password accounts (PBKDF2 verifiers in an owner-only file outside
+Git); Entra is optional future work, not a release prerequisite. The review database is never restored into the pilot
+or production. Email is
 `Email__Mode: Log` (nothing is delivered).
 
 **Owners:** Jay (product owner and homedev operator) · company IT (company IT, security and privacy approvals) · agent
@@ -69,10 +70,10 @@ and the review seed's three people hold no Admin role.
 |---|---|---|---|
 | U1 | A reviewed provisioning path for real users and the first Admin, written to the activity log. Store each person's Entra sign-in name (UPN) as their email and leave the Entra object ID empty, so a later Entra sign-in claims the same record ([Auth.cs][auth] line 150) | agent | IMPLEMENTED LOCALLY: audited Staging local-Admin bootstrap and Admin create-user endpoint/UI; live browser/company provisioning acceptance remains UNPROVEN |
 | U2 | Participant list (name, UPN, office, system role) from the sponsor | Jay | UNPROVEN |
-| U3 | One login per person with a random password: `scripts/bootstrap-review-credentials.py` for the first batch (it requires an empty verifier file), `scripts/add-review-credential.py` afterwards (12+ characters). At most 64 logins ([LocalPasswordStore.cs][store] line 34). File changes are reloaded; verifier rotation/removal ends prior sessions on their next request | Jay | UNPROVEN |
+| U3 | One login per person with a random password: `scripts/bootstrap-review-credentials.py` for the first batch (it requires an empty verifier file), `scripts/add-review-credential.py` afterwards (12+ characters). At most 64 logins ([LocalPasswordStore.cs][store] line 34). File changes are reloaded; recreate the API container after atomic host-file replacement so the new inode is mounted. Verifier rotation/removal then ends prior sessions on their next request | Jay | UNPROVEN |
 | U4 | Private delivery: one person per message through a company-approved channel, never group chats, tickets or shared mailboxes. Delete the handoff file after delivery; record the delivery date, not the password | Jay | UNPROVEN |
-| U5 | Rotation on suspected exposure or request: remove the entry, add a new one, restart. There is no rotation tool. An existing session stays valid for up to 8 hours (absolute expiry, [Auth.cs][auth] lines 86–87) unless the person is deactivated | Jay (agent may script it) | UNPROVEN |
-| U6 | Offboarding: (1) Admin → Users, clear Active; the next request with an existing cookie is refused ([Auth.cs][auth] line 152); (2) Reassign work ([admin guide][admin]); (3) remove the verifier and restart. Reactivating within 8 hours revives an old cookie, so rotate first. Leavers are not detected automatically (`Graph__DirectorySync: "false"`); the sponsor reports them | Jay + company IT | UNPROVEN |
+| U5 | Rotation on suspected exposure or request: remove the entry, add a new one with the existing credential helper, then recreate the API container. Once the new verifier is visible, existing cookies are refused on their next request by the verifier-stamp check ([Auth.cs][auth]); eight hours is the absolute expiry, not a revocation delay | Jay (agent may script it) | UNPROVEN |
+| U6 | Offboarding: (1) Admin → Users, clear Active; the next request with an existing cookie is refused ([Auth.cs][auth] line 152); (2) Reassign work ([admin guide][admin]); (3) remove the verifier and recreate the API container. Reactivation can revive an unexpired cookie if the same verifier remains; remove or rotate the verifier before reactivation. Leavers are not detected automatically (`Graph__DirectorySync: "false"`); the sponsor reports them | Jay + company IT | UNPROVEN |
 | U7 | Sign-in allows 5 attempts a minute per client address ([Program.cs][program] line 70); people behind one office address share that limit. Confirm egress addresses or accept occasional 429 retries | company IT + agent | UNPROVEN |
 | U8 | Walkthrough and user guide explain ID and password sign-in (the [user guide](../user-guide.md) now explains individual local IDs and passwords) | agent | UNPROVEN |
 

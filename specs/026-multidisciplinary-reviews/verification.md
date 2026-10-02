@@ -56,3 +56,23 @@ Against the current local API and persistent `hub_review_local` database, synthe
 ## 2026-10-01 Codex recovery checkpoint
 
 Current source/review discipline authority is enforced when setting or changing required deliverable gates. A regression refuses another discipline lead attaching a gate and confirms the command rolls back. Review/change API tests passed 19/19; mocked review browser flow and dialog axe checks passed. Company reviewer acceptance remains UNPROVEN.
+
+## 2026-10-02 local browser-to-API acceptance rehearsal at b155601
+
+Independent rehearsal on worktree head `b155601` against the real API and a fresh local database (`hub_agent_verify2`), synthetic project VER-201 with Survey, Civil, Structural and Electrical leads. Each named person used a separate Development-auth Chrome 154 session (Playwright 1.61.1); API calls were used for setup, readback and direct-permission probes only. Package VER-201-RV001 (coordinator Taylor, then Jay) covered survey D001 and grading plan D002 with Civil (Sam), Structural (Diane) and Electrical (Omar) reviewers. axe-core 4.13 WCAG 2.1 A/AA found zero violations in the create, decision, finding, approved-detail, round-history, new-round and stale-conflict dialogs. Console errors were only the deliberate refusals' HTTP 400/403/409 responses. Outcomes matched an earlier run on `70e47bd`.
+
+| Scenario | Result | Evidence |
+|---|---|---|
+| FR-MRV-04 independent reviewer at creation | PASS | Alex (D002 owner) as Civil reviewer refused; no package created; package created with Sam |
+| AC-MRV-01 Electrical pending | PASS | Civil and Structural Approved, package In Review; D002 Ready to Issue refused by the review gate |
+| Blocking finding prevents approval | PASS | All three disciplines Approved, package Changes Required, register shows one blocking finding |
+| AC-MRV-02 response stays open | PASS | Resolver's response leaves it Responded; resolver has no Verify control and API 403; return-to-open, second response and originator verification then Approved; Ready to Issue then succeeded |
+| AC-MRV-04 reassignment to the author | PASS | Refused; Civil assignment still Sam/Approved, package still Approved |
+| AC-MRV-03 new round on revision | PASS | Publishing survey C opened round 2 (Draft) with three Pending decisions; round 1 Superseded with its approvals, read-only in the round history; open advisory finding carried with provenance text |
+| FR-MRV-06 issue rechecks the current round (API) | PASS | With round 4 in Draft, PM issue of D002 refused with the review-gate message |
+| AC-MRV-05 removing Electrical | PASS | Coordinator Jay (discipline lead, not PM) refused 403 "Only the Project Manager can do this."; PM without impact refused; PM with reason and impact opened round 3 without Electrical; earlier Electrical approval and the verified blocking finding remain inspectable |
+| FR-MRV-07 blocking withdrawal | PASS | Withdrawn blocking finding kept the package at Changes Required until coordinator Jay acknowledged it, then Approved |
+| FR-MRV-03 verifier reassignment (API) | PASS | Coordinator 403; PM without reason 400; PM choosing the resolver refused as not independent; PM choosing Yagmur (project Reviewer) with reason succeeded |
+| Two-context stale decision | PASS | Sam's second tab got 409 with the "This record changed…" guidance; the first tab's In Review decision and rationale were kept |
+
+Observation: after the required package returned to Draft, D002 still displayed Ready to Issue; issue itself was correctly refused. NOT RUN: keyboard-only and screen-reader use, other browsers, load, hosted/homedev and company reviewer acceptance. T006 stays open.

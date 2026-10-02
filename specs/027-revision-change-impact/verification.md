@@ -47,3 +47,22 @@ Jay published DEMO-101 P02 as a replacement for P01 in a real local Chrome/API s
 ## 2026-10-01 Codex recovery checkpoint
 
 External-source supersession and publication now check authority over the existing source head, not just the discipline supplied in the request. Regression refused relabelling a Civil source by the Electrical lead and preserved the head; integrated review/change tests passed 19/19. Mocked source-replacement/assessment workflow passed; deployed acceptance remains UNPROVEN.
+
+## 2026-10-02 local browser-to-API acceptance rehearsal at b155601
+
+Independent rehearsal on worktree head `b155601` against the real API and a fresh local database (`hub_agent_verify2`). Taylor registered external source GEO-RPT-01 rev A (owner Jay, Civil); Alex, Omar and Diane each recorded use of A on their own tasks in separate Development-auth Chrome 154 sessions (Playwright 1.61.1); T0006 and D002 stayed unlinked. Taylor registered and published B as VER-201-CH001. API calls were used for setup, readback and direct-permission probes. axe-core 4.13 WCAG 2.1 A/AA found zero violations in the register, input-use, publish, notice, disposition, close-refusal and stale-publication dialogs. Console errors were only the deliberate refusals' HTTP 400/409 responses. Outcomes matched an earlier run on `70e47bd`.
+
+| Scenario | Result | Evidence |
+|---|---|---|
+| AC-CHG-01 three linked uses | PASS | Exactly T0001, T0004 and T0005 got Pending Assessment; detection-boundary text shown; unlinked work not listed |
+| AC-CHG-02 acknowledgement only | PASS | Alex's acknowledgement time recorded, status still Pending Assessment; notice owner Jay's close refused with the incomplete-assessment reason |
+| Acknowledge vs close permissions | PASS | Assessor has no Close control and API close 403; unrelated Sam's acknowledge 403 and no assessment controls |
+| AC-CHG-03 retain A | PASS | Diane's Unaffected disposition kept A; her own retention approval refused as not independent; close refused before approval; Taylor's approval completed it; InputUse still A, head B |
+| Impact accepted: adopt B | PASS | Omar's Unaffected + Adopt new revision moved his InputUse to B and completed the assessment |
+| AC-CHG-05 Update Required | PASS | Correction task, 6 h and 3 d recorded; Jay's verification refused until the task was Complete; then Resolved by Jay; no task due date changed |
+| Close when complete | PASS | Jay closed CH001; register incomplete count 0 |
+| Superseded revision (API) | PASS | A shown historical; a replacement for A refused with "The current revision changed…" |
+| AC-CHG-04 competing publication, two contexts | PASS | C1 published; C2 publish from the second session refused with the stale-record guidance; C2 stayed Draft with no assessments; head C1 |
+| Cancelled correction task (API) | PASS | Assessment stays Update Required and cannot be resolved |
+
+At this head the correction task had never been readiness-assessed, so completing it first returned 422 `start_authorisation_required`; Jay recorded a start authorisation by API and Alex then completed it with acknowledgement and reason. Lower-severity finding: after the correction task is cancelled, resolution is refused with "The referenced work or discipline is unavailable or outside this project." and the task renders as "Unavailable or no longer a participant", which does not tell the owner that a new disposition is needed. NOT RUN: keyboard-only and screen-reader use, other browsers, load, hosted/homedev acceptance. T006 stays open.

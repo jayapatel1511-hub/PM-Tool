@@ -24,6 +24,7 @@ import type { DeliverableRow } from './projects/Deliverables'
 import { ActionOwner, type ActionRow } from './projects/Meetings'
 import { FollowLevelSelect } from './projects/Follow'
 import { BUCKETS, PRIORITIES, StatusMenu, TASK_STATUSES, TaskIndicators, dueBucket, useTaskActions, type TaskRow } from './projects/Tasks'
+import { WorkspaceCoordination } from './WorkspaceCoordination'
 
 interface Work {
   person: { id: string; displayName: string; jobTitle?: string; isActive: boolean }; readOnly: boolean; today: string
@@ -40,7 +41,7 @@ interface Work {
 const SORTS = ['due', 'priority', 'project', 'activity']
 const RANK: Record<string, number> = { Critical: 0, High: 1, Medium: 2, Low: 3 }
 
-const TABS = ['overview', 'today', 'upcoming', 'overdue', 'completed', 'inbox'] as const
+const TABS = ['overview', 'today', 'upcoming', 'overdue', 'completed', 'inbox', 'coordination'] as const
 const WHO = ['mine', 'assigned', 'created'] as const
 
 /** My Work (§13.10, §36.7 FR-VIS-08): the overview of everything assigned to, waiting on or held up by one person, plus
@@ -48,6 +49,7 @@ const WHO = ['mine', 'assigned', 'created'] as const
 export function MyWorkPage() {
   const [sp] = useSearchParams()
   const tab = sp.get('userId') ? 'overview' : sp.get('tab') ?? 'overview'
+  if (tab === 'coordination') return <><MyWorkTabs /><WorkspaceCoordination /></>
   if (tab === 'inbox') return <Inbox />
   if (tab !== 'overview') return <TaskView tab={tab} />
   return <Overview />

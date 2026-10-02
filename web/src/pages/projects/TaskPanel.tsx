@@ -34,6 +34,7 @@ export interface TaskDetailData {
   permissions: {
     edit: P; assign: P; setReviewer: P; dueDate: P; dueNeedsReason: boolean; block: P; delete: P; restore: boolean; comment: boolean
     transitions: Transition[]; completeHint?: string; isReviewer: boolean; dependencies: boolean; enterTime: boolean; needsReason: boolean; allowSelfReview: boolean
+    authoriseStart?: boolean
   }
 }
 interface P { ok: boolean; reason?: string | null }
@@ -89,6 +90,7 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
           <span className="text-xs text-muted-foreground">{d.project.projectNumber}</span>
           {perms.edit.ok && <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/handoffs?targetTask=${r.id}`}>{t('handoff.new')}</Link></Button>}
           <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/changes?target=Task:${r.id}`}>{t('change.inputs')}</Link></Button>
+          {perms.authoriseStart && <Button size="sm" variant="outline" onClick={() => actions.authoriseStart(r)}>{t('tasks.startAuthAuthorise')}</Button>}
           {perms.isReviewer && (
             <div className="ml-auto flex gap-1.5">
               {r.status === 'Ready for Review' && find('In Review') && <Button size="sm" onClick={() => act('In Review')}>{t('task.startReview')}</Button>}

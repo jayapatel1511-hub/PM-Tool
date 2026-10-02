@@ -178,7 +178,11 @@ public class Project : Audited, IAuditable
     public int NextActionSeq { get; set; } = 1;
     public int NextHandoffSeq { get; set; } = 1;
     public int NextReviewSeq { get; set; } = 1;
+    public int NextSubmissionSeq { get; set; } = 1;
     public int NextChangeSeq { get; set; } = 1;
+    public int NextBasisSeq { get; set; } = 1;
+    public int NextConstraintSeq { get; set; } = 1;
+    public int NextCommitmentSeq { get; set; } = 1;
     public string? ExternalSource { get; set; }
     public string? ExternalId { get; set; }
     public string AuditType => ItemType.Project;
@@ -622,6 +626,7 @@ public class Issue : ProjectItem, IAuditable
     public string? Resolution { get; set; }
     public DateOnly? ResolvedDate { get; set; }
     public string Status { get; set; } = IssueStatus.Open;
+    public string IssueType { get; set; } = Domain.IssueType.General;
     public Guid? OriginRiskId { get; set; }
     public Guid? ProjectDisciplineId { get; set; }
     public DateTimeOffset? StatusChangedAt { get; set; }
@@ -997,7 +1002,7 @@ public class CalendarEvent : Audited, IAuditable
     public DateTimeOffset? CancelledAt { get; set; }
     public Guid? CancelledBy { get; set; }
     public string AuditType => ItemType.CalendarEvent;
-    public Guid? AuditProjectId => ProjectId;
+    public Guid? AuditProjectId => Visibility == EventVisibility.Private ? null : ProjectId;
     public string? AuditKey => null;
     public string? AuditName => Title;
 }
@@ -1022,6 +1027,22 @@ public class ProjectTemplate : Audited, IAuditable
 }
 
 public class TemplateDiscipline : Entity { public Guid TemplateId { get; set; } public Guid DisciplineId { get; set; } public int SortOrder { get; set; } public bool IsDefaultIncluded { get; set; } = true; }
+
+public class TemplateDesignBasis : Entity
+{
+    public Guid TemplateId { get; set; }
+    public Guid TemplateDisciplineId { get; set; }
+    public string Kind { get; set; } = BasisKind.Assumption;
+    public string Title { get; set; } = "";
+    public string Scope { get; set; } = "";
+    public string Statement { get; set; } = "";
+    public decimal? NumericValue { get; set; }
+    public string? Units { get; set; }
+    public string? SourceSystem { get; set; }
+    public string? StableSourceId { get; set; }
+    public string? SourceUrl { get; set; }
+    public string? DeclaredRevision { get; set; }
+}
 
 public class TemplateMilestone : Entity
 {

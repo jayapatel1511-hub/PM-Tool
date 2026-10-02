@@ -42,7 +42,11 @@ public static class TimeEndpoints
         {
             var (from, to) = await Range(f, db, store, clock);
             var (rows, parameters) = await ExportRows(f with { From = from, To = to }, access, db, me, http.Request.Query);
-            return await ExportFile.Send(db, store, format, Text.Get("nav.time"), Cols, rows, parameters, f.ProjectId, "task-hours", clock);
+            var auditProjectId = f.ProjectId;
+            if (auditProjectId is { } requestedProjectId
+                && !await access.VisibleProjects().AnyAsync(p => p.Id == requestedProjectId))
+                auditProjectId = null;
+            return await ExportFile.Send(db, store, format, Text.Get("nav.time"), Cols, rows, parameters, auditProjectId, "task-hours", clock);
         });
         api.MapPost("/time", Create);
         api.MapPatch("/time/{id:guid}", Edit);

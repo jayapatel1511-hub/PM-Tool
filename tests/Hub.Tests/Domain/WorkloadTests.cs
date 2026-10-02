@@ -31,6 +31,19 @@ public sealed class WorkloadTests
     }
 
     [Fact]
+    public void Daily_forecast_aggregates_to_the_existing_weekly_forecast_without_losing_hours()
+    {
+        var task = T(10.01m, start: Monday, due: Monday.AddDays(11));
+        var daily = Workload.SpreadDays(task, Monday);
+        var weekly = Workload.Spread(task, Monday);
+        Assert.Equal(10.01m, daily.ByDay.Values.Sum());
+        foreach (var week in weekly.ByWeek)
+            Assert.Equal(week.Value, daily.ByDay.Where(d => Workload.WeekOf(d.Key) == week.Key).Sum(d => d.Value));
+        Assert.Equal(10.01m, Workload.SpreadDays(T(10.01m, due: Monday.AddDays(-1)), Monday).ByDay[Monday]);
+        Assert.Equal(10.01m, Workload.SpreadDays(T(10.01m), Monday).NoDueDate);
+    }
+
+    [Fact]
     public void Unestimated_and_finished_work_contributes_no_hours() // FR-001
     {
         Assert.Null(Workload.Spread(T(null, due: Monday.AddDays(3)), Monday).Remaining);

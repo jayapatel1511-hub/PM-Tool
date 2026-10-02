@@ -24,6 +24,8 @@ jobs:
       - name: Tests with coverage (rules engine ≥ 95 % branches, services ≥ 70 %)
         run: dotnet test Hub.slnx --no-build -c Release --collect:"XPlat Code Coverage" --results-directory coverage
       - run: python3 tools/coverage_gate.py coverage
+      - name: Private backup and pilot bootstrap safety regressions
+        run: python3 tools/test_backup_helpers.py && python3 tools/test_pilot_initializer.py && python3 tools/test_pilot_operations.py
       - name: Vulnerable NuGet packages
         run: dotnet list Hub.slnx package --vulnerable --include-transitive | tee vuln.txt && ! grep -q "Critical" vuln.txt
       - run: npm ci
@@ -41,6 +43,9 @@ jobs:
         working-directory: web
       - name: Review and revision change UI workflows and accessibility (mocked API)
         run: npm run test:coordination
+        working-directory: web
+      - name: Design basis impact and focus regression (mocked API)
+        run: npm run test:design-basis
         working-directory: web
       - name: Coordination browser evidence
         if: always()

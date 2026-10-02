@@ -1,0 +1,10 @@
+[Unit]
+Description=Back up the dedicated PM-Tool review database
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/pm-tool-review-backup
+UMask=0077
+NoNewPrivileges=true

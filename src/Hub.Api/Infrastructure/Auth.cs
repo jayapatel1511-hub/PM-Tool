@@ -4,6 +4,8 @@ using Hub.Api.Data;
 using Hub.Domain;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -33,6 +35,25 @@ public sealed class CurrentUser
 public static class AuthSetup
 {
     public const string DevScheme = "Dev";
+    public const string LocalScheme = "LocalPassword";
+    /// The local-password cookie's fingerprint of the verifier that signed it in (LocalPasswordStore.Stamp).
+    public const string StampClaim = "local_stamp";
+
+    /// Sign-in throttling key. Behind the homedev tunnel every request arrives from the bridge
+    /// gateway, so Cloudflare's client address keeps the limit per person rather than shared by all.
+    public static string ClientKey(HttpContext ctx, System.Net.IPAddress? tunnelProxy)
+    {
+        var remote = ctx.Connection.RemoteIpAddress;
+        var hop = remote is null ? null : remote.IsIPv4MappedToIPv6 ? remote.MapToIPv4() : remote;
+        var forwarded = ctx.Request.Headers["CF-Connecting-IP"];
+        if (tunnelProxy is not null && hop?.Equals(tunnelProxy) == true && forwarded.Count == 1
+            && System.Net.IPAddress.TryParse(forwarded[0], out var client))
+            return "cf:" + (client.IsIPv4MappedToIPv6 ? client.MapToIPv4() : client);
+        return remote?.ToString() ?? "unknown";
+    }
+
+    public static bool LocalAuthAllowed(IHostEnvironment env, IConfiguration cfg) =>
+        (env.IsDevelopment() || env.IsStaging() || env.IsEnvironment("Testing")) && cfg["Auth:Mode"] == LocalScheme;
 
     public static bool DevAuthAllowed(IHostEnvironment env, IConfiguration cfg) =>
         (env.IsDevelopment() || env.IsEnvironment("Testing")) && cfg["Auth:Mode"] == "Development";
@@ -40,9 +61,46 @@ public static class AuthSetup
     public static void AddHubAuth(this WebApplicationBuilder b)
     {
         var dev = DevAuthAllowed(b.Environment, b.Configuration);
-        var auth = b.Services.AddAuthentication(dev ? DevScheme : JwtBearerDefaults.AuthenticationScheme);
+        var local = LocalAuthAllowed(b.Environment, b.Configuration);
+        if (b.Configuration["Auth:Mode"] == LocalScheme && !local)
+            throw new InvalidOperationException("LocalPassword authentication is permitted only in Development, Staging or Testing.");
+        if (local)
+        {
+            var file = b.Configuration["Auth:Local:UsersFile"];
+            var json = b.Configuration["Auth:Local:UsersJson"];
+            var keys = b.Configuration["Auth:Local:KeyDirectory"];
+            if (string.IsNullOrWhiteSpace(keys) || string.IsNullOrWhiteSpace(file) == string.IsNullOrWhiteSpace(json))
+                throw new InvalidOperationException("LocalPassword requires exactly one credential source and a persistent data protection key directory.");
+            b.Services.AddSingleton(new LocalPasswordStore(json ?? file!, json is not null));
+            Directory.CreateDirectory(keys);
+            if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(keys, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            b.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keys));
+        }
+        var auth = b.Services.AddAuthentication(dev ? DevScheme : local ? LocalScheme : JwtBearerDefaults.AuthenticationScheme);
         if (dev)
             auth.AddScheme<AuthenticationSchemeOptions, DevAuthHandler>(DevScheme, _ => { });
+        else if (local)
+            auth.AddCookie(LocalScheme, o =>
+            {
+                o.Cookie.Name = "__Host-hub-review";
+                o.Cookie.HttpOnly = true;
+                o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                o.Cookie.SameSite = SameSiteMode.Strict;
+                o.Cookie.Path = "/";
+                o.ExpireTimeSpan = TimeSpan.FromHours(8);
+                o.SlidingExpiration = false;
+                o.Events.OnRedirectToLogin = c => { c.Response.StatusCode = 401; return Task.CompletedTask; };
+                o.Events.OnRedirectToAccessDenied = c => { c.Response.StatusCode = 403; return Task.CompletedTask; };
+                // Rotating or removing a person's verifier ends their sessions: a cookie is only good with the stamp it was issued with.
+                o.Events.OnValidatePrincipal = async c =>
+                {
+                    var store = c.HttpContext.RequestServices.GetRequiredService<LocalPasswordStore>();
+                    if (Guid.TryParse(c.Principal?.FindFirst("local_user_id")?.Value, out var id)
+                        && c.Principal!.FindFirst(StampClaim)?.Value is { } stamp && store.Stamp(id) == stamp) return;
+                    c.RejectPrincipal();
+                    await c.HttpContext.SignOutAsync(LocalScheme);
+                };
+            });
         else
             auth.AddJwtBearer(o =>
             {
@@ -56,6 +114,63 @@ public static class AuthSetup
                 o.TokenValidationParameters.NameClaimType = "name";
             });
         b.Services.AddAuthorization(o => o.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+    }
+
+    /// One address with something either side of a single @ and no spaces: catches typos, not a full RFC 5322 check.
+    public static bool IsEmail(string s)
+    {
+        var at = s.IndexOf('@');
+        return s.Length <= 200 && at > 0 && at == s.LastIndexOf('@') && at < s.Length - 1 && !s.Any(char.IsWhiteSpace);
+    }
+
+    /// `Auth:Local:BootstrapAdmins`: "email|Display Name" entries separated by semicolons. A malformed entry stops
+    /// start-up so a typo cannot leave the Hub without its administrator.
+    public static List<(string Email, string Name)> ParseBootstrapAdmins(string spec)
+    {
+        var admins = new List<(string Email, string Name)>();
+        foreach (var item in spec.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var parts = item.Split('|', StringSplitOptions.TrimEntries);
+            if (parts.Length != 2 || !IsEmail(parts[0]) || parts[1].Length is 0 or > 200)
+                throw new InvalidOperationException("Auth:Local:BootstrapAdmins must list \"email|Display Name\" entries separated by semicolons.");
+            if (!admins.Exists(a => a.Email.Equals(parts[0], StringComparison.OrdinalIgnoreCase))) admins.Add((parts[0], parts[1]));
+        }
+        return admins;
+    }
+
+    /// First Admin for local-password sign-in, which has no directory roles: at start-up, after migrations, each listed
+    /// person exists (created active if missing) and holds Admin. Idempotent; never removes a role, renames or reactivates anyone.
+    public static async Task BootstrapAdmins(HubDb db, IConfiguration cfg, IHostEnvironment env, ILogger log)
+    {
+        var spec = cfg["Auth:Local:BootstrapAdmins"];
+        if (string.IsNullOrWhiteSpace(spec)) return;
+        if (!LocalAuthAllowed(env, cfg)) { log.LogWarning("Auth:Local:BootstrapAdmins is ignored: it applies only to local-password sign-in."); return; }
+        db.Audit.AsSystem("LocalBootstrap");
+        foreach (var (email, name) in ParseBootstrapAdmins(spec))
+        {
+            var user = await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Email == email);
+            if (user is null)
+            {
+                user = new AppUser { Email = email, DisplayName = name, IsActive = true };
+                db.Users.Add(user);
+                db.Audit.Note(user, action: "Provisioned");
+                log.LogInformation("Bootstrap admin {Email} created", email);
+            }
+            else if (!user.IsActive) { log.LogWarning("Bootstrap admin {Email} is inactive and was left unchanged", email); continue; }
+            if (user.Roles.Exists(r => r.Role == SystemRole.Admin)) continue;
+            var deliberatelyRemoved = await db.ActivityLog.AsNoTracking().AnyAsync(a =>
+                a.ItemType == ItemType.User && a.ItemKey == user.Email && a.ItemName == SystemRole.Admin && a.Action == "RoleRemoved");
+            if (deliberatelyRemoved)
+            {
+                log.LogWarning("Bootstrap admin {Email} was deliberately removed and was left unchanged", email);
+                continue;
+            }
+            var role = new UserSystemRole { UserId = user.Id, Role = SystemRole.Admin, Source = RoleSource.Manual, GrantedAt = DateTimeOffset.UtcNow };
+            db.UserRoles.Add(role); // through the set: a preset key reached only by navigation is tracked as an update
+            db.Audit.Note(role, action: "RoleAdded", key: email);
+            log.LogInformation("Bootstrap admin {Email} granted Admin", email);
+        }
+        await db.SaveChangesAsync();
     }
 }
 
@@ -98,9 +213,13 @@ public sealed class ProvisioningMiddleware(RequestDelegate next)
             var name = ctx.User.FindFirst("name")?.Value ?? email;
             if (string.IsNullOrEmpty(oid)) { ctx.Response.StatusCode = 401; return; }
 
-            var user = await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.EntraObjectId == oid)
+            var isLocal = ctx.User.Identity.AuthenticationType == AuthSetup.LocalScheme;
+            var localId = isLocal && Guid.TryParse(ctx.User.FindFirst("local_user_id")?.Value, out var parsed) ? parsed : Guid.Empty;
+            var user = isLocal ? await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == localId) :
+                await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.EntraObjectId == oid)
                 ?? await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.EntraObjectId == null && u.Email == email);
             var isDev = ctx.User.Identity.AuthenticationType == AuthSetup.DevScheme;
+            if (isLocal && (user is null || !user.IsActive)) { ctx.Response.StatusCode = 401; return; }
             if (user is null)
             {
                 user = new AppUser { EntraObjectId = oid, Email = email, DisplayName = name, IsActive = true };
@@ -110,12 +229,12 @@ public sealed class ProvisioningMiddleware(RequestDelegate next)
             }
             else
             {
-                user.EntraObjectId ??= oid;
+                if (!isLocal) user.EntraObjectId ??= oid;
                 // Matched by directory identity, so an email change in the directory updates the Hub (edge case).
-                if (!string.IsNullOrEmpty(email) && user.Email != email) user.Email = email;
-                if (!isDev && user.DisplayName != name) user.DisplayName = name;
+                if (!isLocal && !string.IsNullOrEmpty(email) && user.Email != email) user.Email = email;
+                if (!isDev && !isLocal && user.DisplayName != name) user.DisplayName = name;
             }
-            if (!isDev || ctx.User.HasClaim(c => c.Type == "dev_roles_present"))
+            if (!isLocal && (!isDev || ctx.User.HasClaim(c => c.Type == "dev_roles_present")))
                 SyncGroupRoles(db, user, ctx.User.FindAll("roles").Select(c => c.Value));
             if (db.ChangeTracker.HasChanges())
             {
@@ -145,7 +264,8 @@ public sealed class ProvisioningMiddleware(RequestDelegate next)
             user.Roles.Remove(r);
             db.UserRoles.Remove(r);
         }
-        foreach (var r in wanted.Where(w => !user.Roles.Any(x => x.Role == w && x.Source == RoleSource.Group)))
-            user.Roles.Add(new UserSystemRole { UserId = user.Id, Role = r, Source = RoleSource.Group, GrantedAt = DateTimeOffset.UtcNow });
+        // Through the set: a role added only to an existing person's navigation is tracked as an update and fails (409).
+        foreach (var r in wanted.Where(w => !user.Roles.Any(x => x.Role == w && x.Source == RoleSource.Group)).ToList())
+            db.UserRoles.Add(new UserSystemRole { UserId = user.Id, Role = r, Source = RoleSource.Group, GrantedAt = DateTimeOffset.UtcNow });
     }
 }

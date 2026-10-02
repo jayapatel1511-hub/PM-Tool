@@ -7,6 +7,8 @@ public static class HubModules
 {
     public static void AddServices(IServiceCollection s, IConfiguration cfg)
     {
+        // A malformed route or query value reaches ProblemMiddleware as a problem body in every environment (§25.6).
+        s.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(o => o.ThrowOnBadRequest = true);
         s.AddScoped<Notifier>();
         s.AddScoped<TeamService>();
         s.AddScoped<IProjectCreateHook, CopyStructureHook>();
@@ -37,6 +39,7 @@ public static class HubModules
         DocumentLinkEndpoints.Map(api);
         NotificationEndpoints.Map(api);
         DashboardEndpoints.Map(api);
+        DisciplineCoordinationEndpoints.Map(api);
         MyWorkEndpoints.Map(api);
         DecisionEndpoints.Map(api);
         SearchEndpoints.Map(api);
@@ -45,6 +48,7 @@ public static class HubModules
         ReassignEndpoints.Map(api);
         PortfolioEndpoints.Map(api);
         WorkloadEndpoints.Map(api);
+        AllocationEndpoints.Map(api);
         TimelineEndpoints.Map(api);
         ViewEndpoints.Map(api);
         CalendarEndpoints.Map(api);
@@ -57,6 +61,10 @@ public static class HubModules
         HandoffEndpoints.Map(api);
         ReviewEndpoints.Map(api);
         ChangeEndpoints.Map(api);
+        SubmissionEndpoints.Map(api);
+        DesignBasisEndpoints.Map(api);
+        ReadinessEndpoints.Map(api);
+        WeeklyCommitmentsEndpoints.Map(api);
         // Support: an Admin can re-run a project's evaluation on demand.
         api.MapPost("/admin/evaluate/{projectId:guid}", async (Guid projectId, CurrentUser me, EvaluationService eval) =>
         {
@@ -67,7 +75,7 @@ public static class HubModules
         // Public client configuration for the SPA sign-in (no secrets: client and tenant IDs are public values).
         api.MapGet("/config", (IConfiguration cfg, IHostEnvironment env) => new
         {
-            authMode = AuthSetup.DevAuthAllowed(env, cfg) ? "Development" : "Entra",
+            authMode = AuthSetup.DevAuthAllowed(env, cfg) ? "Development" : AuthSetup.LocalAuthAllowed(env, cfg) ? "LocalPassword" : "Entra",
             entra = new { clientId = cfg["Auth:Entra:SpaClientId"], tenantId = cfg["Auth:Entra:TenantId"], apiScope = cfg["Auth:Entra:ApiScope"] },
         }).AllowAnonymous();
     }

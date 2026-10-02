@@ -52,6 +52,18 @@ In Development, `Auth:Mode` is `Development`: there is no Entra sign-in; the SPA
 `X-Dev-User: <email>`. This mode is refused in any other environment. Seeded people include jordan (Admin), lena
 (Executive), priya and marc (PMs), sam (Supervisor), alex, jill, diane, omar and rita (Read Only), all `@hub.test`.
 
+The host for review, company pilot and production is homedev at `pm.engcalchub.com`, once its DNS, tunnel and access controls are
+verified. See the [homedev review runbook](docs/runbooks/homedev-review.md). Its separate persistent review database
+uses the opt-in `Seed__ReviewDemo=true` setting. The idempotent seed adds Taylor, Jay and Yagmur and three clearly
+labelled fictional projects; later releases retain reviewer edits. Each reviewer has an individual ID and password
+mapped to one active `AppUser`, stored as a private salted verifier outside Git. This `LocalPassword` sign-in is
+permitted only in Development, Testing and Staging. Production refuses the synthetic seed and local-password mode.
+Never copy the review database into production. The sample `@hub.test` records have reserved development identities;
+real Entra accounts cannot claim them by matching email. Jay clarified on 2026-10-01 that no Azure deployment or
+new paid service is part of this release. Company production uses the reviewed Staging local-password hosting
+configuration; see [homedev production gates](docs/pilot/production-readiness.md). The existing
+[Azure environment design](docs/runbooks/environments.md) is optional future work.
+
 ## Checks
 
 ```bash
@@ -129,6 +141,7 @@ secrets live in Key Vault.
 | `Csp:ConnectSrc` | empty | Extra `connect-src` origins for the content security policy (Application Insights) |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | unset | Send requests, dependencies and logs to Application Insights |
 | `Seed:DevUsers` | `true` in Development | Seed the development people |
+| `Seed:ReviewDemo` | `false` | Add synthetic review people and projects in Development or Staging only; requires a separate review database |
 
 Organisation thresholds and defaults (due-soon days, stale days, health percentages, working days, digest time and so
 on) are not configuration: Admins change them in the application under **Admin → Settings**, and every change is logged.

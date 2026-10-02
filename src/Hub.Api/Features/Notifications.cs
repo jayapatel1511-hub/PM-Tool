@@ -48,8 +48,8 @@ public static class NotificationEndpoints
             var unread = await permitted.CountAsync(n => n.ReadAt == null);
             var latest = await permitted.MaxAsync(n => (DateTimeOffset?)n.CreatedAt);
             var follows = await db.Follows.AsNoTracking().Where(f => f.UserId == me.Id && f.Level != FollowLevel.Muted && visible.Contains(f.ProjectId)).Select(f => new { f.ProjectId, f.LastSeenAt }).ToListAsync();
-            var ids = follows.Select(f => (Guid?)f.ProjectId).ToList();
-            var activity = ids.Count == 0 ? null : await db.ActivityLog.Where(a => ids.Contains(a.ProjectId) && a.ActorUserId != me.Id).MaxAsync(a => (DateTimeOffset?)a.OccurredAt);
+            var ids = follows.Select(f => f.ProjectId).ToList();
+            var activity = ids.Count == 0 ? null : await VisibleFollowed(db, access, ids, me.Id).MaxAsync(a => (DateTimeOffset?)a.OccurredAt);
             var seen = follows.Max(f => f.LastSeenAt);
             return new { Stamp = $"{unread}:{latest?.UtcTicks}:{activity?.UtcTicks}:{seen?.UtcTicks}" };
         });
@@ -174,7 +174,7 @@ public static class NotificationEndpoints
             var (pg, size) = Http.Paging(page, pageSize ?? 100);
             var followed = await Followed(db, access, me.Id);
             var ids = followed.Where(f => projectId is null || f.ProjectId == projectId).Select(f => f.ProjectId).ToList();
-            var q = ActivityEndpoints.Filter(db.ActivityLog.AsNoTracking().Where(a => a.ProjectId != null && ids.Contains(a.ProjectId.Value) && a.ActorUserId != me.Id),
+            var q = ActivityEndpoints.Filter(VisibleFollowed(db, access, ids, me.Id),
                 null, null, null, null, null, null, importantOnly);
             var total = await q.CountAsync();
             var rows = await q.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Skip((pg - 1) * size).Take(size).ToListAsync();
@@ -242,7 +242,7 @@ public static class NotificationEndpoints
         foreach (var f in (await Followed(db, access, userId)).Where(f => f.Status != ProjectStatus.Setup))
         {
             var since = f.LastSeenAt ?? DateTimeOffset.MinValue;
-            var rows = await db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == f.ProjectId && a.OccurredAt > since && a.ActorUserId != userId)
+            var rows = await (await ActivityEndpoints.Visible(db, access, f.ProjectId)).Where(a => a.OccurredAt > since && a.ActorUserId != userId)
                 .OrderByDescending(a => a.OccurredAt).Take(1000).ToListAsync();
             var notified = await NotifiedKeys(db, userId, rows);
             var n = rows.Where(r => !notified.Contains(Key(r))).GroupBy(r => r.CorrelationId is { } c ? c.ToString() : r.Id.ToString()).Count();
@@ -250,4 +250,7 @@ public static class NotificationEndpoints
         }
         return result;
     }
+
+    static IQueryable<ActivityLog> VisibleFollowed(HubDb db, Access access, IEnumerable<Guid> projectIds, Guid userId) =>
+        ActivityEndpoints.Visible(db, access, projectIds.Distinct().ToArray()).Where(a => a.ActorUserId != userId);
 }

@@ -27,6 +27,7 @@ public sealed record OrgSettings
     public bool AllowSelfReview { get; init; }
     public int CompleteProjectEditWindowDays { get; init; } = 30;
     public int DefaultWeeklyCapacityHours { get; init; } = 40;
+    public int CoordinationLookaheadWeeks { get; init; } = 3;
     public string OrgTimeZone { get; init; } = "America/Halifax";
     public string DigestSendTimeLocal { get; init; } = "07:00";
     public bool WeekendDigests { get; init; }
@@ -60,6 +61,7 @@ public sealed record OrgSettings
         new("allow_self_review", SettingKind.Bool, false, "work"),
         new("complete_project_edit_window_days", SettingKind.Int, 30, "work"),
         new("default_weekly_capacity_hours", SettingKind.Int, 40, "work"),
+        new("coordination_lookahead_weeks", SettingKind.Int, 3, "work"),
         new("restricted_projects_enabled", SettingKind.Bool, false, "work"),
         new("viewer_comments_default", SettingKind.Bool, true, "work"),
         new("project_number_format", SettingKind.Regex, "^[A-Za-z0-9][A-Za-z0-9-]{0,31}$", "work"),
@@ -99,6 +101,7 @@ public sealed record OrgSettings
             AllowSelfReview = B("allow_self_review", s.AllowSelfReview),
             CompleteProjectEditWindowDays = I("complete_project_edit_window_days", s.CompleteProjectEditWindowDays),
             DefaultWeeklyCapacityHours = I("default_weekly_capacity_hours", s.DefaultWeeklyCapacityHours),
+            CoordinationLookaheadWeeks = I("coordination_lookahead_weeks", s.CoordinationLookaheadWeeks),
             RestrictedProjectsEnabled = B("restricted_projects_enabled", s.RestrictedProjectsEnabled),
             ViewerCommentsDefault = B("viewer_comments_default", s.ViewerCommentsDefault),
             ProjectNumberFormat = S("project_number_format", s.ProjectNumberFormat),
@@ -119,7 +122,8 @@ public sealed record OrgSettings
     /// Validates an Admin-entered value; returns an error message key or null.
     public static string? Validate(SettingDef def, JsonElement value) => def.Kind switch
     {
-        SettingKind.Int => value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var n) && n >= 0 && n <= 3650 ? null : "setting.int",
+        SettingKind.Int => value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var n) &&
+            (def.Key == "coordination_lookahead_weeks" ? n is >= 1 and <= 12 : n is >= 0 and <= 3650) ? null : "setting.int",
         SettingKind.Bool => value.ValueKind is JsonValueKind.True or JsonValueKind.False ? null : "setting.bool",
         SettingKind.Time => value.ValueKind == JsonValueKind.String && TimeOnly.TryParseExact(value.GetString(), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out _) ? null : "setting.time",
         SettingKind.TimeZone => value.ValueKind == JsonValueKind.String && TryZone(value.GetString()!) ? null : "setting.timezone",
@@ -149,7 +153,14 @@ public static class NotificationEvents
         AttentionCritical = "AttentionCritical", HealthOverride = "HealthOverride", WorkReassignedAway = "WorkReassignedAway",
         DependencyRemoved = "DependencyRemoved", StaffAssignment = "StaffAssignment", SupervisorStaffing = "SupervisorStaffing",
         MemberAutoAdded = "MemberAutoAdded", DeliverableOwned = "DeliverableOwned", ActionAssigned = "ActionAssigned",
-        TaskChanged = "TaskChanged", HandoffChanged = "HandoffChanged", ReviewPackageChanged = "ReviewPackageChanged", ChangeImpact = "ChangeImpact";
+        TaskChanged = "TaskChanged", HandoffChanged = "HandoffChanged", ReviewPackageChanged = "ReviewPackageChanged", ChangeImpact = "ChangeImpact",
+        AllocationChanged = "AllocationChanged", SubmissionChanged = "SubmissionChanged",
+        IssueVerifierAssigned = "IssueVerifierAssigned", IssueVerificationOutcome = "IssueVerificationOutcome",
+        ConstraintAction = "ConstraintAction", ConstraintOutcome = "ConstraintOutcome",
+        CommitmentProposed = "CommitmentProposed", CommitmentChanged = "CommitmentChanged",
+        BasisImpactPending = "BasisImpactPending", BasisConflictRaised = "BasisConflictRaised",
+        TaskStartAuthorised = "TaskStartAuthorised";
+    public const string IssueAffectedDiscipline = "IssueAffectedDiscipline";
 
     public static readonly NotificationEventDef[] All =
     [
@@ -164,7 +175,21 @@ public static class NotificationEvents
         new(MemberAutoAdded, true, false), new(DeliverableOwned, true, false, true), new(ActionAssigned, true, false, true),
         new(TaskChanged, true, false),
         new(HandoffChanged, true, false, true), new(ReviewPackageChanged, true, false, true), new(ChangeImpact, true, false, true),
+        new(AllocationChanged, true, false), new(SubmissionChanged, true, false),
+        new(IssueVerifierAssigned, true, false, true), new(IssueVerificationOutcome, true, false),
+        new(ConstraintAction, true, false, true), new(ConstraintOutcome, true, false),
+        new(CommitmentProposed, true, false, true), new(CommitmentChanged, true, false),
+        new(BasisImpactPending, true, false, true), new(BasisConflictRaised, true, false),
+        new(IssueAffectedDiscipline, true, false),
+        new(TaskStartAuthorised, true, false, true),
     ];
+
+    /// Coordination events whose recipients must hold current project access when the notice is composed and
+    /// again when its email is delivered (FR-MDC-02).
+    public static readonly HashSet<string> ProjectScoped = [HandoffChanged, ReviewPackageChanged, ChangeImpact, AllocationChanged,
+        SubmissionChanged, IssueVerifierAssigned, IssueVerificationOutcome, ConstraintAction, ConstraintOutcome, CommitmentProposed, CommitmentChanged,
+        BasisImpactPending, BasisConflictRaised,
+        IssueAffectedDiscipline, TaskStartAuthorised];
 
     public static NotificationEventDef Get(string code) => All.First(e => e.Code == code);
 }

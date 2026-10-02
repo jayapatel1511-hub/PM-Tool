@@ -19,7 +19,7 @@ public static class ActivityEndpoints
         {
             await access.Project(id, track: false);
             var (pg, size) = Http.Paging(page, pageSize);
-            var q = Filter(db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == id), from, to, actorId, itemType, category, disciplineId, importantOnly);
+            var q = Filter(await Visible(db, access, id), from, to, actorId, itemType, category, disciplineId, importantOnly);
             var total = await q.CountAsync();
             var rows = await q.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Skip((pg - 1) * size).Take(size).ToListAsync();
             return new Page<object>(await Render(db, rows), pg, size, total);
@@ -33,13 +33,39 @@ public static class ActivityEndpoints
             // The item's own rows plus comments, links, hours and dependencies that name it by key ("T1 → T2", "deleted with T1").
             // A project's own history is its rows only: the project number is part of every item key.
             var key = type == ItemType.Project ? null : await db.ActivityLog.Where(a => a.ItemId == id && a.ItemKey != null).Select(a => a.ItemKey).FirstOrDefaultAsync();
-            var q = db.ActivityLog.AsNoTracking().Where(a => a.ProjectId == projectId && (a.ItemId == id || (key != null && a.ItemId != id
+            var q = (await Visible(db, access, projectId)).Where(a => (a.ItemId == id || (key != null && a.ItemId != id
                 && ((a.ItemType != ItemType.Dependency && a.ItemKey == key)
                     || (a.ItemType == ItemType.Dependency && (a.ItemKey!.StartsWith(key + " ") || a.ItemKey.EndsWith(" " + key)))))));
             var total = await q.CountAsync();
             var rows = await q.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Skip((pg - 1) * size).Take(size).ToListAsync();
             return new Page<object>(await Render(db, rows), pg, size, total);
         });
+    }
+
+    /// Apply the source records' privacy boundaries to every project/item history and export, including old log rows.
+    public static async Task<IQueryable<ActivityLog>> Visible(HubDb db, Access access, Guid projectId)
+    {
+        await access.Project(projectId, false); // preserve restricted-project 404 semantics before bulk filtering
+        return Visible(db, access, new[] { projectId });
+    }
+
+    /// Apply the same source privacy boundary to several already-authorized projects in one SQL query.
+    public static IQueryable<ActivityLog> Visible(HubDb db, Access access, IReadOnlyCollection<Guid> projectIds)
+    {
+        var actor = access.Actor;
+        var visibleProjects = access.VisibleProjectIds().Where(id => projectIds.Contains(id));
+        var pmProjects = db.Projects.Where(p => visibleProjects.Contains(p.Id) &&
+            (actor.Admin || p.ProjectManagerId == actor.Id || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == actor.Id && m.RemovedAt == null && m.Roles.Contains(ProjectRole.PM))))
+            .Select(p => p.Id);
+        var leadTasks = db.Tasks.IgnoreQueryFilters().Where(t => visibleProjects.Contains(t.ProjectId)
+            && db.ProjectDisciplines.Any(d => d.Id == t.ProjectDisciplineId && d.ProjectId == t.ProjectId && d.LeadUserId == actor.Id)).Select(t => t.Id);
+        var directReports = db.Users.Where(u => u.SupervisorId == actor.Id).Select(u => u.Id);
+        var visibleEntries = db.TimeEntries.IgnoreQueryFilters().Where(e => visibleProjects.Contains(e.ProjectId) &&
+            (e.UserId == actor.Id || pmProjects.Contains(e.ProjectId) || leadTasks.Contains(e.TaskId)
+                || actor.Supervisor && directReports.Contains(e.UserId))).Select(e => e.Id);
+        return db.ActivityLog.AsNoTracking().Where(a => a.ProjectId != null && visibleProjects.Contains(a.ProjectId.Value)
+            && (a.ItemType != ItemType.TimeEntry || visibleEntries.Select(id => (Guid?)id).Contains(a.ItemId))
+            && (a.ItemType != ItemType.CalendarEvent || !db.CalendarEvents.Any(e => e.Id == a.ItemId && e.Visibility == EventVisibility.Private)));
     }
 
     public static IQueryable<ActivityLog> Filter(IQueryable<ActivityLog> q, DateOnly? from, DateOnly? to, Guid? actorId, string? itemType,

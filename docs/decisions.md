@@ -66,3 +66,25 @@ changes, `spec-parts/`.
 - **No new infrastructure.** No message broker, cache server, search service or job scheduler
   library: PostgreSQL, hosted services and advisory locks cover these at the stated scale
   (constitution VII).
+
+## Product decisions for packets 032–033 (Jay, 2026-10-01)
+
+- **FR-RDY-02 task start.** Starting a task (direct or bulk) whose readiness is **Not Ready or Needs
+  Assessment** (including work never assessed) requires an explicit warning acknowledgement, a reason
+  and PM/Discipline Lead authorisation. Ready and Proceed under Assumption start normally. Review,
+  access and lifecycle guards are never bypassed.
+- **Submission Gate relationship.** Jay asked for the relationship to be defined. A PM or responsible
+  Discipline Lead links a task or deliverable to one or more **prerequisite submission packages** in the
+  same project, with a reason. The gate passes only when every linked package is Issued; a Superseded
+  package is followed through `SupersedesPackageId` to its latest successor, which must be Issued; a
+  Cancelled package or any Draft/Checking/Ready package leaves the gate Not Ready. A package whose
+  manifest contains the target deliverable (or the task's deliverable) cannot be linked, so the output's
+  own submission never gates itself. With no links, the existing reasoned Not Applicable still applies,
+  otherwise the gate is Needs Assessment. Proceed under Assumption cannot override it (FR-RDY-04).
+- **FR-LOC-01 Coordination issue.** An explicit `Coordination` issue type chosen at creation. Only
+  Coordination issues require at least one location or drawing/model reference and independent
+  verification before resolution. Issues had no type before; to keep existing behaviour, the
+  migration marks issues that already carry a location or drawing/model reference as Coordination
+  (their verification gate is unchanged) and all others as General.
+- **FR-RDY-05 commitment week.** Weekly promise weeks start on each project's `CoordinationDay`.
+  Existing rows keep their recorded week start.

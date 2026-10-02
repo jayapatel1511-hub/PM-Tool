@@ -31,4 +31,52 @@ public static class Registers
 
     /// Register sort weight: High first (§13.13).
     public static int Weight(string severity) => severity switch { Impact.High => 0, Impact.Medium => 1, _ => 2 };
+
+    public static readonly string[] IssueLocationKinds = ["SiteArea", "Building", "Alignment", "Coordinate"];
+    public static readonly string[] IssueDocumentKinds = ["Drawing", "Model", "Markup", "Screenshot"];
+
+    public static void ValidateIssueLocation(string kind, string? alignment, decimal? start, decimal? end,
+        string? stationUnits, decimal? x, decimal? y, string? coordinateReferenceSystem, string? coordinateUnits)
+    {
+        if (!IssueLocationKinds.Contains(kind, StringComparer.Ordinal)) throw new ArgumentException("Unknown location kind", nameof(kind));
+        if (kind == "Alignment")
+        {
+            if (string.IsNullOrWhiteSpace(alignment) || start is null || end is null || string.IsNullOrWhiteSpace(stationUnits))
+                throw new ArgumentException("Alignment locations require alignment, station range and units", nameof(alignment));
+            if (end < start) throw new ArgumentException("Station end must be at or after start", nameof(end));
+        }
+        if (kind == "Coordinate")
+        {
+            if (x is null || y is null || string.IsNullOrWhiteSpace(coordinateReferenceSystem) || string.IsNullOrWhiteSpace(coordinateUnits))
+                throw new ArgumentException("Coordinates require x/y, reference system and units", nameof(x));
+        }
+    }
+
+    public static void ValidateIssueDocument(string kind, string identifier, string revision, string sourceUrl)
+    {
+        if (!IssueDocumentKinds.Contains(kind, StringComparer.Ordinal)) throw new ArgumentException("Unknown document kind", nameof(kind));
+        if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(revision) || string.IsNullOrWhiteSpace(sourceUrl))
+            throw new ArgumentException("Document references require identifier, revision and source URL");
+    }
+}
+
+public static class IssueVerificationStatus
+{
+    public const string Proposed = "Proposed", Verified = "Verified", Rejected = "Rejected";
+    public static readonly string[] All = [Proposed, Verified, Rejected];
+}
+
+public static class IssueReferenceImpactStatus
+{
+    public const string Pending = "Pending";
+    public const string Unaffected = "Unaffected";
+    public const string ReopenRequested = "ReopenRequested";
+    public static readonly string[] All = [Pending, Unaffected, ReopenRequested];
+}
+
+public static class IssueReferenceImpactDisposition
+{
+    public const string Unaffected = "Unaffected";
+    public const string Reopen = "Reopen";
+    public static readonly string[] All = [Unaffected, Reopen];
 }

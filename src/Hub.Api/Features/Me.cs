@@ -44,7 +44,8 @@ public static class MeEndpoints
                 Settings = new
                 {
                     s.DateFormat, s.OrgTimeZone, Today = clock.Today(s), s.IdleTimeoutHours, s.RestrictedProjectsEnabled, s.AllowSelfReview,
-                    s.TaskDueSoonDays, s.MilestoneApproachingDays, s.ChainDepthLimit, s.DefaultWeeklyCapacityHours, s.WorkingDaysEnabled,
+                    s.TaskDueSoonDays, s.MilestoneApproachingDays, s.ChainDepthLimit, s.DefaultWeeklyCapacityHours,
+                    s.CoordinationLookaheadWeeks, s.WorkingDaysEnabled,
                 },
                 Preferences = new { pref.DigestEnabled, pref.DigestTimeLocal, pref.DenseRows, pref.WeeklySummaryEnabled },
             };

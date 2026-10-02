@@ -63,6 +63,8 @@ public sealed class NotificationSearchTests(HubFactory f)
             await f.RunJob<WeeklySummaryJob>();
             var mail = await f.DbAsync(db => db.Emails.SingleAsync(e => e.DedupKey == dedup));
             Assert.StartsWith("Hub weekly summary — ", mail.Subject);
+            var visibleSummaryProjects = preview["projects"]!.AsArray().Select(x => x!.G("projectId")).Order();
+            Assert.Equal(visibleSummaryProjects, mail.RequiredProjectIds.Order());
             Assert.Contains($"{projects[0].ProjectNumber} {projects[0].Name}", mail.BodyText);
             Assert.Contains("Overdue tasks: 1 · Blocked tasks: 1 · Overdue decisions: 0", mail.BodyText);
             await f.RunJob<WeeklySummaryJob>();
@@ -145,6 +147,18 @@ public sealed class NotificationSearchTests(HubFactory f)
         (await alex.Post("/api/v1/me/notifications/read", new { all = true })).EnsureSuccessStatusCode();
         Assert.NotEqual(arrived, await Pulse());
         Assert.Equal(0, (await alex.GetAsync("/api/v1/me/notifications/unread-count").Result.Json()).I("notifications"));
+    }
+
+    [Fact]
+    public async Task The_pulse_scopes_many_followed_projects_in_one_activity_query()
+    {
+        var alex = f.As(TestData.Alex);
+        for (var i = 0; i < 12; i++)
+        {
+            var p = await d.Project();
+            (await alex.Put($"/api/v1/projects/{p.Id}/follow", new { level = FollowLevel.AllActivity })).EnsureSuccessStatusCode();
+        }
+        (await alex.GetAsync("/api/v1/me/notifications/pulse")).EnsureSuccessStatusCode();
     }
 
     [Fact]

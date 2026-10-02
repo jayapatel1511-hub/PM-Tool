@@ -22,6 +22,8 @@ public static class TemplateEndpoints
     public sealed record PreviewBody(DateOnly? StartDate, Dictionary<Guid, DateOnly?>? MilestoneDates, Guid[]? DisciplineIds);
     public sealed record PackBody(Guid TemplateId, Guid DisciplineId, Guid? LeadUserId, Dictionary<Guid, Guid?>? Mapping);
     public sealed record VersionBody(int? RowVersion);
+    public sealed record BasisSuggestionBody(Guid TemplateDisciplineId, string Kind, string Title, string Scope, string Statement,
+        decimal? NumericValue, string? Units, string? SourceSystem, string? StableSourceId, string? SourceUrl, string? DeclaredRevision);
 
     const int MaxOffset = 3650;
     static readonly string[] Roles = [AssignToRole.DisciplineLead, AssignToRole.PM, AssignToRole.Unassigned];
@@ -40,6 +42,8 @@ public static class TemplateEndpoints
         });
         api.MapGet("/templates/{id:guid}", async (Guid id, Access access, HubDb db) => await Read(await Visible(db, access, id), db, access));
         api.MapPut("/templates/{id:guid}/structure", Save);
+        api.MapPost("/templates/{id:guid}/design-basis", AddBasisSuggestion);
+        api.MapDelete("/templates/{id:guid}/design-basis/{suggestionId:guid}", RemoveBasisSuggestion);
         api.MapPost("/templates/{id:guid}/draft", NewDraft);
         api.MapPost("/templates/{id:guid}/publish", Publish);
         api.MapPost("/templates/{id:guid}/retire", async (Guid id, Access access, HubDb db) =>
@@ -77,6 +81,45 @@ public static class TemplateEndpoints
 
         api.MapGet("/projects/{id:guid}/template-packs", PackProposal);
         api.MapPost("/projects/{id:guid}/template-packs", AddPack);
+    }
+
+    /// Basis suggestions (031 FR-BAS-07) change only on a Draft, one at a time; each is logged on the template, whose
+    /// version moves as it does when the structure is saved. There is no edit: remove and add again.
+    static async Task<IResult> AddBasisSuggestion(Guid id, BasisSuggestionBody body, Access access, HubDb db)
+    {
+        Editor(access);
+        var template = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
+        if (template.Status != TemplateStatus.Draft) throw ApiException.Rule("template_not_draft", "template.not_draft");
+        Check.OneOf(body.Kind, BasisKind.All, "kind");
+        Check.Required(body.Title, "title", 200);
+        Check.Required(body.Scope, "scope", 500);
+        Check.Required(body.Statement, "statement", 4000);
+        Check.That(body.NumericValue is null || !string.IsNullOrWhiteSpace(body.Units), "units", "template.basis_units");
+        Check.That(await db.TemplateDisciplines.AnyAsync(x => x.Id == body.TemplateDisciplineId && x.TemplateId == id),
+            "templateDisciplineId", "template.bad_discipline");
+        if (body.SourceUrl is not null) Coordination.Url(body.SourceUrl);
+        var suggestion = new TemplateDesignBasis { TemplateId = id, TemplateDisciplineId = body.TemplateDisciplineId,
+            Kind = body.Kind, Title = body.Title.Trim(), Scope = body.Scope.Trim(), Statement = body.Statement.Trim(),
+            NumericValue = body.NumericValue, Units = body.Units?.Trim(), SourceSystem = body.SourceSystem?.Trim(),
+            StableSourceId = body.StableSourceId?.Trim(), SourceUrl = body.SourceUrl?.Trim(), DeclaredRevision = body.DeclaredRevision?.Trim() };
+        db.TemplateDesignBases.Add(suggestion);
+        template.UpdatedAt = DateTimeOffset.UtcNow;
+        db.Audit.Note(template, action: "BasisSuggestionAdded", reason: suggestion.Title);
+        await db.SaveChangesAsync();
+        return Results.Created($"/api/v1/templates/{id}/design-basis/{suggestion.Id}", new { suggestion.Id });
+    }
+
+    static async Task<IResult> RemoveBasisSuggestion(Guid id, Guid suggestionId, Access access, HubDb db)
+    {
+        Editor(access);
+        var template = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
+        if (template.Status != TemplateStatus.Draft) throw ApiException.Rule("template_not_draft", "template.not_draft");
+        var suggestion = await db.TemplateDesignBases.FirstOrDefaultAsync(x => x.Id == suggestionId && x.TemplateId == id) ?? throw ApiException.NotFound();
+        db.TemplateDesignBases.Remove(suggestion);
+        template.UpdatedAt = DateTimeOffset.UtcNow;
+        db.Audit.Note(template, action: "BasisSuggestionRemoved", reason: suggestion.Title);
+        await db.SaveChangesAsync();
+        return Results.NoContent();
     }
 
     // ---------- Reading ----------
@@ -130,11 +173,15 @@ public static class TemplateEndpoints
         var disc = p.Disciplines.ToDictionary(d => d.Id, d => d.DisciplineId);
         var family = await db.Templates.AsNoTracking().Where(x => x.FamilyId == t.FamilyId).OrderByDescending(x => x.Version)
             .Select(x => new { x.Id, x.Version, x.Status, x.PublishedAt }).ToListAsync();
+        var basis = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == t.Id).OrderBy(x => x.Id).ToListAsync();
         return new
         {
             t.Id, t.FamilyId, t.Name, t.Description, t.ProjectTypeId, t.Version, t.Status, t.PublishedAt, t.RowVersion, CanEdit = IsEditor(access) && t.Status == TemplateStatus.Draft,
             Family = family,
-            Disciplines = p.Disciplines.Select(d => new DisciplineIn(d.DisciplineId, d.IsDefaultIncluded)),
+            // TemplateDisciplineId is what a basis suggestion is added against; Save ignores it.
+            Disciplines = p.Disciplines.Select(d => new { d.DisciplineId, d.IsDefaultIncluded, TemplateDisciplineId = d.Id }),
+            BasisSuggestions = basis.Select(b => new { b.Id, DisciplineId = disc[b.TemplateDisciplineId], b.Kind, b.Title, b.Scope, b.Statement,
+                b.NumericValue, b.Units, b.SourceSystem, b.StableSourceId, b.SourceUrl, b.DeclaredRevision }),
             Milestones = p.Milestones.Select(m => new MilestoneIn(m.Id.ToString(), m.Name, m.MilestoneType, m.Anchor, m.OffsetDaysFromAnchor, m.CompletesPhaseId, m.IsClientFacing)),
             Deliverables = p.Deliverables.Select(d => new DeliverableIn(d.Id.ToString(), disc[d.TemplateDisciplineId], d.Name, d.DeliverableTypeId, d.TemplateMilestoneId?.ToString(), d.DueOffsetDays, d.RequiresReview, d.Description)),
             Tasks = p.Tasks.Select(k => new TaskIn(k.Id.ToString(), disc[k.TemplateDisciplineId], k.TemplateDeliverableId?.ToString(), k.Name, k.Description, k.RequiresReview, k.Priority, k.EstimatedHours, k.DueOffsetDays, k.AssignToRole)),
@@ -157,6 +204,7 @@ public static class TemplateEndpoints
 
     static async Task ClearChildren(HubDb db, Guid id)
     {
+        await db.TemplateDesignBases.Where(x => x.TemplateId == id).ExecuteDeleteAsync(); // they reference the disciplines
         await db.TemplateDependencies.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
         await db.TemplateTasks.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
         await db.TemplateDeliverables.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
@@ -237,6 +285,20 @@ public static class TemplateEndpoints
         Check.That(deps.All(d => d.PredecessorTemplateTaskId != d.SuccessorTemplateTaskId) && deps.DistinctBy(d => (d.PredecessorTemplateTaskId, d.SuccessorTemplateTaskId)).Count() == deps.Count, "dependencies", "template.bad_dependency");
         Check.That(!HasCycle(deps), "dependencies", "template.cycle");
 
+        // Basis suggestions move to their discipline's new row. Removing a discipline that still has suggestions is refused
+        // until they are removed, so a save never drops one silently; one added meanwhile moves the version, refusing this save.
+        var basis = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == id).ToListAsync();
+        var was = await db.TemplateDisciplines.AsNoTracking().Where(x => x.TemplateId == id).ToDictionaryAsync(x => x.Id, x => x.DisciplineId);
+        var stranded = basis.GroupBy(b => was[b.TemplateDisciplineId]).Where(g => !byDiscipline.ContainsKey(g.Key)).ToList();
+        if (stranded.Count > 0)
+        {
+            var ids = stranded.Select(g => g.Key).ToList();
+            var names = await db.Disciplines.Where(x => ids.Contains(x.Id)).ToDictionaryAsync(x => x.Id, x => x.Name);
+            throw new ApiException(400, "validation", Text.Get("error.validation"), new Dictionary<string, string[]>
+                { ["disciplines"] = stranded.Select(g => Text.Get("template.basis_in_use", names[g.Key], g.Count())).ToArray() });
+        }
+        foreach (var b in basis) b.TemplateDisciplineId = byDiscipline[was[b.TemplateDisciplineId]];
+
         await Tx.Run(db, async () =>
         {
             await ClearChildren(db, id);
@@ -245,6 +307,7 @@ public static class TemplateEndpoints
             db.TemplateDeliverables.AddRange(deliverables);
             db.TemplateTasks.AddRange(tasks);
             db.TemplateDependencies.AddRange(deps);
+            db.TemplateDesignBases.AddRange(basis);
             t.UpdatedAt = DateTimeOffset.UtcNow; // the header carries the draft's version even when only children changed
             db.Audit.Note(t, action: "StructureSaved");
             return await db.SaveChangesAsync();
@@ -276,6 +339,7 @@ public static class TemplateEndpoints
         if (await db.Templates.AsNoTracking().FirstOrDefaultAsync(x => x.FamilyId == src.FamilyId && x.Status == TemplateStatus.Draft) is { } existing)
             return Results.Ok(new { existing.Id, existing.RowVersion });
         var (_, p) = await Snapshot(db, id);
+        var basis = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == id).ToListAsync();
         var draft = new ProjectTemplate { FamilyId = src.FamilyId, Name = src.Name, Description = src.Description, ProjectTypeId = src.ProjectTypeId, Status = TemplateStatus.Draft };
         var map = new Dictionary<Guid, Guid>();
         Guid N(Guid old) => map[old] = Guid.CreateVersion7();
@@ -294,6 +358,10 @@ public static class TemplateEndpoints
                 EstimatedHours = k.EstimatedHours, DueOffsetDays = k.DueOffsetDays, AssignToRole = k.AssignToRole, SortOrder = k.SortOrder }).ToList());
             db.TemplateDependencies.AddRange(p.Dependencies.Select(d => new TemplateDependency { Id = Guid.CreateVersion7(), TemplateId = draft.Id,
                 PredecessorTemplateTaskId = map[d.PredecessorTemplateTaskId], SuccessorTemplateTaskId = map[d.SuccessorTemplateTaskId] }).ToList());
+            db.TemplateDesignBases.AddRange(basis.Select(b => new TemplateDesignBasis { Id = Guid.CreateVersion7(), TemplateId = draft.Id,
+                TemplateDisciplineId = map[b.TemplateDisciplineId], Kind = b.Kind, Title = b.Title, Scope = b.Scope, Statement = b.Statement,
+                NumericValue = b.NumericValue, Units = b.Units, SourceSystem = b.SourceSystem, StableSourceId = b.StableSourceId,
+                SourceUrl = b.SourceUrl, DeclaredRevision = b.DeclaredRevision }).ToList());
             db.Audit.Note(draft, action: "DraftStarted", reason: src.Version is { } v ? $"v{v}" : null);
             return await db.SaveChangesAsync();
         });
@@ -494,6 +562,23 @@ public sealed class TemplateHook(HubDb db, TeamService team, CurrentUser me, Tim
             }
         var plan = TemplatePlanner.Plan(snap, p.StartDate, typed, pds.Keys.ToHashSet());
         var created = await TemplateEndpoints.Instantiate(db, team, p, parts, plan, pds, null, me.Id, clock.GetUtcNow(), createMilestones: true);
+        var basisSuggestions = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == t.Id).ToListAsync();
+        if (basisSuggestions.Count > 0)
+        {
+            var nextBasis = await Keys.Reserve(db, p.Id, "basis", basisSuggestions.Count);
+            foreach (var suggestion in basisSuggestions)
+            {
+                if (!pds.TryGetValue(suggestion.TemplateDisciplineId, out var pd)) continue;
+                var entry = new DesignBasisEntry { ProjectId = p.Id, Kind = suggestion.Kind, Title = suggestion.Title,
+                    OwnerId = pd.LeadUserId ?? me.Id, ProjectDisciplineId = pd.Id };
+                (entry.Seq, entry.Key) = (nextBasis++, Keys.Format(p.ProjectNumber, "basis", nextBasis - 1));
+                db.DesignBasisEntries.Add(entry);
+                db.DesignBasisVersions.Add(new DesignBasisVersion { ProjectId = p.Id, EntryId = entry.Id, Number = 1,
+                    Status = BasisStatus.Proposed, Scope = suggestion.Scope, Statement = suggestion.Statement,
+                    NumericValue = suggestion.NumericValue, Units = suggestion.Units, SourceSystem = suggestion.SourceSystem,
+                    StableSourceId = suggestion.StableSourceId, SourceUrl = suggestion.SourceUrl, DeclaredRevision = suggestion.DeclaredRevision });
+            }
+        }
         p.CreatedFromTemplateId = t.Id;
         p.TemplateVersion = t.Version;
         db.Audit.Note(p, action: "CreatedFromTemplate", reason: Text.Get("template.created_reason", t.Name, t.Version ?? 0, created.Milestones, created.Deliverables, created.Tasks, created.Dependencies));

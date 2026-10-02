@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using System.Security.Claims;
 using Azure.Core;
 using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
@@ -6,7 +7,10 @@ using Hub.Api.Data;
 using Hub.Api.Features;
 using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 using Npgsql;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 var cfg = builder.Configuration;
@@ -47,6 +51,8 @@ if (!string.IsNullOrEmpty(cfg["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
     builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 builder.AddHubAuth();
+var tunnelProxy = builder.Environment.IsStaging() && cfg.GetValue<bool>("Hosting:LocalTunnelProxy")
+    && IPAddress.TryParse(cfg["Hosting:LocalTunnelProxyAddress"], out var configuredTunnelProxy) ? configuredTunnelProxy : null;
 builder.Services.AddRateLimiter(o =>
 {
     // §21: a per-user limit protects the API from runaway clients.
@@ -58,13 +64,32 @@ builder.Services.AddRateLimiter(o =>
         return ValueTask.CompletedTask;
     };
     o.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
-        RateLimitPartition.GetFixedWindowLimiter(ctx.User.FindFirst("oid")?.Value ?? ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+        RateLimitPartition.GetFixedWindowLimiter(ctx.User.FindFirst("oid")?.Value ?? AuthSetup.ClientKey(ctx, tunnelProxy),
             _ => new FixedWindowRateLimiterOptions { PermitLimit = int.TryParse(cfg["RateLimit:PerMinute"], out var n) ? n : 600, Window = TimeSpan.FromMinutes(1) }));
+    o.AddPolicy("local-sign-in", ctx => RateLimitPartition.GetFixedWindowLimiter(AuthSetup.ClientKey(ctx, tunnelProxy),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(1) }));
 });
 builder.Services.AddOpenApi();
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase);
 
 var app = builder.Build();
+
+// The homedev review origin is bound to loopback behind a local Cloudflare Tunnel.
+// Trust only that local hop, and only its original scheme, for HTTPS and Origin checks.
+if (app.Environment.IsStaging() && cfg.GetValue<bool>("Hosting:LocalTunnelProxy"))
+{
+    if (!IPAddress.TryParse(cfg["Hosting:LocalTunnelProxyAddress"], out var proxyAddress))
+        throw new InvalidOperationException("Hosting:LocalTunnelProxyAddress must identify the review bridge gateway.");
+    var forwarded = new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedProto,
+        ForwardLimit = 1
+    };
+    forwarded.KnownProxies.Add(IPAddress.Loopback);
+    forwarded.KnownProxies.Add(IPAddress.IPv6Loopback);
+    forwarded.KnownProxies.Add(proxyAddress);
+    app.UseForwardedHeaders(forwarded);
+}
 
 app.UseMiddleware<ProblemMiddleware>();
 app.UseMiddleware<SecurityHeaders>();
@@ -75,6 +100,17 @@ if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"
 }
 app.UseDefaultFiles();
 app.UseStaticFiles();
+if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
+    app.Use(async (ctx, next) =>
+    {
+        if (ctx.Request.Path.StartsWithSegments("/api") && !HttpMethods.IsGet(ctx.Request.Method) && !HttpMethods.IsHead(ctx.Request.Method) && !HttpMethods.IsOptions(ctx.Request.Method))
+        {
+            var origin = ctx.Request.Headers.Origin.ToString();
+            var expected = $"{ctx.Request.Scheme}://{ctx.Request.Host}";
+            if (!StringComparer.OrdinalIgnoreCase.Equals(origin, expected)) { ctx.Response.StatusCode = 403; return; }
+        }
+        await next(ctx);
+    });
 app.UseAuthentication();
 app.UseMiddleware<ProvisioningMiddleware>();
 app.UseRateLimiter();
@@ -94,6 +130,19 @@ app.MapGet("/health", async (HubDb db, TimeProvider clock) =>
 }).AllowAnonymous();
 
 var api = app.MapGroup("/api/v1");
+if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
+{
+    api.MapPost("/auth/local/sign-in", async (LocalPasswordStore store, HubDb db, HttpContext ctx, LocalSignIn input) =>
+    {
+        string? stamp = null;
+        var id = input.UserName is { Length: > 0 } && input.Password is { Length: > 0 } ? store.Verify(input.UserName, input.Password, out stamp) : null;
+        if (id is null || !await db.Users.AnyAsync(u => u.Id == id && u.IsActive)) return Results.Unauthorized();
+        var claims = new[] { new Claim("oid", $"local:{id}"), new Claim("local_user_id", id.ToString()!), new Claim(AuthSetup.StampClaim, stamp!) };
+        await ctx.SignInAsync(AuthSetup.LocalScheme, new ClaimsPrincipal(new ClaimsIdentity(claims, AuthSetup.LocalScheme)));
+        return Results.NoContent();
+    }).AllowAnonymous().RequireRateLimiting("local-sign-in");
+    api.MapPost("/auth/local/sign-out", async (HttpContext ctx) => { await ctx.SignOutAsync(AuthSetup.LocalScheme); return Results.NoContent(); });
+}
 if (app.Environment.IsDevelopment()) app.MapOpenApi("/api/v1/openapi.json").AllowAnonymous();
 else app.MapOpenApi("/api/v1/openapi.json");
 MeEndpoints.Map(api);
@@ -108,6 +157,10 @@ if (AuthSetup.DevAuthAllowed(app.Environment, cfg))
     app.MapGet("/api/dev/users", async (HubDb db) => await db.Users.Where(u => u.IsActive).OrderBy(u => u.DisplayName)
         .Select(u => new { u.Email, u.DisplayName, u.JobTitle, Roles = u.Roles.Select(r => r.Role) }).ToListAsync()).AllowAnonymous();
 
+var reviewDemo = cfg.GetValue<bool>("Seed:ReviewDemo");
+if (reviewDemo && !(app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsEnvironment("Testing")))
+    throw new InvalidOperationException("Seed:ReviewDemo is permitted only in Development, Staging or Testing.");
+
 if (cfg["Db:Migrate"] != "false")
 {
     using var scope = app.Services.CreateScope();
@@ -119,8 +172,12 @@ if (cfg["Db:Migrate"] != "false")
         await Seed.DevUsers(db);
         await ReferenceTemplate.Seed(db); // Appendix A, for trying the template wizard
     }
+    if (reviewDemo)
+        await ReviewDemoSeed.Seed(db, scope.ServiceProvider.GetRequiredService<TimeProvider>());
+    await AuthSetup.BootstrapAdmins(db, cfg, app.Environment, app.Logger);
 }
 
 app.Run();
 
 public partial class Program;
+public sealed record LocalSignIn(string UserName, string Password);

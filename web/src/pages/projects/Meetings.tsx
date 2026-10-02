@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Building2, CalendarDays, ExternalLink, ListPlus, Plus, Users } from 'lucide-react'
-import { useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
@@ -35,8 +35,11 @@ interface Perm { ok: boolean; reason?: string | null }
 interface ActionDetail {
   action: ActionRow; meeting: { id: string; title: string; meetingDate: string; meetingType: string; notesLink?: string }
   task?: { id: string; key: string; name: string; status: string } | null; decision?: { id: string; key: string; subject: string; status: string } | null; taskDisciplineId?: string | null
+  links: { id: string; targetType: string; targetId: string; key: string; name: string; status?: string | null }[]
   permissions: { edit: Perm; transitions: { to: string; ok: boolean; reason?: string | null }[]; convert: boolean; comment: boolean }
 }
+
+const ACTION_LINK_ROUTES: Record<string, string> = { Task: 'tasks', Deliverable: 'deliverables', Milestone: 'milestones', Handoff: 'handoffs', ChangeNotice: 'changes' }
 
 const TYPES = ['Coordination', 'Client', 'Design Review', 'Site', 'Other']
 const STATUSES = ['Open', 'In Progress', 'Complete', 'Cancelled']
@@ -110,33 +113,83 @@ function OwnerFields({ projectId, value, onChange, errors, prefix }: { projectId
 
 const CURRENT = '__current'
 
-/** New meeting action: against a chosen meeting, or today's coordination meeting in meeting mode (MTG-04). */
-export function ActionForm({ projectId, meetingId, related, links, defaultOwner, onClose }: {
+/** New meeting action: against a chosen meeting, or today's coordination meeting in meeting mode (MTG-04). From a handoff or
+ * change row the chair may instead reuse an open action, which links it to that source rather than duplicating work (AC-DCV-05). */
+export function ActionForm({ projectId, meetingId, related, links, linkedActionIds, defaultOwner, onClose }: {
   projectId: string; meetingId?: string; related?: { taskId?: string; decisionId?: string; label: string }; links?: { targetType: string; targetId: string }[]
-  defaultOwner?: Owner; onClose: (created?: { id: string; key: string; text: string }) => void
+  linkedActionIds?: string[]; defaultOwner?: Owner; onClose: (created?: { id: string; key: string; text: string; reused?: boolean }) => void
 }) {
   const done = useActionRefresh()
+  const project = useProject(projectId)
   const meetings = useQuery({ queryKey: ['p', projectId, 'meetings'], queryFn: () => get<MeetingRow[]>(`projects/${projectId}/meetings`), enabled: !meetingId })
+  const canReuse = !!links?.some((l) => l.targetType === 'Handoff' || l.targetType === 'ChangeNotice')
+  const candidates = useQuery({ queryKey: ['p', projectId, 'actions', 'open'], queryFn: () => get<ActionRow[]>(`projects/${projectId}/actions?indicator=open`), enabled: canReuse })
+  const [reuse, setReuse] = useState(canReuse && !!linkedActionIds?.length) // never a silent duplicate of linked work
+  const [reuseId, setReuseId] = useState(linkedActionIds?.[0] ?? '')
+  const [reason, setReason] = useState('')
+  const receipt = useRef<{ signature: string; id: string } | null>(null)
   const [meeting, setMeeting] = useState(meetingId ?? CURRENT)
   const [text, setText] = useState('')
   const [owner, setOwner] = useState<Owner>(defaultOwner ?? { type: 'User' })
   const [due, setDue] = useState(addDays(today(), 7))
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const picked = candidates.data?.find((a) => a.id === reuseId)
+  const what = related?.label ?? ''
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
+      if (reuse) {
+        if (!picked) return
+        const body = { rowVersion: picked.rowVersion, links, reason: reason || null }
+        const signature = JSON.stringify([picked.id, body]) // a retry of the same choice replays; a changed one is a new request
+        if (receipt.current?.signature !== signature) receipt.current = { signature, id: crypto.randomUUID() }
+        await post(`projects/${projectId}/actions/${picked.id}/reuse`, { ...body, requestId: receipt.current.id })
+        toast.success(t('dcv.reuseDone', { key: picked.key, what })); done(projectId, picked.id); onClose({ id: picked.id, key: picked.key, text: picked.text, reused: true })
+        return
+      }
       const mid = meeting === CURRENT ? (await post<MeetingRow>(`projects/${projectId}/meetings/current`)).id : meeting
       const r = await post(`meetings/${mid}/actions`, { text, ...ownerBody(owner), dueDate: due || null, relatedTaskId: related?.taskId ?? null, relatedDecisionId: related?.decisionId ?? null, links })
       toast.success(t('action.added', { key: r.key })); done(projectId); onClose({ id: r.id, key: r.key, text })
-    } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
+    } catch (e) {
+      setErr(e as ApiError)
+      if (reuse && (e as ApiError).status === 409) candidates.refetch() // show the current action before another try
+    } finally { setBusy(false) }
   }
   const fe = err?.fieldErrors ?? {}
+  const option = (a: ActionRow) => <option key={a.id} value={a.id}>{a.key} · {a.text} · {a.ownerName ?? t('ind.unassigned')} · {fmtDate(a.dueDate)} · {tv(a.status)}</option>
+  const linked = (candidates.data ?? []).filter((a) => linkedActionIds?.includes(a.id)), others = (candidates.data ?? []).filter((a) => !linkedActionIds?.includes(a.id))
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-        <DialogHeader><DialogTitle>{t('action.new')}</DialogTitle><DialogDescription>{related ? t('action.relatedTo', { what: related.label }) : t('action.newHint')}</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>{canReuse ? t('dcv.captureAction') : t('action.new')}</DialogTitle><DialogDescription>{related ? t('action.relatedTo', { what: related.label }) : t('action.newHint')}</DialogDescription></DialogHeader>
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
+          {canReuse && (
+            <fieldset className="space-y-1.5 sm:col-span-2">
+              <legend className="text-sm font-medium">{t('dcv.reuseMode')}</legend>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <label className="flex items-center gap-1.5"><input type="radio" name="a-capture" checked={reuse} onChange={() => { setReuse(true); setErr(null) }} />{t('dcv.reuseExisting')}</label>
+                <label className="flex items-center gap-1.5"><input type="radio" name="a-capture" checked={!reuse} onChange={() => { setReuse(false); setErr(null) }} />{t('dcv.createSeparateAction')}</label>
+              </div>
+            </fieldset>
+          )}
+          {reuse ? <>
+            <Field label={t('dcv.reuseAction')} htmlFor="a-reuse" error={Object.entries(fe).filter(([k]) => k !== 'reason').flatMap(([, v]) => v)} className="sm:col-span-2"
+              hint={picked && t(linkedActionIds?.includes(picked.id) ? 'dcv.reuseAlreadyLinked' : 'dcv.reuseWillLink', { key: picked.key, what })}>
+              <select id="a-reuse" className={selectCls} required value={picked ? reuseId : ''} onChange={(e) => setReuseId(e.target.value)}>
+                <option value="">{t('coord.choose')}</option>
+                {linked.length > 0 && <optgroup label={t('dcv.reuseLinkedGroup', { what })}>{linked.map(option)}</optgroup>}
+                {others.length > 0 && <optgroup label={t('dcv.reuseOtherGroup')}>{others.map(option)}</optgroup>}
+              </select>
+            </Field>
+            {candidates.data?.length === 0 && <p role="status" className="text-sm text-muted-foreground sm:col-span-2">{t('dcv.reuseNone')}</p>}
+            {candidates.error && <div className="sm:col-span-2"><ErrorBanner error={candidates.error} retry={() => candidates.refetch()} /></div>}
+            {project.data?.status === 'Complete' && (
+              <Field label={t('common.reason')} htmlFor="a-reason" hint={t('common.reasonHint')} error={fe.reason} className="sm:col-span-2">
+                <Textarea id="a-reason" required rows={2} value={reason} onChange={(e) => setReason(e.target.value)} />
+              </Field>
+            )}
+          </> : <>
           {!meetingId && (
             <Field label={t('action.meeting')} htmlFor="a-meeting" error={fe.meetingId} className="sm:col-span-2">
               <select id="a-meeting" className={selectCls} value={meeting} onChange={(e) => setMeeting(e.target.value)}>
@@ -148,10 +201,11 @@ export function ActionForm({ projectId, meetingId, related, links, defaultOwner,
           <Field label={t('action.text')} htmlFor="a-text" error={fe.text} className="sm:col-span-2"><Textarea id="a-text" required autoFocus rows={2} value={text} onChange={(e) => setText(e.target.value)} /></Field>
           <OwnerFields projectId={projectId} value={owner} onChange={setOwner} prefix="a" errors={[...(fe.ownerType ?? []), ...(fe.ownerUserId ?? []), ...(fe.ownerDisciplineId ?? []), ...(fe.ownerExternalPartyId ?? [])]} />
           <Field label={t('common.due')} htmlFor="a-due" error={fe.dueDate}><Input id="a-due" type="date" value={due} onChange={(e) => setDue(e.target.value)} /></Field>
+          </>}
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="outline" onClick={() => onClose()}>{t('common.cancel')}</Button>
-            <Button type="submit" disabled={busy || !text.trim()}>{busy && <Spinner />}{t('action.add')}</Button>
+            <Button type="submit" disabled={busy || (reuse ? !picked : !text.trim())}>{busy && <Spinner />}{reuse ? t('dcv.reuseSubmit') : t('action.add')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -376,6 +430,10 @@ function ActionPanel({ id }: PanelProps) {
         <FieldRow label={t('common.due')}><InlineDate value={a.dueDate} disabled={!can} onSave={(v) => save({ dueDate: v })} /></FieldRow>
         {q.data.task && !a.converted && <FieldRow label={t('action.relatedTask')}><button className="px-2 py-1.5 text-left hover:underline" onClick={() => openPanel('Task', q.data.task!.id)}><Key>{q.data.task.key}</Key> {q.data.task.name}</button></FieldRow>}
         {q.data.decision && <FieldRow label={t('action.relatedDecision')}><button className="px-2 py-1.5 text-left hover:underline" onClick={() => openPanel('Decision', q.data.decision!.id)}><Key>{q.data.decision.key}</Key> {q.data.decision.subject}</button></FieldRow>}
+        {q.data.links?.length > 0 && <FieldRow label={t('decision.links')}><ul className="space-y-1 px-2 py-1.5">{q.data.links.map(link => {
+          const route = ACTION_LINK_ROUTES[link.targetType]
+          return route && <li key={link.id}><Link className="text-primary underline" to={`/projects/${a.projectNumber}/${route}?panel=${encodeURIComponent(`${link.targetType}:${link.targetId}`)}`}><Key>{link.key}</Key> {link.name}</Link>{link.status && <> · <StatusPill status={link.status} /></>}</li>
+        })}</ul></FieldRow>}
       </div>
       <TabBar tabs={[...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'comments' && <CommentsSlot type="Action" id={a.id} projectId={a.projectId} />}

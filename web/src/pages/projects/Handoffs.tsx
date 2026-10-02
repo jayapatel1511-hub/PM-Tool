@@ -14,6 +14,7 @@ import { ApiError, get, post, qs } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { useCurrentProject } from './ProjectLayout'
+import { useCoordRefresh } from './CoordinationForms'
 
 const STATUSES = ['Draft', 'Submitted', 'Clarification Requested', 'Returned', 'Accepted', 'Incorporated', 'Cancelled']
 type Person = { id: string; displayName: string }
@@ -46,6 +47,7 @@ export function HandoffsTab() {
   const p = useCurrentProject()
   const [sp, setSp] = useSearchParams()
   const qc = useQueryClient()
+  const refreshCoordination = useCoordRefresh(p.id)
   const [create, setCreate] = useState(sp.has('source') || sp.has('targetTask'))
   const filters = Object.fromEntries(['q', 'status', 'direction', 'disciplineId', 'overdue'].map(k => [k, sp.get(k) ?? '']))
   const page = Math.max(1, Number(sp.get('page')) || 1)
@@ -53,7 +55,7 @@ export function HandoffsTab() {
   const options = useQuery({ queryKey: ['handoff-options', p.id], queryFn: () => get<Options>(`projects/${p.id}/handoffs/options`) })
   const panel = sp.get('panel')?.startsWith('Handoff:') ? sp.get('panel')!.slice(8) : null
   const setFilter = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); next.delete('page'); setSp(next) }
-  const refresh = () => { qc.invalidateQueries({ queryKey: ['handoffs', p.id] }); qc.invalidateQueries({ queryKey: ['handoff-detail', p.id] }); qc.invalidateQueries({ queryKey: ['handoff-options', p.id] }); qc.invalidateQueries({ queryKey: ['search'] }) }
+  const refresh = () => { refreshCoordination(); qc.invalidateQueries({ queryKey: ['handoffs', p.id] }); qc.invalidateQueries({ queryKey: ['handoff-detail', p.id] }); qc.invalidateQueries({ queryKey: ['handoff-options', p.id] }); qc.invalidateQueries({ queryKey: ['search'] }) }
   const open = (id: string) => { const next = new URLSearchParams(sp); next.set('panel', `Handoff:${id}`); setSp(next) }
   const close = () => { const next = new URLSearchParams(sp); next.delete('panel'); setSp(next) }
   return <Page title={t('handoff.title')} subtitle={t('handoff.subtitle')} actions={<>

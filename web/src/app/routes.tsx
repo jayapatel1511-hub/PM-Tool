@@ -21,6 +21,9 @@ import { MeetingsTab } from '@/pages/projects/Meetings'
 import { ReviewsTab } from '@/pages/projects/Reviews'
 import { ChangesTab } from '@/pages/projects/Changes'
 import { HandoffsTab } from '@/pages/projects/Handoffs'
+import { SubmissionsTab } from '@/pages/projects/Submissions'
+import { AllocationsTab } from '@/pages/projects/Allocations'
+import { DesignBasisTab } from '@/pages/projects/DesignBasis'
 import { TimelineTab } from '@/pages/projects/Timeline'
 import '@/pages/projects/CopyStructure'
 import '@/pages/projects/FromTemplate'
@@ -51,6 +54,7 @@ import { StaffPage } from '@/pages/Staff'
 import { DashboardTab } from '@/pages/projects/Dashboard'
 import { CoordinationTab } from '@/pages/projects/Coordination'
 import { PreferencesPage } from '@/pages/Preferences'
+import { ReadinessTab } from '@/pages/projects/Readiness'
 
 const admin = (el: React.ReactNode) => <AdminLayout>{el}</AdminLayout>
 /** A workspace view shown for the current project only (FR-VIS-01 project tabs). */
@@ -79,9 +83,13 @@ export const routes: RouteObject[] = [
       { index: true, element: <Navigate to={PROJECT_HOME} replace /> },
       { path: 'dashboard', element: <DashboardTab /> },
       { path: 'coordination', element: <CoordinationTab /> },
+      { path: 'readiness', element: <ReadinessTab /> },
       { path: 'handoffs', element: <HandoffsTab /> },
       { path: 'reviews', element: <ReviewsTab /> },
       { path: 'changes', element: <ChangesTab /> },
+      { path: 'submissions', element: <SubmissionsTab /> },
+      { path: 'allocations', element: <AllocationsTab /> },
+      { path: 'design-basis', element: <DesignBasisTab /> },
       { path: 'tasks', element: <TasksTab /> },
       { path: 'board', element: <BoardTab /> },
       { path: 'milestones', element: <MilestonesTab /> },

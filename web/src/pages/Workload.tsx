@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, Info, Pencil } from 'lucide-react'
+import { CalendarDays, ChevronDown, ChevronRight, Info, Pencil } from 'lucide-react'
 import { Fragment, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useReference } from '@/hooks/data'
 import { get, patch, put, qs } from '@/lib/api'
-import { fmtDate, shortDate } from '@/lib/format'
+import { fmtDate, shortDate, today } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -21,10 +21,10 @@ import { errorText } from './projects/Tasks'
 import { WorkspaceTabs } from '@/components/hub/workspace'
 import { ViewMenu } from '@/components/hub/views'
 
-interface Cell { week: string; hours: number; pct: number }
+interface Cell { week: string; hours: number; pct: number; available: number; confirmed: number; proposed: number; committed: number }
 interface PersonRow {
   id: string; displayName: string; supervisorId?: string; supervisorName?: string; capacity: number; capacityOverride: boolean; cells: Cell[]; noDueDate: number
-  openTasks: number; unestimated: number; overdue: number; projects: number; overAssigned: boolean; underAssigned: boolean; cluster: boolean; canSetCapacity: boolean; indicator: string
+  openTasks: number; unestimated: number; overdue: number; projects: number; overAssigned: boolean; underAssigned: boolean; cluster: boolean; canSetCapacity: boolean; partialScope: boolean; indicator: string
 }
 interface Grid { weeks: string[]; today: string; currentWeek: string; defaultCapacity: number; people: PersonRow[] }
 interface TaskLoadRow { id: string; key: string; name: string; status: string; dueDate?: string; estimatedHours?: number | null; progressPct: number; remaining?: number | null; overdue: boolean; noDueDate: number; rowVersion: number; weeks: number[]; canReassign: boolean }
@@ -42,6 +42,7 @@ export function WorkloadPage() {
   const [sp, setSp] = useSearchParams()
   const [open, setOpen] = useState<Set<string>>(new Set())
   const [capacity, setCapacity] = useState<PersonRow | null>(null)
+  const [availability, setAvailability] = useState<PersonRow | null>(null)
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
   const q = useQuery({ queryKey: ['workload', filters], queryFn: () => get<Grid>(`workload${qs(filters)}`) })
@@ -54,7 +55,7 @@ export function WorkloadPage() {
     <Page title={t('nav.workload')} subtitle={t('workload.subtitle')} actions={<><Method /><ViewMenu listType="workload" /><ExportMenu path="workload/export" params={filters} name="workload" /></>}>
       <WorkspaceTabs />
       <div className="flex flex-wrap items-center gap-2">
-        <div className="w-44"><PeoplePicker value={filters.supervisorId} onChange={(v) => set('supervisorId', v)} placeholder={t('workload.anySupervisor')} label={t('param.supervisorId')} /></div>
+        <div className="w-44"><PeoplePicker value={filters.supervisorId} onChange={(v) => set('supervisorId', v)} placeholder={t('workload.anySupervisor')} label={t('workload.supervisor')} /></div>
         <select className={cn(sel, 'max-w-44')} value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)} aria-label={t('common.discipline')}>
           <option value="">{t('projects.anyDiscipline')}</option>{ref.data?.disciplines.filter((d) => d.isActive).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>
@@ -72,6 +73,7 @@ export function WorkloadPage() {
           {[['', 'workload.sort.load'], ['overdue', 'workload.sort.overdue'], ['tasks', 'workload.sort.tasks'], ['name', 'workload.sort.name']].map(([v, l]) => <option key={v} value={v}>{t(l)}</option>)}
         </select>
       </div>
+      {filters.disciplineId && <p className="text-xs text-muted-foreground">{t('workload.disciplineScope')}</p>}
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <Loading rows={8} /> : q.data!.people.length === 0 ? <div className="rounded-lg border bg-card"><Empty>{t('workload.empty')}</Empty></div> : (
         <div className="overflow-x-auto rounded-lg border bg-card">
@@ -89,19 +91,23 @@ export function WorkloadPage() {
                 {people.map((p) => (
                   <Fragment key={p.id}>
                     <tr className="border-t">
-                      <td className="px-2"><button className="rounded p-1 hover:bg-muted" aria-expanded={open.has(p.id)} aria-label={t('workload.showTasks', { name: p.displayName })} onClick={() => toggle(p.id)}>
+                      <td className="px-1"><button className="inline-flex size-10 items-center justify-center rounded hover:bg-muted" aria-expanded={open.has(p.id)} aria-label={t('workload.showTasks', { name: p.displayName })} onClick={() => toggle(p.id)}>
                         {open.has(p.id) ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}</button></td>
                       <td className="min-w-[12rem] px-3 py-1.5">
                         <div className="font-medium">{p.displayName}</div>
                         <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
                           {t('workload.capacity', { h: hrs(p.capacity) })}{p.capacityOverride && ` (${t('workload.custom')})`}
-                          {p.canSetCapacity && <button type="button" className="rounded p-0.5 hover:bg-muted" aria-label={t('workload.setCapacity', { name: p.displayName })} onClick={() => setCapacity(p)}><Pencil className="size-3" /></button>}
+                          {p.canSetCapacity && <><button type="button" className="inline-flex size-10 items-center justify-center rounded hover:bg-muted" aria-label={t('workload.setCapacity', { name: p.displayName })} onClick={() => setCapacity(p)}><Pencil className="size-4" /></button>
+                            <button type="button" className="inline-flex size-10 items-center justify-center rounded hover:bg-muted" aria-label={t('workload.setDayAvailability', { name: p.displayName })} onClick={() => setAvailability(p)}><CalendarDays className="size-4" /></button></>}
+                          {p.partialScope && <span className="ml-1">· {t('workload.partial')}</span>}
                         </div>
                       </td>
                       {p.cells.map((c) => (
                         <td key={c.week} className="px-1 py-1 text-center">
-                          <span className={cn('block rounded px-1 py-1 tabular-nums', shade(c.pct))} title={t('workload.cellTitle', { h: hrs(c.hours), cap: hrs(p.capacity), pct: c.pct })}>
-                            {hrs(c.hours)}<span className="text-[10px]">/{hrs(p.capacity)}</span>
+                          <span className={cn('block min-w-28 rounded px-1 py-1 tabular-nums', shade(c.pct))} title={t('workload.cellTitle', { h: hrs(c.committed), cap: hrs(c.available), pct: c.pct })}>
+                            <strong>{hrs(c.committed)}</strong><span className="text-[10px]">/{hrs(c.available)}</span>
+                            <span className="block text-[10px] font-normal">{t('workload.forecastShort')} {hrs(c.hours)}</span>
+                            <span className="block text-[10px] font-normal">{t('workload.confirmedShort')} {hrs(c.confirmed)} · {t('workload.proposedShort')} {hrs(c.proposed)}</span>
                           </span>
                         </td>
                       ))}
@@ -125,8 +131,35 @@ export function WorkloadPage() {
         </div>
       )}
       {capacity && <CapacityDialog p={capacity} defaultCapacity={q.data?.defaultCapacity ?? 40} onClose={(ok) => { setCapacity(null); if (ok) q.refetch() }} />}
+      {availability && <AvailabilityDialog p={availability} onClose={(ok) => { setAvailability(null); if (ok) q.refetch() }} />}
     </Page>
   )
+}
+
+function AvailabilityDialog({ p, onClose }: { p: PersonRow; onClose: (ok: boolean) => void }) {
+  const [date, setDate] = useState(today())
+  const [hours, setHours] = useState('')
+  const [category, setCategory] = useState('Reduced')
+  const q = useQuery({ queryKey: ['availability', p.id, date], queryFn: () => get<{ workDate: string; availableHours: number; category: string; rowVersion: number }[]>(
+    `users/${p.id}/availability${qs({ from: date, through: date })}`), enabled: !!date })
+  const existing = q.data?.[0]
+  const chooseDate = (value: string) => { setDate(value); setHours(''); setCategory('Reduced') }
+  return <ConfirmDialog open onOpenChange={o => !o && onClose(false)} title={t('workload.dayAvailabilityTitle', { name: p.displayName })}
+    confirmLabel={t('common.save')} body={t('workload.dayAvailabilityHint')}
+    onConfirm={async () => {
+      if (!date || hours === '') throw new Error(t('workload.dayRequired'))
+      await put(`users/${p.id}/availability/${date}`, { expectedRowVersion: existing?.rowVersion ?? 0,
+        availableHours: Number(hours), category })
+      toast.success(t('common.saved')); onClose(true)
+    }}>
+    <Field label={t('workload.dayDate')} htmlFor="availability-date"><Input id="availability-date" type="date" required value={date} onChange={e => chooseDate(e.target.value)} /></Field>
+    {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
+    {q.isPending ? <Loading rows={1} /> : existing && hours === '' && <p className="text-xs text-muted-foreground">{t('workload.existingAvailability', { h: existing.availableHours, category: existing.category })}</p>}
+    <Field label={t('workload.dayHours')} htmlFor="availability-hours"><Input id="availability-hours" type="number" min={0} max={24} step={0.25} required value={hours} onChange={e => setHours(e.target.value)} /></Field>
+    <Field label={t('workload.dayCategory')} htmlFor="availability-category"><select id="availability-category" className="h-9 w-full rounded-md border bg-card px-2 text-sm" value={category} onChange={e => setCategory(e.target.value)}>
+      {['Unavailable', 'Reduced', 'Additional'].map(value => <option key={value} value={value}>{t(`workload.availability.${value}`)}</option>)}
+    </select></Field>
+  </ConfirmDialog>
 }
 
 /** Person → Project → tasks, aligned with the week columns (§13.11), with reassignment where the viewer may (FR-006). */

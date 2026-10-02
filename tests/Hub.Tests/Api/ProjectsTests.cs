@@ -11,6 +11,19 @@ public sealed class ProjectsTests(HubFactory f)
     readonly TestData d = new(f);
 
     [Fact]
+    public async Task Newly_added_restricted_member_receives_the_membership_notice()
+    {
+        var admin = f.As(TestData.Admin);
+        await admin.Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true });
+        try {
+            var p = await d.Project();
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}", new { visibility = "Restricted" }, d.Version(p.Id))).EnsureSuccessStatusCode();
+            await (await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/members", new { userId = d.User(TestData.Diane), roles = new[] { "Reviewer" } })).Json(201);
+            Assert.True(f.Db(db => db.Notifications.Any(n => n.ProjectId == p.Id && n.UserId == d.User(TestData.Diane) && n.EventType == NotificationEvents.AddedToProject)));
+        } finally { await admin.Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }); }
+    }
+
+    [Fact]
     public async Task Duplicate_numbers_are_refused_in_any_case_with_a_link() // AC-PRJ-01
     {
         var p = await d.Project(activate: false);
@@ -144,6 +157,23 @@ public sealed class ProjectsTests(HubFactory f)
         Assert.True(pmNotice);
         Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Sam).Post($"/api/v1/projects/{p.Id}/members", new { userId = d.User(TestData.Diane), roles = new[] { "TeamMember" } })).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Sam).Post($"/api/v1/projects/{p.Id}/members", new { userId = d.User(TestData.Jill), roles = new[] { "PM" } })).StatusCode);
+    }
+
+    [Fact]
+    public async Task Supervisor_reassigns_only_to_a_project_member_or_direct_report()
+    {
+        var p = await d.Project();
+        var source = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Alex) && m.RemovedAt == null));
+        var task = await d.NewTask(p.Id, TestData.Pm, new { assigneeId = d.User(TestData.Alex) });
+
+        var outsider = await f.As(TestData.Sam).DeleteAsync($"/api/v1/projects/{p.Id}/members/{source.Id}?reassignTo={d.User(TestData.Diane)}&reason=Staffing%20change");
+        Assert.Equal(HttpStatusCode.Forbidden, outsider.StatusCode);
+        Assert.Equal(d.User(TestData.Alex), await f.DbAsync(db => db.Tasks.Where(t => t.Id == task.G("id")).Select(t => t.AssigneeId).SingleAsync()));
+
+        var directReport = await f.As(TestData.Sam).DeleteAsync($"/api/v1/projects/{p.Id}/members/{source.Id}?reassignTo={d.User(TestData.Jill)}&reason=Staffing%20change");
+        Assert.Equal(HttpStatusCode.OK, directReport.StatusCode);
+        Assert.Equal(d.User(TestData.Jill), await f.DbAsync(db => db.Tasks.Where(t => t.Id == task.G("id")).Select(t => t.AssigneeId).SingleAsync()));
+        Assert.True(await f.DbAsync(db => db.ProjectMembers.AnyAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Jill) && m.RemovedAt == null)));
     }
 
     [Fact]

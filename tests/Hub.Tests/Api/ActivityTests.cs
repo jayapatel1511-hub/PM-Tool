@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using Hub.Domain;
+using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Tests.Api;
@@ -10,6 +11,84 @@ namespace Hub.Tests.Api;
 public sealed class ActivityTests(HubFactory f)
 {
     readonly TestData d = new(f);
+
+    [Fact]
+    public async Task Private_calendar_events_never_leak_through_project_history_even_for_legacy_rows()
+    {
+        var p = await d.Project();
+        const string secret = "Confidential calendar marker";
+        var e = await f.As(TestData.Alex).Post("/api/v1/calendar/events", new { projectId = p.Id, type = "Meeting", title = secret,
+            start = "2026-09-21T09:00", end = "2026-09-21T10:00", visibility = "Private" }).Result.Json(201);
+        Assert.False(await f.DbAsync(db => db.ActivityLog.AnyAsync(a => a.ItemId == e.G("id") && a.ProjectId == p.Id)));
+        await f.DbAsync(async db =>
+        {
+            db.ActivityLog.Add(new Hub.Api.Data.ActivityLog { ProjectId = p.Id, ItemType = ItemType.CalendarEvent, ItemId = e.G("id"),
+                ItemName = secret, Action = "Created", ActorType = "System", OccurredAt = f.Clock.Now });
+            return await db.SaveChangesAsync();
+        });
+        var history = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/activity?itemType=CalendarEvent").Result.Json();
+        Assert.Empty(history["items"]!.AsArray());
+        var export = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/activity/export?format=csv&itemType=CalendarEvent");
+        export.EnsureSuccessStatusCode();
+        Assert.DoesNotContain(secret, await export.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Time_notes_follow_source_permissions_in_activity_and_export()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex) });
+        const string secret = "Private effort note regression marker";
+        var entry = await f.As(TestData.Alex).Post("/api/v1/time", new { taskId = t.G("id"), workDate = "2026-09-14", hours = 1m, note = secret }).Result.Json(201);
+        var projectHistory = await f.As(TestData.Diane).GetAsync($"/api/v1/projects/{p.Id}/activity?itemType=TimeEntry").Result.Json();
+        Assert.Empty(projectHistory["items"]!.AsArray());
+        var taskHistory = await f.As(TestData.Diane).GetAsync($"/api/v1/items/Task/{t.G("id")}/activity").Result.Json();
+        Assert.DoesNotContain(secret, taskHistory.ToJsonString());
+        var export = await f.As(TestData.Diane).GetAsync($"/api/v1/projects/{p.Id}/activity/export?format=csv&itemType=TimeEntry");
+        export.EnsureSuccessStatusCode();
+        Assert.DoesNotContain(secret, await export.Content.ReadAsStringAsync());
+        var owner = await f.As(TestData.Alex).GetAsync($"/api/v1/projects/{p.Id}/activity?itemType=TimeEntry").Result.Json();
+        Assert.Contains(owner["items"]!.AsArray(), row => row!.G("itemId") == entry.G("id"));
+        var pm = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/activity?itemType=TimeEntry").Result.Json();
+        Assert.Contains(pm["items"]!.AsArray(), row => row!.G("itemId") == entry.G("id"));
+    }
+
+    [Fact]
+    public async Task Dashboard_following_and_daily_digest_hide_private_time_notes()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id, TestData.Pm, new { assigneeId = d.User(TestData.Alex) });
+        const string secret = "Private dashboard digest note regression marker";
+        await f.As(TestData.Alex).Post("/api/v1/time", new { taskId = t.G("id"), workDate = "2026-09-14", hours = 1m, note = secret }).Result.Json(201);
+        (await f.As(TestData.Diane).Put($"/api/v1/projects/{p.Id}/follow", new { level = FollowLevel.AllActivity })).EnsureSuccessStatusCode();
+
+        var dashboard = await f.As(TestData.Diane).GetAsync($"/api/v1/projects/{p.Id}/dashboard").Result.Json();
+        Assert.DoesNotContain(secret, dashboard.ToJsonString());
+        var following = await f.As(TestData.Diane).GetAsync($"/api/v1/me/following?projectId={p.Id}").Result.Json();
+        Assert.DoesNotContain(secret, following.ToJsonString());
+        var digest = await f.DbAsync(db => Digest.Build(db, d.User(TestData.Diane), "Diane", DateOnly.FromDateTime(f.Clock.Now.DateTime), f.Clock.Now.AddDays(-1), f.Clock.Now, new OrgSettings(), ""));
+        Assert.DoesNotContain(secret, digest?.Body ?? "");
+    }
+
+    [Fact]
+    public async Task Weekly_summary_excludes_legacy_private_calendar_activity()
+    {
+        var p = await d.Project();
+        const string secret = "Private weekly summary calendar regression marker";
+        var eventRow = await f.As(TestData.Alex).Post("/api/v1/calendar/events", new { projectId = p.Id, type = "Meeting", title = secret,
+            start = "2026-09-14T09:00", end = "2026-09-14T10:00", visibility = "Private" }).Result.Json(201);
+        var since = f.Clock.Now;
+        await f.DbAsync(async db =>
+        {
+            db.ActivityLog.Add(new Hub.Api.Data.ActivityLog { ProjectId = p.Id, ItemType = ItemType.CalendarEvent, ItemId = eventRow.G("id"),
+                ItemName = secret, Action = "Created", ActorUserId = d.User(TestData.Alex), ActorType = "User", Categories = ["status"],
+                OccurredAt = since.AddMinutes(1) });
+            return await db.SaveChangesAsync();
+        });
+        var summary = await f.DbAsync(db => WeeklySummary.Build(db, d.User(TestData.Pm), "PM", DateOnly.FromDateTime(since.DateTime), since, since.AddMinutes(2), new OrgSettings(), ""));
+        Assert.Equal(0, summary!.Projects.Single(x => x.ProjectId == p.Id).Changes);
+        Assert.DoesNotContain(secret, summary.Body);
+    }
 
     [Fact]
     public async Task Project_activity_filters_and_resolves_names()

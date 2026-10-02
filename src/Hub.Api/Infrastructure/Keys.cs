@@ -13,7 +13,10 @@ public static class Keys
         ["milestone"] = ("next_milestone_seq", "M", 2), ["decision"] = ("next_decision_seq", "DEC", 2),
         ["risk"] = ("next_risk_seq", "R", 2), ["issue"] = ("next_issue_seq", "I", 2), ["action"] = ("next_action_seq", "A", 2),
         ["review"] = ("next_review_seq", "RV", 3), ["change"] = ("next_change_seq", "CH", 3),
+        ["submission"] = ("next_submission_seq", "SUB", 3),
+        ["basis"] = ("next_basis_seq", "B", 3),
         ["handoff"] = ("next_handoff_seq", "H", 3),
+        ["constraint"] = ("next_constraint_seq", "CT", 3), ["commitment"] = ("next_commitment_seq", "WC", 3), // §10.8
     };
 
     public static async Task<(int Seq, string Key)> Next(HubDb db, Guid projectId, string projectNumber, string kind)

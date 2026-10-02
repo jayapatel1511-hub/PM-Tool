@@ -65,10 +65,22 @@ public sealed class TeamService(HubDb db, Notifier notify, AuditContext audit, T
     public async Task EnsureMember(Project p, Guid? userId, string role)
     {
         if (userId is not { } uid || await Active(p.Id, uid) is not null) return;
+        if (p.Visibility == Visibility.Restricted && !await MayManageTeam(p))
+            throw ApiException.Forbidden("perm.pm");
         await Add(p, uid, [role], null);
         var name = await notify.Name(uid);
         await notify.Send(NotificationEvents.MemberAutoAdded, p.ProjectManagerId, Item(p),
             Text.Get("notify.auto_added", name, p.ProjectNumber, Text.Get($"role.{role}")));
+    }
+
+    async Task<bool> MayManageTeam(Project p)
+    {
+        var member = await db.ProjectMembers.AsNoTracking().Where(m => m.ProjectId == p.Id && m.UserId == me.Id && m.RemovedAt == null)
+            .Select(m => new { m.Roles, m.PrimaryDisciplineId }).FirstOrDefaultAsync();
+        var leads = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == p.Id && d.LeadUserId == me.Id).Select(d => d.Id).ToListAsync();
+        var ctx = new ProjectContext(p.Id, p.Status, p.Visibility, p.ProjectManagerId, p.AllowViewerComments,
+            (member?.Roles ?? []).ToHashSet(), leads.ToHashSet(), member?.PrimaryDisciplineId);
+        return Permissions.ManageTeam(me.Actor, ctx).Ok;
     }
 
     /// Removes a member (TM-03, TM-04, TM-08, ASG-04). Open items are reassigned or left flagged.
@@ -233,6 +245,12 @@ public static class TeamEndpoints
             {
                 var staff = Permissions.StaffOnProject(access.Actor, ctx, person.SupervisorId);
                 Access.Demand(staff.Ok && m.Roles.All(r => r == ProjectRole.TeamMember) && !leads ? Allow.Yes : staff.Ok ? Allow.No("perm.pm") : staff);
+                if (reassignTo is { } to)
+                {
+                    var target = await db.Users.FirstOrDefaultAsync(u => u.Id == to && u.IsActive) ?? throw ApiException.Invalid("reassignTo", "error.not_found");
+                    var targetMember = await db.ProjectMembers.AnyAsync(x => x.ProjectId == id && x.UserId == to && x.RemovedAt == null);
+                    Access.Demand(targetMember || target.SupervisorId == access.Actor.Id ? Allow.Yes : Allow.No("perm.supervisor"));
+                }
             }
             var moved = await team.Remove(p, m, reassignTo, reason, bySupervisor: !asPm);
             await db.SaveChangesAsync();
@@ -284,7 +302,8 @@ public static class TeamEndpoints
                 || await db.Deliverables.IgnoreQueryFilters().AnyAsync(d => d.ProjectDisciplineId == pdId && d.DeletedAt == null && d.Status != DeliverableStatus.Cancelled);
             if (used) throw ApiException.Rule("discipline_in_use", "team.discipline_in_use");
             if (await db.Tasks.IgnoreQueryFilters().AnyAsync(t => t.ProjectDisciplineId == pdId) || await db.Deliverables.IgnoreQueryFilters().AnyAsync(d => d.ProjectDisciplineId == pdId)
-                || await db.ProjectMembers.AnyAsync(m => m.PrimaryDisciplineId == pdId) || await db.Milestones.IgnoreQueryFilters().AnyAsync(m => m.ProjectDisciplineId == pdId))
+                || await db.ProjectMembers.AnyAsync(m => m.PrimaryDisciplineId == pdId) || await db.Milestones.IgnoreQueryFilters().AnyAsync(m => m.ProjectDisciplineId == pdId)
+                || await db.IssueAffectedDisciplines.AnyAsync(x => x.ProjectDisciplineId == pdId))
                 pd.IsActive = false; // referenced by history: deactivate rather than delete
             else db.ProjectDisciplines.Remove(pd);
             await db.SaveChangesAsync();

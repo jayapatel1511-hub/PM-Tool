@@ -18,7 +18,7 @@ export function Page({ title, subtitle, actions, children, className }: { title:
           <h1 className="truncate text-xl font-semibold tracking-tight">{title}</h1>
           {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
-        {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+        {actions && <div className="no-print flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
       {children}
     </div>

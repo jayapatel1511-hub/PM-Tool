@@ -124,6 +124,137 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("activity_log", "hub");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.AllocationDayOverride", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AllocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("allocation_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal>("Hours")
+                        .HasPrecision(9, 3)
+                        .HasColumnType("numeric(9,3)")
+                        .HasColumnName("hours");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateOnly>("WorkDate")
+                        .HasColumnType("date")
+                        .HasColumnName("work_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_allocation_day_override");
+
+                    b.HasIndex("AllocationId", "WorkDate")
+                        .IsUnique()
+                        .HasDatabaseName("ix_allocation_day_override_allocation_id_work_date");
+
+                    b.ToTable("allocation_day_override", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_allocation_day_hours", "hours >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.AllocationWorkLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AllocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("allocation_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<DateTimeOffset?>("ReleasedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("released_at");
+
+                    b.Property<decimal?>("ReviewHours")
+                        .HasPrecision(9, 3)
+                        .HasColumnType("numeric(9,3)")
+                        .HasColumnName("review_hours");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateOnly>("WorkDate")
+                        .HasColumnType("date")
+                        .HasColumnName("work_date");
+
+                    b.Property<Guid>("WorkId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("work_id");
+
+                    b.Property<string>("WorkType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("work_type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_allocation_work_link");
+
+                    b.HasIndex("AllocationId")
+                        .HasDatabaseName("ix_allocation_work_link_allocation_id");
+
+                    b.HasIndex("PersonId", "WorkType", "WorkId", "WorkDate")
+                        .IsUnique()
+                        .HasDatabaseName("ix_allocation_work_link_person_id_work_type_work_id_work_date")
+                        .HasFilter("released_at IS NULL");
+
+                    b.ToTable("allocation_work_link", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_allocation_review_hours", "(work_type = 'Task' AND review_hours IS NULL) OR (work_type = 'Review' AND ((review_hours IS NOT NULL AND review_hours > 0) OR (released_at IS NOT NULL AND review_hours IS NULL)))");
+
+                            t.HasCheckConstraint("ck_allocation_work_type", "work_type IN ('Task', 'Review')");
+                        });
+                });
+
             modelBuilder.Entity("Hub.Api.Data.AppUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -381,6 +512,337 @@ namespace Hub.Api.Data.Migrations
                         .HasDatabaseName("ix_attention_snooze_rule_id_item_type_item_id");
 
                     b.ToTable("attention_snooze", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.BasisAssumptionDisposition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ApprovedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approved_by");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly>("ExpiresOn")
+                        .HasColumnType("date")
+                        .HasColumnName("expires_on");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("VersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("version_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_basis_assumption_disposition");
+
+                    b.HasIndex("ApprovedBy")
+                        .HasDatabaseName("ix_basis_assumption_disposition_approved_by");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_basis_assumption_disposition_owner_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_basis_assumption_disposition_project_id");
+
+                    b.HasIndex("VersionId", "ExpiresOn")
+                        .HasDatabaseName("ix_basis_assumption_disposition_version_id_expires_on");
+
+                    b.ToTable("basis_assumption_disposition", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.BasisConflict", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("LeftVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("left_version_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<Guid?>("ResolutionVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("resolution_version_id");
+
+                    b.Property<bool>("Resolved")
+                        .HasColumnType("boolean")
+                        .HasColumnName("resolved");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<Guid?>("ResolvedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("resolved_by");
+
+                    b.Property<Guid>("RightVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("right_version_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_basis_conflict");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_basis_conflict_project_id");
+
+                    b.HasIndex("ResolutionVersionId")
+                        .HasDatabaseName("ix_basis_conflict_resolution_version_id");
+
+                    b.HasIndex("ResolvedBy")
+                        .HasDatabaseName("ix_basis_conflict_resolved_by");
+
+                    b.HasIndex("RightVersionId")
+                        .HasDatabaseName("ix_basis_conflict_right_version_id");
+
+                    b.HasIndex("LeftVersionId", "RightVersionId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_basis_conflict_left_version_id_right_version_id");
+
+                    b.ToTable("basis_conflict", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_basis_conflict_order", "left_version_id < right_version_id");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.BasisImpactAssessment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BasisUseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("basis_use_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DecidedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("decided_at");
+
+                    b.Property<Guid?>("DecidedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("EvidenceUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_url");
+
+                    b.Property<Guid?>("NewVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("new_version_id");
+
+                    b.Property<Guid>("OldVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("old_version_id");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Rationale")
+                        .HasColumnType("text")
+                        .HasColumnName("rationale");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid?>("WithdrawalVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("withdrawal_version_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_basis_impact_assessment");
+
+                    b.HasIndex("DecidedBy")
+                        .HasDatabaseName("ix_basis_impact_assessment_decided_by");
+
+                    b.HasIndex("NewVersionId")
+                        .HasDatabaseName("ix_basis_impact_assessment_new_version_id");
+
+                    b.HasIndex("OldVersionId")
+                        .HasDatabaseName("ix_basis_impact_assessment_old_version_id");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_basis_impact_assessment_owner_id");
+
+                    b.HasIndex("BasisUseId", "NewVersionId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_basis_impact_assessment_basis_use_id_new_version_id");
+
+                    b.HasIndex("ProjectId", "Status")
+                        .HasDatabaseName("ix_basis_impact_assessment_project_id_status");
+
+                    b.ToTable("basis_impact_assessment", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_basis_impact_status", "status IN ('Pending Assessment','Unaffected','Update Required','Clarification Needed','Resolved')");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.BasisUse", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("IntendedUse")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("intended_use");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("target_type");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("VersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("version_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_basis_use");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_basis_use_owner_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_basis_use_project_id");
+
+                    b.HasIndex("VersionId", "TargetType", "TargetId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_basis_use_version_id_target_type_target_id");
+
+                    b.ToTable("basis_use", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_basis_use_target", "target_type IN ('Task', 'Deliverable')");
+                        });
                 });
 
             modelBuilder.Entity("Hub.Api.Data.BoardOrder", b =>
@@ -792,6 +1254,64 @@ namespace Hub.Api.Data.Migrations
                         {
                             t.HasCheckConstraint("ck_change_notice_status", "status IN ('Draft','Open','Closed','Cancelled')");
                         });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.CheckEvidence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CheckId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("check_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EvidenceUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_url");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_check_evidence");
+
+                    b.HasIndex("CheckId")
+                        .HasDatabaseName("ix_check_evidence_check_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_check_evidence_project_id");
+
+                    b.ToTable("check_evidence", "hub");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.Client", b =>
@@ -1755,6 +2275,247 @@ namespace Hub.Api.Data.Migrations
                         .HasDatabaseName("ix_deliverable_type_name");
 
                     b.ToTable("deliverable_type", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.DesignBasisEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CurrentVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("current_version_id");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<Guid?>("IndependentApproverId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("independent_approver_id");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<Guid>("ProjectDisciplineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_discipline_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_design_basis_entry");
+
+                    b.HasIndex("CurrentVersionId")
+                        .HasDatabaseName("ix_design_basis_entry_current_version_id");
+
+                    b.HasIndex("IndependentApproverId")
+                        .HasDatabaseName("ix_design_basis_entry_independent_approver_id");
+
+                    b.HasIndex("Key")
+                        .HasDatabaseName("ix_design_basis_entry_key");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_design_basis_entry_owner_id");
+
+                    b.HasIndex("ProjectDisciplineId")
+                        .HasDatabaseName("ix_design_basis_entry_project_discipline_id");
+
+                    b.HasIndex("ProjectId", "Seq")
+                        .IsUnique()
+                        .HasDatabaseName("ix_design_basis_entry_project_id_seq");
+
+                    b.HasIndex("ProjectId", "ProjectDisciplineId", "Kind", "Title")
+                        .HasDatabaseName("ix_design_basis_entry_project_id_project_discipline_id_kind_ti~");
+
+                    b.ToTable("design_basis_entry", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_basis_entry_kind", "kind IN ('Criterion','Assumption')");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.DesignBasisVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly?>("ConfirmationDueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("confirmation_due_date");
+
+                    b.Property<string>("ConfirmationRationale")
+                        .HasColumnType("text")
+                        .HasColumnName("confirmation_rationale");
+
+                    b.Property<DateTimeOffset?>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmed_at");
+
+                    b.Property<Guid?>("ConfirmedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("confirmed_by");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DecisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("decision_id");
+
+                    b.Property<string>("DeclaredRevision")
+                        .HasColumnType("text")
+                        .HasColumnName("declared_revision");
+
+                    b.Property<Guid>("EntryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("entry_id");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer")
+                        .HasColumnName("number");
+
+                    b.Property<decimal?>("NumericValue")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("numeric_value");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope");
+
+                    b.Property<string>("SourceSystem")
+                        .HasColumnType("text")
+                        .HasColumnName("source_system");
+
+                    b.Property<string>("SourceUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("source_url");
+
+                    b.Property<string>("StableSourceId")
+                        .HasColumnType("text")
+                        .HasColumnName("stable_source_id");
+
+                    b.Property<string>("Statement")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("statement");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("SupersedesVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("supersedes_version_id");
+
+                    b.Property<string>("Units")
+                        .HasColumnType("text")
+                        .HasColumnName("units");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_design_basis_version");
+
+                    b.HasIndex("ConfirmedBy")
+                        .HasDatabaseName("ix_design_basis_version_confirmed_by");
+
+                    b.HasIndex("DecisionId")
+                        .HasDatabaseName("ix_design_basis_version_decision_id");
+
+                    b.HasIndex("SupersedesVersionId")
+                        .HasDatabaseName("ix_design_basis_version_supersedes_version_id");
+
+                    b.HasIndex("EntryId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_design_basis_version_entry_id_number");
+
+                    b.HasIndex("ProjectId", "Status")
+                        .HasDatabaseName("ix_design_basis_version_project_id_status");
+
+                    b.ToTable("design_basis_version", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_basis_confirmed_evidence", "status <> 'Confirmed' OR (source_url IS NOT NULL AND confirmation_rationale IS NOT NULL AND confirmed_by IS NOT NULL AND confirmed_at IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_basis_numeric_units", "status NOT IN ('Confirmed', 'Superseded') OR numeric_value IS NULL OR (units IS NOT NULL AND length(trim(units)) > 0)");
+
+                            t.HasCheckConstraint("ck_basis_version_number", "number > 0");
+
+                            t.HasCheckConstraint("ck_basis_version_status", "status IN ('Proposed','Confirmed','Superseded','Withdrawn')");
+                        });
                 });
 
             modelBuilder.Entity("Hub.Api.Data.Discipline", b =>
@@ -2824,6 +3585,11 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<string>("IssueType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("issue_type");
+
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasColumnType("text")
@@ -2914,6 +3680,485 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("issue", "hub", t =>
                         {
                             t.HasCheckConstraint("ck_issue_status", "status IN ('Open','In Progress','Resolved','Cancelled')");
+
+                            t.HasCheckConstraint("ck_issue_type", "issue_type IN ('General','Coordination')");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.IssueAffectedDiscipline", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("issue_id");
+
+                    b.Property<Guid>("ProjectDisciplineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_discipline_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_issue_affected_discipline");
+
+                    b.HasIndex("ProjectDisciplineId")
+                        .HasDatabaseName("ix_issue_affected_discipline_project_discipline_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_issue_affected_discipline_project_id");
+
+                    b.HasIndex("IssueId", "ProjectDisciplineId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_issue_affected_discipline_issue_id_project_discipline_id");
+
+                    b.ToTable("issue_affected_discipline", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.IssueDocumentReference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("ExternalTopicId")
+                        .HasColumnType("text")
+                        .HasColumnName("external_topic_id");
+
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("identifier");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_available");
+
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("issue_id");
+
+                    b.Property<int>("IssueRowVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("issue_row_version");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("ModelElementGuid")
+                        .HasColumnType("text")
+                        .HasColumnName("model_element_guid");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Revision")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("revision");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("SourceUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_url");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("ViewpointUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("viewpoint_url");
+
+                    b.HasKey("Id")
+                        .HasName("pk_issue_document_reference");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_issue_document_reference_project_id");
+
+                    b.HasIndex("IssueId", "Identifier", "Revision")
+                        .IsUnique()
+                        .HasDatabaseName("ix_issue_document_reference_issue_id_identifier_revision");
+
+                    b.ToTable("issue_document_reference", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_issue_document_kind", "kind IN ('Drawing','Model','Markup','Screenshot')");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.IssueLocation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Alignment")
+                        .HasColumnType("text")
+                        .HasColumnName("alignment");
+
+                    b.Property<string>("AssetSystem")
+                        .HasColumnType("text")
+                        .HasColumnName("asset_system");
+
+                    b.Property<string>("Building")
+                        .HasColumnType("text")
+                        .HasColumnName("building");
+
+                    b.Property<string>("CoordinateReferenceSystem")
+                        .HasColumnType("text")
+                        .HasColumnName("coordinate_reference_system");
+
+                    b.Property<string>("CoordinateUnits")
+                        .HasColumnType("text")
+                        .HasColumnName("coordinate_units");
+
+                    b.Property<decimal?>("CoordinateX")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("coordinate_x");
+
+                    b.Property<decimal?>("CoordinateY")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("coordinate_y");
+
+                    b.Property<decimal?>("CoordinateZ")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("coordinate_z");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal?>("EndStation")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("end_station");
+
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("issue_id");
+
+                    b.Property<int>("IssueRowVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("issue_row_version");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("Level")
+                        .HasColumnType("text")
+                        .HasColumnName("level");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Room")
+                        .HasColumnType("text")
+                        .HasColumnName("room");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("SiteArea")
+                        .HasColumnType("text")
+                        .HasColumnName("site_area");
+
+                    b.Property<decimal?>("StartStation")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("start_station");
+
+                    b.Property<string>("StationUnits")
+                        .HasColumnType("text")
+                        .HasColumnName("station_units");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_issue_location");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_issue_location_project_id");
+
+                    b.HasIndex("IssueId", "CreatedAt")
+                        .HasDatabaseName("ix_issue_location_issue_id_created_at");
+
+                    b.ToTable("issue_location", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_issue_location_kind", "kind IN ('SiteArea','Building','Alignment','Coordinate')");
+
+                            t.HasCheckConstraint("ck_issue_location_station_order", "end_station IS NULL OR start_station IS NULL OR end_station >= start_station");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.IssueReferenceImpactAssessment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("CurrentRevisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("current_revision_id");
+
+                    b.Property<Guid>("DocumentReferenceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("document_reference_id");
+
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("issue_id");
+
+                    b.Property<DateTimeOffset?>("OwnerDecidedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("owner_decided_at");
+
+                    b.Property<Guid?>("OwnerDecidedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_decided_by");
+
+                    b.Property<string>("OwnerDisposition")
+                        .HasColumnType("text")
+                        .HasColumnName("owner_disposition");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<string>("OwnerReason")
+                        .HasColumnType("text")
+                        .HasColumnName("owner_reason");
+
+                    b.Property<Guid>("PreviousRevisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("previous_revision_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateTimeOffset?>("VerifierDecidedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verifier_decided_at");
+
+                    b.Property<Guid?>("VerifierDecidedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("verifier_decided_by");
+
+                    b.Property<string>("VerifierDisposition")
+                        .HasColumnType("text")
+                        .HasColumnName("verifier_disposition");
+
+                    b.Property<Guid?>("VerifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("verifier_id");
+
+                    b.Property<string>("VerifierReason")
+                        .HasColumnType("text")
+                        .HasColumnName("verifier_reason");
+
+                    b.HasKey("Id")
+                        .HasName("pk_issue_reference_impact_assessment");
+
+                    b.HasIndex("CurrentRevisionId")
+                        .HasDatabaseName("ix_issue_reference_impact_assessment_current_revision_id");
+
+                    b.HasIndex("DocumentReferenceId")
+                        .HasDatabaseName("ix_issue_reference_impact_assessment_document_reference_id");
+
+                    b.HasIndex("OwnerDecidedBy")
+                        .HasDatabaseName("ix_issue_reference_impact_assessment_owner_decided_by");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_issue_reference_impact_assessment_owner_id");
+
+                    b.HasIndex("PreviousRevisionId")
+                        .HasDatabaseName("ix_issue_reference_impact_assessment_previous_revision_id");
+
+                    b.HasIndex("VerifierDecidedBy")
+                        .HasDatabaseName("ix_issue_reference_impact_assessment_verifier_decided_by");
+
+                    b.HasIndex("VerifierId")
+                        .HasDatabaseName("ix_issue_reference_impact_assessment_verifier_id");
+
+                    b.HasIndex("IssueId", "DocumentReferenceId", "PreviousRevisionId", "CurrentRevisionId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_issue_reference_impact_assessment_issue_id_document_referen~");
+
+                    b.ToTable("issue_reference_impact_assessment", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_issue_reference_impact_status", "status IN ('Pending','Unaffected','ReopenRequested')");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.IssueVerification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EvidenceUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_url");
+
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("issue_id");
+
+                    b.Property<int>("IssueRowVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("issue_row_version");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateTimeOffset?>("VerifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at");
+
+                    b.Property<Guid>("VerifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("verifier_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_issue_verification");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_issue_verification_project_id");
+
+                    b.HasIndex("VerifierId")
+                        .HasDatabaseName("ix_issue_verification_verifier_id");
+
+                    b.HasIndex("IssueId", "CreatedAt")
+                        .HasDatabaseName("ix_issue_verification_issue_id_created_at");
+
+                    b.ToTable("issue_verification", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_issue_verification_status", "status IN ('Proposed','Verified','Rejected')");
                         });
                 });
 
@@ -3717,6 +4962,306 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("outbox_event", "hub");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.OutputCommitment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CompletionCriteria")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("completion_criteria");
+
+                    b.Property<string>("CompletionEvidenceUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("completion_evidence_url");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("IntendedOutput")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("intended_output");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key");
+
+                    b.Property<Guid>("PerformerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("performer_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("ReadinessAtCommit")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("readiness_at_commit");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    b.Property<Guid?>("SnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.Property<DateOnly>("TargetDate")
+                        .HasColumnType("date")
+                        .HasColumnName("target_date");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("target_type");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateOnly>("WeekStart")
+                        .HasColumnType("date")
+                        .HasColumnName("week_start");
+
+                    b.HasKey("Id")
+                        .HasName("pk_output_commitment");
+
+                    b.HasIndex("Key")
+                        .HasDatabaseName("ix_output_commitment_key");
+
+                    b.HasIndex("PerformerId")
+                        .HasDatabaseName("ix_output_commitment_performer_id");
+
+                    b.HasIndex("SnapshotId")
+                        .HasDatabaseName("ix_output_commitment_snapshot_id");
+
+                    b.HasIndex("ProjectId", "Seq")
+                        .IsUnique()
+                        .HasDatabaseName("ix_output_commitment_project_id_seq");
+
+                    b.HasIndex("ProjectId", "WeekStart", "PerformerId")
+                        .HasDatabaseName("ix_output_commitment_project_id_week_start_performer_id");
+
+                    b.ToTable("output_commitment", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_commitment_readiness", "readiness_at_commit IN ('Needs Assessment','Not Ready','Ready','Proceed under Assumption')");
+
+                            t.HasCheckConstraint("ck_commitment_state", "state IN ('Proposed','Committed','Met','Not Met','Withdrawn')");
+
+                            t.HasCheckConstraint("ck_commitment_target", "target_type IN ('Task', 'Deliverable')");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.OutputCommitmentEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_id");
+
+                    b.Property<Guid>("CommitmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("commitment_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EvidenceUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_url");
+
+                    b.Property<string>("FromState")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("from_state");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("ToState")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("to_state");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_output_commitment_event");
+
+                    b.HasIndex("ActorId")
+                        .HasDatabaseName("ix_output_commitment_event_actor_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_output_commitment_event_project_id");
+
+                    b.HasIndex("CommitmentId", "CreatedAt")
+                        .HasDatabaseName("ix_output_commitment_event_commitment_id_created_at");
+
+                    b.ToTable("output_commitment_event", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.PersonAvailabilityOverride", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("AvailableHours")
+                        .HasPrecision(9, 3)
+                        .HasColumnType("numeric(9,3)")
+                        .HasColumnName("available_hours");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateOnly>("WorkDate")
+                        .HasColumnType("date")
+                        .HasColumnName("work_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_person_availability_override");
+
+                    b.HasIndex("PersonId", "WorkDate")
+                        .IsUnique()
+                        .HasDatabaseName("ix_person_availability_override_person_id_work_date");
+
+                    b.ToTable("person_availability_override", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_availability_category", "category IN ('Unavailable','Reduced','Additional')");
+
+                            t.HasCheckConstraint("ck_availability_hours", "available_hours >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.PersonDateVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateOnly>("WorkDate")
+                        .HasColumnType("date")
+                        .HasColumnName("work_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_person_date_version");
+
+                    b.HasIndex("PersonId", "WorkDate")
+                        .IsUnique()
+                        .HasDatabaseName("ix_person_date_version_person_id_work_date");
+
+                    b.ToTable("person_date_version", "hub");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.Phase", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3871,9 +5416,21 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("next_action_seq");
 
+                    b.Property<int>("NextBasisSeq")
+                        .HasColumnType("integer")
+                        .HasColumnName("next_basis_seq");
+
                     b.Property<int>("NextChangeSeq")
                         .HasColumnType("integer")
                         .HasColumnName("next_change_seq");
+
+                    b.Property<int>("NextCommitmentSeq")
+                        .HasColumnType("integer")
+                        .HasColumnName("next_commitment_seq");
+
+                    b.Property<int>("NextConstraintSeq")
+                        .HasColumnType("integer")
+                        .HasColumnName("next_constraint_seq");
 
                     b.Property<int>("NextDecisionSeq")
                         .HasColumnType("integer")
@@ -3902,6 +5459,10 @@ namespace Hub.Api.Data.Migrations
                     b.Property<int>("NextRiskSeq")
                         .HasColumnType("integer")
                         .HasColumnName("next_risk_seq");
+
+                    b.Property<int>("NextSubmissionSeq")
+                        .HasColumnType("integer")
+                        .HasColumnName("next_submission_seq");
 
                     b.Property<int>("NextTaskSeq")
                         .HasColumnType("integer")
@@ -4438,6 +5999,432 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("project_type", "hub");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.ReadinessAssessment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CompletionCriteria")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("completion_criteria");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("EvaluatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("evaluated_at");
+
+                    b.Property<string>("IntendedOutput")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("intended_output");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("target_type");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_readiness_assessment");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_readiness_assessment_owner_id");
+
+                    b.HasIndex("ProjectId", "TargetType", "TargetId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_readiness_assessment_project_id_target_type_target_id");
+
+                    b.ToTable("readiness_assessment", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_readiness_state", "state IN ('Needs Assessment','Not Ready','Ready','Proceed under Assumption')");
+
+                            t.HasCheckConstraint("ck_readiness_target", "target_type IN ('Task', 'Deliverable')");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ReadinessCheckRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool?>("Applies")
+                        .HasColumnType("boolean")
+                        .HasColumnName("applies");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assessment_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EvidenceUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_url");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid?>("RecordedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recorded_by");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<bool?>("Satisfied")
+                        .HasColumnType("boolean")
+                        .HasColumnName("satisfied");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_readiness_check_record");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_readiness_check_record_project_id");
+
+                    b.HasIndex("RecordedBy")
+                        .HasDatabaseName("ix_readiness_check_record_recorded_by");
+
+                    b.HasIndex("AssessmentId", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_readiness_check_record_assessment_id_code");
+
+                    b.ToTable("readiness_check_record", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_readiness_check_code", "code IN ('Handoff','Predecessor','Decision','Basis','Production Owner','Production Capacity','Review Capacity','Review Gate','Submission Gate')");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ReadinessException", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ApprovedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approved_by");
+
+                    b.Property<Guid>("AssessmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assessment_id");
+
+                    b.Property<Guid>("BasisVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("basis_version_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly>("ExpiresOn")
+                        .HasColumnType("date")
+                        .HasColumnName("expires_on");
+
+                    b.Property<string>("LimitedWork")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("limited_work");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Risk")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("risk");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("VerifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("verifier_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_readiness_exception");
+
+                    b.HasIndex("ApprovedBy")
+                        .HasDatabaseName("ix_readiness_exception_approved_by");
+
+                    b.HasIndex("AssessmentId")
+                        .HasDatabaseName("ix_readiness_exception_assessment_id");
+
+                    b.HasIndex("BasisVersionId")
+                        .HasDatabaseName("ix_readiness_exception_basis_version_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_readiness_exception_project_id");
+
+                    b.HasIndex("VerifierId")
+                        .HasDatabaseName("ix_readiness_exception_verifier_id");
+
+                    b.ToTable("readiness_exception", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ReadinessSubmissionPrerequisite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("package_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("RemovalReason")
+                        .HasColumnType("text")
+                        .HasColumnName("removal_reason");
+
+                    b.Property<DateTimeOffset?>("RemovedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("removed_at");
+
+                    b.Property<Guid?>("RemovedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("removed_by");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("target_type");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_readiness_submission_prerequisite");
+
+                    b.HasIndex("PackageId")
+                        .HasDatabaseName("ix_readiness_submission_prerequisite_package_id");
+
+                    b.HasIndex("RemovedBy")
+                        .HasDatabaseName("ix_readiness_submission_prerequisite_removed_by");
+
+                    b.HasIndex("ProjectId", "TargetType", "TargetId", "PackageId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_readiness_submission_prerequisite_project_id_target_type_ta~")
+                        .HasFilter("removed_at IS NULL");
+
+                    b.ToTable("readiness_submission_prerequisite", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_readiness_prerequisite_target", "target_type IN ('Task', 'Deliverable')");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ResourceAllocation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ConfirmationSnapshot")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("confirmation_snapshot");
+
+                    b.Property<DateTimeOffset?>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmed_at");
+
+                    b.Property<Guid?>("ConfirmedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("confirmed_by");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date")
+                        .HasColumnName("from_date");
+
+                    b.Property<string>("OverCapacityReason")
+                        .HasColumnType("text")
+                        .HasColumnName("over_capacity_reason");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<decimal>("PlannedHours")
+                        .HasPrecision(9, 3)
+                        .HasColumnType("numeric(9,3)")
+                        .HasColumnName("planned_hours");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("purpose");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateOnly>("ThroughDate")
+                        .HasColumnType("date")
+                        .HasColumnName("through_date");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_resource_allocation");
+
+                    b.HasIndex("ConfirmedBy")
+                        .HasDatabaseName("ix_resource_allocation_confirmed_by");
+
+                    b.HasIndex("ProjectId", "Status")
+                        .HasDatabaseName("ix_resource_allocation_project_id_status");
+
+                    b.HasIndex("PersonId", "FromDate", "ThroughDate")
+                        .HasDatabaseName("ix_resource_allocation_person_id_from_date_through_date");
+
+                    b.ToTable("resource_allocation", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_allocation_dates", "through_date >= from_date");
+
+                            t.HasCheckConstraint("ck_allocation_hours", "planned_hours > 0");
+
+                            t.HasCheckConstraint("ck_allocation_purpose", "purpose IN ('Production','Review')");
+
+                            t.HasCheckConstraint("ck_allocation_status", "status IN ('Proposed','Confirmed','Declined','Cancelled','Completed')");
+                        });
+                });
+
             modelBuilder.Entity("Hub.Api.Data.ReviewFinding", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4460,6 +6447,10 @@ namespace Hub.Api.Data.Migrations
                     b.Property<string>("EvidenceUrl")
                         .HasColumnType("text")
                         .HasColumnName("evidence_url");
+
+                    b.Property<Guid?>("IssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("issue_id");
 
                     b.Property<Guid>("OriginatorId")
                         .HasColumnType("uuid")
@@ -4534,6 +6525,9 @@ namespace Hub.Api.Data.Migrations
 
                     b.HasIndex("CarriedFromId")
                         .HasDatabaseName("ix_review_finding_carried_from_id");
+
+                    b.HasIndex("IssueId")
+                        .HasDatabaseName("ix_review_finding_issue_id");
 
                     b.HasIndex("OriginatorId")
                         .HasDatabaseName("ix_review_finding_originator_id");
@@ -5212,6 +7206,384 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("source_revision", "hub");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.SubmissionCheck", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("approved_at");
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approved_by");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EvidenceRule")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_rule");
+
+                    b.Property<string>("EvidenceUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_url");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<int>("ManifestVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("manifest_version");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("package_id");
+
+                    b.Property<Guid?>("ProjectDisciplineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_discipline_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<bool>("Required")
+                        .HasColumnType("boolean")
+                        .HasColumnName("required");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<Guid?>("SourceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_submission_check");
+
+                    b.HasIndex("ApprovedBy")
+                        .HasDatabaseName("ix_submission_check_approved_by");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_submission_check_owner_id");
+
+                    b.HasIndex("ProjectDisciplineId")
+                        .HasDatabaseName("ix_submission_check_project_discipline_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_submission_check_project_id");
+
+                    b.HasIndex("PackageId", "ManifestVersion", "Kind")
+                        .IsUnique()
+                        .HasDatabaseName("ix_submission_check_package_id_manifest_version_kind")
+                        .HasFilter("source_id IS NULL");
+
+                    b.HasIndex("PackageId", "ManifestVersion", "Kind", "SourceId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_submission_check_package_id_manifest_version_kind_source_id");
+
+                    b.ToTable("submission_check", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_submission_check_kind", "kind IN ('Deliverable','Current Revision','Independent Review','Blocking Findings','Handoff','Change Assessment','Access','Applicability')");
+
+                            t.HasCheckConstraint("ck_submission_check_status", "status IN ('Pending','Pass','Not Applicable')");
+
+                            t.HasCheckConstraint("ck_submission_check_waiver", "status <> 'Not Applicable' OR (kind = 'Applicability' AND required = false AND reason IS NOT NULL AND evidence_url IS NOT NULL AND approved_by IS NOT NULL AND approved_at IS NOT NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.SubmissionIssue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("AuthorisedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("authorised_at");
+
+                    b.Property<Guid>("AuthorisedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("authorised_by");
+
+                    b.Property<string>("CheckSnapshot")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("check_snapshot");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("destination");
+
+                    b.Property<string>("ManifestSnapshot")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("manifest_snapshot");
+
+                    b.Property<int>("ManifestVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("manifest_version");
+
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("package_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("TransmittalUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("transmittal_url");
+
+                    b.HasKey("Id")
+                        .HasName("pk_submission_issue");
+
+                    b.HasIndex("AuthorisedBy")
+                        .HasDatabaseName("ix_submission_issue_authorised_by");
+
+                    b.HasIndex("PackageId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_submission_issue_package_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_submission_issue_project_id");
+
+                    b.ToTable("submission_issue", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.SubmissionManifestItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("DeliverableId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deliverable_id");
+
+                    b.Property<int>("ManifestVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("manifest_version");
+
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("package_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<bool>("Required")
+                        .HasColumnType("boolean")
+                        .HasColumnName("required");
+
+                    b.Property<Guid?>("ReviewRoundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("review_round_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<Guid>("SourceRevisionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_revision_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_submission_manifest_item");
+
+                    b.HasIndex("DeliverableId")
+                        .HasDatabaseName("ix_submission_manifest_item_deliverable_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_submission_manifest_item_project_id");
+
+                    b.HasIndex("ReviewRoundId")
+                        .HasDatabaseName("ix_submission_manifest_item_review_round_id");
+
+                    b.HasIndex("SourceRevisionId")
+                        .HasDatabaseName("ix_submission_manifest_item_source_revision_id");
+
+                    b.HasIndex("PackageId", "ManifestVersion", "DeliverableId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_submission_manifest_item_package_id_manifest_version_delive~");
+
+                    b.ToTable("submission_manifest_item", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.SubmissionPackage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CoordinatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("coordinator_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key");
+
+                    b.Property<int>("ManifestVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("manifest_version");
+
+                    b.Property<Guid>("MilestoneId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("milestone_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("purpose");
+
+                    b.Property<string>("RecipientReference")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recipient_reference");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("SupersedesPackageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("supersedes_package_id");
+
+                    b.Property<DateOnly>("TargetDate")
+                        .HasColumnType("date")
+                        .HasColumnName("target_date");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_submission_package");
+
+                    b.HasIndex("CoordinatorId")
+                        .HasDatabaseName("ix_submission_package_coordinator_id");
+
+                    b.HasIndex("Key")
+                        .HasDatabaseName("ix_submission_package_key");
+
+                    b.HasIndex("MilestoneId")
+                        .HasDatabaseName("ix_submission_package_milestone_id");
+
+                    b.HasIndex("SupersedesPackageId")
+                        .HasDatabaseName("ix_submission_package_supersedes_package_id");
+
+                    b.HasIndex("ProjectId", "Seq")
+                        .IsUnique()
+                        .HasDatabaseName("ix_submission_package_project_id_seq");
+
+                    b.HasIndex("ProjectId", "Status")
+                        .HasDatabaseName("ix_submission_package_project_id_status");
+
+                    b.ToTable("submission_package", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_submission_package_status", "status IN ('Draft','Checking','Ready','Issued','Superseded','Cancelled')");
+                        });
+                });
+
             modelBuilder.Entity("Hub.Api.Data.TaskCollaborator", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5310,6 +7682,97 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("task_dependency", "hub", t =>
                         {
                             t.HasCheckConstraint("ck_dependency_self", "predecessor_task_id <> successor_task_id");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.TaskStartAuthorisation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AuthorisedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("authorised_by");
+
+                    b.PrimitiveCollection<string[]>("Blocked")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("blocked");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("ReadinessAtAuthorisation")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("readiness_at_authorisation");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<Guid?>("StartedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("started_by");
+
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("task_id");
+
+                    b.PrimitiveCollection<string[]>("Unknown")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("unknown");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_task_start_authorisation");
+
+                    b.HasIndex("AuthorisedBy")
+                        .HasDatabaseName("ix_task_start_authorisation_authorised_by");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_task_start_authorisation_project_id");
+
+                    b.HasIndex("StartedBy")
+                        .HasDatabaseName("ix_task_start_authorisation_started_by");
+
+                    b.HasIndex("TaskId", "CreatedAt")
+                        .HasDatabaseName("ix_task_start_authorisation_task_id_created_at");
+
+                    b.ToTable("task_start_authorisation", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_task_start_authorisation_readiness", "readiness_at_authorisation IN ('Not Ready','Needs Assessment')");
+
+                            t.HasCheckConstraint("ck_task_start_authorisation_start", "(started_by IS NULL) = (started_at IS NULL)");
                         });
                 });
 
@@ -5592,6 +8055,82 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("template_dependency", "hub");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.TemplateDesignBasis", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("DeclaredRevision")
+                        .HasColumnType("text")
+                        .HasColumnName("declared_revision");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<decimal?>("NumericValue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("numeric_value");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope");
+
+                    b.Property<string>("SourceSystem")
+                        .HasColumnType("text")
+                        .HasColumnName("source_system");
+
+                    b.Property<string>("SourceUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("source_url");
+
+                    b.Property<string>("StableSourceId")
+                        .HasColumnType("text")
+                        .HasColumnName("stable_source_id");
+
+                    b.Property<string>("Statement")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("statement");
+
+                    b.Property<Guid>("TemplateDisciplineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("template_discipline_id");
+
+                    b.Property<Guid>("TemplateId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("template_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Units")
+                        .HasColumnType("text")
+                        .HasColumnName("units");
+
+                    b.HasKey("Id")
+                        .HasName("pk_template_design_basis");
+
+                    b.HasIndex("TemplateDisciplineId")
+                        .HasDatabaseName("ix_template_design_basis_template_discipline_id");
+
+                    b.HasIndex("TemplateId", "TemplateDisciplineId")
+                        .HasDatabaseName("ix_template_design_basis_template_id_template_discipline_id");
+
+                    b.ToTable("template_design_basis", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_template_basis_kind", "kind IN ('Criterion','Assumption')");
+
+                            t.HasCheckConstraint("ck_template_basis_numeric_units", "numeric_value IS NULL OR (units IS NOT NULL AND length(trim(units)) > 0)");
+                        });
+                });
+
             modelBuilder.Entity("Hub.Api.Data.TemplateDiscipline", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5810,6 +8349,201 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("user_system_role", "hub", t =>
                         {
                             t.HasCheckConstraint("ck_role", "role IN ('Admin','Executive','Supervisor','ProjectManager','ReadOnly')");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.WeeklyPlanSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CapturedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("captured_at");
+
+                    b.Property<Guid>("CapturedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("captured_by");
+
+                    b.Property<int>("CommittedCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("committed_count");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateOnly>("WeekStart")
+                        .HasColumnType("date")
+                        .HasColumnName("week_start");
+
+                    b.HasKey("Id")
+                        .HasName("pk_weekly_plan_snapshot");
+
+                    b.HasIndex("CapturedBy")
+                        .HasDatabaseName("ix_weekly_plan_snapshot_captured_by");
+
+                    b.HasIndex("ProjectId", "WeekStart")
+                        .IsUnique()
+                        .HasDatabaseName("ix_weekly_plan_snapshot_project_id_week_start");
+
+                    b.ToTable("weekly_plan_snapshot", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.WorkConstraint", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AffectedOwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("affected_owner_id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key");
+
+                    b.Property<Guid?>("LinkedId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("linked_id");
+
+                    b.Property<string>("LinkedType")
+                        .HasColumnType("text")
+                        .HasColumnName("linked_type");
+
+                    b.Property<DateOnly>("NeededBy")
+                        .HasColumnType("date")
+                        .HasColumnName("needed_by");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<Guid>("RemovalOwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("removal_owner_id");
+
+                    b.Property<string>("ResolutionEvidenceUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("resolution_evidence_url");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    b.Property<string>("SourceUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_url");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("target_type");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateTimeOffset?>("VerifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at");
+
+                    b.Property<Guid?>("VerifiedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("verified_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_work_constraint");
+
+                    b.HasIndex("AffectedOwnerId")
+                        .HasDatabaseName("ix_work_constraint_affected_owner_id");
+
+                    b.HasIndex("Key")
+                        .HasDatabaseName("ix_work_constraint_key");
+
+                    b.HasIndex("RemovalOwnerId")
+                        .HasDatabaseName("ix_work_constraint_removal_owner_id");
+
+                    b.HasIndex("VerifiedBy")
+                        .HasDatabaseName("ix_work_constraint_verified_by");
+
+                    b.HasIndex("ProjectId", "Seq")
+                        .IsUnique()
+                        .HasDatabaseName("ix_work_constraint_project_id_seq");
+
+                    b.HasIndex("ProjectId", "TargetType", "TargetId", "State")
+                        .HasDatabaseName("ix_work_constraint_project_id_target_type_target_id_state");
+
+                    b.ToTable("work_constraint", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_work_constraint_link", "(linked_type IS NULL) = (linked_id IS NULL) AND (linked_type IS NULL OR linked_type IN ('Decision', 'Issue', 'Handoff'))");
+
+                            t.HasCheckConstraint("ck_work_constraint_state", "state IN ('Open','Resolution Proposed','Verified Removed','Cancelled')");
+
+                            t.HasCheckConstraint("ck_work_constraint_target", "target_type IN ('Task', 'Deliverable')");
                         });
                 });
 
@@ -6115,6 +8849,33 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("workspace_project", "hub");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.AllocationDayOverride", b =>
+                {
+                    b.HasOne("Hub.Api.Data.ResourceAllocation", null)
+                        .WithMany()
+                        .HasForeignKey("AllocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_allocation_day_override_allocations_allocation_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.AllocationWorkLink", b =>
+                {
+                    b.HasOne("Hub.Api.Data.ResourceAllocation", null)
+                        .WithMany()
+                        .HasForeignKey("AllocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_allocation_work_link_allocations_allocation_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_allocation_work_link_app_user_person_id");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.AppUser", b =>
                 {
                     b.HasOne("Hub.Api.Data.Office", null)
@@ -6138,6 +8899,140 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_attention_item_projects_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.BasisAssumptionDisposition", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_assumption_disposition_app_user_approved_by");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_assumption_disposition_app_user_owner_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_assumption_disposition_projects_project_id");
+
+                    b.HasOne("Hub.Api.Data.DesignBasisVersion", null)
+                        .WithMany()
+                        .HasForeignKey("VersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_assumption_disposition_design_basis_versions_version_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.BasisConflict", b =>
+                {
+                    b.HasOne("Hub.Api.Data.DesignBasisVersion", null)
+                        .WithMany()
+                        .HasForeignKey("LeftVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_conflict_design_basis_versions_left_version_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_conflict_projects_project_id");
+
+                    b.HasOne("Hub.Api.Data.DesignBasisVersion", null)
+                        .WithMany()
+                        .HasForeignKey("ResolutionVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_basis_conflict_design_basis_versions_resolution_version_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ResolvedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_basis_conflict_app_user_resolved_by");
+
+                    b.HasOne("Hub.Api.Data.DesignBasisVersion", null)
+                        .WithMany()
+                        .HasForeignKey("RightVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_conflict_design_basis_versions_right_version_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.BasisImpactAssessment", b =>
+                {
+                    b.HasOne("Hub.Api.Data.BasisUse", null)
+                        .WithMany()
+                        .HasForeignKey("BasisUseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_impact_assessment_basis_uses_basis_use_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("DecidedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_basis_impact_assessment_app_user_decided_by");
+
+                    b.HasOne("Hub.Api.Data.DesignBasisVersion", null)
+                        .WithMany()
+                        .HasForeignKey("NewVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_basis_impact_assessment_design_basis_versions_new_version_id");
+
+                    b.HasOne("Hub.Api.Data.DesignBasisVersion", null)
+                        .WithMany()
+                        .HasForeignKey("OldVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_impact_assessment_design_basis_versions_old_version_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_impact_assessment_app_user_owner_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_impact_assessment_projects_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.BasisUse", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_use_app_user_owner_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_use_projects_project_id");
+
+                    b.HasOne("Hub.Api.Data.DesignBasisVersion", null)
+                        .WithMany()
+                        .HasForeignKey("VersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_basis_use_design_basis_versions_version_id");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.ChangeAssessment", b =>
@@ -6231,6 +9126,23 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_change_notice_projects_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.CheckEvidence", b =>
+                {
+                    b.HasOne("Hub.Api.Data.SubmissionCheck", null)
+                        .WithMany()
+                        .HasForeignKey("CheckId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_check_evidence_submission_checks_check_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_check_evidence_projects_project_id");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.Comment", b =>
@@ -6394,6 +9306,77 @@ namespace Hub.Api.Data.Migrations
                         .HasForeignKey("DefaultDisciplineId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_deliverable_type_disciplines_default_discipline_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.DesignBasisEntry", b =>
+                {
+                    b.HasOne("Hub.Api.Data.DesignBasisVersion", null)
+                        .WithMany()
+                        .HasForeignKey("CurrentVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_design_basis_entry_design_basis_versions_current_version_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("IndependentApproverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_design_basis_entry_app_user_independent_approver_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_design_basis_entry_app_user_owner_id");
+
+                    b.HasOne("Hub.Api.Data.ProjectDiscipline", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectDisciplineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_design_basis_entry_project_disciplines_project_discipline_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_design_basis_entry_projects_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.DesignBasisVersion", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ConfirmedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_design_basis_version_app_user_confirmed_by");
+
+                    b.HasOne("Hub.Api.Data.Decision", null)
+                        .WithMany()
+                        .HasForeignKey("DecisionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_design_basis_version_decision_decision_id");
+
+                    b.HasOne("Hub.Api.Data.DesignBasisEntry", null)
+                        .WithMany()
+                        .HasForeignKey("EntryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_design_basis_version_design_basis_entry_entry_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_design_basis_version_projects_project_id");
+
+                    b.HasOne("Hub.Api.Data.DesignBasisVersion", null)
+                        .WithMany()
+                        .HasForeignKey("SupersedesVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_design_basis_version_design_basis_version_supersedes_versio~");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.DisciplineReview", b =>
@@ -6639,6 +9622,144 @@ namespace Hub.Api.Data.Migrations
                         .HasConstraintName("fk_issue_projects_project_id");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.IssueAffectedDiscipline", b =>
+                {
+                    b.HasOne("Hub.Api.Data.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_affected_discipline_issue_issue_id");
+
+                    b.HasOne("Hub.Api.Data.ProjectDiscipline", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectDisciplineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_affected_discipline_project_disciplines_project_discip~");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_affected_discipline_projects_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.IssueDocumentReference", b =>
+                {
+                    b.HasOne("Hub.Api.Data.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_document_reference_issue_issue_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_document_reference_projects_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.IssueLocation", b =>
+                {
+                    b.HasOne("Hub.Api.Data.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_location_issue_issue_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_location_projects_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.IssueReferenceImpactAssessment", b =>
+                {
+                    b.HasOne("Hub.Api.Data.SourceRevision", null)
+                        .WithMany()
+                        .HasForeignKey("CurrentRevisionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_reference_impact_assessment_source_revisions_current_r~");
+
+                    b.HasOne("Hub.Api.Data.IssueDocumentReference", null)
+                        .WithMany()
+                        .HasForeignKey("DocumentReferenceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_reference_impact_assessment_issue_document_reference_~");
+
+                    b.HasOne("Hub.Api.Data.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_reference_impact_assessment_issue_issue_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerDecidedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_issue_reference_impact_assessment_app_user_owner_decided_by");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_reference_impact_assessment_app_user_owner_id");
+
+                    b.HasOne("Hub.Api.Data.SourceRevision", null)
+                        .WithMany()
+                        .HasForeignKey("PreviousRevisionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_reference_impact_assessment_source_revisions_previous_~");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("VerifierDecidedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_issue_reference_impact_assessment_app_user_verifier_decided~");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("VerifierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_issue_reference_impact_assessment_app_user_verifier_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.IssueVerification", b =>
+                {
+                    b.HasOne("Hub.Api.Data.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_verification_issue_issue_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_verification_projects_project_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("VerifierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_verification_app_user_verifier_id");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.MeetingAction", b =>
                 {
                     b.HasOne("Hub.Api.Data.Meeting", null)
@@ -6686,6 +9807,73 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_milestone_state_milestone_milestone_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.OutputCommitment", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("PerformerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_output_commitment_app_user_performer_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_output_commitment_projects_project_id");
+
+                    b.HasOne("Hub.Api.Data.WeeklyPlanSnapshot", null)
+                        .WithMany()
+                        .HasForeignKey("SnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_output_commitment_weekly_plan_snapshots_snapshot_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.OutputCommitmentEvent", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_output_commitment_event_app_user_actor_id");
+
+                    b.HasOne("Hub.Api.Data.OutputCommitment", null)
+                        .WithMany()
+                        .HasForeignKey("CommitmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_output_commitment_event_output_commitment_commitment_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_output_commitment_event_projects_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.PersonAvailabilityOverride", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_person_availability_override_app_user_person_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.PersonDateVersion", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_person_date_version_app_user_person_id");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.Project", b =>
@@ -6808,6 +9996,130 @@ namespace Hub.Api.Data.Migrations
                         .HasConstraintName("fk_project_state_project_project_id");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.ReadinessAssessment", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_assessment_app_user_owner_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_assessment_project_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ReadinessCheckRecord", b =>
+                {
+                    b.HasOne("Hub.Api.Data.ReadinessAssessment", null)
+                        .WithMany()
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_check_record_readiness_assessment_assessment_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_check_record_project_project_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("RecordedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_readiness_check_record_app_user_recorded_by");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ReadinessException", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_exception_app_user_approved_by");
+
+                    b.HasOne("Hub.Api.Data.ReadinessAssessment", null)
+                        .WithMany()
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_exception_readiness_assessment_assessment_id");
+
+                    b.HasOne("Hub.Api.Data.DesignBasisVersion", null)
+                        .WithMany()
+                        .HasForeignKey("BasisVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_exception_design_basis_version_basis_version_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_exception_project_project_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("VerifierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_exception_app_user_verifier_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ReadinessSubmissionPrerequisite", b =>
+                {
+                    b.HasOne("Hub.Api.Data.SubmissionPackage", null)
+                        .WithMany()
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_submission_prerequisite_submission_packages_packag~");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_readiness_submission_prerequisite_project_project_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("RemovedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_readiness_submission_prerequisite_app_user_removed_by");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ResourceAllocation", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ConfirmedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_resource_allocation_app_user_confirmed_by");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_resource_allocation_app_user_person_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_resource_allocation_project_project_id");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.ReviewFinding", b =>
                 {
                     b.HasOne("Hub.Api.Data.ReviewFinding", null)
@@ -6815,6 +10127,12 @@ namespace Hub.Api.Data.Migrations
                         .HasForeignKey("CarriedFromId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_review_finding_review_finding_carried_from_id");
+
+                    b.HasOne("Hub.Api.Data.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_review_finding_issue_issue_id");
 
                     b.HasOne("Hub.Api.Data.AppUser", null)
                         .WithMany()
@@ -7014,6 +10332,133 @@ namespace Hub.Api.Data.Migrations
                         .HasConstraintName("fk_source_revision_source_revision_supersedes_id");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.SubmissionCheck", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_submission_check_app_user_approved_by");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_check_app_user_owner_id");
+
+                    b.HasOne("Hub.Api.Data.SubmissionPackage", null)
+                        .WithMany()
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_check_submission_packages_package_id");
+
+                    b.HasOne("Hub.Api.Data.ProjectDiscipline", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectDisciplineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_submission_check_project_discipline_project_discipline_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_check_project_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.SubmissionIssue", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AuthorisedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_issue_app_user_authorised_by");
+
+                    b.HasOne("Hub.Api.Data.SubmissionPackage", null)
+                        .WithMany()
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_issue_submission_packages_package_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_issue_project_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.SubmissionManifestItem", b =>
+                {
+                    b.HasOne("Hub.Api.Data.Deliverable", null)
+                        .WithMany()
+                        .HasForeignKey("DeliverableId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_manifest_item_deliverable_deliverable_id");
+
+                    b.HasOne("Hub.Api.Data.SubmissionPackage", null)
+                        .WithMany()
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_manifest_item_submission_packages_package_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_manifest_item_project_project_id");
+
+                    b.HasOne("Hub.Api.Data.ReviewRound", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewRoundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_submission_manifest_item_review_round_review_round_id");
+
+                    b.HasOne("Hub.Api.Data.SourceRevision", null)
+                        .WithMany()
+                        .HasForeignKey("SourceRevisionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_manifest_item_source_revision_source_revision_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.SubmissionPackage", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("CoordinatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_package_app_user_coordinator_id");
+
+                    b.HasOne("Hub.Api.Data.Milestone", null)
+                        .WithMany()
+                        .HasForeignKey("MilestoneId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_package_milestone_milestone_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_submission_package_project_project_id");
+
+                    b.HasOne("Hub.Api.Data.SubmissionPackage", null)
+                        .WithMany()
+                        .HasForeignKey("SupersedesPackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_submission_package_submission_package_supersedes_package_id");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.TaskCollaborator", b =>
                 {
                     b.HasOne("Hub.Api.Data.WorkTask", null)
@@ -7048,6 +10493,36 @@ namespace Hub.Api.Data.Migrations
                         .HasConstraintName("fk_task_dependency_task_successor_task_id");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.TaskStartAuthorisation", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AuthorisedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_task_start_authorisation_app_user_authorised_by");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_task_start_authorisation_project_project_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("StartedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_task_start_authorisation_app_user_started_by");
+
+                    b.HasOne("Hub.Api.Data.WorkTask", null)
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_task_start_authorisation_task_task_id");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.TaskState", b =>
                 {
                     b.HasOne("Hub.Api.Data.WorkTask", null)
@@ -7075,6 +10550,23 @@ namespace Hub.Api.Data.Migrations
                         .HasConstraintName("fk_task_time_entry_app_user_user_id");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.TemplateDesignBasis", b =>
+                {
+                    b.HasOne("Hub.Api.Data.TemplateDiscipline", null)
+                        .WithMany()
+                        .HasForeignKey("TemplateDisciplineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_template_design_basis_template_disciplines_template_discipli~");
+
+                    b.HasOne("Hub.Api.Data.ProjectTemplate", null)
+                        .WithMany()
+                        .HasForeignKey("TemplateId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_template_design_basis_project_template_template_id");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.UserSystemRole", b =>
                 {
                     b.HasOne("Hub.Api.Data.AppUser", null)
@@ -7083,6 +10575,53 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_system_role_app_user_user_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.WeeklyPlanSnapshot", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("CapturedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_weekly_plan_snapshot_app_user_captured_by");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_weekly_plan_snapshot_project_project_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.WorkConstraint", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AffectedOwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_work_constraint_app_user_affected_owner_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_work_constraint_project_project_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("RemovalOwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_work_constraint_app_user_removal_owner_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("VerifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_work_constraint_app_user_verified_by");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.WorkTask", b =>

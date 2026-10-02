@@ -136,6 +136,32 @@ public sealed class SearchReportsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Restricted_filter_ids_are_not_resolved_in_another_projects_export_parameters()
+    {
+        await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true });
+        try
+        {
+            var hidden = await d.Project(tweak: body => body["members"] = Array.Empty<object>());
+            var hiddenDeliverable = await f.As(TestData.Pm).Post($"/api/v1/projects/{hidden.Id}/deliverables", new
+            {
+                name = "Confidential grading package", projectDisciplineId = d.ProjectDiscipline(hidden.Id, "Civil"), deliverableTypeId = await d.DeliverableType(),
+            }).Result.Json(201);
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{hidden.Id}", new { visibility = Visibility.Restricted }, d.Version(hidden.Id))).EnsureSuccessStatusCode();
+            var visible = await d.Project();
+
+            var export = await f.As(TestData.Alex).GetAsync($"/api/v1/projects/{visible.Id}/tasks/export?format=xlsx&deliverableId={hiddenDeliverable.G("id")}");
+            Assert.Equal(HttpStatusCode.OK, export.StatusCode);
+            using var zip = new ZipArchive(new MemoryStream(await export.Content.ReadAsByteArrayAsync()));
+            using var reader = new StreamReader(zip.GetEntry("xl/worksheets/sheet2.xml")!.Open());
+            var parameters = await reader.ReadToEndAsync();
+            Assert.DoesNotContain("Confidential grading package", parameters);
+            Assert.DoesNotContain(hiddenDeliverable.S("key"), parameters);
+            Assert.Contains(hiddenDeliverable.S("id"), parameters);
+        }
+        finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }); }
+    }
+
+    [Fact]
     public async Task Reports_equal_their_lists_and_respect_scope() // FR-RPT-01, FR-ASG-08, §19, SC-004
     {
         var p1 = await d.Project();

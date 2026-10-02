@@ -1,0 +1,10 @@
+[Unit]
+Description=Back up the dedicated PM-Tool pilot database
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/pm-tool-pilot-backup
+UMask=0077
+NoNewPrivileges=true

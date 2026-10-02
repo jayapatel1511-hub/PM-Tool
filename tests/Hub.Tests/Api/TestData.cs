@@ -57,10 +57,47 @@ public sealed class TestData(HubFactory f)
 
     public Task<int> TaskVersion(JsonNode t) => f.DbAsync(db => db.Tasks.Where(x => x.Id == t.G("id")).Select(x => x.RowVersion).FirstAsync());
 
+    /// FR-RDY-02: work that is not Ready starts only with an acknowledgement, a reason and a PM/lead authorisation.
+    /// Moves in tests about other rules take that authorised path when the server asks for it: the project PM's
+    /// authorisation for exactly the reported readiness, then the start with an acknowledgement and a reason. Passing
+    /// `acknowledgeReadiness` opts out so the rule itself is exercised (TaskStartTests).
     public async Task<JsonNode> Move(string as_, JsonNode t, string to, object? extra = null, int expect = 200)
     {
         var body = new Dictionary<string, object?> { ["toStatus"] = to, ["rowVersion"] = await TaskVersion(t) };
         if (extra is not null) foreach (var p in extra.GetType().GetProperties()) body[p.Name] = p.GetValue(extra);
-        return await f.As(as_).Post($"/api/v1/tasks/{t.S("id")}/transition", body).Result.Json(expect);
+        var url = $"/api/v1/tasks/{t.S("id")}/transition";
+        var res = await f.As(as_).Post(url, body);
+        if ((int)res.StatusCode == 422 && !body.ContainsKey("acknowledgeReadiness")
+            && JsonNode.Parse(await res.Content.ReadAsStringAsync()) is { } problem && problem["code"]?.GetValue<string>() == "start_authorisation_required")
+        {
+            await RecordPmStartAuthorisation(t, problem);
+            body["acknowledgeReadiness"] = true;
+            body.TryAdd("reason", "Started for this test under PM authorisation");
+            res = await f.As(as_).Post(url, body);
+        }
+        return await res.Json(expect);
+    }
+
+    /// Written directly rather than through the API so tests about other rules see no extra notice; the API command, its
+    /// checks and its performer notice are covered in TaskStartTests. The start itself still runs the server's guard.
+    Task<int> RecordPmStartAuthorisation(JsonNode t, JsonNode problem) => f.DbAsync(async db =>
+    {
+        var task = await db.Tasks.AsNoTracking().SingleAsync(x => x.Id == t.G("id"));
+        string[] Codes(string name) => [.. problem[name]!.AsArray().Select(x => x!.GetValue<string>())];
+        db.TaskStartAuthorisations.Add(new TaskStartAuthorisation { ProjectId = task.ProjectId, TaskId = task.Id,
+            AuthorisedBy = await db.Projects.Where(p => p.Id == task.ProjectId).Select(p => p.ProjectManagerId).SingleAsync(),
+            Reason = "Authorised for this test", ReadinessAtAuthorisation = problem.S("readinessState"), Unknown = Codes("unknown"), Blocked = Codes("blocked") });
+        return await db.SaveChangesAsync();
+    });
+
+    /// Records a start authorisation for the task's current readiness, by default as the project's PM.
+    public async Task<JsonNode> AuthoriseStart(JsonNode t, string? as_ = null, bool acknowledged = true,
+        string reason = "Authorised for this test", int expect = 200)
+    {
+        var id = t.G("id");
+        as_ ??= f.Db(db => db.Tasks.Where(x => x.Id == id).Join(db.Projects, x => x.ProjectId, p => p.Id, (x, p) => p.ProjectManagerId)
+            .Join(db.Users, pm => pm, u => u.Id, (pm, u) => u.Email).First());
+        return await f.As(as_).Post($"/api/v1/tasks/{id}/start-authorisations",
+            new { requestId = Guid.NewGuid(), acknowledged, reason }).Result.Json(expect);
     }
 }

@@ -68,6 +68,21 @@ public sealed class FoundationsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Coordination_lookahead_is_bounded_and_visible_to_project_users()
+    {
+        const string path = "/api/v1/admin/settings/coordination_lookahead_weeks";
+        Assert.Equal(HttpStatusCode.BadRequest, (await f.As(Admin).Put(path, new { value = 0 })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await f.As(Admin).Put(path, new { value = 13 })).StatusCode);
+        try
+        {
+            (await f.As(Admin).Put(path, new { value = 5 })).EnsureSuccessStatusCode();
+            var me = await (await f.As(TestData.Alex).GetAsync("/api/v1/me")).Json();
+            Assert.Equal(5, me["settings"]!["coordinationLookaheadWeeks"]!.GetValue<int>());
+        }
+        finally { (await f.As(Admin).Put(path, new { value = 3 })).EnsureSuccessStatusCode(); }
+    }
+
+    [Fact]
     public async Task Reference_data_is_deactivated_not_deleted_with_usage_count() // FR-015, E-18
     {
         var admin = f.As(Admin);

@@ -52,6 +52,31 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<InputAdoption> InputAdoptions => Set<InputAdoption>();
     public DbSet<ChangeNotice> ChangeNotices => Set<ChangeNotice>();
     public DbSet<ChangeAssessment> ChangeAssessments => Set<ChangeAssessment>();
+    public DbSet<SubmissionPackage> SubmissionPackages => Set<SubmissionPackage>();
+    public DbSet<SubmissionManifestItem> SubmissionManifestItems => Set<SubmissionManifestItem>();
+    public DbSet<SubmissionCheck> SubmissionChecks => Set<SubmissionCheck>();
+    public DbSet<CheckEvidence> CheckEvidences => Set<CheckEvidence>();
+    public DbSet<SubmissionIssue> SubmissionIssues => Set<SubmissionIssue>();
+    public DbSet<DesignBasisEntry> DesignBasisEntries => Set<DesignBasisEntry>();
+    public DbSet<DesignBasisVersion> DesignBasisVersions => Set<DesignBasisVersion>();
+    public DbSet<BasisUse> BasisUses => Set<BasisUse>();
+    public DbSet<BasisConflict> BasisConflicts => Set<BasisConflict>();
+    public DbSet<BasisAssumptionDisposition> BasisAssumptionDispositions => Set<BasisAssumptionDisposition>();
+    public DbSet<BasisImpactAssessment> BasisImpactAssessments => Set<BasisImpactAssessment>();
+    public DbSet<ReadinessAssessment> ReadinessAssessments => Set<ReadinessAssessment>();
+    public DbSet<ReadinessCheckRecord> ReadinessChecks => Set<ReadinessCheckRecord>();
+    public DbSet<WorkConstraint> WorkConstraints => Set<WorkConstraint>();
+    public DbSet<ReadinessException> ReadinessExceptions => Set<ReadinessException>();
+    public DbSet<WeeklyPlanSnapshot> WeeklyPlanSnapshots => Set<WeeklyPlanSnapshot>();
+    public DbSet<OutputCommitment> OutputCommitments => Set<OutputCommitment>();
+    public DbSet<OutputCommitmentEvent> OutputCommitmentEvents => Set<OutputCommitmentEvent>();
+    public DbSet<ReadinessSubmissionPrerequisite> ReadinessSubmissionPrerequisites => Set<ReadinessSubmissionPrerequisite>();
+    public DbSet<TaskStartAuthorisation> TaskStartAuthorisations => Set<TaskStartAuthorisation>();
+    public DbSet<PersonAvailabilityOverride> AvailabilityOverrides => Set<PersonAvailabilityOverride>();
+    public DbSet<ResourceAllocation> Allocations => Set<ResourceAllocation>();
+    public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
+    public DbSet<AllocationWorkLink> AllocationWorkLinks => Set<AllocationWorkLink>();
+    public DbSet<PersonDateVersion> PersonDateVersions => Set<PersonDateVersion>();
     public DbSet<WorkTask> Tasks => Set<WorkTask>();
     public DbSet<TaskDependency> Dependencies => Set<TaskDependency>();
     public DbSet<DeliverableDependency> DeliverableDependencies => Set<DeliverableDependency>();
@@ -63,6 +88,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<ItemLink> ItemLinks => Set<ItemLink>();
     public DbSet<Risk> Risks => Set<Risk>();
     public DbSet<Issue> Issues => Set<Issue>();
+    public DbSet<IssueLocation> IssueLocations => Set<IssueLocation>();
+    public DbSet<IssueDocumentReference> IssueDocumentReferences => Set<IssueDocumentReference>();
+    public DbSet<IssueVerification> IssueVerifications => Set<IssueVerification>();
+    public DbSet<IssueAffectedDiscipline> IssueAffectedDisciplines => Set<IssueAffectedDiscipline>();
+    public DbSet<IssueReferenceImpactAssessment> IssueReferenceImpactAssessments => Set<IssueReferenceImpactAssessment>();
     public DbSet<Meeting> Meetings => Set<Meeting>();
     public DbSet<MeetingAction> Actions => Set<MeetingAction>();
     public DbSet<Comment> Comments => Set<Comment>();
@@ -88,6 +118,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<DashboardLayout> DashboardLayouts => Set<DashboardLayout>();
     public DbSet<ProjectTemplate> Templates => Set<ProjectTemplate>();
     public DbSet<TemplateDiscipline> TemplateDisciplines => Set<TemplateDiscipline>();
+    public DbSet<TemplateDesignBasis> TemplateDesignBases => Set<TemplateDesignBasis>();
     public DbSet<TemplateMilestone> TemplateMilestones => Set<TemplateMilestone>();
     public DbSet<TemplateDeliverable> TemplateDeliverables => Set<TemplateDeliverable>();
     public DbSet<TemplateTask> TemplateTasks => Set<TemplateTask>();
@@ -290,7 +321,41 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             t.HasCheckConstraint("ck_risk_scores", "probability BETWEEN 1 AND 3 AND impact BETWEEN 1 AND 3");
             t.HasCheckConstraint("ck_risk_status", $"status IN ({In(RiskStatus.All)})");
         }));
-        Item<Issue>(mb, e => e.ToTable(t => t.HasCheckConstraint("ck_issue_status", $"status IN ({In(IssueStatus.All)})")));
+        Item<Issue>(mb, e => e.ToTable(t =>
+        {
+            t.HasCheckConstraint("ck_issue_status", $"status IN ({In(IssueStatus.All)})");
+            t.HasCheckConstraint("ck_issue_type", $"issue_type IN ({In(IssueType.All)})");
+        }));
+        mb.Entity<IssueLocation>(e =>
+        {
+            e.HasIndex(x => new { x.IssueId, x.CreatedAt });
+            e.Property(x => x.StartStation).HasPrecision(18, 6);
+            e.Property(x => x.EndStation).HasPrecision(18, 6);
+            e.Property(x => x.CoordinateX).HasPrecision(18, 6);
+            e.Property(x => x.CoordinateY).HasPrecision(18, 6);
+            e.Property(x => x.CoordinateZ).HasPrecision(18, 6);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_issue_location_kind", $"kind IN ({In(Hub.Domain.Registers.IssueLocationKinds)})");
+                t.HasCheckConstraint("ck_issue_location_station_order", "end_station IS NULL OR start_station IS NULL OR end_station >= start_station");
+            });
+        });
+        mb.Entity<IssueDocumentReference>(e =>
+        {
+            e.HasIndex(x => new { x.IssueId, x.Identifier, x.Revision }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_issue_document_kind", $"kind IN ({In(Hub.Domain.Registers.IssueDocumentKinds)})"));
+        });
+        mb.Entity<IssueVerification>(e =>
+        {
+            e.HasIndex(x => new { x.IssueId, x.CreatedAt });
+            e.ToTable(t => t.HasCheckConstraint("ck_issue_verification_status", $"status IN ({In(IssueVerificationStatus.All)})"));
+        });
+        mb.Entity<IssueAffectedDiscipline>(e => e.HasIndex(x => new { x.IssueId, x.ProjectDisciplineId }).IsUnique());
+        mb.Entity<IssueReferenceImpactAssessment>(e =>
+        {
+            e.HasIndex(x => new { x.IssueId, x.DocumentReferenceId, x.PreviousRevisionId, x.CurrentRevisionId }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_issue_reference_impact_status", $"status IN ({In(IssueReferenceImpactStatus.All)})"));
+        });
         mb.Entity<Meeting>(e => { e.HasQueryFilter(x => x.DeletedAt == null); e.HasIndex(x => new { x.ProjectId, x.MeetingDate }); });
         Item<MeetingAction>(mb, e => e.ToTable(t => t.HasCheckConstraint("ck_action_status", $"status IN ({In(ActionStatus.All)})")));
         Fk<MeetingAction, Meeting>(mb, x => x.MeetingId);
@@ -379,6 +444,17 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         });
         mb.Entity<DashboardLayout>(e => { e.HasKey(x => x.UserId); e.Property(x => x.Widgets).HasColumnType("jsonb"); });
         mb.Entity<ProjectTemplate>().HasIndex(x => x.FamilyId);
+        mb.Entity<TemplateDesignBasis>(e =>
+        {
+            e.HasIndex(x => new { x.TemplateId, x.TemplateDisciplineId });
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_template_basis_kind", $"kind IN ({In(BasisKind.All)})");
+                t.HasCheckConstraint("ck_template_basis_numeric_units", "numeric_value IS NULL OR (units IS NOT NULL AND length(trim(units)) > 0)");
+            });
+        });
+        Fk<TemplateDesignBasis, ProjectTemplate>(mb, x => x.TemplateId);
+        Fk<TemplateDesignBasis, TemplateDiscipline>(mb, x => x.TemplateDisciplineId);
 
         // Optimistic concurrency on every mutable entity (G-07).
         Item<Handoff>(mb, e =>
@@ -416,6 +492,171 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
 
         Item<ReviewPackage>(mb, e => { e.HasIndex(x => new { x.ProjectId, x.Status }); e.ToTable(t => t.HasCheckConstraint("ck_review_package_status", $"status IN ({In(ReviewStatus.All)})")); });
         Item<ChangeNotice>(mb, e => { e.HasIndex(x => new { x.ProjectId, x.Status }); e.ToTable(t => t.HasCheckConstraint("ck_change_notice_status", $"status IN ({In(ChangeStatus.All)})")); });
+        Item<SubmissionPackage>(mb, e => { e.HasIndex(x => new { x.ProjectId, x.Status }); e.ToTable(t => t.HasCheckConstraint("ck_submission_package_status", $"status IN ({In(SubmissionStatus.All)})")); });
+        mb.Entity<SubmissionManifestItem>().HasIndex(x => new { x.PackageId, x.ManifestVersion, x.DeliverableId }).IsUnique();
+        mb.Entity<SubmissionCheck>().HasIndex(x => new { x.PackageId, x.ManifestVersion, x.Kind, x.SourceId }).IsUnique();
+        mb.Entity<SubmissionCheck>().HasIndex(x => new { x.PackageId, x.ManifestVersion, x.Kind }).IsUnique().HasFilter("source_id IS NULL");
+        mb.Entity<SubmissionCheck>().ToTable(t => { t.HasCheckConstraint("ck_submission_check_status", $"status IN ({In(SubmissionCheckStatus.All)})"); t.HasCheckConstraint("ck_submission_check_kind", $"kind IN ({In(SubmissionCheckKind.All)})"); t.HasCheckConstraint("ck_submission_check_waiver", "status <> 'Not Applicable' OR (kind = 'Applicability' AND required = false AND reason IS NOT NULL AND evidence_url IS NOT NULL AND approved_by IS NOT NULL AND approved_at IS NOT NULL)"); });
+        mb.Entity<SubmissionIssue>().HasIndex(x => x.PackageId).IsUnique();
+        mb.Entity<SubmissionIssue>().Property(x => x.ManifestSnapshot).HasColumnType("jsonb");
+        mb.Entity<SubmissionIssue>().Property(x => x.CheckSnapshot).HasColumnType("jsonb");
+        Item<DesignBasisEntry>(mb, e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.ProjectDisciplineId, x.Kind, x.Title });
+            e.ToTable(t => t.HasCheckConstraint("ck_basis_entry_kind", $"kind IN ({In(BasisKind.All)})"));
+        });
+        mb.Entity<DesignBasisVersion>(e =>
+        {
+            e.HasIndex(x => new { x.EntryId, x.Number }).IsUnique();
+            e.HasIndex(x => new { x.ProjectId, x.Status });
+            e.Property(x => x.NumericValue).HasPrecision(18, 6);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_basis_version_status", $"status IN ({In(BasisStatus.All)})");
+                t.HasCheckConstraint("ck_basis_numeric_units", "status NOT IN ('Confirmed', 'Superseded') OR numeric_value IS NULL OR (units IS NOT NULL AND length(trim(units)) > 0)");
+                t.HasCheckConstraint("ck_basis_confirmed_evidence", "status <> 'Confirmed' OR (source_url IS NOT NULL AND confirmation_rationale IS NOT NULL AND confirmed_by IS NOT NULL AND confirmed_at IS NOT NULL)");
+                t.HasCheckConstraint("ck_basis_version_number", "number > 0");
+            });
+        });
+        mb.Entity<BasisUse>(e =>
+        {
+            e.HasIndex(x => new { x.VersionId, x.TargetType, x.TargetId }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_basis_use_target", "target_type IN ('Task', 'Deliverable')"));
+        });
+        mb.Entity<BasisConflict>(e =>
+        {
+            e.HasIndex(x => new { x.LeftVersionId, x.RightVersionId }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_basis_conflict_order", "left_version_id < right_version_id"));
+        });
+        mb.Entity<BasisAssumptionDisposition>(e => e.HasIndex(x => new { x.VersionId, x.ExpiresOn }));
+        mb.Entity<BasisImpactAssessment>(e =>
+        {
+            e.HasIndex(x => new { x.BasisUseId, x.NewVersionId }).IsUnique();
+            e.HasIndex(x => new { x.ProjectId, x.Status });
+            e.ToTable(t => t.HasCheckConstraint("ck_basis_impact_status", $"status IN ({In(AssessmentStatus.All)})"));
+        });
+        Fk<DesignBasisEntry, AppUser>(mb, x => x.OwnerId);
+        Fk<DesignBasisEntry, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<DesignBasisEntry, AppUser>(mb, x => x.IndependentApproverId);
+        Fk<DesignBasisEntry, DesignBasisVersion>(mb, x => x.CurrentVersionId);
+        Fk<DesignBasisVersion, DesignBasisEntry>(mb, x => x.EntryId);
+        Fk<DesignBasisVersion, DesignBasisVersion>(mb, x => x.SupersedesVersionId);
+        Fk<DesignBasisVersion, Decision>(mb, x => x.DecisionId);
+        Fk<DesignBasisVersion, AppUser>(mb, x => x.ConfirmedBy);
+        Fk<BasisUse, DesignBasisVersion>(mb, x => x.VersionId);
+        Fk<BasisUse, AppUser>(mb, x => x.OwnerId);
+        Fk<BasisConflict, DesignBasisVersion>(mb, x => x.LeftVersionId);
+        Fk<BasisConflict, DesignBasisVersion>(mb, x => x.RightVersionId);
+        Fk<BasisConflict, DesignBasisVersion>(mb, x => x.ResolutionVersionId);
+        Fk<BasisConflict, AppUser>(mb, x => x.ResolvedBy);
+        Fk<BasisAssumptionDisposition, DesignBasisVersion>(mb, x => x.VersionId);
+        Fk<BasisAssumptionDisposition, AppUser>(mb, x => x.OwnerId);
+        Fk<BasisAssumptionDisposition, AppUser>(mb, x => x.ApprovedBy);
+        Fk<BasisImpactAssessment, BasisUse>(mb, x => x.BasisUseId);
+        Fk<BasisImpactAssessment, DesignBasisVersion>(mb, x => x.OldVersionId);
+        Fk<BasisImpactAssessment, DesignBasisVersion>(mb, x => x.NewVersionId);
+        Fk<BasisImpactAssessment, AppUser>(mb, x => x.OwnerId);
+        Fk<BasisImpactAssessment, AppUser>(mb, x => x.DecidedBy);
+        mb.Entity<ReadinessAssessment>(e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.TargetType, x.TargetId }).IsUnique();
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_readiness_target", "target_type IN ('Task', 'Deliverable')");
+                t.HasCheckConstraint("ck_readiness_state", $"state IN ({In(ReadinessState.All)})");
+            });
+        });
+        mb.Entity<ReadinessCheckRecord>(e =>
+        {
+            e.HasIndex(x => new { x.AssessmentId, x.Code }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_readiness_check_code", $"code IN ({In(ReadinessCheckCode.All)})"));
+        });
+        mb.Entity<WorkConstraint>(e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.TargetType, x.TargetId, x.State });
+            e.HasIndex(x => new { x.ProjectId, x.Seq }).IsUnique();
+            e.HasIndex(x => x.Key);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_work_constraint_target", "target_type IN ('Task', 'Deliverable')");
+                t.HasCheckConstraint("ck_work_constraint_state", $"state IN ({In(ConstraintState.All)})");
+                t.HasCheckConstraint("ck_work_constraint_link", "(linked_type IS NULL) = (linked_id IS NULL) AND (linked_type IS NULL OR linked_type IN ('Decision', 'Issue', 'Handoff'))");
+            });
+        });
+        mb.Entity<WeeklyPlanSnapshot>(e => e.HasIndex(x => new { x.ProjectId, x.WeekStart }).IsUnique());
+        mb.Entity<OutputCommitment>(e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.WeekStart, x.PerformerId });
+            e.HasIndex(x => new { x.ProjectId, x.Seq }).IsUnique();
+            e.HasIndex(x => x.Key);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_commitment_target", "target_type IN ('Task', 'Deliverable')");
+                t.HasCheckConstraint("ck_commitment_state", $"state IN ({In(CommitmentState.All)})");
+                t.HasCheckConstraint("ck_commitment_readiness", $"readiness_at_commit IN ({In(ReadinessState.All)})");
+            });
+        });
+        mb.Entity<OutputCommitmentEvent>(e => e.HasIndex(x => new { x.CommitmentId, x.CreatedAt }));
+        mb.Entity<ReadinessSubmissionPrerequisite>(e =>
+        {
+            e.HasIndex(x => new { x.ProjectId, x.TargetType, x.TargetId, x.PackageId }).IsUnique().HasFilter("removed_at IS NULL");
+            e.ToTable(t => t.HasCheckConstraint("ck_readiness_prerequisite_target", "target_type IN ('Task', 'Deliverable')"));
+        });
+        Fk<ReadinessSubmissionPrerequisite, Project>(mb, x => x.ProjectId);
+        Fk<ReadinessSubmissionPrerequisite, SubmissionPackage>(mb, x => x.PackageId);
+        Fk<ReadinessSubmissionPrerequisite, AppUser>(mb, x => x.RemovedBy);
+        Fk<ReadinessAssessment, AppUser>(mb, x => x.OwnerId);
+        Fk<ReadinessCheckRecord, ReadinessAssessment>(mb, x => x.AssessmentId);
+        Fk<ReadinessCheckRecord, AppUser>(mb, x => x.RecordedBy);
+        Fk<WorkConstraint, AppUser>(mb, x => x.RemovalOwnerId);
+        Fk<WorkConstraint, AppUser>(mb, x => x.AffectedOwnerId);
+        Fk<WorkConstraint, AppUser>(mb, x => x.VerifiedBy);
+        Fk<ReadinessException, ReadinessAssessment>(mb, x => x.AssessmentId);
+        Fk<ReadinessException, DesignBasisVersion>(mb, x => x.BasisVersionId);
+        Fk<ReadinessException, AppUser>(mb, x => x.ApprovedBy);
+        Fk<ReadinessException, AppUser>(mb, x => x.VerifierId);
+        Fk<WeeklyPlanSnapshot, AppUser>(mb, x => x.CapturedBy);
+        Fk<OutputCommitment, WeeklyPlanSnapshot>(mb, x => x.SnapshotId);
+        Fk<OutputCommitment, AppUser>(mb, x => x.PerformerId);
+        Fk<OutputCommitmentEvent, OutputCommitment>(mb, x => x.CommitmentId);
+        Fk<OutputCommitmentEvent, AppUser>(mb, x => x.ActorId);
+        mb.Entity<PersonAvailabilityOverride>(e =>
+        {
+            e.HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
+            e.Property(x => x.AvailableHours).HasPrecision(9, 3);
+            e.ToTable(t => { t.HasCheckConstraint("ck_availability_hours", "available_hours >= 0"); t.HasCheckConstraint("ck_availability_category", $"category IN ({In(AvailabilityCategory.All)})"); });
+        });
+        mb.Entity<ResourceAllocation>(e =>
+        {
+            e.HasIndex(x => new { x.PersonId, x.FromDate, x.ThroughDate });
+            e.HasIndex(x => new { x.ProjectId, x.Status });
+            e.Property(x => x.PlannedHours).HasPrecision(9, 3);
+            e.Property(x => x.ConfirmationSnapshot).HasColumnType("jsonb");
+            e.ToTable(t => { t.HasCheckConstraint("ck_allocation_dates", "through_date >= from_date"); t.HasCheckConstraint("ck_allocation_hours", "planned_hours > 0"); t.HasCheckConstraint("ck_allocation_status", $"status IN ({In(AllocationStatus.All)})"); t.HasCheckConstraint("ck_allocation_purpose", $"purpose IN ({In(AllocationPurpose.All)})"); });
+        });
+        mb.Entity<AllocationDayOverride>(e =>
+        {
+            e.HasIndex(x => new { x.AllocationId, x.WorkDate }).IsUnique();
+            e.Property(x => x.Hours).HasPrecision(9, 3);
+            e.ToTable(t => t.HasCheckConstraint("ck_allocation_day_hours", "hours >= 0"));
+        });
+        mb.Entity<AllocationWorkLink>(e =>
+        {
+            e.HasIndex(x => new { x.PersonId, x.WorkType, x.WorkId, x.WorkDate }).IsUnique().HasFilter("released_at IS NULL");
+            e.HasIndex(x => x.AllocationId);
+            e.Property(x => x.ReviewHours).HasPrecision(9, 3);
+            e.ToTable(t => { t.HasCheckConstraint("ck_allocation_work_type", "work_type IN ('Task', 'Review')");
+                t.HasCheckConstraint("ck_allocation_review_hours", "(work_type = 'Task' AND review_hours IS NULL) OR (work_type = 'Review' AND ((review_hours IS NOT NULL AND review_hours > 0) OR (released_at IS NOT NULL AND review_hours IS NULL)))"); });
+        });
+        mb.Entity<PersonDateVersion>().HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
+        Fk<PersonAvailabilityOverride, AppUser>(mb, x => x.PersonId);
+        Fk<ResourceAllocation, Project>(mb, x => x.ProjectId);
+        Fk<ResourceAllocation, AppUser>(mb, x => x.PersonId);
+        Fk<ResourceAllocation, AppUser>(mb, x => x.ConfirmedBy);
+        Fk<AllocationDayOverride, ResourceAllocation>(mb, x => x.AllocationId);
+        Fk<AllocationWorkLink, ResourceAllocation>(mb, x => x.AllocationId);
+        Fk<AllocationWorkLink, AppUser>(mb, x => x.PersonId);
+        Fk<PersonDateVersion, AppUser>(mb, x => x.PersonId);
         mb.Entity<CoordinationCommand>().HasIndex(x => new { x.ProjectId, x.ActorId, x.RequestId }).IsUnique();
         mb.Entity<ReviewRound>().HasIndex(x => new { x.PackageId, x.Number }).IsUnique();
         mb.Entity<ReviewManifestItem>().HasIndex(x => new { x.RoundId, x.DeliverableId }).IsUnique();
@@ -462,6 +703,29 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<ChangeAssessment, WorkTask>(mb, x => x.CorrectionTaskId);
         Fk<ChangeAssessment, AppUser>(mb, x => x.OwnerId);
         Fk<ChangeAssessment, AppUser>(mb, x => x.ReviewerId);
+        Fk<IssueReferenceImpactAssessment, Issue>(mb, x => x.IssueId);
+        Fk<IssueReferenceImpactAssessment, IssueDocumentReference>(mb, x => x.DocumentReferenceId);
+        Fk<IssueReferenceImpactAssessment, SourceRevision>(mb, x => x.PreviousRevisionId);
+        Fk<IssueReferenceImpactAssessment, SourceRevision>(mb, x => x.CurrentRevisionId);
+        Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.OwnerId);
+        Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.VerifierId);
+        Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.OwnerDecidedBy);
+        Fk<IssueReferenceImpactAssessment, AppUser>(mb, x => x.VerifierDecidedBy);
+        Fk<ReviewFinding, Issue>(mb, x => x.IssueId);
+        Fk<SubmissionPackage, AppUser>(mb, x => x.CoordinatorId);
+        Fk<SubmissionPackage, Milestone>(mb, x => x.MilestoneId);
+        Fk<SubmissionPackage, SubmissionPackage>(mb, x => x.SupersedesPackageId);
+        Fk<SubmissionManifestItem, SubmissionPackage>(mb, x => x.PackageId);
+        Fk<SubmissionManifestItem, Deliverable>(mb, x => x.DeliverableId);
+        Fk<SubmissionManifestItem, SourceRevision>(mb, x => x.SourceRevisionId);
+        Fk<SubmissionManifestItem, ReviewRound>(mb, x => x.ReviewRoundId);
+        Fk<SubmissionCheck, SubmissionPackage>(mb, x => x.PackageId);
+        Fk<SubmissionCheck, AppUser>(mb, x => x.OwnerId);
+        Fk<SubmissionCheck, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<SubmissionCheck, AppUser>(mb, x => x.ApprovedBy);
+        Fk<CheckEvidence, SubmissionCheck>(mb, x => x.CheckId);
+        Fk<SubmissionIssue, SubmissionPackage>(mb, x => x.PackageId);
+        Fk<SubmissionIssue, AppUser>(mb, x => x.AuthorisedBy);
         Fk<SourceHead, AppUser>(mb, x => x.OwnerId);
         Fk<SourceHead, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
         Fk<InputUse, AppUser>(mb, x => x.OwnerId);
@@ -478,6 +742,47 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<InputUse, Project>(mb, x => x.ProjectId);
         Fk<InputAdoption, Project>(mb, x => x.ProjectId);
         Fk<ChangeAssessment, Project>(mb, x => x.ProjectId);
+        Fk<SubmissionManifestItem, Project>(mb, x => x.ProjectId);
+        Fk<SubmissionCheck, Project>(mb, x => x.ProjectId);
+        Fk<CheckEvidence, Project>(mb, x => x.ProjectId);
+        Fk<SubmissionIssue, Project>(mb, x => x.ProjectId);
+        Fk<DesignBasisVersion, Project>(mb, x => x.ProjectId);
+        Fk<BasisUse, Project>(mb, x => x.ProjectId);
+        Fk<BasisConflict, Project>(mb, x => x.ProjectId);
+        Fk<BasisAssumptionDisposition, Project>(mb, x => x.ProjectId);
+        Fk<BasisImpactAssessment, Project>(mb, x => x.ProjectId);
+        Fk<IssueLocation, Project>(mb, x => x.ProjectId);
+        Fk<IssueLocation, Issue>(mb, x => x.IssueId);
+        Fk<IssueDocumentReference, Project>(mb, x => x.ProjectId);
+        Fk<IssueDocumentReference, Issue>(mb, x => x.IssueId);
+        Fk<IssueVerification, Project>(mb, x => x.ProjectId);
+        Fk<IssueVerification, Issue>(mb, x => x.IssueId);
+        Fk<IssueVerification, AppUser>(mb, x => x.VerifierId);
+        Fk<IssueAffectedDiscipline, Project>(mb, x => x.ProjectId);
+        Fk<IssueAffectedDiscipline, Issue>(mb, x => x.IssueId);
+        Fk<IssueAffectedDiscipline, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<ReadinessAssessment, Project>(mb, x => x.ProjectId);
+        Fk<ReadinessCheckRecord, Project>(mb, x => x.ProjectId);
+        Fk<WorkConstraint, Project>(mb, x => x.ProjectId);
+        Fk<ReadinessException, Project>(mb, x => x.ProjectId);
+        Fk<WeeklyPlanSnapshot, Project>(mb, x => x.ProjectId);
+        Fk<OutputCommitment, Project>(mb, x => x.ProjectId);
+        Fk<OutputCommitmentEvent, Project>(mb, x => x.ProjectId);
+        // FR-RDY-02 task start authorisations (TaskStartAuthorisation migration).
+        mb.Entity<TaskStartAuthorisation>(e =>
+        {
+            e.HasIndex(x => new { x.TaskId, x.CreatedAt });
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_task_start_authorisation_readiness",
+                    $"readiness_at_authorisation IN ({In([ReadinessState.NotReady, ReadinessState.NeedsAssessment])})");
+                t.HasCheckConstraint("ck_task_start_authorisation_start", "(started_by IS NULL) = (started_at IS NULL)");
+            });
+        });
+        Fk<TaskStartAuthorisation, Project>(mb, x => x.ProjectId);
+        Fk<TaskStartAuthorisation, WorkTask>(mb, x => x.TaskId);
+        Fk<TaskStartAuthorisation, AppUser>(mb, x => x.AuthorisedBy);
+        Fk<TaskStartAuthorisation, AppUser>(mb, x => x.StartedBy);
 
 
         foreach (var et in mb.Model.GetEntityTypes().Where(t => typeof(Audited).IsAssignableFrom(t.ClrType)))

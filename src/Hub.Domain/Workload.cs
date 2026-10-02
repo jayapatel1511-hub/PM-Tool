@@ -5,6 +5,7 @@ public sealed record LoadTask(Guid TaskId, Guid ProjectId, decimal? EstimatedHou
 
 /// Where one task's remaining hours land: per ISO week (Monday), or in the "no due date" bucket.
 public sealed record TaskLoad(decimal? Remaining, IReadOnlyDictionary<DateOnly, decimal> ByWeek, decimal NoDueDate, bool Overdue);
+public sealed record TaskDailyLoad(decimal? Remaining, IReadOnlyDictionary<DateOnly, decimal> ByDay, decimal NoDueDate, bool Overdue);
 
 /// The workload calculation of §12.15 as pure functions, stated on screen in plain words. It deliberately ignores
 /// leave, holidays and logged hours (§12.15 "What it deliberately does not do", §36.8).
@@ -22,18 +23,28 @@ public static class Workload
     /// max(start, today) to the due date; overdue work lands in the current week; work without a due date is not spread.
     public static TaskLoad Spread(LoadTask t, DateOnly today, WorkCalendar? calendar = null)
     {
-        var remaining = Remaining(t.EstimatedHours, t.ProgressPct);
+        var daily = SpreadDays(t, today, calendar);
         var weeks = new Dictionary<DateOnly, decimal>();
-        if (remaining is not { } hours || hours <= 0) return new(remaining, weeks, 0, t.DueDate < today);
-        if (t.DueDate is not { } due) return new(remaining, weeks, hours, false);
-        if (due < today) { weeks[WeekOf(today)] = hours; return new(remaining, weeks, 0, true); }
+        foreach (var (day, hours) in daily.ByDay)
+            weeks[WeekOf(day)] = weeks.GetValueOrDefault(WeekOf(day)) + hours;
+        return new(daily.Remaining, weeks, daily.NoDueDate, daily.Overdue);
+    }
+
+    /// The same forecast as Spread, before the display groups dates into weeks.
+    public static TaskDailyLoad SpreadDays(LoadTask t, DateOnly today, WorkCalendar? calendar = null)
+    {
+        var remaining = Remaining(t.EstimatedHours, t.ProgressPct);
+        var daysByDate = new Dictionary<DateOnly, decimal>();
+        if (remaining is not { } hours || hours <= 0) return new(remaining, daysByDate, 0, t.DueDate < today);
+        if (t.DueDate is not { } due) return new(remaining, daysByDate, hours, false);
+        if (due < today) { daysByDate[today] = hours; return new(remaining, daysByDate, 0, true); }
         var from = t.StartDate is { } s && s > today ? s : today;
         if (from > due) from = due;
         var days = (calendar ?? WorkCalendar.Weekdays).WorkingDays(from, due).ToList();
-        if (days.Count == 0) { weeks[WeekOf(due)] = hours; return new(remaining, weeks, 0, false); } // a weekend-only window keeps its hours in the due week
+        if (days.Count == 0) { daysByDate[due] = hours; return new(remaining, daysByDate, 0, false); } // a weekend-only window keeps its hours on its due date
         var perDay = hours / days.Count;
-        foreach (var d in days) weeks[WeekOf(d)] = weeks.GetValueOrDefault(WeekOf(d)) + perDay;
-        return new(remaining, weeks, 0, false);
+        for (var i = 0; i < days.Count; i++) daysByDate[days[i]] = i == days.Count - 1 ? hours - perDay * (days.Count - 1) : perDay;
+        return new(remaining, daysByDate, 0, false);
     }
 
     public static decimal Pct(decimal hours, decimal capacity) => capacity <= 0 ? (hours > 0 ? 999 : 0) : Math.Round(hours * 100 / capacity, 0);

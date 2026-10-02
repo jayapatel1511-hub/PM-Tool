@@ -21,8 +21,9 @@ public static class WorkloadEndpoints
         DateOnly? StartDate, DateOnly? DueDate, string Status, int RowVersion);
 
     public sealed record PersonLoad(Guid Id, string DisplayName, Guid? SupervisorId, string? SupervisorName, decimal Capacity, bool CapacityOverride,
-        IReadOnlyList<(DateOnly Week, decimal Hours, decimal Pct)> Cells, decimal NoDueDate, int OpenTasks, int Unestimated, int Overdue, int Projects,
-        bool OverAssigned, bool UnderAssigned, bool Cluster, bool CanSetCapacity);
+        IReadOnlyList<(DateOnly Week, decimal Hours, decimal Pct, decimal Available, decimal Confirmed, decimal Proposed, decimal Committed)> Cells,
+        decimal NoDueDate, int OpenTasks, int Unestimated, int Overdue, int Projects,
+        bool OverAssigned, bool UnderAssigned, bool Cluster, bool CanSetCapacity, bool PartialScope);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -35,8 +36,10 @@ public static class WorkloadEndpoints
                 People = people.Select(p => new
                 {
                     p.Id, p.DisplayName, p.SupervisorId, p.SupervisorName, p.Capacity, p.CapacityOverride,
-                    Cells = p.Cells.Select(c => new { c.Week, Hours = Math.Round(c.Hours, 1), c.Pct }), NoDueDate = Math.Round(p.NoDueDate, 1),
-                    p.OpenTasks, p.Unestimated, p.Overdue, p.Projects, p.OverAssigned, p.UnderAssigned, p.Cluster, p.CanSetCapacity,
+                    Cells = p.Cells.Select(c => new { c.Week, Hours = Math.Round(c.Hours, 1), c.Pct,
+                        Available = Math.Round(c.Available, 1), Confirmed = Math.Round(c.Confirmed, 1),
+                        Proposed = Math.Round(c.Proposed, 1), Committed = Math.Round(c.Committed, 1) }), NoDueDate = Math.Round(p.NoDueDate, 1),
+                    p.OpenTasks, p.Unestimated, p.Overdue, p.Projects, p.OverAssigned, p.UnderAssigned, p.Cluster, p.CanSetCapacity, p.PartialScope,
                     Indicator = p.OverAssigned ? "over" : p.UnderAssigned ? "under" : "ok",
                 }),
             };
@@ -86,8 +89,8 @@ public static class WorkloadEndpoints
 
     public static async Task<(List<DateOnly> Weeks, List<PersonLoad> People, DateOnly Today)> Grid(WorkloadQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
-        var a = access.Actor;
-        Access.Demand(Permissions.ViewWorkload(a));
+        var actor = access.Actor;
+        Access.Demand(Permissions.ViewWorkload(actor));
         var s = await store.Get(db);
         var today = clock.Today(s);
         var first = Workload.WeekOf(f.From ?? today);
@@ -95,28 +98,91 @@ public static class WorkloadEndpoints
         var people = People(db, access, me);
         if (f.SupervisorId is { } sup) people = people.Where(u => u.SupervisorId == sup);
         if (f.OfficeId is { } office) people = people.Where(u => u.OfficeId == office);
-        var list = await people.Select(u => new { u.Id, u.DisplayName, u.SupervisorId, u.WeeklyCapacityHours,
+        var list = await people.Select(u => new { u.Id, u.DisplayName, u.SupervisorId, u.OfficeId, u.WeeklyCapacityHours,
             Supervisor = db.Users.Where(x => x.Id == u.SupervisorId).Select(x => x.DisplayName).FirstOrDefault() }).ToListAsync();
-        var tasks = await Tasks(db, access, people.Select(u => u.Id), f.DisciplineId, f.ProjectId);
+        // A discipline selects people with work in that discipline. Capacity and reservations
+        // belong to a person, not a discipline, so keep their visible project totals together.
+        var tasks = await Tasks(db, access, people.Select(u => u.Id), null, f.ProjectId);
+        var disciplineTaskIds = f.DisciplineId is { } disciplineId
+            ? (await db.ProjectDisciplines.AsNoTracking().Where(pd => pd.DisciplineId == disciplineId).Select(pd => pd.Id).ToListAsync()).ToHashSet()
+            : null;
         var cal = await Calendars.For(db, s, [.. tasks.Select(t => t.ProjectId).Distinct()]);
         var byPerson = tasks.ToLookup(t => t.AssigneeId);
+        var personIds = list.Select(u => u.Id).ToArray();
+        var firstDay = weeks[0]; var lastDay = weeks[^1].AddDays(6);
+        var visibleProjects = access.VisibleProjects().Where(p => LiveProjects.Contains(p.Status)).Select(p => p.Id);
+        var allocationRows = await db.Allocations.AsNoTracking().Where(a => personIds.Contains(a.PersonId)
+            && visibleProjects.Contains(a.ProjectId) && (a.Status == AllocationStatus.Confirmed || a.Status == AllocationStatus.Proposed)
+            && a.FromDate <= lastDay && a.ThroughDate >= firstDay).ToListAsync();
+        var allocationIds = allocationRows.Select(a => a.Id).ToArray();
+        var dayOverrides = await db.AllocationDayOverrides.AsNoTracking().Where(d => allocationIds.Contains(d.AllocationId)).ToListAsync();
+        var workLinks = await db.AllocationWorkLinks.AsNoTracking().Where(l => allocationIds.Contains(l.AllocationId)
+            && l.ReleasedAt == null && l.WorkDate >= firstDay && l.WorkDate <= lastDay).ToListAsync();
+        var availability = await db.AvailabilityOverrides.AsNoTracking().Where(o => personIds.Contains(o.PersonId)
+            && o.WorkDate >= firstDay && o.WorkDate <= lastDay).ToListAsync();
+        var holidays = s.WorkingDaysEnabled ? await db.Holidays.AsNoTracking().Select(h => new { h.OfficeId, h.Date }).ToListAsync() : [];
         var now = Workload.WeekOf(today);
         var result = new List<PersonLoad>();
         foreach (var u in list)
         {
             var mine = byPerson[u.Id].ToList();
-            if ((f.ProjectId is not null || f.DisciplineId is not null) && mine.Count == 0) continue; // a project or discipline filter shows the people working in it
+            var personAllocations = allocationRows.Where(a => a.PersonId == u.Id && (f.ProjectId == null || a.ProjectId == f.ProjectId)).ToArray();
+            if (f.ProjectId is not null && mine.Count == 0 && personAllocations.Length == 0) continue;
+            if (disciplineTaskIds is not null && !mine.Any(t => disciplineTaskIds.Contains(t.ProjectDisciplineId))) continue;
             var capacity = u.WeeklyCapacityHours ?? s.DefaultWeeklyCapacityHours;
             var loads = mine.Select(t => Workload.Spread(new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate), today, cal(t.ProjectId))).ToList();
             decimal Hours(DateOnly w) => loads.Sum(l => l.ByWeek.GetValueOrDefault(w));
-            var thisWeek = Workload.Pct(Hours(now), capacity);
-            var nextWeek = Workload.Pct(Hours(now.AddDays(7)), capacity);
+            var dailyTasks = mine.ToDictionary(t => t.Id, t => Workload.SpreadDays(
+                new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate), today, cal(t.ProjectId)).ByDay);
+            var personCalendar = s.WorkingDaysEnabled
+                ? new WorkCalendar(holidays.Where(h => h.OfficeId == null || h.OfficeId == u.OfficeId).Select(h => h.Date)) : WorkCalendar.Weekdays;
+            var personAvailability = availability.Where(o => o.PersonId == u.Id).ToDictionary(o => o.WorkDate, o => o.AvailableHours);
+            var allocationsByWeek = new Dictionary<Guid, (Dictionary<DateOnly, decimal> Reserved, Dictionary<DateOnly, decimal> Linked, Dictionary<DateOnly, decimal> LinkedTasks)>();
+            foreach (var a in personAllocations)
+            {
+                var explicitDays = dayOverrides.Where(d => d.AllocationId == a.Id).ToDictionary(d => d.WorkDate, d => d.Hours);
+                IReadOnlyDictionary<DateOnly, decimal> spread;
+                try { spread = AllocationRules.Spread(a.FromDate, a.ThroughDate, a.PlannedHours, personCalendar, explicitDays); }
+                catch (ArgumentException) { throw ApiException.Conflict("allocation_calendar_changed", "coord.stale"); }
+                var reserved = new Dictionary<DateOnly, decimal>(); var linked = new Dictionary<DateOnly, decimal>(); var linkedTasks = new Dictionary<DateOnly, decimal>();
+                foreach (var (day, hours) in spread)
+                    if (day >= firstDay && day <= lastDay) reserved[Workload.WeekOf(day)] = reserved.GetValueOrDefault(Workload.WeekOf(day)) + hours;
+                foreach (var link in workLinks.Where(l => l.AllocationId == a.Id))
+                {
+                    var week = Workload.WeekOf(link.WorkDate);
+                    var demand = link.WorkType == "Task" ? dailyTasks.GetValueOrDefault(link.WorkId)?.GetValueOrDefault(link.WorkDate) ?? 0 : link.ReviewHours ?? 0;
+                    linked[week] = linked.GetValueOrDefault(week) + demand;
+                    if (link.WorkType == "Task") linkedTasks[week] = linkedTasks.GetValueOrDefault(week) + demand;
+                }
+                allocationsByWeek[a.Id] = (reserved, linked, linkedTasks);
+            }
+            var cells = weeks.Select(w =>
+            {
+                var weekReservations = personAllocations.Where(a => a.Status == AllocationStatus.Confirmed)
+                    .Select(a => new AllocationDemand(allocationsByWeek[a.Id].Reserved.GetValueOrDefault(w), allocationsByWeek[a.Id].Linked.GetValueOrDefault(w))).ToArray();
+                var linkedTaskHours = personAllocations.Where(a => a.Status == AllocationStatus.Confirmed)
+                    .Sum(a => allocationsByWeek[a.Id].LinkedTasks.GetValueOrDefault(w));
+                var committed = AllocationRules.Committed(weekReservations, Math.Max(0, Hours(w) - linkedTaskHours));
+                var proposed = personAllocations.Where(a => a.Status == AllocationStatus.Proposed)
+                    .Sum(a => Math.Max(allocationsByWeek[a.Id].Reserved.GetValueOrDefault(w), allocationsByWeek[a.Id].Linked.GetValueOrDefault(w)));
+                var available = Enumerable.Range(0, 7).Sum(i =>
+                {
+                    var day = w.AddDays(i);
+                    return AllocationRules.DailyCapacity(day, capacity, personCalendar,
+                        personAvailability.TryGetValue(day, out var overrideHours) ? overrideHours : (decimal?)null);
+                });
+                return (Week: w, Hours: Hours(w), Pct: Workload.Pct(committed, available), Available: available,
+                    Confirmed: weekReservations.Sum(r => r.ReservedHours), Proposed: proposed, Committed: committed);
+            }).ToList();
+            var thisWeek = cells.FirstOrDefault(c => c.Week == now).Pct;
+            var nextWeek = cells.FirstOrDefault(c => c.Week == now.AddDays(7)).Pct;
             var unestimated = mine.Count(t => t.EstimatedHours is null);
             result.Add(new PersonLoad(u.Id, u.DisplayName, u.SupervisorId, u.Supervisor, capacity, u.WeeklyCapacityHours is not null,
-                [.. weeks.Select(w => (w, Hours(w), Workload.Pct(Hours(w), capacity)))], loads.Sum(l => l.NoDueDate), mine.Count, unestimated,
+                cells, loads.Sum(l => l.NoDueDate), mine.Count, unestimated,
                 loads.Count(l => l.Overdue), mine.Select(t => t.ProjectId).Distinct().Count(), Workload.OverAssigned(thisWeek, nextWeek),
-                Workload.UnderAssigned(thisWeek, nextWeek, unestimated), Workload.DeadlineCluster(mine.Where(t => t.DueDate is not null).Select(t => (t.DueDate!.Value, t.ProjectId)), today),
-                Permissions.ActOnStaff(a, u.SupervisorId).Ok));
+                access.SeesAllRestricted && f.ProjectId is null && Workload.UnderAssigned(thisWeek, nextWeek, unestimated),
+                Workload.DeadlineCluster(mine.Where(t => t.DueDate is not null).Select(t => (t.DueDate!.Value, t.ProjectId)), today),
+                Permissions.ActOnStaff(actor, u.SupervisorId).Ok, !access.SeesAllRestricted || f.ProjectId is not null));
         }
         result = f.Indicator switch
         {
@@ -207,7 +273,14 @@ public static class WorkloadEndpoints
         Col[] cols =
         [
             new("person", "person"), new("supervisor", "supervisor"), new("capacity", "capacity", "number"),
-            .. weeks.Select((w, i) => new Col($"w{i}", "week", "number", Text.Get("col.weekOf", w.ToString("yyyy-MM-dd")))),
+            new("partialScope", "partialScope"),
+            .. weeks.SelectMany((w, i) => new[] {
+                new Col($"w{i}", "week", "number", Text.Get("col.weekOf", w.ToString("yyyy-MM-dd"))),
+                new Col($"w{i}Available", "available", "number", $"{Text.Get("col.weekOf", w.ToString("yyyy-MM-dd"))} · {Text.Get("col.available")}"),
+                new Col($"w{i}Confirmed", "confirmed", "number", $"{Text.Get("col.weekOf", w.ToString("yyyy-MM-dd"))} · {Text.Get("col.confirmed")}"),
+                new Col($"w{i}Proposed", "proposed", "number", $"{Text.Get("col.weekOf", w.ToString("yyyy-MM-dd"))} · {Text.Get("col.proposed")}"),
+                new Col($"w{i}Committed", "committed", "number", $"{Text.Get("col.weekOf", w.ToString("yyyy-MM-dd"))} · {Text.Get("col.committed")}"),
+            }),
             new("noDueDate", "noDueDate", "number"), new("openTasks", "openTasks", "number"), new("unestimated", "unestimated", "number"),
             new("overdue", "overdueTasks", "number"), new("projects", "projectCount", "number"), new("indicator", "indicator"),
         ];
@@ -216,11 +289,19 @@ public static class WorkloadEndpoints
         {
             var row = new JsonObject
             {
-                ["person"] = p.DisplayName, ["supervisor"] = p.SupervisorName, ["capacity"] = p.Capacity, ["noDueDate"] = Math.Round(p.NoDueDate, 1), ["openTasks"] = p.OpenTasks,
+                ["person"] = p.DisplayName, ["supervisor"] = p.SupervisorName, ["capacity"] = p.Capacity,
+                ["partialScope"] = p.PartialScope ? Text.Get("workload.partial") : Text.Get("workload.complete"),
+                ["noDueDate"] = Math.Round(p.NoDueDate, 1), ["openTasks"] = p.OpenTasks,
                 ["unestimated"] = p.Unestimated, ["overdue"] = p.Overdue, ["projects"] = p.Projects,
                 ["indicator"] = Text.Get(p.OverAssigned ? "workload.over" : p.UnderAssigned ? "workload.under" : "workload.ok") + (p.Cluster ? $"; {Text.Get("workload.cluster")}" : ""),
             };
-            for (var i = 0; i < p.Cells.Count; i++) row[$"w{i}"] = Math.Round(p.Cells[i].Hours, 1);
+            for (var i = 0; i < p.Cells.Count; i++) {
+                row[$"w{i}"] = Math.Round(p.Cells[i].Hours, 1);
+                row[$"w{i}Available"] = Math.Round(p.Cells[i].Available, 1);
+                row[$"w{i}Confirmed"] = Math.Round(p.Cells[i].Confirmed, 1);
+                row[$"w{i}Proposed"] = Math.Round(p.Cells[i].Proposed, 1);
+                row[$"w{i}Committed"] = Math.Round(p.Cells[i].Committed, 1);
+            }
             rows.Add(row);
         }
         return (cols, rows);

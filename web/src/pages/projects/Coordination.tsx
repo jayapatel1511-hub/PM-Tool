@@ -7,6 +7,7 @@ import { AttentionPanel } from '@/components/hub/attention'
 import { ErrorBanner, Loading } from '@/components/hub/common'
 import { InlineDate } from '@/components/hub/fields'
 import { useItemPanel } from '@/components/hub/panel-host'
+import { ViewMenu } from '@/components/hub/views'
 import { PeoplePicker } from '@/components/hub/people'
 import { HealthPill, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -19,6 +20,7 @@ import type { DeliverableRow } from './Deliverables'
 import { ActionForm, ActionOwner, type ActionRow } from './Meetings'
 import { useCurrentProject } from './ProjectLayout'
 import { CreateTask, StatusMenu, TaskIndicators, useProjectLists, useTaskActions, useTaskHints, type Blocker, type TaskRow } from './Tasks'
+import { DisciplineCoordinationView } from './DisciplineCoordinationView'
 
 interface Milestone { id: string; key: string; name: string; date: string; daysRemaining: number; status?: string; deliverableTotal: number; deliverableIssued: number; taskTotal: number; taskComplete: number }
 interface Decision { id: string; key: string; subject: string; status: string; requiredByDate: string; impactLevel: string; ownerName?: string; isOverdue: boolean; daysOverdue: number; blocking: number }
@@ -73,7 +75,8 @@ export function CoordinationTab() {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [creating, setCreating] = useState(false)
   const [recording, setRecording] = useState<{ id: string; key: string } | null>(null)
-  const [capturing, setCapturing] = useState<{ taskId?: string; decisionId?: string; label?: string; ownerId?: string; ownerName?: string } | null>(null)
+  const [capturing, setCapturing] = useState<{ taskId?: string; decisionId?: string; label?: string; ownerId?: string; ownerName?: string;
+    links?: { targetType: string; targetId: string }[]; linkedActionIds?: string[] } | null>(null)
   const reload = () => { q.refetch(); qc.invalidateQueries({ queryKey: ['p', p.id] }) }
   const actions = useTaskActions(reload, (id, key, what) => setLog((l) => [...l, { id, key, what, at: new Date().toISOString() }]))
   const touched = useMemo(() => new Set(log.map((x) => x.id)), [log])
@@ -233,6 +236,7 @@ export function CoordinationTab() {
           </p>
         </div>
         <div className="no-print flex flex-wrap items-center gap-2">
+          <ViewMenu listType="coordination" projectId={p.id} />
           {!meeting && (
             <select className="h-8 rounded-md border bg-card px-2 text-sm" value={disciplineId ?? ''} onChange={(e) => set('discipline', e.target.value || undefined)} aria-label={t('dash.scope')}>
               <option value="">{t('dash.allDisciplines')}</option>{p.disciplines.filter((d) => d.isActive).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -248,6 +252,8 @@ export function CoordinationTab() {
         </div>
       </div>
       {p.status !== 'Active' && <div role="status" className="rounded-md border bg-idle-bg px-3 py-2 text-sm text-idle">{t('wc.notActive', { status: tv(p.status) })}</div>}
+      <DisciplineCoordinationView project={p} disciplineId={disciplineId} meeting={meeting} canCapture={canCapture}
+        onCapture={(label, links, linkedActionIds) => setCapturing({ label, links, linkedActionIds })} />
       <div className="grid gap-4 lg:grid-cols-[12rem_1fr]">
         <nav aria-label={t('wc.index')} className="no-print hidden lg:block">
           <ol className="sticky top-2 space-y-0.5 text-sm">
@@ -284,8 +290,9 @@ export function CoordinationTab() {
       {creating && <CreateTask p={p} deliverables={lists.deliverables} milestones={lists.milestones} defaults={{ projectDisciplineId: disciplineId }}
         onClose={(id) => { setCreating(false); if (id) { setLog((l) => [...l, { id, key: t('wc.newTask'), what: t('wc.created'), at: new Date().toISOString() }]); reload() } }} />}
       {capturing && <ActionForm projectId={p.id} related={capturing.label ? { taskId: capturing.taskId, decisionId: capturing.decisionId, label: capturing.label } : undefined}
+        links={capturing.links} linkedActionIds={capturing.linkedActionIds}
         defaultOwner={capturing.ownerId ? { type: 'User', userId: capturing.ownerId, userName: capturing.ownerName } : undefined}
-        onClose={(created) => { setCapturing(null); if (created) { setLog((l) => [...l, { id: created.id, key: created.key, what: t('wc.actionAdded', { text: created.text }), at: new Date().toISOString() }]); reload() } }} />}
+        onClose={(created) => { setCapturing(null); if (created) { setLog((l) => [...l, { id: created.id, key: created.key, what: t(created.reused ? 'dcv.reuseLogged' : 'wc.actionAdded', { text: created.text }), at: new Date().toISOString() }]); reload() } }} />}
       {actions.dialogs}
     </div>
   )

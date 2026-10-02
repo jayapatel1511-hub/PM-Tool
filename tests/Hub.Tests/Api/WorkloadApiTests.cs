@@ -27,6 +27,19 @@ public sealed class WorkloadApiTests(HubFactory f)
     static decimal Hours(JsonNode person, int week) => person["cells"]![week]!["hours"]!.GetValue<decimal>();
 
     [Fact]
+    public async Task Discipline_selects_people_but_keeps_person_totals_consistent()
+    {
+        var project = await d.Project();
+        var person = await Report();
+        await d.NewTask(project.Id, TestData.Pm, new { assigneeId = person.Id, estimatedHours = 4m, startDate = "2026-09-14", dueDate = "2026-09-14" }, "Civil");
+        await d.NewTask(project.Id, TestData.Pm, new { assigneeId = person.Id, estimatedHours = 8m, startDate = "2026-09-14", dueDate = "2026-09-14" }, "Electrical");
+        var civil = await d.Discipline("Civil");
+        var grid = await f.As(TestData.Sam).GetAsync($"/api/v1/workload?disciplineId={civil}").Result.Json();
+        Assert.Equal(12, Hours(Person(grid, person.Id), 0));
+        Assert.Equal(12, Person(grid, person.Id)["cells"]![0]!["committed"]!.GetValue<decimal>());
+    }
+
+    [Fact]
     public async Task Grid_hours_follow_the_stated_method_and_flags_fire() // FR-001..FR-004, US1, US2
     {
         var p1 = await d.Project();
@@ -64,7 +77,8 @@ public sealed class WorkloadApiTests(HubFactory f)
         Assert.Equal(40, b["capacity"]!.GetValue<decimal>());
         Assert.True(Person(grid, over.Id)["overAssigned"]!.GetValue<bool>());
         Assert.Equal("over", Person(grid, over.Id).S("indicator"));
-        Assert.True(Person(grid, idle.Id)["underAssigned"]!.GetValue<bool>());
+        Assert.False(Person(grid, idle.Id)["underAssigned"]!.GetValue<bool>()); // visible work cannot prove spare capacity
+        Assert.True(Person(grid, idle.Id)["partialScope"]!.GetValue<bool>());
         Assert.False(Person(grid, idleUnknown.Id)["underAssigned"]!.GetValue<bool>()); // never with unestimated work
         Assert.True(Person(grid, crowded.Id)["cluster"]!.GetValue<bool>());
         Assert.False(Person(grid, busy.Id)["cluster"]!.GetValue<bool>());

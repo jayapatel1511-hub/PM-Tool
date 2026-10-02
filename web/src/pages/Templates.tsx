@@ -16,6 +16,7 @@ import { useMe } from '@/lib/auth'
 import { fmtDate, fmtTime } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
+import { FieldsCommand } from './projects/CoordinationForms'
 import type { TemplateRow } from './projects/FromTemplate'
 
 const MILESTONE_TYPES = ['Kickoff', 'Field Work', 'Design Submission', 'Client Workshop', 'Permit Submission', 'Tender', 'Construction', 'IFC', 'Record Drawings', 'Closeout', 'Other']
@@ -27,10 +28,13 @@ interface Ms { ref: string; name: string; milestoneType: string; anchor: string;
 interface Dl { ref: string; disciplineId: string; name: string; deliverableTypeId: string; milestoneRef?: string | null; offset?: number | null; requiresReview: boolean; description?: string | null }
 interface Tk { ref: string; disciplineId: string; deliverableRef?: string | null; name: string; description?: string | null; requiresReview: boolean; priority: string; estimatedHours?: number | null; offset?: number | null; assignTo: string }
 interface Dep { predecessor: string; successor: string }
+interface Basis { id: string; disciplineId: string; kind: string; title: string; scope: string; statement: string; numericValue?: number | null; units?: string | null
+  sourceSystem?: string | null; stableSourceId?: string | null; sourceUrl?: string | null; declaredRevision?: string | null }
 interface Detail {
   id: string; familyId: string; name: string; description?: string | null; projectTypeId?: string | null; version?: number | null; status: string; publishedAt?: string; rowVersion: number
   canEdit: boolean; family: { id: string; version?: number | null; status: string; publishedAt?: string }[]
-  disciplines: { disciplineId: string; isDefaultIncluded: boolean }[]; milestones: Ms[]; deliverables: Dl[]; tasks: Tk[]; dependencies: Dep[]
+  disciplines: { disciplineId: string; isDefaultIncluded: boolean; templateDisciplineId?: string }[]; milestones: Ms[]; deliverables: Dl[]; tasks: Tk[]; dependencies: Dep[]
+  basisSuggestions: Basis[]
 }
 
 const tone = (s: string) => (s === 'Published' ? 'ok' : s === 'Draft' ? 'work' : 'idle') as 'ok' | 'work' | 'idle'
@@ -101,6 +105,8 @@ export function TemplatePage() {
   const [dirty, setDirty] = useState(false)
   const [err, setErr] = useState<unknown>(null)
   const [confirm, setConfirm] = useState<'retire' | 'discard' | null>(null)
+  const [removingBasis, setRemovingBasis] = useState<Basis | null>(null)
+  const [addingBasis, setAddingBasis] = useState(false)
   const [start, setStart] = useState('')
   useEffect(() => { if (q.data) { setD(q.data); setDirty(false) } }, [q.data])
   const preview = useQuery({ queryKey: ['template', id, 'preview', start], enabled: !!q.data,
@@ -284,6 +290,27 @@ export function TemplatePage() {
         )}
       </Section>
 
+      {/* A suggestion saves on its own and the refetch after it would drop unsaved structure edits, so Add waits for Save. */}
+      <Section title={t('templates.basisTitle')} count={d.basisSuggestions.length} actions={edit && q.data.disciplines.length > 0 &&
+        <Button size="sm" variant="outline" disabled={dirty} onClick={() => setAddingBasis(true)}><Plus className="size-3.5" />{t('templates.basisAdd')}</Button>}>
+        <p className="px-4 pt-3 text-xs text-muted-foreground">{t('templates.basisHint')}{edit && dirty && <span className="text-warn"> {t('templates.basisSaveFirst')}</span>}</p>
+        {d.basisSuggestions.length === 0 ? <Empty>{t('templates.basisNone')}</Empty> : (
+          <ul className="divide-y text-sm">
+            {d.basisSuggestions.map((b) => (
+              <li key={b.id} className="space-y-0.5 px-4 py-2">
+                <p className="flex items-start gap-2"><span className="min-w-0 flex-1"><span className="font-medium">{b.title}</span> <span className="text-xs text-muted-foreground">{t(b.kind === 'Criterion' ? 'basis.criterion' : 'basis.assumption')} · {disciplines.get(b.disciplineId)}</span></span>
+                  {edit && rowBtn(`${t('common.remove')} ${b.title}`, () => setRemovingBasis(b), <Trash2 className="size-3.5" />, dirty)}</p>
+                <p className="text-xs text-muted-foreground">{t('basis.scope')}: {b.scope}</p>
+                <p className="whitespace-pre-wrap">{b.statement}{b.numericValue != null && ` · ${b.numericValue} ${b.units ?? ''}`}</p>
+                {(b.sourceSystem || b.stableSourceId || b.declaredRevision || b.sourceUrl) && <p className="text-xs text-muted-foreground">
+                  {t('common.source')}: {[b.sourceSystem, b.stableSourceId, b.declaredRevision].filter(Boolean).join(' · ')}{' '}
+                  {b.sourceUrl && <a className="break-all text-primary underline" href={b.sourceUrl} target="_blank" rel="noopener noreferrer">{b.sourceUrl}</a>}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
       <Section title={t('tpl.preview')}>
         <div className="flex flex-wrap items-center gap-3 p-4 text-sm">
           <label className="text-xs text-muted-foreground">{t('field.StartDate')} <Input type="date" className="inline-flex h-8 w-40" value={start} onChange={(e) => setStart(e.target.value)} /></label>
@@ -293,6 +320,32 @@ export function TemplatePage() {
         </div>
       </Section>
 
+      {addingBasis && (
+        <FieldsCommand path={`templates/${id}/design-basis`} title={t('templates.basisAdd')} hint={t('templates.basisHint')} submitLabel={t('templates.basisAdd')}
+          initial={{ kind: 'Assumption', templateDisciplineId: q.data.disciplines.length === 1 ? q.data.disciplines[0].templateDisciplineId ?? '' : '' }}
+          fields={[
+            { name: 'kind', label: 'basis.kind', choices: [{ value: 'Criterion', label: t('basis.criterion') }, { value: 'Assumption', label: t('basis.assumption') }] },
+            { name: 'title', label: 'coord.title' },
+            { name: 'templateDisciplineId', label: 'basis.discipline', choices: q.data.disciplines.map((x) => ({ value: x.templateDisciplineId ?? '', label: disciplines.get(x.disciplineId) ?? '' })) },
+            { name: 'scope', label: 'basis.scope' },
+            { name: 'statement', label: 'basis.statement', type: 'textarea' },
+            { name: 'numericValue', label: 'basis.numeric', type: 'number', optional: true },
+            { name: 'units', label: 'basis.units', optional: true },
+            { name: 'sourceSystem', label: 'basis.sourceSystem', optional: true },
+            { name: 'stableSourceId', label: 'basis.sourceId', optional: true },
+            { name: 'sourceUrl', label: 'basis.sourceUrl', type: 'url', optional: true },
+            { name: 'declaredRevision', label: 'basis.revision', optional: true },
+          ]}
+          build={(v) => {
+            const s = (k: string) => v[k]?.trim() || null
+            // The endpoint leaves "numeric value needs units" to a database check (a server error), so the form refuses it first.
+            if (s('numericValue') && !s('units')) throw new Error(t('templates.basisUnitsRequired'))
+            return { templateDisciplineId: v.templateDisciplineId, kind: v.kind, title: v.title, scope: v.scope, statement: v.statement,
+              numericValue: s('numericValue') ? Number(v.numericValue) : null, units: s('units'), sourceSystem: s('sourceSystem'),
+              stableSourceId: s('stableSourceId'), sourceUrl: s('sourceUrl'), declaredRevision: s('declaredRevision') }
+          }}
+          onClose={() => setAddingBasis(false)} onDone={() => { setAddingBasis(false); refresh() }} />
+      )}
       {confirm && (
         <ConfirmDialog open destructive={confirm === 'discard'} title={t(confirm === 'retire' ? 'tpl.retireTitle' : 'tpl.discardTitle', { name: d.name })}
           body={t(confirm === 'retire' ? 'tpl.retireBody' : 'tpl.discardBody')} confirmLabel={t(confirm === 'retire' ? 'tpl.retire' : 'tpl.discard')}
@@ -301,6 +354,15 @@ export function TemplatePage() {
             if (confirm === 'retire') { await post(`templates/${id}/retire`, {}); refresh() }
             else { await del(`templates/${id}`); qc.invalidateQueries({ queryKey: ['templates'] }); navigate('/templates') }
             setConfirm(null)
+          }} />
+      )}
+      {removingBasis && (
+        <ConfirmDialog open destructive title={t('common.remove')} body={removingBasis.title} confirmLabel={t('common.remove')}
+          onOpenChange={(o) => !o && setRemovingBasis(null)}
+          onConfirm={async () => {
+            await del(`templates/${id}/design-basis/${removingBasis.id}`)
+            setRemovingBasis(null)
+            refresh()
           }} />
       )}
     </Page>

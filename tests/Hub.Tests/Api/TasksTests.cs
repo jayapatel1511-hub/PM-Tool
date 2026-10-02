@@ -12,6 +12,50 @@ public sealed class TasksTests(HubFactory f)
     readonly TestData d = new(f);
 
     [Fact]
+    public async Task Same_status_transition_still_requires_authority()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex) });
+        var before = await f.DbAsync(db => db.Notifications.CountAsync(n => n.ItemId == t.G("id")));
+        var response = await f.As(TestData.Diane).Post($"/api/v1/tasks/{t.G("id")}/transition",
+            new { toStatus = TaskStatuses.NotStarted, rowVersion = await d.TaskVersion(t) });
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(before, await f.DbAsync(db => db.Notifications.CountAsync(n => n.ItemId == t.G("id"))));
+    }
+
+    [Fact]
+    public async Task Read_only_assignee_cannot_add_collaborators()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Rita) });
+        var response = await f.As(TestData.Rita).Post($"/api/v1/tasks/{t.G("id")}/collaborators", new { userId = d.User(TestData.Jill) });
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.False(await f.DbAsync(db => db.Collaborators.AnyAsync(c => c.TaskId == t.G("id") && c.UserId == d.User(TestData.Jill))));
+    }
+
+    [Fact]
+    public async Task Refused_bulk_assignment_cannot_add_a_member_to_a_restricted_project()
+    {
+        (await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true })).EnsureSuccessStatusCode();
+        try
+        {
+            var p = await d.Project();
+            var t = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex) });
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}", new { visibility = "Restricted" }, d.Version(p.Id))).EnsureSuccessStatusCode();
+            var outsider = d.User(TestData.Jill);
+            var result = await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/tasks/bulk",
+                new { taskIds = new[] { t.G("id") }, operation = "assign", @params = new { assigneeId = outsider } }).Result.Json();
+            Assert.Single(result["skipped"]!.AsArray());
+            Assert.False(await f.DbAsync(db => db.ProjectMembers.AnyAsync(m => m.ProjectId == p.Id && m.UserId == outsider && m.RemovedAt == null)));
+            Assert.Equal(d.User(TestData.Alex), await f.DbAsync(db => db.Tasks.Where(x => x.Id == t.G("id")).Select(x => x.AssigneeId).SingleAsync()));
+        }
+        finally
+        {
+            (await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false })).EnsureSuccessStatusCode();
+        }
+    }
+
+    [Fact]
     public async Task Assigning_a_non_member_adds_them_and_tells_the_pm() // AC-TEAM-01, TM-06
     {
         var p = await d.Project();
@@ -23,6 +67,35 @@ public sealed class TasksTests(HubFactory f)
         Assert.Contains(ProjectRole.TeamMember, member!.Roles);
         Assert.True(notice);
         Assert.True(await f.DbAsync(db => db.Notifications.AnyAsync(n => n.UserId == d.User(TestData.Jill) && n.ItemId == t.G("id") && n.EventType == NotificationEvents.TaskAssigned)));
+        Assert.Equal(new[] { p.Id }, await f.DbAsync(db => db.Emails.Where(e => e.UserId == d.User(TestData.Jill) && e.Subject.Contains(t.S("key"))).Select(e => e.RequiredProjectIds).SingleAsync()));
+    }
+
+    [Fact]
+    public async Task Restricted_projects_do_not_auto_add_outsiders_without_team_management()
+    {
+        await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true });
+        var p = await d.Project();
+        try
+        {
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}", new { visibility = Visibility.Restricted }, d.Version(p.Id))).EnsureSuccessStatusCode();
+            var outsider = d.User(TestData.Jill);
+            var response = await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/tasks", new
+            {
+                name = "Restricted assignment", projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil"), assigneeId = outsider,
+            });
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode); // the PM has ManageTeam and may auto-add on a Restricted project
+            Assert.True(await f.DbAsync(db => db.ProjectMembers.AnyAsync(m => m.ProjectId == p.Id && m.UserId == outsider && m.RemovedAt == null)));
+
+            var nonManager = await d.Project(pm: TestData.Marc);
+            (await f.As(TestData.Marc).Patch($"/api/v1/projects/{nonManager.Id}", new { visibility = Visibility.Restricted }, d.Version(nonManager.Id))).EnsureSuccessStatusCode();
+            var denied = await f.As(TestData.Alex).Post($"/api/v1/projects/{nonManager.Id}/tasks", new
+            {
+                name = "Restricted assignment denied", projectDisciplineId = d.ProjectDiscipline(nonManager.Id, "Civil"), assigneeId = d.User(TestData.Jill),
+            });
+            Assert.Equal(HttpStatusCode.Forbidden, denied.StatusCode);
+            Assert.False(await f.DbAsync(db => db.Tasks.AnyAsync(t => t.ProjectId == nonManager.Id && t.Name == "Restricted assignment denied")));
+        }
+        finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }); }
     }
 
     [Fact]

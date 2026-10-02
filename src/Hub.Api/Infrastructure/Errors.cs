@@ -49,6 +49,9 @@ public static class Check
 
 public sealed class ProblemMiddleware(RequestDelegate next, ILogger<ProblemMiddleware> log, IHostEnvironment env)
 {
+    // ASP.NET Core's binder message, e.g. Failed to bind parameter "Nullable<Guid> AffectedWorkId" from "Task:…".
+    static readonly System.Text.RegularExpressions.Regex BindFailure = new(@"^Failed to bind parameter "".+ (\w+)"" from """);
+
     public async Task Invoke(HttpContext ctx)
     {
         try { await next(ctx); }
@@ -56,6 +59,8 @@ public sealed class ProblemMiddleware(RequestDelegate next, ILogger<ProblemMiddl
         catch (DbUpdateConcurrencyException) { await Write(ctx, 409, "concurrency_conflict", Text.Get("error.concurrency"), null, null); }
         catch (DbUpdateException e) when (e.InnerException is PostgresException { SqlState: "23505" })
         { await Write(ctx, 409, "duplicate", Text.Get("error.duplicate"), null, null); }
+        catch (BadHttpRequestException e) when (BindFailure.Match(e.Message) is { Success: true } m) // a malformed route or query value is a field error
+        { await Write(ctx, 400, "validation", Text.Get("error.validation"), new Dictionary<string, string[]> { [JsonNamingPolicy.CamelCase.ConvertName(m.Groups[1].Value)] = [Text.Get("error.invalid")] }, null); }
         catch (BadHttpRequestException e) { await Write(ctx, 400, "bad_request", e.Message, null, null); }
         catch (JsonException) { await Write(ctx, 400, "bad_request", Text.Get("error.bad_json"), null, null); }
         catch (OperationCanceledException) when (ctx.RequestAborted.IsCancellationRequested) { }

@@ -121,6 +121,26 @@ public static class AdminEndpoints
             }).ToListAsync();
         });
 
+        // Local-password sign-in has no directory to add people at first sign-in, so an Admin adds them. Store the person's
+        // future Entra sign-in name as the email: with no Entra object ID, their first Entra sign-in claims this record.
+        g.MapPost("/users", async (CreateUserBody b, HubDb db, IHostEnvironment env, IConfiguration cfg) =>
+        {
+            if (!AuthSetup.LocalAuthAllowed(env, cfg)) throw ApiException.Rule("local_sign_in_only", "admin.create_user_local_only");
+            var email = Check.Required(b.Email, "email", 200);
+            Check.That(AuthSetup.IsEmail(email), "email", "admin.email_invalid");
+            var u = new AppUser
+            {
+                Email = email, DisplayName = Check.Required(b.DisplayName, "displayName", 200), JobTitle = Check.Optional(b.JobTitle, "jobTitle", 200),
+                OfficeId = b.OfficeId, SupervisorId = b.SupervisorId,
+            };
+            if (b.OfficeId is { } o) Check.That(await db.Offices.AnyAsync(x => x.Id == o), "officeId", "error.not_found");
+            if (b.SupervisorId is { } s) Check.That(await db.Users.AnyAsync(x => x.Id == s && x.IsActive), "supervisorId", "error.not_found");
+            if (await db.Users.AnyAsync(x => x.Email == email)) throw ApiException.Conflict("user_exists", "admin.user_exists");
+            db.Users.Add(u);
+            await db.SaveChangesAsync();
+            return Results.Created($"/api/v1/admin/users/{u.Id}", new { u.Id, u.RowVersion });
+        });
+
         g.MapPatch("/users/{id:guid}", async (Guid id, JsonElement body, HubDb db, HttpContext http) =>
         {
             var p = new Patch(body);
@@ -194,6 +214,7 @@ public static class AdminEndpoints
     }
 
     public sealed record RoleBody(string Role);
+    public sealed record CreateUserBody(string? Email, string? DisplayName, string? JobTitle, Guid? OfficeId, Guid? SupervisorId);
 
     static async Task EnsureAnotherAdmin(HubDb db, Guid userId)
     {

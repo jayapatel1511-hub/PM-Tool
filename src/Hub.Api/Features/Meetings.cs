@@ -17,6 +17,7 @@ public static class MeetingEndpoints
         Guid? RelatedTaskId, Guid? RelatedDecisionId, DecisionEndpoints.LinkInput[]? Links);
     public sealed record ActionMove(string ToStatus, string? Reason, int? RowVersion);
     public sealed record ConvertBody(Guid? ProjectDisciplineId, Guid? AssigneeId, Guid? DeliverableId, DateOnly? DueDate, int? RowVersion);
+    public sealed record ReuseBody(Guid RequestId, int? RowVersion, DecisionEndpoints.LinkInput[]? Links, string? Reason);
     public sealed record ActionQuery(string? Status, string? OwnerType, Guid? OwnerId, Guid? MeetingId, string? Indicator, string? Q);
 
     static readonly string[] OwnerTypes = [ActionOwnerType.User, ActionOwnerType.Discipline, ActionOwnerType.ExternalParty];
@@ -38,11 +39,12 @@ public static class MeetingEndpoints
         api.MapPatch("/actions/{id:guid}", EditAction);
         api.MapPost("/actions/{id:guid}/transition", MoveAction);
         api.MapPost("/actions/{id:guid}/convert", Convert);
+        api.MapPost("/projects/{projectId:guid}/actions/{id:guid}/reuse", Reuse).WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/projects/{id:guid}/actions/export", async (Guid id, string? format, [AsParameters] ActionQuery f, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
         {
             var (p, _) = await access.Project(id, track: false);
             var rows = JsonSerializer.SerializeToNode(await List(id, f, access, db, store, clock), JsonOpts.Web)!.AsArray();
-            return await ExportFile.Send(db, store, format, Text.Get("export.actions", p.ProjectNumber), ActionCols, rows, await ListExportEndpoints.Filters(db, http), p.Id, $"{p.ProjectNumber}-actions", clock);
+            return await ExportFile.Send(db, store, format, Text.Get("export.actions", p.ProjectNumber), ActionCols, rows, await ListExportEndpoints.Filters(db, http, access), p.Id, $"{p.ProjectNumber}-actions", clock);
         });
     }
 
@@ -381,4 +383,25 @@ public static class MeetingEndpoints
         });
         return Results.Ok(new { a.Id, a.Status, a.RowVersion, TaskId = t.Id, TaskKey = t.Key });
     }
+
+    /// AC-DCV-05, FR-DCV-06: meeting mode reuses an existing open action for a handoff or change instead of creating a
+    /// duplicate. Only the missing source and affected-work links are added; the edit rule, version and lifecycle of the
+    /// action apply, a retry with the same request returns the first result, and nobody is notified again.
+    static Task<Coordination.Result> Reuse(Guid projectId, Guid id, ReuseBody body, Access access, HubDb db, TimeProvider clock) =>
+        Coordination.Run(projectId, body.RequestId, new { operation = "action.reuse", id, body }, access, db, clock, async (p, ctx) =>
+        {
+            var a = await db.Actions.SingleOrDefaultAsync(x => x.Id == id && x.ProjectId == p.Id) ?? throw ApiException.NotFound();
+            Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(a)));
+            Coordination.Version(a, body.RowVersion);
+            Check.That(ActionStatus.IsOpen(a.Status), "status", "action.reuse_open");
+            var links = (body.Links ?? []).DistinctBy(l => l.TargetId).ToArray();
+            Check.That(links.Any(l => l.TargetType is ItemType.Handoff or ItemType.ChangeNotice), "links", "action.reuse_source");
+            var linked = await db.ItemLinks.Where(l => l.SourceId == a.Id).Select(l => l.TargetId).ToListAsync();
+            foreach (var l in links.Where(l => !linked.Contains(l.TargetId)))
+                await DecisionEndpoints.NewLink(db, access, p, ItemType.Action, a.Id, a.Key, l.TargetType, l.TargetId, ItemRelation.Related);
+            a.LastActivityAt = clock.GetUtcNow();
+            db.Entry(a).Property(x => x.LastActivityAt).IsModified = true; // the version moves even when every link already existed
+            db.Audit.Note(a, action: "Reused", reason: Check.Optional(body.Reason, "reason", 2000));
+            return a;
+        });
 }

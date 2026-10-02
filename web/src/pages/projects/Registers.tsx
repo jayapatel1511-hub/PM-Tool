@@ -3,7 +3,7 @@ import { ListPlus, OctagonAlert, Plus, ShieldAlert, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
+import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Section, Spinner, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
@@ -16,6 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
+import { useMe } from '@/lib/auth'
 import { ApiError, del, get, patch, post, qs } from '@/lib/api'
 import { fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
@@ -35,20 +36,35 @@ export interface RiskRow {
   projectDisciplineId?: string; disciplineName?: string; realisedIssueId?: string; realisedIssueKey?: string; rowVersion: number
 }
 export interface IssueRow {
-  id: string; projectId: string; key: string; title: string; status: string; raisedById: string; raisedByName?: string; ownerId: string; ownerName?: string
+  id: string; projectId: string; key: string; title: string; status: string; issueType: string; raisedById: string; raisedByName?: string; ownerId: string; ownerName?: string
   severity: string; dateRaised: string; targetResolutionDate?: string; isOverdue: boolean; daysOverdue: number; resolution?: string; resolvedDate?: string
   originRiskId?: string; originRiskKey?: string; projectDisciplineId?: string; disciplineName?: string; rowVersion: number
+  locationSummary?: string; locationLabels?: string[]; affectedDisciplineIds?: string[]; affectedDisciplineNames?: string[]; affectedDisciplineSummary?: string
+  documentSummary?: string; documentIdentifiers?: string[]; documentRevisions?: string[]; verificationStatus?: string
+  groupLabel?: string
 }
 interface Perm { ok: boolean; reason?: string | null }
 interface LinkRow { id: string; targetType: string; targetId: string; key: string; name: string; status?: string; date?: string; person?: string }
-interface Detail { description?: string; project: { id: string; projectNumber: string; name: string }; links: LinkRow[]; permissions: { edit: Perm; transitions: { to: string; ok: boolean; reason?: string | null }[]; comment: boolean } }
+interface Detail { description?: string; project: { id: string; projectNumber: string; name: string }; links: LinkRow[]; permissions: { edit: Perm; changeType?: Perm; transitions: { to: string; ok: boolean; reason?: string | null }[]; comment: boolean } }
 interface RiskDetail extends Detail { risk: RiskRow; realisedIssue?: { id: string; key: string; title: string; status: string } | null }
 interface IssueDetail extends Detail { issue: IssueRow; originRisk?: { id: string; key: string; title: string; status: string } | null }
+interface IssueLocation { id: string; kind: string; siteArea?: string; building?: string; level?: string; room?: string; assetSystem?: string; alignment?: string; startStation?: number; endStation?: number; stationUnits?: string; coordinateX?: number; coordinateY?: number; coordinateZ?: number; coordinateReferenceSystem?: string; coordinateUnits?: string; rowVersion: number }
+interface IssueDocument { id: string; kind: string; identifier: string; revision: string; sourceUrl: string; externalTopicId?: string; modelElementGuid?: string; viewpointUrl?: string; isAvailable: boolean; rowVersion: number }
+interface IssueVerification { id: string; verifierId: string; status: string; evidenceUrl?: string; note?: string; verifiedAt?: string; rowVersion: number }
+interface IssueReferenceImpact {
+  id: string; documentReferenceId: string; previousRevisionId: string; currentRevisionId: string; ownerId: string; verifierId?: string | null
+  status: 'Pending' | 'Unaffected' | 'ReopenRequested'; ownerDisposition?: 'Unaffected' | 'Reopen' | null; verifierDisposition?: 'Unaffected' | 'Reopen' | null
+  ownerDecidedAt?: string | null; verifierDecidedAt?: string | null; ownerReason?: string | null; verifierReason?: string | null; rowVersion: number
+  previousRevision?: { sourceKey?: string; externalIdentifier?: string; revision?: string } | null
+  currentRevision?: { sourceKey?: string; externalIdentifier?: string; revision?: string } | null
+  documentReference?: { identifier?: string; revision?: string; kind?: string } | null
+}
 type Target = { type: 'Task' | 'Deliverable'; id: string; key: string; name: string }
 
 const RISK_STATUSES = ['Open', 'Monitoring', 'Closed', 'Realised']
 const ISSUE_STATUSES = ['Open', 'In Progress', 'Resolved', 'Cancelled']
 const SEVERITIES = ['High', 'Medium', 'Low']
+const ISSUE_TYPES = ['General', 'Coordination']
 const LEVELS = [1, 2, 3]
 const TONE = { High: 'bad', Medium: 'warn', Low: 'idle' } as const
 const FILTERS = ['q', 'status', 'severity', 'ownerId', 'disciplineId', 'indicator'] as const
@@ -115,16 +131,25 @@ function owners(rows: { ownerId: string; ownerName?: string }[] | undefined): [s
   return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]))
 }
 
-function RegisterTable<T extends { id: string }>({ table, rows, loading, empty, hot }: {
-  table: { visible: Column<T>[]; header: (c: Column<T>) => React.ReactNode; cell: (c: Column<T>, r: T) => React.ReactNode }; rows: T[]; loading: boolean; empty: React.ReactNode; hot: (r: T) => boolean
+function RegisterTable<T extends { id: string }>({ table, rows, loading, empty, hot, groupBy }: {
+  table: { visible: Column<T>[]; header: (c: Column<T>) => React.ReactNode; cell: (c: Column<T>, r: T) => React.ReactNode }; rows: T[]; loading: boolean; empty: React.ReactNode; hot: (r: T) => boolean; groupBy?: (r: T) => string
 }) {
   if (loading) return <Loading rows={6} />
   if (!rows.length) return <div className="rounded-lg border bg-card">{empty}</div>
+  const groups: { label: string; items: T[] }[] = []
+  for (const row of rows) {
+    const label = groupBy?.(row) ?? ''
+    if (groups.at(-1)?.label !== label) groups.push({ label, items: [] })
+    groups.at(-1)!.items.push(row)
+  }
   return (
     <div className="overflow-x-auto rounded-lg border bg-card">
       <table className="w-full text-[13px]">
         <thead className="bg-muted/60 text-left text-xs text-muted-foreground"><tr>{table.visible.map(table.header)}</tr></thead>
-        <tbody>{rows.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted/30', hot(r) && 'bg-bad-bg/30')}>{table.visible.map((c) => table.cell(c, r))}</tr>)}</tbody>
+        {groups.map((group, index) => <tbody key={`${index}-${group.label}`}>
+          {groupBy && <tr className="border-t bg-muted/30"><th colSpan={table.visible.length} scope="rowgroup" className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground">{group.label}</th></tr>}
+          {group.items.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted/30', hot(r) && 'bg-bad-bg/30')}>{table.visible.map((c) => table.cell(c, r))}</tr>)}
+        </tbody>)}
       </table>
     </div>
   )
@@ -169,35 +194,112 @@ export function RisksTab() {
 export function IssuesTab() {
   const p = useCurrentProject()
   const f = useFilters()
+  const [sp, setSp] = useSearchParams()
+  const issueFilters = { ...f.filters, location: sp.get('location'), document: sp.get('document'),
+    revision: sp.get('revision'), verification: sp.get('verification'), alignment: sp.get('alignment'),
+    stationFrom: sp.get('stationFrom'), stationTo: sp.get('stationTo'), stationUnits: sp.get('stationUnits'), issueType: sp.get('issueType') }
+  const sourceFilterActive = ['issueType', 'location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits'].some((key) => sp.has(key))
+  const setSourceFilter = (key: string, value: string) => {
+    const next = new URLSearchParams(sp)
+    if (value) next.set(key, value); else next.delete(key)
+    setSp(next, { replace: true })
+  }
+  const clearSourceFilters = () => {
+    const next = new URLSearchParams(sp)
+    for (const key of ['issueType', 'location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits', 'group']) next.delete(key)
+    setSp(next, { replace: true })
+  }
   const openPanel = useItemPanel()
   const [raising, setRaising] = useState(false)
-  const q = useQuery({ queryKey: ['p', p.id, 'issues', f.filters], queryFn: () => get<IssueRow[]>(`projects/${p.id}/issues${qs(f.filters)}`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'issues', issueFilters], queryFn: () => get<IssueRow[]>(`projects/${p.id}/issues${qs(issueFilters)}`) })
   const table = useTable<IssueRow>('hub.issueColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (r) => r.key, className: 'whitespace-nowrap', cell: (r) => <Key>{r.key}</Key> },
     { id: 'title', label: t('register.title'), fixed: true, sort: (r) => r.title.toLowerCase(), className: 'min-w-[14rem] font-medium',
       cell: (r) => <button className="text-left hover:underline" onClick={() => openPanel('Issue', r.id)}>{r.title}</button> },
+    { id: 'type', label: t('issue.type'), sort: (r) => r.issueType, className: 'whitespace-nowrap', cell: (r) => tv(r.issueType) },
     { id: 'severity', label: t('register.severity'), sort: (r) => SEVERITIES.indexOf(r.severity), cell: (r) => <Severity level={r.severity} /> },
     { id: 'status', label: t('common.status'), sort: (r) => r.status, cell: (r) => <StatusPill status={r.status} /> },
     { id: 'owner', label: t('common.owner'), sort: (r) => r.ownerName, className: 'whitespace-nowrap', cell: (r) => r.ownerName },
     { id: 'discipline', label: t('common.discipline'), sort: (r) => r.disciplineName, className: 'whitespace-nowrap', cell: (r) => r.disciplineName ?? t('common.dash') },
+    { id: 'affected', label: t('issue.affectedDisciplines'), optional: true, sort: (r) => r.affectedDisciplineSummary, className: 'min-w-40', cell: (r) => r.affectedDisciplineSummary || t('common.dash') },
     { id: 'raised', label: t('issue.dateRaised'), sort: (r) => r.dateRaised, className: 'whitespace-nowrap', cell: (r) => fmtDate(r.dateRaised) },
     { id: 'target', label: t('issue.target'), sort: (r) => r.targetResolutionDate, className: 'whitespace-nowrap',
       cell: (r) => <span className={cn(r.isOverdue && 'font-medium text-bad')}>{fmtDate(r.targetResolutionDate)}{r.isOverdue && ` · ${t('ind.overdueD', { n: r.daysOverdue })}`}</span> },
     { id: 'raisedBy', label: t('issue.raisedBy'), optional: true, sort: (r) => r.raisedByName, className: 'whitespace-nowrap', cell: (r) => r.raisedByName },
     { id: 'origin', label: t('issue.fromRisk'), optional: true, cell: (r) => r.originRiskId ? <button onClick={() => openPanel('Risk', r.originRiskId!)} className="hover:underline"><Key>{r.originRiskKey}</Key></button> : null },
+    { id: 'location', label: t('issue.locations'), sort: (r) => r.locationSummary, className: 'min-w-48', cell: (r) => r.locationSummary || t('common.dash') },
+    { id: 'documents', label: t('issue.documentReferences'), optional: true, sort: (r) => r.documentSummary, className: 'min-w-48', cell: (r) => r.documentSummary || t('common.dash') },
+    { id: 'verification', label: t('issue.verificationFlow'), sort: (r) => r.verificationStatus, className: 'whitespace-nowrap', cell: (r) =>
+      r.verificationStatus === 'None' ? t('issue.noVerification') : r.verificationStatus === 'Stale' ? t('issue.staleVerification') :
+        r.verificationStatus ? <StatusPill status={r.verificationStatus} /> : t('common.dash') },
   ], q.data ?? [], (r) => [r.targetResolutionDate, r.key])
+  const group = sp.get('group')
+  // An issue appears once under each of its locations, disciplines (primary and affected), documents or revisions.
+  const multiGroup: Record<string, [(r: IssueRow) => (string | undefined)[] | undefined, string]> = {
+    location: [(r) => r.locationLabels, t('issue.noLocationGroup')],
+    discipline: [(r) => [r.disciplineName, ...(r.affectedDisciplineNames ?? [])], t('register.noDiscipline')],
+    document: [(r) => r.documentIdentifiers, t('issue.noDocumentGroup')],
+    revision: [(r) => r.documentRevisions, t('issue.noRevisionGroup')],
+  }
+  const multi = group ? multiGroup[group] : undefined
+  const groupBy = multi ? (r: IssueRow) => r.groupLabel || t('common.dash')
+    : group === 'owner' ? (r: IssueRow) => r.ownerName || t('common.dash')
+      : group === 'verification' ? (r: IssueRow) => r.verificationStatus || t('issue.noVerification') : undefined
+  const expandedRows = multi
+    ? table.sorted.flatMap((row) => {
+      const labels = [...new Set(multi[0](row)?.filter((x): x is string => !!x))]
+      return (labels.length ? labels : [multi[1]]).map((groupLabel) => ({ ...row, groupLabel }))
+    }) : table.sorted
+  // Array.sort is stable, so the register's selected sort order remains intact within each group.
+  const displayRows = groupBy ? [...expandedRows].sort((a, b) => groupBy(a).localeCompare(groupBy(b))) : expandedRows
   const can = p.permissions.raiseRegister
   return (
     <Page title={t('ptab.issues')} subtitle={t('issue.subtitle')}
       actions={<>
-        <ExportMenu path={`projects/${p.id}/issues/export`} params={f.filters} name={`${p.projectNumber}-issues`} />
+        <ExportMenu path={`projects/${p.id}/issues/export`} params={issueFilters} name={`${p.projectNumber}-issues`} />
         {can.ok && <Button onClick={() => setRaising(true)}><Plus className="size-4" />{t('issue.new')}</Button>}
       </>}>
       {!can.ok && can.reason && <p className="text-sm text-muted-foreground">{can.reason}</p>}
       <FilterBar f={f} statuses={ISSUE_STATUSES} open="Open,In Progress" indicator={['overdue', 'ind.overdue']} owners={owners(q.data)} disciplines={p.disciplines} menu={table.menu} />
+      <div role="group" aria-label={t('issue.sourceFilters')} className="flex flex-wrap items-center gap-2">
+        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={issueFilters.issueType ?? ''}
+          onChange={(e) => setSourceFilter('issueType', e.target.value)} aria-label={t('issue.filterType')}>
+          <option value="">{t('issue.anyType')}</option>
+          {ISSUE_TYPES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}
+        </select>
+        <Input className="h-8 w-40" type="search" value={issueFilters.location ?? ''} onChange={(e) => setSourceFilter('location', e.target.value)}
+          placeholder={t('issue.filterLocation')} aria-label={t('issue.filterLocation')} />
+        <Input className="h-8 w-40" type="search" value={issueFilters.document ?? ''} onChange={(e) => setSourceFilter('document', e.target.value)}
+          placeholder={t('issue.filterDocument')} aria-label={t('issue.filterDocument')} />
+        <Input className="h-8 w-28" type="search" value={issueFilters.revision ?? ''} onChange={(e) => setSourceFilter('revision', e.target.value)}
+          placeholder={t('issue.filterRevision')} aria-label={t('issue.filterRevision')} />
+        <Input className="h-8 w-32" type="search" value={issueFilters.alignment ?? ''} onChange={(e) => setSourceFilter('alignment', e.target.value)}
+          placeholder={t('issue.filterAlignment')} aria-label={t('issue.filterAlignment')} />
+        <Input className="h-8 w-24" type="number" value={issueFilters.stationFrom ?? ''} onChange={(e) => setSourceFilter('stationFrom', e.target.value)}
+          placeholder={t('issue.stationFrom')} aria-label={t('issue.stationFrom')} />
+        <Input className="h-8 w-24" type="number" value={issueFilters.stationTo ?? ''} onChange={(e) => setSourceFilter('stationTo', e.target.value)}
+          placeholder={t('issue.stationTo')} aria-label={t('issue.stationTo')} />
+        <Input className="h-8 w-20" value={issueFilters.stationUnits ?? ''} onChange={(e) => setSourceFilter('stationUnits', e.target.value)}
+          placeholder={t('issue.stationUnits')} aria-label={t('issue.stationUnits')} />
+        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={issueFilters.verification ?? ''}
+          onChange={(e) => setSourceFilter('verification', e.target.value)} aria-label={t('issue.filterVerification')}>
+          <option value="">{t('issue.anyVerification')}</option>
+          {['Proposed', 'Verified', 'Rejected'].map((status) => <option key={status} value={status}>{tv(status)}</option>)}
+          <option value="Stale">{t('issue.staleVerification')}</option>
+          <option value="None">{t('issue.noVerification')}</option>
+        </select>
+        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={group ?? ''} onChange={(e) => setSourceFilter('group', e.target.value)} aria-label={t('issue.groupBy')}>
+          <option value="">{t('common.noGroup')}</option><option value="location">{t('issue.groupLocation')}</option>
+          <option value="discipline">{t('issue.groupDiscipline')}</option><option value="owner">{t('issue.groupOwner')}</option>
+          <option value="document">{t('issue.groupDocument')}</option><option value="revision">{t('issue.groupRevision')}</option>
+          <option value="verification">{t('issue.groupVerification')}</option>
+        </select>
+        {sourceFilterActive && <button type="button" className="px-2 text-xs text-muted-foreground hover:text-foreground"
+          onClick={clearSourceFilters}>{t('common.clear')}</button>}
+      </div>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      <RegisterTable table={table} rows={table.sorted} loading={q.isPending} hot={(r) => r.isOverdue || (r.severity === 'High' && ['Open', 'In Progress'].includes(r.status))}
-        empty={<Empty action={can.ok && !f.active && <Button onClick={() => setRaising(true)}>{t('issue.new')}</Button>}>{f.active ? t('register.noMatch') : t('issue.empty')}</Empty>} />
+      <RegisterTable table={table} rows={displayRows} loading={q.isPending} groupBy={groupBy} hot={(r) => r.isOverdue || (r.severity === 'High' && ['Open', 'In Progress'].includes(r.status))}
+        empty={<Empty action={can.ok && !f.active && !sourceFilterActive && <Button onClick={() => setRaising(true)}>{t('issue.new')}</Button>}>{f.active || sourceFilterActive ? t('register.noMatch') : t('issue.empty')}</Empty>} />
       {raising && <IssueForm projectId={p.id} onClose={() => setRaising(false)} />}
     </Page>
   )
@@ -304,14 +406,46 @@ function IssueFields({ projectId, f, setF, fe, prefix }: { projectId: string; f:
       <Field label={t('issue.target')} htmlFor={`${prefix}-target`} error={fe.targetResolutionDate}><Input id={`${prefix}-target`} type="date" min={f.dateRaised ?? today()} value={f.targetResolutionDate ?? ''} onChange={(e) => setF({ ...f, targetResolutionDate: e.target.value })} /></Field>
       <Field label={t('issue.dateRaised')} htmlFor={`${prefix}-raised`} error={fe.dateRaised}><Input id={`${prefix}-raised`} type="date" max={today()} value={f.dateRaised ?? today()} onChange={(e) => setF({ ...f, dateRaised: e.target.value })} /></Field>
       <Field label={t('common.discipline')} htmlFor={`${prefix}-disc`} error={fe.projectDisciplineId}><DisciplineSelect id={`${prefix}-disc`} projectId={projectId} value={f.projectDisciplineId} onChange={(v) => setF({ ...f, projectDisciplineId: v })} /></Field>
+      <fieldset className="sm:col-span-2">
+        <legend className="text-sm font-medium">{t('issue.type')}</legend>
+        <div className="mt-1 flex flex-wrap gap-2">{ISSUE_TYPES.map((x) => (
+          <label key={x} className={cn('flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-1 text-sm', (f.issueType ?? 'General') === x && 'border-primary bg-accent')}>
+            <input type="radio" name={`${prefix}-type`} checked={(f.issueType ?? 'General') === x} onChange={() => setF({ ...f, issueType: x })} />{tv(x)}
+          </label>))}</div>
+        <p className="mt-1 text-xs text-muted-foreground">{t('issue.typeHint')}</p>
+        {fe.issueType?.map((e) => <p key={e} className="text-xs text-bad" role="alert">{e}</p>)}
+      </fieldset>
+      {f.issueType === 'Coordination' && <fieldset className="grid gap-2 sm:col-span-2 md:grid-cols-4">
+        <legend className="text-sm font-medium">{t('issue.firstReference')}</legend>
+        <div className="flex flex-wrap gap-4 text-sm md:col-span-4" role="radiogroup" aria-label={t('issue.firstReference')}>
+          {(['location', 'document'] as const).map((k) => <label key={k} className="flex items-center gap-1.5">
+            <input type="radio" name={`${prefix}-reference`} checked={(f.referenceKind ?? 'location') === k} onChange={() => setF({ ...f, referenceKind: k })} />
+            {t(k === 'location' ? 'issue.referenceByLocation' : 'issue.referenceByDocument')}</label>)}
+        </div>
+        {(f.referenceKind ?? 'location') === 'location'
+          ? <LocationInputs value={f.location ?? NEW_LOCATION} onChange={(v) => setF({ ...f, location: v })} />
+          : <DocumentInputs value={f.document ?? NEW_DOCUMENT} onChange={(v) => setF({ ...f, document: v })} />}
+        {Object.entries(fe).filter(([k]) => !ISSUE_FORM_FIELDS.includes(k)).flatMap(([, v]) => v)
+          .map((e) => <p key={e} className="text-xs text-bad md:col-span-4" role="alert">{e}</p>)}
+      </fieldset>}
     </>
   )
 }
 
-const issueBody = (f: Record<string, any>) => ({
-  title: f.title, description: f.description, severity: f.severity, ownerId: f.ownerId || null, targetResolutionDate: f.targetResolutionDate || null,
-  dateRaised: f.dateRaised || null, projectDisciplineId: f.projectDisciplineId || null,
-})
+const ISSUE_FORM_FIELDS = ['title', 'description', 'severity', 'ownerId', 'targetResolutionDate', 'dateRaised', 'projectDisciplineId', 'issueType', 'issueId']
+
+/** A Coordination issue is raised with its first location or drawing/model reference (FR-LOC-01); others can add them later. */
+const issueBody = (f: Record<string, any>) => {
+  const coordination = f.issueType === 'Coordination'
+  const byLocation = (f.referenceKind ?? 'location') === 'location'
+  const reference = coordination ? (byLocation ? locationBody(f.location ?? NEW_LOCATION) : documentBody(f.document ?? NEW_DOCUMENT)) : null
+  if (typeof reference === 'string') throw new Error(t(reference))
+  return {
+    title: f.title, description: f.description, severity: f.severity, ownerId: f.ownerId || null, targetResolutionDate: f.targetResolutionDate || null,
+    dateRaised: f.dateRaised || null, projectDisciplineId: f.projectDisciplineId || null, issueType: f.issueType ?? 'General',
+    locations: reference && byLocation ? [reference] : [], documents: reference && !byLocation ? [reference] : [],
+  }
+}
 
 function IssueForm({ projectId, link, disciplineId, onClose }: { projectId: string; link?: Target; disciplineId?: string | null; onClose: () => void }) {
   const done = useRegisterRefresh()
@@ -435,6 +569,9 @@ function ResolveDialog({ i, onClose }: { i: IssueRow; onClose: () => void }) {
           <Field label={t('issue.resolution')} htmlFor="res-text" error={err?.fieldErrors.resolution} hint={t('issue.resolutionHint')}><Textarea id="res-text" autoFocus rows={4} value={text} onChange={(e) => setText(e.target.value)} /></Field>
           <Field label={t('issue.resolvedDate')} htmlFor="res-date" error={err?.fieldErrors.resolvedDate}><Input id="res-date" type="date" max={today()} value={date} onChange={(e) => setDate(e.target.value)} /></Field>
           {err && !Object.keys(err.fieldErrors).length && <ErrorBanner error={err} />}
+          {/* Resolution gates (verification, references, impact checks) report on their own fields. */}
+          {Object.entries(err?.fieldErrors ?? {}).filter(([k]) => k !== 'resolution' && k !== 'resolvedDate').flatMap(([, v]) => v)
+            .map((m) => <p key={m} className="text-sm text-bad" role="alert">{m}</p>)}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
@@ -562,6 +699,7 @@ function IssuePanel({ id }: PanelProps) {
     <div>
       <div className="space-y-2 border-b p-4">
         <div className="flex flex-wrap items-center gap-2"><OctagonAlert className="size-4 text-muted-foreground" aria-hidden /><Key>{i.key}</Key><StatusPill status={i.status} /><Severity level={i.severity} />
+          {i.issueType === 'Coordination' && <Chip tone="idle">{tv(i.issueType)}</Chip>}
           {i.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: i.daysOverdue })}</Chip>}
           {i.severity === 'High' && open && <Chip tone="bad">{t('issue.attention')}</Chip>}</div>
         <h2 className="text-lg font-semibold">{i.title}</h2>
@@ -578,11 +716,27 @@ function IssuePanel({ id }: PanelProps) {
         <FieldRow label={t('register.title')}><InlineText value={i.title} disabled={!can} title={perm.edit.reason ?? undefined} onSave={(v) => save({ title: v })} /></FieldRow>
         <FieldRow label={t('common.description')}><InlineText value={q.data.description ?? ''} multiline disabled={!can} onSave={(v) => save({ description: v })} /></FieldRow>
         <FieldRow label={t('register.severity')}><InlineSelect value={i.severity} options={SEVERITIES.map((x) => ({ value: x, label: tv(x) }))} disabled={!can} onSave={(v) => save({ severity: v })} title={t('register.severity')} /></FieldRow>
+        <FieldRow label={t('issue.type')}><InlineSelect value={i.issueType} options={ISSUE_TYPES.map((x) => ({ value: x, label: tv(x) }))} disabled={!perm.changeType?.ok}
+          onSave={(v) => save({ issueType: v })} title={perm.changeType?.ok ? t('issue.type') : perm.changeType?.reason ?? t('issue.type')} /></FieldRow>
         <FieldRow label={t('common.owner')}><InlinePerson value={i.ownerId} name={i.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
         <FieldRow label={t('issue.raisedBy')}><InlinePerson value={i.raisedById} name={i.raisedByName} disabled={!can} allowClear={false} onSave={(v) => save({ raisedById: v })} /></FieldRow>
         <FieldRow label={t('issue.dateRaised')}><InlineDate value={i.dateRaised} disabled={!can} onSave={(v) => save({ dateRaised: v })} /></FieldRow>
         <FieldRow label={t('issue.target')}><InlineDate value={i.targetResolutionDate} disabled={!can} onSave={(v) => save({ targetResolutionDate: v })} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={i.projectDisciplineId} allowEmpty options={disciplines} disabled={!can} onSave={(v) => save({ projectDisciplineId: v || null })} title={t('common.discipline')} /></FieldRow>
+        <FieldRow label={t('issue.affectedDisciplines')}>
+          <fieldset className="flex flex-wrap gap-x-3 gap-y-1 text-sm" disabled={!can} title={perm.edit.reason ?? undefined}>
+            <legend className="sr-only">{t('issue.affectedDisciplines')}</legend>
+            {(project.data?.disciplines ?? []).filter((d) => i.affectedDisciplineIds?.includes(d.id) || (d.isActive && d.id !== i.projectDisciplineId)).map((d) => {
+              const on = i.affectedDisciplineIds?.includes(d.id) ?? false
+              return <label key={d.id} className="inline-flex items-center gap-1">
+                <input type="checkbox" checked={on} onChange={() => save({ affectedDisciplineIds: on ? i.affectedDisciplineIds!.filter((x) => x !== d.id) : [...(i.affectedDisciplineIds ?? []), d.id] })} />
+                {d.name}</label>
+            })}
+            {!can && !i.affectedDisciplineIds?.length && <span className="text-muted-foreground">{t('issue.affectedDisciplinesNone')}</span>}
+          </fieldset>
+        </FieldRow>
+        <IssueMetadata issue={i} canEdit={can} onChanged={refresh} />
+        <IssueReferenceImpacts issue={i} />
       </div>
       <TabBar tabs={[{ id: 'links' as const, label: t('decision.links'), count: q.data.links.length }, ...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'links' && <Links links={q.data.links} canEdit={can} projectId={i.projectId} onChange={refresh} onAdd={(x) => post(`issues/${i.id}/links`, { targetType: x.targetType, targetId: x.targetId })} />}
@@ -595,6 +749,153 @@ function IssuePanel({ id }: PanelProps) {
         confirmLabel={t('issue.reopen')} onConfirm={(reason) => go('In Progress', reason)} />}
     </div>
   )
+}
+
+function IssueReferenceImpacts({ issue }: { issue: IssueRow }) {
+  const me = useMe()
+  const q = useQuery({ queryKey: ['issue-reference-impacts', issue.id], queryFn: () => get<IssueReferenceImpact[]>(`issues/${issue.id}/reference-impacts`) })
+  const [reason, setReason] = useState<Record<string, string>>({})
+  const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState<unknown>(null)
+  const decide = async (impact: IssueReferenceImpact, disposition: 'Unaffected' | 'Reopen') => {
+    setBusy(impact.id); setError(null)
+    try {
+      const text = reason[impact.id]?.trim() ?? ''
+      if (text.length < 5) { setError(new ApiError(400, { detail: t('issue.referenceImpactReasonRequired') })); return }
+      await post(`issues/${issue.id}/reference-impacts/${impact.id}`, { requestId: crypto.randomUUID(), rowVersion: impact.rowVersion, disposition, reason: text })
+      await q.refetch(); setReason((x) => ({ ...x, [impact.id]: '' })); toast.success(t('issue.referenceImpactSaved'))
+    } catch (e) { setError(e) } finally { setBusy(null) }
+  }
+  if (q.isPending) return <div className="mt-4"><Loading rows={2} /></div>
+  if (q.error) return <div className="mt-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
+  const impacts = q.data ?? []
+  return <Section id="issue-reference-impacts" title={t('issue.referenceImpacts')} count={impacts.length} className="mt-4">
+    <div className="space-y-3 p-3">
+      <p className="text-sm text-muted-foreground">{t('issue.referenceImpactsHint')}</p>
+      {error != null ? <ErrorBanner error={error} retry={() => setError(null)} /> : null}
+      {!impacts.length && <p className="text-sm text-muted-foreground">{t('issue.noReferenceImpacts')}</p>}
+      {impacts.map((impact) => {
+        const isOwner = impact.ownerId === me.id, isVerifier = impact.verifierId === me.id
+        const canDecide = impact.status === 'Pending' && ((isOwner && !impact.ownerDisposition) || (isVerifier && !impact.verifierDisposition))
+        const previous = impact.previousRevision, current = impact.currentRevision
+        const source = impact.documentReference?.identifier || previous?.externalIdentifier || t('issue.referenceSourceUnavailable')
+        const previousLabel = [previous?.sourceKey, previous?.revision].filter(Boolean).join(' · ') || t('issue.referenceRevisionUnavailable')
+        const currentLabel = [current?.sourceKey, current?.revision].filter(Boolean).join(' · ') || t('issue.referenceRevisionUnavailable')
+        return <article key={impact.id} className="space-y-2 rounded border p-3" aria-labelledby={`impact-${impact.id}`}>
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 id={`impact-${impact.id}`} className="font-medium">{source}</h4>
+            <StatusPill status={impact.status} />
+            {impact.ownerDisposition && <Chip tone="idle">{t('issue.ownerDisposition')}: {impact.ownerDisposition}</Chip>}
+            {impact.verifierDisposition && <Chip tone="idle">{t('issue.verifierDisposition')}: {impact.verifierDisposition}</Chip>}
+          </div>
+          <p className="text-sm">{t('issue.referenceChanged', { previous: previousLabel, current: currentLabel })}</p>
+          {impact.ownerReason && <p className="text-sm text-muted-foreground">{t('issue.ownerDisposition')}: {impact.ownerReason}</p>}
+          {impact.verifierReason && <p className="text-sm text-muted-foreground">{t('issue.verifierDisposition')}: {impact.verifierReason}</p>}
+          {canDecide && <div className="space-y-2" aria-label={t('issue.referenceImpactDecision')}>
+            <label htmlFor={`impact-reason-${impact.id}`} className="text-sm font-medium">{t('issue.referenceImpactReasonLabel')}</label>
+            <Textarea id={`impact-reason-${impact.id}`} value={reason[impact.id] ?? ''} onChange={(e) => setReason((x) => ({ ...x, [impact.id]: e.target.value }))} placeholder={t('issue.referenceImpactReason')} rows={2} />
+            <div className="flex flex-wrap gap-2"><Button type="button" disabled={busy === impact.id} onClick={() => decide(impact, 'Unaffected')}>{t('issue.referenceUnaffected')}</Button><Button type="button" variant="outline" disabled={busy === impact.id} onClick={() => decide(impact, 'Reopen')}>{t('issue.referenceReopen')}</Button>{busy === impact.id && <Spinner />}</div>
+          </div>}
+          {!canDecide && impact.status === 'Pending' && <p className="text-sm text-muted-foreground">{t(isOwner || isVerifier ? 'issue.referenceImpactWaiting' : 'issue.referenceImpactAssigned')}</p>}
+        </article>
+      })}
+    </div>
+  </Section>
+}
+
+type LocationDraft = Record<'kind' | 'siteArea' | 'building' | 'level' | 'room' | 'assetSystem' | 'alignment' | 'start' | 'end' | 'units'
+  | 'coordinateX' | 'coordinateY' | 'coordinateZ' | 'coordinateCrs' | 'coordinateUnits', string>
+const NEW_LOCATION: LocationDraft = { kind: 'SiteArea', siteArea: '', building: '', level: '', room: '', assetSystem: '', alignment: '', start: '', end: '',
+  units: 'm', coordinateX: '', coordinateY: '', coordinateZ: '', coordinateCrs: '', coordinateUnits: 'm' }
+interface DocumentDraft { kind: string; identifier: string; revision: string; sourceUrl: string; externalTopicId: string; modelElementGuid: string; viewpointUrl: string; available: boolean }
+const NEW_DOCUMENT: DocumentDraft = { kind: 'Drawing', identifier: '', revision: '', sourceUrl: '', externalTopicId: '', modelElementGuid: '', viewpointUrl: '', available: true }
+
+/** The location's API body, or the message key for the first missing value; the server repeats every check. */
+function locationBody(l: LocationDraft): Record<string, unknown> | string {
+  const k = l.kind
+  if (k === 'SiteArea' && !l.siteArea.trim()) return 'issue.locationRequired'
+  if (k === 'Building' && !l.building.trim()) return 'issue.locationRequired'
+  if (k === 'Alignment' && (!l.alignment.trim() || !l.start || !l.end || !l.units.trim())) return 'issue.alignmentRequired'
+  if (k === 'Coordinate' && (!l.coordinateX || !l.coordinateY || !l.coordinateCrs.trim() || !l.coordinateUnits.trim())) return 'issue.coordinateRequired'
+  if ([l.coordinateX, l.coordinateY, l.coordinateZ, l.start, l.end].some((value) => value.trim() && !Number.isFinite(Number(value)))) return 'issue.numberRequired'
+  const numberOrNull = (value: string) => value.trim() ? Number(value) : null
+  return { kind: k, siteArea: l.siteArea || null,
+    building: k === 'Building' ? l.building || null : null, level: k === 'Building' ? l.level || null : null, room: k === 'Building' ? l.room || null : null,
+    assetSystem: l.assetSystem || null, alignment: k === 'Alignment' ? l.alignment || null : null,
+    startStation: k === 'Alignment' ? numberOrNull(l.start) : null, endStation: k === 'Alignment' ? numberOrNull(l.end) : null, stationUnits: k === 'Alignment' ? l.units || null : null,
+    coordinateX: k === 'Coordinate' ? numberOrNull(l.coordinateX) : null, coordinateY: k === 'Coordinate' ? numberOrNull(l.coordinateY) : null,
+    coordinateZ: k === 'Coordinate' ? numberOrNull(l.coordinateZ) : null, coordinateReferenceSystem: k === 'Coordinate' ? l.coordinateCrs || null : null,
+    coordinateUnits: k === 'Coordinate' ? l.coordinateUnits || null : null }
+}
+
+function documentBody(d: DocumentDraft): Record<string, unknown> | string {
+  if (!d.identifier.trim() || !d.revision.trim() || !d.sourceUrl.trim()) return 'issue.documentRequired'
+  return { kind: d.kind, identifier: d.identifier, revision: d.revision, sourceUrl: d.sourceUrl, externalTopicId: d.externalTopicId || null,
+    modelElementGuid: d.modelElementGuid || null, viewpointUrl: d.viewpointUrl || null, isAvailable: d.available }
+}
+
+/** Location entry shared by the issue panel and the Coordination issue form; the project's own conventions are kept as entered. */
+function LocationInputs({ value: l, onChange }: { value: LocationDraft; onChange: (v: LocationDraft) => void }) {
+  const input = (key: keyof LocationDraft, label: string, type?: string) =>
+    <Input value={l[key]} onChange={(e) => onChange({ ...l, [key]: e.target.value })} type={type} placeholder={t(label)} aria-label={t(label)} />
+  return <>
+    <select className={selectCls} value={l.kind} onChange={(e) => onChange({ ...l, kind: e.target.value })} aria-label={t('issue.locationKind')}><option>SiteArea</option><option>Building</option><option>Alignment</option><option>Coordinate</option></select>
+    {input('siteArea', 'issue.siteArea')}{input('building', 'issue.building')}{input('level', 'issue.level')}{input('room', 'issue.room')}{input('assetSystem', 'issue.assetSystem')}
+    {(l.kind === 'Alignment' || l.kind === 'Building') && <>{input('alignment', 'issue.alignment')}{input('start', 'issue.startStation', 'number')}{input('end', 'issue.endStation', 'number')}{input('units', 'issue.units')}</>}
+    {l.kind === 'Coordinate' && <>{input('coordinateX', 'issue.coordinateX', 'number')}{input('coordinateY', 'issue.coordinateY', 'number')}{input('coordinateZ', 'issue.coordinateZ', 'number')}{input('coordinateCrs', 'issue.coordinateCrs')}{input('coordinateUnits', 'issue.coordinateUnits')}</>}
+  </>
+}
+
+function DocumentInputs({ value: d, onChange }: { value: DocumentDraft; onChange: (v: DocumentDraft) => void }) {
+  const input = (key: Exclude<keyof DocumentDraft, 'available' | 'kind'>, label: string) =>
+    <Input value={d[key]} onChange={(e) => onChange({ ...d, [key]: e.target.value })} placeholder={t(label)} aria-label={t(label)} />
+  return <>
+    <select className={selectCls} value={d.kind} onChange={(e) => onChange({ ...d, kind: e.target.value })} aria-label={t('issue.documentKind')}><option>Drawing</option><option>Model</option><option>Markup</option><option>Screenshot</option></select>
+    {input('identifier', 'issue.identifier')}{input('revision', 'issue.revision')}{input('sourceUrl', 'issue.sourceUrl')}{input('externalTopicId', 'issue.externalTopic')}
+    {input('modelElementGuid', 'issue.modelGuid')}{input('viewpointUrl', 'issue.viewpointUrl')}
+    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={d.available} onChange={(e) => onChange({ ...d, available: e.target.checked })} />{t('issue.available')}</label>
+  </>
+}
+
+function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit: boolean; onChanged: () => void }) {
+  const me = useMe()
+  const eligible = useQuery({ queryKey: ['issue-verifier-eligible', issue.projectId],
+    queryFn: () => get<{ people: { id: string; displayName: string }[] }>(`projects/${issue.projectId}/changes/options`) })
+  const locations = useQuery({ queryKey: ['issue-locations', issue.id], queryFn: () => get<IssueLocation[]>(`issues/${issue.id}/locations`) })
+  const documents = useQuery({ queryKey: ['issue-documents', issue.id], queryFn: () => get<IssueDocument[]>(`issues/${issue.id}/documents`) })
+  const verification = useQuery({ queryKey: ['issue-verification', issue.id], queryFn: () => get<IssueVerification[]>(`issues/${issue.id}/verification`) })
+  const [loc, setLoc] = useState(NEW_LOCATION); const [doc, setDoc] = useState(NEW_DOCUMENT)
+  const [verifier, setVerifier] = useState<string | null>(null); const [note, setNote] = useState(''); const [evidence, setEvidence] = useState(''); const [busy, setBusy] = useState(false)
+  const reload = async () => { await Promise.all([locations.refetch(), documents.refetch(), verification.refetch()]); onChanged() }
+  const submit = async (path: string, body: Record<string, unknown>) => { setBusy(true); try { await post(path, { ...body, rowVersion: issue.rowVersion }, issue.rowVersion); await reload(); toast.success(t('issue.metadataSaved')) } catch (e) { toast.error(errorText(e)) } finally { setBusy(false) } }
+  const add = (path: string, body: Record<string, unknown> | string) => { if (typeof body === 'string') toast.error(t(body)); else submit(path, body) }
+  const appoint = () => verifier && submit(`issues/${issue.id}/verification`, { verifierId: verifier, status: 'Proposed', note })
+  const decide = (v: IssueVerification, status: 'Verified' | 'Rejected') => submit(`issues/${issue.id}/verification`, { verifierId: v.verifierId, status, evidenceUrl: evidence || null, note })
+  const latestVerification = verification.data?.[0]
+  return <section className="mt-4 space-y-3 rounded-lg border bg-card p-3" aria-labelledby="issue-metadata-title">
+    <h3 id="issue-metadata-title" className="font-semibold">{t('issue.locationEvidence')}</h3>
+    <div className="space-y-2">
+      <div className="text-sm font-medium">{t('issue.locations')}</div>
+      {(locations.data ?? []).map((x) => <div key={x.id} className="rounded border p-2 text-sm"><Chip tone="idle">{x.kind}</Chip> <span>{[x.siteArea, x.building, x.level, x.room, x.assetSystem, x.alignment].filter(Boolean).join(' · ')}</span>{x.startStation != null && ` · ${x.startStation}–${x.endStation} ${x.stationUnits ?? ''}`}{x.coordinateX != null && ` · (${x.coordinateX}, ${x.coordinateY}${x.coordinateZ != null ? `, ${x.coordinateZ}` : ''}) ${x.coordinateReferenceSystem ?? ''} ${x.coordinateUnits ?? ''}`}</div>)}
+      {!locations.data?.length && <p className="text-sm text-muted-foreground">{t('issue.noLocations')}</p>}
+      {canEdit && <div className="grid gap-2 md:grid-cols-4">
+        <LocationInputs value={loc} onChange={setLoc} />
+        <Button type="button" disabled={busy} onClick={() => add(`issues/${issue.id}/locations`, locationBody(loc))}>{t('common.add')}</Button>
+      </div>}
+    </div>
+    <div className="space-y-2">
+      <div className="text-sm font-medium">{t('issue.documentReferences')}</div>
+      {(documents.data ?? []).map((x) => <div key={x.id} className="rounded border p-2 text-sm"><Chip tone={x.isAvailable ? 'done' : 'bad'}>{x.isAvailable ? t('issue.available') : t('issue.unavailable')}</Chip> {x.kind} · <strong>{x.identifier}</strong> · {t('issue.revision')} {x.revision} · {x.isAvailable ? <a className="underline" href={x.sourceUrl} target="_blank" rel="noreferrer">{t('issue.openSource')}</a> : <span className="text-muted-foreground">{t('issue.sourceUnavailable')}</span>} {(x.externalTopicId || x.modelElementGuid || x.viewpointUrl) && <span className="block text-muted-foreground">{x.externalTopicId && `${t('issue.externalTopic')} ${x.externalTopicId}`} {x.modelElementGuid && ` · ${t('issue.modelGuid')} ${x.modelElementGuid}`} {x.viewpointUrl && <> · <a className="underline" href={x.viewpointUrl} target="_blank" rel="noreferrer">{t('issue.viewpoint')}</a></>}</span>}</div>)}
+      {canEdit && <div className="grid gap-2 md:grid-cols-4"><DocumentInputs value={doc} onChange={setDoc} />
+        <Button type="button" disabled={busy} onClick={() => add(`issues/${issue.id}/documents`, documentBody(doc))}>{t('common.add')}</Button></div>}
+    </div>
+    <div className="space-y-2">
+      <div className="text-sm font-medium">{t('issue.verificationFlow')}</div>
+      {(verification.data ?? []).map((v) => <div key={v.id} className="rounded border p-2 text-sm"><StatusPill status={v.status} /> {v.verifierId === me.id && <span>{t('issue.assignedToYou')}</span>} {v.note && <span className="text-muted-foreground">· {v.note}</span>}{v.id === latestVerification?.id && v.status === 'Proposed' && v.verifierId === me.id && <div className="mt-2 flex gap-2"><Input value={evidence} onChange={(e) => setEvidence(e.target.value)} placeholder={t('issue.evidenceUrl')} aria-label={t('issue.evidenceUrl')} /><Button type="button" disabled={busy} onClick={() => decide(v, 'Verified')}>{t('issue.verify')}</Button><Button type="button" variant="outline" disabled={busy} onClick={() => decide(v, 'Rejected')}>{t('issue.reject')}</Button></div>}</div>)}
+      {canEdit && latestVerification?.status !== 'Proposed' && <div className="grid gap-2 md:grid-cols-3"><PeoplePicker value={verifier} onChange={(id) => setVerifier(id)} label={t('issue.verifier')}
+        disabled={!eligible.data} candidates={eligible.data?.people.filter(p => p.id !== issue.ownerId && p.id !== issue.raisedById)} /><Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('issue.appointmentReason')} aria-label={t('issue.appointmentReason')} /><Button type="button" disabled={busy || !verifier || !note.trim()} onClick={appoint}>{t('issue.appointVerifier')}</Button></div>}
+    </div>
+  </section>
 }
 
 PANELS.Risk = { component: RiskPanel }

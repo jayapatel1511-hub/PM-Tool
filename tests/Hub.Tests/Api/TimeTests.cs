@@ -108,6 +108,25 @@ public sealed class TimeTests(HubFactory f)
     }
 
     [Fact]
+    public async Task An_export_is_logged_only_on_a_project_the_exporter_can_see()
+    {
+        await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true }).Result.Json();
+        try
+        {
+            var hidden = await d.Project();
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{hidden.Id}", new { visibility = Visibility.Restricted }, d.Version(hidden.Id))).EnsureSuccessStatusCode();
+            var open = await d.Project();
+            (await f.As(TestData.Diane).GetAsync($"/api/v1/time/export?format=csv&projectId={hidden.Id}")).EnsureSuccessStatusCode();
+            (await f.As(TestData.Diane).GetAsync($"/api/v1/time/export?format=csv&projectId={open.Id}")).EnsureSuccessStatusCode();
+            var logged = await f.DbAsync(db => db.ActivityLog.Where(a => a.ActorUserId == U(TestData.Diane) && a.ItemKey == "task-hours")
+                .Select(a => a.ProjectId).ToListAsync());
+            Assert.DoesNotContain(hidden.Id, logged); // a non-member cannot write into a restricted project's history
+            Assert.Contains(open.Id, logged);
+        }
+        finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }).Result.Json(); }
+    }
+
+    [Fact]
     public async Task Review_scopes_totals_and_exports_reconcile() // AC-VIS-08 US3, FR-004, SC-002
     {
         var open = await d.Project();

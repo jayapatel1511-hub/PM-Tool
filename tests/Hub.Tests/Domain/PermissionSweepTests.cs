@@ -7,6 +7,15 @@ namespace Hub.Tests.Domain;
 /// that override it (Read Only accounts AC-PERM-04, Archived/Cancelled projects P-06, Complete projects P-05).
 public sealed class PermissionSweepTests
 {
+    [Fact]
+    public void Appointed_basis_approver_loses_authority_when_project_membership_is_removed()
+    {
+        var actor = new Actor(Guid.NewGuid(), true, new HashSet<string>());
+        var project = new ProjectContext(Guid.NewGuid(), ProjectStatus.Active, Visibility.Open, Guid.NewGuid(), true, new HashSet<string>(), new HashSet<Guid>(), null);
+        Assert.False(Permissions.ConfirmBasis(actor, project, Guid.NewGuid(), actor.Id).Ok);
+        Assert.True(Permissions.ConfirmBasis(actor, project with { MemberRoles = new HashSet<string> { ProjectRole.Reviewer } }, Guid.NewGuid(), actor.Id).Ok);
+    }
+
     static readonly Guid Civ = Guid.NewGuid(), Elec = Guid.NewGuid(), Pid = Guid.NewGuid();
     sealed record Persona(string Name, Actor Actor, string[] ProjectRoles, Guid[] Leads, Guid? PrimaryDiscipline, bool PrimaryPm = false);
 

@@ -65,6 +65,47 @@ public static class Permissions
         return IsPM(a, p) || IsDL(p, discipline) ? Allow.Yes : Allow.No("perm.pm_or_dl");
     }
 
+    public static Allow CreateSubmission(Actor a, ProjectContext p)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return IsPM(a, p) || IsAnyDL(p) ? Allow.Yes : Allow.No("perm.pm_or_dl");
+    }
+    public static Allow CreateBasis(Actor a, ProjectContext p, Guid disciplineId, Guid ownerId, Guid? approverId)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        if (IsPM(a, p) || IsDL(p, disciplineId)) return Allow.Yes;
+        return p.Has(ProjectRole.TeamMember) && p.PrimaryDisciplineId == disciplineId &&
+            ownerId == a.Id && approverId is null ? Allow.Yes : Allow.No("perm.dl_own");
+    }
+    /// FR-BAS-02: only the responsible Discipline Lead or the appointed independent approver confirms a basis version.
+    public static Allow ConfirmBasis(Actor a, ProjectContext p, Guid disciplineId, Guid? approverId)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return IsDL(p, disciplineId) || p.IsMember && approverId == a.Id ? Allow.Yes : Allow.No("basis.independent");
+    }
+    public static Allow ProposeAllocation(Actor a, ProjectContext p)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return IsPM(a, p) || IsAnyDL(p) ? Allow.Yes : Allow.No("perm.pm_or_dl");
+    }
+    public static Allow ConfirmAllocation(Actor a, ProjectContext p, Guid? personSupervisorId)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return ActOnStaff(a, personSupervisorId);
+    }
+    public static Allow CoordinateSubmission(Actor a, ProjectContext p, Guid coordinator)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return a.Id == coordinator && p.IsMember ? Allow.Yes : Allow.No("perm.owner");
+    }
+    public static Allow SignSubmissionCheck(Actor a, ProjectContext p, Guid owner)
+        => NamedCoordinationAction(a, p, owner);
+    public static Allow AuthoriseSubmission(Actor a, ProjectContext p)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return p.PrimaryPmId == a.Id || p.Has(ProjectRole.PM) ? Allow.Yes : Allow.No("perm.pm");
+    }
+
     // Packet 025: management rights never imply permission to sign another person's receipt.
     static Allow HandoffGate(Actor a, ProjectContext p) => !a.IsActive || !CanView(a, p)
         ? Allow.No("perm.not_member") : Writable(a, p);

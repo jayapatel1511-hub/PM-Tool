@@ -32,7 +32,7 @@ export function SelectField({ label, value, onChange, choices, required = true }
 }
 export function useCoordRefresh(projectId: string) {
   const qc = useQueryClient()
-  return () => { for (const key of ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'search']) qc.invalidateQueries({ queryKey: key === 'search' ? [key] : [key, projectId] }); qc.invalidateQueries({ queryKey: ['p', projectId] }); qc.invalidateQueries({ queryKey: ['deliverable'] }) }
+  return () => { for (const key of ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'search']) qc.invalidateQueries({ queryKey: key === 'search' ? [key] : [key, projectId] }); qc.invalidateQueries({ queryKey: ['p', projectId] }); qc.invalidateQueries({ queryKey: ['deliverable'] }); qc.invalidateQueries({ queryKey: ['workspace-coordination'] }) }
 }
 export function CommandForm({ path, title, hint, payload, children, onClose, onDone, submitLabel }: { path: string; title: string; hint?: string; payload: () => object; children?: ReactNode; onClose: () => void; onDone: (id: string) => void; submitLabel?: string }) {
   const [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null)
@@ -47,7 +47,11 @@ export function CommandForm({ path, title, hint, payload, children, onClose, onD
     } catch (e) { setError(e) } finally { setBusy(false) }
   }
   return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl"><DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>{hint ?? t('coord.commandHint')}</DialogDescription></DialogHeader>
-    <form onSubmit={submit} className="space-y-4"><fieldset disabled={busy} className="space-y-4">{children}</fieldset>{error != null && <ErrorBanner error={error} />}{error instanceof ApiError && error.status === 409 && <p role="status" className="text-sm text-warn">{t('coord.stale')}</p>}
+    <form onSubmit={submit} className="space-y-4"><fieldset disabled={busy} className="space-y-4">{children}</fieldset>{error != null && <ErrorBanner error={error} />}
+      {error instanceof ApiError && Object.keys(error.fieldErrors).length > 0 && <ul className="list-disc space-y-1 pl-6 text-sm text-bad" aria-label={t('coord.refusalReasons')}>
+        {Object.entries(error.fieldErrors).flatMap(([field, messages]) => messages.map((message, i) => <li key={`${field}-${i}`}>{message}</li>))}
+      </ul>}
+      {error instanceof ApiError && error.status === 409 && <p role="status" className="text-sm text-warn">{t('coord.stale')}</p>}
       <DialogFooter><Button type="button" variant="outline" disabled={busy} onClick={onClose}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{submitLabel ?? t('coord.confirm')}</Button></DialogFooter>
     </form></DialogContent></Dialog>
 }

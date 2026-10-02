@@ -80,12 +80,22 @@ public static class Coordination
         var identity = $"deliverable:{d.Id}";
         var current = await db.SourceHeads.Where(h => h.ProjectId == p.Id && h.Identity == identity).Join(db.SourceRevisions, h => h.CurrentRevisionId, r => r.Id, (h, r) => r).SingleOrDefaultAsync();
         if (current != null && current.Revision == revision && current.Url == url) return current;
-        var hash = Hash(new { d.Id, d.RowVersion, DeclaredRevision = revision, SourceUrl = url });
+        // A previously published revision remains older even if it is resubmitted after a replacement.
+        var prior = await db.SourceRevisions.Where(r => r.ProjectId == p.Id && r.SourceIdentity == identity && r.Revision == revision && r.Url == url).ToListAsync();
+        foreach (var published in prior)
+            if (await Published(db, published)) return published;
+        if (prior.Count > 0) {
+            var snapshot = prior.OrderByDescending(r => r.CreatedAt).First();
+            Check.That(snapshot.SourceRowVersion == d.RowVersion, "declaredRevision", "handoff.snapshot_changed");
+            return snapshot;
+        }
+        var issuer = (await db.Users.Where(u => u.Id == d.OwnerId).Select(u => u.DisplayName).FirstOrDefaultAsync()) ?? p.ProjectNumber;
+        var hash = Hash(new { identity, Revision = revision, Url = url, Issuer = issuer, Scope = d.Name, SupersedesId = current?.Id, sourceVersion = d.RowVersion });
         var r = await db.SourceRevisions.SingleOrDefaultAsync(r => r.ProjectId == p.Id && r.IdentityHash == hash);
         if (r is null) {
             r = new SourceRevision { ProjectId = p.Id, DeliverableId = d.Id, SourceRowVersion = d.RowVersion, IdentityHash = hash, SourceIdentity = $"deliverable:{d.Id}",
                 SourceSystem = "Deliverable", ExternalIdentifier = d.Key, SourceKey = d.Key, Title = d.Name, Revision = revision, Url = url,
-                Issuer = (await db.Users.Where(u => u.Id == d.OwnerId).Select(u => u.DisplayName).FirstOrDefaultAsync()) ?? p.ProjectNumber,
+                Issuer = issuer, SupersedesId = current?.Id,
                 Scope = d.Name, AuthorIds = await Authors(db, d.Id) };
             db.SourceRevisions.Add(r);
         }
@@ -101,7 +111,13 @@ public static class Coordination
         if (head is null) return !await db.ChangeNotices.AnyAsync(c => c.NewRevisionId == revision.Id); // legacy handoff registration
         Guid? cursor = head.CurrentRevisionId;
         var seen = new HashSet<Guid>();
-        while (cursor is { } id && seen.Add(id)) { if (id == revision.Id) return true; cursor = await db.SourceRevisions.Where(r => r.Id == id).Select(r => r.SupersedesId).FirstOrDefaultAsync(); }
+        while (cursor is { } id && seen.Add(id)) {
+            if (id == revision.Id) return true;
+            cursor = await db.SourceRevisions.Where(r => r.Id == id).Select(r => r.SupersedesId).FirstOrDefaultAsync();
+            // Legacy handoff snapshots remain immutable; their published notice records the replacement link.
+            cursor ??= await db.ChangeNotices.Where(c => c.ProjectId == revision.ProjectId && c.NewRevisionId == id && c.PublishedAt != null)
+                .Select(c => (Guid?)c.OldRevisionId).SingleOrDefaultAsync();
+        }
         return false;
     }
     public static async Task<InputUse> Adopt(HubDb db, Project p, Work w, SourceRevision revision, string purpose, string reason, Guid actor, DateTimeOffset now)

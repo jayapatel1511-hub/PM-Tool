@@ -2,6 +2,7 @@
 
 Confirmed participant count (Q16): **50 people**. Proposed operational default: **3 PMs, 6 real projects, 8 weeks**, then a recorded go/no-go decision (§5.1, §35.1); choose the actual PM/project mix with the sponsor. The pilot
 starts only after AC-VIS-01 to AC-VIS-08 pass on the integrated build and the threat-model walkthrough is done.
+Hosting, accounts, approvals, backups and monitoring for the homedev pilot are tracked in [pilot-readiness.md](pilot-readiness.md).
 
 ## Before week 1
 
@@ -48,7 +49,7 @@ after the pilot. Tickets record the screen, item key and time — never comment 
 
 ## Coordination expansion scenarios
 
-Packets 025–033 are specification-only. Include a packet in the pilot only after its own application acceptance and the existing hardening gates pass; record enabled capabilities for each pilot week. The participant count does not certify 50 simultaneous sessions or a server size.
+Packets 025–033 have repository implementations with local synthetic checks; full application acceptance remains incomplete. Include a packet in the pilot only after its own application acceptance and the existing hardening gates pass; record enabled capabilities for each pilot week. The participant count does not certify 50 simultaneous sessions or a server size.
 
 Use representative permitted project data to walk through these end-to-end scenarios:
 

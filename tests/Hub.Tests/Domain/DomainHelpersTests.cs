@@ -51,11 +51,13 @@ public sealed class DomainHelpersTests
     {
         var defaults = OrgSettings.From(new Dictionary<string, JsonElement>());
         Assert.Equal(new OrgSettings().TaskDueSoonDays, defaults.TaskDueSoonDays);
+        Assert.Equal(3, defaults.CoordinationLookaheadWeeks);
         Assert.All(Rules.Ids, r => Assert.True(defaults.IsRuleEnabled(r)));
         var s = OrgSettings.From(new Dictionary<string, JsonElement>
         {
             ["task_due_soon_days"] = J(5), ["task_stale_days"] = J("ten"), ["allow_self_review"] = J(true), ["weekend_digests"] = J(1),
             ["org_time_zone"] = J("America/Toronto"), ["date_format"] = J(7), ["rule_enabled.A-10"] = J(false),
+            ["coordination_lookahead_weeks"] = J(5),
             ["notify_default.TaskAssigned"] = J(new { app = true, email = false }), ["notify_default.ReviewRequested"] = J("yes"),
         });
         Assert.Equal(5, s.TaskDueSoonDays);
@@ -63,6 +65,7 @@ public sealed class DomainHelpersTests
         Assert.True(s.AllowSelfReview);
         Assert.False(s.WeekendDigests);
         Assert.Equal("America/Toronto", s.OrgTimeZone);
+        Assert.Equal(5, s.CoordinationLookaheadWeeks);
         Assert.Equal(defaults.DateFormat, s.DateFormat);
         Assert.False(s.IsRuleEnabled("A-10"));
         Assert.Equal(new Channels(true, false), s.NotificationDefaults[NotificationEvents.TaskAssigned]);
@@ -78,6 +81,10 @@ public sealed class DomainHelpersTests
         Assert.Equal("setting.int", V("task_due_soon_days", -1));
         Assert.Equal("setting.int", V("task_due_soon_days", 4000));
         Assert.Equal("setting.int", V("task_due_soon_days", "7"));
+        Assert.Equal("setting.int", V("coordination_lookahead_weeks", 0));
+        Assert.Null(V("coordination_lookahead_weeks", 1));
+        Assert.Null(V("coordination_lookahead_weeks", 12));
+        Assert.Equal("setting.int", V("coordination_lookahead_weeks", 13));
         Assert.Null(V("allow_self_review", false));
         Assert.Equal("setting.bool", V("allow_self_review", "no"));
         Assert.Null(V("digest_send_time_local", "07:30"));

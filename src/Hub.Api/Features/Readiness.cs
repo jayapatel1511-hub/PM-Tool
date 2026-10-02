@@ -35,13 +35,27 @@ public static class ReadinessEndpoints
             .OrderByDescending(h => h.Seq).Select(h => new LinkedRecord(ItemType.Handoff, h.Id, h.Key, h.Title, h.Status)),
     };
 
+    /// The work as reads see it (finding L6). Unlike Coordination.Target, it does not refuse work whose owner left the project
+    /// or was deactivated, or whose discipline was deactivated: commands still validate through Coordination.Target, and
+    /// readiness reports the condition as an unmet Production Owner check instead of failing every list that shows the work.
+    static async Task<Coordination.Work> ReadTarget(HubDb db, Project project, string targetType, Guid targetId)
+    {
+        Check.OneOf(targetType, ["Task", "Deliverable"], "targetType");
+        var work = targetType == "Task"
+            ? await db.Tasks.AsNoTracking().Where(t => t.Id == targetId && t.ProjectId == project.Id && t.Status != TaskStatuses.Cancelled)
+                .Select(t => new Coordination.Work(targetType, t.Id, t.Key, t.Name, t.AssigneeId ?? Guid.Empty, t.ProjectDisciplineId, t.RowVersion, t.Status, t.CreatedBy)).FirstOrDefaultAsync()
+            : await db.Deliverables.AsNoTracking().Where(d => d.Id == targetId && d.ProjectId == project.Id && d.Status != DeliverableStatus.Cancelled)
+                .Select(d => new Coordination.Work(targetType, d.Id, d.Key, d.Name, d.OwnerId ?? Guid.Empty, d.ProjectDisciplineId, d.RowVersion, d.Status, d.CreatedBy)).FirstOrDefaultAsync();
+        return work ?? throw ApiException.Invalid("targetId", "coord.reference");
+    }
+
     // Source-backed checks are recomputed at read/command time. Manual applicability remains useful for
     // checks without a canonical source, but it cannot keep a linked source in a stale Ready state.
     public static async Task<ReadinessResult> EvaluateCurrent(HubDb db, Project project, string targetType,
         Guid targetId, ReadinessAssessment assessment, IReadOnlyList<ReadinessCheckRecord> records, DateOnly today, DateTimeOffset now,
         SettingsStore? settings = null)
     {
-        var target = await Coordination.Target(db, project, targetType, targetId, false);
+        var target = await ReadTarget(db, project, targetType, targetId);
         var checks = records.ToDictionary(x => x.Code, StringComparer.Ordinal);
         void Source(string code, bool applies, bool? satisfied, string reason)
         {
@@ -122,9 +136,16 @@ public static class ReadinessEndpoints
                 "Linked basis uses and conflicts are current source evidence.");
         }
 
-        Source(ReadinessCheckCode.ProductionOwner, true,
-            target.OwnerId != Guid.Empty && await Coordination.People(db, project).AnyAsync(u => u.Id == target.OwnerId),
-            "The linked production owner is current source evidence.");
+        // FR-MDC-08: a removed, deactivated or missing owner, or an inactive discipline, leaves the work without a valid
+        // production owner; it is a known unmet check with its reason, never an error for the reader.
+        var ownerActive = target.OwnerId != Guid.Empty && await Coordination.People(db, project).AnyAsync(u => u.Id == target.OwnerId);
+        var disciplineActive = await db.ProjectDisciplines.AsNoTracking().AnyAsync(d => d.Id == target.DisciplineId &&
+            d.ProjectId == project.Id && d.IsActive);
+        Source(ReadinessCheckCode.ProductionOwner, true, ownerActive && disciplineActive,
+            target.OwnerId == Guid.Empty ? "No production owner is assigned to this work."
+            : !ownerActive ? "The production owner is no longer an active project member."
+            : !disciplineActive ? "The work's discipline is no longer active in this project."
+            : "The linked production owner is current source evidence.");
 
         // A required review package is a live source gate. The stored readiness check cannot
         // preserve Ready after the package or its current round moves back to review.
@@ -621,7 +642,7 @@ public static class ReadinessEndpoints
     static async Task<object> Constraints(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)
     {
         var (project, _) = await access.Project(projectId, false);
-        await Coordination.Target(db, project, targetType, targetId, false);
+        await ReadTarget(db, project, targetType, targetId);
         var rows = await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
             c.TargetType == targetType && c.TargetId == targetId).OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt).ToListAsync();
         var result = new List<object>();
@@ -851,7 +872,7 @@ public static class ReadinessEndpoints
     static async Task<object> Prerequisites(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)
     {
         var (project, _) = await access.Project(projectId, false);
-        var target = await Coordination.Target(db, project, targetType, targetId, false);
+        var target = await ReadTarget(db, project, targetType, targetId);
         var deliverableId = await OwnDeliverable(db, target.Type, target.Id);
         var links = await db.ReadinessSubmissionPrerequisites.AsNoTracking().Where(l => l.ProjectId == projectId &&
             l.TargetType == target.Type && l.TargetId == target.Id).OrderBy(l => l.CreatedAt).ThenBy(l => l.Id).ToListAsync();

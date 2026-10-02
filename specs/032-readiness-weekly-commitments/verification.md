@@ -323,3 +323,22 @@ Met/Not Met/Withdrawn closure. Reload retained history and Met evidence; withdra
 3. The applicability setup was explicitly synthetic and carried reasons/evidence, so it proves workflow behavior only.
 The complete integrated suite then passed 568/568. Real hosted password, populated company and engineering acceptance
 remain UNPROVEN; see the current recovery checkpoint.
+
+## Finding L6: invalid owner or discipline no longer breaks readiness reads — 2026-10-02
+
+Reproduced first: an assessed item whose owner was removed from the project, whose owner was deactivated, or whose discipline was deactivated made the readiness detail return 400, for the PM and Admin alike (`ownerId` or `projectDisciplineId` validation from `Coordination.Target`). The same 400 hit every list that evaluates the item.
+
+**Fix:** the shared evaluator `EvaluateCurrent` and the per-work constraint and prerequisite reads now load the work through a read-only `ReadTarget`. It keeps the cancelled and missing-work refusal but no longer validates the owner or discipline. The Production Owner check now reports the condition as a known unmet check (Not Ready, which Proceed under Assumption cannot override), with one of these reasons:
+- "No production owner is assigned to this work."
+- "The production owner is no longer an active project member."
+- "The work's discipline is no longer active in this project."
+
+Commands still refuse invalid work through `Coordination.Target`, which was not changed. Task start now receives an evaluated Not Ready, with "Production Owner" blocked, instead of an unevaluated note, and still requires authorisation.
+
+**PASS (local):** `dotnet build Hub.slnx` succeeded. The new `ReadinessInvalidOwnerTests` (3/3) cover owner removed, owner deactivated (an isolated user) and discipline deactivated. For the PM and an Admin each test checks:
+- the readiness detail returns 200 with Not Ready, Production Owner blocked and the exact reason;
+- the window returns 200 and no longer lists the item as ready;
+- the project discipline-coordination view returns 200 with a Not Ready startability row, and the all-projects view returns 200;
+- the per-work constraint and prerequisite lists, both window exports, the weekly-commitment range list and its export all return 200.
+
+Task start readiness returned Not Ready, needing authorisation, with no note. Creating a constraint on the work was still refused with 400. Against the unfixed evaluator the same three tests failed with the reproduced 400s. The full suite passed 572/572, and `tools/trace_spec.py --check` reported 0 not cited. No web files changed.

@@ -17,6 +17,9 @@ grep -q '^PILOT_HOSTNAME=pm\.engcalchub\.com$' "$env_file" || fail "unexpected p
 mkdir -p "$backup_dir"
 backup_dir="$(cd "$backup_dir" && pwd -P)"
 [[ "$backup_dir" != *review* && "$backup_dir" != *hub_review* ]] || fail "review backup path"
+owner="$(stat -c '%u' "$backup_dir" 2>/dev/null || stat -f '%u' "$backup_dir")"
+mode="$(stat -c '%a' "$backup_dir" 2>/dev/null || stat -f '%Lp' "$backup_dir")"
+[[ "$owner" == "$(id -u)" && "$mode" == 700 ]] || fail "pilot backup directory must be owner-only mode 700"
 
 inspect() { sudo docker inspect --format "$1" pm-tool-pilot-db-1 </dev/null; }
 project="$(inspect '{{ index .Config.Labels "com.docker.compose.project" }}')"
@@ -24,15 +27,15 @@ service="$(inspect '{{ index .Config.Labels "com.docker.compose.service" }}')"
 volume="$(inspect '{{ range .Mounts }}{{ if eq .Name "pm-tool-pilot-db" }}{{ .Name }}{{ end }}{{ end }}')"
 [[ "$project" == pm-tool-pilot && "$service" == db && "$volume" == pm-tool-pilot-db ]] || fail "pilot database identity is not exact"
 
-stamp="$(date -u +%Y%m%d%H%M%S)"
+stamp="$(date -u +%Y%m%dT%H%M%S%NZ)"
 target="$backup_dir/hub-pilot-$stamp.dump"
-partial="$target.partial"
+partial="$(mktemp "${target}.partial.XXXXXX")"
 compose_cmd=(sudo env RELEASE_SHA="${RELEASE_SHA:-unknown}" docker compose --env-file "$env_file" -f "$compose")
 trap 'rm -f -- "$partial"' EXIT
 "${compose_cmd[@]}" exec -T db pg_dump -U hub_pilot -d hub_pilot -Fc --no-owner --no-privileges </dev/null >"$partial"
 [[ -s "$partial" ]] || fail "empty dump"
 "${compose_cmd[@]}" exec -T db pg_restore --list - <"$partial" >/dev/null
-mv -f -- "$partial" "$target"
+mv -- "$partial" "$target"
 trap - EXIT
 chmod 600 "$target"
 echo "pilot backup ready: $target"

@@ -62,13 +62,13 @@ compose_cmd=(sudo env RELEASE_SHA="$release_sha" docker compose --env-file "$env
 "${compose_cmd[@]}" up -d --no-build </dev/null
 for _ in {1..60}; do
   health="$(inspect '{{ .State.Health.Status }}' 2>/dev/null || true)"
-  api_health="$(curl -fsS -H 'Host: pm.engcalchub.com' -H 'X-Forwarded-Proto: https' http://127.0.0.1:3081/health 2>/dev/null || true)"
+  api_health="$(curl --max-time 5 -fsS -H 'Host: pm.engcalchub.com' -H 'X-Forwarded-Proto: https' http://127.0.0.1:3081/health 2>/dev/null || true)"
   [[ "$health" == healthy && "$api_health" == *Healthy* ]] && break
   [[ "$health" == unhealthy ]] && fail "pilot database unhealthy"
   sleep 2
 done
 [[ "$(inspect '{{ .State.Health.Status }}')" == healthy ]] || fail "pilot database did not become healthy"
-curl -fsS -H 'Host: pm.engcalchub.com' -H 'X-Forwarded-Proto: https' http://127.0.0.1:3081/health | grep -q Healthy || fail "pilot API did not become ready"
+curl --max-time 5 -fsS -H 'Host: pm.engcalchub.com' -H 'X-Forwarded-Proto: https' http://127.0.0.1:3081/health | grep -q Healthy || fail "pilot API did not become ready"
 api_image="$(sudo docker inspect --format '{{ .Config.Image }}' pm-tool-pilot-api-1 </dev/null)"
 [[ "$api_image" == "pm-tool-pilot:$release_sha" ]] || fail "pilot API image is not the requested release: $api_image"
 volume="$(inspect '{{ range .Mounts }}{{ if eq .Name "pm-tool-pilot-db" }}{{ .Name }}{{ end }}{{ end }}')"

@@ -66,3 +66,24 @@ sudo env RELEASE_SHA=<full-sha> docker compose --env-file .runtime/review.env -f
 The database and persistent key directory are retained. Verify the old cookie is refused, the new individual password
 works, and other people's sessions still work. Do not mark rotation accepted solely because the JSON was edited.
 For the separate pilot, use its own compose file, pilot runtime and pilot release SHA; never pass review settings.
+
+## Current repository checkpoint (2026-10-01 Halifax)
+
+CI [run 36943469659](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/36943469659) passed for
+`07fe142362bb477f0d0042ba3b17c11f7619f5b9`: 569 tests, zero failures/skips, coverage gates, seven backup/pilot
+initializer checks, frontend build/lint, three mocked Chromium suites, dependency and trace checks. Lint reported
+88 warnings and zero errors. Later homedev-scope documentation and pilot operation changes require their own
+verification; this run is evidence for its exact SHA only.
+
+The d4dc1ef review candidate image built, but activation was observed stopped at the pre-release database dump
+with a stopped Docker Compose process. The current pointer still selected `1c59e334b42822510dd0181f83e5dadc7bbe8282`
+and its private health endpoint answered Healthy. This is not evidence of candidate deployment. The operator must
+interrupt the stopped foreground pipeline and rerun activation with `</dev/null`; sudo reads the controlling
+terminal, while batch Docker commands receive no terminal input. Recheck the log, current pointer and all private
+gates before starting the dedicated tunnel or routing DNS.
+
+Pilot operations preparation: the separate activation/backup/restore/private verifier scripts are now integrated
+with the existing pilot initializer and root backup helper. Four backup-helper, three initializer and seven pilot
+operation regressions passed on both Mac and homedev Ubuntu using fake Docker/sudo commands. They cover private
+backup/restore inputs, timer dump names, stdin isolation, preflight credential refusal, cookie replay and transport
+failure. This does not prove real pilot activation, installed timers, public TLS or company acceptance.

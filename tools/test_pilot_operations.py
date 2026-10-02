@@ -7,6 +7,7 @@ import pathlib
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import Mock, patch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SHELLS = [ROOT / "scripts" / name for name in ("activate-homedev-pilot.sh", "backup-homedev-pilot.sh", "restore-homedev-pilot-drill.sh")]
@@ -75,6 +76,24 @@ class PilotOperationsTests(unittest.TestCase):
                 self.assertEqual(module.run(["--credentials-file", str(review)], network_must_not_run), 2)
                 self.assertEqual(module.run(["https://evil.example", "--credentials-file", str(review)], network_must_not_run), 2)
             self.assertNotIn("unique-private-secret", output.getvalue())
+
+    def test_http_transport_preserves_cookie_attributes_and_fails_closed(self):
+        spec = importlib.util.spec_from_file_location("pilot_transport", ROOT / "scripts/verify-homedev-pilot.py")
+        module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        header = "__Host-hub-review=synthetic; Path=/; Secure; HttpOnly; SameSite=Strict"
+        connection = Mock()
+        response = connection.getresponse.return_value
+        response.status = 204
+        response.read.return_value = b""
+        response.getheaders.return_value = [("Set-Cookie", header)]
+        with patch.object(module.http.client, "HTTPConnection", return_value=connection):
+            status, _, cookie = module.call(module.LOOPBACK, "GET", "/api/v1/me")
+            self.assertEqual(status, 204)
+            self.assertEqual(cookie, header)
+            self.assertTrue(module.secure_cookie(cookie))
+            response.read.side_effect = module.http.client.IncompleteRead(b"")
+            self.assertEqual(module.call(module.LOOPBACK, "GET", "/api/v1/me"), (0, b"", ""))
+            self.assertEqual(connection.close.call_count, 2)
 
     def test_verifier_replays_secure_cookie_from_mocked_sign_in(self):
         spec = importlib.util.spec_from_file_location("pilot_verify", ROOT / "scripts/verify-homedev-pilot.py")

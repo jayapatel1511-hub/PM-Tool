@@ -54,8 +54,8 @@ restore a `hub-review-*` dump into it.
 | H5 | Bridge network and trusted proxy | subnet `172.30.245.0/28`; its gateway `172.30.245.1` is also `Hosting__LocalTunnelProxyAddress` | own unused /28; proxy address equals the new gateway | agent | UNPROVEN: `172.30.246.0/28`, proxy `172.30.246.1`; no homedev route used that subnet on 2026-10-01 |
 | H6 | Loopback port | `127.0.0.1:3080` | own free loopback port | agent | UNPROVEN: `127.0.0.1:3081`, free on homedev on 2026-10-01 |
 | H7 | Private runtime | `.runtime/review.env`, `review-users.json`, `keys/` and `data/backups/`, shared by all review releases | separate owner-only runtime and backup directories | agent | UNPROVEN |
-| H8 | Scripts and units | init, activate, backup, restore drill and verify scripts; the root backup helper accepts only `pm-tool-review-db-1` and the review backup path ([helper]) | pilot variants that refuse review containers, volumes and dumps | agent | PARTIAL: isolated initializer `scripts/init-homedev-pilot.py` passed private/no-overwrite/review-runtime refusal checks; root helper `hosting/pm-tool-pilot-backup-root.sh` (accepts only `pm-tool-pilot-db-1` on volume `pm-tool-pilot-db`, writes `hub-pilot-*.dump` to the pilot directory) with its service and 22:15 UTC timer; activation/verify scripts still assume review names; nothing installed |
-| H9 | Hostname | review sets `AllowedHosts` and `Email__BaseUrl` to `pm.engcalchub.com`; one hostname routes to one origin | decide which stack `pm.engcalchub.com` serves during the pilot; the other gets another hostname in the `pm-tool` tunnel or stays loopback-only | Jay | UNPROVEN (undecided) |
+| H8 | Scripts and units | init, activate, backup, restore drill and verify scripts; the root backup helper accepts only `pm-tool-review-db-1` and the review backup path ([helper]) | pilot variants that refuse review containers, volumes and dumps | agent | PARTIAL: isolated initializer `scripts/init-homedev-pilot.py` passed private/no-overwrite/review-runtime refusal checks; root helper `hosting/pm-tool-pilot-backup-root.sh` (accepts only `pm-tool-pilot-db-1` on volume `pm-tool-pilot-db`, writes `hub-pilot-*.dump` to the pilot directory) with its service and 22:15 UTC timer; pilot activation, backup, restore-drill and private-verification variants are now written; focused safety checks pass on Mac and homedev Ubuntu (14 total across backup helpers, initializer and operations, with fake Docker/sudo only); no company stack or timer installed |
+| H9 | Hostname | review sets `AllowedHosts` and `Email__BaseUrl` to `pm.engcalchub.com`; one hostname routes to one origin | decide which stack `pm.engcalchub.com` serves during the pilot; the other gets another hostname in the `pm-tool` tunnel or stays loopback-only | Jay | DECIDED in homedev production gates: route the hostname to company port 3081 after acceptance, retain review on private loopback 3080; cutover remains UNPROVEN |
 | H10 | Capacity | each stack limits the database and the API to 1 GiB each; homedev has about 7.2 GiB RAM shared with other services (platform guide) | measure with both stacks running, or stop the review stack during the pilot | agent + Jay | UNPROVEN |
 | H11 | Releases | [homedev runbook][homedev]: reviewed full SHA, CI pass, dump first, previous image kept | the same, announced in the support channel and run outside business hours | agent + Jay | UNPROVEN |
 
@@ -172,3 +172,17 @@ Admin and create the remaining people in Users & roles, provisioning each GUID i
 `Auth__Local__BootstrapAdmins` from the private env file after bootstrap. Never restore a review dump or copy its
 verifier/key files. Initializer regressions pass locally; the real company database, installed timer, pilot activation,
 mail and browser-to-host acceptance remain UNPROVEN.
+
+Once the first Admin has an individual credential, run the following from the separate pilot release directory:
+
+```bash
+bash scripts/activate-homedev-pilot.sh <full-sha> --verify-file <private-file> [--install-timer]
+```
+
+ The private verification
+file contains only that operator-selected account's `login` and `password`, is owner-only, and must stay outside
+Git and the release source tree. Delete it after verification; it is not the verifier list. An empty first-start
+verifier list cannot prove authentication: a run without explicit verification credentials must stop before
+claiming activation acceptance or updating the current pointer. Initial bootstrap and credential provisioning
+are operator steps, not permission to import review identities. These scripts perform private origin checks;
+trusted public HTTPS and real browser acceptance remain separate gates.

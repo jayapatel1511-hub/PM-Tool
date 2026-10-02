@@ -43,14 +43,14 @@ def call(base, method, path, body=None, host=HOST, origin=None, cookie=None):
     try:
         conn.request(method, path, json.dumps(body) if body is not None else None, headers)
         response = conn.getresponse()
-    except OSError:
-        conn.close()
+        data = response.read()
+        set_cookie = next((value for key, value in response.getheaders() if key.lower() == "set-cookie"), "")
+        return response.status, data, set_cookie
+    except (OSError, http.client.HTTPException):
         return 0, b"", ""
-    data = response.read()
-    set_cookie = next((value for key, value in response.getheaders() if key.lower() == "set-cookie"), "")
-    status = response.status
-    conn.close()
-    return status, data, set_cookie
+    finally:
+        conn.close()
+
 
 def cookie_pair(header):
     return header.split(";", 1)[0] if header else ""

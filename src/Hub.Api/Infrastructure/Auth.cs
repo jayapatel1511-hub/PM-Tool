@@ -158,6 +158,13 @@ public static class AuthSetup
             }
             else if (!user.IsActive) { log.LogWarning("Bootstrap admin {Email} is inactive and was left unchanged", email); continue; }
             if (user.Roles.Exists(r => r.Role == SystemRole.Admin)) continue;
+            var deliberatelyRemoved = await db.ActivityLog.AsNoTracking().AnyAsync(a =>
+                a.ItemType == ItemType.User && a.ItemKey == user.Email && a.ItemName == SystemRole.Admin && a.Action == "RoleRemoved");
+            if (deliberatelyRemoved)
+            {
+                log.LogWarning("Bootstrap admin {Email} was deliberately removed and was left unchanged", email);
+                continue;
+            }
             var role = new UserSystemRole { UserId = user.Id, Role = SystemRole.Admin, Source = RoleSource.Manual, GrantedAt = DateTimeOffset.UtcNow };
             db.UserRoles.Add(role); // through the set: a preset key reached only by navigation is tracked as an update
             db.Audit.Note(role, action: "RoleAdded", key: email);

@@ -147,6 +147,16 @@ public sealed class LocalAccountsTests : IDisposable
         Assert.False(Person("gone@hub.test").IsActive);
         Assert.Empty(Person("gone@hub.test").Roles);
         Assert.Equal(logged + 1, f.Db(db => db.ActivityLog.Count())); // only Pat's new role
+
+        // A deliberate Admin-role removal remains authoritative across later startup runs.
+        Assert.Equal(HttpStatusCode.NoContent, (await Send(c, HttpMethod.Delete,
+            $"/api/v1/admin/users/{patId}/roles/{SystemRole.Admin}", adminCookie)).StatusCode);
+        Assert.Empty(Person("Pat.Pilot@Example.com").Roles);
+        var afterRemoval = f.Db(db => db.ActivityLog.Count());
+        for (var run = 0; run < 2; run++)
+            await f.DbAsync(async db => { await AuthSetup.BootstrapAdmins(db, cfg, env, NullLogger.Instance); return 0; });
+        Assert.Empty(Person("Pat.Pilot@Example.com").Roles);
+        Assert.Equal(afterRemoval, f.Db(db => db.ActivityLog.Count()));
     }
 }
 

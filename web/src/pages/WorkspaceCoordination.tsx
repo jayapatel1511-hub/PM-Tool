@@ -5,6 +5,7 @@ import { ViewMenu } from '@/components/hub/views'
 import { useScope } from '@/components/hub/workspace'
 import { get, qs } from '@/lib/api'
 import { plural, t } from '@/lib/i18n'
+import { ChangeAssessmentCounts, type ChangeCounts } from './projects/DisciplineCoordinationView'
 
 type Item = { id: string; key: string; title: string; status: string }
 type Handoff = Item & { sendingOwnerId: string; receivingOwnerId: string; sendingDisciplineId: string; receivingDisciplineId: string }
@@ -15,8 +16,8 @@ type LinkedAction = { id: string; key: string; text: string; status: string; due
   sourceType: 'Handoff' | 'ChangeNotice'; sourceId: string }
 type UnavailableChangeTarget = { changeNoticeId: string; count: number }
 type ProjectProjection = { id: string; projectNumber: string; name: string; disciplineId: string | null; data: {
-  handoffs: Handoff[]; outgoing: Handoff[]; incoming: Handoff[]; changes: Item[]; reviews: Item[];
-  linkedIssues: Item[]; uses: { id: string }[]; blockerGroups: Group[];
+  handoffs: Handoff[]; outgoing: Handoff[]; incoming: Handoff[]; changes: (Item & ChangeCounts)[]; reviews: Item[];
+  linkedIssues: Item[]; uses: { id: string; targetKey: string | null; targetName: string | null; sourceKey: string | null; revision: string | null; intendedUse: string }[]; blockerGroups: Group[];
   startability: Startability[]; startabilityReadyTotal: number; startabilityFrom: string; startabilityTo: string;
   linkedActions: LinkedAction[]; unavailableChangeTargets: UnavailableChangeTarget[]
 } }
@@ -38,10 +39,12 @@ function downloadCsv(projection: Projection) {
     const number = project.projectNumber, rows = project.data
     for (const row of rows.outgoing) add(number, 'Outgoing Handoff', row.id, row.key, row.title, row.status)
     for (const row of rows.incoming) add(number, 'Incoming Handoff', row.id, row.key, row.title, row.status)
-    for (const row of rows.changes) add(number, 'Change', row.id, row.key, row.title, row.status)
+    for (const row of rows.changes) add(number, 'Change', row.id, row.key,
+      `${row.title} · pending: ${row.pendingAssessments} · acknowledged: ${row.acknowledgedPending} · project pending: ${row.projectPending}`, row.status)
     for (const row of rows.reviews) add(number, 'Review', row.id, row.key, row.title, row.status)
     for (const row of rows.linkedIssues) add(number, 'Issue', row.id, row.key, row.title, row.status)
-    for (const row of rows.uses) add(number, 'InputUse', row.id, '', '', '')
+    for (const row of rows.uses) add(number, 'InputUse', row.id, row.targetKey ?? '',
+      `${row.targetName ?? ''} · ${row.sourceKey ?? ''} rev ${row.revision ?? ''} · ${row.intendedUse}`, '')
     for (const group of rows.blockerGroups) add(number, 'BlockerGroup', group.handoffId, group.handoffKey, group.taskKeys.join('; '), '')
     for (const row of rows.startability) add(number, 'Startability', row.targetId, row.key,
       `${row.name}${row.blocked.length ? ` · blocked: ${row.blocked.join('; ')}` : ''}${row.unknown.length ? ` · unknown: ${row.unknown.join('; ')}` : ''}`, row.state)
@@ -114,14 +117,14 @@ export function WorkspaceCoordination() {
           <ul>{project.data.incoming.map(h => item(project, 'handoffs', 'Handoff', h))}</ul>
           {project.data.blockerGroups.length > 0 && <h4>{t('dcv.ws.linkedTaskBlockers')}</h4>}<ul>{project.data.blockerGroups.map(g =>
           <li key={g.handoffId}><Link className="text-primary underline" to={`/projects/${project.projectNumber}/handoffs?panel=Handoff:${g.handoffId}`}>{g.handoffKey}</Link>
-            {' · '}{t('dcv.linkedTasks', { n: g.taskIds.length })}: {g.taskIds.map((id, index) => <span key={id}>{index > 0 && ', '}
+            {' · '}<Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?ids=${g.taskIds.join(',')}`}>{t('dcv.linkedTasks', { n: g.taskIds.length })}</Link>: {g.taskIds.map((id, index) => <span key={id}>{index > 0 && ', '}
               <Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{g.taskKeys[index]}</Link></span>)}
             <ul>{actionsFor(project, 'Handoff', g.handoffId)}</ul></li>)}</ul></section>
         <section><h3>{t('dcv.using')} ({project.data.uses.length})</h3>
           <Link className="text-primary underline" to={`/projects/${project.projectNumber}/coordination`}>{t('dcv.ws.openSourceRevisions')}</Link></section>
         <section><h3>{t('dcv.changed')} ({project.data.changes.length})</h3><ul>{project.data.changes.map(c => <li key={c.id}>
           <Link className="text-primary underline" to={`/projects/${project.projectNumber}/changes?panel=ChangeNotice:${c.id}`}>
-            {project.projectNumber} · {c.key}</Link> · {c.title} · {c.status}
+            {project.projectNumber} · {c.key}</Link> · {c.title} · {c.status} · <ChangeAssessmentCounts c={c} scoped={!!(project.disciplineId || ownerId)} />
           <ul>{actionsFor(project, 'ChangeNotice', c.id)}</ul>
           {project.data.unavailableChangeTargets.filter(target => target.changeNoticeId === c.id).map(target =>
             <p key={target.changeNoticeId} role="status">{plural(target.count, 'dcv.targetUnavailableOne', 'dcv.targetUnavailableMany')}</p>)}

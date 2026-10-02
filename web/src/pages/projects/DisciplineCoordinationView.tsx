@@ -10,7 +10,8 @@ import { plural, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 
 type Handoff = { id: string; key: string; title: string; status: string; neededBy: string; promisedBy?: string; targetKey?: string; sendingOwnerId: string; receivingOwnerId: string; sendingDisciplineId: string; receivingDisciplineId: string }
-type Change = { id: string; key: string; title: string; status: string; pendingAssessments: number; ownerId?: string }
+export type ChangeCounts = { pendingAssessments: number; acknowledgedPending: number; projectPending: number }
+type Change = ChangeCounts & { id: string; key: string; title: string; status: string; ownerId?: string }
 type Review = { id: string; key: string; title: string; status: string; outstandingDisciplines: number; blockingFindings: number; coordinatorId?: string }
 type LinkedIssue = { id: string; key: string; title: string; status: string; ownerId?: string | null; ownerName?: string | null; projectDisciplineId?: string | null }
 type InputUse = { id: string; targetType: string; targetId: string; sourceRevisionId: string }
@@ -24,6 +25,14 @@ type UnavailableChangeTarget = { changeNoticeId: string; count: number }
 type Data = { handoffs: Handoff[]; changes: Change[]; reviews: Review[]; linkedIssues: LinkedIssue[]; uses: InputUse[]; blockerGroups: BlockerGroup[]; usesTotal: number; linkedIssuesTotal: number; handoffsTotal: number; changesTotal: number; reviewsTotal: number; evaluatedAt: string;
   startability: Startability[]; startabilityReadyTotal: number; startabilityFrom: string; startabilityTo: string;
   linkedActions: LinkedAction[]; changeTargets: ChangeTarget[]; unavailableChangeTargets: UnavailableChangeTarget[] }
+
+/** FR-DCV-03: Pending Assessment is shown apart from acknowledgement; a scoped count also states the whole-project count. */
+export function ChangeAssessmentCounts({ c, scoped }: { c: ChangeCounts; scoped: boolean }) {
+  const n = c.pendingAssessments
+  return <>{t(scoped ? 'dcv.pendingAssessmentScoped' : 'dcv.pendingAssessment', { n })}
+    {n > 0 && ` · ${t('dcv.pendingAcknowledged', { ack: c.acknowledgedPending, n })}`}
+    {scoped && c.projectPending !== n && ` · ${t('dcv.projectPending', { n: c.projectPending })}`}</>
+}
 
 /** Packet 030's five-question coordination projection over the existing registers. */
 export function DisciplineCoordinationView({ project, disciplineId, meeting, canCapture, onCapture }: {
@@ -47,7 +56,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     queryKey: ['p', project.id, 'discipline-coordination', disciplineId, ownerId, from, to],
     queryFn: () => get<Data>(`projects/${project.id}/discipline-coordination${qs({ disciplineId, ownerId, from, to })}`),
   })
-  const filters = <div className="mb-3 flex flex-wrap items-end gap-3 rounded border bg-background/60 p-3" aria-label={t('dcv.scopeLabel')}>
+  const filters = <div role="group" className="mb-3 flex flex-wrap items-end gap-3 rounded border bg-background/60 p-3" aria-label={t('dcv.scopeLabel')}>
     <span className="self-center text-xs text-muted-foreground">{t('dcv.projectPrefix')} <strong>{project.projectNumber}</strong>{disciplineId ? ` · ${project.disciplines.find(x => x.id === disciplineId)?.name ?? t('dcv.selectedDiscipline')}` : ''}</span>
     <label className="text-xs">{t('common.owner')}<select className="mt-1 block rounded border bg-background px-2 py-1 text-sm" value={ownerId} onChange={e => setScope('owner', e.target.value)}><option value="">{t('dcv.allPermittedOwners')}</option>{team.data?.members.map(m => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></label>
     <label className="text-xs">{t('common.from')}<input className="mt-1 block rounded border bg-background px-2 py-1 text-sm" type="date" value={from} onChange={e => setScope('from', e.target.value)} /></label>
@@ -63,7 +72,8 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     (disciplineId ? h.sendingDisciplineId === disciplineId : h.sendingOwnerId === scopedOwnerId) && (!ownerId || h.sendingOwnerId === ownerId) && inDateScope(h))
   const incoming = d.handoffs.filter((h) => ['Submitted', 'Clarification Requested', 'Returned', 'Accepted'].includes(h.status) &&
     (disciplineId ? h.receivingDisciplineId === disciplineId : h.receivingOwnerId === scopedOwnerId) && (!ownerId || h.receivingOwnerId === ownerId) && inDateScope(h))
-  const openChanges = d.changes.filter((c) => c.status === 'Open' || c.pendingAssessments > 0)
+  const scoped = !!(ownerId || disciplineId) // every count below follows the selected discipline and owner
+  const wide = scoped ? '' : ` · ${t('dcv.projectWide')}`
   const registerUrl = (pathname: string, panel?: string) => {
     const params = new URLSearchParams()
     if (panel) params.set('panel', panel)
@@ -94,10 +104,10 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
       {card('owe', t('dcv.owe'), outgoing.length, items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: `${tv(h.status)} · ${fmtDate(h.promisedBy ?? h.neededBy)}` })), 'handoffs'), 'handoffs')}
       {card('waiting', t('dcv.waiting'), incoming.length, items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: tv(h.status) })), 'handoffs'), 'handoffs')}
-      {card('using', `${t('dcv.using')} · ${t('dcv.projectWide')}`, d.usesTotal, d.uses.length ? <p>{t('dcv.usingHint', { n: d.usesTotal })}</p> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
-      {card('changed', `${t('dcv.changed')}${ownerId ? '' : ` · ${t('dcv.projectWide')}`}`, openChanges.length,
-        openChanges.length ? <ul className="space-y-2">{openChanges.map(c => <li key={c.id}>
-          <Link className="underline" to={registerUrl('changes', `ChangeNotice:${c.id}`)}>{c.key}</Link> · {c.title} · {tv(c.status)} · {c.pendingAssessments} {t('dcv.assessments')}
+      {card('using', `${t('dcv.using')}${wide}`, d.usesTotal, d.uses.length ? <p>{t('dcv.usingHint', { n: d.usesTotal })}</p> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
+      {card('changed', `${t('dcv.changed')}${wide}`, d.changes.length,
+        d.changes.length ? <ul className="space-y-2">{d.changes.map(c => <li key={c.id}>
+          <Link className="underline" to={registerUrl('changes', `ChangeNotice:${c.id}`)}>{c.key}</Link> · {c.title} · {tv(c.status)} · <ChangeAssessmentCounts c={c} scoped={scoped} />
           {actionLinks(existingActions('ChangeNotice', c.id))}
           {d.unavailableChangeTargets.filter(target => target.changeNoticeId === c.id).map(target =>
             <p key={target.changeNoticeId} role="status">{plural(target.count, 'dcv.targetUnavailableOneLinkable', 'dcv.targetUnavailableManyLinkable')}</p>)}
@@ -108,7 +118,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
               existingActions('ChangeNotice', c.id).map(a => a.id))}>
               {t('dcv.captureAction')}</button>}
         </li>)}</ul> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
-      {card('start', `${t('dcv.start')}${ownerId || disciplineId ? '' : ` · ${t('dcv.projectWide')}`}`, d.startabilityReadyTotal,
+      {card('start', `${t('dcv.start')}${wide}`, d.startabilityReadyTotal,
         <><p className="text-xs text-muted-foreground">{t('dcv.readySummary', { ready: d.startabilityReadyTotal, n: d.startability.length, from: d.startabilityFrom, to: d.startabilityTo })}</p>
           {d.startability.length ? <ul className="mt-1 space-y-1">{d.startability.slice(0, 4).map(r => <li key={r.id}>
             <Link className="underline" to={registerUrl(r.targetType === 'Task' ? 'tasks' : 'deliverables', `${r.targetType}:${r.targetId}`)}>{r.key}</Link> · {r.name} · {tv(r.state)}
@@ -131,8 +141,8 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
       <p className="mt-2 text-xs text-muted-foreground">{t('dcv.clientRefresh', { when: new Date(d.evaluatedAt).toLocaleTimeString() })}</p>
     </section>
     {d.blockerGroups.length > 0 && <section aria-labelledby="dcv-blockers" className="mt-3 rounded-md border bg-card p-3">
-      <h2 id="dcv-blockers" className="font-medium">{t('dcv.waiting')}</h2>
-      <ul className="mt-2 space-y-2 text-sm">{d.blockerGroups.map(group => <li key={group.handoffId}><Link className="font-medium text-primary underline" to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · {t('dcv.linkedTasks', { n: group.taskKeys.length })} ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})
+      <h2 id="dcv-blockers" className="font-medium">{t('dcv.ws.linkedTaskBlockers')}{wide}</h2>
+      <ul className="mt-2 space-y-2 text-sm">{d.blockerGroups.map(group => <li key={group.handoffId}><Link className="font-medium text-primary underline" to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · <Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?ids=${group.taskIds.join(',')}`}>{t('dcv.linkedTasks', { n: group.taskIds.length })}</Link> ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})
         {actionLinks(existingActions('Handoff', group.handoffId))}
         {meeting && canCapture && onCapture && <button type="button" className="no-print text-primary underline" aria-label={t('dcv.reuseCaptureFor', { key: group.handoffKey })} onClick={() => onCapture(group.handoffKey,
           [{ targetType: 'Handoff', targetId: group.handoffId }, ...group.taskIds.map(id => ({ targetType: 'Task', targetId: id }))],

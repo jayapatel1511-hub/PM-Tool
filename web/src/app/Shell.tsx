@@ -38,9 +38,10 @@ export function Shell() {
   const toggle = () => { const c = !collapsed; setCollapsed(c); localStorage.setItem('hub.rail', c ? 'collapsed' : 'open') }
 
   return (
-    <div className="flex h-dvh overflow-hidden">
+    // The frame scrolls inside one viewport on screen; in print it flows so the whole page paginates.
+    <div className="flex h-dvh overflow-hidden print:block print:h-auto print:overflow-visible">
       <a href="#content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-card focus:p-2">{t('app.skip')}</a>
-      <nav aria-label={t('nav.main')} className={cn('hidden shrink-0 flex-col bg-frame text-frame-foreground md:flex', collapsed ? 'w-14' : 'w-14 xl:w-52')}>
+      <nav aria-label={t('nav.main')} className={cn('no-print hidden shrink-0 flex-col bg-frame text-frame-foreground md:flex', collapsed ? 'w-14' : 'w-14 xl:w-52')}>
         <div className="flex h-12 items-center gap-2 px-3 font-semibold">
           <span aria-hidden className="grid size-7 place-items-center rounded-md bg-frame-active text-xs text-white">T</span>
           <span className={cn('truncate', collapsed ? 'hidden' : 'hidden xl:inline')}>{t('app.name')}</span>
@@ -58,7 +59,7 @@ export function Shell() {
         </button>
       </nav>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col print:block">
         <header className="no-print flex h-12 shrink-0 items-center gap-2 border-b bg-card px-3">
           <ShellSlots.Search inputRef={search} />
           <div className="flex-1" />
@@ -88,7 +89,7 @@ export function Shell() {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main id="content" tabIndex={-1} className="min-h-0 flex-1 overflow-auto pb-16 outline-none md:pb-0">
+        <main id="content" tabIndex={-1} className="min-h-0 flex-1 overflow-auto pb-16 outline-none md:pb-0 print:overflow-visible print:pb-0">
           <Outlet />
         </main>
         <PanelHost />

@@ -141,8 +141,16 @@ public static class DisciplineCoordinationEndpoints
             scopedAssessments.Any(a => a.ChangeNoticeId == c.Id));
         if (ownerId is { } changeOwner) changes = changes.Where(c => c.OwnerId == changeOwner ||
             scopedAssessments.Any(a => a.ChangeNoticeId == c.Id));
-        var changeRows = await changes.OrderBy(c => c.AssessmentDueDate).ThenBy(c => c.Key)
-            .Select(c => new { c.Id, c.Key, c.Title, c.Status, c.OwnerId, PendingAssessments = scopedAssessments.Count(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending) })
+        // "What changed?" has one definition for every view and export: a notice still Open, or one that still holds
+        // Pending Assessment work in this scope. Pending Assessment is counted apart from acknowledgement (FR-DCV-03), and a
+        // scoped count travels with the notice's whole-project count so a partial number is never read as the total.
+        var changeRows = await changes
+            .Where(c => c.Status == ChangeStatus.Open || scopedAssessments.Any(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending))
+            .OrderBy(c => c.AssessmentDueDate).ThenBy(c => c.Key)
+            .Select(c => new { c.Id, c.Key, c.Title, c.Status, c.OwnerId,
+                PendingAssessments = scopedAssessments.Count(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending),
+                AcknowledgedPending = scopedAssessments.Count(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending && a.AcknowledgedAt != null),
+                ProjectPending = db.ChangeAssessments.Count(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending) })
             .ToListAsync();
 
         var reviews = db.ReviewPackages.AsNoTracking().Where(p => p.ProjectId == projectId);
@@ -173,7 +181,15 @@ public static class DisciplineCoordinationEndpoints
                 .Concat(db.Deliverables.Where(d => d.ProjectId == projectId && d.ProjectDisciplineId == useDiscipline).Select(d => d.Id));
             uses = uses.Where(u => targetIds.Contains(u.TargetId));
         }
-        var useRows = await uses.OrderByDescending(u => u.AdoptedAt).ThenBy(u => u.Id).ToListAsync();
+        var useRows = await uses.OrderByDescending(u => u.AdoptedAt).ThenBy(u => u.Id)
+            .Select(u => new { u.Id, u.TargetType, u.TargetId, u.OwnerId, u.SourceIdentity, u.SourceRevisionId, u.IntendedUse, u.AdoptedAt, u.AdoptedBy, u.RowVersion,
+                TargetKey = u.TargetType == ItemType.Task ? db.Tasks.Where(t => t.Id == u.TargetId).Select(t => t.Key).FirstOrDefault()
+                    : db.Deliverables.Where(d => d.Id == u.TargetId).Select(d => d.Key).FirstOrDefault(),
+                TargetName = u.TargetType == ItemType.Task ? db.Tasks.Where(t => t.Id == u.TargetId).Select(t => t.Name).FirstOrDefault()
+                    : db.Deliverables.Where(d => d.Id == u.TargetId).Select(d => d.Name).FirstOrDefault(),
+                SourceKey = db.SourceRevisions.Where(r => r.Id == u.SourceRevisionId).Select(r => r.SourceKey).FirstOrDefault(),
+                Revision = db.SourceRevisions.Where(r => r.Id == u.SourceRevisionId).Select(r => r.Revision).FirstOrDefault() })
+            .ToListAsync();
         var startability = await Startability(projectId, disciplineId, ownerId, from, to, today,
             lookaheadDays, evaluatedAt, db, settings);
         var changeIds = changeRows.Select(c => c.Id).ToArray();

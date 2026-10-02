@@ -267,6 +267,8 @@ public static class Text
         ["error.not_found"] = "Not found.",
         ["error.validation"] = "One or more fields are invalid.",
         ["error.invalid"] = "Enter a valid value.",
+        ["handoff.promised_required"] = "Set a promised date before submitting the handoff.",
+        ["handoff.snapshot_changed"] = "This revision and link identify an earlier source snapshot. Use a new revision or link for the changed source.",
         ["error.required"] = "Required.",
         ["error.too_long"] = "Must be {0} characters or fewer.",
         ["error.one_of"] = "Must be one of: {0}.",

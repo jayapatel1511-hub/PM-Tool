@@ -166,10 +166,12 @@ public static class HandoffEndpoints
             var oldTargetTaskId = h.TargetTaskId;
             var oldTargetDeliverableId = h.TargetDeliverableId;
             await Fill(db, p, h, body, source);
-            if (oldTargetTaskId != h.TargetTaskId || oldTargetDeliverableId != h.TargetDeliverableId)
-                await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, oldTargetTaskId, oldTargetDeliverableId);
-            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId);
-            db.Audit.Note(h, reason: body.Reason);
+            if (db.Entry(h).Properties.Any(property => !Equals(property.CurrentValue, property.OriginalValue))) {
+                if (oldTargetTaskId != h.TargetTaskId || oldTargetDeliverableId != h.TargetDeliverableId)
+                    await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, oldTargetTaskId, oldTargetDeliverableId);
+                await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId);
+                db.Audit.Note(h, reason: body.Reason);
+            }
             ProjectEndpoints.CorrectionReason(p, body.Reason);
             return h;
         });
@@ -197,7 +199,7 @@ public static class HandoffEndpoints
             }
             if (body.ToStatus == HandoffStatus.Submitted)
             {
-                Check.That(h.PromisedBy is not null, "promisedBy", "error.required");
+                Check.That(h.PromisedBy is not null, "promisedBy", "handoff.promised_required");
                 var source = await Source(db, p.Id, h.SourceDeliverableId, h.SourceRowVersion);
                 var registered = await Coordination.Snapshot(db, p, source, h.DeclaredRevision, h.SourceUrl);
                 var revision = new HandoffRevision { ProjectId = p.Id, HandoffId = h.Id, SourceRevisionId = registered.Id,
@@ -217,7 +219,10 @@ public static class HandoffEndpoints
                 var receipt = await db.HandoffRevisions.SingleAsync(r => r.Id == h.CurrentRevisionId);
                 var sourceRevision = await Coordination.Revision(db, p.Id, receipt.SourceRevisionId);
                 var head = await Coordination.Head(db, sourceRevision);
-                if (head != null && head.CurrentRevisionId != sourceRevision.Id)
+                var unpublishedCorrection = head != null && !await Coordination.Published(db, sourceRevision)
+                    && (sourceRevision.SupersedesId == head.CurrentRevisionId
+                        || receipt.PreviousRevisionId != null && await db.HandoffRevisions.AnyAsync(r => r.Id == receipt.PreviousRevisionId && r.SourceRevisionId == head.CurrentRevisionId));
+                if (head != null && head.CurrentRevisionId != sourceRevision.Id && !unpublishedCorrection)
                     Check.That(await db.ChangeAssessments.AnyAsync(a => a.ProjectId == p.Id && a.TargetId == (h.TargetTaskId ?? h.TargetDeliverableId) && a.RevisionUsedId == sourceRevision.Id && a.RetentionApprovedBy != null && a.RetainOldRevision && db.ChangeNotices.Any(c => c.Id == a.ChangeNoticeId && c.NewRevisionId == head.CurrentRevisionId)), "revision", "change.retention");
                 var target = await Coordination.Target(db, p, h.TargetTaskId != null ? "Task" : "Deliverable", h.TargetTaskId ?? h.TargetDeliverableId!.Value);
                 Check.That(target.Status is not (DeliverableStatus.Issued or DeliverableStatus.Accepted), "targetId", "review.issued");
@@ -339,7 +344,8 @@ public static class HandoffEndpoints
                 Assign = Permission(Permissions.AssignHandoff(access.Actor, ctx, facts)),
                 Transitions = HandoffStatus.All.Where(to => HandoffRules.Step(h.Status, to)).Select(to => new {
                     To = to, Permission = Permission(Permissions.HandoffTransition(access.Actor, ctx, facts, to, settings.AllowSelfReview)) }) },
-            ChangeAssessments = await db.ChangeAssessments.Where(a => a.ProjectId == projectId && (a.HandoffId == id || a.TargetId == (h.TargetTaskId ?? h.TargetDeliverableId)))
+            ChangeAssessments = await db.ChangeAssessments.Where(a => a.ProjectId == projectId && (a.HandoffId == id || a.TargetId == (h.TargetTaskId ?? h.TargetDeliverableId)
+                    && db.ChangeNotices.Any(c => c.Id == a.ChangeNoticeId && db.SourceRevisions.Any(r => r.Id == c.NewRevisionId && r.DeliverableId == h.SourceDeliverableId))))
                 .Join(db.ChangeNotices, a => a.ChangeNoticeId, c => c.Id, (a, c) => new { a.Id, a.Status, a.ChangeNoticeId, c.Key, c.Title, NoticeStatus = c.Status }).ToListAsync(),
             History = await db.HandoffReceiptEvents.AsNoTracking().Where(e => e.HandoffId == h.Id).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id)
                 .Select(e => new { e.Id, e.FromStatus, e.ToStatus, e.RevisionId, e.Reason, e.CriteriaOutcome, e.CreatedAt, e.CreatedBy,

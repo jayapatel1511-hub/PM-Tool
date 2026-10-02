@@ -314,7 +314,8 @@ public sealed class HandoffsTests(HubFactory f)
         await (await f.As(TestData.Marc).Post(Path(s.Project.Id), s.Body with { RequestId = Guid.NewGuid(), SourceRowVersion = s.Body.SourceRowVersion + 1 })).Json(422);
         Assert.Equal(0, f.Db(db => db.Handoffs.Count(h => h.ProjectId == s.Project.Id)));
         var id = (await Create(s, s.Body with { PromisedBy = null })).G("id");
-        await Move(s, id, TestData.Alex, HandoffStatus.Submitted, expect: 400);
+        var undated = await Move(s, id, TestData.Alex, HandoffStatus.Submitted, expect: 400);
+        Assert.Contains("promised date", undated["errors"]!["promisedBy"]![0]!.GetValue<string>()); // the refusal names the missing field
         Assert.Equal(0, f.Db(db => db.HandoffRevisions.Count(r => r.HandoffId == id)));
         Assert.Equal(0, f.Db(db => db.HandoffReceiptEvents.Count(r => r.HandoffId == id)));
         await Move(s, id, TestData.Rita, HandoffStatus.Cancelled, reason: "Read-only attempt", expect: 403);
@@ -377,5 +378,184 @@ public sealed class HandoffsTests(HubFactory f)
         Assert.False(detail["row"]!["ownersAvailable"]!.GetValue<bool>());
         await Move(s, id, TestData.Omar, HandoffStatus.Accepted, outcome: "Blocked by unavailable sender", expect: 400);
         // The later packet 027 creates the change-impact assignment; this test does not claim AC-HND-03.
+    }
+
+    // The 2026-10-02 browser flow: revision A is returned, the sender issues B on the deliverable, resubmits B with a response and it is accepted.
+    async Task<Guid> AcceptCorrectedRevision(Setup s, bool legacySnapshot = false)
+    {
+        var id = (await Create(s)).G("id"); var source = s.Source.G("id");
+        await Move(s, id, TestData.Alex, HandoffStatus.Submitted);
+        await Move(s, id, TestData.Omar, HandoffStatus.Returned, reason: "The west corridor tie-in is missing");
+        (await f.As(TestData.Alex).Patch($"/api/v1/deliverables/{source}", new { revision = "B" }, f.Db(db => db.Deliverables.Single(d => d.Id == source).RowVersion))).EnsureSuccessStatusCode();
+        await (await f.As(TestData.Alex).Post(Path(s.Project.Id, id) + "/draft", s.Body with { RequestId = Guid.NewGuid(), RowVersion = f.Db(db => db.Handoffs.Single(h => h.Id == id).RowVersion),
+            SourceRowVersion = f.Db(db => db.Deliverables.Single(d => d.Id == source).RowVersion), DeclaredRevision = "B", SourceUrl = "https://example.test/survey-B.pdf",
+            Reason = "Revision B adds the west corridor tie-in" })).Json();
+        if (legacySnapshot) await f.DbAsync(async db => {
+            // Existing review data captured immutable B before snapshots recorded a superseded revision.
+            var d = await db.Deliverables.SingleAsync(d => d.Id == source);
+            var issuer = await db.Users.Where(u => u.Id == d.OwnerId).Select(u => u.DisplayName).SingleAsync();
+            db.SourceRevisions.Add(new SourceRevision { ProjectId = s.Project.Id, DeliverableId = source, SourceRowVersion = d.RowVersion,
+                IdentityHash = Guid.NewGuid().ToString(), SourceIdentity = $"deliverable:{source}", SourceSystem = "Deliverable", ExternalIdentifier = d.Key,
+                SourceKey = d.Key, Title = d.Name, Revision = "B", Url = "https://example.test/survey-B.pdf", Issuer = issuer, Scope = d.Name });
+            return await db.SaveChangesAsync();
+        });
+        await Move(s, id, TestData.Alex, HandoffStatus.Submitted, reason: "Revision B issued with the west corridor tie-in");
+        await Move(s, id, TestData.Omar, HandoffStatus.Accepted, outcome: "Both corridor ends verified on revision B");
+        return id;
+    }
+    async Task<JsonNode> RegisterSurvey(Setup s, string revision, string description)
+    {
+        // As the Changes form does: copy the replaced current revision's details; enter the new revision and link.
+        var head = f.Db(db => db.SourceHeads.AsNoTracking().Single(h => h.ProjectId == s.Project.Id && h.Identity == $"deliverable:{s.Source.G("id")}"));
+        var current = f.Db(db => db.SourceRevisions.AsNoTracking().Single(r => r.Id == head.CurrentRevisionId));
+        var root = $"/api/v1/projects/{s.Project.Id}";
+        var notice = await (await f.As(TestData.Alex).Post(root + "/source-revisions", new ChangeEndpoints.RegisterBody(Guid.NewGuid(), s.Source.G("id"),
+            f.Db(db => db.Deliverables.Single(d => d.Id == s.Source.G("id")).RowVersion), head.ProjectDisciplineId, head.OwnerId, current.SourceSystem, current.ExternalIdentifier,
+            current.Title, revision, $"https://example.test/survey-{revision}.pdf", current.Issuer, current.Scope, null, current.Id, head.RowVersion, description,
+            new DateOnly(2026, 9, 14), new DateOnly(2026, 9, 18)))).Json();
+        await (await f.As(TestData.Alex).Post(root + $"/changes/{notice.G("id")}/publish", new ChangeEndpoints.PublishBody(Guid.NewGuid(), notice.I("rowVersion"), head.RowVersion, null))).Json();
+        return notice;
+    }
+    string RevisionOf(Guid sourceRevisionId) => f.Db(db => db.SourceRevisions.Single(r => r.Id == sourceRevisionId).Revision);
+
+    [Fact]
+    public async Task FR_HND_02_03_corrected_resubmission_is_incorporated_as_the_revision_used()
+    {
+        var s = await New(); var id = await AcceptCorrectedRevision(s);
+        await Move(s, id, TestData.Omar, HandoffStatus.Incorporated, outcome: "Revision B tie-in used in service alignment E-101");
+        var detail = await Detail(s, id);
+        Assert.Equal(HandoffStatus.Incorporated, detail["row"]!.S("status"));
+        Assert.Equal(new[] { "A", "B" }, detail["revisions"]!.AsArray().Select(r => r!["source"]!.S("revision")));
+        var use = f.Db(db => db.InputUses.Single(u => u.TargetId == s.Target.G("id")));
+        Assert.Equal("B", RevisionOf(use.SourceRevisionId));
+        // B is an explicit, unpublished replacement of the registered A until packet 027 publishes it.
+        var head = f.Db(db => db.SourceHeads.Single(h => h.ProjectId == s.Project.Id));
+        Assert.Equal("A", RevisionOf(head.CurrentRevisionId));
+        Assert.Equal(head.CurrentRevisionId, f.Db(db => db.SourceRevisions.Single(r => r.Id == use.SourceRevisionId).SupersedesId));
+        Assert.Equal(TaskStatuses.NotStarted, f.Db(db => db.Tasks.Single(t => t.Id == s.Target.G("id")).Status));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Registering_the_corrected_revision_later_does_not_assess_it_against_itself(bool legacySnapshot)
+    {
+        var s = await New(); var id = await AcceptCorrectedRevision(s, legacySnapshot);
+        await Move(s, id, TestData.Omar, HandoffStatus.Incorporated, outcome: "Revision B tie-in used in service alignment E-101");
+        // Other work still records A, so publishing B must still assess that work.
+        var other = (await data.NewTask(s.Project.Id, TestData.Omar, new { assigneeId = data.User(TestData.Omar) }, "Electrical")).G("id");
+        var a = f.Db(db => db.SourceHeads.Single(h => h.ProjectId == s.Project.Id).CurrentRevisionId);
+        await (await f.As(TestData.Omar).Post($"/api/v1/projects/{s.Project.Id}/input-uses", new ChangeEndpoints.AdoptBody(Guid.NewGuid(), "Task", other,
+            f.Db(db => db.Tasks.Single(t => t.Id == other).RowVersion), a, a, null, "Duct route levels", "Adopted survey A for the duct route"))).Json();
+        var notice = await RegisterSurvey(s, "B", "Revision B adds the west corridor tie-in");
+        Assert.Equal(new[] { other }, f.Db(db => db.ChangeAssessments.Where(x => x.ChangeNoticeId == notice.G("id")).Select(x => x.TargetId).ToList()));
+        var use = f.Db(db => db.InputUses.Single(u => u.TargetId == s.Target.G("id")));
+        Assert.Equal(f.Db(db => db.SourceHeads.Single(h => h.ProjectId == s.Project.Id).CurrentRevisionId), use.SourceRevisionId);
+        Assert.Empty((await Detail(s, id))["changeAssessments"]!.AsArray());
+        Assert.True(await f.DbAsync(async db => await Coordination.Published(db, await db.SourceRevisions.SingleAsync(r => r.Id == a))));
+        if (legacySnapshot) Assert.Null(f.Db(db => db.SourceRevisions.Single(r => r.Id == use.SourceRevisionId).SupersedesId)); // evidence stays immutable
+    }
+
+    [Fact]
+    public async Task FR_HND_04_corrected_revision_overtaken_by_a_published_change_needs_approved_retention()
+    {
+        var s = await New(); var id = await AcceptCorrectedRevision(s);
+        var notice = await RegisterSurvey(s, "C", "Revision C re-levels the east boundary");
+        await Move(s, id, TestData.Omar, HandoffStatus.Incorporated, outcome: "Revision B used in E-101", expect: 400);
+        var a = f.Db(db => db.ChangeAssessments.AsNoTracking().Single(x => x.ChangeNoticeId == notice.G("id")));
+        Assert.Equal(id, a.HandoffId); Assert.Equal("B", RevisionOf(a.RevisionUsedId));
+        var path = $"/api/v1/projects/{s.Project.Id}/changes/{notice.G("id")}/assessments/{a.Id}";
+        ChangeEndpoints.AssessmentBody Assess(string action, string? status) => new(Guid.NewGuid(), f.Db(db => db.ChangeAssessments.Single(x => x.Id == a.Id).RowVersion), action, status,
+            "East boundary re-levelling is outside the service corridor", "https://example.test/corridor-extent.pdf", null, null, null, null, a.OwnerId, null, null, null, null);
+        await (await f.As(TestData.Omar).Post(path, Assess("disposition", AssessmentStatus.Unaffected))).Json();
+        await Move(s, id, TestData.Omar, HandoffStatus.Incorporated, outcome: "Revision B used in E-101", expect: 400); // retention is not yet approved
+        await (await f.As(TestData.Pm).Post(path, Assess("approveRetention", null))).Json();
+        await Move(s, id, TestData.Omar, HandoffStatus.Incorporated, outcome: "Revision B retained for the service corridor");
+        Assert.Equal("B", RevisionOf(f.Db(db => db.InputUses.Single(u => u.TargetId == s.Target.G("id")).SourceRevisionId)));
+        Assert.Equal("C", RevisionOf(f.Db(db => db.SourceHeads.Single(h => h.ProjectId == s.Project.Id).CurrentRevisionId)));
+    }
+
+    [Fact]
+    public async Task Resubmitting_the_same_unpublished_B_after_C_does_not_make_B_current()
+    {
+        var s = await New(); await AcceptCorrectedRevision(s);
+        await RegisterSurvey(s, "C", "Revision C replaces the survey");
+        var b = f.Db(db => db.SourceRevisions.Single(r => r.ProjectId == s.Project.Id && r.Revision == "B").Id);
+        var replacement = (await Create(s, s.Body with { RequestId = Guid.NewGuid(), SourceRowVersion = f.Db(db => db.Deliverables.Single(d => d.Id == s.Source.G("id")).RowVersion),
+            DeclaredRevision = "B", SourceUrl = "https://example.test/survey-B.pdf" })).G("id");
+        await Move(s, replacement, TestData.Alex, HandoffStatus.Submitted);
+        await Move(s, replacement, TestData.Omar, HandoffStatus.Accepted, outcome: "Revision B accepted for this corridor");
+        await Move(s, replacement, TestData.Omar, HandoffStatus.Incorporated, outcome: "Retain B without approval", expect: 400);
+        Assert.Equal(b, f.Db(db => db.HandoffRevisions.Single(r => r.HandoffId == replacement).SourceRevisionId));
+        Assert.Equal("C", RevisionOf(f.Db(db => db.SourceHeads.Single(h => h.ProjectId == s.Project.Id).CurrentRevisionId)));
+    }
+
+    [Fact]
+    public async Task A_changed_deliverable_cannot_resubmit_an_earlier_unpublished_snapshot_as_new_evidence()
+    {
+        var s = await New(); await AcceptCorrectedRevision(s, legacySnapshot: true);
+        var source = s.Source.G("id");
+        var b = f.Db(db => db.SourceRevisions.Single(r => r.ProjectId == s.Project.Id && r.Revision == "B").Id);
+        (await f.As(TestData.Alex).Patch($"/api/v1/deliverables/{source}", new { name = "Updated survey basis" },
+            f.Db(db => db.Deliverables.Single(d => d.Id == source).RowVersion))).EnsureSuccessStatusCode();
+        var replacement = (await Create(s, s.Body with { RequestId = Guid.NewGuid(), SourceRowVersion = f.Db(db => db.Deliverables.Single(d => d.Id == source).RowVersion),
+            DeclaredRevision = "B", SourceUrl = "https://example.test/survey-B.pdf" })).G("id");
+        await Move(s, replacement, TestData.Alex, HandoffStatus.Submitted, expect: 400);
+        Assert.Null(f.Db(db => db.Handoffs.Single(h => h.Id == replacement).CurrentRevisionId));
+        Assert.Empty(f.Db(db => db.HandoffRevisions.Where(r => r.HandoffId == replacement).ToList()));
+        Assert.Equal("Survey basis", f.Db(db => db.SourceRevisions.Single(r => r.Id == b).Title));
+    }
+
+    [Fact]
+    public async Task Detail_lists_change_assessments_for_its_own_source_only()
+    {
+        var s = await New(); var id = (await Create(s)).G("id"); var target = s.Target.G("id");
+        await Move(s, id, TestData.Alex, HandoffStatus.Submitted);
+        // The receiving task also uses an unrelated external report; a change to that report is not about this handoff.
+        var root = $"/api/v1/projects/{s.Project.Id}"; var electrical = data.ProjectDiscipline(s.Project.Id, "Electrical");
+        ChangeEndpoints.RegisterBody Report(string revision, Guid? old = null, int? head = null) => new(Guid.NewGuid(), null, null, electrical, data.User(TestData.Omar), "External", "geo-report",
+            "Geotechnical report", revision, $"https://example.test/geo-{revision}.pdf", "Geotech Ltd", "Bearing assumptions", null, old, head,
+            old == null ? null : "Revised bearing values", old == null ? null : new DateOnly(2026, 9, 14), old == null ? null : new DateOnly(2026, 9, 18));
+        var reportA = (await (await f.As(TestData.Omar).Post(root + "/source-revisions", Report("A"))).Json()).G("id");
+        await (await f.As(TestData.Omar).Post(root + "/input-uses", new ChangeEndpoints.AdoptBody(Guid.NewGuid(), "Task", target,
+            f.Db(db => db.Tasks.Single(t => t.Id == target).RowVersion), reportA, reportA, null, "Bearing assumptions", "Adopted for the service base"))).Json();
+        var head = f.Db(db => db.SourceHeads.AsNoTracking().Single(h => h.CurrentRevisionId == reportA));
+        var notice = await (await f.As(TestData.Omar).Post(root + "/source-revisions", Report("B", reportA, head.RowVersion))).Json();
+        await (await f.As(TestData.Omar).Post(root + $"/changes/{notice.G("id")}/publish", new ChangeEndpoints.PublishBody(Guid.NewGuid(), notice.I("rowVersion"), head.RowVersion, null))).Json();
+        Assert.True(f.Db(db => db.ChangeAssessments.Any(x => x.ChangeNoticeId == notice.G("id") && x.TargetId == target)));
+        Assert.Empty((await Detail(s, id))["changeAssessments"]!.AsArray());
+    }
+
+    [Fact]
+    public async Task Saving_an_unchanged_draft_keeps_submission_sign_offs_and_a_real_change_still_resets_them()
+    {
+        var s = await New(); var root = $"/api/v1/projects/{s.Project.Id}"; var civil = data.ProjectDiscipline(s.Project.Id, "Civil");
+        var work = (await (await f.As(TestData.Marc).Post(root + "/deliverables", new { name = "Grading plan", projectDisciplineId = civil,
+            deliverableTypeId = await data.DeliverableType(), ownerId = data.User(TestData.Marc), revision = "P1", requiresReview = false })).Json(201)).G("id");
+        var revision = await (await f.As(TestData.Marc).Post(root + "/source-revisions", new ChangeEndpoints.RegisterBody(Guid.NewGuid(), work,
+            f.Db(db => db.Deliverables.Single(d => d.Id == work).RowVersion), civil, data.User(TestData.Marc), "Deliverable", "grading", "Grading plan", "P1",
+            "https://example.test/grading-P1.pdf", "Civil team", "Submission", null, null, null, null, null, null))).Json();
+        var milestone = await (await f.As(TestData.Pm).Post(root + "/milestones", new MilestoneEndpoints.CreateBody("Grading issue", MilestoneType.DesignSubmission,
+            new DateOnly(2026, 10, 15), null, null, null, true))).Json(201);
+        var package = (await (await f.As(TestData.Marc).Post(root + "/submissions", new SubmissionEndpoints.CreateBody(Guid.NewGuid(), "Grading package", "Permit", "Municipality",
+            data.User(TestData.Marc), milestone.G("id"), new DateOnly(2026, 10, 15), [new(revision.G("id"))], [], null, null))).Json()).G("id");
+        var body = s.Body with { ReceivingDisciplineId = civil, ReceivingOwnerId = data.User(TestData.Marc), TargetTaskId = null, TargetDeliverableId = work };
+        var id = (await Create(s, body)).G("id");
+        async Task SignOff() => await f.DbAsync(async db => {
+            (await db.SubmissionPackages.SingleAsync(p => p.Id == package)).Status = SubmissionStatus.Ready;
+            foreach (var check in await db.SubmissionChecks.Where(c => c.PackageId == package).ToListAsync()) { check.Status = SubmissionCheckStatus.Pass; check.EvidenceUrl = "https://example.test/signed"; }
+            return await db.SaveChangesAsync();
+        });
+        async Task Save(HandoffEndpoints.DraftBody edit) => await (await f.As(TestData.Alex).Post(Path(s.Project.Id, id) + "/draft",
+            edit with { RequestId = Guid.NewGuid(), RowVersion = f.Db(db => db.Handoffs.Single(h => h.Id == id).RowVersion) })).Json();
+        bool SignedOff() => f.Db(db => db.SubmissionPackages.Single(p => p.Id == package).Status == SubmissionStatus.Ready
+            && db.SubmissionChecks.Where(c => c.PackageId == package).All(c => c.Status == SubmissionCheckStatus.Pass && c.EvidenceUrl != null));
+        await SignOff();
+        await Save(body);
+        Assert.True(SignedOff());
+        await Save(body with { PromisedBy = new DateOnly(2026, 9, 17) });
+        Assert.False(SignedOff());
+        Assert.Equal(SubmissionStatus.Checking, f.Db(db => db.SubmissionPackages.Single(p => p.Id == package).Status));
+        Assert.All(f.Db(db => db.SubmissionChecks.Where(c => c.PackageId == package).ToList()), c => { Assert.Equal(SubmissionCheckStatus.Pending, c.Status); Assert.Null(c.EvidenceUrl); });
     }
 }

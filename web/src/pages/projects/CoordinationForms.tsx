@@ -32,7 +32,7 @@ export function SelectField({ label, value, onChange, choices, required = true }
 }
 export function useCoordRefresh(projectId: string) {
   const qc = useQueryClient()
-  return () => { for (const key of ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'search']) qc.invalidateQueries({ queryKey: key === 'search' ? [key] : [key, projectId] }); qc.invalidateQueries({ queryKey: ['p', projectId] }); qc.invalidateQueries({ queryKey: ['deliverable'] }) }
+  return () => { for (const key of ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'search']) qc.invalidateQueries({ queryKey: key === 'search' ? [key] : [key, projectId] }); qc.invalidateQueries({ queryKey: ['p', projectId] }); qc.invalidateQueries({ queryKey: ['deliverable'] }); qc.invalidateQueries({ queryKey: ['workspace-coordination'] }) }
 }
 export function CommandForm({ path, title, hint, payload, children, onClose, onDone, submitLabel }: { path: string; title: string; hint?: string; payload: () => object; children?: ReactNode; onClose: () => void; onDone: (id: string) => void; submitLabel?: string }) {
   const [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null)

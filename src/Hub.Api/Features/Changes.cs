@@ -68,8 +68,20 @@ public static class ChangeEndpoints
                 SourceSystem = system, ExternalIdentifier = external, SourceKey = sourceKey, Title = Check.Required(body.Title, "title"), Revision = Check.Required(body.Revision, "revision", 100),
                 Url = Coordination.Url(body.Url), Issuer = Check.Required(body.Issuer, "issuer", 200), Scope = Check.Required(body.Scope, "scope", 2000), SourceCheckedAt = body.SourceCheckedAt, SupersedesId = previous?.Id, AuthorIds = authors };
             revision.IdentityHash = Coordination.Hash(new { identity, revision.Revision, revision.Url, revision.Issuer, revision.Scope, revision.SupersedesId, sourceVersion });
-            Check.That(!await db.SourceRevisions.AnyAsync(r => r.ProjectId == p.Id && r.IdentityHash == revision.IdentityHash), "revision", "change.duplicate_revision");
-            db.SourceRevisions.Add(revision);
+            var snapshot = await db.SourceRevisions.SingleOrDefaultAsync(r => r.ProjectId == p.Id && r.IdentityHash == revision.IdentityHash);
+            // Register the receiver's existing immutable handoff snapshot rather than replacing B with another B.
+            if (snapshot is null && previous is not null)
+                snapshot = await db.SourceRevisions.FirstOrDefaultAsync(r => r.ProjectId == p.Id && r.SourceIdentity == identity
+                    && r.SourceRowVersion == sourceVersion && r.Revision == revision.Revision && r.Url == revision.Url
+                    && r.Title == revision.Title && r.Issuer == revision.Issuer && r.Scope == revision.Scope && r.SourceCheckedAt == revision.SourceCheckedAt
+                    && db.HandoffRevisions.Any(h => h.SourceRevisionId == r.Id && h.PreviousRevisionId != null
+                        && db.HandoffRevisions.Any(old => old.Id == h.PreviousRevisionId && old.SourceRevisionId == previous.Id)));
+            if (snapshot is not null) {
+                Check.That(previous is not null && !await Coordination.Published(db, snapshot)
+                    && !await db.ChangeNotices.AnyAsync(c => c.NewRevisionId == snapshot.Id)
+                    && await db.HandoffRevisions.AnyAsync(h => h.SourceRevisionId == snapshot.Id), "revision", "change.duplicate_revision");
+                revision = snapshot;
+            } else db.SourceRevisions.Add(revision);
             if (previous == null) {
                 db.SourceHeads.Add(new SourceHead { ProjectId = p.Id, Identity = identity, CurrentRevisionId = revision.Id, OwnerId = body.OwnerId, ProjectDisciplineId = body.ProjectDisciplineId }); return revision;
             }

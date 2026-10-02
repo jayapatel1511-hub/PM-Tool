@@ -212,15 +212,13 @@ public static class ReadinessEndpoints
         ReadinessPermission? permission = null;
         if (latestException is not null)
             permission = new ReadinessPermission(true, latestException.ExpiresOn,
-                exceptionBasisVersionId == latestException.BasisVersionId && activeConstraints.Count == 0,
+                exceptionBasisVersionId == latestException.BasisVersionId,
                 latestException.VerifierId != target.OwnerId && await Coordination.People(db, project)
                     .AnyAsync(u => u.Id == latestException.VerifierId), latestException.LimitedWork, latestException.Risk);
-        var result = ReadinessRules.Evaluate(checks.Values.Select(c => new ReadinessCheck(c.Code, c.Applies, c.Satisfied)), permission, today);
-        var openConstraint = await db.WorkConstraints.AsNoTracking().AnyAsync(c => c.ProjectId == project.Id &&
-            c.TargetType == targetType && c.TargetId == targetId &&
-            (c.State == ConstraintState.Open || c.State == ConstraintState.ResolutionProposed));
-        if (openConstraint) result = new ReadinessResult(ReadinessState.NotReady, result.Unknown,
-            [.. result.Blocked, "Constraint"]);
+        // An open or proposed-for-removal constraint is a known failure; it never hides an unknown check (§10.8 precedence)
+        // and, being a second failure, leaves no room for Proceed under Assumption.
+        var result = ReadinessRules.Evaluate(checks.Values.Select(c => new ReadinessCheck(c.Code, c.Applies, c.Satisfied)), permission, today,
+            activeConstraints.Count > 0 ? [ReadinessRules.ConstraintBlocker] : null);
         assessment.State = result.State; assessment.EvaluatedAt = now;
         return result;
     }

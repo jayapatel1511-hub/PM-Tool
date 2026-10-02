@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Features;
 using Hub.Domain;
@@ -523,6 +524,45 @@ public sealed class ReadinessApiTests(HubFactory f)
         });
         Assert.Equal(ReadinessState.NotReady, saved.Assessment.State);
         Assert.False(saved.Predecessor.Satisfied);
+    }
+
+    [Fact]
+    public async Task Open_constraint_lists_as_blocking_but_never_hides_an_unknown_check()
+    {
+        var project = await data.Project();
+        var task = (await data.NewTask(project.Id, extra: new { assigneeId = data.User(TestData.Alex) })).G("id");
+        var version = f.Db(db => db.Tasks.Single(t => t.Id == task).RowVersion);
+        var path = $"/api/v1/projects/{project.Id}/readiness/Task/{task}";
+        var assessment = (await (await f.As(TestData.Alex).Post(path, new ReadinessEndpoints.CreateBody(Guid.NewGuid(), version, "Layout", "Checked"))).Json()).G("id");
+        await f.DbAsync(async db =>
+        {
+            foreach (var check in await db.ReadinessChecks.Where(c => c.AssessmentId == assessment).ToListAsync())
+                check.Applies = check.Code == ReadinessCheckCode.Decision ? null : check.Code == ReadinessCheckCode.ProductionOwner;
+            return await db.SaveChangesAsync();
+        });
+        var constraint = (await (await f.As(TestData.Alex).Post($"{path}/constraints", new ReadinessEndpoints.ConstraintBody(Guid.NewGuid(), version,
+            "Scope", "Confirm the scope change", data.User(TestData.Pm), DateOnly.FromDateTime(f.Clock.Now.UtcDateTime.AddDays(3)),
+            "https://example.test/scope"))).Json()).G("id");
+        string[] Codes(JsonNode n, string key) => [.. n[key]!.AsArray().Select(x => x!.GetValue<string>())];
+
+        var both = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal(ReadinessState.NeedsAssessment, both["assessment"]!.S("state")); // §10.8: unknown first
+        Assert.Equal([ReadinessCheckCode.Decision], Codes(both, "unknown"));
+        Assert.Equal([ReadinessRules.ConstraintBlocker], Codes(both, "blocked")); // the known failure stays listed
+        var start = await (await f.As(TestData.Alex).GetAsync($"/api/v1/tasks/{task}/start-readiness")).Json();
+        Assert.Equal((ReadinessState.NeedsAssessment, true), (start.S("readinessState"), start["needsAuthorisation"]!.GetValue<bool>()));
+
+        var detail = await (await f.As(TestData.Pm).GetAsync(path)).Json();
+        var decision = detail["checks"]!.AsArray().Single(c => c!.S("code") == ReadinessCheckCode.Decision)!;
+        await (await f.As(TestData.Pm).Post($"{path}/checks/Decision/applicability", new ReadinessEndpoints.ApplicabilityBody(Guid.NewGuid(),
+            detail["assessment"]!.I("rowVersion"), decision.I("rowVersion"), false, "No decision gates this layout", null))).Json();
+        var constrained = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.Equal((ReadinessState.NotReady, ReadinessRules.ConstraintBlocker), (constrained["assessment"]!.S("state"), Assert.Single(Codes(constrained, "blocked"))));
+        Assert.True((await (await f.As(TestData.Alex).GetAsync($"/api/v1/tasks/{task}/start-readiness")).Json())["needsAuthorisation"]!.GetValue<bool>());
+
+        await (await f.As(TestData.Pm).Post($"{path}/constraints/{constraint}/transition", new ReadinessEndpoints.ConstraintMoveBody(Guid.NewGuid(),
+            f.Db(db => db.WorkConstraints.Single(c => c.Id == constraint).RowVersion), ConstraintState.Cancelled, "Scope change withdrawn", null))).Json();
+        Assert.Equal(ReadinessState.Ready, (await (await f.As(TestData.Alex).GetAsync(path)).Json())["assessment"]!.S("state"));
     }
 
     [Fact]

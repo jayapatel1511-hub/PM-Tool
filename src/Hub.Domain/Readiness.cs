@@ -26,7 +26,15 @@ public sealed record ReadinessResult(string State, string[] Unknown, string[] Bl
 
 public static class ReadinessRules
 {
-    public static ReadinessResult Evaluate(IEnumerable<ReadinessCheck> inputs, ReadinessPermission? permission, DateOnly today)
+    /// A known failure outside the canonical checks: an open or proposed-for-removal constraint on the work.
+    public const string ConstraintBlocker = "Constraint";
+
+    /// §10.8 precedence: Needs Assessment for any unknown applicable check (or an approved assumption that expired or
+    /// changed), then Not Ready for known failures, otherwise Ready; Proceed under Assumption only when the sole failure is
+    /// the covered Basis check. Every unknown and blocking reason stays listed whatever the headline.
+    /// <paramref name="blockers"/> are known failures outside the canonical checks, such as <see cref="ConstraintBlocker"/>.
+    public static ReadinessResult Evaluate(IEnumerable<ReadinessCheck> inputs, ReadinessPermission? permission, DateOnly today,
+        IEnumerable<string>? blockers = null)
     {
         var checks = inputs.ToArray();
         if (checks.Length != ReadinessCheckCode.All.Length ||
@@ -35,7 +43,7 @@ public static class ReadinessRules
             throw new ArgumentException("Readiness requires each unique canonical check.", nameof(inputs));
         var unknown = checks.Where(x => x.Applies is null || x.Applies == true && x.Satisfied is null)
             .Select(x => x.Code).ToArray();
-        var blocked = checks.Where(x => x.Applies == true && x.Satisfied == false).Select(x => x.Code).ToArray();
+        var blocked = checks.Where(x => x.Applies == true && x.Satisfied == false).Select(x => x.Code).Concat(blockers ?? []).ToArray();
         if (unknown.Length > 0 || blocked.Contains(ReadinessCheckCode.Basis) && permission is { Approved: true } &&
             (permission.ExpiresOn < today || !permission.SameBasisVersion || !permission.HasVerifier))
             return new(ReadinessState.NeedsAssessment, unknown, blocked);

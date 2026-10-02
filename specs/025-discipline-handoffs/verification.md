@@ -79,3 +79,8 @@ Independent rehearsal against the real API on worktree head `b155601` (fresh loc
 **Lower-severity findings.** The handoff detail's change-assessment list includes notices for unrelated sources on the same receiving task (VER-201-H004 listed the geotechnical notices CH001 and CH002 beside the survey notice); the query in `HandoffEndpoints.Detail` matches on `TargetId` alone. The refused undated submission says only "One or more fields are invalid. Required." without naming the promised date.
 
 NOT RUN: AC-HND-03 incorporated-A-then-B (covered by the earlier local evidence), keyboard-only and screen-reader use, other browsers, load, hosted/homedev and company acceptance. T006 stays open.
+
+
+## 2026-10-02 combined candidate
+
+Corrected resubmission, immutable snapshot registration/legacy lineage, overtaken-revision retention, stale-evidence refusal, no-op draft sign-offs and coordination refresh are fixed at `c70cedf`. Final handoff/change PostgreSQL checks passed 52/52. Hosted browser acceptance remains pending activation. See [combined release evidence](../../docs/reviews/2026-10-02-combined-candidate.md).

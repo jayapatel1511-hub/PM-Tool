@@ -100,3 +100,8 @@ Real Chrome against the API on 127.0.0.1:5099 with the isolated database `hub_ag
 | Errors | 0 page errors, 0 console errors, 0 failed API calls |
 
 NOT RUN: Letter and other paper sizes, other browsers and assistive technology, hosted or homedev runs. Packet 030 is not accepted. AC-DCV-03 stays open until handoff commands refresh the projection.
+
+
+## 2026-10-02 combined candidate
+
+Integrated count scope, pending/acknowledgement, linked-task, print and CSV corrections (`36b6cd5`, `8b3bdd3`, `c70cedf`). Frontend build/lint and mocked Chromium regressions passed. Hosted scope/export/print acceptance remains pending activation. See [combined release evidence](../../docs/reviews/2026-10-02-combined-candidate.md).

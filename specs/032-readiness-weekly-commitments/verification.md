@@ -342,3 +342,8 @@ Commands still refuse invalid work through `Coordination.Target`, which was not 
 - the per-work constraint and prerequisite lists, both window exports, the weekly-commitment range list and its export all return 200.
 
 Task start readiness returned Not Ready, needing authorisation, with no note. Creating a constraint on the work was still refused with 400. Against the unfixed evaluator the same three tests failed with the reproduced 400s. The full suite passed 572/572, and `tools/trace_spec.py --check` reported 0 not cited. No web files changed.
+
+
+## 2026-10-02 combined candidate
+
+Canonical section 10.8 constraint/unknown precedence is corrected at `7c412b0`; all blocker reasons remain visible and constraints prevent Proceed under Assumption. Focused readiness/task-start/coordination checks passed 266/266. Hosted acceptance remains pending activation. See [combined release evidence](../../docs/reviews/2026-10-02-combined-candidate.md).

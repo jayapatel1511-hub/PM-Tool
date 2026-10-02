@@ -12,6 +12,11 @@ const options={actorId:actor,canWrite:true,manageDisciplineIds:[civil,electrical
 let packageRow, assignments=[], rounds=[], notice, assessment, uses=[{id:id(16),rowVersion:1,targetType:'Task',targetId:target,ownerId:actor,sourceIdentity:source.sourceIdentity,sourceRevisionId:srcA,intendedUse:'Service route',adoptedAt:'2026-09-27T09:00:00Z',adoptedBy:actor}], newSource, server,browser;
 const requests=[],errors=[],violations=[];
 (async()=>{
+ // L7: client-built CSV cells follow the server's Export.Csv formula guard and also quote ; and tab (no browser needed).
+ const { csvCell } = await import('../src/lib/csv.ts');
+ for (const [value, cell] of [['plain','plain'],['a,b','"a,b"'],['a;b','"a;b"'],['tab\there','"tab\there"'],['say "hi"','"say ""hi"""'],['two\nlines','"two\nlines"'],
+   ['=SUM(A1:A2)',"'=SUM(A1:A2)"],['+cmd',"'+cmd"],['-cmd',"'-cmd"],['@cmd',"'@cmd"],['\tcmd',`"'\tcmd"`],['\rcmd',`"'\rcmd"`],[' =cmd',"' =cmd"],
+   ['=1;2',`"'=1;2"`],['-12.5','-12.5'],['+3e2','+3e2'],[42,'42'],[null,'']]) assert.equal(csvCell(value), cell, JSON.stringify(value));
  server=spawn(process.execPath,['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','5174','--strictPort'],{cwd:path.resolve(__dirname,'..'),stdio:'inherit'});
  for(let i=0;i<50;i++){try{if((await fetch('http://127.0.0.1:5174')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  browser=await chromium.launch({headless:true,...(process.env.CHROME_EXECUTABLE_PATH?{executablePath:process.env.CHROME_EXECUTABLE_PATH}:{})});const page=await browser.newPage({viewport:{width:1440,height:1000}});

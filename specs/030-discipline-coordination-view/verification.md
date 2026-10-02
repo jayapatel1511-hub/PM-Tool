@@ -64,3 +64,39 @@ Independent rehearsal on worktree head `b155601` against the real API and a fres
 **Defects.** (Medium) Handoff commands do not invalidate the coordination projection: `refresh()` in `web/src/pages/projects/Handoffs.tsx` invalidates handoff, option and search queries but not `['p', projectId, 'discipline-coordination', …]`, so within the 15 s `staleTime` (`web/src/main.tsx`) a returning user sees the pre-edit snapshot; review and change commands use `useCoordRefresh`, which does invalidate it. (Medium) The server filters input uses and change assessments by the selected discipline (`Build` in `src/Hub.Api/Features/DisciplineCoordination.cs`) while card titles and the scope note in `DisciplineCoordinationView.tsx` call them project-wide, so a partial count is described as project-wide. (Medium) Printing truncates to one viewport: in print media the shell `div` in `web/src/app/Shell.tsx` keeps `h-dvh overflow-hidden` and `main#content` keeps `overflow-auto` (computed: shell height 1000px, overflow hidden; main clientHeight 1000 of scrollHeight 5756), and `@media print` in `web/src/index.css` only hides `.no-print`. (Low) The blocker-group count is not a link to those tasks, although the task list accepts an `ids` filter. (Low) My Work counts every notice, including Closed and Draft, under "What changed?" (VER-201: 5), while the project card counts only open ones (3) for the same scope; My Work CSV InputUse rows carry only an ID. (Low, accessibility) `aria-label` on the scope-filter `div` without a role.
 
 NOT RUN: staffing-conflict filters, weekly-commitment snapshots in meeting mode, screen-reader and other-browser checks, large populated data, hosted/homedev acceptance. Packet 030 is not accepted.
+
+## 2026-10-02 fix verification: scope labels, change counts, print and CSV
+
+Fixes for the coordination-view findings of the 2026-10-02 rehearsal above (the handoff-refresh defect behind the AC-DCV-03 failure belongs to the handoff writer and is not addressed here).
+
+- **Scope labels.** Every section of the project view follows the selected discipline and owner, as the server already counted. "project-wide" now appears only when neither is selected, the scope note says which cards fall back to the signed-in user's handoffs, and the blocker list is headed "Linked task blockers" instead of repeating "What are we waiting for?".
+- **FR-DCV-03 change rows.** Each row shows Pending Assessment apart from acknowledgement, for example "2 Pending Assessment · 1 of 2 acknowledged". A scoped row says "in this scope" and adds the notice's whole-project pending count when that differs, so a partial number is never read as the total.
+- **One "What changed?" definition.** The server returns only notices that are Open or still hold Pending Assessment work in scope, so My Work, the project card and the CSV count the same rows. Draft and closed notices are no longer counted in My Work.
+- **CSV.** Input-use rows carry the consuming work's key and name and the source key and revision. Change rows carry the pending, acknowledged and project-pending numbers. Finding L7: client CSV cells use the server `Export.Csv` formula guard (leading `= + - @`, tab or CR gets an apostrophe; numbers stay numbers) and are also quoted when they contain `;` or a tab. A formula after leading spaces is guarded as well, so the client rule is never weaker than the server's; the server does not quote `;` or a tab.
+- **AC-DCV-01.** "N linked tasks" links to the task list filtered to exactly those tasks (`tasks?ids=…`), in both the project view and My Work.
+- **Print.** In print media the app shell flows (`print:block print:h-auto print:overflow-visible`, rail hidden, `main` not scrolled), so the whole page paginates.
+- **Accessibility.** The scope filter is a labelled `role="group"`.
+
+| Check | Result |
+|---|---|
+| New `DisciplineCoordinationTests` (Open + Draft notices, two assessments with one acknowledged, project/Civil/Electrical/owner scopes, My Work equality, readable uses) | 1/1 passed. It fails if the "What changed?" filter is removed |
+| Focused suites (DisciplineCoordination, MeetingActions, Handoffs, ReviewChange, CoordinationLifecycleSweep, Views) | 120/120 passed |
+| Full PostgreSQL suite | 570/570 passed |
+| `python3 tools/trace_spec.py --check` | 612 IDs, 0 not cited, 0 unknown |
+| `npm --prefix web run build`, then `npm --prefix web run lint` | Build passed. Lint showed 88 warnings and 0 errors, the same warnings as at `e28577c` |
+| `test:coordination` with the installed Chrome (`CHROME_EXECUTABLE_PATH`) | Exit 0. The new CSV-cell assertions passed (`;`, tab, quote, newline, `= + - @`, leading tab or CR, numbers), as did the 5 axe-scanned flows with 0 violations. Run alone against a copy without `;` quoting, the same CSV assertions fail |
+
+Real Chrome against the API on 127.0.0.1:5099 with the isolated database `hub_agent_dcv` (dropped afterwards), Development auth, and synthetic projects seeded through the API:
+
+| Scenario | Result |
+|---|---|
+| Project view, no scope (Priya) | "Which revision are we using? · project-wide" counted 2. "What changed? · project-wide" counted 1 because the Draft notice was excluded. The row read "CH001 · Coordinated survey · Open · 2 Pending Assessment · 1 of 2 acknowledged" |
+| Civil scope (`?discipline=`) | Titles had no "project-wide"; uses counted 1. The row read "1 Pending Assessment in this scope · 0 of 1 acknowledged · 2 pending across the project", which resolves the earlier "0 assessment(s)" reading |
+| AC-DCV-01 count link | "3 linked tasks" opened `tasks?ids=` with exactly T0003–T0005. The two consumer tasks were not listed |
+| My Work (Marc, default Civil scope) | "What changed? (1)" matched the project view for the same scope. The downloaded CSV InputUse row was `DCVF9336-T0002,"Grading tie-in; east · DCVF9336-D001 rev A · Coordinate the corridor"`, with the `;` field quoted. The Change row title carried `pending: 1 · acknowledged: 0 · project pending: 2` |
+| axe WCAG 2.1 A/AA | Project view and My Work: 0 violations and 0 incomplete. The scope-filter `aria-prohibited-attr` result is gone |
+| Print before and after, same data, A4 under print media | With the shell at `e28577c`, Weekly Coordination and My Work each printed 1 page, and the last section or project was missing. With the fix, each printed 3 pages with "12. Held items" and the last project present |
+| Print final run | Weekly Coordination printed 3 pages with all 12 numbered sections and the coordination card titles in the PDF text. My Work printed 5 pages with every on-screen project heading. Export and print controls were absent. Shell and `main` overflow were `visible`, and `main` clientHeight equalled its scrollHeight |
+| Errors | 0 page errors, 0 console errors, 0 failed API calls |
+
+NOT RUN: Letter and other paper sizes, other browsers and assistive technology, hosted or homedev runs. Packet 030 is not accepted. AC-DCV-03 stays open until handoff commands refresh the projection.

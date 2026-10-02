@@ -4,6 +4,7 @@ import { ErrorBanner, Loading, Page } from '@/components/hub/common'
 import { ViewMenu } from '@/components/hub/views'
 import { useScope } from '@/components/hub/workspace'
 import { get, qs } from '@/lib/api'
+import { csvCell } from '@/lib/csv'
 import { plural, t } from '@/lib/i18n'
 import { ChangeAssessmentCounts, type ChangeCounts } from './projects/DisciplineCoordinationView'
 
@@ -24,12 +25,6 @@ type ProjectProjection = { id: string; projectNumber: string; name: string; disc
 type Choice = { id: string; name?: string; projectNumber?: string; displayName?: string }
 type Projection = { evaluatedAt: string; projects: ProjectProjection[]; projectChoices: Choice[];
   disciplines: Choice[]; owners: Choice[] }
-
-function csvCell(value: unknown) {
-  let text = String(value ?? '')
-  if (/^\s*[-=+@]/.test(text) && !/^[+-]?\d+(\.\d+)?$/.test(text)) text = `'${text}`
-  return /[,"\n\r]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text
-}
 
 function downloadCsv(projection: Projection) {
   const lines = ['evaluatedAt,project,section,id,key,title,status']

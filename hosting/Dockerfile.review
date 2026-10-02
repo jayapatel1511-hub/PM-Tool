@@ -16,4 +16,5 @@ WORKDIR /app
 COPY --from=build /out/ ./
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 EXPOSE 8080
+USER 1000:1000
 ENTRYPOINT ["dotnet", "Hub.Api.dll"]

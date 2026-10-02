@@ -36,6 +36,11 @@ services:
     mem_limit: 1g
     cpus: 2.0
     security_opt: ["no-new-privileges:true"]
+    # Least privilege: immutable image filesystem, no Linux capabilities, bounded processes.
+    read_only: true
+    tmpfs: ["/tmp:size=64m,mode=1777"]
+    cap_drop: [ALL]
+    pids_limit: 256
     logging:
       options: { max-size: "10m", max-file: "3" }
     depends_on:
@@ -44,6 +49,8 @@ services:
       - ../.runtime/pilot.env
     environment:
       ASPNETCORE_ENVIRONMENT: Staging
+      # Cloudflare forwards the visitor scheme; redirect plain-HTTP visitors before any password is typed.
+      ASPNETCORE_HTTPS_PORT: "443"
       Auth__Mode: LocalPassword
       Auth__Local__UsersFile: /run/pilot/pilot-users.json
       Auth__Local__KeyDirectory: /run/pilot/keys

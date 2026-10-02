@@ -75,3 +75,14 @@ Earlier CI `a8cd339` passed; later heads require their own exact-head CI. Homede
 `1c59e33`, requires interactive sudo for activation, and has no public DNS/tunnel. No merge, current review deployment,
 company pilot acceptance or production deployment is claimed. The local HTTPS password browser rehearsal was blocked
 by certificate trust; current hosted password/browser acceptance remains unproven.
+
+## 2026-10-02 private review activation
+
+- **PASS, review activation (private origin):** Jay ran `scripts/activate-homedev-review.sh b1556019a35d0e32e97d0414c5103624c375a546 --install-timer` on homedev with noninteractive input (22:06–22:11 UTC). Exact-head CI had passed ([run 36945640860](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/36945640860)). The image built, a fresh 894,615-byte pre-release dump verified, and the new API started on the existing `pm-tool-review-db` volume. `current` now points to `releases/b155601…`; the rollback image is `pm-tool-review:1c59e33…`.
+- **PASS, deployed individual sign-in on the new image:** `scripts/verify-homedev-review.py` on the loopback origin passed 10/10. Checks: health, anonymous `/me` 401, invalid Host 400, unsafe Origin 403, wrong password 401, individual sign-in 204, `/me` 200 as the synthetic user, project list 200, sign-out 204, cleared-cookie `/me` 401. A copied cookie still works after sign-out until its absolute expiry (stateless by specification).
+- **PASS, persistence across image replacement:** the synthetic marker comment written on DEMO-101-T0001 through the `1c59e33` origin on 2026-10-01 is present on `b155601`.
+- **PASS, migrations live:** endpoints backed by the newest tables return 200: task start-readiness, submission prerequisites, constraint link options and the readiness window. The Codex session's populated-copy rehearsal applied 20→27 migrations with counts preserved; no migration changed after the rehearsed head.
+- **PASS, scheduled dump installed and exercised:** the root-owned descriptor-safe helper and `pm-tool-review-backup.timer` are installed; next run Sat 2026-10-03 22:00 UTC. Its first run wrote a 924,085-byte mode-600 user-owned dump. The isolated restore drill restored 3 projects and removed the drill database. The first automatic timer run and off-host retrieval remain UNPROVEN.
+- **OPEN, origin HTTPS redirect:** the API logs "Failed to determine the https port for redirect". Verify Cloudflare's edge redirect of `http://` after DNS, or configure the origin's HTTPS port.
+- **NOTE:** Npgsql logs a missing `libgssapi_krb5.so.2` probe in the aspnet image and falls back to password authentication. Disable GSS encryption in the connection string to silence it.
+- **BLOCKED (operator step), public hostname:** installing the `pm-tool-tunnel.service` user unit and routing `pm.engcalchub.com` were not performed by the agent; they await Jay's command or permission.

@@ -55,3 +55,8 @@ Constraint/promise keys, generic links, export and search commits were integrate
 Added scoped title/key, effective Ready/Checking status, coordinator, milestone and target-date filters and matching CSV/XLSX list export. Derived status is evaluated before count/paging; normal lists page SQL first. Existing issue-history JSON export is preserved. Focused real-PostgreSQL submission checks pass, including a blocking Electrical finding in Checking, Ready exclusion, effective Ready inclusion and restricted-project list/export denial. Search now opens exact SUB keys and scoped title matches. Saved-view definitions round-trip without open panels.
 
 The combined increment passed 27 focused PostgreSQL cases across the final runs, frontend build/lint and the extended existing Chromium harness. This is local synthetic implementation evidence; the new exact-head CI, merge, image, homedev activation and hosted checks are separate gates in [the combined checkpoint](../../docs/reviews/2026-10-02-combined-candidate.md). Packet T006 remains open for full acceptance, and no company pilot or production acceptance is inferred.
+
+
+## Completion correction checkpoint — 2026-10-03
+
+See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) for exact implementation commits, focused regression evidence and remaining combined/hosted gates. The earlier `26c0ae1` candidate is held. This checkpoint does not close T006 or claim final hosted/company acceptance; live review remains `02ca7cd` pending activation of the corrected candidate.

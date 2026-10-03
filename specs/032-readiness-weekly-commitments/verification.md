@@ -354,3 +354,8 @@ Canonical section 10.8 constraint/unknown precedence is corrected at `7c412b0`; 
 Weekly promise target-date filtering now precedes SQL paging and shares its predicate/order with export. Legacy recorded-week calls retain their contract. The real-PostgreSQL regression puts 500 earlier promises before visible records; all three visible identities remain reachable, while the full snapshot denominator and out-of-page Met/Withdrawn counts remain unchanged on every page. Constraints and ready-output lists now offer independent pages with full totals and unpaged matching exports. Saved views retain date definitions. Chromium verifies all three pagers and date-change resets.
 
 The combined increment passed 27 focused PostgreSQL cases across the final runs, frontend build/lint and the extended existing Chromium harness. This is local synthetic implementation evidence; the new exact-head CI, merge, image, homedev activation and hosted checks are separate gates in [the combined checkpoint](../../docs/reviews/2026-10-02-combined-candidate.md). Packet T006 remains open for full acceptance, and no company pilot or production acceptance is inferred.
+
+
+## Completion correction checkpoint — 2026-10-03
+
+See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) for exact implementation commits, focused regression evidence and remaining combined/hosted gates. The earlier `26c0ae1` candidate is held. This checkpoint does not close T006 or claim final hosted/company acceptance; live review remains `02ca7cd` pending activation of the corrected candidate.

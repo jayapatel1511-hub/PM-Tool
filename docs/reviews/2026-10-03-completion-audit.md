@@ -16,15 +16,19 @@ This record supersedes any claim that `26c0ae1` completes packets 025–033. Tha
 | Submission Fail and actual A-to-B issue history | `c279137`, `ef4859f`: required failures block, optional failures remain recorded without gating, manual source labels and immutable snapshots retained | Included in the 52 combined issue/submission/allocation/change checks below |
 | Unavailable issue-reference recovery | `86b133d`: authorised versioned retry-safe replacement preserves original reference and invalidates earlier verification | 52 combined checks; frontend build/lint; Release EF reports no pending model changes; additive migration 29 |
 | One notification per command and recipient/item | `6ced0d7`: current-context and persisted notification/email deduplication | 10 collaboration checks; regression first failed on duplicate rows |
+| Owner replacement recovery | `f75a742`, `4e6bf11`, `6153cb1`, `71d426e`: new owner re-records with a reason and current assessment version; active owned work follows the replacement while historical approvals and frozen promises remain | 9 focused recovery/DCV/action checks; aggregate version guard and replay cases |
+| Coordination context and full print | `169d9ab`, `7ba46e0`, `71d426e`: evaluated blockers, source links, promised/needed dates, bounded rows with exact totals and complete capture context; Print fetches all permitted rows | Included in 9 focused checks; frontend build/lint; dedicated Chromium print/paging regression underway |
+| Provisional basis confirmation dates | `26ed8b2`, `f3e9860`, `ffdfd92`: new proposals require dates; historical/template unknown dates remain explicit until authorised editing | 14 combined basis/submission checks after correcting the old fixture; template-copy regression |
 | Source invalidation notices | `59052d5`, `d086ba3`: basis, review, publication and handoff changes route submission/check-owner notices transactionally | 77 focused workflow/collaboration checks; publication-notice regression first failed on missing notices; retry preserves counts |
+
+The combined local suite at `26ed8b2` ran 857 checks: 856 passed and one old submission fixture failed because it omitted the newly required provisional date. `ffdfd92` corrected that fixture; the affected 14 basis/submission checks then passed. Coverage from the combined run met the gates (96.7% rules branches, 94.0% service lines). Final exact-head CI remains required. Backup/pilot helper regressions passed 14/14; traceability covered 612 IDs and 236 sections with no gaps.
 
 Raw evidence remains under `/private/tmp/pm-*`; credentials, dumps and runtime files are not committed. Counts describe the named runs and are not a new combined full-suite claim.
 
 ## Open completion work
 
-- Required-owner replacement recovery across readiness, basis consumption/actions, constraints and proposed weekly promises; preserve old approvals and frozen promise history.
-- Coordination source-revision rows, promised and needed dates, evaluated submission failing checks, staffing context and bounded paging. Keep totals and full exports/print reconciled with permitted records.
-- Provisional basis confirmation due dates: enforce the canonical requirement without fabricating historical dates or transferring template approval.
+- Remove stale readiness-exception verifier assignments from the digest after owner recovery; retain historical records.
+- Complete the dedicated Chromium full-print/paging regression and independent combined review.
 - Independent review of the combined result, final required CI, exact-archive image, fresh/populated migration and old-image compatibility checks, source staging and activation.
 - Hosted password/browser acceptance of the final revision, persistence-marker comparison, print/keyboard/accessibility checks and complete packet T006 evidence.
 

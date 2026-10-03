@@ -34,7 +34,7 @@ compose_cmd=(sudo env RELEASE_SHA="${RELEASE_SHA:-unknown}" docker compose --env
 trap 'rm -f -- "$partial"' EXIT
 "${compose_cmd[@]}" exec -T db pg_dump -U hub_pilot -d hub_pilot -Fc --no-owner --no-privileges </dev/null >"$partial"
 [[ -s "$partial" ]] || fail "empty dump"
-"${compose_cmd[@]}" exec -T db pg_restore --list - <"$partial" >/dev/null
+"${compose_cmd[@]}" exec -T db pg_restore --list <"$partial" >/dev/null
 mv -- "$partial" "$target"
 trap - EXIT
 chmod 600 "$target"

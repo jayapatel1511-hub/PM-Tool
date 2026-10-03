@@ -48,7 +48,7 @@ compose_cmd=(sudo env RELEASE_SHA="${RELEASE_SHA:-unknown}" docker compose --env
 cleanup() { "${compose_cmd[@]}" exec -T db dropdb -U hub_pilot --if-exists "$drill" </dev/null >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 "${compose_cmd[@]}" exec -T db createdb -U hub_pilot "$drill" </dev/null
-"${compose_cmd[@]}" exec -T db pg_restore -U hub_pilot -d "$drill" --no-owner --no-privileges - <"$dump"
+"${compose_cmd[@]}" exec -T db pg_restore -U hub_pilot -d "$drill" --exit-on-error --no-owner --no-privileges <"$dump"
 count="$("${compose_cmd[@]}" exec -T db psql -U hub_pilot -d "$drill" -Atc 'SELECT count(*) FROM hub.project' </dev/null | tr -d '[:space:]')"
 [[ "$count" =~ ^[0-9]+$ ]] || fail "drill count was not numeric"
 echo "pilot restore drill passed: $drill projects=$count"

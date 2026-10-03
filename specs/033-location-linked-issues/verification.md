@@ -113,3 +113,10 @@ Recovered grouping places one handoff blocker above its affected tasks, with liv
 ## Declared-coordinate persistence check — 2026-10-02
 
 PASS locally: `Valid_coordinate_preserves_declared_values_and_reference_metadata_on_readback` (1/1) creates a fresh General issue, stores one Coordinate location, and reads back the exact decimal X/Y/Z values (including negative Y), declared CRS `EPSG:26920` and units `m`, with no conversion or duplicate location. This is synthetic metadata preservation, not validation of an engineering survey or coordinate transformation. Application code is unchanged from `7c412b0` / staged release `7995e88`. Full hosted and assistive-technology acceptance remain unproven.
+
+
+## Location grouping and keyboard panel return — 2026-10-02
+
+PASS locally with a fresh synthetic database and real browser/API: two Coordination issues have explicit Drawing references and two named site areas. Native keyboard selection changed Group issues by to location. The issue shared by North and South appears in each group and opens the same issue identity. Tab/Enter opens the issue panel and Escape closes it. The initial check reproduced a P2: focus fell to BODY. The shared Sheet now follows the existing Dialog opener-focus pattern, retaining caller handlers and skipping disconnected openers. After rebuilding, Escape returned focus to the exact opening button in both the North and South rows, including the duplicate-title case. No browser console errors.
+
+The existing design-basis Chromium harness now also opens a real Task Sheet with valid mocked API contracts and checks Tab → Enter → Escape returns to the exact original title control. It fails before the fix and passes afterward, with zero page errors or unmocked GETs; production build and focused lint passed. Credential-free focus evidence: `/private/tmp/pm-sheet-native-focus-evidence.json`; screenshot: `/private/tmp/pm-issue-keyboard-fixed.jpg`. Fixture references were unavailable, so this check makes no claim about positive evidence availability or issue resolution. Hosted and assistive-technology acceptance remain unproven.

@@ -47,11 +47,15 @@ function SheetContent({
   children,
   side = "right",
   showCloseButton = true,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
 }) {
+  // State-driven panels have no Radix trigger; return focus to their opener unless the caller handles it.
+  const opener = React.useRef<HTMLElement | null>(null)
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -70,6 +74,17 @@ function SheetContent({
           className
         )}
         {...props}
+        onOpenAutoFocus={(event) => {
+          const active = document.activeElement
+          opener.current = active instanceof HTMLElement && active !== document.body ? active : null
+          onOpenAutoFocus?.(event)
+        }}
+        onCloseAutoFocus={(event) => {
+          onCloseAutoFocus?.(event)
+          if (event.defaultPrevented || !opener.current?.isConnected) return
+          event.preventDefault()
+          opener.current.focus()
+        }}
       >
         {children}
         {showCloseButton && (

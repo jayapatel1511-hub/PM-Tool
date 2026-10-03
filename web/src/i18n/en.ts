@@ -24,6 +24,7 @@ export const en: Record<string, string> = {
   "basis.sourceId": "Stable source ID", "basis.sourceUrl": "Source link", "basis.revision": "Declared revision", "basis.due": "Confirmation due date",
   "basis.manual": "Manually registered revision", "basis.missingSource": "Source metadata incomplete", "basis.current": "Current registered version",
   "basis.notConfirmed": "Not confirmed",
+  "basis.dueRequired": "Confirmation due date is missing. Edit the proposal to record it before confirmation.",
   "basis.pending": "Latest proposal", "basis.conflicts": "Unresolved conflicts", "basis.uses": "Consuming work", "basis.impacts": "Impact assessments",
   "basis.confirm": "Confirm version", "basis.propose": "Propose replacement", "basis.editProposed": "Edit proposal", "basis.proceed": "Proceed under assumption", "basis.linkUse": "Link consuming work",
   "basis.withdraw": "Withdraw version", "basis.withdrawn": "Withdrawn", "basis.withdrawHint": "Withdrawal preserves existing consumer links and creates an assessment for each affected use.",

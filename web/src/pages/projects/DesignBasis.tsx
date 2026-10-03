@@ -222,7 +222,7 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
             {v.decisionId && <p><Link className="text-primary underline"
               to={`/projects/${number}/decisions?panel=Decision:${v.decisionId}`}>{t('basis.sourceDecision')}</Link></p>}
             {v.confirmationDueDate ? <p>{t('basis.due')}: {fmtDate(v.confirmationDueDate)}</p>
-              : v.status === 'Proposed' && <p className="text-warn">{t('basis.due')}: {t('basis.notConfirmed')} — {t('basis.confirmHint')}</p>}
+              : v.status === 'Proposed' && <p className="text-warn">{t('basis.dueRequired')}</p>}
             {v.confirmedAt && <p>{t('basis.confirm')}: {name(v.confirmedBy)} · {fmtDate(v.confirmedAt)} · {v.confirmationRationale}</p>}
           </div>)}</div></section>
         <section><h3 className="font-medium">{t('basis.conflicts')} ({row.conflicts.filter(c => !c.resolved).length})</h3>

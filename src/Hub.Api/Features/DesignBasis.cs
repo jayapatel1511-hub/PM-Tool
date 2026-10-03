@@ -87,8 +87,8 @@ public static class DesignBasisEndpoints
             Check.That(await db.Decisions.AnyAsync(d => d.Id == decisionId && d.ProjectId == project.Id), "decisionId", "coord.reference");
     }
 
-    static void RequireConfirmationDueDate(VersionInput input) =>
-        Check.That(input.ConfirmationDueDate is not null, "confirmationDueDate", "error.required");
+    static void RequireConfirmationDueDate(DateOnly? dueDate) =>
+        Check.That(dueDate is not null, "confirmationDueDate", "error.required");
 
     static DesignBasisVersion NewVersion(Project project, Guid entryId, int number, Guid? supersedes, VersionInput input) => new()
     {
@@ -122,7 +122,7 @@ public static class DesignBasisEndpoints
             await Coordination.Person(db, project, body.OwnerId);
             if (body.IndependentApproverId is { } approver) await Coordination.Person(db, project, approver, "independentApproverId");
             await ValidateSource(db, project, body.Version);
-            RequireConfirmationDueDate(body.Version);
+            RequireConfirmationDueDate(body.Version.ConfirmationDueDate);
             var title = Check.Required(body.Title, "title", 200);
             var scope = Check.Required(body.Version.Scope, "scope", 500);
             await InspectDuplicate(db, project.Id, body.Kind, title, body.ProjectDisciplineId, scope, null, body.InspectedDuplicateId);
@@ -150,7 +150,7 @@ public static class DesignBasisEndpoints
                 a.NewVersionId == current.Id && a.Status == AssessmentStatus.Pending), "entryId", "basis.current");
             Check.That(!await db.DesignBasisVersions.AnyAsync(v => v.EntryId == id && v.Status == BasisStatus.Proposed), "entryId", "basis.proposed");
             await ValidateSource(db, project, body.Version);
-            RequireConfirmationDueDate(body.Version);
+            RequireConfirmationDueDate(body.Version.ConfirmationDueDate);
             await InspectDuplicate(db, project.Id, entry.Kind, entry.Title, entry.ProjectDisciplineId,
                 Check.Required(body.Version.Scope, "scope", 500), entry.Id, body.InspectedDuplicateId);
             var nextNumber = await db.DesignBasisVersions.Where(v => v.EntryId == id).MaxAsync(v => v.Number) + 1;
@@ -176,7 +176,7 @@ public static class DesignBasisEndpoints
                     !await db.BasisAssumptionDispositions.AnyAsync(d => d.ProjectId == project.Id && d.VersionId == versionId),
                     "versionId", "basis.edit_linked");
                 await ValidateSource(db, project, body.Version);
-                RequireConfirmationDueDate(body.Version);
+                RequireConfirmationDueDate(body.Version.ConfirmationDueDate);
                 await InspectDuplicate(db, project.Id, entry.Kind, entry.Title, entry.ProjectDisciplineId,
                     Check.Required(body.Version.Scope, "scope", 500), entry.Id, body.InspectedDuplicateId);
                 var revised = NewVersion(project, id, version.Number, version.SupersedesVersionId, body.Version);
@@ -225,9 +225,7 @@ public static class DesignBasisEndpoints
             Check.That(self || access.Me.Id != entry.OwnerId, "approverId", "basis.independent");
             Check.That(!string.IsNullOrWhiteSpace(version.SourceSystem) &&
                 !string.IsNullOrWhiteSpace(version.DeclaredRevision), "source", "basis.source");
-            RequireConfirmationDueDate(new VersionInput(version.Scope, version.Statement, version.NumericValue, version.Units,
-                version.SourceSystem, version.StableSourceId, version.SourceUrl, version.DeclaredRevision,
-                version.ConfirmationDueDate, version.DecisionId));
+            RequireConfirmationDueDate(version.ConfirmationDueDate);
             Check.That(BasisRules.MayConfirm(version.Status, version.NumericValue, version.Units,
                 !string.IsNullOrWhiteSpace(version.SourceUrl), !string.IsNullOrWhiteSpace(body.Rationale),
                 true), "versionId", version.NumericValue is not null && string.IsNullOrWhiteSpace(version.Units) ? "basis.units" : "basis.source");

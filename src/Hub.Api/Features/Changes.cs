@@ -156,7 +156,7 @@ public static class ChangeEndpoints
             var issueImpactRecipients = await CreateIssueImpacts(db, p, await Coordination.Revision(db, p.Id, c.OldRevisionId), next, clock, access.Me.Id);
             await db.SaveChangesAsync();
             await ReviewEndpoints.AdvanceForPublishedRevision(db, notify, p, await Coordination.Revision(db, p.Id, c.OldRevisionId), next);
-            await SubmissionEndpoints.InvalidateForPublishedRevision(db, p.Id, c.OldRevisionId);
+            await SubmissionEndpoints.InvalidateForPublishedRevision(db, p.Id, c.OldRevisionId, notify);
             await Notify(notify, p, c, (await db.ChangeAssessments.Where(a => a.ChangeNoticeId == c.Id).Select(a => a.OwnerId).ToListAsync())
                 .Concat(issueImpactRecipients).Distinct()); return c;
         });

@@ -131,17 +131,29 @@ public sealed class SubmissionApiTests(HubFactory f)
         var a = await Post(TestData.Alex, root + "/source-revisions", Registration("A"));
         var created = await Post(TestData.Marc, root + "/submissions", new SubmissionEndpoints.CreateBody(Guid.NewGuid(), "Stormwater issue", "Permit", "Municipality",
             data.User(TestData.Marc), milestone.G("id"), new DateOnly(2026, 10, 15), [new(a.G("id"))],
-            [new("Traffic control applies", data.User(TestData.Alex), civil)], null, null));
+            [new("Traffic control applies", data.User(TestData.Omar), civil)], null, null));
         var id = created.G("id"); var path = root + $"/submissions/{id}";
         await Post(TestData.Marc, path + "/start", new SubmissionEndpoints.StartBody(Guid.NewGuid(), Version<SubmissionPackage>(id), null));
         var optional = f.Db(db => db.SubmissionChecks.Single(c => c.PackageId == id && c.Kind == SubmissionCheckKind.Applicability));
-        await Post(TestData.Alex, path + $"/checks/{optional.Id}", new SubmissionEndpoints.CheckBody(Guid.NewGuid(), Version<SubmissionPackage>(id), optional.RowVersion,
+        await Post(TestData.Omar, path + $"/checks/{optional.Id}", new SubmissionEndpoints.CheckBody(Guid.NewGuid(), Version<SubmissionPackage>(id), optional.RowVersion,
             SubmissionCheckStatus.Pass, "https://example.test/traffic.pdf", "Scope checked"));
         Assert.Equal(SubmissionStatus.Ready, f.Db(db => db.SubmissionPackages.Single(p => p.Id == id).Status));
         var notice = await Post(TestData.Alex, root + "/source-revisions", Registration("B", a.G("id")));
         var noticeId = notice.G("id");
-        await Post(TestData.Alex, root + $"/changes/{noticeId}/publish", new ChangeEndpoints.PublishBody(Guid.NewGuid(), Version<ChangeNotice>(noticeId),
-            f.Db(db => db.SourceHeads.Single(h => h.ProjectId == project.Id).RowVersion), null));
+        var publish = new ChangeEndpoints.PublishBody(Guid.NewGuid(), Version<ChangeNotice>(noticeId),
+            f.Db(db => db.SourceHeads.Single(h => h.ProjectId == project.Id).RowVersion), null);
+        await Post(TestData.Alex, root + $"/changes/{noticeId}/publish", publish);
+        foreach (var recipient in new[] { TestData.Pm, TestData.Marc, TestData.Omar })
+        {
+            var invalidated = Assert.Single(f.Db(db => db.Notifications.Where(n => n.ItemId == id && n.UserId == data.User(recipient)
+                && n.EventType == NotificationEvents.SubmissionChanged && n.ActorUserId == data.User(TestData.Alex)).ToList()));
+            Assert.Equal(1, invalidated.Count);
+            Assert.Equal($"/projects/{project.ProjectNumber}/submissions?panel=SubmissionPackage:{id}", invalidated.LinkPath);
+        }
+        var notices = f.Db(db => db.Notifications.Where(n => n.ItemId == id).OrderBy(n => n.Id).Select(n => new { n.Id, n.Count }).ToList());
+        await Post(TestData.Alex, root + $"/changes/{noticeId}/publish", publish);
+        Assert.Equal(notices, f.Db(db => db.Notifications.Where(n => n.ItemId == id).OrderBy(n => n.Id).Select(n => new { n.Id, n.Count }).ToList()));
+        Assert.False(f.Db(db => db.Notifications.Any(n => n.ItemId == id && n.UserId == data.User(TestData.Rita))));
         Assert.Equal(SubmissionStatus.Checking, f.Db(db => db.SubmissionPackages.Single(p => p.Id == id).Status));
         Assert.Equal(SubmissionCheckStatus.Pending, f.Db(db => db.SubmissionChecks.Single(c => c.Id == optional.Id).Status));
         var blocked = await Get(TestData.Pm, path);

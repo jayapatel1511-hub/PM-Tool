@@ -140,7 +140,7 @@ public static class ReviewEndpoints
             await Notify(db, notify, project, package, reviewers.Select(a => a.ReviewerId).Append(package.CoordinatorId).Distinct());
         }
     }
-    static async Task Recompute(HubDb db, Project project, ReviewPackage package, bool allowSelf)
+    static async Task Recompute(HubDb db, Notifier notify, Project project, ReviewPackage package, bool allowSelf)
     {
         await db.SaveChangesAsync();
         var r = await Round(db, package);
@@ -150,7 +150,7 @@ public static class ReviewEndpoints
         var status = ReviewRules.PackageStatus(states, findings.Any(f => ReviewRules.BlockingOpen(f.Severity, f.Status, f.WithdrawalAcknowledgedBy != null)));
         if (status == ReviewStatus.Approved) await ValidateRound(db, project, package, allowSelf);
         package.Status = r.Status = status;
-        await SubmissionEndpoints.InvalidateForReviewPackage(db, project.Id, package.Id);
+        await SubmissionEndpoints.InvalidateForReviewPackage(db, project.Id, package.Id, notify);
     }
     static Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, SettingsStore settings, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "review.create", body }, access, db, clock, async (project, ctx) => {
@@ -170,7 +170,7 @@ public static class ReviewEndpoints
             }
             return p;
         });
-    static Task<Coordination.Result> NewRound(Guid projectId, Guid id, RoundBody body, Access access, HubDb db, SettingsStore settings, TimeProvider clock) =>
+    static Task<Coordination.Result> NewRound(Guid projectId, Guid id, RoundBody body, Access access, HubDb db, SettingsStore settings, Notifier notify, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "review.round", id, body }, access, db, clock, async (project, ctx) => {
             var p = await Load(db, project.Id, id); Live(p); Coordination.Version(p, body.RowVersion);
             Access.Demand(Permissions.CoordinateReview(access.Actor, ctx, p.ProjectDisciplineId, p.CoordinatorId));
@@ -197,7 +197,7 @@ public static class ReviewEndpoints
             }
             old.Status = ReviewStatus.Superseded; db.Audit.Note(old, reason: reason);
             await db.SaveChangesAsync(); p.CurrentRoundId = round.Id; p.RoundNumber = round.Number; p.Purpose = round.Purpose; p.Status = ReviewStatus.Draft;
-            await SubmissionEndpoints.InvalidateForReviewPackage(db, project.Id, p.Id);
+            await SubmissionEndpoints.InvalidateForReviewPackage(db, project.Id, p.Id, notify);
             if (p.RequiredForIssue) foreach (var deliverableId in removedDeliverables) {
                 var d = await db.Deliverables.SingleAsync(d => d.Id == deliverableId);
                 if (d.RequiredReviewPackageId != p.Id) continue;
@@ -226,7 +226,7 @@ public static class ReviewEndpoints
                 Check.OneOf(body.Action, ["cancel"], "action"); Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, p.ProjectDisciplineId));
                 var reason = Check.Reason(body.Reason); p.Status = round.Status = ReviewStatus.Cancelled; db.Audit.Note(p, reason: reason); db.Audit.Note(round, reason: reason);
                 // A cancelled package can never approve: release the deliverables it gated, as removing them from the manifest does.
-                await SubmissionEndpoints.InvalidateForReviewPackage(db, project.Id, p.Id);
+                await SubmissionEndpoints.InvalidateForReviewPackage(db, project.Id, p.Id, notify);
                 foreach (var d in await db.Deliverables.Where(d => d.ProjectId == project.Id && d.RequiredReviewPackageId == p.Id).ToListAsync()) {
                     Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, d.ProjectDisciplineId));
                     d.RequiredReviewPackageId = null; db.Audit.Note(d, reason: reason);
@@ -245,7 +245,7 @@ public static class ReviewEndpoints
             var a = await db.DisciplineReviews.SingleOrDefaultAsync(a => a.Id == assignmentId && a.RoundId == p.CurrentRoundId) ?? throw ApiException.NotFound(); Coordination.Version(a, body.RowVersion);
             await Independent(db, project, body.OwnerId, await Authors(db, a.RoundId), (await settings.Get(db)).AllowSelfReview);
             a.ReviewerId = body.OwnerId; a.Status = DisciplineReviewStatus.Pending; a.DecidedAt = null; a.DecidedBy = null; a.Rationale = null; db.Audit.Note(a, reason: Check.Reason(body.Reason));
-            await Recompute(db, project, p, (await settings.Get(db)).AllowSelfReview); await Notify(db, notify, project, p, [body.OwnerId]); return a;
+            await Recompute(db, notify, project, p, (await settings.Get(db)).AllowSelfReview); await Notify(db, notify, project, p, [body.OwnerId]); return a;
         });
     static Task<Coordination.Result> Decide(Guid projectId, Guid id, Guid assignmentId, DecisionBody body, Access access, HubDb db, SettingsStore settings, Notifier notify, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "review.decision", id, assignmentId, body }, access, db, clock, async (project, ctx) => {
@@ -255,7 +255,7 @@ public static class ReviewEndpoints
             await ValidateRound(db, project, p, (await settings.Get(db)).AllowSelfReview);
             Check.OneOf(body.Status, [DisciplineReviewStatus.InReview, DisciplineReviewStatus.ChangesRequired, DisciplineReviewStatus.Approved], "status");
             a.Status = body.Status; a.Rationale = Check.Required(body.Rationale, "rationale", 4000); a.DecidedAt = clock.GetUtcNow(); a.DecidedBy = access.Me.Id;
-            await Recompute(db, project, p, (await settings.Get(db)).AllowSelfReview); await Notify(db, notify, project, p, [p.CoordinatorId]); return a;
+            await Recompute(db, notify, project, p, (await settings.Get(db)).AllowSelfReview); await Notify(db, notify, project, p, [p.CoordinatorId]); return a;
         });
     static Task<Coordination.Result> AddFinding(Guid projectId, Guid id, FindingBody body, Access access, HubDb db, SettingsStore settings, Notifier notify, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "review.finding", id, body }, access, db, clock, async (project, ctx) => {
@@ -269,7 +269,7 @@ public static class ReviewEndpoints
                 Check.That(await db.Issues.AnyAsync(i => i.Id == linkedIssue && i.ProjectId == project.Id), "issueId", "coord.reference");
             var f = new ReviewFinding { ProjectId = project.Id, PackageId = p.Id, RoundId = round.Id, SourceRevisionId = body.SourceRevisionId, ProjectDisciplineId = body.ProjectDisciplineId,
                 IssueId = body.IssueId, OriginatorId = access.Me.Id, VerifierId = access.Me.Id, ResolverId = body.ResolverId, Text = Check.Required(body.Text, "text", 4000), Severity = body.Severity };
-            db.ReviewFindings.Add(f); await Recompute(db, project, p, (await settings.Get(db)).AllowSelfReview); await Notify(db, notify, project, p, [f.ResolverId]); return f;
+            db.ReviewFindings.Add(f); await Recompute(db, notify, project, p, (await settings.Get(db)).AllowSelfReview); await Notify(db, notify, project, p, [f.ResolverId]); return f;
         });
     static Task<Coordination.Result> FindingCommand(Guid projectId, Guid id, Guid findingId, FindingAction body, Access access, HubDb db, SettingsStore settings, Notifier notify, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "review.finding.action", id, findingId, body }, access, db, clock, async (project, ctx) => {
@@ -301,7 +301,7 @@ public static class ReviewEndpoints
                 f.Status = body.Action;
             }
             db.Audit.Note(f, reason: reason); db.FindingEvents.Add(new FindingEvent { ProjectId = project.Id, FindingId = f.Id, Action = body.Action, Reason = reason, EvidenceUrl = body.EvidenceUrl });
-            await Recompute(db, project, p, self); await Notify(db, notify, project, p, [f.ResolverId, f.VerifierId, p.CoordinatorId]); return f;
+            await Recompute(db, notify, project, p, self); await Notify(db, notify, project, p, [f.ResolverId, f.VerifierId, p.CoordinatorId]); return f;
         });
     public static async Task Gate(HubDb db, Project project, Deliverable deliverable, string? issuingRevision, bool allowSelf, string? issuingUrl = null)
     {

@@ -125,7 +125,7 @@ public static class HandoffEndpoints
         await Targets(db, h);
     }
 
-    static async Task<IResult> Create(Guid projectId, DraftBody body, Access access, HubDb db, TimeProvider clock)
+    static async Task<IResult> Create(Guid projectId, DraftBody body, Access access, HubDb db, Notifier notify, TimeProvider clock)
     {
         var result = await Command(projectId, body.RequestId, new { operation = "create", body }, access, db, clock, async (p, ctx) =>
         {
@@ -135,13 +135,13 @@ public static class HandoffEndpoints
             await Fill(db, p, h, body, source);
             (h.Seq, h.Key) = await Keys.Next(db, p.Id, p.ProjectNumber, "handoff");
             db.Handoffs.Add(h);
-            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId);
+            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId, notify);
             return h;
         });
         return Results.Created($"/api/v1/projects/{projectId}/handoffs/{result.Id}", result);
     }
 
-    static async Task<CommandResult> Edit(Guid projectId, Guid id, DraftBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<CommandResult> Edit(Guid projectId, Guid id, DraftBody body, HttpContext http, Access access, HubDb db, SettingsStore store, Notifier notify, TimeProvider clock)
     {
         body = body with { RowVersion = Http.IfMatch(http, body.RowVersion) };
         return await Command(projectId, body.RequestId, new { operation = "draft", id, body }, access, db, clock, async (p, ctx) =>
@@ -168,8 +168,8 @@ public static class HandoffEndpoints
             await Fill(db, p, h, body, source);
             if (db.Entry(h).Properties.Any(property => !Equals(property.CurrentValue, property.OriginalValue))) {
                 if (oldTargetTaskId != h.TargetTaskId || oldTargetDeliverableId != h.TargetDeliverableId)
-                    await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, oldTargetTaskId, oldTargetDeliverableId);
-                await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId);
+                    await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, oldTargetTaskId, oldTargetDeliverableId, notify);
+                await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId, notify);
                 db.Audit.Note(h, reason: body.Reason);
             }
             ProjectEndpoints.CorrectionReason(p, body.Reason);
@@ -232,7 +232,7 @@ public static class HandoffEndpoints
             db.HandoffReceiptEvents.Add(new HandoffReceiptEvent { ProjectId = p.Id, HandoffId = h.Id, RevisionId = h.CurrentRevisionId,
                 FromStatus = h.Status, ToStatus = body.ToStatus, Reason = reason, CriteriaOutcome = outcome });
             h.Status = body.ToStatus;
-            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId);
+            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId, notify);
             db.Audit.Note(h, reason: reason);
             await notify.Send(NotificationEvents.HandoffChanged, new Guid?[] { h.SendingOwnerId, h.ReceivingOwnerId },
                 new NotifyItem(p.Id, "Handoff", h.Id, h.Key, $"/projects/{p.ProjectNumber}/handoffs?panel=Handoff:{h.Id}", p.ProjectNumber),
@@ -261,7 +261,7 @@ public static class HandoffEndpoints
             await Owners(db, p, body.SendingOwnerId, body.ReceivingOwnerId);
             await IndependentAssignment(db, h, body.SendingOwnerId, body.ReceivingOwnerId, (await store.Get(db)).AllowSelfReview);
             (h.SendingOwnerId, h.ReceivingOwnerId) = (body.SendingOwnerId, body.ReceivingOwnerId);
-            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId);
+            await SubmissionEndpoints.InvalidateForHandoff(db, p.Id, h.TargetTaskId, h.TargetDeliverableId, notify);
             db.Audit.Note(h, reason: reason);
             await notify.Send(NotificationEvents.HandoffChanged, new Guid?[] { h.SendingOwnerId, h.ReceivingOwnerId },
                 new NotifyItem(p.Id, "Handoff", h.Id, h.Key, $"/projects/{p.ProjectNumber}/handoffs?panel=Handoff:{h.Id}", p.ProjectNumber),

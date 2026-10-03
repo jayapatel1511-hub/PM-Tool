@@ -27,22 +27,25 @@ public sealed class OwnerReplacementTests(HubFactory f)
         await Post(TestData.Alex, readinessPath, new ReadinessEndpoints.CreateBody(Guid.NewGuid(), Version<WorkTask>(taskId), "Duplicate", "Duplicate"), 409);
 
         var entryId = Guid.CreateVersion7(); var oldVersionId = Guid.CreateVersion7(); var newVersionId = Guid.CreateVersion7();
-        var impactId = Guid.CreateVersion7(); var settledImpactId = Guid.CreateVersion7(); var useId = Guid.CreateVersion7(); var constraintId = Guid.CreateVersion7(); var promiseId = Guid.CreateVersion7();
+        var impactId = Guid.CreateVersion7(); var settledImpactId = Guid.CreateVersion7(); var useId = Guid.CreateVersion7(); var settledUseId = Guid.CreateVersion7(); var settledTargetId = Guid.CreateVersion7(); var constraintId = Guid.CreateVersion7(); var promiseId = Guid.CreateVersion7();
         var snapshotId = Guid.CreateVersion7(); var committedPromiseId = Guid.CreateVersion7();
         await f.DbAsync(async db =>
         {
             db.DesignBasisEntries.Add(new DesignBasisEntry { Id = entryId, ProjectId = project.Id, Key = "BAS-001", Seq = 1,
-                Kind = BasisKind.Criterion, Title = "Owner replacement basis", OwnerId = alex, ProjectDisciplineId = civil, CurrentVersionId = newVersionId });
+                Kind = BasisKind.Criterion, Title = "Owner replacement basis", OwnerId = alex, ProjectDisciplineId = civil });
             db.DesignBasisVersions.AddRange(
                 new DesignBasisVersion { Id = oldVersionId, ProjectId = project.Id, EntryId = entryId, Number = 1, Status = BasisStatus.Superseded,
                     Scope = "Scope", Statement = "Old confirmed basis", SourceSystem = "Manual", DeclaredRevision = "A", SourceUrl = "https://example.test/a" },
                 new DesignBasisVersion { Id = newVersionId, ProjectId = project.Id, EntryId = entryId, Number = 2, SupersedesVersionId = oldVersionId,
-                    Status = BasisStatus.Confirmed, Scope = "Scope", Statement = "Current confirmed basis", SourceSystem = "Manual", DeclaredRevision = "B", SourceUrl = "https://example.test/b", ConfirmedBy = pm, ConfirmedAt = f.Clock.Now });
+                    Status = BasisStatus.Confirmed, Scope = "Scope", Statement = "Current confirmed basis", SourceSystem = "Manual", DeclaredRevision = "B", SourceUrl = "https://example.test/b",
+                    ConfirmedBy = pm, ConfirmedAt = f.Clock.Now, ConfirmationRationale = "Confirmed current basis" });
+            db.BasisUses.Add(new BasisUse { Id = settledUseId, ProjectId = project.Id, VersionId = oldVersionId, TargetType = "Deliverable", TargetId = settledTargetId,
+                OwnerId = alex, IntendedUse = "Historical settled basis use", CreatedAt = f.Clock.Now.AddDays(-1) });
             db.BasisUses.Add(new BasisUse { Id = useId, ProjectId = project.Id, VersionId = oldVersionId, TargetType = "Task", TargetId = taskId,
-                OwnerId = alex, IntendedUse = "Owner replacement recovery" });
+                OwnerId = alex, IntendedUse = "Owner replacement recovery", CreatedAt = f.Clock.Now });
             db.BasisImpactAssessments.Add(new BasisImpactAssessment { Id = impactId, ProjectId = project.Id, BasisUseId = useId,
                 OldVersionId = oldVersionId, NewVersionId = newVersionId, OwnerId = alex, Status = AssessmentStatus.Pending });
-            db.BasisImpactAssessments.Add(new BasisImpactAssessment { Id = settledImpactId, ProjectId = project.Id, BasisUseId = useId,
+            db.BasisImpactAssessments.Add(new BasisImpactAssessment { Id = settledImpactId, ProjectId = project.Id, BasisUseId = settledUseId,
                 OldVersionId = oldVersionId, NewVersionId = newVersionId, OwnerId = alex, Status = AssessmentStatus.Resolved,
                 DecidedBy = alex, DecidedAt = f.Clock.Now, Rationale = "Historical decision" });
             db.WorkConstraints.Add(new WorkConstraint { Id = constraintId, ProjectId = project.Id, Key = "CON-001", Seq = 1,
@@ -56,6 +59,8 @@ public sealed class OwnerReplacementTests(HubFactory f)
             db.OutputCommitments.Add(new OutputCommitment { Id = committedPromiseId, ProjectId = project.Id, Key = "COM-002", Seq = 2,
                 TargetType = "Task", TargetId = taskId, PerformerId = alex, WeekStart = new DateOnly(2026, 9, 28), TargetDate = new DateOnly(2026, 9, 30),
                 IntendedOutput = "Signed frozen promise", CompletionCriteria = "Frozen criteria", State = CommitmentState.Committed, SnapshotId = snapshotId, CreatedBy = alex });
+            await db.SaveChangesAsync();
+            db.DesignBasisEntries.Single(e => e.Id == entryId).CurrentVersionId = newVersionId;
             await db.SaveChangesAsync();
             return 0;
         });

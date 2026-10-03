@@ -132,3 +132,7 @@ The combined increment passed 27 focused PostgreSQL cases across the final runs,
 ## Completion correction checkpoint — 2026-10-03
 
 See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) for exact implementation commits, focused regression evidence and remaining combined/hosted gates. The earlier `26c0ae1` candidate is held. This checkpoint does not close T006 or claim final hosted/company acceptance; live review remains `02ca7cd` pending activation of the corrected candidate.
+
+## Shared location form regression — 2026-10-03
+
+The form offered Building/Level/Room while SiteArea discarded them, and Alignment/Stations while Building discarded them. Kind-specific inputs now match the persisted payload; numeric validation considers the selected kind only. The existing Coordination browser suite reproduced the old bug and now checks Building creation plus Alignment, Coordinate and SiteArea additions, exact payload values and explicit reload rendering with mocked API responses. The changed Building form also passes the existing axe dialog checks after finite CSS transitions finish. Local production UI build, lint (existing warnings only), and 17 focused `LocationIssueTests` / `LocationIssueRulesTests` passed. This is local regression evidence; it does not prove hosted deployment or company acceptance.

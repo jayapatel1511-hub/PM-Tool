@@ -1,6 +1,7 @@
 // Browser form/interaction checks use mocked API responses; API integration tests cover server decisions.
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
+const port=process.env.COORDINATION_TEST_PORT||'5174', base=`http://127.0.0.1:${port}`;
 const out = path.resolve(__dirname, '../test-results/coordination'); fs.mkdirSync(out, { recursive: true });
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const pid=id(1), actor=id(2), author=id(3), civil=id(4), electrical=id(5), deliverable=id(6), target=id(7), rid=id(8), round=id(9), aid=id(10), srcA=id(11), srcB=id(12), nid=id(13), assessmentId=id(14);
@@ -9,6 +10,8 @@ const me={id:actor,displayName:'Omar Reviewer',email:'omar@hub.test',roles:[],sy
 const source={id:srcA,sourceKey:'P-DEMO-D001',title:'Survey corridor',revision:'A',url:'https://example.test/A.pdf',sourceSystem:'Deliverable',externalIdentifier:'survey',sourceIdentity:`deliverable:${deliverable}`,deliverableId:deliverable,issuer:'Survey team',scope:'East corridor',authorIds:[author],createdAt:'2026-09-27T09:00:00Z',rowVersion:0};
 const head={id:id(15),identity:source.sourceIdentity,currentRevisionId:srcA,ownerId:actor,projectDisciplineId:civil,rowVersion:1};
 const options={actorId:actor,canWrite:true,manageDisciplineIds:[civil,electrical],people:[{id:actor,displayName:'Omar Reviewer'},{id:author,displayName:'Alex Author'}],disciplines:[{id:civil,name:'Civil'},{id:electrical,name:'Electrical'}],sources:[{revision:source,identity:source.sourceIdentity,published:true,isCurrent:true}],heads:[head],deliverables:[{id:deliverable,key:source.sourceKey,name:source.title,projectDisciplineId:civil,ownerId:author,revision:'A',rowVersion:2,status:'In Progress'}],tasks:[{id:target,key:'P-DEMO-T0001',name:'Electrical alignment',projectDisciplineId:electrical,ownerId:actor,rowVersion:1,status:'In Progress'}]};
+let locatedIssue, locations=[];
+project.permissions.raiseRegister={ok:true};
 let packageRow, assignments=[], rounds=[], notice, assessment, uses=[{id:id(16),rowVersion:1,targetType:'Task',targetId:target,ownerId:actor,sourceIdentity:source.sourceIdentity,sourceRevisionId:srcA,intendedUse:'Service route',adoptedAt:'2026-09-27T09:00:00Z',adoptedBy:actor}], newSource, server,browser;
 const requests=[],errors=[],violations=[];
 (async()=>{
@@ -17,8 +20,8 @@ const requests=[],errors=[],violations=[];
  for (const [value, cell] of [['plain','plain'],['a,b','"a,b"'],['a;b','"a;b"'],['tab\there','"tab\there"'],['say "hi"','"say ""hi"""'],['two\nlines','"two\nlines"'],
    ['=SUM(A1:A2)',"'=SUM(A1:A2)"],['+cmd',"'+cmd"],['-cmd',"'-cmd"],['@cmd',"'@cmd"],['\tcmd',`"'\tcmd"`],['\rcmd',`"'\rcmd"`],[' =cmd',"' =cmd"],
    ['=1;2',`"'=1;2"`],['-12.5','-12.5'],['+3e2','+3e2'],[42,'42'],[null,'']]) assert.equal(csvCell(value), cell, JSON.stringify(value));
- server=spawn(process.execPath,['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','5174','--strictPort'],{cwd:path.resolve(__dirname,'..'),stdio:'inherit'});
- for(let i=0;i<50;i++){try{if((await fetch('http://127.0.0.1:5174')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
+ server=spawn(process.execPath,['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port',port,'--strictPort',...(process.env.VITE_PREVIEW_OUT_DIR?['--outDir',process.env.VITE_PREVIEW_OUT_DIR]:[])],{cwd:path.resolve(__dirname,'..'),stdio:'inherit'});
+ for(let i=0;i<50;i++){try{if((await fetch(base)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  browser=await chromium.launch({headless:true,...(process.env.CHROME_EXECUTABLE_PATH?{executablePath:process.env.CHROME_EXECUTABLE_PATH}:{})});const page=await browser.newPage({viewport:{width:1440,height:1000}});
  await page.addInitScript(()=>sessionStorage.setItem('hub.devUser','omar@hub.test'));page.on('pageerror',e=>errors.push(e.message));
  await page.route('**/api/**',async route=>{
@@ -38,22 +41,64 @@ const requests=[],errors=[],violations=[];
   else if(p.endsWith(`/assessments/${assessmentId}`)){requests.push(b);assert.equal(b.rowVersion,assessment.rowVersion);if(b.action==='acknowledge')assessment.acknowledgedAt='2026-09-27T10:00:00Z';if(b.action==='disposition')Object.assign(assessment,{status:b.status,rationale:b.rationale,evidenceUrl:b.evidenceUrl});if(b.action==='adopt'){assert.equal(b.expectedCurrentRevisionId,srcB);assert.equal(b.inputUseRowVersion,1);assessment.retainOldRevision=false;uses[0].sourceRevisionId=srcB;uses[0].rowVersion++;}assessment.rowVersion++;data={id:assessmentId,rowVersion:assessment.rowVersion};}
   else if(p===`projects/${pid}/changes/${nid}/action`){requests.push(b);assert.equal(b.action,'close');if(assessment?.status==='Pending Assessment'){status=400;data={detail:'One or more fields are invalid.',code:'validation',errors:{assessments:['Every linked assessment needs an evidenced disposition, approved retention or adoption, and verified correction where required.']}};}else{notice.status='Closed';notice.rowVersion++;data={id:nid,rowVersion:notice.rowVersion};}}
   else if(p===`projects/${pid}/changes/${nid}`)data={notice,assessments:assessment?[assessment]:[],completeAssessmentIds:assessment?.status==='Unaffected'&&!assessment.retainOldRevision?[assessmentId]:[],oldRevision:source,newRevision:newSource,head,actorId:actor,canWrite:true,canPublish:true,canManage:true,uses};
+  else if(p===`projects/${pid}/issues`&&b){
+   locatedIssue={...b,id:id(30),projectId:pid,key:'P-DEMO-I001',status:'Open',rowVersion:1,ownerId:actor,ownerName:me.displayName,raisedById:actor,dateRaised:'2026-09-27',isOverdue:false,daysOverdue:0};
+   locations=b.locations.map((x,i)=>({...x,id:id(31+i),rowVersion:1}));data={id:locatedIssue.id,key:locatedIssue.key};status=201;
+  }
+  else if(p===`projects/${pid}/issues`)data=locatedIssue?[locatedIssue]:[];
+  else if(p===`issues/${id(30)}`)data={issue:locatedIssue,project,links:[],permissions:{edit:{ok:true},changeType:{ok:true},transitions:[],comment:true}};
+  else if(p===`issues/${id(30)}/locations`&&b){locations.push({...b,id:id(31+locations.length),rowVersion:1});locatedIssue.rowVersion++;data={id:locations.at(-1).id};status=201;}
+  else if(p===`issues/${id(30)}/locations`)data=locations;
+  else if([`issues/${id(30)}/documents`,`issues/${id(30)}/verification`,`issues/${id(30)}/reference-impacts`].includes(p))data=[];
   else throw new Error(`Unmocked endpoint ${method} ${p}`);
   await route.fulfill({status,contentType:'application/json',body:JSON.stringify(data)});
  });
- async function axe(label){await page.waitForFunction(()=>{const dialog=[...document.querySelectorAll('[role="dialog"]')].at(-1);return dialog&&getComputedStyle(dialog).opacity==='1'});await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});const v=await page.evaluate(()=>axe.run([...document.querySelectorAll('[role="dialog"]')].at(-1),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}}));violations.push({label,violations:v.violations.map(v=>({id:v.id,impact:v.impact,targets:v.nodes.map(n=>n.target)}))});await page.screenshot({path:path.join(out,`${label}.png`),fullPage:true});}
- await page.goto('http://127.0.0.1:5174/projects/P-DEMO/reviews');await page.getByRole('button',{name:'New review package',exact:true}).click();
+ async function axe(label){await page.waitForFunction(()=>{const dialog=[...document.querySelectorAll('[role="dialog"]')].at(-1);return dialog&&getComputedStyle(dialog).opacity==='1'});await page.evaluate(async()=>{const dialog=[...document.querySelectorAll('[role="dialog"]')].at(-1);await Promise.all(dialog.getAnimations({subtree:true}).filter(a=>a.effect?.getComputedTiming().iterations!==Infinity).map(a=>a.finished.catch(()=>{})));});await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});const v=await page.evaluate(()=>axe.run([...document.querySelectorAll('[role="dialog"]')].at(-1),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}}));violations.push({label,violations:v.violations.map(v=>({id:v.id,impact:v.impact,targets:v.nodes.map(n=>n.target),summaries:v.nodes.map(n=>n.failureSummary)}))});await page.screenshot({path:path.join(out,`${label}.png`),fullPage:true});}
+ await page.goto(base+'/projects/P-DEMO/reviews');await page.getByRole('button',{name:'New review package',exact:true}).click();
  await page.getByLabel('Title',{exact:true}).fill('Survey interface review');await page.getByLabel('Coordinator',{exact:true}).last().selectOption(actor);await page.getByLabel('Review purpose and scope',{exact:true}).fill('Verify the service alignment');
  await page.getByLabel('P-DEMO-D001 · A · Survey corridor',{exact:true}).check();await page.getByRole('checkbox',{name:'Electrical',exact:true}).check();await page.getByLabel('Reviewer',{exact:true}).selectOption(actor);
  await axe('review-form');await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.getByRole('button',{name:'Start review',exact:true}).click();await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.getByRole('button',{name:'Record decision',exact:true}).click();
  await page.getByLabel('Status',{exact:true}).last().selectOption('Approved');await page.getByLabel('Rationale',{exact:true}).fill('Clearance verified against revision A');await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.getByText('Clearance verified against revision A',{exact:true}).waitFor();assert.equal(packageRow.status,'Approved');await axe('review-approved');
- await page.goto('http://127.0.0.1:5174/projects/P-DEMO/changes');await page.getByRole('button',{name:'Register source revision',exact:true}).click();await page.getByLabel('Current revision being replaced (leave blank for a new source)',{exact:true}).selectOption(srcA);await page.getByLabel('Declared revision',{exact:true}).fill('B');await page.getByLabel('Exact source link',{exact:true}).fill('https://example.test/B.pdf');await page.getByLabel('What changed and why',{exact:true}).fill('The east alignment was moved');await axe('source-replacement');await page.getByRole('button',{name:'Confirm',exact:true}).click();
+ await page.goto(base+'/projects/P-DEMO/changes');await page.getByRole('button',{name:'Register source revision',exact:true}).click();await page.getByLabel('Current revision being replaced (leave blank for a new source)',{exact:true}).selectOption(srcA);await page.getByLabel('Declared revision',{exact:true}).fill('B');await page.getByLabel('Exact source link',{exact:true}).fill('https://example.test/B.pdf');await page.getByLabel('What changed and why',{exact:true}).fill('The east alignment was moved');await axe('source-replacement');await page.getByRole('button',{name:'Confirm',exact:true}).click();
  await page.getByRole('button',{name:'Publish change notice',exact:true}).click();await page.getByRole('button',{name:'Confirm',exact:true}).click();
  await page.getByRole('button',{name:'Close notice',exact:true}).click();const refused=page.getByRole('dialog').last();await refused.getByLabel('Reason or response',{exact:true}).fill('Check the pending assessment');await refused.getByRole('button',{name:'Confirm',exact:true}).click();await refused.getByRole('list',{name:'Reasons this action was refused'}).getByText(/Every linked assessment needs an evidenced disposition/).waitFor();assert.equal(notice.status,'Open');await refused.getByRole('button',{name:'Cancel',exact:true}).click();
  await page.getByRole('button',{name:'Acknowledge receipt',exact:true}).click();await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.getByRole('button',{name:'Acknowledge receipt',exact:true}).waitFor({state:'hidden'});assert.equal(assessment.status,'Pending Assessment');
  await page.getByRole('button',{name:'Record assessment',exact:true}).click();await page.getByLabel('Rationale',{exact:true}).fill('The revised alignment preserves service clearance');await page.getByLabel('Evidence link',{exact:true}).fill('https://example.test/clearance.pdf');await axe('change-assessment');await page.getByRole('button',{name:'Confirm',exact:true}).click();
  await page.getByRole('button',{name:'Adopt new revision',exact:true}).click();await page.getByLabel('Rationale',{exact:true}).fill('Revision B has been incorporated into the work');await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.getByText('Assessment meets the closure requirements',{exact:true}).waitFor();assert.equal(uses[0].sourceRevisionId,srcB);
  await page.getByRole('button',{name:'Close notice',exact:true}).click();await page.getByLabel('Reason or response',{exact:true}).fill('Every linked assessment was checked');await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.getByRole('button',{name:'Close notice',exact:true}).waitFor({state:'hidden'});assert.equal(notice.status,'Closed');await axe('change-closed');
+ // Location fields offered by the shared create/panel form must be saved, and other kinds must not offer silently dropped values.
+ await page.goto(base+'/projects/P-DEMO/issues');await page.getByRole('button',{name:'Raise issue',exact:true}).first().click();
+ const issueForm=page.getByRole('dialog').last();await issueForm.getByRole('radio',{name:'Coordination',exact:true}).check();
+ assert.equal(await issueForm.getByLabel('Building',{exact:true}).count(),0);
+ assert.equal(await issueForm.getByLabel('Start station',{exact:true}).count(),0);
+ await issueForm.getByLabel('Title',{exact:true}).fill('Pump room clash');await issueForm.getByRole('radio',{name:'Medium',exact:true}).check();
+ await issueForm.getByLabel('Location kind',{exact:true}).selectOption('Building');
+ assert.equal(await issueForm.getByLabel('Alignment',{exact:true}).count(),0);
+ for(const [label,value] of [['Site area','South yard'],['Building','Pump house'],['Level','L2'],['Room','204'],['Asset or system','Ventilation']])await issueForm.getByLabel(label,{exact:true}).fill(value);
+ await axe('location-building-form');
+ await issueForm.getByRole('button',{name:'Raise issue',exact:true}).click();
+ const metadata=page.locator('section[aria-labelledby="issue-metadata-title"]');
+ await metadata.getByText('South yard · Pump house · L2 · 204 · Ventilation',{exact:true}).waitFor();
+ assert.equal(locations.length,1);assert.deepEqual(Object.fromEntries(['kind','siteArea','building','level','room','assetSystem','alignment','startStation','endStation'].map(k=>[k,locations[0][k]])),
+  {kind:'Building',siteArea:'South yard',building:'Pump house',level:'L2',room:'204',assetSystem:'Ventilation',alignment:null,startStation:null,endStation:null});
+ await page.reload();await metadata.getByText('South yard · Pump house · L2 · 204 · Ventilation',{exact:true}).waitFor();
+ await metadata.getByLabel('Location kind',{exact:true}).selectOption('Alignment');
+ assert.equal(await metadata.getByLabel('Building',{exact:true}).count(),0);
+ for(const [label,value] of [['Alignment','Road-A'],['Start station','12.25'],['End station','18.75'],['Units','m']])await metadata.getByLabel(label,{exact:true}).fill(value);
+ await metadata.getByRole('button',{name:'Add',exact:true}).first().click();await metadata.getByText('Road-A',{exact:true}).waitFor();
+ assert.equal(locations.length,2);assert.equal(locations[1].startStation,12.25);assert.equal(locations[1].endStation,18.75);assert.equal(locations[1].stationUnits,'m');assert.equal(locations[1].building,null);
+ await metadata.getByLabel('Location kind',{exact:true}).selectOption('Coordinate');
+ assert.equal(await metadata.getByLabel('Start station',{exact:true}).count(),0);
+ for(const [label,value] of [['Coordinate X','420123.5'],['Coordinate Y','4934567.25'],['Coordinate Z','17.5'],['Coordinate reference system','EPSG:26920'],['Coordinate units','m']])await metadata.getByLabel(label,{exact:true}).fill(value);
+ await metadata.getByRole('button',{name:'Add',exact:true}).first().click();await metadata.getByText(/420123.5, 4934567.25, 17.5/).waitFor();
+ assert.equal(locations.length,3);assert.equal(locations[2].coordinateReferenceSystem,'EPSG:26920');assert.equal(locations[2].coordinateZ,17.5);assert.equal(locations[2].startStation,null);
+ await page.reload();await metadata.getByText(/420123.5, 4934567.25, 17.5/).waitFor();await metadata.getByText(/12.25–18.75 m/).waitFor();
+ await metadata.getByLabel('Location kind',{exact:true}).selectOption('SiteArea');
+ assert.equal(await metadata.getByLabel('Coordinate X',{exact:true}).count(),0);assert.equal(await metadata.getByLabel('Building',{exact:true}).count(),0);
+ await metadata.getByLabel('Site area',{exact:true}).fill('North yard');await metadata.getByLabel('Asset or system',{exact:true}).fill('Storm drain');
+ await metadata.getByRole('button',{name:'Add',exact:true}).first().click();await metadata.getByText('North yard · Storm drain',{exact:true}).waitFor();
+ assert.equal(locations.length,4);assert.equal(locations[3].siteArea,'North yard');assert.equal(locations[3].assetSystem,'Storm drain');assert.equal(locations[3].coordinateX,null);assert.equal(locations[3].startStation,null);
+ await page.reload();await metadata.getByText('North yard · Storm drain',{exact:true}).waitFor();await metadata.getByText('South yard · Pump house · L2 · 204 · Ventilation',{exact:true}).waitFor();await metadata.getByText(/12.25–18.75 m/).waitFor();await metadata.getByText(/420123.5, 4934567.25, 17.5/).waitFor();
  assert.equal(errors.length,0,JSON.stringify(errors));for(const b of requests)assert.match(b.requestId,/^[a-f0-9-]{36}$/);assert.equal(new Set(requests.map(b=>b.requestId)).size,requests.length);
- const report={scope:'Chromium workflows with mocked API; backend rules tested separately',requests:requests.length,errors,violations};fs.writeFileSync(path.join(out,'review-change-ui.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));assert.ok(violations.every(v=>v.violations.length===0),'Dialog axe checks');
+ const report={scope:'Chromium workflows with mocked API; backend rules tested separately',requests:requests.length,locationKindsSavedAndReloaded:locations.map(x=>x.kind),errors,violations};fs.writeFileSync(path.join(out,'review-change-ui.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));assert.ok(violations.every(v=>v.violations.length===0),'Dialog axe checks');
 })().catch(e=>{console.error(e);process.exitCode=1}).finally(async()=>{await browser?.close();server?.kill()});

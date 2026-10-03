@@ -829,7 +829,8 @@ function locationBody(l: LocationDraft): Record<string, unknown> | string {
   if (k === 'Building' && !l.building.trim()) return 'issue.locationRequired'
   if (k === 'Alignment' && (!l.alignment.trim() || !l.start || !l.end || !l.units.trim())) return 'issue.alignmentRequired'
   if (k === 'Coordinate' && (!l.coordinateX || !l.coordinateY || !l.coordinateCrs.trim() || !l.coordinateUnits.trim())) return 'issue.coordinateRequired'
-  if ([l.coordinateX, l.coordinateY, l.coordinateZ, l.start, l.end].some((value) => value.trim() && !Number.isFinite(Number(value)))) return 'issue.numberRequired'
+  const numericValues = k === 'Coordinate' ? [l.coordinateX, l.coordinateY, l.coordinateZ] : k === 'Alignment' ? [l.start, l.end] : []
+  if (numericValues.some((value) => value.trim() && !Number.isFinite(Number(value)))) return 'issue.numberRequired'
   const numberOrNull = (value: string) => value.trim() ? Number(value) : null
   return { kind: k, siteArea: l.siteArea || null,
     building: k === 'Building' ? l.building || null : null, level: k === 'Building' ? l.level || null : null, room: k === 'Building' ? l.room || null : null,
@@ -852,8 +853,9 @@ function LocationInputs({ value: l, onChange }: { value: LocationDraft; onChange
     <Input value={l[key]} onChange={(e) => onChange({ ...l, [key]: e.target.value })} type={type} placeholder={t(label)} aria-label={t(label)} />
   return <>
     <select className={selectCls} value={l.kind} onChange={(e) => onChange({ ...l, kind: e.target.value })} aria-label={t('issue.locationKind')}><option>SiteArea</option><option>Building</option><option>Alignment</option><option>Coordinate</option></select>
-    {input('siteArea', 'issue.siteArea')}{input('building', 'issue.building')}{input('level', 'issue.level')}{input('room', 'issue.room')}{input('assetSystem', 'issue.assetSystem')}
-    {(l.kind === 'Alignment' || l.kind === 'Building') && <>{input('alignment', 'issue.alignment')}{input('start', 'issue.startStation', 'number')}{input('end', 'issue.endStation', 'number')}{input('units', 'issue.units')}</>}
+    {input('siteArea', 'issue.siteArea')}{input('assetSystem', 'issue.assetSystem')}
+    {l.kind === 'Building' && <>{input('building', 'issue.building')}{input('level', 'issue.level')}{input('room', 'issue.room')}</>}
+    {l.kind === 'Alignment' && <>{input('alignment', 'issue.alignment')}{input('start', 'issue.startStation', 'number')}{input('end', 'issue.endStation', 'number')}{input('units', 'issue.units')}</>}
     {l.kind === 'Coordinate' && <>{input('coordinateX', 'issue.coordinateX', 'number')}{input('coordinateY', 'issue.coordinateY', 'number')}{input('coordinateZ', 'issue.coordinateZ', 'number')}{input('coordinateCrs', 'issue.coordinateCrs')}{input('coordinateUnits', 'issue.coordinateUnits')}</>}
   </>
 }

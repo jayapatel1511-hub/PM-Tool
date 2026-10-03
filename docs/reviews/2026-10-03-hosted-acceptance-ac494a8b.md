@@ -1,5 +1,7 @@
 # Hosted synthetic acceptance checkpoint — 2026-10-03
 
+Later recovery evidence is recorded in the [scheduled recovery checkpoint](2026-10-03-scheduled-recovery-ac494a8b.md). Both first local timer runs, the pilot physical-base verification and encrypted review logical restore passed; timer statements below remain historical to this workflow checkpoint.
+
 Both isolated homedev runtimes use executable `ac494a8ba70d50517f540ad7e0acced85d84897e`.
 Public review is served at `https://pm.engcalchub.com` through the existing tunnel to loopback `3080`;
 the separate 30-person/10-project synthetic pilot remains private on loopback `3081`.

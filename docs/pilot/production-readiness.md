@@ -1,5 +1,7 @@
 # Production readiness: homedev
 
+The later [scheduled recovery checkpoint](../reviews/2026-10-03-scheduled-recovery-ac494a8b.md) proves both first automatic local backups, the pilot physical-base verification and approved encrypted review retrieval/restore. Historical pre-trigger timer statements below do not describe that later result. This does not close company recovery or production acceptance.
+
 Jay clarified on 2026-10-01 that review, company pilot and production stay on homedev. No Azure deployment or new
 paid service is authorized for this release. Existing Azure templates remain unused; their compile checks are not
 production gates. Use `pm.engcalchub.com`, the existing Cloudflare tunnel infrastructure and individual passwords

@@ -166,12 +166,161 @@ public sealed class SearchReportsTests(HubFactory f)
     {
         var p = await d.Project();
         var cap = Hub.Api.Infrastructure.Export.MaxRows;
-        await f.DbAsync(db => db.Database.ExecuteSqlRawAsync(
-            "INSERT INTO hub.project_health_snapshot (id, project_id, snapshot_date, computed_health, reported_health, inputs) " +
-            "SELECT gen_random_uuid(), {0}, DATE '1900-01-01' + s, 'Green', 'Green', jsonb_build_object() FROM generate_series(1, {1}) s", p.Id, cap + 2));
-        var report = await f.As(TestData.Pm).GetAsync($"/api/v1/reports/health-history?projectId={p.Id}&from=1900-01-01&to=2199-12-31").Result.Json();
-        Assert.Equal(cap + 1, report.I("total")); // enough to know it is over the export cap, never the whole scope in memory
-        Assert.True(report["truncated"]!.GetValue<bool>());
+        var prefix = "00000000-" + p.Id.ToString()[9..24];
+        var first = Guid.Parse(prefix + "000000000001");
+        var last = Guid.Parse(prefix + (cap + 2).ToString("D12"));
+        try
+        {
+            await f.DbAsync(db => db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO hub.project_health_snapshot (id, project_id, snapshot_date, computed_health, reported_health, inputs) " +
+                "SELECT ({2} || lpad(s::text, 12, '0'))::uuid, {0}, DATE '1900-01-01' + s, 'Green', 'Green', jsonb_build_object() FROM generate_series(1, {1}) s", p.Id, cap + 2, prefix));
+            var report = await f.As(TestData.Pm).GetAsync($"/api/v1/reports/health-history?projectId={p.Id}&from=1900-01-01&to=2199-12-31").Result.Json();
+            Assert.Equal(cap + 1, report.I("total")); // enough to know it is over the export cap, never the whole scope in memory
+            Assert.True(report["truncated"]!.GetValue<bool>());
+            Assert.True(report["totalIsLowerBound"]!.GetValue<bool>());
+            var small = await (await f.As(TestData.Pm).GetAsync($"/api/v1/reports/health-history?projectId={p.Id}&from=1900-01-02&to=1900-01-02")).Json();
+            Assert.Equal(1, small.I("total"));
+            Assert.False(small["totalIsLowerBound"]!.GetValue<bool>());
+        }
+        finally
+        {
+            await f.DbAsync(db => db.Database.ExecuteSqlRawAsync(
+                "DELETE FROM hub.project_health_snapshot WHERE project_id = {0} AND id BETWEEN {1} AND {2}", p.Id, first, last));
+        }
+    }
+
+    [Fact]
+    public async Task Blocked_report_filters_decision_sources_before_the_export_cap_and_exports_every_match()
+    {
+        var p = await d.Project();
+        var client = f.As(TestData.Pm);
+        var cap = Hub.Api.Infrastructure.Export.MaxRows + 1;
+        var manual = await d.NewTask(p.Id, TestData.Pm, new { name = "Survey hold", dueDate = "2026-09-01" });
+        await (await client.Post($"/api/v1/tasks/{manual.G("id")}/block", new
+        {
+            type = BlockType.Information, reason = "Wait for survey", rowVersion = await d.TaskVersion(manual),
+        })).Json();
+        var blocked = await d.NewTask(p.Id, TestData.Pm, new { name = "Decision hold", dueDate = "2026-10-01" });
+        foreach (var (target, requiredBy) in new[] { (manual, "2026-09-30"), (blocked, "2026-09-10") })
+            await (await client.Post($"/api/v1/projects/{p.Id}/decisions", new
+            {
+                subject = "Approve layout", description = "Layout approval", ownerUserId = U(TestData.Pm), requiredByDate = requiredBy,
+                impactLevel = Impact.High, impactDescription = "Layout waits", links = new[] { new { targetType = ItemType.Task, targetId = target.G("id"), relation = ItemRelation.BlockedByDecision } },
+            })).Json(201);
+        await f.Evaluate(p.Id);
+        var manualState = await f.DbAsync(db => db.TaskStates.SingleAsync(x => x.TaskId == manual.G("id")));
+        var manualBlockers = JsonNode.Parse(manualState.BlockedBy)!.AsArray();
+        Assert.True(manualState.IsBlocked);
+        Assert.Contains(manualBlockers, x => x!.S("type") == "manual" && x["blocking"]!.GetValue<bool>());
+        Assert.Contains(manualBlockers, x => x!.S("type") == "decision" && !x["blocking"]!.GetValue<bool>());
+        var decisionState = await f.DbAsync(db => db.TaskStates.SingleAsync(x => x.TaskId == blocked.G("id")));
+        var decisionBlocker = Assert.Single(JsonNode.Parse(decisionState.BlockedBy)!.AsArray())!;
+        Assert.Equal("decision", decisionBlocker.S("type"));
+        Assert.True(decisionBlocker["blocking"]!.GetValue<bool>());
+
+        var legacyId = Guid.NewGuid();
+        var legacySeq = cap + 101;
+        var legacyKey = $"{p.ProjectNumber}-T{legacySeq}";
+        try
+        {
+            await f.DbAsync(async db =>
+            {
+                // The indexed 50,001-row fixture gets a bounded setup timeout; API reads retain their normal timeout.
+                db.Database.SetCommandTimeout(TimeSpan.FromMinutes(2));
+                // Clone valid API rows and evaluated states; the early sources have only a manual blocker and a false decision.
+                await db.Database.ExecuteSqlRawAsync("""
+                    INSERT INTO hub.task
+                    SELECT (jsonb_populate_record(NULL::hub.task, to_jsonb(t) || jsonb_build_object(
+                        'id', gen_random_uuid(), 'seq', s + 100, 'key', {1} || '-T' || (s + 100)::text))).*
+                    FROM hub.task t CROSS JOIN generate_series(1, {2}) s WHERE t.id = {0}
+                    """, manual.G("id"), p.ProjectNumber, cap);
+                await db.Database.ExecuteSqlRawAsync("""
+                    INSERT INTO hub.task_state
+                    SELECT (jsonb_populate_record(NULL::hub.task_state, to_jsonb(st) || jsonb_build_object('task_id', t.id))).*
+                    FROM hub.task_state st CROSS JOIN hub.task t
+                    WHERE st.task_id = {0} AND t.project_id = {1} AND t.seq BETWEEN 101 AND {2}
+                    """, manual.G("id"), p.Id, cap + 100);
+                await db.Database.ExecuteSqlRawAsync("""
+                    INSERT INTO hub.task
+                    SELECT (jsonb_populate_record(NULL::hub.task, to_jsonb(t) || jsonb_build_object('id', {1}, 'seq', {2}, 'key', {3}))).*
+                    FROM hub.task t WHERE t.id = {0}
+                    """, blocked.G("id"), legacyId, legacySeq, legacyKey);
+                return await db.Database.ExecuteSqlRawAsync("""
+                    INSERT INTO hub.task_state
+                    SELECT (jsonb_populate_record(NULL::hub.task_state, to_jsonb(st) || jsonb_build_object(
+                        'task_id', {1}, 'blocked_by', jsonb_build_array((st.blocked_by -> 0) - 'blocking')))).*
+                    FROM hub.task_state st WHERE st.task_id = {0}
+                    """, blocked.G("id"), legacyId);
+            });
+            Assert.Equal(cap + 3, await f.DbAsync(db => db.TaskStates.CountAsync(x => x.ProjectId == p.Id && x.IsBlocked)));
+            Assert.False(await f.DbAsync(db => db.Tasks.Where(x => x.ProjectId == p.Id).OrderBy(x => x.DueDate).ThenBy(x => x.Seq)
+                .Take(cap).AnyAsync(x => x.Id == blocked.G("id") || x.Id == legacyId)));
+
+            var query = $"projectId={p.Id}&blockerType=decision";
+            var report = await (await client.GetAsync($"/api/v1/reports/blocked-tasks?{query}")).Json();
+            var expectedKeys = new[] { blocked.S("key"), legacyKey };
+            Assert.Equal(expectedKeys, report["rows"]!.AsArray().Select(x => x!.S("key"))); // neither match may disappear behind the raw source cap
+            Assert.Equal(2, report.I("total"));
+            Assert.False(report["truncated"]!.GetValue<bool>());
+            Assert.False(report["totalIsLowerBound"]!.GetValue<bool>());
+            var csv = await client.GetAsync($"/api/v1/reports/blocked-tasks/export?format=csv&{query}");
+            Assert.Equal(HttpStatusCode.OK, csv.StatusCode);
+            Assert.Equal("text/csv", csv.Content.Headers.ContentType!.MediaType);
+            var lines = Encoding.UTF8.GetString(await csv.Content.ReadAsByteArrayAsync()).TrimStart('\uFEFF')
+                .Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            Assert.Equal(3, lines.Length);
+            Assert.Equal(expectedKeys, lines.Skip(1).Select(line => line.Split(',')[0])); // complete filtered CSV, no manual/false-decision sources
+        }
+        finally
+        {
+            // Task-state clones are removed by the task FK's cascade; keep both API seed tasks.
+            await f.DbAsync(async db =>
+            {
+                db.Database.SetCommandTimeout(TimeSpan.FromMinutes(2));
+                return await db.Database.ExecuteSqlRawAsync(
+                    "DELETE FROM hub.task WHERE project_id = {0} AND seq BETWEEN 101 AND {1}", p.Id, legacySeq);
+            });
+        }
+    }
+
+    [Fact]
+    public async Task Issue_report_prioritises_high_severity_before_the_uuid_source_cap()
+    {
+        var p = await d.Project();
+        var cap = Hub.Api.Infrastructure.Export.MaxRows + 1;
+        var high = await (await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/issues", new
+        {
+            title = "Urgent site access", description = "Access is blocked", severity = Impact.High, dateRaised = "2026-09-01", targetResolutionDate = "2026-09-01",
+        })).Json(201);
+        var prefix = "00000000-" + p.Id.ToString()[9..24];
+        try
+        {
+            await f.DbAsync(async db =>
+            {
+                db.Database.SetCommandTimeout(TimeSpan.FromMinutes(2));
+                return await db.Database.ExecuteSqlRawAsync("""
+                INSERT INTO hub.issue
+                SELECT (jsonb_populate_record(NULL::hub.issue, to_jsonb(i) || jsonb_build_object(
+                    'id', ({1} || lpad(s::text, 12, '0'))::uuid, 'seq', s + 1, 'key', {2} || '-I' || (s + 1)::text,
+                    'severity', 'Low', 'target_resolution_date', DATE '2026-09-30'))).*
+                FROM hub.issue i CROSS JOIN generate_series(1, {3}) s WHERE i.id = {0}
+                """, high.G("id"), prefix, p.ProjectNumber, cap);
+            });
+            Assert.Equal(cap + 1, await f.DbAsync(db => db.Issues.CountAsync(x => x.ProjectId == p.Id)));
+            Assert.False(await f.DbAsync(db => db.Issues.Where(x => x.ProjectId == p.Id).OrderBy(x => x.Id).Take(cap).AnyAsync(x => x.Id == high.G("id"))));
+
+            var report = await (await f.As(TestData.Pm).GetAsync($"/api/v1/reports/open-issues-high-risks?projectId={p.Id}")).Json();
+            Assert.Equal(high.G("id"), report["rows"]![0]!.G("id")); // the highest-priority issue must survive the source cap
+            Assert.Equal(Impact.High, report["rows"]![0]!.S("severity"));
+            Assert.Equal(cap, report.I("total"));
+            Assert.True(report["truncated"]!.GetValue<bool>());
+            Assert.True(report["totalIsLowerBound"]!.GetValue<bool>());
+        }
+        finally
+        {
+            await f.DbAsync(db => db.Database.ExecuteSqlRawAsync(
+                "DELETE FROM hub.issue WHERE project_id = {0} AND seq BETWEEN 2 AND {1}", p.Id, cap + 1));
+        }
     }
 
     [Fact]

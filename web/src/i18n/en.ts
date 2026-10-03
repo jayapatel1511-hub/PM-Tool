@@ -1335,6 +1335,7 @@ export const en: Record<string, string> = {
   'reports.chooseProject': 'Choose a project', 'reports.allProjects': 'All my visible projects', 'reports.nProjects': '{n} projects',
   'reports.anyOffice': 'Any office', 'reports.anyone': 'Anyone', 'reports.any': 'Any', 'reports.empty': 'No rows match these parameters.',
   'reports.rows': '{n} rows', 'reports.row1': '1 row', 'reports.truncated': 'Showing the first {n} of {total} rows; export for all of them.',
+  'reports.truncatedLowerBound': 'Showing {n} of at least {total} rows. Apply filters to narrow the result.',
   'export.label': 'Export', 'export.xlsx': 'Excel (.xlsx)', 'export.csv': 'CSV (.csv)',
   'activity.anyActor': 'Anyone', 'activity.actor': 'Actor',
   // Timeline, copy structure, reassign work (packet 010)

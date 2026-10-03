@@ -27,8 +27,7 @@ Raw evidence remains under `/private/tmp/pm-*`; credentials, dumps and runtime f
 
 ## Open completion work
 
-- Complete shared canonical basis evaluation for readiness-exception digest eligibility; owner recovery suppression is integrated and its 11 focused digest/notification checks pass.
-- Independent combined review found one remaining mismatch in digest basis eligibility; readiness and digest are being changed to reuse the same canonical basis evaluation. The full-print/paging/repeated-refresh browser regression passed.
+- Finish independent combined review and exact-head CI/image/hosted gates. Shared canonical basis evaluation is integrated in `4c7df62`; readiness and digest now use the same current-use/conflict/impact/provisional-assumption predicates. The final 39 affected checks pass. All three required Chromium mocked suites pass, including immediate repeated Print refresh.
 - Independent review of the combined result, final required CI, exact-archive image, fresh/populated migration and old-image compatibility checks, source staging and activation.
 - Hosted password/browser acceptance of the final revision, persistence-marker comparison, print/keyboard/accessibility checks and complete packet T006 evidence.
 
@@ -36,7 +35,7 @@ Raw evidence remains under `/private/tmp/pm-*`; credentials, dumps and runtime f
 
 | Gate | Verdict | Limit |
 |---|---|---|
-| Full code completion | FAIL / work continues | Open implementation above; older green CI does not settle these requirements |
+| Full code completion | UNPROVEN / final verification | Known implementation findings are corrected; final 39 affected checks and three mocked browser suites pass. Independent combined review, exact-head CI/image and hosted acceptance remain open |
 | Earlier register candidate merge | PASS, historical | PR #24 merged; new completion fixes have not yet been merged |
 | Current review deployment | PASS for `02ca7cd` only | Later fixes are not deployed; no activation of the held `26c0ae1` is claimed |
 | Encrypted off-host recovery | PASS, manual | Approved review dump/config/verifiers/keys retrieved byte-identically and restored in isolation; not automatic execution |

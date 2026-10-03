@@ -232,9 +232,19 @@ public sealed class LocationIssueTests(HubFactory f)
 
         var document = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/documents", new
         {
-            kind = "Drawing", identifier = "C-101", revision = "A", sourceUrl = "https://review.example.test/c-101", isAvailable = true, rowVersion = await IssueVersion(id)
+            kind = "Drawing", identifier = "C-101", revision = "A", sourceUrl = "https://review.example.test/c-101", sourceSystem = "SharePoint", stableSourceId = "document-101", isAvailable = true, rowVersion = await IssueVersion(id)
         }).Result.Json(201);
         Assert.NotEqual(Guid.Empty, document.G("id"));
+        var registered = Assert.Single((await (await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{id}/documents")).Json()).AsArray())!;
+        Assert.Equal("SharePoint", registered.S("sourceSystem"));
+        Assert.Equal("document-101", registered.S("stableSourceId"));
+        Assert.Equal("Manual", registered.S("registrationMethod"));
+        Assert.Equal(d.User(TestData.Alex), registered.G("registeredBy"));
+        Assert.NotNull(registered["registeredAt"]);
+        var provenanceExport = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues/export?format=csv");
+        var provenanceCsv = await provenanceExport.Content.ReadAsStringAsync();
+        Assert.Contains("SharePoint", provenanceCsv); Assert.Contains("document-101", provenanceCsv);
+        Assert.Contains("manually registered", provenanceCsv);
         Assert.Equal(HttpStatusCode.Conflict, (await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/documents", new
         {
             kind = "Drawing", identifier = "C-101", revision = "A", sourceUrl = "https://review.example.test/c-101", isAvailable = true, rowVersion = await IssueVersion(id)

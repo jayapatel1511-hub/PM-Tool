@@ -25,7 +25,7 @@ public static class RegisterEndpoints
         string? Alignment, decimal? StartStation, decimal? EndStation, string? StationUnits, decimal? CoordinateX, decimal? CoordinateY,
         decimal? CoordinateZ, string? CoordinateReferenceSystem, string? CoordinateUnits, int RowVersion);
     public sealed record IssueDocumentBody(string Kind, string Identifier, string Revision, string SourceUrl, string? ExternalTopicId,
-        string? ModelElementGuid, string? ViewpointUrl, bool IsAvailable, int RowVersion);
+        string? ModelElementGuid, string? ViewpointUrl, bool IsAvailable, int RowVersion, string? SourceSystem = null, string? StableSourceId = null);
     public sealed record IssueVerificationBody(Guid VerifierId, string Status, string? EvidenceUrl, string? Note, int RowVersion);
 
     static readonly Col[] RiskCols =
@@ -386,7 +386,7 @@ public static class RegisterEndpoints
                     LocationLabels = locationLabels, LocationSummary = string.Join("; ", locationLabels),
                     AffectedDisciplineIds = affected.Select(x => x.ProjectDisciplineId).ToArray(), AffectedDisciplineNames = affected.Select(x => x.Name).ToArray(),
                     AffectedDisciplineSummary = string.Join("; ", affected.Select(x => x.Name)),
-                    DocumentSummary = string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
+                    DocumentSummary = string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · manually registered · source {x.SourceSystem ?? "[unknown]"} · ID {x.StableSourceId ?? "[unknown]"} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
                     DocumentIdentifiers = issueDocuments.Select(x => x.Identifier).Distinct(StringComparer.OrdinalIgnoreCase)
                         .OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
                     DocumentRevisions = issueDocuments.Select(x => x.Revision).Distinct(StringComparer.OrdinalIgnoreCase)
@@ -672,7 +672,7 @@ public static class RegisterEndpoints
     {
         await LoadIssue(db, access, id);
         return await db.IssueDocumentReferences.AsNoTracking().Where(x => x.IssueId == id).OrderBy(x => x.CreatedAt)
-            .Select(x => (object)new { x.Id, x.Kind, x.Identifier, x.Revision, x.SourceUrl, x.ExternalTopicId, x.ModelElementGuid, x.ViewpointUrl, x.IsAvailable, x.RowVersion }).ToListAsync();
+            .Select(x => (object)new { x.Id, x.Kind, x.Identifier, x.Revision, x.SourceUrl, x.SourceSystem, x.StableSourceId, RegisteredBy = x.CreatedBy, RegisteredAt = x.CreatedAt, RegistrationMethod = "Manual", x.ExternalTopicId, x.ModelElementGuid, x.ViewpointUrl, x.IsAvailable, x.RowVersion }).ToListAsync();
     }
 
     static async Task<IResult> AddIssueDocument(Guid id, IssueDocumentBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
@@ -692,8 +692,11 @@ public static class RegisterEndpoints
     {
         try { Registers.ValidateIssueDocument(body.Kind, body.Identifier, body.Revision, body.SourceUrl); }
         catch (ArgumentException ex) { throw ApiException.Invalid("document", "issue.document_invalid", ex.Message); }
+        var sourceUrl = Coordination.Url(body.SourceUrl);
         return new IssueDocumentReference { ProjectId = issue.ProjectId, IssueId = issue.Id, IssueRowVersion = issueRowVersion, Kind = body.Kind,
-            Identifier = Check.Required(body.Identifier, "identifier", 300), Revision = Check.Required(body.Revision, "revision", 100), SourceUrl = Coordination.Url(body.SourceUrl),
+            Identifier = Check.Required(body.Identifier, "identifier", 300), Revision = Check.Required(body.Revision, "revision", 100), SourceUrl = sourceUrl,
+            SourceSystem = Check.Optional(body.SourceSystem, "sourceSystem", 200) ?? new Uri(sourceUrl).Host,
+            StableSourceId = Check.Optional(body.StableSourceId, "stableSourceId", 300),
             ExternalTopicId = Check.Optional(body.ExternalTopicId, "externalTopicId", 300), ModelElementGuid = Check.Optional(body.ModelElementGuid, "modelElementGuid", 300),
             ViewpointUrl = string.IsNullOrWhiteSpace(body.ViewpointUrl) ? null : Coordination.Url(body.ViewpointUrl), IsAvailable = body.IsAvailable };
     }

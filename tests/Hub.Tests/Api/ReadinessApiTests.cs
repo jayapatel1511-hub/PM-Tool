@@ -729,6 +729,11 @@ public sealed class ReadinessApiTests(HubFactory f)
         Assert.True(updatedHandoff["applies"]!.GetValue<bool>());
         Assert.Null(updatedHandoff["satisfied"]);
         Assert.Equal(ReadinessState.NeedsAssessment, updated["assessment"]!.S("state"));
+        Assert.True(updated["assessment"]!.I("rowVersion") > detail["assessment"]!.I("rowVersion"));
+        await (await f.As(TestData.Pm).Post(applicabilityPath, applies with
+        {
+            RequestId = Guid.NewGuid(), CheckRowVersion = updatedHandoff.I("rowVersion")
+        })).Json(409); // stale aggregate cannot overwrite a current child even when derived state is unchanged
         var constraintPath = path + "/constraints";
         var createConstraint = new ReadinessEndpoints.ConstraintBody(Guid.NewGuid(), version, "Handoff",
             "Obtain accepted drainage input", data.User(TestData.Pm), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),

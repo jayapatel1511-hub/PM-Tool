@@ -314,8 +314,8 @@ public static class TaskEndpoints
                 var ndid = patch.Id("deliverableId");
                 if (ndid is { } nd2)
                 {
-                    var nd = await db.Deliverables.FirstOrDefaultAsync(d => d.Id == nd2) ?? throw ApiException.Invalid("deliverableId", "error.not_found");
-                    Check.That(nd.ProjectId == t.ProjectId, "deliverableId", "task.other_project"); // T-18
+                    // T-18, with one answer whether the deliverable is missing or in another project (no existence check across projects).
+                    Check.That(await db.Deliverables.AnyAsync(d => d.Id == nd2 && d.ProjectId == t.ProjectId), "deliverableId", "task.other_project");
                     t.MilestoneId = null; // T-17/T-21: milestone context follows the deliverable; dependencies are kept
                 }
                 t.DeliverableId = ndid;

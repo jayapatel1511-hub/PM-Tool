@@ -58,6 +58,30 @@ public sealed class TasksTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Moving_a_task_to_a_deliverable_outside_its_project_gives_one_answer_whether_or_not_it_exists()
+    {
+        await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true });
+        try
+        {
+            var hidden = await d.Project(tweak: body => body["members"] = Array.Empty<object>());
+            var secret = await f.As(TestData.Pm).Post($"/api/v1/projects/{hidden.Id}/deliverables", new
+            {
+                name = "Confidential package", projectDisciplineId = d.ProjectDiscipline(hidden.Id, "Civil"), deliverableTypeId = await d.DeliverableType(),
+            }).Result.Json(201);
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{hidden.Id}", new { visibility = Visibility.Restricted }, d.Version(hidden.Id))).EnsureSuccessStatusCode();
+            var p = await d.Project();
+            var t = await d.NewTask(p.Id, TestData.Alex); // Alex may edit his own new task but cannot see the restricted project
+            async Task<string> Answer(Guid deliverableId)
+            {
+                var r = await f.As(TestData.Alex).Patch($"/api/v1/tasks/{t.G("id")}", new { deliverableId, rowVersion = await d.TaskVersion(t) });
+                return $"{(int)r.StatusCode} {(await r.Json(400))["errors"]!.ToJsonString()}";
+            }
+            Assert.Equal(await Answer(Guid.NewGuid()), await Answer(secret.G("id"))); // no existence check on another project's records
+        }
+        finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }); }
+    }
+
+    [Fact]
     public async Task Refused_bulk_assignment_cannot_add_a_member_to_a_restricted_project()
     {
         (await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true })).EnsureSuccessStatusCode();

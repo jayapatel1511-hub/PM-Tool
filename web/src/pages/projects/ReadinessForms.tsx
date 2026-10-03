@@ -16,7 +16,7 @@ import { CommandForm, SelectField, personName, workChoices, workRef, type CoordO
 type Assessment = { id: string; rowVersion: number; ownerId: string; state: string; intendedOutput: string; completionCriteria: string; evaluatedAt: string }
 type Check = { id: string; rowVersion: number; code: string; applies: boolean | null; satisfied: boolean | null; reason?: string; evidenceUrl?: string; recordedBy?: string }
 type RdyException = { id: string; basisVersionId: string; approvedBy: string; verifierId: string; limitedWork: string; risk: string; expiresOn: string; createdAt: string }
-type Detail = { assessment: Assessment; checks: Check[]; unknown: string[]; blocked: string[]; exceptions: RdyException[] }
+type Detail = { assessment: Assessment; checks: Check[]; unknown: string[]; blocked: string[]; exceptions: RdyException[]; sources: { code: string; record: LinkedRecord }[] }
 type BasisVersion = { id: string; number: number; status: string; scope: string; rowVersion: number }
 type BasisDetail = { entry: { key: string; title: string }; versions: { version: BasisVersion }[];
   uses: { versionId: string; targetType: string; targetId: string; isCurrent: boolean }[];
@@ -90,6 +90,9 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
         <p>{t('readiness.applicability')}: {t(c.applies === null ? 'readiness.unassessed' : c.applies ? 'readiness.applies' : 'readiness.notApplicable')}</p>
         {c.applies !== false && <p>{t('readiness.result')}: {t(c.satisfied === null ? 'readiness.unassessed' : c.satisfied ? 'readiness.satisfied' : 'readiness.unsatisfied')}</p>}
         {c.reason && <p>{c.reason}</p>}
+        {(q.data!.sources ?? []).some(s => s.code === c.code) && <ul aria-label={t('readiness.sources')} className="space-y-1">
+          {(q.data!.sources ?? []).filter(s => s.code === c.code).map(({ record: r }) => <li key={`${r.type}:${r.id}`}><Link className="text-primary underline" to={itemHref(r.type, number, r.id)}>{r.key} · {r.title}</Link> · {tv(r.status)}</li>)}
+        </ul>}
         {c.evidenceUrl && <a className="text-primary underline" href={c.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
         {c.recordedBy && <p className="text-xs text-muted-foreground">{t('readiness.recordedBy')}: {personName(options, c.recordedBy)}</p>}
         {canAssess && <Button size="sm" variant="outline" onClick={() => setEditing(c)}>{t('readiness.recordApplicability')} · {tv(c.code)}</Button>}

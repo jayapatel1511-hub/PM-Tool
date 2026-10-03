@@ -319,6 +319,7 @@ export const en: Record<string, string> = {
   "digest.section.issueVerifications": "Issue verification", "prefs.section.issueVerifications": "Issue verification",
   "digest.section.readinessExceptions": "Assumption exception verification", "prefs.section.readinessExceptions": "Assumption exception verification",
   "notify.ReadinessExceptionApproved": "Assumption exception verification", "prefs.event.ReadinessExceptionApproved": "Assumption exception verification", "event.ReadinessExceptionApproved": "Assumption exception verification",
+  "readiness.sources": "Contributing records",
   "digest.section.reviewPackages": "Multidisciplinary reviews",
   "prefs.section.reviewPackages": "Multidisciplinary reviews",
   "digest.section.changes": "Revision change assessments",

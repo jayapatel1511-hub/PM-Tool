@@ -58,6 +58,23 @@ public sealed class TasksTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Only_the_watcher_or_a_PM_removes_a_watch()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id);
+        var url = $"/api/v1/items/Task/{t.G("id")}/watchers";
+        Task<bool> Watching() => f.DbAsync(db => db.Watchers.AnyAsync(w => w.ItemId == t.G("id") && w.UserId == d.User(TestData.Diane)));
+        (await f.As(TestData.Diane).Post(url, new { userId = d.User(TestData.Diane) })).EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).DeleteAsync($"{url}/{d.User(TestData.Diane)}")).StatusCode); // a commenter, not a PM
+        Assert.True(await Watching());
+        Assert.Equal(HttpStatusCode.NoContent, (await f.As(TestData.Pm).DeleteAsync($"{url}/{d.User(TestData.Diane)}")).StatusCode);
+        Assert.False(await Watching());
+        (await f.As(TestData.Diane).Post(url, new { userId = d.User(TestData.Diane) })).EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.NoContent, (await f.As(TestData.Diane).DeleteAsync($"{url}/{d.User(TestData.Diane)}")).StatusCode);
+        Assert.False(await Watching());
+    }
+
+    [Fact]
     public async Task Moving_a_task_to_a_deliverable_outside_its_project_gives_one_answer_whether_or_not_it_exists()
     {
         await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true });

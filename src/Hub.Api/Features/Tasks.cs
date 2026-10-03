@@ -67,7 +67,7 @@ public static class TaskEndpoints
         {
             var pid = await ActivityEndpoints.ItemProject(db, type, id) ?? throw ApiException.NotFound();
             var (_, ctx) = await access.Project(pid, track: false);
-            Access.Demand(userId == access.Me.Id ? Allow.Yes : Permissions.Comment(access.Actor, ctx));
+            Access.Demand(userId == access.Me.Id ? Allow.Yes : Permissions.ManageTeam(access.Actor, ctx)); // one's own watch, or a PM's call
             await db.Watchers.Where(w => w.ItemType == type && w.ItemId == id && w.UserId == userId).ExecuteDeleteAsync();
             return Results.NoContent();
         });

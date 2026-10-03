@@ -3,7 +3,10 @@
 Checklist for moving from the synthetic review release to the company pilot on homedev. It lists what must be true
 and who proves it; it is not a readiness claim. Run the pilot itself with the [pilot plan][plan]; homedev production
 is covered by [production readiness][prod]. Homedev runs the synthetic review release `02ca7cd`, activated 2026-10-03 01:03 UTC.
-Recheck its state before acting on any row ([gates]); the latest [combined checkpoint](../reviews/2026-10-02-combined-candidate.md) records earlier security/mobile candidate `6becc79` merged through PR #23, exact-head/main CI passing 838/838, fresh-image safety checks and separate pilot source staging. The register-completion candidate replaces that activation request; its activation and hosted retest are pending; the live `02ca7cd` retains the narrow-screen defect.
+Recheck its state before acting on any row ([gates]). The corrected candidate `211bd88` merged through
+PR #25 at `328e88a`; candidate and identical-tree main CI passed 858/858. Fresh seed-free image and restored
+synthetic review migration/old-executable compatibility checks passed locally. Its homedev activation and final
+hosted/browser checks are pending; live review remains `02ca7cd`. See the [completion checkpoint](../reviews/2026-10-03-completion-audit.md).
 
 **Decisions in force (Jay, clarified 2026-10-01):** homedev hosts review, company pilot and production at
 `pm.engcalchub.com` through the existing Cloudflare tunnel infrastructure. No Azure deployment or new paid service
@@ -76,7 +79,9 @@ Local-password sign-in maps each login to an existing active `AppUser` and grant
 
 ## 5. Backup and recovery
 
-Proposal for Jay and company acceptance. The 15-minute RPO in §22 is the Azure point-in-time target, not homedev's.
+Proposal for Jay and company acceptance. §22 and packet 011 FR-005 require an RPO of at most 15 minutes,
+including on homedev. The daily-dump proposal below does not meet that requirement. It is not an approved
+relaxation: implement and prove the required recovery target or record an explicit accepted change before go-live.
 
 | Measure | Pilot proposal | Basis |
 |---|---|---|

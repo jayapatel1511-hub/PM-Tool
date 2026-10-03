@@ -1,5 +1,7 @@
 # Verification: Location-Linked Coordination Issues
 
+**Current checkpoint — 2026-10-03:** the dated increments below retain historical gaps. Unavailable document-reference recovery is now implemented: `POST /issues/{id}/documents/{documentId}/replace` preserves the original reference and invalidates earlier verification, with a corresponding recovery control in the issue inspector. The earlier statement that nothing was implemented is superseded by `86b133d` and the [completion audit](../../docs/reviews/2026-10-03-completion-audit.md). Current `ac494a8b` public browser save/reload and actual CSV/XLSX response checks passed for four location kinds; their bounds are recorded in the [hosted checkpoint](../../docs/reviews/2026-10-03-hosted-acceptance-ac494a8b.md). These observations do not close full packet or company acceptance.
+
 **Date**: 2026-09-26
 **State**: Backend and scoped UI slices implemented in the isolated review worktree. Deployed acceptance and pilot execution remain unproven.
 

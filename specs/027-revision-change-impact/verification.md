@@ -66,3 +66,8 @@ Independent rehearsal on worktree head `b155601` against the real API and a fres
 | Cancelled correction task (API) | PASS | Assessment stays Update Required and cannot be resolved |
 
 At this head the correction task had never been readiness-assessed, so completing it first returned 422 `start_authorisation_required`; Jay recorded a start authorisation by API and Alex then completed it with acknowledgement and reason. Lower-severity finding: after the correction task is cancelled, resolution is refused with "The referenced work or discipline is unavailable or outside this project." and the task renders as "Unavailable or no longer a participant", which does not tell the owner that a new disposition is needed. NOT RUN: keyboard-only and screen-reader use, other browsers, load, hosted/homedev acceptance. T006 stays open.
+
+
+## Hosted revision-change checkpoint — 2026-10-03 20:21–20:30 UTC
+
+On executable `ac494a8ba70d50517f540ad7e0acced85d84897e`, three new labelled consumers exercised acknowledgement-only refusal, authorised retention of A, adoption of B, and correction completion plus independent verification. Closure was refused before correction completion and before verification; immutable A, adoption histories and due dates remained intact. Final Closed state and dispositions survived public signed-in browser reload. A separate two-connection publication race returned 200/409 from one saved head snapshot, left the losing Draft untouched and refused stale adoption without changes. These are bounded AC-CHG-01/02/03/05 and AC-CHG-04 publication/head/use slices; approval replacement under that race and exact internal server overlap remain unproven. See the [current hosted checkpoint](../../docs/reviews/2026-10-03-hosted-acceptance-ac494a8b.md).

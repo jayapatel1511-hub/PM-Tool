@@ -359,3 +359,17 @@ The combined increment passed 27 focused PostgreSQL cases across the final runs,
 ## Completion correction checkpoint — 2026-10-03
 
 See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) for exact implementation commits, focused regression evidence and remaining combined/hosted gates. The earlier `26c0ae1` candidate is held. This checkpoint does not close T006 or claim final hosted/company acceptance; live review remains `02ca7cd` pending activation of the corrected candidate.
+
+## Hosted five-promise freeze/withdrawal slice — 2026-10-03
+
+On executable `ac494a8ba70d50517f540ad7e0acced85d84897e`, Taylor proposed five new labelled synthetic outputs and Jay confirmed each before the Tuesday week beginning 2026-09-29 was frozen. Withdrawing one after the snapshot retained all five original promise IDs/content and the immutable denominator of five; the remaining four stayed Committed. The signed-in browser displayed five original promises and one later withdrawal after full reload. The actual CSV response matched all five outputs, criteria, recorded weeks, target dates, readiness and states. Task original/due dates, progress and completion status did not change.
+
+The helper initially submitted a version from before snapshot capture and received 409 without adding history. A targeted retry read the fresh version and resumed only those same five journalled promises, creating no duplicate work or snapshot. PASS covers AC-RDY-04 and a bounded chair/performer slice; complete AC-RDY-05 permissions/notifications, native download, assistive technology and company acceptance remain UNPROVEN. Credential-free evidence is `pm-tool/data/hosted-weekly-five-ac494a8b.json` and `hosted-weekly-export-ac494a8b.json`. See the [hosted acceptance checkpoint](../../docs/reviews/2026-10-03-hosted-acceptance-ac494a8b.md); T006 remains open.
+
+## Hosted performer permissions and app notifications — 2026-10-03 21:20 UTC
+
+A separate bounded AC-RDY-05 slice on the same executable created one new labelled task/promise in the previously empty Tuesday week beginning 2026-10-06. Taylor's proposal stayed Proposed until Jay confirmed. Taylor and Yagmur confirmation attempts, and Taylor's Met attestation attempt after freezing, returned 403 with the full promise, events and scoped notifications unchanged. Jay explicitly confirmed and then recorded evidence for Met. The single-promise snapshot retained denominator one and final Met count one; task dates/status/progress and the earlier five-promise fixture were not edited.
+
+Jay received one proposal notice from Taylor. Taylor's outcome notice retained its ID and increased its coalesced count from one at commitment to two at Met; actor/self and unrelated Yagmur outcome notices were absent. Existing notification preferences were inspected and preserved. Credential-free evidence is `pm-tool/data/hosted-weekly-permissions-ac494a8b.json`. This PASS does not cover email, all restricted/lifecycle/actor combinations, complete browser forms, assistive technology or company acceptance; T006 remains open.
+
+The public signed-in browser displayed WC006 Met/Ready with the frozen denominator of one after full reload. The earlier five-promise week still displayed its original denominator of five and one later withdrawal.

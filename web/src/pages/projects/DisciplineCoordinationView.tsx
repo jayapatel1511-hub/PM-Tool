@@ -73,11 +73,11 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     queryFn: () => get<Data>(`projects/${project.id}/discipline-coordination${qs({ disciplineId, ownerId, from, to, page: printAll ? undefined : page, pageSize: printAll ? undefined : 4 })}`),
   })
   useEffect(() => {
-    if (!printAll || q.isPending || !onPrinted) return
+    if (!printAll || q.isPending || q.isFetching || !onPrinted) return
     if (q.error) { onPrinted(false); return }
     const frame = requestAnimationFrame(() => { try { window.print() } finally { onPrinted(false) } })
     return () => cancelAnimationFrame(frame)
-  }, [printAll, q.isPending, q.error, onPrinted])
+  }, [printAll, q.isPending, q.isFetching, q.error, onPrinted])
   const filters = <div role="group" className="mb-3 flex flex-wrap items-end gap-3 rounded border bg-background/60 p-3" aria-label={t('dcv.scopeLabel')}>
     <span className="self-center text-xs text-muted-foreground">{t('dcv.projectPrefix')} <strong>{project.projectNumber}</strong>{disciplineId ? ` · ${project.disciplines.find(x => x.id === disciplineId)?.name ?? t('dcv.selectedDiscipline')}` : ''}</span>
     <label className="text-xs">{t('common.owner')}<select className="mt-1 block rounded border bg-background px-2 py-1 text-sm" value={ownerId} onChange={e => setScope('owner', e.target.value)}><option value="">{t('dcv.allPermittedOwners')}</option>{team.data?.members.map(m => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></label>

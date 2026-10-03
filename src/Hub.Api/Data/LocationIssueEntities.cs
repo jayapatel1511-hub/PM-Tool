@@ -40,6 +40,7 @@ public sealed class IssueDocumentReference : CoordinationRecord
     public string? ModelElementGuid { get; set; }
     public string? ViewpointUrl { get; set; }
     public bool IsAvailable { get; set; } = true;
+    public Guid? ReplacedById { get; set; }
     public override string AuditType => "IssueDocumentReference";
     public override string? AuditName => Identifier;
 }

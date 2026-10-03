@@ -1,3 +1,5 @@
+using Hub.Api.Features;
+using Hub.Domain;
 using System.Net;
 using System.Text.Json.Nodes;
 using Hub.Api.Infrastructure;
@@ -356,6 +358,32 @@ public sealed class LocationIssueTests(HubFactory f)
             toStatus = "Resolved", resolution = "Should remain blocked", rowVersion = await f.DbAsync(db => db.Issues.Where(x => x.Id == unavailableId).Select(x => x.RowVersion).FirstAsync())
         });
         Assert.Equal(HttpStatusCode.BadRequest, unavailableResolution.StatusCode);
+        var oldReference = Assert.Single((await (await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{unavailableId}/documents")).Json()).AsArray())!;
+        var oldId = oldReference.G("id");
+        var recover = new RegisterEndpoints.ReplaceIssueDocumentBody(Guid.NewGuid(), await IssueVersion(unavailableId), oldReference.I("rowVersion"),
+            new("Drawing", "C-202", "C", "https://review.example.test/c-202-restored", null, null, null, true, 0, "SharePoint", "c202-id"),
+            "Original file is unavailable; register the corrected current reference");
+        var recoverPath = $"/api/v1/issues/{unavailableId}/documents/{oldId}/replace";
+        await (await f.As(TestData.Rita).Post(recoverPath, recover)).Json(403);
+        await (await f.As(TestData.Alex).Post(recoverPath, recover with { RequestId = Guid.NewGuid(), RowVersion = -1 })).Json(409);
+        var recovered = await (await f.As(TestData.Alex).Post(recoverPath, recover)).Json();
+        Assert.Equal(recovered.G("id"), (await (await f.As(TestData.Alex).Post(recoverPath, recover)).Json()).G("id"));
+        var references = (await (await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{unavailableId}/documents")).Json()).AsArray();
+        Assert.Equal(2, references.Count);
+        var historical = references.Single(r => r!.G("id") == oldId)!;
+        Assert.False(historical["isAvailable"]!.GetValue<bool>());
+        Assert.Equal("B", historical.S("revision"));
+        Assert.Equal(oldReference.S("sourceUrl"), historical.S("sourceUrl"));
+        Assert.Equal(recovered.G("id"), historical.G("replacedById"));
+        var resolveRecovered = new { toStatus = "Resolved", resolution = "Correction verified", rowVersion = await IssueVersion(unavailableId) };
+        await (await f.As(TestData.Alex).Post($"/api/v1/issues/{unavailableId}/transition", resolveRecovered)).Json(400);
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{unavailableId}/verification", new
+        { verifierId = d.User(TestData.Marc), status = "Proposed", note = "Recheck the replacement", rowVersion = await IssueVersion(unavailableId) }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{unavailableId}/verification", new
+        { verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/recovery-proof", rowVersion = await IssueVersion(unavailableId) }).Result.Json(201);
+        await (await f.As(TestData.Alex).Post($"/api/v1/issues/{unavailableId}/transition", resolveRecovered with { rowVersion = await IssueVersion(unavailableId) })).Json();
+        Assert.Equal(IssueStatus.Resolved, f.Db(db => db.Issues.Single(i => i.Id == unavailableId).Status));
+        Assert.Contains(f.Db(db => db.ActivityLog.Where(a => a.ItemId == oldId).ToList()), a => a.Reason == recover.Reason);
     }
 
     [Fact]

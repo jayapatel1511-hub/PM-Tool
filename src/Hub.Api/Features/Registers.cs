@@ -26,6 +26,8 @@ public static class RegisterEndpoints
         decimal? CoordinateZ, string? CoordinateReferenceSystem, string? CoordinateUnits, int RowVersion);
     public sealed record IssueDocumentBody(string Kind, string Identifier, string Revision, string SourceUrl, string? ExternalTopicId,
         string? ModelElementGuid, string? ViewpointUrl, bool IsAvailable, int RowVersion, string? SourceSystem = null, string? StableSourceId = null);
+    public sealed record ReplaceIssueDocumentBody(Guid RequestId, int RowVersion, int DocumentRowVersion,
+        IssueDocumentBody Document, string Reason);
     public sealed record IssueVerificationBody(Guid VerifierId, string Status, string? EvidenceUrl, string? Note, int RowVersion);
 
     static readonly Col[] RiskCols =
@@ -74,6 +76,7 @@ public static class RegisterEndpoints
         api.MapPost("/issues/{id:guid}/locations", AddIssueLocation);
         api.MapGet("/issues/{id:guid}/documents", ListIssueDocuments);
         api.MapPost("/issues/{id:guid}/documents", AddIssueDocument);
+        api.MapPost("/issues/{id:guid}/documents/{documentId:guid}/replace", ReplaceIssueDocument).WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/issues/{id:guid}/verification", ListIssueVerification);
         api.MapPost("/issues/{id:guid}/verification", AddIssueVerification);
         api.MapPost("/issues/{id:guid}/links", async (Guid id, DecisionEndpoints.LinkInput body, Access access, HubDb db) =>
@@ -386,7 +389,7 @@ public static class RegisterEndpoints
                     LocationLabels = locationLabels, LocationSummary = string.Join("; ", locationLabels),
                     AffectedDisciplineIds = affected.Select(x => x.ProjectDisciplineId).ToArray(), AffectedDisciplineNames = affected.Select(x => x.Name).ToArray(),
                     AffectedDisciplineSummary = string.Join("; ", affected.Select(x => x.Name)),
-                    DocumentSummary = string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · manually registered · source {x.SourceSystem ?? "[unknown]"} · ID {x.StableSourceId ?? "[unknown]"} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
+                    DocumentSummary = string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · {(x.ReplacedById is null ? "current reference" : "historical replaced reference")} · manually registered · source {x.SourceSystem ?? "[unknown]"} · ID {x.StableSourceId ?? "[unknown]"} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
                     DocumentIdentifiers = issueDocuments.Select(x => x.Identifier).Distinct(StringComparer.OrdinalIgnoreCase)
                         .OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
                     DocumentRevisions = issueDocuments.Select(x => x.Revision).Distinct(StringComparer.OrdinalIgnoreCase)
@@ -600,7 +603,7 @@ public static class RegisterEndpoints
         if (to == IssueStatus.Resolved && i.IssueType == IssueType.Coordination)
         {
             Check.That(await HasReference(db, i.Id), "reference", "issue.coordination_reference_required");
-            Check.That(await db.IssueDocumentReferences.Where(x => x.IssueId == i.Id).AllAsync(x => x.IsAvailable), "document", "issue.document_unavailable");
+            Check.That(await db.IssueDocumentReferences.Where(x => x.IssueId == i.Id && x.ReplacedById == null).AllAsync(x => x.IsAvailable), "document", "issue.document_unavailable");
             var latestReferenceVersion = await db.IssueLocations.Where(x => x.IssueId == i.Id).Select(x => (int?)x.IssueRowVersion)
                 .Concat(db.IssueDocumentReferences.Where(x => x.IssueId == i.Id).Select(x => (int?)x.IssueRowVersion)).MaxAsync() ?? 0;
             var latestVerification = await db.IssueVerifications.Where(x => x.IssueId == i.Id).OrderByDescending(x => x.IssueRowVersion).FirstOrDefaultAsync();
@@ -672,7 +675,7 @@ public static class RegisterEndpoints
     {
         await LoadIssue(db, access, id);
         return await db.IssueDocumentReferences.AsNoTracking().Where(x => x.IssueId == id).OrderBy(x => x.CreatedAt)
-            .Select(x => (object)new { x.Id, x.Kind, x.Identifier, x.Revision, x.SourceUrl, x.SourceSystem, x.StableSourceId, RegisteredBy = x.CreatedBy, RegisteredAt = x.CreatedAt, RegistrationMethod = "Manual", x.ExternalTopicId, x.ModelElementGuid, x.ViewpointUrl, x.IsAvailable, x.RowVersion }).ToListAsync();
+            .Select(x => (object)new { x.Id, x.Kind, x.Identifier, x.Revision, x.SourceUrl, x.SourceSystem, x.StableSourceId, RegisteredBy = x.CreatedBy, RegisteredAt = x.CreatedAt, RegistrationMethod = "Manual", x.ExternalTopicId, x.ModelElementGuid, x.ViewpointUrl, x.IsAvailable, x.ReplacedById, x.RowVersion }).ToListAsync();
     }
 
     static async Task<IResult> AddIssueDocument(Guid id, IssueDocumentBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
@@ -681,10 +684,43 @@ public static class RegisterEndpoints
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(issue)));
         await Http.CheckVersion(db, http, issue, body.RowVersion);
         var row = Document(issue, body, issue.RowVersion + 1);
-        if (await db.IssueDocumentReferences.AnyAsync(x => x.IssueId == id && x.Identifier == row.Identifier && x.Revision == row.Revision)) throw ApiException.Conflict("duplicate_reference", "error.duplicate");
+        if (await db.IssueDocumentReferences.AnyAsync(x => x.IssueId == id && x.Identifier == row.Identifier && x.Revision == row.Revision && x.ReplacedById == null)) throw ApiException.Conflict("duplicate_reference", "error.duplicate");
         issue.LastActivityAt = clock.GetUtcNow(); db.Entry(issue).Property(x => x.LastActivityAt).IsModified = true;
         db.IssueDocumentReferences.Add(row); db.Audit.Note(row, key: issue.Key); await db.SaveChangesAsync();
         return Results.Created($"/api/v1/issue-document-references/{row.Id}", new { row.Id, row.RowVersion });
+    }
+
+    // Recovery retains the old declared reference and invalidates its earlier verification (FR-MDC-03/05).
+    static async Task<Coordination.Result> ReplaceIssueDocument(Guid id, Guid documentId, ReplaceIssueDocumentBody body,
+        Access access, HubDb db, TimeProvider clock)
+    {
+        var projectId = await db.Issues.AsNoTracking().Where(i => i.Id == id).Select(i => (Guid?)i.ProjectId).SingleOrDefaultAsync()
+            ?? throw ApiException.NotFound();
+        return await Coordination.Run(projectId, body.RequestId, new { operation = "issue.document.replace", id, documentId, body },
+            access, db, clock, async (project, ctx) =>
+            {
+                var issue = await db.Issues.SingleAsync(i => i.Id == id && i.ProjectId == project.Id);
+                Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(issue)));
+                Coordination.Version(issue, body.RowVersion);
+                Check.That(IssueStatus.IsOpen(issue.Status), "status", "issue.document_replace_open");
+                var previous = await db.IssueDocumentReferences.SingleOrDefaultAsync(r => r.Id == documentId && r.IssueId == id)
+                    ?? throw ApiException.NotFound();
+                Coordination.Version(previous, body.DocumentRowVersion);
+                Check.That(previous.ReplacedById is null, "documentId", "issue.document_replaced");
+                var reason = Check.Reason(body.Reason);
+                var replacement = Document(issue, body.Document, issue.RowVersion + 1);
+                Check.That(replacement.IsAvailable, "isAvailable", "issue.document_unavailable");
+                Check.That(!await db.IssueDocumentReferences.AnyAsync(r => r.IssueId == id && r.Id != documentId && r.ReplacedById == null &&
+                    r.Identifier == replacement.Identifier && r.Revision == replacement.Revision), "document", "error.duplicate");
+                db.IssueDocumentReferences.Add(replacement);
+                previous.ReplacedById = replacement.Id;
+                issue.LastActivityAt = clock.GetUtcNow();
+                db.Entry(issue).Property(i => i.LastActivityAt).IsModified = true;
+                db.Audit.Note(previous, reason: reason, key: issue.Key);
+                db.Audit.Note(replacement, reason: reason, key: issue.Key);
+                db.Audit.Note(issue, reason: reason);
+                return replacement;
+            });
     }
 
     /// FR-LOC-01: every drawing/model reference names its identifier, declared revision and external source link.

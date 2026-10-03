@@ -107,7 +107,7 @@ public static class ChangeEndpoints
         var recipients = new HashSet<Guid>();
         // A drawing number and revision can occur in more than one source. Only an exact
         // registered source link establishes that this reference was superseded.
-        var documents = await db.IssueDocumentReferences.Where(d => d.ProjectId == p.Id && d.Revision == oldRevision.Revision && d.SourceUrl == oldRevision.Url &&
+        var documents = await db.IssueDocumentReferences.Where(d => d.ProjectId == p.Id && d.ReplacedById == null && d.Revision == oldRevision.Revision && d.SourceUrl == oldRevision.Url &&
             (d.Identifier == oldRevision.ExternalIdentifier || d.Identifier == oldRevision.SourceKey) &&
             db.Issues.Any(i => i.Id == d.IssueId && i.Status == IssueStatus.Resolved)).ToListAsync();
         foreach (var document in documents)

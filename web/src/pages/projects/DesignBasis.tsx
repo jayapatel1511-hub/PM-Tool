@@ -1,3 +1,4 @@
+import { ViewMenu } from '@/components/hub/views'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
@@ -62,7 +63,7 @@ export function DesignBasisTab() {
   const kind = sp.get('kind') ?? '', status = sp.get('status') ?? '', discipline = sp.get('discipline') ?? ''
   const scope = sp.get('scope') ?? '', overdue = sp.get('overdue') ?? '', affectedWorkId = sp.get('affectedWorkId') ?? ''
   const set = (name: string, value: string) => setSp(p => { const next = new URLSearchParams(p); if (value) next.set(name, value); else next.delete(name);
-    if (name !== 'basis') next.delete('page'); return next })
+    if (name !== 'basis' && name !== 'page') next.delete('page'); return next })
   const base = `projects/${project.id}/design-basis`
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
   const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => get<Team>(`projects/${project.id}/team`) })
@@ -80,7 +81,7 @@ export function DesignBasisTab() {
   const refresh = () => { qc.invalidateQueries({ queryKey: ['design-basis', project.id] }); qc.invalidateQueries({ queryKey: ['design-basis-detail', project.id] }) }
   const name = (id?: string) => team.data?.members.find(m => m.userId === id)?.displayName ?? t('coord.unavailable')
   return <Page title={t('basis.title')} subtitle={t('basis.subtitle')}
-    actions={<><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-design-basis`} />
+    actions={<><ViewMenu listType="design-basis" projectId={project.id} panelParam="basis" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-design-basis`} />
       {canCreate && <Button size="sm" onClick={() => setAdding(true)}>{t('basis.new')}</Button>}</>}>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
     <div className="flex flex-wrap gap-3 rounded border p-3">

@@ -23,6 +23,31 @@ public sealed class SearchReportsTests(HubFactory f)
     static JsonArray Group(JsonNode r, string g) => r["groups"]![g]!.AsArray();
 
     [Fact]
+    public async Task Coordination_search_opens_submission_and_basis_keys_and_keeps_allocation_visibility()
+    {
+        var project = await d.Project();
+        var word = "coord-search-" + Guid.NewGuid().ToString("N");
+        var milestone = await f.As(TestData.Pm).Post($"/api/v1/projects/{project.Id}/milestones", new { name = "Submission", milestoneType = "Design Submission", date = "2026-10-05" }).Result.Json(201);
+        var submission = new Hub.Api.Data.SubmissionPackage { ProjectId = project.Id, Seq = 1, Key = project.ProjectNumber + "-SUB0001", Title = word + " permit", Purpose = "Permit", RecipientReference = "Synthetic recipient", CoordinatorId = d.User(TestData.Marc), MilestoneId = milestone.G("id"), TargetDate = new DateOnly(2026, 10, 5) };
+        var basis = new Hub.Api.Data.DesignBasisEntry { ProjectId = project.Id, Seq = 1, Key = project.ProjectNumber + "-B0001", Title = word + " criterion", OwnerId = d.User(TestData.Alex), ProjectDisciplineId = d.ProjectDiscipline(project.Id, "Civil") };
+        var allocation = new Hub.Api.Data.ResourceAllocation { ProjectId = project.Id, PersonId = d.User(TestData.Alex), Purpose = AllocationPurpose.Production, FromDate = new DateOnly(2026, 10, 5), ThroughDate = new DateOnly(2026, 10, 5), PlannedHours = 4 };
+        await f.DbAsync(async db => { db.SubmissionPackages.Add(submission); db.DesignBasisEntries.Add(basis); db.Allocations.Add(allocation);
+            (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted; return await db.SaveChangesAsync(); });
+        var visible = await Search(TestData.Pm, word);
+        Assert.Contains(Group(visible, "submissions"), x => x!.G("id") == submission.Id);
+        Assert.Contains(Group(visible, "design-basis"), x => x!.G("id") == basis.Id);
+        Assert.Empty(Group(await Search(TestData.Rita, word), "submissions"));
+        Assert.Empty(Group(await Search(TestData.Rita, word), "design-basis"));
+        var submissionKey = f.Db(db => db.SubmissionPackages.Single(x => x.Id == submission.Id).Key);
+        var basisKey = f.Db(db => db.DesignBasisEntries.Single(x => x.Id == basis.Id).Key);
+        Assert.Equal("SubmissionPackage", (await Search(TestData.Pm, submissionKey))["exact"]!.S("type"));
+        Assert.Equal("DesignBasisEntry", (await Search(TestData.Pm, basisKey))["exact"]!.S("type"));
+        Assert.Contains(Group(await Search(TestData.Pm, "Alex Chen", "&type=allocations&limit=200"), "allocations"), x => x!.G("id") == allocation.Id);
+        Assert.DoesNotContain(Group(await Search(TestData.Jill, "Alex Chen", "&type=allocations&limit=200"), "allocations"), x => x!.G("id") == allocation.Id);
+        Assert.DoesNotContain(Group(await Search(TestData.Rita, "Alex Chen", "&type=allocations&limit=200"), "allocations"), x => x!.G("id") == allocation.Id);
+    }
+
+    [Fact]
     public async Task Key_lookup_grouped_results_archived_toggle_and_visibility() // AC-SRCH-01, AC-SRCH-02, FR-SRCH-01, FR-SRCH-02, §18.1
     {
         var word = Token();
@@ -227,29 +252,34 @@ public sealed class SearchReportsTests(HubFactory f)
             {
                 // The indexed 50,001-row fixture gets a bounded setup timeout; API reads retain their normal timeout.
                 db.Database.SetCommandTimeout(TimeSpan.FromMinutes(2));
+                // LATERAL builds each composite once; SELECT (function()).* repeats it for every column.
+                // PostgreSQL 17: https://www.postgresql.org/docs/17/rowtypes.html#ROWTYPES-USAGE
                 // Clone valid API rows and evaluated states; the early sources have only a manual blocker and a false decision.
                 await db.Database.ExecuteSqlRawAsync("""
                     INSERT INTO hub.task
-                    SELECT (jsonb_populate_record(NULL::hub.task, to_jsonb(t) || jsonb_build_object(
-                        'id', gen_random_uuid(), 'seq', s + 100, 'key', {1} || '-T' || (s + 100)::text))).*
-                    FROM hub.task t CROSS JOIN generate_series(1, {2}) s WHERE t.id = {0}
+                    SELECT clone.* FROM hub.task t CROSS JOIN generate_series(1, {2}) s
+                    CROSS JOIN LATERAL jsonb_populate_record(NULL::hub.task, to_jsonb(t) || jsonb_build_object(
+                        'id', gen_random_uuid(), 'seq', s + 100, 'key', {1} || '-T' || (s + 100)::text)) AS clone
+                    WHERE t.id = {0}
                     """, manual.G("id"), p.ProjectNumber, cap);
                 await db.Database.ExecuteSqlRawAsync("""
                     INSERT INTO hub.task_state
-                    SELECT (jsonb_populate_record(NULL::hub.task_state, to_jsonb(st) || jsonb_build_object('task_id', t.id))).*
-                    FROM hub.task_state st CROSS JOIN hub.task t
+                    SELECT clone.* FROM hub.task_state st CROSS JOIN hub.task t
+                    CROSS JOIN LATERAL jsonb_populate_record(NULL::hub.task_state, to_jsonb(st) || jsonb_build_object('task_id', t.id)) AS clone
                     WHERE st.task_id = {0} AND t.project_id = {1} AND t.seq BETWEEN 101 AND {2}
                     """, manual.G("id"), p.Id, cap + 100);
                 await db.Database.ExecuteSqlRawAsync("""
                     INSERT INTO hub.task
-                    SELECT (jsonb_populate_record(NULL::hub.task, to_jsonb(t) || jsonb_build_object('id', {1}, 'seq', {2}, 'key', {3}))).*
-                    FROM hub.task t WHERE t.id = {0}
+                    SELECT clone.* FROM hub.task t
+                    CROSS JOIN LATERAL jsonb_populate_record(NULL::hub.task, to_jsonb(t) || jsonb_build_object('id', {1}, 'seq', {2}, 'key', {3})) AS clone
+                    WHERE t.id = {0}
                     """, blocked.G("id"), legacyId, legacySeq, legacyKey);
                 return await db.Database.ExecuteSqlRawAsync("""
                     INSERT INTO hub.task_state
-                    SELECT (jsonb_populate_record(NULL::hub.task_state, to_jsonb(st) || jsonb_build_object(
-                        'task_id', {1}, 'blocked_by', jsonb_build_array((st.blocked_by -> 0) - 'blocking')))).*
-                    FROM hub.task_state st WHERE st.task_id = {0}
+                    SELECT clone.* FROM hub.task_state st
+                    CROSS JOIN LATERAL jsonb_populate_record(NULL::hub.task_state, to_jsonb(st) || jsonb_build_object(
+                        'task_id', {1}, 'blocked_by', jsonb_build_array((st.blocked_by -> 0) - 'blocking'))) AS clone
+                    WHERE st.task_id = {0}
                     """, blocked.G("id"), legacyId);
             });
             Assert.Equal(cap + 3, await f.DbAsync(db => db.TaskStates.CountAsync(x => x.ProjectId == p.Id && x.IsBlocked)));
@@ -300,10 +330,11 @@ public sealed class SearchReportsTests(HubFactory f)
                 db.Database.SetCommandTimeout(TimeSpan.FromMinutes(2));
                 return await db.Database.ExecuteSqlRawAsync("""
                 INSERT INTO hub.issue
-                SELECT (jsonb_populate_record(NULL::hub.issue, to_jsonb(i) || jsonb_build_object(
+                SELECT clone.* FROM hub.issue i CROSS JOIN generate_series(1, {3}) s
+                CROSS JOIN LATERAL jsonb_populate_record(NULL::hub.issue, to_jsonb(i) || jsonb_build_object(
                     'id', ({1} || lpad(s::text, 12, '0'))::uuid, 'seq', s + 1, 'key', {2} || '-I' || (s + 1)::text,
-                    'severity', 'Low', 'target_resolution_date', DATE '2026-09-30'))).*
-                FROM hub.issue i CROSS JOIN generate_series(1, {3}) s WHERE i.id = {0}
+                    'severity', 'Low', 'target_resolution_date', DATE '2026-09-30')) AS clone
+                WHERE i.id = {0}
                 """, high.G("id"), prefix, p.ProjectNumber, cap);
             });
             Assert.Equal(cap + 1, await f.DbAsync(db => db.Issues.CountAsync(x => x.ProjectId == p.Id)));

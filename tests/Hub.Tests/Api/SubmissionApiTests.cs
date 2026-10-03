@@ -43,6 +43,15 @@ public sealed class SubmissionApiTests(HubFactory f)
         Assert.Equal(SubmissionCheckStatus.NotApplicable, f.Db(db => db.SubmissionChecks.Single(c => c.Id == optional.Id).Status));
         var detail = await Get(TestData.Marc, path);
         Assert.True(detail["readiness"]!["ready"]!.GetValue<bool>());
+        var filtered = await Get(TestData.Pm, root + $"/submissions?status=Ready&coordinatorId={data.User(TestData.Marc)}&milestoneId={milestone.G("id")}&targetFrom=2026-10-15&targetTo=2026-10-15&page=1&pageSize=1");
+        Assert.Equal(1, filtered["totalCount"]!.GetValue<int>());
+        Assert.Equal("Ready", filtered["items"]![0]!["status"]!.GetValue<string>());
+        Assert.Equal(id, filtered["items"]![0]!.G("id"));
+        Assert.Equal(0, (await Get(TestData.Pm, root + "/submissions?status=Checking"))["totalCount"]!.GetValue<int>());
+        var listExport = await f.As(TestData.Pm).GetAsync(root + $"/submissions/export?status=Ready&coordinatorId={data.User(TestData.Marc)}&milestoneId={milestone.G("id")}&targetFrom=2026-10-15&targetTo=2026-10-15&format=csv");
+        Assert.Contains("Design package", await listExport.Content.ReadAsStringAsync());
+        await (await f.As(TestData.Rita).GetAsync(root + "/submissions")).Json(404);
+        await (await f.As(TestData.Rita).GetAsync(root + "/submissions/export?format=csv")).Json(404);
         var fingerprint = detail["readiness"]!["fingerprint"]!.GetValue<string>();
         await Post(TestData.Alex, path + $"/checks/{optional.Id}", new SubmissionEndpoints.CheckBody(Guid.NewGuid(), Version<SubmissionPackage>(id), Version<SubmissionCheck>(optional.Id),
             SubmissionCheckStatus.Pass, "https://example.test/traffic-plan.pdf", "Plan checked"));
@@ -163,6 +172,11 @@ public sealed class SubmissionApiTests(HubFactory f)
         var blocked = await Get(TestData.Pm, path);
         Assert.False(blocked["readiness"]!["ready"]!.GetValue<bool>());
         Assert.Contains(finding.S("id"), blocked["readiness"]!["blockers"]!.ToJsonString());
+        var checking = await Get(TestData.Pm, root + "/submissions?status=Checking&page=1&pageSize=1");
+        Assert.Equal(1, checking["totalCount"]!.GetValue<int>());
+        Assert.Equal(id, checking["items"]![0]!.G("id"));
+        Assert.Equal(0, (await Get(TestData.Pm, root + "/submissions?status=Ready"))["totalCount"]!.GetValue<int>());
+
         var mandatory = f.Db(db => db.SubmissionChecks.Single(c => c.PackageId == id && c.Kind == SubmissionCheckKind.BlockingFindings));
         await Post(TestData.Pm, path + $"/checks/{mandatory.Id}", new SubmissionEndpoints.CheckBody(Guid.NewGuid(), Version<SubmissionPackage>(id), mandatory.RowVersion,
             SubmissionCheckStatus.NotApplicable, "https://example.test/waiver", "Ignore electrical finding"), 400);

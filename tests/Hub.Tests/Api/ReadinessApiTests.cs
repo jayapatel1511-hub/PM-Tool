@@ -52,10 +52,14 @@ public sealed class ReadinessApiTests(HubFactory f)
         var ready = await (await f.As(TestData.Alex).GetAsync(path)).Json();
         Assert.Equal(1, ready["readyOutputsTotal"]!.GetValue<int>());
         Assert.Equal(targetId, ready["readyOutputs"]!.AsArray().Single()!.G("targetId"));
+        var nextReady = await (await f.As(TestData.Alex).GetAsync(path + "&readyPage=2&pageSize=1")).Json();
+        Assert.Empty(nextReady["readyOutputs"]!.AsArray());
+        Assert.Equal(1, nextReady.I("readyOutputsTotal"));
+        Assert.False(nextReady["readyOutputsTruncated"]!.GetValue<bool>());
 
         await f.DbAsync(async db =>
         {
-            db.WorkConstraints.Add(new WorkConstraint { ProjectId = project.Id, TargetType = "Task", TargetId = targetId,
+            db.WorkConstraints.Add(new WorkConstraint { ProjectId = project.Id, Seq = 1, Key = project.ProjectNumber + "-CT0001", TargetType = "Task", TargetId = targetId,
                 Category = "Handoff", Description = "Await survey", RemovalOwnerId = data.User(TestData.Alex),
                 AffectedOwnerId = data.User(TestData.Marc), NeededBy = today.AddDays(-1),
                 SourceUrl = "https://example.test/survey", State = ConstraintState.Open });
@@ -66,6 +70,15 @@ public sealed class ReadinessApiTests(HubFactory f)
         Assert.Equal(0, blocked["readyOutputsTotal"]!.GetValue<int>());
         Assert.False(blocked["constraintsTruncated"]!.GetValue<bool>());
         Assert.False(blocked["readyOutputsTruncated"]!.GetValue<bool>());
+        var laterConstraint = new WorkConstraint { ProjectId = project.Id, Seq = 2, Key = project.ProjectNumber + "-CT0002", TargetType = "Task", TargetId = targetId,
+            Category = "Approval", Description = "Await permit", RemovalOwnerId = data.User(TestData.Alex),
+            AffectedOwnerId = data.User(TestData.Marc), NeededBy = today.AddDays(1), SourceUrl = "https://example.test/permit", State = ConstraintState.Open };
+        await f.DbAsync(async db => { db.WorkConstraints.Add(laterConstraint); return await db.SaveChangesAsync(); });
+        var nextConstraints = await (await f.As(TestData.Alex).GetAsync(path + "&constraintsPage=2&pageSize=1")).Json();
+        Assert.Equal(laterConstraint.Id, nextConstraints["constraints"]!.AsArray().Single()!.G("id"));
+        Assert.Equal(2, nextConstraints.I("constraintsTotal"));
+        var csv = await (await f.As(TestData.Alex).GetAsync(path.Replace("/window?", "/window/export?") + "&list=constraints&format=csv&constraintsPage=2&pageSize=1")).EnsureSuccessStatusCode().Content.ReadAsStringAsync();
+        Assert.Contains("Await survey", csv); Assert.Contains("Await permit", csv);
         await f.DbAsync(async db =>
         {
             (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted;

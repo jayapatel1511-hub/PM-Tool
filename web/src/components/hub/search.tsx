@@ -8,7 +8,7 @@ import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
-export const GROUPS = ['projects', 'tasks', 'deliverables', 'milestones', 'decisions', 'handoffs', 'reviews', 'changes', 'constraints', 'commitments', 'comments', 'people'] as const
+export const GROUPS = ['projects', 'tasks', 'deliverables', 'milestones', 'decisions', 'handoffs', 'reviews', 'changes', 'submissions', 'allocations', 'design-basis', 'constraints', 'commitments', 'comments', 'people'] as const
 export type Group = (typeof GROUPS)[number]
 export interface SearchResult {
   q: string; exact: { type: string; id?: string | null; projectNumber: string; key: string } | null
@@ -17,14 +17,17 @@ export interface SearchResult {
 export interface Hit { id: string; icon: LucideIcon; key?: string; title: string; sub: string; href: string | null; match?: string | null }
 
 /** Item keys such as 1234-T0042 open the item directly (§18.1, FR-SRCH-02). */
-export const KEY_PATTERN = /^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H|CT|WC)\d+$/i
+export const KEY_PATTERN = /^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H|RV|CH|CT|WC|SUB|B)\d+$/i
 const TAB: Record<string, string> = { Task: 'tasks', Deliverable: 'deliverables', Milestone: 'milestones', Decision: 'decisions', Risk: 'risks', Issue: 'issues', Action: 'meetings', Handoff: 'handoffs', ReviewPackage: 'reviews', ChangeNotice: 'changes',
   WorkConstraint: 'readiness', OutputCommitment: 'readiness' }
-const TYPE: Record<string, string> = { tasks: 'Task', deliverables: 'Deliverable', milestones: 'Milestone', decisions: 'Decision', handoffs: 'Handoff', reviews: 'ReviewPackage', changes: 'ChangeNotice', constraints: 'WorkConstraint', commitments: 'OutputCommitment' }
-const ICON: Record<Group, LucideIcon> = { projects: Briefcase, tasks: CheckSquare, deliverables: FileText, milestones: Flag, decisions: Scale, comments: MessageSquare, people: User, handoffs: FileText, reviews: FileText, changes: FileText, constraints: Link2Off, commitments: CalendarCheck }
+const TYPE: Record<string, string> = { tasks: 'Task', deliverables: 'Deliverable', milestones: 'Milestone', decisions: 'Decision', handoffs: 'Handoff', reviews: 'ReviewPackage', changes: 'ChangeNotice', submissions: 'SubmissionPackage', allocations: 'ResourceAllocation', 'design-basis': 'DesignBasisEntry', constraints: 'WorkConstraint', commitments: 'OutputCommitment' }
+const ICON: Record<Group, LucideIcon> = { projects: Briefcase, tasks: CheckSquare, deliverables: FileText, milestones: Flag, decisions: Scale, comments: MessageSquare, people: User, handoffs: FileText, reviews: FileText, changes: FileText, submissions: FileText, allocations: CalendarCheck, 'design-basis': FileText, constraints: Link2Off, commitments: CalendarCheck }
 
 export function itemHref(type: string, projectNumber: string, id?: string | null) {
   const base = `/projects/${encodeURIComponent(projectNumber)}`
+  if (id && type === 'ResourceAllocation') return `${base}/allocations?allocation=${id}`
+  if (id && type === 'DesignBasisEntry') return `${base}/design-basis?basis=${id}`
+  if (id && type === 'SubmissionPackage') return `${base}/submissions?panel=SubmissionPackage:${id}`
   return type === 'Project' || !id ? base : `${base}/${TAB[type] ?? 'dashboard'}?panel=${type}:${id}`
 }
 

@@ -3,17 +3,20 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page } from '@/components/hub/common'
+import { ExportMenu } from '@/components/hub/export'
+import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { get, post } from '@/lib/api'
+import { get, post, qs } from '@/lib/api'
 import { fmtDate, hours, today } from '@/lib/format'
-import { t } from '@/lib/i18n'
+import { t, tv } from '@/lib/i18n'
 import { CommandForm, SelectField, type CoordOptions, WorkLink } from './CoordinationForms'
 import { useCurrentProject } from './ProjectLayout'
 
 type Allocation = { id: string; personId: string; personName: string; purpose: string; fromDate: string; throughDate: string; plannedHours: number; status: string; rowVersion: number }
+type AllocationPage = { items: Allocation[]; page: number; pageSize: number; totalCount: number }
 type Detail = Allocation & { links: { workType: string; workId: string; workDate: string; reviewHours?: number; reviewPackageId?: string }[]; days: { workDate: string; hours: number }[]; overCapacityWarningRecorded: boolean; canConfirm: boolean; canManage: boolean }
 type Preview = { id: string; rowVersion: number; days: { date: string; availableHours: number; confirmedHours: number; proposedHours: number; resultingHours: number; overByHours: number; dateVersion: number }[] }
 type ReviewOption = { id: string; reviewerId: string; dueDate: string; packageId: string; packageKey: string; packageTitle: string }
@@ -22,24 +25,36 @@ export function AllocationsTab() {
   const project = useCurrentProject(), qc = useQueryClient()
   const [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false)
   const selected = sp.get('allocation')
+  const page = Math.max(1, Number(sp.get('page')) || 1)
+  const filters = Object.fromEntries(['q', 'personId', 'purpose', 'status', 'from', 'to'].map(k => [k, sp.get(k) ?? '']))
   const open = (id: string | null) => { const next = new URLSearchParams(sp); if (id) next.set('allocation', id); else next.delete('allocation'); setSp(next) }
   const base = `projects/${project.id}/allocations`
-  const list = useQuery({ queryKey: ['allocations', project.id], queryFn: () => get<Allocation[]>(base) })
+  const list = useQuery({ queryKey: ['allocations', project.id, filters, page], queryFn: () => get<AllocationPage>(`${base}${qs({ ...filters, page })}`) })
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
   const canPropose = project.permissions.isPm || (options.data?.manageDisciplineIds.length ?? 0) > 0
   const refresh = () => { qc.invalidateQueries({ queryKey: ['allocations', project.id] }); qc.invalidateQueries({ queryKey: ['workload'] }) }
+  const change = (key: string, value: string) => { const next = new URLSearchParams(sp); value ? next.set(key, value) : next.delete(key); if (key !== 'page' && key !== 'allocation') next.delete('page'); setSp(next) }
   return <Page title={t('allocation.title')} subtitle={t('allocation.subtitle')}
-    actions={canPropose && <Button size="sm" onClick={() => setAdding(true)}>{t('allocation.new')}</Button>}>
+    actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} />{canPropose && <Button size="sm" onClick={() => setAdding(true)}>{t('allocation.new')}</Button>}</>}>
+    <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-3">
+      <Field label={t('common.search')} htmlFor="allocation-search"><Input id="allocation-search" type="search" value={filters.q} onChange={e => change('q', e.target.value)} /></Field>
+      <SelectField label={t('workload.person')} value={filters.personId} onChange={v => change('personId', v)} required={false} choices={options.data?.people.map(p => ({ value: p.id, label: p.displayName })) ?? []} />
+      <SelectField label={t('allocation.purpose')} value={filters.purpose} onChange={v => change('purpose', v)} required={false} choices={['Production', 'Review'].map(v => ({ value: v, label: t(`allocation.purpose.${v}`) }))} />
+      <SelectField label={t('common.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={['Proposed', 'Confirmed', 'Declined', 'Cancelled', 'Completed'].map(v => ({ value: v, label: tv(v) }))} />
+      <Field label={t('allocation.from')} htmlFor="allocation-filter-from"><Input id="allocation-filter-from" type="date" value={filters.from} onChange={e => change('from', e.target.value)} /></Field>
+      <Field label={t('allocation.through')} htmlFor="allocation-filter-to"><Input id="allocation-filter-to" type="date" value={filters.to} onChange={e => change('to', e.target.value)} /></Field>
+    </div>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
-    {list.isPending ? <Loading rows={4} /> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.length ?
+    {list.isPending ? <Loading rows={4} /> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.items.length ?
       <Empty>{t('allocation.empty')}</Empty> : <div className="overflow-x-auto rounded-lg border bg-card"><table className="w-full text-left text-sm">
         <caption className="sr-only">{t('allocation.title')}</caption><thead className="bg-muted/60"><tr>
           {[t('workload.person'), t('allocation.purpose'), t('allocation.dates'), t('allocation.hours'), t('common.status')].map(h => <th key={h} scope="col" className="p-3">{h}</th>)}
-        </tr></thead><tbody>{list.data.map(a => <tr key={a.id} className="border-t">
+        </tr></thead><tbody>{list.data.items.map(a => <tr key={a.id} className="border-t">
           <td className="p-3"><button className="text-left font-medium text-primary underline" onClick={() => open(a.id)}>{a.personName}</button></td>
           <td className="p-3">{t(`allocation.purpose.${a.purpose}`)}</td><td className="p-3 whitespace-nowrap">{fmtDate(a.fromDate)}–{fmtDate(a.throughDate)}</td>
-          <td className="p-3 tabular-nums">{a.plannedHours}</td><td className="p-3">{a.status}</td>
+          <td className="p-3 tabular-nums">{a.plannedHours}</td><td className="p-3">{tv(a.status)}</td>
         </tr>)}</tbody></table></div>}
+    {!list.isPending && !list.error && <div className="flex items-center justify-end gap-3"><Button size="sm" variant="outline" disabled={page <= 1} onClick={() => change('page', String(page - 1))}>{t('handoff.previous')}</Button><span className="text-sm">{t('handoff.page', { n: page })}</span><Button size="sm" variant="outline" disabled={page * list.data.pageSize >= list.data.totalCount} onClick={() => change('page', String(page + 1))}>{t('handoff.next')}</Button></div>}
     {adding && options.data && <Proposal base={base} options={options.data} close={() => setAdding(false)} done={id => { setAdding(false); refresh(); open(id) }} />}
     {selected && <AllocationDetail base={base} id={selected} projectNumber={project.projectNumber} options={options.data}
       close={() => open(null)} refresh={refresh} />}

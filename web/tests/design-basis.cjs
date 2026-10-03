@@ -11,9 +11,9 @@ const actor = () => (who === 'consumer' ? consumer : lead);
 const project = () => ({ id: pid, projectNumber: 'P-DEMO', name: 'Basis checks', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1, links: [], starred: false,
   disciplines: [{ id: civil, disciplineId: id(5), name: 'Civil', code: 'CIV', colour: '#2563eb', leadUserId: lead, isActive: true, leadName: 'Marc Lead' }],
   myRoles: who === 'consumer' ? ['TeamMember'] : ['DisciplineLead'], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] },
-  permissions: { edit: { ok: false }, healthOverride: { ok: false }, isPm: false, leadOf: who === 'consumer' ? [] : [civil], createTaskIn: [civil], createDeliverableIn: [civil], transitions: [] } });
+  permissions: { raiseRegister: { ok: false }, edit: { ok: false }, healthOverride: { ok: false }, isPm: false, leadOf: who === 'consumer' ? [] : [civil], createTaskIn: [civil], createDeliverableIn: [civil], transitions: [] } });
 const me = () => ({ id: actor(), displayName: who, email: `${who}@hub.test`, roles: [], systemRoles: [], capabilities: { createProject: false, createTask: true, portfolio: false, workload: false, staff: false, admin: false, templates: false, readOnly: false, directReports: 0 },
-  settings: { today: '2026-10-01', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 }, preferences: { denseRows: true, digestEnabled: true } });
+  settings: { coordinationLookaheadWeeks: 6, today: '2026-10-01', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 }, preferences: { denseRows: true, digestEnabled: true } });
 const options = () => ({ actorId: actor(), canWrite: true, manageDisciplineIds: who === 'consumer' ? [] : [civil], people: [{ id: consumer, displayName: 'Alex Consumer' }, { id: lead, displayName: 'Marc Lead' }],
   disciplines: [{ id: civil, name: 'Civil' }], sources: [], heads: [], deliverables: [],
   tasks: [{ id: task, key: 'P-DEMO-T0001', name: 'Watermain layout', projectDisciplineId: civil, ownerId: consumer, rowVersion: 3, status: 'In Progress' }] });
@@ -41,6 +41,7 @@ const taskDetail = () => ({ task: taskRow(), project: project(), description: 'C
     dueNeedsReason: false, block: { ok: true }, delete: { ok: false }, restore: false, comment: true,
     transitions: [{ to: 'Ready for Review', allowed: false, reason: 'Only the assignee may submit for review.', needsReason: false }], isReviewer: true, dependencies: false,
     enterTime: true, needsReason: false, allowSelfReview: false, authoriseStart: false } });
+const registerQueries = [], savedViews = [];
 const lists = [], decisions = [], errors = [], unknown = [], taskWrites = [], panelLayouts = [];
 let server, browser;
 (async () => {
@@ -55,7 +56,8 @@ let server, browser;
     if (method !== 'GET' && p.startsWith(`tasks/${task}`)) taskWrites.push({ method, path: p });
     if (p === 'config') data = { authMode: 'Development', entra: {} };
     else if (p === 'me') data = me(); else if (p === 'me/sign-in') data = {}; else if (p === 'me/notifications/pulse') data = { stamp: '0' };
-    else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }; else if (p === 'workspaces') data = []; else if (p === 'views') data = { views: [], canShare: false };
+    else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }; else if (p === 'workspaces') data = []; else if (p === 'views' && method === 'POST') { const body = req.postDataJSON(); savedViews.push({ ...body, id: id(300 + savedViews.length), scope: 'Personal', rowVersion: 1, dropped: [], canEdit: true }); data = savedViews.at(-1) }
+    else if (p === 'views') data = { views: savedViews.filter(v => v.listType === u.searchParams.get('listType')), canShare: false };
     else if (p === 'projects') data = { items: [project()], totalCount: 1 }; else if (p === `projects/${pid}` || p === 'projects/P-DEMO') data = project();
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }; else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' };
     else if (p.endsWith('/changes/options')) data = options();
@@ -66,7 +68,12 @@ let server, browser;
     else if (p === `tasks/${task}/dependencies`) data = { dependsOn: [], blocks: [] };
     else if (p === `items/Task/${task}/comments`) data = { items: [], canComment: true };
     else if (p === `items/Task/${task}/links`) data = { links: [], inherited: [], canAdd: true };
-    else if (p === `projects/${pid}/design-basis`) { lists.push(u.search); data = { items: [row(e1, 'P-DEMO-B001', v12, 'Confirmed'), row(e2, 'P-DEMO-B002', null, 'Withdrawn')], pageSize: 50, totalCount: 2 } }
+    else if (p === `projects/${pid}/design-basis`) { lists.push(u.search); data = { items: [row(e1, 'P-DEMO-B001', v12, 'Confirmed'), row(e2, 'P-DEMO-B002', null, 'Withdrawn')], pageSize: 50, totalCount: 101 } }
+    else if (p === `projects/${pid}/submissions`) { registerQueries.push({ list: 'submissions', params: Object.fromEntries(u.searchParams) }); data = { items: [{ id: id(100), key: 'P-DEMO-SUB0001', title: 'Synthetic permit', coordinatorId: consumer, targetDate: '2026-10-05', status: 'Checking', blockerCount: 2 }], pageSize: 50, totalCount: 101 } }
+    else if (p === `projects/${pid}/allocations`) { registerQueries.push({ list: 'allocations', params: Object.fromEntries(u.searchParams) }); data = { items: [{ id: id(110), personName: 'Alex Consumer', purpose: 'Production', fromDate: '2026-10-01', throughDate: '2026-10-05', plannedHours: 8, status: 'Proposed' }], pageSize: 50, totalCount: 101 } }
+    else if (p === `projects/${pid}/readiness/window`) { registerQueries.push({ list: 'window', params: Object.fromEntries(u.searchParams) }); data = { constraints: [{ id: id(130), targetType: 'Task', targetId: task, category: 'Handoff', description: 'Synthetic constraint', neededBy: '2026-10-05', sourceUrl: 'https://example.test/input' }], constraintsTotal: 101, constraintsTruncated: false, readyOutputs: [{ id: id(131), targetType: 'Task', targetId: task, key: 'P-DEMO-T0001', name: 'Watermain layout', dueDate: '2026-10-05', intendedOutput: 'Synthetic layout', completionCriteria: 'Checked', state: 'Ready' }], readyOutputsTotal: 101, readyOutputsTruncated: false, pageSize: 50 } }
+    else if (p === `projects/${pid}/weekly-commitments`) { registerQueries.push({ list: 'commitments', params: Object.fromEntries(u.searchParams) }); data = { commitments: [{ id: id(120), key: 'P-DEMO-WC0001', targetType: 'Task', targetId: task, performerId: consumer, weekStart: '2026-09-28', targetDate: '2026-10-05', intendedOutput: 'Synthetic output', completionCriteria: 'Checked', state: 'Proposed', rowVersion: 1 }], snapshots: [], total: 101, truncated: false, page: Number(u.searchParams.get('page') ?? 1), pageSize: 50 } }
+    else if (p === `projects/${pid}/issues`) data = Array.from({ length: 51 }, (_, n) => ({ id: id(200 + n), key: `P-DEMO-I${String(n + 1).padStart(4, '0')}`, title: `Synthetic issue ${String(n + 1).padStart(3, '0')}`, issueType: 'Coordination', severity: 'High', status: 'Open', ownerId: consumer, ownerName: 'Alex Consumer', raisedByName: 'Alex Consumer', projectDisciplineId: civil, disciplineName: 'Civil', affectedDisciplineNames: [], affectedDisciplineSummary: '', dateRaised: '2026-10-01', targetResolutionDate: '2026-10-05', daysOverdue: 0, isOverdue: false, locationLabels: ['North', 'South'], locationSummary: 'North; South', documentLabels: [], documentRevisions: [], documentSummary: '', rowVersion: 1, verificationStatus: 'None' }));
     else if (p === `projects/${pid}/design-basis/${e1}` || p === `projects/${pid}/design-basis/${e2}`) data = detail(p.endsWith(e1) ? e1 : e2);
     else if (method === 'POST' && p.endsWith('/decide')) { decisions.push({ path: p, ...req.postDataJSON() }); data = { id: i1, rowVersion: 2 } }
     else if (method === 'GET') { unknown.push(p); data = {} } else throw new Error(`Unmocked endpoint ${method} ${p}`);
@@ -112,6 +119,62 @@ let server, browser;
   who = 'lead'; await page.reload(); entry = page.getByRole('dialog', { name: /^P-DEMO-B002 · / }); await entry.getByText('Uses withdrawn version').waitFor();
   await entry.getByRole('button', { name: 'Decide impact', exact: true }).click();
   assert.deepEqual(await page.getByRole('dialog', { name: 'Decide impact' }).getByLabel('Decision', { exact: true }).locator('option').allInnerTexts(), ['Choose…', 'Unaffected by change']);
+
+  // FR-MDC-06: list controls retain URL filters, page before expanding issue groups and save definitions only.
+  await page.goto(`${base}/projects/P-DEMO/design-basis`);
+  await Promise.all([page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/design-basis') && u.searchParams.get('page') === '2' }), register.getByRole('button', { name: 'Next', exact: true }).click()]);
+  await page.waitForURL(/page=2/);
+  await register.getByLabel('Kind', { exact: true }).selectOption('Assumption');
+  await page.waitForFunction(() => location.search.includes('kind=Assumption') && !new URLSearchParams(location.search).has('page'));
+  assert.ok(lists.some(q => new URLSearchParams(q).get('page') === '2'), 'Basis Next reaches page two');
+
+  for (const list of ['submissions', 'allocations']) {
+    await page.goto(`${base}/projects/P-DEMO/${list}`);
+    await Promise.all([page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith(`/${list}`) && u.searchParams.get('page') === '2' }), register.getByRole('button', { name: 'Next', exact: true }).click()]);
+    await page.waitForURL(/page=2/);
+    await register.getByLabel('Search', { exact: true }).fill('Synthetic');
+    await page.waitForFunction(() => location.search.includes('q=Synthetic') && !new URLSearchParams(location.search).has('page'));
+    await register.getByRole('button', { name: 'Views', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Save current view…', exact: true }).click();
+    const save = page.getByRole('dialog', { name: 'Save this view', exact: true });
+    await save.getByLabel('Name', { exact: true }).fill(`${list} synthetic filter`);
+    await save.getByRole('button', { name: 'Save', exact: true }).click();
+    await save.waitFor({ state: 'detached' });
+    assert.equal(savedViews.at(-1).listType, list);
+    assert.equal(savedViews.at(-1).params.q, 'Synthetic');
+    assert.ok(!savedViews.at(-1).params.allocation && !savedViews.at(-1).params.panel, 'Open panels are not saved');
+    assert.ok(registerQueries.some(q => q.list === list && q.params.page === '2'), `${list} Next sends page two`);
+  }
+
+  await page.goto(`${base}/projects/P-DEMO/issues?group=location`);
+  await register.getByRole('button', { name: 'Synthetic issue 001', exact: true }).first().waitFor();
+  assert.equal(await register.getByRole('button', { name: 'Synthetic issue 001', exact: true }).count(), 2, 'A two-location issue stays on one identity page');
+  assert.equal(await register.getByRole('button', { name: 'Synthetic issue 051', exact: true }).count(), 0);
+  await register.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.waitForURL(/page=2/);
+  await register.getByRole('button', { name: 'Synthetic issue 051', exact: true }).first().waitFor();
+  assert.equal(await register.getByRole('button', { name: 'Synthetic issue 051', exact: true }).count(), 2);
+  assert.equal(await register.getByRole('button', { name: 'Synthetic issue 001', exact: true }).count(), 0);
+  await register.getByRole('button', { name: 'Title', exact: true }).click();
+  await page.waitForFunction(() => !new URLSearchParams(location.search).has('page'));
+  await register.getByRole('button', { name: 'Synthetic issue 001', exact: true }).first().waitFor();
+
+  await page.goto(`${base}/projects/P-DEMO/readiness`);
+  for (const [label, param] of [['Constraints to remove', 'constraintsPage'], ['Ready outputs', 'readyPage']]) {
+    const pager = register.getByRole('navigation', { name: label, exact: true });
+    await Promise.all([page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/readiness/window') && u.searchParams.get(param) === '2' }), pager.getByRole('button', { name: 'Next', exact: true }).click()]);
+    await page.waitForURL(new RegExp(`${param}=2`));
+    await pager.getByRole('button', { name: 'Next', exact: true }).waitFor();
+  }
+  const promises = register.getByRole('navigation', { name: 'Weekly promises', exact: true });
+  await Promise.all([page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/weekly-commitments') && u.searchParams.get('page') === '2' }), promises.getByRole('button', { name: 'Next', exact: true }).click()]);
+  await page.waitForURL(/promisePage=2/);
+  await register.getByLabel('From', { exact: true }).fill('2026-10-02');
+  await page.waitForFunction(() => location.search.includes('from=2026-10-02') && !new URLSearchParams(location.search).has('promisePage'));
+  await promises.getByRole('button', { name: 'Next', exact: true }).waitFor();
+  assert.ok(registerQueries.some(q => q.list === 'commitments' && q.params.page === '2'), 'Promise Next reaches page two');
+  assert.ok(registerQueries.some(q => q.list === 'commitments' && q.params.targetFrom === '2026-10-02' && q.params.page === '1'), 'Window filtering happens in the API before paging');
+  assert.ok(registerQueries.some(q => q.list === 'window' && q.params.from === '2026-10-02' && q.params.constraintsPage === '1' && q.params.readyPage === '1'), 'Date changes reset both aggregate list pages');
 
   // Shared Sheet: preserve keyboard focus and keep editable people/date controls inside the panel at each viewport.
   await page.goto(`${base}/projects/P-DEMO/tasks`);
@@ -166,5 +229,5 @@ let server, browser;
 
   assert.deepEqual(unknown, []);
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ scope: 'Chromium UI with mocked API; backend rules tested separately', listQueries: lists.length, decisions: decisions.length, panelWidths: [...new Set(panelLayouts.map(sample => sample.width))], dateFields: dateFields.map(([label]) => label), unmockedGets: [...new Set(unknown)] }));
+  console.log(JSON.stringify({ scope: 'Chromium UI with mocked API; backend rules tested separately', listQueries: lists.length, registerQueries: registerQueries.length, savedViews: savedViews.length, issueIdentityPages: 2, decisions: decisions.length, panelWidths: [...new Set(panelLayouts.map(sample => sample.width))], dateFields: dateFields.map(([label]) => label), unmockedGets: [...new Set(unknown)] }));
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(async () => { await browser?.close(); server?.kill() });

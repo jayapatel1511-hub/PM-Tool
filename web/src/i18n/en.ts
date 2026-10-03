@@ -89,6 +89,7 @@ export const en: Record<string, string> = {
   "submissions.export": "Export evidence",
   "itemType.ReviewPackage": "Review package",
   "itemType.ChangeNotice": "Change notice",
+  "search.group.submissions": "Submissions", "search.group.allocations": "Allocations", "search.group.design-basis": "Design basis",
   "search.group.reviews": "Reviews",
   "search.group.changes": "Change notices",
   "search.group.constraints": "Readiness constraints", "search.group.commitments": "Weekly promises",
@@ -1439,6 +1440,7 @@ export const en: Record<string, string> = {
   'calendar.vis.Project': 'Everyone who can see the project', 'calendar.vis.Private': 'Only me', 'calendar.owner': 'Owner: {name}', 'calendar.cancelEvent': 'Cancel event',
   'calendar.cancelled': 'Event cancelled',
   // Saved views and board order (packet 019)
+  'readiness.promises': 'Weekly promises',
   'views.label': 'Views', 'views.mine': 'My views', 'views.project': 'Project views', 'views.none': 'No saved views yet',
   'views.save': 'Save current view…', 'views.update': 'Update "{name}" with current filters', 'views.updated': '"{name}" updated',
   'views.makeDefault': 'Open this list in this view', 'views.madeDefault': '"{name}" is now your default', 'views.delete': 'Delete this view',
@@ -1447,6 +1449,7 @@ export const en: Record<string, string> = {
   'views.share': 'Share with everyone on this project', 'views.asDefault': 'Open this list in this view by default',
   'views.includes': 'Includes {n} settings from the current list.', 'views.plain': 'The list as it is, without filters.', 'views.saved': '"{name}" saved',
   'views.dropped': '"{name}": some settings no longer apply and were left out ({list}).',
+  'views.param.coordinatorId': 'coordinator', 'views.param.personId': 'person', 'views.param.affectedWorkId': 'affected work',
   'views.param.deliverableId': 'deliverable', 'views.param.milestoneId': 'milestone', 'views.param.disciplineId': 'discipline', 'views.param.assigneeId': 'assignee',
   'views.param.ownerId': 'owner', 'views.param.pmId': 'Project Manager', 'views.param.typeId': 'type', 'views.param.clientId': 'client', 'views.param.officeId': 'office',
   'views.param.phaseId': 'phase', 'views.param.projectTypeId': 'project type', 'views.param.supervisorId': 'supervisor', 'views.param.projectId': 'project',

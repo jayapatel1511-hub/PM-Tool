@@ -44,7 +44,7 @@ public sealed class WeeklyCommitmentWeekTests(HubFactory f)
     }
 
     [Fact]
-    public async Task Recorded_weeks_keep_their_start_after_the_coordination_day_changes()
+    public async Task Recorded_weeks_and_target_window_pages_preserve_snapshots_export_scope_and_privacy()
     {
         var (project, task, root) = await Work(null);
         var legacy = (await Post(TestData.Pm, $"{root}/Task/{task}", Proposal(task, Monday))).G("id");
@@ -58,9 +58,77 @@ public sealed class WeeklyCommitmentWeekTests(HubFactory f)
         await (await f.As(TestData.Pm).GetAsync($"{root}?weekStart={Monday:yyyy-MM-dd}")).Json();
         await (await f.As(TestData.Pm).GetAsync($"{root}?from={Wednesday:yyyy-MM-dd}&to={Wednesday.AddDays(91):yyyy-MM-dd}")).Json(400);
 
-        await Post(TestData.Pm, $"{root}/snapshot", new WeeklyCommitmentsEndpoints.SnapshotBody(Guid.NewGuid(), Monday, "Close the recorded week"));
+        var first = (await Post(TestData.Pm, $"{root}/Task/{task}", Proposal(task, Wednesday) with { TargetDate = Monday })).G("id");
+        var second = (await Post(TestData.Pm, $"{root}/Task/{task}", Proposal(task, Wednesday) with { TargetDate = Monday.AddDays(1) })).G("id");
+        var performer = data.User(TestData.Alex);
+        // Synthetic signed rows put 500 out-of-window promises before the visible rows. This test exercises reads,
+        // while signature/readiness guards are covered by the weekly lifecycle tests.
+        var spillover = Enumerable.Range(100, 500).Select(seq => new OutputCommitment
+        {
+            ProjectId = project.Id, Seq = seq, Key = $"{project.ProjectNumber}-WC{seq:000}", TargetType = "Task", TargetId = task,
+            PerformerId = performer, WeekStart = Wednesday, TargetDate = Wednesday.AddDays(2),
+            IntendedOutput = "Earlier output", CompletionCriteria = "Earlier output checked",
+            ReadinessAtCommit = ReadinessState.Ready, State = CommitmentState.Committed,
+        }).ToArray();
+        await f.DbAsync(async db =>
+        {
+            foreach (var row in await db.OutputCommitments.Where(c => c.ProjectId == project.Id).ToListAsync())
+            {
+                row.State = CommitmentState.Committed;
+                row.ReadinessAtCommit = ReadinessState.Ready;
+            }
+            db.OutputCommitments.AddRange(spillover);
+            return await db.SaveChangesAsync();
+        });
+        var recordedSnapshot = (await Post(TestData.Pm, $"{root}/snapshot",
+            new WeeklyCommitmentsEndpoints.SnapshotBody(Guid.NewGuid(), Monday, "Close the recorded week"))).G("id");
+        var currentSnapshot = (await Post(TestData.Pm, $"{root}/snapshot",
+            new WeeklyCommitmentsEndpoints.SnapshotBody(Guid.NewGuid(), Wednesday, "Close the current week"))).G("id");
+        await Post(TestData.Alex, $"{root}/{current}/transition", new WeeklyCommitmentsEndpoints.MoveBody(Guid.NewGuid(),
+            Version<OutputCommitment>(current), CommitmentState.Met, "Earlier output checked", "https://example.test/earlier-output"));
+        await Post(TestData.Alex, $"{root}/{spillover[0].Id}/transition", new WeeklyCommitmentsEndpoints.MoveBody(Guid.NewGuid(),
+            Version<OutputCommitment>(spillover[0].Id), CommitmentState.Withdrawn, "Earlier scope withdrawn", null));
+
+        var recordedRange = $"from={Monday.AddDays(-6):yyyy-MM-dd}&to={Monday.AddDays(6):yyyy-MM-dd}";
+        var legacyList = await (await f.As(TestData.Pm).GetAsync($"{root}?{recordedRange}")).Json();
+        Assert.Equal(504, legacyList.I("total"));
+        Assert.Equal(500, legacyList["commitments"]!.AsArray().Count);
+        Assert.True(legacyList["truncated"]!.GetValue<bool>());
+        Assert.Null(legacyList["page"]); // no paging fields are added to legacy calls
+        var targetRange = $"targetFrom={Monday:yyyy-MM-dd}&targetTo={Monday.AddDays(6):yyyy-MM-dd}";
+        var visibleIds = new[] { first, second, legacy };
+        for (var page = 1; page <= visibleIds.Length; page++)
+        {
+            var listed = await (await f.As(TestData.Pm).GetAsync($"{root}?{recordedRange}&{targetRange}&page={page}&pageSize=1")).Json();
+            Assert.Equal(page, listed.I("page"));
+            Assert.Equal(1, listed.I("pageSize"));
+            Assert.Equal(3, listed.I("total"));
+            Assert.False(listed["truncated"]!.GetValue<bool>());
+            Assert.Equal(visibleIds[page - 1], listed["commitments"]!.AsArray().Single()!.G("id"));
+            var snapshots = listed["snapshots"]!.AsArray();
+            Assert.Equal(2, snapshots.Count);
+            var recorded = snapshots.Single(s => s!.G("id") == recordedSnapshot)!;
+            Assert.Equal(1, recorded.I("committedCount"));
+            var currentWeek = snapshots.Single(s => s!.G("id") == currentSnapshot)!;
+            Assert.Equal(503, currentWeek.I("committedCount"));
+            Assert.Equal(1, currentWeek.I("met")); // outcome is outside the target-date window and every page
+            Assert.Equal(1, currentWeek.I("withdrawn"));
+        }
+        var exportPath = $"{root}/export?from={Monday:yyyy-MM-dd}&to={Monday.AddDays(6):yyyy-MM-dd}&format=csv&page=2&pageSize=1";
+        var csv = System.Text.Encoding.UTF8.GetString(await (await f.As(TestData.Pm).GetAsync(exportPath)).EnsureSuccessStatusCode().Content.ReadAsByteArrayAsync());
+        var keys = f.Db(db => db.OutputCommitments.Where(c => c.ProjectId == project.Id).ToDictionary(c => c.Id, c => c.Key));
+        foreach (var id in visibleIds) Assert.Contains(keys[id], csv); // export contains the whole filtered set, not page 2
+        Assert.DoesNotContain(keys[current], csv);
+        foreach (var row in spillover) Assert.DoesNotContain(row.Key, csv);
+        Assert.Equal(1, f.Db(db => db.WeeklyPlanSnapshots.Single(s => s.Id == recordedSnapshot).CommittedCount));
+        Assert.Equal(503, f.Db(db => db.WeeklyPlanSnapshots.Single(s => s.Id == currentSnapshot).CommittedCount));
         Assert.Equal(Monday, f.Db(db => db.OutputCommitments.Single(c => c.Id == legacy).WeekStart));
-        Assert.Equal(Monday, f.Db(db => db.WeeklyPlanSnapshots.Single(s => s.ProjectId == project.Id).WeekStart));
+        Assert.Equal(Monday, f.Db(db => db.WeeklyPlanSnapshots.Single(s => s.Id == recordedSnapshot).WeekStart));
+
+        await f.DbAsync(async db => { (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted; return await db.SaveChangesAsync(); });
+        await (await f.As(TestData.Rita).GetAsync($"{root}?{recordedRange}&{targetRange}&page=2&pageSize=1")).Json(404);
+        await (await f.As(TestData.Rita).GetAsync($"{root}?weekStart={Monday:yyyy-MM-dd}")).Json(404);
+        await (await f.As(TestData.Rita).GetAsync(exportPath)).Json(404);
     }
 
     [Fact]

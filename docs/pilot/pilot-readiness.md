@@ -3,7 +3,7 @@
 Checklist for moving from the synthetic review release to the company pilot on homedev. It lists what must be true
 and who proves it; it is not a readiness claim. Run the pilot itself with the [pilot plan][plan]; homedev production
 is covered by [production readiness][prod]. Homedev runs the synthetic review release `02ca7cd`, activated 2026-10-03 01:03 UTC.
-Recheck its state before acting on any row ([gates]); the latest [combined checkpoint](../reviews/2026-10-02-combined-candidate.md) records PR #21 merged, exact-head/main CI passing 809/809, encrypted review recovery and activation proven, plus a remaining narrow-screen control-layout defect under repair.
+Recheck its state before acting on any row ([gates]); the latest [combined checkpoint](../reviews/2026-10-02-combined-candidate.md) records earlier security/mobile candidate `6becc79` merged through PR #23, exact-head/main CI passing 838/838, fresh-image safety checks and separate pilot source staging. The register-completion candidate replaces that activation request; its activation and hosted retest are pending; the live `02ca7cd` retains the narrow-screen defect.
 
 **Decisions in force (Jay, clarified 2026-10-01):** homedev hosts review, company pilot and production at
 `pm.engcalchub.com` through the existing Cloudflare tunnel infrastructure. No Azure deployment or new paid service
@@ -23,7 +23,7 @@ something outside the repository, cited) · OPEN (known gap in the repository, c
 | E1 | AC-VIS-01 to AC-VIS-08 pass on the exact pilot commit (FR-016, [§35.1][spec10]) | agent | UNPROVEN. Evidence in the `specs/022`–`024` verification records predates packets 025–033 |
 | E2 | Threat-model walkthrough held, with the homedev boundary added (TLS ends at Cloudflare's edge, local-password cookie, single host); findings resolved or accepted (FR-011) | Jay + company IT | UNPROVEN. The walkthrough record is empty ([threat model][threats]) |
 | E3 | Packets 025–033 enabled only after their own acceptance ([pilot plan][plan]) | agent | UNPROVEN full acceptance for 025–033. Implementation and combined checks pass; current hosted/browser/company limits are recorded in the combined checkpoint and packet verification records |
-| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: `02ca7cd` activation/private probes 10/10, public probes 9/9, HTTP 307/HTTPS, browser sign-in/session, original review marker and desktop keyboard return passed. Narrow-screen picker/date controls need the shared follow-up; first automatic review backup is unproven |
+| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: `02ca7cd` activation/private probes 10/10, public probes 9/9, HTTP 307/HTTPS, browser sign-in/session, original review marker and desktop keyboard return passed. The register-completion candidate includes the earlier locally proven narrow-screen fixes; its activation/hosted retest are pending; first automatic review backup is unproven |
 | E5 | 50 participants named (Q16); the proposed 3 PMs and 6 projects confirmed; sponsor named | Jay | UNPROVEN |
 
 ## 2. Company approvals
@@ -71,7 +71,7 @@ Local-password sign-in maps each login to an existing active `AppUser` and grant
 | U4 | Private delivery: one person per message through a company-approved channel, never group chats, tickets or shared mailboxes. Delete the handoff file after delivery; record the delivery date, not the password | Jay | UNPROVEN |
 | U5 | Rotation on suspected exposure or request: remove the entry, add a new one with the existing credential helper, then recreate the API container. Once the new verifier is visible, existing cookies are refused on their next request by the verifier-stamp check ([Auth.cs][auth]); eight hours is the absolute expiry, not a revocation delay | Jay (agent may script it) | UNPROVEN |
 | U6 | Offboarding: (1) Admin → Users, clear Active; the next request with an existing cookie is refused ([Auth.cs][auth] line 152); (2) Reassign work ([admin guide][admin]); (3) remove the verifier and recreate the API container. Reactivation can revive an unexpired cookie if the same verifier remains; remove or rotate the verifier before reactivation. Leavers are not detected automatically (`Graph__DirectorySync: "false"`); the sponsor reports them | Jay + company IT | UNPROVEN |
-| U7 | Sign-in allows 5 attempts a minute per client address ([Program.cs][program] line 70); people behind one office address share that limit. Confirm egress addresses or accept occasional 429 retries | company IT + agent | UNPROVEN |
+| U7 | Sign-in allows five attempts a minute per client address and per normalised login name ([Program.cs][program]); IPv6 clients share a /64 bucket. People behind one office address share the address limit, and distributed attempts against one login share its name limit. Confirm egress addresses and the one-minute retry tradeoff | company IT + agent | UNPROVEN |
 | U8 | Walkthrough and user guide explain ID and password sign-in (the [user guide](../user-guide.md) now explains individual local IDs and passwords) | agent | UNPROVEN |
 
 ## 5. Backup and recovery
@@ -88,10 +88,10 @@ Proposal for Jay and company acceptance. The 15-minute RPO in §22 is the Azure 
 
 | # | Must be proven | Owner | Status and record |
 |---|---|---|---|
-| B1 | Pilot dump helper and timer installed; the first automatic run leaves a nonempty, owner-only archive | agent + Jay (sudo) | UNPROVEN. The review timer itself was not installed at the last observation ([gates], 2026-10-01) |
-| B2 | Restore drill of a timer-produced pilot dump into an isolated temporary database; counts compared and time recorded | agent + Jay | UNPROVEN. Only a manual review dump was drilled (PASS, [gates]) |
-| B3 | Off-host encrypted copy. The Mac whole-host restic job fails: last success 2026-09-20, SSH export exit 255 on 2026-09-28 ([gates]); per Jay, its ~50 GB export now exceeds the job's 2-hour limit. Proposal: a separate small job that copies only pilot dumps and the verifier file to an encrypted repository after each dump, independent of the whole-host export | Jay approves destination and schedule (company IT too, for company data); agent prepares | FAIL (whole-host); UNPROVEN (dedicated) |
-| B4 | Retrieval: fetch a dump from the off-host copy, compare SHA-256, restore-drill it | agent + Jay | UNPROVEN for the pilot. Manual review retrieval PASS (snapshot `224a6c27`, [gates]) |
+| B1 | Pilot dump helper and timer installed; the first automatic run leaves a nonempty, owner-only archive | agent + Jay (sudo) | UNPROVEN for pilot. Review timer is installed; its first automatic run is due 2026-10-03 22:00 UTC and remains unproven ([combined checkpoint](../reviews/2026-10-02-combined-candidate.md)) |
+| B2 | Restore drill of a timer-produced pilot dump into an isolated temporary database; counts compared and time recorded | agent + Jay | UNPROVEN for pilot. A manually invoked review backup-service dump and the separately retrieved review dump restored successfully; neither proves the first automatic timer run |
+| B3 | Off-host encrypted copy. The independent whole-server Mac export failed at 2026-10-03 01:30 UTC after its two-hour SSH timeout. The approved manual PM-only review recovery snapshot passed. A dedicated pilot copy schedule and destination still require company acceptance; it must include dumps, verifier/configuration and protection keys, independently of the whole-host export | Jay approves destination and schedule (company IT too, for company data); agent prepares | FAIL (independent whole-host export); PASS (manual PM-only review recovery); UNPROVEN (scheduled pilot copy) |
+| B4 | Retrieval: fetch a dump from the off-host copy, compare SHA-256, restore-drill it | agent + Jay | UNPROVEN for the pilot. Manual review retrieval PASS (snapshot `2582b812`, [combined checkpoint](../reviews/2026-10-02-combined-candidate.md)); byte hashes matched and isolated restore kept three projects, three users and 27 migrations |
 | B5 | Dumps cannot cross over: separate directories and file prefixes; the pilot helper refuses review containers; pilot dumps never go into review, development or test (FR-007) | agent | UNPROVEN |
 
 ## 6. Monitoring

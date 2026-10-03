@@ -181,14 +181,18 @@ public static class WeeklyCommitmentsEndpoints
         new("completionCriteria", "completionCriteria"), new("state", "status"), new("readinessAtCommit", "readinessAtCommit"),
         new("snapshotAt", "snapshotAt", "datetime"), new("completionEvidenceUrl", "completionEvidence")];
 
+    static IQueryable<OutputCommitment> TargetWindow(IQueryable<OutputCommitment> query, DateOnly? from, DateOnly? to) =>
+        query.Where(c => (!from.HasValue || c.TargetDate >= from.Value) && (!to.HasValue || c.TargetDate <= to.Value));
+
     /// FR-MDC-06: the promises the readiness page shows for a window (those due in it), with their recorded week and snapshot.
     static async Task<IResult> ExportRows(Guid projectId, DateOnly from, DateOnly to, string? format, HttpContext http, Access access,
         HubDb db, SettingsStore settings, TimeProvider clock)
     {
         var (project, _) = await access.Project(projectId, false);
         Check.That(to >= from && to.DayNumber - from.DayNumber <= 83, "to", "error.invalid");
-        var rows = await db.OutputCommitments.AsNoTracking().Where(c => c.ProjectId == projectId && c.TargetDate >= from && c.TargetDate <= to)
-            .OrderBy(c => c.WeekStart).ThenBy(c => c.TargetDate).ThenBy(c => c.CreatedAt).Take(Export.MaxRows + 1).ToListAsync();
+        var rows = await TargetWindow(db.OutputCommitments.AsNoTracking().Where(c => c.ProjectId == projectId), from, to)
+            .OrderBy(c => c.WeekStart).ThenBy(c => c.TargetDate).ThenBy(c => c.CreatedAt).ThenBy(c => c.Id)
+            .Take(Export.MaxRows + 1).ToListAsync();
         var performers = rows.Select(r => r.PerformerId).Distinct().ToArray();
         var names = await db.Users.AsNoTracking().Where(u => performers.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
         var work = await ReadinessEndpoints.WorkLabels(db, projectId, rows.Select(r => r.TargetId).ToArray());
@@ -203,27 +207,35 @@ public static class WeeklyCommitmentsEndpoints
     }
 
     /// One recorded week (`weekStart`) or every recorded week start within `from`..`to`, so weeks recorded on an
-    /// earlier coordination day stay visible beside the current ones.
-    static async Task<object> List(Guid projectId, DateOnly? weekStart, DateOnly? from, DateOnly? to, Access access, HubDb db)
+    /// earlier coordination day stay visible beside the current ones. Target dates filter rows, not snapshot outcomes;
+    /// paging is opt-in so existing recorded-week callers retain their response contract.
+    static async Task<object> List(Guid projectId, DateOnly? weekStart, DateOnly? from, DateOnly? to,
+        DateOnly? targetFrom, DateOnly? targetTo, int? page, int? pageSize, Access access, HubDb db)
     {
         var (project, _) = await access.Project(projectId, false);
         if (weekStart is { } week) await Week(db, project, week, allowRecorded: true);
         Check.That(weekStart is null || from is null && to is null, "weekStart", "error.invalid");
         DateOnly? lo = weekStart ?? from, hi = weekStart ?? to;
         Check.That(lo is null || hi is null || hi >= lo && hi.Value.DayNumber - lo.Value.DayNumber <= 90, "to", "error.invalid");
+        Check.That(targetFrom is null || targetTo is null || targetTo >= targetFrom &&
+            targetTo.Value.DayNumber - targetFrom.Value.DayNumber <= 83, "targetTo", "error.invalid");
         var query = db.OutputCommitments.AsNoTracking().Where(c => c.ProjectId == projectId &&
             (!lo.HasValue || c.WeekStart >= lo.Value) && (!hi.HasValue || c.WeekStart <= hi.Value));
-        var total = await query.CountAsync();
-        var rows = await query.OrderBy(c => c.WeekStart).ThenBy(c => c.TargetDate).ThenBy(c => c.CreatedAt)
-            .Take(500).ToListAsync();
+        var visible = TargetWindow(query, targetFrom, targetTo);
+        var total = await visible.CountAsync();
+        var paged = page.HasValue || pageSize.HasValue;
+        var (pg, size) = Http.Paging(page, pageSize);
+        var ordered = visible.OrderBy(c => c.WeekStart).ThenBy(c => c.TargetDate).ThenBy(c => c.CreatedAt).ThenBy(c => c.Id);
+        var rows = await (paged ? ordered.Skip((pg - 1) * size).Take(size) : ordered.Take(500)).ToListAsync();
         var snapshots = await db.WeeklyPlanSnapshots.AsNoTracking().Where(s => s.ProjectId == projectId &&
             (!lo.HasValue || s.WeekStart >= lo.Value) && (!hi.HasValue || s.WeekStart <= hi.Value)).ToListAsync();
         var outcome = await query.Where(c => c.SnapshotId != null)
             .GroupBy(c => new { c.SnapshotId, c.State }).Select(g => new { g.Key.SnapshotId, g.Key.State, Count = g.Count() })
             .ToListAsync();
-        return new { Commitments = rows, Total = total, Truncated = total > rows.Count,
-            Snapshots = snapshots.Select(s => new { s.Id, s.WeekStart, s.CapturedAt, s.CommittedCount,
-                Met = outcome.Where(o => o.SnapshotId == s.Id && o.State == CommitmentState.Met).Sum(o => o.Count),
-                Withdrawn = outcome.Where(o => o.SnapshotId == s.Id && o.State == CommitmentState.Withdrawn).Sum(o => o.Count) }) };
+        var summaries = snapshots.Select(s => new { s.Id, s.WeekStart, s.CapturedAt, s.CommittedCount,
+            Met = outcome.Where(o => o.SnapshotId == s.Id && o.State == CommitmentState.Met).Sum(o => o.Count),
+            Withdrawn = outcome.Where(o => o.SnapshotId == s.Id && o.State == CommitmentState.Withdrawn).Sum(o => o.Count) });
+        if (paged) return new { Commitments = rows, Total = total, Page = pg, PageSize = size, Truncated = false, Snapshots = summaries };
+        return new { Commitments = rows, Total = total, Truncated = total > rows.Count, Snapshots = summaries };
     }
 }

@@ -685,7 +685,7 @@ public static class ReadinessEndpoints
 
         var constraints = db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
             c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled &&
-            c.NeededBy <= last).OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt);
+            c.NeededBy <= last).OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt).ThenBy(c => c.Id);
 
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId && t.DeletedAt == null &&
             t.DueDate >= first && t.DueDate <= last && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
@@ -718,17 +718,23 @@ public static class ReadinessEndpoints
         return (first, last, constraints, [.. ready.OrderBy(r => r.DueDate).ThenBy(r => r.Key)]);
     }
 
-    static async Task<object> Window(Guid projectId, DateOnly? from, DateOnly? to, Access access, HubDb db,
+    static async Task<object> Window(Guid projectId, DateOnly? from, DateOnly? to, int? constraintsPage, int? readyPage, int? pageSize, Access access, HubDb db,
         SettingsStore settings, TimeProvider clock)
     {
         var (project, _) = await access.Project(projectId, false);
         var window = await WindowData(project, from, to, db, settings, clock);
         var constraintsTotal = await window.Constraints.CountAsync();
-        var constraints = await window.Constraints.Take(500).ToListAsync();
+        var paged = constraintsPage.HasValue || readyPage.HasValue || pageSize.HasValue;
+        var (cp, size) = Http.Paging(constraintsPage, pageSize);
+        var (rp, _) = Http.Paging(readyPage, pageSize);
+        if (!paged) size = 500; // existing preview callers retain their bounded response
+        var constraints = await window.Constraints.Skip((cp - 1) * size).Take(size).ToListAsync();
         var readyTotal = window.Ready.Count;
         return new { From = window.First, To = window.Last, Constraints = constraints, ConstraintsTotal = constraintsTotal,
-            ConstraintsTruncated = constraintsTotal > constraints.Count, ReadyOutputs = window.Ready.Take(500),
-            ReadyOutputsTotal = readyTotal, ReadyOutputsTruncated = readyTotal > 500 };
+            ConstraintsPage = cp, ReadyPage = rp, PageSize = size,
+            ConstraintsTruncated = !paged && constraintsTotal > constraints.Count,
+            ReadyOutputs = window.Ready.Skip((rp - 1) * size).Take(size),
+            ReadyOutputsTotal = readyTotal, ReadyOutputsTruncated = !paged && readyTotal > size };
     }
 
     static readonly Col[] ConstraintColumns = [new("key", "key"), new("work", "item"), new("category", "constraintCategory"),

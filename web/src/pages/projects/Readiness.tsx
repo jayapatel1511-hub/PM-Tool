@@ -1,3 +1,4 @@
+import { ViewMenu } from '@/components/hub/views'
 import { CalendarCheck, ExternalLink } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
@@ -23,10 +24,10 @@ type Commitment = {
   rowVersion: number; completionEvidenceUrl?: string
 }
 type Snapshot = { id: string; weekStart: string; capturedAt: string; committedCount: number; met: number; withdrawn: number }
-type Weekly = { commitments: Commitment[]; total: number; truncated: boolean; snapshots: Snapshot[] }
+type Weekly = { commitments: Commitment[]; total: number; page: number; pageSize: number; truncated: boolean; snapshots: Snapshot[] }
 type Constraint = { id: string; targetType: string; targetId: string; description: string; category: string; neededBy: string; sourceUrl: string }
 type ReadyOutput = { id: string; targetType: string; targetId: string; key: string; name: string; dueDate: string | null; intendedOutput: string; completionCriteria: string; state: string }
-type Aggregate = { constraints: Constraint[]; constraintsTotal: number; constraintsTruncated: boolean; readyOutputs: ReadyOutput[]; readyOutputsTotal: number; readyOutputsTruncated: boolean }
+type Aggregate = { constraints: Constraint[]; constraintsTotal: number; constraintsTruncated: boolean; readyOutputs: ReadyOutput[]; readyOutputsTotal: number; readyOutputsTruncated: boolean; pageSize: number }
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 /** FR-RDY-05: promise weeks start on the project's coordination day (Monday when unset). */
@@ -52,9 +53,12 @@ export function ReadinessTab() {
   const defaultFrom = weekStart(today(), day)
   const from = sp.get('from') ?? defaultFrom
   const to = sp.get('to') ?? addDays(defaultFrom, lookahead * 7 - 1)
+  const promisePage = Math.max(1, Number(sp.get('promisePage')) || 1)
+  const constraintsPage = Math.max(1, Number(sp.get('constraintsPage')) || 1), readyPage = Math.max(1, Number(sp.get('readyPage')) || 1)
   const set = (key: string, value: string) => {
     const next = new URLSearchParams(sp)
     if (value) next.set(key, value); else next.delete(key)
+    if (key === 'from' || key === 'to') for (const page of ['promisePage', 'constraintsPage', 'readyPage']) next.delete(page)
     setSp(next, { replace: true })
   }
   const reset = () => setSp(new URLSearchParams(), { replace: true })
@@ -78,13 +82,13 @@ export function ReadinessTab() {
   }, [from, to, day])
   const invalidWindow = weeks.length === 0 || weeks.length > 12
   const q = useQuery({
-    queryKey: ['p', p.id, 'readiness-window', from, to],
+    queryKey: ['p', p.id, 'readiness-window', from, to, promisePage, constraintsPage, readyPage],
     enabled: !invalidWindow,
     queryFn: async () => {
       // A promise due in the window starts at most six days earlier; rows keep the week start they were recorded with.
       const [aggregate, weekly] = await Promise.all([
-        get<Aggregate>(`projects/${p.id}/readiness/window?from=${from}&to=${to}`),
-        get<Weekly>(`projects/${p.id}/weekly-commitments?from=${addDays(from, -6)}&to=${to}`),
+        get<Aggregate>(`projects/${p.id}/readiness/window?from=${from}&to=${to}&constraintsPage=${constraintsPage}&readyPage=${readyPage}&pageSize=50`),
+        get<Weekly>(`projects/${p.id}/weekly-commitments?from=${addDays(from, -6)}&to=${to}&targetFrom=${from}&targetTo=${to}&page=${promisePage}`),
       ])
       return { ...aggregate, ...weekly }
     },
@@ -101,7 +105,7 @@ export function ReadinessTab() {
   if (q.isPending) return <Loading rows={8} />
   if (q.error) return <div className="p-6"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const data = q.data
-  const shown = data.commitments.filter((c) => c.targetDate >= from && c.targetDate <= to)
+  const shown = data.commitments
   const snapshotByWeek = new Map(data.snapshots.map((s) => [s.weekStart, s]))
   // Weeks recorded on an earlier coordination day are shown beside the current ones, never re-dated.
   const sections = [...new Set([...weeks, ...shown.map((c) => c.weekStart), ...data.snapshots.map((s) => s.weekStart)])].sort()
@@ -109,7 +113,7 @@ export function ReadinessTab() {
   const workLink = (c: Commitment) => `${base}/${c.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${c.targetType}:${c.targetId}`
   return (
     <Page title={t('readiness.title')} subtitle={t('readiness.subtitle')} actions={
-      <>{options.data && <Button size="sm" variant="outline" onClick={() => setInspecting(true)}>{t('readiness.inspect')}</Button>}
+      <><ViewMenu listType="readiness" projectId={p.id} />{options.data && <Button size="sm" variant="outline" onClick={() => setInspecting(true)}>{t('readiness.inspect')}</Button>}
       {options.data?.canWrite && <Button size="sm" onClick={() => setProposing(true)}>{t('readiness.propose')}</Button>}
       <ExportMenu path={`projects/${p.id}/weekly-commitments/export`} params={{ from, to }} name={`${p.projectNumber}-weekly-commitments`} label={t('readiness.exportPromises')} />
       <Button asChild variant="outline" size="sm"><Link to={`${base}/coordination?meeting=1`}><CalendarCheck className="size-4" />{t('readiness.meeting')}</Link></Button></>
@@ -125,6 +129,7 @@ export function ReadinessTab() {
             <Link className="font-medium text-primary hover:underline" to={`${base}/${c.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${c.targetType}:${c.targetId}`}>{c.category} · {c.targetType}</Link>
             <p className="mt-1">{c.description}</p><p className="text-xs text-muted-foreground">{fmtDate(c.neededBy)} · <a className="underline" href={c.sourceUrl} target="_blank" rel="noreferrer">{t('readiness.source')}</a></p>
           </li>)}</ul>}
+          <WindowPager label={t('readiness.constraints')} page={constraintsPage} total={data.constraintsTotal} pageSize={data.pageSize} onPage={n => set('constraintsPage', String(n))} />
         </Section>
         <Section title={t('readiness.readyOutputs')} id="ready-outputs" count={data.readyOutputsTotal}
           actions={<ExportMenu path={`projects/${p.id}/readiness/window/export`} params={{ from, to, list: 'ready' }} name={`${p.projectNumber}-ready-outputs`} />}>
@@ -133,6 +138,7 @@ export function ReadinessTab() {
             <Link className="font-medium text-primary hover:underline" to={`${base}/${o.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${o.targetType}:${o.targetId}`}>{o.key} · {o.name}</Link>
             <p className="mt-1">{o.intendedOutput}</p><p className="text-xs text-muted-foreground">{o.dueDate ? fmtDate(o.dueDate) : t('readiness.noDueDate')} · {o.completionCriteria}</p>
           </li>)}</ul>}
+          <WindowPager label={t('readiness.readyOutputs')} page={readyPage} total={data.readyOutputsTotal} pageSize={data.pageSize} onPage={n => set('readyPage', String(n))} />
         </Section>
       </div>
       {data.truncated && <div role="status" className="rounded border border-warn/30 bg-warn-bg px-3 py-2 text-sm text-warn">{t('readiness.truncated', { n: data.total })}</div>}
@@ -154,6 +160,7 @@ export function ReadinessTab() {
           </li>)}</ul>}
         </Section>
       })}
+      <WindowPager label={t('readiness.promises')} page={promisePage} total={data.total} pageSize={data.pageSize} onPage={n => set('promisePage', String(n))} />
       <p className="text-xs text-muted-foreground"><ExternalLink className="mr-1 inline size-3" aria-hidden />{t('readiness.sourceNote')}</p>
       {proposing && options.data && <ProposePromise projectId={p.id} options={options.data} week={weeks[0]} day={day}
         complete={p.status === 'Complete'} close={() => setProposing(false)} done={done} />}
@@ -165,6 +172,15 @@ export function ReadinessTab() {
         close={() => clear('promise', 'panel')} done={done} />}
     </Page>
   )
+}
+
+function WindowPager({ label, page, total, pageSize, onPage }: { label: string; page: number; total: number; pageSize: number; onPage: (page: number) => void }) {
+  return <nav aria-label={label} className="flex flex-wrap items-center justify-end gap-3 p-3">
+    <span className="mr-auto text-sm text-muted-foreground">{t('coord.count', { n: total })}</span>
+    <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t('handoff.previous')}</Button>
+    <span className="text-sm">{t('handoff.page', { n: page })}</span>
+    <Button size="sm" variant="outline" disabled={page * pageSize >= total} onClick={() => onPage(page + 1)}>{t('handoff.next')}</Button>
+  </nav>
 }
 
 function ProposePromise({ projectId, options, week, day, complete, close, done }: { projectId: string; options: CoordOptions; week: string; day: string

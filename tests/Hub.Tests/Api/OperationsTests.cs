@@ -158,5 +158,12 @@ public sealed class ExportSafetyTests
     [InlineData("-5", "-5")]
     [InlineData("2.5", "2.5")]
     [InlineData("Pier footing, east", "\"Pier footing, east\"")]
+    // The same rules as the client's csvCell (web/src/lib/csv.ts): every separator a spreadsheet may split on is quoted,
+    // so a semicolon-separated locale cannot turn the text after one into its own (formula) cell.
+    [InlineData("Grade;=SUM(1;2)", "\"Grade;=SUM(1;2)\"")]
+    [InlineData("Grade\t=SUM(1)", "\"Grade\t=SUM(1)\"")]
+    [InlineData("\t=SUM(1)", "\"'\t=SUM(1)\"")]
+    [InlineData("  =SUM(1)", "'  =SUM(1)")] // a formula behind leading spaces
+    [InlineData("-1e5", "-1e5")]
     public void Formula_like_text_is_neutralised_and_numbers_are_kept(string value, string csv) => Assert.Equal(csv, Export.Csv(value));
 }

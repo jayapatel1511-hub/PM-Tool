@@ -58,3 +58,11 @@ Proposed homedev targets are a 24-hour local RPO, 24-hour off-host RPO only whil
 and an 8-hour RTO with the host intact. Keep daily dumps for 14 days; company approval must record whether these
 targets and longer retention are acceptable. Jay approved the review recovery payload in the existing encrypted Mac restic repository, and retrieval plus isolated restore passed. This approval/evidence applies to review data; company-data approval, a working off-host schedule and host-loss recovery remain unproven. Verify and record those gates before go-live. Azure PITR,
 managed identity, paid monitoring and Azure mail integrations are not assumed capabilities of this deployment.
+
+### Pilot recovery preparation checkpoint (2026-10-03)
+
+The [restore runbook](../runbooks/restore.md#pilot-pitr-preparation-local-proof-homedev-activation-pending) records
+locally verified PostgreSQL 17 WAL/base/replay preparation. It retains the existing daily logical dump and adds a
+verified physical base to that daily service. Homedev activation, automatic operation, bounded off-host transfer,
+retrieved replay and full application recovery are still required. The synthetic six-person fixture is a rehearsal,
+not company participant acceptance or permission to cut over production.

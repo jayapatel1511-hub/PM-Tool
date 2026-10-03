@@ -31,7 +31,13 @@ writes; local regression tests do not prove the installed timer or off-host reco
 
 ## Findings
 
-Control descriptions below are repository evidence, not company acceptance. PR #24 exact-head and merged-main CI passed 845/845 with coverage, three mocked Chromium harnesses and 14 backup/pilot safety checks. Those results apply only to `26c0ae1`, which is now held after the completion audit found additional packet and direct sign-in logging gaps. The sign-in correction passed 13 focused account/activity cases (the new direct-sign-in regression failed before correction). Other fixes and their combined CI/image checks remain in progress. Hosted review still runs `02ca7cd` at this checkpoint; candidate activation and hosted browser/security acceptance remain open. The walkthrough and company sign-off below have not occurred.
+Control descriptions below are repository evidence, not company acceptance. Corrected candidate `211bd88` merged
+through PR #25 at `328e88a` with identical Git trees. Candidate and main CI passed 858/858 with coverage gates,
+three mocked Chromium suites and 14 backup/pilot helper checks. Independent changed-path review reported no further
+confirmed findings. Fresh seed-free and restored synthetic review image checks passed locally; see the
+[completion checkpoint](../reviews/2026-10-03-completion-audit.md). Hosted review still selects `02ca7cd` at this
+checkpoint. Final activation/browser checks, the walkthrough and company sign-off remain open. T-09 below remains
+an organisation-wide rollout gate; container hardening does not give the application's database role least privilege.
 
 | ID | Threat | Where | Mitigation | Status |
 |---|---|---|---|---|

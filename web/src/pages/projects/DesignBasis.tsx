@@ -204,7 +204,7 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
       <div className="space-y-5 text-sm">
         <p>{row.entry.kind} · {t('basis.owner')}: {name(row.entry.ownerId)} · {t('basis.discipline')}: {options?.disciplines.find(d => d.id === row.entry.projectDisciplineId)?.name ?? t('coord.unavailable')}</p>
         <div className="flex flex-wrap gap-2">{row.canManage && current && !proposed && options && <Button size="sm" variant="outline" onClick={() => setAction('propose')}>{t('basis.propose')}</Button>}
-          {row.canManage && !current && proposed && options && <Button size="sm" variant="outline" onClick={() => setAction('assign')}>{t('basis.owner')}</Button>}
+          {row.canManage && (current || proposed) && options && <Button size="sm" variant="outline" onClick={() => setAction('assign')}>{t('basis.owner')}</Button>}
           {row.canConfirm && proposed && <Button size="sm" onClick={() => setAction('confirm')}>{t('basis.confirm')}</Button>}
           {row.canManage && row.entry.kind === 'Assumption' && proposed && <Button size="sm" variant="outline" onClick={() => setAction('proceed')}>{t('basis.proceed')}</Button>}
           {options?.canWrite && [...options.tasks, ...options.deliverables].some(w => w.ownerId === options.actorId) && (current || proposed) &&

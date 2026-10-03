@@ -195,11 +195,11 @@ public static class DesignBasisEndpoints
             var entry = await Entry(db, project.Id, id);
             Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId));
             Coordination.Version(entry, body.EntryRowVersion);
-            Check.That(entry.CurrentVersionId is null && await db.DesignBasisVersions.AnyAsync(v =>
-                v.EntryId == entry.Id && v.Status == BasisStatus.Proposed), "entryId", "basis.current");
             await Coordination.Person(db, project, body.OwnerId);
             if (body.IndependentApproverId is { } approver)
                 await Coordination.Person(db, project, approver, "independentApproverId");
+            Check.That(body.IndependentApproverId is null || body.IndependentApproverId != body.OwnerId,
+                "independentApproverId", "basis.independent");
             entry.OwnerId = body.OwnerId;
             entry.IndependentApproverId = body.IndependentApproverId;
             db.Audit.Note(entry, reason: Check.Reason(body.Reason));

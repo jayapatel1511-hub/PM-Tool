@@ -8,7 +8,7 @@ namespace Hub.Api.Features;
 
 public static class ReadinessEndpoints
 {
-    public sealed record CreateBody(Guid RequestId, int TargetRowVersion, string IntendedOutput, string CompletionCriteria);
+    public sealed record CreateBody(Guid RequestId, int TargetRowVersion, string IntendedOutput, string CompletionCriteria, string? Reason = null);
     public sealed record ApplicabilityBody(Guid RequestId, int AssessmentRowVersion, int CheckRowVersion,
         bool Applies, string Reason, string? EvidenceUrl);
     public sealed record ConstraintBody(Guid RequestId, int TargetRowVersion, string Category, string Description,
@@ -554,6 +554,53 @@ public static class ReadinessEndpoints
             : issued ? (true, "Every linked submission package is Issued.") : (false, "A linked submission package is not Issued.");
     }
 
+    static async Task RecoverOwnerOwnedState(HubDb db, Guid projectId, Coordination.Work target, ReadinessAssessment assessment, string reason, DateTimeOffset now)
+    {
+        var uses = await db.BasisUses.Where(u => u.ProjectId == projectId && u.TargetType == target.Type && u.TargetId == target.Id)
+            .Join(db.DesignBasisVersions, u => u.VersionId, v => v.Id, (u, v) => new { Use = u, v.EntryId })
+            .ToListAsync();
+        foreach (var use in uses.GroupBy(x => x.EntryId).Select(g => g.OrderByDescending(x => x.Use.CreatedAt).ThenByDescending(x => x.Use.Id).First()).Select(x => x.Use))
+        {
+            use.OwnerId = target.OwnerId;
+            db.Audit.Note(use, reason: reason);
+            foreach (var impact in await db.BasisImpactAssessments.Where(i => i.ProjectId == projectId &&
+                i.BasisUseId == use.Id && i.Status == AssessmentStatus.Pending).ToListAsync())
+            {
+                impact.OwnerId = target.OwnerId;
+                db.Audit.Note(impact, reason: reason);
+            }
+        }
+
+        foreach (var constraint in await db.WorkConstraints.Where(c => c.ProjectId == projectId &&
+            c.TargetType == target.Type && c.TargetId == target.Id &&
+            c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled).ToListAsync())
+        {
+            constraint.AffectedOwnerId = target.OwnerId;
+            db.Audit.Note(constraint, reason: reason);
+        }
+
+        foreach (var commitment in await db.OutputCommitments.Where(c => c.ProjectId == projectId &&
+            c.TargetType == target.Type && c.TargetId == target.Id && c.State == CommitmentState.Proposed && c.SnapshotId == null).ToListAsync())
+        {
+            commitment.PerformerId = target.OwnerId;
+            db.Audit.Note(commitment, reason: reason);
+        }
+
+        assessment.OwnerId = target.OwnerId;
+        assessment.State = ReadinessState.NeedsAssessment;
+        assessment.EvaluatedAt = now;
+        db.Audit.Note(assessment, reason: reason);
+        foreach (var check in await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.Id).ToListAsync())
+        {
+            check.Applies = null;
+            check.Satisfied = null;
+            check.Reason = null;
+            check.EvidenceUrl = null;
+            check.RecordedBy = null;
+            db.Audit.Note(check, reason: reason);
+        }
+    }
+
     static Task<Coordination.Result> Create(Guid projectId, string targetType, Guid targetId, CreateBody body,
         Access access, HubDb db, TimeProvider clock) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "readiness.create", targetType, targetId, body },
@@ -563,9 +610,22 @@ public static class ReadinessEndpoints
                 if (target.RowVersion != body.TargetRowVersion)
                     throw ApiException.Conflict("concurrency_conflict", "coord.stale");
                 Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, target.OwnerId));
-                if (await db.ReadinessAssessments.AnyAsync(a => a.ProjectId == project.Id &&
-                    a.TargetType == target.Type && a.TargetId == target.Id))
-                    throw ApiException.Conflict("readiness_exists", "error.duplicate");
+                var existing = await db.ReadinessAssessments.SingleOrDefaultAsync(a => a.ProjectId == project.Id &&
+                    a.TargetType == target.Type && a.TargetId == target.Id);
+                if (existing is not null)
+                {
+                    if (existing.OwnerId == target.OwnerId)
+                    {
+                        Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, target.OwnerId));
+                        throw ApiException.Conflict("readiness_exists", "error.duplicate");
+                    }
+                    Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, target.OwnerId));
+                    var reason = Check.Reason(body.Reason);
+                    await RecoverOwnerOwnedState(db, project.Id, target, existing, reason, clock.GetUtcNow());
+                    existing.IntendedOutput = Check.Required(body.IntendedOutput, "intendedOutput", 2000);
+                    existing.CompletionCriteria = Check.Required(body.CompletionCriteria, "completionCriteria", 2000);
+                    return existing;
+                }
                 var assessment = new ReadinessAssessment { ProjectId = project.Id, TargetType = target.Type,
                     TargetId = target.Id, OwnerId = target.OwnerId,
                     IntendedOutput = Check.Required(body.IntendedOutput, "intendedOutput", 2000),

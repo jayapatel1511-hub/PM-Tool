@@ -79,6 +79,7 @@ let server, browser;
     else if (p === `projects/${pid}/discipline-coordination`) {
       const print = !u.searchParams.has('page') && !u.searchParams.has('pageSize');
       coordinationQueries.push({ params: Object.fromEntries(u.searchParams), print });
+      if (print) await new Promise(resolve => setTimeout(resolve, 100));
       const page = Number(u.searchParams.get('page') ?? 1);
       const uses = print ? coordinationUses : page === 2 ? coordinationUses.slice(4) : coordinationUses.slice(0, 4);
       data = {
@@ -188,6 +189,15 @@ let server, browser;
   const printed = await page.evaluate(() => window.__printedTaskIds);
   assert.deepEqual(printed, coordinationUses.map(u => u.targetId).sort(), 'Print captures all five rendered input-use target ids');
   assert.ok(coordinationQueries.some(q => q.print && q.params.page === undefined && q.params.pageSize === undefined), 'Print requests the unpaged coordination projection');
+  await page.waitForFunction(() => [...document.querySelectorAll('button')].some(button => button.textContent?.trim() === 'Print' && !button.disabled));
+  await page.waitForTimeout(15_100); // Let the app's 15-second query stale window expire before the repeated print.
+  coordinationUses[4].targetId = id(699);
+  const secondProjection = page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/discipline-coordination') && !u.searchParams.has('page') && !u.searchParams.has('pageSize'); });
+  await page.getByRole('button', { name: 'Print', exact: true }).click();
+  await secondProjection;
+  await page.waitForFunction(() => window.__printCalls === 2);
+  const reprinted = await page.evaluate(() => window.__printedTaskIds);
+  assert.deepEqual(reprinted, coordinationUses.map(u => u.targetId).sort(), 'Second print captures changed input-use target ids after the fresh response');
 
   // FR-MDC-06: list controls retain URL filters, page before expanding issue groups and save definitions only.
   await page.goto(`${base}/projects/P-DEMO/design-basis`);

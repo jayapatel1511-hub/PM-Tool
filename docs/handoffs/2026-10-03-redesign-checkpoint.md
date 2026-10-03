@@ -112,6 +112,30 @@ sessions, runtime configuration, dumps, verifiers and key material remain outsid
    to the accepted company origin only at cutover; retain review privately. Production
    deployment and company acceptance are currently NOT PERFORMED.
 
+## Packet acceptance index
+
+Current task files leave **T006 open in all nine packets**. Use each packet’s
+verification record to distinguish older failures, later fixes and bounded PASS
+slices; an open full-acceptance task is not proof that all implementation is missing.
+
+| Packet | Full acceptance required | Authoritative verification record |
+|---|---|---|
+| 025 Handoffs | AC-HND-01–05 plus concurrency/access and complete UI scenarios | [025 verification](../../specs/025-discipline-handoffs/verification.md) |
+| 026 Reviews | AC-MRV-01–05 plus concurrency/access and complete UI scenarios | [026 verification](../../specs/026-multidisciplinary-reviews/verification.md) |
+| 027 Change impact | AC-CHG-01–05 plus concurrency/access and complete UI scenarios | [027 verification](../../specs/027-revision-change-impact/verification.md) |
+| 028 Submissions | AC-SUB-01–05 plus concurrency/access and complete UI scenarios | [028 verification](../../specs/028-submission-readiness/verification.md) |
+| 029 Capacity | AC-CAP-01–05 plus concurrency/access and complete UI scenarios | [029 verification](../../specs/029-dated-capacity-allocations/verification.md) |
+| 030 Coordination | AC-DCV-01–05 plus concurrency/access and complete UI scenarios | [030 verification](../../specs/030-discipline-coordination-view/verification.md) |
+| 031 Design basis | AC-BAS-01–05 plus concurrency/access and complete UI scenarios | [031 verification](../../specs/031-design-basis-assumptions/verification.md) |
+| 032 Readiness/weekly | AC-RDY-01–05 plus concurrency/access and complete UI scenarios | [032 verification](../../specs/032-readiness-weekly-commitments/verification.md) |
+| 033 Located issues | AC-LOC-01–05 plus concurrency/access and complete UI scenarios | [033 verification](../../specs/033-location-linked-issues/verification.md) |
+
+Metadata reconciliation also remains: 028–033 task files still show T001–T005
+unchecked despite implementation and verification records. Reconcile each task
+against actual final source/evidence after agreeing the redesign; do not mark them
+complete merely to match a summary or implement them again solely because a box
+is unchecked. This checkpoint does not change those task statuses.
+
 ## Prepared work that must not be mistaken for completed work
 
 - `/private/tmp/pm_hosted_basis_lifecycle_29b3d703.py` and

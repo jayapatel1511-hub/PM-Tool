@@ -400,6 +400,12 @@ public sealed class ReadinessApiTests(HubFactory f)
             { RequestId = Guid.NewGuid(), AssessmentRowVersion = -1 })).Json(409);
             var approved = await (await f.As(TestData.Pm).Post(path + "/exceptions", body)).Json();
             Assert.Equal(approved.G("id"), (await (await f.As(TestData.Pm).Post(path + "/exceptions", body)).Json()).G("id"));
+            var assigned = f.Db(db => db.Notifications.Where(n => n.ItemId == approved.G("id") &&
+                n.EventType == NotificationEvents.ReadinessExceptionApproved).ToList());
+            var notice = Assert.Single(assigned);
+            Assert.Equal(data.User(TestData.Marc), notice.UserId);
+            Assert.Equal(1, notice.Count);
+            Assert.Contains($"panel=Task:{taskId}", notice.LinkPath);
             var permitted = await (await f.As(TestData.Alex).GetAsync(path)).Json();
             Assert.Equal(ReadinessState.ProceedUnderAssumption, permitted["assessment"]!.S("state"));
             Assert.Single(permitted["exceptions"]!.AsArray());

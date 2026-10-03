@@ -582,7 +582,7 @@ public static class ReadinessEndpoints
             });
 
     static Task<Coordination.Result> ApproveException(Guid projectId, string targetType, Guid targetId,
-        ExceptionBody body, Access access, HubDb db, TimeProvider clock) =>
+        ExceptionBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "readiness.exception", targetType, targetId, body },
             access, db, clock, async (project, ctx) =>
             {
@@ -618,6 +618,11 @@ public static class ReadinessEndpoints
                     Risk = Check.Required(body.Risk, "risk", 2000), ExpiresOn = body.ExpiresOn };
                 db.ReadinessExceptions.Add(row);
                 db.Audit.Note(row);
+                var page = target.Type == "Task" ? "tasks" : "deliverables";
+                await notify.Send(NotificationEvents.ReadinessExceptionApproved, [row.VerifierId],
+                    new NotifyItem(project.Id, "ReadinessException", row.Id, target.Key,
+                        $"/projects/{project.ProjectNumber}/{page}?panel={target.Type}:{target.Id}", project.ProjectNumber),
+                    Text.Get("notify.readiness_exception_assigned", target.Key, row.ExpiresOn));
                 return row;
             });
 

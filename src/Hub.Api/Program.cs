@@ -180,6 +180,10 @@ var reviewDemo = cfg.GetValue<bool>("Seed:ReviewDemo");
 if (reviewDemo && !(app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsEnvironment("Testing")))
     throw new InvalidOperationException("Seed:ReviewDemo is permitted only in Development, Staging or Testing.");
 
+var migrateOnly = cfg.GetValue<bool>("Db:MigrateOnly");
+if (migrateOnly && cfg["Db:Migrate"] == "false")
+    throw new InvalidOperationException("Migration-only execution requires Db:Migrate.");
+
 if (cfg["Db:Migrate"] != "false")
 {
     using var scope = app.Services.CreateScope();
@@ -195,6 +199,8 @@ if (cfg["Db:Migrate"] != "false")
         await ReviewDemoSeed.Seed(db, scope.ServiceProvider.GetRequiredService<TimeProvider>());
     await AuthSetup.BootstrapAdmins(db, cfg, app.Environment, app.Logger);
 }
+
+if (migrateOnly) return; // Privileged release step exits before the ordinary HTTP/background host starts.
 
 app.Run();
 

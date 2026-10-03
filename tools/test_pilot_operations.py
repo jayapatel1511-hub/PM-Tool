@@ -5,6 +5,7 @@ import io
 import os
 import pathlib
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
@@ -13,6 +14,89 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SHELLS = [ROOT / "scripts" / name for name in ("activate-homedev-pilot.sh", "backup-homedev-pilot.sh", "restore-homedev-pilot-drill.sh")]
 
 class PilotOperationsTests(unittest.TestCase):
+    def test_runtime_grant_step_keeps_password_on_stdin_and_sanitizes_failure(self):
+        script = (ROOT / 'scripts/activate-homedev-pilot.sh').read_text()
+        source = script.split("<<'GRANTS_PY'\n", 1)[1].split('\nGRANTS_PY', 1)[0]
+        password = 'synthetic-app-password-never-in-argv-' + 'a' * 32
+        with tempfile.TemporaryDirectory() as temp:
+            app = pathlib.Path(temp) / 'pilot-app.env'
+            app.write_text('ConnectionStrings__Hub=Host=db;Port=5432;Database=hub_pilot;Username=hub_pilot_app;Password=' + password + '\n')
+            for code in (0, 1):
+                with patch.object(sys, 'argv', ['grants', str(app), str(ROOT / 'hosting/pilot-runtime-role.sql')]), \
+                     patch('subprocess.run', return_value=subprocess.CompletedProcess([], code, stderr=password.encode())) as run:
+                    if code:
+                        with self.assertRaises(SystemExit) as refusal:
+                            exec(compile(source, 'grants', 'exec'), {})
+                        self.assertNotIn(password, str(refusal.exception))
+                    else:
+                        exec(compile(source, 'grants', 'exec'), {})
+                    args, kwargs = run.call_args
+                    self.assertNotIn(password, ' '.join(args[0]))
+                    self.assertIn(password.encode(), kwargs['input'])
+                    self.assertEqual(kwargs['stdout'], subprocess.DEVNULL)
+                    self.assertEqual(kwargs['stderr'], subprocess.PIPE)
+
+    def test_preflight_refuses_bootstrap_or_extra_environment_in_app_file(self):
+        script = (ROOT / 'scripts/activate-homedev-pilot.sh').read_text()
+        source = script.split("<<'PREFLIGHT_PY'\n", 1)[1].split('\nPREFLIGHT_PY', 1)[0]
+        with tempfile.TemporaryDirectory() as temp:
+            app, admin = pathlib.Path(temp) / 'app', pathlib.Path(temp) / 'admin'
+            password = 'a' * 64
+            admin.write_text('PILOT_DB_PASSWORD=' + password + '\nConnectionStrings__Hub=Host=db;Port=5432;Database=hub_pilot;Username=hub_pilot;Password=' + password + '\n')
+            valid = 'ConnectionStrings__Hub=Host=db;Port=5432;Database=hub_pilot;Username=hub_pilot_app;Password=' + 'b' * 64 + '\n'
+            for value in (valid.replace('hub_pilot_app', 'hub_pilot'), valid + 'Auth__Local__BootstrapAdmins=x\n', valid.replace('b' * 64, password)):
+                app.write_text(value)
+                with patch.object(sys, 'argv', ['preflight', str(app), str(admin)]), self.assertRaises(SystemExit):
+                    exec(compile(source, 'preflight', 'exec'), {})
+            app.write_text(valid)
+            with patch.object(sys, 'argv', ['preflight', str(app), str(admin)]):
+                exec(compile(source, 'preflight', 'exec'), {})
+
+    def test_activation_verifier_failure_stops_candidate(self):
+        script = (ROOT / 'scripts/activate-homedev-pilot.sh').read_text()
+        body = script[script.index('api_started=0;'):]
+        stubs = r'''set -Eeuo pipefail
+exec 3>&1
+release_sha=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+expected=/unused
+app_file=/unused/app
+role_sql=/unused/role
+verify_file=""
+install_timer=0
+compose_cmd=(mock_compose)
+fail() { exit 1; }
+mock_compose() {
+  echo "$*" >&3
+  if [[ "$1" == exec ]]; then echo 0:0; fi
+}
+inspect() {
+  case "$1" in
+    *Health.Status*) echo healthy;;
+    *) echo pm-tool-pilot-db;;
+  esac
+}
+curl() { echo '{"status":"Healthy"}'; }
+sudo() {
+  case "$*" in *inspect*) echo "pm-tool-pilot:$release_sha";; esac
+}
+timeout() { shift; "$@"; }
+python3() {
+  case "$1" in
+    -c) echo synthetic;;
+    -) return 0;;
+    *) echo VERIFIER_REJECTED >&3; return 42;;
+  esac
+}
+ln() { return 98; }
+mv() { return 98; }
+'''
+        result = subprocess.run(['bash'], input=stubs + body, text=True, capture_output=True, timeout=5)
+        self.assertEqual(result.returncode, 42, result.stderr)
+        calls = result.stdout.splitlines()
+        self.assertIn('up -d --no-build --no-deps --force-recreate api', calls)
+        self.assertEqual(calls[-2:], ['VERIFIER_REJECTED', 'stop api'])
+        self.assertEqual(calls.count('stop api'), 2)
+
     def test_shell_scripts_have_valid_syntax(self):
         for script in SHELLS:
             self.assertEqual(subprocess.run(["bash", "-n", str(script)]).returncode, 0, script)

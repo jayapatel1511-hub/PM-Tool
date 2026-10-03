@@ -2,7 +2,7 @@
 # backups from the review stack (docs/pilot/pilot-readiness.md section 3); never attach the
 # review volume or restore a review dump here. Run from a release under the pilot base
 # directory (its .runtime and data links point at the pilot's own private directories):
-#   sudo env RELEASE_SHA=<sha> PILOT_HOSTNAME=<host> docker compose --env-file .runtime/pilot.env -f hosting/homedev-pilot.compose.yml up -d
+# Use scripts/activate-homedev-pilot.sh: migrate, apply runtime grants, then start API.
 name: pm-tool-pilot
 
 services:
@@ -46,7 +46,8 @@ services:
     depends_on:
       db: { condition: service_healthy }
     env_file:
-      - ../.runtime/pilot.env
+      # Validated one-setting whitelist; never supply pilot.env to the ordinary API.
+      - ../.runtime/pilot-app.env
     environment:
       ASPNETCORE_ENVIRONMENT: Staging
       # Cloudflare forwards the visitor scheme; redirect plain-HTTP visitors before any password is typed.
@@ -61,6 +62,8 @@ services:
       Seed__ReviewDemo: "false"
       Seed__DevUsers: "false"
       Db__UseManagedIdentity: "false"
+      Db__Migrate: "false"
+      Db__MigrateOnly: "false"
       Graph__DirectorySync: "false"
       Graph__Mail: "false"
       Email__Mode: Log
@@ -69,6 +72,39 @@ services:
       - ../.runtime/keys:/run/pilot/keys
     ports:
       - "127.0.0.1:3081:8080"
+    networks: [pilot]
+
+  migrate:
+    image: pm-tool-pilot:${RELEASE_SHA:?Set the reviewed release SHA}
+    profiles: [migration]
+    restart: "no"
+    user: "1000:1000"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs: ["/tmp:size=64m,mode=1777"]
+    mem_limit: 1g
+    pids_limit: 256
+    depends_on:
+      db: { condition: service_healthy }
+    env_file:
+      - ../.runtime/pilot.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+      Auth__Mode: LocalPassword
+      Auth__Local__UsersFile: /run/pilot/pilot-users.json
+      Auth__Local__KeyDirectory: /run/pilot/keys
+      Seed__ReviewDemo: "false"
+      Seed__DevUsers: "false"
+      Db__UseManagedIdentity: "false"
+      Db__Migrate: "true"
+      Db__MigrateOnly: "true"
+      Graph__DirectorySync: "false"
+      Graph__Mail: "false"
+      Email__Mode: Log
+    volumes:
+      - ../.runtime/pilot-users.json:/run/pilot/pilot-users.json:ro
+      - ../.runtime/keys:/run/pilot/keys
     networks: [pilot]
 
 volumes:

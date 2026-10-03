@@ -21,8 +21,8 @@ environment to `Production` would currently break sign-in. No Azure identity is 
 
 | Gate | Evidence required | Current status |
 |---|---|---|
-| Exact code revision | Passing CI and reviewed changes for the deployed full SHA; merge status recorded separately | Corrected candidate `211bd88` merged through PR #25 at `328e88a` with identical Git trees. Candidate/main CI passed 858/858 and required gates; exact archive fresh/populated image checks passed locally. Homedev activation and final hosted/company acceptance remain UNPROVEN; see the completion checkpoint |
-| Review deployment | Current release pointer, database migration and preserved synthetic records, trusted HTTPS and browser workflows | PASS for bounded synthetic review gates on `02ca7cd`: exact image/volume and current pointer, private/public probes, HTTP 307/HTTPS and preserved marker/session. The register-completion candidate supersedes the earlier activation request; its hosted narrow-screen/list retest remains open; full company acceptance is UNPROVEN. See the combined checkpoint |
+| Exact code revision | Passing CI and reviewed changes for the deployed full SHA; merge status recorded separately | Corrected candidate `211bd88` merged through PR #25 at `328e88a` with identical Git trees. Candidate/main CI passed 858/858 and required gates; exact archive fresh/populated image checks passed locally. Homedev activation passed at 14:06:40 UTC on October 3; populated hosted slices passed. Full company acceptance remains UNPROVEN; subsequent pilot least-privilege work is a separate candidate; see the completion checkpoint |
+| Review deployment | Current release pointer, database migration and preserved synthetic records, trusted HTTPS and browser workflows | PASS for bounded synthetic review gates on `211bd88`: exact image/volume and pointer, 10/10 private and 9/9 public probes, HTTP 307/HTTPS, preserved original marker/tasks, signed-in narrow-screen controls and populated workflow slices. Native print and full company acceptance remain UNPROVEN. See the completion checkpoint |
 | Company approval | Approved homedev hosting, data classification, hostname and individual-password authentication; sponsor and support owner | UNPROVEN; see pilot approvals |
 | Pilot acceptance | Real participants complete the agreed workflows and record go/no-go | UNPROVEN |
 | Accounts | First Admin bootstrap and audit entry, Admin-created users, private delivery and handoff deletion, wrong-password denial, non-Admin 403, inactive-user 401, and rotation/removal rejecting an existing cookie | UNPROVEN on hosted company stack |
@@ -31,8 +31,11 @@ environment to `Production` would currently break sign-in. No Azure identity is 
 | Backup and recovery | Scheduled owner-only company dumps, approved encrypted off-host copy, retrieval and isolated restore drill; measured RPO/RTO accepted | UNPROVEN; do not equate a manual dump with scheduled recovery |
 | Operations | Existing host monitoring, actionable notification route, disk/capacity checks, daily Operations review and outage procedure | UNPROVEN |
 | Notifications | In-app delivery accepted; email remains Log mode unless an existing approved relay is configured | UNPROVEN acceptance; no email delivery claimed |
+| Database runtime | Migration/bootstrap account isolated from the ordinary API; observed app sessions/ACLs deny schema/trigger/audit mutation | Prepared and actual PG17/image rehearsal PASS locally; hosted T-09 remains UNPROVEN pending the next reviewed candidate activation |
 | Security and accessibility | Hosted role/privacy checks, cookie revocation, threat-model review and required accessibility checks | UNPROVEN final hosted acceptance |
 | Cutover | Reviewed SHA, pre-release dump, preserved previous image, health/browser verification and rollback rehearsal | UNPROVEN |
+
+Jay requested a separate **synthetic pilot rehearsal** with fictional users/projects. Its clean runtime is prepared, with activation pending. Rehearsal results cannot close company approval, real pilot acceptance or production deployment.
 
 ## Cutover and rollback
 

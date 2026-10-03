@@ -1,6 +1,6 @@
 # Completion audit and release checkpoint — 2026-10-03
 
-This record supersedes any claim that `26c0ae1` completes packets 025–033. That candidate passed its bounded CI/image checks and PR #24 merged, but subsequent source/specification review found required behavior still missing. Its activation is held. The latest verified live synthetic review release remains `02ca7cd9ae097867bcd4c11c0614bf8d0d9d1619`. A newer implementation commit is not evidence of deployment or company acceptance.
+This record supersedes any claim that `26c0ae1` completes packets 025–033. That candidate passed its bounded CI/image checks and PR #24 merged, but subsequent source/specification review found required behavior still missing. Its activation is held. The live synthetic review release is now `211bd88649e288484901aba6946fdd0e2e29dd17`, activated on 2026-10-03 at 14:06:40 UTC. The 06:55 checkpoint below is historical; the hosted checkpoint records subsequent evidence. A newer implementation commit is not evidence of deployment or company acceptance.
 
 ## Completed implementation slices
 
@@ -49,7 +49,7 @@ packet acceptance scenario has been performed by a company user.
 - The exact candidate is staged in both review and separate pilot release directories. Review runtime/data links
   are retained. Pilot runtime is empty; no company accounts, database or service were provisioned.
 
-## Remaining hosted and company acceptance
+## Remaining hosted and company acceptance at 06:55 UTC (superseded)
 
 - Operator activation of **211bd88**, private/public probes and final browser checks remain pending. Homedev still
   selects `02ca7cd`; the held `26c0ae1` must not be activated. The prepared hosted read checks refuse to run until
@@ -59,18 +59,74 @@ packet acceptance scenario has been performed by a company user.
 - Final hosted paging/action context, native print, keyboard and narrow-screen checks remain required. Mocked UI
   tests and image health do not close packet T006 or prove company acceptance.
 
+## Hosted synthetic checkpoint — 2026-10-03 15:25 UTC
+
+The operator activated executable **211bd88** at **14:06:40 UTC**. The exact image, retained
+`pm-tool-review-db` volume, private probes **10/10** and public probes **9/9** passed. The fresh pre-activation dump
+is private `data/backups/hub-review-20261003T140623986900866Z.dump`; the previous image remains available.
+The original T0001 comment marker, progress **70%** and row version **1**, and original T0002 dates/status/version
+were preserved in public API comparisons after activation and hosted fixture creation. The marker is a comment,
+not the task description. No original task, staffing, calendar or permission records were edited.
+
+All new hosted fixture records use `HOSTED-211bd88-20261003` labels. These are observed API/browser slices,
+not a blanket PASS for all 45 acceptance criteria or company pilot acceptance:
+
+| Packet | Observed hosted PASS | Remaining limits |
+|---|---|---|
+| 025 | Undated submit refused atomically; date mismatch exposed; source/proxy/recipient authority enforced; two independent receipts; accepted is distinct from incorporated; corrected B incorporated while head A; later publication reuses B and creates only the pending A-consumer assessment | Full restricted-viewer acceptance remains unproven |
+| 026–028 | Independent reviewer closes a finding after resolver response; self-review/reassignment denied; B supersedes round A; unissued stale A returns to Checking; issue B supersedes issued A while the complete immutable A record/export stays equal; stale issue fingerprint returns 409 without issue creation | Full access, checklist waiver, impact/adoption and browser matrices remain unproven |
+| 029 | New Production/Review reservations yield committed delta **19 h** (`max(12,8)+3+max(4,3)`); unknown estimate stays null; overload without a reason is refused without mutation; cancellation removes reservations but retains **11 h** forecast and unchanged task records; date-only edit withdraws confirmation, preserves old provenance and requires reconfirmation; stale person/date confirmation returns 409 unchanged, then refreshed confirmation passes | Availability overrides, simultaneous competition, full native UI and restricted-project matrix remain unproven |
+| 030 | Exact three-task drill-down; PM scope labels and saved private view; repeated meeting capture reuses one action with four links; Mark as reviewed changes review metadata without changing work/sign-offs; refreshed view reflects incorporated input | Native print/PDF and full export parity remain unproven |
+| 031–032 | Numeric basis without units refused; independent confirmation; two old-version consumers retained with two pending impacts after B; bounded assumption permission; independently verified constraint removal; performer signature and chair snapshot; withdrawal stays in frozen denominator | Actual expiry, five-item denominator and full conflict/adoption/browser matrices remain unproven |
+| 033 | Two disciplines see one issue/location ID; reverse station range and coordinate without CRS refused unchanged; independent evidence required before resolution; publishing B preserves closed issue and its A-document reference with pending impact | All location forms, multi-location grouping/export and product reference-kind decision remain unproven |
+
+Signed-in native browser checks passed for task dates at **1440, 390 and 320 px**: associated native inputs,
+32 px clear controls inside the viewport, Escape closes the picker/panel and restores task-title focus. No task values
+were changed. Taylor performed Accept/Incorporate and the coordination drill-down/saved view/action reuse in the
+browser. The submission register and B detail render the actual Superseded/Checking/Issued states and B manifest.
+Print fetches the complete context, but the native print preview could not be inspected with the available app
+controls; no print PASS is claimed.
+
+Private evidence: `data/hosted-acceptance-journal-211bd88.jsonl`, `hosted-original-records-211bd88.json`,
+`hosted-handoffs-211bd88.json`, `hosted-coordination-browser-211bd88.json`,
+`hosted-reviews-submissions-issues-211bd88.json`, `hosted-basis-readiness-211bd88.json`,
+`hosted-weekly-readiness-211bd88.json`, and `hosted-capacity-211bd88.json`. Partial harness runs are retained;
+use their journal and final successful evidence rather than treating corrected harness projection errors as app defects.
+These reports contain synthetic records only. Working credentials/session cookies, runtime files and dumps stay private.
+
+Jay requested synthetic users/projects instead of supplying real company participants. A **separate synthetic pilot
+rehearsal** is prepared at the pilot base, with its own Admin, private password/keys and port **3081**, no review seed
+or copied review accounts/data. Its interactive sudo activation is pending; the public review route remains on **3080**.
+This preparation cannot establish company participation or business acceptance.
+
+## Next pilot security candidate (not deployed)
+
+After 211 activation, T-09 preparation adds a separate runtime DB password/file/role and a bounded one-shot
+migration service. It does not change or activate staged 211. Ordinary API configuration excludes the database
+owner/bootstrap settings. Actual isolated PG17/Staging image checks passed: 29 migrations with no web host,
+8 denied DDL/role/audit mutations, individual sign-in, ordinary insert/update plus audit inserts, only
+`hub_pilot_app` sessions, no owner credential in the API and cookie/key persistence after restart.
+The apparent restart timeout was a checker error: Docker reassigned the ephemeral published port; refreshing that
+port made the unchanged image pass. Independent review identified candidate-stop and migration-container cleanup
+failures; both are corrected, a verifier-rejection stop regression is retained and failure-path re-review PASS. All 19 backup/pilot helper tests
+and 3 LocalAccounts tests passed at this checkpoint; exact new-candidate CI is still required.
+
+This addresses preparation for the database role gate; it does **not** implement PITR, a bounded encrypted off-host
+copy schedule or the 15-minute recovery target. Those remain explicit production gates.
+
 ## Separate release gates
 
 | Gate | Verdict | Limit |
 |---|---|---|
-| Corrected code and required CI | PASS, bounded | Independent changed-path review and candidate/main CI above; complete real-user acceptance remains open |
-| Merge | PASS | PR #25 merged at `328e88a`; its tree equals candidate `211bd88` |
-| Exact image and migration rehearsal | PASS locally | Fresh seed-free configuration and restored synthetic review snapshot in Colima; not homedev activation |
-| Current review deployment | PASS for `02ca7cd` only | Final candidate staged, activation and hosted retest pending |
-| Encrypted off-host recovery | PASS, manual | Approved review dump/config/verifiers/keys retrieved and restored in isolation; not automatic execution |
-| Scheduled recovery | UNPROVEN | First automatic review backup scheduled 2026-10-03 22:00 UTC; daily dumps do not meet the 15-minute production RPO |
+| Corrected code and required CI | PASS, bounded | Candidate/main CI 858/858; latest documentation follow-up and its merged-main CI also PASS; subsequent pilot database-role work is a separate uncommitted candidate |
+| Merge | PASS | PR #25 merged at `328e88a`; PR #26 documentation merged at `5b2631a`; executable remains 211bd88 |
+| Exact image and migration rehearsal | PASS locally | Fresh seed-free configuration and restored synthetic review snapshot in Colima |
+| Current review deployment | PASS for 211bd88 | Private/public probes and populated hosted slices above; all packet/company/native-print acceptance is not closed |
+| Encrypted off-host recovery | PASS, manual | Approved review dump/config/verifiers/keys retrieved and restored in isolation; earlier snapshot, not automatic execution or latest 29-migration retrieval |
+| Scheduled recovery | UNPROVEN | First automatic review backup due 2026-10-03 22:00 UTC; daily dumps FAIL the 15-minute/PITR requirement |
 | Monitoring | Prepared only | Specific Uptime Kuma save approval remains pending |
-| Company pilot | Prepared only | Separate base/runtime unprovisioned; real participants/projects and workflow acceptance pending |
-| Production | Prepared only | Company go/no-go, recovery targets, a separate runtime database role and activation/acceptance remain open |
+| Synthetic pilot rehearsal | Prepared only | Separate private runtime initialized; operator activation and fictional participant/project provisioning pending |
+| Company pilot acceptance | UNPROVEN | Synthetic rehearsal does not supply real participants, hosting/privacy approval or sponsor go/no-go |
+| Production | Prepared only | Company approval, recovery targets, hosted restricted database role, operations and cutover remain open |
 
 Homedev and individual passwords remain the chosen hosting/authentication direction. Azure and new paid services are not prerequisites. Never populate company pilot or production by restoring the review database.

@@ -88,6 +88,70 @@ public sealed class LocationIssueTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Verification_remains_independent_after_owner_reassignment()
+    {
+        var project = await d.Project();
+        var issue = await Issue(project.Id);
+        var id = issue.G("id");
+        var marc = d.User(TestData.Marc);
+        var omar = d.User(TestData.Omar);
+        var alex = d.User(TestData.Alex);
+
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = marc, status = "Proposed", note = "Appoint Marc", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = marc, status = "Verified", evidenceUrl = "https://review.example.test/packet033", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+
+        var version = await IssueVersion(id);
+        var refused = await f.As(TestData.Alex).Patch($"/api/v1/issues/{id}", new { ownerId = marc }, version);
+        Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
+        Assert.Equal(alex, f.Db(db => db.Issues.Single(x => x.Id == id).OwnerId));
+        Assert.Equal(version, await IssueVersion(id));
+
+        await f.As(TestData.Alex).Patch($"/api/v1/issues/{id}", new { ownerId = omar }, version).Result.Json(200);
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = marc, status = "Proposed", note = "Reverify after owner replacement", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = marc, status = "Verified", evidenceUrl = "https://review.example.test/packet033-recheck", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        (await f.As(TestData.Omar).Post($"/api/v1/issues/{id}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Independently reverified", rowVersion = await IssueVersion(id)
+        })).EnsureSuccessStatusCode();
+
+        var selfReview = await f.As(TestData.Admin).Put("/api/v1/admin/settings/allow_self_review", new { value = true });
+        selfReview.EnsureSuccessStatusCode();
+        try
+        {
+            var selfIssue = await Issue(project.Id);
+            var selfId = selfIssue.G("id");
+            await f.As(TestData.Pm).Post($"/api/v1/issues/{selfId}/verification", new
+            {
+                verifierId = alex, status = "Proposed", note = "Explicit self-review setting", rowVersion = await IssueVersion(selfId)
+            }).Result.Json(201);
+            await f.As(TestData.Alex).Post($"/api/v1/issues/{selfId}/verification", new
+            {
+                verifierId = alex, status = "Verified", evidenceUrl = "https://review.example.test/self-review", rowVersion = await IssueVersion(selfId)
+            }).Result.Json(201);
+            (await f.As(TestData.Alex).Post($"/api/v1/issues/{selfId}/transition", new
+            {
+                toStatus = "Resolved", resolution = "Self-review explicitly allowed", rowVersion = await IssueVersion(selfId)
+            })).EnsureSuccessStatusCode();
+        }
+        finally
+        {
+            (await f.As(TestData.Admin).Put("/api/v1/admin/settings/allow_self_review", new { value = false })).EnsureSuccessStatusCode();
+        }
+    }
+
+    [Fact]
     public async Task Location_document_and_independent_verification_are_scoped_and_gate_resolution()
     {
         var p = await d.Project();

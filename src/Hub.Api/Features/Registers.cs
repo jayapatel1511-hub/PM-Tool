@@ -559,6 +559,10 @@ public static class RegisterEndpoints
             await DeliverableEndpoints.ActivePerson(db, o, "ownerId");
             if (i.OwnerId != o)
             {
+                var allowSelfReview = (await store.Get(db)).AllowSelfReview;
+                var latestVerification = await db.IssueVerifications.Where(x => x.IssueId == i.Id).OrderByDescending(x => x.IssueRowVersion).FirstOrDefaultAsync();
+                Check.That(allowSelfReview || latestVerification is null || latestVerification.VerifierId != o,
+                    "ownerId", "issue.verifier_independent");
                 Check.That(!await db.IssueReferenceImpactAssessments.AnyAsync(a => a.IssueId == i.Id && a.Status == IssueReferenceImpactStatus.Pending && a.VerifierId == o),
                     "ownerId", "issue.verifier_independent");
                 foreach (var impact in await db.IssueReferenceImpactAssessments.Where(a => a.IssueId == i.Id && a.Status == IssueReferenceImpactStatus.Pending).ToListAsync())
@@ -600,7 +604,8 @@ public static class RegisterEndpoints
             var latestReferenceVersion = await db.IssueLocations.Where(x => x.IssueId == i.Id).Select(x => (int?)x.IssueRowVersion)
                 .Concat(db.IssueDocumentReferences.Where(x => x.IssueId == i.Id).Select(x => (int?)x.IssueRowVersion)).MaxAsync() ?? 0;
             var latestVerification = await db.IssueVerifications.Where(x => x.IssueId == i.Id).OrderByDescending(x => x.IssueRowVersion).FirstOrDefaultAsync();
-            var current = latestVerification?.Status == IssueVerificationStatus.Verified && latestVerification.IssueRowVersion > latestReferenceVersion;
+            var current = latestVerification?.Status == IssueVerificationStatus.Verified && latestVerification.IssueRowVersion > latestReferenceVersion &&
+                ((await store.Get(db)).AllowSelfReview || latestVerification.VerifierId != i.OwnerId);
             Check.That(current, "verification", "issue.verification_required");
         }
         var today = clock.Today(await store.Get(db));
@@ -700,12 +705,12 @@ public static class RegisterEndpoints
             .Select(x => (object)new { x.Id, x.VerifierId, x.Status, x.EvidenceUrl, x.Note, x.VerifiedAt, x.RowVersion }).ToListAsync();
     }
 
-    static async Task<IResult> AddIssueVerification(Guid id, IssueVerificationBody body, HttpContext http, Access access, HubDb db, TimeProvider clock, Notifier notify)
+    static async Task<IResult> AddIssueVerification(Guid id, IssueVerificationBody body, HttpContext http, Access access, HubDb db, TimeProvider clock, Notifier notify, SettingsStore store)
     {
         var (issue, project, ctx) = await LoadIssue(db, access, id);
         await Http.CheckVersion(db, http, issue, body.RowVersion);
         Check.OneOf(body.Status, IssueVerificationStatus.All, "status");
-        Check.That(body.VerifierId != issue.OwnerId && body.VerifierId != issue.CreatedBy && body.VerifierId != issue.RaisedById,
+        Check.That((await store.Get(db)).AllowSelfReview || body.VerifierId != issue.OwnerId && body.VerifierId != issue.CreatedBy && body.VerifierId != issue.RaisedById,
             "verifierId", "issue.verifier_independent");
         await Coordination.Person(db, project, body.VerifierId, "verifierId");
         if (body.Status == IssueVerificationStatus.Proposed)

@@ -102,6 +102,30 @@ public static class SubmissionReadiness
             if (head is null || head.CurrentRevisionId != input.SourceRevisionId)
                 Block(SubmissionCheckKind.CurrentRevision, input.Id, null, input.OwnerId, "submission.input_changed", $"/projects/{project.ProjectNumber}/changes");
         }
+        var basisUses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == package.ProjectId &&
+            (u.TargetType == "Deliverable" && ids.Contains(u.TargetId) || u.TargetType == "Task" && taskIds.Contains(u.TargetId)))
+            .Join(db.DesignBasisVersions.AsNoTracking(), u => u.VersionId, v => v.Id,
+                (u, v) => new { UseId = u.Id, u.VersionId, u.TargetType, u.TargetId, u.OwnerId, u.CreatedAt, v.EntryId, v.Status })
+            .OrderBy(u => u.EntryId).ThenBy(u => u.TargetType).ThenBy(u => u.TargetId).ThenBy(u => u.CreatedAt).ThenBy(u => u.UseId)
+            .ToListAsync();
+        foreach (var use in basisUses)
+            facts.Add(new { use.UseId, use.VersionId, use.TargetType, use.TargetId, use.OwnerId, use.CreatedAt, use.EntryId, use.Status });
+        foreach (var currentUses in basisUses.GroupBy(u => new { u.EntryId, u.TargetType, u.TargetId }))
+        {
+            var current = currentUses.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.UseId).First();
+            var versionIds = new[] { current.VersionId };
+            var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => c.ProjectId == package.ProjectId &&
+                (versionIds.Contains(c.LeftVersionId) || versionIds.Contains(c.RightVersionId))).AnyAsync(c => !c.Resolved);
+            var impacts = await db.BasisImpactAssessments.AsNoTracking().Where(a => a.ProjectId == package.ProjectId &&
+                a.BasisUseId == current.UseId).OrderBy(a => a.Id).ToListAsync();
+            foreach (var impact in impacts)
+                facts.Add(new { impact.Id, impact.RowVersion, impact.BasisUseId, impact.OldVersionId, impact.NewVersionId, impact.WithdrawalVersionId, impact.Status });
+            var pendingImpact = impacts.Any(a => a.Status == AssessmentStatus.Pending);
+            var ready = !conflicts && !pendingImpact && current.Status == BasisStatus.Confirmed;
+            if (!ready)
+                Block(SubmissionCheckKind.ChangeAssessment, impacts.FirstOrDefault(a => a.Status == AssessmentStatus.Pending)?.Id ?? current.VersionId,
+                    null, current.OwnerId, "submission.change_pending", $"/projects/{project.ProjectNumber}/design-basis?basis={current.EntryId}");
+        }
         return new SubmissionReadinessResult(blockers.Count == 0, Coordination.Hash(new { package.Id, package.RowVersion, package.ManifestVersion, Facts = facts }), blockers);
     }
 }

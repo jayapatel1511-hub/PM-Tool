@@ -245,5 +245,16 @@ public sealed class SubmissionApiTests(HubFactory f)
         await Post(TestData.Marc, root + $"/design-basis/{basisId}/versions/{proposedBasisVersionId}/confirm",
             new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(basisId), Version<DesignBasisVersion>(proposedBasisVersionId), "Confirmed updated basis"));
         Assert.Equal(SubmissionStatus.Checking, f.Db(db => db.SubmissionPackages.Single(p => p.Id == packageId).Status));
+        var fresh = await Get(TestData.Pm, $"{root}/submissions/{packageId}");
+        Assert.False(fresh["readiness"]!["ready"]!.GetValue<bool>());
+        Assert.Contains("submission.change_pending", fresh["readiness"]!["blockers"]!.ToJsonString());
+        var checking = await Get(TestData.Pm, root + "/submissions?status=Checking&page=1&pageSize=1");
+        Assert.Equal(1, checking["totalCount"]!.GetValue<int>());
+        Assert.Equal(packageId, checking["items"]![0]!["id"]!.GetValue<Guid>());
+        Assert.Equal(0, (await Get(TestData.Pm, root + "/submissions?status=Ready&page=1&pageSize=1"))["totalCount"]!.GetValue<int>());
+        await Post(TestData.Pm, $"{root}/submissions/{packageId}/issue", new SubmissionEndpoints.IssueBody(Guid.NewGuid(),
+            fresh["package"]!["rowVersion"]!.GetValue<int>(), 1, fresh["readiness"]!["fingerprint"]!.GetValue<string>(),
+            "Municipality", "https://example.test/transmittal", null), 422);
+        Assert.Empty(f.Db(db => db.SubmissionIssues.Where(i => i.PackageId == packageId).ToList()));
     }
 }

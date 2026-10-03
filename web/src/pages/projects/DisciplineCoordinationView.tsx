@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import { ErrorBanner, Loading } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { useItemPanel } from '@/components/hub/panel-host'
-import { useMe } from '@/lib/auth'
 import { get, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
@@ -23,14 +22,14 @@ type LinkedAction = { id: string; key: string; text: string; status: string; due
   sourceType: 'Handoff' | 'ChangeNotice'; sourceId: string; targetType: 'Task' | 'Deliverable'; targetId: string }
 type ChangeTarget = { changeNoticeId: string; targetType: 'Task' | 'Deliverable'; targetId: string }
 type UnavailableChangeTarget = { changeNoticeId: string; count: number }
-type UpcomingSubmission = { id: string; key: string; title: string; status: string; targetDate: string; coordinatorId: string; failingChecks: { id: string; kind: string; evidenceRule?: string }[] }
+type UpcomingSubmission = { id: string; key: string; title: string; status: string; effectiveStatus: string; targetDate: string; coordinatorId: string; failingChecks: { sourceId?: string; kind: string; code: string; message: string; sourcePath?: string }[] }
 type StaffingConflict = { id: string; key: string; targetType: string; targetId: string; description: string; neededBy: string; state: string; affectedOwnerId: string; removalOwnerId: string }
-type Data = { handoffs: Handoff[]; changes: Change[]; reviews: Review[]; linkedIssues: LinkedIssue[]; uses: InputUse[]; blockerGroups: BlockerGroup[]; usesTotal: number; linkedIssuesTotal: number; handoffsTotal: number; changesTotal: number; reviewsTotal: number; evaluatedAt: string;
+type Data = { handoffs: Handoff[]; outgoing: Handoff[]; incoming: Handoff[]; changes: Change[]; reviews: Review[]; linkedIssues: LinkedIssue[]; uses: InputUse[]; blockerGroups: BlockerGroup[]; usesTotal: number; linkedIssuesTotal: number; handoffsTotal: number; outgoingTotal: number; incomingTotal: number; changesTotal: number; reviewsTotal: number; evaluatedAt: string;
   startability: Startability[]; startabilityReadyTotal: number; startabilityFrom: string; startabilityTo: string;
   linkedActions: LinkedAction[]; changeTargets: ChangeTarget[]; unavailableChangeTargets: UnavailableChangeTarget[];
   usesPage: number; usesPageSize: number; linkedIssuesPage: number; linkedIssuesPageSize: number; changesPage: number; changesPageSize: number;
   startabilityTotal: number; startabilityPage: number; startabilityPageSize: number; upcomingSubmissions: UpcomingSubmission[]; upcomingSubmissionsTotal: number;
-  staffingConflicts: StaffingConflict[]; staffingConflictsTotal: number; page: number; pageSize: number }
+  staffingConflicts: StaffingConflict[]; staffingConflictsTotal: number; handoffPage: number; handoffPageSize: number; blockerGroupsTotal: number; page: number; pageSize: number }
 
 function Pager({ label, page, total, pageSize, onPage }: { label: string; page: number; total: number; pageSize: number; onPage: (page: number) => void }) {
   if (total <= pageSize) return null
@@ -54,7 +53,6 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   project: ProjectDetail; disciplineId?: string; meeting?: boolean; canCapture?: boolean;
   onCapture?: (label: string, links: { targetType: string; targetId: string }[], linkedActionIds: string[]) => void
 }) {
-  const me = useMe()
   const openPanel = useItemPanel()
   const [sp, setSp] = useSearchParams()
   const ownerId = sp.get('owner') ?? ''
@@ -83,12 +81,8 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   if (q.isPending) return <Loading rows={2} />
   if (q.error) return <section aria-label={t('dcv.scopeLabel')}>{filters}<ErrorBanner error={q.error} retry={() => q.refetch()} /></section>
   const d = q.data
-  const scopedOwnerId = ownerId || me.id
-  const inDateScope = (h: Handoff) => (!from || (h.promisedBy ?? h.neededBy) >= from) && (!to || (h.promisedBy ?? h.neededBy) <= to)
-  const outgoing = d.handoffs.filter((h) => h.status !== 'Cancelled' && h.status !== 'Incorporated' && (h.promisedBy || h.status === 'Draft') &&
-    (disciplineId ? h.sendingDisciplineId === disciplineId : h.sendingOwnerId === scopedOwnerId) && (!ownerId || h.sendingOwnerId === ownerId) && inDateScope(h))
-  const incoming = d.handoffs.filter((h) => ['Submitted', 'Clarification Requested', 'Returned', 'Accepted'].includes(h.status) &&
-    (disciplineId ? h.receivingDisciplineId === disciplineId : h.receivingOwnerId === scopedOwnerId) && (!ownerId || h.receivingOwnerId === ownerId) && inDateScope(h))
+  const outgoing = d.outgoing
+  const incoming = d.incoming
   const scoped = !!(ownerId || disciplineId) // every count below follows the selected discipline and owner
   const wide = scoped ? '' : ` · ${t('dcv.projectWide')}`
   const registerUrl = (pathname: string, panel?: string) => {
@@ -119,8 +113,8 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     {filters}
     {(from || to) && <p role="status" className="mb-3 rounded border border-warn/30 bg-warn-bg px-3 py-2 text-xs text-warn">{t('dcv.dateScopeNote')}</p>}
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-      {card('owe', t('dcv.owe'), outgoing.length, items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: `${tv(h.status)} · ${t('dcv.promisedDate')}: ${h.promisedBy ? fmtDate(h.promisedBy) : t('dcv.unavailable')} · ${t('dcv.neededDate')}: ${fmtDate(h.neededBy)}` })), 'handoffs'), 'handoffs')}
-      {card('waiting', t('dcv.waiting'), incoming.length, items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: tv(h.status) })), 'handoffs'), 'handoffs')}
+      {card('owe', t('dcv.owe'), d.outgoingTotal, <><>{items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: `${tv(h.status)} · ${t('dcv.promisedDate')}: ${h.promisedBy ? fmtDate(h.promisedBy) : t('dcv.unavailable')} · ${t('dcv.neededDate')}: ${fmtDate(h.neededBy)}` })), 'handoffs')}</><Pager label={t('dcv.owe')} page={d.handoffPage} total={d.outgoingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
+      {card('waiting', t('dcv.waiting'), d.incomingTotal, <><>{items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: tv(h.status) })), 'handoffs')}</><Pager label={t('dcv.waiting')} page={d.handoffPage} total={d.incomingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
       {card('using', `${t('dcv.using')}${wide}`, d.usesTotal, d.uses.length ? <><ul className="space-y-1">{d.uses.map(u => <li key={u.id}><span className="font-medium">{u.targetKey ?? t('dcv.unknownWork')}</span> · {u.targetName ?? ''} · {t('dcv.sourceRevision')}: {u.sourceKey ?? t('dcv.unavailable')} {u.revision ? `(${u.revision})` : ''}<span className="block text-xs text-muted-foreground">{u.intendedUse}</span></li>)}</ul><Pager label={t('dcv.using')} page={d.usesPage} total={d.usesTotal} pageSize={d.usesPageSize} onPage={setPage} /></> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
       {card('changed', `${t('dcv.changed')}${wide}`, d.changesTotal,
         d.changes.length ? <><ul className="space-y-2">{d.changes.map(c => <li key={c.id}>
@@ -158,10 +152,10 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     </section>
     <div className="mt-3 grid gap-3 md:grid-cols-2">
       <section aria-labelledby="dcv-submissions" className="rounded-md border bg-card p-3"><div className="flex items-center justify-between"><h2 id="dcv-submissions" className="font-medium">{t('dcv.upcomingSubmissions')}</h2><span className="rounded-full bg-muted px-2 text-sm tabular-nums">{d.upcomingSubmissionsTotal}</span></div>
-        {d.upcomingSubmissions.length ? <ul className="mt-2 space-y-2 text-sm">{d.upcomingSubmissions.map(s => <li key={s.id}><Link className="underline" to={`/projects/${project.projectNumber}/submissions?panel=SubmissionPackage:${s.id}`}>{s.key}</Link> · {s.title} · {tv(s.status)} · {fmtDate(s.targetDate)}{s.failingChecks.length > 0 && <span className="block text-warn">{t('dcv.failingChecks')}: {s.failingChecks.map(c => c.kind).join(', ')}</span>}</li>)}</ul> : <p className="mt-2 text-sm text-muted-foreground">{t('dcv.none')}</p>}
+        {d.upcomingSubmissions.length ? <><ul className="mt-2 space-y-2 text-sm">{d.upcomingSubmissions.map(s => <li key={s.id}><Link className="underline" to={`/projects/${project.projectNumber}/submissions?panel=SubmissionPackage:${s.id}`}>{s.key}</Link> · {s.title} · {tv(s.effectiveStatus)} · {fmtDate(s.targetDate)}{s.failingChecks.length > 0 && <span className="block text-warn">{t('dcv.failingChecks')}: {s.failingChecks.map(c => c.sourcePath ? <Link key={`${s.id}-${c.code}-${c.sourceId ?? 'none'}`} className="underline" to={c.sourcePath}>{c.kind}</Link> : c.kind)}</span>}</li>)}</ul><Pager label={t('dcv.upcomingSubmissions')} page={d.page} total={d.upcomingSubmissionsTotal} pageSize={d.pageSize} onPage={setPage} /></> : <p className="mt-2 text-sm text-muted-foreground">{t('dcv.none')}</p>}
       </section>
       <section aria-labelledby="dcv-staffing" className="rounded-md border bg-card p-3"><div className="flex items-center justify-between"><h2 id="dcv-staffing" className="font-medium">{t('dcv.staffingConflicts')}</h2><span className="rounded-full bg-muted px-2 text-sm tabular-nums">{d.staffingConflictsTotal}</span></div>
-        {d.staffingConflicts.length ? <ul className="mt-2 space-y-2 text-sm">{d.staffingConflicts.map(c => <li key={c.id}><Link className="underline" to={registerUrl(c.targetType === 'Task' ? 'tasks' : 'deliverables', `${c.targetType}:${c.targetId}`)}>{c.key}</Link> · {c.description} · {fmtDate(c.neededBy)}</li>)}</ul> : <p className="mt-2 text-sm text-muted-foreground">{t('dcv.none')}</p>}
+        {d.staffingConflicts.length ? <><ul className="mt-2 space-y-2 text-sm">{d.staffingConflicts.map(c => <li key={c.id}><Link className="underline" to={registerUrl(c.targetType === 'Task' ? 'tasks' : 'deliverables', `${c.targetType}:${c.targetId}`)}>{c.key}</Link> · {c.description} · {fmtDate(c.neededBy)}</li>)}</ul><Pager label={t('dcv.staffingConflicts')} page={d.page} total={d.staffingConflictsTotal} pageSize={d.pageSize} onPage={setPage} /></> : <p className="mt-2 text-sm text-muted-foreground">{t('dcv.none')}</p>}
       </section>
     </div>
     {d.blockerGroups.length > 0 && <section aria-labelledby="dcv-blockers" className="mt-3 rounded-md border bg-card p-3">
@@ -172,7 +166,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
           [{ targetType: 'Handoff', targetId: group.handoffId }, ...group.taskIds.map(id => ({ targetType: 'Task', targetId: id }))],
           existingActions('Handoff', group.handoffId).map(a => a.id))}>
           {t('dcv.captureAction')}</button>}
-      </li>)}</ul>
+      </li>)}</ul><Pager label={t('dcv.ws.linkedTaskBlockers')} page={d.page} total={d.blockerGroupsTotal} pageSize={d.pageSize} onPage={setPage} />
     </section>}
   </section>
 }

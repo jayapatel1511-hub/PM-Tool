@@ -10,6 +10,12 @@ namespace Hub.Api.Features;
 /// filtered source query; callers never have to infer a total from a capped register page.
 public static class DisciplineCoordinationEndpoints
 {
+    sealed record SubmissionFailingCheck(Guid? SourceId, string Kind, string Code, string Message, string? SourcePath);
+    sealed record SubmissionContextRow(Guid Id, string Key, string Title, string Status, string EffectiveStatus, DateOnly TargetDate,
+        Guid CoordinatorId, IReadOnlyList<SubmissionFailingCheck> FailingChecks);
+    sealed record StaffingContextRow(Guid Id, string Key, string TargetType, Guid TargetId, string Description, DateOnly NeededBy,
+        string State, Guid AffectedOwnerId, Guid RemovalOwnerId);
+
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/discipline-coordination", Get);
@@ -212,10 +218,16 @@ public static class DisciplineCoordinationEndpoints
         if (ownerId is { } submissionOwner)
             packages = packages.Where(p => p.CoordinatorId == submissionOwner || db.SubmissionChecks.Any(c => c.PackageId == p.Id &&
                 c.ManifestVersion == p.ManifestVersion && c.OwnerId == submissionOwner));
-        var submissionRows = await packages.OrderBy(p => p.TargetDate).ThenBy(p => p.Key)
-            .Select(p => new { p.Id, p.Key, p.Title, p.Status, p.TargetDate, p.CoordinatorId,
-                FailingChecks = db.SubmissionChecks.Where(c => c.PackageId == p.Id && c.ManifestVersion == p.ManifestVersion && c.Required && c.Status == SubmissionCheckStatus.Pending)
-                    .Select(c => new { c.Id, c.Kind, c.EvidenceRule }).ToList() }).ToListAsync();
+        var packageRows = await packages.OrderBy(p => p.TargetDate).ThenBy(p => p.Key).ToListAsync();
+        var submissionRows = new List<SubmissionContextRow>();
+        foreach (var package in packageRows)
+        {
+            var readiness = await SubmissionReadiness.Evaluate(db, package);
+            var effectiveStatus = package.Status is SubmissionStatus.Checking or SubmissionStatus.Ready
+                ? readiness.Ready ? SubmissionStatus.Ready : SubmissionStatus.Checking : package.Status;
+            submissionRows.Add(new(package.Id, package.Key, package.Title, package.Status, effectiveStatus, package.TargetDate,
+                package.CoordinatorId, readiness.Blockers.Select(b => new SubmissionFailingCheck(b.SourceId, b.Kind, b.Code, b.Message, b.SourcePath)).ToArray()));
+        }
 
         var staffing = db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId && c.Category == "Capacity" &&
             c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled && c.NeededBy >= submissionFirst && c.NeededBy <= submissionLast);
@@ -224,7 +236,7 @@ public static class DisciplineCoordinationEndpoints
                 (c.TargetType == ItemType.Deliverable && db.Deliverables.Any(d => d.Id == c.TargetId && d.ProjectDisciplineId == staffingDiscipline)));
         if (ownerId is { } staffingOwner) staffing = staffing.Where(c => c.AffectedOwnerId == staffingOwner || c.RemovalOwnerId == staffingOwner);
         var staffingRows = await staffing.OrderBy(c => c.NeededBy).ThenBy(c => c.Key)
-            .Select(c => new { c.Id, c.Key, c.TargetType, c.TargetId, c.Description, c.NeededBy, c.State, c.AffectedOwnerId, c.RemovalOwnerId })
+            .Select(c => new StaffingContextRow(c.Id, c.Key, c.TargetType, c.TargetId, c.Description, c.NeededBy, c.State, c.AffectedOwnerId, c.RemovalOwnerId))
             .ToListAsync();
         var startability = await Startability(projectId, disciplineId, ownerId, from, to, today,
             lookaheadDays, evaluatedAt, db, settings);
@@ -260,12 +272,20 @@ public static class DisciplineCoordinationEndpoints
         return new
         {
             EvaluatedAt = evaluatedAt,
-            Handoffs = handoffRows,
-            Outgoing = outgoing,
-            Incoming = incoming,
-            ChangeTargets = changeTargets,
-            UnavailableChangeTargets = unavailableChangeTargets,
-            Reviews = reviewRows,
+            Handoffs = PageRows(handoffRows, paged, pg, size),
+            Outgoing = PageRows(outgoing, paged, pg, size),
+            Incoming = PageRows(incoming, paged, pg, size),
+            OutgoingTotal = outgoing.Count,
+            IncomingTotal = incoming.Count,
+            HandoffPage = paged ? pg : 1,
+            HandoffPageSize = paged ? size : handoffRows.Count,
+            ChangeTargets = PageRows(changeTargets, paged, pg, size),
+            UnavailableChangeTargets = PageRows(unavailableChangeTargets, paged, pg, size),
+            ChangeTargetsTotal = changeTargets.Count,
+            UnavailableChangeTargetsTotal = unavailableChangeTargets.Count,
+            Reviews = PageRows(reviewRows, paged, pg, size),
+            ReviewsPage = paged ? pg : 1,
+            ReviewsPageSize = paged ? size : reviewRows.Count,
             Uses = PageRows(useRows, paged, pg, size),
             UsesTotal = useRows.Count,
             UsesPage = paged ? pg : 1,
@@ -280,7 +300,8 @@ public static class DisciplineCoordinationEndpoints
             ChangesPage = paged ? pg : 1,
             ChangesPageSize = paged ? size : changeRows.Count,
             ReviewsTotal = reviewRows.Count,
-            BlockerGroups = blockerGroups,
+            BlockerGroups = PageRows(blockerGroups, paged, pg, size),
+            BlockerGroupsTotal = blockerGroups.Count,
             Startability = PageRows(startability.Rows, paged, pg, size),
             StartabilityTotal = startability.Rows.Count,
             StartabilityPage = paged ? pg : 1,
@@ -288,10 +309,11 @@ public static class DisciplineCoordinationEndpoints
             StartabilityFrom = startability.From,
             StartabilityTo = startability.To,
             StartabilityReadyTotal = startability.Rows.Count(r => r.State == ReadinessState.Ready),
-            LinkedActions = linkedActions,
-            UpcomingSubmissions = submissionRows,
+            LinkedActions = PageRows(linkedActions, paged, pg, size),
+            LinkedActionsTotal = linkedActions.Count,
+            UpcomingSubmissions = PageRows(submissionRows, paged, pg, size),
             UpcomingSubmissionsTotal = submissionRows.Count,
-            StaffingConflicts = staffingRows,
+            StaffingConflicts = PageRows(staffingRows, paged, pg, size),
             StaffingConflictsTotal = staffingRows.Count,
             Page = paged ? pg : 1,
             PageSize = paged ? size : 0,

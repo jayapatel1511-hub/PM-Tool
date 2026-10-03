@@ -34,6 +34,12 @@ public sealed class DisciplineCoordinationTests(HubFactory f)
         foreach (var (who, task) in new[] { (TestData.Omar, electricalTask.G("id")), (TestData.Marc, civilTask.G("id")) })
             await f.As(who).Post($"{root}/input-uses", new ChangeEndpoints.AdoptBody(Guid.NewGuid(), "Task", task, Rv<WorkTask>(task), a, a, null,
                 "Coordinate the corridor", "Incorporated into design basis")).Result.Json();
+        for (var i = 1; i <= 3; i++)
+        {
+            var task = await d.NewTask(p.Id, TestData.Omar, new { name = $"Service alignment {i}", assigneeId = d.User(TestData.Omar), dueDate = $"2026-09-{20 + i}" }, "Electrical");
+            await f.As(TestData.Omar).Post($"{root}/input-uses", new ChangeEndpoints.AdoptBody(Guid.NewGuid(), "Task", task.G("id"), Rv<WorkTask>(task.G("id")), a, a, null,
+                "Coordinate the corridor", "Incorporated into design basis")).Result.Json();
+        }
         var notice = (await f.As(TestData.Alex).Post($"{root}/source-revisions", Revision("B", a)).Result.Json()).G("id");
         await f.As(TestData.Alex).Post($"{root}/changes/{notice}/publish", new ChangeEndpoints.PublishBody(Guid.NewGuid(), Rv<ChangeNotice>(notice), Head(), null)).Result.Json();
         var omars = f.Db(db => db.ChangeAssessments.Single(x => x.ChangeNoticeId == notice && x.TargetId == electricalTask.G("id")));
@@ -45,32 +51,35 @@ public sealed class DisciplineCoordinationTests(HubFactory f)
         // Project-wide: the open notice with both assessments pending, one acknowledged; an unpublished draft is not yet a change.
         var all = await f.As(TestData.Pm).GetAsync($"{root}/discipline-coordination").Result.Json();
         Assert.Equal((notice, 1), (Row(all).G("id"), all.I("changesTotal")));
-        Assert.Equal((2, 1, 2), Counts(Row(all)));
+        Assert.Equal((5, 1, 5), Counts(Row(all)));
         Assert.NotEqual(notice, draft);
         Assert.Equal("Draft", f.Db(db => db.ChangeNotices.Single(c => c.Id == draft).Status));
 
         // Civil issued it and holds one unacknowledged assessment; Electrical's one is acknowledged; each states the project's two.
         var civilView = await f.As(TestData.Marc).GetAsync($"{root}/discipline-coordination?disciplineId={civil}").Result.Json();
-        Assert.Equal((1, 0, 2), Counts(Row(civilView)));
-        Assert.Equal((1, 1, 2), Counts(Row(await f.As(TestData.Omar).GetAsync($"{root}/discipline-coordination?disciplineId={electrical}").Result.Json())));
-        Assert.Equal((1, 1, 2), Counts(Row(await f.As(TestData.Pm).GetAsync($"{root}/discipline-coordination?ownerId={d.User(TestData.Omar)}").Result.Json())));
+        Assert.Equal((1, 0, 5), Counts(Row(civilView)));
+        Assert.Equal((4, 1, 5), Counts(Row(await f.As(TestData.Omar).GetAsync($"{root}/discipline-coordination?disciplineId={electrical}").Result.Json())));
+        Assert.Equal((4, 1, 5), Counts(Row(await f.As(TestData.Pm).GetAsync($"{root}/discipline-coordination?ownerId={d.User(TestData.Omar)}").Result.Json())));
 
         // My Work answers the question with the same rows for the same scope (its card count and CSV read these rows).
         var workspace = await f.As(TestData.Marc).GetAsync($"/api/v1/discipline-coordination?projectId={p.Id}&disciplineId={await d.Discipline("Civil")}").Result.Json();
         Assert.Equal(civilView["changes"]!.ToJsonString(), Assert.Single(workspace["projects"]!.AsArray())!["data"]!["changes"]!.ToJsonString());
 
         // Input uses name the consuming work and the source revision they use.
-        Assert.Equal(new[] { civilTask.S("key"), electricalTask.S("key") }.Order(), all["uses"]!.AsArray().Select(u => u!.S("targetKey")).Order());
+        Assert.Equal(5, all.I("usesTotal"));
+        Assert.Equal(5, all["uses"]!.AsArray().Count);
+        Assert.Contains(civilTask.S("key"), all["uses"]!.AsArray().Select(u => u!.S("targetKey")));
+        Assert.Contains(electricalTask.S("key"), all["uses"]!.AsArray().Select(u => u!.S("targetKey")));
         var civilUse = Assert.Single(civilView["uses"]!.AsArray())!;
         Assert.Equal((civilTask.S("key"), "Grading tie-in", "A", f.Db(db => db.Deliverables.Single(x => x.Id == survey).Key)),
             (civilUse.S("targetKey"), civilUse.S("targetName"), civilUse.S("revision"), civilUse.S("sourceKey")));
 
         // Packet 030 bounded projection: a populated second page keeps the exact filtered total and source revision row.
-        var pageTwo = await f.As(TestData.Pm).GetAsync($"{root}/discipline-coordination?page=2&pageSize=1").Result.Json();
-        Assert.Equal(2, pageTwo.I("usesTotal"));
-        Assert.Equal((2, 1), (pageTwo.I("usesPage"), pageTwo.I("usesPageSize")));
-        var secondUse = Assert.Single(pageTwo["uses"]!.AsArray())!;
-        Assert.Equal("A", secondUse.S("revision"));
-        Assert.Equal(civilTask.S("key"), secondUse.S("targetKey"));
+        var pageThree = await f.As(TestData.Pm).GetAsync($"{root}/discipline-coordination?page=3&pageSize=2").Result.Json();
+        Assert.Equal(5, pageThree.I("usesTotal"));
+        Assert.Equal((3, 2), (pageThree.I("usesPage"), pageThree.I("usesPageSize")));
+        var lastUse = Assert.Single(pageThree["uses"]!.AsArray())!;
+        Assert.Equal("A", lastUse.S("revision"));
+        Assert.False(string.IsNullOrWhiteSpace(lastUse.S("targetKey")));
     }
 }

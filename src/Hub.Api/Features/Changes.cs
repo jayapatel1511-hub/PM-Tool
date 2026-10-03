@@ -327,7 +327,7 @@ public static class ChangeEndpoints
     static async Task<Coordination.Result> DecideIssueImpact(Guid id, Guid impactId, IssueImpactBody body, Access access, HubDb db, TimeProvider clock)
     {
         var (_, project, _) = await RegisterEndpoints.LoadIssue(db, access, id);
-        return await Coordination.Run(project.Id, body.RequestId, new { operation = "issue.reference_impact", id, impactId, body }, access, db, clock, async (p, _) => {
+        return await Coordination.Run(project.Id, body.RequestId, new { operation = "issue.reference_impact", id, impactId, body }, access, db, clock, async (p, ctx) => {
             var issue = await db.Issues.SingleOrDefaultAsync(i => i.ProjectId == p.Id && i.Id == id) ?? throw ApiException.NotFound();
             var impact = await db.IssueReferenceImpactAssessments.SingleOrDefaultAsync(a => a.ProjectId == p.Id && a.IssueId == id && a.Id == impactId)
                 ?? throw ApiException.NotFound();
@@ -336,12 +336,13 @@ public static class ChangeEndpoints
             Check.OneOf(body.Disposition, IssueReferenceImpactDisposition.All, "disposition");
             var reason = Check.Reason(body.Reason);
             var now = clock.GetUtcNow();
-            if (access.Me.Id == impact.OwnerId && issue.OwnerId == access.Me.Id)
+            // The named owner and verifier decide only while they are on the team (a leaver keeps project read access).
+            if (access.Me.Id == impact.OwnerId && issue.OwnerId == access.Me.Id && ctx.IsMember)
             {
                 Check.That(impact.OwnerDisposition is null, "disposition", "issue.reference_impact_decided");
                 impact.OwnerDisposition = body.Disposition; impact.OwnerReason = reason; impact.OwnerDecidedBy = access.Me.Id; impact.OwnerDecidedAt = now;
             }
-            else if (impact.VerifierId == access.Me.Id && issue.OwnerId != access.Me.Id)
+            else if (impact.VerifierId == access.Me.Id && issue.OwnerId != access.Me.Id && ctx.IsMember)
             {
                 Check.That(impact.VerifierDisposition is null, "disposition", "issue.reference_impact_decided");
                 impact.VerifierDisposition = body.Disposition; impact.VerifierReason = reason; impact.VerifierDecidedBy = access.Me.Id; impact.VerifierDecidedAt = now;

@@ -317,6 +317,32 @@ public sealed class ReviewChangeTests(HubFactory f)
         Assert.Equal(IssueStatus.InProgress, f.Db(db => db.Issues.Single(i => i.Id == issueId).Status));
     }
     [Fact]
+    public async Task Named_owner_and_verifier_removed_from_the_team_cannot_decide_a_reference_impact()
+    {
+        var s = await New();
+        var issue = await Post(TestData.Alex, Root(s) + "/issues", new { title = "Reference held by leavers", severity = "High", ownerId = data.User(TestData.Alex), projectDisciplineId = s.Civil }, 201);
+        var issueId = issue.G("id");
+        int IssueVersion() => f.Db(db => db.Issues.Single(i => i.Id == issueId).RowVersion);
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/documents", new { kind = "Drawing", identifier = "survey", revision = "A", sourceUrl = "https://example.test/A.pdf", isAvailable = true, rowVersion = IssueVersion() }, 201);
+        await Post(TestData.Pm, $"/api/v1/issues/{issueId}/verification", new { verifierId = data.User(TestData.Marc), status = "Proposed", note = "Appoint independent verifier", rowVersion = IssueVersion() }, 201);
+        await Post(TestData.Marc, $"/api/v1/issues/{issueId}/verification", new { verifierId = data.User(TestData.Marc), status = "Verified", evidenceUrl = "https://example.test/evidence", rowVersion = IssueVersion() }, 201);
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/transition", new { toStatus = "Resolved", resolution = "Closed against revision A", rowVersion = IssueVersion() });
+        await Publish(s, await Notice(s));
+        var impact = Assert.Single((await Get(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts")).AsArray())!;
+        // The owner and the verifier leave the team (the Civil lead's lead role goes with his membership); the project stays open to them.
+        foreach (var who in new[] { TestData.Alex, TestData.Marc })
+        {
+            var member = f.Db(db => db.ProjectMembers.Single(m => m.ProjectId == s.P.Id && m.UserId == data.User(who) && m.RemovedAt == null).Id);
+            (await f.As(TestData.Pm).DeleteAsync($"{Root(s)}/members/{member}?reason=Left%20the%20team")).EnsureSuccessStatusCode();
+        }
+        foreach (var who in new[] { TestData.Alex, TestData.Marc })
+            await Post(who, $"/api/v1/issues/{issueId}/reference-impacts/{impact.G("id")}",
+                new ChangeEndpoints.IssueImpactBody(Guid.NewGuid(), impact.I("rowVersion"), "Unaffected", "Decided after leaving the team"), 403);
+        var after = Assert.Single((await Get(TestData.Pm, $"/api/v1/issues/{issueId}/reference-impacts")).AsArray())!;
+        Assert.Null(after["ownerDisposition"]);
+        Assert.Null(after["verifierDisposition"]);
+    }
+    [Fact]
     public async Task Removing_a_manifest_deliverable_requires_impact_review_and_releases_its_issue_gate()
     {
         var s = await New();

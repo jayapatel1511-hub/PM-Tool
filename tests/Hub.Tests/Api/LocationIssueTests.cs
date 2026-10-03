@@ -69,6 +69,25 @@ public sealed class LocationIssueTests(HubFactory f)
     }
 
     [Fact]
+    public async Task An_issue_creator_removed_from_the_team_cannot_appoint_a_verifier()
+    {
+        var project = await d.Project();
+        var issueId = (await Issue(project.Id)).G("id"); // raised by Alex, a Civil team member
+        await f.DbAsync(async db =>
+        {
+            var alex = await db.ProjectMembers.SingleAsync(m => m.ProjectId == project.Id && m.UserId == d.User(TestData.Alex) && m.RemovedAt == null);
+            alex.RemovedAt = f.Clock.GetUtcNow();
+            return await db.SaveChangesAsync();
+        });
+        var refused = await f.As(TestData.Alex).Post($"/api/v1/issues/{issueId}/verification", new
+        {
+            verifierId = d.User(TestData.Marc), status = "Proposed", note = "Appointed after leaving the team", rowVersion = await IssueVersion(issueId)
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, refused.StatusCode);
+        Assert.False(await f.DbAsync(db => db.IssueVerifications.AnyAsync(v => v.IssueId == issueId)));
+    }
+
+    [Fact]
     public async Task Location_document_and_independent_verification_are_scoped_and_gate_resolution()
     {
         var p = await d.Project();

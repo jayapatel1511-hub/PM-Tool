@@ -152,6 +152,44 @@ public sealed class LocationIssueTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Legacy_owner_change_to_verifier_cannot_resolve_and_does_not_write_history()
+    {
+        var project = await d.Project();
+        var issue = await Issue(project.Id);
+        var id = issue.G("id");
+        var verifier = d.User(TestData.Marc);
+
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = verifier, status = "Proposed", note = "Appoint verifier", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = verifier, status = "Verified", evidenceUrl = "https://review.example.test/legacy", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+
+        await f.DbAsync(async db =>
+        {
+            db.Issues.Single(x => x.Id == id).OwnerId = verifier;
+            return await db.SaveChangesAsync();
+        });
+        var version = await IssueVersion(id);
+        var history = f.Db(db => db.ActivityLog.Count(x => x.ItemId == id));
+
+        var refused = await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Must remain open", rowVersion = version
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
+        var current = f.Db(db => db.Issues.Single(x => x.Id == id));
+        Assert.Equal("Open", current.Status);
+        Assert.Equal(verifier, current.OwnerId);
+        Assert.Equal(version, current.RowVersion);
+        Assert.Equal(history, f.Db(db => db.ActivityLog.Count(x => x.ItemId == id)));
+    }
+
+    [Fact]
     public async Task Location_document_and_independent_verification_are_scoped_and_gate_resolution()
     {
         var p = await d.Project();

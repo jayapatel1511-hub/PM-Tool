@@ -5,10 +5,11 @@ paid service is authorized for this release. Existing Azure templates remain unu
 production gates. Use `pm.engcalchub.com`, the existing Cloudflare tunnel infrastructure and individual passwords
 with credentials outside Git. This document records preparation, not deployment or company acceptance.
 
-The public review remains `211bd88649e288484901aba6946fdd0e2e29dd17` on `3080`. The separate private synthetic pilot
-uses `3bfea2328aae1421300f81979ceebc7d5be6b6b1` on `3081`; PR #30 merged at `d0c2ab7179eba47014e821f13b5fbd19bcaeb06d`,
-candidate/main CI passed 858 tests, and the 30-user/10-project rehearsal passed its bounded sign-in, project-access,
-logical-restore and paused native-PITR checks. This does not make production live or establish company acceptance.
+Both public review (`3080`) and the separate private synthetic pilot (`3081`) use executable
+`ac494a8ba70d50517f540ad7e0acced85d84897e`. The current location checkpoint below records merged CI,
+activation and live browser/export evidence. The 18:24 30-user/10-project rehearsal on `3bfea232` passed
+its bounded sign-in, project-access, logical-restore and paused native-PITR checks. That historical drill was
+not repeated for this client form release. Neither result makes production live or establishes company acceptance.
 
 ## Deployment and data boundary
 
@@ -22,12 +23,22 @@ local passwords in `Production`. A business production release and that runtime 
 facts. Keep the reviewed configuration until its security controls and company acceptance are proven; setting the
 environment to `Production` would currently break sign-in. No Azure identity is required to use local accounts.
 
+## Current location release checkpoint — 2026-10-03 19:33 UTC
+
+Both isolated homedev runtimes now use executable `ac494a8ba70d50517f540ad7e0acced85d84897e`: public synthetic review on loopback `3080` at `https://pm.engcalchub.com`, and private synthetic pilot on loopback `3081`. PR #31 merged at `1175598d732ab890b48fef18ada32ae22b86e200`; candidate/main trees equal `3d8ac30d508340c7fea4aae57636f5634321d633`. Candidate CI `37146135878` and merged-main CI `37146643841` passed, including 858 API/rules tests and the three browser suites.
+
+The operator log `data/location-activation-ac494a8b-20261003T191817077097641Z.log` records review private probes 10/10, review public probes 9/9, pilot private probes 10/10, and both final current pointers. A subsequent read-only public HTTPS check confirmed the original review persistence marker and the two original task progress/versions/dates unchanged (`pm-tool/data/hosted-preservation-ac494a8b.json`). The pilot remains 30 active fictional users and 10 Setup projects in 10 actual categories. The six original password verifiers, the 24 newly prepared password verifiers and both runtime configurations are preserved. No review database, credentials or protection keys were copied into the pilot.
+
+Public signed-in browser acceptance on this executable created only the labelled synthetic issue `SYNTH-GATES-1003-I01`. Building (site area, building, level, room and asset), Alignment (12.25–18.75 m), Coordinate (fictional decimal X/Y/Z, EPSG:26920, m) and SiteArea saved and survived full reload. A fresh HTTPS API session then checked the exact persisted values and null inapplicable fields; CSV and Excel each retained all four locations in one complete cell. Credential-free evidence is `pm-tool/data/hosted-location-ac494a8b.json`. The browser download-event capture timed out; these export PASS results cover actual HTTPS export responses, not a confirmed native browser download.
+
+Both system-level backup timers are active, due at 22:00 UTC (review) and 22:15 UTC (pilot) on October 3; their `LastTriggerUSec` values are still empty. First automatic execution remains **UNPROVEN**. This client form release did not repeat the 18:24 native pilot PITR drill or the earlier review workflow slices. Full packet acceptance, native print, off-host WAL replay/full application DR, accepted RPO/RTO, real company acceptance and production deployment remain **UNPROVEN**. No Azure deployment or new paid service was introduced.
+
 ## Release gates
 
 | Gate | Evidence required | Current status |
 |---|---|---|
-| Exact code revision | Passing CI and reviewed changes for the deployed full SHA; merge status recorded separately | Public review candidate `211bd88` merged through PR #25 at `328e88a` with identical Git trees; its bounded hosted review evidence remains historical/current for that public stack. Separate private pilot source `3bfea232` merged through PR #30 at `d0c2ab7`, with candidate/main CI 858/858. Full company acceptance remains UNPROVEN; see the completion checkpoint |
-| Review deployment | Current release pointer, database migration and preserved synthetic records, trusted HTTPS and browser workflows | PASS for bounded synthetic review gates on `211bd88`: exact image/volume and pointer, 10/10 private and 9/9 public probes, HTTP 307/HTTPS, preserved original marker/tasks, signed-in narrow-screen controls and populated workflow slices. Native print and full company acceptance remain UNPROVEN. See the completion checkpoint |
+| Exact code revision | Passing CI and reviewed changes for the deployed full SHA; merge status recorded separately | Both current executables `ac494a8ba70d50517f540ad7e0acced85d84897e`, PR #31 merged at `1175598d732ab890b48fef18ada32ae22b86e200`, equal trees; candidate CI `37146135878` and main CI `37146643841` PASS including 858 tests. The `211bd88` / `3bfea232` workflow and recovery results below are historical. Full company acceptance remains UNPROVEN |
+| Review deployment | Current release pointer, database migration and preserved synthetic records, trusted HTTPS and browser workflows | PASS for current `ac494a8b` pointers, 10/10 private and 9/9 public probes, and the live location checks above. Historical `211bd88` checks covered exact image/volume, HTTP 307/HTTPS, preserved original marker/tasks, signed-in narrow-screen controls and populated workflow slices. Native print and full company acceptance remain UNPROVEN. See the completion checkpoint |
 | Company approval | Approved homedev hosting, data classification, hostname and individual-password authentication; sponsor and support owner | UNPROVEN; see pilot approvals |
 | Pilot acceptance | Real participants complete the agreed workflows and record go/no-go | UNPROVEN |
 | Accounts | First Admin bootstrap and audit entry, Admin-created users, private delivery and handoff deletion, wrong-password denial, non-Admin 403, inactive-user 401, and rotation/removal rejecting an existing cookie | UNPROVEN on hosted company stack |

@@ -70,6 +70,15 @@ public sealed class CoordinationDigestTests(HubFactory f)
         Assert.DoesNotContain((await Build())!.Sections, s => s.Code == "issueVerifications");
         await f.DbAsync(async other =>
         {
+            var previous = await other.ReadinessExceptions.SingleAsync(e => e.ProjectId == project.Id);
+            other.ReadinessExceptions.Add(new ReadinessException { ProjectId = project.Id, AssessmentId = previous.AssessmentId,
+                BasisVersionId = previous.BasisVersionId, ApprovedBy = pm, VerifierId = pm,
+                ExpiresOn = today.AddDays(2), LimitedWork = "Replacement approval", Risk = "Updated scope" });
+            return await other.SaveChangesAsync();
+        });
+        Assert.DoesNotContain((await Build())!.Sections, s => s.Code == "readinessExceptions");
+        await f.DbAsync(async other =>
+        {
             (await other.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted;
             (await other.ProjectMembers.SingleAsync(m => m.ProjectId == project.Id && m.UserId == me)).RemovedAt = f.Clock.Now;
             return await other.SaveChangesAsync();

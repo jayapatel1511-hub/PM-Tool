@@ -191,7 +191,9 @@ public static class Digest
                 (v, i) => new { v, i.Id, i.Key, i.Title, i.TargetResolutionDate }).OrderBy(x => x.TargetResolutionDate).ThenBy(x => x.v.Id).ToListAsync();
         var issueVerifications = Make("issueVerifications", verificationRows.Select(x => new Row(x.v.Id, x.Key, x.Title, Num(x.v.ProjectId),
             Text.Get("digest.coordination_detail", x.v.Status, D(x.TargetResolutionDate)), $"{baseUrl}/projects/{Num(x.v.ProjectId)}/issues?panel=Issue:{x.Id}")));
-        var exceptionRows = await db.ReadinessExceptions.AsNoTracking().Where(e => pids.Contains(e.ProjectId) && e.VerifierId == userId && e.ExpiresOn >= today)
+        var exceptionRows = await db.ReadinessExceptions.AsNoTracking().Where(e => pids.Contains(e.ProjectId) && e.VerifierId == userId && e.ExpiresOn >= today
+            && e.Id == db.ReadinessExceptions.Where(latest => latest.AssessmentId == e.AssessmentId)
+                .OrderByDescending(latest => latest.CreatedAt).ThenByDescending(latest => latest.Id).Select(latest => latest.Id).First())
             .Join(db.ReadinessAssessments, e => e.AssessmentId, a => a.Id, (e, a) => new { e, a.TargetType, a.TargetId }).OrderBy(x => x.e.ExpiresOn).ThenBy(x => x.e.Id).ToListAsync();
         var readinessExceptions = Make("readinessExceptions", exceptionRows.Select(x => new Row(x.e.Id, null, x.e.LimitedWork, Num(x.e.ProjectId),
             Text.Get("digest.exception_detail", D(x.e.ExpiresOn)), x.TargetType == "Task" ? TaskLink(x.e.ProjectId, x.TargetId) : DelLink(x.e.ProjectId, x.TargetId))));

@@ -55,14 +55,20 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
             if (app)
             {
                 var collapse = $"{eventType}:{item.ItemId}:{actor}";
-                var existing = await db.Notifications.Where(n => n.UserId == u.Id && n.CollapseKey == collapse && n.ReadAt == null && n.UpdatedAt >= collapseSince)
-                    .OrderByDescending(n => n.UpdatedAt).FirstOrDefaultAsync();
+                var existing = db.Notifications.Local.Where(n => n.UserId == u.Id && n.CollapseKey == collapse && n.ReadAt == null && n.UpdatedAt >= collapseSince)
+                    .OrderByDescending(n => n.UpdatedAt).FirstOrDefault()
+                    ?? await db.Notifications.Where(n => n.UserId == u.Id && n.CollapseKey == collapse && n.ReadAt == null && n.UpdatedAt >= collapseSince)
+                        .OrderByDescending(n => n.UpdatedAt).FirstOrDefaultAsync();
                 if (existing is not null)
                 {
-                    existing.Count++;
-                    existing.Title = Text.Get("notify.collapsed", title, existing.Count);
-                    existing.UpdatedAt = now;
-                    existing.CorrelationId = audit.CorrelationId;
+                    // Source/review invalidation can reach the same recipient twice in one command.
+                    if (existing.CorrelationId != audit.CorrelationId)
+                    {
+                        existing.Count++;
+                        existing.Title = Text.Get("notify.collapsed", title, existing.Count);
+                        existing.UpdatedAt = now;
+                        existing.CorrelationId = audit.CorrelationId;
+                    }
                 }
                 else
                     db.Notifications.Add(new Notification
@@ -75,7 +81,8 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
             if (mail && !string.IsNullOrEmpty(u.Email))
             {
                 var dedup = $"{eventType}:{item.ItemId}:{u.Id}";
-                if (await db.Emails.AnyAsync(e => e.DedupKey == dedup && e.CreatedAt >= dedupSince)) continue;
+                if (db.Emails.Local.Any(e => e.DedupKey == dedup && e.CreatedAt >= dedupSince)
+                    || await db.Emails.AnyAsync(e => e.DedupKey == dedup && e.CreatedAt >= dedupSince)) continue;
                 var subject = item.ItemKey is null ? title : $"[{item.ItemKey}] {title}";
                 var link = item.Link is null ? "" : $"\n\n{Text.Get("email.open")}: {baseUrl}{item.Link}";
                 db.Emails.Add(new EmailMessage

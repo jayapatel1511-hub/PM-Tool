@@ -34,10 +34,13 @@ public sealed class IssueDocumentReference : CoordinationRecord
     public string Identifier { get; set; } = "";
     public string Revision { get; set; } = "";
     public string SourceUrl { get; set; } = "";
+    public string? SourceSystem { get; set; }
+    public string? StableSourceId { get; set; }
     public string? ExternalTopicId { get; set; }
     public string? ModelElementGuid { get; set; }
     public string? ViewpointUrl { get; set; }
     public bool IsAvailable { get; set; } = true;
+    public Guid? ReplacedById { get; set; }
     public override string AuditType => "IssueDocumentReference";
     public override string? AuditName => Identifier;
 }

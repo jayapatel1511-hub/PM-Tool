@@ -6,6 +6,7 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Hub.Api.Data;
 using Hub.Api.Features;
 using Hub.Api.Infrastructure;
+using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -137,7 +138,7 @@ app.MapGet("/health", async (HubDb db, TimeProvider clock) =>
 var api = app.MapGroup("/api/v1");
 if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
 {
-    api.MapPost("/auth/local/sign-in", async (LocalPasswordStore store, HubDb db, HttpContext ctx, LocalSignIn input, PartitionedRateLimiter<string> perName) =>
+    api.MapPost("/auth/local/sign-in", async (LocalPasswordStore store, HubDb db, HttpContext ctx, LocalSignIn input, PartitionedRateLimiter<string> perName, TimeProvider clock) =>
     {
         // Names compare as the verifier store matches them (case-insensitive); an impossible name shares one bucket.
         using var attempt = perName.AttemptAcquire(input.UserName?.Trim().ToUpperInvariant() is { Length: > 0 and <= 64 } name ? name : "");
@@ -149,7 +150,12 @@ if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
         }
         string? stamp = null;
         var id = input.UserName is { Length: > 0 } && input.Password is { Length: > 0 } ? store.Verify(input.UserName, input.Password, out stamp) : null;
-        if (id is null || !await db.Users.AnyAsync(u => u.Id == id && u.IsActive)) return Results.Unauthorized();
+        var user = id is null ? null : await db.Users.FirstOrDefaultAsync(u => u.Id == id && u.IsActive);
+        if (user is null) return Results.Unauthorized();
+        db.Audit.ActorId = user.Id;
+        user.LastSignInAt = clock.GetUtcNow();
+        db.LogEvent(ItemType.User, user.Id, "SignedIn", "access", key: user.Email, name: user.DisplayName);
+        await db.SaveChangesAsync(); // authentication must not succeed without its audit event
         var claims = new[] { new Claim("oid", $"local:{id}"), new Claim("local_user_id", id.ToString()!), new Claim(AuthSetup.StampClaim, stamp!) };
         await ctx.SignInAsync(AuthSetup.LocalScheme, new ClaimsPrincipal(new ClaimsIdentity(claims, AuthSetup.LocalScheme)));
         return Results.NoContent();

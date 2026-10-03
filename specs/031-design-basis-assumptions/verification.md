@@ -140,3 +140,8 @@ This completes the successful form path missing from the earlier AC-BAS-03 brows
 Corrected the pager helper that deleted its own page parameter, retaining page changes and resetting on filter changes. Added existing saved-view controls and exact B-key/scoped title search. The extended Chromium harness reaches page two, resets on Kind change and retains prior impact decisions, withdrawn-version warning, focus return and TaskSheet date/Clear controls at 1440/390/320px.
 
 The combined increment passed 27 focused PostgreSQL cases across the final runs, frontend build/lint and the extended existing Chromium harness. This is local synthetic implementation evidence; the new exact-head CI, merge, image, homedev activation and hosted checks are separate gates in [the combined checkpoint](../../docs/reviews/2026-10-02-combined-candidate.md). Packet T006 remains open for full acceptance, and no company pilot or production acceptance is inferred.
+
+
+## Completion correction checkpoint — 2026-10-03
+
+See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) for exact implementation commits, focused regression evidence and remaining combined/hosted gates. The earlier `26c0ae1` candidate is held. This checkpoint does not close T006 or claim final hosted/company acceptance; live review remains `02ca7cd` pending activation of the corrected candidate.

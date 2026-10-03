@@ -65,7 +65,7 @@ public static class AuditRules
         [typeof(IssueAffectedDiscipline)] = ["IssueId", "ProjectDisciplineId"],
         [typeof(IssueLocation)] = ["IssueId", "Kind", "SiteArea", "Building", "Level", "Room", "AssetSystem", "Alignment", "StartStation", "EndStation",
             "StationUnits", "CoordinateX", "CoordinateY", "CoordinateZ", "CoordinateReferenceSystem", "CoordinateUnits"],
-        [typeof(IssueDocumentReference)] = ["IssueId", "Kind", "Identifier", "Revision", "SourceUrl", "ExternalTopicId", "ModelElementGuid", "ViewpointUrl", "IsAvailable"],
+        [typeof(IssueDocumentReference)] = ["IssueId", "Kind", "Identifier", "Revision", "SourceUrl", "SourceSystem", "StableSourceId", "ExternalTopicId", "ModelElementGuid", "ViewpointUrl", "IsAvailable", "ReplacedById"],
         [typeof(IssueVerification)] = ["IssueId", "VerifierId", "Status", "EvidenceUrl", "Note", "VerifiedAt"],
         [typeof(IssueReferenceImpactAssessment)] = ["IssueId", "DocumentReferenceId", "PreviousRevisionId", "CurrentRevisionId", "OwnerId", "VerifierId", "Status", "OwnerDisposition", "OwnerReason", "OwnerDecidedBy", "OwnerDecidedAt", "VerifierDisposition", "VerifierReason", "VerifierDecidedBy", "VerifierDecidedAt"],
         [typeof(PersonAvailabilityOverride)] = ["PersonId", "WorkDate", "AvailableHours", "Category"],

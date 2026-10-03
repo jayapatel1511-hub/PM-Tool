@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Hub.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Hub.Api.Data.Migrations
 {
     [DbContext(typeof(HubDb))]
-    partial class HubDbModelSnapshot : ModelSnapshot
+    [Migration("20261003051003_IssueReferenceProvenance")]
+    partial class IssueReferenceProvenance
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3790,10 +3793,6 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("project_id");
 
-                    b.Property<Guid?>("ReplacedById")
-                        .HasColumnType("uuid")
-                        .HasColumnName("replaced_by_id");
-
                     b.Property<string>("Revision")
                         .IsRequired()
                         .HasColumnType("text")
@@ -3834,9 +3833,6 @@ namespace Hub.Api.Data.Migrations
 
                     b.HasIndex("ProjectId")
                         .HasDatabaseName("ix_issue_document_reference_project_id");
-
-                    b.HasIndex("ReplacedById")
-                        .HasDatabaseName("ix_issue_document_reference_replaced_by_id");
 
                     b.HasIndex("IssueId", "Identifier", "Revision")
                         .IsUnique()
@@ -7335,7 +7331,7 @@ namespace Hub.Api.Data.Migrations
                         {
                             t.HasCheckConstraint("ck_submission_check_kind", "kind IN ('Deliverable','Current Revision','Independent Review','Blocking Findings','Handoff','Change Assessment','Access','Applicability')");
 
-                            t.HasCheckConstraint("ck_submission_check_status", "status IN ('Pending','Pass','Fail','Not Applicable')");
+                            t.HasCheckConstraint("ck_submission_check_status", "status IN ('Pending','Pass','Not Applicable')");
 
                             t.HasCheckConstraint("ck_submission_check_waiver", "status <> 'Not Applicable' OR (kind = 'Applicability' AND required = false AND reason IS NOT NULL AND evidence_url IS NOT NULL AND approved_by IS NOT NULL AND approved_at IS NOT NULL)");
                         });
@@ -9676,12 +9672,6 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_issue_document_reference_projects_project_id");
-
-                    b.HasOne("Hub.Api.Data.IssueDocumentReference", null)
-                        .WithMany()
-                        .HasForeignKey("ReplacedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_issue_document_reference_issue_document_reference_replaced_~");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.IssueLocation", b =>

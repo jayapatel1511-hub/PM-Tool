@@ -281,6 +281,34 @@ public sealed class CollaborationTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Repeated_notice_calls_in_one_command_create_one_notice_and_email()
+    {
+        var project = await d.Project(); var recipient = U(TestData.Alex);
+        var eventType = NotificationEvents.SubmissionChanged; var itemId = Guid.NewGuid();
+        await f.DbAsync(async db => {
+            var preference = await db.NotificationPreferences.SingleOrDefaultAsync(p => p.UserId == recipient && p.EventType == eventType);
+            if (preference is null) { preference = new NotificationPreference { UserId = recipient, EventType = eventType }; db.NotificationPreferences.Add(preference); }
+            preference.InApp = true; preference.Email = true; return await db.SaveChangesAsync();
+        });
+        using var scope = f.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<HubDb>();
+        var audit = scope.ServiceProvider.GetRequiredService<AuditContext>(); audit.ActorId = U(TestData.Pm);
+        var notifier = scope.ServiceProvider.GetRequiredService<Notifier>();
+        var item = new NotifyItem(project.Id, "SubmissionPackage", itemId, "S0001", $"/projects/{project.ProjectNumber}/submissions?panel=SubmissionPackage:{itemId}");
+        await notifier.Send(eventType, recipient, item, "Checks invalidated");
+        await notifier.Send(eventType, recipient, item, "Checks invalidated");
+        await db.SaveChangesAsync();
+        await notifier.Send(eventType, recipient, item, "Checks invalidated");
+        await db.SaveChangesAsync();
+        Assert.Equal(1, f.Db(d => d.Notifications.Single(n => n.ItemId == itemId && n.UserId == recipient).Count));
+        Assert.Single(f.Db(d => d.Emails.Where(e => e.DedupKey == $"{eventType}:{itemId}:{recipient}").ToList()));
+        audit.CorrelationId = Guid.NewGuid();
+        await notifier.Send(eventType, recipient, item, "Checks invalidated again"); await db.SaveChangesAsync();
+        Assert.Equal(2, f.Db(d => d.Notifications.Single(n => n.ItemId == itemId && n.UserId == recipient).Count));
+        Assert.Single(f.Db(d => d.Emails.Where(e => e.DedupKey == $"{eventType}:{itemId}:{recipient}").ToList()));
+    }
+
+    [Fact]
     public async Task Project_notifications_and_staff_digest_rows_require_current_project_access()
     {
         var hidden = await d.Project();

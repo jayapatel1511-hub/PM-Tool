@@ -13,6 +13,8 @@ namespace Hub.Api.Infrastructure;
 public static class Digest
 {
     public sealed record Row(Guid ItemId, string? Key, string Name, string Project, string Detail, string Link);
+    sealed record ExceptionRow(Guid Id, Guid ProjectId, Guid AssessmentId, Guid BasisVersionId, Guid VerifierId,
+        string LimitedWork, DateOnly ExpiresOn, string TargetType, Guid TargetId, Guid OwnerId);
     public sealed record Section(string Code, List<Row> Rows, int Total);
     public sealed record Updates(string ProjectNumber, string ProjectName, int Count, Dictionary<string, int> ByType, List<string> Top);
     public sealed record Result(string Subject, string Body, List<Section> Sections, List<Updates> ProjectUpdates)
@@ -21,7 +23,7 @@ public static class Digest
     const int Cap = 10;
 
     /// Sections a person can switch off (FR-002, packet 020), in digest order.
-    public static readonly string[] SectionCodes = ["overdue", "dueSoon", "blocked", "reviews", "decisions", "handoffs", "reviewPackages", "changes", "attention", "milestones", "staff", "updates"];
+    public static readonly string[] SectionCodes = ["overdue", "dueSoon", "blocked", "reviews", "decisions", "handoffs", "reviewPackages", "changes", "submissions", "allocations", "basisImpacts", "constraints", "commitments", "issueVerifications", "readinessExceptions", "attention", "milestones", "staff", "updates"];
     static readonly string[] ImportantCategories = ["status", "assignment", "date", "decision"];
 
     /// Active projects the person can see: open ones, and restricted ones they belong to (§8.7); Setup and On Hold are left out.
@@ -154,7 +156,73 @@ public static class Digest
         var notices = await db.ChangeNotices.AsNoTracking().Where(c => pids.Contains(c.ProjectId) && c.Status == ChangeStatus.Open
             && (c.OwnerId == userId || db.ChangeAssessments.Any(a => a.ChangeNoticeId == c.Id && (a.OwnerId == userId || a.ReviewerId == userId) && a.Status != AssessmentStatus.Resolved))).OrderBy(c => c.AssessmentDueDate).ToListAsync();
         var changes = Make("changes", notices.Select(c => new Row(c.Id, c.Key, c.Title, Num(c.ProjectId), Text.Get("change.digest_detail", c.Status, D(c.AssessmentDueDate)), $"{baseUrl}/projects/{Num(c.ProjectId)}/changes?panel=ChangeNotice:{c.Id}")));
-        var sections = new List<Section> { overdue, dueSoon, blocked, reviews, decisionRows, handoffs, reviewPackages, changes, attentionRows, milestones, staff }.Where(x => x.Total > 0).ToList();
+        // Pending actions remain digest items even when their assignment already produced an in-app notice (FR-MDC-06).
+        var submissionRows = await db.SubmissionPackages.AsNoTracking().Where(p => pids.Contains(p.ProjectId) &&
+            (p.Status == SubmissionStatus.Draft || p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready) &&
+            (p.CoordinatorId == userId || db.SubmissionChecks.Any(c => c.PackageId == p.Id && c.ManifestVersion == p.ManifestVersion &&
+                c.OwnerId == userId && c.Status != SubmissionCheckStatus.Pass && c.Status != SubmissionCheckStatus.NotApplicable)))
+            .OrderBy(p => p.TargetDate).ThenBy(p => p.Id).ToListAsync();
+        var submissions = Make("submissions", submissionRows.Select(p => new Row(p.Id, p.Key, p.Title, Num(p.ProjectId),
+            Text.Get("digest.coordination_detail", p.Status, D(p.TargetDate)), $"{baseUrl}/projects/{Num(p.ProjectId)}/submissions?panel=SubmissionPackage:{p.Id}")));
+        var managedProjectIds = db.Projects.Where(p => p.ProjectManagerId == userId ||
+            db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == userId && m.RemovedAt == null && m.Roles.Contains(ProjectRole.PM))).Select(p => p.Id);
+        var allocationRows = await AllocationEndpoints.VisibleQuery(db, new Actor(userId, true, roles.ToHashSet()), managedProjectIds)
+            .Where(a => pids.Contains(a.ProjectId) && a.Status == AllocationStatus.Proposed).OrderBy(a => a.FromDate).ThenBy(a => a.Id)
+            .Join(db.Users.AsNoTracking(), a => a.PersonId, u => u.Id, (a, u) => new { a, u.DisplayName }).ToListAsync();
+        var allocations = Make("allocations", allocationRows.Select(x => new Row(x.a.Id, null, x.DisplayName, Num(x.a.ProjectId),
+            Text.Get("digest.coordination_detail", x.a.Purpose, D(x.a.FromDate)), $"{baseUrl}/projects/{Num(x.a.ProjectId)}/allocations?allocation={x.a.Id}")));
+        var impactRows = await db.BasisImpactAssessments.AsNoTracking().Where(a => pids.Contains(a.ProjectId) && a.OwnerId == userId &&
+            a.Status != AssessmentStatus.Unaffected && a.Status != AssessmentStatus.Resolved)
+            .Join(db.DesignBasisVersions, a => a.OldVersionId, v => v.Id, (a, v) => new { a, v.EntryId })
+            .Join(db.DesignBasisEntries, x => x.EntryId, e => e.Id, (x, e) => new { x.a, e.Id, e.Key, e.Title }).OrderBy(x => x.a.Id).ToListAsync();
+        var basisImpacts = Make("basisImpacts", impactRows.Select(x => new Row(x.a.Id, x.Key, x.Title, Num(x.a.ProjectId), x.a.Status,
+            $"{baseUrl}/projects/{Num(x.a.ProjectId)}/design-basis?basis={x.Id}")));
+        var constraintRows = await db.WorkConstraints.AsNoTracking().Where(c => pids.Contains(c.ProjectId) &&
+            (c.State == ConstraintState.Open && c.RemovalOwnerId == userId || c.State == ConstraintState.ResolutionProposed && c.AffectedOwnerId == userId))
+            .OrderBy(c => c.NeededBy).ThenBy(c => c.Id).ToListAsync();
+        var constraints = Make("constraints", constraintRows.Select(c => new Row(c.Id, c.Key, c.Description, Num(c.ProjectId),
+            Text.Get("digest.coordination_detail", c.State, D(c.NeededBy)), $"{baseUrl}/projects/{Num(c.ProjectId)}/readiness?panel=WorkConstraint:{c.Id}")));
+        var commitmentRows = await db.OutputCommitments.AsNoTracking().Where(c => pids.Contains(c.ProjectId) && c.PerformerId == userId &&
+            (c.State == CommitmentState.Proposed || c.State == CommitmentState.Committed)).OrderBy(c => c.TargetDate).ThenBy(c => c.Id).ToListAsync();
+        var commitments = Make("commitments", commitmentRows.Select(c => new Row(c.Id, c.Key, c.IntendedOutput, Num(c.ProjectId),
+            Text.Get("digest.coordination_detail", c.State, D(c.TargetDate)), $"{baseUrl}/projects/{Num(c.ProjectId)}/readiness?panel=OutputCommitment:{c.Id}")));
+        var verificationRows = await db.IssueVerifications.AsNoTracking().Where(v => pids.Contains(v.ProjectId) && v.VerifierId == userId &&
+            v.Status == IssueVerificationStatus.Proposed && v.Id == db.IssueVerifications.Where(latest => latest.IssueId == v.IssueId)
+                .OrderByDescending(latest => latest.IssueRowVersion).ThenByDescending(latest => latest.Id).Select(latest => latest.Id).First())
+            .Join(db.Issues.Where(i => i.Status == IssueStatus.Open || i.Status == IssueStatus.InProgress), v => v.IssueId, i => i.Id,
+                (v, i) => new { v, i.Id, i.Key, i.Title, i.TargetResolutionDate }).OrderBy(x => x.TargetResolutionDate).ThenBy(x => x.v.Id).ToListAsync();
+        var issueVerifications = Make("issueVerifications", verificationRows.Select(x => new Row(x.v.Id, x.Key, x.Title, Num(x.v.ProjectId),
+            Text.Get("digest.coordination_detail", x.v.Status, D(x.TargetResolutionDate)), $"{baseUrl}/projects/{Num(x.v.ProjectId)}/issues?panel=Issue:{x.Id}")));
+        var exceptionCandidates = await db.ReadinessExceptions.AsNoTracking().Where(e => pids.Contains(e.ProjectId) && e.VerifierId == userId && e.ExpiresOn >= today
+            && e.Id == db.ReadinessExceptions.Where(latest => latest.AssessmentId == e.AssessmentId)
+                .OrderByDescending(latest => latest.CreatedAt).ThenByDescending(latest => latest.Id).Select(latest => latest.Id).First())
+            .Join(db.ReadinessAssessments, e => e.AssessmentId, a => a.Id, (e, a) => new ExceptionRow(e.Id, e.ProjectId, e.AssessmentId,
+                e.BasisVersionId, e.VerifierId, e.LimitedWork, e.ExpiresOn, a.TargetType, a.TargetId, a.OwnerId)).ToListAsync();
+        var exceptionRows = new List<ExceptionRow>();
+        foreach (var candidate in exceptionCandidates)
+        {
+            var targetOwner = candidate.TargetType == "Task"
+                ? await db.Tasks.AsNoTracking().Where(t => t.Id == candidate.TargetId && t.ProjectId == candidate.ProjectId && t.DeletedAt == null).Select(t => (Guid?)t.AssigneeId).SingleOrDefaultAsync()
+                : await db.Deliverables.AsNoTracking().Where(d => d.Id == candidate.TargetId && d.ProjectId == candidate.ProjectId && d.DeletedAt == null).Select(d => d.OwnerId).SingleOrDefaultAsync();
+            if (targetOwner is not { } owner || owner != candidate.OwnerId || owner == candidate.VerifierId) continue;
+            if (!await Coordination.People(db, projects[candidate.ProjectId]).AnyAsync(u => u.Id == owner)) continue;
+
+            var basis = await ReadinessEndpoints.EvaluateBasis(db, projects[candidate.ProjectId], candidate.TargetType, candidate.TargetId);
+            if (basis.ExceptionBasisVersionId != candidate.BasisVersionId) continue;
+            var exceptionScope = await db.DesignBasisVersions.AsNoTracking().Where(v => v.Id == candidate.BasisVersionId)
+                .Select(v => v.Scope).SingleOrDefaultAsync();
+            if (exceptionScope is null) continue;
+            if (!await db.BasisAssumptionDispositions.AsNoTracking().AnyAsync(d => d.ProjectId == candidate.ProjectId &&
+                    d.VersionId == candidate.BasisVersionId && d.OwnerId == owner && d.ApprovedBy != owner &&
+                    d.ExpiresOn >= candidate.ExpiresOn && d.Scope.ToLower() == exceptionScope.ToLower())) continue;
+            if (!await Coordination.People(db, projects[candidate.ProjectId]).AnyAsync(u => u.Id == candidate.VerifierId)) continue;
+            exceptionRows.Add(candidate);
+        }
+        exceptionRows = exceptionRows.OrderBy(x => x.ExpiresOn).ThenBy(x => x.Id).ToList();
+        var readinessExceptions = Make("readinessExceptions", exceptionRows.Select(x => new Row(x.Id, null, x.LimitedWork, Num(x.ProjectId),
+            Text.Get("digest.exception_detail", D(x.ExpiresOn)), x.TargetType == "Task" ? TaskLink(x.ProjectId, x.TargetId) : DelLink(x.ProjectId, x.TargetId))));
+        var sections = new List<Section> { overdue, dueSoon, blocked, reviews, decisionRows, handoffs, reviewPackages, changes,
+            submissions, allocations, basisImpacts, constraints, commitments, issueVerifications, readinessExceptions, attentionRows, milestones, staff }.Where(x => x.Total > 0).ToList();
         if (sections.Count == 0 && updates.Count == 0) return null; // AC-NOT-04: nothing to say, nothing sent
 
         var parts = new List<string>();

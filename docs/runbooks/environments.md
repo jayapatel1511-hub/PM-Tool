@@ -1,59 +1,36 @@
 # Runbook: environments
 
-The current temporary review/pilot host is homedev; its deployment and data boundary are in
-[`homedev-review.md`](homedev-review.md), and what the company pilot still needs there is in
-[`pilot-readiness.md`](../pilot/pilot-readiness.md). The Azure design below remains the target for the later company move;
-its open gates are in [`production-readiness.md`](../pilot/production-readiness.md).
-At that point, development, test, review and production use separate Azure resource groups and Entra app registrations (§21, FR-007).
-Production data is never copied into development, test or review; the synthetic data in `tools/scale/seed.sql` exists for load
-tests. Keep the review database when releasing new preview builds.
+Review, company pilot and production stay on homedev under Jay's 2026-10-01 decision. Use individual local passwords and existing infrastructure. Azure, Entra and new paid services are optional future work, not this release's prerequisites. See [homedev review](homedev-review.md), [pilot readiness](../pilot/pilot-readiness.md) and [production readiness](../pilot/production-readiness.md).
 
-For a review preview, deploy `infra/env/review.bicepparam` to a dedicated review resource group. Its
-`hub-review-pg` server (database `hub`) persists across preview releases; `infra/main.bicep` sets `Seed__ReviewDemo=true` only there. The app adds
-clearly marked fictional people and projects once and keeps reviewer edits on later releases. `Seed:ReviewDemo` is
-refused in Production; do not restore the review database into production. The review app uses `LocalPassword`
-authentication with a separate ID and verifier for each reviewer until company Entra sign-in is available. Development
-identity headers are never accepted in Staging. Review credentials map to existing active `AppUser` IDs; they cannot
-create users or grant project roles. The review-only `review-users` Key Vault secret contains a JSON `users` array in
-the format produced by `scripts/add-review-credential.py`; create and verify that secret before starting the review app.
-The secret must not enter Git, terminal logs or a deployment package. The Azure template denies every inbound
-review IP by default; supply approved `reviewAllowedCidrs` before reviewers access it. The template gives only the
-app's identity a role on the vault, so first assign yourself Key Vault Secrets Officer on it. Bootstrap the new vault with
-an owner-only file containing `{ "users": [] }` using `az keyvault secret set --vault-name hub-review-kv --name review-users --file <private-file>`.
-This lets the app seed the separate review database while no login is possible. Query the seeded active `AppUser` IDs
-through the authorised database admin connection, then run `scripts/add-review-credential.py` for each reviewer using
-an owner-only JSON file outside the repository. Replace the Key Vault secret from that file and restart the app so it
-loads the new verifiers. Persist `/home/hub-review-keys` across preview releases so signed-in sessions survive an app
-restart. The template has no pilot environment (`dev`, `test`, `review`, `prod`): the company pilot stays on homedev
-with individual local passwords until Azure is available, and production on Azure uses Entra (`Auth__Mode` is `Entra`
-outside review) and must exercise real tenant sign-in. Synthetic `@hub.test` people are reserved records. Keep
-`pm.engcalchub.com` unassigned until DNS, hosting, and access controls are verified for the intended environment.
+## Environment boundaries
 
-## What defines an environment
-
-| Part | Where |
+| Environment | Runtime and data boundary |
 |---|---|
-| Azure resources: App Service, PostgreSQL (Entra authentication only, 14-day point-in-time restore), Key Vault, Log Analytics, Application Insights, optional alert rules | `infra/main.bicep`, `infra/env/<env>.bicepparam` |
-| Homedev review stack: API and PostgreSQL containers, daily dump timer, Cloudflare tunnel unit | `hosting/homedev.compose.yml`, `hosting/*.service`, `hosting/*.timer`, private `.runtime/` and `data/` on homedev ([`homedev-review.md`](homedev-review.md)) |
-| Database schema | EF Core migrations in `src/Hub.Api/Data/Migrations`, applied when the app starts |
-| Reference data (disciplines, types, settings defaults) | `src/Hub.Api/Data/Seed.cs`, applied at start |
-| Application | a reviewed commit whose CI passed; `.github/workflows/ci.yml` builds and tests but publishes no package. Azure deploys a `dotnet publish` zip (README); homedev builds `hosting/Dockerfile.review` on the host |
-| Secrets | Azure: Key Vault for review password verifiers and any mail relay password; the database has no password. Homedev: owner-only `.runtime/` files outside Git hold the database password and the verifiers (`hosting/homedev.compose.yml`) |
+| Mac development/tests | Development or Testing authentication; synthetic test databases. Development identity headers are never registered in the hosted Staging runtime. |
+| Persistent synthetic review | `/home/jaypatel04/Workspace/Projects/pm-tool`, `hosting/homedev.compose.yml`, dedicated review database/volume, runtime and key ring. Preserve reviewer edits across releases. |
+| Company pilot and accepted production | `/home/jaypatel04/Workspace/Projects/pm-tool-pilot`, `hosting/homedev-pilot.compose.yml`, separate company database/volume, runtime and key ring. Keep both seed flags false. Retain accepted pilot data or start fresh according to the recorded company decision. |
 
-## Rebuild
+The local-password provider currently permits ASP.NET Core Development, Staging and Testing, and refuses the runtime name Production. Homedev uses the reviewed Staging configuration, including secure cookies, HTTPS redirection, hostile Host/Origin denial and explicit trusted-proxy limits. A business production cutover is a separate acceptance decision; changing the runtime name to Production would break this authentication mode. Do not enable development authentication, restore review data or turn on either seed flag to provision company users.
 
-1. Create the resource group and fill `infra/env/<env>.bicepparam` (tenant, app registrations, database admin group,
-   `operatorEmail` if alerts are wanted).
-2. `az deployment group create -g <rg> -f infra/main.bicep -p infra/env/<env>.bicepparam`
-3. Signed in as the database administrators' group, create the app's role for its managed identity:
-   `SELECT * FROM pgaadauth_create_principal('hub-<env>-app', false, false);` and grant it `CREATE` on the `hub` database.
-   The template creates no PostgreSQL firewall rule or private endpoint, so first give the app and the administrators a
-   network path ([`production-readiness.md`](../pilot/production-readiness.md), T1).
-4. Put any mail secret into the Key Vault, and set `Graph:DirectorySync`, `Graph:Mail` / `Email:*` app settings. The
-   template sets the whole app-settings list, so settings added by hand are replaced at its next deployment; reapply them
-   until they are template parameters (T3).
-5. Deploy the build (`az webapp deploy` with the published zip). On start the app migrates the schema and seeds reference data.
-6. Assign the first administrator the Entra app role `Hub.Admin` (group-assigned roles sync at each sign-in), sign in, and check `/health` and Admin → Operations.
-7. For production only: restore data from the latest backup instead of starting empty (see `restore.md`).
+`pm.engcalchub.com` is the chosen hostname. Its current review route is not company acceptance. Move the existing dedicated tunnel to the separately verified company origin only at the authorised cutover; leave the review origin private. Never route both environments as though they are the same database.
 
-Typical time: under two hours without data; restore time adds to it.
+## Release and recovery
+
+1. Build and test the exact committed source on the Mac. Record review, CI and merge separately. Prepare only a Git archive with `scripts/prepare-homedev-review.sh`; uncommitted output and credentials are not release input.
+2. Keep database passwords, salted password verifiers, runtime configuration and persistent protection keys in owner-only `.runtime/` files outside Git. Create real users through the existing bootstrap/Admin flows; credentials map to active account IDs and grant no project roles themselves.
+3. Take a fresh private dump before activation. Rehearse fresh and populated migrations and previous-image compatibility. Activate through the existing release script with interactive operator sudo in the homedev terminal.
+4. Verify the exact release, migrations, TLS/authentication, project/role restrictions, browser workflows, persistent marker and key/cookie behavior. A healthy endpoint alone is not acceptance.
+5. Verify scheduled dumps, approved encrypted off-host retrieval and isolated restore. Review recovery approval applies to the review payload only; company recovery requires its own approved data scope and measured recovery targets. Consult [restore](restore.md) before rollback or recovery.
+
+Current daily dumps and manually verified encrypted retrieval do not establish the specification's 15-minute production RPO or prove an automatic backup. These remain explicit production gates. Do not overwrite newer operational data with an older dump to roll back application code.
+
+## Maintained sources
+
+| Part | Source |
+|---|---|
+| Review/company container isolation and hardening | `hosting/homedev.compose.yml`, `hosting/homedev-pilot.compose.yml`, `hosting/Dockerfile.review` |
+| Backup helpers, units and private recovery | `hosting/`, host `.runtime/` and `data/`, [restore runbook](restore.md) |
+| Schema | EF Core migrations under `src/Hub.Api/Data/Migrations`; applied on startup |
+| Reference data | `src/Hub.Api/Data/Seed.cs`; company demo/test flags stay false |
+| CI | `.github/workflows/ci.yml`; checks code but does not activate homedev |
+| Historical Azure design | `infra/main.bicep`, `infra/env/`; unused for this release. Template compilation proves no hosting, identity, mail or recovery capability. |

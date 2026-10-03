@@ -755,6 +755,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<IssueLocation, Issue>(mb, x => x.IssueId);
         Fk<IssueDocumentReference, Project>(mb, x => x.ProjectId);
         Fk<IssueDocumentReference, Issue>(mb, x => x.IssueId);
+        Fk<IssueDocumentReference, IssueDocumentReference>(mb, x => x.ReplacedById);
         Fk<IssueVerification, Project>(mb, x => x.ProjectId);
         Fk<IssueVerification, Issue>(mb, x => x.IssueId);
         Fk<IssueVerification, AppUser>(mb, x => x.VerifierId);

@@ -87,6 +87,9 @@ public static class DesignBasisEndpoints
             Check.That(await db.Decisions.AnyAsync(d => d.Id == decisionId && d.ProjectId == project.Id), "decisionId", "coord.reference");
     }
 
+    static void RequireConfirmationDueDate(DateOnly? dueDate) =>
+        Check.That(dueDate is not null, "confirmationDueDate", "error.required");
+
     static DesignBasisVersion NewVersion(Project project, Guid entryId, int number, Guid? supersedes, VersionInput input) => new()
     {
         ProjectId = project.Id, EntryId = entryId, Number = number, SupersedesVersionId = supersedes,
@@ -119,6 +122,7 @@ public static class DesignBasisEndpoints
             await Coordination.Person(db, project, body.OwnerId);
             if (body.IndependentApproverId is { } approver) await Coordination.Person(db, project, approver, "independentApproverId");
             await ValidateSource(db, project, body.Version);
+            RequireConfirmationDueDate(body.Version.ConfirmationDueDate);
             var title = Check.Required(body.Title, "title", 200);
             var scope = Check.Required(body.Version.Scope, "scope", 500);
             await InspectDuplicate(db, project.Id, body.Kind, title, body.ProjectDisciplineId, scope, null, body.InspectedDuplicateId);
@@ -146,6 +150,7 @@ public static class DesignBasisEndpoints
                 a.NewVersionId == current.Id && a.Status == AssessmentStatus.Pending), "entryId", "basis.current");
             Check.That(!await db.DesignBasisVersions.AnyAsync(v => v.EntryId == id && v.Status == BasisStatus.Proposed), "entryId", "basis.proposed");
             await ValidateSource(db, project, body.Version);
+            RequireConfirmationDueDate(body.Version.ConfirmationDueDate);
             await InspectDuplicate(db, project.Id, entry.Kind, entry.Title, entry.ProjectDisciplineId,
                 Check.Required(body.Version.Scope, "scope", 500), entry.Id, body.InspectedDuplicateId);
             var nextNumber = await db.DesignBasisVersions.Where(v => v.EntryId == id).MaxAsync(v => v.Number) + 1;
@@ -156,7 +161,7 @@ public static class DesignBasisEndpoints
         });
 
     static Task<Coordination.Result> EditProposed(Guid projectId, Guid id, Guid versionId, EditProposedBody body,
-        Access access, HubDb db, TimeProvider clock) =>
+        Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "basis.edit-proposed", id, versionId, body }, access, db, clock,
             async (project, ctx) =>
             {
@@ -171,6 +176,7 @@ public static class DesignBasisEndpoints
                     !await db.BasisAssumptionDispositions.AnyAsync(d => d.ProjectId == project.Id && d.VersionId == versionId),
                     "versionId", "basis.edit_linked");
                 await ValidateSource(db, project, body.Version);
+                RequireConfirmationDueDate(body.Version.ConfirmationDueDate);
                 await InspectDuplicate(db, project.Id, entry.Kind, entry.Title, entry.ProjectDisciplineId,
                     Check.Required(body.Version.Scope, "scope", 500), entry.Id, body.InspectedDuplicateId);
                 var revised = NewVersion(project, id, version.Number, version.SupersedesVersionId, body.Version);
@@ -185,7 +191,7 @@ public static class DesignBasisEndpoints
                 version.ConfirmationDueDate = revised.ConfirmationDueDate;
                 version.DecisionId = revised.DecisionId;
                 db.Audit.Note(version, reason: Check.Reason(body.Reason));
-                await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id);
+                await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id, notify);
                 return version;
             });
 
@@ -195,11 +201,11 @@ public static class DesignBasisEndpoints
             var entry = await Entry(db, project.Id, id);
             Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId));
             Coordination.Version(entry, body.EntryRowVersion);
-            Check.That(entry.CurrentVersionId is null && await db.DesignBasisVersions.AnyAsync(v =>
-                v.EntryId == entry.Id && v.Status == BasisStatus.Proposed), "entryId", "basis.current");
             await Coordination.Person(db, project, body.OwnerId);
             if (body.IndependentApproverId is { } approver)
                 await Coordination.Person(db, project, approver, "independentApproverId");
+            Check.That(body.IndependentApproverId is null || body.IndependentApproverId != body.OwnerId,
+                "independentApproverId", "basis.independent");
             entry.OwnerId = body.OwnerId;
             entry.IndependentApproverId = body.IndependentApproverId;
             db.Audit.Note(entry, reason: Check.Reason(body.Reason));
@@ -219,6 +225,7 @@ public static class DesignBasisEndpoints
             Check.That(self || access.Me.Id != entry.OwnerId, "approverId", "basis.independent");
             Check.That(!string.IsNullOrWhiteSpace(version.SourceSystem) &&
                 !string.IsNullOrWhiteSpace(version.DeclaredRevision), "source", "basis.source");
+            RequireConfirmationDueDate(version.ConfirmationDueDate);
             Check.That(BasisRules.MayConfirm(version.Status, version.NumericValue, version.Units,
                 !string.IsNullOrWhiteSpace(version.SourceUrl), !string.IsNullOrWhiteSpace(body.Rationale),
                 true), "versionId", version.NumericValue is not null && string.IsNullOrWhiteSpace(version.Units) ? "basis.units" : "basis.source");
@@ -275,7 +282,7 @@ public static class DesignBasisEndpoints
             if (conflictOwners.Count > 0)
                 await Notify(notify, project, entry, NotificationEvents.BasisConflictRaised, [entry.OwnerId, .. conflictOwners],
                     Text.Get("notify.basis_conflict", entry.Key));
-            await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id);
+            await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id, notify);
             return version;
         });
 
@@ -316,7 +323,7 @@ public static class DesignBasisEndpoints
             }
             db.Audit.Note(version, action: "Withdrawn", reason: reason);
             db.Audit.Note(entry, reason: reason);
-            await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id);
+            await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id, notify);
             return version;
         });
 

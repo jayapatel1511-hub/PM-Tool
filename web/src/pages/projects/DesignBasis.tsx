@@ -125,7 +125,7 @@ function VersionFields({ draft, setDraft }: { draft: VersionDraft; setDraft: (v:
       <Field label={t('basis.sourceId')} htmlFor="basis-source-id"><Input id="basis-source-id" value={draft.stableSourceId} onChange={e => update('stableSourceId', e.target.value)} /></Field></div>
     <Field label={t('basis.sourceUrl')} htmlFor="basis-source-url"><Input id="basis-source-url" type="url" value={draft.sourceUrl} onChange={e => update('sourceUrl', e.target.value)} /></Field>
     <div className="grid gap-3 sm:grid-cols-2"><Field label={t('basis.revision')} htmlFor="basis-revision"><Input id="basis-revision" value={draft.declaredRevision} onChange={e => update('declaredRevision', e.target.value)} /></Field>
-      <Field label={t('basis.due')} htmlFor="basis-due"><Input id="basis-due" type="date" value={draft.confirmationDueDate} onChange={e => update('confirmationDueDate', e.target.value)} /></Field></div>
+      <Field label={t('basis.due')} htmlFor="basis-due"><Input id="basis-due" type="date" required value={draft.confirmationDueDate} onChange={e => update('confirmationDueDate', e.target.value)} /></Field></div>
     <p className="text-xs text-muted-foreground">{t('basis.manual')}</p>
   </div>
 }
@@ -204,7 +204,7 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
       <div className="space-y-5 text-sm">
         <p>{row.entry.kind} · {t('basis.owner')}: {name(row.entry.ownerId)} · {t('basis.discipline')}: {options?.disciplines.find(d => d.id === row.entry.projectDisciplineId)?.name ?? t('coord.unavailable')}</p>
         <div className="flex flex-wrap gap-2">{row.canManage && current && !proposed && options && <Button size="sm" variant="outline" onClick={() => setAction('propose')}>{t('basis.propose')}</Button>}
-          {row.canManage && !current && proposed && options && <Button size="sm" variant="outline" onClick={() => setAction('assign')}>{t('basis.owner')}</Button>}
+          {row.canManage && (current || proposed) && options && <Button size="sm" variant="outline" onClick={() => setAction('assign')}>{t('basis.owner')}</Button>}
           {row.canConfirm && proposed && <Button size="sm" onClick={() => setAction('confirm')}>{t('basis.confirm')}</Button>}
           {row.canManage && row.entry.kind === 'Assumption' && proposed && <Button size="sm" variant="outline" onClick={() => setAction('proceed')}>{t('basis.proceed')}</Button>}
           {options?.canWrite && [...options.tasks, ...options.deliverables].some(w => w.ownerId === options.actorId) && (current || proposed) &&
@@ -221,7 +221,8 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
             {v.sourceUrl && <a className="text-primary underline" href={v.sourceUrl} target="_blank" rel="noopener noreferrer">{t('basis.sourceUrl')}</a>}
             {v.decisionId && <p><Link className="text-primary underline"
               to={`/projects/${number}/decisions?panel=Decision:${v.decisionId}`}>{t('basis.sourceDecision')}</Link></p>}
-            {v.confirmationDueDate && <p>{t('basis.due')}: {fmtDate(v.confirmationDueDate)}</p>}
+            {v.confirmationDueDate ? <p>{t('basis.due')}: {fmtDate(v.confirmationDueDate)}</p>
+              : v.status === 'Proposed' && <p className="text-warn">{t('basis.dueRequired')}</p>}
             {v.confirmedAt && <p>{t('basis.confirm')}: {name(v.confirmedBy)} · {fmtDate(v.confirmedAt)} · {v.confirmationRationale}</p>}
           </div>)}</div></section>
         <section><h3 className="font-medium">{t('basis.conflicts')} ({row.conflicts.filter(c => !c.resolved).length})</h3>

@@ -79,8 +79,16 @@ public sealed class SubmissionApiTests(HubFactory f)
         Assert.False(f.Db(db => db.Notifications.Any(n => n.UserId == data.User(TestData.Rita) && n.ItemId == id)));
         Assert.Equal(snapshot, f.Db(db => db.SubmissionIssues.Single(i => i.PackageId == id).ManifestSnapshot));
 
+        var revisionBNotice = await Post(TestData.Alex, root + "/source-revisions", new ChangeEndpoints.RegisterBody(Guid.NewGuid(), did,
+            Version<Deliverable>(did), civil, data.User(TestData.Alex), "Deliverable", "grading", "Site grading", "B",
+            "https://example.test/grading-b.pdf", "Design team", "Submission", null, revision.G("id"),
+            f.Db(db => db.SourceHeads.Single(h => h.ProjectId == project.Id).RowVersion), "Corrected grading revision", new DateOnly(2026, 9, 14), new DateOnly(2026, 9, 18)));
+        var revisionBNoticeId = revisionBNotice.G("id");
+        await Post(TestData.Alex, root + $"/changes/{revisionBNoticeId}/publish", new ChangeEndpoints.PublishBody(Guid.NewGuid(),
+            Version<ChangeNotice>(revisionBNoticeId), f.Db(db => db.SourceHeads.Single(h => h.ProjectId == project.Id).RowVersion), null));
+        var revisionB = f.Db(db => db.ChangeNotices.Single(c => c.Id == revisionBNoticeId).NewRevisionId);
         var successor = await Post(TestData.Marc, root + "/submissions", new SubmissionEndpoints.CreateBody(Guid.NewGuid(), "Corrected design package", "Permit review", "Municipality",
-            data.User(TestData.Marc), milestone.G("id"), new DateOnly(2026, 10, 15), [new(revision.G("id"))], [], id, "Corrected transmittal"));
+            data.User(TestData.Marc), milestone.G("id"), new DateOnly(2026, 10, 15), [new(revisionB)], [], id, "Corrected transmittal"));
         var nextId = successor.G("id"); var nextPath = root + $"/submissions/{nextId}";
         await Post(TestData.Marc, nextPath + "/start", new SubmissionEndpoints.StartBody(Guid.NewGuid(), Version<SubmissionPackage>(nextId), null));
         var nextDetail = await Get(TestData.Pm, nextPath);
@@ -93,6 +101,11 @@ public sealed class SubmissionApiTests(HubFactory f)
         Assert.Equal("A", export["manifest"]![0]!["revision"]!.GetValue<string>());
         Assert.Equal("https://example.test/transmittal-1", export["issueHistory"]![0]!["issue"]!["transmittalUrl"]!.GetValue<string>());
         Assert.Equal(nextId.ToString(), export["successorIssues"]![0]!["id"]!.GetValue<string>());
+        var successorSnapshot = f.Db(db => db.SubmissionIssues.Single(i => i.PackageId == nextId).ManifestSnapshot);
+        Assert.Contains("grading-b.pdf", successorSnapshot);
+        Assert.Equal("B", JsonNode.Parse(successorSnapshot)![0]!["revision"]!.GetValue<string>());
+        var successorHistorySnapshot = export["successorIssues"]![0]!["issue"]!["manifestSnapshot"]!.GetValue<string>();
+        Assert.Equal("B", JsonNode.Parse(successorHistorySnapshot)![0]!["revision"]!.GetValue<string>());
         await (await f.As(TestData.Rita).GetAsync(path + "/export")).Json(404);
         await Assert.ThrowsAsync<DbUpdateException>(() => f.DbAsync(async db => {
             var first = await db.SubmissionIssues.SingleAsync(i => i.PackageId == id);
@@ -118,17 +131,29 @@ public sealed class SubmissionApiTests(HubFactory f)
         var a = await Post(TestData.Alex, root + "/source-revisions", Registration("A"));
         var created = await Post(TestData.Marc, root + "/submissions", new SubmissionEndpoints.CreateBody(Guid.NewGuid(), "Stormwater issue", "Permit", "Municipality",
             data.User(TestData.Marc), milestone.G("id"), new DateOnly(2026, 10, 15), [new(a.G("id"))],
-            [new("Traffic control applies", data.User(TestData.Alex), civil)], null, null));
+            [new("Traffic control applies", data.User(TestData.Omar), civil)], null, null));
         var id = created.G("id"); var path = root + $"/submissions/{id}";
         await Post(TestData.Marc, path + "/start", new SubmissionEndpoints.StartBody(Guid.NewGuid(), Version<SubmissionPackage>(id), null));
         var optional = f.Db(db => db.SubmissionChecks.Single(c => c.PackageId == id && c.Kind == SubmissionCheckKind.Applicability));
-        await Post(TestData.Alex, path + $"/checks/{optional.Id}", new SubmissionEndpoints.CheckBody(Guid.NewGuid(), Version<SubmissionPackage>(id), optional.RowVersion,
+        await Post(TestData.Omar, path + $"/checks/{optional.Id}", new SubmissionEndpoints.CheckBody(Guid.NewGuid(), Version<SubmissionPackage>(id), optional.RowVersion,
             SubmissionCheckStatus.Pass, "https://example.test/traffic.pdf", "Scope checked"));
         Assert.Equal(SubmissionStatus.Ready, f.Db(db => db.SubmissionPackages.Single(p => p.Id == id).Status));
         var notice = await Post(TestData.Alex, root + "/source-revisions", Registration("B", a.G("id")));
         var noticeId = notice.G("id");
-        await Post(TestData.Alex, root + $"/changes/{noticeId}/publish", new ChangeEndpoints.PublishBody(Guid.NewGuid(), Version<ChangeNotice>(noticeId),
-            f.Db(db => db.SourceHeads.Single(h => h.ProjectId == project.Id).RowVersion), null));
+        var publish = new ChangeEndpoints.PublishBody(Guid.NewGuid(), Version<ChangeNotice>(noticeId),
+            f.Db(db => db.SourceHeads.Single(h => h.ProjectId == project.Id).RowVersion), null);
+        await Post(TestData.Alex, root + $"/changes/{noticeId}/publish", publish);
+        foreach (var recipient in new[] { TestData.Pm, TestData.Marc, TestData.Omar })
+        {
+            var invalidated = Assert.Single(f.Db(db => db.Notifications.Where(n => n.ItemId == id && n.UserId == data.User(recipient)
+                && n.EventType == NotificationEvents.SubmissionChanged && n.ActorUserId == data.User(TestData.Alex)).ToList()));
+            Assert.Equal(1, invalidated.Count);
+            Assert.Equal($"/projects/{project.ProjectNumber}/submissions?panel=SubmissionPackage:{id}", invalidated.LinkPath);
+        }
+        var notices = f.Db(db => db.Notifications.Where(n => n.ItemId == id).OrderBy(n => n.Id).Select(n => new { n.Id, n.Count }).ToList());
+        await Post(TestData.Alex, root + $"/changes/{noticeId}/publish", publish);
+        Assert.Equal(notices, f.Db(db => db.Notifications.Where(n => n.ItemId == id).OrderBy(n => n.Id).Select(n => new { n.Id, n.Count }).ToList()));
+        Assert.False(f.Db(db => db.Notifications.Any(n => n.ItemId == id && n.UserId == data.User(TestData.Rita))));
         Assert.Equal(SubmissionStatus.Checking, f.Db(db => db.SubmissionPackages.Single(p => p.Id == id).Status));
         Assert.Equal(SubmissionCheckStatus.Pending, f.Db(db => db.SubmissionChecks.Single(c => c.Id == optional.Id).Status));
         var blocked = await Get(TestData.Pm, path);
@@ -186,6 +211,71 @@ public sealed class SubmissionApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Optional_applicability_fail_is_recorded_without_blocking_issue()
+    {
+        var project = await data.Project(); var root = $"/api/v1/projects/{project.Id}";
+        var civil = data.ProjectDiscipline(project.Id, "Civil");
+        var milestone = await Post(TestData.Pm, root + "/milestones", new MilestoneEndpoints.CreateBody("Fail milestone", MilestoneType.DesignSubmission, new DateOnly(2026, 10, 15), null, null, null, true), 201);
+        var deliverable = await Post(TestData.Marc, root + "/deliverables", new { name = "Fail target", projectDisciplineId = civil,
+            deliverableTypeId = await data.DeliverableType(), ownerId = data.User(TestData.Alex), revision = "A", requiresReview = false }, 201);
+        var did = deliverable.G("id");
+        var revision = await Post(TestData.Alex, root + "/source-revisions", new ChangeEndpoints.RegisterBody(Guid.NewGuid(), did, Version<Deliverable>(did), civil, data.User(TestData.Alex),
+            "Deliverable", "fail-target", "Fail target", "A", "https://example.test/fail-a.pdf", "Design team", "Submission", null, null, null, null, null, null));
+        var created = await Post(TestData.Marc, root + "/submissions", new SubmissionEndpoints.CreateBody(Guid.NewGuid(), "Fail package", "Permit", "Municipality",
+            data.User(TestData.Marc), milestone.G("id"), new DateOnly(2026, 10, 15), [new(revision.G("id"))],
+            [new("Traffic control plan applies", data.User(TestData.Alex), civil)], null, null));
+        var id = created.G("id"); var path = root + $"/submissions/{id}";
+        await Post(TestData.Marc, path + "/start", new SubmissionEndpoints.StartBody(Guid.NewGuid(), Version<SubmissionPackage>(id), null));
+        var optional = f.Db(db => db.SubmissionChecks.Single(c => c.PackageId == id && c.Kind == SubmissionCheckKind.Applicability));
+        await Post(TestData.Alex, path + $"/checks/{optional.Id}", new SubmissionEndpoints.CheckBody(Guid.NewGuid(), Version<SubmissionPackage>(id), optional.RowVersion,
+            SubmissionCheckStatus.Fail, "https://example.test/fail-evidence", "Plan is outside the registered tolerance"));
+        var detail = await Get(TestData.Pm, path);
+        Assert.True(detail["readiness"]!["ready"]!.GetValue<bool>());
+        Assert.Equal(SubmissionCheckStatus.Fail, detail["checks"]!.AsArray().Single(c => c!.G("id") == optional.Id)!["status"]!.GetValue<string>());
+        var filtered = await Get(TestData.Pm, root + "/submissions?status=Ready&page=1&pageSize=10");
+        Assert.Contains(filtered["items"]!.AsArray(), item => item!.G("id") == id);
+        await Post(TestData.Pm, path + "/issue", new SubmissionEndpoints.IssueBody(Guid.NewGuid(), Version<SubmissionPackage>(id), 1,
+            detail["readiness"]!["fingerprint"]!.GetValue<string>(), "Municipality", "https://example.test/transmittal", null));
+        Assert.Equal(SubmissionStatus.Issued, f.Db(db => db.SubmissionPackages.Single(p => p.Id == id).Status));
+    }
+
+    [Fact]
+    public async Task Required_review_edit_makes_a_stale_issue_request_refuse_finalization()
+    {
+        var project = await data.Project(); var root = $"/api/v1/projects/{project.Id}";
+        var civil = data.ProjectDiscipline(project.Id, "Civil");
+        var milestone = await Post(TestData.Pm, root + "/milestones", new MilestoneEndpoints.CreateBody("Review milestone", MilestoneType.DesignSubmission, new DateOnly(2026, 10, 15), null, null, null, true), 201);
+        var deliverable = await Post(TestData.Marc, root + "/deliverables", new { name = "Reviewed target", projectDisciplineId = civil,
+            deliverableTypeId = await data.DeliverableType(), ownerId = data.User(TestData.Alex), revision = "A", requiresReview = true }, 201);
+        var did = deliverable.G("id");
+        var revision = await Post(TestData.Alex, root + "/source-revisions", new ChangeEndpoints.RegisterBody(Guid.NewGuid(), did, Version<Deliverable>(did), civil, data.User(TestData.Alex),
+            "Deliverable", "reviewed-target", "Reviewed target", "A", "https://example.test/reviewed-a.pdf", "Design team", "Submission", null, null, null, null, null, null));
+        var rid = revision.G("id");
+        var review = await Post(TestData.Marc, root + "/reviews", new ReviewEndpoints.CreateBody(Guid.NewGuid(), "Reviewed target", "Required review", civil,
+            data.User(TestData.Marc), [rid], [new(civil, data.User(TestData.Pm), new DateOnly(2026, 10, 1))], true, null));
+        var reviewId = review.G("id");
+        await Post(TestData.Marc, root + $"/reviews/{reviewId}/action", new ReviewEndpoints.ActionBody(Guid.NewGuid(), Version<ReviewPackage>(reviewId), "start", null));
+        var assignmentId = f.Db(db => db.DisciplineReviews.Single(a => a.RoundId == db.ReviewPackages.Single(p => p.Id == reviewId).CurrentRoundId).Id);
+        await Post(TestData.Pm, root + $"/reviews/{reviewId}/assignments/{assignmentId}/decision", new ReviewEndpoints.DecisionBody(Guid.NewGuid(),
+            Version<DisciplineReview>(assignmentId), DisciplineReviewStatus.Approved, "Reviewed the registered revision"));
+        var created = await Post(TestData.Marc, root + "/submissions", new SubmissionEndpoints.CreateBody(Guid.NewGuid(), "Reviewed package", "Permit", "Municipality",
+            data.User(TestData.Marc), milestone.G("id"), new DateOnly(2026, 10, 15), [new(rid)], [], null, null));
+        var id = created.G("id"); var path = root + $"/submissions/{id}";
+        await Post(TestData.Marc, path + "/start", new SubmissionEndpoints.StartBody(Guid.NewGuid(), Version<SubmissionPackage>(id), null));
+        var beforeEdit = await Get(TestData.Pm, path);
+        Assert.True(beforeEdit["readiness"]!["ready"]!.GetValue<bool>());
+        var fingerprint = beforeEdit["readiness"]!["fingerprint"]!.GetValue<string>();
+        await Post(TestData.Marc, root + $"/reviews/{reviewId}/rounds", new ReviewEndpoints.RoundBody(Guid.NewGuid(), Version<ReviewPackage>(reviewId),
+            "Updated required review scope", [rid], [new(civil, data.User(TestData.Pm), new DateOnly(2026, 10, 2))], "Scope edited before issue", null));
+        await Post(TestData.Pm, path + "/issue", new SubmissionEndpoints.IssueBody(Guid.NewGuid(), Version<SubmissionPackage>(id), 1, fingerprint,
+            "Municipality", "https://example.test/transmittal", null), 409);
+        Assert.Empty(f.Db(db => db.SubmissionIssues.Where(i => i.PackageId == id).ToList()));
+        var afterEdit = await Get(TestData.Pm, path);
+        Assert.False(afterEdit["readiness"]!["ready"]!.GetValue<bool>());
+        Assert.Contains("submission.review_not_current", afterEdit["readiness"]!["blockers"]!.ToJsonString());
+    }
+
+    [Fact]
     public async Task Handoff_change_invalidates_unissued_submission_checks_and_evidence()
     {
         var project = await data.Project(); var root = $"/api/v1/projects/{project.Id}";
@@ -227,7 +317,7 @@ public sealed class SubmissionApiTests(HubFactory f)
 
         var basis = await Post(TestData.Marc, root + "/design-basis", new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion,
             "Handoff basis", data.User(TestData.Alex), civil, null,
-            new DesignBasisEndpoints.VersionInput("Service", "Initial basis", 10, "kPa", "Manual", "basis-1", "https://example.test/basis-1", "A", null, null), "Initial basis"));
+            new DesignBasisEndpoints.VersionInput("Service", "Initial basis", 10, "kPa", "Manual", "basis-1", "https://example.test/basis-1", "A", new DateOnly(2026, 10, 5), null), "Initial basis"));
         var basisId = basis.G("id");
         var basisVersionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == basisId).Id);
         await Post(TestData.Marc, root + $"/design-basis/{basisId}/versions/{basisVersionId}/confirm",
@@ -240,10 +330,41 @@ public sealed class SubmissionApiTests(HubFactory f)
         });
         await Post(TestData.Marc, root + $"/design-basis/{basisId}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
             Version<DesignBasisEntry>(basisId), Version<DesignBasisVersion>(basisVersionId),
-            new DesignBasisEndpoints.VersionInput("Service", "Updated basis", 11, "kPa", "Manual", "basis-2", "https://example.test/basis-2", "B", null, null), "Basis changed"));
+            new DesignBasisEndpoints.VersionInput("Service", "Updated basis", 11, "kPa", "Manual", "basis-2", "https://example.test/basis-2", "B", new DateOnly(2026, 10, 5), null), "Basis changed"));
         var proposedBasisVersionId = f.Db(db => db.DesignBasisVersions.Where(v => v.EntryId == basisId && v.Status == BasisStatus.Proposed).Select(v => v.Id).Single());
         await Post(TestData.Marc, root + $"/design-basis/{basisId}/versions/{proposedBasisVersionId}/confirm",
             new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(basisId), Version<DesignBasisVersion>(proposedBasisVersionId), "Confirmed updated basis"));
         Assert.Equal(SubmissionStatus.Checking, f.Db(db => db.SubmissionPackages.Single(p => p.Id == packageId).Status));
+        var fresh = await Get(TestData.Pm, $"{root}/submissions/{packageId}");
+        Assert.False(fresh["readiness"]!["ready"]!.GetValue<bool>());
+        Assert.Contains("submission.change_pending", fresh["readiness"]!["blockers"]!.ToJsonString());
+        var checking = await Get(TestData.Pm, root + "/submissions?status=Checking&page=1&pageSize=1");
+        Assert.Equal(1, checking["totalCount"]!.GetValue<int>());
+        Assert.Equal(packageId, checking["items"]![0]!["id"]!.GetValue<Guid>());
+        Assert.Equal(0, (await Get(TestData.Pm, root + "/submissions?status=Ready&page=1&pageSize=1"))["totalCount"]!.GetValue<int>());
+        await Post(TestData.Pm, $"{root}/submissions/{packageId}/issue", new SubmissionEndpoints.IssueBody(Guid.NewGuid(),
+            fresh["package"]!["rowVersion"]!.GetValue<int>(), 1, fresh["readiness"]!["fingerprint"]!.GetValue<string>(),
+            "Municipality", "https://example.test/transmittal", null), 422);
+        Assert.Empty(f.Db(db => db.SubmissionIssues.Where(i => i.PackageId == packageId).ToList()));
+        var impact = f.Db(db => db.BasisImpactAssessments.Single(i => i.NewVersionId == proposedBasisVersionId && i.Status == AssessmentStatus.Pending));
+        var use = f.Db(db => db.BasisUses.Single(u => u.Id == impact.BasisUseId));
+        var adopt = new DesignBasisEndpoints.ImpactBody(Guid.NewGuid(), impact.RowVersion, use.RowVersion,
+            Version<DesignBasisVersion>(proposedBasisVersionId), Version<Deliverable>(did), "Adopt",
+            "Replacement basis reviewed and adopted", "https://example.test/basis-impact-review");
+        await Post(TestData.Alex, $"{root}/design-basis/{basisId}/impacts/{impact.Id}/decide", adopt);
+        Assert.Equal(AssessmentStatus.Resolved, f.Db(db => db.BasisImpactAssessments.Single(i => i.Id == impact.Id).Status));
+        Assert.Equal(proposedBasisVersionId, f.Db(db => db.BasisUses.Where(u => u.TargetId == did)
+            .OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).Select(u => u.VersionId).First()));
+        var recovered = await Get(TestData.Pm, $"{root}/submissions/{packageId}");
+        Assert.True(recovered["readiness"]!["ready"]!.GetValue<bool>());
+        var ready = await Get(TestData.Pm, root + "/submissions?status=Ready&page=1&pageSize=1");
+        Assert.Equal(1, ready["totalCount"]!.GetValue<int>());
+        Assert.Equal(packageId, ready["items"]![0]!["id"]!.GetValue<Guid>());
+        Assert.Equal(0, (await Get(TestData.Pm, root + "/submissions?status=Checking&page=1&pageSize=1"))["totalCount"]!.GetValue<int>());
+        var issued = await Post(TestData.Pm, $"{root}/submissions/{packageId}/issue", new SubmissionEndpoints.IssueBody(Guid.NewGuid(),
+            recovered["package"]!["rowVersion"]!.GetValue<int>(), 1, recovered["readiness"]!["fingerprint"]!.GetValue<string>(),
+            "Municipality", "https://example.test/transmittal", "Basis impact resolved"));
+        Assert.Equal(packageId, issued.G("id"));
+        Assert.Equal(SubmissionStatus.Issued, f.Db(db => db.SubmissionPackages.Single(p => p.Id == packageId).Status));
     }
 }

@@ -221,6 +221,8 @@ public sealed class MeetingActionsTests(HubFactory f)
         (Guid, string, Guid)[] expected = [.. new[] { (first, ItemType.ChangeNotice, w.Notice), (first, ItemType.Handoff, w.Handoff), (second, ItemType.ChangeNotice, w.Notice) }.Order()];
         var project = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{w.P.Id}/discipline-coordination").Result.Json();
         Assert.Equal(expected, Pairs(project));
+        var paged = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{w.P.Id}/discipline-coordination?page=9&pageSize=1").Result.Json();
+        Assert.Equal(expected, Pairs(paged)); // capture context stays complete for each visible source, regardless of requested page
         var workspace = await f.As(TestData.Pm).GetAsync($"/api/v1/discipline-coordination?projectId={w.P.Id}").Result.Json();
         Assert.Equal(expected, Pairs(Assert.Single(workspace["projects"]!.AsArray())!["data"]!));
         var key = f.Db(db => db.Actions.Single(a => a.Id == first).Key);

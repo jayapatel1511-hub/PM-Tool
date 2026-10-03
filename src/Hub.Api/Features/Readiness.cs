@@ -8,7 +8,7 @@ namespace Hub.Api.Features;
 
 public static class ReadinessEndpoints
 {
-    public sealed record CreateBody(Guid RequestId, int TargetRowVersion, string IntendedOutput, string CompletionCriteria);
+    public sealed record CreateBody(Guid RequestId, int TargetRowVersion, string IntendedOutput, string CompletionCriteria, string? Reason = null, int? AssessmentRowVersion = null);
     public sealed record ApplicabilityBody(Guid RequestId, int AssessmentRowVersion, int CheckRowVersion,
         bool Applies, string Reason, string? EvidenceUrl);
     public sealed record ConstraintBody(Guid RequestId, int TargetRowVersion, string Category, string Description,
@@ -22,6 +22,7 @@ public static class ReadinessEndpoints
     static readonly string[] ConstraintCategories = ["Handoff", "Decision", "Basis", "Capacity", "Review", "Scope", "Other"];
     static readonly string[] LinkTypes = [ItemType.Decision, ItemType.Issue, ItemType.Handoff];
     public sealed record LinkedRecord(string Type, Guid Id, string Key, string Title, string Status);
+    public sealed record CheckSource(string Code, LinkedRecord Record);
 
     // FR-RDY-03: a constraint points at the same-project decision, issue or handoff that already represents it instead of
     // duplicating it. Deleted records drop out through the soft-deletion query filters, so a stale link reads as unavailable.
@@ -53,7 +54,7 @@ public static class ReadinessEndpoints
     // checks without a canonical source, but it cannot keep a linked source in a stale Ready state.
     public static async Task<ReadinessResult> EvaluateCurrent(HubDb db, Project project, string targetType,
         Guid targetId, ReadinessAssessment assessment, IReadOnlyList<ReadinessCheckRecord> records, DateOnly today, DateTimeOffset now,
-        SettingsStore? settings = null)
+        SettingsStore? settings = null, List<CheckSource>? sources = null)
     {
         var target = await ReadTarget(db, project, targetType, targetId);
         var checks = records.ToDictionary(x => x.Code, StringComparer.Ordinal);
@@ -65,9 +66,10 @@ public static class ReadinessEndpoints
 
         var handoffs = await db.Handoffs.AsNoTracking().Where(h => h.ProjectId == project.Id &&
             (targetType == "Task" ? h.TargetTaskId == targetId : h.TargetDeliverableId == targetId) &&
-            h.Status != HandoffStatus.Cancelled).Select(h => h.Status).ToListAsync();
+            h.Status != HandoffStatus.Cancelled).Select(h => new LinkedRecord(ItemType.Handoff, h.Id, h.Key, h.Title, h.Status)).ToListAsync();
+        sources?.AddRange(handoffs.Select(h => new CheckSource(ReadinessCheckCode.Handoff, h)));
         if (handoffs.Count > 0)
-            Source(ReadinessCheckCode.Handoff, true, handoffs.All(s => s is HandoffStatus.Accepted or HandoffStatus.Incorporated),
+            Source(ReadinessCheckCode.Handoff, true, handoffs.All(h => h.Status is HandoffStatus.Accepted or HandoffStatus.Incorporated),
                 "Linked handoffs are current source evidence.");
 
         if (targetType == "Task")
@@ -77,9 +79,10 @@ public static class ReadinessEndpoints
             if (predecessorIds.Count > 0)
             {
                 var predecessors = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == project.Id &&
-                    predecessorIds.Contains(t.Id)).Select(t => t.Status).ToListAsync();
+                    predecessorIds.Contains(t.Id)).Select(t => new LinkedRecord(ItemType.Task, t.Id, t.Key, t.Name, t.Status)).ToListAsync();
+                sources?.AddRange(predecessors.Select(t => new CheckSource(ReadinessCheckCode.Predecessor, t)));
                 Source(ReadinessCheckCode.Predecessor, true, predecessors.Count == predecessorIds.Count &&
-                    predecessors.All(s => s == TaskStatuses.Complete), "Linked predecessor tasks are current source evidence.");
+                    predecessors.All(t => t.Status == TaskStatuses.Complete), "Linked predecessor tasks are current source evidence.");
             }
         }
         else
@@ -89,9 +92,10 @@ public static class ReadinessEndpoints
             if (predecessorIds.Count > 0)
             {
                 var predecessors = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == project.Id &&
-                    predecessorIds.Contains(d.Id)).Select(d => d.Status).ToListAsync();
+                    predecessorIds.Contains(d.Id)).Select(d => new LinkedRecord(ItemType.Deliverable, d.Id, d.Key, d.Name, d.Status)).ToListAsync();
+                sources?.AddRange(predecessors.Select(d => new CheckSource(ReadinessCheckCode.Predecessor, d)));
                 Source(ReadinessCheckCode.Predecessor, true, predecessors.Count == predecessorIds.Count &&
-                    predecessors.All(s => s is DeliverableStatus.Issued or DeliverableStatus.Accepted),
+                    predecessors.All(d => d.Status is DeliverableStatus.Issued or DeliverableStatus.Accepted),
                     "Linked predecessor deliverables are current source evidence.");
             }
         }
@@ -101,40 +105,16 @@ public static class ReadinessEndpoints
             .Select(l => l.SourceId).Distinct().ToListAsync();
         if (decisionIds.Count > 0)
         {
-            var statuses = await db.Decisions.AsNoTracking().Where(d => decisionIds.Contains(d.Id)).Select(d => d.Status).ToListAsync();
-            Source(ReadinessCheckCode.Decision, true, statuses.Count == decisionIds.Count && statuses.All(s => s == DecisionStatus.Decided),
+            var decisions = await Linkable(db, project.Id, ItemType.Decision).Where(d => decisionIds.Contains(d.Id)).ToListAsync();
+            sources?.AddRange(decisions.Select(d => new CheckSource(ReadinessCheckCode.Decision, d)));
+            Source(ReadinessCheckCode.Decision, true, decisions.Count == decisionIds.Count && decisions.All(d => d.Status == DecisionStatus.Decided),
                 "Linked decisions are current source evidence.");
         }
 
-        Guid? exceptionBasisVersionId = null;
-        var allUses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == project.Id && u.TargetType == targetType && u.TargetId == targetId)
-            .Join(db.DesignBasisVersions.AsNoTracking(), u => u.VersionId, v => v.Id,
-                (u, v) => new { u.Id, u.VersionId, u.CreatedAt, v.EntryId }).ToListAsync();
-        var currentUses = allUses.GroupBy(u => u.EntryId)
-            .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()).ToList();
-        if (currentUses.Count > 0)
-        {
-            var useIds = currentUses.Select(u => u.Id).ToArray();
-            var versionIds = currentUses.Select(u => u.VersionId).ToArray();
-            var versions = await db.DesignBasisVersions.AsNoTracking().Where(v => versionIds.Contains(v.Id)).ToListAsync();
-            var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => c.ProjectId == project.Id &&
-                (versionIds.Contains(c.LeftVersionId) || versionIds.Contains(c.RightVersionId)))
-                .AnyAsync(c => !c.Resolved);
-            var pendingImpact = await db.BasisImpactAssessments.AsNoTracking().AnyAsync(a => a.ProjectId == project.Id &&
-                useIds.Contains(a.BasisUseId) && a.Status == AssessmentStatus.Pending);
-            var proposed = versions.Where(v => v.Status == BasisStatus.Proposed).ToList();
-            if (versions.Count == currentUses.Count && proposed.Count == 1 && !conflicts && !pendingImpact &&
-                versions.All(v => v.Status == BasisStatus.Confirmed || v.Id == proposed[0].Id))
-            {
-                var candidate = proposed[0];
-                if (await db.DesignBasisEntries.AsNoTracking().AnyAsync(e => e.ProjectId == project.Id &&
-                    e.Id == candidate.EntryId && e.Kind == BasisKind.Assumption))
-                    exceptionBasisVersionId = candidate.Id;
-            }
-            Source(ReadinessCheckCode.Basis, true, versions.Count == currentUses.Count && !conflicts && !pendingImpact &&
-                versions.All(v => v.Status == BasisStatus.Confirmed),
+        var basis = await EvaluateBasis(db, project, targetType, targetId, sources);
+        if (basis.HasUses)
+            Source(ReadinessCheckCode.Basis, true, basis.Satisfied,
                 "Linked basis uses and conflicts are current source evidence.");
-        }
 
         // FR-MDC-08: a removed, deactivated or missing owner, or an inactive discipline, leaves the work without a valid
         // production owner; it is a known unmet check with its reason, never an error for the reader.
@@ -165,6 +145,12 @@ public static class ReadinessEndpoints
             var containsTarget = review?.CurrentRoundId is { } currentRoundId &&
                 await db.ReviewManifestItems.AsNoTracking().AnyAsync(m => m.ProjectId == project.Id &&
                     m.RoundId == currentRoundId && m.DeliverableId == targetId);
+            if (sources is not null)
+            {
+                var source = await db.ReviewPackages.AsNoTracking().Where(p => p.ProjectId == project.Id && p.Id == packageId)
+                    .Select(p => new LinkedRecord("ReviewPackage", p.Id, p.Key, p.Title, p.Status)).SingleOrDefaultAsync();
+                if (source is not null) sources.Add(new CheckSource(ReadinessCheckCode.ReviewGate, source));
+            }
             Source(ReadinessCheckCode.ReviewGate, true,
                 review?.Status == ReviewStatus.Approved && round == ReviewStatus.Approved && containsTarget,
                 "The required review package and current round are current source evidence.");
@@ -176,7 +162,7 @@ public static class ReadinessEndpoints
 
         // Jay's Submission Gate (2026-10-01): every linked prerequisite package must be Issued. With no link, a reasoned
         // Not Applicable stands and anything else stays unknown; satisfaction is never taken from a stored record.
-        var gate = await SubmissionGate(db, project.Id, targetType, targetId);
+        var gate = await SubmissionGate(db, project.Id, targetType, targetId, sources);
         if (gate is not null) Source(ReadinessCheckCode.SubmissionGate, true, gate.Value.Satisfied, gate.Value.Reason);
         else if (checks.TryGetValue(ReadinessCheckCode.SubmissionGate, out var gateRecord) && gateRecord.Applies == true)
             Source(ReadinessCheckCode.SubmissionGate, true, null, "No prerequisite submission package is linked.");
@@ -192,10 +178,10 @@ public static class ReadinessEndpoints
 
         var activeConstraints = await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == project.Id &&
             c.TargetType == targetType && c.TargetId == targetId &&
-            c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled).Select(c => c.Category).ToListAsync();
-        foreach (var category in activeConstraints.Distinct())
+            c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled).ToListAsync();
+        foreach (var constraint in activeConstraints)
         {
-            var code = category switch
+            var code = constraint.Category switch
             {
                 "Handoff" => ReadinessCheckCode.Handoff,
                 "Decision" => ReadinessCheckCode.Decision,
@@ -204,23 +190,77 @@ public static class ReadinessEndpoints
                 "Review" => ReadinessCheckCode.ReviewGate,
                 _ => null,
             };
-            if (code is not null) Source(code, true, false, "An active linked constraint blocks this check.");
+            if (code is not null)
+            {
+                Source(code, true, false, "An active linked constraint blocks this check.");
+                sources?.Add(new CheckSource(code, new LinkedRecord("WorkConstraint", constraint.Id, constraint.Key, constraint.Description, constraint.State)));
+            }
         }
 
         var latestException = await db.ReadinessExceptions.AsNoTracking().Where(e => e.ProjectId == project.Id &&
             e.AssessmentId == assessment.Id).OrderByDescending(e => e.CreatedAt).ThenByDescending(e => e.Id).FirstOrDefaultAsync();
         ReadinessPermission? permission = null;
         if (latestException is not null)
+        {
+            var exceptionScope = await db.DesignBasisVersions.AsNoTracking().Where(v => v.Id == latestException.BasisVersionId)
+                .Select(v => v.Scope).SingleOrDefaultAsync();
+            var hasCurrentOwnerDisposition = basis.ExceptionBasisVersionId == latestException.BasisVersionId && exceptionScope is not null &&
+                await db.BasisAssumptionDispositions.AsNoTracking().AnyAsync(d => d.ProjectId == project.Id &&
+                    d.VersionId == latestException.BasisVersionId && d.OwnerId == target.OwnerId &&
+                    d.ApprovedBy != target.OwnerId && d.ExpiresOn >= latestException.ExpiresOn &&
+                    d.Scope.ToLower() == exceptionScope.ToLower());
             permission = new ReadinessPermission(true, latestException.ExpiresOn,
-                exceptionBasisVersionId == latestException.BasisVersionId,
+                hasCurrentOwnerDisposition,
                 latestException.VerifierId != target.OwnerId && await Coordination.People(db, project)
                     .AnyAsync(u => u.Id == latestException.VerifierId), latestException.LimitedWork, latestException.Risk);
+        }
         // An open or proposed-for-removal constraint is a known failure; it never hides an unknown check (§10.8 precedence)
         // and, being a second failure, leaves no room for Proceed under Assumption.
         var result = ReadinessRules.Evaluate(checks.Values.Select(c => new ReadinessCheck(c.Code, c.Applies, c.Satisfied)), permission, today,
             activeConstraints.Count > 0 ? [ReadinessRules.ConstraintBlocker] : null);
         assessment.State = result.State; assessment.EvaluatedAt = now;
         return result;
+    }
+
+    public static async Task<(bool HasUses, bool Satisfied, Guid? ExceptionBasisVersionId)> EvaluateBasis(
+        HubDb db, Project project, string targetType, Guid targetId, List<CheckSource>? sources = null)
+    {
+        var allUses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == project.Id && u.TargetType == targetType && u.TargetId == targetId)
+            .Join(db.DesignBasisVersions.AsNoTracking(), u => u.VersionId, v => v.Id,
+                (u, v) => new { u.Id, u.VersionId, u.CreatedAt, v.EntryId }).ToListAsync();
+        var currentUses = allUses.GroupBy(u => u.EntryId)
+            .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()).ToList();
+        if (currentUses.Count == 0) return (false, false, null);
+
+        var useIds = currentUses.Select(u => u.Id).ToArray();
+        var versionIds = currentUses.Select(u => u.VersionId).ToArray();
+        var versions = await db.DesignBasisVersions.AsNoTracking().Where(v => versionIds.Contains(v.Id)).ToListAsync();
+        if (sources is not null)
+        {
+            var entryIds = versions.Select(v => v.EntryId).ToArray();
+            var entries = await db.DesignBasisEntries.AsNoTracking().Where(e => e.ProjectId == project.Id && entryIds.Contains(e.Id)).ToDictionaryAsync(e => e.Id);
+            foreach (var v in versions)
+                if (entries.TryGetValue(v.EntryId, out var entry))
+                    sources.Add(new CheckSource(ReadinessCheckCode.Basis, new LinkedRecord("DesignBasisEntry", entry.Id, entry.Key,
+                        $"{entry.Title} · v{v.Number}", v.Status)));
+        }
+        var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => c.ProjectId == project.Id &&
+            (versionIds.Contains(c.LeftVersionId) || versionIds.Contains(c.RightVersionId)))
+            .AnyAsync(c => !c.Resolved);
+        var pendingImpact = await db.BasisImpactAssessments.AsNoTracking().AnyAsync(a => a.ProjectId == project.Id &&
+            useIds.Contains(a.BasisUseId) && a.Status == AssessmentStatus.Pending);
+        var proposed = versions.Where(v => v.Status == BasisStatus.Proposed).ToList();
+        Guid? exceptionBasisVersionId = null;
+        if (versions.Count == currentUses.Count && proposed.Count == 1 && !conflicts && !pendingImpact &&
+            versions.All(v => v.Status == BasisStatus.Confirmed || v.Id == proposed[0].Id))
+        {
+            var candidate = proposed[0];
+            if (await db.DesignBasisEntries.AsNoTracking().AnyAsync(e => e.ProjectId == project.Id &&
+                e.Id == candidate.EntryId && e.Kind == BasisKind.Assumption))
+                exceptionBasisVersionId = candidate.Id;
+        }
+        return (true, versions.Count == currentUses.Count && !conflicts && !pendingImpact &&
+            versions.All(v => v.Status == BasisStatus.Confirmed), exceptionBasisVersionId);
     }
 
     /// Evaluates the assigned production owner's capacity over the target's authoritative due-date window.
@@ -511,7 +551,7 @@ public static class ReadinessEndpoints
         await db.SubmissionManifestItems.AsNoTracking().AnyAsync(m => m.PackageId == package.Id && m.ManifestVersion == package.ManifestVersion && m.DeliverableId == id);
 
     /// Null without an active link. A link whose current package now lists the output itself cannot gate it, so it is unknown.
-    static async Task<(bool? Satisfied, string Reason)?> SubmissionGate(HubDb db, Guid projectId, string targetType, Guid targetId)
+    static async Task<(bool? Satisfied, string Reason)?> SubmissionGate(HubDb db, Guid projectId, string targetType, Guid targetId, List<CheckSource>? sources = null)
     {
         var links = await db.ReadinessSubmissionPrerequisites.AsNoTracking().Where(l => l.ProjectId == projectId &&
             l.TargetType == targetType && l.TargetId == targetId && l.RemovedAt == null).Select(l => l.PackageId).ToListAsync();
@@ -521,11 +561,60 @@ public static class ReadinessEndpoints
         foreach (var link in links)
         {
             var package = await EffectivePackage(db, projectId, link);
+            if (package is not null) sources?.Add(new CheckSource(ReadinessCheckCode.SubmissionGate,
+                new LinkedRecord("SubmissionPackage", package.Id, package.Key, package.Title, package.Status)));
             issued &= package?.Status == SubmissionStatus.Issued;
             selfGating |= package is null || await ContainsOutput(db, package, deliverableId);
         }
         return selfGating ? (null, "A linked submission package now lists this output; remove or replace the link.")
             : issued ? (true, "Every linked submission package is Issued.") : (false, "A linked submission package is not Issued.");
+    }
+
+    static async Task RecoverOwnerOwnedState(HubDb db, Guid projectId, Coordination.Work target, ReadinessAssessment assessment, string reason, DateTimeOffset now)
+    {
+        var uses = await db.BasisUses.Where(u => u.ProjectId == projectId && u.TargetType == target.Type && u.TargetId == target.Id)
+            .Join(db.DesignBasisVersions, u => u.VersionId, v => v.Id, (u, v) => new { Use = u, v.EntryId })
+            .ToListAsync();
+        foreach (var use in uses.GroupBy(x => x.EntryId).Select(g => g.OrderByDescending(x => x.Use.CreatedAt).ThenByDescending(x => x.Use.Id).First()).Select(x => x.Use))
+        {
+            use.OwnerId = target.OwnerId;
+            db.Audit.Note(use, reason: reason);
+            foreach (var impact in await db.BasisImpactAssessments.Where(i => i.ProjectId == projectId &&
+                i.BasisUseId == use.Id && i.Status == AssessmentStatus.Pending).ToListAsync())
+            {
+                impact.OwnerId = target.OwnerId;
+                db.Audit.Note(impact, reason: reason);
+            }
+        }
+
+        foreach (var constraint in await db.WorkConstraints.Where(c => c.ProjectId == projectId &&
+            c.TargetType == target.Type && c.TargetId == target.Id &&
+            c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled).ToListAsync())
+        {
+            constraint.AffectedOwnerId = target.OwnerId;
+            db.Audit.Note(constraint, reason: reason);
+        }
+
+        foreach (var commitment in await db.OutputCommitments.Where(c => c.ProjectId == projectId &&
+            c.TargetType == target.Type && c.TargetId == target.Id && c.State == CommitmentState.Proposed && c.SnapshotId == null).ToListAsync())
+        {
+            commitment.PerformerId = target.OwnerId;
+            db.Audit.Note(commitment, reason: reason);
+        }
+
+        assessment.OwnerId = target.OwnerId;
+        assessment.State = ReadinessState.NeedsAssessment;
+        assessment.EvaluatedAt = now;
+        db.Audit.Note(assessment, reason: reason);
+        foreach (var check in await db.ReadinessChecks.Where(c => c.AssessmentId == assessment.Id).ToListAsync())
+        {
+            check.Applies = null;
+            check.Satisfied = null;
+            check.Reason = null;
+            check.EvidenceUrl = null;
+            check.RecordedBy = null;
+            db.Audit.Note(check, reason: reason);
+        }
     }
 
     static Task<Coordination.Result> Create(Guid projectId, string targetType, Guid targetId, CreateBody body,
@@ -537,9 +626,20 @@ public static class ReadinessEndpoints
                 if (target.RowVersion != body.TargetRowVersion)
                     throw ApiException.Conflict("concurrency_conflict", "coord.stale");
                 Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, target.OwnerId));
-                if (await db.ReadinessAssessments.AnyAsync(a => a.ProjectId == project.Id &&
-                    a.TargetType == target.Type && a.TargetId == target.Id))
-                    throw ApiException.Conflict("readiness_exists", "error.duplicate");
+                var existing = await db.ReadinessAssessments.SingleOrDefaultAsync(a => a.ProjectId == project.Id &&
+                    a.TargetType == target.Type && a.TargetId == target.Id);
+                if (existing is not null)
+                {
+                    if (existing.OwnerId == target.OwnerId)
+                        throw ApiException.Conflict("readiness_exists", "error.duplicate");
+                    Check.That(body.AssessmentRowVersion is not null, "assessmentRowVersion", "error.required");
+                    Coordination.Version(existing, body.AssessmentRowVersion!.Value);
+                    var reason = Check.Reason(body.Reason);
+                    await RecoverOwnerOwnedState(db, project.Id, target, existing, reason, clock.GetUtcNow());
+                    existing.IntendedOutput = Check.Required(body.IntendedOutput, "intendedOutput", 2000);
+                    existing.CompletionCriteria = Check.Required(body.CompletionCriteria, "completionCriteria", 2000);
+                    return existing;
+                }
                 var assessment = new ReadinessAssessment { ProjectId = project.Id, TargetType = target.Type,
                     TargetId = target.Id, OwnerId = target.OwnerId,
                     IntendedOutput = Check.Required(body.IntendedOutput, "intendedOutput", 2000),
@@ -576,13 +676,15 @@ public static class ReadinessEndpoints
                 var settings = await settingsStore.Get(db);
                 await EvaluateCurrent(db, project, target.Type, target.Id, assessment, checks,
                     clock.Today(settings), clock.GetUtcNow(), settingsStore);
+                // Every child applicability write advances the aggregate version, even if derived state is unchanged.
+                db.Entry(assessment).Property(a => a.EvaluatedAt).IsModified = true;
                 db.Audit.Note(check, reason: check.Reason);
                 db.Audit.Note(assessment, reason: check.Reason);
                 return check;
             });
 
     static Task<Coordination.Result> ApproveException(Guid projectId, string targetType, Guid targetId,
-        ExceptionBody body, Access access, HubDb db, TimeProvider clock) =>
+        ExceptionBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "readiness.exception", targetType, targetId, body },
             access, db, clock, async (project, ctx) =>
             {
@@ -618,21 +720,40 @@ public static class ReadinessEndpoints
                     Risk = Check.Required(body.Risk, "risk", 2000), ExpiresOn = body.ExpiresOn };
                 db.ReadinessExceptions.Add(row);
                 db.Audit.Note(row);
+                var page = target.Type == "Task" ? "tasks" : "deliverables";
+                await notify.Send(NotificationEvents.ReadinessExceptionApproved, [row.VerifierId],
+                    new NotifyItem(project.Id, "ReadinessException", row.Id, target.Key,
+                        $"/projects/{project.ProjectNumber}/{page}?panel={target.Type}:{target.Id}", project.ProjectNumber),
+                    Text.Get("notify.readiness_exception_assigned", target.Key, row.ExpiresOn));
                 return row;
             });
 
     static async Task<object> Detail(Guid projectId, string targetType, Guid targetId, Access access, HubDb db, TimeProvider clock,
         SettingsStore settings)
     {
-        var (project, _) = await access.Project(projectId, false);
+        var (project, ctx) = await access.Project(projectId, false);
         Check.OneOf(targetType, ["Task", "Deliverable"], "targetType");
         var assessment = await db.ReadinessAssessments.AsNoTracking().SingleOrDefaultAsync(a =>
             a.ProjectId == projectId && a.TargetType == targetType && a.TargetId == targetId) ?? throw ApiException.NotFound();
         var checks = await db.ReadinessChecks.AsNoTracking().Where(c => c.ProjectId == projectId &&
             c.AssessmentId == assessment.Id).OrderBy(c => c.Code).ToListAsync();
+        var sources = new List<CheckSource>();
         var result = await EvaluateCurrent(db, project, targetType, targetId, assessment, checks,
-            clock.Today(await settings.Get(db)), clock.GetUtcNow(), settings);
-        return new { Assessment = assessment, Checks = checks, result.Unknown, result.Blocked,
+            clock.Today(await settings.Get(db)), clock.GetUtcNow(), settings, sources);
+        var managedProjects = Permissions.IsPM(access.Actor, ctx)
+            ? db.Projects.Where(p => p.Id == projectId).Select(p => p.Id) : db.Projects.Where(_ => false).Select(p => p.Id);
+        var allocationLinks = db.AllocationWorkLinks.AsNoTracking().Where(l => l.ReleasedAt == null &&
+            (l.WorkType == targetType && l.WorkId == targetId || l.WorkType == "Review" && targetType == "Deliverable" &&
+                db.DisciplineReviews.Any(r => r.Id == l.WorkId && db.ReviewPackages.Any(p => p.CurrentRoundId == r.RoundId &&
+                    db.Deliverables.Any(d => d.Id == targetId && d.RequiredReviewPackageId == p.Id)))));
+        var allocationSources = await AllocationEndpoints.VisibleQuery(db, access.Actor, managedProjects)
+            .Where(a => a.ProjectId == projectId && (a.Status == AllocationStatus.Proposed || a.Status == AllocationStatus.Confirmed) &&
+                allocationLinks.Any(l => l.AllocationId == a.Id))
+            .Select(a => new { a.Id, a.Purpose, a.Status, a.FromDate, a.ThroughDate }).ToListAsync();
+        sources.AddRange(allocationSources.Select(a => new CheckSource(a.Purpose == AllocationPurpose.Review
+            ? ReadinessCheckCode.ReviewCapacity : ReadinessCheckCode.ProductionCapacity,
+            new LinkedRecord("ResourceAllocation", a.Id, "", $"{a.Purpose} · {a.FromDate:yyyy-MM-dd}–{a.ThroughDate:yyyy-MM-dd}", a.Status))));
+        return new { Assessment = assessment, Checks = checks, Sources = sources.Distinct().ToList(), result.Unknown, result.Blocked,
             Exceptions = await db.ReadinessExceptions.AsNoTracking().Where(e => e.ProjectId == projectId &&
                 e.AssessmentId == assessment.Id).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync() };
     }

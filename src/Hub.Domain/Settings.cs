@@ -157,6 +157,7 @@ public static class NotificationEvents
         AllocationChanged = "AllocationChanged", SubmissionChanged = "SubmissionChanged",
         IssueVerifierAssigned = "IssueVerifierAssigned", IssueVerificationOutcome = "IssueVerificationOutcome",
         ConstraintAction = "ConstraintAction", ConstraintOutcome = "ConstraintOutcome",
+        ReadinessExceptionApproved = "ReadinessExceptionApproved",
         CommitmentProposed = "CommitmentProposed", CommitmentChanged = "CommitmentChanged",
         BasisImpactPending = "BasisImpactPending", BasisConflictRaised = "BasisConflictRaised",
         TaskStartAuthorised = "TaskStartAuthorised";
@@ -178,6 +179,7 @@ public static class NotificationEvents
         new(AllocationChanged, true, false), new(SubmissionChanged, true, false),
         new(IssueVerifierAssigned, true, false, true), new(IssueVerificationOutcome, true, false),
         new(ConstraintAction, true, false, true), new(ConstraintOutcome, true, false),
+        new(ReadinessExceptionApproved, true, false, true),
         new(CommitmentProposed, true, false, true), new(CommitmentChanged, true, false),
         new(BasisImpactPending, true, false, true), new(BasisConflictRaised, true, false),
         new(IssueAffectedDiscipline, true, false),
@@ -187,7 +189,7 @@ public static class NotificationEvents
     /// Coordination events whose recipients must hold current project access when the notice is composed and
     /// again when its email is delivered (FR-MDC-02).
     public static readonly HashSet<string> ProjectScoped = [HandoffChanged, ReviewPackageChanged, ChangeImpact, AllocationChanged,
-        SubmissionChanged, IssueVerifierAssigned, IssueVerificationOutcome, ConstraintAction, ConstraintOutcome, CommitmentProposed, CommitmentChanged,
+        SubmissionChanged, IssueVerifierAssigned, IssueVerificationOutcome, ConstraintAction, ConstraintOutcome, ReadinessExceptionApproved, CommitmentProposed, CommitmentChanged,
         BasisImpactPending, BasisConflictRaised,
         IssueAffectedDiscipline, TaskStartAuthorised];
 

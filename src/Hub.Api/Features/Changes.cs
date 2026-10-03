@@ -107,7 +107,7 @@ public static class ChangeEndpoints
         var recipients = new HashSet<Guid>();
         // A drawing number and revision can occur in more than one source. Only an exact
         // registered source link establishes that this reference was superseded.
-        var documents = await db.IssueDocumentReferences.Where(d => d.ProjectId == p.Id && d.Revision == oldRevision.Revision && d.SourceUrl == oldRevision.Url &&
+        var documents = await db.IssueDocumentReferences.Where(d => d.ProjectId == p.Id && d.ReplacedById == null && d.Revision == oldRevision.Revision && d.SourceUrl == oldRevision.Url &&
             (d.Identifier == oldRevision.ExternalIdentifier || d.Identifier == oldRevision.SourceKey) &&
             db.Issues.Any(i => i.Id == d.IssueId && i.Status == IssueStatus.Resolved)).ToListAsync();
         foreach (var document in documents)
@@ -156,7 +156,7 @@ public static class ChangeEndpoints
             var issueImpactRecipients = await CreateIssueImpacts(db, p, await Coordination.Revision(db, p.Id, c.OldRevisionId), next, clock, access.Me.Id);
             await db.SaveChangesAsync();
             await ReviewEndpoints.AdvanceForPublishedRevision(db, notify, p, await Coordination.Revision(db, p.Id, c.OldRevisionId), next);
-            await SubmissionEndpoints.InvalidateForPublishedRevision(db, p.Id, c.OldRevisionId);
+            await SubmissionEndpoints.InvalidateForPublishedRevision(db, p.Id, c.OldRevisionId, notify);
             await Notify(notify, p, c, (await db.ChangeAssessments.Where(a => a.ChangeNoticeId == c.Id).Select(a => a.OwnerId).ToListAsync())
                 .Concat(issueImpactRecipients).Distinct()); return c;
         });

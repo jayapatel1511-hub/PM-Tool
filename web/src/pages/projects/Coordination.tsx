@@ -72,6 +72,7 @@ export function CoordinationTab() {
   const q = useQuery({ queryKey: ['p', p.id, 'coordination', disciplineId], queryFn: () => get<Coord>(`projects/${p.id}/coordination${qs({ disciplineId })}`) })
   const [log, setLog] = useState<{ id: string; key: string; what: string; at: string }[]>([])
   const [hideDiscussed, setHideDiscussed] = useState(false)
+  const [printAll, setPrintAll] = useState(false)
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [creating, setCreating] = useState(false)
   const [recording, setRecording] = useState<{ id: string; key: string } | null>(null)
@@ -247,12 +248,12 @@ export function CoordinationTab() {
           {meeting && canCapture && <Button size="sm" variant="outline" onClick={() => setCapturing({})}><ListPlus className="size-4" />{t('action.new')}</Button>}
           <Button size="sm" variant={meeting ? 'default' : 'outline'} aria-pressed={meeting} onClick={() => set('meeting', meeting ? undefined : '1')}><MonitorPlay className="size-4" />{t('wc.meetingMode')}</Button>
           <Button size="sm" variant="outline" onClick={copySummary}><ClipboardCopy className="size-4" />{t('wc.copySummary')}</Button>
-          <Button size="sm" variant="outline" onClick={() => window.print()}><Printer className="size-4" />{t('wc.print')}</Button>
+          <Button size="sm" variant="outline" disabled={printAll} onClick={() => setPrintAll(true)}><Printer className="size-4" />{t('wc.print')}</Button>
           {c.window.canMarkReviewed && <Button size="sm" onClick={markReviewed}><CheckCheck className="size-4" />{t('wc.markReviewed')}</Button>}
         </div>
       </div>
       {p.status !== 'Active' && <div role="status" className="rounded-md border bg-idle-bg px-3 py-2 text-sm text-idle">{t('wc.notActive', { status: tv(p.status) })}</div>}
-      <DisciplineCoordinationView project={p} disciplineId={disciplineId} meeting={meeting} canCapture={canCapture}
+      <DisciplineCoordinationView printAll={printAll} onPrinted={setPrintAll} project={p} disciplineId={disciplineId} meeting={meeting} canCapture={canCapture}
         onCapture={(label, links, linkedActionIds) => setCapturing({ label, links, linkedActionIds })} />
       <div className="grid gap-4 lg:grid-cols-[12rem_1fr]">
         <nav aria-label={t('wc.index')} className="no-print hidden lg:block">

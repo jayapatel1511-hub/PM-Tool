@@ -47,7 +47,7 @@ public static class SubmissionEndpoints
     }
 
     // Publication and invalidation share the same project transaction. Issued snapshots are untouched.
-    public static async Task InvalidateForPublishedRevision(HubDb db, Guid projectId, Guid oldRevisionId)
+    public static async Task InvalidateForPublishedRevision(HubDb db, Guid projectId, Guid oldRevisionId, Notifier notify)
     {
         var packages = await db.SubmissionManifestItems.Where(m => m.ProjectId == projectId && m.SourceRevisionId == oldRevisionId)
             .Join(db.SubmissionPackages, m => m.PackageId, p => p.Id, (m, p) => p)
@@ -55,21 +55,21 @@ public static class SubmissionEndpoints
                 && (p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready || p.Status == SubmissionStatus.Draft))
             .Distinct().ToListAsync();
         foreach (var package in packages)
-            await Invalidate(db, package, "Source revision changed");
+            await Invalidate(db, notify, package, "Source revision changed");
     }
 
-    public static async Task InvalidateForReviewPackage(HubDb db, Guid projectId, Guid reviewPackageId)
+    public static async Task InvalidateForReviewPackage(HubDb db, Guid projectId, Guid reviewPackageId, Notifier notify)
     {
         var packages = await db.SubmissionPackages.Where(p => p.ProjectId == projectId &&
             (p.Status == SubmissionStatus.Draft || p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready) &&
             db.SubmissionManifestItems.Any(m => m.PackageId == p.Id && m.ManifestVersion == p.ManifestVersion &&
                 db.Deliverables.Any(d => d.Id == m.DeliverableId && d.RequiredReviewPackageId == reviewPackageId))).ToListAsync();
         foreach (var package in packages)
-            await Invalidate(db, package, "Required review changed");
+            await Invalidate(db, notify, package, "Required review changed");
     }
 
     /// <summary>Invalidates unissued packages whose manifest contains a handoff target.</summary>
-    public static async Task InvalidateForHandoff(HubDb db, Guid projectId, Guid? targetTaskId, Guid? targetDeliverableId)
+    public static async Task InvalidateForHandoff(HubDb db, Guid projectId, Guid? targetTaskId, Guid? targetDeliverableId, Notifier notify)
     {
         var packageIds = await db.SubmissionManifestItems.Where(m => m.ProjectId == projectId &&
             (m.DeliverableId == targetDeliverableId || targetTaskId != null && db.Tasks.Any(t => t.Id == targetTaskId && t.DeliverableId == m.DeliverableId)))
@@ -78,11 +78,11 @@ public static class SubmissionEndpoints
             .Select(m => m.PackageId).Distinct().ToListAsync();
         foreach (var package in await db.SubmissionPackages.Where(p => p.ProjectId == projectId && packageIds.Contains(p.Id) &&
             (p.Status == SubmissionStatus.Draft || p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready)).ToListAsync())
-            await Invalidate(db, package, "Handoff changed");
+            await Invalidate(db, notify, package, "Handoff changed");
     }
 
     /// <summary>Invalidates unissued packages whose manifest contains work using a changed basis entry.</summary>
-    public static async Task InvalidateForDesignBasisEntry(HubDb db, Guid projectId, Guid entryId)
+    public static async Task InvalidateForDesignBasisEntry(HubDb db, Guid projectId, Guid entryId, Notifier notify)
     {
         var uses = await db.BasisUses.Where(u => u.ProjectId == projectId && db.DesignBasisVersions.Any(v => v.Id == u.VersionId && v.EntryId == entryId))
             .Select(u => new { u.TargetType, u.TargetId }).ToListAsync();
@@ -95,18 +95,21 @@ public static class SubmissionEndpoints
             .Select(m => m.PackageId).Distinct().ToListAsync();
         foreach (var package in await db.SubmissionPackages.Where(p => p.ProjectId == projectId && packageIds.Contains(p.Id) &&
             (p.Status == SubmissionStatus.Draft || p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready)).ToListAsync())
-            await Invalidate(db, package, "Applicable design basis changed");
+            await Invalidate(db, notify, package, "Applicable design basis changed");
     }
 
-    static async Task Invalidate(HubDb db, SubmissionPackage package, string reason)
+    static async Task Invalidate(HubDb db, Notifier notify, SubmissionPackage package, string reason)
     {
         package.Status = SubmissionStatus.Checking;
-        foreach (var check in await db.SubmissionChecks.Where(c => c.PackageId == package.Id && c.ManifestVersion == package.ManifestVersion).ToListAsync())
+        var checks = await db.SubmissionChecks.Where(c => c.PackageId == package.Id && c.ManifestVersion == package.ManifestVersion).ToListAsync();
+        foreach (var check in checks)
         {
             check.Status = SubmissionCheckStatus.Pending; check.EvidenceUrl = null; check.Reason = null; check.ApprovedAt = null; check.ApprovedBy = null;
             db.Audit.Note(check, reason: reason);
         }
         db.Audit.Note(package, reason: reason);
+        var project = await db.Projects.SingleAsync(p => p.Id == package.ProjectId);
+        await NotifyChanged(notify, project, package, checks.Select(c => (Guid?)c.OwnerId).ToArray());
     }
 
     static async Task<SubmissionPackage> Load(HubDb db, Guid projectId, Guid id) =>
@@ -223,7 +226,7 @@ public static class SubmissionEndpoints
             var reason = Check.Reason(body.Reason);
             var previousCoordinatorId = package.CoordinatorId;
             package.CoordinatorId = body.CoordinatorId;
-            await Invalidate(db, package, reason);
+            await Invalidate(db, notify, package, reason);
             foreach (var check in await db.SubmissionChecks.Where(c => c.PackageId == id && c.ManifestVersion == package.ManifestVersion && c.Kind != SubmissionCheckKind.Applicability).ToListAsync())
                 check.OwnerId = body.CoordinatorId;
             db.Audit.Note(package, reason: reason); await NotifyChanged(notify, project, package, previousCoordinatorId); return package;
@@ -251,10 +254,11 @@ public static class SubmissionEndpoints
             var check = await db.SubmissionChecks.SingleOrDefaultAsync(c => c.Id == checkId && c.PackageId == id && c.ManifestVersion == package.ManifestVersion) ?? throw ApiException.NotFound();
             Coordination.Version(check, body.RowVersion);
             Check.That(check.Kind == SubmissionCheckKind.Applicability && !check.Required, "checkId", "submission.derived_check");
-            Check.OneOf(body.Action, [SubmissionCheckStatus.Pass, SubmissionCheckStatus.NotApplicable, SubmissionCheckStatus.Pending], "action");
+            Check.OneOf(body.Action, [SubmissionCheckStatus.Pass, SubmissionCheckStatus.Fail, SubmissionCheckStatus.NotApplicable, SubmissionCheckStatus.Pending], "action");
             if (body.Action == SubmissionCheckStatus.NotApplicable) Access.Demand(Permissions.AuthoriseSubmission(access.Actor, ctx));
             else Access.Demand(Permissions.SignSubmissionCheck(access.Actor, ctx, check.OwnerId));
             await Coordination.Person(db, project, check.OwnerId);
+            if (body.Action == SubmissionCheckStatus.Fail) Check.Reason(body.Reason);
             check.Status = body.Action; check.Reason = body.Action == SubmissionCheckStatus.Pending ? Check.Reason(body.Reason) : body.Action == SubmissionCheckStatus.NotApplicable ? Check.Reason(body.Reason) : body.Reason;
             check.EvidenceUrl = body.Action == SubmissionCheckStatus.Pending ? null : Coordination.Url(body.EvidenceUrl);
             check.ApprovedBy = body.Action == SubmissionCheckStatus.NotApplicable ? access.Me.Id : null;
@@ -297,7 +301,9 @@ public static class SubmissionEndpoints
             foreach (var derived in await db.SubmissionChecks.Where(c => c.PackageId == id && c.ManifestVersion == package.ManifestVersion && c.Kind != SubmissionCheckKind.Applicability).ToListAsync())
                 derived.Status = SubmissionCheckStatus.Pass;
             var manifest = await db.SubmissionManifestItems.Where(m => m.PackageId == id && m.ManifestVersion == package.ManifestVersion)
-                .Join(db.SourceRevisions, m => m.SourceRevisionId, r => r.Id, (m, r) => new { m.DeliverableId, m.SourceRevisionId, m.ReviewRoundId, m.Required, r.Revision, r.Url, r.Title }).ToListAsync();
+                .Join(db.SourceRevisions, m => m.SourceRevisionId, r => r.Id, (m, r) => new { m.DeliverableId, m.SourceRevisionId, m.ReviewRoundId, m.Required,
+                    r.SourceKey, r.Revision, r.Url, r.Title, r.SourceSystem, r.ExternalIdentifier, r.Issuer, r.Scope, r.SourceCheckedAt,
+                    ManuallyRegistered = true }).ToListAsync();
             var checks = await db.SubmissionChecks.Where(c => c.PackageId == id && c.ManifestVersion == package.ManifestVersion).ToListAsync();
             var checkIds = checks.Select(c => c.Id).ToArray();
             var evidence = await db.CheckEvidences.Where(e => checkIds.Contains(e.CheckId)).Select(e => new { e.CheckId, e.EvidenceUrl, e.Note, e.CreatedAt, e.CreatedBy }).ToListAsync();
@@ -416,7 +422,8 @@ public static class SubmissionEndpoints
         var package = await Load(db, projectId, id);
         var manifest = await db.SubmissionManifestItems.AsNoTracking().Where(m => m.PackageId == id).OrderBy(m => m.ManifestVersion).ThenBy(m => m.DeliverableId)
             .Join(db.SourceRevisions, m => m.SourceRevisionId, s => s.Id, (m, s) => new { m.ManifestVersion, m.DeliverableId, m.SourceRevisionId, m.ReviewRoundId, m.Required,
-                s.SourceKey, s.Title, s.Revision, s.Url, s.SourceSystem, s.ExternalIdentifier }).ToListAsync();
+                s.SourceKey, s.Title, s.Revision, s.Url, s.SourceSystem, s.ExternalIdentifier, s.Issuer, s.Scope, s.SourceCheckedAt,
+                ManuallyRegistered = true }).ToListAsync();
         var checks = await db.SubmissionChecks.AsNoTracking().Where(c => c.PackageId == id).OrderBy(c => c.ManifestVersion).ThenBy(c => c.Kind).ThenBy(c => c.Id).ToListAsync();
         var checkIds = checks.Select(c => c.Id).ToArray();
         var evidence = await db.CheckEvidences.AsNoTracking().Where(e => checkIds.Contains(e.CheckId)).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync();

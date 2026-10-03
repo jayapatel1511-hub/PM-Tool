@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { useMe } from '@/lib/auth'
 import { ApiError, del, get, patch, post, qs } from '@/lib/api'
-import { fmtDate, today } from '@/lib/format'
+import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { ProjectDiscipline } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -50,7 +50,7 @@ interface Detail { description?: string; project: { id: string; projectNumber: s
 interface RiskDetail extends Detail { risk: RiskRow; realisedIssue?: { id: string; key: string; title: string; status: string } | null }
 interface IssueDetail extends Detail { issue: IssueRow; originRisk?: { id: string; key: string; title: string; status: string } | null }
 interface IssueLocation { id: string; kind: string; siteArea?: string; building?: string; level?: string; room?: string; assetSystem?: string; alignment?: string; startStation?: number; endStation?: number; stationUnits?: string; coordinateX?: number; coordinateY?: number; coordinateZ?: number; coordinateReferenceSystem?: string; coordinateUnits?: string; rowVersion: number }
-interface IssueDocument { id: string; kind: string; identifier: string; revision: string; sourceUrl: string; externalTopicId?: string; modelElementGuid?: string; viewpointUrl?: string; isAvailable: boolean; rowVersion: number }
+interface IssueDocument { sourceSystem?: string; stableSourceId?: string; registeredBy?: string; registeredAt?: string; registrationMethod?: string; replacedById?: string | null; id: string; kind: string; identifier: string; revision: string; sourceUrl: string; externalTopicId?: string; modelElementGuid?: string; viewpointUrl?: string; isAvailable: boolean; rowVersion: number }
 interface IssueVerification { id: string; verifierId: string; status: string; evidenceUrl?: string; note?: string; verifiedAt?: string; rowVersion: number }
 interface IssueReferenceImpact {
   id: string; documentReferenceId: string; previousRevisionId: string; currentRevisionId: string; ownerId: string; verifierId?: string | null
@@ -819,8 +819,8 @@ type LocationDraft = Record<'kind' | 'siteArea' | 'building' | 'level' | 'room' 
   | 'coordinateX' | 'coordinateY' | 'coordinateZ' | 'coordinateCrs' | 'coordinateUnits', string>
 const NEW_LOCATION: LocationDraft = { kind: 'SiteArea', siteArea: '', building: '', level: '', room: '', assetSystem: '', alignment: '', start: '', end: '',
   units: 'm', coordinateX: '', coordinateY: '', coordinateZ: '', coordinateCrs: '', coordinateUnits: 'm' }
-interface DocumentDraft { kind: string; identifier: string; revision: string; sourceUrl: string; externalTopicId: string; modelElementGuid: string; viewpointUrl: string; available: boolean }
-const NEW_DOCUMENT: DocumentDraft = { kind: 'Drawing', identifier: '', revision: '', sourceUrl: '', externalTopicId: '', modelElementGuid: '', viewpointUrl: '', available: true }
+interface DocumentDraft { sourceSystem: string; stableSourceId: string; kind: string; identifier: string; revision: string; sourceUrl: string; externalTopicId: string; modelElementGuid: string; viewpointUrl: string; available: boolean }
+const NEW_DOCUMENT: DocumentDraft = { sourceSystem: '', stableSourceId: '', kind: 'Drawing', identifier: '', revision: '', sourceUrl: '', externalTopicId: '', modelElementGuid: '', viewpointUrl: '', available: true }
 
 /** The location's API body, or the message key for the first missing value; the server repeats every check. */
 function locationBody(l: LocationDraft): Record<string, unknown> | string {
@@ -842,7 +842,7 @@ function locationBody(l: LocationDraft): Record<string, unknown> | string {
 
 function documentBody(d: DocumentDraft): Record<string, unknown> | string {
   if (!d.identifier.trim() || !d.revision.trim() || !d.sourceUrl.trim()) return 'issue.documentRequired'
-  return { kind: d.kind, identifier: d.identifier, revision: d.revision, sourceUrl: d.sourceUrl, externalTopicId: d.externalTopicId || null,
+  return { kind: d.kind, identifier: d.identifier, revision: d.revision, sourceUrl: d.sourceUrl, sourceSystem: d.sourceSystem || null, stableSourceId: d.stableSourceId || null, externalTopicId: d.externalTopicId || null,
     modelElementGuid: d.modelElementGuid || null, viewpointUrl: d.viewpointUrl || null, isAvailable: d.available }
 }
 
@@ -863,7 +863,7 @@ function DocumentInputs({ value: d, onChange }: { value: DocumentDraft; onChange
     <Input value={d[key]} onChange={(e) => onChange({ ...d, [key]: e.target.value })} placeholder={t(label)} aria-label={t(label)} />
   return <>
     <select className={selectCls} value={d.kind} onChange={(e) => onChange({ ...d, kind: e.target.value })} aria-label={t('issue.documentKind')}><option>Drawing</option><option>Model</option><option>Markup</option><option>Screenshot</option></select>
-    {input('identifier', 'issue.identifier')}{input('revision', 'issue.revision')}{input('sourceUrl', 'issue.sourceUrl')}{input('externalTopicId', 'issue.externalTopic')}
+    {input('identifier', 'issue.identifier')}{input('revision', 'issue.revision')}{input('sourceSystem', 'basis.sourceSystem')}{input('stableSourceId', 'basis.sourceId')}{input('sourceUrl', 'issue.sourceUrl')}{input('externalTopicId', 'issue.externalTopic')}
     {input('modelElementGuid', 'issue.modelGuid')}{input('viewpointUrl', 'issue.viewpointUrl')}
     <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={d.available} onChange={(e) => onChange({ ...d, available: e.target.checked })} />{t('issue.available')}</label>
   </>
@@ -877,12 +877,28 @@ function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit
   const documents = useQuery({ queryKey: ['issue-documents', issue.id], queryFn: () => get<IssueDocument[]>(`issues/${issue.id}/documents`) })
   const verification = useQuery({ queryKey: ['issue-verification', issue.id], queryFn: () => get<IssueVerification[]>(`issues/${issue.id}/verification`) })
   const [loc, setLoc] = useState(NEW_LOCATION); const [doc, setDoc] = useState(NEW_DOCUMENT)
+  const [replacing, setReplacing] = useState<IssueDocument | null>(null), [replacementReason, setReplacementReason] = useState('')
   const [verifier, setVerifier] = useState<string | null>(null); const [note, setNote] = useState(''); const [evidence, setEvidence] = useState(''); const [busy, setBusy] = useState(false)
   const reload = async () => { await Promise.all([locations.refetch(), documents.refetch(), verification.refetch()]); onChanged() }
-  const submit = async (path: string, body: Record<string, unknown>) => { setBusy(true); try { await post(path, { ...body, rowVersion: issue.rowVersion }, issue.rowVersion); await reload(); toast.success(t('issue.metadataSaved')) } catch (e) { toast.error(errorText(e)) } finally { setBusy(false) } }
+  const submit = async (path: string, body: Record<string, unknown>) => { setBusy(true); try { await post(path, { ...body, rowVersion: issue.rowVersion }, issue.rowVersion); await reload(); toast.success(t('issue.metadataSaved')); return true } catch (e) { toast.error(errorText(e)); return false } finally { setBusy(false) } }
   const add = (path: string, body: Record<string, unknown> | string) => { if (typeof body === 'string') toast.error(t(body)); else submit(path, body) }
   const appoint = () => verifier && submit(`issues/${issue.id}/verification`, { verifierId: verifier, status: 'Proposed', note })
   const decide = (v: IssueVerification, status: 'Verified' | 'Rejected') => submit(`issues/${issue.id}/verification`, { verifierId: v.verifierId, status, evidenceUrl: evidence || null, note })
+  const replace = (x: IssueDocument) => {
+    setReplacing(x); setReplacementReason(''); setDoc({ kind: x.kind, identifier: x.identifier, revision: x.revision,
+      sourceUrl: x.sourceUrl, sourceSystem: x.sourceSystem ?? '', stableSourceId: x.stableSourceId ?? '',
+      externalTopicId: x.externalTopicId ?? '', modelElementGuid: x.modelElementGuid ?? '', viewpointUrl: x.viewpointUrl ?? '', available: true })
+  }
+  const saveReference = async () => {
+    const body = documentBody(doc)
+    if (typeof body === 'string') { toast.error(t(body)); return }
+    if (!replacing) { add(`issues/${issue.id}/documents`, body); return }
+    if (!replacementReason.trim()) { toast.error(t('coord.reasonRequired')); return }
+    if (await submit(`issues/${issue.id}/documents/${replacing.id}/replace`, { requestId: crypto.randomUUID(),
+      documentRowVersion: replacing.rowVersion, document: body, reason: replacementReason })) {
+      setReplacing(null); setReplacementReason(''); setDoc(NEW_DOCUMENT)
+    }
+  }
   const latestVerification = verification.data?.[0]
   return <section className="mt-4 space-y-3 rounded-lg border bg-card p-3" aria-labelledby="issue-metadata-title">
     <h3 id="issue-metadata-title" className="font-semibold">{t('issue.locationEvidence')}</h3>
@@ -897,15 +913,20 @@ function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit
     </div>
     <div className="space-y-2">
       <div className="text-sm font-medium">{t('issue.documentReferences')}</div>
-      {(documents.data ?? []).map((x) => <div key={x.id} className="rounded border p-2 text-sm"><Chip tone={x.isAvailable ? 'done' : 'bad'}>{x.isAvailable ? t('issue.available') : t('issue.unavailable')}</Chip> {x.kind} · <strong>{x.identifier}</strong> · {t('issue.revision')} {x.revision} · {x.isAvailable ? <a className="underline" href={x.sourceUrl} target="_blank" rel="noreferrer">{t('issue.openSource')}</a> : <span className="text-muted-foreground">{t('issue.sourceUnavailable')}</span>} {(x.externalTopicId || x.modelElementGuid || x.viewpointUrl) && <span className="block text-muted-foreground">{x.externalTopicId && `${t('issue.externalTopic')} ${x.externalTopicId}`} {x.modelElementGuid && ` · ${t('issue.modelGuid')} ${x.modelElementGuid}`} {x.viewpointUrl && <> · <a className="underline" href={x.viewpointUrl} target="_blank" rel="noreferrer">{t('issue.viewpoint')}</a></>}</span>}</div>)}
-      {canEdit && <div className="grid gap-2 md:grid-cols-4"><DocumentInputs value={doc} onChange={setDoc} />
-        <Button type="button" disabled={busy} onClick={() => add(`issues/${issue.id}/documents`, documentBody(doc))}>{t('common.add')}</Button></div>}
+      {(documents.data ?? []).map((x) => <div key={x.id} className="rounded border p-2 text-sm"><Chip tone={x.replacedById ? 'idle' : x.isAvailable ? 'done' : 'bad'}>{x.replacedById ? t('issue.referenceHistorical') : x.isAvailable ? t('issue.available') : t('issue.unavailable')}</Chip> {x.kind} · <strong>{x.identifier}</strong> · {t('issue.revision')} {x.revision} · <span>{t('basis.manual')}</span> · {x.sourceSystem && <span>{t('basis.sourceSystem')}: {x.sourceSystem} · </span>}{x.stableSourceId && <span>{t('basis.sourceId')}: {x.stableSourceId} · </span>}{x.registeredAt && <span>{fmtTime(x.registeredAt)} · </span>}{x.isAvailable ? <a className="underline" href={x.sourceUrl} target="_blank" rel="noreferrer">{t('issue.openSource')}</a> : <span className="text-muted-foreground">{t('issue.sourceUnavailable')}</span>} {(x.externalTopicId || x.modelElementGuid || x.viewpointUrl) && <span className="block text-muted-foreground">{x.externalTopicId && `${t('issue.externalTopic')} ${x.externalTopicId}`} {x.modelElementGuid && ` · ${t('issue.modelGuid')} ${x.modelElementGuid}`} {x.viewpointUrl && <> · <a className="underline" href={x.viewpointUrl} target="_blank" rel="noreferrer">{t('issue.viewpoint')}</a></>}</span>}{canEdit && !x.replacedById && ['Open', 'In Progress'].includes(issue.status) && <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => replace(x)}>{t('issue.replaceReference')}</Button>}</div>)}
+      {canEdit && <div className="grid gap-2 md:grid-cols-4">
+        {replacing && <p className="md:col-span-4" role="status">{t('issue.referenceRecoveryHint')}</p>}
+        <DocumentInputs value={doc} onChange={setDoc} />
+        {replacing && <Textarea value={replacementReason} maxLength={2000} onChange={e => setReplacementReason(e.target.value)} aria-label={t('coord.reason')} placeholder={t('coord.reason')} />}
+        <Button type="button" disabled={busy || !!replacing && !replacementReason.trim()} onClick={saveReference}>{t(replacing ? 'issue.replaceReference' : 'common.add')}</Button>
+        {replacing && <Button type="button" variant="outline" disabled={busy} onClick={() => { setReplacing(null); setDoc(NEW_DOCUMENT); setReplacementReason('') }}>{t('common.cancel')}</Button>}
+      </div>}
     </div>
     <div className="space-y-2">
       <div className="text-sm font-medium">{t('issue.verificationFlow')}</div>
       {(verification.data ?? []).map((v) => <div key={v.id} className="rounded border p-2 text-sm"><StatusPill status={v.status} /> {v.verifierId === me.id && <span>{t('issue.assignedToYou')}</span>} {v.note && <span className="text-muted-foreground">· {v.note}</span>}{v.id === latestVerification?.id && v.status === 'Proposed' && v.verifierId === me.id && <div className="mt-2 flex gap-2"><Input value={evidence} onChange={(e) => setEvidence(e.target.value)} placeholder={t('issue.evidenceUrl')} aria-label={t('issue.evidenceUrl')} /><Button type="button" disabled={busy} onClick={() => decide(v, 'Verified')}>{t('issue.verify')}</Button><Button type="button" variant="outline" disabled={busy} onClick={() => decide(v, 'Rejected')}>{t('issue.reject')}</Button></div>}</div>)}
       {canEdit && latestVerification?.status !== 'Proposed' && <div className="grid gap-2 md:grid-cols-3"><PeoplePicker value={verifier} onChange={(id) => setVerifier(id)} label={t('issue.verifier')}
-        disabled={!eligible.data} candidates={eligible.data?.people.filter(p => p.id !== issue.ownerId && p.id !== issue.raisedById)} /><Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('issue.appointmentReason')} aria-label={t('issue.appointmentReason')} /><Button type="button" disabled={busy || !verifier || !note.trim()} onClick={appoint}>{t('issue.appointVerifier')}</Button></div>}
+        disabled={!eligible.data} candidates={eligible.data?.people.filter(p => me.settings.allowSelfReview || p.id !== issue.ownerId && p.id !== issue.raisedById)} /><Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('issue.appointmentReason')} aria-label={t('issue.appointmentReason')} /><Button type="button" disabled={busy || !verifier || !note.trim()} onClick={appoint}>{t('issue.appointVerifier')}</Button></div>}
     </div>
   </section>
 }

@@ -105,3 +105,8 @@ NOT RUN: Letter and other paper sizes, other browsers and assistive technology, 
 ## 2026-10-02 combined candidate
 
 Integrated count scope, pending/acknowledgement, linked-task, print and CSV corrections (`36b6cd5`, `8b3bdd3`, `c70cedf`). Frontend build/lint and mocked Chromium regressions passed. Hosted scope/export/print acceptance remains pending activation. See [combined release evidence](../../docs/reviews/2026-10-02-combined-candidate.md).
+
+
+## Completion correction checkpoint — 2026-10-03
+
+See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) for exact implementation commits, focused regression evidence and remaining combined/hosted gates. The earlier `26c0ae1` candidate is held. This checkpoint does not close T006 or claim final hosted/company acceptance; live review remains `02ca7cd` pending activation of the corrected candidate.

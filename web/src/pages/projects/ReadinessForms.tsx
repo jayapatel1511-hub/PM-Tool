@@ -16,7 +16,7 @@ import { CommandForm, SelectField, personName, workChoices, workRef, type CoordO
 type Assessment = { id: string; rowVersion: number; ownerId: string; state: string; intendedOutput: string; completionCriteria: string; evaluatedAt: string }
 type Check = { id: string; rowVersion: number; code: string; applies: boolean | null; satisfied: boolean | null; reason?: string; evidenceUrl?: string; recordedBy?: string }
 type RdyException = { id: string; basisVersionId: string; approvedBy: string; verifierId: string; limitedWork: string; risk: string; expiresOn: string; createdAt: string }
-type Detail = { assessment: Assessment; checks: Check[]; unknown: string[]; blocked: string[]; exceptions: RdyException[] }
+type Detail = { assessment: Assessment; checks: Check[]; unknown: string[]; blocked: string[]; exceptions: RdyException[]; sources: { code: string; record: LinkedRecord }[] }
 type BasisVersion = { id: string; number: number; status: string; scope: string; rowVersion: number }
 type BasisDetail = { entry: { key: string; title: string }; versions: { version: BasisVersion }[];
   uses: { versionId: string; targetType: string; targetId: string; isCurrent: boolean }[];
@@ -61,7 +61,7 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
     q.refetch(); constraints.refetch(); assumptions.refetch(); prerequisites.refetch(); done() }
   const canCreate = options.canWrite && work?.ownerId === options.actorId
   const canAssess = options.canWrite && work && options.manageDisciplineIds.includes(work.projectDisciplineId)
-  if (creating && work) return <CreateAssessment path={path} rowVersion={work.rowVersion} close={() => setCreating(false)} done={changed} />
+  if (creating && work) return <CreateAssessment path={path} rowVersion={work.rowVersion} assessmentVersion={q.data?.assessment.rowVersion} close={() => setCreating(false)} done={changed} />
   if (editing && q.data) return <Applicability path={`${path}/checks/${encodeURIComponent(editing.code)}/applicability`} check={editing}
     assessmentVersion={q.data.assessment.rowVersion} close={() => setEditing(null)} done={changed} />
   if (raising && work) return <RaiseConstraint path={`${path}/constraints`} projectId={projectId} work={work} options={options} close={() => setRaising(false)} done={changed} />
@@ -82,6 +82,7 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
       <StatusPill status={q.data.assessment.state} />
       <p>{t('readiness.performer')}: {personName(options, q.data.assessment.ownerId)}</p>
       <p>{t('readiness.output')}: {q.data.assessment.intendedOutput}</p><p>{t('readiness.criteria')}: {q.data.assessment.completionCriteria}</p>
+      {canCreate && q.data.assessment.ownerId !== work.ownerId && <Button size="sm" variant="outline" onClick={() => setCreating(true)}>{t('readiness.recoverAssessment')}</Button>}
       <p className="text-xs text-muted-foreground">{t('readiness.evaluated')}: {fmtTime(q.data.assessment.evaluatedAt)}</p>
       {q.data.unknown.length > 0 && <p>{t('readiness.unknown')}: {q.data.unknown.map(tv).join(', ')}</p>}
       {q.data.blocked.length > 0 && <p>{t('readiness.blocked')}: {q.data.blocked.map(tv).join(', ')}</p>}
@@ -90,6 +91,9 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
         <p>{t('readiness.applicability')}: {t(c.applies === null ? 'readiness.unassessed' : c.applies ? 'readiness.applies' : 'readiness.notApplicable')}</p>
         {c.applies !== false && <p>{t('readiness.result')}: {t(c.satisfied === null ? 'readiness.unassessed' : c.satisfied ? 'readiness.satisfied' : 'readiness.unsatisfied')}</p>}
         {c.reason && <p>{c.reason}</p>}
+        {(q.data!.sources ?? []).some(s => s.code === c.code) && <ul aria-label={t('readiness.sources')} className="space-y-1">
+          {(q.data!.sources ?? []).filter(s => s.code === c.code).map(({ record: r }) => <li key={`${r.type}:${r.id}`}><Link className="text-primary underline" to={itemHref(r.type, number, r.id)}>{r.key} · {r.title}</Link> · {tv(r.status)}</li>)}
+        </ul>}
         {c.evidenceUrl && <a className="text-primary underline" href={c.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
         {c.recordedBy && <p className="text-xs text-muted-foreground">{t('readiness.recordedBy')}: {personName(options, c.recordedBy)}</p>}
         {canAssess && <Button size="sm" variant="outline" onClick={() => setEditing(c)}>{t('readiness.recordApplicability')} · {tv(c.code)}</Button>}
@@ -207,12 +211,13 @@ function MoveConstraint({ path, row, state, close, done }: { path: string; row: 
   </CommandForm>
 }
 
-function CreateAssessment({ path, rowVersion, close, done }: { path: string; rowVersion: number; close: () => void; done: () => void }) {
-  const [output, setOutput] = useState(''), [criteria, setCriteria] = useState('')
-  return <CommandForm path={path} title={t('readiness.createAssessment')} hint={t('readiness.createHint')} onClose={close} onDone={done}
-    payload={() => ({ targetRowVersion: rowVersion, intendedOutput: output, completionCriteria: criteria })}>
+function CreateAssessment({ path, rowVersion, assessmentVersion, close, done }: { path: string; rowVersion: number; assessmentVersion?: number; close: () => void; done: () => void }) {
+  const [output, setOutput] = useState(''), [criteria, setCriteria] = useState(''), [reason, setReason] = useState('')
+  return <CommandForm path={path} title={t(assessmentVersion != null ? 'readiness.recoverAssessment' : 'readiness.createAssessment')} hint={t(assessmentVersion != null ? 'readiness.recoverHint' : 'readiness.createHint')} onClose={close} onDone={done}
+    payload={() => ({ targetRowVersion: rowVersion, intendedOutput: output, completionCriteria: criteria, reason: reason || null, assessmentRowVersion: assessmentVersion })}>
     <Field label={t('readiness.output')} htmlFor="assessment-output"><Textarea id="assessment-output" required maxLength={2000} value={output} onChange={e => setOutput(e.target.value)} /></Field>
     <Field label={t('readiness.criteria')} htmlFor="assessment-criteria"><Textarea id="assessment-criteria" required maxLength={2000} value={criteria} onChange={e => setCriteria(e.target.value)} /></Field>
+    {assessmentVersion != null && <Field label={t('basis.reason')} htmlFor="assessment-recovery-reason"><Textarea id="assessment-recovery-reason" required minLength={5} maxLength={4000} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
   </CommandForm>
 }
 

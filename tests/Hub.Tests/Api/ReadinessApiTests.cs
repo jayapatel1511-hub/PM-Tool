@@ -27,6 +27,34 @@ public sealed class ReadinessApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Contributing_allocation_records_keep_the_allocation_visibility_boundary()
+    {
+        var project = await data.Project();
+        var owner = data.User(TestData.Alex);
+        var task = await data.NewTask(project.Id, extra: new { assigneeId = owner });
+        var path = $"/api/v1/projects/{project.Id}/readiness/Task/{task.G("id")}";
+        await (await f.As(TestData.Alex).Post(path, new ReadinessEndpoints.CreateBody(Guid.NewGuid(),
+            task.I("rowVersion"), "Synthetic output", "Reviewed output"))).Json();
+        var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
+        var allocation = new ResourceAllocation { ProjectId = project.Id, PersonId = owner, CreatedBy = data.User(TestData.Pm),
+            FromDate = today, ThroughDate = today, PlannedHours = 2, Status = AllocationStatus.Confirmed };
+        await f.DbAsync(async db =>
+        {
+            db.Allocations.Add(allocation);
+            db.AllocationWorkLinks.Add(new AllocationWorkLink { AllocationId = allocation.Id, PersonId = owner,
+                WorkType = "Task", WorkId = task.G("id"), WorkDate = today });
+            return await db.SaveChangesAsync();
+        });
+        var limited = await (await f.As(TestData.Alex).GetAsync(path)).Json();
+        Assert.DoesNotContain(limited["sources"]!.AsArray(), s => s!["record"]!.G("id") == allocation.Id);
+        var manager = await (await f.As(TestData.Pm).GetAsync(path)).Json();
+        var visible = Assert.Single(manager["sources"]!.AsArray(), s => s!["record"]!.G("id") == allocation.Id)!;
+        Assert.Equal(ReadinessCheckCode.ProductionCapacity, visible.S("code"));
+        Assert.Equal("ResourceAllocation", visible["record"]!.S("type"));
+        Assert.Equal(AllocationStatus.Confirmed, visible["record"]!.S("status"));
+    }
+
+    [Fact]
     public async Task Readiness_window_rechecks_ready_output_and_exposes_same_project_constraint()
     {
         var project = await data.Project();
@@ -400,6 +428,12 @@ public sealed class ReadinessApiTests(HubFactory f)
             { RequestId = Guid.NewGuid(), AssessmentRowVersion = -1 })).Json(409);
             var approved = await (await f.As(TestData.Pm).Post(path + "/exceptions", body)).Json();
             Assert.Equal(approved.G("id"), (await (await f.As(TestData.Pm).Post(path + "/exceptions", body)).Json()).G("id"));
+            var assigned = f.Db(db => db.Notifications.Where(n => n.ItemId == approved.G("id") &&
+                n.EventType == NotificationEvents.ReadinessExceptionApproved).ToList());
+            var notice = Assert.Single(assigned);
+            Assert.Equal(data.User(TestData.Marc), notice.UserId);
+            Assert.Equal(1, notice.Count);
+            Assert.Contains($"panel=Task:{taskId}", notice.LinkPath);
             var permitted = await (await f.As(TestData.Alex).GetAsync(path)).Json();
             Assert.Equal(ReadinessState.ProceedUnderAssumption, permitted["assessment"]!.S("state"));
             Assert.Single(permitted["exceptions"]!.AsArray());
@@ -455,6 +489,11 @@ public sealed class ReadinessApiTests(HubFactory f)
         var predecessorCheck = detail["checks"]!.AsArray().Single(c => c!["code"]!.GetValue<string>() == ReadinessCheckCode.Predecessor)!;
         Assert.True(predecessorCheck["applies"]!.GetValue<bool>());
         Assert.False(predecessorCheck["satisfied"]!.GetValue<bool>());
+        var predecessorSource = Assert.Single(detail["sources"]!.AsArray(), s => s!.S("code") == ReadinessCheckCode.Predecessor)!;
+        Assert.Equal(predecessor.G("id"), predecessorSource["record"]!.G("id"));
+        Assert.Equal(predecessor.S("key"), predecessorSource["record"]!.S("key"));
+        Assert.Equal("Task", predecessorSource["record"]!.S("type"));
+        Assert.Equal(TaskStatuses.NotStarted, predecessorSource["record"]!.S("status"));
         var monday = DateOnly.FromDateTime(DateTime.UtcNow.Date);
         monday = monday.AddDays(-((int)monday.DayOfWeek + 6) % 7);
         var commitments = $"/api/v1/projects/{project.Id}/weekly-commitments";
@@ -690,6 +729,11 @@ public sealed class ReadinessApiTests(HubFactory f)
         Assert.True(updatedHandoff["applies"]!.GetValue<bool>());
         Assert.Null(updatedHandoff["satisfied"]);
         Assert.Equal(ReadinessState.NeedsAssessment, updated["assessment"]!.S("state"));
+        Assert.True(updated["assessment"]!.I("rowVersion") > detail["assessment"]!.I("rowVersion"));
+        await (await f.As(TestData.Pm).Post(applicabilityPath, applies with
+        {
+            RequestId = Guid.NewGuid(), CheckRowVersion = updatedHandoff.I("rowVersion")
+        })).Json(409); // stale aggregate cannot overwrite a current child even when derived state is unchanged
         var constraintPath = path + "/constraints";
         var createConstraint = new ReadinessEndpoints.ConstraintBody(Guid.NewGuid(), version, "Handoff",
             "Obtain accepted drainage input", data.User(TestData.Pm), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),

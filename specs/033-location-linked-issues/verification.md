@@ -127,3 +127,8 @@ The existing design-basis Chromium harness now also opens a real Task Sheet with
 Added existing saved-view controls with the actual source-filter URL keys. Issues paginate the complete filtered/sorted distinct identities before expanding multi-location/document groups, preserving global ordering, exports and the existing complete-array lookup callers. The Chromium regression proves that a two-location issue appears twice on one identity page, reaches identity 51 on page two, and resets to page one after sorting. Client paging deliberately retains the complete filtered payload; move paging/sorting into SQL if that payload fails the performance gate.
 
 The combined increment passed 27 focused PostgreSQL cases across the final runs, frontend build/lint and the extended existing Chromium harness. This is local synthetic implementation evidence; the new exact-head CI, merge, image, homedev activation and hosted checks are separate gates in [the combined checkpoint](../../docs/reviews/2026-10-02-combined-candidate.md). Packet T006 remains open for full acceptance, and no company pilot or production acceptance is inferred.
+
+
+## Completion correction checkpoint — 2026-10-03
+
+See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) for exact implementation commits, focused regression evidence and remaining combined/hosted gates. The earlier `26c0ae1` candidate is held. This checkpoint does not close T006 or claim final hosted/company acceptance; live review remains `02ca7cd` pending activation of the corrected candidate.

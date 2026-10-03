@@ -49,6 +49,8 @@ Before company writes, roll back only to the known compatible previous image and
 changes, do not overwrite current data with an old dump: stop writes and assess migration compatibility, then fix
 forward or perform a controlled restore with an explicit data-loss decision. Keep the latest company dump and logs.
 
+The specification's 15-minute RPO is not met by daily logical dumps. The alternative targets below are a proposal, not an approved relaxation or a production PASS. Scheduled off-host recovery and measured host-loss recovery also remain unproven.
+
 Proposed homedev targets are a 24-hour local RPO, 24-hour off-host RPO only while the scheduled copy actually runs,
 and an 8-hour RTO with the host intact. Keep daily dumps for 14 days; company approval must record whether these
 targets and longer retention are acceptable. Jay approved the review recovery payload in the existing encrypted Mac restic repository, and retrieval plus isolated restore passed. This approval/evidence applies to review data; company-data approval, a working off-host schedule and host-loss recovery remain unproven. Verify and record those gates before go-live. Azure PITR,

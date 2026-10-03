@@ -1,3 +1,5 @@
+using Hub.Api.Features;
+using Hub.Domain;
 using System.Net;
 using System.Text.Json.Nodes;
 using Hub.Api.Infrastructure;
@@ -88,6 +90,108 @@ public sealed class LocationIssueTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Verification_remains_independent_after_owner_reassignment()
+    {
+        var project = await d.Project();
+        var issue = await Issue(project.Id);
+        var id = issue.G("id");
+        var marc = d.User(TestData.Marc);
+        var omar = d.User(TestData.Omar);
+        var alex = d.User(TestData.Alex);
+
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = marc, status = "Proposed", note = "Appoint Marc", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = marc, status = "Verified", evidenceUrl = "https://review.example.test/packet033", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+
+        var version = await IssueVersion(id);
+        var refused = await f.As(TestData.Alex).Patch($"/api/v1/issues/{id}", new { ownerId = marc }, version);
+        Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
+        Assert.Equal(alex, f.Db(db => db.Issues.Single(x => x.Id == id).OwnerId));
+        Assert.Equal(version, await IssueVersion(id));
+
+        await f.As(TestData.Alex).Patch($"/api/v1/issues/{id}", new { ownerId = omar }, version).Result.Json(200);
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = marc, status = "Proposed", note = "Reverify after owner replacement", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = marc, status = "Verified", evidenceUrl = "https://review.example.test/packet033-recheck", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        (await f.As(TestData.Omar).Post($"/api/v1/issues/{id}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Independently reverified", rowVersion = await IssueVersion(id)
+        })).EnsureSuccessStatusCode();
+
+        var selfReview = await f.As(TestData.Admin).Put("/api/v1/admin/settings/allow_self_review", new { value = true });
+        selfReview.EnsureSuccessStatusCode();
+        try
+        {
+            var selfIssue = await Issue(project.Id);
+            var selfId = selfIssue.G("id");
+            await f.As(TestData.Pm).Post($"/api/v1/issues/{selfId}/verification", new
+            {
+                verifierId = alex, status = "Proposed", note = "Explicit self-review setting", rowVersion = await IssueVersion(selfId)
+            }).Result.Json(201);
+            await f.As(TestData.Alex).Post($"/api/v1/issues/{selfId}/verification", new
+            {
+                verifierId = alex, status = "Verified", evidenceUrl = "https://review.example.test/self-review", rowVersion = await IssueVersion(selfId)
+            }).Result.Json(201);
+            (await f.As(TestData.Alex).Post($"/api/v1/issues/{selfId}/transition", new
+            {
+                toStatus = "Resolved", resolution = "Self-review explicitly allowed", rowVersion = await IssueVersion(selfId)
+            })).EnsureSuccessStatusCode();
+        }
+        finally
+        {
+            (await f.As(TestData.Admin).Put("/api/v1/admin/settings/allow_self_review", new { value = false })).EnsureSuccessStatusCode();
+        }
+    }
+
+    [Fact]
+    public async Task Legacy_owner_change_to_verifier_cannot_resolve_and_does_not_write_history()
+    {
+        var project = await d.Project();
+        var issue = await Issue(project.Id);
+        var id = issue.G("id");
+        var verifier = d.User(TestData.Marc);
+
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = verifier, status = "Proposed", note = "Appoint verifier", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/verification", new
+        {
+            verifierId = verifier, status = "Verified", evidenceUrl = "https://review.example.test/legacy", rowVersion = await IssueVersion(id)
+        }).Result.Json(201);
+
+        await f.DbAsync(async db =>
+        {
+            db.Issues.Single(x => x.Id == id).OwnerId = verifier;
+            return await db.SaveChangesAsync();
+        });
+        var version = await IssueVersion(id);
+        var history = f.Db(db => db.ActivityLog.Count(x => x.ItemId == id));
+
+        var refused = await f.As(TestData.Marc).Post($"/api/v1/issues/{id}/transition", new
+        {
+            toStatus = "Resolved", resolution = "Must remain open", rowVersion = version
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
+        var current = f.Db(db => db.Issues.Single(x => x.Id == id));
+        Assert.Equal("Open", current.Status);
+        Assert.Equal(verifier, current.OwnerId);
+        Assert.Equal(version, current.RowVersion);
+        Assert.Equal(history, f.Db(db => db.ActivityLog.Count(x => x.ItemId == id)));
+    }
+
+    [Fact]
     public async Task Location_document_and_independent_verification_are_scoped_and_gate_resolution()
     {
         var p = await d.Project();
@@ -130,9 +234,19 @@ public sealed class LocationIssueTests(HubFactory f)
 
         var document = await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/documents", new
         {
-            kind = "Drawing", identifier = "C-101", revision = "A", sourceUrl = "https://review.example.test/c-101", isAvailable = true, rowVersion = await IssueVersion(id)
+            kind = "Drawing", identifier = "C-101", revision = "A", sourceUrl = "https://review.example.test/c-101", sourceSystem = "SharePoint", stableSourceId = "document-101", isAvailable = true, rowVersion = await IssueVersion(id)
         }).Result.Json(201);
         Assert.NotEqual(Guid.Empty, document.G("id"));
+        var registered = Assert.Single((await (await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{id}/documents")).Json()).AsArray())!;
+        Assert.Equal("SharePoint", registered.S("sourceSystem"));
+        Assert.Equal("document-101", registered.S("stableSourceId"));
+        Assert.Equal("Manual", registered.S("registrationMethod"));
+        Assert.Equal(d.User(TestData.Alex), registered.G("registeredBy"));
+        Assert.NotNull(registered["registeredAt"]);
+        var provenanceExport = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/issues/export?format=csv");
+        var provenanceCsv = await provenanceExport.Content.ReadAsStringAsync();
+        Assert.Contains("SharePoint", provenanceCsv); Assert.Contains("document-101", provenanceCsv);
+        Assert.Contains("manually registered", provenanceCsv);
         Assert.Equal(HttpStatusCode.Conflict, (await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/documents", new
         {
             kind = "Drawing", identifier = "C-101", revision = "A", sourceUrl = "https://review.example.test/c-101", isAvailable = true, rowVersion = await IssueVersion(id)
@@ -244,6 +358,32 @@ public sealed class LocationIssueTests(HubFactory f)
             toStatus = "Resolved", resolution = "Should remain blocked", rowVersion = await f.DbAsync(db => db.Issues.Where(x => x.Id == unavailableId).Select(x => x.RowVersion).FirstAsync())
         });
         Assert.Equal(HttpStatusCode.BadRequest, unavailableResolution.StatusCode);
+        var oldReference = Assert.Single((await (await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{unavailableId}/documents")).Json()).AsArray())!;
+        var oldId = oldReference.G("id");
+        var recover = new RegisterEndpoints.ReplaceIssueDocumentBody(Guid.NewGuid(), await IssueVersion(unavailableId), oldReference.I("rowVersion"),
+            new("Drawing", "C-202", "C", "https://review.example.test/c-202-restored", null, null, null, true, 0, "SharePoint", "c202-id"),
+            "Original file is unavailable; register the corrected current reference");
+        var recoverPath = $"/api/v1/issues/{unavailableId}/documents/{oldId}/replace";
+        await (await f.As(TestData.Rita).Post(recoverPath, recover)).Json(403);
+        await (await f.As(TestData.Alex).Post(recoverPath, recover with { RequestId = Guid.NewGuid(), RowVersion = -1 })).Json(409);
+        var recovered = await (await f.As(TestData.Alex).Post(recoverPath, recover)).Json();
+        Assert.Equal(recovered.G("id"), (await (await f.As(TestData.Alex).Post(recoverPath, recover)).Json()).G("id"));
+        var references = (await (await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{unavailableId}/documents")).Json()).AsArray();
+        Assert.Equal(2, references.Count);
+        var historical = references.Single(r => r!.G("id") == oldId)!;
+        Assert.False(historical["isAvailable"]!.GetValue<bool>());
+        Assert.Equal("B", historical.S("revision"));
+        Assert.Equal(oldReference.S("sourceUrl"), historical.S("sourceUrl"));
+        Assert.Equal(recovered.G("id"), historical.G("replacedById"));
+        var resolveRecovered = new { toStatus = "Resolved", resolution = "Correction verified", rowVersion = await IssueVersion(unavailableId) };
+        await (await f.As(TestData.Alex).Post($"/api/v1/issues/{unavailableId}/transition", resolveRecovered)).Json(400);
+        await f.As(TestData.Pm).Post($"/api/v1/issues/{unavailableId}/verification", new
+        { verifierId = d.User(TestData.Marc), status = "Proposed", note = "Recheck the replacement", rowVersion = await IssueVersion(unavailableId) }).Result.Json(201);
+        await f.As(TestData.Marc).Post($"/api/v1/issues/{unavailableId}/verification", new
+        { verifierId = d.User(TestData.Marc), status = "Verified", evidenceUrl = "https://review.example.test/recovery-proof", rowVersion = await IssueVersion(unavailableId) }).Result.Json(201);
+        await (await f.As(TestData.Alex).Post($"/api/v1/issues/{unavailableId}/transition", resolveRecovered with { rowVersion = await IssueVersion(unavailableId) })).Json();
+        Assert.Equal(IssueStatus.Resolved, f.Db(db => db.Issues.Single(i => i.Id == unavailableId).Status));
+        Assert.Contains(f.Db(db => db.ActivityLog.Where(a => a.ItemId == oldId).ToList()), a => a.Reason == recover.Reason);
     }
 
     [Fact]

@@ -98,6 +98,42 @@ public sealed class LocalAccountsTests : IDisposable
     }
 
     [Fact]
+    public async Task Successful_local_sign_in_is_audited_on_the_server_without_a_duplicate_browser_event()
+    {
+        SaveLogins();
+        using var f = new HubFactory { Settings = {
+            ["Auth:Mode"] = "LocalPassword", ["Auth:Local:UsersFile"] = Verifiers, ["Auth:Local:KeyDirectory"] = Path.Combine(dir, "keys"),
+            ["Auth:Local:BootstrapAdmins"] = "audit@hub.test|Synthetic audit Admin",
+        } };
+        using var c = f.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), HandleCookies = false });
+        var userId = f.Db(db => db.Users.Single(u => u.Email == "audit@hub.test").Id);
+        const string password = "synthetic sign-in audit password";
+        SetLogin(userId, "audit", password);
+        int Events() => f.Db(db => db.ActivityLog.Count(a => a.ItemId == userId && a.Action == "SignedIn"));
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Send(c, HttpMethod.Post, "/api/v1/auth/local/sign-in", body: new { userName = "audit", password = "wrong" })).StatusCode);
+        Assert.Equal(0, Events());
+
+        var cookie = await SignIn(c, "audit", password); // no /me or browser callback is needed for the event
+        var row = Assert.Single(f.Db(db => db.ActivityLog.Where(a => a.ItemId == userId && a.Action == "SignedIn").ToList()));
+        Assert.Equal(userId, row.ActorUserId);
+        Assert.Equal("User", row.ActorType);
+        Assert.Equal(ItemType.User, row.ItemType);
+        Assert.Equal(["access"], row.Categories);
+        Assert.Equal(f.Clock.GetUtcNow(), row.OccurredAt);
+        Assert.Equal(row.OccurredAt, f.Db(db => db.Users.Single(u => u.Id == userId).LastSignInAt));
+        Assert.DoesNotContain(password, JsonSerializer.Serialize(row));
+        for (var repeat = 0; repeat < 2; repeat++)
+            Assert.Equal(HttpStatusCode.NoContent, (await Send(c, HttpMethod.Post, "/api/v1/me/sign-in", cookie, new { })).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await Send(c, HttpMethod.Get, "/api/v1/me", cookie)).StatusCode);
+        Assert.Equal(1, Events());
+        await SignIn(c, "audit", password);
+        Assert.Equal(2, Events());
+        await f.DbAsync(async db => { (await db.Users.SingleAsync(u => u.Id == userId)).IsActive = false; return await db.SaveChangesAsync(); });
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Send(c, HttpMethod.Post, "/api/v1/auth/local/sign-in", body: new { userName = "audit", password })).StatusCode);
+        Assert.Equal(2, Events());
+    }
+
+    [Fact]
     public async Task First_admin_comes_from_configuration_and_people_they_add_sign_in_rotate_and_revoke_without_a_restart()
     {
         SaveLogins(); // the empty bootstrap list

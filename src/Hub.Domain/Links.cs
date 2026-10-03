@@ -5,7 +5,9 @@ namespace Hub.Domain;
 /// Document and project links (§12.7): pointers only, recognised by pattern (DOC-01, DOC-02, FR-DOC-02).
 public static partial class Links
 {
-    [GeneratedRegex(@"^\\\\[^\\/:*?""<>|]+\\[^\\/:*?""<>|]+", RegexOptions.CultureInvariant)]
+    /// The whole path: \\server\share, then any further segments and an optional closing backslash; no segment holds a
+    /// character Windows refuses in a path, a control character or a line break. Any server is accepted (no allow-list setting).
+    [GeneratedRegex(@"^\\\\[^\\/:*?""<>|\x00-\x1f]+(?:\\[^\\/:*?""<>|\x00-\x1f]+)+\\?\z", RegexOptions.CultureInvariant)]
     private static partial Regex Unc();
 
     public static bool IsUnc(string url) => Unc().IsMatch(url);

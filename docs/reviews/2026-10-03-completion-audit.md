@@ -2,6 +2,16 @@
 
 This record supersedes any claim that `26c0ae1` completes packets 025–033. That candidate passed its bounded CI/image checks and PR #24 merged, but subsequent source/specification review found required behavior still missing. Its activation is held. The live synthetic review release is now `211bd88649e288484901aba6946fdd0e2e29dd17`, activated on 2026-10-03 at 14:06:40 UTC. The 06:55 checkpoint below is historical; the hosted checkpoint records subsequent evidence. A newer implementation commit is not evidence of deployment or company acceptance.
 
+## Current synthetic pilot checkpoint — 2026-10-03 18:24 UTC
+
+The current private pilot rehearsal uses release `3bfea2328aae1421300f81979ceebc7d5be6b6b1`. PR #30 merged at `d0c2ab7179eba47014e821f13b5fbd19bcaeb06d`, with candidate and merged trees equal. Candidate CI `37139948986` and merged-main CI `37140933823` passed 858 tests. This is a synthetic pilot result, not a code bug-fix claim, public review upgrade, real-company acceptance, or production deployment.
+
+The latest operator log is `data/synthetic-pilot-fixture-30-20261003T181646351856362.log`. It records 30 fictional users, 10 Setup projects, all 30 individual sign-ins and assigned-project checks, preservation of the existing six passwords, local logical restore of 10 projects, and native pilot PITR replay paused with `before=1` and `after=0`, passed at 18:24 UTC. The roster is Admin 1, PM 3, CIV 4, STR 2, GEO 4, MAT 4, MEC 4, ELE 4 and ENV 4. Categories are MunicipalInfrastructure (existing), Road/Drainage, Water/Wastewater, CommercialBuilding, IndustrialRetrofit, LandDevelopment, Geotechnical, MaterialTesting, EnvironmentalRemediation and EnergySite.
+
+The private pilot remains on `3081`; public review release `211bd88649e288484901aba6946fdd0e2e29dd17` remains on `3080`. The pilot backup timer is active for 22:15 UTC on October 3, but `LastTriggerUSec` is empty, so the first automatic run is **UNPROVEN**. The latest bounded result at 18:24:29 UTC reports WAL archived 8 and failed 0. Bounded off-host WAL transfer/retrieval/replay, full-application DR, and accepted RPO/RTO remain **UNPROVEN**. Credentials remain outside Git. The earlier encrypted snapshot `2582b812` is historical review evidence only: 27 migrations, 3 projects and 3 users.
+
+Real company participants, the 8-week / 50-user human-acceptance process, privacy and hosting approvals, and sponsor go/no-go remain external gates. Azure and new paid services are not prerequisites for the stated homedev direction.
+
 ## Completed implementation slices
 
 | Required behavior | Implemented evidence | Verification scope |
@@ -25,7 +35,7 @@ The combined local suite at `26ed8b2` ran 857 checks: 856 passed and one old sub
 
 Raw evidence remains under `/private/tmp/pm-*`; credentials, dumps and runtime files are not committed. Counts describe the named runs and are not a new combined full-suite claim.
 
-## Final code and image checkpoint — 2026-10-03 06:55 UTC
+## Historical review code and image checkpoint — 2026-10-03 06:55 UTC
 
 Reviewed candidate **`211bd88649e288484901aba6946fdd0e2e29dd17`** merged through
 [PR #25](https://github.com/jayapatel1511-hub/PM-Tool/pull/25) as
@@ -59,7 +69,7 @@ packet acceptance scenario has been performed by a company user.
 - Final hosted paging/action context, native print, keyboard and narrow-screen checks remain required. Mocked UI
   tests and image health do not close packet T006 or prove company acceptance.
 
-## Hosted synthetic checkpoint — 2026-10-03 15:25 UTC
+## Historical hosted synthetic checkpoint — 2026-10-03 15:25 UTC
 
 The operator activated executable **211bd88** at **14:06:40 UTC**. The exact image, retained
 `pm-tool-review-db` volume, private probes **10/10** and public probes **9/9** passed. The fresh pre-activation dump
@@ -95,11 +105,12 @@ use their journal and final successful evidence rather than treating corrected h
 These reports contain synthetic records only. Working credentials/session cookies, runtime files and dumps stay private.
 
 Jay requested synthetic users/projects instead of supplying real company participants. A **separate synthetic pilot
-rehearsal** is prepared at the pilot base, with its own Admin, private password/keys and port **3081**, no review seed
-or copied review accounts/data. Its interactive sudo activation is pending; the public review route remains on **3080**.
+rehearsal** was prepared at the pilot base, with its own Admin, private password/keys and port **3081**, no review seed
+or copied review accounts/data. At this historical checkpoint its interactive sudo activation was pending; the current
+activated pilot result is recorded at the top of this audit. The public review route remains on **3080**.
 This preparation cannot establish company participation or business acceptance.
 
-## Next pilot security candidate (not deployed)
+## Historical pilot security candidate checkpoint — 2026-10-03 (not deployed)
 
 After 211 activation, T-09 preparation adds a separate runtime DB password/file/role and a bounded one-shot
 migration service. It does not change or activate staged 211. Ordinary API configuration excludes the database
@@ -114,7 +125,7 @@ and 3 LocalAccounts tests passed at this checkpoint; exact new-candidate CI is s
 This addresses preparation for the database role gate; it does **not** implement PITR, a bounded encrypted off-host
 copy schedule or the 15-minute recovery target. Those remain explicit production gates.
 
-## Separate release gates
+## Historical review release gates — 2026-10-03
 
 | Gate | Verdict | Limit |
 |---|---|---|
@@ -131,7 +142,7 @@ copy schedule or the 15-minute recovery target. Those remain explicit production
 
 Homedev and individual passwords remain the chosen hosting/authentication direction. Azure and new paid services are not prerequisites. Never populate company pilot or production by restoring the review database.
 
-## Pilot operations and recovery checkpoint — 2026-10-03 17:15 UTC
+## Historical pilot operations and recovery checkpoint — 2026-10-03 17:15 UTC
 
 Pilot migration/runtime separation merged through PR #27 (`9437f5e`); candidate `17d1b48` passed all CI gates.
 Homedev bootstrap stopped before migration because Compose 5.5.1 rejects `run --no-build`. PR #28 replaced it

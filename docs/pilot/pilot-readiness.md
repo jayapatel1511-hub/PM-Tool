@@ -2,12 +2,20 @@
 
 Checklist for moving from the synthetic review release to the company pilot on homedev. It lists what must be true
 and who proves it; it is not a readiness claim. Run the pilot itself with the [pilot plan][plan]; homedev production
-is covered by [production readiness][prod]. Homedev runs executable **211bd88**, activated 2026-10-03 at
-14:06:40 UTC. PR #25 merged it at `328e88a`; candidate/main CI passed 858/858 and PR #26 documentation/main CI
-also passed. Private/public activation checks passed 10/10 and 9/9. Populated hosted workflow slices and signed-in
-browser checks are recorded in the [completion checkpoint](../reviews/2026-10-03-completion-audit.md); they do not
-close every packet or company acceptance. Jay requested **synthetic pilot rehearsal** users/projects on October 3.
-The separate clean pilot runtime is initialized, and its interactive sudo activation is pending.
+is covered by [production readiness][prod]. The public review runs executable **211bd88** on `3080`, activated
+2026-10-03 at 14:06:40 UTC; the private synthetic pilot runs **`3bfea2328aae1421300f81979ceebc7d5be6b6b1`** on
+`3081`. PR #30 merged the pilot at `d0c2ab7179eba47014e821f13b5fbd19bcaeb06d`; candidate/main pilot CI passed 858/858.
+Historical public activation checks, hosted workflow slices and signed-in browser checks are recorded in the
+[completion checkpoint](../reviews/2026-10-03-completion-audit.md); they do not close every packet or company acceptance.
+The private synthetic pilot activation and 30-user/10-project rehearsal are complete; company acceptance remains open.
+
+## Current synthetic pilot checkpoint — 2026-10-03 18:24 UTC
+
+The private synthetic pilot uses release `3bfea2328aae1421300f81979ceebc7d5be6b6b1`. PR #30 merged at `d0c2ab7179eba47014e821f13b5fbd19bcaeb06d`, with equal candidate and merged trees. Candidate CI `37139948986` and merged-main CI `37140933823` passed 858 tests. The operator log `data/synthetic-pilot-fixture-30-20261003T181646351856362.log` records 30 fictional users, 10 Setup projects, all 30 individual sign-ins and project-access checks, existing six passwords preserved, local logical restore of 10 projects, and paused native PITR replay with `before=1`, `after=0`, passed at 18:24 UTC.
+
+The roster is Admin 1, PM 3, CIV 4, STR 2, GEO 4, MAT 4, MEC 4, ELE 4 and ENV 4. Categories are MunicipalInfrastructure (existing), Road/Drainage, Water/Wastewater, CommercialBuilding, IndustrialRetrofit, LandDevelopment, Geotechnical, MaterialTesting, EnvironmentalRemediation and EnergySite. The private pilot is on `3081`; public review `211bd88649e288484901aba6946fdd0e2e29dd17` remains on `3080`.
+
+The maintained activation launcher completed the current pilot activation gates. The timer is active for 22:15 UTC on October 3, but `LastTriggerUSec` is empty, so the first automatic run is **UNPROVEN**. The latest bounded result at 18:24:29 UTC reports WAL archived 8 and failed 0. Bounded off-host WAL transfer/retrieval/replay, full-application DR, and accepted 15-minute RPO / 8-hour RTO remain **UNPROVEN**. This rehearsal is synthetic and cannot establish company acceptance; credentials remain outside Git.
 
 **Decisions in force (Jay, clarified 2026-10-01):** homedev hosts review, company pilot and production at
 `pm.engcalchub.com` through the existing Cloudflare tunnel infrastructure. No Azure deployment or new paid service
@@ -27,8 +35,8 @@ something outside the repository, cited) · OPEN (known gap in the repository, c
 | E1 | AC-VIS-01 to AC-VIS-08 pass on the exact pilot commit (FR-016, [§35.1][spec10]) | agent | UNPROVEN. Evidence in the `specs/022`–`024` verification records predates packets 025–033 |
 | E2 | Threat-model walkthrough held, with the homedev boundary added (TLS ends at Cloudflare's edge, local-password cookie, single host); findings resolved or accepted (FR-011) | Jay + company IT | UNPROVEN. The walkthrough record is empty ([threat model][threats]) |
 | E3 | Packets 025–033 enabled only after their own acceptance ([pilot plan][plan]) | agent | UNPROVEN full acceptance for 025–033. Implementation and combined checks pass; current hosted/browser/company limits are recorded in the combined checkpoint and packet verification records |
-| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: `211bd88` activation/private probes 10/10, public probes 9/9, HTTP 307/HTTPS, preserved original records, signed-in 1440/390/320 px date controls and populated workflow slices passed. Native print, remaining full packet acceptance and first automatic review backup are unproven |
-| E5 | 50 participants named (Q16); the proposed 3 PMs and 6 projects confirmed; sponsor named | Jay | UNPROVEN |
+| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: historical `211bd88` activation/private probes 10/10, public probes 9/9, HTTP 307/HTTPS, preserved original records, signed-in 1440/390/320 px date controls and populated workflow slices passed. Current pilot rehearsal is separately recorded above; native print, remaining full packet acceptance and automatic backup remain unproven |
+| E5 | 50 participants named (Q16); the proposed 3 PMs and 6 projects confirmed; sponsor named | Jay | UNPROVEN for a company pilot. Current 30-person / 10-project result is fictional rehearsal data |
 
 ## 2. Company approvals
 
@@ -51,21 +59,21 @@ restore a `hub-review-*` dump into it.
 
 | # | Part | Review value | Pilot requirement | Owner | Status |
 |---|---|---|---|---|---|
-| H1 | Compose project | `name: pm-tool-review`, image `pm-tool-review:<sha>` | own file and project, for example `pm-tool-pilot` | agent | UNPROVEN: written as `hosting/homedev-pilot.compose.yml` (project `pm-tool-pilot`, image `pm-tool-pilot:<sha>`); `docker compose config` validated with dummy values; not run |
-| H2 | Database | volume `pm-tool-review-db`; database and user `hub_review` | new volume, database, user and password | agent | UNPROVEN: volume `pm-tool-pilot-db`, database/user `hub_pilot`, password from `.runtime/pilot.env`; not run |
-| H3 | Seed | `Seed__ReviewDemo: "true"` | `"false"`. After first start, `SELECT count(*) FROM hub.app_user WHERE email LIKE '%@hub.test'` and `SELECT count(*) FROM hub.project WHERE external_source = 'ReviewDemo'` both return 0 | agent | UNPROVEN |
-| H4 | Environment | `ASPNETCORE_ENVIRONMENT: Staging` | stays Staging: local-password sign-in is refused in Production ([Auth.cs][auth] line 62) | agent | UNPROVEN: set in the pilot compose file |
-| H5 | Bridge network and trusted proxy | subnet `172.30.245.0/28`; its gateway `172.30.245.1` is also `Hosting__LocalTunnelProxyAddress` | own unused /28; proxy address equals the new gateway | agent | UNPROVEN: `172.30.246.0/28`, proxy `172.30.246.1`; no homedev route used that subnet on 2026-10-01 |
-| H6 | Loopback port | `127.0.0.1:3080` | own free loopback port | agent | UNPROVEN: `127.0.0.1:3081`, free on homedev on 2026-10-01 |
-| H7 | Private runtime | `.runtime/review.env`, `review-users.json`, `keys/` and `data/backups/`, shared by all review releases | separate owner-only runtime and backup directories | agent | PREPARED: dedicated pilot directories are mode 700; new synthetic Admin `pilot-admin@example.test`, independent private password/verifier files (600) and keys initialized. No review secrets/data copied; activation pending |
-| H8 | Scripts and units | init, activate, backup, restore drill and verify scripts; the root backup helper accepts only `pm-tool-review-db-1` and the review backup path ([helper]) | pilot variants that refuse review containers, volumes and dumps | agent | PARTIAL: isolated initializer `scripts/init-homedev-pilot.py` passed private/no-overwrite/review-runtime refusal checks; root helper `hosting/pm-tool-pilot-backup-root.sh` (accepts only `pm-tool-pilot-db-1` on volume `pm-tool-pilot-db`, writes `hub-pilot-*.dump` to the pilot directory) with its service and 22:15 UTC timer; pilot activation, backup, restore-drill and private-verification variants are now written; focused safety checks pass on Mac and homedev Ubuntu (14 total across backup helpers, initializer and operations, with fake Docker/sudo only); no company stack or timer installed |
+| H1 | Compose project | `name: pm-tool-review`, image `pm-tool-review:<sha>` | own file and project, for example `pm-tool-pilot` | agent | PASS for the private synthetic pilot: separate pilot Compose project/runtime is active on `3081` with source `3bfea232`; public review remains on `3080` |
+| H2 | Database | volume `pm-tool-review-db`; database and user `hub_review` | new volume, database, user and password | agent | PASS for bounded activation: the private pilot uses its own database/runtime and credentials; no review database, credentials or key ring were copied |
+| H3 | Seed | `Seed__ReviewDemo: "true"` | `"false"`. After first start, `SELECT count(*) FROM hub.app_user WHERE email LIKE '%@hub.test'` and `SELECT count(*) FROM hub.project WHERE external_source = 'ReviewDemo'` both return 0 | agent | PASS for activation gate: both review-seed counts are 0:0; current fixture data is fictional pilot data |
+| H4 | Environment | `ASPNETCORE_ENVIRONMENT: Staging` | stays Staging: local-password sign-in is refused in Production ([Auth.cs][auth] line 62) | agent | PASS for the deployed private pilot: Staging local-password runtime, 29 migrations and individual sign-in checks passed |
+| H5 | Bridge network and trusted proxy | subnet `172.30.245.0/28`; its gateway `172.30.245.1` is also `Hosting__LocalTunnelProxyAddress` | own unused /28; proxy address equals the new gateway | agent | PASS for bounded private activation using the separate pilot bridge/proxy configuration; public hostname cutover remains an external gate |
+| H6 | Loopback port | `127.0.0.1:3080` | own free loopback port | agent | PASS: private pilot is on `127.0.0.1:3081`; public review remains on `127.0.0.1:3080` |
+| H7 | Private runtime | `.runtime/review.env`, `review-users.json`, `keys/` and `data/backups/`, shared by all review releases | separate owner-only runtime and backup directories | agent | PASS for current synthetic pilot activation: separate owner-only runtime, fictional records, independent credentials and private pilot data; company runtime/data remain unproven |
+| H8 | Scripts and units | init, activate, backup, restore drill and verify scripts; the root backup helper accepts only `pm-tool-review-db-1` and the review backup path ([helper]) | pilot variants that refuse review containers, volumes and dumps | agent | PASS for bounded helper/activation gates and local restore/PITR rehearsal using the maintained activation launcher. The timer is active for 22:15 UTC, but `LastTriggerUSec` is empty; automatic execution remains UNPROVEN |
 | H9 | Hostname | review sets `AllowedHosts` and `Email__BaseUrl` to `pm.engcalchub.com`; one hostname routes to one origin | decide which stack `pm.engcalchub.com` serves during the pilot; the other gets another hostname in the `pm-tool` tunnel or stays loopback-only | Jay | DECIDED in homedev production gates: route the hostname to company port 3081 after acceptance, retain review on private loopback 3080; cutover remains UNPROVEN |
 | H10 | Capacity | each stack limits the database and the API to 1 GiB each; homedev has about 7.2 GiB RAM shared with other services (platform guide) | measure with both stacks running, or stop the review stack during the pilot | agent + Jay | UNPROVEN |
-| H11 | Releases | [homedev runbook][homedev]: reviewed full SHA, CI pass, dump first, previous image kept | the same, announced in the support channel and run outside business hours | agent + Jay | UNPROVEN |
+| H11 | Releases | [homedev runbook][homedev]: reviewed full SHA, CI pass, dump first, previous image kept | the same, announced in the support channel and run outside business hours | agent + Jay | PASS for current synthetic pilot source/CI and bounded activation gates; company release announcement, cutover and acceptance remain UNPROVEN |
 
-### Restricted database runtime (next candidate)
+### Restricted database runtime — current bounded pilot evidence
 
-The next candidate adds one-shot `Db__MigrateOnly=true` migration/bootstrap, then runs the ordinary API with
+The current pilot uses one-shot `Db__MigrateOnly=true` migration/bootstrap, then runs the ordinary API with
 `Db__Migrate=false` and a distinct **hub_pilot_app** credential in owner-only `pilot-app.env`. The privileged
 `pilot.env` and bootstrap settings are excluded from the API. After migration, activation applies
 `hosting/pilot-runtime-role.sql`: runtime owns no objects, has no elevated role/membership/schema-creation privilege,
@@ -78,7 +86,8 @@ observed `hub_pilot_app` sessions and key/cookie persistence after restart pass.
 `python3 tools/check_pilot_database_permissions.py --image <already-built-local-image>`.
 The image check does not activate homedev or close hosted T-09. Activation now stops the candidate on any failed
 post-start gate and cleans up a timed-out migration container. Independent review findings were corrected;
-failure-path re-review PASS; exact-candidate CI remains pending.
+failure-path re-review PASS; candidate CI `37139948986` and merged-main CI `37140933823` passed 858 tests. The
+ordinary pilot API uses the deployed least-privilege `hub_pilot_app` role; its 29-migration activation gates passed.
 
 ## 4. Pilot accounts
 
@@ -111,10 +120,10 @@ relaxation: implement and prove the required recovery target or record an explic
 
 | # | Must be proven | Owner | Status and record |
 |---|---|---|---|
-| B1 | Pilot dump helper and timer installed; the first automatic run leaves a nonempty, owner-only archive | agent + Jay (sudo) | UNPROVEN for pilot. Review timer is installed; its first automatic run is due 2026-10-03 22:00 UTC and remains unproven ([combined checkpoint](../reviews/2026-10-02-combined-candidate.md)) |
-| B2 | Restore drill of a timer-produced pilot dump into an isolated temporary database; counts compared and time recorded | agent + Jay | UNPROVEN for pilot. A manually invoked review backup-service dump and the separately retrieved review dump restored successfully; neither proves the first automatic timer run |
-| B3 | Off-host encrypted copy. The independent whole-server Mac export failed at 2026-10-03 01:30 UTC after its two-hour SSH timeout. The approved manual PM-only review recovery snapshot passed. A dedicated pilot copy schedule and destination still require company acceptance; it must include dumps, verifier/configuration and protection keys, independently of the whole-host export | Jay approves destination and schedule (company IT too, for company data); agent prepares | FAIL (independent whole-host export); PASS (manual PM-only review recovery); UNPROVEN (scheduled pilot copy) |
-| B4 | Retrieval: fetch a dump from the off-host copy, compare SHA-256, restore-drill it | agent + Jay | UNPROVEN for the pilot. Manual review retrieval PASS (snapshot `2582b812`, [combined checkpoint](../reviews/2026-10-02-combined-candidate.md)); byte hashes matched and isolated restore kept three projects, three users and 27 migrations |
+| B1 | Pilot dump helper and timer installed; the first automatic run leaves a nonempty, owner-only archive | agent + Jay (sudo) | PARTIAL: pilot timer active for 22:15 UTC on October 3, but `LastTriggerUSec` is empty; first automatic run remains UNPROVEN. Latest bounded result at 18:24:29 UTC reports WAL archived 8 and failed 0 |
+| B2 | Restore drill of a timer-produced pilot dump into an isolated temporary database; counts compared and time recorded | agent + Jay | PARTIAL: local logical restore of 10 pilot projects passed, and native paused PITR replay passed with `before=1`, `after=0` at 18:24 UTC; a timer-produced dump restore remains UNPROVEN |
+| B3 | Off-host encrypted copy. The independent whole-server Mac export failed at 2026-10-03 01:30 UTC after its two-hour SSH timeout. The approved manual PM-only review recovery snapshot passed. A dedicated pilot copy schedule and destination still require company acceptance; it must include dumps, verifier/configuration and protection keys, independently of the whole-host export | Jay approves destination and schedule (company IT too, for company data); agent prepares | FAIL (independent whole-server export); PASS (manual review snapshot); UNPROVEN (bounded off-host pilot WAL transfer/copy) |
+| B4 | Retrieval: fetch a dump from the off-host copy, compare SHA-256, restore-drill it | agent + Jay | UNPROVEN for the pilot. Bounded off-host WAL transfer, retrieval and replay remain unproven. Historical review retrieval PASS (snapshot `2582b812`, [combined checkpoint](../reviews/2026-10-02-combined-candidate.md)); it contained 27 migrations, 3 projects and 3 users |
 | B5 | Dumps cannot cross over: separate directories and file prefixes; the pilot helper refuses review containers; pilot dumps never go into review, development or test (FR-007) | agent | UNPROVEN |
 
 ## 6. Monitoring

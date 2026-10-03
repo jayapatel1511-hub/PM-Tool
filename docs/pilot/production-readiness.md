@@ -5,6 +5,11 @@ paid service is authorized for this release. Existing Azure templates remain unu
 production gates. Use `pm.engcalchub.com`, the existing Cloudflare tunnel infrastructure and individual passwords
 with credentials outside Git. This document records preparation, not deployment or company acceptance.
 
+The public review remains `211bd88649e288484901aba6946fdd0e2e29dd17` on `3080`. The separate private synthetic pilot
+uses `3bfea2328aae1421300f81979ceebc7d5be6b6b1` on `3081`; PR #30 merged at `d0c2ab7179eba47014e821f13b5fbd19bcaeb06d`,
+candidate/main CI passed 858 tests, and the 30-user/10-project rehearsal passed its bounded sign-in, project-access,
+logical-restore and paused native-PITR checks. This does not make production live or establish company acceptance.
+
 ## Deployment and data boundary
 
 First complete the persistent synthetic review release, then use the separate company pilot stack described in
@@ -21,7 +26,7 @@ environment to `Production` would currently break sign-in. No Azure identity is 
 
 | Gate | Evidence required | Current status |
 |---|---|---|
-| Exact code revision | Passing CI and reviewed changes for the deployed full SHA; merge status recorded separately | Corrected candidate `211bd88` merged through PR #25 at `328e88a` with identical Git trees. Candidate/main CI passed 858/858 and required gates; exact archive fresh/populated image checks passed locally. Homedev activation passed at 14:06:40 UTC on October 3; populated hosted slices passed. Full company acceptance remains UNPROVEN; subsequent pilot least-privilege work is a separate candidate; see the completion checkpoint |
+| Exact code revision | Passing CI and reviewed changes for the deployed full SHA; merge status recorded separately | Public review candidate `211bd88` merged through PR #25 at `328e88a` with identical Git trees; its bounded hosted review evidence remains historical/current for that public stack. Separate private pilot source `3bfea232` merged through PR #30 at `d0c2ab7`, with candidate/main CI 858/858. Full company acceptance remains UNPROVEN; see the completion checkpoint |
 | Review deployment | Current release pointer, database migration and preserved synthetic records, trusted HTTPS and browser workflows | PASS for bounded synthetic review gates on `211bd88`: exact image/volume and pointer, 10/10 private and 9/9 public probes, HTTP 307/HTTPS, preserved original marker/tasks, signed-in narrow-screen controls and populated workflow slices. Native print and full company acceptance remain UNPROVEN. See the completion checkpoint |
 | Company approval | Approved homedev hosting, data classification, hostname and individual-password authentication; sponsor and support owner | UNPROVEN; see pilot approvals |
 | Pilot acceptance | Real participants complete the agreed workflows and record go/no-go | UNPROVEN |
@@ -31,11 +36,11 @@ environment to `Production` would currently break sign-in. No Azure identity is 
 | Backup and recovery | Scheduled owner-only company dumps, approved encrypted off-host copy, retrieval and isolated restore drill; measured RPO/RTO accepted | UNPROVEN; do not equate a manual dump with scheduled recovery |
 | Operations | Existing host monitoring, actionable notification route, disk/capacity checks, daily Operations review and outage procedure | UNPROVEN |
 | Notifications | In-app delivery accepted; email remains Log mode unless an existing approved relay is configured | UNPROVEN acceptance; no email delivery claimed |
-| Database runtime | Migration/bootstrap account isolated from the ordinary API; observed app sessions/ACLs deny schema/trigger/audit mutation | Prepared and actual PG17/image rehearsal PASS locally; hosted T-09 remains UNPROVEN pending the next reviewed candidate activation |
+| Database runtime | Migration/bootstrap account isolated from the ordinary API; observed app sessions/ACLs deny schema/trigger/audit mutation | PASS for the bounded private pilot activation: 29 migrations, deployed least-privilege `hub_pilot_app` ordinary role, and activation gates passed. Broader company-hosted acceptance remains UNPROVEN |
 | Security and accessibility | Hosted role/privacy checks, cookie revocation, threat-model review and required accessibility checks | UNPROVEN final hosted acceptance |
 | Cutover | Reviewed SHA, pre-release dump, preserved previous image, health/browser verification and rollback rehearsal | UNPROVEN |
 
-Jay requested a separate **synthetic pilot rehearsal** with fictional users/projects. Its clean runtime is prepared, with activation pending. Rehearsal results cannot close company approval, real pilot acceptance or production deployment.
+Jay requested a separate **synthetic pilot rehearsal** with fictional users/projects. Its private runtime is activated and its bounded rehearsal passed; the result cannot close company approval, real pilot acceptance or production deployment.
 
 ## Cutover and rollback
 
@@ -59,10 +64,11 @@ and an 8-hour RTO with the host intact. Keep daily dumps for 14 days; company ap
 targets and longer retention are acceptable. Jay approved the review recovery payload in the existing encrypted Mac restic repository, and retrieval plus isolated restore passed. This approval/evidence applies to review data; company-data approval, a working off-host schedule and host-loss recovery remain unproven. Verify and record those gates before go-live. Azure PITR,
 managed identity, paid monitoring and Azure mail integrations are not assumed capabilities of this deployment.
 
-### Pilot recovery preparation checkpoint (2026-10-03)
+### Pilot recovery preparation checkpoint — current bounded evidence (2026-10-03 18:24 UTC)
 
-The [restore runbook](../runbooks/restore.md#pilot-pitr-preparation-local-proof-homedev-activation-pending) records
-locally verified PostgreSQL 17 WAL/base/replay preparation. It retains the existing daily logical dump and adds a
-verified physical base to that daily service. Homedev activation, automatic operation, bounded off-host transfer,
-retrieved replay and full application recovery are still required. The synthetic six-person fixture is a rehearsal,
-not company participant acceptance or permission to cut over production.
+The [restore runbook](../runbooks/restore.md#pilot-pitr-bounded-on-host-proof-off-host-recovery-unproven) records
+locally verified PostgreSQL 17 WAL/base/replay preparation. The current private pilot rehearsal passed native paused
+PITR with `before=1` and `after=0` at 18:24 UTC, plus local logical restore of 10 projects. The timer is active for
+22:15 UTC but `LastTriggerUSec` is empty, so automatic operation remains UNPROVEN. Bounded off-host transfer,
+retrieved replay, full application recovery, the 15-minute RPO and the 8-hour RTO remain unproven. The
+30-person/10-project fixture is synthetic, not company participant acceptance or permission to cut over production.

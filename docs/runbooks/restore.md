@@ -13,12 +13,19 @@ database afterwards. The pilot script requires its own private runtime and dump 
 Jay enters sudo credentials in his Ubuntu terminal. A drill is not a live database restore or permission to discard
 newer writes. Freeze writes and record the restore point, compatibility and any accepted data loss before a real restore.
 
-Homedev currently has logical dumps, not point-in-time recovery. Proposed targets are a 24-hour RPO and eight-hour
-RTO, subject to measured recovery and company acceptance; the original §22 15-minute RPO is not achieved by daily
-dumps and needs a recorded exception or an implemented recovery change before production acceptance. The proposed retention is 14 days; current helpers preserve dumps without pruning. A manual encrypted review retrieval and isolated restore passed; the first automatic review timer
-trigger (2026-10-03 22:00 UTC), automatic off-host copying and company recovery remain UNPROVEN.
+The public review still has daily logical dumps. The separate private synthetic pilot now has native physical-base
+and WAL recovery on homedev: release `3bfea2328aae1421300f81979ceebc7d5be6b6b1` passed the bounded replay drill
+at 2026-10-03 18:24 UTC, with replay paused, `before=1` and `after=0`. Its operator run also restored 10 projects
+from a logical dump. These are on-host recovery checks; they do not prove recovery after losing homedev.
 
-## Pilot PITR preparation (local proof; homedev activation pending)
+The §22 targets remain a 15-minute RPO and eight-hour RTO. Daily review dumps do not meet the RPO. Encrypted
+off-host pilot base/WAL transfer, retrieved replay and full application recovery remain UNPROVEN. The proposed
+24-hour logical RPO is not an accepted exception. Current helpers preserve backups without pruning; the proposed
+14-day retention needs a verified recovery chain and space checks before company acceptance. A manual encrypted
+review retrieval and isolated restore passed. The first automatic review and pilot timer triggers (2026-10-03
+22:00 and 22:15 UTC respectively) have not yet occurred at this checkpoint.
+
+## Pilot PITR (bounded on-host proof; off-host recovery unproven)
 
 The pilot Compose enables replica WAL, archiving and a five-minute archive timeout. Its WAL and physical-base
 volumes are separate from the source database and every review volume. The archive helper publishes without
@@ -39,8 +46,12 @@ archive history/duplicate/collision checks. The final fixture drill took 7.3 sec
 host-loss recovery time. The command uses only its own disposable resources and requires an already available
 `postgres:17-alpine` image. Without `--docker`, it checks both outer and embedded shell syntax.
 
-**Still unproven:** homedev WAL configuration/archiver lag, automatic physical backup, encrypted off-host WAL/base
-transfer within the 15-minute target, off-host retrieval/replay, full application recovery and quarterly repetition.
+The deployed pilot operator run recorded 8 WAL archives and 0 failures at 18:24:29 UTC. Its backup timer is active;
+`LastTriggerUSec` was empty before the first 22:15 UTC run. The private 30-person synthetic fixture and all individual
+sign-ins passed on this release; company participant acceptance remains separate.
+
+**Still unproven:** ongoing archiver lag, the first automatic physical backup, encrypted off-host WAL/base transfer
+within the 15-minute target, off-host retrieval/replay, full application recovery and quarterly repetition.
 A five-minute local archive timeout does not prove protection against loss of the laptop. No base/WAL pruning is
 implemented until a retained, retrieved recovery chain is demonstrated; monitor space and agree retention before
 company data. The 24-hour logical-dump proposal remains unaccepted.

@@ -64,5 +64,13 @@ public sealed class DisciplineCoordinationTests(HubFactory f)
         var civilUse = Assert.Single(civilView["uses"]!.AsArray())!;
         Assert.Equal((civilTask.S("key"), "Grading tie-in", "A", f.Db(db => db.Deliverables.Single(x => x.Id == survey).Key)),
             (civilUse.S("targetKey"), civilUse.S("targetName"), civilUse.S("revision"), civilUse.S("sourceKey")));
+
+        // Packet 030 bounded projection: a populated second page keeps the exact filtered total and source revision row.
+        var pageTwo = await f.As(TestData.Pm).GetAsync($"{root}/discipline-coordination?page=2&pageSize=1").Result.Json();
+        Assert.Equal(2, pageTwo.I("usesTotal"));
+        Assert.Equal((2, 1), (pageTwo.I("usesPage"), pageTwo.I("usesPageSize")));
+        var secondUse = Assert.Single(pageTwo["uses"]!.AsArray())!;
+        Assert.Equal("A", secondUse.S("revision"));
+        Assert.Equal(civilTask.S("key"), secondUse.S("targetKey"));
     }
 }

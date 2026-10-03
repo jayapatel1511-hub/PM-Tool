@@ -17,17 +17,19 @@ public static class DisciplineCoordinationEndpoints
     }
 
     static async Task<object> Get(Guid projectId, Guid? disciplineId, Guid? ownerId, DateOnly? from, DateOnly? to,
+        int? page, int? pageSize,
         Access access, HubDb db, TimeProvider clock, SettingsStore settings)
     {
         await using var snapshot = await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         await access.Project(projectId, track: false);
         var org = await settings.Get(db);
-        return await Build(projectId, disciplineId, ownerId, from, to, access.Me.Id, db, clock.GetUtcNow(),
+        return await Build(projectId, disciplineId, ownerId, from, to, page, pageSize, access.Me.Id, db, clock.GetUtcNow(),
             clock.Today(org), org.CoordinationLookaheadWeeks * 7 - 1, settings);
     }
 
     static async Task<object> Workspace(Guid? projectId, Guid? disciplineId, Guid? ownerId, DateOnly? from, DateOnly? to,
         string? scopeKind, string? scopeProjectIds, Guid? scopeWorkspaceId,
+        int? page, int? pageSize,
         Access access, HubDb db, TimeProvider clock, SettingsStore settings)
     {
         await using var snapshot = await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
@@ -75,7 +77,7 @@ public static class DisciplineCoordinationEndpoints
                 : memberships.FirstOrDefault(m => m.ProjectId == project.Id)?.PrimaryDisciplineId;
             if (disciplineId is not null && localDiscipline is null) continue;
             rows.Add(new { project.Id, project.ProjectNumber, project.Name, DisciplineId = localDiscipline,
-                Data = await Build(project.Id, localDiscipline, ownerId, from, to, access.Me.Id, db, evaluatedAt, today,
+                Data = await Build(project.Id, localDiscipline, ownerId, from, to, page, pageSize, access.Me.Id, db, evaluatedAt, today,
                     org.CoordinationLookaheadWeeks * 7 - 1, settings) });
         }
         return new { EvaluatedAt = evaluatedAt, ActorId = access.Me.Id, Projects = rows, ProjectChoices = choices, Disciplines = disciplineChoices, Owners = owners,
@@ -83,6 +85,7 @@ public static class DisciplineCoordinationEndpoints
     }
 
     static async Task<object> Build(Guid projectId, Guid? disciplineId, Guid? ownerId, DateOnly? from, DateOnly? to,
+        int? page, int? pageSize,
         Guid actorId, HubDb db, DateTimeOffset evaluatedAt, DateOnly today, int lookaheadDays, SettingsStore settings)
     {
 
@@ -190,6 +193,39 @@ public static class DisciplineCoordinationEndpoints
                 SourceKey = db.SourceRevisions.Where(r => r.Id == u.SourceRevisionId).Select(r => r.SourceKey).FirstOrDefault(),
                 Revision = db.SourceRevisions.Where(r => r.Id == u.SourceRevisionId).Select(r => r.Revision).FirstOrDefault() })
             .ToListAsync();
+
+        var paged = page.HasValue || pageSize.HasValue;
+        var (pg, size) = Http.Paging(page, pageSize);
+        static IReadOnlyList<T> PageRows<T>(IReadOnlyList<T> rows, bool enabled, int page, int size) =>
+            enabled ? rows.Skip((page - 1) * size).Take(size).ToArray() : rows;
+
+        // FR-DCV-01/03 context comes from the submission and readiness registers. A pending
+        // check is an actionable failing check for an unissued package; no readiness is inferred.
+        var submissionFirst = from ?? today;
+        var submissionLast = to ?? today.AddDays(lookaheadDays);
+        var packages = db.SubmissionPackages.AsNoTracking().Where(p => p.ProjectId == projectId &&
+            p.Status != SubmissionStatus.Issued && p.Status != SubmissionStatus.Superseded && p.Status != SubmissionStatus.Cancelled &&
+            p.TargetDate >= submissionFirst && p.TargetDate <= submissionLast);
+        if (disciplineId is { } submissionDiscipline)
+            packages = packages.Where(p => db.SubmissionManifestItems.Any(m => m.PackageId == p.Id && m.ManifestVersion == p.ManifestVersion &&
+                db.Deliverables.Any(d => d.Id == m.DeliverableId && d.ProjectDisciplineId == submissionDiscipline)));
+        if (ownerId is { } submissionOwner)
+            packages = packages.Where(p => p.CoordinatorId == submissionOwner || db.SubmissionChecks.Any(c => c.PackageId == p.Id &&
+                c.ManifestVersion == p.ManifestVersion && c.OwnerId == submissionOwner));
+        var submissionRows = await packages.OrderBy(p => p.TargetDate).ThenBy(p => p.Key)
+            .Select(p => new { p.Id, p.Key, p.Title, p.Status, p.TargetDate, p.CoordinatorId,
+                FailingChecks = db.SubmissionChecks.Where(c => c.PackageId == p.Id && c.ManifestVersion == p.ManifestVersion && c.Required && c.Status == SubmissionCheckStatus.Pending)
+                    .Select(c => new { c.Id, c.Kind, c.EvidenceRule }).ToList() }).ToListAsync();
+
+        var staffing = db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId && c.Category == "Capacity" &&
+            c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled && c.NeededBy >= submissionFirst && c.NeededBy <= submissionLast);
+        if (disciplineId is { } staffingDiscipline)
+            staffing = staffing.Where(c => (c.TargetType == ItemType.Task && db.Tasks.Any(t => t.Id == c.TargetId && t.ProjectDisciplineId == staffingDiscipline)) ||
+                (c.TargetType == ItemType.Deliverable && db.Deliverables.Any(d => d.Id == c.TargetId && d.ProjectDisciplineId == staffingDiscipline)));
+        if (ownerId is { } staffingOwner) staffing = staffing.Where(c => c.AffectedOwnerId == staffingOwner || c.RemovalOwnerId == staffingOwner);
+        var staffingRows = await staffing.OrderBy(c => c.NeededBy).ThenBy(c => c.Key)
+            .Select(c => new { c.Id, c.Key, c.TargetType, c.TargetId, c.Description, c.NeededBy, c.State, c.AffectedOwnerId, c.RemovalOwnerId })
+            .ToListAsync();
         var startability = await Startability(projectId, disciplineId, ownerId, from, to, today,
             lookaheadDays, evaluatedAt, db, settings);
         var changeIds = changeRows.Select(c => c.Id).ToArray();
@@ -227,23 +263,38 @@ public static class DisciplineCoordinationEndpoints
             Handoffs = handoffRows,
             Outgoing = outgoing,
             Incoming = incoming,
-            Changes = changeRows,
             ChangeTargets = changeTargets,
             UnavailableChangeTargets = unavailableChangeTargets,
             Reviews = reviewRows,
-            LinkedIssues = issueRows,
-            Uses = useRows,
+            Uses = PageRows(useRows, paged, pg, size),
             UsesTotal = useRows.Count,
+            UsesPage = paged ? pg : 1,
+            UsesPageSize = paged ? size : useRows.Count,
+            LinkedIssues = PageRows(issueRows, paged, pg, size),
             LinkedIssuesTotal = issueRows.Count,
+            LinkedIssuesPage = paged ? pg : 1,
+            LinkedIssuesPageSize = paged ? size : issueRows.Count,
             HandoffsTotal = handoffRows.Count,
+            Changes = PageRows(changeRows, paged, pg, size),
             ChangesTotal = changeRows.Count,
+            ChangesPage = paged ? pg : 1,
+            ChangesPageSize = paged ? size : changeRows.Count,
             ReviewsTotal = reviewRows.Count,
             BlockerGroups = blockerGroups,
-            Startability = startability.Rows,
+            Startability = PageRows(startability.Rows, paged, pg, size),
+            StartabilityTotal = startability.Rows.Count,
+            StartabilityPage = paged ? pg : 1,
+            StartabilityPageSize = paged ? size : startability.Rows.Count,
             StartabilityFrom = startability.From,
             StartabilityTo = startability.To,
             StartabilityReadyTotal = startability.Rows.Count(r => r.State == ReadinessState.Ready),
             LinkedActions = linkedActions,
+            UpcomingSubmissions = submissionRows,
+            UpcomingSubmissionsTotal = submissionRows.Count,
+            StaffingConflicts = staffingRows,
+            StaffingConflictsTotal = staffingRows.Count,
+            Page = paged ? pg : 1,
+            PageSize = paged ? size : 0,
         };
     }
 

@@ -40,6 +40,8 @@ public sealed class CoordinationDigestTests(HubFactory f)
                 Category = "Handoff", Description = "Provide input", RemovalOwnerId = me, AffectedOwnerId = pm, NeededBy = today, SourceUrl = "https://example.test/input" });
             var assessment = new ReadinessAssessment { ProjectId = project.Id, TargetType = "Task", TargetId = taskId, OwnerId = me };
             db.ReadinessAssessments.Add(assessment);
+            db.BasisAssumptionDispositions.Add(new BasisAssumptionDisposition { ProjectId = project.Id, VersionId = version.Id,
+                Scope = version.Scope, OwnerId = me, ApprovedBy = pm, ExpiresOn = today.AddDays(3), Reason = "Current digest fixture" });
             db.ReadinessExceptions.Add(new ReadinessException { ProjectId = project.Id, AssessmentId = assessment.Id, BasisVersionId = version.Id,
                 ApprovedBy = pm, VerifierId = me, ExpiresOn = today.AddDays(1), LimitedWork = "Review limited work", Risk = "Provisional input" });
             for (var i = 1; i <= 12; i++)
@@ -54,7 +56,7 @@ public sealed class CoordinationDigestTests(HubFactory f)
         var db = scope.ServiceProvider.GetRequiredService<HubDb>();
         Task<Digest.Result?> Build(IReadOnlySet<string>? off = null) => Digest.Build(db, me, "Test", today,
             f.Clock.Now.AddDays(-1), f.Clock.Now, new OrgSettings(), "https://example.test", off);
-        var sections = new[] { "submissions", "allocations", "basisImpacts", "constraints", "commitments", "issueVerifications", "readinessExceptions" };
+        var sections = new[] { "submissions", "allocations", "basisImpacts", "constraints", "commitments", "issueVerifications" };
         var result = Assert.IsType<Digest.Result>(await Build());
         foreach (var code in sections) Assert.Contains(result.Sections, s => s.Code == code && s.Total > 0);
         var promises = Assert.Single(result.Sections, s => s.Code == "commitments");
@@ -84,5 +86,86 @@ public sealed class CoordinationDigestTests(HubFactory f)
             return await other.SaveChangesAsync();
         });
         Assert.Null(await Build());
+    }
+
+    [Fact]
+    public async Task Owner_recovery_hides_stale_exception_assignment_but_keeps_current_exception_assignment()
+    {
+        var data = new TestData(f);
+        var project = await data.Project();
+        var alex = data.User(TestData.Alex);
+        var omar = data.User(TestData.Omar);
+        var marc = data.User(TestData.Marc);
+        var jill = data.User(TestData.Jill);
+        var pm = data.User(TestData.Pm);
+        var task = await data.NewTask(project.Id, extra: new { assigneeId = alex });
+        var taskId = task.G("id");
+        var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
+        var assessmentId = Guid.CreateVersion7();
+        var entryId = Guid.CreateVersion7();
+        var versionId = Guid.CreateVersion7();
+        var useId = Guid.CreateVersion7();
+        await f.DbAsync(async db =>
+        {
+            foreach (var userId in new[] { marc, jill })
+            {
+                var member = await db.ProjectMembers.SingleOrDefaultAsync(m => m.ProjectId == project.Id && m.UserId == userId);
+                if (member is null) db.ProjectMembers.Add(new ProjectMember { ProjectId = project.Id, UserId = userId, Roles = [ProjectRole.TeamMember] });
+                else { member.Roles = [ProjectRole.TeamMember]; member.RemovedAt = null; }
+            }
+            db.DesignBasisEntries.Add(new DesignBasisEntry { Id = entryId, ProjectId = project.Id, Seq = 991, Key = "B0991",
+                Kind = BasisKind.Assumption, Title = "Digest recovery assumption", OwnerId = alex,
+                ProjectDisciplineId = data.ProjectDiscipline(project.Id, "Civil") });
+            db.DesignBasisVersions.Add(new DesignBasisVersion { Id = versionId, ProjectId = project.Id, EntryId = entryId,
+                Number = 1, Scope = "Digest scope", Statement = "Recovery assumption" });
+            db.BasisUses.Add(new BasisUse { Id = useId, ProjectId = project.Id, VersionId = versionId, TargetType = "Task", TargetId = taskId,
+                OwnerId = alex, IntendedUse = "Digest recovery" });
+            db.ReadinessAssessments.Add(new ReadinessAssessment { Id = assessmentId, ProjectId = project.Id, TargetType = "Task",
+                TargetId = taskId, OwnerId = alex });
+            db.BasisAssumptionDispositions.Add(new BasisAssumptionDisposition { ProjectId = project.Id, VersionId = versionId,
+                Scope = "Digest scope", OwnerId = alex, ApprovedBy = pm, ExpiresOn = today.AddDays(5), Reason = "Original owner disposition" });
+            db.ReadinessExceptions.Add(new ReadinessException { ProjectId = project.Id, AssessmentId = assessmentId, BasisVersionId = versionId,
+                ApprovedBy = pm, VerifierId = marc, ExpiresOn = today.AddDays(2), LimitedWork = "Stale exception", Risk = "Old owner" });
+            return await db.SaveChangesAsync();
+        });
+
+        using var scope = f.Services.CreateScope();
+        var digestDb = scope.ServiceProvider.GetRequiredService<HubDb>();
+        var preRecoveryDigest = await Digest.Build(digestDb, marc, "Marc", today, f.Clock.Now.AddDays(-1), f.Clock.Now,
+            new OrgSettings(), "https://example.test");
+        Assert.Contains(preRecoveryDigest?.Sections ?? [], s => s.Code == "readinessExceptions" && s.Rows.Any(r => r.Name == "Stale exception"));
+
+        await f.DbAsync(async db =>
+        {
+            db.Tasks.Single(t => t.Id == taskId).AssigneeId = omar;
+            return await db.SaveChangesAsync();
+        });
+        var recovery = await f.As(TestData.Omar).Post($"/api/v1/projects/{project.Id}/readiness/Task/{taskId}", new
+        {
+            requestId = Guid.NewGuid(), targetRowVersion = f.Db(db => db.Tasks.Single(t => t.Id == taskId).RowVersion),
+            assessmentRowVersion = f.Db(db => db.ReadinessAssessments.Single(a => a.Id == assessmentId).RowVersion),
+            intendedOutput = "Reconfirm output", completionCriteria = "Reconfirm criteria", reason = "Replacement owner reconfirmed"
+        });
+        Assert.True(recovery.IsSuccessStatusCode, await recovery.Content.ReadAsStringAsync());
+
+        var oldVerifierDigest = await Digest.Build(digestDb, marc, "Marc", today, f.Clock.Now.AddDays(-1), f.Clock.Now,
+            new OrgSettings(), "https://example.test");
+        Assert.DoesNotContain(oldVerifierDigest?.Sections ?? [], s => s.Code == "readinessExceptions" && s.Rows.Any(r => r.Name == "Stale exception"));
+
+        await f.DbAsync(async db =>
+        {
+            db.BasisAssumptionDispositions.Add(new BasisAssumptionDisposition { ProjectId = project.Id, VersionId = versionId,
+                Scope = "Digest scope", OwnerId = omar, ApprovedBy = pm, ExpiresOn = today.AddDays(5), Reason = "Replacement owner disposition" });
+            db.ReadinessExceptions.Add(new ReadinessException { ProjectId = project.Id, AssessmentId = assessmentId, BasisVersionId = versionId,
+                ApprovedBy = pm, VerifierId = jill, ExpiresOn = today.AddDays(4), LimitedWork = "Current exception", Risk = "Replacement owner" });
+            return await db.SaveChangesAsync();
+        });
+
+        var currentVerifierDigest = await Digest.Build(digestDb, jill, "Jill", today, f.Clock.Now.AddDays(-1), f.Clock.Now,
+            new OrgSettings(), "https://example.test");
+        var current = Assert.Single(currentVerifierDigest!.Sections, s => s.Code == "readinessExceptions");
+        Assert.Contains(current.Rows, r => r.Name == "Current exception");
+
+        Assert.Equal(2, f.Db(db => db.ReadinessExceptions.Count(e => e.AssessmentId == assessmentId)));
     }
 }

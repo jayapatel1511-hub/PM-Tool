@@ -13,6 +13,8 @@ namespace Hub.Api.Infrastructure;
 public static class Digest
 {
     public sealed record Row(Guid ItemId, string? Key, string Name, string Project, string Detail, string Link);
+    sealed record ExceptionRow(Guid Id, Guid ProjectId, Guid AssessmentId, Guid BasisVersionId, Guid VerifierId,
+        string LimitedWork, DateOnly ExpiresOn, string TargetType, Guid TargetId, Guid OwnerId);
     public sealed record Section(string Code, List<Row> Rows, int Total);
     public sealed record Updates(string ProjectNumber, string ProjectName, int Count, Dictionary<string, int> ByType, List<string> Top);
     public sealed record Result(string Subject, string Body, List<Section> Sections, List<Updates> ProjectUpdates)
@@ -191,12 +193,41 @@ public static class Digest
                 (v, i) => new { v, i.Id, i.Key, i.Title, i.TargetResolutionDate }).OrderBy(x => x.TargetResolutionDate).ThenBy(x => x.v.Id).ToListAsync();
         var issueVerifications = Make("issueVerifications", verificationRows.Select(x => new Row(x.v.Id, x.Key, x.Title, Num(x.v.ProjectId),
             Text.Get("digest.coordination_detail", x.v.Status, D(x.TargetResolutionDate)), $"{baseUrl}/projects/{Num(x.v.ProjectId)}/issues?panel=Issue:{x.Id}")));
-        var exceptionRows = await db.ReadinessExceptions.AsNoTracking().Where(e => pids.Contains(e.ProjectId) && e.VerifierId == userId && e.ExpiresOn >= today
+        var exceptionCandidates = await db.ReadinessExceptions.AsNoTracking().Where(e => pids.Contains(e.ProjectId) && e.VerifierId == userId && e.ExpiresOn >= today
             && e.Id == db.ReadinessExceptions.Where(latest => latest.AssessmentId == e.AssessmentId)
                 .OrderByDescending(latest => latest.CreatedAt).ThenByDescending(latest => latest.Id).Select(latest => latest.Id).First())
-            .Join(db.ReadinessAssessments, e => e.AssessmentId, a => a.Id, (e, a) => new { e, a.TargetType, a.TargetId }).OrderBy(x => x.e.ExpiresOn).ThenBy(x => x.e.Id).ToListAsync();
-        var readinessExceptions = Make("readinessExceptions", exceptionRows.Select(x => new Row(x.e.Id, null, x.e.LimitedWork, Num(x.e.ProjectId),
-            Text.Get("digest.exception_detail", D(x.e.ExpiresOn)), x.TargetType == "Task" ? TaskLink(x.e.ProjectId, x.TargetId) : DelLink(x.e.ProjectId, x.TargetId))));
+            .Join(db.ReadinessAssessments, e => e.AssessmentId, a => a.Id, (e, a) => new ExceptionRow(e.Id, e.ProjectId, e.AssessmentId,
+                e.BasisVersionId, e.VerifierId, e.LimitedWork, e.ExpiresOn, a.TargetType, a.TargetId, a.OwnerId)).ToListAsync();
+        var exceptionRows = new List<ExceptionRow>();
+        foreach (var candidate in exceptionCandidates)
+        {
+            var targetOwner = candidate.TargetType == "Task"
+                ? await db.Tasks.AsNoTracking().Where(t => t.Id == candidate.TargetId && t.ProjectId == candidate.ProjectId && t.DeletedAt == null).Select(t => (Guid?)t.AssigneeId).SingleOrDefaultAsync()
+                : await db.Deliverables.AsNoTracking().Where(d => d.Id == candidate.TargetId && d.ProjectId == candidate.ProjectId && d.DeletedAt == null).Select(d => d.OwnerId).SingleOrDefaultAsync();
+            if (targetOwner is not { } owner || owner != candidate.OwnerId || owner == candidate.VerifierId) continue;
+            if (!await Coordination.People(db, projects[candidate.ProjectId]).AnyAsync(u => u.Id == owner)) continue;
+
+            var uses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == candidate.ProjectId &&
+                    u.TargetType == candidate.TargetType && u.TargetId == candidate.TargetId)
+                .Join(db.DesignBasisVersions.AsNoTracking(), u => u.VersionId, v => v.Id,
+                    (u, v) => new { UseId = u.Id, u.VersionId, EntryId = v.EntryId, u.CreatedAt, v.Status, v.Scope,
+                        IsAssumption = db.DesignBasisEntries.Any(e => e.Id == v.EntryId && e.ProjectId == candidate.ProjectId && e.Kind == BasisKind.Assumption) })
+                .ToListAsync();
+            var currentUses = uses.GroupBy(u => u.EntryId).Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.UseId).First()).ToList();
+            var currentUse = currentUses.SingleOrDefault(u => u.VersionId == candidate.BasisVersionId && u.Status == BasisStatus.Proposed && u.IsAssumption);
+            if (currentUse is null) continue;
+            if (await db.BasisImpactAssessments.AnyAsync(a => a.ProjectId == candidate.ProjectId && a.BasisUseId == currentUse.UseId && a.Status == AssessmentStatus.Pending)) continue;
+            if (await db.BasisConflicts.AnyAsync(c => c.ProjectId == candidate.ProjectId && !c.Resolved &&
+                    (c.LeftVersionId == candidate.BasisVersionId || c.RightVersionId == candidate.BasisVersionId))) continue;
+            if (!await db.BasisAssumptionDispositions.AsNoTracking().AnyAsync(d => d.ProjectId == candidate.ProjectId &&
+                    d.VersionId == candidate.BasisVersionId && d.OwnerId == owner && d.ApprovedBy != owner &&
+                    d.ExpiresOn >= candidate.ExpiresOn && d.Scope.ToLower() == currentUse.Scope.ToLower())) continue;
+            if (!await Coordination.People(db, projects[candidate.ProjectId]).AnyAsync(u => u.Id == candidate.VerifierId)) continue;
+            exceptionRows.Add(candidate);
+        }
+        exceptionRows = exceptionRows.OrderBy(x => x.ExpiresOn).ThenBy(x => x.Id).ToList();
+        var readinessExceptions = Make("readinessExceptions", exceptionRows.Select(x => new Row(x.Id, null, x.LimitedWork, Num(x.ProjectId),
+            Text.Get("digest.exception_detail", D(x.ExpiresOn)), x.TargetType == "Task" ? TaskLink(x.ProjectId, x.TargetId) : DelLink(x.ProjectId, x.TargetId))));
         var sections = new List<Section> { overdue, dueSoon, blocked, reviews, decisionRows, handoffs, reviewPackages, changes,
             submissions, allocations, basisImpacts, constraints, commitments, issueVerifications, readinessExceptions, attentionRows, milestones, staff }.Where(x => x.Total > 0).ToList();
         if (sections.Count == 0 && updates.Count == 0) return null; // AC-NOT-04: nothing to say, nothing sent

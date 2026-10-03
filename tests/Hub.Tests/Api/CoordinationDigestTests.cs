@@ -105,6 +105,9 @@ public sealed class CoordinationDigestTests(HubFactory f)
         var entryId = Guid.CreateVersion7();
         var versionId = Guid.CreateVersion7();
         var useId = Guid.CreateVersion7();
+        var secondEntryId = Guid.CreateVersion7();
+        var secondVersionId = Guid.CreateVersion7();
+        var secondUseId = Guid.CreateVersion7();
         await f.DbAsync(async db =>
         {
             foreach (var userId in new[] { marc, jill })
@@ -165,6 +168,36 @@ public sealed class CoordinationDigestTests(HubFactory f)
             new OrgSettings(), "https://example.test");
         var current = Assert.Single(currentVerifierDigest!.Sections, s => s.Code == "readinessExceptions");
         Assert.Contains(current.Rows, r => r.Name == "Current exception");
+
+        await f.DbAsync(async db =>
+        {
+            db.DesignBasisEntries.Add(new DesignBasisEntry { Id = secondEntryId, ProjectId = project.Id, Seq = 992, Key = "B0992",
+                Kind = BasisKind.Criterion, Title = "Second current basis", OwnerId = omar,
+                ProjectDisciplineId = data.ProjectDiscipline(project.Id, "Civil") });
+            db.DesignBasisVersions.Add(new DesignBasisVersion { Id = secondVersionId, ProjectId = project.Id, EntryId = secondEntryId,
+                Number = 1, Status = BasisStatus.Proposed, Scope = "Second scope", Statement = "Second current basis" });
+            db.BasisUses.Add(new BasisUse { Id = secondUseId, ProjectId = project.Id, VersionId = secondVersionId, TargetType = "Task",
+                TargetId = taskId, OwnerId = omar, IntendedUse = "Second current basis" });
+            return await db.SaveChangesAsync();
+        });
+        var mismatchedDigest = await Digest.Build(digestDb, jill, "Jill", today, f.Clock.Now.AddDays(-1), f.Clock.Now,
+            new OrgSettings(), "https://example.test");
+        Assert.DoesNotContain(mismatchedDigest?.Sections ?? [], s => s.Code == "readinessExceptions");
+
+        await f.DbAsync(async db =>
+        {
+            var second = await db.DesignBasisVersions.SingleAsync(v => v.Id == secondVersionId);
+            second.Status = BasisStatus.Confirmed;
+            second.SourceUrl = "https://example.test/second-current-basis";
+            second.ConfirmedBy = pm;
+            second.ConfirmedAt = f.Clock.Now;
+            second.ConfirmationRationale = "Confirmed for digest restoration";
+            return await db.SaveChangesAsync();
+        });
+        var restoredDigest = await Digest.Build(digestDb, jill, "Jill", today, f.Clock.Now.AddDays(-1), f.Clock.Now,
+            new OrgSettings(), "https://example.test");
+        Assert.Contains(Assert.Single(restoredDigest!.Sections, s => s.Code == "readinessExceptions").Rows,
+            r => r.Name == "Current exception");
 
         Assert.Equal(2, f.Db(db => db.ReadinessExceptions.Count(e => e.AssessmentId == assessmentId)));
     }

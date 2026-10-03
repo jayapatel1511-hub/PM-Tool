@@ -207,21 +207,14 @@ public static class Digest
             if (targetOwner is not { } owner || owner != candidate.OwnerId || owner == candidate.VerifierId) continue;
             if (!await Coordination.People(db, projects[candidate.ProjectId]).AnyAsync(u => u.Id == owner)) continue;
 
-            var uses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == candidate.ProjectId &&
-                    u.TargetType == candidate.TargetType && u.TargetId == candidate.TargetId)
-                .Join(db.DesignBasisVersions.AsNoTracking(), u => u.VersionId, v => v.Id,
-                    (u, v) => new { UseId = u.Id, u.VersionId, EntryId = v.EntryId, u.CreatedAt, v.Status, v.Scope,
-                        IsAssumption = db.DesignBasisEntries.Any(e => e.Id == v.EntryId && e.ProjectId == candidate.ProjectId && e.Kind == BasisKind.Assumption) })
-                .ToListAsync();
-            var currentUses = uses.GroupBy(u => u.EntryId).Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.UseId).First()).ToList();
-            var currentUse = currentUses.SingleOrDefault(u => u.VersionId == candidate.BasisVersionId && u.Status == BasisStatus.Proposed && u.IsAssumption);
-            if (currentUse is null) continue;
-            if (await db.BasisImpactAssessments.AnyAsync(a => a.ProjectId == candidate.ProjectId && a.BasisUseId == currentUse.UseId && a.Status == AssessmentStatus.Pending)) continue;
-            if (await db.BasisConflicts.AnyAsync(c => c.ProjectId == candidate.ProjectId && !c.Resolved &&
-                    (c.LeftVersionId == candidate.BasisVersionId || c.RightVersionId == candidate.BasisVersionId))) continue;
+            var basis = await ReadinessEndpoints.EvaluateBasis(db, projects[candidate.ProjectId], candidate.TargetType, candidate.TargetId);
+            if (basis.ExceptionBasisVersionId != candidate.BasisVersionId) continue;
+            var exceptionScope = await db.DesignBasisVersions.AsNoTracking().Where(v => v.Id == candidate.BasisVersionId)
+                .Select(v => v.Scope).SingleOrDefaultAsync();
+            if (exceptionScope is null) continue;
             if (!await db.BasisAssumptionDispositions.AsNoTracking().AnyAsync(d => d.ProjectId == candidate.ProjectId &&
                     d.VersionId == candidate.BasisVersionId && d.OwnerId == owner && d.ApprovedBy != owner &&
-                    d.ExpiresOn >= candidate.ExpiresOn && d.Scope.ToLower() == currentUse.Scope.ToLower())) continue;
+                    d.ExpiresOn >= candidate.ExpiresOn && d.Scope.ToLower() == exceptionScope.ToLower())) continue;
             if (!await Coordination.People(db, projects[candidate.ProjectId]).AnyAsync(u => u.Id == candidate.VerifierId)) continue;
             exceptionRows.Add(candidate);
         }

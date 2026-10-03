@@ -111,44 +111,10 @@ public static class ReadinessEndpoints
                 "Linked decisions are current source evidence.");
         }
 
-        Guid? exceptionBasisVersionId = null;
-        var allUses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == project.Id && u.TargetType == targetType && u.TargetId == targetId)
-            .Join(db.DesignBasisVersions.AsNoTracking(), u => u.VersionId, v => v.Id,
-                (u, v) => new { u.Id, u.VersionId, u.CreatedAt, v.EntryId }).ToListAsync();
-        var currentUses = allUses.GroupBy(u => u.EntryId)
-            .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()).ToList();
-        if (currentUses.Count > 0)
-        {
-            var useIds = currentUses.Select(u => u.Id).ToArray();
-            var versionIds = currentUses.Select(u => u.VersionId).ToArray();
-            var versions = await db.DesignBasisVersions.AsNoTracking().Where(v => versionIds.Contains(v.Id)).ToListAsync();
-            if (sources is not null)
-            {
-                var entryIds = versions.Select(v => v.EntryId).ToArray();
-                var entries = await db.DesignBasisEntries.AsNoTracking().Where(e => e.ProjectId == project.Id && entryIds.Contains(e.Id)).ToDictionaryAsync(e => e.Id);
-                foreach (var v in versions)
-                    if (entries.TryGetValue(v.EntryId, out var entry))
-                        sources.Add(new CheckSource(ReadinessCheckCode.Basis, new LinkedRecord("DesignBasisEntry", entry.Id, entry.Key,
-                            $"{entry.Title} · v{v.Number}", v.Status)));
-            }
-            var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => c.ProjectId == project.Id &&
-                (versionIds.Contains(c.LeftVersionId) || versionIds.Contains(c.RightVersionId)))
-                .AnyAsync(c => !c.Resolved);
-            var pendingImpact = await db.BasisImpactAssessments.AsNoTracking().AnyAsync(a => a.ProjectId == project.Id &&
-                useIds.Contains(a.BasisUseId) && a.Status == AssessmentStatus.Pending);
-            var proposed = versions.Where(v => v.Status == BasisStatus.Proposed).ToList();
-            if (versions.Count == currentUses.Count && proposed.Count == 1 && !conflicts && !pendingImpact &&
-                versions.All(v => v.Status == BasisStatus.Confirmed || v.Id == proposed[0].Id))
-            {
-                var candidate = proposed[0];
-                if (await db.DesignBasisEntries.AsNoTracking().AnyAsync(e => e.ProjectId == project.Id &&
-                    e.Id == candidate.EntryId && e.Kind == BasisKind.Assumption))
-                    exceptionBasisVersionId = candidate.Id;
-            }
-            Source(ReadinessCheckCode.Basis, true, versions.Count == currentUses.Count && !conflicts && !pendingImpact &&
-                versions.All(v => v.Status == BasisStatus.Confirmed),
+        var basis = await EvaluateBasis(db, project, targetType, targetId, sources);
+        if (basis.HasUses)
+            Source(ReadinessCheckCode.Basis, true, basis.Satisfied,
                 "Linked basis uses and conflicts are current source evidence.");
-        }
 
         // FR-MDC-08: a removed, deactivated or missing owner, or an inactive discipline, leaves the work without a valid
         // production owner; it is a known unmet check with its reason, never an error for the reader.
@@ -238,7 +204,7 @@ public static class ReadinessEndpoints
         {
             var exceptionScope = await db.DesignBasisVersions.AsNoTracking().Where(v => v.Id == latestException.BasisVersionId)
                 .Select(v => v.Scope).SingleOrDefaultAsync();
-            var hasCurrentOwnerDisposition = exceptionBasisVersionId == latestException.BasisVersionId && exceptionScope is not null &&
+            var hasCurrentOwnerDisposition = basis.ExceptionBasisVersionId == latestException.BasisVersionId && exceptionScope is not null &&
                 await db.BasisAssumptionDispositions.AsNoTracking().AnyAsync(d => d.ProjectId == project.Id &&
                     d.VersionId == latestException.BasisVersionId && d.OwnerId == target.OwnerId &&
                     d.ApprovedBy != target.OwnerId && d.ExpiresOn >= latestException.ExpiresOn &&
@@ -254,6 +220,47 @@ public static class ReadinessEndpoints
             activeConstraints.Count > 0 ? [ReadinessRules.ConstraintBlocker] : null);
         assessment.State = result.State; assessment.EvaluatedAt = now;
         return result;
+    }
+
+    public static async Task<(bool HasUses, bool Satisfied, Guid? ExceptionBasisVersionId)> EvaluateBasis(
+        HubDb db, Project project, string targetType, Guid targetId, List<CheckSource>? sources = null)
+    {
+        var allUses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == project.Id && u.TargetType == targetType && u.TargetId == targetId)
+            .Join(db.DesignBasisVersions.AsNoTracking(), u => u.VersionId, v => v.Id,
+                (u, v) => new { u.Id, u.VersionId, u.CreatedAt, v.EntryId }).ToListAsync();
+        var currentUses = allUses.GroupBy(u => u.EntryId)
+            .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First()).ToList();
+        if (currentUses.Count == 0) return (false, false, null);
+
+        var useIds = currentUses.Select(u => u.Id).ToArray();
+        var versionIds = currentUses.Select(u => u.VersionId).ToArray();
+        var versions = await db.DesignBasisVersions.AsNoTracking().Where(v => versionIds.Contains(v.Id)).ToListAsync();
+        if (sources is not null)
+        {
+            var entryIds = versions.Select(v => v.EntryId).ToArray();
+            var entries = await db.DesignBasisEntries.AsNoTracking().Where(e => e.ProjectId == project.Id && entryIds.Contains(e.Id)).ToDictionaryAsync(e => e.Id);
+            foreach (var v in versions)
+                if (entries.TryGetValue(v.EntryId, out var entry))
+                    sources.Add(new CheckSource(ReadinessCheckCode.Basis, new LinkedRecord("DesignBasisEntry", entry.Id, entry.Key,
+                        $"{entry.Title} · v{v.Number}", v.Status)));
+        }
+        var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => c.ProjectId == project.Id &&
+            (versionIds.Contains(c.LeftVersionId) || versionIds.Contains(c.RightVersionId)))
+            .AnyAsync(c => !c.Resolved);
+        var pendingImpact = await db.BasisImpactAssessments.AsNoTracking().AnyAsync(a => a.ProjectId == project.Id &&
+            useIds.Contains(a.BasisUseId) && a.Status == AssessmentStatus.Pending);
+        var proposed = versions.Where(v => v.Status == BasisStatus.Proposed).ToList();
+        Guid? exceptionBasisVersionId = null;
+        if (versions.Count == currentUses.Count && proposed.Count == 1 && !conflicts && !pendingImpact &&
+            versions.All(v => v.Status == BasisStatus.Confirmed || v.Id == proposed[0].Id))
+        {
+            var candidate = proposed[0];
+            if (await db.DesignBasisEntries.AsNoTracking().AnyAsync(e => e.ProjectId == project.Id &&
+                e.Id == candidate.EntryId && e.Kind == BasisKind.Assumption))
+                exceptionBasisVersionId = candidate.Id;
+        }
+        return (true, versions.Count == currentUses.Count && !conflicts && !pendingImpact &&
+            versions.All(v => v.Status == BasisStatus.Confirmed), exceptionBasisVersionId);
     }
 
     /// Evaluates the assigned production owner's capacity over the target's authoritative due-date window.

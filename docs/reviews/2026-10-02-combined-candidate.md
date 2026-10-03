@@ -1,6 +1,6 @@
 # Combined review release candidate — 2026-10-02
 
-Application code: `7c412b0`; staged release: `7995e88b95d4a31bc5895faa788026667316f9ad`. [PR #13](https://github.com/jayapatel1511-hub/PM-Tool/pull/13) merged at `db2f09fd93f81b2c7c3718175320e5101083e089`. Latest observation: 2026-10-03 00:02 UTC (2026-10-02 Halifax). This record distinguishes candidate checks from activation and company acceptance. Homedev remains the target for review, pilot and production; individual passwords and existing services are used. Azure and new paid services are not release prerequisites.
+Current candidate: the shared Sheet focus follow-up to `4950665`; previous application base `7c412b0`. The staged `7995e88b95d4a31bc5895faa788026667316f9ad` is superseded by this new fix and must not be activated as the final candidate. [PR #13](https://github.com/jayapatel1511-hub/PM-Tool/pull/13) merged at `db2f09fd93f81b2c7c3718175320e5101083e089`. Latest observation: 2026-10-03 00:45 UTC (2026-10-02 Halifax). This record distinguishes candidate checks from activation and company acceptance. Homedev remains the target for review, pilot and production; individual passwords and existing services are used. Azure and new paid services are not release prerequisites.
 
 ## Integrated corrections
 
@@ -40,3 +40,16 @@ A test-only follow-up adds valid-coordinate persistence coverage (1/1): exact de
 - Review-purpose allocation: real browser/API on a fresh isolated synthetic database, Development authentication. Taylor proposed 4 reserved hours for Yagmur against 3 explicit review hours, confirmed it as supervisor, reloaded the Confirmed record, and followed its source link to DEMO-101-RV001. Preview showed 8 h available, 1.62 h existing, 5.62 h resulting and zero overload. Editing to 5 reserved hours with a reason returned it to Proposed and kept 3 h review effort after reload. No browser errors. Existing native date defaults were used.
 
 These checks extend local product evidence; they do not prove hosted individual-password, company or assistive-technology acceptance. Credential-free local records: `pm-candidate-browser-acceptance.json` and `pm-review-allocation-acceptance.json` under `/private/tmp/`.
+
+
+## Final keyboard correction and expanded acceptance
+
+The location-grouped issue panel lost focus to BODY on Escape. The shared Sheet now uses the existing Dialog opener-focus behavior, chains supplied handlers, and restores only a connected opener. This covers all PanelHost side panels. The smallest existing Chromium regression fails on the original implementation and passes after the fix. Frontend production build and focused lint passed. Real native keyboard acceptance returned to each exact opening row in both location groups, including a duplicated issue title; zero browser errors. See packet 033's new verification record.
+
+Packet 031's successful Proceed under Assumption and consuming-work forms now pass on an isolated synthetic real browser/API: the native expiry date is recorded; the exact-version use persists; the assumption remains Proposed. See its new verification record. These checks do not prove hosted password authentication or company acceptance.
+
+PR #20 merged at `dd4ad38537254fda11aaf1d5c72cdd5fc7324c14`. Its exact head `4950665` CI [37080450700](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/37080450700) and merged-main CI [37081136667](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/37081136667) passed 809/809, rules branch coverage 96.7%, service line coverage 93.7%. Those results precede this UI-only focus fix; new exact-head CI is required. No local .NET rerun was needed for this UI-only correction.
+
+The exact `7995e88` image passed a separate local least-privilege fresh-database smoke check: 27 migrations, seed flags off, no review projects/users, synthetic bootstrap Admin, HTTP 307, Host/Origin/authentication denials, correct sign-in, and key/cookie persistence after recreation. Evidence: `/private/tmp/pm-candidate-image-smoke-evidence.json`. It is a pre-focus-fix image check, not a homedev activation.
+
+At the last host check, live remained `b155601` and no activation log for `7995e88` existed. SSH works, but sudo still requires the human's private terminal authentication. Review runtime/data stay intact; the clean company pilot runtime remains empty. The separate whole-server Mac backup was verified live by its owning Python process and growing archive (about 23.7 GB); completion and scheduled recovery remain unproven.

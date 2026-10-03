@@ -126,3 +126,10 @@ As PM, priya saw the list read-only with no Add, and her direct POST got 403. He
 ## 2026-10-01 Codex recovery checkpoint
 
 Recovered template basis suggestions, draft preservation/remapping and validation, Pending Assessment actions, GUID filters, withdrawal visibility and focus restoration were integrated. The mocked design-basis browser regression passed with five list queries, one impact decision and zero unmocked GETs. A removed appointed approver no longer has confirmation authority on an open project (domain sweep 18/18). Deployed and company engineering acceptance remain UNPROVEN.
+
+
+## Proposed assumption disposition and consuming-work forms — 2026-10-02
+
+PASS locally on application code `7c412b0` / follow-up base `4950665`: a fresh synthetic database and real browser/API with Development authentication. A Proposed Site grading assumption was supplied through the API. Taylor then saved Proceed under Assumption through the form, naming Jay, Site grading, an explicit synthetic rationale and expiry 2026-10-09. The native date picker committed the expiry. Jay used the consuming-work form to link his own task to exact version 1. Reload and API assertions retained one current exact-version use and one scoped disposition attributed to Taylor; version 1 stayed Proposed, without a current confirmed head or confirmation attribution. Browser console errors: zero. Credential-free evidence: `/private/tmp/pm-basis-proposed-use-evidence.json`; screenshot: `/private/tmp/pm-basis-proposed-use.jpg`.
+
+This completes the successful form path missing from the earlier AC-BAS-03 browser record. Existing API tests cover refusal without a disposition and invalid scope/expiry. The template-copy browser/API proof above covers AC-BAS-05; recovered template fixes are included in the merged review source. These are local product slices, not hosted password sign-in, readiness-exception approval, engineering confirmation, assistive-technology or company pilot acceptance.

@@ -28,6 +28,18 @@ const detail = eid => eid === e1
     uses: [{ id: u2, versionId: v21, targetType: 'Task', targetId: task, intendedUse: 'Profile check', ownerId: consumer, rowVersion: 1, isCurrent: true }],
     impacts: [{ id: i2, basisUseId: u2, oldVersionId: v21, withdrawalVersionId: v21, status: 'Pending Assessment', ownerId: consumer, rowVersion: 1 }], conflicts: [], dispositions: [],
     canManage: who === 'lead', canEditProposed: false, canConfirm: false };
+// Reuse the consuming task, with the real TaskRow and TaskDetailData contracts used by the register and panel.
+const taskRow = () => ({ id: task, key: options().tasks[0].key, name: options().tasks[0].name, projectDisciplineId: civil,
+  projectId: pid, projectNumber: 'P-DEMO', projectName: 'Basis checks', projectStatus: 'Active', status: 'In Progress', lane: 'In Progress',
+  disciplineName: 'Civil', disciplineCode: 'CIV', disciplineColour: '#2563eb', disciplineOrder: 1, milestoneDerived: false,
+  assigneeId: consumer, assigneeName: 'Alex Consumer', assigneeActive: true, requiresReview: false, priority: 'Medium', progressPct: 20,
+  estimatedHours: 4, reviewRound: 0, dueDateChangeCount: 0, lastActivityAt: '2026-10-01T09:00:00Z', createdAt: '2026-10-01T09:00:00Z',
+  sortOrder: 1, rowVersion: 3, commentCount: 0, predecessorCount: 0, successorCount: 0, collaboratorIds: [], state: null });
+const taskDetail = () => ({ task: taskRow(), project: project(), description: 'Check watermain cover against design basis version 1.',
+  collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: false }, setReviewer: { ok: false }, dueDate: { ok: true },
+    dueNeedsReason: false, block: { ok: true }, delete: { ok: false }, restore: false, comment: true,
+    transitions: [{ to: 'Complete', allowed: true, needsReason: false }], isReviewer: false, dependencies: false,
+    enterTime: true, needsReason: false, allowSelfReview: false, authoriseStart: false } });
 const lists = [], decisions = [], errors = [], unknown = [];
 let server, browser;
 (async () => {
@@ -46,7 +58,12 @@ let server, browser;
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }; else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' };
     else if (p.endsWith('/changes/options')) data = options();
     else if (p === `projects/${pid}/team`) data = { members: [{ userId: consumer, displayName: 'Alex Consumer', primaryDisciplineId: civil }, { userId: lead, displayName: 'Marc Lead', primaryDisciplineId: civil }] };
-    else if (p === `projects/${pid}/decisions`) data = [];
+    else if (p === `projects/${pid}/decisions` || p === `projects/${pid}/deliverables` || p === `projects/${pid}/milestones`) data = [];
+    else if (p === `projects/${pid}/tasks`) data = { items: [taskRow()], page: 1, pageSize: 200, totalCount: 1 };
+    else if (p === `tasks/${task}`) data = taskDetail();
+    else if (p === `tasks/${task}/dependencies`) data = { dependsOn: [], blocks: [] };
+    else if (p === `items/Task/${task}/comments`) data = { items: [], canComment: true };
+    else if (p === `items/Task/${task}/links`) data = { links: [], inherited: [], canAdd: true };
     else if (p === `projects/${pid}/design-basis`) { lists.push(u.search); data = { items: [row(e1, 'P-DEMO-B001', v12, 'Confirmed'), row(e2, 'P-DEMO-B002', null, 'Withdrawn')], pageSize: 50, totalCount: 2 } }
     else if (p === `projects/${pid}/design-basis/${e1}` || p === `projects/${pid}/design-basis/${e2}`) data = detail(p.endsWith(e1) ? e1 : e2);
     else if (method === 'POST' && p.endsWith('/decide')) { decisions.push({ path: p, ...req.postDataJSON() }); data = { id: i1, rowVersion: 2 } }
@@ -94,6 +111,26 @@ let server, browser;
   await entry.getByRole('button', { name: 'Decide impact', exact: true }).click();
   assert.deepEqual(await page.getByRole('dialog', { name: 'Decide impact' }).getByLabel('Decision', { exact: true }).locator('option').allInnerTexts(), ['Choose…', 'Unaffected by change']);
 
+  // Shared Sheet: Tab to the existing task's title, Enter opens its actual side panel, Escape restores that exact control.
+  await page.goto(`${base}/projects/P-DEMO/tasks`);
+  const taskTitle = register.getByRole('button', { name: 'Watermain layout', exact: true });
+  await taskTitle.waitFor();
+  await register.getByRole('button', { name: 'P-DEMO-T0001', exact: true }).focus();
+  await page.keyboard.press('Tab');
+  const opener = await taskTitle.elementHandle();
+  assert.equal(await opener.evaluate(el => document.activeElement === el), true, 'Tab reaches the task title');
+  await page.keyboard.press('Enter');
+  const panel = page.getByRole('dialog', { name: 'Task', exact: true });
+  await panel.getByRole('heading', { name: 'Watermain layout', exact: true }).waitFor();
+  await panel.getByText('No comments yet. Discuss the work here; changes are recorded in History.', { exact: true }).waitFor();
+  await panel.getByText('No document links yet.', { exact: true }).waitFor();
+  await page.keyboard.press('Escape');
+  await panel.waitFor({ state: 'detached' });
+  await page.waitForFunction(el => document.activeElement === el, opener, { timeout: 2000 });
+  assert.equal(await opener.evaluate(el => el.isConnected && document.activeElement === el), true, 'Escape restores the original task title');
+  assert.equal(new URL(page.url()).searchParams.has('panel'), false);
+
+  assert.deepEqual(unknown, []);
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ scope: 'Chromium UI with mocked API; backend rules tested separately', listQueries: lists.length, decisions: decisions.length, unmockedGets: [...new Set(unknown)] }));
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(async () => { await browser?.close(); server?.kill() });

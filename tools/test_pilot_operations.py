@@ -67,6 +67,8 @@ compose_cmd=(mock_compose)
 fail() { exit 1; }
 mock_compose() {
   echo "$*" >&3
+  # Compose run supports --pull never; --no-build belongs to Compose up.
+  if [[ "$1" == run && "$*" == *--no-build* ]]; then return 125; fi
   if [[ "$1" == exec ]]; then echo 0:0; fi
 }
 inspect() {

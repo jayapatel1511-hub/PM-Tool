@@ -2,8 +2,8 @@
 
 Checklist for moving from the synthetic review release to the company pilot on homedev. It lists what must be true
 and who proves it; it is not a readiness claim. Run the pilot itself with the [pilot plan][plan]; homedev production
-is covered by [production readiness][prod]. Homedev is reachable again at the latest 2026-10-01 checkpoint; it still runs the first private review release.
-Recheck its state before acting on any row ([gates]); the latest [combined checkpoint](../reviews/2026-10-02-combined-candidate.md) records PR #13 merged, candidate/main CI passing, encrypted review recovery proven, and candidate activation still pending interactive sudo.
+is covered by [production readiness][prod]. Homedev runs the synthetic review release `02ca7cd`, activated 2026-10-03 01:03 UTC.
+Recheck its state before acting on any row ([gates]); the latest [combined checkpoint](../reviews/2026-10-02-combined-candidate.md) records PR #21 merged, exact-head/main CI passing 809/809, encrypted review recovery and activation proven, plus a remaining narrow-screen control-layout defect under repair.
 
 **Decisions in force (Jay, clarified 2026-10-01):** homedev hosts review, company pilot and production at
 `pm.engcalchub.com` through the existing Cloudflare tunnel infrastructure. No Azure deployment or new paid service
@@ -23,7 +23,7 @@ something outside the repository, cited) · OPEN (known gap in the repository, c
 | E1 | AC-VIS-01 to AC-VIS-08 pass on the exact pilot commit (FR-016, [§35.1][spec10]) | agent | UNPROVEN. Evidence in the `specs/022`–`024` verification records predates packets 025–033 |
 | E2 | Threat-model walkthrough held, with the homedev boundary added (TLS ends at Cloudflare's edge, local-password cookie, single host); findings resolved or accepted (FR-011) | Jay + company IT | UNPROVEN. The walkthrough record is empty ([threat model][threats]) |
 | E3 | Packets 025–033 enabled only after their own acceptance ([pilot plan][plan]) | agent | UNPROVEN full acceptance for 025–033. Implementation and combined checks pass; current hosted/browser/company limits are recorded in the combined checkpoint and packet verification records |
-| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: existing review public sign-in passed 9/9; hostname/TLS and manual encrypted recovery passed. Candidate activation and its hosted workflows remain pending; first automatic review backup is unproven |
+| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: `02ca7cd` activation/private probes 10/10, public probes 9/9, HTTP 307/HTTPS, browser sign-in/session, original review marker and desktop keyboard return passed. Narrow-screen picker/date controls need the shared follow-up; first automatic review backup is unproven |
 | E5 | 50 participants named (Q16); the proposed 3 PMs and 6 projects confirmed; sponsor named | Jay | UNPROVEN |
 
 ## 2. Company approvals

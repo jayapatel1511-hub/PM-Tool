@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { ChangeList, type ActivityRow } from '@/components/hub/activity'
 import { Empty, Loading } from '@/components/hub/common'
 import { PeoplePicker } from '@/components/hub/people'
@@ -13,11 +13,16 @@ import { cn } from '@/lib/utils'
 
 // Inline edit on click for detail panels; each field saves on its own (§13.0 interaction, §13.3.1 autosave).
 
+const FieldLabelContext = createContext<string | undefined>(undefined)
+
 export function FieldRow({ label, children, className }: { label: ReactNode; children: ReactNode; className?: string }) {
+  const labelId = useId()
   return (
-    <div className={cn('grid grid-cols-[8.5rem_1fr] items-start gap-2 py-1 text-sm', className)}>
-      <div className="pt-1.5 text-xs text-muted-foreground">{label}</div>
-      <div className="min-w-0">{children}</div>
+    <div className={cn('grid grid-cols-1 items-start gap-2 py-1 text-sm sm:grid-cols-[8.5rem_1fr]', className)}>
+      <div id={labelId} className="pt-1.5 text-xs text-muted-foreground">{label}</div>
+      <div className="min-w-0">
+        <FieldLabelContext.Provider value={labelId}>{children}</FieldLabelContext.Provider>
+      </div>
     </div>
   )
 }
@@ -49,9 +54,10 @@ export function InlineText({ value, onSave, multiline, disabled, placeholder, ti
 }
 
 export function InlineDate({ value, onSave, disabled, title }: { value?: string | null; onSave: (v: string | null) => Promise<unknown>; disabled?: boolean; title?: string }) {
+  const labelId = useContext(FieldLabelContext)
   const [editing, setEditing] = useState(false)
   if (!editing) return <Display onEdit={() => setEditing(true)} disabled={disabled} title={title}>{fmtDate(value)}</Display>
-  return <Input type="date" className="h-8 w-44" autoFocus defaultValue={value ?? ''} onBlur={async (e) => { setEditing(false); if ((e.target.value || null) !== (value ?? null)) await onSave(e.target.value || null) }}
+  return <Input type="date" aria-labelledby={labelId} title={title} className="h-8 w-44" autoFocus defaultValue={value ?? ''} onBlur={async (e) => { setEditing(false); if ((e.target.value || null) !== (value ?? null)) await onSave(e.target.value || null) }}
     onKeyDown={(e) => { if (e.key === 'Escape') setEditing(false); if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
 }
 

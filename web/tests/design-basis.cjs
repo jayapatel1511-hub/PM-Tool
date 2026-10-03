@@ -32,15 +32,16 @@ const detail = eid => eid === e1
 const taskRow = () => ({ id: task, key: options().tasks[0].key, name: options().tasks[0].name, projectDisciplineId: civil,
   projectId: pid, projectNumber: 'P-DEMO', projectName: 'Basis checks', projectStatus: 'Active', status: 'In Progress', lane: 'In Progress',
   disciplineName: 'Civil', disciplineCode: 'CIV', disciplineColour: '#2563eb', disciplineOrder: 1, milestoneDerived: false,
-  assigneeId: consumer, assigneeName: 'Alex Consumer', assigneeActive: true, requiresReview: false, priority: 'Medium', progressPct: 20,
+  assigneeId: consumer, assigneeName: 'Alex Consumer', assigneeActive: true, reviewerId: lead, reviewerName: 'Marc Lead', requiresReview: true,
+  startDate: '2026-10-01', originalStartDate: '2026-10-01', dueDate: '2026-10-05', originalDueDate: '2026-10-05', priority: 'Medium', progressPct: 20,
   estimatedHours: 4, reviewRound: 0, dueDateChangeCount: 0, lastActivityAt: '2026-10-01T09:00:00Z', createdAt: '2026-10-01T09:00:00Z',
   sortOrder: 1, rowVersion: 3, commentCount: 0, predecessorCount: 0, successorCount: 0, collaboratorIds: [], state: null });
 const taskDetail = () => ({ task: taskRow(), project: project(), description: 'Check watermain cover against design basis version 1.',
-  collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: false }, setReviewer: { ok: false }, dueDate: { ok: true },
+  collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: true }, setReviewer: { ok: true }, dueDate: { ok: true },
     dueNeedsReason: false, block: { ok: true }, delete: { ok: false }, restore: false, comment: true,
-    transitions: [{ to: 'Complete', allowed: true, needsReason: false }], isReviewer: false, dependencies: false,
+    transitions: [{ to: 'Ready for Review', allowed: false, reason: 'Only the assignee may submit for review.', needsReason: false }], isReviewer: true, dependencies: false,
     enterTime: true, needsReason: false, allowSelfReview: false, authoriseStart: false } });
-const lists = [], decisions = [], errors = [], unknown = [];
+const lists = [], decisions = [], errors = [], unknown = [], taskWrites = [], panelLayouts = [];
 let server, browser;
 (async () => {
   server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', port, '--strictPort'], { cwd: path.resolve(__dirname, '..'), stdio: 'inherit' });
@@ -51,6 +52,7 @@ let server, browser;
   page.on('pageerror', e => errors.push(e.message));
   await page.route('**/api/**', async route => {
     const req = route.request(), u = new URL(req.url()), p = u.pathname.replace('/api/v1/', ''), method = req.method(); let data = {};
+    if (method !== 'GET' && p.startsWith(`tasks/${task}`)) taskWrites.push({ method, path: p });
     if (p === 'config') data = { authMode: 'Development', entra: {} };
     else if (p === 'me') data = me(); else if (p === 'me/sign-in') data = {}; else if (p === 'me/notifications/pulse') data = { stamp: '0' };
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }; else if (p === 'workspaces') data = []; else if (p === 'views') data = { views: [], canShare: false };
@@ -111,26 +113,58 @@ let server, browser;
   await entry.getByRole('button', { name: 'Decide impact', exact: true }).click();
   assert.deepEqual(await page.getByRole('dialog', { name: 'Decide impact' }).getByLabel('Decision', { exact: true }).locator('option').allInnerTexts(), ['Choose…', 'Unaffected by change']);
 
-  // Shared Sheet: Tab to the existing task's title, Enter opens its actual side panel, Escape restores that exact control.
+  // Shared Sheet: preserve keyboard focus and keep editable people/date controls inside the panel at each viewport.
   await page.goto(`${base}/projects/P-DEMO/tasks`);
-  const taskTitle = register.getByRole('button', { name: 'Watermain layout', exact: true });
-  await taskTitle.waitFor();
-  await register.getByRole('button', { name: 'P-DEMO-T0001', exact: true }).focus();
-  await page.keyboard.press('Tab');
-  const opener = await taskTitle.elementHandle();
-  assert.equal(await opener.evaluate(el => document.activeElement === el), true, 'Tab reaches the task title');
-  await page.keyboard.press('Enter');
-  const panel = page.getByRole('dialog', { name: 'Task', exact: true });
-  await panel.getByRole('heading', { name: 'Watermain layout', exact: true }).waitFor();
-  await panel.getByText('No comments yet. Discuss the work here; changes are recorded in History.', { exact: true }).waitFor();
-  await panel.getByText('No document links yet.', { exact: true }).waitFor();
-  await page.keyboard.press('Escape');
-  await panel.waitFor({ state: 'detached' });
-  await page.waitForFunction(el => document.activeElement === el, opener, { timeout: 2000 });
-  assert.equal(await opener.evaluate(el => el.isConnected && document.activeElement === el), true, 'Escape restores the original task title');
-  assert.equal(new URL(page.url()).searchParams.has('panel'), false);
+  const dateFields = [['Start date', '2026-10-01'], ['Due date', '2026-10-05']];
+  const dateNameFailures = [];
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    for (const [dateLabel, dateValue] of dateFields) {
+      const taskTitle = register.getByRole('button', { name: 'Watermain layout', exact: true });
+      await taskTitle.waitFor();
+      await register.getByRole('button', { name: 'P-DEMO-T0001', exact: true }).focus();
+      await page.keyboard.press('Tab');
+      const opener = await taskTitle.elementHandle();
+      assert.equal(await opener.evaluate(el => document.activeElement === el), true, 'Tab reaches the task title');
+      await page.keyboard.press('Enter');
+      const panel = page.getByRole('dialog', { name: 'Task', exact: true });
+      await panel.getByRole('heading', { name: 'Watermain layout', exact: true }).waitFor();
+      await panel.getByText('No comments yet. Discuss the work here; changes are recorded in History.', { exact: true }).waitFor();
+      await panel.getByText('No document links yet.', { exact: true }).waitFor();
+      await panel.evaluate(async el => {
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        await Promise.all(el.getAnimations().map(animation => animation.finished));
+      });
+      const bounds = await panel.boundingBox();
+      const clears = panel.getByRole('button', { name: 'Clear', exact: true });
+      assert.equal(await clears.count(), 2, 'Assigned assignee and reviewer both retain their Clear control');
+      const clearBounds = await Promise.all([clears.nth(0).boundingBox(), clears.nth(1).boundingBox()]);
+      assert.ok(clearBounds.every(control => control?.width === 32 && control.height === 32), 'Clear controls retain their full size');
+      await panel.getByRole('button', { name: dateValue, exact: true }).click();
+      const date = panel.locator('input[type="date"]');
+      await date.waitFor();
+      assert.equal(await date.inputValue(), dateValue);
+      if (await panel.getByLabel(dateLabel, { exact: true }).and(date).count() !== 1) dateNameFailures.push(`${dateLabel} has no accessible field name at ${width}px`);
+      panelLayouts.push({ width, bounds, clearBounds, dateLabel, dateBounds: await date.boundingBox() });
+      await page.keyboard.press('Escape');
+      await panel.waitFor({ state: 'detached' });
+      await page.waitForFunction(el => document.activeElement === el, opener, { timeout: 2000 });
+      assert.equal(await opener.evaluate(el => el.isConnected && document.activeElement === el), true, 'Escape restores the original task title');
+      assert.equal(new URL(page.url()).searchParams.has('panel'), false);
+    }
+  }
+  assert.deepEqual(dateNameFailures, [], 'Native date editors are associated with their visible field labels');
+  const fits = (control, panel, width) => control && panel && control.width > 0 && control.height > 0 &&
+    control.x >= Math.max(0, panel.x) - 1 && control.x + control.width <= Math.min(width, panel.x + panel.width) + 1 &&
+    control.y >= Math.max(0, panel.y) - 1 && control.y + control.height <= panel.y + panel.height + 1;
+  const layoutFailures = panelLayouts.flatMap(sample => [
+    ...sample.clearBounds.map((control, i) => ({ name: `${i === 0 ? 'Assignee' : 'Reviewer'} Clear`, control })),
+    { name: `${sample.dateLabel} editor`, control: sample.dateBounds },
+  ].filter(({ control }) => !fits(control, sample.bounds, sample.width)).map(({ name }) => `${name} overflows at ${sample.width}px`));
+  assert.deepEqual(layoutFailures, [], 'Controls fit inside both the sheet and viewport');
+  assert.deepEqual(taskWrites, [], 'Opening and cancelling the native date editor does not save the task');
 
   assert.deepEqual(unknown, []);
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ scope: 'Chromium UI with mocked API; backend rules tested separately', listQueries: lists.length, decisions: decisions.length, unmockedGets: [...new Set(unknown)] }));
+  console.log(JSON.stringify({ scope: 'Chromium UI with mocked API; backend rules tested separately', listQueries: lists.length, decisions: decisions.length, panelWidths: [...new Set(panelLayouts.map(sample => sample.width))], dateFields: dateFields.map(([label]) => label), unmockedGets: [...new Set(unknown)] }));
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(async () => { await browser?.close(); server?.kill() });

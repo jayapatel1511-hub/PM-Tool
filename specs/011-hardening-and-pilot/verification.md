@@ -108,3 +108,8 @@ procedure and record), `environments.md` (rebuild from definitions).
 - My Work's attention section shows the 100 most urgent items and says how many there are; the complete lists stay on
   each project's dashboard.
 - Job records are kept 90 days; the activity log is the permanent audit trail.
+
+
+## Homedev shared field correction — 2026-10-03 UTC
+
+The actual `02ca7cd` review at `pm.engcalchub.com` exposed clipped people Clear controls and a clipped native Start date editor at narrow widths. Shared picker sizing and responsive FieldRow layout now pass the existing Chromium TaskSheet regression at 1440, 390 and 320px. Native Start/Due date editors are associated with the existing visible field labels; the name assertion failed before the fix and passes after it. All six date/viewport combinations preserve exact opener focus and cancel without task writes. Frontend build, focused lint and bounded independent review passed. These are local mocked-API checks; hosted correction and manual screen-reader/device acceptance remain unproven. Current deployment and recovery evidence is in the [combined checkpoint](../../docs/reviews/2026-10-02-combined-candidate.md).

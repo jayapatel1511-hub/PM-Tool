@@ -199,7 +199,7 @@ public sealed class SubmissionApiTests(HubFactory f)
     }
 
     [Fact]
-    public async Task Optional_applicability_fail_blocks_issue_until_owner_resolves_it()
+    public async Task Optional_applicability_fail_is_recorded_without_blocking_issue()
     {
         var project = await data.Project(); var root = $"/api/v1/projects/{project.Id}";
         var civil = data.ProjectDiscipline(project.Id, "Civil");
@@ -217,15 +217,13 @@ public sealed class SubmissionApiTests(HubFactory f)
         var optional = f.Db(db => db.SubmissionChecks.Single(c => c.PackageId == id && c.Kind == SubmissionCheckKind.Applicability));
         await Post(TestData.Alex, path + $"/checks/{optional.Id}", new SubmissionEndpoints.CheckBody(Guid.NewGuid(), Version<SubmissionPackage>(id), optional.RowVersion,
             SubmissionCheckStatus.Fail, "https://example.test/fail-evidence", "Plan is outside the registered tolerance"));
-        var blocked = await Get(TestData.Pm, path);
-        Assert.False(blocked["readiness"]!["ready"]!.GetValue<bool>());
-        Assert.Contains("submission.check_failed", blocked["readiness"]!["blockers"]!.ToJsonString());
-        await Post(TestData.Alex, path + $"/checks/{optional.Id}", new SubmissionEndpoints.CheckBody(Guid.NewGuid(), Version<SubmissionPackage>(id), Version<SubmissionCheck>(optional.Id),
-            SubmissionCheckStatus.Pass, "https://example.test/reviewed", "Resolved against the current plan"));
-        var recovered = await Get(TestData.Pm, path);
-        Assert.True(recovered["readiness"]!["ready"]!.GetValue<bool>());
+        var detail = await Get(TestData.Pm, path);
+        Assert.True(detail["readiness"]!["ready"]!.GetValue<bool>());
+        Assert.Equal(SubmissionCheckStatus.Fail, detail["checks"]!.AsArray().Single(c => c!.G("id") == optional.Id)!["status"]!.GetValue<string>());
+        var filtered = await Get(TestData.Pm, root + "/submissions?status=Ready&page=1&pageSize=10");
+        Assert.Contains(filtered["items"]!.AsArray(), item => item!.G("id") == id);
         await Post(TestData.Pm, path + "/issue", new SubmissionEndpoints.IssueBody(Guid.NewGuid(), Version<SubmissionPackage>(id), 1,
-            recovered["readiness"]!["fingerprint"]!.GetValue<string>(), "Municipality", "https://example.test/transmittal", null));
+            detail["readiness"]!["fingerprint"]!.GetValue<string>(), "Municipality", "https://example.test/transmittal", null));
         Assert.Equal(SubmissionStatus.Issued, f.Db(db => db.SubmissionPackages.Single(p => p.Id == id).Status));
     }
 

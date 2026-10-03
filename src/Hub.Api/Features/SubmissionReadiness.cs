@@ -34,7 +34,7 @@ public static class SubmissionReadiness
             if (!eligible.Contains(check.OwnerId)) Block(SubmissionCheckKind.Access, check.Id, check.ProjectDisciplineId, check.OwnerId, "submission.check_owner_inactive");
             if (check.Required && check.Status != SubmissionCheckStatus.Pass && check.EvidenceRule is null)
                 Block(check.Kind, check.SourceId ?? check.Id, check.ProjectDisciplineId, check.OwnerId, "submission.check_pending");
-            if (check.Status == SubmissionCheckStatus.Fail)
+            if (check.Required && check.Status == SubmissionCheckStatus.Fail)
                 Block(check.Kind, check.SourceId ?? check.Id, check.ProjectDisciplineId, check.OwnerId, "submission.check_failed");
             if (check.Status == SubmissionCheckStatus.NotApplicable && (!SubmissionCheckKind.Waivable(check.Kind) || check.Required || check.ApprovedBy is null || string.IsNullOrWhiteSpace(check.Reason) || string.IsNullOrWhiteSpace(check.EvidenceUrl)))
                 Block(check.Kind, check.Id, check.ProjectDisciplineId, check.OwnerId, "submission.invalid_waiver");

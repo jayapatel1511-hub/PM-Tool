@@ -252,29 +252,34 @@ public sealed class SearchReportsTests(HubFactory f)
             {
                 // The indexed 50,001-row fixture gets a bounded setup timeout; API reads retain their normal timeout.
                 db.Database.SetCommandTimeout(TimeSpan.FromMinutes(2));
+                // LATERAL builds each composite once; SELECT (function()).* repeats it for every column.
+                // PostgreSQL 17: https://www.postgresql.org/docs/17/rowtypes.html#ROWTYPES-USAGE
                 // Clone valid API rows and evaluated states; the early sources have only a manual blocker and a false decision.
                 await db.Database.ExecuteSqlRawAsync("""
                     INSERT INTO hub.task
-                    SELECT (jsonb_populate_record(NULL::hub.task, to_jsonb(t) || jsonb_build_object(
-                        'id', gen_random_uuid(), 'seq', s + 100, 'key', {1} || '-T' || (s + 100)::text))).*
-                    FROM hub.task t CROSS JOIN generate_series(1, {2}) s WHERE t.id = {0}
+                    SELECT clone.* FROM hub.task t CROSS JOIN generate_series(1, {2}) s
+                    CROSS JOIN LATERAL jsonb_populate_record(NULL::hub.task, to_jsonb(t) || jsonb_build_object(
+                        'id', gen_random_uuid(), 'seq', s + 100, 'key', {1} || '-T' || (s + 100)::text)) AS clone
+                    WHERE t.id = {0}
                     """, manual.G("id"), p.ProjectNumber, cap);
                 await db.Database.ExecuteSqlRawAsync("""
                     INSERT INTO hub.task_state
-                    SELECT (jsonb_populate_record(NULL::hub.task_state, to_jsonb(st) || jsonb_build_object('task_id', t.id))).*
-                    FROM hub.task_state st CROSS JOIN hub.task t
+                    SELECT clone.* FROM hub.task_state st CROSS JOIN hub.task t
+                    CROSS JOIN LATERAL jsonb_populate_record(NULL::hub.task_state, to_jsonb(st) || jsonb_build_object('task_id', t.id)) AS clone
                     WHERE st.task_id = {0} AND t.project_id = {1} AND t.seq BETWEEN 101 AND {2}
                     """, manual.G("id"), p.Id, cap + 100);
                 await db.Database.ExecuteSqlRawAsync("""
                     INSERT INTO hub.task
-                    SELECT (jsonb_populate_record(NULL::hub.task, to_jsonb(t) || jsonb_build_object('id', {1}, 'seq', {2}, 'key', {3}))).*
-                    FROM hub.task t WHERE t.id = {0}
+                    SELECT clone.* FROM hub.task t
+                    CROSS JOIN LATERAL jsonb_populate_record(NULL::hub.task, to_jsonb(t) || jsonb_build_object('id', {1}, 'seq', {2}, 'key', {3})) AS clone
+                    WHERE t.id = {0}
                     """, blocked.G("id"), legacyId, legacySeq, legacyKey);
                 return await db.Database.ExecuteSqlRawAsync("""
                     INSERT INTO hub.task_state
-                    SELECT (jsonb_populate_record(NULL::hub.task_state, to_jsonb(st) || jsonb_build_object(
-                        'task_id', {1}, 'blocked_by', jsonb_build_array((st.blocked_by -> 0) - 'blocking')))).*
-                    FROM hub.task_state st WHERE st.task_id = {0}
+                    SELECT clone.* FROM hub.task_state st
+                    CROSS JOIN LATERAL jsonb_populate_record(NULL::hub.task_state, to_jsonb(st) || jsonb_build_object(
+                        'task_id', {1}, 'blocked_by', jsonb_build_array((st.blocked_by -> 0) - 'blocking'))) AS clone
+                    WHERE st.task_id = {0}
                     """, blocked.G("id"), legacyId);
             });
             Assert.Equal(cap + 3, await f.DbAsync(db => db.TaskStates.CountAsync(x => x.ProjectId == p.Id && x.IsBlocked)));
@@ -325,10 +330,11 @@ public sealed class SearchReportsTests(HubFactory f)
                 db.Database.SetCommandTimeout(TimeSpan.FromMinutes(2));
                 return await db.Database.ExecuteSqlRawAsync("""
                 INSERT INTO hub.issue
-                SELECT (jsonb_populate_record(NULL::hub.issue, to_jsonb(i) || jsonb_build_object(
+                SELECT clone.* FROM hub.issue i CROSS JOIN generate_series(1, {3}) s
+                CROSS JOIN LATERAL jsonb_populate_record(NULL::hub.issue, to_jsonb(i) || jsonb_build_object(
                     'id', ({1} || lpad(s::text, 12, '0'))::uuid, 'seq', s + 1, 'key', {2} || '-I' || (s + 1)::text,
-                    'severity', 'Low', 'target_resolution_date', DATE '2026-09-30'))).*
-                FROM hub.issue i CROSS JOIN generate_series(1, {3}) s WHERE i.id = {0}
+                    'severity', 'Low', 'target_resolution_date', DATE '2026-09-30')) AS clone
+                WHERE i.id = {0}
                 """, high.G("id"), prefix, p.ProjectNumber, cap);
             });
             Assert.Equal(cap + 1, await f.DbAsync(db => db.Issues.CountAsync(x => x.ProjectId == p.Id)));

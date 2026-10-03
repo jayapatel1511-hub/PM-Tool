@@ -251,10 +251,11 @@ public static class SubmissionEndpoints
             var check = await db.SubmissionChecks.SingleOrDefaultAsync(c => c.Id == checkId && c.PackageId == id && c.ManifestVersion == package.ManifestVersion) ?? throw ApiException.NotFound();
             Coordination.Version(check, body.RowVersion);
             Check.That(check.Kind == SubmissionCheckKind.Applicability && !check.Required, "checkId", "submission.derived_check");
-            Check.OneOf(body.Action, [SubmissionCheckStatus.Pass, SubmissionCheckStatus.NotApplicable, SubmissionCheckStatus.Pending], "action");
+            Check.OneOf(body.Action, [SubmissionCheckStatus.Pass, SubmissionCheckStatus.Fail, SubmissionCheckStatus.NotApplicable, SubmissionCheckStatus.Pending], "action");
             if (body.Action == SubmissionCheckStatus.NotApplicable) Access.Demand(Permissions.AuthoriseSubmission(access.Actor, ctx));
             else Access.Demand(Permissions.SignSubmissionCheck(access.Actor, ctx, check.OwnerId));
             await Coordination.Person(db, project, check.OwnerId);
+            if (body.Action == SubmissionCheckStatus.Fail) Check.Reason(body.Reason);
             check.Status = body.Action; check.Reason = body.Action == SubmissionCheckStatus.Pending ? Check.Reason(body.Reason) : body.Action == SubmissionCheckStatus.NotApplicable ? Check.Reason(body.Reason) : body.Reason;
             check.EvidenceUrl = body.Action == SubmissionCheckStatus.Pending ? null : Coordination.Url(body.EvidenceUrl);
             check.ApprovedBy = body.Action == SubmissionCheckStatus.NotApplicable ? access.Me.Id : null;
@@ -297,7 +298,9 @@ public static class SubmissionEndpoints
             foreach (var derived in await db.SubmissionChecks.Where(c => c.PackageId == id && c.ManifestVersion == package.ManifestVersion && c.Kind != SubmissionCheckKind.Applicability).ToListAsync())
                 derived.Status = SubmissionCheckStatus.Pass;
             var manifest = await db.SubmissionManifestItems.Where(m => m.PackageId == id && m.ManifestVersion == package.ManifestVersion)
-                .Join(db.SourceRevisions, m => m.SourceRevisionId, r => r.Id, (m, r) => new { m.DeliverableId, m.SourceRevisionId, m.ReviewRoundId, m.Required, r.Revision, r.Url, r.Title }).ToListAsync();
+                .Join(db.SourceRevisions, m => m.SourceRevisionId, r => r.Id, (m, r) => new { m.DeliverableId, m.SourceRevisionId, m.ReviewRoundId, m.Required,
+                    r.SourceKey, r.Revision, r.Url, r.Title, r.SourceSystem, r.ExternalIdentifier, r.Issuer, r.Scope, r.SourceCheckedAt,
+                    ManuallyRegistered = r.SourceSystem == "Manual" }).ToListAsync();
             var checks = await db.SubmissionChecks.Where(c => c.PackageId == id && c.ManifestVersion == package.ManifestVersion).ToListAsync();
             var checkIds = checks.Select(c => c.Id).ToArray();
             var evidence = await db.CheckEvidences.Where(e => checkIds.Contains(e.CheckId)).Select(e => new { e.CheckId, e.EvidenceUrl, e.Note, e.CreatedAt, e.CreatedBy }).ToListAsync();
@@ -416,7 +419,8 @@ public static class SubmissionEndpoints
         var package = await Load(db, projectId, id);
         var manifest = await db.SubmissionManifestItems.AsNoTracking().Where(m => m.PackageId == id).OrderBy(m => m.ManifestVersion).ThenBy(m => m.DeliverableId)
             .Join(db.SourceRevisions, m => m.SourceRevisionId, s => s.Id, (m, s) => new { m.ManifestVersion, m.DeliverableId, m.SourceRevisionId, m.ReviewRoundId, m.Required,
-                s.SourceKey, s.Title, s.Revision, s.Url, s.SourceSystem, s.ExternalIdentifier }).ToListAsync();
+                s.SourceKey, s.Title, s.Revision, s.Url, s.SourceSystem, s.ExternalIdentifier, s.Issuer, s.Scope, s.SourceCheckedAt,
+                ManuallyRegistered = s.SourceSystem == "Manual" }).ToListAsync();
         var checks = await db.SubmissionChecks.AsNoTracking().Where(c => c.PackageId == id).OrderBy(c => c.ManifestVersion).ThenBy(c => c.Kind).ThenBy(c => c.Id).ToListAsync();
         var checkIds = checks.Select(c => c.Id).ToArray();
         var evidence = await db.CheckEvidences.AsNoTracking().Where(e => checkIds.Contains(e.CheckId)).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync();

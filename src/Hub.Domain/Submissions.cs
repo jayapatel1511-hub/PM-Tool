@@ -8,8 +8,8 @@ public static class SubmissionStatus
 
 public static class SubmissionCheckStatus
 {
-    public const string Pending = "Pending", Pass = "Pass", NotApplicable = "Not Applicable";
-    public static readonly string[] All = [Pending, Pass, NotApplicable];
+    public const string Pending = "Pending", Pass = "Pass", Fail = "Fail", NotApplicable = "Not Applicable";
+    public static readonly string[] All = [Pending, Pass, Fail, NotApplicable];
 }
 
 public static class SubmissionCheckKind

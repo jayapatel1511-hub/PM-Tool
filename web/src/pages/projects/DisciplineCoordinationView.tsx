@@ -70,6 +70,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => get<{ members: { userId: string; displayName: string }[] }>(`projects/${project.id}/team`), staleTime: 60_000 })
   const q = useQuery({
     queryKey: ['p', project.id, 'discipline-coordination', disciplineId, ownerId, from, to, page, printAll],
+    staleTime: 0,
     queryFn: () => get<Data>(`projects/${project.id}/discipline-coordination${qs({ disciplineId, ownerId, from, to, page: printAll ? undefined : page, pageSize: printAll ? undefined : 4 })}`),
   })
   useEffect(() => {

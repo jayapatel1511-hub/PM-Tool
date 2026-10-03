@@ -190,7 +190,6 @@ let server, browser;
   assert.deepEqual(printed, coordinationUses.map(u => u.targetId).sort(), 'Print captures all five rendered input-use target ids');
   assert.ok(coordinationQueries.some(q => q.print && q.params.page === undefined && q.params.pageSize === undefined), 'Print requests the unpaged coordination projection');
   await page.waitForFunction(() => [...document.querySelectorAll('button')].some(button => button.textContent?.trim() === 'Print' && !button.disabled));
-  await page.waitForTimeout(15_100); // Let the app's 15-second query stale window expire before the repeated print.
   coordinationUses[4].targetId = id(699);
   const secondProjection = page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/discipline-coordination') && !u.searchParams.has('page') && !u.searchParams.has('pageSize'); });
   await page.getByRole('button', { name: 'Print', exact: true }).click();

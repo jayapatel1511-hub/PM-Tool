@@ -256,5 +256,25 @@ public sealed class SubmissionApiTests(HubFactory f)
             fresh["package"]!["rowVersion"]!.GetValue<int>(), 1, fresh["readiness"]!["fingerprint"]!.GetValue<string>(),
             "Municipality", "https://example.test/transmittal", null), 422);
         Assert.Empty(f.Db(db => db.SubmissionIssues.Where(i => i.PackageId == packageId).ToList()));
+        var impact = f.Db(db => db.BasisImpactAssessments.Single(i => i.NewVersionId == proposedBasisVersionId && i.Status == AssessmentStatus.Pending));
+        var use = f.Db(db => db.BasisUses.Single(u => u.Id == impact.BasisUseId));
+        var adopt = new DesignBasisEndpoints.ImpactBody(Guid.NewGuid(), impact.RowVersion, use.RowVersion,
+            Version<DesignBasisVersion>(proposedBasisVersionId), Version<Deliverable>(did), "Adopt",
+            "Replacement basis reviewed and adopted", "https://example.test/basis-impact-review");
+        await Post(TestData.Alex, $"{root}/design-basis/{basisId}/impacts/{impact.Id}/decide", adopt);
+        Assert.Equal(AssessmentStatus.Resolved, f.Db(db => db.BasisImpactAssessments.Single(i => i.Id == impact.Id).Status));
+        Assert.Equal(proposedBasisVersionId, f.Db(db => db.BasisUses.Where(u => u.TargetId == did)
+            .OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).Select(u => u.VersionId).First()));
+        var recovered = await Get(TestData.Pm, $"{root}/submissions/{packageId}");
+        Assert.True(recovered["readiness"]!["ready"]!.GetValue<bool>());
+        var ready = await Get(TestData.Pm, root + "/submissions?status=Ready&page=1&pageSize=1");
+        Assert.Equal(1, ready["totalCount"]!.GetValue<int>());
+        Assert.Equal(packageId, ready["items"]![0]!["id"]!.GetValue<Guid>());
+        Assert.Equal(0, (await Get(TestData.Pm, root + "/submissions?status=Checking&page=1&pageSize=1"))["totalCount"]!.GetValue<int>());
+        var issued = await Post(TestData.Pm, $"{root}/submissions/{packageId}/issue", new SubmissionEndpoints.IssueBody(Guid.NewGuid(),
+            recovered["package"]!["rowVersion"]!.GetValue<int>(), 1, recovered["readiness"]!["fingerprint"]!.GetValue<string>(),
+            "Municipality", "https://example.test/transmittal", "Basis impact resolved"));
+        Assert.Equal(packageId, issued.G("id"));
+        Assert.Equal(SubmissionStatus.Issued, f.Db(db => db.SubmissionPackages.Single(p => p.Id == packageId).Status));
     }
 }

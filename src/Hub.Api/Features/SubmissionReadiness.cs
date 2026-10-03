@@ -115,13 +115,15 @@ public static class SubmissionReadiness
             var current = currentUses.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.UseId).First();
             var versionIds = new[] { current.VersionId };
             var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => c.ProjectId == package.ProjectId &&
-                (versionIds.Contains(c.LeftVersionId) || versionIds.Contains(c.RightVersionId))).AnyAsync(c => !c.Resolved);
+                (versionIds.Contains(c.LeftVersionId) || versionIds.Contains(c.RightVersionId))).OrderBy(c => c.Id).ToListAsync();
+            foreach (var conflict in conflicts)
+                facts.Add(new { conflict.Id, conflict.RowVersion, conflict.LeftVersionId, conflict.RightVersionId, conflict.Resolved, conflict.ResolutionVersionId });
             var impacts = await db.BasisImpactAssessments.AsNoTracking().Where(a => a.ProjectId == package.ProjectId &&
                 a.BasisUseId == current.UseId).OrderBy(a => a.Id).ToListAsync();
             foreach (var impact in impacts)
                 facts.Add(new { impact.Id, impact.RowVersion, impact.BasisUseId, impact.OldVersionId, impact.NewVersionId, impact.WithdrawalVersionId, impact.Status });
             var pendingImpact = impacts.Any(a => a.Status == AssessmentStatus.Pending);
-            var ready = !conflicts && !pendingImpact && current.Status == BasisStatus.Confirmed;
+            var ready = !conflicts.Any(c => !c.Resolved) && !pendingImpact && current.Status == BasisStatus.Confirmed;
             if (!ready)
                 Block(SubmissionCheckKind.ChangeAssessment, impacts.FirstOrDefault(a => a.Status == AssessmentStatus.Pending)?.Id ?? current.VersionId,
                     null, current.OwnerId, "submission.change_pending", $"/projects/{project.ProjectNumber}/design-basis?basis={current.EntryId}");

@@ -23,7 +23,7 @@ something outside the repository, cited) · OPEN (known gap in the repository, c
 | E1 | AC-VIS-01 to AC-VIS-08 pass on the exact pilot commit (FR-016, [§35.1][spec10]) | agent | UNPROVEN. Evidence in the `specs/022`–`024` verification records predates packets 025–033 |
 | E2 | Threat-model walkthrough held, with the homedev boundary added (TLS ends at Cloudflare's edge, local-password cookie, single host); findings resolved or accepted (FR-011) | Jay + company IT | UNPROVEN. The walkthrough record is empty ([threat model][threats]) |
 | E3 | Packets 025–033 enabled only after their own acceptance ([pilot plan][plan]) | agent | UNPROVEN full acceptance for 025–033. Implementation and combined checks pass; current hosted/browser/company limits are recorded in the combined checkpoint and packet verification records |
-| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: `02ca7cd` activation/private probes 10/10, public probes 9/9, HTTP 307/HTTPS, browser sign-in/session, original review marker and desktop keyboard return passed. Candidate `6becc79` fixes the narrow-screen controls locally, but its activation/hosted retest are pending; first automatic review backup is unproven |
+| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: `02ca7cd` activation/private probes 10/10, public probes 9/9, HTTP 307/HTTPS, browser sign-in/session, original review marker and desktop keyboard return passed. The register-completion candidate includes the earlier locally proven narrow-screen fixes; its activation/hosted retest are pending; first automatic review backup is unproven |
 | E5 | 50 participants named (Q16); the proposed 3 PMs and 6 projects confirmed; sponsor named | Jay | UNPROVEN |
 
 ## 2. Company approvals

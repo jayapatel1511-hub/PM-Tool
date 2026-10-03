@@ -163,7 +163,8 @@ public static class MyWorkEndpoints
         var dels = await db.Deliverables.AsNoTracking().Where(d => d.OwnerId != null && ids.Contains(d.OwnerId.Value) && visible.Contains(d.ProjectId)
                 && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled && d.DueDate >= today && d.DueDate <= horizon)
             .Select(d => d.OwnerId!.Value).ToListAsync();
-        var lastActivity = await db.ActivityLog.AsNoTracking().Where(a => a.ActorUserId != null && ids.Contains(a.ActorUserId.Value))
+        // ASG-09: only activity the viewer may see, by the same source boundaries as project history (private time and calendar).
+        var lastActivity = await ActivityEndpoints.Visible(db, access, visible).Where(a => a.ActorUserId != null && ids.Contains(a.ActorUserId.Value))
             .GroupBy(a => a.ActorUserId!.Value).Select(g => new { UserId = g.Key, At = g.Max(x => x.OccurredAt) }).ToDictionaryAsync(x => x.UserId, x => x.At);
 
         var rows = people.Select(p =>

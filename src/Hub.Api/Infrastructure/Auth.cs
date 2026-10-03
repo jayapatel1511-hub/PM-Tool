@@ -48,8 +48,18 @@ public static class AuthSetup
         var forwarded = ctx.Request.Headers["CF-Connecting-IP"];
         if (tunnelProxy is not null && hop?.Equals(tunnelProxy) == true && forwarded.Count == 1
             && System.Net.IPAddress.TryParse(forwarded[0], out var client))
-            return "cf:" + (client.IsIPv4MappedToIPv6 ? client.MapToIPv4() : client);
-        return remote?.ToString() ?? "unknown";
+            return "cf:" + Prefix(client);
+        return hop is null ? "unknown" : Prefix(hop);
+    }
+
+    /// One IPv6 client holds a whole /64, so it is keyed by that prefix: rotating addresses inside it gains nothing.
+    static string Prefix(System.Net.IPAddress address)
+    {
+        if (address.IsIPv4MappedToIPv6) address = address.MapToIPv4();
+        if (address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6) return address.ToString();
+        var bytes = address.GetAddressBytes();
+        Array.Clear(bytes, 8, 8);
+        return new System.Net.IPAddress(bytes) + "/64";
     }
 
     public static bool LocalAuthAllowed(IHostEnvironment env, IConfiguration cfg) =>

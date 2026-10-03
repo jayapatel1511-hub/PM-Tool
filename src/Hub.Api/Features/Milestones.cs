@@ -128,7 +128,12 @@ public static class MilestoneEndpoints
         if (patch.Has("name")) m.Name = Check.Required(patch.Str("name"), "name", 200);
         if (patch.Has("milestoneType")) { var t = patch.Str("milestoneType"); Check.OneOf(t, MilestoneType.All, "milestoneType"); m.MilestoneType = t!; }
         if (patch.Has("description")) m.Description = Check.Optional(patch.Str("description"), "description");
-        if (patch.Has("projectDisciplineId")) m.ProjectDisciplineId = patch.Id("projectDisciplineId");
+        if (patch.Has("projectDisciplineId"))
+        {
+            var pd = patch.Id("projectDisciplineId");
+            if (pd is { } pdid) Check.That(await db.ProjectDisciplines.AnyAsync(x => x.Id == pdid && x.ProjectId == m.ProjectId), "projectDisciplineId", "error.not_found"); // as at creation
+            m.ProjectDisciplineId = pd;
+        }
         if (patch.Has("completesPhaseId")) m.CompletesPhaseId = patch.Id("completesPhaseId");
         if (patch.Has("isClientFacing")) m.IsClientFacing = patch.Bool("isClientFacing") ?? false;
         if (patch.Has("date"))

@@ -5,6 +5,8 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -57,6 +59,42 @@ public sealed class LocalAccountsTests : IDisposable
         var r = await Send(c, HttpMethod.Post, "/api/v1/auth/local/sign-in", body: new { userName, password });
         Assert.Equal(HttpStatusCode.NoContent, r.StatusCode);
         return string.Join("; ", r.Headers.GetValues("Set-Cookie").Select(v => v.Split(';', 2)[0]));
+    }
+
+    /// Gives each request the client address in `X-Test-Client`, standing in for different machines.
+    sealed class ClientAddress : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
+        {
+            app.Use((ctx, more) =>
+            {
+                if (ctx.Request.Headers.TryGetValue("X-Test-Client", out var ip)) ctx.Connection.RemoteIpAddress = IPAddress.Parse(ip.ToString());
+                return more(ctx);
+            });
+            next(app);
+        };
+    }
+
+    [Fact]
+    public async Task One_login_name_is_limited_whichever_client_address_tries_it()
+    {
+        SaveLogins(); // no logins: every guess is wrong
+        using var f = new HubFactory { Settings = {
+            ["Auth:Mode"] = "LocalPassword", ["Auth:Local:UsersFile"] = Verifiers, ["Auth:Local:KeyDirectory"] = Path.Combine(dir, "keys"),
+        } };
+        using var app = f.WithWebHostBuilder(b => b.ConfigureServices(s => s.AddTransient<IStartupFilter, ClientAddress>()));
+        using var c = app.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), HandleCookies = false });
+        async Task<HttpStatusCode> Guess(string userName, int client)
+        {
+            var req = new HttpRequestMessage(HttpMethod.Post, "/api/v1/auth/local/sign-in") { Content = JsonContent.Create(new { userName, password = "not the synthetic password" }, options: Web) };
+            req.Headers.Add("Origin", "https://localhost");
+            req.Headers.Add("X-Test-Client", $"198.51.100.{client}");
+            return (await c.SendAsync(req)).StatusCode;
+        }
+        var codes = new List<HttpStatusCode>();
+        for (var client = 1; client <= 6; client++) codes.Add(await Guess(client % 2 == 0 ? "Pat" : " pat", client)); // one name, six addresses
+        Assert.Equal([.. Enumerable.Repeat(HttpStatusCode.Unauthorized, 5), HttpStatusCode.TooManyRequests], codes);
+        Assert.Equal(HttpStatusCode.Unauthorized, await Guess("someone.else", 7)); // other names are not held up
     }
 
     [Fact]

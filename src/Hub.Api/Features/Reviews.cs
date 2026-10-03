@@ -225,6 +225,12 @@ public static class ReviewEndpoints
             } else {
                 Check.OneOf(body.Action, ["cancel"], "action"); Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, p.ProjectDisciplineId));
                 var reason = Check.Reason(body.Reason); p.Status = round.Status = ReviewStatus.Cancelled; db.Audit.Note(p, reason: reason); db.Audit.Note(round, reason: reason);
+                // A cancelled package can never approve: release the deliverables it gated, as removing them from the manifest does.
+                await SubmissionEndpoints.InvalidateForReviewPackage(db, project.Id, p.Id);
+                foreach (var d in await db.Deliverables.Where(d => d.ProjectId == project.Id && d.RequiredReviewPackageId == p.Id).ToListAsync()) {
+                    Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, d.ProjectDisciplineId));
+                    d.RequiredReviewPackageId = null; db.Audit.Note(d, reason: reason);
+                }
             }
             await Notify(db, notify, project, p, await db.DisciplineReviews.Where(a => a.RoundId == round.Id).Select(a => a.ReviewerId).ToListAsync()); return p;
         });

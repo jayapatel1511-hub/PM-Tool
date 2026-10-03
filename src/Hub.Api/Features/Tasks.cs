@@ -67,7 +67,7 @@ public static class TaskEndpoints
         {
             var pid = await ActivityEndpoints.ItemProject(db, type, id) ?? throw ApiException.NotFound();
             var (_, ctx) = await access.Project(pid, track: false);
-            Access.Demand(userId == access.Me.Id ? Allow.Yes : Permissions.Comment(access.Actor, ctx));
+            Access.Demand(userId == access.Me.Id ? Allow.Yes : Permissions.ManageTeam(access.Actor, ctx)); // one's own watch, or a PM's call
             await db.Watchers.Where(w => w.ItemType == type && w.ItemId == id && w.UserId == userId).ExecuteDeleteAsync();
             return Results.NoContent();
         });
@@ -273,7 +273,6 @@ public static class TaskEndpoints
                     Text.Get("notify.due_changed", actor, t.Key, t.Name, old?.ToString("yyyy-MM-dd") ?? "—", nd?.ToString("yyyy-MM-dd") ?? "—"), reason);
             }
         }
-        t.OriginalStartDate ??= t.StartDate;
         if (t.StartDate is { } sd && t.DueDate is { } dd) Check.That(sd <= dd, "startDate", "deliverable.start_after_due"); // T-19
         if (patch.Has("assigneeId"))
         {
@@ -315,8 +314,8 @@ public static class TaskEndpoints
                 var ndid = patch.Id("deliverableId");
                 if (ndid is { } nd2)
                 {
-                    var nd = await db.Deliverables.FirstOrDefaultAsync(d => d.Id == nd2) ?? throw ApiException.Invalid("deliverableId", "error.not_found");
-                    Check.That(nd.ProjectId == t.ProjectId, "deliverableId", "task.other_project"); // T-18
+                    // T-18, with one answer whether the deliverable is missing or in another project (no existence check across projects).
+                    Check.That(await db.Deliverables.AnyAsync(d => d.Id == nd2 && d.ProjectId == t.ProjectId), "deliverableId", "task.other_project");
                     t.MilestoneId = null; // T-17/T-21: milestone context follows the deliverable; dependencies are kept
                 }
                 t.DeliverableId = ndid;
@@ -335,8 +334,13 @@ public static class TaskEndpoints
                 t.ProjectDisciplineId = pd.Id;
             }
         }
-        t.LastActivityAt = clock.GetUtcNow();
-        await db.SaveChangesAsync();
+        // An edit that changes nothing writes nothing: unchanged fields skip the checks above, so they must not move the version.
+        if (db.ChangeTracker.HasChanges())
+        {
+            t.OriginalStartDate ??= t.StartDate;
+            t.LastActivityAt = clock.GetUtcNow();
+            await db.SaveChangesAsync();
+        }
         Http.ETag(http, t);
         var warnings = new List<string>();
         if (t.DeliverableId is { } dId && await db.Deliverables.Where(d => d.Id == dId).Select(d => d.DueDate).FirstOrDefaultAsync() is { } ddue && t.DueDate > ddue)

@@ -317,7 +317,7 @@ public sealed class SubmissionApiTests(HubFactory f)
 
         var basis = await Post(TestData.Marc, root + "/design-basis", new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion,
             "Handoff basis", data.User(TestData.Alex), civil, null,
-            new DesignBasisEndpoints.VersionInput("Service", "Initial basis", 10, "kPa", "Manual", "basis-1", "https://example.test/basis-1", "A", null, null), "Initial basis"));
+            new DesignBasisEndpoints.VersionInput("Service", "Initial basis", 10, "kPa", "Manual", "basis-1", "https://example.test/basis-1", "A", new DateOnly(2026, 10, 5), null), "Initial basis"));
         var basisId = basis.G("id");
         var basisVersionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == basisId).Id);
         await Post(TestData.Marc, root + $"/design-basis/{basisId}/versions/{basisVersionId}/confirm",
@@ -330,7 +330,7 @@ public sealed class SubmissionApiTests(HubFactory f)
         });
         await Post(TestData.Marc, root + $"/design-basis/{basisId}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
             Version<DesignBasisEntry>(basisId), Version<DesignBasisVersion>(basisVersionId),
-            new DesignBasisEndpoints.VersionInput("Service", "Updated basis", 11, "kPa", "Manual", "basis-2", "https://example.test/basis-2", "B", null, null), "Basis changed"));
+            new DesignBasisEndpoints.VersionInput("Service", "Updated basis", 11, "kPa", "Manual", "basis-2", "https://example.test/basis-2", "B", new DateOnly(2026, 10, 5), null), "Basis changed"));
         var proposedBasisVersionId = f.Db(db => db.DesignBasisVersions.Where(v => v.EntryId == basisId && v.Status == BasisStatus.Proposed).Select(v => v.Id).Single());
         await Post(TestData.Marc, root + $"/design-basis/{basisId}/versions/{proposedBasisVersionId}/confirm",
             new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(basisId), Version<DesignBasisVersion>(proposedBasisVersionId), "Confirmed updated basis"));

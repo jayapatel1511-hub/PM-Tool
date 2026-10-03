@@ -6,6 +6,7 @@ const path = require('path'), { spawn } = require('child_process'), assert = req
 const port = process.env.PORT ?? '5176', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const pid = id(1), consumer = id(2), lead = id(3), civil = id(4), task = id(7), e1 = id(20), e2 = id(21), v11 = id(30), v12 = id(31), v21 = id(32), u1 = id(40), u2 = id(41), i1 = id(50), i2 = id(51);
+const coordinationUses = Array.from({ length: 5 }, (_, n) => ({ id: id(600 + n), targetType: 'Task', targetId: id(610 + n), sourceRevisionId: id(620 + n), targetKey: `P-DEMO-T${String(n + 1).padStart(3, '0')}`, targetName: `Coordination target ${n + 1}`, sourceKey: `P-DEMO-B${String(n + 1).padStart(3, '0')}`, sourceUrl: `https://example.test/source/${n + 1}`, revision: `R${n + 1}`, intendedUse: `Input use ${n + 1}` }));
 let who = 'consumer';
 const actor = () => (who === 'consumer' ? consumer : lead);
 const project = () => ({ id: pid, projectNumber: 'P-DEMO', name: 'Basis checks', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1, links: [], starred: false,
@@ -41,7 +42,7 @@ const taskDetail = () => ({ task: taskRow(), project: project(), description: 'C
     dueNeedsReason: false, block: { ok: true }, delete: { ok: false }, restore: false, comment: true,
     transitions: [{ to: 'Ready for Review', allowed: false, reason: 'Only the assignee may submit for review.', needsReason: false }], isReviewer: true, dependencies: false,
     enterTime: true, needsReason: false, allowSelfReview: false, authoriseStart: false } });
-const registerQueries = [], savedViews = [];
+const registerQueries = [], savedViews = [], coordinationQueries = [];
 const lists = [], decisions = [], errors = [], unknown = [], taskWrites = [], panelLayouts = [];
 let server, browser;
 (async () => {
@@ -49,7 +50,16 @@ let server, browser;
   for (let i = 0; i < 50; i++) { try { if ((await fetch(base)).ok) break } catch {} await new Promise(r => setTimeout(r, 100)) }
   browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-  await page.addInitScript(() => sessionStorage.setItem('hub.devUser', 'basis@hub.test'));
+  await page.addInitScript(() => {
+    sessionStorage.setItem('hub.devUser', 'basis@hub.test');
+    window.__printCalls = 0;
+    window.__printedTaskIds = [];
+    window.print = () => {
+      window.__printCalls++;
+      window.__printedTaskIds = [...new Set([...document.querySelectorAll('section[aria-labelledby="dcv-using"] a[href*="panel"]')]
+        .map(a => new URL(a.href).searchParams.get('panel')).filter(panel => panel?.startsWith('Task:')).map(panel => panel.slice('Task:'.length)))].sort();
+    };
+  });
   page.on('pageerror', e => errors.push(e.message));
   await page.route('**/api/**', async route => {
     const req = route.request(), u = new URL(req.url()), p = u.pathname.replace('/api/v1/', ''), method = req.method(); let data = {};
@@ -59,6 +69,36 @@ let server, browser;
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }; else if (p === 'workspaces') data = []; else if (p === 'views' && method === 'POST') { const body = req.postDataJSON(); savedViews.push({ ...body, id: id(300 + savedViews.length), scope: 'Personal', rowVersion: 1, dropped: [], canEdit: true }); data = savedViews.at(-1) }
     else if (p === 'views') data = { views: savedViews.filter(v => v.listType === u.searchParams.get('listType')), canShare: false };
     else if (p === 'projects') data = { items: [project()], totalCount: 1 }; else if (p === `projects/${pid}` || p === 'projects/P-DEMO') data = project();
+    else if (p === `projects/${pid}/coordination`) data = {
+      window: { thisWeek: { from: '2026-10-01', to: '2026-10-07' }, nextWeek: { from: '2026-10-08', to: '2026-10-14' }, since: '2026-09-01', canMarkReviewed: false },
+      headline: { computedHealth: 'Green', overdueTasks: { value: 0, link: '#' }, blockedTasks: { value: 0, link: '#' }, decisionsOverdue: 0, deliverablesAtRisk: { value: 0, link: '#' } },
+      milestones: [], deliverables: [], decisions: [], blocked: [], overdue: [], dueThisWeek: [], disciplines: [], issues: [], risks: [], waiting: [],
+      completed: { tasks: [], deliverables: [], decisions: [] }, upcoming: { tasks: [], deliverables: [] }, held: { tasks: [], deliverables: [] }
+    };
+    else if (p === `projects/${pid}/attention`) data = { items: [], snoozed: 0, total: 0 };
+    else if (p === `projects/${pid}/discipline-coordination`) {
+      const print = !u.searchParams.has('page') && !u.searchParams.has('pageSize');
+      coordinationQueries.push({ params: Object.fromEntries(u.searchParams), print });
+      const page = Number(u.searchParams.get('page') ?? 1);
+      const uses = print ? coordinationUses : page === 2 ? coordinationUses.slice(4) : coordinationUses.slice(0, 4);
+      data = {
+        handoffs: [], outgoing: [], incoming: [], uses, usesTotal: 5, usesPage: print ? 1 : page, usesPageSize: print ? 5 : 4,
+        changes: [{ id: id(650), key: 'P-DEMO-C001', title: 'Revised input', status: 'Open', pendingAssessments: 1, acknowledgedPending: 0, projectPending: 1, ownerId: consumer }],
+        changesTotal: 1, changesPage: 1, changesPageSize: 4,
+        reviews: [{ id: id(660), key: 'P-DEMO-R001', title: 'Pending package review', status: 'In Review', outstandingDisciplines: 1, blockingFindings: 0, coordinatorId: consumer }],
+        reviewsTotal: 1, reviewsPage: 1, reviewsPageSize: 4,
+        linkedIssues: [{ id: id(690), key: 'P-DEMO-I0001', title: 'Input coordination issue', status: 'Open', ownerId: consumer, ownerName: 'Alex Consumer', projectDisciplineId: civil }],
+        linkedIssuesTotal: 1, linkedIssuesPage: 1, linkedIssuesPageSize: 4,
+        startability: [], startabilityReadyTotal: 0, startabilityFrom: '2026-10-01', startabilityTo: '2026-10-31', startabilityTotal: 0, startabilityPage: 1, startabilityPageSize: 4,
+        linkedActions: [], changeTargets: [], unavailableChangeTargets: [],
+        upcomingSubmissions: [{ id: id(670), key: 'P-DEMO-SUB0001', title: 'Permit package', status: 'Checking', effectiveStatus: 'Pending review', targetDate: '2026-10-05', coordinatorId: consumer, failingChecks: [{ sourceId: id(650), kind: 'Pending review', code: 'REVIEW', message: 'Review is pending', sourcePath: `/projects/P-DEMO/reviews?panel=ReviewPackage:${id(660)}` }] }],
+        upcomingSubmissionsTotal: 1, upcomingSubmissionsPage: 1,
+        staffingConflicts: [{ id: id(680), key: 'P-DEMO-T0001', targetType: 'Task', targetId: coordinationUses[0].targetId, description: 'Staffing confirmation pending', neededBy: '2026-10-05', state: 'Pending', affectedOwnerId: consumer, removalOwnerId: lead }],
+        staffingConflictsTotal: 1, staffingConflictsPage: 1,
+        blockerGroups: [], blockerGroupsPage: 1, blockerGroupsTotal: 0, handoffPage: 1, handoffPageSize: 4, outgoingPage: 1, incomingPage: 1, outgoingTotal: 0, incomingTotal: 0,
+        page, pageSize: print ? 5 : 4, evaluatedAt: '2026-10-01T12:00:00Z'
+      };
+    }
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }; else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' };
     else if (p.endsWith('/changes/options')) data = options();
     else if (p === `projects/${pid}/team`) data = { members: [{ userId: consumer, displayName: 'Alex Consumer', primaryDisciplineId: civil }, { userId: lead, displayName: 'Marc Lead', primaryDisciplineId: civil }] };
@@ -119,6 +159,35 @@ let server, browser;
   who = 'lead'; await page.reload(); entry = page.getByRole('dialog', { name: /^P-DEMO-B002 · / }); await entry.getByText('Uses withdrawn version').waitFor();
   await entry.getByRole('button', { name: 'Decide impact', exact: true }).click();
   assert.deepEqual(await page.getByRole('dialog', { name: 'Decide impact' }).getByLabel('Decision', { exact: true }).locator('option').allInnerTexts(), ['Choose…', 'Unaffected by change']);
+
+  // FR-MDC-08: the coordination projection pages input uses while retaining full context and prints all rows.
+  who = 'consumer';
+  await page.goto(`${base}/projects/P-DEMO/coordination`);
+  await page.getByRole('heading', { name: 'Discipline coordination', exact: true }).waitFor();
+  const using = page.getByRole('heading', { name: /^Which revision are we using\?/ });
+  await using.waitFor();
+  for (let n = 1; n <= 4; n++) await page.getByRole('link', { name: `P-DEMO-T${String(n).padStart(3, '0')}`, exact: true }).waitFor();
+  assert.equal(await page.getByRole('link', { name: 'P-DEMO-T005', exact: true }).count(), 0);
+  await page.locator('section[aria-labelledby="dcv-using"] a[href="https://example.test/source/1"]').waitFor();
+  await page.getByRole('heading', { name: /^What changed\?/ }).locator('..').locator('..').getByRole('link', { name: 'P-DEMO-C001', exact: true }).waitFor();
+  await page.getByRole('heading', { name: 'Pending reviews · 1', exact: true }).waitFor();
+  await page.getByRole('link', { name: 'P-DEMO-SUB0001', exact: true }).waitFor();
+  await page.getByRole('link', { name: 'P-DEMO-T0001', exact: true }).last().waitFor();
+  assert.ok(coordinationQueries.some(q => q.params.page === '1' && q.params.pageSize === '4' && q.params.disciplineId === undefined), 'Coordination uses page one sends page size four');
+  const usesPager = page.locator('[aria-label="Which revision are we using?"]');
+  await Promise.all([page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/discipline-coordination') && u.searchParams.get('page') === '2' }), usesPager.getByRole('button', { name: 'Next', exact: true }).click()]);
+  await page.waitForURL(/rowsPage=2/);
+  await page.getByRole('link', { name: 'P-DEMO-T005', exact: true }).waitFor();
+  assert.equal(await page.getByRole('link', { name: 'P-DEMO-T001', exact: true }).count(), 0);
+  await page.getByRole('link', { name: 'P-DEMO-C001', exact: true }).waitFor();
+  assert.ok(coordinationQueries.some(q => q.params.page === '2' && q.params.pageSize === '4'), 'Coordination uses page two reaches the fifth row');
+  await page.goto(`${base}/projects/P-DEMO/coordination`);
+  await page.getByRole('heading', { name: 'Discipline coordination', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Print', exact: true }).click();
+  await page.waitForFunction(() => window.__printCalls === 1);
+  const printed = await page.evaluate(() => window.__printedTaskIds);
+  assert.deepEqual(printed, coordinationUses.map(u => u.targetId).sort(), 'Print captures all five rendered input-use target ids');
+  assert.ok(coordinationQueries.some(q => q.print && q.params.page === undefined && q.params.pageSize === undefined), 'Print requests the unpaged coordination projection');
 
   // FR-MDC-06: list controls retain URL filters, page before expanding issue groups and save definitions only.
   await page.goto(`${base}/projects/P-DEMO/design-basis`);

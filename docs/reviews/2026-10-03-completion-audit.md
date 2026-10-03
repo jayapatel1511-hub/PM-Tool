@@ -17,7 +17,7 @@ This record supersedes any claim that `26c0ae1` completes packets 025–033. Tha
 | Unavailable issue-reference recovery | `86b133d`: authorised versioned retry-safe replacement preserves original reference and invalidates earlier verification | 52 combined checks; frontend build/lint; Release EF reports no pending model changes; additive migration 29 |
 | One notification per command and recipient/item | `6ced0d7`: current-context and persisted notification/email deduplication | 10 collaboration checks; regression first failed on duplicate rows |
 | Owner replacement recovery | `f75a742`, `4e6bf11`, `6153cb1`, `71d426e`: new owner re-records with a reason and current assessment version; active owned work follows the replacement while historical approvals and frozen promises remain | 9 focused recovery/DCV/action checks; aggregate version guard and replay cases |
-| Coordination context and full print | `169d9ab`, `7ba46e0`, `71d426e`: evaluated blockers, source links, promised/needed dates, bounded rows with exact totals and complete capture context; Print fetches all permitted rows | Included in 9 focused checks; frontend build/lint; dedicated Chromium print/paging regression underway |
+| Coordination context and full print | `169d9ab`, `7ba46e0`, `71d426e`: evaluated blockers, source links, promised/needed dates, bounded rows with exact totals and complete capture context; Print fetches all permitted rows | Included in 9 focused checks; frontend build/lint; all three required Chromium mocked suites passed locally; paged fifth row and repeated Print refresh included |
 | Provisional basis confirmation dates | `26ed8b2`, `f3e9860`, `ffdfd92`: new proposals require dates; historical/template unknown dates remain explicit until authorised editing | 14 combined basis/submission checks after correcting the old fixture; template-copy regression |
 | Source invalidation notices | `59052d5`, `d086ba3`: basis, review, publication and handoff changes route submission/check-owner notices transactionally | 77 focused workflow/collaboration checks; publication-notice regression first failed on missing notices; retry preserves counts |
 
@@ -27,8 +27,8 @@ Raw evidence remains under `/private/tmp/pm-*`; credentials, dumps and runtime f
 
 ## Open completion work
 
-- Remove stale readiness-exception verifier assignments from the digest after owner recovery; retain historical records.
-- Complete the dedicated Chromium full-print/paging regression and independent combined review.
+- Complete shared canonical basis evaluation for readiness-exception digest eligibility; owner recovery suppression is integrated and its 11 focused digest/notification checks pass.
+- Independent combined review found one remaining mismatch in digest basis eligibility; readiness and digest are being changed to reuse the same canonical basis evaluation. The full-print/paging/repeated-refresh browser regression passed.
 - Independent review of the combined result, final required CI, exact-archive image, fresh/populated migration and old-image compatibility checks, source staging and activation.
 - Hosted password/browser acceptance of the final revision, persistence-marker comparison, print/keyboard/accessibility checks and complete packet T006 evidence.
 

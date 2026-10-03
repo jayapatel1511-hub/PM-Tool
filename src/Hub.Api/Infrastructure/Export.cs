@@ -13,12 +13,18 @@ public static class Export
 {
     public const int MaxRows = 50_000;
 
+    static readonly System.Text.RegularExpressions.Regex Formula = new(@"^(\s*[=+\-@]|[\t\r])", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+    static readonly System.Text.RegularExpressions.Regex Number = new(@"^\s*[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)(e[+-]?[0-9]+)?\s*\z",
+        System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+    /// One CSV cell by the same rules as the client's csvCell (web/src/lib/csv.ts).
     public static string Csv(string? v)
     {
         v ??= "";
-        // CSV injection (OWASP): text a spreadsheet would run as a formula gets a leading apostrophe; numbers stay numbers.
-        if (v.Length > 0 && "=+-@\t\r".Contains(v[0]) && !double.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out _)) v = "'" + v;
-        return v.IndexOfAny([',', '"', '\n', '\r']) >= 0 ? $"\"{v.Replace("\"", "\"\"")}\"" : v;
+        // CSV injection (OWASP): text a spreadsheet would run as a formula, even behind leading spaces, gets a leading apostrophe;
+        // numbers stay numbers. Any separator a spreadsheet may split on (comma, semicolon, tab), a quote or a line break is quoted.
+        if (Formula.IsMatch(v) && !Number.IsMatch(v)) v = "'" + v;
+        return v.IndexOfAny([',', ';', '"', '\t', '\n', '\r']) >= 0 ? $"\"{v.Replace("\"", "\"\"")}\"" : v;
     }
 
     public static byte[] Bom(string s) => [.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(s)];

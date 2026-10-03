@@ -26,6 +26,8 @@ public static class ReportEndpoints
 
     static readonly string[] Live = [ProjectStatus.Setup, ProjectStatus.Active, ProjectStatus.OnHold, ProjectStatus.Complete];
     const int ScreenRows = 2000;
+    /// Report queries read one row past the export cap: enough to show the screen and refuse an oversized export, never a whole huge scope.
+    const int Cap = Export.MaxRows + 1;
 
     static Param Projects => new("projectId", "projects");
     static Param Discipline => new("disciplineId", "discipline");
@@ -111,7 +113,7 @@ public static class ReportEndpoints
             return new
             {
                 def.Code, Title = Text.Get($"report.{def.Code}"), ItemType = ItemTypeOf(def.Code), Columns = (r.Columns ?? def.Cols).Select(c => new { c.Path, Header = c.Title, c.Type }),
-                Rows = new JsonArray([.. r.Rows.Take(ScreenRows).Select(x => x?.DeepClone())]), Total = r.Rows.Count, Truncated = r.Rows.Count > ScreenRows, r.ListLink,
+                Rows = new JsonArray([.. r.Rows.Take(ScreenRows).Select(x => x?.DeepClone())]), Total = r.Rows.Count, TotalIsLowerBound = r.Rows.Count >= Cap, Truncated = r.Rows.Count > ScreenRows, r.ListLink,
                 Parameters = (await ctx.Describe(def.Params)).Select(p => new { Label = p.Item1, Value = p.Item2 }),
             };
         });
@@ -188,7 +190,8 @@ public static class ReportEndpoints
                 var ids = Http.Ids(raw);
                 var value = p.Type switch
                 {
-                    "projects" or "project" => string.Join(", ", await db.Projects.Where(x => ids.Contains(x.Id)).Select(x => x.ProjectNumber).ToListAsync()),
+                    // Only projects the caller may view are named; people and reference data are organisation-wide already.
+                    "projects" or "project" => string.Join(", ", await access.VisibleProjects().Where(x => ids.Contains(x.Id)).Select(x => x.ProjectNumber).ToListAsync()),
                     "discipline" => string.Join(", ", await db.Disciplines.Where(x => ids.Contains(x.Id)).Select(x => x.Name).ToListAsync()),
                     "office" => string.Join(", ", await db.Offices.Where(x => ids.Contains(x.Id)).Select(x => x.Name).ToListAsync()),
                     "person" => string.Join(", ", await db.Users.Where(x => ids.Contains(x.Id)).Select(x => x.DisplayName).ToListAsync()),
@@ -270,7 +273,7 @@ public static class ReportEndpoints
         var from = day.AddDays(-(((int)day.DayOfWeek + 6) % 7));
         var to = from.AddDays(6);
         var f = new TaskFilter { DueFrom = from, DueTo = to, Indicators = ["open"], AssigneeIds = c.Id("assigneeId") is { } a ? [a] : [], Mine = c.Bool("mine") ? true : null };
-        var rows = Json(await TaskQueries.Rows(c.Db, TaskQueries.Sort(Tasks(c, f), null)));
+        var rows = Json(await TaskQueries.Rows(c.Db, TaskQueries.Sort(Tasks(c, f), null).Take(Cap)));
         foreach (var r in rows) r!["indicators"] = Indicators(r["state"]);
         return new(rows, await Link(c, "tasks", ("dueFrom", $"{from:yyyy-MM-dd}"), ("dueTo", $"{to:yyyy-MM-dd}"), ("open", "true"), ("assigneeId", c.Str("assigneeId")), ("mine", c.Bool("mine") ? "true" : null)));
     }
@@ -280,14 +283,25 @@ public static class ReportEndpoints
         var min = Math.Max(c.Int("minDaysOverdue") ?? 1, 1);
         var f = new TaskFilter { Indicators = ["overdue"], AssigneeIds = c.Id("assigneeId") is { } a ? [a] : [] };
         var q = Tasks(c, f).Where(t => c.Db.TaskStates.Any(s => s.TaskId == t.Id && s.DaysOverdue >= min));
-        var rows = await WithMilestones(c.Db, Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.DueDate).ThenBy(t => t.Seq))));
+        var rows = await WithMilestones(c.Db, Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap))));
         return new(rows, min > 1 ? null : await Link(c, "tasks", ("overdue", "true"), ("assigneeId", c.Str("assigneeId"))));
     }
 
     static async Task<Result> Blocked(Ctx c)
     {
         var kind = c.Str("blockerType");
-        var rows = await WithMilestones(c.Db, Json(await TaskQueries.Rows(c.Db, Tasks(c, new TaskFilter { Indicators = ["blocked"] }).OrderBy(t => t.DueDate).ThenBy(t => t.Seq))));
+        var q = Tasks(c, new TaskFilter { Indicators = ["blocked"] });
+        if (kind is not null)
+        {
+            // Match the complete blocker predicate before the cap, including legacy entries without a blocking flag.
+            var matching = c.Db.Database.SqlQuery<Guid>($"""
+                SELECT task_id AS "Value" FROM hub.task_state
+                WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(blocked_by) AS b
+                    WHERE b->>'type' = {kind} AND b->>'blocking' IS DISTINCT FROM 'false')
+                """);
+            q = q.Where(t => matching.Contains(t.Id));
+        }
+        var rows = await WithMilestones(c.Db, Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap))));
         var kept = new JsonArray();
         foreach (var r in rows.ToList())
         {
@@ -303,7 +317,7 @@ public static class ReportEndpoints
 
     static async Task<Result> Blocking(Ctx c)
     {
-        var rows = Json(await TaskQueries.Rows(c.Db, Tasks(c, new TaskFilter { Indicators = ["blocking"] }).OrderBy(t => t.DueDate).ThenBy(t => t.Seq)));
+        var rows = Json(await TaskQueries.Rows(c.Db, Tasks(c, new TaskFilter { Indicators = ["blocking"] }).OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap)));
         var succIds = rows.SelectMany(r => GuidList(r!["state"]?["blockingTaskIds"])).Distinct().ToList();
         var succ = await c.Db.Tasks.AsNoTracking().Where(t => succIds.Contains(t.Id))
             .Select(t => new { t.Id, Milestone = t.MilestoneId ?? c.Db.Deliverables.Where(d => d.Id == t.DeliverableId).Select(d => d.MilestoneId).FirstOrDefault() }).ToListAsync();
@@ -320,7 +334,7 @@ public static class ReportEndpoints
         var days = Math.Clamp(c.Int("daysAhead") ?? 14, 0, 365);
         var q = ByDiscipline(c, DeliverableEndpoints.Filter(c.Db, c.Db.Deliverables.AsNoTracking().Where(d => c.ProjectIds().Contains(d.ProjectId)),
             dueFrom: c.Today, dueTo: c.Today.AddDays(days), indicator: "open"));
-        var rows = await WithProject(c.Db, Json(await DeliverableEndpoints.Rows(c.Db, q)));
+        var rows = await WithProject(c.Db, Json(await DeliverableEndpoints.Rows(c.Db, q.OrderBy(d => d.DueDate).ThenBy(d => d.Seq).Take(Cap))));
         foreach (var r in rows) r!["indicators"] = Indicators(r["state"]);
         return new(rows, await Link(c, "deliverables", ("dueFrom", $"{c.Today:yyyy-MM-dd}"), ("dueTo", $"{c.Today.AddDays(days):yyyy-MM-dd}"), ("indicator", "open")));
     }
@@ -328,7 +342,7 @@ public static class ReportEndpoints
     static async Task<Result> DeliverableStatus_(Ctx c)
     {
         var q = ByDiscipline(c, c.Db.Deliverables.AsNoTracking().Where(d => c.ProjectIds().Contains(d.ProjectId) && d.Status != DeliverableStatus.Cancelled));
-        var rows = await WithProject(c.Db, Json(await DeliverableEndpoints.Rows(c.Db, q)));
+        var rows = await WithProject(c.Db, Json(await DeliverableEndpoints.Rows(c.Db, q.OrderBy(d => c.Db.Projects.Where(p => p.Id == d.ProjectId).Select(p => p.ProjectNumber).First()).ThenBy(d => d.Key).Take(Cap))));
         var sorted = new JsonArray([.. rows.Select(r => r!.DeepClone()).OrderBy(r => r["projectNumber"]?.GetValue<string>()).ThenBy(r => r["key"]?.GetValue<string>())]);
         return new(sorted, await Link(c, "deliverables"));
     }
@@ -347,7 +361,7 @@ public static class ReportEndpoints
         var until = c.Today.AddDays(days);
         var q = c.Db.Milestones.AsNoTracking().Where(m => c.ProjectIds().Contains(m.ProjectId) && !m.IsComplete && !m.IsCancelled && m.Date >= c.Today && m.Date <= until);
         if (c.Str("type") is { } type) q = q.Where(m => m.MilestoneType == type);
-        var rows = await WithProject(c.Db, Json(await MilestoneEndpoints.Rows(c.Db, q)));
+        var rows = await WithProject(c.Db, Json(await MilestoneEndpoints.Rows(c.Db, q.OrderBy(m => m.Date).ThenBy(m => m.Id).Take(Cap))));
         foreach (var r in rows) r!["deliverablesIssued"] = $"{r["deliverableIssued"]}/{r["deliverableTotal"]}";
         return new(rows, await Link(c, "milestones", ("type", c.Str("type"))));
     }
@@ -364,7 +378,8 @@ public static class ReportEndpoints
             _ => q,
         };
         if (c.Bool("overdueOnly")) q = q.Where(d => c.Db.DecisionStates.Any(x => x.DecisionId == d.Id && x.IsOverdue));
-        var rows = await WithProject(c.Db, Json(await DecisionEndpoints.Rows(c.Db, q, c.Today)));
+        var rows = await WithProject(c.Db, Json(await DecisionEndpoints.Rows(c.Db, q.OrderByDescending(d => c.Db.DecisionStates.Any(st => st.DecisionId == d.Id && st.IsOverdue)).ThenBy(d => d.RequiredByDate)
+            .ThenBy(d => d.ImpactLevel == Impact.High ? 0 : d.ImpactLevel == Impact.Medium ? 1 : 2).ThenBy(d => d.Key).Take(Cap), c.Today)));
         foreach (var r in rows)
         {
             r!["days"] = r["isOverdue"]?.GetValue<bool>() == true ? -r["daysOverdue"]!.GetValue<int>() : r["daysUntil"] is JsonNode du ? du.GetValue<int>() : null;
@@ -384,12 +399,14 @@ public static class ReportEndpoints
         var risks = c.Db.Risks.AsNoTracking().Where(r => c.ProjectIds().Contains(r.ProjectId) && (r.Status == RiskStatus.Open || r.Status == RiskStatus.Monitoring)
             && scores.Contains(r.Probability * r.Impact));
         var rows = new List<(int Weight, string? Date, JsonNode Row)>(); // ISO dates sort as text
-        foreach (var i in Json(await RegisterEndpoints.IssueRows(c.Db, issues, c.Today)))
+        foreach (var i in Json(await RegisterEndpoints.IssueRows(c.Db, issues.OrderBy(i => i.Severity == Impact.High ? 0 : i.Severity == Impact.Medium ? 1 : 2)
+            .ThenBy(i => i.TargetResolutionDate ?? DateOnly.MaxValue).ThenBy(i => i.Seq).Take(Cap), c.Today)))
         {
             i!["itemType"] = ItemType.Issue; i["itemTypeLabel"] = Text.Get("itemType.Issue"); i["date"] = i["targetResolutionDate"]?.DeepClone();
             rows.Add((Registers.Weight(i["severity"]!.GetValue<string>()), i["targetResolutionDate"]?.GetValue<string>(), i));
         }
-        foreach (var r in Json(await RegisterEndpoints.RiskRows(c.Db, risks, c.Today)))
+        foreach (var r in Json(await RegisterEndpoints.RiskRows(c.Db, risks.OrderBy(r => r.Probability * r.Impact >= 6 ? 0 : r.Probability * r.Impact >= 3 ? 1 : 2)
+            .ThenBy(r => r.ReviewDate ?? DateOnly.MaxValue).ThenByDescending(r => r.Probability * r.Impact).ThenBy(r => r.Seq).Take(Cap), c.Today)))
         {
             var band = r!["band"]!.GetValue<string>();
             r["itemType"] = ItemType.Risk; r["itemTypeLabel"] = Text.Get("itemType.Risk"); r["severity"] = $"{band} ({r["score"]})";
@@ -405,18 +422,20 @@ public static class ReportEndpoints
     {
         var q = c.Db.Actions.AsNoTracking().Where(a => c.ProjectIds().Contains(a.ProjectId) && (a.Status == ActionStatus.Open || a.Status == ActionStatus.InProgress));
         if (c.Str("ownerType") is { } ot) q = q.Where(a => a.OwnerType == ot);
-        return new(Json(await MeetingEndpoints.Rows(c.Db, q, c.Today)), await Link(c, "meetings", ("indicator", "open"), ("ownerType", c.Str("ownerType"))));
+        return new(Json(await MeetingEndpoints.Rows(c.Db, q.OrderBy(a => a.DueDate ?? DateOnly.MaxValue).ThenBy(a => a.Seq).Take(Cap), c.Today)), await Link(c, "meetings", ("indicator", "open"), ("ownerType", c.Str("ownerType"))));
     }
 
     static async Task<Result> ReviewQueue(Ctx c)
     {
         var reviewer = c.Id("reviewerId");
         var f = new TaskFilter { Indicators = ["readyForReview"], ReviewerIds = reviewer is { } r ? [r] : [] };
-        var tasks = Json(await TaskQueries.Rows(c.Db, Tasks(c, f).OrderBy(t => t.ReviewRequestedAt)));
+        var tasks = Json(await TaskQueries.Rows(c.Db, Tasks(c, f).OrderBy(t => t.ReviewRequestedAt == null && t.StatusChangedAt == null)
+            .ThenBy(t => t.ReviewRequestedAt ?? t.StatusChangedAt).ThenBy(t => t.Key).Take(Cap)));
         var taskIds = tasks.Select(x => Guid.Parse(x!["id"]!.GetValue<string>())).ToList();
         var requested = await c.Db.Tasks.AsNoTracking().Where(t => taskIds.Contains(t.Id)).ToDictionaryAsync(t => t.Id, t => t.ReviewRequestedAt ?? t.StatusChangedAt);
         var dq = c.Db.Deliverables.AsNoTracking().Where(d => c.ProjectIds().Contains(d.ProjectId) && d.Status == DeliverableStatus.InReview);
         if (reviewer is { } rv) dq = dq.Where(d => d.ReviewerId == rv);
+        dq = dq.OrderBy(d => d.StatusChangedAt == null).ThenBy(d => d.StatusChangedAt).ThenBy(d => d.Key).Take(Cap);
         var dels = await WithProject(c.Db, Json(await DeliverableEndpoints.Rows(c.Db, dq)));
         var since = await dq.ToDictionaryAsync(d => d.Id, d => d.StatusChangedAt);
         var rows = new JsonArray();
@@ -450,7 +469,7 @@ public static class ReportEndpoints
         var days = Math.Max(c.Int("days") ?? c.S.TaskStaleDays, 1);
         var cutoff = c.Now.AddDays(-days);
         var q = Tasks(c, new TaskFilter { Indicators = ["open"] }).Where(t => t.Status != TaskStatuses.OnHold && t.LastActivityAt < cutoff);
-        var rows = Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.LastActivityAt)));
+        var rows = Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.LastActivityAt).Take(Cap)));
         foreach (var r in rows)
             r!["staleDays"] = c.Today.DayNumber - Clock.LocalDate(DateTimeOffset.Parse(r["lastActivityAt"]!.GetValue<string>(), CultureInfo.InvariantCulture), c.S).DayNumber;
         return new(rows, days == c.S.TaskStaleDays ? await Link(c, "tasks", ("stale", "true")) : null);
@@ -495,8 +514,7 @@ public static class ReportEndpoints
     /// §19 Task Hours (§36.8): the Time view's permitted, non-deleted entries and their total.
     static async Task<Result> TaskHours(Ctx c)
     {
-        var from = c.Date("from") ?? Workload.WeekOf(c.Today);
-        var to = c.Date("to") ?? from.AddDays(6);
+        var (from, to) = await TimeEndpoints.Range(new(c.Date("from"), c.Date("to"), null, null, null, null), c.Db, c.Store, c.Clock); // the Time view's bound
         var f = new TimeEndpoints.TimeQuery(from, to, c.Id("projectId"), null, c.Id("userId"), c.Str("scope") == "team" ? "all" : "mine");
         var rows = await TimeEndpoints.Visible(f, c.Access, c.Db, c.Me);
         var json = Json(rows.Select(r => (object)new { r.WorkDate, r.Person, r.ProjectNumber, r.TaskKey, r.TaskName, r.Hours, r.Note, ItemType = ItemType.Task, Id = r.TaskId }));
@@ -519,7 +537,7 @@ public static class ReportEndpoints
         var to = c.Date("to") ?? c.Today;
         var rows = await c.Db.HealthSnapshots.AsNoTracking().Where(x => c.ProjectIds().Contains(x.ProjectId) && x.SnapshotDate >= from && x.SnapshotDate <= to)
             .Join(c.Db.Projects, x => x.ProjectId, p => p.Id, (x, p) => new { p.ProjectNumber, p.Name, Date = x.SnapshotDate, Computed = x.ComputedHealth, Reported = x.ReportedHealth })
-            .OrderBy(x => x.ProjectNumber).ThenBy(x => x.Date).ToListAsync();
+            .OrderBy(x => x.ProjectNumber).ThenBy(x => x.Date).Take(Cap).ToListAsync();
         return new(Json(rows));
     }
 
@@ -581,7 +599,7 @@ public static class ReportEndpoints
             AddedBy = c.Db.Users.Where(u => u.Id == m.AddedBy).Select(u => u.DisplayName).FirstOrDefault(),
             OpenTasks = c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled),
             OverdueTasks = c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && c.Db.TaskStates.Any(s => s.TaskId == t.Id && s.IsOverdue)),
-        }).ToListAsync();
+        }).OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Take(Cap).ToListAsync();
         return new(Json(rows.OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Select(r => (object)new
         {
             r.Person, r.Project.ProjectNumber, ProjectName = r.Project.Name, ProjectStatus = r.Project.Status,

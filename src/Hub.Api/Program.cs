@@ -51,6 +51,8 @@ if (!string.IsNullOrEmpty(cfg["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
     builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 builder.AddHubAuth();
+// §21: a request body holds at most 1 MB. There are no uploads; the largest legitimate body, a template structure, is a few kilobytes.
+builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = 1024 * 1024);
 var tunnelProxy = builder.Environment.IsStaging() && cfg.GetValue<bool>("Hosting:LocalTunnelProxy")
     && IPAddress.TryParse(cfg["Hosting:LocalTunnelProxyAddress"], out var configuredTunnelProxy) ? configuredTunnelProxy : null;
 builder.Services.AddRateLimiter(o =>
@@ -69,6 +71,9 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy("local-sign-in", ctx => RateLimitPartition.GetFixedWindowLimiter(AuthSetup.ClientKey(ctx, tunnelProxy),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(1) }));
 });
+// The same five attempts a minute per login name, so guesses at one login cannot be spread over many client addresses.
+builder.Services.AddSingleton(_ => PartitionedRateLimiter.Create<string, string>(name =>
+    RateLimitPartition.GetFixedWindowLimiter(name, _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(1) })));
 builder.Services.AddOpenApi();
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase);
 
@@ -132,8 +137,16 @@ app.MapGet("/health", async (HubDb db, TimeProvider clock) =>
 var api = app.MapGroup("/api/v1");
 if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
 {
-    api.MapPost("/auth/local/sign-in", async (LocalPasswordStore store, HubDb db, HttpContext ctx, LocalSignIn input) =>
+    api.MapPost("/auth/local/sign-in", async (LocalPasswordStore store, HubDb db, HttpContext ctx, LocalSignIn input, PartitionedRateLimiter<string> perName) =>
     {
+        // Names compare as the verifier store matches them (case-insensitive); an impossible name shares one bucket.
+        using var attempt = perName.AttemptAcquire(input.UserName?.Trim().ToUpperInvariant() is { Length: > 0 and <= 64 } name ? name : "");
+        if (!attempt.IsAcquired)
+        {
+            var after = attempt.TryGetMetadata(MetadataName.RetryAfter, out var wait) ? (int)Math.Ceiling(wait.TotalSeconds) : 60;
+            ctx.Response.Headers.RetryAfter = after.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return Results.StatusCode(StatusCodes.Status429TooManyRequests);
+        }
         string? stamp = null;
         var id = input.UserName is { Length: > 0 } && input.Password is { Length: > 0 } ? store.Verify(input.UserName, input.Password, out stamp) : null;
         if (id is null || !await db.Users.AnyAsync(u => u.Id == id && u.IsActive)) return Results.Unauthorized();

@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils'
 interface Param { key: string; label: string; type: string; default?: string | null; options?: { value: string; label: string }[] | null }
 interface Column { path: string; header: string; type: string }
 interface ReportDef { code: string; title: string; description: string; params: Param[]; columns: Column[]; itemType?: string | null }
-interface ReportRun { code: string; title: string; itemType?: string | null; columns: Column[]; rows: Record<string, any>[]; total: number; truncated: boolean; listLink?: string | null; parameters: { label: string; value: string }[] }
+interface ReportRun { code: string; title: string; itemType?: string | null; columns: Column[]; rows: Record<string, any>[]; total: number; totalIsLowerBound?: boolean; truncated: boolean; listLink?: string | null; parameters: { label: string; value: string }[] }
 
 const useCatalogue = () => useQuery({ queryKey: ['reports'], queryFn: () => get<ReportDef[]>('reports'), staleTime: 5 * 60_000 })
 
@@ -156,7 +156,7 @@ function ReportTable({ r, itemType }: { r: ReportRun; itemType?: string | null }
   }
   return (
     <div className="space-y-2">
-      <p className="text-sm text-muted-foreground">{r.truncated ? t('reports.truncated', { n: r.rows.length, total: r.total }) : plural(r.total, 'reports.row1', 'reports.rows')}
+      <p className="text-sm text-muted-foreground">{r.truncated ? t(r.totalIsLowerBound ? 'reports.truncatedLowerBound' : 'reports.truncated', { n: r.rows.length, total: r.total }) : plural(r.total, 'reports.row1', 'reports.rows')}
         {r.parameters.length > 0 && <> · {r.parameters.map((p) => `${p.label}: ${p.value}`).join(' · ')}</>}</p>
       <div className="overflow-x-auto rounded-lg border bg-card focus-visible:ring-2 focus-visible:ring-ring" tabIndex={0} role="region" aria-label={r.title}>
         <table className="w-full text-[13px]">

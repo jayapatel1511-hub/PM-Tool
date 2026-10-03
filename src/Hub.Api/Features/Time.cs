@@ -64,7 +64,7 @@ public static class TimeEndpoints
         });
     }
 
-    static async Task<(DateOnly From, DateOnly To)> Range(TimeQuery f, HubDb db, SettingsStore store, TimeProvider clock)
+    internal static async Task<(DateOnly From, DateOnly To)> Range(TimeQuery f, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var today = clock.Today(await store.Get(db));
         var from = f.From ?? Workload.WeekOf(today);

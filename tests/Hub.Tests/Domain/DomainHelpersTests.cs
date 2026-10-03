@@ -26,6 +26,21 @@ public sealed class DomainHelpersTests
         Assert.Equal(title, Links.DefaultTitle(url));
     }
 
+    [Theory]
+    [InlineData(@"\\fileserver\projects", true)]
+    [InlineData(@"\\fileserver\projects\2026-0417\Design Drawings\C-101 rev B.pdf", true)]
+    [InlineData(@"\\fileserver\projects\", true)]
+    [InlineData(@"\\fileserver", false)]
+    [InlineData(@"\\fileserver\projects\a""b", false)] // the whole path is checked, not only its start
+    [InlineData(@"\\fileserver\projects\x<script>", false)]
+    [InlineData("\\\\fileserver\\projects\\x\ny", false)]
+    [InlineData("\\\\fileserver\\projects\\x\n", false)]
+    public void A_network_path_is_valid_only_as_a_whole(string path, bool valid)
+    {
+        Assert.Equal(valid, Links.IsUnc(path));
+        Assert.Equal(valid, Links.IsValid(path));
+    }
+
     [Fact]
     public void Working_day_calendar_skips_weekends_and_holidays()
     {

@@ -71,6 +71,12 @@ public sealed class LocalPasswordTests
         Assert.Equal("172.30.245.1", AuthSetup.ClientKey(multiple, proxy));
         Assert.Equal("172.30.245.1", AuthSetup.ClientKey(Req("172.30.245.1", "203.0.113.7"), null)); // tunnel mode off
         Assert.Equal("172.30.245.1", AuthSetup.ClientKey(Req("172.30.245.1", null), proxy));
+        // One IPv6 client holds a whole /64, so addresses inside it share a bucket; IPv4 stays per address.
+        Assert.Equal("cf:2001:db8:1:2::/64", AuthSetup.ClientKey(Req("172.30.245.1", "2001:db8:1:2::5"), proxy));
+        Assert.Equal("cf:2001:db8:1:2::/64", AuthSetup.ClientKey(Req("172.30.245.1", "2001:db8:1:2:ffff:eeee:dddd:1"), proxy));
+        Assert.Equal("cf:2001:db8:1:3::/64", AuthSetup.ClientKey(Req("172.30.245.1", "2001:db8:1:3::5"), proxy));
+        Assert.Equal("2001:db8:a:b::/64", AuthSetup.ClientKey(Req("2001:db8:a:b:1:2:3:4", null), null)); // a direct IPv6 hop too
+        Assert.Equal("10.0.0.5", AuthSetup.ClientKey(Req("::ffff:10.0.0.5", null), null));
     }
 
     [Fact]

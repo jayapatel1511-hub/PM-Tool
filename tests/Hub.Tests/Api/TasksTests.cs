@@ -34,6 +34,71 @@ public sealed class TasksTests(HubFactory f)
     }
 
     [Fact]
+    public async Task An_edit_that_changes_nothing_writes_nothing()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex), dueDate = "2026-10-30" });
+        Task<string> Row() => f.DbAsync(db => db.Tasks.Where(x => x.Id == t.G("id")).Select(x => $"{x.RowVersion}|{x.UpdatedBy}|{x.LastActivityAt:O}").SingleAsync());
+        var before = await Row();
+        var version = await d.TaskVersion(t);
+        var saved = f.Clock.Now;
+        f.Clock.Now = saved.AddMinutes(5); // the test clock is frozen otherwise, which would hide an activity-date write
+        try
+        {
+            foreach (var (who, body) in new (string, object)[]
+            {
+                (TestData.Diane, new { rowVersion = version }), // a viewer sending no field at all
+                (TestData.Rita, new { rowVersion = version, dueDate = "2026-10-30" }), // a Read Only account sending the current due date
+                (TestData.Diane, new { rowVersion = version, assigneeId = d.User(TestData.Alex) }), // the current assignee
+            })
+                Assert.Equal(HttpStatusCode.OK, (await f.As(who).Patch($"/api/v1/tasks/{t.G("id")}", body)).StatusCode);
+        }
+        finally { f.Clock.Now = saved; }
+        Assert.Equal(before, await Row()); // no version, actor or activity change
+    }
+
+    [Fact]
+    public async Task Only_the_watcher_or_a_PM_removes_a_watch()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id);
+        var url = $"/api/v1/items/Task/{t.G("id")}/watchers";
+        Task<bool> Watching() => f.DbAsync(db => db.Watchers.AnyAsync(w => w.ItemId == t.G("id") && w.UserId == d.User(TestData.Diane)));
+        (await f.As(TestData.Diane).Post(url, new { userId = d.User(TestData.Diane) })).EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).DeleteAsync($"{url}/{d.User(TestData.Diane)}")).StatusCode); // a commenter, not a PM
+        Assert.True(await Watching());
+        Assert.Equal(HttpStatusCode.NoContent, (await f.As(TestData.Pm).DeleteAsync($"{url}/{d.User(TestData.Diane)}")).StatusCode);
+        Assert.False(await Watching());
+        (await f.As(TestData.Diane).Post(url, new { userId = d.User(TestData.Diane) })).EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.NoContent, (await f.As(TestData.Diane).DeleteAsync($"{url}/{d.User(TestData.Diane)}")).StatusCode);
+        Assert.False(await Watching());
+    }
+
+    [Fact]
+    public async Task Moving_a_task_to_a_deliverable_outside_its_project_gives_one_answer_whether_or_not_it_exists()
+    {
+        await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true });
+        try
+        {
+            var hidden = await d.Project(tweak: body => body["members"] = Array.Empty<object>());
+            var secret = await f.As(TestData.Pm).Post($"/api/v1/projects/{hidden.Id}/deliverables", new
+            {
+                name = "Confidential package", projectDisciplineId = d.ProjectDiscipline(hidden.Id, "Civil"), deliverableTypeId = await d.DeliverableType(),
+            }).Result.Json(201);
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{hidden.Id}", new { visibility = Visibility.Restricted }, d.Version(hidden.Id))).EnsureSuccessStatusCode();
+            var p = await d.Project();
+            var t = await d.NewTask(p.Id, TestData.Alex); // Alex may edit his own new task but cannot see the restricted project
+            async Task<string> Answer(Guid deliverableId)
+            {
+                var r = await f.As(TestData.Alex).Patch($"/api/v1/tasks/{t.G("id")}", new { deliverableId, rowVersion = await d.TaskVersion(t) });
+                return $"{(int)r.StatusCode} {(await r.Json(400))["errors"]!.ToJsonString()}";
+            }
+            Assert.Equal(await Answer(Guid.NewGuid()), await Answer(secret.G("id"))); // no existence check on another project's records
+        }
+        finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }); }
+    }
+
+    [Fact]
     public async Task Refused_bulk_assignment_cannot_add_a_member_to_a_restricted_project()
     {
         (await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true })).EnsureSuccessStatusCode();

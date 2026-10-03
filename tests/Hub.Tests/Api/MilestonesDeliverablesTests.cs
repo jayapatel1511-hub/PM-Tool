@@ -23,6 +23,18 @@ public sealed class MilestonesDeliverablesTests(HubFactory f)
     }
 
     [Fact]
+    public async Task A_milestone_s_discipline_must_belong_to_its_project()
+    {
+        var p = await d.Project();
+        var other = await d.Project();
+        var m = await Milestone(p.Id, "2027-03-01");
+        var refused = await f.As(TestData.Pm).Patch($"/api/v1/milestones/{m.S("id")}", new { projectDisciplineId = d.ProjectDiscipline(other.Id, "Civil") }, m.I("rowVersion"));
+        Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
+        Assert.Null(await f.DbAsync(db => db.Milestones.Where(x => x.Id == m.G("id")).Select(x => x.ProjectDisciplineId).SingleAsync()));
+        (await f.As(TestData.Pm).Patch($"/api/v1/milestones/{m.S("id")}", new { projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil") }, m.I("rowVersion"))).EnsureSuccessStatusCode();
+    }
+
+    [Fact]
     public async Task Milestone_date_change_keeps_original_logs_notifies_and_cascades() // AC-MS-04, AC-MS-05
     {
         var p = await d.Project();

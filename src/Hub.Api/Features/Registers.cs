@@ -711,7 +711,7 @@ public static class RegisterEndpoints
         if (body.Status == IssueVerificationStatus.Proposed)
         {
             Access.Demand(Permissions.Writable(access.Actor, ctx));
-            Access.Demand(Permissions.IsPM(access.Actor, ctx) || issue.CreatedBy == access.Me.Id
+            Access.Demand(Permissions.IsPM(access.Actor, ctx) || issue.CreatedBy == access.Me.Id && ctx.IsMember // the creator, while on the team
                 ? Allow.Yes : Allow.No("perm.owner"));
             Check.Reason(body.Note);
         }

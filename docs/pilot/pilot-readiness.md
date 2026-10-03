@@ -2,14 +2,22 @@
 
 Checklist for moving from the synthetic review release to the company pilot on homedev. It lists what must be true
 and who proves it; it is not a readiness claim. Run the pilot itself with the [pilot plan][plan]; homedev production
-is covered by [production readiness][prod]. The public review runs executable **211bd88** on `3080`, activated
-2026-10-03 at 14:06:40 UTC; the private synthetic pilot runs **`3bfea2328aae1421300f81979ceebc7d5be6b6b1`** on
-`3081`. PR #30 merged the pilot at `d0c2ab7179eba47014e821f13b5fbd19bcaeb06d`; candidate/main pilot CI passed 858/858.
+is covered by [production readiness][prod]. Both public review (`3080`) and the separate private synthetic pilot (`3081`) now run executable **`ac494a8ba70d50517f540ad7e0acced85d84897e`**. PR #31 merged at `1175598d732ab890b48fef18ada32ae22b86e200`; candidate and main CI passed 858 tests with equal source trees.
 Historical public activation checks, hosted workflow slices and signed-in browser checks are recorded in the
 [completion checkpoint](../reviews/2026-10-03-completion-audit.md); they do not close every packet or company acceptance.
 The private synthetic pilot activation and 30-user/10-project rehearsal are complete; company acceptance remains open.
 
-## Current synthetic pilot checkpoint — 2026-10-03 18:24 UTC
+## Current location release checkpoint — 2026-10-03 19:33 UTC
+
+Both isolated homedev runtimes now use executable `ac494a8ba70d50517f540ad7e0acced85d84897e`: public synthetic review on loopback `3080` at `https://pm.engcalchub.com`, and private synthetic pilot on loopback `3081`. PR #31 merged at `1175598d732ab890b48fef18ada32ae22b86e200`; candidate/main trees equal `3d8ac30d508340c7fea4aae57636f5634321d633`. Candidate CI `37146135878` and merged-main CI `37146643841` passed, including 858 API/rules tests and the three browser suites.
+
+The operator log `data/location-activation-ac494a8b-20261003T191817077097641Z.log` records review private probes 10/10, review public probes 9/9, pilot private probes 10/10, and both final current pointers. A subsequent read-only public HTTPS check confirmed the original review persistence marker and the two original task progress/versions/dates unchanged (`pm-tool/data/hosted-preservation-ac494a8b.json`). The pilot remains 30 active fictional users and 10 Setup projects in 10 actual categories. The six original password verifiers, the 24 newly prepared password verifiers and both runtime configurations are preserved. No review database, credentials or protection keys were copied into the pilot.
+
+Public signed-in browser acceptance on this executable created only the labelled synthetic issue `SYNTH-GATES-1003-I01`. Building (site area, building, level, room and asset), Alignment (12.25–18.75 m), Coordinate (fictional decimal X/Y/Z, EPSG:26920, m) and SiteArea saved and survived full reload. A fresh HTTPS API session then checked the exact persisted values and null inapplicable fields; CSV and Excel each retained all four locations in one complete cell. Credential-free evidence is `pm-tool/data/hosted-location-ac494a8b.json`. The browser download-event capture timed out; these export PASS results cover actual HTTPS export responses, not a confirmed native browser download.
+
+Both system-level backup timers are active, due at 22:00 UTC (review) and 22:15 UTC (pilot) on October 3; their `LastTriggerUSec` values are still empty. First automatic execution remains **UNPROVEN**. This client form release did not repeat the 18:24 native pilot PITR drill or the earlier review workflow slices. Full packet acceptance, native print, off-host WAL replay/full application DR, accepted RPO/RTO, real company acceptance and production deployment remain **UNPROVEN**. No Azure deployment or new paid service was introduced.
+
+## Historical synthetic pilot checkpoint — 2026-10-03 18:24 UTC
 
 The private synthetic pilot uses release `3bfea2328aae1421300f81979ceebc7d5be6b6b1`. PR #30 merged at `d0c2ab7179eba47014e821f13b5fbd19bcaeb06d`, with equal candidate and merged trees. Candidate CI `37139948986` and merged-main CI `37140933823` passed 858 tests. The operator log `data/synthetic-pilot-fixture-30-20261003T181646351856362.log` records 30 fictional users, 10 Setup projects, all 30 individual sign-ins and project-access checks, existing six passwords preserved, local logical restore of 10 projects, and paused native PITR replay with `before=1`, `after=0`, passed at 18:24 UTC.
 
@@ -35,7 +43,7 @@ something outside the repository, cited) · OPEN (known gap in the repository, c
 | E1 | AC-VIS-01 to AC-VIS-08 pass on the exact pilot commit (FR-016, [§35.1][spec10]) | agent | UNPROVEN. Evidence in the `specs/022`–`024` verification records predates packets 025–033 |
 | E2 | Threat-model walkthrough held, with the homedev boundary added (TLS ends at Cloudflare's edge, local-password cookie, single host); findings resolved or accepted (FR-011) | Jay + company IT | UNPROVEN. The walkthrough record is empty ([threat model][threats]) |
 | E3 | Packets 025–033 enabled only after their own acceptance ([pilot plan][plan]) | agent | UNPROVEN full acceptance for 025–033. Implementation and combined checks pass; current hosted/browser/company limits are recorded in the combined checkpoint and packet verification records |
-| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: historical `211bd88` activation/private probes 10/10, public probes 9/9, HTTP 307/HTTPS, preserved original records, signed-in 1440/390/320 px date controls and populated workflow slices passed. Current pilot rehearsal is separately recorded above; native print, remaining full packet acceptance and automatic backup remain unproven |
+| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: current `ac494a8b` activation/private probes 10/10, public probes 9/9, plus the live location save/reload and API export checks above. Historical `211bd88` checks include HTTP 307/HTTPS, preserved original records, signed-in 1440/390/320 px date controls and populated workflow slices. Current pilot rehearsal is separately recorded above; native print, remaining full packet acceptance and automatic backup remain unproven |
 | E5 | 50 participants named (Q16); the proposed 3 PMs and 6 projects confirmed; sponsor named | Jay | UNPROVEN for a company pilot. Current 30-person / 10-project result is fictional rehearsal data |
 
 ## 2. Company approvals
@@ -59,7 +67,7 @@ restore a `hub-review-*` dump into it.
 
 | # | Part | Review value | Pilot requirement | Owner | Status |
 |---|---|---|---|---|---|
-| H1 | Compose project | `name: pm-tool-review`, image `pm-tool-review:<sha>` | own file and project, for example `pm-tool-pilot` | agent | PASS for the private synthetic pilot: separate pilot Compose project/runtime is active on `3081` with source `3bfea232`; public review remains on `3080` |
+| H1 | Compose project | `name: pm-tool-review`, image `pm-tool-review:<sha>` | own file and project, for example `pm-tool-pilot` | agent | PASS for the private synthetic pilot: separate pilot Compose project/runtime is active on `3081` with source `ac494a8b`; public review independently uses the same executable on `3080` |
 | H2 | Database | volume `pm-tool-review-db`; database and user `hub_review` | new volume, database, user and password | agent | PASS for bounded activation: the private pilot uses its own database/runtime and credentials; no review database, credentials or key ring were copied |
 | H3 | Seed | `Seed__ReviewDemo: "true"` | `"false"`. After first start, `SELECT count(*) FROM hub.app_user WHERE email LIKE '%@hub.test'` and `SELECT count(*) FROM hub.project WHERE external_source = 'ReviewDemo'` both return 0 | agent | PASS for activation gate: both review-seed counts are 0:0; current fixture data is fictional pilot data |
 | H4 | Environment | `ASPNETCORE_ENVIRONMENT: Staging` | stays Staging: local-password sign-in is refused in Production ([Auth.cs][auth] line 62) | agent | PASS for the deployed private pilot: Staging local-password runtime, 29 migrations and individual sign-in checks passed |

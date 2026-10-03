@@ -235,10 +235,19 @@ public static class ReadinessEndpoints
             e.AssessmentId == assessment.Id).OrderByDescending(e => e.CreatedAt).ThenByDescending(e => e.Id).FirstOrDefaultAsync();
         ReadinessPermission? permission = null;
         if (latestException is not null)
+        {
+            var exceptionScope = await db.DesignBasisVersions.AsNoTracking().Where(v => v.Id == latestException.BasisVersionId)
+                .Select(v => v.Scope).SingleOrDefaultAsync();
+            var hasCurrentOwnerDisposition = exceptionBasisVersionId == latestException.BasisVersionId && exceptionScope is not null &&
+                await db.BasisAssumptionDispositions.AsNoTracking().AnyAsync(d => d.ProjectId == project.Id &&
+                    d.VersionId == latestException.BasisVersionId && d.OwnerId == target.OwnerId &&
+                    d.ApprovedBy != target.OwnerId && d.ExpiresOn >= latestException.ExpiresOn &&
+                    d.Scope.ToLower() == exceptionScope.ToLower());
             permission = new ReadinessPermission(true, latestException.ExpiresOn,
-                exceptionBasisVersionId == latestException.BasisVersionId,
+                hasCurrentOwnerDisposition,
                 latestException.VerifierId != target.OwnerId && await Coordination.People(db, project)
                     .AnyAsync(u => u.Id == latestException.VerifierId), latestException.LimitedWork, latestException.Risk);
+        }
         // An open or proposed-for-removal constraint is a known failure; it never hides an unknown check (§10.8 precedence)
         // and, being a second failure, leaves no room for Proceed under Assumption.
         var result = ReadinessRules.Evaluate(checks.Values.Select(c => new ReadinessCheck(c.Code, c.Applies, c.Satisfied)), permission, today,

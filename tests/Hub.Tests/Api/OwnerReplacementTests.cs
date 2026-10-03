@@ -29,6 +29,7 @@ public sealed class OwnerReplacementTests(HubFactory f)
         var entryId = Guid.CreateVersion7(); var oldVersionId = Guid.CreateVersion7(); var newVersionId = Guid.CreateVersion7();
         var impactId = Guid.CreateVersion7(); var settledImpactId = Guid.CreateVersion7(); var useId = Guid.CreateVersion7(); var settledUseId = Guid.CreateVersion7(); var settledTargetId = Guid.CreateVersion7(); var constraintId = Guid.CreateVersion7(); var promiseId = Guid.CreateVersion7();
         var snapshotId = Guid.CreateVersion7(); var committedPromiseId = Guid.CreateVersion7();
+        var assumptionEntryId = Guid.CreateVersion7(); var assumptionVersionId = Guid.CreateVersion7(); var assumptionUseId = Guid.CreateVersion7();
         await f.DbAsync(async db =>
         {
             db.DesignBasisEntries.Add(new DesignBasisEntry { Id = entryId, ProjectId = project.Id, Key = "BAS-001", Seq = 1,
@@ -39,10 +40,21 @@ public sealed class OwnerReplacementTests(HubFactory f)
                 new DesignBasisVersion { Id = newVersionId, ProjectId = project.Id, EntryId = entryId, Number = 2, SupersedesVersionId = oldVersionId,
                     Status = BasisStatus.Confirmed, Scope = "Scope", Statement = "Current confirmed basis", SourceSystem = "Manual", DeclaredRevision = "B", SourceUrl = "https://example.test/b",
                     ConfirmedBy = pm, ConfirmedAt = f.Clock.Now, ConfirmationRationale = "Confirmed current basis" });
+            db.DesignBasisEntries.Add(new DesignBasisEntry { Id = assumptionEntryId, ProjectId = project.Id, Key = "BAS-002", Seq = 2,
+                Kind = BasisKind.Assumption, Title = "Owner replacement assumption", OwnerId = alex, ProjectDisciplineId = civil });
+            db.DesignBasisVersions.Add(new DesignBasisVersion { Id = assumptionVersionId, ProjectId = project.Id, EntryId = assumptionEntryId,
+                Number = 1, Status = BasisStatus.Proposed, Scope = "Assumption scope", Statement = "Assumption for owner recovery" });
             db.BasisUses.Add(new BasisUse { Id = settledUseId, ProjectId = project.Id, VersionId = oldVersionId, TargetType = "Deliverable", TargetId = settledTargetId,
                 OwnerId = alex, IntendedUse = "Historical settled basis use", CreatedAt = f.Clock.Now.AddDays(-1) });
             db.BasisUses.Add(new BasisUse { Id = useId, ProjectId = project.Id, VersionId = oldVersionId, TargetType = "Task", TargetId = taskId,
                 OwnerId = alex, IntendedUse = "Owner replacement recovery", CreatedAt = f.Clock.Now });
+            db.BasisUses.Add(new BasisUse { Id = assumptionUseId, ProjectId = project.Id, VersionId = assumptionVersionId, TargetType = "Task", TargetId = taskId,
+                OwnerId = alex, IntendedUse = "Owner replacement exception", CreatedAt = f.Clock.Now });
+            db.BasisAssumptionDispositions.Add(new BasisAssumptionDisposition { ProjectId = project.Id, VersionId = assumptionVersionId,
+                Scope = "Assumption scope", OwnerId = alex, ApprovedBy = pm, ExpiresOn = new DateOnly(2026, 10, 20), Reason = "Original owner approval" });
+            db.ReadinessExceptions.Add(new ReadinessException { ProjectId = project.Id, AssessmentId = assessment.G("id"), BasisVersionId = assumptionVersionId,
+                ApprovedBy = pm, VerifierId = pm, LimitedWork = "Original owner exception scope", Risk = "Original owner exception risk",
+                ExpiresOn = new DateOnly(2026, 10, 15), CreatedAt = f.Clock.Now });
             db.BasisImpactAssessments.Add(new BasisImpactAssessment { Id = impactId, ProjectId = project.Id, BasisUseId = useId,
                 OldVersionId = oldVersionId, NewVersionId = newVersionId, OwnerId = alex, Status = AssessmentStatus.Pending });
             db.BasisImpactAssessments.Add(new BasisImpactAssessment { Id = settledImpactId, ProjectId = project.Id, BasisUseId = settledUseId,
@@ -103,6 +115,17 @@ public sealed class OwnerReplacementTests(HubFactory f)
             ConstraintState.ResolutionProposed, "Constraint work completed", "https://example.test/constraint-resolved"));
         await Post(TestData.Omar, constraintPath, new ReadinessEndpoints.ConstraintMoveBody(Guid.NewGuid(), Version<WorkConstraint>(constraintId),
             ConstraintState.VerifiedRemoved, "New owner verified the constraint removal", null));
+
+        var reassessed = await (await f.As(TestData.Omar).GetAsync(readinessPath)).Json();
+        Assert.Equal(ReadinessState.NeedsAssessment, reassessed["assessment"]!.S("state"));
+        Assert.NotEqual(ReadinessState.ProceedUnderAssumption, reassessed["assessment"]!.S("state"));
+        var preservedException = f.Db(db => new
+        {
+            Exception = db.ReadinessExceptions.Single(e => e.AssessmentId == assessment.G("id")),
+            Disposition = db.BasisAssumptionDispositions.Single(d => d.VersionId == assumptionVersionId)
+        });
+        Assert.Equal(assumptionVersionId, preservedException.Exception.BasisVersionId);
+        Assert.Equal(alex, preservedException.Disposition.OwnerId);
 
         var promisePath = $"/api/v1/projects/{project.Id}/weekly-commitments/{promiseId}/transition";
         await Post(TestData.Omar, promisePath, new WeeklyCommitmentsEndpoints.MoveBody(Guid.NewGuid(), Version<OutputCommitment>(promiseId),

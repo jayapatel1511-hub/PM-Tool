@@ -61,7 +61,7 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
     q.refetch(); constraints.refetch(); assumptions.refetch(); prerequisites.refetch(); done() }
   const canCreate = options.canWrite && work?.ownerId === options.actorId
   const canAssess = options.canWrite && work && options.manageDisciplineIds.includes(work.projectDisciplineId)
-  if (creating && work) return <CreateAssessment path={path} rowVersion={work.rowVersion} recovering={!!q.data} close={() => setCreating(false)} done={changed} />
+  if (creating && work) return <CreateAssessment path={path} rowVersion={work.rowVersion} assessmentVersion={q.data?.assessment.rowVersion} close={() => setCreating(false)} done={changed} />
   if (editing && q.data) return <Applicability path={`${path}/checks/${encodeURIComponent(editing.code)}/applicability`} check={editing}
     assessmentVersion={q.data.assessment.rowVersion} close={() => setEditing(null)} done={changed} />
   if (raising && work) return <RaiseConstraint path={`${path}/constraints`} projectId={projectId} work={work} options={options} close={() => setRaising(false)} done={changed} />
@@ -82,7 +82,7 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
       <StatusPill status={q.data.assessment.state} />
       <p>{t('readiness.performer')}: {personName(options, q.data.assessment.ownerId)}</p>
       <p>{t('readiness.output')}: {q.data.assessment.intendedOutput}</p><p>{t('readiness.criteria')}: {q.data.assessment.completionCriteria}</p>
-      {canCreate && q.data.assessment.ownerId !== work.ownerId && <Button size="sm" variant="outline" onClick={() => setCreating(true)}>{t('readiness.createAssessment')}</Button>}
+      {canCreate && q.data.assessment.ownerId !== work.ownerId && <Button size="sm" variant="outline" onClick={() => setCreating(true)}>{t('readiness.recoverAssessment')}</Button>}
       <p className="text-xs text-muted-foreground">{t('readiness.evaluated')}: {fmtTime(q.data.assessment.evaluatedAt)}</p>
       {q.data.unknown.length > 0 && <p>{t('readiness.unknown')}: {q.data.unknown.map(tv).join(', ')}</p>}
       {q.data.blocked.length > 0 && <p>{t('readiness.blocked')}: {q.data.blocked.map(tv).join(', ')}</p>}
@@ -211,13 +211,13 @@ function MoveConstraint({ path, row, state, close, done }: { path: string; row: 
   </CommandForm>
 }
 
-function CreateAssessment({ path, rowVersion, recovering, close, done }: { path: string; rowVersion: number; recovering: boolean; close: () => void; done: () => void }) {
+function CreateAssessment({ path, rowVersion, assessmentVersion, close, done }: { path: string; rowVersion: number; assessmentVersion?: number; close: () => void; done: () => void }) {
   const [output, setOutput] = useState(''), [criteria, setCriteria] = useState(''), [reason, setReason] = useState('')
-  return <CommandForm path={path} title={t('readiness.createAssessment')} hint={t('readiness.createHint')} onClose={close} onDone={done}
-    payload={() => ({ targetRowVersion: rowVersion, intendedOutput: output, completionCriteria: criteria, reason: reason || null })}>
+  return <CommandForm path={path} title={t(assessmentVersion != null ? 'readiness.recoverAssessment' : 'readiness.createAssessment')} hint={t(assessmentVersion != null ? 'readiness.recoverHint' : 'readiness.createHint')} onClose={close} onDone={done}
+    payload={() => ({ targetRowVersion: rowVersion, intendedOutput: output, completionCriteria: criteria, reason: reason || null, assessmentRowVersion: assessmentVersion })}>
     <Field label={t('readiness.output')} htmlFor="assessment-output"><Textarea id="assessment-output" required maxLength={2000} value={output} onChange={e => setOutput(e.target.value)} /></Field>
     <Field label={t('readiness.criteria')} htmlFor="assessment-criteria"><Textarea id="assessment-criteria" required maxLength={2000} value={criteria} onChange={e => setCriteria(e.target.value)} /></Field>
-    {recovering && <Field label={t('basis.reason')} htmlFor="assessment-recovery-reason"><Textarea id="assessment-recovery-reason" required minLength={5} maxLength={4000} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
+    {assessmentVersion != null && <Field label={t('basis.reason')} htmlFor="assessment-recovery-reason"><Textarea id="assessment-recovery-reason" required minLength={5} maxLength={4000} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
   </CommandForm>
 }
 

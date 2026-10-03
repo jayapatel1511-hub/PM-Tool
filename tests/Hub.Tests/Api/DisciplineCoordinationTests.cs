@@ -80,6 +80,11 @@ public sealed class DisciplineCoordinationTests(HubFactory f)
         Assert.Equal((3, 2), (pageThree.I("usesPage"), pageThree.I("usesPageSize")));
         var lastUse = Assert.Single(pageThree["uses"]!.AsArray())!;
         Assert.Equal("A", lastUse.S("revision"));
+        Assert.Equal("https://example.test/survey-A.pdf", lastUse.S("sourceUrl"));
         Assert.False(string.IsNullOrWhiteSpace(lastUse.S("targetKey")));
+        Assert.Equal(1, pageThree.I("changesPage"));
+        Assert.Single(pageThree["changes"]!.AsArray());
+        Assert.Equal(5, pageThree["changeTargets"]!.AsArray().Count);
+
     }
 }

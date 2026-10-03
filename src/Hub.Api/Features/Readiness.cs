@@ -8,7 +8,7 @@ namespace Hub.Api.Features;
 
 public static class ReadinessEndpoints
 {
-    public sealed record CreateBody(Guid RequestId, int TargetRowVersion, string IntendedOutput, string CompletionCriteria, string? Reason = null);
+    public sealed record CreateBody(Guid RequestId, int TargetRowVersion, string IntendedOutput, string CompletionCriteria, string? Reason = null, int? AssessmentRowVersion = null);
     public sealed record ApplicabilityBody(Guid RequestId, int AssessmentRowVersion, int CheckRowVersion,
         bool Applies, string Reason, string? EvidenceUrl);
     public sealed record ConstraintBody(Guid RequestId, int TargetRowVersion, string Category, string Description,
@@ -624,11 +624,9 @@ public static class ReadinessEndpoints
                 if (existing is not null)
                 {
                     if (existing.OwnerId == target.OwnerId)
-                    {
-                        Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, target.OwnerId));
                         throw ApiException.Conflict("readiness_exists", "error.duplicate");
-                    }
-                    Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, target.OwnerId));
+                    Check.That(body.AssessmentRowVersion is not null, "assessmentRowVersion", "error.required");
+                    Coordination.Version(existing, body.AssessmentRowVersion!.Value);
                     var reason = Check.Reason(body.Reason);
                     await RecoverOwnerOwnedState(db, project.Id, target, existing, reason, clock.GetUtcNow());
                     existing.IntendedOutput = Check.Required(body.IntendedOutput, "intendedOutput", 2000);
@@ -671,6 +669,8 @@ public static class ReadinessEndpoints
                 var settings = await settingsStore.Get(db);
                 await EvaluateCurrent(db, project, target.Type, target.Id, assessment, checks,
                     clock.Today(settings), clock.GetUtcNow(), settingsStore);
+                // Every child applicability write advances the aggregate version, even if derived state is unchanged.
+                db.Entry(assessment).Property(a => a.EvaluatedAt).IsModified = true;
                 db.Audit.Note(check, reason: check.Reason);
                 db.Audit.Note(assessment, reason: check.Reason);
                 return check;

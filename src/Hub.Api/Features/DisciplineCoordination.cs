@@ -196,14 +196,16 @@ public static class DisciplineCoordinationEndpoints
                     : db.Deliverables.Where(d => d.Id == u.TargetId).Select(d => d.Key).FirstOrDefault(),
                 TargetName = u.TargetType == ItemType.Task ? db.Tasks.Where(t => t.Id == u.TargetId).Select(t => t.Name).FirstOrDefault()
                     : db.Deliverables.Where(d => d.Id == u.TargetId).Select(d => d.Name).FirstOrDefault(),
+                SourceUrl = db.SourceRevisions.Where(r => r.Id == u.SourceRevisionId).Select(r => r.Url).FirstOrDefault(),
                 SourceKey = db.SourceRevisions.Where(r => r.Id == u.SourceRevisionId).Select(r => r.SourceKey).FirstOrDefault(),
                 Revision = db.SourceRevisions.Where(r => r.Id == u.SourceRevisionId).Select(r => r.Revision).FirstOrDefault() })
             .ToListAsync();
 
         var paged = page.HasValue || pageSize.HasValue;
         var (pg, size) = Http.Paging(page, pageSize);
-        static IReadOnlyList<T> PageRows<T>(IReadOnlyList<T> rows, bool enabled, int page, int size) =>
-            enabled ? rows.Skip((page - 1) * size).Take(size).ToArray() : rows;
+        int PageNumber(int count) => paged ? Math.Min(pg, Math.Max(1, (count + size - 1) / size)) : 1;
+        IReadOnlyList<T> PageRows<T>(IReadOnlyList<T> rows) =>
+            paged ? rows.Skip((PageNumber(rows.Count) - 1) * size).Take(size).ToArray() : rows;
 
         // FR-DCV-01/03 context comes from the submission and readiness registers. A pending
         // check is an actionable failing check for an unissued package; no readiness is inferred.
@@ -249,7 +251,10 @@ public static class DisciplineCoordinationEndpoints
         var changeTargets = assessmentTargets.Where(a => a.Available).ToList();
         var unavailableChangeTargets = assessmentTargets.Where(a => !a.Available)
             .GroupBy(a => a.ChangeNoticeId).Select(g => new { ChangeNoticeId = g.Key, Count = g.Count() }).ToList();
+        var visibleChanges = PageRows(changeRows).Select(c => c.Id).ToHashSet();
+        var visibleHandoffs = PageRows(blockerGroups).Select(g => g.HandoffId).ToHashSet();
         var linkedActions = new List<object>();
+        var linkedActionsTotal = 0;
         var blockerIds = blockerGroups.Select(g => g.HandoffId).ToArray();
         if (blockerIds.Length > 0 || changeIds.Length > 0)
         {
@@ -265,56 +270,66 @@ public static class DisciplineCoordinationEndpoints
                 .Select(a => new { a.Id, a.Key, a.Text, a.Status, a.DueDate }).ToListAsync();
             foreach (var link in links.DistinctBy(l => (l.SourceId, l.TargetType, l.TargetId)))
                 if (actions.FirstOrDefault(a => a.Id == link.SourceId) is { } action)
-                    linkedActions.Add(new { action.Id, action.Key, action.Text, action.Status, action.DueDate,
-                        SourceType = link.TargetType, SourceId = link.TargetId });
+                {
+                    linkedActionsTotal++;
+                    if (!paged || link.TargetType == ItemType.ChangeNotice && visibleChanges.Contains(link.TargetId) ||
+                        link.TargetType == ItemType.Handoff && visibleHandoffs.Contains(link.TargetId))
+                        linkedActions.Add(new { action.Id, action.Key, action.Text, action.Status, action.DueDate,
+                            SourceType = link.TargetType, SourceId = link.TargetId });
+                }
         }
 
         return new
         {
             EvaluatedAt = evaluatedAt,
-            Handoffs = PageRows(handoffRows, paged, pg, size),
-            Outgoing = PageRows(outgoing, paged, pg, size),
-            Incoming = PageRows(incoming, paged, pg, size),
+            Handoffs = PageRows(handoffRows),
+            Outgoing = PageRows(outgoing),
+            Incoming = PageRows(incoming),
+            OutgoingPage = PageNumber(outgoing.Count),
+            IncomingPage = PageNumber(incoming.Count),
             OutgoingTotal = outgoing.Count,
             IncomingTotal = incoming.Count,
-            HandoffPage = paged ? pg : 1,
+            HandoffPage = PageNumber(handoffRows.Count),
             HandoffPageSize = paged ? size : handoffRows.Count,
-            ChangeTargets = PageRows(changeTargets, paged, pg, size),
-            UnavailableChangeTargets = PageRows(unavailableChangeTargets, paged, pg, size),
+            ChangeTargets = changeTargets.Where(c => !paged || visibleChanges.Contains(c.ChangeNoticeId)).ToArray(),
+            UnavailableChangeTargets = unavailableChangeTargets.Where(c => !paged || visibleChanges.Contains(c.ChangeNoticeId)).ToArray(),
             ChangeTargetsTotal = changeTargets.Count,
             UnavailableChangeTargetsTotal = unavailableChangeTargets.Count,
-            Reviews = PageRows(reviewRows, paged, pg, size),
-            ReviewsPage = paged ? pg : 1,
+            Reviews = PageRows(reviewRows),
+            ReviewsPage = PageNumber(reviewRows.Count),
             ReviewsPageSize = paged ? size : reviewRows.Count,
-            Uses = PageRows(useRows, paged, pg, size),
+            Uses = PageRows(useRows),
             UsesTotal = useRows.Count,
-            UsesPage = paged ? pg : 1,
+            UsesPage = PageNumber(useRows.Count),
             UsesPageSize = paged ? size : useRows.Count,
-            LinkedIssues = PageRows(issueRows, paged, pg, size),
+            LinkedIssues = PageRows(issueRows),
             LinkedIssuesTotal = issueRows.Count,
-            LinkedIssuesPage = paged ? pg : 1,
+            LinkedIssuesPage = PageNumber(issueRows.Count),
             LinkedIssuesPageSize = paged ? size : issueRows.Count,
             HandoffsTotal = handoffRows.Count,
-            Changes = PageRows(changeRows, paged, pg, size),
+            Changes = PageRows(changeRows),
             ChangesTotal = changeRows.Count,
-            ChangesPage = paged ? pg : 1,
+            ChangesPage = PageNumber(changeRows.Count),
             ChangesPageSize = paged ? size : changeRows.Count,
             ReviewsTotal = reviewRows.Count,
-            BlockerGroups = PageRows(blockerGroups, paged, pg, size),
+            BlockerGroups = PageRows(blockerGroups),
             BlockerGroupsTotal = blockerGroups.Count,
-            Startability = PageRows(startability.Rows, paged, pg, size),
+            Startability = PageRows(startability.Rows),
             StartabilityTotal = startability.Rows.Count,
-            StartabilityPage = paged ? pg : 1,
+            StartabilityPage = PageNumber(startability.Rows.Count),
             StartabilityPageSize = paged ? size : startability.Rows.Count,
             StartabilityFrom = startability.From,
             StartabilityTo = startability.To,
             StartabilityReadyTotal = startability.Rows.Count(r => r.State == ReadinessState.Ready),
-            LinkedActions = PageRows(linkedActions, paged, pg, size),
-            LinkedActionsTotal = linkedActions.Count,
-            UpcomingSubmissions = PageRows(submissionRows, paged, pg, size),
+            LinkedActions = linkedActions,
+            LinkedActionsTotal = linkedActionsTotal,
+            UpcomingSubmissions = PageRows(submissionRows),
             UpcomingSubmissionsTotal = submissionRows.Count,
-            StaffingConflicts = PageRows(staffingRows, paged, pg, size),
+            UpcomingSubmissionsPage = PageNumber(submissionRows.Count),
+            StaffingConflicts = PageRows(staffingRows),
             StaffingConflictsTotal = staffingRows.Count,
+            StaffingConflictsPage = PageNumber(staffingRows.Count),
+            BlockerGroupsPage = PageNumber(blockerGroups.Count),
             Page = paged ? pg : 1,
             PageSize = paged ? size : 0,
         };

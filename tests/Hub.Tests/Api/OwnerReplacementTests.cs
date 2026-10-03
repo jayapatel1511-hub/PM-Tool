@@ -78,8 +78,12 @@ public sealed class OwnerReplacementTests(HubFactory f)
         });
 
         await (await f.As(TestData.Pm).Patch($"/api/v1/tasks/{taskId}", new { assigneeId = omar, reason = "Owner reassigned for recovery" }, Version<WorkTask>(taskId))).Json();
-        var recovered = await Post(TestData.Omar, readinessPath,
-            new ReadinessEndpoints.CreateBody(Guid.NewGuid(), Version<WorkTask>(taskId), "Replacement output", "Replacement criteria", "New owner reconfirmed the output after reassignment"));
+        var recovery = new ReadinessEndpoints.CreateBody(Guid.NewGuid(), Version<WorkTask>(taskId), "Replacement output", "Replacement criteria",
+            "New owner reconfirmed the output after reassignment", Version<ReadinessAssessment>(assessment.G("id")));
+        await Post(TestData.Rita, readinessPath, recovery, 403);
+        await Post(TestData.Omar, readinessPath, recovery with { RequestId = Guid.NewGuid(), AssessmentRowVersion = recovery.AssessmentRowVersion - 1 }, 409);
+        var recovered = await Post(TestData.Omar, readinessPath, recovery);
+        Assert.Equal(recovered.G("id"), (await Post(TestData.Omar, readinessPath, recovery)).G("id"));
         Assert.Equal(assessment.G("id"), recovered.G("id"));
 
         var state = f.Db(db => new

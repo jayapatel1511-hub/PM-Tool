@@ -61,3 +61,27 @@ try:
 finally:
     os.close(folder)
 BACKUP_PY
+
+# The same daily timer verifies a physical base as well as the portable logical dump.
+[[ "$(/usr/bin/docker exec "$container" psql -U hub_pilot -d hub_pilot -Atqc 'SHOW archive_mode' </dev/null)" == on ]] || {
+  echo 'Physical backup requires pilot WAL archiving; logical dump is retained.' >&2
+  exit 1
+}
+for mount in 'pm-tool-pilot-wal-archive:/var/lib/postgresql/wal-archive' 'pm-tool-pilot-base-backups:/var/lib/postgresql/base-backups'; do
+  name="${mount%%:*}"; destination="${mount#*:}"
+  actual=$(/usr/bin/docker inspect --format "{{ range .Mounts }}{{ if eq .Destination \"$destination\" }}{{ .Name }}{{ end }}{{ end }}" "$container")
+  [[ "$actual" == "$name" ]] || { echo 'Unexpected physical backup volume.' >&2; exit 1; }
+done
+backup_id=$(/usr/bin/python3 -c 'import datetime; print(datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ"))')
+/usr/bin/docker exec -i --user postgres "$container" sh -s -- "$backup_id" <<'BASE_BACKUP_SH'
+set -eu
+umask 077
+target="/var/lib/postgresql/base-backups/base-$1"
+test ! -e "$target"
+mkdir -m 700 "$target.partial"
+pg_basebackup -U hub_pilot -D "$target.partial" -Fp -X stream --checkpoint=fast
+pg_verifybackup "$target.partial"
+mv "$target.partial" "$target"
+echo "Verified physical pilot base: $1"
+BASE_BACKUP_SH
+# ponytail: retain all bases/WAL until off-host retrieval is proved; then add verified-chain retention.

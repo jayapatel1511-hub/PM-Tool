@@ -130,3 +130,28 @@ copy schedule or the 15-minute recovery target. Those remain explicit production
 | Production | Prepared only | Company approval, recovery targets, hosted restricted database role, operations and cutover remain open |
 
 Homedev and individual passwords remain the chosen hosting/authentication direction. Azure and new paid services are not prerequisites. Never populate company pilot or production by restoring the review database.
+
+## Pilot operations and recovery checkpoint — 2026-10-03 17:15 UTC
+
+Pilot migration/runtime separation merged through PR #27 (`9437f5e`); candidate `17d1b48` passed all CI gates.
+Homedev bootstrap stopped before migration because Compose 5.5.1 rejects `run --no-build`. PR #28 replaced it
+with `--pull never`; candidate `a532f8e` and merged-main CI passed. The retry then stopped at the preserved-database
+backup: PostgreSQL treats a trailing `-` as a filename. PR #29 corrected both pilot stdin calls and added
+`--exit-on-error`; candidate `90ad077` passed 858/858, coverage 96.7% rules branches/94.2% service lines, browser
+regressions and all trace gates, then merged as `0fa478c`. Real local maintained logical backup/restore passed.
+Public review stays on `211bd88`; neither failed pilot attempt establishes deployment or acceptance.
+
+Jay requested fictional pilot people/projects. The fixture runner passed real local API checks for six synthetic
+participants, one Setup project, one milestone, two draft deliverables and three Not Started tasks. The unknown
+estimate remained null. Independent review corrected archived-project refusal and Admin-ID stdin isolation.
+Separate private operator helpers are staged on homedev; actual provisioning and five new individual sign-ins
+remain pending. No existing review people/projects/verifiers are copied to the pilot.
+
+Pilot-only PITR preparation is a separate uncommitted patch at this checkpoint: durable archive helper, five-minute
+WAL timeout, separate base/WAL volumes, verified physical backup on the existing daily service, and bounded isolated
+replay drill. Independent review caught timestamp, history-file, durability, shell and stdin defects. Actual replay
+then caught a Mac bind mount resolving to a directory and the image lacking `su-exec`; the mount now fails closed
+and native Docker user selection is used. Final local PostgreSQL 17 rehearsal PASS in 7.3 seconds: verified base,
+replay paused at the UTC target, post-base before-marker present/after-marker absent, daily physical command,
+archive history/duplicates/collision refusal. All 19 existing helper checks pass. Final independent source re-review found no actionable findings. Homedev PITR, off-host schedule,
+retrieval and full RPO/RTO remain unproven; no acceptance criterion or company decision is fabricated.

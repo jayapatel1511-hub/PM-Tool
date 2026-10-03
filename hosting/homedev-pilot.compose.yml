@@ -22,9 +22,37 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+    command:
+      - postgres
+      - -c
+      - wal_level=replica
+      - -c
+      - archive_mode=on
+      - -c
+      - archive_timeout=5min
+      - -c
+      - archive_command=test -f /usr/local/bin/pm-tool-pilot-wal-archive.sh && /bin/sh /usr/local/bin/pm-tool-pilot-wal-archive.sh "%p" "%f"
     volumes:
       - pilot-db:/var/lib/postgresql/data
+      - pilot-wal-archive:/var/lib/postgresql/wal-archive
+      - pilot-base-backups:/var/lib/postgresql/base-backups
+      - type: bind
+        source: ./pm-tool-pilot-wal-archive.sh
+        target: /usr/local/bin/pm-tool-pilot-wal-archive.sh
+        read_only: true
+        bind: { create_host_path: false }
+    depends_on:
+      permissions: { condition: service_completed_successfully }
     networks: [pilot]
+
+  permissions:
+    image: postgres:17-alpine
+    restart: "no"
+    user: "0:0"
+    command: ["sh", "-ceu", "chown postgres:postgres /var/lib/postgresql/wal-archive /var/lib/postgresql/base-backups && chmod 700 /var/lib/postgresql/wal-archive /var/lib/postgresql/base-backups"]
+    volumes:
+      - pilot-wal-archive:/var/lib/postgresql/wal-archive
+      - pilot-base-backups:/var/lib/postgresql/base-backups
 
   api:
     image: pm-tool-pilot:${RELEASE_SHA:?Set the reviewed release SHA}
@@ -110,6 +138,10 @@ services:
 volumes:
   pilot-db:
     name: pm-tool-pilot-db
+  pilot-wal-archive:
+    name: pm-tool-pilot-wal-archive
+  pilot-base-backups:
+    name: pm-tool-pilot-base-backups
 
 networks:
   pilot:

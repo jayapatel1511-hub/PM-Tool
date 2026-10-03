@@ -18,6 +18,33 @@ RTO, subject to measured recovery and company acceptance; the original §22 15-m
 dumps and needs a recorded exception or an implemented recovery change before production acceptance. The proposed retention is 14 days; current helpers preserve dumps without pruning. A manual encrypted review retrieval and isolated restore passed; the first automatic review timer
 trigger (2026-10-03 22:00 UTC), automatic off-host copying and company recovery remain UNPROVEN.
 
+## Pilot PITR preparation (local proof; homedev activation pending)
+
+The pilot Compose enables replica WAL, archiving and a five-minute archive timeout. Its WAL and physical-base
+volumes are separate from the source database and every review volume. The archive helper publishes without
+replacement, checks repeated files and syncs the file and directory before reporting success. A missing helper
+bind mount fails closed. The daily pilot backup service retains its logical dump and also verifies a physical base.
+
+From the **activated PITR-capable pilot release**, with interactive sudo authenticated, run
+`scripts/pilot-base-backup.sh` for an additional physical base or `scripts/pilot-pitr-drill.sh` for a bounded drill.
+The drill creates its own temporary source database, takes a verified base, commits markers on either side of a
+UTC target, and replays in a network-isolated PostgreSQL container. Only its own base/WAL volumes are mounted,
+read-only; the original database volume is absent. The container runs as postgres and must pause at the target
+with `before=1 after=0`. Cleanup removes only its labelled container and temporary source database; bases/WAL are
+retained. These are private physical copies of the **entire pilot cluster**; handle them as sensitive recovery data.
+
+Local verification: `python3 tools/test_pilot_pitr.py --docker` passed against disposable PostgreSQL 17 on
+2026-10-03: actual logical backup/restore, physical base verification, post-base WAL replay, daily physical command,
+archive history/duplicate/collision checks. The final fixture drill took 7.3 seconds; this does not establish full
+host-loss recovery time. The command uses only its own disposable resources and requires an already available
+`postgres:17-alpine` image. Without `--docker`, it checks both outer and embedded shell syntax.
+
+**Still unproven:** homedev WAL configuration/archiver lag, automatic physical backup, encrypted off-host WAL/base
+transfer within the 15-minute target, off-host retrieval/replay, full application recovery and quarterly repetition.
+A five-minute local archive timeout does not prove protection against loss of the laptop. No base/WAL pruning is
+implemented until a retained, retrieved recovery chain is demonstrated; monitor space and agree retention before
+company data. The 24-hour logical-dump proposal remains unaccepted.
+
 ## Unused Azure procedure
 
 The procedure below records the earlier Azure design. It does not describe the active homedev environment or prove

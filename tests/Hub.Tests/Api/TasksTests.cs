@@ -34,6 +34,30 @@ public sealed class TasksTests(HubFactory f)
     }
 
     [Fact]
+    public async Task An_edit_that_changes_nothing_writes_nothing()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex), dueDate = "2026-10-30" });
+        Task<string> Row() => f.DbAsync(db => db.Tasks.Where(x => x.Id == t.G("id")).Select(x => $"{x.RowVersion}|{x.UpdatedBy}|{x.LastActivityAt:O}").SingleAsync());
+        var before = await Row();
+        var version = await d.TaskVersion(t);
+        var saved = f.Clock.Now;
+        f.Clock.Now = saved.AddMinutes(5); // the test clock is frozen otherwise, which would hide an activity-date write
+        try
+        {
+            foreach (var (who, body) in new (string, object)[]
+            {
+                (TestData.Diane, new { rowVersion = version }), // a viewer sending no field at all
+                (TestData.Rita, new { rowVersion = version, dueDate = "2026-10-30" }), // a Read Only account sending the current due date
+                (TestData.Diane, new { rowVersion = version, assigneeId = d.User(TestData.Alex) }), // the current assignee
+            })
+                Assert.Equal(HttpStatusCode.OK, (await f.As(who).Patch($"/api/v1/tasks/{t.G("id")}", body)).StatusCode);
+        }
+        finally { f.Clock.Now = saved; }
+        Assert.Equal(before, await Row()); // no version, actor or activity change
+    }
+
+    [Fact]
     public async Task Refused_bulk_assignment_cannot_add_a_member_to_a_restricted_project()
     {
         (await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true })).EnsureSuccessStatusCode();

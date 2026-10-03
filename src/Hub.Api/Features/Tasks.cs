@@ -273,7 +273,6 @@ public static class TaskEndpoints
                     Text.Get("notify.due_changed", actor, t.Key, t.Name, old?.ToString("yyyy-MM-dd") ?? "—", nd?.ToString("yyyy-MM-dd") ?? "—"), reason);
             }
         }
-        t.OriginalStartDate ??= t.StartDate;
         if (t.StartDate is { } sd && t.DueDate is { } dd) Check.That(sd <= dd, "startDate", "deliverable.start_after_due"); // T-19
         if (patch.Has("assigneeId"))
         {
@@ -335,8 +334,13 @@ public static class TaskEndpoints
                 t.ProjectDisciplineId = pd.Id;
             }
         }
-        t.LastActivityAt = clock.GetUtcNow();
-        await db.SaveChangesAsync();
+        // An edit that changes nothing writes nothing: unchanged fields skip the checks above, so they must not move the version.
+        if (db.ChangeTracker.HasChanges())
+        {
+            t.OriginalStartDate ??= t.StartDate;
+            t.LastActivityAt = clock.GetUtcNow();
+            await db.SaveChangesAsync();
+        }
         Http.ETag(http, t);
         var warnings = new List<string>();
         if (t.DeliverableId is { } dId && await db.Deliverables.Where(d => d.Id == dId).Select(d => d.DueDate).FirstOrDefaultAsync() is { } ddue && t.DueDate > ddue)

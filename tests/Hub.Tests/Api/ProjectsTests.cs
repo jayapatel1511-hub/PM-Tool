@@ -177,6 +177,18 @@ public sealed class ProjectsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task A_member_s_primary_discipline_must_belong_to_the_project()
+    {
+        var p = await d.Project();
+        var other = await d.Project();
+        var alex = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Alex) && m.RemovedAt == null));
+        var refused = await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}/members/{alex.Id}", new { primaryDisciplineId = d.ProjectDiscipline(other.Id, "Electrical") });
+        Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
+        Assert.Equal(alex.PrimaryDisciplineId, await f.DbAsync(db => db.ProjectMembers.Where(m => m.Id == alex.Id).Select(m => m.PrimaryDisciplineId).SingleAsync()));
+        (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}/members/{alex.Id}", new { primaryDisciplineId = d.ProjectDiscipline(p.Id, "Electrical") })).EnsureSuccessStatusCode();
+    }
+
+    [Fact]
     public async Task Project_number_changes_are_admin_only() // P-07
     {
         var p = await d.Project();

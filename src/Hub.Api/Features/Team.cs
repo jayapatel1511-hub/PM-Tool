@@ -221,7 +221,12 @@ public static class TeamEndpoints
                 m.Roles = [.. roles.Distinct()];
                 await team.Follow(id, m.UserId, m.Roles);
             }
-            if (patch.Has("primaryDisciplineId")) m.PrimaryDisciplineId = patch.Id("primaryDisciplineId");
+            if (patch.Has("primaryDisciplineId"))
+            {
+                var pd = patch.Id("primaryDisciplineId");
+                if (pd is { } pdid) Check.That(await db.ProjectDisciplines.AnyAsync(d => d.Id == pdid && d.ProjectId == id), "primaryDisciplineId", "error.not_found"); // as when adding
+                m.PrimaryDisciplineId = pd;
+            }
             await db.SaveChangesAsync();
             return Results.NoContent();
         });

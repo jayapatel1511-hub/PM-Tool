@@ -162,6 +162,23 @@ public sealed class SearchReportsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Report_parameters_name_only_projects_the_caller_can_see()
+    {
+        await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true });
+        try
+        {
+            var hidden = await d.Project();
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{hidden.Id}", new { visibility = Visibility.Restricted }, d.Version(hidden.Id))).EnsureSuccessStatusCode();
+            var visible = await d.Project();
+            var report = await f.As(TestData.Diane).GetAsync($"/api/v1/reports/stale-work?projectId={hidden.Id},{visible.Id}").Result.Json();
+            var parameters = report["parameters"]!.ToJsonString();
+            Assert.DoesNotContain(hidden.ProjectNumber, parameters); // a non-member learns nothing from a restricted project's ID
+            Assert.Contains(visible.ProjectNumber, parameters);
+        }
+        finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }); }
+    }
+
+    [Fact]
     public async Task Reports_equal_their_lists_and_respect_scope() // FR-RPT-01, FR-ASG-08, §19, SC-004
     {
         var p1 = await d.Project();

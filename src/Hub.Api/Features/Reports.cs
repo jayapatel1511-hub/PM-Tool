@@ -188,7 +188,8 @@ public static class ReportEndpoints
                 var ids = Http.Ids(raw);
                 var value = p.Type switch
                 {
-                    "projects" or "project" => string.Join(", ", await db.Projects.Where(x => ids.Contains(x.Id)).Select(x => x.ProjectNumber).ToListAsync()),
+                    // Only projects the caller may view are named; people and reference data are organisation-wide already.
+                    "projects" or "project" => string.Join(", ", await access.VisibleProjects().Where(x => ids.Contains(x.Id)).Select(x => x.ProjectNumber).ToListAsync()),
                     "discipline" => string.Join(", ", await db.Disciplines.Where(x => ids.Contains(x.Id)).Select(x => x.Name).ToListAsync()),
                     "office" => string.Join(", ", await db.Offices.Where(x => ids.Contains(x.Id)).Select(x => x.Name).ToListAsync()),
                     "person" => string.Join(", ", await db.Users.Where(x => ids.Contains(x.Id)).Select(x => x.DisplayName).ToListAsync()),

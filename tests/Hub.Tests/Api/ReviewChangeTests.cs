@@ -46,6 +46,18 @@ public sealed class ReviewChangeTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Cancelling_a_required_review_releases_its_issue_gate_with_the_reason()
+    {
+        var s = await New();
+        var id = await Review(s); // required for issue, so it gates the deliverable
+        Assert.Equal(id, f.Db(db => db.Deliverables.Single(d => d.Id == s.Deliverable).RequiredReviewPackageId));
+        await ReviewAction(s, id, "cancel");
+        Assert.Null(f.Db(db => db.Deliverables.Single(d => d.Id == s.Deliverable).RequiredReviewPackageId)); // a cancelled package can never approve it
+        Assert.Contains(f.Db(db => db.ActivityLog.Where(a => a.ItemId == s.Deliverable && a.Reason == "Confirmed package scope").Select(a => a.Changes).ToList()),
+            changes => changes.Contains("RequiredReviewPackageId")); // the release is logged with the cancellation reason
+    }
+
+    [Fact]
     public async Task External_source_supersession_requires_the_existing_head_discipline()
     {
         var s = await New();

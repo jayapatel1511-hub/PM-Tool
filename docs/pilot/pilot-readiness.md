@@ -2,11 +2,12 @@
 
 Checklist for moving from the synthetic review release to the company pilot on homedev. It lists what must be true
 and who proves it; it is not a readiness claim. Run the pilot itself with the [pilot plan][plan]; homedev production
-is covered by [production readiness][prod]. Homedev runs the synthetic review release `02ca7cd`, activated 2026-10-03 01:03 UTC.
-Recheck its state before acting on any row ([gates]). The corrected candidate `211bd88` merged through
-PR #25 at `328e88a`; candidate and identical-tree main CI passed 858/858. Fresh seed-free image and restored
-synthetic review migration/old-executable compatibility checks passed locally. Its homedev activation and final
-hosted/browser checks are pending; live review remains `02ca7cd`. See the [completion checkpoint](../reviews/2026-10-03-completion-audit.md).
+is covered by [production readiness][prod]. Homedev runs executable **211bd88**, activated 2026-10-03 at
+14:06:40 UTC. PR #25 merged it at `328e88a`; candidate/main CI passed 858/858 and PR #26 documentation/main CI
+also passed. Private/public activation checks passed 10/10 and 9/9. Populated hosted workflow slices and signed-in
+browser checks are recorded in the [completion checkpoint](../reviews/2026-10-03-completion-audit.md); they do not
+close every packet or company acceptance. Jay requested **synthetic pilot rehearsal** users/projects on October 3.
+The separate clean pilot runtime is initialized, and its interactive sudo activation is pending.
 
 **Decisions in force (Jay, clarified 2026-10-01):** homedev hosts review, company pilot and production at
 `pm.engcalchub.com` through the existing Cloudflare tunnel infrastructure. No Azure deployment or new paid service
@@ -26,7 +27,7 @@ something outside the repository, cited) · OPEN (known gap in the repository, c
 | E1 | AC-VIS-01 to AC-VIS-08 pass on the exact pilot commit (FR-016, [§35.1][spec10]) | agent | UNPROVEN. Evidence in the `specs/022`–`024` verification records predates packets 025–033 |
 | E2 | Threat-model walkthrough held, with the homedev boundary added (TLS ends at Cloudflare's edge, local-password cookie, single host); findings resolved or accepted (FR-011) | Jay + company IT | UNPROVEN. The walkthrough record is empty ([threat model][threats]) |
 | E3 | Packets 025–033 enabled only after their own acceptance ([pilot plan][plan]) | agent | UNPROVEN full acceptance for 025–033. Implementation and combined checks pass; current hosted/browser/company limits are recorded in the combined checkpoint and packet verification records |
-| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: `02ca7cd` activation/private probes 10/10, public probes 9/9, HTTP 307/HTTPS, browser sign-in/session, original review marker and desktop keyboard return passed. The register-completion candidate includes the earlier locally proven narrow-screen fixes; its activation/hosted retest are pending; first automatic review backup is unproven |
+| E4 | Review-release environment gates pass first | agent + Jay | PARTIAL: `211bd88` activation/private probes 10/10, public probes 9/9, HTTP 307/HTTPS, preserved original records, signed-in 1440/390/320 px date controls and populated workflow slices passed. Native print, remaining full packet acceptance and first automatic review backup are unproven |
 | E5 | 50 participants named (Q16); the proposed 3 PMs and 6 projects confirmed; sponsor named | Jay | UNPROVEN |
 
 ## 2. Company approvals
@@ -56,15 +57,32 @@ restore a `hub-review-*` dump into it.
 | H4 | Environment | `ASPNETCORE_ENVIRONMENT: Staging` | stays Staging: local-password sign-in is refused in Production ([Auth.cs][auth] line 62) | agent | UNPROVEN: set in the pilot compose file |
 | H5 | Bridge network and trusted proxy | subnet `172.30.245.0/28`; its gateway `172.30.245.1` is also `Hosting__LocalTunnelProxyAddress` | own unused /28; proxy address equals the new gateway | agent | UNPROVEN: `172.30.246.0/28`, proxy `172.30.246.1`; no homedev route used that subnet on 2026-10-01 |
 | H6 | Loopback port | `127.0.0.1:3080` | own free loopback port | agent | UNPROVEN: `127.0.0.1:3081`, free on homedev on 2026-10-01 |
-| H7 | Private runtime | `.runtime/review.env`, `review-users.json`, `keys/` and `data/backups/`, shared by all review releases | separate owner-only runtime and backup directories | agent | PREPARED: dedicated pilot directories are mode 700; runtime is empty awaiting approved Admin/participants; no review secrets/data copied |
+| H7 | Private runtime | `.runtime/review.env`, `review-users.json`, `keys/` and `data/backups/`, shared by all review releases | separate owner-only runtime and backup directories | agent | PREPARED: dedicated pilot directories are mode 700; new synthetic Admin `pilot-admin@example.test`, independent private password/verifier files (600) and keys initialized. No review secrets/data copied; activation pending |
 | H8 | Scripts and units | init, activate, backup, restore drill and verify scripts; the root backup helper accepts only `pm-tool-review-db-1` and the review backup path ([helper]) | pilot variants that refuse review containers, volumes and dumps | agent | PARTIAL: isolated initializer `scripts/init-homedev-pilot.py` passed private/no-overwrite/review-runtime refusal checks; root helper `hosting/pm-tool-pilot-backup-root.sh` (accepts only `pm-tool-pilot-db-1` on volume `pm-tool-pilot-db`, writes `hub-pilot-*.dump` to the pilot directory) with its service and 22:15 UTC timer; pilot activation, backup, restore-drill and private-verification variants are now written; focused safety checks pass on Mac and homedev Ubuntu (14 total across backup helpers, initializer and operations, with fake Docker/sudo only); no company stack or timer installed |
 | H9 | Hostname | review sets `AllowedHosts` and `Email__BaseUrl` to `pm.engcalchub.com`; one hostname routes to one origin | decide which stack `pm.engcalchub.com` serves during the pilot; the other gets another hostname in the `pm-tool` tunnel or stays loopback-only | Jay | DECIDED in homedev production gates: route the hostname to company port 3081 after acceptance, retain review on private loopback 3080; cutover remains UNPROVEN |
 | H10 | Capacity | each stack limits the database and the API to 1 GiB each; homedev has about 7.2 GiB RAM shared with other services (platform guide) | measure with both stacks running, or stop the review stack during the pilot | agent + Jay | UNPROVEN |
 | H11 | Releases | [homedev runbook][homedev]: reviewed full SHA, CI pass, dump first, previous image kept | the same, announced in the support channel and run outside business hours | agent + Jay | UNPROVEN |
 
+### Restricted database runtime (next candidate)
+
+The next candidate adds one-shot `Db__MigrateOnly=true` migration/bootstrap, then runs the ordinary API with
+`Db__Migrate=false` and a distinct **hub_pilot_app** credential in owner-only `pilot-app.env`. The privileged
+`pilot.env` and bootstrap settings are excluded from the API. After migration, activation applies
+`hosting/pilot-runtime-role.sql`: runtime owns no objects, has no elevated role/membership/schema-creation privilege,
+and can only SELECT/INSERT the activity log. Existing runtime files are preserved; the owner explicitly adds
+only the missing app credential with `scripts/init-homedev-pilot.py --runtime <pilot-runtime> --add-app-credential`.
+
+Local actual PG17/image rehearsal PASS: migration-only exits after 29 migrations with no HTTP/worker host;
+8 forbidden DDL/audit/role operations are refused; Staging individual sign-in, user insert/update, audit insertion,
+observed `hub_pilot_app` sessions and key/cookie persistence after restart pass. Runnable check:
+`python3 tools/check_pilot_database_permissions.py --image <already-built-local-image>`.
+The image check does not activate homedev or close hosted T-09. Activation now stops the candidate on any failed
+post-start gate and cleans up a timed-out migration container. Independent review findings were corrected;
+failure-path re-review PASS; exact-candidate CI remains pending.
+
 ## 4. Pilot accounts
 
-Local-password sign-in maps each login to an existing active `AppUser` and grants no roles. The reviewed Staging bootstrap provisions the approved first Admin with an audit entry; that Admin creates real people through Users & roles. Bootstrap no longer re-grants an explicitly removed Admin role or reactivates a disabled person. The synthetic review identities are never copied to the company stack. Hosted provisioning remains unproven until the first Admin and participant roles are supplied.
+Local-password sign-in maps each login to an existing active `AppUser` and grants no roles. The reviewed Staging bootstrap provisions the approved first Admin with an audit entry; that Admin creates real people through Users & roles. Bootstrap no longer re-grants an explicitly removed Admin role or reactivates a disabled person. The synthetic review identities are never copied to the company stack. Jay requested fictional participants/projects for an isolated synthetic rehearsal. A new synthetic first Admin is prepared; hosted activation, role provisioning and real company acceptance remain unproven. Rehearsal identities never become real participant acceptance.
 
 | # | Item | Owner | Status |
 |---|---|---|---|

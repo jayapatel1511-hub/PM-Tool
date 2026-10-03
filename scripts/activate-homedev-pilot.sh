@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+# Never inherit shell tracing while handling private database input.
+set +x
 umask 077
 
 fail() { echo "pilot activation refused: $*" >&2; exit 1; }
@@ -21,9 +23,10 @@ base="/home/jaypatel04/Workspace/Projects/pm-tool-pilot"
 expected="$base/releases/$release_sha"
 [[ "$(pwd -P)" == "$expected" ]] || fail "run from the requested pilot release"
 compose="$expected/hosting/homedev-pilot.compose.yml"
-runtime="$expected/.runtime"; env_file="$runtime/pilot.env"; users_file="$runtime/pilot-users.json"; keys="$runtime/keys"
-[[ -f "$compose" && -f "$env_file" && -f "$users_file" && -d "$keys" ]] || fail "pilot runtime is incomplete"
-[[ ! -L "$env_file" && ! -L "$users_file" ]] || fail "pilot credential files must not be symlinks"
+runtime="$expected/.runtime"; env_file="$runtime/pilot.env"; app_file="$runtime/pilot-app.env"
+role_sql="$expected/hosting/pilot-runtime-role.sql"; users_file="$runtime/pilot-users.json"; keys="$runtime/keys"
+[[ -f "$compose" && -f "$env_file" && -f "$app_file" && -f "$role_sql" && -f "$users_file" && -d "$keys" ]] || fail "pilot runtime is incomplete; legacy runtime needs explicit --add-app-credential"
+[[ ! -L "$env_file" && ! -L "$app_file" && ! -L "$users_file" ]] || fail "pilot credential files must not be symlinks"
 canonical() { cd "$1" && pwd -P; }
 canonical_runtime="$(canonical "$runtime")"; canonical_keys="$(canonical "$keys")"; canonical_data="$(canonical "$expected/data")"
 for value in "$canonical_runtime" "$canonical_keys" "$canonical_data"; do
@@ -41,7 +44,22 @@ owner_mode() {
   [[ "$mode" == 700 || "$mode" == 600 ]] || fail "pilot path is not private: $path"
 }
 for path in "$canonical_runtime" "$canonical_keys" "$canonical_data" "$canonical_data/backups"; do [[ -e "$path" ]] && owner_mode "$path"; done
-owner_mode "$env_file"; owner_mode "$users_file"
+owner_mode "$env_file"; owner_mode "$app_file"; owner_mode "$users_file"
+for path in "$env_file" "$app_file" "$users_file"; do
+  [[ "$(stat -c '%a' "$path" 2>/dev/null || stat -f '%Lp' "$path")" == 600 ]] || fail "pilot secret file must be mode 600"
+done
+# Validate the API whitelist and legacy administrator connection before any Docker mutation.
+python3 - "$app_file" "$env_file" <<'PREFLIGHT_PY'
+import pathlib, re, sys
+app = pathlib.Path(sys.argv[1]).read_text()
+match = re.fullmatch(r'ConnectionStrings__Hub=Host=db;Port=5432;Database=hub_pilot;Username=hub_pilot_app;Password=([A-Za-z0-9_-]{32,128})\n', app)
+admin = dict(line.split('=', 1) for line in pathlib.Path(sys.argv[2]).read_text().splitlines() if '=' in line)
+if not match or not re.fullmatch(r'Host=db;Port=5432;Database=hub_pilot;Username=hub_pilot;Password=[A-Za-z0-9_-]{32,128}', admin.get('ConnectionStrings__Hub', '')):
+    sys.exit('pilot activation refused: database credential separation is incomplete')
+if match.group(1) == admin.get('PILOT_DB_PASSWORD'):
+    sys.exit('pilot activation refused: runtime and administrator passwords must differ')
+PREFLIGHT_PY
+command -v timeout >/dev/null || fail "timeout is required for the one-shot migration step"
 
 sudo -v </dev/null
 inspect() { sudo docker inspect --format "$1" pm-tool-pilot-db-1 </dev/null; }
@@ -58,8 +76,67 @@ if [[ "$db_exists" == 1 || "$volume_exists" == 1 ]]; then
 fi
 
 compose_cmd=(sudo env RELEASE_SHA="$release_sha" docker compose --env-file "$env_file" -f "$compose")
+api_started=0; migration_container=""
+cleanup_activation() {
+  [[ -z "$migration_container" ]] || sudo docker rm -f "$migration_container" </dev/null >/dev/null 2>&1 || true
+  if [[ "$api_started" == 1 ]]; then "${compose_cmd[@]}" stop api </dev/null >/dev/null 2>&1 || true; fi
+}
+trap cleanup_activation EXIT
 "${compose_cmd[@]}" build api </dev/null
-"${compose_cmd[@]}" up -d --no-build </dev/null
+# Preserve the volume/data. Stop the old API before any privileged migration or grant change.
+"${compose_cmd[@]}" stop api </dev/null
+"${compose_cmd[@]}" up -d --no-build db </dev/null
+for _ in {1..60}; do
+  [[ "$(inspect '{{ .State.Health.Status }}' 2>/dev/null || true)" == healthy ]] && break
+  sleep 2
+done
+[[ "$(inspect '{{ .State.Health.Status }}')" == healthy ]] || fail "pilot database did not become healthy"
+[[ "$(inspect '{{ range .Mounts }}{{ if eq .Destination "/var/lib/postgresql/data" }}{{ .Name }}{{ end }}{{ end }}')" == pm-tool-pilot-db ]] || fail "pilot volume is not exact"
+# Parent's Db__MigrateOnly contract must exit successfully without starting the web/worker host.
+# A missing/broken contract times out; ordinary API stays stopped.
+migration_container="pm-tool-pilot-migrate-$(python3 -c 'import uuid; print(uuid.uuid4().hex)')"
+timeout 180 "${compose_cmd[@]}" run --rm --name "$migration_container" --no-deps --no-build migrate </dev/null || fail "one-shot migration did not complete; API remains stopped"
+sudo docker rm -f "$migration_container" </dev/null >/dev/null 2>&1 || true
+migration_container=""
+python3 - "$app_file" "$role_sql" <<'GRANTS_PY'
+import pathlib, re, subprocess, sys
+value = pathlib.Path(sys.argv[1]).read_text()
+match = re.fullmatch(r'ConnectionStrings__Hub=Host=db;Port=5432;Database=hub_pilot;Username=hub_pilot_app;Password=([A-Za-z0-9_-]{32,128})\n', value)
+if not match:
+    sys.exit('pilot activation refused: runtime credential whitelist changed')
+password = match.group(1)
+sql = "\\set app_password '" + password + "'\n" + pathlib.Path(sys.argv[2]).read_text()
+# Authentication over TCP proves that the provisioned password works as the app role,
+# not as the container's local-trust bootstrap account. No password goes into argv/env.
+sql += "\n\\setenv PGPASSWORD '" + password + "'\n"
+sql += '\\connect "host=127.0.0.1 port=5432 dbname=hub_pilot user=hub_pilot_app"\n'
+sql += "DO $$ BEGIN IF current_user <> 'hub_pilot_app' THEN RAISE EXCEPTION 'Wrong runtime role'; END IF; END $$;\nSELECT 1 FROM hub.activity_log LIMIT 1;\n"
+result = subprocess.run(['sudo', 'docker', 'exec', '-i', 'pm-tool-pilot-db-1', 'psql', '-X', '-q',
+                         '-v', 'ON_ERROR_STOP=1', '-U', 'hub_pilot', '-d', 'hub_pilot'],
+                        input=sql.encode(), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+if result.returncode:
+    # psql errors can repeat input statements; do not expose private input in terminal/logs.
+    sys.exit('pilot activation refused: runtime grants/authentication failed; API remains stopped')
+GRANTS_PY
+api_started=1
+"${compose_cmd[@]}" up -d --no-build --no-deps --force-recreate api </dev/null
+if ! python3 - "$app_file" <<'API_ENV_PY'
+import json, pathlib, subprocess, sys
+result = subprocess.run(['sudo', 'docker', 'inspect', '--format', '{{json .Config.Env}}', 'pm-tool-pilot-api-1'],
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+if result.returncode:
+    sys.exit(1)
+env = dict(item.split('=', 1) for item in json.loads(result.stdout))
+expected = pathlib.Path(sys.argv[1]).read_text().strip().split('=', 1)[1]
+if (env.get('ConnectionStrings__Hub') != expected or env.get('Db__Migrate') != 'false'
+        or env.get('Db__MigrateOnly') != 'false'
+        or any(key.startswith('PILOT_') or key.startswith('Auth__Local__Bootstrap') for key in env)):
+    sys.exit(1)
+API_ENV_PY
+then
+  "${compose_cmd[@]}" stop api </dev/null
+  fail "ordinary API environment is not separated; API stopped"
+fi
 for _ in {1..60}; do
   health="$(inspect '{{ .State.Health.Status }}' 2>/dev/null || true)"
   api_health="$(curl --max-time 5 -fsS -H 'Host: pm.engcalchub.com' -H 'X-Forwarded-Proto: https' http://127.0.0.1:3081/health 2>/dev/null || true)"
@@ -95,4 +172,6 @@ fi
 
 ln -sfn "releases/$release_sha" "$base/current.new"
 mv -Tf "$base/current.new" "$base/current"
+api_started=0
+trap - EXIT
 echo "pilot activated: $release_sha; private verification gates passed"

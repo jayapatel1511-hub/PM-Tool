@@ -108,6 +108,14 @@ public sealed class TimeTests(HubFactory f)
     }
 
     [Fact]
+    public async Task The_task_hours_report_keeps_the_time_views_370_day_range()
+    {
+        var refused = await f.As(TestData.Pm).GetAsync("/api/v1/reports/task-hours?from=1900-01-01&to=2199-12-31&scope=team");
+        Assert.NotNull((await refused.Json(400))["errors"]!["to"]); // the same bound as the Time view and its export
+        Assert.Equal(HttpStatusCode.OK, (await f.As(TestData.Pm).GetAsync("/api/v1/reports/task-hours?from=2026-01-01&to=2026-12-31&scope=team")).StatusCode);
+    }
+
+    [Fact]
     public async Task An_export_is_logged_only_on_a_project_the_exporter_can_see()
     {
         await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true }).Result.Json();

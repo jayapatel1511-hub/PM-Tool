@@ -2,7 +2,10 @@ using System.Net;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Hub.Tests.Api;
 
@@ -20,6 +23,13 @@ public sealed class OperationsTests(HubFactory f)
         new(now ?? Now, Halifax, outbox, nightly ?? Now.AddHours(-8), first ?? Now.AddDays(-30), failed ?? [], notBuilt, unsent);
 
     static string[] Kinds(OpsFacts facts) => OpsChecks.Evaluate(facts).Select(p => p.Kind).ToArray();
+
+    [Fact]
+    public void Request_bodies_are_limited_to_one_megabyte() // T-11: the largest legitimate body is a template structure of a few kilobytes
+    {
+        var kestrel = f.Services.GetRequiredService<IOptions<KestrelServerOptions>>().Value;
+        Assert.Equal(1024 * 1024, kestrel.Limits.MaxRequestBodySize);
+    }
 
     [Fact]
     public void Each_condition_raises_its_alert_and_only_past_its_threshold()

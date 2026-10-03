@@ -51,7 +51,9 @@ if (!string.IsNullOrEmpty(cfg["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
     builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 builder.AddHubAuth();
-var tunnelProxy = builder.Environment.IsStaging() && cfg.GetValue<bool>("Hosting:LocalTunnelProxy")
+// §21: a request body holds at most 1 MB. There are no uploads; the largest legitimate body, a template structure, is a few kilobytes.
+builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = 1024 * 1024);
+var tunnelProxy =builder.Environment.IsStaging() && cfg.GetValue<bool>("Hosting:LocalTunnelProxy")
     && IPAddress.TryParse(cfg["Hosting:LocalTunnelProxyAddress"], out var configuredTunnelProxy) ? configuredTunnelProxy : null;
 builder.Services.AddRateLimiter(o =>
 {

@@ -162,6 +162,19 @@ public sealed class SearchReportsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task A_report_reads_at_most_one_row_past_the_export_cap()
+    {
+        var p = await d.Project();
+        var cap = Hub.Api.Infrastructure.Export.MaxRows;
+        await f.DbAsync(db => db.Database.ExecuteSqlRawAsync(
+            "INSERT INTO hub.project_health_snapshot (id, project_id, snapshot_date, computed_health, reported_health, inputs) " +
+            "SELECT gen_random_uuid(), {0}, DATE '1900-01-01' + s, 'Green', 'Green', jsonb_build_object() FROM generate_series(1, {1}) s", p.Id, cap + 2));
+        var report = await f.As(TestData.Pm).GetAsync($"/api/v1/reports/health-history?projectId={p.Id}&from=1900-01-01&to=2199-12-31").Result.Json();
+        Assert.Equal(cap + 1, report.I("total")); // enough to know it is over the export cap, never the whole scope in memory
+        Assert.True(report["truncated"]!.GetValue<bool>());
+    }
+
+    [Fact]
     public async Task Report_parameters_name_only_projects_the_caller_can_see()
     {
         await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true });

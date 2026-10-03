@@ -26,6 +26,7 @@ export function useTable<T>(storageKey: string, columns: Column<T>[], rows: T[],
     const n = new URLSearchParams(sp)
     const next = field !== id ? id : dir === 'desc' ? null : `${id}:desc`
     if (next) n.set('sort', next); else n.delete('sort')
+    n.delete('page')
     setSp(n, { replace: true })
   }
   const header = (c: Column<T>) => (

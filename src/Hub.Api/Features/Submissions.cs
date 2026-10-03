@@ -20,12 +20,21 @@ public static class SubmissionEndpoints
     public sealed record CheckAssignBody(Guid RequestId, int PackageRowVersion, int RowVersion, Guid OwnerId, string Reason);
     public sealed record IssueBody(Guid RequestId, int RowVersion, int ManifestVersion, string ExpectedFingerprint, string Destination, string TransmittalUrl, string? Reason);
     public sealed record CancelBody(Guid RequestId, int RowVersion, string Reason);
+    public sealed record Filter(string? Q, string? Status, Guid? CoordinatorId, Guid? MilestoneId, DateOnly? TargetFrom, DateOnly? TargetTo);
+    static readonly Col[] ListColumns = [
+        new("key", "key"), new("title", "name"), new("status", "status"),
+        new("coordinatorName", "owner", Label: "Coordinator"), new("milestoneName", "milestone"),
+        new("targetDate", "targetDate", "date", "Target date"), new("blockerCount", "blockers", "number", "Readiness blockers")];
+
+    sealed record ListRow(Guid Id, string Key, string Title, string Purpose, string Status, Guid CoordinatorId, string? CoordinatorName,
+        Guid MilestoneId, string? MilestoneName, DateOnly TargetDate, int ManifestVersion, int RowVersion, int BlockerCount);
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/submissions", List);
+        api.MapGet("/projects/{projectId:guid}/submissions/export", ExportRows);
         api.MapGet("/projects/{projectId:guid}/submissions/{id:guid}", Detail);
-        api.MapGet("/projects/{projectId:guid}/submissions/{id:guid}/export", Export);
+        api.MapGet("/projects/{projectId:guid}/submissions/{id:guid}/export", ExportSnapshot);
         api.MapPost("/projects/{projectId:guid}/submissions", Create).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/submissions/{id:guid}/manifest", ReplaceManifest).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/submissions/{id:guid}/edit", Edit).WithMetadata(new Coordination.AtomicCommand());
@@ -314,21 +323,76 @@ public static class SubmissionEndpoints
             await NotifyChanged(notify, project, package); return package;
         });
 
-    static async Task<object> List(Guid projectId, int? page, int? pageSize, Access access, HubDb db)
+    static IQueryable<SubmissionPackage> Query(HubDb db, Guid projectId, Filter filter)
+    {
+        var query = db.SubmissionPackages.AsNoTracking().Where(p => p.ProjectId == projectId);
+        if (!string.IsNullOrWhiteSpace(filter.Q)) {
+            var term = $"%{SearchEndpoints.Escape(filter.Q.Trim())}%";
+            query = query.Where(p => EF.Functions.ILike(p.Key, term, @"\") || EF.Functions.ILike(p.Title, term, @"\") || EF.Functions.ILike(p.Purpose, term, @"\"));
+        }
+        if (!string.IsNullOrWhiteSpace(filter.Status)) {
+            Check.OneOf(filter.Status, SubmissionStatus.All, "status");
+            query = filter.Status is SubmissionStatus.Ready or SubmissionStatus.Checking
+                ? query.Where(p => p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready)
+                : query.Where(p => p.Status == filter.Status);
+        }
+        if (filter.CoordinatorId is { } coordinator) query = query.Where(p => p.CoordinatorId == coordinator);
+        if (filter.MilestoneId is { } milestone) query = query.Where(p => p.MilestoneId == milestone);
+        if (filter.TargetFrom is { } from) query = query.Where(p => p.TargetDate >= from);
+        if (filter.TargetTo is { } to) query = query.Where(p => p.TargetDate <= to);
+        return query.OrderByDescending(p => p.UpdatedAt).ThenBy(p => p.Seq);
+    }
+
+    static async Task<List<ListRow>> Rows(HubDb db, IReadOnlyList<SubmissionPackage> packages, string? status)
+    {
+        if (!string.IsNullOrWhiteSpace(status)) Check.OneOf(status, SubmissionStatus.All, "status");
+        var userIds = packages.Select(p => p.CoordinatorId).Distinct().ToArray();
+        var milestoneIds = packages.Select(p => p.MilestoneId).Distinct().ToArray();
+        var names = await db.Users.Where(u => userIds.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
+        var milestones = await db.Milestones.Where(m => milestoneIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, m => m.Name);
+        var rows = new List<ListRow>();
+        foreach (var package in packages)
+        {
+            var readiness = package.Status is SubmissionStatus.Checking or SubmissionStatus.Ready ? await SubmissionReadiness.Evaluate(db, package) : null;
+            var effective = readiness is null ? package.Status : readiness.Ready ? SubmissionStatus.Ready : SubmissionStatus.Checking;
+            if (!string.IsNullOrWhiteSpace(status) && effective != status) continue;
+            rows.Add(new(package.Id, package.Key, package.Title, package.Purpose, effective, package.CoordinatorId, names.GetValueOrDefault(package.CoordinatorId),
+                package.MilestoneId, milestones.GetValueOrDefault(package.MilestoneId), package.TargetDate, package.ManifestVersion, package.RowVersion, readiness?.Blockers.Count ?? 0));
+        }
+        return rows;
+    }
+
+    static async Task<List<ListRow>> FilteredRows(Guid projectId, Filter filter, Access access, HubDb db)
     {
         await access.Project(projectId, false);
-        var query = db.SubmissionPackages.AsNoTracking().Where(p => p.ProjectId == projectId);
+        Check.That(!filter.TargetFrom.HasValue || !filter.TargetTo.HasValue || filter.TargetTo >= filter.TargetFrom, "targetTo", "error.date_range");
+        var packages = await Query(db, projectId, filter).Take(Export.MaxRows + 1).ToListAsync();
+        if (packages.Count > Export.MaxRows) throw ApiException.Rule("export_too_large", "export.too_large", null, Export.MaxRows);
+        return await Rows(db, packages, filter.Status);
+    }
+
+    static async Task<object> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
+    {
         var (pg, size) = Http.Paging(page, pageSize);
-        var packages = await query.OrderByDescending(p => p.UpdatedAt).ThenBy(p => p.Seq).Skip((pg - 1) * size).Take(size).ToListAsync();
-        var rows = new List<object>();
-        foreach (var package in packages) {
-            var readiness = package.Status is SubmissionStatus.Checking or SubmissionStatus.Ready ? await SubmissionReadiness.Evaluate(db, package) : null;
-            rows.Add(new { package.Id, package.Key, package.Title, package.Purpose,
-                Status = readiness is null ? package.Status : readiness.Ready ? SubmissionStatus.Ready : SubmissionStatus.Checking,
-                package.CoordinatorId, package.MilestoneId, package.TargetDate, package.ManifestVersion, package.RowVersion,
-                BlockerCount = readiness?.Blockers.Count ?? 0 });
+        if (filter.Status is SubmissionStatus.Ready or SubmissionStatus.Checking) {
+            // ponytail: derived status evaluates at most 50,000 candidates; move the shared readiness projection into SQL if projects reach this ceiling.
+            var filtered = await FilteredRows(projectId, filter, access, db);
+            return new Page<ListRow>(filtered.Skip((pg - 1) * size).Take(size).ToList(), pg, size, filtered.Count);
         }
-        return new Page<object>(rows, pg, size, await query.CountAsync());
+        await access.Project(projectId, false);
+        Check.That(!filter.TargetFrom.HasValue || !filter.TargetTo.HasValue || filter.TargetTo >= filter.TargetFrom, "targetTo", "error.date_range");
+        var query = Query(db, projectId, filter);
+        var rows = await Rows(db, await query.Skip((pg - 1) * size).Take(size).ToListAsync(), filter.Status);
+        return new Page<ListRow>(rows, pg, size, await query.CountAsync());
+    }
+
+    static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    {
+        var (project, _) = await access.Project(projectId, false);
+        var rows = await FilteredRows(projectId, filter, access, db);
+        return await ExportFile.Send(db, store, format, "Submission readiness", ListColumns,
+            JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access), project.Id,
+            $"{project.ProjectNumber}-submissions", clock);
     }
 
     static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
@@ -346,7 +410,7 @@ public static class SubmissionEndpoints
             CanAuthorise = Permissions.AuthoriseSubmission(access.Actor, ctx).Ok };
     }
 
-    static async Task<IResult> Export(Guid projectId, Guid id, Access access, HubDb db, TimeProvider clock)
+    static async Task<IResult> ExportSnapshot(Guid projectId, Guid id, Access access, HubDb db, TimeProvider clock)
     {
         await access.Project(projectId, false);
         var package = await Load(db, projectId, id);

@@ -1,6 +1,29 @@
 # Combined review release candidate — 2026-10-02
 
-Live synthetic review: `02ca7cd9ae097867bcd4c11c0614bf8d0d9d1619`, activated 2026-10-03 01:03:16 UTC (2026-10-02 Halifax). [PR #21](https://github.com/jayapatel1511-hub/PM-Tool/pull/21) merged at `c220353da35bb4e7b56772f2405b483ad97f50d9`; its source tree matches the deployed candidate. Exact-head and merged-main CI passed 809/809. The narrow-screen check below found a remaining shared control-layout defect; a follow-up is being verified before broader release acceptance. Homedev remains the review, pilot and production target, with individual passwords and existing services. Azure and new paid services are not release prerequisites.
+Live synthetic review: `02ca7cd9ae097867bcd4c11c0614bf8d0d9d1619`, activated 2026-10-03 01:03:16 UTC (2026-10-02 Halifax). [PR #21](https://github.com/jayapatel1511-hub/PM-Tool/pull/21) merged at `c220353da35bb4e7b56772f2405b483ad97f50d9`; its source tree matches the deployed candidate. Exact-head and merged-main CI passed 809/809. The later candidate `6becc79536056bea0ac232cad392af0f050a100e` fixes the shared narrow-screen controls and remaining security/report findings. It is merged and staged, but is not yet activated; the live `02ca7cd` still has the reproduced narrow-screen defect. Homedev remains the review, pilot and production target, with individual passwords and existing services. Azure and new paid services are not release prerequisites.
+
+## Register completion — 2026-10-03
+
+A source audit found missing FR-MDC-06 list tools after the earlier security/mobile candidate. This increment adds scoped submission/allocation filters and matching CSV/XLSX exports; allocation paging and privacy-scoped search; exact submission/design-basis key search; saved views for submissions, allocations, design basis, readiness and issues; the corrected design-basis pager; paged weekly promises filtered by target date before paging; and paged constraint/ready-output lists. Snapshot denominators/outcomes remain independent of the selected promise page. Issues page distinct identities after filtering/sorting and before expanding location/document groups, retaining the complete existing array contract for review/risk lookups and export.
+
+Local verification: 27 focused PostgreSQL cases passed across the final register/weekly, corrected submission and readiness-window runs. The weekly regression includes 500 out-of-window promises and full immutable snapshot counts on every page. Build and lint passed. The extended existing Chromium harness passed basis/submission/allocation/readiness paging and date/filter reset, two saved-view definitions, two grouped issue pages, original basis impact/focus workflows and actual TaskSheet controls at 1440/390/320px. It reported 8 basis queries, 16 other register queries, no unmocked GETs and no browser errors. API and mocked-browser evidence are separate from hosted acceptance.
+
+The earlier `6becc79` activation request is superseded by this completion increment. Its CI/image evidence below remains valid for that revision only. The new exact-head CI, independent final review, merge, image and homedev source staging are subsequent gates; consult the private per-release checkpoint for their actual outcomes. Do not activate `6becc79` as though it contains these list fixes. Full packet T006, company pilot and production acceptance remain open.
+
+## Earlier security/mobile candidate gates — 2026-10-03
+
+| Gate | Verdict | Current evidence |
+|---|---|---|
+| Code and combined checks | PASS | Candidate `6becc79`: [exact-head CI 37089388204](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/37089388204) and [merged-main CI 37089996512](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/37089996512) passed 838/838, rules branch coverage 96.7%, service line coverage 94.1%, all three Chromium harnesses, 14 backup/pilot safety tests and full traceability (612 IDs, 236 sections, zero uncited/unknown). Mocked browser harnesses are not hosted workflow acceptance. |
+| Merge | PASS | [PR #23](https://github.com/jayapatel1511-hub/PM-Tool/pull/23) merged at `27fa370e16db5453ff77139294f3ca12d5b8e5a3`; its tree matches candidate `6becc79`. [PR #22](https://github.com/jayapatel1511-hub/PM-Tool/pull/22) is also marked merged through integration commit `19b07cd`. The original checkout and concurrent security branch were preserved. |
+| Exact image | PASS, local | Exact Git-archive image `pm-tool-review:smoke-6becc79`, ID `sha256:fb5a3107e5ed83216827019eabd5174290620def08742d16a88505c3eb707292`. Fresh synthetic pilot configuration applied 27 migrations with both seed flags off, no review projects/users, one synthetic bootstrap Admin, correct/wrong password checks, Host/Origin/anonymous denial, HTTP 307, least privilege and key/cookie persistence after API recreation. Its disposable containers, volumes, network and plaintext were removed. This does not prove company provisioning or homedev activation. |
+| Source staging | PASS | Separate review and pilot `releases/6becc79536056bea0ac232cad392af0f050a100e` directories are prepared on homedev. Representative source checksums match the commit and both use their own base's shared runtime/data links. Pilot runtime is empty; no company database, account, service or timer was created. |
+| Review activation | SUPERSEDED candidate | Current host pointer remained `releases/02ca7cd…` when checked. Hold the earlier `6becc79` request; the register-completion candidate replaces it after exact-revision gates. Docker requires interactive sudo in Jay's private terminal. |
+| Hosted acceptance of candidate fixes | UNPROVEN | After activation, verify exact image/current pointer, the retained review database, private/public probes, original synthetic marker/session, mobile Clear/date layout and accessible names at 390/320px, and exact opener focus return. Preserve concurrent review edits rather than restoring earlier values. |
+| Recovery and operations | PARTIAL | Approved manual encrypted PM recovery passed; first automatic review backup is due 2026-10-03 22:00 UTC and remains unproven. The independent whole-server export failed after its two-hour SSH timeout. Uptime Kuma monitor remains prepared, not saved, pending its specific UI configuration approval. |
+| Company pilot / production | PREPARED, not accepted or deployed | Separate pilot source/runtime/data preparation is complete. Real identities/roles, company hosting/privacy/authentication approvals, pilot workflow acceptance and go/no-go remain required; no review data may be copied into company use. Homedev and individual passwords remain the selected approach, with no Azure or new paid service. |
+
+Credential-free current evidence: `/private/tmp/pm-release-evidence-6becc79.json`, also saved owner-only at homedev `pm-tool/data/release-evidence-6becc79.json`. Local image evidence and CI logs use `/private/tmp/pm-combined-image-*` and `/private/tmp/pm-combined-{ci-6becc79,main-ci-27fa370}.log`. Earlier sections below are dated history, not claims about the final candidate's hosted acceptance.
 
 ## Integrated corrections
 
@@ -10,7 +33,7 @@ Live synthetic review: `02ca7cd9ae097867bcd4c11c0614bf8d0d9d1619`, activated 202
 - `7c412b0`: canonical section 10.8 precedence keeps Needs Assessment when unknown checks coexist with a constraint, while retaining all blocker reasons and preventing an assumption from overriding the constraint. Recovered the prior unfinished writer diff without changing its worktree.
 - Previously committed `bad0e7a` / `3c335d8`: unavailable owners/disciplines become assessed readiness failures instead of breaking reads; HTTPS redirect and least-privilege containers are live in the verified `02ca7cd` activation below.
 
-## Verification actually run
+## Earlier combined verification — before candidate 6becc79
 
 | Check | Verdict | Evidence and limit |
 |---|---|---|

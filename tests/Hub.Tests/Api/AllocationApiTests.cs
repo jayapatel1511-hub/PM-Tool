@@ -57,7 +57,7 @@ public sealed class AllocationApiTests(HubFactory f)
         Assert.False(supervisorDetail["canManage"]!.GetValue<bool>());
         Assert.False(string.IsNullOrWhiteSpace(supervisorDetail.S("personName")));
         var supervisorList = await (await f.As(TestData.Sam).GetAsync(root)).Json();
-        Assert.Contains(supervisorList.AsArray(), a => a!.G("id") == id && !string.IsNullOrWhiteSpace(a.S("personName")));
+        Assert.Contains(supervisorList["items"]!.AsArray(), a => a!.G("id") == id && !string.IsNullOrWhiteSpace(a.S("personName")));
         await (await f.As(TestData.Alex).GetAsync($"{root}/{id}")).Json(404);
         var updated = await (await f.As(TestData.Pm).Post($"{root}/{id}/edit",
             new AllocationEndpoints.EditBody(Guid.NewGuid(), first.I("rowVersion"), alex, AllocationPurpose.Production,
@@ -71,6 +71,40 @@ public sealed class AllocationApiTests(HubFactory f)
         Assert.Empty(f.Db(db => db.AllocationWorkLinks.Where(l => l.AllocationId == id && l.ReleasedAt == null).ToList()));
         var replacement = await (await f.As(TestData.Pm).Post(root, create with { RequestId = Guid.NewGuid() })).Json();
         Assert.NotEqual(id, replacement.G("id"));
+    }
+
+    [Fact]
+    public async Task Filtered_allocation_pagination_and_exports_share_visible_records()
+    {
+        var project = await data.Project();
+        var (personId, _) = await FreshReport(project.Id);
+        var day = new DateOnly(2026, 10, 5);
+        async Task<JsonNode> Create()
+        {
+            var task = await data.NewTask(project.Id, extra: new { assigneeId = personId, dueDate = day });
+            return await (await f.As(TestData.Pm).Post($"/api/v1/projects/{project.Id}/allocations",
+                new AllocationEndpoints.CreateBody(Guid.NewGuid(), personId, AllocationPurpose.Production, day, day, 4,
+                    [], [new("Task", task.G("id"), day)], null))).Json();
+        }
+        var first = await Create();
+        var second = await Create();
+        var filter = $"q=Production&personId={personId}&purpose=Production&status=Proposed&from={day:yyyy-MM-dd}&to={day:yyyy-MM-dd}";
+        var page1 = await (await f.As(TestData.Sam).GetAsync($"/api/v1/projects/{project.Id}/allocations?{filter}&page=1&pageSize=1")).Json();
+        var page2 = await (await f.As(TestData.Sam).GetAsync($"/api/v1/projects/{project.Id}/allocations?{filter}&page=2&pageSize=1")).Json();
+        Assert.Equal(2, page1.I("totalCount"));
+        Assert.Single(page1["items"]!.AsArray());
+        Assert.Single(page2["items"]!.AsArray());
+        Assert.NotEqual(page1["items"]![0]!.G("id"), page2["items"]![0]!.G("id"));
+        Assert.Contains(first.G("id"), new[] { page1["items"]![0]!.G("id"), page2["items"]![0]!.G("id") });
+        Assert.Contains(second.G("id"), new[] { page1["items"]![0]!.G("id"), page2["items"]![0]!.G("id") });
+
+        var csv = await (await f.As(TestData.Sam).GetAsync($"/api/v1/projects/{project.Id}/allocations/export?{filter}&format=csv")).Content.ReadAsStringAsync();
+        Assert.Equal(3, csv.Split('\n', StringSplitOptions.RemoveEmptyEntries).Length);
+        var xlsx = await f.As(TestData.Sam).GetAsync($"/api/v1/projects/{project.Id}/allocations/export?{filter}&format=xlsx");
+        Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", xlsx.Content.Headers.ContentType!.MediaType);
+
+        var supervisor = await (await f.As(TestData.Sam).GetAsync($"/api/v1/projects/{project.Id}/allocations?personId={personId}&pageSize=200")).Json();
+        Assert.Equal(2, supervisor.I("totalCount"));
     }
 
     [Fact]

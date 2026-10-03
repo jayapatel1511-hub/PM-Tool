@@ -48,3 +48,10 @@ No keyboard trap or unlabeled control was found. Not run: a screen reader, other
 ## 2026-10-01 Codex recovery checkpoint
 
 Constraint/promise keys, generic links, export and search commits were integrated. The combined PostgreSQL suite passed 563/563 before the later readiness applicability/export privacy commits. Populated local review-copy migration rehearsal applied 22 to 27 migrations without changing project/task/constraint/promise counts. This is local synthetic evidence, not company submission acceptance.
+
+
+## FR-MDC-06 register completion — 2026-10-03
+
+Added scoped title/key, effective Ready/Checking status, coordinator, milestone and target-date filters and matching CSV/XLSX list export. Derived status is evaluated before count/paging; normal lists page SQL first. Existing issue-history JSON export is preserved. Focused real-PostgreSQL submission checks pass, including a blocking Electrical finding in Checking, Ready exclusion, effective Ready inclusion and restricted-project list/export denial. Search now opens exact SUB keys and scoped title matches. Saved-view definitions round-trip without open panels.
+
+The combined increment passed 27 focused PostgreSQL cases across the final runs, frontend build/lint and the extended existing Chromium harness. This is local synthetic implementation evidence; the new exact-head CI, merge, image, homedev activation and hosted checks are separate gates in [the combined checkpoint](../../docs/reviews/2026-10-02-combined-candidate.md). Packet T006 remains open for full acceptance, and no company pilot or production acceptance is inferred.

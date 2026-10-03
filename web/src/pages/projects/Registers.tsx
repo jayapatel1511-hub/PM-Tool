@@ -1,3 +1,4 @@
+import { ViewMenu } from '@/components/hub/views'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListPlus, OctagonAlert, Plus, ShieldAlert, Trash2 } from 'lucide-react'
 import { useState } from 'react'
@@ -89,9 +90,9 @@ function useRegisterRefresh() {
 
 function useFilters() {
   const [sp, setSp] = useSearchParams()
-  const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
+  const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); n.delete('page'); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)])) as Record<(typeof FILTERS)[number], string | null>
-  const clear = () => { const n = new URLSearchParams(sp); FILTERS.forEach((k) => n.delete(k)); setSp(n, { replace: true }) }
+  const clear = () => { const n = new URLSearchParams(sp); FILTERS.forEach((k) => n.delete(k)); n.delete('page'); setSp(n, { replace: true }) }
   return { filters, set, clear, active: FILTERS.some((k) => sp.has(k)) }
 }
 
@@ -202,11 +203,12 @@ export function IssuesTab() {
   const setSourceFilter = (key: string, value: string) => {
     const next = new URLSearchParams(sp)
     if (value) next.set(key, value); else next.delete(key)
+    next.delete('page')
     setSp(next, { replace: true })
   }
   const clearSourceFilters = () => {
     const next = new URLSearchParams(sp)
-    for (const key of ['issueType', 'location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits', 'group']) next.delete(key)
+    for (const key of ['issueType', 'location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits', 'group', 'page']) next.delete(key)
     setSp(next, { replace: true })
   }
   const openPanel = useItemPanel()
@@ -245,17 +247,22 @@ export function IssuesTab() {
   const groupBy = multi ? (r: IssueRow) => r.groupLabel || t('common.dash')
     : group === 'owner' ? (r: IssueRow) => r.ownerName || t('common.dash')
       : group === 'verification' ? (r: IssueRow) => r.verificationStatus || t('issue.noVerification') : undefined
+  const pageSize = 50, total = table.sorted.length
+  const page = Math.max(1, Math.min(Math.ceil(total / pageSize) || 1, Math.floor(Number(sp.get('page')) || 1)))
+  // ponytail: load the filtered register to keep global sort/group order; move paging into SQL if the list payload fails the performance gate.
+  const pageRows = table.sorted.slice((page - 1) * pageSize, page * pageSize)
   const expandedRows = multi
-    ? table.sorted.flatMap((row) => {
+    ? pageRows.flatMap((row) => {
       const labels = [...new Set(multi[0](row)?.filter((x): x is string => !!x))]
       return (labels.length ? labels : [multi[1]]).map((groupLabel) => ({ ...row, groupLabel }))
-    }) : table.sorted
+    }) : pageRows
   // Array.sort is stable, so the register's selected sort order remains intact within each group.
   const displayRows = groupBy ? [...expandedRows].sort((a, b) => groupBy(a).localeCompare(groupBy(b))) : expandedRows
   const can = p.permissions.raiseRegister
   return (
     <Page title={t('ptab.issues')} subtitle={t('issue.subtitle')}
       actions={<>
+        <ViewMenu listType="issues" projectId={p.id} />
         <ExportMenu path={`projects/${p.id}/issues/export`} params={issueFilters} name={`${p.projectNumber}-issues`} />
         {can.ok && <Button onClick={() => setRaising(true)}><Plus className="size-4" />{t('issue.new')}</Button>}
       </>}>
@@ -300,6 +307,11 @@ export function IssuesTab() {
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       <RegisterTable table={table} rows={displayRows} loading={q.isPending} groupBy={groupBy} hot={(r) => r.isOverdue || (r.severity === 'High' && ['Open', 'In Progress'].includes(r.status))}
         empty={<Empty action={can.ok && !f.active && !sourceFilterActive && <Button onClick={() => setRaising(true)}>{t('issue.new')}</Button>}>{f.active || sourceFilterActive ? t('register.noMatch') : t('issue.empty')}</Empty>} />
+      {!q.isPending && !q.error && <div className="flex items-center justify-end gap-3">
+        <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => { const next = new URLSearchParams(sp); next.set('page', String(page - 1)); setSp(next) }}>{t('handoff.previous')}</Button>
+        <span className="text-sm">{t('handoff.page', { n: page })}</span>
+        <Button size="sm" variant="outline" disabled={page * pageSize >= total} onClick={() => { const next = new URLSearchParams(sp); next.set('page', String(page + 1)); setSp(next) }}>{t('handoff.next')}</Button>
+      </div>}
       {raising && <IssueForm projectId={p.id} onClose={() => setRaising(false)} />}
     </Page>
   )

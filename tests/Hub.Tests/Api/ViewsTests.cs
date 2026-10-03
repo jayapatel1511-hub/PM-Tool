@@ -100,6 +100,39 @@ public sealed class ViewsTests(HubFactory f)
         Assert.Empty((await f.As(TestData.Jill).GetAsync("/api/v1/views?listType=workspace-coordination").Result.Json())["views"]!.AsArray());
     }
 
+    [Theory]
+    [InlineData("submissions")]
+    [InlineData("allocations")]
+    [InlineData("design-basis")]
+    [InlineData("readiness")]
+    [InlineData("issues")]
+    public async Task Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(string kind)
+    {
+        var project = await d.Project();
+        var task = await d.NewTask(project.Id, TestData.Pm);
+        var ps = kind switch {
+            "submissions" => new Dictionary<string, string> { ["q"] = "Permit", ["status"] = "Ready", ["coordinatorId"] = U(TestData.Alex).ToString(), ["targetFrom"] = "2026-10-01" },
+            "allocations" => new Dictionary<string, string> { ["q"] = "Production", ["personId"] = U(TestData.Alex).ToString(), ["purpose"] = "Production", ["from"] = "2026-10-01" },
+            "design-basis" => new Dictionary<string, string> { ["kind"] = "Assumption", ["discipline"] = d.ProjectDiscipline(project.Id, "Civil").ToString(), ["affectedWorkId"] = task.S("id") },
+            "readiness" => new Dictionary<string, string> { ["from"] = "2026-10-01", ["to"] = "2026-10-14" },
+            _ => new Dictionary<string, string> { ["location"] = "North", ["verification"] = "Open", ["document"] = "Drawing", ["alignment"] = "Road A", ["issueType"] = "Drawing", ["group"] = "location" },
+        };
+        var stored = new Dictionary<string, string>(ps) { ["panel"] = "Task:open", ["allocation"] = "open", ["basis"] = "open" };
+        await f.As(TestData.Alex).Post("/api/v1/views", new { name = "Scoped coordination", listType = kind, projectId = project.Id, @params = stored, isDefault = true }).Result.Json(201);
+        var view = (await Views(TestData.Alex, project.Id, kind))["views"]!.AsArray().Single()!;
+        foreach (var pair in ps) Assert.Equal(pair.Value, view["params"]!.S(pair.Key));
+        Assert.Null(view["params"]!["panel"]); Assert.Null(view["params"]!["allocation"]); Assert.Null(view["params"]!["basis"]);
+        Assert.Empty((await Views(TestData.Jill, project.Id, kind))["views"]!.AsArray());
+        if (kind == "design-basis") {
+            await f.DbAsync(async db => { (await db.Tasks.SingleAsync(t => t.Id == task.G("id"))).DeletedAt = DateTimeOffset.UtcNow; return await db.SaveChangesAsync(); });
+            var cleaned = (await Views(TestData.Alex, project.Id, kind))["views"]!.AsArray().Single()!;
+            Assert.Null(cleaned["params"]!["affectedWorkId"]);
+            Assert.Contains("affectedWorkId", cleaned["dropped"]!.AsArray().Select(x => x!.GetValue<string>()));
+        }
+        await f.DbAsync(async db => { (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted; return await db.SaveChangesAsync(); });
+        await f.As(TestData.Rita).GetAsync($"/api/v1/views?listType={kind}&projectId={project.Id}").Result.Json(404);
+    }
+
     [Fact]
     public async Task Manual_board_order_is_shared_by_the_team() // FR-004, US3, SC-002
     {

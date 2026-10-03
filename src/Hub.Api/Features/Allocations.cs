@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -20,10 +21,24 @@ public static class AllocationEndpoints
     public sealed record ConfirmBody(Guid RequestId, int RowVersion, DateVersionInput[] DateVersions, string? OverCapacityReason);
     public sealed record CapacityDay(DateOnly Date, decimal AvailableHours, decimal ConfirmedHours,
         decimal ProposedHours, decimal ResultingHours, decimal OverByHours, int DateVersion);
+    public sealed record Filter(string? Q, Guid? PersonId, string? Purpose, string? Status, DateOnly? From, DateOnly? To);
+    sealed record AllocationRow(Guid Id, Guid PersonId, string? PersonName, string Purpose, DateOnly FromDate, DateOnly ThroughDate,
+        decimal PlannedHours, string Status, int RowVersion);
+
+    internal static IQueryable<ResourceAllocation> VisibleQuery(HubDb db, Actor actor, IQueryable<Guid> managedProjectIds) =>
+        db.Allocations.AsNoTracking().Where(a => managedProjectIds.Contains(a.ProjectId) || a.CreatedBy == actor.Id || ((actor.Supervisor || actor.Admin)
+            && db.Users.Any(u => u.Id == a.PersonId && (actor.Admin || u.SupervisorId == actor.Id))));
+
+    static readonly Col[] ExportColumns =
+    [
+        new("personName", "person"), new("purpose", "type"), new("fromDate", "date", "date", "From date"),
+        new("throughDate", "date", "date", "Through date"), new("plannedHours", "hours", "number"), new("status", "status"),
+    ];
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/allocations", List);
+        api.MapGet("/projects/{projectId:guid}/allocations/export", ExportRows);
         api.MapGet("/projects/{projectId:guid}/allocations/review-options", ReviewOptions);
         api.MapGet("/projects/{projectId:guid}/allocations/{id:guid}", Detail);
         api.MapPost("/projects/{projectId:guid}/allocations", Create).WithMetadata(new Coordination.AtomicCommand());
@@ -223,16 +238,52 @@ public static class AllocationEndpoints
         });
     }
 
-    static async Task<object> List(Guid projectId, Access access, HubDb db)
+    static IQueryable<ResourceAllocation> Query(Guid projectId, Filter filter, Access access, HubDb db, IQueryable<Guid> managedProjectIds)
+    {
+        var q = VisibleQuery(db, access.Actor, managedProjectIds).Where(a => a.ProjectId == projectId);
+        if (filter.PersonId is { } personId) q = q.Where(a => a.PersonId == personId);
+        if (!string.IsNullOrWhiteSpace(filter.Purpose)) q = q.Where(a => a.Purpose == filter.Purpose);
+        if (!string.IsNullOrWhiteSpace(filter.Status)) q = q.Where(a => a.Status == filter.Status);
+        if (filter.From is { } from) q = q.Where(a => a.ThroughDate >= from);
+        if (filter.To is { } to) q = q.Where(a => a.FromDate <= to);
+        if (!string.IsNullOrWhiteSpace(filter.Q))
+        {
+            var term = $"%{SearchEndpoints.Escape(filter.Q.Trim())}%";
+            q = q.Where(a => EF.Functions.ILike(a.Purpose, term, @"\") || EF.Functions.ILike(a.Status, term, @"\")
+                || db.Users.Any(u => u.Id == a.PersonId && EF.Functions.ILike(u.DisplayName, term, @"\")));
+        }
+        return q;
+    }
+
+    static IQueryable<AllocationRow> Rows(Guid projectId, Filter filter, Access access, HubDb db, IQueryable<Guid> managedProjectIds) =>
+        Query(projectId, filter, access, db, managedProjectIds).OrderBy(a => a.FromDate).ThenBy(a => a.Id)
+            .Select(a => new AllocationRow(a.Id, a.PersonId, db.Users.Where(u => u.Id == a.PersonId).Select(u => u.DisplayName).FirstOrDefault(),
+                a.Purpose, a.FromDate, a.ThroughDate, a.PlannedHours, a.Status, a.RowVersion));
+
+    static async Task<object> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
     {
         var (_, ctx) = await access.Project(projectId, false);
-        var actor = access.Actor;
-        var manager = Permissions.IsPM(actor, ctx);
-        return await db.Allocations.AsNoTracking().Where(a => a.ProjectId == projectId &&
-                (manager || a.CreatedBy == actor.Id || ((actor.Supervisor || actor.Admin) &&
-                    db.Users.Any(u => u.Id == a.PersonId && (actor.Admin || u.SupervisorId == actor.Id)))))
-            .OrderBy(a => a.FromDate).Select(a => new { a.Id, a.PersonId, PersonName = db.Users.Where(u => u.Id == a.PersonId).Select(u => u.DisplayName).FirstOrDefault(), a.Purpose, a.FromDate, a.ThroughDate,
-                a.PlannedHours, a.Status, a.RowVersion }).ToListAsync();
+        Check.That(!filter.From.HasValue || !filter.To.HasValue || filter.To >= filter.From, "to", "error.date_range");
+        var managedProjects = Permissions.IsPM(access.Actor, ctx)
+            ? db.Projects.Where(p => p.Id == projectId).Select(p => p.Id)
+            : db.Projects.Where(_ => false).Select(p => p.Id);
+        var q = Rows(projectId, filter, access, db, managedProjects);
+        var (pg, size) = Http.Paging(page, pageSize);
+        return new Page<AllocationRow>(await q.Skip((pg - 1) * size).Take(size).ToListAsync(), pg, size, await q.CountAsync());
+    }
+
+    static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format, HttpContext http, Access access,
+        HubDb db, SettingsStore store, TimeProvider clock)
+    {
+        var (project, ctx) = await access.Project(projectId, false);
+        Check.That(!filter.From.HasValue || !filter.To.HasValue || filter.To >= filter.From, "to", "error.date_range");
+        var managedProjects = Permissions.IsPM(access.Actor, ctx)
+            ? db.Projects.Where(p => p.Id == projectId).Select(p => p.Id)
+            : db.Projects.Where(_ => false).Select(p => p.Id);
+        var rows = await Rows(projectId, filter, access, db, managedProjects).Take(Export.MaxRows + 1).ToListAsync();
+        return await ExportFile.Send(db, store, format, $"Allocations {project.ProjectNumber}", ExportColumns,
+            JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access), project.Id,
+            $"{project.ProjectNumber}-allocations", clock);
     }
 
     static async Task<object> ReviewOptions(Guid projectId, Access access, HubDb db)

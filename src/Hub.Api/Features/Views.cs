@@ -26,6 +26,11 @@ public static class ViewEndpoints
         ["reviews"] = ["q", "status", "ownerId", "disciplineId", "mine"],
         ["changes"] = ["q", "status", "ownerId", "mine"],
         ["handoffs"] = ["q", "status", "direction", "disciplineId", "overdue"],
+        ["submissions"] = ["q", "status", "coordinatorId", "milestoneId", "targetFrom", "targetTo"],
+        ["allocations"] = ["q", "personId", "purpose", "status", "from", "to"],
+        ["design-basis"] = ["kind", "status", "discipline", "scope", "overdue", "affectedWorkId"],
+        ["readiness"] = ["from", "to"],
+        ["issues"] = ["q", "status", "severity", "ownerId", "disciplineId", "indicator", "location", "document", "revision", "verification", "alignment", "issueType", "stationFrom", "stationTo", "stationUnits", "group", "sort", "cols"],
         ["board"] = [.. TaskKeys, "swim", "side"],
         ["deliverables"] = ["q", "disciplineId", "status", "milestoneId", "ownerId", "typeId", "indicator", "dueFrom", "dueTo", "requiresReview", "group", "sort", "cols"],
         ["decisions"] = ["q", "status", "ownerId", "ownerType", "impact", "requiredFrom", "requiredTo", "blocking", "indicator", "sort", "cols"],
@@ -172,6 +177,10 @@ public static class ViewEndpoints
                 "owner" when projectId is not null => await Count(db.Users.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "deliverableId" => await Count(db.Deliverables.Where(x => ids.Contains(x.Id)).Select(x => x.Id), ids),
                 "milestoneId" => await Count(db.Milestones.Where(x => ids.Contains(x.Id) && !x.IsCancelled).Select(x => x.Id), ids),
+                "coordinatorId" or "personId" when projectId is not null => await Count(db.Users.Where(x => ids.Contains(x.Id) && x.IsActive
+                    && db.ProjectMembers.Any(m => m.ProjectId == projectId && m.UserId == x.Id && m.RemovedAt == null)).Select(x => x.Id), ids),
+                "affectedWorkId" when projectId is not null => await Count(db.Tasks.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.DeletedAt == null).Select(x => x.Id)
+                    .Concat(db.Deliverables.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.DeletedAt == null).Select(x => x.Id)), ids),
                 "assigneeId" or "ownerId" or "pmId" or "supervisorId" => await Count(db.Users.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids)
                     || (k == "ownerId" && await Count(db.ExternalParties.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids)),
                 "typeId" => await Count(db.DeliverableTypes.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),

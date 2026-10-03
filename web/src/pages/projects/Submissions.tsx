@@ -3,11 +3,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ErrorBanner, Field, Loading, Page } from '@/components/hub/common'
+import { ExportMenu } from '@/components/hub/export'
+import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { download, get } from '@/lib/api'
+import { download, get, qs } from '@/lib/api'
 import { fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { useCurrentProject } from './ProjectLayout'
@@ -24,15 +26,24 @@ type Action = { type: 'start' | 'manifest' | 'edit' | 'assign' | 'cancel' | 'iss
 export function SubmissionsTab() {
   const project = useCurrentProject(), qc = useQueryClient(), [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false)
   const page = Math.max(1, Number(sp.get('page')) || 1), panel = sp.get('panel')?.startsWith('SubmissionPackage:') ? sp.get('panel')!.slice(18) : null
+  const filters = Object.fromEntries(['q', 'status', 'coordinatorId', 'milestoneId', 'targetFrom', 'targetTo'].map(k => [k, sp.get(k) ?? '']))
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
   const milestones = useQuery({ queryKey: ['submission-milestones', project.id], queryFn: () => get<Milestone[]>(`projects/${project.id}/milestones?showCompleted=true`) })
-  const list = useQuery({ queryKey: ['submissions', project.id, page], queryFn: () => get<{ items: Row[]; pageSize: number; totalCount: number }>(`projects/${project.id}/submissions?page=${page}`) })
+  const list = useQuery({ queryKey: ['submissions', project.id, filters, page], queryFn: () => get<{ items: Row[]; pageSize: number; totalCount: number }>(`projects/${project.id}/submissions${qs({ ...filters, page })}`) })
   const refresh = () => { qc.invalidateQueries({ queryKey: ['submissions', project.id] }); qc.invalidateQueries({ queryKey: ['submission-detail', project.id] }); qc.invalidateQueries({ queryKey: ['coord-options', project.id] }) }
   const open = (id?: string) => { const next = new URLSearchParams(sp); if (id) next.set('panel', `SubmissionPackage:${id}`); else next.delete('panel'); setSp(next) }
+  const change = (key: string, value: string) => { const next = new URLSearchParams(sp); value ? next.set(key, value) : next.delete(key); if (key !== 'page' && key !== 'panel') next.delete('page'); setSp(next) }
   const canCreate = project.permissions.isPm || (options.data?.manageDisciplineIds.length ?? 0) > 0
-  return <Page title={t('submissions.title')} subtitle={t('submissions.subtitle')} actions={canCreate && <Button size="sm" onClick={() => setAdding(true)}>{t('submissions.new')}</Button>}>
+  return <Page title={t('submissions.title')} subtitle={t('submissions.subtitle')} actions={<><ViewMenu listType="submissions" projectId={project.id} /><ExportMenu path={`projects/${project.id}/submissions/export`} params={filters} name={`${project.projectNumber}-submissions`} />{canCreate && <Button size="sm" onClick={() => setAdding(true)}>{t('submissions.new')}</Button>}</>}>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
     {milestones.error && <ErrorBanner error={milestones.error} retry={() => milestones.refetch()} />}
+    <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-3"><Field label={t('common.search')} htmlFor="submissions-search"><Input id="submissions-search" type="search" value={filters.q} onChange={e => change('q', e.target.value)} /></Field>
+      <SelectField label={t('common.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={['Draft', 'Checking', 'Ready', 'Issued', 'Superseded', 'Cancelled'].map(s => ({ value: s, label: tv(s) }))} />
+      {options.data && <SelectField label={t('coord.coordinator')} value={filters.coordinatorId} onChange={v => change('coordinatorId', v)} required={false} choices={peopleChoices(options.data)} />}
+      {milestones.data && <SelectField label={t('submissions.milestone')} value={filters.milestoneId} onChange={v => change('milestoneId', v)} required={false} choices={milestones.data.map(m => ({ value: m.id, label: `${m.key} · ${m.name}` }))} />}
+      <Field label={`${t('submissions.targetDate')} ${t('common.from')}`} htmlFor="submissions-target-from"><Input id="submissions-target-from" type="date" value={filters.targetFrom} onChange={e => change('targetFrom', e.target.value)} /></Field>
+      <Field label={`${t('submissions.targetDate')} ${t('common.to')}`} htmlFor="submissions-target-to"><Input id="submissions-target-to" type="date" value={filters.targetTo} onChange={e => change('targetTo', e.target.value)} /></Field>
+    </div>
     {list.isPending ? <Loading rows={4} /> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : <>
       <p role="status" className="text-sm text-muted-foreground">{t('coord.count', { n: list.data.totalCount })}</p>
       {!list.data.items.length ? <div className="rounded-lg border bg-card p-8 text-center"><h2 className="font-medium">{t('submissions.empty')}</h2><p className="mt-2 text-sm text-muted-foreground">{t('submissions.emptyHint')}</p></div> :

@@ -12,7 +12,7 @@ namespace Hub.Api.Features;
 public static partial class SearchEndpoints
 {
     public static readonly string[] Groups = ["projects", "tasks", "deliverables", "milestones", "decisions", "handoffs", "reviews", "changes",
-        "constraints", "commitments", "comments", "people"];
+        "submissions", "allocations", "design-basis", "constraints", "commitments", "comments", "people"];
 
     [GeneratedRegex(@"@\[([^\]]+)\]\([0-9a-fA-F-]{36}\)")]
     private static partial Regex Mention();
@@ -28,13 +28,13 @@ public static partial class SearchEndpoints
         return (start > 0 ? "…" : "") + plain[start..end].Trim() + (end < plain.Length ? "…" : "");
     }
 
-    [GeneratedRegex(@"^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H|RV|CH|CT|WC)\d+$", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H|RV|CH|CT|WC|SUB|B)\d+$", RegexOptions.IgnoreCase)]
     public static partial Regex KeyPattern();
 
     public static void Map(RouteGroupBuilder api) => api.MapGet("/search", Search);
 
     /// ILIKE patterns with the caller's text taken literally.
-    static string Escape(string s) => s.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_");
+    internal static string Escape(string s) => s.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_");
 
     // ponytail: ILIKE scans; add pg_trgm GIN indexes on names and keys (§18.2) if search passes 1 s at scale (packet 011).
     static async Task<object> Search(string? q, string? type, bool? includeArchived, int? limit, int? page, Access access, HubDb db, CurrentUser me)
@@ -127,6 +127,33 @@ public static partial class SearchEndpoints
             groups["changes"] = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenByDescending(x => x.UpdatedAt))
                 .Select(x => new { x.Id, x.Key, Name = x.Title, x.Status, ProjectNumber = db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First() }).ToListAsync();
         }
+        if (want.Contains("submissions")) {
+            var rq = db.SubmissionPackages.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Title, contains, @"\")));
+            counts["submissions"] = await rq.CountAsync();
+            groups["submissions"] = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenByDescending(x => x.UpdatedAt).ThenBy(x => x.Id))
+                .Select(x => new { x.Id, x.Key, Name = x.Title, DueDate = x.TargetDate,
+                    ProjectNumber = db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First(),
+                    Owner = db.Users.Where(u => u.Id == x.CoordinatorId).Select(u => u.DisplayName).FirstOrDefault() }).ToListAsync();
+        }
+        if (want.Contains("allocations")) {
+            var actor = access.Actor;
+            var managed = actor.Admin ? ids : projects.Where(p => p.ProjectManagerId == actor.Id
+                || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == actor.Id && m.RemovedAt == null && m.Roles.Contains(ProjectRole.PM))).Select(p => p.Id);
+            var rq = AllocationEndpoints.VisibleQuery(db, actor, managed).Where(x => ids.Contains(x.ProjectId)
+                && (EF.Functions.ILike(x.Purpose, contains, @"\") || db.Users.Any(u => u.Id == x.PersonId && EF.Functions.ILike(u.DisplayName, contains, @"\"))));
+            counts["allocations"] = await rq.CountAsync();
+            groups["allocations"] = await Page(rq.OrderByDescending(x => x.UpdatedAt).ThenBy(x => x.Id)).Select(x => new {
+                x.Id, Name = db.Users.Where(u => u.Id == x.PersonId).Select(u => u.DisplayName).FirstOrDefault() + " · " + x.Purpose,
+                x.Status, DueDate = x.ThroughDate, ProjectNumber = db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First() }).ToListAsync();
+        }
+        if (want.Contains("design-basis")) {
+            var rq = db.DesignBasisEntries.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Title, contains, @"\")));
+            counts["design-basis"] = await rq.CountAsync();
+            groups["design-basis"] = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenByDescending(x => x.UpdatedAt).ThenBy(x => x.Id))
+                .Select(x => new { x.Id, x.Key, Name = x.Title,
+                    ProjectNumber = db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First(),
+                    Owner = db.Users.Where(u => u.Id == x.OwnerId).Select(u => u.DisplayName).FirstOrDefault() }).ToListAsync();
+        }
         if (want.Contains("constraints")) { // packet 032: open the work's readiness inspector
             var rq = db.WorkConstraints.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Description, contains, @"\")));
             counts["constraints"] = await rq.CountAsync();
@@ -209,6 +236,8 @@ public static partial class SearchEndpoints
             ?? await db.Handoffs.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "Handoff", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
         hit ??= await db.ReviewPackages.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "ReviewPackage", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
         hit ??= await db.ChangeNotices.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "ChangeNotice", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
+        hit ??= await db.SubmissionPackages.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "SubmissionPackage", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
+        hit ??= await db.DesignBasisEntries.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "DesignBasisEntry", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
         hit ??= await db.WorkConstraints.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "WorkConstraint", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
         hit ??= await db.OutputCommitments.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new { type = "OutputCommitment", t.Id, t.ProjectId, t.Key }).FirstOrDefaultAsync();
         if (hit is null) return null;

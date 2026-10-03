@@ -125,7 +125,7 @@ function VersionFields({ draft, setDraft }: { draft: VersionDraft; setDraft: (v:
       <Field label={t('basis.sourceId')} htmlFor="basis-source-id"><Input id="basis-source-id" value={draft.stableSourceId} onChange={e => update('stableSourceId', e.target.value)} /></Field></div>
     <Field label={t('basis.sourceUrl')} htmlFor="basis-source-url"><Input id="basis-source-url" type="url" value={draft.sourceUrl} onChange={e => update('sourceUrl', e.target.value)} /></Field>
     <div className="grid gap-3 sm:grid-cols-2"><Field label={t('basis.revision')} htmlFor="basis-revision"><Input id="basis-revision" value={draft.declaredRevision} onChange={e => update('declaredRevision', e.target.value)} /></Field>
-      <Field label={t('basis.due')} htmlFor="basis-due"><Input id="basis-due" type="date" value={draft.confirmationDueDate} onChange={e => update('confirmationDueDate', e.target.value)} /></Field></div>
+      <Field label={t('basis.due')} htmlFor="basis-due"><Input id="basis-due" type="date" required value={draft.confirmationDueDate} onChange={e => update('confirmationDueDate', e.target.value)} /></Field></div>
     <p className="text-xs text-muted-foreground">{t('basis.manual')}</p>
   </div>
 }
@@ -221,7 +221,8 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
             {v.sourceUrl && <a className="text-primary underline" href={v.sourceUrl} target="_blank" rel="noopener noreferrer">{t('basis.sourceUrl')}</a>}
             {v.decisionId && <p><Link className="text-primary underline"
               to={`/projects/${number}/decisions?panel=Decision:${v.decisionId}`}>{t('basis.sourceDecision')}</Link></p>}
-            {v.confirmationDueDate && <p>{t('basis.due')}: {fmtDate(v.confirmationDueDate)}</p>}
+            {v.confirmationDueDate ? <p>{t('basis.due')}: {fmtDate(v.confirmationDueDate)}</p>
+              : v.status === 'Proposed' && <p className="text-warn">{t('basis.due')}: {t('basis.notConfirmed')} — {t('basis.confirmHint')}</p>}
             {v.confirmedAt && <p>{t('basis.confirm')}: {name(v.confirmedBy)} · {fmtDate(v.confirmedAt)} · {v.confirmationRationale}</p>}
           </div>)}</div></section>
         <section><h3 className="font-medium">{t('basis.conflicts')} ({row.conflicts.filter(c => !c.resolved).length})</h3>

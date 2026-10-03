@@ -62,6 +62,7 @@ public sealed class TemplatesTests(HubFactory f)
         var basis = await f.DbAsync(db => db.DesignBasisEntries.Where(x => x.ProjectId == pid).SingleAsync());
         var version = await f.DbAsync(db => db.DesignBasisVersions.SingleAsync(x => x.EntryId == basis.Id));
         Assert.Equal(BasisStatus.Proposed, version.Status);
+        Assert.Null(version.ConfirmationDueDate);
         Assert.Equal("Template bearing criterion", basis.Title);
         Assert.Equal(U(TestData.Marc), basis.OwnerId);
         Assert.Null(basis.CurrentVersionId);

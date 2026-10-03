@@ -14,13 +14,38 @@ public sealed class DesignBasisApiTests(HubFactory f)
     int Version<T>(Guid id) where T : Audited => f.Db(db => db.Set<T>().AsNoTracking().Single(x => x.Id == id).RowVersion);
 
     [Fact]
+    public async Task New_proposed_basis_requires_a_confirmation_due_date()
+    {
+        var project = await data.Project();
+        var civil = data.ProjectDiscipline(project.Id, "Civil");
+        var body = new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion, "Dated basis", data.User(TestData.Alex), civil,
+            data.User(TestData.Marc), new DesignBasisEndpoints.VersionInput("Area A", "Proposed value", null, null,
+                "Manual", null, "https://example.test/source", "A", null, null), null);
+
+        await Post(TestData.Pm, $"/api/v1/projects/{project.Id}/design-basis", body, 400);
+        var dated = body with { RequestId = Guid.NewGuid(), Version = body.Version with { ConfirmationDueDate = new DateOnly(2026, 10, 5) } };
+        var root = $"/api/v1/projects/{project.Id}/design-basis";
+        var entry = await Post(TestData.Pm, root, dated);
+        var entryId = entry.G("id");
+        var versionId = f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == entryId).Id);
+        await Post(TestData.Marc, $"{root}/{entryId}/versions/{versionId}/confirm", new DesignBasisEndpoints.ConfirmBody(
+            Guid.NewGuid(), Version<DesignBasisEntry>(entryId), Version<DesignBasisVersion>(versionId), "Confirm dated basis"));
+        await Post(TestData.Marc, $"{root}/{entryId}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
+            Version<DesignBasisEntry>(entryId), Version<DesignBasisVersion>(versionId), body.Version, "Propose without date"), 400);
+        var proposed = await Post(TestData.Marc, $"{root}/{entryId}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(),
+            Version<DesignBasisEntry>(entryId), Version<DesignBasisVersion>(versionId), dated.Version with { ConfirmationDueDate = new DateOnly(2026, 11, 5) }, "Propose dated replacement"));
+        await Post(TestData.Alex, $"{root}/{entryId}/versions/{proposed.G("id")}/edit", new DesignBasisEndpoints.EditProposedBody(
+            Guid.NewGuid(), Version<DesignBasisEntry>(entryId), Version<DesignBasisVersion>(proposed.G("id")), body.Version, "Edit without date"), 400);
+    }
+
+    [Fact]
     public async Task Scope_edit_and_replacement_require_inspection_of_another_duplicate_entry()
     {
         var project = await data.Project();
         var civil = data.ProjectDiscipline(project.Id, "Civil");
         var root = $"/api/v1/projects/{project.Id}/design-basis";
         var input = new DesignBasisEndpoints.VersionInput("Area A", "Narrative requirement", null, null,
-            "Synthetic report", "SYN-DUP", "https://example.test/source", "A", null, null);
+            "Synthetic report", "SYN-DUP", "https://example.test/source", "A", new DateOnly(2026, 10, 5), null);
         var create = new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion, "Shared criterion",
             data.User(TestData.Alex), civil, data.User(TestData.Marc), input, null);
         var original = await Post(TestData.Pm, root, create);

@@ -17,7 +17,7 @@ import { useCurrentProject } from './ProjectLayout'
 
 type Allocation = { id: string; personId: string; personName: string; purpose: string; fromDate: string; throughDate: string; plannedHours: number; status: string; rowVersion: number }
 type AllocationPage = { items: Allocation[]; page: number; pageSize: number; totalCount: number }
-type Detail = Allocation & { links: { workType: string; workId: string; workDate: string; reviewHours?: number; reviewPackageId?: string }[]; days: { workDate: string; hours: number }[]; overCapacityWarningRecorded: boolean; canConfirm: boolean; canManage: boolean }
+type Detail = Allocation & { personState: 'Eligible' | 'Inactive' | 'Removed' | 'Missing'; personEligible: boolean; confirmedBy?: string; confirmedAt?: string; links: { workType: string; workId: string; workDate: string; reviewHours?: number; reviewPackageId?: string }[]; days: { workDate: string; hours: number }[]; overCapacityWarningRecorded: boolean; canConfirm: boolean; canManage: boolean }
 type Preview = { id: string; rowVersion: number; days: { date: string; availableHours: number; confirmedHours: number; proposedHours: number; resultingHours: number; overByHours: number; dateVersion: number }[] }
 type ReviewOption = { id: string; reviewerId: string; dueDate: string; packageId: string; packageKey: string; packageTitle: string }
 
@@ -120,7 +120,12 @@ function AllocationDetail({ base, id, projectNumber, options, close, refresh }: 
       <DialogHeader><DialogTitle>{t('allocation.detail')}</DialogTitle></DialogHeader>
       {detail.isPending ? <Loading rows={4} /> : detail.error ? <ErrorBanner error={detail.error} retry={() => detail.refetch()} /> : row && <div className="space-y-4 text-sm">
         <p>{row.personName} · {t(`allocation.purpose.${row.purpose}`)} · {row.status}</p>
+        {!row.personEligible && <div role="alert" className="rounded border border-warn p-3 text-warn">
+          <p>{t(row.personState === 'Inactive' ? 'allocation.personInactiveWarning' : row.personState === 'Removed' ? 'allocation.personRemovedWarning' : 'allocation.personMissingWarning')}</p>
+          {row.canManage && <p className="mt-1">{t('allocation.replacePersonHint')}</p>}
+        </div>}
         <p>{fmtDate(row.fromDate)}–{fmtDate(row.throughDate)} · {row.plannedHours} {t('allocation.hours')}</p>
+        {row.confirmedAt && <p className="text-muted-foreground">{t('allocation.confirmationProvenance')} · {fmtDate(row.confirmedAt)}</p>}
         {row.overCapacityWarningRecorded && <p className="rounded border border-warn p-2 text-warn">{t('allocation.overCapacityRecorded')}</p>}
         {row.days.length > 0 && <section><h3 className="font-medium">{t('allocation.daySplits')}</h3><ul className="mt-1 space-y-1">{row.days.map(d =>
           <li key={d.workDate}>{fmtDate(d.workDate)} · {d.hours} {t('allocation.hours')}</li>)}</ul></section>}

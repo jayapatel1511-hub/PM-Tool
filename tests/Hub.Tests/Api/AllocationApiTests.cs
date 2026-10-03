@@ -283,8 +283,8 @@ public sealed class AllocationApiTests(HubFactory f)
             new AllocationEndpoints.ConfirmBody(Guid.NewGuid(), second.I("rowVersion"), Versions(fresh), "Approved overlap"))).Json();
         Assert.Equal(2, f.Db(db => db.Allocations.Count(a => a.PersonId == personId && a.Status == AllocationStatus.Confirmed)));
         var confirmedDetail = await (await f.As(TestData.Pm).GetAsync(firstPath)).Json();
-        Assert.Null(confirmedDetail["confirmationSnapshot"]);
-        Assert.Null(confirmedDetail["overCapacityReason"]);
+        Assert.True(confirmedDetail["overCapacityWarningRecorded"]!.GetValue<bool>());
+        Assert.Equal("Approved overlap", f.Db(db => db.Allocations.Single(a => a.Id == first.G("id")).OverCapacityReason));
         var audit = f.Db(db => db.ActivityLog.Where(log => log.ItemId == first.G("id") && log.ItemType == "ResourceAllocation")
             .OrderByDescending(log => log.OccurredAt).First());
         Assert.Null(audit.Snapshot);
@@ -322,5 +322,103 @@ public sealed class AllocationApiTests(HubFactory f)
         });
         await (await f.As(TestData.Sam).GetAsync($"{root}/{allocation.G("id")}/confirmation-preview")).Json(400);
         Assert.Equal(AllocationStatus.Proposed, f.Db(db => db.Allocations.Single(a => a.Id == allocation.G("id")).Status));
+    }
+
+    [Fact]
+    public async Task Inactive_or_removed_people_keep_allocation_history_and_can_be_replaced()
+    {
+        var project = await data.Project();
+        var root = $"/api/v1/projects/{project.Id}/allocations";
+        var day = new DateOnly(2026, 10, 5);
+
+        async Task<JsonNode> Confirmed(Guid personId)
+        {
+            var task = await data.NewTask(project.Id, extra: new { assigneeId = personId, estimatedHours = 4m, startDate = day, dueDate = day });
+            var allocation = await (await f.As(TestData.Pm).Post(root, new AllocationEndpoints.CreateBody(Guid.NewGuid(), personId,
+                AllocationPurpose.Production, day, day, 4, [], [new("Task", task.G("id"), day)], null))).Json();
+            var preview = await (await f.As(TestData.Sam).GetAsync($"{root}/{allocation.G("id")}/confirmation-preview")).Json();
+            return await (await f.As(TestData.Sam).Post($"{root}/{allocation.G("id")}/confirm", new AllocationEndpoints.ConfirmBody(
+                Guid.NewGuid(), allocation.I("rowVersion"), [new(day, preview["days"]![0]!["dateVersion"]!.GetValue<int>())], null))).Json();
+        }
+
+        async Task ReplaceAndConfirm(JsonNode allocation, Guid replacementId)
+        {
+            var replacementTask = await data.NewTask(project.Id, extra: new { assigneeId = replacementId, estimatedHours = 4m, startDate = day, dueDate = day });
+            var edited = await (await f.As(TestData.Pm).Post($"{root}/{allocation.G("id")}/edit", new AllocationEndpoints.EditBody(
+                Guid.NewGuid(), allocation.I("rowVersion"), replacementId, AllocationPurpose.Production, day, day, 4, [],
+                [new("Task", replacementTask.G("id"), day)], "Replace unavailable person"))).Json();
+            var editedDetail = await (await f.As(TestData.Pm).GetAsync($"{root}/{allocation.G("id")}")).Json();
+            Assert.Equal(AllocationStatus.Proposed, editedDetail.S("status"));
+            Assert.True(editedDetail["personId"]!.GetValue<Guid>() == replacementId);
+            Assert.NotNull(editedDetail["confirmedBy"]);
+            Assert.NotNull(editedDetail["confirmedAt"]);
+            Assert.NotNull(f.Db(db => db.Allocations.Single(a => a.Id == allocation.G("id")).ConfirmationSnapshot));
+            var preview = await (await f.As(TestData.Sam).GetAsync($"{root}/{allocation.G("id")}/confirmation-preview")).Json();
+            await (await f.As(TestData.Sam).Post($"{root}/{allocation.G("id")}/confirm", new AllocationEndpoints.ConfirmBody(
+                Guid.NewGuid(), edited.I("rowVersion"), [new(day, preview["days"]![0]!["dateVersion"]!.GetValue<int>())], null))).Json();
+        }
+
+        var inactive = await FreshReport(project.Id);
+        var inactiveAllocation = await Confirmed(inactive.Id);
+        await f.DbAsync(async db =>
+        {
+            db.Users.Single(u => u.Id == inactive.Id).IsActive = false;
+            return await db.SaveChangesAsync();
+        });
+        var inactiveDetail = await (await f.As(TestData.Pm).GetAsync($"{root}/{inactiveAllocation.G("id")}")).Json();
+        Assert.Equal("Inactive", inactiveDetail.S("personState"));
+        Assert.False(inactiveDetail["personEligible"]!.GetValue<bool>());
+        Assert.False(inactiveDetail["canConfirm"]!.GetValue<bool>());
+        Assert.Equal(AllocationStatus.Confirmed, inactiveDetail.S("status"));
+        await (await f.As(TestData.Sam).GetAsync($"{root}/{inactiveAllocation.G("id")}/confirmation-preview")).Json(400);
+        await ReplaceAndConfirm(inactiveAllocation, (await FreshReport(project.Id)).Id);
+
+        var removed = await FreshReport(project.Id);
+        var removedAllocation = await Confirmed(removed.Id);
+        await f.DbAsync(async db =>
+        {
+            var membership = await db.ProjectMembers.SingleAsync(m => m.ProjectId == project.Id && m.UserId == removed.Id);
+            membership.RemovedAt = f.Clock.GetUtcNow();
+            return await db.SaveChangesAsync();
+        });
+        var removedDetail = await (await f.As(TestData.Pm).GetAsync($"{root}/{removedAllocation.G("id")}")).Json();
+        Assert.Equal("Removed", removedDetail.S("personState"));
+        Assert.False(removedDetail["personEligible"]!.GetValue<bool>());
+        Assert.False(removedDetail["canConfirm"]!.GetValue<bool>());
+        Assert.Equal(AllocationStatus.Confirmed, removedDetail.S("status"));
+        await (await f.As(TestData.Sam).GetAsync($"{root}/{removedAllocation.G("id")}/confirmation-preview")).Json(400);
+        await ReplaceAndConfirm(removedAllocation, (await FreshReport(project.Id)).Id);
+    }
+
+    [Fact]
+    public async Task Date_only_edit_withdraws_confirmation_and_requires_reconfirmation()
+    {
+        var project = await data.Project();
+        var personId = (await FreshReport(project.Id)).Id;
+        var from = new DateOnly(2026, 9, 14);
+        var through = from.AddDays(1);
+        var task = await data.NewTask(project.Id, extra: new { assigneeId = personId, estimatedHours = 4m, startDate = from, dueDate = through });
+        var root = $"/api/v1/projects/{project.Id}/allocations";
+        var created = await (await f.As(TestData.Pm).Post(root, new AllocationEndpoints.CreateBody(Guid.NewGuid(), personId,
+            AllocationPurpose.Production, from, from, 4, [], [new("Task", task.G("id"), from)], null))).Json();
+        var initialPreview = await (await f.As(TestData.Sam).GetAsync($"{root}/{created.G("id")}/confirmation-preview")).Json();
+        var confirmed = await (await f.As(TestData.Sam).Post($"{root}/{created.G("id")}/confirm", new AllocationEndpoints.ConfirmBody(
+            Guid.NewGuid(), created.I("rowVersion"), [new(from, initialPreview["days"]![0]!["dateVersion"]!.GetValue<int>())], null))).Json();
+        var provenance = f.Db(db => db.Allocations.Where(a => a.Id == created.G("id")).Select(a => new { a.ConfirmedBy, a.ConfirmedAt, a.ConfirmationSnapshot }).Single());
+
+        var edited = await (await f.As(TestData.Pm).Post($"{root}/{created.G("id")}/edit", new AllocationEndpoints.EditBody(
+            Guid.NewGuid(), confirmed.I("rowVersion"), personId, AllocationPurpose.Production, through, through, 4, [],
+            [new("Task", task.G("id"), through)], "Move allocation date"))).Json();
+        var editedDetail = await (await f.As(TestData.Pm).GetAsync($"{root}/{created.G("id")}")).Json();
+        Assert.Equal(AllocationStatus.Proposed, editedDetail.S("status"));
+        Assert.Equal(provenance.ConfirmedBy, editedDetail["confirmedBy"]!.GetValue<Guid>());
+        Assert.Equal(provenance.ConfirmedAt, editedDetail["confirmedAt"]!.GetValue<DateTimeOffset>());
+        Assert.Equal(provenance.ConfirmationSnapshot, f.Db(db => db.Allocations.Single(a => a.Id == created.G("id")).ConfirmationSnapshot));
+
+        var reconfirmPreview = await (await f.As(TestData.Sam).GetAsync($"{root}/{created.G("id")}/confirmation-preview")).Json();
+        await (await f.As(TestData.Sam).Post($"{root}/{created.G("id")}/confirm", new AllocationEndpoints.ConfirmBody(
+            Guid.NewGuid(), edited.I("rowVersion"), [new(through, reconfirmPreview["days"]![0]!["dateVersion"]!.GetValue<int>())], null))).Json();
+        var reconfirmedDetail = await (await f.As(TestData.Pm).GetAsync($"{root}/{created.G("id")}")).Json();
+        Assert.Equal(AllocationStatus.Confirmed, reconfirmedDetail.S("status"));
     }
 }

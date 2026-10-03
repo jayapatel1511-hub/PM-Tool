@@ -164,7 +164,9 @@ public static class AllocationEndpoints
     {
         var (project, ctx) = await access.Project(projectId, false);
         var a = await db.Allocations.AsNoTracking().FirstOrDefaultAsync(a => a.ProjectId == projectId && a.Id == id) ?? throw ApiException.NotFound();
-        var supervisorId = await db.Users.Where(u => u.Id == a.PersonId && u.IsActive).Select(u => u.SupervisorId).FirstOrDefaultAsync();
+        var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == a.PersonId);
+        Check.That(person is not null && person.IsActive && await Coordination.People(db, project).AnyAsync(u => u.Id == a.PersonId), "personId", "coord.person");
+        var supervisorId = person!.SupervisorId;
         Access.Demand(Permissions.ConfirmAllocation(access.Actor, ctx, supervisorId));
         Check.That(a.Status == AllocationStatus.Proposed, "status", "error.invalid");
         await ValidateSaved(db, project, a, store);
@@ -176,7 +178,8 @@ public static class AllocationEndpoints
         {
             var a = await db.Allocations.FirstOrDefaultAsync(a => a.ProjectId == project.Id && a.Id == id) ?? throw ApiException.NotFound();
             Coordination.Version(a, body.RowVersion);
-            var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == a.PersonId && u.IsActive) ?? throw ApiException.NotFound();
+            var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == a.PersonId);
+            Check.That(person is not null && person.IsActive && await Coordination.People(db, project).AnyAsync(u => u.Id == a.PersonId), "personId", "coord.person");
             Access.Demand(Permissions.ConfirmAllocation(access.Actor, ctx, person.SupervisorId));
             Check.That(a.Status == AllocationStatus.Proposed, "status", "error.invalid");
             await LockPerson(db, person.Id);
@@ -303,16 +306,18 @@ public static class AllocationEndpoints
 
     static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
     {
-        var (_, ctx) = await access.Project(projectId, false);
+        var (project, ctx) = await access.Project(projectId, false);
         var actor = access.Actor;
         var manager = Permissions.IsPM(actor, ctx);
         var a = await db.Allocations.AsNoTracking().FirstOrDefaultAsync(a => a.ProjectId == projectId && a.Id == id &&
             (manager || a.CreatedBy == actor.Id || ((actor.Supervisor || actor.Admin) &&
                 db.Users.Any(u => u.Id == a.PersonId && (actor.Admin || u.SupervisorId == actor.Id))))) ?? throw ApiException.NotFound();
-        var supervisorId = await db.Users.Where(u => u.Id == a.PersonId).Select(u => u.SupervisorId).FirstOrDefaultAsync();
-        var canConfirm = Permissions.ConfirmAllocation(actor, ctx, supervisorId).Ok;
+        var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == a.PersonId);
+        var personEligible = person is not null && person.IsActive && await Coordination.People(db, project).AnyAsync(u => u.Id == a.PersonId);
+        var personState = person is null ? "Missing" : !person.IsActive ? "Inactive" : personEligible ? "Eligible" : "Removed";
+        var canConfirm = a.Status == AllocationStatus.Proposed && personEligible && Permissions.ConfirmAllocation(actor, ctx, person.SupervisorId).Ok;
         var canManage = Permissions.ProposeAllocation(actor, ctx).Ok && (manager || a.CreatedBy == actor.Id);
-        return new { a.Id, a.ProjectId, a.PersonId, PersonName = await db.Users.Where(u => u.Id == a.PersonId).Select(u => u.DisplayName).FirstOrDefaultAsync(),
+        return new { a.Id, a.ProjectId, a.PersonId, PersonName = person?.DisplayName, PersonState = personState, PersonEligible = personEligible,
             a.Purpose, a.FromDate, a.ThroughDate, a.PlannedHours, a.Status,
             a.ConfirmedBy, a.ConfirmedAt, OverCapacityWarningRecorded = a.OverCapacityReason != null, a.RowVersion, CanConfirm = canConfirm, CanManage = canManage,
             Days = await db.AllocationDayOverrides.AsNoTracking().Where(d => d.AllocationId == id).OrderBy(d => d.WorkDate)
@@ -411,7 +416,6 @@ public static class AllocationEndpoints
                     WorkType = link.WorkType, WorkId = link.WorkId, WorkDate = link.WorkDate, ReviewHours = link.ReviewHours });
             a.PersonId = body.PersonId; a.Purpose = body.Purpose; a.FromDate = body.FromDate; a.ThroughDate = body.ThroughDate;
             a.PlannedHours = body.PlannedHours; a.Status = AllocationRules.AfterMaterialEdit(a.Status);
-            a.ConfirmedBy = null; a.ConfirmedAt = null; a.OverCapacityReason = null; a.ConfirmationSnapshot = null;
             if (wasConfirmed) await TouchDates(db, priorPerson, Enumerable.Range(0, priorThrough.DayNumber - priorFrom.DayNumber + 1)
                 .Select(i => priorFrom.AddDays(i)));
             // A child-only edit must invalidate the allocation version seen by another editor.

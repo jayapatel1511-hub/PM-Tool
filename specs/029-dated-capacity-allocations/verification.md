@@ -56,3 +56,10 @@ This run covers the multi-link proposal, supervisor confirmation, pointer operat
 ## 2026-10-01 Codex recovery checkpoint
 
 Recovered allocation dialog sizing, hour display and overload warning changes were integrated with the browser-recovery commit. The combined PostgreSQL suite passed 563/563. Live supervisor confirmation and company workload acceptance remain UNPROVEN.
+
+
+## Review-purpose browser acceptance — 2026-10-02
+
+PASS locally on application code `7c412b0` (staged release `7995e88`), real IAB browser/API, fresh isolated synthetic database, Development authentication. Review/source setup used the API; allocation commands used the browser. Taylor proposed 4 reserved hours for Yagmur against a current Civil review assignment with 3 explicit review hours. Supervisor preview displayed 8 h available, 1.62 h existing, 5.62 h resulting and no overload. Confirmation survived reload; Review assignment opened the exact DEMO-101-RV001 panel. A reasoned edit to 5 reserved hours returned the allocation to Proposed and retained 3 h linked effort after reload. Browser errors: zero. Native date defaults were used; no date-entry result is claimed. The isolated database is disposable and separate from review/company data.
+
+This closes the earlier unrun Review-purpose submission/source-navigation slice. Hosted password, restricted-project browser privacy, assistive-technology and company acceptance remain UNPROVEN. Screenshots and credential-free assertions are retained under `/private/tmp/pm-review-allocation-*`.

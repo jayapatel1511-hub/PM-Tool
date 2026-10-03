@@ -1,6 +1,6 @@
 # Review release gates — 2026-09-27
 
-Branch `codex/pm-review-release` and draft PR #13. This record is for the current increment; update it when later packets or environment checks change the evidence.
+Historical increment record. For current merge, CI, recovery and activation observations, use [the combined candidate checkpoint](2026-10-02-combined-candidate.md). PR #13 is now merged; the older rows below retain their original revision/environment scope.
 
 | Gate | Result | Evidence and limit |
 |---|---|---|

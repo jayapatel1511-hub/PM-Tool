@@ -21,8 +21,8 @@ environment to `Production` would currently break sign-in. No Azure identity is 
 
 | Gate | Evidence required | Current status |
 |---|---|---|
-| Exact code revision | Passing CI and reviewed changes for the deployed full SHA; merge status recorded separately | UNPROVEN for final production revision; PR #13 is draft |
-| Review deployment | Current release pointer, database migration and preserved synthetic records, trusted HTTPS and browser workflows | UNPROVEN; image build alone does not prove activation |
+| Exact code revision | Passing CI and reviewed changes for the deployed full SHA; merge status recorded separately | PR #13 merged at `db2f09fd`; candidate `7995e88` and merged-main CI passed. Final company production revision/acceptance remains UNPROVEN |
+| Review deployment | Current release pointer, database migration and preserved synthetic records, trusted HTTPS and browser workflows | PARTIAL: review `b155601` is live; `7995e88` is staged and awaits interactive sudo activation. See the combined checkpoint |
 | Company approval | Approved homedev hosting, data classification, hostname and individual-password authentication; sponsor and support owner | UNPROVEN; see pilot approvals |
 | Pilot acceptance | Real participants complete the agreed workflows and record go/no-go | UNPROVEN |
 | Accounts | First Admin bootstrap and audit entry, Admin-created users, private delivery and handoff deletion, wrong-password denial, non-Admin 403, inactive-user 401, and rotation/removal rejecting an existing cookie | UNPROVEN on hosted company stack |
@@ -51,6 +51,5 @@ forward or perform a controlled restore with an explicit data-loss decision. Kee
 
 Proposed homedev targets are a 24-hour local RPO, 24-hour off-host RPO only while the scheduled copy actually runs,
 and an 8-hour RTO with the host intact. Keep daily dumps for 14 days; company approval must record whether these
-targets and longer retention are acceptable. The encrypted off-host destination and retrieval procedure remain
-unapproved here; no working schedule or host-loss recovery is claimed. Verify and record those gates before go-live. Azure PITR,
+targets and longer retention are acceptable. Jay approved the review recovery payload in the existing encrypted Mac restic repository, and retrieval plus isolated restore passed. This approval/evidence applies to review data; company-data approval, a working off-host schedule and host-loss recovery remain unproven. Verify and record those gates before go-live. Azure PITR,
 managed identity, paid monitoring and Azure mail integrations are not assumed capabilities of this deployment.

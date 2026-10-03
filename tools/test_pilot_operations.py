@@ -117,7 +117,7 @@ mv() { return 98; }
             sudo = fakebin / "sudo"
             sudo.write_text("#!/usr/bin/env python3\nimport os,sys\na=sys.argv[1:]\nif a and a[0]=='-v': sys.exit(0)\nwhile a and '=' in a[0] and not a[0].startswith('-'): a.pop(0)\nos.execvpe(a[0],a,os.environ)\n")
             docker = fakebin / "docker"
-            docker.write_text("#!/usr/bin/env python3\nimport os,sys\np=sys.stdin.buffer.read(); open(os.environ['FAKE_IO'],'ab').write(b'---\\n'+p+b'\\n'); a=sys.argv[1:]\nif a[:1]==['inspect']:\n f=a[a.index('--format')+1] if '--format' in a else ''\n print('healthy' if 'Health.Status' in f else 'pm-tool-pilot' if 'compose.project' in f else 'db' if 'compose.service' in f else 'pm-tool-pilot-db')\nelif 'compose' in a and 'exec' in a:\n sys.stdout.buffer.write(b'synthetic-dump' if 'pg_dump' in a else b'2\\n' if 'psql' in a else b'')\n")
+            docker.write_text("#!/usr/bin/env python3\nimport os,sys\np=sys.stdin.buffer.read(); open(os.environ['FAKE_IO'],'ab').write(b'---\\n'+p+b'\\n'); a=sys.argv[1:]\nif 'pg_restore' in a and a[-1:] == ['-']: sys.exit(2)\nif a[:1]==['inspect']:\n f=a[a.index('--format')+1] if '--format' in a else ''\n print('healthy' if 'Health.Status' in f else 'pm-tool-pilot' if 'compose.project' in f else 'db' if 'compose.service' in f else 'pm-tool-pilot-db')\nelif 'compose' in a and 'exec' in a:\n sys.stdout.buffer.write(b'synthetic-dump' if 'pg_dump' in a else b'2\\n' if 'psql' in a else b'')\n")
             for path in (sudo, docker): path.chmod(0o755)
             env = {**os.environ, "PATH": f"{fakebin}:{os.environ['PATH']}", "FAKE_IO": str(log), "RELEASE_SHA": "a" * 40}
             terminal = b"terminal-secret-must-not-reach-docker"

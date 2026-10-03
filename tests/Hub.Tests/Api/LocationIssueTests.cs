@@ -228,6 +228,33 @@ public sealed class LocationIssueTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Valid_coordinate_preserves_declared_values_and_reference_metadata_on_readback()
+    {
+        var p = await d.Project();
+        var issue = await (await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/issues", new
+        {
+            title = "Coordinate preservation", severity = "Low", issueType = "General",
+            projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil")
+        })).Json(201);
+        var id = issue.G("id");
+        const decimal x = 123.456m, y = -7.25m, z = 0.5m;
+
+        await (await f.As(TestData.Alex).Post($"/api/v1/issues/{id}/locations", new
+        {
+            kind = "Coordinate", coordinateX = x, coordinateY = y, coordinateZ = z,
+            coordinateReferenceSystem = "EPSG:26920", coordinateUnits = "m", rowVersion = await IssueVersion(id)
+        })).Json(201);
+
+        var saved = Assert.Single((await (await f.As(TestData.Alex).GetAsync($"/api/v1/issues/{id}/locations")).Json()).AsArray());
+        Assert.Equal("Coordinate", saved!.S("kind"));
+        Assert.Equal(x, saved["coordinateX"]!.GetValue<decimal>());
+        Assert.Equal(y, saved["coordinateY"]!.GetValue<decimal>());
+        Assert.Equal(z, saved["coordinateZ"]!.GetValue<decimal>());
+        Assert.Equal("EPSG:26920", saved.S("coordinateReferenceSystem"));
+        Assert.Equal("m", saved.S("coordinateUnits"));
+    }
+
+    [Fact]
     public async Task Appointed_non_owner_verifier_decides_and_latest_rejection_blocks_resolution()
     {
         var p = await d.Project();

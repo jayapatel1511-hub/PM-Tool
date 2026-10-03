@@ -108,3 +108,8 @@ Evidence:
 ## 2026-10-01 Codex recovery checkpoint
 
 Recovered grouping places one handoff blocker above its affected tasks, with live source/action links. Focused handoff/grouping checks passed 14/14 and the combined PostgreSQL suite passed 563/563 before subsequent readiness/export additions. Full location workflow, source/register reconciliation, print/export and company engineering acceptance remain UNPROVEN.
+
+
+## Declared-coordinate persistence check — 2026-10-02
+
+PASS locally: `Valid_coordinate_preserves_declared_values_and_reference_metadata_on_readback` (1/1) creates a fresh General issue, stores one Coordinate location, and reads back the exact decimal X/Y/Z values (including negative Y), declared CRS `EPSG:26920` and units `m`, with no conversion or duplicate location. This is synthetic metadata preservation, not validation of an engineering survey or coordinate transformation. Application code is unchanged from `7c412b0` / staged release `7995e88`. Full hosted and assistive-technology acceptance remain unproven.

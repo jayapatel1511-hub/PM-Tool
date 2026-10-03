@@ -2,6 +2,8 @@
 
 ## Current homedev recovery
 
+Latest bounded evidence: [both first scheduled local backups and approved review retrieval/restore](../reviews/2026-10-03-scheduled-recovery-ac494a8b.md) passed on October 3. Review retrieval/restore passed at 22:03 UTC; the pilot logical dump and verified physical base completed at 22:15 UTC. Earlier timer statements below record their own pre-trigger checkpoint. Full application recovery and production targets remain unproven.
+
 Review, company pilot and production remain on homedev; no Azure or new paid service is required. Use the existing
 [homedev review runbook](homedev-review.md) for private dumps and isolated restore drills, and the separate
 [pilot/production gates](../pilot/production-readiness.md) for company data and cutover. Review and pilot credentials,

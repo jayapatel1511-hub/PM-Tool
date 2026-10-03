@@ -60,3 +60,7 @@ The combined increment passed 27 focused PostgreSQL cases across the final runs,
 ## Completion correction checkpoint — 2026-10-03
 
 See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) for exact implementation commits, focused regression evidence and remaining combined/hosted gates. The earlier `26c0ae1` candidate is held. This checkpoint does not close T006 or claim final hosted/company acceptance; live review remains `02ca7cd` pending activation of the corrected candidate.
+
+## Bounded hosted metadata edit — 2026-10-03 22:09 UTC
+
+On executable `ac494a8ba70d50517f540ad7e0acced85d84897e`, one new labelled synthetic package passed coordinator metadata editing, noncoordinator 403s, stale-version 409, source/milestone preservation and immutable historical manifest/check comparison through public HTTPS. The real JSON export retained both versions and all 14 checks. The initial signed-in browser showed the edited metadata and version 2; full reload reached sign-in and remains UNPROVEN. See the [scheduled recovery/metadata checkpoint](../../docs/reviews/2026-10-03-scheduled-recovery-ac494a8b.md) for evidence and the candidate fix for a missing reviewer being labelled unavailable. This closes the dedicated metadata API slice only; notification preferences/delivery, other lifecycle/access/concurrency scenarios, complete accessibility and company acceptance remain open.

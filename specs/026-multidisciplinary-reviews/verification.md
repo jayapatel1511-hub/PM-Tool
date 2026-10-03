@@ -76,3 +76,8 @@ Independent rehearsal on worktree head `b155601` against the real API and a fres
 | Two-context stale decision | PASS | Sam's second tab got 409 with the "This record changed…" guidance; the first tab's In Review decision and rationale were kept |
 
 Observation: after the required package returned to Draft, D002 still displayed Ready to Issue; issue itself was correctly refused. NOT RUN: keyboard-only and screen-reader use, other browsers, load, hosted/homedev and company reviewer acceptance. T006 stays open.
+
+
+## Hosted AC-MRV-05 checkpoint — 2026-10-03 20:28 UTC
+
+On executable `ac494a8ba70d50517f540ad7e0acced85d84897e`, a fresh labelled synthetic source A review received independent Civil/Electrical approvals. Publishing B reset the package to a new Draft/Pending round. Required-discipline removal without a reason or impact was refused without changes; justified removal created a third Draft/Pending round. Original approved assignments and immutable A manifest remained intact. The signed-in public browser showed current B/Pending and historical A approvals, then returned to the current round after full reload. See the [bounded hosted acceptance checkpoint](../../docs/reviews/2026-10-03-hosted-acceptance-ac494a8b.md). This does not close all packet or company acceptance.

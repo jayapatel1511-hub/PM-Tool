@@ -145,3 +145,9 @@ The combined increment passed 27 focused PostgreSQL cases across the final runs,
 ## Completion correction checkpoint — 2026-10-03
 
 See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) for exact implementation commits, focused regression evidence and remaining combined/hosted gates. The earlier `26c0ae1` candidate is held. This checkpoint does not close T006 or claim final hosted/company acceptance; live review remains `02ca7cd` pending activation of the corrected candidate.
+
+## Hosted unresolved-conflict/current-use slice — 2026-10-03
+
+On executable `ac494a8ba70d50517f540ad7e0acced85d84897e`, two new independently confirmed fictional narrative assumptions in `SYNTH-GATES-1003` retained their own current confirmed versions and one shared unresolved conflict. The existing exact A use stayed unchanged when B was confirmed, and a second consumer explicitly linked B. Both consumers' derived Basis checks were applicable and unsatisfied; their whole assessment states were Needs Assessment while other inputs remained unknown. Task dates and completion stayed unchanged. The signed-in public register and inspector displayed both conflicting values, the original current use and one conflict on each entry after full reload.
+
+This is PASS for a bounded AC-BAS-04 slice, not replacement/adoption, template copy, complete readiness, assistive technology or company engineering acceptance. Credential-free evidence is `pm-tool/data/hosted-basis-conflict-ac494a8b.json`. See the [hosted acceptance checkpoint](../../docs/reviews/2026-10-03-hosted-acceptance-ac494a8b.md); T006 remains open.

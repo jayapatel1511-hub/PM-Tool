@@ -1,5 +1,7 @@
 # Completion audit and release checkpoint — 2026-10-03
 
+Later bounded public HTTPS/browser observations are recorded in the [hosted acceptance checkpoint](2026-10-03-hosted-acceptance-ac494a8b.md). Application source remains `ac494a8b`; PR #32 merged-main CI also passed. These new observations do not make company pilot or production acceptance complete.
+
 This record supersedes any claim that `26c0ae1` completes packets 025–033. That candidate passed its bounded CI/image checks and PR #24 merged, but subsequent source/specification review found required behavior still missing. Its activation is held. The earlier public review executable `211bd88649e288484901aba6946fdd0e2e29dd17` was activated on 2026-10-03 at 14:06:40 UTC; the current executable is recorded below. The 06:55 checkpoint below is historical; the hosted checkpoint records subsequent evidence. A newer implementation commit is not evidence of deployment or company acceptance.
 
 ## Current location release checkpoint — 2026-10-03 19:33 UTC

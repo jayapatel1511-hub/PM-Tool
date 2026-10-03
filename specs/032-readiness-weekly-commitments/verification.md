@@ -359,3 +359,9 @@ The combined increment passed 27 focused PostgreSQL cases across the final runs,
 ## Completion correction checkpoint — 2026-10-03
 
 See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) for exact implementation commits, focused regression evidence and remaining combined/hosted gates. The earlier `26c0ae1` candidate is held. This checkpoint does not close T006 or claim final hosted/company acceptance; live review remains `02ca7cd` pending activation of the corrected candidate.
+
+## Hosted five-promise freeze/withdrawal slice — 2026-10-03
+
+On executable `ac494a8ba70d50517f540ad7e0acced85d84897e`, Taylor proposed five new labelled synthetic outputs and Jay confirmed each before the Tuesday week beginning 2026-09-29 was frozen. Withdrawing one after the snapshot retained all five original promise IDs/content and the immutable denominator of five; the remaining four stayed Committed. The signed-in browser displayed five original promises and one later withdrawal after full reload. The actual CSV response matched all five outputs, criteria, recorded weeks, target dates, readiness and states. Task original/due dates, progress and completion status did not change.
+
+The helper initially submitted a version from before snapshot capture and received 409 without adding history. A targeted retry read the fresh version and resumed only those same five journalled promises, creating no duplicate work or snapshot. PASS covers AC-RDY-04 and a bounded chair/performer slice; complete AC-RDY-05 permissions/notifications, native download, assistive technology and company acceptance remain UNPROVEN. Credential-free evidence is `pm-tool/data/hosted-weekly-five-ac494a8b.json` and `hosted-weekly-export-ac494a8b.json`. See the [hosted acceptance checkpoint](../../docs/reviews/2026-10-03-hosted-acceptance-ac494a8b.md); T006 remains open.

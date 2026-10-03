@@ -161,6 +161,38 @@ public sealed class SurfacesTests(HubFactory f)
     }
 
     [Fact]
+    public async Task My_staff_last_activity_counts_only_activity_the_supervisor_may_see() // AC-ASG-09
+    {
+        var supervisor = $"s{Guid.NewGuid().ToString("N")[..8]}@hub.test";
+        var report = $"r{Guid.NewGuid().ToString("N")[..8]}@hub.test";
+        HttpClient Supervisor() => f.As(supervisor, "Hub.Supervisor");
+        await Supervisor().GetAsync("/api/v1/me").Result.Json();
+        await f.As(report).GetAsync("/api/v1/me").Result.Json();
+        var row = (await f.As(TestData.Admin).GetAsync($"/api/v1/admin/users?q={report}").Result.Json())[0]!;
+        (await f.As(TestData.Admin).Patch($"/api/v1/admin/users/{row.S("id")}", new { supervisorId = U(supervisor) }, row.I("rowVersion"))).EnsureSuccessStatusCode();
+        async Task<JsonNode?> LastActivity() => (await Supervisor().GetAsync("/api/v1/staff").Result.Json())["people"]!.AsArray()
+            .Single(x => x!.G("id") == row.G("id"))!["lastActivityAt"];
+        async Task CommentAsReport(Guid projectId)
+        {
+            await f.As(TestData.Pm).Post($"/api/v1/projects/{projectId}/members", new { userId = row.G("id"), roles = new[] { "TeamMember" } }).Result.Json(201);
+            var task = await d.NewTask(projectId, TestData.Pm);
+            await f.As(report).Post($"/api/v1/items/Task/{task.S("id")}/comments", new { body = "Checked the grading levels" }).Result.Json(201);
+        }
+
+        await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true }).Result.Json();
+        try
+        {
+            var hidden = await d.Project();
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{hidden.Id}", new { visibility = Visibility.Restricted }, d.Version(hidden.Id))).EnsureSuccessStatusCode();
+            await CommentAsReport(hidden.Id);
+            Assert.Null(await LastActivity()); // the report's only activity is in a project the supervisor cannot see
+        }
+        finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }).Result.Json(); }
+        await CommentAsReport((await d.Project()).Id);
+        Assert.NotNull(await LastActivity());
+    }
+
+    [Fact]
     public async Task My_staff_scopes_counts_and_staffing() // AC-ASG-07, AC-ASG-08, AC-ASG-09, ASG-10
     {
         var sam = f.As(TestData.Sam);

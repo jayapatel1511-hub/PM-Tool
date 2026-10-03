@@ -1,5 +1,7 @@
 # Verification: Discipline Coordination View
 
+**Current checkpoint — 2026-10-03:** the dated increments below retain historical failures. The deployed `ac494a8b` source includes the handoff-refresh correction: `HandoffsTab.refresh()` calls `useCoordRefresh()`, which invalidates the `['p', projectId]` prefix used by the discipline projection; that projection also uses `staleTime: 0`. The earlier claim that this invalidation is absent is superseded. This source finding does not by itself close full hosted saved-view acceptance. Native print remains UNPROVEN because the current print was cancelled without saving a PDF. See the [completion audit](../../docs/reviews/2026-10-03-completion-audit.md) and [current hosted evidence](../../docs/reviews/2026-10-03-hosted-acceptance-ac494a8b.md).
+
 **Date**: 2026-09-26
 **State**: Partial project Coordination view implemented in the isolated review worktree; full packet acceptance remains unproven.
 

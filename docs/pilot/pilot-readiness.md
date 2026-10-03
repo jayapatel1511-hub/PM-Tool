@@ -1,13 +1,15 @@
 # Pilot readiness: homedev company pilot
 
+Latest deployed checkpoint: [submission label release 29b3d703](../reviews/2026-10-03-submission-label-29b3d703.md). Both separate runtimes run that executable; PR #34 is merged, candidate/main CI passed, current-data preservation passed, and the first scheduled pilot dump restored with 10 projects. Fresh signed-in browser label verification remains UNPROVEN. Historical checkpoints below retain their own revision and time.
+
 Checklist for moving from the synthetic review release to the company pilot on homedev. It lists what must be true
 and who proves it; it is not a readiness claim. Run the pilot itself with the [pilot plan][plan]; homedev production
-is covered by [production readiness][prod]. Both public review (`3080`) and the separate private synthetic pilot (`3081`) now run executable **`ac494a8ba70d50517f540ad7e0acced85d84897e`**. PR #31 merged at `1175598d732ab890b48fef18ada32ae22b86e200`; candidate and main CI passed 858 tests with equal source trees.
+is covered by [production readiness][prod]. Both public review (`3080`) and the separate private synthetic pilot (`3081`) now run executable **`29b3d7036f529b513fdc2ad47cff62a0b75f0b59`**. The following PR #31 evidence is historical. PR #31 merged at `1175598d732ab890b48fef18ada32ae22b86e200`; candidate and main CI passed 858 tests with equal source trees.
 Historical public activation checks, hosted workflow slices and signed-in browser checks are recorded in the
 [completion checkpoint](../reviews/2026-10-03-completion-audit.md); they do not close every packet or company acceptance.
 The private synthetic pilot activation and 30-user/10-project rehearsal are complete; company acceptance remains open.
 
-## Current location release checkpoint — 2026-10-03 19:33 UTC
+## Historical location release checkpoint — 2026-10-03 19:33 UTC
 
 Both isolated homedev runtimes now use executable `ac494a8ba70d50517f540ad7e0acced85d84897e`: public synthetic review on loopback `3080` at `https://pm.engcalchub.com`, and private synthetic pilot on loopback `3081`. PR #31 merged at `1175598d732ab890b48fef18ada32ae22b86e200`; candidate/main trees equal `3d8ac30d508340c7fea4aae57636f5634321d633`. Candidate CI `37146135878` and merged-main CI `37146643841` passed, including 858 API/rules tests and the three browser suites.
 

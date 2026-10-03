@@ -2,6 +2,8 @@
 
 ## Current homedev recovery
 
+The [later 29b3d703 activation](../reviews/2026-10-03-submission-label-29b3d703.md) restored the first automatic pilot dump into an isolated drill database with 10 projects at 22:43 UTC. Both backup timers remain active; no pilot recovery payload was transferred off-host.
+
 Latest bounded evidence: [both first scheduled local backups and approved review retrieval/restore](../reviews/2026-10-03-scheduled-recovery-ac494a8b.md) passed on October 3. Review retrieval/restore passed at 22:03 UTC; the pilot logical dump and verified physical base completed at 22:15 UTC. Earlier timer statements below record their own pre-trigger checkpoint. Full application recovery and production targets remain unproven.
 
 Review, company pilot and production remain on homedev; no Azure or new paid service is required. Use the existing

@@ -64,3 +64,7 @@ See [the completion audit](../../docs/reviews/2026-10-03-completion-audit.md) fo
 ## Bounded hosted metadata edit — 2026-10-03 22:09 UTC
 
 On executable `ac494a8ba70d50517f540ad7e0acced85d84897e`, one new labelled synthetic package passed coordinator metadata editing, noncoordinator 403s, stale-version 409, source/milestone preservation and immutable historical manifest/check comparison through public HTTPS. The real JSON export retained both versions and all 14 checks. The initial signed-in browser showed the edited metadata and version 2; full reload reached sign-in and remains UNPROVEN. See the [scheduled recovery/metadata checkpoint](../../docs/reviews/2026-10-03-scheduled-recovery-ac494a8b.md) for evidence and the candidate fix for a missing reviewer being labelled unavailable. This closes the dedicated metadata API slice only; notification preferences/delivery, other lifecycle/access/concurrency scenarios, complete accessibility and company acceptance remain open.
+
+## Hosted missing-owner label activation — 2026-10-03
+
+The [29b3d703 checkpoint](../../docs/reviews/2026-10-03-submission-label-29b3d703.md) records PR #34, passing candidate/main CI and activation in the separate review and pilot runtimes. A fresh read-only HTTPS check preserved edited SUB002 metadata, Checking/manifest 2 and both historical export versions with 14 checks. Fresh signed-in browser label and full-reload verification remain UNPROVEN pending sign-in; full packet and company acceptance remain open.

@@ -1,5 +1,7 @@
 # Production readiness: homedev
 
+Latest deployed checkpoint: [submission label release 29b3d703](../reviews/2026-10-03-submission-label-29b3d703.md). Both separate runtimes run that executable; PR #34 is merged, candidate/main CI passed, current-data preservation passed, and the first scheduled pilot dump restored with 10 projects. Fresh signed-in browser label verification remains UNPROVEN. Historical checkpoints below retain their own revision and time.
+
 The later [scheduled recovery checkpoint](../reviews/2026-10-03-scheduled-recovery-ac494a8b.md) proves both first automatic local backups, the pilot physical-base verification and approved encrypted review retrieval/restore. Historical pre-trigger timer statements below do not describe that later result. This does not close company recovery or production acceptance.
 
 Jay clarified on 2026-10-01 that review, company pilot and production stay on homedev. No Azure deployment or new
@@ -8,7 +10,7 @@ production gates. Use `pm.engcalchub.com`, the existing Cloudflare tunnel infras
 with credentials outside Git. This document records preparation, not deployment or company acceptance.
 
 Both public review (`3080`) and the separate private synthetic pilot (`3081`) use executable
-`ac494a8ba70d50517f540ad7e0acced85d84897e`. The current location checkpoint below records merged CI,
+`29b3d7036f529b513fdc2ad47cff62a0b75f0b59`. The historical location checkpoint below records merged CI,
 activation and live browser/export evidence. The 18:24 30-user/10-project rehearsal on `3bfea232` passed
 its bounded sign-in, project-access, logical-restore and paused native-PITR checks. That historical drill was
 not repeated for this client form release. Neither result makes production live or establishes company acceptance.
@@ -25,7 +27,7 @@ local passwords in `Production`. A business production release and that runtime 
 facts. Keep the reviewed configuration until its security controls and company acceptance are proven; setting the
 environment to `Production` would currently break sign-in. No Azure identity is required to use local accounts.
 
-## Current location release checkpoint — 2026-10-03 19:33 UTC
+## Historical location release checkpoint — 2026-10-03 19:33 UTC
 
 Both isolated homedev runtimes now use executable `ac494a8ba70d50517f540ad7e0acced85d84897e`: public synthetic review on loopback `3080` at `https://pm.engcalchub.com`, and private synthetic pilot on loopback `3081`. PR #31 merged at `1175598d732ab890b48fef18ada32ae22b86e200`; candidate/main trees equal `3d8ac30d508340c7fea4aae57636f5634321d633`. Candidate CI `37146135878` and merged-main CI `37146643841` passed, including 858 API/rules tests and the three browser suites.
 
@@ -39,8 +41,8 @@ Both system-level backup timers are active, due at 22:00 UTC (review) and 22:15 
 
 | Gate | Evidence required | Current status |
 |---|---|---|
-| Exact code revision | Passing CI and reviewed changes for the deployed full SHA; merge status recorded separately | Both current executables `ac494a8ba70d50517f540ad7e0acced85d84897e`, PR #31 merged at `1175598d732ab890b48fef18ada32ae22b86e200`, equal trees; candidate CI `37146135878` and main CI `37146643841` PASS including 858 tests. The `211bd88` / `3bfea232` workflow and recovery results below are historical. Full company acceptance remains UNPROVEN |
-| Review deployment | Current release pointer, database migration and preserved synthetic records, trusted HTTPS and browser workflows | PASS for current `ac494a8b` pointers, 10/10 private and 9/9 public probes, and the live location checks above. Historical `211bd88` checks covered exact image/volume, HTTP 307/HTTPS, preserved original marker/tasks, signed-in narrow-screen controls and populated workflow slices. Native print and full company acceptance remain UNPROVEN. See the completion checkpoint |
+| Exact code revision | Passing CI and reviewed changes for the deployed full SHA; merge status recorded separately | Both current executables `29b3d7036f529b513fdc2ad47cff62a0b75f0b59`; PR #34 merged at `fbb6f34efc55308e4a8decddb7db05ad6800ea5d`, equal trees. Candidate CI `37158060280` and main CI `37159018378` passed 858 tests each. Full company acceptance remains UNPROVEN |
+| Review deployment | Current release pointer, database migration and preserved synthetic records, trusted HTTPS and browser workflows | PASS for current `29b3d703` pointers, 10/10 private probes on each runtime, 9/9 public review probes and current-data preservation. The one-line label change adds no migration. Fresh signed-in browser label/full-reload verification, native print and full company acceptance remain UNPROVEN; earlier location/workflow checks retain their own revision |
 | Company approval | Approved homedev hosting, data classification, hostname and individual-password authentication; sponsor and support owner | UNPROVEN; see pilot approvals |
 | Pilot acceptance | Real participants complete the agreed workflows and record go/no-go | UNPROVEN |
 | Accounts | First Admin bootstrap and audit entry, Admin-created users, private delivery and handoff deletion, wrong-password denial, non-Admin 403, inactive-user 401, and rotation/removal rejecting an existing cookie | UNPROVEN on hosted company stack |

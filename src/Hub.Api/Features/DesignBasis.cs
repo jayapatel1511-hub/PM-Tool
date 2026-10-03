@@ -156,7 +156,7 @@ public static class DesignBasisEndpoints
         });
 
     static Task<Coordination.Result> EditProposed(Guid projectId, Guid id, Guid versionId, EditProposedBody body,
-        Access access, HubDb db, TimeProvider clock) =>
+        Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "basis.edit-proposed", id, versionId, body }, access, db, clock,
             async (project, ctx) =>
             {
@@ -185,7 +185,7 @@ public static class DesignBasisEndpoints
                 version.ConfirmationDueDate = revised.ConfirmationDueDate;
                 version.DecisionId = revised.DecisionId;
                 db.Audit.Note(version, reason: Check.Reason(body.Reason));
-                await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id);
+                await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id, notify);
                 return version;
             });
 
@@ -275,7 +275,7 @@ public static class DesignBasisEndpoints
             if (conflictOwners.Count > 0)
                 await Notify(notify, project, entry, NotificationEvents.BasisConflictRaised, [entry.OwnerId, .. conflictOwners],
                     Text.Get("notify.basis_conflict", entry.Key));
-            await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id);
+            await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id, notify);
             return version;
         });
 
@@ -316,7 +316,7 @@ public static class DesignBasisEndpoints
             }
             db.Audit.Note(version, action: "Withdrawn", reason: reason);
             db.Audit.Note(entry, reason: reason);
-            await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id);
+            await SubmissionEndpoints.InvalidateForDesignBasisEntry(db, project.Id, entry.Id, notify);
             return version;
         });
 

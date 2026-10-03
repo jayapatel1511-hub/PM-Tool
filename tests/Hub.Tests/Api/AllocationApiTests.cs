@@ -371,6 +371,8 @@ public sealed class AllocationApiTests(HubFactory f)
         Assert.False(inactiveDetail["canConfirm"]!.GetValue<bool>());
         Assert.Equal(AllocationStatus.Confirmed, inactiveDetail.S("status"));
         await (await f.As(TestData.Sam).GetAsync($"{root}/{inactiveAllocation.G("id")}/confirmation-preview")).Json(400);
+        var inactiveAllocationList = await (await f.As(TestData.Pm).GetAsync(root)).Json();
+        Assert.Equal("Inactive", inactiveAllocationList["items"]!.AsArray().Single(a => a!.G("id") == inactiveAllocation.G("id"))!.S("personState"));
         await ReplaceAndConfirm(inactiveAllocation, (await FreshReport(project.Id)).Id);
 
         var removed = await FreshReport(project.Id);
@@ -387,6 +389,8 @@ public sealed class AllocationApiTests(HubFactory f)
         Assert.False(removedDetail["canConfirm"]!.GetValue<bool>());
         Assert.Equal(AllocationStatus.Confirmed, removedDetail.S("status"));
         await (await f.As(TestData.Sam).GetAsync($"{root}/{removedAllocation.G("id")}/confirmation-preview")).Json(400);
+        var removedAllocationList = await (await f.As(TestData.Pm).GetAsync(root)).Json();
+        Assert.Equal("Removed", removedAllocationList["items"]!.AsArray().Single(a => a!.G("id") == removedAllocation.G("id"))!.S("personState"));
         await ReplaceAndConfirm(removedAllocation, (await FreshReport(project.Id)).Id);
     }
 

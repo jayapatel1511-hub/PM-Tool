@@ -23,7 +23,7 @@ public static class AllocationEndpoints
         decimal ProposedHours, decimal ResultingHours, decimal OverByHours, int DateVersion);
     public sealed record Filter(string? Q, Guid? PersonId, string? Purpose, string? Status, DateOnly? From, DateOnly? To);
     sealed record AllocationRow(Guid Id, Guid PersonId, string? PersonName, string Purpose, DateOnly FromDate, DateOnly ThroughDate,
-        decimal PlannedHours, string Status, int RowVersion);
+        decimal PlannedHours, string Status, int RowVersion, string PersonState);
 
     internal static IQueryable<ResourceAllocation> VisibleQuery(HubDb db, Actor actor, IQueryable<Guid> managedProjectIds) =>
         db.Allocations.AsNoTracking().Where(a => managedProjectIds.Contains(a.ProjectId) || a.CreatedBy == actor.Id || ((actor.Supervisor || actor.Admin)
@@ -31,7 +31,7 @@ public static class AllocationEndpoints
 
     static readonly Col[] ExportColumns =
     [
-        new("personName", "person"), new("purpose", "type"), new("fromDate", "date", "date", "From date"),
+        new("personName", "person"), new("personState", "person", Label: "Person eligibility"), new("purpose", "type"), new("fromDate", "date", "date", "From date"),
         new("throughDate", "date", "date", "Through date"), new("plannedHours", "hours", "number"), new("status", "status"),
     ];
 
@@ -258,19 +258,24 @@ public static class AllocationEndpoints
         return q;
     }
 
-    static IQueryable<AllocationRow> Rows(Guid projectId, Filter filter, Access access, HubDb db, IQueryable<Guid> managedProjectIds) =>
-        Query(projectId, filter, access, db, managedProjectIds).OrderBy(a => a.FromDate).ThenBy(a => a.Id)
+    static IQueryable<AllocationRow> Rows(Project project, Filter filter, Access access, HubDb db, IQueryable<Guid> managedProjectIds)
+    {
+        var eligible = Coordination.People(db, project);
+        return Query(project.Id, filter, access, db, managedProjectIds).OrderBy(a => a.FromDate).ThenBy(a => a.Id)
             .Select(a => new AllocationRow(a.Id, a.PersonId, db.Users.Where(u => u.Id == a.PersonId).Select(u => u.DisplayName).FirstOrDefault(),
-                a.Purpose, a.FromDate, a.ThroughDate, a.PlannedHours, a.Status, a.RowVersion));
+                a.Purpose, a.FromDate, a.ThroughDate, a.PlannedHours, a.Status, a.RowVersion,
+                !db.Users.Any(u => u.Id == a.PersonId) ? "Missing" : !db.Users.Any(u => u.Id == a.PersonId && u.IsActive) ? "Inactive"
+                    : eligible.Any(u => u.Id == a.PersonId) ? "Eligible" : "Removed"));
+    }
 
     static async Task<object> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
     {
-        var (_, ctx) = await access.Project(projectId, false);
+        var (project, ctx) = await access.Project(projectId, false);
         Check.That(!filter.From.HasValue || !filter.To.HasValue || filter.To >= filter.From, "to", "error.date_range");
         var managedProjects = Permissions.IsPM(access.Actor, ctx)
             ? db.Projects.Where(p => p.Id == projectId).Select(p => p.Id)
             : db.Projects.Where(_ => false).Select(p => p.Id);
-        var q = Rows(projectId, filter, access, db, managedProjects);
+        var q = Rows(project, filter, access, db, managedProjects);
         var (pg, size) = Http.Paging(page, pageSize);
         return new Page<AllocationRow>(await q.Skip((pg - 1) * size).Take(size).ToListAsync(), pg, size, await q.CountAsync());
     }
@@ -283,7 +288,7 @@ public static class AllocationEndpoints
         var managedProjects = Permissions.IsPM(access.Actor, ctx)
             ? db.Projects.Where(p => p.Id == projectId).Select(p => p.Id)
             : db.Projects.Where(_ => false).Select(p => p.Id);
-        var rows = await Rows(projectId, filter, access, db, managedProjects).Take(Export.MaxRows + 1).ToListAsync();
+        var rows = await Rows(project, filter, access, db, managedProjects).Take(Export.MaxRows + 1).ToListAsync();
         return await ExportFile.Send(db, store, format, $"Allocations {project.ProjectNumber}", ExportColumns,
             JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access), project.Id,
             $"{project.ProjectNumber}-allocations", clock);

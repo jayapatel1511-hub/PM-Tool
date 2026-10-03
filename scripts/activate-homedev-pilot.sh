@@ -95,7 +95,7 @@ done
 # Parent's Db__MigrateOnly contract must exit successfully without starting the web/worker host.
 # A missing/broken contract times out; ordinary API stays stopped.
 migration_container="pm-tool-pilot-migrate-$(python3 -c 'import uuid; print(uuid.uuid4().hex)')"
-timeout 180 "${compose_cmd[@]}" run --rm --name "$migration_container" --no-deps --no-build migrate </dev/null || fail "one-shot migration did not complete; API remains stopped"
+timeout 180 "${compose_cmd[@]}" run --rm --name "$migration_container" --no-deps --pull never migrate </dev/null || fail "one-shot migration did not complete; API remains stopped"
 sudo docker rm -f "$migration_container" </dev/null >/dev/null 2>&1 || true
 migration_container=""
 python3 - "$app_file" "$role_sql" <<'GRANTS_PY'

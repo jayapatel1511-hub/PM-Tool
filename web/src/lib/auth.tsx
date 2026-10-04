@@ -170,12 +170,16 @@ function useIdleSignOut(hours: number, signOut: () => void) {
   }, [hours, signOut])
 }
 
+/** Sign-in and loading states on the white canvas the entrance and app content share, with the shell's mint brand mark. */
 function Splash({ text, action }: { text: string; action?: ReactNode }) {
   return (
-    <div className="grid min-h-screen place-items-center bg-frame text-frame-foreground">
+    <div className="grid min-h-dvh place-items-center bg-background p-4 text-foreground">
       <div className="space-y-4 text-center" role="status">
-        <div className="text-lg font-semibold">{t('app.name')}</div>
-        <p className="text-frame-muted">{text}</p>
+        <div className="flex items-center justify-center gap-2.5 text-xl font-semibold tracking-[-0.4px]">
+          <span aria-hidden data-accent="mint" className="grid size-8 shrink-0 place-items-center rounded-[10px] bg-(--acc-bg) text-lg text-(--acc-fg)">t</span>
+          {t('app.name')}
+        </div>
+        <p className="max-w-sm text-base/6 text-muted-foreground">{text}</p>
         {action}
       </div>
     </div>

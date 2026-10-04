@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronDown, ChevronRight, Link2, Plus, Send, X } from 'lucide-react'
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
+import { ActiveFilters, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, TableRegion, selectCls } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
 import { DeliverableIndicators, progressLabel, type DeliverableStateView } from '@/components/hub/indicators'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
@@ -22,6 +22,7 @@ import { fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { DateText, FieldGroup, GroupRow, HeadCell, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from './Decisions'
 import type { MilestoneRow } from './Milestones'
 import { CommentsSlot, ItemSlots, LinksSlot, RaiseSlot } from './slots-items'
 import { useCurrentProject } from './ProjectLayout'
@@ -58,20 +59,25 @@ export function DeliverablesTab() {
   const q = useQuery({ queryKey: ['p', p.id, 'deliverables', filters], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables${qs({ ...filters, includeTasks: true })}`) })
   const milestones = useQuery({ queryKey: ['p', p.id, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones`) })
   const group = sp.get('group') ?? 'discipline'
+  const panel = sp.get('panel')
   const table = useTable<DeliverableRow>('hub.deliverableColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (d) => d.key, className: 'whitespace-nowrap', cell: (d) => <Key>{d.key}</Key> },
-    { id: 'name', label: t('deliverable.name'), fixed: true, sort: (d) => d.name.toLowerCase(), className: 'font-medium', cell: (d) => <button className="text-left hover:underline" onClick={() => openPanel('Deliverable', d.id)}>{d.name}</button> },
-    { id: 'type', label: t('common.type'), sort: (d) => d.typeName, cell: (d) => d.typeName },
-    { id: 'discipline', label: t('common.discipline'), sort: (d) => d.disciplineOrder, className: 'whitespace-nowrap', cell: (d) => <><span className="mr-1 inline-block size-2 rounded-sm" style={{ background: d.disciplineColour }} aria-hidden />{d.disciplineName}</> },
-    { id: 'owner', label: t('common.owner'), sort: (d) => d.ownerName, className: 'whitespace-nowrap', cell: (d) => d.ownerName ? (d.ownerActive ? d.ownerName : t('common.inactiveSuffix', { name: d.ownerName })) : t('common.dash') },
-    { id: 'reviewer', label: t('field.ReviewerId'), sort: (d) => d.reviewerName, className: 'whitespace-nowrap', cell: (d) => d.reviewerName ?? t('common.dash') },
-    { id: 'milestone', label: t('field.MilestoneId'), sort: (d) => d.milestoneDate, className: 'whitespace-nowrap', cell: (d) => d.milestoneKey ? <span title={d.milestoneName}>{d.milestoneKey}</span> : t('common.dash') },
-    { id: 'due', label: t('common.due'), sort: (d) => d.dueDate, className: 'whitespace-nowrap', cell: (d) => fmtDate(d.dueDate) },
+    { id: 'name', label: t('deliverable.name'), fixed: true, sort: (d) => d.name.toLowerCase(), className: 'min-w-[14rem]',
+      cell: (d) => <button className={TITLE_LINK} aria-current={panel === `Deliverable:${d.id}` || undefined} onClick={() => openPanel('Deliverable', d.id)}>{d.name}</button> },
+    { id: 'type', label: t('common.type'), sort: (d) => d.typeName, cell: (d) => d.typeName ?? <Missing /> },
+    { id: 'discipline', label: t('common.discipline'), sort: (d) => d.disciplineOrder, className: 'whitespace-nowrap',
+      cell: (d) => d.disciplineName ? <span className="inline-flex items-center gap-2"><span className="inline-block size-2.5 shrink-0 rounded-full" style={{ background: d.disciplineColour }} aria-hidden />{d.disciplineName}</span> : <Missing /> },
+    { id: 'owner', label: t('common.owner'), sort: (d) => d.ownerName, className: 'whitespace-nowrap',
+      cell: (d) => <Person id={d.ownerId} name={d.ownerName && (d.ownerActive ? d.ownerName : t('common.inactiveSuffix', { name: d.ownerName }))} /> },
+    { id: 'reviewer', label: t('field.ReviewerId'), sort: (d) => d.reviewerName, className: 'whitespace-nowrap', cell: (d) => <Person id={d.reviewerId} name={d.reviewerName} /> },
+    { id: 'milestone', label: t('field.MilestoneId'), sort: (d) => d.milestoneDate, className: 'whitespace-nowrap', cell: (d) => d.milestoneKey ? <span title={d.milestoneName}><Key>{d.milestoneKey}</Key></span> : <Missing /> },
+    { id: 'due', label: t('common.due'), sort: (d) => d.dueDate, className: 'text-right', cell: (d) => <DateText date={d.dueDate} /> },
     { id: 'status', label: t('common.status'), sort: (d) => d.status, cell: (d) => <StatusPill status={d.status} /> },
-    { id: 'progress', label: t('deliverable.progress'), sort: (d) => d.state?.progressPct, className: 'whitespace-nowrap', cell: (d) => <><ProgressBar pct={d.state?.progressPct} label={progressLabel(d.state)} /> <span className="text-xs text-muted-foreground">{progressLabel(d.state)}</span></> },
-    { id: 'indicators', label: t('deliverable.indicators'), cell: (d) => <DeliverableIndicators s={d.state} /> },
-    { id: 'revision', label: t('field.Revision'), sort: (d) => d.revision, cell: (d) => d.revision },
-    { id: 'issued', label: t('field.IssuedDate'), sort: (d) => d.issuedDate, className: 'whitespace-nowrap', cell: (d) => fmtDate(d.issuedDate) },
+    { id: 'progress', label: t('deliverable.progress'), sort: (d) => d.state?.progressPct, className: 'whitespace-nowrap text-right',
+      cell: (d) => <span className="inline-flex items-center gap-2"><ProgressBar pct={d.state?.progressPct} label={progressLabel(d.state)} /><span className="text-xs/[18px] text-muted-foreground tabular-nums">{progressLabel(d.state)}</span></span> },
+    { id: 'indicators', label: t('deliverable.indicators'), className: 'min-w-32', cell: (d) => <DeliverableIndicators s={d.state} /> },
+    { id: 'revision', label: t('field.Revision'), sort: (d) => d.revision, cell: (d) => d.revision || <Missing /> },
+    { id: 'issued', label: t('field.IssuedDate'), sort: (d) => d.issuedDate, className: 'text-right', cell: (d) => <DateText date={d.issuedDate} /> },
   ], q.data ?? [], (d) => [d.dueDate, d.key])
   const rows = table.sorted
   const groups = useMemo(() => {
@@ -83,77 +89,119 @@ export function DeliverablesTab() {
   }, [rows, group])
   const canCreate = p.permissions.createDeliverableIn.length > 0
   const toggle = (s: Set<string>, id: string) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n }
+  const active = Object.values(filters).some(Boolean)
+  const clear = () => { const n = new URLSearchParams(sp); for (const k of Object.keys(filters)) n.delete(k); setSp(n, { replace: true }) }
+  const milestone = milestones.data?.find((m) => m.id === filters.milestoneId)
+  // Active filters as removable tokens (§13.0 Filters), including owner and review filters that arrive by link.
+  const tokens = [
+    filters.q && { key: 'q', label: t('common.search'), value: filters.q },
+    filters.disciplineId && { key: 'disciplineId', label: t('common.discipline'), value: p.disciplines.find((d) => d.id === filters.disciplineId)?.name ?? <Missing /> },
+    filters.status && { key: 'status', label: t('common.status'), value: tv(filters.status) },
+    filters.milestoneId && { key: 'milestoneId', label: t('field.MilestoneId'), value: milestone ? `${milestone.key} ${milestone.name}` : <Missing /> },
+    filters.ownerId && { key: 'ownerId', label: t('common.owner'), value: q.data?.find((d) => d.ownerId === filters.ownerId)?.ownerName ?? <Missing /> },
+    filters.typeId && { key: 'typeId', label: t('common.type'), value: ref.data?.deliverableTypes.find((x) => x.id === filters.typeId)?.name ?? <Missing /> },
+    filters.indicator && { key: 'indicator', label: t('deliverable.indicator'), value: t(`dfilter.${filters.indicator}`) },
+    filters.dueFrom && { key: 'dueFrom', label: t('tfilter.dueFrom'), value: fmtDate(filters.dueFrom) },
+    filters.dueTo && { key: 'dueTo', label: t('tfilter.dueTo'), value: fmtDate(filters.dueTo) },
+    filters.requiresReview && { key: 'requiresReview', label: t('field.RequiresReview'), value: filters.requiresReview === 'true' ? t('common.yes') : t('common.no') },
+  ].filter(Boolean) as { key: string; label: string; value: ReactNode }[]
 
   return (
-    <Page title={t('ptab.deliverables')} actions={canCreate && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('deliverable.new')}</Button>}>
-      <div className="flex flex-wrap items-center gap-2">
-        <Input className="h-8 w-56" placeholder={t('common.search')} defaultValue={sp.get('q') ?? ''} onChange={(e) => set('q', e.target.value)} aria-label={t('common.search')} />
-        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)} aria-label={t('common.discipline')}>
-          <option value="">{t('projects.anyDiscipline')}</option>{p.disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-        </select>
-        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={filters.status ?? ''} onChange={(e) => set('status', e.target.value)} aria-label={t('common.status')}>
-          <option value="">{t('deliverable.anyStatus')}</option>{STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
-        </select>
-        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={filters.milestoneId ?? ''} onChange={(e) => set('milestoneId', e.target.value)} aria-label={t('field.MilestoneId')}>
-          <option value="">{t('deliverable.anyMilestone')}</option>{(milestones.data ?? []).map((m) => <option key={m.id} value={m.id}>{m.key} {m.name}</option>)}
-        </select>
-        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={filters.typeId ?? ''} onChange={(e) => set('typeId', e.target.value)} aria-label={t('common.type')}>
-          <option value="">{t('deliverable.anyType')}</option>{ref.data?.deliverableTypes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-        </select>
-        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={filters.indicator ?? ''} onChange={(e) => set('indicator', e.target.value)} aria-label={t('deliverable.indicator')}>
-          <option value="">{t('deliverable.anyIndicator')}</option>
-          {['overdue', 'atRisk', 'dueSoon', 'unassigned', 'dateInconsistent', 'slipped', 'open'].map((x) => <option key={x} value={x}>{t(`dfilter.${x}`)}</option>)}
-        </select>
-        <label className="text-xs text-muted-foreground">{t('common.from')} <Input type="date" className="inline-flex h-8 w-36" value={filters.dueFrom ?? ''} onChange={(e) => set('dueFrom', e.target.value)} /></label>
-        <label className="text-xs text-muted-foreground">{t('common.to')} <Input type="date" className="inline-flex h-8 w-36" value={filters.dueTo ?? ''} onChange={(e) => set('dueTo', e.target.value)} /></label>
-        <div className="flex-1" />
-        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={group} onChange={(e) => set('group', e.target.value === 'discipline' ? null : e.target.value)} aria-label={t('common.groupBy')}>
-          {['discipline', 'milestone', 'status', 'owner', 'none'].map((g) => <option key={g} value={g}>{t(`dgroup.${g}`)}</option>)}
-        </select>
+    <Page title={t('ptab.deliverables')} subtitle={t('deliverable.subtitle')}
+      actions={<>
         {table.menu}
         <ViewMenu listType="deliverables" projectId={p.id} extra={() => ({ cols: table.colsParam })} />
         <ExportMenu path={`projects/${p.id}/deliverables/export`} params={filters} name={`${p.projectNumber}-deliverables`} />
-      </div>
+        {canCreate && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('deliverable.new')}</Button>}
+      </>}>
+      <FilterBar>
+        <div className="flex flex-wrap items-end gap-3">
+          <Field label={t('common.search')} htmlFor="deliverable-search" className="w-full sm:w-56">
+            <Input id="deliverable-search" type="search" value={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
+          </Field>
+          <Field label={t('common.discipline')} htmlFor="deliverable-discipline" className="w-full sm:w-44">
+            <select id="deliverable-discipline" className={selectCls} value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
+              <option value="">{t('projects.anyDiscipline')}</option>{p.disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          </Field>
+          <Field label={t('common.status')} htmlFor="deliverable-status" className="w-full sm:w-44">
+            <select id="deliverable-status" className={selectCls} value={filters.status ?? ''} onChange={(e) => set('status', e.target.value)}>
+              <option value="">{t('deliverable.anyStatus')}</option>{STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
+            </select>
+          </Field>
+          <Field label={t('field.MilestoneId')} htmlFor="deliverable-milestone" className="w-full sm:w-52">
+            <select id="deliverable-milestone" className={selectCls} value={filters.milestoneId ?? ''} onChange={(e) => set('milestoneId', e.target.value)}>
+              <option value="">{t('deliverable.anyMilestone')}</option>{(milestones.data ?? []).map((m) => <option key={m.id} value={m.id}>{m.key} {m.name}</option>)}
+            </select>
+          </Field>
+          <Field label={t('common.type')} htmlFor="deliverable-type" className="w-full sm:w-44">
+            <select id="deliverable-type" className={selectCls} value={filters.typeId ?? ''} onChange={(e) => set('typeId', e.target.value)}>
+              <option value="">{t('deliverable.anyType')}</option>{ref.data?.deliverableTypes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+            </select>
+          </Field>
+          <Field label={t('deliverable.indicator')} htmlFor="deliverable-indicator" className="w-full sm:w-44">
+            <select id="deliverable-indicator" className={selectCls} value={filters.indicator ?? ''} onChange={(e) => set('indicator', e.target.value)}>
+              <option value="">{t('deliverable.anyIndicator')}</option>
+              {['overdue', 'atRisk', 'dueSoon', 'unassigned', 'dateInconsistent', 'slipped', 'open'].map((x) => <option key={x} value={x}>{t(`dfilter.${x}`)}</option>)}
+            </select>
+          </Field>
+          <Field label={t('tfilter.dueFrom')} htmlFor="deliverable-due-from" className="w-full sm:w-44">
+            <Input id="deliverable-due-from" type="date" value={filters.dueFrom ?? ''} onChange={(e) => set('dueFrom', e.target.value)} />
+          </Field>
+          <Field label={t('tfilter.dueTo')} htmlFor="deliverable-due-to" className="w-full sm:w-44">
+            <Input id="deliverable-due-to" type="date" value={filters.dueTo ?? ''} onChange={(e) => set('dueTo', e.target.value)} />
+          </Field>
+          <Field label={t('common.groupBy')} htmlFor="deliverable-group" className="w-full sm:w-48">
+            <select id="deliverable-group" className={selectCls} value={group} onChange={(e) => set('group', e.target.value === 'discipline' ? null : e.target.value)}>
+              {['discipline', 'milestone', 'status', 'owner', 'none'].map((g) => <option key={g} value={g}>{t(`dgroup.${g}`)}</option>)}
+            </select>
+          </Field>
+        </div>
+        <ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />
+      </FilterBar>
       {selected.size > 0 && (
-        <div className="flex items-center gap-2 rounded-md border bg-accent px-3 py-1.5 text-sm">
-          <span>{t('bulk.selected', { n: selected.size })}</span>
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-accent px-4 py-2 text-sm" role="region" aria-label={t('bulk.actions')}>
+          <span className="mr-1 font-semibold tabular-nums text-accent-foreground">{t('bulk.selected', { n: selected.size })}</span>
           <Button size="sm" variant="outline" onClick={() => setBulk('setMilestone')}>{t('bulk.setMilestone')}</Button>
           <Button size="sm" variant="outline" onClick={() => setBulk('shiftDueDates')}>{t('bulk.shiftDue')}</Button>
           <Button size="sm" variant="outline" onClick={() => setBulk('setOwner')}>{t('bulk.setOwner')}</Button>
           <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>{t('common.clear')}</Button>
         </div>
       )}
-      {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      {q.isPending ? <Loading rows={8} /> : rows.length === 0 ? (
-        <div className="rounded-lg border bg-card"><Empty action={canCreate && <Button onClick={() => setCreating(true)}>{t('deliverable.new')}</Button>}>{t('deliverable.empty')}</Empty></div>
-      ) : (
-        <div className="overflow-x-auto rounded-lg border bg-card">
-          <table className="w-full text-[13px]">
-            <thead className="sticky top-0 bg-muted/80 text-left text-xs text-muted-foreground backdrop-blur">
+      {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : rows.length === 0 ? (
+        <div className="rounded-lg border bg-card">{active
+          ? <Empty title={t('register.noMatch')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('register.noMatchHint')}</Empty>
+          : <Empty action={canCreate && <Button variant="outline" onClick={() => setCreating(true)}><Plus className="size-4" />{t('deliverable.new')}</Button>}>{t('deliverable.empty')}</Empty>}</div>
+      ) : (<>
+        <RegisterCards groups={groups.map(([g, list]) => ({ label: group === 'none' ? '' : g, rows: list }))} columns={table.visible} current={(d) => panel === `Deliverable:${d.id}`} />
+        <TableRegion className="hidden md:block">
+          <table className="w-full text-sm">
+            <caption className="sr-only">{t('ptab.deliverables')}</caption>
+            <thead className="bg-muted text-left text-muted-foreground">
               <tr>
-                <th className="w-8 px-2"><Checkbox aria-label={t('bulk.selectAll')} checked={selected.size === rows.length} onCheckedChange={(c) => setSelected(c ? new Set(rows.map((r) => r.id)) : new Set())} /></th>
-                <th className="w-6"><span className="sr-only">{t('common.details')}</span></th>
-                {table.visible.map(table.header)}
+                <th scope="col" className="w-10 px-(--cell-px)"><Checkbox aria-label={t('bulk.selectAll')} checked={selected.size === rows.length} onCheckedChange={(c) => setSelected(c ? new Set(rows.map((r) => r.id)) : new Set())} /></th>
+                <th scope="col" className="w-10"><span className="sr-only">{t('common.details')}</span></th>
+                {table.visible.map((c) => <HeadCell key={c.id} th={table.header(c)} right={c.className?.includes('text-right')} />)}
               </tr>
             </thead>
             {groups.map(([g, list]) => (
               <tbody key={g}>
-                {group !== 'none' && <tr className="border-t bg-muted/30"><th colSpan={table.visible.length + 2} className="px-3 py-1.5 text-left text-sm font-semibold">{g} <span className="ml-1 text-xs font-normal text-muted-foreground">{list.length}</span></th></tr>}
+                {group !== 'none' && <GroupRow span={table.visible.length + 2} label={g} count={list.length} />}
                 {list.map((d) => (
                   <Fragment key={d.id}>
-                    <tr className="border-t hover:bg-muted/30">
-                      <td className="px-2"><Checkbox aria-label={`${t('bulk.select')} ${d.key}`} checked={selected.has(d.id)} onCheckedChange={() => setSelected(toggle(selected, d.id))} /></td>
-                      <td>{(d.tasks?.length ?? 0) > 0 && <button className="rounded p-1 hover:bg-muted" aria-expanded={open.has(d.id)} aria-label={t('deliverable.showTasks')} onClick={() => setOpen(toggle(open, d.id))}>
-                        {open.has(d.id) ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}</button>}</td>
+                    <tr className={cn('border-t hover:bg-muted', selected.has(d.id) && 'bg-accent hover:bg-accent', panel === `Deliverable:${d.id}` && SELECTED_ROW)}>
+                      <td className="px-(--cell-px)"><Checkbox aria-label={`${t('bulk.select')} ${d.key}`} checked={selected.has(d.id)} onCheckedChange={() => setSelected(toggle(selected, d.id))} /></td>
+                      <td className="px-1">{(d.tasks?.length ?? 0) > 0 && <button className="grid size-(--control-row-h) place-items-center rounded-md hover:bg-secondary" aria-expanded={open.has(d.id)} aria-label={t('deliverable.showTasks')} onClick={() => setOpen(toggle(open, d.id))}>
+                        {open.has(d.id) ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</button>}</td>
                       {table.visible.map((c) => table.cell(c, d))}
                     </tr>
                     {open.has(d.id) && d.tasks?.map((tk) => (
-                      <tr key={tk.id} className="border-t bg-muted/10 text-xs">
+                      <tr key={tk.id} className="border-t bg-muted">
                         <td /><td />
-                        <td colSpan={table.visible.length} className="px-3 py-1 pl-6">
+                        <td colSpan={table.visible.length} className="px-(--cell-px) py-2">
                           <span className="flex flex-wrap items-center gap-x-4 gap-y-1"><Key>{tk.key}</Key>
-                            <button className="hover:underline" onClick={() => openPanel('Task', tk.id)}>{tk.name}</button>
-                            <span>{tk.assignee ?? t('ind.unassigned')}</span><span>{fmtDate(tk.dueDate)}</span><StatusPill status={tk.status} /></span>
+                            <button className="break-words text-left hover:underline" onClick={() => openPanel('Task', tk.id)}>{tk.name}</button>
+                            <span className="text-muted-foreground">{tk.assignee ?? t('ind.unassigned')}</span><DateText date={tk.dueDate} /><StatusPill status={tk.status} /></span>
                         </td>
                       </tr>
                     ))}
@@ -162,8 +210,8 @@ export function DeliverablesTab() {
               </tbody>
             ))}
           </table>
-        </div>
-      )}
+        </TableRegion>
+      </>)}
       {creating && <CreateDeliverable p={p} milestones={milestones.data ?? []} onClose={() => setCreating(false)} />}
       {bulk && <BulkDialog p={p} op={bulk} ids={[...selected]} milestones={milestones.data ?? []} onClose={(ok) => { setBulk(null); if (ok) { setSelected(new Set()); q.refetch() } }} />}
     </Page>
@@ -181,9 +229,9 @@ function BulkDialog({ p, op, ids, milestones, onClose }: { p: ProjectDetail; op:
         toast.success(t('bulk.result', { updated: r.updated, skipped: r.skipped.length }))
         onClose(true)
       }}>
-      {op === 'setMilestone' && <select className={selectCls} value={v ?? ''} onChange={(e) => setV(e.target.value)} aria-label={t('field.MilestoneId')}>
-        <option value="">{t('common.selectPlaceholder')}</option>{milestones.map((m) => <option key={m.id} value={m.id}>{m.key} {m.name}</option>)}</select>}
-      {op === 'setOwner' && <PeoplePicker value={v} onChange={setV} />}
+      {op === 'setMilestone' && <Field label={t('field.MilestoneId')} htmlFor="bulk-milestone"><select id="bulk-milestone" className={selectCls} value={v ?? ''} onChange={(e) => setV(e.target.value)}>
+        <option value="">{t('common.selectPlaceholder')}</option>{milestones.map((m) => <option key={m.id} value={m.id}>{m.key} {m.name}</option>)}</select></Field>}
+      {op === 'setOwner' && <Field label={t('common.owner')} htmlFor="bulk-owner"><PeoplePicker id="bulk-owner" value={v} onChange={setV} /></Field>}
       {op === 'shiftDueDates' && <Field label={t('bulk.days')} htmlFor="bulk-days"><Input id="bulk-days" type="number" value={v ?? ''} onChange={(e) => setV(e.target.value)} /></Field>}
     </ConfirmDialog>
   )
@@ -270,74 +318,81 @@ function DeliverablePanel({ id }: PanelProps) {
   const perms = data.permissions
   const can = perms.edit.ok
   const reload = () => { qc.invalidateQueries({ queryKey: ['deliverable', id] }); qc.invalidateQueries({ queryKey: ['p', d.projectId] }); refresh(d.projectId) }
-  const save = async (body: object) => {
+  // The outcome lets each inline field say Saved or Not saved (design §8); the banner keeps the reason.
+  const save = async (body: object): Promise<boolean> => {
     setErr(null)
     try {
       const r = await patch(`deliverables/${d.id}`, body, d.rowVersion)
       r.warnings?.forEach((w: string) => toast.warning(w)); reload()
+      return true
     } catch (e) {
       if ((e as ApiError).code === 'confirm_move_tasks' && confirm((e as ApiError).message)) return save({ ...body, confirmMoveTasks: true })
       setErr(e)
+      return false
     }
   }
   const s = d.state
   return (
     <div>
-      <div className="space-y-2 border-b p-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <Key>{d.key}</Key>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild><button className="rounded-full focus-visible:outline-2" aria-label={t('deliverable.changeStatus')}><StatusPill status={d.status} /></button></DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {perms.transitions.map((x: any) => (
-                <DropdownMenuItem key={x.to} disabled={!x.allowed} onSelect={() => setTransition({ to: x.to, needsReason: x.needsReason })}>{tv(x.to)}</DropdownMenuItem>
-              ))}
-              {perms.readyToIssueGuard && d.status !== 'In Review' && <DropdownMenuItem disabled title={perms.readyToIssueGuard}>{tv('Ready to Issue')} — {perms.readyToIssueGuard}</DropdownMenuItem>}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <PriorityBadge priority={d.priority} />
-          <div className="ml-auto flex gap-1.5">
-            {can && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/handoffs?source=${d.id}`}>{t('handoff.new')}</Link></Button>}
-            <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/changes?target=Deliverable:${d.id}`}>{t('change.inputs')}</Link></Button>
-            {d.requiredReviewPackageId && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/reviews?panel=ReviewPackage:${d.requiredReviewPackageId}`}>{t('review.issueGate')}</Link></Button>}
-            <RaiseSlot projectId={d.projectId} targetType="Deliverable" targetId={d.id} targetKey={d.key} targetName={d.name} disciplineId={d.projectDisciplineId} />
-            {perms.issue && <Button size="sm" onClick={() => setIssuing(true)}><Send className="size-3.5" />{t('deliverable.issue')}</Button>}
-          </div>
-        </div>
-        <h2 className="text-lg font-semibold">{d.name}</h2>
+      <PanelHead title={d.name} meta={<>
+        <Key>{d.key}</Key>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild><button className="inline-flex items-center gap-1 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" aria-label={t('deliverable.changeStatus')}><StatusPill status={d.status} /><ChevronDown className="size-4 text-muted-foreground" aria-hidden /></button></DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            {perms.transitions.map((x: any) => (
+              <DropdownMenuItem key={x.to} disabled={!x.allowed} onSelect={() => setTransition({ to: x.to, needsReason: x.needsReason })}>{tv(x.to)}</DropdownMenuItem>
+            ))}
+            {perms.readyToIssueGuard && d.status !== 'In Review' && <DropdownMenuItem disabled title={perms.readyToIssueGuard}>{tv('Ready to Issue')} — {perms.readyToIssueGuard}</DropdownMenuItem>}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <PriorityBadge priority={d.priority} />
+      </>}>
         <DeliverableIndicators s={s} />
-        {s?.isAtRisk && <Why reasons={s.atRiskReasons as any} title={t('ind.atRisk')}><span className="text-xs text-muted-foreground">{t('deliverable.whyAtRisk')}</span></Why>}
-      </div>
-      {err != null && <div className="p-3"><ErrorBanner error={err} retry={() => { setErr(null); reload() }} /></div>}
-      <div className="px-4 py-2">
+        {s?.isAtRisk && <Why reasons={s.atRiskReasons as any} title={t('ind.atRisk')}><span className="text-sm text-muted-foreground">{t('deliverable.whyAtRisk')}</span></Why>}
+        <div className="flex flex-wrap gap-2">
+          {can && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/handoffs?source=${d.id}`}>{t('handoff.new')}</Link></Button>}
+          <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/changes?target=Deliverable:${d.id}`}>{t('change.inputs')}</Link></Button>
+          {d.requiredReviewPackageId && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/reviews?panel=ReviewPackage:${d.requiredReviewPackageId}`}>{t('review.issueGate')}</Link></Button>}
+          <RaiseSlot projectId={d.projectId} targetType="Deliverable" targetId={d.id} targetKey={d.key} targetName={d.name} disciplineId={d.projectDisciplineId} />
+          {perms.issue && <Button size="sm" onClick={() => setIssuing(true)}><Send className="size-4" />{t('deliverable.issue')}</Button>}
+        </div>
+      </PanelHead>
+      {err != null && <div className="px-4 pb-4"><ErrorBanner error={err} retry={() => { setErr(null); reload() }} /></div>}
+      <FieldGroup title={t('common.details')}>
         <FieldRow label={t('common.name')}><InlineText value={d.name} disabled={!can} onSave={(v) => save({ name: v })} /></FieldRow>
         <FieldRow label={t('common.type')}><InlineSelect value={d.deliverableTypeId} disabled={!can} options={(ref.data?.deliverableTypes ?? []).filter((x) => x.isActive || x.id === d.deliverableTypeId).map((x) => ({ value: x.id, label: x.name }))} onSave={(v) => save({ deliverableTypeId: v })} title={t('common.type')} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={d.projectDisciplineId} disabled={!can} options={(project.data?.disciplines ?? []).filter((x) => x.isActive || x.id === d.projectDisciplineId).map((x) => ({ value: x.id, label: x.name }))} onSave={(v) => save({ projectDisciplineId: v })} title={t('common.discipline')} /></FieldRow>
+        <FieldRow label={t('common.priority')}><InlineSelect value={d.priority} disabled={!can} options={['Low', 'Medium', 'High', 'Critical'].map((x) => ({ value: x, label: tv(x) }))} onSave={(v) => save({ priority: v })} title={t('common.priority')} /></FieldRow>
+        <FieldRow label={t('common.description')}><InlineText value={data.description} multiline disabled={!can} onSave={(v) => save({ description: v })} /></FieldRow>
+      </FieldGroup>
+      <FieldGroup title={t('register.group.ownership')}>
         <FieldRow label={t('common.owner')}><InlinePerson value={d.ownerId} name={d.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
         <FieldRow label={t('field.ReviewerId')}><InlinePerson value={d.reviewerId} name={d.reviewerName} disabled={!can} onSave={(v) => save({ reviewerId: v })} /></FieldRow>
+      </FieldGroup>
+      <FieldGroup title={t('register.group.schedule')}>
         <FieldRow label={t('field.MilestoneId')}><InlineSelect value={d.milestoneId} allowEmpty disabled={!can} options={(milestones.data ?? []).map((m) => ({ value: m.id, label: `${m.key} ${m.name}` }))} onSave={(v) => save({ milestoneId: v })} title={t('field.MilestoneId')} /></FieldRow>
         <FieldRow label={t('field.StartDate')}><InlineDate value={d.startDate} disabled={!can} onSave={(v) => save({ startDate: v })} /></FieldRow>
-        <FieldRow label={t('field.DueDate')}><InlineDate value={d.dueDate} disabled={!can} onSave={(v) => save({ dueDate: v })} />{d.originalDueDate && d.originalDueDate !== d.dueDate && <span className="px-2 text-xs text-muted-foreground">{t('deliverable.originally', { date: fmtDate(d.originalDueDate) })}</span>}</FieldRow>
-        <FieldRow label={t('common.priority')}><InlineSelect value={d.priority} disabled={!can} options={['Low', 'Medium', 'High', 'Critical'].map((x) => ({ value: x, label: tv(x) }))} onSave={(v) => save({ priority: v })} title={t('common.priority')} /></FieldRow>
-        <FieldRow label={t('field.RequiresReview')}><div className="px-2 py-1"><Checkbox checked={d.requiresReview} disabled={!can} onCheckedChange={(c) => save({ requiresReview: !!c })} aria-label={t('field.RequiresReview')} /></div></FieldRow>
+        <FieldRow label={t('field.DueDate')}><InlineDate value={d.dueDate} disabled={!can} onSave={(v) => save({ dueDate: v })} />{d.originalDueDate && d.originalDueDate !== d.dueDate && <span className="px-2 text-xs/[18px] text-muted-foreground tabular-nums">{t('deliverable.originally', { date: fmtDate(d.originalDueDate) })}</span>}</FieldRow>
+        <FieldRow label={t('deliverable.progress')}><div className="px-2 py-1.5"><span className="inline-flex items-center gap-2"><ProgressBar pct={s?.progressPct} /><span className="text-xs/[18px] text-muted-foreground tabular-nums">{progressLabel(s) ?? t('deliverable.noTasks')}</span></span>
+          {s && <div className="mt-1 text-xs/[18px] text-muted-foreground tabular-nums">{t('deliverable.breakdown', { open: s.taskOpen, overdue: s.taskOverdue, blocked: s.taskBlocked })}</div>}</div></FieldRow>
+      </FieldGroup>
+      <FieldGroup title={t('register.group.reviewIssue')}>
+        <FieldRow label={t('field.RequiresReview')}><div className="px-2 py-1.5"><Checkbox checked={d.requiresReview} disabled={!can} onCheckedChange={(c) => save({ requiresReview: !!c })} aria-label={t('field.RequiresReview')} /></div></FieldRow>
         <FieldRow label={t('field.Revision')}><InlineText value={d.revision} disabled={!can} onSave={(v) => save({ revision: v })} /></FieldRow>
-        {d.issuedDate && <FieldRow label={t('deliverable.issued')}><div className="px-2 py-1.5">{fmtDate(d.issuedDate)} · {d.revision} · {d.issuedTo}{data.transmittalUrl && <> · <a className="text-primary underline" href={data.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a></>}</div></FieldRow>}
+        {d.issuedDate && <FieldRow label={t('deliverable.issued')}><div className="px-2 py-1.5"><span className="tabular-nums">{fmtDate(d.issuedDate)}</span> · {d.revision} · {d.issuedTo}{data.transmittalUrl && <> · <a className="text-primary underline underline-offset-4" href={data.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a></>}</div></FieldRow>}
         {data.onHoldReason && d.status === 'On Hold' && <FieldRow label={t('field.OnHoldReason')}><div className="px-2 py-1.5">{data.onHoldReason}</div></FieldRow>}
-        <FieldRow label={t('deliverable.progress')}><div className="px-2 py-1.5"><ProgressBar pct={s?.progressPct} /> <span className="text-xs text-muted-foreground">{progressLabel(s) ?? t('deliverable.noTasks')}</span>
-          {s && <div className="mt-1 text-xs text-muted-foreground">{t('deliverable.breakdown', { open: s.taskOpen, overdue: s.taskOverdue, blocked: s.taskBlocked })}</div>}</div></FieldRow>
-        <FieldRow label={t('common.description')}><InlineText value={data.description} multiline disabled={!can} onSave={(v) => save({ description: v })} /></FieldRow>
-      </div>
+      </FieldGroup>
       <TabBar tabs={[{ id: 'tasks', label: t('ptab.tasks'), count: d.tasks?.length }, { id: 'deps', label: t('deliverable.dependencies') }, { id: 'issues', label: t('deliverable.issues'), count: data.issues.length },
         ...(ItemSlots.Links ? [{ id: 'links', label: t('common.links') }] : []), ...(ItemSlots.Comments ? [{ id: 'comments', label: t('common.comments') }] : []),
         ...DELIVERABLE_TABS.map((x) => ({ id: x.id, label: x.label })), { id: 'history', label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'tasks' && (
         <div className="p-4">
           {(d.tasks ?? []).length === 0 ? <Empty>{t('deliverable.noTasks')}</Empty> : (
-            <ul className="divide-y rounded border">
+            <ul className="divide-y rounded-md border">
               {d.tasks!.map((tk) => (
-                <li key={tk.id} className="flex items-center gap-2 px-3 py-1.5 text-sm">
-                  <Key>{tk.key}</Key><button className="flex-1 truncate text-left hover:underline" onClick={() => openPanel('Task', tk.id)}>{tk.name}</button>
-                  <span className="text-xs text-muted-foreground">{tk.assignee ?? t('ind.unassigned')}</span><span className="text-xs">{fmtDate(tk.dueDate)}</span><StatusPill status={tk.status} />
+                <li key={tk.id} className="flex min-h-(--row-min) flex-wrap items-center gap-x-3 gap-y-1 px-3 py-(--cell-py) text-sm">
+                  <Key>{tk.key}</Key><button className="min-w-0 flex-1 truncate text-left hover:underline" onClick={() => openPanel('Task', tk.id)}>{tk.name}</button>
+                  <span className="text-muted-foreground">{tk.assignee ?? t('ind.unassigned')}</span><DateText date={tk.dueDate} /><StatusPill status={tk.status} />
                 </li>
               ))}
             </ul>
@@ -345,12 +400,12 @@ function DeliverablePanel({ id }: PanelProps) {
         </div>
       )}
       {tab === 'deps' && (
-        <div className="grid gap-3 p-4 text-sm">
+        <div className="grid gap-4 p-4 text-sm">
           <ExplicitDeps d={d} data={data} onChange={reload} />
-          <p className="text-xs text-muted-foreground">{t('deliverable.derivedHint')}</p>
+          <p className="text-xs/[18px] text-muted-foreground">{t('deliverable.derivedHint')}</p>
           {[['deliverable.dependsOn', data.derivedPredecessors], ['deliverable.blocks', data.derivedSuccessors]].map(([label, list]: any) => (
             <div key={label}><div className="mb-1 font-medium">{t(label)}</div>
-              {list.length === 0 ? <p className="text-muted-foreground">{t('common.none')}</p> : <ul>{list.map((x: any) => <li key={x.id}><Key>{x.key}</Key> <button className="hover:underline" onClick={() => openPanel('Deliverable', x.id)}>{x.name}</button> <StatusPill status={x.status} /></li>)}</ul>}
+              {list.length === 0 ? <p className="text-muted-foreground">{t('common.none')}</p> : <ul className="space-y-1">{list.map((x: any) => <li key={x.id} className="flex flex-wrap items-center gap-2"><Key>{x.key}</Key><button className="text-left hover:underline" onClick={() => openPanel('Deliverable', x.id)}>{x.name}</button><StatusPill status={x.status} /></li>)}</ul>}
             </div>
           ))}
         </div>
@@ -392,23 +447,23 @@ function ExplicitDeps({ d, data, onChange }: { d: DeliverableRow; data: any; onC
   const list = (rows: DepRow[], label: string, dir: 'predecessor' | 'successor') => (
     <div>
       <div className="mb-1 flex items-center justify-between font-medium">{t(label)}
-        {can && <Button size="sm" variant="ghost" onClick={() => setAdding(dir)}><Plus className="size-3.5" />{t('common.add')}</Button>}</div>
+        {can && <Button size="sm" variant="ghost" onClick={() => setAdding(dir)}><Plus className="size-4" />{t('common.add')}</Button>}</div>
       {rows.length === 0 ? <p className="text-muted-foreground">{t('common.none')}</p> : (
-        <ul className="divide-y rounded border">{rows.map((x) => (
-          <li key={x.dependencyId} className="flex flex-wrap items-center gap-2 px-2 py-1.5">
-            {satisfied(x) ? <Check className="size-3.5 text-done" aria-label={t('task.satisfied')} /> : <Link2 className="size-3.5 text-muted-foreground" aria-hidden />}
+        <ul className="divide-y rounded-md border bg-card">{rows.map((x) => (
+          <li key={x.dependencyId} className="flex flex-wrap items-center gap-2 px-3 py-1.5">
+            {satisfied(x) ? <Check className="size-4 text-done" aria-label={t('task.satisfied')} /> : <Link2 className="size-4 text-muted-foreground" aria-hidden />}
             <button className="min-w-0 flex-1 truncate text-left hover:underline" onClick={() => openPanel('Deliverable', x.id)}><Key>{x.key}</Key> {x.name}</button>
             {x.lagDays > 0 && <Chip tone="idle">{t('dep.lagN', { n: x.lagDays })}</Chip>}
-            {x.note && <span className="hidden max-w-40 truncate text-xs text-muted-foreground sm:inline" title={x.note}>{x.note}</span>}
-            <span className="text-xs tabular-nums">{fmtDate(x.issuedDate ?? x.dueDate)}</span><StatusPill status={x.status} />
-            {can && <Button variant="ghost" size="icon" className="size-7" aria-label={t('task.removeDependency', { key: x.key })} onClick={() => remove(x)}><X className="size-3.5" /></Button>}
+            {x.note && <span className="hidden max-w-40 truncate text-xs/[18px] text-muted-foreground sm:inline" title={x.note}>{x.note}</span>}
+            <DateText date={x.issuedDate ?? x.dueDate} /><StatusPill status={x.status} />
+            {can && <Button variant="ghost" size="icon-sm" aria-label={t('task.removeDependency', { key: x.key })} onClick={() => remove(x)}><X className="size-4" /></Button>}
           </li>))}</ul>
       )}
     </div>
   )
   return (
-    <div className="grid gap-3 rounded-md border p-3">
-      <div className="text-xs font-semibold text-muted-foreground">{t('deliverable.explicitDeps')}</div>
+    <div className="grid gap-3 rounded-lg border bg-muted p-4">
+      <div className="text-sm font-semibold">{t('deliverable.explicitDeps')}</div>
       {list(data.explicitPredecessors, 'deliverable.dependsOn', 'predecessor')}
       {list(data.explicitSuccessors, 'deliverable.blocks', 'successor')}
       {adding && <LinkDeliverable d={d} direction={adding} exclude={[d.id, ...data.explicitPredecessors.map((x: DepRow) => x.id), ...data.explicitSuccessors.map((x: DepRow) => x.id)]}
@@ -447,11 +502,11 @@ function LinkDeliverable({ d, direction, exclude, onClose }: { d: DeliverableRow
           </Field>
           <Field label={t('dep.lag')} htmlFor="ld-lag" hint={t('dep.lagHint')}><Input id="ld-lag" type="number" min={0} max={365} className="w-28" value={lag} onChange={(e) => setLag(e.target.value)} /></Field>
           <Field label={t('common.notes')} htmlFor="ld-note" hint={t('common.optional')}><Input id="ld-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('dep.notePlaceholder')} /></Field>
-          {err && <div role="alert" className="rounded-md border border-bad/30 bg-bad-bg px-3 py-2 text-sm text-bad">{err}</div>}
+          {err && <div role="alert" className="rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad">{err}</div>}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onClose(false)}>{t('common.cancel')}</Button>
-          <Button disabled={!choice || busy} onClick={save}>{busy && <Spinner />}{t('common.add')}</Button>
+          <Button disabled={!choice || busy} onClick={save}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.add')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -464,19 +519,19 @@ interface IssueRow { id: string; issuedDate: string; revision?: string; issuedTo
 function IssueHistory({ issues }: { issues: IssueRow[] }) {
   if (!issues.length) return <div className="p-4"><Empty>{t('deliverable.noIssues')}</Empty></div>
   return (
-    <div className="overflow-x-auto p-4">
-      <table className="w-full text-[13px]">
-        <thead className="text-left text-xs text-muted-foreground">
-          <tr>{['field.IssuedDate', 'field.Revision', 'field.IssuedTo', 'deliverable.transmittalLink', 'common.notes', 'deliverable.issuedBy'].map((h) => <th key={h} className="py-1 pr-3 font-medium">{t(h)}</th>)}</tr>
+    <div className="scroll-region overflow-x-auto p-4">
+      <table className="w-full text-sm">
+        <thead className="text-left text-muted-foreground">
+          <tr>{['field.IssuedDate', 'field.Revision', 'field.IssuedTo', 'deliverable.transmittalLink', 'common.notes', 'deliverable.issuedBy'].map((h) => <th key={h} scope="col" className="whitespace-nowrap py-2 pr-3 font-medium">{t(h)}</th>)}</tr>
         </thead>
         <tbody>{issues.map((x) => (
           <tr key={x.id} className="border-t align-top">
-            <td className="whitespace-nowrap py-1.5 pr-3">{fmtDate(x.issuedDate)}</td>
-            <td className="whitespace-nowrap py-1.5 pr-3 font-medium">{x.revision ?? t('common.dash')}</td>
-            <td className="py-1.5 pr-3">{x.issuedTo}</td>
-            <td className="py-1.5 pr-3">{x.transmittalUrl && <a className="text-primary hover:underline" href={x.transmittalUrl} title={x.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a>}</td>
-            <td className="whitespace-pre-wrap py-1.5 pr-3">{x.note}</td>
-            <td className="whitespace-nowrap py-1.5">{x.issuedBy}</td>
+            <td className="py-2 pr-3"><DateText date={x.issuedDate} /></td>
+            <td className="whitespace-nowrap py-2 pr-3 font-medium">{x.revision ?? <Missing />}</td>
+            <td className="py-2 pr-3">{x.issuedTo}</td>
+            <td className="py-2 pr-3">{x.transmittalUrl && <a className="text-primary underline underline-offset-4" href={x.transmittalUrl} title={x.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a>}</td>
+            <td className="whitespace-pre-wrap py-2 pr-3">{x.note}</td>
+            <td className="whitespace-nowrap py-2">{x.issuedBy}</td>
           </tr>))}
         </tbody>
       </table>
@@ -502,7 +557,7 @@ function IssueDialog({ d, needsConfirm, onClose }: { d: DeliverableRow; needsCon
         <Field label={t('deliverable.transmittalLink')} htmlFor="i-link" className="sm:col-span-2"><Input id="i-link" placeholder="https://…" value={f.transmittalUrl ?? ''} onChange={(e) => setF({ ...f, transmittalUrl: e.target.value })} /></Field>
         <Field label={t('common.notes')} htmlFor="i-note" className="sm:col-span-2"><Textarea id="i-note" rows={2} value={f.note ?? ''} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
       </div>
-      {open && <ul className={cn('max-h-32 overflow-y-auto rounded border p-2 text-xs')}>{open.map((x) => <li key={x.id}><span className="key">{x.key}</span> {x.name} · {tv(x.status)}</li>)}</ul>}
+      {open && <ul className="max-h-32 space-y-1 overflow-y-auto rounded-md border p-3 text-sm">{open.map((x) => <li key={x.id}><span className="key">{x.key}</span> {x.name} · {tv(x.status)}</li>)}</ul>}
     </ConfirmDialog>
   )
 }

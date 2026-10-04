@@ -1,9 +1,9 @@
 import { ViewMenu } from '@/components/hub/views'
-import { CalendarCheck, ExternalLink } from 'lucide-react'
+import { AlertTriangle, CalendarCheck, ExternalLink, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Empty, ErrorBanner, Field, Loading, Page, Section } from '@/components/hub/common'
+import { Empty, ErrorBanner, Field, FilterBar, Loading, Page, Section } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -11,10 +11,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { get } from '@/lib/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
-import { Chip, StatusPill } from '@/components/hub/pills'
+import { Chip, Key } from '@/components/hub/pills'
 import { useMe } from '@/lib/auth'
+import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
-import { CommandForm, SelectField, personName, workChoices, workRef, type CoordOptions } from './CoordinationForms'
+import { CommandForm, CoordStatus, PersonLabel, SelectField, personName, workChoices, workRef, type CoordOptions } from './CoordinationForms'
 import { ReadinessInspector } from './ReadinessForms'
 import { ExportMenu } from '@/components/hub/export'
 
@@ -40,6 +41,9 @@ function dateValue(d: string) {
   const value = Date.parse(`${d}T00:00:00Z`)
   return Number.isFinite(value) && new Date(value).toISOString().slice(0, 10) === d ? value : null
 }
+
+const itemLink = 'font-semibold text-primary underline-offset-4 hover:underline'
+const Truncated = ({ children }: { children: string }) => <p role="status" className="flex gap-2 border-b border-warn/30 bg-warn-bg px-5 py-2 text-xs/[18px] text-warn"><span aria-hidden>▲</span><span>{children}</span></p>
 
 /** Packet 032 readiness window and explicit weekly promise signatures. */
 export function ReadinessTab() {
@@ -93,75 +97,82 @@ export function ReadinessTab() {
       return { ...aggregate, ...weekly }
     },
   })
-  const filters = <div className="flex flex-wrap items-end gap-2 rounded-lg border bg-card p-3">
-    <label className="text-xs text-muted-foreground">{t('readiness.from')}<Input type="date" className="mt-1 h-8 w-36" value={from} onChange={(e) => set('from', e.target.value)} /></label>
-    <label className="text-xs text-muted-foreground">{t('readiness.to')}<Input type="date" className="mt-1 h-8 w-36" value={to} onChange={(e) => set('to', e.target.value)} /></label>
-    <Button size="sm" variant="ghost" onClick={reset}>{t('common.clear')}</Button>
-    <span className="ml-auto text-xs text-muted-foreground">{t('readiness.windowNote', { n: lookahead })}</span>
-  </div>
-  if (invalidWindow) return <Page title={t('readiness.title')} subtitle={t('readiness.subtitle')}>
-    {filters}<div role="alert" className="rounded border border-bad/30 bg-bad-bg px-3 py-2 text-sm text-bad">{t('readiness.invalidWindow')}</div>
+  const header = { title: t('readiness.title'), subtitle: t('readiness.subtitle') }
+  // The window fields stay first in every state, so editing a date never unmounts the field being edited.
+  const filters = <FilterBar><div className="flex flex-wrap items-end gap-3">
+    <Field label={t('readiness.from')} htmlFor="readiness-from" className="w-full sm:w-44"><Input id="readiness-from" type="date" value={from} onChange={(e) => set('from', e.target.value)} /></Field>
+    <Field label={t('readiness.to')} htmlFor="readiness-to" className="w-full sm:w-44"><Input id="readiness-to" type="date" value={to} onChange={(e) => set('to', e.target.value)} /></Field>
+    <Button variant="link" className="px-1" onClick={reset}>{t('common.clear')}</Button>
+    <p className="w-full self-center text-xs/[18px] text-muted-foreground sm:ml-auto sm:w-auto">{t('readiness.windowNote', { n: lookahead })}</p>
+  </div></FilterBar>
+  if (invalidWindow) return <Page {...header}>
+    {filters}<div role="alert" className="flex items-center gap-3 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad"><AlertTriangle className="size-4 shrink-0" aria-hidden />{t('readiness.invalidWindow')}</div>
   </Page>
-  if (q.isPending) return <Loading rows={8} />
-  if (q.error) return <div className="p-6"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
+  if (q.isPending) return <Page {...header}>{filters}<div className="rounded-lg border bg-card"><Loading rows={8} /></div></Page>
+  if (q.error) return <Page {...header}>{filters}<ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
   const data = q.data
   const shown = data.commitments
   const snapshotByWeek = new Map(data.snapshots.map((s) => [s.weekStart, s]))
   // Weeks recorded on an earlier coordination day are shown beside the current ones, never re-dated.
   const sections = [...new Set([...weeks, ...shown.map((c) => c.weekStart), ...data.snapshots.map((s) => s.weekStart)])].sort()
   const base = `/projects/${p.projectNumber}`
-  const workLink = (c: Commitment) => `${base}/${c.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${c.targetType}:${c.targetId}`
+  const href = (type: string, id: string) => `${base}/${type === 'Task' ? 'tasks' : 'deliverables'}?panel=${type}:${id}`
+  // The linked work's readable key and name, when this viewer's options include it.
+  const work = (type: string, id: string) => { const w = options.data && workRef(options.data, type, id); return w ? <><span className="key font-normal">{w.key}</span> · {w.name}</> : null }
+  const canCapture = p.permissions.isPm && options.data?.canWrite
   return (
-    <Page title={t('readiness.title')} subtitle={t('readiness.subtitle')} actions={
-      <><ViewMenu listType="readiness" projectId={p.id} />{options.data && <Button size="sm" variant="outline" onClick={() => setInspecting(true)}>{t('readiness.inspect')}</Button>}
-      {options.data?.canWrite && <Button size="sm" onClick={() => setProposing(true)}>{t('readiness.propose')}</Button>}
+    <Page {...header} actions={
+      <><ViewMenu listType="readiness" projectId={p.id} />{options.data && <Button variant="outline" onClick={() => setInspecting(true)}>{t('readiness.inspect')}</Button>}
       <ExportMenu path={`projects/${p.id}/weekly-commitments/export`} params={{ from, to }} name={`${p.projectNumber}-weekly-commitments`} label={t('readiness.exportPromises')} />
-      <Button asChild variant="outline" size="sm"><Link to={`${base}/coordination?meeting=1`}><CalendarCheck className="size-4" />{t('readiness.meeting')}</Link></Button></>
+      <Button asChild variant="outline"><Link to={`${base}/coordination?meeting=1`}><CalendarCheck className="size-4" />{t('readiness.meeting')}</Link></Button>
+      {options.data?.canWrite && <Button onClick={() => setProposing(true)}><Plus className="size-4" />{t('readiness.propose')}</Button>}</>
     }>
+      {filters}
       {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
       {linked.error && <ErrorBanner error={linked.error} />}
-      {filters}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Section title={t('readiness.constraints')} id="constraints" count={data.constraintsTotal}
           actions={<ExportMenu path={`projects/${p.id}/readiness/window/export`} params={{ from, to, list: 'constraints' }} name={`${p.projectNumber}-readiness-constraints`} />}>
-          {data.constraintsTruncated && <p role="status" className="border-b border-warn/30 bg-warn-bg px-4 py-2 text-xs text-warn">{t('readiness.aggregateTruncated')}</p>}
-          {data.constraints.length === 0 ? <p className="px-4 py-4 text-sm text-muted-foreground">{t('readiness.noConstraints')}</p> : <ul className="divide-y">{data.constraints.map((c) => <li key={c.id} className="px-4 py-3 text-sm">
-            <Link className="font-medium text-primary hover:underline" to={`${base}/${c.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${c.targetType}:${c.targetId}`}>{c.category} · {c.targetType}</Link>
-            <p className="mt-1">{c.description}</p><p className="text-xs text-muted-foreground">{fmtDate(c.neededBy)} · <a className="underline" href={c.sourceUrl} target="_blank" rel="noreferrer">{t('readiness.source')}</a></p>
+          {data.constraintsTruncated && <Truncated>{t('readiness.aggregateTruncated')}</Truncated>}
+          {data.constraints.length === 0 ? <Empty>{t('readiness.noConstraints')}</Empty> : <ul className="divide-y">{data.constraints.map((c) => <li key={c.id} className="space-y-1 px-5 py-3 text-sm">
+            <div className="flex flex-wrap items-center gap-2"><span className="rounded-md bg-secondary px-2 py-0.5 text-xs/[18px] font-medium">{tv(c.category)}</span>
+              <Link className={itemLink} to={href(c.targetType, c.targetId)}>{work(c.targetType, c.targetId) ?? c.targetType}</Link></div>
+            <p>{c.description}</p><p className="text-xs/[18px] text-muted-foreground"><span className="tabular-nums">{fmtDate(c.neededBy)}</span> · <a className="underline underline-offset-4" href={c.sourceUrl} target="_blank" rel="noreferrer">{t('readiness.source')}</a></p>
           </li>)}</ul>}
-          <WindowPager label={t('readiness.constraints')} page={constraintsPage} total={data.constraintsTotal} pageSize={data.pageSize} onPage={n => set('constraintsPage', String(n))} />
+          <WindowPager className="border-t" label={t('readiness.constraints')} page={constraintsPage} total={data.constraintsTotal} pageSize={data.pageSize} onPage={n => set('constraintsPage', String(n))} />
         </Section>
         <Section title={t('readiness.readyOutputs')} id="ready-outputs" count={data.readyOutputsTotal}
           actions={<ExportMenu path={`projects/${p.id}/readiness/window/export`} params={{ from, to, list: 'ready' }} name={`${p.projectNumber}-ready-outputs`} />}>
-          {data.readyOutputsTruncated && <p role="status" className="border-b border-warn/30 bg-warn-bg px-4 py-2 text-xs text-warn">{t('readiness.aggregateTruncated')}</p>}
-          {data.readyOutputs.length === 0 ? <p className="px-4 py-4 text-sm text-muted-foreground">{t('readiness.noReadyOutputs')}</p> : <ul className="divide-y">{data.readyOutputs.map((o) => <li key={o.id} className="px-4 py-3 text-sm">
-            <Link className="font-medium text-primary hover:underline" to={`${base}/${o.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${o.targetType}:${o.targetId}`}>{o.key} · {o.name}</Link>
-            <p className="mt-1">{o.intendedOutput}</p><p className="text-xs text-muted-foreground">{o.dueDate ? fmtDate(o.dueDate) : t('readiness.noDueDate')} · {o.completionCriteria}</p>
+          {data.readyOutputsTruncated && <Truncated>{t('readiness.aggregateTruncated')}</Truncated>}
+          {data.readyOutputs.length === 0 ? <Empty>{t('readiness.noReadyOutputs')}</Empty> : <ul className="divide-y">{data.readyOutputs.map((o) => <li key={o.id} className="space-y-1 px-5 py-3 text-sm">
+            <div className="flex flex-wrap items-center gap-2"><Link className={itemLink} to={href(o.targetType, o.targetId)}><span className="key font-normal">{o.key}</span> · {o.name}</Link><CoordStatus status={o.state} /></div>
+            <p>{o.intendedOutput}</p><p className="text-xs/[18px] text-muted-foreground">{o.dueDate ? <span className="tabular-nums">{fmtDate(o.dueDate)}</span> : t('readiness.noDueDate')} · {o.completionCriteria}</p>
           </li>)}</ul>}
-          <WindowPager label={t('readiness.readyOutputs')} page={readyPage} total={data.readyOutputsTotal} pageSize={data.pageSize} onPage={n => set('readyPage', String(n))} />
+          <WindowPager className="border-t" label={t('readiness.readyOutputs')} page={readyPage} total={data.readyOutputsTotal} pageSize={data.pageSize} onPage={n => set('readyPage', String(n))} />
         </Section>
       </div>
-      {data.truncated && <div role="status" className="rounded border border-warn/30 bg-warn-bg px-3 py-2 text-sm text-warn">{t('readiness.truncated', { n: data.total })}</div>}
+      {data.truncated && <p role="status" className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲</span><span>{t('readiness.truncated', { n: data.total })}</span></p>}
       {shown.length === 0 && !data.truncated && <div className="rounded-lg border bg-card"><Empty>{t('readiness.empty')}</Empty></div>}
       {sections.map((week) => {
         const rows = shown.filter((c) => c.weekStart === week)
         const snapshot = snapshotByWeek.get(week)
-        return <Section key={week} title={t('readiness.week', { date: fmtDate(week) })} count={rows.length}>
-          {!snapshot && p.permissions.isPm && options.data?.canWrite && <div className="border-b px-4 py-2"><Button size="sm" variant="outline" onClick={() => setSnapshotWeek(week)}>{t('readiness.capture')}</Button></div>}
-          {snapshot && <div className="flex flex-wrap gap-x-4 gap-y-1 border-b bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+        return <Section key={week} title={t('readiness.week', { date: fmtDate(week) })} count={rows.length}
+          actions={!snapshot && canCapture ? <Button size="sm" variant="outline" onClick={() => setSnapshotWeek(week)}>{t('readiness.capture')}</Button> : undefined}>
+          {snapshot && <div className="flex flex-wrap gap-x-4 gap-y-1 border-b bg-muted px-5 py-2 text-xs/[18px] text-muted-foreground tabular-nums">
             <span>{t('readiness.snapshot', { n: snapshot.committedCount })}</span>
             <span>{t('readiness.met', { n: snapshot.met, total: snapshot.committedCount })}</span>
             {snapshot.withdrawn > 0 && <span>{t('readiness.withdrawn', { n: snapshot.withdrawn })}</span>}
           </div>}
-          {rows.length === 0 ? <p className="px-4 py-3 text-sm text-muted-foreground">{t('readiness.noWeekCommitments')}</p> : <ul className="divide-y">{rows.map((c) => <li key={c.id} className="flex flex-wrap items-start gap-3 px-4 py-3 text-sm">
-            <div className="min-w-0 flex-1"><span className="mr-2 font-mono text-xs text-muted-foreground">{c.key}</span><Link className="font-medium text-primary hover:underline" to={workLink(c)}>{c.targetType} <span className="font-mono text-xs">{c.targetId.slice(0, 8)}</span></Link><p className="mt-1">{c.intendedOutput}</p><p className="text-xs text-muted-foreground">{t('readiness.criteria')}: {c.completionCriteria}</p></div>
-            <div className="flex shrink-0 flex-wrap items-center gap-2"><span className="text-xs text-muted-foreground">{fmtDate(c.targetDate)}</span><StatusPill status={c.state} />{c.readinessAtCommit ? <Chip tone={c.readinessAtCommit === 'Ready' ? 'done' : 'idle'}>{tv(c.readinessAtCommit)}</Chip> : <Chip tone="idle">{t('readiness.notRecorded')}</Chip>}</div>
+          {rows.length === 0 ? <p className="px-5 py-3 text-sm text-muted-foreground">{t('readiness.noWeekCommitments')}</p> : <ul className="divide-y">{rows.map((c) => <li key={c.id} className="flex flex-wrap items-start gap-x-4 gap-y-2 px-5 py-3 text-sm">
+            <div className="min-w-0 flex-1 space-y-1"><div className="flex flex-wrap items-center gap-2"><Key>{c.key}</Key><Link className={itemLink} to={href(c.targetType, c.targetId)}>{work(c.targetType, c.targetId) ?? <>{c.targetType} <span className="key font-normal">{c.targetId.slice(0, 8)}</span></>}</Link></div>
+              <p>{c.intendedOutput}</p><p className="text-xs/[18px] text-muted-foreground">{t('readiness.criteria')}: {c.completionCriteria}</p></div>
+            <div className="flex shrink-0 flex-wrap items-center gap-2"><span className="text-muted-foreground tabular-nums">{fmtDate(c.targetDate)}</span><CoordStatus status={c.state} />{c.readinessAtCommit ? <Chip tone={c.readinessAtCommit === 'Ready' ? 'done' : 'idle'}>{tv(c.readinessAtCommit)}</Chip> : <Chip tone="idle">{t('readiness.notRecorded')}</Chip>}</div>
             <Button size="sm" variant="outline" onClick={() => set('promise', c.id)}>{t('readiness.reviewPromise')}</Button>
           </li>)}</ul>}
         </Section>
       })}
-      <WindowPager label={t('readiness.promises')} page={promisePage} total={data.total} pageSize={data.pageSize} onPage={n => set('promisePage', String(n))} />
-      <p className="text-xs text-muted-foreground"><ExternalLink className="mr-1 inline size-3" aria-hidden />{t('readiness.sourceNote')}</p>
+      <WindowPager className="rounded-lg border bg-card" label={t('readiness.promises')} page={promisePage} total={data.total} pageSize={data.pageSize} onPage={n => set('promisePage', String(n))} />
+      <p className="flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><ExternalLink className="size-3.5 shrink-0" aria-hidden />{t('readiness.sourceNote')}</p>
       {proposing && options.data && <ProposePromise projectId={p.id} options={options.data} week={weeks[0]} day={day}
         complete={p.status === 'Complete'} close={() => setProposing(false)} done={done} />}
       {(inspecting || linked.data) && options.data && <ReadinessInspector projectId={p.id} number={p.projectNumber} options={options.data}
@@ -174,11 +185,11 @@ export function ReadinessTab() {
   )
 }
 
-function WindowPager({ label, page, total, pageSize, onPage }: { label: string; page: number; total: number; pageSize: number; onPage: (page: number) => void }) {
-  return <nav aria-label={label} className="flex flex-wrap items-center justify-end gap-3 p-3">
-    <span className="mr-auto text-sm text-muted-foreground">{t('coord.count', { n: total })}</span>
+function WindowPager({ label, page, total, pageSize, onPage, className }: { label: string; page: number; total: number; pageSize: number; onPage: (page: number) => void; className?: string }) {
+  return <nav aria-label={label} className={cn('flex flex-wrap items-center justify-end gap-3 px-5 py-3', className)}>
+    <span className="mr-auto text-sm text-muted-foreground tabular-nums">{t('coord.count', { n: total })}</span>
     <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t('handoff.previous')}</Button>
-    <span className="text-sm">{t('handoff.page', { n: page })}</span>
+    <span className="text-sm tabular-nums">{t('common.pageOf', { page, pages: Math.max(1, Math.ceil(total / Math.max(1, pageSize))) })}</span>
     <Button size="sm" variant="outline" disabled={page * pageSize >= total} onClick={() => onPage(page + 1)}>{t('handoff.next')}</Button>
   </nav>
 }
@@ -195,10 +206,12 @@ function ProposePromise({ projectId, options, week, day, complete, close, done }
     payload={() => { if (!work) throw new Error(t('coord.unavailable')); return { targetRowVersion: work.rowVersion, weekStart: start, targetDate,
       intendedOutput: output, completionCriteria: criteria, reason: reason || null } }}>
     <SelectField label={t('readiness.work')} value={target} onChange={setTarget} choices={workChoices(eligible)} />
-    {work && <p>{t('readiness.performer')}: {personName(options, work.ownerId)}</p>}
-    <Field label={t('readiness.weekStart')} htmlFor="promise-week" hint={t('readiness.weekStartHint', { day: t(`day.${day}`) })}>
-      <Input id="promise-week" type="date" required min={week} step={7} value={start} onChange={e => { setStart(e.target.value); setTargetDate(e.target.value) }} /></Field>
-    <Field label={t('readiness.targetDate')} htmlFor="promise-date"><Input id="promise-date" type="date" required min={start} max={dateValue(start) === null ? undefined : addDays(start, 6)} value={targetDate} onChange={e => setTargetDate(e.target.value)} /></Field>
+    {work && <p className="flex flex-wrap items-center gap-2 text-sm"><span className="text-muted-foreground">{t('readiness.performer')}:</span><PersonLabel options={options} id={work.ownerId} /></p>}
+    <div className="grid gap-3 sm:grid-cols-2">
+      <Field label={t('readiness.weekStart')} htmlFor="promise-week" hint={t('readiness.weekStartHint', { day: t(`day.${day}`) })}>
+        <Input id="promise-week" type="date" required min={week} step={7} value={start} onChange={e => { setStart(e.target.value); setTargetDate(e.target.value) }} /></Field>
+      <Field label={t('readiness.targetDate')} htmlFor="promise-date"><Input id="promise-date" type="date" required min={start} max={dateValue(start) === null ? undefined : addDays(start, 6)} value={targetDate} onChange={e => setTargetDate(e.target.value)} /></Field>
+    </div>
     <Field label={t('readiness.output')} htmlFor="promise-output"><Textarea id="promise-output" required maxLength={2000} value={output} onChange={e => setOutput(e.target.value)} /></Field>
     <Field label={t('readiness.criteria')} htmlFor="promise-criteria"><Textarea id="promise-criteria" required maxLength={2000} value={criteria} onChange={e => setCriteria(e.target.value)} /></Field>
     {complete && <Field label={t('common.reason')} htmlFor="promise-reason" hint={t('settings.correctionHint')}><Textarea id="promise-reason" required minLength={5} maxLength={4000} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
@@ -209,7 +222,7 @@ function SnapshotForm({ projectId, week, close, done }: { projectId: string; wee
   const [reason, setReason] = useState('')
   return <CommandForm path={`projects/${projectId}/weekly-commitments/snapshot`} title={t('readiness.capture')}
     hint={t('readiness.captureHint')} onClose={close} onDone={done} payload={() => ({ weekStart: week, reason })}>
-    <p>{t('readiness.week', { date: fmtDate(week) })}</p>
+    <p className="rounded-md bg-muted px-4 py-3 text-sm font-medium">{t('readiness.week', { date: fmtDate(week) })}</p>
     <Field label={t('basis.reason')} htmlFor="snapshot-reason"><Textarea id="snapshot-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>
   </CommandForm>
 }
@@ -224,22 +237,26 @@ function PromiseDetail({ projectId, id, options, close, done }: { projectId: str
   if (action && row) return <PromiseMove projectId={projectId} row={row} state={action} close={() => setAction(null)} done={changed} />
   return <Dialog open onOpenChange={o => !o && close()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
     <DialogHeader><DialogTitle>{t('readiness.reviewPromise')}</DialogTitle><DialogDescription>{t('readiness.promiseHint')}</DialogDescription></DialogHeader>
-    {q.isPending ? <Loading rows={4} /> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : row && q.data && <div className="space-y-4 text-sm">
-      <StatusPill status={row.state} /><p>{t('readiness.performer')}: {personName(options, row.performerId)}</p>
-      <p>{t('readiness.output')}: {row.intendedOutput}</p><p>{t('readiness.criteria')}: {row.completionCriteria}</p>
-      <p>{t('readiness.targetDate')}: {fmtDate(row.targetDate)}</p>
-      {row.completionEvidenceUrl && <a className="text-primary underline" href={row.completionEvidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
-      <div className="flex flex-wrap gap-2">
+    {q.isPending ? <Loading rows={4} /> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : row && q.data && <div className="space-y-5 text-sm">
+      <div className="flex flex-wrap items-center gap-2"><Key>{row.key}</Key><CoordStatus status={row.state} /></div>
+      <dl className="grid grid-cols-[minmax(8rem,auto)_1fr] gap-x-4 gap-y-2">
+        <dt className="text-muted-foreground">{t('readiness.performer')}</dt><dd><PersonLabel options={options} id={row.performerId} /></dd>
+        <dt className="text-muted-foreground">{t('readiness.output')}</dt><dd className="whitespace-pre-wrap">{row.intendedOutput}</dd>
+        <dt className="text-muted-foreground">{t('readiness.criteria')}</dt><dd className="whitespace-pre-wrap">{row.completionCriteria}</dd>
+        <dt className="text-muted-foreground">{t('readiness.targetDate')}</dt><dd className="tabular-nums">{fmtDate(row.targetDate)}</dd>
+      </dl>
+      {row.completionEvidenceUrl && <a className="text-primary underline underline-offset-4" href={row.completionEvidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
+      {(q.data.canCommit || q.data.canRecordMet || q.data.canRecordNotMet || q.data.canWithdraw) && <div className="flex flex-wrap gap-2 border-t pt-4">
         {q.data.canCommit && <Button onClick={() => setAction('Committed')}>{t('readiness.sign')}</Button>}
         {q.data.canRecordMet && <Button onClick={() => setAction('Met')}>{t('readiness.recordMet')}</Button>}
         {q.data.canRecordNotMet && <Button variant="outline" onClick={() => setAction('Not Met')}>{t('readiness.recordNotMet')}</Button>}
         {q.data.canWithdraw && <Button variant="outline" onClick={() => setAction('Withdrawn')}>{t('readiness.withdrawPromise')}</Button>}
-      </div>
-      <h3 className="font-medium">{t('readiness.promiseHistory')}</h3>
-      <ul className="space-y-2">{q.data.events.map(e => <li key={e.id} className="rounded border p-3">
-        <p>{tv(e.fromState)} → {tv(e.toState)} · {personName(options, e.actorId)} · {fmtTime(e.createdAt)}</p>
-        <p>{e.reason}</p>{e.evidenceUrl && <a className="text-primary underline" href={e.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
-      </li>)}</ul>
+      </div>}
+      <section className="space-y-2"><h3 className="text-base/6 font-semibold">{t('readiness.promiseHistory')}</h3>
+        <ul className="space-y-2">{q.data.events.map(e => <li key={e.id} className="space-y-1 rounded-lg border p-4">
+          <p><span className="font-medium">{tv(e.fromState)} → {tv(e.toState)}</span> · {personName(options, e.actorId)} · <span className="tabular-nums">{fmtTime(e.createdAt)}</span></p>
+          <p className="whitespace-pre-wrap">{e.reason}</p>{e.evidenceUrl && <a className="text-primary underline underline-offset-4" href={e.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
+        </li>)}</ul></section>
     </div>}
   </DialogContent></Dialog>
 }
@@ -250,8 +267,8 @@ function PromiseMove({ projectId, row, state, close, done }: { projectId: string
   return <CommandForm path={`projects/${projectId}/weekly-commitments/${row.id}/transition`} title={t(label)}
     hint={t('readiness.promiseHint')} onClose={close} onDone={done} submitLabel={t(label)}
     payload={() => ({ rowVersion: row.rowVersion, toState: state, reason, evidenceUrl: evidenceUrl || null })}>
-    <p>{row.intendedOutput}</p><p>{t('readiness.criteria')}: {row.completionCriteria}</p>
+    <div className="space-y-1 rounded-md bg-muted px-4 py-3 text-sm"><p className="whitespace-pre-wrap">{row.intendedOutput}</p><p className="text-muted-foreground">{t('readiness.criteria')}: {row.completionCriteria}</p></div>
     <Field label={t('basis.reason')} htmlFor="promise-reason"><Textarea id="promise-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>
-    {state !== 'Committed' && <Field label={t('basis.evidence')} htmlFor="promise-evidence"><Input id="promise-evidence" type="url" required={state === 'Met'} value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} /></Field>}
+    {state !== 'Committed' && <Field label={t('basis.evidence')} htmlFor="promise-evidence" optional={state !== 'Met'}><Input id="promise-evidence" type="url" required={state === 'Met'} value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} /></Field>}
   </CommandForm>
 }

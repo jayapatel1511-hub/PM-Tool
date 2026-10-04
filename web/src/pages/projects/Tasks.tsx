@@ -1,13 +1,13 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { ArrowDown, ArrowUp, Columns3, KanbanSquare, List, Plus } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronDown, Columns3, KanbanSquare, List, Plus } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { InlineDate } from '@/components/hub/fields'
 import { useItemPanel } from '@/components/hub/panel-host'
-import { PeoplePicker } from '@/components/hub/people'
+import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Chip, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
 import { Why, type Reason } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh } from '@/hooks/data'
 import { ApiError, get, patch, post, qs } from '@/lib/api'
 import { useMe } from '@/lib/auth'
-import { addDays, ago, fmtDate, today } from '@/lib/format'
+import { addDays, ago, fmtDate, hours, today } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import type { Page as PageOf, ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -75,7 +75,7 @@ const NOTE_LABEL: Record<string, string> = {
 export function TaskIndicators({ r }: { r: TaskRow }) {
   const s = r.state
   return (
-    <span className="flex flex-wrap gap-1">
+    <span className="flex flex-wrap gap-1 empty:hidden">
       {s?.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: s.daysOverdue })}</Chip>}
       {s?.isDueSoon && !s.isOverdue && <Chip tone="warn">{t('ind.dueSoon')}</Chip>}
       {s?.isBlocked && <Why reasons={blockerReasons(s)} title={t('task.blockersOf', { key: r.key })}><Chip tone="bad">{s.daysBlocked > 0 ? t('ind.blockedD', { n: s.daysBlocked }) : t('ind.blocked')}</Chip></Why>}
@@ -212,8 +212,8 @@ export function TransitionDialog({ m, onClose, onStart }: { m: MoveRequest; onCl
         catch (e) { if (onStart && needsStartAuthorisation(e)) { onStart(body); return } throw e } // FR-RDY-02: the readiness dialog takes over
         onClose(true)
       }}>
-      {m.needsReviewer && <Field label={t('field.ReviewerId')} hint={t('task.reviewerNeeded')}><PeoplePicker value={reviewer} onChange={setReviewer} /></Field>}
-      <Field label={revision ? t('task.revisionComment') : t('deliverable.statusNote')} htmlFor="tt-comment" hint={revision ? t('task.revisionHint') : t('common.optional')}>
+      {m.needsReviewer && <Field label={t('field.ReviewerId')} htmlFor="tt-reviewer" hint={t('task.reviewerNeeded')}><PeoplePicker id="tt-reviewer" value={reviewer} onChange={setReviewer} /></Field>}
+      <Field label={revision ? t('task.revisionComment') : t('deliverable.statusNote')} htmlFor="tt-comment" hint={revision ? t('task.revisionHint') : undefined} optional={!revision}>
         <Textarea id="tt-comment" rows={3} value={comment} onChange={(e) => setComment(e.target.value)} />
       </Field>
     </ConfirmDialog>
@@ -225,6 +225,9 @@ export function moveFrom(detail: any, x: Transition): MoveRequest {
     needsReviewer: x.to === 'Ready for Review' && detail.task.requiresReview && !detail.task.reviewerId }
 }
 
+/** A refused transition stays readable with its reason (design §6: disabled remains readable), not faded to half opacity. */
+export const readableDisabled = 'data-[disabled]:opacity-100 data-[disabled]:text-disabled-foreground'
+
 /** Status pill that lists only the transitions the server allows for this user, fetched when opened (FR-004). */
 export function StatusMenu({ r, onMove, disabled }: { r: TaskRow; onMove: (m: MoveRequest) => void; disabled?: boolean }) {
   const [open, setOpen] = useState(false)
@@ -234,16 +237,18 @@ export function StatusMenu({ r, onMove, disabled }: { r: TaskRow; onMove: (m: Mo
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <button className="rounded-full focus-visible:outline-2" aria-label={t('task.changeStatus', { key: r.key, status: tv(r.status) })}><StatusPill status={r.status} /></button>
+        <button type="button" className="inline-flex min-h-6 items-center gap-0.5 rounded-md hover:bg-muted" aria-label={t('task.changeStatus', { key: r.key, status: tv(r.status) })}>
+          <StatusPill status={r.status} /><ChevronDown className="size-3.5 text-muted-foreground" aria-hidden />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="max-w-80">
-        {q.isPending ? <div className="p-2"><Spinner /></div> : list.map((x) => (
-          <DropdownMenuItem key={x.to} disabled={!x.allowed} onSelect={() => onMove(moveFrom(q.data, x))} className="flex-col items-start gap-0">
+        {q.isPending ? <div role="status" aria-label={t('app.loading')} className="p-2"><Spinner /></div> : list.map((x) => (
+          <DropdownMenuItem key={x.to} disabled={!x.allowed} onSelect={() => onMove(moveFrom(q.data, x))} className={cn('flex-col items-start gap-0', readableDisabled)}>
             <span>{tv(x.to)}{x.via && <span className="ml-1 text-xs text-muted-foreground">{t('task.viaShort', { via: tv(x.via) })}</span>}</span>
             {!x.allowed && x.reason && <span className="text-xs text-muted-foreground">{x.reason}</span>}
           </DropdownMenuItem>
         ))}
-        {q.data?.permissions.completeHint && <DropdownMenuItem disabled className="text-xs">{q.data.permissions.completeHint}</DropdownMenuItem>}
+        {q.data?.permissions.completeHint && <DropdownMenuItem disabled className={cn('text-xs', readableDisabled)}>{q.data.permissions.completeHint}</DropdownMenuItem>}
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -264,42 +269,65 @@ export function useTaskFilters() {
 /** Filters that links from the dashboard and elsewhere may carry beyond the visible controls; shown as removable tokens. */
 const EXTRA = ['waiting', 'open', 'stale', 'dueSoon', 'noDueDate', 'dateInconsistent', 'heldPastDue', 'dueFrom', 'dueTo', 'milestoneId', 'assigneeId', 'ids']
 const FILTER_KEYS = ['q', 'disciplineId', 'deliverableId', 'status', 'priority', ...QUICK, ...EXTRA]
+/** Flags (quick chips and linked indicator filters) are on or absent; the rest carry a value. */
+const FLAGS = new Set<string>([...QUICK, 'waiting', 'open', 'stale', 'dueSoon', 'noDueDate', 'dateInconsistent', 'heldPastDue'])
+const TOKEN_LABEL: Record<string, string> = { q: 'common.search', disciplineId: 'common.discipline', deliverableId: 'task.deliverable', status: 'common.status', priority: 'common.priority' }
 
+/** The filter bar (§13.0, §13.3): labelled filters, the quick chips and every active filter as a removable token with Clear. */
 export function TaskFilterBar({ p, deliverables, extra }: { p: ProjectDetail; deliverables: DeliverableRow[]; extra?: ReactNode }) {
-  const { sp, set, filters, clear, active } = useTaskFilters()
-  const sel = 'h-8 rounded-md border bg-card px-2 text-sm'
+  const { sp, set, filters, clear } = useTaskFilters()
+  const { milestones } = useProjectLists(p.id)
+  const on = (k: string) => sp.get(k) === 'true'
+  const value = (k: string, v: string): string | undefined => {
+    switch (k) {
+      case 'q': return v
+      case 'disciplineId': return p.disciplines.find((d) => d.id === v)?.name
+      case 'deliverableId': { const d = deliverables.find((x) => x.id === v); return d && `${d.key} ${d.name}` }
+      case 'milestoneId': { const m = milestones.find((x) => x.id === v); return m && `${m.key} ${m.name}` }
+      case 'status': case 'priority': return tv(v)
+      case 'dueFrom': case 'dueTo': return fmtDate(v)
+      case 'ids': return String(v.split(',').length)
+    }
+  }
+  const tokens = FILTER_KEYS.filter((k) => sp.has(k)).map((k) => ({
+    key: k,
+    label: t(TOKEN_LABEL[k] ?? ((QUICK as readonly string[]).includes(k) ? `tquick.${k}` : `tfilter.${k}`)),
+    value: FLAGS.has(k) ? (on(k) ? t('common.yes') : sp.get(k) ?? '') : value(k, sp.get(k) ?? '') ?? t('task.filterSelected'),
+  }))
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <Input key={filters.q ? 'q' : 'empty'} className="h-8 w-52" type="search" placeholder={t('task.searchPlaceholder')} defaultValue={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} aria-label={t('common.search')} />
-        <select className={sel} value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)} aria-label={t('common.discipline')}>
-          <option value="">{t('projects.anyDiscipline')}</option>{p.disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-        </select>
-        <select className={cn(sel, 'max-w-56')} value={filters.deliverableId ?? ''} onChange={(e) => set('deliverableId', e.target.value)} aria-label={t('task.deliverable')}>
-          <option value="">{t('task.anyDeliverable')}</option>{deliverables.map((d) => <option key={d.id} value={d.id}>{d.key} {d.name}</option>)}
-        </select>
-        <select className={sel} value={filters.status ?? ''} onChange={(e) => set('status', e.target.value)} aria-label={t('common.status')}>
-          <option value="">{t('task.anyOpenStatus')}</option>{TASK_STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
-        </select>
-        <select className={sel} value={filters.priority ?? ''} onChange={(e) => set('priority', e.target.value)} aria-label={t('common.priority')}>
-          <option value="">{t('task.anyPriority')}</option>{PRIORITIES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
-        </select>
-        <div className="flex-1" />
+    <FilterBar>
+      <div className="flex flex-wrap items-end gap-3">
+        <Field label={t('common.search')} htmlFor="tasks-q" className="w-full sm:w-56">
+          <Input id="tasks-q" key={filters.q ? 'q' : 'empty'} type="search" placeholder={t('task.searchPlaceholder')} defaultValue={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
+        </Field>
+        <Field label={t('common.discipline')} htmlFor="tasks-discipline" className="w-full sm:w-44">
+          <select id="tasks-discipline" className={selectCls} value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
+            <option value="">{t('projects.anyDiscipline')}</option>{p.disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+        </Field>
+        <Field label={t('task.deliverable')} htmlFor="tasks-deliverable" className="w-full sm:w-56">
+          <select id="tasks-deliverable" className={selectCls} value={filters.deliverableId ?? ''} onChange={(e) => set('deliverableId', e.target.value)}>
+            <option value="">{t('task.anyDeliverable')}</option>{deliverables.map((d) => <option key={d.id} value={d.id}>{d.key} {d.name}</option>)}
+          </select>
+        </Field>
+        <Field label={t('common.status')} htmlFor="tasks-status" className="w-full sm:w-52">
+          <select id="tasks-status" className={selectCls} value={filters.status ?? ''} onChange={(e) => set('status', e.target.value)}>
+            <option value="">{t('task.anyOpenStatus')}</option>{TASK_STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
+          </select>
+        </Field>
+        <Field label={t('common.priority')} htmlFor="tasks-priority" className="w-full sm:w-40">
+          <select id="tasks-priority" className={selectCls} value={filters.priority ?? ''} onChange={(e) => set('priority', e.target.value)}>
+            <option value="">{t('task.anyPriority')}</option>{PRIORITIES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
+          </select>
+        </Field>
         {extra}
       </div>
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('task.quickFilters')}>
-        {QUICK.map((k) => (
-          <button key={k} type="button" aria-pressed={sp.get(k) === 'true'} onClick={() => set(k, sp.get(k) === 'true' ? null : 'true')}
-            className={cn('rounded-full border px-2.5 py-0.5 text-xs', sp.get(k) === 'true' ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:bg-muted')}>{t(`tquick.${k}`)}</button>
-        ))}
-        {EXTRA.filter((k) => sp.has(k)).map((k) => (
-          <button key={k} type="button" onClick={() => set(k, null)} className="rounded-full border border-primary bg-accent px-2.5 py-0.5 text-xs" aria-label={t('task.removeFilter', { name: t(`tfilter.${k}`) })}>
-            {t(`tfilter.${k}`)}{['dueFrom', 'dueTo'].includes(k) ? `: ${sp.get(k)}` : k === 'ids' ? `: ${sp.get(k)!.split(',').length}` : ''} ×
-          </button>
-        ))}
-        {active && <button type="button" className="px-2 text-xs text-muted-foreground hover:text-foreground" onClick={clear}>{t('common.clear')}</button>}
+      <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="tasks-quick">
+        <span id="tasks-quick" className="mr-1 text-sm font-medium">{t('task.quickFilters')}</span>
+        {QUICK.map((k) => <ChipToggle key={k} on={on(k)} onClick={() => set(k, on(k) ? null : 'true')}>{t(`tquick.${k}`)}</ChipToggle>)}
       </div>
-    </div>
+      <ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />
+    </FilterBar>
   )
 }
 
@@ -307,11 +335,12 @@ export function TaskFilterBar({ p, deliverables, extra }: { p: ProjectDetail; de
 export function ViewSwitch({ view, paths }: { view: 'tasks' | 'board'; paths?: { tasks: string; board: string } }) {
   const [sp] = useSearchParams()
   const n = new URLSearchParams(sp); n.delete('panel')
-  const cls = (on: boolean) => cn('inline-flex h-8 items-center gap-1 px-2.5 text-sm', on ? 'bg-accent font-medium' : 'hover:bg-muted')
+  const cls = (on: boolean) => cn('inline-flex min-h-[calc(var(--control-row-h)-4px)] items-center gap-1.5 rounded-[4px] px-3 text-sm',
+    on ? 'bg-card font-semibold text-foreground shadow-[0_1px_2px_rgba(25,27,32,0.12)]' : 'text-muted-foreground hover:text-foreground')
   return (
-    <div className="inline-flex overflow-hidden rounded-md border bg-card" role="group" aria-label={t('task.view')}>
-      <Link to={{ pathname: paths?.tasks ?? '../tasks', search: n.toString() }} relative="path" className={cls(view === 'tasks')} aria-current={view === 'tasks' ? 'page' : undefined}><List className="size-4" />{t('task.listView')}</Link>
-      <Link to={{ pathname: paths?.board ?? '../board', search: n.toString() }} relative="path" className={cls(view === 'board')} aria-current={view === 'board' ? 'page' : undefined}><KanbanSquare className="size-4" />{t('ptab.board')}</Link>
+    <div className="inline-flex rounded-md border border-input bg-muted p-0.5" role="group" aria-label={t('task.view')}>
+      <Link to={{ pathname: paths?.tasks ?? '../tasks', search: n.toString() }} relative="path" className={cls(view === 'tasks')} aria-current={view === 'tasks' ? 'page' : undefined}><List className="size-4" aria-hidden />{t('task.listView')}</Link>
+      <Link to={{ pathname: paths?.board ?? '../board', search: n.toString() }} relative="path" className={cls(view === 'board')} aria-current={view === 'board' ? 'page' : undefined}><KanbanSquare className="size-4" aria-hidden />{t('ptab.board')}</Link>
     </div>
   )
 }
@@ -324,12 +353,20 @@ export function useProjectLists(projectId: string | undefined) {
 
 // ---------- Task list (§13.3) ----------
 
-interface Col { id: string; label: string; sort?: string; optional?: boolean; cls?: string; cell: (r: TaskRow) => ReactNode }
+/** `num` columns are right-aligned with tabular figures; `pad` replaces the text padding in cells that hold a control. */
+interface Col { id: string; label: string; sort?: string; optional?: boolean; cls?: string; num?: boolean; pad?: string; cell: (r: TaskRow) => ReactNode }
 type Flat = { kind: 'group'; id: string; label: string; count: number; deliverableId?: string; status?: string; progress?: number | null } | { kind: 'row'; r: TaskRow }
 
 const GROUPS = ['deliverable', 'discipline', 'milestone', 'assignee', 'status', 'due', 'none']
 export const BUCKETS = ['overdue', 'today', 'thisWeek', 'nextWeek', 'later', 'noDate']
 const COLS_KEY = 'hub.taskColumns'
+const BULK = ['assign', 'setDueDate', 'shiftDueDates', 'setPriority', 'setDeliverable', 'hold', 'cancel']
+// Cell paddings that keep every cell's first line on the text line of a 36 px (compact) or 48 px (comfortable) row:
+// row-height controls fill the row, 24 px pills sit 2 px above the text padding.
+const CONTROL = 'py-0.5'
+const PILL = 'py-[calc(var(--cell-py)_-_2px)]'
+/** A select inside a row: the shared control styling at row height, with its boundary shown on hover and focus. */
+const rowSelect = cn(selectCls, 'h-(--control-row-h) w-auto border-transparent bg-transparent px-2 hover:border-input hover:bg-muted focus-visible:border-input')
 
 export function dueBucket(r: TaskRow, now: string) {
   if (r.state?.isOverdue) return 'overdue'
@@ -380,7 +417,7 @@ export function TasksTab() {
   const openPanel = useItemPanel()
   const refresh = useProjectRefresh()
   const hints = useTaskHints(p)
-  const { sp, set, filters } = useTaskFilters()
+  const { sp, set, filters, clear, active } = useTaskFilters()
   const { deliverables, milestones } = useProjectLists(p.id)
   const byId = useMemo(() => new Map(deliverables.map((d) => [d.id, d])), [deliverables])
   const [creating, setCreating] = useState<{ deliverableId?: string } | null>(null)
@@ -389,6 +426,8 @@ export function TasksTab() {
   const [visible, setVisible] = useState<string[] | null>(readCols)
   const sort = sp.get('sort') ?? ''
   const group = sp.get('group') ?? 'deliverable'
+  const panel = sp.get('panel')
+  const current = panel?.startsWith('Task:') ? panel.slice('Task:'.length) : null // the task open in the side panel
   const params = { ...filters, sort: sort || undefined, pageSize: 200 }
   const q = useInfiniteQuery({
     queryKey: ['p', p.id, 'tasks', params],
@@ -405,37 +444,45 @@ export function TasksTab() {
   const actions = useTaskActions(reload)
   const canCreate = p.permissions.createTaskIn.length > 0
   const toggle = (id: string) => setSelected((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
+  const dash = <span className="text-muted-foreground">{t('common.dash')}</span>
 
   const all: Col[] = [
-    { id: 'key', label: 'milestone.key', sort: 'key', cls: 'whitespace-nowrap', cell: (r) => <button className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button> },
-    { id: 'name', label: 'task.name', sort: 'name', cls: 'min-w-56', cell: (r) => <button className="text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button> },
-    { id: 'deliverable', label: 'task.deliverable', cell: (r) => r.deliverableId ? <button className="block max-w-44 truncate text-left hover:underline" title={`${r.deliverableKey} ${r.deliverableName}`} onClick={() => openPanel('Deliverable', r.deliverableId!)}>{r.deliverableName}</button> : t('common.dash') },
-    { id: 'discipline', label: 'common.discipline', cls: 'whitespace-nowrap', cell: (r) => <><span className="mr-1 inline-block size-2 rounded-sm" style={{ background: r.disciplineColour }} aria-hidden />{r.disciplineName}</> },
-    { id: 'assignee', label: 'field.AssigneeId', cls: 'min-w-36', cell: (r) => hints.manages(r)
-      ? <PeoplePicker compact value={r.assigneeId} valueName={r.assigneeActive ? r.assigneeName : t('common.inactiveSuffix', { name: r.assigneeName ?? '' })} placeholder={t('ind.unassigned')} label={t('task.assigneeOf', { key: r.key })} onChange={(id) => actions.save(r, { assigneeId: id })} />
-      : <span className={cn(!r.assigneeActive && 'text-muted-foreground')}>{r.assigneeName ? (r.assigneeActive ? r.assigneeName : t('common.inactiveSuffix', { name: r.assigneeName })) : <span className="text-muted-foreground">{t('ind.unassigned')}</span>}</span> },
-    { id: 'reviewer', label: 'field.ReviewerId', cls: 'whitespace-nowrap', cell: (r) => r.reviewerName ?? (r.requiresReview ? <span className="text-warn">{t('task.noReviewer')}</span> : t('common.dash')) },
-    { id: 'status', label: 'common.status', sort: 'status', cell: (r) => <StatusMenu r={r} onMove={actions.move} disabled={p.status === 'Archived' || p.status === 'Cancelled'} /> },
+    { id: 'key', label: 'milestone.key', sort: 'key', cls: 'whitespace-nowrap', cell: (r) => <button type="button" className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button> },
+    { id: 'name', label: 'task.name', sort: 'name', cls: 'min-w-56', cell: (r) => <button type="button" aria-current={current === r.id || undefined} className="text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button> },
+    { id: 'deliverable', label: 'task.deliverable', cell: (r) => r.deliverableId ? <button type="button" className="block max-w-44 truncate text-left hover:underline" title={`${r.deliverableKey} ${r.deliverableName}`} onClick={() => openPanel('Deliverable', r.deliverableId!)}>{r.deliverableName}</button> : dash },
+    { id: 'discipline', label: 'common.discipline', cls: 'whitespace-nowrap', cell: (r) => <span className="inline-flex items-center gap-1.5"><span className="size-2.5 shrink-0 rounded-sm" style={{ background: r.disciplineColour }} aria-hidden />{r.disciplineName}</span> },
+    { id: 'assignee', label: 'field.AssigneeId', cls: 'min-w-48', pad: CONTROL, cell: (r) => {
+      const name = r.assigneeName && !r.assigneeActive ? t('common.inactiveSuffix', { name: r.assigneeName }) : r.assigneeName
+      return (
+        <div className="flex min-h-(--control-row-h) items-center gap-2">
+          {r.assigneeId ? <Avatar id={r.assigneeId} name={r.assigneeName} /> : <span aria-hidden className="size-7 shrink-0 rounded-full border border-dashed border-input" />}
+          {hints.manages(r)
+            ? <div className="min-w-0 flex-1"><PeoplePicker compact value={r.assigneeId} valueName={name} placeholder={t('ind.unassigned')} label={t('task.assigneeOf', { key: r.key })} onChange={(id) => actions.save(r, { assigneeId: id })} /></div>
+            : <span className={cn('min-w-0', (!r.assigneeName || !r.assigneeActive) && 'text-muted-foreground')}>{name ?? t('ind.unassigned')}</span>}
+        </div>
+      ) } },
+    { id: 'reviewer', label: 'field.ReviewerId', cls: 'whitespace-nowrap', cell: (r) => r.reviewerName ?? (r.requiresReview ? <span className="text-warn"><span aria-hidden>▲ </span>{t('task.noReviewer')}</span> : dash) },
+    { id: 'status', label: 'common.status', sort: 'status', pad: PILL, cell: (r) => <StatusMenu r={r} onMove={actions.move} disabled={p.status === 'Archived' || p.status === 'Cancelled'} /> },
     { id: 'indicators', label: 'deliverable.indicators', cls: 'min-w-32', cell: (r) => <TaskIndicators r={r} /> },
-    { id: 'priority', label: 'common.priority', sort: 'priority', cell: (r) => hints.edit(r)
-      ? <select className="h-7 rounded border border-transparent bg-transparent px-1 text-[13px] hover:border-border" value={r.priority} aria-label={t('task.priorityOf', { key: r.key })} onChange={(e) => actions.save(r, { priority: e.target.value })}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select>
-      : <PriorityBadge priority={r.priority} /> },
-    { id: 'start', label: 'field.StartDate', sort: 'startDate', cls: 'whitespace-nowrap', cell: (r) => fmtDate(r.startDate) },
-    { id: 'due', label: 'common.due', sort: 'dueDate', cls: 'whitespace-nowrap', cell: (r) => (
-      <span className={cn(r.state?.isOverdue && 'font-medium text-bad', r.state?.isDueSoon && !r.state.isOverdue && 'text-warn')}>
+    { id: 'priority', label: 'common.priority', sort: 'priority', pad: CONTROL, cell: (r) => hints.edit(r)
+      ? <select className={rowSelect} value={r.priority} aria-label={t('task.priorityOf', { key: r.key })} onChange={(e) => actions.save(r, { priority: e.target.value })}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select>
+      : <span className="flex min-h-(--control-row-h) items-center"><PriorityBadge priority={r.priority} /></span> },
+    { id: 'start', label: 'field.StartDate', sort: 'startDate', cls: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.startDate) },
+    { id: 'due', label: 'common.due', sort: 'dueDate', cls: 'whitespace-nowrap', pad: CONTROL, cell: (r) => (
+      <div className={cn(r.state?.isOverdue && 'font-medium text-bad', r.state?.isDueSoon && !r.state.isOverdue && 'text-warn')}>
         <InlineDate value={r.dueDate} disabled={!hints.due(r)} title={t('task.dueOf', { key: r.key })} onSave={(v) => actions.save(r, { dueDate: v })} />
-      </span>) },
-    { id: 'progress', label: 'deliverable.progress', sort: 'progress', cell: (r) => hints.edit(r) && r.status !== 'Complete' && r.status !== 'Cancelled'
-      ? <select className="h-7 rounded border border-transparent bg-transparent px-1 text-[13px] tabular-nums hover:border-border" value={r.progressPct} aria-label={t('task.progressOf', { key: r.key })} onChange={(e) => actions.setProgress(r, Number(e.target.value))}>{PROGRESS.map((x) => <option key={x} value={x}>{x}%</option>)}</select>
-      : <span className="tabular-nums">{r.progressPct}%</span> },
-    { id: 'estimate', label: 'task.estimate', sort: 'estimate', cls: 'text-right tabular-nums', cell: (r) => r.estimatedHours ?? t('common.dash') },
+      </div>) },
+    { id: 'progress', label: 'deliverable.progress', sort: 'progress', num: true, pad: CONTROL, cell: (r) => hints.edit(r) && r.status !== 'Complete' && r.status !== 'Cancelled'
+      ? <select className={rowSelect} value={r.progressPct} aria-label={t('task.progressOf', { key: r.key })} onChange={(e) => actions.setProgress(r, Number(e.target.value))}>{PROGRESS.map((x) => <option key={x} value={x}>{x}%</option>)}</select>
+      : <span className="flex min-h-(--control-row-h) items-center justify-end">{r.progressPct}%</span> },
+    { id: 'estimate', label: 'task.estimate', sort: 'estimate', num: true, cls: 'whitespace-nowrap', cell: (r) => r.estimatedHours == null ? <Missing /> : hours(r.estimatedHours) },
     { id: 'lastActivity', label: 'task.lastActivity', sort: 'lastActivity', cls: 'whitespace-nowrap text-muted-foreground', cell: (r) => <span title={r.lastActivityAt}>{ago(r.lastActivityAt)}</span> },
-    { id: 'milestone', label: 'field.MilestoneId', optional: true, cls: 'whitespace-nowrap', cell: (r) => r.milestoneKey ? <span title={r.milestoneName}>{r.milestoneKey}{r.milestoneDerived && <span className="text-muted-foreground"> ↳</span>}</span> : t('common.dash') },
-    { id: 'created', label: 'task.createdCol', sort: 'created', optional: true, cls: 'whitespace-nowrap', cell: (r) => fmtDate(r.createdAt) },
-    { id: 'completed', label: 'task.completedCol', sort: 'completed', optional: true, cls: 'whitespace-nowrap', cell: (r) => fmtDate(r.completedAt) },
-    { id: 'blocking', label: 'task.blockingCount', optional: true, cls: 'text-right tabular-nums', cell: (r) => r.state?.blockingCount || t('common.dash') },
-    { id: 'reviewRound', label: 'task.reviewRound', optional: true, cls: 'text-right tabular-nums', cell: (r) => r.reviewRound || t('common.dash') },
-    { id: 'dueChanges', label: 'task.dueChanges', optional: true, cls: 'text-right tabular-nums', cell: (r) => r.dueDateChangeCount || t('common.dash') },
+    { id: 'milestone', label: 'field.MilestoneId', optional: true, cls: 'whitespace-nowrap', cell: (r) => r.milestoneKey ? <span title={r.milestoneName}><span className="key">{r.milestoneKey}</span>{r.milestoneDerived && <span className="text-muted-foreground"> ↳</span>}</span> : dash },
+    { id: 'created', label: 'task.createdCol', sort: 'created', optional: true, cls: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.createdAt) },
+    { id: 'completed', label: 'task.completedCol', sort: 'completed', optional: true, cls: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.completedAt) },
+    { id: 'blocking', label: 'task.blockingCount', optional: true, num: true, cell: (r) => r.state?.blockingCount || dash },
+    { id: 'reviewRound', label: 'task.reviewRound', optional: true, num: true, cell: (r) => r.reviewRound || dash },
+    { id: 'dueChanges', label: 'task.dueChanges', optional: true, num: true, cell: (r) => r.dueDateChangeCount || dash },
   ]
   const urlCols = sp.get('cols')?.split(',') // a saved view or shared link carries its columns
   const shown = all.filter((c) => (urlCols ? urlCols.includes(c.id) || c.id === 'key' || c.id === 'name' : visible ? visible.includes(c.id) : !c.optional))
@@ -450,13 +497,19 @@ export function TasksTab() {
 
   return (
     <Page title={t('ptab.tasks')} subtitle={q.data ? plural(total, 'decision.task1', 'task.count') : undefined}
-      actions={<><ViewMenu listType="tasks" projectId={p.id} extra={() => ({ cols: shown.map((c) => c.id).join(',') })} /><ViewSwitch view="tasks" />{canCreate && <Button onClick={() => setCreating({})}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
+      actions={<>
+        <ViewMenu listType="tasks" projectId={p.id} extra={() => ({ cols: shown.map((c) => c.id).join(',') })} /><ViewSwitch view="tasks" />
+        <ExportMenu path={`projects/${p.id}/tasks/export`} params={{ ...filters, sort: sort || undefined }} name={`${p.projectNumber}-tasks`} />
+        {canCreate && <Button onClick={() => setCreating({})}><Plus className="size-4" />{t('task.new')}</Button>}
+      </>}>
       <TaskFilterBar p={p} deliverables={deliverables} extra={<>
-        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={group} onChange={(e) => set('group', e.target.value === 'deliverable' ? null : e.target.value)} aria-label={t('common.groupBy')}>
-          {GROUPS.map((g) => <option key={g} value={g}>{t(`tgroup.${g}`)}</option>)}
-        </select>
+        <Field label={t('common.groupBy')} htmlFor="tasks-group" className="w-full sm:w-52">
+          <select id="tasks-group" className={selectCls} value={group} onChange={(e) => set('group', e.target.value === 'deliverable' ? null : e.target.value)}>
+            {GROUPS.map((g) => <option key={g} value={g}>{t(`tgroup.${g}`)}</option>)}
+          </select>
+        </Field>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="outline" size="sm"><Columns3 className="size-4" />{t('task.columns')}</Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild><Button variant="outline" className="sm:ml-auto"><Columns3 className="size-4" aria-hidden />{t('task.columns')}</Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {all.filter((c) => c.id !== 'key' && c.id !== 'name').map((c) => (
               <DropdownMenuCheckboxItem key={c.id} checked={shown.includes(c)} onSelect={(e) => e.preventDefault()}
@@ -464,32 +517,36 @@ export function TasksTab() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <ExportMenu path={`projects/${p.id}/tasks/export`} params={{ ...filters, sort: sort || undefined }} name={`${p.projectNumber}-tasks`} />
       </>} />
       {selected.size > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-md border bg-accent px-3 py-1.5 text-sm" role="region" aria-label={t('bulk.actions')}>
-          <span>{t('bulk.selected', { n: selected.size })}</span>
-          {['assign', 'setDueDate', 'shiftDueDates', 'setPriority', 'setDeliverable', 'hold', 'cancel'].map((op) => (
-            <Button key={op} size="sm" variant="outline" onClick={() => setBulk(op)}>{t(`tbulk.${op}`)}</Button>
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-accent px-4 py-3 text-sm" role="region" aria-label={t('bulk.actions')}>
+          <span className="mr-2 font-semibold text-accent-foreground tabular-nums">{t('bulk.selected', { n: selected.size })}</span>
+          {BULK.map((op) => (
+            <Button key={op} variant="outline" className={cn(op === 'cancel' && 'text-bad hover:text-bad')} onClick={() => setBulk(op)}>{t(`tbulk.${op}`)}</Button>
           ))}
-          <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>{t('common.clear')}</Button>
+          <Button variant="ghost" className="sm:ml-auto" onClick={() => setSelected(new Set())}>{t('common.clear')}</Button>
         </div>
       )}
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      {q.isPending ? <Loading rows={8} /> : rows.length === 0 ? (
-        <div className="rounded-lg border bg-card"><Empty action={canCreate && <Button onClick={() => setCreating({})}>{t('task.new')}</Button>}>{t('task.empty')}</Empty></div>
+      {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : rows.length === 0 ? !q.error && (
+        <div className="rounded-lg border bg-card">
+          {active
+            ? <Empty title={t('task.emptyFilteredTitle')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('task.emptyFilteredHint')}</Empty>
+            : <Empty title={t('task.emptyTitle')} action={canCreate && <Button variant="outline" onClick={() => setCreating({})}><Plus className="size-4" />{t('task.new')}</Button>}>{t('task.emptyHint')}</Empty>}
+        </div>
       ) : (
-        <div ref={scroller} className="max-h-[calc(100dvh-17rem)] min-h-64 overflow-auto rounded-lg border bg-card">
-          <table className="w-full text-[13px]" aria-rowcount={flat.length + 1}>
-            <thead className="sticky top-0 z-10 bg-muted text-left text-xs text-muted-foreground">
+        <div ref={scroller} className="scroll-region max-h-[calc(100dvh-10rem)] min-h-64 overflow-auto rounded-lg border bg-card">
+          <table className="w-full text-sm" aria-rowcount={flat.length + 1}>
+            <caption className="sr-only">{t('ptab.tasks')}</caption>
+            <thead className="sticky top-0 z-10 bg-muted">
               <tr>
-                <th className="w-8 px-2"><Checkbox aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={(c) => setSelected(c ? new Set(rows.map((r) => r.id)) : new Set())} /></th>
+                <th scope="col" className={cn(thCls, 'w-10')}><Checkbox className="mt-0.5" aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={(c) => setSelected(c ? new Set(rows.map((r) => r.id)) : new Set())} /></th>
                 {shown.map((c) => {
                   const dir = sort === c.sort ? 'ascending' : sort === `${c.sort}:desc` ? 'descending' : undefined
                   return (
-                    <th key={c.id} className="whitespace-nowrap px-2 py-2 font-medium" aria-sort={c.sort ? dir ?? 'none' : undefined}>
-                      {c.sort ? <button className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => sortBy(c.sort!)}>{t(c.label)}
-                        {dir === 'ascending' && <ArrowUp className="size-3" />}{dir === 'descending' && <ArrowDown className="size-3" />}</button> : t(c.label)}
+                    <th key={c.id} scope="col" className={cn(thCls, c.num && 'text-right')} aria-sort={c.sort ? dir ?? 'none' : undefined}>
+                      {c.sort ? <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => sortBy(c.sort!)}>{t(c.label)}
+                        {dir === 'ascending' && <ArrowUp className="size-3.5" aria-hidden />}{dir === 'descending' && <ArrowDown className="size-3.5" aria-hidden />}</button> : t(c.label)}
                     </th>
                   )
                 })}
@@ -500,27 +557,32 @@ export function TasksTab() {
               {items.map((vi) => {
                 const f = flat[vi.index]
                 if (f.kind === 'group') return (
-                  <tr key={`g-${f.id}`} data-index={vi.index} ref={virtual.measureElement} className="border-t bg-muted/40">
-                    <th colSpan={shown.length + 1} scope="colgroup" className="px-3 py-1.5 text-left text-sm font-semibold">
-                      <span className="inline-flex flex-wrap items-center gap-2">{f.label}<span className="text-xs font-normal text-muted-foreground">{f.count}</span>
-                        {f.status && <StatusPill status={f.status} />}{f.progress != null && <span className="text-xs font-normal text-muted-foreground">{f.progress}%</span>}
-                        {group === 'deliverable' && canCreate && <button className="inline-flex items-center gap-0.5 text-xs font-normal text-primary hover:underline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-3" />{t('task.addHere')}</button>}
+                  <tr key={`g-${f.id}`} data-index={vi.index} ref={virtual.measureElement} className="border-t bg-muted">
+                    <th colSpan={shown.length + 1} scope="rowgroup" className="px-(--cell-px) py-2 text-left font-normal">
+                      <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="font-semibold">{f.label}</span>
+                        <span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{f.count}</span>
+                        {f.status && <StatusPill status={f.status} />}
+                        {f.progress != null && <span className="text-xs/[18px] text-muted-foreground tabular-nums"><span className="sr-only">{t('deliverable.progress')} </span>{f.progress}%</span>}
+                        {group === 'deliverable' && canCreate && <button type="button" className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" aria-hidden />{t('task.addHere')}</button>}
                       </span>
                     </th>
                   </tr>
                 )
                 const r = f.r
+                const open = current === r.id
                 return (
-                  <tr key={r.id} data-index={vi.index} ref={virtual.measureElement} className={cn('border-t hover:bg-muted/30', selected.has(r.id) && 'bg-accent/40')}>
-                    <td className="px-2"><Checkbox aria-label={`${t('bulk.select')} ${r.key}`} checked={selected.has(r.id)} onCheckedChange={() => toggle(r.id)} /></td>
-                    {shown.map((c) => <td key={c.id} className={cn('px-2 py-1', c.cls)}>{c.cell(r)}</td>)}
+                  <tr key={r.id} data-index={vi.index} ref={virtual.measureElement}
+                    className={cn('border-t hover:bg-muted', (open || selected.has(r.id)) && 'bg-accent hover:bg-accent', open && 'shadow-[inset_3px_0_0_var(--primary)]')}>
+                    <td className={tdCls}><Checkbox className="mt-0.5" aria-label={`${t('bulk.select')} ${r.key}`} checked={selected.has(r.id)} onCheckedChange={() => toggle(r.id)} /></td>
+                    {shown.map((c) => <td key={c.id} className={cn(tdCls, c.pad, c.num && 'text-right tabular-nums', c.cls)}>{c.cell(r)}</td>)}
                   </tr>
                 )
               })}
               {padBottom > 0 && <tr aria-hidden style={{ height: padBottom }} />}
             </tbody>
           </table>
-          {q.isFetchingNextPage && <div className="flex items-center gap-2 p-2 text-xs text-muted-foreground"><Spinner />{t('task.loadingMore', { n: rows.length, total })}</div>}
+          {q.isFetchingNextPage && <div role="status" className="flex items-center gap-2 border-t px-(--cell-px) py-2 text-xs/[18px] text-muted-foreground"><Spinner />{t('task.loadingMore', { n: rows.length, total })}</div>}
         </div>
       )}
       {creating && <CreateTask p={p} deliverables={deliverables} milestones={milestones} defaults={creating} onClose={(id) => { setCreating(null); if (id) { reload(); openPanel('Task', id) } }} />}
@@ -546,12 +608,12 @@ function TaskBulkDialog({ p, op, ids, deliverables, onClose }: { p: ProjectDetai
         toast.success(t('bulk.result', { updated: r.updated, skipped: skipped.length }), { description: skipped.slice(0, 6).map((s) => `${s.key}: ${s.reason}`).join('\n') || undefined, duration: skipped.length ? 12000 : 4000 })
         onClose(true)
       }}>
-      {op === 'assign' && <PeoplePicker value={v} onChange={setV} />}
+      {op === 'assign' && <Field label={t('field.AssigneeId')} htmlFor="tb-assignee"><PeoplePicker id="tb-assignee" value={v} onChange={setV} /></Field>}
       {op === 'setDueDate' && <Field label={t('field.DueDate')} htmlFor="tb-due"><Input id="tb-due" type="date" value={v ?? ''} onChange={(e) => setV(e.target.value)} /></Field>}
       {op === 'shiftDueDates' && <Field label={t('bulk.days')} htmlFor="tb-days"><Input id="tb-days" type="number" value={v ?? ''} onChange={(e) => setV(e.target.value)} /></Field>}
-      {op === 'setPriority' && <select className={selectCls} value={v ?? ''} onChange={(e) => setV(e.target.value)} aria-label={t('common.priority')}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select>}
-      {op === 'setDeliverable' && <select className={selectCls} value={v ?? ''} onChange={(e) => setV(e.target.value)} aria-label={t('task.deliverable')}>
-        <option value="">{t('common.none')}</option>{deliverables.map((d) => <option key={d.id} value={d.id}>{d.key} {d.name}</option>)}</select>}
+      {op === 'setPriority' && <Field label={t('common.priority')} htmlFor="tb-priority"><select id="tb-priority" className={selectCls} value={v ?? ''} onChange={(e) => setV(e.target.value)}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select></Field>}
+      {op === 'setDeliverable' && <Field label={t('task.deliverable')} htmlFor="tb-deliverable"><select id="tb-deliverable" className={selectCls} value={v ?? ''} onChange={(e) => setV(e.target.value)}>
+        <option value="">{t('common.none')}</option>{deliverables.map((d) => <option key={d.id} value={d.id}>{d.key} {d.name}</option>)}</select></Field>}
     </ConfirmDialog>
   )
 }
@@ -591,20 +653,20 @@ export function CreateTask({ p, deliverables, milestones, defaults, onClose }: {
   const dl = deliverables.find((d) => d.id === f.deliverableId)
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader><DialogTitle>{t('task.new')}</DialogTitle></DialogHeader>
-        <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
+        <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
           <Field label={t('task.name')} htmlFor="t-name" error={fe.name} className="sm:col-span-2"><Input id="t-name" required autoFocus value={f.name ?? ''} onChange={(e) => up('name', e.target.value)} /></Field>
           <Field label={t('common.discipline')} htmlFor="t-disc" error={fe.projectDisciplineId}>
             <select id="t-disc" className={selectCls} value={f.projectDisciplineId ?? ''} onChange={(e) => up('projectDisciplineId', e.target.value)}>{allowed.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
           </Field>
-          <Field label={t('task.deliverable')} htmlFor="t-del" error={fe.deliverableId}>
+          <Field label={t('task.deliverable')} htmlFor="t-del" error={fe.deliverableId} optional>
             <select id="t-del" className={selectCls} value={f.deliverableId ?? ''} onChange={(e) => chooseDeliverable(e.target.value)}>
               <option value="">{t('common.none')}</option>{deliverables.filter((d) => !['Cancelled'].includes(d.status)).map((d) => <option key={d.id} value={d.id}>{d.key} {d.name}</option>)}
             </select>
           </Field>
           {!f.deliverableId && (
-            <Field label={t('field.MilestoneId')} htmlFor="t-ms" hint={t('task.milestoneHint')} error={fe.milestoneId}>
+            <Field label={t('field.MilestoneId')} htmlFor="t-ms" hint={t('task.milestoneHint')} error={fe.milestoneId} optional>
               <select id="t-ms" className={selectCls} value={f.milestoneId ?? ''} onChange={(e) => up('milestoneId', e.target.value)}>
                 <option value="">{t('common.none')}</option>{milestones.map((m) => <option key={m.id} value={m.id}>{m.key} {m.name}</option>)}
               </select>
@@ -613,19 +675,19 @@ export function CreateTask({ p, deliverables, milestones, defaults, onClose }: {
           <Field label={t('common.priority')} htmlFor="t-prio">
             <select id="t-prio" className={selectCls} value={f.priority} onChange={(e) => up('priority', e.target.value)}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select>
           </Field>
-          <Field label={t('field.AssigneeId')} error={fe.assigneeId} hint={t('task.assigneeHint')}><PeoplePicker value={assignee} onChange={setAssignee} /></Field>
-          <Field label={t('field.ReviewerId')} error={fe.reviewerId}><PeoplePicker value={reviewer} onChange={setReviewer} exclude={assignee ? [assignee] : []} /></Field>
-          <Field label={t('field.StartDate')} htmlFor="t-start" error={fe.startDate}><Input id="t-start" type="date" value={f.startDate ?? ''} onChange={(e) => up('startDate', e.target.value)} /></Field>
-          <Field label={t('field.DueDate')} htmlFor="t-due" error={fe.dueDate} hint={dl?.dueDate ? t('task.deliverableDue', { date: fmtDate(dl.dueDate) }) : undefined}>
+          <Field label={t('field.AssigneeId')} htmlFor="t-assignee" error={fe.assigneeId} hint={t('task.assigneeHint')} optional><PeoplePicker id="t-assignee" value={assignee} onChange={setAssignee} /></Field>
+          <Field label={t('field.ReviewerId')} htmlFor="t-reviewer" error={fe.reviewerId} optional><PeoplePicker id="t-reviewer" value={reviewer} onChange={setReviewer} exclude={assignee ? [assignee] : []} /></Field>
+          <Field label={t('field.StartDate')} htmlFor="t-start" error={fe.startDate} optional><Input id="t-start" type="date" value={f.startDate ?? ''} onChange={(e) => up('startDate', e.target.value)} /></Field>
+          <Field label={t('field.DueDate')} htmlFor="t-due" error={fe.dueDate} hint={dl?.dueDate ? t('task.deliverableDue', { date: fmtDate(dl.dueDate) }) : undefined} optional>
             <Input id="t-due" type="date" value={f.dueDate ?? ''} onChange={(e) => up('dueDate', e.target.value)} />
           </Field>
-          <Field label={t('task.estimateHours')} htmlFor="t-est" error={fe.estimatedHours}><Input id="t-est" type="number" min={0} step={0.5} value={f.estimatedHours ?? ''} onChange={(e) => up('estimatedHours', e.target.value)} /></Field>
-          <label className="flex items-center gap-2 self-end pb-2 text-sm"><Checkbox checked={f.requiresReview} onCheckedChange={(c) => up('requiresReview', !!c)} />{t('field.RequiresReview')}</label>
-          <Field label={t('common.description')} htmlFor="t-desc" hint={t('task.descriptionHint')} className="sm:col-span-2"><Textarea id="t-desc" rows={3} value={f.description ?? ''} onChange={(e) => up('description', e.target.value)} /></Field>
+          <Field label={t('task.estimateHours')} htmlFor="t-est" error={fe.estimatedHours} optional><Input id="t-est" type="number" min={0} step={0.5} value={f.estimatedHours ?? ''} onChange={(e) => up('estimatedHours', e.target.value)} /></Field>
+          <label className="flex min-h-(--control-h) items-center gap-2 self-end text-sm"><Checkbox checked={f.requiresReview} onCheckedChange={(c) => up('requiresReview', !!c)} />{t('field.RequiresReview')}</label>
+          <Field label={t('common.description')} htmlFor="t-desc" hint={t('task.descriptionHint')} className="sm:col-span-2" optional><Textarea id="t-desc" rows={3} value={f.description ?? ''} onChange={(e) => up('description', e.target.value)} /></Field>
           {err && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="outline" onClick={() => onClose()}>{t('common.cancel')}</Button>
-            <Button type="submit" disabled={busy || !f.name?.trim() || !f.projectDisciplineId}>{busy && <Spinner />}{t('task.create')}</Button>
+            <Button type="submit" disabled={busy || !f.name?.trim() || !f.projectDisciplineId}>{busy && <Spinner />}{busy ? t('common.saving') : t('task.create')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

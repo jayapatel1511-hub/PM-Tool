@@ -1,13 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router'
 import { useEffect, type ReactNode } from 'react'
-import { ErrorBanner, Loading } from '@/components/hub/common'
+import { ErrorBanner, Field, FilterBar, Loading, selectCls } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { get, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
+import type { Accent } from '@/lib/utils'
+import { CoordStatus } from './CoordinationForms'
 
 type Handoff = { id: string; key: string; title: string; status: string; neededBy: string; promisedBy?: string; targetKey?: string; sendingOwnerId: string; receivingOwnerId: string; sendingDisciplineId: string; receivingDisciplineId: string }
 export type ChangeCounts = { pendingAssessments: number; acknowledgedPending: number; projectPending: number }
@@ -31,14 +34,25 @@ type Data = { handoffs: Handoff[]; outgoing: Handoff[]; incoming: Handoff[]; cha
   startabilityTotal: number; startabilityPage: number; startabilityPageSize: number; upcomingSubmissions: UpcomingSubmission[]; upcomingSubmissionsTotal: number;
   staffingConflicts: StaffingConflict[]; staffingConflictsTotal: number; upcomingSubmissionsPage: number; staffingConflictsPage: number; blockerGroupsPage: number; handoffPage: number; handoffPageSize: number; blockerGroupsTotal: number; page: number; pageSize: number }
 
+/** Each of the five questions keeps one identity stripe wherever it appears; the stripe never signals status. */
+const QUESTION_ACCENT: Record<string, Accent> = { owe: 'blue', waiting: 'mint', using: 'lavender', changed: 'peach', start: 'amber' }
+const box = 'overflow-hidden rounded-lg border bg-card', head = 'flex flex-wrap items-start justify-between gap-2 px-4 pb-2 pt-3', body = 'px-4 pb-3 text-sm'
+const badge = 'rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums', title = 'text-base/6 font-semibold'
+const keyLink = 'key text-primary underline underline-offset-4', textLink = 'text-primary underline underline-offset-4'
+const row = 'space-y-1 py-2 first:pt-0 last:pb-0'
+
 function Pager({ label, page, total, pageSize, onPage }: { label: string; page: number; total: number; pageSize: number; onPage: (page: number) => void }) {
   if (pageSize <= 0 || total <= pageSize) return null
-  return <div className="no-print mt-2 flex items-center justify-end gap-2" aria-label={label}>
+  return <nav className="no-print mt-3 flex flex-wrap items-center justify-end gap-2" aria-label={label}>
     <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t('handoff.previous')}</Button>
-    <span className="text-xs" aria-live="polite">{t('handoff.page', { n: page })} · {total}</span>
+    <span className="text-xs tabular-nums" aria-live="polite">{t('common.pageOf', { page, pages: Math.ceil(total / pageSize) })}</span>
     <Button size="sm" variant="outline" disabled={page * pageSize >= total} onClick={() => onPage(page + 1)}>{t('handoff.next')}</Button>
-  </div>
+  </nav>
 }
+
+/** A flagged list of names (blocked ■ / unknown ▲): the reason stays readable, never colour alone. */
+const Flags = ({ tone, children }: { tone: 'bad' | 'warn'; children: string }) =>
+  <span className={tone === 'bad' ? 'text-bad' : 'text-warn'}><span aria-hidden>{tone === 'bad' ? '■ ' : '▲ '}</span>{children}</span>
 
 /** FR-DCV-03: Pending Assessment is shown apart from acknowledgement; a scoped count also states the whole-project count. */
 export function ChangeAssessmentCounts({ c, scoped }: { c: ChangeCounts; scoped: boolean }) {
@@ -79,15 +93,26 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     const frame = requestAnimationFrame(() => { try { window.print() } finally { onPrinted(false) } })
     return () => cancelAnimationFrame(frame)
   }, [printAll, q.isPending, q.isFetching, q.error, onPrinted])
-  const filters = <div role="group" className="mb-3 flex flex-wrap items-end gap-3 rounded border bg-background/60 p-3" aria-label={t('dcv.scopeLabel')}>
-    <span className="self-center text-xs text-muted-foreground">{t('dcv.projectPrefix')} <strong>{project.projectNumber}</strong>{disciplineId ? ` · ${project.disciplines.find(x => x.id === disciplineId)?.name ?? t('dcv.selectedDiscipline')}` : ''}</span>
-    <label className="text-xs">{t('common.owner')}<select className="mt-1 block rounded border bg-background px-2 py-1 text-sm" value={ownerId} onChange={e => setScope('owner', e.target.value)}><option value="">{t('dcv.allPermittedOwners')}</option>{team.data?.members.map(m => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></label>
-    <label className="text-xs">{t('common.from')}<input className="mt-1 block rounded border bg-background px-2 py-1 text-sm" type="date" value={from} onChange={e => setScope('from', e.target.value)} /></label>
-    <label className="text-xs">{t('common.to')}<input className="mt-1 block rounded border bg-background px-2 py-1 text-sm" type="date" value={to} onChange={e => setScope('to', e.target.value)} /></label>
-    {(ownerId || from || to) && <button type="button" className="px-2 py-1 text-xs text-primary underline" onClick={clearScope}>{t('dcv.clearScope')}</button>}
-  </div>
-  if (q.isPending) return <Loading rows={2} />
-  if (q.error) return <section aria-label={t('dcv.scopeLabel')}>{filters}<ErrorBanner error={q.error} retry={() => q.refetch()} /></section>
+  const filters = <FilterBar><div role="group" className="flex flex-wrap items-end gap-3" aria-label={t('dcv.scopeLabel')}>
+    <p className="w-full text-sm text-muted-foreground">{t('dcv.projectPrefix')} <strong className="font-semibold text-foreground">{project.projectNumber}</strong>{disciplineId ? ` · ${project.disciplines.find(x => x.id === disciplineId)?.name ?? t('dcv.selectedDiscipline')}` : ''}</p>
+    <Field label={t('common.owner')} htmlFor="dcv-owner" className="w-full sm:w-56"><select id="dcv-owner" className={selectCls} value={ownerId} onChange={e => setScope('owner', e.target.value)}><option value="">{t('dcv.allPermittedOwners')}</option>{team.data?.members.map(m => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></Field>
+    <Field label={t('common.from')} htmlFor="dcv-from" className="w-full sm:w-44"><Input id="dcv-from" type="date" value={from} onChange={e => setScope('from', e.target.value)} /></Field>
+    <Field label={t('common.to')} htmlFor="dcv-to" className="w-full sm:w-44"><Input id="dcv-to" type="date" value={to} onChange={e => setScope('to', e.target.value)} /></Field>
+    {(ownerId || from || to) && <Button variant="link" className="px-1" onClick={clearScope}>{t('dcv.clearScope')}</Button>}
+  </div></FilterBar>
+  // The heading and scope stay in place while a page or scope loads, so a changed field keeps focus and the layout its shape.
+  const shell = (content: ReactNode, evaluatedAt?: string) => <section aria-labelledby="dcv-title" className="space-y-4">
+    <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-1">
+      <div className="min-w-0 max-w-3xl"><h2 id="dcv-title" className="text-lg/[26px] font-semibold tracking-[-0.2px]">{t('dcv.title')}</h2><p className="mt-1 text-sm text-muted-foreground">{t('dcv.subtitle')}</p></div>
+      {evaluatedAt && <span className="text-xs text-muted-foreground tabular-nums">{t('dcv.clientRefresh', { when: new Date(evaluatedAt).toLocaleTimeString() })}</span>}
+    </div>
+    <p role="status" className="max-w-4xl text-xs text-muted-foreground">{t('dcv.scopeNote')}</p>
+    {filters}
+    {(from || to) && <p role="status" className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲</span><span>{t('dcv.dateScopeNote')}</span></p>}
+    {content}
+  </section>
+  if (q.isPending) return shell(<div className="rounded-lg border bg-card"><Loading rows={2} /></div>)
+  if (q.error) return shell(<ErrorBanner error={q.error} retry={() => q.refetch()} />)
   const d = q.data
   const outgoing = d.outgoing
   const incoming = d.incoming
@@ -104,85 +129,102 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     const suffix = params.size ? `?${params}` : ''
     return `/projects/${project.projectNumber}/${pathname}${suffix}`
   }
-  const link = (path: string, label: string) => <Link className="text-xs font-medium text-primary underline" to={registerUrl(path)}>{label}</Link>
-  const card = (id: string, title: string, count: number | string, content: ReactNode, href: string) => (
-    <section aria-labelledby={`dcv-${id}`} className="rounded-md border bg-card p-3">
-      <div className="flex items-center justify-between gap-2"><h2 id={`dcv-${id}`} className="font-medium">{title}</h2><span className="rounded-full bg-muted px-2 text-sm tabular-nums">{count}</span></div>
-      <div className="mt-2 text-sm">{content}</div><div className="mt-2">{link(href, t('dcv.openRegister'))}</div>
+  const none = <p className="text-muted-foreground">{t('dcv.none')}</p>
+  // One of the five fixed questions: a stable identity stripe, the question as its heading, its count, and the register.
+  const card = (id: string, heading: string, count: number | string, content: ReactNode, href: string) => (
+    <section aria-labelledby={`dcv-${id}`} data-accent={QUESTION_ACCENT[id]} className={`flex flex-col ${box} border-t-4 border-t-(color:--acc-stripe)`}>
+      <div className={head}><h2 id={`dcv-${id}`} className={title}>{heading}</h2><span className={badge}>{count}</span></div>
+      <div className={`flex-1 ${body}`}>{content}</div>
+      <div className="border-t px-4 py-2.5"><Link className="text-sm font-medium text-primary underline underline-offset-4" to={registerUrl(href)}>{t('dcv.openRegister')}</Link></div>
     </section>
   )
-  const items = (rows: { id: string; key: string; text: string; detail?: string }[], register: string) => rows.length ? <ul className="space-y-1">{rows.map((r) => <li key={r.id}><Link className="underline" to={registerUrl(register, `${register === 'handoffs' ? 'Handoff' : 'ChangeNotice'}:${r.id}`)}>{r.key}</Link> <span>{r.text}</span>{r.detail && <span className="text-muted-foreground"> · {r.detail}</span>}</li>)}</ul> : <p className="text-muted-foreground">{t('dcv.none')}</p>
+  const items = (rows: { id: string; key: string; text: string; detail?: ReactNode }[], register: string) => rows.length ? <ul className="divide-y">{rows.map((r) => <li key={r.id} className={row}>
+    <p><Link className={keyLink} to={registerUrl(register, `${register === 'handoffs' ? 'Handoff' : 'ChangeNotice'}:${r.id}`)}>{r.key}</Link> <span className="font-medium">{r.text}</span></p>
+    {r.detail && <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">{r.detail}</div>}
+  </li>)}</ul> : none
   const linkedIssueItems = d.linkedIssues
   const existingActions = (sourceType: LinkedAction['sourceType'], sourceId: string) => d.linkedActions.filter(a => a.sourceType === sourceType && a.sourceId === sourceId)
-  const actionLinks = (rows: LinkedAction[]) => rows.length > 0 && <ul className="mt-1 space-y-1">{rows.map(a =>
-    <li key={a.id}>{t('dcv.existingAction')} <Link className="text-primary underline" to={registerUrl('meetings', `Action:${a.id}`)}>{a.key}</Link> · {a.text} · {tv(a.status)}{a.dueDate && ` · ${fmtDate(a.dueDate)}`}</li>)}</ul>
-  return <section aria-labelledby="dcv-title" className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-    <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><div><h2 id="dcv-title" className="text-lg font-semibold">{t('dcv.title')}</h2><p className="text-sm text-muted-foreground">{t('dcv.subtitle')}</p><p role="status" className="mt-1 text-xs text-muted-foreground">{t('dcv.scopeNote')}</p></div><span className="text-xs text-muted-foreground">{t('dcv.clientRefresh', { when: new Date(d.evaluatedAt).toLocaleTimeString() })}</span></div>
-    {filters}
-    <p className="no-print my-2 text-xs text-muted-foreground">{t('dcv.allSectionsPage')}</p>
-    {(from || to) && <p role="status" className="mb-3 rounded border border-warn/30 bg-warn-bg px-3 py-2 text-xs text-warn">{t('dcv.dateScopeNote')}</p>}
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-      {card('owe', t('dcv.owe'), d.outgoingTotal, <><>{items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: `${tv(h.status)} · ${t('dcv.promisedDate')}: ${h.promisedBy ? fmtDate(h.promisedBy) : t('dcv.unavailable')} · ${t('dcv.neededDate')}: ${fmtDate(h.neededBy)}` })), 'handoffs')}</><Pager label={t('dcv.owe')} page={d.outgoingPage} total={d.outgoingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
-      {card('waiting', t('dcv.waiting'), d.incomingTotal, <><>{items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: tv(h.status) })), 'handoffs')}</><Pager label={t('dcv.waiting')} page={d.incomingPage} total={d.incomingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
-      {card('using', `${t('dcv.using')}${wide}`, d.usesTotal, d.uses.length ? <><ul className="space-y-1">{d.uses.map(u => <li key={u.id}><Link className="font-medium underline" to={registerUrl(u.targetType === 'Task' ? 'tasks' : 'deliverables', `${u.targetType}:${u.targetId}`)}>{u.targetKey ?? t('dcv.unknownWork')}</Link> · {u.targetName ?? ''} · {t('dcv.sourceRevision')}: {u.sourceUrl ? <a className="underline" href={u.sourceUrl} target="_blank" rel="noopener noreferrer">{u.sourceKey ?? t('dcv.unavailable')} {u.revision ? `(${u.revision})` : ''}</a> : t('dcv.unavailable')}<span className="block text-xs text-muted-foreground">{u.intendedUse}</span></li>)}</ul><Pager label={t('dcv.using')} page={d.usesPage} total={d.usesTotal} pageSize={d.usesPageSize} onPage={setPage} /></> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
+  const actionLinks = (rows: LinkedAction[]) => rows.length > 0 && <ul className="mt-1 space-y-1 text-xs">{rows.map(a =>
+    <li key={a.id}>{t('dcv.existingAction')} <Link className={keyLink} to={registerUrl('meetings', `Action:${a.id}`)}>{a.key}</Link> · {a.text} · {tv(a.status)}{a.dueDate && <span className="tabular-nums"> · {fmtDate(a.dueDate)}</span>}</li>)}</ul>
+  const capture = (key: string, onClick: () => void) => meeting && canCapture && onCapture &&
+    <button type="button" className="no-print inline-flex min-h-6 items-center text-sm text-primary underline underline-offset-4" aria-label={t('dcv.reuseCaptureFor', { key })} onClick={onClick}>{t('dcv.captureAction')}</button>
+  return shell(<>
+    <p className="no-print text-xs text-muted-foreground">{t('dcv.allSectionsPage')}</p>
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {card('owe', t('dcv.owe'), d.outgoingTotal, <>{items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: <><CoordStatus status={h.status} /><span>{t('dcv.promisedDate')}: <span className="tabular-nums">{h.promisedBy ? fmtDate(h.promisedBy) : t('dcv.unavailable')}</span></span><span>{t('dcv.neededDate')}: <span className="tabular-nums">{fmtDate(h.neededBy)}</span></span></> })), 'handoffs')}<Pager label={t('dcv.owe')} page={d.outgoingPage} total={d.outgoingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
+      {card('waiting', t('dcv.waiting'), d.incomingTotal, <>{items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: <CoordStatus status={h.status} /> })), 'handoffs')}<Pager label={t('dcv.waiting')} page={d.incomingPage} total={d.incomingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
+      {card('using', `${t('dcv.using')}${wide}`, d.usesTotal, d.uses.length ? <><ul className="divide-y">{d.uses.map(u => <li key={u.id} className={row}>
+        <p><Link className={keyLink} to={registerUrl(u.targetType === 'Task' ? 'tasks' : 'deliverables', `${u.targetType}:${u.targetId}`)}>{u.targetKey ?? t('dcv.unknownWork')}</Link> <span className="font-medium">{u.targetName ?? ''}</span></p>
+        <p>{t('dcv.sourceRevision')}: {u.sourceUrl ? <a className={textLink} href={u.sourceUrl} target="_blank" rel="noopener noreferrer">{u.sourceKey ?? t('dcv.unavailable')} {u.revision ? `(${u.revision})` : ''}</a> : <span className="text-muted-foreground">{t('dcv.unavailable')}</span>}</p>
+        <p className="text-xs text-muted-foreground">{u.intendedUse}</p>
+      </li>)}</ul><Pager label={t('dcv.using')} page={d.usesPage} total={d.usesTotal} pageSize={d.usesPageSize} onPage={setPage} /></> : none, 'changes')}
       {card('changed', `${t('dcv.changed')}${wide}`, d.changesTotal,
-        d.changes.length ? <><ul className="space-y-2">{d.changes.map(c => <li key={c.id}>
-          <Link className="underline" to={registerUrl('changes', `ChangeNotice:${c.id}`)}>{c.key}</Link> · {c.title} · {tv(c.status)} · <ChangeAssessmentCounts c={c} scoped={scoped} />
+        d.changes.length ? <><ul className="divide-y">{d.changes.map(c => <li key={c.id} className={row}>
+          <p><Link className={keyLink} to={registerUrl('changes', `ChangeNotice:${c.id}`)}>{c.key}</Link> <span className="font-medium">{c.title}</span></p>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs"><CoordStatus status={c.status} /><span className={c.pendingAssessments > 0 ? 'text-warn' : 'text-muted-foreground'}>{c.pendingAssessments > 0 && <span aria-hidden>▲ </span>}<ChangeAssessmentCounts c={c} scoped={scoped} /></span></div>
           {actionLinks(existingActions('ChangeNotice', c.id))}
           {d.unavailableChangeTargets.filter(target => target.changeNoticeId === c.id).map(target =>
-            <p key={target.changeNoticeId} role="status">{plural(target.count, 'dcv.targetUnavailableOneLinkable', 'dcv.targetUnavailableManyLinkable')}</p>)}
-          {meeting && canCapture && onCapture &&
-            <button type="button" className="no-print text-primary underline" aria-label={t('dcv.reuseCaptureFor', { key: c.key })} onClick={() => onCapture(c.key,
-              [{ targetType: 'ChangeNotice', targetId: c.id },
-                ...d.changeTargets.filter(target => target.changeNoticeId === c.id).map(target => ({ targetType: target.targetType, targetId: target.targetId }))],
-              existingActions('ChangeNotice', c.id).map(a => a.id))}>
-              {t('dcv.captureAction')}</button>}
-        </li>)}</ul><Pager label={t('dcv.changed')} page={d.changesPage} total={d.changesTotal} pageSize={d.changesPageSize} onPage={setPage} /></> : <p className="text-muted-foreground">{t('dcv.none')}</p>, 'changes')}
+            <p key={target.changeNoticeId} role="status" className="text-xs text-warn"><span aria-hidden>▲ </span>{plural(target.count, 'dcv.targetUnavailableOneLinkable', 'dcv.targetUnavailableManyLinkable')}</p>)}
+          {capture(c.key, () => onCapture!(c.key,
+            [{ targetType: 'ChangeNotice', targetId: c.id },
+              ...d.changeTargets.filter(target => target.changeNoticeId === c.id).map(target => ({ targetType: target.targetType, targetId: target.targetId }))],
+            existingActions('ChangeNotice', c.id).map(a => a.id)))}
+        </li>)}</ul><Pager label={t('dcv.changed')} page={d.changesPage} total={d.changesTotal} pageSize={d.changesPageSize} onPage={setPage} /></> : none, 'changes')}
       {card('start', `${t('dcv.start')}${wide}`, d.startabilityReadyTotal,
-        <><p className="text-xs text-muted-foreground">{t('dcv.readySummary', { ready: d.startabilityReadyTotal, n: d.startabilityTotal, from: d.startabilityFrom, to: d.startabilityTo })}</p>
-          {d.startability.length ? <><ul className="mt-1 space-y-1">{d.startability.map(r => <li key={r.id}>
-            <Link className="underline" to={registerUrl(r.targetType === 'Task' ? 'tasks' : 'deliverables', `${r.targetType}:${r.targetId}`)}>{r.key}</Link> · {r.name} · {tv(r.state)}
-            {r.blocked.length > 0 && <span> · {t('dcv.blocked', { list: r.blocked.join(', ') })}</span>}{r.unknown.length > 0 && <span> · {t('dcv.unknown', { list: r.unknown.join(', ') })}</span>}
-          </li>)}</ul><Pager label={t('dcv.start')} page={d.startabilityPage} total={d.startabilityTotal} pageSize={d.startabilityPageSize} onPage={setPage} /></> : <p>{t('dcv.noAssessedWork')}</p>}</>, 'readiness')}
+        <><p className="mb-2 text-xs text-muted-foreground">{t('dcv.readySummary', { ready: d.startabilityReadyTotal, n: d.startabilityTotal, from: d.startabilityFrom, to: d.startabilityTo })}</p>
+          {d.startability.length ? <><ul className="divide-y">{d.startability.map(r => <li key={r.id} className={row}>
+            <p><Link className={keyLink} to={registerUrl(r.targetType === 'Task' ? 'tasks' : 'deliverables', `${r.targetType}:${r.targetId}`)}>{r.key}</Link> <span className="font-medium">{r.name}</span></p>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs"><CoordStatus status={r.state} />
+              {r.blocked.length > 0 && <Flags tone="bad">{t('dcv.blocked', { list: r.blocked.join(', ') })}</Flags>}{r.unknown.length > 0 && <Flags tone="warn">{t('dcv.unknown', { list: r.unknown.join(', ') })}</Flags>}</div>
+          </li>)}</ul><Pager label={t('dcv.start')} page={d.startabilityPage} total={d.startabilityTotal} pageSize={d.startabilityPageSize} onPage={setPage} /></> : <p className="text-muted-foreground">{t('dcv.noAssessedWork')}</p>}</>, 'readiness')}
     </div>
-    <section aria-labelledby="dcv-linked-issues" className="mt-3 rounded-md border bg-card p-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="dcv-linked-issues" className="font-medium">{t('dcv.linkedIssues')}</h2>
-        <span className="rounded-full bg-muted px-2 text-sm tabular-nums">{d.linkedIssuesTotal}</span>
+    <section aria-labelledby="dcv-linked-issues" className={box}>
+      <div className={head}><h2 id="dcv-linked-issues" className={title}>{t('dcv.linkedIssues')}</h2><span className={badge}>{d.linkedIssuesTotal}</span></div>
+      <div className={body}>
+        <p className="mb-2 text-xs text-muted-foreground">{t('dcv.linkedIssuesHint')}</p>
+        {linkedIssueItems.length ? <><ul className="divide-y rounded-md border">{linkedIssueItems.map((issue) => <li key={issue.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2">
+          <Link className={keyLink} to={`/projects/${project.projectNumber}/issues?panel=Issue:${issue.id}`} aria-label={t('dcv.openLinkedIssue', { key: issue.key })}>{issue.key}</Link>
+          <button type="button" className="min-w-[12rem] flex-1 text-left font-medium hover:underline" onClick={() => openPanel('Issue', issue.id)}>{issue.title}</button>
+          <CoordStatus status={issue.status} />
+          <span className="text-muted-foreground">{issue.ownerName ?? issue.ownerId ?? t('dcv.ownerUnavailable')}</span>
+        </li>)}</ul><Pager label={t('dcv.linkedIssues')} page={d.linkedIssuesPage} total={d.linkedIssuesTotal} pageSize={d.linkedIssuesPageSize} onPage={setPage} /></> : none}
+        <p className="mt-2 text-xs text-muted-foreground tabular-nums">{t('dcv.clientRefresh', { when: new Date(d.evaluatedAt).toLocaleTimeString() })}</p>
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">{t('dcv.linkedIssuesHint')}</p>
-      {linkedIssueItems.length ? <><ul className="mt-2 divide-y rounded border">{linkedIssueItems.map((issue) => <li key={issue.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 text-sm">
-        <Link className="font-medium text-primary underline" to={`/projects/${project.projectNumber}/issues?panel=Issue:${issue.id}`} aria-label={t('dcv.openLinkedIssue', { key: issue.key })}>{issue.key}</Link>
-        <button type="button" className="min-w-[12rem] flex-1 text-left hover:underline" onClick={() => openPanel('Issue', issue.id)}>{issue.title}</button>
-        <span className="text-muted-foreground">{tv(issue.status)}</span>
-        <span className="text-muted-foreground">{issue.ownerName ?? issue.ownerId ?? t('dcv.ownerUnavailable')}</span>
-      </li>)}</ul><Pager label={t('dcv.linkedIssues')} page={d.linkedIssuesPage} total={d.linkedIssuesTotal} pageSize={d.linkedIssuesPageSize} onPage={setPage} /></> : <p className="mt-2 text-sm text-muted-foreground">{t('dcv.none')}</p>}
-      <p className="mt-2 text-xs text-muted-foreground">{t('dcv.clientRefresh', { when: new Date(d.evaluatedAt).toLocaleTimeString() })}</p>
     </section>
-    <section aria-labelledby="dcv-pending-reviews" className="mt-3 rounded border bg-card p-3">
-      <h2 id="dcv-pending-reviews" className="font-medium">{t('dcv.pendingReviews')} · {d.reviewsTotal}</h2>
-      {d.reviews.length ? <ul className="mt-2 space-y-1">{d.reviews.map(r => <li key={r.id}>
-        <Link className="underline" to={registerUrl('reviews', `ReviewPackage:${r.id}`)}>{r.key}</Link> · {r.title} · {tv(r.status)} · {t('dcv.reviewOutstanding', { n: r.outstandingDisciplines })} · {t('dcv.reviewBlocking', { n: r.blockingFindings })}
-      </li>)}</ul> : <p>{t('dcv.none')}</p>}
-      <Pager label={t('dcv.pendingReviews')} page={d.reviewsPage} total={d.reviewsTotal} pageSize={d.reviewsPageSize} onPage={setPage} />
+    <section aria-labelledby="dcv-pending-reviews" className={box}>
+      <div className={head}><h2 id="dcv-pending-reviews" className={title}>{t('dcv.pendingReviews')} · {d.reviewsTotal}</h2></div>
+      <div className={body}>
+        {d.reviews.length ? <ul className="divide-y">{d.reviews.map(r => <li key={r.id} className={row}>
+          <p><Link className={keyLink} to={registerUrl('reviews', `ReviewPackage:${r.id}`)}>{r.key}</Link> <span className="font-medium">{r.title}</span></p>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground"><CoordStatus status={r.status} /><span className="tabular-nums">{t('dcv.reviewOutstanding', { n: r.outstandingDisciplines })}</span><span className={r.blockingFindings > 0 ? 'font-medium text-bad tabular-nums' : 'tabular-nums'}>{r.blockingFindings > 0 && <span aria-hidden>■ </span>}{t('dcv.reviewBlocking', { n: r.blockingFindings })}</span></div>
+        </li>)}</ul> : none}
+        <Pager label={t('dcv.pendingReviews')} page={d.reviewsPage} total={d.reviewsTotal} pageSize={d.reviewsPageSize} onPage={setPage} />
+      </div>
     </section>
-    <div className="mt-3 grid gap-3 md:grid-cols-2">
-      <section aria-labelledby="dcv-submissions" className="rounded-md border bg-card p-3"><div className="flex items-center justify-between"><h2 id="dcv-submissions" className="font-medium">{t('dcv.upcomingSubmissions')}</h2><span className="rounded-full bg-muted px-2 text-sm tabular-nums">{d.upcomingSubmissionsTotal}</span></div>
-        {d.upcomingSubmissions.length ? <><ul className="mt-2 space-y-2 text-sm">{d.upcomingSubmissions.map(s => <li key={s.id}><Link className="underline" to={`/projects/${project.projectNumber}/submissions?panel=SubmissionPackage:${s.id}`}>{s.key}</Link> · {s.title} · {tv(s.effectiveStatus)} · {fmtDate(s.targetDate)}{s.failingChecks.length > 0 && <span className="block text-warn">{t('dcv.failingChecks')}: {s.failingChecks.map(c => c.sourcePath ? <Link key={`${s.id}-${c.code}-${c.sourceId ?? 'none'}`} className="underline" to={c.sourcePath}>{c.kind}</Link> : c.kind)}</span>}</li>)}</ul><Pager label={t('dcv.upcomingSubmissions')} page={d.upcomingSubmissionsPage} total={d.upcomingSubmissionsTotal} pageSize={d.pageSize} onPage={setPage} /></> : <p className="mt-2 text-sm text-muted-foreground">{t('dcv.none')}</p>}
+    <div className="grid gap-4 md:grid-cols-2">
+      <section aria-labelledby="dcv-submissions" className={box}><div className={head}><h2 id="dcv-submissions" className={title}>{t('dcv.upcomingSubmissions')}</h2><span className={badge}>{d.upcomingSubmissionsTotal}</span></div>
+        <div className={body}>{d.upcomingSubmissions.length ? <><ul className="divide-y">{d.upcomingSubmissions.map(s => <li key={s.id} className={row}>
+          <p><Link className={keyLink} to={`/projects/${project.projectNumber}/submissions?panel=SubmissionPackage:${s.id}`}>{s.key}</Link> <span className="font-medium">{s.title}</span></p>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground"><CoordStatus status={s.effectiveStatus} /><span className="tabular-nums">{fmtDate(s.targetDate)}</span></div>
+          {s.failingChecks.length > 0 && <p className="text-xs text-warn"><span aria-hidden>▲ </span>{t('dcv.failingChecks')}: {s.failingChecks.map((c, i) => <span key={`${s.id}-${c.code}-${c.sourceId ?? 'none'}`}>{i > 0 && ', '}{c.sourcePath ? <Link className="underline underline-offset-4" to={c.sourcePath}>{c.kind}</Link> : c.kind}</span>)}</p>}
+        </li>)}</ul><Pager label={t('dcv.upcomingSubmissions')} page={d.upcomingSubmissionsPage} total={d.upcomingSubmissionsTotal} pageSize={d.pageSize} onPage={setPage} /></> : none}</div>
       </section>
-      <section aria-labelledby="dcv-staffing" className="rounded-md border bg-card p-3"><div className="flex items-center justify-between"><h2 id="dcv-staffing" className="font-medium">{t('dcv.staffingConflicts')}</h2><span className="rounded-full bg-muted px-2 text-sm tabular-nums">{d.staffingConflictsTotal}</span></div>
-        {d.staffingConflicts.length ? <><ul className="mt-2 space-y-2 text-sm">{d.staffingConflicts.map(c => <li key={c.id}><Link className="underline" to={registerUrl(c.targetType === 'Task' ? 'tasks' : 'deliverables', `${c.targetType}:${c.targetId}`)}>{c.key}</Link> · {c.description} · {fmtDate(c.neededBy)}</li>)}</ul><Pager label={t('dcv.staffingConflicts')} page={d.staffingConflictsPage} total={d.staffingConflictsTotal} pageSize={d.pageSize} onPage={setPage} /></> : <p className="mt-2 text-sm text-muted-foreground">{t('dcv.none')}</p>}
+      <section aria-labelledby="dcv-staffing" className={box}><div className={head}><h2 id="dcv-staffing" className={title}>{t('dcv.staffingConflicts')}</h2><span className={badge}>{d.staffingConflictsTotal}</span></div>
+        <div className={body}>{d.staffingConflicts.length ? <><ul className="divide-y">{d.staffingConflicts.map(c => <li key={c.id} className={row}>
+          <p><Link className={keyLink} to={registerUrl(c.targetType === 'Task' ? 'tasks' : 'deliverables', `${c.targetType}:${c.targetId}`)}>{c.key}</Link> <span className="font-medium">{c.description}</span></p>
+          <p className="text-xs text-muted-foreground tabular-nums">{fmtDate(c.neededBy)}</p>
+        </li>)}</ul><Pager label={t('dcv.staffingConflicts')} page={d.staffingConflictsPage} total={d.staffingConflictsTotal} pageSize={d.pageSize} onPage={setPage} /></> : none}</div>
       </section>
     </div>
-    {d.blockerGroups.length > 0 && <section aria-labelledby="dcv-blockers" className="mt-3 rounded-md border bg-card p-3">
-      <h2 id="dcv-blockers" className="font-medium">{t('dcv.ws.linkedTaskBlockers')}{wide}</h2>
-      <ul className="mt-2 space-y-2 text-sm">{d.blockerGroups.map(group => <li key={group.handoffId}><Link className="font-medium text-primary underline" to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · <Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?ids=${group.taskIds.join(',')}`}>{t('dcv.linkedTasks', { n: group.taskIds.length })}</Link> ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className="text-primary underline" to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})
+    {d.blockerGroups.length > 0 && <section aria-labelledby="dcv-blockers" className={box}>
+      <div className={head}><h2 id="dcv-blockers" className={title}>{t('dcv.ws.linkedTaskBlockers')}{wide}</h2><span className={badge}>{d.blockerGroupsTotal}</span></div>
+      <div className={body}><ul className="divide-y">{d.blockerGroups.map(group => <li key={group.handoffId} className={row}>
+        <p><Link className={keyLink} to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · <Link className={textLink} to={`/projects/${project.projectNumber}/tasks?ids=${group.taskIds.join(',')}`}>{t('dcv.linkedTasks', { n: group.taskIds.length })}</Link> ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className={keyLink} to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})</p>
         {actionLinks(existingActions('Handoff', group.handoffId))}
-        {meeting && canCapture && onCapture && <button type="button" className="no-print text-primary underline" aria-label={t('dcv.reuseCaptureFor', { key: group.handoffKey })} onClick={() => onCapture(group.handoffKey,
+        {capture(group.handoffKey, () => onCapture!(group.handoffKey,
           [{ targetType: 'Handoff', targetId: group.handoffId }, ...group.taskIds.map(id => ({ targetType: 'Task', targetId: id }))],
-          existingActions('Handoff', group.handoffId).map(a => a.id))}>
-          {t('dcv.captureAction')}</button>}
-      </li>)}</ul><Pager label={t('dcv.ws.linkedTaskBlockers')} page={d.blockerGroupsPage} total={d.blockerGroupsTotal} pageSize={d.pageSize} onPage={setPage} />
+          existingActions('Handoff', group.handoffId).map(a => a.id)))}
+      </li>)}</ul><Pager label={t('dcv.ws.linkedTaskBlockers')} page={d.blockerGroupsPage} total={d.blockerGroupsTotal} pageSize={d.pageSize} onPage={setPage} /></div>
     </section>}
-  </section>
+  </>, d.evaluatedAt)
 }

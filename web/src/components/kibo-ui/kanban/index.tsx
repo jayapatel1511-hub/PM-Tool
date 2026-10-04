@@ -76,7 +76,7 @@ export const KanbanBoard = ({ id, children, className }: KanbanBoardProps) => {
   return (
     <div
       className={cn(
-        "flex size-full min-h-40 flex-col divide-y overflow-hidden rounded-md border bg-secondary text-xs shadow-sm ring-2 transition-all",
+        "flex size-full min-h-40 flex-col overflow-hidden rounded-lg border bg-muted text-sm ring-2 transition-shadow duration-[120ms]",
         isOver ? "ring-primary" : "ring-transparent",
         className
       )}
@@ -127,29 +127,31 @@ export const KanbanCard = <T extends KanbanItemProps = KanbanItemProps>({
       <div style={style} {...pointer} ref={setNodeRef}>
         <Card
           className={cn(
-            "group relative cursor-grab gap-4 rounded-md p-3 pl-5 shadow-sm",
+            "group relative cursor-grab gap-0 rounded-lg p-3 shadow-none transition-colors duration-[120ms] hover:border-input",
             isDragging && "pointer-events-none cursor-grabbing opacity-30",
             className
           )}
         >
+          {/* Tuesday: a 28 px handle at full contrast in the top-right corner; the card's first row leaves room for it. */}
           <button type="button" ref={setActivatorNodeRef} {...attributes} onKeyDown={onKeyDown as React.KeyboardEventHandler<HTMLButtonElement> | undefined} aria-label={handleLabel ?? name}
-            className="absolute left-0.5 top-2 rounded p-0.5 text-muted-foreground opacity-40 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring">
-            <GripVertical className="size-3.5" aria-hidden />
+            className="absolute right-1 top-1 grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+            <GripVertical className="size-4" aria-hidden />
           </button>
           {children ?? <p className="m-0 font-medium text-sm">{name}</p>}
         </Card>
       </div>
       {activeCardId === id && (
         <t.In>
-          <Card
+          {/* A plain surface, not Card: Card's own shadow-sm would compete with the lifted overlay shadow. */}
+          <div
             className={cn(
-              "cursor-grab gap-4 rounded-md p-3 shadow-sm ring-2 ring-primary",
+              "cursor-grab rounded-lg border bg-card p-3 text-card-foreground shadow-overlay ring-2 ring-primary",
               isDragging && "cursor-grabbing",
               className
             )}
           >
             {children ?? <p className="m-0 font-medium text-sm">{name}</p>}
-          </Card>
+          </div>
         </t.In>
       )}
     </>
@@ -189,7 +191,7 @@ export const KanbanCards = <T extends KanbanItemProps = KanbanItemProps>({
 export type KanbanHeaderProps = HTMLAttributes<HTMLDivElement>;
 
 export const KanbanHeader = ({ className, ...props }: KanbanHeaderProps) => (
-  <div className={cn("m-0 p-2 font-semibold text-sm", className)} {...props} />
+  <div className={cn("m-0 flex min-h-11 items-center justify-between gap-2 px-3 py-2 font-semibold text-sm", className)} {...props} />
 );
 
 export type KanbanProviderProps<
@@ -329,7 +331,7 @@ export const KanbanProvider = <
       >
         <div
           className={cn(
-            "grid size-full auto-cols-fr grid-flow-col gap-4",
+            "grid w-max auto-cols-[248px] grid-flow-col gap-3",
             className
           )}
         >

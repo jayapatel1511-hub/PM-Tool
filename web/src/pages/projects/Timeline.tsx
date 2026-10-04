@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Printer } from 'lucide-react'
+import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Monitor, Printer } from 'lucide-react'
 import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Loading, Page } from '@/components/hub/common'
+import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, Segmented, selectCls, useIsPhone } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key, toneOf } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -30,6 +30,7 @@ export const toneBg = (status?: string | null) => `var(--${toneOf(status)}-bg)`
 const min = (xs: (string | null | undefined)[]) => xs.filter(Boolean).reduce<string | undefined>((a, b) => (!a || b! < a ? b! : a), undefined)
 const max = (xs: (string | null | undefined)[]) => xs.filter(Boolean).reduce<string | undefined>((a, b) => (!a || b! > a ? b! : a), undefined)
 export const HATCH = 'repeating-linear-gradient(135deg, var(--bad) 0 3px, transparent 3px 7px)'
+const FILTERS = ['disciplineId', 'milestoneId', 'status', 'hideCompleted', 'from', 'to'] as const
 
 interface TimelineTask {
   id: string; key: string; name: string; deliverableId?: string | null; projectDisciplineId: string; milestoneId?: string | null; startDate?: string | null; dueDate?: string | null
@@ -67,14 +68,16 @@ export function TimelineTab() {
   const [msMove, setMsMove] = useState<{ m: MilestoneRow; date: string } | null>(null)
   const drag = useRef<{ id: string; x0: number; moved: boolean } | null>(null)
   const suppress = useRef(false)
+  const phone = useIsPhone() // milestone editing is desktop/tablet only (§13.0); on phones the diamonds open the milestone instead
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); n.delete('panel'); setSp(n, { replace: true }) }
   const zoom = (sp.get('zoom') as Zoom | null) ?? 'month'
   const f = { disciplineId: sp.get('disciplineId'), milestoneId: sp.get('milestoneId'), status: sp.get('status'), hide: sp.get('hideCompleted') === 'true', from: sp.get('from'), to: sp.get('to') }
   const ms = useQuery({ queryKey: ['p', p.id, 'milestones', true, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones?showCompleted=true`) })
   const dels = useQuery({ queryKey: ['p', p.id, 'deliverables', {}], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables`) })
   const tl = useQuery({ queryKey: ['p', p.id, 'timeline'], queryFn: () => get<TimelineData>(`projects/${p.id}/timeline`) })
-  if (ms.isPending || dels.isPending || tl.isPending) return <Loading rows={8} />
-  if (ms.error || dels.error || tl.error) return <div className="p-4"><ErrorBanner error={ms.error ?? dels.error ?? tl.error} /></div>
+  const header = { title: t('ptab.timeline'), subtitle: t('timeline.subtitle') }
+  if (ms.isPending || dels.isPending || tl.isPending) return <Page {...header}><div className="rounded-lg border bg-card"><Loading rows={8} /></div></Page>
+  if (ms.error || dels.error || tl.error) return <Page {...header}><ErrorBanner error={ms.error ?? dels.error ?? tl.error} retry={() => { ms.refetch(); dels.refetch(); tl.refetch() }} /></Page>
 
   const now = today()
   const px = ZOOM[zoom]
@@ -141,7 +144,7 @@ export function TimelineTab() {
   const lanes: number[] = []
   const placed = [...milestones].sort((a, b) => a.date!.localeCompare(b.date!)).map((m) => {
     const left = x(m.date!)
-    const w = Math.min(170, 44 + m.name.length * 6.5)
+    const w = Math.min(176, 44 + m.name.length * 7)
     let row = lanes.findIndex((e) => e < left - 6)
     if (row < 0) row = lanes.length < 3 ? lanes.length : lanes.indexOf(Math.min(...lanes))
     lanes[row] = left + w
@@ -200,8 +203,17 @@ export function TimelineTab() {
   const toggle = (setter: typeof setClosed, id: string) => setter((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
   const expandable = rows.flatMap((r) => (r.kind === 'deliverable' && r.tasks > 0 ? [r.id] : r.kind === 'loose' ? [r.id] : []))
   const allOpen = expandable.length > 0 && expandable.every((id) => expanded.has(id))
-  const sel = 'h-8 rounded-md border bg-card px-2 text-sm'
   const reload = () => { qc.invalidateQueries({ queryKey: ['p', p.id] }); refresh(p.id) }
+  // Active filters as removable tokens with Clear (§13.0 Filters); zoom is a view choice, not a filter.
+  const tokens = ([
+    ['disciplineId', t('common.discipline'), p.disciplines.find((d) => d.id === f.disciplineId)?.name],
+    ['milestoneId', t('field.MilestoneId'), ms.data.find((m) => m.id === f.milestoneId)?.key],
+    ['status', t('common.status'), f.status && tv(f.status)],
+    ['hideCompleted', t('timeline.hideCompleted'), t('common.yes')],
+    ['from', t('common.from'), f.from && fmtDate(f.from)],
+    ['to', t('common.to'), f.to && fmtDate(f.to)],
+  ] as const).filter(([k]) => sp.get(k))
+  const clear = () => { const n = new URLSearchParams(sp); for (const k of FILTERS) n.delete(k); n.delete('panel'); setSp(n, { replace: true }) }
 
   const bar = (id: string, span: Span, status: string, pct: number, label: string, thin: boolean, can: boolean, onDrop: (n: number) => void, open: () => void) => {
     const left = Math.max(x(span.start), 0)
@@ -218,9 +230,9 @@ export function TimelineTab() {
           className={cn('absolute overflow-hidden rounded-sm border text-left focus-visible:ring-2', shift?.id === id && 'ring-2 ring-primary')}
           style={{ ...dragProps(id, can, onDrop, open).style, left: left + dx(id), width: w, top, height, borderColor: tone(status), background: toneBg(status) }}>
           <span className="absolute inset-y-0 left-0 opacity-40" style={{ width: `${pct}%`, background: tone(status) }} />
-          {!thin && w > 44 && <span className="relative px-1 text-[10px] leading-4">{pct}%</span>}
+          {!thin && w > 44 && <span className="relative px-1 text-xs/4 tabular-nums">{pct}%</span>}
         </button>
-        {shift?.id === id && <span className="absolute z-30 rounded bg-primary px-1 text-[10px] text-primary-foreground" style={{ left: left + dx(id) + w + 4, top }}>{shift.days > 0 ? '+' : ''}{shift.days} d</span>}
+        {shift?.id === id && <span className="absolute z-30 whitespace-nowrap rounded-md bg-primary px-1.5 text-xs/[18px] text-primary-foreground tabular-nums" style={{ left: left + dx(id) + w + 4, top: top - 1 }}>{shift.days > 0 ? '+' : ''}{shift.days} d</span>}
         {span.late && <span aria-hidden className="absolute rounded-r-sm border border-l-0 border-bad" title={t('timeline.overdueBy', { n: daysBetween(span.end, now) })}
           style={{ left: x(span.end) + px, width: Math.max(daysBetween(span.end, now) * px, 2), top, height, background: HATCH }} />}
       </>
@@ -228,64 +240,73 @@ export function TimelineTab() {
   }
 
   return (
-    <Page title={t('ptab.timeline')} subtitle={t('timeline.subtitle')}
-      actions={<Button variant="outline" size="sm" className="no-print" onClick={() => window.print()}><Printer className="size-4" />{t('wc.print')}</Button>}>
-      <div className="no-print flex flex-wrap items-center gap-2">
-        <div className="inline-flex overflow-hidden rounded-md border bg-card" role="group" aria-label={t('timeline.zoom')}>
-          {(Object.keys(ZOOM) as Zoom[]).map((z) => (
-            <button key={z} type="button" aria-pressed={zoom === z} onClick={() => set('zoom', z === 'month' ? null : z)}
-              className={cn('h-8 px-3 text-sm', zoom === z ? 'bg-accent font-medium' : 'hover:bg-muted')}>{t(`timeline.zoom.${z}`)}</button>
-          ))}
+    <Page {...header} actions={<Button variant="outline" className="no-print" onClick={() => window.print()}><Printer className="size-4" />{t('wc.print')}</Button>}>
+      <FilterBar className="no-print">
+        <div className="flex flex-wrap items-end gap-3">
+          <Segmented label={t('timeline.zoom')} value={zoom} onChange={(z) => set('zoom', z === 'month' ? null : z)}
+            options={(Object.keys(ZOOM) as Zoom[]).map((z) => ({ value: z, label: t(`timeline.zoom.${z}`) }))} />
+          <Field label={t('common.discipline')} htmlFor="tl-discipline" className="w-full sm:w-44">
+            <select id="tl-discipline" className={selectCls} value={f.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
+              <option value="">{t('projects.anyDiscipline')}</option>{p.disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          </Field>
+          <Field label={t('field.MilestoneId')} htmlFor="tl-milestone" className="w-full sm:w-56">
+            <select id="tl-milestone" className={selectCls} value={f.milestoneId ?? ''} onChange={(e) => set('milestoneId', e.target.value)}>
+              <option value="">{t('deliverable.anyMilestone')}</option>{ms.data.filter((m) => !m.isCancelled).map((m) => <option key={m.id} value={m.id}>{m.key} {m.name}</option>)}
+            </select>
+          </Field>
+          <Field label={t('common.status')} htmlFor="tl-status" className="w-full sm:w-44">
+            <select id="tl-status" className={selectCls} value={f.status ?? ''} onChange={(e) => set('status', e.target.value)}>
+              <option value="">{t('deliverable.anyStatus')}</option>{STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
+            </select>
+          </Field>
+          <Field label={t('common.from')} htmlFor="tl-from" className="w-full sm:w-40"><Input id="tl-from" type="date" value={f.from ?? ''} onChange={(e) => set('from', e.target.value)} /></Field>
+          <Field label={t('common.to')} htmlFor="tl-to" className="w-full sm:w-40"><Input id="tl-to" type="date" value={f.to ?? ''} onChange={(e) => set('to', e.target.value)} /></Field>
+          <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={f.hide} onCheckedChange={(c) => set('hideCompleted', c ? 'true' : null)} />{t('timeline.hideCompleted')}</label>
         </div>
-        <select className={sel} value={f.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)} aria-label={t('common.discipline')}>
-          <option value="">{t('projects.anyDiscipline')}</option>{p.disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-        </select>
-        <select className={cn(sel, 'max-w-52')} value={f.milestoneId ?? ''} onChange={(e) => set('milestoneId', e.target.value)} aria-label={t('field.MilestoneId')}>
-          <option value="">{t('deliverable.anyMilestone')}</option>{ms.data.filter((m) => !m.isCancelled).map((m) => <option key={m.id} value={m.id}>{m.key} {m.name}</option>)}
-        </select>
-        <select className={sel} value={f.status ?? ''} onChange={(e) => set('status', e.target.value)} aria-label={t('common.status')}>
-          <option value="">{t('deliverable.anyStatus')}</option>{STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
-        </select>
-        <label className="flex items-center gap-2 text-sm"><Checkbox checked={f.hide} onCheckedChange={(c) => set('hideCompleted', c ? 'true' : null)} />{t('timeline.hideCompleted')}</label>
-        <label className="text-xs text-muted-foreground">{t('common.from')} <Input type="date" className="inline-flex h-8 w-36" value={f.from ?? ''} onChange={(e) => set('from', e.target.value)} /></label>
-        <label className="text-xs text-muted-foreground">{t('common.to')} <Input type="date" className="inline-flex h-8 w-36" value={f.to ?? ''} onChange={(e) => set('to', e.target.value)} /></label>
-        {expandable.length > 0 && <Button variant="ghost" size="sm" onClick={() => setExpanded(allOpen ? new Set() : new Set(expandable))}>
+        <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />
+      </FilterBar>
+      {data.permissions.manageMilestones && <DesktopOnly notice={<Notice icon={Monitor} title={t('milestone.phoneTitle')}>{t('milestone.phoneHint')}</Notice>}>{null}</DesktopOnly>}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Legend />
+        {expandable.length > 0 && <Button variant="outline" className="no-print" onClick={() => setExpanded(allOpen ? new Set() : new Set(expandable))}>
           {allOpen ? <ChevronsDownUp className="size-4" /> : <ChevronsUpDown className="size-4" />}{allOpen ? t('timeline.collapseTasks') : t('timeline.expandTasks')}</Button>}
       </div>
-      <Legend />
-      {rows.length === 0 && milestones.length === 0 ? <div className="rounded-lg border bg-card"><Empty>{t('timeline.empty')}</Empty></div> : (
-        <div className="overflow-x-auto rounded-lg border bg-card print:overflow-visible" role="region" aria-label={t('ptab.timeline')}>
+      {rows.length === 0 && milestones.length === 0 ? (
+        <div className="rounded-lg border bg-card"><Empty action={tokens.length > 0 && <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('timeline.empty')}</Empty></div>
+      ) : (
+        <div className="scroll-region overflow-x-auto rounded-lg border bg-card print:overflow-visible" role="region" aria-label={t('ptab.timeline')}>
           <div className="relative" style={{ width: LABEL + width }}>
-            <div className="flex h-8 border-b text-[11px] text-muted-foreground">
-              <div className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-card px-3 font-medium" style={{ width: LABEL }}>{t('timeline.items')}</div>
+            <div className="flex h-10 border-b bg-muted text-xs/4 text-muted-foreground">
+              <div className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-muted px-3 text-sm font-medium" style={{ width: LABEL }}>{t('timeline.items')}</div>
               <div className="relative" style={{ width }} aria-hidden>
                 {ticks.map((k) => (
                   <div key={k.date} className={cn('absolute top-0 h-full border-l', k.major ? 'border-border' : 'border-border/40')} style={{ left: x(k.date) }}>
-                    {k.label && <span className="absolute left-1 top-1 whitespace-nowrap">{k.label}</span>}
+                    {k.label && <span className="absolute left-1 top-1 whitespace-nowrap tabular-nums">{k.label}</span>}
                   </div>
                 ))}
               </div>
             </div>
             <div className="flex border-b" style={{ height: laneHeight }}>
-              <div className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-card px-3 text-xs font-semibold" style={{ width: LABEL }}>{t('ptab.milestones')}</div>
+              <div className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-card px-3 text-sm font-semibold" style={{ width: LABEL }}>{t('ptab.milestones')}</div>
               <div className="relative" style={{ width }}>
                 {placed.map(({ m, left, w, row }) => {
                   const status = milestoneStatusLabel(m)
                   const slipped = m.originalDate && m.originalDate !== m.date && !m.isComplete && visible(m.originalDate)
-                  const can = data.permissions.manageMilestones && !m.isComplete
+                  const can = data.permissions.manageMilestones && !m.isComplete && !phone
                   const drop = (n: number) => setMsMove({ m, date: addDays(m.date!, n) })
                   return (
                     <Fragment key={m.id}>
                       {slipped && <span aria-hidden title={t('timeline.originalDate', { date: fmtDate(m.originalDate) })} className="absolute top-[7px] size-3 rotate-45 border-2 bg-card"
                         style={{ left: x(m.originalDate!) - 6 + px / 2, borderColor: tone(status) }} />}
-                      <button type="button" {...dragProps(m.id, can, drop, () => openPanel('Milestone', m.id))} className="group absolute top-[5px] -translate-x-1/2"
+                      <button type="button" {...dragProps(m.id, can, drop, () => openPanel('Milestone', m.id))} className="group absolute top-px grid size-6 -translate-x-1/2 place-items-center rounded-md"
                         style={{ ...dragProps(m.id, can, drop, () => openPanel('Milestone', m.id)).style, left: left + px / 2 + dx(m.id) }}
                         aria-label={t('timeline.milestoneLabel', { key: m.key, name: m.name, date: fmtDate(m.date), status: tv(status) })} title={`${m.key} ${m.name} · ${fmtDate(m.date)} · ${tv(status)}`}>
-                        <span className={cn('block size-4 rotate-45 border border-white shadow', shift?.id === m.id && 'ring-2 ring-primary')} style={{ background: tone(status) }} />
+                        <span className={cn('block size-4 rotate-45 border border-white shadow-[0_0_0_1px_rgba(25,27,32,0.3)]', shift?.id === m.id && 'ring-2 ring-primary')} style={{ background: tone(status) }} />
                       </button>
-                      {shift?.id === m.id && <span className="absolute z-30 rounded bg-primary px-1 text-[10px] text-primary-foreground" style={{ left: left + px / 2 + dx(m.id) + 12, top: 4 }}>{shift.days > 0 ? '+' : ''}{shift.days} d</span>}
-                      <span className="pointer-events-none absolute truncate text-[11px] leading-4" style={{ left: left + px / 2 - 6, top: 24 + row * 16, maxWidth: w }} title={m.name}>
-                        {m.name} · <span className="text-muted-foreground">{shortDate(m.date)}</span>
+                      {shift?.id === m.id && <span className="absolute z-30 whitespace-nowrap rounded-md bg-primary px-1.5 text-xs/[18px] text-primary-foreground tabular-nums" style={{ left: left + px / 2 + dx(m.id) + 12, top: 3 }}>{shift.days > 0 ? '+' : ''}{shift.days} d</span>}
+                      <span className="pointer-events-none absolute truncate text-xs/4" style={{ left: left + px / 2 - 6, top: 24 + row * 16, maxWidth: w }} title={m.name}>
+                        {m.name} · <span className="text-muted-foreground tabular-nums">{shortDate(m.date)}</span>
                       </span>
                     </Fragment>
                   )
@@ -295,20 +316,21 @@ export function TimelineTab() {
             <div className="relative">
               {rows.map((r) => {
                 if (r.kind === 'group') return (
-                  <div key={r.id} className="flex border-b bg-muted/40" style={{ height: H.group }}>
-                    <button type="button" className="sticky left-0 z-20 flex shrink-0 items-center gap-1.5 border-r bg-muted px-2 text-left text-xs font-semibold" style={{ width: LABEL }}
+                  <div key={r.id} className="flex border-b bg-muted" style={{ height: H.group }}>
+                    <button type="button" className="sticky left-0 z-20 flex shrink-0 items-center gap-2 border-r bg-muted px-2 text-left text-sm font-semibold hover:bg-secondary" style={{ width: LABEL }}
                       aria-expanded={!closed.has(r.id)} onClick={() => toggle(setClosed, r.id)}>
-                      {closed.has(r.id) ? <ChevronRight className="size-3.5" /> : <ChevronDown className="size-3.5" />}
-                      <span className="inline-block size-2 rounded-sm" style={{ background: r.colour }} aria-hidden />{r.name}<span className="font-normal text-muted-foreground">{r.count}</span>
+                      {closed.has(r.id) ? <ChevronRight className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
+                      <span className="inline-block size-2.5 shrink-0 rounded-sm" style={{ background: r.colour }} aria-hidden /><span className="truncate">{r.name}</span>
+                      <span className="rounded-md bg-card px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">{r.count}</span>
                     </button>
                     <div style={{ width }} />
                   </div>
                 )
                 if (r.kind === 'loose') return (
                   <div key={r.id} className="flex border-b" style={{ height: H.loose }}>
-                    <button type="button" className="sticky left-0 z-20 flex shrink-0 items-center gap-1.5 border-r bg-card px-3 text-left text-xs italic text-muted-foreground hover:bg-muted" style={{ width: LABEL }}
+                    <button type="button" className="sticky left-0 z-20 flex shrink-0 items-center gap-1.5 border-r bg-card px-3 text-left text-xs/4 text-muted-foreground hover:bg-muted" style={{ width: LABEL }}
                       aria-expanded={expanded.has(r.id)} onClick={() => toggle(setExpanded, r.id)}>
-                      {expanded.has(r.id) ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}{t('timeline.looseTasks', { n: r.count })}
+                      {expanded.has(r.id) ? <ChevronDown className="size-3.5 shrink-0" /> : <ChevronRight className="size-3.5 shrink-0" />}<span className="truncate">{t('timeline.looseTasks', { n: r.count })}</span>
                     </button>
                     <div style={{ width }} />
                   </div>
@@ -319,9 +341,9 @@ export function TimelineTab() {
                   const can = !!canDel.get(d.id)
                   return (
                     <div key={r.id} className="flex border-b" style={{ height: H.deliverable }}>
-                      <div className="sticky left-0 z-20 flex shrink-0 items-center gap-1 border-r bg-card pl-1 pr-3 text-xs" style={{ width: LABEL }}>
-                        {r.tasks > 0 ? <button type="button" className="rounded p-0.5 hover:bg-muted" aria-expanded={expanded.has(d.id)} aria-label={t('timeline.showTasks', { key: d.key, n: r.tasks })} onClick={() => toggle(setExpanded, d.id)}>
-                          {expanded.has(d.id) ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}</button> : <span className="w-[18px]" />}
+                      <div className="sticky left-0 z-20 flex shrink-0 items-center gap-1 border-r bg-card pl-1 pr-3 text-sm" style={{ width: LABEL }}>
+                        {r.tasks > 0 ? <button type="button" className="grid size-6 shrink-0 place-items-center rounded-md hover:bg-muted" aria-expanded={expanded.has(d.id)} aria-label={t('timeline.showTasks', { key: d.key, n: r.tasks })} onClick={() => toggle(setExpanded, d.id)}>
+                          {expanded.has(d.id) ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</button> : <span className="w-6 shrink-0" />}
                         <button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left hover:underline" onClick={() => openPanel('Deliverable', d.id)} title={`${d.key} ${d.name}`}>
                           <Key>{d.key.split('-').pop()}</Key><span className="truncate">{d.name}</span>
                         </button>
@@ -337,7 +359,7 @@ export function TimelineTab() {
                 const tk = r.tk
                 return (
                   <div key={r.id} className="flex border-b border-border/60" style={{ height: H.task }}>
-                    <button type="button" className="sticky left-0 z-20 flex shrink-0 items-center gap-2 border-r bg-card pl-8 pr-3 text-left text-[11px] hover:bg-muted" style={{ width: LABEL }}
+                    <button type="button" className="sticky left-0 z-20 flex shrink-0 items-center gap-2 border-r bg-card pl-8 pr-3 text-left text-xs/4 hover:bg-muted" style={{ width: LABEL }}
                       onClick={() => openPanel('Task', tk.id)} title={`${tk.key} ${tk.name}${tk.assignee ? ` · ${tk.assignee}` : ''}`}>
                       <span className="key text-muted-foreground">{tk.key.split('-').pop()}</span><span className="truncate">{tk.name}</span>
                     </button>
@@ -364,20 +386,19 @@ export function TimelineTab() {
             </div>
             {lines.map((l) => (
               <div key={l.label} aria-hidden className={cn('pointer-events-none absolute bottom-0 top-0 z-10', l.cls)} style={{ left: LABEL + x(l.date) + l.offset }}>
-                <span className={cn('absolute left-1 top-[18px] whitespace-nowrap bg-card/80 px-0.5 text-[10px] font-medium', l.text)}>{l.label}</span>
+                <span className={cn('absolute left-1 top-[22px] whitespace-nowrap rounded-sm bg-card/90 px-1 text-xs/4 font-semibold', l.text)}>{l.label}</span>
               </div>
             ))}
           </div>
         </div>
       )}
       {unscheduled.length > 0 && (
-        <section className="rounded-lg border bg-card" aria-labelledby="tl-unscheduled">
-          <h2 id="tl-unscheduled" className="border-b px-4 py-2 text-sm font-semibold">{t('timeline.unscheduled')} <span className="text-muted-foreground">{unscheduled.length}</span></h2>
+        <Section id="tl-unscheduled" title={t('timeline.unscheduled')} count={unscheduled.length}>
           <ul className="divide-y text-sm">{unscheduled.map((u) => (
-            <li key={u.id}><button type="button" className="flex w-full items-center gap-2 px-4 py-1.5 text-left hover:bg-muted/40" onClick={() => openPanel(u.type, u.id)}>
-              <span className="w-20 shrink-0 text-xs text-muted-foreground">{t(`itemType.${u.type}`)}</span><Key>{u.key}</Key><span className="flex-1 truncate">{u.name}</span>
-              <span className="text-xs text-muted-foreground">{u.sub}</span></button></li>))}</ul>
-        </section>
+            <li key={u.id}><button type="button" className="flex min-h-(--row-min) w-full items-center gap-3 px-5 py-(--cell-py) text-left hover:bg-muted" onClick={() => openPanel(u.type, u.id)}>
+              <span className="w-24 shrink-0 text-xs/[18px] text-muted-foreground">{t(`itemType.${u.type}`)}</span><Key>{u.key}</Key><span className="min-w-0 flex-1 truncate font-medium">{u.name}</span>
+              <span className="text-xs/[18px] text-muted-foreground">{u.sub}</span></button></li>))}</ul>
+        </Section>
       )}
       {move && <MoveDialog move={move} projectComplete={data.permissions.needsReason} onClose={(ok) => { setMove(null); if (ok) reload() }} />}
       {msMove && <ChangeDateDialog m={msMove.m} initialDate={msMove.date} onClose={() => setMsMove(null)} onDone={() => { setMsMove(null); reload() }} />}
@@ -414,7 +435,7 @@ export function MoveDialog({ move, projectComplete, onClose }: { move: Move; pro
 export function Legend() {
   const swatch = (status: string) => <span className="inline-block h-3 w-5 rounded-sm border" style={{ borderColor: tone(status), background: toneBg(status) }} aria-hidden />
   return (
-    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground" aria-label={t('timeline.legend')}>
+    <ul className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs/[18px] text-muted-foreground" aria-label={t('timeline.legend')}>
       {['Not Started', 'In Progress', 'Revision Required', 'Issued'].map((s) => <li key={s} className="flex items-center gap-1.5">{swatch(s)}{tv(s)}</li>)}
       <li className="flex items-center gap-1.5"><span className="inline-block h-3 w-5 rounded-sm border border-bad" style={{ background: HATCH }} aria-hidden />{t('timeline.legendOverdue')}</li>
       <li className="flex items-center gap-1.5"><span className="inline-block h-3 w-5 rounded-sm border border-dashed border-foreground/40" aria-hidden />{t('timeline.legendBaseline')}</li>

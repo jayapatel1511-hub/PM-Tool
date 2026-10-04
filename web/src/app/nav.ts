@@ -29,7 +29,7 @@ export const NAV: NavItem[] = [
   { id: 'reports', path: '/reports', icon: BarChart3, label: 'nav.reports', show: all, primary: true },
   { id: 'team', path: '/team', icon: Users, label: 'nav.team', show: all, primary: true },
   { id: 'portfolio', path: '/portfolio', icon: Gauge, label: 'nav.portfolio', show: (m) => m.capabilities.portfolio },
-  { id: 'workload', path: '/workload', icon: FolderKanban, label: 'nav.workload', show: (m) => m.capabilities.workload },
+  { id: 'workload', path: '/workload', icon: FolderKanban, label: 'nav.resources', show: (m) => m.capabilities.workload },
   { id: 'staff', path: '/staff', icon: UserCog, label: 'nav.staff', show: (m) => m.capabilities.staff },
   { id: 'notifications', path: '/notifications', icon: Bell, label: 'nav.notifications', show: all },
   { id: 'templates', path: '/templates', icon: LayoutTemplate, label: 'nav.templates', show: (m) => m.capabilities.templates },

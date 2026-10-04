@@ -1,54 +1,88 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Design tokens. Visual cues from docs/reference/coordination-hub-v2 (navy frame, blue accent);
-   typography follows §13.0: one system sans-serif stack, 13–14 px tables, 16 px body text. */
+/* Tuesday visual standard v1.0 (docs/design/tuesday-tokens.json): light surfaces, black primary actions, six pastel
+   identity accents and the §13.0 status language. Colour never carries meaning alone: status keeps its text and symbol. */
 :root {
-  --radius: 0.5rem;
-  --background: #f4f6f9;
-  --foreground: #1b2230;
+  --radius: 0.375rem;
+  --background: #ffffff;
+  --foreground: #191b20;
   --card: #ffffff;
-  --card-foreground: #1b2230;
+  --card-foreground: #191b20;
   --popover: #ffffff;
-  --popover-foreground: #1b2230;
-  --primary: #1d55d0;
+  --popover-foreground: #191b20;
+  /* Links, focus and the selected cue. Primary actions use --action (black), not this blue. */
+  --primary: #385cac;
   --primary-foreground: #ffffff;
-  --secondary: #eceff4;
-  --secondary-foreground: #1b2230;
-  --muted: #f2f4f7;
-  --muted-foreground: #555f6f;
-  --accent: #eaf1fe;
-  --accent-foreground: #1a48ad;
-  --destructive: #b42318;
-  --border: #e2e6ec;
-  --input: #cbd2dc;
-  --ring: #2563eb;
+  --secondary: #f1f2f4;
+  --secondary-foreground: #191b20;
+  --muted: #f7f8fa;
+  --muted-foreground: #59606c;
+  --placeholder: #646a76;
+  --accent: #edf2fd;
+  --accent-foreground: #37589a;
+  --destructive: #b42332;
+  --border: #e5e7eb;   /* decorative: cards, separators, tracks */
+  --input: #7c8491;    /* a control's necessary boundary (3:1) */
+  --ring: #385cac;
 
-  --frame: #1b2230;
-  --frame-foreground: #e4e8ee;
-  --frame-muted: #9aa4b2;
-  --frame-active: #2563eb;
+  --action: #191b20;
+  --action-hover: #303236;
+  --action-foreground: #ffffff;
+  --disabled: #f1f2f4;
+  --disabled-foreground: #646a76;
+  --sidebar: #f5f6f7;
+  --sidebar-hover: #eceef1;
+  --nav-active: #e4ebf3;
+  --nav-active-foreground: #253e69;
 
-  /* Status colour language (§13.0); always paired with text and an icon. */
-  --ok: #177d43;         --ok-bg: #e7f7ed;
-  --warn: #8a5300;       --warn-bg: #fff4e0;
-  --bad: #b42318;        --bad-bg: #fdecea;
-  --idle: #555f6f;       --idle-bg: #eceff4;
-  --done: #1a48ad;       --done-bg: #eaf1fe;
-  --work: #3730a3;       --work-bg: #eef0ff;
+  /* The sign-in splash still reads the frame tokens. */
+  --frame: #f5f6f7;
+  --frame-foreground: #191b20;
+  --frame-muted: #59606c;
+  --frame-active: #e4ebf3;
+
+  /* Status (§13.0): On Track, Attention, Critical, Not Started, Complete, In Progress. */
+  --ok: #386953;    --ok-bg: #eaf5ef;
+  --warn: #7a5817;  --warn-bg: #fff4db;
+  --bad: #b42332;   --bad-bg: #fff0f1;
+  --idle: #59606c;  --idle-bg: #f1f2f4;
+  --done: #37589a;  --done-bg: #edf2fd;
+  --work: #574e87;  --work-bg: #f0effa;
+
+  /* Density: compact by default; comfortable and touch use 44 px targets (rows grow for wrapped content). */
+  --row-min: 36px;
+  --cell-py: 8px;
+  --cell-px: 12px;
+  --control-h: 40px;
+  --control-row-h: 32px;
 }
 
+:root[data-density="comfortable"] { --row-min: 48px; --cell-py: 14px; --cell-px: 16px; --control-h: 44px; --control-row-h: 44px; }
+@media (pointer: coarse) { :root { --control-h: 44px; --control-row-h: 44px; } }
+
+/* Identity accents: a person, project or category keeps one accent across views. They identify; they never signal status. */
+[data-accent="blue"] { --acc-bg: #edf2fd; --acc-fg: #37589a; --acc-stripe: #b6c9ed; }
+[data-accent="mint"] { --acc-bg: #eaf5ef; --acc-fg: #386953; --acc-stripe: #aacfb9; }
+[data-accent="lavender"] { --acc-bg: #f1edfc; --acc-fg: #64558f; --acc-stripe: #cbbce9; }
+[data-accent="peach"] { --acc-bg: #fff0e7; --acc-fg: #8d5538; --acc-stripe: #ecc3a9; }
+[data-accent="amber"] { --acc-bg: #fff4db; --acc-fg: #7a5817; --acc-stripe: #e3d29d; }
+[data-accent="rose"] { --acc-bg: #fbeaf0; --acc-fg: #974a68; --acc-stripe: #e7b8c8; }
+
 @media (prefers-contrast: more) {
-  :root { --border: #6b7585; --muted-foreground: #1b2230; --input: #3a4351; }
+  :root { --border: #7c8491; --muted-foreground: #191b20; }
 }
 
 @theme inline {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --radius-sm: 4px;
+  --radius-md: 6px;   /* controls, chips */
+  --radius-lg: 10px;  /* cards */
+  --radius-xl: 12px;  /* panels */
+  --radius-2xl: 14px; /* dialogs */
+  --shadow-popover: 0 8px 28px rgba(25, 27, 32, 0.1);
+  --shadow-overlay: 0 16px 48px rgba(25, 27, 32, 0.16);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -61,12 +95,22 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-placeholder: var(--placeholder);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-action: var(--action);
+  --color-action-hover: var(--action-hover);
+  --color-action-foreground: var(--action-foreground);
+  --color-disabled: var(--disabled);
+  --color-disabled-foreground: var(--disabled-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-nav-active: var(--nav-active);
+  --color-nav-active-foreground: var(--nav-active-foreground);
   --color-frame: var(--frame);
   --color-frame-foreground: var(--frame-foreground);
   --color-frame-muted: var(--frame-muted);
@@ -88,19 +132,35 @@
 @layer base {
   * { @apply border-border outline-ring/50; }
   html { font-size: 16px; }
-  body { @apply bg-background text-foreground antialiased; font-size: 14px; line-height: 1.45; }
+  body { @apply bg-background text-foreground antialiased; font-size: 14px; line-height: 1.43; }
+  input::placeholder, textarea::placeholder { color: var(--placeholder); }
   :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
-  .prose-body { font-size: 16px; line-height: 1.55; }
+  .prose-body { font-size: 16px; line-height: 1.5; }
   .key { font-family: var(--font-mono); font-size: 12px; letter-spacing: -0.01em; }
 }
 
-/* Windows high-contrast (forced colours) drops box-shadow rings: keep keyboard focus visible with a system colour. */
+/* Dense grids scroll inside their region; keep the scrollbar discoverable even where the OS uses overlay scrollbars.
+   Styling ::-webkit-scrollbar gives Chromium and Safari a permanent bar; scrollbar-width would override it, so only
+   browsers without the pseudo-element get the standard properties. */
+.scroll-region { position: relative; } /* contains absolutely positioned (screen-reader) text, so it never widens the page */
+.scroll-region::-webkit-scrollbar { height: 12px; width: 12px; }
+.scroll-region::-webkit-scrollbar-track { background: var(--secondary); }
+.scroll-region::-webkit-scrollbar-thumb { background: var(--input); border-radius: 6px; border: 3px solid var(--secondary); }
+.scroll-region.scroll-thin::-webkit-scrollbar { height: 6px; }
+.scroll-region.scroll-thin::-webkit-scrollbar-thumb { border-width: 1px; }
+@supports not selector(::-webkit-scrollbar) {
+  .scroll-region { scrollbar-width: thin; scrollbar-color: var(--input) var(--secondary); }
+}
+
+/* Windows high-contrast (forced colours): keep focus, boundaries, meters and patterns visible with system colours. */
 @media (forced-colors: active) {
-  :focus-visible { outline: 2px solid CanvasText !important; outline-offset: 2px; }
+  :focus-visible { outline: 2px solid Highlight !important; outline-offset: 2px; }
+  [data-meter-fill] { background: Highlight !important; forced-color-adjust: none; }
+  [aria-current="page"], [aria-selected="true"], [aria-pressed="true"] { outline: 1px solid Highlight; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
 
 @media print {

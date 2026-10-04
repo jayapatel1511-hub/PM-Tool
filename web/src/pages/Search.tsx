@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router'
-import { Empty, ErrorBanner, Loading, Page } from '@/components/hub/common'
+import { Empty, ErrorBanner, Field, FilterBar, Loading, Page, Section } from '@/components/hub/common'
+import { Key } from '@/components/hub/pills'
 import { GROUPS, Highlight, searchQuery, toHits, type Group } from '@/components/hub/search'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -16,6 +17,9 @@ export function SearchPage() {
   const q = sp.get('q') ?? ''
   const archived = sp.get('archived') === 'true'
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
+  // One navigation for the new term and the type reset: two set() calls in a row would each start from the old URL,
+  // and the second would put the previous term back.
+  const submit = (term: string) => { const n = new URLSearchParams(sp); if (term) n.set('q', term); else n.delete('q'); n.delete('type'); setSp(n, { replace: true }) }
   const counts = useQuery({ queryKey: ['search-counts', q, archived], queryFn: () => searchQuery(q, { includeArchived: archived, limit: 1 }), enabled: q.trim().length > 0 })
   const first = GROUPS.find((g) => (counts.data?.counts[g] ?? 0) > 0)
   const type = (sp.get('type') as Group | null) ?? first ?? 'projects'
@@ -27,40 +31,50 @@ export function SearchPage() {
   const hits = rows.data?.pages.flatMap((p) => toHits(type, p.groups[type])) ?? []
   return (
     <Page title={t('search.title')}>
-      <form className="flex flex-wrap items-center gap-3" onSubmit={(e) => { e.preventDefault(); set('q', new FormData(e.currentTarget).get('q') as string); set('type', null) }}>
-        <Input key={q} name="q" type="search" defaultValue={q} className="h-9 w-72" aria-label={t('common.search')} placeholder={t('top.search')} />
-        <Button type="submit" size="sm">{t('common.search')}</Button>
-        <label className="flex items-center gap-2 text-sm"><Checkbox checked={archived} onCheckedChange={(c) => set('archived', c ? 'true' : null)} />{t('search.includeArchived')}</label>
-      </form>
-      {!q.trim() ? <Empty>{t('search.prompt')}</Empty> : (
+      <FilterBar>
+        <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); submit(new FormData(e.currentTarget).get('q') as string) }}>
+          <Field label={t('common.search')} htmlFor="search-q" className="w-full sm:w-96">
+            <Input key={q} id="search-q" name="q" type="search" defaultValue={q} placeholder={t('top.search')} />
+          </Field>
+          <Button type="submit">{t('common.search')}</Button>
+          <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={archived} onCheckedChange={(c) => set('archived', c ? 'true' : null)} />{t('search.includeArchived')}</label>
+        </form>
+      </FilterBar>
+      {!q.trim() ? <div className="rounded-lg border bg-card"><Empty>{t('search.prompt')}</Empty></div> : (
         <>
-          <div role="tablist" aria-label={t('search.types')} className="flex gap-1 overflow-x-auto border-b">
+          <div role="tablist" aria-label={t('search.types')} className="scroll-region scroll-thin flex gap-1 overflow-x-auto border-b">
             {GROUPS.map((g) => (
-              <button key={g} role="tab" aria-selected={type === g} onClick={() => set('type', g)}
-                className={cn('whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-sm text-muted-foreground hover:text-foreground', type === g && 'border-primary font-medium text-foreground')}>
-                {t(`search.group.${g}`)} <span className="ml-1 rounded-full bg-muted px-1.5 text-xs">{counts.data?.counts[g] ?? 0}</span>
+              <button key={g} type="button" role="tab" id={`search-tab-${g}`} aria-selected={type === g} aria-controls="search-results" onClick={() => set('type', g)}
+                className={cn('-mb-px inline-flex min-h-11 shrink-0 items-center whitespace-nowrap border-b-2 px-3 text-sm',
+                  type === g ? 'border-primary font-semibold text-foreground' : 'border-transparent text-muted-foreground hover:bg-muted hover:text-foreground')}>
+                {t(`search.group.${g}`)}<span className="ml-1.5 rounded-md bg-secondary px-1.5 text-xs/[18px] font-medium tabular-nums">{counts.data?.counts[g] ?? 0}</span>
               </button>
             ))}
           </div>
-          {(rows.error || counts.error) && <ErrorBanner error={rows.error ?? counts.error} />}
-          {rows.isPending ? <Loading rows={6} /> : hits.length === 0 ? <Empty>{t('search.none', { q })}</Empty> : (
-            <ul className="divide-y rounded-lg border bg-card">
-              {hits.map((h) => {
-                const Icon = h.icon
-                const body = <>
-                  <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-                  {h.key && <span className="key shrink-0 font-mono text-xs text-muted-foreground">{h.key}</span>}
-                  <span className="min-w-0 flex-1"><span className="block truncate font-medium">{h.title}</span>
-                    {h.match && <span className="block truncate text-xs text-muted-foreground"><Highlight text={h.match} term={q} /></span>}</span>
-                  <span className="hidden truncate text-xs text-muted-foreground sm:inline">{h.sub}</span>
-                </>
-                return <li key={h.id}>{h.href
-                  ? <Link to={h.href} className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted/40">{body}</Link>
-                  : <div className="flex items-center gap-2 px-4 py-2 text-sm" title={t('search.noWorkAccess')}>{body}</div>}</li>
-              })}
-            </ul>
-          )}
-          {rows.hasNextPage && <Button variant="outline" onClick={() => rows.fetchNextPage()} disabled={rows.isFetchingNextPage}>{t('search.more')}</Button>}
+          {(rows.error || counts.error) && <ErrorBanner error={rows.error ?? counts.error} retry={() => { rows.refetch(); counts.refetch() }} />}
+          <div role="tabpanel" id="search-results" aria-labelledby={`search-tab-${type}`}>
+            <Section title={t(`search.group.${type}`)} count={counts.data?.counts[type]}>
+              {rows.isPending ? <Loading rows={6} /> : hits.length === 0 ? <Empty>{t('search.none', { q })}</Empty> : (
+                <ul className="divide-y">
+                  {hits.map((h) => {
+                    const Icon = h.icon
+                    const cls = 'flex min-h-(--row-min) items-start gap-3 px-5 py-(--cell-py) text-sm'
+                    const body = <>
+                      <Icon className="mt-0.5 size-[18px] shrink-0 text-muted-foreground" aria-hidden />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-baseline gap-x-2">{h.key && <Key>{h.key}</Key>}<span className="min-w-0 break-words font-medium">{h.title}</span></span>
+                        {h.sub && <span className="block text-xs/[18px] text-muted-foreground">{h.sub}</span>}
+                        {h.match && <span className="block text-xs/[18px] text-muted-foreground"><Highlight text={h.match} term={q} /></span>}
+                        {!h.href && <span className="block text-xs/[18px] text-muted-foreground">{t('search.noWorkAccess')}</span>}
+                      </span>
+                    </>
+                    return <li key={h.id}>{h.href ? <Link to={h.href} className={cn(cls, 'hover:bg-muted')}>{body}</Link> : <div className={cls}>{body}</div>}</li>
+                  })}
+                </ul>
+              )}
+              {rows.hasNextPage && <div className="border-t px-5 py-3"><Button variant="outline" size="sm" onClick={() => rows.fetchNextPage()} disabled={rows.isFetchingNextPage}>{t('search.more')}</Button></div>}
+            </Section>
+          </div>
         </>
       )}
     </Page>

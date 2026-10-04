@@ -1,0 +1,29 @@
+{
+  "cssSource": "https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=DM+Sans:wght@400;500;600;650;700;750;800&family=Instrument+Serif:ital@0;1&display=swap",
+  "files": [
+    {
+      "family": "Caveat",
+      "url": "https://fonts.gstatic.com/s/caveat/v23/WnznHAc5bAfYB2QRah7pcpNvOx-pjcB9eIWpYQ.woff2",
+      "file": "fonts/caveat-normal-0.woff2",
+      "sha256": "edbfb1a768829d4e85127cd327e59faaec9701cb043e96430938f1f66acf009f"
+    },
+    {
+      "family": "DM Sans",
+      "url": "https://fonts.gstatic.com/s/dmsans/v17/rP2Yp2ywxg089UriI5-g4vlH9VoD8Cmcqbu0-K4.woff2",
+      "file": "fonts/dm-sans-normal-1.woff2",
+      "sha256": "9fea608a947e67020c33cad9a6fe3d60c54119dfb8cff87768a8117a15ed7543"
+    },
+    {
+      "family": "Instrument Serif",
+      "url": "https://fonts.gstatic.com/s/instrumentserif/v5/jizHRFtNs2ka5fXjeivQ4LroWlx-6zAjjH7M.woff2",
+      "file": "fonts/instrument-serif-italic-2.woff2",
+      "sha256": "5a51946dfffa82972bc98745359c46761515641fda557c25116459a9f83da4a7"
+    },
+    {
+      "family": "Instrument Serif",
+      "url": "https://fonts.gstatic.com/s/instrumentserif/v5/jizBRFtNs2ka5fXjeivQ4LroWlx-6zUTjg.woff2",
+      "file": "fonts/instrument-serif-normal-3.woff2",
+      "sha256": "5eb09b5ac0e28b67c2f041c8ba6d244604ca0c0980d65912ab2d47fed84ddc31"
+    }
+  ]
+}

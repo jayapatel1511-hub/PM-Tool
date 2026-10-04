@@ -69,9 +69,9 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
   const show = open && term.length >= 2
   let n = -1
   return (
-    <div className="relative w-full max-w-md">
+    <div className="relative w-full max-w-md lg:w-72 2xl:w-[400px]">
       <label className="relative flex items-center">
-        <Search aria-hidden className="pointer-events-none absolute left-2.5 size-4 text-muted-foreground" />
+        <Search aria-hidden className="pointer-events-none absolute left-3 size-4 text-muted-foreground" />
         <span className="sr-only">{t('common.search')}</span>
         <input ref={inputRef} type="search" placeholder={t('top.search')} title={t('top.searchShortcut')} value={q} autoComplete="off"
           role="combobox" aria-expanded={show} aria-controls={listId} aria-autocomplete="list" aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
@@ -82,10 +82,11 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
             else if (e.key === 'Escape') { setOpen(false); setActive(-1) }
             else if (e.key === 'Enter') { e.preventDefault(); onEnter() }
           }}
-          className="h-8 w-full rounded-md border bg-muted pl-8 pr-2 text-sm placeholder:text-muted-foreground focus:bg-card" />
+          className="h-(--control-h) w-full rounded-md border border-input bg-card pl-9 pr-10 text-sm placeholder:text-placeholder focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" />
+        <kbd aria-hidden className="pointer-events-none absolute right-2.5 hidden rounded border bg-muted px-1.5 font-mono text-xs text-muted-foreground lg:block">/</kbd>
       </label>
       {show && (
-        <div id={listId} role="listbox" aria-label={t('search.results')} className="absolute left-0 right-0 top-9 z-50 max-h-[70vh] overflow-y-auto rounded-md border bg-popover py-1 text-sm shadow-lg sm:right-auto sm:w-[32rem]">
+        <div id={listId} role="listbox" aria-label={t('search.results')} className="absolute left-0 right-0 top-12 z-50 max-h-[70vh] overflow-y-auto rounded-lg border bg-popover py-1 text-sm shadow-popover sm:right-auto sm:w-[32rem] lg:left-auto lg:right-0">
           {res.isPending && <div className="px-3 py-2 text-muted-foreground">{t('search.searching')}</div>}
           {res.data && sections.length === 0 && <div className="px-3 py-2 text-muted-foreground">{t('search.none', { q: term })}</div>}
           {sections.map((s) => (
@@ -115,7 +116,7 @@ function Option({ h, id, active, onPick, term }: { h: Hit; id: string; active: b
   const Icon = h.icon
   return (
     <div id={id} role="option" tabIndex={-1} aria-selected={active} aria-disabled={!h.href} onMouseDown={(e) => { e.preventDefault(); if (h.href) onPick(h.href) }}
-      className={cn('flex cursor-pointer items-center gap-2 px-3 py-1.5', active && 'bg-accent', !h.href && 'cursor-default opacity-70')}>
+      className={cn('flex min-h-(--control-row-h) cursor-pointer items-center gap-2 px-3 py-1.5', active && 'bg-accent', !h.href && 'cursor-default text-muted-foreground')}>
       <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
       {h.key && <span className="key shrink-0 font-mono text-xs text-muted-foreground">{h.key}</span>}
       <span className="min-w-0 flex-1 truncate">{h.title}{h.match && <span className="block truncate text-xs text-muted-foreground"><Highlight text={h.match} term={term} /></span>}</span>

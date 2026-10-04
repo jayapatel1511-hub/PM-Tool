@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Spinner } from '@/components/hub/common'
+import { AccentDot, ActiveFilters, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Segmented, Spinner, SummaryTile, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
-import { PeoplePicker } from '@/components/hub/people'
+import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -29,6 +29,7 @@ interface TimeView {
 }
 const monday = (d: string) => addDays(d, -((new Date(d + 'T00:00:00Z').getUTCDay() + 6) % 7))
 const h = (n: number) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2))))
+const weekday = (d: string) => t(`calendar.dow.${new Date(d + 'T00:00:00Z').getUTCDay()}`)
 
 /** Time (§36.8, FR-VIS-10): my task hours by day and week, Add Time, corrections, and — for PMs, leads and supervisors —
  *  the entries they may review. Totals are sums of the entries shown; hours never change estimates or progress. */
@@ -50,72 +51,114 @@ export function TimePage() {
   const shift = (n: number) => { const f = addDays(from, 7 * n); const n2 = new URLSearchParams(sp); n2.set('from', f); n2.set('to', addDays(f, 6)); setSp(n2, { replace: true }) }
   const days = Array.from({ length: 7 }, (_, i) => addDays(from, i))
   const byDate = new Map((q.data?.entries ?? []).reduce((m, e) => m.set(e.workDate, [...(m.get(e.workDate) ?? []), e]), new Map<string, Entry[]>()))
-  const sel = 'h-8 rounded-md border bg-card px-2 text-sm'
+  const now = today()
+  // Filters a link may carry (a task's hours) show as removable tokens beside the visible ones (§13.0).
+  const entry = (k: 'userId' | 'taskId') => q.data?.entries.find((e) => e[k] === filters[k])
+  const tokens = ([
+    ['projectId', t('calendar.project'), projects.data?.items.find((p) => p.id === filters.projectId)?.projectNumber],
+    ['userId', t('time.person'), entry('userId')?.person],
+    ['taskId', t('time.task'), entry('taskId')?.taskKey],
+  ] as const).filter(([k]) => filters[k])
+  const clear = () => { const n = new URLSearchParams(sp); for (const [k] of tokens) n.delete(k); setSp(n, { replace: true }) }
+  const cols = scope ? 6 : 5
   return (
     <Page title={t('nav.time')} subtitle={t('time.subtitle')}
       actions={<>
-        <Button variant="ghost" size="sm" asChild><Link to={`/reports/task-hours${qs({ from, to, scope: scope ? 'team' : undefined, projectId: filters.projectId })}`}>{t('time.report')}</Link></Button>
+        <Button variant="outline" asChild><Link to={`/reports/task-hours${qs({ from, to, scope: scope ? 'team' : undefined, projectId: filters.projectId })}`}>{t('time.report')}</Link></Button>
         <ExportMenu path="time/export" params={filters} name="task-hours" />
         {canEnter && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('time.add')}</Button>}
       </>}>
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" onClick={() => { const n = new URLSearchParams(sp); n.delete('from'); n.delete('to'); setSp(n, { replace: true }) }}>{t('time.thisWeek')}</Button>
-        <Button variant="ghost" size="icon" className="size-8" aria-label={t('calendar.previous')} onClick={() => shift(-1)}><ChevronLeft className="size-4" /></Button>
-        <Button variant="ghost" size="icon" className="size-8" aria-label={t('calendar.next')} onClick={() => shift(1)}><ChevronRight className="size-4" /></Button>
-        <span className="text-sm font-medium" aria-live="polite">{fmtDate(from)} – {fmtDate(to)}</span>
-        <div className="flex-1" />
-        {q.data?.canReview && (
-          <div className="inline-flex overflow-hidden rounded-md border bg-card" role="group" aria-label={t('time.whose')}>
-            {[undefined, 'all'].map((s) => <button key={s ?? 'mine'} type="button" aria-pressed={scope === s} onClick={() => set('scope', s ?? null)}
-              className={cn('h-8 px-3 text-sm', scope === s ? 'bg-accent font-medium' : 'hover:bg-muted')}>{t(s ? 'time.scope.all' : 'time.scope.mine')}</button>)}
-          </div>
-        )}
-        <select className={cn(sel, 'max-w-52')} value={filters.projectId ?? ''} onChange={(e) => set('projectId', e.target.value)} aria-label={t('calendar.project')}>
-          <option value="">{t('workload.anyProject')}</option>{projects.data?.items.map((p) => <option key={p.id} value={p.id}>{p.projectNumber} {p.name}</option>)}
-        </select>
-        {scope && <div className="w-44"><PeoplePicker value={filters.userId} onChange={(v) => set('userId', v)} placeholder={t('reports.anyone')} label={t('time.person')} /></div>}
+        <Button variant="outline" size="icon" aria-label={t('calendar.previous')} onClick={() => shift(-1)}><ChevronLeft className="size-5" /></Button>
+        <span className="min-w-52 text-center text-sm font-semibold tabular-nums" aria-live="polite">{fmtDate(from)} – {fmtDate(to)}</span>
+        <Button variant="outline" size="icon" aria-label={t('calendar.next')} onClick={() => shift(1)}><ChevronRight className="size-5" /></Button>
+        <Button variant="outline" onClick={() => { const n = new URLSearchParams(sp); n.delete('from'); n.delete('to'); setSp(n, { replace: true }) }}>{t('time.thisWeek')}</Button>
       </div>
+      <FilterBar>
+        <div className="flex flex-wrap items-end gap-3">
+          {q.data?.canReview && (
+            <div className="space-y-1.5">
+              <p aria-hidden className="text-sm font-medium">{t('time.whose')}</p>
+              <Segmented label={t('time.whose')} value={scope ?? 'mine'} onChange={(s) => set('scope', s === 'all' ? 'all' : null)}
+                options={[{ value: 'mine', label: t('time.scope.mine') }, { value: 'all', label: t('time.scope.all') }]} />
+            </div>
+          )}
+          <Field label={t('calendar.project')} htmlFor="time-project" className="w-full sm:w-64">
+            <select id="time-project" className={selectCls} value={filters.projectId ?? ''} onChange={(e) => set('projectId', e.target.value)}>
+              <option value="">{t('workload.anyProject')}</option>{projects.data?.items.map((p) => <option key={p.id} value={p.id}>{p.projectNumber} {p.name}</option>)}
+            </select>
+          </Field>
+          {scope && <Field label={t('time.person')} htmlFor="time-person" className="w-full sm:w-56">
+            <PeoplePicker id="time-person" value={filters.userId} valueName={entry('userId')?.person} onChange={(v) => set('userId', v)} placeholder={t('reports.anyone')} label={t('time.person')} />
+          </Field>}
+        </div>
+        <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? <Missing /> }))} onRemove={(k) => set(k, null)} onClear={clear} />
+      </FilterBar>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      {q.isPending ? <Loading rows={6} /> : (
-        <div className="grid gap-4 lg:grid-cols-[1fr_18rem]">
-          <div className="space-y-3">
-            <div className="grid grid-cols-7 gap-1 rounded-lg border bg-card p-2 text-center text-xs" aria-label={t('time.dailyTotals')}>
+      {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={6} /></div> : q.data && (
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="min-w-0 space-y-4">
+            <ul aria-label={t('time.dailyTotals')} className="grid grid-cols-7 overflow-hidden rounded-lg border bg-card text-center">
               {days.map((d) => {
                 const hours = q.data!.byDay.find((x) => x.date === d)?.hours ?? 0
-                return <div key={d} className={cn('rounded px-1 py-1', d === today() && 'bg-accent')}>
-                  <div className="text-muted-foreground">{t(`calendar.dow.${new Date(d + 'T00:00:00Z').getUTCDay()}`)} {d.slice(8)}</div>
-                  <div className={cn('text-sm font-semibold tabular-nums', hours === 0 && 'text-muted-foreground')}>{h(hours)} h</div>
-                </div>
+                return (
+                  <li key={d} aria-current={d === now ? 'date' : undefined} className={cn('border-l px-1 py-2.5 first:border-l-0', d === now && 'bg-accent')}>
+                    <span className={cn('block text-xs/[18px]', d === now ? 'font-semibold text-accent-foreground' : 'text-muted-foreground')}>{d === now ? t('common.today') : weekday(d)} {d.slice(8)}</span>
+                    <span className={cn('mt-0.5 block text-base/6 tabular-nums', hours === 0 ? 'text-muted-foreground' : 'font-semibold')}>{h(hours)} h</span>
+                  </li>
+                )
               })}
-            </div>
-            {q.data!.entries.length === 0 ? <div className="rounded-lg border bg-card"><Empty action={canEnter && <Button onClick={() => setAdding(true)}>{t('time.add')}</Button>}>{t('time.empty')}</Empty></div> : (
-              <div className="divide-y rounded-lg border bg-card">
-                {days.filter((d) => byDate.has(d)).map((d) => (
-                  <section key={d} aria-label={fmtDate(d)}>
-                    <h2 className="flex justify-between bg-muted/40 px-4 py-1.5 text-sm font-semibold"><span>{fmtDate(d)}</span><span className="tabular-nums">{h(byDate.get(d)!.reduce((s, e) => s + e.hours, 0))} h</span></h2>
-                    <ul className="divide-y">
+            </ul>
+            {q.data.entries.length === 0 ? <div className="rounded-lg border bg-card"><Empty action={canEnter && <Button variant="outline" onClick={() => setAdding(true)}>{t('time.add')}</Button>}>{t('time.empty')}</Empty></div> : (
+              <TableRegion>
+                <table className="w-full text-sm">
+                  <caption className="sr-only">{t('time.entries')}</caption>
+                  <thead className="bg-muted">
+                    <tr>
+                      <th scope="col" className={thCls}>{t('time.task')}</th>
+                      <th scope="col" className={thCls}>{t('calendar.project')}</th>
+                      {scope && <th scope="col" className={thCls}>{t('time.person')}</th>}
+                      <th scope="col" className={thCls}>{t('time.note')}</th>
+                      <th scope="col" className={cn(thCls, 'text-right')}>{t('time.hours')}</th>
+                      <th scope="col" className={thCls}><span className="sr-only">{t('common.actions')}</span></th>
+                    </tr>
+                  </thead>
+                  {days.filter((d) => byDate.has(d)).map((d) => (
+                    <tbody key={d}>
+                      <tr className="border-t bg-muted">
+                        <th scope="rowgroup" colSpan={cols - 2} className="px-(--cell-px) py-2 text-left font-semibold">{weekday(d)} <span className="tabular-nums">{fmtDate(d)}</span></th>
+                        <td className="whitespace-nowrap px-(--cell-px) py-2 text-right font-semibold tabular-nums">{h(byDate.get(d)!.reduce((s, e) => s + e.hours, 0))} h</td>
+                        <td />
+                      </tr>
                       {byDate.get(d)!.map((e) => (
-                        <li key={e.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm">
-                          <span className="min-w-0 flex-1"><Key>{e.taskKey}</Key> <span className="font-medium">{e.taskName}</span>
-                            <span className="block text-xs text-muted-foreground">{e.projectNumber} · {e.projectName}{scope ? ` · ${e.person}` : ''}{e.note ? ` · ${e.note}` : ''}</span></span>
-                          <span className="w-16 text-right font-semibold tabular-nums">{h(e.hours)} h</span>
-                          {e.canEdit && <span className="flex gap-1">
-                            <Button variant="ghost" size="icon" className="size-7" aria-label={t('time.edit', { key: e.taskKey })} onClick={() => setEditing(e)}><Pencil className="size-3.5" /></Button>
-                            <Button variant="ghost" size="icon" className="size-7 text-bad" aria-label={t('time.delete', { key: e.taskKey })} onClick={() => setRemoving(e)}><Trash2 className="size-3.5" /></Button>
-                          </span>}
-                        </li>
+                        <tr key={e.id} className="border-t hover:bg-muted">
+                          <td className={cn(tdCls, 'min-w-48')}><Key>{e.taskKey}</Key> <span className="font-medium">{e.taskName}</span></td>
+                          <td className={cn(tdCls, 'min-w-40')}>
+                            <span className="inline-flex items-center gap-2"><AccentDot id={e.projectId} /><Key>{e.projectNumber}</Key></span>
+                            <span className="block text-xs/[18px] text-muted-foreground">{e.projectName}</span>
+                          </td>
+                          {scope && <td className={cn(tdCls, 'whitespace-nowrap')}><span className="inline-flex items-center gap-2"><Avatar id={e.userId} name={e.person} />{e.person}</span></td>}
+                          <td className={cn(tdCls, 'min-w-40 text-muted-foreground')}>{e.note}</td>
+                          <td className={cn(tdCls, 'whitespace-nowrap text-right font-semibold tabular-nums')}>{h(e.hours)} h</td>
+                          <td className={cn(tdCls, 'whitespace-nowrap py-1 text-right')}>{e.canEdit && <>
+                            <Button variant="ghost" size="icon-sm" aria-label={t('time.edit', { key: e.taskKey })} onClick={() => setEditing(e)}><Pencil className="size-4" /></Button>
+                            <Button variant="ghost" size="icon-sm" className="text-bad hover:text-bad" aria-label={t('time.delete', { key: e.taskKey })} onClick={() => setRemoving(e)}><Trash2 className="size-4" /></Button>
+                          </>}</td>
+                        </tr>
                       ))}
-                    </ul>
-                  </section>
-                ))}
-              </div>
+                    </tbody>
+                  ))}
+                </table>
+              </TableRegion>
             )}
           </div>
-          <aside className="space-y-3" aria-label={t('time.totals')}>
-            <div className="rounded-lg border bg-card p-3"><div className="text-xs text-muted-foreground">{t('time.weekTotal')}</div><div className="text-2xl font-semibold tabular-nums">{h(q.data!.total)} h</div></div>
-            {q.data!.byProject.length > 0 && <Totals title={t('time.byProject')} rows={q.data!.byProject.map((x) => ({ id: x.projectId, label: `${x.projectNumber} ${x.projectName}`, hours: x.hours }))} />}
-            {q.data!.byTask.length > 0 && <Totals title={t('time.byTask')} rows={q.data!.byTask.map((x) => ({ id: x.taskId, label: `${x.taskKey} ${x.taskName}`, hours: x.hours }))} />}
-            <p className="text-xs text-muted-foreground">{t('time.separate')}</p>
+          <aside className="space-y-4" aria-label={t('time.totals')}>
+            <SummaryTile label={t('time.weekTotal')} value={`${h(q.data.total)} h`} accent="blue" />
+            {q.data.byProject.length > 0 && <Totals title={t('time.byProject')} rows={q.data.byProject.map((x) => ({ id: x.projectId, title: `${x.projectNumber} ${x.projectName}`, hours: x.hours,
+              label: <><AccentDot id={x.projectId} className="mr-2" /><Key>{x.projectNumber}</Key> {x.projectName}</> }))} />}
+            {q.data.byTask.length > 0 && <Totals title={t('time.byTask')} rows={q.data.byTask.map((x) => ({ id: x.taskId, title: `${x.taskKey} ${x.taskName}`, hours: x.hours,
+              label: <><Key>{x.taskKey}</Key> {x.taskName}</> }))} />}
+            <p className="text-xs/[18px] text-muted-foreground">{t('time.separate')}</p>
           </aside>
         </div>
       )}
@@ -128,12 +171,20 @@ export function TimePage() {
   )
 }
 
-function Totals({ title, rows }: { title: string; rows: { id: string; label: string; hours: number }[] }) {
+/** A read-only total per project or task: sums of the entries shown, right-aligned in hours. */
+function Totals({ title, rows }: { title: string; rows: { id: string; label: ReactNode; title: string; hours: number }[] }) {
   return (
-    <div className="rounded-lg border bg-card">
-      <h3 className="border-b px-3 py-1.5 text-xs font-semibold">{title}</h3>
-      <ul className="divide-y text-sm">{rows.map((r) => <li key={r.id} className="flex gap-2 px-3 py-1.5"><span className="min-w-0 flex-1 truncate" title={r.label}>{r.label}</span><span className="tabular-nums">{h(r.hours)} h</span></li>)}</ul>
-    </div>
+    <section className="overflow-hidden rounded-lg border bg-card">
+      <h2 className="border-b px-4 py-2.5 text-sm font-semibold">{title}</h2>
+      <table className="w-full text-sm">
+        <tbody>{rows.map((r) => (
+          <tr key={r.id} className="border-t first:border-t-0">
+            <th scope="row" className="w-full max-w-0 truncate px-4 py-2 text-left font-normal" title={r.title}>{r.label}</th>
+            <td className="whitespace-nowrap px-4 py-2 text-right font-medium tabular-nums">{h(r.hours)} h</td>
+          </tr>
+        ))}</tbody>
+      </table>
+    </section>
   )
 }
 
@@ -159,28 +210,30 @@ function EntryDialog({ entry, onClose }: { entry?: Entry; onClose: (ok: boolean)
     <Dialog open onOpenChange={(o) => !o && onClose(false)}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader><DialogTitle>{entry ? t('time.editTitle') : t('time.add')}</DialogTitle><DialogDescription>{t('time.dialogHint')}</DialogDescription></DialogHeader>
-        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save() }}>
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); save() }}>
           {entry ? <p className="text-sm"><span className="text-muted-foreground">{t('time.task')}:</span> {task?.label}</p> : (
             <Field label={t('time.task')} htmlFor="te-task" error={fe.taskId}>
-              {task ? <div className="flex items-center gap-2 text-sm"><span className="flex-1 truncate">{task.label}</span><Button type="button" variant="ghost" size="sm" onClick={() => setTask(null)}>{t('time.changeTask')}</Button></div> : <>
+              {task ? <div className="flex min-h-(--control-h) items-center gap-2 rounded-md bg-muted px-3 text-sm"><span className="flex-1 truncate">{task.label}</span><Button type="button" variant="ghost" size="sm" onClick={() => setTask(null)}>{t('time.changeTask')}</Button></div> : <>
                 <Input id="te-task" type="search" autoFocus placeholder={t('task.searchPlaceholder')} value={term} onChange={(e) => setTerm(e.target.value)} />
-                <ul className="max-h-40 overflow-y-auto rounded border" role="listbox" aria-label={t('time.task')}>
+                <ul className="max-h-48 overflow-y-auto rounded-md border" role="listbox" aria-label={t('time.task')}>
                   {(tasks.data?.items ?? []).map((x) => (
-                    <li key={x.id}><button type="button" role="option" aria-selected={false} className="flex w-full items-center gap-2 px-2 py-1 text-left text-sm hover:bg-muted" onClick={() => setTask({ id: x.id, label: `${x.key} ${x.name}` })}>
-                      <Key>{x.key}</Key><span className="min-w-0 flex-1 truncate">{x.name}</span><span className="text-xs text-muted-foreground">{x.projectNumber}</span></button></li>
+                    <li key={x.id}><button type="button" role="option" aria-selected={false} className="flex min-h-(--control-row-h) w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-muted" onClick={() => setTask({ id: x.id, label: `${x.key} ${x.name}` })}>
+                      <Key>{x.key}</Key><span className="min-w-0 flex-1 truncate">{x.name}</span><span className="text-xs/[18px] text-muted-foreground">{x.projectNumber}</span></button></li>
                   ))}
                 </ul>
               </>}
             </Field>
           )}
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label={t('time.workDate')} htmlFor="te-date" error={fe.workDate}><Input id="te-date" type="date" required value={f.workDate} onChange={(e) => setF({ ...f, workDate: e.target.value })} /></Field>
-            <Field label={t('time.hours')} htmlFor="te-hours" error={fe.hours} hint={t('time.hoursHint')}><Input id="te-hours" type="number" required min={0.25} max={24} step={0.25} value={f.hours} onChange={(e) => setF({ ...f, hours: e.target.value })} /></Field>
+            <Field label={t('time.hours')} htmlFor="te-hours" error={fe.hours} hint={t('time.hoursHint')}>
+              <div className="flex items-center gap-2"><Input id="te-hours" type="number" required min={0.25} max={24} step={0.25} value={f.hours} onChange={(e) => setF({ ...f, hours: e.target.value })} /><span aria-hidden className="text-sm text-muted-foreground">h</span></div>
+            </Field>
           </div>
-          <Field label={t('time.note')} htmlFor="te-note"><Textarea id="te-note" rows={2} maxLength={1000} value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
+          <Field label={t('time.note')} htmlFor="te-note" optional><Textarea id="te-note" rows={2} maxLength={1000} value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
           {entry?.editNeedsReason && <Field label={t('common.reason')} htmlFor="te-reason" error={fe.reason} hint={t('time.reasonHint', { name: entry.person })}><Textarea id="te-reason" rows={2} required value={f.reason} onChange={(e) => setF({ ...f, reason: e.target.value })} /></Field>}
           {err && !Object.keys(fe).length && <ErrorBanner error={err} />}
-          <DialogFooter><Button type="button" variant="outline" onClick={() => onClose(false)}>{t('common.cancel')}</Button><Button type="submit" disabled={busy || (!entry && !task) || !f.hours}>{busy && <Spinner />}{t('common.save')}</Button></DialogFooter>
+          <DialogFooter><Button type="button" variant="outline" onClick={() => onClose(false)}>{t('common.cancel')}</Button><Button type="submit" disabled={busy || (!entry && !task) || !f.hours}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

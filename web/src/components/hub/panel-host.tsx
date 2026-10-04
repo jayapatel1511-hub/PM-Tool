@@ -32,12 +32,15 @@ export function PanelHost() {
   const Comp = entry.component
   return (
     <Sheet open onOpenChange={(o) => !o && close()}>
-      <SheetContent side="right" className="w-full gap-0 overflow-y-auto p-0 sm:max-w-[600px] [&>button:last-child]:hidden">
-        <SheetTitle className="sr-only">{t(`itemType.${type}`)}</SheetTitle>
+      <SheetContent side="right" className="w-full gap-0 overflow-y-auto p-0 sm:max-w-none xl:max-w-[560px] [&>button:last-child]:hidden">
         <SheetDescription className="sr-only">{t('panel.description')}</SheetDescription>
-        <div className="sticky top-0 z-10 flex justify-end gap-1 border-b bg-card/95 px-2 py-1 backdrop-blur">
-          {entry.fullPage && <Button variant="ghost" size="sm" onClick={() => navigate(entry.fullPage!(id))}><ExternalLink className="size-4" />{t('panel.fullPage')}</Button>}
-          <Button variant="ghost" size="icon" className="size-8" onClick={close} aria-label={t('common.close')}><X className="size-4" /></Button>
+        {/* Header bar (design §6 detail panel): the item type, then "open full page" and close; it stays put while the item scrolls. */}
+        <div className="sticky top-0 z-10 flex min-h-14 items-center justify-between gap-2 border-b bg-card py-2 pl-4 pr-2">
+          <SheetTitle className="text-sm font-semibold">{t(`itemType.${type}`)}</SheetTitle>
+          <div className="flex items-center gap-1">
+            {entry.fullPage && <Button variant="ghost" size="sm" onClick={() => navigate(entry.fullPage!(id))}><ExternalLink className="size-4" aria-hidden />{t('panel.fullPage')}</Button>}
+            <Button variant="ghost" size="icon" onClick={close} aria-label={t('common.close')}><X className="size-5" aria-hidden /></Button>
+          </div>
         </div>
         <Comp id={id} onClose={close} />
       </SheetContent>

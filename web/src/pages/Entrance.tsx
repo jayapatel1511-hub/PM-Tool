@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { ArrowRight, ArrowUpRight, ChevronRight, LockKeyhole, ShieldCheck } from 'lucide-react'
+import { ArrowRight, LockKeyhole, ShieldCheck } from 'lucide-react'
 import './entrance.css'
+import { ApprovedHero } from './ApprovedHero'
 
 type DevUser = { email: string; displayName: string; jobTitle?: string; roles: string[] }
 
@@ -24,44 +25,7 @@ function Footer() {
 }
 
 export function LandingPage() {
-  return <div className="entrance">
-    <a className="entrance-skip" href="#main">Skip to content</a>
-    <Header />
-    <main id="main">
-      <section className="entrance-hero entrance-wrap">
-        <div className="entrance-hero-copy">
-          <span className="entrance-eyebrow">Tuesday / Project coordination</span>
-          <h1>Know what<br />moves <em>next.</em></h1>
-          <p>Bring the commitments, handoffs, reviews and decisions that move engineering work into one clear view.</p>
-          <div className="entrance-actions"><a className="entrance-button" href="/login">Enter Tuesday <ArrowRight size={18} aria-hidden="true" /></a><a className="entrance-text-link" href="#approach">Explore the approach <ChevronRight size={17} aria-hidden="true" /></a></div>
-          <span className="entrance-hero-footnote">For the work between disciplines.</span>
-        </div>
-        <div className="entrance-brief" aria-label="Tuesday coordination questions">
-          <div className="entrance-brief-top"><span>THE COORDINATION BRIEF</span><span>01 / 05</span></div>
-          <h2>Five questions.<br />One clear view.</h2>
-          <ol>
-            <li><span>01</span>What do we owe?<ArrowUpRight size={17} aria-hidden="true" /></li>
-            <li><span>02</span>What are we waiting for?<ArrowUpRight size={17} aria-hidden="true" /></li>
-            <li><span>03</span>Which revision are we using?<ArrowUpRight size={17} aria-hidden="true" /></li>
-            <li><span>04</span>What changed?<ArrowUpRight size={17} aria-hidden="true" /></li>
-            <li><span>05</span>What can we confidently start?<ArrowUpRight size={17} aria-hidden="true" /></li>
-          </ol>
-          <div className="entrance-brief-bottom"><span>FROM THE WORK QUEUE</span><span>→</span></div>
-        </div>
-      </section>
-      <section className="entrance-trust"><div className="entrance-wrap"><ShieldCheck size={18} /><span>Access is limited to authorised team members. The review preview uses individual accounts and synthetic data.</span></div></section>
-      <section id="approach" className="entrance-approach entrance-wrap">
-        <div className="entrance-approach-lead"><span className="entrance-eyebrow">A connected workspace</span><h2>Context travels<br />with the work.</h2><p>A next step is easier to trust when its owner, source and status are clear to everyone involved.</p></div>
-        <div className="entrance-approach-list">
-          <div><span>01</span><strong>Own the next action</strong><p>See assignments, reviews and upcoming work in your queue.</p></div>
-          <div><span>02</span><strong>Keep the thread</strong><p>Move between project work, decisions and team updates with the context intact.</p></div>
-          <div><span>03</span><strong>See the effort</strong><p>Record time against the work that moves the project forward.</p></div>
-        </div>
-      </section>
-      <section className="entrance-close"><div className="entrance-wrap"><h2>Move forward with clarity.</h2><p>Sign in with your assigned account to open your workspace.</p><a className="entrance-button" href="/login">Enter Tuesday <ArrowRight size={18} aria-hidden="true" /></a></div></section>
-    </main>
-    <Footer />
-  </div>
+  return <ApprovedHero />
 }
 
 export function LoginPage({ mode, onSignIn, onLocalSignIn, users, onPick, error, idle }: { mode: 'Development' | 'LocalPassword' | 'Entra'; onSignIn: () => void; onLocalSignIn: (userName: string, password: string) => Promise<void>; users?: DevUser[]; onPick: (email: string) => void; error?: string; idle?: boolean }) {

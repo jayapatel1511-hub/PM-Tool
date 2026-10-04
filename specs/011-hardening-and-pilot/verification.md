@@ -113,3 +113,26 @@ procedure and record), `environments.md` (rebuild from definitions).
 ## Homedev shared field correction — 2026-10-03 UTC
 
 The actual `02ca7cd` review at `pm.engcalchub.com` exposed clipped people Clear controls and a clipped native Start date editor at narrow widths. Shared picker sizing and responsive FieldRow layout now pass the existing Chromium TaskSheet regression at 1440, 390 and 320px. Native Start/Due date editors are associated with the existing visible field labels; the name assertion failed before the fix and passes after it. All six date/viewport combinations preserve exact opener focus and cancel without task writes. Frontend build, focused lint and bounded independent review passed. These are local mocked-API checks; hosted correction and manual screen-reader/device acceptance remain unproven. Current deployment and recovery evidence is in the [combined checkpoint](../../docs/reviews/2026-10-02-combined-candidate.md).
+
+
+## Approved Paper landing hero — 2026-10-03
+
+Jay approved the Paper hero before requesting integration into main. The public landing route now uses the approved Terrace mark, centered serif heading, original engineering margin sketches and straight fictional Task Board preview. Design exploration controls stay in the separate prototype. Both public sign-in links enter the existing `/login` flow; the `LoginPage` implementation and authentication/security modules are unchanged.
+
+The decorative app preview is a script-free SVG DOM snapshot with a fixed 1728 × 873 viewport, unchanged captured app CSS and a JPEG image-error fallback. No live API, active links or embedded frames are included. Font files and their SIL Open Font License notices are served locally. Provenance, hashes and fictional-data boundaries are recorded in `web/public/landing/`.
+
+| Check | Result |
+|---|---|
+| Frontend TypeScript and production build | PASS; existing Vite/config, generated-selector and bundle-size warnings remain |
+| Frontend lint | PASS with existing repository warnings; no findings in the new hero component |
+| Spec traceability | PASS: 612 IDs, 236 sections, no missing or unknown references |
+| `git diff --check` | PASS |
+| Static SVG XML, no script/frame/external DOM destinations, asset and font hashes | PASS |
+| Existing `LoginPage` implementation compared with base | PASS; byte-for-byte unchanged |
+| Built page in native Chrome under the existing API CSP and framing headers | PASS; sharp static preview rendered, no console warning/error |
+| Public Sign in and unauthenticated project deep link | PASS; both show the existing development login in the isolated fixture |
+| Preview dialog keyboard behavior | PASS; named dialog, close focus, Escape dismissal and opener focus return |
+| Weekly planning tabs | PASS; ArrowRight and Home change the selected tab, associated panel and fictional capacity total |
+| Responsive geometry at 320, 375, 768 and 1440 pixels | PASS; no document horizontal overflow, heading and primary action within viewport, preview image loaded |
+
+Browser checks used a local production frontend build and an isolated fictional GET API, with the existing security headers applied. They do not establish production Entra sign-in, hosting, manual screen-reader acceptance, Safari/Firefox behavior or deployment. Automated backend and browser regression coverage remains the PR CI gate.

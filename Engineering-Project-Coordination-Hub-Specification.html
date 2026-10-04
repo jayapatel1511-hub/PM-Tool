@@ -154,6 +154,7 @@ td,th{font-variant-numeric:tabular-nums}
 <a href="#36-six-view-visual-workspace-requirements"><span class="n">36</span><span>Six-View Visual Workspace Requirements</span></a>
 <a href="#37-multidisciplinary-coordination-amendment"><span class="n">37</span><span>Multidisciplinary Coordination Amendment</span></a>
 <a href="#38-design-inputs-readiness-and-location-context"><span class="n">38</span><span>Design Inputs, Readiness and Location Context</span></a>
+<a href="#39-weekly-planning-layer-amendment"><span class="n">39</span><span>Weekly Planning Layer Amendment</span></a>
     </div></details>
   </nav>
   <main>
@@ -1202,6 +1203,113 @@ td,th{font-variant-numeric:tabular-nums}
 </tbody>
 </table></div>
 <p>Reassignment is attributed, reasoned and version checked, retains earlier signatures/decisions, and reruns self-review and access invariants. No proxy approval is implied by manager, coordinator or administrator status. Common refusal/notification rules: §37.1.</p>
+<h3 id="811-weekly-planning-permissions"><span class="num">8.11</span> Weekly planning permissions</h3>
+<p>These rows extend the matrix for the weekly planning layer (§39, packet 034). Inactive and Read Only accounts cannot write. A linked project's visibility (§8.7) applies to every read, and a Supervisor's staff are their direct reports (§8.8, Q19). Ownership extends a row only where the table says so and is never an exception to a refusal; Private draft privacy is defined in §39.6. Every row becomes an automated test (§8.9).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Action</th>
+<th>The person (own row)</th>
+<th>The person's Supervisor</th>
+<th>System Administrator</th>
+<th>Executive</th>
+<th>Project Manager (system role)</th>
+<th>Anyone else</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open the Weekly Planner (§13.21)</td>
+<td>— (own row on My Work, My Week)</td>
+<td>Y (direct reports and own row)</td>
+<td>Y (all active people)</td>
+<td>Y (all active people)</td>
+<td>Y (members of Setup or Active projects they manage, and own row)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>See a person's Self-entered entries, Proposed and Confirmed assignments, approved project allocations, capacity and time away</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y (those members)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>See a Private draft</td>
+<td>O (drafts they own)</td>
+<td>O (drafts they own)</td>
+<td>Only in data-correction mode with a reason; each access is logged</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Create a self entry</td>
+<td>Y</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Create a manager entry</td>
+<td>—</td>
+<td>Y</td>
+<td>Y</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Change, move, extend, mark Still valid or delete an entry; copy creates a new entry and needs the create right for its person</td>
+<td>O (own self entries)</td>
+<td>O (manager entries they own, while still the Supervisor)</td>
+<td>Y (own entries; others' entries only as a data correction with a reason)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Change a manager entry's visibility</td>
+<td>—</td>
+<td>O (manager entries they own)</td>
+<td>Y (own entries; others' entries only as a data correction with a reason)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Record or clear time away (availability overrides, §39.3)</td>
+<td>—</td>
+<td>Y</td>
+<td>Y</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Export planner and entry lists; save personal planner views</td>
+<td>—</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Change planning settings (§10.9)</td>
+<td>—</td>
+<td>—</td>
+<td>Y</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
 <hr />
 <h2 id="9-information-architecture"><span class="num">9</span><span class="ttl">Information Architecture</span></h2>
 <h3 id="91-evaluation-of-the-proposed-hierarchy"><span class="num">9.1</span> Evaluation of the proposed hierarchy</h3>
@@ -1294,8 +1402,8 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td><strong>Resources</strong> (first release)</td>
-<td>Resource / Workload View</td>
-<td>Supervisors, Executives, PMs</td>
+<td>Resource / Workload View; Weekly Planner (§13.21, §39)</td>
+<td>Supervisors, Executives, PMs; everyone sees their own planning row in My Work (My Week)</td>
 </tr>
 <tr>
 <td><strong>My Staff</strong></td>
@@ -2059,6 +2167,114 @@ td,th{font-variant-numeric:tabular-nums}
 <p>Readiness precedence is Needs Assessment for missing/unknown applicable checks, then Not Ready for known unsatisfied required checks; the UI always lists all reasons. Ready requires every applicable check satisfied. Proceed under Assumption is available only when the remaining unsatisfied inputs are covered by valid, scoped, unexpired authorised assumptions and no non-overridable gate is failed. A known failure alongside an unknown check remains visible even when the headline is Needs Assessment.</p>
 <p>New records use stable UUIDs and readable per-project keys where they appear as standalone items: Handoff H, Review RV, Change CH, Submission SUB, Basis B, Constraint CT and Commitment WC. Existing Issue keys remain unchanged. Prefixes do not alter existing item sequences; deleted keys are never reused. New records carry project, owner, created/updated attribution, row version and soft-deletion fields as applicable. Immutable published snapshots use append-only superseding records rather than edits or deletes. Source references must remain same-project; use a unique source/version identity and unique change/consumer assignment to deduplicate.</p>
 <p>Add <code>coordination_lookahead_weeks</code> to organisation settings, default 3 and allowed range 1–12. Existing working-day calendars, weekly capacity and workload warning thresholds continue to apply. Submission checks and readiness constraints are purpose-specific records, not arbitrary checklists inside tasks or a custom workflow builder. Physical tables and migrations are designed in each packet before application implementation.</p>
+<h3 id="109-weekly-planning-vocabulary-and-settings"><span class="num">10.9</span> Weekly planning vocabulary and settings</h3>
+<p>This is the canonical extension to §10 for the weekly planning layer (§39, packet 034). It adds one record beside the §10.8 resource allocation and availability override, which are unchanged. Planning entries belong to a person, not to a project.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Canonical values or representation</th>
+<th>Key rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Planning entry</td>
+<td>Person, owner, hours per week, start week, end week, label, source category, optional project and project discipline, confidence, visibility, notes, last validated</td>
+<td>One row per block of weekly hours; the owner is the creator; soft-deleted; row-versioned; never a project record</td>
+</tr>
+<tr>
+<td>Owner kind (derived)</td>
+<td>Self (the owner is the person) · Manager (the owner is the person's Supervisor or an Admin)</td>
+<td>Displayed as "Self-entered" or "Manager plan"</td>
+</tr>
+<tr>
+<td>Source category</td>
+<td>Major project · Other project · Proposal · Business development · Training · Admin · Supervision · Internal initiative · Field work · Other</td>
+<td>Major project if and only if a project is linked; there is no leave category</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>Confirmed · Expected · Possible</td>
+<td>Displayed as "Confidence: …"; Possible never reduces remaining capacity</td>
+</tr>
+<tr>
+<td>Visibility</td>
+<td>Draft · Published · Confirmed</td>
+<td>Manager entries display "Visibility: Private draft", "Visibility: Proposed assignment" or "Visibility: Confirmed assignment"; self entries are stored as Confirmed and display "Visibility: Self-entered"</td>
+</tr>
+<tr>
+<td>Approved project allocation</td>
+<td>Read-only projection of a resource allocation whose status is Confirmed (§10.8)</td>
+<td>Displayed with "Approval status: Confirmed"; counted in the Confirmed band; changed only through §37.6</td>
+</tr>
+<tr>
+<td>Time away</td>
+<td>An availability override (§10.8) with category Unavailable or Reduced</td>
+<td>Explains reduced capacity; no separate leave record, reason or leave type</td>
+</tr>
+<tr>
+<td>Remaining capacity</td>
+<td>Capacity − Confidence Confirmed hours − Confidence Expected hours</td>
+<td>May be negative; Possible hours are shown separately</td>
+</tr>
+<tr>
+<td>Planner indicators</td>
+<td>Over-planned and Under-planned (person and week) · Stale plan (planning entry)</td>
+<td>Distinct from the Workload indicators Over-assigned, Under-assigned and Deadline cluster</td>
+</tr>
+</tbody>
+</table></div>
+<p>Confirmed has three meanings here — a confidence band, a visibility state and the §37.6 allocation status — and is never displayed without its qualifier (FR-PLN-04).</p>
+<p>Planning settings are organisation settings, editable by System Administrators. <code>default_weekly_capacity_hours</code> (§10.4, Q18) remains the default capacity for both Workload and the planner.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Setting key</th>
+<th>Default</th>
+<th>Allowed</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>planning_horizon_weeks</code></td>
+<td>12</td>
+<td>6–26</td>
+<td>Weeks shown by the Weekly Planner</td>
+</tr>
+<tr>
+<td><code>planning_over_pct</code></td>
+<td>105</td>
+<td>50–300</td>
+<td>Over-planned (PLN-10)</td>
+</tr>
+<tr>
+<td><code>planning_under_pct</code></td>
+<td>50</td>
+<td>0–100 (0 switches it off)</td>
+<td>Under-planned (PLN-11)</td>
+</tr>
+<tr>
+<td><code>planning_under_weeks</code></td>
+<td>2</td>
+<td>1–12</td>
+<td>Under-planned (PLN-11)</td>
+</tr>
+<tr>
+<td><code>planning_stale_days</code></td>
+<td>28</td>
+<td>1–365</td>
+<td>Stale plan (PLN-12)</td>
+</tr>
+<tr>
+<td><code>planning_max_hours_per_week</code></td>
+<td>80</td>
+<td>1–168</td>
+<td>Largest hours per week for one planning entry (PLN-02)</td>
+</tr>
+</tbody>
+</table></div>
 <h2 id="11-functional-requirements"><span class="num">11</span><span class="ttl">Functional Requirements</span></h2>
 <p>This catalogue is the ticket-level index of what the system does. Each requirement has a stable ID, a classification, and a pointer to the module specification that details it. Development tickets should reference these IDs.</p>
 <p>Classification codes: <strong>R</strong> = MVP-Required, <strong>Rec</strong> = MVP-Recommended, <strong>P2</strong> = Phase 2, <strong>P3</strong> = Phase 3.</p>
@@ -4542,6 +4758,10 @@ td,th{font-variant-numeric:tabular-nums}
 <td>Milestones in my projects within 30 days</td>
 </tr>
 <tr>
+<td>My Week</td>
+<td>My own planning row for this week and the next five (§39.9): capacity, time away, hours by confidence (Confirmed, Expected, Possible) and remaining capacity; my self entries with quick add; Proposed and Confirmed assignments and approved project allocations, read-only. Private drafts never appear. Shown only on my own My Work; editable on desktop, read-only on tablet, a notice on phones.</td>
+</tr>
+<tr>
 <td>Recently completed by me</td>
 <td>Last 14 days (collapsed)</td>
 </tr>
@@ -4626,6 +4846,24 @@ td,th{font-variant-numeric:tabular-nums}
 <p><strong>Information.</strong> A Today/This week summary above a dated list: Work date · Project · Task key/name · Hours · Note · Entered by. Daily and weekly totals are sums of non-deleted entries, not estimates. Filters cover project, task, person (for authorised reviewers), and date range. Task and project totals are visible from their details.</p>
 <p><strong>Primary actions.</strong> Add Time against a permitted task; edit or soft-delete own entry; PM correction with a required reason; export the filtered list. The form defaults the work date to today and never substitutes another user's identity. An invalid or over-24-hour day shows a field error. Entries on Completed tasks are allowed while the project remains editable; Archived and Cancelled projects are read-only.</p>
 <p><strong>Navigation.</strong> Task → task panel; project → project dashboard; Time remains a direct global route. The responsive view preserves the same fields and permission rules.</p>
+<hr />
+<h3 id="1321-weekly-planner-approved-under-39"><span class="num">13.21</span> Weekly Planner [Approved under §39]</h3>
+<p><strong>Purpose.</strong> A Supervisor's weekly planning surface: each person's capacity, what is already planned and with what confidence, and adding or adjusting planning entries in one or two interactions (§39). Workload (§13.11) remains the task-forecast and allocation-commitment view; the two screens link to each other and keep their own indicators.</p>
+<p><strong>Users.</strong> Supervisors (plan their direct reports), System Administrators (all people; data correction), Executives (read all), Project Managers with the system role (read members of the projects they manage). Everyone sees their own row in My Work, My Week (§13.10). Permissions: §8.11.</p>
+<p><strong>Information.</strong></p>
+<ol>
+<li><strong>Header</strong>: title; previous, this and next week; week picker; horizon (<code>planning_horizon_weeks</code>, default 12); Grid or List; Export; saved views; "Show my private drafts" (on by default); the partial-view note when it applies.</li>
+<li><strong>Filter bar</strong> (§13.0): Supervisor, discipline, office, person, project, source category, confidence, visibility, indicator (Over-planned, Under-planned, Stale plan) and text. Entry filters select people and highlight entries; they never change totals.</li>
+<li><strong>Grid</strong>: a sticky 240 px person column (name, Supervisor, weekly capacity, indicator chips, partial chip) grouped by Supervisor; one column of at least 144 px per ISO week with a sticky header ("W42 · 12 Oct"), the current week first and highlighted; deliberate horizontal scrolling inside the grid with a visible scrollbar. Each cell shows remaining capacity prominently (for example "−3.0 h"), planned hours against capacity in smaller text, a stacked confidence bar (Confirmed, Expected, Possible, each labelled in the legend and the cell's accessible name; Possible dotted), time away ("Time away 16 h") and indicator chips with text. A team footer row gives band totals and the number of Over-planned people per week.</li>
+<li><strong>Expanded row</strong>: one sub-row per visible planning entry spanning its weeks (source tint, label, hours per week, Confidence and Visibility labels, lock, hatch and the words Private draft for a draft, dotted outline and the word Possible for possible work, Stale plan and other warnings); one sub-row per approved project allocation (project, hours, link icon, "Approval status: Confirmed", read-only); a Time away sub-row; and a "Task estimates (context)" sub-row ("14 h · 3 unestimated") that is never added to totals.</li>
+<li><strong>List view</strong>: a paged table of visible planning entries — person, owner, label, source category, project, hours per week, start and end week, Confidence, Visibility, last validated, warnings — with the same filters and export.</li>
+</ol>
+<p><strong>Primary actions.</strong> Quick add in an editable cell (Enter or click, type "8 h proposal support", Enter saves, Esc cancels). The entry side panel (560 px): hours, label, source category, project and project discipline, start and end week, Repeat for N weeks, person, Confidence, Visibility (a segmented control of Private draft, Proposed assignment and Confirmed assignment, shown to the owner of a manager entry), notes, Still valid, Copy, Delete and history. A contribution list on any cell total (§39.4). Record or clear time away for a date range (Supervisor or Admin). Open Workload or a project.</p>
+<p><strong>Sorting.</strong> Remaining capacity ascending in the selected week (default), name, Over-planned first.</p>
+<p><strong>Responsive.</strong> At 1280 px and wider the planner is editable. From 768 px to 1279 px it is read-only: no quick add, side panels read-only, contribution lists available. Below 768 px it shows the §13.0 notice that the planner is available on desktop and tablet.</p>
+<p><strong>Keyboard and accessibility.</strong> The grid uses grid semantics with one tab stop: arrow keys move between cells; Enter opens quick add in an editable cell or the contribution list in a read-only one; Esc cancels and returns focus to the cell; Tab moves into the side panel, and closing it returns focus to the originating cell. Saves, conflicts and errors are announced in a live region. Every state has text and a symbol, colour is never the only signal, and no operation needs a pointer or dragging.</p>
+<p><strong>Empty states.</strong> "No one is in your planning scope." "No planning entries yet. Select a week cell and type, for example, 8 h proposal support."</p>
+<p><strong>Navigation.</strong> Route <code>/planner</code> under Resources, beside Workload; an entry opens its side panel with a deep link; a project link opens the project; an approved project allocation opens its §37.6 detail for viewers allowed to see it. Scope, filters and week are encoded in the URL.</p>
 <h2 id="14-user-workflows"><span class="num">14</span><span class="ttl">User Workflows</span></h2>
 <p>Each workflow states the actor, trigger, steps, system response, exceptions, and result. Rule IDs refer to Section 15; screen references to Section 13.</p>
 <h3 id="workflow-1-pm-creates-a-new-project-without-template">Workflow 1 — PM creates a new project (without template)</h3>
@@ -7247,6 +7485,7 @@ The first-release Created by Me view (§36.7) requires <code>task.created_by_id<
 </ul>
 <h2 id="27-mvp-scope"><span class="num">27</span><span class="ttl">MVP Scope</span></h2>
 <p><strong>2026-09-26 amendment:</strong> The existing first-release set below is the 24-packet implementation baseline. Jay has also approved all nine coordination additions in §37–§38 (packets 025–033). They are specified, not built. Release in accepted increments within the 50-person pilot; do not claim completion of the expanded scope based on the older packet status. §38.4 defines the dependency order.</p>
+<p><strong>2026-10-03 amendment:</strong> Jay also approved the weekly planning layer (§39, packet 034) as a separate record beside the §37.6 allocations. It is specified, not built, follows the same staged-acceptance rule, and depends on packet 029.</p>
 <h3 id="271-critical-evaluation-of-the-candidate-mvp-list"><span class="num">27.1</span> Critical evaluation of the candidate MVP list</h3>
 <div class="tbl"><table>
 <thead>
@@ -7503,7 +7742,7 @@ Thin Decision Register + External Parties; slip and due-change tracking; attenti
 <li><strong>SharePoint integration</strong> — browse and pick documents from the project library (Graph); still no storage in the Hub.</li>
 <li><strong>ERP / Vantagepoint integration</strong> — inbound project master data sync (<span class="tbd">TBD</span>: capabilities, licensing, ownership of fields). Nothing is assumed about ERP capabilities in this specification.</li>
 <li><strong>Project financial information (read-only display)</strong> — only if sourced from ERP; the Hub never becomes a financial system.</li>
-<li><strong>Utilisation / resource planning</strong> — availability from HR/leave systems, capacity by role, longer horizons; still no levelling or payroll timesheets. Manual dated capacity overrides and confirmed production/review allocations are now approved in §37.6; HR integration remains Phase 3.</li>
+<li><strong>Utilisation / resource planning</strong> — availability from HR/leave systems, capacity by role, longer horizons; still no levelling or payroll timesheets. Manual dated capacity overrides and confirmed production/review allocations are now approved in §37.6, and manual weekly planning entries in §39; HR integration remains Phase 3.</li>
 <li><strong>Client / external actions</strong> — optional read-only external access or emailed action lists to external parties (security review required).</li>
 <li><strong>Advanced portfolio reporting</strong> — cross-office comparisons, discipline throughput, submission on-time rates from snapshots.</li>
 <li><strong>Advanced administration</strong> — per-project threshold overrides; template analytics; bulk data tools.</li>
@@ -7531,7 +7770,7 @@ Thin Decision Register + External Parties; slip and due-change tracking; attenti
 </tr>
 <tr>
 <td>Payroll, HR records, leave management</td>
-<td>Not a coordination concern.</td>
+<td>Not a coordination concern. Planned time away is recorded only as a non-sensitive availability override for capacity (§37.6, §39.3), with no leave type, reason or balance.</td>
 </tr>
 <tr>
 <td>Payroll or billable timesheet approval, billing rates, invoicing, and payroll submission</td>
@@ -9488,6 +9727,371 @@ Thin Decision Register + External Parties; slip and due-change tracking; attenti
 <h3 id="384-delivery-sequence-and-evidence"><span class="num">38.4</span> Delivery sequence and evidence</h3>
 <p>Implement prerequisites before dependent commands: 025 and 026; 027; 029 and 031; 032 and 028; 033; then complete the integrated 030 view. Packet 030 may add sections incrementally but is not accepted until all nine workflows reconcile. This dependency order refines the user-facing priority order; it does not change which capabilities were approved. Carry the 50-person pilot scenario and the existing 011 hardening gates across every increment. Record failed, passed and unrun checks separately, retain the original 24-packet evidence as historical, and re-estimate delivery after the new scope rather than reuse earlier release percentages.</p>
 <p>Packets 025/026 establish immutable revision references; 027 extends those same records with source registration, InputUse and impact commands. The 025 change-impact integration scenario AC-HND-03 is verified after 027, so foundation delivery is not full packet acceptance. Packet 027 supports deliverable/external-source changes first; 031 adds the design-basis source adapter to the same assessment mechanism. This staged integration must not create duplicate revision stores or circular implementation prerequisites.</p>
+<h2 id="39-weekly-planning-layer-amendment"><span class="num">39</span><span class="ttl">Weekly Planning Layer Amendment</span></h2>
+<p>Approved scope: on 2026-10-03 Jay chose option (b) of the three-way review of the unmerged Specification v1.1 draft (local commit 16399682, review note <code>T-tuesday-v1.1-vs-code.md</code>): v1.1's weekly planning entries become a <strong>separate record beside the dated resource allocations of §37.6</strong>, delivered by packet 034. This section records the product contract; implementation and acceptance remain pending. §37.6, the §12.15/§13.11 Workload calculation and the readiness capacity checks of §38.2 are unchanged. Canonical vocabulary and settings are in §10.9, permissions in §8.11, the screen in §13.21 and the My Week strip in §13.10. v1.1's other changes (navigation, Manager Home, People, role-level demand, planned versus actual) are not adopted here, and none of its section numbers or identifiers are reused.</p>
+<p>The planner answers a Supervisor's weekly question — who has room, and what is already planned with what certainty — including work that is not a Hub project. It is a manual planning layer: it never assigns people, levels resources, forecasts or manages leave (§30). Presentation follows the Tuesday visual standard's resource-planning language (source tint, confidence bands, visibility labels); that standard supplies no thresholds, permissions or calculations.</p>
+<h3 id="391-approved-scope-and-boundary"><span class="num">39.1</span> Approved scope and boundary</h3>
+<ul>
+<li><strong>FR-PLN-01.</strong> Planning entries MUST be a separate, person-scoped record. Creating, changing, publishing or deleting one MUST NOT create, change or delete a resource allocation, allocation work link, availability override, person/date version, task, estimate, progress value, due date, time entry, readiness result, health value or attention item. Resource allocations keep their §37.6 model, lifecycle, permissions and confirmation snapshot; the Workload view keeps its §12.15/§13.11 calculation, its indicators (Over-assigned, Under-assigned, Deadline cluster) and the FR-CAP-04 committed load; readiness capacity checks (§38.2) keep reading resource allocations and availability overrides only. Project workflows never create, change or delete planning entries. The one planner command that writes another packet's record is the time-away command (FR-PLN-10), which applies the FR-CAP-02 availability rule unchanged; because time away is an availability override, it affects Workload and readiness exactly as an override set from Workload does. Shared rules FR-MDC-02, FR-MDC-03 and FR-MDC-06 apply to planning entries; the FR-MDC-01 single-project rule does not, because a planning entry, like an availability override, belongs to a person.</li>
+</ul>
+<h3 id="392-planning-entries"><span class="num">39.2</span> Planning entries</h3>
+<ul>
+<li>
+<p><strong>FR-PLN-02.</strong> A planning entry MUST record one person, its owner (the user who created it), hours per week, a start week and an end week, a label, a source category, an optional project, an optional project discipline of that project, a confidence, a visibility, optional notes and a last-validated time (§10.9). Weeks are ISO weeks identified by their Monday; the entry contributes its hours per week to every week from start to end inclusive and is one row however many weeks it spans (PLN-01, PLN-02). Hours per week are a positive multiple of 0.5 up to <code>planning_max_hours_per_week</code>; hours above the person's capacity are accepted with a warning. The label is required (1–120 characters) and notes are optional (up to 2,000 characters). A project link requires the source category Major project, and Major project requires a project link.</p>
+</li>
+<li>
+<p><strong>FR-PLN-03.</strong> A user who adds an entry to their own row creates a self entry: they own it, its visibility is always Confirmed (displayed Self-entered) and its default confidence is Confirmed. A Supervisor adding an entry for a direct report, or an Admin adding one for another person, creates a manager entry: they own it, its default visibility is Draft (displayed Private draft) and its default confidence is Expected (PLN-03). Neither kind overwrites the other; both count in the person's totals, each labelled with its owner. Only the owner changes an entry, apart from an Admin data correction (PLN-17): the person cannot change a manager entry, and a Supervisor cannot change a self entry. A person who disagrees with a manager entry adds their own entry or speaks to its owner.</p>
+</li>
+<li>
+<p><strong>FR-PLN-04.</strong> The interface, exports and notifications MUST never display the word Confirmed on its own. Confidence is displayed as "Confidence: Confirmed", "Confidence: Expected" or "Confidence: Possible"; visibility as "Visibility: Private draft", "Visibility: Proposed assignment" or "Visibility: Confirmed assignment" for manager entries and "Visibility: Self-entered" for self entries; a projected resource allocation as "Approval status: Confirmed". Fields are labelled Confidence and Visibility, and contribution lists and exports keep both columns. A Private draft shows a lock, a hatch and the words Private draft; Possible work shows a dotted outline and the word Possible; both apply together when both are true. The source category sets a stable tint (Major project blue, Other project mint, Proposal lavender, Admin amber, Training peach, other categories neutral) that does not change with visibility or confidence. Tint, hatch and outline are never the only signal.</p>
+</li>
+<li>
+<p><strong>FR-PLN-05.</strong> Quick add MUST create an entry from one line typed into a person-week cell: <code>&lt;hours&gt; h &lt;label&gt;</code> and the variants of PLN-13, such as <code>8h proposal support</code>, <code>8 — proposal support</code> and <code>~8 h upcoming review</code>; a leading <code>~</code> sets confidence Possible. Enter creates a one-week entry for that person and week with the FR-PLN-03 defaults and source category Other project; nothing else is asked. Text that does not match leaves the input open with a field message and creates nothing.</p>
+</li>
+<li>
+<p><strong>FR-PLN-06.</strong> The entry side panel MUST let the owner change hours, label, source category, project and project discipline, start and end week, person, confidence and notes; set "Repeat for N weeks" (end week = start week + N − 1 weeks); extend or shorten the entry by changing its end week; move it to other weeks by changing both weeks; copy it (a new entry with the same fields, owned by the actor and subject to the create permission for its person); mark it Still valid; and delete it (soft deletion). Moving a manager entry to another person requires permission to create a manager entry for that person; a self entry cannot move. Every change, visibility change and Still valid resets last validated (PLN-12). No change needs a reason or an approval, except an Admin data correction (FR-PLN-17).</p>
+</li>
+<li>
+<p><strong>FR-PLN-07.</strong> The owner of a manager entry MUST be able to change its visibility between any two of Private draft, Proposed assignment and Confirmed assignment in one action, without anyone's approval (PLN-16). Self entries have no visibility change. A visibility change alters no hours, confidence or resource allocation; Confirmed assignment is not an approval in the §37.6 sense.</p>
+</li>
+</ul>
+<h3 id="393-capacity-and-time-away"><span class="num">39.3</span> Capacity and time away</h3>
+<ul>
+<li>
+<p><strong>FR-PLN-08.</strong> A person's capacity for a week MUST be the sum of their daily capacity over the week, using the existing weekly capacity (the person's override, otherwise <code>default_weekly_capacity_hours</code>), the person's working-day calendar and any availability override, by the FR-CAP-02 rule (PLN-05). It is therefore the number the Workload view shows as available hours. The planner adds no capacity record, capacity history or per-person working-day setting.</p>
+</li>
+<li>
+<p><strong>FR-PLN-09.</strong> Time away MUST be represented only by availability overrides (§10.8) with category Unavailable or Reduced. The planner keeps no separate leave record, leave type, reason or balance (§30). For a day with such an override, time away is the normal day capacity minus the override hours, never less than zero; an Additional override shows extra availability. The override already replaces that day's capacity, so time away is shown as an explanation and is never subtracted a second time (PLN-06). Planning entries cannot use a leave category.</p>
+</li>
+<li>
+<p><strong>FR-PLN-10.</strong> A person's Supervisor (for a direct report) or an Admin MUST be able to record or clear time away for an inclusive date range of up to 366 days in one command (PLN-19). Record writes an override of 0–24 hours, category Unavailable or Reduced, on every working day of the person's calendar in the range; clear removes the Unavailable and Reduced overrides in the range, keeping Additional ones, and so restores normal capacity. The command applies FR-CAP-02 unchanged: the same editors, no reason or sensitive detail, a lock on the person, the caller's expected override version for every date it changes and an advanced person/date version for every changed date, all in one transaction. A stale date refuses the whole command, so nothing is partly written. The person cannot record their own time away (§39.12).</p>
+</li>
+</ul>
+<h3 id="394-planned-totals-and-approved-allocations"><span class="num">39.4</span> Planned totals and approved allocations</h3>
+<ul>
+<li>
+<p><strong>FR-PLN-11.</strong> For each person and week the planner MUST show capacity, time away, hours by confidence band (Confirmed, Expected and Possible) and remaining capacity = capacity − Confirmed − Expected (PLN-09). Possible hours are shown beside the bands and never subtracted. Hours carry the unit h; a negative remaining capacity keeps its minus sign; exact decimals are aggregated before display rounding to one decimal place.</p>
+</li>
+<li>
+<p><strong>FR-PLN-12.</strong> Each resource allocation with status Confirmed for the person, on a Setup or Active project the viewer can view, MUST appear as a read-only Approved project allocation that adds its reserved hours for the week to the Confirmed band (PLN-07). Reserved hours are the allocation's §37.6 spread over the person's working days, explicit day hours first. Linked remaining-work hours are not used, and Proposed, Declined, Cancelled and Completed allocations do not appear; Workload continues to show proposals. The projection shows the project, the hours and "Approval status: Confirmed"; it never shows the confirmation snapshot or an over-capacity reason, and links to the allocation only for viewers whom §37.6 lets open it. Approved allocations change only through §37.6 commands.</p>
+</li>
+<li>
+<p><strong>FR-PLN-13.</strong> Hours MUST NOT be counted twice when a planning entry and an approved allocation describe the same project work. For each person, week and project, the approved allocation hours first cover the visible planning entries linked to that project, in the order Confidence Confirmed, Expected, Possible, then start week, creation time and identifier; each entry counts only its uncovered hours, in its own band (PLN-08). The per-project total is therefore the larger of the approved hours and the entries' hours. Entries without a project, entries for other projects and planning entries against each other are never netted: overlapping self and manager entries both count and are shown with their owners.</p>
+</li>
+<li>
+<p><strong>FR-PLN-14.</strong> The planner MUST show the existing Workload forecast (§12.15: remaining task hours spread to weeks) for the person's open tasks on visible Setup or Active projects, with the unestimated task count, as a labelled context figure ("Task estimates: 14 h · 3 unestimated"). Task estimates are never added to planning bands, remaining capacity or planner indicators.</p>
+</li>
+<li>
+<p><strong>FR-PLN-15.</strong> Selecting a person-week total MUST open a contribution list with every input: capacity and its derivation (weekly capacity, working days, each override date with its hours and category, time away); each approved project allocation (project, hours, approval status); each visible planning entry (owner, owner kind, label, source category, project, hours per week, hours counted, hours covered by an approved allocation, confidence, visibility, last validated, warnings); band totals and remaining capacity; the task-estimate context; the partial-view note; and each planner indicator with its rule and threshold. No figure appears that the list does not account for.</p>
+</li>
+</ul>
+<h3 id="395-planner-indicators"><span class="num">39.5</span> Planner indicators</h3>
+<ul>
+<li><strong>FR-PLN-16.</strong> The planner MUST evaluate Over-planned and Under-planned for each person and week, and Stale plan for each entry, from the §10.9 settings (PLN-10, PLN-11, PLN-12). These names are distinct from the Workload indicators Over-assigned, Under-assigned and Deadline cluster, which keep their own rules and thresholds; a person can be Over-planned without being Over-assigned. Under-planned is never shown in a partial view (PLN-15), in a week with time away, or while the person has an open visible task without an estimate due that week. Indicators are evaluated when read, are warnings only and block nothing. Each shows its rule and figures, for example "Over-planned: Confirmed + Expected 46.0 h is more than 105 % of 40.0 h (42.0 h)".</li>
+</ul>
+<h3 id="396-permissions-ownership-and-privacy"><span class="num">39.6</span> Permissions, ownership and privacy</h3>
+<ul>
+<li>
+<p><strong>FR-PLN-17.</strong> Every planner query, command, aggregate, export, search result and notification MUST be authorised on the server, deny by default, from the §8.11 matrix; each row becomes an automated test. Read Only and inactive accounts cannot write. An Admin may create manager entries as their owner; changing or deleting an entry the Admin does not own is a data correction that needs a reason of at least five characters, is logged with that reason and notifies the person when the entry is visible to them.</p>
+</li>
+<li>
+<p><strong>FR-PLN-18.</strong> A Private draft MUST be returned only to its owner (PLN-04). Everyone else's lists, grid rows, cells, band totals, coverage, indicators, contribution lists, search results, exports, saved-view results, notifications, digests, activity histories and counts exclude it, and no total or count differs because of it. The owner's own totals include it, and a "Show my private drafts" control lets the owner see the totals other viewers see. An Admin sees another owner's drafts only in an explicit data-correction mode that requires a reason; each such request writes an activity entry naming the Admin, the time, the reason and the people in scope. Enforcement is in the server queries, never only in the interface.</p>
+</li>
+<li>
+<p><strong>FR-PLN-19.</strong> An entry linked to a project the viewer cannot view MUST be excluded from that viewer's lists, totals and coverage. Every person's totals carry the partial-view label for a viewer who is not an Admin or Executive (PLN-15), as in Workload, so no person-specific difference reveals restricted work, and a partial view never claims spare capacity (AC-CAP-04). A project link requires a Setup, Active or On Hold project that both the actor and the person can view (PLN-18).</p>
+</li>
+<li>
+<p><strong>FR-PLN-20.</strong> Planner rows MUST be the Workload scope plus the viewer's own row (PLN-14): all active people for Admins and Executives, direct reports for Supervisors (Q19), and members of Setup or Active projects a Project Manager manages. A viewer outside that scope for a person cannot see the person's row or entries and receives "not found". Users without planner access see only their own row, through My Week.</p>
+</li>
+</ul>
+<h3 id="397-lifecycle-audit-and-notifications"><span class="num">39.7</span> Lifecycle, audit and notifications</h3>
+<ul>
+<li>
+<p><strong>FR-PLN-21.</strong> Project status changes MUST NOT change planning entries. An entry linked to a project that is no longer Setup or Active keeps counting and shows "Project not active"; its owner may unlink, change or delete it, and a new or changed link requires a Setup, Active or On Hold project. A manager entry whose owner is inactive, or can no longer act on the person (no longer their Supervisor and not an Admin), becomes read-only with the warning "Owner no longer manages this person"; it still counts when visible, an Admin may correct or delete it, and such an owner's Private drafts stay private. An inactive person's row is not listed; their entries remain in history. Entries are never hard-deleted.</p>
+</li>
+<li>
+<p><strong>FR-PLN-22.</strong> Every create, change, move, visibility change, Still valid, deletion and Admin correction MUST write an immutable activity entry in the same transaction, with the actor, time, old and new values and any reason (FR-AUD-01). Planning activity is person-scoped: it carries no project, appears in no project activity history, Following feed, project digest or organisation activity list, and is read only through the entry's own history by viewers who may see the entry (PLN-04). Admin data-correction access entries (FR-PLN-18) appear in the organisation activity list.</p>
+</li>
+<li>
+<p><strong>FR-PLN-23.</strong> The person MUST receive one in-app notification (event Planning entry changed; email off by default and user-configurable) when a manager entry becomes visible to them, changes while visible, returns to Private draft, or is deleted while visible. A withdrawal notice says only that the planned assignment was withdrawn. An Admin correction of a self entry also notifies its person (FR-PLN-17). Changes confined to Private drafts, and a person's own changes to their self entries, notify no one. Notices collapse per entry under the existing five-minute rule and never notify the actor. The daily digest gains a Planning section, which the user can switch off, listing the recipient's own Stale plan entries.</p>
+</li>
+</ul>
+<h3 id="398-lists-exports-search-saved-views-and-concurrency"><span class="num">39.8</span> Lists, exports, search, saved views and concurrency</h3>
+<ul>
+<li>
+<p><strong>FR-PLN-24.</strong> The planner MUST offer filters (Supervisor, discipline, office, person, project, source category, confidence, visibility, indicator and text in label or notes), sorting, a paged entry list, CSV/XLSX export of the grid and of the entry list from the same visible records, and personal saved views that store filters, not data. Entry filters select people and highlight matching entries; they never change capacity, bands, remaining capacity or indicators. The discipline filter selects people with a visible entry linked to, or an open visible task in, that discipline. Global search returns visible entries by label or notes.</p>
+</li>
+<li>
+<p><strong>FR-PLN-25.</strong> Every change MUST compare the row version the caller read; a stale change returns a conflict naming who changed the entry and when, and stores nothing. Creates and quick adds accept an idempotency key so that a retry creates one entry. The time-away command is all or nothing (FR-PLN-10).</p>
+</li>
+</ul>
+<h3 id="399-screens-weekly-planner-and-my-week"><span class="num">39.9</span> Screens: Weekly Planner and My Week</h3>
+<ul>
+<li>
+<p><strong>FR-PLN-26.</strong> The Weekly Planner (§13.21) MUST show people as rows (a 240 px sticky person column, grouped by Supervisor) and <code>planning_horizon_weeks</code> ISO weeks as columns (default 12; each at least 144 px; current week first and highlighted; horizontal scrolling inside the grid). Each cell shows remaining capacity prominently, planned hours against capacity, stacked confidence bands, time away and indicator chips. Rows expand into sub-rows for planning entries, approved project allocations, time away and the task-estimate context. The screen provides quick add, the entry side panel, contribution lists, filters, export and links to Workload. It is editable at 1280 px and wider, read-only from 768 px to 1279 px, and shows the §13.0 desktop and tablet notice below 768 px.</p>
+</li>
+<li>
+<p><strong>FR-PLN-27.</strong> My Work MUST show the signed-in person a My Week strip (§13.10) for the current week and the next five: capacity, time away, bands, remaining capacity, their own self entries with quick add, and their visible manager entries and approved project allocations, read-only. Private drafts never appear. The strip appears only on the person's own My Work, follows the planner's responsive policy and links to the Weekly Planner when the person has planner access.</p>
+</li>
+<li>
+<p><strong>FR-PLN-28.</strong> The planner and My Week MUST be fully keyboard operable: arrow keys move between cells; Enter opens quick add in an editable cell or the contribution list in a read-only one; Enter saves; Esc cancels and returns focus to the cell; Tab reaches the side panel; closing the panel returns focus to its cell. Saves, conflicts and errors are announced in a live region. Every state has text and a symbol, and no operation needs a pointer or dragging. The screens meet the §22 accessibility gate (WCAG 2.1 AA).</p>
+</li>
+</ul>
+<h3 id="3910-planning-rules-pln"><span class="num">39.10</span> Planning rules (PLN)</h3>
+<p>All rules are pure functions over planning entries, resource allocations, availability overrides, calendars and organisation settings. Thresholds come from §10.9 settings and are never hard-coded.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PLN-01</td>
+<td><strong>Weeks.</strong> A week is the ISO week identified by its Monday in <code>org_time_zone</code>. <code>start_week</code> and <code>end_week</code> are Mondays, <code>start_week ≤ end_week</code>, and the span is at most 104 weeks. An entry contributes <code>hours_per_week</code> to each week w with <code>start_week ≤ w ≤ end_week</code> and nothing to any other week.</td>
+</tr>
+<tr>
+<td>PLN-02</td>
+<td><strong>Hours.</strong> <code>hours_per_week</code> is greater than 0, a multiple of 0.5 and at most <code>planning_max_hours_per_week</code>. A value above the person's capacity in any week of the range is accepted and returned with a warning.</td>
+</tr>
+<tr>
+<td>PLN-03</td>
+<td><strong>Ownership.</strong> The owner is the creator and never changes. Owner = person makes a self entry: visibility Confirmed, default confidence Confirmed, person fixed. Owner ≠ person makes a manager entry: default visibility Draft, default confidence Expected; it can never move onto its owner's own row.</td>
+</tr>
+<tr>
+<td>PLN-04</td>
+<td><strong>Visibility.</strong> Viewer v sees entry e if and only if e is not deleted; e's visibility is not Draft, or v owns e, or v is an Admin in data-correction mode; v = e's person or v may see e's person's row (PLN-14); and e has no project or v can view that project. The same predicate filters every list, cell, total, coverage step, indicator, export, search result, notification recipient, digest row and history.</td>
+</tr>
+<tr>
+<td>PLN-05</td>
+<td><strong>Capacity.</strong> capacity(p, w) = Σ over days d of w of DailyCapacity(d, weekly(p), calendar(p), override(p, d)), where weekly(p) is the person's weekly capacity override or <code>default_weekly_capacity_hours</code> and DailyCapacity is the §37.6 rule: an override replaces the day; otherwise a working day receives the weekly capacity divided by that week's working days and a non-working day receives 0.</td>
+</tr>
+<tr>
+<td>PLN-06</td>
+<td><strong>Time away.</strong> For each day with an Unavailable or Reduced override: max(0, DailyCapacity(d, weekly, calendar, no override) − override hours). For an Additional override: extra availability max(0, override hours − normal day capacity). Both explain capacity; neither is applied again.</td>
+</tr>
+<tr>
+<td>PLN-07</td>
+<td><strong>Approved hours.</strong> A(p, w, P) = the sum, over resource allocations with status Confirmed for person p and project P, where P is Setup or Active and viewable by the viewer, of the allocation's daily spread (§37.6, explicit day hours first) on the days of w.</td>
+</tr>
+<tr>
+<td>PLN-08</td>
+<td><strong>Coverage.</strong> For each (p, w, P) with A &gt; 0, order the visible entries linked to P by confidence (Confirmed, Expected, Possible), start week, creation time and identifier. With S = A, for each entry: covered = min(hours, S), counted = hours − covered, S = S − covered. Every other entry has covered = 0 and counted = hours.</td>
+</tr>
+<tr>
+<td>PLN-09</td>
+<td><strong>Bands.</strong> Confirmed = Σ over P of A(p, w, P) + Σ counted hours of Confidence Confirmed entries; Expected = Σ counted hours of Confidence Expected entries; Possible = Σ counted hours of Confidence Possible entries; Remaining = capacity − Confirmed − Expected. Arithmetic is exact; display rounds to one decimal place after aggregation.</td>
+</tr>
+<tr>
+<td>PLN-10</td>
+<td><strong>Over-planned (person and week).</strong> Confirmed + Expected &gt; capacity × <code>planning_over_pct</code> ÷ 100. A week with zero capacity and any Confirmed or Expected hours is Over-planned.</td>
+</tr>
+<tr>
+<td>PLN-11</td>
+<td><strong>Under-planned (person and week).</strong> Evaluated only in a view that is not partial (PLN-15) and only when <code>planning_under_pct</code> &gt; 0. A week w at or after the current week is Under-planned when each of the <code>planning_under_weeks</code> consecutive weeks starting at w lies within the evaluated weeks and has capacity &gt; 0, no time away, Confirmed + Expected + Possible &lt; capacity × <code>planning_under_pct</code> ÷ 100, and no open visible task without an estimate due in it.</td>
+</tr>
+<tr>
+<td>PLN-12</td>
+<td><strong>Stale plan (entry).</strong> <code>end_week</code> ≥ the current week and now − <code>last_validated_at</code> &gt; <code>planning_stale_days</code> days. Creation, any change, a visibility change and Still valid set <code>last_validated_at</code> to now. A stale entry still counts.</td>
+</tr>
+<tr>
+<td>PLN-13</td>
+<td><strong>Quick add.</strong> Case-insensitive, in order: an optional <code>~</code>; the hours as one to three digits with an optional single decimal digit after a point; an optional unit word (h, hr, hrs, hour or hours) ending at a word boundary; an optional separator (-, –, — or :); then the label, which is the trimmed remainder. Spaces between the parts are optional. The hours must satisfy PLN-02; the label must have 1–120 characters and may not be only a unit word; <code>~</code> sets confidence Possible. Any other text is refused with a field message.</td>
+</tr>
+<tr>
+<td>PLN-14</td>
+<td><strong>People scope.</strong> Rows for viewer v are the active users in the Workload scope (Admin and Executive: everyone; Supervisor: direct reports; Project Manager system role: members of Setup or Active projects v manages) plus v. v may see a person's row if and only if the person is in that set.</td>
+</tr>
+<tr>
+<td>PLN-15</td>
+<td><strong>Partial view.</strong> For a viewer who is not an Admin or Executive, every person's totals are partial (the Workload rule of FR-CAP-06). Partial totals carry the label "Partial view: totals include only projects you can see" and suppress Under-planned.</td>
+</tr>
+<tr>
+<td>PLN-16</td>
+<td><strong>Visibility changes.</strong> A manager entry's owner (or an Admin making a correction) may change its visibility between any two of Draft, Published and Confirmed; self entries have none. Leaving Draft, changing a visible entry, returning to Draft and deleting a visible entry each notify the person (FR-PLN-23); nothing about a Draft is sent to anyone.</td>
+</tr>
+<tr>
+<td>PLN-17</td>
+<td><strong>Authority.</strong> A self entry is changed only by its person while active and not Read Only. A manager entry is changed by its owner while the owner may act on the person (their Supervisor, or an Admin); otherwise it is read-only and shows "Owner no longer manages this person". An Admin may change or delete an entry they do not own only as a data correction with a reason. Nobody else may change an entry.</td>
+</tr>
+<tr>
+<td>PLN-18</td>
+<td><strong>Project links.</strong> A link requires a project in Setup, Active or On Hold that both the actor and the person can view; a project discipline must be an active discipline of that project; linking sets Major project. When the linked project is not Setup or Active, the entry shows "Project not active" and is otherwise unchanged.</td>
+</tr>
+<tr>
+<td>PLN-19</td>
+<td><strong>Time-away command.</strong> The actor may act on the person (their Supervisor, or an Admin). For a range [from, through] of at most 366 days: Record sets the override on each working day of the person's calendar to the given hours (0–24) and category (Unavailable or Reduced); Clear removes each Unavailable or Reduced override in the range and keeps Additional ones. The person row is locked; for every date the command changes, the caller's expected override version (0 when none) must match; every changed date's person/date version advances; all writes and activity entries share one transaction; no reason or leave detail is stored.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="3911-acceptance-criteria"><span class="num">39.11</span> Acceptance criteria</h3>
+<ul>
+<li>
+<p><strong>AC-PLN-01.</strong> Given Taylor supervises Yagmur, when Taylor focuses Yagmur's week-W cell, types <code>8 h proposal support</code> and presses Enter, then exactly one planning entry exists for Yagmur with 8.0 h per week, start and end week W, label "proposal support", source Other project, Confidence: Expected, Visibility: Private draft and owner Taylor, and no other input was requested.</p>
+</li>
+<li>
+<p><strong>AC-PLN-02.</strong> Given that Private draft, then Yagmur's My Week, another Supervisor's, an Executive's and a Project Manager's planner, global search, both exports, notifications, digests and activity histories contain neither the entry nor its 8 h, and no total or count differs because of it; Taylor's own planner includes it; an Admin sees it only after entering data-correction mode with a reason, and that access is recorded in the activity log.</p>
+</li>
+<li>
+<p><strong>AC-PLN-03.</strong> Given Taylor changes the entry to Visibility: Proposed assignment, then Yagmur receives one in-app notification, the 8 h appears in her My Week in the Expected band labelled "Confidence: Expected · Visibility: Proposed assignment", and the entry history records the change with actor and time; when Taylor returns it to Private draft, Yagmur is told only that the planned assignment was withdrawn, and the entry leaves her view.</p>
+</li>
+<li>
+<p><strong>AC-PLN-04.</strong> Given capacity 40 h in week W with no time away, 30 h Confidence Confirmed, 13 h Confidence Expected and 8 h Confidence Possible, then the cell shows remaining −3.0 h, shows the 8 h Possible separately, and is Over-planned at the default 105 % (43 h is more than 42 h); with <code>planning_over_pct</code> 110 the week is not Over-planned (43 h is not more than 44 h); the contribution list shows every row with owner, label, source, hours, confidence and visibility.</p>
+</li>
+<li>
+<p><strong>AC-PLN-05.</strong> Given a Confirmed resource allocation reserving 12 h on project P in week W and a manager entry of 16 h per week, Confidence: Confirmed, linked to P, then the Confirmed band is 16 h (12 h approved allocation and 4 h counted), not 28 h; given instead an 8 h Confidence: Expected entry linked to P, then Confirmed is 12 h, Expected is 0 h and the entry shows 8 h covered by the approved allocation; an unlinked 6 h entry with source category Admin adds 6 h to its own band in both cases.</p>
+</li>
+<li>
+<p><strong>AC-PLN-06.</strong> Given a weekly capacity of 40 h over five working days and availability overrides of 0 h, category Unavailable, on two days of week W, then the planner capacity for W is 24 h, the contribution list shows 16 h of time away on those two dates, remaining capacity is not reduced a second time, and the Workload view shows 24 h available for W.</p>
+</li>
+<li>
+<p><strong>AC-PLN-07.</strong> Given Yagmur types <code>6 h small project</code> in her own My Week cell, then a self entry exists with Confidence: Confirmed and Visibility: Self-entered; Taylor sees it in the planner, but Taylor's change, visibility change or deletion is refused, while Yagmur can change or delete it.</p>
+</li>
+<li>
+<p><strong>AC-PLN-08.</strong> Given a manager entry spanning weeks 1–3, when its owner sets the end week to week 6 (or chooses Repeat for 6 weeks), then exactly one entry remains, each of weeks 1–6 shows its hours, and its last-validated time is reset.</p>
+</li>
+<li>
+<p><strong>AC-PLN-09.</strong> Given an entry last validated 29 days ago, <code>planning_stale_days</code> 28 and an end week in the future, then it shows Stale plan in the planner and in its owner's digest Planning section and still counts in totals; Still valid clears the indicator; an entry whose end week has passed is never a Stale plan.</p>
+</li>
+<li>
+<p><strong>AC-PLN-10.</strong> Given 14 h of remaining task estimate for a person in week W and no planning entries, then the cell shows "Task estimates: 14 h" as context, every band is 0 h, remaining capacity equals capacity, and neither Over-planned nor Under-planned is affected by the estimate.</p>
+</li>
+<li>
+<p><strong>AC-PLN-11.</strong> Given existing proposed and confirmed resource allocations, when planning entries are created, changed, published, moved and deleted, then every resource allocation, allocation work link, availability override and person/date version, the Workload grid and export responses and the readiness capacity results are identical to their values before those commands, and the existing packet 017, 029 and 032 automated tests pass unchanged.</p>
+</li>
+<li>
+<p><strong>AC-PLN-12.</strong> Given an entry linked to a Restricted project, then a viewer who cannot view that project sees neither the entry nor its hours, sees the person's totals labelled partial and never sees Under-planned for that person; linking a project that the person cannot view is refused.</p>
+</li>
+<li>
+<p><strong>AC-PLN-13.</strong> Given two editors read version 3 of an entry, when both save, then the second receives a conflict with the current version and the name and time of the first change, and none of the second change is stored; a quick add retried with the same idempotency key creates one entry.</p>
+</li>
+<li>
+<p><strong>AC-PLN-14.</strong> Given any planner, My Week, contribution list, side panel, export or notification text, then the word Confirmed never appears without one of the qualifiers "Confidence:", "Visibility: … assignment" or "Approval status:", or a column header naming Confidence, Visibility or Approval status.</p>
+</li>
+<li>
+<p><strong>AC-PLN-15.</strong> Given the §8.11 matrix, then every row allows and refuses the roles it states: Read Only and inactive users cannot write; a Supervisor cannot create an entry for a person who is not a direct report and cannot see that person's row; a Project Manager can view members of projects they manage but cannot create; an Executive can view but not create; an Admin's change or deletion of an entry they do not own requires a reason and is logged as a data correction; a former Supervisor's Proposed assignment is read-only to them.</p>
+</li>
+<li>
+<p><strong>AC-PLN-16.</strong> Given Taylor records time away for Yagmur for Monday to Friday of week W at 0 h, then five availability overrides are written in one transaction, each date's version advances, and planner and Workload capacity for W become 0 h; if any date's version is stale, nothing is written; clearing the range restores 40 h; Yagmur's own attempt to record time away is refused.</p>
+</li>
+<li>
+<p><strong>AC-PLN-17.</strong> Given a Supervisor scope of 12 people, a 12-week horizon, 500 visible planning entries and 50 confirmed allocations, then the planner grid response completes within 1.5 s at the 95th percentile in the pilot environment, and the My Week response within 500 ms.</p>
+</li>
+<li>
+<p><strong>AC-PLN-18.</strong> Given a 1440 px desktop, then a keyboard user can move between cells with the arrow keys, open quick add with Enter, save with Enter, cancel with Esc and reach the side panel with Tab, with focus returning to the cell; at 1024 px the planner and My Week are read-only; at 375 px both show the desktop and tablet notice; no state relies on colour alone.</p>
+</li>
+<li>
+<p><strong>AC-PLN-19.</strong> Given an entry linked to project P, when P becomes Archived, then the entry is unchanged, still counts and shows "Project not active"; its owner can unlink, change or delete it, and a new link to an Archived project is refused.</p>
+</li>
+<li>
+<p><strong>AC-PLN-20.</strong> Given Yagmur has a Confirmed resource allocation of 12 h on a project she can view in week W, then her My Week shows 12 h as a read-only "Approved project allocation · Approval status: Confirmed" in the Confirmed band, without the confirmation snapshot or any over-capacity reason, and she cannot change it from the planner.</p>
+</li>
+</ul>
+<h3 id="3912-open-decisions-and-deferred-proposals"><span class="num">39.12</span> Open decisions and deferred proposals</h3>
+<p>Each open decision below has the default this amendment uses until Jay decides otherwise.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Default used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Default weekly capacity: v1.1's 37.5 h or the existing 40 h</td>
+<td>Keep <code>default_weekly_capacity_hours</code> at 40 h (§10.4, Q18). 37.5 h needs a decimal setting kind; propose it separately.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Planner thresholds</td>
+<td>v1.1's values as Admin settings (§10.9): over 105 %, under 50 % for 2 weeks, stale after 28 days, at most 80 h per entry week, 12-week horizon (6–26).</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Indicator names</td>
+<td>Over-planned, Under-planned and Stale plan, distinct from Workload's Over-assigned and Under-assigned.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Who records time away</td>
+<td>Supervisor (direct reports) or Admin, as availability overrides (FR-CAP-02 unchanged). Self-recorded time away is deferred because it would change FR-CAP-02's editors.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Whether the time-away command may clear overrides</td>
+<td>Yes, for the same editors, audited.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Whether the allocated person sees their own approved allocations</td>
+<td>Yes, in My Week, as read-only hours on projects they can view (AC-PLN-20); the §37.6 detail stays closed to them.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Supervisor read scope</td>
+<td>Direct reports only (Q19); v1.1's all-staff read for Supervisors is deferred.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Project Managers and Discipline Leads creating planning entries</td>
+<td>No; they propose resource allocations (§37.6). Project Managers with the system role can view members of projects they manage.</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Person changing or commenting on a manager entry</td>
+<td>No change; add an own entry. Comments on planning entries are deferred.</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Person accepting Confirmed assignment</td>
+<td>Not required; one owner action.</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Other planners seeing that a Private draft exists</td>
+<td>Nothing is visible.</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Week or date grain</td>
+<td>Planning entries use ISO-week ranges; resource allocations keep date grain; weekly sums reconcile them.</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Coverage order</td>
+<td>Confidence Confirmed, Expected, Possible, then start week, creation time, identifier.</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Partial-view rule</td>
+<td>Workload's rule: partial unless the viewer is an Admin or Executive. A finer rule that never leaks restricted existence is a follow-up.</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Project status change</td>
+<td>Entries are untouched and flagged "Project not active"; v1.1's unlink on archive is not adopted.</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Global search</td>
+<td>Includes visible entries by label and notes.</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Notification channels</td>
+<td>In-app on, email off; Stale plan in the digest only.</td>
+</tr>
+<tr>
+<td>18</td>
+<td>Pointer drag of planner blocks</td>
+<td>Deferred; side-panel fields provide extend, shorten and move.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Deferred follow-up proposals, outside packet 034: Manager Home exception dashboard and in-app overload alerts; People and Person Profile (job role, discipline, skills, capacity history, per-person working days); self-recorded time away and a notice to the person when time away is recorded for them; Overlapping Plans and cross-team planning for people who are not direct reports; Deliverable Pressure and planned staffing on the Project Dashboard; role-level long-term demand; planned versus actual effort; pointer drag of planner blocks and conversion of an entry to a task assignment; comments on planning entries; Team Capacity and Allocations by Source reports; a decimal default capacity; and moving Workload's fixed 110 %/40 % thresholds into settings (an existing constitution II gap that this amendment does not change).</p>
   </main>
 </div>
 <script>

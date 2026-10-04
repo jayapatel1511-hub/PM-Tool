@@ -2,6 +2,8 @@
 
 **2026-09-26 amendment:** The existing first-release set below is the 24-packet implementation baseline. Jay has also approved all nine coordination additions in §37–§38 (packets 025–033). They are specified, not built. Release in accepted increments within the 50-person pilot; do not claim completion of the expanded scope based on the older packet status. §38.4 defines the dependency order.
 
+**2026-10-03 amendment:** Jay also approved the weekly planning layer (§39, packet 034) as a separate record beside the §37.6 allocations. It is specified, not built, follows the same staged-acceptance rule, and depends on packet 029.
+
 ### 27.1 Critical evaluation of the candidate MVP list
 
 | Candidate | Decision | Rationale |
@@ -102,7 +104,7 @@ Original item numbers are retained for historical packet citations. Items marked
 2. **SharePoint integration** — browse and pick documents from the project library (Graph); still no storage in the Hub.
 3. **ERP / Vantagepoint integration** — inbound project master data sync (**TBD**: capabilities, licensing, ownership of fields). Nothing is assumed about ERP capabilities in this specification.
 4. **Project financial information (read-only display)** — only if sourced from ERP; the Hub never becomes a financial system.
-5. **Utilisation / resource planning** — availability from HR/leave systems, capacity by role, longer horizons; still no levelling or payroll timesheets. Manual dated capacity overrides and confirmed production/review allocations are now approved in §37.6; HR integration remains Phase 3.
+5. **Utilisation / resource planning** — availability from HR/leave systems, capacity by role, longer horizons; still no levelling or payroll timesheets. Manual dated capacity overrides and confirmed production/review allocations are now approved in §37.6, and manual weekly planning entries in §39; HR integration remains Phase 3.
 6. **Client / external actions** — optional read-only external access or emailed action lists to external parties (security review required).
 7. **Advanced portfolio reporting** — cross-office comparisons, discipline throughput, submission on-time rates from snapshots.
 8. **Advanced administration** — per-project threshold overrides; template analytics; bulk data tools.
@@ -119,7 +121,7 @@ No AI features are planned in any phase of this specification.
 |---|---|
 | AI assistants, LLM features, automated summaries, AI task extraction, recommendations, predictions, "smart" scheduling | Product constraint; the product must be fully deterministic and explainable. |
 | Accounting, invoicing, budgets, cost tracking, earned value | Financial systems of record exist; the Hub coordinates work, not money. |
-| Payroll, HR records, leave management | Not a coordination concern. |
+| Payroll, HR records, leave management | Not a coordination concern. Planned time away is recorded only as a non-sensitive availability override for capacity (§37.6, §39.3), with no leave type, reason or balance. |
 | Payroll or billable timesheet approval, billing rates, invoicing, and payroll submission | Actual hours are recorded against tasks in the first-release Time view (§36.8), but the Hub does not replace financial or payroll systems. |
 | Full ERP or CRM functionality | — |
 | CPM scheduling, critical path, float, resource levelling, baselining beyond original dates, MS Project/P6 import-export | Primavera/Project replacement is a non-goal. |

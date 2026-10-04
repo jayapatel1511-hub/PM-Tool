@@ -42,7 +42,7 @@ export function SearchPage() {
       </FilterBar>
       {!q.trim() ? <div className="rounded-lg border bg-card"><Empty>{t('search.prompt')}</Empty></div> : (
         <>
-          <div role="tablist" aria-label={t('search.types')} className="scroll-region scroll-thin flex gap-1 overflow-x-auto border-b">
+          <div role="tablist" aria-label={t('search.types')} className="flex min-w-0 flex-wrap gap-1 border-b">
             {GROUPS.map((g) => (
               <button key={g} type="button" role="tab" id={`search-tab-${g}`} aria-selected={type === g} aria-controls="search-results" onClick={() => set('type', g)}
                 className={cn('-mb-px inline-flex min-h-11 shrink-0 items-center whitespace-nowrap border-b-2 px-3 text-sm',

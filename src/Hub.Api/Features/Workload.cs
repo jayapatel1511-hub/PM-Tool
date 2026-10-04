@@ -15,9 +15,9 @@ public static class WorkloadEndpoints
     public sealed record CapacityBody(decimal? Hours);
 
     public const int Weeks = 8;
-    static readonly string[] LiveProjects = [ProjectStatus.Setup, ProjectStatus.Active];
+    internal static readonly string[] LiveProjects = [ProjectStatus.Setup, ProjectStatus.Active];
 
-    sealed record TaskRow(Guid Id, Guid ProjectId, string Key, string Name, Guid AssigneeId, Guid ProjectDisciplineId, decimal? EstimatedHours, int ProgressPct,
+    internal sealed record TaskRow(Guid Id, Guid ProjectId, string Key, string Name, Guid AssigneeId, Guid ProjectDisciplineId, decimal? EstimatedHours, int ProgressPct,
         DateOnly? StartDate, DateOnly? DueDate, string Status, int RowVersion);
 
     public sealed record PersonLoad(Guid Id, string DisplayName, Guid? SupervisorId, string? SupervisorName, decimal Capacity, bool CapacityOverride,
@@ -65,7 +65,7 @@ public static class WorkloadEndpoints
 
     /// Who appears (§13.11): everyone for Executives and Admins, direct reports for Supervisors (Q19), and members of the
     /// projects a PM manages. Hours come only from Setup and Active projects the viewer can see (Workflow 10, §36.1).
-    static IQueryable<AppUser> People(HubDb db, Access access, CurrentUser me)
+    internal static IQueryable<AppUser> People(HubDb db, Access access, CurrentUser me)
     {
         var a = access.Actor;
         var users = db.Users.AsNoTracking().Where(u => u.IsActive);
@@ -76,7 +76,7 @@ public static class WorkloadEndpoints
         return users.Where(u => (a.Supervisor && u.SupervisorId == me.Id) || (a.SystemPM && members.Contains(u.Id)));
     }
 
-    static async Task<List<TaskRow>> Tasks(HubDb db, Access access, IQueryable<Guid> people, Guid? disciplineId, Guid? projectId)
+    internal static async Task<List<TaskRow>> Tasks(HubDb db, Access access, IQueryable<Guid> people, Guid? disciplineId, Guid? projectId)
     {
         var projects = access.VisibleProjects().Where(p => LiveProjects.Contains(p.Status)).Select(p => p.Id);
         var q = db.Tasks.AsNoTracking().Where(t => t.AssigneeId != null && people.Contains(t.AssigneeId.Value) && projects.Contains(t.ProjectId)

@@ -1,10 +1,12 @@
+import { disciplineColour } from '@/lib/discipline-colour'
+import { UrlSearchInput } from '@/components/hub/url-search'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { ArrowDown, ArrowUp, ChevronDown, Columns3, KanbanSquare, List, Plus } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { InlineDate } from '@/components/hub/fields'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
@@ -119,12 +121,12 @@ const needsStartAuthorisation = (e: unknown) => e instanceof ApiError && e.code 
 /** Saves, transitions and the follow-up offers shared by the list, board and panel (T-16 reasons, T-20 progress offers, G-07 conflicts). */
 /** `onSaved` hears about every change that was actually saved, including ones completed in a dialog (meeting tray, §12.13). */
 export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key: string, what: string) => void) {
-  const [ask, setAsk] = useState<{ title: string; run: (reason: string) => Promise<unknown> } | null>(null)
+  const [ask, setAsk] = useState<{ title: string; run: (reason: string) => Promise<unknown>; cancel: () => void } | null>(null)
   const [moving, setMoving] = useState<MoveRequest | null>(null)
   const [offer, setOffer] = useState<{ id: string; key: string; rowVersion: number; to: string } | null>(null)
   const [starting, setStarting] = useState<StartRequest | null>(null)
 
-  const save = async (r: { id: string; key: string; rowVersion: number }, body: Record<string, unknown>): Promise<number | null> => {
+  const save = async (r: { id: string; key: string; rowVersion: number }, body: Record<string, unknown>): Promise<number | null | undefined> => {
     try {
       const res = await patch(`tasks/${r.id}`, body, r.rowVersion)
       onSaved?.(r.id, r.key, describe(body))
@@ -133,8 +135,16 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
     } catch (e) {
       const err = e as ApiError
       if (err.fieldErrors?.reason && !body.reason) {
-        setAsk({ title: t('task.reasonTitle', { key: r.key }), run: async (reason) => { await patch(`tasks/${r.id}`, { ...body, reason }, r.rowVersion); onSaved?.(r.id, r.key, describe(body)); onChanged() } })
-        return null
+        return await new Promise<number | null | undefined>((resolve) => setAsk({
+          title: t('task.reasonTitle', { key: r.key }),
+          cancel: () => resolve(undefined),
+          run: async (reason) => {
+            try {
+              const result = await patch(`tasks/${r.id}`, { ...body, reason }, r.rowVersion)
+              onSaved?.(r.id, r.key, describe(body)); onChanged(); resolve(result.rowVersion as number); return result
+            } catch (reasonError) { resolve(null); throw reasonError }
+          },
+        }))
       }
       toast.error(Object.values(err.fieldErrors ?? {})[0]?.[0] ?? errorText(e))
       onChanged()
@@ -158,15 +168,16 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
   // FR-010: progress above 0 on a Not Started task offers In Progress; 100 offers Complete or Ready for Review.
   const setProgress = async (r: TaskRow, pct: number) => {
     const v = await save(r, { progressPct: pct })
-    if (v == null) return
+    if (v == null) return v
     if (pct > 0 && r.status === 'Not Started') setOffer({ id: r.id, key: r.key, rowVersion: v, to: 'In Progress' })
     else if (pct === 100 && ['Not Started', 'In Progress', 'Revision Required'].includes(r.status))
       setOffer({ id: r.id, key: r.key, rowVersion: v, to: r.requiresReview ? 'Ready for Review' : 'Complete' })
+    return v
   }
 
   const dialogs = (
     <>
-      {ask && <ConfirmDialog open title={ask.title} body={t('task.reasonBody')} reason onOpenChange={(o) => !o && setAsk(null)} onConfirm={(reason) => ask.run(reason)} />}
+      {ask && <ConfirmDialog open title={ask.title} body={t('task.reasonBody')} reason onOpenChange={(o) => { if (!o) { ask.cancel(); setAsk(null) } }} onConfirm={(reason) => ask.run(reason)} />}
       {moving && <TransitionDialog m={moving} onStart={(body) => setStarting({ id: moving.id, key: moving.key, to: moving.to, body })}
         onClose={(done) => { const m = moving; setMoving(null); if (done) { onSaved?.(m.id, m.key, `→ ${tv(m.to)}`); onChanged() } }} />}
       {starting && <StartAuthorisationDialog req={starting} onClose={(done) => {
@@ -298,7 +309,7 @@ export function TaskFilterBar({ p, deliverables, extra }: { p: ProjectDetail; de
     <FilterBar>
       <div className="flex flex-wrap items-end gap-3">
         <Field label={t('common.search')} htmlFor="tasks-q" className="w-full sm:w-56">
-          <Input id="tasks-q" key={filters.q ? 'q' : 'empty'} type="search" placeholder={t('task.searchPlaceholder')} defaultValue={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
+          <UrlSearchInput id="tasks-q" placeholder={t('task.searchPlaceholder')} value={filters.q ?? ''} onValueChange={value => set('q', value || null)} />
         </Field>
         <Field label={t('common.discipline')} htmlFor="tasks-discipline" className="w-full sm:w-44">
           <select id="tasks-discipline" className={selectCls} value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
@@ -413,6 +424,7 @@ function readCols(): string[] | null {
 }
 
 export function TasksTab() {
+  const phone = useIsPhone()
   const p = useCurrentProject()
   const openPanel = useItemPanel()
   const refresh = useProjectRefresh()
@@ -450,7 +462,7 @@ export function TasksTab() {
     { id: 'key', label: 'milestone.key', sort: 'key', cls: 'whitespace-nowrap', cell: (r) => <button type="button" className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button> },
     { id: 'name', label: 'task.name', sort: 'name', cls: 'min-w-56', cell: (r) => <button type="button" aria-current={current === r.id || undefined} className="text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button> },
     { id: 'deliverable', label: 'task.deliverable', cell: (r) => r.deliverableId ? <button type="button" className="block max-w-44 truncate text-left hover:underline" title={`${r.deliverableKey} ${r.deliverableName}`} onClick={() => openPanel('Deliverable', r.deliverableId!)}>{r.deliverableName}</button> : dash },
-    { id: 'discipline', label: 'common.discipline', cls: 'whitespace-nowrap', cell: (r) => <span className="inline-flex items-center gap-1.5"><span className="size-2.5 shrink-0 rounded-sm" style={{ background: r.disciplineColour }} aria-hidden />{r.disciplineName}</span> },
+    { id: 'discipline', label: 'common.discipline', cls: 'whitespace-nowrap', cell: (r) => <span className="inline-flex items-center gap-1.5"><span className="size-2.5 shrink-0 rounded-sm" style={{ background: disciplineColour(r.disciplineColour) }} aria-hidden />{r.disciplineName}</span> },
     { id: 'assignee', label: 'field.AssigneeId', cls: 'min-w-48', pad: CONTROL, cell: (r) => {
       const name = r.assigneeName && !r.assigneeActive ? t('common.inactiveSuffix', { name: r.assigneeName }) : r.assigneeName
       return (
@@ -535,16 +547,20 @@ export function TasksTab() {
             : <Empty title={t('task.emptyTitle')} action={canCreate && <Button variant="outline" onClick={() => setCreating({})}><Plus className="size-4" />{t('task.new')}</Button>}>{t('task.emptyHint')}</Empty>}
         </div>
       ) : (
-        <div ref={scroller} className="scroll-region max-h-[calc(100dvh-10rem)] min-h-64 overflow-auto rounded-lg border bg-card">
+        phone ? <div className="space-y-2"><Checkbox aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={c => setSelected(c ? new Set(rows.map(r => r.id)) : new Set())} /><ul className="space-y-2">{flat.map(f => f.kind === 'group' ? <li key={`g-${f.id}`} className="flex flex-wrap items-center gap-2 py-2"><h3 className="break-words text-sm font-semibold">{f.label}</h3><span className="text-xs text-muted-foreground">{f.count}</span>{f.status && <StatusPill status={f.status} />}{group === 'deliverable' && canCreate && <Button size="sm" variant="outline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" />{t('task.addHere')}</Button>}</li> : <li key={f.r.id} className={cn('rounded-lg border bg-card p-4', (current === f.r.id || selected.has(f.r.id)) && 'bg-accent', current === f.r.id && 'shadow-[inset_3px_0_0_var(--primary)]')}>
+          <div className="mb-3 flex items-start gap-3"><Checkbox aria-label={`${t('bulk.select')} ${f.r.key}`} checked={selected.has(f.r.id)} onCheckedChange={() => toggle(f.r.id)} /><div className="min-w-0 flex-1">{all.find(c => c.id === 'key')?.cell(f.r)}<div className="mt-1 break-words font-semibold">{all.find(c => c.id === 'name')?.cell(f.r)}</div></div></div>
+          <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name').map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{t(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
+        </li>)}</ul>{q.isFetchingNextPage && <p role="status" className="text-xs text-muted-foreground">{t('task.loadingMore', { n: rows.length, total })}</p>}</div> :
+        <TableRegion ref={scroller} className="max-h-[calc(100dvh-10rem)] min-h-64 overflow-auto">
           <table className="w-full text-sm" aria-rowcount={flat.length + 1}>
             <caption className="sr-only">{t('ptab.tasks')}</caption>
             <thead className="sticky top-0 z-10 bg-muted">
               <tr>
-                <th scope="col" className={cn(thCls, 'w-10')}><Checkbox className="mt-0.5" aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={(c) => setSelected(c ? new Set(rows.map((r) => r.id)) : new Set())} /></th>
+                <th scope="col" className={cn(thCls, 'sticky left-0 z-30 w-10 min-w-10 bg-muted')}><Checkbox className="mt-0.5" aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={(c) => setSelected(c ? new Set(rows.map((r) => r.id)) : new Set())} /></th>
                 {shown.map((c) => {
                   const dir = sort === c.sort ? 'ascending' : sort === `${c.sort}:desc` ? 'descending' : undefined
                   return (
-                    <th key={c.id} scope="col" className={cn(thCls, c.num && 'text-right')} aria-sort={c.sort ? dir ?? 'none' : undefined}>
+                    <th key={c.id} scope="col" className={cn(thCls, c.num && 'text-right', c.id === 'key' && 'sticky left-10 z-20 w-40 min-w-40 max-w-40 bg-muted', c.id === 'name' && 'sticky left-50 z-20 min-w-64 bg-muted')} aria-sort={c.sort ? dir ?? 'none' : undefined}>
                       {c.sort ? <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => sortBy(c.sort!)}>{t(c.label)}
                         {dir === 'ascending' && <ArrowUp className="size-3.5" aria-hidden />}{dir === 'descending' && <ArrowDown className="size-3.5" aria-hidden />}</button> : t(c.label)}
                     </th>
@@ -574,8 +590,8 @@ export function TasksTab() {
                 return (
                   <tr key={r.id} data-index={vi.index} ref={virtual.measureElement}
                     className={cn('border-t hover:bg-muted', (open || selected.has(r.id)) && 'bg-accent hover:bg-accent', open && 'shadow-[inset_3px_0_0_var(--primary)]')}>
-                    <td className={tdCls}><Checkbox className="mt-0.5" aria-label={`${t('bulk.select')} ${r.key}`} checked={selected.has(r.id)} onCheckedChange={() => toggle(r.id)} /></td>
-                    {shown.map((c) => <td key={c.id} className={cn(tdCls, c.pad, c.num && 'text-right tabular-nums', c.cls)}>{c.cell(r)}</td>)}
+                    <td className={cn(tdCls, 'sticky left-0 z-10 w-10 min-w-10 bg-card', (open || selected.has(r.id)) && 'bg-accent')}><Checkbox className="mt-0.5" aria-label={`${t('bulk.select')} ${r.key}`} checked={selected.has(r.id)} onCheckedChange={() => toggle(r.id)} /></td>
+                    {shown.map((c) => <td key={c.id} className={cn(tdCls, c.pad, c.num && 'text-right tabular-nums', c.cls, c.id === 'key' && 'sticky left-10 z-10 w-40 min-w-40 max-w-40 bg-card', c.id === 'name' && 'sticky left-50 z-10 min-w-64 bg-card', (c.id === 'key' || c.id === 'name') && (open || selected.has(r.id)) && 'bg-accent')}>{c.cell(r)}</td>)}
                   </tr>
                 )
               })}
@@ -583,7 +599,7 @@ export function TasksTab() {
             </tbody>
           </table>
           {q.isFetchingNextPage && <div role="status" className="flex items-center gap-2 border-t px-(--cell-px) py-2 text-xs/[18px] text-muted-foreground"><Spinner />{t('task.loadingMore', { n: rows.length, total })}</div>}
-        </div>
+        </TableRegion>
       )}
       {creating && <CreateTask p={p} deliverables={deliverables} milestones={milestones} defaults={creating} onClose={(id) => { setCreating(null); if (id) { reload(); openPanel('Task', id) } }} />}
       {bulk && <TaskBulkDialog p={p} op={bulk} ids={[...selected]} deliverables={deliverables} onClose={(ok) => { setBulk(null); if (ok) { setSelected(new Set()); reload() } }} />}

@@ -18,6 +18,11 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
         var key = ctx.Request.Headers["Idempotency-Key"].FirstOrDefault()?.Trim();
         if (!HttpMethods.IsPost(ctx.Request.Method) || string.IsNullOrEmpty(key) || !me.Resolved) { await next(ctx); return; }
         Check.That(key.Length <= 100, "Idempotency-Key", "error.too_long", 100);
+        if (ctx.Request.Path.StartsWithSegments("/api/v1/planning"))
+        {
+            await Hub.Api.Features.PlanningIdempotency.Run(ctx, next, db, me, clock, key);
+            return;
+        }
         var path = ctx.Request.Path.Value ?? "";
         var seen = await db.Idempotency.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == me.Id && x.Key == key && x.CreatedAt > clock.GetUtcNow().AddDays(-1));
         if (seen is not null)

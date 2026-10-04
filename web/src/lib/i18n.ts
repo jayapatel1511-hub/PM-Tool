@@ -2,9 +2,7 @@ import { en } from '@/i18n/en'
 
 // All interface text lives in src/i18n/en.ts (§22, Q7); a second language adds a sibling table.
 type Dict = Record<string, string>
-// Integration aid: area string files (src/i18n/en-*.ts, one owner each) merge here until they are folded into en.ts.
-const areas = import.meta.glob<Dict>('../i18n/en-*.ts', { eager: true, import: 'default' })
-const table: Dict = Object.assign({}, en, ...Object.values(areas))
+const table: Dict = en
 
 export function t(key: string, params?: Record<string, string | number | null | undefined>): string {
   let s = table[key] ?? key

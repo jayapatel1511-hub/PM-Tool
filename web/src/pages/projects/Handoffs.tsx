@@ -1,9 +1,10 @@
+import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ExternalLink, Plus } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { Avatar } from '@/components/hub/people'
 import { ViewMenu } from '@/components/hub/views'
@@ -53,6 +54,7 @@ function Refusal({ error }: { error: ApiError }) {
 }
 
 export function HandoffsTab() {
+  const phone = useIsPhone()
   const p = useCurrentProject()
   const [sp, setSp] = useSearchParams()
   const qc = useQueryClient()
@@ -85,7 +87,7 @@ export function HandoffsTab() {
   </>}>
     <FilterBar>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label={t('common.search')} htmlFor="handoff-search" className="w-full sm:w-56"><Input id="handoff-search" type="search" value={filters.q} onChange={e => setFilter('q', e.target.value)} /></Field>
+        <Field label={t('common.search')} htmlFor="handoff-search" className="w-full sm:w-56"><UrlSearchInput id="handoff-search" value={filters.q} onValueChange={value => setFilter('q', value)} /></Field>
         <Field label={t('handoff.direction')} htmlFor="handoff-direction" className="w-full sm:w-44"><select id="handoff-direction" className={selectCls} value={filters.direction} onChange={e => setFilter('direction', e.target.value)}>
           <option value="">{t('handoff.all')}</option><option value="incoming">{t('handoff.incoming')}</option><option value="outgoing">{t('handoff.outgoing')}</option>
         </select></Field>
@@ -103,6 +105,7 @@ export function HandoffsTab() {
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={5} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : <>
       <p role="status" className="text-sm text-muted-foreground">{t('handoff.count', { n: list.data.totalCount })}</p>
       {!list.data.items.length ? <div className="rounded-lg border bg-card"><Empty title={t('handoff.empty')}>{t(tokens.length ? 'register.noMatch' : 'handoff.emptyHint')}</Empty></div> :
+        phone ? <ul className="space-y-2">{list.data.items.map(h => <li key={h.id} className={cn('space-y-3 rounded-lg border bg-card p-4 text-sm', panel === h.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)]')}><button className="break-words text-left font-semibold text-primary hover:underline" aria-current={panel === h.id || undefined} onClick={() => open(h.id)}><span className="key font-normal">{h.key}</span> · {h.title}</button><CoordStatus status={h.status} /><p className="break-words text-xs/[18px] text-muted-foreground"><span className="key">{h.sourceKey}</span> → <span className="key">{h.targetKey}</span><br />{discipline(h.sendingDisciplineId)} → {discipline(h.receivingDisciplineId)}</p><div className="space-y-1"><div className="flex items-center gap-2"><Avatar id={h.sendingOwnerId} name={h.senderName} />{t('handoff.from', { name: h.senderName })}</div><div className="flex items-center gap-2"><Avatar id={h.receivingOwnerId} name={h.receiverName} />{t('handoff.to', { name: h.receiverName })}</div>{!h.ownersAvailable && <Flag tone="bad">{t('handoff.ownerUnavailable')}</Flag>}</div><dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2"><dt className="text-muted-foreground">{t('handoff.revision')}</dt><dd>{h.declaredRevision}{h.sourceChanged && <Flag tone="warn">{t('handoff.sourceChanged')}</Flag>}</dd><dt className="text-muted-foreground">{t('handoff.needed')}</dt><dd>{fmtDate(h.neededBy)}{h.isOverdue && <Flag tone="bad">{t('handoff.overdue')}</Flag>}</dd><dt className="text-muted-foreground">{t('handoff.promised')}</dt><dd>{h.promisedBy ? fmtDate(h.promisedBy) : <Missing />}{h.dateMismatch && <Flag tone="warn">{t('handoff.dateMismatch')}</Flag>}</dd></dl></li>)}</ul> :
         <TableRegion><table className="w-full text-left text-sm"><caption className="sr-only">{t('handoff.title')}</caption>
           <thead className="bg-muted"><tr>{['item', 'owners', 'revision', 'needed', 'promised', 'state'].map(k => <th key={k} scope="col" className={thCls}>{t(`handoff.${k}`)}</th>)}</tr></thead>
           <tbody>{list.data.items.map(h => <tr key={h.id} className={cn('border-t hover:bg-muted', panel === h.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent')}>

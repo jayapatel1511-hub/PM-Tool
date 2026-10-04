@@ -44,7 +44,7 @@ export function PeoplePicker({ value, valueName, onChange, placeholder, allowCle
     <div className="flex items-center gap-1">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button id={id} variant="outline" aria-label={label} disabled={disabled}
+          <Button id={id} variant="outline" aria-label={compact && label ? `${label}: ${value ? selectedName ?? t('common.unavailable') : placeholder ?? t('people.choose')}` : label} disabled={disabled}
             className={cn('min-w-0 flex-1 justify-between font-normal', compact ? 'min-h-(--control-row-h) border-transparent bg-transparent px-2 hover:border-input' : 'px-3')}>
             <span className={cn('truncate', !value && 'text-muted-foreground')}>{value ? selectedName ?? '…' : placeholder ?? t('people.choose')}</span>
             <ChevronsUpDown className="size-3.5 opacity-50" />

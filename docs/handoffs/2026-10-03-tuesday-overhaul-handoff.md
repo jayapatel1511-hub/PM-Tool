@@ -1,172 +1,112 @@
-# Tuesday visual overhaul — handoff (2026-10-03, about 22:55 ADT)
+# Tuesday visual overhaul — current handoff (4 October 2026)
 
-Work in progress. **Committed locally on this branch at Jay's request (2026-10-03): the packet 034 spec, then the UI overhaul. Not pushed or deployed** (Jay: commit/push/deploy only on request).
+**Locally implemented and software/browser checks PASS. Overall goal BLOCKED at T023's manual screen-reader validation. Jay has now explicitly authorized committing and deploying the reviewed synthetic-review candidate; release preparation/CI and interactive sudo remain pending.** Worktree `/Users/jaypatel/PM-Tool/.claude/worktrees/tuesday-visual-batch1`, branch `claude/tuesday-visual-batch1`, current baseline `9d3e9b91`. Another session committed packet 034's specification (`586fc48b`) and the existing visual batch (`9d3e9b91`) during this run. Jay explicitly answered: “Continue from 9d3e9b91; leave remaining work uncommitted.” Preserve those commits and all unrelated edits.
 
-## Where it is
+## Deployment authorization — 4 October, evening
 
-- Worktree: `/Users/jaypatel/PM-Tool/.claude/worktrees/tuesday-visual-batch1`, branch `claude/tuesday-visual-batch1`, based on
-  `codex/pm-review-release` @ `e3d6ccf8` (includes `origin/main` `49b2a4ab`). `origin/main` has since moved to `9e74863e`
-  (PR #36, approved landing); its files are already copied into this worktree (see Decisions). About 110 changed or new files.
-- Design contract: `/Users/jaypatel/.codex/worktrees/29d5/PM-Tool/docs/design/README.md` and `tuesday-tokens.json`.
-- Rules for screen work: [2026-10-03-tuesday-migration-brief.md](2026-10-03-tuesday-migration-brief.md) (ownership, visual rules, checks).
+Jay returned home and explicitly answered **“Yes, commit and deploy synthetic review.”** This supersedes the earlier uncommitted/no-deployment hold for the reviewed candidate. Current preparation is for the existing review stack only, preserving unrelated edits and all pilot/operational data. Host preflight verified the current review and pilot pointers at `29b3d7036f529b513fdc2ad47cff62a0b75f0b59`, review origin health HTTP 200 with the configured proxy headers, and the existing tunnel active. That release is an ancestor of the candidate. The candidate's 114 selected files and 315 frozen application/test/build sources had zero drift since final checks. GitHub authentication is valid when checked outside the network sandbox.
 
-## Decisions taken
+Prepare a reviewed commit, incorporate the approved Paper hero commit from origin/main, and pass the required draft-PR CI before transferring the exact committed tree. Interactive homedev sudo remains a user step. Deployment is not yet claimed complete. T023 stays BLOCKED/UNRUN and human acceptance/pilot remains pending; Jay authorized this synthetic review deployment with that limitation disclosed. Historical local-only status statements below describe the earlier snapshot.
 
-1. **UI-only overhaul on the existing models.** Routes, APIs, calculations, permissions and ownership stay as they are.
-   Allocation approval status, proposed requests and partial scope are presented with explicit labels; v1.1 planner
-   concepts are not faked on the packet 029 model.
-2. **Planner (Jay, 2026-10-03): "New planning layer".** v1.1's weekly planning entries become a separate record in a new
-   packet 034 beside packet 029, delivered as a spec + backend + UI batch after the UI pass.
-3. **Landing (Jay, 2026-10-03): use the approved Paper hero from PR #36 unchanged.** `ApprovedHero.tsx`,
-   `approved-hero.css` and `web/public/landing/*` are byte-identical to `origin/main`; its `landing.*` strings are merged
-   into `en.ts` at main's position; `Entrance.tsx` `LandingPage` renders `<ApprovedHero />`. Sign-in keeps the Tuesday app
-   style.
-4. **Open for Jay:** one brand mark (approved Terrace wordmark on the landing versus the mint "t" in sign-in and the app);
-   re-capturing the hero's board image after the new UI is approved (it shows the old navy UI); behaviour items found
-   during migration (no confirmation when deleting a holiday or removing a manual role; no per-notification "Mark read").
+## Review/fix/release follow-up — 4 October
 
-## Done
+Jay requested another review/fix loop and deployment. **Local review/fixes/checks PASS; deployment BLOCKED, not attempted.** Independent review found and repaired planner draft loss on failed reload, metadata-action draft loss, time-away conflict recovery and stale Retry after editing. Exact type-check, lint (87 baseline/current; zero new), synthetic build, all five browser suites and local Release publish pass. Planner: 14 base flows plus six recovery regressions, 180 API calls, three entries, two notices, seven axe scans, zero errors/unknown requests/violations. All 96 affected six-role/four-width route cases cold-rechecked; retained full first pass plus rechecks has 1,956 unique combinations and zero findings. Source hashes stayed frozen. English remains 3,561 unique keys.
 
-- Batch 1: tokens (`web/src/index.css`), primitives (`web/src/components/ui/*`), shared hub components, the shell
-  (`Shell.tsx`: 232 px sidebar / 76 px rail / phone bottom bar, breadcrumbs, search, black quick create, density in the
-  account menu), project header and tabs, and the Resources workflow (Workload, Allocations, My Staff, Reassign work).
-- Shared building blocks in `components/hub/common.tsx`: `FilterBar`, `ChipToggle`, `ActiveFilters`, `Segmented`,
-  `SummaryTile`, `AccentDot`, `TableRegion`, `thCls`/`tdCls`, `DesktopOnly`, `Notice`, `Missing`, density toggle.
-- Screens finished by parallel writers:
-  - Personal: Home, My Work, Notifications, Search, Preferences, Not found, bell, New menu.
-  - Organisation: Admin, Holidays, Operations, Templates, Portfolio, Reports.
-  - Sign-in and splash.
-  - Projects: list, create/template/copy, dashboard, health, follow, team, settings, activity, milestones, timeline.
-  - Workspace views: tasks/boards, Gantt, calendar, files, team, coordination, time, links, workspace selector/tabs.
-  - Coordination: coordination page, discipline view, handoffs, reviews, changes, submissions, readiness, design basis.
-  - Task workflow: task list, task panel, board, kanban, task start, comments, inline fields (every item panel), panel host.
-  - Registers: risks, issues, deliverables, decisions, meetings, and their panels. Below 768 px the tables become cards.
+Planner tests now run in CI. The shared Dockerfile's synthetic flag defaults false, with review-only Compose true; company pilot remains false and LocalPassword/auth/seed boundaries unchanged. Dummy-only configuration checks pass. No Docker image or exact-commit hosted CI/runtime was claimed verified. Full backend evidence is retained unchanged; no database suite repeat or seed write in this loop.
 
-  None of these writers opened a browser; the sweep and visual review below are what check them.
-- Follow-ups from the Projects and Workspace writers (not yet done unless ticked):
-  - [x] Pass `projectName` to `FollowLevelSelect`, so each select is named for its project: `Preferences.tsx` ~138 (`${f.projectNumber} ${f.name}`) and `MyWork.tsx` ~227 (`${p.projectNumber} ${p.name}`).
-  - [x] Export `useIsPhone()` from `common.tsx` (`DesktopOnly` already has the media query) and use it in `Timeline.tsx` in place of its local copy.
-  - [x] `Section` always renders an h2. Use h3 inside a project (the `InProject` context), as `Page` already does; Files is also a project tab.
-  - [ ] `ExportMenu` is fixed at `size="sm"` (32 px) beside 40 px header buttons on Time.
-  - [ ] Check that URL-bound search boxes don't drop fast keystrokes, because the router applies URL changes in a transition: `Allocations.tsx`, `Handoffs.tsx`, `Submissions.tsx`, `CoordinationRegister.tsx`, and now the register screens (`Decisions.tsx`, `Deliverables.tsx`, `Registers.tsx`). Tasks still uses the `key` remount and loses focus. Type fast in the browser, then use one approach everywhere.
-  - [x] Avatar initials in `people.tsx` (confirmed 12 px).
-  - [ ] Add the coordination states (Approved, Incorporated, Pending Assessment, Changes Required, Submitted, Draft, Ready, Not Met, Needs Assessment and others) to `STATUS_TONE` in `pills.tsx`. Today they show grey; `CoordStatus` in `CoordinationForms.tsx` has a local map to move.
-  - [ ] Optional: a details slot on `ErrorBanner` for refusal lists, and a heading-id prop on `Section` so the `dcv-*`/`wc-h-*` cards can use it.
-  - [ ] Task workflow requests:
-    - `TableRegion` should accept a `ref`. The virtualised task list copies its classes inline instead.
-    - In the compact `PeoplePicker`, `label` replaces the selected person's name for screen readers.
-    - `ViewMenu` is also 32 px (see `ExportMenu`).
-    - `DropdownMenuItem` fades disabled items to 50 %. `Tasks.tsx` overrides this locally so refusal reasons stay readable; the fix belongs in the menu primitive.
-    - `WorkspaceTasks.tsx` should wrap `Swimlane` like the project board (`scroll-region` plus `w-max min-w-full`) and drop its `h-8` selects.
-  - [ ] Existing task bugs, left unfixed:
-    - The task search box remounts and loses focus on the first keystroke and when cleared (its `key` trick).
-    - The progress slider can save twice (pointer-up, key-up and blur).
-    - A save that opens a reason dialog shows "Not saved" until the confirmed save lands.
-    - The inline save note briefly becomes part of the panel title heading's accessible name.
-  - [ ] `task.empty` and `task.removeFilter` in `en.ts` are now unused; drop them during the fold-in.
-  - [ ] Register requests:
-    - `useTable` in `table.tsx` should pass column alignment (`text-right`) to its `<th>`; then delete `HeadCell` from `Decisions.tsx`.
-    - Move the shared register helpers out of `Decisions.tsx` into `components/hub`: `SELECTED_ROW`, `TITLE_LINK`, `Person`, `DateText`, `GroupRow`, `RegisterCards`, `PanelHead`, `FieldGroup`. `FieldGroup` can replace TaskPanel's local `PanelSection`.
-    - Choose one panel title size: TaskPanel uses 16 px because the title is edited inline; the register panels use the design's 24 px.
-    - Location-kind options show raw values such as "SiteArea"; they need labels.
-    - The deliverable panel's "Requires review" checkbox doesn't use `SaveStatus` yet.
-    - Decisions' Clear wipes every URL parameter, including sort, columns and the open panel. Narrow it to filters.
-  - Register behaviour changes to confirm:
-    - Issues now has one "Clear filters", which no longer resets `group`.
-    - Red row tints were replaced by explicit overdue and severity chips.
-    - A failed query shows only the error banner.
-  - Known gaps:
-    - On phones the task list is still a scrolling table; the spec describes cards. Key and name columns don't stay pinned when the table scrolls sideways.
-    - Below 768 px the coordination registers stay tables that scroll sideways.
-    - The status-tone mapping and the coordination section accent colours need Jay's review.
-    - Milestone strip labels truncate when the strip is narrower than about 900 px.
-    - The Milestones and Team tables scroll sideways on phones instead of becoming cards.
-    - Workspace lanes depend on the kanban grid's `auto-cols-[248px]` (Task workflow writer).
-- Preview data: `tools/preview/seed_resources.py` and `tools/preview/seed_modules.py` (all modules, synthetic).
-- Checks from batch 1 (rerun after integration): type-check, lint, build, browser suites `test:handoffs`,
-  `test:coordination`, `test:design-basis`, new `test:resources`; axe at 0 violations on the Resources screens.
+Deployment cannot proceed under the earlier uncommitted/no-homedev-authentication instructions. The established runbook transfers only a committed Git tree, and activation calls interactive sudo in Jay's own terminal. Do not transfer baseline 9d3e9b91: it omits the current implementation/repairs. No SSH/authentication/host data action was attempted. Await clarification for a local reviewed commit; host activation stays held while Jay is away. T023 manual screen-reader remains BLOCKED/UNRUN, separate from pending human acceptance/pilot.
 
-## Packet 034: specified, not built
+See the [release-loop evidence and exact blockers](../reviews/2026-10-04-tuesday-release-review-loop.md). Latest logs use `/private/tmp/tuesday-*-release-final.log`; sweep evidence is `/private/tmp/tuesday-sweep-release-final/`. The local preview is running again on 5173 with the synthetic flag (session 78090), API remains on 5080.
 
-No agents are running. Every screen writer and the packet 034 spec writer reported complete.
+## Additional UI/UX pass — completed
 
-- **Written:** `spec-parts/14-weekly-planning-layer.md` (§39, plus §8.11, §10.9, §13.21 and small edits to §9.4, §13.10, §27, §29, §30) and `specs/034-weekly-planning-layer/` (spec, plan, tasks, checklist, verification).
-- **New IDs:** FR-PLN-01..28, AC-PLN-01..20 and PLN-01..19. `build_spec.py --check` and `trace_spec.py --check` pass (660 IDs, 0 uncited). All application checks in `verification.md` are UNRUN.
-- **Model:**
-  - A person-scoped planning entry: person × ISO-week range × hours, with confidence and visibility.
-  - Packet 029's Confirmed allocations appear read-only.
-  - No double counting: approved hours cover a project's entries first (PLN-08).
-  - Capacity matches Workload's available hours.
-  - Time away is an availability override, not a separate leave record.
-- **Screens:** Weekly Planner at `/planner`, and a My Week strip on My Work.
-- **Open decisions:** §39.12 lists 18, each with a default the spec uses. The most consequential:
-  - Supervisors see direct reports only.
-  - Only a supervisor or admin records time away.
-  - PMs and Discipline Leads can't create entries.
-  - Entries use week grain.
-  - Partial view follows Workload's rule, so supervisors never see Under-planned.
-- **Plan boundary:**
-  - The backend is new files plus additive edits.
-  - `Workload.cs` changes three members from private to internal; no behaviour change.
-  - Must not change: `Allocations.cs`, `Domain/Workload.cs`, `Readiness.cs`, `AllocationEntities.cs`, existing migrations.
-- **Housekeeping:**
-  - `CLAUDE.md` and `docs/SPEC-KIT-WORKFLOW.md` still say packets 001–033; Jay to approve that edit.
-  - The design README in the Codex worktree needs the "Self-entered" label and a pointer to §13.21. That is outside this worktree.
-  - `specs/011-hardening-and-pilot/verification.md` shows as modified because it was restored to `origin/main`'s content.
+Jay requested overlap, button placement and usability review, then explicitly requested menus wrap into extra rows instead of horizontal scrolling. No homedev access or authentication actions are permitted while he is away. All work stays on the local synthetic preview.
 
-Area strings live temporarily in `web/src/i18n/en-<area>.ts` (personal, workspace, projects, work, registers,
-coordination, org, entrance), merged at runtime by a glob in `web/src/lib/i18n.ts`.
+Confirmed, verified repairs: duplicate planner Close controls (overlapping measured rectangles), misleading My Week count/heading, ambiguous stale filters, forbidden/error reads shown as empty results, mobile My Work filter disclosure, wrapped Project/Search/Admin/shared tab menus, and persistent dialog titles/Close while long forms scroll. Time conflict recovery is implemented and independently checked, including failed Reload retention, reason retention, latest rowVersion and loss of edit access. The expanded menu sweep exposed 36 tablet breadcrumb overflows; the 450-row interrupted run is preserved in `/private/tmp/tuesday-sweep-ux-interrupted/`. Breadcrumb groups now wrap, and the repaired-source fresh full replacement sweep completed **1,956 unique combinations with zero findings**, including page/main/menu overflow, in `/private/tmp/tuesday-sweep-ux-final2/`. Web source hashes stayed unchanged during the sweep. Required web checks and all five browser suites pass on the final build (UX final3; Handoffs UX final). All 12 live desktop/phone menu captures were reviewed; 108 focused dialog observations include 40 applicable passes and 68 explicit NAs. The [additional UI/UX report](../reviews/2026-10-04-tuesday-ui-ux-review.md) records repairs, evidence and deferred refinements. Earlier final12/final7–8 evidence remains retained; it is not claimed as verification of these new changes. The current blocker remains T023 manual screen-reader validation; no attempt requiring homedev authentication will be made.
 
-## Next steps, in order
+## Authority and decisions
 
-1. All areas reported complete, but none was opened in a browser. From `web/`, run `npx tsc -p tsconfig.app.json --noEmit --incremental false` and `npx oxlint`.
-2. Fold `web/src/i18n/en-*.ts` into `en.ts` with no duplicate keys, delete the area files, and remove the glob from `lib/i18n.ts`.
-3. Remove the unused `--frame*` tokens from `index.css` (grep for `frame` first).
-4. `npm run build`, then the browser suites. Playwright 1.61 needs the cached browser:
-   `CHROME_EXECUTABLE_PATH=/Users/jaypatel/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell`.
-   Run `test:design-basis` with `PORT=5186`, because another session's server holds 5176. `test:handoffs` needs port 5173 free, so stop the dev server first.
-5. With the preview running: `CHROME_EXECUTABLE_PATH=… node tools/preview/sweep.cjs 1440,1024,768,375`. It reports page
-   errors, axe (WCAG 2.0 to 2.2 AA), sideways overflow, text under 12 px, raw string keys and old palette colours for each
-   route, role and width. Fix the findings.
-6. Review every screen in the browser as priya, sam, lena, jordan, alex and rita.
-7. Packet 034:
-   - Review `spec-parts/14` and `specs/034` (`/speckit-analyze`). Use the §39.12 defaults unless Jay has answered them.
-   - Implement the domain rules, the API with its EF migration, privacy filters and tests (`tests/Hub.Tests`; API tests create temporary `hub_test_*` databases in the dev Postgres on 55432).
-   - Then build the planner UI and record the results in `specs/034-weekly-planning-layer/verification.md`.
-8. Report to Jay, offer commit/PR. Do not deploy.
+- Canonical `spec-parts/`, section 10 first. Packet 034 is the approved new planning layer beside packet 029; its confidence and visibility do not replace allocation approval status.
+- Outside 034: UI only. No changes to routes, authentication, APIs, calculations, ownership or permissions. No AI features, no Phase 2 promotion.
+- Read the [migration brief](2026-10-03-tuesday-migration-brief.md), external `/Users/jaypatel/.codex/worktrees/29d5/PM-Tool/docs/design/README.md` and `tuesday-tokens.json`.
+- Approved Paper landing from PR #36 remains the visual authority for the hero. Jay's four open decisions remain: unify the brand mark; re-capture the hero board image after UI approval; confirm holiday deletion/manual-role removal behavior; per-notification Mark read. These require Jay's product decisions and are deferred, not silently changed.
+- Packet 034 uses all 18 §39.12 defaults. They are reproduced in [verification.md](../../specs/034-weekly-planning-layer/verification.md). Comments, self-recorded time away, all-staff Supervisor access and pointer dragging remain deferred by the canonical MVP contract.
+- The external design README's Self-entered/pointer addition is deferred: that contract is maintained in a separate worktree. Local planner labels and the planning guide implement the canonical distinction and pointer here.
 
-## Preview
+## Follow-ups from the previous handoff
 
-- Database: Docker (colima) container `pm-tuesday-preview-db`, 127.0.0.1:55433, volume of the same name. Never use `pm-tool-db-1`.
-- API (from the worktree root):
-  `dotnet run --project src/Hub.Api --no-launch-profile -- --environment Development --urls http://localhost:5080 --ConnectionStrings:Hub "Host=localhost;Port=55433;Database=hub;Username=hub"`
-  (also `.claude/launch.json` config `api-preview`). Web: `npm --prefix web run dev` (port 5173).
-- Sign in at http://localhost:5173/login as a development user:
-  - Sam: supervisor, partial view.
-  - Priya: project manager for SYN-101.
-  - Lena: executive.
-  - Jordan: admin.
-  - Alex: no Resources access.
-  - Rita: read-only.
-- Data notes:
-  - Seed dates are anchored to 2026-10-03.
-  - One synthetic decision link was soft-deleted to avoid the Readiness 500 (see Known issues).
-  - Verification added an extra 20 h proposal for Alex on SYN-101 (Oct 5–9), moved SYN-101-T0010 to Alex, and edited the descriptions of T0009 and T0010.
-  - To reset: `docker rm -f pm-tuesday-preview-db && docker volume rm pm-tuesday-preview-db`, start the container again (see `seed_resources.py`), start the API, then run both seed scripts.
+- [x] Follow selectors have project-specific accessible names; shared `useIsPhone`; project Sections use h3.
+- [x] ExportMenu and ViewMenu use 40 px header actions.
+- [x] URL-bound searches use one optimistic input that retains fast typing/focus and honors URL Clear/back/saved views. Direct browser typing verified on Tasks and Allocations; broad state checks pass.
+- [x] Coordination tones moved to shared pills; readable disabled dropdown items; PeoplePicker compact name includes selected person.
+- [x] ErrorBanner details slot; Section headingId; TableRegion accepts ref/props; table headers honor numeric alignment.
+- [x] Workspace board has internal sideways lane scrolling and normal-height controls.
+- [x] Task duplicate slider saves guarded; reason dialog waits before reporting failure; title accessible name excludes save feedback.
+- [x] Register helpers shared; TaskPanel uses the same 24 px title; location kinds labelled; deliverable review checkbox SaveStatus; Decisions Clear preserves sort/columns/panel.
+- [x] Unused `task.empty`/`task.removeFilter` strings removed.
+- [x] Phone cards implemented for Tasks, Team, Milestones/targeted deliverables, Handoffs, Reviews, Changes and Submissions. Desktop task key/name pinned. Milestone strip uses short keys; full labels are visible in the adjacent list.
+- [x] Issues Clear retains grouping; overdue/severity use explicit chips; failed queries show ErrorBanner. These UI behavior choices stand pending Jay's final review.
+- [x] Nine area translation files folded into `en.ts`, 3561 current keys, all unique (TypeScript AST check); 3417 at fold time; area files and runtime glob deleted.
+- [x] Eight unused `--frame*` variables removed after checking usages.
 
-## Known issues
+## Current evidence and work remaining
 
-- **Backend defect (pre-existing in `main`, not fixed in this UI branch):** `src/Hub.Api/Features/Readiness.cs:108` filters after
-  projecting into the `LinkedRecord` record, which EF Core cannot translate. Any task with readiness inputs and a "blocked by
-  decision" link makes the project readiness window and the discipline-coordination views return HTTP 500. A separate fix task
-  was raised; fix it by filtering on the id before the projection, and add a regression test.
-- Batch-1 notes still apply: an 8-week grid (API constant); partial scope is decided by role in the API; capacity values
-  over 80 h get a misleading server message, which the UI now prevents; a supervisor who cannot see all of a person's
-  projects cannot preview capacity, and the UI explains this.
+Backend verification is final: 1,036/1,036 Hub.Tests pass, no failures/skips; domain branch coverage 96.6 %, feature line coverage 94.2 %, PlanningRules branches 100 %. EF reports no pending model changes. Both additive preview migrations are applied. The 30-sample planning scale check passes (grid p95 26.32 ms; My Week 14.90 ms). Existing packet 029 and Readiness command/calculation sources remain unchanged; Workload edits expose internal helpers only.
+
+Retained frontend checkpoint UX final3: exact type-check PASS; lint PASS with 87 baseline/current warnings and zero new file/rule/message diagnostics; build PASS. Handoffs, Planner, Coordination, Design Basis (5186) and Resources suites PASS on the final local build. Handoffs port 5173 was freed for its suite and the synthetic Vite preview has been restarted.
+
+Historical evidence retained: the fresh final7 live sweep measured **1,956 combinations**, including six users, 81 routes each plus Jordan's actual draft template, four widths and public landing/sign-in: zero errors, axe violations, document/main horizontal overflow, text below 12 px, raw keys or old palette flags. A stronger keyboard test then exposed the planner's Escape focus-loss bug. It is repaired and the strict keyboard test passes. **Final8 cold-rechecked all 96 affected Planner/My Work route-role-width combinations; the complete combined 1,956-row result still has zero findings.** Both the unmodified zero-finding first pass and fresh rechecks are retained in `/private/tmp/tuesday-sweep-final8/`. Earlier failed evidence remains in final5; deliberately interrupted final6 is not claimed complete.
+
+Broad state audit PASS: **974 desktop/phone route-role combinations**, browser-only loading/empty/failed-load fixtures, no runtime errors, all live writes blocked. All 101 initial focus captures affected by the old outline utility ordering were cold-rechecked and now show solid keyboard focus. Full normal visual review completed all 108 contact sheets, with 81 routes per role/width and Jordan 82. See `/private/tmp/tuesday-visual-final-review.md`.
+
+Task state audit PASS for all 12 user/width contexts: real role permissions; editable Priya/Jordan/Alex and read-only Sam/Lena/Rita; long labels, missing/zero values, history failure/retry, pending/500/409 drafts and changed-server values. Date/select/person failures retain the attempted input, and progress release+blur issues one command with actual outcome feedback. Evidence `/private/tmp/tuesday-task-states-v2/results.json`.
+
+Retained UX final3 Planner acceptance PASS: 14 flows, 150 API calls, 3 created entries, 2 notices, five axe scans and zero errors/unknown requests. Exact same-body/idempotency retry after 500, original-version conflict followed by explicit reload, ordinary-user self entry and exact six-week My Week query are asserted. The stronger keyboard protocol asserts all four arrows, Enter quick add, natural cell focus after Escape/save, Tab into the entry panel, and natural exact-opener focus after close. Latest live six-role Planner/My Work axe checks PASS in the fresh UX full sweep: all 96 base-route/role/width combinations, zero page errors/violations. The earlier separate 36-case audit is retained. Human supervisor timing and VoiceOver remain UNRUN.
+
+- [x] Final backend full suite, coverage, EF model and scale checks.
+- [x] Full planner stateful acceptance assertions implemented; parent independently checked exact request bodies.
+- [x] Fresh UX final2 six-role/four-width sweep, 1,956 unique checks with zero findings including page/main/menu overflow; final7/final8 retained. Six-role desktop/phone normal visual review plus additional menu/dialog UX checks.
+- [x] Broad loading/empty/failure/focus/selected/disabled/read-only states and Task workflow edge-state review.
+- [x] Editor saving/failure/conflict review: **364 observations, 1,764 assertions, zero final failures or page errors**, all six roles at 1440/375. Includes Preferences/Reset/Preview, Time, primary register and meeting forms, Templates, Admin, Project Settings links, and four parent-provider loading/error/retry cases. 101 held-save observations and 223 explicit inapplicable states are distinguished; real role permissions were retained and live mutations blocked. Fixed draft/pending feedback, phone dialogs and Settings internal overflow. Final read-only visual review of repaired captures PASS. Evidence: `/private/tmp/tuesday-editors-review-merged/` and `/private/tmp/tuesday-final-repair-visual-review.md`.
+- [x] Final Handoffs/live axe reruns; final web checks and task/AC evidence update. Final source/trace/whitespace results are recorded in verification.md.
+- [x] [Jay review report](2026-10-04-tuesday-final-review.md) and running synthetic preview. All remaining work is uncommitted.
+- [ ] **BLOCKED: T023 manual screen-reader pass at 1440/1024/375.** The native VoiceOver control request timed out before usable accessibility state. Keyboard/axe evidence does not replace this plan Validation step 10. T023 remains unticked; human supervisor pilot and Jay acceptance remain UNRUN separately.
+
+## Preview and data safety
+
+Only Docker/Colima **`pm-tuesday-preview-db`**, bound `127.0.0.1:55433`, database `hub`, is authorized for preview. Never mutate `pm-tool-db-1`. API tests may create temporary `hub_test_*` databases on 55432.
+
+API command from target worktree:
+
+```sh
+dotnet run --project src/Hub.Api --no-launch-profile -- --environment Development --urls http://localhost:5080 --ConnectionStrings:Hub "Host=localhost;Port=55433;Database=hub;Username=hub"
+```
+
+Web command: `VITE_SYNTHETIC_PREVIEW=true npm --prefix web run dev -- --port 5173 --strictPort`. Preview URL: `http://localhost:5173/login`. Development picker users: Priya (PM), Sam (Supervisor/partial scope), Lena (Executive), Jordan (Admin), Alex (individual contributor), Rita (Read Only).
+
+API on 5080 is running the final integrated planner build from `src/Hub.Api` with Development mode and the exact 55433 preview connection. Vite 5173 is running with the synthetic flag. Both additive migrations are applied. All five final web browser suites passed; Vite 5173 is running again. Final API remains on 5080. Native screen-reader validation is the remaining T023 blocker. Stop Vite only if repeating the handoff suite which needs 5173. `.claude/launch.json` sets the synthetic flag. Shell banner explicitly labels all shown preview records fictional.
+
+`seed_modules.py` **read in full (701 lines)** and reviewed. Records use Synthetic preview prefixes and `.test` evidence. Module marker checks skip an existing module and may leave a partially seeded module incomplete; refusal aborts subsequent writes. `seed_resources.py` also read. Both now call `preview_target.py` before any writes: exact local API command/port and named Docker mapping must match. Current-target PASS; wrong-port refusal verified. Scale fixture has a separate `planning_only` branch and named-preview guard.
+
+Seed dates anchor 2026-10-03. Pre-existing preview adjustments: extra 20 h proposal for Alex Oct 5–9, T0010 moved to Alex, T0009/T0010 descriptions edited. One decision/task link was omitted to avoid the separate Readiness defect; do not present that omitted edge as tested.
+
+## Known limitations
+
+`Readiness.cs:108` has a pre-existing EF translation failure for a task linked as blocked by a decision. Separate fix task exists. Do not fix unless a required check blocks, and report if it does. It has not yet blocked this continuation's checks.
+
+Packet 029 retains its 8-week grid, role-based partial scope, and existing capacity validation. Do not retrofit planner concepts into it. Human pilot timing (SC-001, an actual supervisor's existing spreadsheet) and final Jay acceptance cannot be inferred from automation; record unperformed human evidence honestly.
+
+Required browser executable:
+
+```sh
+CHROME_EXECUTABLE_PATH=/Users/jaypatel/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell
+```
+
+`test:handoffs` needs 5173 free; `test:design-basis` uses `PORT=5186`. Final sweep command: `CHROME_EXECUTABLE_PATH=… node tools/preview/sweep.cjs 1440,1024,768,375`.
 
 ## Restart prompt
 
-Paste this whole block into a new session after this session's agents have stopped:
+The technical blocker to resolve is the manual screen-reader pass in packet 034 plan Validation step 10. All other final evidence above is recorded; preserve it and rerun checks only if source changes or the evidence no longer describes the running revision. The full original goal below remains the acceptance contract. Paste this block into a new session after this session's agents have stopped:
 
 ```text
 GOAL: Finish the Tuesday visual overhaul and packet 034, so Jay can do one final visual review before anything is committed.
@@ -227,10 +167,3 @@ Rules:
 - Do not commit, push or deploy. Keep the handoff doc current as you go, so another session can resume.
 - If a goal item cannot be met, stop on that item and report the precise blocker rather than working around it.
 ```
-
-## Resume audit — 3 October 2026 (Codex)
-
-- Confirmed worktree and branch `claude/tuesday-visual-batch1`; existing dirty work preserved.
-- Read handoff, migration brief and external Tuesday design contract. Previous screen completion claims remain unverified.
-- Ownership: planner helper owns packet 034 analysis and backend; Task/Registers helper owns its UI; main agent owns shared components, integration, planner UI, preview, verification and this handoff.
-- No commit, push or deployment authorized. Required checks and full role/width/state browser review remain pending.

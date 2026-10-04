@@ -48,6 +48,11 @@ export function TimePage() {
   const [editing, setEditing] = useState<Entry | null>(null)
   const [removing, setRemoving] = useState<Entry | null>(null)
   const refresh = () => qc.invalidateQueries({ queryKey: ['time'] })
+  const reloadEntry = async (id: string) => {
+    const next = await q.refetch()
+    if (next.error) throw next.error
+    return next.data?.entries.find((e) => e.id === id) ?? null
+  }
   const shift = (n: number) => { const f = addDays(from, 7 * n); const n2 = new URLSearchParams(sp); n2.set('from', f); n2.set('to', addDays(f, 6)); setSp(n2, { replace: true }) }
   const days = Array.from({ length: 7 }, (_, i) => addDays(from, i))
   const byDate = new Map((q.data?.entries ?? []).reduce((m, e) => m.set(e.workDate, [...(m.get(e.workDate) ?? []), e]), new Map<string, Entry[]>()))
@@ -163,7 +168,7 @@ export function TimePage() {
         </div>
       )}
       {adding && <EntryDialog onClose={(ok) => { setAdding(false); if (ok) refresh() }} />}
-      {editing && <EntryDialog entry={editing} onClose={(ok) => { setEditing(null); if (ok) refresh() }} />}
+      {editing && <EntryDialog entry={editing} onReload={reloadEntry} onClose={(ok) => { setEditing(null); if (ok) refresh() }} />}
       {removing && <ConfirmDialog open onOpenChange={(o) => !o && setRemoving(null)} destructive reason={removing.editNeedsReason ? true : undefined}
         title={t('time.deleteTitle', { h: h(removing.hours), key: removing.taskKey })} body={t('time.deleteHint')} confirmLabel={t('time.deleteConfirm')}
         onConfirm={async (reason) => { await del(`time/${removing.id}`, { reason: reason || undefined }, removing.rowVersion); toast.success(t('time.deleted')); refresh() }} />}
@@ -190,28 +195,57 @@ function Totals({ title, rows }: { title: string; rows: { id: string; label: Rea
 
 /** Add Time or correct an entry (FR-002, FR-003): one task, a work date, positive hours up to 24, an optional note; a PM
  *  correcting someone else's entry gives a reason. */
-function EntryDialog({ entry, onClose }: { entry?: Entry; onClose: (ok: boolean) => void }) {
-  const [task, setTask] = useState<{ id: string; label: string } | null>(entry ? { id: entry.taskId, label: `${entry.taskKey} ${entry.taskName}` } : null)
+function EntryDialog({ entry, onReload, onClose }: { entry?: Entry; onReload?: (id: string) => Promise<Entry | null>; onClose: (ok: boolean) => void }) {
+  const [currentEntry, setCurrentEntry] = useState(entry)
+  const [task, setTask] = useState<{ id: string; label: string } | null>(currentEntry ? { id: currentEntry.taskId, label: `${currentEntry.taskKey} ${currentEntry.taskName}` } : null)
   const [term, setTerm] = useState('')
-  const [f, setF] = useState({ workDate: entry?.workDate ?? today(), hours: entry ? String(entry.hours) : '', note: entry?.note ?? '', reason: '' })
+  const [f, setF] = useState({ workDate: currentEntry?.workDate ?? today(), hours: currentEntry ? String(currentEntry.hours) : '', note: currentEntry?.note ?? '', reason: '' })
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const [reloaded, setReloaded] = useState(false)
+  const [reloading, setReloading] = useState(false)
+  const [hasConflict, setHasConflict] = useState(false)
   const tasks = useQuery({ queryKey: ['time-tasks', term], enabled: !entry, queryFn: () => get<PageOf<{ id: string; key: string; name: string; projectNumber: string; status: string }>>(`tasks${qs({ q: term, pageSize: 20 })}`) })
   const fe = err?.fieldErrors ?? {}
+  const reload = async () => {
+    if (!currentEntry || !onReload) return
+    setReloading(true)
+    try {
+      const latest = await onReload(currentEntry.id)
+      if (!latest) throw new ApiError(404, { detail: t('app.notFound') })
+      setCurrentEntry(latest)
+      setTask({ id: latest.taskId, label: `${latest.taskKey} ${latest.taskName}` })
+      setF((old) => ({ ...old, workDate: latest.workDate, hours: String(latest.hours), note: latest.note ?? '' }))
+      setReloaded(true)
+      setHasConflict(false)
+      setErr(null)
+    } catch (e) {
+      setErr(e as ApiError)
+    } finally {
+      setReloading(false)
+    }
+  }
   const save = async () => {
+    if (busy || reloading || hasConflict || (currentEntry && !currentEntry.canEdit) || (!currentEntry && !task) || !f.hours) return
     setBusy(true); setErr(null)
     try {
-      if (entry) await patch(`time/${entry.id}`, { workDate: f.workDate, hours: Number(f.hours), note: f.note || null, reason: f.reason || undefined }, entry.rowVersion)
+      if (currentEntry) await patch(`time/${currentEntry.id}`, { workDate: f.workDate, hours: Number(f.hours), note: f.note || null, reason: f.reason || undefined }, currentEntry.rowVersion)
       else await post('time', { taskId: task!.id, workDate: f.workDate, hours: Number(f.hours), note: f.note || null })
       toast.success(t('common.saved')); onClose(true)
-    } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
+    } catch (e) {
+      const apiErr = e as ApiError
+      if (apiErr.status === 409 || apiErr.code === 'concurrency_conflict') setHasConflict(true)
+      setErr(apiErr)
+    } finally { setBusy(false) }
   }
   return (
     <Dialog open onOpenChange={(o) => !o && onClose(false)}>
       <DialogContent className="sm:max-w-lg">
-        <DialogHeader><DialogTitle>{entry ? t('time.editTitle') : t('time.add')}</DialogTitle><DialogDescription>{t('time.dialogHint')}</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>{currentEntry ? t('time.editTitle') : t('time.add')}</DialogTitle><DialogDescription>{t('time.dialogHint')}</DialogDescription></DialogHeader>
+        {hasConflict && <p role="status" className="rounded-md border border-warn/40 bg-warn-bg px-3 py-2 text-sm text-warn">{t('time.reloadHint')}</p>}
+        {err && !Object.keys(fe).length && <ErrorBanner error={err} retry={hasConflict ? () => { if (!reloading) void reload() } : undefined} retryLabel={hasConflict ? t('error.reload') : undefined} />}
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); save() }}>
-          {entry ? <p className="text-sm"><span className="text-muted-foreground">{t('time.task')}:</span> {task?.label}</p> : (
+          {currentEntry ? <p className="text-sm"><span className="text-muted-foreground">{t('time.task')}:</span> {task?.label}</p> : (
             <Field label={t('time.task')} htmlFor="te-task" error={fe.taskId}>
               {task ? <div className="flex min-h-(--control-h) items-center gap-2 rounded-md bg-muted px-3 text-sm"><span className="flex-1 truncate">{task.label}</span><Button type="button" variant="ghost" size="sm" onClick={() => setTask(null)}>{t('time.changeTask')}</Button></div> : <>
                 <Input id="te-task" type="search" autoFocus placeholder={t('task.searchPlaceholder')} value={term} onChange={(e) => setTerm(e.target.value)} />
@@ -231,9 +265,10 @@ function EntryDialog({ entry, onClose }: { entry?: Entry; onClose: (ok: boolean)
             </Field>
           </div>
           <Field label={t('time.note')} htmlFor="te-note" optional><Textarea id="te-note" rows={2} maxLength={1000} value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
-          {entry?.editNeedsReason && <Field label={t('common.reason')} htmlFor="te-reason" error={fe.reason} hint={t('time.reasonHint', { name: entry.person })}><Textarea id="te-reason" rows={2} required value={f.reason} onChange={(e) => setF({ ...f, reason: e.target.value })} /></Field>}
-          {err && !Object.keys(fe).length && <ErrorBanner error={err} />}
-          <DialogFooter><Button type="button" variant="outline" onClick={() => onClose(false)}>{t('common.cancel')}</Button><Button type="submit" disabled={busy || (!entry && !task) || !f.hours}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter>
+          {currentEntry?.editNeedsReason && <Field label={t('common.reason')} htmlFor="te-reason" error={fe.reason} hint={t('time.reasonHint', { name: currentEntry.person })}><Textarea id="te-reason" rows={2} required value={f.reason} onChange={(e) => setF({ ...f, reason: e.target.value })} /></Field>}
+          {err && Object.keys(fe).length > 0 && <ErrorBanner error={err} />}
+          {reloaded && <p role="status" className="rounded-md border border-warn/40 bg-warn-bg px-3 py-2 text-sm text-warn">{currentEntry?.canEdit ? t('time.reloaded') : t('time.noLongerEditable')}</p>}
+          <DialogFooter><Button type="button" variant="outline" onClick={() => onClose(false)}>{t('common.cancel')}</Button>{currentEntry?.canEdit !== false && <Button type="submit" disabled={busy || reloading || hasConflict || (!currentEntry && !task) || !f.hours}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button>}</DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

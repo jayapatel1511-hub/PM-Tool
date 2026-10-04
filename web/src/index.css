@@ -36,12 +36,6 @@
   --nav-active: #e4ebf3;
   --nav-active-foreground: #253e69;
 
-  /* The sign-in splash still reads the frame tokens. */
-  --frame: #f5f6f7;
-  --frame-foreground: #191b20;
-  --frame-muted: #59606c;
-  --frame-active: #e4ebf3;
-
   /* Status (§13.0): On Track, Attention, Critical, Not Started, Complete, In Progress. */
   --ok: #386953;    --ok-bg: #eaf5ef;
   --warn: #7a5817;  --warn-bg: #fff4db;
@@ -111,10 +105,6 @@
   --color-sidebar-hover: var(--sidebar-hover);
   --color-nav-active: var(--nav-active);
   --color-nav-active-foreground: var(--nav-active-foreground);
-  --color-frame: var(--frame);
-  --color-frame-foreground: var(--frame-foreground);
-  --color-frame-muted: var(--frame-muted);
-  --color-frame-active: var(--frame-active);
   --color-ok: var(--ok);
   --color-ok-bg: var(--ok-bg);
   --color-warn: var(--warn);
@@ -129,12 +119,16 @@
   --color-work-bg: var(--work-bg);
 }
 
+/* Keep the keyboard focus rule outside Tailwind layers: outline-none utilities otherwise
+ * suppress its solid style even when a primitive sets focus-visible outline width/colour. */
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
 @layer base {
   * { @apply border-border outline-ring/50; }
   html { font-size: 16px; }
   body { @apply bg-background text-foreground antialiased; font-size: 14px; line-height: 1.43; }
   input::placeholder, textarea::placeholder { color: var(--placeholder); }
-  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
   .prose-body { font-size: 16px; line-height: 1.5; }
   .key { font-family: var(--font-mono); font-size: 12px; letter-spacing: -0.01em; }
 }
@@ -167,3 +161,6 @@
   .no-print { display: none !important; }
   body { background: white; }
 }
+
+/* Private entries keep a visible hatch as well as their label and lock. */
+.planner-draft { background-image: repeating-linear-gradient(135deg, transparent 0 5px, #59606c0d 5px 7px); }

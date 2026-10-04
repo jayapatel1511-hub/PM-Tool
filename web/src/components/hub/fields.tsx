@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Check, Pencil } from 'lucide-react'
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { ChangeList, type ActivityRow } from '@/components/hub/activity'
-import { Empty, Loading, Spinner } from '@/components/hub/common'
+import { Empty, ErrorBanner, Loading, Spinner } from '@/components/hub/common'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -52,7 +52,7 @@ function useSaveStatus(current?: unknown) {
     } catch (e) { setState({ status: 'failed', value, message: why(e) }) }
   }
   const landed = state?.status === 'failed' && blank(state.value) === blank(current)
-  return { state: landed ? null : state, track }
+  return { state: landed ? null : state, track, clear: () => { clearTimeout(timer.current); setState(null) } }
 }
 
 /** The live save line under a field; empty (and silent) when there is nothing to report. */
@@ -92,14 +92,14 @@ export function InlineText({ value, onSave, multiline, disabled, placeholder, ti
   const [v, setV] = useState(value ?? '')
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
   const save = useSaveStatus(value)
-  useEffect(() => { setV(value ?? '') }, [value])
+  useEffect(() => { if (!editing && save.state?.status !== 'saving' && save.state?.status !== 'failed') setV(value ?? '') }, [value, editing, save.state?.status])
   useEffect(() => { if (editing) ref.current?.focus() }, [editing])
   const commit = async () => { setEditing(false); if ((v || null) !== (value || null)) await save.track(onSave(v.trim() || null), v.trim() || null) }
   const note = <SaveNote state={save.state} />
   if (!editing) return <><Display onEdit={() => setEditing(true)} disabled={disabled} title={title}>{value ? (render ? render(value) : value) : <span className="text-muted-foreground">{placeholder ?? t('common.dash')}</span>}</Display>{note}</>
-  const props = { ref, value: v, 'aria-labelledby': labelId, onChange: (e: any) => setV(e.target.value), onBlur: commit,
-    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Escape') { setV(value ?? ''); setEditing(false) } if (e.key === 'Enter' && (!multiline || e.ctrlKey || e.metaKey)) { e.preventDefault(); commit() } } }
-  return <>{multiline ? <Textarea rows={4} {...props} /> : <Input className="min-h-(--control-row-h)" {...props} />}{note}</>
+  const props = { ref, value: v, 'aria-labelledby': labelId, 'aria-label': labelId ? undefined : title, onChange: (e: any) => setV(e.target.value), onBlur: commit,
+    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Escape') { save.clear(); setV(value ?? ''); setEditing(false) } if (e.key === 'Enter' && (!multiline || e.ctrlKey || e.metaKey)) { e.preventDefault(); commit() } } }
+  return <>{!labelId && title && <span className="mb-1 block text-xs/[18px] font-normal text-muted-foreground">{title}</span>}{multiline ? <Textarea rows={4} {...props} /> : <Input className="min-h-(--control-row-h)" {...props} />}{note}</>
 }
 
 export function InlineDate({ value, onSave, disabled, title }: { value?: string | null; onSave: (v: string | null) => Promise<unknown>; disabled?: boolean; title?: string }) {
@@ -108,9 +108,9 @@ export function InlineDate({ value, onSave, disabled, title }: { value?: string 
   const save = useSaveStatus(value)
   const note = <SaveNote state={save.state} />
   if (!editing) return <><Display onEdit={() => setEditing(true)} disabled={disabled} title={title}><span className="tabular-nums">{fmtDate(value)}</span></Display>{note}</>
-  return <><Input type="date" aria-labelledby={labelId} title={title} className="min-h-(--control-row-h) w-44" autoFocus defaultValue={value ?? ''}
+  return <><Input type="date" aria-labelledby={labelId} title={title} className="min-h-(--control-row-h) w-44" autoFocus defaultValue={save.state?.status === 'failed' ? String(save.state.value ?? '') : value ?? ''}
     onBlur={async (e) => { setEditing(false); if ((e.target.value || null) !== (value ?? null)) await save.track(onSave(e.target.value || null), e.target.value || null) }}
-    onKeyDown={(e) => { if (e.key === 'Escape') setEditing(false); if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />{note}</>
+    onKeyDown={(e) => { if (e.key === 'Escape') { save.clear(); setEditing(false) } if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />{note}</>
 }
 
 export function InlineSelect({ value, options, onSave, disabled, allowEmpty, title }: {
@@ -122,7 +122,7 @@ export function InlineSelect({ value, options, onSave, disabled, allowEmpty, tit
   if (disabled) return <Display onEdit={() => {}} disabled title={title}>{label ?? t('common.dash')}</Display>
   return (
     <>
-      <select className="h-(--control-row-h) w-full rounded-md border border-transparent bg-transparent px-1.5 text-sm hover:border-input hover:bg-muted focus-visible:border-input" value={value ?? ''} title={title}
+      <select className="h-(--control-row-h) w-full rounded-md border border-transparent bg-transparent px-1.5 text-sm hover:border-input hover:bg-muted focus-visible:border-input" value={save.state?.status === 'failed' || save.state?.status === 'saving' ? String(save.state.value ?? '') : value ?? ''} title={title}
         onChange={(e) => save.track(onSave(e.target.value || null), e.target.value || null)} aria-label={title} aria-labelledby={title ? undefined : labelId}>
         {allowEmpty && <option value="">{t('common.none')}</option>}
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -134,13 +134,17 @@ export function InlineSelect({ value, options, onSave, disabled, allowEmpty, tit
 
 export function InlinePerson({ value, name, onSave, disabled, title, allowClear = true }: { value?: string | null; name?: string | null; onSave: (id: string | null) => Promise<unknown>; disabled?: boolean; title?: string; allowClear?: boolean }) {
   const save = useSaveStatus(value)
-  const avatar = value && <Avatar id={value} name={name} />
-  if (disabled) return <Display onEdit={() => {}} disabled title={title}><span className="flex items-center gap-2">{avatar}{name ?? t('common.dash')}</span></Display>
+  const [candidate, setCandidate] = useState<{ id: string; displayName: string } | undefined>()
+  const retaining = save.state?.status === 'saving' || save.state?.status === 'failed'
+  const displayId = retaining ? save.state?.value as string | null : value
+  const displayName = retaining && displayId !== value ? candidate?.displayName : name
+  const avatar = displayId && <Avatar id={displayId} name={displayName} />
+  if (disabled) return <Display onEdit={() => {}} disabled title={title}><span className="flex items-center gap-2">{avatar}{displayName ?? t('common.dash')}</span></Display>
   return (
     <>
       <div className="flex items-center gap-2">
         {avatar}
-        <div className="min-w-0 flex-1"><PeoplePicker value={value} valueName={name} onChange={(id) => save.track(onSave(id), id)} allowClear={allowClear} placeholder={t('common.none')} /></div>
+        <div className="min-w-0 flex-1"><PeoplePicker value={displayId} valueName={displayName} onChange={(id, person) => { setCandidate(person); save.track(onSave(id), id) }} allowClear={allowClear} placeholder={t('common.none')} /></div>
       </div>
       <SaveNote state={save.state} />
     </>
@@ -151,6 +155,7 @@ export function InlinePerson({ value, name, onSave, disabled, title, allowClear 
 export function HistoryList({ type, id }: { type: string; id: string }) {
   const q = useQuery({ queryKey: ['history', type, id], queryFn: () => get<{ items: ActivityRow[] }>(`items/${type}/${id}/activity?pageSize=100`) })
   if (q.isPending) return <Loading rows={3} />
+  if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   if (!q.data?.items.length) return <Empty>{t('activity.empty')}</Empty>
   return (
     <ol className="divide-y px-4">
@@ -175,7 +180,7 @@ export function HistoryList({ type, id }: { type: string; id: string }) {
 /** `label` names the tab list for assistive technology when the tabs need a group name; without it nothing changes. */
 export function TabBar<T extends string>({ tabs, value, onChange, label }: { tabs: { id: T; label: string; count?: number }[]; value: T; onChange: (v: T) => void; label?: string }) {
   return (
-    <div role="tablist" aria-label={label} className="flex gap-1 overflow-x-auto border-b px-4">
+    <div role="tablist" aria-label={label} className="flex min-w-0 flex-wrap gap-1 border-b px-4">
       {tabs.map((tb) => (
         <button key={tb.id} role="tab" aria-selected={value === tb.id} onClick={() => onChange(tb.id)}
           className={cn('min-h-11 whitespace-nowrap px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', value === tb.id && 'font-semibold text-foreground shadow-[inset_0_-2px_0_var(--primary)]')}>

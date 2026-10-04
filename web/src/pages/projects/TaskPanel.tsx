@@ -1,6 +1,7 @@
+import { FieldGroup } from '@/components/hub/registers'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Ban, Check, ChevronDown, Eye, EyeOff, GitBranch, Link2, Lock, Plus, RotateCcw, Trash2, X } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { AccentDot, ConfirmDialog, Empty, ErrorBanner, Field, Loading, Notice, Spinner, selectCls } from '@/components/hub/common'
@@ -94,7 +95,7 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
           <PriorityBadge priority={r.priority} />
           <span className="inline-flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><AccentDot id={d.project.id} />{d.project.projectNumber}</span>
         </div>
-        <h2 className="-mx-2 text-base/6 font-semibold"><InlineText value={r.name} disabled={!perms.edit.ok} title={perms.edit.reason ?? undefined} onSave={(v) => save({ name: v })} /></h2>
+        <h2 aria-label={r.name} className="-mx-2 break-words text-2xl/8 font-semibold tracking-[-0.4px]"><InlineText value={r.name} disabled={!perms.edit.ok} title={perms.edit.ok ? t('common.name') : perms.edit.reason ?? undefined} onSave={(v) => save({ name: v })} /></h2>
         <TaskIndicators r={r} />
         <div className="flex flex-wrap items-center gap-2">
           {perms.isReviewer && r.status === 'Ready for Review' && find('In Review') && <Button size="sm" onClick={() => act('In Review')}>{t('task.startReview')}</Button>}
@@ -122,7 +123,7 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
         </div>
       )}
 
-      <PanelSection title={t('task.people')}>
+      <FieldGroup title={t('task.people')}>
         <FieldRow label={t('field.AssigneeId')}><InlinePerson value={r.assigneeId} name={r.assigneeName && !r.assigneeActive ? t('common.inactiveSuffix', { name: r.assigneeName }) : r.assigneeName} disabled={!perms.assign.ok} title={perms.assign.reason ?? undefined} onSave={(v) => save({ assigneeId: v })} /></FieldRow>
         <FieldRow label={t('field.ReviewerId')}><InlinePerson value={r.reviewerId} name={r.reviewerName} disabled={!perms.setReviewer.ok} title={perms.setReviewer.reason ?? undefined} onSave={(v) => save({ reviewerId: v })} /></FieldRow>
         <FieldRow label={t('field.RequiresReview')}>
@@ -131,9 +132,9 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
           )}</SaveStatus>
         </FieldRow>
         <People d={d} me={me.id} canManage={perms.assign.ok} onChanged={reload} onError={setErr} />
-      </PanelSection>
+      </FieldGroup>
 
-      <PanelSection title={t('common.details')}>
+      <FieldGroup title={t('common.details')}>
         <FieldRow label={t('common.priority')}><InlineSelect value={r.priority} disabled={!perms.edit.ok} options={PRIORITIES.map((x) => ({ value: x, label: tv(x) }))} onSave={(v) => save({ priority: v })} title={t('common.priority')} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={r.projectDisciplineId} disabled={!perms.edit.ok} title={t('common.discipline')}
           options={(project.data?.disciplines ?? []).filter((x) => x.isActive || x.id === r.projectDisciplineId).map((x) => ({ value: x.id, label: x.name }))} onSave={(v) => save({ projectDisciplineId: v })} /></FieldRow>
@@ -146,9 +147,9 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
         </FieldRow>
         {r.status === 'On Hold' && d.onHoldReason && <FieldRow label={t('field.OnHoldReason')}><div className="px-2 py-1.5">{d.onHoldReason}</div></FieldRow>}
         {r.status === 'Cancelled' && d.cancelledReason && <FieldRow label={t('field.CancelledReason')}><div className="px-2 py-1.5">{d.cancelledReason}</div></FieldRow>}
-      </PanelSection>
+      </FieldGroup>
 
-      <PanelSection title={t('task.group.dates')}>
+      <FieldGroup title={t('task.group.dates')}>
         <FieldRow label={t('field.StartDate')}><InlineDate value={r.startDate} disabled={!perms.edit.ok} onSave={(v) => save({ startDate: v })} /></FieldRow>
         <FieldRow label={t('field.DueDate')}>
           <InlineDate value={r.dueDate} disabled={!perms.dueDate.ok} title={perms.dueDate.reason ?? (perms.dueNeedsReason ? t('task.dueReasonHint') : undefined)} onSave={(v) => save({ dueDate: v })} />
@@ -159,26 +160,26 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
             </div>
           )}
         </FieldRow>
-      </PanelSection>
+      </FieldGroup>
 
-      <PanelSection title={t('task.group.work')}>
+      <FieldGroup title={t('task.group.work')}>
         <FieldRow label={t('deliverable.progress')}><ProgressSlider value={r.progressPct} disabled={!perms.edit.ok || terminal} onCommit={(v) => actions.setProgress(r, v)} /></FieldRow>
         <FieldRow label={t('task.estimateHours')}><InlineText value={r.estimatedHours == null ? '' : String(r.estimatedHours)} disabled={!perms.edit.ok}
           onSave={(v) => save({ estimatedHours: v == null || v === '' ? null : Number(v) })} /></FieldRow>
         {TASK_SECTIONS.map((x) => <div key={x.id}>{x.render(d, reload)}</div>)}
-      </PanelSection>
+      </FieldGroup>
 
-      <PanelSection title={t('common.description')}>
+      <FieldGroup title={t('common.description')}>
         {/* The section title is the visible label; the field keeps its own name for the editor. */}
         <FieldRow label={<span className="sr-only">{t('common.description')}</span>} className="gap-y-0 py-0 sm:grid-cols-1">
           <div className="-mx-2"><InlineText value={d.description} multiline disabled={!perms.edit.ok} placeholder={t('task.noDescription')}
             render={(v) => <RichText text={v} className="whitespace-normal" />} onSave={(v) => save({ description: v })} /></div>
         </FieldRow>
-      </PanelSection>
+      </FieldGroup>
 
       <Dependencies task={r} canManage={perms.dependencies} onChanged={reload} />
 
-      <PanelSection title={t('task.manualBlock')}>
+      <FieldGroup title={t('task.manualBlock')}>
         {r.manualBlockType ? (
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <Chip tone="bad">{tv(r.manualBlockType)}</Chip>
@@ -188,9 +189,9 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
           </div>
         ) : perms.block.ok ? <Button size="sm" variant="outline" onClick={() => setBlocking(true)}><Ban className="size-4" aria-hidden />{t('task.setBlock')}</Button>
           : <p className="text-sm text-muted-foreground">{t('common.none')}</p>}
-      </PanelSection>
+      </FieldGroup>
 
-      {ItemSlots.Links && <PanelSection title={t('common.links')}><LinksSlot type="Task" id={r.id} projectId={r.projectId} inheritedFrom={r.deliverableId} /></PanelSection>}
+      {ItemSlots.Links && <FieldGroup title={t('common.links')}><LinksSlot type="Task" id={r.id} projectId={r.projectId} inheritedFrom={r.deliverableId} /></FieldGroup>}
 
       <div className="border-t">
         <TabBar tabs={[...(ItemSlots.Comments ? [{ id: 'comments', label: t('common.comments'), count: r.commentCount }] : []), { id: 'history', label: t('common.history') }]} value={tab} onChange={setTab} />
@@ -210,16 +211,6 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
   )
 }
 
-/** A purpose group in the panel: a 14 px heading over its fields, separated from the next group by a rule. */
-function PanelSection({ title, children, actions }: { title: string; children: ReactNode; actions?: ReactNode }) {
-  return (
-    <section className="border-t p-4">
-      <div className="mb-2 flex min-h-8 items-center justify-between gap-2"><h3 className="text-sm font-semibold">{title}</h3>{actions}</div>
-      {children}
-    </section>
-  )
-}
-
 function BlockerLine({ b, open }: { b: Blocker; open: (type: string, id: string) => void }) {
   if (b.type === 'manual') return <li>{t('task.manualBlocker', { type: tv(b.name ?? ''), reason: b.reason ?? '' })}</li>
   const type = b.type === 'task' ? 'Task' : b.type === 'decision' ? 'Decision' : 'Deliverable'
@@ -236,14 +227,19 @@ function BlockerLine({ b, open }: { b: Blocker; open: (type: string, id: string)
 /** Progress in 10 % steps; saved when the slider is released (T-20), with the pending state shown beneath it. */
 function ProgressSlider({ value, disabled, onCommit }: { value: number; disabled?: boolean; onCommit: (v: number) => Promise<unknown> | void }) {
   const [v, setV] = useState(value)
-  useEffect(() => setV(value), [value])
+  const changed = useRef(false)
+  useEffect(() => { setV(value); changed.current = false }, [value])
   return (
     <SaveStatus current={value}>{(track) => {
-      const commit = () => { if (v !== value) track(onCommit(v), v) }
+      const commit = () => {
+        if (v === value || !changed.current) return
+        changed.current = false
+        track(onCommit(v), v)
+      }
       return (
         <div className="flex min-h-(--control-row-h) items-center gap-3 px-2">
           <input type="range" min={0} max={100} step={10} value={v} disabled={disabled} aria-label={t('deliverable.progress')} aria-valuetext={`${v}%`}
-            className="h-6 w-full max-w-56 accent-(--primary)" onChange={(e) => setV(Number(e.target.value))} onPointerUp={commit} onKeyUp={commit} onBlur={commit} />
+            className="h-6 w-full max-w-56 accent-(--primary)" onChange={(e) => { changed.current = true; setV(Number(e.target.value)) }} onPointerUp={commit} onKeyUp={commit} onBlur={commit} />
           <span className="w-12 text-right text-sm font-medium tabular-nums">{v}%</span>
         </div>
       )
@@ -282,7 +278,7 @@ function Dependencies({ task, canManage, onChanged }: { task: TaskRow; canManage
     </ul>
   )
   return (
-    <PanelSection title={t('deliverable.dependencies')} actions={<Button size="sm" variant="ghost" onClick={() => setChain(true)}><GitBranch className="size-4" aria-hidden />{t('task.showChain')}</Button>}>
+    <FieldGroup title={t('deliverable.dependencies')} actions={<Button size="sm" variant="ghost" onClick={() => setChain(true)}><GitBranch className="size-4" aria-hidden />{t('task.showChain')}</Button>}>
       {err != null && <div className="mb-2"><ErrorBanner error={err} /></div>}
       {q.isPending ? <Loading rows={2} className="p-0" /> : q.data && (
         <div className="grid gap-4">
@@ -300,7 +296,7 @@ function Dependencies({ task, canManage, onChanged }: { task: TaskRow; canManage
       )}
       {adding && <AddDependency task={task} direction={adding} onClose={(ok) => { setAdding(null); if (ok) { q.refetch(); onChanged() } }} />}
       {chain && <ChainDialog task={task} onClose={() => setChain(false)} />}
-    </PanelSection>
+    </FieldGroup>
   )
 }
 

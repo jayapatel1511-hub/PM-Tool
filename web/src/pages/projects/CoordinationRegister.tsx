@@ -1,11 +1,11 @@
+import { UrlSearchInput } from '@/components/hub/url-search'
 import { useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { useSearchParams } from 'react-router'
-import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, TableRegion, tdCls, thCls } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, TableRegion, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { ViewMenu } from '@/components/hub/views'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { get, qs } from '@/lib/api'
 import { t, tv } from '@/lib/i18n'
@@ -17,6 +17,7 @@ import { CoordStatus, Count, PersonLabel, RegisterPager, SelectField, discName, 
 type Row = RecordVersion & { key: string; title: string; status: string; coordinatorId?: string; ownerId?: string; outstandingDisciplines?: number; blockingFindings?: number; roundNumber?: number; waitingDays?: number; assessmentDueDate?: string; pendingAssessments?: number }
 export type RegisterContext = { options: CoordOptions; projectId: string; number: string; refresh: () => void; open: (id: string) => void }
 export function CoordinationRegister({ kind, statuses, create, detail, extra }: { kind: 'reviews' | 'changes'; statuses: string[]; create: (c: RegisterContext & { close: () => void }) => ReactNode; detail: (c: RegisterContext & { id: string; close: () => void }) => ReactNode; extra?: (c: RegisterContext) => ReactNode }) {
+  const phone = useIsPhone()
   const p = useCurrentProject(), [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false), refresh = useCoordRefresh(p.id)
   const type = kind === 'reviews' ? 'ReviewPackage' : 'ChangeNotice', page = Math.max(1, Number(sp.get('page')) || 1)
   const filters = Object.fromEntries(['q', 'status', 'ownerId', 'mine', ...(kind === 'reviews' ? ['disciplineId'] : [])].map(k => [k, sp.get(k) ?? '']))
@@ -40,7 +41,7 @@ export function CoordinationRegister({ kind, statuses, create, detail, extra }: 
   return <Page title={t(`${kind}.title`)} subtitle={t(`${kind}.subtitle`)} actions={<><ViewMenu listType={kind} projectId={p.id} /><ExportMenu path={`projects/${p.id}/${kind}/export`} params={filters} name={`${p.projectNumber}-${kind}`} />{ctx?.options.canWrite && (kind === 'changes' || ctx.options.manageDisciplineIds.length > 0) && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t(`${kind}.new`)}</Button>}</>}>
     <FilterBar>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label={t('common.search')} htmlFor={`${kind}-search`} className="w-full sm:w-56"><Input id={`${kind}-search`} type="search" value={filters.q} onChange={e => change('q', e.target.value)} /></Field>
+        <Field label={t('common.search')} htmlFor={`${kind}-search`} className="w-full sm:w-56"><UrlSearchInput id={`${kind}-search`} value={filters.q} onValueChange={value => change('q', value)} /></Field>
         <div className="w-full sm:w-44"><SelectField label={t('common.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={statuses.map(s => ({ value: s, label: tv(s) }))} /></div>
         {ctx && <div className="w-full sm:w-52"><SelectField label={ownerLabel} value={filters.ownerId} onChange={v => change('ownerId', v)} required={false} choices={peopleChoices(ctx.options)} /></div>}
         {ctx && reviews && <div className="w-full sm:w-48"><SelectField label={t('coord.discipline')} value={filters.disciplineId} onChange={v => change('disciplineId', v)} required={false} choices={disciplineChoices(ctx.options)} /></div>}
@@ -52,6 +53,7 @@ export function CoordinationRegister({ kind, statuses, create, detail, extra }: 
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : <>
       <p role="status" className="text-sm text-muted-foreground">{t('coord.count', { n: list.data.totalCount })}</p>
       {!list.data.items.length ? <div className="rounded-lg border bg-card"><Empty title={t(`${kind}.empty`)}>{t(tokens.length ? 'register.noMatch' : `${kind}.emptyHint`)}</Empty></div> :
+        phone ? <ul className="space-y-2">{list.data.items.map(r => <li key={r.id} className={cn('space-y-3 rounded-lg border bg-card p-4 text-sm', panel === r.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)]')}><button className="break-words text-left font-semibold text-primary hover:underline" aria-current={panel === r.id || undefined} onClick={() => open(r.id)}><span className="key font-normal">{r.key}</span> · {r.title}</button><CoordStatus status={r.status} /><dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2"><dt className="text-muted-foreground">{ownerLabel}</dt><dd>{ctx ? <PersonLabel options={ctx.options} id={r.coordinatorId ?? r.ownerId} /> : <Missing />}</dd>{reviews ? <><dt>{t('review.round')}</dt><dd>{r.roundNumber ?? <Missing />}</dd><dt>{t('review.outstanding')}</dt><dd>{r.outstandingDisciplines ?? <Missing />}</dd><dt>{t('review.blocking')}</dt><dd><Count n={r.blockingFindings} tone="bad" /></dd><dt>{t('review.waiting')}</dt><dd>{r.waitingDays ?? <Missing />}</dd></> : <><dt>{t('change.due')}</dt><dd>{r.assessmentDueDate ? fmtDate(r.assessmentDueDate) : <Missing />}</dd><dt>{t('change.pending')}</dt><dd><Count n={r.pendingAssessments} tone="warn" /></dd></>}</dl></li>)}</ul> :
         <TableRegion><table className="w-full text-left text-sm"><caption className="sr-only">{t(`${kind}.title`)}</caption>
           <thead className="bg-muted"><tr>{headings.map(([h, numeric]) => <th scope="col" key={h} className={cn(thCls, numeric && 'text-right')}>{t(h)}</th>)}</tr></thead>
           <tbody>{list.data.items.map(r => <tr key={r.id} className={cn('border-t hover:bg-muted', panel === r.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent')}>

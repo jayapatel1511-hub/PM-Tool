@@ -1,3 +1,4 @@
+import { disciplineColour } from '@/lib/discipline-colour'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Monitor, Printer } from 'lucide-react'
 import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
@@ -320,7 +321,7 @@ export function TimelineTab() {
                     <button type="button" className="sticky left-0 z-20 flex shrink-0 items-center gap-2 border-r bg-muted px-2 text-left text-sm font-semibold hover:bg-secondary" style={{ width: LABEL }}
                       aria-expanded={!closed.has(r.id)} onClick={() => toggle(setClosed, r.id)}>
                       {closed.has(r.id) ? <ChevronRight className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
-                      <span className="inline-block size-2.5 shrink-0 rounded-sm" style={{ background: r.colour }} aria-hidden /><span className="truncate">{r.name}</span>
+                      <span className="inline-block size-2.5 shrink-0 rounded-sm" style={{ background: disciplineColour(r.colour) }} aria-hidden /><span className="truncate">{r.name}</span>
                       <span className="rounded-md bg-card px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">{r.count}</span>
                     </button>
                     <div style={{ width }} />

@@ -1,5 +1,5 @@
 import { AlertTriangle, Info, Loader2, X, type LucideIcon } from 'lucide-react'
-import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ComponentProps, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -35,12 +35,12 @@ export function Page({ title, subtitle, eyebrow, actions, children, className }:
 }
 
 /** A card with a titled header; `accent` tints the header for identity or grouping, never for status. */
-export function Section({ title, count, actions, children, className, id, accent }: { title: ReactNode; count?: number; actions?: ReactNode; children: ReactNode; className?: string; id?: string; accent?: Accent }) {
+export function Section({ title, count, actions, children, className, id, headingId, accent }: { title: ReactNode; count?: number; actions?: ReactNode; children: ReactNode; className?: string; id?: string; headingId?: string; accent?: Accent }) {
   const Heading = useContext(InProject) ? 'h3' : 'h2' // one level below the page title
   return (
-    <section id={id} className={cn('overflow-hidden rounded-lg border bg-card', className)} aria-labelledby={id ? `${id}-h` : undefined}>
+    <section id={id} className={cn('overflow-hidden rounded-lg border bg-card', className)} aria-labelledby={headingId ?? (id ? `${id}-h` : undefined)}>
       <div data-accent={accent} className={cn('flex flex-wrap items-center justify-between gap-2 border-b px-5 py-3', accent && 'bg-(--acc-bg)')}>
-        <Heading id={id ? `${id}-h` : undefined} className="text-base/6 font-semibold">
+        <Heading id={headingId ?? (id ? `${id}-h` : undefined)} className="text-base/6 font-semibold">
           {title}{count != null && <span className="ml-2 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{count}</span>}
         </Heading>
         {actions}
@@ -68,7 +68,7 @@ export function Loading({ rows = 5, className }: { rows?: number; className?: st
   )
 }
 
-export function ErrorBanner({ error, retry }: { error: unknown; retry?: () => void }) {
+export function ErrorBanner({ error, retry, retryLabel, details }: { error: unknown; retry?: () => void; retryLabel?: string; details?: ReactNode }) {
   const e = error as ApiError
   const conflict = e?.code === 'concurrency_conflict'
   const msg = conflict && e.body.changedBy ? t('error.conflict', { who: e.body.changedBy, when: ago(e.body.changedAt) }) : e?.message ?? t('app.error')
@@ -76,7 +76,8 @@ export function ErrorBanner({ error, retry }: { error: unknown; retry?: () => vo
     <div role="alert" className="flex flex-wrap items-center gap-3 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad">
       <AlertTriangle className="size-4 shrink-0" aria-hidden />
       <span className="min-w-0 flex-1">{e?.status === 404 ? t('app.notFound') : msg}</span>
-      {retry && <Button size="sm" variant="outline" onClick={retry}>{conflict ? t('error.reload') : t('app.retry')}</Button>}
+      {retry && <Button size="sm" variant="outline" onClick={retry}>{retryLabel ?? (conflict ? t('error.reload') : t('app.retry'))}</Button>}
+      {details && <div className="w-full">{details}</div>}
     </div>
   )
 }
@@ -205,8 +206,9 @@ export function AccentDot({ id, className }: { id?: string | null; className?: s
  *  text-right to numeric columns and wrap the table in TableRegion. */
 export const thCls = 'whitespace-nowrap px-(--cell-px) py-3 text-left font-medium text-muted-foreground'
 export const tdCls = 'h-(--row-min) px-(--cell-px) py-(--cell-py) align-top'
-export function TableRegion({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('scroll-region overflow-x-auto rounded-lg border bg-card', className)}>{children}</div>
+export function TableRegion({ children, className, ...props }: ComponentProps<'div'>) {
+  // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- the region must allow keyboard scrolling when its table is read-only
+  return <div tabIndex={0} className={cn('scroll-region overflow-x-auto rounded-lg border bg-card', className)} {...props}>{children}</div>
 }
 
 export function Spinner({ className }: { className?: string }) {

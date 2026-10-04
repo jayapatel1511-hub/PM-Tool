@@ -68,6 +68,14 @@ function Templates() {
   const q = useQuery({ queryKey: ['templates'], queryFn: () => get<{ canEdit: boolean; templates: TemplateRow[] }>('templates') })
   const [creating, setCreating] = useState(false)
   const [name, setName] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<unknown>(null)
+  const create = async () => {
+    if (busy) return
+    setErr(null); setBusy(true)
+    try { const r = await post<{ id: string }>('templates', { name: name.trim() }); navigate(`/templates/${r.id}`) }
+    catch (e) { setErr(e) } finally { setBusy(false) }
+  }
   const header = { title: t('nav.templates'), subtitle: t('tpl.subtitle') }
   if (q.isPending) return <Page {...header}><div className="rounded-lg border bg-card"><Loading rows={6} /></div></Page>
   if (q.error) return <Page {...header}><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
@@ -101,13 +109,14 @@ function Templates() {
         </TableRegion>
       )}
       {creating && (
-        <Dialog open onOpenChange={(o) => !o && setCreating(false)}>
+        <Dialog open onOpenChange={(o) => !o && !busy && setCreating(false)}>
           <DialogContent className="max-w-sm">
             <DialogHeader><DialogTitle>{t('tpl.new')}</DialogTitle></DialogHeader>
-            <Field label={t('common.name')} htmlFor="tpl-name"><Input id="tpl-name" value={name} maxLength={200} onChange={(e) => setName(e.target.value)} /></Field>
+            <Field label={t('common.name')} htmlFor="tpl-name"><Input id="tpl-name" disabled={busy} value={name} maxLength={200} onChange={(e) => setName(e.target.value)} /></Field>
+            {err != null && <ErrorBanner error={err} />}
             <DialogFooter>
               <Button variant="outline" onClick={() => setCreating(false)}>{t('common.cancel')}</Button>
-              <Button disabled={!name.trim()} onClick={async () => { const r = await post<{ id: string }>('templates', { name: name.trim() }); navigate(`/templates/${r.id}`) }}>{t('common.create')}</Button>
+              <Button disabled={!name.trim() || busy} onClick={create}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.create')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -132,7 +141,7 @@ function TemplateEditor() {
   const [d, setD] = useState<Detail | null>(null)
   const [dirty, setDirty] = useState(false)
   const [err, setErr] = useState<unknown>(null)
-  const [busy, setBusy] = useState<'save' | 'publish' | null>(null)
+  const [busy, setBusy] = useState<'save' | 'publish' | 'draft' | null>(null)
   const [confirm, setConfirm] = useState<'retire' | 'discard' | null>(null)
   const [removingBasis, setRemovingBasis] = useState<Basis | null>(null)
   const [addingBasis, setAddingBasis] = useState(false)
@@ -147,7 +156,7 @@ function TemplateEditor() {
   if (!q.data || !d) return <Page {...header}><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
   const saved = q.data
   const edit = d.canEdit
-  const change = (patch: Partial<Detail>) => { setD({ ...d, ...patch }); setDirty(true) }
+  const change = (patch: Partial<Detail>) => { if (busy) return; setD({ ...d, ...patch }); setDirty(true) }
   const refresh = () => { qc.invalidateQueries({ queryKey: ['template', id] }); qc.invalidateQueries({ queryKey: ['templates'] }) }
   const save = async () => {
     setErr(null)
@@ -167,8 +176,12 @@ function TemplateEditor() {
     catch (e) { setErr(e as ApiError) }
   }
   // Saving and publishing show their pending state and cannot be started twice.
-  const run = (kind: 'save' | 'publish', fn: () => Promise<unknown>) => async () => { setBusy(kind); try { await fn() } finally { setBusy(null) } }
-  const newDraft = async () => { const r = await post<{ id: string }>(`templates/${id}/draft`, {}); navigate(`/templates/${r.id}`) }
+  const run = (kind: 'save' | 'publish' | 'draft', fn: () => Promise<unknown>) => async () => { setBusy(kind); try { await fn() } finally { setBusy(null) } }
+  const newDraft = async () => {
+    setErr(null)
+    try { const r = await post<{ id: string }>(`templates/${id}/draft`, {}); navigate(`/templates/${r.id}`) }
+    catch (e) { setErr(e) }
+  }
   const inTemplate = d.disciplines.map((x) => x.disciplineId)
   // Compact controls inside table rows (32 px); disabled read-only values stay legible.
   const cls = cn(selectCls, 'h-(--control-row-h) w-auto px-2')
@@ -176,7 +189,7 @@ function TemplateEditor() {
   const cell = cn(tdCls, 'py-1')
   const box = 'flex h-(--control-row-h) items-center' // a lone checkbox lines up with the row's controls
   const rowBtn = (label: string, onClick: () => void, icon: ReactNode, disabled = false) => (
-    <Button type="button" variant="ghost" size="icon-sm" aria-label={label} disabled={disabled} onClick={onClick}>{icon}</Button>)
+    <Button type="button" variant="ghost" size="icon-sm" aria-label={label} disabled={disabled || !!busy} onClick={onClick}>{icon}</Button>)
   const move = <T,>(list: T[], i: number, by: number) => { const n = [...list]; [n[i], n[i + by]] = [n[i + by], n[i]]; return n }
   const head = (cols: string[], prefix: string, numeric: string[] = []) => (
     <thead className="bg-muted"><tr>{cols.map((c) => <th key={c} scope="col" className={cn(thCls, numeric.includes(c) && 'text-right')}>{t(`${prefix}.${c}`)}</th>)}
@@ -189,12 +202,12 @@ function TemplateEditor() {
       actions={<>
         {edit && <Button variant="outline" disabled={!dirty || !!busy} onClick={run('save', save)}>{busy === 'save' && <Spinner />}{busy === 'save' ? t('common.saving') : t('common.save')}</Button>}
         {edit && <Button disabled={!!busy} onClick={run('publish', publish)}>{busy === 'publish' && <Spinner />}{busy === 'publish' ? t('common.saving') : t('tpl.publish')}</Button>}
-        {edit && <Button variant="ghost" className="text-bad hover:text-bad" onClick={() => setConfirm('discard')}>{t('tpl.discard')}</Button>}
-        {!edit && me.capabilities.templates && saved.status !== 'Draft' && <Button onClick={newDraft}>{t('tpl.editDraft')}</Button>}
-        {!edit && me.capabilities.templates && saved.status === 'Published' && <Button variant="ghost" onClick={() => setConfirm('retire')}>{t('tpl.retire')}</Button>}
+        {edit && <Button variant="ghost" className="text-bad hover:text-bad" disabled={!!busy} onClick={() => setConfirm('discard')}>{t('tpl.discard')}</Button>}
+        {!edit && me.capabilities.templates && saved.status !== 'Draft' && <Button disabled={!!busy} onClick={run('draft', newDraft)}>{busy === 'draft' && <Spinner />}{busy === 'draft' ? t('common.saving') : t('tpl.editDraft')}</Button>}
+        {!edit && me.capabilities.templates && saved.status === 'Published' && <Button variant="ghost" disabled={!!busy} onClick={() => setConfirm('retire')}>{t('tpl.retire')}</Button>}
       </>}>
       {q.error != null && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      {err != null && <ErrorBanner error={err} />}
+      {err != null && <ErrorBanner error={err} retry={(err as ApiError).code === 'concurrency_conflict' ? () => { setErr(null); q.refetch() } : undefined} />}
       {!edit && <Notice icon={Lock} title={t('tpl.readOnlyTitle')}>{saved.status === 'Draft' ? t('tpl.editorsOnly') : t('tpl.readOnly')}</Notice>}
       <nav aria-label={t('tpl.col.versions')} className="flex flex-wrap gap-2">{d.family.map((v) => {
         const on = v.id === d.id
@@ -207,13 +220,13 @@ function TemplateEditor() {
 
       <Section title={t('tpl.about')}>
         <div className="grid max-w-[760px] gap-4 p-5 sm:grid-cols-2">
-          <Field label={t('common.name')} htmlFor="t-name"><Input id="t-name" value={d.name} disabled={!edit} onChange={(e) => change({ name: e.target.value })} /></Field>
+          <Field label={t('common.name')} htmlFor="t-name"><Input id="t-name" value={d.name} disabled={!edit || !!busy} onChange={(e) => change({ name: e.target.value })} /></Field>
           <Field label={t('projects.type')} htmlFor="t-type">
-            <select id="t-type" className={selectCls} value={d.projectTypeId ?? ''} disabled={!edit} onChange={(e) => change({ projectTypeId: e.target.value || null })}>
+            <select id="t-type" className={selectCls} value={d.projectTypeId ?? ''} disabled={!edit || !!busy} onChange={(e) => change({ projectTypeId: e.target.value || null })}>
               <option value="">{t('common.none')}</option>{ref.data?.projectTypes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
             </select>
           </Field>
-          <Field label={t('common.description')} htmlFor="t-desc" className="sm:col-span-2"><Textarea id="t-desc" rows={2} value={d.description ?? ''} disabled={!edit} onChange={(e) => change({ description: e.target.value })} /></Field>
+          <Field label={t('common.description')} htmlFor="t-desc" className="sm:col-span-2"><Textarea id="t-desc" rows={2} value={d.description ?? ''} disabled={!edit || !!busy} onChange={(e) => change({ description: e.target.value })} /></Field>
         </div>
       </Section>
 
@@ -223,9 +236,9 @@ function TemplateEditor() {
             const row = d.disciplines.find((y) => y.disciplineId === x.id)
             return (
               <li key={x.id} className="flex min-h-6 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                <label className="flex items-center gap-2"><Checkbox checked={!!row} disabled={!edit}
+                <label className="flex items-center gap-2"><Checkbox checked={!!row} disabled={!edit || !!busy}
                   onCheckedChange={(c) => change({ disciplines: c ? [...d.disciplines, { disciplineId: x.id, isDefaultIncluded: true }] : d.disciplines.filter((y) => y.disciplineId !== x.id) })} />{x.name}</label>
-                {row && <label className="flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><Checkbox checked={row.isDefaultIncluded} disabled={!edit}
+                {row && <label className="flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><Checkbox checked={row.isDefaultIncluded} disabled={!edit || !!busy}
                   onCheckedChange={(c) => change({ disciplines: d.disciplines.map((y) => (y.disciplineId === x.id ? { ...y, isDefaultIncluded: !!c } : y)) })} />{t('tpl.byDefault')}</label>}
               </li>
             )
@@ -233,7 +246,7 @@ function TemplateEditor() {
         </ul>
       </Section>
 
-      <Section title={t('ptab.milestones')} count={d.milestones.length} actions={edit && <Button size="sm" variant="outline" onClick={() => change({ milestones: [...d.milestones, { ref: newRef(), name: '', milestoneType: 'Other', anchor: 'PreviousMilestone', offset: 30, isClientFacing: false }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
+      <Section title={t('ptab.milestones')} count={d.milestones.length} actions={edit && <Button size="sm" variant="outline" disabled={!!busy} onClick={() => change({ milestones: [...d.milestones, { ref: newRef(), name: '', milestoneType: 'Other', anchor: 'PreviousMilestone', offset: 30, isClientFacing: false }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
         <Scroll label={t('ptab.milestones')}>
           <table className="w-full text-sm">
             {head(['#', 'name', 'type', 'anchor', 'offset', 'phase', 'client'], 'tpl.mcol', ['offset'])}
@@ -244,14 +257,14 @@ function TemplateEditor() {
                 return (
                   <tr key={m.ref} className="border-t">
                     <td className={cn(tdCls, 'tabular-nums text-muted-foreground')}>M{String(i + 1).padStart(2, '0')}</td>
-                    <td className={cell}><Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.mcol.name')} value={m.name} disabled={!edit} onChange={(e) => set({ name: e.target.value })} />
+                    <td className={cell}><Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.mcol.name')} value={m.name} disabled={!edit || !!busy} onChange={(e) => set({ name: e.target.value })} />
                       {planned?.date && <div className="mt-0.5 text-xs/[18px] text-muted-foreground tabular-nums">{t('tpl.wouldBe', { date: fmtDate(planned.date) })}</div>}</td>
-                    <td className={cell}><select className={cls} aria-label={t('tpl.mcol.type')} value={m.milestoneType} disabled={!edit} onChange={(e) => set({ milestoneType: e.target.value })}>{MILESTONE_TYPES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select></td>
-                    <td className={cell}><select className={cls} aria-label={t('tpl.mcol.anchor')} value={m.anchor} disabled={!edit} onChange={(e) => set({ anchor: e.target.value })}>{ANCHORS.map((x) => <option key={x} value={x}>{t(`tpl.anchor.${x}`)}</option>)}</select></td>
-                    <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.mcol.offset')} value={m.offset ?? ''} disabled={!edit} onChange={(e) => set({ offset: num(e.target.value) })} /></td>
-                    <td className={cell}><select className={cls} aria-label={t('tpl.mcol.phase')} value={m.completesPhaseId ?? ''} disabled={!edit} onChange={(e) => set({ completesPhaseId: e.target.value || null })}>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.mcol.type')} value={m.milestoneType} disabled={!edit || !!busy} onChange={(e) => set({ milestoneType: e.target.value })}>{MILESTONE_TYPES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select></td>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.mcol.anchor')} value={m.anchor} disabled={!edit || !!busy} onChange={(e) => set({ anchor: e.target.value })}>{ANCHORS.map((x) => <option key={x} value={x}>{t(`tpl.anchor.${x}`)}</option>)}</select></td>
+                    <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.mcol.offset')} value={m.offset ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ offset: num(e.target.value) })} /></td>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.mcol.phase')} value={m.completesPhaseId ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ completesPhaseId: e.target.value || null })}>
                       <option value="">{t('common.none')}</option>{ref.data?.phases.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></td>
-                    <td className={cell}><div className={box}><Checkbox aria-label={t('tpl.mcol.client')} checked={m.isClientFacing} disabled={!edit} onCheckedChange={(c) => set({ isClientFacing: !!c })} /></div></td>
+                    <td className={cell}><div className={box}><Checkbox aria-label={t('tpl.mcol.client')} checked={m.isClientFacing} disabled={!edit || !!busy} onCheckedChange={(c) => set({ isClientFacing: !!c })} /></div></td>
                     <td className={cn(cell, 'whitespace-nowrap')}>{edit && <>
                       {rowBtn(t('tpl.moveUp'), () => change({ milestones: move(d.milestones, i, -1) }), <ArrowUp className="size-4" />, i === 0)}
                       {rowBtn(t('tpl.moveDown'), () => change({ milestones: move(d.milestones, i, 1) }), <ArrowDown className="size-4" />, i === d.milestones.length - 1)}
@@ -266,7 +279,7 @@ function TemplateEditor() {
       </Section>
 
       <Section title={t('ptab.deliverables')} count={d.deliverables.length} actions={edit && inTemplate.length > 0 && <Button size="sm" variant="outline"
-        onClick={() => change({ deliverables: [...d.deliverables, { ref: newRef(), disciplineId: inTemplate[0], name: '', deliverableTypeId: ref.data?.deliverableTypes[0]?.id ?? '', milestoneRef: null, offset: 0, requiresReview: true }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
+        disabled={!!busy} onClick={() => change({ deliverables: [...d.deliverables, { ref: newRef(), disciplineId: inTemplate[0], name: '', deliverableTypeId: ref.data?.deliverableTypes[0]?.id ?? '', milestoneRef: null, offset: 0, requiresReview: true }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
         <Scroll label={t('ptab.deliverables')}>
           <table className="w-full text-sm">
             {head(['discipline', 'name', 'type', 'target', 'offset', 'review'], 'tpl.dcol', ['offset'])}
@@ -275,13 +288,13 @@ function TemplateEditor() {
                 const set = (p: Partial<Dl>) => change({ deliverables: d.deliverables.map((y) => (y.ref === x.ref ? { ...y, ...p } : y)) })
                 return (
                   <tr key={x.ref} className="border-t">
-                    <td className={cell}><select className={cls} aria-label={t('tpl.dcol.discipline')} value={x.disciplineId} disabled={!edit} onChange={(e) => set({ disciplineId: e.target.value })}>{inTemplate.map((id) => <option key={id} value={id}>{disciplines.get(id)}</option>)}</select></td>
-                    <td className={cell}><Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.dcol.name')} value={x.name} disabled={!edit} onChange={(e) => set({ name: e.target.value })} /></td>
-                    <td className={cell}><select className={cls} aria-label={t('tpl.dcol.type')} value={x.deliverableTypeId} disabled={!edit} onChange={(e) => set({ deliverableTypeId: e.target.value })}>{ref.data?.deliverableTypes.map((y) => <option key={y.id} value={y.id}>{y.name}</option>)}</select></td>
-                    <td className={cell}><select className={cls} aria-label={t('tpl.dcol.target')} value={x.milestoneRef ?? ''} disabled={!edit} onChange={(e) => set({ milestoneRef: e.target.value || null })}>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.dcol.discipline')} value={x.disciplineId} disabled={!edit || !!busy} onChange={(e) => set({ disciplineId: e.target.value })}>{inTemplate.map((id) => <option key={id} value={id}>{disciplines.get(id)}</option>)}</select></td>
+                    <td className={cell}><Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.dcol.name')} value={x.name} disabled={!edit || !!busy} onChange={(e) => set({ name: e.target.value })} /></td>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.dcol.type')} value={x.deliverableTypeId} disabled={!edit || !!busy} onChange={(e) => set({ deliverableTypeId: e.target.value })}>{ref.data?.deliverableTypes.map((y) => <option key={y.id} value={y.id}>{y.name}</option>)}</select></td>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.dcol.target')} value={x.milestoneRef ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ milestoneRef: e.target.value || null })}>
                       <option value="">{t('common.none')}</option>{d.milestones.map((m, i) => <option key={m.ref} value={m.ref}>M{String(i + 1).padStart(2, '0')} {m.name}</option>)}</select></td>
-                    <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.dcol.offset')} value={x.offset ?? ''} disabled={!edit} onChange={(e) => set({ offset: num(e.target.value) })} /></td>
-                    <td className={cell}><div className={box}><Checkbox aria-label={t('tpl.dcol.review')} checked={x.requiresReview} disabled={!edit} onCheckedChange={(c) => set({ requiresReview: !!c })} /></div></td>
+                    <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.dcol.offset')} value={x.offset ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ offset: num(e.target.value) })} /></td>
+                    <td className={cell}><div className={box}><Checkbox aria-label={t('tpl.dcol.review')} checked={x.requiresReview} disabled={!edit || !!busy} onCheckedChange={(c) => set({ requiresReview: !!c })} /></div></td>
                     <td className={cell}>{edit && rowBtn(t('common.remove'), () => change({ deliverables: d.deliverables.filter((y) => y.ref !== x.ref), tasks: d.tasks.map((k) => (k.deliverableRef === x.ref ? { ...k, deliverableRef: null } : k)) }), <Trash2 className="size-4" />)}</td>
                   </tr>
                 )
@@ -292,7 +305,7 @@ function TemplateEditor() {
       </Section>
 
       <Section title={t('ptab.tasks')} count={d.tasks.length} actions={edit && inTemplate.length > 0 && <Button size="sm" variant="outline"
-        onClick={() => change({ tasks: [...d.tasks, { ref: newRef(), disciplineId: inTemplate[0], deliverableRef: null, name: '', requiresReview: false, priority: 'Medium', estimatedHours: null, offset: null, assignTo: 'Unassigned' }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
+        disabled={!!busy} onClick={() => change({ tasks: [...d.tasks, { ref: newRef(), disciplineId: inTemplate[0], deliverableRef: null, name: '', requiresReview: false, priority: 'Medium', estimatedHours: null, offset: null, assignTo: 'Unassigned' }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
         <Scroll label={t('ptab.tasks')} className="max-h-[32rem] overflow-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10 bg-muted"><tr>{['deliverable', 'name', 'discipline', 'assign', 'estimate', 'offset', 'review'].map((c) => <th key={c} scope="col" className={cn(thCls, ['estimate', 'offset'].includes(c) && 'text-right')}>{t(`tpl.tcol.${c}`)}</th>)}
@@ -302,15 +315,15 @@ function TemplateEditor() {
                 const set = (p: Partial<Tk>) => change({ tasks: d.tasks.map((y) => (y.ref === k.ref ? { ...y, ...p } : y)) })
                 return (
                   <tr key={k.ref} className="border-t">
-                    <td className={cell}><select className={cn(cls, 'max-w-44')} aria-label={t('tpl.tcol.deliverable')} value={k.deliverableRef ?? ''} disabled={!edit} onChange={(e) => set({ deliverableRef: e.target.value || null })}>
+                    <td className={cell}><select className={cn(cls, 'max-w-44')} aria-label={t('tpl.tcol.deliverable')} value={k.deliverableRef ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ deliverableRef: e.target.value || null })}>
                       <option value="">{t('common.none')}</option>{d.deliverables.map((x) => <option key={x.ref} value={x.ref}>{x.name}</option>)}</select></td>
-                    <td className={cell}><Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.tcol.name')} value={k.name} disabled={!edit} onChange={(e) => set({ name: e.target.value })} /></td>
-                    <td className={cell}><select className={cls} aria-label={t('tpl.tcol.discipline')} value={k.disciplineId} disabled={!edit} onChange={(e) => set({ disciplineId: e.target.value })}>{inTemplate.map((id) => <option key={id} value={id}>{disciplines.get(id)}</option>)}</select></td>
-                    <td className={cell}><select className={cls} aria-label={t('tpl.tcol.assign')} value={k.assignTo} disabled={!edit} onChange={(e) => set({ assignTo: e.target.value })}>{ROLES.map((x) => <option key={x} value={x}>{t(`tpl.role.${x}`)}</option>)}</select></td>
-                    <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.tcol.estimate')} value={k.estimatedHours ?? ''} disabled={!edit} onChange={(e) => set({ estimatedHours: num(e.target.value) })} /></td>
-                    <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.tcol.offset')} value={k.offset ?? ''} disabled={!edit} onChange={(e) => set({ offset: num(e.target.value) })} /></td>
-                    <td className={cell}><div className="flex items-center gap-2"><Checkbox aria-label={t('tpl.tcol.review')} checked={k.requiresReview} disabled={!edit} onCheckedChange={(c) => set({ requiresReview: !!c })} />
-                      <select className={cls} aria-label={t('common.priority')} value={k.priority} disabled={!edit} onChange={(e) => set({ priority: e.target.value })}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select></div></td>
+                    <td className={cell}><Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.tcol.name')} value={k.name} disabled={!edit || !!busy} onChange={(e) => set({ name: e.target.value })} /></td>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.tcol.discipline')} value={k.disciplineId} disabled={!edit || !!busy} onChange={(e) => set({ disciplineId: e.target.value })}>{inTemplate.map((id) => <option key={id} value={id}>{disciplines.get(id)}</option>)}</select></td>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.tcol.assign')} value={k.assignTo} disabled={!edit || !!busy} onChange={(e) => set({ assignTo: e.target.value })}>{ROLES.map((x) => <option key={x} value={x}>{t(`tpl.role.${x}`)}</option>)}</select></td>
+                    <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.tcol.estimate')} value={k.estimatedHours ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ estimatedHours: num(e.target.value) })} /></td>
+                    <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.tcol.offset')} value={k.offset ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ offset: num(e.target.value) })} /></td>
+                    <td className={cell}><div className="flex items-center gap-2"><Checkbox aria-label={t('tpl.tcol.review')} checked={k.requiresReview} disabled={!edit || !!busy} onCheckedChange={(c) => set({ requiresReview: !!c })} />
+                      <select className={cls} aria-label={t('common.priority')} value={k.priority} disabled={!edit || !!busy} onChange={(e) => set({ priority: e.target.value })}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select></div></td>
                     <td className={cell}>{edit && rowBtn(t('common.remove'), () => change({ tasks: d.tasks.filter((y) => y.ref !== k.ref), dependencies: d.dependencies.filter((x) => x.predecessor !== k.ref && x.successor !== k.ref) }), <Trash2 className="size-4" />)}</td>
                   </tr>
                 )
@@ -321,7 +334,7 @@ function TemplateEditor() {
       </Section>
 
       <Section title={t('tpl.dependencies')} count={d.dependencies.length} actions={edit && d.tasks.length > 1 && <Button size="sm" variant="outline"
-        onClick={() => change({ dependencies: [...d.dependencies, { predecessor: d.tasks[0].ref, successor: d.tasks[1].ref }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
+        disabled={!!busy} onClick={() => change({ dependencies: [...d.dependencies, { predecessor: d.tasks[0].ref, successor: d.tasks[1].ref }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
         {d.dependencies.length === 0 ? <Empty>{t('tpl.noDependencies')}</Empty> : (
           <ul className="divide-y text-sm">
             {d.dependencies.map((x, i) => {
@@ -329,9 +342,9 @@ function TemplateEditor() {
               const opts = d.tasks.map((k) => <option key={k.ref} value={k.ref}>{k.name || t('tpl.unnamed')}</option>)
               return (
                 <li key={i} className="flex flex-wrap items-center gap-2 px-5 py-2">
-                  <select className={cn(cls, 'max-w-72')} aria-label={t('tpl.predecessor')} value={x.predecessor} disabled={!edit} onChange={(e) => set({ predecessor: e.target.value })}>{opts}</select>
+                  <select className={cn(cls, 'max-w-72')} aria-label={t('tpl.predecessor')} value={x.predecessor} disabled={!edit || !!busy} onChange={(e) => set({ predecessor: e.target.value })}>{opts}</select>
                   <span aria-hidden className="text-muted-foreground">→</span>
-                  <select className={cn(cls, 'max-w-72')} aria-label={t('tpl.successor')} value={x.successor} disabled={!edit} onChange={(e) => set({ successor: e.target.value })}>{opts}</select>
+                  <select className={cn(cls, 'max-w-72')} aria-label={t('tpl.successor')} value={x.successor} disabled={!edit || !!busy} onChange={(e) => set({ successor: e.target.value })}>{opts}</select>
                   {edit && rowBtn(t('common.remove'), () => change({ dependencies: d.dependencies.filter((_, j) => j !== i) }), <Trash2 className="size-4" />)}
                 </li>
               )
@@ -342,14 +355,14 @@ function TemplateEditor() {
 
       {/* A suggestion saves on its own and the refetch after it would drop unsaved structure edits, so Add waits for Save. */}
       <Section title={t('templates.basisTitle')} count={d.basisSuggestions.length} actions={edit && saved.disciplines.length > 0 &&
-        <Button size="sm" variant="outline" disabled={dirty} onClick={() => setAddingBasis(true)}><Plus className="size-4" />{t('templates.basisAdd')}</Button>}>
+        <Button size="sm" variant="outline" disabled={dirty || !!busy} onClick={() => setAddingBasis(true)}><Plus className="size-4" />{t('templates.basisAdd')}</Button>}>
         <p className="px-5 pt-4 text-sm text-muted-foreground">{t('templates.basisHint')}{edit && dirty && <span className="text-warn"> {t('templates.basisSaveFirst')}</span>}</p>
         {d.basisSuggestions.length === 0 ? <Empty>{t('templates.basisNone')}</Empty> : (
           <ul className="divide-y text-sm">
             {d.basisSuggestions.map((b) => (
               <li key={b.id} className="space-y-1 px-5 py-3">
                 <p className="flex items-start gap-2"><span className="min-w-0 flex-1"><span className="font-semibold">{b.title}</span> <span className="text-xs/[18px] text-muted-foreground">{t(b.kind === 'Criterion' ? 'basis.criterion' : 'basis.assumption')} · {disciplines.get(b.disciplineId)}</span></span>
-                  {edit && <Button type="button" variant="ghost" size="icon-sm" className="text-bad hover:text-bad" aria-label={`${t('common.remove')} ${b.title}`} disabled={dirty} onClick={() => setRemovingBasis(b)}><Trash2 className="size-4" /></Button>}</p>
+                  {edit && <Button type="button" variant="ghost" size="icon-sm" className="text-bad hover:text-bad" aria-label={`${t('common.remove')} ${b.title}`} disabled={dirty || !!busy} onClick={() => setRemovingBasis(b)}><Trash2 className="size-4" /></Button>}</p>
                 <p className="text-xs/[18px] text-muted-foreground">{t('basis.scope')}: {b.scope}</p>
                 <p className="whitespace-pre-wrap">{b.statement}{b.numericValue != null && <span className="tabular-nums"> · {b.numericValue} {b.units ?? ''}</span>}</p>
                 {(b.sourceSystem || b.stableSourceId || b.declaredRevision || b.sourceUrl) && <p className="text-xs/[18px] text-muted-foreground">

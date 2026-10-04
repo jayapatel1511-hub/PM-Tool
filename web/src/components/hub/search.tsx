@@ -1,3 +1,4 @@
+import { visibilityLabel } from '@/components/planner/labels'
 import { useQuery } from '@tanstack/react-query'
 import { Briefcase, CalendarCheck, CheckSquare, Flag, FileText, Link2Off, MessageSquare, Scale, Search, User, type LucideIcon } from 'lucide-react'
 import { useEffect, useId, useMemo, useState, type RefObject } from 'react'
@@ -8,7 +9,7 @@ import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
-export const GROUPS = ['projects', 'tasks', 'deliverables', 'milestones', 'decisions', 'handoffs', 'reviews', 'changes', 'submissions', 'allocations', 'design-basis', 'constraints', 'commitments', 'comments', 'people'] as const
+export const GROUPS = ['projects', 'tasks', 'deliverables', 'milestones', 'decisions', 'handoffs', 'reviews', 'changes', 'submissions', 'allocations', 'design-basis', 'constraints', 'commitments', 'planning', 'comments', 'people'] as const
 export type Group = (typeof GROUPS)[number]
 export interface SearchResult {
   q: string; exact: { type: string; id?: string | null; projectNumber: string; key: string } | null
@@ -20,14 +21,15 @@ export interface Hit { id: string; icon: LucideIcon; key?: string; title: string
 export const KEY_PATTERN = /^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H|RV|CH|CT|WC|SUB|B)\d+$/i
 const TAB: Record<string, string> = { Task: 'tasks', Deliverable: 'deliverables', Milestone: 'milestones', Decision: 'decisions', Risk: 'risks', Issue: 'issues', Action: 'meetings', Handoff: 'handoffs', ReviewPackage: 'reviews', ChangeNotice: 'changes',
   WorkConstraint: 'readiness', OutputCommitment: 'readiness' }
-const TYPE: Record<string, string> = { tasks: 'Task', deliverables: 'Deliverable', milestones: 'Milestone', decisions: 'Decision', handoffs: 'Handoff', reviews: 'ReviewPackage', changes: 'ChangeNotice', submissions: 'SubmissionPackage', allocations: 'ResourceAllocation', 'design-basis': 'DesignBasisEntry', constraints: 'WorkConstraint', commitments: 'OutputCommitment' }
-const ICON: Record<Group, LucideIcon> = { projects: Briefcase, tasks: CheckSquare, deliverables: FileText, milestones: Flag, decisions: Scale, comments: MessageSquare, people: User, handoffs: FileText, reviews: FileText, changes: FileText, submissions: FileText, allocations: CalendarCheck, 'design-basis': FileText, constraints: Link2Off, commitments: CalendarCheck }
+const TYPE: Record<string, string> = { tasks: 'Task', deliverables: 'Deliverable', milestones: 'Milestone', decisions: 'Decision', handoffs: 'Handoff', reviews: 'ReviewPackage', changes: 'ChangeNotice', submissions: 'SubmissionPackage', allocations: 'ResourceAllocation', 'design-basis': 'DesignBasisEntry', constraints: 'WorkConstraint', commitments: 'OutputCommitment', planning: 'PlanningEntry' }
+const ICON: Record<Group, LucideIcon> = { projects: Briefcase, tasks: CheckSquare, deliverables: FileText, milestones: Flag, decisions: Scale, comments: MessageSquare, people: User, handoffs: FileText, reviews: FileText, changes: FileText, submissions: FileText, allocations: CalendarCheck, 'design-basis': FileText, constraints: Link2Off, commitments: CalendarCheck, planning: CalendarCheck }
 
 export function itemHref(type: string, projectNumber: string, id?: string | null) {
   const base = `/projects/${encodeURIComponent(projectNumber)}`
   if (id && type === 'ResourceAllocation') return `${base}/allocations?allocation=${id}`
   if (id && type === 'DesignBasisEntry') return `${base}/design-basis?basis=${id}`
   if (id && type === 'SubmissionPackage') return `${base}/submissions?panel=SubmissionPackage:${id}`
+  if (id && type === 'PlanningEntry') return `/planner?entry=${id}`
   return type === 'Project' || !id ? base : `${base}/${TAB[type] ?? 'dashboard'}?panel=${type}:${id}`
 }
 
@@ -36,6 +38,7 @@ export function toHits(group: Group, rows: any[] = []): Hit[] {
   if (group === 'projects') return rows.map((p) => ({ id: p.id, icon, key: p.projectNumber, title: p.name, sub: [p.client, p.pm, tv(p.status)].filter(Boolean).join(' · '), href: itemHref('Project', p.projectNumber) }))
   if (group === 'people') return rows.map((u) => ({ id: u.id, icon, title: u.isActive ? u.displayName : t('common.inactiveSuffix', { name: u.displayName }),
     sub: [u.jobTitle, u.email].filter(Boolean).join(' · '), href: u.canViewWork ? `/my-work?userId=${u.id}` : null }))
+  if (group === 'planning') return rows.map((x) => ({ id: x.id, icon, title: x.name, sub: [visibilityLabel(x.status), fmtDate(x.dueDate)].join(' · '), href: x.status === 'Self' ? `/my-work?myWeek=${x.startWeek ?? x.dueDate}&planningEntry=${x.id}` : `/planner?personId=${x.personId}&entry=${x.id}` }))
   if (group === 'comments') return rows.map((c) => ({ id: c.id, icon, key: c.key, title: c.name, match: c.match, // FR-004: the comment's item, with the matching text
     sub: [c.projectNumber, c.author, fmtDate(c.createdAt?.slice(0, 10))].filter((v) => v && v !== '—').join(' · '), href: itemHref(c.itemType, c.projectNumber, c.itemId) }))
   return rows.map((x) => ({ id: x.id, icon, key: x.key, title: x.name, match: x.match,

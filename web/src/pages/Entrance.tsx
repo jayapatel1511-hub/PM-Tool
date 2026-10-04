@@ -52,7 +52,7 @@ function PublicShell({ children }: { children: ReactNode }) {
   )
 }
 
-/** The approved Paper hero (Jay, 2026-10-03; PR #36), unchanged. */
+/** The approved Paper hero (Jay, 2026-10-03; PR #36), with a 12px minimum text size. */
 export function LandingPage() {
   return <ApprovedHero />
 }
@@ -61,7 +61,7 @@ export function LoginPage({ mode, onSignIn, onLocalSignIn, users, onPick, error,
   const [userName, setUserName] = useState(''), [password, setPassword] = useState(''), [busy, setBusy] = useState(false)
   async function submit(e: FormEvent) { e.preventDefault(); setBusy(true); try { await onLocalSignIn(userName, password); setPassword('') } finally { setBusy(false) } }
   return <PublicShell>
-    <main id="main" className="mx-auto grid w-full max-w-5xl flex-1 content-center px-4 py-8 md:grid-cols-2 md:px-6 md:py-16">
+    <main id="main" className="mx-auto grid w-full grid-cols-1 max-w-5xl flex-1 content-center px-4 py-8 md:grid-cols-2 md:px-6 md:py-16">
       <aside aria-label={t('entrance.about')} className="hidden flex-col rounded-l-xl border border-r-0 bg-sidebar p-8 md:flex lg:p-10">
         <p className={eyebrow}>{t('entrance.storyEyebrow')}</p>
         <h2 className={cn(heading, 'mt-2')}>{t('entrance.storyTitle')}</h2>
@@ -71,7 +71,7 @@ export function LoginPage({ mode, onSignIn, onLocalSignIn, users, onPick, error,
         </div>
         <p className={cn(eyebrow, 'mt-auto pt-12')}>{t('entrance.storyFoot')}</p>
       </aside>
-      <section aria-labelledby="login-title" className="w-full max-w-md justify-self-center rounded-xl border bg-card p-5 sm:p-8 md:max-w-none md:rounded-l-none lg:p-10">
+      <section aria-labelledby="login-title" className="min-w-0 w-full max-w-md justify-self-center rounded-xl border bg-card p-5 sm:p-8 md:max-w-none md:rounded-l-none lg:p-10">
         <span aria-hidden data-accent="blue" className={cn(mark, 'size-10 rounded-[10px]')}><LockKeyhole className="size-5" /></span>
         <h1 id="login-title" className="mt-6 text-2xl/8 font-semibold tracking-[-0.4px] md:text-[28px]/9 md:tracking-[-0.6px]">{t('entrance.welcome')}</h1>
         <p className="mt-2 text-muted-foreground">{t(`entrance.intro.${mode}`)}</p>

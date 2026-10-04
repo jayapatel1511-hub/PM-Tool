@@ -1,3 +1,4 @@
+import { UrlSearchInput } from '@/components/hub/url-search'
 import { ViewMenu } from '@/components/hub/views'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListPlus, Lock, OctagonAlert, Plus, ShieldAlert, Trash2 } from 'lucide-react'
@@ -23,7 +24,8 @@ import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { ProjectDiscipline } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { DateText, FieldGroup, GroupRow, HeadCell, ItemPicker, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK, type Pick } from './Decisions'
+import { DateText, FieldGroup, GroupRow, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
+import { ItemPicker, type Pick } from './Decisions'
 import { ActionForm } from './Meetings'
 import { useCurrentProject } from './ProjectLayout'
 import { CommentsSlot, ItemSlots, type RaiseProps } from './slots-items'
@@ -118,7 +120,7 @@ function RegisterFilters({ f, statuses, open, indicator, owners, disciplines, ex
     <FilterBar>
       <div className="flex flex-wrap items-end gap-3">
         <Field label={t('common.search')} htmlFor="register-search" className="w-full sm:w-56">
-          <Input id="register-search" type="search" value={q ?? ''} onChange={(e) => f.set('q', e.target.value)} />
+          <UrlSearchInput id="register-search" value={q ?? ''} onValueChange={value => f.set('q', value)} />
         </Field>
         <Field label={t('common.status')} htmlFor="register-status" className="w-full sm:w-44">
           <select id="register-status" className={selectCls} value={status ?? ''} onChange={(e) => f.set('status', e.target.value)}>
@@ -174,7 +176,7 @@ function RegisterTable<T extends { id: string }>({ table, rows, loading, empty, 
     <TableRegion className="hidden md:block">
       <table className="w-full text-sm">
         <caption className="sr-only">{caption}</caption>
-        <thead className="bg-muted text-left text-muted-foreground"><tr>{table.visible.map((c) => <HeadCell key={c.id} th={table.header(c)} right={c.className?.includes('text-right')} />)}</tr></thead>
+        <thead className="bg-muted text-left text-muted-foreground"><tr>{table.visible.map((c) => table.header(c))}</tr></thead>
         {groups.map((group, index) => <tbody key={`${index}-${group.label}`}>
           {groupBy && <GroupRow span={table.visible.length} label={group.label} count={group.items.length} />}
           {group.items.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted', current(r) && SELECTED_ROW)}>{table.visible.map((c) => table.cell(c, r))}</tr>)}
@@ -798,7 +800,7 @@ function IssuePanel({ id }: PanelProps) {
       {i.status === 'Resolved' && (
         <div className="mx-4 mb-4 rounded-md border border-done/30 bg-done-bg px-4 py-3 text-sm">
           <div className="text-xs/[18px] text-muted-foreground">{t('issue.resolvedOn', { date: fmtDate(i.resolvedDate) })}</div>
-          <InlineText value={i.resolution ?? ''} multiline disabled={!can} onSave={(v) => save({ resolution: v })} />
+          <InlineText value={i.resolution ?? ''} multiline disabled={!can} title={t('field.Resolution')} onSave={(v) => save({ resolution: v })} />
         </div>
       )}
       <FieldGroup title={t('common.details')}>
@@ -937,7 +939,10 @@ function LocationInputs({ value: l, onChange }: { value: LocationDraft; onChange
     <Field label={t(label)} htmlFor={`${id}-${key}`}><Input id={`${id}-${key}`} value={l[key]} onChange={(e) => onChange({ ...l, [key]: e.target.value })} type={type} /></Field>
   return <>
     <Field label={t('issue.locationKind')} htmlFor={`${id}-kind`}>
-      <select id={`${id}-kind`} className={selectCls} value={l.kind} onChange={(e) => onChange({ ...l, kind: e.target.value })}><option>SiteArea</option><option>Building</option><option>Alignment</option><option>Coordinate</option></select>
+      <select id={`${id}-kind`} className={selectCls} value={l.kind} onChange={(e) => onChange({ ...l, kind: e.target.value })}>
+        <option value="SiteArea">{t('issue.location.siteArea')}</option><option value="Building">{t('issue.location.building')}</option>
+        <option value="Alignment">{t('issue.location.alignment')}</option><option value="Coordinate">{t('issue.location.coordinate')}</option>
+      </select>
     </Field>
     {input('siteArea', 'issue.siteArea')}{input('assetSystem', 'issue.assetSystem')}
     {l.kind === 'Building' && <>{input('building', 'issue.building')}{input('level', 'issue.level')}{input('room', 'issue.room')}</>}

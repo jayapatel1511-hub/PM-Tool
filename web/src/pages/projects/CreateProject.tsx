@@ -1,3 +1,4 @@
+import { disciplineColour } from '@/lib/discipline-colour'
 import { Monitor } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -128,7 +129,7 @@ export function CreateProjectDialog({ onClose }: { onClose: () => void }) {
                       <li key={d.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2">
                         <label className="flex min-h-(--control-row-h) w-48 items-center gap-2 text-sm">
                           <Checkbox checked={!!picked} onCheckedChange={(c) => setDisciplines(c ? [...disciplines, { disciplineId: d.id, leadUserId: null }] : disciplines.filter((x) => x.disciplineId !== d.id))} />
-                          <span className="size-2.5 shrink-0 rounded-sm" style={{ background: d.colour }} aria-hidden />{d.name}
+                          <span className="size-2.5 shrink-0 rounded-sm" style={{ background: disciplineColour(d.colour) }} aria-hidden />{d.name}
                         </label>
                         {picked && (
                           <div className="min-w-48 flex-1">

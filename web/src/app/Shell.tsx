@@ -1,5 +1,5 @@
 import { Bell, CheckSquare, ChevronRight, ChevronsLeft, ChevronsRight, LogOut, Search, User } from 'lucide-react'
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router'
 import { useDensity, type Density } from '@/components/hub/common'
 import { PanelHost } from '@/components/hub/panel-host'
@@ -77,7 +77,7 @@ export function Shell() {
         </button>
       </nav>
 
-      <div className="flex min-w-0 flex-1 flex-col print:block">
+      <div className="flex min-w-0 flex-1 flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0 print:block print:pb-0">
         <header className="no-print flex h-16 shrink-0 items-center gap-2 border-b bg-card px-4 md:gap-3 md:px-6 xl:px-8">
           <Breadcrumbs />
           <div className="flex min-w-0 flex-1 justify-end lg:flex-none"><ShellSlots.Search inputRef={search} /></div>
@@ -111,7 +111,8 @@ export function Shell() {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main id="content" tabIndex={-1} className="relative min-h-0 flex-1 overflow-auto pb-20 outline-none md:pb-0 print:overflow-visible print:pb-0">
+        <main id="content" tabIndex={-1} className="relative min-h-0 flex-1 overflow-auto outline-none print:overflow-visible print:pb-0">
+          {import.meta.env.VITE_SYNTHETIC_PREVIEW === 'true' && <p className="border-b bg-warn-bg px-4 py-2 text-xs/[18px] font-medium text-warn md:px-6 xl:px-8">{t('preview.synthetic')}</p>}
           <Outlet />
         </main>
         <PanelHost />
@@ -177,16 +178,14 @@ function Breadcrumbs() {
   }
   return (
     <nav aria-label={t('nav.breadcrumb')} className="hidden min-w-0 flex-1 lg:block">
-      <ol className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
+      <ol className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm text-muted-foreground">
         <li className="shrink-0"><Link to="/" className="block rounded-sm leading-6 hover:text-foreground hover:underline">{t('app.name')}</Link></li>
         {crumbs.map((c, i) => (
-          <Fragment key={i}>
-            <li aria-hidden className="shrink-0"><ChevronRight className="size-3.5" /></li>
-            <li className={c.long ? 'min-w-0' : 'shrink-0 whitespace-nowrap'} title={c.label}>
-              {c.to ? <Link to={c.to} className="block truncate rounded-sm leading-6 hover:text-foreground hover:underline">{c.label}</Link>
-                : <span aria-current="page" className="block truncate font-medium leading-6 text-foreground">{c.label}</span>}
-            </li>
-          </Fragment>
+          <li key={i} className={cn('inline-flex min-w-0 max-w-full items-center gap-1.5', c.long && 'flex-1 basis-16')} title={c.label}>
+            <ChevronRight className="size-3.5 shrink-0" aria-hidden />
+            {c.to ? <Link to={c.to} className="block min-w-0 truncate rounded-sm leading-6 hover:text-foreground hover:underline">{c.label}</Link>
+              : <span aria-current="page" className="block min-w-0 truncate font-medium leading-6 text-foreground">{c.label}</span>}
+          </li>
         ))}
       </ol>
     </nav>

@@ -26,11 +26,14 @@ export interface ApiOptions {
   signal?: AbortSignal
   raw?: boolean
   quiet?: boolean
+  /** Packet 034 creates retain one key across a retry. */
+  idempotencyKey?: string
 }
 
 export async function api<T = any>(path: string, o: ApiOptions = {}): Promise<T> {
   const headers: Record<string, string> = { 'X-Hub-Source': 'UI', ...(await authHeaders()) }
   if (o.body !== undefined) headers['Content-Type'] = 'application/json'
+  if (o.idempotencyKey) headers['Idempotency-Key'] = o.idempotencyKey
   if (o.ifMatch != null) headers['If-Match'] = `"${o.ifMatch}"`
   const res = await fetch(path.startsWith('/') ? path : `/api/v1/${path}`, {
     method: o.method ?? (o.body !== undefined ? 'POST' : 'GET'),

@@ -1,3 +1,4 @@
+import { disciplineColour } from '@/lib/discipline-colour'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowDown, ArrowUp, Monitor, Plus, X } from 'lucide-react'
 import { useState } from 'react'
@@ -37,7 +38,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     <DesktopOnly notice={<Page title={title}><Notice icon={Monitor} title={t('app.phoneNotice')}
       action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('admin.phoneHint')}</Notice></Page>}>
       <Page title={title}>
-        <nav aria-label={title} className="scroll-region scroll-thin flex gap-1 overflow-x-auto shadow-[inset_0_-1px_0_var(--border)]">
+        <nav aria-label={title} className="flex min-w-0 flex-wrap gap-1 shadow-[inset_0_-1px_0_var(--border)]">
           {links.map((l) => (
             <NavLink key={l.to} to={l.to} className={({ isActive }) => cn('inline-flex min-h-11 shrink-0 items-center whitespace-nowrap border-b-2 border-transparent px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground',
               isActive && 'border-primary font-semibold text-foreground')}>{l.label}</NavLink>
@@ -115,7 +116,7 @@ export function ReferenceData() {
                   </td>
                   <td className={cn(tdCls, 'font-medium')}>{r.name}</td>
                   {hasCode && <td className={cn(tdCls, 'key')}>{r.code}</td>}
-                  {kind === 'disciplines' && <td className={tdCls}><span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm border" style={{ background: r.colour }} aria-hidden />{r.colour}</span></td>}
+                  {kind === 'disciplines' && <td className={tdCls}><span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm border" style={{ background: disciplineColour(r.colour) }} aria-hidden />{r.colour}</span></td>}
                   {kind === 'offices' && <td className={tdCls}>{r.timeZone}</td>}
                   {kind === 'clients' && <td className={tdCls}>{r.shortName || <Missing />}</td>}
                   <td className={tdCls}><Active on={r.isActive} /></td>
@@ -179,15 +180,24 @@ export function Settings() {
   const qc = useQueryClient()
   const list = useQuery({ queryKey: ['admin', 'settings'], queryFn: () => get<SettingRow[]>('admin/settings') })
   const [draft, setDraft] = useState<Record<string, any>>({})
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, unknown>>({})
+  const [pending, setPending] = useState<Record<string, boolean>>({})
+  const clearDraft = (key: string) => setDraft((d) => { const { [key]: _, ...rest } = d; return rest })
   const save = async (key: string, value: any) => {
+    if (pending[key]) return
+    setDraft((d) => ({ ...d, [key]: value }))
+    setErrors((e) => ({ ...e, [key]: null }))
+    setPending((p) => ({ ...p, [key]: true }))
     try {
       await put(`admin/settings/${encodeURIComponent(key)}`, { value })
-      setErrors((e) => ({ ...e, [key]: '' }))
-      setDraft((d) => { const { [key]: _, ...rest } = d; return rest })
-      qc.invalidateQueries({ queryKey: ['admin', 'settings'] }); qc.invalidateQueries({ queryKey: ['me'] })
+      await qc.invalidateQueries({ queryKey: ['admin', 'settings'] })
+      qc.invalidateQueries({ queryKey: ['me'] })
+      clearDraft(key)
       toast.success(t('common.saved'))
-    } catch (e) { setErrors((x) => ({ ...x, [key]: (e as ApiError).fieldErrors?.value?.[0] ?? (e as Error).message })) }
+    } catch (e) {
+      const field = (e as ApiError).fieldErrors?.value?.[0]
+      setErrors((x) => ({ ...x, [key]: field ? new Error(field) : e }))
+    } finally { setPending((p) => ({ ...p, [key]: false })) }
   }
   if (list.isPending) return <div className={card}><Loading /></div>
   if (list.error) return <ErrorBanner error={list.error} retry={() => list.refetch()} />
@@ -212,20 +222,21 @@ export function Settings() {
                   <label htmlFor={id} id={`${id}-l`} className="text-sm font-medium">{label(s)}
                     <span className="block text-xs/[18px] font-normal text-muted-foreground">{t('admin.default', { value: fallback(s) })}</span>
                   </label>
-                  {s.kind === 'Bool' ? <Switch id={id} checked={!!v} onCheckedChange={(c) => save(s.key, c)} />
+                  {s.kind === 'Bool' ? <Switch id={id} disabled={!!pending[s.key]} checked={!!v} onCheckedChange={(c) => save(s.key, c)} />
                     : s.kind === 'Channels' ? (
                       <div role="group" aria-labelledby={`${id}-l`} className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-                        <label className="flex min-h-6 items-center gap-2"><Checkbox checked={!!v.app} onCheckedChange={(c) => save(s.key, { ...v, app: !!c })} />{t('pref.app')}</label>
-                        <label className="flex min-h-6 items-center gap-2"><Checkbox checked={!!v.email} onCheckedChange={(c) => save(s.key, { ...v, email: !!c })} />{t('pref.email')}</label>
+                        <label className="flex min-h-6 items-center gap-2"><Checkbox disabled={!!pending[s.key]} checked={!!v.app} onCheckedChange={(c) => save(s.key, { ...v, app: !!c })} />{t('pref.app')}</label>
+                        <label className="flex min-h-6 items-center gap-2"><Checkbox disabled={!!pending[s.key]} checked={!!v.email} onCheckedChange={(c) => save(s.key, { ...v, email: !!c })} />{t('pref.email')}</label>
                       </div>
                     ) : (
                       <form className="flex items-center gap-2" onSubmit={(e) => { e.preventDefault(); save(s.key, s.kind === 'Int' ? Number(v) : v) }}>
-                        <Input id={id} className="w-full sm:w-56" type={s.kind === 'Int' ? 'number' : s.kind === 'Time' ? 'time' : 'text'} value={v ?? ''}
+                        <Input id={id} disabled={!!pending[s.key]} className="w-full sm:w-56" type={s.kind === 'Int' ? 'number' : s.kind === 'Time' ? 'time' : 'text'} value={v ?? ''}
                           onChange={(e) => setDraft({ ...draft, [s.key]: e.target.value })} aria-invalid={!!err} aria-describedby={err ? `${id}-e` : undefined} />
-                        {s.key in draft && <Button type="submit">{t('common.save')}</Button>}
+                        {s.key in draft && <Button type="submit" disabled={!!pending[s.key]}>{t('common.save')}</Button>}
                       </form>
                     )}
-                  {err && <p id={`${id}-e`} className="text-xs/[18px] text-bad sm:col-span-2" role="alert">{err}</p>}
+                  {pending[s.key] && <p className="flex items-center gap-2 text-xs/[18px] text-muted-foreground sm:col-span-2" role="status"><Spinner />{t('common.saving')}</p>}
+                  {err != null && <div id={`${id}-e`} className="sm:col-span-2"><ErrorBanner error={err} retryLabel={t('app.retry')} retry={() => save(s.key, s.kind === 'Int' ? Number(v) : v)} /></div>}
                 </li>
               )
             })}

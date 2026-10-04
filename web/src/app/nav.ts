@@ -30,6 +30,7 @@ export const NAV: NavItem[] = [
   { id: 'team', path: '/team', icon: Users, label: 'nav.team', show: all, primary: true },
   { id: 'portfolio', path: '/portfolio', icon: Gauge, label: 'nav.portfolio', show: (m) => m.capabilities.portfolio },
   { id: 'workload', path: '/workload', icon: FolderKanban, label: 'nav.resources', show: (m) => m.capabilities.workload },
+  { id: 'planner', path: '/planner', icon: CalendarDays, label: 'nav.planner', show: (m) => m.capabilities.workload },
   { id: 'staff', path: '/staff', icon: UserCog, label: 'nav.staff', show: (m) => m.capabilities.staff },
   { id: 'notifications', path: '/notifications', icon: Bell, label: 'nav.notifications', show: all },
   { id: 'templates', path: '/templates', icon: LayoutTemplate, label: 'nav.templates', show: (m) => m.capabilities.templates },
@@ -37,4 +38,4 @@ export const NAV: NavItem[] = [
 ]
 
 /** Routes whose packets are built; others stay hidden rather than becoming dead links (§36.1). */
-export const BUILT = new Set<string>(['home', 'mywork', 'boards', 'projects', 'tasks', 'calendar', 'files', 'time', 'reports', 'team', 'portfolio', 'workload', 'staff', 'notifications', 'templates', 'admin'])
+export const BUILT = new Set<string>(['home', 'mywork', 'boards', 'projects', 'tasks', 'calendar', 'files', 'time', 'reports', 'team', 'portfolio', 'workload', 'planner', 'staff', 'notifications', 'templates', 'admin'])

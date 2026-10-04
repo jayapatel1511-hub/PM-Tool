@@ -173,7 +173,7 @@ function ReportTable({ r, itemType, asOf }: { r: ReportRun; itemType?: string | 
             <thead className="bg-muted"><tr>{r.columns.map((c) => <th key={c.path} scope="col" className={cn(thCls, NUMERIC.includes(c.type) && 'text-right')}>{c.header}</th>)}</tr></thead>
             <tbody>
               {r.rows.map((row, i) => (
-                <tr key={row.id ?? i} className="border-t hover:bg-muted">
+                <tr key={`${row.id ?? 'row'}:${i}`} className="border-t hover:bg-muted">
                   {r.columns.map((c) => <td key={c.path} className={cn(tdCls, NUMERIC.includes(c.type) ? 'text-right tabular-nums' : c.type === 'text' ? 'min-w-[8rem]' : 'whitespace-nowrap', ['date', 'datetime'].includes(c.type) && 'tabular-nums')}>{cell(row, c)}</td>)}
                 </tr>
               ))}

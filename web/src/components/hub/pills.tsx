@@ -14,7 +14,13 @@ const TONE: Record<Tone, { cls: string; icon: string }> = {
 }
 
 const STATUS_TONE: Record<string, Tone> = {
-  'On Track': 'ok', Green: 'ok',
+  'On Track': 'ok', Green: 'ok', Ready: 'ok',
+  Draft: 'idle', Superseded: 'idle', Withdrawn: 'idle', Advisory: 'idle',
+  Submitted: 'work', Responded: 'work', Checking: 'work', Proposed: 'work', Committed: 'work', 'Resolution Proposed': 'work',
+  'Clarification Requested': 'warn', Returned: 'warn', 'Changes Required': 'warn', 'Pending Assessment': 'warn',
+  'Update Required': 'warn', 'Clarification Needed': 'warn', 'Needs Assessment': 'warn', 'Proceed under Assumption': 'warn',
+  Incorporated: 'done', Approved: 'done', 'Verified Closed': 'done', Unaffected: 'done', Confirmed: 'done', Met: 'done', 'Verified Removed': 'done', Pass: 'done',
+  'Not Met': 'bad', 'Not Ready': 'bad', Fail: 'bad', Blocking: 'bad',
   'At Risk': 'warn', Yellow: 'warn', Deferred: 'warn', Monitoring: 'warn', 'Revision Required': 'warn',
   Overdue: 'bad', Red: 'bad', Blocked: 'bad', Critical: 'bad', Realised: 'bad',
   'Not Started': 'idle', 'On Hold': 'idle', Grey: 'idle', Cancelled: 'idle', Setup: 'idle', Archived: 'idle', Pending: 'idle', Closed: 'idle',
@@ -29,7 +35,7 @@ export function Pill({ tone, children, className, title, icon = true }: { tone: 
   const s = TONE[tone]
   return (
     <span title={title} className={cn('inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium', s.cls, className)}>
-      {icon && <span aria-hidden className="text-[10px]">{s.icon}</span>}{children}
+      {icon && <span aria-hidden className="text-xs">{s.icon}</span>}{children}
     </span>
   )
 }
@@ -57,8 +63,8 @@ export function Chip({ tone, children, title, onClick }: { tone: Tone; children:
   const s = TONE[tone]
   const cls = cn('inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-transparent px-1.5 py-px text-xs/[18px] font-medium', s.cls, onClick && 'cursor-pointer hover:brightness-95')
   return onClick
-    ? <button type="button" title={title} onClick={onClick} className={cls}><span aria-hidden className="text-[10px]">{s.icon}</span>{children}</button>
-    : <span title={title} className={cls}><span aria-hidden className="text-[10px]">{s.icon}</span>{children}</span>
+    ? <button type="button" title={title} onClick={onClick} className={cls}><span aria-hidden className="text-xs">{s.icon}</span>{children}</button>
+    : <span title={title} className={cls}><span aria-hidden className="text-xs">{s.icon}</span>{children}</span>
 }
 
 export function Key({ children }: { children: React.ReactNode }) {

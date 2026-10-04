@@ -47,6 +47,9 @@ jobs:
       - name: Design basis impact and focus regression (mocked API)
         run: npm run test:design-basis
         working-directory: web
+      - name: Weekly planner recovery, permissions and keyboard regressions (mocked API)
+        run: npm run test:planner
+        working-directory: web
       - name: Coordination browser evidence
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,7 +1,7 @@
 # Feature Specification: Weekly Planning Layer
 
 **Packet**: 034 | **Feature directory**: `specs/034-weekly-planning-layer` | **Date**: 2026-10-03
-**Status**: Approved scope; specified and planned; application implementation not started.
+**Status**: Locally implemented after `9d3e9b91`; remaining work is uncommitted. Final verification and visual acceptance are recorded in `verification.md`.
 **Input**: Jay, 2026-10-03: option (b) of the three-way review `T-tuesday-v1.1-vs-code.md` — add the weekly planning entries of the unmerged Specification v1.1 (local commit 16399682) as a separate record in a new packet beside packet 029's confirmed allocations, leaving packet 029, the Workload grid and its calculations, and packet 032's readiness capacity checks unchanged.
 **Source**: Product specification §39 and §39.1–§39.12; §8.11 (permissions); §10.9 (vocabulary and settings); §13.21 (Weekly Planner screen); §13.10 (My Week row); §9.4 (Resources area); §27, §29 and §30 (scope notes). Related, unchanged contracts: §37.6 (FR-CAP-02, FR-CAP-03, FR-CAP-04, FR-CAP-06, AC-CAP-04), §37.1 (FR-MDC-02, FR-MDC-03, FR-MDC-06), §10.8, §8.10, §12.15, §13.11, §13.0, §38.2, FR-AUD-01; decisions Q4, Q18, Q19.
 

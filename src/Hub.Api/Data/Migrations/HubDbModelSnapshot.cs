@@ -2766,6 +2766,11 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_attempt_at");
 
+                    b.PrimitiveCollection<Guid[]>("RequiredPlanningEntryIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("required_planning_entry_ids");
+
                     b.PrimitiveCollection<Guid[]>("RequiredProjectIds")
                         .IsRequired()
                         .HasColumnType("uuid[]")
@@ -5325,6 +5330,145 @@ namespace Hub.Api.Data.Migrations
                         .HasDatabaseName("ix_phase_name");
 
                     b.ToTable("phase", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.PlanningEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Confidence")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("confidence");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateOnly>("EndWeek")
+                        .HasColumnType("date")
+                        .HasColumnName("end_week");
+
+                    b.Property<decimal>("HoursPerWeek")
+                        .HasPrecision(5, 1)
+                        .HasColumnType("numeric(5,1)")
+                        .HasColumnName("hours_per_week");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("label");
+
+                    b.Property<DateTimeOffset>("LastValidatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_validated_at");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<Guid?>("ProjectDisciplineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_discipline_id");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("SourceCategory")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_category");
+
+                    b.Property<DateOnly>("StartWeek")
+                        .HasColumnType("date")
+                        .HasColumnName("start_week");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("visibility");
+
+                    b.HasKey("Id")
+                        .HasName("pk_planning_entry");
+
+                    b.HasIndex("DeletedBy")
+                        .HasDatabaseName("ix_planning_entry_deleted_by");
+
+                    b.HasIndex("ProjectDisciplineId")
+                        .HasDatabaseName("ix_planning_entry_project_discipline_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_planning_entry_project_id")
+                        .HasFilter("project_id IS NOT NULL");
+
+                    b.HasIndex("UpdatedBy")
+                        .HasDatabaseName("ix_planning_entry_updated_by");
+
+                    b.HasIndex("CreatedBy", "EndWeek")
+                        .HasDatabaseName("ix_planning_entry_created_by_end_week")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("PersonId", "StartWeek", "EndWeek")
+                        .HasDatabaseName("ix_planning_entry_person_id_start_week_end_week")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("planning_entry", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_planning_confidence", "confidence IN ('Confirmed','Expected','Possible')");
+
+                            t.HasCheckConstraint("ck_planning_discipline", "project_discipline_id IS NULL OR project_id IS NOT NULL");
+
+                            t.HasCheckConstraint("ck_planning_hours", "hours_per_week > 0 AND hours_per_week <= 168 AND hours_per_week * 2 = trunc(hours_per_week * 2)");
+
+                            t.HasCheckConstraint("ck_planning_label", "char_length(btrim(label)) BETWEEN 1 AND 120");
+
+                            t.HasCheckConstraint("ck_planning_notes", "notes IS NULL OR char_length(notes) <= 2000");
+
+                            t.HasCheckConstraint("ck_planning_owner", "created_by IS NOT NULL");
+
+                            t.HasCheckConstraint("ck_planning_project_source", "(source_category = 'MajorProject') = (project_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_planning_self_visible", "created_by <> person_id OR visibility = 'Confirmed'");
+
+                            t.HasCheckConstraint("ck_planning_source", "source_category IN ('MajorProject','OtherProject','Proposal','BusinessDevelopment','Training','Admin','Supervision','InternalInitiative','FieldWork','Other')");
+
+                            t.HasCheckConstraint("ck_planning_visibility", "visibility IN ('Draft','Published','Confirmed')");
+
+                            t.HasCheckConstraint("ck_planning_weeks", "extract(isodow FROM start_week) = 1 AND extract(isodow FROM end_week) = 1 AND end_week >= start_week AND end_week - start_week <= 721");
+                        });
                 });
 
             modelBuilder.Entity("Hub.Api.Data.Project", b =>
@@ -9895,6 +10039,46 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_person_date_version_app_user_person_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.PlanningEntry", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_planning_entry_app_user_created_by");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_planning_entry_app_user_deleted_by");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_planning_entry_app_user_person_id");
+
+                    b.HasOne("Hub.Api.Data.ProjectDiscipline", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectDisciplineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_planning_entry_project_disciplines_project_discipline_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_planning_entry_projects_project_id");
+
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_planning_entry_app_user_updated_by");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.Project", b =>

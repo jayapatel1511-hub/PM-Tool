@@ -18,12 +18,12 @@ public static class Digest
     public sealed record Section(string Code, List<Row> Rows, int Total);
     public sealed record Updates(string ProjectNumber, string ProjectName, int Count, Dictionary<string, int> ByType, List<string> Top);
     public sealed record Result(string Subject, string Body, List<Section> Sections, List<Updates> ProjectUpdates)
-    { public Guid[] RequiredProjectIds { get; init; } = []; }
+    { public Guid[] RequiredProjectIds { get; init; } = []; public Guid[] RequiredPlanningEntryIds { get; init; } = []; }
 
     const int Cap = 10;
 
     /// Sections a person can switch off (FR-002, packet 020), in digest order.
-    public static readonly string[] SectionCodes = ["overdue", "dueSoon", "blocked", "reviews", "decisions", "handoffs", "reviewPackages", "changes", "submissions", "allocations", "basisImpacts", "constraints", "commitments", "issueVerifications", "readinessExceptions", "attention", "milestones", "staff", "updates"];
+    public static readonly string[] SectionCodes = ["overdue", "dueSoon", "blocked", "reviews", "decisions", "handoffs", "reviewPackages", "changes", "submissions", "allocations", "planning", "basisImpacts", "constraints", "commitments", "issueVerifications", "readinessExceptions", "attention", "milestones", "staff", "updates"];
     static readonly string[] ImportantCategories = ["status", "assignment", "date", "decision"];
 
     /// Active projects the person can see: open ones, and restricted ones they belong to (§8.7); Setup and On Hold are left out.
@@ -171,6 +171,16 @@ public static class Digest
             .Join(db.Users.AsNoTracking(), a => a.PersonId, u => u.Id, (a, u) => new { a, u.DisplayName }).ToListAsync();
         var allocations = Make("allocations", allocationRows.Select(x => new Row(x.a.Id, null, x.DisplayName, Num(x.a.ProjectId),
             Text.Get("digest.coordination_detail", x.a.Purpose, D(x.a.FromDate)), $"{baseUrl}/projects/{Num(x.a.ProjectId)}/allocations?allocation={x.a.Id}")));
+        // Planning is person-scoped and therefore never enters a project digest or activity
+        // feed.  It is included only in the recipient's own daily digest, and only for
+        // entries the recipient owns, as required by the stale-plan rule.
+        var planningRows = await Hub.Api.Features.PlanningEndpoints.VisibleForUser(db, userId)
+            .Where(e => e.CreatedBy == userId && e.EndWeek >= Workload.WeekOf(today)
+                && e.LastValidatedAt < now.AddDays(-s.PlanningStaleDays))
+            .OrderBy(e => e.EndWeek).ThenBy(e => e.Id).Take(Cap + 1).ToListAsync();
+        var planning = Make("planning", planningRows.Select(e => new Row(e.Id, null, e.Label, "",
+            Text.Get("digest.planning_stale", e.LastValidatedAt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)),
+            e.PersonId == userId ? $"{baseUrl}/my-work?myWeek={e.StartWeek:yyyy-MM-dd}" : $"{baseUrl}/planner?personId={e.PersonId}&entry={e.Id}")));
         var impactRows = await db.BasisImpactAssessments.AsNoTracking().Where(a => pids.Contains(a.ProjectId) && a.OwnerId == userId &&
             a.Status != AssessmentStatus.Unaffected && a.Status != AssessmentStatus.Resolved)
             .Join(db.DesignBasisVersions, a => a.OldVersionId, v => v.Id, (a, v) => new { a, v.EntryId })
@@ -223,6 +233,7 @@ public static class Digest
             Text.Get("digest.exception_detail", D(x.ExpiresOn)), x.TargetType == "Task" ? TaskLink(x.ProjectId, x.TargetId) : DelLink(x.ProjectId, x.TargetId))));
         var sections = new List<Section> { overdue, dueSoon, blocked, reviews, decisionRows, handoffs, reviewPackages, changes,
             submissions, allocations, basisImpacts, constraints, commitments, issueVerifications, readinessExceptions, attentionRows, milestones, staff }.Where(x => x.Total > 0).ToList();
+        if (planning.Total > 0) sections.Add(planning);
         if (sections.Count == 0 && updates.Count == 0) return null; // AC-NOT-04: nothing to say, nothing sent
 
         var parts = new List<string>();
@@ -254,7 +265,7 @@ public static class Digest
             body.AppendLine($"  {Text.Get("digest.following")} {baseUrl}/notifications?tab=following").AppendLine();
         }
         body.AppendLine(Text.Get("digest.footer", $"{baseUrl}/my-work", $"{baseUrl}/preferences"));
-        return new Result(subject, body.ToString(), sections, updates) { RequiredProjectIds = [.. pids] };
+        return new Result(subject, body.ToString(), sections, updates) { RequiredProjectIds = [.. pids], RequiredPlanningEntryIds = [.. planning.Rows.Select(r => r.ItemId)] };
     }
 
     /// Apply the same source-level privacy boundary as project activity reads when no request Access is available.
@@ -317,7 +328,7 @@ public sealed class DigestJob : IJob
             var digest = await Digest.Build(db, u.Id, u.DisplayName.Split(' ')[0], today, pref?.LastDigestAt ?? now.AddDays(-1), now, s, baseUrl, off);
             if (digest is not null && !string.IsNullOrEmpty(u.Email))
             {
-                db.Emails.Add(new EmailMessage { UserId = u.Id, ToAddress = u.Email, Subject = digest.Subject, BodyText = digest.Body, Kind = "Digest", RequiredProjectIds = digest.RequiredProjectIds,
+                db.Emails.Add(new EmailMessage { UserId = u.Id, ToAddress = u.Email, Subject = digest.Subject, BodyText = digest.Body, Kind = "Digest", RequiredProjectIds = digest.RequiredProjectIds, RequiredPlanningEntryIds = digest.RequiredPlanningEntryIds,
                     DedupKey = $"digest:{u.Id}:{today:yyyy-MM-dd}", CreatedAt = now, NextAttemptAt = now });
                 sent++;
             }

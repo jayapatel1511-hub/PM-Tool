@@ -52,9 +52,9 @@ export function ProjectSettingsTab() {
 
   return (
     <Page title={t('ptab.settings')}>
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <Section title={t('settings.information')}>
-          <form className="grid max-w-[760px] gap-4 p-5 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save() }}>
+      <div className="grid min-w-0 grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <Section title={t('settings.information')} className="min-w-0">
+          <form className="grid min-w-0 grid-cols-1 max-w-[760px] gap-4 p-5 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save() }}>
             {!canEdit && p.permissions.edit.reason && <Notice icon={Lock} title={p.permissions.edit.reason} className="sm:col-span-2" />}
             <Field label={t('projects.col.number')} htmlFor="s-num" error={fe.projectNumber} hint={!p.permissions.changeNumber ? t('settings.numberAdminOnly') : undefined}>
               <Input id="s-num" className="key" value={v('projectNumber')} onChange={set('projectNumber')} disabled={!p.permissions.changeNumber} />
@@ -124,7 +124,7 @@ export function ProjectSettingsTab() {
           </form>
         </Section>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <LinksSection p={p} onChange={() => refresh(p.id)} />
           {SETTINGS_SECTIONS.map((s) => <div key={s.id}>{s.render(p)}</div>)}
           <Section title={t('settings.status')}>
@@ -157,7 +157,16 @@ function LinksSection({ p, onChange }: { p: ProjectDetail; onChange: () => void 
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
   const [err, setErr] = useState<unknown>(null)
+  const [removeErr, setRemoveErr] = useState<unknown>(null)
+  const [removeErrId, setRemoveErrId] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+  const [removing, setRemoving] = useState<string | null>(null)
   const canEdit = p.permissions.edit.ok
+  const removeLink = async (id: string) => {
+    if (removing) return
+    setRemoveErr(null); setRemoveErrId(null); setRemoving(id)
+    try { await del(`projects/${p.id}/links/${id}`); onChange() } catch (e) { setRemoveErr(e); setRemoveErrId(id) } finally { setRemoving(null) }
+  }
   return (
     <Section title={t('settings.links')} count={p.links.length}>
       {p.links.length === 0 ? <p className="px-5 py-4 text-sm text-muted-foreground">{t('links.none')}</p> : (
@@ -168,19 +177,20 @@ function LinksSection({ p, onChange }: { p: ProjectDetail; onChange: () => void 
               {l.linkType === 'Network Folder'
                 ? <><span className="min-w-0 truncate font-mono text-xs" title={l.url}>{l.url}</span><Button size="icon-sm" variant="ghost" aria-label={t('links.copyPath')} onClick={() => { navigator.clipboard?.writeText(l.url); toast.success(t('links.pathCopied')) }}><Copy className="size-4" /></Button></>
                 : <a href={l.url} target="_blank" rel="noreferrer noopener" className="inline-flex min-w-0 items-center gap-1 text-primary underline underline-offset-4 hover:text-foreground"><span className="truncate">{l.title}</span><ExternalLink className="size-3.5 shrink-0" aria-hidden /></a>}
-              {canEdit && <Button size="icon-sm" variant="ghost" className="ml-auto shrink-0 text-bad hover:text-bad" aria-label={t('links.remove', { title: l.title || l.url })} onClick={async () => { await del(`projects/${p.id}/links/${l.id}`); onChange() }}><Trash2 className="size-4" /></Button>}
+              {canEdit && <Button size="icon-sm" variant="ghost" className="ml-auto shrink-0 text-bad hover:text-bad" disabled={!!removing} aria-label={removing === l.id ? t('common.saving') : t('links.remove', { title: l.title || l.url })} onClick={() => void removeLink(l.id)}>{removing === l.id ? <><Spinner /><span className="sr-only">{t('common.saving')}</span></> : <Trash2 className="size-4" />}</Button>}
             </li>
           ))}
         </ul>
       )}
+      {removeErr != null && <div className="border-t px-5 py-3"><ErrorBanner error={removeErr} retry={() => removeErrId && void removeLink(removeErrId)} /></div>}
       {canEdit && (
         <form className="grid gap-3 border-t px-5 py-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,11rem)_auto] sm:items-end" onSubmit={async (e) => {
-          e.preventDefault(); setErr(null)
-          try { await post(`projects/${p.id}/links`, { url, title }); setUrl(''); setTitle(''); onChange() } catch (x) { setErr(x) }
+          e.preventDefault(); if (adding) return; setErr(null); setAdding(true)
+          try { await post(`projects/${p.id}/links`, { url, title }); setUrl(''); setTitle(''); onChange() } catch (x) { setErr(x) } finally { setAdding(false) }
         }}>
-          <Field label={t('field.Url')} htmlFor="s-link-url"><Input id="s-link-url" placeholder={t('links.urlPlaceholder')} value={url} onChange={(e) => setUrl(e.target.value)} /></Field>
-          <Field label={t('field.Title')} htmlFor="s-link-title" optional><Input id="s-link-title" value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
-          <Button type="submit" variant="outline" disabled={!url}>{t('common.add')}</Button>
+          <Field label={t('field.Url')} htmlFor="s-link-url"><Input id="s-link-url" placeholder={t('links.urlPlaceholder')} value={url} disabled={adding} onChange={(e) => setUrl(e.target.value)} /></Field>
+          <Field label={t('field.Title')} htmlFor="s-link-title" optional><Input id="s-link-title" value={title} disabled={adding} onChange={(e) => setTitle(e.target.value)} /></Field>
+          <Button type="submit" variant="outline" disabled={!url || adding}>{adding && <Spinner />}{adding ? t('common.saving') : t('common.add')}</Button>
           {err != null && <div className="sm:col-span-3"><ErrorBanner error={err} /></div>}
         </form>
       )}

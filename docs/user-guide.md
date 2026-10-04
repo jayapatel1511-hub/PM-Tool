@@ -66,6 +66,7 @@ PM's reported health always appears next to the computed one.
 | Revisions and change impact | Project → **Changes** | [Change impact](guides/change-impact.md) |
 | Submission readiness | Project → **Submissions** | [Submissions](guides/submissions.md) |
 | Dated allocations and availability | Project → **Allocations**; **Workload** | [Allocations](guides/allocations.md) |
+| Weekly planning, confidence, visibility and time away | **Weekly Planner**; **My Work → My Week** | [Weekly planning](guides/planning.md) |
 | Discipline coordination view, saved views, meeting actions | Project → **Weekly Coordination**; **My Work → Coordination** | [Coordination view](guides/coordination-view.md) |
 | Design basis and assumptions | Project → **Design basis** | [Design basis](guides/design-basis.md) |
 | Readiness, constraints and weekly promises | Project → **Readiness** | [Readiness](guides/readiness.md) |

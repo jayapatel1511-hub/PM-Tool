@@ -1,10 +1,12 @@
+import { disciplineColour } from '@/lib/discipline-colour'
+import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronDown, ChevronRight, Link2, Plus, Send, X } from 'lucide-react'
 import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, TableRegion, selectCls } from '@/components/hub/common'
-import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
+import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, SaveStatus, TabBar } from '@/components/hub/fields'
 import { DeliverableIndicators, progressLabel, type DeliverableStateView } from '@/components/hub/indicators'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
@@ -22,7 +24,7 @@ import { fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { DateText, FieldGroup, GroupRow, HeadCell, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from './Decisions'
+import { DateText, FieldGroup, GroupRow, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
 import type { MilestoneRow } from './Milestones'
 import { CommentsSlot, ItemSlots, LinksSlot, RaiseSlot } from './slots-items'
 import { useCurrentProject } from './ProjectLayout'
@@ -66,7 +68,7 @@ export function DeliverablesTab() {
       cell: (d) => <button className={TITLE_LINK} aria-current={panel === `Deliverable:${d.id}` || undefined} onClick={() => openPanel('Deliverable', d.id)}>{d.name}</button> },
     { id: 'type', label: t('common.type'), sort: (d) => d.typeName, cell: (d) => d.typeName ?? <Missing /> },
     { id: 'discipline', label: t('common.discipline'), sort: (d) => d.disciplineOrder, className: 'whitespace-nowrap',
-      cell: (d) => d.disciplineName ? <span className="inline-flex items-center gap-2"><span className="inline-block size-2.5 shrink-0 rounded-full" style={{ background: d.disciplineColour }} aria-hidden />{d.disciplineName}</span> : <Missing /> },
+      cell: (d) => d.disciplineName ? <span className="inline-flex items-center gap-2"><span className="inline-block size-2.5 shrink-0 rounded-full" style={{ background: disciplineColour(d.disciplineColour) }} aria-hidden />{d.disciplineName}</span> : <Missing /> },
     { id: 'owner', label: t('common.owner'), sort: (d) => d.ownerName, className: 'whitespace-nowrap',
       cell: (d) => <Person id={d.ownerId} name={d.ownerName && (d.ownerActive ? d.ownerName : t('common.inactiveSuffix', { name: d.ownerName }))} /> },
     { id: 'reviewer', label: t('field.ReviewerId'), sort: (d) => d.reviewerName, className: 'whitespace-nowrap', cell: (d) => <Person id={d.reviewerId} name={d.reviewerName} /> },
@@ -117,7 +119,7 @@ export function DeliverablesTab() {
       <FilterBar>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.search')} htmlFor="deliverable-search" className="w-full sm:w-56">
-            <Input id="deliverable-search" type="search" value={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
+            <UrlSearchInput id="deliverable-search" value={filters.q ?? ''} onValueChange={value => set('q', value)} />
           </Field>
           <Field label={t('common.discipline')} htmlFor="deliverable-discipline" className="w-full sm:w-44">
             <select id="deliverable-discipline" className={selectCls} value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
@@ -181,7 +183,7 @@ export function DeliverablesTab() {
               <tr>
                 <th scope="col" className="w-10 px-(--cell-px)"><Checkbox aria-label={t('bulk.selectAll')} checked={selected.size === rows.length} onCheckedChange={(c) => setSelected(c ? new Set(rows.map((r) => r.id)) : new Set())} /></th>
                 <th scope="col" className="w-10"><span className="sr-only">{t('common.details')}</span></th>
-                {table.visible.map((c) => <HeadCell key={c.id} th={table.header(c)} right={c.className?.includes('text-right')} />)}
+                {table.visible.map((c) => table.header(c))}
               </tr>
             </thead>
             {groups.map(([g, list]) => (
@@ -245,20 +247,22 @@ function CreateDeliverable({ p, milestones, onClose }: { p: ProjectDetail; miles
   const [owner, setOwner] = useState<{ id: string | null; name?: string }>({ id: null })
   const [reviewer, setReviewer] = useState<string | null>(null)
   const [err, setErr] = useState<ApiError | null>(null)
+  const [busy, setBusy] = useState(false)
   const lead = p.disciplines.find((d) => d.id === f.projectDisciplineId)
   const submit = async () => {
-    setErr(null)
+    if (busy) return
+    setErr(null); setBusy(true)
     try {
       const r = await post(`projects/${p.id}/deliverables`, { ...f, ownerId: owner.id ?? lead?.leadUserId ?? null, reviewerId: reviewer, milestoneId: f.milestoneId || null,
         startDate: f.startDate || null, dueDate: f.dueDate || null })
       toast.success(t('deliverable.created', { key: r.key }))
       r.warnings?.forEach((w: string) => toast.warning(w))
       refresh(p.id); onClose()
-    } catch (e) { setErr(e as ApiError) }
+    } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   const fe = err?.fieldErrors ?? {}
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && !busy && onClose()}>
       <DialogContent className="max-w-xl">
         <DialogHeader><DialogTitle>{t('deliverable.new')}</DialogTitle></DialogHeader>
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
@@ -288,7 +292,7 @@ function CreateDeliverable({ p, milestones, onClose }: { p: ProjectDetail; miles
           <label className="flex items-center gap-2 text-sm sm:col-span-2"><Checkbox checked={f.requiresReview} onCheckedChange={(c) => setF({ ...f, requiresReview: !!c })} />{t('field.RequiresReview')}</label>
           <Field label={t('common.description')} htmlFor="d-desc" className="sm:col-span-2"><Textarea id="d-desc" rows={2} value={f.description ?? ''} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
           {err && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
-          <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button><Button type="submit">{t('common.save')}</Button></DialogFooter>
+          <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" disabled={busy} onClick={onClose}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
@@ -377,7 +381,11 @@ function DeliverablePanel({ id }: PanelProps) {
           {s && <div className="mt-1 text-xs/[18px] text-muted-foreground tabular-nums">{t('deliverable.breakdown', { open: s.taskOpen, overdue: s.taskOverdue, blocked: s.taskBlocked })}</div>}</div></FieldRow>
       </FieldGroup>
       <FieldGroup title={t('register.group.reviewIssue')}>
-        <FieldRow label={t('field.RequiresReview')}><div className="px-2 py-1.5"><Checkbox checked={d.requiresReview} disabled={!can} onCheckedChange={(c) => save({ requiresReview: !!c })} aria-label={t('field.RequiresReview')} /></div></FieldRow>
+        <FieldRow label={t('field.RequiresReview')}><ReviewRequiredCheckbox key={d.id} value={d.requiresReview} disabled={!can} onSave={async (v) => {
+          const ok = await save({ requiresReview: v })
+          if (ok) await q.refetch()
+          return ok
+        }} /></FieldRow>
         <FieldRow label={t('field.Revision')}><InlineText value={d.revision} disabled={!can} onSave={(v) => save({ revision: v })} /></FieldRow>
         {d.issuedDate && <FieldRow label={t('deliverable.issued')}><div className="px-2 py-1.5"><span className="tabular-nums">{fmtDate(d.issuedDate)}</span> · {d.revision} · {d.issuedTo}{data.transmittalUrl && <> · <a className="text-primary underline underline-offset-4" href={data.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a></>}</div></FieldRow>}
         {data.onHoldReason && d.status === 'On Hold' && <FieldRow label={t('field.OnHoldReason')}><div className="px-2 py-1.5">{data.onHoldReason}</div></FieldRow>}
@@ -419,6 +427,18 @@ function DeliverablePanel({ id }: PanelProps) {
       {issuing && <IssueDialog d={d} needsConfirm={perms.issueNeedsConfirm} onClose={() => { setIssuing(false); reload() }} />}
     </div>
   )
+}
+
+function ReviewRequiredCheckbox({ value, disabled, onSave }: { value: boolean; disabled: boolean; onSave: (v: boolean) => Promise<boolean> }) {
+  const [draft, setDraft] = useState<boolean | null>(null)
+  const [busy, setBusy] = useState(false)
+  return <SaveStatus current={value}>{(track) => <div className="px-2 py-1.5"><Checkbox checked={draft ?? value} disabled={disabled || busy} aria-label={t('field.RequiresReview')}
+    onCheckedChange={async (c) => {
+      if (busy) return
+      const next = !!c
+      setDraft(next); setBusy(true)
+      try { await track((async () => { const ok = await onSave(next); if (ok) setDraft(null); return ok })(), next) } finally { setBusy(false) }
+    }} /></div>}</SaveStatus>
 }
 
 function DeliverableTransition({ d, to, needsReason, onClose }: { d: DeliverableRow; to: string; needsReason: boolean; onClose: () => void }) {

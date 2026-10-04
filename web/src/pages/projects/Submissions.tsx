@@ -1,9 +1,10 @@
+import { UrlSearchInput } from '@/components/hub/url-search'
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Download, Plus } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ActiveFilters, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, TableRegion, tdCls, thCls } from '@/components/hub/common'
+import { ActiveFilters, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, TableRegion, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { Pill } from '@/components/hub/pills'
 import { ViewMenu } from '@/components/hub/views'
@@ -29,6 +30,7 @@ const fieldset = 'space-y-1 rounded-lg border p-4', legend = 'px-1 text-sm font-
 const subhead = 'text-base/6 font-semibold'
 
 export function SubmissionsTab() {
+  const phone = useIsPhone()
   const project = useCurrentProject(), qc = useQueryClient(), [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false)
   const page = Math.max(1, Number(sp.get('page')) || 1), panel = sp.get('panel')?.startsWith('SubmissionPackage:') ? sp.get('panel')!.slice(18) : null
   const filters = Object.fromEntries(['q', 'status', 'coordinatorId', 'milestoneId', 'targetFrom', 'targetTo'].map(k => [k, sp.get(k) ?? '']))
@@ -55,7 +57,7 @@ export function SubmissionsTab() {
     {milestones.error && <ErrorBanner error={milestones.error} retry={() => milestones.refetch()} />}
     <FilterBar>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label={t('common.search')} htmlFor="submissions-search" className="w-full sm:w-56"><Input id="submissions-search" type="search" value={filters.q} onChange={e => change('q', e.target.value)} /></Field>
+        <Field label={t('common.search')} htmlFor="submissions-search" className="w-full sm:w-56"><UrlSearchInput id="submissions-search" value={filters.q} onValueChange={value => change('q', value)} /></Field>
         <div className="w-full sm:w-40"><SelectField label={t('common.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={['Draft', 'Checking', 'Ready', 'Issued', 'Superseded', 'Cancelled'].map(s => ({ value: s, label: tv(s) }))} /></div>
         {options.data && <div className="w-full sm:w-48"><SelectField label={t('coord.coordinator')} value={filters.coordinatorId} onChange={v => change('coordinatorId', v)} required={false} choices={peopleChoices(options.data)} /></div>}
         {milestones.data && <div className="w-full sm:w-56"><SelectField label={t('submissions.milestone')} value={filters.milestoneId} onChange={v => change('milestoneId', v)} required={false} choices={milestones.data.map(m => ({ value: m.id, label: `${m.key} · ${m.name}` }))} /></div>}
@@ -67,6 +69,7 @@ export function SubmissionsTab() {
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : <>
       <p role="status" className="text-sm text-muted-foreground">{t('coord.count', { n: list.data.totalCount })}</p>
       {!list.data.items.length ? <div className="rounded-lg border bg-card"><Empty title={t('submissions.empty')}>{t(tokens.length ? 'register.noMatch' : 'submissions.emptyHint')}</Empty></div> :
+        phone ? <ul className="space-y-2">{list.data.items.map(row => <li key={row.id} className={cn('space-y-3 rounded-lg border bg-card p-4 text-sm', panel === row.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)]')}><button className="break-words text-left font-semibold text-primary hover:underline" aria-current={panel === row.id || undefined} onClick={() => open(row.id)}><span className="key font-normal">{row.key}</span> · {row.title}</button><CoordStatus status={row.status} /><dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2"><dt className="text-muted-foreground">{t('coord.coordinator')}</dt><dd>{options.data ? <PersonLabel options={options.data} id={row.coordinatorId} /> : <Missing />}</dd><dt className="text-muted-foreground">{t('submissions.targetDate')}</dt><dd>{row.targetDate ? fmtDate(row.targetDate) : <Missing />}</dd><dt className="text-muted-foreground">{t('submissions.blockers')}</dt><dd><Count n={row.blockerCount} tone="bad" /></dd></dl></li>)}</ul> :
         <TableRegion><table className="w-full text-left text-sm"><caption className="sr-only">{t('submissions.title')}</caption>
           <thead className="bg-muted"><tr>{['coord.item', 'coord.coordinator', 'common.status', 'submissions.targetDate'].map(k => <th scope="col" key={k} className={thCls}>{t(k)}</th>)}<th scope="col" className={cn(thCls, 'text-right')}>{t('submissions.blockers')}</th></tr></thead>
           <tbody>{list.data.items.map(row => <tr key={row.id} className={cn('border-t hover:bg-muted', panel === row.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent')}>

@@ -1,6 +1,6 @@
 # Feature packets
 
-The product specification has 34 Spec Kit packets: the original 18 first-release and 6 Phase 2 packets, plus 9 approved coordination additions (025–033) and 1 approved planning addition (034). Packets 025–027 have foundation implementations with passing automated checks; full acceptance and implementation of 028–034 remain pending. The user's confirmation of the six pictured views moved the Portfolio, Workload, improved Timeline,
+The product specification has 34 Spec Kit packets: the original 18 first-release and 6 Phase 2 packets, plus 9 approved coordination additions (025–033) and 1 approved planning addition (034). Packets 025–027 have foundation implementations with passing automated checks; full acceptance and implementation of 028–033 remain pending. Packet 034 is locally implemented with passing software/browser evidence, uncommitted after `9d3e9b91`; T023's manual screen-reader validation is blocked and human acceptance remains pending. The user's confirmation of the six pictured views moved the Portfolio, Workload, improved Timeline,
 saved views, and three new workspace/calendar/task-hour packets into the first release (§36). Each folder holds a `spec.md` in Spec Kit's format and a quality checklist;
 `plan.md`, `tasks.md`, and `verification.md` are added as each packet is planned and built.
 
@@ -90,7 +90,7 @@ On 2026-10-03 Jay chose to add the weekly planning entries of the unmerged Speci
 
 | Packet | Delivers | Depends on | Status |
 |---|---|---|---|
-| [034-weekly-planning-layer](034-weekly-planning-layer/spec.md) | Weekly Planning Layer: person × week planning entries with confidence and private drafts, the Weekly Planner and My Week | 001, 002, 006, 009, 017, 019, 021, 029 | Specified and planned; open decisions to confirm (§39.12); implementation pending |
+| [034-weekly-planning-layer](034-weekly-planning-layer/spec.md) | Weekly Planning Layer: person × week planning entries with confidence and private drafts, the Weekly Planner and My Week | 001, 002, 006, 009, 017, 019, 021, 029 | Locally implemented, uncommitted after 9d3e9b91; software/browser checks PASS; T023 manual screen-reader BLOCKED; human acceptance pending |
 
 Implementation order: after packet 029's built allocation model, which 034 reads but does not change. 034 is independent of 030–033.
 

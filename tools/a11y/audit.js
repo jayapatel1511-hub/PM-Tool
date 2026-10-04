@@ -19,3 +19,40 @@ export async function audit(routes, project) {
   }
   return out
 }
+
+// The packet acceptance command is also runnable from Node against the local synthetic preview.
+// Browser-console imports retain the audit() API above.
+if (typeof window === 'undefined') {
+  const { createRequire } = await import('node:module')
+  const { fileURLToPath } = await import('node:url')
+  const { dirname, resolve } = await import('node:path')
+  const require = createRequire(import.meta.url)
+  const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
+  const { chromium } = require(resolve(root, 'web/node_modules/playwright'))
+  const axePath = require.resolve(resolve(root, 'web/node_modules/axe-core/axe.min.js'))
+  const origin = process.env.AUDIT_BASE ?? 'http://localhost:5173'
+  const url = new URL(origin)
+  if (!['localhost', '127.0.0.1'].includes(url.hostname)) throw new Error('Accessibility CLI is restricted to a local preview')
+  const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
+  const results = []
+  try {
+    for (const user of (process.env.AUDIT_USERS ?? 'priya,sam,lena,jordan,alex,rita').split(',')) {
+      for (const width of [1440, 1024, 375]) {
+        const context = await browser.newContext({ viewport: { width, height: 900 } })
+        await context.addInitScript((who) => { sessionStorage.setItem('hub.devUser', who + '@hub.test'); sessionStorage.setItem('hub.signedIn', '1') }, user)
+        const page = await context.newPage(); const errors = []
+        page.on('pageerror', (error) => errors.push(error.message))
+        for (const route of (process.argv.slice(2).length ? process.argv.slice(2) : ['/planner', '/my-work'])) {
+          errors.length = 0
+          await page.goto(origin + route); await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {})
+          await page.addScriptTag({ path: axePath })
+          const violations = await page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] } })).violations.map((v) => ({ id: v.id, targets: v.nodes.map((n) => n.target) })))
+          results.push({ user, width, route, errors: [...errors], violations })
+        }
+        await context.close()
+      }
+    }
+  } finally { await browser.close() }
+  console.log(JSON.stringify(results, null, 2))
+  if (results.some((r) => r.errors.length || r.violations.length)) process.exitCode = 1
+}

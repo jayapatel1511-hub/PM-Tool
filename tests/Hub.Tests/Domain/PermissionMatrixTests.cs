@@ -286,4 +286,100 @@ public sealed class PermissionMatrixTests
         Assert.True(Permissions.CreateDeliverable(Std, both, Electrical).Ok);
         Assert.True(Permissions.RunCoordination(Std, both).Ok);
     }
+
+    [Fact]
+    public void Planning_permissions_follow_self_report_and_direct_report_scope()
+    {
+        Assert.True(Permissions.CreatePlanningEntry(Sup, Me, Other).Ok);
+        Assert.True(Permissions.CreatePlanningEntry(Sup, Other, Me).Ok);
+        Assert.False(Permissions.CreatePlanningEntry(Sup, Other, Guid.NewGuid()).Ok);
+        var draft = new PlanningEntryFacts(Other, Other, Me, PlanningVisibility.Draft, false, true);
+        Assert.False(Permissions.SeePlanningEntry(Sup, draft).Ok);
+        Assert.True(Permissions.SeePlanningEntry(Admin, draft, dataCorrection: true).Ok);
+        Assert.False(Permissions.SeePlanningEntry(Admin, draft).Ok);
+    }
+
+    static Actor PlannerActor(string role) => role == "Standard" ? Std : A(role);
+
+    [Theory]
+    [InlineData("Admin", true)] [InlineData("Executive", true)] [InlineData("Supervisor", true)]
+    [InlineData("ProjectManager", true)] [InlineData("Standard", false)] [InlineData("ReadOnly", false)]
+    public void Planner_open_and_export_require_the_planner_role(string role, bool allowed)
+        => Assert.Equal(allowed, Permissions.ViewWorkload(PlannerActor(role)).Ok);
+
+    [Theory]
+    [InlineData("Admin", true)] [InlineData("Executive", true)] [InlineData("Supervisor", true)]
+    [InlineData("ProjectManager", true)] [InlineData("Standard", true)] [InlineData("ReadOnly", true)]
+    public void Planner_person_sees_their_own_visible_entries(string role, bool allowed)
+        => Assert.Equal(allowed, Permissions.SeePlanningEntry(PlannerActor(role), new(Me, Other, Other, PlanningVisibility.Published, false, false)).Ok);
+
+    [Theory]
+    [InlineData("Admin", true)] [InlineData("Executive", true)] [InlineData("Supervisor", true)]
+    [InlineData("ProjectManager", false)] [InlineData("Standard", false)] [InlineData("ReadOnly", false)]
+    public void Planner_other_row_requires_current_scope(string role, bool allowed)
+    {
+        var a = PlannerActor(role);
+        var row = new PlanningEntryFacts(Other, Me, Me, PlanningVisibility.Published, false, true);
+        Assert.Equal(allowed, Permissions.SeePlanningEntry(a, row).Ok);
+        Assert.False(Permissions.SeePlanningEntry(a, row with { ProjectVisible = false }).Ok);
+        Assert.Equal(role is "Admin" or "Executive", Permissions.SeePlanningEntry(a, row with { PersonSupervisorId = Other }).Ok);
+        Assert.True(Permissions.SeePlanningEntry(a, row with { InViewerScope = true }).Ok);
+    }
+
+    [Theory]
+    [InlineData("Admin")] [InlineData("Executive")] [InlineData("Supervisor")]
+    [InlineData("ProjectManager")] [InlineData("Standard")] [InlineData("ReadOnly")]
+    public void Planner_private_requires_owner_or_explicit_admin_correction(string role)
+    {
+        var a = PlannerActor(role);
+        var draft = new PlanningEntryFacts(Me, Other, Me, PlanningVisibility.Draft, false, true);
+        Assert.False(Permissions.SeePlanningEntry(a, draft).Ok);
+        Assert.Equal(role == "Admin", Permissions.SeePlanningEntry(a, draft, true).Ok);
+        Assert.True(Permissions.SeePlanningEntry(a, draft with { OwnerId = Me }).Ok);
+        Assert.False(Permissions.SeePlanningEntry(a, draft with { OwnerId = Me, PersonId = Other, PersonSupervisorId = Other, ProjectVisible = false }, true).Ok);
+    }
+
+    [Theory]
+    [InlineData("Admin", true)] [InlineData("Executive", true)] [InlineData("Supervisor", true)]
+    [InlineData("ProjectManager", true)] [InlineData("Standard", true)] [InlineData("ReadOnly", false)]
+    public void Planner_self_create_and_self_owner_manage(string role, bool allowed)
+    {
+        var a = PlannerActor(role);
+        Assert.Equal(allowed, Permissions.CreatePlanningEntry(a, Me, Other).Ok);
+        Assert.Equal(allowed, Permissions.ManagePlanningEntry(a, new(Me, Me, Other, PlanningVisibility.Confirmed, true, false)).Ok);
+        Assert.False(Permissions.CreatePlanningEntry(a with { IsActive = false }, Me, Other).Ok);
+        Assert.False(Permissions.ManagePlanningEntry(a with { IsActive = false }, new(Me, Me, Other, PlanningVisibility.Confirmed, true, false)).Ok);
+    }
+
+    [Theory]
+    [InlineData("Admin", true)] [InlineData("Executive", false)] [InlineData("Supervisor", true)]
+    [InlineData("ProjectManager", false)] [InlineData("Standard", false)] [InlineData("ReadOnly", false)]
+    public void Planner_manager_create_and_owner_manage_and_visibility(string role, bool allowed)
+    {
+        var a = PlannerActor(role);
+        Assert.Equal(allowed, Permissions.CreatePlanningEntry(a, Other, Me).Ok);
+        Assert.Equal(role == "Admin", Permissions.CreatePlanningEntry(a, Other, Other).Ok);
+        var owned = new PlanningEntryFacts(Other, Me, Me, PlanningVisibility.Published, false, true);
+        Assert.Equal(allowed, Permissions.ManagePlanningEntry(a, owned).Ok);
+        Assert.Equal(role == "Admin", Permissions.ManagePlanningEntry(a, owned with { OwnerId = Other }).Ok);
+        Assert.False(Permissions.ManagePlanningEntry(a, owned with { OwnerStillManages = false }).Ok);
+    }
+
+    [Theory]
+    [InlineData("Admin", true)] [InlineData("Executive", false)] [InlineData("Supervisor", true)]
+    [InlineData("ProjectManager", false)] [InlineData("Standard", false)] [InlineData("ReadOnly", false)]
+    public void Planner_time_away_requires_manager_authority_and_is_never_self(string role, bool allowed)
+    {
+        var a = PlannerActor(role);
+        Assert.Equal(allowed, Permissions.RecordTimeAway(a, Me, Other).Ok);
+        Assert.Equal(role == "Admin", Permissions.RecordTimeAway(a, Other, Other).Ok);
+        Assert.False(Permissions.RecordTimeAway(a, Me, Me).Ok);
+        Assert.False(Permissions.RecordTimeAway(a with { IsActive = false }, Me, Other).Ok);
+    }
+
+    [Theory]
+    [InlineData("Admin", true)] [InlineData("Executive", false)] [InlineData("Supervisor", false)]
+    [InlineData("ProjectManager", false)] [InlineData("Standard", false)] [InlineData("ReadOnly", false)]
+    public void Planner_settings_are_admin_only(string role, bool allowed)
+        => Assert.Equal(allowed, Permissions.Administer(PlannerActor(role)).Ok);
 }

@@ -1,3 +1,4 @@
+import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, CheckCircle2, Lock, Monitor, Plus, X } from 'lucide-react'
 import { useState } from 'react'
@@ -61,7 +62,7 @@ function Allocations(header: { title: string; subtitle: string }) {
   const propose = <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>
   return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} />{canPropose && propose}</>}>
     <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4 md:p-5">
-      <Field label={t('common.search')} htmlFor="allocation-search" className="w-full sm:w-56"><Input id="allocation-search" type="search" value={filters.q} onChange={e => change('q', e.target.value)} /></Field>
+      <Field label={t('common.search')} htmlFor="allocation-search" className="w-full sm:w-56"><UrlSearchInput id="allocation-search" value={filters.q} onValueChange={value => change('q', value)} /></Field>
       <div className="w-full sm:w-48"><SelectField label={t('workload.person')} value={filters.personId} onChange={v => change('personId', v)} required={false} choices={options.data?.people.map(p => ({ value: p.id, label: p.displayName })) ?? []} /></div>
       <div className="w-full sm:w-40"><SelectField label={t('allocation.purpose')} value={filters.purpose} onChange={v => change('purpose', v)} required={false} choices={['Production', 'Review'].map(v => ({ value: v, label: t(`allocation.purpose.${v}`) }))} /></div>
       <div className="w-full sm:w-44"><SelectField label={t('allocation.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={['Proposed', 'Confirmed', 'Declined', 'Cancelled', 'Completed'].map(v => ({ value: v, label: tv(v) }))} /></div>

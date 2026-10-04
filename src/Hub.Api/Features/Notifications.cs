@@ -23,7 +23,7 @@ public static class NotificationEndpoints
         {
             var (pg, size) = Http.Paging(page, pageSize ?? 50);
             var visible = access.VisibleProjectIds();
-            var q = db.Notifications.AsNoTracking().Where(n => n.UserId == me.Id && (n.ProjectId == null || visible.Contains(n.ProjectId.Value)));
+            var q = PlanningEndpoints.VisibleNotifications(db, access).AsNoTracking();
             if (unread == true) q = q.Where(n => n.ReadAt == null);
             var types = Http.List(type);
             if (types.Length > 0) q = q.Where(n => types.Contains(n.EventType));
@@ -44,7 +44,7 @@ public static class NotificationEndpoints
         api.MapGet("/me/notifications/pulse", async (HubDb db, Access access, CurrentUser me) =>
         {
             var visible = access.VisibleProjectIds();
-            var permitted = db.Notifications.Where(n => n.UserId == me.Id && (n.ProjectId == null || visible.Contains(n.ProjectId.Value)));
+            var permitted = PlanningEndpoints.VisibleNotifications(db, access);
             var unread = await permitted.CountAsync(n => n.ReadAt == null);
             var latest = await permitted.MaxAsync(n => (DateTimeOffset?)n.CreatedAt);
             var follows = await db.Follows.AsNoTracking().Where(f => f.UserId == me.Id && f.Level != FollowLevel.Muted && visible.Contains(f.ProjectId)).Select(f => new { f.ProjectId, f.LastSeenAt }).ToListAsync();
@@ -58,14 +58,14 @@ public static class NotificationEndpoints
         api.MapGet("/me/notifications/unread-count", async (HubDb db, Access access, CurrentUser me, TimeProvider clock) =>
         {
             var visible = access.VisibleProjectIds();
-            var personal = await db.Notifications.CountAsync(n => n.UserId == me.Id && n.ReadAt == null && (n.ProjectId == null || visible.Contains(n.ProjectId.Value)));
+            var personal = await PlanningEndpoints.VisibleNotifications(db, access).CountAsync(n => n.ReadAt == null);
             var following = (await FollowingUnread(db, access, me.Id)).Values.Sum();
             return new { notifications = personal, following };
         });
 
-        api.MapPost("/me/notifications/read", async (ReadBody body, HubDb db, CurrentUser me, TimeProvider clock) =>
+        api.MapPost("/me/notifications/read", async (ReadBody body, HubDb db, CurrentUser me, TimeProvider clock, Access access) =>
         {
-            var q = db.Notifications.Where(n => n.UserId == me.Id && n.ReadAt == null);
+            var q = PlanningEndpoints.VisibleNotifications(db, access).Where(n => n.ReadAt == null);
             if (body.All != true) { var ids = body.Ids ?? []; q = q.Where(n => ids.Contains(n.Id)); }
             var now = clock.GetUtcNow();
             var n = await q.ExecuteUpdateAsync(s => s.SetProperty(x => x.ReadAt, now));

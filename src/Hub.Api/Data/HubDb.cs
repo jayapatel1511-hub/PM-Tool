@@ -77,6 +77,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
     public DbSet<AllocationWorkLink> AllocationWorkLinks => Set<AllocationWorkLink>();
     public DbSet<PersonDateVersion> PersonDateVersions => Set<PersonDateVersion>();
+    public DbSet<PlanningEntry> PlanningEntries => Set<PlanningEntry>();
     public DbSet<WorkTask> Tasks => Set<WorkTask>();
     public DbSet<TaskDependency> Dependencies => Set<TaskDependency>();
     public DbSet<DeliverableDependency> DeliverableDependencies => Set<DeliverableDependency>();
@@ -626,6 +627,28 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.Property(x => x.AvailableHours).HasPrecision(9, 3);
             e.ToTable(t => { t.HasCheckConstraint("ck_availability_hours", "available_hours >= 0"); t.HasCheckConstraint("ck_availability_category", $"category IN ({In(AvailabilityCategory.All)})"); });
         });
+        mb.Entity<PlanningEntry>(e =>
+        {
+            e.HasIndex(x => new { x.PersonId, x.StartWeek, x.EndWeek }).HasFilter("deleted_at IS NULL");
+            e.HasIndex(x => new { x.CreatedBy, x.EndWeek }).HasFilter("deleted_at IS NULL");
+            e.HasIndex(x => x.ProjectId).HasFilter("project_id IS NOT NULL");
+            e.Property(x => x.HoursPerWeek).HasPrecision(5, 1);
+            e.HasQueryFilter(x => x.DeletedAt == null);
+            e.ToTable("planning_entry", t =>
+            {
+                t.HasCheckConstraint("ck_planning_owner", "created_by IS NOT NULL");
+                t.HasCheckConstraint("ck_planning_hours", "hours_per_week > 0 AND hours_per_week <= 168 AND hours_per_week * 2 = trunc(hours_per_week * 2)");
+                t.HasCheckConstraint("ck_planning_weeks", "extract(isodow FROM start_week) = 1 AND extract(isodow FROM end_week) = 1 AND end_week >= start_week AND end_week - start_week <= 721");
+                t.HasCheckConstraint("ck_planning_label", "char_length(btrim(label)) BETWEEN 1 AND 120");
+                t.HasCheckConstraint("ck_planning_notes", "notes IS NULL OR char_length(notes) <= 2000");
+                t.HasCheckConstraint("ck_planning_source", "source_category IN ('MajorProject','OtherProject','Proposal','BusinessDevelopment','Training','Admin','Supervision','InternalInitiative','FieldWork','Other')");
+                t.HasCheckConstraint("ck_planning_confidence", "confidence IN ('Confirmed','Expected','Possible')");
+                t.HasCheckConstraint("ck_planning_visibility", "visibility IN ('Draft','Published','Confirmed')");
+                t.HasCheckConstraint("ck_planning_self_visible", "created_by <> person_id OR visibility = 'Confirmed'");
+                t.HasCheckConstraint("ck_planning_project_source", "(source_category = 'MajorProject') = (project_id IS NOT NULL)");
+                t.HasCheckConstraint("ck_planning_discipline", "project_discipline_id IS NULL OR project_id IS NOT NULL");
+            });
+        });
         mb.Entity<ResourceAllocation>(e =>
         {
             e.HasIndex(x => new { x.PersonId, x.FromDate, x.ThroughDate });
@@ -650,6 +673,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         });
         mb.Entity<PersonDateVersion>().HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
         Fk<PersonAvailabilityOverride, AppUser>(mb, x => x.PersonId);
+        Fk<PlanningEntry, AppUser>(mb, x => x.PersonId);
+        Fk<PlanningEntry, AppUser>(mb, x => x.CreatedBy);
+        Fk<PlanningEntry, AppUser>(mb, x => x.UpdatedBy);
+        Fk<PlanningEntry, AppUser>(mb, x => x.DeletedBy);
+        Fk<PlanningEntry, Project>(mb, x => x.ProjectId);
+        Fk<PlanningEntry, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
         Fk<ResourceAllocation, Project>(mb, x => x.ProjectId);
         Fk<ResourceAllocation, AppUser>(mb, x => x.PersonId);
         Fk<ResourceAllocation, AppUser>(mb, x => x.ConfirmedBy);

@@ -200,7 +200,7 @@ public static class AdminEndpoints
         g.MapGet("/activity", async (HubDb db, DateOnly? from, DateOnly? to, Guid? actorId, string? itemType, string? category, int? page, int? pageSize) =>
         {
             var (pg, size) = Http.Paging(page, pageSize);
-            var q = db.ActivityLog.AsNoTracking().AsQueryable();
+            var q = db.ActivityLog.AsNoTracking().Where(a => a.ItemType != "PlanningEntry");
             if (from is { } f) q = q.Where(a => a.OccurredAt >= f.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
             if (to is { } t) q = q.Where(a => a.OccurredAt < t.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
             if (actorId is { } aid) q = q.Where(a => a.ActorUserId == aid);

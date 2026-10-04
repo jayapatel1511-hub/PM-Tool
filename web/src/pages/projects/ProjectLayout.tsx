@@ -58,18 +58,20 @@ export function ProjectLayout() {
     <Ctx.Provider value={p}>
       <div className="flex min-h-full flex-col">
         <ProjectHeader p={p} />
-        <nav aria-label={t('ptab.label')} className="scroll-region scroll-thin no-print sticky top-0 z-20 flex gap-1 overflow-x-auto border-b bg-card px-4 md:px-6 xl:px-8">
-          {PROJECT_TABS.filter((tab) => !tab.show || tab.show(p, me)).map((tab) => (
-            <NavLink key={tab.label} to={typeof tab.path === 'string' ? tab.path : tab.path(p)} className={({ isActive }) => cn('inline-flex min-h-11 items-center whitespace-nowrap px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground',
-              isActive && 'font-semibold text-foreground shadow-[inset_0_-2px_0_var(--primary)]')}>{t(tab.label)}</NavLink>
-          ))}
-        </nav>
+        <ProjectTabs p={p} me={me} />
         <StatusBanner p={p} />
         {p.status === 'Active' && (p.permissions.isPm || p.permissions.leadOf.length > 0) && <DateReviewBanner p={p} />}
         <div className="flex-1"><InProject.Provider value><Outlet /></InProject.Provider></div>
       </div>
     </Ctx.Provider>
   )
+}
+
+/** Jay's review preference: section menus wrap into rows rather than scrolling sideways. */
+function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
+  return <nav aria-label={t('ptab.label')} className="no-print flex min-w-0 flex-wrap gap-1 border-b bg-card px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8">
+    {PROJECT_TABS.filter((tab) => !tab.show || tab.show(p, me)).map((tab) => <NavLink key={tab.label} to={typeof tab.path === 'string' ? tab.path : tab.path(p)} className={({ isActive }) => cn('inline-flex min-h-11 max-w-full items-center break-words px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', isActive && 'font-semibold text-foreground shadow-[inset_0_-2px_0_var(--primary)]')}>{t(tab.label)}</NavLink>)}
+  </nav>
 }
 
 /** Shared project header (§12.1 UI behaviour, §13.0): key, name, client, PM, phase, status, health with why, next milestone, links, follow. */

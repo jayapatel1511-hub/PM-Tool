@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ChevronRight, Lock, Monitor, MoreHorizontal, Plus } from 'lucide-react'
 import { Fragment, useState } from 'react'
 import { toast } from 'sonner'
-import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, Spinner, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineText, TabBar } from '@/components/hub/fields'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Chip, Key, ProgressBar, StatusPill, toneOf } from '@/components/hub/pills'
@@ -47,6 +47,7 @@ const PhoneNotice = ({ className }: { className?: string }) => <Notice icon={Mon
 /** Milestone View (§13.7): strip with slip ghosts, table with readiness, and the PM's lifecycle actions. */
 export function MilestonesTab() {
   const p = useCurrentProject()
+  const phone = useIsPhone()
   const ref = useReference()
   const [showCompleted, setShowCompleted] = useState(false)
   const [type, setType] = useState('')
@@ -79,6 +80,30 @@ export function MilestonesTab() {
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <div className="rounded-lg border bg-card"><Loading /></div> : rows.length === 0 ? (
         <div className="rounded-lg border bg-card"><Empty action={can && create('outline')}>{t('milestone.empty')}</Empty></div>
+      ) : phone ? (
+        <ul className="space-y-3">{rows.map((m) => <li key={m.id} className="rounded-lg border bg-card p-4">
+          <div className="mb-2 flex flex-wrap items-center gap-2"><Key>{m.key}</Key><StatusPill status={milestoneStatusLabel(m)} /></div>
+          <button type="button" className="mb-3 break-words text-left text-base/6 font-semibold text-primary hover:underline" onClick={() => openPanel('Milestone', m.id)}>{m.isSubmission && '◆ '}{m.name}</button>
+          <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">
+            {[
+              [t('common.type'), t(`mtype.${m.milestoneType}`)],
+              [t('common.date'), fmtDate(m.date)], [t('milestone.original'), fmtDate(m.originalDate)],
+              [t('milestone.slip'), slip(m.slipDays)],
+              [t('milestone.remaining'), m.isComplete ? fmtDate(m.completedDate) : m.date ? relative(m.date) : t('common.dash')],
+              [t('milestone.deliverables'), t('milestone.issuedOf', { n: m.deliverableIssued, total: m.deliverableTotal })],
+              [t('milestone.tasks'), `${m.taskComplete}/${m.taskTotal}`],
+              [t('common.discipline'), disc(m.projectDisciplineId) ?? t('common.dash')],
+              [t('milestone.clientFacing'), m.isClientFacing ? t('common.yes') : t('common.no')],
+            ].map(([label, value]) => <Fragment key={label}><dt className="text-muted-foreground">{label}</dt><dd className="min-w-0 break-words tabular-nums">{value}</dd></Fragment>)}
+          </dl>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {m.taskOverdue > 0 && <Chip tone="bad">{t('ind.overdueN', { n: m.taskOverdue })}</Chip>}
+            {m.taskBlocked > 0 && <Chip tone="bad">{t('ind.blockedN', { n: m.taskBlocked })}</Chip>}
+            <Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><span className="text-sm text-primary underline">{t('common.why')}</span></Why>
+          </div>
+          <Button className="mt-3" variant="outline" aria-expanded={open.has(m.id)} onClick={() => { const n = new Set(open); if (n.has(m.id)) n.delete(m.id); else n.add(m.id); setOpen(n) }}>{t('milestone.showDeliverables', { key: m.key })}</Button>
+          {open.has(m.id) && <div className="mt-3 border-t pt-3"><TargetedDeliverables milestoneId={m.id} /></div>}
+        </li>)}</ul>
       ) : (
         <TableRegion>
           <table className="w-full text-sm">
@@ -151,11 +176,13 @@ function MilestoneMenu({ m, onPick }: { m: MilestoneRow; onPick: (k: 'edit' | 'd
 }
 
 function TargetedDeliverables({ milestoneId }: { milestoneId: string }) {
+  const phone = useIsPhone()
   const q = useQuery({ queryKey: ['milestone', milestoneId], queryFn: () => get(`milestones/${milestoneId}`) })
   const openPanel = useItemPanel()
   if (q.isPending) return <Loading rows={2} />
   const list: any[] = q.data?.deliverables ?? []
   if (!list.length) return <p className="py-1 text-sm text-muted-foreground">{t('milestone.noDeliverables')}</p>
+  if (phone) return <ul className="divide-y rounded-md border bg-card">{list.map(d => <li key={d.id} className="space-y-2 p-3 text-sm"><Key>{d.key}</Key><button type="button" className="block break-words text-left font-semibold text-primary hover:underline" onClick={() => openPanel('Deliverable', d.id)}>{d.name}</button><StatusPill status={d.status} /><p>{t('common.owner')}: {d.ownerName || t('common.dash')}</p><p>{t('common.due')}: {fmtDate(d.dueDate)}</p><ProgressBar pct={d.state?.progressPct} />{d.state && <p className="text-xs/[18px] text-muted-foreground">{t('milestone.taskCounts', { open: d.state.taskOpen, overdue: d.state.taskOverdue, blocked: d.state.taskBlocked })}</p>}</li>)}</ul>
   return (
     <div className="scroll-region overflow-x-auto rounded-md border bg-card">
       <table className="w-full text-sm">
@@ -196,7 +223,7 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
   const x = (d: string) => 4 + (daysBetween(min, d) / span) * 92
   const tone = (m: MilestoneRow) => toneOf(m.isComplete ? 'Complete' : m.status)
   // Each label is centred under its diamond (anchored inwards at the edges) and takes the first of three lanes it clears.
-  // ponytail: assumes a strip of about 900 px (a label ≈ 16 % of it); narrower strips rely on truncation and the tooltip.
+  // Preserve the readable date-axis width. Short keys identify diamonds; full names stay in the adjacent table/cards.
   const lanes: number[] = []
   const placed = [...dated].sort((a, b) => a.date!.localeCompare(b.date!)).map((m) => {
     const left = x(m.date!)
@@ -209,8 +236,8 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
   })
   const todayX = x(now)
   return (
-    <div className="rounded-lg border bg-card px-5 py-4" role="group" aria-label={t('milestone.stripLabel', { n: dated.length })}>
-      <div className="relative" style={{ height: AXIS + 16 + lanes.length * LANE }}>
+    <div className="scroll-region overflow-x-auto rounded-lg border bg-card" role="group" aria-label={t('milestone.stripLabel', { n: dated.length })}>
+      <div className="min-w-[900px] px-5 py-4"><div className="relative" style={{ height: AXIS + 16 + lanes.length * LANE }}>
         <div aria-hidden className="absolute inset-x-0 h-px bg-border" style={{ top: AXIS }} />
         <div className="absolute border-l-2 border-dashed border-primary" style={{ left: `${todayX}%`, top: 0, height: AXIS + 12 }}>
           <span className={cn('absolute top-0 whitespace-nowrap text-xs/[18px] font-semibold text-primary', todayX > 85 ? 'right-1.5' : 'left-1.5')}>{t('common.today')}</span>
@@ -232,15 +259,15 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
                 <span className="block size-3.5 rotate-45 border border-white shadow-[0_0_0_1px_rgba(25,27,32,0.3)]" style={{ background: color }} />
               </button>
               <span aria-hidden className="pointer-events-none absolute w-max max-w-36 text-xs/[18px]" style={{ ...label, top: AXIS + 14 + lane * LANE }}>
-                <span className="block truncate font-medium">{m.name}</span>
-                <span className="block truncate text-muted-foreground tabular-nums">
+                <span className="block font-medium">{m.key}</span>
+                <span className="block whitespace-nowrap text-muted-foreground tabular-nums">
                   {SYMBOL[tone(m)]} {shortDate(m.date)}{m.slipDays > 0 && <span className="text-warn"> · {slip(m.slipDays)}</span>}
                 </span>
               </span>
             </Fragment>
           )
         })}
-      </div>
+      </div></div>
     </div>
   )
 }

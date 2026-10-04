@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { RotateCcw } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { toast } from 'sonner'
 import { AccentDot, Empty, ErrorBanner, Field, Loading, Page, Section, tdCls, thCls } from '@/components/hub/common'
 import { Key, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -10,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { SaveStatus } from '@/components/hub/fields'
 import { del, get, put } from '@/lib/api'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -28,12 +28,23 @@ export function PreferencesPage() {
   const q = useQuery({ queryKey: ['preferences'], queryFn: () => get<Prefs>('me/preferences') })
   const [err, setErr] = useState<unknown>(null)
   const [preview, setPreview] = useState<{ subject: string; body: string } | null>(null)
+  const [digestDraft, setDigestDraft] = useState<Partial<Prefs['digest']>>({})
+  const [eventDraft, setEventDraft] = useState<Record<string, { app?: boolean; email?: boolean }>>({})
+  const [eventFeedbackVersion, setEventFeedbackVersion] = useState<Record<string, number>>({})
+  const [pending, setPending] = useState<Record<string, boolean>>({})
   const reload = () => qc.invalidateQueries({ queryKey: ['preferences'] })
-  const run = async (f: () => Promise<unknown>) => { setErr(null); try { await f(); reload() } catch (e) { setErr(e) } }
+  const run = async (key: string, f: () => Promise<unknown>, onSuccess?: () => void) => {
+    if (pending[key]) return
+    setErr(null)
+    setPending((s) => ({ ...s, [key]: true }))
+    try { await f(); await reload(); onSuccess?.(); return true } catch (e) { setErr(e); throw e } finally { setPending((s) => ({ ...s, [key]: false })) }
+  }
   const header = { title: t('top.preferences'), subtitle: t('prefs.subtitle') }
   if (q.isPending) return <Page {...header}><div className="w-full max-w-[760px]"><Loading rows={8} /></div></Page>
   if (q.error) return <Page {...header}><div className="w-full max-w-[760px]"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div></Page>
   const p = q.data
+  const digest = { ...p.digest, ...digestDraft }
+  const events = p.events.map((e) => ({ ...e, ...eventDraft[e.code], serverApp: e.app, serverEmail: e.email }))
   return (
     <Page {...header}>
       <div className="flex w-full max-w-[760px] flex-col gap-6">
@@ -42,25 +53,33 @@ export function PreferencesPage() {
           <div className="divide-y">
             <div className="px-5 py-4">
               <label className="flex min-h-(--control-row-h) items-center gap-3 text-sm font-medium">
-                <Switch checked={p.digest.digestEnabled} onCheckedChange={(on) => run(() => put('me/preferences/digest', { enabled: on, time: p.digest.time }))} />{t('prefs.digestOn')}
+                <SaveStatus current={p.digest.digestEnabled}>{(track) => <Switch checked={digest.digestEnabled} disabled={!!pending.digest}
+                  onCheckedChange={(on) => { setDigestDraft((d) => ({ ...d, digestEnabled: on })); void track(run('digest', () => put('me/preferences/digest', { enabled: on, time: digest.time }), () => setDigestDraft((d) => { const next = { ...d }; delete next.digestEnabled; return next })), on) }} />}</SaveStatus>{t('prefs.digestOn')}
               </label>
             </div>
             <div className="px-5 py-4">
-              <Field label={t('prefs.digestTimeLabel')} htmlFor="digest-time" hint={p.digest.weekendDigests ? t('prefs.weekendOn') : t('prefs.weekendOff')}>
-                <Input id="digest-time" type="time" className="w-40" defaultValue={p.digest.time} disabled={!p.digest.digestEnabled}
-                  onBlur={(e) => e.target.value && e.target.value !== p.digest.time && run(async () => { await put('me/preferences/digest', { enabled: true, time: e.target.value }); toast.success(t('prefs.saved')) })} />
+              <Field label={t('prefs.digestTimeLabel')} htmlFor="digest-time" hint={digest.weekendDigests ? t('prefs.weekendOn') : t('prefs.weekendOff')}>
+                <SaveStatus current={p.digest.time}>
+                  {(track) => (
+                    <Input id="digest-time" type="time" className="w-40" value={digest.time} disabled={!digest.digestEnabled || !!pending.digest}
+                      onChange={(e) => setDigestDraft((d) => ({ ...d, time: e.target.value }))}
+                      onBlur={(e) => { if (e.target.value && e.target.value !== p.digest.time) void track(run('digest', () => put('me/preferences/digest', { enabled: digest.digestEnabled, time: e.target.value }), () => setDigestDraft((d) => { const next = { ...d }; delete next.time; return next })), e.target.value) }} />
+                  )}
+                </SaveStatus>
               </Field>
             </div>
             <div className="px-5 py-4">
-              <fieldset disabled={!p.digest.digestEnabled}>
+              <fieldset disabled={!digest.digestEnabled}>
                 <legend className="text-sm font-medium">{t('prefs.sections')} <span className="font-normal text-muted-foreground">{t('prefs.sectionsHint')}</span></legend>
                 <div className="mt-3 grid gap-x-4 gap-y-1 sm:grid-cols-2 md:grid-cols-3">
-                  {p.digest.sections.map((code) => {
-                    const on = !p.digest.sectionsOff.includes(code)
+                  {digest.sections.map((code) => {
+                    const on = !digest.sectionsOff.includes(code)
                     return (
                       <label key={code} className="flex min-h-(--control-row-h) items-center gap-2 text-sm">
-                        <Checkbox checked={on} onCheckedChange={(c) => run(() => put('me/preferences/digest', { enabled: p.digest.digestEnabled, time: p.digest.time,
-                          sectionsOff: c ? p.digest.sectionsOff.filter((x) => x !== code) : [...p.digest.sectionsOff, code] }))} />
+                        <SaveStatus current={!p.digest.sectionsOff.includes(code)}>{(track) => <Checkbox checked={on} disabled={!!pending.digest} onCheckedChange={(c) => {
+                          const sectionsOff = c ? digest.sectionsOff.filter((x) => x !== code) : [...digest.sectionsOff, code]
+                          setDigestDraft((d) => ({ ...d, sectionsOff })); void track(run('digest', () => put('me/preferences/digest', { enabled: digest.digestEnabled, time: digest.time, sectionsOff }), () => setDigestDraft((d) => { const next = { ...d }; delete next.sectionsOff; return next })), !!c)
+                        }} />}</SaveStatus>
                         {t(`prefs.section.${code}`)}
                       </label>
                     )
@@ -68,14 +87,14 @@ export function PreferencesPage() {
                 </div>
               </fieldset>
             </div>
-            {p.digest.managesProjects && (
+            {digest.managesProjects && (
               <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 px-5 py-4">
                 <div className="min-w-0 flex-1 space-y-1">
-                  <label className="flex min-h-(--control-row-h) items-center gap-3 text-sm font-medium"><Switch checked={p.digest.weeklySummaryEnabled}
-                    onCheckedChange={(on) => run(() => put('me/preferences/digest', { enabled: p.digest.digestEnabled, time: p.digest.time, weeklySummary: on }))} />{t('prefs.weekly')}</label>
+                  <label className="flex min-h-(--control-row-h) items-center gap-3 text-sm font-medium"><SaveStatus current={p.digest.weeklySummaryEnabled}>{(track) => <Switch checked={digest.weeklySummaryEnabled} disabled={!!pending.digest}
+                    onCheckedChange={(on) => { setDigestDraft((d) => ({ ...d, weeklySummaryEnabled: on })); void track(run('digest', () => put('me/preferences/digest', { enabled: digest.digestEnabled, time: digest.time, weeklySummary: on }), () => setDigestDraft((d) => { const next = { ...d }; delete next.weeklySummaryEnabled; return next })), on) }} />}</SaveStatus>{t('prefs.weekly')}</label>
                   <p className="text-xs/[18px] text-muted-foreground">{t('prefs.weeklyHint')}</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => run(async () => setPreview(await get('me/weekly-summary')))}>{t('prefs.weeklyPreview')}</Button>
+                <Button variant="outline" size="sm" disabled={!!pending.preview} onClick={() => void run('preview', async () => setPreview(await get('me/weekly-summary'))).catch(() => undefined)}>{t('prefs.weeklyPreview')}</Button>
               </div>
             )}
           </div>
@@ -101,14 +120,14 @@ export function PreferencesPage() {
                 </tr>
               </thead>
               <tbody>
-                {p.events.map((e) => {
+                {events.map((e) => {
                   const name = t(`event.${e.code}`)
                   return (
                     <tr key={e.code} className="border-t hover:bg-muted">
                       <td className={cn(tdCls, 'align-middle')}>{name}{e.direct && <span className="block text-xs/[18px] text-muted-foreground">{t('prefs.direct')}</span>}</td>
-                      <td className={cn(tdCls, 'align-middle')}><div className="flex justify-center"><Checkbox checked={e.app} aria-label={`${name} ${t('prefs.inApp')}`} onCheckedChange={(c) => run(() => put(`me/preferences/events/${e.code}`, { app: !!c, email: e.email }))} /></div></td>
-                      <td className={cn(tdCls, 'align-middle')}><div className="flex justify-center"><Checkbox checked={e.email} aria-label={`${name} ${t('prefs.email')}`} onCheckedChange={(c) => run(() => put(`me/preferences/events/${e.code}`, { app: e.app, email: !!c }))} /></div></td>
-                      <td className={cn(tdCls, 'align-middle text-right')}>{e.custom && <Button variant="ghost" size="sm" aria-label={t('prefs.resetEvent', { event: name })} onClick={() => run(() => del(`me/preferences/events/${e.code}`))}><RotateCcw className="size-3.5" />{t('prefs.reset')}</Button>}</td>
+                      <td className={cn(tdCls, 'align-middle')}><div className="flex justify-center"><SaveStatus key={`app-${e.code}-${eventFeedbackVersion[e.code] ?? 0}`} current={e.serverApp}>{(track) => <Checkbox checked={e.app} disabled={!!pending[`event-${e.code}`]} aria-label={`${name} ${t('prefs.inApp')}`} onCheckedChange={(c) => { const app = !!c; setEventDraft((d) => ({ ...d, [e.code]: { ...d[e.code], app } })); void track(run(`event-${e.code}`, () => put(`me/preferences/events/${e.code}`, { app, email: e.email }), () => setEventDraft((d) => { const next = { ...d }; if (!next[e.code]?.email) delete next[e.code]; else { const entry = { ...next[e.code] }; delete entry.app; next[e.code] = entry } return next })), app) }} />}</SaveStatus></div></td>
+                      <td className={cn(tdCls, 'align-middle')}><div className="flex justify-center"><SaveStatus key={`email-${e.code}-${eventFeedbackVersion[e.code] ?? 0}`} current={e.serverEmail}>{(track) => <Checkbox checked={e.email} disabled={!!pending[`event-${e.code}`]} aria-label={`${name} ${t('prefs.email')}`} onCheckedChange={(c) => { const email = !!c; setEventDraft((d) => ({ ...d, [e.code]: { ...d[e.code], email } })); void track(run(`event-${e.code}`, () => put(`me/preferences/events/${e.code}`, { app: e.app, email }), () => setEventDraft((d) => { const next = { ...d }; if (!next[e.code]?.app) delete next[e.code]; else { const entry = { ...next[e.code] }; delete entry.email; next[e.code] = entry } return next })), email) }} />}</SaveStatus></div></td>
+                      <td className={cn(tdCls, 'align-middle text-right')}>{e.custom && <Button variant="ghost" size="sm" disabled={!!pending[`event-${e.code}`]} aria-label={t('prefs.resetEvent', { event: name })} onClick={() => void run(`event-${e.code}`, () => del(`me/preferences/events/${e.code}`), () => { setEventDraft((d) => { const next = { ...d }; delete next[e.code]; return next }); setEventFeedbackVersion((v) => ({ ...v, [e.code]: (v[e.code] ?? 0) + 1 })) }).catch(() => undefined)}><RotateCcw className="size-3.5" />{t('prefs.reset')}</Button>}</td>
                     </tr>
                   )
                 })}

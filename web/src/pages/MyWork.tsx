@@ -25,6 +25,7 @@ import { ActionOwner, type ActionRow } from './projects/Meetings'
 import { FollowLevelSelect } from './projects/Follow'
 import { BUCKETS, PRIORITIES, StatusMenu, TASK_STATUSES, TaskIndicators, dueBucket, useTaskActions, type TaskRow } from './projects/Tasks'
 import { WorkspaceCoordination } from './WorkspaceCoordination'
+import { MyWeekStrip } from '@/components/planner/MyWeekStrip'
 
 interface Work {
   person: { id: string; displayName: string; jobTitle?: string; isActive: boolean }; readOnly: boolean; today: string
@@ -105,6 +106,7 @@ function Overview() {
   const userId = sp.get('userId') ?? undefined
   const q = useQuery({ queryKey: ['mywork', userId], queryFn: () => get<Work>(`me/work${qs({ userId })}`) })
   const [creating, setCreating] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const f = { project: sp.get('project') ?? '', discipline: sp.get('discipline') ?? '', status: sp.get('status') ?? '', priority: sp.get('priority') ?? '',
     from: sp.get('from') ?? '', to: sp.get('to') ?? '', hideWaiting: sp.get('hideWaiting') === '1', sort: sp.get('sort') ?? 'due' }
@@ -172,7 +174,8 @@ function Overview() {
     </li>
   )
   const list = (rows: ReactNode[], empty: string) => rows.length ? <ul className="divide-y">{rows}</ul> : <Empty>{empty}</Empty>
-  const sections: { id: string; title: string; count: number; body: ReactNode; open?: boolean; accent?: Accent }[] = [
+  const sections: { id: string; title: string; count?: number; body: ReactNode; open?: boolean; accent?: Accent }[] = [
+    ...(!userId ? [{ id: 'my-week', title: t('planner.myWeek'), body: <MyWeekStrip personId={me.id} canPlan={me.capabilities.workload} />, accent: 'blue' as Accent }] : []),
     { id: 'attention', title: t('mywork.attention'), count: w.attention.total, accent: 'peach', body: <>
       <AttentionRows items={w.attention.items} canSnooze={false} showProject onChanged={reload} />
       {w.attention.total > w.attention.items.length && <p className="border-t px-5 py-2.5 text-xs/[18px] text-muted-foreground">{t('mywork.attentionMore', { n: w.attention.items.length, total: w.attention.total })}</p>}
@@ -238,6 +241,8 @@ function Overview() {
     <Page title={ro ? t('mywork.of', { name: w.person.displayName }) : t('mywork.title')} subtitle={ro ? t('mywork.readOnly') : me.displayName}
       actions={!ro && <><ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
       {!ro && <MyWorkTabs />}
+      <Button className="self-start sm:hidden" variant="outline" aria-expanded={filtersOpen} aria-controls="mw-filters" onClick={() => setFiltersOpen((open) => !open)}>{t('mywork.filters', { n: tokens.length })}</Button>
+      <div id="mw-filters" className={cn(!filtersOpen && 'hidden sm:block')}>
       <FilterBar>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.project')} htmlFor="mw-project" className="w-full sm:w-40">
@@ -275,12 +280,13 @@ function Overview() {
         <div className="flex flex-wrap items-center gap-2">
           <ChipToggle on={f.hideWaiting} onClick={() => set('hideWaiting', f.hideWaiting ? undefined : '1')}>{t('mywork.hideWaiting')}</ChipToggle>
         </div>
-        <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))} onRemove={(k) => set(k)} onClear={clear} />
       </FilterBar>
+      </div>
+      <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))} onRemove={(k) => set(k)} onClear={clear} />
       <nav aria-label={t('mywork.sections')} className="flex flex-wrap gap-2">
         {sections.map((s) => (
           <a key={s.id} href={`#mw-${s.id}`} className="inline-flex min-h-(--control-row-h) items-center gap-1.5 rounded-md border bg-card px-3 text-sm hover:bg-muted">
-            {s.title}{s.count > 0 && <span className="rounded-md bg-secondary px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">{s.count}</span>}
+            {s.title}{(s.count ?? 0) > 0 && <span className="rounded-md bg-secondary px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">{s.count}</span>}
           </a>
         ))}
       </nav>

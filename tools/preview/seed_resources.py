@@ -3,11 +3,12 @@
 
 Usage: python3 tools/preview/seed_resources.py [base-url]    (default http://localhost:5080)
 Synthetic local preview data only: every project, task and reason here is invented and says so. Signs in with the
-development header (X-Dev-User), and refuses to run unless GET /api/v1/config reports authMode == "Development"; never
+development header (X-Dev-User), and refuses to run unless GET /api/v1/config reports authMode == "Development"; the named local preview database is verified before any writes; never
 aim it at a real environment. Every write goes through the API as the person who would make it, so validation,
 permissions and audit apply; the Admin also switches on restricted projects so SYN-103 can be Restricted. Dates are
 relative to the organisation's today (GET /api/v1/me), so it works on any day. If SYN-101 already exists it creates
 nothing and only prints the summary. A refused step is printed with its status and error code; the rest continues."""
+from preview_target import verify_preview_target
 import datetime as dt
 import json
 import sys
@@ -16,6 +17,7 @@ import urllib.request
 import uuid
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5080"
+verify_preview_target(BASE)
 NUMBERS = ("SYN-101", "SYN-102", "SYN-103")
 refusals = []
 

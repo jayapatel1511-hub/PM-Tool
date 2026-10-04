@@ -1,7 +1,7 @@
 # Implementation Plan: Weekly Planning Layer
 
 **Packet**: 034 | **Feature directory**: `specs/034-weekly-planning-layer` | **Date**: 2026-10-03 | **Spec**: [spec.md](spec.md)
-**Status**: Proposed implementation plan. This change contains specifications only; no application code is changed.
+**Status**: Locally implemented and software/browser checks recorded in `verification.md`; remaining work is uncommitted. T023 is blocked at Validation step 10's manual screen-reader pass.
 **Input**: Product specification §39, §8.11, §10.9, §13.21, §13.10; packet 029 as built (`specs/029-dated-capacity-allocations/verification.md`).
 
 ## Summary
@@ -29,9 +29,9 @@ Add one person-scoped table, `planning_entry`, and one feature module, `Planning
 | I. Coordination First | Answers "who has room and what is planned" for project and non-project work; §30 respected: time away is a non-sensitive availability override, not leave management; no levelling or auto-assignment | PASS — one record, no workflow engine, no leave data |
 | II. Deterministic and Explainable | Rules PLN-01–PLN-19 are pure functions; thresholds are §10.9 settings; contribution list and indicator explanations are the "Why?" | PASS — `PlanningRules` has no I/O; no constant threshold; AC worked examples become tests |
 | III. One Accountable Owner | Each entry has one owner, its creator; approved allocations keep their §37.6 ownership | PASS — `created_by` is required; owner never changes |
-| IV. Specification Is the Source of Truth | §39, §8.11, §10.9, §13.21 and the §13.10 row amended in this change; canonical names verbatim and distinct from Workload's | PASS — `build_spec`/`trace_spec` checks pass |
+| IV. Specification Is the Source of Truth | §39, §8.11, §10.9, §13.21 and the §13.10 row amended in this change; canonical names verbatim and distinct from Workload's | PASS — build/trace results recorded in `verification.md` |
 | V. Traceable by Construction | Same-transaction activity rows through `HubDb.SaveChanges`; soft delete; row versions | PASS — `AuditRules.Fields` entry, explicit action notes, no hard delete |
-| VI. Secure by Default | Deny by default from §8.11; one visibility predicate for every read, aggregate, export, search, notification, digest and history; Admin draft access needs a reason and is logged | PASS — matrix rows become `PermissionMatrixTests`; privacy sweep tests every read path |
+| VI. Secure by Default | Deny by default from §8.11; one visibility predicate for every read, aggregate, export, search, notification, digest and history; Admin draft access needs a reason and is logged | PASS — full matrix, all-surface privacy and queued-email revocation tests recorded in `verification.md` |
 | VII. Simple Enough for a Small Team | One table, one feature file, one domain file; no broker, job, cache or materialised table | PASS — no Complexity Tracking entry |
 
 Open product decisions this plan depends on: Q4 (restricted projects: PLN-15 uses the Workload partial rule), Q6 (organisation time zone for ISO weeks), Q7 (externalised strings), Q18 (capacity default stays 40 h, an integer setting), Q19 (direct reports only). The §39.12 defaults are used until Jay decides otherwise; T001 records his answers.
@@ -66,15 +66,15 @@ All commands run in `Tx.Run(db, …)`: check the §8.11 permission with the pure
 
 ### Notifications
 
-New event `NotificationEvents.PlanningEntryChanged` (App on, Email off, not `ProjectScoped`). `NotifyItem(ProjectId: null, ItemType: "PlanningEntry", ItemId: entry.Id, ItemKey: null, Link: "/my-work?myWeek={startWeek}")`. Recipient: the person, only when PLN-16 applies and the person passes PLN-04 for the entry; never the actor (the existing `Notifier` rule). Titles: `notify.planning_shared`, `notify.planning_changed`, `notify.planning_withdrawn`, `notify.planning_corrected` with owner name, label, hours and week range only. The existing five-minute collapse key (`event:item:actor`) applies.
+New event `NotificationEvents.PlanningEntryChanged` (App on, Email off, not `ProjectScoped`). `NotifyItem(ProjectId: null, ItemType: "PlanningEntry", ItemId: entry.Id, ItemKey: null, Link: "/my-work?myWeek={startWeek}")`. Recipient: the person, only when PLN-16 applies and the person passes PLN-04 for the entry; never the actor (the existing `Notifier` rule). Titles use `planning.changed` with the visible entry label; the body carries qualified confidence and visibility. Withdrawal uses only the generic `planning.withdrawn` message and `/my-work`, with no entry identifier or details. The existing five-minute collapse key (`event:item:actor`) applies.
 
 ### Audit and history
 
-`AuditRules.Fields[typeof(PlanningEntry)] = ["PersonId", "HoursPerWeek", "StartWeek", "EndWeek", "Label", "SourceCategory", "ProjectId", "ProjectDisciplineId", "Confidence", "Visibility", "Notes", "DeletedAt"]`. `LastValidatedAt` is not a logged field; Still valid writes a note with action `Validated`. Explicit actions: `Moved` (person change), `VisibilityChanged`, `Validated`; Admin corrections add the reason and category `correction`. No `FieldCategory` entry is added, because `PersonId` and `Visibility` are shared names with existing audited records whose categories must not change. `PlanningEntry.AuditProjectId` is always null, so project activity, Following feeds, project digests and reports never read planning rows. `Admin.cs` org activity excludes `ItemType = "PlanningEntry"`. Admin draft access writes `db.LogEvent("PlanningDraftAccess", null, "Viewed", "access", reason: reason, changes: new { personIds, from, weeks })`, which does appear in org activity.
+`AuditRules.Fields[typeof(PlanningEntry)] = ["PersonId", "HoursPerWeek", "StartWeek", "EndWeek", "Label", "SourceCategory", "ProjectId", "ProjectDisciplineId", "Confidence", "Visibility", "Notes", "LastValidatedAt", "DeletedAt"]`. `LastValidatedAt` is logged so the old and new validation time is retained; Still valid also writes an explicit `Validated` action. Explicit actions: `Moved` (person change), `VisibilityChanged`, `Validated`; Admin corrections add the reason and categories `admin`, `data-correction`. No `FieldCategory` entry is added, because `PersonId` and `Visibility` are shared names with existing audited records whose categories must not change. `PlanningEntry.AuditProjectId` is always null, so project activity, Following feeds, project digests and reports never read planning rows. `Admin.cs` org activity excludes `ItemType = "PlanningEntry"`. Admin draft access writes `db.LogEvent("PlanningDraftAccess", null, "Viewed", "access", reason: reason, changes: new { personIds, from, weeks })`, which does appear in org activity.
 
 ### Search, saved views, digest, export
 
-- Search group `planning` in `SearchEndpoints.Groups`: `PlanningEndpoints.VisibleEntries(db, access, …)` filtered by `ILIKE` on label or notes; result `{ id, name: "<person> · <label>", status: <visibility display key>, dueDate: endWeek, personId }`; link `/planner?person={personId}&entry={id}&from={startWeek}`.
+- Search group `planning` in `SearchEndpoints.Groups`: `PlanningEndpoints.VisibleEntries(db, access, …)` filtered by `ILIKE` on label or notes; result `{ id, name: "<person> · <label>", status: <stored visibility or Self>, dueDate: endWeek, startWeek, personId }`. The central planning-label mapping qualifies visibility. Self results link to `/my-work?myWeek={startWeek}&planningEntry={id}`; manager results link to `/planner?personId={personId}&entry={id}`.
 - Saved views: `ViewEndpoints.Lists["planner"] = ["view", "from", "weeks", "week", "supervisorId", "disciplineId", "officeId", "personId", "projectId", "source", "confidence", "visibility", "indicator", "q", "sort", "includeMyDrafts"]`.
 - Digest section `planning` (added to `Digest.SectionCodes` after `allocations`): the recipient's own visible entries for which `PlanningRules.Stale` is true; row link `/planner?entry={id}` for manager entries and `/my-work?myWeek={startWeek}` for self entries.
 - Exports through `ExportFile.Send` with the same visible rows; more than `Export.MaxRows` rows → 422 `export_too_large`.
@@ -87,6 +87,7 @@ An existing file is extended, never replaced; unrelated edits by other work are 
 
 - `src/Hub.Domain/Planning.cs` — vocabulary constants (`PlanningVisibility`, `PlanningConfidence`, `PlanningSource`, `PlanningIndicator`, `PlanningWarning`) and `PlanningRules` pure functions.
 - `src/Hub.Api/Data/PlanningEntities.cs` — `PlanningEntry`.
+- Additive `PlanningNotificationPrivacy` migration (+ Designer/snapshot) adds an empty-default `EmailMessage.RequiredPlanningEntryIds` array; existing email rows keep their behavior.
 - `src/Hub.Api/Data/Migrations/<timestamp>_PlanningEntries.cs` and `.Designer.cs` (generated), plus the generated update to `src/Hub.Api/Data/Migrations/HubDbModelSnapshot.cs`.
 - `src/Hub.Api/Features/Planning.cs` — `PlanningEndpoints`: routes, read model, commands, time-away command, `VisibleEntries`, notification helper, digest and search helpers.
 
@@ -96,12 +97,16 @@ An existing file is extended, never replaced; unrelated edits by other work are 
 - `src/Hub.Domain/Settings.cs` — six `planning_*` settings (properties, `Defs` in group `planning`, `From`, per-key ranges in `Validate`); `NotificationEvents.PlanningEntryChanged`.
 - `src/Hub.Api/Data/HubDb.cs` — `DbSet<PlanningEntry> PlanningEntries`, model configuration (checks, indexes, foreign keys, query filter).
 - `src/Hub.Api/Infrastructure/Audit.cs` — `AuditRules.Fields` entry only.
-- `src/Hub.Api/Infrastructure/Digest.cs` — `planning` section code and rows.
+- `src/Hub.Api/Infrastructure/Digest.cs` — `planning` section code and rows, with scoped delivery metadata.
+- `src/Hub.Api/Data/Entities.cs` — additive `EmailMessage.RequiredPlanningEntryIds` metadata for planning recipients.
+- `src/Hub.Api/Infrastructure/Email.cs` — rechecks current PLN-04 scope for planning-only queue items immediately before delivery; generic withdrawal checks recipient activity. Existing email branches are unchanged.
+- `src/Hub.Api/Features/Notifications.cs` — planning-only current-entry authorization in the shared notification query for list, pulse, count and read commands; other event predicates are unchanged.
+- `src/Hub.Api/Infrastructure/Idempotency.cs` — route only `/api/v1/planning` POSTs to the packet-specific atomic, body-bound, permission-rechecked receipt in `Planning.cs`; existing POST paths retain their baseline behavior.
 - `src/Hub.Api/Features/Search.cs` — `planning` group.
 - `src/Hub.Api/Features/Views.cs` — `planner` list type.
 - `src/Hub.Api/Features/Admin.cs` — org activity excludes `PlanningEntry` rows (one predicate).
 - `src/Hub.Api/Features/Modules.cs` — `PlanningEndpoints.Map(api);`.
-- `src/Hub.Api/Features/Workload.cs` — `People`, `Tasks` and `LiveProjects` change from `private` to `internal`; no other change.
+- `src/Hub.Api/Features/Workload.cs` — `People`, `Tasks` and `LiveProjects` change from `private` to `internal`; the nested `TaskRow` type is also `internal` solely so the packet-034 read model can consume the existing task projection; no behavior change.
 - `src/Hub.Api/Text.cs` — server text (validation, notifications, digest, export headers, search label).
 
 **Backend — must not change** (AC-PLN-11): `src/Hub.Api/Features/Allocations.cs`, `src/Hub.Domain/Allocations.cs`, `src/Hub.Domain/Workload.cs`, `src/Hub.Api/Features/Readiness.cs`, `src/Hub.Api/Data/AllocationEntities.cs`, existing migrations, `src/Hub.Api/Infrastructure/Coordination.cs`, `src/Hub.Api/Infrastructure/Notify.cs`.
@@ -109,6 +114,7 @@ An existing file is extended, never replaced; unrelated edits by other work are 
 **Tests**
 
 - New `tests/Hub.Tests/Domain/PlanningTests.cs` — every `PlanningRules` function with the cases below; settings validation ranges.
+- New `tests/Hub.Tests/Api/PlanningContractTests.cs` — exact read-model totals, filtered accounting, coverage, lifecycle, concurrent receipt, private/restricted scope and packet-029 time-away parity.
 - New `tests/Hub.Tests/Api/PlanningSchemaTests.cs` — each database check, index and foreign key on a fresh PostgreSQL; migration up and down.
 - New `tests/Hub.Tests/Api/PlanningApiTests.cs` — AC-PLN-01, AC-PLN-03 to AC-PLN-13, AC-PLN-15, AC-PLN-16, AC-PLN-19, AC-PLN-20; commands, versions, idempotency, exports, time-away parity, no-change regression.
 - New `tests/Hub.Tests/Api/PlanningPrivacyTests.cs` — AC-PLN-02 sweep: grid, cell, list, detail, history, exports, search, notifications, digest, saved-view results and Admin org activity, for owner, person, other Supervisor, Executive, Project Manager, Admin with and without data-correction mode.
@@ -119,8 +125,8 @@ An existing file is extended, never replaced; unrelated edits by other work are 
 
 - New `web/src/pages/Planner.tsx` — page: header, filters, Grid/List, export, saved views (`ViewMenu`), phone notice (`app.phoneNotice`), data-correction mode for Admins.
 - New `web/src/components/planner/PlannerGrid.tsx` — ARIA grid, sticky 240 px person column, ≥ 144 px week columns, cells, expanded sub-rows, inline quick add, roving focus.
-- New `web/src/components/planner/ContributionList.tsx` — cell breakdown (`ui/popover` on desktop, full-width overlay on tablet).
-- New `web/src/components/planner/EntryPanel.tsx` — side panel (`ui/sheet`, 560 px): fields, visibility segmented control (`ui/toggle-group`), Still valid, Copy, Delete (`ConfirmDialog`), history (`components/hub/activity` renderer).
+- New `web/src/components/planner/ContributionList.tsx` — cell breakdown in the shared accessible `ui/dialog`, with capacity days, entry metadata, coverage, approved allocations and indicator explanations.
+- New `web/src/components/planner/EntryPanel.tsx` — side panel (`ui/sheet`, 560 px): fields, visibility buttons with the current value disabled, Still valid, Copy, Delete (`ConfirmDialog`), person-scoped history with loading and failed-load feedback.
 - New `web/src/components/planner/TimeAwayDialog.tsx` — range form (`ui/dialog`) reading `GET /users/{id}/availability` versions first.
 - New `web/src/components/planner/MyWeekStrip.tsx` — six-week strip reusing `PlannerGrid` in single-row mode.
 - New `web/src/components/planner/labels.ts` — the only place that turns stored confidence, visibility and approval status into display keys (AC-PLN-14), plus shared types.
@@ -196,7 +202,7 @@ That a project discipline belongs to the linked project, that a project is live 
 | `planning_stale_days` | Int | 28 | 1–365 | `PlanningStaleDays` |
 | `planning_max_hours_per_week` | Int | 80 | 1–168 | `PlanningMaxHoursPerWeek` |
 
-`OrgSettings.Validate` replaces its one special case with a per-key range table that keeps `coordination_lookahead_weeks` at 1–12 and every other integer at 0–3650.
+`OrgSettings.Validate` uses a per-key range table: `coordination_lookahead_weeks` remains 1–12 and each planning setting uses the exact range above; unrelated integer settings retain their existing validation rules.
 
 ## API contracts
 

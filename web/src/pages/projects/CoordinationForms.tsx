@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 import { toast } from 'sonner'
 import { ErrorBanner, Field, Missing, Spinner, selectCls } from '@/components/hub/common'
 import { Avatar } from '@/components/hub/people'
-import { Pill, toneOf, type Tone } from '@/components/hub/pills'
+import { Pill, toneOf } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -34,19 +34,9 @@ export function SelectField({ label, value, onChange, choices, required = true }
   return <Field label={label} htmlFor={id}><select id={id} className={selectCls} required={required} value={value} onChange={e => onChange(e.target.value)}><option value="">{t('coord.choose')}</option>{choices.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></Field>
 }
 
-// Coordination states the shared status map does not name yet, in the §13.0 language: the state's own text and symbol,
-// never colour alone. Anything else falls back to the shared mapping.
-const COORD_TONE: Record<string, Tone> = {
-  Draft: 'idle', Submitted: 'work', 'Clarification Requested': 'warn', Returned: 'warn', Incorporated: 'done',
-  'Changes Required': 'warn', Approved: 'done', Superseded: 'idle', Withdrawn: 'idle', Responded: 'work', 'Verified Closed': 'done',
-  'Pending Assessment': 'warn', 'Update Required': 'warn', 'Clarification Needed': 'warn', Unaffected: 'done',
-  Checking: 'work', Ready: 'ok', Proposed: 'work', Confirmed: 'done', Committed: 'work', Met: 'done', 'Not Met': 'bad',
-  'Needs Assessment': 'warn', 'Not Ready': 'bad', 'Proceed under Assumption': 'warn', 'Resolution Proposed': 'work', 'Verified Removed': 'done',
-  Pass: 'done', Fail: 'bad', Blocking: 'bad', Advisory: 'idle',
-}
 /** A coordination state as a pill; a missing state reads as unavailable, never as a pass. */
 export function CoordStatus({ status }: { status?: string | null }) {
-  return status ? <Pill tone={COORD_TONE[status] ?? toneOf(status)}>{tv(status)}</Pill> : <Missing />
+  return status ? <Pill tone={toneOf(status)}>{tv(status)}</Pill> : <Missing />
 }
 /** A count that needs attention keeps its symbol (§13.0); an unknown count is never shown as zero. */
 export function Count({ n, tone }: { n?: number | null; tone: 'bad' | 'warn' }) {

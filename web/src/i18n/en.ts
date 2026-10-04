@@ -2098,6 +2098,8 @@ export const en: Record<string, string> = {
   'register.group.related': 'Related work',
 
   // Integrated en-work.ts
+  'task.empty': 'No tasks match. Add the work each discipline must do, under the deliverable it produces.',
+  'task.removeFilter': 'Remove filter {name}',
   'task.emptyTitle': 'No tasks yet',
   'task.emptyHint': 'Add the work each discipline must do, under the deliverable it produces. Each task then shows its owner, dates and status here.',
   'task.emptyFilteredTitle': 'No tasks match these filters',

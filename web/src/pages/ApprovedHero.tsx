@@ -62,7 +62,7 @@ export function ApprovedHero() {
               <div className="screen-preview">
                 <img
                   id="paper-background"
-                  src="/landing/tuesday-board-current.jpg"
+                  src="/landing/tuesday-board-current.jpg?v=93a350c5"
                   alt=""
                   width="1728"
                   height={873}

@@ -282,8 +282,8 @@
 .approved-hero .rail-line { display:none; }
 .approved-hero :is(header,.hero) :is(button,a):focus-visible { outline-color:var(--hero-text); }
 .approved-hero .hero { display:flex; flex-direction:column; justify-content:flex-start; padding-bottom:54px; min-height:100svh; }
-.approved-hero .hero:before { content:''; position:absolute; z-index:-3; inset:0; background:radial-gradient(ellipse 58% 38% at 12% 56%,#e7c79870,transparent 76%),radial-gradient(ellipse 54% 37% at 91% 55%,#c9d5ac80,transparent 78%); }
-.approved-hero .hero:after { content:''; position:absolute; z-index:-2; top:350px; left:50%; width:min(1500px,130vw); aspect-ratio:1; border-radius:50%; transform:translateX(-50%); background:#ffffff4d; pointer-events:none; }
+.approved-hero .hero:before { content:''; position:absolute; z-index:-3; inset:0; background:radial-gradient(ellipse 62% 44% at 8% 56%,#e7c79870,transparent 80%),radial-gradient(ellipse 60% 44% at 94% 58%,#c9d5ac80,transparent 82%),radial-gradient(ellipse 62% 26% at 50% 78%,#ffffff80,transparent 85%); }
+.approved-hero .hero:after { content:none; }
 .approved-hero .hero-copy { order:1; padding:142px 0 0; width:min(1050px,calc(100% - 80px)); text-align:center; }
 .approved-hero h1 { font-family:'Instrument Serif',Georgia,serif; font-size:clamp(68px,6.2vw,92px); line-height:1.01; font-weight:400; letter-spacing:-2.5px; margin:24px 0 20px; }
 .approved-hero h1 em { font-style:italic; letter-spacing:-2.5px; }
@@ -297,7 +297,10 @@
 .approved-hero .text-button { font-size:14px; }
 .approved-hero .discipline-rail { justify-content:center; margin:24px auto 0; gap:28px; }
 .approved-hero .paper-art { display:block; position:relative; inset:auto; z-index:0; overflow:visible; order:2; width:min(1280px,calc(100% - 112px)); margin:40px auto 0; }
-.approved-hero .app-mockup { position:relative; border-radius:10px; background:#f5f6fa; border:1px solid #d7ddd9; box-shadow:0 20px 50px -22px #253c3230,0 46px 90px -42px #48513630; }
+/* The decorative capture belongs to the same canvas: no floating-card frame or heavy shadow.
+   Its edges fade into the page; the actual application remains fully opaque and unmodified. */
+.approved-hero .app-mockup { position:relative; background:transparent; border:0; box-shadow:none; }
+.approved-hero .paper-art .screen-preview { mask-image:linear-gradient(to bottom,transparent,black 5%,black 76%,transparent),linear-gradient(to right,transparent,black 5%,black 95%,transparent); mask-composite:intersect; -webkit-mask-image:linear-gradient(to bottom,transparent,black 5%,black 76%,transparent),linear-gradient(to right,transparent,black 5%,black 95%,transparent); -webkit-mask-composite:source-in; }
 .approved-hero .paper-art .screen-preview { border-radius:9px; }
 .approved-hero .app-background-note { display:none; color:var(--hero-muted); font-size:12px; line-height:1.5; }
 .approved-hero .app-background-note { display:block; position:relative; order:3; margin:24px 24px 0; text-align:center; }

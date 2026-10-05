@@ -62,17 +62,12 @@ export function ApprovedHero() {
               <div className="screen-preview">
                 <img
                   id="paper-background"
-                  src="/landing/board.svg"
+                  src="/landing/tuesday-board-current.jpg"
                   alt=""
                   width="1728"
                   height={873}
                   decoding="async"
                   fetchPriority="high"
-                  onError={({ currentTarget }) => {
-                    if (currentTarget.getAttribute('src') === '/landing/board.svg') {
-                      currentTarget.src = '/landing/tuesday-board.jpg'
-                    }
-                  }}
                 />
               </div>
             </div>

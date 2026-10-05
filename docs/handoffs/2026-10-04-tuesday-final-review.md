@@ -2,19 +2,35 @@
 
 4 October 2026. Worktree: `/Users/jaypatel/PM-Tool/.claude/worktrees/tuesday-visual-batch1`; branch `claude/tuesday-visual-batch1`; baseline `9d3e9b91`.
 
-**Status: implementation and software/browser checks PASS; the full goal remains BLOCKED at packet T023's manual screen-reader validation.** Implementation is local. No remaining changes have been committed, pushed or deployed. Another session previously committed the spec and visual batch as `586fc48b` and `9d3e9b91`; Jay authorized continuing from that baseline and leaving all further work uncommitted. No history was rewritten.
+**Current status: implementation and software/browser checks PASS; release `d81c13f9084cfd4e828ab9762433d38c3849b302` is committed, pushed, deployed to the synthetic review stack and passed post-deployment safety gates. The full goal remains BLOCKED at T023's manual screen-reader validation and human acceptance.** Another session previously committed the spec and visual batch as `586fc48b` and `9d3e9b91`; Jay later authorized the reviewed synthetic release. No history was rewritten.
 
-## Deployment authorization — 4 October, evening
+## Landing follow-up — locally verified, not yet redeployed
+
+Jay requested a current board image, seamless background blending, then explicitly preferred the older colours over the white/mint trial. The current local hero keeps the approved pale paper, forest ink and amber/sage palette. Broad washes and a soft decorative-image mask blend the app capture into the page; the floating frame, heavy shadow and old-image fallback are removed. The unchanged 1728 × 873 JPEG comes from Priya's existing synthetic `/boards` preview, visibly labelled fictional; no records were edited. Its 102957 bytes and SHA-256 match `web/public/landing/capture.json`.
+
+Independent source/provenance review found no actionable issue. Root inspected the final desktop and phone screenshots. Final build PASS; exact type-check and lint PASS (87 existing warnings, no new); eight cold public landing/login rechecks at 1440/1024/768/375 PASS with zero findings, replacing those cases in the retained 1956-combination evidence. This is an affected-route recheck, not another fresh full sweep. Evidence: `/private/tmp/tuesday-hero-paper-{build,sweep}.log`, `/private/tmp/tuesday-sweep-hero-paper/`. ReUI's MCP audit guidance and the business UI design skill informed the review; no new component package, image generation, authentication or app behaviour changes.
+
+The deployed release below still serves the prior hero. The follow-up needs its own exact-head CI, prepared committed release and Jay's own-terminal sudo activation. The current local result awaits Jay's visual acceptance. T023 manual screen-reader and SC-001 remain unrun. Brand mark, holiday/manual-role removal confirmations and per-notification Mark read remain open decisions.
+
+## Current deployment evidence — verified 5 October 2026 UTC / 4 October Halifax
+
+The review pointer is `d81c13f9084cfd4e828ab9762433d38c3849b302`; the separate pilot pointer remains `29b3d7036f529b513fdc2ad47cff62a0b75f0b59`. Draft PR #37 remains unmerged. Exact-head CI 37245644519 passed with 1,036 passed and zero failures/skips, rules branch coverage 96.8%, service line coverage 94.5%, and planner 14 base plus six recovery flows, 181 calls and seven zero-finding axe scans. Local Resources also passed because CI does not configure that suite.
+
+The activation and `postdeploy-d81c13f9.sh` were run by Jay in his own Terminal. Independent log review confirmed both planning migrations, exact review image/volume checks, a 1255924-byte mode-0600 fresh backup, isolated restore of four projects with cleanup, and restart persistence counts `projects|people|planning = 4|3|0`. Private/public health and auth probes passed: health 200, anonymous 401, invalid private Host 400, unsafe Origin 403, wrong password 401, sign-in 204, authenticated `/me` and project list 200, sign-out 204, then `/me` 401. Existing copied-cookie replay returned 200 and remains a disclosed stateless eight-hour expiry behavior. A transient curl 52 during restart recovered before the final PASS.
+
+The versioned hosted login loaded the new JS/CSS and versioned authenticated My Work showed the synthetic banner after initial old-HTML caching. Hosted browser review remains bounded. The landing follow-up above is locally verified, not deployed; T023, SC-001 and Jay's acceptance remain open.
+
+## Historical deployment preparation — 4 October, evening (completed above)
 
 Jay returned home and explicitly answered **“Yes, commit and deploy synthetic review.”** This supersedes the earlier uncommitted/no-deployment hold for the reviewed candidate. Current preparation is for the existing review stack only, preserving unrelated edits and all pilot/operational data. Host preflight verified the current review and pilot pointers at `29b3d7036f529b513fdc2ad47cff62a0b75f0b59`, review origin health HTTP 200 with the configured proxy headers, and the existing tunnel active. That release is an ancestor of the candidate. The candidate's 114 selected files and 315 frozen application/test/build sources had zero drift since final checks. GitHub authentication is valid when checked outside the network sandbox.
 
 Prepare a reviewed commit, incorporate the approved Paper hero commit from origin/main, and pass the required draft-PR CI before transferring the exact committed tree. The approved candidate implementation is committed as `c829f0e6`. Hero merge resolution retains the approved main hero/component/assets and the reviewed sign-in/12 px fixes; two unused incoming Task translation keys are preserved, giving 3,563 unique English keys. No UI flow or authenticated API behavior changes in this integration. Interactive homedev sudo remains a user step. Deployment is not yet claimed complete. T023 stays BLOCKED/UNRUN and human acceptance/pilot remains pending; Jay authorized this synthetic review deployment with that limitation disclosed. Historical local-only status statements below describe the earlier snapshot.
 
-## Latest release review loop
+## Historical local release review loop (superseded above)
 
 The additional review/fix loop passes on the final candidate: exact type-check, lint with zero new warnings, review build, all five browser suites and local Release publish. Planner now has 14 base flows plus six recovery regressions, 180 API calls and seven axe scans with zero findings. All 96 affected six-role/four-width routes cold-rechecked successfully; the retained full sweep plus rechecks has 1,956 unique zero-finding combinations. The earlier UX final3 evidence below is retained and superseded for these repaired planner paths. CI includes planner checks, and only fictional review enables the synthetic banner in the shared review/pilot build.
 
-**Deployment requested but not performed.** The existing path needs a committed reviewed SHA and interactive homedev sudo; those conflict with the earlier uncommitted/no-authentication instructions. No host connection or authentication was attempted. T023 remains BLOCKED/UNRUN. See [the release-loop report](../reviews/2026-10-04-tuesday-release-review-loop.md) for final commands, fixes, candidate scope and exact blockers.
+**Historical checkpoint before authorization: deployment requested but not performed.** The existing path needs a committed reviewed SHA and interactive homedev sudo; those conflict with the earlier uncommitted/no-authentication instructions. No host connection or authentication was attempted. T023 remains BLOCKED/UNRUN. See [the release-loop report](../reviews/2026-10-04-tuesday-release-review-loop.md) for final commands, fixes, candidate scope and exact blockers.
 
 ## Review preview
 
@@ -89,7 +105,7 @@ Packet 029 keeps its eight-week grid, partial-scope rules, approval statuses and
 Jay's four product decisions remain explicitly deferred:
 
 1. The unified brand mark.
-2. Re-capturing the hero board image after the final UI is approved.
+2. Hero board recapture: completed locally at Jay's request; publication and visual acceptance pending as described above.
 3. Confirmation behavior for deleting holidays and removing manual roles.
 4. Per-notification Mark read.
 

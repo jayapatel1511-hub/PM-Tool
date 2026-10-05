@@ -1,21 +1,39 @@
 {
-  "capturedDate": "2026-10-03",
-  "method": "Read-only rendered DOM snapshots from native Chrome",
-  "sourceBuild": "src/Hub.Api/wwwroot (maintained build captured in the local design worktree)",
-  "sourceCss": "index-DXxw5p9j.css",
-  "sourceCssSha256": "3cd835b684e1c8ce3c4ff93a35bb092f203784b48a45a5ce4ace6e95d892cfd2",
-  "fixture": "Same isolated fictional GET API as the JPEG captures; maintained source untouched",
-  "usage": "Static SVG image of the same fictional Board DOM with embedded unmodified source CSS and fixed 1728x873 image viewport; no application scripts, frames, live API or active links",
+  "capturedDate": "2026-10-04",
+  "method": "Read-only browser screenshot of the maintained Tuesday synthetic preview",
+  "sourceBuild": "d81c13f9084cfd4e828ab9762433d38c3849b302 on local Vite preview; application source unchanged at capture",
+  "fixture": "Existing pm-tuesday-preview-db at 127.0.0.1:55433; Priya development account; fictional records labelled in the captured shell; no record mutation",
+  "usage": "Static JPEG of current Tuesday workspace Board; no live data, scripts, frames or active destinations",
   "captures": [
     {
       "id": "board",
-      "file": "board.svg",
-      "route": "/projects/DEMO-101/board",
+      "file": "tuesday-board-current.jpg",
+      "route": "/boards",
       "width": 1728,
       "height": 873,
-      "bytes": 175484,
-      "sha256": "de125d8750004cad200dc47563d03bd8d43f0d84715dce1e68773351e7deeeb8",
-      "sourceDomSha256": "82ab8d8e041762b797c6635fb142b7f217dd04f15bc593af516e4a336c29b0fc"
+      "bytes": 102957,
+      "sha256": "e05b2d1ebec0857a6b861208dd30c23d710d022fa1c594f0af2865cca3824ce2"
     }
-  ]
+  ],
+  "historicalCapture": {
+    "capturedDate": "2026-10-03",
+    "method": "Read-only rendered DOM snapshots from native Chrome",
+    "sourceBuild": "src/Hub.Api/wwwroot (maintained build captured in the local design worktree)",
+    "sourceCss": "index-DXxw5p9j.css",
+    "sourceCssSha256": "3cd835b684e1c8ce3c4ff93a35bb092f203784b48a45a5ce4ace6e95d892cfd2",
+    "fixture": "Same isolated fictional GET API as the JPEG captures; maintained source untouched",
+    "usage": "Static SVG image of the same fictional Board DOM with embedded unmodified source CSS and fixed 1728x873 image viewport; no application scripts, frames, live API or active links",
+    "captures": [
+      {
+        "id": "board",
+        "file": "board.svg",
+        "route": "/projects/DEMO-101/board",
+        "width": 1728,
+        "height": 873,
+        "bytes": 175484,
+        "sha256": "de125d8750004cad200dc47563d03bd8d43f0d84715dce1e68773351e7deeeb8",
+        "sourceDomSha256": "82ab8d8e041762b797c6635fb142b7f217dd04f15bc593af516e4a336c29b0fc"
+      }
+    ]
+  }
 }

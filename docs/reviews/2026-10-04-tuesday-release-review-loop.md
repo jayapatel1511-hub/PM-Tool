@@ -1,8 +1,24 @@
 # Tuesday release review loop — 4 October 2026
 
-Worktree: `/Users/jaypatel/PM-Tool/.claude/worktrees/tuesday-visual-batch1`; branch `claude/tuesday-visual-batch1`; baseline `9d3e9b9103081f75b7af580313f4fb17bc87778f`. **Review/fix/software verification PASS. Synthetic review commit/deployment now authorized; preparing release, not yet deployed.** Earlier local-only checkpoint details are retained below.
+Worktree: `/Users/jaypatel/PM-Tool/.claude/worktrees/tuesday-visual-batch1`; branch `claude/tuesday-visual-batch1`; baseline `9d3e9b9103081f75b7af580313f4fb17bc87778f`. **Review/fix/software verification PASS. Synthetic review release `d81c13f9084cfd4e828ab9762433d38c3849b302` is committed, pushed, deployed and passed post-deployment safety gates.** Earlier local-only checkpoint details are retained below as historical evidence.
 
-## Deployment authorization — 4 October, evening
+## Landing follow-up — locally verified, not yet redeployed
+
+Jay requested a current board image, seamless background blending, then explicitly preferred the older colours over the white/mint trial. The current local hero keeps the approved pale paper, forest ink and amber/sage palette. Broad washes and a soft decorative-image mask blend the app capture into the page; the floating frame, heavy shadow and old-image fallback are removed. The unchanged 1728 × 873 JPEG comes from Priya's existing synthetic `/boards` preview, visibly labelled fictional; no records were edited. Its 102957 bytes and SHA-256 match `web/public/landing/capture.json`.
+
+Independent source/provenance review found no actionable issue. Root inspected the final desktop and phone screenshots. Final build PASS; exact type-check and lint PASS (87 existing warnings, no new); eight cold public landing/login rechecks at 1440/1024/768/375 PASS with zero findings, replacing those cases in the retained 1956-combination evidence. This is an affected-route recheck, not another fresh full sweep. Evidence: `/private/tmp/tuesday-hero-paper-{build,sweep}.log`, `/private/tmp/tuesday-sweep-hero-paper/`. ReUI's MCP audit guidance and the business UI design skill informed the review; no new component package, image generation, authentication or app behaviour changes.
+
+The deployed release below still serves the prior hero. The follow-up needs its own exact-head CI, prepared committed release and Jay's own-terminal sudo activation. The current local result awaits Jay's visual acceptance. T023 manual screen-reader and SC-001 remain unrun. Brand mark, holiday/manual-role removal confirmations and per-notification Mark read remain open decisions.
+
+## Current deployment evidence — verified 5 October 2026 UTC / 4 October Halifax
+
+The deployed review pointer is `d81c13f9084cfd4e828ab9762433d38c3849b302`; pilot remains on `29b3d7036f529b513fdc2ad47cff62a0b75f0b59`. Draft PR #37 is unmerged. Exact-head CI 37245644519 passed with 1,036 passed, zero failures/skips, rules branch coverage 96.8%, service line coverage 94.5%, and planner 14 base plus six recovery flows, 181 calls and seven zero-finding axe scans. Local Resources passed separately because CI does not configure it.
+
+Jay ran activation and the post-deployment helper in his own Terminal. The independent log review confirmed both planning migrations, `pm-tool-review:d81c13f9084cfd4e828ab9762433d38c3849b302` on `pm-tool-review-db`, fresh mode-0600 backup `hub-review-20261005T002150459496724Z.dump` (1255924 bytes), isolated restore of four projects with cleanup, and restart persistence `4|3|0` for projects, people and planning entries. Health and auth probes passed all required cases. The copied-cookie replay 200 is existing stateless eight-hour expiry behavior and remains a documented limitation; a transient curl 52 during restart recovered before the final PASS.
+
+The versioned login loaded the new assets and authenticated versioned My Work showed the synthetic banner after initial old-HTML caching; no cache purge was performed. Hosted browser review remains bounded. The locally verified landing follow-up above awaits CI/deployment. T023, SC-001 and final acceptance remain open.
+
+## Historical deployment preparation — 4 October, evening (completed above)
 
 Jay returned home and explicitly answered **“Yes, commit and deploy synthetic review.”** This supersedes the earlier uncommitted/no-deployment hold for the reviewed candidate. Current preparation is for the existing review stack only, preserving unrelated edits and all pilot/operational data. Host preflight verified the current review and pilot pointers at `29b3d7036f529b513fdc2ad47cff62a0b75f0b59`, review origin health HTTP 200 with the configured proxy headers, and the existing tunnel active. That release is an ancestor of the candidate. The candidate's 114 selected files and 315 frozen application/test/build sources had zero drift since final checks. GitHub authentication is valid when checked outside the network sandbox.
 

@@ -1,15 +1,31 @@
 # Verification: Weekly Planning Layer
 
 **Date**: 2026-10-04
-**State**: Locally implemented after `9d3e9b91`, uncommitted. Backend, model, performance, required web suites, complete route sweep, keyboard and visual/state checks PASS. **T023 remains BLOCKED/UNRUN for its manual screen-reader validation:** native VoiceOver control timed out before usable accessibility state. No commit, push, deployment or human acceptance is implied.
+**State**: Implemented in `c829f0e6026cb9f518616c7e4ad8a25c1db8b2e7` and deployed in release `d81c13f9084cfd4e828ab9762433d38c3849b302` to the synthetic review stack. Backend, model, performance, required web suites, complete route sweep, keyboard and visual/state checks PASS; post-deployment safety gates PASS. **T023 remains BLOCKED/UNRUN for its manual screen-reader validation:** native VoiceOver control timed out before usable accessibility state. Human acceptance and SC-001 remain pending.
 
-## Deployment authorization — 4 October, evening
+## Landing follow-up — locally verified, not yet redeployed
+
+Jay requested a current board image, seamless background blending, then explicitly preferred the older colours over the white/mint trial. The current local hero keeps the approved pale paper, forest ink and amber/sage palette. Broad washes and a soft decorative-image mask blend the app capture into the page; the floating frame, heavy shadow and old-image fallback are removed. The unchanged 1728 × 873 JPEG comes from Priya's existing synthetic `/boards` preview, visibly labelled fictional; no records were edited. Its 102957 bytes and SHA-256 match `web/public/landing/capture.json`.
+
+Independent source/provenance review found no actionable issue. Root inspected the final desktop and phone screenshots. Final build PASS; exact type-check and lint PASS (87 existing warnings, no new); eight cold public landing/login rechecks at 1440/1024/768/375 PASS with zero findings, replacing those cases in the retained 1956-combination evidence. This is an affected-route recheck, not another fresh full sweep. Evidence: `/private/tmp/tuesday-hero-paper-{build,sweep}.log`, `/private/tmp/tuesday-sweep-hero-paper/`. ReUI's MCP audit guidance and the business UI design skill informed the review; no new component package, image generation, authentication or app behaviour changes.
+
+The deployed release below still serves the prior hero. The follow-up needs its own exact-head CI, prepared committed release and Jay's own-terminal sudo activation. The current local result awaits Jay's visual acceptance. T023 manual screen-reader and SC-001 remain unrun. Brand mark, holiday/manual-role removal confirmations and per-notification Mark read remain open decisions.
+
+## Deployed verification — 5 October 2026 UTC / 4 October Halifax
+
+Draft PR #37 remains unmerged and the separate pilot remains on `29b3d7036f529b513fdc2ad47cff62a0b75f0b59`. Exact-head CI 37245644519 passed: 1,036 passed, zero failed/skipped; rules branch coverage 96.8%, service line coverage 94.5%; planner 14 base plus six recovery flows, 181 calls, seven axe scans with zero errors/unknowns/violations. Local Resources also passed because CI does not configure it.
+
+Jay executed activation and the post-deployment helper in his own Terminal. Independent review of the sanitized log confirmed both planning migrations applied, exact review image/volume checks, fresh mode-0600 backup `hub-review-20261005T002150459496724Z.dump` (1255924 bytes), isolated restore of four projects followed by cleanup, and restart persistence `projects|people|planning = 4|3|0`. Health and private/public auth probes passed all required cases. The copied-cookie replay returned 200 under the existing stateless eight-hour expiry behavior; a transient curl 52 during restart recovered before the final PASS.
+
+The versioned login loaded the new assets and authenticated versioned My Work showed the synthetic banner after initial old-HTML caching. The landing follow-up above is locally verified, not deployed. Complete hosted role/width review and human acceptance are not claimed.
+
+## Historical deployment preparation — 4 October, evening (completed above)
 
 Jay returned home and explicitly answered **“Yes, commit and deploy synthetic review.”** This supersedes the earlier uncommitted/no-deployment hold for the reviewed candidate. Current preparation is for the existing review stack only, preserving unrelated edits and all pilot/operational data. Host preflight verified the current review and pilot pointers at `29b3d7036f529b513fdc2ad47cff62a0b75f0b59`, review origin health HTTP 200 with the configured proxy headers, and the existing tunnel active. That release is an ancestor of the candidate. The candidate's 114 selected files and 315 frozen application/test/build sources had zero drift since final checks. GitHub authentication is valid when checked outside the network sandbox.
 
 Prepare a reviewed commit, incorporate the approved Paper hero commit from origin/main, and pass the required draft-PR CI before transferring the exact committed tree. The approved candidate implementation is committed as `c829f0e6`. Hero merge resolution retains the approved main hero/component/assets and the reviewed sign-in/12 px fixes; two unused incoming Task translation keys are preserved, giving 3,563 unique English keys. No UI flow or authenticated API behavior changes in this integration. Interactive homedev sudo remains a user step. Deployment is not yet claimed complete. T023 stays BLOCKED/UNRUN and human acceptance/pilot remains pending; Jay authorized this synthetic review deployment with that limitation disclosed. Historical local-only status statements below describe the earlier snapshot.
 
-## Latest release review loop
+## Historical local release review loop (superseded above)
 
 PASS for local software checks after independent review/fixes: exact app type-check, required lint with 87 baseline/current warnings and zero new diagnostics, synthetic frontend build, Handoffs/Coordination/Design Basis (5186)/Resources/Planner and local Release publish. Planner: 14 base flows plus six recovery regressions, 180 API calls, three created entries, two notices, seven axe scans, zero errors/unknown requests/violations. The regression repairs failed conflict reload draft loss, immediate stale-save lock, metadata action draft preservation, edited failed-save retry, permission revocation and time-away fresh-version/idempotency recovery. Final independent source review found no actionable defect in that bounded scope.
 

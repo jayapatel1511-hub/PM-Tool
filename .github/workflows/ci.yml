@@ -27,7 +27,7 @@ jobs:
       - name: Private backup and pilot bootstrap safety regressions
         run: python3 tools/test_backup_helpers.py && python3 tools/test_pilot_initializer.py && python3 tools/test_pilot_operations.py && python3 tools/test_pilot_pitr.py
       - name: Hosted review fixture and credential safety regressions
-        run: python3 -m unittest tools/preview/test_fixture_api.py tools/preview/test_refresh_fixture_copy.py scripts/test_extend_review_credentials.py scripts/test_seed_homedev_tuesday_review.py -v
+        run: python3 -m unittest tools/preview/test_fixture_api.py tools/preview/test_refresh_fixture_copy.py tools/preview/test_seed_resources.py scripts/test_extend_review_credentials.py scripts/test_seed_homedev_tuesday_review.py -v
       - name: Vulnerable NuGet packages
         run: dotnet list Hub.slnx package --vulnerable --include-transitive | tee vuln.txt && ! grep -q "Critical" vuln.txt
       - run: npm ci

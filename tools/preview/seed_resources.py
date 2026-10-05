@@ -20,8 +20,8 @@ import datetime as dt
 import sys
 import uuid
 
-client = connect()
-BASE = client.base
+api_client = connect()
+BASE = api_client.base
 NUMBERS = ("SYN-101", "SYN-102", "SYN-103")
 refusals = []
 
@@ -34,7 +34,7 @@ class Refused(Exception):
 
 def call(path, user, method="GET", body=None):
     try:
-        return client.call(path, user, method, body)
+        return api_client.call(path, user, method, body)
     except FixtureError as e:
         raise Refused(e.status, str(e)) from None
 
@@ -90,7 +90,7 @@ except Refused as e:
 uid = {u["email"].split("@")[0]: u["id"] for u in call("users?limit=500", "jordan")}
 ref = call("reference", "jordan")
 disc = {d["code"]: d["id"] for d in ref["disciplines"]}
-client = next(c["id"] for c in ref["clients"] if c["isActive"])
+client_id = next(c["id"] for c in ref["clients"] if c["isActive"])
 office = next(o["id"] for o in ref["offices"] if o["isActive"])
 call("admin/settings/restricted_projects_enabled", "jordan", "PUT", {"value": True})
 
@@ -98,7 +98,7 @@ call("admin/settings/restricted_projects_enabled", "jordan", "PUT", {"value": Tr
 def project(pm, number, name, members, leads, restricted=False):
     """Created by its PM with the given members and discipline leads, then made Active; returns (id, discipline ids by code)."""
     pid = call("projects", pm, "POST", {
-        "projectNumber": number, "name": name, "clientId": client, "officeId": office,
+        "projectNumber": number, "name": name, "clientId": client_id, "officeId": office,
         "clientReference": 'Harbour Road design programme', "description": 'Road rehabilitation, stormwater separation and utility coordination.',
         "startDate": iso(today - dt.timedelta(days=30)), "targetCompletionDate": iso(today + dt.timedelta(days=120)),
         "disciplines": [{"disciplineId": disc[code], "leadUserId": uid[lead] if lead else None} for code, lead in leads.items()],

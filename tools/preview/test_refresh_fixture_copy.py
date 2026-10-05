@@ -24,7 +24,8 @@ class FakeApi:
         }
         self.rows = {"tasks": [{"id": "t1", "rowVersion": 2, "name": "Reviewer task", "description": "Synthetic preview task."}],
                      "milestones": [], "deliverables": [], "decisions": [], "risks": [], "issues": [],
-                     "meetings": [{"id": "m1", "rowVersion": 4, "title": "Synthetic preview — weekly review", "meetingDate": "2026-10-05", "meetingType": "Coordination", "notesLink": None, "calendarEventId": None}]}
+                     "meetings": [{"id": "m1", "rowVersion": 4, "title": "Synthetic preview — weekly review", "meetingDate": "2026-10-05", "meetingType": "Coordination", "notesLink": None, "calendarEventId": None}],
+                     "actions": [{"id": "a1", "rowVersion": 2, "text": "Synthetic preview action: issue the meeting notes.", "dueDate": "2026-10-06", "ownerType": "User"}]}
         self.planning = {"id": "pl1", "rowVersion": 7, "label": "Synthetic preview — weekly planning", "notes": "Reviewer note"}
         self.fail_patch = False
         self.header_calls = []
@@ -47,6 +48,9 @@ class FakeApi:
             elif path == "planning/entries/pl1":
                 self.planning.update({k: v for k, v in body.items() if k != "rowVersion"})
                 self.planning["rowVersion"] += 1
+            elif path == "actions/a1":
+                self.rows["actions"][0].update({k: v for k, v in body.items() if k != "rowVersion"})
+                self.rows["actions"][0]["rowVersion"] += 1
             elif path == "links/l1":
                 self.link_title = body["title"]
             return {"rowVersion": body.get("rowVersion", 0) + 1}
@@ -66,6 +70,8 @@ class FakeApi:
             return {"links": [{"id": "l1", "title": self.link_title, "url": "https://docs.example.test/source", "canChange": True}], "inherited": []}
         if path.startswith("projects/") and path.endswith("/meetings"):
             return {"items": self.rows["meetings"]}
+        if path.startswith("projects/") and path.endswith("/actions"):
+            return {"items": self.rows["actions"]}
         if path.startswith("planning/entries"):
             return {"items": [self.planning] if who == "jordan" else []}
         raise AssertionError(f"unexpected GET {path}")
@@ -99,7 +105,7 @@ class RefreshFixtureCopyTests(unittest.TestCase):
         for path, _who, _method, body in patches:
             if path != "links/l1":
                 self.assertIn("rowVersion", body)
-            self.assertTrue(set(body) - {"rowVersion"} <= {"name", "description", "clientReference", "label", "notes", "title", "meetingDate", "meetingType", "notesLink", "calendarEventId"})
+            self.assertTrue(set(body) - {"rowVersion"} <= {"name", "description", "clientReference", "label", "notes", "title", "meetingDate", "meetingType", "notesLink", "calendarEventId", "text"})
             self.assertNotIn("hoursPerWeek", body)
         api.calls.clear()
         second = refresh.refresh_fixture_copy(api)
@@ -130,6 +136,12 @@ class RefreshFixtureCopyTests(unittest.TestCase):
         self.assertTrue(any(x.get("path") == "links/l1" for x in report))
         link_call = next(c for c in api.calls if c[0] == "links/l1")
         self.assertEqual(link_call[3], {"title": "source packet"})
+
+    def test_action_cleanup_changes_text_and_version_only(self):
+        api = FakeApi()
+        refresh.refresh_fixture_copy(api, apply=True)
+        action_call = next(c for c in api.calls if c[0] == "actions/a1")
+        self.assertEqual(action_call[3], {"rowVersion": 2, "text": "issue the meeting notes."})
 
     def test_only_allowlisted_projects_are_read(self):
         api = FakeApi()

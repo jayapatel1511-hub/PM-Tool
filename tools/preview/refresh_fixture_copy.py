@@ -155,6 +155,13 @@ def refresh_fixture_copy(client: Any, *, apply: bool = False) -> list[dict[str, 
                           "actor": ACTOR, "field": "title", "from": raw, "to": _target(raw), "row": meeting,
                           "requiresIfMatch": True, "meetingBody": {key: meeting[key] for key in ("meetingDate", "meetingType", "notesLink", "calendarEventId")}})
 
+        # Meeting actions expose a normal versioned PATCH contract. Change only
+        # the display text; ownership, dates, links and workflow state remain intact.
+        for action in _items(client.call(f"projects/{pid}/actions", ACTOR)):
+            aid, raw = action.get("id"), action.get("text")
+            if aid and isinstance(raw, str) and _eligible(raw, _target(raw)):
+                _plan(report, client, f"actions/{aid}", ACTOR, action, "text", _target(raw), label=f"{number} action {aid} text")
+
         links = client.call(f"items/Project/{pid}/links", ACTOR)
         for link in _items(links.get("links", []) if isinstance(links, dict) else links):
             title = link.get("title")

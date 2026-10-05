@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Building2, CalendarDays, ExternalLink, ListPlus, Plus, Users } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { FieldRow, HistoryList, InlineDate, InlineText, TabBar } from '@/components/hub/fields'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
@@ -18,6 +18,7 @@ import { ApiError, get, patch, post, qs } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
+import { DateText, FieldGroup, PanelHead, Person, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
 import { useCurrentProject } from './ProjectLayout'
 import { CommentsSlot, ItemSlots } from './slots-items'
 import { errorText } from './Tasks'
@@ -71,7 +72,12 @@ export function ActionOwner({ a }: { a: ActionRow }) {
 }
 
 function Due({ a }: { a: ActionRow }) {
-  return <span className={cn('whitespace-nowrap tabular-nums', a.isOverdue && 'font-medium text-bad')}>{fmtDate(a.dueDate)}{a.isOverdue && ` · ${t('ind.overdueD', { n: a.daysOverdue })}`}</span>
+  return <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 lg:justify-end"><DateText date={a.dueDate} />{a.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: a.daysOverdue })}</Chip>}</span>
+}
+
+/** A person owner gets their avatar; discipline and external owners keep their own marks (ActionOwner). */
+function OwnerCell({ a }: { a: ActionRow }) {
+  return a.ownerType === 'User' ? <Person id={a.ownerUserId} name={a.ownerName} /> : <ActionOwner a={a} />
 }
 
 // ---------- Owner fields (FR-002) ----------
@@ -104,9 +110,9 @@ function OwnerFields({ projectId, value, onChange, errors, prefix }: { projectId
           {(parties.data ?? []).filter((x) => x.isActive).map((x) => <option key={x.id} value={x.id}>{x.name}{x.organisation ? ` · ${x.organisation}` : ''}{x.isClient ? ` (${t('party.client')})` : ''}</option>)}
         </select>
       )}
-      {value.type === 'External Party' && <p className="text-xs text-muted-foreground">{t('action.externalHint')}</p>}
-      {value.type === 'Discipline' && <p className="text-xs text-muted-foreground">{t('action.disciplineHint')}</p>}
-      {errors?.map((e) => <p key={e} className="text-xs text-bad" role="alert">{e}</p>)}
+      {value.type === 'External Party' && <p className="text-xs/[18px] text-muted-foreground">{t('action.externalHint')}</p>}
+      {value.type === 'Discipline' && <p className="text-xs/[18px] text-muted-foreground">{t('action.disciplineHint')}</p>}
+      {errors?.map((e) => <p key={e} className="text-xs/[18px] text-bad" role="alert">{e}</p>)}
     </fieldset>
   )
 }
@@ -205,7 +211,7 @@ export function ActionForm({ projectId, meetingId, related, links, linkedActionI
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="outline" onClick={() => onClose()}>{t('common.cancel')}</Button>
-            <Button type="submit" disabled={busy || (reuse ? !picked : !text.trim())}>{busy && <Spinner />}{reuse ? t('dcv.reuseSubmit') : t('action.add')}</Button>
+            <Button type="submit" disabled={busy || (reuse ? !picked : !text.trim())}>{busy && <Spinner />}{busy ? t('common.saving') : reuse ? t('dcv.reuseSubmit') : t('action.add')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -252,7 +258,7 @@ function MeetingForm({ projectId, meeting, onClose }: { projectId: string; meeti
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
-            <Button type="submit" disabled={busy}>{busy && <Spinner />}{t('common.save')}</Button>
+            <Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -270,65 +276,98 @@ export function MeetingsTab() {
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
   const active = FILTERS.some((k) => sp.has(k))
+  const clear = () => setSp(new URLSearchParams(), { replace: true })
   const meetings = useQuery({ queryKey: ['p', p.id, 'meetings'], queryFn: () => get<MeetingRow[]>(`projects/${p.id}/meetings`) })
   const actions = useQuery({ queryKey: ['p', p.id, 'actions', filters], queryFn: () => get<ActionRow[]>(`projects/${p.id}/actions${qs(filters)}`) })
   const canMeet = p.permissions.runCoordination.ok
   const canRaise = p.permissions.raiseRegister.ok
-  const sel = 'h-8 rounded-md border bg-card px-2 text-sm'
   const byMeeting = new Map<string, ActionRow[]>()
   for (const a of actions.data ?? []) byMeeting.set(a.meetingId, [...(byMeeting.get(a.meetingId) ?? []), a])
   const shown = (meetings.data ?? []).filter((m) => !active || byMeeting.has(m.id))
+  const panel = sp.get('panel')
+  const tokens = [
+    filters.q && { key: 'q', label: t('common.search'), value: filters.q },
+    filters.status && { key: 'status', label: t('common.status'), value: filters.status === 'Open,In Progress' ? t('register.openStatuses') : tv(filters.status) },
+    filters.ownerType && { key: 'ownerType', label: t('action.ownerType'), value: t(`action.owner.${filters.ownerType}`) },
+    filters.indicator && { key: 'indicator', label: t('deliverable.indicator'), value: filters.indicator === 'overdue' ? t('ind.overdue') : filters.indicator },
+  ].filter(Boolean) as { key: string; label: string; value: ReactNode }[]
   return (
     <Page title={t('ptab.meetings')} subtitle={t('meeting.subtitle')}
       actions={<>
         <ExportMenu path={`projects/${p.id}/actions/export`} params={filters} name={`${p.projectNumber}-actions`} />
         {canMeet && <Button onClick={() => setMeetingForm('new')}><Plus className="size-4" />{t('meeting.new')}</Button>}
       </>}>
-      <div className="flex flex-wrap items-center gap-2">
-        <Input key={filters.q ? 'q' : 'empty'} className="h-8 w-52" type="search" placeholder={t('common.search')} defaultValue={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} aria-label={t('common.search')} />
-        <select className={sel} value={filters.status ?? ''} onChange={(e) => set('status', e.target.value)} aria-label={t('common.status')}>
-          <option value="">{t('register.anyStatus')}</option><option value="Open,In Progress">{t('register.openStatuses')}</option>
-          {STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
-        </select>
-        <select className={sel} value={filters.ownerType ?? ''} onChange={(e) => set('ownerType', e.target.value)} aria-label={t('action.ownerType')}>
-          <option value="">{t('action.anyOwnerType')}</option>{OWNER_TYPES.map((x) => <option key={x} value={x}>{t(`action.owner.${x}`)}</option>)}
-        </select>
-        <button type="button" aria-pressed={filters.indicator === 'overdue'} onClick={() => set('indicator', filters.indicator === 'overdue' ? null : 'overdue')}
-          className={cn('rounded-full border px-2.5 py-0.5 text-xs', filters.indicator === 'overdue' ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:bg-muted')}>{t('ind.overdue')}</button>
-        {active && <button type="button" className="px-2 text-xs text-muted-foreground hover:text-foreground" onClick={() => setSp(new URLSearchParams(), { replace: true })}>{t('common.clear')}</button>}
-      </div>
-      {(meetings.error || actions.error) && <ErrorBanner error={meetings.error ?? actions.error} retry={() => { meetings.refetch(); actions.refetch() }} />}
-      {meetings.isPending || actions.isPending ? <Loading rows={6} /> : shown.length === 0 ? (
-        <div className="rounded-lg border bg-card"><Empty action={canMeet && !active && <Button onClick={() => setMeetingForm('new')}>{t('meeting.new')}</Button>}>{active ? t('register.noMatch') : t('meeting.empty')}</Empty></div>
-      ) : shown.map((m) => {
-        const rows = byMeeting.get(m.id) ?? []
-        return (
-          <section key={m.id} className="rounded-lg border bg-card" aria-labelledby={`mt-${m.id}`}>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b px-4 py-2.5">
-              <h2 id={`mt-${m.id}`} className="font-semibold">{m.title}</h2>
-              <span className="text-sm text-muted-foreground">{fmtDate(m.meetingDate)} · {tv(m.meetingType)}</span>
-              {m.notesLink && <a className="inline-flex items-center gap-1 text-sm text-primary underline" href={m.notesLink} target="_blank" rel="noreferrer noopener"><ExternalLink className="size-3.5" aria-hidden />{t('meeting.minutes')}</a>}
-              {m.calendarEventTitle && <span className="inline-flex items-center gap-1 text-sm text-muted-foreground"><CalendarDays className="size-3.5" aria-hidden />{m.calendarEventTitle}</span>}
-              <span className="ml-auto flex gap-1.5">
-                {canMeet && <Button size="sm" variant="ghost" onClick={() => setMeetingForm(m)}>{t('common.edit')}</Button>}
-                {canRaise && <Button size="sm" variant="outline" onClick={() => setAdding(m.id)}><ListPlus className="size-4" />{t('action.add')}</Button>}
-              </span>
-            </div>
-            {rows.length === 0 ? <p className="px-4 py-3 text-sm text-muted-foreground">{t('meeting.noActions')}</p> : (
-              <ul className="divide-y text-[13px]">
-                {rows.map((a) => (
-                  <li key={a.id} className={cn('flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2', a.isOverdue && 'bg-bad-bg/30')}>
-                    <Key>{a.key}</Key>
-                    <button className="min-w-[12rem] flex-1 text-left font-medium hover:underline" onClick={() => openPanel('Action', a.id)}>{a.text}</button>
-                    <ActionOwner a={a} /><Due a={a} /><StatusPill status={a.status} />
-                    {a.taskKey && <button className="hover:underline" title={t('action.becameTask')} onClick={() => openPanel('Task', a.relatedTaskId!)}><Key>{a.taskKey}</Key></button>}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        )
-      })}
+      <FilterBar>
+        <div className="flex flex-wrap items-end gap-3">
+          <Field label={t('common.search')} htmlFor="action-search" className="w-full sm:w-56">
+            <Input id="action-search" type="search" value={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
+          </Field>
+          <Field label={t('common.status')} htmlFor="action-status" className="w-full sm:w-44">
+            <select id="action-status" className={selectCls} value={filters.status ?? ''} onChange={(e) => set('status', e.target.value)}>
+              <option value="">{t('register.anyStatus')}</option><option value="Open,In Progress">{t('register.openStatuses')}</option>
+              {STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
+            </select>
+          </Field>
+          <Field label={t('action.ownerType')} htmlFor="action-owner-type" className="w-full sm:w-44">
+            <select id="action-owner-type" className={selectCls} value={filters.ownerType ?? ''} onChange={(e) => set('ownerType', e.target.value)}>
+              <option value="">{t('action.anyOwnerType')}</option>{OWNER_TYPES.map((x) => <option key={x} value={x}>{t(`action.owner.${x}`)}</option>)}
+            </select>
+          </Field>
+        </div>
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>
+          <ChipToggle on={filters.indicator === 'overdue'} onClick={() => set('indicator', filters.indicator === 'overdue' ? null : 'overdue')}>{t('ind.overdue')}</ChipToggle>
+        </div>
+        <ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />
+      </FilterBar>
+      {meetings.isPending || actions.isPending ? <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
+        : meetings.error || actions.error ? <ErrorBanner error={meetings.error ?? actions.error} retry={() => { meetings.refetch(); actions.refetch() }} />
+        : shown.length === 0 ? (
+          <div className="rounded-lg border bg-card">{active
+            ? <Empty title={t('register.noMatch')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('register.noMatchHint')}</Empty>
+            : <Empty title={t('meeting.empty')} action={canMeet && <Button variant="outline" onClick={() => setMeetingForm('new')}><Plus className="size-4" />{t('meeting.new')}</Button>}>{t('meeting.emptyHint')}</Empty>}</div>
+        ) : shown.map((m) => {
+          const rows = byMeeting.get(m.id) ?? []
+          return (
+            <section key={m.id} className="overflow-hidden rounded-lg border bg-card" aria-labelledby={`mt-${m.id}`}>
+              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b px-5 py-3">
+                <div className="min-w-0 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 id={`mt-${m.id}`} className="break-words text-base/6 font-semibold">{m.title}</h3>
+                    <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{rows.length}</span>
+                  </div>
+                  <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                    <span className="tabular-nums">{fmtDate(m.meetingDate)} · {tv(m.meetingType)}</span>
+                    {m.notesLink && <a className="inline-flex items-center gap-1 text-primary underline underline-offset-4" href={m.notesLink} target="_blank" rel="noreferrer noopener"><ExternalLink className="size-4" aria-hidden />{t('meeting.minutes')}</a>}
+                    {m.calendarEventTitle && <span className="inline-flex items-center gap-1"><CalendarDays className="size-4" aria-hidden />{m.calendarEventTitle}</span>}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {canMeet && <Button size="sm" variant="ghost" onClick={() => setMeetingForm(m)}>{t('common.edit')}</Button>}
+                  {canRaise && <Button size="sm" variant="outline" onClick={() => setAdding(m.id)}><ListPlus className="size-4" />{t('action.add')}</Button>}
+                </div>
+              </div>
+              {rows.length === 0 ? <p className="px-5 py-4 text-sm text-muted-foreground">{t('meeting.noActions')}</p> : (
+                <ul className="divide-y text-sm">
+                  {rows.map((a) => {
+                    const current = panel === `Action:${a.id}`
+                    return (
+                      <li key={a.id} className={cn('flex min-h-(--row-min) flex-wrap items-center gap-x-4 gap-y-1 px-5 py-(--cell-py) hover:bg-muted lg:grid lg:grid-cols-[7rem_minmax(0,1fr)_13rem_11rem_8rem]', current && SELECTED_ROW)}>
+                        <Key>{a.key}</Key>
+                        <span className="min-w-[12rem] flex-1 lg:min-w-0">
+                          <button className={TITLE_LINK} aria-current={current || undefined} onClick={() => openPanel('Action', a.id)}>{a.text}</button>
+                          {a.taskKey && <button className="ml-2 hover:underline" title={t('action.becameTask')} onClick={() => openPanel('Task', a.relatedTaskId!)}><Key>{a.taskKey}</Key></button>}
+                        </span>
+                        <span className="min-w-0"><OwnerCell a={a} /></span>
+                        <Due a={a} />
+                        <StatusPill status={a.status} className="justify-self-start" />
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </section>
+          )
+        })}
       {meetingForm && <MeetingForm projectId={p.id} meeting={meetingForm === 'new' ? undefined : meetingForm} onClose={() => setMeetingForm(null)} />}
       {adding && <ActionForm projectId={p.id} meetingId={adding} onClose={() => setAdding(null)} />}
     </Page>
@@ -356,7 +395,7 @@ function ConvertDialog({ a, disciplineId, onClose }: { a: ActionRow; disciplineI
       <DialogContent>
         <DialogHeader><DialogTitle>{t('action.convertTitle', { key: a.key })}</DialogTitle><DialogDescription>{t('action.convertHint')}</DialogDescription></DialogHeader>
         <div className="grid gap-3">
-          <p className="rounded bg-muted/60 p-2 text-sm">{a.text}</p>
+          <p className="rounded-md bg-muted px-4 py-3 text-sm">{a.text}</p>
           <Field label={t('common.discipline')} htmlFor="c-disc" error={err?.fieldErrors.projectDisciplineId}>
             <select id="c-disc" className={selectCls} value={f.projectDisciplineId} onChange={(e) => setF({ ...f, projectDisciplineId: e.target.value })} required>
               <option value="">{t('action.chooseDiscipline')}</option>
@@ -371,7 +410,7 @@ function ConvertDialog({ a, disciplineId, onClose }: { a: ActionRow; disciplineI
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
-          <Button disabled={busy || !f.projectDisciplineId} onClick={save}>{busy && <Spinner />}{t('action.convert')}</Button>
+          <Button disabled={busy || !f.projectDisciplineId} onClick={save}>{busy && <Spinner />}{busy ? t('common.saving') : t('action.convert')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -398,22 +437,23 @@ function ActionPanel({ id }: PanelProps) {
     if (to === 'Cancelled') { setStep(to); return }
     try { await go(to) } catch (e) { toast.error(errorText(e)) }
   }
+  const related = (q.data.task && !a.converted) || q.data.decision || q.data.links?.length > 0
   return (
     <div>
-      <div className="space-y-2 border-b p-4">
-        <div className="flex flex-wrap items-center gap-2"><ListPlus className="size-4 text-muted-foreground" aria-hidden /><Key>{a.key}</Key><StatusPill status={a.status} />
-          {a.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: a.daysOverdue })}</Chip>}{a.noLead && <Chip tone="warn">{t('action.noLead')}</Chip>}</div>
-        <h2 className="text-lg font-semibold">{a.text}</h2>
+      <PanelHead title={a.text} meta={<>
+        <ListPlus className="size-4 text-muted-foreground" aria-hidden /><Key>{a.key}</Key><StatusPill status={a.status} />
+        {a.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: a.daysOverdue })}</Chip>}{a.noLead && <Chip tone="warn">{t('action.noLead')}</Chip>}
+      </>}>
         <p className="text-sm text-muted-foreground">{t('action.fromMeeting', { title: m.title, date: fmtDate(m.meetingDate) })}
-          {m.notesLink && <> · <a className="text-primary underline" href={m.notesLink} target="_blank" rel="noreferrer noopener">{t('meeting.minutes')}</a></>}</p>
+          {m.notesLink && <> · <a className="text-primary underline underline-offset-4" href={m.notesLink} target="_blank" rel="noreferrer noopener">{t('meeting.minutes')}</a></>}</p>
         {q.data.task && a.converted && <p className="text-sm">{t('action.followsTask')} <button className="hover:underline" onClick={() => openPanel('Task', q.data.task!.id)}><Key>{q.data.task.key}</Key> {q.data.task.name}</button> <StatusPill status={q.data.task.status} /></p>}
-        <div className="flex flex-wrap gap-1.5 pt-1">
+        <div className="flex flex-wrap gap-2">
           {perm.transitions.map((s) => <Button key={s.to} size="sm" variant={s.to === 'Complete' ? 'default' : 'outline'} disabled={!s.ok} title={s.reason ?? undefined}
             onClick={() => onStep(s.to)}>{t(s.to === 'In Progress' && a.status === 'Complete' ? 'action.reopen' : STEP[s.to])}</Button>)}
           {perm.convert && <Button size="sm" variant="outline" onClick={() => setStep('convert')}>{t('action.convert')}</Button>}
         </div>
-      </div>
-      <div className="px-4 py-2">
+      </PanelHead>
+      <FieldGroup title={t('common.details')}>
         <FieldRow label={t('action.text')}><InlineText value={a.text} multiline disabled={!can} title={perm.edit.reason ?? undefined} onSave={(v) => save({ text: v })} /></FieldRow>
         <FieldRow label={t('common.owner')}>
           {owner ? (
@@ -422,19 +462,21 @@ function ActionPanel({ id }: PanelProps) {
               <div className="flex gap-2"><Button size="sm" onClick={() => save(ownerBody(owner)).then((ok) => ok && setOwner(null))}>{t('common.save')}</Button><Button size="sm" variant="ghost" onClick={() => setOwner(null)}>{t('common.cancel')}</Button></div>
             </div>
           ) : (
-            <div className="flex flex-wrap items-center gap-2 px-2 py-1.5"><ActionOwner a={a} />
-              {can && <button type="button" className="text-xs text-muted-foreground underline hover:text-foreground"
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-1.5"><OwnerCell a={a} />
+              {can && <button type="button" className="text-sm text-primary underline underline-offset-4 hover:text-foreground"
                 onClick={() => setOwner({ type: a.ownerType, userId: a.ownerUserId, userName: a.ownerType === 'User' ? a.ownerName : null, disciplineId: a.ownerDisciplineId, partyId: a.ownerExternalPartyId })}>{t('action.changeOwner')}</button>}</div>
           )}
         </FieldRow>
         <FieldRow label={t('common.due')}><InlineDate value={a.dueDate} disabled={!can} onSave={(v) => save({ dueDate: v })} /></FieldRow>
+      </FieldGroup>
+      {related && <FieldGroup title={t('register.group.related')}>
         {q.data.task && !a.converted && <FieldRow label={t('action.relatedTask')}><button className="px-2 py-1.5 text-left hover:underline" onClick={() => openPanel('Task', q.data.task!.id)}><Key>{q.data.task.key}</Key> {q.data.task.name}</button></FieldRow>}
         {q.data.decision && <FieldRow label={t('action.relatedDecision')}><button className="px-2 py-1.5 text-left hover:underline" onClick={() => openPanel('Decision', q.data.decision!.id)}><Key>{q.data.decision.key}</Key> {q.data.decision.subject}</button></FieldRow>}
         {q.data.links?.length > 0 && <FieldRow label={t('decision.links')}><ul className="space-y-1 px-2 py-1.5">{q.data.links.map(link => {
           const route = ACTION_LINK_ROUTES[link.targetType]
-          return route && <li key={link.id}><Link className="text-primary underline" to={`/projects/${a.projectNumber}/${route}?panel=${encodeURIComponent(`${link.targetType}:${link.targetId}`)}`}><Key>{link.key}</Key> {link.name}</Link>{link.status && <> · <StatusPill status={link.status} /></>}</li>
+          return route && <li key={link.id}><Link className="text-primary underline underline-offset-4" to={`/projects/${a.projectNumber}/${route}?panel=${encodeURIComponent(`${link.targetType}:${link.targetId}`)}`}><Key>{link.key}</Key> {link.name}</Link>{link.status && <> · <StatusPill status={link.status} /></>}</li>
         })}</ul></FieldRow>}
-      </div>
+      </FieldGroup>}
       <TabBar tabs={[...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'comments' && <CommentsSlot type="Action" id={a.id} projectId={a.projectId} />}
       {tab === 'history' && <HistoryList type="Action" id={a.id} />}

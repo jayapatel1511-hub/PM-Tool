@@ -23,6 +23,9 @@ interface StartReadiness {
 }
 interface Authorisation { id: string; authorisedByName?: string | null; reason: string; createdAt: string }
 
+/** Attention text keeps its ▲ symbol and tint, so the warning never rests on colour alone. */
+const warnBox = 'rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-warn'
+
 /** Readiness warning for a start that is Not Ready or Needs Assessment: the starter acknowledges it and gives a reason;
  *  a PM or Discipline Lead authorises inline, anyone else needs the authorisation recorded for this readiness. */
 export function StartAuthorisationDialog({ req, onClose }: { req: StartRequest; onClose: (done: boolean) => void }) {
@@ -52,15 +55,15 @@ export function StartAuthorisationDialog({ req, onClose }: { req: StartRequest; 
         </DialogHeader>
         {q.isPending ? <Loading rows={3} /> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : r && (
           <div className="space-y-3 text-sm">
-            <p className="flex items-center gap-2">{t('tasks.startAuthState')}: <StatusPill status={r.readinessState} /></p>
+            <p className="flex flex-wrap items-center gap-2 font-medium">{t('tasks.startAuthState')}: <StatusPill status={r.readinessState} /></p>
             {!r.assessed && <p>{t('tasks.startAuthNotAssessed')}</p>}
             {r.note && <p>{t('tasks.startAuthNote', { note: r.note })}</p>}
             {r.blocked.length > 0 && <p>{t('tasks.startAuthBlocked', { list: r.blocked.map(tv).join(', ') })}</p>}
             {r.unknown.length > 0 && <p>{t('tasks.startAuthUnknown', { list: r.unknown.map(tv).join(', ') })}</p>}
             {!r.needsAuthorisation ? <p role="status">{t(starting ? 'tasks.startAuthNowReady' : 'tasks.startAuthNotNeeded', { state: tv(r.readinessState) })}</p> : <>
               {r.authorisation && <p>{t('tasks.startAuthExisting', { name: r.authorisation.authorisedByName ?? t('coord.unavailable'), date: fmtDate(r.authorisation.createdAt), reason: r.authorisation.reason })}</p>}
-              {r.unusableAuthorisation && <p className="text-warn">{t('tasks.startAuthUnusable', { name: r.unusableAuthorisation.authorisedByName ?? t('coord.unavailable'), date: fmtDate(r.unusableAuthorisation.createdAt) })}</p>}
-              {!permitted && <p role="status" className="text-warn">{t('tasks.startAuthAsk')}</p>}
+              {r.unusableAuthorisation && <p className={warnBox}><span aria-hidden>▲ </span>{t('tasks.startAuthUnusable', { name: r.unusableAuthorisation.authorisedByName ?? t('coord.unavailable'), date: fmtDate(r.unusableAuthorisation.createdAt) })}</p>}
+              {!permitted && <p role="status" className={warnBox}><span aria-hidden>▲ </span>{t('tasks.startAuthAsk')}</p>}
               {permitted && <>
                 <div className="flex items-start gap-2">
                   <Checkbox id="start-ack" className="mt-0.5" autoFocus checked={ack} onCheckedChange={(v) => setAck(v === true)} />

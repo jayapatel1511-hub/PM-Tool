@@ -47,25 +47,63 @@ public static class ReviewDemoSeed
         // Set the reporting line once. A reviewer may later change it without a restart undoing their work.
         if (yagmurAdded) yagmur.SupervisorId = taylor.Id;
 
-        var client = await db.Clients.FirstOrDefaultAsync(c => c.Name == "Synthetic Review Client");
+        // Keep the review database useful for every Tuesday persona while preserving reviewer edits.
+        // These definitions intentionally mirror Seed.DevUsers; this opt-in seed must not enable
+        // development authentication or alter the development-only user picker.
+        await Person("Jordan Lee", "jordan@hub.test", "Applications Administrator", SystemRole.Admin);
+        var (lena, _) = await Person("Lena Brooks", "lena@hub.test", "Regional Manager", SystemRole.Executive, SystemRole.Supervisor);
+        var (sam, samAdded) = await Person("Sam Patel", "sam@hub.test", "Civil Group Manager", SystemRole.Supervisor);
+        var (priya, priyaAdded) = await Person("Priya Nair", "priya@hub.test", "Project Manager", SystemRole.ProjectManager);
+        var (marc, marcAdded) = await Person("Marc Dubois", "marc@hub.test", "Senior Civil Engineer", SystemRole.ProjectManager, SystemRole.Supervisor);
+        var (alex, alexAdded) = await Person("Alex Chen", "alex@hub.test", "Civil Designer (EIT)");
+        var (jill, jillAdded) = await Person("Jill Martin", "jill@hub.test", "Civil Designer");
+        var (diane, dianeAdded) = await Person("Diane Roy", "diane@hub.test", "Senior Technical Reviewer");
+        var (omar, omarAdded) = await Person("Omar Haddad", "omar@hub.test", "Geotechnical Lead");
+        await Person("Rita Gomez", "rita@hub.test", "Auditor", SystemRole.ReadOnly);
+
+        // Only newly provisioned children receive the default reporting line. Existing review
+        // records may have been deliberately reorganized and must remain untouched on restart.
+        if (samAdded) sam.SupervisorId = lena.Id;
+        if (priyaAdded) priya.SupervisorId = lena.Id;
+        if (marcAdded) marc.SupervisorId = sam.Id;
+        if (alexAdded) alex.SupervisorId = sam.Id;
+        if (jillAdded) jill.SupervisorId = sam.Id;
+        if (dianeAdded) diane.SupervisorId = lena.Id;
+        if (omarAdded) omar.SupervisorId = lena.Id;
+
+        // Find the client by fixture provenance first, so a reviewer rename is preserved.
+        var clientId = await db.Projects.Where(p => p.ExternalSource == Source).Select(p => (Guid?)p.ClientId).FirstOrDefaultAsync();
+        var client = clientId is { } knownClient
+            ? await db.Clients.FirstOrDefaultAsync(c => c.Id == knownClient)
+            : await db.Clients.FirstOrDefaultAsync(c => c.Name == "Harbour Municipality" || c.Name == "Synthetic Review Client");
         if (client is null)
         {
-            client = new Client { Name = "Synthetic Review Client", ShortName = "Demo" };
+            client = new Client { Name = "Harbour Municipality", ShortName = "Harbour" };
             db.Clients.Add(client);
         }
+        // Jay requested ordinary display copy; clean only the exact old fixture defaults.
+        if (client.Name == "Synthetic Review Client") client.Name = "Harbour Municipality";
+        if (client.ShortName == "Demo") client.ShortName = "Harbour";
         var disciplines = await db.Disciplines.Where(d => d.Code == "PM" || d.Code == "CIV")
             .ToDictionaryAsync(d => d.Code, d => d.Id);
         var drawingType = await db.DeliverableTypes.Where(t => t.Name == "Drawing Package").Select(t => t.Id).FirstAsync();
 
         async Task Project(string number, string name, AppUser pm, AppUser civilOwner, AppUser reviewer, string deliverableName, string taskName)
         {
-            if (await db.Projects.AnyAsync(p => p.ExternalSource == Source && p.ExternalId == number)) return;
+            var existing = await db.Projects.FirstOrDefaultAsync(p => p.ExternalSource == Source && p.ExternalId == number);
+            if (existing is not null)
+            {
+                if (existing.Name == name + " (Demo)") existing.Name = name;
+                if (existing.Description == "SYNTHETIC DEMO DATA — fictional client, project and work for application review only.")
+                    existing.Description = "Coordinate the civil design package, review comments and multidisciplinary inputs.";
+                return;
+            }
             if (await db.Projects.AnyAsync(p => p.ProjectNumber == number))
                 throw new InvalidOperationException($"Project number {number} is already used by non-demo data.");
             var project = new Project
             {
                 ProjectNumber = number, Name = name, ClientId = client.Id, OfficeId = office.Id, ProjectManagerId = pm.Id,
-                Description = "SYNTHETIC DEMO DATA — fictional client, project and work for application review only.",
+                Description = "Coordinate the civil design package, review comments and multidisciplinary inputs.",
                 Status = ProjectStatus.Active, StatusChangedAt = now, ActivatedAt = now,
                 StartDate = today.AddDays(-14), TargetCompletionDate = today.AddDays(90),
                 ExternalSource = Source, ExternalId = number,
@@ -113,11 +151,11 @@ public static class ReviewDemoSeed
                 });
         }
 
-        await Project("DEMO-101", "Community Facility Site Servicing (Demo)", taylor, jay, yagmur,
+        await Project("DEMO-101", "Community Facility Site Servicing", taylor, jay, yagmur,
             "Site Servicing Concept Drawings", "Prepare preliminary servicing layout");
-        await Project("DEMO-102", "Harbour Road Civil Design (Demo)", jay, jay, taylor,
+        await Project("DEMO-102", "Harbour Road Civil Design", jay, jay, taylor,
             "Road and Grading Concept Drawings", "Develop road and grading concept");
-        await Project("DEMO-103", "Waterfront Drainage Review (Demo)", yagmur, yagmur, jay,
+        await Project("DEMO-103", "Waterfront Drainage Review", yagmur, yagmur, jay,
             "Drainage Concept Drawings", "Prepare drainage design inputs");
 
         await db.SaveChangesAsync();

@@ -3,8 +3,8 @@ import { ChevronDown, ChevronRight, UserPlus } from 'lucide-react'
 import { Fragment, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, selectCls } from '@/components/hub/common'
-import { PeoplePicker } from '@/components/hub/people'
+import { AccentDot, ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Segmented, SummaryTile, selectCls, tdCls, thCls, TableRegion } from '@/components/hub/common'
+import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { HealthPill, Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { useProject, useReference } from '@/hooks/data'
@@ -12,7 +12,7 @@ import { del, get, post, qs } from '@/lib/api'
 import { ago, fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { Page as PageOf, ProjectRow } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { cn, type Accent } from '@/lib/utils'
 
 interface StaffRow {
   id: string; displayName: string; jobTitle?: string; officeId?: string; isActive: boolean; projects: number
@@ -38,8 +38,9 @@ export function StaffPage() {
   const q = useQuery({ queryKey: ['staff', f], queryFn: () => get<StaffData>(`staff${qs(f)}`) })
   const [open, setOpen] = useState<Set<string>>(new Set())
   const [sort, setSort] = useState<{ key: string; desc: boolean } | null>(null)
-  if (q.isPending) return <Loading rows={8} />
-  if (q.error) return <div className="p-6"><ErrorBanner error={q.error} /></div>
+  const header = { eyebrow: t('nav.resources'), title: t('nav.staff') }
+  if (q.isPending) return <Page {...header}><Loading rows={8} /></Page>
+  if (q.error) return <Page {...header}><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
   const d = q.data
   const rows = sort ? [...d.people].sort((a, b) => {
     const va = sort.key === 'name' ? a.displayName : (a as any)[sort.key] ?? '', vb = sort.key === 'name' ? b.displayName : (b as any)[sort.key] ?? ''
@@ -47,42 +48,44 @@ export function StaffPage() {
     return sort.desc ? -r : r
   }) : d.people
   const office = (id?: string) => ref.data?.offices.find((o) => o.id === id)?.name
-  const tile = (label: string, n: number, indicator?: string) => (
-    <button type="button" onClick={() => set('indicator', indicator)} className={cn('rounded-lg border bg-card px-4 py-3 text-left hover:bg-muted', f.indicator === indicator && indicator && 'ring-2 ring-primary')}>
-      <div className="text-xs text-muted-foreground">{label}</div><div className="text-xl font-semibold tabular-nums">{n}</div>
-    </button>
-  )
+  // Summary tiles (§13.19) filter the table; the selected one is outlined and checked, never tinted alone.
+  const tile = (label: string, n: number, accent: Accent, indicator?: string) => {
+    const on = !!indicator && f.indicator === indicator
+    return <SummaryTile label={label} value={n} accent={accent} selected={indicator ? on : undefined} onClick={() => set('indicator', on ? undefined : indicator)} />
+  }
   const roleChips = (r: StaffRow['roles']) => (['pm', 'dl', 'team', 'reviewer', 'viewer'] as const).filter((k) => r[k] > 0).map((k) => `${t(`staff.role.${k}`)} ${r[k]}`).join(' · ')
   const count = (p: StaffRow, n: number, section: string, bad = false) => <Link to={`/my-work?userId=${p.id}#mw-${section}`} className={cn('tabular-nums hover:underline', bad && n > 0 && 'font-medium text-bad')}>{n}</Link>
   return (
-    <Page title={t('nav.staff')} subtitle={d.scope === 'all' ? t('staff.allSubtitle') : t('staff.directSubtitle')}>
-      <div className="flex flex-wrap items-center gap-2 text-sm">
+    <Page {...header} subtitle={d.scope === 'all' ? t('staff.allSubtitle') : t('staff.directSubtitle')}>
+      <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4 text-sm md:p-5">
         {d.canSeeAll && (
-          <div className="inline-flex overflow-hidden rounded-md border bg-card" role="group" aria-label={t('staff.scope')}>
-            {['direct', 'all'].map((s) => <button key={s} className={cn('px-3 py-1', (f.scope ?? 'direct') === s ? 'bg-accent font-medium' : 'hover:bg-muted')} aria-pressed={(f.scope ?? 'direct') === s}
-              onClick={() => set('scope', s === 'direct' ? undefined : s)}>{t(`staff.scope.${s}`)}</button>)}
-          </div>
+          <Segmented label={t('staff.scope')} value={f.scope ?? 'direct'} onChange={(s) => set('scope', s === 'direct' ? undefined : s)}
+            options={['direct', 'all'].map((s) => ({ value: s, label: t(`staff.scope.${s}`) }))} />
         )}
-        <select className="h-8 rounded-md border bg-card px-2" value={f.officeId ?? ''} onChange={(e) => set('office', e.target.value || undefined)} aria-label={t('field.OfficeId')}>
-          <option value="">{t('staff.anyOffice')}</option>{ref.data?.offices.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-        </select>
-        <select className="h-8 rounded-md border bg-card px-2" value={f.disciplineId ?? ''} onChange={(e) => set('discipline', e.target.value || undefined)} aria-label={t('common.discipline')}>
-          <option value="">{t('projects.anyDiscipline')}</option>{ref.data?.disciplines.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-        </select>
-        <label className="flex items-center gap-1.5"><input type="checkbox" checked={!!f.showInactive} onChange={(e) => set('inactive', e.target.checked ? '1' : undefined)} />{t('staff.showInactive')}</label>
+        <Field label={t('field.OfficeId')} htmlFor="staff-office" className="w-full sm:w-44">
+          <select id="staff-office" className={selectCls} value={f.officeId ?? ''} onChange={(e) => set('office', e.target.value || undefined)}>
+            <option value="">{t('staff.anyOffice')}</option>{ref.data?.offices.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+          </select>
+        </Field>
+        <Field label={t('common.discipline')} htmlFor="staff-discipline" className="w-full sm:w-48">
+          <select id="staff-discipline" className={selectCls} value={f.disciplineId ?? ''} onChange={(e) => set('discipline', e.target.value || undefined)}>
+            <option value="">{t('projects.anyDiscipline')}</option>{ref.data?.disciplines.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+          </select>
+        </Field>
+        <label className="flex min-h-(--control-h) items-center gap-2"><input type="checkbox" className="size-4 accent-(--primary)" checked={!!f.showInactive} onChange={(e) => set('inactive', e.target.checked ? '1' : undefined)} />{t('staff.showInactive')}</label>
       </div>
-      <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-5">
-        {tile(t('staff.tile.staff'), d.tiles.staff)}
-        {tile(t('staff.tile.assignments'), d.tiles.assignments)}
-        {tile(t('staff.tile.overdue'), d.tiles.withOverdue, 'overdue')}
-        {tile(t('staff.tile.blocked'), d.tiles.withBlocked, 'blocked')}
-        {tile(t('staff.tile.reviews'), d.tiles.reviewsStalled, 'reviews')}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-5">
+        {tile(t('staff.tile.staff'), d.tiles.staff, 'blue')}
+        {tile(t('staff.tile.assignments'), d.tiles.assignments, 'mint')}
+        {tile(t('staff.tile.overdue'), d.tiles.withOverdue, 'lavender', 'overdue')}
+        {tile(t('staff.tile.blocked'), d.tiles.withBlocked, 'peach', 'blocked')}
+        {tile(t('staff.tile.reviews'), d.tiles.reviewsStalled, 'rose', 'reviews')}
       </div>
       {rows.length > 0 && (
         <ul className="space-y-2 md:hidden" aria-label={t('nav.staff')}>
           {rows.map((p) => (
-            <li key={p.id} className="rounded-lg border bg-card p-3 text-sm">
-              <div className="font-medium">{p.isActive ? p.displayName : t('common.inactiveSuffix', { name: p.displayName })}</div>
+            <li key={p.id} className="rounded-lg border bg-card p-4 text-sm">
+              <div className="flex items-center gap-2.5 font-semibold"><Avatar id={p.id} name={p.displayName} />{p.isActive ? p.displayName : t('common.inactiveSuffix', { name: p.displayName })}</div>
               <div className="text-xs text-muted-foreground">{[p.jobTitle, office(p.officeId), roleChips(p.roles)].filter(Boolean).join(' · ')}</div>
               <dl className="mt-2 grid grid-cols-4 gap-2 text-center text-xs">
                 {([['dash.open', p.open, false], ['ind.overdue', p.overdue, true], ['ind.blocked', p.blocked, true], ['staff.reviews', p.reviews, false]] as const).map(([label, n, bad]) => (
@@ -94,41 +97,43 @@ export function StaffPage() {
         </ul>
       )}
       {rows.length === 0 ? <div className="rounded-lg border bg-card"><Empty>{t('staff.none')}</Empty></div> : (
-        <div className="hidden overflow-x-auto rounded-lg border bg-card md:block">
+        <TableRegion className="hidden md:block">
           <table className="w-full text-sm">
-            <thead className="bg-muted/60 text-left text-xs text-muted-foreground">
-              <tr><th className="w-8"><span className="sr-only">{t('common.details')}</span></th>{COLS.map(([k, label]) => (
-                <th key={k} className="whitespace-nowrap px-3 py-2 font-medium" aria-sort={sort?.key === k ? (sort.desc ? 'descending' : 'ascending') : 'none'}>
-                  <button className="hover:text-foreground" onClick={() => setSort(sort?.key === k ? { key: k, desc: !sort.desc } : { key: k, desc: k !== 'name' })}>{t(label)}</button>
-                </th>))}<th className="px-3 py-2 font-medium">{t('staff.roles')}</th></tr>
+            <thead className="bg-muted text-left text-muted-foreground">
+              <tr><th scope="col" className="w-12"><span className="sr-only">{t('common.details')}</span></th>{COLS.map(([k, label]) => (
+                <th key={k} scope="col" className={cn(thCls, k !== 'name' && k !== 'lastActivityAt' && 'text-right')} aria-sort={sort?.key === k ? (sort.desc ? 'descending' : 'ascending') : 'none'}>
+                  <button className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => setSort(sort?.key === k ? { key: k, desc: !sort.desc } : { key: k, desc: k !== 'name' })}>
+                    {t(label)}{sort?.key === k && <span aria-hidden>{sort.desc ? '↓' : '↑'}</span>}</button>
+                </th>))}<th scope="col" className={thCls}>{t('staff.roles')}</th></tr>
             </thead>
             <tbody>
               {rows.map((p) => (
                 <Fragment key={p.id}>
-                  <tr className={cn('border-t', !p.isActive && 'text-muted-foreground')}>
-                    <td className="px-2"><button className="rounded p-1 hover:bg-muted" aria-expanded={open.has(p.id)} aria-label={t('staff.showAssignments', { name: p.displayName })}
+                  <tr className={cn('border-t hover:bg-muted', !p.isActive && 'text-muted-foreground')}>
+                    <td className="px-2"><button className="grid size-(--control-row-h) place-items-center rounded-md hover:bg-secondary" aria-expanded={open.has(p.id)} aria-label={t('staff.showAssignments', { name: p.displayName })}
                       onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(p.id)) n.delete(p.id); else n.add(p.id); return n })}>
                       {open.has(p.id) ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}</button></td>
-                    <td className="px-3 py-2">
-                      <Link to={`/my-work?userId=${p.id}`} className="font-medium hover:underline">{p.isActive ? p.displayName : t('common.inactiveSuffix', { name: p.displayName })}</Link>
-                      <div className="text-xs text-muted-foreground">{[p.jobTitle, office(p.officeId)].filter(Boolean).join(' · ')}</div>
+                    <td className={tdCls}>
+                      <div className="flex items-center gap-2.5"><Avatar id={p.id} name={p.displayName} />
+                        <div className="min-w-0"><Link to={`/my-work?userId=${p.id}`} className="font-semibold hover:underline">{p.isActive ? p.displayName : t('common.inactiveSuffix', { name: p.displayName })}</Link>
+                          <div className="text-xs/[18px] text-muted-foreground">{[p.jobTitle, office(p.officeId)].filter(Boolean).join(' · ')}</div></div></div>
                     </td>
-                    <td className="px-3 py-2 tabular-nums">{p.projects}</td>
-                    <td className="px-3 py-2">{count(p, p.open, 'tasks')}</td>
-                    <td className="px-3 py-2">{count(p, p.overdue, 'tasks', true)}</td>
-                    <td className="px-3 py-2">{count(p, p.blocked, 'waiting', true)}</td>
-                    <td className="px-3 py-2">{count(p, p.blocking, 'blocking', true)}</td>
-                    <td className="px-3 py-2">{count(p, p.reviews, 'reviews')}{p.reviewsStalled > 0 && <span className="ml-1 text-xs text-warn">({t('staff.stalled', { n: p.reviewsStalled })})</span>}</td>
-                    <td className="px-3 py-2">{count(p, p.deliverablesDue, 'deliverables')}</td>
-                    <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">{p.lastActivityAt ? ago(p.lastActivityAt) : t('common.dash')}</td>
-                    <td className="whitespace-nowrap px-3 py-2 text-xs">{roleChips(p.roles) || t('common.dash')}</td>
+                    <td className="px-(--cell-px) py-(--cell-py) text-right tabular-nums">{p.projects}</td>
+                    <td className="px-(--cell-px) py-(--cell-py) text-right">{count(p, p.open, 'tasks')}</td>
+                    <td className="px-(--cell-px) py-(--cell-py) text-right">{count(p, p.overdue, 'tasks', true)}</td>
+                    <td className="px-(--cell-px) py-(--cell-py) text-right">{count(p, p.blocked, 'waiting', true)}</td>
+                    <td className="px-(--cell-px) py-(--cell-py) text-right">{count(p, p.blocking, 'blocking', true)}</td>
+                    <td className="px-(--cell-px) py-(--cell-py) text-right">{count(p, p.reviews, 'reviews')}{p.reviewsStalled > 0 && <span className="ml-1 text-xs text-warn">({t('staff.stalled', { n: p.reviewsStalled })})</span>}</td>
+                    <td className="px-(--cell-px) py-(--cell-py) text-right">{count(p, p.deliverablesDue, 'deliverables')}</td>
+                    <td className="whitespace-nowrap px-(--cell-px) py-(--cell-py) text-xs text-muted-foreground">{p.lastActivityAt ? ago(p.lastActivityAt) : t('common.dash')}</td>
+                    <td className="whitespace-nowrap px-(--cell-px) py-(--cell-py) text-xs">{roleChips(p.roles) || t('common.dash')}</td>
                   </tr>
-                  {open.has(p.id) && <tr className="border-t bg-muted/20"><td /><td colSpan={COLS.length + 1} className="px-3 py-2"><Assignments person={p} scope={f.scope} onChanged={() => q.refetch()} /></td></tr>}
+                  {open.has(p.id) && <tr className="border-t bg-muted"><td /><td colSpan={COLS.length + 1} className="px-(--cell-px) py-3"><Assignments person={p} scope={f.scope} onChanged={() => q.refetch()} /></td></tr>}
                 </Fragment>
               ))}
             </tbody>
           </table>
-        </div>
+        </TableRegion>
       )}
     </Page>
   )
@@ -145,17 +150,18 @@ function Assignments({ person, scope, onChanged }: { person: StaffRow; scope?: s
   return (
     <div className="space-y-2">
       {q.data.length === 0 ? <p className="text-sm text-muted-foreground">{t('staff.noAssignments')}</p> : (
-        <ul className="divide-y rounded border bg-card">
+        <ul className="divide-y rounded-lg border bg-card">
           {q.data.map((a) => (
-            <li key={a.memberId} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 text-sm">
-              <Link to={`/projects/${a.projectNumber}`} className="min-w-0 flex-1 truncate hover:underline"><Key>{a.projectNumber}</Key> {a.name}</Link>
+            <li key={a.memberId} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-sm">
+              <Link to={`/projects/${a.projectNumber}`} className="flex min-w-0 flex-1 items-center gap-2 hover:underline">
+                <AccentDot id={a.projectId} /><Key>{a.projectNumber}</Key><span className="break-words">{a.name}</span></Link>
               <HealthPill health={a.reportedHealth} />
               <span className="text-xs">{a.roles.map((r) => t(`role.${r}`)).join(', ')}{a.leads.length > 0 && ` (${a.leads.join(', ')})`}</span>
               <span className="text-xs text-muted-foreground">{a.primaryDiscipline ?? t('common.dash')} · {t('staff.added', { date: fmtDate(a.addedAt) })}</span>
               <span className="text-xs tabular-nums">{t('staff.openOverdue', { open: a.open, overdue: a.overdue })}</span>
               <span className="text-xs text-muted-foreground">{a.nextDue ? `${a.nextDue.key} ${fmtDate(a.nextDue.dueDate)}` : ''}</span>
               <span className="text-xs text-muted-foreground">{tv(a.status)}</span>
-              {a.canRemove && <Button size="sm" variant="ghost" className="h-7 text-bad" onClick={() => setRemoving(a)}>{t('staff.remove')}</Button>}
+              {a.canRemove && <Button size="sm" variant="ghost" className="text-bad hover:text-bad" onClick={() => setRemoving(a)}>{t('staff.remove')}</Button>}
             </li>
           ))}
         </ul>

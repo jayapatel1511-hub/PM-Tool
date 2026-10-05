@@ -1,6 +1,6 @@
 # Feature packets
 
-The product specification has 33 Spec Kit packets: the original 18 first-release and 6 Phase 2 packets, plus 9 approved coordination additions (025–033). Packets 025–027 have foundation implementations with passing automated checks; full acceptance and implementation of 028–033 remain pending. The user's confirmation of the six pictured views moved the Portfolio, Workload, improved Timeline,
+The product specification has 34 Spec Kit packets: the original 18 first-release and 6 Phase 2 packets, plus 9 approved coordination additions (025–033) and 1 approved planning addition (034). Packets 025–027 have foundation implementations with passing automated checks; full acceptance and implementation of 028–033 remain pending. Packet 034 is implemented in `c829f0e6` and deployed to the synthetic review stack in `d81c13f9`, with passing software/browser and deployed safety evidence; T023's manual screen-reader validation is blocked and human acceptance remains pending. The user's confirmation of the six pictured views moved the Portfolio, Workload, improved Timeline,
 saved views, and three new workspace/calendar/task-hour packets into the first release (§36). Each folder holds a `spec.md` in Spec Kit's format and a quality checklist;
 `plan.md`, `tasks.md`, and `verification.md` are added as each packet is planned and built.
 
@@ -84,12 +84,22 @@ Jay accepted the full scope on 2026-09-26. Foundation tasks T001–T005 are impl
 
 Implementation order: 025/026 → 027 → 029/031 → 032/028 → 033 → integrated 030. Slashes indicate independent prerequisites, not authorisation to start sub-agents. The discipline view can expose accepted sections incrementally; its final acceptance requires the whole integrated flow.
 
+## Approved planning addition
+
+On 2026-10-03 Jay chose to add the weekly planning entries of the unmerged Specification v1.1 draft as a separate record beside packet 029's allocations (option (b)). The contract is §39 with §8.11, §10.9 and §13.21. Packet 029, the Workload grid and its calculations, and packet 032's readiness capacity checks stay unchanged; Manager Home, People and role-level demand are deferred proposals (§39.12).
+
+| Packet | Delivers | Depends on | Status |
+|---|---|---|---|
+| [034-weekly-planning-layer](034-weekly-planning-layer/spec.md) | Weekly Planning Layer: person × week planning entries with confidence and private drafts, the Weekly Planner and My Week | 001, 002, 006, 009, 017, 019, 021, 029 | Implemented in c829f0e6, deployed to synthetic review in d81c13f9; software/browser and deployed safety checks PASS; T023 manual screen-reader BLOCKED; human acceptance pending |
+
+Implementation order: after packet 029's built allocation model, which 034 reads but does not change. 034 is independent of 030–033.
+
 ## Phase 3: not yet packets
 
 The specification lists these as designed for, not built (§29), with too little detail to specify
 without inventing requirements. Each becomes a packet after discovery: Microsoft Teams
 notifications (FR-NOT-04), SharePoint document picking, ERP or Vantagepoint project sync,
-read-only project financials, HR-sourced utilisation and resource planning (manual dated allocations are now packet 029), client or external
+read-only project financials, HR-sourced utilisation and resource planning (manual dated allocations are now packet 029 and manual weekly planning entries packet 034), client or external
 access, advanced portfolio reporting, per-project threshold overrides, a personal calendar feed,
 and a second interface language if not done earlier. Cross-project dependencies (FR-DEP-10) are
 also Phase 3.

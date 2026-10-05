@@ -21,6 +21,16 @@ Homedev hosts review, company pilot and production under Jay's 2026-10-01 clarif
 
 Steps 3–5 are scripted: from `releases/<full-sha>` on homedev run `bash scripts/activate-homedev-review.sh <full-sha> [--install-timer]` in your own terminal (sudo prompts there). It builds the image, dumps the database, starts the API on the existing volume, prints migration/error log lines without secrets, runs `scripts/verify-homedev-review.py` (health, anonymous/Host/Origin denial, wrong-password denial, individual sign-in, `/me`, sign-out) and only then moves `current`. `--install-timer` also installs the daily dump timer, runs it once and restores that dump in an isolated drill database. `python3 scripts/verify-homedev-review.py https://pm.engcalchub.com` repeats the probes through the tunnel; the user unit is `hosting/pm-tool-tunnel.service`. Sign-in throttling behind the tunnel is keyed on Cloudflare's client address only when the request comes from the trusted bridge gateway.
 
+### Tuesday hosted review fixture activation
+
+After the exact new review release has been activated and its private health/auth checks pass, run the operator wrapper from `releases/<full-sha>` in Jay's own terminal:
+
+```bash
+python3 scripts/seed-homedev-tuesday-review.py <full-review-sha>
+```
+
+The wrapper rechecks the exact hosted release before any SQL, credential or API mutation; validates all 13 active reserved AppUsers (`email`, reserved `EntraObjectId`, UUID); preserves the legacy Taylor/Jay/Yagmur verifier credentials; and creates the owner-only `.runtime/tuesday-review-login-handoff.json` for the ten Tuesday personas. It force-recreates the API at the exact SHA, waits for the proxy health response, verifies each local-password sign-in as the same person, waits between rate-limited phases, and runs `seed_resources.py`, `seed_modules.py` and `seed_planning.py` through the hosted API transport. It writes only private handoff/log files and `data/tuesday-fixtures-<sha>.json`; passwords, hashes and cookies must never be logged. A rerun validates the current verifier, handoff, reserved IDs and actual fixture counts before treating the manifest as complete. Do not use a database import, touch pilot data, or run this before exact release activation.
+
 ## Daily review database dump
 
 The timer runs at 22:00 UTC, before the Mac's 20:30 Halifax off-host restic schedule in either daylight or standard time. It is a separate local dump; its success does **not** prove that the off-host schedule ran. The helper is copied to a root-owned path because systemd must not execute a script from the user-writable release tree as root. It targets only the `pm-tool-review-db-1` container and writes a mode-600 archive into the existing user-owned, mode-700 `data/backups` directory.

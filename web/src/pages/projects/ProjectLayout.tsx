@@ -3,14 +3,14 @@ import { CalendarClock, ExternalLink, FolderOpen, Star } from 'lucide-react'
 import { createContext, useContext, useState } from 'react'
 import { NavLink, Outlet, useParams } from 'react-router'
 import { toast } from 'sonner'
-import { ErrorBanner, Loading, Spinner } from '@/components/hub/common'
+import { ErrorBanner, InProject, Loading, Spinner } from '@/components/hub/common'
 import { HealthPill, Key, StatusPill } from '@/components/hub/pills'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { del, get, post } from '@/lib/api'
 import { fmtDate, relative } from '@/lib/format'
 import { plural, t } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { accentOf, cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useMe, type Me } from '@/lib/auth'
@@ -58,35 +58,37 @@ export function ProjectLayout() {
     <Ctx.Provider value={p}>
       <div className="flex min-h-full flex-col">
         <ProjectHeader p={p} />
-        <nav aria-label={t('ptab.label')} className="no-print sticky top-0 z-20 flex gap-1 overflow-x-auto border-b bg-card px-4">
-          {PROJECT_TABS.filter((tab) => !tab.show || tab.show(p, me)).map((tab) => (
-            <NavLink key={tab.label} to={typeof tab.path === 'string' ? tab.path : tab.path(p)} className={({ isActive }) => cn('whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-sm text-muted-foreground hover:text-foreground',
-              isActive && 'border-primary font-medium text-foreground')}>{t(tab.label)}</NavLink>
-          ))}
-        </nav>
+        <ProjectTabs p={p} me={me} />
         <StatusBanner p={p} />
         {p.status === 'Active' && (p.permissions.isPm || p.permissions.leadOf.length > 0) && <DateReviewBanner p={p} />}
-        <div className="flex-1"><Outlet /></div>
+        <div className="flex-1"><InProject.Provider value><Outlet /></InProject.Provider></div>
       </div>
     </Ctx.Provider>
   )
+}
+
+/** Jay's review preference: section menus wrap into rows rather than scrolling sideways. */
+function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
+  return <nav aria-label={t('ptab.label')} className="no-print flex min-w-0 flex-wrap gap-1 border-b bg-card px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8">
+    {PROJECT_TABS.filter((tab) => !tab.show || tab.show(p, me)).map((tab) => <NavLink key={tab.label} to={typeof tab.path === 'string' ? tab.path : tab.path(p)} className={({ isActive }) => cn('inline-flex min-h-11 max-w-full items-center break-words px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', isActive && 'font-semibold text-foreground shadow-[inset_0_-2px_0_var(--primary)]')}>{t(tab.label)}</NavLink>)}
+  </nav>
 }
 
 /** Shared project header (§12.1 UI behaviour, §13.0): key, name, client, PM, phase, status, health with why, next milestone, links, follow. */
 function ProjectHeader({ p }: { p: ProjectDetail }) {
   const refresh = useProjectRefresh()
   return (
-    <header className="flex flex-wrap items-start justify-between gap-3 border-b bg-card px-4 pb-3 pt-4">
-      <div className="min-w-0 space-y-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <button className="key rounded bg-muted px-1.5 py-0.5 text-xs hover:bg-accent" title={t('common.copyLink')}
-            onClick={() => { navigator.clipboard?.writeText(p.projectNumber); toast.success(t('common.copied')) }}>{p.projectNumber}</button>
-          <h1 className="truncate text-xl font-semibold tracking-tight">{p.name}</h1>
+    <header data-accent={accentOf(p.id)} className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 border-b border-t-4 border-t-(color:--acc-stripe) bg-card px-4 pb-4 pt-4 md:px-6 xl:px-8">
+      <div className="min-w-0 max-w-5xl space-y-2">
+        <button className="key rounded-md bg-(--acc-bg) px-2 py-0.5 text-(--acc-fg) hover:underline" title={t('common.copyLink')}
+          onClick={() => { navigator.clipboard?.writeText(p.projectNumber); toast.success(t('common.copied')) }}>{p.projectNumber}</button>
+        <div className="flex items-start gap-1">
+          <h1 className="min-w-0 break-words text-2xl/8 font-semibold tracking-[-0.4px] md:text-[28px]/9 md:tracking-[-0.6px]">{p.name}</h1>
           <button aria-label={p.starred ? t('projects.unstar') : t('projects.star')} aria-pressed={p.starred}
             onClick={async () => { await (p.starred ? del(`projects/${p.id}/star`) : post(`projects/${p.id}/star`)); refresh(p.id) }}
-            className={cn('rounded p-1 hover:bg-muted', p.starred ? 'text-warn' : 'text-muted-foreground/60')}><Star className={cn('size-4', p.starred && 'fill-current')} /></button>
+            className={cn('grid size-9 shrink-0 place-items-center rounded-md hover:bg-muted', p.starred ? 'text-warn' : 'text-muted-foreground')}><Star className={cn('size-5', p.starred && 'fill-current')} /></button>
         </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
           <span>{p.client}</span>
           <span>{t('projects.col.pm')}: <span className="text-foreground">{p.pmName}</span></span>
           {p.phase && <span>{t('projects.col.phase')}: <span className="text-foreground">{p.phase}</span></span>}
@@ -102,9 +104,9 @@ function ProjectHeader({ p }: { p: ProjectDetail }) {
       <div className="flex flex-wrap items-center gap-2">
         {p.links.slice(0, 4).map((l) => (
           l.linkType === 'Network Folder'
-            ? <button key={l.id} className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs hover:bg-muted" title={l.url}
+            ? <button key={l.id} className="inline-flex min-h-(--control-row-h) items-center gap-1.5 rounded-md border border-input px-2.5 text-sm hover:bg-muted" title={l.url}
                 onClick={() => { navigator.clipboard?.writeText(l.url); toast.success(t('links.pathCopied')) }}><FolderOpen className="size-3.5" />{l.title}</button>
-            : <a key={l.id} href={l.url} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs hover:bg-muted">
+            : <a key={l.id} href={l.url} target="_blank" rel="noreferrer noopener" className="inline-flex min-h-(--control-row-h) items-center gap-1.5 rounded-md border border-input px-2.5 text-sm hover:bg-muted">
                 <ExternalLink className="size-3.5" />{l.title}</a>
         ))}
         <ProjectSlots.Follow p={p} />
@@ -140,7 +142,7 @@ function DateReviewBanner({ p }: { p: ProjectDetail }) {
   }
   const dismiss = () => { try { localStorage.setItem(key, '1') } catch { /* per-viewer convenience only */ } rerender((x) => x + 1) }
   return (
-    <div role="status" className="mx-4 mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-warn/30 bg-warn-bg px-3 py-2 text-sm">
+    <div role="status" className="mx-4 mt-4 md:mx-6 xl:mx-8 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-warn/30 bg-warn-bg px-3 py-2 text-sm">
       <CalendarClock className="size-4 shrink-0 text-warn" aria-hidden />
       <span className="min-w-0 flex-1">{t('dateReview.text', { what: [r.tasks.length && plural(r.tasks.length, 'dateReview.task1', 'dateReview.tasksN'),
         r.deliverables.length && plural(r.deliverables.length, 'dateReview.deliverable1', 'dateReview.deliverablesN')].filter(Boolean).join(t('dateReview.and')),
@@ -158,16 +160,16 @@ function StatusBanner({ p }: { p: ProjectDetail }) {
   if (p.status === 'Setup' && c) {
     const items = [['projects.check.milestone', c.hasMilestone], ['projects.check.leads', c.everyDisciplineHasLead], ['projects.check.submissions', c.everySubmissionHasDeliverable]] as const
     return (
-      <div role="status" className="mx-4 mt-3 rounded-md border border-warn/30 bg-warn-bg px-3 py-2 text-sm text-warn">
+      <div role="status" className="mx-4 mt-4 md:mx-6 xl:mx-8 rounded-md border border-warn/30 bg-warn-bg px-3 py-2 text-sm text-warn">
         <div className="font-medium">{t('projects.setupBanner')}</div>
         <ul className="mt-1 flex flex-wrap gap-x-5">{items.map(([k, ok]) => <li key={k}>{ok ? '✓' : '○'} {t(k)}</li>)}</ul>
       </div>
     )
   }
-  if (p.status === 'On Hold') return <div role="status" className="mx-4 mt-3 rounded-md border bg-idle-bg px-3 py-2 text-sm text-idle">{t('projects.onHoldBanner')}</div>
-  if (p.status === 'Complete') return <div role="status" className="mx-4 mt-3 rounded-md border border-done/30 bg-done-bg px-3 py-2 text-sm text-done">
+  if (p.status === 'On Hold') return <div role="status" className="mx-4 mt-4 md:mx-6 xl:mx-8 rounded-md border bg-idle-bg px-3 py-2 text-sm text-idle">{t('projects.onHoldBanner')}</div>
+  if (p.status === 'Complete') return <div role="status" className="mx-4 mt-4 md:mx-6 xl:mx-8 rounded-md border border-done/30 bg-done-bg px-3 py-2 text-sm text-done">
     {p.suggestArchive ? t('projects.archiveSuggested') : t('projects.completeBanner', { n: p.editWindowDaysLeft ?? 0 })}</div>
-  if (p.status === 'Archived' || p.status === 'Cancelled') return <div role="status" className="mx-4 mt-3 rounded-md border bg-idle-bg px-3 py-2 text-sm text-idle">{t('projects.readOnlyBanner', { status: t(`value.${p.status}`) })}</div>
+  if (p.status === 'Archived' || p.status === 'Cancelled') return <div role="status" className="mx-4 mt-4 md:mx-6 xl:mx-8 rounded-md border bg-idle-bg px-3 py-2 text-sm text-idle">{t('projects.readOnlyBanner', { status: t(`value.${p.status}`) })}</div>
   return null
 }
 

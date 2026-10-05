@@ -1,9 +1,10 @@
+import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Building2, Check, ChevronDown, ChevronRight, Download, Plus, Scale, Trash2, Users } from 'lucide-react'
-import { Fragment, useMemo, useState } from 'react'
+import { Building2, Check, ChevronDown, ChevronRight, Download, Lock, Plus, Scale, Trash2, Users, X } from 'lucide-react'
+import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Segmented, Spinner, TableRegion, selectCls } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineDate, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
@@ -26,6 +27,7 @@ import { errorText, type TaskRow } from './Tasks'
 import { useCurrentProject } from './ProjectLayout'
 import { ExportMenu } from '@/components/hub/export'
 import { useTable } from '@/components/hub/table'
+import { DateText, FieldGroup, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
 import { ViewMenu } from '@/components/hub/views'
 
 export interface DecisionRow {
@@ -60,10 +62,10 @@ function Impact({ level }: { level: string }) {
 
 /** Owner with external parties set apart by icon and organisation (§13.8 UX). */
 function Owner({ d }: { d: DecisionRow }) {
-  if (!d.ownerExternalPartyId) return <span className={cn(d.isInactiveOwner && 'text-bad')}>{d.ownerName ?? t('common.dash')}</span>
+  if (!d.ownerExternalPartyId) return <Person id={d.ownerUserId} name={d.ownerName} />
   return (
-    <span className="inline-flex items-center gap-1" title={d.ownerIsClient ? t('decision.clientOwner') : t('decision.externalOwner')}>
-      <Building2 className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+    <span className="inline-flex items-center gap-1.5" title={d.ownerIsClient ? t('decision.clientOwner') : t('decision.externalOwner')}>
+      <Building2 className="size-4 shrink-0 text-muted-foreground" aria-hidden />
       <span>{d.ownerName}</span>{d.ownerOrganisation && <span className="text-muted-foreground">· {d.ownerOrganisation}</span>}
       <span className="sr-only">({d.ownerIsClient ? t('decision.clientOwner') : t('decision.externalOwner')})</span>
     </span>
@@ -71,14 +73,16 @@ function Owner({ d }: { d: DecisionRow }) {
 }
 
 function Due({ d }: { d: DecisionRow }) {
-  if (d.isOverdue) return <span className="font-medium text-bad">■ {t('ind.overdueD', { n: d.daysOverdue })}</span>
-  if (d.daysUntil == null) return <span className="text-muted-foreground">{t('common.dash')}</span>
-  return <span className={cn(d.isDueSoon && 'text-warn')}>{d.isDueSoon && '▲ '}{d.daysUntil === 0 ? t('common.today') : d.daysUntil < 0 ? t('ind.overdueD', { n: -d.daysUntil }) : t('decision.inDays', { n: d.daysUntil })}</span>
+  if (d.isOverdue) return <Chip tone="bad">{t('ind.overdueD', { n: d.daysOverdue })}</Chip>
+  if (d.daysUntil == null) return <Missing />
+  const text = d.daysUntil === 0 ? t('common.today') : d.daysUntil < 0 ? t('ind.overdueD', { n: -d.daysUntil }) : t('decision.inDays', { n: d.daysUntil })
+  return d.isDueSoon ? <Chip tone="warn">{text}</Chip> : <span className="tabular-nums">{text}</span>
 }
 
 function Blocking({ d }: { d: DecisionRow }) {
   if (!d.blockingTaskIds.length) return <span className="text-muted-foreground">{t('common.dash')}</span>
-  return <Link to={`../tasks?ids=${d.blockingTaskIds.join(',')}`} relative="path" className="text-bad underline">{plural(d.blockingTaskIds.length, 'decision.task1', 'wc.tasksN')}</Link>
+  return <Link to={`../tasks?ids=${d.blockingTaskIds.join(',')}`} relative="path" className="inline-flex items-center gap-1 font-medium text-bad underline underline-offset-4">
+    <span aria-hidden>■</span>{plural(d.blockingTaskIds.length, 'decision.task1', 'wc.tasksN')}</Link>
 }
 
 /** Decision Register (§13.8): an agenda for the client call, with filters in the URL and rows that expand to linked items. */
@@ -91,18 +95,20 @@ export function DecisionsTab() {
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
   const q = useQuery({ queryKey: ['p', p.id, 'decisions', filters], queryFn: () => get<DecisionRow[]>(`projects/${p.id}/decisions${qs(filters)}`) })
+  const panel = sp.get('panel')
   const table = useTable<DecisionRow>('hub.decisionColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (d) => d.key, className: 'whitespace-nowrap', cell: (d) => <Key>{d.key}</Key> },
-    { id: 'subject', label: t('decision.subject'), fixed: true, sort: (d) => d.subject.toLowerCase(), className: 'min-w-[12rem] font-medium',
-      cell: (d) => <button className="text-left hover:underline" onClick={() => openPanel('Decision', d.id)}>{d.subject}</button> },
-    { id: 'owner', label: t('common.owner'), sort: (d) => d.ownerName, className: 'whitespace-nowrap', cell: (d) => <Owner d={d} /> },
-    { id: 'requestedBy', label: t('decision.requestedBy'), sort: (d) => d.requestedByName, className: 'whitespace-nowrap', cell: (d) => d.requestedByName },
-    { id: 'requested', label: t('decision.requested'), sort: (d) => d.dateRequested, className: 'whitespace-nowrap', cell: (d) => fmtDate(d.dateRequested) },
-    { id: 'requiredBy', label: t('decision.requiredBy'), sort: (d) => d.requiredByDate, className: 'whitespace-nowrap', cell: (d) => fmtDate(d.requiredByDate) },
-    { id: 'days', label: t('decision.daysTo'), sort: (d) => (d.isOverdue ? -d.daysOverdue : d.daysUntil), className: 'whitespace-nowrap', cell: (d) => <Due d={d} /> },
+    { id: 'subject', label: t('decision.subject'), fixed: true, sort: (d) => d.subject.toLowerCase(), className: 'min-w-[12rem]',
+      cell: (d) => <button className={TITLE_LINK} aria-current={panel === `Decision:${d.id}` || undefined} onClick={() => openPanel('Decision', d.id)}>{d.subject}</button> },
+    { id: 'owner', label: t('common.owner'), sort: (d) => d.ownerName, className: 'whitespace-nowrap',
+      cell: (d) => <span className="flex flex-wrap items-center gap-x-2 gap-y-1"><Owner d={d} />{d.isInactiveOwner && <Chip tone="bad">{t('decision.inactiveOwner')}</Chip>}</span> },
+    { id: 'requestedBy', label: t('decision.requestedBy'), sort: (d) => d.requestedByName, className: 'whitespace-nowrap', cell: (d) => <Person id={d.requestedById} name={d.requestedByName} /> },
+    { id: 'requested', label: t('decision.requested'), sort: (d) => d.dateRequested, className: 'text-right', cell: (d) => <DateText date={d.dateRequested} /> },
+    { id: 'requiredBy', label: t('decision.requiredBy'), sort: (d) => d.requiredByDate, className: 'text-right', cell: (d) => <DateText date={d.requiredByDate} /> },
+    { id: 'days', label: t('decision.daysTo'), sort: (d) => (d.isOverdue ? -d.daysOverdue : d.daysUntil), className: 'whitespace-nowrap text-right', cell: (d) => <Due d={d} /> },
     { id: 'impact', label: t('decision.impact'), sort: (d) => IMPACTS.indexOf(d.impactLevel), cell: (d) => <Impact level={d.impactLevel} /> },
     { id: 'status', label: t('common.status'), sort: (d) => d.status, cell: (d) => <StatusPill status={d.status} /> },
-    { id: 'blocking', label: t('decision.blocking'), sort: (d) => -d.blockingTaskIds.length, className: 'whitespace-nowrap', cell: (d) => <Blocking d={d} /> },
+    { id: 'blocking', label: t('decision.blocking'), sort: (d) => -d.blockingTaskIds.length, className: 'whitespace-nowrap text-right', cell: (d) => <Blocking d={d} /> },
     { id: 'linked', label: t('decision.linked'), cell: (d) => <span className="flex flex-wrap gap-1">
       {[...d.deliverables.map((x) => ['Deliverable', x] as const), ...d.milestones.map((x) => ['Milestone', x] as const)].map(([type, x]) => (
         <button key={x.id} title={x.name} onClick={() => openPanel(type, x.id)} className="hover:underline"><Key>{x.key}</Key></button>))}</span> },
@@ -114,76 +120,101 @@ export function DecisionsTab() {
     return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]))
   }, [q.data])
   const can = p.permissions.raiseRegister
-  const sel = 'h-8 rounded-md border bg-card px-2 text-sm'
   const toggle = (id: string) => { const n = new Set(open); if (n.has(id)) n.delete(id); else n.add(id); setOpen(n) }
   const active = FILTERS.some((k) => sp.has(k))
+  const clear = () => { const n = new URLSearchParams(sp); FILTERS.forEach((k) => n.delete(k)); setSp(n, { replace: true }) }
   const view = sp.get('view') === 'log' ? 'log' : 'register'
+  // Active filters as removable tokens (§13.0 Filters), including those that arrive by link (indicator).
+  const tokens = [
+    filters.q && { key: 'q', label: t('common.search'), value: filters.q },
+    filters.status && { key: 'status', label: t('common.status'), value: filters.status === OPEN ? t('decision.openStatuses') : tv(filters.status) },
+    filters.ownerType && { key: 'ownerType', label: t('decision.ownerType'), value: t(`decision.ownerType.${filters.ownerType}`) },
+    filters.ownerId && { key: 'ownerId', label: t('common.owner'), value: owners.find(([id]) => id === filters.ownerId)?.[1] ?? <Missing /> },
+    filters.impact && { key: 'impact', label: t('decision.impact'), value: tv(filters.impact) },
+    filters.requiredFrom && { key: 'requiredFrom', label: t('decision.requiredFrom'), value: fmtDate(filters.requiredFrom) },
+    filters.requiredTo && { key: 'requiredTo', label: t('decision.requiredTo'), value: fmtDate(filters.requiredTo) },
+    filters.blocking && { key: 'blocking', label: t('decision.blockingWork'), value: filters.blocking === 'true' ? t('common.yes') : t('common.no') },
+    filters.indicator && { key: 'indicator', label: t('deliverable.indicator'), value: t(`decision.ind.${filters.indicator}`) },
+  ].filter(Boolean) as { key: string; label: string; value: ReactNode }[]
   return (
     <Page title={t('ptab.decisions')} subtitle={t('decision.subtitle')}
       actions={<>
+        {view === 'register' && <>{table.menu}<ViewMenu listType="decisions" projectId={p.id} extra={() => ({ cols: table.colsParam })} /></>}
         <ExportMenu path={`projects/${p.id}/decisions/export`} params={filters} name={`${p.projectNumber}-decisions`} />
-        <Button variant="outline" size="sm" onClick={() => setDialog('client')}><Download className="size-4" />{t('decision.clientExport')}</Button>
+        <Button variant="outline" onClick={() => setDialog('client')}><Download className="size-4" />{t('decision.clientExport')}</Button>
         <Button variant="outline" onClick={() => setDialog('parties')}><Users className="size-4" />{t('party.title')}</Button>
         {can.ok && <Button onClick={() => setDialog('new')}><Plus className="size-4" />{t('decision.new')}</Button>}
       </>}>
-      {!can.ok && can.reason && <p className="text-sm text-muted-foreground">{can.reason}</p>}
-      <div className="inline-flex self-start overflow-hidden rounded-md border bg-card" role="group" aria-label={t('decision.view')}>
-        {(['register', 'log'] as const).map((v) => (
-          <button key={v} type="button" aria-pressed={view === v} onClick={() => set('view', v === 'log' ? v : null)}
-            className={cn('inline-flex h-8 items-center px-2.5 text-sm', view === v ? 'bg-accent font-medium' : 'hover:bg-muted')}>{t(`decision.view.${v}`)}</button>
-        ))}
-      </div>
+      {!can.ok && can.reason && <Notice icon={Lock} title={can.reason} />}
+      <div><Segmented label={t('decision.view')} value={view} onChange={(v) => set('view', v === 'log' ? v : null)}
+        options={(['register', 'log'] as const).map((v) => ({ value: v, label: t(`decision.view.${v}`) }))} /></div>
       {view === 'log' ? <DecisionLog projectId={p.id} /> : <>
-      <div className="flex flex-wrap items-center gap-2">
-        <Input key={filters.q ? 'q' : 'empty'} className="h-8 w-52" type="search" placeholder={t('common.search')} defaultValue={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} aria-label={t('common.search')} />
-        <select className={sel} value={filters.status ?? ''} onChange={(e) => set('status', e.target.value)} aria-label={t('common.status')}>
-          <option value="">{t('decision.anyStatus')}</option><option value={OPEN}>{t('decision.openStatuses')}</option>
-          {STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
-        </select>
-        <select className={sel} value={filters.ownerType ?? ''} onChange={(e) => set('ownerType', e.target.value)} aria-label={t('decision.ownerType')}>
-          <option value="">{t('decision.anyOwnerType')}</option>{['internal', 'external', 'client'].map((x) => <option key={x} value={x}>{t(`decision.ownerType.${x}`)}</option>)}
-        </select>
-        <select className={cn(sel, 'max-w-48')} value={filters.ownerId ?? ''} onChange={(e) => set('ownerId', e.target.value)} aria-label={t('common.owner')}>
-          <option value="">{t('decision.anyOwner')}</option>{owners.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
-        </select>
-        <select className={sel} value={filters.impact ?? ''} onChange={(e) => set('impact', e.target.value)} aria-label={t('decision.impact')}>
-          <option value="">{t('decision.anyImpact')}</option>{IMPACTS.map((x) => <option key={x} value={x}>{tv(x)}</option>)}
-        </select>
-        <label className="text-xs text-muted-foreground">{t('decision.requiredFrom')} <Input type="date" className="inline-flex h-8 w-36" value={filters.requiredFrom ?? ''} onChange={(e) => set('requiredFrom', e.target.value)} /></label>
-        <label className="text-xs text-muted-foreground">{t('common.to')} <Input type="date" className="inline-flex h-8 w-36" value={filters.requiredTo ?? ''} onChange={(e) => set('requiredTo', e.target.value)} /></label>
-        <button type="button" aria-pressed={filters.blocking === 'true'} onClick={() => set('blocking', filters.blocking === 'true' ? null : 'true')}
-          className={cn('rounded-full border px-2.5 py-0.5 text-xs', filters.blocking === 'true' ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:bg-muted')}>{t('decision.blockingWork')}</button>
-        {filters.indicator && <button type="button" onClick={() => set('indicator', null)} className="rounded-full border border-primary bg-accent px-2.5 py-0.5 text-xs"
-          aria-label={t('task.removeFilter', { name: t(`decision.ind.${filters.indicator}`) })}>{t(`decision.ind.${filters.indicator}`)} ×</button>}
-        {active && <button type="button" className="px-2 text-xs text-muted-foreground hover:text-foreground" onClick={() => setSp(new URLSearchParams(), { replace: true })}>{t('common.clear')}</button>}
-        <div className="flex-1" />
-        {table.menu}
-        <ViewMenu listType="decisions" projectId={p.id} extra={() => ({ cols: table.colsParam })} />
-      </div>
-      {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      {q.isPending ? <Loading rows={6} /> : rows.length === 0 ? (
-        <div className="rounded-lg border bg-card"><Empty action={can.ok && !active && <Button onClick={() => setDialog('new')}>{t('decision.new')}</Button>}>{active ? t('decision.noMatch') : t('decision.empty')}</Empty></div>
-      ) : (
-        <div className="overflow-x-auto rounded-lg border bg-card">
-          <table className="w-full text-[13px]">
-            <thead className="bg-muted/60 text-left text-xs text-muted-foreground">
-              <tr><th className="w-8"><span className="sr-only">{t('common.details')}</span></th>{table.visible.map(table.header)}</tr>
+      <FilterBar>
+        <div className="flex flex-wrap items-end gap-3">
+          <Field label={t('common.search')} htmlFor="decision-search" className="w-full sm:w-56">
+            <UrlSearchInput id="decision-search" value={filters.q ?? ''} onValueChange={value => set('q', value)} />
+          </Field>
+          <Field label={t('common.status')} htmlFor="decision-status" className="w-full sm:w-56">
+            <select id="decision-status" className={selectCls} value={filters.status ?? ''} onChange={(e) => set('status', e.target.value)}>
+              <option value="">{t('decision.anyStatus')}</option><option value={OPEN}>{t('decision.openStatuses')}</option>
+              {STATUSES.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
+            </select>
+          </Field>
+          <Field label={t('decision.ownerType')} htmlFor="decision-owner-type" className="w-full sm:w-44">
+            <select id="decision-owner-type" className={selectCls} value={filters.ownerType ?? ''} onChange={(e) => set('ownerType', e.target.value)}>
+              <option value="">{t('decision.anyOwnerType')}</option>{['internal', 'external', 'client'].map((x) => <option key={x} value={x}>{t(`decision.ownerType.${x}`)}</option>)}
+            </select>
+          </Field>
+          <Field label={t('common.owner')} htmlFor="decision-owner" className="w-full sm:w-48">
+            <select id="decision-owner" className={selectCls} value={filters.ownerId ?? ''} onChange={(e) => set('ownerId', e.target.value)}>
+              <option value="">{t('decision.anyOwner')}</option>{owners.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+            </select>
+          </Field>
+          <Field label={t('decision.impact')} htmlFor="decision-impact" className="w-full sm:w-40">
+            <select id="decision-impact" className={selectCls} value={filters.impact ?? ''} onChange={(e) => set('impact', e.target.value)}>
+              <option value="">{t('decision.anyImpact')}</option>{IMPACTS.map((x) => <option key={x} value={x}>{tv(x)}</option>)}
+            </select>
+          </Field>
+          <Field label={t('decision.requiredFrom')} htmlFor="decision-required-from" className="w-full sm:w-44">
+            <Input id="decision-required-from" type="date" value={filters.requiredFrom ?? ''} onChange={(e) => set('requiredFrom', e.target.value)} />
+          </Field>
+          <Field label={t('decision.requiredTo')} htmlFor="decision-required-to" className="w-full sm:w-44">
+            <Input id="decision-required-to" type="date" value={filters.requiredTo ?? ''} onChange={(e) => set('requiredTo', e.target.value)} />
+          </Field>
+        </div>
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>
+          <ChipToggle on={filters.blocking === 'true'} onClick={() => set('blocking', filters.blocking === 'true' ? null : 'true')}>{t('decision.blockingWork')}</ChipToggle>
+        </div>
+        <ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />
+      </FilterBar>
+      {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={6} /></div> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : rows.length === 0 ? (
+        <div className="rounded-lg border bg-card">{active
+          ? <Empty title={t('decision.noMatch')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('register.noMatchHint')}</Empty>
+          : <Empty action={can.ok && <Button variant="outline" onClick={() => setDialog('new')}><Plus className="size-4" />{t('decision.new')}</Button>}>{t('decision.empty')}</Empty>}</div>
+      ) : (<>
+        <RegisterCards groups={[{ label: '', rows }]} columns={table.visible} current={(d) => panel === `Decision:${d.id}`} />
+        <TableRegion className="hidden md:block">
+          <table className="w-full text-sm">
+            <caption className="sr-only">{t('ptab.decisions')}</caption>
+            <thead className="bg-muted text-left text-muted-foreground">
+              <tr><th scope="col" className="w-12"><span className="sr-only">{t('common.details')}</span></th>
+                {table.visible.map((c) => table.header(c))}</tr>
             </thead>
             <tbody>
               {rows.map((d) => (
                 <Fragment key={d.id}>
-                  <tr className={cn('border-t hover:bg-muted/30', d.isOverdue && 'bg-bad-bg/30')}>
-                    <td className="px-2"><button className="rounded p-1 hover:bg-muted" aria-expanded={open.has(d.id)} aria-label={t('decision.showLinked', { key: d.key })} onClick={() => toggle(d.id)}>
-                      {open.has(d.id) ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}</button></td>
+                  <tr className={cn('border-t hover:bg-muted', panel === `Decision:${d.id}` && SELECTED_ROW)}>
+                    <td className="px-2"><button className="grid size-(--control-row-h) place-items-center rounded-md hover:bg-secondary" aria-expanded={open.has(d.id)} aria-label={t('decision.showLinked', { key: d.key })} onClick={() => toggle(d.id)}>
+                      {open.has(d.id) ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</button></td>
                     {table.visible.map((c) => table.cell(c, d))}
                   </tr>
-                  {open.has(d.id) && <tr className="border-t bg-muted/20"><td colSpan={table.visible.length + 1} className="px-8 py-2"><LinkedItems id={d.id} /></td></tr>}
+                  {open.has(d.id) && <tr className="border-t bg-muted"><td /><td colSpan={table.visible.length} className="px-(--cell-px) py-3"><LinkedItems id={d.id} /></td></tr>}
                 </Fragment>
               ))}
             </tbody>
           </table>
-        </div>
-      )}
+        </TableRegion>
+      </>)}
       </>}
       {dialog === 'new' && <DecisionForm p={p} onClose={() => setDialog(null)} />}
       {dialog === 'parties' && <PartiesDialog p={p} onClose={() => setDialog(null)} />}
@@ -201,7 +232,7 @@ interface LogEntry {
 function DecisionLog({ projectId }: { projectId: string }) {
   const q = useQuery({ queryKey: ['p', projectId, 'decision-log'], queryFn: () => get<LogEntry[]>(`projects/${projectId}/decision-log`) })
   const openPanel = useItemPanel()
-  if (q.isPending) return <Loading rows={6} />
+  if (q.isPending) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
   if (q.error) return <ErrorBanner error={q.error} retry={() => q.refetch()} />
   if (!q.data.length) return <div className="rounded-lg border bg-card"><Empty>{t('decision.logEmpty')}</Empty></div>
   const detail = (x: LogEntry) => [
@@ -212,13 +243,13 @@ function DecisionLog({ projectId }: { projectId: string }) {
   return (
     <ol className="divide-y rounded-lg border bg-card" aria-label={t('decision.view.log')}>
       {q.data.map((x) => (
-        <li key={`${x.decisionId}-${x.occurredAt}-${x.kind}`} className="grid gap-1 px-4 py-3 text-sm sm:grid-cols-[8.5rem_1fr]">
-          <time dateTime={x.occurredAt} className="text-xs text-muted-foreground">{fmtTime(x.occurredAt)}</time>
-          <div className="min-w-0 space-y-1">
+        <li key={`${x.decisionId}-${x.occurredAt}-${x.kind}`} className="grid gap-1 px-5 py-4 text-sm sm:grid-cols-[10rem_1fr] sm:gap-4">
+          <time dateTime={x.occurredAt} className="text-xs/[18px] text-muted-foreground tabular-nums sm:pt-0.5">{fmtTime(x.occurredAt)}</time>
+          <div className="min-w-0 space-y-1.5">
             <div className="flex flex-wrap items-center gap-2"><StatusPill status={x.kind} /><Key>{x.itemKey}</Key>
-              <button className="text-left font-medium hover:underline" onClick={() => openPanel('Decision', x.decisionId)}>{x.subject}</button></div>
+              <button className={TITLE_LINK} onClick={() => openPanel('Decision', x.decisionId)}>{x.subject}</button></div>
             {x.text && <p className="whitespace-pre-wrap">{x.text}</p>}
-            <p className="text-xs text-muted-foreground">{detail(x)}</p>
+            <p className="text-xs/[18px] text-muted-foreground">{detail(x)}</p>
           </div>
         </li>
       ))}
@@ -274,18 +305,18 @@ function LinkedItems({ id, canRemove }: { id: string; canRemove?: boolean }) {
   const links = q.data.links
   if (!links.length) return <p className="py-2 text-sm text-muted-foreground">{t('decision.noLinks')}</p>
   return (
-    <table className="w-full text-[13px]">
+    <table className="w-full text-sm">
       <tbody>
         {links.map((l) => (
           <tr key={l.id} className="border-b last:border-0">
-            <td className="py-1 pr-3 text-xs text-muted-foreground">{t(`decision.rel.${l.relation}`)}</td>
-            <td className="whitespace-nowrap py-1 pr-3"><Key>{l.key}</Key></td>
-            <td className="py-1 pr-3"><button className="text-left hover:underline" onClick={() => openPanel(l.targetType, l.targetId)}>{l.name}</button></td>
-            <td className="py-1 pr-3">{l.status && <StatusPill status={l.status} />}</td>
-            <td className="whitespace-nowrap py-1 pr-3">{l.person}</td>
-            <td className="whitespace-nowrap py-1 pr-3">{fmtDate(l.date)}</td>
-            <td className="py-1 text-right">{canRemove && <Button variant="ghost" size="icon" className="size-7" aria-label={t('decision.unlink', { key: l.key })}
-              onClick={async () => { try { await del(`item-links/${l.id}`); done(q.data.decision.projectId, id) } catch (e) { toast.error(errorText(e)) } }}><Trash2 className="size-3.5" /></Button>}</td>
+            <td className="py-1.5 pr-3 text-xs/[18px] text-muted-foreground">{t(`decision.rel.${l.relation}`)}</td>
+            <td className="whitespace-nowrap py-1.5 pr-3"><Key>{l.key}</Key></td>
+            <td className="py-1.5 pr-3"><button className="break-words text-left hover:underline" onClick={() => openPanel(l.targetType, l.targetId)}>{l.name}</button></td>
+            <td className="py-1.5 pr-3">{l.status && <StatusPill status={l.status} />}</td>
+            <td className="whitespace-nowrap py-1.5 pr-3">{l.person}</td>
+            <td className="py-1.5 pr-3"><DateText date={l.date} /></td>
+            <td className="py-1 text-right">{canRemove && <Button variant="ghost" size="icon-sm" aria-label={t('decision.unlink', { key: l.key })}
+              onClick={async () => { try { await del(`item-links/${l.id}`); done(q.data.decision.projectId, id) } catch (e) { toast.error(errorText(e)) } }}><Trash2 className="size-4" /></Button>}</td>
           </tr>
         ))}
       </tbody>
@@ -329,8 +360,8 @@ function OwnerField({ p, user, userName, party, onChange, error }: {
           <Button type="button" variant="outline" onClick={() => setAdding(true)}><Plus className="size-4" />{t('party.new')}</Button>
         </div>
       )}
-      {kind === 'party' && <p className="text-xs text-muted-foreground">{t('decision.noExternalEmail')}</p>}
-      {error?.map((e) => <p key={e} className="text-xs text-bad" role="alert">{e}</p>)}
+      {kind === 'party' && <p className="text-xs/[18px] text-muted-foreground">{t('decision.noExternalEmail')}</p>}
+      {error?.map((e) => <p key={e} className="text-xs/[18px] text-bad" role="alert">{e}</p>)}
       {adding && <PartyForm p={p} onClose={(created) => { setAdding(false); if (created) onChange({ user: null, party: created.id }) }} />}
     </fieldset>
   )
@@ -381,16 +412,16 @@ function DecisionForm({ p, onClose }: { p: ProjectDetail; onClose: () => void })
           </Field>
           <div className="space-y-1.5 sm:col-span-2">
             <div className="text-sm font-medium">{t('decision.links')}</div>
-            <p className="text-xs text-muted-foreground">{t('decision.linksHint')}</p>
+            <p className="text-xs/[18px] text-muted-foreground">{t('decision.linksHint')}</p>
             {links.length > 0 && <ul className="flex flex-wrap gap-1.5">{links.map((l) => (
-              <li key={l.targetId} className="flex items-center gap-1 rounded-full border bg-card px-2 py-0.5 text-xs">
+              <li key={l.targetId} className="flex items-center gap-1.5 rounded-md border bg-card py-0.5 pl-2 pr-0.5 text-xs/[18px]">
                 <span className="text-muted-foreground">{t(l.targetType === 'Task' ? 'decision.rel.blocked_by_decision' : 'decision.rel.related')}</span><Key>{l.key}</Key>{l.name}
-                <button type="button" aria-label={t('common.remove')} onClick={() => setLinks(links.filter((x) => x.targetId !== l.targetId))}>×</button>
+                <button type="button" className="grid size-6 place-items-center rounded-md hover:bg-muted" aria-label={t('common.remove')} onClick={() => setLinks(links.filter((x) => x.targetId !== l.targetId))}><X className="size-3.5" aria-hidden /></button>
               </li>))}</ul>}
             <ItemPicker projectId={p.id} exclude={links.map((l) => l.targetId)} onPick={(x) => setLinks([...links, x])} />
           </div>
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
-          <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{t('decision.raise')}</Button></DialogFooter>
+          <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('decision.raise')}</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
@@ -413,18 +444,18 @@ export function ItemPicker({ projectId, exclude, onPick, selected, onPickAll }: 
   ].filter((x) => !exclude.includes(x.targetId))
   const shown = options.slice(0, 60)
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border border-input bg-card">
       <div className="flex items-center border-b">
-        <Input type="search" className="h-8 flex-1 rounded-b-none border-0" placeholder={t('decision.searchItems')} value={term} onChange={(e) => setTerm(e.target.value)} aria-label={t('decision.searchItems')} />
-        {onPickAll && shown.length > 0 && <button type="button" className="shrink-0 px-2 text-xs text-primary hover:underline" onClick={() => onPickAll(shown)}>{t('decision.selectShown', { n: shown.length })}</button>}
+        <Input type="search" className="flex-1 rounded-b-none border-0" placeholder={t('decision.searchItems')} value={term} onChange={(e) => setTerm(e.target.value)} aria-label={t('decision.searchItems')} />
+        {onPickAll && shown.length > 0 && <button type="button" className="shrink-0 px-3 text-sm text-primary underline-offset-4 hover:underline" onClick={() => onPickAll(shown)}>{t('decision.selectShown', { n: shown.length })}</button>}
       </div>
       <div className="max-h-48 overflow-y-auto" role="listbox" aria-multiselectable={selected ? true : undefined} aria-label={t('decision.links')}>
-        {tasks.isPending ? <Loading rows={2} /> : shown.length === 0 ? <p className="px-2 py-2 text-xs text-muted-foreground">{t('decision.noItems')}</p> : shown.map((o) => {
+        {tasks.isPending ? <Loading rows={2} /> : shown.length === 0 ? <p className="px-3 py-2 text-sm text-muted-foreground">{t('decision.noItems')}</p> : shown.map((o) => {
           const on = selected?.includes(o.targetId) ?? false
           return (
-            <button key={o.targetId} type="button" role="option" aria-selected={on} aria-label={`${t(`itemType.${o.targetType}`)} ${o.key} ${o.name}`} onClick={() => onPick(o)} className={cn('flex w-full items-center gap-2 px-2 py-1 text-left text-[13px] hover:bg-muted', on && 'bg-accent')}>
-              {selected && <Check className={cn('size-3.5 shrink-0', !on && 'invisible')} aria-hidden />}
-              <span className="w-20 shrink-0 text-xs text-muted-foreground">{t(`itemType.${o.targetType}`)}</span><Key>{o.key}</Key><span className="min-w-0 flex-1 truncate">{o.name}</span>
+            <button key={o.targetId} type="button" role="option" aria-selected={on} aria-label={`${t(`itemType.${o.targetType}`)} ${o.key} ${o.name}`} onClick={() => onPick(o)} className={cn('flex min-h-(--control-row-h) w-full items-center gap-2 px-3 py-1 text-left text-sm hover:bg-muted', on && 'bg-accent')}>
+              {selected && <Check className={cn('size-4 shrink-0', !on && 'invisible')} aria-hidden />}
+              <span className="w-24 shrink-0 text-xs/[18px] text-muted-foreground">{t(`itemType.${o.targetType}`)}</span><Key>{o.key}</Key><span className="min-w-0 flex-1 truncate">{o.name}</span>
             </button>
           )
         })}
@@ -471,7 +502,7 @@ export function RecordDecisionDialog({ id, onClose }: { id: string; onClose: (ok
         )}
         <DialogFooter>
           <Button variant="outline" onClick={() => onClose(false)}>{t('common.cancel')}</Button>
-          <Button disabled={!text.trim() || busy || !step?.ok} onClick={save}>{busy && <Spinner />}{t('decision.record')}</Button>
+          <Button disabled={!text.trim() || busy || !step?.ok} onClick={save}>{busy && <Spinner />}{busy ? t('common.saving') : t('decision.record')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -526,33 +557,36 @@ function DecisionPanel({ id }: PanelProps) {
   const partyOptions = (parties.data ?? []).filter((x) => x.isActive || x.id === d.ownerExternalPartyId).map((x) => ({ value: x.id, label: `${x.name}${x.organisation ? ` · ${x.organisation}` : ''}` }))
   return (
     <div>
-      <div className="space-y-2 border-b p-4">
-        <div className="flex flex-wrap items-center gap-2"><Scale className="size-4 text-muted-foreground" aria-hidden /><Key>{d.key}</Key><StatusPill status={d.status} /><Impact level={d.impactLevel} />
-          {d.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: d.daysOverdue })}</Chip>}
-          {d.isDueSoon && <Chip tone="warn">{t('decision.dueSoon')}</Chip>}
-          {d.isInactiveOwner && <Chip tone="bad">{t('decision.inactiveOwner')}</Chip>}
-        </div>
-        <h2 className="text-lg font-semibold">{d.subject}</h2>
-        {d.blockingTaskIds.length > 0 && <p className="text-sm text-bad">{plural(d.blockingTaskIds.length, 'decision.holdingUp1', 'decision.holdingUp')} <Link className="underline" to={`/projects/${q.data.project.projectNumber}/tasks?ids=${d.blockingTaskIds.join(',')}`}>{t('decision.openTasks')}</Link></p>}
-        <div className="flex flex-wrap gap-1.5 pt-1">
+      <PanelHead title={d.subject} meta={<>
+        <Scale className="size-4 text-muted-foreground" aria-hidden /><Key>{d.key}</Key><StatusPill status={d.status} /><Impact level={d.impactLevel} />
+        {d.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: d.daysOverdue })}</Chip>}
+        {d.isDueSoon && <Chip tone="warn">{t('decision.dueSoon')}</Chip>}
+        {d.isInactiveOwner && <Chip tone="bad">{t('decision.inactiveOwner')}</Chip>}
+      </>}>
+        {d.blockingTaskIds.length > 0 && <p className="text-sm text-bad"><span aria-hidden>■ </span>{plural(d.blockingTaskIds.length, 'decision.holdingUp1', 'decision.holdingUp')} <Link className="underline underline-offset-4" to={`/projects/${q.data.project.projectNumber}/tasks?ids=${d.blockingTaskIds.join(',')}`}>{t('decision.openTasks')}</Link></p>}
+        <div className="flex flex-wrap gap-2">
           {perm.transitions.map((s) => (
             <Button key={s.to} size="sm" variant={s.to === 'Decided' ? 'default' : 'outline'} disabled={!s.ok} title={s.reason ?? undefined} onClick={() => quick(s)}>
               {t(s.to === 'Pending' && d.status === 'Decided' ? 'decision.reopen' : STEP_LABEL[s.to])}
             </Button>
           ))}
         </div>
-      </div>
-      <div className="px-4 py-2">
-        {d.status === 'Decided' && (
-          <div className="mb-2 rounded-md border border-done/30 bg-done-bg p-3 text-sm">
-            <div className="text-xs text-muted-foreground">{t('decision.decidedBy', { who: q.data.decidedBy ?? '', date: fmtDate(d.decisionDate) })}</div>
-            <p className="mt-1 whitespace-pre-wrap">{d.decisionText}</p>
-          </div>
-        )}
-        {d.status === 'Deferred' && q.data.deferralReason && <p className="mb-2 rounded bg-warn-bg p-2 text-xs">{t('decision.deferredNote', { reason: q.data.deferralReason })}</p>}
-        {d.status === 'Cancelled' && q.data.cancelledReason && <p className="mb-2 rounded bg-idle-bg p-2 text-xs">{t('decision.cancelledNote', { reason: q.data.cancelledReason })}</p>}
+      </PanelHead>
+      {d.status === 'Decided' && (
+        <div className="mx-4 mb-4 rounded-md border border-done/30 bg-done-bg px-4 py-3 text-sm">
+          <div className="text-xs/[18px] text-muted-foreground">{t('decision.decidedBy', { who: q.data.decidedBy ?? '', date: fmtDate(d.decisionDate) })}</div>
+          <p className="mt-1 whitespace-pre-wrap">{d.decisionText}</p>
+        </div>
+      )}
+      {d.status === 'Deferred' && q.data.deferralReason && <p className="mx-4 mb-4 rounded-md bg-warn-bg px-4 py-3 text-sm">{t('decision.deferredNote', { reason: q.data.deferralReason })}</p>}
+      {d.status === 'Cancelled' && q.data.cancelledReason && <p className="mx-4 mb-4 rounded-md bg-idle-bg px-4 py-3 text-sm">{t('decision.cancelledNote', { reason: q.data.cancelledReason })}</p>}
+      <FieldGroup title={t('common.details')}>
         <FieldRow label={t('decision.subject')}><InlineText value={d.subject} disabled={!can} title={perm.edit.reason ?? undefined} onSave={(v) => save({ subject: v })} /></FieldRow>
         <FieldRow label={t('common.description')}><InlineText value={q.data.description} multiline disabled={!can} onSave={(v) => save({ description: v })} /></FieldRow>
+        <FieldRow label={t('decision.impact')}><InlineSelect value={d.impactLevel} options={IMPACTS.map((x) => ({ value: x, label: tv(x) }))} disabled={!can} onSave={(v) => save({ impactLevel: v })} title={t('decision.impact')} /></FieldRow>
+        <FieldRow label={t('decision.impactDescription')}><InlineText value={d.impactDescription} disabled={!can} onSave={(v) => save({ impactDescription: v })} /></FieldRow>
+      </FieldGroup>
+      <FieldGroup title={t('register.group.ownership')}>
         <FieldRow label={t('common.owner')}>
           {!can ? <div className="px-2 py-1.5"><Owner d={d} /></div> : d.ownerExternalPartyId
             ? <InlineSelect value={d.ownerExternalPartyId} options={partyOptions} onSave={(v) => save({ ownerExternalPartyId: v })} title={t('decision.owner.party')} />
@@ -561,16 +595,16 @@ function DecisionPanel({ id }: PanelProps) {
         </FieldRow>
         <FieldRow label={t('decision.requestedBy')}>{can
           ? <PeoplePicker compact value={d.requestedById} valueName={d.requestedByName} allowClear={false} onChange={(v) => v && save({ requestedById: v })} label={t('decision.requestedBy')} />
-          : <div className="px-2 py-1.5">{d.requestedByName}</div>}</FieldRow>
+          : <div className="px-2 py-1.5"><Person id={d.requestedById} name={d.requestedByName} /></div>}</FieldRow>
+      </FieldGroup>
+      <FieldGroup title={t('allocation.dates')}>
         <FieldRow label={t('decision.requested')}><InlineDate value={d.dateRequested} disabled={!can} onSave={(v) => save({ dateRequested: v })} /></FieldRow>
         <FieldRow label={t('decision.requiredBy')}><InlineDate value={d.requiredByDate} disabled={!can || !isOpen} title={isOpen ? undefined : t('decision.dateClosed')} onSave={(v) => save({ requiredByDate: v })} /></FieldRow>
-        {d.originalRequiredByDate !== d.requiredByDate && <FieldRow label={t('decision.originalRequiredBy')}><div className="px-2 py-1.5 text-muted-foreground">{fmtDate(d.originalRequiredByDate)}</div></FieldRow>}
-        <FieldRow label={t('decision.impact')}><InlineSelect value={d.impactLevel} options={IMPACTS.map((x) => ({ value: x, label: tv(x) }))} disabled={!can} onSave={(v) => save({ impactLevel: v })} title={t('decision.impact')} /></FieldRow>
-        <FieldRow label={t('decision.impactDescription')}><InlineText value={d.impactDescription} disabled={!can} onSave={(v) => save({ impactDescription: v })} /></FieldRow>
-      </div>
+        {d.originalRequiredByDate !== d.requiredByDate && <FieldRow label={t('decision.originalRequiredBy')}><div className="px-2 py-1.5 text-muted-foreground tabular-nums">{fmtDate(d.originalRequiredByDate)}</div></FieldRow>}
+      </FieldGroup>
       <TabBar tabs={[{ id: 'links' as const, label: t('decision.links'), count: q.data.links.length }, ...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'links' && (
-        <div className="space-y-2 p-4">
+        <div className="space-y-3 p-4">
           <LinkedItems id={d.id} canRemove={can} />
           {can && (linking ? <AddLinkBox d={d} exclude={q.data.links.map((l) => l.targetId)} onDone={() => setLinking(false)} />
             : <Button size="sm" variant="outline" onClick={() => setLinking(true)}><Plus className="size-4" />{t('decision.addLink')}</Button>)}
@@ -588,11 +622,11 @@ function OwnerSwitch({ d, parties, onSave }: { d: DecisionRow; parties: { value:
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState<string | null>(null)
   const toParty = !d.ownerExternalPartyId
-  if (!open) return <button type="button" className="px-2 text-xs text-muted-foreground underline hover:text-foreground" onClick={() => setOpen(true)}>{t(toParty ? 'decision.switchToParty' : 'decision.switchToPerson')}</button>
+  if (!open) return <button type="button" className="px-2 text-sm text-primary underline underline-offset-4 hover:text-foreground" onClick={() => setOpen(true)}>{t(toParty ? 'decision.switchToParty' : 'decision.switchToPerson')}</button>
   return (
     <div className="mt-1 flex items-center gap-2 px-2">
       {toParty
-        ? <select className={cn(selectCls, 'h-8')} value={choice ?? ''} onChange={(e) => setChoice(e.target.value || null)} aria-label={t('decision.owner.party')}>
+        ? <select className={cn(selectCls, 'h-(--control-row-h)')} value={choice ?? ''} onChange={(e) => setChoice(e.target.value || null)} aria-label={t('decision.owner.party')}>
             <option value="">{t('decision.chooseParty')}</option>{parties.map((x) => <option key={x.value} value={x.value}>{x.label}</option>)}
           </select>
         : <PeoplePicker value={choice} onChange={(v) => setChoice(v)} label={t('decision.owner.person')} />}
@@ -628,21 +662,21 @@ function AddLinkBox({ d, exclude, onDone }: { d: DecisionRow; exclude: string[];
     } catch (e) { toast.error(errorText(e)) } finally { setBusy(false) }
   }
   return (
-    <div className="space-y-2 rounded-md border p-2">
-      <label className="flex items-center gap-2 text-xs"><Checkbox checked={related} onCheckedChange={(c) => setRelated(!!c)} />{t('decision.tasksRelated')}</label>
+    <div className="space-y-3 rounded-lg border bg-muted p-3">
+      <label className="flex items-center gap-2 text-sm"><Checkbox checked={related} onCheckedChange={(c) => setRelated(!!c)} />{t('decision.tasksRelated')}</label>
       <ItemPicker projectId={d.projectId} exclude={exclude} selected={picked.map((x) => x.targetId)}
         onPick={(x) => setPicked((cur) => (has(cur, x) ? cur.filter((y) => y.targetId !== x.targetId) : [...cur, x]))}
         onPickAll={(xs) => setPicked((cur) => [...cur, ...xs.filter((x) => !has(cur, x))])} />
       {skipped.length > 0 && (
-        <div role="status" className="rounded bg-warn-bg p-2 text-xs">
-          <p className="font-medium">{plural(skipped.length, 'decision.skipped1', 'decision.skippedN')}</p>
+        <div role="status" className="rounded-md border border-warn/40 bg-warn-bg px-3 py-2 text-sm">
+          <p className="font-medium text-warn"><span aria-hidden>▲ </span>{plural(skipped.length, 'decision.skipped1', 'decision.skippedN')}</p>
           <ul className="mt-1 space-y-0.5">{skipped.map((x) => <li key={x.id}>{x.key && <Key>{x.key}</Key>} {x.reason}</li>)}</ul>
         </div>
       )}
       <div className="flex items-center justify-end gap-2">
-        {picked.length > 0 && <button type="button" className="mr-auto text-xs text-muted-foreground hover:text-foreground" onClick={() => setPicked([])}>{t('common.clear')}</button>}
+        {picked.length > 0 && <Button type="button" variant="link" size="sm" className="mr-auto px-0" onClick={() => setPicked([])}>{t('common.clear')}</Button>}
         <Button size="sm" variant="ghost" onClick={onDone}>{t('common.close')}</Button>
-        <Button size="sm" disabled={!picked.length || busy} onClick={link}>{busy && <Spinner />}{picked.length ? plural(picked.length, 'decision.linkN1', 'decision.linkN') : t('decision.linkItems')}</Button>
+        <Button size="sm" disabled={!picked.length || busy} onClick={link}>{busy && <Spinner />}{busy ? t('common.saving') : picked.length ? plural(picked.length, 'decision.linkN1', 'decision.linkN') : t('decision.linkItems')}</Button>
       </div>
     </div>
   )
@@ -692,14 +726,17 @@ function PartiesDialog({ p, onClose }: { p: ProjectDetail; onClose: () => void }
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader><DialogTitle>{t('party.title')}</DialogTitle><DialogDescription>{t('party.listHint')}</DialogDescription></DialogHeader>
         {q.isPending ? <Loading rows={3} /> : !q.data?.length ? <Empty>{t('party.empty')}</Empty> : (
-          <div className="max-h-80 overflow-y-auto rounded border">
-            <table className="w-full text-[13px]">
-              <thead className="bg-muted/60 text-left text-xs text-muted-foreground"><tr>{['common.name', 'party.organisation', 'party.role', 'party.email', ''].map((h, i) => <th key={i} className="px-3 py-1.5 font-medium">{h && t(h)}</th>)}</tr></thead>
+          <div className="scroll-region max-h-80 overflow-y-auto rounded-md border">
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-muted text-left text-muted-foreground"><tr>
+                {['common.name', 'party.organisation', 'party.role', 'party.email'].map((h) => <th key={h} scope="col" className="px-3 py-2 font-medium">{t(h)}</th>)}
+                <th scope="col"><span className="sr-only">{t('common.actions')}</span></th>
+              </tr></thead>
               <tbody>{q.data.map((x) => (
                 <tr key={x.id} className={cn('border-t', !x.isActive && 'text-muted-foreground')}>
-                  <td className="px-3 py-1.5">{x.name}{x.isClient && <span className="ml-1.5"><Chip tone="work">{t('party.client')}</Chip></span>}{!x.isActive && ` (${t('party.inactive')})`}</td>
-                  <td className="px-3 py-1.5">{x.organisation}</td><td className="px-3 py-1.5">{x.role}</td><td className="px-3 py-1.5">{x.email}</td>
-                  <td className="px-2 py-1.5 text-right">{canEdit && <Button size="sm" variant="ghost" onClick={() => setForm(x)}>{t('common.edit')}</Button>}</td>
+                  <td className="px-3 py-2">{x.name}{x.isClient && <span data-accent="lavender" className="ml-2 rounded-md bg-(--acc-bg) px-1.5 py-0.5 text-xs font-medium text-(--acc-fg)">{t('party.client')}</span>}{!x.isActive && ` (${t('party.inactive')})`}</td>
+                  <td className="px-3 py-2">{x.organisation}</td><td className="px-3 py-2">{x.role}</td><td className="px-3 py-2">{x.email}</td>
+                  <td className="px-2 py-1 text-right">{canEdit && <Button size="sm" variant="ghost" onClick={() => setForm(x)}>{t('common.edit')}</Button>}</td>
                 </tr>))}</tbody>
             </table>
           </div>

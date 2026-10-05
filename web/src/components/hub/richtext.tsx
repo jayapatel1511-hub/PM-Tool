@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 // Descriptions and comments allow bold, italic, lists, links, inline code and @mentions (FR-TSK-01, §12.8); rendered as
 // React nodes, never as HTML, and never images.
 const INLINE = /(@\[[^\]\n]{1,120}\]\([0-9a-fA-F-]{36}\)|\*\*[^*]+\*\*|`[^`\n]+`|\*[^*\s][^*]*\*|_[^_\s][^_]*_|\[[^\]]+\]\(https?:\/\/[^\s)]+\)|https?:\/\/[^\s<]+)/g
-const link = 'text-primary underline underline-offset-2'
+const link = 'text-primary underline underline-offset-4'
 
 function inline(text: string): ReactNode[] {
   return text.split(INLINE).map((part, i) => {

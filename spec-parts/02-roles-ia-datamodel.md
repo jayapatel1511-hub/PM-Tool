@@ -174,6 +174,23 @@ These actions extend the existing matrix for packets 025–033. Existing access/
 
 Reassignment is attributed, reasoned and version checked, retains earlier signatures/decisions, and reruns self-review and access invariants. No proxy approval is implied by manager, coordinator or administrator status. Common refusal/notification rules: §37.1.
 
+### 8.11 Weekly planning permissions
+
+These rows extend the matrix for the weekly planning layer (§39, packet 034). Inactive and Read Only accounts cannot write. A linked project's visibility (§8.7) applies to every read, and a Supervisor's staff are their direct reports (§8.8, Q19). Ownership extends a row only where the table says so and is never an exception to a refusal; Private draft privacy is defined in §39.6. Every row becomes an automated test (§8.9).
+
+| Action | The person (own row) | The person's Supervisor | System Administrator | Executive | Project Manager (system role) | Anyone else |
+|---|---|---|---|---|---|---|
+| Open the Weekly Planner (§13.21) | — (own row on My Work, My Week) | Y (direct reports and own row) | Y (all active people) | Y (all active people) | Y (members of Setup or Active projects they manage, and own row) | — |
+| See a person's Self-entered entries, Proposed and Confirmed assignments, approved project allocations, capacity and time away | Y | Y | Y | Y | Y (those members) | — |
+| See a Private draft | O (drafts they own) | O (drafts they own) | Only in data-correction mode with a reason; each access is logged | — | — | — |
+| Create a self entry | Y | — | — | — | — | — |
+| Create a manager entry | — | Y | Y | — | — | — |
+| Change, move, extend, mark Still valid or delete an entry; copy creates a new entry and needs the create right for its person | O (own self entries) | O (manager entries they own, while still the Supervisor) | Y (own entries; others' entries only as a data correction with a reason) | — | — | — |
+| Change a manager entry's visibility | — | O (manager entries they own) | Y (own entries; others' entries only as a data correction with a reason) | — | — | — |
+| Record or clear time away (availability overrides, §39.3) | — | Y | Y | — | — | — |
+| Export planner and entry lists; save personal planner views | — | Y | Y | Y | Y | — |
+| Change planning settings (§10.9) | — | — | Y | — | — | — |
+
 ---
 
 ## 9. Information Architecture
@@ -236,7 +253,7 @@ Global navigation (persistent left rail or top bar; desktop-first):
 | **My Work** (landing page) | My Tasks, My Reviews, My Deliverables, Waiting on Others, Blocking Others, My Projects, Upcoming Milestones | Everyone |
 | **Projects** | Project list (search, filter); opens a project workspace | Everyone |
 | **Portfolio** (first release) | Portfolio Dashboard, Projects At Risk | Executives, Supervisors, PMs |
-| **Resources** (first release) | Resource / Workload View | Supervisors, Executives, PMs |
+| **Resources** (first release) | Resource / Workload View; Weekly Planner (§13.21, §39) | Supervisors, Executives, PMs; everyone sees their own planning row in My Work (My Week) |
 | **My Staff** | The user's direct reports with their project assignments and work counts; staffing them on projects (§13.19) | Supervisors, Executives, Admins |
 | **Reports** | Deterministic report list with export | Everyone (scoped) |
 | **Notifications** | In-app notification centre: personal notifications and the Following feed of followed projects | Everyone |
@@ -482,3 +499,32 @@ Readiness precedence is Needs Assessment for missing/unknown applicable checks, 
 New records use stable UUIDs and readable per-project keys where they appear as standalone items: Handoff H, Review RV, Change CH, Submission SUB, Basis B, Constraint CT and Commitment WC. Existing Issue keys remain unchanged. Prefixes do not alter existing item sequences; deleted keys are never reused. New records carry project, owner, created/updated attribution, row version and soft-deletion fields as applicable. Immutable published snapshots use append-only superseding records rather than edits or deletes. Source references must remain same-project; use a unique source/version identity and unique change/consumer assignment to deduplicate.
 
 Add `coordination_lookahead_weeks` to organisation settings, default 3 and allowed range 1–12. Existing working-day calendars, weekly capacity and workload warning thresholds continue to apply. Submission checks and readiness constraints are purpose-specific records, not arbitrary checklists inside tasks or a custom workflow builder. Physical tables and migrations are designed in each packet before application implementation.
+
+### 10.9 Weekly planning vocabulary and settings
+
+This is the canonical extension to §10 for the weekly planning layer (§39, packet 034). It adds one record beside the §10.8 resource allocation and availability override, which are unchanged. Planning entries belong to a person, not to a project.
+
+| Term | Canonical values or representation | Key rules |
+|---|---|---|
+| Planning entry | Person, owner, hours per week, start week, end week, label, source category, optional project and project discipline, confidence, visibility, notes, last validated | One row per block of weekly hours; the owner is the creator; soft-deleted; row-versioned; never a project record |
+| Owner kind (derived) | Self (the owner is the person) · Manager (the owner is the person's Supervisor or an Admin) | Displayed as "Self-entered" or "Manager plan" |
+| Source category | Major project · Other project · Proposal · Business development · Training · Admin · Supervision · Internal initiative · Field work · Other | Major project if and only if a project is linked; there is no leave category |
+| Confidence | Confirmed · Expected · Possible | Displayed as "Confidence: …"; Possible never reduces remaining capacity |
+| Visibility | Draft · Published · Confirmed | Manager entries display "Visibility: Private draft", "Visibility: Proposed assignment" or "Visibility: Confirmed assignment"; self entries are stored as Confirmed and display "Visibility: Self-entered" |
+| Approved project allocation | Read-only projection of a resource allocation whose status is Confirmed (§10.8) | Displayed with "Approval status: Confirmed"; counted in the Confirmed band; changed only through §37.6 |
+| Time away | An availability override (§10.8) with category Unavailable or Reduced | Explains reduced capacity; no separate leave record, reason or leave type |
+| Remaining capacity | Capacity − Confidence Confirmed hours − Confidence Expected hours | May be negative; Possible hours are shown separately |
+| Planner indicators | Over-planned and Under-planned (person and week) · Stale plan (planning entry) | Distinct from the Workload indicators Over-assigned, Under-assigned and Deadline cluster |
+
+Confirmed has three meanings here — a confidence band, a visibility state and the §37.6 allocation status — and is never displayed without its qualifier (FR-PLN-04).
+
+Planning settings are organisation settings, editable by System Administrators. `default_weekly_capacity_hours` (§10.4, Q18) remains the default capacity for both Workload and the planner.
+
+| Setting key | Default | Allowed | Used by |
+|---|---|---|---|
+| `planning_horizon_weeks` | 12 | 6–26 | Weeks shown by the Weekly Planner |
+| `planning_over_pct` | 105 | 50–300 | Over-planned (PLN-10) |
+| `planning_under_pct` | 50 | 0–100 (0 switches it off) | Under-planned (PLN-11) |
+| `planning_under_weeks` | 2 | 1–12 | Under-planned (PLN-11) |
+| `planning_stale_days` | 28 | 1–365 | Stale plan (PLN-12) |
+| `planning_max_hours_per_week` | 80 | 1–168 | Largest hours per week for one planning entry (PLN-02) |

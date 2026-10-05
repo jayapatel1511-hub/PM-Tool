@@ -50,7 +50,7 @@ export function AttentionRows({ items, canSnooze, limit, onChanged, footer, show
       {items.length === 0 ? <Empty>{t('attention.none')}</Empty> : (
         <ul className="divide-y">
           {shown.map((a) => (
-            <li key={a.id} className={cn('flex items-start gap-3 px-4 py-2.5 text-sm', a.snoozed && 'opacity-60')}>
+            <li key={a.id} className={cn('flex items-start gap-3 px-5 py-3 text-sm', a.snoozed && 'text-muted-foreground')}>
               <Pill tone={TONE[a.severity] ?? 'idle'} className="mt-0.5">{tv(a.severity)}</Pill>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-baseline gap-x-2">
@@ -58,8 +58,8 @@ export function AttentionRows({ items, canSnooze, limit, onChanged, footer, show
                   <button className="text-left font-medium hover:underline" onClick={() => openPanel(a.itemType, a.itemId)}>{a.itemKey && <Key>{a.itemKey}</Key>} {a.itemName}</button>
                   <Why reasons={a.why ? [a.why] : []} title={`${a.ruleId} ${a.ruleName}`}><span className="text-xs text-muted-foreground">{a.ruleId} {a.ruleName}</span></Why>
                 </div>
-                <div className="text-[13px] text-muted-foreground">{a.message}</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-sm text-muted-foreground">{a.message}</div>
+                <div className="text-xs/[18px] text-muted-foreground">
                   {a.ownerName && <span>{a.ownerName} · </span>}{t('attention.age', { n: a.ageDays })}
                   {a.snoozed && <span> · {t('attention.snoozedUntil', { date: fmtDate(a.snoozedUntil), note: a.snoozeNote ?? '' })}</span>}
                 </div>
@@ -70,8 +70,8 @@ export function AttentionRows({ items, canSnooze, limit, onChanged, footer, show
         </ul>
       )}
       {((limit && items.length > limit) || footer) && (
-        <div className="flex flex-wrap items-center gap-3 border-t px-4 py-2 text-xs text-muted-foreground">
-          {limit && items.length > limit && <button className="text-primary hover:underline" onClick={() => setAll(!all)}>{all ? t('attention.showFewer') : t('attention.showAll', { n: items.length })}</button>}
+        <div className="flex flex-wrap items-center gap-3 border-t px-5 py-2.5 text-sm text-muted-foreground">
+          {limit && items.length > limit && <button className="min-h-6 text-primary underline underline-offset-4" onClick={() => setAll(!all)}>{all ? t('attention.showFewer') : t('attention.showAll', { n: items.length })}</button>}
           {footer}
         </div>
       )}

@@ -1,5 +1,7 @@
 # Production readiness: homedev
 
+Current work boundary: [redesign checkpoint and remaining work](../handoffs/2026-10-03-redesign-checkpoint.md). Jay requested committing completed work before the incoming UI/behaviour redesign. No new acceptance mutations or UI polishing are queued automatically. The bounded inactive-account control passed on the private synthetic pilot; company acceptance remains open.
+
 Latest deployed checkpoint: [submission label release 29b3d703](../reviews/2026-10-03-submission-label-29b3d703.md). Both separate runtimes run that executable; PR #34 is merged, candidate/main CI passed, current-data preservation passed, and the first scheduled pilot dump restored with 10 projects. Fresh signed-in browser label verification remains UNPROVEN. Historical checkpoints below retain their own revision and time.
 
 The later [scheduled recovery checkpoint](../reviews/2026-10-03-scheduled-recovery-ac494a8b.md) proves both first automatic local backups, the pilot physical-base verification and approved encrypted review retrieval/restore. Historical pre-trigger timer statements below do not describe that later result. This does not close company recovery or production acceptance.

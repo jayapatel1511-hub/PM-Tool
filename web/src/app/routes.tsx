@@ -55,6 +55,7 @@ import { DashboardTab } from '@/pages/projects/Dashboard'
 import { CoordinationTab } from '@/pages/projects/Coordination'
 import { PreferencesPage } from '@/pages/Preferences'
 import { ReadinessTab } from '@/pages/projects/Readiness'
+import { PlannerPage } from '@/pages/Planner'
 
 const admin = (el: React.ReactNode) => <AdminLayout>{el}</AdminLayout>
 /** A workspace view shown for the current project only (FR-VIS-01 project tabs). */
@@ -115,6 +116,7 @@ export const routes: RouteObject[] = [
   { path: 'staff', element: <StaffPage /> },
   { path: 'portfolio', element: <PortfolioPage /> },
   { path: 'workload', element: <WorkloadPage /> },
+  { path: 'planner', element: <PlannerPage /> },
   { path: 'calendar', element: <CalendarPage /> },
   { path: 'time', element: <TimePage /> },
   { path: 'people/:id/reassign-work', element: <ReassignWorkPage /> },

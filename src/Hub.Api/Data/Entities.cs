@@ -764,6 +764,7 @@ public class Notification : Entity
 
 public class EmailMessage : Entity
 {
+    public Guid[] RequiredPlanningEntryIds { get; set; } = [];
     public Guid[] RequiredProjectIds { get; set; } = [];
     public DateTimeOffset? SuppressedAt { get; set; }
     public Guid? UserId { get; set; }

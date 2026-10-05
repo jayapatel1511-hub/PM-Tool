@@ -12,7 +12,7 @@ namespace Hub.Api.Features;
 public static partial class SearchEndpoints
 {
     public static readonly string[] Groups = ["projects", "tasks", "deliverables", "milestones", "decisions", "handoffs", "reviews", "changes",
-        "submissions", "allocations", "design-basis", "constraints", "commitments", "comments", "people"];
+        "submissions", "allocations", "planning", "design-basis", "constraints", "commitments", "comments", "people"];
 
     [GeneratedRegex(@"@\[([^\]]+)\]\([0-9a-fA-F-]{36}\)")]
     private static partial Regex Mention();
@@ -185,6 +185,17 @@ public static partial class SearchEndpoints
             {
                 r.Id, r.ItemType, r.ItemId, items[r.ItemId].Key, items[r.ItemId].Name, r.ProjectNumber, r.Author, r.CreatedAt, Match = Snippet(r.Body, term),
             }).ToList();
+        }
+        if (want.Contains("planning"))
+        {
+            var pq = PlanningEndpoints.VisibleEntries(db, access).Where(e => EF.Functions.ILike(e.Label, contains, @"\")
+                || e.Notes != null && EF.Functions.ILike(e.Notes, contains, @"\"));
+            counts["planning"] = await pq.CountAsync();
+            groups["planning"] = await Page(pq.OrderBy(e => e.StartWeek)).Select(e => new
+            {
+                e.Id, Name = db.Users.Where(u => u.Id == e.PersonId).Select(u => u.DisplayName).First() + " · " + e.Label,
+                Status = e.CreatedBy == e.PersonId ? "Self" : e.Visibility, DueDate = e.EndWeek, e.StartWeek, e.PersonId,
+            }).ToListAsync();
         }
         if (want.Contains("people"))
         {

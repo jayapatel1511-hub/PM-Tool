@@ -1,18 +1,21 @@
 import { ViewMenu } from '@/components/hub/views'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Plus } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ErrorBanner, Field, Loading, Page } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Spinner, TableRegion, tdCls, thCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
+import { Pill } from '@/components/hub/pills'
 import { ApiError, get, post } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
-import { CommandForm, SelectField, type CoordOptions, workChoices, workRef, WorkLink } from './CoordinationForms'
+import { cn } from '@/lib/utils'
+import { CommandForm, CoordStatus, Count, PersonLabel, RegisterPager, SelectField, type CoordOptions, workChoices, workRef, WorkLink } from './CoordinationForms'
 import { useCurrentProject } from './ProjectLayout'
 
 type EntryRow = { id: string; key: string; title: string; kind: string; ownerId: string; projectDisciplineId: string;
@@ -46,7 +49,11 @@ const payloadVersion = (v: VersionDraft) => ({ scope: v.scope, statement: v.stat
 
 /** FR-BAS-04: flag current work that still relies on a replaced or withdrawn version. */
 const staleUse = (status?: string) => status === 'Superseded' || status === 'Withdrawn'
-  ? <strong className="ml-2 text-warn">{t(status === 'Withdrawn' ? 'basis.withdrawnUse' : 'basis.supersededUse')}</strong> : null
+  ? <strong className="ml-2 inline-flex items-center gap-1 font-semibold text-warn"><span aria-hidden>▲</span>{t(status === 'Withdrawn' ? 'basis.withdrawnUse' : 'basis.supersededUse')}</strong> : null
+/** Kind is a category (identity tint), not a status. */
+const Kind = ({ kind }: { kind: string }) => <span data-accent={kind === 'Assumption' ? 'amber' : 'blue'} className="inline-flex items-center whitespace-nowrap rounded-md bg-(--acc-bg) px-2 py-0.5 text-xs/[18px] font-medium text-(--acc-fg)">{kind === 'Assumption' ? t('basis.assumption') : kind === 'Criterion' ? t('basis.criterion') : kind}</span>
+const Warn = ({ children }: { children: string }) => <p className="flex gap-2 text-warn"><span aria-hidden>▲</span><span>{children}</span></p>
+const subhead = 'flex items-center gap-2 text-base/6 font-semibold', badge = 'rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums'
 
 /** What this actor may record on a pending assessment, mirroring DecideImpact: the consumer adopts a confirmed
  *  replacement; an independent PM or discipline lead records Unaffected. */
@@ -79,34 +86,53 @@ export function DesignBasisTab() {
   const list = useQuery({ queryKey: ['design-basis', project.id, page, filters],
     queryFn: () => get<{ items: EntryRow[]; pageSize: number; totalCount: number }>(`${base}?${params}`) })
   const refresh = () => { qc.invalidateQueries({ queryKey: ['design-basis', project.id] }); qc.invalidateQueries({ queryKey: ['design-basis-detail', project.id] }) }
-  const name = (id?: string) => team.data?.members.find(m => m.userId === id)?.displayName ?? t('coord.unavailable')
+  const member = (id?: string) => team.data?.members.find(m => m.userId === id)?.displayName
+  const name = (id?: string) => member(id) ?? t('coord.unavailable')
+  const work = options.data && affectedWorkId ? [...options.data.tasks, ...options.data.deliverables].find(w => w.id === affectedWorkId) : undefined
+  // Active filters as removable tokens (§13.0 Filters); the URL keeps the same parameters.
+  const tokens = [
+    kind && { key: 'kind', label: t('basis.kind'), value: kind === 'Assumption' ? t('basis.assumption') : kind === 'Criterion' ? t('basis.criterion') : kind },
+    status && { key: 'status', label: t('basis.status'), value: status },
+    discipline && { key: 'discipline', label: t('basis.discipline'), value: project.disciplines.find(d => d.id === discipline)?.name ?? t('common.dash') },
+    scope && { key: 'scope', label: t('basis.scope'), value: scope },
+    affectedWorkId && { key: 'affectedWorkId', label: t('basis.affectedWork'), value: work ? `${work.key} · ${work.name}` : t('common.dash') },
+    overdue && { key: 'overdue', label: t('basis.overdueOnly'), value: t('common.yes') },
+  ].filter(x => !!x)
+  const clear = () => setSp(p => { const next = new URLSearchParams(p); for (const k of ['kind', 'status', 'discipline', 'scope', 'overdue', 'affectedWorkId', 'page']) next.delete(k); return next })
+  const discName = (id: string) => project.disciplines.find(d => d.id === id)?.name
   return <Page title={t('basis.title')} subtitle={t('basis.subtitle')}
     actions={<><ViewMenu listType="design-basis" projectId={project.id} panelParam="basis" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-design-basis`} />
-      {canCreate && <Button size="sm" onClick={() => setAdding(true)}>{t('basis.new')}</Button>}</>}>
+      {canCreate && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('basis.new')}</Button>}</>}>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
-    <div className="flex flex-wrap gap-3 rounded border p-3">
-      <SelectField label={t('basis.kind')} value={kind} onChange={v => set('kind', v)} required={false}
-        choices={[{ value: 'Criterion', label: t('basis.criterion') }, { value: 'Assumption', label: t('basis.assumption') }]} />
-      <SelectField label={t('basis.status')} value={status} onChange={v => set('status', v)} required={false}
-        choices={['Proposed', 'Confirmed', 'Superseded', 'Withdrawn'].map(value => ({ value, label: value }))} />
-      <SelectField label={t('basis.discipline')} value={discipline} onChange={v => set('discipline', v)} required={false}
-        choices={project.disciplines.map(d => ({ value: d.id, label: d.name }))} />
-      <Field label={t('basis.scope')} htmlFor="basis-scope-filter"><Input id="basis-scope-filter" type="search" value={scope} onChange={e => set('scope', e.target.value)} /></Field>
-      {options.data && <SelectField label={t('basis.affectedWork')} value={affectedWorkId} onChange={v => set('affectedWorkId', v)}
-        required={false} choices={[...options.data.tasks, ...options.data.deliverables].map(w => ({ value: w.id, label: `${w.key} · ${w.name}` }))} />}
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={overdue === 'true'} onChange={e => set('overdue', e.target.checked ? 'true' : '')} />{t('basis.overdueOnly')}</label>
-    </div>
-    {list.isPending ? <Loading rows={4} /> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.items.length ?
-      <p className="rounded border p-8 text-center text-muted-foreground">{t('basis.empty')}</p> :
-      <div className="overflow-x-auto rounded border"><table className="w-full text-left text-sm"><caption className="sr-only">{t('basis.title')}</caption>
-        <thead className="bg-muted/60"><tr>{[t('coord.item'), t('basis.kind'), t('basis.discipline'), t('basis.owner'), t('basis.current'), t('basis.pending'), t('basis.conflicts')].map(h => <th key={h} scope="col" className="p-3">{h}</th>)}</tr></thead>
-        <tbody>{list.data.items.map(row => <tr key={row.id} className="border-t"><td className="p-3"><button className="text-left font-medium text-primary underline" onClick={() => set('basis', row.id)}>{row.key} · {row.title}</button></td>
-          <td className="p-3">{row.kind}</td><td className="p-3">{project.disciplines.find(d => d.id === row.projectDisciplineId)?.name ?? t('coord.unavailable')}</td>
-          <td className="p-3">{name(row.ownerId)}</td><td className="p-3">{row.currentStatus ? tv(row.currentStatus) : t('basis.notConfirmed')}</td>
-          <td className="p-3">{row.latestStatus === 'Proposed' ? tv(row.latestStatus) : '—'}</td><td className="p-3">{row.conflictCount}</td></tr>)}</tbody>
-      </table></div>}
-    {list.data && <div className="flex items-center justify-end gap-3"><Button size="sm" variant="outline" disabled={page <= 1} onClick={() => set('page', String(page - 1))}>{t('handoff.previous')}</Button>
-      <span>{t('handoff.page', { n: page })}</span><Button size="sm" variant="outline" disabled={page * list.data.pageSize >= list.data.totalCount} onClick={() => set('page', String(page + 1))}>{t('handoff.next')}</Button></div>}
+    <FilterBar>
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="w-full sm:w-40"><SelectField label={t('basis.kind')} value={kind} onChange={v => set('kind', v)} required={false}
+          choices={[{ value: 'Criterion', label: t('basis.criterion') }, { value: 'Assumption', label: t('basis.assumption') }]} /></div>
+        <div className="w-full sm:w-40"><SelectField label={t('basis.status')} value={status} onChange={v => set('status', v)} required={false}
+          choices={['Proposed', 'Confirmed', 'Superseded', 'Withdrawn'].map(value => ({ value, label: value }))} /></div>
+        <div className="w-full sm:w-52"><SelectField label={t('basis.discipline')} value={discipline} onChange={v => set('discipline', v)} required={false}
+          choices={project.disciplines.map(d => ({ value: d.id, label: d.name }))} /></div>
+        <Field label={t('basis.scope')} htmlFor="basis-scope-filter" className="w-full sm:w-56"><Input id="basis-scope-filter" type="search" value={scope} onChange={e => set('scope', e.target.value)} /></Field>
+        {options.data && <div className="w-full sm:w-64"><SelectField label={t('basis.affectedWork')} value={affectedWorkId} onChange={v => set('affectedWorkId', v)}
+          required={false} choices={[...options.data.tasks, ...options.data.deliverables].map(w => ({ value: w.id, label: `${w.key} · ${w.name}` }))} /></div>}
+      </div>
+      <div className="flex flex-wrap items-center gap-2"><ChipToggle on={overdue === 'true'} onClick={() => set('overdue', overdue === 'true' ? '' : 'true')}>{t('basis.overdueOnly')}</ChipToggle></div>
+      <ActiveFilters tokens={tokens} onRemove={k => set(k, '')} onClear={clear} />
+    </FilterBar>
+    {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.items.length ?
+      <div className="rounded-lg border bg-card"><Empty title={t(tokens.length ? 'register.noMatch' : 'basis.empty')}>{t('basis.emptyHint')}</Empty></div> :
+      <TableRegion><table className="w-full text-left text-sm"><caption className="sr-only">{t('basis.title')}</caption>
+        <thead className="bg-muted"><tr>{[t('coord.item'), t('basis.kind'), t('basis.discipline'), t('basis.owner'), t('basis.current'), t('basis.pending')].map(h => <th key={h} scope="col" className={thCls}>{h}</th>)}<th scope="col" className={cn(thCls, 'text-right')}>{t('basis.conflicts')}</th></tr></thead>
+        <tbody>{list.data.items.map(row => <tr key={row.id} className={cn('border-t hover:bg-muted', selected === row.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent')}>
+          <td className={cn(tdCls, 'min-w-64')}><button className="break-words text-left font-semibold text-primary underline-offset-4 hover:underline" aria-current={selected === row.id || undefined} onClick={() => set('basis', row.id)}><span className="key font-normal">{row.key}</span> · {row.title}</button></td>
+          <td className={tdCls}><Kind kind={row.kind} /></td>
+          <td className={tdCls}>{discName(row.projectDisciplineId) ?? <span className="text-muted-foreground">{t('coord.unavailable')}</span>}</td>
+          <td className={tdCls}><PersonLabel id={row.ownerId} name={member(row.ownerId)} /></td>
+          <td className={tdCls}>{row.currentStatus ? <CoordStatus status={row.currentStatus} /> : <Pill tone="idle">{t('basis.notConfirmed')}</Pill>}</td>
+          <td className={tdCls}>{row.latestStatus === 'Proposed' ? <CoordStatus status={row.latestStatus} /> : <span className="text-muted-foreground">{t('common.dash')}</span>}</td>
+          <td className={cn(tdCls, 'text-right tabular-nums')}><Count n={row.conflictCount} tone="warn" /></td></tr>)}</tbody>
+      </table></TableRegion>}
+    {list.data && <RegisterPager label={t('basis.pager')} page={page} total={list.data.totalCount} pageSize={list.data.pageSize} onPage={n => set('page', String(n))} />}
     {adding && options.data && <BasisForm base={base} number={project.projectNumber} options={options.data}
       allowedDisciplines={allowedDisciplines} canAssign={canAssign} onClose={() => setAdding(false)} onDone={id => { setAdding(false); refresh(); set('basis', id) }} />}
     {selected && <BasisDetail base={base} id={selected} number={project.projectNumber} options={options.data} name={name}
@@ -126,7 +152,7 @@ function VersionFields({ draft, setDraft }: { draft: VersionDraft; setDraft: (v:
     <Field label={t('basis.sourceUrl')} htmlFor="basis-source-url"><Input id="basis-source-url" type="url" value={draft.sourceUrl} onChange={e => update('sourceUrl', e.target.value)} /></Field>
     <div className="grid gap-3 sm:grid-cols-2"><Field label={t('basis.revision')} htmlFor="basis-revision"><Input id="basis-revision" value={draft.declaredRevision} onChange={e => update('declaredRevision', e.target.value)} /></Field>
       <Field label={t('basis.due')} htmlFor="basis-due"><Input id="basis-due" type="date" required value={draft.confirmationDueDate} onChange={e => update('confirmationDueDate', e.target.value)} /></Field></div>
-    <p className="text-xs text-muted-foreground">{t('basis.manual')}</p>
+    <p className="text-xs/[18px] text-muted-foreground">{t('basis.manual')}</p>
   </div>
 }
 
@@ -175,11 +201,11 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
       <SelectField label={t('basis.sourceDecision')} value={draft.decisionId}
         onChange={decisionId => setDraft(v => ({ ...v, decisionId }))} required={false} choices={decisionChoices} />
       {existing && <Field label={t('basis.reason')} htmlFor="basis-reason"><Textarea id="basis-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
-      {duplicateId && <div className="space-y-2 rounded border border-warn p-3 text-sm"><p>{t('basis.duplicate')}</p>
-        <Link className="text-primary underline" to={`/projects/${number}/design-basis?basis=${duplicateId}`} target="_blank" rel="noopener noreferrer">{t('basis.openExisting')}</Link>
-        <label className="flex gap-2"><input type="checkbox" checked={inspected} onChange={e => setInspected(e.target.checked)} />{t('basis.inspected')}</label></div>}
+      {duplicateId && <div className="space-y-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm"><p className="flex gap-2 text-warn"><span aria-hidden>▲</span><span>{t('basis.duplicate')}</span></p>
+        <Link className="text-primary underline underline-offset-4" to={`/projects/${number}/design-basis?basis=${duplicateId}`} target="_blank" rel="noopener noreferrer">{t('basis.openExisting')}</Link>
+        <label className="flex items-start gap-2"><input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-(--primary)" checked={inspected} onChange={e => setInspected(e.target.checked)} />{t('basis.inspected')}</label></div>}
     </fieldset>{error != null && <ErrorBanner error={error} />}
-      <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button><Button disabled={busy || !!duplicateId && !inspected}>{t('common.save')}</Button></div>
+      <DialogFooter><Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button><Button disabled={busy || !!duplicateId && !inspected}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter>
     </form></DialogContent></Dialog>
 }
 
@@ -197,54 +223,60 @@ function BasisDetail({ base, id, number, options, name, close, refresh }: { base
     onClose={() => setAction(null)} onDone={done} />
   if (action === 'edit' && row && options && selectedVersion) return <BasisForm base={base} number={number} options={options}
     existing={row} editing={selectedVersion} onClose={() => setAction(null)} onDone={done} />
+  const unresolved = row?.conflicts.filter(c => !c.resolved) ?? []
   return <><Dialog open onOpenChange={o => !o && close()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
     <DialogHeader><DialogTitle>{row ? `${row.entry.key} · ${row.entry.title}` : t('basis.title')}</DialogTitle>
       <DialogDescription>{t('basis.subtitle')}</DialogDescription></DialogHeader>
     {q.isPending ? <Loading rows={4} /> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : row &&
-      <div className="space-y-5 text-sm">
-        <p>{row.entry.kind} · {t('basis.owner')}: {name(row.entry.ownerId)} · {t('basis.discipline')}: {options?.disciplines.find(d => d.id === row.entry.projectDisciplineId)?.name ?? t('coord.unavailable')}</p>
-        <div className="flex flex-wrap gap-2">{row.canManage && current && !proposed && options && <Button size="sm" variant="outline" onClick={() => setAction('propose')}>{t('basis.propose')}</Button>}
+      <div className="space-y-6 text-sm">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2"><Kind kind={row.entry.kind} />
+          <span><span className="text-muted-foreground">{t('basis.owner')}:</span> {name(row.entry.ownerId)}</span>
+          <span><span className="text-muted-foreground">{t('basis.discipline')}:</span> {options?.disciplines.find(d => d.id === row.entry.projectDisciplineId)?.name ?? t('coord.unavailable')}</span></div>
+        <div className="flex flex-wrap gap-2">{row.canConfirm && proposed && <Button size="sm" onClick={() => setAction('confirm')}>{t('basis.confirm')}</Button>}
+          {row.canManage && current && !proposed && options && <Button size="sm" variant="outline" onClick={() => setAction('propose')}>{t('basis.propose')}</Button>}
           {row.canManage && (current || proposed) && options && <Button size="sm" variant="outline" onClick={() => setAction('assign')}>{t('basis.owner')}</Button>}
-          {row.canConfirm && proposed && <Button size="sm" onClick={() => setAction('confirm')}>{t('basis.confirm')}</Button>}
           {row.canManage && row.entry.kind === 'Assumption' && proposed && <Button size="sm" variant="outline" onClick={() => setAction('proceed')}>{t('basis.proceed')}</Button>}
           {options?.canWrite && [...options.tasks, ...options.deliverables].some(w => w.ownerId === options.actorId) && (current || proposed) &&
             <Button size="sm" variant="outline" onClick={() => setAction('use')}>{t('basis.linkUse')}</Button>}</div>
-        <section><h3 className="font-medium">{t('basis.version')}</h3><div className="mt-2 space-y-3">{row.versions.map(({ version: v, sourceMissing }) =>
-          <div key={v.id} className="rounded border p-3"><p className="font-medium">{t('basis.version')} {v.number} · {tv(v.status)}{row.entry.currentVersionId === v.id && ` · ${t('basis.current')}`}</p>
-            <p>{t('basis.scope')}: {v.scope}</p><p className="whitespace-pre-wrap">{v.statement}{v.numericValue != null && ` · ${v.numericValue} ${v.units ?? ''}`}</p>
-            {sourceMissing && <p className="text-warn">{t('basis.missingSource')}</p>}
-            {row.canEditProposed && v.status === 'Proposed' && !row.uses.some(u => u.versionId === v.id) &&
-              !row.dispositions.some(d => d.versionId === v.id) && <Button size="sm" variant="outline"
-                onClick={() => { setSelectedVersion(v); setAction('edit') }}>{t('basis.editProposed')}</Button>}
-            {row.canManage && (v.status === 'Proposed' || v.status === 'Confirmed') && <Button size="sm" variant="outline" onClick={() => { setSelectedVersion(v); setAction('withdraw') }}>{t('basis.withdraw')}</Button>}
-            <p>{t('basis.manual')}{v.sourceSystem && ` · ${v.sourceSystem}`}{v.stableSourceId && ` · ${v.stableSourceId}`}{v.declaredRevision && ` · ${t('basis.revision')}: ${v.declaredRevision}`}</p>
-            {v.sourceUrl && <a className="text-primary underline" href={v.sourceUrl} target="_blank" rel="noopener noreferrer">{t('basis.sourceUrl')}</a>}
-            {v.decisionId && <p><Link className="text-primary underline"
+        <section className="space-y-3"><h3 className={subhead}>{t('basis.version')}</h3>{row.versions.map(({ version: v, sourceMissing }) => {
+          const canEdit = row.canEditProposed && v.status === 'Proposed' && !row.uses.some(u => u.versionId === v.id) && !row.dispositions.some(d => d.versionId === v.id)
+          const canWithdraw = row.canManage && (v.status === 'Proposed' || v.status === 'Confirmed')
+          return <div key={v.id} className="space-y-2 rounded-lg border p-4"><div className="flex flex-wrap items-center gap-2"><span className="font-semibold">{t('basis.version')} {v.number}</span><CoordStatus status={v.status} />{row.entry.currentVersionId === v.id && <span className={badge}>{t('basis.current')}</span>}</div>
+            <p>{t('basis.scope')}: {v.scope}</p><p className="whitespace-pre-wrap text-base/6">{v.statement}{v.numericValue != null && <span className="tabular-nums"> · {v.numericValue} {v.units ?? ''}</span>}</p>
+            {sourceMissing && <Warn>{t('basis.missingSource')}</Warn>}
+            <p className="text-xs/[18px] text-muted-foreground">{t('basis.manual')}{v.sourceSystem && ` · ${v.sourceSystem}`}{v.stableSourceId && ` · ${v.stableSourceId}`}{v.declaredRevision && ` · ${t('basis.revision')}: ${v.declaredRevision}`}</p>
+            {v.sourceUrl && <a className="text-primary underline underline-offset-4" href={v.sourceUrl} target="_blank" rel="noopener noreferrer">{t('basis.sourceUrl')}</a>}
+            {v.decisionId && <p><Link className="text-primary underline underline-offset-4"
               to={`/projects/${number}/decisions?panel=Decision:${v.decisionId}`}>{t('basis.sourceDecision')}</Link></p>}
-            {v.confirmationDueDate ? <p>{t('basis.due')}: {fmtDate(v.confirmationDueDate)}</p>
-              : v.status === 'Proposed' && <p className="text-warn">{t('basis.dueRequired')}</p>}
-            {v.confirmedAt && <p>{t('basis.confirm')}: {name(v.confirmedBy)} · {fmtDate(v.confirmedAt)} · {v.confirmationRationale}</p>}
-          </div>)}</div></section>
-        <section><h3 className="font-medium">{t('basis.conflicts')} ({row.conflicts.filter(c => !c.resolved).length})</h3>
-          {!row.conflicts.some(c => !c.resolved) && <p>{t('basis.noConflict')}</p>}
-          {row.conflicts.filter(c => !c.resolved).map(c => <div key={c.id} className="rounded border border-warn p-2">
-            <p>{c.left.entryKey}: {c.left.numericValue ?? c.left.statement} {c.left.units ?? ''}</p>
-            <p>{c.right.entryKey}: {c.right.numericValue ?? c.right.statement} {c.right.units ?? ''}</p>
+            {v.confirmationDueDate ? <p>{t('basis.due')}: <span className="tabular-nums">{fmtDate(v.confirmationDueDate)}</span></p>
+              : v.status === 'Proposed' && <Warn>{t('basis.dueRequired')}</Warn>}
+            {v.confirmedAt && <p>{t('basis.confirm')}: {name(v.confirmedBy)} · <span className="tabular-nums">{fmtDate(v.confirmedAt)}</span> · {v.confirmationRationale}</p>}
+            {(canEdit || canWithdraw) && <div className="flex flex-wrap gap-2 pt-1">
+              {canEdit && <Button size="sm" variant="outline" onClick={() => { setSelectedVersion(v); setAction('edit') }}>{t('basis.editProposed')}</Button>}
+              {canWithdraw && <Button size="sm" variant="ghost" className="text-bad hover:text-bad" onClick={() => { setSelectedVersion(v); setAction('withdraw') }}>{t('basis.withdraw')}</Button>}
+            </div>}
+          </div>
+        })}</section>
+        <section className="space-y-3"><h3 className={subhead}>{t('basis.conflicts')} <span className={badge}>{unresolved.length}</span></h3>
+          {!unresolved.length && <p className="text-muted-foreground">{t('basis.noConflict')}</p>}
+          {unresolved.map(c => <div key={c.id} className="space-y-1 rounded-lg border border-warn/40 bg-warn-bg p-4">
+            <p><span className="key">{c.left.entryKey}</span>: {c.left.numericValue ?? c.left.statement} {c.left.units ?? ''}</p>
+            <p><span className="key">{c.right.entryKey}</span>: {c.right.numericValue ?? c.right.statement} {c.right.units ?? ''}</p>
             <p>{t('basis.scope')}: {c.left.scope}</p>
-            {row.canManage && row.versions.some(v => v.version.id === c.left.versionId || v.version.id === c.right.versionId) && <Button size="sm" variant="outline" onClick={() => { setSelectedConflict(c.id); setAction('resolveConflict') }}>{t('basis.resolveConflict')}</Button>}
+            {row.canManage && row.versions.some(v => v.version.id === c.left.versionId || v.version.id === c.right.versionId) && <Button size="sm" variant="outline" className="mt-1" onClick={() => { setSelectedConflict(c.id); setAction('resolveConflict') }}>{t('basis.resolveConflict')}</Button>}
           </div>)}</section>
-        <section><h3 className="font-medium">{t('basis.uses')} ({row.uses.length})</h3><ul className="mt-2 space-y-2">{row.uses.map(u =>
-          <li key={u.id} className="rounded border p-2">{options ? <WorkLink options={options} type={u.targetType} id={u.targetId} number={number} /> :
-            <Link className="text-primary underline" to={`/projects/${number}/${u.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${u.targetType}:${u.targetId}`}>{u.targetType}</Link>}
+        <section className="space-y-2"><h3 className={subhead}>{t('basis.uses')} <span className={badge}>{row.uses.length}</span></h3><ul className="divide-y rounded-lg border">{row.uses.map(u =>
+          <li key={u.id} className="px-4 py-3">{options ? <WorkLink options={options} type={u.targetType} id={u.targetId} number={number} /> :
+            <Link className="text-primary underline underline-offset-4" to={`/projects/${number}/${u.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${u.targetType}:${u.targetId}`}>{u.targetType}</Link>}
             {' · '}{t('basis.version')} {row.versions.find(v => v.version.id === u.versionId)?.version.number ?? '?'} · {u.isCurrent ? t('basis.currentUse') : t('basis.historicalUse')}
             {u.isCurrent && staleUse(row.versions.find(v => v.version.id === u.versionId)?.version.status)} · {u.intendedUse}</li>)}</ul></section>
-        <section><h3 className="font-medium">{t('basis.impacts')} ({row.impacts.length})</h3><ul className="mt-2 space-y-2">{row.impacts.map(i =>
-          <li key={i.id} className="rounded border p-2">{tv(i.status)} · {name(i.ownerId)} · {t('basis.version')} {row.versions.find(v => v.version.id === i.oldVersionId)?.version.number} → {i.newVersionId ? row.versions.find(v => v.version.id === i.newVersionId)?.version.number : i.withdrawalVersionId ? t('basis.withdrawn') : t('basis.decisionReopened')}
-            {i.rationale && <p>{t('basis.reason')}: {i.rationale}</p>}{i.evidenceUrl && <a className="text-primary underline" href={i.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
+        <section className="space-y-2"><h3 className={subhead}>{t('basis.impacts')} <span className={badge}>{row.impacts.length}</span></h3><ul className="space-y-2">{row.impacts.map(i =>
+          <li key={i.id} className="space-y-2 rounded-lg border p-4"><div className="flex flex-wrap items-center gap-2"><CoordStatus status={i.status} /><span>{name(i.ownerId)}</span><span className="text-muted-foreground">· {t('basis.version')} {row.versions.find(v => v.version.id === i.oldVersionId)?.version.number} → {i.newVersionId ? row.versions.find(v => v.version.id === i.newVersionId)?.version.number : i.withdrawalVersionId ? t('basis.withdrawn') : t('basis.decisionReopened')}</span></div>
+            {i.rationale && <p>{t('basis.reason')}: {i.rationale}</p>}{i.evidenceUrl && <a className="text-primary underline underline-offset-4" href={i.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
             {options && impactActions(row, options, i).length > 0 &&
-              <Button size="sm" variant="outline" onClick={() => setSelectedImpact(i.id)}>{t('basis.decideImpact')}</Button>}</li>)}</ul></section>
-        {row.dispositions.length > 0 && <section><h3 className="font-medium">{t('basis.proceed')}</h3><ul>{row.dispositions.map(d =>
-          <li key={d.id} className="rounded border p-2">{d.scope} · {name(d.ownerId)} · {t('basis.expiry')}: {fmtDate(d.expiresOn)} · {d.reason}</li>)}</ul></section>}
+              <div><Button size="sm" variant="outline" onClick={() => setSelectedImpact(i.id)}>{t('basis.decideImpact')}</Button></div>}</li>)}</ul></section>
+        {row.dispositions.length > 0 && <section className="space-y-2"><h3 className={subhead}>{t('basis.proceed')}</h3><ul className="divide-y rounded-lg border">{row.dispositions.map(d =>
+          <li key={d.id} className="px-4 py-3">{d.scope} · {name(d.ownerId)} · {t('basis.expiry')}: <span className="tabular-nums">{fmtDate(d.expiresOn)}</span> · {d.reason}</li>)}</ul></section>}
       </div>}
   </DialogContent></Dialog>
     {row && action === 'assign' && options && <AssignForm base={base} entry={row.entry} options={options}
@@ -284,7 +316,7 @@ function WithdrawForm({ base, id, entry, version, close, done }: { base: string;
   const [reason, setReason] = useState('')
   return <CommandForm path={`${base}/${id}/versions/${version.id}/withdraw`} title={t('basis.withdraw')} hint={t('basis.withdrawHint')} onClose={close} onDone={done}
     payload={() => ({ entryRowVersion: entry.rowVersion, versionRowVersion: version.rowVersion, reason })}>
-    <p>{t('basis.version')} {version.number} · {tv(version.status)}</p>
+    <p className="flex flex-wrap items-center gap-2"><span className="font-semibold">{t('basis.version')} {version.number}</span><CoordStatus status={version.status} /></p>
     <Field label={t('basis.reason')} htmlFor="basis-withdraw-reason"><Textarea id="basis-withdraw-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>
   </CommandForm>
 }
@@ -300,7 +332,7 @@ function ConflictForm({ base, conflict, entry, versions, close, done }: { base: 
     payload={() => ({ conflictRowVersion: conflict.rowVersion, resolutionVersionId, resolutionVersionRowVersion: resolution?.rowVersion, rationale })}>
     <SelectField label={t('basis.resolutionVersion')} value={resolutionVersionId} onChange={setResolutionVersionId}
       choices={candidates.map(v => ({ value: v.id, label: `${t('basis.version')} ${v.number}` }))} />
-    <p className="text-xs text-muted-foreground">{entry.title}</p>
+    <p className="text-xs/[18px] text-muted-foreground">{entry.title}</p>
     <Field label={t('basis.reason')} htmlFor="basis-conflict-reason"><Textarea id="basis-conflict-reason" required minLength={5} value={rationale} onChange={e => setRationale(e.target.value)} /></Field>
   </CommandForm>
 }
@@ -316,13 +348,13 @@ function ImpactForm({ base, id, number, row, impactId, options, close, done }: {
     hint={t('basis.impactHint')} onClose={close} onDone={done}
     payload={() => ({ assessmentRowVersion: impact.rowVersion, basisUseRowVersion: use.rowVersion,
       newVersionRowVersion: next?.rowVersion, targetRowVersion: target?.rowVersion, action: decision, rationale, evidenceUrl })}>
-    <p>{t('basis.version')} {row.versions.find(v => v.version.id === impact.oldVersionId)?.version.number} → {next ? next.number : impact.withdrawalVersionId ? t('basis.withdrawn') : t('basis.decisionReopened')}</p>
-    {target ? <WorkLink options={options} type={use.targetType} id={use.targetId} number={number} /> : <p>{t('coord.unavailable')}</p>}
+    <div className="space-y-1 rounded-md bg-muted px-4 py-3 text-sm"><p className="font-medium">{t('basis.version')} {row.versions.find(v => v.version.id === impact.oldVersionId)?.version.number} → {next ? next.number : impact.withdrawalVersionId ? t('basis.withdrawn') : t('basis.decisionReopened')}</p>
+      {target ? <WorkLink options={options} type={use.targetType} id={use.targetId} number={number} /> : <p className="text-muted-foreground">{t('coord.unavailable')}</p>}</div>
     <SelectField label={t('basis.decision')} value={decision} onChange={setDecision}
       choices={actions.map(a => ({ value: a, label: t(a === 'Adopt' ? 'basis.adopt' : 'basis.unaffected') }))} />
     <Field label={t('basis.reason')} htmlFor="basis-impact-reason"><Textarea id="basis-impact-reason" required minLength={5} value={rationale} onChange={e => setRationale(e.target.value)} /></Field>
     <Field label={t('basis.evidence')} htmlFor="basis-impact-evidence"><Input id="basis-impact-evidence" type="url" required value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} /></Field>
-    {!target && <p className="text-warn">{t('basis.targetUnavailable')}</p>}
+    {!target && <p role="status" className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲</span><span>{t('basis.targetUnavailable')}</span></p>}
   </CommandForm>
 }
 
@@ -332,7 +364,7 @@ function ProceedForm({ base, id, version, options, close, done }: { base: string
   return <CommandForm path={`${base}/${id}/versions/${version.id}/proceed`} title={t('basis.proceed')}
     hint={t('basis.proceedHint')} onClose={close} onDone={done}
     payload={() => ({ versionRowVersion: version.rowVersion, scope: version.scope, ownerId, expiresOn: expiry, reason })}>
-    <p>{t('basis.scope')}: {version.scope}</p><SelectField label={t('basis.owner')} value={ownerId} onChange={setOwnerId}
+    <p className="rounded-md bg-muted px-4 py-3 text-sm">{t('basis.scope')}: {version.scope}</p><SelectField label={t('basis.owner')} value={ownerId} onChange={setOwnerId}
       choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
     <Field label={t('basis.expiry')} htmlFor="basis-expiry"><Input id="basis-expiry" type="date" required value={expiry} onChange={e => setExpiry(e.target.value)} /></Field>
     <Field label={t('basis.reason')} htmlFor="basis-proceed-reason"><Textarea id="basis-proceed-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>

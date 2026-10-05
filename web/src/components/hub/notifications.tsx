@@ -9,7 +9,7 @@ import { Empty, Loading } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { get, post } from '@/lib/api'
-import { ago } from '@/lib/format'
+import { ago, fmtTime } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import type { Page } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -58,18 +58,23 @@ export function useMarkRead() {
   }
 }
 
-/** One notification: icon by type, sentence, project and time; opening it marks it read. */
+/** One notification: icon by type, sentence, project and time; opening it marks it read. Unread is a dot, a bold
+ *  sentence and the word "Unread" for screen readers, never the tint alone. */
 export function NotificationItem({ n, onOpen }: { n: NotificationRow; onOpen: (n: NotificationRow) => void }) {
   const Icon = eventIcon(n.eventType)
+  const unread = !n.readAt
   return (
-    <button type="button" onClick={() => onOpen(n)} className={cn('flex w-full items-start gap-3 px-3 py-2.5 text-left text-sm hover:bg-muted', !n.readAt && 'bg-accent/40')}>
-      <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+    <button type="button" onClick={() => onOpen(n)} className={cn('flex w-full items-start gap-3 px-4 py-3 text-left text-sm hover:bg-muted', unread && 'bg-accent/40')}>
+      <Icon className="mt-0.5 size-[18px] shrink-0 text-muted-foreground" aria-hidden />
       <span className="min-w-0 flex-1">
-        <span className="block">{n.title}</span>
-        {n.body && <span className="block truncate text-xs text-muted-foreground">{n.body}</span>}
-        <span className="block text-xs text-muted-foreground">{[n.projectNumber, ago(n.updatedAt)].filter(Boolean).join(' · ')}</span>
+        <span className={cn('block break-words', unread && 'font-semibold')}>{n.title}</span>
+        {n.body && <span className="block truncate text-muted-foreground">{n.body}</span>}
+        <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs/[18px] text-muted-foreground">
+          {n.projectNumber && <><span className="key">{n.projectNumber}</span><span aria-hidden>·</span></>}
+          <time dateTime={n.updatedAt} title={fmtTime(n.updatedAt)}>{ago(n.updatedAt)}</time>
+        </span>
       </span>
-      {!n.readAt && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" aria-label={t('notif.unread')} />}
+      {unread && <><span aria-hidden className="mt-1.5 size-2.5 shrink-0 rounded-full bg-primary" /><span className="sr-only">{t('notif.unread')}</span></>}
     </button>
   )
 }
@@ -93,9 +98,9 @@ function BellButton() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative size-9" aria-label={count ? t('notif.bellCount', { n: count }) : t('nav.notifications')}>
-          <Bell className="size-4" />
-          {count > 0 && <span className="absolute right-1 top-1 grid min-w-4 place-items-center rounded-full bg-bad px-1 text-[10px] font-semibold leading-4 text-white">{count > 99 ? '99+' : count}</span>}
+        <Button variant="ghost" size="icon" className="relative" aria-label={count ? t('notif.bellCount', { n: count }) : t('nav.notifications')}>
+          <Bell className="size-5" />
+          {count > 0 && <span className="absolute right-0.5 top-0.5 grid min-w-[18px] place-items-center rounded-full bg-bad px-1 text-xs font-semibold leading-[18px] text-white tabular-nums">{count > 99 ? '99+' : count}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-96 p-0">

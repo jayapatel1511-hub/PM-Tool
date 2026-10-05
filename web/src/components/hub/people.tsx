@@ -6,15 +6,17 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { get, qs } from '@/lib/api'
 import { t } from '@/lib/i18n'
-import { cn } from '@/lib/utils'
+import { accentOf, cn } from '@/lib/utils'
 
 export interface Person { id: string; displayName: string; email?: string; jobTitle?: string; isActive?: boolean }
 
 export function initials(name?: string | null) { return (name ?? '?').split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase() }
 
-export function Avatar({ name, className, title }: { name?: string | null; className?: string; title?: string }) {
+/** Initials on the person's stable pastel accent (keyed by id where known), 28 px in tables. */
+export function Avatar({ name, id, className, title }: { name?: string | null; id?: string | null; className?: string; title?: string }) {
   return (
-    <span title={title ?? name ?? ''} aria-hidden className={cn('inline-grid size-6 shrink-0 place-items-center rounded-full bg-accent text-[10px] font-semibold text-accent-foreground', className)}>
+    <span title={title ?? name ?? ''} aria-hidden data-accent={accentOf(id ?? name)}
+      className={cn('inline-grid size-7 shrink-0 place-items-center rounded-full bg-(--acc-bg) text-xs font-semibold text-(--acc-fg)', className)}>
       {initials(name)}
     </span>
   )
@@ -42,8 +44,8 @@ export function PeoplePicker({ value, valueName, onChange, placeholder, allowCle
     <div className="flex items-center gap-1">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button id={id} variant="outline" aria-label={label} disabled={disabled}
-            className={cn('min-w-0 flex-1 justify-between font-normal', compact ? 'h-7 border-transparent bg-transparent px-1.5 text-[13px] shadow-none hover:border-border' : 'h-9 px-2')}>
+          <Button id={id} variant="outline" aria-label={compact && label ? `${label}: ${value ? selectedName ?? t('common.unavailable') : placeholder ?? t('people.choose')}` : label} disabled={disabled}
+            className={cn('min-w-0 flex-1 justify-between font-normal', compact ? 'min-h-(--control-row-h) border-transparent bg-transparent px-2 hover:border-input' : 'px-3')}>
             <span className={cn('truncate', !value && 'text-muted-foreground')}>{value ? selectedName ?? '…' : placeholder ?? t('people.choose')}</span>
             <ChevronsUpDown className="size-3.5 opacity-50" />
           </Button>

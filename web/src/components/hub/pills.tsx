@@ -3,17 +3,24 @@ import { t, tv } from '@/lib/i18n'
 
 // Status colour language (§13.0): every colour carries text and an icon; colour is never the only signal.
 type Tone = 'ok' | 'warn' | 'bad' | 'idle' | 'done' | 'work'
+// The border is transparent on screen and becomes a visible outline in forced-colours mode.
 const TONE: Record<Tone, { cls: string; icon: string }> = {
-  ok: { cls: 'bg-ok-bg text-ok border-ok/25', icon: '●' },
-  warn: { cls: 'bg-warn-bg text-warn border-warn/25', icon: '▲' },
-  bad: { cls: 'bg-bad-bg text-bad border-bad/25', icon: '■' },
-  idle: { cls: 'bg-idle-bg text-idle border-idle/20', icon: '○' },
-  done: { cls: 'bg-done-bg text-done border-done/25', icon: '✓' },
-  work: { cls: 'bg-work-bg text-work border-work/25', icon: '◐' },
+  ok: { cls: 'bg-ok-bg text-ok', icon: '●' },
+  warn: { cls: 'bg-warn-bg text-warn', icon: '▲' },
+  bad: { cls: 'bg-bad-bg text-bad', icon: '■' },
+  idle: { cls: 'bg-idle-bg text-idle', icon: '○' },
+  done: { cls: 'bg-done-bg text-done', icon: '✓' },
+  work: { cls: 'bg-work-bg text-work', icon: '◐' },
 }
 
 const STATUS_TONE: Record<string, Tone> = {
-  'On Track': 'ok', Green: 'ok',
+  'On Track': 'ok', Green: 'ok', Ready: 'ok',
+  Draft: 'idle', Superseded: 'idle', Withdrawn: 'idle', Advisory: 'idle',
+  Submitted: 'work', Responded: 'work', Checking: 'work', Proposed: 'work', Committed: 'work', 'Resolution Proposed': 'work',
+  'Clarification Requested': 'warn', Returned: 'warn', 'Changes Required': 'warn', 'Pending Assessment': 'warn',
+  'Update Required': 'warn', 'Clarification Needed': 'warn', 'Needs Assessment': 'warn', 'Proceed under Assumption': 'warn',
+  Incorporated: 'done', Approved: 'done', 'Verified Closed': 'done', Unaffected: 'done', Confirmed: 'done', Met: 'done', 'Verified Removed': 'done', Pass: 'done',
+  'Not Met': 'bad', 'Not Ready': 'bad', Fail: 'bad', Blocking: 'bad',
   'At Risk': 'warn', Yellow: 'warn', Deferred: 'warn', Monitoring: 'warn', 'Revision Required': 'warn',
   Overdue: 'bad', Red: 'bad', Blocked: 'bad', Critical: 'bad', Realised: 'bad',
   'Not Started': 'idle', 'On Hold': 'idle', Grey: 'idle', Cancelled: 'idle', Setup: 'idle', Archived: 'idle', Pending: 'idle', Closed: 'idle',
@@ -21,13 +28,14 @@ const STATUS_TONE: Record<string, Tone> = {
   'In Progress': 'work', 'In Review': 'work', 'Ready for Review': 'work', Active: 'work', 'Under Review': 'work', Open: 'work',
 }
 
+export type { Tone }
 export function toneOf(status?: string | null): Tone { return (status && STATUS_TONE[status]) || 'idle' }
 
 export function Pill({ tone, children, className, title, icon = true }: { tone: Tone; children: React.ReactNode; className?: string; title?: string; icon?: boolean }) {
   const s = TONE[tone]
   return (
-    <span title={title} className={cn('inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium leading-4', s.cls, className)}>
-      {icon && <span aria-hidden className="text-[9px]">{s.icon}</span>}{children}
+    <span title={title} className={cn('inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium', s.cls, className)}>
+      {icon && <span aria-hidden className="text-xs">{s.icon}</span>}{children}
     </span>
   )
 }
@@ -53,10 +61,10 @@ export function PriorityBadge({ priority }: { priority?: string | null }) {
 /** Small indicator chip with icon and short text ("Overdue 3d", "Blocked", "Waiting", "Review r2"). */
 export function Chip({ tone, children, title, onClick }: { tone: Tone; children: React.ReactNode; title?: string; onClick?: () => void }) {
   const s = TONE[tone]
-  const cls = cn('inline-flex items-center gap-1 whitespace-nowrap rounded border px-1.5 py-px text-[11px] font-medium', s.cls, onClick && 'cursor-pointer hover:brightness-95')
+  const cls = cn('inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-transparent px-1.5 py-px text-xs/[18px] font-medium', s.cls, onClick && 'cursor-pointer hover:brightness-95')
   return onClick
-    ? <button type="button" title={title} onClick={onClick} className={cls}><span aria-hidden className="text-[8px]">{s.icon}</span>{children}</button>
-    : <span title={title} className={cls}><span aria-hidden className="text-[8px]">{s.icon}</span>{children}</span>
+    ? <button type="button" title={title} onClick={onClick} className={cls}><span aria-hidden className="text-xs">{s.icon}</span>{children}</button>
+    : <span title={title} className={cls}><span aria-hidden className="text-xs">{s.icon}</span>{children}</span>
 }
 
 export function Key({ children }: { children: React.ReactNode }) {
@@ -67,8 +75,8 @@ export function ProgressBar({ pct, label }: { pct?: number | null; label?: strin
   if (pct == null) return <span className="text-muted-foreground">{t('common.dash')}</span>
   return (
     <span className="inline-flex items-center gap-2" title={label}>
-      <span className="h-1.5 w-16 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={label ?? `${pct}%`}>
-        <span className="block h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+      <span className="h-1.5 w-16 overflow-hidden rounded-full bg-border" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={label ?? `${pct}%`}>
+        <span data-meter-fill className={cn('block h-full rounded-full', pct >= 100 ? 'bg-done' : 'bg-ok')} style={{ width: `${Math.min(pct, 100)}%` }} />
       </span>
       <span className="text-xs tabular-nums">{pct}%</span>
     </span>

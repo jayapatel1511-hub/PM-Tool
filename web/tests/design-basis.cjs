@@ -260,6 +260,7 @@ let server, browser;
   const dateNameFailures = [];
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
+    await page.waitForFunction((isPhone) => Boolean(document.querySelector(`[data-task-layout="${isPhone ? 'phone' : 'desktop'}"]`)), width <= 639);
     for (const [dateLabel, dateValue] of dateFields) {
       const taskTitle = register.getByRole('button', { name: 'Watermain layout', exact: true });
       await taskTitle.waitFor();
@@ -294,6 +295,23 @@ let server, browser;
       assert.equal(new URL(page.url()).searchParams.has('panel'), false);
     }
   }
+  // A live resize while a task control owns focus must preserve the same logical control.
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.waitForSelector('[data-task-layout="desktop"]');
+  const resizeTitle = register.getByRole('button', { name: 'Watermain layout', exact: true });
+  await resizeTitle.waitFor();
+  await resizeTitle.focus();
+  await page.setViewportSize({ width: 320, height: 1000 });
+  await page.waitForFunction(() => document.activeElement?.getAttribute('data-task-focus') === 'title');
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-task-id')), task, 'Resize keeps focus on the same task');
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.waitForSelector('[data-task-layout="desktop"]');
+  await page.waitForFunction(() => document.activeElement?.getAttribute('data-task-focus') === 'title');
+  const filter = register.getByRole('searchbox', { name: 'Search', exact: true });
+  await filter.focus();
+  await page.setViewportSize({ width: 320, height: 1000 });
+  await page.waitForSelector('[data-task-layout="phone"]');
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-task-focus')), null, 'Resize does not steal focus from a filter');
   assert.deepEqual(dateNameFailures, [], 'Native date editors are associated with their visible field labels');
   const fits = (control, panel, width) => control && panel && control.width > 0 && control.height > 0 &&
     control.x >= Math.max(0, panel.x) - 1 && control.x + control.width <= Math.min(width, panel.x + panel.width) + 1 &&

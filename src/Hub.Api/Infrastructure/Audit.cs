@@ -69,6 +69,7 @@ public static class AuditRules
         [typeof(IssueVerification)] = ["IssueId", "VerifierId", "Status", "EvidenceUrl", "Note", "VerifiedAt"],
         [typeof(IssueReferenceImpactAssessment)] = ["IssueId", "DocumentReferenceId", "PreviousRevisionId", "CurrentRevisionId", "OwnerId", "VerifierId", "Status", "OwnerDisposition", "OwnerReason", "OwnerDecidedBy", "OwnerDecidedAt", "VerifierDisposition", "VerifierReason", "VerifierDecidedBy", "VerifierDecidedAt"],
         [typeof(PersonAvailabilityOverride)] = ["PersonId", "WorkDate", "AvailableHours", "Category"],
+        [typeof(PlanningEntry)] = ["PersonId", "HoursPerWeek", "StartWeek", "EndWeek", "Label", "SourceCategory", "ProjectId", "ProjectDisciplineId", "Confidence", "Visibility", "Notes", "LastValidatedAt", "DeletedAt"],
         [typeof(ResourceAllocation)] = ["PersonId", "Purpose", "FromDate", "ThroughDate", "PlannedHours", "Status", "ConfirmedBy", "ConfirmedAt"],
         [typeof(AllocationDayOverride)] = ["AllocationId", "WorkDate", "Hours"],
         [typeof(AllocationWorkLink)] = ["AllocationId", "PersonId", "WorkType", "WorkId", "WorkDate", "ReviewHours", "ReleasedAt"],

@@ -62,7 +62,7 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="max-w-56"><Bookmark className="size-4" /><span className="truncate">{active ? active.name : t('views.label')}</span></Button>
+          <Button variant="outline" className="max-w-56"><Bookmark className="size-4" /><span className="truncate">{active ? active.name : t('views.label')}</span></Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
           {q.error && <div className="p-2"><ErrorBanner error={q.error} /></div>}

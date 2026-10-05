@@ -1,10 +1,11 @@
+import { UrlSearchInput } from '@/components/hub/url-search'
 import { ViewMenu } from '@/components/hub/views'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ListPlus, OctagonAlert, Plus, ShieldAlert, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { ListPlus, Lock, OctagonAlert, Plus, ShieldAlert, Trash2 } from 'lucide-react'
+import { useId, useState, type ReactElement, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Section, Spinner, selectCls } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Section, Spinner, TableRegion, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
@@ -23,6 +24,7 @@ import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { ProjectDiscipline } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { DateText, FieldGroup, GroupRow, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
 import { ItemPicker, type Pick } from './Decisions'
 import { ActionForm } from './Meetings'
 import { useCurrentProject } from './ProjectLayout'
@@ -69,6 +71,7 @@ const ISSUE_TYPES = ['General', 'Coordination']
 const LEVELS = [1, 2, 3]
 const TONE = { High: 'bad', Medium: 'warn', Low: 'idle' } as const
 const FILTERS = ['q', 'status', 'severity', 'ownerId', 'disciplineId', 'indicator'] as const
+const SOURCE_FILTERS = ['issueType', 'location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits'] as const
 /** Live preview only; saved risks carry the band worked out by the server (§12.10: Low 1–2, Medium 3–4, High 6–9). */
 const bandOf = (score: number) => (score >= 6 ? 'High' : score >= 3 ? 'Medium' : 'Low')
 
@@ -96,33 +99,57 @@ function useFilters() {
   return { filters, set, clear, active: FILTERS.some((k) => sp.has(k)) }
 }
 
-function FilterBar({ f, statuses, open, indicator, owners, disciplines, menu }: {
-  f: ReturnType<typeof useFilters>; statuses: string[]; open: string; indicator: [string, string]; owners: [string, string][]; disciplines: ProjectDiscipline[]; menu: React.ReactNode
+type Token = { key: string; label: string; value: ReactNode }
+
+/** Labelled register filters, the indicator as a quick chip and active filters as removable tokens (§13.0 Filters). */
+function RegisterFilters({ f, statuses, open, indicator, owners, disciplines, extra, extraTokens = [], onClear = f.clear }: {
+  f: ReturnType<typeof useFilters>; statuses: string[]; open: string; indicator: [string, string]; owners: [string, string][]; disciplines: ProjectDiscipline[]
+  extra?: ReactNode; extraTokens?: Token[]; onClear?: () => void
 }) {
-  const sel = 'h-8 rounded-md border bg-card px-2 text-sm'
-  const on = f.filters.indicator === indicator[0]
+  const { q, status, severity, ownerId, disciplineId, indicator: shown } = f.filters
+  const on = shown === indicator[0]
+  const tokens = [
+    q && { key: 'q', label: t('common.search'), value: q },
+    status && { key: 'status', label: t('common.status'), value: status === open ? t('register.openStatuses') : tv(status) },
+    severity && { key: 'severity', label: t('register.severity'), value: tv(severity) },
+    ownerId && { key: 'ownerId', label: t('common.owner'), value: owners.find(([id]) => id === ownerId)?.[1] ?? <Missing /> },
+    disciplineId && { key: 'disciplineId', label: t('common.discipline'), value: disciplines.find((d) => d.id === disciplineId)?.name ?? <Missing /> },
+    shown && { key: 'indicator', label: t('deliverable.indicator'), value: on ? t(indicator[1]) : shown },
+  ].filter(Boolean) as Token[]
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Input key={f.filters.q ? 'q' : 'empty'} className="h-8 w-52" type="search" placeholder={t('common.search')} defaultValue={f.filters.q ?? ''} onChange={(e) => f.set('q', e.target.value)} aria-label={t('common.search')} />
-      <select className={sel} value={f.filters.status ?? ''} onChange={(e) => f.set('status', e.target.value)} aria-label={t('common.status')}>
-        <option value="">{t('register.anyStatus')}</option><option value={open}>{t('register.openStatuses')}</option>
-        {statuses.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
-      </select>
-      <select className={sel} value={f.filters.severity ?? ''} onChange={(e) => f.set('severity', e.target.value)} aria-label={t('register.severity')}>
-        <option value="">{t('register.anySeverity')}</option>{SEVERITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}
-      </select>
-      <select className={cn(sel, 'max-w-48')} value={f.filters.ownerId ?? ''} onChange={(e) => f.set('ownerId', e.target.value)} aria-label={t('common.owner')}>
-        <option value="">{t('decision.anyOwner')}</option>{owners.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
-      </select>
-      <select className={cn(sel, 'max-w-48')} value={f.filters.disciplineId ?? ''} onChange={(e) => f.set('disciplineId', e.target.value)} aria-label={t('common.discipline')}>
-        <option value="">{t('register.anyDiscipline')}</option>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-      </select>
-      <button type="button" aria-pressed={on} onClick={() => f.set('indicator', on ? null : indicator[0])}
-        className={cn('rounded-full border px-2.5 py-0.5 text-xs', on ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:bg-muted')}>{t(indicator[1])}</button>
-      {f.active && <button type="button" className="px-2 text-xs text-muted-foreground hover:text-foreground" onClick={f.clear}>{t('common.clear')}</button>}
-      <div className="flex-1" />
-      {menu}
-    </div>
+    <FilterBar>
+      <div className="flex flex-wrap items-end gap-3">
+        <Field label={t('common.search')} htmlFor="register-search" className="w-full sm:w-56">
+          <UrlSearchInput id="register-search" value={q ?? ''} onValueChange={value => f.set('q', value)} />
+        </Field>
+        <Field label={t('common.status')} htmlFor="register-status" className="w-full sm:w-44">
+          <select id="register-status" className={selectCls} value={status ?? ''} onChange={(e) => f.set('status', e.target.value)}>
+            <option value="">{t('register.anyStatus')}</option><option value={open}>{t('register.openStatuses')}</option>
+            {statuses.map((s) => <option key={s} value={s}>{tv(s)}</option>)}
+          </select>
+        </Field>
+        <Field label={t('register.severity')} htmlFor="register-severity" className="w-full sm:w-40">
+          <select id="register-severity" className={selectCls} value={severity ?? ''} onChange={(e) => f.set('severity', e.target.value)}>
+            <option value="">{t('register.anySeverity')}</option>{SEVERITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}
+          </select>
+        </Field>
+        <Field label={t('common.owner')} htmlFor="register-owner" className="w-full sm:w-48">
+          <select id="register-owner" className={selectCls} value={ownerId ?? ''} onChange={(e) => f.set('ownerId', e.target.value)}>
+            <option value="">{t('decision.anyOwner')}</option>{owners.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+          </select>
+        </Field>
+        <Field label={t('common.discipline')} htmlFor="register-discipline" className="w-full sm:w-48">
+          <select id="register-discipline" className={selectCls} value={disciplineId ?? ''} onChange={(e) => f.set('disciplineId', e.target.value)}>
+            <option value="">{t('register.anyDiscipline')}</option>{disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+        </Field>
+      </div>
+      <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>
+        <ChipToggle on={on} onClick={() => f.set('indicator', on ? null : indicator[0])}>{t(indicator[1])}</ChipToggle>
+      </div>
+      {extra}
+      <ActiveFilters tokens={[...tokens, ...extraTokens]} onRemove={(k) => f.set(k, null)} onClear={onClear} />
+    </FilterBar>
   )
 }
 
@@ -132,10 +159,11 @@ function owners(rows: { ownerId: string; ownerName?: string }[] | undefined): [s
   return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]))
 }
 
-function RegisterTable<T extends { id: string }>({ table, rows, loading, empty, hot, groupBy }: {
-  table: { visible: Column<T>[]; header: (c: Column<T>) => React.ReactNode; cell: (c: Column<T>, r: T) => React.ReactNode }; rows: T[]; loading: boolean; empty: React.ReactNode; hot: (r: T) => boolean; groupBy?: (r: T) => string
+function RegisterTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption }: {
+  table: { visible: Column<T>[]; header: (c: Column<T>) => ReactElement; cell: (c: Column<T>, r: T) => ReactNode }; rows: T[]; loading: boolean; empty: ReactNode
+  current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string
 }) {
-  if (loading) return <Loading rows={6} />
+  if (loading) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
   if (!rows.length) return <div className="rounded-lg border bg-card">{empty}</div>
   const groups: { label: string; items: T[] }[] = []
   for (const row of rows) {
@@ -143,50 +171,58 @@ function RegisterTable<T extends { id: string }>({ table, rows, loading, empty, 
     if (groups.at(-1)?.label !== label) groups.push({ label, items: [] })
     groups.at(-1)!.items.push(row)
   }
-  return (
-    <div className="overflow-x-auto rounded-lg border bg-card">
-      <table className="w-full text-[13px]">
-        <thead className="bg-muted/60 text-left text-xs text-muted-foreground"><tr>{table.visible.map(table.header)}</tr></thead>
+  return (<>
+    <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} />
+    <TableRegion className="hidden md:block">
+      <table className="w-full text-sm">
+        <caption className="sr-only">{caption}</caption>
+        <thead className="bg-muted text-left text-muted-foreground"><tr>{table.visible.map((c) => table.header(c))}</tr></thead>
         {groups.map((group, index) => <tbody key={`${index}-${group.label}`}>
-          {groupBy && <tr className="border-t bg-muted/30"><th colSpan={table.visible.length} scope="rowgroup" className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground">{group.label}</th></tr>}
-          {group.items.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted/30', hot(r) && 'bg-bad-bg/30')}>{table.visible.map((c) => table.cell(c, r))}</tr>)}
+          {groupBy && <GroupRow span={table.visible.length} label={group.label} count={group.items.length} />}
+          {group.items.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted', current(r) && SELECTED_ROW)}>{table.visible.map((c) => table.cell(c, r))}</tr>)}
         </tbody>)}
       </table>
-    </div>
-  )
+    </TableRegion>
+  </>)
 }
 
 export function RisksTab() {
   const p = useCurrentProject()
   const f = useFilters()
   const openPanel = useItemPanel()
+  const [sp] = useSearchParams()
+  const panel = sp.get('panel')
   const [raising, setRaising] = useState(false)
   const q = useQuery({ queryKey: ['p', p.id, 'risks', f.filters], queryFn: () => get<RiskRow[]>(`projects/${p.id}/risks${qs(f.filters)}`) })
   const table = useTable<RiskRow>('hub.riskColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (r) => r.key, className: 'whitespace-nowrap', cell: (r) => <Key>{r.key}</Key> },
-    { id: 'title', label: t('register.title'), fixed: true, sort: (r) => r.title.toLowerCase(), className: 'min-w-[14rem] font-medium',
-      cell: (r) => <button className="text-left hover:underline" onClick={() => openPanel('Risk', r.id)}>{r.title}</button> },
+    { id: 'title', label: t('register.title'), fixed: true, sort: (r) => r.title.toLowerCase(), className: 'min-w-[14rem]',
+      cell: (r) => <button className={TITLE_LINK} aria-current={panel === `Risk:${r.id}` || undefined} onClick={() => openPanel('Risk', r.id)}>{r.title}</button> },
     { id: 'severity', label: t('register.severity'), sort: (r) => -r.score, className: 'whitespace-nowrap', cell: (r) => <Severity level={r.band} score={r.score} /> },
     { id: 'status', label: t('common.status'), sort: (r) => r.status, cell: (r) => <StatusPill status={r.status} /> },
-    { id: 'owner', label: t('common.owner'), sort: (r) => r.ownerName, className: 'whitespace-nowrap', cell: (r) => r.ownerName },
-    { id: 'discipline', label: t('common.discipline'), sort: (r) => r.disciplineName, className: 'whitespace-nowrap', cell: (r) => r.disciplineName ?? t('common.dash') },
-    { id: 'review', label: t('risk.reviewDate'), sort: (r) => r.reviewDate, className: 'whitespace-nowrap',
-      cell: (r) => <span className={cn(r.isReviewOverdue && 'font-medium text-bad')}>{fmtDate(r.reviewDate)}{r.isReviewOverdue && ` · ${t('risk.reviewOverdue')}`}</span> },
-    { id: 'mitigation', label: t('risk.mitigation'), cell: (r) => <span className="line-clamp-2 text-muted-foreground">{r.mitigation}</span> },
+    { id: 'owner', label: t('common.owner'), sort: (r) => r.ownerName, className: 'whitespace-nowrap', cell: (r) => <Person id={r.ownerId} name={r.ownerName} /> },
+    { id: 'discipline', label: t('common.discipline'), sort: (r) => r.disciplineName, className: 'whitespace-nowrap', cell: (r) => r.disciplineName ?? <Missing /> },
+    { id: 'review', label: t('risk.reviewDate'), sort: (r) => r.reviewDate, className: 'whitespace-nowrap text-right',
+      cell: (r) => <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-1"><DateText date={r.reviewDate} />{r.isReviewOverdue && <Chip tone="bad">{t('risk.reviewOverdue')}</Chip>}</span> },
+    { id: 'mitigation', label: t('risk.mitigation'), className: 'min-w-48', cell: (r) => r.mitigation ? <span className="line-clamp-2 text-muted-foreground">{r.mitigation}</span> : <Missing /> },
     { id: 'realised', label: t('risk.realisedAs'), optional: true, cell: (r) => r.realisedIssueId ? <button onClick={() => openPanel('Issue', r.realisedIssueId!)} className="hover:underline"><Key>{r.realisedIssueKey}</Key></button> : null },
   ], q.data ?? [], (r) => [r.reviewDate, r.key])
   const can = p.permissions.raiseRegister
   return (
     <Page title={t('ptab.risks')} subtitle={t('risk.subtitle')}
       actions={<>
+        {table.menu}
         <ExportMenu path={`projects/${p.id}/risks/export`} params={f.filters} name={`${p.projectNumber}-risks`} />
         {can.ok && <Button onClick={() => setRaising(true)}><Plus className="size-4" />{t('risk.new')}</Button>}
       </>}>
-      {!can.ok && can.reason && <p className="text-sm text-muted-foreground">{can.reason}</p>}
-      <FilterBar f={f} statuses={RISK_STATUSES} open="Open,Monitoring" indicator={['reviewOverdue', 'risk.reviewOverdue']} owners={owners(q.data)} disciplines={p.disciplines} menu={table.menu} />
-      {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      <RegisterTable table={table} rows={table.sorted} loading={q.isPending} hot={(r) => r.isReviewOverdue}
-        empty={<Empty action={can.ok && !f.active && <Button onClick={() => setRaising(true)}>{t('risk.new')}</Button>}>{f.active ? t('register.noMatch') : t('risk.empty')}</Empty>} />
+      {!can.ok && can.reason && <Notice icon={Lock} title={can.reason} />}
+      <RegisterFilters f={f} statuses={RISK_STATUSES} open="Open,Monitoring" indicator={['reviewOverdue', 'risk.reviewOverdue']} owners={owners(q.data)} disciplines={p.disciplines} />
+      {q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : (
+        <RegisterTable table={table} rows={table.sorted} loading={q.isPending} caption={t('ptab.risks')} current={(r) => panel === `Risk:${r.id}`}
+          empty={f.active
+            ? <Empty title={t('register.noMatch')} action={<Button variant="outline" onClick={f.clear}>{t('filters.clear')}</Button>}>{t('register.noMatchHint')}</Empty>
+            : <Empty title={t('risk.empty')} action={can.ok && <Button variant="outline" onClick={() => setRaising(true)}><Plus className="size-4" />{t('risk.new')}</Button>}>{t('risk.emptyHint')}</Empty>} />
+      )}
       {raising && <RiskForm projectId={p.id} onClose={() => setRaising(false)} />}
     </Page>
   )
@@ -199,41 +235,44 @@ export function IssuesTab() {
   const issueFilters = { ...f.filters, location: sp.get('location'), document: sp.get('document'),
     revision: sp.get('revision'), verification: sp.get('verification'), alignment: sp.get('alignment'),
     stationFrom: sp.get('stationFrom'), stationTo: sp.get('stationTo'), stationUnits: sp.get('stationUnits'), issueType: sp.get('issueType') }
-  const sourceFilterActive = ['issueType', 'location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits'].some((key) => sp.has(key))
+  const sourceFilterActive = SOURCE_FILTERS.some((key) => sp.has(key))
   const setSourceFilter = (key: string, value: string) => {
     const next = new URLSearchParams(sp)
     if (value) next.set(key, value); else next.delete(key)
     next.delete('page')
     setSp(next, { replace: true })
   }
-  const clearSourceFilters = () => {
+  // One Clear for both filter rows; grouping is a view choice and stays.
+  const clearFilters = () => {
     const next = new URLSearchParams(sp)
-    for (const key of ['issueType', 'location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits', 'group', 'page']) next.delete(key)
+    for (const key of [...FILTERS, ...SOURCE_FILTERS, 'page']) next.delete(key)
     setSp(next, { replace: true })
   }
   const openPanel = useItemPanel()
+  const panel = sp.get('panel')
   const [raising, setRaising] = useState(false)
   const q = useQuery({ queryKey: ['p', p.id, 'issues', issueFilters], queryFn: () => get<IssueRow[]>(`projects/${p.id}/issues${qs(issueFilters)}`) })
+  const verificationLabel = (v: string) => v === 'None' ? t('issue.noVerification') : v === 'Stale' ? t('issue.staleVerification') : tv(v)
   const table = useTable<IssueRow>('hub.issueColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (r) => r.key, className: 'whitespace-nowrap', cell: (r) => <Key>{r.key}</Key> },
-    { id: 'title', label: t('register.title'), fixed: true, sort: (r) => r.title.toLowerCase(), className: 'min-w-[14rem] font-medium',
-      cell: (r) => <button className="text-left hover:underline" onClick={() => openPanel('Issue', r.id)}>{r.title}</button> },
+    { id: 'title', label: t('register.title'), fixed: true, sort: (r) => r.title.toLowerCase(), className: 'min-w-[14rem]',
+      cell: (r) => <button className={TITLE_LINK} aria-current={panel === `Issue:${r.id}` || undefined} onClick={() => openPanel('Issue', r.id)}>{r.title}</button> },
     { id: 'type', label: t('issue.type'), sort: (r) => r.issueType, className: 'whitespace-nowrap', cell: (r) => tv(r.issueType) },
     { id: 'severity', label: t('register.severity'), sort: (r) => SEVERITIES.indexOf(r.severity), cell: (r) => <Severity level={r.severity} /> },
     { id: 'status', label: t('common.status'), sort: (r) => r.status, cell: (r) => <StatusPill status={r.status} /> },
-    { id: 'owner', label: t('common.owner'), sort: (r) => r.ownerName, className: 'whitespace-nowrap', cell: (r) => r.ownerName },
-    { id: 'discipline', label: t('common.discipline'), sort: (r) => r.disciplineName, className: 'whitespace-nowrap', cell: (r) => r.disciplineName ?? t('common.dash') },
-    { id: 'affected', label: t('issue.affectedDisciplines'), optional: true, sort: (r) => r.affectedDisciplineSummary, className: 'min-w-40', cell: (r) => r.affectedDisciplineSummary || t('common.dash') },
-    { id: 'raised', label: t('issue.dateRaised'), sort: (r) => r.dateRaised, className: 'whitespace-nowrap', cell: (r) => fmtDate(r.dateRaised) },
-    { id: 'target', label: t('issue.target'), sort: (r) => r.targetResolutionDate, className: 'whitespace-nowrap',
-      cell: (r) => <span className={cn(r.isOverdue && 'font-medium text-bad')}>{fmtDate(r.targetResolutionDate)}{r.isOverdue && ` · ${t('ind.overdueD', { n: r.daysOverdue })}`}</span> },
-    { id: 'raisedBy', label: t('issue.raisedBy'), optional: true, sort: (r) => r.raisedByName, className: 'whitespace-nowrap', cell: (r) => r.raisedByName },
+    { id: 'owner', label: t('common.owner'), sort: (r) => r.ownerName, className: 'whitespace-nowrap', cell: (r) => <Person id={r.ownerId} name={r.ownerName} /> },
+    { id: 'discipline', label: t('common.discipline'), sort: (r) => r.disciplineName, className: 'whitespace-nowrap', cell: (r) => r.disciplineName ?? <Missing /> },
+    { id: 'affected', label: t('issue.affectedDisciplines'), optional: true, sort: (r) => r.affectedDisciplineSummary, className: 'min-w-40', cell: (r) => r.affectedDisciplineSummary || <Missing /> },
+    { id: 'raised', label: t('issue.dateRaised'), sort: (r) => r.dateRaised, className: 'text-right', cell: (r) => <DateText date={r.dateRaised} /> },
+    { id: 'target', label: t('issue.target'), sort: (r) => r.targetResolutionDate, className: 'whitespace-nowrap text-right',
+      cell: (r) => <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-1"><DateText date={r.targetResolutionDate} />{r.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: r.daysOverdue })}</Chip>}</span> },
+    { id: 'raisedBy', label: t('issue.raisedBy'), optional: true, sort: (r) => r.raisedByName, className: 'whitespace-nowrap', cell: (r) => r.raisedByName ?? <Missing /> },
     { id: 'origin', label: t('issue.fromRisk'), optional: true, cell: (r) => r.originRiskId ? <button onClick={() => openPanel('Risk', r.originRiskId!)} className="hover:underline"><Key>{r.originRiskKey}</Key></button> : null },
-    { id: 'location', label: t('issue.locations'), sort: (r) => r.locationSummary, className: 'min-w-48', cell: (r) => r.locationSummary || t('common.dash') },
-    { id: 'documents', label: t('issue.documentReferences'), optional: true, sort: (r) => r.documentSummary, className: 'min-w-48', cell: (r) => r.documentSummary || t('common.dash') },
+    { id: 'location', label: t('issue.locations'), sort: (r) => r.locationSummary, className: 'min-w-48', cell: (r) => r.locationSummary || <Missing /> },
+    { id: 'documents', label: t('issue.documentReferences'), optional: true, sort: (r) => r.documentSummary, className: 'min-w-48', cell: (r) => r.documentSummary || <Missing /> },
     { id: 'verification', label: t('issue.verificationFlow'), sort: (r) => r.verificationStatus, className: 'whitespace-nowrap', cell: (r) =>
-      r.verificationStatus === 'None' ? t('issue.noVerification') : r.verificationStatus === 'Stale' ? t('issue.staleVerification') :
-        r.verificationStatus ? <StatusPill status={r.verificationStatus} /> : t('common.dash') },
+      r.verificationStatus === 'None' ? t('issue.noVerification') : r.verificationStatus === 'Stale' ? <Chip tone="warn">{t('issue.staleVerification')}</Chip> :
+        r.verificationStatus ? <StatusPill status={r.verificationStatus} /> : <Missing /> },
   ], q.data ?? [], (r) => [r.targetResolutionDate, r.key])
   const group = sp.get('group')
   // An issue appears once under each of its locations, disciplines (primary and affected), documents or revisions.
@@ -259,59 +298,89 @@ export function IssuesTab() {
   // Array.sort is stable, so the register's selected sort order remains intact within each group.
   const displayRows = groupBy ? [...expandedRows].sort((a, b) => groupBy(a).localeCompare(groupBy(b))) : expandedRows
   const can = p.permissions.raiseRegister
+  const sourceTokens = [
+    issueFilters.issueType && { key: 'issueType', label: t('issue.filterType'), value: tv(issueFilters.issueType) },
+    issueFilters.location && { key: 'location', label: t('issue.filterLocation'), value: issueFilters.location },
+    issueFilters.document && { key: 'document', label: t('issue.filterDocument'), value: issueFilters.document },
+    issueFilters.revision && { key: 'revision', label: t('issue.filterRevision'), value: issueFilters.revision },
+    issueFilters.alignment && { key: 'alignment', label: t('issue.filterAlignment'), value: issueFilters.alignment },
+    issueFilters.stationFrom && { key: 'stationFrom', label: t('issue.stationFrom'), value: issueFilters.stationFrom },
+    issueFilters.stationTo && { key: 'stationTo', label: t('issue.stationTo'), value: issueFilters.stationTo },
+    issueFilters.stationUnits && { key: 'stationUnits', label: t('issue.stationUnits'), value: issueFilters.stationUnits },
+    issueFilters.verification && { key: 'verification', label: t('issue.filterVerification'), value: verificationLabel(issueFilters.verification) },
+  ].filter(Boolean) as Token[]
+  const pages = Math.max(1, Math.ceil(total / pageSize))
+  const toPage = (n: number) => { const next = new URLSearchParams(sp); next.set('page', String(n)); setSp(next) }
   return (
     <Page title={t('ptab.issues')} subtitle={t('issue.subtitle')}
       actions={<>
+        {table.menu}
         <ViewMenu listType="issues" projectId={p.id} />
         <ExportMenu path={`projects/${p.id}/issues/export`} params={issueFilters} name={`${p.projectNumber}-issues`} />
         {can.ok && <Button onClick={() => setRaising(true)}><Plus className="size-4" />{t('issue.new')}</Button>}
       </>}>
-      {!can.ok && can.reason && <p className="text-sm text-muted-foreground">{can.reason}</p>}
-      <FilterBar f={f} statuses={ISSUE_STATUSES} open="Open,In Progress" indicator={['overdue', 'ind.overdue']} owners={owners(q.data)} disciplines={p.disciplines} menu={table.menu} />
-      <div role="group" aria-label={t('issue.sourceFilters')} className="flex flex-wrap items-center gap-2">
-        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={issueFilters.issueType ?? ''}
-          onChange={(e) => setSourceFilter('issueType', e.target.value)} aria-label={t('issue.filterType')}>
-          <option value="">{t('issue.anyType')}</option>
-          {ISSUE_TYPES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}
-        </select>
-        <Input className="h-8 w-40" type="search" value={issueFilters.location ?? ''} onChange={(e) => setSourceFilter('location', e.target.value)}
-          placeholder={t('issue.filterLocation')} aria-label={t('issue.filterLocation')} />
-        <Input className="h-8 w-40" type="search" value={issueFilters.document ?? ''} onChange={(e) => setSourceFilter('document', e.target.value)}
-          placeholder={t('issue.filterDocument')} aria-label={t('issue.filterDocument')} />
-        <Input className="h-8 w-28" type="search" value={issueFilters.revision ?? ''} onChange={(e) => setSourceFilter('revision', e.target.value)}
-          placeholder={t('issue.filterRevision')} aria-label={t('issue.filterRevision')} />
-        <Input className="h-8 w-32" type="search" value={issueFilters.alignment ?? ''} onChange={(e) => setSourceFilter('alignment', e.target.value)}
-          placeholder={t('issue.filterAlignment')} aria-label={t('issue.filterAlignment')} />
-        <Input className="h-8 w-24" type="number" value={issueFilters.stationFrom ?? ''} onChange={(e) => setSourceFilter('stationFrom', e.target.value)}
-          placeholder={t('issue.stationFrom')} aria-label={t('issue.stationFrom')} />
-        <Input className="h-8 w-24" type="number" value={issueFilters.stationTo ?? ''} onChange={(e) => setSourceFilter('stationTo', e.target.value)}
-          placeholder={t('issue.stationTo')} aria-label={t('issue.stationTo')} />
-        <Input className="h-8 w-20" value={issueFilters.stationUnits ?? ''} onChange={(e) => setSourceFilter('stationUnits', e.target.value)}
-          placeholder={t('issue.stationUnits')} aria-label={t('issue.stationUnits')} />
-        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={issueFilters.verification ?? ''}
-          onChange={(e) => setSourceFilter('verification', e.target.value)} aria-label={t('issue.filterVerification')}>
-          <option value="">{t('issue.anyVerification')}</option>
-          {['Proposed', 'Verified', 'Rejected'].map((status) => <option key={status} value={status}>{tv(status)}</option>)}
-          <option value="Stale">{t('issue.staleVerification')}</option>
-          <option value="None">{t('issue.noVerification')}</option>
-        </select>
-        <select className="h-8 rounded-md border bg-card px-2 text-sm" value={group ?? ''} onChange={(e) => setSourceFilter('group', e.target.value)} aria-label={t('issue.groupBy')}>
-          <option value="">{t('common.noGroup')}</option><option value="location">{t('issue.groupLocation')}</option>
-          <option value="discipline">{t('issue.groupDiscipline')}</option><option value="owner">{t('issue.groupOwner')}</option>
-          <option value="document">{t('issue.groupDocument')}</option><option value="revision">{t('issue.groupRevision')}</option>
-          <option value="verification">{t('issue.groupVerification')}</option>
-        </select>
-        {sourceFilterActive && <button type="button" className="px-2 text-xs text-muted-foreground hover:text-foreground"
-          onClick={clearSourceFilters}>{t('common.clear')}</button>}
-      </div>
-      {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      <RegisterTable table={table} rows={displayRows} loading={q.isPending} groupBy={groupBy} hot={(r) => r.isOverdue || (r.severity === 'High' && ['Open', 'In Progress'].includes(r.status))}
-        empty={<Empty action={can.ok && !f.active && !sourceFilterActive && <Button onClick={() => setRaising(true)}>{t('issue.new')}</Button>}>{f.active || sourceFilterActive ? t('register.noMatch') : t('issue.empty')}</Empty>} />
-      {!q.isPending && !q.error && <div className="flex items-center justify-end gap-3">
-        <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => { const next = new URLSearchParams(sp); next.set('page', String(page - 1)); setSp(next) }}>{t('handoff.previous')}</Button>
-        <span className="text-sm">{t('handoff.page', { n: page })}</span>
-        <Button size="sm" variant="outline" disabled={page * pageSize >= total} onClick={() => { const next = new URLSearchParams(sp); next.set('page', String(page + 1)); setSp(next) }}>{t('handoff.next')}</Button>
-      </div>}
+      {!can.ok && can.reason && <Notice icon={Lock} title={can.reason} />}
+      <RegisterFilters f={f} statuses={ISSUE_STATUSES} open="Open,In Progress" indicator={['overdue', 'ind.overdue']} owners={owners(q.data)} disciplines={p.disciplines}
+        extraTokens={sourceTokens} onClear={clearFilters} extra={
+          <div role="group" aria-labelledby="issue-source-filters" className="space-y-3 border-t pt-4">
+            <p id="issue-source-filters" className="text-sm font-medium">{t('issue.sourceFilters')}</p>
+            <div className="flex flex-wrap items-end gap-3">
+              <Field label={t('issue.filterType')} htmlFor="issue-type-filter" className="w-full sm:w-40">
+                <select id="issue-type-filter" className={selectCls} value={issueFilters.issueType ?? ''} onChange={(e) => setSourceFilter('issueType', e.target.value)}>
+                  <option value="">{t('issue.anyType')}</option>
+                  {ISSUE_TYPES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}
+                </select>
+              </Field>
+              <Field label={t('issue.filterLocation')} htmlFor="issue-location-filter" className="w-full sm:w-44">
+                <Input id="issue-location-filter" type="search" value={issueFilters.location ?? ''} onChange={(e) => setSourceFilter('location', e.target.value)} />
+              </Field>
+              <Field label={t('issue.filterDocument')} htmlFor="issue-document-filter" className="w-full sm:w-48">
+                <Input id="issue-document-filter" type="search" value={issueFilters.document ?? ''} onChange={(e) => setSourceFilter('document', e.target.value)} />
+              </Field>
+              <Field label={t('issue.filterRevision')} htmlFor="issue-revision-filter" className="w-full sm:w-28">
+                <Input id="issue-revision-filter" type="search" value={issueFilters.revision ?? ''} onChange={(e) => setSourceFilter('revision', e.target.value)} />
+              </Field>
+              <Field label={t('issue.filterAlignment')} htmlFor="issue-alignment-filter" className="w-full sm:w-36">
+                <Input id="issue-alignment-filter" type="search" value={issueFilters.alignment ?? ''} onChange={(e) => setSourceFilter('alignment', e.target.value)} />
+              </Field>
+              <Field label={t('issue.stationFrom')} htmlFor="issue-station-from" className="w-full sm:w-28">
+                <Input id="issue-station-from" type="number" className="tabular-nums" value={issueFilters.stationFrom ?? ''} onChange={(e) => setSourceFilter('stationFrom', e.target.value)} />
+              </Field>
+              <Field label={t('issue.stationTo')} htmlFor="issue-station-to" className="w-full sm:w-28">
+                <Input id="issue-station-to" type="number" className="tabular-nums" value={issueFilters.stationTo ?? ''} onChange={(e) => setSourceFilter('stationTo', e.target.value)} />
+              </Field>
+              <Field label={t('issue.stationUnits')} htmlFor="issue-station-units" className="w-full sm:w-24">
+                <Input id="issue-station-units" value={issueFilters.stationUnits ?? ''} onChange={(e) => setSourceFilter('stationUnits', e.target.value)} />
+              </Field>
+              <Field label={t('issue.filterVerification')} htmlFor="issue-verification-filter" className="w-full sm:w-48">
+                <select id="issue-verification-filter" className={selectCls} value={issueFilters.verification ?? ''} onChange={(e) => setSourceFilter('verification', e.target.value)}>
+                  <option value="">{t('issue.anyVerification')}</option>
+                  {['Proposed', 'Verified', 'Rejected'].map((status) => <option key={status} value={status}>{tv(status)}</option>)}
+                  <option value="Stale">{t('issue.staleVerification')}</option>
+                  <option value="None">{t('issue.noVerification')}</option>
+                </select>
+              </Field>
+              <Field label={t('issue.groupBy')} htmlFor="issue-group" className="w-full sm:w-52">
+                <select id="issue-group" className={selectCls} value={group ?? ''} onChange={(e) => setSourceFilter('group', e.target.value)}>
+                  <option value="">{t('common.noGroup')}</option><option value="location">{t('issue.groupLocation')}</option>
+                  <option value="discipline">{t('issue.groupDiscipline')}</option><option value="owner">{t('issue.groupOwner')}</option>
+                  <option value="document">{t('issue.groupDocument')}</option><option value="revision">{t('issue.groupRevision')}</option>
+                  <option value="verification">{t('issue.groupVerification')}</option>
+                </select>
+              </Field>
+            </div>
+          </div>} />
+      {q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : (
+        <RegisterTable table={table} rows={displayRows} loading={q.isPending} groupBy={groupBy} caption={t('ptab.issues')} current={(r) => panel === `Issue:${r.id}`}
+          empty={f.active || sourceFilterActive
+            ? <Empty title={t('register.noMatch')} action={<Button variant="outline" onClick={clearFilters}>{t('filters.clear')}</Button>}>{t('register.noMatchHint')}</Empty>
+            : <Empty title={t('issue.empty')} action={can.ok && <Button variant="outline" onClick={() => setRaising(true)}><Plus className="size-4" />{t('issue.new')}</Button>}>{t('issue.emptyHint')}</Empty>} />
+      )}
+      {!q.isPending && !q.error && <nav aria-label={t('issue.pager')} className="flex items-center justify-end gap-3">
+        <Button variant="outline" disabled={page <= 1} onClick={() => toPage(page - 1)}>{t('handoff.previous')}</Button>
+        <span className="text-sm tabular-nums" aria-live="polite">{t('common.pageOf', { page, pages })}</span>
+        <Button variant="outline" disabled={page * pageSize >= total} onClick={() => toPage(page + 1)}>{t('handoff.next')}</Button>
+      </nav>}
       {raising && <IssueForm projectId={p.id} onClose={() => setRaising(false)} />}
     </Page>
   )
@@ -323,24 +392,24 @@ export function IssuesTab() {
 function ScoreFields({ p, i, onChange, errors }: { p?: number; i?: number; onChange: (v: { probability?: number; impact?: number }) => void; errors?: string[] }) {
   const score = p && i ? p * i : null
   const group = (name: 'probability' | 'impact', value?: number) => (
-    <fieldset className="space-y-1">
-      <legend className="text-sm font-medium">{t(`risk.${name}`)}</legend>
+    <fieldset className="space-y-1.5">
+      <legend className="mb-1.5 text-sm font-medium">{t(`risk.${name}`)}</legend>
       {LEVELS.map((n) => (
-        <label key={n} className={cn('grid cursor-pointer grid-cols-[auto_1fr] items-start gap-x-2 rounded-md border px-2 py-1.5 text-sm', value === n && 'border-primary bg-accent')}>
-          <input type="radio" name={`risk-${name}`} className="row-span-2 mt-1" checked={value === n} onChange={() => onChange({ [name]: n })} />
+        <label key={n} className={cn('grid cursor-pointer grid-cols-[auto_1fr] items-start gap-x-2.5 rounded-md border px-3 py-2 text-sm hover:bg-muted', value === n && 'border-primary bg-accent hover:bg-accent')}>
+          <input type="radio" name={`risk-${name}`} className="row-span-2 mt-0.5 size-4 accent-(--primary)" checked={value === n} onChange={() => onChange({ [name]: n })} />
           <span className="font-medium">{n} · {t(`risk.${name}.${n}`)}</span>
-          <span className="text-xs text-muted-foreground">{t(`risk.${name}.${n}.hint`)}</span>
+          <span className="text-xs/[18px] text-muted-foreground">{t(`risk.${name}.${n}.hint`)}</span>
         </label>
       ))}
     </fieldset>
   )
   return (
-    <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
+    <div className="grid gap-4 sm:col-span-2 sm:grid-cols-2">
       {group('probability', p)}{group('impact', i)}
-      <p className="text-sm sm:col-span-2" aria-live="polite">
+      <p className="flex flex-wrap items-center gap-2 text-sm sm:col-span-2" aria-live="polite">
         {score ? <>{t('risk.severityIs')} <Severity level={bandOf(score)} score={score} /></> : <span className="text-muted-foreground">{t('risk.chooseBoth')}</span>}
       </p>
-      {errors?.map((e) => <p key={e} className="text-xs text-bad sm:col-span-2" role="alert">{e}</p>)}
+      {errors?.map((e) => <p key={e} className="text-xs/[18px] text-bad sm:col-span-2" role="alert">{e}</p>)}
     </div>
   )
 }
@@ -389,7 +458,7 @@ function RiskForm({ projectId, link, disciplineId, onClose }: { projectId: strin
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
-            <Button type="submit" disabled={busy || !f.probability || !f.impact}>{busy && <Spinner />}{t('risk.raise')}</Button>
+            <Button type="submit" disabled={busy || !f.probability || !f.impact}>{busy && <Spinner />}{busy ? t('common.saving') : t('risk.raise')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -405,12 +474,12 @@ function IssueFields({ projectId, f, setF, fe, prefix }: { projectId: string; f:
       <Field label={t('common.description')} htmlFor={`${prefix}-desc`} error={fe.description} className="sm:col-span-2"><Textarea id={`${prefix}-desc`} rows={2} value={f.description ?? ''} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
       <fieldset className="sm:col-span-2">
         <legend className="text-sm font-medium">{t('register.severity')}</legend>
-        <div className="mt-1 flex flex-wrap gap-2">{SEVERITIES.map((s) => (
-          <label key={s} className={cn('flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-1 text-sm', f.severity === s && 'border-primary bg-accent')}>
-            <input type="radio" name={`${prefix}-severity`} checked={f.severity === s} onChange={() => setF({ ...f, severity: s })} />{tv(s)}
+        <div className="mt-1.5 flex flex-wrap gap-2">{SEVERITIES.map((s) => (
+          <label key={s} className={cn(CHOICE, f.severity === s && CHOICE_ON)}>
+            <input type="radio" className="size-4 accent-(--primary)" name={`${prefix}-severity`} checked={f.severity === s} onChange={() => setF({ ...f, severity: s })} />{tv(s)}
           </label>))}</div>
-        <p className="mt-1 text-xs text-muted-foreground">{t('issue.highHint')}</p>
-        {fe.severity?.map((e) => <p key={e} className="text-xs text-bad" role="alert">{e}</p>)}
+        <p className="mt-1.5 text-xs/[18px] text-muted-foreground">{t('issue.highHint')}</p>
+        {fe.severity?.map((e) => <p key={e} className="text-xs/[18px] text-bad" role="alert">{e}</p>)}
       </fieldset>
       <Field label={t('common.owner')} htmlFor={`${prefix}-owner`} error={fe.ownerId}>
         <PeoplePicker id={`${prefix}-owner`} value={f.ownerId} valueName={f.ownerName} placeholder={t('decision.me')} onChange={(id, person) => setF({ ...f, ownerId: id, ownerName: person?.displayName })} />
@@ -420,29 +489,33 @@ function IssueFields({ projectId, f, setF, fe, prefix }: { projectId: string; f:
       <Field label={t('common.discipline')} htmlFor={`${prefix}-disc`} error={fe.projectDisciplineId}><DisciplineSelect id={`${prefix}-disc`} projectId={projectId} value={f.projectDisciplineId} onChange={(v) => setF({ ...f, projectDisciplineId: v })} /></Field>
       <fieldset className="sm:col-span-2">
         <legend className="text-sm font-medium">{t('issue.type')}</legend>
-        <div className="mt-1 flex flex-wrap gap-2">{ISSUE_TYPES.map((x) => (
-          <label key={x} className={cn('flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-1 text-sm', (f.issueType ?? 'General') === x && 'border-primary bg-accent')}>
-            <input type="radio" name={`${prefix}-type`} checked={(f.issueType ?? 'General') === x} onChange={() => setF({ ...f, issueType: x })} />{tv(x)}
+        <div className="mt-1.5 flex flex-wrap gap-2">{ISSUE_TYPES.map((x) => (
+          <label key={x} className={cn(CHOICE, (f.issueType ?? 'General') === x && CHOICE_ON)}>
+            <input type="radio" className="size-4 accent-(--primary)" name={`${prefix}-type`} checked={(f.issueType ?? 'General') === x} onChange={() => setF({ ...f, issueType: x })} />{tv(x)}
           </label>))}</div>
-        <p className="mt-1 text-xs text-muted-foreground">{t('issue.typeHint')}</p>
-        {fe.issueType?.map((e) => <p key={e} className="text-xs text-bad" role="alert">{e}</p>)}
+        <p className="mt-1.5 text-xs/[18px] text-muted-foreground">{t('issue.typeHint')}</p>
+        {fe.issueType?.map((e) => <p key={e} className="text-xs/[18px] text-bad" role="alert">{e}</p>)}
       </fieldset>
-      {f.issueType === 'Coordination' && <fieldset className="grid gap-2 sm:col-span-2 md:grid-cols-4">
-        <legend className="text-sm font-medium">{t('issue.firstReference')}</legend>
-        <div className="flex flex-wrap gap-4 text-sm md:col-span-4" role="radiogroup" aria-label={t('issue.firstReference')}>
-          {(['location', 'document'] as const).map((k) => <label key={k} className="flex items-center gap-1.5">
-            <input type="radio" name={`${prefix}-reference`} checked={(f.referenceKind ?? 'location') === k} onChange={() => setF({ ...f, referenceKind: k })} />
+      {f.issueType === 'Coordination' && <fieldset className="grid gap-3 rounded-lg border bg-muted p-4 sm:col-span-2 sm:grid-cols-2">
+        <legend className="px-1 text-sm font-semibold">{t('issue.firstReference')}</legend>
+        <div className="flex flex-wrap gap-2 text-sm sm:col-span-2" role="radiogroup" aria-label={t('issue.firstReference')}>
+          {(['location', 'document'] as const).map((k) => <label key={k} className={cn(CHOICE, 'bg-card', (f.referenceKind ?? 'location') === k && CHOICE_ON)}>
+            <input type="radio" className="size-4 accent-(--primary)" name={`${prefix}-reference`} checked={(f.referenceKind ?? 'location') === k} onChange={() => setF({ ...f, referenceKind: k })} />
             {t(k === 'location' ? 'issue.referenceByLocation' : 'issue.referenceByDocument')}</label>)}
         </div>
         {(f.referenceKind ?? 'location') === 'location'
           ? <LocationInputs value={f.location ?? NEW_LOCATION} onChange={(v) => setF({ ...f, location: v })} />
           : <DocumentInputs value={f.document ?? NEW_DOCUMENT} onChange={(v) => setF({ ...f, document: v })} />}
         {Object.entries(fe).filter(([k]) => !ISSUE_FORM_FIELDS.includes(k)).flatMap(([, v]) => v)
-          .map((e) => <p key={e} className="text-xs text-bad md:col-span-4" role="alert">{e}</p>)}
+          .map((e) => <p key={e} className="text-xs/[18px] text-bad sm:col-span-2" role="alert">{e}</p>)}
       </fieldset>}
     </>
   )
 }
+
+/** A radio choice drawn as a chip; selected adds the outline and tint to the checked radio (never tint alone). */
+const CHOICE = 'flex min-h-(--control-row-h) cursor-pointer items-center gap-2 rounded-md border border-input px-3 text-sm hover:bg-muted'
+const CHOICE_ON = 'border-primary bg-accent font-medium hover:bg-accent'
 
 const ISSUE_FORM_FIELDS = ['title', 'description', 'severity', 'ownerId', 'targetResolutionDate', 'dateRaised', 'projectDisciplineId', 'issueType', 'issueId']
 
@@ -482,7 +555,7 @@ function IssueForm({ projectId, link, disciplineId, onClose }: { projectId: stri
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
-            <Button type="submit" disabled={busy || !f.severity}>{busy && <Spinner />}{t('issue.raise')}</Button>
+            <Button type="submit" disabled={busy || !f.severity}>{busy && <Spinner />}{busy ? t('common.saving') : t('issue.raise')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -497,7 +570,7 @@ function RaiseMenu({ projectId, targetType, targetId, targetKey, targetName, dis
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild><Button size="sm" variant="outline"><Plus className="size-3.5" />{t('register.raise')}</Button></DropdownMenuTrigger>
+        <DropdownMenuTrigger asChild><Button size="sm" variant="outline"><Plus className="size-4" />{t('register.raise')}</Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={() => setOpen('risk')}><ShieldAlert className="size-4" />{t('risk.new')}</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setOpen('issue')}><OctagonAlert className="size-4" />{t('issue.new')}</DropdownMenuItem>
@@ -537,8 +610,8 @@ function RealiseDialog({ r, onClose }: { r: RiskRow; onClose: () => void }) {
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader><DialogTitle>{t('risk.realiseTitle', { key: r.key })}</DialogTitle><DialogDescription>{t('risk.realiseHint')}</DialogDescription></DialogHeader>
-        <div className="flex gap-4 text-sm" role="radiogroup" aria-label={t('risk.realiseTitle', { key: r.key })}>
-          {(['new', 'existing'] as const).map((m) => <label key={m} className="flex items-center gap-1.5"><input type="radio" name="realise-mode" checked={mode === m} onChange={() => setMode(m)} />{t(`risk.realise.${m}`)}</label>)}
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('risk.realiseTitle', { key: r.key })}>
+          {(['new', 'existing'] as const).map((m) => <label key={m} className={cn(CHOICE, mode === m && CHOICE_ON)}><input type="radio" className="size-4 accent-(--primary)" name="realise-mode" checked={mode === m} onChange={() => setMode(m)} />{t(`risk.realise.${m}`)}</label>)}
         </div>
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save() }}>
           {mode === 'new' ? <IssueFields projectId={r.projectId} f={f} setF={setF} fe={fe} prefix="ri" /> : (
@@ -552,7 +625,7 @@ function RealiseDialog({ r, onClose }: { r: RiskRow; onClose: () => void }) {
           {err && (!Object.keys(fe).length || fe.issueId) && mode === 'new' && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
-            <Button type="submit" disabled={busy || (mode === 'new' ? !f.severity : !issueId)}>{busy && <Spinner />}{t('risk.realise')}</Button>
+            <Button type="submit" disabled={busy || (mode === 'new' ? !f.severity : !issueId)}>{busy && <Spinner />}{busy ? t('common.saving') : t('risk.realise')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -587,7 +660,7 @@ function ResolveDialog({ i, onClose }: { i: IssueRow; onClose: () => void }) {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
-          <Button disabled={!text.trim() || busy} onClick={save}>{busy && <Spinner />}{t('issue.resolve')}</Button>
+          <Button disabled={!text.trim() || busy} onClick={save}>{busy && <Spinner />}{busy ? t('common.saving') : t('issue.resolve')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -605,19 +678,19 @@ function Links({ links, canEdit, projectId, onAdd, onChange }: { links: LinkRow[
   const openPanel = useItemPanel()
   const [adding, setAdding] = useState(false)
   return (
-    <div className="space-y-2 p-4">
+    <div className="space-y-3 p-4">
       {links.length === 0 ? <p className="text-sm text-muted-foreground">{t('decision.noLinks')}</p> : (
-        <ul className="divide-y rounded border">{links.map((l) => (
-          <li key={l.id} className="flex items-center gap-2 px-3 py-1.5 text-[13px]">
-            <span className="w-20 shrink-0 text-xs text-muted-foreground">{t(`itemType.${l.targetType}`)}</span><Key>{l.key}</Key>
+        <ul className="divide-y rounded-md border">{links.map((l) => (
+          <li key={l.id} className="flex min-h-(--row-min) flex-wrap items-center gap-x-2.5 gap-y-1 px-3 py-1 text-sm">
+            <span className="w-20 shrink-0 text-xs/[18px] text-muted-foreground">{t(`itemType.${l.targetType}`)}</span><Key>{l.key}</Key>
             <button className="min-w-0 flex-1 truncate text-left hover:underline" onClick={() => openPanel(l.targetType, l.targetId)}>{l.name}</button>
-            {l.status && <StatusPill status={l.status} />}<span className="whitespace-nowrap text-xs">{fmtDate(l.date)}</span>
-            {canEdit && <Button variant="ghost" size="icon" className="size-7" aria-label={t('decision.unlink', { key: l.key })}
-              onClick={async () => { try { await del(`item-links/${l.id}`); onChange() } catch (e) { toast.error(errorText(e)) } }}><Trash2 className="size-3.5" /></Button>}
+            {l.status && <StatusPill status={l.status} />}<DateText date={l.date} />
+            {canEdit && <Button variant="ghost" size="icon-sm" aria-label={t('decision.unlink', { key: l.key })}
+              onClick={async () => { try { await del(`item-links/${l.id}`); onChange() } catch (e) { toast.error(errorText(e)) } }}><Trash2 className="size-4" /></Button>}
           </li>))}</ul>
       )}
       {canEdit && (adding ? (
-        <div className="space-y-2 rounded-md border p-2">
+        <div className="space-y-2 rounded-lg border bg-muted p-3">
           <ItemPicker projectId={projectId} exclude={links.map((l) => l.targetId)} onPick={async (x) => { try { await onAdd(x); onChange() } catch (e) { toast.error(errorText(e)) } }} />
           <div className="flex justify-end"><Button size="sm" variant="ghost" onClick={() => setAdding(false)}>{t('common.close')}</Button></div>
         </div>
@@ -628,7 +701,7 @@ function Links({ links, canEdit, projectId, onAdd, onChange }: { links: LinkRow[
 
 function Steps({ transitions, label, onStep }: { transitions: Detail['permissions']['transitions']; label: (to: string) => string; onStep: (to: string) => void }) {
   return (
-    <div className="flex flex-wrap gap-1.5 pt-1">
+    <div className="flex flex-wrap gap-2">
       {transitions.map((s) => <Button key={s.to} size="sm" variant={['Realised', 'Resolved'].includes(s.to) ? 'default' : 'outline'} disabled={!s.ok} title={s.reason ?? undefined} onClick={() => onStep(s.to)}>{label(s.to)}</Button>)}
     </div>
   )
@@ -657,24 +730,30 @@ function RiskPanel({ id }: PanelProps) {
   const disciplines = (project.data?.disciplines ?? []).filter((d) => d.isActive || d.id === r.projectDisciplineId).map((d) => ({ value: d.id, label: d.name }))
   return (
     <div>
-      <div className="space-y-2 border-b p-4">
-        <div className="flex flex-wrap items-center gap-2"><ShieldAlert className="size-4 text-muted-foreground" aria-hidden /><Key>{r.key}</Key><StatusPill status={r.status} /><Severity level={r.band} score={r.score} />
-          {r.isReviewOverdue && <Chip tone="bad">{t('risk.reviewOverdue')}</Chip>}</div>
-        <h2 className="text-lg font-semibold">{r.title}</h2>
+      <PanelHead title={r.title} meta={<>
+        <ShieldAlert className="size-4 text-muted-foreground" aria-hidden /><Key>{r.key}</Key><StatusPill status={r.status} /><Severity level={r.band} score={r.score} />
+        {r.isReviewOverdue && <Chip tone="bad">{t('risk.reviewOverdue')}</Chip>}
+      </>}>
         {q.data.realisedIssue && <p className="text-sm">{t('risk.realisedAsLabel')} <button className="hover:underline" onClick={() => openPanel('Issue', q.data.realisedIssue!.id)}><Key>{q.data.realisedIssue.key}</Key> {q.data.realisedIssue.title}</button></p>}
         <Steps transitions={perm.transitions} label={(to) => t(to === 'Open' && r.status === 'Closed' ? 'risk.reopen' : STEP[to])} onStep={onStep} />
-      </div>
-      <div className="px-4 py-2">
+      </PanelHead>
+      <FieldGroup title={t('common.details')}>
         <FieldRow label={t('register.title')}><InlineText value={r.title} disabled={!can} title={perm.edit.reason ?? undefined} onSave={(v) => save({ title: v })} /></FieldRow>
         <FieldRow label={t('common.description')}><InlineText value={q.data.description ?? ''} multiline disabled={!can} onSave={(v) => save({ description: v })} /></FieldRow>
+      </FieldGroup>
+      <FieldGroup title={t('register.group.assessment')}>
         <FieldRow label={t('risk.probability')}><InlineSelect value={String(r.probability)} options={levelOptions('probability')} disabled={!can} onSave={(v) => save({ probability: Number(v) })} title={t('risk.probability')} /></FieldRow>
         <FieldRow label={t('risk.impact')}><InlineSelect value={String(r.impact)} options={levelOptions('impact')} disabled={!can} onSave={(v) => save({ impact: Number(v) })} title={t('risk.impact')} /></FieldRow>
+      </FieldGroup>
+      <FieldGroup title={t('register.group.ownership')}>
         <FieldRow label={t('common.owner')}><InlinePerson value={r.ownerId} name={r.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
-        <FieldRow label={t('risk.reviewDate')}><InlineDate value={r.reviewDate} disabled={!can} onSave={(v) => save({ reviewDate: v })} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={r.projectDisciplineId} allowEmpty options={disciplines} disabled={!can} onSave={(v) => save({ projectDisciplineId: v || null })} title={t('common.discipline')} /></FieldRow>
+        <FieldRow label={t('risk.reviewDate')}><InlineDate value={r.reviewDate} disabled={!can} onSave={(v) => save({ reviewDate: v })} /></FieldRow>
+      </FieldGroup>
+      <FieldGroup title={t('register.group.response')}>
         <FieldRow label={t('risk.mitigation')}><InlineText value={r.mitigation ?? ''} multiline disabled={!can} onSave={(v) => save({ mitigation: v })} /></FieldRow>
         <FieldRow label={t('risk.trigger')}><InlineText value={r.triggerIndicator ?? ''} disabled={!can} onSave={(v) => save({ triggerIndicator: v })} /></FieldRow>
-      </div>
+      </FieldGroup>
       <TabBar tabs={[{ id: 'links' as const, label: t('decision.links'), count: q.data.links.length }, ...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'links' && <Links links={q.data.links} canEdit={can} projectId={r.projectId} onChange={refresh} onAdd={(x) => post(`risks/${r.id}/links`, { targetType: x.targetType, targetId: x.targetId })} />}
       {tab === 'comments' && <CommentsSlot type="Risk" id={r.id} projectId={r.projectId} />}
@@ -709,44 +788,50 @@ function IssuePanel({ id }: PanelProps) {
   const disciplines = (project.data?.disciplines ?? []).filter((d) => d.isActive || d.id === i.projectDisciplineId).map((d) => ({ value: d.id, label: d.name }))
   return (
     <div>
-      <div className="space-y-2 border-b p-4">
-        <div className="flex flex-wrap items-center gap-2"><OctagonAlert className="size-4 text-muted-foreground" aria-hidden /><Key>{i.key}</Key><StatusPill status={i.status} /><Severity level={i.severity} />
-          {i.issueType === 'Coordination' && <Chip tone="idle">{tv(i.issueType)}</Chip>}
-          {i.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: i.daysOverdue })}</Chip>}
-          {i.severity === 'High' && open && <Chip tone="bad">{t('issue.attention')}</Chip>}</div>
-        <h2 className="text-lg font-semibold">{i.title}</h2>
+      <PanelHead title={i.title} meta={<>
+        <OctagonAlert className="size-4 text-muted-foreground" aria-hidden /><Key>{i.key}</Key><StatusPill status={i.status} /><Severity level={i.severity} />
+        {i.issueType === 'Coordination' && <Chip tone="idle">{tv(i.issueType)}</Chip>}
+        {i.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: i.daysOverdue })}</Chip>}
+        {i.severity === 'High' && open && <Chip tone="bad">{t('issue.attention')}</Chip>}
+      </>}>
         {q.data.originRisk && <p className="text-sm">{t('issue.fromRiskLabel')} <button className="hover:underline" onClick={() => openPanel('Risk', q.data.originRisk!.id)}><Key>{q.data.originRisk.key}</Key> {q.data.originRisk.title}</button></p>}
         <Steps transitions={perm.transitions} label={(to) => t(reopening(to) ? 'issue.reopen' : STEP[to])} onStep={onStep} />
-      </div>
-      <div className="px-4 py-2">
-        {i.status === 'Resolved' && (
-          <div className="mb-2 rounded-md border border-done/30 bg-done-bg p-3 text-sm">
-            <div className="text-xs text-muted-foreground">{t('issue.resolvedOn', { date: fmtDate(i.resolvedDate) })}</div>
-            <InlineText value={i.resolution ?? ''} multiline disabled={!can} onSave={(v) => save({ resolution: v })} />
-          </div>
-        )}
+      </PanelHead>
+      {i.status === 'Resolved' && (
+        <div className="mx-4 mb-4 rounded-md border border-done/30 bg-done-bg px-4 py-3 text-sm">
+          <div className="text-xs/[18px] text-muted-foreground">{t('issue.resolvedOn', { date: fmtDate(i.resolvedDate) })}</div>
+          <InlineText value={i.resolution ?? ''} multiline disabled={!can} title={t('field.Resolution')} onSave={(v) => save({ resolution: v })} />
+        </div>
+      )}
+      <FieldGroup title={t('common.details')}>
         <FieldRow label={t('register.title')}><InlineText value={i.title} disabled={!can} title={perm.edit.reason ?? undefined} onSave={(v) => save({ title: v })} /></FieldRow>
         <FieldRow label={t('common.description')}><InlineText value={q.data.description ?? ''} multiline disabled={!can} onSave={(v) => save({ description: v })} /></FieldRow>
         <FieldRow label={t('register.severity')}><InlineSelect value={i.severity} options={SEVERITIES.map((x) => ({ value: x, label: tv(x) }))} disabled={!can} onSave={(v) => save({ severity: v })} title={t('register.severity')} /></FieldRow>
         <FieldRow label={t('issue.type')}><InlineSelect value={i.issueType} options={ISSUE_TYPES.map((x) => ({ value: x, label: tv(x) }))} disabled={!perm.changeType?.ok}
           onSave={(v) => save({ issueType: v })} title={perm.changeType?.ok ? t('issue.type') : perm.changeType?.reason ?? t('issue.type')} /></FieldRow>
+      </FieldGroup>
+      <FieldGroup title={t('register.group.ownership')}>
         <FieldRow label={t('common.owner')}><InlinePerson value={i.ownerId} name={i.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
         <FieldRow label={t('issue.raisedBy')}><InlinePerson value={i.raisedById} name={i.raisedByName} disabled={!can} allowClear={false} onSave={(v) => save({ raisedById: v })} /></FieldRow>
-        <FieldRow label={t('issue.dateRaised')}><InlineDate value={i.dateRaised} disabled={!can} onSave={(v) => save({ dateRaised: v })} /></FieldRow>
-        <FieldRow label={t('issue.target')}><InlineDate value={i.targetResolutionDate} disabled={!can} onSave={(v) => save({ targetResolutionDate: v })} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={i.projectDisciplineId} allowEmpty options={disciplines} disabled={!can} onSave={(v) => save({ projectDisciplineId: v || null })} title={t('common.discipline')} /></FieldRow>
         <FieldRow label={t('issue.affectedDisciplines')}>
-          <fieldset className="flex flex-wrap gap-x-3 gap-y-1 text-sm" disabled={!can} title={perm.edit.reason ?? undefined}>
+          <fieldset className="flex flex-wrap gap-x-4 gap-y-1 px-2 py-1.5 text-sm" disabled={!can} title={perm.edit.reason ?? undefined}>
             <legend className="sr-only">{t('issue.affectedDisciplines')}</legend>
             {(project.data?.disciplines ?? []).filter((d) => i.affectedDisciplineIds?.includes(d.id) || (d.isActive && d.id !== i.projectDisciplineId)).map((d) => {
               const on = i.affectedDisciplineIds?.includes(d.id) ?? false
-              return <label key={d.id} className="inline-flex items-center gap-1">
-                <input type="checkbox" checked={on} onChange={() => save({ affectedDisciplineIds: on ? i.affectedDisciplineIds!.filter((x) => x !== d.id) : [...(i.affectedDisciplineIds ?? []), d.id] })} />
+              return <label key={d.id} className="inline-flex min-h-6 items-center gap-2">
+                <input type="checkbox" className="size-4 accent-(--primary)" checked={on} onChange={() => save({ affectedDisciplineIds: on ? i.affectedDisciplineIds!.filter((x) => x !== d.id) : [...(i.affectedDisciplineIds ?? []), d.id] })} />
                 {d.name}</label>
             })}
             {!can && !i.affectedDisciplineIds?.length && <span className="text-muted-foreground">{t('issue.affectedDisciplinesNone')}</span>}
           </fieldset>
         </FieldRow>
+      </FieldGroup>
+      <FieldGroup title={t('allocation.dates')}>
+        <FieldRow label={t('issue.dateRaised')}><InlineDate value={i.dateRaised} disabled={!can} onSave={(v) => save({ dateRaised: v })} /></FieldRow>
+        <FieldRow label={t('issue.target')}><InlineDate value={i.targetResolutionDate} disabled={!can} onSave={(v) => save({ targetResolutionDate: v })} /></FieldRow>
+      </FieldGroup>
+      <div className="space-y-4 border-t p-4">
         <IssueMetadata issue={i} canEdit={can} onChanged={refresh} />
         <IssueReferenceImpacts issue={i} />
       </div>
@@ -778,11 +863,11 @@ function IssueReferenceImpacts({ issue }: { issue: IssueRow }) {
       await q.refetch(); setReason((x) => ({ ...x, [impact.id]: '' })); toast.success(t('issue.referenceImpactSaved'))
     } catch (e) { setError(e) } finally { setBusy(null) }
   }
-  if (q.isPending) return <div className="mt-4"><Loading rows={2} /></div>
-  if (q.error) return <div className="mt-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
+  if (q.isPending) return <Loading rows={2} className="p-0" />
+  if (q.error) return <ErrorBanner error={q.error} retry={() => q.refetch()} />
   const impacts = q.data ?? []
-  return <Section id="issue-reference-impacts" title={t('issue.referenceImpacts')} count={impacts.length} className="mt-4">
-    <div className="space-y-3 p-3">
+  return <Section id="issue-reference-impacts" title={t('issue.referenceImpacts')} count={impacts.length}>
+    <div className="space-y-3 p-4">
       <p className="text-sm text-muted-foreground">{t('issue.referenceImpactsHint')}</p>
       {error != null ? <ErrorBanner error={error} retry={() => setError(null)} /> : null}
       {!impacts.length && <p className="text-sm text-muted-foreground">{t('issue.noReferenceImpacts')}</p>}
@@ -793,7 +878,7 @@ function IssueReferenceImpacts({ issue }: { issue: IssueRow }) {
         const source = impact.documentReference?.identifier || previous?.externalIdentifier || t('issue.referenceSourceUnavailable')
         const previousLabel = [previous?.sourceKey, previous?.revision].filter(Boolean).join(' · ') || t('issue.referenceRevisionUnavailable')
         const currentLabel = [current?.sourceKey, current?.revision].filter(Boolean).join(' · ') || t('issue.referenceRevisionUnavailable')
-        return <article key={impact.id} className="space-y-2 rounded border p-3" aria-labelledby={`impact-${impact.id}`}>
+        return <article key={impact.id} className="space-y-2 rounded-md border p-4" aria-labelledby={`impact-${impact.id}`}>
           <div className="flex flex-wrap items-center gap-2">
             <h4 id={`impact-${impact.id}`} className="font-medium">{source}</h4>
             <StatusPill status={impact.status} />
@@ -803,7 +888,7 @@ function IssueReferenceImpacts({ issue }: { issue: IssueRow }) {
           <p className="text-sm">{t('issue.referenceChanged', { previous: previousLabel, current: currentLabel })}</p>
           {impact.ownerReason && <p className="text-sm text-muted-foreground">{t('issue.ownerDisposition')}: {impact.ownerReason}</p>}
           {impact.verifierReason && <p className="text-sm text-muted-foreground">{t('issue.verifierDisposition')}: {impact.verifierReason}</p>}
-          {canDecide && <div className="space-y-2" aria-label={t('issue.referenceImpactDecision')}>
+          {canDecide && <div className="space-y-2" role="group" aria-label={t('issue.referenceImpactDecision')}>
             <label htmlFor={`impact-reason-${impact.id}`} className="text-sm font-medium">{t('issue.referenceImpactReasonLabel')}</label>
             <Textarea id={`impact-reason-${impact.id}`} value={reason[impact.id] ?? ''} onChange={(e) => setReason((x) => ({ ...x, [impact.id]: e.target.value }))} placeholder={t('issue.referenceImpactReason')} rows={2} />
             <div className="flex flex-wrap gap-2"><Button type="button" disabled={busy === impact.id} onClick={() => decide(impact, 'Unaffected')}>{t('issue.referenceUnaffected')}</Button><Button type="button" variant="outline" disabled={busy === impact.id} onClick={() => decide(impact, 'Reopen')}>{t('issue.referenceReopen')}</Button>{busy === impact.id && <Spinner />}</div>
@@ -849,10 +934,16 @@ function documentBody(d: DocumentDraft): Record<string, unknown> | string {
 
 /** Location entry shared by the issue panel and the Coordination issue form; the project's own conventions are kept as entered. */
 function LocationInputs({ value: l, onChange }: { value: LocationDraft; onChange: (v: LocationDraft) => void }) {
+  const id = useId()
   const input = (key: keyof LocationDraft, label: string, type?: string) =>
-    <Input value={l[key]} onChange={(e) => onChange({ ...l, [key]: e.target.value })} type={type} placeholder={t(label)} aria-label={t(label)} />
+    <Field label={t(label)} htmlFor={`${id}-${key}`}><Input id={`${id}-${key}`} value={l[key]} onChange={(e) => onChange({ ...l, [key]: e.target.value })} type={type} /></Field>
   return <>
-    <select className={selectCls} value={l.kind} onChange={(e) => onChange({ ...l, kind: e.target.value })} aria-label={t('issue.locationKind')}><option>SiteArea</option><option>Building</option><option>Alignment</option><option>Coordinate</option></select>
+    <Field label={t('issue.locationKind')} htmlFor={`${id}-kind`}>
+      <select id={`${id}-kind`} className={selectCls} value={l.kind} onChange={(e) => onChange({ ...l, kind: e.target.value })}>
+        <option value="SiteArea">{t('issue.location.siteArea')}</option><option value="Building">{t('issue.location.building')}</option>
+        <option value="Alignment">{t('issue.location.alignment')}</option><option value="Coordinate">{t('issue.location.coordinate')}</option>
+      </select>
+    </Field>
     {input('siteArea', 'issue.siteArea')}{input('assetSystem', 'issue.assetSystem')}
     {l.kind === 'Building' && <>{input('building', 'issue.building')}{input('level', 'issue.level')}{input('room', 'issue.room')}</>}
     {l.kind === 'Alignment' && <>{input('alignment', 'issue.alignment')}{input('start', 'issue.startStation', 'number')}{input('end', 'issue.endStation', 'number')}{input('units', 'issue.units')}</>}
@@ -861,18 +952,22 @@ function LocationInputs({ value: l, onChange }: { value: LocationDraft; onChange
 }
 
 function DocumentInputs({ value: d, onChange }: { value: DocumentDraft; onChange: (v: DocumentDraft) => void }) {
+  const id = useId()
   const input = (key: Exclude<keyof DocumentDraft, 'available' | 'kind'>, label: string) =>
-    <Input value={d[key]} onChange={(e) => onChange({ ...d, [key]: e.target.value })} placeholder={t(label)} aria-label={t(label)} />
+    <Field label={t(label)} htmlFor={`${id}-${key}`}><Input id={`${id}-${key}`} value={d[key]} onChange={(e) => onChange({ ...d, [key]: e.target.value })} /></Field>
   return <>
-    <select className={selectCls} value={d.kind} onChange={(e) => onChange({ ...d, kind: e.target.value })} aria-label={t('issue.documentKind')}><option>Drawing</option><option>Model</option><option>Markup</option><option>Screenshot</option></select>
+    <Field label={t('issue.documentKind')} htmlFor={`${id}-kind`}>
+      <select id={`${id}-kind`} className={selectCls} value={d.kind} onChange={(e) => onChange({ ...d, kind: e.target.value })}><option>Drawing</option><option>Model</option><option>Markup</option><option>Screenshot</option></select>
+    </Field>
     {input('identifier', 'issue.identifier')}{input('revision', 'issue.revision')}{input('sourceSystem', 'basis.sourceSystem')}{input('stableSourceId', 'basis.sourceId')}{input('sourceUrl', 'issue.sourceUrl')}{input('externalTopicId', 'issue.externalTopic')}
     {input('modelElementGuid', 'issue.modelGuid')}{input('viewpointUrl', 'issue.viewpointUrl')}
-    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={d.available} onChange={(e) => onChange({ ...d, available: e.target.checked })} />{t('issue.available')}</label>
+    <label className="flex min-h-(--control-h) items-center gap-2 self-end text-sm"><input type="checkbox" className="size-4 accent-(--primary)" checked={d.available} onChange={(e) => onChange({ ...d, available: e.target.checked })} />{t('issue.available')}</label>
   </>
 }
 
 function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit: boolean; onChanged: () => void }) {
   const me = useMe()
+  const uid = useId()
   const eligible = useQuery({ queryKey: ['issue-verifier-eligible', issue.projectId],
     queryFn: () => get<{ people: { id: string; displayName: string }[] }>(`projects/${issue.projectId}/changes/options`) })
   const locations = useQuery({ queryKey: ['issue-locations', issue.id], queryFn: () => get<IssueLocation[]>(`issues/${issue.id}/locations`) })
@@ -902,33 +997,46 @@ function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit
     }
   }
   const latestVerification = verification.data?.[0]
-  return <section className="mt-4 space-y-3 rounded-lg border bg-card p-3" aria-labelledby="issue-metadata-title">
-    <h3 id="issue-metadata-title" className="font-semibold">{t('issue.locationEvidence')}</h3>
-    <div className="space-y-2">
-      <div className="text-sm font-medium">{t('issue.locations')}</div>
-      {(locations.data ?? []).map((x) => <div key={x.id} className="rounded border p-2 text-sm"><Chip tone="idle">{x.kind}</Chip> <span>{[x.siteArea, x.building, x.level, x.room, x.assetSystem, x.alignment].filter(Boolean).join(' · ')}</span>{x.startStation != null && ` · ${x.startStation}–${x.endStation} ${x.stationUnits ?? ''}`}{x.coordinateX != null && ` · (${x.coordinateX}, ${x.coordinateY}${x.coordinateZ != null ? `, ${x.coordinateZ}` : ''}) ${x.coordinateReferenceSystem ?? ''} ${x.coordinateUnits ?? ''}`}</div>)}
-      {!locations.data?.length && <p className="text-sm text-muted-foreground">{t('issue.noLocations')}</p>}
-      {canEdit && <div className="grid gap-2 md:grid-cols-4">
-        <LocationInputs value={loc} onChange={setLoc} />
-        <Button type="button" disabled={busy} onClick={() => add(`issues/${issue.id}/locations`, locationBody(loc))}>{t('common.add')}</Button>
-      </div>}
-    </div>
-    <div className="space-y-2">
-      <div className="text-sm font-medium">{t('issue.documentReferences')}</div>
-      {(documents.data ?? []).map((x) => <div key={x.id} className="rounded border p-2 text-sm"><Chip tone={x.replacedById ? 'idle' : x.isAvailable ? 'done' : 'bad'}>{x.replacedById ? t('issue.referenceHistorical') : x.isAvailable ? t('issue.available') : t('issue.unavailable')}</Chip> {x.kind} · <strong>{x.identifier}</strong> · {t('issue.revision')} {x.revision} · <span>{t('basis.manual')}</span> · {x.sourceSystem && <span>{t('basis.sourceSystem')}: {x.sourceSystem} · </span>}{x.stableSourceId && <span>{t('basis.sourceId')}: {x.stableSourceId} · </span>}{x.registeredAt && <span>{fmtTime(x.registeredAt)} · </span>}{x.isAvailable ? <a className="underline" href={x.sourceUrl} target="_blank" rel="noreferrer">{t('issue.openSource')}</a> : <span className="text-muted-foreground">{t('issue.sourceUnavailable')}</span>} {(x.externalTopicId || x.modelElementGuid || x.viewpointUrl) && <span className="block text-muted-foreground">{x.externalTopicId && `${t('issue.externalTopic')} ${x.externalTopicId}`} {x.modelElementGuid && ` · ${t('issue.modelGuid')} ${x.modelElementGuid}`} {x.viewpointUrl && <> · <a className="underline" href={x.viewpointUrl} target="_blank" rel="noreferrer">{t('issue.viewpoint')}</a></>}</span>}{canEdit && !x.replacedById && ['Open', 'In Progress'].includes(issue.status) && <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => replace(x)}>{t('issue.replaceReference')}</Button>}</div>)}
-      {canEdit && <div className="grid gap-2 md:grid-cols-4">
-        {replacing && <p className="md:col-span-4" role="status">{t('issue.referenceRecoveryHint')}</p>}
-        <DocumentInputs value={doc} onChange={setDoc} />
-        {replacing && <Textarea value={replacementReason} maxLength={2000} onChange={e => setReplacementReason(e.target.value)} aria-label={t('coord.reason')} placeholder={t('coord.reason')} />}
-        <Button type="button" disabled={busy || !!replacing && !replacementReason.trim()} onClick={saveReference}>{t(replacing ? 'issue.replaceReference' : 'common.add')}</Button>
-        {replacing && <Button type="button" variant="outline" disabled={busy} onClick={() => { setReplacing(null); setDoc(NEW_DOCUMENT); setReplacementReason('') }}>{t('common.cancel')}</Button>}
-      </div>}
-    </div>
-    <div className="space-y-2">
-      <div className="text-sm font-medium">{t('issue.verificationFlow')}</div>
-      {(verification.data ?? []).map((v) => <div key={v.id} className="rounded border p-2 text-sm"><StatusPill status={v.status} /> {v.verifierId === me.id && <span>{t('issue.assignedToYou')}</span>} {v.note && <span className="text-muted-foreground">· {v.note}</span>}{v.id === latestVerification?.id && v.status === 'Proposed' && v.verifierId === me.id && <div className="mt-2 flex gap-2"><Input value={evidence} onChange={(e) => setEvidence(e.target.value)} placeholder={t('issue.evidenceUrl')} aria-label={t('issue.evidenceUrl')} /><Button type="button" disabled={busy} onClick={() => decide(v, 'Verified')}>{t('issue.verify')}</Button><Button type="button" variant="outline" disabled={busy} onClick={() => decide(v, 'Rejected')}>{t('issue.reject')}</Button></div>}</div>)}
-      {canEdit && latestVerification?.status !== 'Proposed' && <div className="grid gap-2 md:grid-cols-3"><PeoplePicker value={verifier} onChange={(id) => setVerifier(id)} label={t('issue.verifier')}
-        disabled={!eligible.data} candidates={eligible.data?.people.filter(p => me.settings.allowSelfReview || p.id !== issue.ownerId && p.id !== issue.raisedById)} /><Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('issue.appointmentReason')} aria-label={t('issue.appointmentReason')} /><Button type="button" disabled={busy || !verifier || !note.trim()} onClick={appoint}>{t('issue.appointVerifier')}</Button></div>}
+  const sub = 'text-sm font-semibold'
+  const form = 'grid gap-3 rounded-lg bg-muted p-3 sm:grid-cols-2'
+  return <section className="overflow-hidden rounded-lg border bg-card" aria-labelledby="issue-metadata-title">
+    <h3 id="issue-metadata-title" className="border-b px-4 py-3 text-base/6 font-semibold">{t('issue.locationEvidence')}</h3>
+    <div className="space-y-5 p-4">
+      <div className="space-y-2">
+        <h4 className={sub}>{t('issue.locations')}</h4>
+        {(locations.data ?? []).map((x) => <div key={x.id} className="rounded-md border px-3 py-2 text-sm"><span className="mr-2 rounded-md bg-secondary px-1.5 py-0.5 text-xs font-medium text-muted-foreground">{x.kind}</span><span>{[x.siteArea, x.building, x.level, x.room, x.assetSystem, x.alignment].filter(Boolean).join(' · ')}</span>{x.startStation != null && ` · ${x.startStation}–${x.endStation} ${x.stationUnits ?? ''}`}{x.coordinateX != null && ` · (${x.coordinateX}, ${x.coordinateY}${x.coordinateZ != null ? `, ${x.coordinateZ}` : ''}) ${x.coordinateReferenceSystem ?? ''} ${x.coordinateUnits ?? ''}`}</div>)}
+        {!locations.data?.length && <p className="text-sm text-muted-foreground">{t('issue.noLocations')}</p>}
+        {canEdit && <div className={form}>
+          <LocationInputs value={loc} onChange={setLoc} />
+          <div className="flex items-end"><Button type="button" variant="outline" disabled={busy} onClick={() => add(`issues/${issue.id}/locations`, locationBody(loc))}>{t('common.add')}</Button></div>
+        </div>}
+      </div>
+      <div className="space-y-2">
+        <h4 className={sub}>{t('issue.documentReferences')}</h4>
+        {(documents.data ?? []).map((x) => <div key={x.id} className="space-y-2 rounded-md border px-3 py-2 text-sm"><div><Chip tone={x.replacedById ? 'idle' : x.isAvailable ? 'done' : 'bad'}>{x.replacedById ? t('issue.referenceHistorical') : x.isAvailable ? t('issue.available') : t('issue.unavailable')}</Chip> {x.kind} · <strong>{x.identifier}</strong> · {t('issue.revision')} {x.revision} · <span>{t('basis.manual')}</span> · {x.sourceSystem && <span>{t('basis.sourceSystem')}: {x.sourceSystem} · </span>}{x.stableSourceId && <span>{t('basis.sourceId')}: {x.stableSourceId} · </span>}{x.registeredAt && <span className="tabular-nums">{fmtTime(x.registeredAt)} · </span>}{x.isAvailable ? <a className="text-primary underline underline-offset-4" href={x.sourceUrl} target="_blank" rel="noreferrer">{t('issue.openSource')}</a> : <span className="text-muted-foreground">{t('issue.sourceUnavailable')}</span>} {(x.externalTopicId || x.modelElementGuid || x.viewpointUrl) && <span className="block text-muted-foreground">{x.externalTopicId && `${t('issue.externalTopic')} ${x.externalTopicId}`} {x.modelElementGuid && ` · ${t('issue.modelGuid')} ${x.modelElementGuid}`} {x.viewpointUrl && <> · <a className="text-primary underline underline-offset-4" href={x.viewpointUrl} target="_blank" rel="noreferrer">{t('issue.viewpoint')}</a></>}</span>}</div>
+          {canEdit && !x.replacedById && ['Open', 'In Progress'].includes(issue.status) && <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => replace(x)}>{t('issue.replaceReference')}</Button>}</div>)}
+        {canEdit && <div className={form}>
+          {replacing && <p className="text-sm sm:col-span-2" role="status">{t('issue.referenceRecoveryHint')}</p>}
+          <DocumentInputs value={doc} onChange={setDoc} />
+          {replacing && <Field label={t('coord.reason')} htmlFor={`${uid}-reason`} className="sm:col-span-2"><Textarea id={`${uid}-reason`} value={replacementReason} maxLength={2000} onChange={e => setReplacementReason(e.target.value)} /></Field>}
+          <div className="flex flex-wrap items-end gap-2 sm:col-span-2">
+            <Button type="button" variant={replacing ? 'default' : 'outline'} disabled={busy || !!replacing && !replacementReason.trim()} onClick={saveReference}>{t(replacing ? 'issue.replaceReference' : 'common.add')}</Button>
+            {replacing && <Button type="button" variant="outline" disabled={busy} onClick={() => { setReplacing(null); setDoc(NEW_DOCUMENT); setReplacementReason('') }}>{t('common.cancel')}</Button>}
+          </div>
+        </div>}
+      </div>
+      <div className="space-y-2">
+        <h4 className={sub}>{t('issue.verificationFlow')}</h4>
+        {(verification.data ?? []).map((v) => <div key={v.id} className="rounded-md border px-3 py-2 text-sm"><StatusPill status={v.status} /> {v.verifierId === me.id && <span>{t('issue.assignedToYou')}</span>} {v.note && <span className="text-muted-foreground">· {v.note}</span>}{v.id === latestVerification?.id && v.status === 'Proposed' && v.verifierId === me.id && <div className="mt-2 flex flex-wrap items-end gap-2">
+          <Field label={t('issue.evidenceUrl')} htmlFor={`${uid}-evidence`} className="min-w-48 flex-1"><Input id={`${uid}-evidence`} value={evidence} onChange={(e) => setEvidence(e.target.value)} /></Field>
+          <Button type="button" disabled={busy} onClick={() => decide(v, 'Verified')}>{t('issue.verify')}</Button><Button type="button" variant="outline" disabled={busy} onClick={() => decide(v, 'Rejected')}>{t('issue.reject')}</Button></div>}</div>)}
+        {canEdit && latestVerification?.status !== 'Proposed' && <div className={form}>
+          <Field label={t('issue.verifier')} htmlFor={`${uid}-verifier`}><PeoplePicker id={`${uid}-verifier`} value={verifier} onChange={(id) => setVerifier(id)} label={t('issue.verifier')}
+            disabled={!eligible.data} candidates={eligible.data?.people.filter(p => me.settings.allowSelfReview || p.id !== issue.ownerId && p.id !== issue.raisedById)} /></Field>
+          <Field label={t('issue.appointmentReason')} htmlFor={`${uid}-note`}><Textarea id={`${uid}-note`} rows={2} value={note} onChange={(e) => setNote(e.target.value)} /></Field>
+          <div className="sm:col-span-2"><Button type="button" variant="outline" disabled={busy || !verifier || !note.trim()} onClick={appoint}>{t('issue.appointVerifier')}</Button></div>
+        </div>}
+      </div>
     </div>
   </section>
 }

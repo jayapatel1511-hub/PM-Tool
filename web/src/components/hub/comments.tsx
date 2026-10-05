@@ -1,10 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil, Trash2 } from 'lucide-react'
-import { useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { ConfirmDialog, Empty, ErrorBanner, Loading, Spinner } from '@/components/hub/common'
 import { Avatar, type Person } from '@/components/hub/people'
 import { RichText } from '@/components/hub/richtext'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { get, patch, post, qs, del } from '@/lib/api'
 import { fmtTime } from '@/lib/format'
@@ -31,28 +32,28 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const items = q.data.items
   return (
-    <div className="space-y-3 p-4">
+    <div className="space-y-4 p-4">
       {items.length === 0 ? <Empty>{t('comments.empty')}</Empty> : (
-        <ol className="space-y-3" aria-label={t('common.comments')}>
+        <ol className="space-y-4" aria-label={t('common.comments')}>
           {items.map((c) => (
-            <li key={c.id} className="flex gap-2.5">
-              <Avatar name={c.authorName} className="mt-0.5 size-7" />
+            <li key={c.id} className="flex gap-3">
+              <Avatar id={c.authorId} name={c.authorName} className="mt-0.5" />
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-baseline gap-x-2 text-sm">
-                  <span className="font-medium">{c.authorName}</span>
-                  {c.commentKind === 'Review' && <span className="rounded bg-warn-bg px-1.5 text-xs text-warn">{t('comments.review', { n: c.reviewRound ?? 1 })}</span>}
-                  {c.commentKind === 'Status Note' && <span className="rounded bg-muted px-1.5 text-xs text-muted-foreground">{t('comments.statusNote')}</span>}
-                  <time className="text-xs text-muted-foreground" dateTime={c.createdAt} title={c.createdAt}>{fmtTime(c.createdAt)}</time>
-                  {c.editedAt && !c.deleted && <span className="text-xs text-muted-foreground">{t('comments.edited')}</span>}
+                <div className="flex min-h-8 flex-wrap items-center gap-x-2">
+                  <span className="text-sm font-semibold">{c.authorName}</span>
+                  {c.commentKind === 'Review' && <span data-accent="lavender" className="rounded-md bg-(--acc-bg) px-1.5 text-xs/[18px] font-medium text-(--acc-fg)">{t('comments.review', { n: c.reviewRound ?? 1 })}</span>}
+                  {c.commentKind === 'Status Note' && <span className="rounded-md bg-secondary px-1.5 text-xs/[18px] font-medium text-muted-foreground">{t('comments.statusNote')}</span>}
+                  <time className="text-xs/[18px] text-muted-foreground tabular-nums" dateTime={c.createdAt} title={c.createdAt}>{fmtTime(c.createdAt)}</time>
+                  {c.editedAt && !c.deleted && <span className="text-xs/[18px] text-muted-foreground">{t('comments.edited')}</span>}
                   <span className="ml-auto flex gap-0.5">
-                    {c.canEdit && editing !== c.id && <Button variant="ghost" size="icon" className="size-7" aria-label={t('common.edit')} onClick={() => setEditing(c.id)}><Pencil className="size-3.5" /></Button>}
-                    {c.canDelete && <Button variant="ghost" size="icon" className="size-7" aria-label={t('common.delete')} onClick={() => setRemoving(c)}><Trash2 className="size-3.5" /></Button>}
+                    {c.canEdit && editing !== c.id && <Button variant="ghost" size="icon-sm" aria-label={t('common.edit')} onClick={() => setEditing(c.id)}><Pencil className="size-4" /></Button>}
+                    {c.canDelete && <Button variant="ghost" size="icon-sm" aria-label={t('common.delete')} onClick={() => setRemoving(c)}><Trash2 className="size-4" /></Button>}
                   </span>
                 </div>
                 {c.deleted ? (
                   <div className="text-sm italic text-muted-foreground">
                     {c.deletedByPm ? t('comments.removedByPm') : t('comments.deletedByAuthor')}
-                    {c.body && <div className="mt-1 rounded border border-dashed p-2 not-italic" title={t('comments.adminOnly')}><RichText text={c.body} /></div>}
+                    {c.body && <div className="mt-1 rounded-md border border-dashed p-2 not-italic" title={t('comments.adminOnly')}><RichText text={c.body} /></div>}
                   </div>
                 ) : editing === c.id ? (
                   <Composer projectId={projectId} initial={c.body ?? ''} submitLabel={t('common.save')} onCancel={() => setEditing(null)}
@@ -78,6 +79,7 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
 function Composer({ projectId, initial = '', submitLabel, onSubmit, onCancel }: {
   projectId: string; initial?: string; submitLabel: string; onSubmit: (body: string) => Promise<unknown>; onCancel?: () => void
 }) {
+  const fieldId = useId()
   const [text, setText] = useState(initial)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<unknown>(null)
@@ -122,31 +124,35 @@ function Composer({ projectId, initial = '', submitLabel, onSubmit, onCancel }: 
     if (e.key === 'Escape') { if (mention) setMention(null); else onCancel?.(); return }
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit() }
   }
+  const listId = `${fieldId}-mentions`
   return (
-    <div className="relative space-y-2">
-      <Textarea ref={area} rows={3} value={text} placeholder={t('comments.placeholder')} aria-label={t('comments.box')}
-        aria-autocomplete="list" aria-controls={mention && options.length > 0 ? "mention-options" : undefined}
-        onChange={(e) => { setText(e.target.value); detect(e.target.value, e.target.selectionStart) }} onKeyDown={onKey}
-        onBlur={() => setTimeout(() => setMention(null), 150)} />
-      {mention && options.length > 0 && (
-        <ul id="mention-options" role="listbox" aria-label={t('comments.mentionPeople')} className="absolute left-0 top-full z-20 mt-1 w-72 overflow-hidden rounded-md border bg-popover shadow-md">
-          {options.map((o, i) => (
-            <li key={o.id} role="option" aria-selected={i === active}>
-              <button type="button" onMouseDown={(e) => { e.preventDefault(); choose(o) }}
-                className={cn('flex w-full items-center gap-2 px-2 py-1.5 text-left text-sm', i === active ? 'bg-accent' : 'hover:bg-muted')}>
-                <Avatar name={o.name} className="size-5" /><span className="flex-1 truncate">{o.name}</span>
-                {!o.member && <span className="text-xs text-muted-foreground">{t('comments.notOnTeam')}</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="space-y-2">
+      <Label htmlFor={fieldId}>{t('comments.box')}</Label>
+      <div className="relative">
+        <Textarea id={fieldId} ref={area} rows={3} value={text} placeholder={t('comments.placeholder')} aria-describedby={`${fieldId}-hint`}
+          aria-autocomplete="list" aria-controls={mention && options.length > 0 ? listId : undefined}
+          onChange={(e) => { setText(e.target.value); detect(e.target.value, e.target.selectionStart) }} onKeyDown={onKey}
+          onBlur={() => setTimeout(() => setMention(null), 150)} />
+        {mention && options.length > 0 && (
+          <ul id={listId} role="listbox" aria-label={t('comments.mentionPeople')} className="absolute left-0 top-full z-20 mt-1 w-72 max-w-full overflow-hidden rounded-md border bg-popover py-1 shadow-popover">
+            {options.map((o, i) => (
+              <li key={o.id} role="option" aria-selected={i === active}>
+                <button type="button" onMouseDown={(e) => { e.preventDefault(); choose(o) }}
+                  className={cn('flex min-h-(--control-row-h) w-full items-center gap-2 px-3 py-1 text-left text-sm', i === active ? 'bg-accent text-accent-foreground' : 'hover:bg-muted')}>
+                  <Avatar id={o.id} name={o.name} className="size-6" /><span className="flex-1 truncate">{o.name}</span>
+                  {!o.member && <span className="text-xs/[18px] text-muted-foreground">{t('comments.notOnTeam')}</span>}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       {err != null && <ErrorBanner error={err} />}
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-muted-foreground">{t('comments.hint')}</span>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span id={`${fieldId}-hint`} className="text-xs/[18px] text-muted-foreground">{t('comments.hint')}</span>
         <div className="flex gap-2">
-          {onCancel && <Button size="sm" variant="ghost" onClick={onCancel}>{t('common.cancel')}</Button>}
-          <Button size="sm" disabled={!text.trim() || busy} onClick={submit}>{busy && <Spinner />}{submitLabel}</Button>
+          {onCancel && <Button variant="ghost" onClick={onCancel}>{t('common.cancel')}</Button>}
+          <Button disabled={!text.trim() || busy} onClick={submit}>{busy && <Spinner />}{busy ? t('common.saving') : submitLabel}</Button>
         </div>
       </div>
     </div>

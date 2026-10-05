@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
+using Hub.Api.Features;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -72,6 +73,33 @@ public sealed class TemplatesTests(HubFactory f)
         Assert.Equal(100, version.NumericValue);
         Assert.Equal("https://example.test/template", version.SourceUrl);
         Assert.DoesNotContain(version.Id, await f.DbAsync(db => db.BasisUses.Where(x => x.ProjectId == pid).Select(x => x.VersionId).ToListAsync()));
+
+        // Template-derived basis must acquire a project-specific confirmation date;
+        // an independent approver cannot approve an unknown date carried by the copy.
+        var root = $"/api/v1/projects/{pid}/design-basis/{basis.Id}";
+        var appointed = await (await f.As(TestData.Pm).Post(root + "/assign", new DesignBasisEndpoints.AssignBody(
+            Guid.NewGuid(), basis.RowVersion, basis.OwnerId, U(TestData.Pm), "Appoint independent project approver"))).Json();
+        var refusal = await (await f.As(TestData.Pm).Post($"{root}/versions/{version.Id}/confirm", new DesignBasisEndpoints.ConfirmBody(
+            Guid.NewGuid(), appointed.I("rowVersion"), version.RowVersion, "Review copied source evidence"))).Json(400);
+        Assert.NotNull(refusal["errors"]?["confirmationDueDate"]);
+        var unchanged = await f.DbAsync(db => db.DesignBasisVersions.AsNoTracking().SingleAsync(v => v.Id == version.Id));
+        Assert.Equal(BasisStatus.Proposed, unchanged.Status);
+        Assert.Equal(version.RowVersion, unchanged.RowVersion);
+        Assert.Null(unchanged.ConfirmedBy);
+        Assert.Null((await f.DbAsync(db => db.DesignBasisEntries.AsNoTracking().SingleAsync(e => e.Id == basis.Id))).CurrentVersionId);
+
+        var date = new DateOnly(2026, 10, 12);
+        var input = new DesignBasisEndpoints.VersionInput(version.Scope, version.Statement, version.NumericValue, version.Units,
+            version.SourceSystem, version.StableSourceId, version.SourceUrl, version.DeclaredRevision, date, null);
+        var edited = await (await f.As(TestData.Marc).Post($"{root}/versions/{version.Id}/edit", new DesignBasisEndpoints.EditProposedBody(
+            Guid.NewGuid(), appointed.I("rowVersion"), unchanged.RowVersion, input, "Supply the project's confirmation date"))).Json();
+        await (await f.As(TestData.Pm).Post($"{root}/versions/{version.Id}/confirm", new DesignBasisEndpoints.ConfirmBody(
+            Guid.NewGuid(), appointed.I("rowVersion"), edited.I("rowVersion"), "Independently confirm dated project basis"))).Json();
+        var confirmed = await f.DbAsync(db => db.DesignBasisVersions.AsNoTracking().SingleAsync(v => v.Id == version.Id));
+        Assert.Equal(BasisStatus.Confirmed, confirmed.Status);
+        Assert.Equal(date, confirmed.ConfirmationDueDate);
+        Assert.Equal(U(TestData.Pm), confirmed.ConfirmedBy);
+        Assert.Equal(version.Id, (await f.DbAsync(db => db.DesignBasisEntries.AsNoTracking().SingleAsync(e => e.Id == basis.Id))).CurrentVersionId);
     }
 
     [Fact]

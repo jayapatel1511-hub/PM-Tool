@@ -1,12 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  CalendarDays, Check, ChartGantt, ChevronDown, FileStack, FolderKanban, KanbanSquare, Layers, LayoutDashboard, Link2, List, Plus, Users, type LucideIcon,
+  AlertTriangle, CalendarDays, Check, ChartGantt, ChevronDown, EyeOff, FileStack, FolderKanban, KanbanSquare, Layers, LayoutDashboard, Link2, List, Plus, Users, type LucideIcon,
 } from 'lucide-react'
 import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ShellSlots } from '@/app/slots'
-import { ConfirmDialog, Field } from '@/components/hub/common'
+import { ConfirmDialog, Field, Notice, Spinner } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -149,7 +149,7 @@ function WorkspaceSelector() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="max-w-52 gap-1.5" aria-label={t('scope.label', { name: scope.label })}>
+          <Button variant="outline" className="max-w-52 gap-1.5" aria-label={t('scope.label', { name: scope.label })}>
             <Layers className="size-4" /><span className="hidden truncate sm:inline">{scope.label}</span><ChevronDown className="size-3.5 opacity-60" />
           </Button>
         </DropdownMenuTrigger>
@@ -178,19 +178,21 @@ function WorkspaceDialog({ m, initial, onClose }: { m: Mode; initial: string[] |
   const [name, setName] = useState(ws?.name ?? '')
   const [save, setSave] = useState(m.mode !== 'choose')
   const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const setScope = useSetScope()
   const qc = useQueryClient()
   const chosen = ids.split(',').filter(Boolean)
   const submit = async () => {
     if (!save) { setScope({ projects: ids }); onClose(); return }
+    setBusy(true)
     try {
       const row = ws ? await patch<WorkspaceRow>(`workspaces/${ws.id}`, { name: name.trim(), projectIds: chosen }) : await post<WorkspaceRow>('workspaces', { name: name.trim(), projectIds: chosen })
       await qc.invalidateQueries({ queryKey: ['workspaces'] })
       setScope({ ws: row.id })
       toast.success(t('scope.saved', { name: row.name }))
       onClose()
-    } catch (e) { const err = e as ApiError; setError(Object.values(err.fieldErrors ?? {})[0]?.[0] ?? err.message) }
+    } catch (e) { const err = e as ApiError; setError(Object.values(err.fieldErrors ?? {})[0]?.[0] ?? err.message) } finally { setBusy(false) }
   }
   return (
     <>
@@ -203,14 +205,14 @@ function WorkspaceDialog({ m, initial, onClose }: { m: Mode; initial: string[] |
           <Field label={t('scope.projects')} htmlFor="ws-projects" hint={plural(chosen.length, 'scope.oneProject', 'scope.nProjects', { n: chosen.length })}>
             <ProjectsPicker id="ws-projects" value={ids || undefined} onChange={(v) => setIds(v ?? '')} placeholder={t('scope.pick')} />
           </Field>
-          {m.mode === 'choose' && <label className="flex items-center gap-2 text-sm"><Checkbox checked={save} onCheckedChange={(c) => setSave(!!c)} />{t('scope.saveAs')}</label>}
+          {m.mode === 'choose' && <label className="flex min-h-(--control-h) items-center gap-2 text-sm font-medium"><Checkbox checked={save} onCheckedChange={(c) => setSave(!!c)} />{t('scope.saveAs')}</label>}
           {save && <Field label={t('scope.name')} htmlFor="ws-name"><Input id="ws-name" value={name} maxLength={100} placeholder={t('scope.namePlaceholder')} onChange={(e) => setName(e.target.value)} /></Field>}
-          {ws && ws.hidden > 0 && <p className="text-xs text-muted-foreground">{plural(ws.hidden, 'scope.hiddenOne', 'scope.hiddenMany', { n: ws.hidden })}</p>}
-          {error && <p role="alert" className="text-sm text-bad">{error}</p>}
+          {ws && ws.hidden > 0 && <Notice icon={EyeOff} title={plural(ws.hidden, 'scope.hiddenOne', 'scope.hiddenMany', { n: ws.hidden })} />}
+          {error && <p role="alert" className="flex gap-2 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad"><AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />{error}</p>}
           <DialogFooter>
-            {ws && <Button variant="ghost" className="mr-auto text-bad" onClick={() => setDeleting(true)}>{t('scope.delete')}</Button>}
+            {ws && <Button variant="ghost" className="mr-auto text-bad hover:text-bad" onClick={() => setDeleting(true)}>{t('scope.delete')}</Button>}
             <Button variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
-            <Button disabled={chosen.length === 0 || (save && !name.trim())} onClick={submit}>{save ? t('common.save') : t('scope.apply')}</Button>
+            <Button disabled={busy || chosen.length === 0 || (save && !name.trim())} onClick={submit}>{busy && <Spinner />}{busy ? t('common.saving') : save ? t('common.save') : t('scope.apply')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -255,7 +257,7 @@ export function WorkspaceTabs() {
           const on = pathname === v.path
           return (
             <Link key={v.id} to={{ pathname: v.path, search }} aria-current={on ? 'page' : undefined}
-              className={cn('-mb-px inline-flex h-9 items-center gap-1.5 border-b-2 px-2.5 text-sm outline-offset-[-2px]', on ? 'border-primary font-medium' : 'border-transparent text-muted-foreground hover:text-foreground')}>
+              className={cn('inline-flex min-h-11 items-center gap-1.5 px-3 text-sm outline-offset-[-2px]', on ? 'font-semibold text-foreground shadow-[inset_0_-2px_0_var(--primary)]' : 'text-muted-foreground shadow-none hover:bg-muted hover:text-foreground')}>
               <v.icon className="size-4" aria-hidden />{t(v.label)}
             </Link>
           )
@@ -274,8 +276,8 @@ export function WorkspaceTabs() {
         </DropdownMenu>
       </nav>
       <div className="flex-1" />
-      <span className="hidden text-xs text-muted-foreground md:inline">{scope.label}</span>
-      <Button variant="ghost" size="sm" onClick={() => share(scope)}><Link2 className="size-4" />{t('scope.share')}</Button>
+      <span className="hidden items-center gap-1.5 text-sm text-muted-foreground md:inline-flex"><Layers className="size-4" aria-hidden />{scope.label}</span>
+      <Button variant="ghost" onClick={() => share(scope)}><Link2 className="size-4" />{t('scope.share')}</Button>
     </div>
   )
 }

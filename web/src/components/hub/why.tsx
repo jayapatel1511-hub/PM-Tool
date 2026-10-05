@@ -12,7 +12,7 @@ export function Why({ reasons, children, title, defaultOpen }: { reasons?: Reaso
   return (
     <Popover defaultOpen={defaultOpen}>
       <PopoverTrigger asChild>
-        <button type="button" className="inline-flex items-center gap-1 rounded-full focus-visible:outline-2" aria-label={`${title ?? ''} ${t('common.why')}`.trim()}>
+        <button type="button" className="inline-flex min-h-6 min-w-6 items-center justify-center gap-1 rounded-md hover:bg-muted focus-visible:outline-2" aria-label={`${title ?? ''} ${t('common.why')}`.trim()}>
           {children}
           <HelpCircle className="size-3.5 text-muted-foreground" aria-hidden />
         </button>

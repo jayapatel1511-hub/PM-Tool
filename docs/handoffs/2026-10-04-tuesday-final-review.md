@@ -4,13 +4,19 @@
 
 **Current status: implementation and software/browser checks PASS; release `d81c13f9084cfd4e828ab9762433d38c3849b302` is committed, pushed, deployed to the synthetic review stack and passed post-deployment safety gates. The full goal remains BLOCKED at T023's manual screen-reader validation and human acceptance.** Another session previously committed the spec and visual batch as `586fc48b` and `9d3e9b91`; Jay later authorized the reviewed synthetic release. No history was rewritten.
 
-## Landing follow-up — locally verified, not yet redeployed
+## Current review pointer — 4 October 2026
+
+The current uncommitted candidate supersedes the prepared candidate `29e9b15c388415ed4ace830f5c10c37c6cec93f3` for final local review. The deployed review pointer remains `d81c13f9084cfd4e828ab9762433d38c3849b302`; this worktree must not be described as deployed or complete. The current Tuesday board capture is `93a350...` (full hash recorded in web/public/landing/capture.json). Ten fictional Tuesday personas and the full Tuesday examples are approved for hosted review.
+
+Jay explicitly requested natural visible copy: rendered screens no longer show synthetic/sample disclaimers or badges. Fixture provenance remains private in seeds, handoffs, logs and verification records. Root verified 32 focused Python tests, spec build/trace at 660/252, Resources PASS, and Planner 14 base plus six recovery flows, 179 calls and seven axe scans; two final Design Basis resize-focus runs PASS after repairing mounted-control focus tracking. Open decisions remain the brand mark, recapturing the hero board image, confirmations for deleting holidays and removing roles, and per-notification Mark read. T023 manual validation, SC-001 and Jay's final acceptance remain open; no CI or SHA is claimed here beyond the evidence below.
+
+## Landing follow-up — committed, CI PASS, prepared; activation pending
 
 Jay requested a current board image, seamless background blending, then explicitly preferred the older colours over the white/mint trial. The current local hero keeps the approved pale paper, forest ink and amber/sage palette. Broad washes and a soft decorative-image mask blend the app capture into the page; the floating frame, heavy shadow and old-image fallback are removed. The unchanged 1728 × 873 JPEG comes from Priya's existing synthetic `/boards` preview, visibly labelled fictional; no records were edited. Its 102957 bytes and SHA-256 match `web/public/landing/capture.json`.
 
 Independent source/provenance review found no actionable issue. Root inspected the final desktop and phone screenshots. Final build PASS; exact type-check and lint PASS (87 existing warnings, no new); eight cold public landing/login rechecks at 1440/1024/768/375 PASS with zero findings, replacing those cases in the retained 1956-combination evidence. This is an affected-route recheck, not another fresh full sweep. Evidence: `/private/tmp/tuesday-hero-paper-{build,sweep}.log`, `/private/tmp/tuesday-sweep-hero-paper/`. ReUI's MCP audit guidance and the business UI design skill informed the review; no new component package, image generation, authentication or app behaviour changes.
 
-The deployed release below still serves the prior hero. The follow-up needs its own exact-head CI, prepared committed release and Jay's own-terminal sudo activation. The current local result awaits Jay's visual acceptance. T023 manual screen-reader and SC-001 remain unrun. Brand mark, holiday/manual-role removal confirmations and per-notification Mark read remain open decisions.
+The follow-up is committed and pushed only to the existing feature branch as `29e9b15c388415ed4ace830f5c10c37c6cec93f3`. [Exact-head CI 37248697226](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/37248697226) PASS: 1036 tests, zero failed/skipped, coverage and required browser gates; planner 14 base plus six recovery flows, 180 API calls, seven zero-finding axe scans. The exact tree is prepared on homedev and its JPEG hash independently matches. The active review pointer is still `d81c13f9084cfd4e828ab9762433d38c3849b302`; activation is pending Jay's own-terminal sudo. Root provided one command combining activation and the reviewed `incoming/postdeploy-29e9b15c.sh` helper, with an owner-only `data/activation-29e9b15c.log`. After Jay runs it, independently verify the log, exact image/pointer/volume, migrations, restore/persistence gates, public probes and hosted hero. The separate pilot remains unchanged. The current local result awaits Jay's visual acceptance. T023 manual screen-reader and SC-001 remain unrun. Brand mark, holiday/manual-role removal confirmations and per-notification Mark read remain open decisions.
 
 ## Current deployment evidence — verified 5 October 2026 UTC / 4 October Halifax
 
@@ -45,7 +51,7 @@ The additional review/fix loop passes on the final candidate: exact type-check, 
 | alex | Alex Chen | Individual contributor |
 | rita | Rita Gomez | Read Only |
 
-All shown records are fictional and the signed-in shell labels them **Synthetic preview**. Preview writes and scale fixtures use only `pm-tuesday-preview-db`, bound to `127.0.0.1:55433`. API tests use temporary `hub_test_*` databases on 55432. The preview guard verifies the named database container and exact API process before seed writes. It refuses a different port. No operational records in `pm-tool-db-1` were modified.
+All shown records are fictional; the source and private preview provenance remain documented in the seed and verification files while the visible screens use natural product copy. Preview writes and scale fixtures use only `pm-tuesday-preview-db`, bound to `127.0.0.1:55433`. API tests use temporary `hub_test_*` databases on 55432. The preview guard verifies the named database container and exact API process before seed writes. It refuses a different port. No operational records in `pm-tool-db-1` were modified.
 
 ## What changed
 

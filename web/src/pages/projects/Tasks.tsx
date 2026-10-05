@@ -3,7 +3,7 @@ import { UrlSearchInput } from '@/components/hub/url-search'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { ArrowDown, ArrowUp, ChevronDown, Columns3, KanbanSquare, List, Plus } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
@@ -425,6 +425,38 @@ function readCols(): string[] | null {
 
 export function TasksTab() {
   const phone = useIsPhone()
+  const focusRestore = useRef<{ id: string; control: 'key' | 'title'; mode: 'phone' | 'desktop' } | null>(null)
+  // Record focus while the control is still mounted. Layout-effect cleanup can
+  // run after React removes the old table/card tree, when activeElement is body.
+  useEffect(() => {
+    const remember = (event: FocusEvent) => {
+      const target = event.target as HTMLElement | null
+      const id = target?.dataset.taskId
+      const control = target?.dataset.taskFocus
+      const mode = target?.closest<HTMLElement>('[data-task-layout]')?.dataset.taskLayout
+      focusRestore.current = id && (control === 'key' || control === 'title') && (mode === 'phone' || mode === 'desktop')
+        ? { id, control, mode } : null
+    }
+    const forgetOutside = (event: PointerEvent) => {
+      if (!(event.target as HTMLElement | null)?.closest('[data-task-focus]')) focusRestore.current = null
+    }
+    document.addEventListener('focusin', remember)
+    document.addEventListener('pointerdown', forgetOutside, true)
+    return () => {
+      document.removeEventListener('focusin', remember)
+      document.removeEventListener('pointerdown', forgetOutside, true)
+      focusRestore.current = null
+    }
+  }, [])
+  useLayoutEffect(() => {
+    const pending = focusRestore.current
+    focusRestore.current = null
+    if (!pending || pending.mode === (phone ? 'phone' : 'desktop')) return
+    if (document.activeElement !== document.body && document.activeElement !== document.documentElement) return
+    const target = [...document.querySelectorAll<HTMLElement>('[data-task-focus]')]
+      .find((el) => el.dataset.taskId === pending.id && el.dataset.taskFocus === pending.control)
+    if (target) target.focus()
+  }, [phone])
   const p = useCurrentProject()
   const openPanel = useItemPanel()
   const refresh = useProjectRefresh()
@@ -459,8 +491,8 @@ export function TasksTab() {
   const dash = <span className="text-muted-foreground">{t('common.dash')}</span>
 
   const all: Col[] = [
-    { id: 'key', label: 'milestone.key', sort: 'key', cls: 'whitespace-nowrap', cell: (r) => <button type="button" className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button> },
-    { id: 'name', label: 'task.name', sort: 'name', cls: 'min-w-56', cell: (r) => <button type="button" aria-current={current === r.id || undefined} className="text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button> },
+    { id: 'key', label: 'milestone.key', sort: 'key', cls: 'whitespace-nowrap', cell: (r) => <button type="button" data-task-focus="key" data-task-id={r.id} className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button> },
+    { id: 'name', label: 'task.name', sort: 'name', cls: 'min-w-56', cell: (r) => <button type="button" data-task-focus="title" data-task-id={r.id} aria-current={current === r.id || undefined} className="text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button> },
     { id: 'deliverable', label: 'task.deliverable', cell: (r) => r.deliverableId ? <button type="button" className="block max-w-44 truncate text-left hover:underline" title={`${r.deliverableKey} ${r.deliverableName}`} onClick={() => openPanel('Deliverable', r.deliverableId!)}>{r.deliverableName}</button> : dash },
     { id: 'discipline', label: 'common.discipline', cls: 'whitespace-nowrap', cell: (r) => <span className="inline-flex items-center gap-1.5"><span className="size-2.5 shrink-0 rounded-sm" style={{ background: disciplineColour(r.disciplineColour) }} aria-hidden />{r.disciplineName}</span> },
     { id: 'assignee', label: 'field.AssigneeId', cls: 'min-w-48', pad: CONTROL, cell: (r) => {
@@ -547,11 +579,11 @@ export function TasksTab() {
             : <Empty title={t('task.emptyTitle')} action={canCreate && <Button variant="outline" onClick={() => setCreating({})}><Plus className="size-4" />{t('task.new')}</Button>}>{t('task.emptyHint')}</Empty>}
         </div>
       ) : (
-        phone ? <div className="space-y-2"><Checkbox aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={c => setSelected(c ? new Set(rows.map(r => r.id)) : new Set())} /><ul className="space-y-2">{flat.map(f => f.kind === 'group' ? <li key={`g-${f.id}`} className="flex flex-wrap items-center gap-2 py-2"><h3 className="break-words text-sm font-semibold">{f.label}</h3><span className="text-xs text-muted-foreground">{f.count}</span>{f.status && <StatusPill status={f.status} />}{group === 'deliverable' && canCreate && <Button size="sm" variant="outline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" />{t('task.addHere')}</Button>}</li> : <li key={f.r.id} className={cn('rounded-lg border bg-card p-4', (current === f.r.id || selected.has(f.r.id)) && 'bg-accent', current === f.r.id && 'shadow-[inset_3px_0_0_var(--primary)]')}>
+        phone ? <div data-task-layout="phone" className="space-y-2"><Checkbox aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={c => setSelected(c ? new Set(rows.map(r => r.id)) : new Set())} /><ul className="space-y-2">{flat.map(f => f.kind === 'group' ? <li key={`g-${f.id}`} className="flex flex-wrap items-center gap-2 py-2"><h3 className="break-words text-sm font-semibold">{f.label}</h3><span className="text-xs text-muted-foreground">{f.count}</span>{f.status && <StatusPill status={f.status} />}{group === 'deliverable' && canCreate && <Button size="sm" variant="outline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" />{t('task.addHere')}</Button>}</li> : <li key={f.r.id} className={cn('rounded-lg border bg-card p-4', (current === f.r.id || selected.has(f.r.id)) && 'bg-accent', current === f.r.id && 'shadow-[inset_3px_0_0_var(--primary)]')}>
           <div className="mb-3 flex items-start gap-3"><Checkbox aria-label={`${t('bulk.select')} ${f.r.key}`} checked={selected.has(f.r.id)} onCheckedChange={() => toggle(f.r.id)} /><div className="min-w-0 flex-1">{all.find(c => c.id === 'key')?.cell(f.r)}<div className="mt-1 break-words font-semibold">{all.find(c => c.id === 'name')?.cell(f.r)}</div></div></div>
           <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name').map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{t(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
         </li>)}</ul>{q.isFetchingNextPage && <p role="status" className="text-xs text-muted-foreground">{t('task.loadingMore', { n: rows.length, total })}</p>}</div> :
-        <TableRegion ref={scroller} className="max-h-[calc(100dvh-10rem)] min-h-64 overflow-auto">
+        <TableRegion ref={scroller} data-task-layout="desktop" className="max-h-[calc(100dvh-10rem)] min-h-64 overflow-auto">
           <table className="w-full text-sm" aria-rowcount={flat.length + 1}>
             <caption className="sr-only">{t('ptab.tasks')}</caption>
             <thead className="sticky top-0 z-10 bg-muted">

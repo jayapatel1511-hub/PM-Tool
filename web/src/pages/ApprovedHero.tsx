@@ -3,7 +3,7 @@ import { ArrowRight, ArrowUpRight, CalendarDays, Check, Layers, Users, X } from 
 import { t } from '@/lib/i18n'
 import './approved-hero.css'
 
-// Fictional, labelled planning examples from the approved concept; never live data.
+// Fictional planning examples from the approved concept; never live data.
 const weeks = [
   [24, 6, 7.5, 30, 4, 3.5, 20, 8, 9.5],
   [28, 5, 4.5, 24, 6, 7.5, 16, 10, 11.5],
@@ -158,7 +158,6 @@ export function ApprovedHero() {
                 <CalendarDays className="icon" aria-hidden="true" />
                 {t('landing.plannerEyebrow')}
               </span>
-              <span className="sample-label">{t('landing.syntheticPreview')}</span>
             </div>
             <div className="planner-heading">
               <h2 id="planner-title">{t('landing.aLittleMoreClarity')}</h2>
@@ -356,7 +355,6 @@ export function ApprovedHero() {
       </main>
       <footer className="wrap">
         <span>{t('landing.tuesdayThoughtfullyConnected')}</span>
-        <span>{t('landing.allSamplePlanningRecordsAreFictional')}</span>
       </footer>
 
       <dialog

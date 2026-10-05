@@ -1,23 +1,27 @@
-#!/usr/bin/env python3
-"""Seeds a small resource-workflow scenario (projects SYN-101 to SYN-103) for previewing Workload and Allocations locally.
+"""Permissioned fictional Tuesday fixtures for the isolated local preview or hosted review.
 
-Usage: python3 tools/preview/seed_resources.py [base-url]    (default http://localhost:5080)
-Synthetic local preview data only: every project, task and reason here is invented and says so. Signs in with the
-development header (X-Dev-User), and refuses to run unless GET /api/v1/config reports authMode == "Development"; the named local preview database is verified before any writes; never
-aim it at a real environment. Every write goes through the API as the person who would make it, so validation,
-permissions and audit apply; the Admin also switches on restricted projects so SYN-103 can be Restricted. Dates are
-relative to the organisation's today (GET /api/v1/me), so it works on any day. If SYN-101 already exists it creates
-nothing and only prints the summary. A refused step is printed with its status and error code; the rest continues."""
-from preview_target import verify_preview_target
+Default: [base-url] verifies pm-tuesday-preview-db at 127.0.0.1:55433 and
+Development authentication. Explicit hosted mode: --hosted-review --release SHA
+--credentials PRIVATE_FILE verifies the exact prepared review image, review-only
+database, LocalPassword authentication and ten individual accounts. It never
+enables development authentication on the host. See fixture_api.py.
+
+Every record in this recipe is invented. Jay requested normal visible copy;
+fixture provenance is retained here and in the private deployment manifest.
+Every write uses the API as the person who would make it, preserving validation,
+permissions, audit and notifications. Dates follow the organisation's today.
+Existing fixture markers are preserved; refused API steps fail the process.
+SYN-101 already present means no resource writes; partial setup requires
+inspection. The Admin enables restricted projects for the SYN-103 scenario.
+"""
+from fixture_api import connect, FixtureError
+from fixture_copy import natural_copy
 import datetime as dt
-import json
 import sys
-import urllib.error
-import urllib.request
 import uuid
 
-BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5080"
-verify_preview_target(BASE)
+client = connect()
+BASE = client.base
 NUMBERS = ("SYN-101", "SYN-102", "SYN-103")
 refusals = []
 
@@ -29,19 +33,10 @@ class Refused(Exception):
 
 
 def call(path, user, method="GET", body=None):
-    req = urllib.request.Request(f"{BASE}/api/v1/{path}", method=method, data=None if body is None else json.dumps(body).encode(),
-                                 headers={"X-Dev-User": f"{user}@hub.test", "Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            data = r.read()
-    except urllib.error.HTTPError as e:
-        try:
-            p = json.loads(e.read())
-        except ValueError:
-            p = {}
-        raise Refused(e.code, f"{method} /api/v1/{path} as {user}: HTTP {e.code} {p.get('code')}: {p.get('detail') or p.get('title')}"
-                      + (f" {p['errors']}" if p.get("errors") else "")) from None
-    return json.loads(data) if data else None
+        return client.call(path, user, method, body)
+    except FixtureError as e:
+        raise Refused(e.status, str(e)) from None
 
 
 def attempt(label, step):
@@ -51,11 +46,6 @@ def attempt(label, step):
     except Refused as e:
         refusals.append(f"{label}: {e}")
 
-
-with urllib.request.urlopen(f"{BASE}/api/v1/config", timeout=30) as r:
-    mode = json.loads(r.read()).get("authMode")
-if mode != "Development":
-    sys.exit(f"Refusing to run: {BASE} reports authMode {mode!r}; this script only seeds a Development instance.")
 
 today = dt.date.fromisoformat(call("me", "priya")["settings"]["today"])
 monday = today - dt.timedelta(days=today.weekday())
@@ -108,8 +98,8 @@ call("admin/settings/restricted_projects_enabled", "jordan", "PUT", {"value": Tr
 def project(pm, number, name, members, leads, restricted=False):
     """Created by its PM with the given members and discipline leads, then made Active; returns (id, discipline ids by code)."""
     pid = call("projects", pm, "POST", {
-        "projectNumber": number, "name": f"Synthetic preview — {name}", "clientId": client, "officeId": office,
-        "clientReference": "Synthetic, not a real client", "description": "Synthetic preview data for local UI review; not a real project.",
+        "projectNumber": number, "name": name, "clientId": client, "officeId": office,
+        "clientReference": 'Harbour Road design programme', "description": 'Road rehabilitation, stormwater separation and utility coordination.',
         "startDate": iso(today - dt.timedelta(days=30)), "targetCompletionDate": iso(today + dt.timedelta(days=120)),
         "disciplines": [{"disciplineId": disc[code], "leadUserId": uid[lead] if lead else None} for code, lead in leads.items()],
         "members": [{"userId": uid[who], "roles": [role], "disciplineId": disc.get(code)} for who, role, code in members]})["id"]
@@ -128,7 +118,7 @@ p3, d3 = project("marc", "SYN-103", "Restricted client study", [("jill", "TeamMe
 
 
 def task(pid, pd, pm, who, name, est, start=None, due=None, progress=0, code="CIV"):
-    t = call(f"projects/{pid}/tasks", pm, "POST", {"name": name, "description": "Synthetic preview task.", "projectDisciplineId": pd[code],
+    t = call(f"projects/{pid}/tasks", pm, "POST", {"name": name, "description": 'Prepare the assigned design work and coordinate its review.', "projectDisciplineId": pd[code],
                                                    "assigneeId": uid[who], "estimatedHours": est, "startDate": iso(start), "dueDate": iso(due)})
     if progress:
         call(f"tasks/{t['id']}", pm, "PATCH", {"progressPct": progress, "rowVersion": t["rowVersion"]})
@@ -174,12 +164,12 @@ def confirm(pid, a, supervisor):
     return call(f"projects/{pid}/allocations/{a['id']}/confirm", supervisor, "POST", {
         "requestId": str(uuid.uuid4()), "rowVersion": pv["rowVersion"],
         "dateVersions": [{"workDate": d["date"], "rowVersion": d["dateVersion"]} for d in pv["days"]],
-        "overCapacityReason": f"Synthetic preview: accepted over capacity on {', '.join(over)}." if over else None})
+        "overCapacityReason": f"Accepted over capacity on {', '.join(over)}." if over else None})
 
 
 def finish(pid, a, user, verb, reason):
     return call(f"projects/{pid}/allocations/{a['id']}/{verb}", user, "POST",
-                {"requestId": str(uuid.uuid4()), "rowVersion": a["rowVersion"], "reason": f"Synthetic preview: {reason}"})
+                {"requestId": str(uuid.uuid4()), "rowVersion": a["rowVersion"], "reason": f"{reason}"})
 
 
 attempt("SYN-101 Alex 30 h next week, proposed by Priya, confirmed by Sam", lambda: confirm(p1, propose(p1, "priya", "alex", 1, 30, a3), "sam"))
@@ -192,3 +182,6 @@ attempt("SYN-101 Omar 6 h next week, proposed by Priya, confirmed by Lena, compl
         lambda: finish(p1, confirm(p1, propose(p1, "priya", "omar", 1, 6, o3), "lena"), "priya", "complete", "trench support note delivered."))
 attempt("SYN-102 Alex 20 h in two weeks, proposed by Marc", lambda: propose(p2, "marc", "alex", 2, 20, a4))
 summary()
+
+if refusals:
+    raise SystemExit("Fixture setup stopped with refused API steps; review the reported failures before continuing.")

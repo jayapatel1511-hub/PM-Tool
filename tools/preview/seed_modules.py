@@ -1,31 +1,34 @@
-#!/usr/bin/env python3
-"""Seeds synthetic records for every other Tuesday module on SYN-101 to SYN-103, so each screen has something to show.
+"""Permissioned fictional Tuesday fixtures for the isolated local preview or hosted review.
 
-Usage: python3 tools/preview/seed_modules.py [base-url]    (default http://localhost:5080)
-Run tools/preview/seed_resources.py first: this builds on its projects, tasks and people. Synthetic local preview data
-only: every record is invented and says so, and links point at the reserved docs.example.test domain. Signs in with the
-development header (X-Dev-User) and refuses to run unless GET /api/v1/config reports authMode == "Development"; the named local preview database is verified before any writes; never aim
-it at a real environment. Every write goes through the API as the person who would make it, so validation, permissions,
-audit and notifications apply; no setting is changed. Dates are relative to the organisation's today (GET /api/v1/me).
-Each module is skipped when its marker (the first record it creates) already exists, so a second run creates nothing.
-A refused step is printed with its status and error code; the rest continues."""
-from preview_target import verify_preview_target
+Default: [base-url] verifies pm-tuesday-preview-db at 127.0.0.1:55433 and
+Development authentication. Explicit hosted mode: --hosted-review --release SHA
+--credentials PRIVATE_FILE verifies the exact prepared review image, review-only
+database, LocalPassword authentication and ten individual accounts. It never
+enables development authentication on the host. See fixture_api.py.
+
+Every record in this recipe is invented. Jay requested normal visible copy;
+fixture provenance is retained here and in the private deployment manifest.
+Every write uses the API as the person who would make it, preserving validation,
+permissions, audit and notifications. Dates follow the organisation's today.
+Existing fixture markers are preserved; refused API steps fail the process.
+Run seed_resources.py first. Module markers skip existing records; partially
+completed earlier runs require inspection rather than blind mutation retries.
+"""
+from fixture_api import connect, FixtureError
+from fixture_copy import natural_copy
 import datetime as dt
-import json
 import sys
 import time
-import urllib.error
-import urllib.request
 import uuid
 
-BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5080"
-verify_preview_target(BASE)
+client = connect()
+BASE = client.base
 NUMBERS = ("SYN-101", "SYN-102", "SYN-103")
 DEV_USERS = ("jordan", "lena", "sam", "priya", "marc", "alex", "jill", "diane", "omar", "rita")
-P = "Synthetic preview — "
-URL = "https://docs.example.test/synthetic-preview/"  # reserved test domain: never a real site
-FOLDER = r"\\synthetic-preview-fs\projects\SYN-101"
-refusals, skipped, created = [], [], {}
+P = ''
+URL = 'https://docs.example.test/project-docs/'  # reserved test domain: never a real site
+FOLDER = '\\\\project-docs-fs\\projects\\SYN-101'
+refusals, skipped, missing_steps, created = [], [], [], {}
 
 # Work created by seed_resources.py (looked up by name, never changed here).
 T_SURVEY = "Survey base plan QA and topographic gap list"
@@ -50,7 +53,7 @@ D_STORM, D_MEMO, D_REGISTER, D_BRIEF, D_SET90, D_PAVEMENT = (P + s for s in (
     "Drainage design brief", "90 % drawing set", "Pavement design recommendations"))
 D_SITE, D_SBRIEF, D_OPTIONS = (P + s for s in ("Site servicing plan (60 %)", "Servicing brief", "Restricted options memo"))
 DEC_OUTFALL, DEC_STANDARD, DEC_BACKFILL, DEC_HYDRANT, DEC_SHORTLIST = (P + s for s in (
-    "Confirm the storm sewer outfall option", "Adopt the synthetic drainage standard for minor-system sizing",
+    "Confirm the storm sewer outfall option", 'Adopt the drainage standard for minor-system sizing',
     "Confirm the trench backfill material", "Confirm hydrant spacing for the waterfront lots", "Shortlist the restricted study options"))
 RSK_UTILITIES, RSK_GROUNDWATER, RSK_CLIENT, RSK_LOTS = (P + s for s in (
     "Unrecorded utilities in the corridor", "Groundwater inflow during trenching", "Client review period overruns",
@@ -66,7 +69,7 @@ CAL_COORD, CAL_SITE, CAL_FOCUS, CAL_WATERFRONT, CAL_RESTRICTED = (P + s for s in
 H_ACCEPTED, H_SUBMITTED = (P + s for s in ("Groundwater and bedding inputs for storm sewer design",
                                            "Geotechnical constraints for the utility relocation register"))
 REVIEW, SUBMISSION = P + "60 % storm sewer drawings review", P + "60 % design submission package"
-STD_ID, STD_TITLE = "SYN-STD-01", P + "Municipal drainage design standard (fictional)"
+STD_ID, STD_TITLE = "SYN-STD-01", P + 'Municipal drainage design standard'
 BASIS_STORM, BASIS_GROUNDWATER = P + "Minor storm design return period", P + "Groundwater stays below trench invert"
 TEMPLATE = P + "Small site servicing template"
 STORM_URL, MEMO_URL = f"{URL}SYN-101/SYN-101-C-201-P02.pdf", f"{URL}SYN-101/SYN-101-G-001-R0.pdf"
@@ -83,19 +86,10 @@ class Missing(Exception):
 
 
 def call(path, user, method="GET", body=None):
-    req = urllib.request.Request(f"{BASE}/api/v1/{path}", method=method, data=None if body is None else json.dumps(body).encode(),
-                                 headers={"X-Dev-User": f"{user}@hub.test", "Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            data = r.read()
-    except urllib.error.HTTPError as e:
-        try:
-            p = json.loads(e.read())
-        except ValueError:
-            p = {}
-        raise Refused(e.code, f"{method} /api/v1/{path} as {user}: HTTP {e.code} {p.get('code')}: {p.get('detail') or p.get('title')}"
-                      + (f" {p['errors']}" if p.get("errors") else "")) from None
-    return json.loads(data) if data else None
+        return client.call(path, user, method, body)
+    except FixtureError as e:
+        raise Refused(e.status, str(e)) from None
 
 
 def attempt(label, step):
@@ -105,7 +99,7 @@ def attempt(label, step):
     except Refused as e:
         refusals.append(f"{label}: {e}")
     except Missing as e:
-        skipped.append(f"{label}: needs {e}")
+        missing_steps.append(f"{label}: needs {e}")
 
 
 def made(module, label):
@@ -122,7 +116,7 @@ def rid():
 
 def find(path, value, field="name"):
     data = call(path, "jordan")
-    return next((x for x in (data["items"] if isinstance(data, dict) else data) if x.get(field) == value), None)
+    return next((x for x in (data["items"] if isinstance(data, dict) else data) if natural_copy(x.get(field)) == natural_copy(value)), None)
 
 
 def need(record, what):
@@ -149,11 +143,6 @@ def current_revision(pid, deliverable_id):
     return next((s["revision"] for s in call(f"projects/{pid}/changes/options", "jordan")["sources"]
                  if s["revision"]["deliverableId"] == deliverable_id and s["isCurrent"] and s["published"]), None)
 
-
-with urllib.request.urlopen(f"{BASE}/api/v1/config", timeout=30) as r:
-    mode = json.loads(r.read()).get("authMode")
-if mode != "Development":
-    sys.exit(f"Refusing to run: {BASE} reports authMode {mode!r}; this script only seeds a Development instance.")
 
 today = dt.date.fromisoformat(call("me", "priya")["settings"]["today"])
 monday = today - dt.timedelta(days=today.weekday())
@@ -201,15 +190,15 @@ def milestones_and_deliverables():
                                       (p2, "marc", BRIEF, "Design Submission", ago(14)), (p2, "marc", SERVICING60, "Design Submission", ahead(30)),
                                       (p3, "marc", OPTIONS, "Client Workshop", ahead(20))):
         ms[name] = call(f"projects/{pid}/milestones", pm, "POST", {"name": name, "milestoneType": kind, "date": iso(date),
-                                                                    "description": "Synthetic preview milestone for local UI review."})
+                                                                    "description": 'Coordinate the agreed design programme.'})
         made(mod, ms[name]["key"])
     attempt("SYN-101 60 % submission moved five days later by Priya", lambda: call(f"milestones/{ms[SUB60]['id']}/change-date", "priya", "POST", {
-        "newDate": iso(ahead(11)), "reason": "Synthetic preview: the client asked for five more days to return survey comments.",
+        "newDate": iso(ahead(11)), "reason": 'the client asked for five more days to return survey comments.',
         "rowVersion": ms[SUB60]["rowVersion"]}))
 
     def new(pid, pm, name, discipline, kind, owner, target, reviewer=None, review=True, revision=None, due=None):
         d = call(f"projects/{pid}/deliverables", pm, "POST", {
-            "name": name, "projectDisciplineId": discipline, "deliverableTypeId": dtype[kind], "description": "Synthetic preview deliverable for local UI review.",
+            "name": name, "projectDisciplineId": discipline, "deliverableTypeId": dtype[kind], "description": 'Prepare and review the design package.',
             "ownerId": uid[owner], "reviewerId": uid[reviewer] if reviewer else None, "milestoneId": ms[target]["id"], "dueDate": iso(due),
             "revision": revision, "requiresReview": review})
         made(mod, d["key"])
@@ -221,7 +210,7 @@ def milestones_and_deliverables():
     def issue(d, who, days_ago, to):
         return {**d, **call(f"deliverables/{d['id']}/issue", who, "POST", {
             "issuedDate": iso(ago(days_ago)), "issuedTo": to, "transmittalUrl": f"{URL}transmittals/{d['key']}",
-            "note": "Synthetic preview issue record.", "rowVersion": d["rowVersion"]})}
+            "note": 'issue record.', "rowVersion": d["rowVersion"]})}
 
     storm = new(p1, "priya", D_STORM, c1, "Drawing Package", "jill", SUB60, "diane", revision="P02")
     memo = new(p1, "priya", D_MEMO, g1, "Memo", "omar", SUB60, review=False, revision="R0", due=ahead(7))
@@ -238,16 +227,16 @@ def milestones_and_deliverables():
                                                                      "rowVersion": call(f"milestones/{m['id']}", pm)["milestone"]["rowVersion"]})
 
     attempt("SYN-101 drainage brief issued and accepted by Priya", lambda: move(
-        issue(brief, "priya", 29, "Synthetic preview client contact (fictional)"), "priya", "Accepted"))
+        issue(brief, "priya", 29, 'client contact'), "priya", "Accepted"))
     attempt("SYN-101 kickoff completed by Priya", lambda: complete(ms[KICKOFF], "priya", 28))
     attempt("SYN-101 storm drawings started and sent for review by Jill", lambda: move(
-        move(storm, "jill", "In Progress"), "jill", "In Review", comment="Synthetic preview: 60 % sheets ready for review."))
+        move(storm, "jill", "In Progress"), "jill", "In Review", comment='60 % sheets ready for review.'))
     attempt("SYN-101 geotechnical memo started and issued by Omar", lambda: issue(
-        move(memo, "omar", "In Progress"), "omar", 2, "Synthetic preview civil design team (internal)"))
+        move(memo, "omar", "In Progress"), "omar", 2, 'civil design team (internal)'))
     attempt("SYN-101 pavement recommendations put on hold by Omar", lambda: move(
-        pavement, "omar", "On Hold", reason="Synthetic preview: waiting for the borehole programme before pavement design starts."))
+        pavement, "omar", "On Hold", reason='waiting for the borehole programme before pavement design starts.'))
     attempt("SYN-102 site servicing plan started by Alex", lambda: move(site, "alex", "In Progress"))
-    attempt("SYN-102 servicing brief issued by Marc", lambda: issue(sbrief, "marc", 15, "Synthetic preview client contact (fictional)"))
+    attempt("SYN-102 servicing brief issued by Marc", lambda: issue(sbrief, "marc", 15, 'client contact'))
     attempt("SYN-102 servicing brief milestone completed by Marc", lambda: complete(ms[BRIEF], "marc", 14))
     attempt("SYN-103 options memo started by Jill", lambda: move(options, "jill", "In Progress"))
 
@@ -261,9 +250,9 @@ def decisions():
 
     def new(pid, who, subject, owner, requested, required, impact, links=()):
         d = call(f"projects/{pid}/decisions", who, "POST", {
-            "subject": subject, "description": "Synthetic preview decision for local UI review.", "ownerUserId": uid[owner],
+            "subject": subject, "description": 'Resolve the design question and record the agreed approach.', "ownerUserId": uid[owner],
             "dateRequested": iso(requested), "requiredByDate": iso(required), "impactLevel": impact,
-            "impactDescription": "Synthetic preview: affects the design programme of this fictional project.", "links": list(links)})
+            "impactDescription": 'affects the design programme of this project.', "links": list(links)})
         made(mod, d["key"])
         return d
 
@@ -274,7 +263,7 @@ def decisions():
     new(p1, "marc", DEC_OUTFALL, "priya", ago(3), ahead(6), "High")
     standard = new(p1, "jill", DEC_STANDARD, "marc", ago(6), ahead(2), "Medium", [{"targetType": "Task", "targetId": drainage_task["id"]}])
     attempt("SYN-101 drainage standard decided by Marc", lambda: call(f"decisions/{standard['id']}/transition", "marc", "POST", {
-        "toStatus": "Decided", "decisionText": "Synthetic preview decision: size the minor system to the fictional 2025 drainage standard.",
+        "toStatus": "Decided", "decisionText": 'size the minor system to the 2025 drainage standard.',
         "decisionDate": iso(ago(1)), "rowVersion": standard["rowVersion"]}))
     backfill = new(p1, "alex", DEC_BACKFILL, "omar", ago(12), ago(5), "Medium",
                    [{"targetType": "Milestone", "targetId": sub60["id"]}] if sub60 else [])
@@ -291,16 +280,16 @@ def risks_and_issues():
 
     def risk(pid, who, title, owner, probability, impact, review, discipline=None):
         r = call(f"projects/{pid}/risks", who, "POST", {
-            "title": title, "description": "Synthetic preview risk for local UI review.", "ownerId": uid[owner], "probability": probability,
-            "impact": impact, "mitigation": "Synthetic preview mitigation: check early and keep the programme float.",
-            "triggerIndicator": "Synthetic preview trigger: the next survey or site visit shows the condition.", "reviewDate": iso(review),
+            "title": title, "description": 'Track the design and programme impact.', "ownerId": uid[owner], "probability": probability,
+            "impact": impact, "mitigation": 'check early and keep the programme float.',
+            "triggerIndicator": 'the next survey or site visit shows the condition.', "reviewDate": iso(review),
             "projectDisciplineId": discipline})
         made(mod, r["key"])
         return r
 
     def issue(pid, who, title, owner, severity, raised, target, discipline=None, **extra):
         i = call(f"projects/{pid}/issues", who, "POST", {
-            "title": title, "description": "Synthetic preview issue for local UI review.", "ownerId": uid[owner], "severity": severity,
+            "title": title, "description": 'Resolve the open design issue.', "ownerId": uid[owner], "severity": severity,
             "dateRaised": iso(raised), "targetResolutionDate": iso(target), "projectDisciplineId": discipline, **extra})
         made(mod, i["key"])
         return i
@@ -311,28 +300,28 @@ def risks_and_issues():
     risk(p1, "priya", RSK_UTILITIES, "marc", 3, 2, ahead(7), c1)
     groundwater = risk(p1, "omar", RSK_GROUNDWATER, "omar", 1, 2, ago(4), g1)
     attempt("SYN-101 groundwater risk moved to Monitoring by Omar", lambda: move(
-        "risks", groundwater, "omar", "Monitoring", reason="Synthetic preview: watch the next borehole readings."))
+        "risks", groundwater, "omar", "Monitoring", reason='watch the next borehole readings.'))
     client = risk(p1, "priya", RSK_CLIENT, "priya", 2, 2, ahead(3))
     realised = attempt("SYN-101 client review risk realised as an issue by Priya", lambda: move(
-        "risks", client, "priya", "Realised", reason="Synthetic preview: the review comments arrived a week late.",
-        issue={"title": ISS_CLIENT, "description": "Synthetic preview issue raised from a realised risk.", "ownerId": uid["priya"],
+        "risks", client, "priya", "Realised", reason='the review comments arrived a week late.',
+        issue={"title": ISS_CLIENT, "description": 'issue raised from a realised risk.', "ownerId": uid["priya"],
                "severity": "Medium", "targetResolutionDate": iso(ahead(4))}))
     if realised:
         made(mod, realised["issueKey"])
     risk(p2, "marc", RSK_LOTS, "marc", 2, 3, ahead(10), c2)
     issue(p1, "jill", ISS_SURVEY, "alex", "Medium", ago(4), ahead(5), c1)
     conflict = issue(p1, "jill", ISS_CONFLICT, "marc", "High", ago(2), ahead(3), c1, issueType="Coordination", affectedDisciplineIds=[g1],
-                     locations=[{"kind": "Alignment", "alignment": "Synthetic preview alignment SA-1", "startStation": 120.0, "endStation": 260.0,
-                                 "stationUnits": "m", "assetSystem": "Synthetic preview storm sewer", "rowVersion": 0}],
+                     locations=[{"kind": "Alignment", "alignment": 'alignment SA-1', "startStation": 120.0, "endStation": 260.0,
+                                 "stationUnits": "m", "assetSystem": 'storm sewer', "rowVersion": 0}],
                      documents=[{"kind": "Drawing", "identifier": "SYN-101-C-201", "revision": "P02", "sourceUrl": STORM_URL,
                                  "isAvailable": True, "rowVersion": 0}])
     attempt("SYN-101 conflict issue started by Marc", lambda: move("issues", conflict, "marc", "In Progress"))
     attempt("SYN-101 conflict issue verifier proposed by Jill", lambda: call(f"issues/{conflict['id']}/verification", "jill", "POST", {
-        "verifierId": uid["diane"], "status": "Proposed", "note": "Synthetic preview: Diane checks the revised crossing against the drawing.",
+        "verifierId": uid["diane"], "status": "Proposed", "note": 'Diane checks the revised crossing against the drawing.',
         "rowVersion": call(f"issues/{conflict['id']}", "jill")["issue"]["rowVersion"]}))
     layers = issue(p1, "alex", ISS_LAYERS, "alex", "Low", ago(9), ago(2), c1)
     attempt("SYN-101 layer issue resolved by Alex", lambda: move("issues", layers, "alex", "Resolved", resolvedDate=iso(ago(1)),
-                                                                   resolution="Synthetic preview: layer names aligned with the CAD standard."))
+                                                                   resolution='layer names aligned with the CAD standard.'))
     issue(p2, "alex", ISS_FLOWTEST, "jill", "Medium", ago(3), ago(1), c2)
 
 
@@ -348,7 +337,7 @@ def meetings():
 
     def action(m, who, text, owner=None, discipline=None, due=None):
         a = call(f"meetings/{m['id']}/actions", who, "POST", {
-            "text": f"Synthetic preview action: {text}", "ownerType": "Discipline" if discipline else "User",
+            "text": text, "ownerType": "Discipline" if discipline else "User",
             "ownerUserId": uid[owner] if owner else None, "ownerDisciplineId": discipline, "dueDate": iso(due)})
         made(mod, a["key"])
         return a
@@ -364,22 +353,22 @@ def meetings():
     workshop = action(coord, "priya", "book the utility relocation workshop.", "marc", due=ago(3))
     attempt("SYN-101 workshop action completed by Marc", lambda: move(workshop, "marc", "Complete"))
     client = meeting(p1, "marc", MTG_CLIENT, "Client", day(0, 3))
-    action(client, "marc", "issue the meeting notes to the fictional client contact.", "priya", due=ahead(1))
+    action(client, "marc", 'issue the meeting notes to the client contact.', "priya", due=ahead(1))
     servicing = meeting(p2, "marc", MTG_SERVICING, "Coordination", day(0, 2))
-    action(servicing, "marc", "confirm hydrant flow test dates with the fictional utility.", "alex", due=ahead(5))
+    action(servicing, "marc", 'confirm hydrant flow test dates with the utility.', "alex", due=ahead(5))
 
 
 def comments():
     mod = "Comments"
     storm = deliverable(p1, D_STORM)
-    if any((c["body"] or "").startswith("Synthetic preview comment") for c in call(f"items/Deliverable/{storm['id']}/comments", "priya")["items"]):
-        return skip(mod, "Synthetic preview comment on " + storm["key"])
+    if any(natural_copy(c["body"]).endswith("please confirm the HGL check covers the 1-in-100-year event before the 60 % review.") for c in call(f"items/Deliverable/{storm['id']}/comments", "priya")["items"]):
+        return skip(mod, 'comment on ' + storm["key"])
 
     def at(u):
         return f"@[{uname[u]}]({uid[u]})"
 
     def comment(kind, item, who, text):
-        call(f"items/{kind}/{item['id']}/comments", who, "POST", {"body": f"Synthetic preview comment: {text}"})
+        call(f"items/{kind}/{item['id']}/comments", who, "POST", {"body": f"{text}"})
         made(mod, f"{item.get('key', kind)} by {who}")
 
     comment("Deliverable", storm, "priya", f"{at('jill')} please confirm the HGL check covers the 1-in-100-year event before the 60 % review.")
@@ -394,25 +383,25 @@ def comments():
 def calendar_events():
     mod = "Calendar events"
     window = call(f"calendar?from={iso(ago(61))}&to={iso(ahead(31))}&projectIds=all", "priya")["entries"]
-    if any(e.get("title") == CAL_COORD for e in window):
+    if any(natural_copy(e.get("title")) == CAL_COORD for e in window):
         return skip(mod, CAL_COORD)
 
     def event(who, kind, title, pid, date, start, end, where=None):
         call("calendar/events", who, "POST", {"type": kind, "title": title, "projectId": pid, "start": f"{iso(date)}T{start}",
                                               "end": f"{iso(date)}T{end}", "location": where,
-                                              "description": "Synthetic preview calendar entry for local UI review."})
+                                              "description": 'Design coordination and scheduled work.'})
         made(mod, f"{title.removeprefix(P)} ({kind}, {who})")
 
-    event("priya", "Meeting", CAL_COORD, p1, day(1, 1), "10:00", "11:00", "Synthetic preview meeting room")
-    event("omar", "Site Work", CAL_SITE, p1, day(1, 3), "08:00", "12:00", "Synthetic preview site, north tie-in")
+    event("priya", "Meeting", CAL_COORD, p1, day(1, 1), "10:00", "11:00", 'meeting room')
+    event("omar", "Site Work", CAL_SITE, p1, day(1, 3), "08:00", "12:00", 'site, north tie-in')
     event("alex", "Internal Task", CAL_FOCUS, None, day(1, 0), "13:00", "16:00")
-    event("marc", "Meeting", CAL_WATERFRONT, p2, day(1, 2), "14:00", "14:30", "Synthetic preview video call")
-    event("marc", "Meeting", CAL_RESTRICTED, p3, day(1, 4), "09:00", "10:00", "Synthetic preview meeting room")
+    event("marc", "Meeting", CAL_WATERFRONT, p2, day(1, 2), "14:00", "14:30", 'video call')
+    event("marc", "Meeting", CAL_RESTRICTED, p3, day(1, 4), "09:00", "10:00", 'meeting room')
 
 
 def links():
     mod = "Links"
-    if any(link["url"] == FOLDER for link in call(f"projects/{p1}", "priya")["links"]):
+    if any(link["url"] in (FOLDER, r"\\synthetic-preview-fs\projects\SYN-101") for link in call(f"projects/{p1}", "priya")["links"]):
         return skip(mod, FOLDER)
 
     def link(path, who, title, url, kind=None):
@@ -427,8 +416,8 @@ def links():
 
 def time_entries():
     mod = "Time entries"
-    if any((e["note"] or "").startswith("Synthetic preview") for e in call(f"time?from={iso(ago(365))}&to={iso(today)}", "alex")["entries"]):
-        return skip(mod, "Synthetic preview time entry by alex")
+    if any(natural_copy(e["note"]) == "base plan QA and topographic gap list" for e in call(f"time?from={iso(ago(365))}&to={iso(today)}", "alex")["entries"]):
+        return skip(mod, 'time entry by alex')
     days = [d for d in (ago(n) for n in range(14, 0, -1)) if d.weekday() < 5]  # the last ten working days
     w1, w2 = days[:5], days[5:]
     for who, pid, name, dates, hours, note in (
@@ -441,7 +430,7 @@ def time_entries():
             ("jill", p1, T_DRAINAGE, w2, 4, "drainage areas and runoff summary")):
         tid = task(pid, name)["id"]
         for d in dates:
-            call("time", who, "POST", {"taskId": tid, "workDate": iso(d), "hours": hours, "note": f"Synthetic preview: {note}"})
+            call("time", who, "POST", {"taskId": tid, "workDate": iso(d), "hours": hours, "note": f"{note}"})
         made(mod, f"{who} {len(dates)} × {hours:g} h ({note})")
 
 
@@ -455,7 +444,7 @@ def handoffs():
         h = call(f"projects/{p1}/handoffs", "omar", "POST", {
             "requestId": rid(), "title": title, "sourceDeliverableId": memo["id"], "sourceRowVersion": memo["rowVersion"], "declaredRevision": "R0",
             "sourceUrl": MEMO_URL, "receivingDisciplineId": c1, "sendingOwnerId": uid["omar"], "receivingOwnerId": uid[receiver], **target,
-            "intendedUse": f"Synthetic preview: {use}", "acceptanceCriteria": f"Synthetic preview: {criteria}", "neededBy": iso(needed),
+            "intendedUse": f"{use}", "acceptanceCriteria": f"{criteria}", "neededBy": iso(needed),
             "promisedBy": iso(promised)})
         made(mod, title.removeprefix(P))
         return h
@@ -466,8 +455,8 @@ def handoffs():
     first = draft(H_ACCEPTED, "jill", {"targetTaskId": task(p1, T_STORM)["id"]}, ahead(1), today,
                   "groundwater levels and bedding parameters for storm sewer sizing.", "the memo gives groundwater depth and bedding class for every run.")
     attempt("SYN-101 groundwater handoff submitted by Omar and accepted by Jill", lambda: move(
-        move(first, "omar", "Submitted", reason="Synthetic preview: memo R0 issued."), "jill", "Accepted",
-        criteriaOutcome="Synthetic preview: groundwater depth and bedding class are given for every run."))
+        move(first, "omar", "Submitted", reason='memo R0 issued.'), "jill", "Accepted",
+        criteriaOutcome='groundwater depth and bedding class are given for every run.'))
     second = draft(H_SUBMITTED, "alex", {"targetDeliverableId": deliverable(p1, D_REGISTER)["id"]}, ahead(3), ahead(5),
                    "trench support limits for the conflict register.", "each conflict location has a trench support note.")
     attempt("SYN-101 register handoff submitted by Omar", lambda: move(second, "omar", "Submitted"))
@@ -480,12 +469,12 @@ def review_package():
         return skip(mod, f"registered revision of {storm['key']}")
     revision = call(f"projects/{p1}/source-revisions", "jill", "POST", {
         "requestId": rid(), "deliverableId": storm["id"], "deliverableRowVersion": storm["rowVersion"], "projectDisciplineId": c1,
-        "ownerId": uid["jill"], "sourceSystem": "Synthetic preview document register", "externalIdentifier": "SYN-101-C-201", "title": D_STORM,
-        "revision": "P02", "url": STORM_URL, "issuer": "Synthetic preview civil design team",
-        "scope": "Synthetic preview: 60 % storm sewer plan and profile sheets."})
+        "ownerId": uid["jill"], "sourceSystem": 'document register', "externalIdentifier": "SYN-101-C-201", "title": D_STORM,
+        "revision": "P02", "url": STORM_URL, "issuer": 'civil design team',
+        "scope": '60 % storm sewer plan and profile sheets.'})
     made(mod, f"revision P02 of {storm['key']} registered by jill")
     package = call(f"projects/{p1}/reviews", "marc", "POST", {
-        "requestId": rid(), "title": REVIEW, "purpose": "Synthetic preview: independent 60 % review of the storm sewer sheets.",
+        "requestId": rid(), "title": REVIEW, "purpose": 'independent 60 % review of the storm sewer sheets.',
         "projectDisciplineId": c1, "coordinatorId": uid["marc"], "sourceRevisionIds": [revision["id"]], "requiredForIssue": True,
         "assignments": [{"projectDisciplineId": c1, "reviewerId": uid["diane"], "dueDate": iso(ahead(5))},
                         {"projectDisciplineId": g1, "reviewerId": uid["omar"], "dueDate": iso(ahead(5))}]})
@@ -501,7 +490,7 @@ def review_package():
     def decide(who, discipline, status, rationale):
         a = assignment(discipline)
         call(f"{root}/assignments/{a['id']}/decision", who, "POST", {"requestId": rid(), "rowVersion": a["rowVersion"], "status": status,
-                                                                    "rationale": f"Synthetic preview: {rationale}"})
+                                                                    "rationale": f"{rationale}"})
         made(mod, f"{status} by {who}")
 
     attempt("SYN-101 review: Diane requires changes", lambda: decide("diane", c1, "Changes Required", "HGL is above the rim at two manholes."))
@@ -509,7 +498,7 @@ def review_package():
     if attempt("SYN-101 review: Diane raises a blocking finding", lambda: call(f"{root}/findings", "diane", "POST", {
             "requestId": rid(), "rowVersion": call(root, "diane")["package"]["rowVersion"], "sourceRevisionId": revision["id"],
             "projectDisciplineId": c1, "resolverId": uid["jill"], "severity": "Blocking", "issueId": conflict["id"] if conflict else None,
-            "text": "Synthetic preview finding: lower the outlet at the watermain crossing or add a drop structure."})):
+            "text": 'lower the outlet at the watermain crossing or add a drop structure.'})):
         made(mod, "blocking finding by diane")
     attempt("SYN-101 review: Omar approves", lambda: decide("omar", g1, "Approved", "bedding and groundwater values match memo R0."))
 
@@ -518,8 +507,8 @@ def change_notice():
     mod = "Change notice"
     if any(s["revision"]["externalIdentifier"] == STD_ID for s in call(f"projects/{p1}/changes/options", "jordan")["sources"]):
         return skip(mod, f"{STD_ID} source revision")
-    source = {"projectDisciplineId": c1, "ownerId": uid["marc"], "sourceSystem": "Synthetic standards library", "externalIdentifier": STD_ID,
-              "title": STD_TITLE, "issuer": "Synthetic standards body (fictional)", "scope": "Synthetic preview: storm sewer sizing and HGL criteria."}
+    source = {"projectDisciplineId": c1, "ownerId": uid["marc"], "sourceSystem": 'standards library', "externalIdentifier": STD_ID,
+              "title": STD_TITLE, "issuer": 'standards body', "scope": 'storm sewer sizing and HGL criteria.'}
     base = call(f"projects/{p1}/source-revisions", "marc", "POST", {"requestId": rid(), **source, "revision": "2025-A",
                                                                     "url": f"{URL}standards/{STD_ID}-2025-A.pdf"})
     made(mod, f"{STD_ID} revision 2025-A registered by marc")
@@ -527,13 +516,13 @@ def change_notice():
     call(f"projects/{p1}/input-uses", "alex", "POST", {
         "requestId": rid(), "targetType": "Task", "targetId": profiles["id"], "targetRowVersion": profiles["rowVersion"],
         "sourceRevisionId": base["id"], "expectedCurrentRevisionId": base["id"],
-        "intendedUse": "Synthetic preview: HGL criteria for the storm sewer profiles.", "reason": "Synthetic preview: recorded the revision used."})
+        "intendedUse": 'HGL criteria for the storm sewer profiles.', "reason": 'recorded the revision used.'})
     made(mod, f"input use on {profiles['key']} recorded by alex")
     head = need(next((h for h in call(f"projects/{p1}/changes/options", "marc")["heads"] if h["currentRevisionId"] == base["id"]), None),
                 f"the {STD_ID} source head")
     notice = call(f"projects/{p1}/source-revisions", "marc", "POST", {
         "requestId": rid(), **source, "revision": "2026-B", "url": f"{URL}standards/{STD_ID}-2026-B.pdf", "supersedesId": base["id"],
-        "headRowVersion": head["rowVersion"], "description": "Synthetic preview: revision 2026-B raises the minimum HGL freeboard (fictional change).",
+        "headRowVersion": head["rowVersion"], "description": 'revision 2026-B raises the minimum HGL freeboard (change).',
         "effectiveDate": iso(today), "assessmentDueDate": iso(ahead(7))})
     root = f"projects/{p1}/changes/{notice['id']}"
     detail = call(root, "marc")
@@ -547,7 +536,7 @@ def change_notice():
     redlines = task(p1, T_REDLINES)
     if attempt("SYN-101 change assessment recorded as Update Required by Alex", lambda: call(f"{root}/assessments/{assessment['id']}", "alex", "POST", {
             "requestId": rid(), "rowVersion": assessment["rowVersion"], "action": "disposition", "status": "Update Required",
-            "rationale": "Synthetic preview: the higher freeboard changes three profile sheets.", "evidenceUrl": f"{URL}SYN-101/assessments/profiles",
+            "rationale": 'the higher freeboard changes three profile sheets.', "evidenceUrl": f"{URL}SYN-101/assessments/profiles",
             "correctionTaskId": redlines["id"], "correctionTaskRowVersion": redlines["rowVersion"], "effortImpactHours": 6, "dateImpactDays": 2})):
         made(mod, "assessment Update Required by alex")
 
@@ -559,10 +548,10 @@ def submission():
     revision = need(current_revision(p1, deliverable(p1, D_STORM)["id"]), "registered revision of " + D_STORM)
     sub60 = milestone(p1, SUB60)
     package = call(f"projects/{p1}/submissions", "priya", "POST", {
-        "requestId": rid(), "title": SUBMISSION, "purpose": "Synthetic preview: 60 % design submission to the fictional client.",
-        "recipientReference": "Synthetic preview client review team (fictional)", "coordinatorId": uid["marc"], "milestoneId": sub60["id"],
+        "requestId": rid(), "title": SUBMISSION, "purpose": '60 % design submission to the client.',
+        "recipientReference": 'client review team', "coordinatorId": uid["marc"], "milestoneId": sub60["id"],
         "targetDate": sub60["date"], "manifest": [{"sourceRevisionId": revision["id"]}],
-        "optionalChecks": [{"label": "Synthetic preview: a traffic management plan applies to this submission", "ownerId": uid["alex"],
+        "optionalChecks": [{"label": 'a traffic management plan applies to this submission', "ownerId": uid["alex"],
                             "projectDisciplineId": c1}]})
     root = f"projects/{p1}/submissions/{package['id']}"
     made(mod, call(root, "priya")["package"]["key"])
@@ -572,7 +561,7 @@ def submission():
     check = need(next((c for c in detail["checks"] if c["kind"] == "Applicability"), None), "the optional check")
     if attempt("SYN-101 submission optional check passed by Alex", lambda: call(f"{root}/checks/{check['id']}", "alex", "POST", {
             "requestId": rid(), "packageRowVersion": detail["package"]["rowVersion"], "rowVersion": check["rowVersion"], "action": "Pass",
-            "evidenceUrl": f"{URL}SYN-101/traffic-management-plan", "reason": "Synthetic preview: plan checked against the 60 % sheets."})):
+            "evidenceUrl": f"{URL}SYN-101/traffic-management-plan", "reason": 'plan checked against the 60 % sheets.'})):
         made(mod, "optional check Pass by alex")
 
 
@@ -589,23 +578,23 @@ def design_basis():
         return e
 
     storm = entry("marc", "Criterion", BASIS_STORM, "jill", c1, {
-        "scope": "Synthetic preview storm sewer network", "statement": "Synthetic preview: size the minor system for the 1-in-5-year storm.",
-        "numericValue": 5, "units": "years", "sourceSystem": "Synthetic standards library", "stableSourceId": f"{STD_ID} §4.2",
+        "scope": 'storm sewer network', "statement": 'size the minor system for the 1-in-5-year storm.',
+        "numericValue": 5, "units": "years", "sourceSystem": 'standards library', "stableSourceId": f"{STD_ID} §4.2",
         "sourceUrl": f"{URL}standards/{STD_ID}-2025-A.pdf", "declaredRevision": "2025-A", "confirmationDueDate": iso(ahead(5))})
     root = f"projects/{p1}/design-basis/{storm['id']}"
     detail = call(root, "marc")
     version = detail["versions"][0]["version"]
     if attempt("SYN-101 storm criterion confirmed by Marc", lambda: call(f"{root}/versions/{version['id']}/confirm", "marc", "POST", {
             "requestId": rid(), "entryRowVersion": detail["entry"]["rowVersion"], "versionRowVersion": version["rowVersion"],
-            "rationale": "Synthetic preview: matches the fictional drainage standard."})):
+            "rationale": 'matches the drainage standard.'})):
         made(mod, "criterion confirmed by marc")
         if attempt("SYN-101 storm criterion linked to Jill's task", lambda: call(f"{root}/uses", "jill", "POST", {
                 "requestId": rid(), "versionId": version["id"], "targetType": "Task", "targetId": task(p1, T_STORM)["id"],
-                "intendedUse": "Synthetic preview: pipe sizing for the 60 % sheets."})):
+                "intendedUse": 'pipe sizing for the 60 % sheets.'})):
             made(mod, "criterion used by jill's storm sewer task")
     entry("omar", "Assumption", BASIS_GROUNDWATER, "omar", g1, {
-        "scope": "Synthetic preview trench excavations", "statement": "Synthetic preview: groundwater stays below the trench invert during construction.",
-        "sourceSystem": "Synthetic preview borehole logs", "stableSourceId": "SYN-BH-03", "sourceUrl": f"{URL}SYN-101/boreholes",
+        "scope": 'trench excavations', "statement": 'groundwater stays below the trench invert during construction.',
+        "sourceSystem": 'borehole logs', "stableSourceId": "SYN-BH-03", "sourceUrl": f"{URL}SYN-101/boreholes",
         "declaredRevision": "R0", "confirmationDueDate": iso(ago(2))}, approver="diane")
 
 
@@ -613,42 +602,42 @@ def readiness():
     mod = "Readiness constraints"
     storm = task(p1, T_STORM)
     base = f"projects/{p1}/readiness/Task"
-    if any(c["description"].startswith("Synthetic preview") for c in call(f"{base}/{storm['id']}/constraints", "jordan")):
+    if any(natural_copy(c["description"]) == "pipe sizing waits on the outfall decision." for c in call(f"{base}/{storm['id']}/constraints", "jordan")):
         return skip(mod, f"Synthetic preview constraint on {storm['key']}")
     outfall = find(f"projects/{p1}/decisions", DEC_OUTFALL, "subject")
     call(f"{base}/{storm['id']}/constraints", "jill", "POST", {
         "requestId": rid(), "targetRowVersion": storm["rowVersion"], "category": "Decision",
-        "description": "Synthetic preview: pipe sizing waits on the outfall decision.", "removalOwnerId": uid["priya"], "neededBy": iso(ahead(5)),
+        "description": 'pipe sizing waits on the outfall decision.', "removalOwnerId": uid["priya"], "neededBy": iso(ahead(5)),
         "sourceUrl": f"{URL}SYN-101/decisions/outfall", "linkedType": "Decision" if outfall else None, "linkedId": outfall["id"] if outfall else None})
     made(mod, f"Decision constraint on {storm['key']} by jill")
     if attempt("SYN-101 storm task output defined by Jill", lambda: call(f"{base}/{storm['id']}", "jill", "POST", {
             "requestId": rid(), "targetRowVersion": task(p1, T_STORM)["rowVersion"],
-            "intendedOutput": "Synthetic preview: storm sewer design sheets with the HGL check.",
-            "completionCriteria": "Synthetic preview: every run sized, HGL below the rims, sheets checked."})):
+            "intendedOutput": 'storm sewer design sheets with the HGL check.',
+            "completionCriteria": 'every run sized, HGL below the rims, sheets checked.'})):
         made(mod, f"output defined for {storm['key']} by jill")
     profiles = task(p1, T_PROFILES)
     capacity = call(f"{base}/{profiles['id']}/constraints", "priya", "POST", {
         "requestId": rid(), "targetRowVersion": profiles["rowVersion"], "category": "Capacity",
-        "description": "Synthetic preview: Alex is over capacity next week; confirm cover before starting.", "removalOwnerId": uid["marc"],
+        "description": 'Alex is over capacity next week; confirm cover before starting.', "removalOwnerId": uid["marc"],
         "neededBy": iso(ahead(2)), "sourceUrl": f"{URL}SYN-101/workload"})
     made(mod, f"Capacity constraint on {profiles['key']} by priya")
     if attempt("SYN-101 capacity constraint resolution proposed by Marc", lambda: call(
             f"{base}/{profiles['id']}/constraints/{capacity['id']}/transition", "marc", "POST", {
                 "requestId": rid(), "rowVersion": capacity["rowVersion"], "toState": "Resolution Proposed",
-                "reason": "Synthetic preview: Jill covers the sanitary profiles next week.", "evidenceUrl": f"{URL}SYN-101/allocations"})):
+                "reason": 'Jill covers the sanitary profiles next week.', "evidenceUrl": f"{URL}SYN-101/allocations"})):
         made(mod, "resolution proposed by marc")
 
 
 def weekly_commitments():
     mod = "Weekly commitments"
-    if any(c["intendedOutput"].startswith("Synthetic preview") for c in call(f"projects/{p1}/weekly-commitments", "jordan")["commitments"]):
-        return skip(mod, "Synthetic preview promise")
+    if any(natural_copy(c["intendedOutput"]) == "storm sewer profiles for sheets C-201 to C-204." for c in call(f"projects/{p1}/weekly-commitments", "jordan")["commitments"]):
+        return skip(mod, 'promise')
 
     def propose(who, name, target, output, criteria):
         t = task(p1, name)
         call(f"projects/{p1}/weekly-commitments/Task/{t['id']}", who, "POST", {
             "requestId": rid(), "targetRowVersion": t["rowVersion"], "weekStart": iso(day(1)), "targetDate": iso(target),
-            "intendedOutput": f"Synthetic preview: {output}", "completionCriteria": f"Synthetic preview: {criteria}"})
+            "intendedOutput": f"{output}", "completionCriteria": f"{criteria}"})
         made(mod, f"{t['key']} for the week of {day(1)} proposed by {who}")
 
     propose("priya", T_PROFILES, day(1, 3), "storm sewer profiles for sheets C-201 to C-204.", "profiles drawn and checked against the HGL table.")
@@ -657,9 +646,9 @@ def weekly_commitments():
 
 def template():
     mod = "Template"
-    if any(t["name"] == TEMPLATE for t in call("templates", "jordan")["templates"]):
+    if any(natural_copy(t["name"]) == TEMPLATE for t in call("templates", "jordan")["templates"]):
         return skip(mod, TEMPLATE)
-    t = call("templates", "jordan", "POST", {"name": TEMPLATE, "description": "Synthetic preview template for local UI review; not a real standard."})
+    t = call("templates", "jordan", "POST", {"name": TEMPLATE, "description": 'Standard starting point for small site servicing projects.'})
     made(mod, TEMPLATE.removeprefix(P) + " (Draft)")
     call(f"templates/{t['id']}/structure", "jordan", "PUT", {
         "rowVersion": t["rowVersion"],
@@ -701,3 +690,8 @@ for s in skipped:
     print(f"  SKIPPED {s}")
 for r in refusals:
     print(f"  REFUSED {r}")
+for missing in missing_steps:
+    print(f"  MISSING {missing}")
+
+if refusals or missing_steps:
+    raise SystemExit("Fixture setup stopped with refused API steps; review the reported failures before continuing.")

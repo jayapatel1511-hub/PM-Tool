@@ -112,7 +112,6 @@ export function Shell() {
           </DropdownMenu>
         </header>
         <main id="content" tabIndex={-1} className="relative min-h-0 flex-1 overflow-auto outline-none print:overflow-visible print:pb-0">
-          {import.meta.env.VITE_SYNTHETIC_PREVIEW === 'true' && <p className="border-b bg-warn-bg px-4 py-2 text-xs/[18px] font-medium text-warn md:px-6 xl:px-8">{t('preview.synthetic')}</p>}
           <Outlet />
         </main>
         <PanelHost />

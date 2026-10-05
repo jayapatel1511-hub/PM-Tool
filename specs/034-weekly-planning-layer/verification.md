@@ -3,13 +3,13 @@
 **Date**: 2026-10-04
 **State**: Implemented in `c829f0e6026cb9f518616c7e4ad8a25c1db8b2e7` and deployed in release `d81c13f9084cfd4e828ab9762433d38c3849b302` to the synthetic review stack. Backend, model, performance, required web suites, complete route sweep, keyboard and visual/state checks PASS; post-deployment safety gates PASS. **T023 remains BLOCKED/UNRUN for its manual screen-reader validation:** native VoiceOver control timed out before usable accessibility state. Human acceptance and SC-001 remain pending.
 
-## Landing follow-up — locally verified, not yet redeployed
+## Landing follow-up — committed, CI PASS, prepared; activation pending
 
 Jay requested a current board image, seamless background blending, then explicitly preferred the older colours over the white/mint trial. The current local hero keeps the approved pale paper, forest ink and amber/sage palette. Broad washes and a soft decorative-image mask blend the app capture into the page; the floating frame, heavy shadow and old-image fallback are removed. The unchanged 1728 × 873 JPEG comes from Priya's existing synthetic `/boards` preview, visibly labelled fictional; no records were edited. Its 102957 bytes and SHA-256 match `web/public/landing/capture.json`.
 
 Independent source/provenance review found no actionable issue. Root inspected the final desktop and phone screenshots. Final build PASS; exact type-check and lint PASS (87 existing warnings, no new); eight cold public landing/login rechecks at 1440/1024/768/375 PASS with zero findings, replacing those cases in the retained 1956-combination evidence. This is an affected-route recheck, not another fresh full sweep. Evidence: `/private/tmp/tuesday-hero-paper-{build,sweep}.log`, `/private/tmp/tuesday-sweep-hero-paper/`. ReUI's MCP audit guidance and the business UI design skill informed the review; no new component package, image generation, authentication or app behaviour changes.
 
-The deployed release below still serves the prior hero. The follow-up needs its own exact-head CI, prepared committed release and Jay's own-terminal sudo activation. The current local result awaits Jay's visual acceptance. T023 manual screen-reader and SC-001 remain unrun. Brand mark, holiday/manual-role removal confirmations and per-notification Mark read remain open decisions.
+The follow-up is committed and pushed only to the existing feature branch as `29e9b15c388415ed4ace830f5c10c37c6cec93f3`. [Exact-head CI 37248697226](https://github.com/jayapatel1511-hub/PM-Tool/actions/runs/37248697226) PASS: 1036 tests, zero failed/skipped, coverage and required browser gates; planner 14 base plus six recovery flows, 180 API calls, seven zero-finding axe scans. The exact tree is prepared on homedev and its JPEG hash independently matches. The active review pointer is still `d81c13f9084cfd4e828ab9762433d38c3849b302`; activation is pending Jay's own-terminal sudo. Root provided one command combining activation and the reviewed `incoming/postdeploy-29e9b15c.sh` helper, with an owner-only `data/activation-29e9b15c.log`. After Jay runs it, independently verify the log, exact image/pointer/volume, migrations, restore/persistence gates, public probes and hosted hero. The separate pilot remains unchanged. The current local result awaits Jay's visual acceptance. T023 manual screen-reader and SC-001 remain unrun. Brand mark, holiday/manual-role removal confirmations and per-notification Mark read remain open decisions.
 
 ## Deployed verification — 5 October 2026 UTC / 4 October Halifax
 
@@ -99,6 +99,26 @@ Commands ran in this worktree. Browser suites use the handoff's `CHROME_EXECUTAB
 | Manual screen-reader pass | BLOCKED/UNRUN — plan Validation step 10 remains unmet. Native VoiceOver app control timed out before usable accessibility state. Keyboard assertions, visible focus and axe are tested separately; no screen-reader acceptance is claimed. |
 | Supervisor spreadsheet pilot (SC-001) | UNRUN — needs an actual supervisor and their existing spreadsheet; synthetic timing is not a substitute. |
 | `build_spec.py --check`, `trace_spec.py --check`, `git diff --check` | PASS after final evidence updates. Source/trace: 660 IDs, 252 sections, zero uncited/unknown. Final local logs `/private/tmp/tuesday-{spec,trace}-ux-close.log`. |
+
+## Normal-copy/full-review candidate — 4 October 2026
+
+Jay approved all ten Tuesday personas and the full hosted examples, then explicitly removed the requirement for visible synthetic/sample labels. Fixture provenance stays in maintained sources/private setup records; normal app copy, new fixture recipes and the current board JPEG are implemented locally. This candidate supersedes prepared 29e9b15c and is not yet activated; the host remains d81c13f9. Existing credentials, role boundaries, packet 029 statuses and packet 034 confidence/visibility remain distinct.
+
+Six ReviewDemoSeed tests, ten transport safety tests, eight credential tests and seven operator tests PASS. Type-check/build/lint PASS with 87 existing warnings. Required browser flows PASS, including two final Design Basis resize-focus runs and Planner 14 base + six recovery checks, 179 calls, seven zero-finding axe scans. A final route sweep and release CI are still pending; the earlier 596-observation zero-finding partial run is retained and not called complete. T023, SC-001 and human acceptance remain unrun. No new deployment or overall goal completion is claimed.
+
+## Current completion audit and manual pass handoff
+
+Fresh continuation check: review `current` still selects `d81c13f9`; pilot remains `29b3d70`; health is Healthy. No `data/activation-29e9b15c.log` exists, so the prepared landing release is not active. A fresh native `cua.getApp('VoiceOver')` attempt with a 20-second request timeout again returned timeoutReached before usable screen-reader state. This is an unavailable observation, not a product defect and not a screen-reader pass. T023 stays unticked; the goal is not complete.
+
+Validation step 10 requires actual keyboard and screen-reader observation at 1440, 1024 and 375 px. A tester can use the local labelled synthetic preview at `http://localhost:5173/login` with Development users Sam, Alex, Lena, Priya, Jordan and Rita. Never use hosted credentials or operational records for this local pass. Record the tested browser, VoiceOver version, revision, role and width, actual announcement, PASS/FAIL/UNRUN, and any defect. Do not infer speech output from DOM/AX attributes.
+
+| Width | Required observed behaviour | Actual screen-reader result |
+|---|---|---|
+| 1440 | On `/planner`, hear the heading, grid name, person/week, remaining/planned/capacity values and contribution controls. Check grid navigation, quick-add focus/cancel for permitted editors, entry/contribution panel names and focus return. On `/my-work`, check My Week and permitted self-entry controls. Verify read-only roles receive the actual permitted controls. | UNRUN |
+| 1024 | Planner is read-only: hear grid/cell summaries and contribution controls, inspect/close allowed panels, and hear the read-only explanation. Check My Week; no editing capability is implied by visible data. | UNRUN |
+| 375 | Hear the desktop/tablet notice on Planner and My Week, and navigate its link and surrounding My Work content without a focus trap. Grid editing is inapplicable at this width, not a failed test or successful save. | UNRUN |
+
+These cases supplement the retained automated keyboard, focus and axe results. They do not replace the manual test or claim all conditional states passed. Report remaining conditional states as UNRUN until actually observed. SC-001's real-supervisor spreadsheet exercise and Jay's final visual acceptance remain separate human evidence. Activation remains a pending own-terminal action already requested; do not retry or bypass sudo from automation.
 
 ## Additional UI/UX follow-up
 

@@ -1,8 +1,8 @@
 {
   "capturedDate": "2026-10-04",
-  "method": "Read-only browser screenshot of the maintained Tuesday synthetic preview",
-  "sourceBuild": "d81c13f9084cfd4e828ab9762433d38c3849b302 on local Vite preview; application source unchanged at capture",
-  "fixture": "Existing pm-tuesday-preview-db at 127.0.0.1:55433; Priya development account; fictional records labelled in the captured shell; no record mutation",
+  "method": "Unedited browser screenshot of the maintained Tuesday review workspace",
+  "sourceBuild": "29e9b15c388415ed4ace830f5c10c37c6cec93f3 plus uncommitted visible-copy follow-up",
+  "fixture": "Existing fictional pm-tuesday-preview-db at 127.0.0.1:55433; Priya development account. Jay requested normal display copy. Three SYN project names were updated through guarded, versioned API patches; project IDs, ownership, permissions and calculations preserved.",
   "usage": "Static JPEG of current Tuesday workspace Board; no live data, scripts, frames or active destinations",
   "captures": [
     {
@@ -11,8 +11,8 @@
       "route": "/boards",
       "width": 1728,
       "height": 873,
-      "bytes": 102957,
-      "sha256": "e05b2d1ebec0857a6b861208dd30c23d710d022fa1c594f0af2865cca3824ce2"
+      "bytes": 97821,
+      "sha256": "93a350c50f3b0d53c19ca02f17d28231595b9a02347733dfbed709b5fce5471b"
     }
   ],
   "historicalCapture": {

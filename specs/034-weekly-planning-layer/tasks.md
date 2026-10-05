@@ -1,6 +1,6 @@
 # Tasks: Weekly Planning Layer
 
-**Input**: [spec.md](spec.md), [plan.md](plan.md). Backend and interface implementation is local and uncommitted inside the plan's file boundaries; final software/browser evidence is recorded. T001–T022 are complete; T023 remains blocked at the manual screen-reader pass. Record actual results in [verification.md](verification.md); a task checkbox is never evidence by itself.
+**Input**: [spec.md](spec.md), [plan.md](plan.md). Backend and interface implementation is committed in `c829f0e6` and deployed to the synthetic review stack in `d81c13f9`, inside the plan's file boundaries; final software/browser and deployed safety evidence is recorded. T001–T022 are complete; T023 remains blocked at the manual screen-reader pass. Record actual results in [verification.md](verification.md); a task checkbox is never evidence by itself.
 
 Order: decisions, then domain, data and API with their tests, then the interface, then documentation and acceptance. `[P]` marks a task that can run in parallel with the previous one (different files, no dependency).
 

@@ -1,7 +1,7 @@
 # Implementation Plan: Weekly Planning Layer
 
 **Packet**: 034 | **Feature directory**: `specs/034-weekly-planning-layer` | **Date**: 2026-10-03 | **Spec**: [spec.md](spec.md)
-**Status**: Locally implemented and software/browser checks recorded in `verification.md`; remaining work is uncommitted. T023 is blocked at Validation step 10's manual screen-reader pass.
+**Status**: Implemented in `c829f0e6` and deployed to the synthetic review stack in `d81c13f9`; software/browser evidence is recorded in `verification.md`. The landing-only follow-up `29e9b15c` passed CI and is prepared, awaiting own-terminal activation. T023 remains blocked at Validation step 10's manual screen-reader pass; human acceptance is pending.
 **Input**: Product specification §39, §8.11, §10.9, §13.21, §13.10; packet 029 as built (`specs/029-dated-capacity-allocations/verification.md`).
 
 ## Summary

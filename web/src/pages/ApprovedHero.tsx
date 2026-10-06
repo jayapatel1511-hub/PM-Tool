@@ -1,24 +1,71 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { ArrowRight, ArrowUpRight, CalendarDays, Check, Layers, Users, X } from 'lucide-react'
+import { ArrowDown, ArrowRight, ArrowUpRight, CalendarDays, X } from 'lucide-react'
 import { t } from '@/lib/i18n'
 import './approved-hero.css'
 
-// Fictional, labelled planning examples from the approved concept; never live data.
-const weeks = [
-  [24, 6, 7.5, 30, 4, 3.5, 20, 8, 9.5],
-  [28, 5, 4.5, 24, 6, 7.5, 16, 10, 11.5],
+// Fictional public examples. Capacity and recorded time never come from the live API.
+const people = [
+  { name: 'alexChen', role: 'civilDesign', initials: 'AC', project: [24, 28], other: [6, 5], forecast: [30, 33, 40, 28] },
+  { name: 'morganLee', role: 'geotechnical', initials: 'ML', project: [30, 24], other: [4, 6], forecast: [34, 30, 37.5, 41] },
+  { name: 'samRivera', role: 'fieldServices', initials: 'SR', project: [20, 16], other: [8, 10], forecast: [28, 26, 31, 24] },
 ]
+const weeklyCapacity = 37.5
+const hours = (value: number) => t('landing.hours', { hours: value })
 
-export function ApprovedHero() {
-  const dialog = useRef<HTMLDialogElement>(null)
+function Brand() {
+  return <a className="brand" href="#main" aria-label={t('landing.tuesdayHome')}>
+    <span className="tuesday-logo" aria-hidden="true">
+      <svg className="logo-mark" viewBox="0 0 40 40" fill="none">
+        <path d="m3 7 26-4 8 7-26 4Zm8 10 18-3 8 7-18 3Zm8 10 10-2 8 7-10 2Z" fill="currentColor" />
+        <path d="m3 7 26-4 8 7-26 4Z" fill="#a5442a" />
+      </svg><span>tuesday</span>
+    </span>
+  </a>
+}
+
+function Person({ person }: { person: typeof people[number] }) {
+  return <div className="person"><span className="avatar" aria-hidden="true">{person.initials}</span>
+    <div><strong>{t(`landing.${person.name}`)}</strong><small>{t(`landing.${person.role}`)}</small></div>
+  </div>
+}
+
+function WorkloadPreview() {
+  const [discipline, setDiscipline] = useState('all')
+  const rows = people.filter(person => discipline === 'all' || person.role === discipline)
+  return <section className="workload-preview" aria-labelledby="workload-title">
+    <div className="preview-top"><span className="preview-brand">tuesday</span><span>{t('landing.syntheticPreview')}</span></div>
+    <div className="preview-body">
+      <div className="preview-heading"><div><span className="ui-meta">{t('landing.resources')}</span><h2 id="workload-title">{t('landing.forecastWorkload')}</h2></div><CalendarDays size={18} aria-hidden="true" /></div>
+      <div className="preview-toolbar"><span>{t('landing.october2026')}</span>
+        <label><span className="sr-only">{t('landing.filterSampleDiscipline')}</span>
+          <select value={discipline} onChange={event => setDiscipline(event.target.value)}>
+            <option value="all">{t('landing.allDisciplines')}</option>
+            {people.map(person => <option key={person.role} value={person.role}>{t(`landing.${person.role}`)}</option>)}
+          </select>
+        </label>
+      </div>
+      <p className="scroll-hint">{t('landing.scrollForecast')}</p>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Named scroll regions need keyboard access. */}
+      <div className="table-scroll forecast-scroll" tabIndex={0} role="region" aria-label={t('landing.forecastScroll')}>
+        <table className="forecast-grid"><caption className="sr-only">{t('landing.forecastCaption')}</caption>
+          <thead><tr><th scope="col">{t('landing.people')}</th>{['05', '12', '19', '26'].map(day => <th scope="col" key={day}>{t('landing.octDay', { day })}</th>)}</tr></thead>
+          <tbody>{rows.map(person => <tr key={person.name}><th scope="row"><Person person={person} /></th>
+            {person.forecast.map((value, index) => <td key={index}><div className={`load-cell ${value > weeklyCapacity ? 'over' : ''}`}>
+              <strong>{hours(value)}</strong><small>{t('landing.ofCapacity', { hours: weeklyCapacity })}</small>
+              {value > weeklyCapacity && <span>{t('landing.overCapacity')}</span>}
+            </div></td>)}
+          </tr>)}</tbody>
+        </table>
+      </div>
+      <div className="preview-foot"><span><i aria-hidden="true" />{t('landing.withinCapacity')}</span><span><i className="warning" aria-hidden="true" />{t('landing.overCapacity')}</span></div>
+      <p className="preview-note" role="status">{t(rows.length === 1 ? 'landing.forecastPerson' : 'landing.forecastPeople', { count: rows.length })}</p>
+    </div>
+  </section>
+}
+
+function WeeklyPlanner() {
   const [week, setWeek] = useState(0)
-  useEffect(() => {
-    const previousTitle = document.title
-    document.title = t('landing.pageTitle')
-    return () => {
-      document.title = previousTitle
-    }
-  }, [])
+  const available = people.reduce((total, person) => total + weeklyCapacity - person.project[week] - person.other[week], 0)
   function changeWeek(event: KeyboardEvent<HTMLButtonElement>, current: number) {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
     event.preventDefault()
@@ -26,395 +73,115 @@ export function ApprovedHero() {
     setWeek(next)
     document.getElementById(`week-${next + 1}`)?.focus()
   }
-  return (
-    <div className="approved-hero">
-      <a className="skip" href="#main">
-        {t('landing.skipToContent')}
-      </a>
-      <header className="wrap">
-        <nav className="nav" aria-label={t('landing.mainNavigation')}>
-          <a className="brand" href="#main" aria-label={t('landing.tuesdayHome')}>
-            <span className="tuesday-logo" aria-hidden="true">
-              <svg className="logo-mark" viewBox="0 0 40 40" fill="none">
-                <path d="m3 7 26-4 8 7-26 4Zm8 10 18-3 8 7-18 3Zm8 10 10-2 8 7-10 2Z" fill="currentColor" />
-                <path d="m3 7 26-4 8 7-26 4Z" fill="#a5442a" />
-              </svg>
-              <span>tuesday</span>
-            </span>
-          </a>
-          <div className="nav-links">
-            <a href="#workspace">{t('landing.theWorkspace')}</a>
-            <a href="#approach">{t('landing.ourApproach')}</a>
-            <a className="nav-cta" href="/login">
-              {t('auth.signIn')}
-              <ArrowUpRight className="icon" aria-hidden="true" />
-            </a>
-          </div>
-        </nav>
-      </header>
-      <main id="main">
-        <section className="hero" aria-labelledby="hero-title">
-          <div className="thought-sketches" aria-hidden="true">
-            <Sketches />
-          </div>
-          <div className="direction-art paper-art" aria-hidden="true">
-            <div className="app-mockup">
-              <div className="screen-preview">
-                <img
-                  id="paper-background"
-                  src="/landing/board.svg"
-                  alt=""
-                  width="1728"
-                  height={873}
-                  decoding="async"
-                  fetchPriority="high"
-                  onError={({ currentTarget }) => {
-                    if (currentTarget.getAttribute('src') === '/landing/board.svg') {
-                      currentTarget.src = '/landing/tuesday-board.jpg'
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="hero-copy">
-            <span className="eyebrow">
-              <span className="dot" aria-hidden="true"></span>
-              {t('landing.forTheWorkBetweenDisciplines')}
-            </span>
-            <h1 id="hero-title">
-              <span className="headline-line" id="headline-first">
-                {t('landing.everyDiscipline')}
-              </span>
-              <span className="headline-line">
-                <em id="headline-second">{t('landing.oneDirection')}</em>
-              </span>
-            </h1>
-            <p id="hero-description">
-              <span className="hero-lead">{t('landing.intro')}</span>
-              <br />
-              <span className="hero-support">{t('landing.introSupport')}</span>
-            </p>
-            <div className="actions">
-              <button className="primary" aria-haspopup="dialog" onClick={() => dialog.current?.showModal()}>
-                {t('landing.previewTheWorkspace')}
-                <span className="arrow-box">
-                  <ArrowUpRight className="icon" aria-hidden="true" />
-                </span>
-              </button>
-              <a className="text-button" href="#workspace">
-                {t('landing.seeWeeklyPlanning')}
-                <ArrowRight className="icon" aria-hidden="true" />
-              </a>
-            </div>
-            <div className="discipline-rail" aria-label={t('landing.connectedEngineeringDisciplines')}>
-              <span className="discipline">
-                <span className="node">
-                  <Layers className="icon" aria-hidden="true" />
-                </span>
-                {t('landing.geotechnical')}
-              </span>
-              <span className="rail-line" aria-hidden="true"></span>
-              <span className="discipline">
-                <span className="node">
-                  <Users className="icon" aria-hidden="true" />
-                </span>
-                {t('landing.civilDesign')}
-              </span>
-              <span className="rail-line" aria-hidden="true"></span>
-              <span className="discipline">
-                <span className="node">
-                  <CalendarDays className="icon" aria-hidden="true" />
-                </span>
-                {t('landing.fieldServices')}
-              </span>
-            </div>
-          </div>
-          <p className="app-background-note">{t('landing.taskBoardSampleWorkspace')}</p>
-        </section>
-
-        <section id="workspace" className="workspace wrap" aria-labelledby="workspace-title">
-          <div className="workspace-copy">
-            <span className="section-number">{t('landing.workspaceEyebrow')}</span>
-            <h2 id="workspace-title">
-              {t('landing.connectedAbove')}
-              <br />
-              <em>{t('landing.clearOnTheGround')}</em>
-            </h2>
-            <p>{t('landing.workspaceDescription')}</p>
-            <div className="workspace-tags">
-              <span>
-                <Layers className="icon" aria-hidden="true" />
-                {t('landing.projects')}
-              </span>
-              <span>
-                <Users className="icon" aria-hidden="true" />
-                {t('landing.people')}
-              </span>
-              <span>
-                <CalendarDays className="icon" aria-hidden="true" />
-                {t('landing.capacity')}
-              </span>
-            </div>
-          </div>
-          <section className="planner" aria-labelledby="planner-title">
-            <div className="planner-top">
-              <span className="planner-label">
-                <CalendarDays className="icon" aria-hidden="true" />
-                {t('landing.plannerEyebrow')}
-              </span>
-              <span className="sample-label">{t('landing.syntheticPreview')}</span>
-            </div>
-            <div className="planner-heading">
-              <h2 id="planner-title">{t('landing.aLittleMoreClarity')}</h2>
-              <span>{t('landing.october2026')}</span>
-            </div>
-            <div className="plan-tabs" role="tablist" aria-label={t('landing.samplePlanningWeek')}>
-              <button
-                id="week-1"
-                role="tab"
-                aria-controls="plan-panel"
-                aria-selected={week === 0}
-                tabIndex={week === 0 ? 0 : -1}
-                onClick={() => setWeek(0)}
-                onKeyDown={(event) => changeWeek(event, 0)}
-              >
-                {t('landing.weekOfOct5')}
-              </button>
-              <button
-                id="week-2"
-                role="tab"
-                aria-controls="plan-panel"
-                aria-selected={week === 1}
-                tabIndex={week === 1 ? 0 : -1}
-                onClick={() => setWeek(1)}
-                onKeyDown={(event) => changeWeek(event, 1)}
-              >
-                {t('landing.weekOfOct12')}
-              </button>
-            </div>
-            <div id="plan-panel" role="tabpanel" aria-labelledby={`week-${week + 1}`}>
-              <p className="scroll-hint">{t('landing.scrollTheGridToSeeAllWeekly')}</p>
-              <div
-                className="plan-scroll"
-                // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Keyboard access to the horizontal planning table.
-                tabIndex={0}
-                role="region"
-                aria-label={t('landing.weeklyAllocationsScrollHorizontallyForAllColumns')}
-              >
-                <table className="plan-grid">
-                  <caption className="sr-only">{t('landing.sampleWeeklyAllocationsInHours')}</caption>
-                  <colgroup>
-                    <col className="person-column" />
-                    <col />
-                    <col />
-                    <col />
-                  </colgroup>
-                  <thead>
-                    <tr>
-                      <th className="grid-head" scope="col">
-                        {t('landing.people2')}
-                      </th>
-                      <th className="grid-head" scope="col">
-                        {t('landing.projects2')}
-                      </th>
-                      <th className="grid-head" scope="col">
-                        {t('landing.otherWork')}
-                      </th>
-                      <th className="grid-head" scope="col">
-                        {t('landing.available')}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">
-                        <div className="person">
-                          <span className="avatar" aria-hidden="true">
-                            {t('landing.ac')}
-                          </span>
-                          <div>
-                            <div className="person-name">{t('landing.alexChen')}</div>
-                            <div className="person-role">{t('landing.civilDesign')}</div>
-                          </div>
-                        </div>
-                      </th>
-                      <td>
-                        <span className="allocation">{t('landing.hours', { hours: weeks[week][0] })}</span>
-                      </td>
-                      <td>
-                        <span className="allocation tentative">
-                          {t('landing.hours', { hours: weeks[week][1] })}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="allocation available">
-                          {t('landing.hours', { hours: weeks[week][2] })}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <div className="person">
-                          <span className="avatar" aria-hidden="true">
-                            {t('landing.ml')}
-                          </span>
-                          <div>
-                            <div className="person-name">{t('landing.morganLee')}</div>
-                            <div className="person-role">{t('landing.geotechnical')}</div>
-                          </div>
-                        </div>
-                      </th>
-                      <td>
-                        <span className="allocation">{t('landing.hours', { hours: weeks[week][3] })}</span>
-                      </td>
-                      <td>
-                        <span className="allocation tentative">
-                          {t('landing.hours', { hours: weeks[week][4] })}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="allocation available">
-                          {t('landing.hours', { hours: weeks[week][5] })}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <div className="person">
-                          <span className="avatar" aria-hidden="true">
-                            {t('landing.sr')}
-                          </span>
-                          <div>
-                            <div className="person-name">{t('landing.samRivera')}</div>
-                            <div className="person-role">{t('landing.fieldServices')}</div>
-                          </div>
-                        </div>
-                      </th>
-                      <td>
-                        <span className="allocation">{t('landing.hours', { hours: weeks[week][6] })}</span>
-                      </td>
-                      <td>
-                        <span className="allocation tentative">
-                          {t('landing.hours', { hours: weeks[week][7] })}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="allocation available">
-                          {t('landing.hours', { hours: weeks[week][8] })}
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div className="plan-foot">
-                <span className="legend">
-                  <i aria-hidden="true"></i>
-                  {t('landing.sampleWeeklyCapacity')}
-                </span>
-                <span id="plan-summary" role="status">
-                  {t('landing.availableAcrossTeam', {
-                    hours: weeks[week][2] + weeks[week][5] + weeks[week][8],
-                  })}
-                </span>
-              </div>
-            </div>
-          </section>
-        </section>
-
-        <section id="approach" className="approach wrap" aria-labelledby="approach-title">
-          <div>
-            <span className="section-number">{t('landing.approachEyebrow')}</span>
-            <h2 id="approach-title">
-              {t('landing.lessChasing')}
-              <br />
-              {t('landing.more')}{' '}
-              <em>{t('landing.movingForward')}</em>
-            </h2>
-            <p>{t('landing.approachDescription')}</p>
-          </div>
-          <div className="approach-steps">
-            <div className="step">
-              <span>{t('landing.01')}</span>
-              <div>
-                <h3>{t('landing.seeTheWorkNotJustTheTask')}</h3>
-                <p>{t('landing.connectMilestonesHandoffsAndProjectHealthAcross')}</p>
-              </div>
-            </div>
-            <div className="step">
-              <span>{t('landing.02')}</span>
-              <div>
-                <h3>{t('landing.makeRoomForWhatSComing')}</h3>
-                <p>{t('landing.planPeopleAndWeeklyCapacityIncludingThe')}</p>
-              </div>
-            </div>
-            <div className="step">
-              <span>{t('landing.03')}</span>
-              <div>
-                <h3>{t('landing.moveWithSharedContext')}</h3>
-                <p>{t('landing.knowWhatSConfirmedWhatSExpected')}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      <footer className="wrap">
-        <span>{t('landing.tuesdayThoughtfullyConnected')}</span>
-        <span>{t('landing.allSamplePlanningRecordsAreFictional')}</span>
-      </footer>
-
-      <dialog
-        id="workspace-demo"
-        aria-labelledby="demo-title"
-        aria-describedby="demo-description"
-        ref={dialog}
-      >
-        <div className="dialog-head">
-          <span className="eyebrow">
-            <span className="dot" aria-hidden="true"></span>
-            {t('landing.aLookInsideTuesday')}
-          </span>
-          <button
-            className="close"
-            onClick={() => dialog.current?.close()}
-            aria-label={t('landing.closeWorkspacePreview')}
-            autoFocus
-          >
-            <X className="icon" aria-hidden="true" />
-          </button>
-        </div>
-        <h2 id="demo-title">
-          {t('landing.oneWorkspace')}
-          <br />
-          {t('landing.yourPartOfThePicture')}
-        </h2>
-        <p id="demo-description">{t('landing.projectsGiveEveryoneSharedContextEachRole')}</p>
-        <div className="demo-workflows">
-          <article className="demo-workflow">
-            <Layers className="icon" aria-hidden="true" />
-            <h3>{t('landing.projectManagers')}</h3>
-            <p>{t('landing.followProjectHealthDisciplineHandoffsAndUpcoming')}</p>
-          </article>
-          <article className="demo-workflow">
-            <Users className="icon" aria-hidden="true" />
-            <h3>{t('landing.teamManagers')}</h3>
-            <p>{t('landing.planWeeklyCommitmentsSeeAvailableCapacityAnd')}</p>
-          </article>
-          <article className="demo-workflow">
-            <Check className="icon" aria-hidden="true" />
-            <h3>{t('landing.teamMembers')}</h3>
-            <p>{t('landing.findYourPrioritiesKeepContextCloseAnd')}</p>
-          </article>
-        </div>
-        <div className="dialog-note">{t('landing.sampleNotice')}</div>
-        <a className="primary dialog-sign-in" href="/login">
-          {t('landing.enterTuesday')}
-          <ArrowRight className="icon" aria-hidden="true" />
-        </a>
-      </dialog>
+  return <section className="planner" aria-labelledby="planner-title">
+    <div className="surface-heading"><h3 id="planner-title">{t('landing.weeklyPlanning')}</h3><span className="ui-meta">{t('landing.syntheticPreview')}</span></div>
+    <div className="plan-tabs" role="tablist" aria-label={t('landing.samplePlanningWeek')}>
+      {[0, 1].map(index => <button key={index} id={`week-${index + 1}`} role="tab" aria-controls="plan-panel" aria-selected={week === index} tabIndex={week === index ? 0 : -1}
+        onClick={() => setWeek(index)} onKeyDown={event => changeWeek(event, index)}>{t(index === 0 ? 'landing.weekOfOct5' : 'landing.weekOfOct12')}</button>)}
     </div>
-  )
+    <div id="plan-panel" role="tabpanel" aria-labelledby={`week-${week + 1}`}>
+      <p className="scroll-hint">{t('landing.scrollTheGridToSeeAllWeekly')}</p>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Named scroll regions need keyboard access. */}
+      <div className="table-scroll" tabIndex={0} role="region" aria-label={t('landing.weeklyAllocationsScrollHorizontallyForAllColumns')}>
+        <table className="plan-grid"><caption className="sr-only">{t('landing.sampleWeeklyAllocationsInHours')}</caption>
+          <thead><tr>{['people', 'projects', 'otherWork', 'available'].map(key => <th key={key} scope="col">{t(`landing.${key}`)}</th>)}</tr></thead>
+          <tbody>{people.map(person => <tr key={person.name}><th scope="row"><Person person={person} /></th>
+            <td><span className="allocation">{hours(person.project[week])}</span></td><td><span className="allocation other">{hours(person.other[week])}</span></td>
+            <td><span className="allocation available">{hours(weeklyCapacity - person.project[week] - person.other[week])}</span></td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+      <div className="plan-foot"><span>{t('landing.sampleWeeklyCapacity')}</span><strong id="plan-summary" role="status">{t('landing.availableAcrossTeam', { hours: available })}</strong></div>
+    </div>
+  </section>
+}
+
+function EffortPreview() {
+  return <div className="effort-preview">
+    <div className="surface-heading"><div><span className="ui-meta">{t('landing.illustrativeSummary')}</span><h3>{t('landing.watermain')}</h3></div><span className="phase">{t('landing.designPhase')}</span></div>
+    {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Named scroll regions need keyboard access. */}
+      <div className="table-scroll" tabIndex={0} role="region" aria-label={t('landing.effortScroll')}>
+      <table className="effort-table"><caption className="sr-only">{t('landing.effortCaption')}</caption>
+        <thead><tr>{['workPackage', 'allocatedWeek', 'recordedWeek', 'remainingEstimate'].map(key => <th key={key} scope="col">{t(`landing.${key}`)}</th>)}</tr></thead>
+        <tbody>{[
+          ['detailedDesign', 64, 52, 320], ['fieldInspection', 24, 18, 160], ['constructionSupport', 16, 12, 160],
+        ].map(([key, allocated, recorded, remaining]) => <tr key={key}><th scope="row">{t(`landing.${key}`)}</th><td>{hours(Number(allocated))}</td><td>{hours(Number(recorded))}</td><td>{hours(Number(remaining))}</td></tr>)}</tbody>
+        <tfoot><tr><th scope="row">{t('landing.total')}</th><td>{hours(104)}</td><td>{hours(82)}</td><td>{hours(640)}</td></tr></tfoot>
+      </table>
+    </div>
+    <p className="ui-note">{t('landing.effortPeriod')}</p>
+  </div>
+}
+
+export function ApprovedHero() {
+  const dialog = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    const previousTitle = document.title
+    document.title = t('landing.pageTitle')
+    return () => { document.title = previousTitle }
+  }, [])
+  return <div className="approved-hero">
+    <a className="skip" href="#main">{t('landing.skipToContent')}</a>
+    <header className="wrap"><nav className="nav" aria-label={t('landing.mainNavigation')}><Brand />
+      <div className="nav-links"><a href="#workspace">{t('landing.productNav')}</a><a href="#teams">{t('landing.teamsNav')}</a><a href="#data">{t('landing.dataNav')}</a>
+        <a className="nav-cta" href="/login">{t('auth.signIn')}<ArrowUpRight size={16} aria-hidden="true" /></a>
+      </div>
+    </nav></header>
+    <main id="main" tabIndex={-1}>
+      <div className="hero-shell"><div className="thought-sketches" aria-hidden="true"><Sketches /></div>
+      <section className="hero wrap" aria-labelledby="hero-title">
+        <div className="hero-copy"><span className="eyebrow">{t('landing.engineeringConsulting')}</span>
+          <h1 id="hero-title">{t('landing.projectDelivery')}<br /><em>{t('landing.withoutSpreadsheets')}</em></h1>
+          <p>{t('landing.heroDescription')}</p>
+          <div className="actions"><a className="primary" href="#workspace">{t('landing.explorePlatform')}<ArrowRight size={18} aria-hidden="true" /></a>
+            <button className="text-button" aria-haspopup="dialog" onClick={() => dialog.current?.showModal()}>{t('landing.howItWorks')}<ArrowUpRight size={16} aria-hidden="true" /></button>
+          </div><p className="hero-footnote">{t('landing.everyDisciplineOneDirection')}</p>
+        </div>
+        <div className="hero-product"><WorkloadPreview /><p className="product-caption">{t('landing.forecastExplanation')}</p></div>
+      </section></div>
+      <div className="discipline-strip"><div className="wrap"><span>{t('landing.builtAroundTeams')}</span><p>{t('landing.disciplineList')}</p></div></div>
+      <section id="workspace" className="workspace wrap section" aria-labelledby="workspace-title">
+        <div className="section-copy"><span className="section-number">{t('landing.capacityLabel')}</span><h2 id="workspace-title">{t('landing.capacityHeading')}</h2><p>{t('landing.capacityDescription')}</p>
+          <ul className="plain-list"><li>{t('landing.capacityPoint')}</li><li>{t('landing.nonProjectPoint')}</li><li>{t('landing.conflictPoint')}</li></ul>
+        </div><WeeklyPlanner />
+      </section>
+      <section className="effort-band" aria-labelledby="effort-title"><div className="wrap section">
+        <div className="section-intro"><span className="section-number">{t('landing.effortLabel')}</span><h2 id="effort-title">{t('landing.effortHeading')}</h2><p>{t('landing.effortDescription')}</p></div>
+        <EffortPreview /><div className="effort-explainer"><p>{t('landing.effortDistinction')}</p><span>{t('landing.effortStaffing')}</span></div>
+      </div></section>
+      <section id="approach" className="editorial wrap" aria-labelledby="approach-title"><span className="section-number">{t('landing.approachEyebrow')}</span>
+        <h2 id="approach-title">{t('landing.complexityHeading')}<br /><em>{t('landing.complexitySupport')}</em></h2>
+      </section>
+      <section id="teams" className="teams wrap section" aria-labelledby="teams-title">
+        <div className="team-intro"><div><span className="section-number">{t('landing.teamsLabel')}</span><h2 id="teams-title">{t('landing.teamsHeading')}</h2></div><p>{t('landing.teamsDescription')}</p></div>
+        <figure className="board-figure">
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Keyboard access to the horizontally scrollable screenshot. */}
+          <div className="board-scroll" tabIndex={0} role="region" aria-label={t('landing.boardScroll')}>
+          <img src="/landing/board.svg" alt={t('landing.boardAlt')} width="1728" height="873" loading="lazy" decoding="async"
+            onError={({ currentTarget }) => { if (currentTarget.getAttribute('src') === '/landing/board.svg') currentTarget.src = '/landing/tuesday-board.jpg' }} />
+        </div><p className="board-hint">{t('landing.boardHint')}</p><figcaption><span>{t('landing.actualWorkspace')}</span><span>{t('landing.sampleNotice')}</span></figcaption></figure>
+        <div className="team-notes"><div><h3>{t('landing.projectManagers')}</h3><p>{t('landing.followProjectHealthDisciplineHandoffsAndUpcoming')}</p></div><div><h3>{t('landing.teamManagers')}</h3><p>{t('landing.planWeeklyCommitmentsSeeAvailableCapacityAnd')}</p></div><div><h3>{t('landing.teamMembers')}</h3><p>{t('landing.findYourPrioritiesKeepContextCloseAnd')}</p></div></div>
+      </section>
+      <section id="data" className="data-section" aria-labelledby="data-title"><div className="wrap section data-grid">
+        <div className="section-copy"><span className="section-number">{t('landing.dataLabel')}</span><h2 id="data-title">{t('landing.dataHeading')}</h2><p className="data-lead">{t('landing.dataOwnership')}</p><p>{t('landing.dataDescription')}</p><p className="data-detail">{t('landing.integrationBoundary')}</p></div>
+        <ol className="data-flow" aria-label={t('landing.dataFlowLabel')}><li><span className="flow-number">01</span><div><h3>{t('landing.businessSystems')}</h3><p>{t('landing.businessSystemsDetail')}</p></div></li><li className="flow-arrow" aria-hidden="true"><ArrowDown size={20} /></li><li><span className="flow-number">02</span><div><h3>{t('landing.companyData')}</h3><p>{t('landing.companyDataDetail')}</p></div></li><li className="flow-arrow" aria-hidden="true"><ArrowDown size={20} /></li><li><span className="flow-number">03</span><div><h3>{t('landing.tuesdayPlatform')}</h3><p>{t('landing.platformDetail')}</p></div></li></ol>
+      </div></section>
+      <section className="final-cta wrap" aria-labelledby="final-title"><div><h2 id="final-title">{t('landing.finalHeading')}</h2><p>{t('landing.finalDescription')}</p></div><a className="primary" href="#workspace">{t('landing.seePlatform')}<ArrowRight size={18} aria-hidden="true" /></a></section>
+    </main>
+    <footer className="wrap"><Brand /><span>{t('landing.everyDisciplineOneDirection')}</span><a href="/login">{t('auth.signIn')}<ArrowUpRight size={14} aria-hidden="true" /></a></footer>
+    <dialog id="workspace-demo" ref={dialog} aria-labelledby="demo-title" aria-describedby="demo-description" onKeyDown={event => {
+      if (event.key !== 'Tab') return
+      const controls = event.currentTarget.querySelectorAll<HTMLButtonElement | HTMLAnchorElement>('button, a[href]')
+      const first = controls[0], last = controls[controls.length - 1]
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
+    }}>
+      <div className="dialog-head"><span className="section-number">{t('landing.aLookInsideTuesday')}</span><button className="close" onClick={() => dialog.current?.close()} aria-label={t('landing.closeWorkspacePreview')} autoFocus><X size={20} aria-hidden="true" /></button></div>
+      <h2 id="demo-title">{t('landing.oneWorkspace')}</h2><p id="demo-description">{t('landing.demoDescription')}</p>
+      <ol className="demo-steps"><li><h3>{t('landing.demoPlan')}</h3><p>{t('landing.demoPlanDetail')}</p></li><li><h3>{t('landing.demoCoordinate')}</h3><p>{t('landing.demoCoordinateDetail')}</p></li><li><h3>{t('landing.demoReview')}</h3><p>{t('landing.demoReviewDetail')}</p></li></ol>
+      <p className="ui-note">{t('landing.sampleNotice')}</p><a className="primary" href="/login">{t('landing.enterTuesday')}<ArrowRight size={18} aria-hidden="true" /></a>
+    </dialog>
+  </div>
 }
 
 function Sketches() {

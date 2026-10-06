@@ -136,3 +136,57 @@ The decorative app preview is a script-free SVG DOM snapshot with a fixed 1728 Ã
 | Responsive geometry at 320, 375, 768 and 1440 pixels | PASS; no document horizontal overflow, heading and primary action within viewport, preview image loaded |
 
 Browser checks used a local production frontend build and an isolated fictional GET API, with the existing security headers applied. They do not establish production Entra sign-in, hosting, manual screen-reader acceptance, Safari/Firefox behavior or deployment. Automated backend and browser regression coverage remains the PR CI gate.
+
+
+## Tuesday landing refinement â€” 2026-10-06
+
+Local refinement from the approved Paper landing revision `9e74863e` in the isolated
+`landing-polish` worktree. The existing site was reviewed across desktop, tablet and phone,
+including the full page. The Terrace wordmark, Instrument Serif / DM Sans typography,
+forest-green palette and raw-thought sketches remain; the sketch component is byte-for-byte
+unchanged from the base. Jay explicitly confirmed that the raw-thought background should stay.
+Soft amber/sage washes support the original drawings.
+
+The editorial hero now explains the engineering-consulting audience and resource-planning
+purpose. Capacity, effort, shared context, a quieter editorial section, data ownership and a
+final product CTA form the page. Landing-only CSS tokens standardise typography, spacing,
+borders, radii and focus states. No dependency, route, authentication or backend changes.
+The actual Board capture and its fictional-record provenance remain unchanged. Workload and
+weekly planning examples are labelled synthetic; the effort table is labelled illustrative,
+with weekly recorded hours separate from remaining task estimates. Integration copy makes
+no automatic-connection, certification or security promises.
+
+The second visual pass fixed small-screen table legibility, the phone Board crop, tablet
+forecast clipping and the modal's backward Tab focus wrap. Full desktop and mobile pages
+were inspected again, along with section views and all required hero breakpoints. The in-app
+browser verified the rendered page and modal; its viewport override did not resize the local
+tab, so existing Playwright with installed Chrome supplied exact breakpoint screenshots.
+
+| Check | Result |
+|---|---|
+| `npm run build --prefix web` | PASS: TypeScript and production build; inherited Vite/config, generated-selector and large-bundle warnings remain |
+| Focused `oxlint` on the landing component, strings and regression | PASS: no findings |
+| `python3 tools/trace_spec.py --check` | PASS: 612 IDs, 236 sections, no missing or unknown references |
+| `git diff --check` | PASS |
+| `LANDING_URL=http://127.0.0.1:4196 node web/tests/landing.cjs` | PASS against the isolated production frontend preview |
+| Responsive geometry: 375, 390, 768, 1024, 1440 px | PASS: no document overflow or clipped heading/CTA; weekly and effort columns fit; tablet/desktop forecast weeks fit |
+| Navigation, CTAs, discipline filter, weekly tabs and visible hour totals | PASS; hours reconcile against the fictional capacity and effort rows |
+| Keyboard, modal focus wrap, Escape, close, focus return, skip link, reduced motion | PASS |
+| axe WCAG 2.0/2.1 A/AA at all five widths and in the dialog | PASS: zero reported violations; overload also has a text label |
+| Phone Sign in | PASS: existing User ID / Password login displayed, without entering or submitting credentials |
+| Runtime, assets and browser console | PASS: no unexpected findings; the fixture's expected unauthenticated `/api/v1/me` 401 is excluded |
+| Existing login, AuthGate, router entry, package manifests and Board assets compared to base | PASS: byte-for-byte unchanged |
+
+Performance review: locally served fonts, reserved image dimensions, lazy Board loading and
+no continuous animation; no added packages. Unthrottled local LCP/CLS samples are saved with
+the geometry evidence. They are diagnostic samples, not production Core Web Vitals. The
+existing full-app JavaScript bundle is still about 1.91 MB / 501 KB gzip; application-wide
+code splitting is outside this landing refinement.
+
+Evidence is saved under
+`/Users/jaypatel/.codex/visualizations/2026/10/06/01a11343-4783-7172-9f87-103d2fb680de/landing-qa/`
+(section, hero and full-page screenshots, accessibility and result JSON). The browser fixture
+serves synthetic authentication configuration and no operational records. These checks do
+not establish production sign-in, field LCP/INP, manual screen-reader acceptance or
+Safari/Firefox behavior. Backend/full-suite checks were not run for this landing-only change.
+Checks were completed locally before commit; deployment and human acceptance remain UNPROVEN.

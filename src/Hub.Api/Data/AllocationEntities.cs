@@ -8,6 +8,7 @@ public class PersonAvailabilityOverride : Audited, IAuditable
     public Guid PersonId { get; set; }
     public DateOnly WorkDate { get; set; }
     public decimal AvailableHours { get; set; }
+    public Guid? ReconciledLeaveId { get; set; }
     public string Category { get; set; } = AvailabilityCategory.Reduced;
     public string AuditType => "PersonAvailabilityOverride";
     public Guid? AuditProjectId => null;

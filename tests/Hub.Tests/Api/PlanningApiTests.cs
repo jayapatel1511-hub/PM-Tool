@@ -62,21 +62,16 @@ public sealed class PlanningApiTests(HubFactory f)
     }
 
     [Fact]
-    public async Task Stale_patch_is_conflict_and_time_away_updates_date_version_atomically()
+    public async Task Stale_patch_is_conflict_and_HR_leave_updates_date_version_atomically()
     {
         var alex = await FreshReport();
         var created = await CreateDraft(alex);
         var path = $"/api/v1/planning/entries/{created.G("id")}";
         Assert.Equal(HttpStatusCode.Conflict, (await f.As(TestData.Sam).Patch(path, new { label = "Changed", rowVersion = created.I("rowVersion") - 1 })).StatusCode);
         var day = Week.AddDays(1);
-        var away = await (await f.As(TestData.Sam).Post("/api/v1/planning/time-away", new
-        {
-            personId = alex, from = day, through = day, action = "Record", availableHours = 0m, category = AvailabilityCategory.Unavailable,
-            versions = new[] { new { workDate = day, rowVersion = 0 } },
-        })).Json();
-        Assert.Equal(0m, away["days"]![0]! ["availableHours"]!.GetValue<decimal>());
-        Assert.True(away["days"]![0]! ["dateVersion"]!.GetValue<int>() >= 1);
-        Assert.Equal(1, f.Db(db => db.PersonDateVersions.Count(v => v.PersonId == alex && v.WorkDate == day)));
+        await (await f.As(TestData.Sam).Post("/api/v1/planning/leave/manual", new { personId = alex, fromDate = day, throughDate = day, sourceSystem = "Synthetic HR", externalId = Guid.NewGuid().ToString(), status = "Approved", rowVersion = 0 })).Json();
+        Assert.True(f.Db(db => db.PersonDateVersions.Single(v => v.PersonId == alex && v.WorkDate == day).RowVersion) >= 1);
+
     }
 
     [Fact]
@@ -134,25 +129,18 @@ public sealed class PlanningApiTests(HubFactory f)
     }
 
     [Fact]
-    public async Task Time_away_range_is_atomic_and_stale_versions_write_nothing()
+    public async Task HR_leave_range_is_atomic_and_stale_versions_write_nothing()
     {
         var alex = await FreshReport();
         var from = Week;
         var through = Week.AddDays(4);
-        var versions = Enumerable.Range(0, 5).Select(i => new { workDate = from.AddDays(i), rowVersion = 0 }).ToArray();
-        var result = await (await f.As(TestData.Sam).Post("/api/v1/planning/time-away", new
-        {
-            personId = alex, from, through, action = "Record", availableHours = 0m, category = "Unavailable", versions
-        })).Json();
-        Assert.Equal(5, result["days"]!.AsArray().Count);
-        Assert.All(result["days"]!.AsArray(), day => Assert.True(day!["dateVersion"]!.GetValue<int>() > 0));
-        var stale = await f.As(TestData.Sam).Post("/api/v1/planning/time-away", new
-        {
-            personId = alex, from, through, action = "Record", availableHours = 4m, category = "Reduced",
-            versions = new[] { new { workDate = from, rowVersion = 0 } }
-        });
+        var externalId = Guid.NewGuid().ToString();
+        var result = await (await f.As(TestData.Sam).Post("/api/v1/planning/leave/manual", new { personId = alex, fromDate = from, throughDate = through, sourceSystem = "Synthetic HR", externalId, status = "Approved", rowVersion = 0 })).Json();
+        Assert.Equal(5, f.Db(db => db.PersonDateVersions.Count(x => x.PersonId == alex && x.WorkDate >= from && x.WorkDate <= through)));
+        var stale = await f.As(TestData.Sam).Post("/api/v1/planning/leave/manual", new { personId = alex, fromDate = from, throughDate = through, sourceSystem = "Synthetic HR", externalId, hoursPerDay = 4m, status = "Approved", rowVersion = 0 });
         Assert.Equal(HttpStatusCode.Conflict, stale.StatusCode);
-        Assert.Equal(5, f.Db(db => db.AvailabilityOverrides.Count(x => x.PersonId == alex && x.WorkDate >= from && x.WorkDate <= through)));
+        Assert.Null(f.Db(db => db.ApprovedLeaves.Single(l => l.Id == result.G("id")).HoursPerDay));
+
     }
 
     [Fact]

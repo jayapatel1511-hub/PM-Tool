@@ -19,7 +19,7 @@ SPEC = ROOT / "Engineering-Project-Coordination-Hub-Specification.md"
 PACKETS = sorted((ROOT / "specs").glob("[0-9][0-9][0-9]-*/spec.md"))
 OUT = ROOT / "specs" / "TRACEABILITY.md"
 
-RULE = r"(?:G|P|TM|M|DL|T|R|D|DEC|C|DOC|ATT|ASG|RSK|ISS|MTG|A|E)"
+RULE = r"(?:G|P|TM|M|DL|T|R|D|DEC|C|DOC|ATT|ASG|RSK|ISS|MTG|RES|PLN|A|E)"
 DASH = r"(?:\s+to\s+|\s*(?:…|\.\.|–|-)\s*)"
 # Sections that feed /speckit-plan rather than a feature spec, and document scaffolding.
 PLANNING = {"23", "24", "25", "26"}

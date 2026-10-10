@@ -145,39 +145,29 @@ public sealed class PlanningContractTests(HubFactory f)
     }
 
     [Fact]
-    public async Task Time_away_matches_029_versions_and_clear_preserves_additional_and_noops()
+    public async Task Legacy_absence_reconciliation_preserves_source_and_additional_hours()
     {
-        var (first, _) = await Person(); var (second, _) = await Person();
-        for (var version = 0; version < 2; version++)
-        {
-            var legacy = await (await f.As(TestData.Sam).Put($"/api/v1/users/{first}/availability/{W:yyyy-MM-dd}", new { expectedRowVersion = version, availableHours = 4, category = "Reduced" })).Json();
-            var plan = await (await f.As(TestData.Sam).Post("/api/v1/planning/time-away", new { personId = second, from = W, through = W, action = "Record", availableHours = 4, category = "Reduced", versions = new[] { new { workDate = W, rowVersion = version } } })).Json();
-            Assert.Equal(legacy.I("rowVersion"), plan["days"]![0]!.I("rowVersion"));
-            Assert.Equal(N(legacy, "availableHours"), N(plan["days"]![0]!, "availableHours"));
-            Assert.Equal(f.Db(db => db.PersonDateVersions.Single(v => v.PersonId == first && v.WorkDate == W).RowVersion), plan["days"]![0]!.I("dateVersion"));
-        }
-        var saturday = W.AddDays(5); var friday = W.AddDays(4);
-        await (await f.As(TestData.Sam).Put($"/api/v1/users/{second}/availability/{saturday:yyyy-MM-dd}", new { expectedRowVersion = 0, availableHours = 0, category = "Unavailable" })).Json();
-        await (await f.As(TestData.Sam).Put($"/api/v1/users/{second}/availability/{friday:yyyy-MM-dd}", new { expectedRowVersion = 0, availableHours = 10, category = "Additional" })).Json();
-        var cleared = await (await f.As(TestData.Sam).Post("/api/v1/planning/time-away", new { personId = second, from = W, through = saturday, action = "Clear", versions = new[] { new { workDate = W, rowVersion = 2 }, new { workDate = saturday, rowVersion = 1 } } })).Json();
-        Assert.Equal(2, cleared["cleared"]!.AsArray().Count);
-        Assert.Equal(1, f.Db(db => db.AvailabilityOverrides.Count(v => v.PersonId == second)));
-        Assert.Equal(1, f.Db(db => db.PersonDateVersions.Single(v => v.PersonId == second && v.WorkDate == friday).RowVersion));
-        var before = f.Db(db => db.PersonDateVersions.Where(v => v.PersonId == second).Sum(v => v.RowVersion));
-        var noOp = await (await f.As(TestData.Sam).Post("/api/v1/planning/time-away", new { personId = second, from = W, through = saturday, action = "Clear" })).Json();
-        Assert.Empty(noOp["cleared"]!.AsArray()); Assert.Equal(before, f.Db(db => db.PersonDateVersions.Where(v => v.PersonId == second).Sum(v => v.RowVersion)));
+        var (id, _) = await Person();
+        await (await f.As(TestData.Sam).Put($"/api/v1/users/{id}/availability/{W:yyyy-MM-dd}", new { expectedRowVersion = 0, availableHours = 4, category = "Reduced" })).Json();
+        var friday = W.AddDays(4);
+        await (await f.As(TestData.Sam).Put($"/api/v1/users/{id}/availability/{friday:yyyy-MM-dd}", new { expectedRowVersion = 0, availableHours = 10, category = "Additional" })).Json();
+        var leave = await (await f.As(TestData.Sam).Post("/api/v1/planning/leave/manual", new { personId = id, sourceSystem = "Synthetic HR", externalId = Guid.NewGuid().ToString(), fromDate = W, throughDate = W, status = "Cancelled", rowVersion = 0 })).Json();
+        await (await f.As(TestData.Sam).Post("/api/v1/planning/leave/reconcile", new { personId = id, leaveId = leave.G("id"), dates = new[] { new { workDate = W, rowVersion = 1 } } })).Json();
+        Assert.Equal(2, f.Db(db => db.AvailabilityOverrides.Count(v => v.PersonId == id)));
+        Assert.NotNull(f.Db(db => db.AvailabilityOverrides.Single(v => v.PersonId == id && v.WorkDate == W).ReconciledLeaveId));
+        Assert.Equal(1, f.Db(db => db.PersonDateVersions.Single(v => v.PersonId == id && v.WorkDate == friday).RowVersion));
     }
 
     [Fact]
-    public async Task Stale_range_and_missing_versions_cannot_partially_write()
+    public async Task Unreferenced_time_away_cannot_partially_write()
     {
         var (id, _) = await Person();
         await (await f.As(TestData.Sam).Put($"/api/v1/users/{id}/availability/{W:yyyy-MM-dd}", new { expectedRowVersion = 0, availableHours = 4, category = "Reduced" })).Json();
         var before = f.Db(db => JsonSerializer.Serialize(db.AvailabilityOverrides.Where(x => x.PersonId == id).AsNoTracking().ToList()));
         foreach (var versions in new object[] { Array.Empty<object>(), new[] { new { workDate = W, rowVersion = 0 }, new { workDate = W.AddDays(1), rowVersion = 0 } } })
         {
-            var result = await (await f.As(TestData.Sam).Post("/api/v1/planning/time-away", new { personId = id, from = W, through = W.AddDays(1), action = "Record", availableHours = 0, category = "Unavailable", versions })).Json(409);
-            Assert.Contains(W.ToString("yyyy-MM-dd"), result["staleDates"]!.ToJsonString());
+            var result = await (await f.As(TestData.Sam).Post("/api/v1/planning/time-away", new { personId = id, from = W, through = W.AddDays(1), action = "Record", availableHours = 0, category = "Unavailable", versions })).Json(422);
+            Assert.Equal("hr_reference_required", result.S("code"));
             Assert.Equal(before, f.Db(db => JsonSerializer.Serialize(db.AvailabilityOverrides.Where(x => x.PersonId == id).AsNoTracking().ToList())));
             Assert.False(f.Db(db => db.PersonDateVersions.Any(v => v.PersonId == id && v.WorkDate == W.AddDays(1))));
         }
@@ -306,8 +296,8 @@ public sealed class PlanningContractTests(HubFactory f)
         async Task<HttpResponseMessage> Send(string path, string json, string key) { var request = new HttpRequestMessage(HttpMethod.Post, path) { Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json") }; request.Headers.Add("Idempotency-Key", key); return await f.As(TestData.Admin).SendAsync(request); }
         var key = Guid.NewGuid().ToString(); var path = $"/api/v1/planning/entries/{entry.G("id")}/still-valid";
         var body = JsonSerializer.Serialize(new { RowVersion = entry.I("rowVersion") }); var first = await (await Send(path, body, key)).Json(); var replay = await Send(path, body, key); Assert.Equal(first.G("id"), (await replay.Json()).G("id")); Assert.True(replay.Headers.Contains("Idempotent-Replayed"));
-        var timeBody = JsonSerializer.Serialize(new { PersonId = id, From = W.AddDays(3), Through = W.AddDays(3), Action = "Record", AvailableHours = 0, Category = "Unavailable", Versions = new[] { new { WorkDate = W.AddDays(3), RowVersion = 0 } } });
-        var timeKey = Guid.NewGuid().ToString(); await (await Send("/api/v1/planning/time-away", timeBody, timeKey)).Json(); await (await Send("/api/v1/planning/time-away", timeBody, timeKey)).Json();
+        var timeBody = JsonSerializer.Serialize(new { PersonId = id, FromDate = W.AddDays(3), ThroughDate = W.AddDays(3), SourceSystem = "Synthetic HR", ExternalId = Guid.NewGuid().ToString(), Status = "Approved", RowVersion = 0 });
+        var timeKey = Guid.NewGuid().ToString(); await (await Send("/api/v1/planning/leave/manual", timeBody, timeKey)).Json(); await (await Send("/api/v1/planning/leave/manual", timeBody, timeKey)).Json();
         var other = await Entry(id, visibility: "Draft"); var correctionBody = JsonSerializer.Serialize(new { RowVersion = other.I("rowVersion"), Reason = "Synthetic correction access" });
         var before = f.Db(db => db.ActivityLog.Count(a => a.ItemType == "PlanningDraftAccess"));
         var correctionKey = Guid.NewGuid().ToString(); var correctionPath = $"/api/v1/planning/entries/{other.G("id")}/still-valid";

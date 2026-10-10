@@ -15,6 +15,7 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
         if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.HandoffEndpoints.AtomicCommand>() is not null
             || ctx.GetEndpoint()?.Metadata.GetMetadata<Coordination.AtomicCommand>() is not null)
         { await next(ctx); return; }
+        if (ctx.Request.Path.StartsWithSegments("/api/v1/me/calendar-subscription")) { await next(ctx); return; }
         var key = ctx.Request.Headers["Idempotency-Key"].FirstOrDefault()?.Trim();
         if (!HttpMethods.IsPost(ctx.Request.Method) || string.IsNullOrEmpty(key) || !me.Resolved) { await next(ctx); return; }
         Check.That(key.Length <= 100, "Idempotency-Key", "error.too_long", 100);

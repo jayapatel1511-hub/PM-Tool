@@ -284,6 +284,14 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("entra_object_id");
 
+                    b.Property<string>("HrPersonKey")
+                        .HasColumnType("text")
+                        .HasColumnName("hr_person_key");
+
+                    b.Property<string>("HrSourceSystem")
+                        .HasColumnType("text")
+                        .HasColumnName("hr_source_system");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -349,9 +357,110 @@ namespace Hub.Api.Data.Migrations
                     b.HasIndex("SupervisorId")
                         .HasDatabaseName("ix_app_user_supervisor_id");
 
+                    b.HasIndex("HrSourceSystem", "HrPersonKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_app_user_hr_source_system_hr_person_key");
+
                     b.ToTable("app_user", "hub", t =>
                         {
                             t.HasCheckConstraint("ck_app_user_not_own_supervisor", "supervisor_id IS NULL OR supervisor_id <> id");
+
+                            t.HasCheckConstraint("ck_hr_identity_pair", "(hr_source_system IS NULL) = (hr_person_key IS NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ApprovedLeave", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("ExternalId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("external_id");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date")
+                        .HasColumnName("from_date");
+
+                    b.Property<decimal?>("HoursPerDay")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("hours_per_day");
+
+                    b.Property<DateTimeOffset>("ImportedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("imported_at");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("SourceKind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_kind");
+
+                    b.Property<string>("SourceSystem")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_system");
+
+                    b.Property<DateTimeOffset>("SourceUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("source_updated_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateOnly>("ThroughDate")
+                        .HasColumnType("date")
+                        .HasColumnName("through_date");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_approved_leave");
+
+                    b.HasIndex("SourceSystem", "ExternalId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_approved_leave_source_system_external_id");
+
+                    b.HasIndex("PersonId", "FromDate", "ThroughDate")
+                        .HasDatabaseName("ix_approved_leave_person_id_from_date_through_date");
+
+                    b.ToTable("approved_leave", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_leave_dates", "through_date >= from_date AND through_date - from_date <= 365");
+
+                            t.HasCheckConstraint("ck_leave_hours", "hours_per_day IS NULL OR hours_per_day > 0 AND hours_per_day <= 24");
+
+                            t.HasCheckConstraint("ck_leave_source", "source_kind IN ('HRImport','ManualHR')");
+
+                            t.HasCheckConstraint("ck_leave_status", "status IN ('Approved','Cancelled','Unverified')");
                         });
                 });
 
@@ -977,6 +1086,124 @@ namespace Hub.Api.Data.Migrations
                         {
                             t.HasCheckConstraint("ck_event_times", "end_at > start_at");
                         });
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.CalendarFeedItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean")
+                        .HasColumnName("active");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Fingerprint")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("fingerprint");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date")
+                        .HasColumnName("from_date");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("integer")
+                        .HasColumnName("sequence");
+
+                    b.Property<string>("SourceKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_key");
+
+                    b.Property<DateOnly>("ThroughDate")
+                        .HasColumnType("date")
+                        .HasColumnName("through_date");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_calendar_feed_item");
+
+                    b.HasIndex("UserId", "SourceKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_calendar_feed_item_user_id_source_key");
+
+                    b.ToTable("calendar_feed_item", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.CalendarSubscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("TokenHash")
+                        .HasColumnType("text")
+                        .HasColumnName("token_hash");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_calendar_subscription");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_calendar_subscription_token_hash");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_calendar_subscription_user_id");
+
+                    b.ToTable("calendar_subscription", "hub");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.ChangeAssessment", b =>
@@ -4326,6 +4553,86 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("job_run", "hub");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.LeaveImportPreview", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("RowsHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("rows_hash");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_leave_import_preview");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_leave_import_preview_user_id");
+
+                    b.ToTable("leave_import_preview", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.LeaveImportState", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("ImportedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("imported_at");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("SourceSystem")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_system");
+
+                    b.Property<DateTimeOffset>("SourceUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("source_updated_at");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_leave_import_state");
+
+                    b.HasIndex("SourceSystem")
+                        .IsUnique()
+                        .HasDatabaseName("ix_leave_import_state_source_system");
+
+                    b.ToTable("leave_import_state", "hub");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.Meeting", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5204,6 +5511,10 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("person_id");
 
+                    b.Property<Guid?>("ReconciledLeaveId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reconciled_leave_id");
+
                     b.Property<int>("RowVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("integer")
@@ -5223,6 +5534,9 @@ namespace Hub.Api.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_person_availability_override");
+
+                    b.HasIndex("ReconciledLeaveId")
+                        .HasDatabaseName("ix_person_availability_override_reconciled_leave_id");
 
                     b.HasIndex("PersonId", "WorkDate")
                         .IsUnique()
@@ -5280,6 +5594,65 @@ namespace Hub.Api.Data.Migrations
                         .HasDatabaseName("ix_person_date_version_person_id_work_date");
 
                     b.ToTable("person_date_version", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.PersonSchedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date")
+                        .HasColumnName("from_date");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<decimal>("WeeklyHours")
+                        .HasPrecision(5, 1)
+                        .HasColumnType("numeric(5,1)")
+                        .HasColumnName("weekly_hours");
+
+                    b.PrimitiveCollection<int[]>("WorkingDays")
+                        .IsRequired()
+                        .HasColumnType("integer[]")
+                        .HasColumnName("working_days");
+
+                    b.HasKey("Id")
+                        .HasName("pk_person_schedule");
+
+                    b.HasIndex("PersonId", "FromDate")
+                        .IsUnique()
+                        .HasDatabaseName("ix_person_schedule_person_id_from_date");
+
+                    b.ToTable("person_schedule", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_person_schedule", "weekly_hours >= 0 AND weekly_hours <= 168 AND cardinality(working_days) BETWEEN 1 AND 7 AND working_days <@ ARRAY[0,1,2,3,4,5,6]");
+                        });
                 });
 
             modelBuilder.Entity("Hub.Api.Data.Phase", b =>
@@ -9050,6 +9423,16 @@ namespace Hub.Api.Data.Migrations
                         .HasConstraintName("fk_app_user_app_user_supervisor_id");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.ApprovedLeave", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_approved_leave_app_user_person_id");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.AttentionItem", b =>
                 {
                     b.HasOne("Hub.Api.Data.Project", null)
@@ -9192,6 +9575,26 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_basis_use_design_basis_versions_version_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.CalendarFeedItem", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_calendar_feed_item_app_user_user_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.CalendarSubscription", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_calendar_subscription_app_user_user_id");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.ChangeAssessment", b =>
@@ -9925,6 +10328,16 @@ namespace Hub.Api.Data.Migrations
                         .HasConstraintName("fk_issue_verification_app_user_verifier_id");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.LeaveImportPreview", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_leave_import_preview_app_user_user_id");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.MeetingAction", b =>
                 {
                     b.HasOne("Hub.Api.Data.Meeting", null)
@@ -10029,6 +10442,12 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_person_availability_override_app_user_person_id");
+
+                    b.HasOne("Hub.Api.Data.ApprovedLeave", null)
+                        .WithMany()
+                        .HasForeignKey("ReconciledLeaveId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_person_availability_override_approved_leave_reconciled_leav~");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.PersonDateVersion", b =>
@@ -10039,6 +10458,16 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_person_date_version_app_user_person_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.PersonSchedule", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_person_schedule_app_user_person_id");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.PlanningEntry", b =>

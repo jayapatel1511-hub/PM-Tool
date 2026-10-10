@@ -18,7 +18,7 @@ public static class Digest
     public sealed record Section(string Code, List<Row> Rows, int Total);
     public sealed record Updates(string ProjectNumber, string ProjectName, int Count, Dictionary<string, int> ByType, List<string> Top);
     public sealed record Result(string Subject, string Body, List<Section> Sections, List<Updates> ProjectUpdates)
-    { public Guid[] RequiredProjectIds { get; init; } = []; public Guid[] RequiredPlanningEntryIds { get; init; } = []; }
+    { public Guid[] RequiredProjectIds { get; init; } = []; }
 
     const int Cap = 10;
 
@@ -265,7 +265,7 @@ public static class Digest
             body.AppendLine($"  {Text.Get("digest.following")} {baseUrl}/notifications?tab=following").AppendLine();
         }
         body.AppendLine(Text.Get("digest.footer", $"{baseUrl}/my-work", $"{baseUrl}/preferences"));
-        return new Result(subject, body.ToString(), sections, updates) { RequiredProjectIds = [.. pids], RequiredPlanningEntryIds = [.. planning.Rows.Select(r => r.ItemId)] };
+        return new Result(subject, body.ToString(), sections, updates) { RequiredProjectIds = [.. pids] };
     }
 
     /// Apply the same source-level privacy boundary as project activity reads when no request Access is available.
@@ -328,7 +328,7 @@ public sealed class DigestJob : IJob
             var digest = await Digest.Build(db, u.Id, u.DisplayName.Split(' ')[0], today, pref?.LastDigestAt ?? now.AddDays(-1), now, s, baseUrl, off);
             if (digest is not null && !string.IsNullOrEmpty(u.Email))
             {
-                db.Emails.Add(new EmailMessage { UserId = u.Id, ToAddress = u.Email, Subject = digest.Subject, BodyText = digest.Body, Kind = "Digest", RequiredProjectIds = digest.RequiredProjectIds, RequiredPlanningEntryIds = digest.RequiredPlanningEntryIds,
+                db.Emails.Add(new EmailMessage { UserId = u.Id, ToAddress = u.Email, Subject = digest.Subject, BodyText = digest.Body, Kind = "Digest", RequiredProjectIds = digest.RequiredProjectIds,
                     DedupKey = $"digest:{u.Id}:{today:yyyy-MM-dd}", CreatedAt = now, NextAttemptAt = now });
                 sent++;
             }

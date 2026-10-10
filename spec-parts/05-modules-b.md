@@ -221,9 +221,82 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 **What it deliberately does not do.** The first-release workload calculation does not subtract logged actual task hours from estimates or treat them as an approved timesheet (§36.8). It also does not use leave/holiday calendars (Phase 3, or import from HR), utilisation targets, resource levelling, forecasts beyond 8 weeks, or capacity planning by role.
 
-**Views.** Person × week grid (heat-shaded load with the number visible) with expandable rows: Person → Project → Tasks (with due dates). Filters: supervisor, discipline, office, project, date range. Sort by load, overdue count, task count. Export.
+#### 12.15.2 Capacity and leave
+
+- Each person has `weekly_capacity_hours` (default `default_weekly_capacity_hours` = 37.5) and `working_days` (default Mon–Fri). Stored in `PersonCapacity` with `effective_from` so a change to part-time does not rewrite history.
+- `Leave` is a date range per person with full-day or hours-per-day, copied from HR-approved leave (§12.18). Admin imports it; an Admin/Supervisor may record an HR-referenced manual fallback. Employees do not approve or edit imported leave in Tuesday.
+- Resource availability is calculated per working date using the effective capacity/schedule on that date, then summed into ISO weeks. Daily hours are weekly capacity divided by the number of working days (equal-length working days in MVP). Approved leave is capped to those daily hours; office holidays make that date unavailable. Overlapping leave and holidays reduce the day at most once. A Leave row explains the reduction but is never added to planned hours. Changes preserve existing allocation hours and dates and raise warnings.
+
+#### 12.15.3 Allocation
+
+One row = one block of recurring weekly hours for one person.
+
+| Field | Notes |
+|---|---|
+| `person_id` | Required. |
+| `created_by_id`, `owner_kind` | `Employee` (self-created) or `Manager`. Determines edit rights (§8.6). |
+| `hours_per_week` | Required. 0.5 h steps. Warning above capacity; hard stop above `allocation_max_hours_per_week`. |
+| `start_week`, `end_week` | ISO week (Monday date). Quick add sets both to the clicked week. |
+| `label` | Required free text ("proposal support", "Hwy 7 small project"). |
+| `source_category` | §10.2 list. Quick add defaults to `OtherProject` unless a project is linked. |
+| `project_id`, `project_discipline_id` | Optional. Linking a project sets `MajorProject` and lets the Project Dashboard show staffing. |
+| `confidence` | Confirmed / Expected / Possible. Employee entries default Confirmed; manager entries default Expected. |
+| `visibility` | Draft / Published / Confirmed (manager entries only). Employee entries are always Confirmed. |
+| `notes` | Optional. |
+| `last_confirmed_at` | Set on create, on edit, and by "still valid". Drives Stale Allocation. |
+
+#### 12.15.4 Two owners, one grid
+
+- **Employee-added work.** Any employee adds entries to their own row: "10 h proposal support", "3 h admin", "6 h small project". Employee-owned; a Supervisor sees them but cannot edit them.
+- **Manager planning.** A Supervisor adds entries to supervised staff. Default is a Private Draft so the manager can scenario-plan without creating expectations. Publish when the work is likely; Confirm when it is real. Manager-owned; the employee can comment but not edit.
+
+Neither owner overwrites the other. Both appear in the same weekly total, each labelled with its owner and source.
+
+#### 12.15.5 Quick add
+
+1. Click a person-week cell (or press Enter on a focused cell).
+2. Type `8 h proposal support` (also accepts `8h`, `8 — proposal support`, `~8 h upcoming review`; a leading `~` sets confidence Possible).
+3. Press Enter.
+
+Result: a one-week allocation with defaults from 12.15.3. Nothing else is asked. Everything else lives in the optional side panel (§13.11): visibility, confidence, start/end week, repeat, category, project link, notes, move to another person, convert to a task assignment.
+
+#### 12.15.6 Repeat, extend, drag
+
+An allocation spanning weeks is one row, not N copies. Extend or shorten by dragging the block's edge or editing `end_week`. Drag the block to another week to shift both dates; drag to another person to change `person_id` (permission-checked). "Repeat for N weeks" sets `end_week`. Copy creates a new row with the same fields.
+
+#### 12.15.7 Explainable totals
+
+Per person-week the planner shows capacity, planned hours by confidence band, remaining capacity (`capacity − confirmed − expected`), and an indicator. Clicking the total lists every contributing row: owner, label, source, hours, confidence, visibility. A viewer never sees a number they cannot decompose. Private Drafts appear only in their creator's view and totals (§8.7).
+
+#### 12.15.8 Project-derived demand (context, not load) [MVP-Recommended]
+
+The v1.0 calculation is retained as a **context column**: for each open task with `estimated_hours`, spread remaining hours over working days between `max(start_date, today)` and `due_date`, sum per ISO week per assignee; overdue remainder lands in the current week; unestimated tasks are counted, not spread. Show it beside planned hours as "task estimates: 14 h (3 unestimated)". It is never added to planned hours. It exists to prompt the manager ("the Hub thinks this person has 14 h of task work next week and you have planned 0 h against that project").
+
+#### 12.15.9 Horizon and precision
+
+Near term (0–6 weeks): person-level hours. Mid term (6–12 weeks): same model, Expected/Possible dominate. Beyond the horizon the planner does not pretend to know; **role-level demand** ("one civil technologist in January") is Phase 2 (FR-RES-16).
+
+#### 12.15.10 Conflicts
+
+Rules RES-08…RES-13 (§15.13) run nightly and on change. Results are warnings in the grid and on Manager Home. Nothing is blocked. Overlapping Plans tells each manager "another manager has planned N h on this person in week W" and leaves resolution to them.
+
+#### 12.15.11 Connected workflows
+
+| Trigger elsewhere in the Hub | Effect in the planner |
+|---|---|
+| PM moves a deliverable earlier | Deliverable Pressure may fire for the week; manager decides whether to re-plan. Nothing moves automatically. |
+| Approved HR leave is imported, updated or cancelled | Capacity and coverage warnings recompute; existing allocation hours/dates stay unchanged. |
+| Supervisor reassigns a task | No allocation change (tasks are not load). The context column updates. |
+| Manager publishes an allocation linked to a project | Project Dashboard discipline summary shows planned staffing hours for the week. |
+| Allocation references a project not in the Hub | Nothing; that is the point. Label and `OtherProject` carry it. |
 
 ---
+
+#### 12.15.12 Weekly planning and publishing
+
+The manager starts from current allocations or **Copy last week**. Copy previews only their own manager rows active in the source week; each selected row becomes a one-week Draft in the target week with its label, hours, category, confidence and permitted project link retained. Existing target allocations, employee entries, leave and other managers’ work are displayed as context, never copied or overwritten. Warn about potential duplicates and changed capacity before applying; every preview item can be skipped. Applying the preview is atomic, version-checked and idempotent so a retry creates no duplicate rows; stale previews require refresh. Inactive people and archived project links must be resolved before applying.
+
+**Publish selected** previews the resulting employee plans and warnings, then transitions only the creator’s selected Drafts to Published in one version-checked transaction. It preserves confidence independently of visibility and sends one summary per affected employee. It does not publish other managers’ drafts or create a separate weekly-plan store. My Week, project staffing and reports update from those same allocations. Export uses the current visible view and labels possible work and private drafts explicitly.
 
 ### 12.16 Gantt / Timeline
 
@@ -255,9 +328,36 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 Module-level behaviour for the Project Dashboard, Portfolio Dashboard, and My Work is fully specified in their screen specifications (§13.1, §13.12, §13.10) because they are composed entirely of the modules above. The shared principle: every number on a dashboard is a link to the filtered list that produced it, and every colour has a visible reason.
 
----
 
-### 12.18 Project Assignments, Following, and My Staff
+### 12.18 Vacation & Coverage [MVP-Required]
+
+#### 12.18.1 Authority and calendar
+
+HR approves leave and owns balances, accruals, reasons and cancellations. Tuesday stores only availability and source provenance. The year calendar (§13.21) shows approved full/partial days and office holidays alongside coverage concerns. Admin-configured `OfficeHoliday` dates apply to the person’s office and working schedule; changing a holiday re-evaluates capacity. Project date thresholds still use calendar days. Legacy Unverified leave remains visible as provisional availability pending HR reconciliation.
+
+#### 12.18.2 HR-approved leave CSV import
+
+The first version accepts one documented CSV contract: `source_system`, `external_id`, `person_key`, `status` (Approved/Cancelled), `start_date`, `end_date`, `hours_per_day` (blank = full working day), and `source_updated_at`. Admin maintains the exact `(source_system, person_key)` → User mapping using the User’s HR identity fields. Agree it from a real HR export before implementation; never match by display name. Unmapped rows reject the batch. Uniform partial hours apply to each working day in the range; varying daily hours require explicit source mapping without averaging. No leave reasons, medical information or balance columns are imported or retained. Dates and positive hours must be valid for the mapped schedule; ambiguous overlapping partial-day rows require reconciliation rather than a guessed total.
+
+Admin previews new/changed/cancelled/unchanged rows, affected people/weeks, duplicate keys, invalid dates/hours, unmapped people and manual-fallback matches. Reject invalid or conflicting batches without changing leave or allocations. Deduplicate identical rows; reject contradictory repeated keys and source timestamps older than the stored record. Preview records expected versions; apply is atomic and rejects concurrent/stale changes. Reimporting unchanged source rows is a no-op. Upsert by `(source_system, external_id)`; reconcile matching ManualHR records in place, retaining their audit history. A missing row never cancels leave: require an explicit Cancelled source row. Preserve cancellations and historical records, recompute availability and warnings, and log the import actor and source time. Show the last successful import time separately from the HR export’s source time; failed imports leave the previous data intact and visibly dated. Do not retain raw uploaded files.
+
+A Supervisor/Admin may manually copy already-approved leave with the same stable HR reference when an export is unavailable. This is labelled ManualHR and dated; it is not approval in Tuesday and does not promise elimination of duplicate entry. Automatic HR API/calendar sync is later work after source-system discovery.
+
+#### 12.18.3 Coverage planning
+
+Coverage Concern (RES-19) lists the absence dates, responsible person, permitted affected task/deliverable/review and relevant submission. Detect a dated concern separately from weekly Leave Conflict: a team may fit within weekly capacity while its reviewer is away on the due date. A partial absence is shown for review without asserting that work cannot occur during the remaining hours. Weekly allocations have no daily timing, so the system must not invent a day-specific collision from weekly hours alone. Unknown work dates are shown as needing a date, not proven covered.
+
+Managers and authorised PMs/DLs use existing task/reviewer reassignment, comments and linked handover tasks to record coverage. Reassignment preserves qualification/independent-review rules and requires the existing permissions; no automatic staffing occurs. A handover note alone does not resolve a warning while the original dated condition still holds. Leave changes do not alter project deadlines, statuses or planned effort.
+
+### 12.19 Personal calendar subscription [MVP-Recommended]
+
+Offer an individual read-only ICS subscription for the user’s approved leave, assigned dated tasks, dated reviews (using the work item’s due date) and permitted project milestones. No start/end time is inferred from weekly allocations: use all-day date events and link to My Week for hours. Label dates as commitments, not booked appointments. Feed subscription is read-only and is refreshed by the calendar client; do not promise instant updates or treat the feed as an availability source.
+
+Use stable event UIDs for each item, updated sequence/timestamps, and cancellation events with the same UID when an item is cancelled, reassigned away or loses visibility. Previously emitted cancellations retain only the UID and cancellation metadata, no restricted content. Recheck account state and permissions on every fetch. The subscription uses a revocable per-user capability token, stored hashed and excluded from logs/audit/export content; rotation or account deactivation invalidates the old URL. Render no other managers’ drafts, HR reasons, balances or restricted project details. Outlook is the first intended client; validate update/cancellation handling in supported clients before claiming compatibility. Subscription access and permitted data destination require the organisation’s existing IT policy.
+
+Inbound meeting/free-busy import and two-way Outlook/Google calendar sync are Phase 3, pending actual APIs and consent. Calendar edits never approve leave, change HR records or automatically overwrite staffing allocations. Any future inbound feed must reconcile source event identities and avoid double-counting HR leave, holidays and already-planned administration/meetings.
+
+### 12.20 Project Assignments, Following, and My Staff
 
 **Purpose.** Make project assignment do two things without anyone configuring it: everyone assigned to a project receives all of that project's updates, and every manager can see their direct reports — which projects each person is on, in what role, and what they are carrying, waiting on, and holding up — and staff them on projects.
 

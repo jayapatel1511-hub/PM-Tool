@@ -39,7 +39,7 @@ public static class AllocationRules
         if (dayOverride is { } exact) return exact;
         if (!calendar.IsWorkingDay(day)) return 0;
         var monday = Workload.WeekOf(day);
-        var workingDays = calendar.WorkingDays(monday, monday.AddDays(6)).Count();
+        var workingDays = WorkCalendar.Weekdays.WorkingDays(monday, monday.AddDays(6)).Count();
         return workingDays == 0 ? 0 : weeklyHours / workingDays;
     }
 

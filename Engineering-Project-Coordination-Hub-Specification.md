@@ -1,13 +1,13 @@
 # Engineering Project Coordination Hub
 
-## Product Specification — Version 1.0 (Draft for Review)
+## Product Specification — Version 1.2 (Draft for Review)
 
 | Item | Value |
 |---|---|
 | Document | Product and Implementation Specification |
-| Product | Engineering Project Coordination Hub (working name; "the Hub" in this document) |
-| Version | 1.0 — Draft for stakeholder review |
-| Date | 2026-09-15 |
+| Product | Engineering Project Coordination Hub (working name; "the Hub" in this document; candidate product name **Tuesday**, see Section 34) |
+| Version | 1.2 — Draft for stakeholder review |
+| Date | 2026-10-09 (v1.0: 2026-09-15) |
 | Status | Ready for architecture review, wireframing, and ticket breakdown |
 | Audience | Product owner, engineering team, UX design, IT security, pilot project managers |
 
@@ -27,6 +27,14 @@ This specification uses a small set of consistent labels. They matter, because t
 | **Recommendation:** | A recommendation by the authors, not a stated requirement. The business may choose otherwise. |
 | **Assumption:** | An architectural or business assumption made to keep the specification concrete. Must be validated. |
 | **TBD — Business Decision Required** | Information that only the company can provide. The specification is written so that development can proceed around it where possible. |
+
+**Change log**
+
+| Version | Date | Change |
+|---|---|---|
+| 1.0 | 2026-09-15 | Initial draft. |
+| 1.1 | 2026-10-01 | Resource planning promoted from a derived Phase 2 view to an MVP engine owned by managers: weekly person × week allocations, employee- and manager-owned entries, Draft/Published/Confirmed visibility, Confirmed/Expected/Possible confidence, leave, capacity, conflict rules, Manager Home, People area. Sections 1, 8, 9.4, 10, 11.9, 11.13, 12.15, 13.10, 13.11, 13.19, 13.20, 15.13, 23.3, 24.2, 25.7, 27–29, 34 amended. Source: `docs/Tuesday-Consolidated-Product-Scope.md` and `docs/Feature-Gap-Have-vs-Adopt.md`. |
+| 1.2 | 2026-10-09 | Connected Team Planner, Vacation & Coverage, and My Week added to MVP: HR-approved leave CSV import with updates/cancellations, office holidays, coverage warnings, copy-last-week preview, project staffing and batched publishing. Personal calendar subscriptions are MVP-Recommended; automatic HR sync, meeting imports and two-way calendar sync remain later work. Permissions, data model, rules and acceptance criteria aligned. |
 
 Canonical status names, role names, and threshold names are defined once in Section 10 (Core Data Model) and used verbatim everywhere else. If a later section appears to contradict Section 10, Section 10 wins and the later section should be corrected.
 
@@ -71,6 +79,10 @@ Canonical status names, role names, and threshold names are defined once in Sect
 - [33. Risks and Technical Considerations](#33-risks-and-technical-considerations)
 - [34. Open Decisions / Questions](#34-open-decisions-questions)
 - [35. Recommended Development Sequence](#35-recommended-development-sequence)
+- [32. Edge Cases and Recommended Handling](#32-edge-cases-and-recommended-handling)
+- [33. Risks and Technical Considerations](#33-risks-and-technical-considerations)
+- [34. Open Decisions / Questions](#34-open-decisions-questions)
+- [35. Recommended Development Sequence](#35-recommended-development-sequence)
 - [Decisions We Need to Make Before Development](#decisions-we-need-to-make-before-development)
 - [Features That Sound Useful But Should NOT Be Built Yet](#features-that-sound-useful-but-should-not-be-built-yet)
 - [Appendix A — Reference Example: Municipal Infrastructure Design template and "DCC Dundurn Roads"](#appendix-a-reference-example-municipal-infrastructure-design-template-and-dcc-dundurn-roads)
@@ -103,8 +115,9 @@ The product is built entirely from structured data and deterministic rules. Ever
 - A Project Dashboard, a personal My Work page, and a Weekly Coordination view designed to run a multidisciplinary coordination meeting directly from the application.
 - A thin Decision Register, because decisions are the most common non-task blocker in design projects. (Recommended for MVP; see Section 27 for the rationale and the fallback if it is cut.)
 - Comments with @mentions, document links to SharePoint/Teams/network folders, a full activity log, in-app and email notifications, and corporate single sign-on.
-- Project assignment that doubles as a subscription: everyone assigned to a project follows it and receives all of its updates (in-app feed and daily digest), and a My Staff page where every manager sees their direct reports' assignments and work and staffs them on projects.
-- The six-view visual workspace in §36: grouped project board, cross-project task board and Gantt, team calendar, overview dashboard, and personal My Work, with functional navigation, saved views, and task-hour entry under Time in the first release.
+- A **Weekly Resource Planner**: a manager-owned planning layer of person × week allocations that is informed by project data but not controlled by it. Managers and employees record hours against projects and against work that lives outside the Hub (proposals, admin, training, small projects); HR-approved leave reduces availability separately. Allocations carry a visibility state (Private Draft, Published, Confirmed) and a confidence (Confirmed, Expected, Possible). Deterministic rules flag over- and under-allocation, overlapping plans from two managers, leave conflicts and stale plans. A Manager Home exception dashboard answers "where does my team need attention" in about 30 seconds.
+
+The planning workspace connects three views over the same records: **Team Planner** (weekly people and project staffing), **Vacation & Coverage** (a year of approved leave and coverage concerns), and **My Week** (each person’s published plan). HR approves leave; Tuesday imports availability and helps managers arrange coverage. Leave reduces capacity without reducing assigned work or counting the same absence twice. Personal calendar subscriptions can surface dated commitments; weekly hours do not become invented appointments.
 
 **What comes later**
 
@@ -387,8 +400,15 @@ Legend: **Y** = allowed; **O** = allowed for own items only (see 8.6); **D** = a
 | View project list and any project (subject to 8.7) | Y | Y | Y | Y | Y | Y |
 | Create a project | Y | — | — | Y | — | — |
 | View Portfolio Dashboard | Y | Y | Y | Y (own projects by default; all with filter) | — | — |
-| View Resource / Workload View | Y | Y (all) | Y (supervised staff, plus all in read) | Y (members of own projects) | — | — |
-| View My Staff page (staff assignments and work, §13.19) | Y (all staff) | Y (all staff) | Y (supervised staff) | — | — | — |
+| View Weekly Resource Planner (published and confirmed allocations) | Y | Y (all) | Y (all) | Y (members of own projects) | Y (self only, via My Work) | — |
+| View Private Draft allocations | Y (data correction only, logged) | — | O (creator only) | — | — | — |
+| Create / edit / delete manager allocations for a person | Y | — | Y (supervised staff) | — | — | — |
+| Publish / confirm / unpublish a manager allocation | Y | — | O (creator) | — | — | — |
+| Create / edit / delete own employee allocations | Y | Y | Y | Y | Y | — |
+| Record / correct a manual copy of HR-approved leave (with HR reference) | Y | — | Y (supervised staff) | — | — | — |
+| Preview / apply HR-approved leave CSV; configure office holidays | Y | — | — | — | — | — |
+| View Vacation & Coverage availability | Y | Y (all) | Y (all) | Y (members of own projects) | Y (own team; availability only) | — |
+| Set a person's weekly capacity and working days | Y | — | Y (supervised staff) | — | — | — |
 | Reassign tasks across projects for supervised staff | Y | — | Y | — | — | — |
 | Add or remove supervised staff on a project team (as Team Member) | Y | — | Y | — | — | — |
 | Manage users, system roles, offices, disciplines, clients, deliverable types, phases | Y | — | — | — | — | — |
@@ -454,6 +474,10 @@ Ownership extends role permissions on individual items regardless of project rol
 **Assumption:** All active employees may view all projects (open-by-default). This is typical in consulting firms, maximises coordination value, and keeps the permission model simple.
 
 **TBD — Business Decision Required:** whether some projects must be **restricted** (e.g., confidential clients, litigation support, M&A due diligence). If yes, the design accommodates a per-project `visibility` flag (`Open` | `Restricted`), where Restricted projects are visible only to project members, System Administrators, and Executives. This is cheap to add at the data-model level and should be included in the schema from day one even if the UI control ships later. Recommendation: include the column and enforce it in the authorisation layer in MVP; expose the toggle only if the business confirms the need.
+
+**Private Draft allocations are an exception to open-by-default.** A manager allocation in `Draft` visibility is visible only to its creator (and to System Administrators for data correction). It is excluded from the employee's My Work, from other managers' planner views, from totals shown to anyone but the creator, and from search. It is **included** in the creator's own totals and in the overlapping-plans conflict rule (RES-10), which reports the conflict to both managers without revealing the other manager's draft details beyond "another manager has planned N h". Enforcement is in the authorisation layer and in every query that aggregates hours, not in the UI.
+
+**Leave privacy and ownership.** HR is the sole approval authority. Imported dates, hours and cancellation state are read-only in Tuesday and change only through a validated HR import. Admins and Supervisors may enter an HR-referenced manual fallback; employees flag discrepancies for correction in HR. Calendar and planner readers see dates, hours and “Unavailable”, never HR reasons, medical details or balances. For this MVP, a team means people with the same `supervisor_id`. Standard Users see their own team’s availability only; PMs see their project members. Project names and coverage details remain project-permission scoped, including notifications, exports and calendar feeds.
 
 ### 8.8 How roles are assigned
 
@@ -577,11 +601,10 @@ Global navigation (persistent left rail or top bar; desktop-first):
 |---|---|---|
 | **My Work** (landing page) | My Tasks, My Reviews, My Deliverables, Waiting on Others, Blocking Others, My Projects, Upcoming Milestones | Everyone |
 | **Projects** | Project list (search, filter); opens a project workspace | Everyone |
-| **Portfolio** (first release) | Portfolio Dashboard, Projects At Risk | Executives, Supervisors, PMs |
-| **Resources** (first release) | Resource / Workload View; Weekly Planner (§13.21, §39) | Supervisors, Executives, PMs; everyone sees their own planning row in My Work (My Week) |
-| **My Staff** | The user's direct reports with their project assignments and work counts; staffing them on projects (§13.19) | Supervisors, Executives, Admins |
-| **Reports** | Deterministic report list with export | Everyone (scoped) |
-| **Notifications** | In-app notification centre: personal notifications and the Following feed of followed projects | Everyone |
+| **People** | People directory and Person Profile (§13.20): role, discipline, skills, manager, capacity, leave, current allocations | Everyone (read; edit per §8.5.1) |
+| **Resources** | Team Planner (§13.11: People / Projects views) and Vacation & Coverage (§13.21) | Supervisors, Executives, PMs (members of own projects); employees see their own allocation row and own-team availability |
+| **Insights** | Reports (§19) and, in Phase 2, the Portfolio Dashboard and Projects At Risk | Everyone (scoped) |
+| **Notifications** | In-app notification centre | Everyone |
 | **Admin** | Users & roles, Disciplines, Clients, Offices, Deliverable Types, Phases, Templates, Settings | System Administrators |
 | Global search | Always visible search box | Everyone |
 
@@ -624,7 +647,8 @@ This section defines the conceptual model and all canonical vocabulary. The phys
 | Work | `Milestone`, `Deliverable`, `Task`, `TaskDependency`, `TaskParticipant`, `TaskTimeEntry` | Core hierarchy and first-release actual hours (§36.8) |
 | Registers | `Decision` (MVP-thin), `Risk` (P2), `Issue` (P2), `Meeting` (P2), `MeetingAction` (P2), `ItemLink` | `ItemLink` is a generic relation between any two items |
 | Collaboration | `Comment`, `Mention`, `DocumentLink` | Polymorphic target (item type + id) |
-| System | `ActivityLog`, `Notification`, `NotificationPreference`, `ProjectFollow`, `AttentionSnooze`, `SavedView` | `ProjectFollow` records who follows which project and at what level (§12.18); saved views are first-release scope (§36.7) |
+| Resources | `Allocation`, `Leave`, `OfficeHoliday`, `PersonCapacity`, `ResourceConflict` (materialised) | Manager-owned planning layer; see Section 12.15. `Allocation.project_id` is nullable: planning works for work that is not a Hub project. |
+| System | `ActivityLog`, `Notification`, `NotificationPreference`, `AttentionSnooze`, `SavedView` (P2) | |
 | Templates | `ProjectTemplate`, `TemplateDiscipline`, `TemplateMilestone`, `TemplateDeliverable`, `TemplateTask`, `TemplateDependency` (P2) | Snapshot-copied into projects |
 
 ### 10.2 Canonical statuses
@@ -705,6 +729,30 @@ Transitions are defined in Section 15 (rules T-10 to T-14). **Blocked is not a s
 
 `Open` → `In Progress` → `Complete`; `Cancelled`.
 
+#### Allocation visibility (manager allocations only)
+
+`Draft` → `Published` → `Confirmed`. Employee allocations are always `Confirmed`. Approved leave availability is visible per §8.7; imported HR fields are read-only. Leave is not an allocation visibility or confidence state.
+
+| Status | Meaning |
+|---|---|
+| **Draft** | Private to the creating manager. Scenario planning, reserving capacity. Not shown to the employee. |
+| **Published** | Visible to the employee and to planner readers as a proposed assignment. Still adjustable. |
+| **Confirmed** | Part of the employee's normal planned workload. |
+
+Transitions are a single manager action in either direction (no approval workflow). `Confirmed` → `Draft` is allowed but logged and notifies the employee.
+
+#### Allocation confidence
+
+`Confirmed` · `Expected` · `Possible`. Independent of visibility: a manager may publish an `Expected` allocation to warn an employee of likely work. Totals are always shown per band (e.g. 30 h confirmed · 10 h expected · 8 h possible), never as one blended number.
+
+#### Allocation source category
+
+`MajorProject` (linked Hub project) · `OtherProject` (work outside the Hub) · `Proposal` · `BusinessDevelopment` · `Training` · `Admin` · `Supervision` · `InternalInitiative` · `FieldWork` · `Leave` (system-generated from `Leave`) · `Other`. Fixed list in MVP; labels are free text.
+
+#### Leave source and state
+
+`source_kind`: `HRImport` or `ManualHR` (an HR-referenced fallback). `status`: `Approved` or `Cancelled`; legacy records without verified HR approval are `Unverified`. Only HR-approved absence is presented as approved leave. Preserve Unverified records and show affected capacity as provisional until reconciled; never silently assume those people are fully available. No Requested/Denied workflow or leave-balance ledger exists in Tuesday.
+
 #### Project health
 
 `Green` (On Track) · `Yellow` (Attention Required) · `Red` (At Risk / Critical) · `Grey` (Not Evaluated). Computed per Section 16, with optional PM override.
@@ -726,12 +774,19 @@ Indicators are computed, never stored as the primary status (they may be cached)
 | **Date Inconsistent** | Task, Deliverable | Task due after its deliverable's due date; deliverable due after its milestone date; successor starts before predecessor is due. |
 | **Slipped** | Milestone, Deliverable | Current date is later than original (baseline) date; shows days of slip. |
 | **Inactive Owner** | Task, Deliverable, Decision | Owner's user account is inactive. |
+| **Over-allocated** | Person-week | Confirmed + Expected hours (all visible sources, plus the viewer's own drafts) exceed capacity by more than `allocation_over_pct`. |
+| **Under-allocated** | Person-week | Confirmed + Expected + Possible hours are below `allocation_under_pct` of capacity for `allocation_under_weeks` consecutive weeks, and the person has no unestimated open tasks due in those weeks. |
+| **Overlapping Plans** | Person-week | Two or more managers have allocations (any visibility) on the same person-week whose sum plus other commitments exceeds capacity. |
+| **Leave Conflict** | Person-week | A Published or Confirmed allocation overlaps recorded leave such that remaining capacity is negative. |
+| **Coverage Concern** | Person-week | An active task/review or deliverable due date falls on a non-working day for its responsible person due to approved leave or an office holiday. Partial absence is flagged for review, not declared blocked. Links to permitted work items; separate from weekly overload. |
+| **Stale Allocation** | Allocation | Not confirmed or edited for longer than `allocation_stale_days` while its weeks are in the future. Displayed as "needs confirmation". |
+| **Deliverable Pressure** | Person-week | A deliverable due in the week has an owner or task assignees who are Over-allocated that week. |
 
 > **Design note.** Why "Blocked" is an indicator and not a status: a blocked task is still *In Progress* or *Not Started* from a workflow point of view. If Blocked replaced the workflow status, unblocking it would require guessing which status to restore, and reporting would lose the distinction between "not started because blocked" and "half done and blocked". Modelling Blocked as a computed flag with an explicit list of blockers means it appears and disappears automatically as predecessors complete, and the workflow status is never corrupted. The same reasoning applies to Overdue.
 
 ### 10.4 Canonical thresholds (organisation settings)
 
-All thresholds are stored in `OrgSetting`, editable by System Administrators, with the defaults below. Calendar days are used in MVP; working-day calendars are Phase 2 (**TBD — Business Decision Required:** statutory holiday calendar by office).
+All thresholds are stored in `OrgSetting`, editable by System Administrators, with the defaults below. Project attention thresholds use calendar days in MVP; working-day thresholds remain Phase 2. Resource availability uses the person’s working days and Admin-configured office holidays in MVP; no statutory calendar is guessed.
 
 | Setting key | Default | Used by |
 |---|---|---|
@@ -1024,6 +1079,34 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-AUD-01 | Immutable activity log for creates, updates (field-level), status changes, assignments, date changes, deletions, decision changes, and health overrides. | R | §20 |
 | FR-AUD-02 | Item-level history tab and project-level Activity History with filters. | R | §13.14 |
 | FR-AUD-03 | Export of activity log for a project. | Rec | §20 |
+
+### 11.13 Resource planning
+
+| ID | Requirement | Class | Detail |
+|---|---|---|---|
+| FR-RES-02 | Each person has a weekly capacity (default `default_weekly_capacity_hours`, per-person override) and working days; Supervisors edit for supervised staff. | R | §12.15.2 |
+| FR-RES-03 | HR-approved leave is imported as a date range with full-day or hours-per-day; an HR-referenced manual fallback is limited to Admin/Supervisor. Leave and office holidays reduce availability once, leave remains separate from planned work, and imported HR fields are read-only. | R | §12.15.2, §12.18 |
+| FR-RES-04 | An allocation records person, hours per week, start week, end week, label, source category, optional project and discipline, confidence, visibility, notes. `project_id` may be null. | R | §12.15.3 |
+| FR-RES-05 | Employees create allocations for themselves; they are employee-owned and always Confirmed visibility. | R | §12.15.4 |
+| FR-RES-06 | Supervisors create allocations for supervised staff; they are manager-owned and default to Draft visibility and Expected confidence. | R | §12.15.4 |
+| FR-RES-07 | Quick add: clicking a person-week cell and typing `<hours> h <label>` then Enter creates a one-week allocation with all other fields defaulted. No other field is required. | R | §12.15.5 |
+| FR-RES-08 | An allocation can be extended or shortened by editing `end_week`, repeated across N weeks, copied, and dragged to another week or person (drag = edit `start_week`/`end_week` or `person_id`, respecting permissions). | R | §12.15.6 |
+| FR-RES-09 | Visibility transitions Draft ↔ Published ↔ Confirmed are a single action by the creating manager; Published and Confirmed notify the employee. | R | §10.2 |
+| FR-RES-10 | Every person-week shows capacity, planned hours per confidence band, remaining capacity, and a drill-down listing every allocation and leave entry contributing to the total, with its source category and owner. | R | §12.15.7 |
+| FR-RES-11 | Project-derived demand (remaining task hours per §12.15.8) is shown as a separate context column, never summed into planned hours. | Rec | §12.15.8 |
+| FR-RES-12 | Conflict rules RES-08…RES-13 (§15.13) are evaluated per person-week nightly and on any allocation, leave, holiday, capacity or affected work-date/ownership change; results are materialised in `ResourceConflict` and shown as non-blocking warnings. | R | §15.13 |
+| FR-RES-13 | Overlapping Plans reports to every manager involved; no manager's allocation is changed automatically. | R | §15.13 |
+| FR-RES-14 | Stale allocations are shown as "needs confirmation"; a one-click "still valid" action resets `last_confirmed_at`. | R | §15.13 |
+| FR-RES-15 | Allocation, leave and capacity changes are written to the activity log; visibility transitions and conflicts raise notifications per §17.2. | R | §17, §20 |
+| FR-RES-16 | Role-level long-term demand ("one civil technologist in January") without a named person. | P2 | §12.15.9 |
+| FR-RES-17 | Planned vs actual effort comparison. | P3 | §29 |
+| FR-RES-18 | Admin previews and applies an HR-approved leave CSV with stable source keys, exact person mapping, row validation, idempotent updates, explicit cancellations, source time and audit history. Invalid/conflicting batches do not change records; missing rows never imply cancellation. | R | §12.18.2 |
+| FR-RES-19 | Vacation & Coverage shows daily approved availability across a selected year, team/discipline/office filters, partial days, overlaps, source freshness and permitted affected work. | R | §13.21 |
+| FR-RES-20 | Coverage Concern identifies tasks, deliverables and reviews due during approved absence or an office holiday. Managers use existing reassignment, comments and handover tasks; warnings never change work or assert that a backup is qualified. | R | §12.18.3, RES-19 |
+| FR-RES-21 | Copy last week previews the creator’s manager allocations for a target week, defaults new rows to Draft, identifies existing target work and changed availability, and applies only explicitly selected rows without duplicating employee work or leave. | R | §12.15.12 |
+| FR-RES-22 | People and Projects staffing views, My Week and staffing reports read the same allocations with the same permissions and totals. Project views do not grant cross-team write rights. | R | §13.11 |
+| FR-RES-23 | A manager previews and publishes selected owned Draft allocations as one atomic action; one summary notification per affected employee links to My Week. Later changes remain auditable and visible. | R | §12.15.12 |
+| FR-RES-24 | A revocable personal calendar subscription exposes only the user’s approved leave and permitted dated tasks, reviews and milestones. Stable event identities support updates/cancellations; weekly allocations stay in My Week. | Rec | §12.19 |
 
 ### 11.12 Administration
 
@@ -1585,9 +1668,82 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 **What it deliberately does not do.** The first-release workload calculation does not subtract logged actual task hours from estimates or treat them as an approved timesheet (§36.8). It also does not use leave/holiday calendars (Phase 3, or import from HR), utilisation targets, resource levelling, forecasts beyond 8 weeks, or capacity planning by role.
 
-**Views.** Person × week grid (heat-shaded load with the number visible) with expandable rows: Person → Project → Tasks (with due dates). Filters: supervisor, discipline, office, project, date range. Sort by load, overdue count, task count. Export.
+#### 12.15.2 Capacity and leave
+
+- Each person has `weekly_capacity_hours` (default `default_weekly_capacity_hours` = 37.5) and `working_days` (default Mon–Fri). Stored in `PersonCapacity` with `effective_from` so a change to part-time does not rewrite history.
+- `Leave` is a date range per person with full-day or hours-per-day, copied from HR-approved leave (§12.18). Admin imports it; an Admin/Supervisor may record an HR-referenced manual fallback. Employees do not approve or edit imported leave in Tuesday.
+- Resource availability is calculated per working date using the effective capacity/schedule on that date, then summed into ISO weeks. Daily hours are weekly capacity divided by the number of working days (equal-length working days in MVP). Approved leave is capped to those daily hours; office holidays make that date unavailable. Overlapping leave and holidays reduce the day at most once. A Leave row explains the reduction but is never added to planned hours. Changes preserve existing allocation hours and dates and raise warnings.
+
+#### 12.15.3 Allocation
+
+One row = one block of recurring weekly hours for one person.
+
+| Field | Notes |
+|---|---|
+| `person_id` | Required. |
+| `created_by_id`, `owner_kind` | `Employee` (self-created) or `Manager`. Determines edit rights (§8.6). |
+| `hours_per_week` | Required. 0.5 h steps. Warning above capacity; hard stop above `allocation_max_hours_per_week`. |
+| `start_week`, `end_week` | ISO week (Monday date). Quick add sets both to the clicked week. |
+| `label` | Required free text ("proposal support", "Hwy 7 small project"). |
+| `source_category` | §10.2 list. Quick add defaults to `OtherProject` unless a project is linked. |
+| `project_id`, `project_discipline_id` | Optional. Linking a project sets `MajorProject` and lets the Project Dashboard show staffing. |
+| `confidence` | Confirmed / Expected / Possible. Employee entries default Confirmed; manager entries default Expected. |
+| `visibility` | Draft / Published / Confirmed (manager entries only). Employee entries are always Confirmed. |
+| `notes` | Optional. |
+| `last_confirmed_at` | Set on create, on edit, and by "still valid". Drives Stale Allocation. |
+
+#### 12.15.4 Two owners, one grid
+
+- **Employee-added work.** Any employee adds entries to their own row: "10 h proposal support", "3 h admin", "6 h small project". Employee-owned; a Supervisor sees them but cannot edit them.
+- **Manager planning.** A Supervisor adds entries to supervised staff. Default is a Private Draft so the manager can scenario-plan without creating expectations. Publish when the work is likely; Confirm when it is real. Manager-owned; the employee can comment but not edit.
+
+Neither owner overwrites the other. Both appear in the same weekly total, each labelled with its owner and source.
+
+#### 12.15.5 Quick add
+
+1. Click a person-week cell (or press Enter on a focused cell).
+2. Type `8 h proposal support` (also accepts `8h`, `8 — proposal support`, `~8 h upcoming review`; a leading `~` sets confidence Possible).
+3. Press Enter.
+
+Result: a one-week allocation with defaults from 12.15.3. Nothing else is asked. Everything else lives in the optional side panel (§13.11): visibility, confidence, start/end week, repeat, category, project link, notes, move to another person, convert to a task assignment.
+
+#### 12.15.6 Repeat, extend, drag
+
+An allocation spanning weeks is one row, not N copies. Extend or shorten by dragging the block's edge or editing `end_week`. Drag the block to another week to shift both dates; drag to another person to change `person_id` (permission-checked). "Repeat for N weeks" sets `end_week`. Copy creates a new row with the same fields.
+
+#### 12.15.7 Explainable totals
+
+Per person-week the planner shows capacity, planned hours by confidence band, remaining capacity (`capacity − confirmed − expected`), and an indicator. Clicking the total lists every contributing row: owner, label, source, hours, confidence, visibility. A viewer never sees a number they cannot decompose. Private Drafts appear only in their creator's view and totals (§8.7).
+
+#### 12.15.8 Project-derived demand (context, not load) [MVP-Recommended]
+
+The v1.0 calculation is retained as a **context column**: for each open task with `estimated_hours`, spread remaining hours over working days between `max(start_date, today)` and `due_date`, sum per ISO week per assignee; overdue remainder lands in the current week; unestimated tasks are counted, not spread. Show it beside planned hours as "task estimates: 14 h (3 unestimated)". It is never added to planned hours. It exists to prompt the manager ("the Hub thinks this person has 14 h of task work next week and you have planned 0 h against that project").
+
+#### 12.15.9 Horizon and precision
+
+Near term (0–6 weeks): person-level hours. Mid term (6–12 weeks): same model, Expected/Possible dominate. Beyond the horizon the planner does not pretend to know; **role-level demand** ("one civil technologist in January") is Phase 2 (FR-RES-16).
+
+#### 12.15.10 Conflicts
+
+Rules RES-08…RES-13 (§15.13) run nightly and on change. Results are warnings in the grid and on Manager Home. Nothing is blocked. Overlapping Plans tells each manager "another manager has planned N h on this person in week W" and leaves resolution to them.
+
+#### 12.15.11 Connected workflows
+
+| Trigger elsewhere in the Hub | Effect in the planner |
+|---|---|
+| PM moves a deliverable earlier | Deliverable Pressure may fire for the week; manager decides whether to re-plan. Nothing moves automatically. |
+| Approved HR leave is imported, updated or cancelled | Capacity and coverage warnings recompute; existing allocation hours/dates stay unchanged. |
+| Supervisor reassigns a task | No allocation change (tasks are not load). The context column updates. |
+| Manager publishes an allocation linked to a project | Project Dashboard discipline summary shows planned staffing hours for the week. |
+| Allocation references a project not in the Hub | Nothing; that is the point. Label and `OtherProject` carry it. |
 
 ---
+
+#### 12.15.12 Weekly planning and publishing
+
+The manager starts from current allocations or **Copy last week**. Copy previews only their own manager rows active in the source week; each selected row becomes a one-week Draft in the target week with its label, hours, category, confidence and permitted project link retained. Existing target allocations, employee entries, leave and other managers’ work are displayed as context, never copied or overwritten. Warn about potential duplicates and changed capacity before applying; every preview item can be skipped. Applying the preview is atomic, version-checked and idempotent so a retry creates no duplicate rows; stale previews require refresh. Inactive people and archived project links must be resolved before applying.
+
+**Publish selected** previews the resulting employee plans and warnings, then transitions only the creator’s selected Drafts to Published in one version-checked transaction. It preserves confidence independently of visibility and sends one summary per affected employee. It does not publish other managers’ drafts or create a separate weekly-plan store. My Week, project staffing and reports update from those same allocations. Export uses the current visible view and labels possible work and private drafts explicitly.
 
 ### 12.16 Gantt / Timeline
 
@@ -1619,9 +1775,36 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 Module-level behaviour for the Project Dashboard, Portfolio Dashboard, and My Work is fully specified in their screen specifications (§13.1, §13.12, §13.10) because they are composed entirely of the modules above. The shared principle: every number on a dashboard is a link to the filtered list that produced it, and every colour has a visible reason.
 
----
 
-### 12.18 Project Assignments, Following, and My Staff
+### 12.18 Vacation & Coverage [MVP-Required]
+
+#### 12.18.1 Authority and calendar
+
+HR approves leave and owns balances, accruals, reasons and cancellations. Tuesday stores only availability and source provenance. The year calendar (§13.21) shows approved full/partial days and office holidays alongside coverage concerns. Admin-configured `OfficeHoliday` dates apply to the person’s office and working schedule; changing a holiday re-evaluates capacity. Project date thresholds still use calendar days. Legacy Unverified leave remains visible as provisional availability pending HR reconciliation.
+
+#### 12.18.2 HR-approved leave CSV import
+
+The first version accepts one documented CSV contract: `source_system`, `external_id`, `person_key`, `status` (Approved/Cancelled), `start_date`, `end_date`, `hours_per_day` (blank = full working day), and `source_updated_at`. Admin maintains the exact `(source_system, person_key)` → User mapping using the User’s HR identity fields. Agree it from a real HR export before implementation; never match by display name. Unmapped rows reject the batch. Uniform partial hours apply to each working day in the range; varying daily hours require explicit source mapping without averaging. No leave reasons, medical information or balance columns are imported or retained. Dates and positive hours must be valid for the mapped schedule; ambiguous overlapping partial-day rows require reconciliation rather than a guessed total.
+
+Admin previews new/changed/cancelled/unchanged rows, affected people/weeks, duplicate keys, invalid dates/hours, unmapped people and manual-fallback matches. Reject invalid or conflicting batches without changing leave or allocations. Deduplicate identical rows; reject contradictory repeated keys and source timestamps older than the stored record. Preview records expected versions; apply is atomic and rejects concurrent/stale changes. Reimporting unchanged source rows is a no-op. Upsert by `(source_system, external_id)`; reconcile matching ManualHR records in place, retaining their audit history. A missing row never cancels leave: require an explicit Cancelled source row. Preserve cancellations and historical records, recompute availability and warnings, and log the import actor and source time. Show the last successful import time separately from the HR export’s source time; failed imports leave the previous data intact and visibly dated. Do not retain raw uploaded files.
+
+A Supervisor/Admin may manually copy already-approved leave with the same stable HR reference when an export is unavailable. This is labelled ManualHR and dated; it is not approval in Tuesday and does not promise elimination of duplicate entry. Automatic HR API/calendar sync is later work after source-system discovery.
+
+#### 12.18.3 Coverage planning
+
+Coverage Concern (RES-19) lists the absence dates, responsible person, permitted affected task/deliverable/review and relevant submission. Detect a dated concern separately from weekly Leave Conflict: a team may fit within weekly capacity while its reviewer is away on the due date. A partial absence is shown for review without asserting that work cannot occur during the remaining hours. Weekly allocations have no daily timing, so the system must not invent a day-specific collision from weekly hours alone. Unknown work dates are shown as needing a date, not proven covered.
+
+Managers and authorised PMs/DLs use existing task/reviewer reassignment, comments and linked handover tasks to record coverage. Reassignment preserves qualification/independent-review rules and requires the existing permissions; no automatic staffing occurs. A handover note alone does not resolve a warning while the original dated condition still holds. Leave changes do not alter project deadlines, statuses or planned effort.
+
+### 12.19 Personal calendar subscription [MVP-Recommended]
+
+Offer an individual read-only ICS subscription for the user’s approved leave, assigned dated tasks, dated reviews (using the work item’s due date) and permitted project milestones. No start/end time is inferred from weekly allocations: use all-day date events and link to My Week for hours. Label dates as commitments, not booked appointments. Feed subscription is read-only and is refreshed by the calendar client; do not promise instant updates or treat the feed as an availability source.
+
+Use stable event UIDs for each item, updated sequence/timestamps, and cancellation events with the same UID when an item is cancelled, reassigned away or loses visibility. Previously emitted cancellations retain only the UID and cancellation metadata, no restricted content. Recheck account state and permissions on every fetch. The subscription uses a revocable per-user capability token, stored hashed and excluded from logs/audit/export content; rotation or account deactivation invalidates the old URL. Render no other managers’ drafts, HR reasons, balances or restricted project details. Outlook is the first intended client; validate update/cancellation handling in supported clients before claiming compatibility. Subscription access and permitted data destination require the organisation’s existing IT policy.
+
+Inbound meeting/free-busy import and two-way Outlook/Google calendar sync are Phase 3, pending actual APIs and consent. Calendar edits never approve leave, change HR records or automatically overwrite staffing allocations. Any future inbound feed must reconcile source event identities and avoid double-counting HR leave, holidays and already-planned administration/meetings.
+
+### 12.20 Project Assignments, Following, and My Staff
 
 **Purpose.** Make project assignment do two things without anyone configuring it: everyone assigned to a project receives all of that project's updates, and every manager can see their direct reports — which projects each person is on, in what role, and what they are carrying, waiting on, and holding up — and staff them on projects.
 
@@ -1948,7 +2131,7 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 | My Decisions | Decisions I own or requested that are open |
 | My Projects | Projects where I hold any role or that I follow, with my role(s), follow level (changeable inline, §12.18), health, next milestone |
 | Upcoming Milestones | Milestones in my projects within 30 days |
-| My Week | My own planning row for this week and the next five (§39.9): capacity, time away, hours by confidence (Confirmed, Expected, Possible) and remaining capacity; my self entries with quick add; Proposed and Confirmed assignments and approved project allocations, read-only. Private drafts never appear. Shown only on my own My Work; editable on desktop, read-only on tablet, a notice on phones. |
+| My Week | Published weekly plan plus a capacity strip for the next 6 weeks (§12.15): priorities, dated tasks/reviews, approved leave, office holidays, available hours, planned hours by source/confidence and remaining. Shows my entries and Published/Confirmed manager allocations from the same records as Team Planner, with the latest publish/change time; quick add for my entries and comments to flag conflicts. Private Drafts are never shown here. |
 | Recently completed by me | Last 14 days (collapsed) |
 
 **Primary actions.** Change status/progress inline; open panel; add comment; start review; quick-create task (into a chosen project).
@@ -1965,19 +2148,21 @@ The first-release personal presentation adds Today, Upcoming, Overdue, Completed
 
 ---
 
-### 13.11 Resource / Workload View [First release under §36]
+### 13.11 Weekly Resource Planner (Team Planner)
 
-**Purpose.** Cross-project workload per person, per §12.15.
+**Purpose.** The Supervisor’s working surface for §12.15. See capacity, add what you need, adjust in place. People and Projects views are two presentations of the same allocations, not separate plans.
 
 **Users.** Supervisors, Executives, PMs (their members).
 
 **Information.** Grid: rows = people (grouped by supervisor or discipline), columns = next 8 weeks; cell = assigned hours / capacity with heat shading and the number; row summary: projects, open tasks, unestimated tasks, overdue, deadline cluster flag, indicator (Over/OK/Under). Expand row → Project → tasks (key, name, due, est., remaining).
 
-**Primary actions.** Reassign task (Supervisor for supervised staff; PM within project); set a person's capacity override (Supervisor/Admin); export.
+**Primary actions.** Quick add in any cell (FR-RES-07). Drag block edge to extend/shorten; drag block to another week or person. Click block → Allocation side panel: hours, label, source, project link, discipline, start/end week, repeat for N weeks, confidence, visibility (Draft / Publish / Confirm as one segmented control), notes, "still valid", move to person, copy, convert to task assignment (creates a task in the linked project and keeps the allocation), delete. Click a cell total → contribution list (§12.15.7). Copy last week → preview (§12.15.12). Publish selected → preview and one summary per employee. Open Vacation & Coverage. Set capacity. Export the visible People or Projects view to CSV.
 
 **Filters.** Supervisor, discipline, office, project, indicator, date range.
 
-**Sorting.** Load desc (default), overdue, name.
+**Projects view.** Group the same permitted allocations by project → discipline → person and ISO week; keep non-project commitments under their source labels. Show project staffing beside due deliverables/reviews, with links to the project dashboard. Reuse the same write permissions; a PM gains visibility, not control over another manager’s people. Row/cell totals agree with People view for the same filters and visibility.
+
+**Sorting.** Remaining capacity ascending in the selected week (default), name, conflicts.
 
 **UX.** Method popover explains the calculation and its limits in plain language; unestimated counts sit beside hours so nobody over-reads the numbers.
 
@@ -2075,14 +2260,18 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 
 **Information displayed (top to bottom)**
 
-1. **Scope bar**: My direct reports (default) · All staff (Executives and Admins only). Filters: office, discipline, project, indicator (has overdue, has blocked, blocking others, reviews waiting), show inactive.
-2. **Summary tiles** (each a link to the filtered table): Staff · Project assignments · Staff with overdue work · Staff with blocked work · Reviews waiting longer than `review_stale_days`.
-3. **Staff table**, one row per person: Name · Job title · Office · Projects (count) · Roles (chips such as "PM 1 · DL 3 · Team 4 · Reviewer 2") · Open tasks · Overdue · Blocked · Blocking others · Reviews waiting on them · Deliverables owned due ≤ 14 d · Last activity. Every count links to that person's My Work section, filtered.
-4. **Expanded row — assignments**: one line per project the person is on: project number and name, health pill, role(s), primary discipline, added on, their open and overdue tasks on that project, next due item. Each line has **Remove from project** (Supervisor; Team Member role only). The row has **Assign to project**, which opens a picker of projects the supervisor can view in Setup, Active, or On Hold, and a primary-discipline picker (ASG-10).
+| Card | Content |
+|---|---|
+| People needing attention | Over-allocated (with the two or three largest contributors named), significantly Under-allocated, returning from leave this week, Leave Conflicts, Coverage Concerns |
+| Planning conflicts | Overlapping Plans: person, week, managers involved, hours each |
+| Upcoming pressure | Weeks within the horizon where team confirmed + expected hours exceed team capacity; Deliverable Pressure items |
+| Needs confirmation | Stale allocations (mine) and Published allocations older than `allocation_stale_days` |
+| Projects needing attention | For projects where supervised staff are members: disciplines with stale updates (A-10 / §16.6), major deliverables due within `milestone_approaching_days` |
+| My Work | Collapsed; the user's own §13.10 sections |
 
 **Primary actions.** Assign to project and remove from project (Supervisor, direct reports, ASG-10); open the person's My Work (read-only); open a project; reassign a task (Supervisor, direct reports); export via the Staff Assignments report (§19).
 
-**Sorting.** Default: Overdue descending, then Blocked descending, then name. Any column sortable.
+**Primary actions.** Open Vacation & Coverage; open planner at the person-week; "still valid"; publish/confirm from the stale list; snooze a conflict for N days with a note (same mechanism as attention snooze, ATT-03).
 
 **Navigation.** Person → their My Work (read-only); project → Project Dashboard; counts → filtered lists. Scope and filters are encoded in the URL.
 
@@ -2120,15 +2309,28 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 
 **Primary actions.** Quick add in an editable cell (Enter or click, type "8 h proposal support", Enter saves, Esc cancels). The entry side panel (560 px): hours, label, source category, project and project discipline, start and end week, Repeat for N weeks, person, Confidence, Visibility (a segmented control of Private draft, Proposed assignment and Confirmed assignment, shown to the owner of a manager entry), notes, Still valid, Copy, Delete and history. A contribution list on any cell total (§39.4). Record or clear time away for a date range (Supervisor or Admin). Open Workload or a project.
 
-**Sorting.** Remaining capacity ascending in the selected week (default), name, Over-planned first.
+**Users.** Everyone (read subject to §8.7 availability/allocation scope); Supervisors edit capacity, HR-referenced manual leave and owned manager allocations for supervised staff; the person edits their own skills and employee allocations. Imported leave is read-only; System Administrators manage imports and source corrections.
 
 **Responsive.** At 1280 px and wider the planner is editable. From 768 px to 1279 px it is read-only: no quick add, side panels read-only, contribution lists available. Below 768 px it shows the §13.0 notice that the planner is available on desktop and tablet.
 
-**Keyboard and accessibility.** The grid uses grid semantics with one tab stop: arrow keys move between cells; Enter opens quick add in an editable cell or the contribution list in a read-only one; Esc cancels and returns focus to the cell; Tab moves into the side panel, and closing it returns focus to the originating cell. Saves, conflicts and errors are announced in a live region. Every state has text and a symbol, colour is never the only signal, and no operation needs a pointer or dragging.
+**Person Profile.** Header: name, job title, discipline, office, supervisor, system roles, capacity and working days, skills (free-text tags). Sections: **My Week strip** for the horizon (same component as §13.10 My Week; shows Drafts only to their creator); **Allocations** list (filterable by source, confidence, visibility); **Leave** (read-only approved availability, source freshness and a link to HR for discrepancies; manual fallback only for authorised users); **Project roles** (projects, roles, disciplines); **Open work** (tasks and deliverables, read-only summary linking to My Work).
 
-**Empty states.** "No one is in your planning scope." "No planning entries yet. Select a week cell and type, for example, 8 h proposal support."
+**Primary actions.** Quick add allocation (self, or Supervisor for supervised staff); open Vacation & Coverage; copy HR-approved leave manually only as Supervisor/Admin; set capacity (Supervisor/Admin); edit skills (self/Admin).
 
-**Navigation.** Route `/planner` under Resources, beside Workload; an entry opens its side panel with a deep link; a project link opens the project; an approved project allocation opens its §37.6 detail for viewers allowed to see it. Scope, filters and week are encoded in the URL.
+**UX.** No performance data, no history of utilisation, no comparison between people. Skills are tags for search in Phase 2 (skills-based resource search); in MVP they are display only.
+
+
+### 13.21 Vacation & Coverage
+
+**Purpose.** Plan team coverage from HR-approved leave without a separate vacation spreadsheet.
+
+**Users.** Per §8.5.1 and §8.7. Standard Users see own-team availability; PMs see project members and only permitted work details. Nobody approves leave here.
+
+**Information.** Select a year; show month/day availability by person with full/partial approved leave, office holidays, source/last successful import time, HR source time, and a visibly provisional label for Unverified legacy records. Team overlaps prompt coverage review, not a claim that staffing is insufficient. An adjacent list shows dated Coverage Concerns and weekly Leave Conflicts with links to permitted work/planner cells. Unknown work dates remain explicitly unknown. Filters: team/supervisor, discipline, office, person, date range and concerns only. Imported leave reasons and balances never appear.
+
+**Actions.** Open My Week/Team Planner; open an affected task/review; record a coverage comment or linked handover task; use existing reassignment with the same permissions. Admin has Import approved leave → validate/preview → apply and a successful-import summary. Admin/Supervisor may enter a labelled HR-referenced manual fallback. Export only the visible availability and permitted coverage details.
+
+**UX.** Full-day, partial-day, holiday and provisional states use labels/patterns as well as colour. Offer an accessible chronological list alongside the year calendar and keyboard access to the same actions. No HR approval or balance controls. A Personal calendar subscription action in My Week is MVP-Recommended (§12.19); it provides subscribe/revoke controls and explains client refresh and dated events versus weekly hours.
 
 
 ## 14. User Workflows
@@ -2311,16 +2513,37 @@ Each workflow states the actor, trigger, steps, system response, exceptions, and
 **Actor.** Supervisor (Civil group). **Trigger.** Weekly resourcing check or PM request for help.
 
 **Steps.**
-1. Open Resources → filter Supervisor = me → 8-week grid.
-2. Sort by load; identify Alex at 140% next week with a deadline cluster (3 tasks due 2026-09-24/25 across 2 projects) and Jill at 25% with no unestimated tasks.
-3. Expand Alex → see tasks by project; open 1234-T0058; reassign to Jill (Supervisor permission for supervised staff) with a comment.
-4. Note tasks without estimates for the DLs to fill in.
+1. Open Home → Manager Home shows: 1 Over-allocated (Alex, W42, 46 h / 37.5 h, two deliverables due), 1 Under-allocated (Jill, W42–W43, 12 h), 1 Overlapping Plans (Sam, W44: me 16 h, Environmental manager 16 h, 20 h confirmed), 2 allocations need confirmation.
+2. Click Alex W42 → planner opens on that cell; the contribution list shows 30 h Confirmed (project 1234, DL-published), 8 h Expected (my Draft "proposal support"), 8 h employee-added "small client project". Drag my 8 h Draft block from Alex to Jill (same week). Totals recompute; Alex's warning clears; Jill shows 20 h.
+3. In Jill's W42 cell type `12 h Hwy 7 review support` and Enter; set "Repeat for 3 weeks" in the side panel; Publish. Jill is notified.
+4. Open the Sam W44 conflict → see "Environmental manager has planned 16 h". Message them outside the Hub; they drop to 8 h. Conflict clears on their save.
+5. Click "still valid" on the two stale allocations.
+6. For next week, use Copy last week → inspect selected owned rows, existing work and changed leave/holiday capacity → apply as Drafts; skip rows that already have continuing allocations. Use Publish selected after resolving or acknowledging warnings; each affected person gets one summary linking to My Week. Check Projects view for the same staffing totals.
 
 **System response.** Reassignment notifies both people and the PM; workload grid recomputes; the change is logged with actor Supervisor.
 
 **Exceptions.** Task belongs to a Restricted project the supervisor cannot see → its row and hours are excluded from this supervisor's grid and export; reassignment must be done by a PM who can see the project. Person on leave → not modelled in the first release or Phase 2 (Phase 3 or manual capacity override).
 
-**Result.** Load is rebalanced with a traceable change; estimates gaps are visible.
+**Result.** The team's next six weeks are realistic, every total is traceable to its rows, and no manager overwrote another's plan. Time spent: a few minutes, no spreadsheet.
+
+---
+
+### Workflow 10b — Employee records non-project work; HR leave informs the plan
+
+**Actor.** Team member; System Administrator for import. **Trigger.** Proposal support and a week of leave already approved in HR.
+
+**Steps.**
+
+1. Employee opens My Work › My Week, adds `10 h proposal support` for each of two weeks; these remain employee-owned allocations.
+2. Admin imports an HR export containing the approved leave, previews person/source-key mapping and changes, then applies the valid batch.
+3. My Week and Vacation & Coverage show the approved dates; a full five-day absence in a normal five-day week leaves 0 h available. The Supervisor sees the same data in Team Planner.
+4. If a published assignment or dated review conflicts, its manager/authorised lead records a handover or reassigns the work. The employee reports incorrect dates to HR; imported leave cannot be edited in Tuesday.
+
+**System response.** Capacity, Leave Conflict and Coverage Concern recompute without changing allocations or deadlines. Unchanged reimports produce no duplicate leave or notifications. Explicit HR cancellation restores availability after a successful import.
+
+**Exceptions.** Failed imports preserve previous data and show its age; missing rows do not cancel leave. Where an export is unavailable, Supervisor/Admin records a labelled ManualHR copy with its HR reference. Other staff see “Unavailable”, never private HR reasons.
+
+**Result.** Employee work, published staffing and HR-approved availability share one planning picture.
 
 ---
 
@@ -2506,7 +2729,28 @@ C-01 to C-08 as in §12.8; DOC-01 to DOC-04 as in §12.7.
 
 ### 15.13 Assignment and following rules (ASG)
 
-ASG-01 to ASG-11 as in §12.18.
+| ID | Rule |
+|---|---|
+| RES-01 | A week is identified by its ISO Monday date. `start_week ≤ end_week`. An allocation contributes `hours_per_week` to every week in its range. |
+| RES-02 | `hours_per_week` is a multiple of 0.5, greater than 0, and at most `allocation_max_hours_per_week`. Values above the person's capacity are accepted with a warning. |
+| RES-03 | Calculate capacity per working date with the schedule effective that date, then sum into ISO weeks. Baseline daily hours = weekly capacity ÷ working-day count. An office holiday removes that day’s baseline; otherwise subtract approved leave hours capped at baseline. Ignore non-working dates; union overlapping absence so each daily hour is removed once. Show Leave/Holiday reductions separately; they never add to planned hours. Unverified legacy absence conservatively reduces availability with a provisional label pending reconciliation. |
+| RES-04 | Employee-owned allocations have `visibility = Confirmed` and `owner_kind = Employee`; only the person may edit or delete them. Manager-owned allocations may be edited, deleted or re-scoped only by their creator (plus Sys Admin, logged). |
+| RES-05 | Visibility transitions are single actions by the creator. `Draft → Published`, `Published → Confirmed`, `Confirmed → Published`, `Published → Draft`, `Confirmed → Draft`. Transitions out of Draft notify the person; `→ Draft` from a visible state notifies the person that a planned assignment was withdrawn. |
+| RES-06 | A Draft allocation is returned only to its creator and System Administrators. It is excluded from everyone else's totals, lists, search and notifications, except as stated in RES-10. |
+| RES-07 | Planned hours per person-week are reported per confidence band. `remaining = capacity − confirmed − expected`. Possible hours are shown but not subtracted. For the viewer, their own Draft allocations are included in these figures; other managers' Drafts are not. |
+| RES-08 | **Over-allocated** when `(confirmed + expected) > capacity × allocation_over_pct`, using visibility rules from RES-07 for the viewer. Severity Warning; Critical when more than 1.5 × capacity. |
+| RES-09 | **Under-allocated** when `(confirmed + expected + possible) < capacity × allocation_under_pct` for `allocation_under_weeks` consecutive weeks starting at or after the current week, **and** the person has no open task without `estimated_hours` due in those weeks. Severity Info. Never fires for weeks with leave covering 50 % or more of capacity. |
+| RES-10 | **Overlapping Plans** when manager allocations from two or more distinct creators (any visibility) exist on the same person-week and `Σ all allocations (any visibility) > capacity` (capacity is already net of leave/holidays). Reported to every creator involved, naming the other managers and their hours but not their labels or notes. Not reported to the person unless all involved allocations are Published or Confirmed. No allocation is changed. |
+| RES-11 | **Leave Conflict** when leave hours in a week > 0 and `(confirmed + expected, Published or Confirmed only) > capacity` for that week. Reported to the person and to creators of the involved allocations. |
+| RES-12 | **Stale Allocation** when `end_week ≥ current week` and `now − last_confirmed_at > allocation_stale_days`. Any edit, visibility change, or "still valid" resets `last_confirmed_at`. Shown as "needs confirmation"; totals still include it. |
+| RES-13 | **Deliverable Pressure** when a deliverable not Issued/Accepted/Cancelled is due in week W and its owner, or any assignee of its open tasks, is Over-allocated in W. Reported to the deliverable's PM and the person's Supervisor. |
+| RES-14 | Conflicts, including RES-19 Coverage Concern, are materialised in `resource_conflict` keyed by (`rule_id`, `person_id`, `week`); they persist while the condition holds and disappear when it clears. Snooze follows ATT-03. |
+| RES-15 | Evaluation runs on every allocation, leave, office holiday or capacity write and affected task/deliverable/review due-date or ownership change, plus nightly. Recompute affected person-weeks, including both old and new ranges after moves/cancellations. Coverage/calendar queries also evaluate dates outside the weekly planner horizon. |
+| RES-16 | Project workflows never create, modify or delete allocations. Deleting or archiving a project sets `project_id` to null on its allocations and keeps the label; the source becomes `OtherProject`. Deactivating a user keeps their allocations read-only and lists them in the Reassign Work tool (FR-ADM-02). |
+| RES-17 | Task `estimated_hours` are never added to planned hours. They feed the context column only (§12.15.8). |
+| RES-18 | HR alone approves/cancels leave. Imported fields are read-only; preview/apply obey §12.18.2 source identity, validation, timestamp, concurrency and idempotency rules. Rejected imports and missing rows never alter availability. Leave/holiday changes never alter assigned work or project deadlines. |
+| RES-19 | **Coverage Concern** when an active task/deliverable’s assignee/owner or required reviewer has approved absence or an office holiday on that item’s due date. Full-day absence is a warning; partial absence is a review prompt with remaining daily hours. Weekly allocation hours alone do not prove a dated conflict. Aggregate affected permitted items per person-week, route to Supervisor and relevant PM/DL, and preserve the flag while the condition holds even if a handover note exists. |
+| RES-20 | Copy-last-week and Publish-selected operate on explicitly selected creator-owned manager rows only, with preview, expected versions and atomic/idempotent apply. Copy creates target-week Drafts; publishing changes visibility, never confidence or employee-owned work. |
 
 ---
 
@@ -2629,9 +2873,14 @@ Channels: **App** = in-app notification centre; **Email** = immediate email; **D
 | Health override set/expired | PM | ● | | |
 | Work reassigned away from you | Previous assignee | ● | | |
 | Predecessor of your task was deleted / dependency removed | Successor assignee | ● | | |
-| Any change by someone else on a project you follow at All activity | Followers | ● (Following tab) | | ● (Project updates) |
-| Someone else added one of your direct reports to or removed them from a project, or made them Discipline Lead | Supervisor | ● | | ● (My staff) |
-| A Supervisor added or removed one of their direct reports on your project team | PM | ● | | ● |
+| Manager allocation published or confirmed for you | Person | ● | | ● |
+| Manager allocation withdrawn (visible → Draft) or deleted | Person | ● | | |
+| HR-approved leave changed, cancelled or manually copied | Person, Supervisor | ● (one summary per import/person) | | ● |
+| Coverage Concern (RES-19) | Supervisor, relevant PM/DL | ● | | ● |
+| Overlapping Plans on someone you supervise (RES-10) | Managers involved | ● | | ● |
+| Over-allocated / Leave Conflict on someone you supervise (RES-08, RES-11) | Supervisor | ● | | ● |
+| Deliverable Pressure (RES-13) | PM, Supervisor | ● | | ● |
+| Your allocation needs confirmation (RES-12) | Creator | | | ● |
 
 ### 17.3 Daily digest
 
@@ -2709,10 +2958,13 @@ All reports are deterministic queries over current data (or snapshots where note
 | Projects At Risk | office, PM, health | Project, PM, computed/reported health, why, next submission | Portfolio | First release (§36) |
 | Open Issues / High Risks | project(s), severity | Register rows | Project / All | P2 |
 | Meeting Actions Outstanding | project, owner type | Action rows | Project | P2 |
-| Workload by Employee | supervisor, discipline, weeks | Person, week columns (hours/capacity), open tasks, unestimated, overdue | Resources | First release (§36) |
-| Workload by Discipline | office, weeks | Discipline, week columns aggregated | Resources | First release (§36) |
-| Health History | project(s), date range | Date, computed, reported (from snapshots) | Portfolio | First release (§36) |
-| Task Hours | project(s), task, person, work-date range | Work date, person, project, task, actual hours, note, total hours | My / Project / Staff (permission-filtered) | First release (§36.8) |
+| Workload by Person | supervisor, discipline, weeks, include possible | Person, week columns (confirmed / expected / possible / capacity / remaining), leave, conflicts; Drafts only for the caller | Resources | MVP |
+| Team Capacity | supervisor or discipline, weeks | Week columns: capacity, confirmed, expected, possible, remaining, people over, people under | Resources | MVP |
+| Allocations by Source | supervisor, discipline, weeks, source category | Hours per source category per week; lists allocations with no linked project | Resources | MVP |
+| Vacation & Coverage | supervisor/team, office, year/date range | Person, unavailable dates/hours, holidays, permitted affected work, source freshness; no HR reasons/balances | Availability per §8.7 | MVP |
+| Project Staffing | project(s), discipline, weeks | Project, discipline, person, allocation hours/confidence, capacity context; same records as Team Planner | Project and Resources intersection | MVP |
+| Workload by Discipline | office, weeks | Discipline, week columns aggregated | Resources | P2 |
+| Health History | project(s), date range | Date, computed, reported (from snapshots) | Portfolio | P2 |
 | Attention Items Export | project(s), severity | Rule, severity, item, why, owner, age | Project / All | P2 |
 
 **Export rules.** CSV is UTF-8 with BOM (Excel-friendly); XLSX has a header row, frozen pane, date-typed columns, and a "Parameters" sheet recording filters and generation time. Exports are limited to 50,000 rows per request (larger runs split by project). Exports are logged (who exported which report when) but not their content.
@@ -2737,7 +2989,9 @@ All reports are deterministic queries over current data (or snapshots where note
 | Attention | Snooze set/expired |
 | Admin | Reference data changes; threshold changes; system role changes; user activation/deactivation |
 | Access (minimal) | Sign-in events (success), export events |
-| Not logged | Views/reads of items; comment body edits within the 15-minute window (only "edited" flag); search queries; follow level changes and feed read markers (personal preferences) |
+| Resource planning | Allocation create/edit/delete, visibility changes, weekly-copy/publish actions, capacity/holiday changes, HR-referenced leave updates/cancellations and import summaries (source/actor/time/counts, no raw CSV or HR reasons) |
+| Calendar subscription | Create/revoke/rotate capability; metadata only, never the token or subscription URL |
+| Not logged | Views/reads of items; comment body edits within the 15-minute window (only "edited" flag); search queries |
 
 ### 20.2 Structure
 
@@ -2759,12 +3013,12 @@ Logging is performed in the application service layer (a single `ActivityLogger`
 
 ## 21. Security Requirements
 
-The Hub is an internal line-of-business application holding project coordination data (not financial or personal-sensitive data beyond employee names, emails, and job titles). Security is proportionate: standard enterprise controls, no over-engineering.
+The Hub is an internal line-of-business application holding internal-confidential project coordination and employee availability data (names, work identities, approved absence dates/hours; no HR reasons or balances). Security is proportionate: standard enterprise controls, no over-engineering.
 
 | Area | Requirement | Class |
 |---|---|---|
 | Transport | HTTPS only; TLS 1.2+; HSTS; HTTP redirects to HTTPS. | MVP |
-| Authentication | Microsoft Entra ID via OpenID Connect / OAuth 2.0 with PKCE for the SPA; API accepts only bearer tokens issued for the Hub API audience; no local accounts, no passwords stored. | MVP |
+| Authentication | Microsoft Entra ID via OpenID Connect / OAuth 2.0 with PKCE for the SPA; API accepts only bearer tokens issued for the Hub API audience; the optional read-only ICS endpoint uses a revocable personal capability (§12.19) as its sole exception. No local accounts or passwords stored. | MVP |
 | Authorisation | Role-based access control per Section 8 enforced in the application service layer for every command and query; deny by default; permission tests derived from the matrix. | MVP |
 | Least privilege | App Service uses a system-assigned managed identity to reach Key Vault and (if Graph is used) Graph with the minimum application permissions (`User.Read.All` for sync; `Mail.Send` restricted to one mailbox via an Application Access Policy). Database role for the app has only the needed DML; `activity_log` INSERT/SELECT only (Rec). | MVP |
 | Secret management | No secrets in code or config files; connection strings and client secrets in Azure Key Vault referenced by App Service; rotate on schedule (TBD). Prefer Entra-authenticated PostgreSQL (managed identity) to avoid database passwords entirely. | MVP |
@@ -2777,6 +3031,7 @@ The Hub is an internal line-of-business application holding project coordination
 | Environment separation | Separate Azure resource groups (and ideally subscriptions) for dev, test/UAT, prod; separate Entra app registrations per environment; no production data in dev; anonymised copy for test if needed (TBD). | MVP |
 | Rate limiting | Basic per-user request rate limit on the API (e.g., 600 requests/minute) to protect against runaway clients. | Rec |
 | Data classification | All project data treated as internal-confidential; Restricted projects (if enabled) additionally limited to members. | MVP |
+| Leave and calendar privacy | Enforce §8.7 in queries, reports, notifications and feeds. Do not retain raw HR CSV files or private reasons. Calendar capability tokens are hashed, revocable and never logged; feed access rechecks account state and permissions. | MVP (calendar if shipped) |
 | Security review | Threat-model walkthrough before pilot; automated OWASP dependency and static analysis in CI; penetration test before organisation-wide rollout (**TBD**). | Rec |
 | Not in scope | Customer-facing security certifications, DLP integration, field-level encryption, bring-your-own-key. | — |
 
@@ -2861,6 +3116,7 @@ One deployable API with clear internal module boundaries (separate projects/asse
 | `Workspace` | Named project selections, cross-project board and timeline queries, dashboard layout, calendar events and deadline projections (§36) |
 | `Registers` | Decisions, external parties; P2 risks, issues, meetings, actions; item links |
 | `Collaboration` | Comments, mentions, watchers, document links |
+| `Resources` | Capacity, leave, allocations, visibility filtering (Draft is enforced here, not in the UI), HR-approved leave import, office holidays, weekly copy/publish, conflict rules RES-08…13/RES-19 and `resource_conflict` materialisation |
 | `Evaluation` | Pure rules (indicators, milestone status, health, attention) + state materialisation + change detection |
 | `Notifications` | Event → notification mapping, preferences, in-app store, email rendering and sending, digest |
 | `Templates` (P2) | Template CRUD and instantiation |
@@ -2983,7 +3239,7 @@ Only the important fields are listed; standard audit columns are implied.
 
 | Entity | Purpose | Key fields | PK | FKs / relationships |
 |---|---|---|---|---|
-| `app_user` | Employees who can use the Hub | `entra_object_id` (unique), `email` (unique), `display_name`, `job_title`, `office_id`, `supervisor_id`, `is_active`, `weekly_capacity_hours`, `last_sign_in_at` | `id` | `office_id → office`; `supervisor_id → app_user` (self) |
+| `app_user` | Employees who can use the Hub | `entra_object_id` (unique), `email` (unique), `hr_source_system`, `hr_person_key` (nullable pair, Admin-mapped; unique together), `display_name`, `job_title`, `office_id`, `supervisor_id`, `discipline_id`, `skills` (text[]), `is_active`, `last_sign_in_at` | `id` | `office_id → office`; `supervisor_id → app_user` (self); `discipline_id → discipline`. Capacity lives in `person_capacity`. |
 | `user_system_role` | System roles per user | `user_id`, `role` (Admin, Executive, Supervisor, ProjectManager, ReadOnly), `source` (Group, Manual), `granted_by`, `granted_at` | `id`; unique(`user_id`,`role`) | `user_id → app_user` |
 | `office` | Offices | `name`, `code`, `time_zone`, `is_active` | `id` | — |
 | `discipline` | Organisation discipline list | `name`, `code`, `colour`, `sort_order`, `is_active` | `id` | — |
@@ -3049,6 +3305,20 @@ The first-release Created by Me view (§36.7) requires `task.created_by_id`, ret
 | `comment` | Comments on items | `project_id`, `item_type`, `item_id`, `author_id`, `body`, `comment_kind`, `review_round`, `created_at`, `edited_at`, `deleted_at`, `deleted_by` | `id` | → `project`, `app_user`; polymorphic item; index (`item_type`,`item_id`,`created_at`) |
 | `comment_mention` | Users mentioned in a comment | `comment_id`, `user_id` | `id`; unique | → `comment` (cascade), `app_user` |
 | `document_link` | Links to documents | `project_id`, `item_type` (Project, Deliverable, Task), `item_id`, `title`, `url`, `link_type`, `added_by`, `added_at`, `deleted_at` | `id` | polymorphic item |
+
+#### Resources
+
+| Table | Purpose | Key columns | PK / uniqueness | FKs and constraints |
+|---|---|---|---|---|
+| `person_capacity` | Weekly capacity history | `user_id`, `effective_from` (date), `weekly_capacity_hours` (numeric(4,1)), `working_days` (smallint[] 1–7), `set_by`, `set_at` | `id`; unique(`user_id`,`effective_from`) | → `app_user`; require non-empty distinct working days and non-negative weekly capacity. Replaces the single `app_user.weekly_capacity_hours` column from v1.0 (drop it). |
+| `leave` | Copy of HR-approved absence | `user_id`, `start_date`, `end_date`, `hours_per_day` (null = full working day), `source_kind` (HRImport/ManualHR), `status` (Approved/Cancelled/Unverified), `source_system`, `external_id`, `source_updated_at`, `imported_at`, `created_by`, `created_at`, `updated_at`, `row_version` | `id`; unique(`source_system`,`external_id`) when verified | → `app_user`; CHECK `start_date <= end_date`; CHECK `hours_per_day IS NULL OR hours_per_day > 0`. Source keys required for verified leave; cancellations retained, imported fields read-only. No HR reason/balance column. |
+| `office_holiday` | Office-specific non-working date | `office_id`, `date`, `name`, `created_by`, `updated_at`, `row_version` | `id`; unique(`office_id`,`date`) | → `office`; administered dates, not an assumed statutory calendar. |
+| `allocation` | Planning layer rows | `user_id`, `created_by`, `owner_kind` (Employee, Manager), `hours_per_week` (numeric(4,1)), `start_week` (date, Monday), `end_week` (date, Monday), `label`, `source_category`, `project_id` (nullable), `project_discipline_id` (nullable), `confidence` (Confirmed, Expected, Possible), `visibility` (Draft, Published, Confirmed), `notes`, `last_confirmed_at`, `created_at`, `updated_at`, `deleted_at`, `row_version` | `id` | → `app_user` ×2, `project`, `project_discipline` (both `ON DELETE SET NULL`). CHECK `start_week <= end_week`; CHECK `extract(isodow from start_week) = 1`; CHECK `hours_per_week > 0 AND hours_per_week = round(hours_per_week*2)/2`; CHECK `(owner_kind = 'Employee') = (visibility = 'Confirmed' AND created_by = user_id) OR owner_kind = 'Manager'`. Index (`user_id`,`start_week`,`end_week`); index (`created_by`) where `visibility = 'Draft'`. |
+| `allocation_week` | Materialised expansion of allocations to weeks for fast aggregation (rebuilt per allocation on write) | `allocation_id`, `user_id`, `week`, `hours`, `confidence`, `visibility`, `created_by`, `source_category` | PK(`allocation_id`,`week`) | → `allocation` (cascade). Index (`user_id`,`week`). Every totals query reads this table with a visibility predicate: `visibility <> 'Draft' OR created_by = :viewer`. |
+| `person_week_state` | Materialised per person-week figures | `user_id`, `week`, `capacity_hours`, `leave_hours`, `holiday_hours`, `confirmed_hours`, `expected_hours`, `possible_hours`, `task_estimate_hours`, `unestimated_task_count`, `evaluated_at` | PK(`user_id`,`week`) | → `app_user`. Excludes Draft hours; viewers add their own drafts at read time from `allocation_week`. |
+| `resource_conflict` | Current conflicts (RES-08…13, RES-19) | `rule_id`, `user_id`, `week`, `severity`, `message`, `route_to_user_ids` (uuid[]), `involved_allocation_ids` (uuid[]), `involved_work_items` (jsonb: item type/id/project for permission-filtered coverage links), `first_detected_at`, `last_evaluated_at` | `id`; unique(`rule_id`,`user_id`,`week`) | → `app_user`. Snoozes reuse `attention_snooze` with `project_id` null and `item_type = 'PersonWeek'`. |
+
+Calendar subscription storage (if shipped): one per-user hashed capability with created/revoked times, plus emitted event UID/sequence metadata needed for cancellation tombstones; no duplicate staffing or leave store. Import history and last successful import/source time use the existing ActivityLog.
 
 #### System
 
@@ -3179,7 +3449,7 @@ erDiagram
 
 ### 25.2 Authentication and authorisation
 
-- `Authorization: Bearer <access token>` issued by Entra ID for the API's audience. Missing/invalid → `401`.
+- `Authorization: Bearer <access token>` issued by Entra ID for the API’s audience. Missing/invalid → `401`. The optional `/calendar/{token}.ics` endpoint instead verifies its personal capability, active user and current permissions; it exposes no general API access. Subscription management still requires Entra authentication.
 - Every endpoint declares its required permission (e.g., `Task.Update`) and scope resolution (project from route or body). The authorisation service resolves the caller's system roles (from app-role claims + manual grants) and project roles (from `project_member`, `project_discipline`, `project.project_manager_id`) and ownership, and evaluates the matrix (§8.5). Denied → `403` with a problem detail explaining the missing role in plain language (used by the UI for hover text).
 - List endpoints apply visibility filtering server-side (Restricted projects).
 
@@ -3241,7 +3511,25 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET /me/work` | My Work aggregate (sections with counts and top rows) | any |
 | `GET /me/tasks`, `/me/reviews`, `/me/deliverables`, `/me/decisions`, `/me/attention` | Section lists with filters | any |
 | `GET /me/notifications`, `POST /me/notifications:markRead`, `PATCH /me/preferences` | Notification centre and preferences | any |
-| `GET /me/following`, `GET /me/feed?projectId=…&since=…`, `POST /me/feed:markRead` | Followed projects, Following feed, feed read markers | any |
+| `GET /me/week?from=&weeks=` | My Week strip (own row, Drafts excluded) | any |
+| `GET /manager/home?supervisorId=&weeks=` | Manager Home cards | Resources.ViewTeam |
+| `GET /people`, `GET /people/{id}` | People list and profile | any |
+| `GET/POST /people/{id}/capacity` | Capacity history | Resources.EditPerson (Supervisor/Admin) |
+| `GET /people/{id}/leave`, `POST/PATCH /people/{id}/leave[/{leaveId}]` | Scoped availability; manual HR-referenced fallback only. Reject writes to imported HR fields; cancellation requires HR evidence. | Leave.View / Leave.RecordManualHR (Supervisor/Admin) |
+| `POST /resources/leave-import:preview`, `POST /resources/leave-import:apply` | Validated CSV preview; atomic version-checked/idempotent apply with explicit Approved/Cancelled rows | Admin |
+| `GET /resources/vacation?year=&supervisorId=&officeId=` | Scoped daily availability, coverage concerns and import/source times | Leave.View |
+| `GET/POST/PATCH/DELETE /admin/office-holidays[/{id}]` | Office holiday configuration with expected versions; recompute old/new dates on changes | Admin |
+| `GET /resources/planner?view=people-or-projects&supervisorId=&disciplineId=&from=&weeks=&includeDrafts=` | Grid payload: people × weeks with per-band hours, remaining, indicators; Drafts only for the caller | Resources.View |
+| `GET /resources/planner/{userId}/{week}` | Contribution list for one cell | Resources.View |
+| `POST /allocations` | Create (quick add sends `{ userId, week, text }`; full form sends all fields) | Allocation.Create (self or supervised) |
+| `PATCH /allocations/{id}`, `DELETE /allocations/{id}` | Edit / delete (creator only) | Allocation.Edit |
+| `POST /allocations/{id}:transition` | `{ toVisibility }` | Allocation.Edit (Manager-owned only) |
+| `POST /allocations/{id}:confirmStillValid`, `:copy`, `:move` | Reset staleness; copy; `{ userId?, startWeek?, endWeek? }` | Allocation.Edit |
+| `POST /resources/allocations:copyWeekPreview`, `:copyWeekApply` | Source/target weeks and selected creator-owned rows; preview then atomic version-checked/idempotent Draft copies | Allocation.Create (Manager) |
+| `POST /resources/allocations:publishPreview`, `:publishApply` | Selected creator-owned Drafts; atomic version-checked transition and batched notifications | Allocation.Edit (Manager) |
+| `POST/DELETE /me/calendar-subscription` [MVP-Recommended] | Create/rotate or revoke personal capability; URL returned only to the owner | any active user |
+| `GET /calendar/{token}.ics` [MVP-Recommended] | Read-only dated events, stable UIDs and sanitised cancellation tombstones; permissions rechecked per fetch | Revocable personal capability |
+| `GET /resources/conflicts?supervisorId=&from=&weeks=`, `POST /resources/conflicts/{id}:snooze` | Conflict list and snooze | Resources.View |
 | `GET /projects` | Project list with filters/sort | any (visibility-filtered) |
 | `POST /projects` | Create project | Project.Create |
 | `GET /projects/{id}` | Project header and summary (includes `state`) | Project.View |
@@ -3351,7 +3639,7 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 
 ### 26.1 Principles
 
-- MVP integrates with exactly one external system: **Microsoft Entra ID** (plus Microsoft Graph for user sync and, if approved, mail). Everything else is a link or an export.
+- MVP uses **Microsoft Entra ID** (plus Microsoft Graph for user sync and, if approved, mail) and a validated, Admin-applied HR-approved leave CSV import. No live HR API is assumed. A personal read-only ICS subscription is MVP-Recommended; other integrations remain links/exports or later phases.
 - Integrations are **adapters** behind interfaces (`IUserDirectory`, `IEmailSender`, `IChatNotifier`, `IProjectMasterSource`) so they can be swapped or stubbed in dev/test.
 - The Hub never writes to systems of record it does not own (no writes to ERP, SharePoint, Exchange beyond sending mail).
 - No inbound webhooks or public API for third parties in MVP–P2.
@@ -3368,8 +3656,10 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 | SharePoint (Graph) | Read | Browse/pick documents from a project library | Graph Sites/Drives | P3 |
 | ERP / Vantagepoint | Inbound (sync) | Project master data (number, name, client, PM, office, status) | Nightly import via vendor API or file drop; Hub fields marked "managed by ERP" become read-only | P3 (**TBD** capabilities and licensing — not assumed) |
 | Excel | Outbound | Report and list exports | CSV/XLSX download | MVP |
-| Calendar (ICS) | Outbound | Personal feed of due dates and milestones | Signed per-user ICS URL | P3 (optional) |
-| HR / leave system | Inbound | Availability for workload | — | Out of scope unless P3 requested |
+| Calendar (ICS) | Outbound | Personal approved leave and permitted dated commitments; no weekly-hour appointments | Revocable per-user subscription, stable UIDs/cancellations (§12.19) | MVP-Recommended |
+| HR / leave export | Inbound | Approved leave availability, changes and explicit cancellations | Validated Admin CSV import (§12.18.2); source mapping TBD | MVP |
+| HR live API/calendar sync | Inbound | Automate the same availability import | TBD actual system, API/export capability, identity mapping and consent; no write-back | P3 |
+| Outlook / other calendar service | Inbound / bidirectional (later) | Meeting/free-busy context and optional two-way dated-event sync | TBD provider APIs/consent; reconcile identities and prevent double counting; HR remains leave authority | P3 |
 
 ### 26.3 Design for the Phase 3 ERP integration (so MVP does not preclude it)
 
@@ -3419,11 +3709,12 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 | My Staff page (direct reports, with staffing) | **MVP-Required** | Managers see their direct reports' assignments and work and staff them on projects without going through each PM. Hours-based load is in the first-release Resource View. |
 | Project templates | **Phase 2** | High value but the template editor is a significant UI; MVP projects can be set up manually or by cloning a project (**Recommendation: include "clone project structure" as a cheap MVP stopgap** — copies disciplines, milestones (undated), deliverables, tasks (unassigned), and dependencies from an existing project). |
 | Risk / Issue registers, Meeting Actions | **Phase 2** | Valuable but not needed to answer the core question; can be represented in MVP by tasks and comments. |
-| Resource / Workload view | **MVP-Required** | Workload is a visible first-release view (§36.8); missing estimates remain explicit. |
-| Portfolio and overview dashboards | **MVP-Required** | The overview with metrics, charts, deadlines, and personal layout editing is in the image (§36.6). |
-| Saved views and manual board order | **MVP-Required** | Both are needed for the pictured personal and board workflows (§36.3, §36.7). |
-| Team calendar and cross-project views | **MVP-Required** | Week/Month/Agenda, event creation, multi-project board and Gantt are in the image (§36). |
-| Task-hour entry under Time | **MVP-Required** | The user confirmed that the image's Time route records actual hours against tasks (§36.8). |
+| Weekly Resource Planner | **MVP-Required** | Changed in v1.1. The v1.0 view derived load from task estimates and so had to wait for estimates to be populated. The planner now takes manually entered allocations as the source of load, so it is useful from day one and is the feature most likely to retire the managers' spreadsheets. Task estimates remain a context column. |
+| Vacation & Coverage with HR-approved leave CSV | **MVP-Required** | Replaces a separate vacation/coverage tracker and makes weekly capacity credible. HR owns approval; office holidays and dated coverage concerns share the planner records. |
+| Personal calendar subscription | **MVP-Recommended** | Dated commitments and approved personal leave can appear in Outlook/other clients without a second maintained list. Client refresh and cancellation behavior must be verified. |
+| Portfolio dashboard | **Phase 2** | Requires enough Active projects in the system to be meaningful; the Project List with health column covers the interim. |
+| Saved views | **Phase 2** | URL-encoded filters cover MVP. |
+| Tasks/dependencies on the timeline, drag to reschedule | **Phase 2** | Scheduling-adjacent; risk of scope creep. |
 
 ### 27.2 MVP feature list
 
@@ -3442,12 +3733,14 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 12. Notifications: in-app, immediate email, daily digest, preferences.
 13. Global search, list filters, sorting, grouping, column chooser, exports.
 14. Activity log on all specified changes; item and project history.
-15. Core reports (§19 MVP rows).
-16. Assignments and following: follow on team assignment, follow levels, Following feed, Project updates digest section, My Staff page for direct reports, with staffing (§12.18).
-17. Six-view visual workspace: named project scope, project priority and derived progress, four-lane task board, task-level Gantt, calendar events, overview widgets and charts, saved personal views, functional navigation, and task-hour entry under Time (§36).
+15. Core reports (§19 MVP rows), plus the Workload by Person and Team Capacity reports.
+16. Resource planning (§12.15): `PersonCapacity`, `Leave`, `Allocation` with owner, source category, confidence and visibility; server-side Draft filtering; quick add; repeat, extend, drag, copy; explainable per-band totals; conflict rules RES-08…RES-13 and RES-19 materialised and notified; copy-last-week preview; batched publish; connected People/Projects staffing.
+17. Screens: Weekly Resource Planner (§13.11), Manager Home (§13.19), People and Person Profile (§13.20), My Week published plan on My Work (§13.10); Vacation & Coverage year calendar (§13.21).
+18. Thin Decision Register (§12.9) — promoted from Recommended; the product scope lists decisions in every role's view.
+19. HR-approved leave CSV import with validation/preview, stable source identity, update/cancellation handling, freshness and audit; office holidays; read-only HR fields and privacy (§12.18).
 
 **Recommended (ship if schedule allows; each independently cuttable)**
-Thin Decision Register + External Parties; slip and due-change tracking; attention snooze; Restricted visibility enforcement; reassign-work tool; clone project structure; "Copy summary" on Weekly Coordination; milestone date cascade to deliverables; staff assignment notices and My staff digest section for supervisors; Staff Assignments report. The six pictured views are required, not cuttable.
+Personal calendar subscription (§12.19); External Parties; project-derived demand context column (§12.15.8); Deliverable Pressure rule RES-13; thin Risk and Issue registers (same pattern as Decisions); read-only Timeline; slip and due-change tracking; health snapshots; attention snooze; Restricted visibility enforcement; reassign-work tool; clone project structure; "Copy summary" on Weekly Coordination; milestone date cascade to deliverables.
 
 ### 27.3 Explicitly not in MVP (and the consequence)
 
@@ -3455,6 +3748,12 @@ Thin Decision Register + External Parties; slip and due-change tracking; attenti
 |---|---|
 | Templates | Projects built manually or cloned from a reference project. |
 | Risks, Issues, Meeting Actions | Tracked as tasks/comments or outside the Hub. |
+| Portfolio Dashboard | Executives use Project List sorted by health plus Projects At Risk report (P2) — interim: Project List. |
+| Role-level long-term demand | Managers plan named people only; beyond 12 weeks they plan outside the Hub. |
+| Live HR API/calendar sync | Admin applies a validated approved-leave CSV; Supervisor/Admin may use a labelled HR-referenced manual fallback. No automated sync is claimed. |
+| Inbound meetings / two-way calendar sync | Personal subscription is read-only if shipped; calendar changes do not write back to HR or staffing. |
+| Tasks on the timeline; drag scheduling | Dates edited in lists/panels. |
+| Saved views | Bookmark URLs. |
 | Teams notifications | Email and in-app only. |
 
 ---
@@ -3485,11 +3784,11 @@ Original item numbers are retained for historical packet citations. Items marked
 2. **SharePoint integration** — browse and pick documents from the project library (Graph); still no storage in the Hub.
 3. **ERP / Vantagepoint integration** — inbound project master data sync (**TBD**: capabilities, licensing, ownership of fields). Nothing is assumed about ERP capabilities in this specification.
 4. **Project financial information (read-only display)** — only if sourced from ERP; the Hub never becomes a financial system.
-5. **Utilisation / resource planning** — availability from HR/leave systems, capacity by role, longer horizons; still no levelling or payroll timesheets. Manual dated capacity overrides and confirmed production/review allocations are now approved in §37.6, and manual weekly planning entries in §39; HR integration remains Phase 3.
+5. **Resource planning integrations** — automatic HR API/calendar availability sync after source discovery (validated CSV is already MVP); planned vs actual effort from timesheet data (FR-RES-17), for planning improvement only, never individual performance tracking; still not levelling or timesheets in the Hub.
 6. **Client / external actions** — optional read-only external access or emailed action lists to external parties (security review required).
 7. **Advanced portfolio reporting** — cross-office comparisons, discipline throughput, submission on-time rates from snapshots.
 8. **Advanced administration** — per-project threshold overrides; template analytics; bulk data tools.
-9. **Calendar feed (ICS)** for personal due dates and milestones.
+9. **Inbound meeting/free-busy and two-way calendar sync** — after the personal ICS subscription is verified; actual provider APIs, permissions and event identity reconciliation required. Calendar edits never approve leave or automatically overwrite allocations.
 10. **Localisation** into a second language if not done in MVP (**TBD**).
 
 No AI features are planned in any phase of this specification.
@@ -3502,8 +3801,8 @@ No AI features are planned in any phase of this specification.
 |---|---|
 | AI assistants, LLM features, automated summaries, AI task extraction, recommendations, predictions, "smart" scheduling | Product constraint; the product must be fully deterministic and explainable. |
 | Accounting, invoicing, budgets, cost tracking, earned value | Financial systems of record exist; the Hub coordinates work, not money. |
-| Payroll, HR records, leave management | Not a coordination concern. Planned time away is recorded only as a non-sensitive availability override for capacity (§37.6, §39.3), with no leave type, reason or balance. |
-| Payroll or billable timesheet approval, billing rates, invoicing, and payroll submission | Actual hours are recorded against tasks in the first-release Time view (§36.8), but the Hub does not replace financial or payroll systems. |
+| Payroll, sensitive HR records, leave approval/balances/accruals | HR remains authoritative; importing approved availability and planning coverage are in scope. |
+| Timesheets or time tracking of any kind | Duplicates ERP/timesheet systems; poisons task estimates with compliance behaviour. |
 | Full ERP or CRM functionality | — |
 | CPM scheduling, critical path, float, resource levelling, baselining beyond original dates, MS Project/P6 import-export | Primavera/Project replacement is a non-goal. |
 | CAD/BIM authoring, model viewing, drawing mark-up | Engineering tools do this. Location metadata and links to external markups/viewpoints are approved in §38.3; no embedded authoring/viewer is added. |
@@ -3685,6 +3984,37 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 
 ### 31.16 Assignments, following, and My Staff (AC-ASG)
 
+### 31.16 Resource planning (AC-RES)
+
+- **AC-RES-01** Given a Supervisor focuses a supervised person's week cell and types `8 h proposal support` then Enter, Then one allocation exists for that person and week with 8.0 h, label "proposal support", source `OtherProject`, confidence Expected, visibility Draft, and no other field was required.
+- **AC-RES-02** Given the allocation from AC-RES-01 is Draft, When the person opens My Work › My Week, Then the week total excludes the 8 h and the allocation is not listed; When another Supervisor opens the planner, Then the same holds.
+- **AC-RES-03** Given the creator publishes the allocation, Then the person receives an in-app notification and the 8 h appears in their My Week as Expected; the activity log records the transition.
+- **AC-RES-04** Given a person with capacity 37.5 h, 30 h Confirmed and 10 h Expected in week W, Then the planner shows remaining −2.5 h, Over-allocated fires at Warning severity, and the contribution list for the cell shows every allocation with owner, label, source, hours, confidence and visibility.
+- **AC-RES-05** Given manager A has 16 h Draft and manager B has 16 h Draft on the same person-week with 20 h Confirmed and capacity 37.5 h, Then RES-10 fires for both A and B, each sees "another manager has planned 16 h", neither sees the other's label, the person sees nothing, and no allocation changed.
+- **AC-RES-06** Given an employee adds `6 h small project` to their own row, Then the allocation is employee-owned, visibility Confirmed, and their Supervisor can view but receives a permission error on edit.
+- **AC-RES-07** Given an allocation spanning weeks 1–3, When the creator drags its right edge to week 6, Then `end_week` is week 6, there is still exactly one allocation row, and each of weeks 1–6 shows its hours.
+- **AC-RES-08** Given 2 days of HR-approved leave are imported for a person in week W (5 working days, 37.5 h), Then capacity for W is 22.5 h, a Leave source row of 15 h is shown, and any Published/Confirmed allocations exceeding 22.5 h raise Leave Conflict.
+- **AC-RES-09** Given an allocation whose `last_confirmed_at` is older than `allocation_stale_days` and whose `end_week` is in the future, Then it is marked "needs confirmation" in the planner and on Manager Home; When the creator clicks "still valid", Then the flag clears.
+- **AC-RES-10** Given a task with 14 h estimated and no allocation against its project for the assignee next week, Then the planner's context column shows "task estimates: 14 h" and planned hours remain unchanged.
+- **AC-RES-11** Given a project is archived, Then its allocations keep their label and hours, `project_id` is null, and the source category is `OtherProject`.
+- **AC-RES-12** Given a Supervisor with 12 supervised people over a 12-week horizon, Then the planner payload returns in under 1.5 s at the 95th percentile with 500 allocations, and Manager Home in under 2 s.
+
+- **AC-RES-13** Given an approved HR row with a stable source key, When Admin previews/applies it twice, Then one read-only leave record exists, the second apply is unchanged, and source/import times and the first change are auditable. Ordinary employees and Supervisors cannot alter imported dates/hours.
+- **AC-RES-14** Given imported leave, When its HR row is explicitly Cancelled, Then capacity is restored and history retained without changing allocations. Omitting the row from another file does not cancel it. Invalid dates/hours, unknown people, contradictory duplicate keys, older source data or stale expected versions reject the batch without any mutation.
+- **AC-RES-15** Given a normal 37.5 h/five-day week with full-day approved leave on a 7.5 h office holiday and no other absence, Then available capacity is 30 h, the reduction is counted once, and Leave/Holiday rows do not increase planned hours. A non-working weekend absence causes no further reduction; a verified 3 h partial weekday absence reduces capacity by 3 h.
+- **AC-RES-16** Given a review due Friday and its reviewer has full-day approved leave Friday while weekly hours fit capacity, Then Coverage Concern links to the permitted review and routes to Supervisor/PM/DL; the due date and allocated hours stay unchanged. Partial absence is labelled a review prompt, and an undated item is never declared covered.
+- **AC-RES-17** Given a manager previews copying last week, Then only selected owned manager rows become one-week target Drafts; continuing target work is flagged before apply, and employee work/leave/other managers’ drafts are not copied. Retrying apply creates no duplicates; changed versions require refresh.
+- **AC-RES-18** Given selected owned Draft allocations, When the manager publishes them together, Then all selected rows publish atomically, confidence stays unchanged, each employee receives one summary, and My Week/People/Projects/report totals agree for the same scope. A stale or unauthorised row prevents the entire publish.
+- **AC-RES-19** Given a Standard User, PM, or planner export reader, Then only permitted availability and work links are returned; no HR reasons/balances or private draft details leak through calendar, notifications or exports. A failed import leaves the last successful data/source timestamps visible and does not claim a current sync.
+- **AC-RES-20** Given legacy leave without a verified HR reference, Then it is preserved as Unverified and availability is visibly provisional. When its source-matched HR row is reconciled, Then one approved record and its history remain, without double reduction.
+- **AC-CAL-01** If the subscription ships, Given personal approved leave and dated permitted commitments, Then the ICS uses stable UIDs, all-day date events and exclusive end dates; weekly allocations produce no invented appointment times or actual-hours records.
+- **AC-CAL-02** If the subscription ships, When leave/commitments change or are cancelled/reassigned out of scope, Then the feed updates the same event or emits a sanitised cancellation with that UID. Permission removal exposes no former restricted content; revocation, rotation or inactive accounts deny the old URL. Tokens/URLs are absent from logs and exports. Outlook update/cancellation handling is verified before compatibility is claimed; calendar-client refresh is not advertised as instant.
+
+---
+
+
+### 31.18 Assignments, following, and My Staff (AC-ASG)
+
 - **AC-ASG-01** Given a PM adds Alex to project 1234 as a Team Member, Then Alex follows 1234 at All activity with source Assignment, and Alex's "Added to a project" notification states that they now follow it; Given Diane is auto-added only as Reviewer, Then she follows at My items only.
 - **AC-ASG-02** Given Alex follows 1234 at All activity, When Marc changes a task due date on 1234, Then the change appears in Alex's Following tab within 60 seconds and counts as unread for 1234; When Alex changes a task themselves, Then it is not counted as unread.
 - **AC-ASG-03** Given Alex set 1234 to My items only, When the PM later changes Alex's project role, Then Alex's level is still My items only.
@@ -3727,6 +4057,8 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | E-24 | **Deliverable issued, then client returns comments** | Set status Revision Required (from Issued, PM/DL) with a comment; `issued_date`/`revision` retained; the next issue records the new revision; P2 issue history lists both. |
 | E-25 | **Employee moves to another manager** | The `supervisor_id` change (Admin or directory sync) takes effect immediately for My Staff and reassignment scope; the previous supervisor loses read access to that person's My Work; logged as an Admin change. |
 | E-26 | **Supervisor data missing** | Users with no supervisor appear only in the All staff scope and in an Admin "No supervisor" filter so the gap gets fixed; nobody can staff them from My Staff until a supervisor is set. |
+| E-28 | **Follower loses access to a Restricted project** | The follow is deleted (ASG-04), and because the feed is permission-filtered at read time, that project's entries disappear from the Following tab immediately. |
+| E-29 | **Supervisor removes a direct report who owns open work on a project** | The TM-04 prompt runs for the supervisor as it would for the PM: reassign the person's open items within the project or leave them assigned with an "Inactive on project" indicator; the PM is notified with the list of affected items; all logged. |
 | E-27 | **Person on many projects gets too many updates** | Per-project follow levels (ASG-02); the digest groups updates by project and caps each at five rows; the Following tab has an "important only" filter; the system never overrides a level the user has set. |
 | E-28 | **Follower loses access to a Restricted project** | The follow is deleted (ASG-04), and because the feed is permission-filtered at read time, that project's entries disappear from the Following tab immediately. |
 | E-29 | **Supervisor removes a direct report who owns open work on a project** | The TM-04 prompt runs for the supervisor as it would for the PM: reassign the person's open items within the project or leave them assigned with an "Inactive on project" indicator; the PM is notified with the list of affected items; all logged. |
@@ -3787,17 +4119,111 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 
 ## 35. Recommended Development Sequence
 
+## 32. Edge Cases and Recommended Handling
+
+| ID | Edge case | Handling |
+|---|---|---|
+| E-01 | **Employee leaves the company** | Entra disable → sync marks Inactive within 24 h → cannot sign in → A-18 fires for every open task, deliverable, decision, review, and discipline lead role they hold → Supervisor and PMs use the Reassign-work tool (bulk, per project, logged) → historical references retained with "(Inactive)" suffix. Notifications to the inactive user stop. |
+| E-02 | **Project manager changes** | PM (or Admin) sets a new `project_manager_id`; the new PM gets the PM role and notification; the old PM keeps membership as Team Member unless removed; attention items and digests re-route within one cycle; the change is logged. The Reassign-work dialog is offered for tasks assigned to the old PM (optional). |
+| E-03 | **Due date is changed** | Log old → new with reason (required for non-PM/DL by Recommendation); notify assignee and reviewer if changed by someone else; increment `due_date_change_count`; re-evaluate Overdue/Due Soon/Blocked/Date Inconsistent for the task and its successors; if the task is a predecessor, successors with start dates before the new due date are flagged D-12. |
+| E-04 | **Predecessor is deleted** | Soft-delete; all edges removed and listed in the log snapshot; successors re-evaluated (usually unblocked); successor assignees and PM notified with "dependency removed because 1234-T0031 was deleted"; PM may restore the task (Admin/PM restore action, Rec) which re-creates edges from the snapshot. |
+| E-05 | **Project is placed On Hold** | Evaluation suspended (G-05); items keep their dates; portfolio shows On Hold; digests exclude the project; on resume, a "Date review" banner lists items whose dates passed while on hold with a bulk shift-by-N-days action (Rec). |
+| E-06 | **Task belongs to multiple disciplines** | Not supported by design: one owning discipline for accountability. Handling: create the task under the leading discipline and add collaborators from the other; or create two linked tasks with a dependency; a "Coordination" task typically belongs to Project Management or the discipline that owns the deliverable. Documented in user guidance. |
+| E-07 | **Multiple people collaborate on a task** | Single assignee plus collaborators (T-15); collaborators can update progress/status and comment; notifications go to assignee and collaborators; if the work is genuinely separable, split into tasks under the deliverable. |
+| E-08 | **Reviewer is also the assignee** | Refused unless `allow_self_review` is on (R-02). If a DL must review their own work on a small project, the PM may change the reviewer to themselves or the org may enable self-review (logged setting change). |
+| E-09 | **Milestone moves** | M-02 to M-04: log, notify DLs, flag inconsistent deliverables, optional cascade preview; slip visible on milestone; portfolio "next submission" updates; if moved earlier, deliverables now due after the milestone are flagged. |
+| E-10 | **Task is reopened** | T-14: reason required; progress 90; successors re-evaluated (may re-block; notified); deliverable progress recalculated; if the deliverable is Issued, "Issued with open work" indicator (DL-12) — the deliverable status is never auto-reverted. |
+| E-11 | **Completed project needs correction** | Complete status stays editable for the PM (P-05); Archived requires Admin unarchive → PM edits with reasons → re-archive; all logged; corrected items remain in original snapshot history. |
+| E-12 | **Template changes after projects were created** | Snapshot semantics: no propagation. Projects record template id and version. "Add from template" allows pulling specific new items. A "Compare with template" view is deliberately not built. |
+| E-13 | **Duplicate project numbers** | Unique constraint with case-insensitive collation; clear error linking to the existing project; Admin can renumber with logging; if the business uses sub-project suffixes (e.g., `1234-02`), the format regex allows them and each is a distinct project. |
+| E-14 | **External parties own actions/decisions but have no accounts** | `ExternalParty` records; owner shown with organisation; no outbound notifications; requester/PM receive attention and digests; Weekly Coordination lists "Waiting on client/external" items; P3 may add emailed action lists. |
+| E-15 | **Task with no deliverable and no milestone** | Allowed (e.g., "Book kickoff room"); shows under "Other tasks" in grouped views; excluded from milestone readiness; A-09 applies if In Progress with no due date. |
+| E-16 | **Deliverable retargeted to another milestone** | Logged; both milestones re-evaluated; if the new milestone date is earlier than the deliverable due date, flag A-17. |
+| E-17 | **Cancelled milestone with linked deliverables** | Deliverables flagged "Milestone cancelled — retarget"; excluded from readiness; PM prompted with a bulk retarget dialog. |
+| E-18 | **Discipline deactivated organisation-wide while in use** | Deactivation hides it from pickers only; existing project disciplines and items remain valid; Admin sees the count of affected projects before deactivating. |
+| E-19 | **Same person is PM, DL, and assignee on one project** | Permissions are the union; UI never asks to switch roles; self-review still governed by R-02; attention items routed once per user (de-duplicated). |
+| E-20 | **Bulk action partially fails** | Row-by-row with a results summary (updated / skipped with reason); no rollback of successful rows; single summary notification per recipient. |
+| E-21 | **Clock/time-zone differences** | Dates are calendar dates; "today" is the organisation time zone; a user in another time zone may see an item become Overdue an hour "early" or "late" — accepted and documented; per-project time zone is a future capability. |
+| E-22 | **Very large project (5,000+ tasks)** | Whole-project evaluation still completes within seconds; lists are virtualised and paginated; Kanban warns above 500 cards and suggests filtering. |
+| E-23 | **Two PMs edit Weekly Coordination items simultaneously** | Optimistic concurrency per item; conflicts surfaced inline; no locking. |
+| E-24 | **Deliverable issued, then client returns comments** | Set status Revision Required (from Issued, PM/DL) with a comment; `issued_date`/`revision` retained; the next issue records the new revision; P2 issue history lists both. |
+| E-25 | **Leave overlaps a holiday or another absence** | Apply RES-03 once per daily hour. Deduplicate stable source keys; ambiguous overlapping partial-day source rows require reconciliation, never a guessed aggregate. Allocation hours remain intact. |
+| E-26 | **HR export is stale, incomplete or cancelled** | Reject older/conflicting rows and stale previews atomically; missing rows never mean cancellation. Retain last successful source/import times and history; explicit cancellations recompute affected old dates. |
+| E-27 | **Calendar event loses visibility or is reassigned** | Emit a stable-UID cancellation tombstone without former content. Active feed queries enforce current permissions; revoke capabilities on deactivation. Client polling may delay display changes. |
+
+---
+
+## 33. Risks and Technical Considerations
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| **Adoption**: team members do not update tasks, so indicators are wrong and PMs stop trusting the tool. | High | My Work as the single list; minimal required fields; weekly coordination run from the tool creates the habit; digest reminders; pilot with 2–3 motivated PMs; measure update frequency. |
+| **Data quality**: missing due dates, unassigned tasks, no estimates. | Medium | Attention rules A-08/A-09/A-13 make gaps visible; the first-release Resource View shows unestimated counts rather than hiding them; templates (P2) seed structure. |
+| **Notification fatigue** leads to filters that hide everything. | Medium | Digest-first defaults; transition-based immediate notifications only; per-user preferences; monitor unsubscribe rates in pilot and adjust defaults. |
+| **Rule tuning**: thresholds produce too many or too few attention items. | Medium | All thresholds configurable; start with defaults; review attention volume per project weekly during pilot; keep the rule set small. |
+| **Over-reliance on health colours** by management. | Medium | Computed and reported shown together; "why" always available; override expiry; training message: health summarises indicators, it does not predict. |
+| **Permission model perceived as restrictive** (e.g., DL cannot move a milestone). | Low | Clear hover explanations; PMs can grant roles quickly; revisit after pilot rather than pre-emptively loosening. |
+| **Entra/Graph permission approvals** delay SSO or sync. | Medium | Start the IT approval process in the discovery sprint; SSO works without Graph; sync has a documented fallback. |
+| **Supervisor data is incomplete** (Entra `manager` not populated), so My Staff shows the wrong people and the wrong managers can staff them. | Medium | Sync `manager` from Entra where populated (Q3); Admin maintenance otherwise; "No supervisor" filter for Admins. |
+| **Staffing conflicts**: a supervisor adds or removes people on a project without the PM's agreement. | Low | The PM is notified of every change (ASG-10); supervisors can only add their own direct reports as Team Members; the PM controls all other roles and can remove anyone. |
+| **Email deliverability** (spam filtering of digests). | Low | Send from a corporate mailbox via Graph; SPF/DKIM already handled by Exchange Online; plain formatting. |
+| **Evaluation performance** at higher-than-assumed scale. | Low | Whole-project evaluation is O(items) per project; per-project debounce; profile in test with synthetic 5,000-task projects; state tables keep reads cheap. |
+| **Time-zone and working-day expectations** differ by office. | Low | Calendar days and one organisation time zone in MVP, stated plainly; working-day calendars in P2. |
+| **Bilingual requirement discovered late.** | High if late | Externalise all strings from the first commit; decide the language requirement before development (§34). |
+| **Small team bus factor.** | Medium | Mainstream stack; modular monolith; ADRs; runbooks; tests on rules; avoid exotic libraries. |
+| **Template maintenance** becomes a bottleneck (P2). | Low | Template Editor flag; versioning; snapshot semantics avoid propagation complexity. |
+| **Scope creep** toward scheduling, documents, or chat. | High | Section 30 and the "do not build yet" list; product principle 1 applied at every ticket. |
+| **Optimistic concurrency confusion** during meetings. | Low | Clear conflict messages; per-field autosave reduces collision windows. |
+
+---
+
+## 34. Open Decisions / Questions
+
+| # | Decision | Why it matters | Default assumption if undecided |
+|---|---|---|---|
+| Q1 | Backend stack: ASP.NET Core vs Node/TypeScript | Team skills and hiring; scheduling library choice | ASP.NET Core (.NET 8) |
+| Q2 | System roles via Entra app roles/groups vs in-app assignment (or both) | IT ownership of access; audit expectations | App roles on groups + in-app manual additions |
+| Q3 | Approval for Graph `User.Read.All` (directory sync) and `Mail.Send` (service mailbox) | Leaver detection and email delivery path | Request both; fall back to manual deactivation and ACS Email |
+| Q4 | Open-by-default visibility vs Restricted projects | Permission enforcement, search, portfolio | Open by default; Restricted column enforced, toggle hidden |
+| Q5 | Project number format and source (manual now; ERP later?) | Validation regex, uniqueness, future sync | Manual entry, free format with uniqueness |
+| Q6 | Organisation time zone; date format | All date rules and display | Single org time zone; ISO dates |
+| Q7 | Bilingual UI requirement (e.g., English/French) | i18n architecture from day one | Externalised strings; English only at launch |
+| Q8 | Thin Decision Register in MVP: yes/no | Blocked-by-decision rule; workflow 11 | Yes |
+| Q9 | Availability/HA and backup retention targets | Database tier and cost | 99.5% business hours; 14-day PITR; no zone-redundant HA |
+| Q10 | Official browser list; iPad support | Testing matrix | Edge, Chrome current; Safari iPadOS |
+| Q11 | Reason required for due-date changes by non-PM/DL? | Friction vs traceability | Required |
+| Q12 | `allow_self_review` default | QA policy | False |
+| Q13 | Who can create projects (PM role holders only vs all staff) | Governance vs friction | PM system role holders and Admins |
+| Q14 | Retention policy for archived projects and logs | Storage, compliance | Indefinite |
+| Q15 | CI/CD platform (GitHub Actions vs Azure DevOps) | Tooling alignment | Whichever the organisation already uses |
+| Q16 | Pilot group and success metrics | Rollout plan | **Decided:** 50 people. Proposed operational default remains 3 PMs, 6 projects, 8 weeks, subject to project selection; the 50-person count is not a concurrency or server-capacity claim. |
+| Q17 | Idle session timeout | Security vs convenience | 8 hours |
+| Q18 | Weekly capacity default | Planner | 37.5 h (product scope §12); org setting |
+| Q19 | Product name in the UI: "Hub" or "Tuesday"? | Branding, URL `pm.engcalchub.com`, Entra app name | Tuesday, pending confirmation; this document keeps "the Hub" until renamed |
+| Q20 | May an employee edit a Published or Confirmed manager allocation? | Trust model §8.6 | No; comment only, or add their own entry |
+| Q21 | Does Confirmed visibility need the employee to accept? | Workflow weight | No; manager action only (product scope §17) |
+| Q22 | Should other managers see that a Draft exists on a person (count only), or nothing until RES-10 fires? | Cross-team transparency vs private planning | Nothing until RES-10 fires |
+| Q23 | Minimum horizon for Under-allocated to be meaningful during pilot (`allocation_under_weeks`) | Noise on Manager Home | 2 weeks; raise to 3 if noisy |
+| Q24 | HR system/export contract, stable person/leave keys, source freshness and varying daily hours | Import cannot safely map unknown HR formats or claim current availability without source evidence | Obtain a real approved-leave export and exact identity mapping; CSV first, no assumed API |
+| Q25 | Office holiday dates and person working schedules | Accurate capacity and overlap handling | Admin-maintained dates per office; equal-length scheduled working days in MVP, no guessed statutory calendar |
+| Q26 | Personal calendar subscription access/data destination and supported clients | Capability URL handling and refresh/cancellation acceptance | Outlook first under company IT policy; read-only dated events; no two-way sync in MVP |
+
+---
+
+## 35. Recommended Development Sequence
+
 ### 35.1 Overall sequence
 
 | Stage | Purpose | Exit criteria |
 |---|---|---|
-| **0. Discovery & design sprint** | Confirm decisions Q1–Q13 and Q21; validate the §36 functional flows with 3 PMs using representative project data; use the V2 prototype only as a visual clue while designing and testing the actual screens; finalise discipline and deliverable type lists | Decisions recorded as ADRs; functional flows and proposed screen designs reviewed; test data set prepared (DCC Dundurn Roads-style project) |
+| **0. Discovery & design sprint** | Confirm decisions Q1–Q13 and Q18–Q26; wireframes for My Work, Project Dashboard, Task List/Panel, Weekly Coordination, Team Planner, Vacation & Coverage, Manager Home; validate rules with 3 PMs using real project data on paper; finalise discipline and deliverable type lists | Decisions recorded as ADRs; wireframes approved; test data set prepared (DCC Dundurn Roads-style project) |
 | **1. Foundations** | Repo, CI/CD, IaC, environments, SSO end-to-end, user provisioning, admin reference data, activity log framework, design system skeleton | A user can sign in, see their name, and an Admin can maintain disciplines |
 | **2. Core structure** | Projects, team, disciplines, milestones, deliverables, tasks (CRUD, workflow, review), comments, links | A project can be fully built by hand and worked through review |
 | **3. Dependencies and rules** | Dependencies, evaluation module, state tables, outbox worker, indicators, milestone status, health, attention engine, nightly jobs | Worked examples in §15.12 pass as automated tests and show correctly in the UI |
 | **4. Coordination surfaces** | Project Dashboard, My Work, Weekly Coordination (with meeting mode), Kanban, Milestone view, Deliverables Register polish, search, filters, exports | A PM can run a coordination meeting on the test project without leaving the app |
-| **5. Visual workspace and notifications** | Six pictured views (§36), task-hour entry, portfolio, resource grid, saved views, task-level Gantt, team calendar, in-app centre, email, digest, preferences; recommended Decision Register and extras | Every first-release visual acceptance scenario AC-VIS-01 through AC-VIS-08 passes before pilot |
-| **6. Hardening and pilot** | Accessibility audit, performance test with synthetic scale, security review, runbooks, training material; 50-person pilot (proposed 3 PMs, 6 projects, 8 weeks); accepted coordination increments (§38.4); threshold tuning | Pilot success metrics met; go/no-go for organisation rollout |
+| **4b. Resource planning** | Capacity/office holidays, approved-leave CSV, allocations, People/Projects planner with quick add/copy/publish, Draft filtering, Vacation & Coverage, My Week, Manager Home; core allocation/availability can start beside stage 3, coverage requires dated work/reviews | A Supervisor plans a 12-person team for 12 weeks, import/update/cancellation and scoped views work, and AC-RES-01…20 pass |
+| **5. Notifications and recommended items** | In-app centre, email, digest, preferences; Decision Register; Timeline; snooze; reassign tool; clone project; personal ICS if shipped | Pilot readiness; AC-CAL-01…02 and real calendar behavior pass if shipped |
+| **6. Hardening and pilot** | Accessibility audit, performance test with synthetic scale, security review, runbooks, training material; pilot with 3 PMs for 8 weeks; threshold tuning | Pilot success metrics met; go/no-go for organisation rollout |
 | **7. General availability** | Rollout by office/group; support process; backlog triage for Phase 2 | — |
 
 ### 35.2 Recommended MVP Build Order (epics and dependencies)
@@ -3817,9 +4243,9 @@ Format: Given / When / Then. Criteria are testable against the rules and thresho
 | **E10 Coordination Surfaces** | Project Dashboard, My Work, Weekly Coordination (+ meeting mode, mark reviewed, copy summary), discipline summaries, My Staff (including staffing) | E7, E8 | XL |
 | **E11 Decisions & External Parties** (Rec) | Decision CRUD/lifecycle, external parties, item links, decision-block rule, register screen, dashboard/coordination integration | E7 | M |
 | **E12 Search, Filters, Reports** | FTS indexing, global search, key lookup, filter bar/URL state, group-by, column chooser, core reports, CSV/XLSX export | E5 (usable earlier for projects) | M |
-| **E13 Timeline & Extras** | Baseline Timeline, clone project structure, reassign-work tool, milestone cascade | E7 | M |
-| **E15 Six-View Workspace** | Projects board, cross-project board/Gantt, calendar, overview, My Work views, portfolio, workload, saved views, task-hour entry, §36 functional acceptance | E5, E7, E9, E10, E12, E13 | Re-estimate |
-| **E14 Hardening & Pilot** | Accessibility, performance, security review, runbooks, training, pilot support, threshold tuning | E0–E13, E15 | Re-estimate |
+| **E13 Timeline & Extras** (Rec) | Read-only Timeline, clone project structure, reassign-work tool, milestone cascade | E7 | M |
+| **E15 Resource Planning** | `person_capacity`, `leave`, `office_holiday`, `allocation`, `allocation_week`, `person_week_state`, `resource_conflict`; approved-leave CSV and source freshness; quick-add parser; visibility enforcement in the Resources module and every aggregate query; rules RES-01…20; People/Projects planner (keyboard, drag, copy/publish previews, side panel); Vacation & Coverage; My Week published plan; Manager Home; People and Person Profile; workload reports; notifications for allocation events | E1, E2 (data); E7 for context column and Deliverable Pressure; E9 for notifications; E10 for dashboard staffing column | XL |
+| **E14 Hardening & Pilot** | Accessibility, performance, security review, runbooks, training, pilot support, threshold tuning | All | M |
 
 ```mermaid
 flowchart TD
@@ -3898,7 +4324,7 @@ Everything else in Section 34 has a workable default and can be decided during d
 | **Per-project threshold overrides** | "Our project is different." | Makes portfolio comparisons meaningless; tune org defaults instead. | P3 at most. |
 | **Dark mode, themes, custom dashboard widget builder** | Polish and unlimited customisation. | The first release already lets users reorder or hide fixed overview widgets (§36.6); new widget definitions require separate metrics and permission rules. | After GA if requested. |
 | **Cross-project dependencies** | "Project B waits on Project A's survey." | Rare; complicates permissions and evaluation; can be represented by a decision or manual block with a link. | P3 if a pattern emerges. |
-| **Email-to-task, calendar sync** | Convenience. | Integration before adoption. | P3 (ICS feed is the cheap version). |
+| **Email-to-task, inbound/two-way calendar sync** | Convenience. | Integration before adoption. | P3; read-only personal ICS is MVP-Recommended (§12.19). |
 | **Report builder / pivot tables** | "Let managers build their own." | Excel export already provides this; a builder is a product in itself. | Not planned. |
 | **Any AI feature** | Summaries, extraction, prediction. | Explicit product constraint; deterministic rules must be trusted first. | Outside this specification. |
 

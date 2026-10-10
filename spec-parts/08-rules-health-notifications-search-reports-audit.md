@@ -108,7 +108,28 @@ C-01 to C-08 as in §12.8; DOC-01 to DOC-04 as in §12.7.
 
 ### 15.13 Assignment and following rules (ASG)
 
-ASG-01 to ASG-11 as in §12.18.
+| ID | Rule |
+|---|---|
+| RES-01 | A week is identified by its ISO Monday date. `start_week ≤ end_week`. An allocation contributes `hours_per_week` to every week in its range. |
+| RES-02 | `hours_per_week` is a multiple of 0.5, greater than 0, and at most `allocation_max_hours_per_week`. Values above the person's capacity are accepted with a warning. |
+| RES-03 | Calculate capacity per working date with the schedule effective that date, then sum into ISO weeks. Baseline daily hours = weekly capacity ÷ working-day count. An office holiday removes that day’s baseline; otherwise subtract approved leave hours capped at baseline. Ignore non-working dates; union overlapping absence so each daily hour is removed once. Show Leave/Holiday reductions separately; they never add to planned hours. Unverified legacy absence conservatively reduces availability with a provisional label pending reconciliation. |
+| RES-04 | Employee-owned allocations have `visibility = Confirmed` and `owner_kind = Employee`; only the person may edit or delete them. Manager-owned allocations may be edited, deleted or re-scoped only by their creator (plus Sys Admin, logged). |
+| RES-05 | Visibility transitions are single actions by the creator. `Draft → Published`, `Published → Confirmed`, `Confirmed → Published`, `Published → Draft`, `Confirmed → Draft`. Transitions out of Draft notify the person; `→ Draft` from a visible state notifies the person that a planned assignment was withdrawn. |
+| RES-06 | A Draft allocation is returned only to its creator and System Administrators. It is excluded from everyone else's totals, lists, search and notifications, except as stated in RES-10. |
+| RES-07 | Planned hours per person-week are reported per confidence band. `remaining = capacity − confirmed − expected`. Possible hours are shown but not subtracted. For the viewer, their own Draft allocations are included in these figures; other managers' Drafts are not. |
+| RES-08 | **Over-allocated** when `(confirmed + expected) > capacity × allocation_over_pct`, using visibility rules from RES-07 for the viewer. Severity Warning; Critical when more than 1.5 × capacity. |
+| RES-09 | **Under-allocated** when `(confirmed + expected + possible) < capacity × allocation_under_pct` for `allocation_under_weeks` consecutive weeks starting at or after the current week, **and** the person has no open task without `estimated_hours` due in those weeks. Severity Info. Never fires for weeks with leave covering 50 % or more of capacity. |
+| RES-10 | **Overlapping Plans** when manager allocations from two or more distinct creators (any visibility) exist on the same person-week and `Σ all allocations (any visibility) > capacity` (capacity is already net of leave/holidays). Reported to every creator involved, naming the other managers and their hours but not their labels or notes. Not reported to the person unless all involved allocations are Published or Confirmed. No allocation is changed. |
+| RES-11 | **Leave Conflict** when leave hours in a week > 0 and `(confirmed + expected, Published or Confirmed only) > capacity` for that week. Reported to the person and to creators of the involved allocations. |
+| RES-12 | **Stale Allocation** when `end_week ≥ current week` and `now − last_confirmed_at > allocation_stale_days`. Any edit, visibility change, or "still valid" resets `last_confirmed_at`. Shown as "needs confirmation"; totals still include it. |
+| RES-13 | **Deliverable Pressure** when a deliverable not Issued/Accepted/Cancelled is due in week W and its owner, or any assignee of its open tasks, is Over-allocated in W. Reported to the deliverable's PM and the person's Supervisor. |
+| RES-14 | Conflicts, including RES-19 Coverage Concern, are materialised in `resource_conflict` keyed by (`rule_id`, `person_id`, `week`); they persist while the condition holds and disappear when it clears. Snooze follows ATT-03. |
+| RES-15 | Evaluation runs on every allocation, leave, office holiday or capacity write and affected task/deliverable/review due-date or ownership change, plus nightly. Recompute affected person-weeks, including both old and new ranges after moves/cancellations. Coverage/calendar queries also evaluate dates outside the weekly planner horizon. |
+| RES-16 | Project workflows never create, modify or delete allocations. Deleting or archiving a project sets `project_id` to null on its allocations and keeps the label; the source becomes `OtherProject`. Deactivating a user keeps their allocations read-only and lists them in the Reassign Work tool (FR-ADM-02). |
+| RES-17 | Task `estimated_hours` are never added to planned hours. They feed the context column only (§12.15.8). |
+| RES-18 | HR alone approves/cancels leave. Imported fields are read-only; preview/apply obey §12.18.2 source identity, validation, timestamp, concurrency and idempotency rules. Rejected imports and missing rows never alter availability. Leave/holiday changes never alter assigned work or project deadlines. |
+| RES-19 | **Coverage Concern** when an active task/deliverable’s assignee/owner or required reviewer has approved absence or an office holiday on that item’s due date. Full-day absence is a warning; partial absence is a review prompt with remaining daily hours. Weekly allocation hours alone do not prove a dated conflict. Aggregate affected permitted items per person-week, route to Supervisor and relevant PM/DL, and preserve the flag while the condition holds even if a handover note exists. |
+| RES-20 | Copy-last-week and Publish-selected operate on explicitly selected creator-owned manager rows only, with preview, expected versions and atomic/idempotent apply. Copy creates target-week Drafts; publishing changes visibility, never confidence or employee-owned work. |
 
 ---
 
@@ -231,9 +252,14 @@ Channels: **App** = in-app notification centre; **Email** = immediate email; **D
 | Health override set/expired | PM | ● | | |
 | Work reassigned away from you | Previous assignee | ● | | |
 | Predecessor of your task was deleted / dependency removed | Successor assignee | ● | | |
-| Any change by someone else on a project you follow at All activity | Followers | ● (Following tab) | | ● (Project updates) |
-| Someone else added one of your direct reports to or removed them from a project, or made them Discipline Lead | Supervisor | ● | | ● (My staff) |
-| A Supervisor added or removed one of their direct reports on your project team | PM | ● | | ● |
+| Manager allocation published or confirmed for you | Person | ● | | ● |
+| Manager allocation withdrawn (visible → Draft) or deleted | Person | ● | | |
+| HR-approved leave changed, cancelled or manually copied | Person, Supervisor | ● (one summary per import/person) | | ● |
+| Coverage Concern (RES-19) | Supervisor, relevant PM/DL | ● | | ● |
+| Overlapping Plans on someone you supervise (RES-10) | Managers involved | ● | | ● |
+| Over-allocated / Leave Conflict on someone you supervise (RES-08, RES-11) | Supervisor | ● | | ● |
+| Deliverable Pressure (RES-13) | PM, Supervisor | ● | | ● |
+| Your allocation needs confirmation (RES-12) | Creator | | | ● |
 
 ### 17.3 Daily digest
 
@@ -311,10 +337,13 @@ All reports are deterministic queries over current data (or snapshots where note
 | Projects At Risk | office, PM, health | Project, PM, computed/reported health, why, next submission | Portfolio | First release (§36) |
 | Open Issues / High Risks | project(s), severity | Register rows | Project / All | P2 |
 | Meeting Actions Outstanding | project, owner type | Action rows | Project | P2 |
-| Workload by Employee | supervisor, discipline, weeks | Person, week columns (hours/capacity), open tasks, unestimated, overdue | Resources | First release (§36) |
-| Workload by Discipline | office, weeks | Discipline, week columns aggregated | Resources | First release (§36) |
-| Health History | project(s), date range | Date, computed, reported (from snapshots) | Portfolio | First release (§36) |
-| Task Hours | project(s), task, person, work-date range | Work date, person, project, task, actual hours, note, total hours | My / Project / Staff (permission-filtered) | First release (§36.8) |
+| Workload by Person | supervisor, discipline, weeks, include possible | Person, week columns (confirmed / expected / possible / capacity / remaining), leave, conflicts; Drafts only for the caller | Resources | MVP |
+| Team Capacity | supervisor or discipline, weeks | Week columns: capacity, confirmed, expected, possible, remaining, people over, people under | Resources | MVP |
+| Allocations by Source | supervisor, discipline, weeks, source category | Hours per source category per week; lists allocations with no linked project | Resources | MVP |
+| Vacation & Coverage | supervisor/team, office, year/date range | Person, unavailable dates/hours, holidays, permitted affected work, source freshness; no HR reasons/balances | Availability per §8.7 | MVP |
+| Project Staffing | project(s), discipline, weeks | Project, discipline, person, allocation hours/confidence, capacity context; same records as Team Planner | Project and Resources intersection | MVP |
+| Workload by Discipline | office, weeks | Discipline, week columns aggregated | Resources | P2 |
+| Health History | project(s), date range | Date, computed, reported (from snapshots) | Portfolio | P2 |
 | Attention Items Export | project(s), severity | Rule, severity, item, why, owner, age | Project / All | P2 |
 
 **Export rules.** CSV is UTF-8 with BOM (Excel-friendly); XLSX has a header row, frozen pane, date-typed columns, and a "Parameters" sheet recording filters and generation time. Exports are limited to 50,000 rows per request (larger runs split by project). Exports are logged (who exported which report when) but not their content.
@@ -339,7 +368,9 @@ All reports are deterministic queries over current data (or snapshots where note
 | Attention | Snooze set/expired |
 | Admin | Reference data changes; threshold changes; system role changes; user activation/deactivation |
 | Access (minimal) | Sign-in events (success), export events |
-| Not logged | Views/reads of items; comment body edits within the 15-minute window (only "edited" flag); search queries; follow level changes and feed read markers (personal preferences) |
+| Resource planning | Allocation create/edit/delete, visibility changes, weekly-copy/publish actions, capacity/holiday changes, HR-referenced leave updates/cancellations and import summaries (source/actor/time/counts, no raw CSV or HR reasons) |
+| Calendar subscription | Create/revoke/rotate capability; metadata only, never the token or subscription URL |
+| Not logged | Views/reads of items; comment body edits within the 15-minute window (only "edited" flag); search queries |
 
 ### 20.2 Structure
 

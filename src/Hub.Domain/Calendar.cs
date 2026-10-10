@@ -2,12 +2,12 @@ namespace Hub.Domain;
 
 /// Working-day calendar (packet 021, §10.4): weekends and an office's statutory holidays are skipped when the
 /// organisation counts thresholds in working days. Overdue still means "due date before today" (G-01).
-public sealed class WorkCalendar(IEnumerable<DateOnly>? holidays = null)
+public sealed class WorkCalendar(IEnumerable<DateOnly>? holidays = null, Func<DateOnly, bool>? scheduled = null)
 {
     readonly HashSet<DateOnly> off = [.. holidays ?? []];
     public static readonly WorkCalendar Weekdays = new();
 
-    public bool IsWorkingDay(DateOnly d) => d.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday) && !off.Contains(d);
+    public bool IsWorkingDay(DateOnly d) => (scheduled?.Invoke(d) ?? d.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday)) && !off.Contains(d);
 
     /// Working days d with from < d ≤ to; negative when `to` is before `from`.
     public int Between(DateOnly from, DateOnly to)

@@ -1,13 +1,13 @@
 # Engineering Project Coordination Hub
 
-## Product Specification — Version 1.0 (Draft for Review)
+## Product Specification — Version 1.2 (Draft for Review)
 
 | Item | Value |
 |---|---|
 | Document | Product and Implementation Specification |
-| Product | Engineering Project Coordination Hub (working name; "the Hub" in this document) |
-| Version | 1.0 — Draft for stakeholder review |
-| Date | 2026-09-15 |
+| Product | Engineering Project Coordination Hub (working name; "the Hub" in this document; candidate product name **Tuesday**, see Section 34) |
+| Version | 1.2 — Draft for stakeholder review |
+| Date | 2026-10-09 (v1.0: 2026-09-15) |
 | Status | Ready for architecture review, wireframing, and ticket breakdown |
 | Audience | Product owner, engineering team, UX design, IT security, pilot project managers |
 
@@ -27,6 +27,14 @@ This specification uses a small set of consistent labels. They matter, because t
 | **Recommendation:** | A recommendation by the authors, not a stated requirement. The business may choose otherwise. |
 | **Assumption:** | An architectural or business assumption made to keep the specification concrete. Must be validated. |
 | **TBD — Business Decision Required** | Information that only the company can provide. The specification is written so that development can proceed around it where possible. |
+
+**Change log**
+
+| Version | Date | Change |
+|---|---|---|
+| 1.0 | 2026-09-15 | Initial draft. |
+| 1.1 | 2026-10-01 | Resource planning promoted from a derived Phase 2 view to an MVP engine owned by managers: weekly person × week allocations, employee- and manager-owned entries, Draft/Published/Confirmed visibility, Confirmed/Expected/Possible confidence, leave, capacity, conflict rules, Manager Home, People area. Sections 1, 8, 9.4, 10, 11.9, 11.13, 12.15, 13.10, 13.11, 13.19, 13.20, 15.13, 23.3, 24.2, 25.7, 27–29, 34 amended. Source: `docs/Tuesday-Consolidated-Product-Scope.md` and `docs/Feature-Gap-Have-vs-Adopt.md`. |
+| 1.2 | 2026-10-09 | Connected Team Planner, Vacation & Coverage, and My Week added to MVP: HR-approved leave CSV import with updates/cancellations, office holidays, coverage warnings, copy-last-week preview, project staffing and batched publishing. Personal calendar subscriptions are MVP-Recommended; automatic HR sync, meeting imports and two-way calendar sync remain later work. Permissions, data model, rules and acceptance criteria aligned. |
 
 Canonical status names, role names, and threshold names are defined once in Section 10 (Core Data Model) and used verbatim everywhere else. If a later section appears to contradict Section 10, Section 10 wins and the later section should be corrected.
 
@@ -54,8 +62,9 @@ The product is built entirely from structured data and deterministic rules. Ever
 - A Project Dashboard, a personal My Work page, and a Weekly Coordination view designed to run a multidisciplinary coordination meeting directly from the application.
 - A thin Decision Register, because decisions are the most common non-task blocker in design projects. (Recommended for MVP; see Section 27 for the rationale and the fallback if it is cut.)
 - Comments with @mentions, document links to SharePoint/Teams/network folders, a full activity log, in-app and email notifications, and corporate single sign-on.
-- Project assignment that doubles as a subscription: everyone assigned to a project follows it and receives all of its updates (in-app feed and daily digest), and a My Staff page where every manager sees their direct reports' assignments and work and staffs them on projects.
-- The six-view visual workspace in §36: grouped project board, cross-project task board and Gantt, team calendar, overview dashboard, and personal My Work, with functional navigation, saved views, and task-hour entry under Time in the first release.
+- A **Weekly Resource Planner**: a manager-owned planning layer of person × week allocations that is informed by project data but not controlled by it. Managers and employees record hours against projects and against work that lives outside the Hub (proposals, admin, training, small projects); HR-approved leave reduces availability separately. Allocations carry a visibility state (Private Draft, Published, Confirmed) and a confidence (Confirmed, Expected, Possible). Deterministic rules flag over- and under-allocation, overlapping plans from two managers, leave conflicts and stale plans. A Manager Home exception dashboard answers "where does my team need attention" in about 30 seconds.
+
+The planning workspace connects three views over the same records: **Team Planner** (weekly people and project staffing), **Vacation & Coverage** (a year of approved leave and coverage concerns), and **My Week** (each person’s published plan). HR approves leave; Tuesday imports availability and helps managers arrange coverage. Leave reduces capacity without reducing assigned work or counting the same absence twice. Personal calendar subscriptions can surface dated commitments; weekly hours do not become invented appointments.
 
 **What comes later**
 

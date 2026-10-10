@@ -178,16 +178,37 @@ Each workflow states the actor, trigger, steps, system response, exceptions, and
 **Actor.** Supervisor (Civil group). **Trigger.** Weekly resourcing check or PM request for help.
 
 **Steps.**
-1. Open Resources → filter Supervisor = me → 8-week grid.
-2. Sort by load; identify Alex at 140% next week with a deadline cluster (3 tasks due 2026-09-24/25 across 2 projects) and Jill at 25% with no unestimated tasks.
-3. Expand Alex → see tasks by project; open 1234-T0058; reassign to Jill (Supervisor permission for supervised staff) with a comment.
-4. Note tasks without estimates for the DLs to fill in.
+1. Open Home → Manager Home shows: 1 Over-allocated (Alex, W42, 46 h / 37.5 h, two deliverables due), 1 Under-allocated (Jill, W42–W43, 12 h), 1 Overlapping Plans (Sam, W44: me 16 h, Environmental manager 16 h, 20 h confirmed), 2 allocations need confirmation.
+2. Click Alex W42 → planner opens on that cell; the contribution list shows 30 h Confirmed (project 1234, DL-published), 8 h Expected (my Draft "proposal support"), 8 h employee-added "small client project". Drag my 8 h Draft block from Alex to Jill (same week). Totals recompute; Alex's warning clears; Jill shows 20 h.
+3. In Jill's W42 cell type `12 h Hwy 7 review support` and Enter; set "Repeat for 3 weeks" in the side panel; Publish. Jill is notified.
+4. Open the Sam W44 conflict → see "Environmental manager has planned 16 h". Message them outside the Hub; they drop to 8 h. Conflict clears on their save.
+5. Click "still valid" on the two stale allocations.
+6. For next week, use Copy last week → inspect selected owned rows, existing work and changed leave/holiday capacity → apply as Drafts; skip rows that already have continuing allocations. Use Publish selected after resolving or acknowledging warnings; each affected person gets one summary linking to My Week. Check Projects view for the same staffing totals.
 
 **System response.** Reassignment notifies both people and the PM; workload grid recomputes; the change is logged with actor Supervisor.
 
 **Exceptions.** Task belongs to a Restricted project the supervisor cannot see → its row and hours are excluded from this supervisor's grid and export; reassignment must be done by a PM who can see the project. Person on leave → not modelled in the first release or Phase 2 (Phase 3 or manual capacity override).
 
-**Result.** Load is rebalanced with a traceable change; estimates gaps are visible.
+**Result.** The team's next six weeks are realistic, every total is traceable to its rows, and no manager overwrote another's plan. Time spent: a few minutes, no spreadsheet.
+
+---
+
+### Workflow 10b — Employee records non-project work; HR leave informs the plan
+
+**Actor.** Team member; System Administrator for import. **Trigger.** Proposal support and a week of leave already approved in HR.
+
+**Steps.**
+
+1. Employee opens My Work › My Week, adds `10 h proposal support` for each of two weeks; these remain employee-owned allocations.
+2. Admin imports an HR export containing the approved leave, previews person/source-key mapping and changes, then applies the valid batch.
+3. My Week and Vacation & Coverage show the approved dates; a full five-day absence in a normal five-day week leaves 0 h available. The Supervisor sees the same data in Team Planner.
+4. If a published assignment or dated review conflicts, its manager/authorised lead records a handover or reassigns the work. The employee reports incorrect dates to HR; imported leave cannot be edited in Tuesday.
+
+**System response.** Capacity, Leave Conflict and Coverage Concern recompute without changing allocations or deadlines. Unchanged reimports produce no duplicate leave or notifications. Explicit HR cancellation restores availability after a successful import.
+
+**Exceptions.** Failed imports preserve previous data and show its age; missing rows do not cancel leave. Where an export is unavailable, Supervisor/Admin records a labelled ManualHR copy with its HR reference. Other staff see “Unavailable”, never private HR reasons.
+
+**Result.** Employee work, published staffing and HR-approved availability share one planning picture.
 
 ---
 

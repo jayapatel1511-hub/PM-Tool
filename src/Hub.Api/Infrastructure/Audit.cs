@@ -33,7 +33,11 @@ public static class AuditRules
 {
     public static readonly IReadOnlyDictionary<Type, string[]> Fields = new Dictionary<Type, string[]>
     {
-        [typeof(AppUser)] = ["DisplayName", "Email", "JobTitle", "OfficeId", "SupervisorId", "IsActive", "WeeklyCapacityHours", "IsTemplateEditor"],
+        [typeof(ApprovedLeave)] = ["PersonId", "SourceSystem", "ExternalId", "SourceKind", "Status", "FromDate", "ThroughDate", "HoursPerDay", "SourceUpdatedAt", "ImportedAt"],
+        [typeof(LeaveImportState)] = ["SourceSystem", "ImportedAt", "SourceUpdatedAt"],
+        [typeof(PersonSchedule)] = ["PersonId", "FromDate", "WeeklyHours", "WorkingDays"],
+        [typeof(CalendarSubscription)] = ["UserId"], // A capability hash is never written to the activity log.
+        [typeof(AppUser)] = ["DisplayName", "Email", "JobTitle", "OfficeId", "SupervisorId", "IsActive", "WeeklyCapacityHours", "IsTemplateEditor", "HrSourceSystem", "HrPersonKey"],
         [typeof(UserSystemRole)] = ["UserId", "Role", "Source"],
         [typeof(Office)] = ["Name", "Code", "TimeZone", "IsActive", "SortOrder"],
         [typeof(Discipline)] = ["Name", "Code", "Colour", "IsActive", "SortOrder"],
@@ -68,7 +72,7 @@ public static class AuditRules
         [typeof(IssueDocumentReference)] = ["IssueId", "Kind", "Identifier", "Revision", "SourceUrl", "SourceSystem", "StableSourceId", "ExternalTopicId", "ModelElementGuid", "ViewpointUrl", "IsAvailable", "ReplacedById"],
         [typeof(IssueVerification)] = ["IssueId", "VerifierId", "Status", "EvidenceUrl", "Note", "VerifiedAt"],
         [typeof(IssueReferenceImpactAssessment)] = ["IssueId", "DocumentReferenceId", "PreviousRevisionId", "CurrentRevisionId", "OwnerId", "VerifierId", "Status", "OwnerDisposition", "OwnerReason", "OwnerDecidedBy", "OwnerDecidedAt", "VerifierDisposition", "VerifierReason", "VerifierDecidedBy", "VerifierDecidedAt"],
-        [typeof(PersonAvailabilityOverride)] = ["PersonId", "WorkDate", "AvailableHours", "Category"],
+        [typeof(PersonAvailabilityOverride)] = ["PersonId", "WorkDate", "AvailableHours", "Category", "ReconciledLeaveId"],
         [typeof(PlanningEntry)] = ["PersonId", "HoursPerWeek", "StartWeek", "EndWeek", "Label", "SourceCategory", "ProjectId", "ProjectDisciplineId", "Confidence", "Visibility", "Notes", "LastValidatedAt", "DeletedAt"],
         [typeof(ResourceAllocation)] = ["PersonId", "Purpose", "FromDate", "ThroughDate", "PlannedHours", "Status", "ConfirmedBy", "ConfirmedAt"],
         [typeof(AllocationDayOverride)] = ["AllocationId", "WorkDate", "Hours"],

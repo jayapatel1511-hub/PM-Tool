@@ -33,8 +33,8 @@ export const SOURCE_KEYS: Record<string, string> = { MajorProject: 'planner.sour
 export const confidenceLabel = (value: string) => t(CONFIDENCE_KEYS[value] ?? 'planner.unknown')
 export const visibilityLabel = (value: string, self = false) => t(VISIBILITY_KEYS[self ? 'Self' : value] ?? 'planner.unknown')
 export const approvalLabel = (value: string) => t(APPROVAL_KEYS[value] ?? 'planner.unknown')
-const SOURCE_FALLBACKS: Record<string, string> = { InternalInitiative: 'Internal initiative', FieldWork: 'Field work', Other: 'Other' }
-export const sourceLabel = (value: string) => SOURCE_KEYS[value] ? t(SOURCE_KEYS[value]) : SOURCE_FALLBACKS[value] ?? t('planner.source.other')
+export const SOURCE_OPTIONS = Object.keys(SOURCE_KEYS)
+export const sourceLabel = (value: string) => t(SOURCE_KEYS[value] ?? 'planner.source.other')
 export const sourceTone = (value: string) => SOURCE_TONES[value] ?? 'neutral'
 export const indicatorLabel = (value: string) => t(({ OverPlanned: 'planner.indicator.over', UnderPlanned: 'planner.indicator.under', StalePlan: 'planner.indicator.stale' } as Record<string, string>)[value] ?? 'planner.unknown')
 export const hoursLabel = (value: number) => `${value.toFixed(1).replace(/\.0$/, '')} h`

@@ -23,6 +23,7 @@ export const NAV: NavItem[] = [
   { id: 'boards', path: '/boards', icon: KanbanSquare, label: 'nav.boards', show: all, primary: true },
   { id: 'projects', path: '/projects', icon: Briefcase, label: 'nav.projects', show: all, primary: true },
   { id: 'tasks', path: '/tasks', icon: ListChecks, label: 'nav.tasks', show: all, primary: true },
+  { id: 'vacation', path: '/vacation', icon: CalendarDays, label: 'availability.title', show: (me) => !me.capabilities.readOnly },
   { id: 'calendar', path: '/calendar', icon: CalendarDays, label: 'nav.calendar', show: all, primary: true },
   { id: 'files', path: '/files', icon: FileStack, label: 'nav.files', show: all, primary: true },
   { id: 'time', path: '/time', icon: Clock, label: 'nav.time', show: all, primary: true },

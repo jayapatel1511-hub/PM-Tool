@@ -118,9 +118,8 @@ public static class WorkloadEndpoints
         var dayOverrides = await db.AllocationDayOverrides.AsNoTracking().Where(d => allocationIds.Contains(d.AllocationId)).ToListAsync();
         var workLinks = await db.AllocationWorkLinks.AsNoTracking().Where(l => allocationIds.Contains(l.AllocationId)
             && l.ReleasedAt == null && l.WorkDate >= firstDay && l.WorkDate <= lastDay).ToListAsync();
-        var availability = await db.AvailabilityOverrides.AsNoTracking().Where(o => personIds.Contains(o.PersonId)
-            && o.WorkDate >= firstDay && o.WorkDate <= lastDay).ToListAsync();
-        var holidays = s.WorkingDaysEnabled ? await db.Holidays.AsNoTracking().Select(h => new { h.OfficeId, h.Date }).ToListAsync() : [];
+        var availability = await PersonCapacity.Load(db, personIds, firstDay, lastDay, s);
+        var calendars = await PersonCapacity.Calendars(db, personIds, allocationRows.Select(a => a.ThroughDate).Append(lastDay).Max());
         var now = Workload.WeekOf(today);
         var result = new List<PersonLoad>();
         foreach (var u in list)
@@ -134,9 +133,7 @@ public static class WorkloadEndpoints
             decimal Hours(DateOnly w) => loads.Sum(l => l.ByWeek.GetValueOrDefault(w));
             var dailyTasks = mine.ToDictionary(t => t.Id, t => Workload.SpreadDays(
                 new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate), today, cal(t.ProjectId)).ByDay);
-            var personCalendar = s.WorkingDaysEnabled
-                ? new WorkCalendar(holidays.Where(h => h.OfficeId == null || h.OfficeId == u.OfficeId).Select(h => h.Date)) : WorkCalendar.Weekdays;
-            var personAvailability = availability.Where(o => o.PersonId == u.Id).ToDictionary(o => o.WorkDate, o => o.AvailableHours);
+            var personCalendar = calendars[u.Id];
             var allocationsByWeek = new Dictionary<Guid, (Dictionary<DateOnly, decimal> Reserved, Dictionary<DateOnly, decimal> Linked, Dictionary<DateOnly, decimal> LinkedTasks)>();
             foreach (var a in personAllocations)
             {
@@ -168,8 +165,7 @@ public static class WorkloadEndpoints
                 var available = Enumerable.Range(0, 7).Sum(i =>
                 {
                     var day = w.AddDays(i);
-                    return AllocationRules.DailyCapacity(day, capacity, personCalendar,
-                        personAvailability.TryGetValue(day, out var overrideHours) ? overrideHours : (decimal?)null);
+                    return availability[(u.Id, day)].Available;
                 });
                 return (Week: w, Hours: Hours(w), Pct: Workload.Pct(committed, available), Available: available,
                     Confirmed: weekReservations.Sum(r => r.ReservedHours), Proposed: proposed, Committed: committed);

@@ -67,8 +67,8 @@ export function CalendarPage() {
 
   return (
     <Page title={t('nav.calendar')} subtitle={t('calendar.subtitle', { zone: q.data?.timeZone ?? '' })}
-      actions={<Button onClick={() => setEditing('new')}><Plus className="size-4" />{t('calendar.new')}</Button>}>
-      <Button variant="outline" onClick={() => setSubscription(true)}>{t('calendar.subscription')}</Button>{subscription && <CalendarSubscriptionDialog onClose={() => setSubscription(false)} />}<WorkspaceTabs />
+      actions={<><Button variant="outline" onClick={() => setSubscription(true)}>{t('calendar.subscription')}</Button><Button onClick={() => setEditing('new')}><Plus className="size-4" />{t('calendar.new')}</Button></>}>
+      {subscription && <CalendarSubscriptionDialog onClose={() => setSubscription(false)} />}<WorkspaceTabs />
       <div className="flex flex-wrap items-center gap-3">
         <Segmented label={t('calendar.view')} value={view} onChange={(m) => set('mode', m === 'week' ? null : m)}
           options={(['week', 'month', 'agenda'] as const).map((m) => ({ value: m, label: t(`calendar.mode.${m}`) }))} />

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Check, ChevronsUpDown, X } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type ComponentProps } from 'react'
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -28,10 +28,10 @@ export function PersonName({ name, active = true, className }: { name?: string |
 }
 
 /** People picker: searches active people by name or email (G-11: inactive people cannot be chosen). */
-export function PeoplePicker({ value, valueName, onChange, placeholder, allowClear = true, exclude = [], id, disabled, candidates, compact, label }: {
+export function PeoplePicker({ value, valueName, onChange, placeholder, allowClear = true, exclude = [], id, disabled, candidates, compact, label, ...aria }: {
   value?: string | null; valueName?: string | null; onChange: (id: string | null, person?: Person) => void; placeholder?: string
   allowClear?: boolean; exclude?: string[]; id?: string; disabled?: boolean; candidates?: Person[]; compact?: boolean; label?: string
-}) {
+} & Pick<ComponentProps<typeof Button>, 'aria-describedby' | 'aria-invalid'>) {
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
   const search = useQuery({
@@ -44,7 +44,7 @@ export function PeoplePicker({ value, valueName, onChange, placeholder, allowCle
     <div className="flex items-center gap-1">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button id={id} variant="outline" aria-label={compact && label ? `${label}: ${value ? selectedName ?? t('common.unavailable') : placeholder ?? t('people.choose')}` : label} disabled={disabled}
+          <Button {...aria} id={id} variant="outline" aria-label={compact && label ? `${label}: ${value ? selectedName ?? t('common.unavailable') : placeholder ?? t('people.choose')}` : label} disabled={disabled}
             className={cn('min-w-0 flex-1 justify-between font-normal', compact ? 'min-h-(--control-row-h) border-transparent bg-transparent px-2 hover:border-input' : 'px-3')}>
             <span className={cn('truncate', !value && 'text-muted-foreground')}>{value ? selectedName ?? '…' : placeholder ?? t('people.choose')}</span>
             <ChevronsUpDown className="size-3.5 opacity-50" />

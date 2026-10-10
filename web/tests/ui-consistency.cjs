@@ -1,0 +1,93 @@
+// Read-only UI regressions against an explicitly selected local Development preview.
+// Validation POSTs are intercepted with fixtures; no task or calendar records are changed.
+const assert = require('node:assert/strict')
+const { chromium } = require('playwright')
+const base = process.env.TUESDAY_UI_BASE_URL
+assert.ok(base && ['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'Set TUESDAY_UI_BASE_URL to the local Development preview')
+;(async () => {
+  assert.equal((await (await fetch(`${base}/api/v1/config`)).json()).authMode, 'Development')
+  const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
+  try {
+    for (const width of [1440, 768, 390, 320]) {
+      console.log(`Checking ${width}px`)
+      const page = await browser.newPage({ viewport: { width, height: 740 }, reducedMotion: 'reduce' })
+      await page.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'sam@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
+      await page.goto(`${base}/vacation?view=list`)
+      const schedule = page.getByRole('button', { name: 'Working schedule', exact: true }).first()
+      await schedule.waitFor()
+      assert.equal(await page.locator('main').evaluate(el => el.scrollWidth - el.clientWidth), 0, 'Leave actions stay within the page')
+      await page.getByRole('button', { name: 'Day view', exact: true }).click()
+      const region = page.getByRole('region', { name: 'Availability view', exact: true })
+      await region.waitFor()
+      assert.equal(await region.getAttribute('tabindex'), '0')
+      assert.equal(await page.locator('main').evaluate(el => el.scrollWidth - el.clientWidth), 0, 'Only the availability table scrolls horizontally')
+      if (width === 320) {
+        await region.focus(); await page.keyboard.press('ArrowRight')
+        await page.waitForFunction(() => document.querySelector('[aria-label="Availability view"][role="region"]').scrollLeft > 0)
+      }
+      await page.getByRole('button', { name: 'Record HR-approved leave', exact: true }).first().click()
+      let dialog = page.getByRole('dialog')
+      await dialog.waitFor()
+      let box = await dialog.boundingBox()
+      assert.ok(box.x >= 15 && box.x + box.width <= width - 15, 'Caller width overrides retain viewport margins')
+      await page.keyboard.press('Escape')
+      await dialog.waitFor({ state: 'detached' })
+      await page.setViewportSize({ width, height: 480 })
+      await page.goto(`${base}/calendar`)
+      const opener = page.getByRole('button', { name: 'New event', exact: true })
+      await opener.click(); dialog = page.getByRole('dialog'); await dialog.waitFor()
+      await page.route('**/api/v1/calendar/events', route => route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ title: 'Validation failed', status: 400, errors: { projectId: ['Meetings and site work belong to a project.'] } }) }))
+      const visibility = page.locator('#ev-visibility')
+      assert.ok(await visibility.getAttribute('aria-describedby'), 'Helper text describes its field')
+      await page.getByLabel('Title', { exact: true }).fill('Synthetic validation fixture')
+      await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+      await dialog.getByRole('alert').waitFor()
+      const project = page.locator('#ev-projectId')
+      assert.equal(await project.getAttribute('aria-invalid'), 'true')
+      assert.match(await page.locator(`#${await project.getAttribute('aria-describedby')}`).innerText(), /belong to a project/)
+      for (let i = 0; i < 14; i++) {
+        await page.keyboard.press('Tab')
+        assert.ok(await page.evaluate(() => !!document.activeElement.closest('[role="dialog"]')), 'Dialog contains keyboard focus')
+      }
+      await page.keyboard.press('Escape'); await dialog.waitFor({ state: 'detached' })
+      await page.waitForFunction(() => document.activeElement?.textContent?.includes('New event'))
+      assert.ok(await opener.evaluate(el => document.activeElement === el), 'Escape returns focus to the opener')
+      await page.close()
+      const taskPage = await browser.newPage({ viewport: { width, height: 480 }, reducedMotion: 'reduce' })
+      await taskPage.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'alex@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
+      await taskPage.goto(`${base}/projects/SYN-101/tasks`)
+      await taskPage.getByRole('button', { name: 'New task', exact: true }).click()
+      const assignee = taskPage.locator('#t-assignee')
+      assert.equal(await assignee.getAttribute('aria-describedby'), 't-assignee-feedback', 'People picker forwards helper association')
+      await assignee.click()
+      const popover = taskPage.locator('[data-slot="popover-content"]')
+      await popover.waitFor()
+      await taskPage.waitForLoadState('networkidle')
+      await popover.evaluate(async el => { await Promise.all(el.getAnimations().map(animation => animation.finished.catch(() => undefined))) })
+      const pickerBox = await popover.boundingBox()
+      assert.ok(pickerBox.x >= 15 && pickerBox.x + pickerBox.width <= width - 15 && pickerBox.y >= -1 && pickerBox.y + pickerBox.height <= 481, 'Picker stays inside a constrained viewport')
+      const searchBox = await popover.locator('input').boundingBox()
+      assert.ok(searchBox.y >= 0 && searchBox.y + searchBox.height <= 480, 'Picker search remains reachable')
+      await taskPage.keyboard.press('Escape')
+      await popover.waitFor({ state: 'detached' })
+      let rejectWithFieldError = true
+      await taskPage.route('**/api/v1/projects/*/tasks', route => {
+        if (route.request().method() !== 'POST') return route.continue()
+        return route.fulfill({ status: rejectWithFieldError ? 400 : 500, contentType: 'application/json', body: JSON.stringify(rejectWithFieldError
+          ? { title: 'Validation failed', status: 400, errors: { assigneeId: ['Synthetic assignee validation error'] } }
+          : { detail: 'Synthetic server rejection', status: 500 }) })
+      })
+      await taskPage.locator('#t-name').fill('Synthetic task validation fixture')
+      await taskPage.getByRole('dialog').getByRole('button', { name: 'Create task', exact: true }).click()
+      await taskPage.locator('#t-assignee-feedback').getByText('Synthetic assignee validation error').waitFor()
+      assert.equal(await assignee.getAttribute('aria-invalid'), 'true', 'People picker forwards invalid state')
+      rejectWithFieldError = false
+      await taskPage.getByRole('dialog').getByRole('button', { name: 'Create task', exact: true }).click()
+      await taskPage.getByRole('alert').getByText('Synthetic server rejection').waitFor()
+      assert.equal(await assignee.getAttribute('aria-invalid'), null, 'Cleared field error removes invalid state')
+      assert.match(await taskPage.locator('#t-assignee-feedback').innerText(), /Team Member/, 'Cleared field error restores helper text')
+      await taskPage.close()
+    }
+    console.log('PASS: responsive leave actions, contained keyboard scrolling, dialog margins, native and picker helper/error associations and clearing, focus containment and restoration (4 widths).')
+  } finally { await browser.close() }
+})().catch(error => { console.error(error); process.exitCode = 1 })

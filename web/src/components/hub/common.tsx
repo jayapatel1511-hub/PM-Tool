@@ -1,5 +1,5 @@
 import { AlertTriangle, Info, Loader2, X, type LucideIcon } from 'lucide-react'
-import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ComponentProps, type ReactNode } from 'react'
+import { Children, cloneElement, createContext, isValidElement, useContext, useEffect, useState, useSyncExternalStore, type ComponentProps, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -261,12 +261,21 @@ export function ConfirmDialog({ open, onOpenChange, title, body, confirmLabel, r
 
 export function Field({ label, htmlFor, hint, error, children, className, optional }: { label: ReactNode; htmlFor?: string; hint?: ReactNode; error?: string[] | string; children: ReactNode; className?: string; optional?: boolean }) {
   const errs = typeof error === 'string' ? [error] : error
+  const feedbackId = htmlFor ? `${htmlFor}-feedback` : undefined
+  const feedback = !!errs?.length || !!hint
+  const controls = Children.map(children, (child) => {
+    if (!htmlFor || !isValidElement<{ id?: string; 'aria-describedby'?: string; 'aria-invalid'?: boolean }>(child) || child.props.id !== htmlFor) return child
+    return cloneElement(child, {
+      'aria-describedby': [child.props['aria-describedby'], feedback && feedbackId].filter(Boolean).join(' ') || undefined,
+      'aria-invalid': errs?.length ? true : child.props['aria-invalid'],
+    })
+  })
   return (
-    <div className={cn('space-y-1.5', className)}>
+    <div className={cn('min-w-0 space-y-1.5', className)}>
       <Label htmlFor={htmlFor}>{label}{optional && <span className="font-normal text-muted-foreground"> ({t('common.optional')})</span>}</Label>
-      {children}
-      {hint && !errs?.length && <p className="text-xs/[18px] text-muted-foreground">{hint}</p>}
-      {errs?.map((e) => <p key={e} className="text-xs/[18px] text-bad" role="alert">{e}</p>)}
+      {controls}
+      {hint && !errs?.length && <p id={feedbackId} className="text-xs/[18px] text-muted-foreground">{hint}</p>}
+      {!!errs?.length && <div id={feedbackId}>{errs.map((e) => <p key={e} className="text-xs/[18px] text-bad" role="alert">{e}</p>)}</div>}
     </div>
   )
 }

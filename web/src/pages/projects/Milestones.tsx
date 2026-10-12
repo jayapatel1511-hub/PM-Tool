@@ -242,13 +242,14 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
         <div className="absolute border-l-2 border-dashed border-primary" style={{ left: `${todayX}%`, top: 0, height: AXIS + 12 }}>
           <span className={cn('absolute top-0 whitespace-nowrap text-xs/[18px] font-semibold text-primary', todayX > 85 ? 'right-1.5' : 'left-1.5')}>{t('common.today')}</span>
         </div>
-        {placed.map(({ m, left, lane, anchor }) => {
+        {/* Each milestone is a list item (display: contents keeps the absolute layout), so the strip reads as a list of milestones. */}
+        <div role="list" className="contents">{placed.map(({ m, left, lane, anchor }) => {
           const status = milestoneStatusLabel(m)
           const color = `var(--${tone(m)})`
           const label = anchor === 'start' ? { left: `calc(${left}% - 8px)` } : anchor === 'end' ? { right: `calc(${100 - left}% - 8px)`, textAlign: 'right' as const }
             : { left: `${left}%`, transform: 'translateX(-50%)', textAlign: 'center' as const }
           return (
-            <Fragment key={m.id}>
+            <div role="listitem" key={m.id} className="contents">
               {m.originalDate && m.originalDate !== m.date && (
                 <span aria-hidden className="absolute size-3 rotate-45 border-2 bg-card" style={{ left: `calc(${x(m.originalDate)}% - 6px)`, top: AXIS - 6, borderColor: color }}
                   title={`${m.name}: ${t('milestone.original')} ${fmtDate(m.originalDate)}`} />
@@ -264,9 +265,9 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
                   {SYMBOL[tone(m)]} {shortDate(m.date)}{m.slipDays > 0 && <span className="text-warn"> · {slip(m.slipDays)}</span>}
                 </span>
               </span>
-            </Fragment>
+            </div>
           )
-        })}
+        })}</div>
       </div></div>
     </div>
   )

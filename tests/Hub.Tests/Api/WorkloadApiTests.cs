@@ -142,29 +142,29 @@ public sealed class WorkloadApiTests(HubFactory f)
         var person = await Report();
         await d.NewTask(p.Id, TestData.Pm, new { assigneeId = person.Id, estimatedHours = 16, startDate = "2027-03-15", dueDate = "2027-03-26" });
         var path = $"/api/v1/workload?from=2027-03-08&projectId={p.Id}";
-        var before = (await f.As(TestData.Pm).GetAsync(path).Result.Json())["people"]!.ToJsonString();
+        var before = (await (await f.As(TestData.Pm).GetAsync(path)).Json())["people"]!.ToJsonString();
         // 80 h over the four full working weeks of 15 March to 9 April 2027 (20 working days, no holidays).
-        var role = await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/open-roles",
-            new { roleLabel = "Civil technologist", fromDate = "2027-03-15", throughDate = "2027-04-09", plannedHours = 80 }).Result.Json(201);
+        var role = await (await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/open-roles",
+            new { roleLabel = "Civil technologist", fromDate = "2027-03-15", throughDate = "2027-04-09", plannedHours = 80 })).Json(201);
         decimal[] Cells(JsonNode grid) => [.. grid["unfilledRoles"]!.AsArray().Single(r => r!.G("id") == role.G("id"))!["cells"]!.AsArray().Select(c => c!["hours"]!.GetValue<decimal>())];
-        var after = await f.As(TestData.Pm).GetAsync(path).Result.Json();
+        var after = await (await f.As(TestData.Pm).GetAsync(path)).Json();
         Assert.Equal(before, after["people"]!.ToJsonString()); // no person's hours, percentage or indicator moves
         Assert.Equal(new[] { 0m, 20, 20, 20, 20, 0, 0, 0 }, Cells(after));
         Assert.Equal(p.ProjectNumber, after["unfilledRoles"]![0]!.S("projectNumber"));
-        Assert.Empty((await f.As(TestData.Pm).GetAsync($"/api/v1/workload?from=2027-03-08&projectId={(await d.Project()).Id}").Result.Json())["unfilledRoles"]!.AsArray());
+        Assert.Empty((await (await f.As(TestData.Pm).GetAsync($"/api/v1/workload?from=2027-03-08&projectId={(await d.Project()).Id}")).Json())["unfilledRoles"]!.AsArray());
 
         // An organisation holiday on Wednesday 24 March leaves 19 working days: 80/19 h each, the last day taking the remainder.
-        var holiday = await f.As(TestData.Admin).Post("/api/v1/admin/holidays", new { date = "2027-03-24", name = "Synthetic role holiday" }).Result.Json(201);
+        var holiday = await (await f.As(TestData.Admin).Post("/api/v1/admin/holidays", new { date = "2027-03-24", name = "Synthetic role holiday" })).Json(201);
         try
         {
-            Assert.Equal(new[] { 0m, 21.1m, 16.8m, 21.1m, 21.1m, 0, 0, 0 }, Cells(await f.As(TestData.Pm).GetAsync(path).Result.Json()));
+            Assert.Equal(new[] { 0m, 21.1m, 16.8m, 21.1m, 21.1m, 0, 0, 0 }, Cells(await (await f.As(TestData.Pm).GetAsync(path)).Json()));
             var exact = AllocationRules.Spread(new(2027, 3, 15), new(2027, 4, 9), 80, new WorkCalendar([new DateOnly(2027, 3, 24)]));
             Assert.Equal((19, 80m), (exact.Count, exact.Values.Sum()));
         }
         finally { (await f.As(TestData.Admin).DeleteAsync($"/api/v1/admin/holidays/{holiday.S("id")}")).EnsureSuccessStatusCode(); }
 
-        await f.As(TestData.Pm).Post($"/api/v1/open-roles/{role.S("id")}/cancel", new { rowVersion = role.I("rowVersion") }).Result.Json();
-        var cancelled = await f.As(TestData.Pm).GetAsync(path).Result.Json();
+        await (await f.As(TestData.Pm).Post($"/api/v1/open-roles/{role.S("id")}/cancel", new { rowVersion = role.I("rowVersion") })).Json();
+        var cancelled = await (await f.As(TestData.Pm).GetAsync(path)).Json();
         Assert.Empty(cancelled["unfilledRoles"]!.AsArray());
         Assert.Equal(before, cancelled["people"]!.ToJsonString());
     }
@@ -175,7 +175,7 @@ public sealed class WorkloadApiTests(HubFactory f)
         var person = await Report();
         var civil = await d.Discipline("Civil");
         await f.DbAsync(async db => { var u = await db.Users.SingleAsync(x => x.Id == person.Id); u.JobTitle = "Civil Designer (EIT)"; u.HomeDisciplineId = civil; return await db.SaveChangesAsync(); });
-        var row = Person(await f.As(TestData.Sam).GetAsync("/api/v1/workload").Result.Json(), person.Id);
+        var row = Person(await (await f.As(TestData.Sam).GetAsync("/api/v1/workload")).Json(), person.Id);
         Assert.Equal("Civil Designer (EIT)", row.S("jobTitle"));
         Assert.Equal(civil, row.G("homeDisciplineId"));
         Assert.True(row.AsObject().ContainsKey("officeId"));

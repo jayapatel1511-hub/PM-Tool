@@ -201,7 +201,7 @@ public sealed class OpenRoleApiTests(HubFactory f)
         var path = $"{root}/{kept.G("id")}";
         var preview = await (await f.As(TestData.Sam).GetAsync(path + "/confirmation-preview")).Json();
         var confirmed = await (await f.As(TestData.Sam).Post(path + "/confirm", new AllocationEndpoints.ConfirmBody(Guid.NewGuid(), kept.I("rowVersion"),
-            [.. preview["days"]!.AsArray().Select(d => new AllocationEndpoints.DateVersionInput(DateOnly.Parse(d!.S("date")), d.I("dateVersion")))], "Covered by the role"))).Json();
+            [.. preview["days"]!.AsArray().Select(d => new AllocationEndpoints.DateVersionInput(DateOnly.Parse(d!.S("date")), d!.I("dateVersion")))], "Covered by the role"))).Json();
         Assert.Equal((OpenRoleStatus.Filled, (Guid?)kept.G("id")), (Stored(roleId).Status, Stored(roleId).FilledAllocationId));
         await (await f.As(TestData.Pm).Post(path + "/complete", new AllocationEndpoints.CancelBody(Guid.NewGuid(), confirmed.I("rowVersion"), "Allocation period closed"))).Json();
         Assert.Equal((OpenRoleStatus.Filled, (Guid?)kept.G("id")), (Stored(roleId).Status, Stored(roleId).FilledAllocationId));
@@ -243,7 +243,7 @@ public sealed class OpenRoleApiTests(HubFactory f)
         foreach (var insider in new[] { TestData.Marc, TestData.Jill, TestData.Admin })
             Assert.Contains((await (await f.As(insider).GetAsync($"/api/v1/projects/{project.Id}/open-roles")).Json()).AsArray(), r => r!.G("id") == roleId);
         foreach (var viewer in new[] { TestData.Marc, TestData.Admin })
-            Assert.Contains((await (await f.As(viewer).GetAsync(workload)).Json())["unfilledRoles"]!.AsArray(), r => r!.G("id") == roleId && r.S("projectNumber") == project.ProjectNumber);
+            Assert.Contains((await (await f.As(viewer).GetAsync(workload)).Json())["unfilledRoles"]!.AsArray(), r => r!.G("id") == roleId && r!.S("projectNumber") == project.ProjectNumber);
         await (await f.As(TestData.Marc).GetAsync($"/api/v1/projects/{project.Id}/activity?itemType=OpenRole")).Json();
 
         // R3: open roles raise no notification or email, so nobody outside the project hears of one.

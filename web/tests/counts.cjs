@@ -11,7 +11,7 @@ const { chromium } = require('playwright')
 
 const base = process.env.TUESDAY_UI_BASE_URL ?? 'http://localhost:5173'
 assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'TUESDAY_UI_BASE_URL must be a local Development preview')
-const reportPath = process.env.COUNTS_REPORT ?? '/private/tmp/claude-501/-Users-jaypatel-PM-Tool/f879a8c1-966b-47f2-8c07-d393d08b7d6e/scratchpad/counts-report.json'
+const reportPath = process.env.COUNTS_REPORT ?? require('node:path').join(require('node:os').tmpdir(), 'tuesday-counts-report.json')
 const PERSONAS = [['jordan', 'Jordan Lee'], ['priya', 'Priya Nair'], ['sam', 'Sam Patel']]
 const PROJECTS = ['SYN-101', 'SYN-102', 'SYN-103']
 // Agreed tile list (section 7). Lanes, project segments and discipline rows come from the page's own data.

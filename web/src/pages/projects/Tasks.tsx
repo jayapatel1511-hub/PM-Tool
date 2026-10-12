@@ -300,7 +300,7 @@ export function useTaskFilters() {
   return { sp, set, filters, clear, active: FILTER_KEYS.some((k) => sp.has(k)) }
 }
 /** Filters that links from the dashboard and elsewhere may carry beyond the visible controls; shown as removable tokens. */
-const EXTRA = ['waiting', 'open', 'stale', 'dueSoon', 'noDueDate', 'dateInconsistent', 'heldPastDue', 'dueFrom', 'dueTo', 'milestoneId', 'assigneeId', 'ids']
+const EXTRA = ['waiting', 'open', 'onHold', 'stale', 'dueSoon', 'noDueDate', 'dateInconsistent', 'heldPastDue', 'dueFrom', 'dueTo', 'milestoneId', 'assigneeId', 'ids']
 const FILTER_KEYS = ['q', 'disciplineId', 'deliverableId', 'status', 'priority', ...QUICK, ...EXTRA]
 /** Flags (quick chips and linked indicator filters) are on or absent; the rest carry a value. */
 const FLAGS = new Set<string>([...QUICK, 'waiting', 'open', 'stale', 'dueSoon', 'noDueDate', 'dateInconsistent', 'heldPastDue'])
@@ -320,6 +320,7 @@ export function TaskFilterBar({ p, deliverables, extra, actions, pinned = PINNED
       case 'status': case 'priority': return tv(v)
       case 'dueFrom': case 'dueTo': return fmtDate(v)
       case 'ids': return String(v.split(',').length)
+      case 'onHold': return t(v === 'true' ? 'common.yes' : 'common.no')
     }
   }
   const tokens = FILTER_KEYS.filter((k) => sp.has(k)).map((k) => ({

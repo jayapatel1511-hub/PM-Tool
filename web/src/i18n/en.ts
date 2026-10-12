@@ -1552,7 +1552,7 @@ export const en: Record<string, string> = {
   'staff.assigned': '{name} added to {number}', 'staff.remove': 'Remove from project', 'staff.removeTitle': 'Remove {name} from {number}?',
   'staff.openItems': 'They have {n} open items on this project. Reassign them, or leave them flagged "assignee not on project".', 'staff.noOpenItems': 'They have no open items on this project.',
   'staff.reassignTo': 'Reassign open items to', 'staff.reassignHint': 'Leave empty to keep them assigned and flagged.', 'staff.removed': 'Removed from the project',
-  'tfilter.waiting': 'Waiting', 'tfilter.open': 'Open only', 'tfilter.stale': 'Stale', 'tfilter.dueSoon': 'Due soon', 'tfilter.noDueDate': 'No due date',
+  'tfilter.waiting': 'Waiting', 'tfilter.open': 'Open only', 'tfilter.onHold': 'On Hold', 'tfilter.stale': 'Stale', 'tfilter.dueSoon': 'Due soon', 'tfilter.noDueDate': 'No due date',
   'tfilter.dateInconsistent': 'Date inconsistent', 'tfilter.heldPastDue': 'Held past due', 'tfilter.dueFrom': 'Due from', 'tfilter.dueTo': 'Due to',
   'tfilter.milestoneId': 'Milestone', 'tfilter.assigneeId': 'Assignee', 'tfilter.ids': 'Specific tasks',
   // Decision register (packet 008)

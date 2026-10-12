@@ -256,8 +256,7 @@ function WeekHead({ weeks, currentWeek, first, last }: { weeks: string[]; curren
  *  listed apart from people and never enter anyone's load, percentage or indicator (AC-ROLE-02). */
 function UnfilledRoles({ roles, weeks, currentWeek }: { roles: UnfilledRole[]; weeks: string[]; currentWeek: string }) {
   return (
-    <Section id="wl-unfilled" title={t('openRole.unfilled')} count={roles.length}>
-      <p className="border-b px-5 py-2 text-xs/[18px] text-muted-foreground">{t('openRole.unfilledHint')}</p>
+    <Section id="wl-unfilled" title={t('openRole.unfilled')} count={roles.length} actions={<PageHelp label={t('openRole.unfilledHelp')}>{t('openRole.unfilledHint')}</PageHelp>}>
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- axe scrollable-region-focusable */}
       <div className="scroll-region overflow-x-auto" role="region" aria-label={t('openRole.unfilled')} tabIndex={0}>
         <table className="w-full min-w-max border-separate border-spacing-0 text-sm">

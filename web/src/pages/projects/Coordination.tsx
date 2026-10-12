@@ -1,16 +1,17 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, CheckCheck, ChevronDown, ChevronRight, ClipboardCopy, ListPlus, MessageSquare, MonitorPlay, Plus, Printer } from 'lucide-react'
+import { Check, CheckCheck, ChevronDown, ChevronRight, ClipboardCopy, ListPlus, MessageSquare, MonitorPlay, MoreHorizontal, Plus, Printer } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { AttentionPanel } from '@/components/hub/attention'
-import { ErrorBanner, Loading, Notice, Page, selectCls } from '@/components/hub/common'
+import { ErrorBanner, Loading, Notice, Page, PageHelp, selectCls } from '@/components/hub/common'
 import { InlineDate } from '@/components/hub/fields'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { ViewMenu } from '@/components/hub/views'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Chip, HealthPill, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { get, post, qs } from '@/lib/api'
 import { fmtDate, fmtTime, relative, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
@@ -83,7 +84,8 @@ export function CoordinationTab() {
   const [log, setLog] = useState<{ id: string; key: string; what: string; at: string }[]>([])
   const [hideDiscussed, setHideDiscussed] = useState(false)
   const [printAll, setPrintAll] = useState(false)
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  // Look-back, look-ahead and held items start collapsed (§41: secondary sections one click away); print shows them all.
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set(['completed', 'upcoming', 'held']))
   const [creating, setCreating] = useState(false)
   const [recording, setRecording] = useState<{ id: string; key: string } | null>(null)
   const [capturing, setCapturing] = useState<{ taskId?: string; decisionId?: string; label?: string; ownerId?: string; ownerName?: string;
@@ -247,7 +249,8 @@ export function CoordinationTab() {
   return (
     <Page title={t('ptab.coordination')} className={scale}
       subtitle={<>{t('wc.window', { from: fmtDate(c.window.thisWeek.from), to: fmtDate(c.window.thisWeek.to) })} ·{' '}
-        {c.window.lastCoordinationReviewedAt ? t('wc.sinceReview', { when: fmtTime(c.window.lastCoordinationReviewedAt), who: c.window.reviewedBy ?? '' }) : t('wc.neverReviewed')}</>}
+        {c.window.lastCoordinationReviewedAt ? t('wc.sinceReview', { when: fmtTime(c.window.lastCoordinationReviewedAt), who: c.window.reviewedBy ?? '' }) : t('wc.neverReviewedShort')}
+        <PageHelp>{t('wc.help')}</PageHelp></>}
       actions={<>
         <ViewMenu listType="coordination" projectId={p.id} />
         {!meeting && (
@@ -260,7 +263,10 @@ export function CoordinationTab() {
         {meeting && p.permissions.createTaskIn.length > 0 && <Button variant="outline" onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}
         {meeting && canCapture && <Button variant="outline" onClick={() => setCapturing({})}><ListPlus className="size-4" />{t('action.new')}</Button>}
         <Button variant="outline" aria-pressed={meeting} className={cn(meeting && 'border-primary bg-accent font-semibold text-accent-foreground hover:bg-accent')} onClick={() => set('meeting', meeting ? undefined : '1')}>{meeting ? <Check className="size-4" /> : <MonitorPlay className="size-4" />}{t('wc.meetingMode')}</Button>
-        <Button variant="outline" onClick={copySummary}><ClipboardCopy className="size-4" />{t('wc.copySummary')}</Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild><Button variant="outline" size="icon" aria-label={t('wc.moreActions')}><MoreHorizontal className="size-5" /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end"><DropdownMenuItem onSelect={copySummary}><ClipboardCopy className="size-4" />{t('wc.copySummary')}</DropdownMenuItem></DropdownMenuContent>
+        </DropdownMenu>
         <Button variant="outline" disabled={printAll} onClick={() => setPrintAll(true)}><Printer className="size-4" />{t('wc.print')}</Button>
         {c.window.canMarkReviewed && <Button onClick={markReviewed}><CheckCheck className="size-4" />{t('wc.markReviewed')}</Button>}
       </>}>
@@ -288,7 +294,7 @@ export function CoordinationTab() {
                   </button>
                   <span>{i + 1}. {s.title}</span>{s.count > 0 && <span className={badge}>{s.count}</span>}
                 </h2>
-                {!shut && <div className="text-sm">{s.body}</div>}
+                <div className={cn('text-sm', shut && 'hidden print:block')}>{s.body}</div>
               </section>
             )
           })}

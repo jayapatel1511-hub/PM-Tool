@@ -4,7 +4,7 @@ import { CalendarClock, ChevronLeft, ChevronRight, Flag, HardHat, ListTodo, Plus
 import { useContext, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { AccentDot, ChipToggle, Empty, ErrorBanner, Field, InProject, Loading, Page, Segmented, Spinner, selectCls } from '@/components/hub/common'
+import { AccentDot, ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, InProject, Loading, Page, PageHelp, Segmented, Spinner, selectCls } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -42,8 +42,9 @@ const weekday = (d: string) => t(`calendar.dow.${new Date(d + 'T00:00:00Z').getU
 const late = (e: Entry) => e.kind === 'deadline' && e.overdue
 const TodayTag = () => <span className="rounded-md bg-primary px-1.5 text-xs/[18px] font-medium text-primary-foreground">{t('common.today')}</span>
 
-/** Team calendar (§36.5, FR-VIS-06): Week, Month and Agenda over selected projects, four type toggles, all-day project
- *  deadlines that open their source item, and events created, edited and cancelled here. */
+/** Team calendar (§36.5, FR-VIS-06): Week, Month and Agenda over selected projects, four type toggles in the Filters
+ *  popover (§41 R1, R2), all-day project deadlines that open their source item, and events created, edited and cancelled
+ *  here. */
 export function CalendarPage() {
   const [subscription, setSubscription] = useState(false)
   const [sp, setSp] = useSearchParams()
@@ -66,7 +67,7 @@ export function CalendarPage() {
   const label = view === 'month' ? monthTitle(anchor) : `${fmtDate(from)} – ${fmtDate(to)}`
 
   return (
-    <Page title={t('nav.calendar')} subtitle={t('calendar.subtitle', { zone: q.data?.timeZone ?? '' })}
+    <Page title={t('nav.calendar')} subtitle={<>{t('calendar.zoneShort', { zone: q.data?.timeZone ?? '' })}<PageHelp>{t('calendar.subtitle', { zone: q.data?.timeZone ?? '' })}</PageHelp></>}
       actions={<><Button variant="outline" onClick={() => setSubscription(true)}>{t('calendar.subscription')}</Button><Button onClick={() => setEditing('new')}><Plus className="size-4" />{t('calendar.new')}</Button></>}>
       {subscription && <CalendarSubscriptionDialog onClose={() => setSubscription(false)} />}<WorkspaceTabs />
       <div className="flex flex-wrap items-center gap-3">
@@ -78,14 +79,18 @@ export function CalendarPage() {
           <Button variant="outline" size="icon" aria-label={t('calendar.next')} onClick={() => step(1)}><ChevronRight className="size-5" /></Button>
         </div>
         <span className="text-base/6 font-semibold tabular-nums" aria-live="polite">{label}</span>
-      </div>
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="cal-types">
-        <span id="cal-types" className="mr-1 text-sm font-medium">{t('calendar.types')}</span>
-        {TYPES.map((x) => (
-          <ChipToggle key={x.id} on={!hidden.includes(x.id)} onClick={() => toggle(x.id)}>
-            <x.icon className="mr-1.5 inline-block size-4 align-[-3px]" aria-hidden />{t(x.label)}
-          </ChipToggle>
-        ))}
+        <FilterBar activeCount={hidden.length}
+          active={<ActiveFilters tokens={TYPES.filter((x) => hidden.includes(x.id)).map((x) => ({ key: x.id, label: t('calendar.hiddenType'), value: t(x.label) }))}
+            onRemove={toggle} onClear={() => set('hide', null)} />}>
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="cal-types">
+            <span id="cal-types" className="w-full text-sm font-medium">{t('calendar.types')}</span>
+            {TYPES.map((x) => (
+              <ChipToggle key={x.id} on={!hidden.includes(x.id)} onClick={() => toggle(x.id)}>
+                <x.icon className="mr-1.5 inline-block size-4 align-[-3px]" aria-hidden />{t(x.label)}
+              </ChipToggle>
+            ))}
+          </div>
+        </FilterBar>
       </div>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {types.length > 0 && q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : view === 'week' ? <Week from={from} entries={entries} onOpen={open} />
@@ -110,13 +115,13 @@ function Marks({ e }: { e: Entry }) {
   return <><Icon className="size-3.5 shrink-0" aria-hidden />{type && <span className="sr-only">{t(type.label)}:</span>}</>
 }
 
-/** An entry on the grid: type icon, readable 12 px text and the project's accent (an event without a project stays
+/** An entry on the grid: type icon, readable 12 px text and the project's accent stripe (an event without a project stays
  *  neutral); an overdue deadline adds the critical square and the word for screen readers. */
 function Chip({ e, onOpen, compact }: { e: Entry; onOpen: (e: Entry) => void; compact?: boolean }) {
   const deadline = e.kind === 'deadline'
   return (
     <button type="button" onClick={() => onOpen(e)} data-accent={e.projectId ? accentOf(e.projectId) : undefined} title={deadline ? `${e.key} ${e.title} · ${e.projectNumber}` : `${time(e.start)}–${time(e.end)} ${e.title}${e.location ? ` · ${e.location}` : ''}`}
-      className={cn('flex w-full min-w-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-left text-xs/[18px] hover:brightness-95', e.projectId ? 'bg-(--acc-bg)' : 'bg-secondary', late(e) ? 'text-bad' : 'text-foreground')}>
+      className={cn('flex w-full min-w-0 items-center gap-1 rounded-md border-l-4 bg-secondary px-1.5 py-0.5 text-left text-xs/[18px] hover:brightness-95', e.projectId ? 'border-l-(color:--acc-stripe)' : 'border-l-transparent', late(e) ? 'text-bad' : 'text-foreground')}>
       <Marks e={e} />
       {late(e) && <span className="shrink-0 font-semibold"><span aria-hidden>■</span><span className="sr-only">{t('ind.overdue')}</span></span>}
       {deadline ? !compact && <span className="key shrink-0 text-muted-foreground">{e.key.split('-').pop()}</span>

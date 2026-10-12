@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, BarChart3, ChevronRight, ChevronsUpDown, ListFilter } from 'lucide-react'
+import { ArrowLeft, ChevronsUpDown, ListFilter } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
-import { Empty, ErrorBanner, Field, Loading, Missing, Page, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { Empty, ErrorBanner, Field, Loading, Missing, Page, PageHelp, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
@@ -17,7 +17,7 @@ import { get, qs } from '@/lib/api'
 import { fmtDate, fmtTime } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
-import { accentOf, cn } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 interface Param { key: string; label: string; type: string; default?: string | null; options?: { value: string; label: string }[] | null }
 interface Column { path: string; header: string; type: string }
@@ -27,26 +27,28 @@ interface ReportRun { code: string; title: string; itemType?: string | null; col
 const useCatalogue = () => useQuery({ queryKey: ['reports'], queryFn: () => get<ReportDef[]>('reports'), staleTime: 5 * 60_000 })
 const card = 'rounded-lg border bg-card'
 
-/** Reports catalogue (§13.18, §19): deterministic reports with a description each; a card opens its report. */
+/** Reports catalogue (§13.18, §19, §41 R5): deterministic reports, one table row each with its description; the title
+ *  opens the report. */
 export function ReportsPage() {
   const q = useCatalogue()
   return (
-    <Page title={t('nav.reports')} subtitle={t('reports.subtitle')}>
+    <Page title={t('nav.reports')} subtitle={<>{q.data && plural(q.data.length, 'reports.countOne', 'reports.count')}<PageHelp>{t('reports.help')}</PageHelp></>}>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <div className={card}><Loading rows={6} /></div> : q.data && (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {q.data.map((r) => (
-            <li key={r.code}>
-              <Link to={r.code} className="group flex h-full flex-col gap-3 rounded-lg border bg-card p-5 hover:bg-muted">
-                <span className="flex items-center justify-between gap-3">
-                  <span data-accent={accentOf(r.code)} className="grid size-9 place-items-center rounded-md bg-(--acc-bg) text-(--acc-fg)"><BarChart3 className="size-5" aria-hidden /></span>
-                  <ChevronRight className="size-4 text-muted-foreground group-hover:text-foreground" aria-hidden />
-                </span>
-                <span><span className="block text-base/6 font-semibold">{r.title}</span><span className="mt-1 block text-sm text-muted-foreground">{r.description}</span></span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <TableRegion>
+          <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.reports')}</caption>
+            <thead className="bg-muted"><tr><th scope="col" className={thCls}>{t('reports.report')}</th><th scope="col" className={thCls}>{t('common.description')}</th></tr></thead>
+            <tbody>
+              {q.data.map((r) => (
+                <tr key={r.code} className="border-t hover:bg-muted">
+                  <td className={cn(tdCls, 'whitespace-nowrap')}><Link to={r.code} className="font-medium hover:underline">{r.title}</Link></td>
+                  <td className={cn(tdCls, 'text-muted-foreground')}>{r.description}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableRegion>
       )}
     </Page>
   )

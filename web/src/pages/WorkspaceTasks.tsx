@@ -263,7 +263,8 @@ export function WorkspaceBoardPage() {
                     <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{g.rows.length}</span>
                   </h2>
                 )}
-                <Swimlane rows={g.rows} columns={columns} onDrop={onDrop} onReorder={onReorder} onAdd={me.capabilities.createTask ? () => setCreating(true) : undefined}
+                {/* New task lives in the page header only; a per-lane copy would repeat it in every swimlane (§41 R1). */}
+                <Swimlane rows={g.rows} columns={columns} onDrop={onDrop} onReorder={onReorder}
                   render={(r) => <CardBody r={r} showProject open={() => openPanel('Task', r.id)} openDeliverable={(id) => openPanel('Deliverable', id)} />} />
               </section>
             ))}

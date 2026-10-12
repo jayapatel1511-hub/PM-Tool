@@ -55,13 +55,16 @@
 :root[data-density="comfortable"] { --row-min: 48px; --cell-py: 14px; --cell-px: 16px; --control-h: 44px; --control-row-h: 44px; }
 @media (pointer: coarse) { :root { --control-h: 44px; --control-row-h: 44px; } }
 
-/* Identity accents: a person, project or category keeps one accent across views. They identify; they never signal status. */
-[data-accent="blue"] { --acc-bg: #edf2fd; --acc-fg: #37589a; --acc-stripe: #b6c9ed; }
-[data-accent="mint"] { --acc-bg: #eaf5ef; --acc-fg: #386953; --acc-stripe: #aacfb9; }
-[data-accent="lavender"] { --acc-bg: #f1edfc; --acc-fg: #64558f; --acc-stripe: #cbbce9; }
-[data-accent="peach"] { --acc-bg: #fff0e7; --acc-fg: #8d5538; --acc-stripe: #ecc3a9; }
-[data-accent="amber"] { --acc-bg: #fff4db; --acc-fg: #7a5817; --acc-stripe: #e3d29d; }
-[data-accent="rose"] { --acc-bg: #fbeaf0; --acc-fg: #974a68; --acc-stripe: #e7b8c8; }
+/* Identity accents: a person, project or category keeps one accent across views. They identify; they never signal status.
+   Colour budget (§41 R8): every accent shares one neutral tint; the identity lives in the text colour (>= 5.3:1 on the
+   tint) and the stripe, so a screen of people, projects and categories does not add a fill colour for each. */
+[data-accent] { --acc-bg: var(--secondary); }
+[data-accent="blue"] { --acc-fg: #37589a; --acc-stripe: #b6c9ed; }
+[data-accent="mint"] { --acc-fg: #386953; --acc-stripe: #aacfb9; }
+[data-accent="lavender"] { --acc-fg: #64558f; --acc-stripe: #cbbce9; }
+[data-accent="peach"] { --acc-fg: #8d5538; --acc-stripe: #ecc3a9; }
+[data-accent="amber"] { --acc-fg: #7a5817; --acc-stripe: #e3d29d; }
+[data-accent="rose"] { --acc-fg: #974a68; --acc-stripe: #e7b8c8; }
 
 @media (prefers-contrast: more) {
   :root { --border: #7c8491; --muted-foreground: #191b20; }

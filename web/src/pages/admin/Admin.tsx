@@ -249,7 +249,7 @@ export function Settings() {
 
 // ---------- Users and roles (FR-004, FR-016, FR-017, FR-027, E-26) ----------
 
-interface UserRow { id: string; displayName: string; email: string; jobTitle?: string; officeId?: string; supervisorId?: string; isActive: boolean; weeklyCapacityHours?: number; isTemplateEditor: boolean; lastSignInAt?: string; rowVersion: number; roles: { role: string; source: string }[] }
+interface UserRow { id: string; displayName: string; email: string; jobTitle?: string; officeId?: string; supervisorId?: string; homeDisciplineId?: string | null; isActive: boolean; weeklyCapacityHours?: number; isTemplateEditor: boolean; lastSignInAt?: string; rowVersion: number; roles: { role: string; source: string }[] }
 
 /** A system role with where it comes from: directory-group roles are filled, roles added in the Hub are outlined. */
 const RoleBadge = ({ r, children }: { r: UserRow['roles'][number]; children: React.ReactNode }) => (
@@ -316,7 +316,7 @@ export function Users() {
           </table>
         </TableRegion>
       )}
-      {edit && <UserDialog user={edit} users={everyone.data ?? []} offices={ref.data?.offices ?? []} onClose={() => { setEdit(null); refresh() }} />}
+      {edit && <UserDialog user={edit} users={everyone.data ?? []} offices={ref.data?.offices ?? []} disciplines={ref.data?.disciplines ?? []} onClose={() => { setEdit(null); refresh() }} />}
       {creating && <CreateUserDialog users={everyone.data ?? []} offices={ref.data?.offices ?? []}
         onClose={() => setCreating(false)} onCreated={(created) => { setCreating(false); setHandoff(created); refresh() }} />}
       {handoff && <CredentialHandoff user={handoff} onClose={() => setHandoff(null)} />}
@@ -365,8 +365,8 @@ function CredentialHandoff({ user, onClose }: { user: { id: string; email: strin
   </Dialog>
 }
 
-function UserDialog({ user, users, offices, onClose }: { user: UserRow; users: UserRow[]; offices: any[]; onClose: () => void }) {
-  const [form, setForm] = useState({ supervisorId: user.supervisorId ?? '', officeId: user.officeId ?? '', weeklyCapacityHours: user.weeklyCapacityHours?.toString() ?? '', isTemplateEditor: user.isTemplateEditor, isActive: user.isActive })
+function UserDialog({ user, users, offices, disciplines, onClose }: { user: UserRow; users: UserRow[]; offices: any[]; disciplines: { id: string; name: string; isActive: boolean }[]; onClose: () => void }) {
+  const [form, setForm] = useState({ supervisorId: user.supervisorId ?? '', officeId: user.officeId ?? '', homeDisciplineId: user.homeDisciplineId ?? '', weeklyCapacityHours: user.weeklyCapacityHours?.toString() ?? '', isTemplateEditor: user.isTemplateEditor, isActive: user.isActive })
   const [role, setRole] = useState('')
   const [err, setErr] = useState<unknown>(null)
   const [busy, setBusy] = useState(false)
@@ -374,7 +374,7 @@ function UserDialog({ user, users, offices, onClose }: { user: UserRow; users: U
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
-      await patch(`admin/users/${user.id}`, { supervisorId: form.supervisorId || null, officeId: form.officeId || null, weeklyCapacityHours: form.weeklyCapacityHours === '' ? null : Number(form.weeklyCapacityHours), isTemplateEditor: form.isTemplateEditor, isActive: form.isActive }, user.rowVersion)
+      await patch(`admin/users/${user.id}`, { supervisorId: form.supervisorId || null, officeId: form.officeId || null, homeDisciplineId: form.homeDisciplineId || null, weeklyCapacityHours: form.weeklyCapacityHours === '' ? null : Number(form.weeklyCapacityHours), isTemplateEditor: form.isTemplateEditor, isActive: form.isActive }, user.rowVersion)
       toast.success(t('common.saved')); onClose()
     } catch (e) { setErr(e) } finally { setBusy(false) }
   }
@@ -395,6 +395,13 @@ function UserDialog({ user, users, offices, onClose }: { user: UserRow; users: U
             <select id="u-off" className={selectCls} value={form.officeId} onChange={(e) => setForm({ ...form, officeId: e.target.value })}>
               <option value="">{t('common.none')}</option>
               {offices.filter((o) => o.isActive || o.id === form.officeId).map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+            </select>
+          </Field>
+          {/* FR-GRP-01 (D7): the person's home discipline, for grouping Workload and the Planner; edited here, not synced. */}
+          <Field label={t('admin.homeDiscipline')} htmlFor="u-disc" optional>
+            <select id="u-disc" className={selectCls} value={form.homeDisciplineId} onChange={(e) => setForm({ ...form, homeDisciplineId: e.target.value })}>
+              <option value="">{t('staff.group.notSet')}</option>
+              {disciplines.filter((d) => d.isActive || d.id === form.homeDisciplineId).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
           </Field>
           <Field label={t('admin.capacity')} htmlFor="u-cap"><Input id="u-cap" className="w-32" type="number" min={0} max={80} value={form.weeklyCapacityHours} onChange={(e) => setForm({ ...form, weeklyCapacityHours: e.target.value })} /></Field>

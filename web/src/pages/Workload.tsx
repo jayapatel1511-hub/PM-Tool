@@ -1,16 +1,18 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, EyeOff, Info, Lock, Monitor, Pencil } from 'lucide-react'
+import { ArrowUpDown, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Ellipsis, EyeOff, Info, Lock, Monitor, Pencil } from 'lucide-react'
 import { Fragment, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { AccentDot, ActiveFilters, ChipToggle, ConfirmDialog, DensityToggle, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Missing, Notice, Page, Spinner, selectCls } from '@/components/hub/common'
+import { AccentDot, ActiveFilters, ChipToggle, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Missing, Notice, Page, PageHelp, Section, Spinner, selectCls, useDensity, type Density } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
+import { OneSignal, type Signal } from '@/components/hub/indicators'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Chip, Key, StatusPill } from '@/components/hub/pills'
 import { itemHref } from '@/components/hub/search'
 import { ViewMenu } from '@/components/hub/views'
 import { WorkspaceTabs } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -20,19 +22,35 @@ import { addDays, fmtDate, hours, shortDate, today } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { errorText } from './projects/Tasks'
+import { GROUP_BY, GROUP_LABEL, groupPeople } from '@/components/planner/labels'
+import { MenuSelect, errorText } from './projects/Tasks'
 
 interface Cell { week: string; hours: number; pct: number; available: number; confirmed: number; proposed: number; committed: number }
 interface PersonRow {
   id: string; displayName: string; supervisorId?: string; supervisorName?: string; capacity: number; capacityOverride: boolean; cells: Cell[]; noDueDate: number
   openTasks: number; unestimated: number; overdue: number; projects: number; overAssigned: boolean; underAssigned: boolean; cluster: boolean; canSetCapacity: boolean; partialScope: boolean; indicator: string
+  officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null
 }
-interface Grid { weeks: string[]; today: string; currentWeek: string; defaultCapacity: number; people: PersonRow[] }
+/** Open demand with no person named yet (FR-ROLE-04): shown apart from people, never in anyone's load. */
+interface UnfilledRole { id: string; projectId: string; projectNumber: string; projectName: string; roleLabel: string; disciplineName?: string | null; fromDate: string; throughDate: string; plannedHours: number; cells: { week: string; hours: number }[] }
+interface Grid { weeks: string[]; today: string; currentWeek: string; defaultCapacity: number; people: PersonRow[]; unfilledRoles?: UnfilledRole[] }
 interface TaskLoadRow { id: string; key: string; name: string; status: string; dueDate?: string; estimatedHours?: number | null; progressPct: number; remaining?: number | null; overdue: boolean; noDueDate: number; rowVersion: number; weeks: number[]; canReassign: boolean }
 interface PersonTasks { weeks: string[]; projects: { id: string; projectNumber: string; name: string; tasks: TaskLoadRow[] }[] }
 
 const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'projectId', 'indicator', 'from', 'sort'] as const
 const INDICATORS = ['over', 'under', 'cluster', 'unestimated'] as const
+const SORTS = ['load', 'overdue', 'tasks', 'name'] as const
+
+/** The row's indicators, most severe first (§41 R7). Over-assigned names the week that tripped it (this or next week). */
+function personSignals(p: PersonRow, currentWeek: string): Signal[] {
+  const overWeek = p.cells.find((c) => (c.week === currentWeek || c.week === addDays(currentWeek, 7)) && c.pct > 110)?.week
+  return ([
+    p.overAssigned && { key: 'over', tone: 'bad', label: overWeek ? t('signal.withWeek', { label: t('workload.ind.over'), week: shortDate(overWeek) }) : t('workload.ind.over') },
+    p.cluster && { key: 'cluster', tone: 'warn', label: t('workload.ind.cluster') },
+    p.unestimated > 0 && { key: 'unestimated', tone: 'warn', label: t('workload.unestimatedN', { n: p.unestimated }) },
+    p.underAssigned && { key: 'under', tone: 'idle', label: t('workload.ind.under') },
+  ] as (Signal | false)[]).filter(Boolean) as Signal[]
+}
 
 /** Heat shading by load with the number always shown (§13.11): light under 40 %, calm to 90 %, amber to 110 %, red above. */
 const loadTone = (pct: number) => (pct > 110 ? 'bad' : pct > 90 ? 'warn' : pct >= 40 ? 'ok' : 'idle')
@@ -63,9 +81,9 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
   const forbidden = (q.error as ApiError | null)?.status === 403
   const toggle = (id: string) => setOpen((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
-  const groups = new Map<string, PersonRow[]>()
-  for (const p of q.data?.people ?? []) { const g = p.supervisorName ? t('workload.reportsTo', { name: p.supervisorName }) : t('workload.noSupervisor'); groups.set(g, [...(groups.get(g) ?? []), p]) }
+  const groupBy = (GROUP_BY as readonly string[]).includes(sp.get('groupBy') ?? '') ? sp.get('groupBy')! : 'supervisor'
   const people = q.data?.people ?? []
+  const groups = groupPeople(people, groupBy, ref.data)
   const allPartial = people.length > 0 && people.every((p) => p.partialScope)
 
   // Active filters as removable tokens (§13.0 Filters); sort is an order, not a filter.
@@ -78,6 +96,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
     ['indicator', t('workload.indicator'), filters.indicator ? t(`workload.ind.${filters.indicator}`) : null],
     ['from', t('workload.from'), filters.from ? fmtDate(filters.from) : null],
   ] as const).filter(([k]) => filters[k])
+  const unfilled = q.data?.unfilledRoles ?? []
   // One indicator at a time; choosing the selected chip again shows every person (the former "Any" chip).
   const indicatorChip = (x: string) => <ChipToggle key={x} on={filters.indicator === x} onClick={() => set('indicator', filters.indicator === x ? null : x)}>{t(`workload.ind.${x}`)}</ChipToggle>
   const clear = () => { const n = new URLSearchParams(sp); for (const [k] of tokens) n.delete(k); setSp(n, { replace: true }) }
@@ -85,13 +104,29 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   const shiftWeeks = (days: number) => set('from', addDays(weeks[0] ?? today(), days))
 
   return (
-    <Page {...header} actions={forbidden ? <Method /> : <><Method /><ViewMenu listType="workload" /><ExportMenu path="workload/export" params={filters} name="workload" /></>}>
+    <Page {...header} actions={forbidden ? <Method /> : <><Method /><ViewMenu listType="workload" /><ExportMenu path="workload/export" params={filters} name="workload" /><DensityMenu /></>}>
       <WorkspaceTabs />
       {forbidden ? <Notice icon={Lock} title={t('workload.noAccessTitle')}
         action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('workload.noAccess')}</Notice> : <>
+        {/* §41 R1: one toolbar row. Filters and the week start sit in the popover; Group and Sort are menus. */}
         <FilterBar activeCount={tokens.length}
-          quick={<div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('workload.indicator')}>{INDICATORS.slice(0, 3).map(indicatorChip)}</div>}
-          active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
+          quick={<>
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('workload.indicator')}>{INDICATORS.slice(0, 3).map(indicatorChip)}</div>
+            <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={GROUP_BY.map((g) => ({ value: g, label: t(GROUP_LABEL[g]) }))} />
+            <MenuSelect label={t('common.sort')} icon={ArrowUpDown} value={filters.sort ?? 'load'} onChange={(v) => set('sort', v === 'load' ? null : v)} options={SORTS.map((v) => ({ value: v, label: t(`workload.sortBy.${v}`) }))} />
+          </>}
+          active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}
+          actions={<>
+            {allPartial && <span role="status" className="inline-flex items-center gap-1.5 text-sm"><EyeOff className="size-4 text-muted-foreground" aria-hidden />{t('workload.partialTitle')}<PageHelp>{t('workload.partialAll')}</PageHelp></span>}
+            <div role="group" aria-label={t('workload.weeks')} className="flex items-center gap-1">
+              <Button variant="outline" size="icon" aria-label={t('workload.prevWeek')} onClick={() => shiftWeeks(-7)}><ChevronLeft className="size-5" /></Button>
+              <span className="min-w-32 text-center text-sm font-semibold tabular-nums" aria-live="polite">
+                {weeks.length ? t('workload.range', { from: shortDate(weeks[0]), to: shortDate(addDays(weeks[weeks.length - 1], 6)) }) : t('common.dash')}
+              </span>
+              <Button variant="outline" size="icon" aria-label={t('workload.nextWeek')} onClick={() => shiftWeeks(7)}><ChevronRight className="size-5" /></Button>
+              <Button variant="outline" disabled={!filters.from} onClick={() => set('from', null)}>{t('workload.thisWeek')}</Button>
+            </div>
+          </>}>
           <div className="flex flex-wrap items-end gap-3">
             <Field label={t('workload.supervisor')} htmlFor="wl-supervisor" className="w-full sm:w-56">
               <PeoplePicker id="wl-supervisor" value={filters.supervisorId} valueName={supervisorName} onChange={(v) => set('supervisorId', v)} placeholder={t('workload.anySupervisor')} />
@@ -111,10 +146,8 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
                 <option value="">{t('workload.anyProject')}</option>{projects.data?.items.map((p) => <option key={p.id} value={p.id}>{p.projectNumber} {p.name}</option>)}
               </select>
             </Field>
-            <Field label={t('common.sort')} htmlFor="wl-sort" className="w-full sm:w-48">
-              <select id="wl-sort" className={selectCls} value={filters.sort ?? ''} onChange={(e) => set('sort', e.target.value)}>
-                {[['', 'workload.sort.load'], ['overdue', 'workload.sort.overdue'], ['tasks', 'workload.sort.tasks'], ['name', 'workload.sort.name']].map(([v, l]) => <option key={v} value={v}>{t(l)}</option>)}
-              </select>
+            <Field label={t('workload.from')} htmlFor="wl-from" className="w-full sm:w-44">
+              <Input id="wl-from" type="date" value={filters.from ?? ''} onChange={(e) => set('from', e.target.value)} />
             </Field>
           </div>
           <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="wl-indicator">
@@ -123,24 +156,8 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
           </div>
         </FilterBar>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div role="group" aria-label={t('workload.weeks')} className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="icon" aria-label={t('workload.prevWeek')} onClick={() => shiftWeeks(-7)}><ChevronLeft className="size-5" /></Button>
-            <span className="min-w-40 text-center text-sm font-semibold tabular-nums" aria-live="polite">
-              {weeks.length ? t('workload.range', { from: shortDate(weeks[0]), to: shortDate(addDays(weeks[weeks.length - 1], 6)) }) : t('common.dash')}
-            </span>
-            <Button variant="outline" size="icon" aria-label={t('workload.nextWeek')} onClick={() => shiftWeeks(7)}><ChevronRight className="size-5" /></Button>
-            <Button variant="outline" disabled={!filters.from} onClick={() => set('from', null)}>{t('workload.thisWeek')}</Button>
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">{t('workload.from')}
-              <Input type="date" className="w-40" value={filters.from ?? ''} onChange={(e) => set('from', e.target.value)} /></label>
-          </div>
-          <DensityToggle />
-        </div>
-
         {filters.disciplineId && <p className="text-sm text-muted-foreground">{t('workload.disciplineScope')}</p>}
-        {allPartial && <Notice icon={EyeOff} title={t('workload.partialTitle')}>{t('workload.partialAll')}</Notice>}
         {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-        <Legend />
         {q.isPending ? <GridSkeleton /> : !q.data ? null : q.data.people.length === 0 ? (
           <div className="rounded-lg border bg-card">
             <Empty title={t('workload.emptyTitle')} action={tokens.length > 0 && <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('workload.empty')}</Empty>
@@ -150,30 +167,22 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
           <div className="scroll-region max-h-[78dvh] overflow-auto rounded-lg border bg-card" role="region" aria-label={t('workload.grid')} tabIndex={0}>
             <table className="w-full min-w-max border-separate border-spacing-0 text-sm">
               <caption className="sr-only">{t('workload.gridCaption')}</caption>
-              <thead>
-                <tr>
-                  <th scope="col" className="sticky left-0 top-0 z-30 w-60 min-w-60 border-b border-r bg-muted px-4 py-3 text-left font-medium text-muted-foreground">{t('workload.person')}</th>
-                  {q.data.weeks.map((w) => {
-                    const current = w === q.data!.currentWeek
-                    return (
-                      <th key={w} scope="col" aria-current={current ? 'date' : undefined}
-                        className={cn('sticky top-0 z-20 min-w-36 border-b border-r px-3 py-3 text-left font-medium', current ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground')}>
-                        <span className="block text-xs/[18px]">{current ? t('workload.thisWeek') : t('workload.weekOfLabel')}</span>
-                        <span className="text-sm font-semibold text-foreground">{shortDate(w)}</span>
-                      </th>
-                    )
-                  })}
-                  <th scope="col" className="sticky top-0 z-20 min-w-56 border-b bg-muted px-4 py-3 text-left font-medium text-muted-foreground">{t('workload.summary')}</th>
-                </tr>
-              </thead>
-              {[...groups.entries()].map(([g, list]) => (
+              <WeekHead weeks={q.data.weeks} currentWeek={q.data.currentWeek} first={t('workload.person')} last={t('workload.summary')} />
+              {groups.map(([g, list]) => (
                 <tbody key={g}>
-                  {groups.size > 1 && (
+                  {groupBy !== 'none' && (
                     <tr>
                       <th scope="rowgroup" className="sticky left-0 z-10 border-b border-r bg-sidebar px-4 py-2 text-left text-xs/[18px] font-semibold uppercase tracking-[0.5px] text-muted-foreground">
                         {g} · {list.length}
                       </th>
-                      <td colSpan={q.data!.weeks.length + 1} className="border-b bg-sidebar" />
+                      {/* Group subtotal (AC-GRP-02c): the sum of the rows below, week by week. */}
+                      {q.data!.weeks.map((w, i) => {
+                        const committed = list.reduce((n, p) => n + (p.cells[i]?.committed ?? 0), 0), available = list.reduce((n, p) => n + (p.cells[i]?.available ?? 0), 0)
+                        return <td key={w} data-subtotal={committed} className="border-b border-r bg-sidebar px-(--cell-px) py-2 text-xs/[18px] text-muted-foreground tabular-nums">
+                          <span className="font-semibold text-foreground">{hours(committed)}</span> <span aria-hidden>/</span><span className="sr-only">{t('workload.ofAvailable')}</span> {hours(available)}
+                        </td>
+                      })}
+                      <td className="border-b bg-sidebar" />
                     </tr>
                   )}
                   {list.map((p) => (
@@ -191,14 +200,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
                                 {t('workload.capacityPerWeek', { h: hours(p.capacity) })}{p.capacityOverride && ` · ${t('workload.custom')}`}
                               </div>
                               {p.partialScope && !allPartial && <span className="mt-1 inline-flex items-center gap-1 text-xs/[18px] text-muted-foreground" title={t('workload.partial')}><EyeOff className="size-3.5" aria-hidden />{t('workload.partialChip')}</span>}
-                              {(p.overAssigned || p.underAssigned || p.cluster || p.unestimated > 0) && (
-                                <div className="mt-1.5 flex flex-wrap gap-1">
-                                  {p.overAssigned && <Chip tone="bad">{t('workload.ind.over')}</Chip>}
-                                  {p.underAssigned && <Chip tone="idle">{t('workload.ind.under')}</Chip>}
-                                  {p.cluster && <Chip tone="warn">{t('workload.ind.cluster')}</Chip>}
-                                  {p.unestimated > 0 && <Chip tone="warn">{t('workload.unestimatedN', { n: p.unestimated })}</Chip>}
-                                </div>
-                              )}
+                              <div className="mt-1.5 empty:hidden"><OneSignal signals={personSignals(p, q.data!.currentWeek)} /></div>
                               {p.canSetCapacity && (
                                 <div className="mt-1 flex gap-1">
                                   <Button variant="ghost" size="icon-sm" title={t('workload.setCapacity', { name: p.displayName })} aria-label={t('workload.setCapacity', { name: p.displayName })} onClick={() => setCapacity(p)}><Pencil className="size-4" /></Button>
@@ -219,10 +221,61 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
             </table>
           </div>
         )}
+        {q.data && unfilled.length > 0 && <UnfilledRoles roles={unfilled} weeks={q.data.weeks} currentWeek={q.data.currentWeek} />}
       </>}
       {capacity && <CapacityDialog p={capacity} defaultCapacity={q.data?.defaultCapacity ?? 40} onClose={(ok) => { setCapacity(null); if (ok) q.refetch() }} />}
       {availability && <AvailabilityDialog p={availability} onClose={(ok) => { setAvailability(null); if (ok) q.refetch() }} />}
     </Page>
+  )
+}
+
+/** The week columns' header row, on one line so the first person sits higher (§41 AC-CALM-01). */
+function WeekHead({ weeks, currentWeek, first, last }: { weeks: string[]; currentWeek: string; first: string; last?: string }) {
+  return (
+    <thead>
+      <tr>
+        <th scope="col" className="sticky left-0 top-0 z-30 w-60 min-w-60 border-b border-r bg-muted px-4 py-2 text-left font-medium text-muted-foreground">{first}</th>
+        {weeks.map((w) => {
+          const current = w === currentWeek
+          return (
+            <th key={w} scope="col" aria-current={current ? 'date' : undefined}
+              className={cn('sticky top-0 z-20 min-w-36 whitespace-nowrap border-b border-r px-3 py-2 text-left font-medium', current ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground')}>
+              <span className="text-xs/[18px]">{current ? t('workload.thisWeek') : t('workload.weekOfLabel')}</span> <span className="text-sm font-semibold text-foreground">{shortDate(w)}</span>
+            </th>
+          )
+        })}
+        {last && <th scope="col" className="sticky top-0 z-20 min-w-56 border-b bg-muted px-4 py-2 text-left font-medium text-muted-foreground">{last}</th>}
+      </tr>
+    </thead>
+  )
+}
+
+/** Unfilled roles (FR-ROLE-04, D3): open demand on visible projects, spread over working days like an allocation. They are
+ *  listed apart from people and never enter anyone's load, percentage or indicator (AC-ROLE-02). */
+function UnfilledRoles({ roles, weeks, currentWeek }: { roles: UnfilledRole[]; weeks: string[]; currentWeek: string }) {
+  return (
+    <Section id="wl-unfilled" title={t('openRole.unfilled')} count={roles.length}>
+      <p className="border-b px-5 py-2 text-xs/[18px] text-muted-foreground">{t('openRole.unfilledHint')}</p>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- axe scrollable-region-focusable */}
+      <div className="scroll-region overflow-x-auto" role="region" aria-label={t('openRole.unfilled')} tabIndex={0}>
+        <table className="w-full min-w-max border-separate border-spacing-0 text-sm">
+          <caption className="sr-only">{t('openRole.unfilled')}</caption>
+          <WeekHead weeks={weeks} currentWeek={currentWeek} first={t('openRole.role')} last={t('openRole.planned')} />
+          <tbody>{roles.map((r) => (
+            <tr key={r.id}>
+              <th scope="row" className="sticky left-0 z-10 w-60 min-w-60 border-b border-r bg-card px-4 py-2 text-left align-top font-normal">
+                <div className="break-words font-semibold">{r.roleLabel}</div>
+                <Link className="text-xs/[18px] text-muted-foreground hover:underline" to={`/projects/${encodeURIComponent(r.projectNumber)}/allocations?view=roles`}>
+                  <span className="whitespace-nowrap"><Key>{r.projectNumber}</Key></span> {r.projectName}{r.disciplineName && ` · ${r.disciplineName}`}
+                </Link>
+              </th>
+              {weeks.map((w) => { const h = r.cells.find((c) => c.week === w)?.hours ?? 0; return <td key={w} className="border-b border-r px-3 py-2 text-right align-top tabular-nums">{h ? hours(h) : <span className="text-muted-foreground"><span aria-hidden>·</span><span className="sr-only">{hours(0)}</span></span>}</td> })}
+              <td className="border-b px-4 py-2 align-top text-xs/[18px] text-muted-foreground tabular-nums">{hours(r.plannedHours)} · {fmtDate(r.fromDate)} – {fmtDate(r.throughDate)}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </Section>
   )
 }
 
@@ -264,7 +317,8 @@ function WeekCell({ c, capacity, partial }: { c: Cell; capacity: number; partial
 function Summary({ p }: { p: PersonRow }) {
   return (
     <div className="space-y-2 text-xs/[18px]">
-      {!p.overAssigned && !p.underAssigned && <Chip tone="ok">{t('workload.ind.ok')}</Chip>}
+      {/* The load is within range: said in words, not as a second indicator on the row (§41 R7, R8). */}
+      {!p.overAssigned && !p.underAssigned && <p className="text-muted-foreground"><span aria-hidden>● </span>{t('workload.ind.ok')}</p>}
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 tabular-nums">
         <dt className="text-muted-foreground">{t('workload.sum.open')}</dt><dd>{t('workload.sum.openValue', { n: p.openTasks, projects: p.projects })}</dd>
         <dt className="text-muted-foreground">{t('ind.overdue')}</dt><dd className={cn(p.overdue > 0 && 'font-semibold text-bad')}>{p.overdue}</dd>
@@ -277,7 +331,7 @@ function Summary({ p }: { p: PersonRow }) {
 
 function Legend() {
   return (
-    <ul aria-label={t('workload.legend')} className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs/[18px] text-muted-foreground">
+    <ul aria-label={t('workload.legend')} className="space-y-1.5 text-xs/[18px] text-muted-foreground">
       <li className="flex items-center gap-1.5"><span aria-hidden className="h-1.5 w-6 rounded-full bg-ok" />{t('workload.legend.committed')}</li>
       <li className="flex items-center gap-1.5"><span aria-hidden className="h-1.5 w-6 rounded-full border border-dotted border-work bg-work-bg" />{t('workload.legend.proposed')}</li>
       <li className="flex items-center gap-1.5"><span aria-hidden className="h-3 w-0.5 bg-foreground" />{t('workload.legend.available')}</li>
@@ -423,6 +477,22 @@ function CapacityDialog({ p, defaultCapacity, onClose }: { p: PersonRow; default
   )
 }
 
+/** Row density, the viewer's own display choice, kept one click away in the overflow menu (§41 R1). */
+function DensityMenu() {
+  const [density, setDensity] = useDensity()
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild><Button variant="outline" size="icon" aria-label={t('calm.moreActions')} title={t('calm.moreActions')}><Ellipsis className="size-4" aria-hidden /></Button></DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>{t('density.label')}</DropdownMenuLabel>
+        <DropdownMenuRadioGroup value={density} onValueChange={(v) => setDensity(v as Density)}>
+          {(['compact', 'comfortable'] as const).map((d) => <DropdownMenuRadioItem key={d} value={d}>{t(`density.${d}`)}</DropdownMenuRadioItem>)}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 /** The method in plain words (§12.15 step 4), so nobody over-reads the numbers. */
 function Method() {
   return (
@@ -431,6 +501,8 @@ function Method() {
       <PopoverContent className="w-[28rem] max-w-[calc(100vw-2rem)] space-y-2 text-sm" align="end">
         <p className="font-semibold">{t('workload.methodTitle')}</p>
         <ul className="list-disc space-y-1.5 pl-4">{[1, 2, 3, 4, 5, 6].map((n) => <li key={n}>{t(`workload.method${n}`)}</li>)}</ul>
+        <p className="pt-1 font-semibold">{t('workload.legend')}</p>
+        <Legend />
       </PopoverContent>
     </Popover>
   )

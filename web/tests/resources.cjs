@@ -53,6 +53,7 @@ let server, browser;
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }
     else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' }
     else if (p === `projects/${pid}/changes/options`) data = { actorId: sam, canWrite: true, manageDisciplineIds: [], people: [{ id: jill, displayName: 'Jill Partial' }], disciplines: [], sources: [], heads: [], deliverables: [], tasks: [] }
+    else if (p === `projects/${pid}/open-roles`) data = []
     else if (p === `projects/${pid}/allocations`) data = { items: [allocation(proposed, 'Proposed'), allocation(confirmed, 'Confirmed')], page: 1, pageSize: 50, totalCount: 2 }
     else if (p === `projects/${pid}/allocations/${proposed}/confirmation-preview`) [status, data] = [403, { code: 'forbidden', detail: 'You cannot open the workload view.' }]
     else if (p.startsWith(`projects/${pid}/allocations/`)) {
@@ -68,7 +69,9 @@ let server, browser;
   // Partial scope: a single notice, negative remaining keeps "−", positive remaining is not claimed, proposed stays apart.
   await page.goto(`${base}/workload`);
   const grid1 = page.getByRole('region', { name: 'Workload by person and week' }); await grid1.waitFor();
+  await page.getByRole('status').filter({ hasText: 'Partial view' }).getByRole('button', { name: 'About this page' }).click();
   await page.getByText('Totals include only the projects you can see.').waitFor();
+  await page.keyboard.press('Escape');
   const alexRow = await row('Alex Overloaded').innerText(), jillRow = await row('Jill Partial').innerText();
   assert.match(alexRow, /Remaining −12 h/, 'Negative remaining keeps a true minus sign');
   assert.match(alexRow, /\+20 h proposed · not counted/, 'Proposed requests are labelled and kept out of load');
@@ -78,16 +81,15 @@ let server, browser;
   const desktopViolations = await axe();
 
   // A re-sort keeps each person's accent (it is derived from the id, never the row index).
-  await page.getByRole('button', { name: /^Filters/ }).click();
-  await page.locator('#wl-sort').selectOption('name');
-  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /^Sort:/ }).click();
+  await page.getByRole('menuitemradio', { name: 'Name' }).click();
   await page.waitForFunction(() => document.querySelector('tbody th[scope=row]')?.textContent.includes('Jill Partial'));
   assert.equal(await row('Alex Overloaded').locator('[data-accent]').first().getAttribute('data-accent'), accent, 'Stable identity accent');
 
   // Complete scope shows remaining capacity; no partial notice.
   partial = false; await page.reload(); await grid1.waitFor();
   assert.match(await row('Jill Partial').innerText(), /Remaining 20 h/);
-  assert.equal(await page.getByText('Totals include only the projects you can see.').count(), 0);
+  assert.equal(await page.getByRole('status').filter({ hasText: 'Partial view' }).count(), 0);
 
   // Denied access explains itself and offers no export or saved views.
   forbidden = true; await page.reload();

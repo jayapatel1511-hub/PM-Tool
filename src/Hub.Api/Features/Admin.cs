@@ -156,14 +156,15 @@ public static class AdminEndpoints
             {
                 var sup = p.Id("supervisorId");
                 Check.That(sup != u.Id, "supervisorId", "admin.self_supervisor");
-                if (sup is { } s) Check.That(await db.Users.AnyAsync(x => x.Id == s && x.IsActive), "supervisorId", "error.not_found");
+                // An unchanged value is kept even when it is no longer active, so editing anything else still saves.
+                if (sup is { } s && s != u.SupervisorId) Check.That(await db.Users.AnyAsync(x => x.Id == s && x.IsActive), "supervisorId", "error.not_found");
                 u.SupervisorId = sup;
             }
             if (p.Has("officeId")) u.OfficeId = p.Id("officeId");
             if (p.Has("homeDisciplineId")) // FR-GRP-01 (D7): edited by an Admin, audited on the user record
             {
                 var discipline = p.Id("homeDisciplineId");
-                if (discipline is { } d) Check.That(await db.Disciplines.AnyAsync(x => x.Id == d && x.IsActive), "homeDisciplineId", "error.not_found");
+                if (discipline is { } d && d != u.HomeDisciplineId) Check.That(await db.Disciplines.AnyAsync(x => x.Id == d && x.IsActive), "homeDisciplineId", "error.not_found");
                 u.HomeDisciplineId = discipline;
             }
             if (p.Has("weeklyCapacityHours"))

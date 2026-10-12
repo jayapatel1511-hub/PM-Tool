@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { AccentDot, ActiveFilters, Empty, ErrorBanner, FilterBar, Loading, Notice, Page, Section, Segmented } from '@/components/hub/common'
+import { AccentDot, ActiveFilters, Empty, ErrorBanner, FilterBar, Loading, Notice, Page, Section } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key } from '@/components/hub/pills'
 import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
@@ -12,7 +12,7 @@ import { get, qs } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { accentOf, cn } from '@/lib/utils'
-import { HATCH, Legend, MoveDialog, ZOOM, tone, toneBg, type Move, type Zoom } from './projects/Timeline'
+import { DepArrow, HATCH, Legend, MoveDialog, PrintLegend, ZOOM, ZoomMenu, assumedWidth, depPath, depTitle, tone, toneBg, type Move, type Zoom } from './projects/Timeline'
 
 interface Dated { id: string; key: string; name: string; startDate?: string | null; dueDate?: string | null; originalStartDate?: string | null; originalDueDate?: string | null
   status: string; progressPct: number; rowVersion: number; createdOn: string; isOverdue: boolean; canEditDates: boolean }
@@ -20,10 +20,11 @@ interface GTask extends Dated { deliverableId?: string | null; assignee?: string
 interface GProject {
   project: { id: string; projectNumber: string; name: string; status: string; startDate?: string | null; targetCompletionDate?: string | null }
   data: { permissions: { needsReason: boolean }; tasks: GTask[]; deliverables: Dated[]
-    dependencies: { id: string; predecessorTaskId: string; successorTaskId: string; highlighted: boolean }[]
-    milestones: { id: string; key: string; name: string; date: string; isComplete: boolean; status: string }[] }
+    dependencies: { id: string; predecessorTaskId: string; successorTaskId: string; type: string; lagDays: number; highlighted: boolean }[]
+    milestones: { id: string; key: string; name: string; date: string | null; isComplete: boolean; status: string }[] }
 }
-interface Span { start: string; end: string; late: boolean; ghost: { start: string; end: string } | null }
+/** `assumed`: no start date, so the bar starts at the creation date (§40 AC-TL-01). */
+interface Span { start: string; end: string; late: boolean; assumed: boolean; ghost: { start: string; end: string } | null }
 type Row =
   | { kind: 'project'; id: string; g: GProject; count: number }
   | { kind: 'deliverable' | 'task'; id: string; g: GProject; item: Dated; span: Span; indent: boolean }
@@ -67,16 +68,17 @@ export function GanttPage() {
     const due = i.dueDate!
     const b = i.startDate ?? i.createdOn
     const ghost = i.originalDueDate && (i.originalDueDate !== i.dueDate || (i.originalStartDate ?? null) !== (i.startDate ?? null)) ? { start: i.originalStartDate ?? i.originalDueDate, end: i.originalDueDate } : null
-    return { start: b > due ? due : b, end: due, late: i.isOverdue && due < now, ghost }
+    return { start: b > due ? due : b, end: due, late: i.isOverdue && due < now, assumed: !i.startDate, ghost }
   }
   const rows: Row[] = []
-  const unscheduled: { type: 'Task' | 'Deliverable'; id: string; key: string; name: string; project: string; projectId: string }[] = []
+  const unscheduled: { type: 'Task' | 'Deliverable' | 'Milestone'; id: string; key: string; name: string; project: string; projectId: string }[] = []
   for (const g of q.data.projects) {
     const tasks = g.data.tasks.filter((tk) => !hide || tk.status !== 'Complete')
     const dels = g.data.deliverables.filter((d) => !hide || !CLOSED.includes(d.status))
     const where = { project: g.project.projectNumber, projectId: g.project.id }
     unscheduled.push(...dels.filter((d) => !d.dueDate).map((d) => ({ type: 'Deliverable' as const, id: d.id, key: d.key, name: d.name, ...where })),
-      ...tasks.filter((tk) => !tk.dueDate).map((tk) => ({ type: 'Task' as const, id: tk.id, key: tk.key, name: tk.name, ...where })))
+      ...tasks.filter((tk) => !tk.dueDate).map((tk) => ({ type: 'Task' as const, id: tk.id, key: tk.key, name: tk.name, ...where })),
+      ...g.data.milestones.filter((m) => !m.date && (!hide || !m.isComplete)).map((m) => ({ type: 'Milestone' as const, id: m.id, key: m.key, name: m.name, ...where }))) // AC-TL-03
     const datedDels = dels.filter((d) => d.dueDate).sort((a, b) => a.dueDate!.localeCompare(b.dueDate!))
     const datedTasks = tasks.filter((tk) => tk.dueDate).sort((a, b) => (a.startDate ?? a.dueDate!).localeCompare(b.startDate ?? b.dueDate!))
     rows.push({ kind: 'project', id: g.project.id, g, count: datedDels.length + datedTasks.length })
@@ -106,10 +108,8 @@ export function GanttPage() {
   const arrows = q.data.projects.flatMap((g) => g.data.dependencies.map((dep) => {
     const a = pos.get(dep.predecessorTaskId), b = pos.get(dep.successorTaskId), sa = spans.get(dep.predecessorTaskId), sb = spans.get(dep.successorTaskId)
     if (!a || !b || !sa || !sb) return null
-    const x1 = x(sa.end) + px, y1 = a.y + a.h / 2, x2 = x(sb.start), y2 = b.y + b.h / 2
-    const bend = Math.max(12, Math.abs(x2 - x1) / 3)
-    return <path key={dep.id} d={`M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2 - 2} ${y2}`} fill="none" strokeWidth={dep.highlighted ? 1.6 : 1}
-      stroke={dep.highlighted ? 'var(--bad)' : 'var(--muted-foreground)'} strokeOpacity={dep.highlighted ? 1 : 0.55} markerEnd={`url(#g-arrow-${dep.highlighted ? 'hot' : 'cold'})`} />
+    const d = depPath(dep.type, { s: x(sa.start), e: x(sa.end) + px, y: a.y + a.h / 2 }, { s: x(sb.start), e: x(sb.end) + px, y: b.y + b.h / 2 })
+    return <DepArrow key={dep.id} d={d} hot={dep.highlighted} title={depTitle(dep.type, dep.lagDays)} marker="g-arrow" />
   })).filter(Boolean)
 
   /** Pointer drag snapping to days; a click without movement opens the item. */
@@ -143,7 +143,7 @@ export function GanttPage() {
     const slip = span.ghost ? daysBetween(span.ghost.end, span.end) : 0
     // Overdue and moved dates are spoken as well as drawn (hatch, dashed baseline), never colour alone.
     const label = [t('timeline.barLabel', { key: item.key, name: item.name, from: fmtDate(span.start), to: fmtDate(span.end), status: tv(item.status), pct: item.progressPct }),
-      late > 0 && t('timeline.overdueBy', { n: late }), span.ghost && t('timeline.baseline', { from: fmtDate(span.ghost.start), to: fmtDate(span.ghost.end) })].filter(Boolean).join(' · ')
+      span.assumed && t('sig.startNotSet'), late > 0 && t('timeline.overdueBy', { n: late }), span.ghost && t('timeline.baseline', { from: fmtDate(span.ghost.start), to: fmtDate(span.ghost.end) })].filter(Boolean).join(' · ')
     const drop = (n: number) => setMove({ kind: r.kind, id: item.id, key: item.key, name: item.name, start: item.startDate, due: item.dueDate!, days: n, rowVersion: item.rowVersion,
       needsReason: r.kind === 'task' && (item as GTask).dueNeedsReason, projectComplete: r.g.data.permissions.needsReason })
     const props = dragProps(item.id, item.canEditDates, drop, () => openPanel(type, item.id))
@@ -156,7 +156,8 @@ export function GanttPage() {
         <button type="button" {...props} aria-label={label} title={label + (item.canEditDates ? ` · ${t('timeline.dragHint')}` : '')}
           className={cn('absolute flex items-center overflow-hidden rounded-md border text-left text-xs/4 text-foreground', span.late && 'rounded-r-none', dx && 'ring-2 ring-primary')}
           style={{ left: left + dx, width: w, top, height, borderColor: tone(item.status), background: toneBg(item.status), touchAction: item.canEditDates ? 'none' : undefined, cursor: item.canEditDates ? 'grab' : 'pointer' }}>
-          {w >= 40 && <span className="min-w-0 truncate px-1.5 font-medium tabular-nums">{item.progressPct}%</span>}
+          {span.assumed && <span aria-hidden className="absolute inset-y-0 left-0 bg-card/65" style={{ width: assumedWidth(span, now, px) }} />}
+          {w >= 40 && <span className="relative min-w-0 truncate px-1.5 font-medium tabular-nums">{item.progressPct}%</span>}
           <span data-meter-fill className="absolute bottom-0 left-0 h-[3px]" style={{ width: `${item.progressPct}%`, background: tone(item.status) }} />
         </button>
         {dx !== 0 && <span className="absolute z-30 rounded-md bg-primary px-1.5 text-xs/[18px] font-medium text-primary-foreground tabular-nums" style={{ left: right + dx + 4, top }}>{shift!.days > 0 ? '+' : ''}{shift!.days} d</span>}
@@ -176,8 +177,7 @@ export function GanttPage() {
       <WorkspaceTabs />
       <FilterBar className="no-print" active={<ActiveFilters tokens={hide ? [{ key: 'hideCompleted', label: t('timeline.hideCompleted'), value: t('common.yes') }] : []} onRemove={(k) => set(k, null)} onClear={() => set('hideCompleted', null)} />}
         quick={<div className="flex flex-wrap items-center gap-3">
-          <Segmented label={t('timeline.zoom')} value={zoom} onChange={(z) => set('zoom', z === 'month' ? null : z)}
-            options={(Object.keys(ZOOM) as Zoom[]).map((z) => ({ value: z, label: t(`timeline.zoom.${z}`) }))} />
+          <ZoomMenu value={zoom} onChange={(z) => set('zoom', z === 'month' ? null : z)} />
           <div className="flex items-center gap-2" role="group" aria-label={t('gantt.navigate')}>
             <Button variant="outline" size="icon" aria-label={t('common.previous')} onClick={() => move2(-Math.round(LEN[zoom] / 2))}><ChevronLeft className="size-5" /></Button>
             <Button variant="outline" onClick={() => set('start', null)}>{t('common.today')}</Button>
@@ -187,8 +187,8 @@ export function GanttPage() {
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={hide} onCheckedChange={(c) => set('hideCompleted', c ? 'true' : null)} />{t('timeline.hideCompleted')}</label>
           {expandable.length > 0 && <Button variant="ghost" onClick={() => setClosed(allOpen ? new Set(expandable) : new Set())}>
             {allOpen ? <ChevronsDownUp className="size-4" /> : <ChevronsUpDown className="size-4" />}{allOpen ? t('gantt.collapse') : t('gantt.expand')}</Button>}
-        </div>} />
-      <Legend />
+        </div>} actions={<Legend>{t('sig.ganttDrag')}</Legend>} />
+      <PrintLegend />
       {q.data.truncated && <Notice title={t('ws.truncatedTitle')}>{t('gantt.truncated', { n: q.data.max })}</Notice>}
       {rows.length === 0 ? <div className="rounded-lg border bg-card"><Empty>{t('gantt.empty')}</Empty></div> : (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- axe scrollable-region-focusable: keyboard users scroll the timeline
@@ -213,7 +213,7 @@ export function GanttPage() {
                   const p = r.g.project
                   const open = !closed.has(p.id)
                   const ps = p.startDate && p.targetCompletionDate ? { l: Math.max(x(p.startDate), 0), r: Math.min(x(p.targetCompletionDate) + px, width) } : null
-                  const ms = r.g.data.milestones.filter((m) => m.date >= start && m.date <= end).sort((a, b) => a.date.localeCompare(b.date))
+                  const ms = r.g.data.milestones.flatMap((m) => (m.date && m.date >= start && m.date <= end ? [{ ...m, date: m.date }] : [])).sort((a, b) => a.date.localeCompare(b.date))
                   return (
                     <div key={r.id} data-accent={accentOf(p.id)} className="flex border-b bg-muted" style={{ height: H.project }}>
                       <div className="sticky left-0 z-20 flex shrink-0 items-center gap-1 border-r bg-muted pl-1 pr-3" style={{ width: LABEL }}>

@@ -1,0 +1,152 @@
+
+> web@0.0.0 test:clutter
+> node tests/clutter.cjs
+
+
+Census as jordan at 1600x900
+┌─────────┬──────────────────────────────────┬────────────────┬──────────────┬─────────────┬────────────┬───────┬───────────┐
+│ (index) │ path                             │ chromeControls │ filterFields │ chromeWords │ firstDataY │ fills │ groupTabs │
+├─────────┼──────────────────────────────────┼────────────────┼──────────────┼─────────────┼────────────┼───────┼───────────┤
+│ 0       │ '/home'                          │ 24             │ 0            │ 83          │ 255        │ 3     │ null      │
+│ 1       │ '/my-work'                       │ 5              │ 0            │ 39          │ null       │ 0     │ null      │
+│ 2       │ '/boards'                        │ 18             │ 1            │ 30          │ null       │ 0     │ null      │
+│ 3       │ '/projects'                      │ 11             │ 1            │ 53          │ null       │ 0     │ null      │
+│ 4       │ '/tasks'                         │ 18             │ 1            │ 30          │ null       │ 0     │ null      │
+│ 5       │ '/calendar'                      │ 20             │ 0            │ 75          │ 319        │ 1     │ null      │
+│ 6       │ '/portfolio'                     │ 11             │ 1            │ 36          │ 405        │ 8     │ null      │
+│ 7       │ '/workload'                      │ 23             │ 0            │ 48          │ 377        │ 5     │ null      │
+│ 8       │ '/planner'                       │ 19             │ 2            │ 52          │ 448        │ 3     │ null      │
+│ 9       │ '/reports'                       │ 1              │ 0            │ 3           │ 231        │ 0     │ null      │
+│ 10      │ '/team'                          │ 11             │ 1            │ 22          │ null       │ 0     │ null      │
+│ 11      │ '/projects/SYN-101/dashboard'    │ 38             │ 1            │ 141         │ 270        │ 3     │ 6         │
+│ 12      │ '/projects/SYN-101/tasks'        │ 25             │ 1            │ 41          │ 396        │ 4     │ 6         │
+│ 13      │ '/projects/SYN-101/deliverables' │ 25             │ 1            │ 47          │ 391        │ 4     │ 6         │
+│ 14      │ '/projects/SYN-101/timeline'     │ 25             │ 0            │ 64          │ 348        │ 5     │ 6         │
+│ 15      │ '/projects/SYN-101/allocations'  │ 24             │ 1            │ 45          │ 395        │ 1     │ 6         │
+│ 16      │ '/projects/SYN-101/coordination' │ 42             │ 1            │ 224         │ 386        │ 2     │ 6         │
+└─────────┴──────────────────────────────────┴────────────────┴──────────────┴─────────────┴────────────┴───────┴───────────┘
+
+Census as lena at 1600x900
+┌─────────┬──────────────────────────────────┬────────────────┬──────────────┬─────────────┬────────────┬───────┬───────────┐
+│ (index) │ path                             │ chromeControls │ filterFields │ chromeWords │ firstDataY │ fills │ groupTabs │
+├─────────┼──────────────────────────────────┼────────────────┼──────────────┼─────────────┼────────────┼───────┼───────────┤
+│ 0       │ '/home'                          │ 24             │ 0            │ 83          │ 255        │ 3     │ null      │
+│ 1       │ '/my-work'                       │ 5              │ 0            │ 39          │ null       │ 0     │ null      │
+│ 2       │ '/boards'                        │ 18             │ 1            │ 30          │ null       │ 0     │ null      │
+│ 3       │ '/projects'                      │ 9              │ 1            │ 49          │ null       │ 0     │ null      │
+│ 4       │ '/tasks'                         │ 18             │ 1            │ 30          │ null       │ 0     │ null      │
+│ 5       │ '/calendar'                      │ 20             │ 0            │ 75          │ 319        │ 1     │ null      │
+│ 6       │ '/portfolio'                     │ 11             │ 1            │ 36          │ 405        │ 8     │ null      │
+│ 7       │ '/workload'                      │ 23             │ 0            │ 48          │ 377        │ 5     │ null      │
+│ 8       │ '/planner'                       │ 17             │ 1            │ 35          │ 308        │ 3     │ null      │
+│ 9       │ '/reports'                       │ 1              │ 0            │ 3           │ 231        │ 0     │ null      │
+│ 10      │ '/team'                          │ 11             │ 1            │ 22          │ null       │ 0     │ null      │
+│ 11      │ '/projects/SYN-101/dashboard'    │ 36             │ 1            │ 143         │ 270        │ 3     │ 6         │
+│ 12      │ '/projects/SYN-101/tasks'        │ 23             │ 1            │ 38          │ 396        │ 4     │ 6         │
+│ 13      │ '/projects/SYN-101/deliverables' │ 23             │ 1            │ 44          │ 391        │ 4     │ 6         │
+│ 14      │ '/projects/SYN-101/timeline'     │ 24             │ 0            │ 63          │ 348        │ 5     │ 6         │
+│ 15      │ '/projects/SYN-101/allocations'  │ 24             │ 1            │ 48          │ 395        │ 1     │ 6         │
+│ 16      │ '/projects/SYN-101/coordination' │ 40             │ 1            │ 220         │ 386        │ 2     │ 6         │
+└─────────┴──────────────────────────────────┴────────────────┴──────────────┴─────────────┴────────────┴───────┴───────────┘
+
+Census as alex at 1600x900
+┌─────────┬──────────────────────────────────┬────────────────┬──────────────┬─────────────┬────────────┬───────┬───────────┐
+│ (index) │ path                             │ chromeControls │ filterFields │ chromeWords │ firstDataY │ fills │ groupTabs │
+├─────────┼──────────────────────────────────┼────────────────┼──────────────┼─────────────┼────────────┼───────┼───────────┤
+│ 0       │ '/home'                          │ 37             │ 0            │ 104         │ 255        │ 6     │ null      │
+│ 1       │ '/my-work'                       │ 20             │ 7            │ 233         │ 348        │ 1     │ null      │
+│ 2       │ '/boards'                        │ 37             │ 1            │ 236         │ 317        │ 4     │ null      │
+│ 3       │ '/projects'                      │ 8              │ 1            │ 27          │ 294        │ 7     │ null      │
+│ 4       │ '/tasks'                         │ 18             │ 1            │ 24          │ 363        │ 4     │ null      │
+│ 5       │ '/calendar'                      │ 27             │ 0            │ 149         │ 319        │ 1     │ null      │
+│ 6       │ '/portfolio'                     │ 6              │ 1            │ 25          │ null       │ 0     │ null      │
+│ 7       │ '/workload'                      │ 11             │ 0            │ 59          │ null       │ 0     │ null      │
+│ 8       │ '/planner'                       │ 2              │ 0            │ 24          │ null       │ 0     │ null      │
+│ 9       │ '/reports'                       │ 1              │ 0            │ 3           │ 231        │ 0     │ null      │
+│ 10      │ '/team'                          │ 10             │ 1            │ 15          │ 363        │ 3     │ null      │
+│ 11      │ '/projects/SYN-101/dashboard'    │ 37             │ 1            │ 147         │ 270        │ 3     │ 6         │
+│ 12      │ '/projects/SYN-101/tasks'        │ 24             │ 1            │ 42          │ 396        │ 4     │ 6         │
+│ 13      │ '/projects/SYN-101/deliverables' │ 23             │ 1            │ 46          │ 391        │ 4     │ 6         │
+│ 14      │ '/projects/SYN-101/timeline'     │ 24             │ 0            │ 65          │ 348        │ 5     │ 6         │
+│ 15      │ '/projects/SYN-101/allocations'  │ 23             │ 1            │ 68          │ null       │ 1     │ 6         │
+│ 16      │ '/projects/SYN-101/coordination' │ 41             │ 1            │ 230         │ 386        │ 2     │ 6         │
+└─────────┴──────────────────────────────────┴────────────────┴──────────────┴─────────────┴────────────┴───────┴───────────┘
+
+Census as rita at 1600x900
+┌─────────┬──────────────────────────────────┬────────────────┬──────────────┬─────────────┬────────────┬───────┬───────────┐
+│ (index) │ path                             │ chromeControls │ filterFields │ chromeWords │ firstDataY │ fills │ groupTabs │
+├─────────┼──────────────────────────────────┼────────────────┼──────────────┼─────────────┼────────────┼───────┼───────────┤
+│ 0       │ '/home'                          │ 23             │ 0            │ 82          │ 255        │ 3     │ null      │
+│ 1       │ '/my-work'                       │ 5              │ 0            │ 39          │ null       │ 0     │ null      │
+│ 2       │ '/boards'                        │ 17             │ 1            │ 29          │ null       │ 0     │ null      │
+│ 3       │ '/projects'                      │ 9              │ 1            │ 49          │ null       │ 0     │ null      │
+│ 4       │ '/tasks'                         │ 17             │ 1            │ 29          │ null       │ 0     │ null      │
+│ 5       │ '/calendar'                      │ 19             │ 0            │ 74          │ 319        │ 1     │ null      │
+│ 6       │ '/portfolio'                     │ 6              │ 1            │ 25          │ null       │ 0     │ null      │
+│ 7       │ '/workload'                      │ 11             │ 0            │ 59          │ null       │ 0     │ null      │
+│ 8       │ '/planner'                       │ 2              │ 0            │ 24          │ null       │ 0     │ null      │
+│ 9       │ '/reports'                       │ 1              │ 0            │ 3           │ 231        │ 0     │ null      │
+│ 10      │ '/team'                          │ 10             │ 1            │ 21          │ null       │ 0     │ null      │
+│ 11      │ '/projects/SYN-101/dashboard'    │ 36             │ 1            │ 143         │ 270        │ 3     │ 6         │
+│ 12      │ '/projects/SYN-101/tasks'        │ 23             │ 1            │ 38          │ 396        │ 4     │ 6         │
+│ 13      │ '/projects/SYN-101/deliverables' │ 23             │ 1            │ 44          │ 391        │ 4     │ 6         │
+│ 14      │ '/projects/SYN-101/timeline'     │ 24             │ 0            │ 63          │ 348        │ 5     │ 6         │
+│ 15      │ '/projects/SYN-101/allocations'  │ 23             │ 1            │ 66          │ null       │ 1     │ 6         │
+│ 16      │ '/projects/SYN-101/coordination' │ 40             │ 1            │ 220         │ 386        │ 2     │ 6         │
+└─────────┴──────────────────────────────────┴────────────────┴──────────────┴─────────────┴────────────┴───────┴───────────┘
+
+Sidebar items on /my-work
+┌─────────┬──────────┬──────────────┐
+│ (index) │ who      │ sidebarItems │
+├─────────┼──────────┼──────────────┤
+│ 0       │ 'jordan' │ 7            │
+│ 1       │ 'lena'   │ 7            │
+│ 2       │ 'sam'    │ 7            │
+│ 3       │ 'priya'  │ 7            │
+│ 4       │ 'alex'   │ 6            │
+│ 5       │ 'rita'   │ 6            │
+└─────────┴──────────┴──────────────┘
+
+No data rows to measure (empty state, AC-CALM-01 unmeasured): jordan /my-work, jordan /boards, jordan /projects, jordan /tasks, jordan /team, lena /my-work, lena /boards, lena /projects, lena /tasks, lena /team, alex /portfolio, alex /workload, alex /planner, alex /projects/SYN-101/allocations, rita /my-work, rita /boards, rita /projects, rita /tasks, rita /portfolio, rita /workload, rita /planner, rita /team, rita /projects/SYN-101/allocations
+
+FAIL: 40 threshold(s) exceeded
+AC-CALM-05 jordan /home words: 83 (limit 57)
+AC-CALM-05 jordan /projects words: 53 (limit 40)
+AC-CALM-05 jordan /portfolio fills: 8 (limit 6)
+AC-CALM-01 jordan /planner: 448 (limit 405)
+AC-CALM-02 jordan /planner: 2 (limit 1)
+AC-CALM-05 jordan /planner words: 52 (limit 40)
+AC-CALM-03 jordan /projects/SYN-101/dashboard: 38 (limit 25)
+AC-CALM-05 jordan /projects/SYN-101/dashboard words: 141 (limit 84)
+AC-CALM-03 jordan /projects/SYN-101/coordination: 42 (limit 25)
+AC-CALM-05 jordan /projects/SYN-101/coordination words: 224 (limit 116)
+AC-CALM-05 lena /home words: 83 (limit 57)
+AC-CALM-05 lena /projects words: 49 (limit 40)
+AC-CALM-05 lena /portfolio fills: 8 (limit 6)
+AC-CALM-03 lena /projects/SYN-101/dashboard: 36 (limit 25)
+AC-CALM-05 lena /projects/SYN-101/dashboard words: 143 (limit 84)
+AC-CALM-03 lena /projects/SYN-101/coordination: 40 (limit 25)
+AC-CALM-05 lena /projects/SYN-101/coordination words: 220 (limit 116)
+AC-CALM-03 alex /home: 37 (limit 25)
+AC-CALM-05 alex /home words: 104 (limit 57)
+AC-CALM-02 alex /my-work: 7 (limit 1)
+AC-CALM-05 alex /my-work words: 233 (limit 40)
+AC-CALM-03 alex /boards: 37 (limit 25)
+AC-CALM-05 alex /boards words: 236 (limit 70)
+AC-CALM-05 alex /projects fills: 7 (limit 6)
+AC-CALM-03 alex /calendar: 27 (limit 25)
+AC-CALM-05 alex /calendar words: 149 (limit 75)
+AC-CALM-05 alex /workload words: 59 (limit 56)
+AC-CALM-03 alex /projects/SYN-101/dashboard: 37 (limit 25)
+AC-CALM-05 alex /projects/SYN-101/dashboard words: 147 (limit 84)
+AC-CALM-05 alex /projects/SYN-101/allocations words: 68 (limit 49)
+AC-CALM-03 alex /projects/SYN-101/coordination: 41 (limit 25)
+AC-CALM-05 alex /projects/SYN-101/coordination words: 230 (limit 116)
+AC-CALM-05 rita /home words: 82 (limit 57)
+AC-CALM-05 rita /projects words: 49 (limit 40)
+AC-CALM-05 rita /workload words: 59 (limit 56)
+AC-CALM-03 rita /projects/SYN-101/dashboard: 36 (limit 25)
+AC-CALM-05 rita /projects/SYN-101/dashboard words: 143 (limit 84)
+AC-CALM-05 rita /projects/SYN-101/allocations words: 66 (limit 49)
+AC-CALM-03 rita /projects/SYN-101/coordination: 40 (limit 25)
+AC-CALM-05 rita /projects/SYN-101/coordination words: 220 (limit 116)

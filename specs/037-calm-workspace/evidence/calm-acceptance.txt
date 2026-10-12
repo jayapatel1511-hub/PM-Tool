@@ -1,0 +1,346 @@
+
+AC-CALM-06 crawl
+✓ priya / → /my-work sidebar /my-work group -
+✓ priya /my-work → /my-work sidebar /my-work group -
+✓ priya /home → /home sidebar /home group -
+✓ priya /boards → /boards sidebar /tasks group -
+✓ priya /tasks → /tasks sidebar /tasks group -
+✓ priya /timeline → /timeline sidebar /tasks group -
+✓ priya /files → /files sidebar /files group -
+✓ priya /team → /team sidebar /team group -
+✓ priya /projects → /projects sidebar /projects group -
+✓ priya /tasks/01a10454-7a0a-709a-8124-f55927334353 → /tasks/01a10454-7a0a-709a-8124-f55927334353 sidebar /tasks group -
+✓ priya /notifications → /notifications sidebar - group -
+✓ priya /search → /search sidebar - group -
+✓ priya /reports → /reports sidebar /reports group -
+✓ priya /reports/tasks-due-this-week → /reports/tasks-due-this-week sidebar /reports group -
+✓ jordan /staff → /staff sidebar /staff group -
+✓ priya /portfolio → /portfolio sidebar /projects group -
+✓ priya /workload → /workload sidebar /planner group -
+✓ priya /planner → /planner sidebar /planner group -
+✓ priya /vacation → /vacation sidebar - group -
+✓ priya /calendar → /calendar sidebar /tasks group -
+✓ priya /time → /time sidebar /time group -
+✓ sam /people/01a10450-4bf3-774f-b3bd-cd6861d66ea7/reassign-work → /people/01a10450-4bf3-774f-b3bd-cd6861d66ea7/reassign-work sidebar - group -
+✓ priya /preferences → /preferences sidebar - group -
+✓ jordan /templates → /templates sidebar /templates group -
+✓ jordan /templates/01a10450-4c51-7309-92c3-ac43fa412efc → /templates/01a10450-4c51-7309-92c3-ac43fa412efc sidebar /templates group -
+✓ jordan /admin → /admin/reference/disciplines sidebar /admin group -
+✓ jordan /admin/reference/disciplines → /admin/reference/disciplines sidebar /admin group -
+✓ jordan /admin/settings → /admin/settings sidebar /admin group -
+✓ jordan /admin/users → /admin/users sidebar /admin group -
+✓ jordan /admin/activity → /admin/activity sidebar /admin group -
+✓ jordan /admin/operations → /admin/operations sidebar /admin group -
+✓ jordan /admin/holidays → /admin/holidays sidebar /admin group -
+✓ priya /no-such-page → /no-such-page sidebar - group -
+✓ priya /projects/SYN-101 → /projects/SYN-101/dashboard sidebar /projects group Overview
+✓ priya /projects/SYN-101/dashboard → /projects/SYN-101/dashboard sidebar /projects group Overview
+✓ priya /projects/SYN-101/coordination → /projects/SYN-101/coordination sidebar /projects group Coordination
+✓ priya /projects/SYN-101/readiness → /projects/SYN-101/readiness sidebar /projects group Deliverables
+✓ priya /projects/SYN-101/handoffs → /projects/SYN-101/handoffs sidebar /projects group Coordination
+✓ priya /projects/SYN-101/reviews → /projects/SYN-101/reviews sidebar /projects group Deliverables
+✓ priya /projects/SYN-101/changes → /projects/SYN-101/changes sidebar /projects group Coordination
+✓ priya /projects/SYN-101/submissions → /projects/SYN-101/submissions sidebar /projects group Deliverables
+✓ priya /projects/SYN-101/allocations → /projects/SYN-101/allocations sidebar /projects group People
+✓ priya /projects/SYN-101/design-basis → /projects/SYN-101/design-basis sidebar /projects group Coordination
+✓ priya /projects/SYN-101/tasks → /projects/SYN-101/tasks sidebar /projects group Work
+✓ priya /projects/SYN-101/board → /projects/SYN-101/board sidebar /projects group Work
+✓ priya /projects/SYN-101/milestones → /projects/SYN-101/milestones sidebar /projects group Work
+✓ priya /projects/SYN-101/timeline → /projects/SYN-101/timeline sidebar /projects group Work
+✓ priya /projects/SYN-101/deliverables → /projects/SYN-101/deliverables sidebar /projects group Deliverables
+✓ priya /projects/SYN-101/decisions → /projects/SYN-101/decisions sidebar /projects group Coordination
+✓ priya /projects/SYN-101/risks → /projects/SYN-101/risks sidebar /projects group Coordination
+✓ priya /projects/SYN-101/issues → /projects/SYN-101/issues sidebar /projects group Coordination
+✓ priya /projects/SYN-101/meetings → /projects/SYN-101/meetings sidebar /projects group Coordination
+✓ priya /projects/SYN-101/files → /projects/SYN-101/files sidebar /projects group Files
+✓ priya /projects/SYN-101/vacation → /projects/SYN-101/vacation sidebar /projects group More
+✓ priya /projects/SYN-101/calendar → /projects/SYN-101/calendar sidebar /projects group Work
+✓ priya /projects/SYN-101/team → /projects/SYN-101/team sidebar /projects group People
+✓ priya /projects/SYN-101/activity → /projects/SYN-101/activity sidebar /projects group Activity
+✓ priya /projects/SYN-101/settings → /projects/SYN-101/settings sidebar /projects group Settings
+
+AC-CALM-06 reach (clicks from the page)
+✓ priya /projects/SYN-101/dashboard former project tabs: /projects/SYN-101/dashboard=1, /projects/SYN-101/coordination=1, /projects/SYN-101/readiness=2, /projects/SYN-101/handoffs=2, /projects/SYN-101/reviews=2, /projects/SYN-101/changes=2, /projects/SYN-101/submissions=2, /projects/SYN-101/allocations=2, /projects/SYN-101/design-basis=2, /projects/SYN-101/tasks=1, /projects/SYN-101/board=2, /projects/SYN-101/deliverables=1, /projects/SYN-101/milestones=2, /projects/SYN-101/timeline=2, /projects/SYN-101/decisions=2, /projects/SYN-101/risks=2, /projects/SYN-101/issues=2, /projects/SYN-101/meetings=2, /projects/SYN-101/files=1, /projects/SYN-101/calendar=2, /projects/SYN-101/team=1, /projects/SYN-101/activity=1, /projects/SYN-101/settings=2, /workload?projectId=01a10454-76c6-7d32-ae72-72e709e168be=2
+✓ priya /my-work former sidebar items (Priya): /home=2, /my-work=1, /boards=2, /projects=1, /tasks=1, /calendar=2, /files=2, /time=1, /reports=1, /team=2, /portfolio=2, /workload=2, /planner=1, /notifications=2
+✓ jordan /my-work former sidebar items (Jordan): /home=2, /my-work=1, /boards=2, /projects=1, /tasks=1, /calendar=2, /files=2, /time=1, /reports=1, /team=2, /portfolio=2, /workload=2, /planner=1, /staff=2, /notifications=2, /templates=2, /admin=2
+✓ priya /my-work My Work views and quick filter: Overview=2, Today=2, Upcoming=2, Overdue=2, Completed=2, Inbox=2, Coordination=2, Hide waiting=1
+✓ priya /my-work?tab=overview My Work sections (from Overview): My Week=2, Needs my attention=2, My tasks=2, My reviews=2, My deliverables=2, Waiting on others=2, Blocking others=2, My decisions=2, Meeting actions=2, My projects=2, Upcoming milestones (30 days)=2, Recently completed by me (14 days)=2
+✓ priya /tasks quick filters: Open only=2, Mine=1, Overdue=1, Blocked=1, Blocking others=2, Due this week=2, Unassigned=2, Ready for review=2
+✓ priya /boards quick filters: Open only=2, Mine=1, Overdue=1, Blocked=1, Blocking others=2, Due this week=2, Unassigned=2, Ready for review=2
+✓ priya /projects/SYN-101/tasks quick filters: Mine=2, Overdue=2, Blocked=2, Blocking others=2, Due this week=2, Unassigned=2, Ready for review=2
+✓ priya /projects/SYN-101/board quick filters: Mine=1, Overdue=1, Blocked=1, Blocking others=2, Due this week=2, Unassigned=2, Ready for review=2
+✓ priya /notifications quick filters: Unread only=1
+✓ priya /notifications?tab=following quick filters: Important only=1
+✓ priya /planner quick filters: Over-planned=1, Under-planned=1, Stale plan=1, Stale entries only=2, Show my private drafts=2
+✓ priya /workload quick filters: Over-assigned=1, Under-assigned=1, Deadline cluster=1, Has unestimated work=2
+✓ priya /workload?indicator=over Any indicator (clears the indicator): Over-assigned=1, Remove filter: Indicator=1
+✓ priya /projects/SYN-101/changes quick filters: Assigned to me=1
+✓ priya /projects/SYN-101/reviews quick filters: Assigned to me=1
+✓ priya /projects/SYN-101/decisions quick filters: Blocking work=1
+✓ priya /projects/SYN-101/design-basis quick filters: Overdue confirmation only=1
+✓ priya /projects/SYN-101/handoffs quick filters: Overdue only=1
+✓ priya /projects/SYN-101/meetings quick filters: Overdue=1
+✓ priya /projects/SYN-101/risks quick filters: Review overdue=1
+✓ priya /projects/SYN-101/issues quick filters: Overdue=1
+✓ priya /calendar quick filters (calendar types): Project deadlines=2, Meetings=2, Site work=2, Internal tasks=2
+
+AC-CALM-06 quick-filter URLs against the base UI
+✓ /tasks?open=true: {"rows":28,"keys":28} → {"rows":28,"keys":28}; filter requests same ["tasks?projects=mine&open=true&page=1&pageSize=100"]
+✓ /boards?open=true: {"keys":27} → {"keys":27}; filter requests same ["tasks?projects=mine&open=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /tasks?mine=true: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["projects?mine=true&includeArchived=true&pageSize=200","tasks?projects=mine&mine=true&page=1&pageSize=100"]
+✓ /boards?mine=true: {"keys":0} → {"keys":0}; filter requests same ["projects?mine=true&includeArchived=true&pageSize=200","tasks?projects=mine&mine=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /tasks?overdue=true: {"rows":4,"keys":4} → {"rows":4,"keys":4}; filter requests same ["tasks?projects=mine&overdue=true&page=1&pageSize=100"]
+✓ /boards?overdue=true: {"keys":4} → {"keys":4}; filter requests same ["tasks?projects=mine&overdue=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /tasks?blocked=true: {"rows":2,"keys":2} → {"rows":2,"keys":2}; filter requests same ["tasks?projects=mine&blocked=true&page=1&pageSize=100"]
+✓ /boards?blocked=true: {"keys":2} → {"keys":2}; filter requests same ["tasks?projects=mine&blocked=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /tasks?blocking=true: {"rows":1,"keys":1} → {"rows":1,"keys":1}; filter requests same ["tasks?projects=mine&blocking=true&page=1&pageSize=100"]
+✓ /boards?blocking=true: {"keys":1} → {"keys":1}; filter requests same ["tasks?projects=mine&blocking=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /tasks?dueThisWeek=true: {"rows":5,"keys":5} → {"rows":5,"keys":5}; filter requests same ["tasks?projects=mine&dueThisWeek=true&page=1&pageSize=100"]
+✓ /boards?dueThisWeek=true: {"keys":5} → {"keys":5}; filter requests same ["tasks?projects=mine&dueThisWeek=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /tasks?unassigned=true: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["tasks?projects=mine&unassigned=true&page=1&pageSize=100"]
+✓ /boards?unassigned=true: {"keys":0} → {"keys":0}; filter requests same ["tasks?projects=mine&unassigned=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /tasks?readyForReview=true: {"rows":1,"keys":1} → {"rows":1,"keys":1}; filter requests same ["tasks?projects=mine&readyForReview=true&page=1&pageSize=100"]
+✓ /boards?readyForReview=true: {"keys":1} → {"keys":1}; filter requests same ["tasks?projects=mine&readyForReview=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /projects/SYN-101/tasks?mine=true: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?mine=true&pageSize=200&page=1"]
+✓ /projects/SYN-101/board?mine=true: {"keys":0} → {"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?mine=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /projects/SYN-101/tasks?overdue=true: {"rows":4,"keys":4} → {"rows":4,"keys":4}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?overdue=true&pageSize=200&page=1"]
+✓ /projects/SYN-101/board?overdue=true: {"keys":4} → {"keys":4}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?overdue=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /projects/SYN-101/tasks?blocked=true: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?blocked=true&pageSize=200&page=1"]
+✓ /projects/SYN-101/board?blocked=true: {"keys":0} → {"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?blocked=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /projects/SYN-101/tasks?blocking=true: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?blocking=true&pageSize=200&page=1"]
+✓ /projects/SYN-101/board?blocking=true: {"keys":0} → {"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?blocking=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /projects/SYN-101/tasks?dueThisWeek=true: {"rows":3,"keys":3} → {"rows":3,"keys":3}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?dueThisWeek=true&pageSize=200&page=1"]
+✓ /projects/SYN-101/board?dueThisWeek=true: {"keys":3} → {"keys":3}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?dueThisWeek=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /projects/SYN-101/tasks?unassigned=true: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?unassigned=true&pageSize=200&page=1"]
+✓ /projects/SYN-101/board?unassigned=true: {"keys":0} → {"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?unassigned=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /projects/SYN-101/tasks?readyForReview=true: {"rows":1,"keys":1} → {"rows":1,"keys":1}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?readyForReview=true&pageSize=200&page=1"]
+✓ /projects/SYN-101/board?readyForReview=true: {"keys":1} → {"keys":1}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?readyForReview=true&sort=dueDate&doneSince=2026-09-28&page=1&pageSize=200"]
+✓ /my-work?tab=overview&hideWaiting=1: {"items":24,"keys":8} → {"items":24,"keys":8}; filter requests same []
+~ /my-work?hideWaiting=1: {"items":24,"keys":8} → {"items":17,"keys":8}; filter requests [] → [] (E3: My Work opens on Today; the old default view is ?tab=overview (M1))
+✓ /notifications?unread=true: {"rows":0,"keys":5} → {"rows":0,"keys":5}; filter requests same ["me/notifications?unread=true&page=1&pageSize=50"]
+✓ /notifications?tab=following&important=true: {"rows":0,"keys":11} → {"rows":0,"keys":11}; filter requests same []
+✓ /planner?indicator=OverPlanned: {"rows":7,"keys":0} → {"rows":7,"keys":0}; filter requests same ["planning/grid?indicator=OverPlanned"]
+✓ /planner?indicator=UnderPlanned: {"rows":18,"keys":0} → {"rows":18,"keys":0}; filter requests same ["planning/grid?indicator=UnderPlanned"]
+✓ /planner?indicator=StalePlan: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["planning/grid?indicator=StalePlan"]
+✓ /planner?stale=true: {"rows":18,"keys":0} → {"rows":18,"keys":0}; filter requests same ["planning/grid?stale=true"]
+✓ /planner?includeMyDrafts=false: {"rows":18,"keys":0} → {"rows":18,"keys":0}; filter requests same ["planning/grid?includeMyDrafts=false"]
+✓ /workload?indicator=over: {"rows":2,"keys":0} → {"rows":2,"keys":0}; filter requests same ["workload?indicator=over"]
+✓ /workload?indicator=under: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["workload?indicator=under"]
+✓ /workload?indicator=cluster: {"rows":2,"keys":0} → {"rows":2,"keys":0}; filter requests same ["workload?indicator=cluster"]
+✓ /workload?indicator=unestimated: {"rows":1,"keys":0} → {"rows":1,"keys":0}; filter requests same ["workload?indicator=unestimated"]
+✓ /projects/SYN-101/changes?mine=true: {"rows":0,"keys":1} → {"rows":0,"keys":1}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/changes?mine=true&page=1"]
+✓ /projects/SYN-101/reviews?mine=true: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/reviews?mine=true&page=1"]
+✓ /projects/SYN-101/decisions?blocking=true: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/decisions?blocking=true"]
+✓ /projects/SYN-101/design-basis?overdue=true: {"rows":1,"keys":0} → {"rows":1,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/design-basis?page=1&overdue=true"]
+✓ /projects/SYN-101/handoffs?overdue=true: {"rows":1,"keys":0} → {"rows":1,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/handoffs?overdue=true&page=1"]
+✓ /projects/SYN-101/meetings?indicator=overdue: {"rows":0,"keys":0} → {"rows":0,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/actions?indicator=overdue"]
+✓ /projects/SYN-101/risks?indicator=reviewOverdue: {"rows":2,"keys":0} → {"rows":2,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/risks?indicator=reviewOverdue"]
+✓ /projects/SYN-101/issues?indicator=overdue: {"rows":3,"keys":0} → {"rows":3,"keys":0}; filter requests same ["projects/01a10454-76c6-7d32-ae72-72e709e168be/issues?indicator=overdue"]
+✓ /calendar?hide=Meeting: {"entries":7} → {"entries":7}; filter requests same []
+✓ /calendar?hide=Deadline: {"entries":0} → {"entries":0}; filter requests same []
+
+AC-CALM-07 filter behaviour
+✓ /projects/SYN-101/tasks: ✓ "Discipline" sets the same URL parameter as the base; ✓ a removable chip shows the filter; ✓ the Filters button counts it; ✓ chip "Overdue" sets the same URL parameter as the base; ✓ the count includes the chip; ✓ reload keeps the URL; ✓ reload keeps the chips and the count; ✓ reload keeps the field value; ✓ a chip removes its filter; ✓ Clear resets every filter
+✓ /projects/SYN-101/deliverables: ✓ "Discipline" sets the same URL parameter as the base; ✓ a removable chip shows the filter; ✓ the Filters button counts it; ✓ reload keeps the URL; ✓ reload keeps the chips and the count; ✓ reload keeps the field value; ✓ a chip removes its filter; ✓ Clear resets every filter
+✓ /planner: ✓ "Discipline" sets the same URL parameter as the base; ✓ a removable chip shows the filter; ✓ the Filters button counts it; ✓ chip "Over-planned" sets the same URL parameter as the base; ✓ the count includes the chip; ✓ reload keeps the URL; ✓ reload keeps the chips and the count; ✓ reload keeps the field value; ✓ a chip removes its filter; ✓ Clear resets every filter
+✓ /my-work: ✓ "Status" sets the same URL parameter as the base; ✓ a removable chip shows the filter; ✓ the Filters button counts it; ✓ chip "Hide waiting" sets the same URL parameter as the base; ✓ the count includes the chip; ✓ reload keeps the URL; ✓ reload keeps the chips and the count; ✓ reload keeps the field value; ✓ a chip removes its filter; ✓ Clear resets every filter
+✓ /tasks: ✓ "Project" sets the same URL parameter as the base; ✓ a removable chip shows the filter; ✓ the Filters button counts it; ✓ chip "Blocked" sets the same URL parameter as the base; ✓ the count includes the chip; ✓ reload keeps the URL; ✓ reload keeps the chips and the count; ✓ reload keeps the field value; ✓ a chip removes its filter; ✓ Clear resets every filter
+
+AC-CALM-08 keyboard
+/home: Filters -; menus All views ✓
+/my-work: Filters ✓; menus Views ✓, My Work views: Today ✓
+/boards: Filters ✓; menus Views ✓, All views ✓
+/projects: Filters ✓; menus Views ✓, Export ✓, Group by: Status ✓, Columns ✓
+/tasks: Filters ✓; menus Views ✓, All views ✓
+/calendar: Filters ✓; menus All views ✓
+/portfolio: Filters ✓; menus Views ✓, Export ✓
+/workload: Filters ✓; menus Views ✓, Export ✓, More actions ✓, All views ✓, Group by: Reports to ✓, Sort: Load ✓
+/planner: Filters ✓; menus More actions ✓, Views ✓, Export ✓, Group by: Reports to ✓, Sort: Remaining capacity ✓
+/reports: Filters -; menus -
+/team: Filters -; menus All views ✓
+/projects/SYN-101/dashboard: Filters -; menus Following: All activity ✓, More ✓
+/projects/SYN-101/tasks: Filters ✓; menus Following: All activity ✓, More ✓, Views ✓, Group by: Deliverable ✓, More actions ✓
+/projects/SYN-101/deliverables: Filters ✓; menus Following: All activity ✓, More ✓, Columns ✓, Views ✓, Export ✓, Group by: Discipline ✓
+/projects/SYN-101/timeline: Filters ✓; menus Following: All activity ✓, More ✓, Zoom: Month ✓
+/projects/SYN-101/allocations: Filters ✓; menus Following: All activity ✓, More ✓, Views ✓, Export ✓
+/projects/SYN-101/coordination: Filters ✓; menus Following: All activity ✓, More ✓, Views ✓, More actions ✓, Change status of SYN-101-T0001, now Not  ✓, Change status of SYN-101-T0005, now Not  ✓, Change status of SYN-101-T0002, now Not  ✓, Change status of SYN-101-T0010, now Not  ✓, Change status of SYN-101-T0004, now Not  ✓, Change status of SYN-101-T0006, now Not  ✓, Change status of SYN-101-T0008, now Not  ✓, Change status of SYN-101-T0001, now Not  ✓, Change status of SYN-101-T0005, now Not  ✓, Change status of SYN-101-T0002, now Not  ✓, Change status of SYN-101-T0010, now Not  ✓, Change status of SYN-101-T0008, now Not  ✓, Change status of SYN-101-T0009, now Not  ✓
+sidebar More: {"expands":true,"tabIntoItems":true}
+
+AC-CALM-08 axe (wcag2a, wcag2aa, wcag21a, wcag21aa)
+✓ priya /home (closed): no violations
+~ priya /home (menu open): aria-hidden-focus(serious)x1
+✓ priya /my-work (closed): no violations
+✓ priya /my-work (filters open): no violations
+~ priya /my-work (menu open): aria-hidden-focus(serious)x1
+✓ priya /boards (closed): no violations
+✓ priya /boards (filters open): no violations
+~ priya /boards (menu open): aria-hidden-focus(serious)x7
+✓ priya /projects (closed): no violations
+✓ priya /projects (filters open): no violations
+~ priya /projects (menu open): aria-hidden-focus(serious)x1
+✓ priya /tasks (closed): no violations
+✓ priya /tasks (filters open): no violations
+~ priya /tasks (menu open): aria-hidden-focus(serious)x1
+✓ priya /calendar (closed): no violations
+✓ priya /calendar (filters open): no violations
+~ priya /calendar (menu open): aria-hidden-focus(serious)x9
+✓ priya /portfolio (closed): no violations
+✓ priya /portfolio (filters open): no violations
+~ priya /portfolio (menu open): aria-hidden-focus(serious)x1
+✓ priya /workload (closed): no violations
+✓ priya /workload (filters open): no violations
+~ priya /workload (menu open): aria-hidden-focus(serious)x14
+✓ priya /planner (closed): no violations
+✓ priya /planner (filters open): no violations
+~ priya /planner (menu open): aria-hidden-focus(serious)x6
+✓ priya /reports (closed): no violations
+✓ priya /team (closed): no violations
+~ priya /team (menu open): aria-hidden-focus(serious)x1
+✓ priya /projects/SYN-101/dashboard (closed): no violations
+~ priya /projects/SYN-101/dashboard (menu open): aria-hidden-focus(serious)x1
+✓ priya /projects/SYN-101/tasks (closed): no violations
+✓ priya /projects/SYN-101/tasks (filters open): no violations
+~ priya /projects/SYN-101/tasks (menu open): aria-hidden-focus(serious)x121
+✓ priya /projects/SYN-101/deliverables (closed): no violations
+✓ priya /projects/SYN-101/deliverables (filters open): no violations
+~ priya /projects/SYN-101/deliverables (menu open): aria-hidden-focus(serious)x1
+✓ priya /projects/SYN-101/timeline (closed): no violations
+✓ priya /projects/SYN-101/timeline (filters open): no violations
+~ priya /projects/SYN-101/timeline (menu open): aria-hidden-focus(serious)x1
+✓ priya /projects/SYN-101/allocations (closed): no violations
+✓ priya /projects/SYN-101/allocations (filters open): no violations
+~ priya /projects/SYN-101/allocations (menu open): aria-hidden-focus(serious)x9
+✓ priya /projects/SYN-101/coordination (closed): no violations
+✓ priya /projects/SYN-101/coordination (filters open): no violations
+~ priya /projects/SYN-101/coordination (menu open): aria-hidden-focus(serious)x1
+✓ sam /home (closed): no violations
+~ sam /home (menu open): aria-hidden-focus(serious)x1
+✓ sam /my-work (closed): no violations
+✓ sam /my-work (filters open): no violations
+~ sam /my-work (menu open): aria-hidden-focus(serious)x1
+✓ sam /boards (closed): no violations
+✓ sam /boards (filters open): no violations
+~ sam /boards (menu open): aria-hidden-focus(serious)x1
+✓ sam /projects (closed): no violations
+✓ sam /projects (filters open): no violations
+~ sam /projects (menu open): aria-hidden-focus(serious)x1
+✓ sam /tasks (closed): no violations
+✓ sam /tasks (filters open): no violations
+~ sam /tasks (menu open): aria-hidden-focus(serious)x1
+✓ sam /calendar (closed): no violations
+✓ sam /calendar (filters open): no violations
+~ sam /calendar (menu open): aria-hidden-focus(serious)x9
+✓ sam /portfolio (closed): no violations
+✓ sam /portfolio (filters open): no violations
+~ sam /portfolio (menu open): aria-hidden-focus(serious)x1
+✓ sam /workload (closed): no violations
+✓ sam /workload (filters open): no violations
+~ sam /workload (menu open): aria-hidden-focus(serious)x14
+✓ sam /planner (closed): no violations
+✓ sam /planner (filters open): no violations
+~ sam /planner (menu open): aria-hidden-focus(serious)x6
+✓ sam /reports (closed): no violations
+✓ sam /team (closed): no violations
+~ sam /team (menu open): aria-hidden-focus(serious)x1
+✓ sam /projects/SYN-101/dashboard (closed): no violations
+~ sam /projects/SYN-101/dashboard (menu open): aria-hidden-focus(serious)x1
+✓ sam /projects/SYN-101/tasks (closed): no violations
+✓ sam /projects/SYN-101/tasks (filters open): no violations
+~ sam /projects/SYN-101/tasks (menu open): aria-hidden-focus(serious)x64
+✓ sam /projects/SYN-101/deliverables (closed): no violations
+✓ sam /projects/SYN-101/deliverables (filters open): no violations
+~ sam /projects/SYN-101/deliverables (menu open): aria-hidden-focus(serious)x1
+✓ sam /projects/SYN-101/timeline (closed): no violations
+✓ sam /projects/SYN-101/timeline (filters open): no violations
+~ sam /projects/SYN-101/timeline (menu open): aria-hidden-focus(serious)x1
+✓ sam /projects/SYN-101/allocations (closed): no violations
+✓ sam /projects/SYN-101/allocations (filters open): no violations
+~ sam /projects/SYN-101/allocations (menu open): aria-hidden-focus(serious)x8
+✓ sam /projects/SYN-101/coordination (closed): no violations
+✓ sam /projects/SYN-101/coordination (filters open): no violations
+~ sam /projects/SYN-101/coordination (menu open): aria-hidden-focus(serious)x1
+
+AC-CALM-09 one signal per row
+✓ priya /planner: 24 rows, 0 with two or more chips, 7 with +n, week chips ▲Over-planned · Oct 12, Oct 19 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 19, Oct 26, Nov 2 +8 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ▲Over-planned · Dec 7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Oct 19 | ▲Over-planned · Oct 26 | ○Under-planned · Oct 12, Oct 19, Nov 9 +7 | ▲Over-planned · Nov 9 | ▲Over-planned · Nov 16 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Nov 30 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9
+✓ lena /planner: 28 rows, 0 with two or more chips, 7 with +n, week chips ▲Over-planned · Oct 12, Oct 19 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 19, Oct 26, Nov 2 +8 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ▲Over-planned · Dec 7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Oct 19 | ▲Over-planned · Oct 26 | ○Under-planned · Oct 12, Oct 19, Nov 9 +7 | ▲Over-planned · Nov 9 | ▲Over-planned · Nov 16 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Nov 30 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9
+✓ priya /workload: 27 rows, 0 with two or more chips, 2 with +n, week chips ■Over-assigned · Oct 12 | ■Over-assigned · Oct 12
+✓ sam /workload: 9 rows, 0 with two or more chips, 2 with +n, week chips ■Over-assigned · Oct 12 | ■Over-assigned · Oct 12
+✓ priya /tasks: 31 rows, 0 with two or more chips, 3 with +n, week chips -
+✓ priya /my-work?tab=overdue: 0 rows, 0 with two or more chips, 0 with +n, week chips -
+✓ priya /projects/SYN-101/tasks: 16 rows, 0 with two or more chips, 0 with +n, week chips -
+✓ priya /projects/SYN-101/deliverables: 12 rows, 0 with two or more chips, 2 with +n, week chips -
+✓ priya /projects/SYN-105/tasks: 17 rows, 0 with two or more chips, 3 with +n, week chips -
+✓ priya /projects/SYN-105/deliverables: 3 rows, 0 with two or more chips, 0 with +n, week chips -
+
+Section 6 deep links (base UI vs this UI, same API)
+✓ /my-work?myWeek=2026-10-12 → /my-work?myWeek=2026-10-12 "My Work"
+✓ /my-work?project=01a10454-76c6-7d32-ae72-72e709e168be → /my-work?project=01a10454-76c6-7d32-ae72-72e709e168be "My Work"
+✓ /projects/SYN-101 → /projects/SYN-101/dashboard "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/activity → /projects/SYN-101/activity "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/allocations?allocation=30ecbb3d-8058-4d57-a1cc-bbd22e3fd6e4 → /projects/SYN-101/allocations?allocation=30ecbb3d-8058-4d57-a1cc-bbd22e3fd6e4 "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "Allocation detail"
+✓ /projects/SYN-101/changes → /projects/SYN-101/changes "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/changes?panel=ChangeNotice:01a10495-0b8d-7b65-b65e-0966aa36845d → /projects/SYN-101/changes?panel=ChangeNotice:01a10495-0b8d-7b65-b65e-0966aa36845d "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "SYN-101-CH001 · Synthetic preview — Municipal drainage design standard (fictiona"
+✓ /projects/SYN-101/coordination → /projects/SYN-101/coordination "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/dashboard → /projects/SYN-101/dashboard "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/decisions → /projects/SYN-101/decisions "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/decisions?panel=Decision:01a10495-054c-7904-a177-317ffe19f5f7 → /projects/SYN-101/decisions?panel=Decision:01a10495-054c-7904-a177-317ffe19f5f7 "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "Decision"
+✓ /projects/SYN-101/deliverables → /projects/SYN-101/deliverables "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/deliverables?panel=Deliverable:01a10495-03b5-7016-ac6a-06a4b9bee8cc → /projects/SYN-101/deliverables?panel=Deliverable:01a10495-03b5-7016-ac6a-06a4b9bee8cc "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "Deliverable"
+✓ /projects/SYN-101/design-basis?basis=01a10495-0d51-7011-8e7b-b2a6ee7a0974 → /projects/SYN-101/design-basis?basis=01a10495-0d51-7011-8e7b-b2a6ee7a0974 "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "SYN-101-B001 · Synthetic preview — Minor storm design return period"
+✓ /projects/SYN-101/handoffs?panel=Handoff:01a10495-0927-7999-b623-b7afd2e607c9 → /projects/SYN-101/handoffs?panel=Handoff:01a10495-0927-7999-b623-b7afd2e607c9 "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "SYN-101-H001 · Synthetic preview — Groundwater and bedding inputs for storm sewe"
+✓ /projects/SYN-101/issues → /projects/SYN-101/issues "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/issues?panel=Issue:01a10495-05d2-7b45-affb-183fa9f6e290 → /projects/SYN-101/issues?panel=Issue:01a10495-05d2-7b45-affb-183fa9f6e290 "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "Issue"
+✓ /projects/SYN-101/meetings → /projects/SYN-101/meetings "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/meetings?panel=Action:01a10495-06da-7bb2-ab92-2531a8e1b441 → /projects/SYN-101/meetings?panel=Action:01a10495-06da-7bb2-ab92-2531a8e1b441 "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "Meeting action"
+✓ /projects/SYN-101/milestones → /projects/SYN-101/milestones "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/milestones?panel=Milestone:01a10495-02c2-7f3f-946b-abc01267d5ef → /projects/SYN-101/milestones?panel=Milestone:01a10495-02c2-7f3f-946b-abc01267d5ef "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "Milestone"
+✓ /projects/SYN-101/readiness → /projects/SYN-101/readiness "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/reviews?panel=ReviewPackage:01a10495-0a24-79ff-9861-116da60b27bd → /projects/SYN-101/reviews?panel=ReviewPackage:01a10495-0a24-79ff-9861-116da60b27bd "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "SYN-101-RV001 · Synthetic preview — 60 % storm sewer drawings review"
+✓ /projects/SYN-101/risks → /projects/SYN-101/risks "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/risks?panel=Risk:01a10495-0579-7132-ba02-aecd1eddd92f → /projects/SYN-101/risks?panel=Risk:01a10495-0579-7132-ba02-aecd1eddd92f "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "Risk"
+✓ /projects/SYN-101/submissions?panel=SubmissionPackage:01a10495-0c66-7b1a-bf1c-a8cb7170559e → /projects/SYN-101/submissions?panel=SubmissionPackage:01a10495-0c66-7b1a-bf1c-a8cb7170559e "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "SYN-101-SUB001 · Synthetic preview — 60 % design submission package"
+✓ /projects/SYN-101/tasks → /projects/SYN-101/tasks "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/tasks?panel=Task:01a10454-7a0a-709a-8124-f55927334353 → /projects/SYN-101/tasks?panel=Task:01a10454-7a0a-709a-8124-f55927334353 "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase" panel "Task"
+✓ /projects/SYN-101/tasks?status=In → /projects/SYN-101/tasks?status=In "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/team → /projects/SYN-101/team "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101/timeline → /projects/SYN-101/timeline "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /projects/SYN-101?attention=A-01 → /projects/SYN-101/dashboard "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase"
+✓ /time → /time "Time"
+
+Screenshots
+  screens-1440/01-home.jpg
+  screens-1440/02-my-work.jpg
+  screens-1440/03-boards.jpg
+  screens-1440/04-projects.jpg
+  screens-1440/05-tasks.jpg
+  screens-1440/06-calendar.jpg
+  screens-1440/07-portfolio.jpg
+  screens-1440/08-workload.jpg
+  screens-1440/09-planner.jpg
+  screens-1440/10-reports.jpg
+  screens-1440/11-team.jpg
+  screens-1440/12-projects_SYN-101_dashboard.jpg
+  screens-1440/13-projects_SYN-101_tasks.jpg
+  screens-1440/14-projects_SYN-101_deliverables.jpg
+  screens-1440/15-projects_SYN-101_timeline.jpg
+  screens-1440/16-projects_SYN-101_allocations.jpg
+  screens-1440/17-projects_SYN-101_coordination.jpg
+  screens-1024/01-home.jpg
+  screens-1024/02-my-work.jpg
+  screens-1024/03-boards.jpg
+  screens-1024/04-projects.jpg
+  screens-1024/05-tasks.jpg
+  screens-1024/06-calendar.jpg
+  screens-1024/07-portfolio.jpg
+  screens-1024/08-workload.jpg
+  screens-1024/09-planner.jpg
+  screens-1024/10-reports.jpg
+  screens-1024/11-team.jpg
+  screens-1024/12-projects_SYN-101_dashboard.jpg
+  screens-1024/13-projects_SYN-101_tasks.jpg
+  screens-1024/14-projects_SYN-101_deliverables.jpg
+  screens-1024/15-projects_SYN-101_timeline.jpg
+  screens-1024/16-projects_SYN-101_allocations.jpg
+  screens-1024/17-projects_SYN-101_coordination.jpg
+
+PASS: crawl, reach, quick, filters, keyboard, axe, signals, deeplinks, shots. Report in /Users/jaypatel/PM-Tool/.claude/worktrees/tuesday-visual-batch1/specs/037-calm-workspace/evidence

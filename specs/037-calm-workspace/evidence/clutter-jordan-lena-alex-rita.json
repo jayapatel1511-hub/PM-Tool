@@ -1,0 +1,669 @@
+{
+  "exitCode": 1,
+  "tables": [
+    {
+      "heading": "Census as jordan at 1600x900",
+      "rows": [
+        {
+          "path": "/home",
+          "chromeControls": 24,
+          "filterFields": 0,
+          "chromeWords": 83,
+          "firstDataY": 255,
+          "fills": 3,
+          "groupTabs": null
+        },
+        {
+          "path": "/my-work",
+          "chromeControls": 5,
+          "filterFields": 0,
+          "chromeWords": 39,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/boards",
+          "chromeControls": 18,
+          "filterFields": 1,
+          "chromeWords": 30,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects",
+          "chromeControls": 11,
+          "filterFields": 1,
+          "chromeWords": 53,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/tasks",
+          "chromeControls": 18,
+          "filterFields": 1,
+          "chromeWords": 30,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/calendar",
+          "chromeControls": 20,
+          "filterFields": 0,
+          "chromeWords": 75,
+          "firstDataY": 319,
+          "fills": 1,
+          "groupTabs": null
+        },
+        {
+          "path": "/portfolio",
+          "chromeControls": 11,
+          "filterFields": 1,
+          "chromeWords": 36,
+          "firstDataY": 405,
+          "fills": 8,
+          "groupTabs": null
+        },
+        {
+          "path": "/workload",
+          "chromeControls": 23,
+          "filterFields": 0,
+          "chromeWords": 48,
+          "firstDataY": 377,
+          "fills": 5,
+          "groupTabs": null
+        },
+        {
+          "path": "/planner",
+          "chromeControls": 19,
+          "filterFields": 2,
+          "chromeWords": 52,
+          "firstDataY": 448,
+          "fills": 3,
+          "groupTabs": null
+        },
+        {
+          "path": "/reports",
+          "chromeControls": 1,
+          "filterFields": 0,
+          "chromeWords": 3,
+          "firstDataY": 231,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/team",
+          "chromeControls": 11,
+          "filterFields": 1,
+          "chromeWords": 22,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects/SYN-101/dashboard",
+          "chromeControls": 38,
+          "filterFields": 1,
+          "chromeWords": 141,
+          "firstDataY": 270,
+          "fills": 3,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/tasks",
+          "chromeControls": 25,
+          "filterFields": 1,
+          "chromeWords": 41,
+          "firstDataY": 396,
+          "fills": 4,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/deliverables",
+          "chromeControls": 25,
+          "filterFields": 1,
+          "chromeWords": 47,
+          "firstDataY": 391,
+          "fills": 4,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/timeline",
+          "chromeControls": 25,
+          "filterFields": 0,
+          "chromeWords": 64,
+          "firstDataY": 348,
+          "fills": 5,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/allocations",
+          "chromeControls": 24,
+          "filterFields": 1,
+          "chromeWords": 45,
+          "firstDataY": 395,
+          "fills": 1,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/coordination",
+          "chromeControls": 42,
+          "filterFields": 1,
+          "chromeWords": 224,
+          "firstDataY": 386,
+          "fills": 2,
+          "groupTabs": 6
+        }
+      ]
+    },
+    {
+      "heading": "Census as lena at 1600x900",
+      "rows": [
+        {
+          "path": "/home",
+          "chromeControls": 24,
+          "filterFields": 0,
+          "chromeWords": 83,
+          "firstDataY": 255,
+          "fills": 3,
+          "groupTabs": null
+        },
+        {
+          "path": "/my-work",
+          "chromeControls": 5,
+          "filterFields": 0,
+          "chromeWords": 39,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/boards",
+          "chromeControls": 18,
+          "filterFields": 1,
+          "chromeWords": 30,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects",
+          "chromeControls": 9,
+          "filterFields": 1,
+          "chromeWords": 49,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/tasks",
+          "chromeControls": 18,
+          "filterFields": 1,
+          "chromeWords": 30,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/calendar",
+          "chromeControls": 20,
+          "filterFields": 0,
+          "chromeWords": 75,
+          "firstDataY": 319,
+          "fills": 1,
+          "groupTabs": null
+        },
+        {
+          "path": "/portfolio",
+          "chromeControls": 11,
+          "filterFields": 1,
+          "chromeWords": 36,
+          "firstDataY": 405,
+          "fills": 8,
+          "groupTabs": null
+        },
+        {
+          "path": "/workload",
+          "chromeControls": 23,
+          "filterFields": 0,
+          "chromeWords": 48,
+          "firstDataY": 377,
+          "fills": 5,
+          "groupTabs": null
+        },
+        {
+          "path": "/planner",
+          "chromeControls": 17,
+          "filterFields": 1,
+          "chromeWords": 35,
+          "firstDataY": 308,
+          "fills": 3,
+          "groupTabs": null
+        },
+        {
+          "path": "/reports",
+          "chromeControls": 1,
+          "filterFields": 0,
+          "chromeWords": 3,
+          "firstDataY": 231,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/team",
+          "chromeControls": 11,
+          "filterFields": 1,
+          "chromeWords": 22,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects/SYN-101/dashboard",
+          "chromeControls": 36,
+          "filterFields": 1,
+          "chromeWords": 143,
+          "firstDataY": 270,
+          "fills": 3,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/tasks",
+          "chromeControls": 23,
+          "filterFields": 1,
+          "chromeWords": 38,
+          "firstDataY": 396,
+          "fills": 4,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/deliverables",
+          "chromeControls": 23,
+          "filterFields": 1,
+          "chromeWords": 44,
+          "firstDataY": 391,
+          "fills": 4,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/timeline",
+          "chromeControls": 24,
+          "filterFields": 0,
+          "chromeWords": 63,
+          "firstDataY": 348,
+          "fills": 5,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/allocations",
+          "chromeControls": 24,
+          "filterFields": 1,
+          "chromeWords": 48,
+          "firstDataY": 395,
+          "fills": 1,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/coordination",
+          "chromeControls": 40,
+          "filterFields": 1,
+          "chromeWords": 220,
+          "firstDataY": 386,
+          "fills": 2,
+          "groupTabs": 6
+        }
+      ]
+    },
+    {
+      "heading": "Census as alex at 1600x900",
+      "rows": [
+        {
+          "path": "/home",
+          "chromeControls": 37,
+          "filterFields": 0,
+          "chromeWords": 104,
+          "firstDataY": 255,
+          "fills": 6,
+          "groupTabs": null
+        },
+        {
+          "path": "/my-work",
+          "chromeControls": 20,
+          "filterFields": 7,
+          "chromeWords": 233,
+          "firstDataY": 348,
+          "fills": 1,
+          "groupTabs": null
+        },
+        {
+          "path": "/boards",
+          "chromeControls": 37,
+          "filterFields": 1,
+          "chromeWords": 236,
+          "firstDataY": 317,
+          "fills": 4,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects",
+          "chromeControls": 8,
+          "filterFields": 1,
+          "chromeWords": 27,
+          "firstDataY": 294,
+          "fills": 7,
+          "groupTabs": null
+        },
+        {
+          "path": "/tasks",
+          "chromeControls": 18,
+          "filterFields": 1,
+          "chromeWords": 24,
+          "firstDataY": 363,
+          "fills": 4,
+          "groupTabs": null
+        },
+        {
+          "path": "/calendar",
+          "chromeControls": 27,
+          "filterFields": 0,
+          "chromeWords": 149,
+          "firstDataY": 319,
+          "fills": 1,
+          "groupTabs": null
+        },
+        {
+          "path": "/portfolio",
+          "chromeControls": 6,
+          "filterFields": 1,
+          "chromeWords": 25,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/workload",
+          "chromeControls": 11,
+          "filterFields": 0,
+          "chromeWords": 59,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/planner",
+          "chromeControls": 2,
+          "filterFields": 0,
+          "chromeWords": 24,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/reports",
+          "chromeControls": 1,
+          "filterFields": 0,
+          "chromeWords": 3,
+          "firstDataY": 231,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/team",
+          "chromeControls": 10,
+          "filterFields": 1,
+          "chromeWords": 15,
+          "firstDataY": 363,
+          "fills": 3,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects/SYN-101/dashboard",
+          "chromeControls": 37,
+          "filterFields": 1,
+          "chromeWords": 147,
+          "firstDataY": 270,
+          "fills": 3,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/tasks",
+          "chromeControls": 24,
+          "filterFields": 1,
+          "chromeWords": 42,
+          "firstDataY": 396,
+          "fills": 4,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/deliverables",
+          "chromeControls": 23,
+          "filterFields": 1,
+          "chromeWords": 46,
+          "firstDataY": 391,
+          "fills": 4,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/timeline",
+          "chromeControls": 24,
+          "filterFields": 0,
+          "chromeWords": 65,
+          "firstDataY": 348,
+          "fills": 5,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/allocations",
+          "chromeControls": 23,
+          "filterFields": 1,
+          "chromeWords": 68,
+          "firstDataY": null,
+          "fills": 1,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/coordination",
+          "chromeControls": 41,
+          "filterFields": 1,
+          "chromeWords": 230,
+          "firstDataY": 386,
+          "fills": 2,
+          "groupTabs": 6
+        }
+      ]
+    },
+    {
+      "heading": "Census as rita at 1600x900",
+      "rows": [
+        {
+          "path": "/home",
+          "chromeControls": 23,
+          "filterFields": 0,
+          "chromeWords": 82,
+          "firstDataY": 255,
+          "fills": 3,
+          "groupTabs": null
+        },
+        {
+          "path": "/my-work",
+          "chromeControls": 5,
+          "filterFields": 0,
+          "chromeWords": 39,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/boards",
+          "chromeControls": 17,
+          "filterFields": 1,
+          "chromeWords": 29,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects",
+          "chromeControls": 9,
+          "filterFields": 1,
+          "chromeWords": 49,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/tasks",
+          "chromeControls": 17,
+          "filterFields": 1,
+          "chromeWords": 29,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/calendar",
+          "chromeControls": 19,
+          "filterFields": 0,
+          "chromeWords": 74,
+          "firstDataY": 319,
+          "fills": 1,
+          "groupTabs": null
+        },
+        {
+          "path": "/portfolio",
+          "chromeControls": 6,
+          "filterFields": 1,
+          "chromeWords": 25,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/workload",
+          "chromeControls": 11,
+          "filterFields": 0,
+          "chromeWords": 59,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/planner",
+          "chromeControls": 2,
+          "filterFields": 0,
+          "chromeWords": 24,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/reports",
+          "chromeControls": 1,
+          "filterFields": 0,
+          "chromeWords": 3,
+          "firstDataY": 231,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/team",
+          "chromeControls": 10,
+          "filterFields": 1,
+          "chromeWords": 21,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects/SYN-101/dashboard",
+          "chromeControls": 36,
+          "filterFields": 1,
+          "chromeWords": 143,
+          "firstDataY": 270,
+          "fills": 3,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/tasks",
+          "chromeControls": 23,
+          "filterFields": 1,
+          "chromeWords": 38,
+          "firstDataY": 396,
+          "fills": 4,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/deliverables",
+          "chromeControls": 23,
+          "filterFields": 1,
+          "chromeWords": 44,
+          "firstDataY": 391,
+          "fills": 4,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/timeline",
+          "chromeControls": 24,
+          "filterFields": 0,
+          "chromeWords": 63,
+          "firstDataY": 348,
+          "fills": 5,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/allocations",
+          "chromeControls": 23,
+          "filterFields": 1,
+          "chromeWords": 66,
+          "firstDataY": null,
+          "fills": 1,
+          "groupTabs": 6
+        },
+        {
+          "path": "/projects/SYN-101/coordination",
+          "chromeControls": 40,
+          "filterFields": 1,
+          "chromeWords": 220,
+          "firstDataY": 386,
+          "fills": 2,
+          "groupTabs": 6
+        }
+      ]
+    },
+    {
+      "heading": "Sidebar items on /my-work",
+      "rows": [
+        {
+          "who": "jordan",
+          "sidebarItems": 7
+        },
+        {
+          "who": "lena",
+          "sidebarItems": 7
+        },
+        {
+          "who": "sam",
+          "sidebarItems": 7
+        },
+        {
+          "who": "priya",
+          "sidebarItems": 7
+        },
+        {
+          "who": "alex",
+          "sidebarItems": 6
+        },
+        {
+          "who": "rita",
+          "sidebarItems": 6
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "\nFAIL: 40 threshold(s) exceeded\nAC-CALM-05 jordan /home words: 83 (limit 57)\nAC-CALM-05 jordan /projects words: 53 (limit 40)\nAC-CALM-05 jordan /portfolio fills: 8 (limit 6)\nAC-CALM-01 jordan /planner: 448 (limit 405)\nAC-CALM-02 jordan /planner: 2 (limit 1)\nAC-CALM-05 jordan /planner words: 52 (limit 40)\nAC-CALM-03 jordan /projects/SYN-101/dashboard: 38 (limit 25)\nAC-CALM-05 jordan /projects/SYN-101/dashboard words: 141 (limit 84)\nAC-CALM-03 jordan /projects/SYN-101/coordination: 42 (limit 25)\nAC-CALM-05 jordan /projects/SYN-101/coordination words: 224 (limit 116)\nAC-CALM-05 lena /home words: 83 (limit 57)\nAC-CALM-05 lena /projects words: 49 (limit 40)\nAC-CALM-05 lena /portfolio fills: 8 (limit 6)\nAC-CALM-03 lena /projects/SYN-101/dashboard: 36 (limit 25)\nAC-CALM-05 lena /projects/SYN-101/dashboard words: 143 (limit 84)\nAC-CALM-03 lena /projects/SYN-101/coordination: 40 (limit 25)\nAC-CALM-05 lena /projects/SYN-101/coordination words: 220 (limit 116)\nAC-CALM-03 alex /home: 37 (limit 25)\nAC-CALM-05 alex /home words: 104 (limit 57)\nAC-CALM-02 alex /my-work: 7 (limit 1)\nAC-CALM-05 alex /my-work words: 233 (limit 40)\nAC-CALM-03 alex /boards: 37 (limit 25)\nAC-CALM-05 alex /boards words: 236 (limit 70)\nAC-CALM-05 alex /projects fills: 7 (limit 6)\nAC-CALM-03 alex /calendar: 27 (limit 25)\nAC-CALM-05 alex /calendar words: 149 (limit 75)\nAC-CALM-05 alex /workload words: 59 (limit 56)\nAC-CALM-03 alex /projects/SYN-101/dashboard: 37 (limit 25)\nAC-CALM-05 alex /projects/SYN-101/dashboard words: 147 (limit 84)\nAC-CALM-05 alex /projects/SYN-101/allocations words: 68 (limit 49)\nAC-CALM-03 alex /projects/SYN-101/coordination: 41 (limit 25)\nAC-CALM-05 alex /projects/SYN-101/coordination words: 230 (limit 116)\nAC-CALM-05 rita /home words: 82 (limit 57)\nAC-CALM-05 rita /projects words: 49 (limit 40)\nAC-CALM-05 rita /workload words: 59 (limit 56)\nAC-CALM-03 rita /projects/SYN-101/dashboard: 36 (limit 25)\nAC-CALM-05 rita /projects/SYN-101/dashboard words: 143 (limit 84)\nAC-CALM-05 rita /projects/SYN-101/allocations words: 66 (limit 49)\nAC-CALM-03 rita /projects/SYN-101/coordination: 40 (limit 25)\nAC-CALM-05 rita /projects/SYN-101/coordination words: 220 (limit 116)"
+  ]
+}

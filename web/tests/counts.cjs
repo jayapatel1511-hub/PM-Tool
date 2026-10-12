@@ -40,11 +40,14 @@ function extract() {
   const out = []
   // Summary tiles: a label span, then a value span. A tile is itself a link, a filter button, or holds links.
   for (const tile of main.querySelectorAll('a[data-accent], button[data-accent], div[data-accent]')) {
-    const [label, value] = tile.children
+    // A linked tile that also holds links is a box whose first child is the link with the label and the value.
+    const head = tile.tagName === 'DIV' && tile.firstElementChild?.tagName === 'A' ? tile.firstElementChild : null
+    const [label, value] = (head ?? tile).children
     if (label?.tagName !== 'SPAN' || value?.tagName !== 'SPAN') continue
     const title = own(label)
+    if (head) { const unit = own(value).replace(/[\d,]+/g, '').trim(); out.push({ name: unit ? `${title} · ${unit}` : title, shown: num(own(value)), href: head.getAttribute('href') }) }
     if (tile.tagName !== 'DIV') out.push({ name: title, shown: num(own(value)), href: tile.tagName === 'A' ? tile.getAttribute('href') : null })
-    else tile.querySelectorAll('a[href]').forEach((a) => out.push(linked(a, title)))
+    else tile.querySelectorAll('a[href]').forEach((a) => { if (a !== head) out.push(linked(a, title)) })
   }
   // Home: lanes and the On hold count, then project segments (their count is in the title) and project totals.
   const lanes = new Map() // a lane's bar and number share one link; keep the one that shows the number

@@ -325,6 +325,7 @@ public static class DeliverableEndpoints
         else if (!string.IsNullOrWhiteSpace(body.Comment))
             db.Comments.Add(new Comment { ProjectId = d.ProjectId, ItemType = ItemType.Deliverable, ItemId = d.Id, AuthorId = db.Audit.ActorId!.Value, Body = body.Comment.Trim(),
                 CommentKind = CommentKind.StatusNote, CreatedAt = now, AuditKey = d.Key });
+        if (from == DeliverableStatus.NotStarted) d.StartedAt ??= now; // D4: the Start-to-Start anchor, set once
         d.Status = to;
         d.StatusChangedAt = now;
         d.LastActivityAt = now;
@@ -365,6 +366,7 @@ public static class DeliverableEndpoints
         if (body.TransmittalUrl is { Length: > 0 } tu) Check.That(Links.IsValid(tu), "transmittalUrl", "link.invalid");
         await ReviewEndpoints.Gate(db, p, d, Check.Optional(body.Revision, "revision", 50), (await store.Get(db)).AllowSelfReview, Check.Optional(body.TransmittalUrl, "transmittalUrl", 2000));
         var now = clock.GetUtcNow();
+        if (d.Status == DeliverableStatus.NotStarted) d.StartedAt ??= now; // D4: issued straight from Not Started
         d.Status = DeliverableStatus.Issued;
         d.IssuedDate = issued;
         d.Revision = Check.Optional(body.Revision, "revision", 50) ?? d.Revision;

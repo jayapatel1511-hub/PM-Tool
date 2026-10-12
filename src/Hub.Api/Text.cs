@@ -327,6 +327,7 @@ public static class Text
         ["error.inactive_account"] = "Your Hub account is inactive. Contact a System Administrator.",
         ["error.if_match"] = "Send the version you read (If-Match header or rowVersion).",
         ["error.date"] = "Enter a valid date.",
+        ["error.date_range"] = "Use an end date on or after the start date, within the allowed range.",
         ["error.positive"] = "Must be a positive number.",
         ["perm.admin"] = "Only a System Administrator can do this.",
         ["perm.read_only"] = "Read Only accounts cannot make changes.",

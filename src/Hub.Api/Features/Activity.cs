@@ -97,6 +97,7 @@ public static class ActivityEndpoints
         "ReviewFinding" => await db.ReviewFindings.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
         "ChangeAssessment" => await db.ChangeAssessments.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
         "Handoff" => await db.Handoffs.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
+        "OpenRole" => await db.OpenRoles.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
         ItemType.Project => await db.Projects.Where(x => x.Id == id).Select(x => (Guid?)x.Id).FirstOrDefaultAsync(),
         _ => null,
     };

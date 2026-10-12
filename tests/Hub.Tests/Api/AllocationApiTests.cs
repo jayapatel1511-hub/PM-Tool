@@ -29,6 +29,16 @@ public sealed class AllocationApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task A_backwards_date_range_is_explained_in_words()
+    {
+        var project = await data.Project();
+        var refused = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{project.Id}/allocations?from=2026-10-09&to=2026-10-05")).Json(400);
+        var message = refused["errors"]!["to"]![0]!.GetValue<string>();
+        Assert.Equal(Hub.Api.Text.Get("error.date_range"), message);
+        Assert.NotEqual("error.date_range", message);
+    }
+
+    [Fact]
     public async Task Proposed_allocation_is_scoped_versioned_retry_safe_and_releases_its_link()
     {
         var project = await data.Project();

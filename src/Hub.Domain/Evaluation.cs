@@ -44,7 +44,7 @@ public sealed record DeliverableResult(Guid DeliverableId, int? ProgressPct, int
     int TaskBlocked, decimal EstimatedHoursTotal, decimal RemainingHours, bool IsOverdue, int DaysOverdue, bool IsDueSoon, bool IsAtRisk, IReadOnlyList<Reason> AtRiskReasons,
     bool IsUnassigned, bool IsStale, bool IsDateInconsistent, IReadOnlyList<Reason> Inconsistencies, int SlipDays, bool IsInactiveOwner, bool IssuedWithOpenWork,
     bool MilestoneCancelled, bool IsWaiting, bool IsBlocked, IReadOnlyList<Blocker> Blockers, IReadOnlyList<Guid> DerivedPredecessorIds, IReadOnlyList<Guid> DerivedSuccessorIds,
-    int BlockingCount = 0);
+    IReadOnlyList<string> Notes, int BlockingCount = 0);
 public sealed record MilestoneResult(Guid MilestoneId, string? Status, IReadOnlyList<Reason> Reasons, int? DaysRemaining, int SlipDays, int DeliverableTotal,
     int DeliverableIssued, int TaskTotal, int TaskComplete, int TaskOpen, int TaskOverdue, int TaskBlocked);
 public sealed record DecisionResult(Guid DecisionId, bool IsOverdue, int DaysOverdue, bool IsDueSoon, IReadOnlyList<Guid> BlockingTaskIds, bool IsInactiveOwner);
@@ -267,13 +267,16 @@ public static class Evaluator
                 foreach (var e in dlPreds[d.Id]) // D-12 for deliverables
                     if (deliverables[e.PredecessorId] is var pr && LinkDates(e, pr.Key, pr.StartDate, pr.DueDate, d.StartDate, d.DueDate, false) is { } why)
                         inconsistencies.Add(why);
+            List<string> dNotes = d.Status is DeliverableStatus.Issued or DeliverableStatus.Accepted // AC-DEPT-03: the note replaces the D-12 flag
+                && dlPreds[d.Id].Any(e => e.Type == DependencyTypes.FinishToFinish && !DeliverableStatus.IsTerminal(deliverables[e.PredecessorId].Status))
+                ? ["finished_before_predecessor"] : [];
             deliverableResults[d.Id] = new DeliverableResult(d.Id, progress, ts.Count, complete, cancelled, openTasks.Count, tOverdue, tBlocked,
                 live.Sum(t => t.EstimatedHours ?? 0), remaining, overdue, overdue ? today.DayNumber - d.DueDate!.Value.DayNumber : 0, dueSoon, atRisk.Count > 0, atRisk,
                 !terminal && d.OwnerId is null, active && d.Status is DeliverableStatus.InProgress or DeliverableStatus.InReview && Since(d.LastActivity) > s.TaskStaleDays,
                 inconsistencies.Count > 0, inconsistencies, d.DueDate is { } a1 && d.OriginalDueDate is { } o1 ? Math.Max(0, a1.DayNumber - o1.DayNumber) : 0,
                 active && !terminal && (Inactive(d.OwnerId) || Inactive(d.ReviewerId)), d.Status is DeliverableStatus.Issued or DeliverableStatus.Accepted && openTasks.Count > 0,
                 !terminal && ms is { IsCancelled: true }, active && !dBlocked && dBlockers.Count > 0, dBlocked, dBlockers,
-                derivedPred.TryGetValue(d.Id, out var dp) ? [.. dp] : [], derivedSucc.TryGetValue(d.Id, out var dsu) ? [.. dsu] : []);
+                derivedPred.TryGetValue(d.Id, out var dp) ? [.. dp] : [], derivedSucc.TryGetValue(d.Id, out var dsu) ? [.. dsu] : [], dNotes);
         }
 
         // Blocking Others for deliverables: explicit successors this one currently blocks (FR-002).
@@ -491,9 +494,10 @@ public static class Evaluator
                 Add("A-11", Severity.Warning, ItemType.Task, t.Id, t.Key, t.Name, $"{t.Status} for {waitDays} days; reviewer {Name(t.ReviewerId)}",
                     [t.ReviewerId, dl, .. pms.Cast<Guid?>()], t.ReviewerId, t.DisciplineId, waitDays, t.Priority, t.DueDate, s.ReviewStaleDays, new() { ["daysWaiting"] = waitDays });
             }
-            // A-21 (FR-STALE-01, D6): touched but not moving; A-10 or A-11 already says more about the same item.
+            // A-21 (FR-STALE-01): the status stands still while people keep touching the item. Untouched work (A-10's
+            // condition) and a stalled review (A-11's) never raise it, whether or not those rules are switched on.
             if ((t.Status == TaskStatuses.InProgress || TaskStatuses.IsReview(t.Status)) && t.StatusChangedOn is { } tsc && since(tsc) > s.StatusStaleDays
-                && !list.Any(a => a.ItemId == t.Id && a.RuleId is "A-10" or "A-11"))
+                && r.StaleDays <= s.TaskStaleDays && !r.IsReviewStalled)
                 Add("A-21", r.IsDueSoon ? Severity.Warning : Severity.Info, ItemType.Task, t.Id, t.Key, t.Name, StatusStill(t.Status, since(tsc)),
                     [t.AssigneeId, dl], t.AssigneeId, t.DisciplineId, since(tsc), t.Priority, t.DueDate, s.StatusStaleDays, new() { ["daysSinceStatusChange"] = since(tsc) });
             if (t.DeliverableId is { } did && deliverables.TryGetValue(did, out var pdel) && pdel.DueDate is { } pdd && t.DueDate is { } tdd && tdd > pdd) // A-16
@@ -562,7 +566,8 @@ public static class Evaluator
             if (d.OwnerId is null && (d.Status != DeliverableStatus.NotStarted || r.IsDueSoon)) // A-13
                 Add("A-13", Severity.Warning, ItemType.Deliverable, d.Id, d.Key, d.Name, d.Status != DeliverableStatus.NotStarted ? $"{d.Status} with no owner" : $"Due {d.DueDate:yyyy-MM-dd} with no owner",
                     [dl, .. pms.Cast<Guid?>()], null, d.DisciplineId, 0, d.Priority, d.DueDate, s.DeliverableDueSoonDays, new() { ["status"] = d.Status });
-            if (d.Status is DeliverableStatus.InProgress or DeliverableStatus.InReview && d.StatusChangedOn is { } dsc && since(dsc) > s.StatusStaleDays) // A-21
+            if (d.Status is DeliverableStatus.InProgress or DeliverableStatus.InReview && d.StatusChangedOn is { } dsc && since(dsc) > s.StatusStaleDays
+                && since(d.LastActivity) <= s.TaskStaleDays) // A-21, as for tasks
                 Add("A-21", r.IsDueSoon ? Severity.Warning : Severity.Info, ItemType.Deliverable, d.Id, d.Key, d.Name, StatusStill(d.Status, since(dsc)),
                     [d.OwnerId, dl], d.OwnerId, d.DisciplineId, since(dsc), d.Priority, d.DueDate, s.StatusStaleDays, new() { ["daysSinceStatusChange"] = since(dsc) });
             if (r.IsDateInconsistent) // A-17

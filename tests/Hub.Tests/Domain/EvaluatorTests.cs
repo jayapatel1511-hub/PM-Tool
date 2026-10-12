@@ -465,6 +465,50 @@ public sealed class EvaluatorTests
         Assert.Equal(15, new OrgSettings().StatusStaleDays);
     }
 
+    // A5: A-21 needs an unchanged status AND activity within task_stale_days; neither the A-10 switch nor whether A-10 applies decides it.
+    [Fact]
+    public void Status_not_moving_needs_recent_activity_even_when_stale_work_is_off()
+    {
+        var s = new Scenario();
+        s.Settings = s.Settings with { RuleEnabled = new Dictionary<string, bool> { ["A-10"] = false } };
+        var idle = s.Task("T21b", statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-16), due: s.Today.AddDays(20));
+        var idleReview = s.Task("T21d", TaskStatuses.InReview, statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-16),
+            reviewRequested: s.Today.AddDays(-1), reviewer: s.Diane, due: s.Today.AddDays(20)); // A-10 never covers a review status
+        var idleDeliverable = s.Deliverable("D21b", s.Today.AddDays(40), statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-16));
+        var r = s.Run();
+        Assert.Empty(r.A(idle.Id));
+        Assert.Empty(r.A(idleReview.Id));
+        Assert.DoesNotContain(r.A(idleDeliverable.Id), x => x.RuleId == "A-21");
+    }
+
+    [Fact]
+    public void Status_not_moving_fires_while_activity_is_within_the_stale_window()
+    {
+        var s = new Scenario();
+        var edge = s.Task("T21e", statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-s.Settings.TaskStaleDays), due: s.Today.AddDays(20));
+        var review = s.Task("T21f", TaskStatuses.InReview, statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-1),
+            reviewRequested: s.Today.AddDays(-2), reviewer: s.Diane, due: s.Today.AddDays(20));
+        var touched = s.Deliverable("D21c", s.Today.AddDays(40), statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-s.Settings.TaskStaleDays));
+        var untouched = s.Deliverable("D21d", s.Today.AddDays(40), statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-s.Settings.TaskStaleDays - 1));
+        var r = s.Run();
+        Assert.Equal(["A-21"], r.A(edge.Id).Select(x => x.RuleId));
+        Assert.Equal(["A-21"], r.A(review.Id).Select(x => x.RuleId));
+        Assert.Contains(r.A(touched.Id), x => x.RuleId == "A-21");
+        Assert.DoesNotContain(r.A(untouched.Id), x => x.RuleId == "A-21");
+    }
+
+    [Fact]
+    public void Status_not_moving_never_fires_while_the_review_is_stalled()
+    {
+        var s = new Scenario();
+        s.Settings = s.Settings with { RuleEnabled = new Dictionary<string, bool> { ["A-11"] = false } };
+        var t = s.Task("T21c", TaskStatuses.InReview, statusChanged: s.Today.AddDays(-16), reviewRequested: s.Today.AddDays(-16), reviewer: s.Diane,
+            lastActivity: s.Today.AddDays(-1), due: s.Today.AddDays(20));
+        var r = s.Run();
+        Assert.True(r.T(t).IsReviewStalled);
+        Assert.Empty(r.A(t.Id));
+    }
+
     [Fact]
     public void Missing_due_date_and_task_after_deliverable() // A-09, A-16, T-04
     {

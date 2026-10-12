@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { CalendarCheck, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { type ActivityRow, ChangeList } from '@/components/hub/activity'
@@ -56,15 +56,17 @@ export function DashboardTab() {
           <option value="">{t('dash.allDisciplines')}</option>{p.disciplines.filter((d) => d.isActive).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>
       </div>
-      <Button asChild variant="outline"><Link to={`${base}/coordination`}><CalendarCheck className="size-4" />{t('ptab.coordination')}</Link></Button>
       {p.permissions.createTaskIn.length > 0 && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}
     </>}>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {!q.data ? (q.isPending ? <Loading rows={8} /> : null) : (
         <>
-          {q.data.milestones.length > 0 && <MilestoneStrip rows={q.data.milestones.map((m) => ({ ...m, isComplete: false, isCancelled: false }) as MilestoneRow)} onOpen={(m) => openPanel('Milestone', m.id)} />}
+          {/* §41 R9: the counts lead; the milestone strip follows at reduced height (less padding round its axis). */}
+          <Counts d={q.data} base={base} scoped={!!disciplineId} />
+          {q.data.milestones.length > 0 && <div className="[&>div>div]:py-2">
+            <MilestoneStrip rows={q.data.milestones.map((m) => ({ ...m, isComplete: false, isCancelled: false }) as MilestoneRow)} onOpen={(m) => openPanel('Milestone', m.id)} />
+          </div>}
           <Headline />
-          <Counts d={q.data} base={base} />
           <div className="grid gap-6 xl:grid-cols-[3fr_2fr]">
             <Section title={t('dash.attention')} id="attention" accent="peach">
               <AttentionPanel projectId={p.id} canSnooze={canSnooze} limit={10} disciplineId={disciplineId} />
@@ -88,7 +90,7 @@ export function DashboardTab() {
                               {name ? <span className="inline-flex items-center gap-2"><Avatar id={d.leadId} name={name} />{name}</span> : <Chip tone="warn">{t('dash.noLead')}</Chip>}
                             </td>
                             <td className={tdCls}><Why reasons={d.reasons} title={d.name}><HealthPill health={d.health} /></Why></td>
-                            <td className={cn(tdCls, 'text-right tabular-nums')}><Link className="hover:underline" to={`${tasks}&open=true`}>{d.open}</Link></td>
+                            <td className={cn(tdCls, 'text-right tabular-nums')}><Link className="hover:underline" to={`${tasks}&open=true&onHold=false`}>{d.open}</Link></td>
                             <td className={cn(tdCls, 'text-right tabular-nums', d.overdue > 0 && 'font-semibold text-bad')}><Link className="hover:underline" to={`${tasks}&overdue=true`}>{d.overdue}</Link></td>
                             <td className={cn(tdCls, 'text-right tabular-nums', d.blocked > 0 && 'font-semibold text-bad')}><Link className="hover:underline" to={`${tasks}&blocked=true`}>{d.blocked}</Link></td>
                             <td className={cn(tdCls, 'text-right tabular-nums')}>{d.deliverablesDue14}</td>
@@ -174,37 +176,41 @@ function Headline() {
 type Entry = [key: string, c: Count, to: string]
 const BAD = ['overdue', 'blocked', 'atRisk', 'issuesHigh', 'risksHigh'], WARN = ['waiting', 'unassigned']
 
-/** The counts row (§13.1 item 4) as summary tiles: every number opens the filtered list it was counted from. */
-function Counts({ d, base }: { d: Dash; base: string }) {
+/** The counts row (§13.1 item 4) as summary tiles: every number opens the filtered list it was counted from, and each tile
+ *  says what it counts (AC-CNT-06). Decisions, issues and risks are project-wide, so a discipline scope says so (AC-CNT-07). */
+function Counts({ d, base, scoped }: { d: Dash; base: string; scoped: boolean }) {
   const tasks = (k: keyof Dash['tasks']): Entry => [k, d.tasks[k], `${base}/tasks?${d.tasks[k].link}`]
   const dels = (k: keyof Dash['deliverables']): Entry => [k, d.deliverables[k], `${base}/deliverables?${d.deliverables[k].link}`]
   const decs = (k: keyof Dash['decisions']): Entry => [`dec${k}`, d.decisions[k], `${base}/decisions?${d.decisions[k].link}`]
-  const tile = (accent: Accent, title: string, [[key, c, to], ...rest]: Entry[]) => (
-    <SummaryTile accent={accent} label={title} value={
-      <Link to={to} className="inline-flex items-baseline gap-2 rounded-md hover:underline">{c.value}<span className="text-sm font-medium tracking-normal text-muted-foreground">{t(`dash.count.${key}`)}</span></Link>}>
-      {rest.length > 0 && (
-        <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 border-t border-(color:--acc-stripe) pt-3">
-          {rest.map(([k, n, href]) => {
-            const tone = n.value > 0 && BAD.includes(k) ? 'bad' : n.value > 0 && WARN.includes(k) ? 'warn' : null
-            return (
-              <li key={k}>
-                <Link to={href} className="flex min-h-6 items-baseline justify-between gap-2 rounded-md text-sm hover:underline">
-                  <span className="text-muted-foreground">{t(`dash.count.${k}`)}</span>
-                  <span className={cn('font-semibold tabular-nums', tone === 'bad' && 'text-bad', tone === 'warn' && 'text-warn')}>{tone && <span aria-hidden className="mr-1 text-xs">{tone === 'bad' ? '■' : '▲'}</span>}{n.value}</span>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-    </SummaryTile>
+  const tile = (accent: Accent, title: string, hint: string, whole: boolean, [[key, c, to], ...rest]: Entry[]) => (
+    <article aria-label={title} className="grid">
+      <SummaryTile accent={accent} hint={hint} to={to}
+        label={<>{title}{whole && scoped && <Chip tone="idle">{t('sig.wholeProject')}</Chip>}</>}
+        value={<span className="inline-flex items-baseline gap-2">{c.value}<span className="text-sm font-medium tracking-normal text-muted-foreground">{t(`dash.count.${key}`)}</span></span>}>
+        {rest.length > 0 && (
+          <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 border-t border-(color:--acc-stripe) pt-3">
+            {rest.map(([k, n, href]) => {
+              const tone = n.value > 0 && BAD.includes(k) ? 'bad' : n.value > 0 && WARN.includes(k) ? 'warn' : null
+              return (
+                <li key={k}>
+                  <Link to={href} className="flex min-h-6 items-baseline justify-between gap-2 rounded-md text-sm hover:underline">
+                    <span className="text-muted-foreground">{t(`dash.count.${k}`)}</span>
+                    <span className={cn('font-semibold tabular-nums', tone === 'bad' && 'text-bad', tone === 'warn' && 'text-warn')}>{tone && <span aria-hidden className="mr-1 text-xs">{tone === 'bad' ? '■' : '▲'}</span>}{n.value}</span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </SummaryTile>
+    </article>
   )
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {tile('blue', t('ptab.tasks'), [tasks('total'), tasks('complete'), tasks('inProgress'), tasks('review'), tasks('overdue'), tasks('blocked'), tasks('waiting'), tasks('unassigned')])}
-      {tile('mint', t('ptab.deliverables'), [dels('total'), dels('upcoming'), dels('atRisk'), dels('issued')])}
-      {tile('lavender', t('ptab.decisions'), [decs('pending'), decs('overdue')])}
-      {tile('peach', t('dash.registers'), [
+      {tile('blue', t('ptab.tasks'), t('sig.def.dashTasks'), false, [tasks('total'), tasks('complete'), tasks('inProgress'), tasks('review'), tasks('overdue'), tasks('blocked'), tasks('waiting'), tasks('unassigned')])}
+      {tile('mint', t('ptab.deliverables'), t('sig.def.dashDeliverables'), false, [dels('total'), dels('upcoming'), dels('atRisk'), dels('issued')])}
+      {tile('lavender', t('ptab.decisions'), t('sig.def.dashDecisions'), true, [decs('pending'), decs('overdue')])}
+      {tile('peach', t('dash.registers'), t('sig.def.dashRegisters'), true, [
         ['issuesOpen', { value: d.issues.open, link: '' }, `${base}/issues?indicator=open`],
         ['issuesHigh', { value: d.issues.high, link: '' }, `${base}/issues?indicator=open&severity=High`],
         ['risksHigh', { value: d.risks.high, link: '' }, `${base}/risks?indicator=open&severity=High`],

@@ -60,8 +60,8 @@ export function ProjectLayout() {
   )
 }
 
-/** Group tabs on one row, More for Activity and Settings, and the active group's pages as a small switch below. All are
- *  real links, so a page opens in a new tab and history works as before. */
+/** Group tabs, More for Activity and Settings, and the active group's pages as a small switch beside them (on a second
+ *  line when they do not fit). All are real links, so a page opens in a new tab and history works as before. */
 function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
   const segment = useMatch('/projects/:number/*')?.params['*']?.split('/')[0]
   const visible = (pages: ProjectPage[]) => pages.filter((x) => !x.show || x.show(p, me))
@@ -72,7 +72,7 @@ function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
   const moreActive = more.find((x) => x.path === segment)
   const tab = (on: boolean) => cn('inline-flex min-h-11 items-center px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', on && 'font-semibold text-foreground shadow-[inset_0_-2px_0_var(--primary)]')
   return (
-    <div className="no-print border-b bg-card px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8">
+    <div className="no-print flex min-w-0 flex-wrap items-center gap-x-6 border-b bg-card px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8">
       <nav aria-label={t('ptab.label')} className="flex min-w-0 flex-wrap items-center gap-1">
         {groups.map((g) => <Link key={g.id} to={to(g.pages[0])} aria-current={g === current ? (g.pages[0].path === segment ? 'page' : 'true') : undefined} className={tab(g === current)}>{t(g.label)}</Link>)}
         {more.length > 0 && (
@@ -85,7 +85,7 @@ function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
         )}
       </nav>
       {current && current.pages.length > 1 && (
-        <nav aria-label={t('calm.groupPages', { group: t(current.label) })} className="-mt-px flex min-w-0 flex-wrap gap-0.5 pb-2 pt-1">
+        <nav aria-label={t('calm.groupPages', { group: t(current.label) })} className="flex min-w-0 flex-wrap gap-0.5 py-1.5">
           {current.pages.map((x) => <NavLink key={x.label} to={to(x)} className={({ isActive }) => cn('inline-flex min-h-8 items-center rounded-md px-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', isActive && 'bg-muted font-semibold text-foreground')}>{t(x.label)}</NavLink>)}
         </nav>
       )}

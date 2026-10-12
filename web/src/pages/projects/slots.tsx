@@ -3,8 +3,8 @@ import { HealthPill } from '@/components/hub/pills'
 import { t } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 
-// Header parts filled in by later packets: the health "Why?" popover (005) and the follow control (006).
-export const ProjectSlots: { Health: ComponentType<{ p: ProjectDetail }>; Follow: ComponentType<{ p: ProjectDetail }> } = {
+// Header parts filled in by later packets: the health "Why?" popover (005), its override action and the follow control (006).
+export const ProjectSlots: { Health: ComponentType<{ p: ProjectDetail }>; Override: ComponentType<{ p: ProjectDetail }>; Follow: ComponentType<{ p: ProjectDetail }> } = {
   Health: ({ p }: { p: ProjectDetail }) => {
     const differs = p.health.overrideActive && p.health.reported !== p.health.computed
     return (
@@ -14,5 +14,6 @@ export const ProjectSlots: { Health: ComponentType<{ p: ProjectDetail }>; Follow
       </span>
     )
   },
+  Override: () => null,
   Follow: () => null,
 }

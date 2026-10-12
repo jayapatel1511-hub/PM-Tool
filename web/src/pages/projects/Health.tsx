@@ -16,8 +16,6 @@ import { ProjectSlots } from './slots'
 // "reported by" line (FR-HLT-02, AC-HLT-03).
 function HealthSlot({ p }: { p: ProjectDetail }) {
   const h = p.health
-  const [overriding, setOverriding] = useState(false)
-  const refresh = useProjectRefresh()
   const differs = h.overrideActive && h.reported !== h.computed
   const by = t('health.overrideBy', { name: h.overrideBy ?? '', date: fmtDate(h.healthOverrideExpiresAt) })
   return (
@@ -29,12 +27,19 @@ function HealthSlot({ p }: { p: ProjectDetail }) {
       {h.overrideActive && (h.healthOverrideNote
         ? <Why reasons={[{ text: h.healthOverrideNote }]} title={by}><span className="text-xs/[18px] text-muted-foreground">{by}</span></Why>
         : <span className="text-xs/[18px] text-muted-foreground">{by}</span>)}
-      {p.permissions.healthOverride.ok && p.status === 'Active' && (
-        <Button size="xs" variant="link" className="min-h-6 px-1" onClick={() => setOverriding(true)}>{h.overrideActive ? t('health.changeOverride') : t('health.override')}</Button>
-      )}
-      {overriding && <OverrideDialog p={p} onClose={(ok) => { setOverriding(false); if (ok) refresh(p.id) }} />}
     </span>
   )
+}
+
+/** The PM's health override (FR-HLT-02), in the project header's details and actions popover (§41 R6). */
+function OverrideAction({ p }: { p: ProjectDetail }) {
+  const [overriding, setOverriding] = useState(false)
+  const refresh = useProjectRefresh()
+  if (!p.permissions.healthOverride.ok || p.status !== 'Active') return null
+  return <>
+    <Button size="sm" variant="outline" onClick={() => setOverriding(true)}>{p.health.overrideActive ? t('health.changeOverride') : t('health.overrideTitle')}</Button>
+    {overriding && <OverrideDialog p={p} onClose={(ok) => { setOverriding(false); if (ok) refresh(p.id) }} />}
+  </>
 }
 
 function OverrideDialog({ p, onClose }: { p: ProjectDetail; onClose: (ok: boolean) => void }) {
@@ -61,3 +66,4 @@ function OverrideDialog({ p, onClose }: { p: ProjectDetail; onClose: (ok: boolea
 }
 
 ProjectSlots.Health = HealthSlot
+ProjectSlots.Override = OverrideAction

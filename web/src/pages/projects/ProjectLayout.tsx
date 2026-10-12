@@ -97,7 +97,8 @@ function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
 const linkCls = 'flex min-h-(--control-row-h) w-full items-center gap-2 rounded-sm px-3 py-1.5 text-left hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent'
 
 /** Shared project header (§12.1 UI behaviour, §13.0, §41 R6): one line with key, name, status and health with why. The
- *  client, PM, phase, next milestone and the project links sit in the details popover; Following keeps its own control. */
+ *  client, PM, phase, next milestone, the project links and the personal and health actions (star, Following, override)
+ *  sit in the details popover. */
 function ProjectHeader({ p }: { p: ProjectDetail }) {
   const refresh = useProjectRefresh()
   return (
@@ -105,12 +106,9 @@ function ProjectHeader({ p }: { p: ProjectDetail }) {
       <button className="key shrink-0 rounded-md bg-(--acc-bg) px-2 py-0.5 text-(--acc-fg) hover:underline" title={t('common.copyLink')}
         onClick={() => { navigator.clipboard?.writeText(p.projectNumber); toast.success(t('common.copied')) }}>{p.projectNumber}</button>
       <h1 title={p.name} className="min-w-0 truncate text-lg/7 font-semibold tracking-[-0.2px]">{p.name}</h1>
-      <button aria-label={p.starred ? t('projects.unstar') : t('projects.star')} aria-pressed={p.starred}
-        onClick={async () => { await (p.starred ? del(`projects/${p.id}/star`) : post(`projects/${p.id}/star`)); refresh(p.id) }}
-        className={cn('grid size-8 shrink-0 place-items-center rounded-md hover:bg-muted', p.starred ? 'text-warn' : 'text-muted-foreground')}><Star className={cn('size-4', p.starred && 'fill-current')} /></button>
+      {p.starred && <span title={t('projects.starred')} className="shrink-0 text-warn"><Star className="size-4 fill-current" aria-hidden /><span className="sr-only">{t('projects.starred')}</span></span>}
       <div className="flex shrink-0 items-center gap-2 text-sm"><StatusPill status={p.status} /><ProjectSlots.Health p={p} /></div>
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        <ProjectSlots.Follow p={p} />
         {/* A labelled popover, not a menu: the details are text that keyboard and screen-reader users read in order. */}
         <Popover>
           <PopoverTrigger asChild><Button variant="ghost" size="icon" aria-label={t('calm.projectDetails')}><MoreHorizontal className="size-5" /></Button></PopoverTrigger>
@@ -136,6 +134,14 @@ function ProjectHeader({ p }: { p: ProjectDetail }) {
                 ))}
               </ul>
             )}
+            <div className="flex flex-wrap items-center gap-2 border-t px-4 py-3">
+              <Button size="sm" variant="outline" aria-pressed={p.starred}
+                onClick={async () => { await (p.starred ? del(`projects/${p.id}/star`) : post(`projects/${p.id}/star`)); refresh(p.id) }}>
+                <Star className={cn('size-4', p.starred && 'fill-current text-warn')} aria-hidden />{p.starred ? t('projects.unstar') : t('projects.star')}
+              </Button>
+              <ProjectSlots.Follow p={p} />
+              <ProjectSlots.Override p={p} />
+            </div>
           </PopoverContent>
         </Popover>
       </div>

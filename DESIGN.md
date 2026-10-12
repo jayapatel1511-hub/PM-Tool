@@ -45,7 +45,7 @@ Submissions is a coordination record; Files remains an external-link library. Lo
 - Loading and empty states: distinguish no results in a filter, no access and unavailable capability without revealing restricted project existence.
 - Keyboard: preserve focus on return from source detail, use accessible tables/dialogs and never make colour the only status indication.
 
-The existing navy frame and blue accent may remain as visual cues. Engineering workflow clarity governs the design; no monday.com assets, logo or screen reproduction is introduced.
+The existing navy frame and blue accent may remain as visual cues. Engineering workflow clarity governs the design; no third-party product assets, logos or screen reproductions are introduced.
 
 ## Handoff experience
 

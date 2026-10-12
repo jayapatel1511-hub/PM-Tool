@@ -45,7 +45,7 @@ public static class PlanningEndpoints
     public sealed record PersonRow(Guid Id, string DisplayName, Guid? SupervisorId, string? SupervisorName,
         decimal WeeklyCapacity, bool CanCreateSelfEntry, bool CanCreateManagerEntry, bool CanRecordTimeAway,
         string[] Indicators, CellRow[] Cells, EntryRow[] Entries, ApprovedRow[] ApprovedAllocations,
-        Guid? OfficeId = null, string? JobTitle = null, Guid? HomeDisciplineId = null);
+        Guid? OfficeId = null, string? JobTitle = null, Guid? HomeDisciplineId = null, bool Partial = false);
     public sealed record PlannerSettings(int HorizonWeeks, int OverPct, int UnderPct, int UnderWeeks, int StaleDays, int MaxHoursPerWeek);
     public sealed record GridResult(DateOnly[] Weeks, DateOnly CurrentWeek, DateTimeOffset EvaluatedAt,
         bool PartialView, bool DraftAccess, PlannerSettings Settings, PersonRow[] People);
@@ -278,7 +278,7 @@ public static class PlanningEndpoints
             rows.Add(new(user.Id, user.DisplayName, user.SupervisorId, user.SupervisorId is { } sid ? supervisors.GetValueOrDefault(sid) : null,
                 user.WeeklyCapacityHours ?? settings.DefaultWeeklyCapacityHours, create && user.Id == access.Actor.Id,
                 create && user.Id != access.Actor.Id, Permissions.RecordTimeAway(access.Actor, user.SupervisorId, user.Id).Ok,
-                indicators, cells, personEntries, projected, user.OfficeId, user.JobTitle, user.HomeDisciplineId));
+                indicators, cells, personEntries, projected, user.OfficeId, user.JobTitle, user.HomeDisciplineId, personPartial));
         }
         var sortWeek = Workload.WeekOf(query.Week ?? current);
         CellRow SortCell(PersonRow p) => p.Cells.FirstOrDefault(c => c.Week == sortWeek) ?? p.Cells[0];

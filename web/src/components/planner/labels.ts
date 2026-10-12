@@ -18,6 +18,8 @@ export type ApprovedAllocation = { allocationId: string; projectId?: string; pro
 export type PlannerPerson = {
   id: string; displayName: string; supervisorId?: string; supervisorName?: string; weeklyCapacity: number
   officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null
+  /** This person has planned work on projects the viewer cannot see (AC-PLN-12), so their totals are partial. */
+  partial?: boolean
   canCreateSelfEntry: boolean; canCreateManagerEntry: boolean; canRecordTimeAway: boolean; indicators: string[]
   cells: PlannerCell[]; entries: PlannerEntry[]; approvedAllocations: ApprovedAllocation[]
 }

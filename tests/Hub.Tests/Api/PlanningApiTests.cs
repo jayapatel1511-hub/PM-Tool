@@ -186,6 +186,24 @@ public sealed class PlanningApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Picker_rows_say_when_a_person_has_planned_work_the_viewer_cannot_see() // packet 036 FR-PICK-02 with FR-CAP-06, AC-PLN-12
+    {
+        var project = await d.Project();
+        var (jill, alex) = (await FreshReport(), await FreshReport());
+        await f.DbAsync(async db => { (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = "Restricted"; db.ProjectMembers.Add(new() { ProjectId = project.Id, UserId = jill, Roles = ["TeamMember"] }); return await db.SaveChangesAsync(); });
+        await (await f.As(TestData.Admin).Post("/api/v1/planning/entries", new { personId = jill, hoursPerWeek = 30m, startWeek = Week, endWeek = Week, label = "Synthetic restricted study",
+            sourceCategory = "MajorProject", projectId = project.Id, confidence = PlanningConfidence.Expected, visibility = PlanningVisibility.Published })).Json(201);
+
+        var grid = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/grid?personIds={jill},{alex}&from={Week:yyyy-MM-dd}&weeks=1")).Json();
+        JsonNode Row(Guid id) => grid["people"]!.AsArray().Single(p => p!.G("id") == id)!;
+        Assert.True(grid["partialView"]!.GetValue<bool>());
+        Assert.Equal((true, false), (Row(jill)["partial"]!.GetValue<bool>(), Row(alex)["partial"]!.GetValue<bool>()));
+        Assert.Equal(40m, PickerCell(grid, jill)["remaining"]!.GetValue<decimal>()); // the hidden 30 h is not in the figure, so the flag must say so
+        var admin = await (await f.As(TestData.Admin).GetAsync($"/api/v1/planning/grid?personIds={jill}&from={Week:yyyy-MM-dd}&weeks=1")).Json();
+        Assert.Equal((false, 10m), (admin["people"]![0]!["partial"]!.GetValue<bool>(), PickerCell(admin, jill)["remaining"]!.GetValue<decimal>()));
+    }
+
+    [Fact]
     public async Task Person_ids_are_limited_scoped_for_project_managers_and_rows_carry_person_fields() // packet 036 AC-PICK-02b, -03c, FR-GRP-02
     {
         var root = $"/api/v1/planning/grid?from={Week:yyyy-MM-dd}&weeks=1&personIds=";

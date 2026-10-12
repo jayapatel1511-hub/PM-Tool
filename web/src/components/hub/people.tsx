@@ -37,32 +37,36 @@ export const weekOf = (d: string) => addDays(d, -((new Date(`${d}T00:00:00Z`).ge
 /** The week whose capacity a picker shows, for pickers rendered by shared fields that cannot pass the prop (FR-PICK-02). */
 export const CapacityWeek = createContext<string | undefined>(undefined)
 
+type PickerCell = PlannerCell & { partial?: boolean }
+
 /** Each candidate's remaining and time-away hours for one week (FR-PICK-01/02, D8). Only viewers who can open Workload ask,
- *  in one planning-grid request for the candidates not yet asked about; the server drops anyone outside the viewer's scope,
- *  and those people simply show no figure. */
+ *  in one planning-grid request for the candidates not yet asked about (chunks of 50, the server's limit, for longer
+ *  lists); the server drops anyone outside the viewer's scope, and those people simply show no figure. */
 function usePickerCapacity(week: string | undefined, open: boolean, ids: string[]) {
   const allowed = useMe().capabilities.workload
-  const [cells, setCells] = useState<Record<string, PlannerCell>>({})
+  const [cells, setCells] = useState<Record<string, PickerCell>>({})
   const asked = useRef(new Set<string>())
   const idsKey = week && open && allowed ? ids.join(',') : ''
   useEffect(() => {
     if (!week || !idsKey) return
-    const wanted = idsKey.split(',').filter((id) => !asked.current.has(`${week}:${id}`)).slice(0, 50)
-    if (!wanted.length) return
+    const wanted = idsKey.split(',').filter((id) => !asked.current.has(`${week}:${id}`))
     for (const id of wanted) asked.current.add(`${week}:${id}`)
-    get<PlannerGridData>(`planning/grid${qs({ personIds: wanted.join(','), from: week, weeks: 1 })}`)
-      .then((g) => setCells((c) => ({ ...c, ...Object.fromEntries(g.people.filter((p) => p.cells[0]).map((p) => [`${week}:${p.id}`, p.cells[0]])) })))
-      .catch(() => { /* no figure: the plain picker still works */ })
+    for (let i = 0; i < wanted.length; i += 50)
+      get<PlannerGridData>(`planning/grid${qs({ personIds: wanted.slice(i, i + 50).join(','), from: week, weeks: 1 })}`)
+        .then((g) => setCells((c) => ({ ...c, ...Object.fromEntries(g.people.filter((p) => p.cells[0]).map((p) => [`${week}:${p.id}`, { ...p.cells[0], partial: p.partial }])) })))
+        .catch(() => { /* no figure: the plain picker still works */ })
   }, [week, idsKey])
   return (id: string) => (week ? cells[`${week}:${id}`] : undefined)
 }
 
-/** "12 h free · 16 h away", short and right-aligned beside a candidate; nothing without data. */
-function CapacityFigure({ cell }: { cell?: PlannerCell }) {
+/** "12 h free · 16 h away", short and right-aligned beside a candidate; nothing without data. When the person has planned
+ *  work on projects the viewer cannot see, the free hours would be too high, so the figure says "Partial view" instead,
+ *  as Workload and the Planner do (FR-CAP-06, AC-PLN-12). */
+function CapacityFigure({ cell }: { cell?: PickerCell }) {
   if (!cell) return null
-  const free = cell.remaining < 0 ? t('people.overBy', { h: hours(-cell.remaining) }) : t('people.free', { h: hours(cell.remaining) })
+  const free = cell.partial ? t('workload.partialChip') : cell.remaining < 0 ? t('people.overBy', { h: hours(-cell.remaining) }) : t('people.free', { h: hours(cell.remaining) })
   return (
-    <span data-capacity className={cn('shrink-0 text-xs tabular-nums', cell.remaining < 0 ? 'font-medium text-warn' : 'text-muted-foreground')}>
+    <span data-capacity title={cell.partial ? t('workload.partial') : undefined} className={cn('shrink-0 text-xs tabular-nums', cell.remaining < 0 && !cell.partial ? 'font-medium text-warn' : 'text-muted-foreground')}>
       {free}{cell.timeAway > 0 && ` · ${t('people.away', { h: hours(cell.timeAway) })}`}
     </span>
   )

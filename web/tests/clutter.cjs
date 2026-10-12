@@ -10,25 +10,25 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'TUESDAY_
 const project = 'SYN-101'
 const personas = (process.env.CLUTTER_PERSONAS ?? 'priya,sam').split(',')
 const navPersonas = ['jordan', 'lena', 'sam', 'priya', 'alex', 'rita']
-// [path, baseline chrome words (section 2, the 5800e3fc re-measure), data selector for screens without table rows]
+// [path, baseline chrome words (section 2: 5800e3fc measured with this census, 2026-10-12), data selector for screens without table rows]
 const SCREENS = [
-  ['/home', 114, 'section, [data-accent].rounded-lg'],
+  ['/home', 83, 'section, [data-accent].rounded-lg'],
   ['/my-work', 78, 'section li'],
-  ['/boards', 140, 'section'],
+  ['/boards', 221, 'section'],
   ['/projects', 33],
   ['/tasks', 43],
-  ['/calendar', 150, '[role=region]'],
+  ['/calendar', 156, '[role=region]'],
   ['/portfolio', 58],
-  ['/workload', 112],
+  ['/workload', 85],
   ['/planner', 63],
-  ['/reports', 169, 'li'],
+  ['/reports', 17, 'li'],
   ['/team', 16],
-  [`/projects/${project}/dashboard`, 168],
+  [`/projects/${project}/dashboard`, 144],
   [`/projects/${project}/tasks`, 108],
   [`/projects/${project}/deliverables`, 110],
-  [`/projects/${project}/timeline`, 185, '[role=region]'],
+  [`/projects/${project}/timeline`, 165, '[role=region]'],
   [`/projects/${project}/allocations`, 98],
-  [`/projects/${project}/coordination`, 232, 'section.rounded-lg'],
+  [`/projects/${project}/coordination`, 213, 'section.rounded-lg'],
 ].filter(([p]) => !process.env.CLUTTER_SCREENS || process.env.CLUTTER_SCREENS.split(',').includes(p))
 // Words: at most half the baseline, but never below 40 (a title, a scope line and a toolbar need that many).
 const LIMIT = { firstDataY: 405, filterFields: 1, chromeControls: 25, wordsShare: 0.5, wordsFloor: 40, fills: 6, groupTabs: 7, sidebarItems: 8 }

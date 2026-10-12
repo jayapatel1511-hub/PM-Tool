@@ -1,0 +1,191 @@
+
+> web@0.0.0 test:clutter
+> node tests/clutter.cjs
+
+
+Census as priya at 1600x900
+┌─────────┬──────────────────────────────────┬────────────────┬──────────────┬─────────────┬────────────┬───────┬───────────┐
+│ (index) │ path                             │ chromeControls │ filterFields │ chromeWords │ firstDataY │ fills │ groupTabs │
+├─────────┼──────────────────────────────────┼────────────────┼──────────────┼─────────────┼────────────┼───────┼───────────┤
+│ 0       │ '/home'                          │ 17             │ 2            │ 83          │ 275        │ 10    │ null      │
+│ 1       │ '/my-work'                       │ 30             │ 7            │ 78          │ 694        │ 3     │ null      │
+│ 2       │ '/boards'                        │ 45             │ 6            │ 221         │ 511        │ 6     │ null      │
+│ 3       │ '/projects'                      │ 13             │ 6            │ 33          │ 504        │ 7     │ null      │
+│ 4       │ '/tasks'                         │ 27             │ 4            │ 43          │ 479        │ 6     │ null      │
+│ 5       │ '/calendar'                      │ 29             │ 0            │ 156         │ 373        │ 3     │ null      │
+│ 6       │ '/portfolio'                     │ 18             │ 9            │ 58          │ 558        │ 9     │ null      │
+│ 7       │ '/workload'                      │ 29             │ 5            │ 85          │ 727        │ 6     │ null      │
+│ 8       │ '/planner'                       │ 27             │ 9            │ 63          │ 744        │ 4     │ null      │
+│ 9       │ '/reports'                       │ 0              │ 0            │ 17          │ 184        │ 4     │ null      │
+│ 10      │ '/team'                          │ 11             │ 1            │ 16          │ 431        │ 6     │ null      │
+│ 11      │ '/projects/SYN-101/dashboard'    │ 42             │ 1            │ 144         │ 1138       │ 6     │ 24        │
+│ 12      │ '/projects/SYN-101/tasks'        │ 50             │ 6            │ 108         │ 762        │ 5     │ 24        │
+│ 13      │ '/projects/SYN-101/deliverables' │ 44             │ 9            │ 110         │ 734        │ 6     │ 24        │
+│ 14      │ '/projects/SYN-101/timeline'     │ 47             │ 5            │ 165         │ 784        │ 6     │ 24        │
+│ 15      │ '/projects/SYN-101/allocations'  │ 40             │ 6            │ 98          │ 660        │ 4     │ 24        │
+│ 16      │ '/projects/SYN-101/coordination' │ 40             │ 4            │ 213         │ 840        │ 2     │ 24        │
+└─────────┴──────────────────────────────────┴────────────────┴──────────────┴─────────────┴────────────┴───────┴───────────┘
+
+Census as sam at 1600x900
+┌─────────┬──────────────────────────────────┬────────────────┬──────────────┬─────────────┬────────────┬───────┬───────────┐
+│ (index) │ path                             │ chromeControls │ filterFields │ chromeWords │ firstDataY │ fills │ groupTabs │
+├─────────┼──────────────────────────────────┼────────────────┼──────────────┼─────────────┼────────────┼───────┼───────────┤
+│ 0       │ '/home'                          │ 15             │ 2            │ 88          │ 275        │ 7     │ null      │
+│ 1       │ '/my-work'                       │ 29             │ 7            │ 71          │ 694        │ 3     │ null      │
+│ 2       │ '/boards'                        │ 29             │ 6            │ 57          │ null       │ 0     │ null      │
+│ 3       │ '/projects'                      │ 13             │ 6            │ 53          │ null       │ 0     │ null      │
+│ 4       │ '/tasks'                         │ 26             │ 4            │ 48          │ null       │ 0     │ null      │
+│ 5       │ '/calendar'                      │ 22             │ 0            │ 93          │ 373        │ 1     │ null      │
+│ 6       │ '/portfolio'                     │ 17             │ 9            │ 55          │ 558        │ 9     │ null      │
+│ 7       │ '/workload'                      │ 29             │ 5            │ 85          │ 727        │ 7     │ null      │
+│ 8       │ '/planner'                       │ 27             │ 9            │ 63          │ 744        │ 4     │ null      │
+│ 9       │ '/reports'                       │ 0              │ 0            │ 17          │ 184        │ 4     │ null      │
+│ 10      │ '/team'                          │ 11             │ 1            │ 22          │ null       │ 0     │ null      │
+│ 11      │ '/projects/SYN-101/dashboard'    │ 40             │ 1            │ 139         │ 1138       │ 6     │ 24        │
+│ 12      │ '/projects/SYN-101/tasks'        │ 48             │ 6            │ 103         │ 762        │ 6     │ 24        │
+│ 13      │ '/projects/SYN-101/deliverables' │ 42             │ 9            │ 105         │ 734        │ 6     │ 24        │
+│ 14      │ '/projects/SYN-101/timeline'     │ 46             │ 5            │ 162         │ 784        │ 6     │ 24        │
+│ 15      │ '/projects/SYN-101/allocations'  │ 38             │ 6            │ 93          │ 660        │ 4     │ 24        │
+│ 16      │ '/projects/SYN-101/coordination' │ 38             │ 4            │ 207         │ 840        │ 2     │ 24        │
+└─────────┴──────────────────────────────────┴────────────────┴──────────────┴─────────────┴────────────┴───────┴───────────┘
+
+Sidebar items on /my-work
+┌─────────┬──────────┬──────────────┐
+│ (index) │ who      │ sidebarItems │
+├─────────┼──────────┼──────────────┤
+│ 0       │ 'jordan' │ 17           │
+│ 1       │ 'lena'   │ 15           │
+│ 2       │ 'sam'    │ 15           │
+│ 3       │ 'priya'  │ 14           │
+│ 4       │ 'alex'   │ 11           │
+│ 5       │ 'rita'   │ 11           │
+└─────────┴──────────┴──────────────┘
+
+No data rows to measure (empty state, AC-CALM-01 unmeasured): sam /boards, sam /projects, sam /tasks, sam /team
+
+FAIL: 125 threshold(s) exceeded
+AC-CALM-02 priya /home: 2 (limit 1)
+AC-CALM-05 priya /home words: 83 (limit 57)
+AC-CALM-05 priya /home fills: 10 (limit 6)
+AC-CALM-01 priya /my-work: 694 (limit 405)
+AC-CALM-02 priya /my-work: 7 (limit 1)
+AC-CALM-03 priya /my-work: 30 (limit 25)
+AC-CALM-05 priya /my-work words: 78 (limit 40)
+AC-CALM-01 priya /boards: 511 (limit 405)
+AC-CALM-02 priya /boards: 6 (limit 1)
+AC-CALM-03 priya /boards: 45 (limit 25)
+AC-CALM-05 priya /boards words: 221 (limit 70)
+AC-CALM-01 priya /projects: 504 (limit 405)
+AC-CALM-02 priya /projects: 6 (limit 1)
+AC-CALM-05 priya /projects fills: 7 (limit 6)
+AC-CALM-01 priya /tasks: 479 (limit 405)
+AC-CALM-02 priya /tasks: 4 (limit 1)
+AC-CALM-03 priya /tasks: 27 (limit 25)
+AC-CALM-05 priya /tasks words: 43 (limit 40)
+AC-CALM-03 priya /calendar: 29 (limit 25)
+AC-CALM-05 priya /calendar words: 156 (limit 75)
+AC-CALM-01 priya /portfolio: 558 (limit 405)
+AC-CALM-02 priya /portfolio: 9 (limit 1)
+AC-CALM-05 priya /portfolio words: 58 (limit 40)
+AC-CALM-05 priya /portfolio fills: 9 (limit 6)
+AC-CALM-01 priya /workload: 727 (limit 405)
+AC-CALM-02 priya /workload: 5 (limit 1)
+AC-CALM-03 priya /workload: 29 (limit 25)
+AC-CALM-05 priya /workload words: 85 (limit 56)
+AC-CALM-01 priya /planner: 744 (limit 405)
+AC-CALM-02 priya /planner: 9 (limit 1)
+AC-CALM-03 priya /planner: 27 (limit 25)
+AC-CALM-05 priya /planner words: 63 (limit 40)
+AC-CALM-01 priya /team: 431 (limit 405)
+AC-CALM-01 priya /projects/SYN-101/dashboard: 1138 (limit 405)
+AC-CALM-03 priya /projects/SYN-101/dashboard: 42 (limit 25)
+AC-CALM-04 priya /projects/SYN-101/dashboard project tabs: 24 (limit 7)
+AC-CALM-05 priya /projects/SYN-101/dashboard words: 144 (limit 84)
+AC-CALM-01 priya /projects/SYN-101/tasks: 762 (limit 405)
+AC-CALM-02 priya /projects/SYN-101/tasks: 6 (limit 1)
+AC-CALM-03 priya /projects/SYN-101/tasks: 50 (limit 25)
+AC-CALM-04 priya /projects/SYN-101/tasks project tabs: 24 (limit 7)
+AC-CALM-05 priya /projects/SYN-101/tasks words: 108 (limit 54)
+AC-CALM-01 priya /projects/SYN-101/deliverables: 734 (limit 405)
+AC-CALM-02 priya /projects/SYN-101/deliverables: 9 (limit 1)
+AC-CALM-03 priya /projects/SYN-101/deliverables: 44 (limit 25)
+AC-CALM-04 priya /projects/SYN-101/deliverables project tabs: 24 (limit 7)
+AC-CALM-05 priya /projects/SYN-101/deliverables words: 110 (limit 55)
+AC-CALM-01 priya /projects/SYN-101/timeline: 784 (limit 405)
+AC-CALM-02 priya /projects/SYN-101/timeline: 5 (limit 1)
+AC-CALM-03 priya /projects/SYN-101/timeline: 47 (limit 25)
+AC-CALM-04 priya /projects/SYN-101/timeline project tabs: 24 (limit 7)
+AC-CALM-05 priya /projects/SYN-101/timeline words: 165 (limit 92)
+AC-CALM-01 priya /projects/SYN-101/allocations: 660 (limit 405)
+AC-CALM-02 priya /projects/SYN-101/allocations: 6 (limit 1)
+AC-CALM-03 priya /projects/SYN-101/allocations: 40 (limit 25)
+AC-CALM-04 priya /projects/SYN-101/allocations project tabs: 24 (limit 7)
+AC-CALM-05 priya /projects/SYN-101/allocations words: 98 (limit 49)
+AC-CALM-01 priya /projects/SYN-101/coordination: 840 (limit 405)
+AC-CALM-02 priya /projects/SYN-101/coordination: 4 (limit 1)
+AC-CALM-03 priya /projects/SYN-101/coordination: 40 (limit 25)
+AC-CALM-04 priya /projects/SYN-101/coordination project tabs: 24 (limit 7)
+AC-CALM-05 priya /projects/SYN-101/coordination words: 213 (limit 116)
+AC-CALM-02 sam /home: 2 (limit 1)
+AC-CALM-05 sam /home words: 88 (limit 57)
+AC-CALM-05 sam /home fills: 7 (limit 6)
+AC-CALM-01 sam /my-work: 694 (limit 405)
+AC-CALM-02 sam /my-work: 7 (limit 1)
+AC-CALM-03 sam /my-work: 29 (limit 25)
+AC-CALM-05 sam /my-work words: 71 (limit 40)
+AC-CALM-02 sam /boards: 6 (limit 1)
+AC-CALM-03 sam /boards: 29 (limit 25)
+AC-CALM-02 sam /projects: 6 (limit 1)
+AC-CALM-05 sam /projects words: 53 (limit 40)
+AC-CALM-02 sam /tasks: 4 (limit 1)
+AC-CALM-03 sam /tasks: 26 (limit 25)
+AC-CALM-05 sam /tasks words: 48 (limit 40)
+AC-CALM-05 sam /calendar words: 93 (limit 75)
+AC-CALM-01 sam /portfolio: 558 (limit 405)
+AC-CALM-02 sam /portfolio: 9 (limit 1)
+AC-CALM-05 sam /portfolio words: 55 (limit 40)
+AC-CALM-05 sam /portfolio fills: 9 (limit 6)
+AC-CALM-01 sam /workload: 727 (limit 405)
+AC-CALM-02 sam /workload: 5 (limit 1)
+AC-CALM-03 sam /workload: 29 (limit 25)
+AC-CALM-05 sam /workload words: 85 (limit 56)
+AC-CALM-05 sam /workload fills: 7 (limit 6)
+AC-CALM-01 sam /planner: 744 (limit 405)
+AC-CALM-02 sam /planner: 9 (limit 1)
+AC-CALM-03 sam /planner: 27 (limit 25)
+AC-CALM-05 sam /planner words: 63 (limit 40)
+AC-CALM-01 sam /projects/SYN-101/dashboard: 1138 (limit 405)
+AC-CALM-03 sam /projects/SYN-101/dashboard: 40 (limit 25)
+AC-CALM-04 sam /projects/SYN-101/dashboard project tabs: 24 (limit 7)
+AC-CALM-05 sam /projects/SYN-101/dashboard words: 139 (limit 84)
+AC-CALM-01 sam /projects/SYN-101/tasks: 762 (limit 405)
+AC-CALM-02 sam /projects/SYN-101/tasks: 6 (limit 1)
+AC-CALM-03 sam /projects/SYN-101/tasks: 48 (limit 25)
+AC-CALM-04 sam /projects/SYN-101/tasks project tabs: 24 (limit 7)
+AC-CALM-05 sam /projects/SYN-101/tasks words: 103 (limit 54)
+AC-CALM-01 sam /projects/SYN-101/deliverables: 734 (limit 405)
+AC-CALM-02 sam /projects/SYN-101/deliverables: 9 (limit 1)
+AC-CALM-03 sam /projects/SYN-101/deliverables: 42 (limit 25)
+AC-CALM-04 sam /projects/SYN-101/deliverables project tabs: 24 (limit 7)
+AC-CALM-05 sam /projects/SYN-101/deliverables words: 105 (limit 55)
+AC-CALM-01 sam /projects/SYN-101/timeline: 784 (limit 405)
+AC-CALM-02 sam /projects/SYN-101/timeline: 5 (limit 1)
+AC-CALM-03 sam /projects/SYN-101/timeline: 46 (limit 25)
+AC-CALM-04 sam /projects/SYN-101/timeline project tabs: 24 (limit 7)
+AC-CALM-05 sam /projects/SYN-101/timeline words: 162 (limit 92)
+AC-CALM-01 sam /projects/SYN-101/allocations: 660 (limit 405)
+AC-CALM-02 sam /projects/SYN-101/allocations: 6 (limit 1)
+AC-CALM-03 sam /projects/SYN-101/allocations: 38 (limit 25)
+AC-CALM-04 sam /projects/SYN-101/allocations project tabs: 24 (limit 7)
+AC-CALM-05 sam /projects/SYN-101/allocations words: 93 (limit 49)
+AC-CALM-01 sam /projects/SYN-101/coordination: 840 (limit 405)
+AC-CALM-02 sam /projects/SYN-101/coordination: 4 (limit 1)
+AC-CALM-03 sam /projects/SYN-101/coordination: 38 (limit 25)
+AC-CALM-04 sam /projects/SYN-101/coordination project tabs: 24 (limit 7)
+AC-CALM-05 sam /projects/SYN-101/coordination words: 207 (limit 116)
+AC-CALM-04 jordan sidebar items: 17 (limit 8)
+AC-CALM-04 lena sidebar items: 15 (limit 8)
+AC-CALM-04 sam sidebar items: 15 (limit 8)
+AC-CALM-04 priya sidebar items: 14 (limit 8)
+AC-CALM-04 alex sidebar items: 11 (limit 8)
+AC-CALM-04 rita sidebar items: 11 (limit 8)

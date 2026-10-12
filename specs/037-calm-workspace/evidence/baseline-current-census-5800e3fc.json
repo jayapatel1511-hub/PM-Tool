@@ -1,0 +1,353 @@
+{
+  "exitCode": 1,
+  "tables": [
+    {
+      "heading": "Census as priya at 1600x900",
+      "rows": [
+        {
+          "path": "/home",
+          "chromeControls": 17,
+          "filterFields": 2,
+          "chromeWords": 83,
+          "firstDataY": 275,
+          "fills": 10,
+          "groupTabs": null
+        },
+        {
+          "path": "/my-work",
+          "chromeControls": 30,
+          "filterFields": 7,
+          "chromeWords": 78,
+          "firstDataY": 694,
+          "fills": 3,
+          "groupTabs": null
+        },
+        {
+          "path": "/boards",
+          "chromeControls": 45,
+          "filterFields": 6,
+          "chromeWords": 221,
+          "firstDataY": 511,
+          "fills": 6,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects",
+          "chromeControls": 13,
+          "filterFields": 6,
+          "chromeWords": 33,
+          "firstDataY": 504,
+          "fills": 7,
+          "groupTabs": null
+        },
+        {
+          "path": "/tasks",
+          "chromeControls": 27,
+          "filterFields": 4,
+          "chromeWords": 43,
+          "firstDataY": 479,
+          "fills": 6,
+          "groupTabs": null
+        },
+        {
+          "path": "/calendar",
+          "chromeControls": 29,
+          "filterFields": 0,
+          "chromeWords": 156,
+          "firstDataY": 373,
+          "fills": 3,
+          "groupTabs": null
+        },
+        {
+          "path": "/portfolio",
+          "chromeControls": 18,
+          "filterFields": 9,
+          "chromeWords": 58,
+          "firstDataY": 558,
+          "fills": 9,
+          "groupTabs": null
+        },
+        {
+          "path": "/workload",
+          "chromeControls": 29,
+          "filterFields": 5,
+          "chromeWords": 85,
+          "firstDataY": 727,
+          "fills": 6,
+          "groupTabs": null
+        },
+        {
+          "path": "/planner",
+          "chromeControls": 27,
+          "filterFields": 9,
+          "chromeWords": 63,
+          "firstDataY": 744,
+          "fills": 4,
+          "groupTabs": null
+        },
+        {
+          "path": "/reports",
+          "chromeControls": 0,
+          "filterFields": 0,
+          "chromeWords": 17,
+          "firstDataY": 184,
+          "fills": 4,
+          "groupTabs": null
+        },
+        {
+          "path": "/team",
+          "chromeControls": 11,
+          "filterFields": 1,
+          "chromeWords": 16,
+          "firstDataY": 431,
+          "fills": 6,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects/SYN-101/dashboard",
+          "chromeControls": 42,
+          "filterFields": 1,
+          "chromeWords": 144,
+          "firstDataY": 1138,
+          "fills": 6,
+          "groupTabs": 24
+        },
+        {
+          "path": "/projects/SYN-101/tasks",
+          "chromeControls": 50,
+          "filterFields": 6,
+          "chromeWords": 108,
+          "firstDataY": 762,
+          "fills": 5,
+          "groupTabs": 24
+        },
+        {
+          "path": "/projects/SYN-101/deliverables",
+          "chromeControls": 44,
+          "filterFields": 9,
+          "chromeWords": 110,
+          "firstDataY": 734,
+          "fills": 6,
+          "groupTabs": 24
+        },
+        {
+          "path": "/projects/SYN-101/timeline",
+          "chromeControls": 47,
+          "filterFields": 5,
+          "chromeWords": 165,
+          "firstDataY": 784,
+          "fills": 6,
+          "groupTabs": 24
+        },
+        {
+          "path": "/projects/SYN-101/allocations",
+          "chromeControls": 40,
+          "filterFields": 6,
+          "chromeWords": 98,
+          "firstDataY": 660,
+          "fills": 4,
+          "groupTabs": 24
+        },
+        {
+          "path": "/projects/SYN-101/coordination",
+          "chromeControls": 40,
+          "filterFields": 4,
+          "chromeWords": 213,
+          "firstDataY": 840,
+          "fills": 2,
+          "groupTabs": 24
+        }
+      ]
+    },
+    {
+      "heading": "Census as sam at 1600x900",
+      "rows": [
+        {
+          "path": "/home",
+          "chromeControls": 15,
+          "filterFields": 2,
+          "chromeWords": 88,
+          "firstDataY": 275,
+          "fills": 7,
+          "groupTabs": null
+        },
+        {
+          "path": "/my-work",
+          "chromeControls": 29,
+          "filterFields": 7,
+          "chromeWords": 71,
+          "firstDataY": 694,
+          "fills": 3,
+          "groupTabs": null
+        },
+        {
+          "path": "/boards",
+          "chromeControls": 29,
+          "filterFields": 6,
+          "chromeWords": 57,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects",
+          "chromeControls": 13,
+          "filterFields": 6,
+          "chromeWords": 53,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/tasks",
+          "chromeControls": 26,
+          "filterFields": 4,
+          "chromeWords": 48,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/calendar",
+          "chromeControls": 22,
+          "filterFields": 0,
+          "chromeWords": 93,
+          "firstDataY": 373,
+          "fills": 1,
+          "groupTabs": null
+        },
+        {
+          "path": "/portfolio",
+          "chromeControls": 17,
+          "filterFields": 9,
+          "chromeWords": 55,
+          "firstDataY": 558,
+          "fills": 9,
+          "groupTabs": null
+        },
+        {
+          "path": "/workload",
+          "chromeControls": 29,
+          "filterFields": 5,
+          "chromeWords": 85,
+          "firstDataY": 727,
+          "fills": 7,
+          "groupTabs": null
+        },
+        {
+          "path": "/planner",
+          "chromeControls": 27,
+          "filterFields": 9,
+          "chromeWords": 63,
+          "firstDataY": 744,
+          "fills": 4,
+          "groupTabs": null
+        },
+        {
+          "path": "/reports",
+          "chromeControls": 0,
+          "filterFields": 0,
+          "chromeWords": 17,
+          "firstDataY": 184,
+          "fills": 4,
+          "groupTabs": null
+        },
+        {
+          "path": "/team",
+          "chromeControls": 11,
+          "filterFields": 1,
+          "chromeWords": 22,
+          "firstDataY": null,
+          "fills": 0,
+          "groupTabs": null
+        },
+        {
+          "path": "/projects/SYN-101/dashboard",
+          "chromeControls": 40,
+          "filterFields": 1,
+          "chromeWords": 139,
+          "firstDataY": 1138,
+          "fills": 6,
+          "groupTabs": 24
+        },
+        {
+          "path": "/projects/SYN-101/tasks",
+          "chromeControls": 48,
+          "filterFields": 6,
+          "chromeWords": 103,
+          "firstDataY": 762,
+          "fills": 6,
+          "groupTabs": 24
+        },
+        {
+          "path": "/projects/SYN-101/deliverables",
+          "chromeControls": 42,
+          "filterFields": 9,
+          "chromeWords": 105,
+          "firstDataY": 734,
+          "fills": 6,
+          "groupTabs": 24
+        },
+        {
+          "path": "/projects/SYN-101/timeline",
+          "chromeControls": 46,
+          "filterFields": 5,
+          "chromeWords": 162,
+          "firstDataY": 784,
+          "fills": 6,
+          "groupTabs": 24
+        },
+        {
+          "path": "/projects/SYN-101/allocations",
+          "chromeControls": 38,
+          "filterFields": 6,
+          "chromeWords": 93,
+          "firstDataY": 660,
+          "fills": 4,
+          "groupTabs": 24
+        },
+        {
+          "path": "/projects/SYN-101/coordination",
+          "chromeControls": 38,
+          "filterFields": 4,
+          "chromeWords": 207,
+          "firstDataY": 840,
+          "fills": 2,
+          "groupTabs": 24
+        }
+      ]
+    },
+    {
+      "heading": "Sidebar items on /my-work",
+      "rows": [
+        {
+          "who": "jordan",
+          "sidebarItems": 17
+        },
+        {
+          "who": "lena",
+          "sidebarItems": 15
+        },
+        {
+          "who": "sam",
+          "sidebarItems": 15
+        },
+        {
+          "who": "priya",
+          "sidebarItems": 14
+        },
+        {
+          "who": "alex",
+          "sidebarItems": 11
+        },
+        {
+          "who": "rita",
+          "sidebarItems": 11
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "\nFAIL: 125 threshold(s) exceeded\nAC-CALM-02 priya /home: 2 (limit 1)\nAC-CALM-05 priya /home words: 83 (limit 57)\nAC-CALM-05 priya /home fills: 10 (limit 6)\nAC-CALM-01 priya /my-work: 694 (limit 405)\nAC-CALM-02 priya /my-work: 7 (limit 1)\nAC-CALM-03 priya /my-work: 30 (limit 25)\nAC-CALM-05 priya /my-work words: 78 (limit 40)\nAC-CALM-01 priya /boards: 511 (limit 405)\nAC-CALM-02 priya /boards: 6 (limit 1)\nAC-CALM-03 priya /boards: 45 (limit 25)\nAC-CALM-05 priya /boards words: 221 (limit 70)\nAC-CALM-01 priya /projects: 504 (limit 405)\nAC-CALM-02 priya /projects: 6 (limit 1)\nAC-CALM-05 priya /projects fills: 7 (limit 6)\nAC-CALM-01 priya /tasks: 479 (limit 405)\nAC-CALM-02 priya /tasks: 4 (limit 1)\nAC-CALM-03 priya /tasks: 27 (limit 25)\nAC-CALM-05 priya /tasks words: 43 (limit 40)\nAC-CALM-03 priya /calendar: 29 (limit 25)\nAC-CALM-05 priya /calendar words: 156 (limit 75)\nAC-CALM-01 priya /portfolio: 558 (limit 405)\nAC-CALM-02 priya /portfolio: 9 (limit 1)\nAC-CALM-05 priya /portfolio words: 58 (limit 40)\nAC-CALM-05 priya /portfolio fills: 9 (limit 6)\nAC-CALM-01 priya /workload: 727 (limit 405)\nAC-CALM-02 priya /workload: 5 (limit 1)\nAC-CALM-03 priya /workload: 29 (limit 25)\nAC-CALM-05 priya /workload words: 85 (limit 56)\nAC-CALM-01 priya /planner: 744 (limit 405)\nAC-CALM-02 priya /planner: 9 (limit 1)\nAC-CALM-03 priya /planner: 27 (limit 25)\nAC-CALM-05 priya /planner words: 63 (limit 40)\nAC-CALM-01 priya /team: 431 (limit 405)\nAC-CALM-01 priya /projects/SYN-101/dashboard: 1138 (limit 405)\nAC-CALM-03 priya /projects/SYN-101/dashboard: 42 (limit 25)\nAC-CALM-04 priya /projects/SYN-101/dashboard project tabs: 24 (limit 7)\nAC-CALM-05 priya /projects/SYN-101/dashboard words: 144 (limit 84)\nAC-CALM-01 priya /projects/SYN-101/tasks: 762 (limit 405)\nAC-CALM-02 priya /projects/SYN-101/tasks: 6 (limit 1)\nAC-CALM-03 priya /projects/SYN-101/tasks: 50 (limit 25)\nAC-CALM-04 priya /projects/SYN-101/tasks project tabs: 24 (limit 7)\nAC-CALM-05 priya /projects/SYN-101/tasks words: 108 (limit 54)\nAC-CALM-01 priya /projects/SYN-101/deliverables: 734 (limit 405)\nAC-CALM-02 priya /projects/SYN-101/deliverables: 9 (limit 1)\nAC-CALM-03 priya /projects/SYN-101/deliverables: 44 (limit 25)\nAC-CALM-04 priya /projects/SYN-101/deliverables project tabs: 24 (limit 7)\nAC-CALM-05 priya /projects/SYN-101/deliverables words: 110 (limit 55)\nAC-CALM-01 priya /projects/SYN-101/timeline: 784 (limit 405)\nAC-CALM-02 priya /projects/SYN-101/timeline: 5 (limit 1)\nAC-CALM-03 priya /projects/SYN-101/timeline: 47 (limit 25)\nAC-CALM-04 priya /projects/SYN-101/timeline project tabs: 24 (limit 7)\nAC-CALM-05 priya /projects/SYN-101/timeline words: 165 (limit 92)\nAC-CALM-01 priya /projects/SYN-101/allocations: 660 (limit 405)\nAC-CALM-02 priya /projects/SYN-101/allocations: 6 (limit 1)\nAC-CALM-03 priya /projects/SYN-101/allocations: 40 (limit 25)\nAC-CALM-04 priya /projects/SYN-101/allocations project tabs: 24 (limit 7)\nAC-CALM-05 priya /projects/SYN-101/allocations words: 98 (limit 49)\nAC-CALM-01 priya /projects/SYN-101/coordination: 840 (limit 405)\nAC-CALM-02 priya /projects/SYN-101/coordination: 4 (limit 1)\nAC-CALM-03 priya /projects/SYN-101/coordination: 40 (limit 25)\nAC-CALM-04 priya /projects/SYN-101/coordination project tabs: 24 (limit 7)\nAC-CALM-05 priya /projects/SYN-101/coordination words: 213 (limit 116)\nAC-CALM-02 sam /home: 2 (limit 1)\nAC-CALM-05 sam /home words: 88 (limit 57)\nAC-CALM-05 sam /home fills: 7 (limit 6)\nAC-CALM-01 sam /my-work: 694 (limit 405)\nAC-CALM-02 sam /my-work: 7 (limit 1)\nAC-CALM-03 sam /my-work: 29 (limit 25)\nAC-CALM-05 sam /my-work words: 71 (limit 40)\nAC-CALM-02 sam /boards: 6 (limit 1)\nAC-CALM-03 sam /boards: 29 (limit 25)\nAC-CALM-02 sam /projects: 6 (limit 1)\nAC-CALM-05 sam /projects words: 53 (limit 40)\nAC-CALM-02 sam /tasks: 4 (limit 1)\nAC-CALM-03 sam /tasks: 26 (limit 25)\nAC-CALM-05 sam /tasks words: 48 (limit 40)\nAC-CALM-05 sam /calendar words: 93 (limit 75)\nAC-CALM-01 sam /portfolio: 558 (limit 405)\nAC-CALM-02 sam /portfolio: 9 (limit 1)\nAC-CALM-05 sam /portfolio words: 55 (limit 40)\nAC-CALM-05 sam /portfolio fills: 9 (limit 6)\nAC-CALM-01 sam /workload: 727 (limit 405)\nAC-CALM-02 sam /workload: 5 (limit 1)\nAC-CALM-03 sam /workload: 29 (limit 25)\nAC-CALM-05 sam /workload words: 85 (limit 56)\nAC-CALM-05 sam /workload fills: 7 (limit 6)\nAC-CALM-01 sam /planner: 744 (limit 405)\nAC-CALM-02 sam /planner: 9 (limit 1)\nAC-CALM-03 sam /planner: 27 (limit 25)\nAC-CALM-05 sam /planner words: 63 (limit 40)\nAC-CALM-01 sam /projects/SYN-101/dashboard: 1138 (limit 405)\nAC-CALM-03 sam /projects/SYN-101/dashboard: 40 (limit 25)\nAC-CALM-04 sam /projects/SYN-101/dashboard project tabs: 24 (limit 7)\nAC-CALM-05 sam /projects/SYN-101/dashboard words: 139 (limit 84)\nAC-CALM-01 sam /projects/SYN-101/tasks: 762 (limit 405)\nAC-CALM-02 sam /projects/SYN-101/tasks: 6 (limit 1)\nAC-CALM-03 sam /projects/SYN-101/tasks: 48 (limit 25)\nAC-CALM-04 sam /projects/SYN-101/tasks project tabs: 24 (limit 7)\nAC-CALM-05 sam /projects/SYN-101/tasks words: 103 (limit 54)\nAC-CALM-01 sam /projects/SYN-101/deliverables: 734 (limit 405)\nAC-CALM-02 sam /projects/SYN-101/deliverables: 9 (limit 1)\nAC-CALM-03 sam /projects/SYN-101/deliverables: 42 (limit 25)\nAC-CALM-04 sam /projects/SYN-101/deliverables project tabs: 24 (limit 7)\nAC-CALM-05 sam /projects/SYN-101/deliverables words: 105 (limit 55)\nAC-CALM-01 sam /projects/SYN-101/timeline: 784 (limit 405)\nAC-CALM-02 sam /projects/SYN-101/timeline: 5 (limit 1)\nAC-CALM-03 sam /projects/SYN-101/timeline: 46 (limit 25)\nAC-CALM-04 sam /projects/SYN-101/timeline project tabs: 24 (limit 7)\nAC-CALM-05 sam /projects/SYN-101/timeline words: 162 (limit 92)\nAC-CALM-01 sam /projects/SYN-101/allocations: 660 (limit 405)\nAC-CALM-02 sam /projects/SYN-101/allocations: 6 (limit 1)\nAC-CALM-03 sam /projects/SYN-101/allocations: 38 (limit 25)\nAC-CALM-04 sam /projects/SYN-101/allocations project tabs: 24 (limit 7)\nAC-CALM-05 sam /projects/SYN-101/allocations words: 93 (limit 49)\nAC-CALM-01 sam /projects/SYN-101/coordination: 840 (limit 405)\nAC-CALM-02 sam /projects/SYN-101/coordination: 4 (limit 1)\nAC-CALM-03 sam /projects/SYN-101/coordination: 38 (limit 25)\nAC-CALM-04 sam /projects/SYN-101/coordination project tabs: 24 (limit 7)\nAC-CALM-05 sam /projects/SYN-101/coordination words: 207 (limit 116)\nAC-CALM-04 jordan sidebar items: 17 (limit 8)\nAC-CALM-04 lena sidebar items: 15 (limit 8)\nAC-CALM-04 sam sidebar items: 15 (limit 8)\nAC-CALM-04 priya sidebar items: 14 (limit 8)\nAC-CALM-04 alex sidebar items: 11 (limit 8)\nAC-CALM-04 rita sidebar items: 11 (limit 8)"
+  ]
+}

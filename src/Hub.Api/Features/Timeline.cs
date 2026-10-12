@@ -76,9 +76,10 @@ public static class TimelineEndpoints
                 d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.ReviewerId, d.StartDate, d.DueDate, d.OriginalStartDate, d.OriginalDueDate, d.Status, d.RowVersion, d.CreatedAt,
                 State = db.DeliverableStates.Where(x => x.DeliverableId == d.Id).Select(x => new { x.ProgressPct, x.IsOverdue }).FirstOrDefault(),
             }).ToListAsync();
-        var milestones = await db.Milestones.AsNoTracking().Where(m => m.ProjectId == id && !m.IsCancelled && m.Date != null)
+        // AC-TL-03: undated milestones come back too (Date null, last), so the views list them under Unscheduled.
+        var milestones = await db.Milestones.AsNoTracking().Where(m => m.ProjectId == id && !m.IsCancelled)
             .Select(m => new { m.Id, m.Key, m.Name, m.Date, m.IsComplete, Status = m.IsComplete ? MilestoneStatus.Complete : db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault() })
-            .OrderBy(m => m.Date).ToListAsync();
+            .OrderBy(m => m.Date == null).ThenBy(m => m.Date).ToListAsync();
         return new
         {
             Permissions = new { ManageMilestones = Permissions.ManageMilestones(a, ctx).Ok, NeedsReason = p.Status == ProjectStatus.Complete },

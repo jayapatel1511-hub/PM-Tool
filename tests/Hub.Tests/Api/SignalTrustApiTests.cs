@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Tests.Api;
 
-/// Packet 036 Part B at API level: counts equal the lists they open (AC-CNT-02 to -05).
+/// Packet 036 Part B at API level: counts equal the lists they open (AC-CNT-02 to -05) and the timeline payload stops
+/// dropping items (AC-TL-03, AC-TL-04), with each link's type for the arrows (FR-DEPT-06).
 [Collection("api")]
 public sealed class SignalTrustApiTests(HubFactory f)
 {
@@ -89,5 +90,42 @@ public sealed class SignalTrustApiTests(HubFactory f)
         var notDone = h["tasksByStatus"]!.AsArray().Where(l => l!.S("lane") != "Done").Sum(l => l!.I("count"));
         Assert.Equal(h["metrics"]!.I("openTasks"), notDone + onHold.I("count"));
         Assert.Equal(3, h["metrics"]!.I("openTasks"));
+    }
+
+    [Fact]
+    public async Task The_timeline_returns_undated_milestones_local_creation_dates_and_link_types() // AC-TL-03, AC-TL-04, FR-DEPT-06
+    {
+        var p = await d.Project();
+        var pm = f.As(TestData.Pm);
+        var workshop = await pm.Post($"/api/v1/projects/{p.Id}/milestones", new { name = "Client workshop", milestoneType = MilestoneType.ClientWorkshop, date = "2026-11-25" }).Result.Json(201);
+        // Creation needs a date; a copied structure or a template leaves it blank.
+        await f.DbAsync(db => db.Milestones.Where(x => x.Id == workshop.G("id")).ExecuteUpdateAsync(x => x.SetProperty(y => y.Date, (DateOnly?)null)));
+        await pm.Post($"/api/v1/projects/{p.Id}/milestones", new { name = "Design submission", milestoneType = "Design Submission", date = "2026-12-01" }).Result.Json(201);
+
+        var saved = f.Clock.Now;
+        JsonNode late, task;
+        try
+        {
+            f.Clock.Now = new DateTimeOffset(2026, 11, 10, 2, 30, 0, TimeSpan.Zero); // 22:30 on 11-09 in the organisation's zone (America/Halifax)
+            late = await Deliverable(p.Id, new { name = "Late-evening package" });
+            task = await d.NewTask(p.Id, TestData.Pm, new { name = "Late-evening task", dueDate = "2026-11-20" });
+        }
+        finally { f.Clock.Now = saved; }
+        var next = await d.NewTask(p.Id, TestData.Pm, new { name = "Starts with it" });
+        await pm.Post($"/api/v1/tasks/{next.S("id")}/dependencies", new { predecessorTaskId = task.G("id"), type = DependencyTypes.StartToStart, lagDays = 2 }).Result.Json(201);
+        var drawings = await Deliverable(p.Id, new { name = "Drawings" });
+        await pm.Post($"/api/v1/deliverables/{drawings.S("id")}/dependencies", new { predecessorDeliverableId = late.G("id"), type = DependencyTypes.FinishToFinish }).Result.Json(201);
+
+        var tl = await Get($"projects/{p.Id}/timeline");
+        Assert.Equal(new[] { "Design submission", "Client workshop" }, tl["milestones"]!.AsArray().Select(m => m!.S("name"))); // undated last, not dropped
+        Assert.Null(tl["milestones"]!.AsArray().Single(m => m!.S("name") == "Client workshop")!["date"]);
+        Assert.Equal("2026-11-09", tl["deliverables"]!.AsArray().Single(x => x!.G("id") == late.G("id"))!.S("createdOn"));
+        Assert.Equal("2026-11-09", tl["tasks"]!.AsArray().Single(x => x!.G("id") == task.G("id"))!.S("createdOn"));
+        var dep = tl["dependencies"]!.AsArray().Single()!;
+        Assert.Equal((DependencyTypes.StartToStart, 2), (dep.S("type"), dep.I("lagDays")));
+        Assert.Equal(DependencyTypes.FinishToFinish, tl["deliverableLinks"]!.AsArray().Single()!.S("type"));
+
+        var cross = (await Get($"timeline?projects={p.Id}"))["projects"]!.AsArray().Single()!["data"]!;
+        Assert.Contains(cross["milestones"]!.AsArray(), m => m!.S("name") == "Client workshop");
     }
 }

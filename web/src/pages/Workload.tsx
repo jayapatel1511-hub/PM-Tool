@@ -41,14 +41,16 @@ const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'projectId', 'indic
 const INDICATORS = ['over', 'under', 'cluster', 'unestimated'] as const
 const SORTS = ['load', 'overdue', 'tasks', 'name'] as const
 
-/** The row's indicators, most severe first (§41 R7). Over-assigned names the week that tripped it (this or next week). */
+/** The row's indicators, most severe first (§41 R7). Over-assigned names the week that tripped it (this or next week);
+ *  Under-assigned is judged on this week and next week together, so it names both. */
 function personSignals(p: PersonRow, currentWeek: string): Signal[] {
   const overWeek = p.cells.find((c) => (c.week === currentWeek || c.week === addDays(currentWeek, 7)) && c.pct > 110)?.week
+  const underWeeks = `${shortDate(currentWeek)}, ${shortDate(addDays(currentWeek, 7))}`
   return ([
     p.overAssigned && { key: 'over', tone: 'bad', label: overWeek ? t('signal.withWeek', { label: t('workload.ind.over'), week: shortDate(overWeek) }) : t('workload.ind.over') },
     p.cluster && { key: 'cluster', tone: 'warn', label: t('workload.ind.cluster') },
     p.unestimated > 0 && { key: 'unestimated', tone: 'warn', label: t('workload.unestimatedN', { n: p.unestimated }) },
-    p.underAssigned && { key: 'under', tone: 'idle', label: t('workload.ind.under') },
+    p.underAssigned && { key: 'under', tone: 'idle', label: t('signal.withWeek', { label: t('workload.ind.under'), week: underWeeks }) },
   ] as (Signal | false)[]).filter(Boolean) as Signal[]
 }
 

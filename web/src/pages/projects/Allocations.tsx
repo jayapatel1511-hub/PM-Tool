@@ -77,7 +77,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   // Active filters as removable chips (§41 R1); the fields themselves open from the Filters button.
   const tokens = ([
     ['q', t('common.search'), filters.q],
-    ['personId', t('workload.person'), options.data?.people.find(p => p.id === filters.personId)?.displayName ?? t('workload.selectedSupervisor')],
+    ['personId', t('workload.person'), options.data?.people.find(p => p.id === filters.personId)?.displayName ?? t('task.filterSelected')],
     ['purpose', t('allocation.purpose'), filters.purpose && t(`allocation.purpose.${filters.purpose}`)],
     ['status', t('allocation.status'), filters.status && tv(filters.status)],
     ['from', t('allocation.from'), filters.from && fmtDate(filters.from)],

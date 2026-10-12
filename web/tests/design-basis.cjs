@@ -186,15 +186,19 @@ let server, browser;
   assert.ok(coordinationQueries.some(q => q.params.page === '2' && q.params.pageSize === '4'), 'Coordination uses page two reaches the fifth row');
   await page.goto(`${base}/projects/P-DEMO/coordination`);
   await page.getByRole('heading', { name: 'Discipline coordination', exact: true }).waitFor();
-  await page.getByRole('button', { name: 'Print', exact: true }).click();
+  // Print is in the More actions menu; its item is enabled again once the last print has finished.
+  const print = async () => {
+    await page.getByRole('button', { name: 'More actions', exact: true }).click();
+    await page.locator('[role=menuitem]:not([data-disabled])').filter({ hasText: /^Print$/ }).click();
+  };
+  await print();
   await page.waitForFunction(() => window.__printCalls === 1);
   const printed = await page.evaluate(() => window.__printedTaskIds);
   assert.deepEqual(printed, coordinationUses.map(u => u.targetId).sort(), 'Print captures all five rendered input-use target ids');
   assert.ok(coordinationQueries.some(q => q.print && q.params.page === undefined && q.params.pageSize === undefined), 'Print requests the unpaged coordination projection');
-  await page.waitForFunction(() => [...document.querySelectorAll('button')].some(button => button.textContent?.trim() === 'Print' && !button.disabled));
   coordinationUses[4].targetId = id(699);
   const secondProjection = page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/discipline-coordination') && !u.searchParams.has('page') && !u.searchParams.has('pageSize'); });
-  await page.getByRole('button', { name: 'Print', exact: true }).click();
+  await print();
   await secondProjection;
   await page.waitForFunction(() => window.__printCalls === 2);
   const reprinted = await page.evaluate(() => window.__printedTaskIds);

@@ -250,7 +250,8 @@ export function CoordinationTab() {
     <Page title={t('ptab.coordination')} className={scale}
       subtitle={<>{t('wc.window', { from: fmtDate(c.window.thisWeek.from), to: fmtDate(c.window.thisWeek.to) })} ·{' '}
         {c.window.lastCoordinationReviewedAt ? t('wc.sinceReview', { when: fmtTime(c.window.lastCoordinationReviewedAt), who: c.window.reviewedBy ?? '' }) : t('wc.neverReviewedShort')}
-        <PageHelp>{t('wc.help')}</PageHelp></>}
+        {/* One help for the page (§41 R5): the weekly agenda and the discipline coordination view it opens with. */}
+        <PageHelp><p>{t('wc.help')}</p><p className="mt-2">{t('dcv.subtitle')}</p><p className="mt-2">{t('dcv.scopeNote')}</p><p className="mt-2">{t('dcv.allSectionsPage')}</p></PageHelp></>}
       actions={<>
         <ViewMenu listType="coordination" projectId={p.id} />
         {!meeting && (
@@ -265,9 +266,11 @@ export function CoordinationTab() {
         <Button variant="outline" aria-pressed={meeting} className={cn(meeting && 'border-primary bg-accent font-semibold text-accent-foreground hover:bg-accent')} onClick={() => set('meeting', meeting ? undefined : '1')}>{meeting ? <Check className="size-4" /> : <MonitorPlay className="size-4" />}{t('wc.meetingMode')}</Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild><Button variant="outline" size="icon" aria-label={t('wc.moreActions')}><MoreHorizontal className="size-5" /></Button></DropdownMenuTrigger>
-          <DropdownMenuContent align="end"><DropdownMenuItem onSelect={copySummary}><ClipboardCopy className="size-4" />{t('wc.copySummary')}</DropdownMenuItem></DropdownMenuContent>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem disabled={printAll} onSelect={() => setPrintAll(true)}><Printer className="size-4" />{t('wc.print')}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={copySummary}><ClipboardCopy className="size-4" />{t('wc.copySummary')}</DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="outline" disabled={printAll} onClick={() => setPrintAll(true)}><Printer className="size-4" />{t('wc.print')}</Button>
         {c.window.canMarkReviewed && <Button onClick={markReviewed}><CheckCheck className="size-4" />{t('wc.markReviewed')}</Button>}
       </>}>
       {p.status !== 'Active' && <Notice title={t('wc.notActive', { status: tv(p.status) })} />}

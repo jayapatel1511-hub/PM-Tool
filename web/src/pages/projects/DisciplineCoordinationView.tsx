@@ -101,11 +101,10 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     {(ownerId || from || to) && <Button variant="link" className="px-1" onClick={clearScope}>{t('dcv.clearScope')}</Button>}
   </div></FilterBar>
   // The heading and scope stay in place while a page or scope loads, so a changed field keeps focus and the layout its shape.
-  // One header row (§41 R1, R5): the title, its explanation behind page help, the Filters toolbar and the freshness time.
+  // One header row (§41 R1, R5): the title, the Filters toolbar and the freshness time; the explanation is in the page help.
   const shell = (content: ReactNode, evaluatedAt?: string) => <section aria-labelledby="dcv-title" className="space-y-4">
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
       <h2 id="dcv-title" className="text-lg/[26px] font-semibold tracking-[-0.2px]">{t('dcv.title')}</h2>
-      <PageHelp><p>{t('dcv.subtitle')}</p><p className="mt-2">{t('dcv.scopeNote')}</p><p className="mt-2">{t('dcv.allSectionsPage')}</p></PageHelp>
       {filters}
       {evaluatedAt && <span className="ml-auto text-xs text-muted-foreground tabular-nums">{t('dcv.clientRefresh', { when: new Date(evaluatedAt).toLocaleTimeString() })}</span>}
     </div>

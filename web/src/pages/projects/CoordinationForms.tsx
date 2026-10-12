@@ -52,6 +52,7 @@ export function PersonLabel({ id, name, options }: { id?: string | null; name?: 
 }
 /** A register's pages (§13.0): a labelled navigation landmark with Previous, the page of the total, and Next. */
 export function RegisterPager({ label, page, total, pageSize, onPage }: { label: string; page: number; total: number; pageSize: number; onPage: (page: number) => void }) {
+  if (total <= pageSize) return null
   return <nav aria-label={label} className="flex flex-wrap items-center justify-end gap-3">
     <Button variant="outline" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t('handoff.previous')}</Button>
     <span className="text-sm tabular-nums" aria-live="polite">{t('common.pageOf', { page, pages: Math.max(1, Math.ceil(total / Math.max(1, pageSize))) })}</span>

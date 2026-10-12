@@ -188,6 +188,9 @@
 .approved-hero h1 { font-size:120px; }
 .approved-hero .hero-copy { width:1100px; }
 }
+@media(max-width:1600px) {
+.approved-hero .sketch-scribble { display:none; }
+}
 @media(max-width:1150px) {
 .approved-hero .wrap { width:calc(100% - 72px); }
 .approved-hero .workspace,.approved-hero .approach { gap:45px; }

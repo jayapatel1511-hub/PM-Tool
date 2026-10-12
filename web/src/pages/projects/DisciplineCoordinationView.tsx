@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { get, qs } from '@/lib/api'
-import { fmtDate } from '@/lib/format'
+import { fmtDate, fmtTime } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import type { Accent } from '@/lib/utils'
@@ -106,7 +106,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
       <h2 id="dcv-title" className="text-lg/[26px] font-semibold tracking-[-0.2px]">{t('dcv.title')}</h2>
       {filters}
-      {evaluatedAt && <span className="ml-auto text-xs text-muted-foreground tabular-nums">{t('dcv.clientRefresh', { when: new Date(evaluatedAt).toLocaleTimeString() })}</span>}
+      {evaluatedAt && <span className="ml-auto text-xs text-muted-foreground tabular-nums">{t('dcv.clientRefresh', { when: fmtTime(evaluatedAt) })}</span>}
     </div>
     {(from || to) && <p role="status" className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲</span><span>{t('dcv.dateScopeNote')}</span></p>}
     {content}

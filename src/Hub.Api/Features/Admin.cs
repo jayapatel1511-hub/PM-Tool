@@ -210,7 +210,7 @@ public static class AdminEndpoints
         });
 
         // Organisation-level history of administrative changes (FR-021).
-        g.MapGet("/activity", async (HubDb db, DateOnly? from, DateOnly? to, Guid? actorId, string? itemType, string? category, int? page, int? pageSize) =>
+        g.MapGet("/activity", async (HubDb db, DateOnly? from, DateOnly? to, Guid? actorId, string? itemType, string? category, string? excludeAction, int? page, int? pageSize) =>
         {
             var (pg, size) = Http.Paging(page, pageSize);
             var q = db.ActivityLog.AsNoTracking().Where(a => a.ItemType != "PlanningEntry");
@@ -218,6 +218,7 @@ public static class AdminEndpoints
             if (to is { } t) q = q.Where(a => a.OccurredAt < t.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
             if (actorId is { } aid) q = q.Where(a => a.ActorUserId == aid);
             if (!string.IsNullOrWhiteSpace(itemType)) q = q.Where(a => a.ItemType == itemType);
+            if (!string.IsNullOrWhiteSpace(excludeAction)) q = q.Where(a => a.Action != excludeAction); // sign-ins swamp the organisation log
             if (!string.IsNullOrWhiteSpace(category)) q = q.Where(a => a.Categories.Contains(category));
             else q = q.Where(a => a.ProjectId == null);
             var total = await q.CountAsync();

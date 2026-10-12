@@ -50,11 +50,11 @@ export function AttentionRows({ items, canSnooze, limit, onChanged, footer, show
       {items.length === 0 ? <Empty>{t('attention.none')}</Empty> : (
         <ul className="divide-y">
           {shown.map((a) => (
-            <li key={a.id} className={cn('flex items-start gap-3 px-5 py-3 text-sm', a.snoozed && 'text-muted-foreground')}>
+            <li key={a.id} className={cn('flex flex-wrap items-start gap-3 px-5 py-3 text-sm', a.snoozed && 'text-muted-foreground')}>
               <Pill tone={TONE[a.severity] ?? 'idle'} className="mt-0.5">{tv(a.severity)}</Pill>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 basis-48">
                 <div className="flex flex-wrap items-baseline gap-x-2">
-                  {showProject && a.projectNumber && <Key>{a.projectNumber}</Key>}
+                  {showProject && a.projectNumber && !a.itemKey?.startsWith(a.projectNumber) && <Key>{a.projectNumber}</Key>}
                   <button className="text-left font-medium hover:underline" onClick={() => openPanel(a.itemType, a.itemId)}>{a.itemKey && <Key>{a.itemKey}</Key>} {a.itemName}</button>
                   <Why reasons={a.why ? [a.why] : []} title={`${a.ruleId} ${a.ruleName}`}><span className="text-xs text-muted-foreground">{a.ruleId} {a.ruleName}</span></Why>
                 </div>

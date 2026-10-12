@@ -376,7 +376,7 @@ export function IssuesTab() {
             ? <Empty title={t('register.noMatch')} action={<Button variant="outline" onClick={clearFilters}>{t('filters.clear')}</Button>}>{t('register.noMatchHint')}</Empty>
             : <Empty title={t('issue.empty')} action={can.ok && <Button variant="outline" onClick={() => setRaising(true)}><Plus className="size-4" />{t('issue.new')}</Button>}>{t('issue.emptyHint')}</Empty>} />
       )}
-      {!q.isPending && !q.error && <nav aria-label={t('issue.pager')} className="flex items-center justify-end gap-3">
+      {!q.isPending && !q.error && pages > 1 && <nav aria-label={t('issue.pager')} className="flex items-center justify-end gap-3">
         <Button variant="outline" disabled={page <= 1} onClick={() => toPage(page - 1)}>{t('handoff.previous')}</Button>
         <span className="text-sm tabular-nums" aria-live="polite">{t('common.pageOf', { page, pages })}</span>
         <Button variant="outline" disabled={page * pageSize >= total} onClick={() => toPage(page + 1)}>{t('handoff.next')}</Button>

@@ -3,7 +3,7 @@ import { UrlSearchInput } from '@/components/hub/url-search'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { ArrowDown, ArrowUp, ChevronDown, Columns3, Ellipsis, KanbanSquare, List, Plus, Rows3, type LucideIcon } from 'lucide-react'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { isValidElement, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
@@ -515,6 +515,8 @@ export function TasksTab() {
   const canCreate = p.permissions.createTaskIn.length > 0
   const toggle = (id: string) => setSelected((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
   const dash = <span className="text-muted-foreground">{t('common.dash')}</span>
+  // Phone cards leave out fields with nothing in them (a dash or a Missing mark), so a card lists what the task has.
+  const blank = (v: ReactNode) => v === dash || v === t('common.dash') || (isValidElement(v) && v.type === Missing)
 
   const all: Col[] = [
     { id: 'key', label: 'milestone.key', sort: 'key', cls: 'whitespace-nowrap', cell: (r) => <button type="button" data-task-focus="key" data-task-id={r.id} className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button> },
@@ -616,7 +618,7 @@ export function TasksTab() {
       ) : (
         phone ? <div data-task-layout="phone" className="space-y-2"><Checkbox aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={c => setSelected(c ? new Set(rows.map(r => r.id)) : new Set())} /><ul className="space-y-2">{flat.map(f => f.kind === 'group' ? <li key={`g-${f.id}`} className="flex flex-wrap items-center gap-2 py-2"><h3 className="break-words text-sm font-semibold">{f.label}</h3><span className="text-xs text-muted-foreground">{f.count}</span>{f.status && <StatusPill status={f.status} />}{group === 'deliverable' && canCreate && <Button size="sm" variant="outline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" />{t('task.addHere')}</Button>}</li> : <li key={f.r.id} className={cn('rounded-lg border bg-card p-4', (current === f.r.id || selected.has(f.r.id)) && 'bg-accent', current === f.r.id && 'shadow-[inset_3px_0_0_var(--primary)]')}>
           <div className="mb-3 flex items-start gap-3"><Checkbox aria-label={`${t('bulk.select')} ${f.r.key}`} checked={selected.has(f.r.id)} onCheckedChange={() => toggle(f.r.id)} /><div className="min-w-0 flex-1">{all.find(c => c.id === 'key')?.cell(f.r)}<div className="mt-1 break-words font-semibold">{all.find(c => c.id === 'name')?.cell(f.r)}</div></div></div>
-          <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name').map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{t(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
+          <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name' && !blank(c.cell(f.r))).map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{t(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
         </li>)}</ul>{q.isFetchingNextPage && <p role="status" className="text-xs text-muted-foreground">{t('task.loadingMore', { n: rows.length, total })}</p>}</div> :
         <TableRegion ref={scroller} data-task-layout="desktop" className="max-h-[calc(100dvh-10rem)] min-h-64 overflow-auto">
           <table className="w-full text-sm" aria-rowcount={flat.length + 1}>

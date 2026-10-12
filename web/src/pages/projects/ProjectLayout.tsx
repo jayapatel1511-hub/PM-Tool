@@ -102,10 +102,10 @@ const linkCls = 'flex min-h-(--control-row-h) w-full items-center gap-2 rounded-
 function ProjectHeader({ p }: { p: ProjectDetail }) {
   const refresh = useProjectRefresh()
   return (
-    <header data-accent={accentOf(p.id)} className="flex min-w-0 items-center gap-3 border-b border-t-4 border-t-(color:--acc-stripe) bg-card px-4 py-2.5 md:px-6 xl:px-8">
+    <header data-accent={accentOf(p.id)} className="flex min-w-0 flex-wrap items-center gap-3 border-b border-t-4 md:flex-nowrap border-t-(color:--acc-stripe) bg-card px-4 py-2.5 md:px-6 xl:px-8">
       <button className="key shrink-0 rounded-md bg-(--acc-bg) px-2 py-0.5 text-(--acc-fg) hover:underline" title={t('common.copyLink')}
         onClick={() => { navigator.clipboard?.writeText(p.projectNumber); toast.success(t('common.copied')) }}>{p.projectNumber}</button>
-      <h1 title={p.name} className="min-w-0 truncate text-lg/7 font-semibold tracking-[-0.2px]">{p.name}</h1>
+      <h1 title={p.name} className="min-w-0 truncate text-lg/7 font-semibold tracking-[-0.2px] max-md:order-last max-md:line-clamp-2 max-md:basis-full max-md:whitespace-normal">{p.name}</h1>
       {p.starred && <span title={t('projects.starred')} className="shrink-0 text-warn"><Star className="size-4 fill-current" aria-hidden /><span className="sr-only">{t('projects.starred')}</span></span>}
       <div className="flex shrink-0 items-center gap-2 text-sm"><StatusPill status={p.status} /><ProjectSlots.Health p={p} /></div>
       <div className="ml-auto flex shrink-0 items-center gap-2">

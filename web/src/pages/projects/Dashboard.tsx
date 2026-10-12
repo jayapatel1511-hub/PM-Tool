@@ -67,7 +67,7 @@ export function DashboardTab() {
             <MilestoneStrip rows={q.data.milestones.map((m) => ({ ...m, isComplete: false, isCancelled: false }) as MilestoneRow)} onOpen={(m) => openPanel('Milestone', m.id)} />
           </div>}
           <Headline />
-          <div className="grid gap-6 xl:grid-cols-[3fr_2fr]">
+          <div className="grid items-start gap-6 xl:grid-cols-[3fr_2fr]">
             <Section title={t('dash.attention')} id="attention" accent="peach">
               <AttentionPanel projectId={p.id} canSnooze={canSnooze} limit={10} disciplineId={disciplineId} />
             </Section>
@@ -229,7 +229,7 @@ function TaskListCard({ title, empty, data, to }: { title: string; empty: string
           {data.items.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-5 py-3 text-sm">
               <Key>{r.key}</Key>
-              <button type="button" className="min-w-0 flex-1 truncate text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>
+              <button type="button" className="min-w-0 grow basis-48 truncate text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>
               <span className="text-xs/[18px] text-muted-foreground">{r.assigneeName ?? t('ind.unassigned')}</span>
               <StatusPill status={r.status} />
               <span className={cn('whitespace-nowrap text-xs/[18px] tabular-nums', r.state?.isOverdue ? 'font-semibold text-bad' : 'text-muted-foreground')}>{t('workload.taskDue', { date: fmtDate(r.dueDate) })}</span>

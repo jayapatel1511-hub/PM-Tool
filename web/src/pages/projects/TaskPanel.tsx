@@ -45,7 +45,7 @@ const BLOCK_TYPES = ['Client', 'External Party', 'Internal', 'Decision', 'Inform
 
 /** Task detail (§13.3.1): header, blockers, fields grouped by purpose (people, details, dates, progress and hours), description,
  *  dependencies, manual block, links, comments and history. Every field saves on its own and says so (design §8). */
-export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }) {
+export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: string; onClose?: () => void; heading?: 'h1' | 'h2' }) {
   const q = useQuery({ queryKey: ['task', id], queryFn: () => get<TaskDetailData>(`tasks/${id}`) })
   const qc = useQueryClient()
   const refresh = useProjectRefresh()
@@ -96,7 +96,7 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
           <PriorityBadge priority={r.priority} />
           <span className="inline-flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><AccentDot id={d.project.id} />{d.project.projectNumber}</span>
         </div>
-        <h2 aria-label={r.name} className="-mx-2 break-words text-2xl/8 font-semibold tracking-[-0.4px]"><InlineText value={r.name} disabled={!perms.edit.ok} title={perms.edit.ok ? t('common.name') : perms.edit.reason ?? undefined} onSave={(v) => save({ name: v })} /></h2>
+        <Heading aria-label={r.name} className="-mx-2 break-words text-2xl/8 font-semibold tracking-[-0.4px]"><InlineText value={r.name} disabled={!perms.edit.ok} title={perms.edit.ok ? t('common.name') : perms.edit.reason ?? undefined} onSave={(v) => save({ name: v })} /></Heading>
         <TaskIndicators r={r} all />
         <div className="flex flex-wrap items-center gap-2">
           {perms.isReviewer && r.status === 'Ready for Review' && find('In Review') && <Button size="sm" onClick={() => act('In Review')}>{t('task.startReview')}</Button>}
@@ -467,7 +467,7 @@ function TaskPanel({ id, onClose }: PanelProps) { return <TaskDetail id={id} onC
 /** Full-page task (§13.3.1 "open full page"). */
 export function TaskPage() {
   const { id } = useParams()
-  return <div className="mx-auto w-full max-w-3xl p-4 md:p-6 xl:p-8"><div className="overflow-hidden rounded-xl border bg-card"><TaskDetail id={id!} /></div></div>
+  return <div className="mx-auto w-full max-w-3xl p-4 md:p-6 xl:p-8"><div className="overflow-hidden rounded-xl border bg-card"><TaskDetail id={id!} heading="h1" /></div></div>
 }
 
 PANELS.Task = { component: TaskPanel, fullPage: (id) => `/tasks/${id}` }

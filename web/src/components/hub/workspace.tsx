@@ -3,10 +3,10 @@ import {
   AlertTriangle, CalendarDays, Check, ChartGantt, ChevronDown, EyeOff, FileStack, FolderKanban, KanbanSquare, Layers, LayoutDashboard, Link2, List, Plus, Users, type LucideIcon,
 } from 'lucide-react'
 import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
-import { Link, useLocation, useSearchParams } from 'react-router'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ShellSlots } from '@/app/slots'
-import { ConfirmDialog, Field, Notice, Spinner } from '@/components/hub/common'
+import { ConfirmDialog, Field, Notice, Spinner, selectCls } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -246,13 +246,19 @@ export function WorkspaceTabs() {
   const scope = useScope()
   const me = useMe()
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const forced = useContext(Forced)
   if (forced) return null // the project's own tabs lead there
   const views = VIEWS.filter((v) => !v.show || v.show(me))
   const search = new URLSearchParams(scope.params).toString()
   return (
     <div className="no-print flex flex-wrap items-center gap-x-1 border-b">
-      <nav aria-label={t('wsview.label')} className="flex flex-wrap items-center">
+      {/* Phones get one select instead of nine tabs over three rows; the plus menu and share stay beside it. */}
+      <label className="flex min-h-11 items-center gap-2 py-1 text-sm md:hidden"><span className="sr-only">{t('wsview.label')}</span>
+        <select className={selectCls} value={views.some((v) => v.path === pathname) ? pathname : ''} onChange={(e) => navigate({ pathname: e.target.value, search })}>
+          {views.map((v) => <option key={v.id} value={v.path}>{t(v.label)}</option>)}
+        </select></label>
+      <nav aria-label={t('wsview.label')} className="hidden flex-wrap items-center md:flex">
         {views.map((v) => {
           const on = pathname === v.path
           return (

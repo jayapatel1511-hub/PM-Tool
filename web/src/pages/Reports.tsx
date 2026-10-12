@@ -14,7 +14,8 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useReference } from '@/hooks/data'
 import { get, qs } from '@/lib/api'
-import { fmtDate, fmtTime } from '@/lib/format'
+import { ChangeList, type ActivityRow } from '@/components/hub/activity'
+import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -60,7 +61,10 @@ export function ReportPage() {
   const cat = useCatalogue()
   const def = cat.data?.find((r) => r.code === code)
   const [sp, setSp] = useSearchParams()
-  const params = useMemo(() => Object.fromEntries([...sp.entries()].filter(([k]) => k !== 'panel')), [sp])
+  const chosen = useMemo(() => Object.fromEntries([...sp.entries()].filter(([k]) => k !== 'panel')), [sp])
+  // An activity log without dates covers the last 30 days rather than the whole project history.
+  const defaulted = code === 'project-activity-log' && !chosen.from && !chosen.to
+  const params = useMemo(() => (defaulted ? { ...chosen, from: addDays(today(), -30) } : chosen), [chosen, defaulted])
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); n.delete('panel'); setSp(n, { replace: true }) }
   const needsProject = def?.params.some((p) => p.type === 'project') && !params.projectId
   const run = useQuery({ queryKey: ['report', code, params], queryFn: () => get<ReportRun>(`reports/${code}${qs(params)}`), enabled: !!def && !needsProject })
@@ -75,7 +79,8 @@ export function ReportPage() {
       </>}>
       <form className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4 md:p-5" onSubmit={(e) => e.preventDefault()} aria-label={t('reports.parameters')}>
         {def.params.map((p) => <ParamInput key={p.key} p={p} value={params[p.key]} onChange={(v) => set(p.key, v)} />)}
-        {Object.keys(params).length > 0 && <Button type="button" variant="ghost" onClick={() => setSp(new URLSearchParams(), { replace: true })}>{t('common.clear')}</Button>}
+        {Object.keys(chosen).length > 0 && <Button type="button" variant="ghost" onClick={() => setSp(new URLSearchParams(), { replace: true })}>{t('common.clear')}</Button>}
+        {defaulted && <p className="w-full text-xs/[18px] text-muted-foreground">{t('reports.defaultRange')}</p>}
       </form>
       {needsProject ? <div className={card}><Empty>{t('reports.chooseProject')}</Empty></div> : run.error ? <ErrorBanner error={run.error} retry={() => run.refetch()} /> : run.isPending ? <div className={card}><Loading rows={8} /></div> : (
         <ReportTable r={run.data} itemType={def.itemType} asOf={run.dataUpdatedAt} />
@@ -148,6 +153,9 @@ function ReportTable({ r, itemType, asOf }: { r: ReportRun; itemType?: string | 
   const cell = (row: Record<string, any>, c: Column) => {
     const v = at(row, c.path)
     if (v == null || v === '') return <Missing />
+    // Activity rows carry their structured changes: show them as the Activity tab does, not as raw field names.
+    if (c.path === 'action' && Array.isArray(row.categories)) return t(`action.${v}`)
+    if (c.path === 'summary' && Array.isArray(row.changes)) return <ChangeList row={row as ActivityRow} />
     switch (c.type) {
       case 'key': {
         const type = row.itemType ?? itemType

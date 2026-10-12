@@ -189,9 +189,11 @@ export function ReadinessTab() {
 function WindowPager({ label, page, total, pageSize, onPage, className }: { label: string; page: number; total: number; pageSize: number; onPage: (page: number) => void; className?: string }) {
   return <nav aria-label={label} className={cn('flex flex-wrap items-center justify-end gap-3 px-5 py-3', className)}>
     <span className="mr-auto text-sm text-muted-foreground tabular-nums">{t('coord.count', { n: total })}</span>
-    <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t('handoff.previous')}</Button>
-    <span className="text-sm tabular-nums">{t('common.pageOf', { page, pages: Math.max(1, Math.ceil(total / Math.max(1, pageSize))) })}</span>
-    <Button size="sm" variant="outline" disabled={page * pageSize >= total} onClick={() => onPage(page + 1)}>{t('handoff.next')}</Button>
+    {total > pageSize && <>
+      <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t('handoff.previous')}</Button>
+      <span className="text-sm tabular-nums">{t('common.pageOf', { page, pages: Math.max(1, Math.ceil(total / Math.max(1, pageSize))) })}</span>
+      <Button size="sm" variant="outline" disabled={page * pageSize >= total} onClick={() => onPage(page + 1)}>{t('handoff.next')}</Button>
+    </>}
   </nav>
 }
 

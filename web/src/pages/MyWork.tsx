@@ -85,7 +85,7 @@ function MyWorkViews({ sections }: { sections?: { id: string; title: string; cou
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="no-print" aria-label={`${t('mywork.views')}: ${t(`mywork.tab.${current}`)}`}>{t(`mywork.tab.${current}`)}<ChevronDown className="size-4" aria-hidden /></Button>
+        <Button variant="outline" className="no-print self-start" aria-label={`${t('mywork.views')}: ${t(`mywork.tab.${current}`)}`}>{t(`mywork.tab.${current}`)}<ChevronDown className="size-4" aria-hidden /></Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64" onCloseAutoFocus={(e) => { if (toSection.current) { e.preventDefault(); toSection.current = false } }}>
         <DropdownMenuRadioGroup value={current} onValueChange={(x) => navigate(link(x))}>

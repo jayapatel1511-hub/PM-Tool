@@ -15,6 +15,9 @@ interface Ops {
 
 /** Operations (§23.8, packet 011 FR-006): the conditions operators are alerted on, checked now, and each background job's
  *  last run. The same checks run every five minutes and raise the environment's alert. */
+/** Jobs are listed by their label; an unknown job keeps its identifier. */
+const jobLabel = (job: string) => { const k = `ops.job.${job}`; const s = t(k); return s === k ? job : s }
+
 export function Operations() {
   const q = useQuery({ queryKey: ['admin', 'operations'], queryFn: () => get<Ops>('admin/operations'), refetchInterval: 60_000 })
   if (q.isPending) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
@@ -41,7 +44,7 @@ export function Operations() {
               <tbody>
                 {d.jobs.map((j) => (
                   <tr key={j.job} className="border-t hover:bg-muted">
-                    <td className={cn(tdCls, 'key')}>{j.job}</td>
+                    <td className={tdCls} title={j.job}>{jobLabel(j.job)}</td>
                     <td className={cn(tdCls, 'whitespace-nowrap')} title={fmtTime(j.startedAt)}>{ago(j.startedAt)}</td>
                     <td className={tdCls}><Pill tone={j.status === 'Succeeded' ? 'ok' : j.status === 'Failed' ? 'bad' : 'work'}>{t(`ops.status.${j.status}`)}</Pill></td>
                     <td className={cn(tdCls, 'whitespace-nowrap')} title={j.lastSuccess ? fmtTime(j.lastSuccess) : undefined}>{j.lastSuccess ? ago(j.lastSuccess) : <Missing />}</td>

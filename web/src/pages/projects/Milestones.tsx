@@ -228,10 +228,10 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
   const placed = [...dated].sort((a, b) => a.date!.localeCompare(b.date!)).map((m) => {
     const left = x(m.date!)
     const anchor = left < 12 ? 'start' : left > 88 ? 'end' : 'middle'
-    const from = anchor === 'start' ? left - 1 : anchor === 'end' ? left - 16 : left - 8
+    const from = anchor === 'start' ? left - 1 : anchor === 'end' ? left - 12 : left - 6
     let lane = lanes.findIndex((end) => end <= from)
     if (lane < 0) lane = lanes.length < 3 ? lanes.length : lanes.indexOf(Math.min(...lanes))
-    lanes[lane] = from + 16
+    lanes[lane] = from + 12
     return { m, left, lane, anchor }
   })
   const todayX = x(now)
@@ -259,7 +259,7 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
                 title={`${m.key} ${m.name} · ${fmtDate(m.date)} · ${tv(status)}`} aria-label={`${m.key} ${m.name}, ${fmtDate(m.date)}, ${tv(status)}`}>
                 <span className="block size-3.5 rotate-45 border border-white shadow-[0_0_0_1px_rgba(25,27,32,0.3)]" style={{ background: color }} />
               </button>
-              <span aria-hidden className="pointer-events-none absolute w-max max-w-36 text-xs/[18px]" style={{ ...label, top: AXIS + 14 + lane * LANE }}>
+              <span aria-hidden className="pointer-events-none absolute w-max max-w-32 text-xs/[18px]" style={{ ...label, top: AXIS + 14 + lane * LANE }}>
                 <span className="block font-medium">{m.key}</span>
                 <span className="block whitespace-nowrap text-muted-foreground tabular-nums">
                   {SYMBOL[tone(m)]} {shortDate(m.date)}{m.slipDays > 0 && <span className="text-warn"> · {slip(m.slipDays)}</span>}

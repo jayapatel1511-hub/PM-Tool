@@ -345,7 +345,7 @@ public static class Text
         ["perm.supervisor"] = "Only this person's supervisor can do this.",
         ["perm.staff"] = "Only Supervisors, Executives and Admins can open My Staff.",
         ["perm.portfolio"] = "Only Executives, Supervisors, Project Managers and Admins can open the portfolio.",
-        ["perm.workload"] = "You cannot open the workload view.",
+        ["perm.workload"] = "You cannot open the workload and planning views.",
         ["perm.templates"] = "Only Admins and Template Editors can edit templates.",
         ["perm.owner"] = "Only the owner or the Project Manager can do this.",
         ["perm.time_entry"] = "Only the person who entered these hours can change them.",

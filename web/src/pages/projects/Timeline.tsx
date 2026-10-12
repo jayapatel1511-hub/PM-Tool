@@ -184,7 +184,7 @@ export function TimelineTab() {
   const lanes: number[] = []
   const placed = [...milestones].sort((a, b) => a.date!.localeCompare(b.date!)).map((m) => {
     const left = x(m.date!)
-    const w = Math.min(176, 44 + m.name.length * 7)
+    const w = Math.min(260, 100 + m.name.length * 6.5)
     let row = lanes.findIndex((e) => e < left - 6)
     if (row < 0) row = lanes.length < 3 ? lanes.length : lanes.indexOf(Math.min(...lanes))
     lanes[row] = left + w

@@ -174,6 +174,9 @@ function BottomLink({ to, icon: Icon, label }: { to: string; icon: React.Compone
   )
 }
 
+/** Pages the navigation lists under another entry, or not at all, still name themselves in the breadcrumb. */
+const CRUMBS: Record<string, string> = { '/timeline': 'wsview.timeline', '/search': 'search.title', '/preferences': 'top.preferences', '/planner': 'planner.title', '/workload': 'nav.workload', '/boards': 'nav.boards', '/calendar': 'nav.calendar' }
+
 /** Where you are: the app, the section from the navigation, and inside a project its number, name and tab. The project
  *  name comes from the same cached query as the project header, so this adds no request. */
 function Breadcrumbs() {
@@ -189,16 +192,18 @@ function Breadcrumbs() {
     if (tab) crumbs.push({ label: t(tab.label) })
   } else if (/^\/people\/[^/]+\/reassign-work$/.test(pathname)) {
     crumbs.push({ label: t('nav.staff'), to: '/staff' }, { label: t('reassign.action') })
+  } else if (CRUMBS[pathname]) {
+    crumbs.push({ label: t(CRUMBS[pathname]) })
   } else {
     const n = NAV.find((x) => pathname === x.path || pathname.startsWith(`${x.path}/`))
     if (n) crumbs.push({ label: t(n.label), to: pathname === n.path ? undefined : n.path })
   }
   return (
     <nav aria-label={t('nav.breadcrumb')} className="hidden min-w-0 flex-1 lg:block">
-      <ol className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm text-muted-foreground">
+      <ol className="flex min-w-0 flex-nowrap items-center gap-x-1.5 overflow-hidden text-sm text-muted-foreground">
         <li className="shrink-0"><Link to="/" className="block rounded-sm leading-6 hover:text-foreground hover:underline">{t('app.name')}</Link></li>
         {crumbs.map((c, i) => (
-          <li key={i} className={cn('inline-flex min-w-0 max-w-full items-center gap-1.5', c.long && 'flex-1 basis-16')} title={c.label}>
+          <li key={i} className={cn('inline-flex items-center gap-1.5', c.long ? 'min-w-16 flex-1 basis-16' : 'shrink-0', c.long === undefined && crumbs.length > 2 && i === 0 && 'hidden xl:inline-flex')} title={c.label}>
             <ChevronRight className="size-3.5 shrink-0" aria-hidden />
             {c.to ? <Link to={c.to} className="block min-w-0 truncate rounded-sm leading-6 hover:text-foreground hover:underline">{c.label}</Link>
               : <span aria-current="page" className="block min-w-0 truncate font-medium leading-6 text-foreground">{c.label}</span>}

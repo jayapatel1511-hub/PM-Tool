@@ -11,18 +11,22 @@ export interface ActivityRow {
 }
 
 const isDate = (v?: string) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v)
-const show = (v?: string | null) => (v == null || v === '' ? t('common.dash') : isDate(v) ? fmtDate(v) : tv(v))
+const isStamp = (v?: string) => !!v && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(v)
+const isGuid = (v: unknown) => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
+const show = (v?: string | null) => (v == null || v === '' ? t('common.dash') : isDate(v) ? fmtDate(v) : isStamp(v) ? fmtTime(v) : tv(v))
 
 /** "Due date: 2026-09-10 → 2026-09-17" (§20.3 human-readable changes). */
 export function ChangeList({ row }: { row: ActivityRow }) {
   if (row.action === 'Deleted' && row.snapshot) {
-    return <span className="text-muted-foreground">{t('activity.snapshot')}: {Object.entries(row.snapshot).filter(([, v]) => v != null && v !== '').slice(0, 6)
+    return <span className="text-muted-foreground">{t('activity.snapshot')}: {Object.entries(row.snapshot).filter(([, v]) => v != null && v !== '' && !isGuid(v)).slice(0, 6)
       .map(([k, v]) => `${t(`field.${k}`)} ${typeof v === 'string' ? show(v) : String(v)}`).join(' · ')}</span>
   }
-  if (!row.changes.length) return null
+  // A change whose only label is an identifier (a revision or notice with no name) says nothing a reader can use.
+  const changes = row.changes.filter((c) => !isGuid(c.newLabel) && !isGuid(c.oldLabel))
+  if (!changes.length) return null
   return (
     <ul className="space-y-0.5">
-      {row.changes.slice(0, 8).map((c) => (
+      {changes.slice(0, 8).map((c) => (
         <li key={c.field}>
           <span className="text-muted-foreground">{t(`field.${c.field}`)}:</span>{' '}
           {row.action === 'Created' ? show(c.newLabel) : <>{show(c.oldLabel)} → {show(c.newLabel)}</>}

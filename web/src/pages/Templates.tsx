@@ -209,14 +209,14 @@ function TemplateEditor() {
       {q.error != null && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {err != null && <ErrorBanner error={err} retry={(err as ApiError).code === 'concurrency_conflict' ? () => { setErr(null); q.refetch() } : undefined} />}
       {!edit && <Notice icon={Lock} title={t('tpl.readOnlyTitle')}>{saved.status === 'Draft' ? t('tpl.editorsOnly') : t('tpl.readOnly')}</Notice>}
-      <nav aria-label={t('tpl.col.versions')} className="flex flex-wrap gap-2">{d.family.map((v) => {
+      {d.family.length > 1 && <nav aria-label={t('tpl.col.versions')} className="flex flex-wrap gap-2">{d.family.map((v) => {
         const on = v.id === d.id
         return (
           <Link key={v.id} to={`/templates/${v.id}`} aria-current={on ? 'page' : undefined}
             className={cn('inline-flex min-h-(--control-row-h) items-center gap-1 rounded-md border px-3 text-sm', on ? 'border-primary bg-accent font-semibold text-accent-foreground' : 'border-input bg-card hover:bg-muted')}>
             {on && <span aria-hidden>✓</span>}{versionLabel(v)}</Link>
         )
-      })}</nav>
+      })}</nav>}
 
       <Section title={t('tpl.about')}>
         <div className="grid max-w-[760px] gap-4 p-5 sm:grid-cols-2">
@@ -257,7 +257,7 @@ function TemplateEditor() {
                 return (
                   <tr key={m.ref} className="border-t">
                     <td className={cn(tdCls, 'tabular-nums text-muted-foreground')}>M{String(i + 1).padStart(2, '0')}</td>
-                    <td className={cell}><Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.mcol.name')} value={m.name} disabled={!edit || !!busy} onChange={(e) => set({ name: e.target.value })} />
+                    <td className={cell}>{edit ? <Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.mcol.name')} value={m.name} disabled={!!busy} onChange={(e) => set({ name: e.target.value })} /> : <span className="block min-w-48 py-1">{m.name}</span>}
                       {planned?.date && <div className="mt-0.5 text-xs/[18px] text-muted-foreground tabular-nums">{t('tpl.wouldBe', { date: fmtDate(planned.date) })}</div>}</td>
                     <td className={cell}><select className={cls} aria-label={t('tpl.mcol.type')} value={m.milestoneType} disabled={!edit || !!busy} onChange={(e) => set({ milestoneType: e.target.value })}>{MILESTONE_TYPES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select></td>
                     <td className={cell}><select className={cls} aria-label={t('tpl.mcol.anchor')} value={m.anchor} disabled={!edit || !!busy} onChange={(e) => set({ anchor: e.target.value })}>{ANCHORS.map((x) => <option key={x} value={x}>{t(`tpl.anchor.${x}`)}</option>)}</select></td>
@@ -289,7 +289,7 @@ function TemplateEditor() {
                 return (
                   <tr key={x.ref} className="border-t">
                     <td className={cell}><select className={cls} aria-label={t('tpl.dcol.discipline')} value={x.disciplineId} disabled={!edit || !!busy} onChange={(e) => set({ disciplineId: e.target.value })}>{inTemplate.map((id) => <option key={id} value={id}>{disciplines.get(id)}</option>)}</select></td>
-                    <td className={cell}><Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.dcol.name')} value={x.name} disabled={!edit || !!busy} onChange={(e) => set({ name: e.target.value })} /></td>
+                    <td className={cell}>{edit ? <Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.dcol.name')} value={x.name} disabled={!!busy} onChange={(e) => set({ name: e.target.value })} /> : <span className="block min-w-48 py-1">{x.name}</span>}</td>
                     <td className={cell}><select className={cls} aria-label={t('tpl.dcol.type')} value={x.deliverableTypeId} disabled={!edit || !!busy} onChange={(e) => set({ deliverableTypeId: e.target.value })}>{ref.data?.deliverableTypes.map((y) => <option key={y.id} value={y.id}>{y.name}</option>)}</select></td>
                     <td className={cell}><select className={cls} aria-label={t('tpl.dcol.target')} value={x.milestoneRef ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ milestoneRef: e.target.value || null })}>
                       <option value="">{t('common.none')}</option>{d.milestones.map((m, i) => <option key={m.ref} value={m.ref}>M{String(i + 1).padStart(2, '0')} {m.name}</option>)}</select></td>
@@ -317,7 +317,7 @@ function TemplateEditor() {
                   <tr key={k.ref} className="border-t">
                     <td className={cell}><select className={cn(cls, 'max-w-44')} aria-label={t('tpl.tcol.deliverable')} value={k.deliverableRef ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ deliverableRef: e.target.value || null })}>
                       <option value="">{t('common.none')}</option>{d.deliverables.map((x) => <option key={x.ref} value={x.ref}>{x.name}</option>)}</select></td>
-                    <td className={cell}><Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.tcol.name')} value={k.name} disabled={!edit || !!busy} onChange={(e) => set({ name: e.target.value })} /></td>
+                    <td className={cell}>{edit ? <Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.tcol.name')} value={k.name} disabled={!!busy} onChange={(e) => set({ name: e.target.value })} /> : <span className="block min-w-48 py-1">{k.name}</span>}</td>
                     <td className={cell}><select className={cls} aria-label={t('tpl.tcol.discipline')} value={k.disciplineId} disabled={!edit || !!busy} onChange={(e) => set({ disciplineId: e.target.value })}>{inTemplate.map((id) => <option key={id} value={id}>{disciplines.get(id)}</option>)}</select></td>
                     <td className={cell}><select className={cls} aria-label={t('tpl.tcol.assign')} value={k.assignTo} disabled={!edit || !!busy} onChange={(e) => set({ assignTo: e.target.value })}>{ROLES.map((x) => <option key={x} value={x}>{t(`tpl.role.${x}`)}</option>)}</select></td>
                     <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.tcol.estimate')} value={k.estimatedHours ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ estimatedHours: num(e.target.value) })} /></td>
@@ -380,6 +380,7 @@ function TemplateEditor() {
           <div className="min-w-0 space-y-1 pb-2">
             {preview.data && <p className="tabular-nums">{t('tpl.creates', { m: preview.data.counts.milestones, d: preview.data.counts.deliverables, k: preview.data.counts.tasks, x: preview.data.counts.dependencies })}</p>}
             {preview.data && <p className="text-muted-foreground tabular-nums">{t('tpl.undatedShort', { m: preview.data.undated.milestones, d: preview.data.undated.deliverables, k: preview.data.undated.tasks })}</p>}
+            {preview.data && <p className="text-xs/[18px] text-muted-foreground">{t('tpl.previewScope')}</p>}
             {dirty && <p className="text-xs/[18px] text-warn"><span aria-hidden>▲ </span>{t('tpl.saveToPreview')}</p>}
           </div>
         </div>

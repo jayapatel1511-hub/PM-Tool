@@ -80,7 +80,7 @@ export function ErrorBanner({ error, retry, retryLabel, details }: { error: unkn
     <div role="alert" className="flex flex-wrap items-center gap-3 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad">
       <AlertTriangle className="size-4 shrink-0" aria-hidden />
       <span className="min-w-0 flex-1">{e?.status === 404 ? t('app.notFound') : msg}</span>
-      {retry && <Button size="sm" variant="outline" onClick={retry}>{retryLabel ?? (conflict ? t('error.reload') : t('app.retry'))}</Button>}
+      {retry && e?.status !== 403 && <Button size="sm" variant="outline" onClick={retry}>{retryLabel ?? (conflict ? t('error.reload') : t('app.retry'))}</Button>}
       {details && <div className="w-full">{details}</div>}
     </div>
   )

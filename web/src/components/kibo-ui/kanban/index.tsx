@@ -175,7 +175,7 @@ export const KanbanCards = <T extends KanbanItemProps = KanbanItemProps>({
   const items = filteredData.map((item) => item.id);
 
   return (
-    <ScrollArea className="overflow-hidden">
+    <ScrollArea className="overflow-hidden [&_[data-slot=scroll-area-viewport]>div]:block!">
       <SortableContext items={items}>
         <div
           role="list"

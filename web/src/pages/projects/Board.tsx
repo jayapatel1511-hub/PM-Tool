@@ -17,7 +17,7 @@ import { useProjectRefresh } from '@/hooks/data'
 import { ViewMenu } from '@/components/hub/views'
 import { get, put, qs } from '@/lib/api'
 import { addDays, shortDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { plural, t, tv } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
@@ -102,7 +102,7 @@ export function BoardTab() {
         <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={side} onCheckedChange={(c) => set('side', c === true ? '1' : null)} />{t('board.showSide')}</label>
       </>} />
       {q.data && q.data.total > MAX_CARDS && <p role="status" className="rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲ </span>{t('board.tooMany', { n: q.data.total, max: MAX_CARDS })}</p>}
-      {hidden > 0 && !side && <p className="text-sm text-muted-foreground">{t('board.hiddenOnHold', { n: hidden })}</p>}
+      {hidden > 0 && !side && <p className="text-sm text-muted-foreground">{plural(hidden, 'board.hiddenOnHoldOne', 'board.hiddenOnHold', { n: hidden })}</p>}
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <BoardSkeleton lanes={lanes.length} /> : (
         // Lanes keep their 248 px width and the board scrolls sideways inside its own region (design §5).

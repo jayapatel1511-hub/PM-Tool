@@ -140,6 +140,13 @@
    Styling ::-webkit-scrollbar gives Chromium and Safari a permanent bar; scrollbar-width would override it, so only
    browsers without the pseudo-element get the standard properties. */
 .scroll-region { position: relative; } /* contains absolutely positioned (screen-reader) text, so it never widens the page */
+/* A sideways-scrolling region shows a soft edge shadow where content continues; the shadow scrolls away at the ends. */
+.scroll-region.overflow-x-auto, .scroll-region.overflow-auto {
+  background: linear-gradient(to right, var(--card) 30%, transparent) 0 0 / 40px 100% no-repeat local,
+    linear-gradient(to left, var(--card) 30%, transparent) 100% 0 / 40px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(25, 27, 32, 0.18), transparent) 0 0 / 14px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(25, 27, 32, 0.18), transparent) 100% 0 / 14px 100% no-repeat scroll, var(--card);
+}
 .scroll-region::-webkit-scrollbar { height: 12px; width: 12px; }
 .scroll-region::-webkit-scrollbar-track { background: var(--secondary); }
 .scroll-region::-webkit-scrollbar-thumb { background: var(--input); border-radius: 6px; border: 3px solid var(--secondary); }

@@ -30,7 +30,7 @@ type Row =
   | { kind: 'deliverable' | 'task'; id: string; g: GProject; item: Dated; span: Span; indent: boolean }
 
 const LABEL = 240
-const H = { project: 44, deliverable: 36, task: 32 } as const
+const H = { project: 56, deliverable: 36, task: 32 } as const
 /** Bar heights inside their rows: deliverables stand out from their tasks. */
 const BAR = { deliverable: 22, task: 18 } as const
 /** Days shown per zoom; previous and next move by half of it (FR-VIS-05). */
@@ -230,14 +230,17 @@ export function GanttPage() {
                         {ps && ps.r > ps.l && <span aria-hidden className="absolute bottom-1.5 h-1 rounded-full bg-(--acc-stripe)" style={{ left: ps.l, width: ps.r - ps.l }} title={t('gantt.projectSpan', { from: fmtDate(p.startDate), to: fmtDate(p.targetCompletionDate) })} />}
                         {ms.map((m, i) => {
                           const at = x(m.date) + px / 2
-                          const room = (i + 1 < ms.length ? x(ms[i + 1].date) + px / 2 : width) - at - 24 // labels stop before the next diamond
+                          // Labels stop before the next diamond; when that leaves no room, the label takes the second line and may run to the one after.
+                          const near = i + 1 < ms.length && x(ms[i + 1].date) - x(m.date) < 120
+                          const stop = i + 1 < ms.length ? (near && i + 2 < ms.length ? x(ms[i + 2].date) : near ? width : x(ms[i + 1].date)) + px / 2 : width
+                          const room = stop - at - 24
                           return (
                             <Fragment key={m.id}>
-                              <button type="button" className="absolute top-1/2 grid size-6 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-md" style={{ left: at }} onClick={() => openPanel('Milestone', m.id)}
+                              <button type="button" className="absolute top-[6px] grid size-6 -translate-x-1/2 place-items-center rounded-md" style={{ left: at }} onClick={() => openPanel('Milestone', m.id)}
                                 aria-label={t('timeline.milestoneLabel', { key: m.key, name: m.name, date: fmtDate(m.date), status: tv(m.status) })} title={`${m.key} ${m.name} · ${fmtDate(m.date)} · ${tv(m.status)}`}>
                                 <span className="block size-3.5 rotate-45 border border-card" style={{ background: tone(m.status) }} />
                               </button>
-                              {room >= 32 && <span aria-hidden className="pointer-events-none absolute top-1/2 -translate-y-1/2 truncate text-xs/[18px] font-medium text-foreground" style={{ left: at + 14, maxWidth: room }}>{m.name}</span>}
+                              {room >= 32 && <span aria-hidden className={cn('pointer-events-none absolute truncate text-xs/[18px] font-medium text-foreground', near ? 'top-[31px]' : 'top-[9px]')} style={{ left: at + (near ? -6 : 14), maxWidth: room + (near ? 20 : 0) }}>{m.name}</span>}
                             </Fragment>
                           )
                         })}

@@ -210,8 +210,11 @@ export function Settings() {
   return (
     <div className="max-w-[760px] space-y-6">
       <p className="text-base/6 text-muted-foreground">{t('admin.settingsIntro')}</p>
+      <nav aria-label={t('admin.settingsSections')} className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        {groups.map((g) => <a key={g} href={`#set-group-${g}`} className="text-primary underline-offset-4 hover:underline" onClick={(e) => { e.preventDefault(); document.getElementById(`set-group-${g}`)?.scrollIntoView({ block: 'start' }) }}>{t(`admin.group.${g}`)}</a>)}
+      </nav>
       {groups.map((g) => (
-        <Section key={g} title={t(`admin.group.${g}`)}>
+        <Section key={g} id={`set-group-${g}`} title={t(`admin.group.${g}`)}>
           <ul className="divide-y">
             {list.data.filter((s) => s.group === g).map((s) => {
               const v = s.key in draft ? draft[s.key] : s.value
@@ -230,7 +233,7 @@ export function Settings() {
                       </div>
                     ) : (
                       <form className="flex items-center gap-2" onSubmit={(e) => { e.preventDefault(); save(s.key, s.kind === 'Int' ? Number(v) : v) }}>
-                        <Input id={id} disabled={!!pending[s.key]} className="w-full sm:w-56" type={s.kind === 'Int' ? 'number' : s.kind === 'Time' ? 'time' : 'text'} value={v ?? ''}
+                        <Input id={id} disabled={!!pending[s.key]} className={cn('w-full', s.kind === 'Text' ? 'sm:w-80' : 'sm:w-56')} type={s.kind === 'Int' ? 'number' : s.kind === 'Time' ? 'time' : 'text'} value={v ?? ''}
                           onChange={(e) => setDraft({ ...draft, [s.key]: e.target.value })} aria-invalid={!!err} aria-describedby={err ? `${id}-e` : undefined} />
                         {s.key in draft && <Button type="submit" disabled={!!pending[s.key]}>{t('common.save')}</Button>}
                       </form>
@@ -296,7 +299,7 @@ export function Users() {
                   <td className={tdCls}>
                     <div className="flex items-start gap-2.5"><Avatar id={u.id} name={u.displayName} />
                       <div className="min-w-0"><div className="font-semibold">{u.isActive ? u.displayName : t('common.inactiveSuffix', { name: u.displayName })}</div>
-                        <div className="break-all text-xs/[18px] text-muted-foreground">{u.email}</div></div></div>
+                        <div className="break-words text-xs/[18px] text-muted-foreground">{u.email}</div></div></div>
                   </td>
                   <td className={tdCls}>{u.jobTitle || <Missing />}</td>
                   <td className={tdCls}>{ref.data?.offices.find((o: any) => o.id === u.officeId)?.name ?? <Missing />}</td>
@@ -438,11 +441,13 @@ function UserDialog({ user, users, offices, disciplines, onClose }: { user: User
 
 export function OrgActivity() {
   const [page, setPage] = useState(1)
-  const list = useQuery({ queryKey: ['admin', 'activity', page], queryFn: () => get(`admin/activity${qs({ page, pageSize: 50 })}`) })
+  const [hideSignIns, setHideSignIns] = useState(true)
+  const list = useQuery({ queryKey: ['admin', 'activity', page, hideSignIns], queryFn: () => get(`admin/activity${qs({ page, pageSize: 50, excludeAction: hideSignIns ? 'SignedIn' : undefined })}`) })
   return (
     <div className="space-y-4">
       <div className="max-w-3xl"><h2 className={h2}>{t('admin.activity')}</h2>
         <p className="mt-1 text-base/6 text-muted-foreground">{t('admin.activityIntro')}</p></div>
+      <label className="flex min-h-6 items-center gap-2 text-sm"><Checkbox checked={hideSignIns} onCheckedChange={(c) => { setHideSignIns(c === true); setPage(1) }} />{t('activity.hideSignIns')}</label>
       {list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : list.isPending ? <div className={card}><Loading /></div>
         : <ActivityTable rows={list.data.items} total={list.data.totalCount} page={page} pageSize={50} onPage={setPage} />}
     </div>

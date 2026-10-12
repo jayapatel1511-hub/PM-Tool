@@ -6,7 +6,9 @@ namespace Hub.Api.Data;
 
 public abstract class Entity { public Guid Id { get; set; } = Guid.CreateVersion7(); }
 
-public abstract class Audited : Entity
+public interface IVersioned { int RowVersion { get; set; } }
+
+public abstract class Audited : Entity, IVersioned
 {
     public DateTimeOffset CreatedAt { get; set; }
     public Guid? CreatedBy { get; set; }
@@ -98,6 +100,7 @@ public class UserSetting
 {
     public Guid UserId { get; set; }
     public bool DigestEnabled { get; set; } = true;
+    public bool HoldDigestWhenAway { get; set; } = true;
     public string? DigestTimeLocal { get; set; }
     public bool DenseRows { get; set; } = true;
     public bool WeeklySummaryEnabled { get; set; } = true;
@@ -194,8 +197,9 @@ public class Project : Audited, IAuditable
     public string? AuditName => Name;
 }
 
-public class ProjectDiscipline : Entity, IAuditable
+public class ProjectDiscipline : Entity, IAuditable, IVersioned
 {
+    public int RowVersion { get; set; } = 1;
     public Guid ProjectId { get; set; }
     public Guid DisciplineId { get; set; }
     public Guid? LeadUserId { get; set; }
@@ -209,8 +213,9 @@ public class ProjectDiscipline : Entity, IAuditable
     public Guid? AuditDisciplineId => Id;
 }
 
-public class ProjectMember : Entity, IAuditable
+public class ProjectMember : Entity, IAuditable, IVersioned
 {
+    public int RowVersion { get; set; } = 1;
     public Guid ProjectId { get; set; }
     public Guid UserId { get; set; }
     public List<string> Roles { get; set; } = [];
@@ -705,8 +710,9 @@ public class Comment : Entity, IAuditable
 
 public class CommentMention : Entity { public Guid CommentId { get; set; } public Guid UserId { get; set; } }
 
-public class DocumentLink : Entity, ISoftDeletable, IAuditable
+public class DocumentLink : Entity, ISoftDeletable, IAuditable, IVersioned
 {
+    public int RowVersion { get; set; } = 1;
     public Guid ProjectId { get; set; }
     public string ItemType { get; set; } = "";
     public Guid ItemId { get; set; }
@@ -984,8 +990,9 @@ public class SavedView : Audited
     public bool IsDefault { get; set; }
 }
 
-public class Workspace : Entity
+public class Workspace : Entity, IVersioned
 {
+    public int RowVersion { get; set; } = 1;
     public string Name { get; set; } = "";
     public Guid OwnerId { get; set; }
     public DateTimeOffset CreatedAt { get; set; }

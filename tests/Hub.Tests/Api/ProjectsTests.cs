@@ -128,7 +128,7 @@ public sealed class ProjectsTests(HubFactory f)
         var pm = f.As(TestData.Pm);
         var team = await pm.GetAsync($"/api/v1/projects/{p.Id}/team").Result.Json();
         var pmMember = team["members"]!.AsArray().First(m => m!.G("userId") == p.ProjectManagerId)!;
-        var r = await pm.DeleteAsync($"/api/v1/projects/{p.Id}/members/{pmMember.S("id")}");
+        var r = await pm.Delete($"/api/v1/projects/{p.Id}/members/{pmMember.S("id")}", pmMember.I("rowVersion"));
         Assert.Equal("primary_pm", (await r.Json(422)).S("code"));
 
         await pm.Post($"/api/v1/projects/{p.Id}/members", new { userId = d.User(TestData.Alex), roles = new[] { "Viewer" } }).Result.Json(201);
@@ -137,7 +137,7 @@ public sealed class ProjectsTests(HubFactory f)
         Assert.Equal(["TeamMember", "Viewer"], alexRows[0].Roles.Order());
 
         var civil = d.ProjectDiscipline(p.Id, "Civil");
-        (await pm.DeleteAsync($"/api/v1/projects/{p.Id}/disciplines/{civil}")).EnsureSuccessStatusCode(); // no work yet: removed or deactivated
+        (await pm.Delete($"/api/v1/projects/{p.Id}/disciplines/{civil}", f.Db(db => db.ProjectDisciplines.Single(d => d.Id == civil).RowVersion))).EnsureSuccessStatusCode(); // no work yet: removed or deactivated
     }
 
     [Fact]
@@ -167,11 +167,11 @@ public sealed class ProjectsTests(HubFactory f)
         var source = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Alex) && m.RemovedAt == null));
         var task = await d.NewTask(p.Id, TestData.Pm, new { assigneeId = d.User(TestData.Alex) });
 
-        var outsider = await f.As(TestData.Sam).DeleteAsync($"/api/v1/projects/{p.Id}/members/{source.Id}?reassignTo={d.User(TestData.Diane)}&reason=Staffing%20change");
+        var outsider = await f.As(TestData.Sam).Delete($"/api/v1/projects/{p.Id}/members/{source.Id}?reassignTo={d.User(TestData.Diane)}&reason=Staffing%20change", source.RowVersion);
         Assert.Equal(HttpStatusCode.Forbidden, outsider.StatusCode);
         Assert.Equal(d.User(TestData.Alex), await f.DbAsync(db => db.Tasks.Where(t => t.Id == task.G("id")).Select(t => t.AssigneeId).SingleAsync()));
 
-        var directReport = await f.As(TestData.Sam).DeleteAsync($"/api/v1/projects/{p.Id}/members/{source.Id}?reassignTo={d.User(TestData.Jill)}&reason=Staffing%20change");
+        var directReport = await f.As(TestData.Sam).Delete($"/api/v1/projects/{p.Id}/members/{source.Id}?reassignTo={d.User(TestData.Jill)}&reason=Staffing%20change", source.RowVersion);
         Assert.Equal(HttpStatusCode.OK, directReport.StatusCode);
         Assert.Equal(d.User(TestData.Jill), await f.DbAsync(db => db.Tasks.Where(t => t.Id == task.G("id")).Select(t => t.AssigneeId).SingleAsync()));
         Assert.True(await f.DbAsync(db => db.ProjectMembers.AnyAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Jill) && m.RemovedAt == null)));
@@ -183,10 +183,30 @@ public sealed class ProjectsTests(HubFactory f)
         var p = await d.Project();
         var other = await d.Project();
         var alex = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Alex) && m.RemovedAt == null));
-        var refused = await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}/members/{alex.Id}", new { primaryDisciplineId = d.ProjectDiscipline(other.Id, "Electrical") });
+        var refused = await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}/members/{alex.Id}", new { primaryDisciplineId = d.ProjectDiscipline(other.Id, "Electrical") }, alex.RowVersion);
         Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
         Assert.Equal(alex.PrimaryDisciplineId, await f.DbAsync(db => db.ProjectMembers.Where(m => m.Id == alex.Id).Select(m => m.PrimaryDisciplineId).SingleAsync()));
-        (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}/members/{alex.Id}", new { primaryDisciplineId = d.ProjectDiscipline(p.Id, "Electrical") })).EnsureSuccessStatusCode();
+        alex = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.Id == alex.Id));
+        (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}/members/{alex.Id}", new { primaryDisciplineId = d.ProjectDiscipline(p.Id, "Electrical") }, alex.RowVersion)).EnsureSuccessStatusCode();
+    }
+
+    [Fact]
+    public async Task Member_changes_reject_a_stale_version() // G-07, §25.8
+    {
+        var p = await d.Project();
+        var member = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Alex) && m.RemovedAt == null));
+        var pm = f.As(TestData.Pm);
+
+        var stale = await pm.Patch($"/api/v1/projects/{p.Id}/members/{member.Id}", new { roles = new[] { ProjectRole.TeamMember, ProjectRole.Reviewer } }, member.RowVersion - 1);
+        var problem = await stale.Json(409);
+        Assert.Equal("concurrency_conflict", problem.S("code"));
+        Assert.Equal([ProjectRole.TeamMember], await f.DbAsync(db => db.ProjectMembers.Where(m => m.Id == member.Id).Select(m => m.Roles).SingleAsync()));
+
+        var updated = await pm.Patch($"/api/v1/projects/{p.Id}/members/{member.Id}", new { roles = new[] { ProjectRole.TeamMember, ProjectRole.Reviewer } }, member.RowVersion);
+        updated.EnsureSuccessStatusCode();
+        var current = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.Id == member.Id));
+        Assert.True(current.RowVersion > member.RowVersion);
+        Assert.Equal(HttpStatusCode.Conflict, (await pm.Delete($"/api/v1/projects/{p.Id}/members/{member.Id}", member.RowVersion)).StatusCode);
     }
 
     [Fact]

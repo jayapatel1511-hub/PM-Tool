@@ -132,6 +132,8 @@ public sealed class StaffingSignalsSchemaTests(HubFactory f)
         string[] counted = ["task", "deliverable", "task_dependency", "deliverable_dependency", "activity_log", "app_user", "project"];
         var countSql = $"SELECT {string.Join(" || ' ' || ", counted.Select(t => $"(SELECT count(*) FROM hub.{t})::text"))} AS \"Value\"";
         Task<string> Counts() => isolated.DbAsync(db => db.Database.SqlQueryRaw<string>(countSql).SingleAsync());
+        const string migration = "20261012014621_StaffingSignals";
+        await isolated.DbAsync(async db => { await db.GetService<IMigrator>().MigrateAsync(migration); return 0; });
         var latest = await Schema(isolated);
         var rows = await Counts();
 
@@ -169,7 +171,7 @@ public sealed class StaffingSignalsSchemaTests(HubFactory f)
         });
 
         // Up again: the same schema as a fresh migration, and the backfill.
-        await isolated.DbAsync(async db => { await db.Database.MigrateAsync(); return 0; });
+        await isolated.DbAsync(async db => { await db.GetService<IMigrator>().MigrateAsync(migration); return 0; });
         var again = await Schema(isolated);
         Assert.Empty(latest.Except(again));
         Assert.Empty(again.Except(latest));

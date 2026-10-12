@@ -11,7 +11,7 @@ import { ItemSlots, type ItemPartProps } from '@/pages/projects/slots-items'
 
 // Document links (§12.7): where the files live. The Hub stores pointers only, never files (FR-DOC-03).
 
-interface LinkRow { id: string; title: string; url: string; linkType: string; isNetworkPath: boolean; addedByName?: string; addedAt: string; canChange: boolean }
+interface LinkRow { id: string; title: string; url: string; linkType: string; rowVersion: number; isNetworkPath: boolean; addedByName?: string; addedAt: string; canChange: boolean }
 interface LinkList { canAdd: boolean; links: LinkRow[]; inherited: LinkRow[] }
 
 const LINK_TYPES = ['SharePoint', 'OneDrive', 'Teams', 'Network Folder', 'External DMS', 'Client Portal', 'Other']
@@ -68,7 +68,7 @@ export function LinksPanel({ type, id }: ItemPartProps) {
         : canAdd && <Button size="sm" variant="outline" onClick={() => setAdding(true)}><Plus className="size-4" />{t('links.add')}</Button>}
       {removing && (
         <ConfirmDialog open title={t('links.removeTitle', { title: removing.title })} body={t('links.removeBody')} confirmLabel={t('common.remove')}
-          onOpenChange={(o) => !o && setRemoving(null)} onConfirm={async () => { await del(`links/${removing.id}`); setRemoving(null); reload() }} />
+          onOpenChange={(o) => !o && setRemoving(null)} onConfirm={async () => { await del(`links/${removing.id}`, undefined, removing.rowVersion); setRemoving(null); reload() }} />
       )}
     </div>
   )

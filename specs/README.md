@@ -1,6 +1,6 @@
 # Feature packets
 
-The product specification has 34 Spec Kit packets: the original 18 first-release and 6 Phase 2 packets, plus 9 approved coordination additions (025–033) and 1 approved planning addition (034). Packets 025–027 have foundation implementations with passing automated checks; full acceptance and implementation of 028–033 remain pending. Packet 034 is implemented in `c829f0e6` and deployed to the synthetic review stack in `d81c13f9`, with passing software/browser and deployed safety evidence; T023's manual screen-reader validation is blocked and human acceptance remains pending. The user's confirmation of the six pictured views moved the Portfolio, Workload, improved Timeline,
+The product specification has 38 Spec Kit packets: the original 18 first-release and 6 Phase 2 packets, 9 approved coordination additions (025–033), planning (034), availability/calendar (035), staffing/trust (036), calm workspace (037) and supervisor capacity (038). Runtime implementation is present for packets 025–037 in integrated baseline `68c56f28`; packet 038 and the final review fixes are locally implemented on `codex/deployment-ready`. Full packet, hosted and human acceptance remain distinct from the passing local release checks. See the [current deployment handoff](../docs/handoffs/2026-10-12-deployment-ready.md). Packet 034's earlier implementation and synthetic-review deployment remain historical evidence; T023's manual screen-reader validation and human acceptance remain pending. The user's confirmation of the six pictured views moved the Portfolio, Workload, improved Timeline,
 saved views, and three new workspace/calendar/task-hour packets into the first release (§36). Each folder holds a `spec.md` in Spec Kit's format and a quality checklist;
 `plan.md`, `tasks.md`, and `verification.md` are added as each packet is planned and built.
 
@@ -68,19 +68,19 @@ planning.
 
 ## Approved coordination additions — staged implementation
 
-Jay accepted the full scope on 2026-09-26. Foundation tasks T001–T005 are implemented for packets 025–027; their full-acceptance tasks and the other six packets remain open. Each folder includes a specification, implementation plan, tasks, quality checklist and honest verification status. The common permissions/model contract is in §8.10, §10.8 and §37.1; feature behaviour is in §37–§38. [DESIGN.md](../DESIGN.md) defines the intended experience.
+Jay accepted the full scope on 2026-09-26. Runtime implementation for all nine packets is present in the integrated baseline. Historical task checklists and verification records retain incomplete full-acceptance scenarios; they are not evidence that the runtime is absent. Each folder includes a specification, implementation plan, tasks, quality checklist and verification status. The common permissions/model contract is in §8.10, §10.8 and §37.1; feature behaviour is in §37–§38. [DESIGN.md](../DESIGN.md) defines the intended experience.
 
 | Packet | Delivers | Depends on | Status |
 |---|---|---|---|
 | [025-discipline-handoffs](025-discipline-handoffs/spec.md) | Discipline Handoffs and Acceptance | 002–006, 009 | Handoff foundation and revision-impact integration built; automated checks passed; full acceptance pending |
 | [026-multidisciplinary-reviews](026-multidisciplinary-reviews/spec.md) | Multidisciplinary Reviews and Comment Closure | 003, 004, 006, 009 | Review foundation built; automated checks passed; full acceptance pending |
 | [027-revision-change-impact](027-revision-change-impact/spec.md) | Revision Awareness and Change Impact | 003–006, 009, 025 | Revision/change foundation built; automated checks passed; packet 031 adapters and full acceptance pending |
-| [028-submission-readiness](028-submission-readiness/spec.md) | Submission Readiness and Issue Manifest | 003, 006, 009, 025–027 | Specified; implementation pending |
-| [029-dated-capacity-allocations](029-dated-capacity-allocations/spec.md) | Dated Capacity and Project Allocations | 002, 004, 006, 009, 017, 021 | Specified; implementation pending |
-| [030-discipline-coordination-view](030-discipline-coordination-view/spec.md) | Discipline Coordination View | 007, 009, 019, 022, 025–029, 031–033 | Specified; implementation pending |
-| [031-design-basis-assumptions](031-design-basis-assumptions/spec.md) | Shared Design Basis and Assumptions | 002–004, 006, 008, 009, 027 | Specified; implementation pending |
-| [032-readiness-weekly-commitments](032-readiness-weekly-commitments/spec.md) | Ready-to-Start Planning and Weekly Commitments | 004–009, 021, 025, 027, 029, 031 | Specified; implementation pending |
-| [033-location-linked-issues](033-location-linked-issues/spec.md) | Location-Linked Coordination Issues | 003, 006, 009, 014, 026, 027 | Specified; implementation pending |
+| [028-submission-readiness](028-submission-readiness/spec.md) | Submission Readiness and Issue Manifest | 003, 006, 009, 025–027 | Runtime implemented; full acceptance pending |
+| [029-dated-capacity-allocations](029-dated-capacity-allocations/spec.md) | Dated Capacity and Project Allocations | 002, 004, 006, 009, 017, 021 | Runtime implemented; full acceptance pending |
+| [030-discipline-coordination-view](030-discipline-coordination-view/spec.md) | Discipline Coordination View | 007, 009, 019, 022, 025–029, 031–033 | Runtime implemented; full acceptance pending |
+| [031-design-basis-assumptions](031-design-basis-assumptions/spec.md) | Shared Design Basis and Assumptions | 002–004, 006, 008, 009, 027 | Runtime implemented; full acceptance pending |
+| [032-readiness-weekly-commitments](032-readiness-weekly-commitments/spec.md) | Ready-to-Start Planning and Weekly Commitments | 004–009, 021, 025, 027, 029, 031 | Runtime implemented; full acceptance pending |
+| [033-location-linked-issues](033-location-linked-issues/spec.md) | Location-Linked Coordination Issues | 003, 006, 009, 014, 026, 027 | Runtime implemented; full acceptance pending |
 
 Implementation order: 025/026 → 027 → 029/031 → 032/028 → 033 → integrated 030. Slashes indicate independent prerequisites, not authorisation to start sub-agents. The discipline view can expose accepted sections incrementally; its final acceptance requires the whole integrated flow.
 
@@ -100,8 +100,7 @@ The specification lists these as designed for, not built (§29), with too little
 without inventing requirements. Each becomes a packet after discovery: Microsoft Teams
 notifications (FR-NOT-04), SharePoint document picking, ERP or Vantagepoint project sync,
 read-only project financials, HR-sourced utilisation and resource planning (manual dated allocations are now packet 029 and manual weekly planning entries packet 034), client or external
-access, advanced portfolio reporting, per-project threshold overrides, a personal calendar feed,
-and a second interface language if not done earlier. Cross-project dependencies (FR-DEP-10) are
+access, advanced portfolio reporting, per-project threshold overrides, and a second interface language if not done earlier. Cross-project dependencies (FR-DEP-10) are
 also Phase 3.
 
 ## Decisions to settle before planning 001
@@ -122,7 +121,7 @@ decided, but the plan records which one it assumed. Q19 (direct reports only) an
 
 ## Next step
 
-The first two increments implement foundations for packets 025–027. Review their verification records, then continue with 029/031 before dependent 032/028, respecting the dependency order and existing hardening findings. Full application acceptance for packets 025–033 remains pending. Do not reuse the original 24-packet completion claim for the expanded product.
+Review the current local candidate and its [deployment handoff](../docs/handoffs/2026-10-12-deployment-ready.md), then authorize the exact release activation separately. Complete the hosted scenarios and human sessions retained in each packet's verification record. Do not reuse the original 24-packet completion claim for expanded-product acceptance.
 
 ## Availability and calendar extension
 
@@ -134,13 +133,13 @@ On 2026-10-11 Jay approved both packets and accepted their default decisions ("l
 
 | Packet | Delivers | Depends on | Status |
 |---|---|---|---|
-| [036-staffing-and-signal-trust](036-staffing-and-signal-trust/spec.md) | Open roles, Start-to-Start and Finish-to-Finish links, the Status not moving rule (A-21), capacity grouping, capacity in the person picker, counts that match their lists, timelines that name their dates | 005, 007, 016–018, 021, 022, 029, 034 | In build, Phase 1 |
-| [037-calm-workspace](037-calm-workspace/spec.md) | One-row toolbars, grouped project tabs, a shorter sidebar, one-line headers, one signal per row, My Work opening on Today | 019, 022, 034 | In build, Phase 1 |
+| [036-staffing-and-signal-trust](036-staffing-and-signal-trust/spec.md) | Open roles, Start-to-Start and Finish-to-Finish links, the Status not moving rule (A-21), capacity grouping, capacity in the person picker, counts that match their lists, timelines that name their dates | 005, 007, 016–018, 021, 022, 029, 034 | Locally implemented and checked; hosted/human acceptance pending |
+| [037-calm-workspace](037-calm-workspace/spec.md) | One-row toolbars, grouped project tabs, a shorter sidebar, one-line headers, one signal per row, My Work opening on Today | 019, 022, 034 | Locally implemented and checked; hosted/human acceptance pending |
 
 ## Supervisor capacity signals
 
-On 2026-10-12 a gap review of the October 2026 product research against §39–§41 left two cheap recommendations open. Packet 038 records them as §42 and rewrites the stale v1.1 rows 16 and 17 of §27.2. Jay has not yet confirmed its defaults D1–D7; nothing is built.
+On 2026-10-12 a gap review of the October 2026 product research against §39–§41 left two recommendations open. Packet 038 records them as §42 and rewrites the stale v1.1 rows 16 and 17 of §27.2. Both are implemented locally with defaults D1–D7 under Jay's build request, plus his explicit confirmation of shared Partial view for hidden Confirmed allocations. See [verification](038-supervisor-capacity-signals/verification.md).
 
 | Packet | Delivers | Depends on | Status |
 |---|---|---|---|
-| [038-supervisor-capacity-signals](038-supervisor-capacity-signals/spec.md) | A "This week" capacity column on My Staff from the planner's batch read, and a daily-digest hold on working days a person has no availability | 006, 007, 034, 035, 036 | Specified |
+| [038-supervisor-capacity-signals](038-supervisor-capacity-signals/spec.md) | A "This week" capacity column on My Staff from the planner's batch read, and a daily-digest hold on working days a person has no availability | 006, 007, 034, 035, 036 | Locally implemented and verified; hosted/human acceptance pending |

@@ -165,7 +165,7 @@ function LinksSection({ p, onChange }: { p: ProjectDetail; onChange: () => void 
   const removeLink = async (id: string) => {
     if (removing) return
     setRemoveErr(null); setRemoveErrId(null); setRemoving(id)
-    try { await del(`projects/${p.id}/links/${id}`); onChange() } catch (e) { setRemoveErr(e); setRemoveErrId(id) } finally { setRemoving(null) }
+    try { await del(`projects/${p.id}/links/${id}`, undefined, p.links.find((l) => l.id === id)?.rowVersion); onChange() } catch (e) { setRemoveErr(e); setRemoveErrId(id) } finally { setRemoving(null) }
   }
   return (
     <Section title={t('settings.links')} count={p.links.length}>

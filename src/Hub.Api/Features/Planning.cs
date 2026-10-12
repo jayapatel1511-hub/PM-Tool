@@ -205,13 +205,20 @@ public static class PlanningEndpoints
             .Where(e => ids.Contains(e.PersonId) && e.StartWeek <= weeks[weeks.Length - 1] && e.EndWeek >= first).ToListAsync();
         var dayRows = new Dictionary<(Guid, DateOnly), DayRow[]>();
         var entryRows = await Rows(db, access, entries, settings, clock, dayRows);
-        // AC-PLN-12: a view is partial only for people who have entries on projects this viewer cannot see.
+        // AC-PLN-12: hidden planning entries or confirmed allocations make the visible totals incomplete.
         var visibleProjects = access.VisibleProjectIds(); var viewer = access.Actor.Id;
-        HashSet<Guid> hidden = access.SeesAllRestricted ? [] : (await db.PlanningEntries.AsNoTracking()
+        var hiddenWork = access.SeesAllRestricted ? [] : await db.PlanningEntries.AsNoTracking()
             .Where(e => ids.Contains(e.PersonId) && e.ProjectId != null && !visibleProjects.Contains(e.ProjectId.Value)
                 && (e.Visibility != PlanningVisibility.Draft || e.CreatedBy == viewer)
                 && e.StartWeek <= weeks[weeks.Length - 1] && e.EndWeek >= first)
-            .Select(e => e.PersonId).Distinct().ToListAsync()).ToHashSet();
+            .Select(e => new { e.PersonId, From = e.StartWeek }).ToListAsync();
+        if (!access.SeesAllRestricted)
+            hiddenWork.AddRange(await db.Allocations.AsNoTracking().Where(a => ids.Contains(a.PersonId) && a.Status == AllocationStatus.Confirmed
+                && !visibleProjects.Contains(a.ProjectId) && db.Projects.Any(p => p.Id == a.ProjectId && WorkloadEndpoints.LiveProjects.Contains(p.Status))
+                && a.FromDate <= weeks[weeks.Length - 1].AddDays(6) && a.ThroughDate >= first).Select(a => new { a.PersonId, From = a.FromDate }).ToListAsync());
+        var displayedThrough = weeks[displayCount - 1].AddDays(6);
+        var hidden = hiddenWork.Where(w => w.From <= displayedThrough).Select(w => w.PersonId).ToHashSet();
+        var hiddenLookahead = hiddenWork.Select(w => w.PersonId).ToHashSet();
         var tasks = await WorkloadEndpoints.Tasks(db, access, people.Select(u => u.Id), null, null);
         var taskCalendars = await Calendars.For(db, settings, tasks.Select(t => t.ProjectId).Distinct().ToArray());
         var forecasts = tasks.ToDictionary(t => t.Id, t => Workload.Spread(new(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate), today, taskCalendars(t.ProjectId)));
@@ -261,7 +268,7 @@ public static class PlanningEndpoints
             }).ToArray();
             var under = PlanningRules.UnderPlanned(cells.Select(c => new UnderWeek(c.Capacity, c.TimeAway, c.Confirmed + c.Expected + c.Possible, c.UnestimatedTasks > 0)).ToArray(),
                 Array.FindIndex(weeks, w => w >= current) is var start && start >= 0 ? start : weeks.Length,
-                settings.PlanningUnderPct, settings.PlanningUnderWeeks, personPartial);
+                settings.PlanningUnderPct, settings.PlanningUnderWeeks, hiddenLookahead.Contains(user.Id));
             cells = cells.Select((c, i) => c with { UnderPlanned = under[i] }).ToArray();
             cells = cells.Take(displayCount).ToArray();
             personEntries = personEntries.Where(e => e.StartWeek <= weeks[displayCount - 1] && e.EndWeek >= first).ToArray();

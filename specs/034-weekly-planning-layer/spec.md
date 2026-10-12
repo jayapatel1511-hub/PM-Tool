@@ -71,7 +71,7 @@ A Supervisor's scenario planning is visible to nobody else, through any channel,
 **Acceptance Scenarios**:
 
 1. **AC-PLN-02.** The draft and its hours are absent from other users' planner, My Week, search, exports, notifications, digests, activity and totals; the Admin sees it only in logged data-correction mode.
-2. **AC-PLN-12.** Entries on Restricted projects are hidden from viewers who cannot view the project; totals are labelled partial; Under-planned is suppressed.
+2. **AC-PLN-12.** Entries and Confirmed allocations on Restricted projects are hidden from viewers who cannot view the project; totals are labelled partial when either overlaps the requested weeks; Under-planned is suppressed. Jay confirmed inclusion of hidden Confirmed allocations on 2026-10-12; Planner, the person picker and My Staff share this label.
 
 ### User Story 4 — Record my own non-project work (Priority: P2)
 

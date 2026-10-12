@@ -566,7 +566,7 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 
 ### 25.8 Optimistic concurrency
 
-Every mutable resource returns `rowVersion`. `PATCH` and action endpoints require `If-Match: "<rowVersion>"` (or `rowVersion` in the body); a mismatch returns `409` with `code: "concurrency_conflict"`, the current representation, and the conflicting fields when determinable, so the UI can show "changed by Marc 2 minutes ago" and offer reload. Comments and links are append-only and exempt. Bulk operations check each row.
+Every mutable resource returns `rowVersion`. `PATCH`, `DELETE` and action endpoints require `If-Match: "<rowVersion>"` (or `rowVersion` in the body); a mismatch returns `409` with `code: "concurrency_conflict"`, the current representation, and the conflicting fields when determinable, so the UI can show "changed by Marc 2 minutes ago" and offer reload. This includes project memberships, project disciplines, named workspaces and editable document links. Document-link edits and soft deletion remain permitted by §12.7 and use this version protection. Comments retain their explicit author/time-window edit and soft-deletion rules in §12.6; these operations remain exempt. Immutable published records use append-only superseding records. Bulk operations check each row.
 
 ### 25.9 Representative payload — task
 

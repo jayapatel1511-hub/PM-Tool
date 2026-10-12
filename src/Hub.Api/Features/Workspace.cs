@@ -29,8 +29,8 @@ public static class Scope
 /// Named workspaces, the overview dashboard, the Files library and the Team list (§36.1, §36.6, §36.8; FR-VIS-01/02/07/09).
 public static class WorkspaceEndpoints
 {
-    public sealed record Body(string? Name, Guid[]? ProjectIds);
-    public sealed record Row(Guid Id, string Name, List<Guid> ProjectIds, int Hidden);
+    public sealed record Body(string? Name, Guid[]? ProjectIds, int? RowVersion = null);
+    public sealed record Row(Guid Id, string Name, List<Guid> ProjectIds, int Hidden, int RowVersion);
     public sealed record Widget(string Id, bool Hidden);
     public sealed record LayoutBody(Widget[] Widgets);
 
@@ -48,16 +48,19 @@ public static class WorkspaceEndpoints
             await db.SaveChangesAsync();
             return Results.Created($"/api/v1/workspaces/{ws.Id}", (await List(access, db)).First(w => w.Id == ws.Id));
         });
-        api.MapPatch("/workspaces/{id:guid}", async (Guid id, Body body, Access access, HubDb db) =>
+        api.MapPatch("/workspaces/{id:guid}", async (Guid id, Body body, HttpContext http, Access access, HubDb db) =>
         {
             var ws = await Own(db, access, id);
+            await Http.CheckVersion(db, http, ws, body.RowVersion);
             await Apply(ws, body, access, db, creating: false);
+            if (body.ProjectIds is not null) db.Entry(ws).Property(w => w.RowVersion).IsModified = true;
             await db.SaveChangesAsync();
             return (await List(access, db)).First(w => w.Id == id);
         });
-        api.MapDelete("/workspaces/{id:guid}", async (Guid id, Access access, HubDb db) =>
+        api.MapDelete("/workspaces/{id:guid}", async (Guid id, HttpContext http, Access access, HubDb db) =>
         {
             var ws = await Own(db, access, id);
+            await Http.CheckVersion(db, http, ws);
             await Tx.Run(db, async () =>
             {
                 db.Workspaces.Remove(ws);
@@ -113,12 +116,12 @@ public static class WorkspaceEndpoints
         var me = access.Me.Id;
         var visible = access.VisibleProjectIds();
         var rows = await db.Workspaces.AsNoTracking().Where(w => w.OwnerId == me).OrderBy(w => w.Name)
-            .Select(w => new
+                .Select(w => new
             {
-                w.Id, w.Name, Total = w.Projects.Count,
+                w.Id, w.Name, w.RowVersion, Total = w.Projects.Count,
                 Visible = w.Projects.Where(p => visible.Contains(p.ProjectId)).OrderBy(p => p.SortOrder).Select(p => p.ProjectId).ToList(),
             }).ToListAsync();
-        return rows.Select(w => new Row(w.Id, w.Name, w.Visible, w.Total - w.Visible.Count)).ToList();
+        return rows.Select(w => new Row(w.Id, w.Name, w.Visible, w.Total - w.Visible.Count, w.RowVersion)).ToList();
     }
 
     static async Task<Workspace> Own(HubDb db, Access access, Guid id) =>
@@ -141,7 +144,12 @@ public static class WorkspaceEndpoints
         var kept = ws.Projects.ToDictionary(p => p.ProjectId);
         for (var i = 0; i < ids.Count; i++)
         {
-            if (!kept.TryGetValue(ids[i], out var row)) ws.Projects.Add(row = new WorkspaceProject { ProjectId = ids[i] });
+            if (!kept.TryGetValue(ids[i], out var row))
+            {
+                row = new WorkspaceProject { WorkspaceId = ws.Id, ProjectId = ids[i] };
+                db.WorkspaceProjects.Add(row);
+                ws.Projects.Add(row);
+            }
             row.SortOrder = i;
         }
     }

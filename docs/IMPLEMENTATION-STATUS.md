@@ -1,5 +1,13 @@
 # Implementation status
 
+## 2026-10-12 local deployment candidate
+
+The integrated Tuesday runtime includes packets 025–037. Packet 038's supervisor capacity and digest hold are now locally implemented, along with the shared Partial view decision and the final audit, concurrency, notification and preference-race fixes. On branch `codex/deployment-ready` (base `68c56f28`), the final Release suite passed **1,132/1,132**, with **96.7%** rules-engine branch coverage and **94.6%** service line coverage. Frontend build/lint, six mocked browser suites, package audits, 61 safety regressions and the disposable PG17 backup/PITR rehearsal passed.
+
+The built review image passed fresh migrations, authentication/Host/Origin probes, all seven background jobs, actual Supervisor Staff rows/capacity and persisted preference changes through browser sign-in. Packet 036's full-scale local API performance gate passed. See [the current handoff](handoffs/2026-10-12-deployment-ready.md) and [packet 038 verification](../specs/038-supervisor-capacity-signals/verification.md) for exact evidence and limits.
+
+Changes remain **uncommitted and undeployed in this pass**. Hosted migration/rollback and exact assets, operational mail/directory, off-host recovery, remaining packet-wide scenarios, manual screen-reader/cross-browser checks and human/company acceptance remain pending. The older entries below are historical snapshots; their claims that 028–033 lack runtime implementation are superseded by this entry.
+
 ## 2026-09-27 reviews and revision/change foundation
 
 Packets 026–027 now add preserved review rounds and revision manifests, discipline decisions, independently verified findings, required deliverable issue gates, source registrations, explicit supersession, input-use history and deduplicated change assessments. Project screens, search, exports, activity and scoped notifications/digests are connected. The handoff A → B impact scenario (AC-HND-03) is covered.

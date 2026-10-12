@@ -17,7 +17,7 @@ import { FollowLevelSelect } from './projects/Follow'
 
 interface Prefs {
   events: { code: string; app: boolean; email: boolean; defaultApp: boolean; defaultEmail: boolean; direct: boolean; custom: boolean }[]
-  digest: { digestEnabled: boolean; time: string; orgTime: string; weekendDigests: boolean; sections: string[]; sectionsOff: string[]; weeklySummaryEnabled: boolean; managesProjects: boolean }
+  digest: { digestEnabled: boolean; holdDigestWhenAway: boolean; time: string; orgTime: string; weekendDigests: boolean; sections: string[]; sectionsOff: string[]; weeklySummaryEnabled: boolean; managesProjects: boolean }
   follows: { projectId: string; projectNumber: string; name: string; status: string; level: string; source: string }[]
 }
 
@@ -55,6 +55,12 @@ export function PreferencesPage() {
               <label className="flex min-h-(--control-row-h) items-center gap-3 text-sm font-medium">
                 <SaveStatus current={p.digest.digestEnabled}>{(track) => <Switch checked={digest.digestEnabled} disabled={!!pending.digest}
                   onCheckedChange={(on) => { setDigestDraft((d) => ({ ...d, digestEnabled: on })); void track(run('digest', () => put('me/preferences/digest', { enabled: on, time: digest.time }), () => setDigestDraft((d) => { const next = { ...d }; delete next.digestEnabled; return next })), on) }} />}</SaveStatus>{t('prefs.digestOn')}
+              </label>
+            </div>
+            <div className="px-5 py-4">
+              <label className="flex min-h-(--control-row-h) items-center gap-3 text-sm font-medium">
+                <SaveStatus current={p.digest.holdDigestWhenAway}>{(track) => <Switch checked={digest.holdDigestWhenAway} disabled={!digest.digestEnabled || !!pending.digest}
+                  onCheckedChange={(on) => { setDigestDraft((d) => ({ ...d, holdDigestWhenAway: on })); void track(run('digest', () => put('me/preferences/digest', { enabled: digest.digestEnabled, time: digest.time, holdDigestWhenAway: on }), () => setDigestDraft((d) => { const next = { ...d }; delete next.holdDigestWhenAway; return next })), on) }} />}</SaveStatus>{t('prefs.holdWhenAway')}
               </label>
             </div>
             <div className="px-5 py-4">

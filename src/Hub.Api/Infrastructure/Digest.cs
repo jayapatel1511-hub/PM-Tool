@@ -314,7 +314,8 @@ public sealed class DigestJob : IJob
         if (!s.WeekendDigests && local.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday) return new { skipped = "weekend" };
         var prefs = await db.UserSettings.ToDictionaryAsync(x => x.UserId, ct);
         var users = await db.Users.AsNoTracking().Where(u => u.IsActive).Select(u => new { u.Id, u.Email, u.DisplayName }).ToListAsync(ct);
-        int sent = 0, empty = 0;
+        var heldPeople = await HeldPeople(db, users.Select(u => u.Id), prefs, today, s);
+        int sent = 0, empty = 0, held = 0;
         foreach (var u in users)
         {
             var pref = prefs.GetValueOrDefault(u.Id);
@@ -325,6 +326,7 @@ public sealed class DigestJob : IJob
             if (TimeOnly.FromDateTime(local.DateTime) < at) continue;
             var scheduled = new DateTimeOffset(today.ToDateTime(at), Clock.Zone(s).GetUtcOffset(today.ToDateTime(at))).ToUniversalTime();
             if (pref?.LastDigestAt is { } last && last >= scheduled) continue; // one digest per person per day (SC-002)
+            if (heldPeople.Contains(u.Id)) { held++; continue; }
             var digest = await Digest.Build(db, u.Id, u.DisplayName.Split(' ')[0], today, pref?.LastDigestAt ?? now.AddDays(-1), now, s, baseUrl, off);
             if (digest is not null && !string.IsNullOrEmpty(u.Email))
             {
@@ -333,14 +335,24 @@ public sealed class DigestJob : IJob
                 sent++;
             }
             else empty++;
-            if (pref is null) { pref = new UserSetting { UserId = u.Id }; db.UserSettings.Add(pref); prefs[u.Id] = pref; }
+            if (pref is null) { pref = await UserPreferences.GetOrCreate(db, u.Id, ct); prefs[u.Id] = pref; }
             pref.LastDigestAt = now;
             await db.SaveChangesAsync(ct);
         }
-        return new { sent, empty, date = today };
+        return new { sent, empty, held, date = today };
     }
 
-    static bool SectionsAllOff(HashSet<string> off) => Digest.SectionCodes.All(off.Contains);
+    // FR-DIG-01: share the planner's day rule with the watchdog; a deliberate hold is not a late digest.
+    internal static async Task<HashSet<Guid>> HeldPeople(HubDb db, IEnumerable<Guid> people,
+        IReadOnlyDictionary<Guid, UserSetting> prefs, DateOnly today, OrgSettings settings)
+    {
+        var ids = people.Where(id => prefs.GetValueOrDefault(id)?.HoldDigestWhenAway != false).ToArray();
+        if (ids.Length == 0) return [];
+        var days = await PersonCapacity.Load(db, ids, today, today, settings);
+        return days.Where(d => d.Value.Normal > 0 && d.Value.Available == 0).Select(d => d.Key.Item1).ToHashSet();
+    }
+
+    internal static bool SectionsAllOff(HashSet<string> off) => Digest.SectionCodes.All(off.Contains);
 }
 
 /// The weekly PM summary (§28 item 9, packet 020): one email per PM covering every Active project they manage — computed
@@ -456,7 +468,7 @@ public sealed class WeeklySummaryJob : IJob
                     DedupKey = $"weekly:{u.Id}:{today:yyyy-MM-dd}", CreatedAt = now, NextAttemptAt = now });
                 sent++;
             }
-            if (pref is null) { pref = new UserSetting { UserId = u.Id }; db.UserSettings.Add(pref); prefs[u.Id] = pref; }
+            if (pref is null) { pref = await UserPreferences.GetOrCreate(db, u.Id, ct); prefs[u.Id] = pref; }
             pref.LastWeeklySummaryAt = now;
             await db.SaveChangesAsync(ct);
         }

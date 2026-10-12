@@ -17,7 +17,7 @@ export interface ProjectRow {
 
 export interface HealthReason { text: string; rule?: string; colour?: string | null; threshold?: number | string | null; values?: Record<string, unknown> | null }
 
-export interface ProjectDiscipline { id: string; disciplineId: string; name: string; code: string; colour: string; leadUserId?: string; leadName?: string; isActive: boolean }
+export interface ProjectDiscipline { id: string; disciplineId: string; name: string; code: string; colour: string; leadUserId?: string; leadName?: string; isActive: boolean; rowVersion: number }
 
 export interface ProjectDetail {
   id: string; projectNumber: string; name: string; clientId: string; clientReference?: string; projectManagerId: string; pmName: string
@@ -26,7 +26,7 @@ export interface ProjectDetail {
   allowViewerComments: boolean; lastCoordinationReviewedAt?: string; lastCoordinationReviewedBy?: string; statusChangedAt?: string
   activatedAt?: string; completedAt?: string; archivedAt?: string; rowVersion: number; client: string; office: string; phase?: string
   createdFromTemplateId?: string; templateVersion?: number; templateName?: string | null
-  links: { id: string; title: string; url: string; linkType: string }[]
+  links: { id: string; title: string; url: string; linkType: string; rowVersion: number }[]
   disciplines: ProjectDiscipline[]
   health: { computed: string; reported: string; overrideActive: boolean; healthOverride?: string; healthOverrideNote?: string; overrideBy?: string
     healthOverrideAt?: string; healthOverrideExpiresAt?: string; reasons?: HealthReason[] | null; inputs?: Record<string, number> | null; evaluatedAt?: string }

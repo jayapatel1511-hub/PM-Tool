@@ -55,6 +55,9 @@ jobs:
       - name: Resource capacity and allocation accessibility (mocked API)
         run: npm run test:resources
         working-directory: web
+      - name: Supervisor capacity signals and digest preference (mocked API)
+        run: npm run test:supervisor-capacity
+        working-directory: web
       - name: Coordination browser evidence
         if: always()
         uses: actions/upload-artifact@v4

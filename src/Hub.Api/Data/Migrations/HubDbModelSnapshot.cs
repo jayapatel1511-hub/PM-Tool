@@ -2953,6 +2953,11 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("project_id");
 
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text")
@@ -6262,6 +6267,11 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("project_id");
 
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
                     b.Property<int>("SortOrder")
                         .HasColumnType("integer")
                         .HasColumnName("sort_order");
@@ -6414,6 +6424,11 @@ namespace Hub.Api.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text[]")
                         .HasColumnName("roles");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -8948,6 +8963,12 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("digest_time_local");
 
+                    b.Property<bool>("HoldDigestWhenAway")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("hold_digest_when_away");
+
                     b.Property<DateTimeOffset?>("LastDigestAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_digest_at");
@@ -9466,6 +9487,11 @@ namespace Hub.Api.Data.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
 
                     b.HasKey("Id")
                         .HasName("pk_workspace");

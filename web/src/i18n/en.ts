@@ -1612,7 +1612,7 @@ export const en: Record<string, string> = {
   'signal.more': '{n} more: {list}', 'signal.withWeek': '{label} · {week}',
   'ind.finishedBeforePredecessor': 'Finished before predecessor',
   'dep.type': 'Link type', 'dep.type.FinishToStart': 'Finish-to-Start', 'dep.type.StartToStart': 'Start-to-Start', 'dep.type.FinishToFinish': 'Finish-to-Finish',
-  'dep.typeWithLag': '{type}, lag {n} days',
+  'dep.typeWithLag1': '{type}, lag 1 day', 'dep.typeWithLag': '{type}, lag {n} days',
   'dep.typeHint.FinishToStart': 'The successor waits until the predecessor finishes, plus the lag.',
   'dep.typeHint.StartToStart': 'The successor waits until the predecessor starts, plus the lag.',
   'dep.typeHint.FinishToFinish': 'The successor should finish no earlier than the predecessor, plus the lag. It never waits on this link.',

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Field, selectCls } from '@/components/hub/common'
 import { Chip, type Tone } from '@/components/hub/pills'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { t } from '@/lib/i18n'
+import { plural, t } from '@/lib/i18n'
 
 // Derived indicators (§10.3) as chips with icon and short text; computed by the rules engine (packet 005).
 
@@ -87,7 +87,7 @@ const DEP_CODE: Record<string, string> = { FinishToStart: 'FS', StartToStart: 'S
 /** The link's type as a two-letter chip with its lag ("SS +2d"); the full name and lag are in the title and for screen readers. */
 export function DepTypeChip({ type, lag }: { type?: string | null; lag: number }) {
   const kind = type ?? 'FinishToStart'
-  const full = lag > 0 ? t('dep.typeWithLag', { type: t(`dep.type.${kind}`), n: lag }) : t(`dep.type.${kind}`)
+  const full = lag > 0 ? plural(lag, 'dep.typeWithLag1', 'dep.typeWithLag', { type: t(`dep.type.${kind}`) }) : t(`dep.type.${kind}`)
   return (
     <span title={full} className="inline-flex shrink-0 items-center rounded-md border px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">
       <span aria-hidden>{DEP_CODE[kind] ?? kind}{lag > 0 && ` +${lag}d`}</span><span className="sr-only">{full}</span>

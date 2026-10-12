@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { Columns3, Plus, Star } from 'lucide-react'
+import { Columns3, Plus, Rows3, Star } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
-import { AccentDot, ActiveFilters, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Segmented, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { AccentDot, ActiveFilters, ChoiceMenu, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Segmented, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { Chip, HealthPill, Key, PriorityBadge, ProgressBar, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -86,14 +86,16 @@ export function ProjectListPage() {
         quick={<Segmented label={t('projects.scope')} value={mine ? 'mine' : 'all'} onChange={(v) => set('mine', v === 'mine' ? null : 'false')}
           options={[{ value: 'mine', label: t('projects.mine') }, { value: 'all', label: t('projects.all') }]} />}
         active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={remove} onClear={clear} />}
-        actions={
+        actions={<>
+          <ChoiceMenu label={t('common.groupBy')} icon={Rows3} value={groupBy === 'status' ? 'status' : 'none'} onChange={(v) => set('group', v === 'status' ? null : v)}
+            options={[{ value: 'status', label: t('common.status') }, { value: 'none', label: t('common.none') }]} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button variant="outline" className="hidden md:inline-flex"><Columns3 className="size-4" />{t('common.columns')}</Button></DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {COLUMNS.map((c) => <DropdownMenuCheckboxItem key={c} checked={cols.includes(c)} onCheckedChange={() => toggleCol(c)} onSelect={(e) => e.preventDefault()}>{t(`projects.col.${c}`)}</DropdownMenuCheckboxItem>)}
             </DropdownMenuContent>
           </DropdownMenu>
-        }>
+        </>}>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.status')} htmlFor="pl-status" className="w-full sm:w-48">
             <select id="pl-status" className={selectCls} value={sp.get('status') ?? ''} onChange={(e) => set('status', e.target.value)}>
@@ -122,12 +124,6 @@ export function ProjectListPage() {
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm">
             <Checkbox checked={sp.get('includeArchived') === 'true'} onCheckedChange={(c) => set('includeArchived', c ? 'true' : null)} />{t('projects.includeArchived')}
           </label>
-          <Field label={t('common.groupBy')} htmlFor="pl-group" className="w-full sm:w-44">
-            <select id="pl-group" className={selectCls} value={groupBy} onChange={(e) => set('group', e.target.value === 'status' ? null : e.target.value)}>
-              <option value="status">{t('projects.groupStatus')}</option>
-              <option value="none">{t('common.noGroup')}</option>
-            </select>
-          </Field>
         </div>
       </FilterBar>
 

@@ -101,6 +101,8 @@ public sealed class StaffingSignalsSchemaTests(HubFactory f)
         var noDates = await NewTask();   // started with no logged change and no StatusChangedAt: CreatedAt
         var reopened = await NewTask();  // started, then back to Not Started: none
         var untouched = await NewTask(); // never started: none
+        var held = await NewTask();      // put On Hold from Not Started: none, and no fallback
+        var heldThenStarted = await NewTask(); // held, back to Not Started, then started: the real start
         var started = await Deliverable(project.Id, isolated, data);
         var notStarted = await Deliverable(project.Id, isolated, data);
         var t1 = new DateTimeOffset(2026, 9, 15, 13, 0, 0, TimeSpan.Zero);
@@ -109,14 +111,20 @@ public sealed class StaffingSignalsSchemaTests(HubFactory f)
             isolated.Clock.Now = at;
             await isolated.DbAsync(async db => { change(db); return await db.SaveChangesAsync(); });
         }
-        void SetTask(HubDb db, Guid id, string status) { var t = db.Tasks.Single(x => x.Id == id); (t.Status, t.StatusChangedAt) = (status, isolated.Clock.Now); }
+        void SetTask(HubDb db, Guid id, string status)
+        {
+            var t = db.Tasks.Single(x => x.Id == id);
+            if (status == TaskStatuses.OnHold) t.PreviousStatus = t.Status;
+            (t.Status, t.StatusChangedAt) = (status, isolated.Clock.Now);
+        }
         await Move(t1, db =>
         {
             SetTask(db, logged, TaskStatuses.InProgress); SetTask(db, reopened, TaskStatuses.InProgress);
+            SetTask(db, held, TaskStatuses.OnHold); SetTask(db, heldThenStarted, TaskStatuses.OnHold);
             var dl = db.Deliverables.Single(x => x.Id == started); (dl.Status, dl.StatusChangedAt) = (DeliverableStatus.InProgress, t1);
         });
-        await Move(t1.AddDays(1), db => { SetTask(db, logged, TaskStatuses.NotStarted); SetTask(db, reopened, TaskStatuses.NotStarted); });
-        await Move(t1.AddDays(2), db => SetTask(db, logged, TaskStatuses.InProgress));
+        await Move(t1.AddDays(1), db => { SetTask(db, logged, TaskStatuses.NotStarted); SetTask(db, reopened, TaskStatuses.NotStarted); SetTask(db, heldThenStarted, TaskStatuses.NotStarted); });
+        await Move(t1.AddDays(2), db => { SetTask(db, logged, TaskStatuses.InProgress); SetTask(db, heldThenStarted, TaskStatuses.InProgress); });
         var taskLink = new TaskDependency { ProjectId = project.Id, PredecessorTaskId = logged, SuccessorTaskId = untouched };
         var deliverableLink = new DeliverableDependency { ProjectId = project.Id, PredecessorDeliverableId = started, SuccessorDeliverableId = notStarted };
         await isolated.DbAsync(async db => { db.Dependencies.Add(taskLink); db.DeliverableDependencies.Add(deliverableLink); return await db.SaveChangesAsync(); });
@@ -175,6 +183,8 @@ public sealed class StaffingSignalsSchemaTests(HubFactory f)
             Assert.Equal(tasks[noDates].CreatedAt, tasks[noDates].StartedAt);
             Assert.Null(tasks[reopened].StartedAt);
             Assert.Null(tasks[untouched].StartedAt);
+            Assert.Null(tasks[held].StartedAt);                  // On Hold is not a start (AC-DEPT-02)
+            Assert.Equal(t1.AddDays(2), tasks[heldThenStarted].StartedAt);
             var dls = await db.Deliverables.AsNoTracking().Where(x => x.ProjectId == project.Id).ToDictionaryAsync(x => x.Id);
             Assert.Equal(t1, dls[started].StartedAt);
             Assert.Null(dls[notStarted].StartedAt);

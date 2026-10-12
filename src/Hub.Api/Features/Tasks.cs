@@ -434,7 +434,7 @@ public static class TaskEndpoints
         if (to == TaskStatuses.InProgress && t.ProgressPct == 0 && from == TaskStatuses.NotStarted) t.ProgressPct = 0;
         if (!string.IsNullOrWhiteSpace(comment)) // C-08: a note typed with a status change is a Status Note comment
             db.Comments.Add(new Comment { ProjectId = t.ProjectId, ItemType = ItemType.Task, ItemId = t.Id, AuthorId = authorId, Body = comment.Trim(), CommentKind = CommentKind.StatusNote, CreatedAt = now, AuditKey = t.Key });
-        if (from == TaskStatuses.NotStarted) t.StartedAt ??= now; // D4: the Start-to-Start anchor, set once
+        if (from == TaskStatuses.NotStarted && to is not (TaskStatuses.OnHold or TaskStatuses.Cancelled)) t.StartedAt ??= now; // D4: the Start-to-Start anchor, set once; holding or cancelling is not a start
         t.Status = to;
         t.StatusChangedAt = now;
         t.LastActivityAt = now;

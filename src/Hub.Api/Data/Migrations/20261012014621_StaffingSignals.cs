@@ -96,15 +96,17 @@ namespace Hub.Api.Data.Migrations
             // Every existing link behaved as Finish-to-Start: the column was never read before packet 036 (AC-DEPT-01a).
             migrationBuilder.Sql("UPDATE hub.task_dependency SET dependency_type = 'FinishToStart' WHERE dependency_type <> 'FinishToStart';");
 
-            // D4 backfill for items that have left Not Started: the first logged Status change away from Not Started,
-            // else StatusChangedAt, else CreatedAt. Items still Not Started keep no StartedAt.
+            // D4 backfill for items that have left Not Started: the first logged Status change from Not Started to a
+            // started or finished status (On Hold and Cancelled are not a start), else StatusChangedAt, else CreatedAt.
+            // Items still Not Started, or held or cancelled straight from Not Started, get no fallback.
             foreach (var (table, itemType) in new[] { ("task", "Task"), ("deliverable", "Deliverable") })
                 migrationBuilder.Sql($$"""
                     UPDATE hub.{{table}} AS x SET started_at = COALESCE(
                         (SELECT min(a.occurred_at) FROM hub.activity_log a
                           WHERE a.item_type = '{{itemType}}' AND a.item_id = x.id
-                            AND a.changes @> '[{"field": "Status", "old": "Not Started"}]'::jsonb),
-                        x.status_changed_at, x.created_at)
+                            AND jsonb_path_exists(a.changes, '$[*] ? (@.field == "Status" && @.old == "Not Started" && @.new != "On Hold" && @.new != "Cancelled")')),
+                        CASE WHEN x.status IN ('On Hold', 'Cancelled') AND x.previous_status = 'Not Started' THEN NULL
+                             ELSE COALESCE(x.status_changed_at, x.created_at) END)
                     WHERE x.status <> 'Not Started';
                     """);
 

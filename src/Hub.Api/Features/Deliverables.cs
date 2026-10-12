@@ -331,7 +331,7 @@ public static class DeliverableEndpoints
         else if (!string.IsNullOrWhiteSpace(body.Comment))
             db.Comments.Add(new Comment { ProjectId = d.ProjectId, ItemType = ItemType.Deliverable, ItemId = d.Id, AuthorId = db.Audit.ActorId!.Value, Body = body.Comment.Trim(),
                 CommentKind = CommentKind.StatusNote, CreatedAt = now, AuditKey = d.Key });
-        if (from == DeliverableStatus.NotStarted) d.StartedAt ??= now; // D4: the Start-to-Start anchor, set once
+        if (from == DeliverableStatus.NotStarted && to is not (DeliverableStatus.OnHold or DeliverableStatus.Cancelled)) d.StartedAt ??= now; // D4: the Start-to-Start anchor, set once; holding or cancelling is not a start
         d.Status = to;
         d.StatusChangedAt = now;
         d.LastActivityAt = now;

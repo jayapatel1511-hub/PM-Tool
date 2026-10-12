@@ -100,6 +100,54 @@ public sealed class DependencyTypeApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Holding_or_cancelling_unstarted_work_does_not_start_it() // D4, AC-DEPT-02, AC-DEPT-02b
+    {
+        var p = await d.Project();
+        var pm = f.As(TestData.Pm);
+        var pred = await d.NewTask(p.Id, TestData.Pm);
+        var succ = await d.NewTask(p.Id, TestData.Pm);
+        await pm.Post($"/api/v1/tasks/{succ.S("id")}/dependencies", new { predecessorTaskId = pred.G("id"), type = DependencyTypes.StartToStart }).Result.Json(201);
+        var dp = await Deliverable(p.Id, new { });
+        var ds = await Deliverable(p.Id, new { });
+        await pm.Post($"/api/v1/deliverables/{ds.S("id")}/dependencies", new { predecessorDeliverableId = dp.G("id"), type = DependencyTypes.StartToStart }).Result.Json(201);
+        async Task MoveDl(string to, string? reason = null)
+        {
+            var version = await f.DbAsync(db => db.Deliverables.Where(x => x.Id == dp.G("id")).Select(x => x.RowVersion).SingleAsync());
+            await pm.Post($"/api/v1/deliverables/{dp.S("id")}/transition", new { toStatus = to, rowVersion = version, reason }).Result.Json();
+        }
+        async Task StillWaiting(string why)
+        {
+            var started = await f.DbAsync(async db => (await db.Tasks.Where(x => x.Id == pred.G("id")).Select(x => x.StartedAt).SingleAsync(),
+                await db.Deliverables.Where(x => x.Id == dp.G("id")).Select(x => x.StartedAt).SingleAsync()));
+            Assert.True(started == (null, null), $"{why}: StartedAt {started}");
+            await f.Evaluate(p.Id);
+            var ts = await f.DbAsync(db => db.TaskStates.SingleAsync(x => x.TaskId == succ.G("id")));
+            Assert.True(ts.IsWaiting || ts.IsBlocked, $"{why}: task successor");
+            var dst = await f.DbAsync(db => db.DeliverableStates.SingleAsync(x => x.DeliverableId == ds.G("id")));
+            Assert.True(dst.IsWaiting || dst.IsBlocked, $"{why}: deliverable successor");
+            var dependsOn = (await pm.GetAsync($"/api/v1/tasks/{succ.S("id")}/dependencies").Result.Json())["dependsOn"]!.AsArray().Single()!;
+            Assert.False(dependsOn["satisfied"]!.GetValue<bool>(), $"{why}: successor's list");
+            var payload = (await pm.GetAsync($"/api/v1/deliverables/{ds.S("id")}").Result.Json())["explicitPredecessors"]!.AsArray().Single()!;
+            Assert.False(payload["satisfied"]!.GetValue<bool>(), $"{why}: deliverable payload");
+        }
+
+        await d.Move(TestData.Pm, pred, TaskStatuses.OnHold, new { reason = "Waiting on the client" });
+        await MoveDl(DeliverableStatus.OnHold, "Waiting on the client");
+        await StillWaiting("held from Not Started");
+        await d.Move(TestData.Pm, pred, TaskStatuses.NotStarted);
+        await MoveDl(DeliverableStatus.NotStarted);
+        await StillWaiting("back to Not Started");
+        await d.Move(TestData.Pm, pred, TaskStatuses.Cancelled, new { reason = "Scope moved to a later phase" });
+        await d.Move(TestData.Pm, pred, TaskStatuses.NotStarted, new { reason = "Back in scope" });
+        await StillWaiting("cancelled and restored");
+
+        await d.Move(TestData.Pm, pred, TaskStatuses.InProgress);
+        Assert.Equal(f.Clock.Now, await f.DbAsync(db => db.Tasks.Where(x => x.Id == pred.G("id")).Select(x => x.StartedAt).SingleAsync()));
+        var dependsOnNow = (await pm.GetAsync($"/api/v1/tasks/{succ.S("id")}/dependencies").Result.Json())["dependsOn"]!.AsArray().Single()!;
+        Assert.True(dependsOnNow["satisfied"]!.GetValue<bool>()); // a real start meets the link
+    }
+
+    [Fact]
     public async Task Evaluator_dependency_lists_deliverable_payload_and_readiness_agree_by_type() // AC-DEPT-05a, -05c, -02b, §8.2
     {
         var admin = f.As(TestData.Admin);

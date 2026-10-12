@@ -33,7 +33,7 @@ export function OneSignal({ signals, all }: { signals: Signal[]; all?: boolean }
   if (all) return <span className="flex flex-wrap gap-1">{list.map((s) => <span key={s.key} className="contents">{chip(s)}</span>)}</span>
   const [first, ...rest] = list
   return (
-    <span className="inline-flex flex-wrap items-center gap-1" data-signals={list.length}>
+    <span className="inline-flex items-center gap-1 whitespace-nowrap" data-signals={list.length}>
       {chip(first)}
       {rest.length > 0 && (
         <Tooltip>

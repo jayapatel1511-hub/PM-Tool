@@ -7,7 +7,7 @@ import { AccentDot, ActiveFilters, ChipToggle, ConfirmDialog, DesktopOnly, Empty
 import { ExportMenu } from '@/components/hub/export'
 import { OneSignal, type Signal } from '@/components/hub/indicators'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
-import { Chip, Key, StatusPill } from '@/components/hub/pills'
+import { Key, StatusPill } from '@/components/hub/pills'
 import { itemHref } from '@/components/hub/search'
 import { ViewMenu } from '@/components/hub/views'
 import { WorkspaceTabs } from '@/components/hub/workspace'
@@ -401,8 +401,7 @@ function PersonTasksRows({ id, name, from, weeks, onChanged }: { id: string; nam
                     <span>{tk.dueDate ? t('workload.taskDue', { date: fmtDate(tk.dueDate) }) : t('workload.sum.noDue')}</span>
                     <span>{t('workload.estimate')} {tk.estimatedHours == null ? <Missing /> : hours(tk.estimatedHours)}</span>
                     <span>{t('workload.left')} {tk.remaining == null ? <Missing /> : hours(tk.remaining)}</span>
-                    {tk.overdue && <Chip tone="bad">{t('ind.overdue')}</Chip>}
-                    {tk.estimatedHours == null && <Chip tone="warn">{t('workload.unestimated')}</Chip>}
+                    <OneSignal signals={([tk.overdue && { key: 'overdue', tone: 'bad', label: t('ind.overdue') }, tk.estimatedHours == null && { key: 'unestimated', tone: 'warn', label: t('workload.unestimated') }] as (Signal | false)[]).filter(Boolean) as Signal[]} />
                   </div>
                 </th>
                 {tk.weeks.map((h, i) => (

@@ -132,6 +132,20 @@ public static class MilestoneType
     public static bool IsSubmission(string t) => t is DesignSubmission or PermitSubmission or Tender or IFC;
 }
 
+/// FR-DEPT-01: link types on task and deliverable dependencies; existing links are Finish-to-Start.
+public static class DependencyTypes
+{
+    public const string FinishToStart = "FinishToStart", StartToStart = "StartToStart", FinishToFinish = "FinishToFinish";
+    public static readonly string[] All = [FinishToStart, StartToStart, FinishToFinish];
+}
+
+/// FR-ROLE-01: unfilled project demand; Filled while a proposed or confirmed allocation names it (D1).
+public static class OpenRoleStatus
+{
+    public const string Open = "Open", Filled = "Filled", Cancelled = "Cancelled";
+    public static readonly string[] All = [Open, Filled, Cancelled];
+}
+
 public static class BlockType
 {
     public const string Client = "Client", ExternalParty = "External Party", Internal = "Internal",

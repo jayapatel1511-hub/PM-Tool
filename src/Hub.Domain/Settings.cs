@@ -17,6 +17,7 @@ public sealed record OrgSettings
     public int DecisionDueSoonDays { get; init; } = 5;
     public int TaskStaleDays { get; init; } = 10;
     public int ReviewStaleDays { get; init; } = 5;
+    public int StatusStaleDays { get; init; } = 15;
     public int BlockedAttentionDays { get; init; } = 0;
     public int HealthOverdueTaskPctYellow { get; init; } = 10;
     public int HealthOverdueTaskPctRed { get; init; } = 25;
@@ -57,6 +58,7 @@ public sealed record OrgSettings
         new("decision_due_soon_days", SettingKind.Int, 5, "thresholds"),
         new("task_stale_days", SettingKind.Int, 10, "thresholds"),
         new("review_stale_days", SettingKind.Int, 5, "thresholds"),
+        new("status_stale_days", SettingKind.Int, 15, "thresholds"),
         new("blocked_attention_days", SettingKind.Int, 0, "thresholds"),
         new("health_overdue_task_pct_yellow", SettingKind.Int, 10, "health"),
         new("health_overdue_task_pct_red", SettingKind.Int, 25, "health"),
@@ -103,6 +105,7 @@ public sealed record OrgSettings
             DecisionDueSoonDays = I("decision_due_soon_days", s.DecisionDueSoonDays),
             TaskStaleDays = I("task_stale_days", s.TaskStaleDays),
             ReviewStaleDays = I("review_stale_days", s.ReviewStaleDays),
+            StatusStaleDays = I("status_stale_days", s.StatusStaleDays),
             BlockedAttentionDays = I("blocked_attention_days", s.BlockedAttentionDays),
             HealthOverdueTaskPctYellow = I("health_overdue_task_pct_yellow", s.HealthOverdueTaskPctYellow),
             HealthOverdueTaskPctRed = I("health_overdue_task_pct_red", s.HealthOverdueTaskPctRed),
@@ -156,7 +159,7 @@ public sealed record OrgSettings
         "planning_horizon_weeks" => n is >= 6 and <= 26,
         "planning_over_pct" => n is >= 50 and <= 300,
         "planning_under_pct" => n is >= 0 and <= 100,
-        "planning_stale_days" => n is >= 1 and <= 365,
+        "planning_stale_days" or "status_stale_days" => n is >= 1 and <= 365,
         "planning_max_hours_per_week" => n is >= 1 and <= 168,
         _ => n is >= 0 and <= 3650,
     };
@@ -225,8 +228,8 @@ public static class NotificationEvents
     public static NotificationEventDef Get(string code) => All.First(e => e.Code == code);
 }
 
-/// Attention rule identifiers (§12.12). A-07 activates with the Phase 2 issue register.
+/// Attention rule identifiers (§12.12, A-21 in §40). A-07 activates with the Phase 2 issue register.
 public static class Rules
 {
-    public static readonly string[] Ids = Enumerable.Range(1, 20).Select(i => $"A-{i:00}").ToArray();
+    public static readonly string[] Ids = Enumerable.Range(1, 21).Select(i => $"A-{i:00}").ToArray();
 }

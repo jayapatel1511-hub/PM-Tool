@@ -85,7 +85,7 @@ function MyWorkViews({ sections }: { sections?: { id: string; title: string; cou
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="no-print"><span className="sr-only">{`${t('mywork.views')}: `}</span>{t(`mywork.tab.${current}`)}<ChevronDown className="size-4" aria-hidden /></Button>
+        <Button variant="outline" className="no-print" aria-label={`${t('mywork.views')}: ${t(`mywork.tab.${current}`)}`}>{t(`mywork.tab.${current}`)}<ChevronDown className="size-4" aria-hidden /></Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64" onCloseAutoFocus={(e) => { if (toSection.current) { e.preventDefault(); toSection.current = false } }}>
         <DropdownMenuRadioGroup value={current} onValueChange={(x) => navigate(link(x))}>
@@ -273,7 +273,7 @@ function Overview({ focus }: { focus: boolean }) {
   const menu = [...(!userId ? [{ id: 'my-week', title: t('planner.myWeek') }] : []), ...sections]
 
   return (
-    <Page title={ro ? t('mywork.of', { name: w.person.displayName }) : t('mywork.title')} subtitle={ro ? t('mywork.readOnly') : me.displayName}
+    <Page title={ro ? t('mywork.of', { name: w.person.displayName }) : t('mywork.title')} subtitle={ro && t('mywork.readOnly')}
       actions={!ro && <><ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
       <div className="flex flex-wrap items-start gap-2">
         {!ro && <MyWorkViews sections={menu} />}
@@ -352,7 +352,7 @@ function TaskView({ tab }: { tab: string }) {
   const lane = useLaneDrop(actions)
   const rows = q.data?.items ?? []
   return (
-    <Page title={t('mywork.title')} subtitle={me.displayName}
+    <Page title={t('mywork.title')}
       actions={<><ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
       <div className="flex flex-wrap items-start gap-2">
         <MyWorkViews />
@@ -402,14 +402,13 @@ function TaskView({ tab }: { tab: string }) {
 
 /** Inbox (FR-VIS-08): unread personal notifications in the selected scope; opening one marks it read. */
 function Inbox() {
-  const me = useMe()
   const scope = useScope()
   const q = useQuery({ queryKey: ['notifications', 'inbox'], queryFn: () => get<PageOf<NotificationRow>>('me/notifications?unread=true&pageSize=100') })
   const open = useOpenNotification()
   const markRead = useMarkRead()
   const rows = (q.data?.items ?? []).filter((n) => !scope.ids || !n.projectId || scope.ids.includes(n.projectId))
   return (
-    <Page title={t('mywork.title')} subtitle={me.displayName}
+    <Page title={t('mywork.title')}
       actions={<><Button variant="outline" disabled={rows.length === 0} onClick={() => markRead({ ids: rows.map((n) => n.id) })}><CheckCheck className="size-4" />{t('mywork.markAllRead')}</Button>
         <Button asChild variant="ghost"><Link to="/notifications">{t('mywork.allNotifications')}</Link></Button></>}>
       <MyWorkViews />

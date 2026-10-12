@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { CalendarClock, ChevronDown, ExternalLink, FolderOpen, Star } from 'lucide-react'
+import { CalendarClock, ChevronDown, ExternalLink, FolderOpen, MoreHorizontal, Star } from 'lucide-react'
 import { createContext, useContext, useState } from 'react'
 import { Link, NavLink, Outlet, useMatch, useParams } from 'react-router'
 import { toast } from 'sonner'
@@ -12,7 +12,7 @@ import { plural, t } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { accentOf, cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { useMe, type Me } from '@/lib/auth'
 import { ProjectSlots } from './slots'
@@ -26,7 +26,7 @@ const page = (path: ProjectPage['path'], label: string, show?: ProjectPage['show
 /** Project navigation (§9.4, §41 R3, decision E1): six groups plus More. Every page keeps its own route; the group that
  *  holds the current page is highlighted, and a group with several pages shows them in a second-level switch. A page
  *  appears only when its screen exists (§36.1). */
-export const PROJECT_GROUPS: { id: string; label: string; pages: ProjectPage[] }[] = [
+const PROJECT_GROUPS: { id: string; label: string; pages: ProjectPage[] }[] = [
   { id: 'overview', label: 'calm.group.overview', pages: [page('dashboard', 'ptab.dashboard')] },
   { id: 'work', label: 'calm.group.work', pages: [page('tasks', 'ptab.tasks'), page('board', 'ptab.board'), page('timeline', 'ptab.timeline'), page('calendar', 'ptab.calendar'), page('milestones', 'ptab.milestones')] },
   { id: 'deliverables', label: 'calm.group.deliverables', pages: [page('deliverables', 'ptab.deliverables'), page('submissions', 'ptab.submissions'), page('reviews', 'ptab.reviews'), page('readiness', 'ptab.readiness')] },
@@ -36,7 +36,7 @@ export const PROJECT_GROUPS: { id: string; label: string; pages: ProjectPage[] }
   { id: 'files', label: 'calm.group.files', pages: [page('files', 'ptab.files')] },
 ]
 /** Lower-frequency pages behind the More menu. */
-export const PROJECT_MORE: ProjectPage[] = [page('activity', 'ptab.activity'), page('settings', 'ptab.settings')]
+const PROJECT_MORE: ProjectPage[] = [page('activity', 'ptab.activity'), page('settings', 'ptab.settings')]
 /** Every project page, for breadcrumbs and route checks. */
 export const PROJECT_TABS: ProjectPage[] = [...PROJECT_GROUPS.flatMap((g) => g.pages), ...PROJECT_MORE]
 
@@ -93,42 +93,39 @@ function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
   )
 }
 
-/** Shared project header (§12.1 UI behaviour, §13.0): key, name, client, PM, phase, status, health with why, next milestone, links, follow. */
+/** Shared project header (§12.1 UI behaviour, §13.0, §41 R6): one line with key, name, status and health with why. The
+ *  client, PM, phase, next milestone and the project links sit in the details menu; Following keeps its own control. */
 function ProjectHeader({ p }: { p: ProjectDetail }) {
   const refresh = useProjectRefresh()
   return (
-    <header data-accent={accentOf(p.id)} className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 border-b border-t-4 border-t-(color:--acc-stripe) bg-card px-4 pb-4 pt-4 md:px-6 xl:px-8">
-      <div className="min-w-0 max-w-5xl space-y-2">
-        <button className="key rounded-md bg-(--acc-bg) px-2 py-0.5 text-(--acc-fg) hover:underline" title={t('common.copyLink')}
-          onClick={() => { navigator.clipboard?.writeText(p.projectNumber); toast.success(t('common.copied')) }}>{p.projectNumber}</button>
-        <div className="flex items-start gap-1">
-          <h1 className="min-w-0 break-words text-2xl/8 font-semibold tracking-[-0.4px] md:text-[28px]/9 md:tracking-[-0.6px]">{p.name}</h1>
-          <button aria-label={p.starred ? t('projects.unstar') : t('projects.star')} aria-pressed={p.starred}
-            onClick={async () => { await (p.starred ? del(`projects/${p.id}/star`) : post(`projects/${p.id}/star`)); refresh(p.id) }}
-            className={cn('grid size-9 shrink-0 place-items-center rounded-md hover:bg-muted', p.starred ? 'text-warn' : 'text-muted-foreground')}><Star className={cn('size-5', p.starred && 'fill-current')} /></button>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
-          <span>{p.client}</span>
-          <span>{t('projects.col.pm')}: <span className="text-foreground">{p.pmName}</span></span>
-          {p.phase && <span>{t('projects.col.phase')}: <span className="text-foreground">{p.phase}</span></span>}
-          <StatusPill status={p.status} />
-          <ProjectSlots.Health p={p} />
-          {p.nextMilestone && (
-            <span title={t('projects.nextMilestone')}>
-              ◆ {p.nextMilestone.name} · {fmtDate(p.nextMilestone.date)} <span className="text-foreground">({relative(p.nextMilestone.date)})</span>
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        {p.links.slice(0, 4).map((l) => (
-          l.linkType === 'Network Folder'
-            ? <button key={l.id} className="inline-flex min-h-(--control-row-h) items-center gap-1.5 rounded-md border border-input px-2.5 text-sm hover:bg-muted" title={l.url}
-                onClick={() => { navigator.clipboard?.writeText(l.url); toast.success(t('links.pathCopied')) }}><FolderOpen className="size-3.5" />{l.title}</button>
-            : <a key={l.id} href={l.url} target="_blank" rel="noreferrer noopener" className="inline-flex min-h-(--control-row-h) items-center gap-1.5 rounded-md border border-input px-2.5 text-sm hover:bg-muted">
-                <ExternalLink className="size-3.5" />{l.title}</a>
-        ))}
+    <header data-accent={accentOf(p.id)} className="flex min-w-0 items-center gap-3 border-b border-t-4 border-t-(color:--acc-stripe) bg-card px-4 py-2.5 md:px-6 xl:px-8">
+      <button className="key shrink-0 rounded-md bg-(--acc-bg) px-2 py-0.5 text-(--acc-fg) hover:underline" title={t('common.copyLink')}
+        onClick={() => { navigator.clipboard?.writeText(p.projectNumber); toast.success(t('common.copied')) }}>{p.projectNumber}</button>
+      <h1 title={p.name} className="min-w-0 truncate text-lg/7 font-semibold tracking-[-0.2px]">{p.name}</h1>
+      <button aria-label={p.starred ? t('projects.unstar') : t('projects.star')} aria-pressed={p.starred}
+        onClick={async () => { await (p.starred ? del(`projects/${p.id}/star`) : post(`projects/${p.id}/star`)); refresh(p.id) }}
+        className={cn('grid size-8 shrink-0 place-items-center rounded-md hover:bg-muted', p.starred ? 'text-warn' : 'text-muted-foreground')}><Star className={cn('size-4', p.starred && 'fill-current')} /></button>
+      <div className="flex shrink-0 items-center gap-2 text-sm"><StatusPill status={p.status} /><ProjectSlots.Health p={p} /></div>
+      <div className="ml-auto flex shrink-0 items-center gap-2">
         <ProjectSlots.Follow p={p} />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t('calm.projectDetails')}><MoreHorizontal className="size-5" /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuLabel className="space-y-1 font-normal">
+              <span className="block font-semibold">{p.name}</span>
+              <span className="block text-muted-foreground">{p.client}</span>
+              <span className="block text-muted-foreground">{t('projects.col.pm')}: <span className="text-foreground">{p.pmName}</span></span>
+              {p.phase && <span className="block text-muted-foreground">{t('projects.col.phase')}: <span className="text-foreground">{p.phase}</span></span>}
+              {p.nextMilestone && <span className="block text-muted-foreground">{t('projects.nextMilestone')}: <span className="text-foreground">◆ {p.nextMilestone.name} · {fmtDate(p.nextMilestone.date)} ({relative(p.nextMilestone.date)})</span></span>}
+            </DropdownMenuLabel>
+            {p.links.length > 0 && <DropdownMenuSeparator />}
+            {p.links.slice(0, 4).map((l) => (
+              l.linkType === 'Network Folder'
+                ? <DropdownMenuItem key={l.id} title={l.url} onSelect={() => { navigator.clipboard?.writeText(l.url); toast.success(t('links.pathCopied')) }}><FolderOpen className="size-4" />{l.title}</DropdownMenuItem>
+                : <DropdownMenuItem key={l.id} asChild><a href={l.url} target="_blank" rel="noreferrer noopener"><ExternalLink className="size-4" />{l.title}</a></DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   )

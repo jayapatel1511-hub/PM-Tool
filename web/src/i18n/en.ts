@@ -1933,6 +1933,7 @@ export const en: Record<string, string> = {
   // Calm workspace (packet 037, §41): toolbar, navigation groups, project header and page help.
   'calm.group.overview': 'Overview', 'calm.group.work': 'Work', 'calm.group.deliverables': 'Deliverables', 'calm.group.coordination': 'Coordination',
   'calm.group.people': 'People', 'calm.group.files': 'Files', 'calm.more': 'More', 'calm.groupPages': '{group} pages',
+  'calm.projectDetails': 'Project details and links',
   'workload.selectedSupervisor': 'Selected supervisor', 'workload.weeks': 'Weeks shown', 'workload.range': '{from} – {to}',
   'workload.prevWeek': 'Previous week', 'workload.nextWeek': 'Next week', 'workload.thisWeek': 'This week', 'workload.weekOfLabel': 'Week of',
   'workload.grid': 'Workload by person and week',

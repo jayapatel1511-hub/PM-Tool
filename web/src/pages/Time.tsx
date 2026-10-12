@@ -79,15 +79,11 @@ export function TimePage() {
         <Button variant="outline" size="icon" aria-label={t('calendar.next')} onClick={() => shift(1)}><ChevronRight className="size-5" /></Button>
         <Button variant="outline" onClick={() => { const n = new URLSearchParams(sp); n.delete('from'); n.delete('to'); setSp(n, { replace: true }) }}>{t('time.thisWeek')}</Button>
       </div>
-      <FilterBar>
+      <FilterBar activeCount={tokens.length}
+        quick={q.data?.canReview && <Segmented label={t('time.whose')} value={scope ?? 'mine'} onChange={(s) => set('scope', s === 'all' ? 'all' : null)}
+          options={[{ value: 'mine', label: t('time.scope.mine') }, { value: 'all', label: t('time.scope.all') }]} />}
+        active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? <Missing /> }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
-          {q.data?.canReview && (
-            <div className="space-y-1.5">
-              <p aria-hidden className="text-sm font-medium">{t('time.whose')}</p>
-              <Segmented label={t('time.whose')} value={scope ?? 'mine'} onChange={(s) => set('scope', s === 'all' ? 'all' : null)}
-                options={[{ value: 'mine', label: t('time.scope.mine') }, { value: 'all', label: t('time.scope.all') }]} />
-            </div>
-          )}
           <Field label={t('calendar.project')} htmlFor="time-project" className="w-full sm:w-64">
             <select id="time-project" className={selectCls} value={filters.projectId ?? ''} onChange={(e) => set('projectId', e.target.value)}>
               <option value="">{t('workload.anyProject')}</option>{projects.data?.items.map((p) => <option key={p.id} value={p.id}>{p.projectNumber} {p.name}</option>)}
@@ -97,7 +93,6 @@ export function TimePage() {
             <PeoplePicker id="time-person" value={filters.userId} valueName={entry('userId')?.person} onChange={(v) => set('userId', v)} placeholder={t('reports.anyone')} label={t('time.person')} />
           </Field>}
         </div>
-        <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? <Missing /> }))} onRemove={(k) => set(k, null)} onClear={clear} />
       </FilterBar>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={6} /></div> : q.data && (

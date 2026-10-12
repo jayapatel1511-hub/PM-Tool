@@ -85,7 +85,7 @@ export function WorkspaceCoordination() {
     <Field label={t('common.to')} htmlFor="workspace-coordination-to" className="w-full sm:w-44"><Input id="workspace-coordination-to" type="date" value={to} onChange={e => set('to', e.target.value)} /></Field>
   </>
   if (q.isPending) return <Page {...header}><div className="rounded-lg border bg-card"><Loading rows={5} /></div></Page>
-  if (q.error) return <Page {...header}><FilterBar><div className="flex flex-wrap items-end gap-3">{dates}
+  if (q.error) return <Page {...header}><FilterBar activeCount={[from, to].filter(Boolean).length}><div className="flex flex-wrap items-end gap-3">{dates}
     <Button variant="link" onClick={() => setSp(new URLSearchParams(), { replace: true })}>{t('dcv.ws.clearFilters')}</Button>
   </div></FilterBar><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
   const data = q.data
@@ -117,7 +117,8 @@ export function WorkspaceCoordination() {
       <Button variant="outline" onClick={() => window.print()}><Printer className="size-4" />{t('dcv.ws.printView')}</Button>
       <Button variant="outline" onClick={() => downloadCsv(data)}><Download className="size-4" />{t('dcv.ws.exportCsv')}</Button>
     </>}>
-    <FilterBar className="no-print">
+    <FilterBar className="no-print" activeCount={tokens.length}
+      active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value || <Missing /> }))} onRemove={name => set(name, '')} onClear={clear} />}>
       <div className="flex flex-wrap items-end gap-3">
         <Field label={t('common.project')} htmlFor="workspace-coordination-project" className="w-full sm:w-52"><select id="workspace-coordination-project" className={selectCls} value={projectId} onChange={e => set('projectId', e.target.value)}>
           <option value="">{t('dcv.ws.allPermittedProjects')}</option>{data.projectChoices.map(p => <option key={p.id} value={p.id}>{p.projectNumber}</option>)}
@@ -130,7 +131,6 @@ export function WorkspaceCoordination() {
         </select></Field>
         {dates}
       </div>
-      <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value || <Missing /> }))} onRemove={name => set(name, '')} onClear={clear} />
     </FilterBar>
     <p role="status" className="text-xs/[18px] text-muted-foreground">{t('dcv.ws.evaluated', { when: new Date(data.evaluatedAt).toLocaleString(), n: data.projects.length })}</p>
     {data.projects.map(project => <Section key={project.id} id={`coord-${project.id}`} accent={accentOf(project.id)}

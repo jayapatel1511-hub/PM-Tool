@@ -104,7 +104,9 @@ export function DesignBasisTab() {
     actions={<><ViewMenu listType="design-basis" projectId={project.id} panelParam="basis" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-design-basis`} />
       {canCreate && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('basis.new')}</Button>}</>}>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
-    <FilterBar>
+    <FilterBar activeCount={tokens.length}
+      quick={<ChipToggle on={overdue === 'true'} onClick={() => set('overdue', overdue === 'true' ? '' : 'true')}>{t('basis.overdueOnly')}</ChipToggle>}
+      active={<ActiveFilters tokens={tokens} onRemove={k => set(k, '')} onClear={clear} />}>
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-full sm:w-40"><SelectField label={t('basis.kind')} value={kind} onChange={v => set('kind', v)} required={false}
           choices={[{ value: 'Criterion', label: t('basis.criterion') }, { value: 'Assumption', label: t('basis.assumption') }]} /></div>
@@ -116,8 +118,6 @@ export function DesignBasisTab() {
         {options.data && <div className="w-full sm:w-64"><SelectField label={t('basis.affectedWork')} value={affectedWorkId} onChange={v => set('affectedWorkId', v)}
           required={false} choices={[...options.data.tasks, ...options.data.deliverables].map(w => ({ value: w.id, label: `${w.key} · ${w.name}` }))} /></div>}
       </div>
-      <div className="flex flex-wrap items-center gap-2"><ChipToggle on={overdue === 'true'} onClick={() => set('overdue', overdue === 'true' ? '' : 'true')}>{t('basis.overdueOnly')}</ChipToggle></div>
-      <ActiveFilters tokens={tokens} onRemove={k => set(k, '')} onClear={clear} />
     </FilterBar>
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.items.length ?
       <div className="rounded-lg border bg-card"><Empty title={t(tokens.length ? 'register.noMatch' : 'basis.empty')}>{t('basis.emptyHint')}</Empty></div> :

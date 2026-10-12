@@ -55,16 +55,16 @@ export function SubmissionsTab() {
   return <Page title={t('submissions.title')} subtitle={t('submissions.subtitle')} actions={<><ViewMenu listType="submissions" projectId={project.id} /><ExportMenu path={`projects/${project.id}/submissions/export`} params={filters} name={`${project.projectNumber}-submissions`} />{canCreate && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('submissions.new')}</Button>}</>}>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
     {milestones.error && <ErrorBanner error={milestones.error} retry={() => milestones.refetch()} />}
-    <FilterBar>
+    <FilterBar activeCount={tokens.length}
+      search={<Field label={t('common.search')} htmlFor="submissions-search"><UrlSearchInput id="submissions-search" placeholder={t('common.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
+      active={<ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />}>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label={t('common.search')} htmlFor="submissions-search" className="w-full sm:w-56"><UrlSearchInput id="submissions-search" value={filters.q} onValueChange={value => change('q', value)} /></Field>
         <div className="w-full sm:w-40"><SelectField label={t('common.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={['Draft', 'Checking', 'Ready', 'Issued', 'Superseded', 'Cancelled'].map(s => ({ value: s, label: tv(s) }))} /></div>
         {options.data && <div className="w-full sm:w-48"><SelectField label={t('coord.coordinator')} value={filters.coordinatorId} onChange={v => change('coordinatorId', v)} required={false} choices={peopleChoices(options.data)} /></div>}
         {milestones.data && <div className="w-full sm:w-56"><SelectField label={t('submissions.milestone')} value={filters.milestoneId} onChange={v => change('milestoneId', v)} required={false} choices={milestones.data.map(m => ({ value: m.id, label: `${m.key} · ${m.name}` }))} /></div>}
         <Field label={`${t('submissions.targetDate')} ${t('common.from')}`} htmlFor="submissions-target-from" className="w-full sm:w-44"><Input id="submissions-target-from" type="date" value={filters.targetFrom} onChange={e => change('targetFrom', e.target.value)} /></Field>
         <Field label={`${t('submissions.targetDate')} ${t('common.to')}`} htmlFor="submissions-target-to" className="w-full sm:w-44"><Input id="submissions-target-to" type="date" value={filters.targetTo} onChange={e => change('targetTo', e.target.value)} /></Field>
       </div>
-      <ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />
     </FilterBar>
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : <>
       <p role="status" className="text-sm text-muted-foreground">{t('coord.count', { n: list.data.totalCount })}</p>

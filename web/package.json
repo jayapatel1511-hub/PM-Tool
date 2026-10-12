@@ -13,7 +13,8 @@
     "test:design-basis": "node tests/design-basis.cjs",
     "test:resources": "node tests/resources.cjs",
     "test:planner": "node tests/planner.cjs",
-    "test:ui-consistency": "node tests/ui-consistency.cjs"
+    "test:ui-consistency": "node tests/ui-consistency.cjs",
+    "test:clutter": "node tests/clutter.cjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.23.0",

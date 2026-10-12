@@ -78,7 +78,9 @@ let server, browser;
   const desktopViolations = await axe();
 
   // A re-sort keeps each person's accent (it is derived from the id, never the row index).
+  await page.getByRole('button', { name: /^Filters/ }).click();
   await page.locator('#wl-sort').selectOption('name');
+  await page.keyboard.press('Escape');
   await page.waitForFunction(() => document.querySelector('tbody th[scope=row]')?.textContent.includes('Jill Partial'));
   assert.equal(await row('Alex Overloaded').locator('[data-accent]').first().getAttribute('data-accent'), accent, 'Stable identity accent');
 

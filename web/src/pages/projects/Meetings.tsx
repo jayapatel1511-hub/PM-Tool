@@ -297,11 +297,15 @@ export function MeetingsTab() {
         <ExportMenu path={`projects/${p.id}/actions/export`} params={filters} name={`${p.projectNumber}-actions`} />
         {canMeet && <Button onClick={() => setMeetingForm('new')}><Plus className="size-4" />{t('meeting.new')}</Button>}
       </>}>
-      <FilterBar>
+      <FilterBar activeCount={tokens.length}
+        search={<Field label={t('common.search')} htmlFor="action-search">
+          <Input id="action-search" type="search" placeholder={t('common.search')} value={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
+        </Field>}
+        quick={<div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>
+          <ChipToggle on={filters.indicator === 'overdue'} onClick={() => set('indicator', filters.indicator === 'overdue' ? null : 'overdue')}>{t('ind.overdue')}</ChipToggle>
+        </div>}
+        active={<ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
-          <Field label={t('common.search')} htmlFor="action-search" className="w-full sm:w-56">
-            <Input id="action-search" type="search" value={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
-          </Field>
           <Field label={t('common.status')} htmlFor="action-status" className="w-full sm:w-44">
             <select id="action-status" className={selectCls} value={filters.status ?? ''} onChange={(e) => set('status', e.target.value)}>
               <option value="">{t('register.anyStatus')}</option><option value="Open,In Progress">{t('register.openStatuses')}</option>
@@ -314,10 +318,6 @@ export function MeetingsTab() {
             </select>
           </Field>
         </div>
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>
-          <ChipToggle on={filters.indicator === 'overdue'} onClick={() => set('indicator', filters.indicator === 'overdue' ? null : 'overdue')}>{t('ind.overdue')}</ChipToggle>
-        </div>
-        <ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />
       </FilterBar>
       {meetings.isPending || actions.isPending ? <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
         : meetings.error || actions.error ? <ErrorBanner error={meetings.error ?? actions.error} retry={() => { meetings.refetch(); actions.refetch() }} />

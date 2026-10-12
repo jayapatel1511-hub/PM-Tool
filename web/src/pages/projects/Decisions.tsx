@@ -149,11 +149,15 @@ export function DecisionsTab() {
       <div><Segmented label={t('decision.view')} value={view} onChange={(v) => set('view', v === 'log' ? v : null)}
         options={(['register', 'log'] as const).map((v) => ({ value: v, label: t(`decision.view.${v}`) }))} /></div>
       {view === 'log' ? <DecisionLog projectId={p.id} /> : <>
-      <FilterBar>
+      <FilterBar activeCount={tokens.length}
+        search={<Field label={t('common.search')} htmlFor="decision-search">
+          <UrlSearchInput id="decision-search" placeholder={t('common.search')} value={filters.q ?? ''} onValueChange={value => set('q', value)} />
+        </Field>}
+        quick={<div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>
+          <ChipToggle on={filters.blocking === 'true'} onClick={() => set('blocking', filters.blocking === 'true' ? null : 'true')}>{t('decision.blockingWork')}</ChipToggle>
+        </div>}
+        active={<ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
-          <Field label={t('common.search')} htmlFor="decision-search" className="w-full sm:w-56">
-            <UrlSearchInput id="decision-search" value={filters.q ?? ''} onValueChange={value => set('q', value)} />
-          </Field>
           <Field label={t('common.status')} htmlFor="decision-status" className="w-full sm:w-56">
             <select id="decision-status" className={selectCls} value={filters.status ?? ''} onChange={(e) => set('status', e.target.value)}>
               <option value="">{t('decision.anyStatus')}</option><option value={OPEN}>{t('decision.openStatuses')}</option>
@@ -182,10 +186,6 @@ export function DecisionsTab() {
             <Input id="decision-required-to" type="date" value={filters.requiredTo ?? ''} onChange={(e) => set('requiredTo', e.target.value)} />
           </Field>
         </div>
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>
-          <ChipToggle on={filters.blocking === 'true'} onClick={() => set('blocking', filters.blocking === 'true' ? null : 'true')}>{t('decision.blockingWork')}</ChipToggle>
-        </div>
-        <ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />
       </FilterBar>
       {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={6} /></div> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : rows.length === 0 ? (
         <div className="rounded-lg border bg-card">{active

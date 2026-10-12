@@ -28,11 +28,9 @@ export function WorkspaceTeamPage() {
   return (
     <Page title={t('nav.team')} subtitle={q.data ? plural(q.data.people.length, 'team.onePerson', 'team.nPeople', { n: q.data.people.length }) : scope.label}>
       <WorkspaceTabs />
-      <FilterBar>
-        <Field label={t('common.search')} htmlFor="team-search" className="w-full sm:w-72">
-          <Input id="team-search" type="search" placeholder={t('team.search')} value={term} onChange={(e) => setTerm(e.target.value)} />
-        </Field>
-      </FilterBar>
+      <FilterBar search={<Field label={t('common.search')} htmlFor="team-search">
+        <Input id="team-search" type="search" placeholder={t('team.search')} value={term} onChange={(e) => setTerm(e.target.value)} />
+      </Field>} />
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={6} /></div> : people.length === 0 ? (
         <div className="rounded-lg border bg-card"><Empty action={s && <Button variant="outline" onClick={() => setTerm('')}>{t('common.clear')}</Button>}>{t('team.none')}</Empty></div>

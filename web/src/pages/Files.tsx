@@ -39,14 +39,15 @@ export function FilesPage() {
   return (
     <Page title={t('nav.files')} subtitle={q.data ? plural(q.data.total, 'files.one', 'files.many', { n: q.data.total }) : scope.label}>
       <WorkspaceTabs />
-      <FilterBar>
+      <FilterBar activeCount={tokens.length}
+        search={<Field label={t('common.search')} htmlFor="files-search">
+          <form onSubmit={(e) => { e.preventDefault(); set('q', term.trim() || null); setDraft(null) }}>
+            <Input id="files-search" type="search" placeholder={t('files.search')} value={term}
+              onChange={(e) => { if (e.target.value) setDraft(e.target.value); else { setDraft(null); set('q', null) } }} />
+          </form>
+        </Field>}
+        active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value as string }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
-          <Field label={t('common.search')} htmlFor="files-search" className="w-full sm:w-72">
-            <form onSubmit={(e) => { e.preventDefault(); set('q', term.trim() || null); setDraft(null) }}>
-              <Input id="files-search" type="search" placeholder={t('files.search')} value={term}
-                onChange={(e) => { if (e.target.value) setDraft(e.target.value); else { setDraft(null); set('q', null) } }} />
-            </form>
-          </Field>
           <Field label={t('common.type')} htmlFor="files-type" className="w-full sm:w-48">
             <select id="files-type" className={selectCls} value={f.type ?? ''} onChange={(e) => set('type', e.target.value)}>
               <option value="">{t('files.anyType')}</option>{q.data?.types.map((x) => <option key={x} value={x}>{t(`linkType.${x}`)}</option>)}
@@ -54,7 +55,6 @@ export function FilesPage() {
           </Field>
           <p className="text-sm text-muted-foreground sm:pb-2.5">{t('files.note')}</p>
         </div>
-        <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value as string }))} onRemove={(k) => set(k, null)} onClear={clear} />
       </FilterBar>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.data?.truncated && <Notice title={t('ws.truncatedTitle')}>{t('files.truncated')}</Notice>}

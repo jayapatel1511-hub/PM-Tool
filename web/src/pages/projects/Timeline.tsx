@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Monitor, Pri
 import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, Segmented, selectCls, useIsPhone } from '@/components/hub/common'
+import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, PageHelp, Section, Segmented, selectCls, useIsPhone } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key, toneOf } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -76,7 +76,7 @@ export function TimelineTab() {
   const ms = useQuery({ queryKey: ['p', p.id, 'milestones', true, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones?showCompleted=true`) })
   const dels = useQuery({ queryKey: ['p', p.id, 'deliverables', {}], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables`) })
   const tl = useQuery({ queryKey: ['p', p.id, 'timeline'], queryFn: () => get<TimelineData>(`projects/${p.id}/timeline`) })
-  const header = { title: t('ptab.timeline'), subtitle: t('timeline.subtitle') }
+  const header = { title: t('ptab.timeline'), subtitle: <>{t('calm.timeline.scope')}<PageHelp>{t('timeline.subtitle')}</PageHelp></> }
   if (ms.isPending || dels.isPending || tl.isPending) return <Page {...header}><div className="rounded-lg border bg-card"><Loading rows={8} /></div></Page>
   if (ms.error || dels.error || tl.error) return <Page {...header}><ErrorBanner error={ms.error ?? dels.error ?? tl.error} retry={() => { ms.refetch(); dels.refetch(); tl.refetch() }} /></Page>
 
@@ -242,10 +242,11 @@ export function TimelineTab() {
 
   return (
     <Page {...header} actions={<Button variant="outline" className="no-print" onClick={() => window.print()}><Printer className="size-4" />{t('wc.print')}</Button>}>
-      <FilterBar className="no-print">
+      <FilterBar className="no-print" activeCount={tokens.length}
+        quick={<Segmented label={t('timeline.zoom')} value={zoom} onChange={(z) => set('zoom', z === 'month' ? null : z)}
+          options={(Object.keys(ZOOM) as Zoom[]).map((z) => ({ value: z, label: t(`timeline.zoom.${z}`) }))} />}
+        active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
-          <Segmented label={t('timeline.zoom')} value={zoom} onChange={(z) => set('zoom', z === 'month' ? null : z)}
-            options={(Object.keys(ZOOM) as Zoom[]).map((z) => ({ value: z, label: t(`timeline.zoom.${z}`) }))} />
           <Field label={t('common.discipline')} htmlFor="tl-discipline" className="w-full sm:w-44">
             <select id="tl-discipline" className={selectCls} value={f.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
               <option value="">{t('projects.anyDiscipline')}</option>{p.disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -265,7 +266,6 @@ export function TimelineTab() {
           <Field label={t('common.to')} htmlFor="tl-to" className="w-full sm:w-40"><Input id="tl-to" type="date" value={f.to ?? ''} onChange={(e) => set('to', e.target.value)} /></Field>
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={f.hide} onCheckedChange={(c) => set('hideCompleted', c ? 'true' : null)} />{t('timeline.hideCompleted')}</label>
         </div>
-        <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />
       </FilterBar>
       {data.permissions.manageMilestones && <DesktopOnly notice={<Notice icon={Monitor} title={t('milestone.phoneTitle')}>{t('milestone.phoneHint')}</Notice>}>{null}</DesktopOnly>}
       <div className="flex flex-wrap items-center justify-between gap-3">

@@ -1,9 +1,11 @@
-import { AlertTriangle, Info, Loader2, X, type LucideIcon } from 'lucide-react'
+import { AlertTriangle, Info, Loader2, SlidersHorizontal, X, type LucideIcon } from 'lucide-react'
 import { Children, cloneElement, createContext, isValidElement, useContext, useEffect, useState, useSyncExternalStore, type ComponentProps, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { ApiError } from '@/lib/api'
@@ -149,9 +151,46 @@ export function Segmented<T extends string>({ label, value, options, onChange }:
   )
 }
 
-/** The card that holds a list's filters (§13.0 Filters); labelled fields, quick chips and active tokens go inside. */
-export function FilterBar({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('flex flex-col gap-4 rounded-lg border bg-card p-4 md:p-5', className)}>{children}</div>
+const tablet = '(max-width: 1023.98px)'
+const subscribeTablet = (l: () => void) => { const m = matchMedia(tablet); m.addEventListener('change', l); return () => m.removeEventListener('change', l) }
+
+/** A one-line page scope with the longer explanation behind an (i) help button (§41 R5). */
+export function PageHelp({ children }: { children: ReactNode }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button type="button" aria-label={t('calm.help')} className="ml-1 inline-grid size-6 place-items-center rounded-md align-middle text-muted-foreground hover:bg-muted hover:text-foreground"><Info className="size-4" aria-hidden /></button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-96 text-sm/5 text-muted-foreground">{children}</PopoverContent>
+    </Popover>
+  )
+}
+
+/** A list's toolbar (§13.0 Filters, §41 R1): one row with the search, a Filters (n) button whose popover (a sheet below
+ *  1024 px) holds the labelled filter fields (`children`), up to three pinned quick chips, the active filters as removable
+ *  chips while any are set, and the page's view or overflow controls on the right. URL handling stays with each page. */
+export function FilterBar({ search, quick, active, activeCount = 0, actions, children, className }: {
+  search?: ReactNode; quick?: ReactNode; active?: ReactNode; activeCount?: number; actions?: ReactNode; children?: ReactNode; className?: string
+}) {
+  const narrow = useSyncExternalStore(subscribeTablet, () => matchMedia(tablet).matches)
+  const trigger = (
+    <Button variant="outline">
+      <SlidersHorizontal className="size-4" aria-hidden />{t('calm.filters')}
+      {activeCount > 0 && <><span aria-hidden className="rounded-md bg-secondary px-1.5 text-xs font-semibold tabular-nums">{activeCount}</span><span className="sr-only">{t('calm.filtersActive', { n: activeCount })}</span></>}
+    </Button>
+  )
+  const fields = <div className="flex flex-col gap-4">{children}</div>
+  return (
+    <div className={cn('flex flex-wrap items-center gap-2', className)}>
+      {search && <div className="w-full sm:w-auto sm:min-w-64 [&_[data-slot=label]]:sr-only">{search}</div>}
+      {children && (narrow
+        ? <Sheet><SheetTrigger asChild>{trigger}</SheetTrigger><SheetContent aria-describedby={undefined} className="overflow-y-auto"><SheetHeader><SheetTitle>{t('calm.filters')}</SheetTitle></SheetHeader><div className="px-4 pb-4">{fields}</div></SheetContent></Sheet>
+        : <Popover><PopoverTrigger asChild>{trigger}</PopoverTrigger><PopoverContent align="start" aria-label={t('calm.filters')} className="w-[46rem]">{fields}</PopoverContent></Popover>)}
+      {quick}
+      {active}
+      {actions && <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div>}
+    </div>
+  )
 }
 
 /** A quick-filter chip: selected shows an outline, a tint and a check, never the tint alone. */
@@ -168,7 +207,7 @@ export function ChipToggle({ on, onClick, children }: { on: boolean; onClick: ()
 export function ActiveFilters({ tokens, onRemove, onClear }: { tokens: { key: string; label: string; value: ReactNode }[]; onRemove: (key: string) => void; onClear: () => void }) {
   if (!tokens.length) return null
   return (
-    <div className="flex flex-wrap items-center gap-2 border-t pt-3" role="group" aria-label={t('filters.active')}>
+    <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('filters.active')}>
       {tokens.map((tk) => (
         <span key={tk.key} className="inline-flex min-h-(--control-row-h) items-center gap-1 rounded-md bg-accent pl-2.5 text-sm text-accent-foreground">
           {tk.label}: <strong className="font-semibold">{tk.value}</strong>

@@ -78,6 +78,8 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
     ['indicator', t('workload.indicator'), filters.indicator ? t(`workload.ind.${filters.indicator}`) : null],
     ['from', t('workload.from'), filters.from ? fmtDate(filters.from) : null],
   ] as const).filter(([k]) => filters[k])
+  // One indicator at a time; choosing the selected chip again shows every person (the former "Any" chip).
+  const indicatorChip = (x: string) => <ChipToggle key={x} on={filters.indicator === x} onClick={() => set('indicator', filters.indicator === x ? null : x)}>{t(`workload.ind.${x}`)}</ChipToggle>
   const clear = () => { const n = new URLSearchParams(sp); for (const [k] of tokens) n.delete(k); setSp(n, { replace: true }) }
   const weeks = q.data?.weeks ?? []
   const shiftWeeks = (days: number) => set('from', addDays(weeks[0] ?? today(), days))
@@ -87,7 +89,9 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
       <WorkspaceTabs />
       {forbidden ? <Notice icon={Lock} title={t('workload.noAccessTitle')}
         action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('workload.noAccess')}</Notice> : <>
-        <FilterBar>
+        <FilterBar activeCount={tokens.length}
+          quick={<div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('workload.indicator')}>{INDICATORS.slice(0, 3).map(indicatorChip)}</div>}
+          active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
           <div className="flex flex-wrap items-end gap-3">
             <Field label={t('workload.supervisor')} htmlFor="wl-supervisor" className="w-full sm:w-56">
               <PeoplePicker id="wl-supervisor" value={filters.supervisorId} valueName={supervisorName} onChange={(v) => set('supervisorId', v)} placeholder={t('workload.anySupervisor')} />
@@ -114,12 +118,9 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
             </Field>
           </div>
           <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="wl-indicator">
-            <span id="wl-indicator" className="mr-1 text-sm font-medium">{t('workload.indicator')}</span>
-            {['', ...INDICATORS].map((x) => (
-              <ChipToggle key={x || 'any'} on={(filters.indicator ?? '') === x} onClick={() => set('indicator', x)}>{x ? t(`workload.ind.${x}`) : t('workload.anyIndicator')}</ChipToggle>
-            ))}
+            <span id="wl-indicator" className="mr-1 text-sm font-medium">{t('calm.moreQuick')}</span>
+            {INDICATORS.slice(3).map(indicatorChip)}
           </div>
-          <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />
         </FilterBar>
 
         <div className="flex flex-wrap items-center justify-between gap-3">

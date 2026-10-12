@@ -244,7 +244,13 @@ def capacity():
         "personId": uid["alex"], "hoursPerWeek": 10, "startWeek": iso(day(1)), "endWeek": iso(day(1)), "label": "Possible proposal support",
         "sourceCategory": "Proposal", "confidence": "Possible", "visibility": "Draft", "notes": 'Private draft; not yet shared.'}))
     profiles = by_name(call(f"projects/{p1}/tasks?pageSize=200", "jordan"), PROFILES)
-    if profiles:
+    # seed_resources.py run on the same day already gives Alex a live SYN-101 allocation in week W, linked to the same
+    # task days, so a second one is refused as a duplicate (036-D4); keep that one instead.
+    held = next((a for a in call(f"projects/{p1}/allocations", "jordan")["items"] if a["personId"] == uid["alex"]
+                 and a["status"] in ("Proposed", "Confirmed") and a["fromDate"] <= iso(day(1, 4)) and a["throughDate"] >= iso(day(1))), None)
+    if held:
+        skipped.append(f"SYN-101 Alex in week W: his {held['status']} allocation {held['fromDate']}..{held['throughDate']} is already present")
+    elif profiles:
         attempt("SYN-101 Alex 20 h in week W, proposed by Priya, confirmed by Sam",
                 lambda: confirm(p1, propose(p1, "priya", "alex", day(1), day(1, 4), 20, profiles["id"]), "sam"))
     else:

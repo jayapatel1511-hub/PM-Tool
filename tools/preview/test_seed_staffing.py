@@ -29,7 +29,7 @@ class FakeFixtureApi:
         self.today, self.calls, self.ids = today, [], itertools.count(1)
         self.projects = {"SYN-101": "p1", "SYN-103": "p3"}
         self.tasks = {"p1": [{"id": "profiles", "name": PROFILES}]}
-        self.entries = []
+        self.entries, self.allocations = [], {}
         if present:
             self.projects.update({"SYN-104": "p4", "SYN-105": "p5"})
             self.tasks["p1"] += [{"id": "t21a", "name": "Utility conflict log"}, {"id": "hold", "name": "Culvert crossing options"}]
@@ -59,6 +59,8 @@ class FakeFixtureApi:
                 return {"items": self.tasks.get(parts[1], [])}
             if parts[0] == "projects" and parts[2] == "open-roles":
                 return []
+            if parts[0] == "projects" and parts[2] == "allocations" and len(parts) == 3:
+                return {"items": self.allocations.get(parts[1], [])}
             if parts[-1] == "confirmation-preview":
                 return {"rowVersion": 0, "days": [{"date": "2026-10-19", "overByHours": 2, "dateVersion": 0}]}
             if path.startswith("planning/entries"):
@@ -141,6 +143,13 @@ class SeedStaffingTests(unittest.TestCase):
         self.assertEqual({who for p, who, m, _ in writes if p.startswith("admin/")}, {"jordan"})
         starts = [who for p, who, m, body in writes if p.endswith("/transition") and body.get("acknowledgeReadiness")]
         self.assertNotIn("priya", starts, "assignees start their own work after the PM's authorisation")
+
+    def test_an_existing_week_w_allocation_for_alex_is_kept(self):
+        # seed_resources.py run the same day already gives Alex a Confirmed SYN-101 allocation in week W (036-D4).
+        api = FakeFixtureApi()
+        api.allocations["p1"] = [{"id": "a1", "personId": "alex-id", "status": "Confirmed", "fromDate": "2026-10-19", "throughDate": "2026-10-23"}]
+        run(api)  # a refused step would raise SystemExit
+        self.assertFalse([body for p, who, m, body in api.writes() if p == "projects/p1/allocations" and body["personId"] == "alex-id"])
 
     def test_present_markers_mean_no_writes(self):
         api = FakeFixtureApi(present=True)

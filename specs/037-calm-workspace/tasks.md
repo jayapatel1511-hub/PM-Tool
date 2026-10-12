@@ -23,14 +23,14 @@
 
 ## Phase 2: Page passes
 
-- [ ] T009 My Work defaults to Today, with a Views switch and a collapsed My Week summary (R10/E3), in `web/src/pages/MyWork.tsx`. Check: AC-CALM-01 for /my-work.
-- [ ] T010 Project Dashboard puts the counts first (R9) in `web/src/pages/projects/Dashboard.tsx`. Check: AC-CALM-01 for /projects/:id/dashboard.
-- [ ] T011 One signal per row with week labels (R7) in `PlannerGrid.tsx`, `Workload.tsx` and `indicators.tsx`. Check: AC-CALM-09.
-- [ ] T012 Colour budget pass (R8) on screens over the limit. Check: AC-CALM-05's colour column.
+- [x] T009 My Work defaults to Today, with a Views switch and a collapsed My Week summary (R10/E3), in `web/src/pages/MyWork.tsx`. Check: AC-CALM-01 for /my-work. Done on `build/037-phase2` in `c54f7766` and `408977c5`, merged 2026-10-12 (`7a39e76b`): first data row 348 px (base 694).
+- [x] T010 Project Dashboard puts the counts first (R9) in `web/src/pages/projects/Dashboard.tsx`. Check: AC-CALM-01 for /projects/:id/dashboard. Done on `build/036-ui-signals` in `a2f57e68`, merged 2026-10-12: first data row 270 px (base 1138).
+- [x] T011 One signal per row with week labels (R7) in `PlannerGrid.tsx`, `Workload.tsx` and `indicators.tsx`. Check: AC-CALM-09. Done on `build/036-ui-staffing` in `adf8b507`, `796f33f9` and `54a50d4d` (`OneSignal` in `indicators.tsx`), merged 2026-10-12.
+- [ ] T012 (partly done 2026-10-12: one neutral tint behind every identity accent in `f1c84165`, avatars as rings in `6afb5fef`; 15 of 17 screens are at 6 fills or fewer, Priya /projects and Sam /portfolio show 7) Colour budget pass (R8) on screens over the limit. Check: AC-CALM-05's colour column.
 
 ## Phase 3: Acceptance
 
-- [ ] T013 Run `test:clutter` and the existing browser suites (`test:planner`, `test:resources`, `test:handoffs`, `test:coordination`, `test:design-basis`), updating selectors only, plus `build` and `lint`. Record the results.
+- [x] T013 Run `test:clutter` and the existing browser suites (`test:planner`, `test:resources`, `test:handoffs`, `test:coordination`, `test:design-basis`), updating selectors only, plus `build` and `lint`. Record the results. Done 2026-10-12 at `caa76893`; results in verification.md sections 4 and 6.
 - [ ] T014 Run the route crawl (AC-CALM-06) and the click-count paths (AC-CALM-10). Record before and after.
 - [ ] T015 Run the keyboard pass and axe (AC-CALM-08).
 - [ ] T016 Run the human sessions SC-CALM-01 (5-second test with 2 PMs) and SC-CALM-02 (Jay's visual review) on the review stack, after Jay's go-ahead to deploy.

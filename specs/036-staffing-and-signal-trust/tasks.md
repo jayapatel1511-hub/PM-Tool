@@ -43,22 +43,22 @@
 
 ## Phase 4: Web, Part A (Stream B, after T009–T011)
 
-- [ ] T012 [B] Open roles in `web/src/pages/projects/Allocations.tsx`:
+- [x] T012 [B] Open roles in `web/src/pages/projects/Allocations.tsx`:
   - list, add, edit and cancel open roles;
   - "Fill" opens the existing allocation create form prefilled with the role's dates and hours, and sends `openRoleId`.
 
-  Add the Unfilled roles section to `web/src/pages/Workload.tsx`. Requirements: AC-ROLE-01–04.
-- [ ] T013 [B] Dependency type:
+  Add the Unfilled roles section to `web/src/pages/Workload.tsx`. Requirements: AC-ROLE-01–04. Done on `build/036-ui-staffing` (`4480db5e` open roles with a view switch on the Allocations tab, `796f33f9` Unfilled roles on Workload), merged 2026-10-12 in run 2.
+- [x] T013 [B] Dependency type:
   - add a select (default Finish-to-Start) and a type chip to the dependency section of `web/src/pages/projects/TaskPanel.tsx`, with hint text by type;
   - make the same change in `ExplicitDeps` in `web/src/pages/projects/Deliverables.tsx`, using the server's `satisfied` value instead of the client rule at :465.
 
-  Requirements: AC-DEPT-01, -05.
-- [ ] T014 [B] Add the `groupBy` control with a "Not set" bucket to `web/src/pages/Workload.tsx` and `web/src/pages/Planner.tsx`. Add the home discipline field to the user editor in `web/src/pages/admin/Admin.tsx`. Requirements: AC-GRP-01, -02.
-- [ ] T015 [B] Add `capacityWeek` to `PeoplePicker` in `web/src/components/hub/people.tsx`, and pass it from `TaskPanel.tsx`, `Tasks.tsx` (create form) and `ReassignWork.tsx`. Requirements: AC-PICK-01–03.
+  Requirements: AC-DEPT-01, -05. Done in `adf8b507` (shared `DepTypeField` and `DepTypeChip` in `indicators.tsx`; the client rule is deleted), merged 2026-10-12.
+- [x] T014 [B] Add the `groupBy` control with a "Not set" bucket to `web/src/pages/Workload.tsx` and `web/src/pages/Planner.tsx`. Add the home discipline field to the user editor in `web/src/pages/admin/Admin.tsx`. Requirements: AC-GRP-01, -02. Done in `796f33f9` (Group menu, `groupPeople` in `planner/labels.ts`, per-week subtotals) and `7a544d18` (Admin editor), merged 2026-10-12.
+- [x] T015 [B] Add `capacityWeek` to `PeoplePicker` in `web/src/components/hub/people.tsx`, and pass it from `TaskPanel.tsx`, `Tasks.tsx` (create form) and `ReassignWork.tsx`. Requirements: AC-PICK-01–03. Done in `6afb5fef` and `adf8b507` (the TaskPanel owner field gets the week through a `CapacityWeek` context), merged 2026-10-12.
 
 ## Phase 5: Part B (Stream C, can start after T003)
 
-- [ ] T016 [C] (Server part done on `build/036-api-deps` in `f41ccc2e`: `TaskQueries.cs` `onHold`, `Deliverables.cs` unassigned filter, `Workspace.cs` ordering and `onHold`, with API tests. `Portfolio.tsx`, `Dashboard.tsx` and `Home.tsx` remain.) Make the count fixes from the plan's B1 table:
+- [x] T016 [C] (Server part done on `build/036-api-deps` in `f41ccc2e`: `TaskQueries.cs` `onHold`, `Deliverables.cs` unassigned filter, `Workspace.cs` ordering and `onHold`, with API tests. Web half done on `build/036-ui-signals` in `937822e9` (Portfolio), `a2f57e68` (Dashboard `onHold=false`) and `aa03498c` (Home On Hold row), merged 2026-10-12; the project Tasks page forwards `onHold` since the integration fix `b1a38fc6`.) Make the count fixes from the plan's B1 table:
   - `Portfolio.tsx`
   - `TaskQueries.cs` (`onHold`) and `Dashboard.tsx`
   - `Deliverables.cs:71`
@@ -66,15 +66,15 @@
   - `Home.tsx`
 
   Add the API tests. Requirements: AC-CNT-01–05, -07.
-- [ ] T017 [C] Add the `SummaryTile` `hint` in `web/src/components/hub/common.tsx`, and `def.*` strings for every Home, Dashboard and Portfolio tile. Requirements: AC-CNT-06.
-- [ ] T018 [C] Make the timeline changes from the plan's B2 list in `Timeline.tsx`, `Gantt.tsx` and `Timeline.cs`. Requirements: AC-TL-01–04. (Server part done in `e1ffbb01`: undated milestones in `Timeline.cs`. `Timeline.tsx` and `Gantt.tsx` remain.)
-- [ ] T019 [C] After T010, draw arrows by dependency type in `Timeline.tsx` and `Gantt.tsx`, with the type and lag in the tooltip. Requirements: AC-DEPT-06.
+- [x] T017 [C] Add the `SummaryTile` `hint` in `web/src/components/hub/common.tsx`, and `def.*` strings for every Home, Dashboard and Portfolio tile. Requirements: AC-CNT-06. Done in `04275ef3` (the hint is an (i) tooltip read through `aria-describedby`; the strings are `sig.def.*`), merged 2026-10-12.
+- [x] T018 [C] Make the timeline changes from the plan's B2 list in `Timeline.tsx`, `Gantt.tsx` and `Timeline.cs`. Requirements: AC-TL-01–04. (Server part done in `e1ffbb01`: undated milestones in `Timeline.cs`. Web part done in `8ddea543`, merged 2026-10-12.)
+- [x] T019 [C] After T010, draw arrows by dependency type in `Timeline.tsx` and `Gantt.tsx`, with the type and lag in the tooltip. Requirements: AC-DEPT-06. Done in `8ddea543` and `becca7b7` (deliverable-link tooltips name the type only, because the payload has no lag for them), merged 2026-10-12.
 
 ## Phase 6: Acceptance (see verification.md)
 
-- [ ] T020 Write `tools/preview/seed_staffing.py` with the section 8 fixtures (SYN-104, SYN-105, stalled items, capacity week W, count and timeline edge cases), seeded through the API as the acting persona. Encode the section 8.2 worked example in `DependencyLagTests`. Add `web/tests/counts.cjs` (an `npm run test:counts` script) that clicks every Home, Dashboard and Portfolio tile as Admin, PM and Supervisor and compares the count with the rows (SC-002).
-- [ ] T021 Run the full checks and the regression guard (verification.md section 5), including the before/after `/workload` JSON diff and the evaluator output diff on the fixture. Record each result with the commit.
-- [ ] T022 Fill in the evidence map (verification.md section 4) for every AC through automated tests or an agent browser pass (desktop, tablet, keyboard), with screenshots. Run the SC-003 and SC-004 browser checks.
-- [ ] T023 Run the wording check: `git diff <base> -- . | grep -inE '<competitor product names>'` returns nothing (weekday names used in date rules are fine). Do a trial merge into the base with no conflicts. Commit on a packet branch.
+- [ ] T020 (partly done 2026-10-12: `seed_staffing.py`, its tests and `counts.cjs` in `df50786e` and `fe1abce2`; the section 8.2 example was encoded in run 1. Three section 8 fixtures cannot be made through the API: an unowned deliverable, backdated ages and an undated milestone on an existing project; see verification.md E4) Write `tools/preview/seed_staffing.py` with the section 8 fixtures (SYN-104, SYN-105, stalled items, capacity week W, count and timeline edge cases), seeded through the API as the acting persona. Encode the section 8.2 worked example in `DependencyLagTests`. Add `web/tests/counts.cjs` (an `npm run test:counts` script) that clicks every Home, Dashboard and Portfolio tile as Admin, PM and Supervisor and compares the count with the rows (SC-002).
+- [ ] T021 (partly done 2026-10-12: the full checks ran at `caa76893`, see verification.md section 9; the `/workload` JSON diff and the evaluator output diff are not run) Run the full checks and the regression guard (verification.md section 5), including the before/after `/workload` JSON diff and the evaluator output diff on the fixture. Record each result with the commit.
+- [ ] T022 (partly done 2026-10-12: rows filled from the run 2 writer browser passes and the integrator's runs; tablet and the SC-003 chip pass are not run) Fill in the evidence map (verification.md section 4) for every AC through automated tests or an agent browser pass (desktop, tablet, keyboard), with screenshots. Run the SC-003 and SC-004 browser checks.
+- [x] T023 Run the wording check: `git diff <base> -- . | grep -inE '<competitor product names>'` returns nothing (weekday names used in date rules are fine). Do a trial merge into the base with no conflicts. Commit on a packet branch. Done 2026-10-12: the five run 2 branches merged into `claude/tuesday-visual-batch1` with no conflicts (`7a39e76b`); the wording grep on `git diff 9beace03..HEAD` and the commit messages prints nothing.
 - [ ] T024 With Jay's go-ahead, deploy to the synthetic review stack. Run the human sessions in verification.md section 7: the SC-001 staffing exercise, the dependency review, the VoiceOver pass and Jay's visual review. Book the people when T001 is answered, not at the end.
 - [ ] T025 Jay signs off in verification.md section 8. Update `specs/README.md` status. Any failed row goes back to its task; a new idea goes to a follow-up proposal, not into this packet.

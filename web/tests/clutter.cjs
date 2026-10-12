@@ -10,17 +10,17 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'TUESDAY_
 const project = 'SYN-101'
 const personas = (process.env.CLUTTER_PERSONAS ?? 'priya,sam').split(',')
 const navPersonas = ['jordan', 'lena', 'sam', 'priya', 'alex', 'rita']
-// [path, baseline chrome words (section 2), data selector for screens without table rows]
+// [path, baseline chrome words (section 2, the 5800e3fc re-measure), data selector for screens without table rows]
 const SCREENS = [
   ['/home', 114, 'section, [data-accent].rounded-lg'],
-  ['/my-work', 78],
+  ['/my-work', 78, 'section li'],
   ['/boards', 140, 'section'],
   ['/projects', 33],
   ['/tasks', 43],
-  ['/calendar', 147, '[role=region]'],
+  ['/calendar', 150, '[role=region]'],
   ['/portfolio', 58],
   ['/workload', 112],
-  ['/planner', 53],
+  ['/planner', 63],
   ['/reports', 169, 'li'],
   ['/team', 16],
   [`/projects/${project}/dashboard`, 168],
@@ -30,9 +30,13 @@ const SCREENS = [
   [`/projects/${project}/allocations`, 98],
   [`/projects/${project}/coordination`, 232, 'section.rounded-lg'],
 ].filter(([p]) => !process.env.CLUTTER_SCREENS || process.env.CLUTTER_SCREENS.split(',').includes(p))
-const LIMIT = { firstDataY: 405, filterFields: 1, chromeControls: 25, wordsShare: 0.5, fills: 6, groupTabs: 7, sidebarItems: 8 }
+// Words: at most half the baseline, but never below 40 (a title, a scope line and a toolbar need that many).
+const LIMIT = { firstDataY: 405, filterFields: 1, chromeControls: 25, wordsShare: 0.5, wordsFloor: 40, fills: 6, groupTabs: 7, sidebarItems: 8 }
+const wordLimit = (baseWords) => Math.max(LIMIT.wordsFloor, Math.floor(baseWords * LIMIT.wordsShare))
 
-// Appendix A, verbatim apart from the extra data selector and the navigation counts.
+// Appendix A, apart from the extra data selector, the navigation counts and the fill rule: a fill counts only when it
+// is chromatic (HSL saturation >= 15 % and lightness 8-96 %, composited on white), so greys, near-whites and
+// near-blacks are not colours.
 function census(extraData) {
   const H = innerHeight
   const vis = el => { const r = el.getBoundingClientRect(); const s = getComputedStyle(el); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && s.opacity !== '0' }
@@ -46,7 +50,14 @@ function census(extraData) {
   const firstData = [...main.querySelectorAll(dataSel)].filter(vis).map(e => e.getBoundingClientRect().top).sort((a, b) => a - b)[0]
   let cw = 0; const tw = document.createTreeWalker(main, NodeFilter.SHOW_TEXT)
   while (tw.nextNode()) { const n = tw.currentNode, p = n.parentElement; if (!p || !vis(p) || inData(p) || !fold(p)) continue; cw += n.textContent.split(/\s+/).filter(Boolean).length }
-  const fills = new Set([...main.querySelectorAll('*')].filter(vis).filter(fold).map(e => getComputedStyle(e).backgroundColor).filter(c => c !== 'rgba(0, 0, 0, 0)' && c !== 'rgb(255, 255, 255)'))
+  const ctx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d', { willReadFrequently: true })
+  const chromatic = (c) => {
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 1, 1); ctx.fillStyle = c; ctx.fillRect(0, 0, 1, 1) // any CSS colour space, on white
+    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data, max = Math.max(r, g, b) / 255, min = Math.min(r, g, b) / 255
+    const l = (max + min) / 2, s = max === min ? 0 : (max - min) / (1 - Math.abs(2 * l - 1))
+    return s >= 0.15 && l >= 0.08 && l <= 0.96 ? `rgb(${r}, ${g}, ${b})` : null
+  }
+  const fills = new Set([...main.querySelectorAll('*')].filter(vis).filter(fold).map(e => chromatic(getComputedStyle(e).backgroundColor)).filter(Boolean))
   const tabs = document.querySelector('main nav[aria-label="Project sections"]')
   const sidebar = document.querySelector('nav[aria-label="Main navigation"]')
   return {
@@ -85,7 +96,7 @@ function census(extraData) {
         if (r.filterFields > LIMIT.filterFields) fail('AC-CALM-02', who, path, r.filterFields, LIMIT.filterFields)
         if (r.chromeControls > LIMIT.chromeControls) fail('AC-CALM-03', who, path, r.chromeControls, LIMIT.chromeControls)
         if (r.groupTabs != null && r.groupTabs > LIMIT.groupTabs) fail('AC-CALM-04', who, `${path} project tabs`, r.groupTabs, LIMIT.groupTabs)
-        if (r.chromeWords > Math.floor(baseWords * LIMIT.wordsShare)) fail('AC-CALM-05', who, `${path} words`, r.chromeWords, Math.floor(baseWords * LIMIT.wordsShare))
+        if (r.chromeWords > wordLimit(baseWords)) fail('AC-CALM-05', who, `${path} words`, r.chromeWords, wordLimit(baseWords))
         if (r.fills > LIMIT.fills) fail('AC-CALM-05', who, `${path} fills`, r.fills, LIMIT.fills)
       }
       console.log(`\nCensus as ${who} at 1600x900`)

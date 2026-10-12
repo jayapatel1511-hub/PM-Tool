@@ -46,7 +46,7 @@ const eligibility = (state: Allocation['personState']) => t(state === 'Inactive'
 
 export function AllocationsTab() {
   // §41 R5: a short scope, with the fuller description behind the help button.
-  const header = { title: t('allocation.title'), subtitle: <>{t('allocation.scope')}<PageHelp>{t('allocation.subtitle')}</PageHelp></> }
+  const header = { title: t('allocation.title'), subtitle: <>{t('allocation.scope')}<PageHelp>{t('allocation.subtitle')} {t('allocation.emptyReadOnly')}</PageHelp></> }
   return <DesktopOnly notice={<Page {...header}><Notice icon={Monitor} title={t('app.phoneNotice')}>{t('allocation.phoneHint')}</Notice></Page>}><Allocations {...header} /></DesktopOnly>
 }
 
@@ -104,7 +104,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.items.length ?
       <div className="rounded-lg border bg-card">{filtered
         ? <Empty title={t('allocation.emptyFilteredTitle')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('allocation.emptyFiltered')}</Empty>
-        : <Empty title={t('allocation.empty')} action={canPropose && <Button variant="outline" onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>}>{t(canPropose ? 'allocation.emptyHint' : 'allocation.emptyReadOnly')}</Empty>}</div>
+        : <Empty title={t('allocation.empty')} action={canPropose && <Button variant="outline" onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>}>{canPropose && t('allocation.emptyHint')}</Empty>}</div>
       : <TableRegion><table className="w-full text-left text-sm">
         <caption className="sr-only">{t('allocation.title')}</caption>
         <thead className="bg-muted"><tr>
@@ -124,7 +124,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
           <td className={cn(td, 'text-right font-medium tabular-nums')}>{hours(a.plannedHours)}</td>
           <td className={td}><AllocationStatus status={a.status} /></td>
         </tr>)}</tbody></table></TableRegion>}
-    {!list.isPending && !list.error && <nav aria-label={t('allocation.pager')} className="flex items-center justify-end gap-3">
+    {!list.isPending && !list.error && pages > 1 && <nav aria-label={t('allocation.pager')} className="flex items-center justify-end gap-3">
       <Button variant="outline" disabled={page <= 1} onClick={() => change('page', String(page - 1))}>{t('handoff.previous')}</Button>
       <span className="text-sm tabular-nums" aria-live="polite">{t('allocation.pageOf', { n: page, total: pages })}</span>
       <Button variant="outline" disabled={page * list.data.pageSize >= list.data.totalCount} onClick={() => change('page', String(page + 1))}>{t('handoff.next')}</Button>

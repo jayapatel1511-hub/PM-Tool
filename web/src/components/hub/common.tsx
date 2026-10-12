@@ -54,11 +54,11 @@ export function Section({ title, count, actions, children, className, id, headin
   )
 }
 
-export function Empty({ children, action, title }: { children: ReactNode; action?: ReactNode; title?: ReactNode }) {
+export function Empty({ children, action, title }: { children?: ReactNode; action?: ReactNode; title?: ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-3 px-4 py-10 text-center text-sm text-muted-foreground">
       {title && <p className="text-base/6 font-semibold text-foreground">{title}</p>}
-      <p className="max-w-prose">{children}</p>
+      {children && <p className="max-w-prose">{children}</p>}
       {action}
     </div>
   )

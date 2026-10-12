@@ -1776,7 +1776,7 @@ export const en: Record<string, string> = {
   'portfolio.highIssues': 'High issues', 'portfolio.attention': 'Attention', 'portfolio.trend': '8-week trend', 'portfolio.coordination': 'Weekly Coordination',
   'portfolio.noteBy': 'note by {name}, {when}', 'portfolio.noSnapshot': 'no snapshot', 'portfolio.trendLabel': 'Health by week: {list}',
   // Workload (packet 017)
-  'workload.person': 'Person', 'workload.subtitle': 'Weekly capacity, reservations, requests and remaining-work forecast across the projects you can see.', 'workload.noSupervisor': 'No supervisor',
+  'workload.person': 'Person', 'workload.subtitle': 'Load against capacity, by week.', 'workload.about': 'Weekly capacity, reservations, requests and remaining-work forecast across the projects you can see.', 'workload.noSupervisor': 'No supervisor',
   'workload.anySupervisor': 'Any supervisor', 'workload.supervisor': 'Supervisor', 'workload.anyProject': 'Any project', 'workload.indicator': 'Indicator', 'workload.anyIndicator': 'Any indicator',
   'workload.disciplineScope': 'Discipline selects people; hours and reservations include all their work in the visible project scope.',
   'workload.ind.over': 'Over-assigned', 'workload.ind.under': 'Under-assigned', 'workload.ind.cluster': 'Deadline cluster', 'workload.ind.unestimated': 'Has unestimated work',
@@ -2246,7 +2246,7 @@ export const en: Record<string, string> = {
   'digest.planning': 'Planning',
 
   // Integrated en-projects.ts
-  'projects.subtitle': 'Find a project and see its status, health and next milestone at a glance.',
+  'projects.subtitle': 'Each project\'s status, health and next milestone.',
   'projects.emptyTitle': 'No projects to show',
   'projects.filter.chosen': 'Chosen projects',
   'projects.filter.computedHealth': 'Computed health',

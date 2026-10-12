@@ -232,10 +232,11 @@ function ByProject({ d, scope }: { d: HomeData; scope: Scope }) {
           ))}
         </ul>
       )}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 text-xs/[18px] text-muted-foreground">
+      {/* The colour key explains the bars, so it shows only when there are bars. */}
+      {rows.length > 0 && <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 text-xs/[18px] text-muted-foreground">
         {Object.entries(LANE_TONE).map(([lane, c]) => <span key={lane} className="flex items-center gap-1.5"><span className="inline-block size-2.5 rounded-full" style={{ background: c }} aria-hidden />{laneName(lane)}</span>)}
         {d.tasksByProject.length > 8 && <Button variant="link" size="sm" className="ml-auto" onClick={() => setAll(!all)}>{all ? t('home.fewer') : plural(d.tasksByProject.length, 'home.allOne', 'home.allMany', { n: d.tasksByProject.length })}</Button>}
-      </div>
+      </div>}
     </Section>
   )
 }

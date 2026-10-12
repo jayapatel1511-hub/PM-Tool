@@ -106,7 +106,8 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   const shiftWeeks = (days: number) => set('from', addDays(weeks[0] ?? today(), days))
 
   return (
-    <Page {...header} actions={forbidden ? <Method /> : <><Method /><ViewMenu listType="workload" /><ExportMenu path="workload/export" params={filters} name="workload" /><DensityMenu /></>}>
+    // Without access the page holds only the notice, so the description and the method help, which explain data the person cannot see, are left out.
+    <Page {...header} subtitle={forbidden ? undefined : header.subtitle} actions={forbidden ? undefined : <><Method /><ViewMenu listType="workload" /><ExportMenu path="workload/export" params={filters} name="workload" /><DensityMenu /></>}>
       <WorkspaceTabs />
       {forbidden ? <Notice icon={Lock} title={t('workload.noAccessTitle')}
         action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('workload.noAccess')}</Notice> : <>
@@ -497,8 +498,9 @@ function DensityMenu() {
 function Method() {
   return (
     <Popover>
-      <PopoverTrigger asChild><Button variant="outline"><Info className="size-4" />{t('workload.method')}</Button></PopoverTrigger>
+      <PopoverTrigger asChild><Button variant="outline" size="icon" aria-label={t('workload.method')} title={t('workload.method')}><Info className="size-4" aria-hidden /></Button></PopoverTrigger>
       <PopoverContent className="w-[28rem] max-w-[calc(100vw-2rem)] space-y-2 text-sm" align="end">
+        <p>{t('workload.about')}</p>
         <p className="font-semibold">{t('workload.methodTitle')}</p>
         <ul className="list-disc space-y-1.5 pl-4">{[1, 2, 3, 4, 5, 6].map((n) => <li key={n}>{t(`workload.method${n}`)}</li>)}</ul>
         <p className="pt-1 font-semibold">{t('workload.legend')}</p>

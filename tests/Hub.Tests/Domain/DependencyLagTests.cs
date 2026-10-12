@@ -214,6 +214,34 @@ public sealed class DependencyLagTests
     }
 
     [Fact]
+    public void A_deliverable_issued_before_its_finish_link_predecessor_gets_the_note() // AC-DEPT-03, FR-DEPT-05, D5
+    {
+        var s = new Scenario { Today = Dates["C"], Calendar = Nov11Holiday };
+        s.Settings = s.Settings with { WorkingDaysEnabled = true };
+        var p5 = s.Deliverable("P5", D(2026, 11, 20), startedOn: D(2026, 11, 2));
+        var s5 = s.Deliverable("S5", D(2026, 11, 19), status: DeliverableStatus.Issued, start: D(2026, 11, 9), issued: D(2026, 11, 16));
+        var s6 = s.Deliverable("S6", D(2026, 11, 19), status: DeliverableStatus.InProgress, start: D(2026, 11, 9));
+        var p7 = s.Deliverable("P7", D(2026, 11, 13), status: DeliverableStatus.Cancelled);
+        var s7 = s.Deliverable("S7", D(2026, 11, 19), status: DeliverableStatus.Accepted, issued: D(2026, 11, 12));
+        var s8 = s.Deliverable("S8", D(2026, 11, 27), status: DeliverableStatus.Accepted, issued: D(2026, 11, 12));
+        s.DeliverableDeps.Add(new DependencySnap(Guid.NewGuid(), p5.Id, s5.Id, 0, DependencyTypes.FinishToFinish));
+        s.DeliverableDeps.Add(new DependencySnap(Guid.NewGuid(), p5.Id, s6.Id, 0, DependencyTypes.FinishToFinish));
+        s.DeliverableDeps.Add(new DependencySnap(Guid.NewGuid(), p7.Id, s7.Id, 0, DependencyTypes.FinishToFinish));
+        s.DeliverableDeps.Add(new DependencySnap(Guid.NewGuid(), p5.Id, s8.Id, 0, DependencyTypes.FinishToStart));
+        var r = s.Run();
+        Assert.Equal(["finished_before_predecessor"], r.D(s5).Notes);
+        Assert.Empty(r.D(s5).Inconsistencies); // the note replaces the date flag
+        Assert.Empty(r.D(s6).Notes); // not finished yet: the date flag applies instead
+        Assert.Equal("Due 2026-11-19 before P5 is due 2026-11-20", r.D(s6).Inconsistencies.Single().Text);
+        Assert.Empty(r.D(s7).Notes); // a cancelled predecessor never finishes
+        Assert.Empty(r.D(s8).Notes); // only finish links carry the note
+        Assert.Equal("Clear", State(r.D(s6)));
+
+        s.Replace(s.Deliverables, p5, p5 with { Status = DeliverableStatus.Issued, IssuedDate = D(2026, 11, 16) });
+        Assert.Empty(s.Run().D(s5).Notes);
+    }
+
+    [Fact]
     public void A_start_link_to_a_cancelled_predecessor_is_satisfied() // D-04
     {
         var s = new Scenario();

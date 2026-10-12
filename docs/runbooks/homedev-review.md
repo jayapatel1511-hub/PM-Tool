@@ -31,6 +31,18 @@ python3 scripts/seed-homedev-tuesday-review.py <full-review-sha>
 
 The wrapper rechecks the exact hosted release before any SQL, credential or API mutation; validates all 13 active reserved AppUsers (`email`, reserved `EntraObjectId`, UUID); preserves the legacy Taylor/Jay/Yagmur verifier credentials; and creates the owner-only `.runtime/tuesday-review-login-handoff.json` for the ten Tuesday personas. It force-recreates the API at the exact SHA, waits for the proxy health response, verifies each local-password sign-in as the same person, waits between rate-limited phases, and runs `seed_resources.py`, `seed_modules.py` and `seed_planning.py` through the hosted API transport. It writes only private handoff/log files and `data/tuesday-fixtures-<sha>.json`; passwords, hashes and cookies must never be logged. A rerun validates the current verifier, handoff, reserved IDs and actual fixture counts before treating the manifest as complete. Do not use a database import, touch pilot data, or run this before exact release activation.
 
+#### Packet 036 staffing fixtures (opt-in)
+
+Add `--with-staffing-fixtures` only before Jay's S1 (staffing) and S2 (dependency review) sessions of packet 036 (`specs/036-staffing-and-signal-trust/verification.md` section 10):
+
+```bash
+python3 scripts/seed-homedev-tuesday-review.py <full-review-sha> --with-staffing-fixtures
+```
+
+The flag runs `tools/preview/seed_staffing.py` through the same hosted transport after the three default seeds; on a release whose fixture manifest is already complete it runs only that seed, after the usual rerun checks, and records it in the manifest. It is off by default because it changes organisation-wide data: it turns on working days for the whole organisation and adds a Riverside office with one holiday, besides SYN-104, SYN-105, the open roles and the stalled items (verification section 8).
+
+Run it on the day of S2, and hold S1 the same day where possible. SYN-105's lag states (section 8.2, browser version) are true only on the day it is seeded: every start and finish happens that day and the holiday falls two working days later. The seed creates SYN-104 and SYN-105 once per review database and a later run makes no writes, so a second run on another day does not refresh them: on any later day the states have moved on from the table.
+
 ## Daily review database dump
 
 The timer runs at 22:00 UTC, before the Mac's 20:30 Halifax off-host restic schedule in either daylight or standard time. It is a separate local dump; its success does **not** prove that the off-host schedule ran. The helper is copied to a root-owned path because systemd must not execute a script from the user-writable release tree as root. It targets only the `pm-tool-review-db-1` container and writes a mode-600 archive into the existing user-owned, mode-700 `data/backups` directory.

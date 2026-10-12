@@ -1,6 +1,6 @@
 # Feature Specification: Staffing Signals and Trustworthy Counts
 
-**Packet**: 035 | **Feature directory**: `specs/035-staffing-and-signal-trust` | **Date**: 2026-10-11
+**Packet**: 036 | **Feature directory**: `specs/036-staffing-and-signal-trust` | **Date**: 2026-10-11
 **Status**: Proposed. Planning only; no application code is authorised until Jay approves the decisions below (T001).
 **Input**: Jay, 2026-10-11: adopt the ranked staffing and signal-quality recommendations from the October product research. The research notes are kept outside the repository.
 **Source**: To be written as product specification §40 in `spec-parts/15-staffing-and-signals.md` (T002). Related, unchanged contracts: §37.6 (resource allocations, packet 029), §39 (weekly planning, packet 034; §39.12 lists role-level demand as a deferred proposal, which this packet takes up), §12.6 and D-rules (dependencies), §12.12 and A-rules (attention), §13.1 (dashboards), §13.5 (timeline), §8 (permissions).

@@ -1,6 +1,6 @@
 # Implementation Plan: Calm Workspace
 
-**Packet**: 036 | **Spec**: [spec.md](spec.md) | **Date**: 2026-10-11 | **Base**: `claude/tuesday-visual-batch1` after packet 035's T003 merge gate
+**Packet**: 037 | **Spec**: [spec.md](spec.md) | **Date**: 2026-10-11 | **Base**: `claude/tuesday-visual-batch1` after packet 036's T003 merge gate
 
 ## Summary
 
@@ -39,15 +39,15 @@ All UI primitives already exist in `web/src/components/ui/` (popover, sheet, dro
 8. **One signal per row** (`PlannerGrid.tsx`, `Workload.tsx`, list indicator cells): show the most severe chip plus "+n", with the rest in a tooltip and the detail panel. Week-specific chips include the week label.
 9. **Text**: page descriptions longer than one line move into a help popover (`(i)` next to the title).
 
-## Ordering with packet 035 (avoids rework and conflicts)
+## Ordering with packet 036 (avoids rework and conflicts)
 
 | Step | What | Why |
 |---|---|---|
-| 1 | Packet 035 T003 merge gate | Shared base. `codex/tuesday-ui-consistency` touches `nav.ts`, `common.tsx` and `Planner.tsx`. |
-| 2 | **036 Phase 1** (toolbar, navigation, header) | 035's UI lands on these layouts. Building 035's screens first would mean doing them twice. |
-| 2 in parallel | 035 Stream A (backend) | No layout files involved. |
-| 3 | 035 Streams B and C (UI) under rules R1–R10 | For example: 035's group-by goes in the toolbar's Group menu; tile definitions are `(i)` tooltips, not visible text; the timeline legend sits behind a Legend button; picker capacity is a short right-aligned figure. |
-| 4 | 036 Phase 2 (My Work, Dashboard, one signal per row) | Smaller, page-local. |
+| 1 | Packet 036 T003 merge gate | Shared base. `codex/tuesday-ui-consistency` touches `nav.ts`, `common.tsx` and `Planner.tsx`. |
+| 2 | **037 Phase 1** (toolbar, navigation, header) | 036's UI lands on these layouts. Building 036's screens first would mean doing them twice. |
+| 2 in parallel | 036 Stream A (backend) | No layout files involved. |
+| 3 | 036 Streams B and C (UI) under rules R1–R10 | For example: 036's group-by goes in the toolbar's Group menu; tile definitions are `(i)` tooltips, not visible text; the timeline legend sits behind a Legend button; picker capacity is a short right-aligned figure. |
+| 4 | 037 Phase 2 (My Work, Dashboard, one signal per row) | Smaller, page-local. |
 
 ## Files
 

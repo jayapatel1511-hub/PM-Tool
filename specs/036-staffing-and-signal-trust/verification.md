@@ -6,7 +6,7 @@
 
 ## 1. Definition of accepted
 
-Packet 035 is accepted only when **all** of these hold for one release commit:
+Packet 036 is accepted only when **all** of these hold for one release commit:
 
 1. Every row in section 6 (acceptance criteria) is PASS.
 2. SC-001 to SC-005 in section 5 are PASS. SC-001 is run by real people, not agents.

@@ -1,6 +1,6 @@
 # Implementation Plan: Staffing Signals and Trustworthy Counts
 
-**Packet**: 035 | **Spec**: [spec.md](spec.md) | **Date**: 2026-10-11 | **Base**: `claude/tuesday-visual-batch1` at `bbac1f6d`
+**Packet**: 036 | **Spec**: [spec.md](spec.md) | **Date**: 2026-10-11 | **Base**: `claude/tuesday-visual-batch1` at `bbac1f6d`
 
 ## Summary
 
@@ -31,7 +31,7 @@ The packet adds no new service, job, cache or materialised table.
 
 Checked on 2026-10-11 against every local branch with commits not in the base:
 
-| Branch | Files it shares with this plan | Required action before 035 starts |
+| Branch | Files it shares with this plan | Required action before 036 starts |
 |---|---|---|
 | `codex/tuesday-ui-consistency` (2026-10-10, 78 files; contains `codex/tuesday-ui-inherited-planning`) | `Entities.cs`, `HubDb.cs`, `Allocations.cs`, `Planning.cs`, `Workload.cs`, `people.tsx`, `en.ts` | Merge it into the base, or record that it is abandoned. **This is the main conflict risk.** |
 | Uncommitted edit in this worktree | `src/Hub.Api/Features/Planning.cs` (+27/−13) | Commit it or set it aside with a WIP commit before T003. |
@@ -46,7 +46,7 @@ Rules while implementing:
   - **Stream C (Part B):** `Workspace.cs`, `Portfolio.tsx`, `Dashboard.tsx`, `Home.tsx`, `common.tsx`, `Timeline.tsx`, `Gantt.tsx`, `Timeline.cs`.
 - Stream C can run in parallel with A. It also owns the arrow-by-type change in `Timeline.tsx` and `Gantt.tsx`, and makes it after A exposes `type` on the timeline payload. Stream B starts after A's API tasks pass.
 - No change to existing migrations, packet 029 commands, or packet 034's planning-entry code paths.
-- **Layout rules.** Streams B and C start after packet 036 Phase 1 (toolbar, navigation, header) and follow its rules R1–R10:
+- **Layout rules.** Streams B and C start after packet 037 Phase 1 (toolbar, navigation, header) and follow its rules R1–R10:
   - group-by goes in the toolbar's Group menu;
   - tile definitions are `(i)` tooltips, not visible text;
   - the timeline legend sits behind a Legend button;

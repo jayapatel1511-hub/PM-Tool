@@ -7,8 +7,8 @@
 ## Phase 0: Gate (no application code)
 
 - [ ] T001 Get Jay's answers to decisions D1–D9 (or a note that the defaults stand). Record them in verification.md section 2.
-- [ ] T002 Write §40 in `spec-parts/15-staffing-and-signals.md` from spec.md's requirements, and add packet 035 to `specs/README.md`. Check: `python3 tools/build_spec.py --check` and `python3 tools/trace_spec.py --check` pass.
-- [ ] T003 Clear the conflict risks listed in the plan's branch table:
+- [ ] T002 Write §40 in `spec-parts/15-staffing-and-signals.md` from spec.md's requirements, and add packet 036 to `specs/README.md`. Check: `python3 tools/build_spec.py --check` and `python3 tools/trace_spec.py --check` pass.
+- [ ] T003 (partly done 2026-10-11: `codex/tuesday-ui-consistency` merged in `4218baec`; the 5 October leftovers, including `Planning.cs`, committed in `7f058aed`; the 12 `codex/pm-*` and other branches with unapplied commits still need review) Clear the conflict risks listed in the plan's branch table:
   - merge `codex/tuesday-ui-consistency` into the base, or record that it is abandoned;
   - commit the pending `Planning.cs` edit;
   - confirm the `codex/pm-*` branches are superseded.

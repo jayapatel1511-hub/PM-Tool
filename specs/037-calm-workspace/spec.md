@@ -1,6 +1,6 @@
 # Feature Specification: Calm Workspace
 
-**Packet**: 036 | **Feature directory**: `specs/036-calm-workspace` | **Date**: 2026-10-11
+**Packet**: 037 | **Feature directory**: `specs/037-calm-workspace` | **Date**: 2026-10-11
 **Status**: Proposed. Planning only; no application code until Jay answers E1–E4.
 **Input**: Jay, 2026-10-11: the app looks overloaded and tries to show everything at once; make it neat and clean.
 **Baseline**: measured on the local preview at 1600×900 as Priya (PM) at commit `121e3ae2`. Numbers are in [verification.md](verification.md) section 2, and screenshots are in `baseline/`.
@@ -18,7 +18,7 @@
 
 The product's engineering depth is its advantage, so no capability is removed. The fix is **progressive disclosure**: show the work first, and put options one click away.
 
-## Rules (binding on every screen, including packet 035's additions)
+## Rules (binding on every screen, including packet 036's additions)
 
 - **R1 One toolbar row.** Lists show one row: primary action, search, **Filters (n)**, Group or Sort when relevant, view switch, and an overflow menu (Export, Columns, Views). Filter fields open in a popover (a sheet on tablet). Active filters show as removable chips only while set.
 - **R2 Three quick filters at most** visible on a screen. The rest become saved views under **Views**.

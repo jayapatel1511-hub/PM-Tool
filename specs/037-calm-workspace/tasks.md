@@ -5,10 +5,10 @@
 ## Phase 0: Gate
 
 - [ ] T001 Record Jay's answers to E1–E4 in verification.md section 3, or a note that the defaults stand.
-- [ ] T002 Confirm packet 035's T003 is done (shared base). Re-run the appendix A census on the new base and replace section 2's baseline if the numbers moved.
+- [ ] T002 Confirm packet 036's T003 is done (shared base). Re-run the appendix A census on the new base and replace section 2's baseline if the numbers moved.
 - [ ] T003 Write `web/tests/clutter.cjs` from appendix A with the section 4 thresholds, and add it as `npm --prefix web run test:clutter`. Run it on the base: it must FAIL there, which proves the thresholds bite.
 
-## Phase 1: Shared layout (before packet 035's UI streams)
+## Phase 1: Shared layout (before packet 036's UI streams)
 
 - [ ] T004 Turn `FilterBar` into the toolbar in `web/src/components/hub/common.tsx` (R1). Then move each page's search into the `search` prop and pass `activeCount`. Pages:
   - Time, Workload, WorkspaceCoordination, Files, Search, Portfolio, Planner, WorkspaceTasks, MyWork, WorkspaceTeam, Gantt

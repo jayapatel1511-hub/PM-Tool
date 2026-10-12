@@ -1,9 +1,9 @@
 # Feature Specification: Staffing Signals and Trustworthy Counts
 
 **Packet**: 036 | **Feature directory**: `specs/036-staffing-and-signal-trust` | **Date**: 2026-10-11
-**Status**: Proposed. Planning only; no application code is authorised until Jay approves the decisions below (T001).
+**Status**: In build. Jay accepted the defaults for D1–D9 on 2026-10-11 ("lets start build"; T001).
 **Input**: Jay, 2026-10-11: adopt the ranked staffing and signal-quality recommendations from the October product research. The research notes are kept outside the repository.
-**Source**: To be written as product specification §40 in `spec-parts/15-staffing-and-signals.md` (T002). Related, unchanged contracts: §37.6 (resource allocations, packet 029), §39 (weekly planning, packet 034; §39.12 lists role-level demand as a deferred proposal, which this packet takes up), §12.6 and D-rules (dependencies), §12.12 and A-rules (attention), §13.1 (dashboards), §13.5 (timeline), §8 (permissions).
+**Source**: product specification §40 (§40.1–§40.10) in `spec-parts/15-staffing-and-signals.md`. Related, unchanged contracts: §37.6 (resource allocations, packet 029), §39 (weekly planning, packet 034; §39.12 lists role-level demand as a deferred proposal, which this packet takes up), §12.6 and D-rules (dependencies), §12.12 and A-rules (attention), §13.1 (dashboards), §13.5 (timeline), §8 (permissions).
 
 ## User outcome
 
@@ -114,15 +114,15 @@ The full acceptance plan, with an evidence map, regression guard, test data and 
 - **SC-004**: Open roles and picker capacity reveal nothing to viewers outside scope.
 - **SC-005**: Packet 029 and 034 behaviour is unchanged: tests green, and Workload person rows identical before and after.
 
-## Requirements (to be carried into §40)
+## Requirements (§40)
 
-- **FR-ROLE-01–05**: open role record, permissions (D2), fill through allocation proposal (D1), Workload display (D3), privacy (AC-ROLE-05).
-- **FR-DEPT-01–06**: type on both link kinds, `StartedAt` (D4), one shared satisfaction function, evaluator rules by type (D5), date checks by type, arrows by type.
-- **FR-STALE-01–02**: rule A-21 and the `status_stale_days` setting (D6).
-- **FR-GRP-01–02**: home discipline attribute (D7) and the group-by control.
-- **FR-PICK-01–02**: multi-person capacity read and the picker display (D8).
-- **FR-CNT-01–07**: the AC-CNT items as requirements.
-- **FR-TL-01–04**: the AC-TL items as requirements.
+- **FR-ROLE-01..05**: open role record, permissions (D2), fill through allocation proposal (D1), Workload display (D3), privacy (AC-ROLE-05).
+- **FR-DEPT-01..06**: type on both link kinds, `StartedAt` (D4), one shared satisfaction function, evaluator rules by type (D5), date checks by type, arrows by type.
+- **FR-STALE-01..02**: rule A-21 and the `status_stale_days` setting (D6).
+- **FR-GRP-01..02**: home discipline attribute (D7) and the group-by control.
+- **FR-PICK-01..02**: multi-person capacity read and the picker display (D8).
+- **FR-CNT-01..07**: the AC-CNT items as requirements.
+- **FR-TL-01..04**: the AC-TL items as requirements.
 
 ## Wording rule
 

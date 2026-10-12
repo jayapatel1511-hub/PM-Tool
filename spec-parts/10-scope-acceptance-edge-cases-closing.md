@@ -4,6 +4,8 @@
 
 **2026-10-03 amendment:** Jay also approved the weekly planning layer (§39, packet 034) as a separate record beside the §37.6 allocations. It is specified, not built, follows the same staged-acceptance rule, and depends on packet 029.
 
+**2026-10-11 amendment:** Jay also approved staffing signals and trustworthy counts (§40, packet 036) and the calm workspace layout rules (§41, packet 037). Both are specified, not built, and follow the same staged-acceptance rule. Open roles in §40 cover project-scoped, dated role demand only; the "Role-level long-term demand" row of §27.3 still applies to longer-term forecasting.
+
 ### 27.1 Critical evaluation of the candidate MVP list
 
 | Candidate | Decision | Rationale |

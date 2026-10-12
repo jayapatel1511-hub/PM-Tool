@@ -127,3 +127,12 @@ The first two increments implement foundations for packets 025–027. Review the
 ## Availability and calendar extension
 
 [035 — Availability, weekly allocation and personal calendar](035-availability-weekly-calendar/spec.md) extends the approved v1.2 requirements and records local verification separately from deployed/client acceptance.
+
+## Staffing signals and calm workspace
+
+On 2026-10-11 Jay approved both packets and accepted their default decisions ("lets start build"). The contracts are §40 and §41. Packet 037's shared layout (Phase 1) lands before packet 036's screens, which follow its rules R1–R10.
+
+| Packet | Delivers | Depends on | Status |
+|---|---|---|---|
+| [036-staffing-and-signal-trust](036-staffing-and-signal-trust/spec.md) | Open roles, Start-to-Start and Finish-to-Finish links, the Status not moving rule (A-21), capacity grouping, capacity in the person picker, counts that match their lists, timelines that name their dates | 005, 007, 016–018, 021, 022, 029, 034 | In build, Phase 1 |
+| [037-calm-workspace](037-calm-workspace/spec.md) | One-row toolbars, grouped project tabs, a shorter sidebar, one-line headers, one signal per row, My Work opening on Today | 019, 022, 034 | In build, Phase 1 |

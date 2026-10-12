@@ -159,6 +159,8 @@ td,th{font-variant-numeric:tabular-nums}
 <a href="#37-multidisciplinary-coordination-amendment"><span class="n">37</span><span>Multidisciplinary Coordination Amendment</span></a>
 <a href="#38-design-inputs-readiness-and-location-context"><span class="n">38</span><span>Design Inputs, Readiness and Location Context</span></a>
 <a href="#39-weekly-planning-layer-amendment"><span class="n">39</span><span>Weekly Planning Layer Amendment</span></a>
+<a href="#40-staffing-signals-and-trustworthy-counts-amendment"><span class="n">40</span><span>Staffing Signals and Trustworthy Counts Amendment</span></a>
+<a href="#41-calm-workspace-amendment"><span class="n">41</span><span>Calm Workspace Amendment</span></a>
     </div></details>
   </nav>
   <main>
@@ -8310,6 +8312,7 @@ The first-release Created by Me view (§36.7) requires <code>task.created_by_id<
 <h2 id="27-mvp-scope"><span class="num">27</span><span class="ttl">MVP Scope</span></h2>
 <p><strong>2026-09-26 amendment:</strong> The existing first-release set below is the 24-packet implementation baseline. Jay has also approved all nine coordination additions in §37–§38 (packets 025–033). They are specified, not built. Release in accepted increments within the 50-person pilot; do not claim completion of the expanded scope based on the older packet status. §38.4 defines the dependency order.</p>
 <p><strong>2026-10-03 amendment:</strong> Jay also approved the weekly planning layer (§39, packet 034) as a separate record beside the §37.6 allocations. It is specified, not built, follows the same staged-acceptance rule, and depends on packet 029.</p>
+<p><strong>2026-10-11 amendment:</strong> Jay also approved staffing signals and trustworthy counts (§40, packet 036) and the calm workspace layout rules (§41, packet 037). Both are specified, not built, and follow the same staged-acceptance rule. Open roles in §40 cover project-scoped, dated role demand only; the "Role-level long-term demand" row of §27.3 still applies to longer-term forecasting.</p>
 <h3 id="271-critical-evaluation-of-the-candidate-mvp-list"><span class="num">27.1</span> Critical evaluation of the candidate MVP list</h3>
 <div class="tbl"><table>
 <thead>
@@ -11450,6 +11453,473 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 </tbody>
 </table></div>
 <p>Deferred follow-up proposals, outside packet 034: Manager Home exception dashboard and in-app overload alerts; People and Person Profile (job role, discipline, skills, capacity history, per-person working days); self-recorded time away and a notice to the person when time away is recorded for them; Overlapping Plans and cross-team planning for people who are not direct reports; Deliverable Pressure and planned staffing on the Project Dashboard; role-level long-term demand; planned versus actual effort; pointer drag of planner blocks and conversion of an entry to a task assignment; comments on planning entries; Team Capacity and Allocations by Source reports; a decimal default capacity; and moving Workload's fixed 110 %/40 % thresholds into settings (an existing constitution II gap that this amendment does not change).</p>
+<h2 id="40-staffing-signals-and-trustworthy-counts-amendment"><span class="num">40</span><span class="ttl">Staffing Signals and Trustworthy Counts Amendment</span></h2>
+<p>Approved scope: on 2026-10-11 Jay adopted the ranked staffing and signal-quality recommendations from the October product research, delivered by packet 036, and accepted the default for every open decision (§40.10). This section records the product contract; implementation and acceptance remain pending. It adds project-scoped open roles, two dependency types, one attention rule, a home discipline for grouping capacity, capacity figures in the person picker, and corrections that make every summary count and timeline bar say what it measures. §37.6 (allocations, packet 029) and §39 (weekly planning, packet 034) are unchanged apart from the two links named in FR-ROLE-03 and FR-PICK-01. Where this section adds to §12.6 (dependency types), §12.12 (attention rules), §10.4 (settings) and the §27.3 row on role-level demand, this section governs.</p>
+<p>Every addition is deterministic and explainable: each figure, flag and count traces to a rule in this section, and the interface shows that rule. Nothing here assigns people, levels resources, reschedules work or forecasts demand.</p>
+<h3 id="401-scope-and-boundary"><span class="num">40.1</span> Scope and boundary</h3>
+<p>Part A (staffing and planning signals) covers open roles (§40.2), dependency types (§40.3), the Status not moving rule (§40.4), capacity grouping (§40.5) and capacity at assignment (§40.6). Part B (trustworthy counts and dates) covers count reconciliation (§40.7) and the timeline date source (§40.8).</p>
+<p>Outside this amendment: changes to §37.6's allocation model, its proposal and confirmation rules or the person named on an allocation; changes to §39's planning entries, or open roles in the Weekly Planner grid, which stays person × week; Start-to-Finish links, negative lag, editing a link's type in place, dependency types in templates and dependency-driven date cascades; staleness rules for due date or owner; a dashboard or widget builder, custom fields, an automation builder and live socket updates.</p>
+<h3 id="402-open-roles"><span class="num">40.2</span> Open roles</h3>
+<ul>
+<li>
+<p><strong>FR-ROLE-01.</strong> An open role MUST be a project-scoped record of unfilled demand: a role label (1–80 characters), an optional project discipline of that project, a from date and a through date (inclusive, through ≥ from), planned hours greater than 0 under the FR-CAP-03 hour rules, an optional note, and a status of Open, Filled or Cancelled. A new role is Open. Its creator is its accountable owner. It is soft-deleted only, carries a row version (G-06, G-07), and every create, change, fill, reopen and cancel writes an activity entry in the same transaction. A stale change returns a conflict and stores nothing.</p>
+</li>
+<li>
+<p><strong>FR-ROLE-02.</strong> Creating, changing or cancelling an open role MUST require the same permission as proposing an allocation (§8.10: PM or Discipline Lead within the project). Everyone else is refused.</p>
+</li>
+<li>
+<p><strong>FR-ROLE-03.</strong> An open role MUST be filled only by proposing a normal §37.6 allocation that names it. The proposal is refused unless the role is Open, is on the same project, and the allocation's date range lies inside the role's range. Creating the Proposed allocation, setting the role to Filled and recording the filling allocation happen in one transaction, so two simultaneous proposals produce exactly one allocation. Declining or cancelling that allocation returns the role to Open and clears the filling allocation; confirming or completing it leaves the role Filled. The allocation keeps every §37.6 rule, including confirmation by the person's Supervisor or an Admin.</p>
+</li>
+<li>
+<p><strong>FR-ROLE-04.</strong> Open roles MUST appear on the project's Allocations tab and in an "Unfilled roles" section of Workload. Workload shows each Open role's hours for every week in its range, spread over the working days of the range by the FR-CAP-03 rule using the project's office calendar (there is no person calendar). Open roles never enter a person's capacity, committed load (FR-CAP-04), Workload indicators, the Weekly Planner or readiness capacity checks (§38.2).</p>
+</li>
+<li>
+<p><strong>FR-ROLE-05.</strong> An open role MUST be visible only to viewers who can view its project (§8.7). For everyone else it is absent from every list, export, search result, count, notification and history, and no total differs because of it.</p>
+</li>
+</ul>
+<h3 id="403-dependency-types"><span class="num">40.3</span> Dependency types</h3>
+<ul>
+<li>
+<p><strong>FR-DEPT-01.</strong> Task and deliverable dependencies MUST carry a type: Finish-to-Start (the default, and the type of every existing link), Start-to-Start or Finish-to-Finish, each with the existing working-day lag. An unknown type is refused. One link per predecessor and successor pair remains the rule (D-03); a link's type is changed by removing and re-adding the link. Copying a project's structure keeps each link's type and lag; template links are Finish-to-Start.</p>
+</li>
+<li>
+<p><strong>FR-DEPT-02.</strong> Each task and deliverable MUST record <code>started_at</code>: the time it first leaves Not Started. It is set once and never cleared. Existing items are backfilled from the activity log, falling back to their last status change time when they have already left Not Started; items still Not Started have none.</p>
+</li>
+<li>
+<p><strong>FR-DEPT-03.</strong> One satisfaction function MUST decide whether a link is satisfied, and the evaluator, the task and deliverable dependency lists (their satisfied mark) and the readiness predecessor check (§38.2) MUST all use it. The client never recomputes satisfaction. For Finish-to-Start, satisfaction is unchanged (D-04, with the lag). For Start-to-Start, the link is satisfied once the predecessor has a <code>started_at</code> and <code>lag</code> working days have passed since it. Finish-to-Finish links are always satisfied for starting work. A Cancelled predecessor satisfies every type (D-04).</p>
+</li>
+<li>
+<p><strong>FR-DEPT-04.</strong> Waiting (D-05) and Blocked (D-06) MUST use the FR-DEPT-03 function: a Start-to-Start successor is Waiting until its link is satisfied and Blocked under the existing D-06 conditions; a Finish-to-Finish link never makes its successor Waiting or Blocked, never makes its predecessor Blocking Others (D-11), and never holds back start readiness. Chain walks (D-11, D-13) follow links of every type. Re-evaluation follows D-07 and D-08 unchanged.</p>
+</li>
+<li>
+<p><strong>FR-DEPT-05.</strong> The date consistency check (D-12) MUST depend on the type and remains a warning only. Finish-to-Start: unchanged. Start-to-Start: flag a successor start earlier than the predecessor start plus <code>lag</code> working days; if either start date is missing, flag nothing. Finish-to-Finish: flag a successor due date earlier than the predecessor due date plus <code>lag</code> working days; when the successor is Complete and the predecessor is not, show the note "Finished before predecessor" instead of the flag.</p>
+</li>
+<li>
+<p><strong>FR-DEPT-06.</strong> Timeline and Gantt arrows MUST run end → start for Finish-to-Start, start → start for Start-to-Start and end → end for Finish-to-Finish. The arrow tooltip and the dependency list chip name the type and the lag (for example "FS", "SS +2d", "FF").</p>
+</li>
+</ul>
+<h3 id="404-status-not-moving-a-21"><span class="num">40.4</span> Status not moving (A-21)</h3>
+<ul>
+<li>
+<p><strong>FR-STALE-01.</strong> The attention engine (§12.12) MUST include rule A-21 "Status not moving": a task or deliverable In Progress or In Review whose status has not changed for more than <code>status_stale_days</code> days, measured as A-10 measures days. It does not fire for an item for which A-10 or A-11 fired. Severity Info, or Warning when the item is also Due Soon; routed to the assignee (task) or owner (deliverable) and the Discipline Lead. The reason states the days since the status changed and the threshold, for example "Status unchanged for 16 days (threshold 15)". It follows the existing snooze rule.</p>
+</li>
+<li>
+<p><strong>FR-STALE-02.</strong> <code>status_stale_days</code> MUST be an organisation setting with default 15 and range 1–365, edited by an Admin with the other attention thresholds; A-21 can be turned off with its rule toggle (<code>rule_enabled.A-21</code>) like every other rule.</p>
+</li>
+</ul>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+<th>Condition (all: item not terminal; project Active)</th>
+<th>Severity</th>
+<th>Routed to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A-21</td>
+<td>Status not moving</td>
+<td>Task or deliverable In Progress or In Review with <code>today − status_changed_at &gt; status_stale_days</code>, and neither A-10 nor A-11 fired for it</td>
+<td>Info; Warning if also Due Soon</td>
+<td>Assignee or owner, DL</td>
+</tr>
+</tbody>
+</table></div>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Setting key</th>
+<th>Default</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>status_stale_days</code></td>
+<td>15 (1–365)</td>
+<td>Attention rule A-21</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="405-capacity-grouping"><span class="num">40.5</span> Capacity grouping</h3>
+<ul>
+<li>
+<p><strong>FR-GRP-01.</strong> Each user MUST have an optional home discipline (one of the organisation's disciplines), edited by an Admin on the user record and recorded in the user's history. It is not synced from the directory. An unknown discipline is refused.</p>
+</li>
+<li>
+<p><strong>FR-GRP-02.</strong> Workload and the Weekly Planner MUST offer a group-by control with Reports to, Office, Job title and Home discipline; the default grouping stays as today. People with no value form a "Not set" group, never a hidden one. Each group's subtotal for a week equals the sum of its rows. The grouping is kept in the URL. Grouping changes no scope, figure or indicator.</p>
+</li>
+</ul>
+<h3 id="406-capacity-at-assignment"><span class="num">40.6</span> Capacity at assignment</h3>
+<ul>
+<li>
+<p><strong>FR-PICK-01.</strong> The Weekly Planner grid read MUST accept a list of at most 50 people for one week and answer inside the existing planner scope (PLN-14). People outside the viewer's scope are left out of the answer silently, so the response reveals nothing about them. The figures are the planner's own: remaining capacity (PLN-09) and time away (PLN-06), with the viewer's visibility rules (FR-PLN-18).</p>
+</li>
+<li>
+<p><strong>FR-PICK-02.</strong> The person picker for a task owner, the task create form and the reassign work tool MUST show each candidate's remaining hours as "N h free", plus "N h away" when the week has time away, for the week of the item's start date, otherwise its due date, otherwise the current week. Figures appear only for people the viewer could already see in Workload or the Weekly Planner; other candidates show none, and a viewer without that access makes no capacity request. The picker loads its figures with one request per opening, not one per person. The figure is information only and blocks no choice.</p>
+</li>
+</ul>
+<h3 id="407-count-reconciliation"><span class="num">40.7</span> Count reconciliation</h3>
+<ul>
+<li>
+<p><strong>FR-CNT-01.</strong> Every summary tile on Home, the Project Dashboard and Portfolio MUST show a count equal to the number of rows in the list it opens, under the same permissions. The Portfolio Red, Yellow and Green tiles open the projects with that computed health and status Active.</p>
+</li>
+<li>
+<p><strong>FR-CNT-02.</strong> The discipline "Open" count on the Project Dashboard and the list its link opens MUST use the same predicate; On Hold is excluded from both.</p>
+</li>
+<li>
+<p><strong>FR-CNT-03.</strong> The deliverable Unassigned filter MUST exclude terminal deliverables (Issued, Accepted, Cancelled), matching the Unassigned chip rule.</p>
+</li>
+<li>
+<p><strong>FR-CNT-04.</strong> Upcoming Deadlines MUST order each item type by date before it truncates the list, so the soonest items are never dropped.</p>
+</li>
+<li>
+<p><strong>FR-CNT-05.</strong> Home's task status lanes MUST account for every open task: On Hold tasks appear as an "On hold" count with a link to exactly those tasks.</p>
+</li>
+<li>
+<p><strong>FR-CNT-06.</strong> Each summary tile MUST carry a one-line definition of what it counts, available as a tooltip, reachable by keyboard and announced to screen readers. Home's Review lane is named "Review and revision", and its definition names the statuses it includes (Ready for Review, In Review, Revision Required); the Project Dashboard's "In review" tile keeps its own rule and shows its definition.</p>
+</li>
+<li>
+<p><strong>FR-CNT-07.</strong> When a discipline scope is selected on the Project Dashboard, the decision, issue and risk tiles MUST say "Whole project", because those registers are not filtered by discipline.</p>
+</li>
+</ul>
+<h3 id="408-timeline-date-source"><span class="num">40.8</span> Timeline date source</h3>
+<ul>
+<li>
+<p><strong>FR-TL-01.</strong> The Timeline and Gantt legend MUST say "Bar: start → due". When a bar's start is assumed from the creation date because no start date is set, that part of the bar is drawn faded, and its tooltip and accessible label say "start not set".</p>
+</li>
+<li>
+<p><strong>FR-TL-02.</strong> On the project Timeline, a dated task under an undated deliverable MUST appear as a top-level row, as it already does on Gantt.</p>
+</li>
+<li>
+<p><strong>FR-TL-03.</strong> Milestones with no date MUST be listed under Unscheduled instead of being dropped (§36.4).</p>
+</li>
+<li>
+<p><strong>FR-TL-04.</strong> The project Timeline MUST take an assumed start from the item's creation date in the organisation time zone, never by cutting a UTC timestamp.</p>
+</li>
+</ul>
+<h3 id="409-acceptance-criteria"><span class="num">40.9</span> Acceptance criteria</h3>
+<ul>
+<li>
+<p><strong>AC-ROLE-01.</strong> Creating an open role needs a label (1–80 characters), a from date and a through date, and planned hours greater than 0. It is audited and has a row version.</p>
+</li>
+<li>
+<p><strong>AC-ROLE-02.</strong> Workload's Unfilled roles section shows the role's hours for each week in range, spread over working days in the same way as an allocation. No person's committed hours, percentage or indicator changes.</p>
+</li>
+<li>
+<p><strong>AC-ROLE-03.</strong> Proposing an allocation that names an open role creates the Proposed allocation and marks the role Filled in one transaction. A second proposal for a role that is already Filled is refused. Two simultaneous proposals give exactly one allocation.</p>
+</li>
+<li>
+<p><strong>AC-ROLE-04.</strong> Declining or cancelling that allocation returns the role to Open. Completing it leaves the role Filled.</p>
+</li>
+<li>
+<p><strong>AC-ROLE-05.</strong> Viewers who cannot view the project never see its open roles in any list, export, search or count.</p>
+</li>
+<li>
+<p><strong>AC-DEPT-01.</strong> The add dialog offers Finish-to-Start (the default), Start-to-Start and Finish-to-Finish. Existing links stay Finish-to-Start.</p>
+</li>
+<li>
+<p><strong>AC-DEPT-02.</strong> Start-to-Start: the successor is Waiting until the predecessor has started and lag working days have passed since <code>started_at</code>. After that the link is satisfied. Blocked follows the existing D-06 conditions.</p>
+</li>
+<li>
+<p><strong>AC-DEPT-03.</strong> Finish-to-Finish never puts the successor in Waiting or Blocked. The date check flags successor due &lt; predecessor due + lag. A successor that is Complete while its predecessor is not shows "Finished before predecessor".</p>
+</li>
+<li>
+<p><strong>AC-DEPT-04.</strong> Start-to-Start date check: successor start &lt; predecessor start + lag is flagged. If either start date is missing, nothing is flagged.</p>
+</li>
+<li>
+<p><strong>AC-DEPT-05.</strong> Readiness, the dependency list's satisfied mark and the deliverable dependency list all use the same satisfaction function as the evaluator. The client never recomputes it.</p>
+</li>
+<li>
+<p><strong>AC-DEPT-06.</strong> Timeline and Gantt arrows run start → start for Start-to-Start, end → end for Finish-to-Finish and end → start for Finish-to-Start. The arrow tooltip names the type and the lag.</p>
+</li>
+<li>
+<p><strong>AC-STALE-01.</strong> Given a task In Progress whose status has not changed for 16 days but which had a comment yesterday, then A-21 "Status not moving" fires with the days and the threshold (15) in the reason.</p>
+</li>
+<li>
+<p><strong>AC-STALE-02.</strong> Given the same task with no activity at all for 16 days, then A-10 fires and A-21 does not.</p>
+</li>
+<li>
+<p><strong>AC-STALE-03.</strong> A-21 can be turned off with <code>rule_enabled.A-21</code>. <code>status_stale_days</code> accepts 1–365.</p>
+</li>
+<li>
+<p><strong>AC-GRP-01.</strong> An Admin sets a person's home discipline. The user record's history shows the change.</p>
+</li>
+<li>
+<p><strong>AC-GRP-02.</strong> Workload and the Weekly Planner group rows by Reports to, Office, Job title or Home discipline. People with no value form a "Not set" group, never a hidden one. Group totals are the sum of their rows.</p>
+</li>
+<li>
+<p><strong>AC-PICK-01.</strong> Given a Supervisor opens the owner picker on a task due in week 46, then each direct report shows their free hours for week 46 (for example "12 h free"), and "16 h away" when time away falls in that week.</p>
+</li>
+<li>
+<p><strong>AC-PICK-02.</strong> For people the viewer cannot see in the Weekly Planner, no figure is shown, and the response contains no data for them.</p>
+</li>
+<li>
+<p><strong>AC-PICK-03.</strong> The figure equals the Weekly Planner's remaining capacity for that person and week. The picker loads it with one request per opening, not one per person.</p>
+</li>
+<li>
+<p><strong>AC-CNT-01.</strong> For every tile on Home, the Project Dashboard and Portfolio, the count equals the number of rows in the list it opens, under the same permissions. The Red, Yellow and Green Portfolio tiles open Active projects with that computed health.</p>
+</li>
+<li>
+<p><strong>AC-CNT-02.</strong> The discipline "Open" count and its link use the same predicate (On Hold is excluded from both).</p>
+</li>
+<li>
+<p><strong>AC-CNT-03.</strong> The deliverable Unassigned filter excludes terminal deliverables, matching the chip rule.</p>
+</li>
+<li>
+<p><strong>AC-CNT-04.</strong> Upcoming Deadlines orders each type by date before truncating, so the soonest items are never dropped.</p>
+</li>
+<li>
+<p><strong>AC-CNT-05.</strong> Home's status lanes account for every open task: On Hold tasks show as an "On hold" count with a link.</p>
+</li>
+<li>
+<p><strong>AC-CNT-06.</strong> Each summary tile has a one-line definition, available as a tooltip and to screen readers.</p>
+</li>
+<li>
+<p><strong>AC-CNT-07.</strong> When a discipline scope is selected, the decision, issue and risk tiles say "Whole project".</p>
+</li>
+<li>
+<p><strong>AC-TL-01.</strong> The legend says "Bar: start → due". A bar whose start is assumed from the creation date draws that part faded, and its tooltip and accessible label say "start not set".</p>
+</li>
+<li>
+<p><strong>AC-TL-02.</strong> On the project Timeline, a dated task under an undated deliverable appears as a top-level row, as it already does on Gantt.</p>
+</li>
+<li>
+<p><strong>AC-TL-03.</strong> Milestones with no date are listed under Unscheduled instead of being dropped.</p>
+</li>
+<li>
+<p><strong>AC-TL-04.</strong> Given a deliverable created at 22:30 organisation time, when that is already the next day in UTC, then the project Timeline's assumed start is the organisation-time creation date.</p>
+</li>
+</ul>
+<h3 id="4010-decisions-and-deferred-proposals"><span class="num">40.10</span> Decisions and deferred proposals</h3>
+<p>Jay accepted every default below on 2026-10-11 ("lets start build").</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Default used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>How an open role is filled</td>
+<td>Proposing a normal allocation that names the role. The role becomes Filled when that allocation is created and returns to Open if the allocation is declined or cancelled.</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>Who can create, change or cancel open roles</td>
+<td>Whoever may propose an allocation: PM or Discipline Lead within the project.</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>Where open roles appear</td>
+<td>The project's Allocations tab and Workload's Unfilled roles section. Never in a person's capacity, the Weekly Planner or readiness checks.</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Anchor for Start-to-Start lag</td>
+<td><code>started_at</code>, set the first time an item leaves Not Started and backfilled from the activity log.</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>What Finish-to-Finish does</td>
+<td>Never makes the successor Waiting or Blocked. It drives the date check and warns when the successor finishes before its predecessor.</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>A-21 threshold and scope</td>
+<td><code>status_stale_days</code> = 15; In Progress or In Review tasks and deliverables; not when A-10 or A-11 fired for the item.</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>Home discipline source</td>
+<td>Edited by an Admin on the user record; not synced from the directory.</td>
+</tr>
+<tr>
+<td>D8</td>
+<td>Who sees capacity in the picker</td>
+<td>Only viewers who could already see that person in Workload or the Weekly Planner.</td>
+</tr>
+<tr>
+<td>D9</td>
+<td>Home Review lane and Dashboard In review tile disagree on Revision Required</td>
+<td>Keep both rules, show each definition, and rename the Home lane "Review and revision".</td>
+</tr>
+</tbody>
+</table></div>
+<p>Open roles take up the project-scoped part of the role-level demand that §27.3 and §39.12 left out: dated demand on one project, filled by a named person. Long-term role-level forecasting stays out.</p>
+<p>Deferred follow-up proposals, outside packet 036: partial and full conflict severity; a pinned status comment with seen-by; a status-mix bar; muting notifications during leave; per-person weekday hours; an intake form; and imported spent hours.</p>
+<h2 id="41-calm-workspace-amendment"><span class="num">41</span><span class="ttl">Calm Workspace Amendment</span></h2>
+<p>Approved scope: on 2026-10-11 Jay asked for a neat and clean workspace that stops showing everything at once, delivered by packet 037, and accepted the default for every open decision (§41.3). This section records the layout contract; implementation and acceptance remain pending. The product's engineering depth is kept: no feature, route, permission, field, count or export is removed. The fix is progressive disclosure: show the work first and put options one click away.</p>
+<p>This section governs placement only. It amends the layout, filter and project header conventions of §13.0, the Project Dashboard order of §13.1, the shell placement of §36.1 and the opening view of My Work in §36.7. Every destination FR-VIS-01 requires stays in the shell, as a sidebar item, as a view of its parent item or under More. Data, rules, permissions, status names, the brand palette and the API are unchanged, and no new interface library is introduced. The rules bind every screen, including those added by §40.</p>
+<h3 id="411-measured-baseline"><span class="num">41.1</span> Measured baseline</h3>
+<p>Measured on 2026-10-11 on the local preview at 1600×900 as a Project Manager, before any change, on 17 screens: Home, My Work, Boards, Projects, Tasks, Calendar, Portfolio, Workload, Weekly Planner, Reports, Team, and the project Dashboard, Tasks, Deliverables, Timeline, Allocations and Weekly Coordination pages.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Measure (above the fold, outside tables and grids)</th>
+<th>Baseline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First data row, from the top of the screen</td>
+<td>425–1137 px (74–84 % down on My Work, Tasks, Weekly Planner and Workload; below the fold on the project Dashboard)</td>
+</tr>
+<tr>
+<td>Always-visible filter fields with no filter set</td>
+<td>0–9 (4–9 on 9 of 17 screens), plus up to 14 quick-filter chips on My Work</td>
+</tr>
+<tr>
+<td>Chrome controls (buttons, links and fields)</td>
+<td>11–50</td>
+</tr>
+<tr>
+<td>Chrome words</td>
+<td>16–232</td>
+</tr>
+<tr>
+<td>Distinct fill colours</td>
+<td>5–12</td>
+</tr>
+<tr>
+<td>Project tabs</td>
+<td>24, in two rows</td>
+</tr>
+<tr>
+<td>Sidebar items</td>
+<td>14 for a Project Manager, up to 17 for an Admin</td>
+</tr>
+<tr>
+<td>Project header height</td>
+<td>about 150 px before the tabs</td>
+</tr>
+</tbody>
+</table></div>
+<p>The Weekly Planner also shows Over-planned and Under-planned on the same person row. Packet 037's verification record holds the per-screen figures, the census method and the baseline screenshots.</p>
+<h3 id="412-layout-rules"><span class="num">41.2</span> Layout rules</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td><strong>One toolbar row.</strong> Lists show one row: primary action, search, <strong>Filters (n)</strong>, Group or Sort when relevant, view switch, and an overflow menu (Export, Columns, Views). Filter fields open in a popover (a sheet on tablet). Active filters show as removable chips only while set. Filter state stays in the URL exactly as before.</td>
+</tr>
+<tr>
+<td>R2</td>
+<td><strong>Three quick filters at most</strong> are visible on a screen. The rest of the §13.0 quick chips become built-in entries under <strong>Views</strong> with the same URL parameters, so every former quick-filter URL still works.</td>
+</tr>
+<tr>
+<td>R3</td>
+<td><strong>Project navigation</strong>: at most 7 visible tabs plus <strong>More</strong>, grouped as in §41.3 (E1). Inside a group, a small second-level switch shows that group's pages. Every existing route and deep link keeps working and highlights its group.</td>
+</tr>
+<tr>
+<td>R4</td>
+<td><strong>Sidebar</strong>: at most 8 items for any role, as in §41.3 (E2). Duplicates of the header (Notifications) and views of another page (Boards, Calendar, Portfolio) move under their parent page or under More.</td>
+</tr>
+<tr>
+<td>R5</td>
+<td><strong>One headline</strong>: the page title, plus at most a one-line scope. Longer explanations move to a help popover next to the title.</td>
+</tr>
+<tr>
+<td>R6</td>
+<td><strong>One-line project header</strong>: key · name (truncated, full name on hover and focus) · status · health, at most 72 px high. Links and Following move into the header's overflow menu; the other §13.0 header facts stay reachable within one click.</td>
+</tr>
+<tr>
+<td>R7</td>
+<td><strong>One signal per row</strong>: list rows show the most severe indicator plus "+n"; the rest appear in a tooltip and the row's detail. A week-specific indicator always names its week.</td>
+</tr>
+<tr>
+<td>R8</td>
+<td><strong>Colour budget</strong>: semantic colours only for status and health, and at most 6 distinct fill colours above the fold. Brand navy and blue stay as they are. Colour is never the only signal (§13.0).</td>
+</tr>
+<tr>
+<td>R9</td>
+<td><strong>Dashboards lead with numbers</strong>: the counts row comes first and secondary visuals, such as the milestone strip, follow it. Data begins above the fold.</td>
+</tr>
+<tr>
+<td>R10</td>
+<td><strong>Personal home is a focus list</strong>: My Work opens on what needs action today (§41.3, E3). Other sections stay one click away.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="413-navigation-groups-and-defaults"><span class="num">41.3</span> Navigation groups and defaults</h3>
+<p>Jay accepted every default below on 2026-10-11 ("lets start build").</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Default used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>E1</td>
+<td>Project tab groups</td>
+<td><strong>Overview</strong> (Dashboard); <strong>Work</strong> (Tasks, Board, Timeline, Calendar and Milestones as views); <strong>Deliverables</strong> (Deliverables, Submissions, Reviews, Readiness); <strong>Coordination</strong> (Weekly Coordination, Handoffs, Changes, Design basis, Decisions, Risks, Issues, Meetings &amp; Actions); <strong>People</strong> (Team &amp; Disciplines, Allocations, Workload); <strong>Files</strong>; More: Activity, Settings.</td>
+</tr>
+<tr>
+<td>E2</td>
+<td>Sidebar</td>
+<td>My Work, Projects (List, Board and Portfolio views), Tasks (List, Board and Calendar views), Resources (Weekly Planner, Workload), Time, Reports. More: Home, Team, Files, Templates, Admin. Notifications only in the header bell. Items still follow role permissions.</td>
+</tr>
+<tr>
+<td>E3</td>
+<td>My Work default</td>
+<td>"Today": the user's overdue items, items due this week, blocked items and attention items routed to them. This focus list replaces FR-VIS-08's narrower Today (due on the current date) as the opening view. Upcoming, Overdue and Completed, the Inbox, saved views and the Coordination sections stay reachable through the view switch.</td>
+</tr>
+<tr>
+<td>E4</td>
+<td>Quick-filter chips</td>
+<td>At most 3 pinned per screen (for example Mine, Overdue, Blocked); the rest become saved views.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="414-acceptance-criteria"><span class="num">41.4</span> Acceptance criteria</h3>
+<p>The census in packet 037's verification record measures AC-CALM-01 to AC-CALM-05 and AC-CALM-09 at 1600×900 on the 17 screens of §41.1, for a Project Manager and a Supervisor, on one release commit.</p>
+<ul>
+<li>
+<p><strong>AC-CALM-01.</strong> Work is visible first: the first data row starts at most 405 px (45 % of the screen) from the top on all 17 screens. Baseline: 425–1137 px.</p>
+</li>
+<li>
+<p><strong>AC-CALM-02.</strong> Filters are closed by default: with no filter set, at most 1 filter field (search) is visible on each of the 17 screens. Baseline: 0–9.</p>
+</li>
+<li>
+<p><strong>AC-CALM-03.</strong> Calm chrome: at most 25 chrome controls above the fold on every screen. Baseline: 11–50.</p>
+</li>
+<li>
+<p><strong>AC-CALM-04.</strong> Fewer destinations: at most 7 project group tabs plus More, and at most 8 sidebar items for an Admin, an Executive, a Supervisor, a Project Manager, a team member and a Read Only user. Baseline: 24 tabs; 14–17 items.</p>
+</li>
+<li>
+<p><strong>AC-CALM-05.</strong> Less reading and fewer colours: chrome words above the fold are at most 50 % of each screen's baseline, and at most 6 fill colours show above the fold. Baseline: 16–232 words; 5–12 colours.</p>
+</li>
+<li>
+<p><strong>AC-CALM-06.</strong> Nothing lost: every route loads for a permitted user and highlights its sidebar item and project group; every former tab and quick filter is reachable in at most 2 clicks from its page; and every former quick-filter URL returns the same rows as before the change.</p>
+</li>
+<li>
+<p><strong>AC-CALM-07.</strong> Filters behave the same: setting a filter in the popover updates the URL exactly as before, shows a removable chip and a count on the Filters button; Clear resets all; reloading restores the state.</p>
+</li>
+<li>
+<p><strong>AC-CALM-08.</strong> Keyboard and screen readers: Enter opens the Filters popover, focus moves inside, and Esc closes it and returns focus. More menus are operable with the arrow keys. An automated accessibility scan reports no serious or critical issues on the 17 screens.</p>
+</li>
+<li>
+<p><strong>AC-CALM-09.</strong> One signal per row: no row shows two indicators at once; extras appear as "+n" with a tooltip; week-specific indicators name their week. Baseline: Over-planned and Under-planned on one Weekly Planner row.</p>
+</li>
+<li>
+<p><strong>AC-CALM-10.</strong> Common tasks are not slower: the click count for each path below is no higher than before the change, recorded before and after: open my most overdue task from My Work; show a project's overdue tasks for one discipline; open a project's high risks; add 8 h of planning for a person next week; export a project's deliverables; change a task's owner.</p>
+</li>
+</ul>
+<p>People checks: two working Project Managers, shown project Tasks, My Work and the Weekly Planner for 5 seconds each, both name each page's purpose and the first thing they would click; and Jay approves the 17 screens at 1440 px and 1024 px widths against the baseline as neat, clean and complete. Phone layouts keep today's behaviour.</p>
   </main>
 </div>
 <script>

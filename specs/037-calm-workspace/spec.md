@@ -1,7 +1,8 @@
 # Feature Specification: Calm Workspace
 
 **Packet**: 037 | **Feature directory**: `specs/037-calm-workspace` | **Date**: 2026-10-11
-**Status**: Proposed. Planning only; no application code until Jay answers E1–E4.
+**Status**: In build. Jay accepted the defaults for E1–E4 on 2026-10-11 ("lets start build"; T001).
+**Source**: product specification §41 (§41.1–§41.4) in `spec-parts/16-calm-workspace.md`. It amends placement in §13.0, §13.1, §36.1 and §36.7 (FR-VIS-01, FR-VIS-08) and binds the screens added by §40.
 **Input**: Jay, 2026-10-11: the app looks overloaded and tries to show everything at once; make it neat and clean.
 **Baseline**: measured on the local preview at 1600×900 as Priya (PM) at commit `121e3ae2`. Numbers are in [verification.md](verification.md) section 2, and screenshots are in `baseline/`.
 
@@ -49,7 +50,7 @@ The product's engineering depth is its advantage, so no capability is removed. T
 
 ## Acceptance
 
-See [verification.md](verification.md). The measurable thresholds are AC-CALM-01 to AC-CALM-10, plus SC-CALM-01 and SC-CALM-02.
+See [verification.md](verification.md). The measurable thresholds are AC-CALM-01, AC-CALM-02, AC-CALM-03, AC-CALM-04, AC-CALM-05, AC-CALM-06, AC-CALM-07, AC-CALM-08, AC-CALM-09, AC-CALM-10, plus SC-CALM-01 and SC-CALM-02.
 
 ## Wording rule
 

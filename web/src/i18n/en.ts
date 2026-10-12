@@ -1930,6 +1930,9 @@ export const en: Record<string, string> = {
   'common.saving': 'Saving…', 'common.unavailable': 'Unavailable',
   'density.label': 'Row density', 'density.compact': 'Compact', 'density.comfortable': 'Comfortable',
   'filters.active': 'Active filters', 'filters.clear': 'Clear filters', 'filters.remove': 'Remove filter: {name}',
+  // Calm workspace (packet 037, §41): toolbar, navigation groups, project header and page help.
+  'calm.group.overview': 'Overview', 'calm.group.work': 'Work', 'calm.group.deliverables': 'Deliverables', 'calm.group.coordination': 'Coordination',
+  'calm.group.people': 'People', 'calm.group.files': 'Files', 'calm.more': 'More', 'calm.groupPages': '{group} pages',
   'workload.selectedSupervisor': 'Selected supervisor', 'workload.weeks': 'Weeks shown', 'workload.range': '{from} – {to}',
   'workload.prevWeek': 'Previous week', 'workload.nextWeek': 'Next week', 'workload.thisWeek': 'This week', 'workload.weekOfLabel': 'Week of',
   'workload.grid': 'Workload by person and week',

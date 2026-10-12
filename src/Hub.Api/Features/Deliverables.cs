@@ -68,7 +68,8 @@ public static class DeliverableEndpoints
                 "overdue" => query.Where(d => db.DeliverableStates.Any(s => s.DeliverableId == d.Id && s.IsOverdue)),
                 "atRisk" => query.Where(d => db.DeliverableStates.Any(s => s.DeliverableId == d.Id && s.IsAtRisk)),
                 "dueSoon" => query.Where(d => db.DeliverableStates.Any(s => s.DeliverableId == d.Id && s.IsDueSoon)),
-                "unassigned" => query.Where(d => d.OwnerId == null),
+                // AC-CNT-03: the same rule as the chip (IsUnassigned): an issued, accepted or cancelled deliverable needs no owner.
+                "unassigned" => query.Where(d => d.OwnerId == null && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled),
                 "dateInconsistent" => query.Where(d => db.DeliverableStates.Any(s => s.DeliverableId == d.Id && s.IsDateInconsistent)),
                 "slipped" => query.Where(d => db.DeliverableStates.Any(s => s.DeliverableId == d.Id && s.SlipDays > 0)),
                 "open" => query.Where(d => d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled),

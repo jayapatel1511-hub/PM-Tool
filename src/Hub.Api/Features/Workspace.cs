@@ -198,6 +198,7 @@ public static class WorkspaceEndpoints
                 TeamMembers = members,
             },
             TasksByStatus = byStatus,
+            OnHold = new { Status = TaskStatuses.OnHold, Count = await Count("status", TaskStatuses.OnHold) }, // AC-CNT-05: the lanes plus this equal Open Tasks
             TasksByProject = byProject,
             UpcomingDeadlines = await Deadlines(db, pids, names.ToDictionary(n => n.Key, n => n.Value.ProjectNumber), start, end),
             Layout = layout is null ? Normalise([]) : Normalise(System.Text.Json.JsonSerializer.Deserialize<Widget[]>(layout.Widgets, JsonOpts.Web) ?? []),
@@ -208,22 +209,23 @@ public static class WorkspaceEndpoints
     static IEnumerable<string> LaneStatuses(string lane) => TaskStatuses.All.Where(x => Workflow.Lane(x) == lane);
 
     /// Open task, deliverable and milestone due dates in the range, soonest first (the calendar's deadline projection).
+    /// Each type is ordered before it is cut, so the soonest items are never dropped (AC-CNT-04).
     static async Task<object> Deadlines(HubDb db, IQueryable<Guid> pids, Dictionary<Guid, string> numbers, DateOnly from, DateOnly to)
     {
         const int Max = 100;
         var tasks = await db.Tasks.AsNoTracking().Where(t => pids.Contains(t.ProjectId) && t.DueDate >= from && t.DueDate <= to && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled)
             .Select(t => new { Type = ItemType.Task, t.Id, t.ProjectId, t.Key, t.Name, Date = t.DueDate!.Value, Status = (string?)t.Status,
                 Owner = db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault(),
-                Overdue = db.TaskStates.Any(x => x.TaskId == t.Id && x.IsOverdue) }).Take(Max + 1).ToListAsync();
+                Overdue = db.TaskStates.Any(x => x.TaskId == t.Id && x.IsOverdue) }).OrderBy(x => x.Date).ThenBy(x => x.Key).Take(Max + 1).ToListAsync();
         var dels = await db.Deliverables.AsNoTracking().Where(d => pids.Contains(d.ProjectId) && d.DueDate >= from && d.DueDate <= to
                 && d.Status != DeliverableStatus.Cancelled && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted)
             .Select(d => new { Type = ItemType.Deliverable, d.Id, d.ProjectId, d.Key, d.Name, Date = d.DueDate!.Value, Status = (string?)d.Status,
                 Owner = db.Users.Where(u => u.Id == d.OwnerId).Select(u => u.DisplayName).FirstOrDefault(),
-                Overdue = db.DeliverableStates.Any(x => x.DeliverableId == d.Id && x.IsOverdue) }).Take(Max + 1).ToListAsync();
+                Overdue = db.DeliverableStates.Any(x => x.DeliverableId == d.Id && x.IsOverdue) }).OrderBy(x => x.Date).ThenBy(x => x.Key).Take(Max + 1).ToListAsync();
         var ms = await db.Milestones.AsNoTracking().Where(m => pids.Contains(m.ProjectId) && m.Date >= from && m.Date <= to && !m.IsCancelled && !m.IsComplete)
             .Select(m => new { Type = ItemType.Milestone, m.Id, m.ProjectId, m.Key, m.Name, Date = m.Date!.Value,
                 Status = db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault(), Owner = (string?)null,
-                Overdue = db.MilestoneStates.Any(x => x.MilestoneId == m.Id && x.Status == MilestoneStatus.Overdue) }).Take(Max + 1).ToListAsync();
+                Overdue = db.MilestoneStates.Any(x => x.MilestoneId == m.Id && x.Status == MilestoneStatus.Overdue) }).OrderBy(x => x.Date).ThenBy(x => x.Key).Take(Max + 1).ToListAsync();
         var all = tasks.Concat(dels).Concat(ms).OrderBy(x => x.Date).ThenBy(x => x.Key).ToList();
         return new
         {

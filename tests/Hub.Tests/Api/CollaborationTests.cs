@@ -226,6 +226,7 @@ public sealed class CollaborationTests(HubFactory f)
             await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/transition", new { toStatus = "Active", rowVersion = pr.I("rowVersion") }).Result.Json();
             var batch = await f.DbAsync(db => db.Notifications.Where(n => n.UserId == U(TestData.Alex) && n.ProjectId == p.Id && n.EventType == NotificationEvents.TaskAssigned).ToListAsync());
             Assert.Contains("3 tasks", Assert.Single(batch).Title);
+            Assert.Equal($"/my-work?tab=overview&project={p.Id}", batch[0].LinkPath); // Overview lists the new work; Today shows only what is due now (§41 E3)
             var marker = await f.DbAsync(db => db.Follows.Where(x => x.ProjectId == p.Id && x.UserId == U(TestData.Alex)).Select(x => x.LastSeenAt).FirstAsync());
             Assert.Equal(f.Clock.Now, marker); // set-up work does not arrive as a flood of unread changes
             Assert.Equal(0, (await f.As(TestData.Alex).GetAsync($"/api/v1/me/following?projectId={p.Id}").Result.Json())["projects"]!.AsArray()

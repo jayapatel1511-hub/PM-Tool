@@ -471,7 +471,7 @@ public static class ProjectEndpoints
                 var counts = await db.Tasks.Where(t => t.ProjectId == id && t.AssigneeId != null && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled)
                     .GroupBy(t => t.AssigneeId).Select(g => new { UserId = g.Key, N = g.Count() }).ToListAsync();
                 foreach (var c in counts)
-                    await notify.Send(NotificationEvents.TaskAssigned, c.UserId, TeamService.Item(p) with { Link = $"/my-work?project={p.Id}" },
+                    await notify.Send(NotificationEvents.TaskAssigned, c.UserId, TeamService.Item(p) with { Link = $"/my-work?tab=overview&project={p.Id}" },
                         Text.Get("notify.batched_assignments", c.N, p.ProjectNumber, p.Name));
             }
             await db.SaveChangesAsync();

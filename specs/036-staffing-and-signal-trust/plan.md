@@ -91,16 +91,16 @@ Rules while implementing:
   - Add a check constraint on `task_dependency.dependency_type`.
   - Add `DependencyType` (default FinishToStart) to `DeliverableDependency` (`Entities.cs:491`).
   - Add `StartedAt` (nullable) to `WorkTask` (`Entities.cs:444` block) and to `Deliverable` (`:299` block).
-- **Backfill (in the migration):**
-  - `StartedAt` = the first activity-log entry whose `Changes` contains a `Status` change with old value `Not Started`.
-  - Fallback for items already started: `StatusChangedAt`.
+- **Setting `StartedAt`:** on the first move from Not Started to a working status (not On Hold or Cancelled), when `StartedAt` is null. Holding or cancelling unstarted work is not a start (defect 036-D2).
+  - In `Tasks.cs`, in the status transition (:437).
+  - In `Deliverables.cs`, in the status transition (:334) and when issuing straight from Not Started (:375).
+- **Backfill (in the migration), by the same rule:**
+  - `StartedAt` = the first activity-log entry whose `Changes` contains a `Status` change from `Not Started` to a status other than On Hold or Cancelled.
+  - Fallback for items already started with no such entry: `StatusChangedAt`, else `CreatedAt`. Items held or cancelled straight from Not Started get no fallback and stay null.
   - Items still Not Started stay null.
-- **Setting `StartedAt`:**
-  - In `Tasks.cs`, in the transition at :438 when leaving Not Started and `StartedAt` is null.
-  - In `Deliverables.cs`, at :329 and :374, with the same condition.
 - **Domain (`Evaluation.cs`):**
   - `DependencySnap` gains `string Type = FinishToStart`.
-  - `TaskSnap` and `DeliverableSnap` gain `StartedOn`.
+  - `TaskSnap` and `DeliverableSnap` gain `StartedOn` (the local date of `StartedAt`).
   - Add one public pure function, `DependencyRules.Satisfied(type, predStatus, predStartedOn, predCompletedOn, lag, after, today)`, which replaces the local `Satisfied` at :84-90 and the deliverable check at :254:
     - Finish-to-Start: unchanged.
     - Start-to-Start: started (or Complete/Cancelled) and `after(StartedOn, lag) <= today`.
@@ -108,7 +108,7 @@ Rules while implementing:
   - D-12 at :149-156 and :262-264 branches on type:
     - Finish-to-Start: as today.
     - Start-to-Start: successor start vs predecessor start + lag.
-    - Finish-to-Finish: successor due vs predecessor due + lag, plus the "finished before predecessor" note.
+    - Finish-to-Finish: successor due vs predecessor due + lag, plus the "finished before predecessor" note for a Complete task, or an Issued or Accepted deliverable, whose predecessor is not finished or cancelled. The note replaces the date flag.
   - D-11 and D-13 walks are unchanged, since they follow edges regardless of type.
 - **Loading:** `EvaluationService.cs:43` and `:52` map `Type`. `:34-42` maps `StartedOn` through `L()`.
 - **API (`Dependencies.cs`):**
@@ -123,9 +123,9 @@ Rules while implementing:
 ### A3. A-21 "Status not moving"
 
 - `TaskSnap` and `DeliverableSnap` gain `StatusChangedOn`, mapped in `EvaluationService.cs`.
-- In `Attention()`:
-  - Tasks (:447-503): In Progress or a review status, `Since(StatusChangedOn) > StatusStaleDays`, and A-10 and A-11 did not fire for the item. Severity Info, or Warning when due soon, mirroring A-10.
-  - Deliverables (:542-562): In Progress or In Review with the same comparison.
+- In `Attention()`, A-21 fires when the status is unchanged for more than `status_stale_days` AND the item had activity within `task_stale_days` (assumption A5, run 2):
+  - Tasks: In Progress or a review status, `Since(StatusChangedOn) > StatusStaleDays` and `Since(LastActivity) <= TaskStaleDays`, and the A-11 review-stalled condition does not hold. It does not depend on whether A-10 or A-11 is switched on. Severity Info, or Warning when due soon, mirroring A-10.
+  - Deliverables: In Progress or In Review with the same two comparisons (deliverables have no review-stalled condition).
 - Add a `RuleNames` entry. Change `Rules.Ids` to `Range(1, 21)` (`Settings.cs:229`).
 - Add the `status_stale_days` setting (int, default 15, range 1–365, group `attention`). It is seeded automatically, so no admin UI code is needed, only i18n keys.
 

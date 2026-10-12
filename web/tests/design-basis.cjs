@@ -56,7 +56,7 @@ let server, browser;
     window.__printedTaskIds = [];
     window.print = () => {
       window.__printCalls++;
-      window.__printedTaskIds = [...new Set([...document.querySelectorAll('section[aria-labelledby="dcv-using"] a[href*="panel"]')]
+      window.__printedTaskIds = [...new Set([...document.querySelectorAll('article[aria-labelledby="dcv-using"] a[href*="panel"]')]
         .map(a => new URL(a.href).searchParams.get('panel')).filter(panel => panel?.startsWith('Task:')).map(panel => panel.slice('Task:'.length)))].sort();
     };
   });
@@ -171,7 +171,7 @@ let server, browser;
   await using.waitFor();
   for (let n = 1; n <= 4; n++) await page.getByRole('link', { name: `P-DEMO-T${String(n).padStart(3, '0')}`, exact: true }).waitFor();
   assert.equal(await page.getByRole('link', { name: 'P-DEMO-T005', exact: true }).count(), 0);
-  await page.locator('section[aria-labelledby="dcv-using"] a[href="https://example.test/source/1"]').waitFor();
+  await page.locator('article[aria-labelledby="dcv-using"] a[href="https://example.test/source/1"]').waitFor();
   await page.getByRole('heading', { name: /^What changed\?/ }).locator('..').locator('..').getByRole('link', { name: 'P-DEMO-C001', exact: true }).waitFor();
   await page.getByRole('heading', { name: 'Pending reviews · 1', exact: true }).waitFor();
   await page.getByRole('link', { name: 'P-DEMO-SUB0001', exact: true }).waitFor();
@@ -186,8 +186,10 @@ let server, browser;
   assert.ok(coordinationQueries.some(q => q.params.page === '2' && q.params.pageSize === '4'), 'Coordination uses page two reaches the fifth row');
   await page.goto(`${base}/projects/P-DEMO/coordination`);
   await page.getByRole('heading', { name: 'Discipline coordination', exact: true }).waitFor();
-  // Print is in the More actions menu; its item is enabled again once the last print has finished.
+  // Print is in the More actions menu; its item is enabled again once the last print has finished. The menu that the
+  // last Print closed must have finished closing first, or it takes the next click on its trigger as a click outside.
   const print = async () => {
+    await page.getByRole('menu').waitFor({ state: 'hidden' });
     await page.getByRole('button', { name: 'More actions', exact: true }).click();
     await page.locator('[role=menuitem]:not([data-disabled])').filter({ hasText: /^Print$/ }).click();
   };

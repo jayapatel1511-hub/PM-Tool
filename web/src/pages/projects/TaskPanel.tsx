@@ -7,7 +7,8 @@ import { toast } from 'sonner'
 import { AccentDot, ConfirmDialog, Empty, ErrorBanner, Field, Loading, Notice, Spinner, selectCls } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, SaveStatus, TabBar } from '@/components/hub/fields'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
-import { Avatar, PeoplePicker } from '@/components/hub/people'
+import { Avatar, CapacityWeek, PeoplePicker, weekOf } from '@/components/hub/people'
+import { DepTypeChip, DepTypeField } from '@/components/hub/indicators'
 import { Chip, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
 import { RichText } from '@/components/hub/richtext'
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { ApiError, del, get, post, qs } from '@/lib/api'
 import { useMe } from '@/lib/auth'
-import { fmtDate, fmtTime } from '@/lib/format'
+import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { CommentsSlot, ItemSlots, LinksSlot, RaiseSlot } from './slots-items'
@@ -96,7 +97,7 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
           <span className="inline-flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><AccentDot id={d.project.id} />{d.project.projectNumber}</span>
         </div>
         <h2 aria-label={r.name} className="-mx-2 break-words text-2xl/8 font-semibold tracking-[-0.4px]"><InlineText value={r.name} disabled={!perms.edit.ok} title={perms.edit.ok ? t('common.name') : perms.edit.reason ?? undefined} onSave={(v) => save({ name: v })} /></h2>
-        <TaskIndicators r={r} />
+        <TaskIndicators r={r} all />
         <div className="flex flex-wrap items-center gap-2">
           {perms.isReviewer && r.status === 'Ready for Review' && find('In Review') && <Button size="sm" onClick={() => act('In Review')}>{t('task.startReview')}</Button>}
           {perms.isReviewer && r.status === 'In Review' && find('Complete') && <Button size="sm" onClick={() => act('Complete')}><Check className="size-4" aria-hidden />{t('task.approve')}</Button>}
@@ -124,7 +125,8 @@ export function TaskDetail({ id, onClose }: { id: string; onClose?: () => void }
       )}
 
       <FieldGroup title={t('task.people')}>
-        <FieldRow label={t('field.AssigneeId')}><InlinePerson value={r.assigneeId} name={r.assigneeName && !r.assigneeActive ? t('common.inactiveSuffix', { name: r.assigneeName }) : r.assigneeName} disabled={!perms.assign.ok} title={perms.assign.reason ?? undefined} onSave={(v) => save({ assigneeId: v })} /></FieldRow>
+        {/* FR-PICK-02: the owner picker shows free hours for the week the task starts, else is due, else this week. */}
+        <CapacityWeek value={weekOf(r.startDate ?? r.dueDate ?? today())}><FieldRow label={t('field.AssigneeId')}><InlinePerson value={r.assigneeId} name={r.assigneeName && !r.assigneeActive ? t('common.inactiveSuffix', { name: r.assigneeName }) : r.assigneeName} disabled={!perms.assign.ok} title={perms.assign.reason ?? undefined} onSave={(v) => save({ assigneeId: v })} /></FieldRow></CapacityWeek>
         <FieldRow label={t('field.ReviewerId')}><InlinePerson value={r.reviewerId} name={r.reviewerName} disabled={!perms.setReviewer.ok} title={perms.setReviewer.reason ?? undefined} onSave={(v) => save({ reviewerId: v })} /></FieldRow>
         <FieldRow label={t('field.RequiresReview')}>
           <SaveStatus current={r.requiresReview}>{(track) => (
@@ -249,7 +251,7 @@ function ProgressSlider({ value, disabled, onCommit }: { value: number; disabled
 
 // ---------- Dependencies and chain view (packet 005: FR-DEP-01..08, D-03, D-10) ----------
 
-interface Edge { dependencyId: string; note?: string; lagDays: number; satisfied: boolean
+interface Edge { dependencyId: string; note?: string; lagDays: number; type?: string; satisfied: boolean
   task: { id: string; key: string; name: string; status: string; dueDate?: string; startDate?: string; assigneeName?: string; overdue: boolean; blocked: boolean; waiting: boolean } }
 
 function Dependencies({ task, canManage, onChanged }: { task: TaskRow; canManage: boolean; onChanged: () => void }) {
@@ -267,9 +269,9 @@ function Dependencies({ task, canManage, onChanged }: { task: TaskRow; canManage
       {edges.map((e) => (
         <li key={e.dependencyId} className="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-1.5 text-sm">
           {e.satisfied ? <Check className="size-4 shrink-0 text-done" role="img" aria-label={t('task.satisfied')} /> : <Link2 className="size-4 shrink-0 text-muted-foreground" aria-hidden />}
-          <button type="button" className="min-w-0 flex-1 break-words text-left hover:underline" onClick={() => openPanel('Task', e.task.id)}><Key>{e.task.key}</Key> {e.task.name}</button>
+          <button type="button" className="min-w-48 flex-1 break-words text-left hover:underline" onClick={() => openPanel('Task', e.task.id)}><Key>{e.task.key}</Key> {e.task.name}</button>
           {e.task.overdue && <Chip tone="bad">{t('ind.overdue')}</Chip>}
-          {e.lagDays > 0 && <Chip tone="idle">{t('dep.lagN', { n: e.lagDays })}</Chip>}
+          <DepTypeChip type={e.type} lag={e.lagDays} />
           <span className="hidden text-xs/[18px] text-muted-foreground sm:inline">{e.task.assigneeName ?? t('ind.unassigned')} · <span className="tabular-nums">{fmtDate(e.task.dueDate)}</span></span>
           <StatusPill status={e.task.status} />
           {canManage && <Button variant="ghost" size="icon-sm" aria-label={t('task.removeDependency', { key: e.task.key })} onClick={() => remove(e)}><X className="size-4" /></Button>}
@@ -305,6 +307,7 @@ function AddDependency({ task, direction, onClose }: { task: TaskRow; direction:
   const [term, setTerm] = useState('')
   const [note, setNote] = useState('')
   const [lag, setLag] = useState('0')
+  const [type, setType] = useState('FinishToStart')
   const [choice, setChoice] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -312,7 +315,7 @@ function AddDependency({ task, direction, onClose }: { task: TaskRow; direction:
   const save = async () => {
     setErr(null); setBusy(true)
     try {
-      const extra = { note: note || null, lagDays: Number(lag) || 0 }
+      const extra = { note: note || null, lagDays: Number(lag) || 0, type }
       await post(`tasks/${task.id}/dependencies`, direction === 'predecessor' ? { predecessorTaskId: choice, ...extra } : { successorTaskId: choice, ...extra })
       onClose(true)
     } catch (e) {
@@ -324,8 +327,8 @@ function AddDependency({ task, direction, onClose }: { task: TaskRow; direction:
     <Dialog open onOpenChange={(o) => !o && onClose(false)}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{direction === 'predecessor' ? t('task.addPredecessorTitle', { key: task.key }) : t('task.addSuccessorTitle', { key: task.key })}</DialogTitle>
-          <DialogDescription>{t('task.fsHint')}</DialogDescription>
+          <DialogTitle>{direction === 'predecessor' ? t('dep.addPredecessorTitle', { key: task.key }) : t('dep.addSuccessorTitle', { key: task.key })}</DialogTitle>
+          <DialogDescription>{t('dep.dialogHint')}</DialogDescription>
         </DialogHeader>
         <Field label={t('common.search')} htmlFor="dep-search"><Input id="dep-search" type="search" autoFocus placeholder={t('task.searchPlaceholder')} value={term} onChange={(e) => setTerm(e.target.value)} /></Field>
         <div className="scroll-region max-h-64 overflow-y-auto rounded-md border" role="listbox" aria-label={t('task.candidates')}>
@@ -337,7 +340,8 @@ function AddDependency({ task, direction, onClose }: { task: TaskRow; direction:
             </button>
           ))}
         </div>
-        <Field label={t('dep.lag')} htmlFor="dep-lag" hint={t('dep.lagHint')}><Input id="dep-lag" type="number" min={0} max={365} className="w-28" value={lag} onChange={(e) => setLag(e.target.value)} /></Field>
+        <DepTypeField id="dep-type" value={type} onChange={setType} />
+        <Field label={t('dep.lag')} htmlFor="dep-lag" hint={t('dep.lagHintTyped')}><Input id="dep-lag" type="number" min={0} max={365} className="w-28" value={lag} onChange={(e) => setLag(e.target.value)} /></Field>
         <Field label={t('common.notes')} htmlFor="dep-note" optional><Textarea id="dep-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)} /></Field>
         {err && <div role="alert" className="rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad">{err}</div>}
         <DialogFooter>

@@ -5,12 +5,12 @@ import { Check, ChevronDown, ChevronRight, Link2, Plus, Send, X } from 'lucide-r
 import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ActiveFilters, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, TableRegion, selectCls } from '@/components/hub/common'
+import { ActiveFilters, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, PageHelp, Spinner, TableRegion, selectCls } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, SaveStatus, TabBar } from '@/components/hub/fields'
-import { DeliverableIndicators, progressLabel, type DeliverableStateView } from '@/components/hub/indicators'
+import { DepTypeChip, DepTypeField, DeliverableIndicators, progressLabel, type DeliverableStateView } from '@/components/hub/indicators'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
-import { Chip, Key, PriorityBadge, ProgressBar, StatusPill } from '@/components/hub/pills'
+import { Key, PriorityBadge, ProgressBar, StatusPill } from '@/components/hub/pills'
 import { Why } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -28,7 +28,7 @@ import { DateText, FieldGroup, GroupRow, PanelHead, Person, RegisterCards, SELEC
 import type { MilestoneRow } from './Milestones'
 import { CommentsSlot, ItemSlots, LinksSlot, RaiseSlot } from './slots-items'
 import { useCurrentProject } from './ProjectLayout'
-import { errorText } from './Tasks'
+import { MenuSelect, errorText } from './Tasks'
 import { ExportMenu } from '@/components/hub/export'
 import { useTable } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
@@ -43,6 +43,7 @@ export interface DeliverableRow {
   tasks?: { id: string; key: string; name: string; status: string; dueDate?: string; assignee?: string }[]
 }
 
+const GROUP_LABEL: Record<string, string> = { discipline: 'common.discipline', milestone: 'field.MilestoneId', status: 'common.status', owner: 'common.owner', none: 'dgroup.none' }
 const STATUSES = ['Not Started', 'In Progress', 'In Review', 'Revision Required', 'Ready to Issue', 'Issued', 'Accepted', 'On Hold', 'Cancelled']
 
 /** Deliverables Register (§13.6): grouped by discipline by default, filters in the URL, expandable to tasks. */
@@ -109,7 +110,7 @@ export function DeliverablesTab() {
   ].filter(Boolean) as { key: string; label: string; value: ReactNode }[]
 
   return (
-    <Page title={t('ptab.deliverables')} subtitle={t('deliverable.subtitle')}
+    <Page title={t('ptab.deliverables')} subtitle={<>{t('deliverable.scope')}<PageHelp>{t('deliverable.subtitle')}</PageHelp></>}
       actions={<>
         {table.menu}
         <ViewMenu listType="deliverables" projectId={p.id} extra={() => ({ cols: table.colsParam })} />
@@ -120,6 +121,8 @@ export function DeliverablesTab() {
         search={<Field label={t('common.search')} htmlFor="deliverable-search">
           <UrlSearchInput id="deliverable-search" placeholder={t('common.search')} value={filters.q ?? ''} onValueChange={value => set('q', value)} />
         </Field>}
+        quick={<MenuSelect label={t('common.groupBy')} value={group} onChange={(v) => set('group', v === 'discipline' ? null : v)}
+          options={Object.entries(GROUP_LABEL).map(([value, label]) => ({ value, label: t(label) }))} />}
         active={<ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.discipline')} htmlFor="deliverable-discipline" className="w-full sm:w-44">
@@ -153,11 +156,6 @@ export function DeliverablesTab() {
           </Field>
           <Field label={t('tfilter.dueTo')} htmlFor="deliverable-due-to" className="w-full sm:w-44">
             <Input id="deliverable-due-to" type="date" value={filters.dueTo ?? ''} onChange={(e) => set('dueTo', e.target.value)} />
-          </Field>
-          <Field label={t('common.groupBy')} htmlFor="deliverable-group" className="w-full sm:w-48">
-            <select id="deliverable-group" className={selectCls} value={group} onChange={(e) => set('group', e.target.value === 'discipline' ? null : e.target.value)}>
-              {['discipline', 'milestone', 'status', 'owner', 'none'].map((g) => <option key={g} value={g}>{t(`dgroup.${g}`)}</option>)}
-            </select>
           </Field>
         </div>
       </FilterBar>
@@ -351,7 +349,7 @@ function DeliverablePanel({ id }: PanelProps) {
         </DropdownMenu>
         <PriorityBadge priority={d.priority} />
       </>}>
-        <DeliverableIndicators s={s} />
+        <DeliverableIndicators s={s} all />
         {s?.isAtRisk && <Why reasons={s.atRiskReasons as any} title={t('ind.atRisk')}><span className="text-sm text-muted-foreground">{t('deliverable.whyAtRisk')}</span></Why>}
         <div className="flex flex-wrap gap-2">
           {can && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/handoffs?source=${d.id}`}>{t('handoff.new')}</Link></Button>}
@@ -455,14 +453,14 @@ function DeliverableTransition({ d, to, needsReason, onClose }: { d: Deliverable
   )
 }
 
-interface DepRow { dependencyId: string; lagDays: number; note?: string; id: string; key: string; name: string; status: string; dueDate?: string; issuedDate?: string }
+interface DepRow { dependencyId: string; type?: string; lagDays: number; note?: string; id: string; key: string; name: string; status: string; dueDate?: string; issuedDate?: string; satisfied: boolean }
 
-/** Explicit Finish-to-Start links to other deliverables (FR-DEP-09, packet 021), with an optional lag, apart from derived ones. */
+/** Explicit typed links to other deliverables (FR-DEP-09, FR-DEPT-01), with an optional lag, apart from derived ones. Whether a
+ *  link is met comes from the server's shared rule (AC-DEPT-05); the client never recomputes it. */
 function ExplicitDeps({ d, data, onChange }: { d: DeliverableRow; data: any; onChange: () => void }) {
   const openPanel = useItemPanel()
   const [adding, setAdding] = useState<'predecessor' | 'successor' | null>(null)
   const can: boolean = data.permissions.linkDeliverables
-  const satisfied = (x: DepRow) => ['Issued', 'Accepted', 'Cancelled'].includes(x.status)
   const remove = async (x: DepRow) => { try { await del(`deliverable-dependencies/${x.dependencyId}`); onChange() } catch (e) { toast.error(errorText(e)) } }
   const list = (rows: DepRow[], label: string, dir: 'predecessor' | 'successor') => (
     <div>
@@ -471,9 +469,9 @@ function ExplicitDeps({ d, data, onChange }: { d: DeliverableRow; data: any; onC
       {rows.length === 0 ? <p className="text-muted-foreground">{t('common.none')}</p> : (
         <ul className="divide-y rounded-md border bg-card">{rows.map((x) => (
           <li key={x.dependencyId} className="flex flex-wrap items-center gap-2 px-3 py-1.5">
-            {satisfied(x) ? <Check className="size-4 text-done" aria-label={t('task.satisfied')} /> : <Link2 className="size-4 text-muted-foreground" aria-hidden />}
-            <button className="min-w-0 flex-1 truncate text-left hover:underline" onClick={() => openPanel('Deliverable', x.id)}><Key>{x.key}</Key> {x.name}</button>
-            {x.lagDays > 0 && <Chip tone="idle">{t('dep.lagN', { n: x.lagDays })}</Chip>}
+            {x.satisfied ? <Check className="size-4 text-done" role="img" aria-label={t('task.satisfied')} /> : <Link2 className="size-4 text-muted-foreground" aria-hidden />}
+            <button className="min-w-40 flex-1 truncate text-left hover:underline" onClick={() => openPanel('Deliverable', x.id)}><Key>{x.key}</Key> {x.name}</button>
+            <DepTypeChip type={x.type} lag={x.lagDays} />
             {x.note && <span className="hidden max-w-40 truncate text-xs/[18px] text-muted-foreground sm:inline" title={x.note}>{x.note}</span>}
             <DateText date={x.issuedDate ?? x.dueDate} /><StatusPill status={x.status} />
             {can && <Button variant="ghost" size="icon-sm" aria-label={t('task.removeDependency', { key: x.key })} onClick={() => remove(x)}><X className="size-4" /></Button>}
@@ -496,13 +494,14 @@ function LinkDeliverable({ d, direction, exclude, onClose }: { d: DeliverableRow
   const list = useQuery({ queryKey: ['p', d.projectId, 'deliverables', {}], queryFn: () => get<DeliverableRow[]>(`projects/${d.projectId}/deliverables`) })
   const [choice, setChoice] = useState('')
   const [lag, setLag] = useState('0')
+  const [type, setType] = useState('FinishToStart')
   const [note, setNote] = useState('')
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const save = async () => {
     setErr(null); setBusy(true)
     try {
-      await post(`deliverables/${d.id}/dependencies`, { [direction === 'predecessor' ? 'predecessorDeliverableId' : 'successorDeliverableId']: choice, lagDays: Number(lag) || 0, note: note || null })
+      await post(`deliverables/${d.id}/dependencies`, { [direction === 'predecessor' ? 'predecessorDeliverableId' : 'successorDeliverableId']: choice, lagDays: Number(lag) || 0, type, note: note || null })
       onClose(true)
     } catch (e) {
       const x = e as ApiError
@@ -512,7 +511,7 @@ function LinkDeliverable({ d, direction, exclude, onClose }: { d: DeliverableRow
   return (
     <Dialog open onOpenChange={(o) => !o && onClose(false)}>
       <DialogContent>
-        <DialogHeader><DialogTitle>{t(direction === 'predecessor' ? 'deliverable.linkNeeds' : 'deliverable.linkHoldsUp', { key: d.key })}</DialogTitle><DialogDescription>{t('deliverable.linkHint')}</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>{t(direction === 'predecessor' ? 'deliverable.linkNeeds' : 'deliverable.linkHoldsUp', { key: d.key })}</DialogTitle><DialogDescription>{t('deliverable.linkHintTyped')}</DialogDescription></DialogHeader>
         <div className="grid gap-3">
           <Field label={t('deliverable.linkOther')} htmlFor="ld-other">
             <select id="ld-other" className={selectCls} value={choice} onChange={(e) => setChoice(e.target.value)}>
@@ -520,7 +519,8 @@ function LinkDeliverable({ d, direction, exclude, onClose }: { d: DeliverableRow
               {(list.data ?? []).filter((x) => !exclude.includes(x.id) && x.status !== 'Cancelled').map((x) => <option key={x.id} value={x.id}>{x.key} · {x.name}</option>)}
             </select>
           </Field>
-          <Field label={t('dep.lag')} htmlFor="ld-lag" hint={t('dep.lagHint')}><Input id="ld-lag" type="number" min={0} max={365} className="w-28" value={lag} onChange={(e) => setLag(e.target.value)} /></Field>
+          <DepTypeField id="ld-type" value={type} onChange={setType} />
+          <Field label={t('dep.lag')} htmlFor="ld-lag" hint={t('dep.lagHintTyped')}><Input id="ld-lag" type="number" min={0} max={365} className="w-28" value={lag} onChange={(e) => setLag(e.target.value)} /></Field>
           <Field label={t('common.notes')} htmlFor="ld-note" hint={t('common.optional')}><Input id="ld-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('dep.notePlaceholder')} /></Field>
           {err && <div role="alert" className="rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad">{err}</div>}
         </div>

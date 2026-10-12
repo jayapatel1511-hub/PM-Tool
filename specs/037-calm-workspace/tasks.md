@@ -4,7 +4,7 @@
 
 ## Phase 0: Gate
 
-- [ ] T001 Record Jay's answers to E1–E4 in verification.md section 3, or a note that the defaults stand.
+- [x] T001 Record Jay's answers to E1–E4 in verification.md section 3, or a note that the defaults stand. Done 2026-10-11: E1–E4 all Default (Jay: 'lets start build'), recorded in verification.md section 3.
 - [ ] T002 Confirm packet 036's T003 is done (shared base). Re-run the appendix A census on the new base and replace section 2's baseline if the numbers moved.
 - [ ] T003 Write `web/tests/clutter.cjs` from appendix A with the section 4 thresholds, and add it as `npm --prefix web run test:clutter`. Run it on the base: it must FAIL there, which proves the thresholds bite.
 

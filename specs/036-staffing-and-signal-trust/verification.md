@@ -21,8 +21,8 @@ A newer release commit voids earlier PASS rows, except rows whose files the diff
 
 | # | Condition | Status |
 |---|---|---|
-| E1 | D1–D9 answered and recorded in section 3. | UNRUN |
-| E2 | T003 done: `codex/tuesday-ui-consistency` merged or recorded as abandoned, the pending `Planning.cs` edit committed, and the base commit recorded here. | UNRUN |
+| E1 | D1–D9 answered and recorded in section 3. | PASS (2026-10-11): every decision takes its spec.md default; Jay said "lets start build". |
+| E2 | T003 done: `codex/tuesday-ui-consistency` merged or recorded as abandoned, the pending `Planning.cs` edit committed, and the base commit recorded here. | PASS (2026-10-11): `codex/tuesday-ui-consistency` merged in `4218baec` (`git rev-list --count HEAD..codex/tuesday-ui-consistency` = 0); the 5 October leftovers, including `Planning.cs`, committed in `7f058aed`. Base: `claude/tuesday-visual-batch1` at `9beace03`. |
 | E3 | T004–T019 complete on the packet branch, and the build is green. | UNRUN |
 | E4 | Section 8 fixtures load on a fresh local preview database with zero refused steps. | UNRUN |
 | E5 | Human session participants booked (section 10), with dates written here. | UNRUN |
@@ -31,15 +31,15 @@ A newer release commit voids earlier PASS rows, except rows whose files the diff
 
 | # | Decision | Jay's answer | Date |
 |---|---|---|---|
-| D1 | Fill through allocation proposal | Pending | |
-| D2 | Open role editors = allocation proposers | Pending | |
-| D3 | Open roles on the Allocations tab and Workload only | Pending | |
-| D4 | `StartedAt` anchors Start-to-Start lag | Pending | |
-| D5 | Finish-to-Finish never waits or blocks | Pending | |
-| D6 | A-21 at 15 days | Pending | |
-| D7 | Home discipline edited by an Admin | Pending | |
-| D8 | Picker capacity only within existing scope | Pending | |
-| D9 | Home lane renamed "Review and revision" | Pending | |
+| D1 | Fill through allocation proposal | Default (Jay: 'lets start build') | 2026-10-11 |
+| D2 | Open role editors = allocation proposers | Default (Jay: 'lets start build') | 2026-10-11 |
+| D3 | Open roles on the Allocations tab and Workload only | Default (Jay: 'lets start build') | 2026-10-11 |
+| D4 | `StartedAt` anchors Start-to-Start lag | Default (Jay: 'lets start build') | 2026-10-11 |
+| D5 | Finish-to-Finish never waits or blocks | Default (Jay: 'lets start build') | 2026-10-11 |
+| D6 | A-21 at 15 days | Default (Jay: 'lets start build') | 2026-10-11 |
+| D7 | Home discipline edited by an Admin | Default (Jay: 'lets start build') | 2026-10-11 |
+| D8 | Picker capacity only within existing scope | Default (Jay: 'lets start build') | 2026-10-11 |
+| D9 | Home lane renamed "Review and revision" | Default (Jay: 'lets start build') | 2026-10-11 |
 
 A different answer to any decision updates spec.md, this plan and the affected tables before the build starts.
 

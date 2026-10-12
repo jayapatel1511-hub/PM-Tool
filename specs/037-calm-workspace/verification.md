@@ -54,10 +54,10 @@ Screenshots: `baseline/my-work.jpg`, `baseline/project-tasks.jpg`, `baseline/pro
 
 | # | Decision | Jay's answer | Date |
 |---|---|---|---|
-| E1 | Project tab groups | Pending | |
-| E2 | Sidebar items | Pending | |
-| E3 | My Work opens on Today | Pending | |
-| E4 | At most 3 quick-filter chips; the rest become Views | Pending | |
+| E1 | Project tab groups | Default (Jay: 'lets start build') | 2026-10-11 |
+| E2 | Sidebar items | Default (Jay: 'lets start build') | 2026-10-11 |
+| E3 | My Work opens on Today | Default (Jay: 'lets start build') | 2026-10-11 |
+| E4 | At most 3 quick-filter chips; the rest become Views | Default (Jay: 'lets start build') | 2026-10-11 |
 
 ## 4. Acceptance criteria
 

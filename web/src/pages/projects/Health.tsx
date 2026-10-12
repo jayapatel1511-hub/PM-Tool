@@ -32,7 +32,7 @@ function HealthSlot({ p }: { p: ProjectDetail }) {
 }
 
 /** The PM's health override (FR-HLT-02), in the project header's details and actions popover (§41 R6). */
-function OverrideAction({ p }: { p: ProjectDetail }) {
+export function OverrideAction({ p }: { p: ProjectDetail }) {
   const [overriding, setOverriding] = useState(false)
   const refresh = useProjectRefresh()
   if (!p.permissions.healthOverride.ok || p.status !== 'Active') return null

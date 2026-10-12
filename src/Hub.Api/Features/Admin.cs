@@ -43,23 +43,29 @@ public static class AdminEndpoints
         g.MapGet("/holidays", async (Guid? officeId, int? year, HubDb db) => await db.Holidays.AsNoTracking()
             .Where(h => (officeId == null || h.OfficeId == officeId) && (year == null || h.Date.Year == year)).OrderBy(h => h.Date)
             .Select(h => new { h.Id, h.OfficeId, Office = db.Offices.Where(o => o.Id == h.OfficeId).Select(o => o.Name).FirstOrDefault(), h.Date, h.Name }).ToListAsync());
-        g.MapPost("/holidays", async (HolidayBody b, HubDb db) =>
+        g.MapPost("/holidays", async (HolidayBody b, HubDb db) => await Tx.Run(db, async () =>
         {
             var date = b.Date ?? throw ApiException.Invalid("date", "error.required");
             if (b.OfficeId is { } o) Check.That(await db.Offices.AnyAsync(x => x.Id == o), "officeId", "error.not_found");
             if (await db.Holidays.AnyAsync(h => h.OfficeId == b.OfficeId && h.Date == date)) throw ApiException.Conflict("holiday_exists", "holiday.exists");
             var h = new Holiday { OfficeId = b.OfficeId, Date = date, Name = Check.Required(b.Name, "name", 120) };
+            var people = await db.Users.Where(u => b.OfficeId == null || u.OfficeId == b.OfficeId).Select(u => u.Id).ToArrayAsync();
+            await PersonCapacity.LockPeople(db, people);
             db.Holidays.Add(h);
+            foreach (var person in people) await PersonCapacity.Touch(db, person, date, date);
             await db.SaveChangesAsync();
             return Results.Created($"/api/v1/admin/holidays/{h.Id}", new { h.Id });
-        });
-        g.MapDelete("/holidays/{id:guid}", async (Guid id, HubDb db) =>
+        }));
+        g.MapDelete("/holidays/{id:guid}", async (Guid id, HubDb db) => await Tx.Run(db, async () =>
         {
             var h = await db.Holidays.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
+            var people = await db.Users.Where(u => h.OfficeId == null || u.OfficeId == h.OfficeId).Select(u => u.Id).ToArrayAsync();
+            await PersonCapacity.LockPeople(db, people);
+            foreach (var person in people) await PersonCapacity.Touch(db, person, h.Date, h.Date);
             db.Holidays.Remove(h); // configuration, not a work item; the removal is logged
             await db.SaveChangesAsync();
             return Results.NoContent();
-        });
+        }));
 
         // ---------- Settings (FR-014) ----------
         g.MapGet("/settings", async (HubDb db) =>

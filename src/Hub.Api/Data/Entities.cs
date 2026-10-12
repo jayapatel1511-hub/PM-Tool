@@ -37,6 +37,8 @@ public class AppUser : Audited, IAuditable
     public string? JobTitle { get; set; }
     public Guid? OfficeId { get; set; }
     public Guid? SupervisorId { get; set; }
+    public string? HrSourceSystem { get; set; }
+    public string? HrPersonKey { get; set; }
     public bool IsActive { get; set; } = true;
     public decimal? WeeklyCapacityHours { get; set; }
     public DateTimeOffset? LastSignInAt { get; set; }

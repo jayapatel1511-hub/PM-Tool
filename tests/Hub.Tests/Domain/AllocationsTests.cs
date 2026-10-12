@@ -18,7 +18,7 @@ public sealed class AllocationsTests
         var monday = new DateOnly(2026, 10, 5);
         var holiday = monday.AddDays(2);
         var calendar = new WorkCalendar([holiday]);
-        Assert.Equal(10m, AllocationRules.DailyCapacity(monday, 40m, calendar, null));
+        Assert.Equal(8m, AllocationRules.DailyCapacity(monday, 40m, calendar, null));
         Assert.Equal(0m, AllocationRules.DailyCapacity(holiday, 40m, calendar, null));
         Assert.Equal(4m, AllocationRules.DailyCapacity(holiday, 40m, calendar, 4m));
         Assert.Equal(0m, AllocationRules.DailyCapacity(monday, 40m, calendar, 0m));

@@ -275,7 +275,7 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 | My Decisions | Decisions I own or requested that are open |
 | My Projects | Projects where I hold any role or that I follow, with my role(s), follow level (changeable inline, §12.18), health, next milestone |
 | Upcoming Milestones | Milestones in my projects within 30 days |
-| My Week | My own planning row for this week and the next five (§39.9): capacity, time away, hours by confidence (Confirmed, Expected, Possible) and remaining capacity; my self entries with quick add; Proposed and Confirmed assignments and approved project allocations, read-only. Private drafts never appear. Shown only on my own My Work; editable on desktop, read-only on tablet, a notice on phones. |
+| My Week | Published weekly plan plus a capacity strip for the next 6 weeks (§12.15): priorities, dated tasks/reviews, approved leave, office holidays, available hours, planned hours by source/confidence and remaining. Shows my entries and Published/Confirmed manager allocations from the same records as Team Planner, with the latest publish/change time; quick add for my entries and comments to flag conflicts. Private Drafts are never shown here. |
 | Recently completed by me | Last 14 days (collapsed) |
 
 **Primary actions.** Change status/progress inline; open panel; add comment; start review; quick-create task (into a chosen project).
@@ -292,19 +292,21 @@ The first-release personal presentation adds Today, Upcoming, Overdue, Completed
 
 ---
 
-### 13.11 Resource / Workload View [First release under §36]
+### 13.11 Weekly Resource Planner (Team Planner)
 
-**Purpose.** Cross-project workload per person, per §12.15.
+**Purpose.** The Supervisor’s working surface for §12.15. See capacity, add what you need, adjust in place. People and Projects views are two presentations of the same allocations, not separate plans.
 
 **Users.** Supervisors, Executives, PMs (their members).
 
 **Information.** Grid: rows = people (grouped by supervisor or discipline), columns = next 8 weeks; cell = assigned hours / capacity with heat shading and the number; row summary: projects, open tasks, unestimated tasks, overdue, deadline cluster flag, indicator (Over/OK/Under). Expand row → Project → tasks (key, name, due, est., remaining).
 
-**Primary actions.** Reassign task (Supervisor for supervised staff; PM within project); set a person's capacity override (Supervisor/Admin); export.
+**Primary actions.** Quick add in any cell (FR-RES-07). Drag block edge to extend/shorten; drag block to another week or person. Click block → Allocation side panel: hours, label, source, project link, discipline, start/end week, repeat for N weeks, confidence, visibility (Draft / Publish / Confirm as one segmented control), notes, "still valid", move to person, copy, convert to task assignment (creates a task in the linked project and keeps the allocation), delete. Click a cell total → contribution list (§12.15.7). Copy last week → preview (§12.15.12). Publish selected → preview and one summary per employee. Open Vacation & Coverage. Set capacity. Export the visible People or Projects view to CSV.
 
 **Filters.** Supervisor, discipline, office, project, indicator, date range.
 
-**Sorting.** Load desc (default), overdue, name.
+**Projects view.** Group the same permitted allocations by project → discipline → person and ISO week; keep non-project commitments under their source labels. Show project staffing beside due deliverables/reviews, with links to the project dashboard. Reuse the same write permissions; a PM gains visibility, not control over another manager’s people. Row/cell totals agree with People view for the same filters and visibility.
+
+**Sorting.** Remaining capacity ascending in the selected week (default), name, conflicts.
 
 **UX.** Method popover explains the calculation and its limits in plain language; unestimated counts sit beside hours so nobody over-reads the numbers.
 
@@ -402,14 +404,18 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 
 **Information displayed (top to bottom)**
 
-1. **Scope bar**: My direct reports (default) · All staff (Executives and Admins only). Filters: office, discipline, project, indicator (has overdue, has blocked, blocking others, reviews waiting), show inactive.
-2. **Summary tiles** (each a link to the filtered table): Staff · Project assignments · Staff with overdue work · Staff with blocked work · Reviews waiting longer than `review_stale_days`.
-3. **Staff table**, one row per person: Name · Job title · Office · Projects (count) · Roles (chips such as "PM 1 · DL 3 · Team 4 · Reviewer 2") · Open tasks · Overdue · Blocked · Blocking others · Reviews waiting on them · Deliverables owned due ≤ 14 d · Last activity. Every count links to that person's My Work section, filtered.
-4. **Expanded row — assignments**: one line per project the person is on: project number and name, health pill, role(s), primary discipline, added on, their open and overdue tasks on that project, next due item. Each line has **Remove from project** (Supervisor; Team Member role only). The row has **Assign to project**, which opens a picker of projects the supervisor can view in Setup, Active, or On Hold, and a primary-discipline picker (ASG-10).
+| Card | Content |
+|---|---|
+| People needing attention | Over-allocated (with the two or three largest contributors named), significantly Under-allocated, returning from leave this week, Leave Conflicts, Coverage Concerns |
+| Planning conflicts | Overlapping Plans: person, week, managers involved, hours each |
+| Upcoming pressure | Weeks within the horizon where team confirmed + expected hours exceed team capacity; Deliverable Pressure items |
+| Needs confirmation | Stale allocations (mine) and Published allocations older than `allocation_stale_days` |
+| Projects needing attention | For projects where supervised staff are members: disciplines with stale updates (A-10 / §16.6), major deliverables due within `milestone_approaching_days` |
+| My Work | Collapsed; the user's own §13.10 sections |
 
 **Primary actions.** Assign to project and remove from project (Supervisor, direct reports, ASG-10); open the person's My Work (read-only); open a project; reassign a task (Supervisor, direct reports); export via the Staff Assignments report (§19).
 
-**Sorting.** Default: Overdue descending, then Blocked descending, then name. Any column sortable.
+**Primary actions.** Open Vacation & Coverage; open planner at the person-week; "still valid"; publish/confirm from the stale list; snooze a conflict for N days with a note (same mechanism as attention snooze, ATT-03).
 
 **Navigation.** Person → their My Work (read-only); project → Project Dashboard; counts → filtered lists. Scope and filters are encoded in the URL.
 
@@ -447,12 +453,25 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 
 **Primary actions.** Quick add in an editable cell (Enter or click, type "8 h proposal support", Enter saves, Esc cancels). The entry side panel (560 px): hours, label, source category, project and project discipline, start and end week, Repeat for N weeks, person, Confidence, Visibility (a segmented control of Private draft, Proposed assignment and Confirmed assignment, shown to the owner of a manager entry), notes, Still valid, Copy, Delete and history. A contribution list on any cell total (§39.4). Record or clear time away for a date range (Supervisor or Admin). Open Workload or a project.
 
-**Sorting.** Remaining capacity ascending in the selected week (default), name, Over-planned first.
+**Users.** Everyone (read subject to §8.7 availability/allocation scope); Supervisors edit capacity, HR-referenced manual leave and owned manager allocations for supervised staff; the person edits their own skills and employee allocations. Imported leave is read-only; System Administrators manage imports and source corrections.
 
 **Responsive.** At 1280 px and wider the planner is editable. From 768 px to 1279 px it is read-only: no quick add, side panels read-only, contribution lists available. Below 768 px it shows the §13.0 notice that the planner is available on desktop and tablet.
 
-**Keyboard and accessibility.** The grid uses grid semantics with one tab stop: arrow keys move between cells; Enter opens quick add in an editable cell or the contribution list in a read-only one; Esc cancels and returns focus to the cell; Tab moves into the side panel, and closing it returns focus to the originating cell. Saves, conflicts and errors are announced in a live region. Every state has text and a symbol, colour is never the only signal, and no operation needs a pointer or dragging.
+**Person Profile.** Header: name, job title, discipline, office, supervisor, system roles, capacity and working days, skills (free-text tags). Sections: **My Week strip** for the horizon (same component as §13.10 My Week; shows Drafts only to their creator); **Allocations** list (filterable by source, confidence, visibility); **Leave** (read-only approved availability, source freshness and a link to HR for discrepancies; manual fallback only for authorised users); **Project roles** (projects, roles, disciplines); **Open work** (tasks and deliverables, read-only summary linking to My Work).
 
-**Empty states.** "No one is in your planning scope." "No planning entries yet. Select a week cell and type, for example, 8 h proposal support."
+**Primary actions.** Quick add allocation (self, or Supervisor for supervised staff); open Vacation & Coverage; copy HR-approved leave manually only as Supervisor/Admin; set capacity (Supervisor/Admin); edit skills (self/Admin).
 
-**Navigation.** Route `/planner` under Resources, beside Workload; an entry opens its side panel with a deep link; a project link opens the project; an approved project allocation opens its §37.6 detail for viewers allowed to see it. Scope, filters and week are encoded in the URL.
+**UX.** No performance data, no history of utilisation, no comparison between people. Skills are tags for search in Phase 2 (skills-based resource search); in MVP they are display only.
+
+
+### 13.21 Vacation & Coverage
+
+**Purpose.** Plan team coverage from HR-approved leave without a separate vacation spreadsheet.
+
+**Users.** Per §8.5.1 and §8.7. Standard Users see own-team availability; PMs see project members and only permitted work details. Nobody approves leave here.
+
+**Information.** Select a year; show month/day availability by person with full/partial approved leave, office holidays, source/last successful import time, HR source time, and a visibly provisional label for Unverified legacy records. Team overlaps prompt coverage review, not a claim that staffing is insufficient. An adjacent list shows dated Coverage Concerns and weekly Leave Conflicts with links to permitted work/planner cells. Unknown work dates remain explicitly unknown. Filters: team/supervisor, discipline, office, person, date range and concerns only. Imported leave reasons and balances never appear.
+
+**Actions.** Open My Week/Team Planner; open an affected task/review; record a coverage comment or linked handover task; use existing reassignment with the same permissions. Admin has Import approved leave → validate/preview → apply and a successful-import summary. Admin/Supervisor may enter a labelled HR-referenced manual fallback. Export only the visible availability and permitted coverage details.
+
+**UX.** Full-day, partial-day, holiday and provisional states use labels/patterns as well as colour. Offer an accessible chronological list alongside the year calendar and keyboard access to the same actions. No HR approval or balance controls. A Personal calendar subscription action in My Week is MVP-Recommended (§12.19); it provides subscribe/revoke controls and explains client refresh and dated events versus weekly hours.

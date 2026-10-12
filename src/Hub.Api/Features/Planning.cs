@@ -34,10 +34,10 @@ public static class PlanningEndpoints
         DateTimeOffset LastValidatedAt, bool Stale, string[] Warnings, bool CanEdit, bool CanChangeVisibility,
         bool CorrectionOnly, int RowVersion, bool MatchesFilter = true,
         decimal? WeekHours = null, decimal? CountedHours = null, decimal? CoveredHours = null);
-    public sealed record DayRow(DateOnly Date, decimal Normal, decimal Available, string? Category, decimal TimeAway, decimal Additional);
+    public sealed record DayRow(DateOnly Date, decimal Normal, decimal Available, string? Category, decimal TimeAway, decimal Additional, decimal Holiday = 0, bool Provisional = false);
     public sealed record CellRow(DateOnly Week, decimal Capacity, decimal TimeAway, decimal AdditionalAvailability,
         decimal Approved, decimal Confirmed, decimal Expected, decimal Possible, decimal Remaining,
-        decimal TaskEstimates, int UnestimatedTasks, bool OverPlanned, bool UnderPlanned, int StaleEntries, decimal OwnDraftHours);
+        decimal TaskEstimates, int UnestimatedTasks, bool OverPlanned, bool UnderPlanned, int StaleEntries, decimal OwnDraftHours, decimal HolidayHours = 0, bool Provisional = false);
     public sealed record AllocationWeek(DateOnly Week, decimal Hours);
     public sealed record ApprovedRow(Guid AllocationId, Guid ProjectId, string ProjectNumber, string ProjectName,
         string ApprovalStatus, bool CanOpen, AllocationWeek[] Weeks);
@@ -121,22 +121,11 @@ public static class PlanningEndpoints
         if (!await People(db, access).AnyAsync(u => u.Id == id)) throw ApiException.NotFound();
     }
 
-    static WorkCalendar Calendar(OrgSettings settings, AppUser person, IEnumerable<Holiday> holidays)
-        => settings.WorkingDaysEnabled ? new WorkCalendar(holidays.Where(h => h.OfficeId == null || h.OfficeId == person.OfficeId).Select(h => h.Date)) : WorkCalendar.Weekdays;
-
-    static DayRow[] Days(AppUser person, DateOnly week, OrgSettings settings, IEnumerable<Holiday> holidays,
-        IReadOnlyDictionary<(Guid, DateOnly), PersonAvailabilityOverride> overrides)
-    {
-        var calendar = Calendar(settings, person, holidays);
-        var weekly = person.WeeklyCapacityHours ?? settings.DefaultWeeklyCapacityHours;
-        return Enumerable.Range(0, 7).Select(i =>
-        {
-            var date = week.AddDays(i); var value = overrides.GetValueOrDefault((person.Id, date));
-            var normal = AllocationRules.DailyCapacity(date, weekly, calendar, null);
-            var (away, additional) = PlanningRules.TimeAway(normal, value?.AvailableHours, value?.Category);
-            return new DayRow(date, normal, AllocationRules.DailyCapacity(date, weekly, calendar, value?.AvailableHours), value?.Category, away, additional);
+    static DayRow[] Days(AppUser person, DateOnly week, IReadOnlyDictionary<(Guid, DateOnly), PersonCapacity.Day> capacity)
+        => Enumerable.Range(0, 7).Select(i => {
+            var date = week.AddDays(i); var d = capacity[(person.Id, date)];
+            return new DayRow(date, d.Normal, d.Available, d.Leave > 0 ? "Unavailable" : null, d.Leave, d.Additional, d.Holiday, d.Provisional);
         }).ToArray();
-    }
 
     static async Task<EntryRow[]> Rows(HubDb db, Access access, IReadOnlyList<PlanningEntry> entries, OrgSettings settings, TimeProvider clock,
         Dictionary<(Guid, DateOnly), DayRow[]>? dayCache = null)
@@ -150,13 +139,11 @@ public static class PlanningEndpoints
         var projects = await db.Projects.AsNoTracking().Where(p => projectIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id);
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => projectIds.Contains(d.ProjectId))
             .Select(d => new { d.Id, d.Discipline!.Name }).ToDictionaryAsync(d => d.Id, d => d.Name);
-        var holidays = settings.WorkingDaysEnabled ? await db.Holidays.AsNoTracking().ToListAsync() : [];
         var from = entries.Min(e => e.StartWeek); var through = entries.Max(e => e.EndWeek).AddDays(6);
-        var overrides = await db.AvailabilityOverrides.AsNoTracking().Where(o => ids.Contains(o.PersonId) && o.WorkDate >= from && o.WorkDate <= through)
-            .ToDictionaryAsync(o => (o.PersonId, o.WorkDate));
+        var overrides = await PersonCapacity.Load(db, ids, from, through, settings);
         var now = clock.GetUtcNow(); var current = Workload.WeekOf(clock.Today(settings));
         DayRow[] DaysFor(AppUser person, DateOnly week) // Days depends only on (person, week); share it with the grid cells.
-            => cache.TryGetValue((person.Id, week), out var days) ? days : cache[(person.Id, week)] = Days(person, week, settings, holidays, overrides);
+            => cache.TryGetValue((person.Id, week), out var days) ? days : cache[(person.Id, week)] = Days(person, week, overrides);
         return entries.Select(e =>
         {
             var person = users[e.PersonId]; var owner = users[e.CreatedBy!.Value];
@@ -225,15 +212,15 @@ public static class PlanningEndpoints
         var explicitDays = await db.AllocationDayOverrides.AsNoTracking().Where(d => allocationIds.Contains(d.AllocationId)).ToListAsync();
         var projects = await db.Projects.AsNoTracking().Where(p => allocations.Select(a => a.ProjectId).Contains(p.Id)).ToDictionaryAsync(p => p.Id);
         var actorMemberships = await db.ProjectMembers.AsNoTracking().Where(m => m.UserId == access.Actor.Id && m.RemovedAt == null).ToListAsync();
-        var availability = await db.AvailabilityOverrides.AsNoTracking().Where(o => ids.Contains(o.PersonId) && o.WorkDate >= first && o.WorkDate <= weeks[weeks.Length - 1].AddDays(6)).ToDictionaryAsync(o => (o.PersonId, o.WorkDate));
-        var holidays = settings.WorkingDaysEnabled ? await db.Holidays.AsNoTracking().ToListAsync() : [];
+        var availability = await PersonCapacity.Load(db, ids, first, weeks[^1].AddDays(6), settings);
+        var calendars = await PersonCapacity.Calendars(db, ids, allocations.Select(a => a.ThroughDate).Append(weeks[^1].AddDays(6)).Max());
         var rows = new List<PersonRow>(); var partial = hidden.Count > 0;
         foreach (var user in users)
         {
             var personPartial = hidden.Contains(user.Id);
             var personEntries = entryRows.Where(e => e.PersonId == user.Id).Select(e => e with { MatchesFilter = Matches(e, query.ProjectId, query.Source, query.Confidence, query.Visibility, query.Q) }).ToArray();
             var personTasks = tasks.Where(t => t.AssigneeId == user.Id).ToArray();
-            var calendar = Calendar(settings, user, holidays);
+            var calendar = calendars[user.Id];
             var projected = allocations.Where(a => a.PersonId == user.Id).Select(a =>
             {
                 var project = projects[a.ProjectId];
@@ -248,7 +235,7 @@ public static class PlanningEndpoints
             }).ToArray();
             var cells = weeks.Select(week =>
             {
-                if (!dayRows.TryGetValue((user.Id, week), out var days)) dayRows[(user.Id, week)] = days = Days(user, week, settings, holidays, availability);
+                if (!dayRows.TryGetValue((user.Id, week), out var days)) dayRows[(user.Id, week)] = days = Days(user, week, availability);
                 var input = entries.Where(e => e.PersonId == user.Id && e.StartWeek <= week && e.EndWeek >= week).ToArray();
                 var approved = projected.GroupBy(a => a.ProjectId).ToDictionary(g => g.Key, g => g.Sum(a => a.Weeks.First(w => w.Week == week).Hours));
                 var capacity = days.Sum(d => d.Available);
@@ -259,7 +246,7 @@ public static class PlanningEndpoints
                     personTasks.Count(t => t.EstimatedHours == null && t.DueDate is { } due && Workload.WeekOf(due) == week),
                     PlanningRules.OverPlanned(bands, capacity, settings.PlanningOverPct), false,
                     personEntries.Count(e => e.Stale && e.StartWeek <= week && e.EndWeek >= week),
-                    input.Where(e => e.CreatedBy == access.Actor.Id && e.Visibility == PlanningVisibility.Draft).Sum(e => e.HoursPerWeek));
+                    input.Where(e => e.CreatedBy == access.Actor.Id && e.Visibility == PlanningVisibility.Draft).Sum(e => e.HoursPerWeek), days.Sum(d => d.Holiday), days.Any(d => d.Provisional));
             }).ToArray();
             var under = PlanningRules.UnderPlanned(cells.Select(c => new UnderWeek(c.Capacity, c.TimeAway, c.Confirmed + c.Expected + c.Possible, c.UnestimatedTasks > 0)).ToArray(),
                 Array.FindIndex(weeks, w => w >= current) is var start && start >= 0 ? start : weeks.Length,
@@ -557,47 +544,11 @@ public static class PlanningEndpoints
         await db.SaveChangesAsync(); return Results.NoContent();
     }
 
-    static async Task<IResult> TimeAway(TimeAwayBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<IResult> TimeAway(TimeAwayBody body, Access access, HubDb db)
     {
-        Check.That(body.From != default && body.Through >= body.From && body.Through.DayNumber - body.From.DayNumber < 366, "through", "error.date_range");
-        Check.OneOf(body.Action, ["Record", "Clear"], "action");
-        if (body.Action == "Record") { Check.That(body.AvailableHours is >= 0 and <= 24, "availableHours", "error.range"); Check.OneOf(body.Category, ["Unavailable", "Reduced"], "category"); }
-        Check.That(body.Versions is null || body.Versions.Select(v => v.WorkDate).Distinct().Count() == body.Versions.Length, "versions", "error.invalid");
-        var settings = await store.Get(db);
-        return await Tx.Run(db, async () =>
-        {
-            await db.Database.SqlQueryRaw<Guid>("SELECT id AS \"Value\" FROM hub.app_user WHERE id = {0} FOR UPDATE", body.PersonId).ToListAsync();
-            var person = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == body.PersonId && u.IsActive) ?? throw ApiException.NotFound();
-            Access.Demand(Permissions.RecordTimeAway(access.Actor, person.SupervisorId, person.Id));
-            var holidays = settings.WorkingDaysEnabled ? await db.Holidays.AsNoTracking().ToListAsync() : [];
-            var calendar = Calendar(settings, person, holidays);
-            var overrides = await db.AvailabilityOverrides.Where(o => o.PersonId == person.Id && o.WorkDate >= body.From && o.WorkDate <= body.Through).ToDictionaryAsync(o => o.WorkDate);
-            var dates = Enumerable.Range(0, body.Through.DayNumber - body.From.DayNumber + 1).Select(i => body.From.AddDays(i))
-                .Where(d => body.Action == "Record" ? calendar.IsWorkingDay(d) : overrides.TryGetValue(d, out var o) && o.Category is "Unavailable" or "Reduced").ToArray();
-            Check.That(body.Action == "Clear" || dates.Length > 0, "range", "planning.time_away_days");
-            var expected = (body.Versions ?? []).ToDictionary(v => v.WorkDate, v => v.RowVersion);
-            var stale = dates.Where(d => expected.GetValueOrDefault(d) != (overrides.GetValueOrDefault(d)?.RowVersion ?? 0)).ToArray();
-            if (stale.Length > 0) throw ApiException.Conflict("planning.stale_dates", "coord.stale", new { staleDates = stale });
-            var versions = await db.PersonDateVersions.Where(v => v.PersonId == person.Id && dates.Contains(v.WorkDate)).ToDictionaryAsync(v => v.WorkDate);
-            var changed = new List<PersonAvailabilityOverride>();
-            foreach (var date in dates)
-            {
-                var row = overrides.GetValueOrDefault(date);
-                if (body.Action == "Clear") { db.AvailabilityOverrides.Remove(row!); }
-                else
-                {
-                    if (row is null) { row = new() { PersonId = person.Id, WorkDate = date, RowVersion = 1 }; db.AvailabilityOverrides.Add(row); }
-                    else db.Entry(row).Property(o => o.AvailableHours).IsModified = true;
-                    row.AvailableHours = body.AvailableHours; row.Category = body.Category; changed.Add(row);
-                }
-                if (versions.TryGetValue(date, out var version)) db.Entry(version).Property(v => v.WorkDate).IsModified = true;
-                else { version = new() { PersonId = person.Id, WorkDate = date, RowVersion = 1 }; db.PersonDateVersions.Add(version); versions[date] = version; }
-            }
-            await db.SaveChangesAsync();
-            return Results.Ok(new { body.PersonId,
-                Days = changed.Select(o => new { Date = o.WorkDate, o.AvailableHours, o.Category, o.RowVersion, DateVersion = versions[o.WorkDate].RowVersion }).ToArray(),
-                Cleared = body.Action == "Clear" ? dates.Select(d => new { Date = d, DateVersion = versions[d].RowVersion }).ToArray() : [] });
-        });
+        var user = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == body.PersonId && u.IsActive) ?? throw ApiException.NotFound();
+        Access.Demand(Permissions.RecordTimeAway(access.Actor, user.SupervisorId, user.Id));
+        throw ApiException.Rule("hr_reference_required", "availability.hr_reference");
     }
 
     static string VisibilityLabel(EntryRow row) => Text.Get(row.OwnerKind == "Self" ? "planning.visibility.Self" : $"planning.visibility.{row.Visibility}");
@@ -696,6 +647,27 @@ public static class PlanningIdempotency
     {
         var input = JsonNode.Parse(request)!.AsObject();
         JsonNode? Input(string name) => input.FirstOrDefault(x => string.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase)).Value; var access = new Access(db, me);
+        if (path.EndsWith("/import-preview", StringComparison.Ordinal) || path.EndsWith("/import", StringComparison.Ordinal))
+        {
+            Access.Demand(Permissions.Administer(access.Actor)); return;
+        }
+        if ((path.EndsWith("/manual", StringComparison.Ordinal) || path.EndsWith("/reconcile", StringComparison.Ordinal)))
+        {
+            var requestedPerson = Guid.Parse(Input("personId")!.GetValue<string>());
+            var person = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == requestedPerson && u.IsActive) ?? throw ApiException.NotFound();
+            Access.Demand(access.Actor.Admin || access.Actor.Supervisor && person.SupervisorId == me.Id ? Allow.Yes : Allow.No("perm.supervised_staff")); return;
+        }
+        if (path.EndsWith("/week-apply", StringComparison.Ordinal))
+        {
+            var selected = Input("entries")!.AsArray().Select(e => Guid.Parse(e!["id"]!.GetValue<string>())).ToArray();
+            var entries = await PlanningEndpoints.VisibleEntries(db, access).Where(e => selected.Contains(e.Id) && e.CreatedBy == me.Id && e.PersonId != me.Id).ToListAsync();
+            if (entries.Count != selected.Length) throw ApiException.NotFound();
+            foreach (var selectedEntry in entries) {
+                var user = await db.Users.AsNoTracking().SingleAsync(u => u.Id == selectedEntry.PersonId);
+                Access.Demand(Permissions.CreatePlanningEntry(access.Actor, user.Id, user.SupervisorId));
+            }
+            return;
+        }
         if (path.EndsWith("/time-away", StringComparison.Ordinal))
         {
             var personId = Guid.Parse(Input("personId")!.GetValue<string>());

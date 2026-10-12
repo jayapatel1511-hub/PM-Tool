@@ -31,6 +31,7 @@ import { TemplatePage, TemplatesPage } from '@/pages/Templates'
 import { ReassignWorkPage } from '@/pages/ReassignWork'
 import { PortfolioPage } from '@/pages/Portfolio'
 import { WorkloadPage } from '@/pages/Workload'
+import { VacationPage } from '@/pages/Vacation'
 import { CalendarPage } from '@/pages/Calendar'
 import { TimePage } from '@/pages/Time'
 import { HomePage } from '@/pages/Home'
@@ -101,7 +102,8 @@ export const routes: RouteObject[] = [
       { path: 'issues', element: <IssuesTab /> },
       { path: 'meetings', element: <MeetingsTab /> },
       { path: 'files', element: <InProject><FilesPage /></InProject> },
-      { path: 'calendar', element: <InProject><CalendarPage /></InProject> },
+      { path: 'vacation', element: <VacationPage /> },
+  { path: 'calendar', element: <InProject><CalendarPage /></InProject> },
       { path: 'team', element: <TeamTab /> },
       { path: 'activity', element: <ProjectActivityTab /> },
       { path: 'settings', element: <ProjectSettingsTab /> },
@@ -117,6 +119,7 @@ export const routes: RouteObject[] = [
   { path: 'portfolio', element: <PortfolioPage /> },
   { path: 'workload', element: <WorkloadPage /> },
   { path: 'planner', element: <PlannerPage /> },
+  { path: 'vacation', element: <VacationPage /> },
   { path: 'calendar', element: <CalendarPage /> },
   { path: 'time', element: <TimePage /> },
   { path: 'people/:id/reassign-work', element: <ReassignWorkPage /> },

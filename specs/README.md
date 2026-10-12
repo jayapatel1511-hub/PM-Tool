@@ -123,3 +123,7 @@ decided, but the plan records which one it assumed. Q19 (direct reports only) an
 ## Next step
 
 The first two increments implement foundations for packets 025–027. Review their verification records, then continue with 029/031 before dependent 032/028, respecting the dependency order and existing hardening findings. Full application acceptance for packets 025–033 remains pending. Do not reuse the original 24-packet completion claim for the expanded product.
+
+## Availability and calendar extension
+
+[035 — Availability, weekly allocation and personal calendar](035-availability-weekly-calendar/spec.md) extends the approved v1.2 requirements and records local verification separately from deployed/client acceptance.

@@ -8,7 +8,7 @@
 
 **Input**: User description: "Convert the Engineering Project Coordination Hub specification into Spec Kit: packet 006, collaboration and notifications (comments with @mentions, document links, the notification centre, immediate emails, the daily digest, preferences, and following the projects a person is assigned to)."
 
-**Source**: Product specification §11.8, §11.11 (FR-NOT), §11.13 (FR-ASG-01–04), §12.7, §12.8, §12.18 (ASG-01–07), §13.17, §15.10, §15.13, §17, §17.7, §31.11, §31.14, §31.16
+**Source**: Product specification §11.8, §11.11 (FR-NOT), §11.13 (FR-ASG-01–04), §12.7, §12.8, §12.20 (ASG-01–07), §13.17, §15.10, §15.13, §17, §17.7, §31.11, §31.14, §31.16
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -160,7 +160,7 @@ remove them from the team; confirm the feed, digest, and follow rules at each st
 - **FR-022**: An event that produced a personal notification MUST NOT be counted again in the Following tab or the Project updates section. *(ASG-06)*
 - **FR-023**: Setup projects MUST record feed entries without unread counts or digest content; On Hold projects MUST keep their feed but leave the digest; Archived and Cancelled projects MUST produce nothing. *(ASG-07)*
 - **FR-024**: The digest's Project updates section MUST give, per followed project, counts of changes by type and the five most important changes. *(FR-ASG-04, §17.3)*
-- **FR-025**: Muted MUST keep only direct assignments (task, review, decision ownership) and @mentions for that project. *(§12.18, §17.4)*
+- **FR-025**: Muted MUST keep only direct assignments (task, review, decision ownership) and @mentions for that project. *(§12.20, §17.4)*
 
 ### Key Entities *(include if feature involves data)*
 
@@ -194,3 +194,5 @@ remove them from the team; confirm the feed, digest, and follow rules at each st
 Packets 025–033 reuse source links, activity history and notification/digest preferences (§37.1). Registered revision metadata is distinct from external file storage. Recipient visibility is checked at composition and delivery under FR-MDC-02.
 
 This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.
+
+Existing Project Assignments and Following acceptance remains governed by §31.18.

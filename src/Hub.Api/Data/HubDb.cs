@@ -77,6 +77,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
     public DbSet<AllocationWorkLink> AllocationWorkLinks => Set<AllocationWorkLink>();
     public DbSet<PersonDateVersion> PersonDateVersions => Set<PersonDateVersion>();
+    public DbSet<LeaveImportPreview> LeaveImportPreviews => Set<LeaveImportPreview>();
+    public DbSet<ApprovedLeave> ApprovedLeaves => Set<ApprovedLeave>();
+    public DbSet<LeaveImportState> LeaveImportStates => Set<LeaveImportState>();
+    public DbSet<PersonSchedule> PersonSchedules => Set<PersonSchedule>();
+    public DbSet<CalendarSubscription> CalendarSubscriptions => Set<CalendarSubscription>();
+    public DbSet<CalendarFeedItem> CalendarFeedItems => Set<CalendarFeedItem>();
     public DbSet<PlanningEntry> PlanningEntries => Set<PlanningEntry>();
     public DbSet<WorkTask> Tasks => Set<WorkTask>();
     public DbSet<TaskDependency> Dependencies => Set<TaskDependency>();
@@ -138,6 +144,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.HasIndex(x => x.Email).IsUnique();
             e.HasIndex(x => x.EntraObjectId).IsUnique();
             e.HasIndex(x => x.SupervisorId);
+            e.HasIndex(x => new { x.HrSourceSystem, x.HrPersonKey }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_hr_identity_pair", "(hr_source_system IS NULL) = (hr_person_key IS NULL)"));
             e.HasMany(x => x.Roles).WithOne().HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Cascade);
             e.Property(x => x.WeeklyCapacityHours).HasPrecision(5, 1);
             e.HasIndex(x => x.DisplayName).HasMethod("gin").HasOperators("gin_trgm_ops");
@@ -621,6 +629,33 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<OutputCommitment, AppUser>(mb, x => x.PerformerId);
         Fk<OutputCommitmentEvent, OutputCommitment>(mb, x => x.CommitmentId);
         Fk<OutputCommitmentEvent, AppUser>(mb, x => x.ActorId);
+        mb.Entity<ApprovedLeave>(e =>
+        {
+            e.HasIndex(x => new { x.SourceSystem, x.ExternalId }).IsUnique();
+            e.HasIndex(x => new { x.PersonId, x.FromDate, x.ThroughDate });
+            e.Property(x => x.HoursPerDay).HasPrecision(5, 2);
+            e.ToTable(t => {
+                t.HasCheckConstraint("ck_leave_dates", "through_date >= from_date AND through_date - from_date <= 365");
+                t.HasCheckConstraint("ck_leave_hours", "hours_per_day IS NULL OR hours_per_day > 0 AND hours_per_day <= 24");
+                t.HasCheckConstraint("ck_leave_source", "source_kind IN ('HRImport','ManualHR')");
+                t.HasCheckConstraint("ck_leave_status", "status IN ('Approved','Cancelled','Unverified')");
+            });
+        });
+        mb.Entity<LeaveImportState>().HasIndex(x => x.SourceSystem).IsUnique();
+        mb.Entity<PersonSchedule>(e => {
+            e.HasIndex(x => new { x.PersonId, x.FromDate }).IsUnique();
+            e.Property(x => x.WeeklyHours).HasPrecision(5, 1);
+            e.ToTable(t => t.HasCheckConstraint("ck_person_schedule", "weekly_hours >= 0 AND weekly_hours <= 168 AND cardinality(working_days) BETWEEN 1 AND 7 AND working_days <@ ARRAY[0,1,2,3,4,5,6]"));
+        });
+        mb.Entity<CalendarSubscription>().HasIndex(x => x.UserId).IsUnique();
+        mb.Entity<CalendarSubscription>().HasIndex(x => x.TokenHash).IsUnique();
+        mb.Entity<CalendarFeedItem>().HasIndex(x => new { x.UserId, x.SourceKey }).IsUnique();
+        Fk<LeaveImportPreview, AppUser>(mb, x => x.UserId);
+        Fk<PersonAvailabilityOverride, ApprovedLeave>(mb, x => x.ReconciledLeaveId);
+        Fk<ApprovedLeave, AppUser>(mb, x => x.PersonId);
+        Fk<PersonSchedule, AppUser>(mb, x => x.PersonId);
+        Fk<CalendarSubscription, AppUser>(mb, x => x.UserId);
+        Fk<CalendarFeedItem, AppUser>(mb, x => x.UserId);
         mb.Entity<PersonAvailabilityOverride>(e =>
         {
             e.HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();

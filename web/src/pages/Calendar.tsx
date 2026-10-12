@@ -1,3 +1,4 @@
+import { CalendarSubscriptionDialog } from '@/components/hub/calendar-subscription'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { CalendarClock, ChevronLeft, ChevronRight, Flag, HardHat, ListTodo, Plus, Users } from 'lucide-react'
 import { useContext, useState } from 'react'
@@ -44,6 +45,7 @@ const TodayTag = () => <span className="rounded-md bg-primary px-1.5 text-xs/[18
 /** Team calendar (§36.5, FR-VIS-06): Week, Month and Agenda over selected projects, four type toggles, all-day project
  *  deadlines that open their source item, and events created, edited and cancelled here. */
 export function CalendarPage() {
+  const [subscription, setSubscription] = useState(false)
   const [sp, setSp] = useSearchParams()
   const openPanel = useItemPanel()
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); n.delete('panel'); setSp(n, { replace: true }) }
@@ -65,8 +67,8 @@ export function CalendarPage() {
 
   return (
     <Page title={t('nav.calendar')} subtitle={t('calendar.subtitle', { zone: q.data?.timeZone ?? '' })}
-      actions={<Button onClick={() => setEditing('new')}><Plus className="size-4" />{t('calendar.new')}</Button>}>
-      <WorkspaceTabs />
+      actions={<><Button variant="outline" onClick={() => setSubscription(true)}>{t('calendar.subscription')}</Button><Button onClick={() => setEditing('new')}><Plus className="size-4" />{t('calendar.new')}</Button></>}>
+      {subscription && <CalendarSubscriptionDialog onClose={() => setSubscription(false)} />}<WorkspaceTabs />
       <div className="flex flex-wrap items-center gap-3">
         <Segmented label={t('calendar.view')} value={view} onChange={(m) => set('mode', m === 'week' ? null : m)}
           options={(['week', 'month', 'agenda'] as const).map((m) => ({ value: m, label: t(`calendar.mode.${m}`) }))} />

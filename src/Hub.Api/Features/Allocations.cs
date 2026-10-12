@@ -93,9 +93,6 @@ public static class AllocationEndpoints
         var settings = await store.Get(db);
         var today = clock.Today(settings);
         var person = await db.Users.AsNoTracking().SingleAsync(u => u.Id == candidate.PersonId);
-        var holidays = settings.WorkingDaysEnabled
-            ? await db.Holidays.Where(h => h.OfficeId == null || h.OfficeId == person.OfficeId).Select(h => h.Date).ToListAsync() : [];
-        var personCalendar = settings.WorkingDaysEnabled ? new WorkCalendar(holidays) : WorkCalendar.Weekdays;
         var confirmed = await db.Allocations.AsNoTracking().Where(a => a.PersonId == person.Id && a.Id != candidate.Id
             && a.Status == AllocationStatus.Confirmed && a.FromDate <= candidate.ThroughDate && a.ThroughDate >= candidate.FromDate).ToListAsync();
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.AssigneeId == person.Id && t.DeletedAt == null
@@ -115,6 +112,7 @@ public static class AllocationEndpoints
         var allocationIds = all.Select(a => a.Id).ToArray();
         var overrides = await db.AllocationDayOverrides.AsNoTracking().Where(d => allocationIds.Contains(d.AllocationId)).ToListAsync();
         var links = await db.AllocationWorkLinks.AsNoTracking().Where(l => allocationIds.Contains(l.AllocationId) && l.ReleasedAt == null).ToListAsync();
+        var personCalendar = (await PersonCapacity.Calendars(db, [person.Id], all.Max(a => a.ThroughDate)))[person.Id];
         var reservations = new Dictionary<Guid, IReadOnlyDictionary<DateOnly, decimal>>();
         foreach (var a in all)
         {
@@ -122,8 +120,7 @@ public static class AllocationEndpoints
             try { reservations[a.Id] = AllocationRules.Spread(a.FromDate, a.ThroughDate, a.PlannedHours, personCalendar, dayHours); }
             catch (ArgumentException) { throw ApiException.Conflict("allocation_calendar_changed", "coord.stale"); }
         }
-        var capacityOverrides = await db.AvailabilityOverrides.AsNoTracking().Where(o => o.PersonId == person.Id
-            && o.WorkDate >= candidate.FromDate && o.WorkDate <= candidate.ThroughDate).ToDictionaryAsync(o => o.WorkDate, o => o.AvailableHours);
+        var capacityOverrides = await PersonCapacity.Load(db, [person.Id], candidate.FromDate, candidate.ThroughDate, settings);
         var versions = await db.PersonDateVersions.AsNoTracking().Where(v => v.PersonId == person.Id
             && v.WorkDate >= candidate.FromDate && v.WorkDate <= candidate.ThroughDate).ToDictionaryAsync(v => v.WorkDate, v => v.RowVersion);
         var result = new List<CapacityDay>();
@@ -151,8 +148,7 @@ public static class AllocationEndpoints
                 links.Where(l => l.AllocationId == candidate.Id && l.WorkDate == date && l.WorkType == "Task")
                     .Sum(l => taskDemand.GetValueOrDefault(l.WorkId)?.GetValueOrDefault(date) ?? 0));
             var resulting = AllocationRules.Committed(demands, unlinked);
-            var available = AllocationRules.DailyCapacity(date, person.WeeklyCapacityHours ?? settings.DefaultWeeklyCapacityHours,
-                personCalendar, capacityOverrides.TryGetValue(date, out var overrideHours) ? overrideHours : (decimal?)null);
+            var available = capacityOverrides[(person.Id, date)].Available;
             result.Add(new CapacityDay(date, available, existing, candidate.Status == AllocationStatus.Proposed
                 ? Math.Max(demands[^1].ReservedHours, demands[^1].LinkedRemainingHours) : 0, resulting,
                 Math.Max(0, resulting - available), versions.GetValueOrDefault(date)));
@@ -344,11 +340,7 @@ public static class AllocationEndpoints
             && days.Select(d => d.WorkDate).Distinct().Count() == days.Length, "days", "error.invalid");
         Check.That(links is { Length: > 0 and <= 500 } && links.All(l => l.WorkDate >= from && l.WorkDate <= through)
             && links.Select(l => (l.WorkType, l.WorkId, l.WorkDate)).Distinct().Count() == links.Length, "links", "error.invalid");
-        var settings = await store.Get(db);
-        var office = await db.Users.Where(u => u.Id == personId).Select(u => u.OfficeId).SingleAsync();
-        var holidays = settings.WorkingDaysEnabled
-            ? await db.Holidays.Where(h => h.OfficeId == null || h.OfficeId == office).Select(h => h.Date).ToListAsync() : [];
-        var calendar = settings.WorkingDaysEnabled ? new WorkCalendar(holidays) : WorkCalendar.Weekdays;
+        var calendar = (await PersonCapacity.Calendars(db, [personId], through))[personId];
         try { AllocationRules.Spread(from, through, hours, calendar, days.ToDictionary(d => d.WorkDate, d => d.Hours)); }
         catch (ArgumentException) { throw ApiException.Invalid("days", "error.invalid"); }
         foreach (var link in links)

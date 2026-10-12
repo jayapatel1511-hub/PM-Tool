@@ -168,6 +168,34 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 | FR-AUD-02 | Item-level history tab and project-level Activity History with filters. | R | §13.14 |
 | FR-AUD-03 | Export of activity log for a project. | Rec | §20 |
 
+### 11.13 Resource planning
+
+| ID | Requirement | Class | Detail |
+|---|---|---|---|
+| FR-RES-02 | Each person has a weekly capacity (default `default_weekly_capacity_hours`, per-person override) and working days; Supervisors edit for supervised staff. | R | §12.15.2 |
+| FR-RES-03 | HR-approved leave is imported as a date range with full-day or hours-per-day; an HR-referenced manual fallback is limited to Admin/Supervisor. Leave and office holidays reduce availability once, leave remains separate from planned work, and imported HR fields are read-only. | R | §12.15.2, §12.18 |
+| FR-RES-04 | An allocation records person, hours per week, start week, end week, label, source category, optional project and discipline, confidence, visibility, notes. `project_id` may be null. | R | §12.15.3 |
+| FR-RES-05 | Employees create allocations for themselves; they are employee-owned and always Confirmed visibility. | R | §12.15.4 |
+| FR-RES-06 | Supervisors create allocations for supervised staff; they are manager-owned and default to Draft visibility and Expected confidence. | R | §12.15.4 |
+| FR-RES-07 | Quick add: clicking a person-week cell and typing `<hours> h <label>` then Enter creates a one-week allocation with all other fields defaulted. No other field is required. | R | §12.15.5 |
+| FR-RES-08 | An allocation can be extended or shortened by editing `end_week`, repeated across N weeks, copied, and dragged to another week or person (drag = edit `start_week`/`end_week` or `person_id`, respecting permissions). | R | §12.15.6 |
+| FR-RES-09 | Visibility transitions Draft ↔ Published ↔ Confirmed are a single action by the creating manager; Published and Confirmed notify the employee. | R | §10.2 |
+| FR-RES-10 | Every person-week shows capacity, planned hours per confidence band, remaining capacity, and a drill-down listing every allocation and leave entry contributing to the total, with its source category and owner. | R | §12.15.7 |
+| FR-RES-11 | Project-derived demand (remaining task hours per §12.15.8) is shown as a separate context column, never summed into planned hours. | Rec | §12.15.8 |
+| FR-RES-12 | Conflict rules RES-08…RES-13 (§15.13) are evaluated per person-week nightly and on any allocation, leave, holiday, capacity or affected work-date/ownership change; results are materialised in `ResourceConflict` and shown as non-blocking warnings. | R | §15.13 |
+| FR-RES-13 | Overlapping Plans reports to every manager involved; no manager's allocation is changed automatically. | R | §15.13 |
+| FR-RES-14 | Stale allocations are shown as "needs confirmation"; a one-click "still valid" action resets `last_confirmed_at`. | R | §15.13 |
+| FR-RES-15 | Allocation, leave and capacity changes are written to the activity log; visibility transitions and conflicts raise notifications per §17.2. | R | §17, §20 |
+| FR-RES-16 | Role-level long-term demand ("one civil technologist in January") without a named person. | P2 | §12.15.9 |
+| FR-RES-17 | Planned vs actual effort comparison. | P3 | §29 |
+| FR-RES-18 | Admin previews and applies an HR-approved leave CSV with stable source keys, exact person mapping, row validation, idempotent updates, explicit cancellations, source time and audit history. Invalid/conflicting batches do not change records; missing rows never imply cancellation. | R | §12.18.2 |
+| FR-RES-19 | Vacation & Coverage shows daily approved availability across a selected year, team/discipline/office filters, partial days, overlaps, source freshness and permitted affected work. | R | §13.21 |
+| FR-RES-20 | Coverage Concern identifies tasks, deliverables and reviews due during approved absence or an office holiday. Managers use existing reassignment, comments and handover tasks; warnings never change work or assert that a backup is qualified. | R | §12.18.3, RES-19 |
+| FR-RES-21 | Copy last week previews the creator’s manager allocations for a target week, defaults new rows to Draft, identifies existing target work and changed availability, and applies only explicitly selected rows without duplicating employee work or leave. | R | §12.15.12 |
+| FR-RES-22 | People and Projects staffing views, My Week and staffing reports read the same allocations with the same permissions and totals. Project views do not grant cross-team write rights. | R | §13.11 |
+| FR-RES-23 | A manager previews and publishes selected owned Draft allocations as one atomic action; one summary notification per affected employee links to My Week. Later changes remain auditable and visible. | R | §12.15.12 |
+| FR-RES-24 | A revocable personal calendar subscription exposes only the user’s approved leave and permitted dated tasks, reviews and milestones. Stable event identities support updates/cancellations; weekly allocations stay in My Week. | Rec | §12.19 |
+
 ### 11.12 Administration
 
 | ID | Requirement | Class | Detail |

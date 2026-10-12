@@ -57,6 +57,10 @@ public sealed class DomainHelpersTests
         Assert.Equal(fri, cal.Add(fri, 0));
         Assert.Equal(new[] { fri, new DateOnly(2026, 10, 13) }, cal.WorkingDays(fri, new DateOnly(2026, 10, 13)));
         Assert.True(WorkCalendar.Weekdays.IsWorkingDay(thanksgiving));
+        var weekend = new WorkCalendar([fri.AddDays(1)], d => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday);
+        Assert.False(weekend.IsWorkingDay(fri));
+        Assert.False(weekend.IsWorkingDay(fri.AddDays(1)));
+        Assert.True(weekend.IsWorkingDay(fri.AddDays(2)));
     }
 
     static JsonElement J(object v) => JsonSerializer.SerializeToElement(v);

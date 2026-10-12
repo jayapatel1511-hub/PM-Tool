@@ -62,8 +62,15 @@ Legend: **Y** = allowed; **O** = allowed for own items only (see 8.6); **D** = a
 | View project list and any project (subject to 8.7) | Y | Y | Y | Y | Y | Y |
 | Create a project | Y | — | — | Y | — | — |
 | View Portfolio Dashboard | Y | Y | Y | Y (own projects by default; all with filter) | — | — |
-| View Resource / Workload View | Y | Y (all) | Y (supervised staff, plus all in read) | Y (members of own projects) | — | — |
-| View My Staff page (staff assignments and work, §13.19) | Y (all staff) | Y (all staff) | Y (supervised staff) | — | — | — |
+| View Weekly Resource Planner (published and confirmed allocations) | Y | Y (all) | Y (all) | Y (members of own projects) | Y (self only, via My Work) | — |
+| View Private Draft allocations | Y (data correction only, logged) | — | O (creator only) | — | — | — |
+| Create / edit / delete manager allocations for a person | Y | — | Y (supervised staff) | — | — | — |
+| Publish / confirm / unpublish a manager allocation | Y | — | O (creator) | — | — | — |
+| Create / edit / delete own employee allocations | Y | Y | Y | Y | Y | — |
+| Record / correct a manual copy of HR-approved leave (with HR reference) | Y | — | Y (supervised staff) | — | — | — |
+| Preview / apply HR-approved leave CSV; configure office holidays | Y | — | — | — | — | — |
+| View Vacation & Coverage availability | Y | Y (all) | Y (all) | Y (members of own projects) | Y (own team; availability only) | — |
+| Set a person's weekly capacity and working days | Y | — | Y (supervised staff) | — | — | — |
 | Reassign tasks across projects for supervised staff | Y | — | Y | — | — | — |
 | Add or remove supervised staff on a project team (as Team Member) | Y | — | Y | — | — | — |
 | Manage users, system roles, offices, disciplines, clients, deliverable types, phases | Y | — | — | — | — | — |
@@ -129,6 +136,10 @@ Ownership extends role permissions on individual items regardless of project rol
 **Assumption:** All active employees may view all projects (open-by-default). This is typical in consulting firms, maximises coordination value, and keeps the permission model simple.
 
 **TBD — Business Decision Required:** whether some projects must be **restricted** (e.g., confidential clients, litigation support, M&A due diligence). If yes, the design accommodates a per-project `visibility` flag (`Open` | `Restricted`), where Restricted projects are visible only to project members, System Administrators, and Executives. This is cheap to add at the data-model level and should be included in the schema from day one even if the UI control ships later. Recommendation: include the column and enforce it in the authorisation layer in MVP; expose the toggle only if the business confirms the need.
+
+**Private Draft allocations are an exception to open-by-default.** A manager allocation in `Draft` visibility is visible only to its creator (and to System Administrators for data correction). It is excluded from the employee's My Work, from other managers' planner views, from totals shown to anyone but the creator, and from search. It is **included** in the creator's own totals and in the overlapping-plans conflict rule (RES-10), which reports the conflict to both managers without revealing the other manager's draft details beyond "another manager has planned N h". Enforcement is in the authorisation layer and in every query that aggregates hours, not in the UI.
+
+**Leave privacy and ownership.** HR is the sole approval authority. Imported dates, hours and cancellation state are read-only in Tuesday and change only through a validated HR import. Admins and Supervisors may enter an HR-referenced manual fallback; employees flag discrepancies for correction in HR. Calendar and planner readers see dates, hours and “Unavailable”, never HR reasons, medical details or balances. For this MVP, a team means people with the same `supervisor_id`. Standard Users see their own team’s availability only; PMs see their project members. Project names and coverage details remain project-permission scoped, including notifications, exports and calendar feeds.
 
 ### 8.8 How roles are assigned
 
@@ -252,11 +263,10 @@ Global navigation (persistent left rail or top bar; desktop-first):
 |---|---|---|
 | **My Work** (landing page) | My Tasks, My Reviews, My Deliverables, Waiting on Others, Blocking Others, My Projects, Upcoming Milestones | Everyone |
 | **Projects** | Project list (search, filter); opens a project workspace | Everyone |
-| **Portfolio** (first release) | Portfolio Dashboard, Projects At Risk | Executives, Supervisors, PMs |
-| **Resources** (first release) | Resource / Workload View; Weekly Planner (§13.21, §39) | Supervisors, Executives, PMs; everyone sees their own planning row in My Work (My Week) |
-| **My Staff** | The user's direct reports with their project assignments and work counts; staffing them on projects (§13.19) | Supervisors, Executives, Admins |
-| **Reports** | Deterministic report list with export | Everyone (scoped) |
-| **Notifications** | In-app notification centre: personal notifications and the Following feed of followed projects | Everyone |
+| **People** | People directory and Person Profile (§13.20): role, discipline, skills, manager, capacity, leave, current allocations | Everyone (read; edit per §8.5.1) |
+| **Resources** | Team Planner (§13.11: People / Projects views) and Vacation & Coverage (§13.21) | Supervisors, Executives, PMs (members of own projects); employees see their own allocation row and own-team availability |
+| **Insights** | Reports (§19) and, in Phase 2, the Portfolio Dashboard and Projects At Risk | Everyone (scoped) |
+| **Notifications** | In-app notification centre | Everyone |
 | **Admin** | Users & roles, Disciplines, Clients, Offices, Deliverable Types, Phases, Templates, Settings | System Administrators |
 | Global search | Always visible search box | Everyone |
 
@@ -299,7 +309,8 @@ This section defines the conceptual model and all canonical vocabulary. The phys
 | Work | `Milestone`, `Deliverable`, `Task`, `TaskDependency`, `TaskParticipant`, `TaskTimeEntry` | Core hierarchy and first-release actual hours (§36.8) |
 | Registers | `Decision` (MVP-thin), `Risk` (P2), `Issue` (P2), `Meeting` (P2), `MeetingAction` (P2), `ItemLink` | `ItemLink` is a generic relation between any two items |
 | Collaboration | `Comment`, `Mention`, `DocumentLink` | Polymorphic target (item type + id) |
-| System | `ActivityLog`, `Notification`, `NotificationPreference`, `ProjectFollow`, `AttentionSnooze`, `SavedView` | `ProjectFollow` records who follows which project and at what level (§12.18); saved views are first-release scope (§36.7) |
+| Resources | `Allocation`, `Leave`, `OfficeHoliday`, `PersonCapacity`, `ResourceConflict` (materialised) | Manager-owned planning layer; see Section 12.15. `Allocation.project_id` is nullable: planning works for work that is not a Hub project. |
+| System | `ActivityLog`, `Notification`, `NotificationPreference`, `AttentionSnooze`, `SavedView` (P2) | |
 | Templates | `ProjectTemplate`, `TemplateDiscipline`, `TemplateMilestone`, `TemplateDeliverable`, `TemplateTask`, `TemplateDependency` (P2) | Snapshot-copied into projects |
 
 ### 10.2 Canonical statuses
@@ -380,6 +391,30 @@ Transitions are defined in Section 15 (rules T-10 to T-14). **Blocked is not a s
 
 `Open` → `In Progress` → `Complete`; `Cancelled`.
 
+#### Allocation visibility (manager allocations only)
+
+`Draft` → `Published` → `Confirmed`. Employee allocations are always `Confirmed`. Approved leave availability is visible per §8.7; imported HR fields are read-only. Leave is not an allocation visibility or confidence state.
+
+| Status | Meaning |
+|---|---|
+| **Draft** | Private to the creating manager. Scenario planning, reserving capacity. Not shown to the employee. |
+| **Published** | Visible to the employee and to planner readers as a proposed assignment. Still adjustable. |
+| **Confirmed** | Part of the employee's normal planned workload. |
+
+Transitions are a single manager action in either direction (no approval workflow). `Confirmed` → `Draft` is allowed but logged and notifies the employee.
+
+#### Allocation confidence
+
+`Confirmed` · `Expected` · `Possible`. Independent of visibility: a manager may publish an `Expected` allocation to warn an employee of likely work. Totals are always shown per band (e.g. 30 h confirmed · 10 h expected · 8 h possible), never as one blended number.
+
+#### Allocation source category
+
+`MajorProject` (linked Hub project) · `OtherProject` (work outside the Hub) · `Proposal` · `BusinessDevelopment` · `Training` · `Admin` · `Supervision` · `InternalInitiative` · `FieldWork` · `Leave` (system-generated from `Leave`) · `Other`. Fixed list in MVP; labels are free text.
+
+#### Leave source and state
+
+`source_kind`: `HRImport` or `ManualHR` (an HR-referenced fallback). `status`: `Approved` or `Cancelled`; legacy records without verified HR approval are `Unverified`. Only HR-approved absence is presented as approved leave. Preserve Unverified records and show affected capacity as provisional until reconciled; never silently assume those people are fully available. No Requested/Denied workflow or leave-balance ledger exists in Tuesday.
+
 #### Project health
 
 `Green` (On Track) · `Yellow` (Attention Required) · `Red` (At Risk / Critical) · `Grey` (Not Evaluated). Computed per Section 16, with optional PM override.
@@ -401,12 +436,19 @@ Indicators are computed, never stored as the primary status (they may be cached)
 | **Date Inconsistent** | Task, Deliverable | Task due after its deliverable's due date; deliverable due after its milestone date; successor starts before predecessor is due. |
 | **Slipped** | Milestone, Deliverable | Current date is later than original (baseline) date; shows days of slip. |
 | **Inactive Owner** | Task, Deliverable, Decision | Owner's user account is inactive. |
+| **Over-allocated** | Person-week | Confirmed + Expected hours (all visible sources, plus the viewer's own drafts) exceed capacity by more than `allocation_over_pct`. |
+| **Under-allocated** | Person-week | Confirmed + Expected + Possible hours are below `allocation_under_pct` of capacity for `allocation_under_weeks` consecutive weeks, and the person has no unestimated open tasks due in those weeks. |
+| **Overlapping Plans** | Person-week | Two or more managers have allocations (any visibility) on the same person-week whose sum plus other commitments exceeds capacity. |
+| **Leave Conflict** | Person-week | A Published or Confirmed allocation overlaps recorded leave such that remaining capacity is negative. |
+| **Coverage Concern** | Person-week | An active task/review or deliverable due date falls on a non-working day for its responsible person due to approved leave or an office holiday. Partial absence is flagged for review, not declared blocked. Links to permitted work items; separate from weekly overload. |
+| **Stale Allocation** | Allocation | Not confirmed or edited for longer than `allocation_stale_days` while its weeks are in the future. Displayed as "needs confirmation". |
+| **Deliverable Pressure** | Person-week | A deliverable due in the week has an owner or task assignees who are Over-allocated that week. |
 
 > **Design note.** Why "Blocked" is an indicator and not a status: a blocked task is still *In Progress* or *Not Started* from a workflow point of view. If Blocked replaced the workflow status, unblocking it would require guessing which status to restore, and reporting would lose the distinction between "not started because blocked" and "half done and blocked". Modelling Blocked as a computed flag with an explicit list of blockers means it appears and disappears automatically as predecessors complete, and the workflow status is never corrupted. The same reasoning applies to Overdue.
 
 ### 10.4 Canonical thresholds (organisation settings)
 
-All thresholds are stored in `OrgSetting`, editable by System Administrators, with the defaults below. Calendar days are used in MVP; working-day calendars are Phase 2 (**TBD — Business Decision Required:** statutory holiday calendar by office).
+All thresholds are stored in `OrgSetting`, editable by System Administrators, with the defaults below. Project attention thresholds use calendar days in MVP; working-day thresholds remain Phase 2. Resource availability uses the person’s working days and Admin-configured office holidays in MVP; no statutory calendar is guessed.
 
 | Setting key | Default | Used by |
 |---|---|---|

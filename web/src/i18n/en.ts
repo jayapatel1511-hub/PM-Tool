@@ -2032,6 +2032,9 @@ export const en: Record<string, string> = {
   // Integrated en-personal.ts
   'home.subtitle': 'Welcome back, {name}. Every number below opens the records behind it.',
   'mywork.newTaskHint': 'Choose the project first; the task form opens next.',
+  // 037 phase 2: My Work's Today view and My Week summary, page help and calm toolbars (§41 R1, R5, R8, R10).
+  'mywork.focusTasks': 'Overdue, due this week or blocked', 'mywork.focusNoTasks': 'Nothing of yours is overdue, due this week or blocked.',
+  'mywork.weekSummary': 'Week of {week}: {planned} of {capacity} planned', 'mywork.weekShow': 'Show', 'mywork.weekHide': 'Hide',
   'prefs.digestTimeLabel': 'Digest time',
   'prefs.resetEvent': 'Reset {event} to the default',
   'app.notFoundTitle': 'Page not available',

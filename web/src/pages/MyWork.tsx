@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCheck, Plus } from 'lucide-react'
-import { useMemo, useState, type ReactNode } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { CheckCheck, ChevronDown, Plus } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { AttentionRows, type AttentionList } from '@/components/hub/attention'
 import { AccentDot, ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Section, Segmented, selectCls } from '@/components/hub/common'
 import { NewTaskDialog } from '@/components/hub/new-item'
@@ -12,6 +12,7 @@ import { ViewMenu } from '@/components/hub/views'
 import { useScope } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { get, qs } from '@/lib/api'
 import { useMe } from '@/lib/auth'
@@ -42,8 +43,11 @@ interface Work {
 const SORTS = ['due', 'priority', 'project', 'activity']
 const RANK: Record<string, number> = { Critical: 0, High: 1, Medium: 2, Low: 3 }
 
-const TABS = ['overview', 'today', 'upcoming', 'overdue', 'completed', 'inbox', 'coordination'] as const
+/** My Work's views, Today first (§41 R10, decision E3); Overview keeps every section on one page. */
+const VIEWS = ['today', 'upcoming', 'overdue', 'completed', 'inbox', 'coordination', 'overview'] as const
 const WHO = ['mine', 'assigned', 'created'] as const
+/** Today's task buckets; blocked tasks due later join them as their own group. */
+const FOCUS = ['overdue', 'today', 'thisWeek']
 
 /** One readable list row (14 px, density-aware height) inside a section card. */
 const ROW = 'flex min-h-(--row-min) flex-wrap items-center gap-x-3 gap-y-1 px-5 py-(--cell-py) text-sm hover:bg-muted'
@@ -52,35 +56,53 @@ const ProjectTag = ({ id, number, name }: { id: string; number: string; name?: s
   <span className="inline-flex shrink-0 items-center gap-1.5" title={name}><AccentDot id={id} /><Key>{number}</Key></span>
 )
 
-/** My Work (§13.10, §36.7 FR-VIS-08): the overview of everything assigned to, waiting on or held up by one person, plus
- *  Today, Upcoming, Overdue and Completed task views, the Inbox of unread notifications, all within the selected scope. */
+/** My Work (§13.10, §36.7 FR-VIS-08, §41 R10): opens on Today, the person's overdue, due-this-week and blocked tasks with
+ *  what needs their attention; Upcoming, Overdue, Completed, the Inbox of unread notifications, Coordination and the
+ *  Overview of everything assigned to, waiting on or held up by them are one menu away, all within the selected scope. */
 export function MyWorkPage() {
   const [sp] = useSearchParams()
-  const tab = sp.get('userId') ? 'overview' : sp.get('tab') ?? 'overview'
-  if (tab === 'coordination') return <><div className="px-4 pt-4 md:px-6 md:pt-6 xl:px-8 xl:pt-8"><MyWorkTabs /></div><WorkspaceCoordination /></>
+  const tab = sp.get('userId') ? 'overview' : sp.get('tab') ?? 'today'
+  if (tab === 'coordination') return <><div className="px-4 pt-4 md:px-6 md:pt-6 xl:px-8 xl:pt-8"><MyWorkViews /></div><WorkspaceCoordination /></>
   if (tab === 'inbox') return <Inbox />
-  if (tab !== 'overview') return <TaskView tab={tab} />
-  return <Overview />
+  // Today for Assigned to Me or Created by Me stays the due-today task view; My Tasks today is the focus list.
+  if (tab === 'upcoming' || tab === 'overdue' || tab === 'completed' || (tab === 'today' && WHO.slice(1).includes(sp.get('who') as never))) return <TaskView tab={tab} />
+  return <Overview focus={tab !== 'overview'} />
 }
 
-/** The My Work tabs; each keeps the scope and the membership view. */
-function MyWorkTabs() {
+/** The compact view switch (§41 R1, R10): the views, then the Overview's sections with their counts. Each choice keeps
+ *  the scope and the membership view; a section opens the Overview there and moves focus to it. */
+function MyWorkViews({ sections }: { sections?: { id: string; title: string; count?: number }[] }) {
   const [sp] = useSearchParams()
-  const tab = sp.get('tab') ?? 'overview'
-  const link = (x: string) => {
+  const navigate = useNavigate()
+  const toSection = useRef(false)
+  const current = (VIEWS as readonly string[]).includes(sp.get('tab') ?? '') ? sp.get('tab')! : 'today'
+  const link = (x: string, hash = '') => {
     const n = new URLSearchParams()
     for (const k of ['projects', 'ws', 'who']) if (sp.get(k)) n.set(k, sp.get(k)!)
-    if (x !== 'overview') n.set('tab', x)
-    return `?${n}`
+    if (x !== 'today') n.set('tab', x)
+    return `?${n}${hash}`
   }
   return (
-    <nav aria-label={t('mywork.views')} className="no-print flex flex-wrap border-b">
-      {TABS.map((x) => (
-        <Link key={x} to={link(x)} aria-current={tab === x ? 'page' : undefined}
-          className={cn('-mb-px inline-flex min-h-11 items-center whitespace-nowrap border-b-2 px-3 text-sm outline-offset-[-2px]',
-            tab === x ? 'border-primary font-semibold text-foreground' : 'border-transparent text-muted-foreground hover:bg-muted hover:text-foreground')}>{t(`mywork.tab.${x}`)}</Link>
-      ))}
-    </nav>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="no-print"><span className="sr-only">{`${t('mywork.views')}: `}</span>{t(`mywork.tab.${current}`)}<ChevronDown className="size-4" aria-hidden /></Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64" onCloseAutoFocus={(e) => { if (toSection.current) { e.preventDefault(); toSection.current = false } }}>
+        <DropdownMenuRadioGroup value={current} onValueChange={(x) => navigate(link(x))}>
+          {VIEWS.map((x) => <DropdownMenuRadioItem key={x} value={x}>{t(`mywork.tab.${x}`)}</DropdownMenuRadioItem>)}
+        </DropdownMenuRadioGroup>
+        {sections && <>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel>{t('mywork.sections')}</DropdownMenuLabel>
+          {sections.map((s) => (
+            <DropdownMenuItem key={s.id} onSelect={() => { toSection.current = true; navigate(link('overview', `#mw-${s.id}`)) }}>
+              <span className="flex-1">{s.title}</span>
+              {(s.count ?? 0) > 0 && <span className="rounded-md bg-secondary px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">{s.count}</span>}
+            </DropdownMenuItem>
+          ))}
+        </>}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -96,7 +118,7 @@ function scopeWork(w: Work, keep: (pid?: string | null) => boolean): Work {
   }
 }
 
-function Overview() {
+function Overview({ focus }: { focus: boolean }) {
   const me = useMe()
   const qc = useQueryClient()
   const [sp, setSp] = useSearchParams()
@@ -106,12 +128,18 @@ function Overview() {
   const userId = sp.get('userId') ?? undefined
   const q = useQuery({ queryKey: ['mywork', userId], queryFn: () => get<Work>(`me/work${qs({ userId })}`) })
   const [creating, setCreating] = useState(false)
-  const [filtersOpen, setFiltersOpen] = useState(false)
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const f = { project: sp.get('project') ?? '', discipline: sp.get('discipline') ?? '', status: sp.get('status') ?? '', priority: sp.get('priority') ?? '',
     from: sp.get('from') ?? '', to: sp.get('to') ?? '', hideWaiting: sp.get('hideWaiting') === '1', sort: sp.get('sort') ?? 'due' }
   const reload = () => { qc.invalidateQueries({ queryKey: ['mywork'] }) }
   const actions = useTaskActions(reload)
+  // A section chosen from the view switch: once the data is in, focus it (focusing also scrolls it into view).
+  const location = useLocation()
+  const ready = !!q.data
+  useEffect(() => {
+    const el = ready && location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null
+    if (el) { el.tabIndex = -1; el.focus() }
+  }, [location.key, location.hash, ready])
 
   const tasks = useMemo(() => {
     const rows = (q.data?.tasks ?? []).filter((r) => (!scope.ids || scope.ids.includes(r.projectId)) && (!f.project || r.projectId === f.project) && (!f.discipline || r.disciplineName === f.discipline)
@@ -125,13 +153,15 @@ function Overview() {
     return [...rows].sort((a, b) => urgent(a) - urgent(b) || (by[f.sort] ?? by.due)(a, b))
   }, [q.data, scope.ids, f.project, f.discipline, f.status, f.priority, f.from, f.to, f.hideWaiting, f.sort])
 
-  if (q.isPending) return <Page title={t('mywork.title')}>{!userId && <MyWorkTabs />}<Loading rows={10} /></Page>
-  if (q.error) return <Page title={t('mywork.title')}>{!userId && <MyWorkTabs />}<ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
+  if (q.isPending) return <Page title={t('mywork.title')}>{!userId && <MyWorkViews />}<Loading rows={10} /></Page>
+  if (q.error) return <Page title={t('mywork.title')}>{!userId && <MyWorkViews />}<ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
   const w = scopeWork(q.data, keep)
   const ro = w.readOnly
   const waiting = tasks.filter((r) => r.state?.isWaiting || r.state?.isBlocked)
   const blocking = (w.tasks).filter((r) => r.state?.isBlocking)
   const buckets = BUCKETS.map((b) => [b, tasks.filter((r) => dueBucket(r, w.today) === b)] as const).filter(([, rows]) => rows.length > 0)
+  const focusBuckets = [...buckets.filter(([b]) => FOCUS.includes(b)),
+    ['blocked', tasks.filter((r) => r.state?.isBlocked && !FOCUS.includes(dueBucket(r, w.today)))] as const].filter(([, rows]) => rows.length > 0)
   const projectOptions = [...new Map(w.tasks.map((r) => [r.projectId, r.projectNumber])).entries()]
   const disciplineOptions = [...new Set(w.tasks.map((r) => r.disciplineName))]
 
@@ -174,21 +204,21 @@ function Overview() {
     </li>
   )
   const list = (rows: ReactNode[], empty: string) => rows.length ? <ul className="divide-y">{rows}</ul> : <Empty>{empty}</Empty>
+  const bucketList = (groups: (readonly [string, TaskRow[]])[], empty: string) => groups.length === 0
+    ? <Empty action={tokens.length > 0 ? <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button> : newTask}>{empty}</Empty>
+    : <div className="divide-y">{groups.map(([b, rows]) => (
+      <div key={b}>
+        <h3 className={cn('border-b bg-muted px-5 py-2 text-xs/[18px] font-semibold', b === 'overdue' ? 'text-bad' : 'text-muted-foreground')}>
+          {b === 'overdue' && <span aria-hidden>■ </span>}{b === 'blocked' ? t('ind.blocked') : t(`tbucket.${b}`)} <span className="tabular-nums">({rows.length})</span>
+        </h3>
+        <ul className="divide-y">{rows.map((r) => taskRow(r))}</ul>
+      </div>))}</div>
   const sections: { id: string; title: string; count?: number; body: ReactNode; open?: boolean; accent?: Accent }[] = [
-    ...(!userId ? [{ id: 'my-week', title: t('planner.myWeek'), body: <MyWeekStrip personId={me.id} canPlan={me.capabilities.workload} />, accent: 'blue' as Accent }] : []),
     { id: 'attention', title: t('mywork.attention'), count: w.attention.total, accent: 'peach', body: <>
       <AttentionRows items={w.attention.items} canSnooze={false} showProject onChanged={reload} />
       {w.attention.total > w.attention.items.length && <p className="border-t px-5 py-2.5 text-xs/[18px] text-muted-foreground">{t('mywork.attentionMore', { n: w.attention.items.length, total: w.attention.total })}</p>}
     </> },
-    { id: 'tasks', title: t('mywork.tasks'), count: tasks.length, accent: 'blue', body: buckets.length === 0
-      ? <Empty action={tokens.length > 0 ? <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button> : newTask}>{t('mywork.noTasks')}</Empty>
-      : <div className="divide-y">{buckets.map(([b, rows]) => (
-        <div key={b}>
-          <h3 className={cn('border-b bg-muted px-5 py-2 text-xs/[18px] font-semibold', b === 'overdue' ? 'text-bad' : 'text-muted-foreground')}>
-            {b === 'overdue' && <span aria-hidden>■ </span>}{t(`tbucket.${b}`)} <span className="tabular-nums">({rows.length})</span>
-          </h3>
-          <ul className="divide-y">{rows.map((r) => taskRow(r))}</ul>
-        </div>))}</div> },
+    { id: 'tasks', title: t('mywork.tasks'), count: tasks.length, accent: 'blue', body: bucketList([...buckets], t('mywork.noTasks')) },
     { id: 'reviews', title: t('mywork.reviews'), count: w.reviews.tasks.length + w.reviews.deliverables.length, accent: 'lavender', body: list([
       ...w.reviews.tasks.map((r) => taskRow(r, !ro && r.status === 'Ready for Review' && <Button size="sm" variant="outline"
         onClick={() => actions.move({ id: r.id, key: r.key, rowVersion: r.rowVersion, to: 'In Review', needsReason: false })}>{t('task.startReview')}</Button>)),
@@ -237,58 +267,56 @@ function Overview() {
     { id: 'completed', title: t('mywork.completed'), count: w.completed.length, open: false, body: list(w.completed.map((r) => taskRow(r)), t('mywork.noCompleted')) },
   ]
 
+  // Today shows what needs the person now; the Overview shows every section. The view switch lists them all.
+  const shown: typeof sections = focus ? [sections.find((x) => x.id === 'attention')!, { id: 'today', title: t('mywork.focusTasks'), count: focusBuckets.reduce((n, [, rows]) => n + rows.length, 0), accent: 'blue' as Accent,
+    body: bucketList(focusBuckets, t('mywork.focusNoTasks')) }] : sections
+  const menu = [...(!userId ? [{ id: 'my-week', title: t('planner.myWeek') }] : []), ...sections]
+
   return (
     <Page title={ro ? t('mywork.of', { name: w.person.displayName }) : t('mywork.title')} subtitle={ro ? t('mywork.readOnly') : me.displayName}
       actions={!ro && <><ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
-      {!ro && <MyWorkTabs />}
-      <Button className="self-start sm:hidden" variant="outline" aria-expanded={filtersOpen} aria-controls="mw-filters" onClick={() => setFiltersOpen((open) => !open)}>{t('mywork.filters', { n: tokens.length })}</Button>
-      <div id="mw-filters" className={cn(!filtersOpen && 'hidden sm:block')}>
-      <FilterBar activeCount={tokens.length}
-        quick={<ChipToggle on={f.hideWaiting} onClick={() => set('hideWaiting', f.hideWaiting ? undefined : '1')}>{t('mywork.hideWaiting')}</ChipToggle>}>
-        <div className="flex flex-wrap items-end gap-3">
-          <Field label={t('common.project')} htmlFor="mw-project" className="w-full sm:w-40">
-            <select id="mw-project" className={selectCls} value={f.project} onChange={(e) => set('project', e.target.value || undefined)}>
-              <option value="">{t('notif.anyProject')}</option>{projectOptions.map(([id, num]) => <option key={id} value={id}>{num}</option>)}
-            </select>
-          </Field>
-          <Field label={t('common.discipline')} htmlFor="mw-discipline" className="w-full sm:w-44">
-            <select id="mw-discipline" className={selectCls} value={f.discipline} onChange={(e) => set('discipline', e.target.value || undefined)}>
-              <option value="">{t('projects.anyDiscipline')}</option>{disciplineOptions.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
-          </Field>
-          <Field label={t('common.status')} htmlFor="mw-status" className="w-full sm:w-44">
-            <select id="mw-status" className={selectCls} value={f.status} onChange={(e) => set('status', e.target.value || undefined)}>
-              <option value="">{t('task.anyOpenStatus')}</option>{TASK_STATUSES.filter((x) => x !== 'Complete' && x !== 'Cancelled').map((x) => <option key={x} value={x}>{tv(x)}</option>)}
-            </select>
-          </Field>
-          <Field label={t('common.priority')} htmlFor="mw-priority" className="w-full sm:w-36">
-            <select id="mw-priority" className={selectCls} value={f.priority} onChange={(e) => set('priority', e.target.value || undefined)}>
-              <option value="">{t('task.anyPriority')}</option>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}
-            </select>
-          </Field>
-          <Field label={t('tfilter.dueFrom')} htmlFor="mw-from" className="w-full sm:w-40">
-            <Input id="mw-from" type="date" value={f.from} onChange={(e) => set('from', e.target.value || undefined)} />
-          </Field>
-          <Field label={t('tfilter.dueTo')} htmlFor="mw-to" className="w-full sm:w-40">
-            <Input id="mw-to" type="date" value={f.to} onChange={(e) => set('to', e.target.value || undefined)} />
-          </Field>
-          <Field label={t('mywork.sort')} htmlFor="mw-sort" className="w-full sm:w-44">
-            <select id="mw-sort" className={selectCls} value={f.sort} onChange={(e) => set('sort', e.target.value === 'due' ? undefined : e.target.value)}>
-              {SORTS.map((x) => <option key={x} value={x}>{t(`mywork.sort.${x}`)}</option>)}
-            </select>
-          </Field>
-        </div>
-      </FilterBar>
+      <div className="flex flex-wrap items-start gap-2">
+        {!ro && <MyWorkViews sections={menu} />}
+        <FilterBar className="flex-1" activeCount={tokens.length}
+          quick={<ChipToggle on={f.hideWaiting} onClick={() => set('hideWaiting', f.hideWaiting ? undefined : '1')}>{t('mywork.hideWaiting')}</ChipToggle>}
+          active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))} onRemove={(k) => set(k)} onClear={clear} />}>
+          <div className="flex flex-wrap items-end gap-3">
+            <Field label={t('common.project')} htmlFor="mw-project" className="w-full sm:w-40">
+              <select id="mw-project" className={selectCls} value={f.project} onChange={(e) => set('project', e.target.value || undefined)}>
+                <option value="">{t('notif.anyProject')}</option>{projectOptions.map(([id, num]) => <option key={id} value={id}>{num}</option>)}
+              </select>
+            </Field>
+            <Field label={t('common.discipline')} htmlFor="mw-discipline" className="w-full sm:w-44">
+              <select id="mw-discipline" className={selectCls} value={f.discipline} onChange={(e) => set('discipline', e.target.value || undefined)}>
+                <option value="">{t('projects.anyDiscipline')}</option>{disciplineOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </Field>
+            <Field label={t('common.status')} htmlFor="mw-status" className="w-full sm:w-44">
+              <select id="mw-status" className={selectCls} value={f.status} onChange={(e) => set('status', e.target.value || undefined)}>
+                <option value="">{t('task.anyOpenStatus')}</option>{TASK_STATUSES.filter((x) => x !== 'Complete' && x !== 'Cancelled').map((x) => <option key={x} value={x}>{tv(x)}</option>)}
+              </select>
+            </Field>
+            <Field label={t('common.priority')} htmlFor="mw-priority" className="w-full sm:w-36">
+              <select id="mw-priority" className={selectCls} value={f.priority} onChange={(e) => set('priority', e.target.value || undefined)}>
+                <option value="">{t('task.anyPriority')}</option>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}
+              </select>
+            </Field>
+            <Field label={t('tfilter.dueFrom')} htmlFor="mw-from" className="w-full sm:w-40">
+              <Input id="mw-from" type="date" value={f.from} onChange={(e) => set('from', e.target.value || undefined)} />
+            </Field>
+            <Field label={t('tfilter.dueTo')} htmlFor="mw-to" className="w-full sm:w-40">
+              <Input id="mw-to" type="date" value={f.to} onChange={(e) => set('to', e.target.value || undefined)} />
+            </Field>
+            <Field label={t('mywork.sort')} htmlFor="mw-sort" className="w-full sm:w-44">
+              <select id="mw-sort" className={selectCls} value={f.sort} onChange={(e) => set('sort', e.target.value === 'due' ? undefined : e.target.value)}>
+                {SORTS.map((x) => <option key={x} value={x}>{t(`mywork.sort.${x}`)}</option>)}
+              </select>
+            </Field>
+          </div>
+        </FilterBar>
       </div>
-      <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))} onRemove={(k) => set(k)} onClear={clear} />
-      <nav aria-label={t('mywork.sections')} className="flex flex-wrap gap-2">
-        {sections.map((s) => (
-          <a key={s.id} href={`#mw-${s.id}`} className="inline-flex min-h-(--control-row-h) items-center gap-1.5 rounded-md border bg-card px-3 text-sm hover:bg-muted">
-            {s.title}{(s.count ?? 0) > 0 && <span className="rounded-md bg-secondary px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">{s.count}</span>}
-          </a>
-        ))}
-      </nav>
-      {sections.map((s) => s.open === false
+      {!userId && <MyWeekStrip id="mw-my-week" personId={me.id} canPlan={me.capabilities.workload} />}
+      {shown.map((s) => s.open === false
         ? <details key={s.id} id={`mw-${s.id}`} className="overflow-hidden rounded-lg border bg-card">
             <summary className="cursor-pointer px-5 py-3 text-base/6 font-semibold hover:bg-muted">
               {s.title}<span className="ml-2 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{s.count}</span>
@@ -326,23 +354,25 @@ function TaskView({ tab }: { tab: string }) {
   return (
     <Page title={t('mywork.title')} subtitle={me.displayName}
       actions={<><ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
-      <MyWorkTabs />
-      <FilterBar activeCount={['from', 'to'].filter((k) => sp.has(k)).length}
-        quick={<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Segmented label={t('mywork.show')} value={who} onChange={(x) => set('who', x === 'mine' ? null : x)} options={WHO.map((x) => ({ value: x, label: t(`mywork.who.${x}`) }))} />
-          <p className="text-sm text-muted-foreground">{t(`mywork.who.${who}.about`)}</p>
-        </div>}>
-        {tab === 'completed' && (
-          <div className="flex flex-wrap items-end gap-3">
-            <Field label={t('common.from')} htmlFor="mw-completed-from" className="w-full sm:w-44">
-              <Input id="mw-completed-from" type="date" value={from} onChange={(e) => set('from', e.target.value || null)} />
-            </Field>
-            <Field label={t('common.to')} htmlFor="mw-completed-to" className="w-full sm:w-44">
-              <Input id="mw-completed-to" type="date" value={to} onChange={(e) => set('to', e.target.value || null)} />
-            </Field>
-          </div>
-        )}
-      </FilterBar>
+      <div className="flex flex-wrap items-start gap-2">
+        <MyWorkViews />
+        <FilterBar className="flex-1" activeCount={['from', 'to'].filter((k) => sp.has(k)).length}
+          quick={<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Segmented label={t('mywork.show')} value={who} onChange={(x) => set('who', x === 'mine' ? null : x)} options={WHO.map((x) => ({ value: x, label: t(`mywork.who.${x}`) }))} />
+            <p className="text-sm text-muted-foreground">{t(`mywork.who.${who}.about`)}</p>
+          </div>}>
+          {tab === 'completed' && (
+            <div className="flex flex-wrap items-end gap-3">
+              <Field label={t('common.from')} htmlFor="mw-completed-from" className="w-full sm:w-44">
+                <Input id="mw-completed-from" type="date" value={from} onChange={(e) => set('from', e.target.value || null)} />
+              </Field>
+              <Field label={t('common.to')} htmlFor="mw-completed-to" className="w-full sm:w-44">
+                <Input id="mw-completed-to" type="date" value={to} onChange={(e) => set('to', e.target.value || null)} />
+              </Field>
+            </div>
+          )}
+        </FilterBar>
+      </div>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       <Section title={t(`mywork.tab.${tab}`)} count={q.data?.totalCount} accent="blue">
         {q.isPending ? <Loading rows={5} /> : rows.length === 0
@@ -382,7 +412,7 @@ function Inbox() {
     <Page title={t('mywork.title')} subtitle={me.displayName}
       actions={<><Button variant="outline" disabled={rows.length === 0} onClick={() => markRead({ ids: rows.map((n) => n.id) })}><CheckCheck className="size-4" />{t('mywork.markAllRead')}</Button>
         <Button asChild variant="ghost"><Link to="/notifications">{t('mywork.allNotifications')}</Link></Button></>}>
-      <MyWorkTabs />
+      <MyWorkViews />
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       <Section title={t('mywork.tab.inbox')} count={rows.length}>
         {q.isPending ? <Loading rows={5} /> : rows.length === 0 ? <Empty>{t('mywork.empty.inbox')}</Empty>

@@ -12,8 +12,9 @@ import { plural, t } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { accentOf, cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useMe, type Me } from '@/lib/auth'
 import { ProjectSlots } from './slots'
 
@@ -93,8 +94,10 @@ function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
   )
 }
 
+const linkCls = 'flex min-h-(--control-row-h) w-full items-center gap-2 rounded-sm px-3 py-1.5 text-left hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent'
+
 /** Shared project header (§12.1 UI behaviour, §13.0, §41 R6): one line with key, name, status and health with why. The
- *  client, PM, phase, next milestone and the project links sit in the details menu; Following keeps its own control. */
+ *  client, PM, phase, next milestone and the project links sit in the details popover; Following keeps its own control. */
 function ProjectHeader({ p }: { p: ProjectDetail }) {
   const refresh = useProjectRefresh()
   return (
@@ -108,24 +111,33 @@ function ProjectHeader({ p }: { p: ProjectDetail }) {
       <div className="flex shrink-0 items-center gap-2 text-sm"><StatusPill status={p.status} /><ProjectSlots.Health p={p} /></div>
       <div className="ml-auto flex shrink-0 items-center gap-2">
         <ProjectSlots.Follow p={p} />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t('calm.projectDetails')}><MoreHorizontal className="size-5" /></Button></DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel className="space-y-1 font-normal">
-              <span className="block font-semibold">{p.name}</span>
-              <span className="block text-muted-foreground">{p.client}</span>
-              <span className="block text-muted-foreground">{t('projects.col.pm')}: <span className="text-foreground">{p.pmName}</span></span>
-              {p.phase && <span className="block text-muted-foreground">{t('projects.col.phase')}: <span className="text-foreground">{p.phase}</span></span>}
-              {p.nextMilestone && <span className="block text-muted-foreground">{t('projects.nextMilestone')}: <span className="text-foreground">◆ {p.nextMilestone.name} · {fmtDate(p.nextMilestone.date)} ({relative(p.nextMilestone.date)})</span></span>}
-            </DropdownMenuLabel>
-            {p.links.length > 0 && <DropdownMenuSeparator />}
-            {p.links.slice(0, 4).map((l) => (
-              l.linkType === 'Network Folder'
-                ? <DropdownMenuItem key={l.id} title={l.url} onSelect={() => { navigator.clipboard?.writeText(l.url); toast.success(t('links.pathCopied')) }}><FolderOpen className="size-4" />{l.title}</DropdownMenuItem>
-                : <DropdownMenuItem key={l.id} asChild><a href={l.url} target="_blank" rel="noreferrer noopener"><ExternalLink className="size-4" />{l.title}</a></DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* A labelled popover, not a menu: the details are text that keyboard and screen-reader users read in order. */}
+        <Popover>
+          <PopoverTrigger asChild><Button variant="ghost" size="icon" aria-label={t('calm.projectDetails')}><MoreHorizontal className="size-5" /></Button></PopoverTrigger>
+          <PopoverContent align="end" aria-label={t('calm.projectDetails')} className="w-80 p-0 text-sm outline-none" tabIndex={-1}
+            onOpenAutoFocus={(e) => { e.preventDefault(); (e.currentTarget as HTMLElement).focus() }}>
+            <div className="space-y-1 px-4 py-3">
+              <p className="font-semibold">{p.name}</p>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-muted-foreground">
+                <dt>{t('projects.col.client')}</dt><dd className="text-foreground">{p.client}</dd>
+                <dt>{t('projects.col.pm')}</dt><dd className="text-foreground">{p.pmName}</dd>
+                {p.phase && <><dt>{t('projects.col.phase')}</dt><dd className="text-foreground">{p.phase}</dd></>}
+                {p.nextMilestone && <><dt>{t('projects.nextMilestone')}</dt><dd className="text-foreground">◆ {p.nextMilestone.name} · {fmtDate(p.nextMilestone.date)} ({relative(p.nextMilestone.date)})</dd></>}
+              </dl>
+            </div>
+            {p.links.length > 0 && (
+              <ul className="border-t p-1">
+                {p.links.slice(0, 4).map((l) => (
+                  <li key={l.id}>
+                    {l.linkType === 'Network Folder'
+                      ? <button type="button" title={l.url} className={linkCls} onClick={() => { navigator.clipboard?.writeText(l.url); toast.success(t('links.pathCopied')) }}><FolderOpen className="size-4 text-muted-foreground" aria-hidden />{l.title}</button>
+                      : <a href={l.url} target="_blank" rel="noreferrer noopener" className={linkCls}><ExternalLink className="size-4 text-muted-foreground" aria-hidden />{l.title}</a>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </PopoverContent>
+        </Popover>
       </div>
     </header>
   )

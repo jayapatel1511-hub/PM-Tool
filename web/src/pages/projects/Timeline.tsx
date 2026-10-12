@@ -1,19 +1,20 @@
 import { disciplineColour } from '@/lib/discipline-colour'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Monitor, Printer } from 'lucide-react'
-import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, ListTree, Monitor, Printer, ZoomIn } from 'lucide-react'
+import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, PageHelp, Section, Segmented, selectCls, useIsPhone } from '@/components/hub/common'
+import { ActiveFilters, ChoiceMenu, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, selectCls, useIsPhone } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key, toneOf } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useProjectRefresh } from '@/hooks/data'
 import { get, patch } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, shortDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { plural, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { DeliverableRow } from './Deliverables'
 import { ChangeDateDialog, milestoneStatusLabel, type MilestoneRow } from './Milestones'
@@ -22,6 +23,33 @@ import { useCurrentProject } from './ProjectLayout'
 /** Pixels per day at each zoom (§12.16: week and month; quarter for long projects). */
 export const ZOOM = { week: 28, month: 7, quarter: 2.4 } as const
 export type Zoom = keyof typeof ZOOM
+/** Zoom as a compact toolbar menu (§41 R1). */
+export const ZoomMenu = ({ value, onChange }: { value: Zoom; onChange: (z: Zoom) => void }) => (
+  <ChoiceMenu label={t('timeline.zoom')} icon={ZoomIn} value={value} onChange={onChange} options={(Object.keys(ZOOM) as Zoom[]).map((z) => ({ value: z, label: t(`timeline.zoom.${z}`) }))} />
+)
+/** A bar's first segment, from its assumed start to today (at least its first day), is drawn faded (§40 AC-TL-01). */
+export const assumedWidth = (span: { start: string; end: string; assumed?: boolean }, now: string, px: number) =>
+  span.assumed ? Math.max(daysBetween(span.start, now < span.end ? now : addDays(span.end, 1)), 1) * px : 0
+/** Arrow ends by link type (§40 AC-DEPT-06): finish → start, start → start or finish → finish. `s` and `e` are the bar's
+ *  left and right edges in px. */
+export function depPath(type: string | undefined, a: { s: number; e: number; y: number }, b: { s: number; e: number; y: number }) {
+  const [x1, out, x2, into] = type === 'StartToStart' ? [a.s, -1, b.s, 1] : type === 'FinishToFinish' ? [a.e, 1, b.e, -1] : [a.e, 1, b.s, 1]
+  const bend = Math.max(12, Math.abs(x2 - x1) / 3)
+  return `M ${x1} ${a.y} C ${x1 + out * bend} ${a.y}, ${x2 - into * bend} ${b.y}, ${x2 - into * 2} ${b.y}`
+}
+/** An arrow's tooltip: its link type and lag (left out when the payload has no lag, as for deliverable links). */
+export const depTitle = (type: string | undefined, lag?: number) =>
+  [t(`sig.dep.${type ?? 'FinishToStart'}`), lag === undefined ? null : lag ? plural(lag, 'sig.depLag1', 'sig.depLag') : t('sig.depNoLag')].filter(Boolean).join(' · ')
+/** One dependency arrow with a hover target and a tooltip naming its type and lag. */
+export function DepArrow({ d, hot, title, marker }: { d: string; hot: boolean; title: string; marker: string }) {
+  return (
+    <g>
+      <title>{title}</title>
+      <path d={d} fill="none" stroke="transparent" strokeWidth={6} style={{ pointerEvents: 'stroke' }} />
+      <path d={d} fill="none" strokeWidth={hot ? 1.6 : 1} stroke={hot ? 'var(--bad)' : 'var(--muted-foreground)'} strokeOpacity={hot ? 1 : 0.55} markerEnd={`url(#${marker}-${hot ? 'hot' : 'cold'})`} />
+    </g>
+  )
+}
 const LABEL = 224
 const H = { group: 28, deliverable: 32, loose: 24, task: 24 } as const
 const CLOSED = ['Issued', 'Accepted', 'Cancelled']
@@ -41,11 +69,12 @@ interface TimelineTask {
 interface TimelineData {
   permissions: { manageMilestones: boolean; needsReason: boolean }
   tasks: TimelineTask[]
-  dependencies: { id: string; predecessorTaskId: string; successorTaskId: string; lagDays: number; highlighted: boolean }[]
-  deliverableLinks: { from: string; to: string; highlighted: boolean; derived: boolean }[]
-  deliverables: { id: string; canEditDates: boolean }[]
+  dependencies: { id: string; predecessorTaskId: string; successorTaskId: string; type: string; lagDays: number; highlighted: boolean }[]
+  deliverableLinks: { from: string; to: string; type: string; highlighted: boolean; derived: boolean }[]
+  deliverables: { id: string; canEditDates: boolean; createdOn: string }[]
 }
-interface Span { start: string; end: string; late: boolean; ghost?: { start: string; end: string } | null }
+/** `assumed`: no start date, so the bar starts at the creation date (§40 AC-TL-01). */
+interface Span { start: string; end: string; late: boolean; assumed?: boolean; ghost?: { start: string; end: string } | null }
 type RowT =
   | { kind: 'group'; id: string; name: string; colour?: string; count: number }
   | { kind: 'deliverable'; id: string; d: DeliverableRow; span: Span; tasks: number }
@@ -76,7 +105,7 @@ export function TimelineTab() {
   const ms = useQuery({ queryKey: ['p', p.id, 'milestones', true, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones?showCompleted=true`) })
   const dels = useQuery({ queryKey: ['p', p.id, 'deliverables', {}], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables`) })
   const tl = useQuery({ queryKey: ['p', p.id, 'timeline'], queryFn: () => get<TimelineData>(`projects/${p.id}/timeline`) })
-  const header = { title: t('ptab.timeline'), subtitle: <>{t('calm.timeline.scope')}<PageHelp>{t('timeline.subtitle')}</PageHelp></> }
+  const header = { title: t('ptab.timeline'), subtitle: t('calm.timeline.scope') }
   if (ms.isPending || dels.isPending || tl.isPending) return <Page {...header}><div className="rounded-lg border bg-card"><Loading rows={8} /></div></Page>
   if (ms.error || dels.error || tl.error) return <Page {...header}><ErrorBanner error={ms.error ?? dels.error ?? tl.error} retry={() => { ms.refetch(); dels.refetch(); tl.refetch() }} /></Page>
 
@@ -86,40 +115,49 @@ export function TimelineTab() {
   const canDel = new Map(data.deliverables.map((x) => [x.id, x.canEditDates]))
   const inRange = (a?: string | null, b?: string | null) => (!f.from || (b ?? a ?? '') >= f.from) && (!f.to || (a ?? b ?? '') <= f.to)
   const ghostOf = (os?: string | null, od?: string | null, s?: string | null, d?: string | null) => (od && (od !== d || (os ?? null) !== (s ?? null)) ? { start: os ?? od, end: od } : null)
-  const milestones = ms.data.filter((m) => m.date && !m.isCancelled && (!f.hide || !m.isComplete) && (!f.milestoneId || m.id === f.milestoneId) && inRange(m.date, m.date))
+  const msShown = ms.data.filter((m) => !m.isCancelled && (!f.hide || !m.isComplete) && (!f.milestoneId || m.id === f.milestoneId))
+  const milestones = msShown.filter((m) => m.date && inRange(m.date, m.date))
   const delById = new Map(dels.data.map((d) => [d.id, d]))
   const items = dels.data.filter((d) => (!f.disciplineId || d.projectDisciplineId === f.disciplineId) && (!f.milestoneId || d.milestoneId === f.milestoneId)
     && (!f.status || d.status === f.status) && (!f.hide || !CLOSED.includes(d.status)))
-  const spanOf = (start: string | null | undefined, created: string, due: string, overdue: boolean) => { const b = start ?? created; return { start: b > due ? due : b, end: due, late: overdue && due < now } }
-  const delSpans = new Map(items.filter((d) => d.dueDate).map((d) => [d.id, { ...spanOf(d.startDate, d.createdAt.slice(0, 10), d.dueDate!, !!d.state?.isOverdue),
+  const spanOf = (start: string | null | undefined, created: string, due: string, overdue: boolean) => { const b = start ?? created; return { start: b > due ? due : b, end: due, late: overdue && due < now, assumed: !start } }
+  // AC-TL-04: the creation date is the server's local date, not a cut UTC timestamp.
+  const createdOn = new Map(data.deliverables.map((x) => [x.id, x.createdOn]))
+  const delSpans = new Map(items.filter((d) => d.dueDate).map((d) => [d.id, { ...spanOf(d.startDate, createdOn.get(d.id) ?? d.dueDate!, d.dueDate!, !!d.state?.isOverdue),
     ghost: ghostOf(d.originalStartDate, d.originalDueDate, d.startDate, d.dueDate) } as Span]))
   const visibleDel = new Set([...delSpans.keys()].filter((id) => { const s = delSpans.get(id)!; return inRange(s.start, s.late ? now : s.end) }))
+  // A task follows its deliverable through the filters; one under a deliverable without a bar here (undated or outside the
+  // date range) is drawn as a top-level row instead of being dropped (AC-TL-02).
+  const shownDel = new Set(items.map((d) => d.id))
   const tasks = data.tasks.filter((tk) => (!f.hide || tk.status !== 'Complete') && (!f.disciplineId || tk.projectDisciplineId === f.disciplineId)
     && (!f.milestoneId || (tk.milestoneId ?? (tk.deliverableId ? delById.get(tk.deliverableId)?.milestoneId : null)) === f.milestoneId)
-    && (tk.deliverableId ? visibleDel.has(tk.deliverableId) : !f.status))
+    && (tk.deliverableId && delById.has(tk.deliverableId) ? shownDel.has(tk.deliverableId) : !f.status))
   const taskSpan = (tk: TimelineTask): Span | null => tk.dueDate ? { ...spanOf(tk.startDate, tk.createdOn, tk.dueDate, tk.isOverdue), ghost: ghostOf(tk.originalStartDate, tk.originalDueDate, tk.startDate, tk.dueDate) } : null
+  const nested = (tk: TimelineTask) => !!tk.deliverableId && visibleDel.has(tk.deliverableId)
+  const loose = tasks.filter((tk) => { const sp = taskSpan(tk); return !nested(tk) && sp && inRange(sp.start, sp.late ? now : sp.end) })
   const unscheduled = [...items.filter((d) => !d.dueDate).map((d) => ({ type: 'Deliverable' as const, id: d.id, key: d.key, name: d.name, sub: d.disciplineName })),
-    ...tasks.filter((tk) => !tk.dueDate).map((tk) => ({ type: 'Task' as const, id: tk.id, key: tk.key, name: tk.name, sub: tk.assignee }))]
+    ...tasks.filter((tk) => !tk.dueDate).map((tk) => ({ type: 'Task' as const, id: tk.id, key: tk.key, name: tk.name, sub: tk.assignee })),
+    ...msShown.filter((m) => !m.date).map((m) => ({ type: 'Milestone' as const, id: m.id, key: m.key, name: m.name, sub: undefined }))] // AC-TL-03
 
-  // Rows in order: discipline, its deliverables (each followed by its tasks when expanded), then tasks without a deliverable.
+  // Rows in order: discipline, its deliverables (each followed by its tasks when expanded), then the tasks on their own.
   const order = new Map(p.disciplines.map((d, i) => [d.id, i]))
-  const pds = [...new Set([...[...visibleDel].map((id) => delById.get(id)!.projectDisciplineId), ...tasks.filter((tk) => !tk.deliverableId && tk.dueDate).map((tk) => tk.projectDisciplineId)])]
+  const pds = [...new Set([...[...visibleDel].map((id) => delById.get(id)!.projectDisciplineId), ...loose.map((tk) => tk.projectDisciplineId)])]
     .sort((a, b) => (order.get(a) ?? 99) - (order.get(b) ?? 99))
   const rows: RowT[] = []
   for (const pd of pds) {
     const disc = p.disciplines.find((d) => d.id === pd)
     const groupDels = [...visibleDel].map((id) => delById.get(id)!).filter((d) => d.projectDisciplineId === pd).sort((a, b) => a.dueDate!.localeCompare(b.dueDate!))
-    const loose = tasks.filter((tk) => !tk.deliverableId && tk.projectDisciplineId === pd && tk.dueDate)
-    rows.push({ kind: 'group', id: pd, name: disc?.name ?? '', colour: disc?.colour, count: groupDels.length + loose.length })
+    const solo = loose.filter((tk) => tk.projectDisciplineId === pd)
+    rows.push({ kind: 'group', id: pd, name: disc?.name ?? '', colour: disc?.colour, count: groupDels.length + solo.length })
     if (closed.has(pd)) continue
     for (const d of groupDels) {
       const own = tasks.filter((tk) => tk.deliverableId === d.id && tk.dueDate)
       rows.push({ kind: 'deliverable', id: d.id, d, span: delSpans.get(d.id)!, tasks: own.length })
       if (expanded.has(d.id)) for (const tk of own.sort((a, b) => (a.startDate ?? a.dueDate!).localeCompare(b.startDate ?? b.dueDate!))) rows.push({ kind: 'task', id: tk.id, tk, span: taskSpan(tk)! })
     }
-    if (loose.length) {
-      rows.push({ kind: 'loose', id: `loose:${pd}`, count: loose.length })
-      if (expanded.has(`loose:${pd}`)) for (const tk of loose.sort((a, b) => a.dueDate!.localeCompare(b.dueDate!))) rows.push({ kind: 'task', id: tk.id, tk, span: taskSpan(tk)! })
+    if (solo.length) {
+      rows.push({ kind: 'loose', id: `loose:${pd}`, count: solo.length })
+      if (expanded.has(`loose:${pd}`)) for (const tk of solo.sort((a, b) => a.dueDate!.localeCompare(b.dueDate!))) rows.push({ kind: 'task', id: tk.id, tk, span: taskSpan(tk)! })
     }
   }
   const spans = rows.flatMap((r) => (r.kind === 'deliverable' || r.kind === 'task' ? [r.span] : []))
@@ -158,19 +196,17 @@ export function TimelineTab() {
   let y = 0
   for (const r of rows) { const h = H[r.kind]; pos.set(r.id, { y, h }); y += h }
   const bodyHeight = y
-  const arrow = (fromId: string, fromSpan: Span, toId: string, toSpan: Span, hot: boolean, key: string) => {
+  const arrow = (fromId: string, fromSpan: Span, toId: string, toSpan: Span, hot: boolean, key: string, type: string, lag?: number) => {
     const a = pos.get(fromId), b = pos.get(toId)
     if (!a || !b) return null
-    const x1 = x(fromSpan.end) + px, y1 = a.y + a.h / 2, x2 = x(toSpan.start), y2 = b.y + b.h / 2
-    const bend = Math.max(12, Math.abs(x2 - x1) / 3)
-    return <path key={key} d={`M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2 - 2} ${y2}`} fill="none" strokeWidth={hot ? 1.6 : 1}
-      stroke={hot ? 'var(--bad)' : 'var(--muted-foreground)'} strokeOpacity={hot ? 1 : 0.55} markerEnd={`url(#arrow-${hot ? 'hot' : 'cold'})`} />
+    const d = depPath(type, { s: x(fromSpan.start), e: x(fromSpan.end) + px, y: a.y + a.h / 2 }, { s: x(toSpan.start), e: x(toSpan.end) + px, y: b.y + b.h / 2 })
+    return <DepArrow key={key} d={d} hot={hot} title={depTitle(type, lag)} marker="arrow" />
   }
   const taskRows = new Map(rows.flatMap((r) => (r.kind === 'task' ? [[r.id, r] as const] : [])))
   const delRows = new Map(rows.flatMap((r) => (r.kind === 'deliverable' ? [[r.id, r] as const] : [])))
   const arrows = [
-    ...data.dependencies.map((dep) => { const a = taskRows.get(dep.predecessorTaskId), b = taskRows.get(dep.successorTaskId); return a && b ? arrow(a.id, a.span, b.id, b.span, dep.highlighted, dep.id) : null }),
-    ...data.deliverableLinks.map((l) => { const a = delRows.get(l.from), b = delRows.get(l.to); return a && b && !expanded.has(a.id) && !expanded.has(b.id) ? arrow(a.id, a.span, b.id, b.span, l.highlighted, `${l.from}-${l.to}`) : null }),
+    ...data.dependencies.map((dep) => { const a = taskRows.get(dep.predecessorTaskId), b = taskRows.get(dep.successorTaskId); return a && b ? arrow(a.id, a.span, b.id, b.span, dep.highlighted, dep.id, dep.type, dep.lagDays) : null }),
+    ...data.deliverableLinks.map((l) => { const a = delRows.get(l.from), b = delRows.get(l.to); return a && b && !expanded.has(a.id) && !expanded.has(b.id) ? arrow(a.id, a.span, b.id, b.span, l.highlighted, `${l.from}-${l.to}`, l.type) : null }),
   ].filter(Boolean)
 
   const lines = [
@@ -216,7 +252,8 @@ export function TimelineTab() {
   ] as const).filter(([k]) => sp.get(k))
   const clear = () => { const n = new URLSearchParams(sp); for (const k of FILTERS) n.delete(k); n.delete('panel'); setSp(n, { replace: true }) }
 
-  const bar = (id: string, span: Span, status: string, pct: number, label: string, thin: boolean, can: boolean, onDrop: (n: number) => void, open: () => void) => {
+  const bar = (id: string, span: Span, status: string, pct: number, text: string, thin: boolean, can: boolean, onDrop: (n: number) => void, open: () => void) => {
+    const label = span.assumed ? `${text} · ${t('sig.startNotSet')}` : text
     const left = Math.max(x(span.start), 0)
     const w = Math.max((daysBetween(span.start, span.end) + 1) * px, 4)
     const top = thin ? 7 : 7
@@ -231,6 +268,7 @@ export function TimelineTab() {
           className={cn('absolute overflow-hidden rounded-sm border text-left focus-visible:ring-2', shift?.id === id && 'ring-2 ring-primary')}
           style={{ ...dragProps(id, can, onDrop, open).style, left: left + dx(id), width: w, top, height, borderColor: tone(status), background: toneBg(status) }}>
           <span className="absolute inset-y-0 left-0 opacity-40" style={{ width: `${pct}%`, background: tone(status) }} />
+          {span.assumed && <span aria-hidden className="absolute inset-y-0 left-0 bg-card/65" style={{ width: assumedWidth(span, now, px) }} />}
           {!thin && w > 44 && <span className="relative px-1 text-xs/4 tabular-nums">{pct}%</span>}
         </button>
         {shift?.id === id && <span className="absolute z-30 whitespace-nowrap rounded-md bg-primary px-1.5 text-xs/[18px] text-primary-foreground tabular-nums" style={{ left: left + dx(id) + w + 4, top: top - 1 }}>{shift.days > 0 ? '+' : ''}{shift.days} d</span>}
@@ -243,9 +281,13 @@ export function TimelineTab() {
   return (
     <Page {...header} actions={<Button variant="outline" className="no-print" onClick={() => window.print()}><Printer className="size-4" />{t('wc.print')}</Button>}>
       <FilterBar className="no-print" activeCount={tokens.length}
-        quick={<Segmented label={t('timeline.zoom')} value={zoom} onChange={(z) => set('zoom', z === 'month' ? null : z)}
-          options={(Object.keys(ZOOM) as Zoom[]).map((z) => ({ value: z, label: t(`timeline.zoom.${z}`) }))} />}
-        active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
+        quick={<ZoomMenu value={zoom} onChange={(z) => set('zoom', z === 'month' ? null : z)} />}
+        active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}
+        actions={<>
+          <Legend>{t('sig.timelineDrag')}</Legend>
+          {expandable.length > 0 && <Button variant="outline" onClick={() => setExpanded(allOpen ? new Set() : new Set(expandable))}>
+            {allOpen ? <ChevronsDownUp className="size-4" /> : <ChevronsUpDown className="size-4" />}{allOpen ? t('timeline.collapseTasks') : t('timeline.expandTasks')}</Button>}
+        </>}>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.discipline')} htmlFor="tl-discipline" className="w-full sm:w-44">
             <select id="tl-discipline" className={selectCls} value={f.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
@@ -267,30 +309,27 @@ export function TimelineTab() {
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={f.hide} onCheckedChange={(c) => set('hideCompleted', c ? 'true' : null)} />{t('timeline.hideCompleted')}</label>
         </div>
       </FilterBar>
+      <PrintLegend />
       {data.permissions.manageMilestones && <DesktopOnly notice={<Notice icon={Monitor} title={t('milestone.phoneTitle')}>{t('milestone.phoneHint')}</Notice>}>{null}</DesktopOnly>}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Legend />
-        {expandable.length > 0 && <Button variant="outline" className="no-print" onClick={() => setExpanded(allOpen ? new Set() : new Set(expandable))}>
-          {allOpen ? <ChevronsDownUp className="size-4" /> : <ChevronsUpDown className="size-4" />}{allOpen ? t('timeline.collapseTasks') : t('timeline.expandTasks')}</Button>}
-      </div>
       {rows.length === 0 && milestones.length === 0 ? (
         <div className="rounded-lg border bg-card"><Empty action={tokens.length > 0 && <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('timeline.empty')}</Empty></div>
       ) : (
         <div className="scroll-region overflow-x-auto rounded-lg border bg-card print:overflow-visible" role="region" aria-label={t('ptab.timeline')}>
-          <div className="relative" style={{ width: LABEL + width }}>
-            <div className="flex h-10 border-b bg-muted text-xs/4 text-muted-foreground">
-              <div className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-muted px-3 text-sm font-medium" style={{ width: LABEL }}>{t('timeline.items')}</div>
-              <div className="relative" style={{ width }} aria-hidden>
+          {/* A table of rows: the item (row header) and its dates (cell), so each bar is announced with its row. */}
+          <div className="relative" style={{ width: LABEL + width }} role="table" aria-label={t('timeline.items')}>
+            <div className="flex h-10 border-b bg-muted text-xs/4 text-muted-foreground" role="row">
+              <div className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-muted px-3 text-sm font-medium" style={{ width: LABEL }} role="columnheader">{t('timeline.items')}</div>
+              <div className="relative" style={{ width }} role="columnheader" aria-label={t('sig.dates')}>
                 {ticks.map((k) => (
-                  <div key={k.date} className={cn('absolute top-0 h-full border-l', k.major ? 'border-border' : 'border-border/40')} style={{ left: x(k.date) }}>
+                  <div key={k.date} aria-hidden className={cn('absolute top-0 h-full border-l', k.major ? 'border-border' : 'border-border/40')} style={{ left: x(k.date) }}>
                     {k.label && <span className="absolute left-1 top-1 whitespace-nowrap tabular-nums">{k.label}</span>}
                   </div>
                 ))}
               </div>
             </div>
-            <div className="flex border-b" style={{ height: laneHeight }}>
-              <div className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-card px-3 text-sm font-semibold" style={{ width: LABEL }}>{t('ptab.milestones')}</div>
-              <div className="relative" style={{ width }}>
+            <div className="flex border-b" style={{ height: laneHeight }} role="row">
+              <div className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-card px-3 text-sm font-semibold" style={{ width: LABEL }} role="rowheader">{t('ptab.milestones')}</div>
+              <div className="relative" style={{ width }} role="cell">
                 {placed.map(({ m, left, w, row }) => {
                   const status = milestoneStatusLabel(m)
                   const slipped = m.originalDate && m.originalDate !== m.date && !m.isComplete && visible(m.originalDate)
@@ -314,26 +353,30 @@ export function TimelineTab() {
                 })}
               </div>
             </div>
-            <div className="relative">
+            <div className="relative" role="rowgroup">
               {rows.map((r) => {
                 if (r.kind === 'group') return (
-                  <div key={r.id} className="flex border-b bg-muted" style={{ height: H.group }}>
-                    <button type="button" className="sticky left-0 z-20 flex shrink-0 items-center gap-2 border-r bg-muted px-2 text-left text-sm font-semibold hover:bg-secondary" style={{ width: LABEL }}
-                      aria-expanded={!closed.has(r.id)} onClick={() => toggle(setClosed, r.id)}>
-                      {closed.has(r.id) ? <ChevronRight className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
-                      <span className="inline-block size-2.5 shrink-0 rounded-sm" style={{ background: disciplineColour(r.colour) }} aria-hidden /><span className="truncate">{r.name}</span>
-                      <span className="rounded-md bg-card px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">{r.count}</span>
-                    </button>
-                    <div style={{ width }} />
+                  <div key={r.id} className="flex border-b bg-muted" style={{ height: H.group }} role="row">
+                    <div role="rowheader" className="sticky left-0 z-20 flex shrink-0 border-r bg-muted" style={{ width: LABEL }}>
+                      <button type="button" className="flex w-full items-center gap-2 px-2 text-left text-sm font-semibold hover:bg-secondary"
+                        aria-expanded={!closed.has(r.id)} onClick={() => toggle(setClosed, r.id)}>
+                        {closed.has(r.id) ? <ChevronRight className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
+                        <span className="inline-block size-2.5 shrink-0 rounded-sm" style={{ background: disciplineColour(r.colour) }} aria-hidden /><span className="truncate">{r.name}</span>
+                        <span className="rounded-md bg-card px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">{r.count}</span>
+                      </button>
+                    </div>
+                    <div style={{ width }} role="cell" />
                   </div>
                 )
                 if (r.kind === 'loose') return (
-                  <div key={r.id} className="flex border-b" style={{ height: H.loose }}>
-                    <button type="button" className="sticky left-0 z-20 flex shrink-0 items-center gap-1.5 border-r bg-card px-3 text-left text-xs/4 text-muted-foreground hover:bg-muted" style={{ width: LABEL }}
-                      aria-expanded={expanded.has(r.id)} onClick={() => toggle(setExpanded, r.id)}>
-                      {expanded.has(r.id) ? <ChevronDown className="size-3.5 shrink-0" /> : <ChevronRight className="size-3.5 shrink-0" />}<span className="truncate">{t('timeline.looseTasks', { n: r.count })}</span>
-                    </button>
-                    <div style={{ width }} />
+                  <div key={r.id} className="flex border-b" style={{ height: H.loose }} role="row">
+                    <div role="rowheader" className="sticky left-0 z-20 flex shrink-0 border-r bg-card" style={{ width: LABEL }}>
+                      <button type="button" className="flex w-full items-center gap-1.5 px-3 text-left text-xs/4 text-muted-foreground hover:bg-muted"
+                        aria-expanded={expanded.has(r.id)} onClick={() => toggle(setExpanded, r.id)} title={t('sig.looseHint')}>
+                        {expanded.has(r.id) ? <ChevronDown className="size-3.5 shrink-0" /> : <ChevronRight className="size-3.5 shrink-0" />}<span className="truncate">{t('sig.looseTasks', { n: r.count })}</span>
+                      </button>
+                    </div>
+                    <div style={{ width }} role="cell" />
                   </div>
                 )
                 if (r.kind === 'deliverable') {
@@ -341,15 +384,15 @@ export function TimelineTab() {
                   const pct = d.state?.progressPct ?? 0
                   const can = !!canDel.get(d.id)
                   return (
-                    <div key={r.id} className="flex border-b" style={{ height: H.deliverable }}>
-                      <div className="sticky left-0 z-20 flex shrink-0 items-center gap-1 border-r bg-card pl-1 pr-3 text-sm" style={{ width: LABEL }}>
+                    <div key={r.id} className="flex border-b" style={{ height: H.deliverable }} role="row">
+                      <div className="sticky left-0 z-20 flex shrink-0 items-center gap-1 border-r bg-card pl-1 pr-3 text-sm" style={{ width: LABEL }} role="rowheader">
                         {r.tasks > 0 ? <button type="button" className="grid size-6 shrink-0 place-items-center rounded-md hover:bg-muted" aria-expanded={expanded.has(d.id)} aria-label={t('timeline.showTasks', { key: d.key, n: r.tasks })} onClick={() => toggle(setExpanded, d.id)}>
                           {expanded.has(d.id) ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</button> : <span className="w-6 shrink-0" />}
                         <button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left hover:underline" onClick={() => openPanel('Deliverable', d.id)} title={`${d.key} ${d.name}`}>
                           <Key>{d.key.split('-').pop()}</Key><span className="truncate">{d.name}</span>
                         </button>
                       </div>
-                      <div className="relative" style={{ width }}>
+                      <div className="relative" style={{ width }} role="cell">
                         {bar(d.id, r.span, d.status, pct, t('timeline.barLabel', { key: d.key, name: d.name, from: fmtDate(r.span.start), to: fmtDate(r.span.end), status: tv(d.status), pct }), false, can,
                           (n) => setMove({ kind: 'deliverable', id: d.id, key: d.key, name: d.name, start: d.startDate, due: d.dueDate!, days: n, rowVersion: d.rowVersion, needsReason: false }),
                           () => openPanel('Deliverable', d.id))}
@@ -359,12 +402,14 @@ export function TimelineTab() {
                 }
                 const tk = r.tk
                 return (
-                  <div key={r.id} className="flex border-b border-border/60" style={{ height: H.task }}>
-                    <button type="button" className="sticky left-0 z-20 flex shrink-0 items-center gap-2 border-r bg-card pl-8 pr-3 text-left text-xs/4 hover:bg-muted" style={{ width: LABEL }}
-                      onClick={() => openPanel('Task', tk.id)} title={`${tk.key} ${tk.name}${tk.assignee ? ` · ${tk.assignee}` : ''}`}>
-                      <span className="key text-muted-foreground">{tk.key.split('-').pop()}</span><span className="truncate">{tk.name}</span>
-                    </button>
-                    <div className="relative" style={{ width }}>
+                  <div key={r.id} className="flex border-b border-border/60" style={{ height: H.task }} role="row">
+                    <div role="rowheader" className="sticky left-0 z-20 flex shrink-0 border-r bg-card" style={{ width: LABEL }}>
+                      <button type="button" className="flex w-full min-w-0 items-center gap-2 pl-8 pr-3 text-left text-xs/4 hover:bg-muted"
+                        onClick={() => openPanel('Task', tk.id)} title={`${tk.key} ${tk.name}${tk.assignee ? ` · ${tk.assignee}` : ''}`}>
+                        <span className="key text-muted-foreground">{tk.key.split('-').pop()}</span><span className="truncate">{tk.name}</span>
+                      </button>
+                    </div>
+                    <div className="relative" style={{ width }} role="cell">
                       {bar(tk.id, r.span, tk.status, tk.progressPct, t('timeline.barLabel', { key: tk.key, name: tk.name, from: fmtDate(r.span.start), to: fmtDate(r.span.end), status: tv(tk.status), pct: tk.progressPct }), true, tk.canEditDates,
                         (n) => setMove({ kind: 'task', id: tk.id, key: tk.key, name: tk.name, start: tk.startDate, due: tk.dueDate!, days: n, rowVersion: tk.rowVersion, needsReason: tk.dueNeedsReason }),
                         () => openPanel('Task', tk.id))}
@@ -433,17 +478,41 @@ export function MoveDialog({ move, projectComplete, onClose }: { move: Move; pro
   )
 }
 
-export function Legend() {
+/** The legend's marks: what a bar spans, the assumed start (§40 AC-TL-01), status, overdue, moved dates and link types. */
+function LegendItems({ className }: { className: string }) {
   const swatch = (status: string) => <span className="inline-block h-3 w-5 rounded-sm border" style={{ borderColor: tone(status), background: toneBg(status) }} aria-hidden />
+  const arrow = (d: string, head: string) => <svg width="22" height="14" aria-hidden><path d={d} fill="none" stroke="var(--muted-foreground)" strokeWidth="1.2" /><path d={head} fill="var(--muted-foreground)" /></svg>
   return (
-    <ul className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs/[18px] text-muted-foreground" aria-label={t('timeline.legend')}>
-      {['Not Started', 'In Progress', 'Revision Required', 'Issued'].map((s) => <li key={s} className="flex items-center gap-1.5">{swatch(s)}{tv(s)}</li>)}
-      <li className="flex items-center gap-1.5"><span className="inline-block h-3 w-5 rounded-sm border border-bad" style={{ background: HATCH }} aria-hidden />{t('timeline.legendOverdue')}</li>
-      <li className="flex items-center gap-1.5"><span className="inline-block h-3 w-5 rounded-sm border border-dashed border-foreground/40" aria-hidden />{t('timeline.legendBaseline')}</li>
-      <li className="flex items-center gap-1.5"><span className="inline-block size-2.5 rotate-45" style={{ background: 'var(--ok)' }} aria-hidden />{t('timeline.legendMilestone')}</li>
-      <li className="flex items-center gap-1.5"><span className="inline-block size-2.5 rotate-45 border-2" style={{ borderColor: 'var(--warn)' }} aria-hidden />{t('timeline.legendOriginal')}</li>
-      <li className="flex items-center gap-1.5"><svg width="22" height="8" aria-hidden><path d="M1 4 H18" stroke="var(--bad)" strokeWidth="1.6" /><path d="M16 1 L21 4 L16 7 z" fill="var(--bad)" /></svg>{t('timeline.legendLate')}</li>
-      <li className="flex items-center gap-1.5"><span className="inline-block h-3 border-l-2 border-primary" aria-hidden />{t('common.today')}</li>
+    <ul className={className}>
+      <li className="flex items-center gap-2"><span className="inline-block h-3 w-5 rounded-sm border border-foreground/50 bg-muted" aria-hidden />{t('sig.legendBar')}</li>
+      <li className="flex items-center gap-2"><span className="relative inline-block h-3 w-5 overflow-hidden rounded-sm border" style={{ borderColor: tone('In Progress'), background: toneBg('In Progress') }} aria-hidden><span className="absolute inset-y-0 left-0 w-3 bg-card/65" /></span>{t('sig.legendAssumed')}</li>
+      {['Not Started', 'In Progress', 'Revision Required', 'Issued'].map((st) => <li key={st} className="flex items-center gap-2">{swatch(st)}{tv(st)}</li>)}
+      <li className="flex items-center gap-2"><span className="inline-block h-3 w-5 rounded-sm border border-bad" style={{ background: HATCH }} aria-hidden />{t('timeline.legendOverdue')}</li>
+      <li className="flex items-center gap-2"><span className="inline-block h-3 w-5 rounded-sm border border-dashed border-foreground/40" aria-hidden />{t('timeline.legendBaseline')}</li>
+      <li className="flex items-center gap-2"><span className="mx-1 inline-block size-2.5 rotate-45" style={{ background: 'var(--ok)' }} aria-hidden />{t('timeline.legendMilestone')}</li>
+      <li className="flex items-center gap-2"><span className="mx-1 inline-block size-2.5 rotate-45 border-2" style={{ borderColor: 'var(--warn)' }} aria-hidden />{t('timeline.legendOriginal')}</li>
+      <li className="flex items-center gap-2"><svg width="22" height="8" aria-hidden><path d="M1 4 H18" stroke="var(--bad)" strokeWidth="1.6" /><path d="M16 1 L21 4 L16 7 z" fill="var(--bad)" /></svg>{t('timeline.legendLate')}</li>
+      <li className="flex items-center gap-2">{arrow('M2 3 C 12 3, 8 11, 17 11', 'M16 8 L21 11 L16 14 z')}{t('sig.dep.FinishToStart')}</li>
+      <li className="flex items-center gap-2">{arrow('M8 3 C 1 3, 1 11, 11 11', 'M10 8 L15 11 L10 14 z')}{t('sig.dep.StartToStart')}</li>
+      <li className="flex items-center gap-2">{arrow('M10 3 C 21 3, 21 11, 15 11', 'M16 8 L11 11 L16 14 z')}{t('sig.dep.FinishToFinish')}</li>
+      <li className="flex items-center gap-2"><span className="mx-2 inline-block h-3 border-l-2 border-primary" aria-hidden />{t('common.today')}</li>
     </ul>
   )
 }
+
+/** The legend behind a Legend button (§41 R1). `children` adds the page's own help, such as how dragging works. */
+export function Legend({ children }: { children?: ReactNode }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild><Button variant="outline"><ListTree className="size-4" aria-hidden />{t('timeline.legend')}</Button></PopoverTrigger>
+      <PopoverContent align="end" aria-label={t('timeline.legend')} className="w-80">
+        <LegendItems className="space-y-2 text-sm" />
+        <p className="mt-3 text-xs/[18px] text-muted-foreground">{t('sig.legendArrows')}</p>
+        {children && <p className="mt-2 text-xs/[18px] text-muted-foreground">{children}</p>}
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+/** The legend on paper, where the popover cannot open. */
+export const PrintLegend = () => <div className="hidden print:block"><LegendItems className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs/[18px] text-muted-foreground" /></div>

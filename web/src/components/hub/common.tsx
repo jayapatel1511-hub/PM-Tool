@@ -1,13 +1,15 @@
-import { AlertTriangle, Info, Loader2, SlidersHorizontal, X, type LucideIcon } from 'lucide-react'
-import { Children, cloneElement, createContext, isValidElement, useContext, useEffect, useState, useSyncExternalStore, type ComponentProps, type ReactNode } from 'react'
+import { AlertTriangle, ChevronDown, Info, Loader2, SlidersHorizontal, X, type LucideIcon } from 'lucide-react'
+import { Children, cloneElement, createContext, isValidElement, useContext, useEffect, useId, useState, useSyncExternalStore, type ComponentProps, type ReactElement, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { ApiError } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { ago } from '@/lib/format'
@@ -151,17 +153,35 @@ export function Segmented<T extends string>({ label, value, options, onChange }:
   )
 }
 
+/** A view choice (group, sort, zoom) as a compact toolbar menu button (§41 R1): the button names the current choice and
+ *  the menu is a radio group, operable by arrow keys. */
+export function ChoiceMenu<T extends string>({ label, value, options, onChange, icon: Icon }: { label: string; value: T; options: { value: T; label: string }[]; onChange: (v: T) => void; icon?: LucideIcon }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">{Icon && <Icon className="size-4" aria-hidden />}{`${label}: ${options.find((o) => o.value === value)?.label ?? ''}`}<ChevronDown className="size-4" aria-hidden /></Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuRadioGroup value={value} onValueChange={(v) => onChange(v as T)}>
+          {options.map((o) => <DropdownMenuRadioItem key={o.value} value={o.value}>{o.label}</DropdownMenuRadioItem>)}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 const tablet = '(max-width: 1023.98px)'
 const subscribeTablet = (l: () => void) => { const m = matchMedia(tablet); m.addEventListener('change', l); return () => m.removeEventListener('change', l) }
 
-/** A one-line page scope with the longer explanation behind an (i) help button (§41 R5). */
-export function PageHelp({ children }: { children: ReactNode }) {
+/** A one-line page scope with the longer explanation behind an (i) help button (§41 R5). The button and its popover share
+ *  one accessible name, `label` (default "About this page"). */
+export function PageHelp({ children, label = t('calm.help') }: { children: ReactNode; label?: string }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button type="button" aria-label={t('calm.help')} className="ml-1 inline-grid size-6 place-items-center rounded-md align-middle text-muted-foreground hover:bg-muted hover:text-foreground"><Info className="size-4" aria-hidden /></button>
+        <button type="button" aria-label={label} className="ml-1 inline-grid size-6 place-items-center rounded-md align-middle text-muted-foreground hover:bg-muted hover:text-foreground"><Info className="size-4" aria-hidden /></button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-96 text-sm/5 text-muted-foreground">{children}</PopoverContent>
+      <PopoverContent align="start" aria-label={label} className="w-96 text-sm/5 text-muted-foreground">{children}</PopoverContent>
     </Popover>
   )
 }
@@ -220,20 +240,36 @@ export function ActiveFilters({ tokens, onRemove, onClear }: { tokens: { key: st
 }
 
 /** Summary tile (design §3, §6): tinted, dark text, a metric; a link or a filter when it has one destination. Home uses
- *  blue, mint, lavender, peach in that order. A warning travels as a separate labelled chip, never as the tint. */
+ *  blue, mint, lavender, peach in that order. A warning travels as a separate labelled chip, never as the tint.
+ *  `hint` is the tile's one-line definition (§40 AC-CNT-06): an (i) tooltip, given to screen readers through
+ *  aria-describedby. A linked tile carries the tooltip itself, so the hint adds no tab stop; a tile without one destination
+ *  gets an (i) button. With `children` and `to`, only the label and value are the link, so links inside the tile stay valid. */
 export function SummaryTile({ label, value, accent, hint, to, onClick, selected, children }: {
   label: ReactNode; value: ReactNode; accent: Accent; hint?: ReactNode; to?: string; onClick?: () => void; selected?: boolean; children?: ReactNode
 }) {
-  const cls = cn('block rounded-lg border bg-(--acc-bg) px-4 py-3 text-left md:px-5 md:py-4', (to || onClick) && 'hover:brightness-[0.98]', selected && 'border-primary ring-2 ring-primary')
-  const body = <>
-    <span className="flex items-center justify-between gap-2 text-sm text-(--acc-fg)">{label}{selected && <span aria-hidden>✓</span>}</span>
+  const hintId = useId()
+  const desc = hint ? hintId : undefined
+  const cls = cn('relative block rounded-lg border bg-(--acc-bg) px-4 py-3 text-left md:px-5', selected && 'border-primary ring-2 ring-primary')
+  const icon = <Info className="size-3.5 opacity-70" aria-hidden />
+  const corner = 'absolute right-1.5 top-1.5 grid size-6 place-items-center rounded-md text-(--acc-fg)'
+  const tip = (el: ReactElement) => hint ? <Tooltip><TooltipTrigger asChild>{el}</TooltipTrigger><TooltipContent className="max-w-72">{hint}</TooltipContent></Tooltip> : el
+  const note = hint && <span id={hintId} hidden>{hint}</span>
+  // The (i) sits in the tile's corner, so it never changes the tile's height or wraps its label.
+  const head = (info: ReactNode) => <>
+    <span className={cn('flex items-center justify-between gap-2 text-sm text-(--acc-fg)', hint && 'pr-2')}><span className="inline-flex min-w-0 flex-wrap items-center gap-1.5">{label}</span>{selected && <span aria-hidden>✓</span>}</span>
     <span className="mt-1 block text-[28px]/9 font-semibold tracking-[-0.6px] tabular-nums">{value}</span>
-    {hint && <span className="mt-0.5 block text-xs/[18px] text-muted-foreground">{hint}</span>}
-    {children}
+    {info}
   </>
-  if (to) return <Link to={to} data-accent={accent} className={cls}>{body}</Link>
-  if (onClick) return <button type="button" data-accent={accent} aria-pressed={selected} onClick={onClick} className={cls}>{body}</button>
-  return <div data-accent={accent} className={cls}>{body}</div>
+  const mark = hint && <span className={corner}>{icon}</span>
+  if (onClick) return <>{tip(<button type="button" data-accent={accent} aria-pressed={selected} aria-describedby={desc} onClick={onClick} className={cn(cls, 'hover:brightness-[0.98]')}>{head(mark)}{children}</button>)}{note}</>
+  if (to && !children) return <>{tip(<Link to={to} data-accent={accent} aria-describedby={desc} className={cn(cls, 'hover:brightness-[0.98]')}>{head(mark)}</Link>)}{note}</>
+  return (
+    <div data-accent={accent} className={cls}>
+      {to ? tip(<Link to={to} aria-describedby={desc} className="block rounded-md [&:hover>span:nth-of-type(2)]:underline">{head(mark)}</Link>)
+        : head(hint && tip(<button type="button" aria-label={t('sig.definition')} aria-describedby={desc} className={cn(corner, 'hover:bg-card/60')}>{icon}</button>))}
+      {children}{note}
+    </div>
+  )
 }
 
 /** A project's or person's stable identity mark (accent derived from the id). */

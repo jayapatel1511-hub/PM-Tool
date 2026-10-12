@@ -1,18 +1,19 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowDown, ArrowUp, Eye, EyeOff, Pencil, RotateCcw } from 'lucide-react'
+import { ArrowDown, ArrowUp, CalendarRange, Eye, EyeOff, Pencil, RotateCcw } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { AccentDot, Empty, ErrorBanner, Loading, Missing, Notice, Page, Section, SummaryTile } from '@/components/hub/common'
+import { AccentDot, Empty, ErrorBanner, Field, Loading, Missing, Notice, Page, PageHelp, Section, SummaryTile } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Chip, Key, StatusPill } from '@/components/hub/pills'
 import { scoped, useScope, WorkspaceTabs, type Scope } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ApiError, del, get, put, qs } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { fmtDate, fmtTime, relative } from '@/lib/format'
-import { plural, t } from '@/lib/i18n'
+import { plural, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 interface Lane { lane: string; statuses: string; count: number }
@@ -21,6 +22,7 @@ interface HomeData {
   today: string; from: string; to: string; asOf: string
   metrics: { activeProjects: number; openTasks: number; overdueTasks: number; onTrack: { green: number; evaluated: number; pct: number | null }; teamMembers: number }
   tasksByStatus: Lane[]
+  onHold: { status: string; count: number }
   tasksByProject: { projectId: string; projectNumber: string; name: string; lanes: Lane[]; total: number }[]
   upcomingDeadlines: { total: number; truncated: boolean; items: { type: string; id: string; projectId: string; projectNumber: string; key: string; name: string; date: string; status?: string; owner?: string; overdue: boolean }[] }
   layout: Widget[]; isDefault: boolean
@@ -28,9 +30,11 @@ interface HomeData {
 
 /** The same four lanes as the board (§36.3), coloured with text beside every bar. */
 const LANE_TONE: Record<string, string> = { 'To Do': 'var(--idle)', 'In Progress': 'var(--work)', Review: 'var(--warn)', Done: 'var(--done)' }
-/** Home counts every Complete task as Done; the board's Done lane shows only the last 14 days. */
-const laneName = (lane: string) => (lane === 'Done' ? t('home.laneDone') : t(`lane.${lane}`))
-const note = (text: string) => <span className="text-xs/[18px] text-muted-foreground">{text}</span>
+/** Home counts every Complete task as Done; the board's Done lane shows only the last 14 days. Home's Review lane also
+ *  holds Revision Required, so it is named for both (§40 D9). */
+const laneName = (lane: string) => (lane === 'Done' ? t('home.laneDone') : lane === 'Review' ? t('sig.laneReview') : t(`lane.${lane}`))
+/** A lane's definition: the canonical statuses it counts, as the server reports them. */
+const laneDef = (l: Lane) => `${laneName(l.lane)}: ${l.statuses.split(',').map((x) => tv(x)).join(', ')}`
 
 /** Project-list links for a scope: its own "mine" default, everything permitted, or the chosen projects. */
 function projectsLink(scope: Scope, extra: Record<string, string>) {
@@ -77,13 +81,13 @@ export function HomePage() {
         <section aria-labelledby="h-metrics">
           <h2 id="h-metrics" className="sr-only">{t('home.metrics')}</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-5">
-            <SummaryTile label={t('home.activeProjects')} value={m.activeProjects} accent="blue" to={projectsLink(scope, {})} />
-            <SummaryTile label={t('home.openTasks')} value={m.openTasks} accent="mint" to={scoped(scope, '/tasks', { open: 'true' })} />
-            <SummaryTile label={t('home.overdueTasks')} value={m.overdueTasks} accent="lavender" to={scoped(scope, '/tasks', { overdue: 'true' })}>
+            <SummaryTile label={t('home.activeProjects')} value={m.activeProjects} accent="blue" hint={t('sig.def.activeProjects')} to={projectsLink(scope, {})} />
+            <SummaryTile label={t('home.openTasks')} value={m.openTasks} accent="mint" hint={t('sig.def.openTasks')} to={scoped(scope, '/tasks', { open: 'true' })} />
+            <SummaryTile label={t('home.overdueTasks')} value={m.overdueTasks} accent="lavender" hint={t('sig.def.overdueTasks')} to={scoped(scope, '/tasks', { overdue: 'true' })}>
               {m.overdueTasks > 0 && <span className="mt-1.5 block"><Chip tone="bad">{t('dash.attention')}</Chip></span>}
             </SummaryTile>
             {/* Two destinations (numerator and denominator), so the tile itself is not a link. */}
-            <SummaryTile label={t('home.onTrack')} value={m.onTrack.pct == null ? <Missing /> : `${m.onTrack.pct}%`} accent="peach">
+            <SummaryTile label={t('home.onTrack')} value={m.onTrack.pct == null ? <Missing /> : `${m.onTrack.pct}%`} accent="peach" hint={t('sig.def.onTrack')}>
               <span className="mt-0.5 block text-xs/[18px] text-muted-foreground tabular-nums">
                 {m.onTrack.evaluated === 0 ? t('home.onTrackNone') : <>
                   <Link className="text-primary underline underline-offset-4 hover:text-foreground" to={projectsLink(scope, { computedHealth: 'Green' })}>{t('home.onTrackGreen', { n: m.onTrack.green })}</Link>
@@ -92,23 +96,29 @@ export function HomePage() {
                 </>}
               </span>
             </SummaryTile>
-            <SummaryTile label={t('home.teamMembers')} value={m.teamMembers} accent="rose" to={scoped(scope, '/team')} />
+            <SummaryTile label={t('home.teamMembers')} value={m.teamMembers} accent="rose" hint={t('sig.def.teamMembers')} to={scoped(scope, '/team')} />
           </div>
-          <p className="mt-2 text-xs/[18px] text-muted-foreground">{t('home.current', { time: fmtTime(d.asOf) })}</p>
         </section>
       )
       case 'tasksByStatus': {
-        const max = Math.max(1, ...d.tasksByStatus.map((l) => l.count))
+        // AC-CNT-05: On Hold is its own row, so the open lanes plus On hold add up to Open Tasks.
+        const lanes = [...d.tasksByStatus.map((l) => ({ ...l, name: laneName(l.lane), def: laneDef(l), tone: LANE_TONE[l.lane] })),
+          { lane: 'On Hold', statuses: d.onHold.status, count: d.onHold.count, name: t('lane.On Hold'), def: `${t('lane.On Hold')}: ${tv(d.onHold.status)}`, tone: 'var(--idle)' }]
+        const max = Math.max(1, ...lanes.map((l) => l.count))
         return (
-          <Section id="h-status" accent="blue" title={t('home.byStatus')} actions={note(t('home.currentShort'))}>
-            <ul className="space-y-2 p-5">
-              {d.tasksByStatus.map((l) => (
-                <li key={l.lane} className="grid grid-cols-[7rem_1fr_3rem] items-center gap-3 text-sm">
-                  <span>{laneName(l.lane)}</span>
-                  <Link to={scoped(scope, '/tasks', { status: l.statuses })} aria-label={t('home.segment', { lane: laneName(l.lane), n: l.count })} className="block h-4 rounded-full bg-secondary hover:ring-2 hover:ring-ring">
-                    <span className="block h-full rounded-full" style={{ width: `${(l.count / max) * 100}%`, background: LANE_TONE[l.lane] }} />
+          <Section id="h-status" accent="blue" title={t('home.byStatus')} actions={<PageHelp label={t('sig.laneHelp')}>
+            <ul className="space-y-1">{lanes.map((l) => <li key={l.lane}>{l.def}</li>)}</ul>
+            <p className="mt-2">{t('sig.laneSum')}</p>
+          </PageHelp>}>
+            <ul className="space-y-1 px-5 py-4">
+              {lanes.map((l) => (
+                <li key={l.lane}>
+                  <Link to={scoped(scope, '/tasks', { status: l.statuses })} aria-label={t('home.segment', { lane: l.name, n: l.count })} title={l.def}
+                    className="grid grid-cols-[10rem_1fr_3rem] items-center gap-3 rounded-md py-0.5 text-sm hover:bg-muted">
+                    <span>{l.name}</span>
+                    <span className="block h-4 rounded-full bg-secondary"><span className="block h-full rounded-full" style={{ width: `${(l.count / max) * 100}%`, background: l.tone }} /></span>
+                    <span className="text-right font-medium tabular-nums">{l.count}</span>
                   </Link>
-                  <Link to={scoped(scope, '/tasks', { status: l.statuses })} className="text-right font-medium tabular-nums hover:underline">{l.count}</Link>
                 </li>
               ))}
             </ul>
@@ -118,11 +128,18 @@ export function HomePage() {
       case 'tasksByProject': return <ByProject d={d} scope={scope} />
       case 'upcomingDeadlines': return (
         <Section id="h-deadlines" accent="peach" title={t('home.deadlines')} actions={
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            {note(t('home.range', { from: fmtDate(d.from), to: fmtDate(d.to) }))}
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">{t('common.from')}<Input type="date" className="w-40" value={from ?? d.from} onChange={(e) => set('from', e.target.value || undefined)} /></label>
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">{t('common.to')}<Input type="date" className="w-40" value={to ?? d.to} onChange={(e) => set('to', e.target.value || undefined)} /></label>
-          </div>}>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" aria-label={t('sig.rangeLabel', { range: t('home.range', { from: fmtDate(d.from), to: fmtDate(d.to) }) })}>
+                <CalendarRange className="size-4" aria-hidden /><span className="tabular-nums">{t('home.range', { from: fmtDate(d.from), to: fmtDate(d.to) })}</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" aria-label={t('sig.range')} className="w-80 space-y-3">
+              <Field label={t('common.from')} htmlFor="h-from"><Input id="h-from" type="date" value={from ?? d.from} onChange={(e) => set('from', e.target.value || undefined)} /></Field>
+              <Field label={t('common.to')} htmlFor="h-to"><Input id="h-to" type="date" value={to ?? d.to} onChange={(e) => set('to', e.target.value || undefined)} /></Field>
+              {(from || to) && <Button variant="link" size="sm" className="px-0" onClick={clearRange}>{t('filters.clear')}</Button>}
+            </PopoverContent>
+          </Popover>}>
           {d.upcomingDeadlines.items.length === 0
             ? <Empty action={(from || to) && <Button variant="outline" onClick={clearRange}>{t('filters.clear')}</Button>}>{t('home.noDeadlines')}</Empty> : (
             <ul className="divide-y">
@@ -151,7 +168,7 @@ export function HomePage() {
   const layout = d?.layout ?? []
   const shown = editing ? layout : layout.filter((w) => !w.hidden)
   return (
-    <Page eyebrow={scope.label} title={t('nav.home')} subtitle={t('home.subtitle', { name: me.displayName })} actions={d && (editing ? <>
+    <Page title={t('nav.home')} subtitle={<>{t('sig.homeScope', { name: me.displayName })}<PageHelp>{t('sig.homeHelp')}{d && <> {t('home.current', { time: fmtTime(d.asOf) })}</>}</PageHelp></>} actions={d && (editing ? <>
       {!d.isDefault && <Button variant="outline" onClick={restore}><RotateCcw className="size-4" />{t('home.restore')}</Button>}
       <Button onClick={() => setEditing(false)}>{t('home.done')}</Button>
     </> : <Button variant="outline" onClick={() => setEditing(true)}><Pencil className="size-4" />{t('home.edit')}</Button>)}>
@@ -194,7 +211,7 @@ function ByProject({ d, scope }: { d: HomeData; scope: Scope }) {
   const rows = all ? d.tasksByProject : d.tasksByProject.slice(0, 8)
   const max = Math.max(1, ...d.tasksByProject.map((p) => p.total))
   return (
-    <Section id="h-projects" accent="mint" title={t('home.byProject')} actions={note(t('home.currentShort'))}>
+    <Section id="h-projects" accent="mint" title={t('home.byProject')}>
       {rows.length === 0 ? <Empty>{t('home.noTasks')}</Empty> : (
         <ul className="space-y-2 px-5 pt-5">
           {rows.map((p) => (

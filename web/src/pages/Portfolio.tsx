@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { Monitor } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { AccentDot, ActiveFilters, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, SummaryTile, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { AccentDot, ActiveFilters, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, PageHelp, SummaryTile, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { HealthPill, Key, StatusPill } from '@/components/hub/pills'
@@ -20,7 +21,7 @@ import { ViewMenu } from '@/components/hub/views'
 interface Row extends ProjectRow { office?: string; phase?: string; overrideBy?: string | null; overrideActive: boolean; trend: { weekEnding: string; computed?: string | null; reported?: string | null }[] }
 interface Portfolio { ownOnly: boolean; tiles: { active: number; red: number; yellow: number; green: number; submissions14: number; overdueDecisions: number }; projects: Row[] }
 
-const FILTERS = ['q', 'pmId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'projectTypeId', 'submissionWithinDays', 'mine'] as const
+const FILTERS = ['q', 'pmId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'computedHealth', 'projectTypeId', 'submissionWithinDays', 'mine'] as const
 const STATUSES = ['Setup', 'Active', 'On Hold', 'Complete']
 const HEALTHS = ['Red', 'Yellow', 'Green', 'Grey']
 const SWATCH: Record<string, string> = { Red: 'var(--bad)', Yellow: 'var(--warn)', Green: 'var(--ok)', Grey: 'var(--idle)' }
@@ -34,7 +35,7 @@ const COLS: [string, boolean][] = [['portfolio.project', false], ['portfolio.pm'
 /** Portfolio Dashboard (§13.12, FR-PORT-01): which projects need help this week and why, computed and reported health side
  *  by side. Desktop and tablet only (§13.0). */
 export function PortfolioPage() {
-  const header = { title: t('nav.portfolio'), subtitle: t('portfolio.subtitle') }
+  const header = { title: t('nav.portfolio'), subtitle: <>{t('sig.pfScope')}<PageHelp>{t('sig.pfHelp')}</PageHelp></> }
   return (
     <DesktopOnly notice={<Page {...header}><Notice icon={Monitor} title={t('app.phoneNotice')}
       action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('portfolio.phoneHint')}</Notice></Page>}>
@@ -43,7 +44,7 @@ export function PortfolioPage() {
   )
 }
 
-function Dashboard(header: { title: string; subtitle: string }) {
+function Dashboard(header: { title: string; subtitle: ReactNode }) {
   const ref = useReference()
   const [sp, setSp] = useSearchParams()
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
@@ -70,6 +71,7 @@ function Dashboard(header: { title: string; subtitle: string }) {
     ['projectTypeId', t('projects.type'), name(ref.data?.projectTypes, filters.projectTypeId)],
     ['status', t('common.status'), filters.status && tv(filters.status)],
     ['health', t('portfolio.health'), filters.health && t(`health.${filters.health}`)],
+    ['computedHealth', t('projects.filter.computedHealth'), filters.computedHealth?.split(',').map((h) => t(`health.${h}`)).join(', ')],
     ['submissionWithinDays', t('portfolio.within'), filters.submissionWithinDays],
     ['mine', t('portfolio.mine'), filters.mine === 'false' ? t('common.no') : filters.mine],
   ] as const).filter(([k]) => filters[k])
@@ -78,16 +80,18 @@ function Dashboard(header: { title: string; subtitle: string }) {
     <span className="inline-flex items-center gap-1.5"><span aria-hidden className={HEALTH_MARK[h][1]}>{HEALTH_MARK[h][0]}</span>{t(key)}</span>
   )
   const tiles = q.data?.tiles
+  // AC-CNT-01: a health tile counts Active projects by computed health, so it opens exactly those rows.
+  const healthLink = (h: string) => { const n = new URLSearchParams(sp); n.set('computedHealth', h); n.set('status', 'Active'); return `?${n}` }
   return (
     <Page {...header} actions={<><ViewMenu listType="portfolio" /><ExportMenu path="portfolio/export" params={filters} name="portfolio" /></>}>
       {tiles && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
-          <SummaryTile label={t('portfolio.active')} value={tiles.active} accent="blue" onClick={() => set('status', 'Active')} />
-          <SummaryTile label={healthLabel('Red', 'portfolio.red')} value={tiles.red} accent="lavender" onClick={() => set('health', 'Red')} />
-          <SummaryTile label={healthLabel('Yellow', 'portfolio.yellow')} value={tiles.yellow} accent="lavender" onClick={() => set('health', 'Yellow')} />
-          <SummaryTile label={healthLabel('Green', 'portfolio.green')} value={tiles.green} accent="lavender" onClick={() => set('health', 'Green')} />
-          <SummaryTile label={t('portfolio.submissions')} value={tiles.submissions14} accent="mint" onClick={() => set('submissionWithinDays', '14')} />
-          <SummaryTile label={t('portfolio.decisions')} value={tiles.overdueDecisions} accent="peach" />
+          <SummaryTile label={t('portfolio.active')} value={tiles.active} accent="blue" hint={t('sig.def.pfActive')} onClick={() => set('status', 'Active')} />
+          {(['Red', 'Yellow', 'Green'] as const).map((h) => (
+            <SummaryTile key={h} label={healthLabel(h, `portfolio.${h.toLowerCase()}`)} value={tiles[h.toLowerCase() as 'red']} accent="lavender" hint={t('sig.def.pfHealth', { health: t(`health.${h}`) })} to={healthLink(h)} />
+          ))}
+          <SummaryTile label={t('portfolio.submissions')} value={tiles.submissions14} accent="mint" hint={t('sig.def.pfSubmissions')} onClick={() => set('submissionWithinDays', '14')} />
+          <SummaryTile label={t('portfolio.decisions')} value={tiles.overdueDecisions} accent="peach" hint={t('sig.def.pfDecisions')} />
         </div>
       )}
       <FilterBar activeCount={tokens.length}

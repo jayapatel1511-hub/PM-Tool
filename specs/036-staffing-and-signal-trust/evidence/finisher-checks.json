@@ -1,0 +1,28 @@
+{
+  "base": "http://localhost:5199",
+  "at": "2026-10-12T08:34:14.532Z",
+  "projectActivity": {
+    "rawKeys": [],
+    "openRole": true,
+    "role": true,
+    "filledBy": [
+      "Filled by: Jill Martin, 2026-11-09 to 2026-11-20 → —",
+      "Filled by: — → Jill Martin, 2026-11-09 to 2026-11-20",
+      "Filled by: — → Omar Haddad, 2026-10-26 to 2026-11-06"
+    ]
+  },
+  "adminActivity": {
+    "rawKeys": [],
+    "homeDiscipline": [
+      "Home discipline: Civil → —",
+      "Home discipline: — → Civil",
+      "Home discipline: — → Geotechnical"
+    ]
+  },
+  "chip": [
+    {
+      "title": "Finish-to-Finish, lag 1 day",
+      "sr": "Finish-to-Finish, lag 1 day"
+    }
+  ]
+}

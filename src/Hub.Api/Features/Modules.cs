@@ -53,6 +53,7 @@ public static class HubModules
         WeeklyPlanningEndpoints.Map(api);
         CalendarFeedEndpoints.Map(api);
         AllocationEndpoints.Map(api);
+        OpenRoleEndpoints.Map(api);
         TimelineEndpoints.Map(api);
         ViewEndpoints.Map(api);
         CalendarEndpoints.Map(api);

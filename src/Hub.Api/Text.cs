@@ -593,6 +593,12 @@ public static class Text
         ["planning.indicator.OverPlanned"] = "Over-planned",
         ["planning.indicator.UnderPlanned"] = "Under-planned",
         ["planning.indicator.StalePlan"] = "Stale plan",
+        // open roles (packet 036)
+        ["openRole.filled"] = "This open role is already filled. Decline or cancel its allocation first, or propose without the role.",
+        ["openRole.range"] = "The allocation dates must fall within the open role's dates.",
+        ["openRole.not_open"] = "Only an open role can be changed or cancelled.",
+        ["openRole.dates"] = "Use a through date on or after the from date, within a year, that includes a working day.",
+        ["planning.person_limit"] = "Ask for at most 50 people at a time.",
     };
 
     public static string Get(string key, params object[] args)

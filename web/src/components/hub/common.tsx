@@ -272,9 +272,10 @@ export function SummaryTile({ label, value, accent, hint, to, onClick, selected,
   )
 }
 
-/** A project's or person's stable identity mark (accent derived from the id). */
+/** A project's or person's stable identity mark (accent derived from the id), drawn as a ring, not a fill, so a list of
+ *  projects stays inside the colour budget (§41 R8), as avatars do. */
 export function AccentDot({ id, className }: { id?: string | null; className?: string }) {
-  return <span aria-hidden data-accent={accentOf(id)} className={cn('inline-block size-2.5 shrink-0 rounded-full bg-(--acc-stripe)', className)} />
+  return <span aria-hidden data-accent={accentOf(id)} className={cn('inline-block size-2.5 shrink-0 rounded-full border-2 border-(--acc-stripe)', className)} />
 }
 
 /** Hand-built register tables (design §6): 14 px text, header on the subtle surface, density-driven cells. Callers add

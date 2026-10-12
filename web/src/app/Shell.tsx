@@ -1,4 +1,4 @@
-import { Bell, CheckSquare, ChevronRight, ChevronsLeft, ChevronsRight, LogOut, Search, User } from 'lucide-react'
+import { Bell, CheckSquare, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, LogOut, MoreHorizontal, Search, User } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router'
 import { useDensity, type Density } from '@/components/hub/common'
@@ -14,7 +14,7 @@ import { useAuth } from '@/lib/auth'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { PROJECT_TABS } from '@/pages/projects/ProjectLayout'
-import { BUILT, NAV } from './nav'
+import { BUILT, NAV, type NavItem } from './nav'
 import { ShellSlots } from './slots'
 
 /** The application frame (§13.0, FR-022–FR-025, design §5): a 232 px sidebar at ≥ 1280 px (collapsible to the rail), a
@@ -25,10 +25,14 @@ export function Shell() {
   const [density, setDensity] = useDensity()
   const search = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
-  const items = NAV.filter((n) => BUILT.has(n.id) && n.show(me))
+  const { pathname } = useLocation()
+  const items = NAV.filter((n) => BUILT.has(n.id) && n.sidebar !== false && n.show(me))
   const primary = items.filter((n) => n.primary)
   const more = items.filter((n) => !n.primary)
   const label = collapsed ? 'sr-only' : 'sr-only xl:not-sr-only'
+  // More stays collapsed (§41 R4) unless the current page lives only there; the viewer's toggle then wins for this visit.
+  const [moreOpen, setMoreOpen] = useState<boolean | null>(null)
+  const openMore = moreOpen ?? (more.some((n) => isActive(pathname, n)) && !primary.some((n) => isActive(pathname, n)))
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -59,15 +63,24 @@ export function Shell() {
         </Link>
         <div className="flex-1 overflow-y-auto px-3 pb-3">
           <ul className="space-y-1">
-            {primary.map((n) => <li key={n.id}><RailLink to={n.path} icon={n.icon} label={t(n.label)} collapsed={collapsed} /></li>)}
+            {primary.map((n) => <li key={n.id}><RailLink item={n} collapsed={collapsed} /></li>)}
           </ul>
           {more.length > 0 && (
             <>
-              <p id="nav-more" className={cn('px-3 pb-2 pt-6 text-xs/[18px] font-semibold uppercase tracking-[1px] text-muted-foreground', label)}>{t('nav.more')}</p>
-              <div aria-hidden className={cn('mx-2 my-3 border-t', !collapsed && 'xl:hidden')} />
-              <ul className="space-y-1" aria-labelledby="nav-more">
-                {more.map((n) => <li key={n.id}><RailLink to={n.path} icon={n.icon} label={t(n.label)} collapsed={collapsed} /></li>)}
-              </ul>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" aria-expanded={openMore} aria-controls="nav-more" onClick={() => setMoreOpen(!openMore)}
+                    className={cn('mt-4 flex min-h-11 w-full items-center gap-3 rounded-md text-sm text-muted-foreground hover:bg-sidebar-hover hover:text-foreground', collapsed ? 'justify-center' : 'justify-center xl:justify-start xl:px-3')}>
+                    <MoreHorizontal className="size-5 shrink-0" aria-hidden />
+                    <span className={cn('min-w-0 flex-1 truncate text-left', label)}>{t('nav.more')}</span>
+                    <ChevronDown className={cn('size-4 shrink-0', openMore && 'rotate-180', collapsed ? 'hidden' : 'hidden xl:block')} aria-hidden />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className={collapsed ? '' : 'xl:hidden'}>{t('nav.more')}</TooltipContent>
+              </Tooltip>
+              {openMore && <ul id="nav-more" className="mt-1 space-y-1" aria-label={t('nav.more')}>
+                {more.map((n) => <li key={n.id}><RailLink item={n} collapsed={collapsed} /></li>)}
+              </ul>}
             </>
           )}
         </div>
@@ -128,19 +141,24 @@ export function Shell() {
   )
 }
 
-function RailLink({ to, icon: Icon, label, collapsed }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; collapsed: boolean }) {
-  // Class computed here (not NavLink's function form) so the tooltip trigger can merge props.
-  const active = !!useMatch({ path: to, end: false })
+/** A route or one of its views (`also`) is the current page. */
+const isActive = (pathname: string, n: NavItem) => [n.path, ...(n.also ?? [])].some((p) => pathname === p || pathname.startsWith(`${p}/`))
+
+function RailLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
+  // A plain Link: the item is current for its own route and for its views (`also`), which NavLink cannot express.
+  const active = isActive(useLocation().pathname, item)
+  const { icon: Icon } = item
+  const label = t(item.label)
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <NavLink to={to} aria-current={active ? 'page' : undefined}
+        <Link to={item.path} aria-current={active ? 'page' : undefined}
           className={cn('relative flex min-h-11 items-center gap-3 rounded-md text-sm text-muted-foreground hover:bg-sidebar-hover hover:text-foreground',
             collapsed ? 'justify-center' : 'justify-center xl:justify-start xl:px-3',
             active && 'bg-nav-active font-semibold text-nav-active-foreground before:absolute before:inset-y-2.5 before:left-0 before:w-[3px] before:rounded-full before:bg-nav-active-foreground hover:bg-nav-active hover:text-nav-active-foreground')}>
           <Icon className="size-5 shrink-0" aria-hidden />
           <span className={cn('min-w-0 truncate', collapsed ? 'sr-only' : 'sr-only xl:not-sr-only')}>{label}</span>
-        </NavLink>
+        </Link>
       </TooltipTrigger>
       <TooltipContent side="right" className={collapsed ? '' : 'xl:hidden'}>{label}</TooltipContent>
     </Tooltip>

@@ -94,6 +94,7 @@ Canonical status names, role names, and threshold names are defined once in Sect
 - [39. Weekly Planning Layer Amendment](#39-weekly-planning-layer-amendment)
 - [40. Staffing Signals and Trustworthy Counts Amendment](#40-staffing-signals-and-trustworthy-counts-amendment)
 - [41. Calm Workspace Amendment](#41-calm-workspace-amendment)
+- [42. Supervisor Capacity Signals Amendment](#42-supervisor-capacity-signals-amendment)
 
 ---
 
@@ -2277,7 +2278,7 @@ Standard register tables with panels, per §12.10 and §12.11. Risk Register def
 
 **Navigation.** Person → their My Work (read-only); project → Project Dashboard; counts → filtered lists. Scope and filters are encoded in the URL.
 
-**Key UX considerations.** Counts only, no hours on this screen: hours and capacity belong to the first-release Resource View, which reuses this page's scope and adds the week grid. Work on Restricted projects the viewer cannot see is excluded (ASG-09, §36.1). Counts come from the same permitted materialised state as My Work, so a person's row reconciles with their permitted My Work. On phones the table becomes a read-only card list.
+**Key UX considerations.** Counts only, no hours on this screen: hours and capacity belong to the first-release Resource View, which reuses this page's scope and adds the week grid. §42 adds the one exception: a "This week" column with the Weekly Planner's remaining capacity and time away for each person (FR-SUP-01). Work on Restricted projects the viewer cannot see is excluded (ASG-09, §36.1). Counts come from the same permitted materialised state as My Work, so a person's row reconciles with their permitted My Work. On phones the table becomes a read-only card list.
 
 ---
 
@@ -2886,7 +2887,7 @@ Channels: **App** = in-app notification centre; **Email** = immediate email; **D
 
 ### 17.3 Daily digest
 
-One email per user per day at `digest_send_time_local` (default 07:00), only if there is content. Sections, each capped at 10 rows with "and n more" linking to My Work: Overdue (mine) · Due in the next N days (mine) · Blocked (mine) with blockers · Reviews waiting on me · Decisions I own/requested due or overdue · For PMs and DLs: attention items Critical/Warning per project · Milestones approaching in my projects · **Project updates**: for each project followed at All activity, counts of changes by type since the last digest and the five most important (status, assignment, date, deliverable issued, decision), linking to the Following tab · **For Supervisors — My staff**: direct reports with overdue or blocked work or reviews waiting beyond `review_stale_days`, and assignment changes made by others since the last digest. Subject line: "Hub digest — 3 overdue, 2 reviews, 1 blocked" (plus "· 14 project updates" when that section has content). No digest for projects in Setup/On Hold. Weekend digests are suppressed by default (Recommendation).
+One email per user per day at `digest_send_time_local` (default 07:00), only if there is content. Sections, each capped at 10 rows with "and n more" linking to My Work: Overdue (mine) · Due in the next N days (mine) · Blocked (mine) with blockers · Reviews waiting on me · Decisions I own/requested due or overdue · For PMs and DLs: attention items Critical/Warning per project · Milestones approaching in my projects · **Project updates**: for each project followed at All activity, counts of changes by type since the last digest and the five most important (status, assignment, date, deliverable issued, decision), linking to the Following tab · **For Supervisors — My staff**: direct reports with overdue or blocked work or reviews waiting beyond `review_stale_days`, and assignment changes made by others since the last digest. Subject line: "Hub digest — 3 overdue, 2 reviews, 1 blocked" (plus "· 14 project updates" when that section has content). No digest for projects in Setup/On Hold. Weekend digests are suppressed by default (Recommendation). A digest is also held on a working day on which the person has no availability (§42.3, FR-DIG-01).
 
 ### 17.4 Preferences
 
@@ -3738,8 +3739,8 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 13. Global search, list filters, sorting, grouping, column chooser, exports.
 14. Activity log on all specified changes; item and project history.
 15. Core reports (§19 MVP rows), plus the Workload by Person and Team Capacity reports.
-16. Resource planning (§12.15): `PersonCapacity`, `Leave`, `Allocation` with owner, source category, confidence and visibility; server-side Draft filtering; quick add; repeat, extend, drag, copy; explainable per-band totals; conflict rules RES-08…RES-13 and RES-19 materialised and notified; copy-last-week preview; batched publish; connected People/Projects staffing.
-17. Screens: Weekly Resource Planner (§13.11), Manager Home (§13.19), People and Person Profile (§13.20), My Week published plan on My Work (§13.10); Vacation & Coverage year calendar (§13.21).
+16. Resource planning, as built and approved (this row was rewritten on 2026-10-12; the v1.1 wording it replaces is kept in the history): dated resource allocations with proposal and confirmation (§37.6, packet 029); availability overrides, HR-approved leave import, HR-referenced manual records, office holidays and Vacation & Coverage (§12.18, packet 035); weekly planning entries with source category, confidence and visibility, server-side Private draft filtering, quick add, repeat, extend and copy, explainable per-band totals and the Over-planned, Under-planned and Stale plan indicators (§39, packet 034); open roles, capacity grouping and capacity in the person picker (§40, packet 036); capacity on My Staff and the digest hold (§42, packet 038). The v1.1 `PersonCapacity`, `Leave` and `Allocation` model of §12.15 and its rules RES-08…RES-13 were not adopted in that form (§39): Over-assigned, Under-assigned and Deadline cluster are Workload's rules (§12.15), the planner's equivalents are PLN-10 to PLN-12, and time away replaces the day's capacity (FR-PLN-09) with the affected work listed in Vacation & Coverage (FR-RES-19) instead of a separate Leave Conflict or Coverage Concern rule. Overlapping Plans, Deliverable Pressure, copy-last-week preview, batched publish and connected People/Projects staffing stay deferred (§39.12).
+17. Screens, as built and approved: Weekly Planner and the My Week strip on My Work (§13.21, §13.10, packet 034); Vacation & Coverage (§13.21, packet 035); My Staff with the §42 capacity column (§13.19, packet 038). The v1.1 Manager Home and People/Person Profile screens were not adopted (§39) and their exception cards stay deferred (§39.12); §13.20 is Time / Task Hours.
 18. Thin Decision Register (§12.9) — promoted from Recommended; the product scope lists decisions in every role's view.
 19. HR-approved leave CSV import with validation/preview, stable source identity, update/cancellation handling, freshness and audit; office holidays; read-only HR fields and privacy (§12.18).
 
@@ -5298,3 +5299,76 @@ The census in packet 037's verification record measures AC-CALM-01 to AC-CALM-05
 - **AC-CALM-10.** Common tasks are not slower: the click count for each path below is no higher than before the change, recorded before and after: open my most overdue task from My Work; show a project's overdue tasks for one discipline; open a project's high risks; add 8 h of planning for a person next week; export a project's deliverables; change a task's owner.
 
 People checks: two working Project Managers, shown project Tasks, My Work and the Weekly Planner for 5 seconds each, both name each page's purpose and the first thing they would click; and Jay approves the 17 screens at 1440 px and 1024 px widths against the baseline as neat, clean and complete. Phone layouts keep today's behaviour.
+
+
+## 42. Supervisor Capacity Signals Amendment
+
+Approved scope: on 2026-10-12 a gap review of the October 2026 product research against §39–§41 found two of its recommendations still open, delivered by packet 038 with the default for every open decision (§42.5). This section records the product contract; implementation and acceptance remain pending. It puts the Weekly Planner's figures for the current week on My Staff, where a Supervisor already looks at their people, and holds the daily digest on days a person has no availability. Both reuse records, rules and reads that exist: §39's planning entries and capacity, the FR-PICK-01 batch read, §12.18's approved leave and office holidays, and §17.3's digest. Nothing here adds a rule, threshold, record, permission or endpoint.
+
+Where this section adds to §13.19 (My Staff), §17.3 (daily digest) and §17.4 (preferences), this section governs. §39, §40 and §41 are unchanged. The research's other open recommendations stay deferred as §40.10 lists them.
+
+### 42.1 Scope and boundary
+
+Part A (§42.2) is one column on My Staff. Part B (§42.3) is one condition in the daily digest and one user preference. Outside this amendment: a Manager Home or exception dashboard; changes to the planner's figures, indicators or scope (PLN-05 to PLN-16); new capacity signals or thresholds; holding immediate in-app or email notices; redirecting notices to a delegate; an "away" marker beside names elsewhere in the product; changes to the Staff Assignments report or any export.
+
+### 42.2 Capacity on My Staff
+
+- **FR-SUP-01.** My Staff (§13.19) MUST show, for each listed person, a "This week" column with their remaining capacity for the current ISO week as "N h free" and, when that week has time away, "N h away". The current week is the ISO week identified by its Monday in `org_time_zone` (PLN-01, G-03), on every day of the week. The figures are the Weekly Planner's own for that person and week: remaining capacity by PLN-09 and time away by PLN-06, computed by the same functions, under the viewer's visibility rules (FR-PLN-18), so the two screens never disagree. This column is the one exception to §13.19's "counts only, no hours" rule.
+
+- **FR-SUP-02.** The figures MUST come from the FR-PICK-01 batch planner read (at most 50 people for one week, answered inside the viewer's planner scope, PLN-14). My Staff loads them with one request per 50 listed rows, after the rows render, never one request per person. A person outside the viewer's planner scope is left out of the answer silently and shows no figure. A viewer without planner access sees no column and makes no capacity request.
+
+- **FR-SUP-03.** The column MUST follow the person picker's partial-view rule (FR-PICK-02): whenever the picker would show "Partial view" instead of a figure for that person, so does My Staff, with the PLN-15 label as its tooltip and accessible description. The two surfaces share one rule, including any later change to it.
+
+- **FR-SUP-04.** The planner's indicators for that person and the current week, Over-planned (PLN-10) and the count of Stale plan entries (PLN-12), MUST join the row's signal set and follow §41 R7: the row shows its most severe signal plus "+n", and the capacity chips name their week (for example "Over-planned · W42"). Under-planned is not shown on My Staff. A week with neither indicator shows no chip.
+
+- **FR-SUP-05.** The column MUST be information only. It is not a filter, sort key or export column; the Staff Assignments report (§19) is unchanged; it stores nothing, notifies no one and changes no figure, indicator or response of the Weekly Planner, Workload, My Week or readiness. On phones the column appears in the read-only card as one line of text.
+
+### 42.3 Digest hold during time away
+
+- **FR-DIG-01.** The daily digest (§17.3) MUST NOT be sent to a person on a day on which their daily capacity, by the planner's day rule (FR-PLN-08, with the approved leave and office holidays of §12.18), is 0 h although their calendar counts the day as a working day (normal day capacity above 0 h). A Reduced day with any available hours sends as usual. The condition is evaluated per person when their digest is due, for the calendar date in `org_time_zone` (G-03). The weekend rule of §17.3 is unchanged and applies first; a day that is non-working by the person's calendar is governed by that rule alone.
+
+- **FR-DIG-02.** A held digest MUST NOT be queued, merged or sent later, and the held day does not count as a sent digest. The next digest sent covers its normal window: the dated sections as of its send day, and the Project updates and My staff sections "since the last digest" sent, so the first digest after time away summarises what changed while the person was away, under the existing caps of 10 rows and "and n more" per section (§17.3, §17.5).
+
+- **FR-DIG-03.** The hold MUST be a per-user preference, "Hold my digest on days I'm away", default on for new and existing users, shown on the Preferences page (§13.17) beside the digest on/off and time. Turning it off sends the digest on away days as before. There is no organisation setting, and the preference changes no other notification.
+
+- **FR-DIG-04.** Immediate in-app and email notices, the weekly summary, the Following feed and the in-app notification centre MUST be unchanged by the hold. The hold reads only the day's available hours; it never reads, logs or shows a leave reason, type, balance or HR reference (§12.18), writes no record about the person, and notifies no one. The digest job reports the number of digests held beside the numbers sent and empty.
+
+### 42.4 Acceptance criteria
+
+- **AC-SUP-01.** Given Taylor supervises Yagmur, and the Weekly Planner shows Yagmur's current-week cell as 12.0 h remaining with 8.0 h time away, when Taylor opens My Staff, then Yagmur's row shows "12 h free · 8 h away", and the figures equal the planner's for that person and week.
+
+- **AC-SUP-02.** Given 12 direct reports, then My Staff loads their figures with one request naming those 12 people; given an Admin on the all-staff scope with 120 people, then three requests of at most 50 people each; in neither case one request per person. A person outside the viewer's planner scope shows no figure, and the response contains no data for them.
+
+- **AC-SUP-03.** Given a person for whom the owner picker shows "Partial view", then My Staff shows "Partial view" for that person, with the PLN-15 label as its tooltip and accessible description, and no figure.
+
+- **AC-SUP-04.** Given a person who is Over-planned in the current week with two Stale plan entries, then the row's signal set includes "Over-planned · W42" and "Stale plan 2", shown as the most severe signal plus "+n" under §41 R7; a person with neither shows no capacity chip.
+
+- **AC-SUP-05.** Given My Staff is opened with the column visible, then the Weekly Planner grid, My Week, Workload and readiness responses, and the Staff Assignments report, are identical to their values before packet 038, and the existing packet 034 and 036 automated tests pass unchanged.
+
+- **AC-DIG-01.** Given Yagmur has digest on and an Unavailable override of 0 h on Tuesday, a working day of her calendar, when 07:00 Tuesday organisation time passes, then no digest email is queued for her, the job counts one held digest, and an immediate notice that day is sent as usual.
+
+- **AC-DIG-02.** Given a Reduced override of 4 h on Wednesday, then Wednesday's digest is sent.
+
+- **AC-DIG-03.** Given Yagmur is away Monday to Friday and returns the following Monday, then none of the five digests is sent, nothing is sent on Saturday or Sunday under the existing weekend rule, and Monday's digest is sent with its dated sections as of that Monday and Project updates since the last digest sent before her leave, each section capped at 10 rows with "and n more".
+
+- **AC-DIG-04.** Given Yagmur turns "Hold my digest on days I'm away" off, then her next away day's digest is sent; the preference is hers alone, defaults to on for new and existing users, and changes no other notification.
+
+- **AC-DIG-05.** Given a full-day office holiday for Yagmur's office on Thursday, then Thursday's digest is held; given instead that Friday is a non-working day of her calendar, then Friday is governed by the weekend rule alone and this hold does not apply.
+
+- **AC-DIG-06.** Given any held digest, then no leave reason, type, balance or HR reference is read, logged or shown, no record is written about the person, and her Supervisor receives nothing.
+
+### 42.5 Decisions and deferred proposals
+
+Each decision below uses its default until Jay decides otherwise.
+
+| # | Decision | Default used |
+|---|---|---|
+| D1 | Which week My Staff shows | The current ISO week (Monday in `org_time_zone`), on every day of the week. No next-week switch or horizon. |
+| D2 | Partial-view rule on My Staff | The person picker's (FR-PICK-02), including any later decision on it, so the two surfaces never disagree. |
+| D3 | Admins and Executives on the all-staff scope | Figures for everyone, loaded one request per 50 rows (FR-SUP-02). |
+| D4 | What holds the digest | A working day of the person's calendar with 0 h available, whatever the cause: a full-day Unavailable override, approved full-day leave or an office holiday. A Reduced day sends. |
+| D5 | What happens to a held digest | Nothing is queued or merged. The next digest's "since the last digest" sections cover the time away under the existing caps. |
+| D6 | Where the hold is controlled | A per-user preference, default on. No organisation setting. |
+| D7 | Exports and reports | Unchanged. The column is screen-only. |
+
+Deferred follow-up proposals, outside packet 038: sorting or filtering My Staff by free hours; a next-week column or a horizon on My Staff; Under-planned on My Staff; holding or redirecting immediate notices during time away; an "away" marker beside names in team lists, pickers and comments; showing the hold in Vacation & Coverage; holding the weekly summary. The Manager Home exception dashboard, People and Person Profile, Overlapping Plans and Deliverable Pressure stay deferred as §39.12 lists them.

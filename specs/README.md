@@ -136,3 +136,11 @@ On 2026-10-11 Jay approved both packets and accepted their default decisions ("l
 |---|---|---|---|
 | [036-staffing-and-signal-trust](036-staffing-and-signal-trust/spec.md) | Open roles, Start-to-Start and Finish-to-Finish links, the Status not moving rule (A-21), capacity grouping, capacity in the person picker, counts that match their lists, timelines that name their dates | 005, 007, 016–018, 021, 022, 029, 034 | In build, Phase 1 |
 | [037-calm-workspace](037-calm-workspace/spec.md) | One-row toolbars, grouped project tabs, a shorter sidebar, one-line headers, one signal per row, My Work opening on Today | 019, 022, 034 | In build, Phase 1 |
+
+## Supervisor capacity signals
+
+On 2026-10-12 a gap review of the October 2026 product research against §39–§41 left two cheap recommendations open. Packet 038 records them as §42 and rewrites the stale v1.1 rows 16 and 17 of §27.2. Jay has not yet confirmed its defaults D1–D7; nothing is built.
+
+| Packet | Delivers | Depends on | Status |
+|---|---|---|---|
+| [038-supervisor-capacity-signals](038-supervisor-capacity-signals/spec.md) | A "This week" capacity column on My Staff from the planner's batch read, and a daily-digest hold on working days a person has no availability | 006, 007, 034, 035, 036 | Specified |

@@ -1,0 +1,92 @@
+Packet 036 section 9: Migration up and down (2026-10-12, migrations from the temporary worktree at 4760e2c4)
+
+A. Preview copy: pg_dump -Fc of pm-tuesday-preview-db (read only) restored into pm-acc036-temp as database previewcopy.
+   The copy starts at 20261012014621_StaffingSignals.
+
+Row counts before (all hub tables): 119 tables
+Invariants before (as the live preview has them):
+  task started, started_at null|0
+  task On Hold/Cancelled, started_at null (allowed only if never started)|1
+  task On Hold/Cancelled, null, but a logged start exists|0
+  task Not Started, started_at set|0
+  task started_at set|10
+  deliverable started, started_at null|0
+  deliverable On Hold/Cancelled, started_at null|0
+  deliverable Not Started, started_at set|0
+  deliverable started_at set|9
+  task links|9
+  task links not FinishToStart|7
+  deliverable links|0
+  deliverable links not FinishToStart|0
+
+Down: dotnet ef database update 20261009225223_AvailabilityAndCalendarFeeds --project src/Hub.Api --connection <previewcopy>
+Row counts, before vs after down (diff):
+  1c1
+  < __ef_migrations|33
+  ---
+  > __ef_migrations|32
+  66d65
+  < open_role|7
+Schema after down vs the schema the base API (9beace03) creates on a fresh database (pg_dump --schema-only, comments dropped):
+  1702c1702
+  <     CONSTRAINT ck_risk_scores CHECK ((((probability >= 1) AND (probability <= 3)) AND ((impact >= 1) AND (impact <= 3)))),
+  ---
+  >     CONSTRAINT ck_risk_scores CHECK (((probability >= 1) AND (probability <= 3) AND ((impact >= 1) AND (impact <= 3)))),
+  1880c1880
+  <     CONSTRAINT ck_task_progress CHECK ((((progress_pct >= 0) AND (progress_pct <= 100)) AND ((progress_pct % 10) = 0))),
+  ---
+  >     CONSTRAINT ck_task_progress CHECK (((progress_pct >= 0) AND (progress_pct <= 100) AND ((progress_pct % 10) = 0))),
+  These two lines also differ on a plain restore of the same dump with no migration run (checked in a scratch database):
+  dump and restore rewrites the nested AND of these BETWEEN checks. Everything else matches.
+
+Up: dotnet ef database update --project src/Hub.Api --connection <previewcopy>
+Row counts, before vs after down and up (diff):
+  66c66
+  < open_role|7
+  ---
+  > open_role|0
+Invariants after up:
+  task started, started_at null|0
+  task On Hold/Cancelled, started_at null (allowed only if never started)|1
+  task On Hold/Cancelled, null, but a logged start exists|0
+  task Not Started, started_at set|0
+  task started_at set|10
+  deliverable started, started_at null|0
+  deliverable On Hold/Cancelled, started_at null|1
+  deliverable Not Started, started_at set|0
+  deliverable started_at set|8
+  task links|9
+  task links not FinishToStart|0
+  deliverable links|0
+  deliverable links not FinishToStart|0
+Schema after up vs the live preview schema (same normalisation):
+  1729c1729
+  <     CONSTRAINT ck_risk_scores CHECK ((((probability >= 1) AND (probability <= 3)) AND ((impact >= 1) AND (impact <= 3)))),
+  ---
+  >     CONSTRAINT ck_risk_scores CHECK (((probability >= 1) AND (probability <= 3) AND ((impact >= 1) AND (impact <= 3)))),
+  1908c1908
+  <     CONSTRAINT ck_task_progress CHECK ((((progress_pct >= 0) AND (progress_pct <= 100)) AND ((progress_pct % 10) = 0))),
+  ---
+  >     CONSTRAINT ck_task_progress CHECK (((progress_pct >= 0) AND (progress_pct <= 100) AND ((progress_pct % 10) = 0))),
+
+The live preview has one deliverable, 'Pavement design recommendations', held straight from Not Started on 2026-10-04,
+with started_at set: the preview applied the migration before the 036-D2 fix changed its backfill. The fixed backfill gives
+it no StartedAt (the 'deliverable On Hold/Cancelled, started_at null' line goes from 0 to 1). See defect 036-D7.
+
+B. Base fixtures migrated in place (the section 9 Workload and Evaluator database, loaded through the base API, then
+   migrated by the HEAD API on start):
+  task started, started_at null|0
+  task On Hold/Cancelled, started_at null (allowed only if never started)|1
+  task On Hold/Cancelled, null, but a logged start exists|0
+  task Not Started, started_at set|0
+  task started_at set|10
+  deliverable started, started_at null|0
+  deliverable On Hold/Cancelled, started_at null|1
+  deliverable Not Started, started_at set|0
+  deliverable started_at set|7
+  task links|6
+  task links not FinishToStart|0
+  deliverable links|0
+  deliverable links not FinishToStart|0
+  The two On Hold items with no StartedAt ('Culvert crossing options', 'Pavement design recommendations') were both held
+  straight from Not Started (previous_status = Not Started, no logged start), as the 036-D2 rule requires.

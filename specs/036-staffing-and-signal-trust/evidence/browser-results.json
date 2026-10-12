@@ -1,0 +1,1360 @@
+{
+ "commit": "4760e2c4",
+ "date": "2026-10-12",
+ "part1": {
+  "where": "shared preview: Vite 5185 from the integration checkout, API 5080, pm-tuesday-preview-db; read only",
+  "results": {
+   "AC-ROLE-02a": {
+    "ok": true,
+    "weeks": [
+     "2026-10-12",
+     "2026-10-19",
+     "2026-10-26",
+     "2026-11-02",
+     "2026-11-09",
+     "2026-11-16",
+     "2026-11-23",
+     "2026-11-30"
+    ],
+    "shown": [
+     "Civil technologist SYN-104 Lakeside subdivision servicing (proposal) \u00b7 Civil",
+     "\u00b7 0 h",
+     "\u00b7 0 h",
+     "20 h",
+     "20 h",
+     "20 h",
+     "20 h",
+     "\u00b7 0 h",
+     "\u00b7 0 h",
+     "80 h \u00b7 2026-10-26 \u2013 2026-11-20"
+    ],
+    "apiCells": [
+     0,
+     0,
+     20,
+     20,
+     20,
+     20,
+     0,
+     0
+    ],
+    "screenshot": "AC-ROLE-02a.png"
+   },
+   "R1": {
+    "ok": true,
+    "outsiders": {
+     "priya": {
+      "workloadUnfilled": "Unfilled roles3\n\nOpen roles on projects you can see, spread over working days. They are not counted in anyone's load.\n\nUnfilled roles\nRole\tThis week Oct 12\tWeek of Oct 19\tWeek of Oct 26\tWeek of Nov 2\tWeek of Nov 9\tWeek of Nov 16\tWeek of Nov 23\tWeek of Nov 30\tPlanned\n\nCivil technologist\nSYN-104 Lakeside subdivision servicing (proposal) \u00b7 Civil\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t20 h\t20 h\t20 h\t20 h\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t80 h \u00b7 2026-10-26 \u2013 2026-11-20\n\nSenior reviewer\nSYN-104 Lakeside subdivision servicing (proposal)\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t10 h\t10 h\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t20 h \u00b7 2026-11-02 \u2013 2026-11-13\n\nDrafting support\nSYN-104 Lakeside subdivision servicing (proposal) \u00b7 Civil\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t12 h\t12 h\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t24 h \u00b7 2026-11-09 \u2013 2026-11-20",
+      "workloadMentions": false,
+      "search": false,
+      "rolesTab": false,
+      "rolesTabNotFound": false,
+      "notifications": false,
+      "roleHistoryStatus": 404
+     },
+     "sam": {
+      "workloadUnfilled": "Unfilled roles3\n\nOpen roles on projects you can see, spread over working days. They are not counted in anyone's load.\n\nUnfilled roles\nRole\tThis week Oct 12\tWeek of Oct 19\tWeek of Oct 26\tWeek of Nov 2\tWeek of Nov 9\tWeek of Nov 16\tWeek of Nov 23\tWeek of Nov 30\tPlanned\n\nCivil technologist\nSYN-104 Lakeside subdivision servicing (proposal) \u00b7 Civil\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t20 h\t20 h\t20 h\t20 h\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t80 h \u00b7 2026-10-26 \u2013 2026-11-20\n\nSenior reviewer\nSYN-104 Lakeside subdivision servicing (proposal)\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t10 h\t10 h\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t20 h \u00b7 2026-11-02 \u2013 2026-11-13\n\nDrafting support\nSYN-104 Lakeside subdivision servicing (proposal) \u00b7 Civil\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t12 h\t12 h\t\u00b7\n0 h\n\t\u00b7\n0 h\n\t24 h \u00b7 2026-11-09 \u2013 2026-11-20",
+      "workloadMentions": false,
+      "search": false,
+      "rolesTab": false,
+      "rolesTabNotFound": false,
+      "notifications": false,
+      "roleHistoryStatus": 404
+     },
+     "alex": {
+      "workloadUnfilled": null,
+      "workloadMentions": false,
+      "search": false,
+      "rolesTab": false,
+      "rolesTabNotFound": false,
+      "notifications": false,
+      "roleHistoryStatus": 404
+     },
+     "rita": {
+      "workloadUnfilled": null,
+      "workloadMentions": false,
+      "search": false,
+      "rolesTab": false,
+      "rolesTabNotFound": false,
+      "notifications": false,
+      "roleHistoryStatus": 404
+     }
+    }
+   },
+   "R2": {
+    "ok": true,
+    "insiders": {
+     "marc": {
+      "rolesTab": true,
+      "workload": true,
+      "workloadSection": true
+     },
+     "jill": {
+      "rolesTab": true,
+      "workload": false,
+      "workloadSection": false
+     },
+     "jordan": {
+      "rolesTab": true,
+      "workload": true,
+      "workloadSection": true
+     }
+    }
+   },
+   "R3": {
+    "ok": true,
+    "notificationsMention": {
+     "priya": false,
+     "sam": false,
+     "alex": false,
+     "rita": false
+    }
+   },
+   "R4": {
+    "ok": true,
+    "historyStatus": {
+     "priya": 404,
+     "sam": 404,
+     "alex": 404,
+     "rita": 404,
+     "marc": 200,
+     "jill": 200,
+     "jordan": 200
+    }
+   },
+   "AC-GRP-02a": {
+    "ok": true,
+    "menuUrl": "http://localhost:5185/workload?groupBy=homeDiscipline",
+    "pages": [
+     {
+      "path": "/workload?groupBy=homeDiscipline",
+      "who": "lena",
+      "groups": [
+       "CIVIL \u00b7 2",
+       "GEOTECHNICAL \u00b7 1",
+       "NOT SET \u00b7 19"
+      ],
+      "reload": true,
+      "screenshot": "AC-GRP-02-workload-groupBy-homeDiscipline-lena.png"
+     },
+     {
+      "path": "/workload?groupBy=office",
+      "who": "lena",
+      "groups": [
+       "HEAD OFFICE \u00b7 22"
+      ],
+      "reload": true,
+      "screenshot": "AC-GRP-02-workload-groupBy-office-lena.png"
+     },
+     {
+      "path": "/workload?groupBy=jobTitle",
+      "who": "priya",
+      "groups": [
+       "CIVIL DESIGNER (EIT) \u00b7 1",
+       "CIVIL DESIGNER \u00b7 1",
+       "SYNTHETIC FIXTURE \u00b7 12",
+       "GEOTECHNICAL LEAD \u00b7 1",
+       "SENIOR TECHNICAL REVIEWER \u00b7 1",
+       "SENIOR CIVIL ENGINEER \u00b7 1",
+       "PROJECT MANAGER \u00b7 1"
+      ],
+      "reload": true,
+      "screenshot": "AC-GRP-02-workload-groupBy-jobTitle-priya.png"
+     },
+     {
+      "path": "/workload",
+      "who": "sam",
+      "groups": [
+       "REPORTS TO SAM PATEL \u00b7 3"
+      ],
+      "reload": true,
+      "screenshot": "AC-GRP-02-workload-sam.png"
+     },
+     {
+      "path": "/planner?groupBy=homeDiscipline",
+      "who": "lena",
+      "groups": [
+       "Civil \u00b7 2",
+       "Geotechnical \u00b7 1",
+       "Not set \u00b7 19"
+      ],
+      "reload": true,
+      "screenshot": "AC-GRP-02-planner-groupBy-homeDiscipline-lena.png"
+     },
+     {
+      "path": "/planner?groupBy=office",
+      "who": "priya",
+      "groups": [
+       "Head Office \u00b7 18"
+      ],
+      "reload": true,
+      "screenshot": "AC-GRP-02-planner-groupBy-office-priya.png"
+     },
+     {
+      "path": "/planner?groupBy=jobTitle",
+      "who": "sam",
+      "groups": [
+       "Civil Designer (EIT) \u00b7 1",
+       "Civil Designer \u00b7 1",
+       "Civil Group Manager \u00b7 1",
+       "Senior Civil Engineer \u00b7 1"
+      ],
+      "reload": true,
+      "screenshot": "AC-GRP-02-planner-groupBy-jobTitle-sam.png"
+     },
+     {
+      "path": "/planner",
+      "who": "lena",
+      "groups": [
+       "Reports to Sam Patel \u00b7 3",
+       "Reports to Synthetic planning scale person 0 \u00b7 11",
+       "Reports to Lena Brooks \u00b7 4",
+       "No supervisor \u00b7 4"
+      ],
+      "reload": true,
+      "screenshot": "AC-GRP-02-planner-lena.png"
+     }
+    ]
+   },
+   "AC-GRP-02b": {
+    "ok": true,
+    "notSet": [
+     {
+      "path": "/workload?groupBy=homeDiscipline",
+      "notSet": {
+       "label": "NOT SET \u00b7 19",
+       "rows": 19,
+       "weeks": 8,
+       "subtotals": [
+        25,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20
+       ],
+       "sumOfRows": [
+        25,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20
+       ],
+       "names": [
+        "Synthetic planning scale person 2",
+        "Diane Roy",
+        "Jordan Lee",
+        "Lena Brooks",
+        "Marc Dubois",
+        "Priya Nair",
+        "Rita Gomez",
+        "Sam Patel",
+        "Synthetic planning scale person 0",
+        "Synthetic planning scale person 1",
+        "Synthetic planning scale person 10",
+        "Synthetic planning scale person 11",
+        "Synthetic planning scale person 3",
+        "Synthetic planning scale person 4",
+        "Synthetic planning scale person 5",
+        "Synthetic planning scale person 6",
+        "Synthetic planning scale person 7",
+        "Synthetic planning scale person 8",
+        "Synthetic planning scale person 9"
+       ]
+      },
+      "last": "NOT SET \u00b7 19"
+     },
+     {
+      "path": "/planner?groupBy=homeDiscipline",
+      "notSet": {
+       "label": "Not set \u00b7 19",
+       "rows": 19,
+       "weeks": 12,
+       "subtotals": [
+        118,
+        139,
+        63,
+        84,
+        105,
+        126,
+        63,
+        81,
+        101.5,
+        122,
+        0,
+        0
+       ],
+       "sumOfRows": [
+        118,
+        139,
+        63,
+        84,
+        105,
+        126,
+        63,
+        81,
+        101.5,
+        122,
+        0,
+        0
+       ],
+       "names": [
+        "Synthetic planning scale person 2",
+        "Priya Nair",
+        "Sam Patel",
+        "Diane Roy",
+        "Jordan Lee",
+        "Lena Brooks",
+        "Marc Dubois",
+        "Rita Gomez",
+        "Synthetic planning scale person 0",
+        "Synthetic planning scale person 1",
+        "Synthetic planning scale person 10",
+        "Synthetic planning scale person 11",
+        "Synthetic planning scale person 3",
+        "Synthetic planning scale person 4",
+        "Synthetic planning scale person 5",
+        "Synthetic planning scale person 6",
+        "Synthetic planning scale person 7",
+        "Synthetic planning scale person 8",
+        "Synthetic planning scale person 9"
+       ]
+      },
+      "last": "Not set \u00b7 19"
+     }
+    ]
+   },
+   "AC-GRP-02c": {
+    "ok": true,
+    "pages": [
+     {
+      "path": "/workload?groupBy=homeDiscipline",
+      "who": "lena",
+      "groups": 3,
+      "weeksChecked": 8,
+      "mismatches": []
+     },
+     {
+      "path": "/workload?groupBy=office",
+      "who": "lena",
+      "groups": 1,
+      "weeksChecked": 8,
+      "mismatches": []
+     },
+     {
+      "path": "/workload?groupBy=jobTitle",
+      "who": "priya",
+      "groups": 7,
+      "weeksChecked": 8,
+      "mismatches": []
+     },
+     {
+      "path": "/workload",
+      "who": "sam",
+      "groups": 1,
+      "weeksChecked": 8,
+      "mismatches": []
+     },
+     {
+      "path": "/planner?groupBy=homeDiscipline",
+      "who": "lena",
+      "groups": 3,
+      "weeksChecked": 12,
+      "mismatches": []
+     },
+     {
+      "path": "/planner?groupBy=office",
+      "who": "priya",
+      "groups": 1,
+      "weeksChecked": 12,
+      "mismatches": []
+     },
+     {
+      "path": "/planner?groupBy=jobTitle",
+      "who": "sam",
+      "groups": 4,
+      "weeksChecked": 12,
+      "mismatches": []
+     },
+     {
+      "path": "/planner",
+      "who": "lena",
+      "groups": 4,
+      "weeksChecked": 12,
+      "mismatches": []
+     }
+    ]
+   },
+   "AC-PICK-01a": {
+    "ok": true,
+    "cases": [
+     {
+      "key": "SYN-101-T0004",
+      "week": "2026-10-12",
+      "figures": {
+       "Alex Chen": {
+        "figure": "7 h over",
+        "planner": -7,
+        "equal": true
+       },
+       "Jill Martin": {
+        "figure": "30 h free",
+        "planner": 30,
+        "equal": true
+       },
+       "Marc Dubois": {
+        "figure": "40 h free",
+        "planner": 40,
+        "equal": true
+       },
+       "Sam Patel": {
+        "figure": "37 h free",
+        "planner": 37,
+        "equal": true
+       }
+      },
+      "screenshot": "AC-PICK-SYN-101-T0004.png"
+     },
+     {
+      "key": "SYN-101-T0007",
+      "week": "2026-10-19",
+      "figures": {
+       "Alex Chen": {
+        "figure": "35 h over",
+        "planner": -35,
+        "equal": true
+       },
+       "Jill Martin": {
+        "figure": "18 h free \u00b7 12 h away",
+        "planner": 18,
+        "equal": true
+       },
+       "Marc Dubois": {
+        "figure": "40 h free",
+        "planner": 40,
+        "equal": true
+       },
+       "Sam Patel": {
+        "figure": "37 h free",
+        "planner": 37,
+        "equal": true
+       }
+      },
+      "screenshot": "AC-PICK-SYN-101-T0007.png"
+     },
+     {
+      "key": "SYN-101-T0011",
+      "week": "2026-10-26",
+      "figures": {
+       "Alex Chen": {
+        "figure": "40 h free",
+        "planner": 40,
+        "equal": true
+       },
+       "Jill Martin": {
+        "figure": "30 h free",
+        "planner": 30,
+        "equal": true
+       },
+       "Marc Dubois": {
+        "figure": "40 h free",
+        "planner": 40,
+        "equal": true
+       },
+       "Sam Patel": {
+        "figure": "40 h free",
+        "planner": 40,
+        "equal": true
+       }
+      },
+      "screenshot": "AC-PICK-SYN-101-T0011.png"
+     },
+     {
+      "key": "SYN-101-T0013",
+      "week": "2026-10-19",
+      "figures": {
+       "Alex Chen": {
+        "figure": "35 h over",
+        "planner": -35,
+        "equal": true
+       },
+       "Jill Martin": {
+        "figure": "18 h free \u00b7 12 h away",
+        "planner": 18,
+        "equal": true
+       },
+       "Marc Dubois": {
+        "figure": "40 h free",
+        "planner": 40,
+        "equal": true
+       },
+       "Sam Patel": {
+        "figure": "37 h free",
+        "planner": 37,
+        "equal": true
+       }
+      },
+      "screenshot": "AC-PICK-SYN-101-T0013.png"
+     },
+     {
+      "key": "SYN-101-T0003",
+      "week": "2026-10-12",
+      "figures": {
+       "Alex Chen": {
+        "figure": "7 h over",
+        "planner": -7,
+        "equal": true
+       },
+       "Jill Martin": {
+        "figure": "30 h free",
+        "planner": 30,
+        "equal": true
+       },
+       "Marc Dubois": {
+        "figure": "40 h free",
+        "planner": 40,
+        "equal": true
+       },
+       "Sam Patel": {
+        "figure": "37 h free",
+        "planner": 37,
+        "equal": true
+       }
+      },
+      "screenshot": "AC-PICK-SYN-101-T0003.png"
+     }
+    ]
+   },
+   "AC-PICK-01b": {
+    "ok": true,
+    "readOnlyForSam": [],
+    "cases": [
+     {
+      "key": "SYN-101-T0004",
+      "why": "start 2026-10-12",
+      "expected": "2026-10-12",
+      "requested": [
+       "2026-10-12"
+      ]
+     },
+     {
+      "key": "SYN-101-T0007",
+      "why": "start 2026-10-19 (week W)",
+      "expected": "2026-10-19",
+      "requested": [
+       "2026-10-19"
+      ]
+     },
+     {
+      "key": "SYN-101-T0011",
+      "why": "no start, due Sun 2026-11-01",
+      "expected": "2026-10-26",
+      "requested": [
+       "2026-10-26"
+      ]
+     },
+     {
+      "key": "SYN-101-T0013",
+      "why": "no start, due 2026-10-22",
+      "expected": "2026-10-19",
+      "requested": [
+       "2026-10-19"
+      ]
+     },
+     {
+      "key": "SYN-101-T0003",
+      "why": "no dates",
+      "expected": "2026-10-12",
+      "requested": [
+       "2026-10-12"
+      ]
+     }
+    ]
+   },
+   "AC-PICK-02a": {
+    "ok": true,
+    "cases": [
+     {
+      "key": "SYN-101-T0004",
+      "responsePeople": [
+       "Alex Chen",
+       "Jill Martin",
+       "Sam Patel",
+       "Marc Dubois"
+      ],
+      "noFigure": [
+       "Diane Roy",
+       "Jordan Lee",
+       "Lena Brooks",
+       "Omar Haddad",
+       "Priya Nair",
+       "Rita Gomez",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning"
+      ]
+     },
+     {
+      "key": "SYN-101-T0007",
+      "responsePeople": [
+       "Alex Chen",
+       "Jill Martin",
+       "Sam Patel",
+       "Marc Dubois"
+      ],
+      "noFigure": [
+       "Diane Roy",
+       "Jordan Lee",
+       "Lena Brooks",
+       "Omar Haddad",
+       "Priya Nair",
+       "Rita Gomez",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning"
+      ]
+     },
+     {
+      "key": "SYN-101-T0011",
+      "responsePeople": [
+       "Jill Martin",
+       "Alex Chen",
+       "Marc Dubois",
+       "Sam Patel"
+      ],
+      "noFigure": [
+       "Diane Roy",
+       "Jordan Lee",
+       "Lena Brooks",
+       "Omar Haddad",
+       "Priya Nair",
+       "Rita Gomez",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning"
+      ]
+     },
+     {
+      "key": "SYN-101-T0013",
+      "responsePeople": [
+       "Alex Chen",
+       "Jill Martin",
+       "Sam Patel",
+       "Marc Dubois"
+      ],
+      "noFigure": [
+       "Diane Roy",
+       "Jordan Lee",
+       "Lena Brooks",
+       "Omar Haddad",
+       "Priya Nair",
+       "Rita Gomez",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning"
+      ]
+     },
+     {
+      "key": "SYN-101-T0003",
+      "responsePeople": [
+       "Alex Chen",
+       "Jill Martin",
+       "Sam Patel",
+       "Marc Dubois"
+      ],
+      "noFigure": [
+       "Diane Roy",
+       "Jordan Lee",
+       "Lena Brooks",
+       "Omar Haddad",
+       "Priya Nair",
+       "Rita Gomez",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning",
+       "Synthetic planning"
+      ]
+     }
+    ]
+   },
+   "AC-PICK-02c": {
+    "ok": true,
+    "assigneeButtons": 0,
+    "gridRequests": 0,
+    "figures": 0,
+    "screenshot": "AC-PICK-02c-alex.png"
+   },
+   "AC-PICK-03b": {
+    "ok": true,
+    "requestsPerOpen": [
+     [
+      "SYN-101-T0004",
+      1,
+      "2026-10-12"
+     ],
+     [
+      "SYN-101-T0007",
+      1,
+      "2026-10-19"
+     ],
+     [
+      "SYN-101-T0011",
+      1,
+      "2026-10-26"
+     ],
+     [
+      "SYN-101-T0013",
+      1,
+      "2026-10-19"
+     ],
+     [
+      "SYN-101-T0003",
+      1,
+      "2026-10-12"
+     ]
+    ],
+    "candidates": 22
+   },
+   "R6": {
+    "ok": true,
+    "samOmarAndAlex": {
+     "status": 200,
+     "people": [
+      "Alex Chen"
+     ]
+    },
+    "samOmarOnlyEqualsUnknownId": true,
+    "samOmarStatus": 200,
+    "alexJill": {
+     "status": 403
+    }
+   },
+   "AC-CNT-05": {
+    "ok": true,
+    "home": {
+     "jordan": {
+      "openTasks": 0,
+      "lanesPlusOnHold": 0,
+      "onHold": 0,
+      "onHoldHref": "/tasks?status=On+Hold",
+      "onHoldList": 0,
+      "review": "Review and revision: Ready for Review, In Review, Revision Required"
+     },
+     "jordan?projects=all": {
+      "openTasks": 32,
+      "lanesPlusOnHold": 32,
+      "onHold": 1,
+      "onHoldHref": "/tasks?projects=all&status=On+Hold",
+      "onHoldList": 1,
+      "review": "Review and revision: Ready for Review, In Review, Revision Required"
+     },
+     "priya": {
+      "openTasks": 28,
+      "lanesPlusOnHold": 28,
+      "onHold": 1,
+      "onHoldHref": "/tasks?status=On+Hold",
+      "onHoldList": 1,
+      "review": "Review and revision: Ready for Review, In Review, Revision Required"
+     },
+     "priya?projects=all": {
+      "openTasks": 31,
+      "lanesPlusOnHold": 31,
+      "onHold": 1,
+      "onHoldHref": "/tasks?projects=all&status=On+Hold",
+      "onHoldList": 1,
+      "review": "Review and revision: Ready for Review, In Review, Revision Required"
+     },
+     "sam": {
+      "openTasks": 0,
+      "lanesPlusOnHold": 0,
+      "onHold": 0,
+      "onHoldHref": "/tasks?status=On+Hold",
+      "onHoldList": 0,
+      "review": "Review and revision: Ready for Review, In Review, Revision Required"
+     },
+     "sam?projects=all": {
+      "openTasks": 31,
+      "lanesPlusOnHold": 31,
+      "onHold": 1,
+      "onHoldHref": "/tasks?projects=all&status=On+Hold",
+      "onHoldList": 1,
+      "review": "Review and revision: Ready for Review, In Review, Revision Required"
+     }
+    },
+    "screenshot": "AC-CNT-05-home-priya-all.png"
+   },
+   "AC-CNT-08": {
+    "ok": true,
+    "definition": "Review and revision: Ready for Review, In Review, Revision Required",
+    "screenshot": "AC-CNT-08.png"
+   },
+   "AC-CNT-06": {
+    "ok": true,
+    "tiles": {
+     "home": [
+      {
+       "name": "Active Projects",
+       "hint": "Projects in this scope whose status is Active.",
+       "info": false,
+       "kind": "link"
+      },
+      {
+       "name": "Open Tasks",
+       "hint": "Tasks that are not Complete or Cancelled, On Hold included.",
+       "info": false,
+       "kind": "link"
+      },
+      {
+       "name": "Overdue Tasks",
+       "hint": "Open tasks past their due date.",
+       "info": false,
+       "kind": "box with link"
+      },
+      {
+       "name": "On Track",
+       "hint": "Active projects with computed health Green, out of those with an evaluated health. An override never counts.",
+       "info": true,
+       "kind": "info button"
+      },
+      {
+       "name": "Team Members",
+       "hint": "People active on at least one project in this scope.",
+       "info": false,
+       "kind": "link"
+      }
+     ],
+     "dashboard": [
+      {
+       "name": "Tasks",
+       "hint": "Tasks in this scope except Cancelled. In review counts Ready for Review and In Review only.",
+       "info": false,
+       "kind": "box with link"
+      },
+      {
+       "name": "Deliverables",
+       "hint": "All deliverables in this scope. Due \u2264 14 d counts open ones due in the next 14 days; Issued includes Accepted.",
+       "info": false,
+       "kind": "box with link"
+      },
+      {
+       "name": "Decisions",
+       "hint": "Decisions that are Pending, Under Review or Deferred, across the whole project.",
+       "info": false,
+       "kind": "box with link"
+      },
+      {
+       "name": "Issues and risks",
+       "hint": "Open issues, and open issues and risks rated High, across the whole project.",
+       "info": false,
+       "kind": "box with link"
+      }
+     ],
+     "portfolio": [
+      {
+       "name": "Active projects",
+       "hint": "Projects in the list whose status is Active.",
+       "info": false,
+       "kind": "filter button"
+      },
+      {
+       "name": "\u25a0Red (computed)",
+       "hint": "Active projects whose computed health is Red. A reported health does not change it.",
+       "info": false,
+       "kind": "link"
+      },
+      {
+       "name": "\u25b2Yellow (computed)",
+       "hint": "Active projects whose computed health is Yellow. A reported health does not change it.",
+       "info": false,
+       "kind": "link"
+      },
+      {
+       "name": "\u25cfGreen (computed)",
+       "hint": "Active projects whose computed health is Green. A reported health does not change it.",
+       "info": false,
+       "kind": "link"
+      },
+      {
+       "name": "Submissions in 14 days",
+       "hint": "Projects whose next submission is due within 14 days.",
+       "info": false,
+       "kind": "filter button"
+      },
+      {
+       "name": "Overdue decisions",
+       "hint": "Overdue decisions, summed over the projects in the list.",
+       "info": true,
+       "kind": "info button"
+      }
+     ]
+    },
+    "withoutHint": [],
+    "axeSeriousOrCritical": [],
+    "keyboardTooltipOnOpenTasks": "Tasks that are not Complete or Cancelled, On Hold included.",
+    "screenshot": "AC-CNT-06.png"
+   },
+   "AC-CNT-07": {
+    "ok": true,
+    "tiles": [
+     [
+      "Tasks",
+      false
+     ],
+     [
+      "Deliverables",
+      false
+     ],
+     [
+      "Decisions",
+      true
+     ],
+     [
+      "Issues and risks",
+      true
+     ]
+    ],
+    "screenshot": "AC-CNT-07.png"
+   },
+   "AC-DEPT-06": {
+    "ok": true,
+    "timelineArrowTitles": [
+     "Finish-to-Start \u00b7 no lag",
+     "Finish-to-Start \u00b7 lag 2 working days",
+     "Start-to-Start \u00b7 no lag",
+     "Start-to-Start \u00b7 lag 2 working days",
+     "Finish-to-Finish \u00b7 no lag",
+     "Finish-to-Finish \u00b7 lag 1 working day"
+    ],
+    "ganttArrowTitles": [
+     "Finish-to-Start \u00b7 no lag",
+     "Finish-to-Start \u00b7 lag 2 working days",
+     "Start-to-Start \u00b7 no lag",
+     "Start-to-Start \u00b7 lag 2 working days",
+     "Finish-to-Finish \u00b7 no lag",
+     "Finish-to-Finish \u00b7 lag 1 working day"
+    ],
+    "screenshots": [
+     "AC-DEPT-06-timeline.png",
+     "AC-DEPT-06-gantt.png"
+    ]
+   },
+   "AC-TL-01": {
+    "ok": true,
+    "barLabel": "SYN-105-T0013 No start date task, 2026-10-12 to 2026-10-22, Not Started, 0% complete \u00b7 start not set",
+    "fadeWidth": 7,
+    "barWidth": 77,
+    "legend": "Bar: start \u2192 due | Start not set | Not Started | In Progress | Revision Required | Issued | Overdue to today | Original dates | Milestone | Original milestone date | Unfinished, overdue predecessor | Finish-to-Start | Start-to-Start | Finish-to-Finish | Today |  | Arrow ends show the link: finish \u2192 start, start \u2192 start or finish \u2192 finish. Point at an arrow for its type and lag. |  | Drag a bar or diamond to change its dates; you confirm before anything is saved, and nothing else moves.",
+    "gantt": "SYN-105-T0013 No start date task, 2026-10-12 to 2026-10-22, Not Started, 0% complete \u00b7 start not set",
+    "screenshot": "AC-TL-01-timeline-legend.png"
+   },
+   "AC-TL-02": {
+    "ok": true,
+    "timelineRow": "T0014Permit drawing markups",
+    "ganttRow": "T0014Permit drawing markups",
+    "screenshot": "AC-DEPT-06-timeline.png"
+   },
+   "SC-003": {
+    "ok": true,
+    "today": "2026-10-12",
+    "chips": [
+     {
+      "link": "L1",
+      "successor": "SYN-105-T0002 Grading design",
+      "ok": true,
+      "ui": [
+       {
+        "text": "SYN-105-T0001 Topographic survey processing FS Finish-to-Start Alex Chen \u00b7 2026-10-13 \u2713 Complete",
+        "satisfied": true,
+        "chip": "FS",
+        "chipTitle": "Finish-to-Start"
+       }
+      ],
+      "apiState": {
+       "blocked": false,
+       "waiting": false,
+       "blockedBy": [],
+       "dateFlag": null
+      },
+      "expected": {
+       "chip": "FS",
+       "satisfied": true,
+       "blocked": false,
+       "waiting": false,
+       "flag": null
+      },
+      "listRow": " SYN-105-T0002 Grading design \u2014 Civil JM Jill Martin \u2014 \u25cb Not Started Low Medium High Critical 2026-10-15 2026-10-26 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100% 8 h 1 h ago"
+     },
+     {
+      "link": "L2",
+      "successor": "SYN-105-T0004 Utility conflict drawings",
+      "ok": true,
+      "ui": [
+       {
+        "text": "SYN-105-T0003 Utility locate review FS +2d Finish-to-Start, lag 2 days Alex Chen \u00b7 2026-10-12 \u2713 Complete",
+        "satisfied": false,
+        "chip": "FS +2d",
+        "chipTitle": "Finish-to-Start, lag 2 days"
+       }
+      ],
+      "apiState": {
+       "blocked": true,
+       "waiting": false,
+       "blockedBy": [
+        "lag 2 days"
+       ],
+       "dateFlag": "Starts 2026-10-12 before SYN-105-T0003 is due 2026-10-15"
+      },
+      "expected": {
+       "chip": "FS +2d",
+       "satisfied": false,
+       "blocked": true,
+       "waiting": false,
+       "flag": "Starts 2026-10-12 before SYN-105-T0003 is due 2026-10-15"
+      },
+      "listRow": " SYN-105-T0004 Utility conflict drawings \u2014 Civil JM Jill Martin \u2014 \u25cb Not Started \u25a0 Blocked +1 Low Medium High Critical 2026-10-12 2026-10-21 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100% 8 h 1 h ago"
+     },
+     {
+      "link": "L3",
+      "successor": "SYN-105-T0006 Storm sewer profiles",
+      "ok": true,
+      "ui": [
+       {
+        "text": "SYN-105-T0005 Storm sewer layout SS Start-to-Start Alex Chen \u00b7 2026-10-21 \u25d0 In Progress",
+        "satisfied": true,
+        "chip": "SS",
+        "chipTitle": "Start-to-Start"
+       }
+      ],
+      "apiState": {
+       "blocked": false,
+       "waiting": false,
+       "blockedBy": [],
+       "dateFlag": null
+      },
+      "expected": {
+       "chip": "SS",
+       "satisfied": true,
+       "blocked": false,
+       "waiting": false,
+       "flag": null
+      },
+      "listRow": " SYN-105-T0006 Storm sewer profiles \u2014 Civil JM Jill Martin \u2014 \u25cb Not Started Low Medium High Critical 2026-10-12 2026-10-21 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100% 8 h 1 h ago"
+     },
+     {
+      "link": "L4",
+      "successor": "SYN-105-T0008 Drainage area plan",
+      "ok": true,
+      "ui": [
+       {
+        "text": "SYN-105-T0007 Grading model SS +2d Start-to-Start, lag 2 days Alex Chen \u00b7 2026-10-26 \u25d0 In Progress",
+        "satisfied": false,
+        "chip": "SS +2d",
+        "chipTitle": "Start-to-Start, lag 2 days"
+       }
+      ],
+      "apiState": {
+       "blocked": true,
+       "waiting": false,
+       "blockedBy": [
+        "start link, lag 2 days"
+       ],
+       "dateFlag": "Starts 2026-10-12 before SYN-105-T0007 starts 2026-10-15"
+      },
+      "expected": {
+       "chip": "SS +2d",
+       "satisfied": false,
+       "blocked": true,
+       "waiting": false,
+       "flag": "Starts 2026-10-12 before SYN-105-T0007 starts 2026-10-15"
+      },
+      "listRow": " SYN-105-T0008 Drainage area plan \u2014 Civil JM Jill Martin \u2014 \u25cb Not Started \u25a0 Blocked +1 Low Medium High Critical 2026-10-12 2026-10-26 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100% 8 h 1 h ago"
+     },
+     {
+      "link": "L5",
+      "successor": "SYN-105-T0010 Quantity estimate",
+      "ok": true,
+      "ui": [
+       {
+        "text": "SYN-105-T0009 Specifications FF Finish-to-Finish Alex Chen \u00b7 2026-10-21 \u25d0 In Progress",
+        "satisfied": true,
+        "chip": "FF",
+        "chipTitle": "Finish-to-Finish"
+       }
+      ],
+      "apiState": {
+       "blocked": false,
+       "waiting": false,
+       "blockedBy": [],
+       "dateFlag": "Due 2026-10-20 before SYN-105-T0009 is due 2026-10-21"
+      },
+      "expected": {
+       "chip": "FF",
+       "satisfied": true,
+       "blocked": false,
+       "waiting": false,
+       "flag": "Due 2026-10-20 before SYN-105-T0009 is due 2026-10-21"
+      },
+      "listRow": " SYN-105-T0010 Quantity estimate \u2014 Civil JM Jill Martin \u2014 \u25d0 In Progress \u25b2 Due soon +1 Low Medium High Critical 2026-10-12 2026-10-20 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100% 8 h 1 h ago"
+     },
+     {
+      "link": "L6",
+      "successor": "SYN-105-T0012 Drawing checklist",
+      "ok": true,
+      "ui": [
+       {
+        "text": "SYN-105-T0011 Design report FF +1d Finish-to-Finish, lag 1 days Alex Chen \u00b7 2026-10-13 \u25cb Not Started",
+        "satisfied": true,
+        "chip": "FF +1d",
+        "chipTitle": "Finish-to-Finish, lag 1 days"
+       }
+      ],
+      "apiState": {
+       "blocked": false,
+       "waiting": false,
+       "blockedBy": [],
+       "dateFlag": null
+      },
+      "expected": {
+       "chip": "FF +1d",
+       "satisfied": true,
+       "blocked": false,
+       "waiting": false,
+       "flag": null
+      },
+      "listRow": " SYN-105-T0012 Drawing checklist \u2014 Civil JM Jill Martin \u2014 \u25d0 In Progress \u25b2 Due soon Low Medium High Critical 2026-10-12 2026-10-15 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100% 8 h 1 h ago"
+     }
+    ]
+   },
+   "AC-DEPT-02-04-B": {
+    "ok": true,
+    "note": "same pass as SC-003"
+   },
+   "AC-DEPT-01b": {
+    "ok": true,
+    "options": [
+     [
+      "FinishToStart",
+      "Finish-to-Start"
+     ],
+     [
+      "StartToStart",
+      "Start-to-Start"
+     ],
+     [
+      "FinishToFinish",
+      "Finish-to-Finish"
+     ]
+    ],
+    "hints": {
+     "FinishToStart": "The successor waits until the predecessor finishes, plus the lag.",
+     "StartToStart": "The successor waits until the predecessor starts, plus the lag.",
+     "FinishToFinish": "The successor should finish no earlier than the predecessor, plus the lag. It never waits on this link."
+    },
+    "savedLinks": 0,
+    "screenshot": "AC-DEPT-01b-dialog.png",
+    "chips": "see SC-003-L1..L6 screenshots"
+   },
+   "AC-STALE-03b-B": {
+    "ok": true,
+    "field": {
+     "value": "15",
+     "min": "",
+     "max": "",
+     "type": "number"
+    },
+    "group": "Indicator thresholds",
+    "screenshot": "AC-STALE-03b.png"
+   }
+  }
+ },
+ "part2": {
+  "where": "temporary HEAD stack: API and SPA built at 4760e2c4 on 5091 (pm-acc036-temp, database hub) and 5092 (database freshhead, seeded through the HEAD API)",
+  "results": {
+   "AC-TL-01-backdated": {
+    "ok": true,
+    "bar": "SYN-105-T0013 No start date task, 2026-10-02 to 2026-10-22, Not Started, 0% complete \u00b7 start not set",
+    "barWidth": 588,
+    "fadeWidth": 280,
+    "fadedDays": 10,
+    "gantt": "SYN-105-T0013 No start date task, 2026-10-02 to 2026-10-22, Not Started, 0% complete \u00b7 start not set",
+    "screenshot": "AC-TL-01-backdated-week-zoom.png"
+   },
+   "AC-TL-03-B": {
+    "ok": true,
+    "timelineUnscheduled": [
+     "DeliverableSYN-105-D001Permit drawingsCivil",
+     "MilestoneSYN-105-M01Client workshop"
+    ],
+    "ganttUnscheduled": [
+     "TaskSYN-101SYN-101-T0003Municipal design standards check",
+     "TaskSYN-101SYN-101-T0014Culvert crossing options",
+     "DeliverableSYN-105SYN-105-D001Permit drawings",
+     "MilestoneSYN-105SYN-105-M01Client workshop"
+    ],
+    "screenshots": [
+     "AC-TL-03-timeline.png",
+     "AC-TL-03-gantt.png"
+    ]
+   },
+   "AC-TL-04-B": {
+    "ok": true,
+    "createdAtUtc": "2026-10-12T01:30:00Z (22:30 on 2026-10-11 in America/Halifax)",
+    "deliverableBar": "SYN-105-D002 Halifax evening deliverable, 2026-10-11 to 2026-11-13, Not Started, 0% complete \u00b7 start not set",
+    "createdOnInPayload": [
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-12\"",
+     "\"createdOn\":\"2026-10-11\""
+    ],
+    "screenshot": "AC-TL-01-backdated-week-zoom.png"
+   },
+   "AC-ROLE-03a": {
+    "ok": true,
+    "prefill": [
+     "2026-10-26",
+     "2026-11-20",
+     "80"
+    ],
+    "postBody": {
+     "openRoleId": "01a12e72-936c-7fdc-8ce1-706b0663ac08",
+     "personId": "01a12e5a-25f8-7377-ac61-3810aee13f6c",
+     "fromDate": "2026-10-26",
+     "throughDate": "2026-11-20",
+     "plannedHours": 80
+    },
+    "status": 200,
+    "roleAfterFill": {
+     "status": "Filled",
+     "filledAllocationId": "01a12e72-9476-73eb-a9fb-375e5d8fe1fa"
+    },
+    "rowAfterFill": "Civil technologist 2026-10-26 \u2013 2026-11-20 80 h \u2713 Filled JM Jill Martin Proposed ",
+    "activity": [
+     "StatusChanged 01a12e72-942e-7bdd-b0b2-7dd9af93b101",
+     "Created 01a12e72-935e-7992-8a18-e3d7fceadf0b"
+    ],
+    "screenshots": [
+     "AC-ROLE-01-created.png",
+     "AC-ROLE-03a-fill-form.png",
+     "AC-ROLE-03a-filled.png"
+    ],
+    "note": "The script's row check expected 'Filled \u00b7 Jill Martin'; the row reads 'Filled JM Jill Martin Proposed' (Filled by column). Corrected after the run; every other check held as recorded."
+   },
+   "AC-ROLE-04b-B": {
+    "ok": true,
+    "roleAfterCancel": {
+     "status": "Open",
+     "filledAllocationId": null
+    },
+    "row": "Civil technologist 2026-10-26 \u2013 2026-11-20 80 h \u25d0 Open \u2014 Fill",
+    "screenshot": "AC-ROLE-04b-reopened.png"
+   },
+   "AC-GRP-01a-B": {
+    "ok": true,
+    "options": [
+     "Not set",
+     "Project Management",
+     "Survey",
+     "Civil",
+     "Geotechnical",
+     "Electrical",
+     "Environmental",
+     "Structural",
+     "Transportation",
+     "Architecture"
+    ],
+    "patchBody": {
+     "homeDisciplineId": "01a12e5a-2534-7f70-b02c-ac8224295cbf"
+    },
+    "status": 200,
+    "stored": "01a12e5a-2534-7f70-b02c-ac8224295cbf",
+    "history": {
+     "apiChanges": [
+      {
+       "item": "Alex Chen",
+       "action": "Updated",
+       "old": null,
+       "new": "01a12e5a-2534-7f70-b02c-ac8224295cbf",
+       "at": "2026-10-12T04:50:29.21935+00:00"
+      }
+     ],
+     "pageShowsIt": true,
+     "screenshot": "AC-GRP-01a-history.png"
+    },
+    "workloadGroupsAfter": [
+     "CIVIL \u00b7 1",
+     "NOT SET \u00b7 9"
+    ],
+    "nonAdminPatch": 403,
+    "screenshot": "AC-GRP-01a-editor.png"
+   },
+   "SC-003-L5-dateC": {
+    "ok": true,
+    "base": "http://localhost:5092",
+    "note": true,
+    "dateFlag": false,
+    "how": "Fresh database seeded through the HEAD API (seed_staffing.py, relative shapes, today = date B); Quantity estimate (L5 FF successor) completed by Jill while Specifications is In Progress, which is the L5 date C shape.",
+    "screenshot": "SC-003-L5-date-C-note.png"
+   }
+  }
+ }
+}

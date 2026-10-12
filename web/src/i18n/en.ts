@@ -2036,6 +2036,7 @@ export const en: Record<string, string> = {
   'mywork.focusTasks': 'Overdue, due this week or blocked', 'mywork.focusNoTasks': 'Nothing of yours is overdue, due this week or blocked.',
   'mywork.weekSummary': 'Week of {week}: {planned} of {capacity} planned', 'mywork.weekShow': 'Show', 'mywork.weekHide': 'Hide',
   'reports.count': '{n} reports', 'reports.countOne': '1 report', 'reports.report': 'Report',
+  'calendar.zoneShort': 'Times in {zone}', 'calendar.hiddenType': 'Hidden',
   'reports.help': 'Fixed reports over current data. Each report opens with its parameters, shows only what you are allowed to see and can be exported.',
   'prefs.digestTimeLabel': 'Digest time',
   'prefs.resetEvent': 'Reset {event} to the default',

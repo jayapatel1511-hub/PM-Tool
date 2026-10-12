@@ -46,6 +46,12 @@ Rules while implementing:
   - **Stream C (Part B):** `Workspace.cs`, `Portfolio.tsx`, `Dashboard.tsx`, `Home.tsx`, `common.tsx`, `Timeline.tsx`, `Gantt.tsx`, `Timeline.cs`.
 - Stream C can run in parallel with A. It also owns the arrow-by-type change in `Timeline.tsx` and `Gantt.tsx`, and makes it after A exposes `type` on the timeline payload. Stream B starts after A's API tasks pass.
 - No change to existing migrations, packet 029 commands, or packet 034's planning-entry code paths.
+- **Layout rules.** Streams B and C start after packet 036 Phase 1 (toolbar, navigation, header) and follow its rules R1–R10:
+  - group-by goes in the toolbar's Group menu;
+  - tile definitions are `(i)` tooltips, not visible text;
+  - the timeline legend sits behind a Legend button;
+  - picker capacity is a short right-aligned figure;
+  - dependency type is a two-letter chip.
 
 ## Design
 

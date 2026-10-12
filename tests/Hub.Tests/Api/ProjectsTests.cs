@@ -82,9 +82,10 @@ public sealed class ProjectsTests(HubFactory f)
 
         await pm.Post($"/api/v1/projects/{p.Id}/transition", new { toStatus = "Archived", rowVersion = d.Version(p.Id) }).Result.Json();
         Assert.Equal(HttpStatusCode.Forbidden, (await pm.Patch($"/api/v1/projects/{p.Id}", new { location = "Y", reason = "still editing" }, d.Version(p.Id))).StatusCode);
-        var list = await pm.GetAsync("/api/v1/projects?mine=true").Result.Json();
+        // Narrowed to this project: the run creates more than one 200-row page of projects, in random number order.
+        var list = await pm.GetAsync($"/api/v1/projects?mine=true&ids={p.Id}").Result.Json();
         Assert.DoesNotContain(list["items"]!.AsArray(), x => x!.G("id") == p.Id);
-        var all = await pm.GetAsync("/api/v1/projects?mine=true&includeArchived=true").Result.Json();
+        var all = await pm.GetAsync($"/api/v1/projects?mine=true&includeArchived=true&ids={p.Id}").Result.Json();
         Assert.Contains(all["items"]!.AsArray(), x => x!.G("id") == p.Id);
         Assert.Equal(HttpStatusCode.Forbidden, (await pm.Post($"/api/v1/projects/{p.Id}/transition", new { toStatus = "Complete", rowVersion = d.Version(p.Id) })).StatusCode);
         await f.As(TestData.Admin).Post($"/api/v1/projects/{p.Id}/transition", new { toStatus = "Complete", reason = "Correction needed", rowVersion = d.Version(p.Id) }).Result.Json();

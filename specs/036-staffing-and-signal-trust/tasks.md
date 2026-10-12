@@ -7,7 +7,7 @@
 ## Phase 0: Gate (no application code)
 
 - [x] T001 Get Jay's answers to decisions D1–D9 (or a note that the defaults stand). Record them in verification.md section 2. Done 2026-10-11: D1–D9 all Default (Jay: 'lets start build'), recorded in verification.md section 3.
-- [ ] T002 Write §40 in `spec-parts/15-staffing-and-signals.md` from spec.md's requirements, and add packet 036 to `specs/README.md`. Check: `python3 tools/build_spec.py --check` and `python3 tools/trace_spec.py --check` pass.
+- [x] T002 Write §40 in `spec-parts/15-staffing-and-signals.md` from spec.md's requirements, and add packet 036 to `specs/README.md`. Check: `python3 tools/build_spec.py --check` and `python3 tools/trace_spec.py --check` pass. Done in `5800e3fc`; both checks pass at the merge commit (verification.md section 9).
 - [ ] T003 (partly done 2026-10-11: `codex/tuesday-ui-consistency` merged in `4218baec`; the 5 October leftovers, including `Planning.cs`, committed in `7f058aed`; the 12 `codex/pm-*` and other branches with unapplied commits still need review) Clear the conflict risks listed in the plan's branch table:
   - merge `codex/tuesday-ui-consistency` into the base, or record that it is abandoned;
   - commit the pending `Planning.cs` edit;
@@ -17,19 +17,19 @@
 
 ## Phase 1: Domain (pure, Stream A)
 
-- [ ] T004 [A] Add `DependencyTypes` to `src/Hub.Domain/Vocabulary.cs`. Add `DependencyRules.Satisfied` and the type-aware D-12 checks to `src/Hub.Domain/Evaluation.cs`. Extend `DependencySnap` (`Type`) and `TaskSnap`/`DeliverableSnap` (`StartedOn`, `StatusChangedOn`) with defaults, so existing callers compile unchanged. Requirements: FR-DEPT-03, -04.
-- [ ] T005 [A] Add the A-21 rule, its `RuleNames` entry, `Rules.Ids` 1–21 and the `status_stale_days` setting in `src/Hub.Domain/Evaluation.cs` and `src/Hub.Domain/Settings.cs`. Requirements: FR-STALE-01, -02.
-- [ ] T006 [A] Add the dependency cases to `tests/Hub.Tests/Domain/DependencyLagTests.cs` and the A-21 cases to `tests/Hub.Tests/Domain/EvaluatorTests.cs`, as in the plan's test table. Check: `dotnet test … --filter 'FullyQualifiedName~DependencyLagTests|FullyQualifiedName~EvaluatorTests'` passes, and `coverage_gate.py` holds.
+- [x] T004 [A] Add `DependencyTypes` to `src/Hub.Domain/Vocabulary.cs`. Add `DependencyRules.Satisfied` and the type-aware D-12 checks to `src/Hub.Domain/Evaluation.cs`. Extend `DependencySnap` (`Type`) and `TaskSnap`/`DeliverableSnap` (`StartedOn`, `StatusChangedOn`) with defaults, so existing callers compile unchanged. Requirements: FR-DEPT-03, -04. Done on `build/036-domain` (`24e1995d`), merged 2026-10-11.
+- [x] T005 [A] Add the A-21 rule, its `RuleNames` entry, `Rules.Ids` 1–21 and the `status_stale_days` setting in `src/Hub.Domain/Evaluation.cs` and `src/Hub.Domain/Settings.cs`. Requirements: FR-STALE-01, -02. Done in `24e1995d`. The setting sits in the existing `thresholds` group.
+- [x] T006 [A] Add the dependency cases to `tests/Hub.Tests/Domain/DependencyLagTests.cs` and the A-21 cases to `tests/Hub.Tests/Domain/EvaluatorTests.cs`, as in the plan's test table. Check: `dotnet test … --filter 'FullyQualifiedName~DependencyLagTests|FullyQualifiedName~EvaluatorTests'` passes, and `coverage_gate.py` holds. Done in `24e1995d`; coverage gate 96.6 % (writer run on `build/036-domain`).
 
 ## Phase 2: Data (Stream A)
 
-- [ ] T007 [A] Add `OpenRole` in `src/Hub.Api/Data/OpenRoleEntities.cs`. Add `StartedAt` (task and deliverable), `DeliverableDependency.DependencyType` and `AppUser.HomeDisciplineId` in `src/Hub.Api/Data/Entities.cs`. Add the DbSet, checks, indexes, FKs and query filter in `src/Hub.Api/Data/HubDb.cs`. Add the audit fields in `src/Hub.Api/Infrastructure/Audit.cs`.
-- [ ] T008 [A] Rebase on the T003 base. Then generate the single `src/Hub.Api/Data/Migrations/<timestamp>_StaffingSignals.cs` with the `StartedAt` backfill SQL. Check: `dotnet ef migrations has-pending-model-changes` reports none; existing migrations are unchanged; the up/down migration test passes on fresh PostgreSQL, including the backfill cases.
+- [x] T007 [A] Add `OpenRole` in `src/Hub.Api/Data/OpenRoleEntities.cs`. Add `StartedAt` (task and deliverable), `DeliverableDependency.DependencyType` and `AppUser.HomeDisciplineId` in `src/Hub.Api/Data/Entities.cs`. Add the DbSet, checks, indexes, FKs and query filter in `src/Hub.Api/Data/HubDb.cs`. Add the audit fields in `src/Hub.Api/Infrastructure/Audit.cs`. Done in `299e8be3`.
+- [x] T008 [A] Rebase on the T003 base. Then generate the single `src/Hub.Api/Data/Migrations/<timestamp>_StaffingSignals.cs` with the `StartedAt` backfill SQL. Check: `dotnet ef migrations has-pending-model-changes` reports none; existing migrations are unchanged; the up/down migration test passes on fresh PostgreSQL, including the backfill cases. Done in `299e8be3`: one migration, `20261012014621_StaffingSignals`, on base `5800e3fc` (T003 is only partly done, so no later base existed).
 
 ## Phase 3: API (Stream A)
 
-- [ ] T009 [A] Implement `src/Hub.Api/Features/OpenRoles.cs` and register it in `Modules.cs`. Add `OpenRoleId` to allocation create and the reset on decline/cancel in `src/Hub.Api/Features/Allocations.cs`, with no other edits there. Add `unfilledRoles` to `/workload` in `src/Hub.Api/Features/Workload.cs`. Add text keys in `src/Hub.Api/Text.cs`. Write `tests/Hub.Tests/Api/OpenRoleApiTests.cs`. Requirements: FR-ROLE-01–05. Check: OpenRole, Allocation and Workload tests pass.
-- [ ] T010 [A] Make the following changes, all listed in the plan's A2 section:
+- [x] T009 [A] Implement `src/Hub.Api/Features/OpenRoles.cs` and register it in `Modules.cs`. Add `OpenRoleId` to allocation create and the reset on decline/cancel in `src/Hub.Api/Features/Allocations.cs`, with no other edits there. Add `unfilledRoles` to `/workload` in `src/Hub.Api/Features/Workload.cs`. Add text keys in `src/Hub.Api/Text.cs`. Write `tests/Hub.Tests/Api/OpenRoleApiTests.cs`. Requirements: FR-ROLE-01–05. Check: OpenRole, Allocation and Workload tests pass. Done on `build/036-api-roles` (`8b689db3`, `0a815c5a`, `913f0123`), merged 2026-10-11.
+- [x] T010 [A] Make the following changes, all listed in the plan's A2 section: Done: the EvaluationService mapping in `0e368af2`, the rest on `build/036-api-deps` (`daa98739`, `7a190db0`), merged 2026-10-11.
   - Map `Type`, `StartedOn` and `StatusChangedOn` in `src/Hub.Api/Infrastructure/EvaluationService.cs`.
   - Set `StartedAt` in `Tasks.cs` and `Deliverables.cs`.
   - Add the type field and shared satisfaction to `Dependencies.cs`.
@@ -39,7 +39,7 @@
   - Add `type` to the payload in `Timeline.cs`.
 
   Requirements: FR-DEPT-01, -02, -05. Check: the `EvaluationTests`, `Readiness` and `Timeline` test filters pass.
-- [ ] T011 [A] [P] Add `homeDisciplineId` to the admin user PATCH (`Admin.cs:144`). Return `officeId`, `jobTitle` and `homeDisciplineId` on `/users`, the Workload person rows and the planning grid rows. Add `PersonIds` to `GridQuery` in `Planning.cs`. Add the `PlanningApiTests` and `WorkloadApiTests` cases. Requirements: FR-GRP-01, FR-PICK-01. Check: the Planning, Workload and Admin test filters pass, and the privacy tests are unchanged.
+- [x] T011 [A] [P] Add `homeDisciplineId` to the admin user PATCH (`Admin.cs:144`). Return `officeId`, `jobTitle` and `homeDisciplineId` on `/users`, the Workload person rows and the planning grid rows. Add `PersonIds` to `GridQuery` in `Planning.cs`. Add the `PlanningApiTests` and `WorkloadApiTests` cases. Requirements: FR-GRP-01, FR-PICK-01. Check: the Planning, Workload and Admin test filters pass, and the privacy tests are unchanged. Done on `build/036-api-roles` (`0a815c5a`, `02a4c2df`, `52a0e3e9`).
 
 ## Phase 4: Web, Part A (Stream B, after T009–T011)
 
@@ -58,7 +58,7 @@
 
 ## Phase 5: Part B (Stream C, can start after T003)
 
-- [ ] T016 [C] Make the count fixes from the plan's B1 table:
+- [ ] T016 [C] (Server part done on `build/036-api-deps` in `f41ccc2e`: `TaskQueries.cs` `onHold`, `Deliverables.cs` unassigned filter, `Workspace.cs` ordering and `onHold`, with API tests. `Portfolio.tsx`, `Dashboard.tsx` and `Home.tsx` remain.) Make the count fixes from the plan's B1 table:
   - `Portfolio.tsx`
   - `TaskQueries.cs` (`onHold`) and `Dashboard.tsx`
   - `Deliverables.cs:71`
@@ -67,7 +67,7 @@
 
   Add the API tests. Requirements: AC-CNT-01–05, -07.
 - [ ] T017 [C] Add the `SummaryTile` `hint` in `web/src/components/hub/common.tsx`, and `def.*` strings for every Home, Dashboard and Portfolio tile. Requirements: AC-CNT-06.
-- [ ] T018 [C] Make the timeline changes from the plan's B2 list in `Timeline.tsx`, `Gantt.tsx` and `Timeline.cs`. Requirements: AC-TL-01–04.
+- [ ] T018 [C] Make the timeline changes from the plan's B2 list in `Timeline.tsx`, `Gantt.tsx` and `Timeline.cs`. Requirements: AC-TL-01–04. (Server part done in `e1ffbb01`: undated milestones in `Timeline.cs`. `Timeline.tsx` and `Gantt.tsx` remain.)
 - [ ] T019 [C] After T010, draw arrows by dependency type in `Timeline.tsx` and `Gantt.tsx`, with the type and lag in the tooltip. Requirements: AC-DEPT-06.
 
 ## Phase 6: Acceptance (see verification.md)

@@ -22,7 +22,7 @@ The product's engineering depth is its advantage, so no capability is removed. T
 ## Rules (binding on every screen, including packet 036's additions)
 
 - **R1 One toolbar row.** Lists show one row: primary action, search, **Filters (n)**, Group or Sort when relevant, view switch, and an overflow menu (Export, Columns, Views). Filter fields open in a popover (a sheet on tablet). Active filters show as removable chips only while set.
-- **R2 Three quick filters at most** visible on a screen. The rest become saved views under **Views**.
+- **R2 Three quick filters at most** visible on a screen. The rest move into the **Filters** popover under "More quick filters", with the same URL parameters (assumption A1, 2026-10-12).
 - **R3 Project navigation**: at most 7 visible tabs plus **More** (decision E1). Inside a group, a small second-level switch shows that group's pages. Every existing route and deep link keeps working and highlights its group.
 - **R4 Sidebar**: at most 8 items for any role (decision E2). Duplicates of the header (Notifications) and views of another page (Boards, Calendar, Portfolio) move under their parent page or under More.
 - **R5 One headline**: page title, plus at most a one-line scope. Explanations move to a help popover.
@@ -39,7 +39,7 @@ The product's engineering depth is its advantage, so no capability is removed. T
 | E1 | Project tab groups | **Overview** (Dashboard); **Work** (Tasks, Board, Timeline, Calendar, Milestones as views); **Deliverables** (Deliverables, Submissions, Reviews, Readiness); **Coordination** (Weekly Coordination, Handoffs, Changes, Design basis, Decisions, Risks, Issues, Meetings & Actions); **People** (Team & Disciplines, Allocations, Workload); **Files**; More: Activity, Settings. |
 | E2 | Sidebar | My Work, Projects (List, Board, Portfolio views), Tasks (List, Board, Calendar views), Resources (Weekly Planner, Workload), Time, Reports. More: Home, Team, Files, Templates, Admin. Notifications only in the header bell. |
 | E3 | My Work default | "Today": my overdue, due this week, blocked and needs-attention items. Upcoming, Completed, Inbox and Coordination are reachable through a view switch. |
-| E4 | Quick-filter chips | Keep up to 3 pinned per screen (for example Mine, Overdue, Blocked). The rest become saved views. |
+| E4 | Quick-filter chips | Keep up to 3 pinned per screen (for example Mine, Overdue, Blocked). The rest move into the Filters popover (R2, assumption A1). |
 
 ## Non-goals
 

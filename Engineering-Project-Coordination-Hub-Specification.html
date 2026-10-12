@@ -11465,10 +11465,10 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <p><strong>FR-ROLE-01.</strong> An open role MUST be a project-scoped record of unfilled demand: a role label (1–80 characters), an optional project discipline of that project, a from date and a through date (inclusive, through ≥ from), planned hours greater than 0 under the FR-CAP-03 hour rules, an optional note, and a status of Open, Filled or Cancelled. A new role is Open. Its creator is its accountable owner. It is soft-deleted only, carries a row version (G-06, G-07), and every create, change, fill, reopen and cancel writes an activity entry in the same transaction. A stale change returns a conflict and stores nothing.</p>
 </li>
 <li>
-<p><strong>FR-ROLE-02.</strong> Creating, changing or cancelling an open role MUST require the same permission as proposing an allocation (§8.10: PM or Discipline Lead within the project). Everyone else is refused.</p>
+<p><strong>FR-ROLE-02.</strong> Creating, changing or cancelling an open role MUST require the same permission as proposing an allocation (§8.10: PM or Discipline Lead within the project). Everyone else is refused. On a Complete project each of these is a correction and needs a reason, as an allocation proposal does.</p>
 </li>
 <li>
-<p><strong>FR-ROLE-03.</strong> An open role MUST be filled only by proposing a normal §37.6 allocation that names it. The proposal is refused unless the role is Open, is on the same project, and the allocation's date range lies inside the role's range. Creating the Proposed allocation, setting the role to Filled and recording the filling allocation happen in one transaction, so two simultaneous proposals produce exactly one allocation. Declining or cancelling that allocation returns the role to Open and clears the filling allocation; confirming or completing it leaves the role Filled. The allocation keeps every §37.6 rule, including confirmation by the person's Supervisor or an Admin.</p>
+<p><strong>FR-ROLE-03.</strong> An open role MUST be filled only by proposing a normal §37.6 allocation that names it. The proposal is refused unless the role is Open, is on the same project, and the allocation's date range lies inside the role's range. Creating the Proposed allocation, setting the role to Filled and recording the filling allocation happen in one transaction, so two simultaneous proposals produce exactly one allocation. Declining or cancelling that allocation returns the role to Open and clears the filling allocation; confirming, editing or completing it leaves the role Filled. The allocation keeps every §37.6 rule, including confirmation by the person's Supervisor or an Admin.</p>
 </li>
 <li>
 <p><strong>FR-ROLE-04.</strong> Open roles MUST appear on the project's Allocations tab and in an "Unfilled roles" section of Workload. Workload shows each Open role's hours for every week in its range, spread over the working days of the range by the FR-CAP-03 rule using the project's office calendar (there is no person calendar). Open roles never enter a person's capacity, committed load (FR-CAP-04), Workload indicators, the Weekly Planner or readiness capacity checks (§38.2).</p>
@@ -11501,7 +11501,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <h3 id="404-status-not-moving-a-21"><span class="num">40.4</span> Status not moving (A-21)</h3>
 <ul>
 <li>
-<p><strong>FR-STALE-01.</strong> The attention engine (§12.12) MUST include rule A-21 "Status not moving": a task or deliverable In Progress or In Review whose status has not changed for more than <code>status_stale_days</code> days, measured as A-10 measures days. It does not fire for an item for which A-10 or A-11 fired. Severity Info, or Warning when the item is also Due Soon; routed to the assignee (task) or owner (deliverable) and the Discipline Lead. The reason states the days since the status changed and the threshold, for example "Status unchanged for 16 days (threshold 15)". It follows the existing snooze rule.</p>
+<p><strong>FR-STALE-01.</strong> The attention engine (§12.12) MUST include rule A-21 "Status not moving": a task or deliverable In Progress or In Review whose status has not changed for more than <code>status_stale_days</code> days, measured as A-10 measures days, while the item has had activity within <code>task_stale_days</code> days. It never fires for an item with no activity within <code>task_stale_days</code> days (A-10's condition) or for a task whose review has stalled (A-11's condition), whether or not A-10 and A-11 are switched on; deliverables have no review-stalled condition. Severity Info, or Warning when the item is also Due Soon; routed to the assignee (task) or owner (deliverable) and the Discipline Lead. The reason states the days since the status changed and the threshold, for example "Status unchanged for 16 days (threshold 15)". It follows the existing snooze rule.</p>
 </li>
 <li>
 <p><strong>FR-STALE-02.</strong> <code>status_stale_days</code> MUST be an organisation setting with default 15 and range 1–365, edited by an Admin with the other attention thresholds; A-21 can be turned off with its rule toggle (<code>rule_enabled.A-21</code>) like every other rule.</p>
@@ -11521,7 +11521,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <tr>
 <td>A-21</td>
 <td>Status not moving</td>
-<td>Task or deliverable In Progress or In Review with <code>today − status_changed_at &gt; status_stale_days</code>, and neither A-10 nor A-11 fired for it</td>
+<td>Task or deliverable In Progress or In Review with <code>today − status_changed_at &gt; status_stale_days</code> and <code>today − last_activity_at ≤ task_stale_days</code>, and, for a task, A-11's review-stalled condition does not hold; whether A-10 or A-11 is switched on makes no difference</td>
 <td>Info; Warning if also Due Soon</td>
 <td>Assignee or owner, DL</td>
 </tr>
@@ -11732,7 +11732,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <tr>
 <td>D6</td>
 <td>A-21 threshold and scope</td>
-<td><code>status_stale_days</code> = 15; In Progress or In Review tasks and deliverables; not when A-10 or A-11 fired for the item.</td>
+<td><code>status_stale_days</code> = 15; In Progress or In Review tasks and deliverables with activity within <code>task_stale_days</code>; never for a task whose review has stalled (A-11's condition), whether or not A-10 and A-11 are switched on.</td>
 </tr>
 <tr>
 <td>D7</td>
@@ -11812,11 +11812,11 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <tbody>
 <tr>
 <td>R1</td>
-<td><strong>One toolbar row.</strong> Lists show one row: primary action, search, <strong>Filters (n)</strong>, Group or Sort when relevant, view switch, and an overflow menu (Export, Columns, Views). Filter fields open in a popover (a sheet on tablet). Active filters show as removable chips only while set. Filter state stays in the URL exactly as before.</td>
+<td><strong>One toolbar row.</strong> Lists show one row: primary action, search, <strong>Filters (n)</strong>, Group or Sort as compact menu buttons when relevant, view switch, and an overflow menu (Export, Columns, Views). Filter fields open in a popover (a sheet on tablet). Active filters show as removable chips only while set. Filter state stays in the URL exactly as before.</td>
 </tr>
 <tr>
 <td>R2</td>
-<td><strong>Three quick filters at most</strong> are visible on a screen. The rest of the §13.0 quick chips become built-in entries under <strong>Views</strong> with the same URL parameters, so every former quick-filter URL still works.</td>
+<td><strong>Three quick filters at most</strong> are visible on a screen. The rest of the §13.0 quick chips move into the <strong>Filters</strong> popover under "More quick filters" with the same URL parameters, so every former quick-filter URL still works.</td>
 </tr>
 <tr>
 <td>R3</td>
@@ -11881,7 +11881,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <tr>
 <td>E4</td>
 <td>Quick-filter chips</td>
-<td>At most 3 pinned per screen (for example Mine, Overdue, Blocked); the rest become saved views.</td>
+<td>At most 3 pinned per screen (for example Mine, Overdue, Blocked); the rest move into the Filters popover (R2).</td>
 </tr>
 </tbody>
 </table></div>
@@ -11901,7 +11901,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <p><strong>AC-CALM-04.</strong> Fewer destinations: at most 7 project group tabs plus More, and at most 8 sidebar items for an Admin, an Executive, a Supervisor, a Project Manager, a team member and a Read Only user. Baseline: 24 tabs; 14–17 items.</p>
 </li>
 <li>
-<p><strong>AC-CALM-05.</strong> Less reading and fewer colours: chrome words above the fold are at most 50 % of each screen's baseline, and at most 6 fill colours show above the fold. Baseline: 16–232 words; 5–12 colours.</p>
+<p><strong>AC-CALM-05.</strong> Less reading and fewer colours: chrome words above the fold are at most 50 % of each screen's baseline and never need to be fewer than 40, and at most 6 chromatic fill colours (saturation at least 15 % and lightness 8–96 %, on white) show above the fold. The census counts tables, grids, dialogs, and articles and list items outside navigation as data, not chrome, and each screen's baseline is the screen before the change measured with that census. Baseline: 16–221 words; 2–10 colours.</p>
 </li>
 <li>
 <p><strong>AC-CALM-06.</strong> Nothing lost: every route loads for a permitted user and highlights its sidebar item and project group; every former tab and quick filter is reachable in at most 2 clicks from its page; and every former quick-filter URL returns the same rows as before the change.</p>

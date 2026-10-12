@@ -42,7 +42,7 @@ A resource manager can staff a project with a role before a person is named, and
 | D3 | Where open roles appear | Project Allocations tab, and an "Unfilled roles" section on Workload. Never in a person's capacity, the Weekly Planner or readiness checks. |
 | D4 | Anchor for Start-to-Start lag | A new `StartedAt`, set the first time a task or deliverable leaves Not Started, and backfilled from the activity log. |
 | D5 | What Finish-to-Finish does | Never makes the successor Waiting or Blocked. It drives the date-consistency check (successor due ≥ predecessor due + lag) and warns when the successor finishes before its predecessor. |
-| D6 | A-21 threshold and scope | `status_stale_days` = 15. In Progress or In Review tasks and deliverables. It does not fire when A-10 or A-11 already fired for the same item. |
+| D6 | A-21 threshold and scope | `status_stale_days` = 15. In Progress or In Review tasks and deliverables that had activity within `task_stale_days`. It never fires for a task whose review has stalled (A-11's condition), and it does not depend on whether A-10 or A-11 is switched on (assumption A5, 2026-10-12). |
 | D7 | Home discipline source | Edited by an Admin on the user record. Not synced from the directory. |
 | D8 | Who sees capacity in the picker | Only viewers who could already see that person in Workload or the Planner. Everyone else sees the plain picker. |
 | D9 | Home "Review" lane and Dashboard "In review" tile disagree on Revision Required | Keep both rules and show each one's definition. Rename the Home lane "Review and revision". |

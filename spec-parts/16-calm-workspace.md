@@ -25,8 +25,8 @@ The Weekly Planner also shows Over-planned and Under-planned on the same person 
 
 | Rule | Requirement |
 |---|---|
-| R1 | **One toolbar row.** Lists show one row: primary action, search, **Filters (n)**, Group or Sort when relevant, view switch, and an overflow menu (Export, Columns, Views). Filter fields open in a popover (a sheet on tablet). Active filters show as removable chips only while set. Filter state stays in the URL exactly as before. |
-| R2 | **Three quick filters at most** are visible on a screen. The rest of the §13.0 quick chips become built-in entries under **Views** with the same URL parameters, so every former quick-filter URL still works. |
+| R1 | **One toolbar row.** Lists show one row: primary action, search, **Filters (n)**, Group or Sort as compact menu buttons when relevant, view switch, and an overflow menu (Export, Columns, Views). Filter fields open in a popover (a sheet on tablet). Active filters show as removable chips only while set. Filter state stays in the URL exactly as before. |
+| R2 | **Three quick filters at most** are visible on a screen. The rest of the §13.0 quick chips move into the **Filters** popover under "More quick filters" with the same URL parameters, so every former quick-filter URL still works. |
 | R3 | **Project navigation**: at most 7 visible tabs plus **More**, grouped as in §41.3 (E1). Inside a group, a small second-level switch shows that group's pages. Every existing route and deep link keeps working and highlights its group. |
 | R4 | **Sidebar**: at most 8 items for any role, as in §41.3 (E2). Duplicates of the header (Notifications) and views of another page (Boards, Calendar, Portfolio) move under their parent page or under More. |
 | R5 | **One headline**: the page title, plus at most a one-line scope. Longer explanations move to a help popover next to the title. |
@@ -45,7 +45,7 @@ Jay accepted every default below on 2026-10-11 ("lets start build").
 | E1 | Project tab groups | **Overview** (Dashboard); **Work** (Tasks, Board, Timeline, Calendar and Milestones as views); **Deliverables** (Deliverables, Submissions, Reviews, Readiness); **Coordination** (Weekly Coordination, Handoffs, Changes, Design basis, Decisions, Risks, Issues, Meetings & Actions); **People** (Team & Disciplines, Allocations, Workload); **Files**; More: Activity, Settings. |
 | E2 | Sidebar | My Work, Projects (List, Board and Portfolio views), Tasks (List, Board and Calendar views), Resources (Weekly Planner, Workload), Time, Reports. More: Home, Team, Files, Templates, Admin. Notifications only in the header bell. Items still follow role permissions. |
 | E3 | My Work default | "Today": the user's overdue items, items due this week, blocked items and attention items routed to them. This focus list replaces FR-VIS-08's narrower Today (due on the current date) as the opening view. Upcoming, Overdue and Completed, the Inbox, saved views and the Coordination sections stay reachable through the view switch. |
-| E4 | Quick-filter chips | At most 3 pinned per screen (for example Mine, Overdue, Blocked); the rest become saved views. |
+| E4 | Quick-filter chips | At most 3 pinned per screen (for example Mine, Overdue, Blocked); the rest move into the Filters popover (R2). |
 
 ### 41.4 Acceptance criteria
 
@@ -59,7 +59,7 @@ The census in packet 037's verification record measures AC-CALM-01 to AC-CALM-05
 
 - **AC-CALM-04.** Fewer destinations: at most 7 project group tabs plus More, and at most 8 sidebar items for an Admin, an Executive, a Supervisor, a Project Manager, a team member and a Read Only user. Baseline: 24 tabs; 14–17 items.
 
-- **AC-CALM-05.** Less reading and fewer colours: chrome words above the fold are at most 50 % of each screen's baseline, and at most 6 fill colours show above the fold. Baseline: 16–232 words; 5–12 colours.
+- **AC-CALM-05.** Less reading and fewer colours: chrome words above the fold are at most 50 % of each screen's baseline and never need to be fewer than 40, and at most 6 chromatic fill colours (saturation at least 15 % and lightness 8–96 %, on white) show above the fold. The census counts tables, grids, dialogs, and articles and list items outside navigation as data, not chrome, and each screen's baseline is the screen before the change measured with that census. Baseline: 16–221 words; 2–10 colours.
 
 - **AC-CALM-06.** Nothing lost: every route loads for a permitted user and highlights its sidebar item and project group; every former tab and quick filter is reachable in at most 2 clicks from its page; and every former quick-filter URL returns the same rows as before the change.
 

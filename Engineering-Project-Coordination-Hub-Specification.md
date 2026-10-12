@@ -5067,9 +5067,9 @@ Outside this amendment: changes to §37.6's allocation model, its proposal and c
 
 - **FR-ROLE-01.** An open role MUST be a project-scoped record of unfilled demand: a role label (1–80 characters), an optional project discipline of that project, a from date and a through date (inclusive, through ≥ from), planned hours greater than 0 under the FR-CAP-03 hour rules, an optional note, and a status of Open, Filled or Cancelled. A new role is Open. Its creator is its accountable owner. It is soft-deleted only, carries a row version (G-06, G-07), and every create, change, fill, reopen and cancel writes an activity entry in the same transaction. A stale change returns a conflict and stores nothing.
 
-- **FR-ROLE-02.** Creating, changing or cancelling an open role MUST require the same permission as proposing an allocation (§8.10: PM or Discipline Lead within the project). Everyone else is refused.
+- **FR-ROLE-02.** Creating, changing or cancelling an open role MUST require the same permission as proposing an allocation (§8.10: PM or Discipline Lead within the project). Everyone else is refused. On a Complete project each of these is a correction and needs a reason, as an allocation proposal does.
 
-- **FR-ROLE-03.** An open role MUST be filled only by proposing a normal §37.6 allocation that names it. The proposal is refused unless the role is Open, is on the same project, and the allocation's date range lies inside the role's range. Creating the Proposed allocation, setting the role to Filled and recording the filling allocation happen in one transaction, so two simultaneous proposals produce exactly one allocation. Declining or cancelling that allocation returns the role to Open and clears the filling allocation; confirming or completing it leaves the role Filled. The allocation keeps every §37.6 rule, including confirmation by the person's Supervisor or an Admin.
+- **FR-ROLE-03.** An open role MUST be filled only by proposing a normal §37.6 allocation that names it. The proposal is refused unless the role is Open, is on the same project, and the allocation's date range lies inside the role's range. Creating the Proposed allocation, setting the role to Filled and recording the filling allocation happen in one transaction, so two simultaneous proposals produce exactly one allocation. Declining or cancelling that allocation returns the role to Open and clears the filling allocation; confirming, editing or completing it leaves the role Filled. The allocation keeps every §37.6 rule, including confirmation by the person's Supervisor or an Admin.
 
 - **FR-ROLE-04.** Open roles MUST appear on the project's Allocations tab and in an "Unfilled roles" section of Workload. Workload shows each Open role's hours for every week in its range, spread over the working days of the range by the FR-CAP-03 rule using the project's office calendar (there is no person calendar). Open roles never enter a person's capacity, committed load (FR-CAP-04), Workload indicators, the Weekly Planner or readiness capacity checks (§38.2).
 
@@ -5091,13 +5091,13 @@ Outside this amendment: changes to §37.6's allocation model, its proposal and c
 
 ### 40.4 Status not moving (A-21)
 
-- **FR-STALE-01.** The attention engine (§12.12) MUST include rule A-21 "Status not moving": a task or deliverable In Progress or In Review whose status has not changed for more than `status_stale_days` days, measured as A-10 measures days. It does not fire for an item for which A-10 or A-11 fired. Severity Info, or Warning when the item is also Due Soon; routed to the assignee (task) or owner (deliverable) and the Discipline Lead. The reason states the days since the status changed and the threshold, for example "Status unchanged for 16 days (threshold 15)". It follows the existing snooze rule.
+- **FR-STALE-01.** The attention engine (§12.12) MUST include rule A-21 "Status not moving": a task or deliverable In Progress or In Review whose status has not changed for more than `status_stale_days` days, measured as A-10 measures days, while the item has had activity within `task_stale_days` days. It never fires for an item with no activity within `task_stale_days` days (A-10's condition) or for a task whose review has stalled (A-11's condition), whether or not A-10 and A-11 are switched on; deliverables have no review-stalled condition. Severity Info, or Warning when the item is also Due Soon; routed to the assignee (task) or owner (deliverable) and the Discipline Lead. The reason states the days since the status changed and the threshold, for example "Status unchanged for 16 days (threshold 15)". It follows the existing snooze rule.
 
 - **FR-STALE-02.** `status_stale_days` MUST be an organisation setting with default 15 and range 1–365, edited by an Admin with the other attention thresholds; A-21 can be turned off with its rule toggle (`rule_enabled.A-21`) like every other rule.
 
 | ID | Rule | Condition (all: item not terminal; project Active) | Severity | Routed to |
 |---|---|---|---|---|
-| A-21 | Status not moving | Task or deliverable In Progress or In Review with `today − status_changed_at > status_stale_days`, and neither A-10 nor A-11 fired for it | Info; Warning if also Due Soon | Assignee or owner, DL |
+| A-21 | Status not moving | Task or deliverable In Progress or In Review with `today − status_changed_at > status_stale_days` and `today − last_activity_at ≤ task_stale_days`, and, for a task, A-11's review-stalled condition does not hold; whether A-10 or A-11 is switched on makes no difference | Info; Warning if also Due Soon | Assignee or owner, DL |
 
 | Setting key | Default | Used by |
 |---|---|---|
@@ -5214,7 +5214,7 @@ Jay accepted every default below on 2026-10-11 ("lets start build").
 | D3 | Where open roles appear | The project's Allocations tab and Workload's Unfilled roles section. Never in a person's capacity, the Weekly Planner or readiness checks. |
 | D4 | Anchor for Start-to-Start lag | `started_at`, set the first time an item leaves Not Started and backfilled from the activity log. |
 | D5 | What Finish-to-Finish does | Never makes the successor Waiting or Blocked. It drives the date check and warns when the successor finishes before its predecessor. |
-| D6 | A-21 threshold and scope | `status_stale_days` = 15; In Progress or In Review tasks and deliverables; not when A-10 or A-11 fired for the item. |
+| D6 | A-21 threshold and scope | `status_stale_days` = 15; In Progress or In Review tasks and deliverables with activity within `task_stale_days`; never for a task whose review has stalled (A-11's condition), whether or not A-10 and A-11 are switched on. |
 | D7 | Home discipline source | Edited by an Admin on the user record; not synced from the directory. |
 | D8 | Who sees capacity in the picker | Only viewers who could already see that person in Workload or the Weekly Planner. |
 | D9 | Home Review lane and Dashboard In review tile disagree on Revision Required | Keep both rules, show each definition, and rename the Home lane "Review and revision". |
@@ -5251,8 +5251,8 @@ The Weekly Planner also shows Over-planned and Under-planned on the same person 
 
 | Rule | Requirement |
 |---|---|
-| R1 | **One toolbar row.** Lists show one row: primary action, search, **Filters (n)**, Group or Sort when relevant, view switch, and an overflow menu (Export, Columns, Views). Filter fields open in a popover (a sheet on tablet). Active filters show as removable chips only while set. Filter state stays in the URL exactly as before. |
-| R2 | **Three quick filters at most** are visible on a screen. The rest of the §13.0 quick chips become built-in entries under **Views** with the same URL parameters, so every former quick-filter URL still works. |
+| R1 | **One toolbar row.** Lists show one row: primary action, search, **Filters (n)**, Group or Sort as compact menu buttons when relevant, view switch, and an overflow menu (Export, Columns, Views). Filter fields open in a popover (a sheet on tablet). Active filters show as removable chips only while set. Filter state stays in the URL exactly as before. |
+| R2 | **Three quick filters at most** are visible on a screen. The rest of the §13.0 quick chips move into the **Filters** popover under "More quick filters" with the same URL parameters, so every former quick-filter URL still works. |
 | R3 | **Project navigation**: at most 7 visible tabs plus **More**, grouped as in §41.3 (E1). Inside a group, a small second-level switch shows that group's pages. Every existing route and deep link keeps working and highlights its group. |
 | R4 | **Sidebar**: at most 8 items for any role, as in §41.3 (E2). Duplicates of the header (Notifications) and views of another page (Boards, Calendar, Portfolio) move under their parent page or under More. |
 | R5 | **One headline**: the page title, plus at most a one-line scope. Longer explanations move to a help popover next to the title. |
@@ -5271,7 +5271,7 @@ Jay accepted every default below on 2026-10-11 ("lets start build").
 | E1 | Project tab groups | **Overview** (Dashboard); **Work** (Tasks, Board, Timeline, Calendar and Milestones as views); **Deliverables** (Deliverables, Submissions, Reviews, Readiness); **Coordination** (Weekly Coordination, Handoffs, Changes, Design basis, Decisions, Risks, Issues, Meetings & Actions); **People** (Team & Disciplines, Allocations, Workload); **Files**; More: Activity, Settings. |
 | E2 | Sidebar | My Work, Projects (List, Board and Portfolio views), Tasks (List, Board and Calendar views), Resources (Weekly Planner, Workload), Time, Reports. More: Home, Team, Files, Templates, Admin. Notifications only in the header bell. Items still follow role permissions. |
 | E3 | My Work default | "Today": the user's overdue items, items due this week, blocked items and attention items routed to them. This focus list replaces FR-VIS-08's narrower Today (due on the current date) as the opening view. Upcoming, Overdue and Completed, the Inbox, saved views and the Coordination sections stay reachable through the view switch. |
-| E4 | Quick-filter chips | At most 3 pinned per screen (for example Mine, Overdue, Blocked); the rest become saved views. |
+| E4 | Quick-filter chips | At most 3 pinned per screen (for example Mine, Overdue, Blocked); the rest move into the Filters popover (R2). |
 
 ### 41.4 Acceptance criteria
 
@@ -5285,7 +5285,7 @@ The census in packet 037's verification record measures AC-CALM-01 to AC-CALM-05
 
 - **AC-CALM-04.** Fewer destinations: at most 7 project group tabs plus More, and at most 8 sidebar items for an Admin, an Executive, a Supervisor, a Project Manager, a team member and a Read Only user. Baseline: 24 tabs; 14–17 items.
 
-- **AC-CALM-05.** Less reading and fewer colours: chrome words above the fold are at most 50 % of each screen's baseline, and at most 6 fill colours show above the fold. Baseline: 16–232 words; 5–12 colours.
+- **AC-CALM-05.** Less reading and fewer colours: chrome words above the fold are at most 50 % of each screen's baseline and never need to be fewer than 40, and at most 6 chromatic fill colours (saturation at least 15 % and lightness 8–96 %, on white) show above the fold. The census counts tables, grids, dialogs, and articles and list items outside navigation as data, not chrome, and each screen's baseline is the screen before the change measured with that census. Baseline: 16–221 words; 2–10 colours.
 
 - **AC-CALM-06.** Nothing lost: every route loads for a permitted user and highlights its sidebar item and project group; every former tab and quick filter is reachable in at most 2 clicks from its page; and every former quick-filter URL returns the same rows as before the change.
 

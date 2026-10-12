@@ -14,9 +14,9 @@ Outside this amendment: changes to §37.6's allocation model, its proposal and c
 
 - **FR-ROLE-01.** An open role MUST be a project-scoped record of unfilled demand: a role label (1–80 characters), an optional project discipline of that project, a from date and a through date (inclusive, through ≥ from), planned hours greater than 0 under the FR-CAP-03 hour rules, an optional note, and a status of Open, Filled or Cancelled. A new role is Open. Its creator is its accountable owner. It is soft-deleted only, carries a row version (G-06, G-07), and every create, change, fill, reopen and cancel writes an activity entry in the same transaction. A stale change returns a conflict and stores nothing.
 
-- **FR-ROLE-02.** Creating, changing or cancelling an open role MUST require the same permission as proposing an allocation (§8.10: PM or Discipline Lead within the project). Everyone else is refused.
+- **FR-ROLE-02.** Creating, changing or cancelling an open role MUST require the same permission as proposing an allocation (§8.10: PM or Discipline Lead within the project). Everyone else is refused. On a Complete project each of these is a correction and needs a reason, as an allocation proposal does.
 
-- **FR-ROLE-03.** An open role MUST be filled only by proposing a normal §37.6 allocation that names it. The proposal is refused unless the role is Open, is on the same project, and the allocation's date range lies inside the role's range. Creating the Proposed allocation, setting the role to Filled and recording the filling allocation happen in one transaction, so two simultaneous proposals produce exactly one allocation. Declining or cancelling that allocation returns the role to Open and clears the filling allocation; confirming or completing it leaves the role Filled. The allocation keeps every §37.6 rule, including confirmation by the person's Supervisor or an Admin.
+- **FR-ROLE-03.** An open role MUST be filled only by proposing a normal §37.6 allocation that names it. The proposal is refused unless the role is Open, is on the same project, and the allocation's date range lies inside the role's range. Creating the Proposed allocation, setting the role to Filled and recording the filling allocation happen in one transaction, so two simultaneous proposals produce exactly one allocation. Declining or cancelling that allocation returns the role to Open and clears the filling allocation; confirming, editing or completing it leaves the role Filled. The allocation keeps every §37.6 rule, including confirmation by the person's Supervisor or an Admin.
 
 - **FR-ROLE-04.** Open roles MUST appear on the project's Allocations tab and in an "Unfilled roles" section of Workload. Workload shows each Open role's hours for every week in its range, spread over the working days of the range by the FR-CAP-03 rule using the project's office calendar (there is no person calendar). Open roles never enter a person's capacity, committed load (FR-CAP-04), Workload indicators, the Weekly Planner or readiness capacity checks (§38.2).
 
@@ -38,13 +38,13 @@ Outside this amendment: changes to §37.6's allocation model, its proposal and c
 
 ### 40.4 Status not moving (A-21)
 
-- **FR-STALE-01.** The attention engine (§12.12) MUST include rule A-21 "Status not moving": a task or deliverable In Progress or In Review whose status has not changed for more than `status_stale_days` days, measured as A-10 measures days. It does not fire for an item for which A-10 or A-11 fired. Severity Info, or Warning when the item is also Due Soon; routed to the assignee (task) or owner (deliverable) and the Discipline Lead. The reason states the days since the status changed and the threshold, for example "Status unchanged for 16 days (threshold 15)". It follows the existing snooze rule.
+- **FR-STALE-01.** The attention engine (§12.12) MUST include rule A-21 "Status not moving": a task or deliverable In Progress or In Review whose status has not changed for more than `status_stale_days` days, measured as A-10 measures days, while the item has had activity within `task_stale_days` days. It never fires for an item with no activity within `task_stale_days` days (A-10's condition) or for a task whose review has stalled (A-11's condition), whether or not A-10 and A-11 are switched on; deliverables have no review-stalled condition. Severity Info, or Warning when the item is also Due Soon; routed to the assignee (task) or owner (deliverable) and the Discipline Lead. The reason states the days since the status changed and the threshold, for example "Status unchanged for 16 days (threshold 15)". It follows the existing snooze rule.
 
 - **FR-STALE-02.** `status_stale_days` MUST be an organisation setting with default 15 and range 1–365, edited by an Admin with the other attention thresholds; A-21 can be turned off with its rule toggle (`rule_enabled.A-21`) like every other rule.
 
 | ID | Rule | Condition (all: item not terminal; project Active) | Severity | Routed to |
 |---|---|---|---|---|
-| A-21 | Status not moving | Task or deliverable In Progress or In Review with `today − status_changed_at > status_stale_days`, and neither A-10 nor A-11 fired for it | Info; Warning if also Due Soon | Assignee or owner, DL |
+| A-21 | Status not moving | Task or deliverable In Progress or In Review with `today − status_changed_at > status_stale_days` and `today − last_activity_at ≤ task_stale_days`, and, for a task, A-11's review-stalled condition does not hold; whether A-10 or A-11 is switched on makes no difference | Info; Warning if also Due Soon | Assignee or owner, DL |
 
 | Setting key | Default | Used by |
 |---|---|---|
@@ -161,7 +161,7 @@ Jay accepted every default below on 2026-10-11 ("lets start build").
 | D3 | Where open roles appear | The project's Allocations tab and Workload's Unfilled roles section. Never in a person's capacity, the Weekly Planner or readiness checks. |
 | D4 | Anchor for Start-to-Start lag | `started_at`, set the first time an item leaves Not Started and backfilled from the activity log. |
 | D5 | What Finish-to-Finish does | Never makes the successor Waiting or Blocked. It drives the date check and warns when the successor finishes before its predecessor. |
-| D6 | A-21 threshold and scope | `status_stale_days` = 15; In Progress or In Review tasks and deliverables; not when A-10 or A-11 fired for the item. |
+| D6 | A-21 threshold and scope | `status_stale_days` = 15; In Progress or In Review tasks and deliverables with activity within `task_stale_days`; never for a task whose review has stalled (A-11's condition), whether or not A-10 and A-11 are switched on. |
 | D7 | Home discipline source | Edited by an Admin on the user record; not synced from the directory. |
 | D8 | Who sees capacity in the picker | Only viewers who could already see that person in Workload or the Weekly Planner. |
 | D9 | Home Review lane and Dashboard In review tile disagree on Revision Required | Keep both rules, show each definition, and rename the Home lane "Review and revision". |

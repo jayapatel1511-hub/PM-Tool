@@ -23,7 +23,8 @@ public static class WorkloadEndpoints
     public sealed record PersonLoad(Guid Id, string DisplayName, Guid? SupervisorId, string? SupervisorName, decimal Capacity, bool CapacityOverride,
         IReadOnlyList<(DateOnly Week, decimal Hours, decimal Pct, decimal Available, decimal Confirmed, decimal Proposed, decimal Committed)> Cells,
         decimal NoDueDate, int OpenTasks, int Unestimated, int Overdue, int Projects,
-        bool OverAssigned, bool UnderAssigned, bool Cluster, bool CanSetCapacity, bool PartialScope);
+        bool OverAssigned, bool UnderAssigned, bool Cluster, bool CanSetCapacity, bool PartialScope,
+        Guid? OfficeId = null, string? JobTitle = null, Guid? HomeDisciplineId = null);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -35,13 +36,14 @@ public static class WorkloadEndpoints
                 Weeks = weeks, Today = today, CurrentWeek = Workload.WeekOf(today), DefaultCapacity = (await store.Get(db)).DefaultWeeklyCapacityHours,
                 People = people.Select(p => new
                 {
-                    p.Id, p.DisplayName, p.SupervisorId, p.SupervisorName, p.Capacity, p.CapacityOverride,
+                    p.Id, p.DisplayName, p.SupervisorId, p.SupervisorName, p.OfficeId, p.JobTitle, p.HomeDisciplineId, p.Capacity, p.CapacityOverride,
                     Cells = p.Cells.Select(c => new { c.Week, Hours = Math.Round(c.Hours, 1), c.Pct,
                         Available = Math.Round(c.Available, 1), Confirmed = Math.Round(c.Confirmed, 1),
                         Proposed = Math.Round(c.Proposed, 1), Committed = Math.Round(c.Committed, 1) }), NoDueDate = Math.Round(p.NoDueDate, 1),
                     p.OpenTasks, p.Unestimated, p.Overdue, p.Projects, p.OverAssigned, p.UnderAssigned, p.Cluster, p.CanSetCapacity, p.PartialScope,
                     Indicator = p.OverAssigned ? "over" : p.UnderAssigned ? "under" : "ok",
                 }),
+                UnfilledRoles = await UnfilledRoles(f, weeks, access, db),
             };
         });
         api.MapGet("/workload/export", async (string? format, [AsParameters] WorkloadQuery f, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
@@ -98,7 +100,7 @@ public static class WorkloadEndpoints
         var people = People(db, access, me);
         if (f.SupervisorId is { } sup) people = people.Where(u => u.SupervisorId == sup);
         if (f.OfficeId is { } office) people = people.Where(u => u.OfficeId == office);
-        var list = await people.Select(u => new { u.Id, u.DisplayName, u.SupervisorId, u.OfficeId, u.WeeklyCapacityHours,
+        var list = await people.Select(u => new { u.Id, u.DisplayName, u.SupervisorId, u.OfficeId, u.JobTitle, u.HomeDisciplineId, u.WeeklyCapacityHours,
             Supervisor = db.Users.Where(x => x.Id == u.SupervisorId).Select(x => x.DisplayName).FirstOrDefault() }).ToListAsync();
         // A discipline selects people with work in that discipline. Capacity and reservations
         // belong to a person, not a discipline, so keep their visible project totals together.
@@ -178,7 +180,8 @@ public static class WorkloadEndpoints
                 loads.Count(l => l.Overdue), mine.Select(t => t.ProjectId).Distinct().Count(), Workload.OverAssigned(thisWeek, nextWeek),
                 access.SeesAllRestricted && f.ProjectId is null && Workload.UnderAssigned(thisWeek, nextWeek, unestimated),
                 Workload.DeadlineCluster(mine.Where(t => t.DueDate is not null).Select(t => (t.DueDate!.Value, t.ProjectId)), today),
-                Permissions.ActOnStaff(actor, u.SupervisorId).Ok, !access.SeesAllRestricted || f.ProjectId is not null));
+                Permissions.ActOnStaff(actor, u.SupervisorId).Ok, !access.SeesAllRestricted || f.ProjectId is not null,
+                u.OfficeId, u.JobTitle, u.HomeDisciplineId));
         }
         result = f.Indicator switch
         {
@@ -198,6 +201,29 @@ public static class WorkloadEndpoints
             _ => [.. result.OrderByDescending(Load).ThenBy(p => p.DisplayName)],
         };
         return (weeks, result, today);
+    }
+
+    /// FR-ROLE-04 (D3): Open roles on visible Setup and Active projects, spread over working days like an allocation. They are
+    /// demand without a person, so they never enter a person's row, percentage or indicator (AC-ROLE-02).
+    static async Task<object[]> UnfilledRoles(WorkloadQuery f, List<DateOnly> weeks, Access access, HubDb db)
+    {
+        var first = weeks[0]; var last = weeks[^1].AddDays(6);
+        var projects = access.VisibleProjects().Where(p => LiveProjects.Contains(p.Status)).Select(p => p.Id);
+        var q = db.OpenRoles.AsNoTracking().Where(r => r.Status == OpenRoleStatus.Open && projects.Contains(r.ProjectId) && r.FromDate <= last && r.ThroughDate >= first);
+        if (f.ProjectId is { } pid) q = q.Where(r => r.ProjectId == pid);
+        if (f.DisciplineId is { } d) q = q.Where(r => db.ProjectDisciplines.Any(pd => pd.Id == r.ProjectDisciplineId && pd.DisciplineId == d));
+        var roles = await q.Select(r => new { Role = r,
+            Project = db.Projects.Where(p => p.Id == r.ProjectId).Select(p => new { p.ProjectNumber, p.Name }).First(),
+            DisciplineName = db.ProjectDisciplines.Where(pd => pd.Id == r.ProjectDisciplineId).Select(pd => pd.Discipline!.Name).FirstOrDefault() })
+            .ToListAsync();
+        var calendar = await OpenRoleEndpoints.Calendars(db, roles.Select(x => x.Role.ProjectId).Distinct().ToArray());
+        return roles.OrderBy(x => x.Project.ProjectNumber).ThenBy(x => x.Role.FromDate).Select(x =>
+        {
+            var spread = OpenRoleEndpoints.Spread(x.Role, calendar(x.Role.ProjectId));
+            return (object)new { x.Role.Id, x.Role.ProjectId, x.Project.ProjectNumber, ProjectName = x.Project.Name, x.Role.RoleLabel,
+                x.Role.ProjectDisciplineId, x.DisciplineName, x.Role.FromDate, x.Role.ThroughDate, x.Role.PlannedHours,
+                Cells = weeks.Select(w => new { Week = w, Hours = Math.Round(spread.Where(day => Workload.WeekOf(day.Key) == w).Sum(day => day.Value), 1) }) };
+        }).ToArray();
     }
 
     /// Person → Project → tasks with each task's hours per week (§13.11 expand row), and whether the viewer may reassign it.

@@ -44,6 +44,9 @@ public static class OpenRoleEndpoints
     static Row ToRow(OpenRole r, string? disciplineName, bool canManage) => new(r.Id, r.ProjectId, r.RoleLabel, r.ProjectDisciplineId, disciplineName,
         r.FromDate, r.ThroughDate, r.PlannedHours, r.Status, r.FilledAllocationId, r.Note, r.RowVersion, canManage);
 
+    /// A6, P-05: on a Complete project every change is a correction that needs a reason, as allocation proposals do.
+    static string? Reason(Project p, string? reason) => p.Status == ProjectStatus.Complete ? Check.Reason(reason) : Check.Optional(reason, "reason", 2000);
+
     static Task<string?> DisciplineName(HubDb db, Guid? id) =>
         db.ProjectDisciplines.Where(d => d.Id == id).Select(d => d.Discipline!.Name).FirstOrDefaultAsync();
 
@@ -79,40 +82,46 @@ public static class OpenRoleEndpoints
         var (project, ctx) = await access.Project(projectId, false);
         Access.Demand(Permissions.ProposeAllocation(access.Actor, ctx));
         var role = new OpenRole { ProjectId = project.Id };
-        await Apply(db, project.Id, role, new Patch(body), true);
+        var p = new Patch(body);
+        var reason = Reason(project, p.Str("reason"));
+        await Apply(db, project.Id, role, p, true);
         db.OpenRoles.Add(role);
+        db.Audit.Note(role, reason: reason);
         await db.SaveChangesAsync();
         return Results.Created($"/api/v1/open-roles/{role.Id}", ToRow(role, await DisciplineName(db, role.ProjectDisciplineId), true));
     }
 
     /// Only an Open role changes; a Filled role is changed by declining or cancelling its allocation first.
-    static async Task<(OpenRole Role, ProjectContext Ctx)> Writable(Guid id, Access access, HubDb db)
+    static async Task<(OpenRole Role, Project Project)> Writable(Guid id, Access access, HubDb db)
     {
         var role = await db.OpenRoles.FirstOrDefaultAsync(r => r.Id == id) ?? throw ApiException.NotFound();
-        var (_, ctx) = await access.Project(role.ProjectId, false);
+        var (project, ctx) = await access.Project(role.ProjectId, false);
         Access.Demand(Permissions.ProposeAllocation(access.Actor, ctx));
         Access.Demand(Permissions.IsPM(access.Actor, ctx) || role.CreatedBy == access.Actor.Id ? Allow.Yes : Allow.No("perm.owner"));
-        return (role, ctx);
+        return (role, project);
     }
 
     static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db)
     {
         var p = new Patch(body);
-        var (role, _) = await Writable(id, access, db);
+        var (role, project) = await Writable(id, access, db);
         await Http.CheckVersion(db, http, role, p.RowVersion);
         Check.That(role.Status == OpenRoleStatus.Open, "status", "openRole.not_open");
+        var reason = Reason(project, p.Str("reason"));
         await Apply(db, role.ProjectId, role, p, false);
+        db.Audit.Note(role, reason: reason);
         await db.SaveChangesAsync();
         return Results.Ok(ToRow(role, await DisciplineName(db, role.ProjectDisciplineId), true));
     }
 
     static async Task<IResult> Cancel(Guid id, CancelBody body, HttpContext http, Access access, HubDb db)
     {
-        var (role, _) = await Writable(id, access, db);
+        var (role, project) = await Writable(id, access, db);
         await Http.CheckVersion(db, http, role, body.RowVersion);
         Check.That(role.Status == OpenRoleStatus.Open, "status", "openRole.not_open");
+        var reason = Reason(project, body.Reason);
         role.Status = OpenRoleStatus.Cancelled;
-        db.Audit.Note(role, reason: Check.Optional(body.Reason, "reason", 2000));
+        db.Audit.Note(role, reason: reason);
         await db.SaveChangesAsync();
         return Results.Ok(ToRow(role, await DisciplineName(db, role.ProjectDisciplineId), true));
     }

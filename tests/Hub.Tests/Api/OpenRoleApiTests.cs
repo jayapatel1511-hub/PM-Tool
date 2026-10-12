@@ -113,6 +113,31 @@ public sealed class OpenRoleApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Changing_roles_on_a_complete_project_needs_a_correction_reason() // A6, P-05: as allocation proposals do
+    {
+        var project = await data.Project();
+        var role = await Role(project.Id);
+        await f.DbAsync(async db => { (await db.Projects.SingleAsync(p => p.Id == project.Id)).Status = ProjectStatus.Complete; return await db.SaveChangesAsync(); });
+        var root = $"/api/v1/projects/{project.Id}/open-roles";
+        var path = $"/api/v1/open-roles/{role.S("id")}";
+
+        foreach (var reason in new[] { null, "", "Late" })
+        {
+            Assert.NotNull((await (await f.As(TestData.Pm).Post(root, new { roleLabel = "Correction", fromDate = Mon, throughDate = Fri, plannedHours = 8, reason })).Json(400))["errors"]!["reason"]);
+            Assert.NotNull((await (await f.As(TestData.Pm).Patch(path, new { note = "Correction", reason }, role.I("rowVersion"))).Json(400))["errors"]!["reason"]);
+            Assert.NotNull((await (await f.As(TestData.Pm).Post(path + "/cancel", new { rowVersion = role.I("rowVersion"), reason })).Json(400))["errors"]!["reason"]);
+        }
+        Assert.Single(f.Db(db => db.OpenRoles.Where(r => r.ProjectId == project.Id).ToList()));
+        Assert.Equal((OpenRoleStatus.Open, (string?)null), (Stored(role.G("id")).Status, Stored(role.G("id")).Note));
+
+        var added = await (await f.As(TestData.Pm).Post(root, new { roleLabel = "Correction", fromDate = Mon, throughDate = Fri, plannedHours = 8, reason = "Missed at close-out" })).Json(201);
+        var edited = await (await f.As(TestData.Pm).Patch(path, new { note = "Correction", reason = "Hours were booked late" }, role.I("rowVersion"))).Json();
+        await (await f.As(TestData.Pm).Post(path + "/cancel", new { rowVersion = edited.I("rowVersion"), reason = "Never staffed" })).Json();
+        var history = f.Db(db => db.ActivityLog.Where(a => a.ItemId == added.G("id") || a.ItemId == role.G("id")).Select(a => a.Reason).ToList());
+        Assert.Equal(["Hours were booked late", "Missed at close-out", "Never staffed"], history.OfType<string>().Order());
+    }
+
+    [Fact]
     public async Task Filling_creates_the_allocation_and_marks_the_role_in_one_transaction() // AC-ROLE-03a, -03b, -03d
     {
         var project = await data.Project();

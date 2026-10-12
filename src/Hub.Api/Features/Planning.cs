@@ -138,9 +138,11 @@ public static class PlanningEndpoints
         }).ToArray();
     }
 
-    static async Task<EntryRow[]> Rows(HubDb db, Access access, IReadOnlyList<PlanningEntry> entries, OrgSettings settings, TimeProvider clock)
+    static async Task<EntryRow[]> Rows(HubDb db, Access access, IReadOnlyList<PlanningEntry> entries, OrgSettings settings, TimeProvider clock,
+        Dictionary<(Guid, DateOnly), DayRow[]>? dayCache = null)
     {
         if (entries.Count == 0) return [];
+        var cache = dayCache ?? new Dictionary<(Guid, DateOnly), DayRow[]>();
         var ids = entries.SelectMany(e => new[] { e.PersonId, e.CreatedBy!.Value }).Distinct().ToArray();
         var users = await db.Users.AsNoTracking().Where(u => ids.Contains(u.Id)).ToDictionaryAsync(u => u.Id);
         var roles = await db.UserRoles.AsNoTracking().Where(r => ids.Contains(r.UserId)).ToListAsync();
@@ -153,6 +155,8 @@ public static class PlanningEndpoints
         var overrides = await db.AvailabilityOverrides.AsNoTracking().Where(o => ids.Contains(o.PersonId) && o.WorkDate >= from && o.WorkDate <= through)
             .ToDictionaryAsync(o => (o.PersonId, o.WorkDate));
         var now = clock.GetUtcNow(); var current = Workload.WeekOf(clock.Today(settings));
+        DayRow[] DaysFor(AppUser person, DateOnly week) // Days depends only on (person, week); share it with the grid cells.
+            => cache.TryGetValue((person.Id, week), out var days) ? days : cache[(person.Id, week)] = Days(person, week, settings, holidays, overrides);
         return entries.Select(e =>
         {
             var person = users[e.PersonId]; var owner = users[e.CreatedBy!.Value];
@@ -164,7 +168,7 @@ public static class PlanningEndpoints
             if (project is not null && !WorkloadEndpoints.LiveProjects.Contains(project.Status)) warnings.Add(PlanningWarning.ProjectNotActive);
             if (!self && !stillManages) warnings.Add(PlanningWarning.OwnerCannotManage);
             for (var week = e.StartWeek; week <= e.EndWeek; week = week.AddDays(7))
-                if (e.HoursPerWeek > Days(person, week, settings, holidays, overrides).Sum(d => d.Available)) { warnings.Add(PlanningWarning.AboveCapacity); break; }
+                if (e.HoursPerWeek > DaysFor(person, week).Sum(d => d.Available)) { warnings.Add(PlanningWarning.AboveCapacity); break; }
             var canEdit = Permissions.ManagePlanningEntry(access.Actor,
                 new(person.Id, owner.Id, person.SupervisorId, e.Visibility, self, stillManages, person.IsActive)).Ok;
             return new EntryRow(e.Id, person.Id, person.DisplayName, owner.Id, owner.DisplayName, self ? "Self" : "Manager",
@@ -201,7 +205,15 @@ public static class PlanningEndpoints
         var supervisors = await db.Users.AsNoTracking().Where(u => users.Select(x => x.SupervisorId).Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
         var entries = await VisibleEntries(db, access, query.IncludeMyDrafts, correction)
             .Where(e => ids.Contains(e.PersonId) && e.StartWeek <= weeks[weeks.Length - 1] && e.EndWeek >= first).ToListAsync();
-        var entryRows = await Rows(db, access, entries, settings, clock);
+        var dayRows = new Dictionary<(Guid, DateOnly), DayRow[]>();
+        var entryRows = await Rows(db, access, entries, settings, clock, dayRows);
+        // AC-PLN-12: a view is partial only for people who have entries on projects this viewer cannot see.
+        var visibleProjects = access.VisibleProjectIds(); var viewer = access.Actor.Id;
+        HashSet<Guid> hidden = access.SeesAllRestricted ? [] : (await db.PlanningEntries.AsNoTracking()
+            .Where(e => ids.Contains(e.PersonId) && e.ProjectId != null && !visibleProjects.Contains(e.ProjectId.Value)
+                && (e.Visibility != PlanningVisibility.Draft || e.CreatedBy == viewer)
+                && e.StartWeek <= weeks[weeks.Length - 1] && e.EndWeek >= first)
+            .Select(e => e.PersonId).Distinct().ToListAsync()).ToHashSet();
         var tasks = await WorkloadEndpoints.Tasks(db, access, people.Select(u => u.Id), null, null);
         var taskCalendars = await Calendars.For(db, settings, tasks.Select(t => t.ProjectId).Distinct().ToArray());
         var forecasts = tasks.ToDictionary(t => t.Id, t => Workload.Spread(new(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate), today, taskCalendars(t.ProjectId)));
@@ -215,10 +227,10 @@ public static class PlanningEndpoints
         var actorMemberships = await db.ProjectMembers.AsNoTracking().Where(m => m.UserId == access.Actor.Id && m.RemovedAt == null).ToListAsync();
         var availability = await db.AvailabilityOverrides.AsNoTracking().Where(o => ids.Contains(o.PersonId) && o.WorkDate >= first && o.WorkDate <= weeks[weeks.Length - 1].AddDays(6)).ToDictionaryAsync(o => (o.PersonId, o.WorkDate));
         var holidays = settings.WorkingDaysEnabled ? await db.Holidays.AsNoTracking().ToListAsync() : [];
-        var dayRows = new Dictionary<(Guid, DateOnly), DayRow[]>();
-        var rows = new List<PersonRow>(); var partial = !access.SeesAllRestricted;
+        var rows = new List<PersonRow>(); var partial = hidden.Count > 0;
         foreach (var user in users)
         {
+            var personPartial = hidden.Contains(user.Id);
             var personEntries = entryRows.Where(e => e.PersonId == user.Id).Select(e => e with { MatchesFilter = Matches(e, query.ProjectId, query.Source, query.Confidence, query.Visibility, query.Q) }).ToArray();
             var personTasks = tasks.Where(t => t.AssigneeId == user.Id).ToArray();
             var calendar = Calendar(settings, user, holidays);
@@ -236,7 +248,7 @@ public static class PlanningEndpoints
             }).ToArray();
             var cells = weeks.Select(week =>
             {
-                var days = Days(user, week, settings, holidays, availability); dayRows[(user.Id, week)] = days;
+                if (!dayRows.TryGetValue((user.Id, week), out var days)) dayRows[(user.Id, week)] = days = Days(user, week, settings, holidays, availability);
                 var input = entries.Where(e => e.PersonId == user.Id && e.StartWeek <= week && e.EndWeek >= week).ToArray();
                 var approved = projected.GroupBy(a => a.ProjectId).ToDictionary(g => g.Key, g => g.Sum(a => a.Weeks.First(w => w.Week == week).Hours));
                 var capacity = days.Sum(d => d.Available);
@@ -251,7 +263,7 @@ public static class PlanningEndpoints
             }).ToArray();
             var under = PlanningRules.UnderPlanned(cells.Select(c => new UnderWeek(c.Capacity, c.TimeAway, c.Confirmed + c.Expected + c.Possible, c.UnestimatedTasks > 0)).ToArray(),
                 Array.FindIndex(weeks, w => w >= current) is var start && start >= 0 ? start : weeks.Length,
-                settings.PlanningUnderPct, settings.PlanningUnderWeeks, partial);
+                settings.PlanningUnderPct, settings.PlanningUnderWeeks, personPartial);
             cells = cells.Select((c, i) => c with { UnderPlanned = under[i] }).ToArray();
             cells = cells.Take(displayCount).ToArray();
             personEntries = personEntries.Where(e => e.StartWeek <= weeks[displayCount - 1] && e.EndWeek >= first).ToArray();
@@ -392,12 +404,14 @@ public static class PlanningEndpoints
         return await db.PlanningEntries.SingleAsync(e => e.Id == id);
     }
 
-    internal static IQueryable<Notification> VisibleNotifications(HubDb db, Access access)
+    internal static async Task<IQueryable<Notification>> VisibleNotifications(HubDb db, Access access)
     {
-        var projects = access.VisibleProjectIds();
+        var uid = access.Actor.Id; var projects = access.VisibleProjectIds();
+        var mine = db.Notifications.Where(n => n.UserId == uid && (n.ProjectId == null || projects.Contains(n.ProjectId.Value)));
+        // The planner scope subquery is only paid by users who actually hold a live planning notification.
+        if (!await db.Notifications.AnyAsync(n => n.UserId == uid && n.ItemType == "PlanningEntry" && n.ItemId != null)) return mine;
         var entries = VisibleEntries(db, access).Select(e => e.Id);
-        return db.Notifications.Where(n => n.UserId == access.Actor.Id && (n.ProjectId == null || projects.Contains(n.ProjectId.Value))
-            && (n.ItemType != "PlanningEntry" || n.ItemId == null || entries.Contains(n.ItemId.Value)));
+        return mine.Where(n => n.ItemType != "PlanningEntry" || n.ItemId == null || entries.Contains(n.ItemId.Value));
     }
 
     internal static async Task<bool> PlanningEmailAllowed(HubDb db, Guid userId, Guid[] ids)
@@ -525,11 +539,11 @@ public static class PlanningEndpoints
     }
 
     static async Task<IResult> StillValid(Guid id, VersionBody body, HttpContext http, Access access, HubDb db,
-        SettingsStore store, TimeProvider clock, Notifier notify)
+        SettingsStore store, TimeProvider clock)
     {
         var entry = await Writable(id, body.Reason, access, db, store, clock); await Http.CheckVersion(db, http, entry, body.RowVersion);
         entry.LastValidatedAt = clock.GetUtcNow(); db.Entry(entry).Property(e => e.LastValidatedAt).IsModified = true;
-        AuditChange(db, access, entry, "Validated", body.Reason); await Notice(db, access, notify, entry, entry.Visibility != PlanningVisibility.Draft, clock);
+        AuditChange(db, access, entry, "Validated", body.Reason); // PLN-12 only resets staleness; nothing changed for the person, so no notice.
         await db.SaveChangesAsync(); return Results.Ok((await Rows(db, access, [entry], await store.Get(db), clock))[0]);
     }
 

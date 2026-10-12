@@ -3,9 +3,7 @@ WORKDIR /work
 COPY web/package.json web/package-lock.json web/
 RUN cd web && npm ci
 COPY web/ web/
-# Review and company pilot share this build; only review enables the fictional-data banner.
-ARG VITE_SYNTHETIC_PREVIEW=false
-RUN mkdir -p src/Hub.Api && cd web && VITE_SYNTHETIC_PREVIEW=$VITE_SYNTHETIC_PREVIEW npm run build
+RUN mkdir -p src/Hub.Api && cd web && npm run build
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /work

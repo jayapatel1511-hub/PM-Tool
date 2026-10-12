@@ -154,6 +154,18 @@ export function Segmented<T extends string>({ label, value, options, onChange }:
 const tablet = '(max-width: 1023.98px)'
 const subscribeTablet = (l: () => void) => { const m = matchMedia(tablet); m.addEventListener('change', l); return () => m.removeEventListener('change', l) }
 
+/** A one-line page scope with the longer explanation behind an (i) help button (§41 R5). */
+export function PageHelp({ children }: { children: ReactNode }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button type="button" aria-label={t('calm.help')} className="ml-1 inline-grid size-6 place-items-center rounded-md align-middle text-muted-foreground hover:bg-muted hover:text-foreground"><Info className="size-4" aria-hidden /></button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-96 text-sm/5 text-muted-foreground">{children}</PopoverContent>
+    </Popover>
+  )
+}
+
 /** A list's toolbar (§13.0 Filters, §41 R1): one row with the search, a Filters (n) button whose popover (a sheet below
  *  1024 px) holds the labelled filter fields (`children`), up to three pinned quick chips, the active filters as removable
  *  chips while any are set, and the page's view or overflow controls on the right. URL handling stays with each page. */

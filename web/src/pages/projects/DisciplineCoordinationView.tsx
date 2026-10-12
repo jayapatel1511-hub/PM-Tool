@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router'
 import { useEffect, type ReactNode } from 'react'
-import { ErrorBanner, Field, FilterBar, Loading, selectCls } from '@/components/hub/common'
+import { ErrorBanner, Field, FilterBar, Loading, PageHelp, selectCls } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useItemPanel } from '@/components/hub/panel-host'
@@ -103,10 +103,9 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   // The heading and scope stay in place while a page or scope loads, so a changed field keeps focus and the layout its shape.
   const shell = (content: ReactNode, evaluatedAt?: string) => <section aria-labelledby="dcv-title" className="space-y-4">
     <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-1">
-      <div className="min-w-0 max-w-3xl"><h2 id="dcv-title" className="text-lg/[26px] font-semibold tracking-[-0.2px]">{t('dcv.title')}</h2><p className="mt-1 text-sm text-muted-foreground">{t('dcv.subtitle')}</p></div>
+      <div className="min-w-0 max-w-3xl"><h2 id="dcv-title" className="text-lg/[26px] font-semibold tracking-[-0.2px]">{t('dcv.title')}</h2><p className="mt-1 text-sm text-muted-foreground">{t('dcv.subtitle')}<PageHelp>{t('dcv.scopeNote')}</PageHelp></p></div>
       {evaluatedAt && <span className="text-xs text-muted-foreground tabular-nums">{t('dcv.clientRefresh', { when: new Date(evaluatedAt).toLocaleTimeString() })}</span>}
     </div>
-    <p role="status" className="max-w-4xl text-xs text-muted-foreground">{t('dcv.scopeNote')}</p>
     {filters}
     {(from || to) && <p role="status" className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲</span><span>{t('dcv.dateScopeNote')}</span></p>}
     {content}

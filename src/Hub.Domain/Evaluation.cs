@@ -491,9 +491,10 @@ public static class Evaluator
                 Add("A-11", Severity.Warning, ItemType.Task, t.Id, t.Key, t.Name, $"{t.Status} for {waitDays} days; reviewer {Name(t.ReviewerId)}",
                     [t.ReviewerId, dl, .. pms.Cast<Guid?>()], t.ReviewerId, t.DisciplineId, waitDays, t.Priority, t.DueDate, s.ReviewStaleDays, new() { ["daysWaiting"] = waitDays });
             }
-            // A-21 (FR-STALE-01, D6): touched but not moving; A-10 or A-11 already says more about the same item.
+            // A-21 (FR-STALE-01): the status stands still while people keep touching the item. Untouched work (A-10's
+            // condition) and a stalled review (A-11's) never raise it, whether or not those rules are switched on.
             if ((t.Status == TaskStatuses.InProgress || TaskStatuses.IsReview(t.Status)) && t.StatusChangedOn is { } tsc && since(tsc) > s.StatusStaleDays
-                && !list.Any(a => a.ItemId == t.Id && a.RuleId is "A-10" or "A-11"))
+                && r.StaleDays <= s.TaskStaleDays && !r.IsReviewStalled)
                 Add("A-21", r.IsDueSoon ? Severity.Warning : Severity.Info, ItemType.Task, t.Id, t.Key, t.Name, StatusStill(t.Status, since(tsc)),
                     [t.AssigneeId, dl], t.AssigneeId, t.DisciplineId, since(tsc), t.Priority, t.DueDate, s.StatusStaleDays, new() { ["daysSinceStatusChange"] = since(tsc) });
             if (t.DeliverableId is { } did && deliverables.TryGetValue(did, out var pdel) && pdel.DueDate is { } pdd && t.DueDate is { } tdd && tdd > pdd) // A-16
@@ -562,7 +563,8 @@ public static class Evaluator
             if (d.OwnerId is null && (d.Status != DeliverableStatus.NotStarted || r.IsDueSoon)) // A-13
                 Add("A-13", Severity.Warning, ItemType.Deliverable, d.Id, d.Key, d.Name, d.Status != DeliverableStatus.NotStarted ? $"{d.Status} with no owner" : $"Due {d.DueDate:yyyy-MM-dd} with no owner",
                     [dl, .. pms.Cast<Guid?>()], null, d.DisciplineId, 0, d.Priority, d.DueDate, s.DeliverableDueSoonDays, new() { ["status"] = d.Status });
-            if (d.Status is DeliverableStatus.InProgress or DeliverableStatus.InReview && d.StatusChangedOn is { } dsc && since(dsc) > s.StatusStaleDays) // A-21
+            if (d.Status is DeliverableStatus.InProgress or DeliverableStatus.InReview && d.StatusChangedOn is { } dsc && since(dsc) > s.StatusStaleDays
+                && since(d.LastActivity) <= s.TaskStaleDays) // A-21, as for tasks
                 Add("A-21", r.IsDueSoon ? Severity.Warning : Severity.Info, ItemType.Deliverable, d.Id, d.Key, d.Name, StatusStill(d.Status, since(dsc)),
                     [d.OwnerId, dl], d.OwnerId, d.DisciplineId, since(dsc), d.Priority, d.DueDate, s.StatusStaleDays, new() { ["daysSinceStatusChange"] = since(dsc) });
             if (r.IsDateInconsistent) // A-17

@@ -2037,6 +2037,8 @@ export const en: Record<string, string> = {
   'mywork.weekSummary': 'Week of {week}: {planned} of {capacity} planned', 'mywork.weekShow': 'Show', 'mywork.weekHide': 'Hide',
   'reports.count': '{n} reports', 'reports.countOne': '1 report', 'reports.report': 'Report',
   'calendar.zoneShort': 'Times in {zone}', 'calendar.hiddenType': 'Hidden',
+  'wc.neverReviewedShort': 'not reviewed yet', 'wc.moreActions': 'More actions',
+  'wc.help': 'The weekly meeting agenda, computed from live project data. Until the first review it lists changes from the last 7 days, then changes since the last review. Meeting mode enlarges the page for a room and steps through the sections with the arrow keys.',
   'reports.help': 'Fixed reports over current data. Each report opens with its parameters, shows only what you are allowed to see and can be exported.',
   'prefs.digestTimeLabel': 'Digest time',
   'prefs.resetEvent': 'Reset {event} to the default',

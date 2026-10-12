@@ -101,12 +101,14 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     {(ownerId || from || to) && <Button variant="link" className="px-1" onClick={clearScope}>{t('dcv.clearScope')}</Button>}
   </div></FilterBar>
   // The heading and scope stay in place while a page or scope loads, so a changed field keeps focus and the layout its shape.
+  // One header row (§41 R1, R5): the title, its explanation behind page help, the Filters toolbar and the freshness time.
   const shell = (content: ReactNode, evaluatedAt?: string) => <section aria-labelledby="dcv-title" className="space-y-4">
-    <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-1">
-      <div className="min-w-0 max-w-3xl"><h2 id="dcv-title" className="text-lg/[26px] font-semibold tracking-[-0.2px]">{t('dcv.title')}</h2><p className="mt-1 text-sm text-muted-foreground">{t('dcv.subtitle')}<PageHelp>{t('dcv.scopeNote')}</PageHelp></p></div>
-      {evaluatedAt && <span className="text-xs text-muted-foreground tabular-nums">{t('dcv.clientRefresh', { when: new Date(evaluatedAt).toLocaleTimeString() })}</span>}
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <h2 id="dcv-title" className="text-lg/[26px] font-semibold tracking-[-0.2px]">{t('dcv.title')}</h2>
+      <PageHelp><p>{t('dcv.subtitle')}</p><p className="mt-2">{t('dcv.scopeNote')}</p><p className="mt-2">{t('dcv.allSectionsPage')}</p></PageHelp>
+      {filters}
+      {evaluatedAt && <span className="ml-auto text-xs text-muted-foreground tabular-nums">{t('dcv.clientRefresh', { when: new Date(evaluatedAt).toLocaleTimeString() })}</span>}
     </div>
-    {filters}
     {(from || to) && <p role="status" className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲</span><span>{t('dcv.dateScopeNote')}</span></p>}
     {content}
   </section>
@@ -148,7 +150,6 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   const capture = (key: string, onClick: () => void) => meeting && canCapture && onCapture &&
     <button type="button" className="no-print inline-flex min-h-6 items-center text-sm text-primary underline underline-offset-4" aria-label={t('dcv.reuseCaptureFor', { key })} onClick={onClick}>{t('dcv.captureAction')}</button>
   return shell(<>
-    <p className="no-print text-xs text-muted-foreground">{t('dcv.allSectionsPage')}</p>
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {card('owe', t('dcv.owe'), d.outgoingTotal, <>{items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: <><CoordStatus status={h.status} /><span>{t('dcv.promisedDate')}: <span className="tabular-nums">{h.promisedBy ? fmtDate(h.promisedBy) : t('dcv.unavailable')}</span></span><span>{t('dcv.neededDate')}: <span className="tabular-nums">{fmtDate(h.neededBy)}</span></span></> })), 'handoffs')}<Pager label={t('dcv.owe')} page={d.outgoingPage} total={d.outgoingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
       {card('waiting', t('dcv.waiting'), d.incomingTotal, <>{items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: <CoordStatus status={h.status} /> })), 'handoffs')}<Pager label={t('dcv.waiting')} page={d.incomingPage} total={d.incomingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
@@ -178,16 +179,14 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
           </li>)}</ul><Pager label={t('dcv.start')} page={d.startabilityPage} total={d.startabilityTotal} pageSize={d.startabilityPageSize} onPage={setPage} /></> : <p className="text-muted-foreground">{t('dcv.noAssessedWork')}</p>}</>, 'readiness')}
     </div>
     <section aria-labelledby="dcv-linked-issues" className={box}>
-      <div className={head}><h2 id="dcv-linked-issues" className={title}>{t('dcv.linkedIssues')}</h2><span className={badge}>{d.linkedIssuesTotal}</span></div>
+      <div className={head}><div className="flex items-center"><h2 id="dcv-linked-issues" className={title}>{t('dcv.linkedIssues')}</h2><PageHelp>{t('dcv.linkedIssuesHint')}</PageHelp></div><span className={badge}>{d.linkedIssuesTotal}</span></div>
       <div className={body}>
-        <p className="mb-2 text-xs text-muted-foreground">{t('dcv.linkedIssuesHint')}</p>
         {linkedIssueItems.length ? <><ul className="divide-y rounded-md border">{linkedIssueItems.map((issue) => <li key={issue.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2">
           <Link className={keyLink} to={`/projects/${project.projectNumber}/issues?panel=Issue:${issue.id}`} aria-label={t('dcv.openLinkedIssue', { key: issue.key })}>{issue.key}</Link>
           <button type="button" className="min-w-[12rem] flex-1 text-left font-medium hover:underline" onClick={() => openPanel('Issue', issue.id)}>{issue.title}</button>
           <CoordStatus status={issue.status} />
           <span className="text-muted-foreground">{issue.ownerName ?? issue.ownerId ?? t('dcv.ownerUnavailable')}</span>
         </li>)}</ul><Pager label={t('dcv.linkedIssues')} page={d.linkedIssuesPage} total={d.linkedIssuesTotal} pageSize={d.linkedIssuesPageSize} onPage={setPage} /></> : none}
-        <p className="mt-2 text-xs text-muted-foreground tabular-nums">{t('dcv.clientRefresh', { when: new Date(d.evaluatedAt).toLocaleTimeString() })}</p>
       </div>
     </section>
     <section aria-labelledby="dcv-pending-reviews" className={box}>

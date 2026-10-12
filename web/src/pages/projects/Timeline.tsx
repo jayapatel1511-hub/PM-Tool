@@ -37,9 +37,9 @@ export function depPath(type: string | undefined, a: { s: number; e: number; y: 
   const bend = Math.max(12, Math.abs(x2 - x1) / 3)
   return `M ${x1} ${a.y} C ${x1 + out * bend} ${a.y}, ${x2 - into * bend} ${b.y}, ${x2 - into * 2} ${b.y}`
 }
-/** An arrow's tooltip: its link type and lag. */
+/** An arrow's tooltip: its link type and lag (left out when the payload has no lag, as for deliverable links). */
 export const depTitle = (type: string | undefined, lag?: number) =>
-  `${t(`sig.dep.${type ?? 'FinishToStart'}`)} · ${lag ? plural(lag, 'sig.depLag1', 'sig.depLag') : t('sig.depNoLag')}`
+  [t(`sig.dep.${type ?? 'FinishToStart'}`), lag === undefined ? null : lag ? plural(lag, 'sig.depLag1', 'sig.depLag') : t('sig.depNoLag')].filter(Boolean).join(' · ')
 /** One dependency arrow with a hover target and a tooltip naming its type and lag. */
 export function DepArrow({ d, hot, title, marker }: { d: string; hot: boolean; title: string; marker: string }) {
   return (

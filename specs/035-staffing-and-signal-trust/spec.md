@@ -17,7 +17,7 @@ A resource manager can staff a project with a role before a person is named, and
 2. **Dependency types** (FR-DEPT): Start-to-Start and Finish-to-Finish next to Finish-to-Start, for task and deliverable links, with the existing working-day lag.
 3. **Stalled status rule** (FR-STALE): a new attention rule, A-21, for open tasks and deliverables whose status has not changed for a configurable number of days.
 4. **Capacity grouping** (FR-GRP): an optional home discipline on each person, and a group-by control on Workload and the Weekly Planner (Reports to, Office, Job title, Home discipline).
-5. **Capacity at assignment** (FR-PICK): the person picker shows each candidate's remaining hours and time away for the relevant week, to viewers who can already see that person's capacity.
+5. **Capacity at assignment** (FR-PICK): the person picker shows each candidate's remaining hours and time-away hours for the relevant week, to viewers who can already see that person's capacity.
 
 **Part B: Trustworthy counts and dates**
 
@@ -55,7 +55,7 @@ A PM adds an open role "Civil technologist, 20 h/week, 3 Nov–19 Dec" to a proj
 
 - **AC-ROLE-01.** Creating an open role needs a label (1–80 characters), a from date and a through date, and planned hours greater than 0. It is audited and has a row version.
 - **AC-ROLE-02.** Workload's Unfilled roles section shows the role's hours for each week in range, spread over working days in the same way as an allocation. No person's committed hours, percentage or indicator changes.
-- **AC-ROLE-03.** Proposing an allocation with `openRoleId` creates the Proposed allocation and marks the role Filled in one transaction. A second proposal for a role that is already Filled is refused.
+- **AC-ROLE-03.** Proposing an allocation with `openRoleId` creates the Proposed allocation and marks the role Filled in one transaction. A second proposal for a role that is already Filled is refused. Two simultaneous proposals give exactly one allocation.
 - **AC-ROLE-04.** Declining or cancelling that allocation returns the role to Open. Completing it leaves the role Filled.
 - **AC-ROLE-05.** Viewers who cannot view the project never see its open roles in any list, export, search or count.
 
@@ -83,7 +83,7 @@ A PM links "Drainage design" to start 2 working days after "Grading design" star
 
 ### Story 5: Assign with capacity in view (P1)
 
-- **AC-PICK-01.** A Supervisor opening the owner picker on a task due in week 46 sees "12 h free" or "Away 2 d" next to each direct report for week 46.
+- **AC-PICK-01.** A Supervisor opening the owner picker on a task due in week 46 sees "12 h free" (and "16 h away" when time away falls in the week) next to each direct report for week 46.
 - **AC-PICK-02.** For people the viewer cannot see in the Planner, no figure is shown, and the response contains no data for them.
 - **AC-PICK-03.** The figure equals the Planner's remaining capacity for that person and week. The picker loads it with one request per open, not one per person.
 

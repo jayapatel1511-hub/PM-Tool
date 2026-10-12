@@ -69,7 +69,7 @@ Rules while implementing:
   Permission is `ProposeAllocation` (D2). Reads use the existing project visibility scope.
 - **Fill:**
   - Add an optional `Guid? OpenRoleId` to `CreateBody` in `src/Hub.Api/Features/Allocations.cs:14`.
-  - The create handler checks that the role is Open, on the same project, and that the date range is inside the role's range. It then sets `Status = Filled` and `FilledAllocationId` in the same `SaveChanges`.
+  - The create handler locks the open role row (the same lock pattern used for the person row), then checks that the role is Open, on the same project, and that the date range is inside the role's range. It then sets `Status = Filled` and `FilledAllocationId` in the same `SaveChanges`.
   - Decline and cancel (`Allocations.cs` :443, :459) reset a linked role to Open.
 
   These are the only edits to `Allocations.cs`.
@@ -135,7 +135,7 @@ Rules while implementing:
 - `Planning.cs` `GridQuery` (:22-25) gains `PersonIds` (comma list, at most 50). It is applied inside the existing scope, so ids outside `Planning.People` are dropped silently.
 - `PeoplePicker` (`web/src/components/hub/people.tsx:31-76`) gains an optional `capacityWeek` prop. When the prop is set and the viewer has `ViewWorkload`:
   - On open, it calls `planning/grid?personIds=…&from=<week>&weeks=1` once for the visible candidates.
-  - It shows `remaining` as "N h free", or "Away N d" when time away covers the week.
+  - It shows `remaining` as "N h free", plus "N h away" when the cell reports time away. It uses the hours the grid already returns, with no new day-count field.
   - Without data, it shows nothing.
 - Pass `capacityWeek`:
   - in TaskPanel owner (`TaskPanel.tsx:127`, the week of the start date, else the due date, else the current week);

@@ -72,7 +72,7 @@
 
 ## Phase 6: Acceptance (see verification.md)
 
-- [ ] T020 Add the synthetic fixtures from verification.md section 6 to the Tuesday fixture import, and fill in the hand-worked dependency table. Add `web/tests/counts.cjs` (an `npm run test:counts` script) that clicks every Home, Dashboard and Portfolio tile as Admin, PM and Supervisor and compares the count with the rows (SC-002).
+- [ ] T020 Write `tools/preview/seed_staffing.py` with the section 8 fixtures (SYN-104, SYN-105, stalled items, capacity week W, count and timeline edge cases), seeded through the API as the acting persona. Encode the section 8.2 worked example in `DependencyLagTests`. Add `web/tests/counts.cjs` (an `npm run test:counts` script) that clicks every Home, Dashboard and Portfolio tile as Admin, PM and Supervisor and compares the count with the rows (SC-002).
 - [ ] T021 Run the full checks and the regression guard (verification.md section 5), including the before/after `/workload` JSON diff and the evaluator output diff on the fixture. Record each result with the commit.
 - [ ] T022 Fill in the evidence map (verification.md section 4) for every AC through automated tests or an agent browser pass (desktop, tablet, keyboard), with screenshots. Run the SC-003 and SC-004 browser checks.
 - [ ] T023 Run the wording check: `git diff <base> -- . | grep -inE '<competitor product names>'` returns nothing (weekday names used in date rules are fine). Do a trial merge into the base with no conflicts. Commit on a packet branch.

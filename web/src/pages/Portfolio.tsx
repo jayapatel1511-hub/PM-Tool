@@ -90,11 +90,12 @@ function Dashboard(header: { title: string; subtitle: string }) {
           <SummaryTile label={t('portfolio.decisions')} value={tiles.overdueDecisions} accent="peach" />
         </div>
       )}
-      <FilterBar>
+      <FilterBar activeCount={tokens.length}
+        search={<Field label={t('common.search')} htmlFor="pf-q">
+          <Input id="pf-q" key={filters.q ? 'q' : 'empty'} type="search" placeholder={t('common.search')} defaultValue={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
+        </Field>}
+        active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
-          <Field label={t('common.search')} htmlFor="pf-q" className="w-full sm:w-52">
-            <Input id="pf-q" key={filters.q ? 'q' : 'empty'} type="search" defaultValue={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
-          </Field>
           <Field label={t('portfolio.pm')} htmlFor="pf-pm" className="w-full sm:w-52">
             <PeoplePicker id="pf-pm" value={filters.pmId} valueName={pmName} onChange={(v) => set('pmId', v)} placeholder={t('portfolio.anyPm')} label={t('portfolio.pm')} />
           </Field>
@@ -120,7 +121,6 @@ function Dashboard(header: { title: string; subtitle: string }) {
             <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={q.data.ownOnly} onCheckedChange={(c) => set('mine', c ? null : 'false')} />{t('portfolio.mine')}</label>
           )}
         </div>
-        <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />
       </FilterBar>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : !q.data ? null : q.data.projects.length === 0 ? (

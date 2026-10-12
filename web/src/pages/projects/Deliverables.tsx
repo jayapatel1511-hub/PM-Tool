@@ -116,11 +116,12 @@ export function DeliverablesTab() {
         <ExportMenu path={`projects/${p.id}/deliverables/export`} params={filters} name={`${p.projectNumber}-deliverables`} />
         {canCreate && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('deliverable.new')}</Button>}
       </>}>
-      <FilterBar>
+      <FilterBar activeCount={tokens.length}
+        search={<Field label={t('common.search')} htmlFor="deliverable-search">
+          <UrlSearchInput id="deliverable-search" placeholder={t('common.search')} value={filters.q ?? ''} onValueChange={value => set('q', value)} />
+        </Field>}
+        active={<ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
-          <Field label={t('common.search')} htmlFor="deliverable-search" className="w-full sm:w-56">
-            <UrlSearchInput id="deliverable-search" value={filters.q ?? ''} onValueChange={value => set('q', value)} />
-          </Field>
           <Field label={t('common.discipline')} htmlFor="deliverable-discipline" className="w-full sm:w-44">
             <select id="deliverable-discipline" className={selectCls} value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
               <option value="">{t('projects.anyDiscipline')}</option>{p.disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -159,7 +160,6 @@ export function DeliverablesTab() {
             </select>
           </Field>
         </div>
-        <ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />
       </FilterBar>
       {selected.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-accent px-4 py-2 text-sm" role="region" aria-label={t('bulk.actions')}>

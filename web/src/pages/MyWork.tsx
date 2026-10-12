@@ -243,7 +243,8 @@ function Overview() {
       {!ro && <MyWorkTabs />}
       <Button className="self-start sm:hidden" variant="outline" aria-expanded={filtersOpen} aria-controls="mw-filters" onClick={() => setFiltersOpen((open) => !open)}>{t('mywork.filters', { n: tokens.length })}</Button>
       <div id="mw-filters" className={cn(!filtersOpen && 'hidden sm:block')}>
-      <FilterBar>
+      <FilterBar activeCount={tokens.length}
+        quick={<ChipToggle on={f.hideWaiting} onClick={() => set('hideWaiting', f.hideWaiting ? undefined : '1')}>{t('mywork.hideWaiting')}</ChipToggle>}>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.project')} htmlFor="mw-project" className="w-full sm:w-40">
             <select id="mw-project" className={selectCls} value={f.project} onChange={(e) => set('project', e.target.value || undefined)}>
@@ -276,9 +277,6 @@ function Overview() {
               {SORTS.map((x) => <option key={x} value={x}>{t(`mywork.sort.${x}`)}</option>)}
             </select>
           </Field>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <ChipToggle on={f.hideWaiting} onClick={() => set('hideWaiting', f.hideWaiting ? undefined : '1')}>{t('mywork.hideWaiting')}</ChipToggle>
         </div>
       </FilterBar>
       </div>
@@ -329,11 +327,11 @@ function TaskView({ tab }: { tab: string }) {
     <Page title={t('mywork.title')} subtitle={me.displayName}
       actions={<><ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
       <MyWorkTabs />
-      <FilterBar>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <FilterBar activeCount={['from', 'to'].filter((k) => sp.has(k)).length}
+        quick={<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Segmented label={t('mywork.show')} value={who} onChange={(x) => set('who', x === 'mine' ? null : x)} options={WHO.map((x) => ({ value: x, label: t(`mywork.who.${x}`) }))} />
           <p className="text-sm text-muted-foreground">{t(`mywork.who.${who}.about`)}</p>
-        </div>
+        </div>}>
         {tab === 'completed' && (
           <div className="flex flex-wrap items-end gap-3">
             <Field label={t('common.from')} htmlFor="mw-completed-from" className="w-full sm:w-44">

@@ -117,11 +117,15 @@ function RegisterFilters({ f, statuses, open, indicator, owners, disciplines, ex
     shown && { key: 'indicator', label: t('deliverable.indicator'), value: on ? t(indicator[1]) : shown },
   ].filter(Boolean) as Token[]
   return (
-    <FilterBar>
+    <FilterBar activeCount={tokens.length + extraTokens.length}
+      search={<Field label={t('common.search')} htmlFor="register-search">
+        <UrlSearchInput id="register-search" placeholder={t('common.search')} value={q ?? ''} onValueChange={value => f.set('q', value)} />
+      </Field>}
+      quick={<div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>
+        <ChipToggle on={on} onClick={() => f.set('indicator', on ? null : indicator[0])}>{t(indicator[1])}</ChipToggle>
+      </div>}
+      active={<ActiveFilters tokens={[...tokens, ...extraTokens]} onRemove={(k) => f.set(k, null)} onClear={onClear} />}>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label={t('common.search')} htmlFor="register-search" className="w-full sm:w-56">
-          <UrlSearchInput id="register-search" value={q ?? ''} onValueChange={value => f.set('q', value)} />
-        </Field>
         <Field label={t('common.status')} htmlFor="register-status" className="w-full sm:w-44">
           <select id="register-status" className={selectCls} value={status ?? ''} onChange={(e) => f.set('status', e.target.value)}>
             <option value="">{t('register.anyStatus')}</option><option value={open}>{t('register.openStatuses')}</option>
@@ -144,11 +148,7 @@ function RegisterFilters({ f, statuses, open, indicator, owners, disciplines, ex
           </select>
         </Field>
       </div>
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>
-        <ChipToggle on={on} onClick={() => f.set('indicator', on ? null : indicator[0])}>{t(indicator[1])}</ChipToggle>
-      </div>
       {extra}
-      <ActiveFilters tokens={[...tokens, ...extraTokens]} onRemove={(k) => f.set(k, null)} onClear={onClear} />
     </FilterBar>
   )
 }

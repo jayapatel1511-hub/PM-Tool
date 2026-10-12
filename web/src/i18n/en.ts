@@ -1931,6 +1931,7 @@ export const en: Record<string, string> = {
   'density.label': 'Row density', 'density.compact': 'Compact', 'density.comfortable': 'Comfortable',
   'filters.active': 'Active filters', 'filters.clear': 'Clear filters', 'filters.remove': 'Remove filter: {name}',
   // Calm workspace (packet 037, §41): toolbar, navigation groups, project header and page help.
+  'calm.filters': 'Filters', 'calm.filtersActive': '{n} active', 'calm.moreQuick': 'More quick filters',
   'calm.group.overview': 'Overview', 'calm.group.work': 'Work', 'calm.group.deliverables': 'Deliverables', 'calm.group.coordination': 'Coordination',
   'calm.group.people': 'People', 'calm.group.files': 'Files', 'calm.more': 'More', 'calm.groupPages': '{group} pages',
   'calm.projectDetails': 'Project details and links',

@@ -39,15 +39,15 @@ export function CoordinationRegister({ kind, statuses, create, detail, extra }: 
   const clear = () => { const next = new URLSearchParams(sp); for (const k of Object.keys(filters)) next.delete(k); next.delete('page'); setSp(next) }
   const num = cn(tdCls, 'text-right tabular-nums')
   return <Page title={t(`${kind}.title`)} subtitle={t(`${kind}.subtitle`)} actions={<><ViewMenu listType={kind} projectId={p.id} /><ExportMenu path={`projects/${p.id}/${kind}/export`} params={filters} name={`${p.projectNumber}-${kind}`} />{ctx?.options.canWrite && (kind === 'changes' || ctx.options.manageDisciplineIds.length > 0) && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t(`${kind}.new`)}</Button>}</>}>
-    <FilterBar>
+    <FilterBar activeCount={tokens.length}
+      search={<Field label={t('common.search')} htmlFor={`${kind}-search`}><UrlSearchInput id={`${kind}-search`} placeholder={t('common.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
+      quick={<ChipToggle on={filters.mine === 'true'} onClick={() => change('mine', filters.mine === 'true' ? '' : 'true')}>{t('coord.mine')}</ChipToggle>}
+      active={<ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />}>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label={t('common.search')} htmlFor={`${kind}-search`} className="w-full sm:w-56"><UrlSearchInput id={`${kind}-search`} value={filters.q} onValueChange={value => change('q', value)} /></Field>
         <div className="w-full sm:w-44"><SelectField label={t('common.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={statuses.map(s => ({ value: s, label: tv(s) }))} /></div>
         {ctx && <div className="w-full sm:w-52"><SelectField label={ownerLabel} value={filters.ownerId} onChange={v => change('ownerId', v)} required={false} choices={peopleChoices(ctx.options)} /></div>}
         {ctx && reviews && <div className="w-full sm:w-48"><SelectField label={t('coord.discipline')} value={filters.disciplineId} onChange={v => change('disciplineId', v)} required={false} choices={disciplineChoices(ctx.options)} /></div>}
       </div>
-      <div className="flex flex-wrap items-center gap-2"><ChipToggle on={filters.mine === 'true'} onClick={() => change('mine', filters.mine === 'true' ? '' : 'true')}>{t('coord.mine')}</ChipToggle></div>
-      <ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />
     </FilterBar>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : <>

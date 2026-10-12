@@ -277,13 +277,11 @@ export function Users() {
           <p className="mt-1 text-base/6 text-muted-foreground">{t('admin.usersIntro')}</p></div>
         <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('admin.createUser')}</Button>
       </div>
-      <FilterBar>
-        <div className="flex flex-wrap items-end gap-x-5 gap-y-3">
-          <Field label={t('common.search')} htmlFor="users-q" className="w-full sm:w-64"><Input id="users-q" value={q} onChange={(e) => setQ(e.target.value)} /></Field>
+      <FilterBar search={<Field label={t('common.search')} htmlFor="users-q"><Input id="users-q" placeholder={t('common.search')} value={q} onChange={(e) => setQ(e.target.value)} /></Field>}
+        quick={<>
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={inactive} onCheckedChange={(c) => setInactive(!!c)} />{t('common.showInactive')}</label>
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={noSup} onCheckedChange={(c) => setNoSup(!!c)} />{t('admin.noSupervisor')}</label>
-        </div>
-      </FilterBar>
+        </>} />
       {list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : list.isPending ? <div className={card}><Loading /></div>
         : rows.length === 0 ? <div className={card}><Empty>{t('admin.noUsers')}</Empty></div> : (
         <TableRegion>

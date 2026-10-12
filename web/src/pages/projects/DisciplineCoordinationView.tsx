@@ -93,7 +93,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     const frame = requestAnimationFrame(() => { try { window.print() } finally { onPrinted(false) } })
     return () => cancelAnimationFrame(frame)
   }, [printAll, q.isPending, q.isFetching, q.error, onPrinted])
-  const filters = <FilterBar><div role="group" className="flex flex-wrap items-end gap-3" aria-label={t('dcv.scopeLabel')}>
+  const filters = <FilterBar activeCount={[ownerId, from, to].filter(Boolean).length}><div role="group" className="flex flex-wrap items-end gap-3" aria-label={t('dcv.scopeLabel')}>
     <p className="w-full text-sm text-muted-foreground">{t('dcv.projectPrefix')} <strong className="font-semibold text-foreground">{project.projectNumber}</strong>{disciplineId ? ` · ${project.disciplines.find(x => x.id === disciplineId)?.name ?? t('dcv.selectedDiscipline')}` : ''}</p>
     <Field label={t('common.owner')} htmlFor="dcv-owner" className="w-full sm:w-56"><select id="dcv-owner" className={selectCls} value={ownerId} onChange={e => setScope('owner', e.target.value)}><option value="">{t('dcv.allPermittedOwners')}</option>{team.data?.members.map(m => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></Field>
     <Field label={t('common.from')} htmlFor="dcv-from" className="w-full sm:w-44"><Input id="dcv-from" type="date" value={from} onChange={e => setScope('from', e.target.value)} /></Field>

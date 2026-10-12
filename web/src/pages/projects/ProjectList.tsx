@@ -79,13 +79,22 @@ export function ProjectListPage() {
       <ExportMenu path="projects/export" params={{ ...filters, mine }} name="projects" />
       {me.capabilities.createProject && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('projects.create')}</Button>}
     </>}>
-      <FilterBar>
+      <FilterBar activeCount={tokens.length}
+        search={<Field label={t('common.search')} htmlFor="pl-search">
+          <Input ref={search} id="pl-search" type="search" placeholder={t('projects.search')} defaultValue={sp.get('q') ?? ''} onChange={(e) => set('q', e.target.value)} />
+        </Field>}
+        quick={<Segmented label={t('projects.scope')} value={mine ? 'mine' : 'all'} onChange={(v) => set('mine', v === 'mine' ? null : 'false')}
+          options={[{ value: 'mine', label: t('projects.mine') }, { value: 'all', label: t('projects.all') }]} />}
+        active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={remove} onClear={clear} />}
+        actions={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild><Button variant="outline" className="hidden md:inline-flex"><Columns3 className="size-4" />{t('common.columns')}</Button></DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {COLUMNS.map((c) => <DropdownMenuCheckboxItem key={c} checked={cols.includes(c)} onCheckedChange={() => toggleCol(c)} onSelect={(e) => e.preventDefault()}>{t(`projects.col.${c}`)}</DropdownMenuCheckboxItem>)}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }>
         <div className="flex flex-wrap items-end gap-3">
-          <Segmented label={t('projects.scope')} value={mine ? 'mine' : 'all'} onChange={(v) => set('mine', v === 'mine' ? null : 'false')}
-            options={[{ value: 'mine', label: t('projects.mine') }, { value: 'all', label: t('projects.all') }]} />
-          <Field label={t('common.search')} htmlFor="pl-search" className="w-full sm:w-72">
-            <Input ref={search} id="pl-search" type="search" placeholder={t('projects.search')} defaultValue={sp.get('q') ?? ''} onChange={(e) => set('q', e.target.value)} />
-          </Field>
           <Field label={t('common.status')} htmlFor="pl-status" className="w-full sm:w-48">
             <select id="pl-status" className={selectCls} value={sp.get('status') ?? ''} onChange={(e) => set('status', e.target.value)}>
               <option value="">{t('projects.liveStatuses')}</option>
@@ -113,25 +122,14 @@ export function ProjectListPage() {
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm">
             <Checkbox checked={sp.get('includeArchived') === 'true'} onCheckedChange={(c) => set('includeArchived', c ? 'true' : null)} />{t('projects.includeArchived')}
           </label>
+          <Field label={t('common.groupBy')} htmlFor="pl-group" className="w-full sm:w-44">
+            <select id="pl-group" className={selectCls} value={groupBy} onChange={(e) => set('group', e.target.value === 'status' ? null : e.target.value)}>
+              <option value="status">{t('projects.groupStatus')}</option>
+              <option value="none">{t('common.noGroup')}</option>
+            </select>
+          </Field>
         </div>
-        <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={remove} onClear={clear} />
       </FilterBar>
-
-      <div className="flex flex-wrap items-center justify-end gap-3">
-        <div className="flex items-center gap-2">
-          <label htmlFor="pl-group" className="text-sm font-medium">{t('common.groupBy')}</label>
-          <select id="pl-group" className={cn(selectCls, 'w-auto')} value={groupBy} onChange={(e) => set('group', e.target.value === 'status' ? null : e.target.value)}>
-            <option value="status">{t('projects.groupStatus')}</option>
-            <option value="none">{t('common.noGroup')}</option>
-          </select>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="outline" className="hidden md:inline-flex"><Columns3 className="size-4" />{t('common.columns')}</Button></DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {COLUMNS.map((c) => <DropdownMenuCheckboxItem key={c} checked={cols.includes(c)} onCheckedChange={() => toggleCol(c)} onSelect={(e) => e.preventDefault()}>{t(`projects.col.${c}`)}</DropdownMenuCheckboxItem>)}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
 
       {list.error && <ErrorBanner error={list.error} retry={() => list.refetch()} />}
       {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : rows.length === 0 ? (

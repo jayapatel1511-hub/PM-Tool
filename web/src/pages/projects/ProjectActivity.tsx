@@ -41,7 +41,7 @@ export function ProjectActivityTab() {
   const clear = () => { const n = new URLSearchParams(sp); for (const k of FILTERS) n.delete(k); n.delete('page'); setSp(n, { replace: true }) }
   return (
     <Page title={t('ptab.activity')} actions={<ExportMenu path={`projects/${p.id}/activity/export`} params={params} name={`${p.projectNumber}-activity`} />}>
-      <FilterBar>
+      <FilterBar activeCount={tokens.length} active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.from')} htmlFor="pa-from" className="w-full sm:w-40"><Input id="pa-from" type="date" value={sp.get('from') ?? ''} onChange={(e) => set('from', e.target.value)} /></Field>
           <Field label={t('common.to')} htmlFor="pa-to" className="w-full sm:w-40"><Input id="pa-to" type="date" value={sp.get('to') ?? ''} onChange={(e) => set('to', e.target.value)} /></Field>
@@ -65,7 +65,6 @@ export function ProjectActivityTab() {
           </Field>
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={params.importantOnly} onCheckedChange={(c) => set('importantOnly', c ? 'true' : null)} />{t('activity.important')}</label>
         </div>
-        <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />
       </FilterBar>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <div className="rounded-lg border bg-card"><Loading /></div> : q.data && (q.data.items.length === 0 && tokens.length > 0

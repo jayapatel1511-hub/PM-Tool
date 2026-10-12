@@ -174,8 +174,8 @@ export function GanttPage() {
   return (
     <Page title={t('wsview.timeline')} subtitle={t('gantt.range', { from: fmtDate(start), to: fmtDate(end) })}>
       <WorkspaceTabs />
-      <FilterBar className="no-print">
-        <div className="flex flex-wrap items-center gap-3">
+      <FilterBar className="no-print" active={<ActiveFilters tokens={hide ? [{ key: 'hideCompleted', label: t('timeline.hideCompleted'), value: t('common.yes') }] : []} onRemove={(k) => set(k, null)} onClear={() => set('hideCompleted', null)} />}
+        quick={<div className="flex flex-wrap items-center gap-3">
           <Segmented label={t('timeline.zoom')} value={zoom} onChange={(z) => set('zoom', z === 'month' ? null : z)}
             options={(Object.keys(ZOOM) as Zoom[]).map((z) => ({ value: z, label: t(`timeline.zoom.${z}`) }))} />
           <div className="flex items-center gap-2" role="group" aria-label={t('gantt.navigate')}>
@@ -187,9 +187,7 @@ export function GanttPage() {
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={hide} onCheckedChange={(c) => set('hideCompleted', c ? 'true' : null)} />{t('timeline.hideCompleted')}</label>
           {expandable.length > 0 && <Button variant="ghost" onClick={() => setClosed(allOpen ? new Set(expandable) : new Set())}>
             {allOpen ? <ChevronsDownUp className="size-4" /> : <ChevronsUpDown className="size-4" />}{allOpen ? t('gantt.collapse') : t('gantt.expand')}</Button>}
-        </div>
-        <ActiveFilters tokens={hide ? [{ key: 'hideCompleted', label: t('timeline.hideCompleted'), value: t('common.yes') }] : []} onRemove={(k) => set(k, null)} onClear={() => set('hideCompleted', null)} />
-      </FilterBar>
+        </div>} />
       <Legend />
       {q.data.truncated && <Notice title={t('ws.truncatedTitle')}>{t('gantt.truncated', { n: q.data.max })}</Notice>}
       {rows.length === 0 ? <div className="rounded-lg border bg-card"><Empty>{t('gantt.empty')}</Empty></div> : (

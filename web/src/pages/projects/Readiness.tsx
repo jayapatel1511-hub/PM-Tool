@@ -99,7 +99,8 @@ export function ReadinessTab() {
   })
   const header = { title: t('readiness.title'), subtitle: t('readiness.subtitle') }
   // The window fields stay first in every state, so editing a date never unmounts the field being edited.
-  const filters = <FilterBar><div className="flex flex-wrap items-end gap-3">
+  const filters = <FilterBar activeCount={['from', 'to'].filter((k) => sp.has(k)).length}
+    quick={<span className="text-sm text-muted-foreground tabular-nums">{fmtDate(from)} – {fmtDate(to)}</span>}><div className="flex flex-wrap items-end gap-3">
     <Field label={t('readiness.from')} htmlFor="readiness-from" className="w-full sm:w-44"><Input id="readiness-from" type="date" value={from} onChange={(e) => set('from', e.target.value)} /></Field>
     <Field label={t('readiness.to')} htmlFor="readiness-to" className="w-full sm:w-44"><Input id="readiness-to" type="date" value={to} onChange={(e) => set('to', e.target.value)} /></Field>
     <Button variant="link" className="px-1" onClick={reset}>{t('common.clear')}</Button>

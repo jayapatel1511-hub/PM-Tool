@@ -67,7 +67,7 @@ export function MilestonesTab() {
       {!can && p.permissions.manageMilestones.reason && <Notice icon={Lock} title={p.permissions.manageMilestones.reason} />}
       {can && <DesktopOnly notice={<PhoneNotice />}>{null}</DesktopOnly>}
       <MilestoneStrip rows={rows} onOpen={(m) => openPanel('Milestone', m.id)} />
-      <FilterBar>
+      <FilterBar activeCount={(type ? 1 : 0) + (showCompleted ? 1 : 0)}>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.type')} htmlFor="ms-type" className="w-full sm:w-56">
             <select id="ms-type" className={selectCls} value={type} onChange={(e) => setType(e.target.value)}>

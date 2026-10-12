@@ -31,15 +31,13 @@ export function SearchPage() {
   const hits = rows.data?.pages.flatMap((p) => toHits(type, p.groups[type])) ?? []
   return (
     <Page title={t('search.title')}>
-      <FilterBar>
-        <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); submit(new FormData(e.currentTarget).get('q') as string) }}>
-          <Field label={t('common.search')} htmlFor="search-q" className="w-full sm:w-96">
+      <FilterBar quick={<label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={archived} onCheckedChange={(c) => set('archived', c ? 'true' : null)} />{t('search.includeArchived')}</label>}
+        search={<form className="flex items-center gap-2 sm:w-[28rem]" onSubmit={(e) => { e.preventDefault(); submit(new FormData(e.currentTarget).get('q') as string) }}>
+          <Field label={t('common.search')} htmlFor="search-q" className="min-w-0 flex-1">
             <Input key={q} id="search-q" name="q" type="search" defaultValue={q} placeholder={t('top.search')} />
           </Field>
           <Button type="submit">{t('common.search')}</Button>
-          <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={archived} onCheckedChange={(c) => set('archived', c ? 'true' : null)} />{t('search.includeArchived')}</label>
-        </form>
-      </FilterBar>
+        </form>} />
       {!q.trim() ? <div className="rounded-lg border bg-card"><Empty>{t('search.prompt')}</Empty></div> : (
         <>
           <div role="tablist" aria-label={t('search.types')} className="flex min-w-0 flex-wrap gap-1 border-b">

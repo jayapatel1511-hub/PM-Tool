@@ -21,7 +21,7 @@ import { plural, t, tv } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { CardBody, LANES, MAX_CARDS, SIDE, Swimlane, fetchUpTo, useLaneDrop } from './projects/Board'
-import { PRIORITIES, QUICK, StatusMenu, TASK_STATUSES, TaskIndicators, ViewSwitch, errorText, useTaskActions, type TaskRow } from './projects/Tasks'
+import { PINNED_QUICK, PRIORITIES, QUICK, StatusMenu, TASK_STATUSES, TaskIndicators, ViewSwitch, errorText, useTaskActions, type TaskRow } from './projects/Tasks'
 
 const PATHS = { tasks: '/tasks', board: '/boards' }
 /** URL parameters that are task filters (everything else is scope, view or layout). */
@@ -62,15 +62,18 @@ function TaskFilters({ rows, extra }: { rows: TaskRow[]; extra?: React.ReactNode
     ] as const).filter(([k]) => f[k]).map(([key, label, value]) => ({ key, label, value: value || <Missing /> })),
     ...flags.map((k) => ({ key: k, label: k === 'open' ? t('tfilter.open') : t(`tquick.${k}`), value: t('common.yes') })),
   ]
+  const chip = (k: 'open' | (typeof QUICK)[number]) => <ChipToggle key={k} on={f[k] === 'true'} onClick={() => set(k, f[k] === 'true' ? null : 'true')}>{k === 'open' ? t('tfilter.open') : t(`tquick.${k}`)}</ChipToggle>
   return (
-    <FilterBar>
+    <FilterBar activeCount={tokens.length}
+      search={<Field label={t('common.search')} htmlFor="wt-search">
+        <form onSubmit={(e) => { e.preventDefault(); set('q', term.trim() || null); setDraft(null) }}>
+          <Input id="wt-search" type="search" placeholder={t('task.searchPlaceholder')} value={term}
+            onChange={(e) => { if (e.target.value) setDraft(e.target.value); else { setDraft(null); set('q', null) } }} />
+        </form>
+      </Field>}
+      quick={<div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>{PINNED_QUICK.map(chip)}</div>}
+      active={<ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />}>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label={t('common.search')} htmlFor="wt-search" className="w-full sm:w-56">
-          <form onSubmit={(e) => { e.preventDefault(); set('q', term.trim() || null); setDraft(null) }}>
-            <Input id="wt-search" type="search" placeholder={t('task.searchPlaceholder')} value={term}
-              onChange={(e) => { if (e.target.value) setDraft(e.target.value); else { setDraft(null); set('q', null) } }} />
-          </form>
-        </Field>
         <Field label={t('common.project')} htmlFor="wt-project" className="w-full sm:w-56">
           <select id="wt-project" className={selectCls} value={f.projectId ?? ''} onChange={(e) => set('projectId', e.target.value)}>
             <option value="">{t('ws.anyProject')}</option>{projects.data?.map((p) => <option key={p.id} value={p.id}>{p.projectNumber} {p.name}</option>)}
@@ -92,12 +95,9 @@ function TaskFilters({ rows, extra }: { rows: TaskRow[]; extra?: React.ReactNode
         {extra}
       </div>
       <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="wt-quick">
-        <span id="wt-quick" className="mr-1 text-sm font-medium">{t('task.quickFilters')}</span>
-        {(['open', ...QUICK] as const).map((k) => (
-          <ChipToggle key={k} on={f[k] === 'true'} onClick={() => set(k, f[k] === 'true' ? null : 'true')}>{k === 'open' ? t('tfilter.open') : t(`tquick.${k}`)}</ChipToggle>
-        ))}
+        <span id="wt-quick" className="mr-1 text-sm font-medium">{t('calm.moreQuick')}</span>
+        {(['open', ...QUICK] as const).filter((k) => !(PINNED_QUICK as readonly string[]).includes(k)).map(chip)}
       </div>
-      <ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />
     </FilterBar>
   )
 }

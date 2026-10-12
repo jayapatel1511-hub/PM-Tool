@@ -125,7 +125,8 @@ let server, browser;
   await page.goto(`${base}/projects/P-DEMO/design-basis`); await page.getByRole('heading', { name: 'Design basis and assumptions' }).waitFor();
 
   // D2: the affected-work filter sends the bare task id the API binds.
-  await register.getByLabel('Affected task or deliverable', { exact: true }).selectOption({ label: 'P-DEMO-T0001 · Watermain layout' });
+  await register.getByRole('button', { name: /^Filters/ }).click();
+  await page.getByRole('dialog', { name: 'Filters' }).getByLabel('Affected task or deliverable', { exact: true }).selectOption({ label: 'P-DEMO-T0001 · Watermain layout' });
   await page.waitForFunction(() => location.search.includes('affectedWorkId='));
   await page.waitForTimeout(200);
   assert.ok(lists.some(q => new URLSearchParams(q).get('affectedWorkId') === task), `list queries: ${lists.join(' ')}`);
@@ -202,7 +203,8 @@ let server, browser;
   await page.goto(`${base}/projects/P-DEMO/design-basis`);
   await Promise.all([page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/design-basis') && u.searchParams.get('page') === '2' }), register.getByRole('button', { name: 'Next', exact: true }).click()]);
   await page.waitForURL(/page=2/);
-  await register.getByLabel('Kind', { exact: true }).selectOption('Assumption');
+  await register.getByRole('button', { name: /^Filters/ }).click();
+  await page.getByRole('dialog', { name: 'Filters' }).getByLabel('Kind', { exact: true }).selectOption('Assumption');
   await page.waitForFunction(() => location.search.includes('kind=Assumption') && !new URLSearchParams(location.search).has('page'));
   assert.ok(lists.some(q => new URLSearchParams(q).get('page') === '2'), 'Basis Next reaches page two');
 
@@ -247,8 +249,10 @@ let server, browser;
   const promises = register.getByRole('navigation', { name: 'Weekly promises', exact: true });
   await Promise.all([page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/weekly-commitments') && u.searchParams.get('page') === '2' }), promises.getByRole('button', { name: 'Next', exact: true }).click()]);
   await page.waitForURL(/promisePage=2/);
-  await register.getByLabel('From', { exact: true }).fill('2026-10-02');
+  await register.getByRole('button', { name: /^Filters/ }).click();
+  await page.getByRole('dialog', { name: 'Filters' }).getByLabel('From', { exact: true }).fill('2026-10-02');
   await page.waitForFunction(() => location.search.includes('from=2026-10-02') && !new URLSearchParams(location.search).has('promisePage'));
+  await page.keyboard.press('Escape');
   await promises.getByRole('button', { name: 'Next', exact: true }).waitFor();
   assert.ok(registerQueries.some(q => q.list === 'commitments' && q.params.page === '2'), 'Promise Next reaches page two');
   assert.ok(registerQueries.some(q => q.list === 'commitments' && q.params.targetFrom === '2026-10-02' && q.params.page === '1'), 'Window filtering happens in the API before paging');

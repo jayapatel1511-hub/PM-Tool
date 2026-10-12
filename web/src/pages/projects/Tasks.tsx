@@ -268,6 +268,8 @@ export function StatusMenu({ r, onMove, disabled }: { r: TaskRow; onMove: (m: Mo
 // ---------- Filters shared by list and board (URL-encoded, §13.3 quick chips) ----------
 
 export const QUICK = ['mine', 'overdue', 'blocked', 'blocking', 'dueThisWeek', 'unassigned', 'readyForReview'] as const
+/** The three quick chips kept in the toolbar (§41 R2, E4); the rest sit in the Filters popover with the same URL flags. */
+export const PINNED_QUICK: readonly (typeof QUICK)[number][] = ['mine', 'overdue', 'blocked']
 
 export function useTaskFilters() {
   const [sp, setSp] = useSearchParams()
@@ -285,7 +287,7 @@ const FLAGS = new Set<string>([...QUICK, 'waiting', 'open', 'stale', 'dueSoon', 
 const TOKEN_LABEL: Record<string, string> = { q: 'common.search', disciplineId: 'common.discipline', deliverableId: 'task.deliverable', status: 'common.status', priority: 'common.priority' }
 
 /** The filter bar (§13.0, §13.3): labelled filters, the quick chips and every active filter as a removable token with Clear. */
-export function TaskFilterBar({ p, deliverables, extra }: { p: ProjectDetail; deliverables: DeliverableRow[]; extra?: ReactNode }) {
+export function TaskFilterBar({ p, deliverables, extra, actions }: { p: ProjectDetail; deliverables: DeliverableRow[]; extra?: ReactNode; actions?: ReactNode }) {
   const { sp, set, filters, clear } = useTaskFilters()
   const { milestones } = useProjectLists(p.id)
   const on = (k: string) => sp.get(k) === 'true'
@@ -305,12 +307,15 @@ export function TaskFilterBar({ p, deliverables, extra }: { p: ProjectDetail; de
     label: t(TOKEN_LABEL[k] ?? ((QUICK as readonly string[]).includes(k) ? `tquick.${k}` : `tfilter.${k}`)),
     value: FLAGS.has(k) ? (on(k) ? t('common.yes') : sp.get(k) ?? '') : value(k, sp.get(k) ?? '') ?? t('task.filterSelected'),
   }))
+  const chip = (k: string) => <ChipToggle key={k} on={on(k)} onClick={() => set(k, on(k) ? null : 'true')}>{t(`tquick.${k}`)}</ChipToggle>
   return (
-    <FilterBar>
+    <FilterBar activeCount={tokens.length} actions={actions}
+      search={<Field label={t('common.search')} htmlFor="tasks-q">
+        <UrlSearchInput id="tasks-q" placeholder={t('task.searchPlaceholder')} value={filters.q ?? ''} onValueChange={value => set('q', value || null)} />
+      </Field>}
+      quick={<div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>{PINNED_QUICK.map(chip)}</div>}
+      active={<ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />}>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label={t('common.search')} htmlFor="tasks-q" className="w-full sm:w-56">
-          <UrlSearchInput id="tasks-q" placeholder={t('task.searchPlaceholder')} value={filters.q ?? ''} onValueChange={value => set('q', value || null)} />
-        </Field>
         <Field label={t('common.discipline')} htmlFor="tasks-discipline" className="w-full sm:w-44">
           <select id="tasks-discipline" className={selectCls} value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
             <option value="">{t('projects.anyDiscipline')}</option>{p.disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -334,10 +339,9 @@ export function TaskFilterBar({ p, deliverables, extra }: { p: ProjectDetail; de
         {extra}
       </div>
       <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="tasks-quick">
-        <span id="tasks-quick" className="mr-1 text-sm font-medium">{t('task.quickFilters')}</span>
-        {QUICK.map((k) => <ChipToggle key={k} on={on(k)} onClick={() => set(k, on(k) ? null : 'true')}>{t(`tquick.${k}`)}</ChipToggle>)}
+        <span id="tasks-quick" className="mr-1 text-sm font-medium">{t('calm.moreQuick')}</span>
+        {QUICK.filter((k) => !PINNED_QUICK.includes(k)).map(chip)}
       </div>
-      <ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />
     </FilterBar>
   )
 }
@@ -552,8 +556,9 @@ export function TasksTab() {
             {GROUPS.map((g) => <option key={g} value={g}>{t(`tgroup.${g}`)}</option>)}
           </select>
         </Field>
+      </>} actions={
         <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="outline" className="sm:ml-auto"><Columns3 className="size-4" aria-hidden />{t('task.columns')}</Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild><Button variant="outline"><Columns3 className="size-4" aria-hidden />{t('task.columns')}</Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {all.filter((c) => c.id !== 'key' && c.id !== 'name').map((c) => (
               <DropdownMenuCheckboxItem key={c.id} checked={shown.includes(c)} onSelect={(e) => e.preventDefault()}
@@ -561,7 +566,7 @@ export function TasksTab() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-      </>} />
+      } />
       {selected.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-accent px-4 py-3 text-sm" role="region" aria-label={t('bulk.actions')}>
           <span className="mr-2 font-semibold text-accent-foreground tabular-nums">{t('bulk.selected', { n: selected.size })}</span>

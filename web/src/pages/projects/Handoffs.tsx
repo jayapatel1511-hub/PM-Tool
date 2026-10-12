@@ -85,9 +85,11 @@ export function HandoffsTab() {
     <ExportMenu path={`projects/${p.id}/handoffs/export`} params={filters} name={`${p.projectNumber}-handoffs`} />
     {options.data?.canCreate && <Button onClick={() => setCreate(true)}><Plus className="size-4" />{t('handoff.new')}</Button>}
   </>}>
-    <FilterBar>
+    <FilterBar activeCount={tokens.length}
+      search={<Field label={t('common.search')} htmlFor="handoff-search"><UrlSearchInput id="handoff-search" placeholder={t('common.search')} value={filters.q} onValueChange={value => setFilter('q', value)} /></Field>}
+      quick={<ChipToggle on={filters.overdue === 'true'} onClick={() => setFilter('overdue', filters.overdue === 'true' ? '' : 'true')}>{t('handoff.overdueOnly')}</ChipToggle>}
+      active={<ActiveFilters tokens={tokens} onRemove={k => setFilter(k, '')} onClear={clear} />}>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label={t('common.search')} htmlFor="handoff-search" className="w-full sm:w-56"><UrlSearchInput id="handoff-search" value={filters.q} onValueChange={value => setFilter('q', value)} /></Field>
         <Field label={t('handoff.direction')} htmlFor="handoff-direction" className="w-full sm:w-44"><select id="handoff-direction" className={selectCls} value={filters.direction} onChange={e => setFilter('direction', e.target.value)}>
           <option value="">{t('handoff.all')}</option><option value="incoming">{t('handoff.incoming')}</option><option value="outgoing">{t('handoff.outgoing')}</option>
         </select></Field>
@@ -98,8 +100,6 @@ export function HandoffsTab() {
           <option value="">{t('handoff.all')}</option>{options.data?.disciplines.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select></Field>
       </div>
-      <div className="flex flex-wrap items-center gap-2"><ChipToggle on={filters.overdue === 'true'} onClick={() => setFilter('overdue', filters.overdue === 'true' ? '' : 'true')}>{t('handoff.overdueOnly')}</ChipToggle></div>
-      <ActiveFilters tokens={tokens} onRemove={k => setFilter(k, '')} onClear={clear} />
     </FilterBar>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={5} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : <>

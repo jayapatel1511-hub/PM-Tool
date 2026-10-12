@@ -2035,6 +2035,8 @@ export const en: Record<string, string> = {
   // 037 phase 2: My Work's Today view and My Week summary, page help and calm toolbars (§41 R1, R5, R8, R10).
   'mywork.focusTasks': 'Overdue, due this week or blocked', 'mywork.focusNoTasks': 'Nothing of yours is overdue, due this week or blocked.',
   'mywork.weekSummary': 'Week of {week}: {planned} of {capacity} planned', 'mywork.weekShow': 'Show', 'mywork.weekHide': 'Hide',
+  'reports.count': '{n} reports', 'reports.countOne': '1 report', 'reports.report': 'Report',
+  'reports.help': 'Fixed reports over current data. Each report opens with its parameters, shows only what you are allowed to see and can be exported.',
   'prefs.digestTimeLabel': 'Digest time',
   'prefs.resetEvent': 'Reset {event} to the default',
   'app.notFoundTitle': 'Page not available',

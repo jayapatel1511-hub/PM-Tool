@@ -73,7 +73,8 @@ public static class ReadinessEndpoints
                 "Linked handoffs are current source evidence.");
 
         // AC-DEPT-05: the evaluator's satisfaction rule (lag and link type included); a Finish-to-Finish link never holds a start.
-        var org = await (settings ?? new SettingsStore(TimeProvider.System)).Get(db);
+        // Without a supplied store, use the application's shared cached store, reached through the context's services.
+        var org = await (settings ?? Microsoft.EntityFrameworkCore.Infrastructure.AccessorExtensions.GetService<SettingsStore>(db)).Get(db);
         var judge = await DependencyEndpoints.Judge(db, project, org, today);
         if (targetType == "Task")
         {

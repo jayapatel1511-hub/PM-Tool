@@ -60,6 +60,12 @@ public sealed class ReviewDemoSeedTests
             projects.Select(p => p.ProjectManagerId));
         Assert.All(projects, p => Assert.DoesNotContain("Demo", p.Name));
         Assert.Equal(6, f.Db(db => db.Tasks.Count(t => projects.Select(p => p.Id).Contains(t.ProjectId))));
+        // Seeded work that has left Not Started carries its start (D4), as work started through the API does.
+        var ids = projects.Select(p => p.Id).ToList();
+        Assert.All(f.Db(db => db.Tasks.Where(t => ids.Contains(t.ProjectId)).ToList()),
+            t => Assert.Equal(t.Status != TaskStatuses.NotStarted, t.StartedAt is not null));
+        Assert.All(f.Db(db => db.Deliverables.Where(d => ids.Contains(d.ProjectId)).ToList()),
+            d => Assert.Equal(d.Status != DeliverableStatus.NotStarted, d.StartedAt is not null));
         var staff = await (await f.As("taylor@hub.test").GetAsync("/api/v1/staff")).Json();
         Assert.Equal(1, staff["tiles"]!["staff"]!.GetValue<int>());
         Assert.Equal("Yagmur", staff["people"]![0]!["displayName"]!.GetValue<string>());

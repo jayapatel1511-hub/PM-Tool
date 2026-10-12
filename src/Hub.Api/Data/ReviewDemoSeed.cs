@@ -130,7 +130,7 @@ public static class ReviewDemoSeed
                 ProjectId = project.Id, Seq = 1, Key = Keys.Format(number, "deliverable", 1), Name = deliverableName,
                 ProjectDisciplineId = civilDiscipline.Id, DeliverableTypeId = drawingType, OwnerId = civilOwner.Id,
                 ReviewerId = reviewer.Id, MilestoneId = milestone.Id, DueDate = today.AddDays(40), OriginalDueDate = today.AddDays(40),
-                Status = DeliverableStatus.InProgress, Revision = "P01", LastActivityAt = now, SortOrder = 1,
+                Status = DeliverableStatus.InProgress, StartedAt = now, Revision = "P01", LastActivityAt = now, SortOrder = 1,
             };
             db.Deliverables.Add(deliverable);
             db.Tasks.AddRange(
@@ -138,7 +138,7 @@ public static class ReviewDemoSeed
                 {
                     ProjectId = project.Id, Seq = 1, Key = Keys.Format(number, "task", 1), Name = taskName,
                     ProjectDisciplineId = civilDiscipline.Id, DeliverableId = deliverable.Id, AssigneeId = civilOwner.Id,
-                    ReviewerId = reviewer.Id, RequiresReview = true, Status = TaskStatuses.InProgress,
+                    ReviewerId = reviewer.Id, RequiresReview = true, Status = TaskStatuses.InProgress, StartedAt = now,
                     StartDate = today.AddDays(-7), DueDate = today.AddDays(14), OriginalStartDate = today.AddDays(-7), OriginalDueDate = today.AddDays(14),
                     EstimatedHours = 24, ProgressPct = 40, LastActivityAt = now, StatusChangedAt = now, SortOrder = 1,
                 },

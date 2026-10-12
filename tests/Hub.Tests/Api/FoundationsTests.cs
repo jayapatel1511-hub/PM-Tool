@@ -145,6 +145,7 @@ public sealed class FoundationsTests(HubFactory f)
         var change = history["items"]!.AsArray().Where(a => a!.G("itemId") == u.Id).SelectMany(a => a!["changes"]!.AsArray()).Single(c => c!.S("field") == "HomeDisciplineId")!;
         Assert.Null(change["old"]);
         Assert.Equal(civil.ToString(), change.S("new"));
+        Assert.Equal("Civil", change.S("newLabel")); // 036-D5: shown by name, like a supervisor or office
         var listed = await (await f.As(Admin).GetAsync($"/api/v1/admin/users?q={email}")).Json();
         Assert.Equal(civil, listed[0]!.G("homeDisciplineId"));
         Assert.Equal(civil, (await (await f.As("alex@hub.test").GetAsync($"/api/v1/users?ids={u.Id}")).Json())[0]!.G("homeDisciplineId"));

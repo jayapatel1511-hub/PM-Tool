@@ -158,6 +158,10 @@ public static class ActivityEndpoints
         Add((await db.Issues.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Title }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Title}")));
         Add((await db.Actions.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Text }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Text}")));
         Add((await db.Meetings.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Title }).ToListAsync()).Select(x => (x.Id, x.Title)));
+        // An allocation has no key or name: the person and dates, which its own log rows already show to the same readers.
+        Add((await db.Allocations.Where(x => list.Contains(x.Id))
+            .Select(x => new { x.Id, Person = db.Users.Where(u => u.Id == x.PersonId).Select(u => u.DisplayName).FirstOrDefault(), x.FromDate, x.ThroughDate }).ToListAsync())
+            .Select(x => (x.Id, $"{x.Person}, {x.FromDate:yyyy-MM-dd} to {x.ThroughDate:yyyy-MM-dd}")));
         Add((await db.Clients.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
         Add((await db.Offices.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
         Add((await db.Phases.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));

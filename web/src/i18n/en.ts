@@ -1982,6 +1982,7 @@ export const en: Record<string, string> = {
   // Activity labels for packet 029 records, which the activity history showed as raw keys.
   'itemType.ResourceAllocation': 'Allocation', 'itemType.AllocationWorkLink': 'Allocation link', 'itemType.AllocationDayOverride': 'Allocation day hours',
   'itemType.PersonAvailabilityOverride': 'Daily availability', 'itemType.PersonDateVersion': 'Availability version',
+  'itemType.OpenRole': 'Open role', 'field.RoleLabel': 'Role', 'field.FilledAllocationId': 'Filled by', 'field.HomeDisciplineId': 'Home discipline',
   'field.AllocationId': 'Allocation', 'field.AvailableHours': 'Available hours', 'field.Category': 'Category', 'field.ConfirmationSnapshot': 'Confirmation snapshot',
   'field.ConfirmedAt': 'Confirmed at', 'field.ConfirmedBy': 'Confirmed by', 'field.FromDate': 'From', 'field.OverCapacityReason': 'Over-capacity reason',
   'field.PersonId': 'Person', 'field.PlannedHours': 'Planned hours', 'field.Purpose': 'Purpose', 'field.ReleasedAt': 'Released', 'field.ReviewHours': 'Review hours',

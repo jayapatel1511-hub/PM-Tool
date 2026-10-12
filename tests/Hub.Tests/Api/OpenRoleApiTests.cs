@@ -188,6 +188,11 @@ public sealed class OpenRoleApiTests(HubFactory f)
             .Select(a => a.CorrelationId).ToList());
         Assert.Equal(2, correlations.Count);
         Assert.Single(correlations.Distinct());
+        // 036-D5: the role history names the filling allocation by its person and dates, not by its id.
+        var history = await (await f.As(TestData.Pm).GetAsync($"/api/v1/items/OpenRole/{roleId}/activity")).Json();
+        var filledBy = history["items"]!.AsArray().SelectMany(a => a!["changes"]!.AsArray()).Single(c => c!.S("field") == "FilledAllocationId")!;
+        var personName = f.Db(db => db.Users.Single(u => u.Id == person.Id).DisplayName);
+        Assert.Equal($"{personName}, 2026-10-05 to 2026-10-05", filledBy.S("newLabel"));
 
         var other = await Person(project.Id);
         var refused = await (await f.As(TestData.Pm).Post(root, Proposal(other, roleId))).Json(409);

@@ -122,7 +122,7 @@ public static class AdminEndpoints
             if (!string.IsNullOrWhiteSpace(q)) query = query.Where(u => EF.Functions.ILike(u.DisplayName, $"%{q.Trim()}%") || EF.Functions.ILike(u.Email, $"%{q.Trim()}%"));
             return await query.OrderBy(u => u.DisplayName).Take(1000).Select(u => new
             {
-                u.Id, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.SupervisorId, u.IsActive, u.WeeklyCapacityHours, u.IsTemplateEditor,
+                u.Id, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.SupervisorId, u.HomeDisciplineId, u.IsActive, u.WeeklyCapacityHours, u.IsTemplateEditor,
                 u.LastSignInAt, u.RowVersion, Roles = u.Roles.Select(r => new { r.Role, r.Source }),
             }).ToListAsync();
         });
@@ -160,6 +160,12 @@ public static class AdminEndpoints
                 u.SupervisorId = sup;
             }
             if (p.Has("officeId")) u.OfficeId = p.Id("officeId");
+            if (p.Has("homeDisciplineId")) // FR-GRP-01 (D7): edited by an Admin, audited on the user record
+            {
+                var discipline = p.Id("homeDisciplineId");
+                if (discipline is { } d) Check.That(await db.Disciplines.AnyAsync(x => x.Id == d && x.IsActive), "homeDisciplineId", "error.not_found");
+                u.HomeDisciplineId = discipline;
+            }
             if (p.Has("weeklyCapacityHours"))
             {
                 var c = p.Dec("weeklyCapacityHours");

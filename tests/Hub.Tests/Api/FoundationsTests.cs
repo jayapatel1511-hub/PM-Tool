@@ -131,6 +131,26 @@ public sealed class FoundationsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Admin_sets_a_home_discipline_and_the_user_history_shows_it() // packet 036 AC-GRP-01a, -01b
+    {
+        var email = $"home{Guid.NewGuid():N}"[..12] + "@hub.test";
+        await f.As(email).GetAsync("/api/v1/me").Result.Json();
+        var u = await f.DbAsync(db => db.Users.FirstAsync(x => x.Email == email));
+        var civil = await f.DbAsync(db => db.Disciplines.Where(x => x.Name == "Civil").Select(x => x.Id).FirstAsync());
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As("priya@hub.test").Patch($"/api/v1/admin/users/{u.Id}", new { homeDisciplineId = civil }, u.RowVersion)).StatusCode);
+        var unknown = await (await f.As(Admin).Patch($"/api/v1/admin/users/{u.Id}", new { homeDisciplineId = Guid.NewGuid() }, u.RowVersion)).Json(400);
+        Assert.Equal("Not found.", unknown["errors"]!["homeDisciplineId"]![0]!.GetValue<string>());
+        (await f.As(Admin).Patch($"/api/v1/admin/users/{u.Id}", new { homeDisciplineId = civil }, u.RowVersion)).EnsureSuccessStatusCode();
+        var history = await f.As(Admin).GetAsync($"/api/v1/admin/activity?itemType=User&pageSize=200").Result.Json();
+        var change = history["items"]!.AsArray().Where(a => a!.G("itemId") == u.Id).SelectMany(a => a!["changes"]!.AsArray()).Single(c => c!.S("field") == "HomeDisciplineId")!;
+        Assert.Null(change["old"]);
+        Assert.Equal(civil.ToString(), change.S("new"));
+        var listed = await f.As(Admin).GetAsync($"/api/v1/admin/users?q={email}").Result.Json();
+        Assert.Equal(civil, listed[0]!.G("homeDisciplineId"));
+        Assert.Equal(civil, (await f.As("alex@hub.test").GetAsync($"/api/v1/users?ids={u.Id}").Result.Json())[0]!.G("homeDisciplineId"));
+    }
+
+    [Fact]
     public async Task Activity_log_rows_cannot_be_changed_or_deleted() // AC-AUD-04
     {
         var ex = await Assert.ThrowsAsync<PostgresException>(() => f.DbAsync(db => db.Database.ExecuteSqlRawAsync("UPDATE hub.activity_log SET action = 'x'")));

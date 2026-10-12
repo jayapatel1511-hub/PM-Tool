@@ -434,6 +434,7 @@ public static class TaskEndpoints
         if (to == TaskStatuses.InProgress && t.ProgressPct == 0 && from == TaskStatuses.NotStarted) t.ProgressPct = 0;
         if (!string.IsNullOrWhiteSpace(comment)) // C-08: a note typed with a status change is a Status Note comment
             db.Comments.Add(new Comment { ProjectId = t.ProjectId, ItemType = ItemType.Task, ItemId = t.Id, AuthorId = authorId, Body = comment.Trim(), CommentKind = CommentKind.StatusNote, CreatedAt = now, AuditKey = t.Key });
+        if (from == TaskStatuses.NotStarted) t.StartedAt ??= now; // D4: the Start-to-Start anchor, set once
         t.Status = to;
         t.StatusChangedAt = now;
         t.LastActivityAt = now;
@@ -442,7 +443,7 @@ public static class TaskEndpoints
         if (path.Contains(TaskStatuses.InProgress) && t.DeliverableId is { } did)
         {
             var d = await db.Deliverables.FirstOrDefaultAsync(x => x.Id == did);
-            if (d is { Status: DeliverableStatus.NotStarted }) { d.Status = DeliverableStatus.InProgress; d.StatusChangedAt = now; d.LastActivityAt = now; }
+            if (d is { Status: DeliverableStatus.NotStarted }) { d.Status = DeliverableStatus.InProgress; d.StatusChangedAt = now; d.StartedAt ??= now; d.LastActivityAt = now; }
         }
     }
 

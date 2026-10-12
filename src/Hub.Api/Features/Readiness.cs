@@ -72,30 +72,35 @@ public static class ReadinessEndpoints
             Source(ReadinessCheckCode.Handoff, true, handoffs.All(h => h.Status is HandoffStatus.Accepted or HandoffStatus.Incorporated),
                 "Linked handoffs are current source evidence.");
 
+        // AC-DEPT-05: the evaluator's satisfaction rule (lag and link type included); a Finish-to-Finish link never holds a start.
+        var org = await (settings ?? new SettingsStore(TimeProvider.System)).Get(db);
+        var judge = await DependencyEndpoints.Judge(db, project, org, today);
         if (targetType == "Task")
         {
-            var predecessorIds = await db.Dependencies.AsNoTracking().Where(d => d.ProjectId == project.Id &&
-                d.SuccessorTaskId == targetId && d.DeletedAt == null).Select(d => d.PredecessorTaskId).Distinct().ToListAsync();
+            var links = await db.Dependencies.AsNoTracking().Where(d => d.ProjectId == project.Id && d.SuccessorTaskId == targetId &&
+                d.DeletedAt == null && d.DependencyType != DependencyTypes.FinishToFinish).Select(d => new { d.PredecessorTaskId, d.DependencyType, d.LagDays }).ToListAsync();
+            var predecessorIds = links.Select(l => l.PredecessorTaskId).Distinct().ToList();
             if (predecessorIds.Count > 0)
             {
                 var predecessors = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == project.Id &&
-                    predecessorIds.Contains(t.Id)).Select(t => new LinkedRecord(ItemType.Task, t.Id, t.Key, t.Name, t.Status)).ToListAsync();
-                sources?.AddRange(predecessors.Select(t => new CheckSource(ReadinessCheckCode.Predecessor, t)));
-                Source(ReadinessCheckCode.Predecessor, true, predecessors.Count == predecessorIds.Count &&
-                    predecessors.All(t => t.Status == TaskStatuses.Complete), "Linked predecessor tasks are current source evidence.");
+                    predecessorIds.Contains(t.Id)).ToDictionaryAsync(t => t.Id);
+                sources?.AddRange(predecessors.Values.Select(t => new CheckSource(ReadinessCheckCode.Predecessor, new LinkedRecord(ItemType.Task, t.Id, t.Key, t.Name, t.Status))));
+                Source(ReadinessCheckCode.Predecessor, true, links.All(l => predecessors.TryGetValue(l.PredecessorTaskId, out var t) &&
+                    judge.Satisfied(l.DependencyType, t.Status, t.StartedAt, judge.Local(t.CompletedAt), l.LagDays)), "Linked predecessor tasks are current source evidence.");
             }
         }
         else
         {
-            var predecessorIds = await db.DeliverableDependencies.AsNoTracking().Where(d => d.ProjectId == project.Id &&
-                d.SuccessorDeliverableId == targetId && d.DeletedAt == null).Select(d => d.PredecessorDeliverableId).Distinct().ToListAsync();
+            var links = await db.DeliverableDependencies.AsNoTracking().Where(d => d.ProjectId == project.Id && d.SuccessorDeliverableId == targetId &&
+                d.DeletedAt == null && d.DependencyType != DependencyTypes.FinishToFinish).Select(d => new { d.PredecessorDeliverableId, d.DependencyType, d.LagDays }).ToListAsync();
+            var predecessorIds = links.Select(l => l.PredecessorDeliverableId).Distinct().ToList();
             if (predecessorIds.Count > 0)
             {
                 var predecessors = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == project.Id &&
-                    predecessorIds.Contains(d.Id)).Select(d => new LinkedRecord(ItemType.Deliverable, d.Id, d.Key, d.Name, d.Status)).ToListAsync();
-                sources?.AddRange(predecessors.Select(d => new CheckSource(ReadinessCheckCode.Predecessor, d)));
-                Source(ReadinessCheckCode.Predecessor, true, predecessors.Count == predecessorIds.Count &&
-                    predecessors.All(d => d.Status is DeliverableStatus.Issued or DeliverableStatus.Accepted),
+                    predecessorIds.Contains(d.Id)).ToDictionaryAsync(d => d.Id);
+                sources?.AddRange(predecessors.Values.Select(d => new CheckSource(ReadinessCheckCode.Predecessor, new LinkedRecord(ItemType.Deliverable, d.Id, d.Key, d.Name, d.Status))));
+                Source(ReadinessCheckCode.Predecessor, true, links.All(l => predecessors.TryGetValue(l.PredecessorDeliverableId, out var d) &&
+                    judge.Satisfied(l.DependencyType, d.Status, d.StartedAt, d.IssuedDate, l.LagDays)),
                     "Linked predecessor deliverables are current source evidence.");
             }
         }

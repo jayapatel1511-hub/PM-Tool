@@ -23,6 +23,13 @@ Steps 3–5 are scripted: from `releases/<full-sha>` on homedev run `bash script
 
 ### Tuesday hosted review fixture activation
 
+Local-password sessions live in `hub.local_auth_session` on the existing review database. Tickets are protected with
+the persistent Data Protection keys. Logout deletes only the current session; copied-cookie replay must return 401.
+Other sign-ins remain valid, and verifier rotation/removal still invalidates the person's sessions. Activation of this
+session-store version rejects old stateless cookies, requiring a fresh sign-in. Each new sign-in removes at most 100
+expired session rows. Preserve the database and key directory across replacement; never restore a pre-logout dump
+into the active stack, which could restore revoked sessions. Rollback to a stateless version reopens the logout risk.
+
 After the exact new review release has been activated and its private health/auth checks pass, run the operator wrapper from `releases/<full-sha>` in Jay's own terminal:
 
 ```bash

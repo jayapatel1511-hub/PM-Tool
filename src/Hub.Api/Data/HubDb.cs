@@ -14,6 +14,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public AuditContext Audit => audit;
 
     public DbSet<AppUser> Users => Set<AppUser>();
+    public DbSet<LocalAuthSession> LocalAuthSessions => Set<LocalAuthSession>();
     public DbSet<UserSystemRole> UserRoles => Set<UserSystemRole>();
     public DbSet<Office> Offices => Set<Office>();
     public DbSet<Discipline> Disciplines => Set<Discipline>();
@@ -137,6 +138,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.HasDefaultSchema("hub");
         mb.HasPostgresExtension("citext");
         mb.HasPostgresExtension("pg_trgm");
+
+        mb.Entity<LocalAuthSession>().HasIndex(x => x.ExpiresAt);
 
         mb.Entity<AppUser>(e =>
         {

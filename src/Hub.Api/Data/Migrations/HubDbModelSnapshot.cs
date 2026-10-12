@@ -4658,6 +4658,31 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("leave_import_state", "hub");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.LocalAuthSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("Ticket")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ticket");
+
+                    b.HasKey("Id")
+                        .HasName("pk_local_auth_session");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("ix_local_auth_session_expires_at");
+
+                    b.ToTable("local_auth_session", "hub");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.Meeting", b =>
                 {
                     b.Property<Guid>("Id")

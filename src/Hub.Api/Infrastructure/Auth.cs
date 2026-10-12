@@ -85,6 +85,12 @@ public static class AuthSetup
             Directory.CreateDirectory(keys);
             if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(keys, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
             b.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keys));
+            b.Services.AddSingleton<LocalSessionStore>();
+            b.Services.AddOptions<CookieAuthenticationOptions>(LocalScheme).Configure<LocalSessionStore, TimeProvider>((o, sessions, clock) =>
+            {
+                o.SessionStore = sessions;
+                o.TimeProvider = clock;
+            });
         }
         var auth = b.Services.AddAuthentication(dev ? DevScheme : local ? LocalScheme : JwtBearerDefaults.AuthenticationScheme);
         if (dev)

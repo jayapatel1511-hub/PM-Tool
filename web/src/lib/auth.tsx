@@ -1,6 +1,7 @@
 import { createStandardPublicClientApplication, type IPublicClientApplication } from '@azure/msal-browser'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { api, configureApi, get } from '@/lib/api'
 import { setDateContext } from '@/lib/format'
@@ -110,7 +111,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   return <Signed onSignOut={() => {
     sessionStorage.removeItem(SIGNIN_KEY)
     if (cfg.current?.authMode === 'Development') { sessionStorage.removeItem(DEV_KEY); window.location.replace('/') }
-    else if (cfg.current?.authMode === 'LocalPassword') { api('auth/local/sign-out', { method: 'POST' }).catch(() => {}).finally(() => { qc.removeQueries({ queryKey: ['me'] }); window.location.replace('/') }) }
+    else if (cfg.current?.authMode === 'LocalPassword') { api('auth/local/sign-out', { method: 'POST' }).then(() => { qc.removeQueries({ queryKey: ['me'] }); window.location.replace('/') }).catch(() => toast.error(t('auth.signOutFailed'))) }
     else msal?.logoutRedirect()
   }}>{children}</Signed>
 }

@@ -143,6 +143,72 @@ public sealed class PlanningApiTests(HubFactory f)
 
     }
 
+    static JsonNode PickerCell(JsonNode grid, Guid id) => grid["people"]!.AsArray().Single(p => p!.G("id") == id)!["cells"]![0]!;
+
+    [Fact]
+    public async Task Person_ids_return_picker_capacity_inside_the_viewers_scope() // packet 036 AC-PICK-01a, -01b, -02a, -02d, -03a, R6
+    {
+        var project = await d.Project();
+        var alex = await FreshReport();
+        await f.DbAsync(async db => {
+            db.Allocations.Add(new() { ProjectId = project.Id, PersonId = alex, FromDate = Week, ThroughDate = Week.AddDays(4), PlannedHours = 20m, Status = AllocationStatus.Confirmed,
+                CreatedBy = d.User(TestData.Pm), ConfirmedBy = d.User(TestData.Sam), ConfirmedAt = f.Clock.GetUtcNow() });
+            return await db.SaveChangesAsync();
+        });
+        var expected = await CreateDraft(alex);
+        await (await f.As(TestData.Sam).Post($"/api/v1/planning/entries/{expected.G("id")}/visibility", new { rowVersion = expected.I("rowVersion"), visibility = PlanningVisibility.Published })).Json();
+        await (await f.As(TestData.Admin).Post("/api/v1/planning/entries", new { personId = alex, hoursPerWeek = 10m, startWeek = Week, endWeek = Week,
+            label = "Admin private draft", sourceCategory = PlanningSource.Other })).Json(201);
+        var jill = await FreshReport();
+        foreach (var day in new[] { Week, Week.AddDays(1) })
+            await (await f.As(TestData.Sam).Put($"/api/v1/users/{jill}/availability/{day:yyyy-MM-dd}", new AllocationEndpoints.AvailabilityBody(0, 0, AvailabilityCategory.Unavailable))).Json();
+        var (omar, diane) = (d.User(TestData.Omar), d.User(TestData.Diane)); // Lena's reports, outside Sam's scope
+        var sam = d.User(TestData.Sam);
+        Assert.False(f.Db(db => db.Users.Any(u => (u.Id == omar || u.Id == diane) && u.SupervisorId == sam)));
+
+        var grid = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/grid?personIds={alex},{jill},{omar},{diane}&from={Week:yyyy-MM-dd}&weeks=1")).Json();
+        Assert.Equal(new[] { alex, jill }.Order(), grid["people"]!.AsArray().Select(p => p!.G("id")).Order());
+        Assert.Equal(12m, PickerCell(grid, alex)["remaining"]!.GetValue<decimal>()); // 40 - 20 confirmed allocation - 8 expected; the admin's draft is not counted
+        Assert.Equal((24m, 16m), (PickerCell(grid, jill)["remaining"]!.GetValue<decimal>(), PickerCell(grid, jill)["timeAway"]!.GetValue<decimal>()));
+        var cell = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/cells/{alex}/{Week:yyyy-MM-dd}")).Json();
+        Assert.Equal(PickerCell(grid, alex)["remaining"]!.GetValue<decimal>(), cell["remaining"]!.GetValue<decimal>());
+        var next = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/grid?personIds={alex}&from={Week.AddDays(7):yyyy-MM-dd}&weeks=1")).Json();
+        Assert.Equal((Week.AddDays(7), 40m), (DateOnly.Parse(PickerCell(next, alex).S("week")), PickerCell(next, alex)["remaining"]!.GetValue<decimal>()));
+
+        // R6: an id outside the scope answers exactly like an id that does not exist.
+        var hidden = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/grid?personIds={omar}&from={Week:yyyy-MM-dd}&weeks=1")).Json();
+        var missing = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/grid?personIds={Guid.NewGuid()}&from={Week:yyyy-MM-dd}&weeks=1")).Json();
+        Assert.Empty(hidden["people"]!.AsArray());
+        Assert.Equal(missing["people"]!.ToJsonString(), hidden["people"]!.ToJsonString());
+        Assert.Equal(missing["partialView"]!.ToJsonString(), hidden["partialView"]!.ToJsonString());
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).GetAsync($"/api/v1/planning/grid?personIds={d.User(TestData.Jill)}&from={Week:yyyy-MM-dd}&weeks=1")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).GetAsync($"/api/v1/planning/grid?personIds={Guid.NewGuid()}&from={Week:yyyy-MM-dd}&weeks=1")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Person_ids_are_limited_scoped_for_project_managers_and_rows_carry_person_fields() // packet 036 AC-PICK-02b, -03c, FR-GRP-02
+    {
+        var root = $"/api/v1/planning/grid?from={Week:yyyy-MM-dd}&weeks=1&personIds=";
+        Assert.NotNull((await (await f.As(TestData.Sam).GetAsync(root + string.Join(",", Enumerable.Range(0, 51).Select(_ => Guid.NewGuid())))).Json(400))["errors"]!["personIds"]);
+        await (await f.As(TestData.Sam).GetAsync(root + string.Join(",", Enumerable.Range(0, 50).Select(_ => Guid.NewGuid())))).Json();
+        await (await f.As(TestData.Sam).GetAsync(root + "not-a-person")).Json(400);
+
+        var project = await d.Project();
+        var member = await FreshReport();
+        var stranger = await f.DbAsync(async db => { var u = new AppUser { Email = $"synthetic-stranger-{Guid.NewGuid():N}@hub.test", DisplayName = "Synthetic stranger" }; db.Users.Add(u); await db.SaveChangesAsync(); return u.Id; });
+        var civil = await d.Discipline("Civil");
+        await f.DbAsync(async db => {
+            db.ProjectMembers.Add(new ProjectMember { ProjectId = project.Id, UserId = member, Roles = [ProjectRole.TeamMember], AddedAt = f.Clock.GetUtcNow() });
+            var u = await db.Users.SingleAsync(x => x.Id == member); u.JobTitle = "Civil Designer (EIT)"; u.HomeDisciplineId = civil;
+            return await db.SaveChangesAsync();
+        });
+        var grid = await (await f.As(TestData.Pm).GetAsync(root + $"{member},{stranger}")).Json();
+        var row = grid["people"]!.AsArray().Single()!;
+        Assert.Equal(member, row.G("id"));
+        Assert.Equal(("Civil Designer (EIT)", civil), (row.S("jobTitle"), row.G("homeDisciplineId")));
+        Assert.True(row.AsObject().ContainsKey("officeId"));
+    }
+
     [Fact]
     public async Task Existing_workload_and_allocation_reads_are_unchanged_by_planning_commands()
     {

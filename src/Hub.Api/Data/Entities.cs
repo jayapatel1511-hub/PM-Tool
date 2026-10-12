@@ -37,6 +37,7 @@ public class AppUser : Audited, IAuditable
     public string? JobTitle { get; set; }
     public Guid? OfficeId { get; set; }
     public Guid? SupervisorId { get; set; }
+    public Guid? HomeDisciplineId { get; set; } // FR-GRP-01, edited by an Admin (D7)
     public string? HrSourceSystem { get; set; }
     public string? HrPersonKey { get; set; }
     public bool IsActive { get; set; } = true;
@@ -317,6 +318,7 @@ public class Deliverable : ProjectItem, IAuditable
     public Guid? TemplateDeliverableId { get; set; }
     public DateTimeOffset LastActivityAt { get; set; }
     public DateTimeOffset? StatusChangedAt { get; set; }
+    public DateTimeOffset? StartedAt { get; set; } // first left Not Started (D4)
     public int SortOrder { get; set; }
     public string AuditType => ItemType.Deliverable;
     public Guid? AuditProjectId => ProjectId;
@@ -462,6 +464,7 @@ public class WorkTask : ProjectItem, IAuditable
     public DateTimeOffset LastActivityAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
     public DateTimeOffset? StatusChangedAt { get; set; }
+    public DateTimeOffset? StartedAt { get; set; } // first left Not Started (D4)
     public DateTimeOffset? ReviewRequestedAt { get; set; }
     public int SortOrder { get; set; }
     public Guid? TemplateTaskId { get; set; }
@@ -495,6 +498,7 @@ public class DeliverableDependency : Entity, ISoftDeletable, IAuditable
     public Guid ProjectId { get; set; }
     public Guid PredecessorDeliverableId { get; set; }
     public Guid SuccessorDeliverableId { get; set; }
+    public string DependencyType { get; set; } = DependencyTypes.FinishToStart;
     public int LagDays { get; set; }
     public string? Note { get; set; }
     public Guid? CreatedBy { get; set; }

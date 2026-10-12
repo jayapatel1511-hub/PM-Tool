@@ -12,7 +12,7 @@ public static class AllocationEndpoints
     public sealed record DayInput(DateOnly WorkDate, decimal Hours);
     public sealed record LinkInput(string WorkType, Guid WorkId, DateOnly WorkDate, decimal? ReviewHours = null);
     public sealed record CreateBody(Guid RequestId, Guid PersonId, string Purpose, DateOnly FromDate, DateOnly ThroughDate,
-        decimal PlannedHours, DayInput[] Days, LinkInput[] Links, string? Reason);
+        decimal PlannedHours, DayInput[] Days, LinkInput[] Links, string? Reason, Guid? OpenRoleId = null);
     public sealed record EditBody(Guid RequestId, int RowVersion, Guid PersonId, string Purpose, DateOnly FromDate, DateOnly ThroughDate,
         decimal PlannedHours, DayInput[] Days, LinkInput[] Links, string Reason);
     public sealed record CancelBody(Guid RequestId, int RowVersion, string Reason);
@@ -65,6 +65,25 @@ public static class AllocationEndpoints
 
     static async Task LockPerson(HubDb db, Guid personId) =>
         await db.Database.SqlQueryRaw<Guid>("SELECT id AS \"Value\" FROM hub.app_user WHERE id = {0} FOR UPDATE", personId).ToListAsync();
+
+    /// FR-ROLE-03 (D1): the named open role is locked, then must be Open, on this project, and cover the allocation's dates.
+    static async Task<OpenRole> LockOpenRole(HubDb db, Guid projectId, Guid roleId, DateOnly from, DateOnly through)
+    {
+        await db.Database.SqlQueryRaw<Guid>("SELECT id AS \"Value\" FROM hub.open_role WHERE id = {0} FOR UPDATE", roleId).ToListAsync();
+        var role = await db.OpenRoles.FirstOrDefaultAsync(r => r.Id == roleId && r.ProjectId == projectId);
+        Check.That(role is not null, "openRoleId", "coord.reference");
+        if (role!.Status == OpenRoleStatus.Filled) throw ApiException.Conflict("open_role_filled", "openRole.filled");
+        Check.That(role.Status == OpenRoleStatus.Open, "openRoleId", "openRole.not_open");
+        Check.That(from >= role.FromDate && through <= role.ThroughDate, "openRoleId", "openRole.range");
+        return role;
+    }
+
+    /// FR-ROLE-03 (D1): a declined or cancelled allocation returns the role it filled to Open.
+    static async Task ReopenRole(HubDb db, Guid allocationId)
+    {
+        if (await db.OpenRoles.FirstOrDefaultAsync(r => r.FilledAllocationId == allocationId) is { } role)
+        { role.Status = OpenRoleStatus.Open; role.FilledAllocationId = null; }
+    }
 
     static async Task TouchDates(HubDb db, Guid personId, IEnumerable<DateOnly> dates)
     {
@@ -372,9 +391,11 @@ public static class AllocationEndpoints
             Access.Demand(Permissions.ProposeAllocation(access.Actor, ctx));
             await Validate(db, project, body.PersonId, body.Purpose, body.FromDate, body.ThroughDate,
                 body.PlannedHours, body.Days, body.Links, store);
+            var role = body.OpenRoleId is { } roleId ? await LockOpenRole(db, project.Id, roleId, body.FromDate, body.ThroughDate) : null;
             var a = new ResourceAllocation { ProjectId = project.Id, PersonId = body.PersonId, Purpose = body.Purpose,
                 FromDate = body.FromDate, ThroughDate = body.ThroughDate, PlannedHours = body.PlannedHours };
             db.Allocations.Add(a);
+            if (role is not null) { role.Status = OpenRoleStatus.Filled; role.FilledAllocationId = a.Id; } // AC-ROLE-03: same transaction
             foreach (var day in body.Days)
                 db.AllocationDayOverrides.Add(new AllocationDayOverride { AllocationId = a.Id, WorkDate = day.WorkDate, Hours = day.Hours });
             foreach (var link in body.Links)
@@ -434,6 +455,7 @@ public static class AllocationEndpoints
             var wasConfirmed = a.Status == AllocationStatus.Confirmed;
             if (wasConfirmed) await LockPerson(db, a.PersonId);
             a.Status = AllocationStatus.Cancelled;
+            await ReopenRole(db, a.Id);
             foreach (var link in await db.AllocationWorkLinks.Where(l => l.AllocationId == id && l.ReleasedAt == null).ToListAsync())
                 link.ReleasedAt = clock.GetUtcNow();
             if (wasConfirmed) await TouchDates(db, a.PersonId, Enumerable.Range(0, a.ThroughDate.DayNumber - a.FromDate.DayNumber + 1)
@@ -452,6 +474,7 @@ public static class AllocationEndpoints
             Access.Demand(Permissions.ConfirmAllocation(access.Actor, ctx, person.SupervisorId));
             Check.That(AllocationRules.Step(a.Status, AllocationStatus.Declined), "status", "error.invalid");
             a.Status = AllocationStatus.Declined;
+            await ReopenRole(db, a.Id);
             foreach (var link in await db.AllocationWorkLinks.Where(l => l.AllocationId == id && l.ReleasedAt == null).ToListAsync())
                 link.ReleasedAt = clock.GetUtcNow();
             db.Audit.Note(a, reason: Check.Reason(body.Reason));

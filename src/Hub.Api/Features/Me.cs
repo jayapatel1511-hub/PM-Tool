@@ -72,7 +72,7 @@ public static class MeEndpoints
             else if (active != false) query = query.Where(u => u.IsActive);
             if (!string.IsNullOrWhiteSpace(q)) query = query.Where(u => EF.Functions.ILike(u.DisplayName, $"%{q.Trim()}%") || EF.Functions.ILike(u.Email, $"%{q.Trim()}%"));
             return await query.OrderBy(u => u.DisplayName).Take(Math.Clamp(limit ?? 50, 1, 500))
-                .Select(u => new { u.Id, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.IsActive, u.SupervisorId }).ToListAsync();
+                .Select(u => new { u.Id, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.HomeDisciplineId, u.IsActive, u.SupervisorId }).ToListAsync();
         });
 
         // Active reference data for every picker; inactive entries only appear on items that already use them.

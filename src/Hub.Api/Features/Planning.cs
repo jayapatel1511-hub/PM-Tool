@@ -22,7 +22,8 @@ public static class PlanningEndpoints
     public sealed record GridQuery(DateOnly? From = null, int? Weeks = null, Guid? PersonId = null,
         Guid? SupervisorId = null, Guid? DisciplineId = null, Guid? OfficeId = null, Guid? ProjectId = null,
         string? Source = null, string? Confidence = null, string? Visibility = null, string? Indicator = null,
-        string? Q = null, string? Sort = null, DateOnly? Week = null, bool IncludeMyDrafts = true, string? DraftAccessReason = null);
+        string? Q = null, string? Sort = null, DateOnly? Week = null, bool IncludeMyDrafts = true, string? DraftAccessReason = null,
+        string? PersonIds = null);
     public sealed record EntryQuery(Guid? PersonId = null, bool? Mine = null, DateOnly? From = null, DateOnly? To = null,
         string? Source = null, string? Confidence = null, string? Visibility = null, Guid? ProjectId = null,
         string? Q = null, bool? Stale = null, bool IncludeMyDrafts = true, string? DraftAccessReason = null,
@@ -43,7 +44,8 @@ public static class PlanningEndpoints
         string ApprovalStatus, bool CanOpen, AllocationWeek[] Weeks);
     public sealed record PersonRow(Guid Id, string DisplayName, Guid? SupervisorId, string? SupervisorName,
         decimal WeeklyCapacity, bool CanCreateSelfEntry, bool CanCreateManagerEntry, bool CanRecordTimeAway,
-        string[] Indicators, CellRow[] Cells, EntryRow[] Entries, ApprovedRow[] ApprovedAllocations);
+        string[] Indicators, CellRow[] Cells, EntryRow[] Entries, ApprovedRow[] ApprovedAllocations,
+        Guid? OfficeId = null, string? JobTitle = null, Guid? HomeDisciplineId = null);
     public sealed record PlannerSettings(int HorizonWeeks, int OverPct, int UnderPct, int UnderWeeks, int StaleDays, int MaxHoursPerWeek);
     public sealed record GridResult(DateOnly[] Weeks, DateOnly CurrentWeek, DateTimeOffset EvaluatedAt,
         bool PartialView, bool DraftAccess, PlannerSettings Settings, PersonRow[] People);
@@ -186,6 +188,15 @@ public static class PlanningEndpoints
         var weeks = Enumerable.Range(0, displayCount + settings.PlanningUnderWeeks - 1).Select(i => first.AddDays(i * 7)).ToArray();
         var people = People(db, access);
         if (query.PersonId is { } personId) people = people.Where(u => u.Id == personId);
+        if (query.PersonIds is not null)
+        {
+            // FR-PICK-01: the picker's one request; ids outside the viewer's scope are dropped without a trace (AC-PICK-02).
+            var wanted = Http.List(query.PersonIds);
+            Check.That(wanted.Length <= 50, "personIds", "planning.person_limit");
+            Check.That(wanted.All(id => Guid.TryParse(id, out _)), "personIds", "error.invalid");
+            var personIds = wanted.Select(Guid.Parse).ToArray();
+            people = people.Where(u => personIds.Contains(u.Id));
+        }
         if (query.SupervisorId is { } supervisorId) people = people.Where(u => u.SupervisorId == supervisorId);
         if (query.OfficeId is { } officeId) people = people.Where(u => u.OfficeId == officeId);
         var users = await people.ToListAsync(); var ids = users.Select(u => u.Id).ToArray();
@@ -267,7 +278,7 @@ public static class PlanningEndpoints
             rows.Add(new(user.Id, user.DisplayName, user.SupervisorId, user.SupervisorId is { } sid ? supervisors.GetValueOrDefault(sid) : null,
                 user.WeeklyCapacityHours ?? settings.DefaultWeeklyCapacityHours, create && user.Id == access.Actor.Id,
                 create && user.Id != access.Actor.Id, Permissions.RecordTimeAway(access.Actor, user.SupervisorId, user.Id).Ok,
-                indicators, cells, personEntries, projected));
+                indicators, cells, personEntries, projected, user.OfficeId, user.JobTitle, user.HomeDisciplineId));
         }
         var sortWeek = Workload.WeekOf(query.Week ?? current);
         CellRow SortCell(PersonRow p) => p.Cells.FirstOrDefault(c => c.Week == sortWeek) ?? p.Cells[0];

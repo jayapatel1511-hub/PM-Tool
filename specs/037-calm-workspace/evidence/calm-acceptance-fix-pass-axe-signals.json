@@ -1,0 +1,1252 @@
+{
+  "base": "http://localhost:5191",
+  "baseUi": null,
+  "commit": "79882c20c3a04b0318614ed8687c9f8a9f6757c8",
+  "at": "2026-10-12T07:47:26.889Z",
+  "fixtures": {
+    "project": "01a10454-76c6-7d32-ae72-72e709e168be",
+    "alex": "01a10450-4bf3-774f-b3bd-cd6861d66ea7",
+    "template": "01a10450-4c51-7309-92c3-ac43fa412efc",
+    "task": "01a10454-7a0a-709a-8124-f55927334353",
+    "deliverable": "01a10495-03b5-7016-ac6a-06a4b9bee8cc",
+    "milestone": "01a10495-02c2-7f3f-946b-abc01267d5ef",
+    "decision": "01a10495-054c-7904-a177-317ffe19f5f7",
+    "risk": "01a10495-0579-7132-ba02-aecd1eddd92f",
+    "issue": "01a10495-05d2-7b45-affb-183fa9f6e290",
+    "handoff": "01a10495-0927-7999-b623-b7afd2e607c9",
+    "change": "01a10495-0b8d-7b65-b65e-0966aa36845d",
+    "review": "01a10495-0a24-79ff-9861-116da60b27bd",
+    "submission": "01a10495-0c66-7b1a-bf1c-a8cb7170559e",
+    "action": "01a10495-06da-7bb2-ab92-2531a8e1b441",
+    "allocation": "30ecbb3d-8058-4d57-a1cc-bbd22e3fd6e4",
+    "basis": "01a10495-0d51-7011-8e7b-b2a6ee7a0974"
+  },
+  "axe": [
+    {
+      "who": "priya",
+      "url": "/home",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/home",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/my-work",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/my-work",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/my-work",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/boards",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/boards",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/boards",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/projects",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/tasks",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/tasks",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/tasks",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/calendar",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/calendar",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/calendar",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/portfolio",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/portfolio",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/portfolio",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/workload",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/workload",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/workload",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/planner",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/planner",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/planner",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/reports",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/team",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/team",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/dashboard",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/dashboard",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/tasks",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/tasks",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/tasks",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/deliverables",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/deliverables",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/deliverables",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/timeline",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/timeline",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/timeline",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/allocations",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/allocations",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/allocations",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/coordination",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/coordination",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/coordination",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/home",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/home",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/my-work",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/my-work",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/my-work",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/boards",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/boards",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/boards",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/projects",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/tasks",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/tasks",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/tasks",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/calendar",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/calendar",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/calendar",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/portfolio",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/portfolio",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/portfolio",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/workload",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/workload",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/workload",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/planner",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/planner",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/planner",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/reports",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/team",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/team",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/dashboard",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/dashboard",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/tasks",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/tasks",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/tasks",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/deliverables",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/deliverables",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/deliverables",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/timeline",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/timeline",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/timeline",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/allocations",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/allocations",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/allocations",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/coordination",
+      "state": "closed",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/coordination",
+      "state": "filters open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": true
+    },
+    {
+      "who": "sam",
+      "url": "/projects/SYN-101/coordination",
+      "state": "menu open",
+      "violations": [],
+      "seriousOrCritical": 0,
+      "counted": false
+    }
+  ],
+  "signals": [
+    {
+      "who": "priya",
+      "url": "/planner",
+      "rows": 24,
+      "bad": [],
+      "more": [
+        {
+          "row": "ACAlex Chen40 h weekly capacity▲Over-planned · Oct",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 26, Nov 2, Nov 9 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 1040 h weekly ca",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 12, Oct 19, Oct 26 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 340 h weekly cap",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 26, Nov 2, Nov 9 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 440 h weekly cap",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 12, Nov 2, Nov 9 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 640 h weekly cap",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 12, Oct 19, Oct 26 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 740 h weekly cap",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 12, Oct 19, Oct 26 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 940 h weekly cap",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 12, Oct 19, Oct 26 +7"
+        }
+      ],
+      "weeks": [
+        {
+          "row": "ACAlex Chen40 h weekly capacity▲Over-planned · Oct",
+          "chip": "▲Over-planned · Oct 12, Oct 19",
+          "namesWeek": true
+        },
+        {
+          "row": "JMJill Martin30 h weekly capacity○Under-planned · ",
+          "chip": "○Under-planned · Oct 26, Nov 2, Nov 9 +7",
+          "namesWeek": true
+        },
+        {
+          "row": "MDMarc Dubois40 h weekly capacity○Under-planned · ",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 240 h weekly cap",
+          "chip": "○Under-planned · Oct 19, Oct 26, Nov 2 +8",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 140 h weekly cap",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 1040 h weekly ca",
+          "chip": "▲Over-planned · Dec 7",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 1140 h weekly ca",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +7",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 340 h weekly cap",
+          "chip": "▲Over-planned · Oct 19",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 440 h weekly cap",
+          "chip": "▲Over-planned · Oct 26",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 540 h weekly cap",
+          "chip": "○Under-planned · Oct 12, Oct 19, Nov 9 +7",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 640 h weekly cap",
+          "chip": "▲Over-planned · Nov 9",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 740 h weekly cap",
+          "chip": "▲Over-planned · Nov 16",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 840 h weekly cap",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +7",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 940 h weekly cap",
+          "chip": "▲Over-planned · Nov 30",
+          "namesWeek": true
+        },
+        {
+          "row": "PNPriya Nair40 h weekly capacity○Under-planned · O",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "DRDiane Roy40 h weekly capacity○Under-planned · Oc",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "OHOmar Haddad40 h weekly capacity○Under-planned · ",
+          "chip": "○Under-planned · Oct 26, Nov 2, Nov 9 +7",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 040 h weekly cap",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        }
+      ],
+      "plusOk": true,
+      "weekOk": true
+    },
+    {
+      "who": "lena",
+      "url": "/planner",
+      "rows": 28,
+      "bad": [],
+      "more": [
+        {
+          "row": "ACAlex Chen40 h weekly capacity▲Over-planned · Oct",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 26, Nov 2, Nov 9 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 1040 h weekly ca",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 12, Oct 19, Oct 26 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 340 h weekly cap",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 26, Nov 2, Nov 9 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 440 h weekly cap",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 12, Nov 2, Nov 9 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 640 h weekly cap",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 12, Oct 19, Oct 26 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 740 h weekly cap",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 12, Oct 19, Oct 26 +7"
+        },
+        {
+          "row": "SPSynthetic planning scale person 940 h weekly cap",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Under-planned · Oct 12, Oct 19, Oct 26 +7"
+        }
+      ],
+      "weeks": [
+        {
+          "row": "ACAlex Chen40 h weekly capacity▲Over-planned · Oct",
+          "chip": "▲Over-planned · Oct 12, Oct 19",
+          "namesWeek": true
+        },
+        {
+          "row": "JMJill Martin30 h weekly capacity○Under-planned · ",
+          "chip": "○Under-planned · Oct 26, Nov 2, Nov 9 +7",
+          "namesWeek": true
+        },
+        {
+          "row": "MDMarc Dubois40 h weekly capacity○Under-planned · ",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 240 h weekly cap",
+          "chip": "○Under-planned · Oct 19, Oct 26, Nov 2 +8",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 140 h weekly cap",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 1040 h weekly ca",
+          "chip": "▲Over-planned · Dec 7",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 1140 h weekly ca",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +7",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 340 h weekly cap",
+          "chip": "▲Over-planned · Oct 19",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 440 h weekly cap",
+          "chip": "▲Over-planned · Oct 26",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 540 h weekly cap",
+          "chip": "○Under-planned · Oct 12, Oct 19, Nov 9 +7",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 640 h weekly cap",
+          "chip": "▲Over-planned · Nov 9",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 740 h weekly cap",
+          "chip": "▲Over-planned · Nov 16",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 840 h weekly cap",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +7",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 940 h weekly cap",
+          "chip": "▲Over-planned · Nov 30",
+          "namesWeek": true
+        },
+        {
+          "row": "PNPriya Nair40 h weekly capacity○Under-planned · O",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSam Patel40 h weekly capacity○Under-planned · Oc",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "DRDiane Roy40 h weekly capacity○Under-planned · Oc",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "OHOmar Haddad40 h weekly capacity○Under-planned · ",
+          "chip": "○Under-planned · Oct 26, Nov 2, Nov 9 +7",
+          "namesWeek": true
+        },
+        {
+          "row": "JLJordan Lee40 h weekly capacity○Under-planned · O",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "LBLena Brooks40 h weekly capacity○Under-planned · ",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "RGRita Gomez40 h weekly capacity○Under-planned · O",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        },
+        {
+          "row": "SPSynthetic planning scale person 040 h weekly cap",
+          "chip": "○Under-planned · Oct 12, Oct 19, Oct 26 +9",
+          "namesWeek": true
+        }
+      ],
+      "plusOk": true,
+      "weekOk": true
+    },
+    {
+      "who": "priya",
+      "url": "/workload",
+      "rows": 27,
+      "bad": [],
+      "more": [
+        {
+          "row": "ACAlex ChenCapacity 40 h per week■Over-assigned · ",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Deadline cluster"
+        },
+        {
+          "row": "JMJill MartinCapacity 30 h per week · custom■Over-",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Deadline cluster"
+        }
+      ],
+      "weeks": [
+        {
+          "row": "ACAlex ChenCapacity 40 h per week■Over-assigned · ",
+          "chip": "■Over-assigned · Oct 12",
+          "namesWeek": true
+        },
+        {
+          "row": "JMJill MartinCapacity 30 h per week · custom■Over-",
+          "chip": "■Over-assigned · Oct 12",
+          "namesWeek": true
+        }
+      ],
+      "plusOk": true,
+      "weekOk": true
+    },
+    {
+      "who": "sam",
+      "url": "/workload",
+      "rows": 9,
+      "bad": [],
+      "more": [
+        {
+          "row": "ACAlex ChenCapacity 40 h per week■Over-assigned · ",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Deadline cluster"
+        },
+        {
+          "row": "JMJill MartinCapacity 30 h per week · custom■Over-",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Deadline cluster"
+        }
+      ],
+      "weeks": [
+        {
+          "row": "ACAlex ChenCapacity 40 h per week■Over-assigned · ",
+          "chip": "■Over-assigned · Oct 12",
+          "namesWeek": true
+        },
+        {
+          "row": "JMJill MartinCapacity 30 h per week · custom■Over-",
+          "chip": "■Over-assigned · Oct 12",
+          "namesWeek": true
+        }
+      ],
+      "plusOk": true,
+      "weekOk": true
+    },
+    {
+      "who": "priya",
+      "url": "/tasks",
+      "rows": 31,
+      "bad": [],
+      "more": [
+        {
+          "row": "SYN-105-T0010",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Date inconsistent"
+        },
+        {
+          "row": "SYN-105-T0004",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Date inconsistent"
+        },
+        {
+          "row": "SYN-105-T0008",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Date inconsistent"
+        }
+      ],
+      "weeks": [],
+      "plusOk": true,
+      "weekOk": true
+    },
+    {
+      "who": "priya",
+      "url": "/my-work?tab=overdue",
+      "rows": 0,
+      "bad": [],
+      "more": [],
+      "weeks": [],
+      "plusOk": true,
+      "weekOk": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/tasks",
+      "rows": 16,
+      "bad": [],
+      "more": [],
+      "weeks": [],
+      "plusOk": true,
+      "weekOk": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-101/deliverables",
+      "rows": 12,
+      "bad": [],
+      "more": [
+        {
+          "row": "",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Due soon"
+        },
+        {
+          "row": "",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Due soon"
+        }
+      ],
+      "weeks": [],
+      "plusOk": true,
+      "weekOk": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-105/tasks",
+      "rows": 17,
+      "bad": [],
+      "more": [
+        {
+          "row": "",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Date inconsistent"
+        },
+        {
+          "row": "",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Date inconsistent"
+        },
+        {
+          "row": "",
+          "signals": 2,
+          "plus": "+1",
+          "label": "1 more: Date inconsistent"
+        }
+      ],
+      "weeks": [],
+      "plusOk": true,
+      "weekOk": true
+    },
+    {
+      "who": "priya",
+      "url": "/projects/SYN-105/deliverables",
+      "rows": 3,
+      "bad": [],
+      "more": [],
+      "weeks": [],
+      "plusOk": true,
+      "weekOk": true
+    }
+  ],
+  "failures": []
+}

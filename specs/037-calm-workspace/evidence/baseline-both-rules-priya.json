@@ -1,0 +1,126 @@
+{
+  "base": "http://localhost:5197",
+  "who": "priya",
+  "at": "2026-10-12T07:41:42.885Z",
+  "rows": [
+    {
+      "path": "/home",
+      "oldControls": 35,
+      "oldWords": 120,
+      "newControls": 17,
+      "newWords": 83
+    },
+    {
+      "path": "/my-work",
+      "oldControls": 30,
+      "oldWords": 78,
+      "newControls": 30,
+      "newWords": 78
+    },
+    {
+      "path": "/boards",
+      "oldControls": 45,
+      "oldWords": 221,
+      "newControls": 45,
+      "newWords": 221
+    },
+    {
+      "path": "/projects",
+      "oldControls": 13,
+      "oldWords": 33,
+      "newControls": 13,
+      "newWords": 33
+    },
+    {
+      "path": "/tasks",
+      "oldControls": 27,
+      "oldWords": 43,
+      "newControls": 27,
+      "newWords": 43
+    },
+    {
+      "path": "/calendar",
+      "oldControls": 29,
+      "oldWords": 156,
+      "newControls": 29,
+      "newWords": 156
+    },
+    {
+      "path": "/portfolio",
+      "oldControls": 18,
+      "oldWords": 58,
+      "newControls": 18,
+      "newWords": 58
+    },
+    {
+      "path": "/workload",
+      "oldControls": 29,
+      "oldWords": 112,
+      "newControls": 29,
+      "newWords": 85
+    },
+    {
+      "path": "/planner",
+      "oldControls": 27,
+      "oldWords": 63,
+      "newControls": 27,
+      "newWords": 63
+    },
+    {
+      "path": "/reports",
+      "oldControls": 15,
+      "oldWords": 169,
+      "newControls": 0,
+      "newWords": 17
+    },
+    {
+      "path": "/team",
+      "oldControls": 11,
+      "oldWords": 16,
+      "newControls": 11,
+      "newWords": 16
+    },
+    {
+      "path": "/projects/SYN-101/dashboard",
+      "oldControls": 49,
+      "oldWords": 168,
+      "newControls": 42,
+      "newWords": 144
+    },
+    {
+      "path": "/projects/SYN-101/tasks",
+      "oldControls": 50,
+      "oldWords": 108,
+      "newControls": 50,
+      "newWords": 108
+    },
+    {
+      "path": "/projects/SYN-101/deliverables",
+      "oldControls": 44,
+      "oldWords": 110,
+      "newControls": 44,
+      "newWords": 110
+    },
+    {
+      "path": "/projects/SYN-101/timeline",
+      "oldControls": 47,
+      "oldWords": 185,
+      "newControls": 47,
+      "newWords": 165
+    },
+    {
+      "path": "/projects/SYN-101/allocations",
+      "oldControls": 40,
+      "oldWords": 98,
+      "newControls": 40,
+      "newWords": 98
+    },
+    {
+      "path": "/projects/SYN-101/coordination",
+      "oldControls": 41,
+      "oldWords": 232,
+      "newControls": 40,
+      "newWords": 213
+    }
+  ]
+}

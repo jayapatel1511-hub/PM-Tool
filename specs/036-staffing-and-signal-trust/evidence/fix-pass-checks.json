@@ -1,0 +1,141 @@
+{
+  "pickerPartial": {
+    "pass": true,
+    "requests": 1,
+    "items": [
+      {
+        "name": "Alex Chen",
+        "figure": "7 h over",
+        "title": null
+      },
+      {
+        "name": "Jill Martin",
+        "figure": "Partial view",
+        "title": "Partial project scope; spare capacity is unknown"
+      },
+      {
+        "name": "Marc Dubois",
+        "figure": "40 h free",
+        "title": null
+      },
+      {
+        "name": "Sam Patel",
+        "figure": "37 h free",
+        "title": null
+      }
+    ]
+  },
+  "timelineInjected": {
+    "from": "SYN-101-D001",
+    "to": "SYN-101-D002"
+  },
+  "timelineLag": {
+    "pass": true,
+    "titles": [
+      "Finish-to-Start · lag 5 working days"
+    ]
+  },
+  "timelinePayload": {
+    "deliverableLinks": []
+  },
+  "portfolioFiltered": {
+    "pass": true,
+    "checks": [
+      {
+        "tile": "Red",
+        "count": 1,
+        "href": "/portfolio?computedHealth=Red&status=Active",
+        "rows": 1
+      },
+      {
+        "tile": "Yellow",
+        "count": 0,
+        "href": "/portfolio?computedHealth=Yellow&status=Active",
+        "rows": 0
+      },
+      {
+        "tile": "Green",
+        "count": 1,
+        "href": "/portfolio?computedHealth=Green&status=Active",
+        "rows": 1
+      },
+      {
+        "tile": "Active",
+        "count": 1,
+        "href": "/portfolio?computedHealth=Red&status=Active",
+        "rows": 1
+      }
+    ]
+  },
+  "myWorkLink": {
+    "pass": true,
+    "now": {
+      "url": "/my-work?tab=overview&project=01a12e2a-224e-7263-b9f9-3041c11bed9f",
+      "view": "My Work views: Overview",
+      "chip": "Project:\nSYN-105\nClear filters",
+      "items": 29
+    },
+    "old": {
+      "url": "/my-work?project=01a12e2a-224e-7263-b9f9-3041c11bed9f",
+      "view": "My Work views: Today",
+      "chip": "Project:\nSYN-105\nClear filters",
+      "items": 9
+    }
+  },
+  "workloadUnder": {
+    "pass": true,
+    "rows": 17,
+    "labels": [
+      "Under-assigned · Oct 12, Oct 19"
+    ]
+  },
+  "plannerTotals": {
+    "pass": true,
+    "foot": "Team total\nConfirmed + Expected\nEvaluated 2026-10-12",
+    "subtotalTitle": "Planned (Confirmed + Expected + Possible) of capacity"
+  },
+  "allocations": {
+    "pass": true,
+    "switchLabel": "Open roles · 3 open",
+    "statuses": [
+      "Open",
+      "Filled",
+      "Open",
+      "Open"
+    ],
+    "chip": "Person: Selected Clear filters"
+  },
+  "axeMenuOpen": {
+    "pass": true,
+    "screens": [
+      {
+        "who": "priya",
+        "path": "/projects/SYN-101/tasks",
+        "menuOpen": 1,
+        "ariaHiddenAncestors": 0,
+        "seriousOrCritical": []
+      },
+      {
+        "who": "priya",
+        "path": "/workload",
+        "menuOpen": 1,
+        "ariaHiddenAncestors": 0,
+        "seriousOrCritical": []
+      },
+      {
+        "who": "priya",
+        "path": "/my-work",
+        "menuOpen": 1,
+        "ariaHiddenAncestors": 0,
+        "seriousOrCritical": []
+      },
+      {
+        "who": "sam",
+        "path": "/planner",
+        "menuOpen": 1,
+        "ariaHiddenAncestors": 0,
+        "seriousOrCritical": []
+      }
+    ]
+  }
+}

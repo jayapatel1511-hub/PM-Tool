@@ -1,34 +1,34 @@
 {
-  "exitCode": 1,
+  "exitCode": 0,
   "tables": [
     {
       "heading": "Census as priya at 1600x900",
       "rows": [
         {
           "path": "/home",
-          "chromeControls": 36,
+          "chromeControls": 14,
           "filterFields": 0,
-          "chromeWords": 105,
+          "chromeWords": 40,
           "firstDataY": 255,
-          "fills": 6,
+          "fills": 3,
           "groupTabs": null
         },
         {
           "path": "/my-work",
-          "chromeControls": 20,
+          "chromeControls": 6,
           "filterFields": 0,
-          "chromeWords": 225,
+          "chromeWords": 28,
           "firstDataY": 348,
           "fills": 1,
           "groupTabs": null
         },
         {
           "path": "/boards",
-          "chromeControls": 38,
+          "chromeControls": 19,
           "filterFields": 1,
-          "chromeWords": 256,
+          "chromeWords": 37,
           "firstDataY": 317,
-          "fills": 4,
+          "fills": 2,
           "groupTabs": null
         },
         {
@@ -37,7 +37,7 @@
           "filterFields": 1,
           "chromeWords": 29,
           "firstDataY": 294,
-          "fills": 7,
+          "fills": 4,
           "groupTabs": null
         },
         {
@@ -46,14 +46,14 @@
           "filterFields": 1,
           "chromeWords": 25,
           "firstDataY": 363,
-          "fills": 4,
+          "fills": 2,
           "groupTabs": null
         },
         {
           "path": "/calendar",
-          "chromeControls": 27,
+          "chromeControls": 20,
           "filterFields": 0,
-          "chromeWords": 138,
+          "chromeWords": 73,
           "firstDataY": 319,
           "fills": 1,
           "groupTabs": null
@@ -64,7 +64,7 @@
           "filterFields": 1,
           "chromeWords": 36,
           "firstDataY": 405,
-          "fills": 6,
+          "fills": 3,
           "groupTabs": null
         },
         {
@@ -100,59 +100,59 @@
           "filterFields": 1,
           "chromeWords": 16,
           "firstDataY": 363,
-          "fills": 3,
+          "fills": 0,
           "groupTabs": null
         },
         {
           "path": "/projects/SYN-101/dashboard",
-          "chromeControls": 38,
+          "chromeControls": 16,
           "filterFields": 1,
-          "chromeWords": 143,
+          "chromeWords": 77,
           "firstDataY": 270,
           "fills": 3,
           "groupTabs": 6
         },
         {
           "path": "/projects/SYN-101/tasks",
-          "chromeControls": 25,
+          "chromeControls": 22,
           "filterFields": 1,
-          "chromeWords": 43,
+          "chromeWords": 39,
           "firstDataY": 396,
           "fills": 4,
           "groupTabs": 6
         },
         {
           "path": "/projects/SYN-101/deliverables",
-          "chromeControls": 25,
+          "chromeControls": 22,
           "filterFields": 1,
-          "chromeWords": 49,
+          "chromeWords": 45,
           "firstDataY": 391,
           "fills": 4,
           "groupTabs": 6
         },
         {
           "path": "/projects/SYN-101/timeline",
-          "chromeControls": 25,
+          "chromeControls": 20,
           "filterFields": 0,
-          "chromeWords": 66,
+          "chromeWords": 50,
           "firstDataY": 348,
           "fills": 5,
           "groupTabs": 6
         },
         {
           "path": "/projects/SYN-101/allocations",
-          "chromeControls": 24,
+          "chromeControls": 21,
           "filterFields": 1,
-          "chromeWords": 47,
+          "chromeWords": 43,
           "firstDataY": 395,
           "fills": 1,
           "groupTabs": 6
         },
         {
           "path": "/projects/SYN-101/coordination",
-          "chromeControls": 42,
+          "chromeControls": 25,
           "filterFields": 1,
-          "chromeWords": 226,
+          "chromeWords": 63,
           "firstDataY": 386,
           "fills": 2,
           "groupTabs": 6
@@ -164,9 +164,9 @@
       "rows": [
         {
           "path": "/home",
-          "chromeControls": 24,
+          "chromeControls": 14,
           "filterFields": 0,
-          "chromeWords": 83,
+          "chromeWords": 45,
           "firstDataY": 255,
           "fills": 3,
           "groupTabs": null
@@ -193,7 +193,7 @@
           "path": "/projects",
           "chromeControls": 9,
           "filterFields": 1,
-          "chromeWords": 49,
+          "chromeWords": 40,
           "firstDataY": null,
           "fills": 0,
           "groupTabs": null
@@ -222,14 +222,14 @@
           "filterFields": 1,
           "chromeWords": 36,
           "firstDataY": 405,
-          "fills": 7,
+          "fills": 4,
           "groupTabs": null
         },
         {
           "path": "/workload",
-          "chromeControls": 24,
+          "chromeControls": 25,
           "filterFields": 0,
-          "chromeWords": 71,
+          "chromeWords": 53,
           "firstDataY": 377,
           "fills": 5,
           "groupTabs": null
@@ -263,54 +263,54 @@
         },
         {
           "path": "/projects/SYN-101/dashboard",
-          "chromeControls": 36,
+          "chromeControls": 15,
           "filterFields": 1,
-          "chromeWords": 143,
+          "chromeWords": 75,
           "firstDataY": 270,
           "fills": 3,
           "groupTabs": 6
         },
         {
           "path": "/projects/SYN-101/tasks",
-          "chromeControls": 23,
+          "chromeControls": 21,
           "filterFields": 1,
-          "chromeWords": 38,
+          "chromeWords": 37,
           "firstDataY": 396,
           "fills": 4,
           "groupTabs": 6
         },
         {
           "path": "/projects/SYN-101/deliverables",
-          "chromeControls": 23,
+          "chromeControls": 21,
           "filterFields": 1,
-          "chromeWords": 44,
+          "chromeWords": 43,
           "firstDataY": 391,
           "fills": 4,
           "groupTabs": 6
         },
         {
           "path": "/projects/SYN-101/timeline",
-          "chromeControls": 24,
+          "chromeControls": 20,
           "filterFields": 0,
-          "chromeWords": 63,
+          "chromeWords": 50,
           "firstDataY": 348,
           "fills": 5,
           "groupTabs": 6
         },
         {
           "path": "/projects/SYN-101/allocations",
-          "chromeControls": 24,
+          "chromeControls": 22,
           "filterFields": 1,
-          "chromeWords": 48,
+          "chromeWords": 47,
           "firstDataY": 395,
           "fills": 1,
           "groupTabs": 6
         },
         {
           "path": "/projects/SYN-101/coordination",
-          "chromeControls": 40,
+          "chromeControls": 24,
           "filterFields": 1,
-          "chromeWords": 220,
+          "chromeWords": 60,
           "firstDataY": 386,
           "fills": 2,
           "groupTabs": 6
@@ -347,7 +347,5 @@
       ]
     }
   ],
-  "errors": [
-    "\nFAIL: 20 threshold(s) exceeded\nAC-CALM-03 priya /home: 36 (limit 25)\nAC-CALM-05 priya /home words: 105 (limit 57)\nAC-CALM-05 priya /my-work words: 225 (limit 40)\nAC-CALM-03 priya /boards: 38 (limit 25)\nAC-CALM-05 priya /boards words: 256 (limit 70)\nAC-CALM-05 priya /projects fills: 7 (limit 6)\nAC-CALM-03 priya /calendar: 27 (limit 25)\nAC-CALM-05 priya /calendar words: 138 (limit 75)\nAC-CALM-03 priya /projects/SYN-101/dashboard: 38 (limit 25)\nAC-CALM-05 priya /projects/SYN-101/dashboard words: 143 (limit 84)\nAC-CALM-03 priya /projects/SYN-101/coordination: 42 (limit 25)\nAC-CALM-05 priya /projects/SYN-101/coordination words: 226 (limit 116)\nAC-CALM-05 sam /home words: 83 (limit 57)\nAC-CALM-05 sam /projects words: 49 (limit 40)\nAC-CALM-05 sam /portfolio fills: 7 (limit 6)\nAC-CALM-05 sam /workload words: 71 (limit 56)\nAC-CALM-03 sam /projects/SYN-101/dashboard: 36 (limit 25)\nAC-CALM-05 sam /projects/SYN-101/dashboard words: 143 (limit 84)\nAC-CALM-03 sam /projects/SYN-101/coordination: 40 (limit 25)\nAC-CALM-05 sam /projects/SYN-101/coordination words: 220 (limit 116)"
-  ]
+  "errors": []
 }

@@ -166,7 +166,7 @@ public static class DeliverableEndpoints
 
     // ---------- Detail (§13.6.1) ----------
 
-    static async Task<object> Get(string id, Access access, HubDb db)
+    static async Task<object> Get(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var d = (Guid.TryParse(id, out var g) ? await db.Deliverables.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Deliverables.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
@@ -185,12 +185,13 @@ public static class DeliverableEndpoints
         var issues = await db.DeliverableIssues.AsNoTracking().Where(i => i.DeliverableId == d.Id).OrderByDescending(i => i.IssuedDate).ThenByDescending(i => i.CreatedAt)
             .Select(i => new { i.Id, i.IssuedDate, i.Revision, i.IssuedTo, i.TransmittalUrl, i.Note, IssuedBy = db.Users.Where(u => u.Id == i.IssuedBy).Select(u => u.DisplayName).FirstOrDefault() }).ToListAsync();
         var edit = Permissions.EditDeliverable(a, ctx, facts);
+        var judge = await DependencyEndpoints.Judge(db, p, store, clock);
         return new
         {
             Deliverable = row, d.Description, d.TransmittalUrl, d.IssueNote, d.AcceptedDate, d.OnHoldReason, d.CancelledReason, d.PreviousStatus,
             Project = new { p.Id, p.ProjectNumber, p.Name, p.Status },
             DerivedPredecessors = derivedPreds, DerivedSuccessors = derivedSuccs, Issues = issues,
-            ExplicitPredecessors = await ExplicitDeps(db, d.Id, predecessors: true), ExplicitSuccessors = await ExplicitDeps(db, d.Id, predecessors: false),
+            ExplicitPredecessors = await ExplicitDeps(db, judge, d, predecessors: true), ExplicitSuccessors = await ExplicitDeps(db, judge, d, predecessors: false),
             Permissions = new
             {
                 Edit = new { edit.Ok, Reason = edit.Why is null ? null : Text.Get(edit.Why, await DisciplineName(db, d.ProjectDisciplineId)) },
@@ -204,9 +205,11 @@ public static class DeliverableEndpoints
     }
 
     /// D-18: deliverable B depends on A when a task in B has a predecessor in A (read-only).
-    /// Explicit deliverable dependencies (FR-DEP-09, packet 021) with their lag and note, shown apart from derived ones.
-    static async Task<List<object>> ExplicitDeps(HubDb db, Guid deliverableId, bool predecessors)
+    /// Explicit deliverable dependencies (FR-DEP-09, packet 021) with their type, lag and note, shown apart from derived ones.
+    /// `satisfied` comes from the evaluator's rule (AC-DEPT-05): finish means Issued or Accepted, start means left Not Started.
+    static async Task<List<object>> ExplicitDeps(HubDb db, DependencyEndpoints.LinkJudge judge, Deliverable self, bool predecessors)
     {
+        var deliverableId = self.Id;
         var edges = await db.DeliverableDependencies.AsNoTracking()
             .Where(e => predecessors ? e.SuccessorDeliverableId == deliverableId : e.PredecessorDeliverableId == deliverableId).OrderBy(e => e.CreatedAt).ToListAsync();
         var ids = edges.Select(e => predecessors ? e.PredecessorDeliverableId : e.SuccessorDeliverableId).ToList();
@@ -214,7 +217,9 @@ public static class DeliverableEndpoints
         return [.. edges.Where(e => items.ContainsKey(predecessors ? e.PredecessorDeliverableId : e.SuccessorDeliverableId)).Select(e =>
         {
             var x = items[predecessors ? e.PredecessorDeliverableId : e.SuccessorDeliverableId];
-            return (object)new { DependencyId = e.Id, e.LagDays, e.Note, x.Id, x.Key, x.Name, x.Status, x.DueDate, x.IssuedDate, x.ProjectDisciplineId };
+            var pred = predecessors ? x : self;
+            return (object)new { DependencyId = e.Id, Type = e.DependencyType, e.LagDays, e.Note, x.Id, x.Key, x.Name, x.Status, x.DueDate, x.IssuedDate, x.ProjectDisciplineId,
+                Satisfied = judge.Satisfied(e.DependencyType, pred.Status, pred.StartedAt, pred.IssuedDate, e.LagDays) };
         })];
     }
 

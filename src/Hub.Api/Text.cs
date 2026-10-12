@@ -248,6 +248,8 @@ public static class Text
         ["dep.would_cycle"] = "Would create a loop",
         ["dep.successor_complete"] = "{0} is already complete.",
         ["dep.predecessor_complete"] = "{0} is already complete; the dependency is recorded for reference.",
+        // dependency types (packet 036, FR-DEPT-01)
+        ["dep.type"] = "Choose Finish-to-Start, Start-to-Start or Finish-to-Finish.",
         ["notify.task_assigned"] = "{0} assigned you {1} {2}",
         ["notify.reviewer_set"] = "{0} made you reviewer of {1} {2}",
         ["notify.reviewer_removed"] = "{0} changed the reviewer of {1} {2}; you are no longer reviewing it",

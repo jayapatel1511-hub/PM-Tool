@@ -1,19 +1,21 @@
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { AlertTriangle, CheckCircle2, Lock, Monitor, Plus, X } from 'lucide-react'
-import { useState } from 'react'
+import { AlertTriangle, CheckCircle2, Ellipsis, Lock, Monitor, Plus, X } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, Loading, Notice, Page, TableRegion, tdCls as td, thCls as th } from '@/components/hub/common'
+import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, PageHelp, Segmented, Spinner, TableRegion, selectCls, tdCls as td, thCls as th } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { Avatar } from '@/components/hub/people'
 import { Pill, type Tone } from '@/components/hub/pills'
 import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
-import { type ApiError, get, post, qs } from '@/lib/api'
+import { ApiError, get, patch, post, qs } from '@/lib/api'
 import { fmtDate, hours, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -25,6 +27,10 @@ type AllocationPage = { items: Allocation[]; page: number; pageSize: number; tot
 type Detail = Allocation & { personEligible: boolean; confirmedBy?: string; confirmedAt?: string; links: { workType: string; workId: string; workDate: string; reviewHours?: number; reviewPackageId?: string }[]; days: { workDate: string; hours: number }[]; overCapacityWarningRecorded: boolean; canConfirm: boolean; canManage: boolean }
 type Preview = { id: string; rowVersion: number; days: { date: string; availableHours: number; confirmedHours: number; proposedHours: number; resultingHours: number; overByHours: number; dateVersion: number }[] }
 type ReviewOption = { id: string; reviewerId: string; dueDate: string; packageId: string; packageKey: string; packageTitle: string }
+/** Unfilled project demand (§40, FR-ROLE-01): filled by proposing a normal allocation that names it (D1). */
+type OpenRole = { id: string; projectId: string; roleLabel: string; projectDisciplineId?: string | null; disciplineName?: string | null; fromDate: string; throughDate: string; plannedHours: number; status: 'Open' | 'Filled' | 'Cancelled'; filledAllocationId?: string | null; note?: string | null; rowVersion: number; canManage: boolean }
+type Fill = { openRoleId: string; roleLabel: string; fromDate: string; throughDate: string; plannedHours: number }
+const ROLE_TONE: Record<string, Tone> = { Open: 'work', Filled: 'done', Cancelled: 'idle' }
 
 /** Approval status (FR-CAP-01) with the §13.0 symbol: a request awaiting the supervisor, an accepted commitment, or closed.
  *  It is an approval state only; the column says so, so "Confirmed" is never read as a confidence or visibility level. */
@@ -39,11 +45,12 @@ const Purpose = ({ purpose }: { purpose: string }) => (
 const eligibility = (state: Allocation['personState']) => t(state === 'Inactive' ? 'allocation.personInactiveWarning' : state === 'Removed' ? 'allocation.personRemovedWarning' : 'allocation.personMissingWarning')
 
 export function AllocationsTab() {
-  const header = { title: t('allocation.title'), subtitle: t('allocation.subtitle') }
+  // §41 R5: a short scope, with the fuller description behind the help button.
+  const header = { title: t('allocation.title'), subtitle: <>{t('allocation.scope')}<PageHelp>{t('allocation.subtitle')}</PageHelp></> }
   return <DesktopOnly notice={<Page {...header}><Notice icon={Monitor} title={t('app.phoneNotice')}>{t('allocation.phoneHint')}</Notice></Page>}><Allocations {...header} /></DesktopOnly>
 }
 
-function Allocations(header: { title: string; subtitle: string }) {
+function Allocations(header: { title: string; subtitle: ReactNode }) {
   const project = useCurrentProject(), qc = useQueryClient()
   const [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false)
   const selected = sp.get('allocation')
@@ -56,21 +63,44 @@ function Allocations(header: { title: string; subtitle: string }) {
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
   const canPropose = project.permissions.isPm || (options.data?.manageDisciplineIds.length ?? 0) > 0
   const refresh = () => { qc.invalidateQueries({ queryKey: ['allocations', project.id] }); qc.invalidateQueries({ queryKey: ['workload'] }) }
-  const change = (key: string, value: string) => { const next = new URLSearchParams(sp); value ? next.set(key, value) : next.delete(key); if (key !== 'page' && key !== 'allocation') next.delete('page'); setSp(next) }
+  const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'allocation') next.delete('page'); setSp(next) }
   const clear = () => { const next = new URLSearchParams(sp); for (const k of Object.keys(filters)) next.delete(k); next.delete('page'); setSp(next) }
   const pages = list.data ? Math.max(1, Math.ceil(list.data.totalCount / list.data.pageSize)) : 1
-  const propose = <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>
+  const view = sp.get('view') === 'roles' ? 'roles' : 'allocations'
+  const roles = useQuery({ queryKey: ['allocations', project.id, 'open-roles'], queryFn: () => get<OpenRole[]>(`projects/${project.id}/open-roles`) })
+  const openRoles = roles.data?.filter(r => r.status === 'Open').length ?? 0
+  const complete = project.status === 'Complete' // P-05: changes to a Complete project are corrections with a reason (A6)
+  const [roleForm, setRoleForm] = useState<OpenRole | 'new' | null>(null), [filling, setFilling] = useState<Fill | null>(null), [cancelling, setCancelling] = useState<OpenRole | null>(null)
+  const propose = view === 'roles'
+    ? <Button onClick={() => setRoleForm('new')}><Plus className="size-4" />{t('openRole.new')}</Button>
+    : <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>
+  // Active filters as removable chips (§41 R1); the fields themselves open from the Filters button.
+  const tokens = ([
+    ['q', t('common.search'), filters.q],
+    ['personId', t('workload.person'), options.data?.people.find(p => p.id === filters.personId)?.displayName ?? t('workload.selectedSupervisor')],
+    ['purpose', t('allocation.purpose'), filters.purpose && t(`allocation.purpose.${filters.purpose}`)],
+    ['status', t('allocation.status'), filters.status && tv(filters.status)],
+    ['from', t('allocation.from'), filters.from && fmtDate(filters.from)],
+    ['to', t('allocation.through'), filters.to && fmtDate(filters.to)],
+  ] as const).filter(([k]) => filters[k]).map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))
   return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} />{canPropose && propose}</>}>
-    <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4 md:p-5">
-      <Field label={t('common.search')} htmlFor="allocation-search" className="w-full sm:w-56"><UrlSearchInput id="allocation-search" value={filters.q} onValueChange={value => change('q', value)} /></Field>
-      <div className="w-full sm:w-48"><SelectField label={t('workload.person')} value={filters.personId} onChange={v => change('personId', v)} required={false} choices={options.data?.people.map(p => ({ value: p.id, label: p.displayName })) ?? []} /></div>
-      <div className="w-full sm:w-40"><SelectField label={t('allocation.purpose')} value={filters.purpose} onChange={v => change('purpose', v)} required={false} choices={['Production', 'Review'].map(v => ({ value: v, label: t(`allocation.purpose.${v}`) }))} /></div>
-      <div className="w-full sm:w-44"><SelectField label={t('allocation.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={['Proposed', 'Confirmed', 'Declined', 'Cancelled', 'Completed'].map(v => ({ value: v, label: tv(v) }))} /></div>
-      <Field label={t('allocation.from')} htmlFor="allocation-filter-from" className="w-full sm:w-40"><Input id="allocation-filter-from" type="date" value={filters.from} onChange={e => change('from', e.target.value)} /></Field>
-      <Field label={t('allocation.through')} htmlFor="allocation-filter-to" className="w-full sm:w-40"><Input id="allocation-filter-to" type="date" value={filters.to} onChange={e => change('to', e.target.value)} /></Field>
-      {filtered && <Button variant="link" className="px-1" onClick={clear}><X className="size-4" />{t('filters.clear')}</Button>}
-    </div>
+    <FilterBar activeCount={tokens.length}
+      search={view === 'allocations' && <Field label={t('common.search')} htmlFor="allocation-search"><UrlSearchInput id="allocation-search" value={filters.q} onValueChange={value => change('q', value)} /></Field>}
+      active={view === 'allocations' && <ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />}
+      actions={<Segmented label={t('openRole.view')} value={view} onChange={v => change('view', v === 'roles' ? 'roles' : '')}
+        options={[{ value: 'allocations', label: t('allocation.title') }, { value: 'roles', label: openRoles ? t('openRole.tabCount', { n: openRoles }) : t('openRole.tab') }]} />}>
+      {view === 'allocations' && <div className="flex flex-wrap items-end gap-3">
+        <div className="w-full sm:w-48"><SelectField label={t('workload.person')} value={filters.personId} onChange={v => change('personId', v)} required={false} choices={options.data?.people.map(p => ({ value: p.id, label: p.displayName })) ?? []} /></div>
+        <div className="w-full sm:w-40"><SelectField label={t('allocation.purpose')} value={filters.purpose} onChange={v => change('purpose', v)} required={false} choices={['Production', 'Review'].map(v => ({ value: v, label: t(`allocation.purpose.${v}`) }))} /></div>
+        <div className="w-full sm:w-44"><SelectField label={t('allocation.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={['Proposed', 'Confirmed', 'Declined', 'Cancelled', 'Completed'].map(v => ({ value: v, label: tv(v) }))} /></div>
+        <Field label={t('allocation.from')} htmlFor="allocation-filter-from" className="w-full sm:w-40"><Input id="allocation-filter-from" type="date" value={filters.from} onChange={e => change('from', e.target.value)} /></Field>
+        <Field label={t('allocation.through')} htmlFor="allocation-filter-to" className="w-full sm:w-40"><Input id="allocation-filter-to" type="date" value={filters.to} onChange={e => change('to', e.target.value)} /></Field>
+      </div>}
+    </FilterBar>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
+    {view === 'roles' ? <OpenRoles roles={roles} base={base} canPropose={canPropose} canFill={canPropose && !!options.data}
+      onAdd={() => setRoleForm('new')} onEdit={setRoleForm} onCancel={setCancelling} onOpenAllocation={open}
+      onFill={r => setFilling({ openRoleId: r.id, roleLabel: r.roleLabel, fromDate: r.fromDate, throughDate: r.throughDate, plannedHours: r.plannedHours })} /> : <>
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.items.length ?
       <div className="rounded-lg border bg-card">{filtered
         ? <Empty title={t('allocation.emptyFilteredTitle')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('allocation.emptyFiltered')}</Empty>
@@ -99,7 +129,14 @@ function Allocations(header: { title: string; subtitle: string }) {
       <span className="text-sm tabular-nums" aria-live="polite">{t('allocation.pageOf', { n: page, total: pages })}</span>
       <Button variant="outline" disabled={page * list.data.pageSize >= list.data.totalCount} onClick={() => change('page', String(page + 1))}>{t('handoff.next')}</Button>
     </nav>}
-    {adding && options.data && <Proposal base={base} options={options.data} close={() => setAdding(false)} done={id => { setAdding(false); refresh(); open(id) }} />}
+    </>}
+    {adding && options.data && <Proposal base={base} options={options.data} complete={complete} close={() => setAdding(false)} done={id => { setAdding(false); refresh(); open(id) }} />}
+    {filling && options.data && <Proposal base={base} options={options.data} complete={complete} fill={filling} close={() => setFilling(null)} done={id => { setFilling(null); refresh(); open(id) }} />}
+    {roleForm && <RoleDialog projectId={project.id} disciplines={project.disciplines} role={roleForm === 'new' ? undefined : roleForm} complete={complete}
+      onClose={() => setRoleForm(null)} onDone={() => { setRoleForm(null); refresh() }} />}
+    {cancelling && <ConfirmDialog open onOpenChange={o => !o && setCancelling(null)} title={t('openRole.cancelTitle', { role: cancelling.roleLabel })} destructive
+      body={t('openRole.cancelBody')} confirmLabel={t('openRole.cancel')} reason={complete ? true : 'optional'}
+      onConfirm={async reason => { await post(`open-roles/${cancelling.id}/cancel`, { rowVersion: cancelling.rowVersion, reason: reason || null }); toast.success(t('common.saved')); setCancelling(null); refresh() }} />}
     {selected && <AllocationDetail base={base} id={selected} projectNumber={project.projectNumber} options={options.data}
       close={() => open(null)} refresh={refresh} />}
   </Page>
@@ -109,12 +146,15 @@ type LinkDraft = { key: string; workId: string; workDate: string; reviewHours: s
 type DayDraft = { key: string; workDate: string; hours: string }
 const fieldset = 'space-y-3 rounded-lg border p-4'
 const legend = 'px-1 text-sm font-semibold'
-function Proposal({ base, options, close, done, existing }: { base: string; options: CoordOptions; close: () => void; done: (id: string) => void; existing?: Detail }) {
+/** Propose or edit an allocation. With `fill`, the same form fills an open role: prefilled with the role's dates and hours,
+ *  sending `openRoleId` so the role is marked Filled in the same transaction (FR-ROLE-03, AC-ROLE-03). */
+function Proposal({ base, options, close, done, existing, fill, complete }: { base: string; options: CoordOptions; close: () => void; done: (id: string) => void; existing?: Detail; fill?: Fill; complete?: boolean }) {
   const [purpose, setPurpose] = useState<'Production' | 'Review'>((existing?.purpose as 'Production' | 'Review') ?? 'Production')
-  const [personId, setPersonId] = useState(existing?.personId ?? ''), [fromDate, setFromDate] = useState(existing?.fromDate ?? today()), [throughDate, setThroughDate] = useState(existing?.throughDate ?? today())
-  const [plannedHours, setPlannedHours] = useState(existing ? String(existing.plannedHours) : '')
+  const start = existing?.fromDate ?? fill?.fromDate ?? today()
+  const [personId, setPersonId] = useState(existing?.personId ?? ''), [fromDate, setFromDate] = useState(start), [throughDate, setThroughDate] = useState(existing?.throughDate ?? fill?.throughDate ?? today())
+  const [plannedHours, setPlannedHours] = useState(existing ? String(existing.plannedHours) : fill ? String(fill.plannedHours) : '')
   const [links, setLinks] = useState<LinkDraft[]>(() => existing?.links.map(l => ({ key: crypto.randomUUID(), workId: l.workId, workDate: l.workDate, reviewHours: l.reviewHours == null ? '' : String(l.reviewHours) })) ??
-    [{ key: crypto.randomUUID(), workId: '', workDate: today(), reviewHours: '' }])
+    [{ key: crypto.randomUUID(), workId: '', workDate: start, reviewHours: '' }])
   const [days, setDays] = useState<DayDraft[]>(() => existing?.days.map(d => ({ key: crypto.randomUUID(), workDate: d.workDate, hours: String(d.hours) })) ?? [])
   const [reason, setReason] = useState('')
   const reviewOptions = useQuery({ queryKey: ['allocation-review-options', base], queryFn: () => get<ReviewOption[]>(`${base}/review-options`) })
@@ -124,10 +164,11 @@ function Proposal({ base, options, close, done, existing }: { base: string; opti
     reviews.map(r => ({ value: r.id, label: `${r.packageKey} · ${r.packageTitle} · ${fmtDate(r.dueDate)}` }))
   const updateLink = (key: string, change: Partial<LinkDraft>) => setLinks(rows => rows.map(row => row.key === key ? { ...row, ...change } : row))
   const updateDay = (key: string, change: Partial<DayDraft>) => setDays(rows => rows.map(row => row.key === key ? { ...row, ...change } : row))
-  return <CommandForm path={existing ? `${base}/${existing.id}/edit` : base} title={t(existing ? 'allocation.edit' : 'allocation.new')}
-    hint={t(existing?.status === 'Confirmed' ? 'allocation.editConfirmedHint' : 'allocation.proposalHint')} onClose={close} onDone={done}
+  const needsReason = !!existing || !!complete
+  return <CommandForm path={existing ? `${base}/${existing.id}/edit` : base} title={fill ? t('openRole.fillTitle', { role: fill.roleLabel }) : t(existing ? 'allocation.edit' : 'allocation.new')}
+    hint={fill ? t('openRole.fillHint', { role: fill.roleLabel, from: fmtDate(fill.fromDate), through: fmtDate(fill.throughDate) }) : t(existing?.status === 'Confirmed' ? 'allocation.editConfirmedHint' : 'allocation.proposalHint')} onClose={close} onDone={done}
     submitLabel={t(existing ? 'allocation.saveChanges' : 'allocation.submitProposal')}
-    payload={() => ({ ...(existing ? { rowVersion: existing.rowVersion, reason } : {}), personId, purpose, fromDate, throughDate,
+    payload={() => ({ ...(existing ? { rowVersion: existing.rowVersion } : {}), ...(needsReason ? { reason } : {}), ...(fill ? { openRoleId: fill.openRoleId } : {}), personId, purpose, fromDate, throughDate,
       plannedHours: Number(plannedHours), days: days.map(d => ({ workDate: d.workDate, hours: Number(d.hours) })),
       links: links.map(l => ({ workType: purpose === 'Production' ? 'Task' : 'Review', workId: l.workId, workDate: l.workDate,
         reviewHours: purpose === 'Review' ? Number(l.reviewHours) : null })) })}>
@@ -138,8 +179,8 @@ function Proposal({ base, options, close, done, existing }: { base: string; opti
     </div>
     {purpose === 'Review' && reviewOptions.error && <ErrorBanner error={reviewOptions.error} retry={() => reviewOptions.refetch()} />}
     {!choices.length && personId && <Notice title={t(purpose === 'Production' ? 'allocation.noTasks' : 'allocation.noReviews')} />}
-    <div className="grid gap-3 sm:grid-cols-3"><Field label={t('allocation.from')} htmlFor="allocation-from"><Input id="allocation-from" type="date" required value={fromDate} onChange={e => setFromDate(e.target.value)} /></Field>
-      <Field label={t('allocation.through')} htmlFor="allocation-through"><Input id="allocation-through" type="date" required min={fromDate} value={throughDate} onChange={e => setThroughDate(e.target.value)} /></Field>
+    <div className="grid gap-3 sm:grid-cols-3"><Field label={t('allocation.from')} htmlFor="allocation-from"><Input id="allocation-from" type="date" required min={fill?.fromDate} max={fill?.throughDate} value={fromDate} onChange={e => setFromDate(e.target.value)} /></Field>
+      <Field label={t('allocation.through')} htmlFor="allocation-through"><Input id="allocation-through" type="date" required min={fromDate} max={fill?.throughDate} value={throughDate} onChange={e => setThroughDate(e.target.value)} /></Field>
       <Field label={t('allocation.plannedHours')} htmlFor="allocation-hours"><div className="flex items-center gap-2"><Input id="allocation-hours" type="number" required min="0.01" max="10000" step="0.01" value={plannedHours} onChange={e => setPlannedHours(e.target.value)} /><span aria-hidden className="text-sm text-muted-foreground">h</span></div></Field></div>
     <fieldset className={fieldset}><legend className={legend}>{t('allocation.linked')}</legend>{links.map((l, i) => <div className="space-y-3 rounded-md bg-muted p-3" key={l.key}>
       <SelectField label={`${t(purpose === 'Production' ? 'allocation.task' : 'allocation.reviewAssignment')} ${i + 1}`} value={l.workId} onChange={workId => updateLink(l.key, { workId })} choices={choices} />
@@ -152,7 +193,7 @@ function Proposal({ base, options, close, done, existing }: { base: string; opti
       <Field label={`${t('allocation.hours')} ${i + 1}`} htmlFor={`allocation-day-hours-${d.key}`}><Input id={`allocation-day-hours-${d.key}`} type="number" required min="0" max="10000" step="0.01" value={d.hours} onChange={e => updateDay(d.key, { hours: e.target.value })} /></Field>
       <Button type="button" size="sm" variant="outline" className="self-end" onClick={() => setDays(rows => rows.filter(row => row.key !== d.key))}>{t('allocation.removeDay')} {i + 1}</Button>
     </div>)}<Button type="button" size="sm" variant="outline" disabled={days.length >= 366} onClick={() => setDays(rows => [...rows, { key: crypto.randomUUID(), workDate: fromDate, hours: '' }])}><Plus className="size-4" />{t('allocation.addDay')}</Button></fieldset>
-    {existing && <Field label={t('common.reason')} htmlFor="allocation-reason" hint={t('common.reasonHint')}><Textarea id="allocation-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
+    {needsReason && <Field label={t('common.reason')} htmlFor="allocation-reason" hint={t(existing ? 'common.reasonHint' : 'openRole.correctionHint')}><Textarea id="allocation-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
   </CommandForm>
 }
 
@@ -253,4 +294,85 @@ function AllocationDetail({ base, id, projectNumber, options, close, refresh }: 
       </ConfirmDialog>}
     </SheetContent>
   </Sheet>
+}
+
+/** The project's open roles (FR-ROLE-01..04): demand before a person is named. Fill proposes a normal allocation for it. */
+function OpenRoles({ roles, base, canPropose, canFill, onAdd, onEdit, onCancel, onFill, onOpenAllocation }: {
+  roles: ReturnType<typeof useQuery<OpenRole[]>>; base: string; canPropose: boolean; canFill: boolean
+  onAdd: () => void; onEdit: (r: OpenRole) => void; onCancel: (r: OpenRole) => void; onFill: (r: OpenRole) => void; onOpenAllocation: (id: string) => void
+}) {
+  if (roles.isPending) return <div className="rounded-lg border bg-card"><Loading rows={3} /></div>
+  if (roles.error) return <ErrorBanner error={roles.error} retry={() => roles.refetch()} />
+  if (!roles.data.length) return <div className="rounded-lg border bg-card"><Empty title={t('openRole.empty')} action={canPropose && <Button variant="outline" onClick={onAdd}><Plus className="size-4" />{t('openRole.new')}</Button>}>{t('openRole.emptyHint')}</Empty></div>
+  return <TableRegion><table className="w-full text-left text-sm">
+    <caption className="sr-only">{t('openRole.tab')}</caption>
+    <thead className="bg-muted"><tr>
+      <th scope="col" className={th}>{t('openRole.role')}</th><th scope="col" className={th}>{t('allocation.dates')}</th>
+      <th scope="col" className={cn(th, 'text-right')}>{t('allocation.plannedHours')}</th><th scope="col" className={th}>{t('common.status')}</th>
+      <th scope="col" className={th}>{t('openRole.filledBy')}</th><th scope="col" className={th}><span className="sr-only">{t('common.actions')}</span></th>
+    </tr></thead>
+    <tbody>{roles.data.map(r => <tr key={r.id} className={cn('border-t hover:bg-muted', r.status === 'Cancelled' && 'text-muted-foreground')}>
+      <td className={td}><div className="break-words font-semibold">{r.roleLabel}</div>
+        {(r.disciplineName || r.note) && <div className="text-xs/[18px] text-muted-foreground">{[r.disciplineName, r.note].filter(Boolean).join(' · ')}</div>}</td>
+      <td className={cn(td, 'whitespace-nowrap tabular-nums')}>{fmtDate(r.fromDate)} – {fmtDate(r.throughDate)}</td>
+      <td className={cn(td, 'text-right font-medium tabular-nums')}>{hours(r.plannedHours)}</td>
+      <td className={td}><Pill tone={ROLE_TONE[r.status] ?? 'idle'}>{t(`openRole.status.${r.status}`)}</Pill></td>
+      <td className={td}>{r.filledAllocationId ? <FilledBy base={base} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span>}</td>
+      <td className={cn(td, 'py-1 text-right')}>{r.status === 'Open' && <div className="flex items-center justify-end gap-1">
+        {canFill && <Button size="sm" variant="outline" onClick={() => onFill(r)} aria-label={t('openRole.fillLabel', { role: r.roleLabel })}>{t('openRole.fill')}</Button>}
+        {r.canManage && <DropdownMenu>
+          <DropdownMenuTrigger asChild><Button size="icon-sm" variant="ghost" aria-label={t('openRole.actions', { role: r.roleLabel })}><Ellipsis className="size-4" aria-hidden /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => onEdit(r)}>{t('common.edit')}</DropdownMenuItem>
+            <DropdownMenuItem className="text-bad" onSelect={() => onCancel(r)}>{t('openRole.cancel')}</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>}
+      </div>}</td>
+    </tr>)}</tbody>
+  </table></TableRegion>
+}
+
+/** Who fills a role: the filling allocation's person, opening that allocation. Shows a dash when the viewer cannot open it. */
+function FilledBy({ base, id, open }: { base: string; id: string; open: (id: string) => void }) {
+  const q = useQuery({ queryKey: ['allocation-detail', base, id], queryFn: () => get<Detail>(`${base}/${id}`), retry: false })
+  if (q.isPending) return <Spinner />
+  if (!q.data) return <span className="text-muted-foreground">{t('common.dash')}</span>
+  return <button type="button" className="flex items-center gap-2 text-left text-primary underline-offset-4 hover:underline" onClick={() => open(id)}>
+    <Avatar id={q.data.personId} name={q.data.personName} /><span className="break-words">{q.data.personName ?? t('allocation.personUnavailable')}</span>
+    <span className="sr-only">{tv(q.data.status)}</span>
+  </button>
+}
+
+/** Add or edit an open role (AC-ROLE-01): label, optional discipline, dates, planned hours and a note. On a Complete project
+ *  the change is a correction and needs a reason (A6). */
+function RoleDialog({ projectId, disciplines, role, complete, onClose, onDone }: { projectId: string; disciplines: { id: string; name: string; isActive: boolean }[]; role?: OpenRole; complete: boolean; onClose: () => void; onDone: () => void }) {
+  const [f, setF] = useState({ roleLabel: role?.roleLabel ?? '', projectDisciplineId: role?.projectDisciplineId ?? '', fromDate: role?.fromDate ?? today(), throughDate: role?.throughDate ?? today(),
+    plannedHours: role ? String(role.plannedHours) : '', note: role?.note ?? '', reason: '' })
+  const [err, setErr] = useState<ApiError | null>(null), [busy, setBusy] = useState(false)
+  const up = (k: keyof typeof f) => (e: { target: { value: string } }) => setF(x => ({ ...x, [k]: e.target.value }))
+  const fe = err?.fieldErrors ?? {}
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault(); setErr(null); setBusy(true)
+    const body = { roleLabel: f.roleLabel, projectDisciplineId: f.projectDisciplineId || null, fromDate: f.fromDate, throughDate: f.throughDate, plannedHours: Number(f.plannedHours), note: f.note || null, ...(complete ? { reason: f.reason } : {}) }
+    try { await (role ? patch(`open-roles/${role.id}`, body, role.rowVersion) : post(`projects/${projectId}/open-roles`, body)); toast.success(t('common.saved')); onDone() }
+    catch (x) { setErr(x as ApiError) } finally { setBusy(false) }
+  }
+  return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
+    <DialogHeader><DialogTitle>{t(role ? 'openRole.edit' : 'openRole.new')}</DialogTitle><DialogDescription>{t('openRole.formHint')}</DialogDescription></DialogHeader>
+    <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
+      <Field label={t('openRole.label')} htmlFor="role-label" error={fe.roleLabel} className="sm:col-span-2"><Input id="role-label" required maxLength={80} autoFocus value={f.roleLabel} onChange={up('roleLabel')} placeholder={t('openRole.labelPlaceholder')} /></Field>
+      <Field label={t('common.discipline')} htmlFor="role-discipline" error={fe.projectDisciplineId} optional className="sm:col-span-2">
+        <select id="role-discipline" className={selectCls} value={f.projectDisciplineId} onChange={up('projectDisciplineId')}>
+          <option value="">{t('common.none')}</option>{disciplines.filter(d => d.isActive || d.id === f.projectDisciplineId).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </select></Field>
+      <Field label={t('allocation.from')} htmlFor="role-from" error={fe.fromDate}><Input id="role-from" type="date" required value={f.fromDate} onChange={up('fromDate')} /></Field>
+      <Field label={t('allocation.through')} htmlFor="role-through" error={fe.throughDate}><Input id="role-through" type="date" required min={f.fromDate} value={f.throughDate} onChange={up('throughDate')} /></Field>
+      <Field label={t('allocation.plannedHours')} htmlFor="role-hours" error={fe.plannedHours} hint={t('openRole.hoursHint')}><Input id="role-hours" type="number" required min="0.01" max="10000" step="0.01" value={f.plannedHours} onChange={up('plannedHours')} /></Field>
+      <Field label={t('common.notes')} htmlFor="role-note" error={fe.note} optional className="sm:col-span-2"><Textarea id="role-note" rows={2} maxLength={2000} value={f.note} onChange={up('note')} /></Field>
+      {complete && <Field label={t('common.reason')} htmlFor="role-reason" error={fe.reason} hint={t('openRole.correctionHint')} className="sm:col-span-2"><Textarea id="role-reason" required minLength={5} value={f.reason} onChange={up('reason')} /></Field>}
+      {err && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
+      <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" disabled={busy} onClick={onClose}>{t('common.cancel')}</Button>
+        <Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter>
+    </form>
+  </DialogContent></Dialog>
 }

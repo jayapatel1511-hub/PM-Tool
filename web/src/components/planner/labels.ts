@@ -17,6 +17,7 @@ export type PlannerCell = {
 export type ApprovedAllocation = { allocationId: string; projectId?: string; projectNumber?: string; projectName?: string; canOpen: boolean; weeks: { week: string; hours: number }[] }
 export type PlannerPerson = {
   id: string; displayName: string; supervisorId?: string; supervisorName?: string; weeklyCapacity: number
+  officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null
   canCreateSelfEntry: boolean; canCreateManagerEntry: boolean; canRecordTimeAway: boolean; indicators: string[]
   cells: PlannerCell[]; entries: PlannerEntry[]; approvedAllocations: ApprovedAllocation[]
 }
@@ -39,3 +40,25 @@ export const sourceTone = (value: string) => SOURCE_TONES[value] ?? 'neutral'
 export const indicatorLabel = (value: string) => t(({ OverPlanned: 'planner.indicator.over', UnderPlanned: 'planner.indicator.under', StalePlan: 'planner.indicator.stale' } as Record<string, string>)[value] ?? 'planner.unknown')
 export const hoursLabel = (value: number) => `${value.toFixed(1).replace(/\.0$/, '')} h`
 export const storedStatusLabel = (value: string) => tv(value)
+
+/** Capacity grouping (§40, FR-GRP-02): Reports to (the default), Office, Job title, Home discipline, or none. People with no
+ *  value form a "Not set" group, listed last and never hidden. Grouping is done here, over the rows already loaded. */
+export const GROUP_BY = ['supervisor', 'office', 'jobTitle', 'homeDiscipline', 'none'] as const
+export const GROUP_LABEL: Record<string, string> = { supervisor: 'staff.group.supervisor', office: 'admin.office', jobTitle: 'admin.jobTitle', homeDiscipline: 'admin.homeDiscipline', none: 'tgroup.none' }
+type Groupable = { supervisorName?: string | null; officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null }
+export function groupPeople<T extends Groupable>(rows: T[], by: string, ref?: { offices?: { id: string; name: string }[]; disciplines?: { id: string; name: string }[] }): [string, T[]][] {
+  const notSet = t('staff.group.notSet')
+  const label = (p: T): string => {
+    switch (by) {
+      case 'none': return ''
+      case 'office': return ref?.offices?.find((o) => o.id === p.officeId)?.name ?? notSet
+      case 'jobTitle': return p.jobTitle?.trim() || notSet
+      case 'homeDiscipline': return ref?.disciplines?.find((d) => d.id === p.homeDisciplineId)?.name ?? notSet
+      default: return p.supervisorName ? t('workload.reportsTo', { name: p.supervisorName }) : t('workload.noSupervisor')
+    }
+  }
+  const groups = new Map<string, T[]>()
+  for (const p of rows) { const g = label(p); groups.set(g, [...(groups.get(g) ?? []), p]) }
+  const notSetLast = (a: string) => (a === notSet ? 1 : 0)
+  return [...groups.entries()].sort(([a], [b]) => notSetLast(a) - notSetLast(b))
+}

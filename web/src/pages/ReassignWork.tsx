@@ -3,13 +3,13 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { Empty, ErrorBanner, Loading, Missing, Page, Spinner } from '@/components/hub/common'
-import { PeoplePicker } from '@/components/hub/people'
+import { PeoplePicker, weekOf } from '@/components/hub/people'
 import { Key, StatusPill } from '@/components/hub/pills'
 import { itemHref } from '@/components/hub/search'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { get, post } from '@/lib/api'
-import { fmtDate } from '@/lib/format'
+import { fmtDate, today } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { accentOf } from '@/lib/utils'
 import { errorText } from './projects/Tasks'
@@ -58,7 +58,7 @@ export function ReassignWorkPage() {
             <label className="flex min-h-(--control-h) items-center gap-2 text-sm font-medium"><Checkbox checked={picked.size === items.length} onCheckedChange={(c) => setPicked(c ? new Set(items.map(id)) : new Set())} />{t('reassign.all', { n: items.length })}</label>
             <span className="text-sm text-muted-foreground tabular-nums" aria-live="polite">{t('bulk.selected', { n: picked.size })}</span>
             <div className="flex-1" />
-            <div className="w-60"><PeoplePicker value={to?.id} valueName={to?.name} exclude={[person.id]} onChange={(v, p) => setTo(v ? { id: v, name: p?.displayName } : null)} placeholder={t('reassign.to')} label={t('reassign.to')} /></div>
+            <div className="w-60"><PeoplePicker value={to?.id} valueName={to?.name} exclude={[person.id]} onChange={(v, p) => setTo(v ? { id: v, name: p?.displayName } : null)} placeholder={t('reassign.to')} label={t('reassign.to')} capacityWeek={weekOf(today())} /></div>
             <Button disabled={!to || picked.size === 0 || busy} onClick={submit}>{busy && <Spinner />}{t('reassign.go', { n: picked.size })}</Button>
           </div>
           {byProject.map(([project, list]) => (

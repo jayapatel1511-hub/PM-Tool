@@ -2,24 +2,24 @@ import { disciplineColour } from '@/lib/discipline-colour'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { ArrowDown, ArrowUp, ChevronDown, Columns3, KanbanSquare, List, Plus } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronDown, Columns3, Ellipsis, KanbanSquare, List, Plus, Rows3, type LucideIcon } from 'lucide-react'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { InlineDate } from '@/components/hub/fields'
 import { useItemPanel } from '@/components/hub/panel-host'
-import { Avatar, PeoplePicker } from '@/components/hub/people'
+import { Avatar, PeoplePicker, weekOf } from '@/components/hub/people'
 import { Chip, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
 import { Why, type Reason } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh } from '@/hooks/data'
-import { ApiError, get, patch, post, qs } from '@/lib/api'
+import { ApiError, download, get, patch, post, qs } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { addDays, ago, fmtDate, hours, today } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils'
 import type { DeliverableRow } from './Deliverables'
 import type { MilestoneRow } from './Milestones'
 import { useCurrentProject } from './ProjectLayout'
-import { ExportMenu } from '@/components/hub/export'
+import { NOTE_LABEL, OneSignal, type Signal } from '@/components/hub/indicators'
 import { ViewMenu } from '@/components/hub/views'
 import { StartAuthorisationDialog, type StartRequest } from './TaskStart'
 
@@ -69,31 +69,51 @@ export function blockerReasons(s?: TaskStateView | null): Reason[] {
   }))
 }
 
-const NOTE_LABEL: Record<string, string> = {
-  predecessor_cancelled: 'ind.predecessorCancelled', decision_cancelled: 'ind.decisionCancelled', deliverable_issued: 'ind.deliverableIssued', assignee_not_on_project: 'ind.notOnProject',
+/** Indicator chips (§10.3) from the stored derived state: one per row in lists (§41 R7), every one with `all` in the task
+ *  panel. The blocked and waiting chips open their blockers without opening the panel (§13.3 UX). */
+export function TaskIndicators({ r, all }: { r: TaskRow; all?: boolean }) {
+  const s = r.state
+  const why = (tone: 'bad' | 'warn', label: string) => <Why reasons={blockerReasons(s)} title={t('task.blockersOf', { key: r.key })}><Chip tone={tone}>{label}</Chip></Why>
+  const blocked = s && (s.daysBlocked > 0 ? t('ind.blockedD', { n: s.daysBlocked }) : t('ind.blocked'))
+  const signals = ([
+    s?.isOverdue && { key: 'overdue', tone: 'bad', label: t('ind.overdueD', { n: s.daysOverdue }) },
+    s?.isDueSoon && !s.isOverdue && { key: 'dueSoon', tone: 'warn', label: t('ind.dueSoon') },
+    s?.isBlocked && { key: 'blocked', tone: 'bad', label: blocked!, node: why('bad', blocked!) },
+    s?.isWaiting && !s.isBlocked && { key: 'waiting', tone: 'warn', label: t('ind.waiting'), node: why('warn', t('ind.waiting')) },
+    s?.isBlocking && { key: 'blocking', tone: s.isOverdue ? 'bad' : 'warn', label: t('ind.blocking', { n: s.blockingCount }) },
+    s?.isStale && { key: 'stale', tone: 'idle', label: t('ind.staleD', { n: s.staleDays }) },
+    s?.isUnassigned && { key: 'unassigned', tone: 'warn', label: t('ind.unassigned') },
+    s?.isMissingDueDate && { key: 'noDueDate', tone: 'idle', label: t('ind.noDueDate') },
+    s?.isDateInconsistent && { key: 'dateInconsistent', tone: 'warn', label: t('ind.dateInconsistent'), title: s.inconsistencyDetail?.map((x) => x.text).join('\n') },
+    s?.isInactiveOwner && { key: 'inactiveOwner', tone: 'bad', label: t('ind.inactiveOwner') },
+    s?.isHeldPastDue && { key: 'heldPastDue', tone: 'warn', label: t('ind.heldPastDue') },
+    s?.isReviewStalled && { key: 'reviewStalled', tone: 'warn', label: t('ind.reviewStalled') },
+    r.reviewRound > 0 && { key: 'reviewRound', tone: 'work', label: t('ind.reviewRound', { n: r.reviewRound }) },
+    r.dueDateChangeCount >= 3 && { key: 'dueMoved', tone: 'warn', label: t('ind.dueMoved', { n: r.dueDateChangeCount }) },
+    ...(s?.notes ?? []).filter((n) => NOTE_LABEL[n]).map((n) => ({ key: n, tone: 'warn', label: t(NOTE_LABEL[n]) })),
+  ] as (Signal | false | undefined)[]).filter(Boolean) as Signal[]
+  return <OneSignal signals={signals} all={all} />
 }
 
-/** Indicator chips (§10.3) from the stored derived state; the blocked chip opens its blockers without opening the panel (§13.3 UX). */
-export function TaskIndicators({ r }: { r: TaskRow }) {
-  const s = r.state
+/** A toolbar menu button for one choice, such as Group or Sort (§41 R1): the button shows the current choice, the menu is a
+ *  radio group headed by `label`, and `children` can add a second group. */
+export function MenuSelect({ label, value, options, onChange, icon: Icon = Rows3, children }: {
+  label: string; value: string; options: { value: string; label: string }[]; onChange: (v: string) => void; icon?: LucideIcon; children?: ReactNode
+}) {
+  const current = options.find((o) => o.value === value) ?? options[0]
   return (
-    <span className="flex flex-wrap gap-1 empty:hidden">
-      {s?.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: s.daysOverdue })}</Chip>}
-      {s?.isDueSoon && !s.isOverdue && <Chip tone="warn">{t('ind.dueSoon')}</Chip>}
-      {s?.isBlocked && <Why reasons={blockerReasons(s)} title={t('task.blockersOf', { key: r.key })}><Chip tone="bad">{s.daysBlocked > 0 ? t('ind.blockedD', { n: s.daysBlocked }) : t('ind.blocked')}</Chip></Why>}
-      {s?.isWaiting && !s.isBlocked && <Why reasons={blockerReasons(s)} title={t('task.blockersOf', { key: r.key })}><Chip tone="warn">{t('ind.waiting')}</Chip></Why>}
-      {s?.isBlocking && <Chip tone={s.isOverdue ? 'bad' : 'warn'}>{t('ind.blocking', { n: s.blockingCount })}</Chip>}
-      {s?.isStale && <Chip tone="idle">{t('ind.staleD', { n: s.staleDays })}</Chip>}
-      {s?.isUnassigned && <Chip tone="warn">{t('ind.unassigned')}</Chip>}
-      {s?.isMissingDueDate && <Chip tone="idle">{t('ind.noDueDate')}</Chip>}
-      {s?.isDateInconsistent && <Chip tone="warn" title={s.inconsistencyDetail?.map((x) => x.text).join('\n')}>{t('ind.dateInconsistent')}</Chip>}
-      {s?.isInactiveOwner && <Chip tone="bad">{t('ind.inactiveOwner')}</Chip>}
-      {s?.isHeldPastDue && <Chip tone="warn">{t('ind.heldPastDue')}</Chip>}
-      {s?.isReviewStalled && <Chip tone="warn">{t('ind.reviewStalled')}</Chip>}
-      {r.reviewRound > 0 && <Chip tone="work">{t('ind.reviewRound', { n: r.reviewRound })}</Chip>}
-      {r.dueDateChangeCount >= 3 && <Chip tone="warn">{t('ind.dueMoved', { n: r.dueDateChangeCount })}</Chip>}
-      {s?.notes.filter((n) => NOTE_LABEL[n]).map((n) => <Chip key={n} tone="warn">{t(NOTE_LABEL[n])}</Chip>)}
-    </span>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" aria-label={`${label}: ${current?.label}`} title={label}><Icon className="size-4" aria-hidden />{current?.label}<ChevronDown className="size-4 opacity-60" aria-hidden /></Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-48">
+        <DropdownMenuLabel>{label}</DropdownMenuLabel>
+        <DropdownMenuRadioGroup value={current?.value} onValueChange={onChange}>
+          {options.map((o) => <DropdownMenuRadioItem key={o.value} value={o.value}>{o.label}</DropdownMenuRadioItem>)}
+        </DropdownMenuRadioGroup>
+        {children}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -287,7 +307,7 @@ const FLAGS = new Set<string>([...QUICK, 'waiting', 'open', 'stale', 'dueSoon', 
 const TOKEN_LABEL: Record<string, string> = { q: 'common.search', disciplineId: 'common.discipline', deliverableId: 'task.deliverable', status: 'common.status', priority: 'common.priority' }
 
 /** The filter bar (§13.0, §13.3): labelled filters, the quick chips and every active filter as a removable token with Clear. */
-export function TaskFilterBar({ p, deliverables, extra, actions }: { p: ProjectDetail; deliverables: DeliverableRow[]; extra?: ReactNode; actions?: ReactNode }) {
+export function TaskFilterBar({ p, deliverables, extra, actions, pinned = PINNED_QUICK, lead }: { p: ProjectDetail; deliverables: DeliverableRow[]; extra?: ReactNode; actions?: ReactNode; pinned?: readonly (typeof QUICK)[number][]; lead?: ReactNode }) {
   const { sp, set, filters, clear } = useTaskFilters()
   const { milestones } = useProjectLists(p.id)
   const on = (k: string) => sp.get(k) === 'true'
@@ -313,7 +333,7 @@ export function TaskFilterBar({ p, deliverables, extra, actions }: { p: ProjectD
       search={<Field label={t('common.search')} htmlFor="tasks-q">
         <UrlSearchInput id="tasks-q" placeholder={t('task.searchPlaceholder')} value={filters.q ?? ''} onValueChange={value => set('q', value || null)} />
       </Field>}
-      quick={<div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>{PINNED_QUICK.map(chip)}</div>}
+      quick={<>{pinned.length > 0 && <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>{pinned.map(chip)}</div>}{lead}</>}
       active={<ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />}>
       <div className="flex flex-wrap items-end gap-3">
         <Field label={t('common.discipline')} htmlFor="tasks-discipline" className="w-full sm:w-44">
@@ -339,8 +359,8 @@ export function TaskFilterBar({ p, deliverables, extra, actions }: { p: ProjectD
         {extra}
       </div>
       <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="tasks-quick">
-        <span id="tasks-quick" className="mr-1 text-sm font-medium">{t('calm.moreQuick')}</span>
-        {QUICK.filter((k) => !PINNED_QUICK.includes(k)).map(chip)}
+        <span id="tasks-quick" className="mr-1 text-sm font-medium">{t(pinned.length ? 'calm.moreQuick' : 'task.quickFilters')}</span>
+        {QUICK.filter((k) => !pinned.includes(k)).map(chip)}
       </div>
     </FilterBar>
   )
@@ -373,6 +393,7 @@ interface Col { id: string; label: string; sort?: string; optional?: boolean; cl
 type Flat = { kind: 'group'; id: string; label: string; count: number; deliverableId?: string; status?: string; progress?: number | null } | { kind: 'row'; r: TaskRow }
 
 const GROUPS = ['deliverable', 'discipline', 'milestone', 'assignee', 'status', 'due', 'none']
+const GROUP_LABEL: Record<string, string> = { deliverable: 'task.deliverable', discipline: 'common.discipline', milestone: 'field.MilestoneId', assignee: 'field.AssigneeId', status: 'common.status', due: 'common.due', none: 'tgroup.none' }
 export const BUCKETS = ['overdue', 'today', 'thisWeek', 'nextWeek', 'later', 'noDate']
 const COLS_KEY = 'hub.taskColumns'
 const BULK = ['assign', 'setDueDate', 'shiftDueDates', 'setPriority', 'setDeliverable', 'hold', 'cancel']
@@ -542,28 +563,36 @@ export function TasksTab() {
   const padTop = items[0]?.start ?? 0
   const padBottom = items.length ? virtual.getTotalSize() - items[items.length - 1].end : 0
   const sortBy = (field: string) => set('sort', sort === field ? `${field}:desc` : sort === `${field}:desc` ? null : field)
+  const boardSearch = (() => { const n = new URLSearchParams(sp); n.delete('panel'); return n.toString() })()
+  const exportAs = (format: 'csv' | 'xlsx') => download(`/api/v1/projects/${p.id}/tasks/export${qs({ ...filters, sort: sort || undefined, format })}`, `${p.projectNumber}-tasks.${format}`)
+    .catch((e) => toast.error(e instanceof ApiError ? e.message : t('app.error')))
 
   return (
     <Page title={t('ptab.tasks')} subtitle={q.data ? plural(total, 'decision.task1', 'task.count') : undefined}
       actions={<>
-        <ViewMenu listType="tasks" projectId={p.id} extra={() => ({ cols: shown.map((c) => c.id).join(',') })} /><ViewSwitch view="tasks" />
-        <ExportMenu path={`projects/${p.id}/tasks/export`} params={{ ...filters, sort: sort || undefined }} name={`${p.projectNumber}-tasks`} />
+        {/* The Work group's second-level links also lead to the board; this link keeps the filters (FR-VIS-04). */}
+        <Button asChild variant="outline"><Link to={{ pathname: '../board', search: boardSearch }} relative="path"><KanbanSquare className="size-4" aria-hidden />{t('ptab.board')}</Link></Button>
+        <ViewMenu listType="tasks" projectId={p.id} extra={() => ({ cols: shown.map((c) => c.id).join(',') })} />
         {canCreate && <Button onClick={() => setCreating({})}><Plus className="size-4" />{t('task.new')}</Button>}
       </>}>
-      <TaskFilterBar p={p} deliverables={deliverables} extra={<>
-        <Field label={t('common.groupBy')} htmlFor="tasks-group" className="w-full sm:w-52">
-          <select id="tasks-group" className={selectCls} value={group} onChange={(e) => set('group', e.target.value === 'deliverable' ? null : e.target.value)}>
-            {GROUPS.map((g) => <option key={g} value={g}>{t(`tgroup.${g}`)}</option>)}
-          </select>
-        </Field>
-      </>} actions={
+      {/* §41 R1: the quick filters sit in the Filters popover, Group is a menu, and Export and Columns share the overflow. */}
+      <TaskFilterBar p={p} deliverables={deliverables} pinned={[]}
+        lead={<MenuSelect label={t('common.groupBy')} value={group} onChange={(v) => set('group', v === 'deliverable' ? null : v)}
+          options={GROUPS.map((g) => ({ value: g, label: t(GROUP_LABEL[g]) }))} />}
+        actions={
         <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="outline"><Columns3 className="size-4" aria-hidden />{t('task.columns')}</Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild><Button variant="outline" size="icon" aria-label={t('calm.moreActions')} title={t('calm.moreActions')}><Ellipsis className="size-4" aria-hidden /></Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {all.filter((c) => c.id !== 'key' && c.id !== 'name').map((c) => (
-              <DropdownMenuCheckboxItem key={c.id} checked={shown.includes(c)} onSelect={(e) => e.preventDefault()}
-                onCheckedChange={(on) => setCols((on ? [...shown.map((x) => x.id), c.id] : shown.map((x) => x.id).filter((x) => x !== c.id)))}>{t(c.label)}</DropdownMenuCheckboxItem>
-            ))}
+            {(['xlsx', 'csv'] as const).map((format) => <DropdownMenuItem key={format} onSelect={() => exportAs(format)}>{t(`export.${format}`)}</DropdownMenuItem>)}
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger><Columns3 className="size-4" aria-hidden />{t('task.columns')}</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {all.filter((c) => c.id !== 'key' && c.id !== 'name').map((c) => (
+                  <DropdownMenuCheckboxItem key={c.id} checked={shown.includes(c)} onSelect={(e) => e.preventDefault()}
+                    onCheckedChange={(on) => setCols((on ? [...shown.map((x) => x.id), c.id] : shown.map((x) => x.id).filter((x) => x !== c.id)))}>{t(c.label)}</DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
       } />
@@ -728,7 +757,7 @@ export function CreateTask({ p, deliverables, milestones, defaults, onClose }: {
           <Field label={t('common.priority')} htmlFor="t-prio">
             <select id="t-prio" className={selectCls} value={f.priority} onChange={(e) => up('priority', e.target.value)}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select>
           </Field>
-          <Field label={t('field.AssigneeId')} htmlFor="t-assignee" error={fe.assigneeId} hint={t('task.assigneeHint')} optional><PeoplePicker id="t-assignee" value={assignee} onChange={setAssignee} /></Field>
+          <Field label={t('field.AssigneeId')} htmlFor="t-assignee" error={fe.assigneeId} hint={t('task.assigneeHint')} optional><PeoplePicker id="t-assignee" value={assignee} onChange={setAssignee} capacityWeek={weekOf(f.startDate || f.dueDate || today())} /></Field>
           <Field label={t('field.ReviewerId')} htmlFor="t-reviewer" error={fe.reviewerId} optional><PeoplePicker id="t-reviewer" value={reviewer} onChange={setReviewer} exclude={assignee ? [assignee] : []} /></Field>
           <Field label={t('field.StartDate')} htmlFor="t-start" error={fe.startDate} optional><Input id="t-start" type="date" value={f.startDate ?? ''} onChange={(e) => up('startDate', e.target.value)} /></Field>
           <Field label={t('field.DueDate')} htmlFor="t-due" error={fe.dueDate} hint={dl?.dueDate ? t('task.deliverableDue', { date: fmtDate(dl.dueDate) }) : undefined} optional>

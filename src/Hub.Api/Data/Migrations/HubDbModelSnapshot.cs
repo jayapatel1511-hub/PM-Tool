@@ -284,6 +284,10 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("entra_object_id");
 
+                    b.Property<Guid?>("HomeDisciplineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("home_discipline_id");
+
                     b.Property<string>("HrPersonKey")
                         .HasColumnType("text")
                         .HasColumnName("hr_person_key");
@@ -350,6 +354,9 @@ namespace Hub.Api.Data.Migrations
                     b.HasIndex("EntraObjectId")
                         .IsUnique()
                         .HasDatabaseName("ix_app_user_entra_object_id");
+
+                    b.HasIndex("HomeDisciplineId")
+                        .HasDatabaseName("ix_app_user_home_discipline_id");
 
                     b.HasIndex("OfficeId")
                         .HasDatabaseName("ix_app_user_office_id");
@@ -2113,6 +2120,10 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("date")
                         .HasColumnName("start_date");
 
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text")
@@ -2218,6 +2229,13 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("deleted_by");
 
+                    b.Property<string>("DependencyType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("FinishToStart")
+                        .HasColumnName("dependency_type");
+
                     b.Property<int>("LagDays")
                         .HasColumnType("integer")
                         .HasColumnName("lag_days");
@@ -2252,6 +2270,8 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("deliverable_dependency", "hub", t =>
                         {
                             t.HasCheckConstraint("ck_deliverable_dependency_self", "predecessor_deliverable_id <> successor_deliverable_id");
+
+                            t.HasCheckConstraint("ck_deliverable_dependency_type", "dependency_type IN ('FinishToStart','StartToStart','FinishToFinish')");
                         });
                 });
 
@@ -5215,6 +5235,108 @@ namespace Hub.Api.Data.Migrations
                         .HasDatabaseName("ix_office_name");
 
                     b.ToTable("office", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.OpenRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<Guid?>("FilledAllocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("filled_allocation_id");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date")
+                        .HasColumnName("from_date");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<decimal>("PlannedHours")
+                        .HasPrecision(9, 3)
+                        .HasColumnType("numeric(9,3)")
+                        .HasColumnName("planned_hours");
+
+                    b.Property<Guid?>("ProjectDisciplineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_discipline_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("RoleLabel")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("role_label");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateOnly>("ThroughDate")
+                        .HasColumnType("date")
+                        .HasColumnName("through_date");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_open_role");
+
+                    b.HasIndex("FilledAllocationId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_open_role_filled_allocation_id")
+                        .HasFilter("filled_allocation_id IS NOT NULL");
+
+                    b.HasIndex("ProjectDisciplineId")
+                        .HasDatabaseName("ix_open_role_project_discipline_id");
+
+                    b.HasIndex("ProjectId", "Status")
+                        .HasDatabaseName("ix_open_role_project_id_status")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("open_role", "hub", t =>
+                        {
+                            t.HasCheckConstraint("ck_open_role_dates", "through_date >= from_date");
+
+                            t.HasCheckConstraint("ck_open_role_hours", "planned_hours > 0");
+
+                            t.HasCheckConstraint("ck_open_role_label", "char_length(btrim(role_label)) BETWEEN 1 AND 80");
+
+                            t.HasCheckConstraint("ck_open_role_status", "status IN ('Open','Filled','Cancelled')");
+                        });
                 });
 
             modelBuilder.Entity("Hub.Api.Data.OrgSetting", b =>
@@ -8214,6 +8336,8 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("task_dependency", "hub", t =>
                         {
                             t.HasCheckConstraint("ck_dependency_self", "predecessor_task_id <> successor_task_id");
+
+                            t.HasCheckConstraint("ck_task_dependency_type", "dependency_type IN ('FinishToStart','StartToStart','FinishToFinish')");
                         });
                 });
 
@@ -9235,6 +9359,10 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("date")
                         .HasColumnName("start_date");
 
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text")
@@ -9410,6 +9538,12 @@ namespace Hub.Api.Data.Migrations
 
             modelBuilder.Entity("Hub.Api.Data.AppUser", b =>
                 {
+                    b.HasOne("Hub.Api.Data.Discipline", null)
+                        .WithMany()
+                        .HasForeignKey("HomeDisciplineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_app_user_disciplines_home_discipline_id");
+
                     b.HasOne("Hub.Api.Data.Office", null)
                         .WithMany()
                         .HasForeignKey("OfficeId")
@@ -10385,6 +10519,28 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_milestone_state_milestone_milestone_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.OpenRole", b =>
+                {
+                    b.HasOne("Hub.Api.Data.ResourceAllocation", null)
+                        .WithMany()
+                        .HasForeignKey("FilledAllocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_open_role_allocations_filled_allocation_id");
+
+                    b.HasOne("Hub.Api.Data.ProjectDiscipline", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectDisciplineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_open_role_project_disciplines_project_discipline_id");
+
+                    b.HasOne("Hub.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_open_role_projects_project_id");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.OutputCommitment", b =>

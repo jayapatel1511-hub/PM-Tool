@@ -74,6 +74,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<TaskStartAuthorisation> TaskStartAuthorisations => Set<TaskStartAuthorisation>();
     public DbSet<PersonAvailabilityOverride> AvailabilityOverrides => Set<PersonAvailabilityOverride>();
     public DbSet<ResourceAllocation> Allocations => Set<ResourceAllocation>();
+    public DbSet<OpenRole> OpenRoles => Set<OpenRole>();
     public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
     public DbSet<AllocationWorkLink> AllocationWorkLinks => Set<AllocationWorkLink>();
     public DbSet<PersonDateVersion> PersonDateVersions => Set<PersonDateVersion>();
@@ -153,6 +154,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         });
         Fk<AppUser, Office>(mb, x => x.OfficeId);
         Fk<AppUser, AppUser>(mb, x => x.SupervisorId);
+        Fk<AppUser, Discipline>(mb, x => x.HomeDisciplineId);
         mb.Entity<UserSystemRole>(e =>
         {
             e.HasIndex(x => new { x.UserId, x.Role, x.Source }).IsUnique();
@@ -265,7 +267,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<WorkTask, AppUser>(mb, x => x.ReviewerId);
         mb.Entity<TaskDependency>(e =>
         {
-            e.ToTable("task_dependency", t => t.HasCheckConstraint("ck_dependency_self", "predecessor_task_id <> successor_task_id"));
+            e.ToTable("task_dependency", t =>
+            {
+                t.HasCheckConstraint("ck_dependency_self", "predecessor_task_id <> successor_task_id");
+                t.HasCheckConstraint("ck_task_dependency_type", $"dependency_type IN ({In(DependencyTypes.All)})");
+            });
             e.HasIndex(x => new { x.PredecessorTaskId, x.SuccessorTaskId }).IsUnique().HasFilter("deleted_at IS NULL");
             e.HasIndex(x => x.SuccessorTaskId);
             e.HasQueryFilter(x => x.DeletedAt == null);
@@ -275,7 +281,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<TaskDependency, WorkTask>(mb, x => x.SuccessorTaskId);
         mb.Entity<DeliverableDependency>(e =>
         {
-            e.ToTable(t => t.HasCheckConstraint("ck_deliverable_dependency_self", "predecessor_deliverable_id <> successor_deliverable_id"));
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_deliverable_dependency_self", "predecessor_deliverable_id <> successor_deliverable_id");
+                t.HasCheckConstraint("ck_deliverable_dependency_type", $"dependency_type IN ({In(DependencyTypes.All)})");
+            });
+            e.Property(x => x.DependencyType).HasDefaultValue(DependencyTypes.FinishToStart);
             e.HasIndex(x => new { x.PredecessorDeliverableId, x.SuccessorDeliverableId }).IsUnique().HasFilter("deleted_at IS NULL");
             e.HasQueryFilter(x => x.DeletedAt == null);
             e.Ignore(x => x.AuditKey);
@@ -692,6 +703,23 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.Property(x => x.ConfirmationSnapshot).HasColumnType("jsonb");
             e.ToTable(t => { t.HasCheckConstraint("ck_allocation_dates", "through_date >= from_date"); t.HasCheckConstraint("ck_allocation_hours", "planned_hours > 0"); t.HasCheckConstraint("ck_allocation_status", $"status IN ({In(AllocationStatus.All)})"); t.HasCheckConstraint("ck_allocation_purpose", $"purpose IN ({In(AllocationPurpose.All)})"); });
         });
+        mb.Entity<OpenRole>(e => // FR-ROLE-01 (packet 036)
+        {
+            e.HasIndex(x => new { x.ProjectId, x.Status }).HasFilter("deleted_at IS NULL");
+            e.HasIndex(x => x.FilledAllocationId).IsUnique().HasFilter("filled_allocation_id IS NOT NULL");
+            e.Property(x => x.PlannedHours).HasPrecision(9, 3);
+            e.HasQueryFilter(x => x.DeletedAt == null);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_open_role_dates", "through_date >= from_date");
+                t.HasCheckConstraint("ck_open_role_hours", "planned_hours > 0");
+                t.HasCheckConstraint("ck_open_role_status", $"status IN ({In(OpenRoleStatus.All)})");
+                t.HasCheckConstraint("ck_open_role_label", "char_length(btrim(role_label)) BETWEEN 1 AND 80");
+            });
+        });
+        Fk<OpenRole, Project>(mb, x => x.ProjectId);
+        Fk<OpenRole, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<OpenRole, ResourceAllocation>(mb, x => x.FilledAllocationId);
         mb.Entity<AllocationDayOverride>(e =>
         {
             e.HasIndex(x => new { x.AllocationId, x.WorkDate }).IsUnique();

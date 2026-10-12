@@ -138,6 +138,28 @@ public sealed class OpenRoleApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Role_history_reaches_exactly_the_people_who_can_view_the_project() // 036-D1, AC-ROLE-05 R4
+    {
+        var project = await data.Project(pm: TestData.Marc);
+        var role = await Role(project.Id, TestData.Marc);
+        await (await f.As(TestData.Marc).Patch($"/api/v1/open-roles/{role.S("id")}", new { note = "Needs drafting software" }, role.I("rowVersion"))).Json();
+        var path = $"/api/v1/items/OpenRole/{role.S("id")}/activity";
+        foreach (var viewer in new[] { TestData.Marc, TestData.Pm, TestData.Admin }) // the project is not restricted yet: Priya can view it
+        {
+            var page = await (await f.As(viewer).GetAsync(path)).Json();
+            Assert.Equal(["Updated", "Created"], page["items"]!.AsArray().Select(a => a!.S("action")));
+            Assert.All(page["items"]!.AsArray(), a => Assert.Equal(role.G("id"), a!.G("itemId")));
+        }
+        await (await f.As(TestData.Marc).GetAsync($"/api/v1/items/OpenRole/{Guid.NewGuid()}/activity")).Json(404);
+
+        await f.DbAsync(async db => { (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted; return await db.SaveChangesAsync(); });
+        foreach (var outsider in new[] { TestData.Pm, TestData.Sam })
+            await (await f.As(outsider).GetAsync(path)).Json(404);
+        foreach (var insider in new[] { TestData.Marc, TestData.Admin })
+            Assert.Equal(2, (await (await f.As(insider).GetAsync(path)).Json())["items"]!.AsArray().Count);
+    }
+
+    [Fact]
     public async Task Filling_creates_the_allocation_and_marks_the_role_in_one_transaction() // AC-ROLE-03a, -03b, -03d
     {
         var project = await data.Project();

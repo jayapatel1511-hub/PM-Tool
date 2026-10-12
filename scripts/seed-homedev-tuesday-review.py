@@ -211,6 +211,26 @@ def seed(root: Path, release: str, handoff: Path, script: str, runner: Callable[
     return run_checked(command, cwd=root, runner=runner)
 
 
+BASE_SCRIPTS = ("seed_resources.py", "seed_modules.py", "seed_planning.py")
+# Opt-in only: it turns on working days for the whole organisation and adds an office holiday (packet 036 fixtures).
+STAFFING_SCRIPT = "seed_staffing.py"
+
+
+def seed_logged(root: Path, release: str, handoff: Path, script: str, runtime: Path,
+                runner: Callable[..., Any] = subprocess.run) -> str:
+    """Run one seed script and keep its output in an owner-only runtime log; returns the provenance line."""
+    print(f"Running {script} through permissioned review API calls…", flush=True)
+    try:
+        result = seed(root, release, handoff, script, runner)
+    except WrapperError as exc:
+        cause = exc.__cause__
+        output = {"script": script, "status": "failed", "stdout": getattr(cause, "stdout", "") or "", "stderr": getattr(cause, "stderr", "") or ""}
+        atomic_json(runtime / f"{script}-{release}.log.json", output)
+        raise WrapperError(f"{script} failed; inspect its private runtime log") from exc
+    atomic_json(runtime / f"{script}-{release}.log.json", {"script": script, "status": "passed", "stdout": result.stdout or "", "stderr": result.stderr or ""})
+    return f"{script}: completed; captured_lines={len((result.stdout or '').splitlines())}"
+
+
 
 FIXTURE_MINIMUMS = {
     "task": 14, "milestone": 7, "deliverable": 9, "decision": 5,
@@ -221,7 +241,7 @@ FIXTURE_MINIMUMS = {
 }
 
 
-def dataset_snapshot(root: Path, runner: Callable[..., Any] = subprocess.run) -> dict[str, Any]:
+def dataset_snapshot(root: Path, runner: Callable[..., Any] = subprocess.run, *, staffing: bool = False) -> dict[str, Any]:
     """Read only counts and fixture IDs from the already-guarded review database."""
     fields = []
     for table in FIXTURE_MINIMUMS:
@@ -234,7 +254,8 @@ def dataset_snapshot(root: Path, runner: Callable[..., Any] = subprocess.run) ->
         'projects', (SELECT coalesce(json_agg(json_build_object('id', id, 'number', project_number, 'visibility', visibility) ORDER BY project_number), '[]'::json) FROM fixture_projects),
         'counts', json_build_object(""" + ",".join(fields) + """,
         'planning_entry', (SELECT count(*) FROM hub.planning_entry WHERE notes IN ('Coordinate weekly work and capacity with the team.', 'Synthetic preview fixture; fictional hours and work only.') AND deleted_at IS NULL),
-        'project_template', (SELECT count(*) FROM hub.project_template WHERE name IN ('Small site servicing template', 'Synthetic preview — Small site servicing template'))
+        'project_template', (SELECT count(*) FROM hub.project_template WHERE name IN ('Small site servicing template', 'Synthetic preview — Small site servicing template')),
+        'staffing_projects', (SELECT count(*) FROM hub.project WHERE project_number IN ('SYN-104','SYN-105'))
     ));"""
     result = run_checked([*COMPOSE, "exec", "-T", "db", "psql", "-U", "hub_review", "-d", "hub_review", "-At", "-c", sql], cwd=root, runner=runner)
     try:
@@ -247,6 +268,8 @@ def dataset_snapshot(root: Path, runner: Callable[..., Any] = subprocess.run) ->
         if any(counts.get(table, 0) < minimum for table, minimum in FIXTURE_MINIMUMS.items()):
             raise ValueError
         if counts.get("planning_entry", 0) < 7 or counts.get("project_template", 0) < 1:
+            raise ValueError
+        if staffing and counts.get("staffing_projects", 0) != 2:
             raise ValueError
         for row in projects:
             uuid.UUID(row["id"])
@@ -267,6 +290,9 @@ def run(argv: list[str] | None = None, *, root: Path = ROOT, verify: Callable[[s
         hosted_verify: Callable[[str, Path], None] | None = None, now: Callable[[], str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("release")
+    parser.add_argument("--with-staffing-fixtures", action="store_true",
+                        help="also run seed_staffing.py after the other seeds (turns on working days for the "
+                             "whole organisation and adds an office holiday); off by default")
     args = parser.parse_args(argv)
     release = args.release
     verify_exact_release(release, root, verify)
@@ -296,7 +322,18 @@ def run(argv: list[str] | None = None, *, root: Path = ROOT, verify: Callable[[s
         if (not isinstance(existing, dict) or existing.get("release") != release or set(credentials) != PERSONA_SET
                 or recorded != {name: ids[name] for name in PERSONAS} or not credentials_match(users, credentials)):
             raise WrapperError("existing Tuesday fixture manifest or handoff does not match the release")
-        dataset_snapshot(root, runner)
+        scripts = existing.get("provenance", {}).get("scripts", [])
+        staffed = STAFFING_SCRIPT in scripts
+        dataset_snapshot(root, runner, staffing=staffed)
+        if args.with_staffing_fixtures and not staffed:
+            sleeper(60)  # the seed signs every persona in again; respect the sign-in rate limit
+            line = seed_logged(root, release, target_handoff, STAFFING_SCRIPT, runtime, runner)
+            snapshot = dataset_snapshot(root, runner, staffing=True)
+            existing.setdefault("provenance", {})["scripts"] = [*scripts, STAFFING_SCRIPT]
+            existing["counts"] = {"accounts": len(PERSONAS), **snapshot["counts"]}
+            existing["staffingFixtures"] = {"result": line, "completedAt": (now or (lambda: datetime.now(UTC).isoformat()))()}
+            atomic_json(manifest, existing)
+            print(f"Added the packet 036 staffing fixture for release {release}.")
         return 0
 
     by_login = {u["userName"]: u for u in users}
@@ -333,29 +370,21 @@ def run(argv: list[str] | None = None, *, root: Path = ROOT, verify: Callable[[s
     log_lines = [f"release={release}", "provenance=hosted review synthetic Tuesday fixture", "transport=local-password same-person API",
                  f"reserved_ids_validated={len(ids)}"]
     atomic_json(log_path, {"release": release, "provenance": log_lines})
-    for index, script in enumerate(("seed_resources.py", "seed_modules.py", "seed_planning.py")):
-        print(f"Running {script} through permissioned review API calls…", flush=True)
-        try:
-            result = seed(root, release, target_handoff, script, runner)
-        except WrapperError as exc:
-            cause = exc.__cause__
-            output = {"script": script, "status": "failed", "stdout": getattr(cause, "stdout", "") or "", "stderr": getattr(cause, "stderr", "") or ""}
-            atomic_json(runtime / f"{script}-{release}.log.json", output)
-            raise WrapperError(f"{script} failed; inspect its private runtime log") from exc
-        atomic_json(runtime / f"{script}-{release}.log.json", {"script": script, "status": "passed", "stdout": result.stdout or "", "stderr": result.stderr or ""})
-        log_lines.append(f"{script}: completed; captured_lines={len((result.stdout or '').splitlines())}")
+    scripts = (*BASE_SCRIPTS, STAFFING_SCRIPT) if args.with_staffing_fixtures else BASE_SCRIPTS
+    for index, script in enumerate(scripts):
+        log_lines.append(seed_logged(root, release, target_handoff, script, runtime, runner))
         atomic_json(log_path, {"release": release, "provenance": log_lines})
-        if index < 2:
+        if index < len(scripts) - 1:
             sleeper(60)
     atomic_json(log_path, {"release": release, "provenance": log_lines})
-    snapshot = dataset_snapshot(root, runner)
+    snapshot = dataset_snapshot(root, runner, staffing=args.with_staffing_fixtures)
     atomic_json(manifest, {
         "release": release,
         "provenance": {
             "source": "Tuesday hosted synthetic review fixture",
             "transport": "local-password same-person API",
             "database": "pm-tool-review-db",
-            "scripts": ["seed_resources.py", "seed_modules.py", "seed_planning.py"],
+            "scripts": list(scripts),
         },
         "reservedAppUsers": [{"login": name, "email": EXPECTED_EMAILS[name], "userId": ids[name]} for name in PERSONAS],
         "counts": {"accounts": len(PERSONAS), **snapshot["counts"]},

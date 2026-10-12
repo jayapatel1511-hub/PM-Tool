@@ -66,9 +66,15 @@ class SeedTuesdayReviewTests(unittest.TestCase):
             output = 'All fixture steps completed; fictional data only.'
         return subprocess.CompletedProcess(command, 0, output, '')
 
-    def run_setup(self):
-        return module.run([self.sha], root=self.root, verify=lambda _: None, runner=self.runner,
+    def run_setup(self, *flags):
+        return module.run([self.sha, *flags], root=self.root, verify=lambda _: None, runner=self.runner,
                           sleeper=self.sleeps.append, hosted_verify=lambda *_: self.events.append(['hosted-verify']), now=lambda: 'now')
+
+    def seeded(self):
+        return [Path(arg).name for e in self.events for arg in e if Path(arg).name.startswith('seed_') and arg.endswith('.py')]
+
+    def manifest(self):
+        return json.loads((self.root / 'data' / f'tuesday-fixtures-{self.sha}.json').read_text())
 
     def test_guard_precedes_every_command(self):
         with self.assertRaises(module.WrapperError):
@@ -97,6 +103,40 @@ class SeedTuesdayReviewTests(unittest.TestCase):
             self.assertNotIn(password, text)
         extension = next(e for e in self.events if 'extend-review-credentials.py' in ' '.join(e))
         self.assertEqual(extension[extension.index('--verifier-file') + 1], str(self.verifier.resolve()))
+
+    def test_staffing_fixtures_are_off_by_default(self):
+        self.run_setup()
+        self.assertEqual(self.seeded(), list(module.BASE_SCRIPTS))
+        self.assertEqual(self.manifest()['provenance']['scripts'], list(module.BASE_SCRIPTS))
+
+    def test_staffing_flag_runs_seed_staffing_last_through_the_same_hosted_transport(self):
+        self.snapshot['counts']['staffing_projects'] = 2
+        self.run_setup('--with-staffing-fixtures')
+        self.assertEqual(self.seeded(), [*module.BASE_SCRIPTS, 'seed_staffing.py'])
+        staffing = next(e for e in self.events if any(arg.endswith('seed_staffing.py') for arg in e))
+        self.assertEqual(staffing[2:], ['--hosted-review', '--credentials', str(self.target), '--release', self.sha])
+        self.assertEqual(self.sleeps, [60, 60, 60, 60])
+        self.assertEqual(self.manifest()['provenance']['scripts'], [*module.BASE_SCRIPTS, 'seed_staffing.py'])
+
+    def test_staffing_flag_refuses_completion_without_the_staffing_projects(self):
+        with self.assertRaises(module.WrapperError):
+            self.run_setup('--with-staffing-fixtures')
+        self.assertFalse((self.root / 'data' / f'tuesday-fixtures-{self.sha}.json').exists())
+
+    def test_staffing_flag_on_a_completed_release_adds_only_the_staffing_seed_once(self):
+        self.run_setup()
+        verifier = self.verifier.read_bytes()
+        self.events.clear()
+        self.snapshot['counts']['staffing_projects'] = 2
+        self.run_setup('--with-staffing-fixtures')
+        self.assertEqual(self.seeded(), ['seed_staffing.py'])
+        self.assertFalse(any('--force-recreate' in e for e in self.events))
+        self.assertEqual(self.verifier.read_bytes(), verifier)
+        self.assertEqual(self.manifest()['provenance']['scripts'], [*module.BASE_SCRIPTS, 'seed_staffing.py'])
+        self.assertEqual(self.manifest()['counts']['staffing_projects'], 2)
+        self.events.clear()
+        self.run_setup('--with-staffing-fixtures')
+        self.assertEqual(self.seeded(), [])
 
     def test_completed_rerun_reads_and_validates_without_recreating_or_reseeding(self):
         self.run_setup()

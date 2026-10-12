@@ -147,8 +147,8 @@ function Week({ from, entries, onOpen }: { from: string; entries: Entry[]; onOpe
         ))}
         <div className="border-b px-1 py-1.5 text-xs/[18px] text-muted-foreground">{t('calendar.allDay')}</div>
         {days.map((d) => (
-          <div key={d} className={cn('space-y-1 border-b border-l p-1', d === now && 'bg-accent/40')} role="group" aria-label={t('calendar.allDayOn', { date: fmtDate(d) })}>
-            {entries.filter((e) => e.kind === 'deadline' && e.date === d).map((e) => <Chip key={e.id} e={e} onOpen={onOpen} />)}
+          <div key={d} className={cn('space-y-1 border-b border-l p-1', d === now && 'bg-accent/40')} role="list" aria-label={t('calendar.allDayOn', { date: fmtDate(d) })}>
+            {entries.filter((e) => e.kind === 'deadline' && e.date === d).map((e) => <div key={e.id} role="listitem"><Chip e={e} onOpen={onOpen} /></div>)}
           </div>
         ))}
         <div className="relative" style={{ height: (LAST - FIRST) * HOUR }}>
@@ -173,9 +173,9 @@ function DayColumn({ day, today: isToday, events, onOpen }: { day: string; today
   })
   const n = Math.max(lanes.length, 1)
   return (
-    <div className={cn('relative border-l', isToday && 'bg-accent/40')} style={{ height: (LAST - FIRST) * HOUR, backgroundImage: `repeating-linear-gradient(to bottom, var(--border) 0 1px, transparent 1px ${HOUR}px)` }}>
-      {placed.map(({ e, top, height, lane }) => (
-        <button key={e.id} type="button" onClick={() => onOpen(e)} data-accent={e.projectId ? accentOf(e.projectId) : undefined}
+    <div role="list" aria-label={t('calendar.eventsOn', { date: fmtDate(day) })} className={cn('relative border-l', isToday && 'bg-accent/40')} style={{ height: (LAST - FIRST) * HOUR, backgroundImage: `repeating-linear-gradient(to bottom, var(--border) 0 1px, transparent 1px ${HOUR}px)` }}>
+      {placed.map(({ e, top, height, lane }) => <div key={e.id} role="listitem">
+        <button type="button" onClick={() => onOpen(e)} data-accent={e.projectId ? accentOf(e.projectId) : undefined}
           className={cn('absolute overflow-hidden rounded-md border border-l-4 border-card px-1.5 py-0.5 text-left text-xs/4 hover:z-10 hover:brightness-95', e.projectId ? 'border-l-(color:--acc-stripe) bg-(--acc-bg)' : 'border-l-input bg-secondary')}
           style={{ top: (top / 60) * HOUR, height: (height / 60) * HOUR, left: `${(lane / n) * 100}%`, width: `${100 / n}%` }}
           title={`${time(e.start)}–${time(e.end)} ${e.title}${e.location ? ` · ${e.location}` : ''}`}>
@@ -183,7 +183,7 @@ function DayColumn({ day, today: isToday, events, onOpen }: { day: string; today
           <span className="block truncate font-medium">{e.title}</span>
           {e.projectNumber && <span className="block truncate text-muted-foreground">{e.projectNumber}</span>}
         </button>
-      ))}
+      </div>)}
     </div>
   )
 }
@@ -205,7 +205,9 @@ function Month({ from, anchor, entries, onOpen, onDay }: { from: string; anchor:
                   aria-label={t('calendar.openWeek', { date: fmtDate(d) })}>{Number(d.slice(8))}</button>
                 {d === now && <span className="text-xs/[18px] font-semibold text-accent-foreground">{t('common.today')}</span>}
               </div>
-              {list.slice(0, 3).map((e) => <Chip key={`${e.kind}-${e.id}`} e={e} onOpen={onOpen} compact />)}
+              <div role="list" aria-label={t('calendar.entriesOn', { date: fmtDate(d) })} className="space-y-1">
+                {list.slice(0, 3).map((e) => <div key={`${e.kind}-${e.id}`} role="listitem"><Chip e={e} onOpen={onOpen} compact /></div>)}
+              </div>
               {list.length > 3 && <button type="button" className="px-1 text-xs/[18px] text-primary underline underline-offset-4 hover:text-foreground" onClick={() => onDay(d)}>{t('calendar.more', { n: list.length - 3 })}</button>}
             </div>
           )

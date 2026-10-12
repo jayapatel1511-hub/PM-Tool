@@ -124,7 +124,8 @@ export const KanbanCard = <T extends KanbanItemProps = KanbanItemProps>({
 
   return (
     <>
-      <div style={style} {...pointer} ref={setNodeRef}>
+      {/* Hub change (§41 R7/R9): each card is an item of its column's list, so the board reads as lists of cards. */}
+      <div role="listitem" style={style} {...pointer} ref={setNodeRef}>
         <Card
           className={cn(
             "group relative cursor-grab gap-0 rounded-lg p-3 shadow-none transition-colors duration-[120ms] hover:border-input",
@@ -177,6 +178,7 @@ export const KanbanCards = <T extends KanbanItemProps = KanbanItemProps>({
     <ScrollArea className="overflow-hidden">
       <SortableContext items={items}>
         <div
+          role="list"
           className={cn("flex flex-grow flex-col gap-2 p-2", className)}
           {...props}
         >

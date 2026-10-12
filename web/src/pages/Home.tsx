@@ -77,17 +77,18 @@ export function HomePage() {
     const m = d.metrics
     switch (w.id) {
       // Tiles in the Home order (blue, mint, lavender, peach); a warning travels as a labelled chip, never as the tint.
+      // Each tile is a labelled data card (article), as on the project dashboard (§41 R9).
       case 'metrics': return (
         <section aria-labelledby="h-metrics">
           <h2 id="h-metrics" className="sr-only">{t('home.metrics')}</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-5">
-            <SummaryTile label={t('home.activeProjects')} value={m.activeProjects} accent="blue" hint={t('sig.def.activeProjects')} to={projectsLink(scope, {})} />
-            <SummaryTile label={t('home.openTasks')} value={m.openTasks} accent="mint" hint={t('sig.def.openTasks')} to={scoped(scope, '/tasks', { open: 'true' })} />
-            <SummaryTile label={t('home.overdueTasks')} value={m.overdueTasks} accent="lavender" hint={t('sig.def.overdueTasks')} to={scoped(scope, '/tasks', { overdue: 'true' })}>
+            <article aria-label={t('home.activeProjects')} className="grid"><SummaryTile label={t('home.activeProjects')} value={m.activeProjects} accent="blue" hint={t('sig.def.activeProjects')} to={projectsLink(scope, {})} /></article>
+            <article aria-label={t('home.openTasks')} className="grid"><SummaryTile label={t('home.openTasks')} value={m.openTasks} accent="mint" hint={t('sig.def.openTasks')} to={scoped(scope, '/tasks', { open: 'true' })} /></article>
+            <article aria-label={t('home.overdueTasks')} className="grid"><SummaryTile label={t('home.overdueTasks')} value={m.overdueTasks} accent="lavender" hint={t('sig.def.overdueTasks')} to={scoped(scope, '/tasks', { overdue: 'true' })}>
               {m.overdueTasks > 0 && <span className="mt-1.5 block"><Chip tone="bad">{t('dash.attention')}</Chip></span>}
-            </SummaryTile>
+            </SummaryTile></article>
             {/* Two destinations (numerator and denominator), so the tile itself is not a link. */}
-            <SummaryTile label={t('home.onTrack')} value={m.onTrack.pct == null ? <Missing /> : `${m.onTrack.pct}%`} accent="peach" hint={t('sig.def.onTrack')}>
+            <article aria-label={t('home.onTrack')} className="grid"><SummaryTile label={t('home.onTrack')} value={m.onTrack.pct == null ? <Missing /> : `${m.onTrack.pct}%`} accent="peach" hint={t('sig.def.onTrack')}>
               <span className="mt-0.5 block text-xs/[18px] text-muted-foreground tabular-nums">
                 {m.onTrack.evaluated === 0 ? t('home.onTrackNone') : <>
                   <Link className="text-primary underline underline-offset-4 hover:text-foreground" to={projectsLink(scope, { computedHealth: 'Green' })}>{t('home.onTrackGreen', { n: m.onTrack.green })}</Link>
@@ -95,8 +96,8 @@ export function HomePage() {
                   <Link className="text-primary underline underline-offset-4 hover:text-foreground" to={projectsLink(scope, { computedHealth: 'Green,Yellow,Red' })}>{t('home.onTrackEvaluated', { n: m.onTrack.evaluated })}</Link>
                 </>}
               </span>
-            </SummaryTile>
-            <SummaryTile label={t('home.teamMembers')} value={m.teamMembers} accent="rose" hint={t('sig.def.teamMembers')} to={scoped(scope, '/team')} />
+            </SummaryTile></article>
+            <article aria-label={t('home.teamMembers')} className="grid"><SummaryTile label={t('home.teamMembers')} value={m.teamMembers} accent="rose" hint={t('sig.def.teamMembers')} to={scoped(scope, '/team')} /></article>
           </div>
         </section>
       )

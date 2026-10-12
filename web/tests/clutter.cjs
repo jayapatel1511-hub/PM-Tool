@@ -34,14 +34,16 @@ const SCREENS = [
 const LIMIT = { firstDataY: 405, filterFields: 1, chromeControls: 25, wordsShare: 0.5, wordsFloor: 40, fills: 6, groupTabs: 7, sidebarItems: 8 }
 const wordLimit = (baseWords) => Math.max(LIMIT.wordsFloor, Math.floor(baseWords * LIMIT.wordsShare))
 
-// Appendix A, apart from the extra data selector, the navigation counts and the fill rule: a fill counts only when it
-// is chromatic (HSL saturation >= 15 % and lightness 8-96 %, composited on white), so greys, near-whites and
-// near-blacks are not colours.
+// Appendix A, apart from the extra data selector, the navigation counts, the fill rule and the data rule. Fill rule: a
+// fill counts only when it is chromatic (HSL saturation >= 15 % and lightness 8-96 %, composited on white), so greys,
+// near-whites and near-blacks are not colours. Data rule: list screens hold their data in tables and grids, while
+// dashboards (R9), the My Work focus list (R10), boards, calendars and register cards hold it in data items (articles
+// and list items outside navigation), which the first-data-row measure already counts as data; neither is chrome.
 function census(extraData) {
   const H = innerHeight
   const vis = el => { const r = el.getBoundingClientRect(); const s = getComputedStyle(el); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && s.opacity !== '0' }
   const main = document.querySelector('main') || document.body
-  const inData = el => !!el.closest('table, [role=grid], [role=table], [role=treegrid], [role=dialog]')
+  const inData = el => !!el.closest('table, [role=grid], [role=table], [role=treegrid], [role=dialog]') || (!!el.closest('article, li, [role=listitem]') && !el.closest('nav'))
   const fold = el => { const r = el.getBoundingClientRect(); return r.top < H && r.bottom > 0 }
   const all = [...main.querySelectorAll('button, a[href], input, select, textarea, [role=button], [role=tab], [role=checkbox], [role=combobox], [role=switch]')].filter(vis)
   const chrome = all.filter(e => !inData(e))

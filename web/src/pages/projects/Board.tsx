@@ -215,7 +215,7 @@ export function Swimlane({ rows, columns, onDrop, onReorder, onAdd, render }: {
               <span className="flex items-center gap-2">{col.name}<span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{count}</span></span>
               {col.id === 'To Do' && onAdd && <Button variant="ghost" size="icon-sm" aria-label={t('task.new')} onClick={onAdd}><Plus className="size-4" /></Button>}
             </KanbanHeader>
-            <KanbanCards<Card> id={col.id}>
+            <KanbanCards<Card> id={col.id} aria-label={col.name}>
               {(c) => <KanbanCard key={c.id} id={c.id} name={c.name} column={c.column} handleLabel={t('board.moveCard', { key: c.r.key, name: c.name })} className="select-none">{render(c.r)}</KanbanCard>}
             </KanbanCards>
             {count === 0 && <p className="px-3 pb-4 text-center text-sm text-muted-foreground">{t('board.emptyLane')}</p>}

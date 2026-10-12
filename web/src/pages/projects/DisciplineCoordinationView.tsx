@@ -132,12 +132,13 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   }
   const none = <p className="text-muted-foreground">{t('dcv.none')}</p>
   // One of the five fixed questions: a stable identity stripe, the question as its heading, its count, and the register.
+  // Each answer is a data card (article), like the boxes below it (§41 R9).
   const card = (id: string, heading: string, count: number | string, content: ReactNode, href: string) => (
-    <section aria-labelledby={`dcv-${id}`} data-accent={QUESTION_ACCENT[id]} className={`flex flex-col ${box} border-t-4 border-t-(color:--acc-stripe)`}>
+    <article aria-labelledby={`dcv-${id}`} data-accent={QUESTION_ACCENT[id]} className={`flex flex-col ${box} border-t-4 border-t-(color:--acc-stripe)`}>
       <div className={head}><h2 id={`dcv-${id}`} className={title}>{heading}</h2><span className={badge}>{count}</span></div>
       <div className={`flex-1 ${body}`}>{content}</div>
       <div className="border-t px-4 py-2.5"><Link className="text-sm font-medium text-primary underline underline-offset-4" to={registerUrl(href)}>{t('dcv.openRegister')}</Link></div>
-    </section>
+    </article>
   )
   const items = (rows: { id: string; key: string; text: string; detail?: ReactNode }[], register: string) => rows.length ? <ul className="divide-y">{rows.map((r) => <li key={r.id} className={row}>
     <p><Link className={keyLink} to={registerUrl(register, `${register === 'handoffs' ? 'Handoff' : 'ChangeNotice'}:${r.id}`)}>{r.key}</Link> <span className="font-medium">{r.text}</span></p>
@@ -178,7 +179,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
               {r.blocked.length > 0 && <Flags tone="bad">{t('dcv.blocked', { list: r.blocked.join(', ') })}</Flags>}{r.unknown.length > 0 && <Flags tone="warn">{t('dcv.unknown', { list: r.unknown.join(', ') })}</Flags>}</div>
           </li>)}</ul><Pager label={t('dcv.start')} page={d.startabilityPage} total={d.startabilityTotal} pageSize={d.startabilityPageSize} onPage={setPage} /></> : <p className="text-muted-foreground">{t('dcv.noAssessedWork')}</p>}</>, 'readiness')}
     </div>
-    <section aria-labelledby="dcv-linked-issues" className={box}>
+    <article aria-labelledby="dcv-linked-issues" className={box}>
       <div className={head}><div className="flex items-center"><h2 id="dcv-linked-issues" className={title}>{t('dcv.linkedIssues')}</h2><PageHelp>{t('dcv.linkedIssuesHint')}</PageHelp></div><span className={badge}>{d.linkedIssuesTotal}</span></div>
       <div className={body}>
         {linkedIssueItems.length ? <><ul className="divide-y rounded-md border">{linkedIssueItems.map((issue) => <li key={issue.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2">
@@ -188,8 +189,8 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
           <span className="text-muted-foreground">{issue.ownerName ?? issue.ownerId ?? t('dcv.ownerUnavailable')}</span>
         </li>)}</ul><Pager label={t('dcv.linkedIssues')} page={d.linkedIssuesPage} total={d.linkedIssuesTotal} pageSize={d.linkedIssuesPageSize} onPage={setPage} /></> : none}
       </div>
-    </section>
-    <section aria-labelledby="dcv-pending-reviews" className={box}>
+    </article>
+    <article aria-labelledby="dcv-pending-reviews" className={box}>
       <div className={head}><h2 id="dcv-pending-reviews" className={title}>{t('dcv.pendingReviews')} · {d.reviewsTotal}</h2></div>
       <div className={body}>
         {d.reviews.length ? <ul className="divide-y">{d.reviews.map(r => <li key={r.id} className={row}>
@@ -198,23 +199,23 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
         </li>)}</ul> : none}
         <Pager label={t('dcv.pendingReviews')} page={d.reviewsPage} total={d.reviewsTotal} pageSize={d.reviewsPageSize} onPage={setPage} />
       </div>
-    </section>
+    </article>
     <div className="grid gap-4 md:grid-cols-2">
-      <section aria-labelledby="dcv-submissions" className={box}><div className={head}><h2 id="dcv-submissions" className={title}>{t('dcv.upcomingSubmissions')}</h2><span className={badge}>{d.upcomingSubmissionsTotal}</span></div>
+      <article aria-labelledby="dcv-submissions" className={box}><div className={head}><h2 id="dcv-submissions" className={title}>{t('dcv.upcomingSubmissions')}</h2><span className={badge}>{d.upcomingSubmissionsTotal}</span></div>
         <div className={body}>{d.upcomingSubmissions.length ? <><ul className="divide-y">{d.upcomingSubmissions.map(s => <li key={s.id} className={row}>
           <p><Link className={keyLink} to={`/projects/${project.projectNumber}/submissions?panel=SubmissionPackage:${s.id}`}>{s.key}</Link> <span className="font-medium">{s.title}</span></p>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground"><CoordStatus status={s.effectiveStatus} /><span className="tabular-nums">{fmtDate(s.targetDate)}</span></div>
           {s.failingChecks.length > 0 && <p className="text-xs text-warn"><span aria-hidden>▲ </span>{t('dcv.failingChecks')}: {s.failingChecks.map((c, i) => <span key={`${s.id}-${c.code}-${c.sourceId ?? 'none'}`}>{i > 0 && ', '}{c.sourcePath ? <Link className="underline underline-offset-4" to={c.sourcePath}>{c.kind}</Link> : c.kind}</span>)}</p>}
         </li>)}</ul><Pager label={t('dcv.upcomingSubmissions')} page={d.upcomingSubmissionsPage} total={d.upcomingSubmissionsTotal} pageSize={d.pageSize} onPage={setPage} /></> : none}</div>
-      </section>
-      <section aria-labelledby="dcv-staffing" className={box}><div className={head}><h2 id="dcv-staffing" className={title}>{t('dcv.staffingConflicts')}</h2><span className={badge}>{d.staffingConflictsTotal}</span></div>
+      </article>
+      <article aria-labelledby="dcv-staffing" className={box}><div className={head}><h2 id="dcv-staffing" className={title}>{t('dcv.staffingConflicts')}</h2><span className={badge}>{d.staffingConflictsTotal}</span></div>
         <div className={body}>{d.staffingConflicts.length ? <><ul className="divide-y">{d.staffingConflicts.map(c => <li key={c.id} className={row}>
           <p><Link className={keyLink} to={registerUrl(c.targetType === 'Task' ? 'tasks' : 'deliverables', `${c.targetType}:${c.targetId}`)}>{c.key}</Link> <span className="font-medium">{c.description}</span></p>
           <p className="text-xs text-muted-foreground tabular-nums">{fmtDate(c.neededBy)}</p>
         </li>)}</ul><Pager label={t('dcv.staffingConflicts')} page={d.staffingConflictsPage} total={d.staffingConflictsTotal} pageSize={d.pageSize} onPage={setPage} /></> : none}</div>
-      </section>
+      </article>
     </div>
-    {d.blockerGroups.length > 0 && <section aria-labelledby="dcv-blockers" className={box}>
+    {d.blockerGroups.length > 0 && <article aria-labelledby="dcv-blockers" className={box}>
       <div className={head}><h2 id="dcv-blockers" className={title}>{t('dcv.ws.linkedTaskBlockers')}{wide}</h2><span className={badge}>{d.blockerGroupsTotal}</span></div>
       <div className={body}><ul className="divide-y">{d.blockerGroups.map(group => <li key={group.handoffId} className={row}>
         <p><Link className={keyLink} to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · <Link className={textLink} to={`/projects/${project.projectNumber}/tasks?ids=${group.taskIds.join(',')}`}>{t('dcv.linkedTasks', { n: group.taskIds.length })}</Link> ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className={keyLink} to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})</p>
@@ -223,6 +224,6 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
           [{ targetType: 'Handoff', targetId: group.handoffId }, ...group.taskIds.map(id => ({ targetType: 'Task', targetId: id }))],
           existingActions('Handoff', group.handoffId).map(a => a.id)))}
       </li>)}</ul><Pager label={t('dcv.ws.linkedTaskBlockers')} page={d.blockerGroupsPage} total={d.blockerGroupsTotal} pageSize={d.pageSize} onPage={setPage} /></div>
-    </section>}
+    </article>}
   </>, d.evaluatedAt)
 }

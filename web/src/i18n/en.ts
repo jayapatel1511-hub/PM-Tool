@@ -1836,7 +1836,7 @@ export const en: Record<string, string> = {
   'calendar.dow.0': 'Sun', 'calendar.dow.1': 'Mon', 'calendar.dow.2': 'Tue', 'calendar.dow.3': 'Wed', 'calendar.dow.4': 'Thu', 'calendar.dow.5': 'Fri', 'calendar.dow.6': 'Sat',
   'calendar.month.1': 'January', 'calendar.month.2': 'February', 'calendar.month.3': 'March', 'calendar.month.4': 'April', 'calendar.month.5': 'May', 'calendar.month.6': 'June',
   'calendar.month.7': 'July', 'calendar.month.8': 'August', 'calendar.month.9': 'September', 'calendar.month.10': 'October', 'calendar.month.11': 'November', 'calendar.month.12': 'December',
-  'calendar.allDay': 'All day', 'calendar.allDayOn': 'All day on {date}', 'calendar.openWeek': 'Open the week of {date}', 'calendar.more': '+{n} more',
+  'calendar.allDay': 'All day', 'calendar.allDayOn': 'All day on {date}', 'calendar.eventsOn': 'Events on {date}', 'calendar.entriesOn': 'On {date}', 'calendar.openWeek': 'Open the week of {date}', 'calendar.more': '+{n} more',
   'calendar.nothing': 'Nothing on the calendar in this period.', 'calendar.readOnly': 'Organised by {owner}. Only they or the project\'s PM can change it.',
   'calendar.zoneNote': 'Times are in {zone}.', 'calendar.orgZone': 'the organisation\'s time zone', 'calendar.project': 'Project',
   'calendar.projectOptional': 'Optional for internal tasks; without a project the event is private.', 'calendar.noProject': 'No project', 'calendar.title': 'Title',

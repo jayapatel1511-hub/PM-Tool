@@ -10,15 +10,15 @@ Census as priya at 1600x900
 │ 0       │ '/home'                          │ 14             │ 0            │ 40          │ 255        │ 3     │ null      │
 │ 1       │ '/my-work'                       │ 6              │ 0            │ 28          │ 348        │ 1     │ null      │
 │ 2       │ '/boards'                        │ 19             │ 1            │ 37          │ 317        │ 2     │ null      │
-│ 3       │ '/projects'                      │ 9              │ 1            │ 29          │ 294        │ 4     │ null      │
+│ 3       │ '/projects'                      │ 9              │ 1            │ 22          │ 294        │ 4     │ null      │
 │ 4       │ '/tasks'                         │ 19             │ 1            │ 25          │ 363        │ 2     │ null      │
 │ 5       │ '/calendar'                      │ 20             │ 0            │ 73          │ 319        │ 1     │ null      │
 │ 6       │ '/portfolio'                     │ 11             │ 1            │ 36          │ 405        │ 3     │ null      │
-│ 7       │ '/workload'                      │ 24             │ 0            │ 50          │ 377        │ 5     │ null      │
+│ 7       │ '/workload'                      │ 24             │ 0            │ 38          │ 377        │ 5     │ null      │
 │ 8       │ '/planner'                       │ 17             │ 1            │ 35          │ 308        │ 3     │ null      │
 │ 9       │ '/reports'                       │ 1              │ 0            │ 3           │ 231        │ 0     │ null      │
 │ 10      │ '/team'                          │ 11             │ 1            │ 16          │ 363        │ 0     │ null      │
-│ 11      │ '/projects/SYN-101/dashboard'    │ 16             │ 1            │ 77          │ 270        │ 3     │ 6         │
+│ 11      │ '/projects/SYN-101/dashboard'    │ 13             │ 1            │ 65          │ 270        │ 3     │ 6         │
 │ 12      │ '/projects/SYN-101/tasks'        │ 22             │ 1            │ 39          │ 396        │ 4     │ 6         │
 │ 13      │ '/projects/SYN-101/deliverables' │ 22             │ 1            │ 45          │ 391        │ 4     │ 6         │
 │ 14      │ '/projects/SYN-101/timeline'     │ 20             │ 0            │ 50          │ 348        │ 5     │ 6         │
@@ -30,22 +30,22 @@ Census as sam at 1600x900
 ┌─────────┬──────────────────────────────────┬────────────────┬──────────────┬─────────────┬────────────┬───────┬───────────┐
 │ (index) │ path                             │ chromeControls │ filterFields │ chromeWords │ firstDataY │ fills │ groupTabs │
 ├─────────┼──────────────────────────────────┼────────────────┼──────────────┼─────────────┼────────────┼───────┼───────────┤
-│ 0       │ '/home'                          │ 14             │ 0            │ 45          │ 255        │ 3     │ null      │
+│ 0       │ '/home'                          │ 14             │ 0            │ 37          │ 255        │ 0     │ null      │
 │ 1       │ '/my-work'                       │ 5              │ 0            │ 39          │ null       │ 0     │ null      │
 │ 2       │ '/boards'                        │ 18             │ 1            │ 30          │ null       │ 0     │ null      │
-│ 3       │ '/projects'                      │ 9              │ 1            │ 40          │ null       │ 0     │ null      │
+│ 3       │ '/projects'                      │ 9              │ 1            │ 33          │ null       │ 0     │ null      │
 │ 4       │ '/tasks'                         │ 18             │ 1            │ 30          │ null       │ 0     │ null      │
 │ 5       │ '/calendar'                      │ 20             │ 0            │ 75          │ 319        │ 1     │ null      │
 │ 6       │ '/portfolio'                     │ 11             │ 1            │ 36          │ 405        │ 4     │ null      │
-│ 7       │ '/workload'                      │ 25             │ 0            │ 53          │ 377        │ 5     │ null      │
+│ 7       │ '/workload'                      │ 25             │ 0            │ 41          │ 377        │ 5     │ null      │
 │ 8       │ '/planner'                       │ 17             │ 1            │ 35          │ 308        │ 3     │ null      │
 │ 9       │ '/reports'                       │ 1              │ 0            │ 3           │ 231        │ 0     │ null      │
 │ 10      │ '/team'                          │ 11             │ 1            │ 22          │ null       │ 0     │ null      │
-│ 11      │ '/projects/SYN-101/dashboard'    │ 15             │ 1            │ 75          │ 270        │ 3     │ 6         │
+│ 11      │ '/projects/SYN-101/dashboard'    │ 12             │ 1            │ 63          │ 270        │ 3     │ 6         │
 │ 12      │ '/projects/SYN-101/tasks'        │ 21             │ 1            │ 37          │ 396        │ 4     │ 6         │
 │ 13      │ '/projects/SYN-101/deliverables' │ 21             │ 1            │ 43          │ 391        │ 4     │ 6         │
 │ 14      │ '/projects/SYN-101/timeline'     │ 20             │ 0            │ 50          │ 348        │ 5     │ 6         │
-│ 15      │ '/projects/SYN-101/allocations'  │ 22             │ 1            │ 47          │ 395        │ 1     │ 6         │
+│ 15      │ '/projects/SYN-101/allocations'  │ 20             │ 1            │ 41          │ 395        │ 1     │ 6         │
 │ 16      │ '/projects/SYN-101/coordination' │ 24             │ 1            │ 60          │ 386        │ 2     │ 6         │
 └─────────┴──────────────────────────────────┴────────────────┴──────────────┴─────────────┴────────────┴───────┴───────────┘
 

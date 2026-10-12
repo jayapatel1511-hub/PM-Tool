@@ -37,7 +37,8 @@ export function depPath(type: string | undefined, a: { s: number; e: number; y: 
   const bend = Math.max(12, Math.abs(x2 - x1) / 3)
   return `M ${x1} ${a.y} C ${x1 + out * bend} ${a.y}, ${x2 - into * bend} ${b.y}, ${x2 - into * 2} ${b.y}`
 }
-/** An arrow's tooltip: its link type and lag (left out when the payload has no lag, as for deliverable links). */
+/** An arrow's tooltip: its link type and lag (left out when the link has no lag of its own, as for a deliverable link
+ *  derived from task links). */
 export const depTitle = (type: string | undefined, lag?: number) =>
   [t(`sig.dep.${type ?? 'FinishToStart'}`), lag === undefined ? null : lag ? plural(lag, 'sig.depLag1', 'sig.depLag') : t('sig.depNoLag')].filter(Boolean).join(' · ')
 /** One dependency arrow with a hover target and a tooltip naming its type and lag. */
@@ -70,7 +71,7 @@ interface TimelineData {
   permissions: { manageMilestones: boolean; needsReason: boolean }
   tasks: TimelineTask[]
   dependencies: { id: string; predecessorTaskId: string; successorTaskId: string; type: string; lagDays: number; highlighted: boolean }[]
-  deliverableLinks: { from: string; to: string; type: string; highlighted: boolean; derived: boolean }[]
+  deliverableLinks: { from: string; to: string; type: string; lagDays?: number | null; highlighted: boolean; derived: boolean }[]
   deliverables: { id: string; canEditDates: boolean; createdOn: string }[]
 }
 /** `assumed`: no start date, so the bar starts at the creation date (§40 AC-TL-01). */
@@ -206,7 +207,7 @@ export function TimelineTab() {
   const delRows = new Map(rows.flatMap((r) => (r.kind === 'deliverable' ? [[r.id, r] as const] : [])))
   const arrows = [
     ...data.dependencies.map((dep) => { const a = taskRows.get(dep.predecessorTaskId), b = taskRows.get(dep.successorTaskId); return a && b ? arrow(a.id, a.span, b.id, b.span, dep.highlighted, dep.id, dep.type, dep.lagDays) : null }),
-    ...data.deliverableLinks.map((l) => { const a = delRows.get(l.from), b = delRows.get(l.to); return a && b && !expanded.has(a.id) && !expanded.has(b.id) ? arrow(a.id, a.span, b.id, b.span, l.highlighted, `${l.from}-${l.to}`, l.type) : null }),
+    ...data.deliverableLinks.map((l) => { const a = delRows.get(l.from), b = delRows.get(l.to); return a && b && !expanded.has(a.id) && !expanded.has(b.id) ? arrow(a.id, a.span, b.id, b.span, l.highlighted, `${l.from}-${l.to}`, l.type, l.lagDays ?? undefined) : null }),
   ].filter(Boolean)
 
   const lines = [

@@ -47,6 +47,7 @@ public sealed class TimelineTests(HubFactory f)
         Assert.False(deps.Single(x => x!.G("predecessorTaskId") == next.G("id"))!["highlighted"]!.GetValue<bool>());
         var link = tl["deliverableLinks"]!.AsArray().Single()!; // derived: a task in B follows a task in A
         Assert.Equal((a.S("id"), b.S("id"), true, true), (link.S("from"), link.S("to"), link["derived"]!.GetValue<bool>(), link["highlighted"]!.GetValue<bool>()));
+        Assert.Null(link["lagDays"]); // a derived link has no lag of its own
 
         Assert.True(tl["permissions"]!["manageMilestones"]!.GetValue<bool>());
         Assert.All(tasks, x => Assert.True(x!["canEditDates"]!.GetValue<bool>()));

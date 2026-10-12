@@ -114,7 +114,7 @@ public sealed class SignalTrustApiTests(HubFactory f)
         var next = await d.NewTask(p.Id, TestData.Pm, new { name = "Starts with it" });
         await pm.Post($"/api/v1/tasks/{next.S("id")}/dependencies", new { predecessorTaskId = task.G("id"), type = DependencyTypes.StartToStart, lagDays = 2 }).Result.Json(201);
         var drawings = await Deliverable(p.Id, new { name = "Drawings" });
-        await pm.Post($"/api/v1/deliverables/{drawings.S("id")}/dependencies", new { predecessorDeliverableId = late.G("id"), type = DependencyTypes.FinishToFinish }).Result.Json(201);
+        await pm.Post($"/api/v1/deliverables/{drawings.S("id")}/dependencies", new { predecessorDeliverableId = late.G("id"), type = DependencyTypes.FinishToFinish, lagDays = 3 }).Result.Json(201);
 
         var tl = await Get($"projects/{p.Id}/timeline");
         Assert.Equal(new[] { "Design submission", "Client workshop" }, tl["milestones"]!.AsArray().Select(m => m!.S("name"))); // undated last, not dropped
@@ -123,7 +123,8 @@ public sealed class SignalTrustApiTests(HubFactory f)
         Assert.Equal("2026-11-09", tl["tasks"]!.AsArray().Single(x => x!.G("id") == task.G("id"))!.S("createdOn"));
         var dep = tl["dependencies"]!.AsArray().Single()!;
         Assert.Equal((DependencyTypes.StartToStart, 2), (dep.S("type"), dep.I("lagDays")));
-        Assert.Equal(DependencyTypes.FinishToFinish, tl["deliverableLinks"]!.AsArray().Single()!.S("type"));
+        var link = tl["deliverableLinks"]!.AsArray().Single()!;
+        Assert.Equal((DependencyTypes.FinishToFinish, 3), (link.S("type"), link.I("lagDays"))); // AC-DEPT-06: the arrow tooltip names the type and the lag
 
         var cross = (await Get($"timeline?projects={p.Id}"))["projects"]!.AsArray().Single()!["data"]!;
         Assert.Contains(cross["milestones"]!.AsArray(), m => m!.S("name") == "Client workshop");

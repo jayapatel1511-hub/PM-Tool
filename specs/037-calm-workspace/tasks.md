@@ -31,7 +31,7 @@
 ## Phase 3: Acceptance
 
 - [x] T013 Run `test:clutter` and the existing browser suites (`test:planner`, `test:resources`, `test:handoffs`, `test:coordination`, `test:design-basis`), updating selectors only, plus `build` and `lint`. Record the results. Done 2026-10-12 at `caa76893`; results in verification.md sections 4 and 6.
-- [ ] T014 Run the route crawl (AC-CALM-06) and the click-count paths (AC-CALM-10). Record before and after.
-- [ ] T015 Run the keyboard pass and axe (AC-CALM-08).
+- [x] T014 Run the route crawl (AC-CALM-06) and the click-count paths (AC-CALM-10). Record before and after. Done 2026-10-12 on code `caa76893`: `web/tests/calm-acceptance.cjs` (crawl, two-click reach, quick-filter rows against the `9beace03` UI) and `web/tests/calm-clicks.cjs` (before on a throwaway `9beace03` stack, after on the preview); results in verification.md section 4 and `evidence/`.
+- [x] T015 Run the keyboard pass and axe (AC-CALM-08). Done 2026-10-12 on code `caa76893` with `web/tests/calm-acceptance.cjs` (keyboard on the 17 screens, axe for Priya and Sam with nothing open and with the Filters popover open); results in verification.md section 4.
 - [ ] T016 Run the human sessions SC-CALM-01 (5-second test with 2 PMs) and SC-CALM-02 (Jay's visual review) on the review stack, after Jay's go-ahead to deploy.
 - [ ] T017 Run the wording check on the diff, do a trial merge with no conflicts, and commit on a packet branch. Jay signs off.

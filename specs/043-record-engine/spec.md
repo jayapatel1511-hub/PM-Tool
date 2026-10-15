@@ -1,7 +1,7 @@
 # Feature Specification: Record Engine
 
 **Packet**: 043 | **Feature directory**: `specs/043-record-engine` | **Date**: 2026-10-14
-**Status**: Specified, not started. Engine slices also wait for Jay's constitution VII approval (D1).
+**Status**: Specified, not started. Jay approved the constitution VII entry for the spike on 2026-10-14 (D1).
 **Input**: Jay's 2026-10-14 instruction to build everything in the 2026-10-14 build-approach report (kept outside the repository): its option 2 (one registry driving generic lists and panels) as narrowed by its hybrid, item 5: generic RecordList and RecordPanel for list- and panel-shaped screens only, after a parity spike on Risks and open roles, with a shared table as the fallback.
 **Source**: product specification §47 (§47.1 to §47.9) in `spec-parts/22-record-engine.md`. Related contracts: §23.4 (shared data table, side panel, filter bar), §13.0 (global UI conventions), §13.13 (Risk Register), §18.4 (saved views, FR-VIEW-04), §40.2 (open roles, FR-ROLE-01 to FR-ROLE-05), §41 (calm layout rules), §44 (entity registry and typed contract, packet 040), §43 (flags, `specs/DECISIONS.md`, merge rules, packet 039) and §46 (build stamp and eager registrations, packet 042).
 
@@ -33,7 +33,7 @@ Acceptance criteria are in §47.8; decisions and deferred proposals are in §47.
 
 | # | Decision | Default |
 |---|---|---|
-| D1 | Approve the plan's Complexity Tracking entry (constitution VII) | Not approved: S01 proceeds; engine slices wait; the fallback starts only on an explicit decline. |
+| D1 | Approve the plan's Complexity Tracking entry (constitution VII) | Decided by Jay 2026-10-14: approved for the spike; adoption beyond the spike screens needs a PASS verdict (D3). |
 | D2 | Spike screens | Risks list and panel; open-roles list on the Allocations tab. |
 | D3 | Verdict | Measured by FR-REC-11, recorded in `acceptance.md`; Jay confirms by setting 043-D3's status. |
 | D4 | Spike additions | Behind `flag.record_engine_additions`, off: Risks saved views; open-role sorting, panel with History, export. Kept on KILL; if D1 is declined, open-role export returns to §51.13's deferred list. |
@@ -44,7 +44,7 @@ Acceptance criteria are in §47.8; decisions and deferred proposals are in §47.
 | D9 | Panel registration | One explicit `PANELS` line per converted type in `web/src/app/registrations.tsx` (§46). |
 | D10 | Merge tier | Spike PRs Tier B (Jay merges); adoption and fallback PRs Tier A when parity passes with no test assertion changed. |
 
-Report decision 11 ("run the record-engine spike") becomes D1 here, because constitution VII requires Jay's approval of the Complexity Tracking entry before any engine code. RPT-11 follows it: the spike is not run until D1 is approved.
+Report decision 11 ("run the record-engine spike") becomes D1 here, because constitution VII requires Jay's approval of the Complexity Tracking entry before any engine code. Jay approved it on 2026-10-14 by directing that everything in the report be built, so the spike runs.
 
 ## Acceptance
 

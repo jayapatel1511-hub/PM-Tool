@@ -6112,11 +6112,11 @@ Outside this section:
 
 ### 47.9 Decisions and deferred proposals
 
-Each decision uses its default until Jay decides otherwise, except D1: it is a constitution VII approval, and its default lets no engine work start.
+Each decision uses its default until Jay decides otherwise. D1 is a constitution VII approval; Jay gave it on 2026-10-14 by directing that everything in the report be built.
 
 | # | Decision | Default |
 |---|---|---|
-| D1 | Approve the Complexity Tracking entry in packet 043's plan for the spike and, on a confirmed PASS, adoption | Not approved: the S01 parity run proceeds; engine slices wait; the fallback starts only on an explicit decline. |
+| D1 | Approve the Complexity Tracking entry in packet 043's plan for the spike and, on a confirmed PASS, adoption | Decided by Jay 2026-10-14: approved for the spike; adoption beyond the spike screens follows only a confirmed PASS verdict (D3). |
 | D2 | Which screens the spike converts | The Risks register list and panel, and the open-roles list on the Allocations tab. |
 | D3 | How the verdict is reached | Measured by FR-REC-11 and recorded in the packet's `acceptance.md`; Jay confirms. PASS starts adoption; KILL starts the revert, which keeps the flagged additions, and the fallback. |
 | D4 | What the spike adds | Behind `flag.record_engine_additions`, off: Risks saved views; open-role sorting, panel with History, and export. Adoption PRs add nothing. On KILL the additions are kept on the restored screens (FR-REC-14). If D1 is declined, the spike never runs and the open-role export returns to §51.13's deferred list. |

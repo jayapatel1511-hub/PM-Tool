@@ -96,6 +96,7 @@ Discipline Lead is not stored on `ProjectMember`; it is derived from `ProjectDis
 | `milestone_type` | enum: Kickoff, Field Work, Design Submission, Client Workshop, Permit Submission, Tender, Construction, IFC, Record Drawings, Closeout, Other | Yes | `Design Submission`, `Permit Submission`, `Tender`, `IFC` are treated as **submissions** for "Next Submission" logic. |
 | `date` | date | Yes | Current planned date. |
 | `original_date` | date | auto | Set to `date` on creation; never changes afterwards. Slip = `date − original_date`. |
+| `baseline_date` | date | No | Set only by a PM re-baseline with a reason, and cleared by "Use original dates" (§50.5). It never changes `original_date` or slip; it adds a separate "since re-baseline" figure (`date − baseline_date`). |
 | `description` | text | No | |
 | `discipline_id` | FK | No | Tag for discipline-specific milestones. |
 | `completes_phase_id` | FK Phase | No | Suggests phase advance on completion. |

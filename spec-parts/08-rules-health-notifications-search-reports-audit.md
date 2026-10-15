@@ -281,7 +281,7 @@ Per user: each event type → App / Email / Off (Digest is a single on/off with 
 
 ### 17.6 Delivery
 
-- In-app: `Notification` rows (§24) read by the notification centre; unread count polled every 60 seconds or pushed via server-sent events (Recommendation: polling in MVP).
+- In-app: `Notification` rows (§24) read by the notification centre. The unread count is read again whenever a cheap pulse, polled every 4 seconds while the tab is visible, changes (packet 020). Where `flag.live_events` is on, change events (§46.6) also refresh it; the pulse stays as the fallback and as the behaviour with the flag off.
 - Email: sent by a background worker via an outbound email provider. **TBD — Business Decision Required:** Microsoft Graph `sendMail` from a service mailbox (keeps mail in Exchange Online, respects corporate mail policies) vs. Azure Communication Services Email vs. SMTP relay. Recommendation: Graph with an application permission scoped to a single shared mailbox, subject to IT approval.
 - Emails are plain, branded minimally, with the item key in the subject and deep links. No reply-by-email.
 
@@ -348,7 +348,7 @@ All reports are deterministic queries over current data (or snapshots where note
 
 **Export rules.** CSV is UTF-8 with BOM (Excel-friendly); XLSX has a header row, frozen pane, date-typed columns, and a "Parameters" sheet recording filters and generation time. Exports are limited to 50,000 rows per request (larger runs split by project). Exports are logged (who exported which report when) but not their content.
 
-**Not built.** Custom report builder, pivot tables, scheduled report emails (P3 if requested), charts beyond the milestone strip and sparkline.
+**Not built.** Custom report builder, pivot tables, scheduled report emails (P3 if requested), charts beyond the milestone strip, the sparkline and the fixed deliverable status bar of §49.5.
 
 ---
 
@@ -370,7 +370,7 @@ All reports are deterministic queries over current data (or snapshots where note
 | Access (minimal) | Sign-in events (success), export events |
 | Resource planning | Allocation create/edit/delete, visibility changes, weekly-copy/publish actions, capacity/holiday changes, HR-referenced leave updates/cancellations and import summaries (source/actor/time/counts, no raw CSV or HR reasons) |
 | Calendar subscription | Create/revoke/rotate capability; metadata only, never the token or subscription URL |
-| Not logged | Views/reads of items; comment body edits within the 15-minute window (only "edited" flag); search queries |
+| Not logged | Views/reads of items; comment body edits within the 15-minute window (only "edited" flag); search queries. While the organisation setting `route_counter_enabled` is on, §51.4 keeps aggregate daily open counts per screen with no user, item or text; they are not activity-log entries |
 
 ### 20.2 Structure
 

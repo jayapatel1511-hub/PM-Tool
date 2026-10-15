@@ -6,7 +6,7 @@ Coordination, decisions, risks and issues, meeting actions, templates, a workspa
 Timeline, Files, Team), a team calendar, task hours, reports, notifications and an append-only activity history.
 
 The product specification is [`Engineering-Project-Coordination-Hub-Specification.md`](Engineering-Project-Coordination-Hub-Specification.md)
-(built from `spec-parts/`). It is written as 38 Spec Kit packets in [`specs/`](specs/README.md), each with its plan,
+(built from `spec-parts/`). It is written as 47 Spec Kit packets in [`specs/`](specs/README.md), each with its plan,
 tasks and verification. What is built and what still needs a real environment to prove is in
 [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md).
 

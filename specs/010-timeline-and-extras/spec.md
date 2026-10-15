@@ -95,7 +95,7 @@ from one screen.
 ### Functional Requirements
 
 - **FR-001**: The timeline MUST show a time axis with week, month, and quarter zoom, a today line, and the project's start and target dates. *(FR-VIEW-01, §12.16, §13.5)*
-- **FR-002**: Milestones MUST appear as diamonds on a top lane coloured by status and labelled with name and date, with a hollow marker at the original date when slipped. *(§12.16)*
+- **FR-002**: Milestones MUST appear as diamonds on a top lane coloured by status and labelled with name and date, with a hollow marker at the original date when it differs by more than `slip_display_days` (§50.5), and a second marker at a PM re-baseline date when one is set (§50.5). *(§12.16)*
 - **FR-003**: Deliverables MUST appear as bars from start date (or creation date) to due date, grouped by discipline with collapsible groups, with progress fill and status colour; overdue bars MUST extend to today with a hatched segment. *(§12.16)*
 - **FR-004**: Clicking a timeline element MUST open its detail panel; filters MUST cover discipline, milestone, status, hide completed, and date range; a print-friendly layout and a visible legend MUST be provided. *(§12.16, §13.5)*
 - **FR-005**: The timeline MUST be read-only in this packet. *(§12.16)*

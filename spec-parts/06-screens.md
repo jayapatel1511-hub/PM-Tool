@@ -71,7 +71,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 **Navigation.** Every count and row deep-links into the corresponding list with filters applied and the item panel opened where relevant.
 
-**Key UX considerations.** Numbers must reconcile with the lists they link to (same rules, same code path). Health pill has a "Why?" popover listing the exact indicators that fired (§16). Avoid charts for their own sake; the only visual is the milestone strip and the progress bars in the discipline table. Dashboard for a `Setup` or `On Hold` project shows a banner explaining why evaluation is paused.
+**Key UX considerations.** Numbers must reconcile with the lists they link to (same rules, same code path). Health pill has a "Why?" popover listing the exact indicators that fired (§16). Avoid charts for their own sake; the only visuals are the milestone strip, the progress bars in the discipline table and each discipline row's deliverable status bar (§49.5). Dashboard for a `Setup` or `On Hold` project shows a banner explaining why evaluation is paused.
 
 ---
 
@@ -105,7 +105,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 **Primary actions.** Create task (inline "add row" under a deliverable group or button); open panel; inline edit of status, assignee, due date, priority, progress from the row; multi-select with bulk actions (assign, set/shift due date, set priority, set deliverable, mark On Hold with reason, cancel); export CSV/XLSX of the filtered view.
 
-**Filters.** Quick chips: Mine · Overdue · Blocked · Blocking others · Due this week · Unassigned · Ready for review. Full: status (multi), assignee, reviewer, discipline, deliverable, milestone, priority, due range, start range, indicators, requires review, has dependencies, created by, text search within project.
+**Filters.** Quick chips: Mine · Overdue · Blocked · Blocking others · Due this week · Unassigned · Ready for review. Full: status (multi), assignee, reviewer, discipline, deliverable, milestone, priority, due range, start range, indicators, requires review, has dependencies, created by, text search within project. A PM also has Show deleted, which lists the project's deleted tasks with Restore (§49.2).
 
 **Sorting.** Any column; default due date ascending with nulls last, then priority.
 
@@ -175,7 +175,7 @@ Status pills always contain the status text. Indicators are small chips with an 
 
 **Primary actions.** Create deliverable (PM/DL); open panel; change status (with guards); Issue deliverable (dialog); add task under deliverable; bulk: set milestone, shift due dates, set owner.
 
-**Filters.** Discipline, status, milestone, owner, type, due range, indicators, requires review.
+**Filters.** Discipline, status, milestone, owner, type, due range, indicators, requires review. A PM also has Show deleted, which lists the project's deleted deliverables with Restore (§49.2).
 
 **Sorting.** Default: due date asc; also status, discipline, milestone, progress.
 
@@ -197,7 +197,7 @@ Header (key, name, status pill/menu, indicators). Fields grid (Type, Discipline,
 
 **Users.** PM, DLs, Executives.
 
-**Information.** Two presentations: **Strip/Timeline** (all milestones on a horizontal axis with today marker; diamonds coloured by status; hollow ghost at original date when slipped) and **Table**: Key · Milestone · Type · Date · Original date · Slip (d) · Status (with "why") · Days remaining · Deliverables (n Issued / m total) · Tasks under them (complete/total, overdue, blocked) · Discipline tag · Client-facing. Expand row → targeted deliverables with status, owner, due, progress; and under each, counts of open/overdue/blocked tasks.
+**Information.** Two presentations: **Strip/Timeline** (all milestones on a horizontal axis with today marker; diamonds coloured by status; hollow ghost at original date when slipped (drawn when the slip exceeds `slip_display_days`, §50.5; a set PM re-baseline adds a second ghost at the baseline date and a "Since re-baseline: n d" figure beside the slip, §50.5)) and **Table**: Key · Milestone · Type · Date · Original date · Slip (d) · Status (with "why") · Days remaining · Deliverables (n Issued / m total) · Tasks under them (complete/total, overdue, blocked) · Discipline tag · Client-facing. Expand row → targeted deliverables with status, owner, due, progress; and under each, counts of open/overdue/blocked tasks.
 
 **Primary actions.** Create milestone (PM); edit date (PM; dialog shows slip and cascade option per M-04); mark Complete (PM; confirmation per M-05 and phase suggestion per M-06); cancel milestone (PM).
 
@@ -298,7 +298,7 @@ The first-release personal presentation adds Today, Upcoming, Overdue, Completed
 
 **Users.** Supervisors, Executives, PMs (their members).
 
-**Information.** Grid: rows = people (grouped by supervisor or discipline), columns = next 8 weeks; cell = assigned hours / capacity with heat shading and the number; row summary: projects, open tasks, unestimated tasks, overdue, deadline cluster flag, indicator (Over/OK/Under). Expand row → Project → tasks (key, name, due, est., remaining).
+**Information.** Grid: rows = people (grouped by supervisor or discipline), columns = next 8 weeks; cell = assigned hours / capacity with heat shading by the server's load band (§45.4) and the number; row summary: projects, open tasks, unestimated tasks, overdue, deadline cluster flag, indicator (Over/OK/Under). Expand row → Project → tasks (key, name, due, est., remaining).
 
 **Primary actions.** Quick add in any cell (FR-RES-07). Drag block edge to extend/shorten; drag block to another week or person. Click block → Allocation side panel: hours, label, source, project link, discipline, start/end week, repeat for N weeks, confidence, visibility (Draft / Publish / Confirm as one segmented control), notes, "still valid", move to person, copy, convert to task assignment (creates a task in the linked project and keeps the allocation), delete. Click a cell total → contribution list (§12.15.7). Copy last week → preview (§12.15.12). Publish selected → preview and one summary per employee. Open Vacation & Coverage. Set capacity. Export the visible People or Projects view to CSV.
 
@@ -318,13 +318,15 @@ The first-release personal presentation adds Today, Upcoming, Overdue, Completed
 
 **Users.** Executives, Supervisors, PMs (own projects).
 
-**Information.** Table: Project · PM · Client · Office · Phase · Health (computed and reported, with "why") · Next milestone (name, date, status) · Next submission · Overdue tasks · Blocked tasks · Decisions overdue · High issues · Attention (Critical/Warning counts) · Health trend (sparkline from daily snapshots, last 8 weeks). Summary tiles: Active projects; Red/Yellow/Green counts; submissions in next 14 days; total overdue decisions.
+**Information.** Table: Project · PM · Client · Office · Phase · Health (computed and reported, with "why") · Next milestone (name, date, status) · Next submission · Overdue tasks · Blocked tasks · Overdue deliverables (§49.6) · Decisions overdue · High issues · Attention (Critical/Warning counts) · Health trend (sparkline from daily snapshots, last 8 weeks). Summary tiles: Active projects; Red/Yellow/Green counts; submissions in next 14 days; total overdue decisions.
 
 **Primary actions.** Open project dashboard; open project's Weekly Coordination; export.
 
 **Filters.** PM, discipline, client, office, status, phase, health, project type, submission within N days.
 
 **Sorting.** Default health severity then next submission date.
+
+**Grouping.** None by default; Client, Office or Project type, with per-group counts and sums only (§49.6).
 
 **UX.** Health "why" is always available; reported health that differs from computed is shown as two pills ("Computed: Yellow · Reported: Green — note by PM, 3 days ago") so optimism is visible, not hidden.
 

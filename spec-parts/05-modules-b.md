@@ -180,18 +180,19 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 | Entity | Fields |
 |---|---|
-| `ProjectTemplate` | `name`, `description`, `project_type_id`, `version` (int, incremented on publish), `status` (Draft, Published, Retired), `created_by`, `published_at` |
+| `ProjectTemplate` | `name`, `description`, `project_type_id`, `version` (int, incremented on publish), `status` (Draft, Published, Retired), `offset_day_kind` (CalendarDays, the default, or WorkingDays; §49.4), `created_by`, `published_at` |
 | `TemplateDiscipline` | `template_id`, `discipline_id`, `sort_order`, `is_default_included` (PM can untick at instantiation) |
 | `TemplateMilestone` | `template_id`, `name`, `milestone_type`, `sort_order`, `offset_days_from_anchor` (nullable), `anchor` (ProjectStart | PreviousMilestone | None), `completes_phase_id`, `is_client_facing` |
 | `TemplateDeliverable` | `template_id`, `template_discipline_id`, `name`, `deliverable_type_id`, `template_milestone_id` (target), `due_offset_days` (relative to target milestone; negative = before), `requires_review`, `sort_order`, `description` |
 | `TemplateTask` | `template_id`, `template_deliverable_id` (nullable), `template_discipline_id`, `name`, `description`, `requires_review`, `priority`, `estimated_hours`, `due_offset_days` (relative to deliverable due; negative = before), `assign_to_role` (DisciplineLead | PM | Unassigned), `sort_order` |
 | `TemplateDependency` | `predecessor_template_task_id`, `successor_template_task_id` |
+| `TemplateRole` | `template_id`, `template_discipline_id` (nullable), `role_label`, `from_template_milestone_id`, `from_offset_days`, `through_template_milestone_id`, `through_offset_days`, `planned_hours`, `note`, `sort_order`; created as open roles at instantiation (§51.5) |
 
 **Instantiation algorithm**
 
 1. PM chooses a template; the wizard shows disciplines (tick/untick), milestones (with a date column), and a summary count.
 2. PM enters the project start date and either (a) accepts offsets to compute milestone dates, or (b) types actual milestone dates (common — submission dates are usually contractual). Milestones with no date remain undated and are flagged.
-3. Deliverable due dates = milestone date + `due_offset_days` (blank if milestone undated). Task due dates = deliverable due + task offset. Tasks without a deliverable and without an offset are undated.
+3. Deliverable due dates = milestone date + `due_offset_days` (blank if milestone undated). Task due dates = deliverable due + task offset. Tasks without a deliverable and without an offset are undated. Offsets count calendar days unless the template's `offset_day_kind` is WorkingDays; then every non-zero offset in steps 2 and 3 counts working days of the project office's calendar, and typed dates are never moved (§49.4).
 4. `assign_to_role` resolves: DisciplineLead → the lead chosen in the wizard for that discipline; PM → the creating PM; Unassigned → null.
 5. All items are **copied** into the project with `template_*_id` origin references and the project records `created_from_template_id` and `template_version`.
 6. Dependencies are copied between the corresponding tasks; any dependency whose tasks belong to an unticked discipline is dropped.
@@ -216,7 +217,7 @@ The screen layout is in §13.9. This section defines the data behind each agenda
    - Window = from `max(start_date, today)` to `due_date`. If `due_date < today` (overdue), the entire remainder lands in the current week. If `due_date` is null, remaining hours are shown in a "no due date" bucket and not spread.
    - Spread `remaining_hours` evenly across working days (Mon–Fri) in the window; sum per ISO week.
 2. Per user per week: `assigned_hours`, `capacity_hours` (user override or `default_weekly_capacity_hours`), `load_pct = assigned / capacity`, `unestimated_task_count`, `overdue_count`, `task_count`, `project_count`.
-3. Indicators: **Over-assigned** when `load_pct > 110%` in the current or next week; **Under-assigned** when `load_pct < 40%` for the next 2 weeks *and* `unestimated_task_count = 0` (never call someone under-assigned when their work is unestimated); **Deadline cluster** when ≥ 3 tasks across ≥ 2 projects are due within any 3-day window in the next 14 days.
+3. Indicators: **Over-assigned** when `load_pct > workload_over_pct` (default 110 %) in the current or next week; **Under-assigned** when `load_pct < workload_under_pct` (default 40 %) for the next 2 weeks *and* `unestimated_task_count = 0` (never call someone under-assigned when their work is unestimated); **Deadline cluster** when ≥ 3 tasks across ≥ 2 projects are due within any 3-day window in the next 14 days. Each person-week also has a load band (Over, Near, Within or Light) computed on the server; Near, the amber band, is above `workload_amber_pct` (default 90 %) (§45.4).
 4. The screen always shows the unestimated count next to the hours so the reader can judge reliability, and states the method in a help popover.
 
 **What it deliberately does not do.** The first-release workload calculation does not subtract logged actual task hours from estimates or treat them as an approved timesheet (§36.8). It also does not use leave/holiday calendars (Phase 3, or import from HR), utilisation targets, resource levelling, forecasts beyond 8 weeks, or capacity planning by role.
@@ -225,7 +226,7 @@ The screen layout is in §13.9. This section defines the data behind each agenda
 
 - Each person has `weekly_capacity_hours` (default `default_weekly_capacity_hours` = 37.5) and `working_days` (default Mon–Fri). Stored in `PersonCapacity` with `effective_from` so a change to part-time does not rewrite history.
 - `Leave` is a date range per person with full-day or hours-per-day, copied from HR-approved leave (§12.18). Admin imports it; an Admin/Supervisor may record an HR-referenced manual fallback. Employees do not approve or edit imported leave in Tuesday.
-- Resource availability is calculated per working date using the effective capacity/schedule on that date, then summed into ISO weeks. Daily hours are weekly capacity divided by the number of working days (equal-length working days in MVP). Approved leave is capped to those daily hours; office holidays make that date unavailable. Overlapping leave and holidays reduce the day at most once. A Leave row explains the reduction but is never added to planned hours. Changes preserve existing allocation hours and dates and raise warnings.
+- Resource availability is calculated per working date using the effective capacity/schedule on that date, then summed into ISO weeks. Daily hours are weekly capacity divided by the number of working days (equal-length working days in MVP), unless the person's schedule sets per-weekday hours (§51.10). Approved leave is capped to those daily hours; office holidays make that date unavailable. Overlapping leave and holidays reduce the day at most once. A Leave row explains the reduction but is never added to planned hours. Changes preserve existing allocation hours and dates and raise warnings.
 
 #### 12.15.3 Allocation
 
@@ -304,7 +305,7 @@ The manager starts from current allocations or **Copy last week**. Copy previews
 
 **Supported [MVP-Required]**
 - Horizontal time axis with week and month zoom; today line; project start/target dates.
-- Milestones as diamonds on a top lane, coloured by status, labelled with name and date; slip shown as a hollow diamond at the original date when different.
+- Milestones as diamonds on a top lane, coloured by status, labelled with name and date; slip shown as a hollow diamond at the original date when it differs by more than `slip_display_days` (§50.5); a set PM re-baseline adds a second hollow diamond at the baseline date (§50.5).
 - Deliverables as bars from `start_date` (or `created_at` if no start) to `due_date`, grouped by discipline (collapsible), with progress fill and status colour; Overdue bars extend to today with a hatched segment.
 - Click any element to open its detail panel.
 - Filters: discipline, milestone, status, show/hide completed.
@@ -314,7 +315,7 @@ The manager starts from current allocations or **Copy last week**. Copy previews
 - Tasks as thin bars under their deliverable (collapsible).
 - Dependency arrows between tasks (and derived deliverable dependencies), highlighted when unsatisfied and overdue.
 - Drag a bar or diamond to change dates, with a confirmation dialog showing the change and (for milestones) the optional cascade (M-04). Dates are the only thing that changes; nothing else is recalculated.
-- Baseline (original) dates shown as ghost bars.
+- Baseline (original) dates shown as ghost bars, drawn when they differ by more than `slip_display_days` (§50.5); a set PM re-baseline adds a second ghost bar at the baseline dates (§50.5).
 - A selected set of permitted projects appears as expandable project groups, each with tasks, deliverables, and milestones; date navigation preserves that scope. Cross-project dependencies are not inferred or created.
 
 **Not supported [Out of Scope]**

@@ -31,15 +31,15 @@ A resource manager can staff a project with a role before a person is named, and
 - Start-to-Finish links, negative lag, editing a link's type in place (remove and re-add instead), dependency types in templates, and dependency-driven date cascades.
 - Staleness rules for due date or owner. An unchanged due date or owner is not a problem signal.
 - A dashboard or widget builder, custom fields, an automation builder, live socket updates.
-- Later proposals, deliberately left out: partial/full conflict severity, a pinned status comment with seen-by, a status-mix bar, muting notifications during leave, per-person weekday hours, an intake form, and imported spent hours.
+- Later proposals, deliberately left out: partial/full conflict severity, a pinned status comment with seen-by (§51.7 later adds an optional status note without seen-by), a status-mix bar, muting notifications during leave, per-person weekday hours (now §51.10), an intake form (§51.8 adds a read-only Requested by me view instead), and imported spent hours.
 
 ## Open decisions (defaults used until Jay decides)
 
 | # | Decision | Default |
 |---|---|---|
 | D1 | How an open role is filled | Proposing a normal resource allocation that names the open role. The role becomes Filled when that allocation is created, and returns to Open if the allocation is declined or cancelled. |
-| D2 | Who can create, edit or cancel open roles | Same as proposing an allocation: PM or Discipline Lead on the project (`ProposeAllocation`). |
-| D3 | Where open roles appear | Project Allocations tab, and an "Unfilled roles" section on Workload. Never in a person's capacity, the Weekly Planner or readiness checks. |
+| D2 | Who can create, edit or cancel open roles | Same as proposing an allocation: PM or Discipline Lead on the project (`ProposeAllocation`). Changing or cancelling also needs the PM or the role's creator (§45.6). |
+| D3 | Where open roles appear | Project Allocations tab, and an "Unfilled roles" section on Workload. Never in a person's capacity, the Weekly Planner or readiness checks. Packet 047 (§51.6) later adds a separate Unfilled roles group to the Planner's Projects view, outside person rows and totals. |
 | D4 | Anchor for Start-to-Start lag | A new `StartedAt`, set the first time a task or deliverable leaves Not Started, and backfilled from the activity log. |
 | D5 | What Finish-to-Finish does | Never makes the successor Waiting or Blocked. It drives the date-consistency check (successor due ≥ predecessor due + lag) and warns when the successor finishes before its predecessor. |
 | D6 | A-21 threshold and scope | `status_stale_days` = 15. In Progress or In Review tasks and deliverables that had activity within `task_stale_days`. It never fires for a task whose review has stalled (A-11's condition), and it does not depend on whether A-10 or A-11 is switched on (assumption A5, 2026-10-12). |

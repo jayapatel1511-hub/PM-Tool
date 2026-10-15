@@ -101,7 +101,7 @@ Original item numbers are retained for historical packet citations. Items marked
 6. **Moved to first release:** Resource / Workload View (§12.15, §13.11, §36.8).
 7. **Moved to first release:** Improved Timeline with tasks, arrows, guarded dragging, and baseline ghosts (§36.4).
 8. **Moved to first release:** Saved views (§18.4, §36.7).
-9. **Advanced notifications** — weekly PM summary email; digest content preferences; server-sent events for live unread counts. (Per-project mute ships in MVP as the Muted follow level, §12.18.)
+9. **Advanced notifications**: weekly PM summary email; digest content preferences; live unread counts. (Per-project mute ships in MVP as the Muted follow level, §12.18.) Live unread counts are built with a 4-second pulse (packet 020); server-sent change events are added by §46 behind `flag.live_events`, and the pulse stays.
 10. **Explicit deliverable-to-deliverable dependencies**; dependency lag days.
 11. **Working-day calendars** for thresholds (statutory holidays by office).
 12. **Search over descriptions and comments**.
@@ -135,7 +135,7 @@ No AI features are planned in any phase of this specification.
 | Payroll, sensitive HR records, leave approval/balances/accruals | HR remains authoritative; importing approved availability and planning coverage are in scope. |
 | Timesheets or time tracking of any kind | Duplicates ERP/timesheet systems; poisons task estimates with compliance behaviour. |
 | Full ERP or CRM functionality | — |
-| CPM scheduling, critical path, float, resource levelling, baselining beyond original dates, MS Project/P6 import-export | Primavera/Project replacement is a non-goal. |
+| CPM scheduling, critical path, float, resource levelling, baselining beyond original dates (one PM re-baseline date per milestone and deliverable, §50.5, is the only exception), MS Project/P6 import-export | Primavera/Project replacement is a non-goal. |
 | CAD/BIM authoring, model viewing, drawing mark-up | Engineering tools do this. Location metadata and links to external markups/viewpoints are approved in §38.3; no embedded authoring/viewer is added. |
 | Document management: file storage, file versioning, check-in/out, sending transmittals | SharePoint/DMS remains the file system of record. Registered revision metadata, revision-use tracking and immutable submission manifests are approved in §37.4–§37.5; Tuesday stores references and coordination evidence only. |
 | Email client features, reply-by-email, Teams/chat replacement | Use Teams and Outlook; the Hub links by item key. |

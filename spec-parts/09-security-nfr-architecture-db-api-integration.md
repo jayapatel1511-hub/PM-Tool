@@ -119,7 +119,7 @@ Layering inside each module: API endpoints (thin) → application services / com
 - Generated typed API client from OpenAPI; server state via TanStack Query with per-project cache keys and invalidation on mutations.
 - Shared component library: status pill, indicator chip, people picker, date picker, data table (virtualised, column chooser, group-by), side panel, filter bar, confirmation dialog with consequence text, "Why?" popover.
 - Filter/sort/group state encoded in the URL; panels deep-linkable.
-- Feature flags (simple config) for MVP-Recommended items and P2 modules so they can ship dark.
+- Feature flags as organisation settings (§43.4) so unreleased additions can merge dark; an existing feature is never put behind a flag.
 - Strings externalised (i18n-ready) from the first component.
 
 ### 23.5 Rules evaluation and background processing
@@ -130,7 +130,7 @@ Layering inside each module: API endpoints (thin) → application services / com
 2. After any write in a project that can affect derived state (task/deliverable/milestone/decision/dependency/project status), the transaction commits and publishes a `ProjectChanged(project_id)` event through a transactional **outbox** table. A background worker consumes it (debounced per project for ~2 seconds) and re-evaluates the whole project, writing results to `task_state`, `deliverable_state`, `milestone_state`, and `project_state` tables and upserting `attention_item` rows. Whole-project evaluation is simple and fast at the expected scale (thousands of tasks), and avoids incremental-graph bugs.
 3. The worker **diffs** new state against previous state to detect transitions (became Blocked, became unblocked, milestone became At Risk, new Critical attention item) and emits notification events for exactly those transitions — this is how "notify when something *becomes* overdue" works without spamming.
 4. A **nightly job** (after midnight in `org_time_zone`) re-evaluates every Active project (date rollovers), writes health snapshots, expires health overrides and snoozes, and queues the daily digest for `digest_send_time_local`.
-5. A **15-minute job** re-evaluates projects whose outbox processing failed and retries email sends. A **daily** Graph user sync marks leavers inactive (§23.6).
+5. A **15-minute job** re-evaluates projects whose outbox processing failed and retries email sends. An outbox event that fails 10 times is dead-lettered and waits for an Admin to retry it on Admin > Operations (§48.4); the nightly job still re-evaluates every Active project. A **daily** Graph user sync marks leavers inactive (§23.6).
 6. Reads (dashboards, lists, My Work, portfolio) query the materialised state tables with ordinary SQL — fast filtering and sorting by indicator, no rule logic in SQL.
 
 > **Design note.** This hybrid avoids the two classic failure modes. Pure compute-on-read puts rule logic in SQL views and again in application code for notifications, and the two drift. Pure nightly batch leaves a task showing "not blocked" all day after its predecessor slipped. Evaluating the whole project on every change through one pure function, then diffing against the last result, gives a single source of truth, near-real-time indicators, and transition-based notifications from the same code path. Whole-project recomputation sounds wasteful but a project rarely exceeds a few thousand tasks, and simplicity wins.
@@ -154,11 +154,11 @@ Scheduling implementation: Quartz.NET (or Hangfire) hosted in the API process wi
 - IaC: Bicep modules for App Service plan and app, PostgreSQL Flexible Server (with private endpoint/VNet integration), Key Vault, App Insights/Log Analytics, and (if used) Static Web App. Parameter files per environment.
 - CI: build, unit tests, rules-engine tests, lint, dependency scan, OpenAPI generation, SPA build, accessibility checks on key pages; PR required for main.
 - CD: GitHub Actions or Azure DevOps Pipelines (**TBD** by existing tooling); database migrations run as a deployment step with backup-before-migrate in prod; blue/green via App Service deployment slots (Rec).
-- Configuration: environment variables from App Service settings referencing Key Vault; feature flags as configuration.
+- Configuration: environment variables from App Service settings referencing Key Vault; feature flags as organisation settings (§43.4).
 
 ### 23.8 Observability
 
-Application Insights (browser + server): requests, dependencies, exceptions, custom events (evaluation duration per project, attention items count, digest sent count, emails failed), availability test on `/health` (checks database and outbox lag). Dashboards and alerts: error rate > 2% for 10 min; outbox lag > 10 min; nightly job failed; digest not sent by 08:00; database CPU > 80% sustained.
+Application Insights (browser + server): requests, dependencies, exceptions, custom events (evaluation duration per project, attention items count, digest sent count, emails failed, and, while the organisation setting `route_counter_enabled` is on, aggregate daily screen-open counts and load-time bands per route with no user, item or text under §51.4), availability test on `/health` (checks database and outbox lag; dead-lettered outbox events are left out of the lag, §48.4). Dashboards and alerts: error rate > 2% for 10 min; outbox lag > 10 min; any dead-lettered outbox event (§48.4); nightly job failed; digest not sent by 08:00; database CPU > 80% sustained. Browser errors also reach the application log through the log-only client-error endpoint (§48.5).
 
 ### 23.9 Azure services and sizing (assumptions)
 
@@ -315,7 +315,7 @@ Calendar subscription storage (if shipped): one per-user hashed capability with 
 | `notification` | In-app notifications | `user_id`, `event_type`, `project_id`, `item_type`, `item_id`, `item_key`, `title`, `body`, `link_path`, `collapse_key`, `created_at`, `read_at`, `emailed_at`, `digest_included_at` | `id` | → `app_user`; index (`user_id`,`read_at`,`created_at desc`) |
 | `notification_preference` | Per-user, per-event channels | `user_id`, `event_type`, `in_app`, `email` | `id`; unique(`user_id`,`event_type`) | → `app_user` |
 | `project_follow` | Per-user project following; the Muted level replaces a separate mute table (§12.18) | `user_id`, `project_id`, `level` (AllActivity, MyItemsOnly, Muted), `source` (Assignment, Manual), `last_seen_at` (Following feed read marker), `created_at`, `updated_at` | `id`; unique(`user_id`,`project_id`) | → `app_user`, `project` (cascade) |
-| `outbox_event` | Transactional outbox | `id`, `event_type`, `payload` (jsonb), `created_at`, `processed_at`, `attempts`, `last_error` | `id` | index on (`processed_at`) where null |
+| `outbox_event` | Transactional outbox | `id`, `event_type`, `payload` (jsonb), `created_at`, `processed_at`, `attempts`, `last_error`, `dead_lettered_at` (§48.4) | `id` | index on (`processed_at`) where null |
 | `task_state` | Materialised derived state | `task_id`, `project_id`, `is_overdue`, `days_overdue`, `is_due_soon`, `is_waiting`, `is_blocked`, `blocked_since`, `blocked_by` (jsonb: tasks/decisions/manual), `is_blocking`, `blocking_count`, `is_stale`, `is_unassigned`, `is_missing_due_date`, `is_date_inconsistent`, `inconsistency_detail`, `affected_milestone_ids` (uuid[]), `evaluated_at` | `task_id` | → `task` (cascade) |
 | `deliverable_state` | Materialised derived state | `deliverable_id`, `project_id`, `progress_pct`, `task_total`, `task_complete`, `task_open`, `task_overdue`, `task_blocked`, `estimated_hours_total`, `remaining_hours`, `is_overdue`, `is_due_soon`, `is_at_risk`, `is_unassigned`, `is_date_inconsistent`, `slip_days`, `derived_predecessor_ids`, `derived_successor_ids`, `evaluated_at` | `deliverable_id` | → `deliverable` (cascade) |
 | `milestone_state` | Materialised status | `milestone_id`, `project_id`, `status`, `status_reasons` (jsonb), `days_remaining`, `slip_days`, `deliverable_total`, `deliverable_issued`, `task_open`, `task_overdue`, `task_blocked`, `evaluated_at` | `milestone_id` | → `milestone` (cascade) |
@@ -329,7 +329,7 @@ Calendar subscription storage (if shipped): one per-user hashed capability with 
 
 | Entity | Key fields | PK | FKs |
 |---|---|---|---|
-| `project_template` | `name`, `description`, `project_type_id`, `version`, `status`, `published_at`, `created_by` | `id` | → `project_type` |
+| `project_template` | `name`, `description`, `project_type_id`, `version`, `status`, `offset_day_kind` (CalendarDays or WorkingDays, default CalendarDays, CHECK), `published_at`, `created_by` | `id` | → `project_type` |
 | `template_discipline` | `template_id`, `discipline_id`, `sort_order`, `is_default_included` | `id` | → `project_template`, `discipline` |
 | `template_milestone` | `template_id`, `name`, `milestone_type`, `sort_order`, `anchor`, `offset_days_from_anchor`, `completes_phase_id`, `is_client_facing` | `id` | → `project_template`, `phase` |
 | `template_deliverable` | `template_id`, `template_discipline_id`, `name`, `deliverable_type_id`, `template_milestone_id`, `due_offset_days`, `requires_review`, `sort_order`, `description` | `id` | → template tables, `deliverable_type` |
@@ -535,6 +535,7 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET/POST /projects/{id}/deliverables`, `GET/PATCH/DELETE /deliverables/{id}` | Deliverables (list includes `state`) | Deliverable.* |
 | `POST /deliverables/{id}:transition` | `{ toStatus, reason }` | Deliverable.ChangeStatus |
 | `POST /deliverables/{id}:issue` | `{ issuedDate, revision, issuedTo, note, confirmOpenTasks }` | Deliverable.ChangeStatus |
+| `GET /projects/{id}/deleted?type={type}`, `GET /projects/{id}/deleted/export`, `POST /tasks/{id}/restore`, `POST /deliverables/{id}/restore`, `POST /milestones/{id}/restore` | Show deleted and Restore for tasks, deliverables and milestones; `If-Match` checked when sent (§49.2) | Project.PM |
 | `GET/POST /projects/{id}/tasks`, `GET/PATCH/DELETE /tasks/{id}` | Tasks (list includes `state`) | Task.* |
 | `POST /tasks/{id}:transition` | `{ toStatus, reason, comment }` | Task.ChangeStatus (role/ownership evaluated per transition) |
 | `POST /tasks/{id}:assign` | `{ assigneeId, reviewerId }` | Task.Assign |
@@ -618,7 +619,7 @@ Including `permissions.allowedTransitions` lets the UI render only valid actions
 
 ### 25.10 Rate limits and idempotency
 
-Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-After`. Create endpoints accept an optional `Idempotency-Key` header (Rec) to make retries safe on flaky connections; not required for MVP.
+Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-After`. Create endpoints accept an optional `Idempotency-Key` header (Rec) to make retries safe on flaky connections; not required for MVP. The server claims the key before it runs the request, so two identical requests sent together create one item: the second gets the first response or `409` with `code: "idempotency_in_progress"` (§48.7).
 
 ---
 

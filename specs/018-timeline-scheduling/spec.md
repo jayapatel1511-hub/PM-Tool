@@ -94,7 +94,7 @@ cascade.
 - **FR-001**: The timeline MUST show tasks as thin, collapsible bars under their deliverables. *(FR-VIEW-02, §12.16)*
 - **FR-002**: The timeline MUST draw arrows for task dependencies and derived deliverable dependencies, highlighted when a predecessor is unfinished and overdue. *(§12.16)*
 - **FR-003**: Users allowed to change an item's dates MUST be able to drag its bar or diamond; a confirmation MUST show the change (and for milestones the optional cascade), and only dates MUST change. *(§12.16)*
-- **FR-004**: The timeline MUST show ghost bars at original dates. *(§12.16)*
+- **FR-004**: The timeline MUST show ghost bars at original dates, drawn when they differ by more than `slip_display_days` (§50.5), and a second ghost bar at a PM re-baseline when one is set (§50.5). *(§12.16)*
 - **FR-005**: The milestone cascade MUST optionally include the tasks of shifted deliverables, previewed first and logged per item. *(M-04)*
 - **FR-006**: The timeline MUST NOT compute critical paths, float, or levelling, or move any item the user did not confirm. *(§12.16, §30)*
 

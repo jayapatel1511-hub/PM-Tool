@@ -14,11 +14,11 @@ Outside this amendment: changes to §37.6's allocation model, its proposal and c
 
 - **FR-ROLE-01.** An open role MUST be a project-scoped record of unfilled demand: a role label (1–80 characters), an optional project discipline of that project, a from date and a through date (inclusive, through ≥ from), planned hours greater than 0 under the FR-CAP-03 hour rules, an optional note, and a status of Open, Filled or Cancelled. A new role is Open. Its creator is its accountable owner. It is soft-deleted only, carries a row version (G-06, G-07), and every create, change, fill, reopen and cancel writes an activity entry in the same transaction. A stale change returns a conflict and stores nothing.
 
-- **FR-ROLE-02.** Creating, changing or cancelling an open role MUST require the same permission as proposing an allocation (§8.10: PM or Discipline Lead within the project). Everyone else is refused. On a Complete project each of these is a correction and needs a reason, as an allocation proposal does.
+- **FR-ROLE-02.** Creating, changing or cancelling an open role MUST require the same permission as proposing an allocation (§8.10: PM or Discipline Lead within the project). Changing or cancelling also requires the actor to be a PM of the project or the role's creator, its accountable owner (`Permissions.ManageOpenRole`, §45.6). Everyone else is refused. On a Complete project each of these is a correction and needs a reason, as an allocation proposal does.
 
 - **FR-ROLE-03.** An open role MUST be filled only by proposing a normal §37.6 allocation that names it. The proposal is refused unless the role is Open, is on the same project, and the allocation's date range lies inside the role's range. Creating the Proposed allocation, setting the role to Filled and recording the filling allocation happen in one transaction, so two simultaneous proposals produce exactly one allocation. Declining or cancelling that allocation returns the role to Open and clears the filling allocation; confirming, editing or completing it leaves the role Filled. The allocation keeps every §37.6 rule, including confirmation by the person's Supervisor or an Admin.
 
-- **FR-ROLE-04.** Open roles MUST appear on the project's Allocations tab and in an "Unfilled roles" section of Workload. Workload shows each Open role's hours for every week in its range, spread over the working days of the range by the FR-CAP-03 rule using the project's office calendar (there is no person calendar). Open roles never enter a person's capacity, committed load (FR-CAP-04), Workload indicators, the Weekly Planner or readiness capacity checks (§38.2).
+- **FR-ROLE-04.** Open roles MUST appear on the project's Allocations tab and in an "Unfilled roles" section of Workload. Workload shows each Open role's hours for every week in its range, spread over the working days of the range by the FR-CAP-03 rule using the project's office calendar (there is no person calendar). Open roles never enter a person's capacity, committed load (FR-CAP-04), Workload indicators, the Weekly Planner's person rows, cells, totals or indicators, or readiness capacity checks (§38.2). The Weekly Planner's Projects view lists them in a separate Unfilled roles group (§51.6).
 
 - **FR-ROLE-05.** An open role MUST be visible only to viewers who can view its project (§8.7). For everyone else it is absent from every list, export, search result, count, notification and history, and no total differs because of it.
 
@@ -157,8 +157,8 @@ Jay accepted every default below on 2026-10-11 ("lets start build").
 | # | Decision | Default used |
 |---|---|---|
 | D1 | How an open role is filled | Proposing a normal allocation that names the role. The role becomes Filled when that allocation is created and returns to Open if the allocation is declined or cancelled. |
-| D2 | Who can create, change or cancel open roles | Whoever may propose an allocation: PM or Discipline Lead within the project. |
-| D3 | Where open roles appear | The project's Allocations tab and Workload's Unfilled roles section. Never in a person's capacity, the Weekly Planner or readiness checks. |
+| D2 | Who can create, change or cancel open roles | Whoever may propose an allocation: PM or Discipline Lead within the project. Changing or cancelling also needs the PM or the role's creator (§45.6). |
+| D3 | Where open roles appear | The project's Allocations tab and Workload's Unfilled roles section. Never in a person's capacity, the Weekly Planner or readiness checks. Packet 047 (§51.6) later adds a separate Unfilled roles group to the Planner's Projects view, outside person rows and totals. |
 | D4 | Anchor for Start-to-Start lag | `started_at`, set the first time an item leaves Not Started and backfilled from the activity log. |
 | D5 | What Finish-to-Finish does | Never makes the successor Waiting or Blocked. It drives the date check and warns when the successor finishes before its predecessor. |
 | D6 | A-21 threshold and scope | `status_stale_days` = 15; In Progress or In Review tasks and deliverables with activity within `task_stale_days`; never for a task whose review has stalled (A-11's condition), whether or not A-10 and A-11 are switched on. |
@@ -168,4 +168,4 @@ Jay accepted every default below on 2026-10-11 ("lets start build").
 
 Open roles take up the project-scoped part of the role-level demand that §27.3 and §39.12 left out: dated demand on one project, filled by a named person. Long-term role-level forecasting stays out.
 
-Deferred follow-up proposals, outside packet 036: partial and full conflict severity; a pinned status comment with seen-by; a status-mix bar; muting notifications during leave; per-person weekday hours; an intake form; and imported spent hours.
+Deferred follow-up proposals, outside packet 036: partial and full conflict severity; a pinned status comment with seen-by (§51.7 later adds an optional status note without seen-by); a status-mix bar; muting notifications during leave; per-person weekday hours (now §51.10); an intake form (§51.8 adds a read-only Requested by me view instead); and imported spent hours.

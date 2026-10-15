@@ -19,7 +19,7 @@ A Supervisor opening My Staff sees, beside each direct report's task counts, how
 - A Manager Home or exception dashboard; People and Person Profile; Overlapping Plans; Deliverable Pressure (all still deferred under §39.12).
 - Changes to visible planner hours, scope or permissions (PLN-05 to PLN-16), Workload, My Week, readiness, or the Staff Assignments report. The approved hidden-work partial-view correction and Under-planned lookahead suppression are included.
 - Holding or redirecting immediate in-app or email notices, the weekly summary or the Following feed.
-- An "away" marker beside names elsewhere in the product; sorting or filtering My Staff by free hours; a next-week column.
+- An "away" marker beside names elsewhere in the product (§51.10 later adds one on the project Team tab); sorting or filtering My Staff by free hours; a next-week column.
 
 ## Decisions (defaults used under the build request)
 

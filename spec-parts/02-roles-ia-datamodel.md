@@ -93,6 +93,7 @@ Legend: **Y** = allowed; **O** = allowed for own items only (see 8.6); **D** = a
 | Add/remove disciplines, set Discipline Lead | Y | — | — | — | — |
 | Set/clear health override | Y | — | — | — | — |
 | Create / edit / delete milestone; change milestone date | Y | — | — | — | — |
+| Re-baseline a milestone or deliverable, or return it to its original dates, with a reason (§50.5) | Y | — | — | — | — |
 | Mark milestone Complete | Y | — | — | — | — |
 | Create deliverable | Y | D | — | — | — |
 | Edit deliverable (fields, owner, dates) | Y | D | O (owner) | — | — |
@@ -465,11 +466,18 @@ All thresholds are stored in `OrgSetting`, editable by System Administrators, wi
 | `health_blocked_days_yellow` | 5 | A task blocked longer than this contributes to Yellow |
 | `health_override_expiry_days` | 14 | Manual health override validity |
 | `chain_depth_limit` | 10 | Maximum depth for dependency chain display |
+| `slip_display_days` | 0 | Smallest slip, in calendar days, that draws a baseline ghost or "Moved n d" label (§50.5); 0 draws every slip, as before |
+| `picker_recent_days` | 90 | People removed from a project within this many days still rank as on the project in the person picker (§50.3) |
+| `activity_burst_minutes` | 10 | Window for grouping one actor's consecutive changes to one item when "Group changes" is on (§50.6) |
+| `route_counter_enabled` | false | Aggregate daily screen-open counts for the pilot (§51.4); Jay turns it on for the pilot only |
 | `allow_self_review` | false | Whether assignee may be their own reviewer |
 | `complete_project_edit_window_days` | 30 | Days a Complete project stays editable by PM before Archive is suggested |
 | `default_weekly_capacity_hours` | 40 | First-release Resource View; **TBD** |
 | `org_time_zone` | **TBD** | "Today" for date rules (Recommendation: single organisation time zone in MVP) |
 | `digest_send_time_local` | 07:00 | Daily digest |
+| `workload_over_pct` | 110 | Workload Over band, Over-assigned (§45.4) |
+| `workload_amber_pct` | 90 | Workload Near (amber) band (§45.4) |
+| `workload_under_pct` | 40 | Workload Light band, Under-assigned (§45.4) |
 
 ### 10.5 Scales
 

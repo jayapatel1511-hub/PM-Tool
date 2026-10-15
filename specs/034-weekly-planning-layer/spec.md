@@ -24,7 +24,7 @@ A Supervisor sees, for each direct report and each of the next weeks, the person
 
 - Any change to packet 029: the resource allocation model, its PM/DL proposal and Supervisor confirmation, confirmation snapshot, per-date versions, availability override editors and statuses (§37.6) stay as built. The only new write to a §37.6 record is the time-away range command, which applies FR-CAP-02 unchanged.
 - Any change to the Workload grid (§12.15, §13.11, packet 017), its Over-assigned/Under-assigned/Deadline cluster rules or its FR-CAP-04 committed load; any change to packet 032's readiness capacity checks (§38.2).
-- Deferred to later proposals (§39.12): Manager Home; People and Person Profile; role-level long-term demand; planned versus actual effort; Overlapping Plans and cross-team planning; Deliverable Pressure and planned staffing on the Project Dashboard; self-recorded time away; pointer drag of planner blocks; conversion of an entry to a task assignment; comments on planning entries; Team Capacity and Allocations by Source reports; a decimal default capacity; moving Workload's fixed thresholds into settings.
+- Deferred to later proposals (§39.12): Manager Home; People and Person Profile; role-level long-term demand; planned versus actual effort; Overlapping Plans and cross-team planning; Deliverable Pressure and planned staffing on the Project Dashboard; self-recorded time away; pointer drag of planner blocks; conversion of an entry to a task assignment; comments on planning entries; Team Capacity and Allocations by Source reports (later specified in §51.3, packet 047); a decimal default capacity; moving Workload's fixed thresholds into settings (later specified in §45.4, packet 041).
 - Leave management, HR integration, automatic assignment, resource levelling, forecasting, billing, payroll or productivity ranking (§30).
 - v1.1's navigation restructure, section numbers and identifiers.
 
@@ -71,7 +71,7 @@ A Supervisor's scenario planning is visible to nobody else, through any channel,
 **Acceptance Scenarios**:
 
 1. **AC-PLN-02.** The draft and its hours are absent from other users' planner, My Week, search, exports, notifications, digests, activity and totals; the Admin sees it only in logged data-correction mode.
-2. **AC-PLN-12.** Entries and Confirmed allocations on Restricted projects are hidden from viewers who cannot view the project; totals are labelled partial when either overlaps the requested weeks; Under-planned is suppressed. Jay confirmed inclusion of hidden Confirmed allocations on 2026-10-12; Planner, the person picker and My Staff share this label.
+2. **AC-PLN-12.** Entries and Confirmed allocations on Restricted projects are hidden from viewers who cannot view the project; totals are labelled partial when either overlaps the requested weeks; Under-planned is suppressed. The Weekly Planner shows the Partial view label on that person's row and states their remaining capacity figures as upper bounds (§45.2, packet 041). Jay confirmed inclusion of hidden Confirmed allocations on 2026-10-12; Planner, the person picker and My Staff share this label.
 
 ### User Story 4 — Record my own non-project work (Priority: P2)
 

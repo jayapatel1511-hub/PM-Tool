@@ -3059,6 +3059,32 @@ namespace Hub.Api.Data.Migrations
                     b.ToTable("email_message", "hub");
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.ExternalIdentity", b =>
+                {
+                    b.Property<string>("Provider")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("provider");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("subject");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Provider", "Subject")
+                        .HasName("pk_external_identity");
+
+                    b.HasIndex("UserId", "Provider")
+                        .IsUnique()
+                        .HasDatabaseName("ix_external_identity_user_id_provider");
+
+                    b.ToTable("external_identity", "hub");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.ExternalParty", b =>
                 {
                     b.Property<Guid>("Id")
@@ -10155,6 +10181,16 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_discipline_review_review_rounds_round_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ExternalIdentity", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_external_identity_app_user_user_id");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.ExternalParty", b =>

@@ -107,6 +107,8 @@ in [`restore.md`](docs/runbooks/restore.md) and jobs and alerts in [`jobs.md`](d
 
 ## Microsoft Entra ID
 
+Microsoft and Google sign-in is now the default server mode. It permits immediate registration with any email domain, preserves server-owned permissions, and uses revocable cookie sessions. Configure both provider registrations and private credentials before starting it outside Development. See the [social sign-in runbook](docs/runbooks/social-sign-in.md), including the mapping required for existing profiles and the real-account acceptance checks. The single-tenant Entra configuration below remains available as an alternative mode.
+
 Each environment has two app registrations in the organisation's tenant:
 
 1. **Hub API**: expose an API (`api://<api-app-id>`) with one delegated scope, `access_as_user`; set the manifest's

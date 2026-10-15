@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { RotateCcw } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
+import { socialSignInError } from '@/lib/auth'
 import { AccentDot, Empty, ErrorBanner, Field, Loading, Page, Section, tdCls, thCls } from '@/components/hub/common'
 import { Key, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -24,6 +25,8 @@ interface Prefs {
 /** Preferences (§17.4, §13.17): channel per event, the daily digest, and follow level per project. A form page: the
  *  fields sit in a 760 px region (design §5). */
 export function PreferencesPage() {
+  const signInConfig = useQuery({ queryKey: ['sign-in-config'], queryFn: () => get<{ authMode: string }>('config') })
+  const signInMethods = useQuery({ queryKey: ['sign-in-methods'], enabled: signInConfig.data?.authMode === 'Social', queryFn: () => get<{ available: string[]; connected: string[] }>('auth/social/providers') })
   const qc = useQueryClient()
   const q = useQuery({ queryKey: ['preferences'], queryFn: () => get<Prefs>('me/preferences') })
   const [err, setErr] = useState<unknown>(null)
@@ -49,6 +52,17 @@ export function PreferencesPage() {
     <Page {...header}>
       <div className="flex w-full max-w-[760px] flex-col gap-6">
         {err != null && <ErrorBanner error={err} />}
+        {signInConfig.data?.authMode === 'Social' && <Section title={t('auth.signInMethods')} id="sign-in-methods">
+          <div className="space-y-3 px-5 py-4">
+            <p className="text-sm text-muted-foreground">{t('auth.signInMethodsHint')}</p>
+            {socialSignInError() && <p role="alert" className="text-sm text-bad">{socialSignInError()}</p>}
+            {new URLSearchParams(window.location.search).get('accountLinked') === 'true' && <p role="status" className="text-sm">{t('auth.accountLinked')}</p>}
+            {signInMethods.isPending ? <Loading rows={2} /> : signInMethods.error ? <ErrorBanner error={signInMethods.error} retry={() => signInMethods.refetch()} /> :
+              <div className="flex flex-wrap gap-3">{signInMethods.data?.available.map(provider => <form key={provider} method="post" action={`/api/v1/auth/social/link/${encodeURIComponent(provider)}`}>
+                <Button type="submit" variant="outline" disabled={signInMethods.data.connected.includes(provider)}>{t(signInMethods.data.connected.includes(provider) ? 'auth.providerConnected' : 'auth.connectProvider', { provider })}</Button>
+              </form>)}</div>}
+          </div>
+        </Section>}
         <Section title={t('prefs.digest')} id="digest">
           <div className="divide-y">
             <div className="px-5 py-4">

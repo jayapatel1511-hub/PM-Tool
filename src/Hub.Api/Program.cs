@@ -108,7 +108,7 @@ if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"
 }
 app.UseDefaultFiles();
 app.UseStaticFiles();
-if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
+if (AuthSetup.LocalAuthAllowed(app.Environment, cfg) || cfg["Auth:Mode"] == SocialAuth.Scheme)
     app.Use(async (ctx, next) =>
     {
         if (ctx.Request.Path.StartsWithSegments("/api") && !HttpMethods.IsGet(ctx.Request.Method) && !HttpMethods.IsHead(ctx.Request.Method) && !HttpMethods.IsOptions(ctx.Request.Method))
@@ -138,6 +138,7 @@ app.MapGet("/health", async (HubDb db, TimeProvider clock) =>
 }).AllowAnonymous();
 
 var api = app.MapGroup("/api/v1");
+if (cfg["Auth:Mode"] == SocialAuth.Scheme) SocialAuth.Map(api);
 if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
 {
     api.MapPost("/auth/local/sign-in", async (LocalPasswordStore store, HubDb db, HttpContext ctx, LocalSignIn input, PartitionedRateLimiter<string> perName, TimeProvider clock) =>

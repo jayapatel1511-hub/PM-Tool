@@ -80,7 +80,8 @@ public static class HubModules
         // Public client configuration for the SPA sign-in (no secrets: client and tenant IDs are public values).
         api.MapGet("/config", (IConfiguration cfg, IHostEnvironment env) => new
         {
-            authMode = AuthSetup.DevAuthAllowed(env, cfg) ? "Development" : AuthSetup.LocalAuthAllowed(env, cfg) ? "LocalPassword" : "Entra",
+            authMode = AuthSetup.DevAuthAllowed(env, cfg) ? "Development" : AuthSetup.LocalAuthAllowed(env, cfg) ? "LocalPassword" : cfg["Auth:Mode"] == SocialAuth.Scheme ? "Social" : "Entra",
+            providers = cfg["Auth:Mode"] == SocialAuth.Scheme ? SocialAuth.Providers.Where(p => SocialAuth.Configured(cfg, p)).ToArray() : [],
             entra = new { clientId = cfg["Auth:Entra:SpaClientId"], tenantId = cfg["Auth:Entra:TenantId"], apiScope = cfg["Auth:Entra:ApiScope"] },
         }).AllowAnonymous();
     }

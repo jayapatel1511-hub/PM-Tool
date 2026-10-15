@@ -57,7 +57,7 @@ export function LandingPage() {
   return <ApprovedHero />
 }
 
-export function LoginPage({ mode, onSignIn, onLocalSignIn, users, onPick, error, idle }: { mode: 'Development' | 'LocalPassword' | 'Entra'; onSignIn: () => void; onLocalSignIn: (userName: string, password: string) => Promise<void>; users?: DevUser[]; onPick: (email: string) => void; error?: string; idle?: boolean }) {
+export function LoginPage({ mode, providers = [], onSignIn, onLocalSignIn, users, onPick, error, idle }: { mode: 'Development' | 'LocalPassword' | 'Entra' | 'Social'; providers?: string[]; onSignIn: (provider?: string) => void; onLocalSignIn: (userName: string, password: string) => Promise<void>; users?: DevUser[]; onPick: (email: string) => void; error?: string; idle?: boolean }) {
   const [userName, setUserName] = useState(''), [password, setPassword] = useState(''), [busy, setBusy] = useState(false)
   async function submit(e: FormEvent) { e.preventDefault(); setBusy(true); try { await onLocalSignIn(userName, password); setPassword('') } finally { setBusy(false) } }
   return <PublicShell>
@@ -77,7 +77,10 @@ export function LoginPage({ mode, onSignIn, onLocalSignIn, users, onPick, error,
         <p className="mt-2 text-muted-foreground">{t(`entrance.intro.${mode}`)}</p>
         {idle && <p className="mt-4 flex gap-2 rounded-md border bg-muted px-4 py-3 text-sm"><Info aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />{t('entrance.idle')}</p>}
         {error && <p role="alert" className="mt-4 flex gap-2 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad"><AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0" />{error}</p>}
-        {mode === 'Entra' ? <Button size="lg" className="mt-6 w-full whitespace-normal" onClick={onSignIn}><MicrosoftMark />{t('entrance.microsoft')}</Button> : mode === 'LocalPassword' ?
+        {mode === 'Social' ? <div className="mt-6 space-y-3">
+          {providers.map(provider => <Button key={provider} size="lg" variant="outline" className="w-full whitespace-normal" onClick={() => onSignIn(provider)}>{provider === 'Microsoft' && <MicrosoftMark />}{t('auth.continueWith', { provider })}</Button>)}
+          {providers.length === 0 && <p role="alert" className="text-sm text-muted-foreground">{t('auth.providersUnavailable')}</p>}
+        </div> : mode === 'Entra' ? <Button size="lg" className="mt-6 w-full whitespace-normal" onClick={() => onSignIn()}><MicrosoftMark />{t('entrance.microsoft')}</Button> : mode === 'LocalPassword' ?
           <form className="mt-6 space-y-4" onSubmit={submit}>
             <div className="space-y-1.5"><Label htmlFor="review-user">{t('auth.userId')}</Label><Input id="review-user" autoComplete="username" required maxLength={64} value={userName} onChange={e => setUserName(e.target.value)} /></div>
             <div className="space-y-1.5"><Label htmlFor="review-password">{t('auth.password')}</Label><Input id="review-password" type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} /></div>
@@ -95,7 +98,7 @@ export function LoginPage({ mode, onSignIn, onLocalSignIn, users, onPick, error,
                 </button>
               ))}</div>}
           </div>}
-        <div className="mt-8 flex items-center justify-center gap-2 border-t pt-4 text-center text-xs/[18px] text-muted-foreground"><ShieldCheck aria-hidden className="size-4 shrink-0" />{t('entrance.assurance')}</div>
+        <div className="mt-8 flex items-center justify-center gap-2 border-t pt-4 text-center text-xs/[18px] text-muted-foreground"><ShieldCheck aria-hidden className="size-4 shrink-0" />{t(mode === 'Social' ? 'entrance.socialAssurance' : 'entrance.assurance')}</div>
       </section>
     </main>
   </PublicShell>

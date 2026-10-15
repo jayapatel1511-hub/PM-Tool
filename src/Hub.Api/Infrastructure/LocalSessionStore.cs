@@ -42,7 +42,8 @@ public sealed class LocalSessionStore(IServiceScopeFactory scopes, IDataProtecti
     public Task<AuthenticationTicket?> RetrieveAsync(string key, HttpContext context, CancellationToken cancellationToken)
     {
         // Fresh sign-in must issue a new reference: an old cookie must never acquire the next person's identity.
-        return HttpMethods.IsPost(context.Request.Method) && context.Request.Path.StartsWithSegments("/api/v1/auth/local/sign-in")
+        return (HttpMethods.IsPost(context.Request.Method) && context.Request.Path.StartsWithSegments("/api/v1/auth/local/sign-in"))
+            || context.Request.Path == "/signin-google" || context.Request.Path == "/signin-microsoft"
             ? Task.FromResult<AuthenticationTicket?>(null) : RetrieveAsync(key);
     }
 

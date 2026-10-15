@@ -55,7 +55,7 @@ public static class MeEndpoints
         api.MapPost("/me/sign-in", async (HubDb db, CurrentUser me, TimeProvider clock, HttpContext ctx) =>
         {
             // Local authentication already recorded this event before issuing its cookie.
-            if (ctx.User.Identity?.AuthenticationType == AuthSetup.LocalScheme) return Results.NoContent();
+            if (ctx.User.Identity?.AuthenticationType is AuthSetup.LocalScheme or SocialAuth.Scheme) return Results.NoContent();
             var u = await db.Users.FirstAsync(x => x.Id == me.Id);
             u.LastSignInAt = clock.GetUtcNow();
             db.LogEvent(ItemType.User, u.Id, "SignedIn", "access", key: u.Email, name: u.DisplayName);

@@ -15,6 +15,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
 
     public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<LocalAuthSession> LocalAuthSessions => Set<LocalAuthSession>();
+    public DbSet<ExternalIdentity> ExternalIdentities => Set<ExternalIdentity>();
     public DbSet<UserSystemRole> UserRoles => Set<UserSystemRole>();
     public DbSet<Office> Offices => Set<Office>();
     public DbSet<Discipline> Disciplines => Set<Discipline>();
@@ -140,6 +141,14 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.HasPostgresExtension("pg_trgm");
 
         mb.Entity<LocalAuthSession>().HasIndex(x => x.ExpiresAt);
+        mb.Entity<ExternalIdentity>(e =>
+        {
+            e.HasKey(x => new { x.Provider, x.Subject });
+            e.Property(x => x.Provider).HasMaxLength(20);
+            e.Property(x => x.Subject).HasMaxLength(200);
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => new { x.UserId, x.Provider }).IsUnique();
+        });
 
         mb.Entity<AppUser>(e =>
         {

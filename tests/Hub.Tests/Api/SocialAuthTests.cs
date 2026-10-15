@@ -37,7 +37,11 @@ public sealed class SocialAuthTests : IDisposable
                 body = new { access_token = "synthetic-token", token_type = "Bearer", expires_in = 3600 };
             }
             else if (request.RequestUri!.Host == "graph.microsoft.com") body = new { id = Subject, mail = Email, displayName = "Social Person" };
-            else body = new { id = Subject, email = Email, name = "Social Person", verified_email = Verified };
+            else
+            {
+                Assert.Equal(GoogleDefaults.UserInformationEndpoint, request.RequestUri!.GetLeftPart(UriPartial.Path));
+                body = new { sub = Subject, email = Email, name = "Social Person", email_verified = Verified };
+            }
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json") });
         }
     }

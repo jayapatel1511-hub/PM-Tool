@@ -831,7 +831,7 @@ export const en: Record<string, string> = {
   'auth.signIn': 'Sign in',
   'auth.signOut': 'Sign out',
   'auth.signOutFailed': 'Sign-out could not be completed. Please try again.',
-  'auth.signingIn': 'Signing you in with your corporate account…',
+  'auth.signingIn': 'Checking your sign-in…',
   'auth.devTitle': 'Development sign-in',
   'auth.localTitle': 'Tuesday sign-in',
   'auth.localHint': 'Sign in with your Tuesday account.',

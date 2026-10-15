@@ -54,7 +54,7 @@ public static class SocialAuth
         if (Configured(b.Configuration, "Google")) auth.AddGoogle("Google", o =>
         {
             Configure(o, b.Configuration, "Google");
-            o.ClaimActions.MapJsonKey("email_verified", "verified_email");
+            o.ClaimActions.MapJsonKey("email_verified", "email_verified");
         });
     }
 

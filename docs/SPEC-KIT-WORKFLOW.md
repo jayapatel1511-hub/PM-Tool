@@ -3,8 +3,11 @@
 This repository uses [GitHub Spec Kit](https://github.com/github/spec-kit) 1.0.8 to build the
 Engineering Project Coordination Hub in small, reviewable packets. [CLAUDE.md](../CLAUDE.md) is
 the entry point, the [constitution](../.specify/memory/constitution.md) holds the rules, and
-[specs/README.md](../specs/README.md) indexes the 33 packets that hold the whole product
-specification in Spec Kit form, including the first-release six-view amendment (§36).
+[specs/README.md](../specs/README.md) indexes the 47 packets (001 to 047) that hold the whole
+product specification in Spec Kit form, including the first-release six-view amendment (§36).
+Open decisions and their defaults are in [specs/DECISIONS.md](../specs/DECISIONS.md). The
+delivery process (one spec pull request then slice pull requests, flags, merge tiers, generated
+verification) is [packet 039](../specs/039-delivery-process/spec.md), §43.
 
 ## What to tell an agent
 
@@ -56,7 +59,8 @@ feature. `/speckit-taskstoissues` runs only on request.
 3. Declare file boundaries in the plan and preserve unrelated edits in those files.
 4. Map every task to requirements and acceptance checks. A task list is not permission to build
    every idea in it.
-5. Record passing, failing, skipped, and unrun checks in `verification.md`.
+5. Record passing, failing, skipped, and unrun checks in `verification.md` until
+   `tools/trace_spec.py --report` is published on main (packet 039, §43.9).
 6. Use sub-agents or `specify workflow run` only when Jay asks. Commit, push, open issues, or
    deploy only on request.
 

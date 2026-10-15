@@ -14,6 +14,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public AuditContext Audit => audit;
 
     public DbSet<AppUser> Users => Set<AppUser>();
+    public DbSet<LocalAuthSession> LocalAuthSessions => Set<LocalAuthSession>();
+    public DbSet<ExternalIdentity> ExternalIdentities => Set<ExternalIdentity>();
     public DbSet<UserSystemRole> UserRoles => Set<UserSystemRole>();
     public DbSet<Office> Offices => Set<Office>();
     public DbSet<Discipline> Disciplines => Set<Discipline>();
@@ -74,9 +76,17 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<TaskStartAuthorisation> TaskStartAuthorisations => Set<TaskStartAuthorisation>();
     public DbSet<PersonAvailabilityOverride> AvailabilityOverrides => Set<PersonAvailabilityOverride>();
     public DbSet<ResourceAllocation> Allocations => Set<ResourceAllocation>();
+    public DbSet<OpenRole> OpenRoles => Set<OpenRole>();
     public DbSet<AllocationDayOverride> AllocationDayOverrides => Set<AllocationDayOverride>();
     public DbSet<AllocationWorkLink> AllocationWorkLinks => Set<AllocationWorkLink>();
     public DbSet<PersonDateVersion> PersonDateVersions => Set<PersonDateVersion>();
+    public DbSet<LeaveImportPreview> LeaveImportPreviews => Set<LeaveImportPreview>();
+    public DbSet<ApprovedLeave> ApprovedLeaves => Set<ApprovedLeave>();
+    public DbSet<LeaveImportState> LeaveImportStates => Set<LeaveImportState>();
+    public DbSet<PersonSchedule> PersonSchedules => Set<PersonSchedule>();
+    public DbSet<CalendarSubscription> CalendarSubscriptions => Set<CalendarSubscription>();
+    public DbSet<CalendarFeedItem> CalendarFeedItems => Set<CalendarFeedItem>();
+    public DbSet<PlanningEntry> PlanningEntries => Set<PlanningEntry>();
     public DbSet<WorkTask> Tasks => Set<WorkTask>();
     public DbSet<TaskDependency> Dependencies => Set<TaskDependency>();
     public DbSet<DeliverableDependency> DeliverableDependencies => Set<DeliverableDependency>();
@@ -130,6 +140,16 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.HasPostgresExtension("citext");
         mb.HasPostgresExtension("pg_trgm");
 
+        mb.Entity<LocalAuthSession>().HasIndex(x => x.ExpiresAt);
+        mb.Entity<ExternalIdentity>(e =>
+        {
+            e.HasKey(x => new { x.Provider, x.Subject });
+            e.Property(x => x.Provider).HasMaxLength(20);
+            e.Property(x => x.Subject).HasMaxLength(200);
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => new { x.UserId, x.Provider }).IsUnique();
+        });
+
         mb.Entity<AppUser>(e =>
         {
             e.ToTable("app_user");
@@ -137,6 +157,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.HasIndex(x => x.Email).IsUnique();
             e.HasIndex(x => x.EntraObjectId).IsUnique();
             e.HasIndex(x => x.SupervisorId);
+            e.HasIndex(x => new { x.HrSourceSystem, x.HrPersonKey }).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_hr_identity_pair", "(hr_source_system IS NULL) = (hr_person_key IS NULL)"));
             e.HasMany(x => x.Roles).WithOne().HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Cascade);
             e.Property(x => x.WeeklyCapacityHours).HasPrecision(5, 1);
             e.HasIndex(x => x.DisplayName).HasMethod("gin").HasOperators("gin_trgm_ops");
@@ -144,6 +166,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         });
         Fk<AppUser, Office>(mb, x => x.OfficeId);
         Fk<AppUser, AppUser>(mb, x => x.SupervisorId);
+        Fk<AppUser, Discipline>(mb, x => x.HomeDisciplineId);
         mb.Entity<UserSystemRole>(e =>
         {
             e.HasIndex(x => new { x.UserId, x.Role, x.Source }).IsUnique();
@@ -154,7 +177,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             mb.Entity(t).HasIndex(nameof(RefData.Name));
         Fk<DeliverableType, Discipline>(mb, x => x.DefaultDisciplineId);
         mb.Entity<OrgSetting>(e => { e.HasKey(x => x.Key); e.Property(x => x.Value).HasColumnType("jsonb"); });
-        mb.Entity<UserSetting>(e => { e.HasKey(x => x.UserId); e.Property(x => x.DigestSectionsOff).HasColumnType("jsonb"); });
+        mb.Entity<UserSetting>(e => { e.HasKey(x => x.UserId); e.Property(x => x.DigestSectionsOff).HasColumnType("jsonb"); e.Property(x => x.HoldDigestWhenAway).HasDefaultValue(true); });
         mb.Entity<NotificationPreference>().HasIndex(x => new { x.UserId, x.EventType }).IsUnique();
         Fk<Holiday, Office>(mb, x => x.OfficeId);
         mb.Entity<IdempotencyRecord>(e => e.HasIndex(x => new { x.UserId, x.Key }).IsUnique());
@@ -184,6 +207,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         {
             e.HasIndex(x => new { x.ProjectId, x.DisciplineId }).IsUnique();
             e.HasOne(x => x.Discipline).WithMany().HasForeignKey(x => x.DisciplineId).OnDelete(DeleteBehavior.Restrict);
+            e.Property(x => x.RowVersion).IsConcurrencyToken();
         });
         Fk<ProjectDiscipline, Project>(mb, x => x.ProjectId);
         Fk<ProjectDiscipline, AppUser>(mb, x => x.LeadUserId);
@@ -192,6 +216,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.HasIndex(x => new { x.ProjectId, x.UserId }).IsUnique().HasFilter("removed_at IS NULL");
             e.HasIndex(x => x.UserId);
             e.ToTable(t => t.HasCheckConstraint("ck_member_roles", $"cardinality(roles) >= 1 AND roles <@ ARRAY[{In(ProjectRole.All)}]::text[]"));
+            e.Property(x => x.RowVersion).IsConcurrencyToken();
         });
         Fk<ProjectMember, Project>(mb, x => x.ProjectId);
         Fk<ProjectMember, AppUser>(mb, x => x.UserId);
@@ -256,7 +281,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<WorkTask, AppUser>(mb, x => x.ReviewerId);
         mb.Entity<TaskDependency>(e =>
         {
-            e.ToTable("task_dependency", t => t.HasCheckConstraint("ck_dependency_self", "predecessor_task_id <> successor_task_id"));
+            e.ToTable("task_dependency", t =>
+            {
+                t.HasCheckConstraint("ck_dependency_self", "predecessor_task_id <> successor_task_id");
+                t.HasCheckConstraint("ck_task_dependency_type", $"dependency_type IN ({In(DependencyTypes.All)})");
+            });
             e.HasIndex(x => new { x.PredecessorTaskId, x.SuccessorTaskId }).IsUnique().HasFilter("deleted_at IS NULL");
             e.HasIndex(x => x.SuccessorTaskId);
             e.HasQueryFilter(x => x.DeletedAt == null);
@@ -266,7 +295,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<TaskDependency, WorkTask>(mb, x => x.SuccessorTaskId);
         mb.Entity<DeliverableDependency>(e =>
         {
-            e.ToTable(t => t.HasCheckConstraint("ck_deliverable_dependency_self", "predecessor_deliverable_id <> successor_deliverable_id"));
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_deliverable_dependency_self", "predecessor_deliverable_id <> successor_deliverable_id");
+                t.HasCheckConstraint("ck_deliverable_dependency_type", $"dependency_type IN ({In(DependencyTypes.All)})");
+            });
+            e.Property(x => x.DependencyType).HasDefaultValue(DependencyTypes.FinishToStart);
             e.HasIndex(x => new { x.PredecessorDeliverableId, x.SuccessorDeliverableId }).IsUnique().HasFilter("deleted_at IS NULL");
             e.HasQueryFilter(x => x.DeletedAt == null);
             e.Ignore(x => x.AuditKey);
@@ -368,7 +402,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         });
         Fk<Comment, AppUser>(mb, x => x.AuthorId);
         Fk<CommentMention, Comment>(mb, x => x.CommentId, DeleteBehavior.Cascade);
-        mb.Entity<DocumentLink>(e => { e.HasIndex(x => new { x.ItemType, x.ItemId }); e.HasQueryFilter(x => x.DeletedAt == null); e.Ignore(x => x.AuditKey); });
+        mb.Entity<DocumentLink>(e => { e.HasIndex(x => new { x.ItemType, x.ItemId }); e.HasQueryFilter(x => x.DeletedAt == null); e.Ignore(x => x.AuditKey); e.Property(x => x.RowVersion).IsConcurrencyToken(); });
 
         mb.Entity<ActivityLog>(e =>
         {
@@ -432,6 +466,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.Entity<Workspace>(e =>
         {
             e.HasIndex(x => new { x.OwnerId, x.Name }).IsUnique();
+            e.Property(x => x.RowVersion).IsConcurrencyToken();
             e.HasMany(x => x.Projects).WithOne().HasForeignKey(p => p.WorkspaceId).OnDelete(DeleteBehavior.Cascade);
         });
         mb.Entity<WorkspaceProject>().HasIndex(x => new { x.WorkspaceId, x.ProjectId }).IsUnique();
@@ -620,11 +655,60 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<OutputCommitment, AppUser>(mb, x => x.PerformerId);
         Fk<OutputCommitmentEvent, OutputCommitment>(mb, x => x.CommitmentId);
         Fk<OutputCommitmentEvent, AppUser>(mb, x => x.ActorId);
+        mb.Entity<ApprovedLeave>(e =>
+        {
+            e.HasIndex(x => new { x.SourceSystem, x.ExternalId }).IsUnique();
+            e.HasIndex(x => new { x.PersonId, x.FromDate, x.ThroughDate });
+            e.Property(x => x.HoursPerDay).HasPrecision(5, 2);
+            e.ToTable(t => {
+                t.HasCheckConstraint("ck_leave_dates", "through_date >= from_date AND through_date - from_date <= 365");
+                t.HasCheckConstraint("ck_leave_hours", "hours_per_day IS NULL OR hours_per_day > 0 AND hours_per_day <= 24");
+                t.HasCheckConstraint("ck_leave_source", "source_kind IN ('HRImport','ManualHR')");
+                t.HasCheckConstraint("ck_leave_status", "status IN ('Approved','Cancelled','Unverified')");
+            });
+        });
+        mb.Entity<LeaveImportState>().HasIndex(x => x.SourceSystem).IsUnique();
+        mb.Entity<PersonSchedule>(e => {
+            e.HasIndex(x => new { x.PersonId, x.FromDate }).IsUnique();
+            e.Property(x => x.WeeklyHours).HasPrecision(5, 1);
+            e.ToTable(t => t.HasCheckConstraint("ck_person_schedule", "weekly_hours >= 0 AND weekly_hours <= 168 AND cardinality(working_days) BETWEEN 1 AND 7 AND working_days <@ ARRAY[0,1,2,3,4,5,6]"));
+        });
+        mb.Entity<CalendarSubscription>().HasIndex(x => x.UserId).IsUnique();
+        mb.Entity<CalendarSubscription>().HasIndex(x => x.TokenHash).IsUnique();
+        mb.Entity<CalendarFeedItem>().HasIndex(x => new { x.UserId, x.SourceKey }).IsUnique();
+        Fk<LeaveImportPreview, AppUser>(mb, x => x.UserId);
+        Fk<PersonAvailabilityOverride, ApprovedLeave>(mb, x => x.ReconciledLeaveId);
+        Fk<ApprovedLeave, AppUser>(mb, x => x.PersonId);
+        Fk<PersonSchedule, AppUser>(mb, x => x.PersonId);
+        Fk<CalendarSubscription, AppUser>(mb, x => x.UserId);
+        Fk<CalendarFeedItem, AppUser>(mb, x => x.UserId);
         mb.Entity<PersonAvailabilityOverride>(e =>
         {
             e.HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
             e.Property(x => x.AvailableHours).HasPrecision(9, 3);
             e.ToTable(t => { t.HasCheckConstraint("ck_availability_hours", "available_hours >= 0"); t.HasCheckConstraint("ck_availability_category", $"category IN ({In(AvailabilityCategory.All)})"); });
+        });
+        mb.Entity<PlanningEntry>(e =>
+        {
+            e.HasIndex(x => new { x.PersonId, x.StartWeek, x.EndWeek }).HasFilter("deleted_at IS NULL");
+            e.HasIndex(x => new { x.CreatedBy, x.EndWeek }).HasFilter("deleted_at IS NULL");
+            e.HasIndex(x => x.ProjectId).HasFilter("project_id IS NOT NULL");
+            e.Property(x => x.HoursPerWeek).HasPrecision(5, 1);
+            e.HasQueryFilter(x => x.DeletedAt == null);
+            e.ToTable("planning_entry", t =>
+            {
+                t.HasCheckConstraint("ck_planning_owner", "created_by IS NOT NULL");
+                t.HasCheckConstraint("ck_planning_hours", "hours_per_week > 0 AND hours_per_week <= 168 AND hours_per_week * 2 = trunc(hours_per_week * 2)");
+                t.HasCheckConstraint("ck_planning_weeks", "extract(isodow FROM start_week) = 1 AND extract(isodow FROM end_week) = 1 AND end_week >= start_week AND end_week - start_week <= 721");
+                t.HasCheckConstraint("ck_planning_label", "char_length(btrim(label)) BETWEEN 1 AND 120");
+                t.HasCheckConstraint("ck_planning_notes", "notes IS NULL OR char_length(notes) <= 2000");
+                t.HasCheckConstraint("ck_planning_source", "source_category IN ('MajorProject','OtherProject','Proposal','BusinessDevelopment','Training','Admin','Supervision','InternalInitiative','FieldWork','Other')");
+                t.HasCheckConstraint("ck_planning_confidence", "confidence IN ('Confirmed','Expected','Possible')");
+                t.HasCheckConstraint("ck_planning_visibility", "visibility IN ('Draft','Published','Confirmed')");
+                t.HasCheckConstraint("ck_planning_self_visible", "created_by <> person_id OR visibility = 'Confirmed'");
+                t.HasCheckConstraint("ck_planning_project_source", "(source_category = 'MajorProject') = (project_id IS NOT NULL)");
+                t.HasCheckConstraint("ck_planning_discipline", "project_discipline_id IS NULL OR project_id IS NOT NULL");
+            });
         });
         mb.Entity<ResourceAllocation>(e =>
         {
@@ -634,6 +718,23 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.Property(x => x.ConfirmationSnapshot).HasColumnType("jsonb");
             e.ToTable(t => { t.HasCheckConstraint("ck_allocation_dates", "through_date >= from_date"); t.HasCheckConstraint("ck_allocation_hours", "planned_hours > 0"); t.HasCheckConstraint("ck_allocation_status", $"status IN ({In(AllocationStatus.All)})"); t.HasCheckConstraint("ck_allocation_purpose", $"purpose IN ({In(AllocationPurpose.All)})"); });
         });
+        mb.Entity<OpenRole>(e => // FR-ROLE-01 (packet 036)
+        {
+            e.HasIndex(x => new { x.ProjectId, x.Status }).HasFilter("deleted_at IS NULL");
+            e.HasIndex(x => x.FilledAllocationId).IsUnique().HasFilter("filled_allocation_id IS NOT NULL");
+            e.Property(x => x.PlannedHours).HasPrecision(9, 3);
+            e.HasQueryFilter(x => x.DeletedAt == null);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_open_role_dates", "through_date >= from_date");
+                t.HasCheckConstraint("ck_open_role_hours", "planned_hours > 0");
+                t.HasCheckConstraint("ck_open_role_status", $"status IN ({In(OpenRoleStatus.All)})");
+                t.HasCheckConstraint("ck_open_role_label", "char_length(btrim(role_label)) BETWEEN 1 AND 80");
+            });
+        });
+        Fk<OpenRole, Project>(mb, x => x.ProjectId);
+        Fk<OpenRole, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
+        Fk<OpenRole, ResourceAllocation>(mb, x => x.FilledAllocationId);
         mb.Entity<AllocationDayOverride>(e =>
         {
             e.HasIndex(x => new { x.AllocationId, x.WorkDate }).IsUnique();
@@ -650,6 +751,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         });
         mb.Entity<PersonDateVersion>().HasIndex(x => new { x.PersonId, x.WorkDate }).IsUnique();
         Fk<PersonAvailabilityOverride, AppUser>(mb, x => x.PersonId);
+        Fk<PlanningEntry, AppUser>(mb, x => x.PersonId);
+        Fk<PlanningEntry, AppUser>(mb, x => x.CreatedBy);
+        Fk<PlanningEntry, AppUser>(mb, x => x.UpdatedBy);
+        Fk<PlanningEntry, AppUser>(mb, x => x.DeletedBy);
+        Fk<PlanningEntry, Project>(mb, x => x.ProjectId);
+        Fk<PlanningEntry, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
         Fk<ResourceAllocation, Project>(mb, x => x.ProjectId);
         Fk<ResourceAllocation, AppUser>(mb, x => x.PersonId);
         Fk<ResourceAllocation, AppUser>(mb, x => x.ConfirmedBy);
@@ -894,6 +1001,16 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         }
         var now = clock.GetUtcNow();
         if (await FollowTasks(now, ct)) ChangeTracker.DetectChanges();
+        var comments = ChangeTracker.Entries<Comment>()
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified && e.Property(nameof(Comment.Body)).IsModified)
+            .Select(e => (Comment)e.Entity).ToList();
+        var taskCommentIds = comments.Where(c => c.ItemType == ItemType.Task).Select(c => c.ItemId).Distinct().ToList();
+        var deliverableCommentIds = comments.Where(c => c.ItemType == ItemType.Deliverable).Select(c => c.ItemId).Distinct().ToList();
+        if (taskCommentIds.Count > 0)
+            foreach (var task in await Tasks.Where(t => taskCommentIds.Contains(t.Id)).ToListAsync(ct)) task.LastActivityAt = now;
+        if (deliverableCommentIds.Count > 0)
+            foreach (var deliverable in await Deliverables.Where(d => deliverableCommentIds.Contains(d.Id)).ToListAsync(ct)) deliverable.LastActivityAt = now;
+        if (taskCommentIds.Count > 0 || deliverableCommentIds.Count > 0) ChangeTracker.DetectChanges();
         var projects = new HashSet<Guid>();
         var users = new HashSet<Guid>();
         foreach (var entry in ChangeTracker.Entries().ToList())
@@ -902,11 +1019,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             if (entry.State is EntityState.Modified or EntityState.Deleted
                 && entry.Entity is SourceRevision or HandoffRevision or HandoffReceiptEvent or HandoffCommand or CoordinationCommand or ReviewManifestItem or FindingEvent or InputAdoption)
                 throw new InvalidOperationException("Published coordination evidence is immutable.");
+            if (entry.Entity is IVersioned versioned && entry.State == EntityState.Modified)
+                versioned.RowVersion++;
             if (entry.Entity is Audited a)
             {
                 if (entry.State == EntityState.Added) { a.CreatedAt = now; a.CreatedBy ??= audit.ActorId; }
                 if (entry.State is EntityState.Added or EntityState.Modified) { a.UpdatedAt = now; a.UpdatedBy = audit.ActorId; }
-                if (entry.State == EntityState.Modified) a.RowVersion++;
             }
             if (entry.Entity is IAuditable item && AuditRules.Fields.TryGetValue(entry.Metadata.ClrType, out var fields))
             {

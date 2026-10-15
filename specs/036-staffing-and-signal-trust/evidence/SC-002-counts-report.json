@@ -1,0 +1,2893 @@
+{
+  "base": "http://localhost:5199",
+  "generatedAt": "2026-10-12T08:28:01.737Z",
+  "checked": 288,
+  "mismatches": 0,
+  "missing": [],
+  "skipped": [
+    "priya: SYN-103 not visible (HTTP 404)",
+    "sam: SYN-103 not visible (HTTP 404)"
+  ],
+  "rows": [
+    {
+      "persona": "jordan",
+      "page": "Home",
+      "tile": "Active Projects",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects?status=Active",
+      "request": "/api/v1/projects?status=Active&mine=true&pageSize=200"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home",
+      "tile": "Open Tasks",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?open=true",
+      "request": "/api/v1/tasks?projects=mine&open=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home",
+      "tile": "Overdue Tasks",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?overdue=true",
+      "request": "/api/v1/tasks?projects=mine&overdue=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home",
+      "tile": "Team Members",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/team",
+      "request": "/api/v1/team?projects=mine"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home",
+      "tile": "Tasks by Status · To Do",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?status=Not+Started",
+      "request": "/api/v1/tasks?projects=mine&status=Not+Started&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home",
+      "tile": "Tasks by Status · In Progress",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?status=In+Progress",
+      "request": "/api/v1/tasks?projects=mine&status=In+Progress&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home",
+      "tile": "Tasks by Status · Review and revision",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?status=Ready+for+Review%2CIn+Review%2CRevision+Required",
+      "request": "/api/v1/tasks?projects=mine&status=Ready+for+Review%2CIn+Review%2CRevision+Required&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home",
+      "tile": "Tasks by Status · Done",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?status=Complete",
+      "request": "/api/v1/tasks?projects=mine&status=Complete&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home",
+      "tile": "Tasks by Status · On Hold",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?status=On+Hold",
+      "request": "/api/v1/tasks?projects=mine&status=On+Hold&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Total",
+      "shown": 14,
+      "total": 14,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Complete",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?status=Complete",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?status=Complete&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · In progress",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?status=In%20Progress",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?status=In+Progress&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · In review",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?readyForReview=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?readyForReview=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Overdue",
+      "shown": 4,
+      "total": 4,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?overdue=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Waiting",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?waiting=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?waiting=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Unassigned",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?unassigned=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?unassigned=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · Total",
+      "shown": 9,
+      "total": 9,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · Due ≤ 14 d",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables?dueFrom=2026-10-12&dueTo=2026-10-26&indicator=open",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?indicator=open&dueFrom=2026-10-12&dueTo=2026-10-26&includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · At risk",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables?indicator=atRisk",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?indicator=atRisk&includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · Issued",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables?status=Issued%2CAccepted",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?status=Issued%2CAccepted&includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Decisions · Open",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/decisions?status=Pending%2CUnder%20Review%2CDeferred",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/decisions?status=Pending%2CUnder+Review%2CDeferred"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Decisions · Overdue",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/decisions?indicator=overdue",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/decisions?indicator=overdue"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Issues and risks · Open issues",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/issues?indicator=open",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/issues?indicator=open"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Issues and risks · High issues",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/issues?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/issues?severity=High&indicator=open"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Issues and risks · High risks",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/risks?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/risks?severity=High&indicator=open"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Civil · Open",
+      "shown": 9,
+      "total": 9,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&open=true&onHold=false",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&open=true&onHold=false&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Civil · Overdue",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&overdue=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Civil · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Geotechnical · Open",
+      "shown": 4,
+      "total": 4,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&open=true&onHold=false",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&open=true&onHold=false&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Geotechnical · Overdue",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&overdue=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Geotechnical · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Due this week",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?dueThisWeek=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?dueThisWeek=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-101",
+      "tile": "Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Total",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Complete",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?status=Complete",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?status=Complete&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · In progress",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?status=In%20Progress",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?status=In+Progress&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · In review",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?readyForReview=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?readyForReview=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Overdue",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?overdue=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Waiting",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?waiting=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?waiting=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Unassigned",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?unassigned=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?unassigned=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · Total",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · Due ≤ 14 d",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables?dueFrom=2026-10-12&dueTo=2026-10-26&indicator=open",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?indicator=open&dueFrom=2026-10-12&dueTo=2026-10-26&includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · At risk",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables?indicator=atRisk",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?indicator=atRisk&includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · Issued",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables?status=Issued%2CAccepted",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?status=Issued%2CAccepted&includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Decisions · Open",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/decisions?status=Pending%2CUnder%20Review%2CDeferred",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/decisions?status=Pending%2CUnder+Review%2CDeferred"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Decisions · Overdue",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/decisions?indicator=overdue",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/decisions?indicator=overdue"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Issues and risks · Open issues",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/issues?indicator=open",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/issues?indicator=open"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Issues and risks · High issues",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/issues?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/issues?severity=High&indicator=open"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Issues and risks · High risks",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/risks?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/risks?severity=High&indicator=open"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Civil · Open",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&open=true&onHold=false",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&open=true&onHold=false&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Civil · Overdue",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&overdue=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Civil · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&blocked=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Due this week",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?dueThisWeek=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?dueThisWeek=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-102",
+      "tile": "Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Tasks · Total",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Tasks · Complete",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?status=Complete",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?status=Complete&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Tasks · In progress",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?status=In%20Progress",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?status=In+Progress&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Tasks · In review",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?readyForReview=true",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?readyForReview=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Tasks · Overdue",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?overdue=true",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Tasks · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Tasks · Waiting",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?waiting=true",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?waiting=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Tasks · Unassigned",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?unassigned=true",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?unassigned=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Deliverables · Total",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-103/deliverables",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/deliverables?includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Deliverables · Due ≤ 14 d",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-103/deliverables?dueFrom=2026-10-12&dueTo=2026-10-26&indicator=open",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/deliverables?indicator=open&dueFrom=2026-10-12&dueTo=2026-10-26&includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Deliverables · At risk",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/deliverables?indicator=atRisk",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/deliverables?indicator=atRisk&includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Deliverables · Issued",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/deliverables?status=Issued%2CAccepted",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/deliverables?status=Issued%2CAccepted&includeTasks=true"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Decisions · Open",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-103/decisions?status=Pending%2CUnder%20Review%2CDeferred",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/decisions?status=Pending%2CUnder+Review%2CDeferred"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Decisions · Overdue",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/decisions?indicator=overdue",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/decisions?indicator=overdue"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Issues and risks · Open issues",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/issues?indicator=open",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/issues?indicator=open"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Issues and risks · High issues",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/issues?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/issues?severity=High&indicator=open"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Issues and risks · High risks",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/risks?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/risks?severity=High&indicator=open"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Civil · Open",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?disciplineId=01a10454-79ae-7d49-9020-fbc189aa4342&open=true&onHold=false",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?disciplineId=01a10454-79ae-7d49-9020-fbc189aa4342&open=true&onHold=false&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Civil · Overdue",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?disciplineId=01a10454-79ae-7d49-9020-fbc189aa4342&overdue=true",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?disciplineId=01a10454-79ae-7d49-9020-fbc189aa4342&overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Civil · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?disciplineId=01a10454-79ae-7d49-9020-fbc189aa4342&blocked=true",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?disciplineId=01a10454-79ae-7d49-9020-fbc189aa4342&blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Due this week",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?dueThisWeek=true",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?dueThisWeek=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Dashboard SYN-103",
+      "tile": "Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-103/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-79ac-7834-96d9-5a0b67f19198/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "jordan",
+      "page": "Portfolio",
+      "tile": "Active projects",
+      "shown": 4,
+      "total": 4,
+      "ok": true,
+      "href": "/portfolio?status=Active",
+      "request": "/api/v1/portfolio?status=Active"
+    },
+    {
+      "persona": "jordan",
+      "page": "Portfolio",
+      "tile": "Red (computed)",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/portfolio?computedHealth=Red&status=Active",
+      "request": "/api/v1/portfolio?status=Active&computedHealth=Red"
+    },
+    {
+      "persona": "jordan",
+      "page": "Portfolio",
+      "tile": "Yellow (computed)",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/portfolio?computedHealth=Yellow&status=Active",
+      "request": "/api/v1/portfolio?status=Active&computedHealth=Yellow"
+    },
+    {
+      "persona": "jordan",
+      "page": "Portfolio",
+      "tile": "Green (computed)",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/portfolio?computedHealth=Green&status=Active",
+      "request": "/api/v1/portfolio?status=Active&computedHealth=Green"
+    },
+    {
+      "persona": "jordan",
+      "page": "Portfolio",
+      "tile": "Submissions in 14 days",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/portfolio?submissionWithinDays=14",
+      "request": "/api/v1/portfolio?submissionWithinDays=14"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Active Projects",
+      "shown": 4,
+      "total": 4,
+      "ok": true,
+      "href": "/projects?status=Active&mine=false",
+      "request": "/api/v1/projects?status=Active&pageSize=200"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Open Tasks",
+      "shown": 32,
+      "total": 32,
+      "ok": true,
+      "href": "/tasks?projects=all&open=true",
+      "request": "/api/v1/tasks?projects=all&open=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Overdue Tasks",
+      "shown": 5,
+      "total": 5,
+      "ok": true,
+      "href": "/tasks?projects=all&overdue=true",
+      "request": "/api/v1/tasks?projects=all&overdue=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "On Track · Green",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects?status=Active&computedHealth=Green&mine=false",
+      "request": "/api/v1/projects?status=Active&computedHealth=Green&pageSize=200"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "On Track · evaluated",
+      "shown": 4,
+      "total": 4,
+      "ok": true,
+      "href": "/projects?status=Active&computedHealth=Green%2CYellow%2CRed&mine=false",
+      "request": "/api/v1/projects?status=Active&computedHealth=Green%2CYellow%2CRed&pageSize=200"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Team Members",
+      "shown": 18,
+      "total": 18,
+      "ok": true,
+      "href": "/team?projects=all",
+      "request": "/api/v1/team?projects=all"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · To Do",
+      "shown": 23,
+      "total": 23,
+      "ok": true,
+      "href": "/tasks?projects=all&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · In Progress",
+      "shown": 7,
+      "total": 7,
+      "ok": true,
+      "href": "/tasks?projects=all&status=In+Progress",
+      "request": "/api/v1/tasks?projects=all&status=In+Progress&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · Review and revision",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&status=Ready+for+Review%2CIn+Review%2CRevision+Required",
+      "request": "/api/v1/tasks?projects=all&status=Ready+for+Review%2CIn+Review%2CRevision+Required&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · Done",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&status=Complete",
+      "request": "/api/v1/tasks?projects=all&status=Complete&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · On Hold",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&status=On+Hold",
+      "request": "/api/v1/tasks?projects=all&status=On+Hold&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 To Do",
+      "shown": 7,
+      "total": 7,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 In Progress",
+      "shown": 5,
+      "total": 5,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=In+Progress",
+      "request": "/api/v1/tasks?projects=all&status=In+Progress&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 Done",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Complete",
+      "request": "/api/v1/tasks?projects=all&status=Complete&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 Riverside lane grading and drainage total",
+      "shown": 14,
+      "total": 14,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 To Do",
+      "shown": 10,
+      "total": 10,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 In Progress",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=In+Progress",
+      "request": "/api/v1/tasks?projects=all&status=In+Progress&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 Review and revision",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Ready+for+Review%2CIn+Review%2CRevision+Required",
+      "request": "/api/v1/tasks?projects=all&status=Ready+for+Review%2CIn+Review%2CRevision+Required&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase 2 detailed design) total",
+      "shown": 13,
+      "total": 13,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-102 To Do",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-102 Waterfront site servicing total",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-104 To Do",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-104 Lakeside subdivision servicing (proposal) total",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-103 To Do",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-79ac-7834-96d9-5a0b67f19198&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a10454-79ac-7834-96d9-5a0b67f19198&page=1&pageSize=100"
+    },
+    {
+      "persona": "jordan",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-103 Restricted client study total",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-79ac-7834-96d9-5a0b67f19198&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a10454-79ac-7834-96d9-5a0b67f19198&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Active Projects",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects?status=Active",
+      "request": "/api/v1/projects?status=Active&mine=true&pageSize=200"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Open Tasks",
+      "shown": 28,
+      "total": 28,
+      "ok": true,
+      "href": "/tasks?open=true",
+      "request": "/api/v1/tasks?projects=mine&open=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Overdue Tasks",
+      "shown": 4,
+      "total": 4,
+      "ok": true,
+      "href": "/tasks?overdue=true",
+      "request": "/api/v1/tasks?projects=mine&overdue=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "On Track · Green",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects?status=Active&computedHealth=Green",
+      "request": "/api/v1/projects?status=Active&computedHealth=Green&mine=true&pageSize=200"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "On Track · evaluated",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects?status=Active&computedHealth=Green%2CYellow%2CRed",
+      "request": "/api/v1/projects?status=Active&computedHealth=Green%2CYellow%2CRed&mine=true&pageSize=200"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Team Members",
+      "shown": 18,
+      "total": 18,
+      "ok": true,
+      "href": "/team",
+      "request": "/api/v1/team?projects=mine"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Status · To Do",
+      "shown": 19,
+      "total": 19,
+      "ok": true,
+      "href": "/tasks?status=Not+Started",
+      "request": "/api/v1/tasks?projects=mine&status=Not+Started&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Status · In Progress",
+      "shown": 7,
+      "total": 7,
+      "ok": true,
+      "href": "/tasks?status=In+Progress",
+      "request": "/api/v1/tasks?projects=mine&status=In+Progress&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Status · Review and revision",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?status=Ready+for+Review%2CIn+Review%2CRevision+Required",
+      "request": "/api/v1/tasks?projects=mine&status=Ready+for+Review%2CIn+Review%2CRevision+Required&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Status · Done",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?status=Complete",
+      "request": "/api/v1/tasks?projects=mine&status=Complete&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Status · On Hold",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?status=On+Hold",
+      "request": "/api/v1/tasks?projects=mine&status=On+Hold&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Project · SYN-105 To Do",
+      "shown": 7,
+      "total": 7,
+      "ok": true,
+      "href": "/tasks?projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Not+Started",
+      "request": "/api/v1/tasks?projects=mine&status=Not+Started&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Project · SYN-105 In Progress",
+      "shown": 5,
+      "total": 5,
+      "ok": true,
+      "href": "/tasks?projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=In+Progress",
+      "request": "/api/v1/tasks?projects=mine&status=In+Progress&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Project · SYN-105 Done",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Complete",
+      "request": "/api/v1/tasks?projects=mine&status=Complete&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Project · SYN-105 Riverside lane grading and drainage total",
+      "shown": 14,
+      "total": 14,
+      "ok": true,
+      "href": "/tasks?projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=mine&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Project · SYN-101 To Do",
+      "shown": 10,
+      "total": 10,
+      "ok": true,
+      "href": "/tasks?projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Not+Started",
+      "request": "/api/v1/tasks?projects=mine&status=Not+Started&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Project · SYN-101 In Progress",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=In+Progress",
+      "request": "/api/v1/tasks?projects=mine&status=In+Progress&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Project · SYN-101 Review and revision",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Ready+for+Review%2CIn+Review%2CRevision+Required",
+      "request": "/api/v1/tasks?projects=mine&status=Ready+for+Review%2CIn+Review%2CRevision+Required&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Project · SYN-101 Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase 2 detailed design) total",
+      "shown": 13,
+      "total": 13,
+      "ok": true,
+      "href": "/tasks?projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=mine&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Project · SYN-104 To Do",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&status=Not+Started",
+      "request": "/api/v1/tasks?projects=mine&status=Not+Started&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home",
+      "tile": "Tasks by Project · SYN-104 Lakeside subdivision servicing (proposal) total",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=mine&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Total",
+      "shown": 14,
+      "total": 14,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Complete",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?status=Complete",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?status=Complete&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · In progress",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?status=In%20Progress",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?status=In+Progress&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · In review",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?readyForReview=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?readyForReview=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Overdue",
+      "shown": 4,
+      "total": 4,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?overdue=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Waiting",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?waiting=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?waiting=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Unassigned",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?unassigned=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?unassigned=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · Total",
+      "shown": 9,
+      "total": 9,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?includeTasks=true"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · Due ≤ 14 d",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables?dueFrom=2026-10-12&dueTo=2026-10-26&indicator=open",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?indicator=open&dueFrom=2026-10-12&dueTo=2026-10-26&includeTasks=true"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · At risk",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables?indicator=atRisk",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?indicator=atRisk&includeTasks=true"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · Issued",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables?status=Issued%2CAccepted",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?status=Issued%2CAccepted&includeTasks=true"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Decisions · Open",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/decisions?status=Pending%2CUnder%20Review%2CDeferred",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/decisions?status=Pending%2CUnder+Review%2CDeferred"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Decisions · Overdue",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/decisions?indicator=overdue",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/decisions?indicator=overdue"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Issues and risks · Open issues",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/issues?indicator=open",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/issues?indicator=open"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Issues and risks · High issues",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/issues?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/issues?severity=High&indicator=open"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Issues and risks · High risks",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/risks?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/risks?severity=High&indicator=open"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Civil · Open",
+      "shown": 9,
+      "total": 9,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&open=true&onHold=false",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&open=true&onHold=false&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Civil · Overdue",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&overdue=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Civil · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Geotechnical · Open",
+      "shown": 4,
+      "total": 4,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&open=true&onHold=false",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&open=true&onHold=false&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Geotechnical · Overdue",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&overdue=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Geotechnical · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Due this week",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?dueThisWeek=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?dueThisWeek=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-101",
+      "tile": "Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Total",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Complete",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?status=Complete",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?status=Complete&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · In progress",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?status=In%20Progress",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?status=In+Progress&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · In review",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?readyForReview=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?readyForReview=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Overdue",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?overdue=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Waiting",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?waiting=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?waiting=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Unassigned",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?unassigned=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?unassigned=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · Total",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?includeTasks=true"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · Due ≤ 14 d",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables?dueFrom=2026-10-12&dueTo=2026-10-26&indicator=open",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?indicator=open&dueFrom=2026-10-12&dueTo=2026-10-26&includeTasks=true"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · At risk",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables?indicator=atRisk",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?indicator=atRisk&includeTasks=true"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · Issued",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables?status=Issued%2CAccepted",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?status=Issued%2CAccepted&includeTasks=true"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Decisions · Open",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/decisions?status=Pending%2CUnder%20Review%2CDeferred",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/decisions?status=Pending%2CUnder+Review%2CDeferred"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Decisions · Overdue",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/decisions?indicator=overdue",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/decisions?indicator=overdue"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Issues and risks · Open issues",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/issues?indicator=open",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/issues?indicator=open"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Issues and risks · High issues",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/issues?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/issues?severity=High&indicator=open"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Issues and risks · High risks",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/risks?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/risks?severity=High&indicator=open"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Civil · Open",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&open=true&onHold=false",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&open=true&onHold=false&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Civil · Overdue",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&overdue=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Civil · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&blocked=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Due this week",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?dueThisWeek=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?dueThisWeek=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Dashboard SYN-102",
+      "tile": "Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "priya",
+      "page": "Portfolio",
+      "tile": "Active projects",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/portfolio?status=Active",
+      "request": "/api/v1/portfolio?status=Active"
+    },
+    {
+      "persona": "priya",
+      "page": "Portfolio",
+      "tile": "Red (computed)",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/portfolio?computedHealth=Red&status=Active",
+      "request": "/api/v1/portfolio?status=Active&computedHealth=Red"
+    },
+    {
+      "persona": "priya",
+      "page": "Portfolio",
+      "tile": "Yellow (computed)",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/portfolio?computedHealth=Yellow&status=Active",
+      "request": "/api/v1/portfolio?status=Active&computedHealth=Yellow"
+    },
+    {
+      "persona": "priya",
+      "page": "Portfolio",
+      "tile": "Green (computed)",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/portfolio?computedHealth=Green&status=Active",
+      "request": "/api/v1/portfolio?status=Active&computedHealth=Green"
+    },
+    {
+      "persona": "priya",
+      "page": "Portfolio",
+      "tile": "Submissions in 14 days",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/portfolio?submissionWithinDays=14",
+      "request": "/api/v1/portfolio?submissionWithinDays=14"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Active Projects",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects?status=Active&mine=false",
+      "request": "/api/v1/projects?status=Active&pageSize=200"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Open Tasks",
+      "shown": 31,
+      "total": 31,
+      "ok": true,
+      "href": "/tasks?projects=all&open=true",
+      "request": "/api/v1/tasks?projects=all&open=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Overdue Tasks",
+      "shown": 5,
+      "total": 5,
+      "ok": true,
+      "href": "/tasks?projects=all&overdue=true",
+      "request": "/api/v1/tasks?projects=all&overdue=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "On Track · Green",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects?status=Active&computedHealth=Green&mine=false",
+      "request": "/api/v1/projects?status=Active&computedHealth=Green&pageSize=200"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "On Track · evaluated",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects?status=Active&computedHealth=Green%2CYellow%2CRed&mine=false",
+      "request": "/api/v1/projects?status=Active&computedHealth=Green%2CYellow%2CRed&pageSize=200"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Team Members",
+      "shown": 18,
+      "total": 18,
+      "ok": true,
+      "href": "/team?projects=all",
+      "request": "/api/v1/team?projects=all"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · To Do",
+      "shown": 22,
+      "total": 22,
+      "ok": true,
+      "href": "/tasks?projects=all&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · In Progress",
+      "shown": 7,
+      "total": 7,
+      "ok": true,
+      "href": "/tasks?projects=all&status=In+Progress",
+      "request": "/api/v1/tasks?projects=all&status=In+Progress&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · Review and revision",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&status=Ready+for+Review%2CIn+Review%2CRevision+Required",
+      "request": "/api/v1/tasks?projects=all&status=Ready+for+Review%2CIn+Review%2CRevision+Required&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · Done",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&status=Complete",
+      "request": "/api/v1/tasks?projects=all&status=Complete&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · On Hold",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&status=On+Hold",
+      "request": "/api/v1/tasks?projects=all&status=On+Hold&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 To Do",
+      "shown": 7,
+      "total": 7,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 In Progress",
+      "shown": 5,
+      "total": 5,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=In+Progress",
+      "request": "/api/v1/tasks?projects=all&status=In+Progress&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 Done",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Complete",
+      "request": "/api/v1/tasks?projects=all&status=Complete&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 Riverside lane grading and drainage total",
+      "shown": 14,
+      "total": 14,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 To Do",
+      "shown": 10,
+      "total": 10,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 In Progress",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=In+Progress",
+      "request": "/api/v1/tasks?projects=all&status=In+Progress&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 Review and revision",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Ready+for+Review%2CIn+Review%2CRevision+Required",
+      "request": "/api/v1/tasks?projects=all&status=Ready+for+Review%2CIn+Review%2CRevision+Required&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase 2 detailed design) total",
+      "shown": 13,
+      "total": 13,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-102 To Do",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-102 Waterfront site servicing total",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-104 To Do",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&page=1&pageSize=100"
+    },
+    {
+      "persona": "priya",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-104 Lakeside subdivision servicing (proposal) total",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home",
+      "tile": "Active Projects",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects?status=Active",
+      "request": "/api/v1/projects?status=Active&mine=true&pageSize=200"
+    },
+    {
+      "persona": "sam",
+      "page": "Home",
+      "tile": "Open Tasks",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?open=true",
+      "request": "/api/v1/tasks?projects=mine&open=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home",
+      "tile": "Overdue Tasks",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?overdue=true",
+      "request": "/api/v1/tasks?projects=mine&overdue=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home",
+      "tile": "Team Members",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/team",
+      "request": "/api/v1/team?projects=mine"
+    },
+    {
+      "persona": "sam",
+      "page": "Home",
+      "tile": "Tasks by Status · To Do",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?status=Not+Started",
+      "request": "/api/v1/tasks?projects=mine&status=Not+Started&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home",
+      "tile": "Tasks by Status · In Progress",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?status=In+Progress",
+      "request": "/api/v1/tasks?projects=mine&status=In+Progress&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home",
+      "tile": "Tasks by Status · Review and revision",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?status=Ready+for+Review%2CIn+Review%2CRevision+Required",
+      "request": "/api/v1/tasks?projects=mine&status=Ready+for+Review%2CIn+Review%2CRevision+Required&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home",
+      "tile": "Tasks by Status · Done",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?status=Complete",
+      "request": "/api/v1/tasks?projects=mine&status=Complete&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home",
+      "tile": "Tasks by Status · On Hold",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/tasks?status=On+Hold",
+      "request": "/api/v1/tasks?projects=mine&status=On+Hold&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Total",
+      "shown": 14,
+      "total": 14,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Complete",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?status=Complete",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?status=Complete&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · In progress",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?status=In%20Progress",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?status=In+Progress&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · In review",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?readyForReview=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?readyForReview=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Overdue",
+      "shown": 4,
+      "total": 4,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?overdue=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Waiting",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?waiting=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?waiting=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Tasks · Unassigned",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?unassigned=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?unassigned=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · Total",
+      "shown": 9,
+      "total": 9,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?includeTasks=true"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · Due ≤ 14 d",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables?dueFrom=2026-10-12&dueTo=2026-10-26&indicator=open",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?indicator=open&dueFrom=2026-10-12&dueTo=2026-10-26&includeTasks=true"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · At risk",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables?indicator=atRisk",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?indicator=atRisk&includeTasks=true"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Deliverables · Issued",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/deliverables?status=Issued%2CAccepted",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/deliverables?status=Issued%2CAccepted&includeTasks=true"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Decisions · Open",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/decisions?status=Pending%2CUnder%20Review%2CDeferred",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/decisions?status=Pending%2CUnder+Review%2CDeferred"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Decisions · Overdue",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-101/decisions?indicator=overdue",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/decisions?indicator=overdue"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Issues and risks · Open issues",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/issues?indicator=open",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/issues?indicator=open"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Issues and risks · High issues",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/issues?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/issues?severity=High&indicator=open"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Issues and risks · High risks",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/risks?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/risks?severity=High&indicator=open"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Civil · Open",
+      "shown": 9,
+      "total": 9,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&open=true&onHold=false",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&open=true&onHold=false&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Civil · Overdue",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&overdue=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Civil · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7708-70d0-b159-03504d207c8b&blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Geotechnical · Open",
+      "shown": 4,
+      "total": 4,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&open=true&onHold=false",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&open=true&onHold=false&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Geotechnical · Overdue",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&overdue=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Geotechnical · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?disciplineId=01a10454-7710-7006-93a6-4a936c061462&blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Due this week",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?dueThisWeek=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?dueThisWeek=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-101",
+      "tile": "Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-101/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-76c6-7d32-ae72-72e709e168be/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Total",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Complete",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?status=Complete",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?status=Complete&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · In progress",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?status=In%20Progress",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?status=In+Progress&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · In review",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?readyForReview=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?readyForReview=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Overdue",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?overdue=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Waiting",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?waiting=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?waiting=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Tasks · Unassigned",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?unassigned=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?unassigned=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · Total",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?includeTasks=true"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · Due ≤ 14 d",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables?dueFrom=2026-10-12&dueTo=2026-10-26&indicator=open",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?indicator=open&dueFrom=2026-10-12&dueTo=2026-10-26&includeTasks=true"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · At risk",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables?indicator=atRisk",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?indicator=atRisk&includeTasks=true"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Deliverables · Issued",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/deliverables?status=Issued%2CAccepted",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/deliverables?status=Issued%2CAccepted&includeTasks=true"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Decisions · Open",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/decisions?status=Pending%2CUnder%20Review%2CDeferred",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/decisions?status=Pending%2CUnder+Review%2CDeferred"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Decisions · Overdue",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/decisions?indicator=overdue",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/decisions?indicator=overdue"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Issues and risks · Open issues",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/issues?indicator=open",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/issues?indicator=open"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Issues and risks · High issues",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/issues?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/issues?severity=High&indicator=open"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Issues and risks · High risks",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/risks?indicator=open&severity=High",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/risks?severity=High&indicator=open"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Civil · Open",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&open=true&onHold=false",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&open=true&onHold=false&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Civil · Overdue",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&overdue=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&overdue=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Civil · Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&blocked=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?disciplineId=01a10454-7932-7c99-b783-9173ff87340a&blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Due this week",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?dueThisWeek=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?dueThisWeek=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Dashboard SYN-102",
+      "tile": "Blocked",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/projects/SYN-102/tasks?blocked=true",
+      "request": "/api/v1/projects/01a10454-792a-76ea-963c-7d37f72e89d8/tasks?blocked=true&pageSize=200&page=1"
+    },
+    {
+      "persona": "sam",
+      "page": "Portfolio",
+      "tile": "Active projects",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/portfolio?status=Active",
+      "request": "/api/v1/portfolio?status=Active"
+    },
+    {
+      "persona": "sam",
+      "page": "Portfolio",
+      "tile": "Red (computed)",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/portfolio?computedHealth=Red&status=Active",
+      "request": "/api/v1/portfolio?status=Active&computedHealth=Red"
+    },
+    {
+      "persona": "sam",
+      "page": "Portfolio",
+      "tile": "Yellow (computed)",
+      "shown": 0,
+      "total": 0,
+      "ok": true,
+      "href": "/portfolio?computedHealth=Yellow&status=Active",
+      "request": "/api/v1/portfolio?status=Active&computedHealth=Yellow"
+    },
+    {
+      "persona": "sam",
+      "page": "Portfolio",
+      "tile": "Green (computed)",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/portfolio?computedHealth=Green&status=Active",
+      "request": "/api/v1/portfolio?status=Active&computedHealth=Green"
+    },
+    {
+      "persona": "sam",
+      "page": "Portfolio",
+      "tile": "Submissions in 14 days",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/portfolio?submissionWithinDays=14",
+      "request": "/api/v1/portfolio?submissionWithinDays=14"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Active Projects",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects?status=Active&mine=false",
+      "request": "/api/v1/projects?status=Active&pageSize=200"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Open Tasks",
+      "shown": 31,
+      "total": 31,
+      "ok": true,
+      "href": "/tasks?projects=all&open=true",
+      "request": "/api/v1/tasks?projects=all&open=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Overdue Tasks",
+      "shown": 5,
+      "total": 5,
+      "ok": true,
+      "href": "/tasks?projects=all&overdue=true",
+      "request": "/api/v1/tasks?projects=all&overdue=true&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "On Track · Green",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/projects?status=Active&computedHealth=Green&mine=false",
+      "request": "/api/v1/projects?status=Active&computedHealth=Green&pageSize=200"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "On Track · evaluated",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/projects?status=Active&computedHealth=Green%2CYellow%2CRed&mine=false",
+      "request": "/api/v1/projects?status=Active&computedHealth=Green%2CYellow%2CRed&pageSize=200"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Team Members",
+      "shown": 18,
+      "total": 18,
+      "ok": true,
+      "href": "/team?projects=all",
+      "request": "/api/v1/team?projects=all"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · To Do",
+      "shown": 22,
+      "total": 22,
+      "ok": true,
+      "href": "/tasks?projects=all&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · In Progress",
+      "shown": 7,
+      "total": 7,
+      "ok": true,
+      "href": "/tasks?projects=all&status=In+Progress",
+      "request": "/api/v1/tasks?projects=all&status=In+Progress&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · Review and revision",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&status=Ready+for+Review%2CIn+Review%2CRevision+Required",
+      "request": "/api/v1/tasks?projects=all&status=Ready+for+Review%2CIn+Review%2CRevision+Required&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · Done",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&status=Complete",
+      "request": "/api/v1/tasks?projects=all&status=Complete&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Status · On Hold",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&status=On+Hold",
+      "request": "/api/v1/tasks?projects=all&status=On+Hold&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 To Do",
+      "shown": 7,
+      "total": 7,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 In Progress",
+      "shown": 5,
+      "total": 5,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=In+Progress",
+      "request": "/api/v1/tasks?projects=all&status=In+Progress&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 Done",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Complete",
+      "request": "/api/v1/tasks?projects=all&status=Complete&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-105 Riverside lane grading and drainage total",
+      "shown": 14,
+      "total": 14,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a12e2a-224e-7263-b9f9-3041c11bed9f&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 To Do",
+      "shown": 10,
+      "total": 10,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 In Progress",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=In+Progress",
+      "request": "/api/v1/tasks?projects=all&status=In+Progress&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 Review and revision",
+      "shown": 1,
+      "total": 1,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Ready+for+Review%2CIn+Review%2CRevision+Required",
+      "request": "/api/v1/tasks?projects=all&status=Ready+for+Review%2CIn+Review%2CRevision+Required&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-101 Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase 2 detailed design) total",
+      "shown": 13,
+      "total": 13,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-76c6-7d32-ae72-72e709e168be&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a10454-76c6-7d32-ae72-72e709e168be&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-102 To Do",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-102 Waterfront site servicing total",
+      "shown": 3,
+      "total": 3,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a10454-792a-76ea-963c-7d37f72e89d8&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-104 To Do",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&status=Not+Started",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&page=1&pageSize=100"
+    },
+    {
+      "persona": "sam",
+      "page": "Home (all projects)",
+      "tile": "Tasks by Project · SYN-104 Lakeside subdivision servicing (proposal) total",
+      "shown": 2,
+      "total": 2,
+      "ok": true,
+      "href": "/tasks?projects=all&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete",
+      "request": "/api/v1/tasks?projects=all&status=Not+Started%2CIn+Progress%2CReady+for+Review%2CIn+Review%2CRevision+Required%2CComplete&projectId=01a12e2a-1da2-715b-912a-17a944a6d6f5&page=1&pageSize=100"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+Packet 036 section 9 checks, 2026-10-12. HEAD = 4760e2c4 (temporary worktree, so the shared API's build on 5080 was not touched); base = 9beace03.
+
+== Full suite, HEAD: dotnet test tests/Hub.Tests/Hub.Tests.csproj --no-restore --no-build --collect:"XPlat Code Coverage"
+Passed!  - Failed:     0, Passed:  1106, Skipped:     0, Total:  1106, Duration: 4 m 37 s - Hub.Tests.dll (net10.0)
+== Full suite, base 9beace03 (same command):
+Passed!  - Failed:     0, Passed:  1052, Skipped:     0, Total:  1052, Duration: 4 m 29 s - Hub.Tests.dll (net10.0)
+
+== Coverage gate, HEAD: python3 tools/coverage_gate.py <results>
+Rules engine branch coverage: 96.6 % (gate 95 %)
+Service line coverage: 94.4 % (gate 70 %)
+exit 0
+== Coverage gate, base:
+Rules engine branch coverage: 96.6 % (gate 95 %)
+Service line coverage: 94.2 % (gate 70 %)
+exit 0
+== Per file, HEAD:
+Features/Allocations.cs: lines 860/870 = 98.9 %, branches 232/312 = 74.4 %
+Features/Dependencies.cs: lines 346/374 = 92.5 %, branches 84/116 = 72.4 %
+Features/OpenRoles.cs: lines 170/172 = 98.8 %, branches 96/108 = 88.9 %
+Features/Workload.cs: lines 496/498 = 99.6 %, branches 176/212 = 83.0 %
+Hub.Domain/Evaluation.cs: lines 1036/1038 = 99.8 %, branches 1790/1860 = 96.2 %
+== Per file, base:
+Features/Allocations.cs: lines 826/836 = 98.8 %, branches 222/300 = 74.0 %
+Features/Dependencies.cs: lines 298/326 = 91.4 %, branches 70/104 = 67.3 %
+Features/Workload.cs: lines 458/460 = 99.6 %, branches 160/196 = 81.6 %
+Hub.Domain/Evaluation.cs: lines 980/982 = 99.8 %, branches 1684/1752 = 96.1 %
+
+== Web (temporary worktree at 4760e2c4, sharing the integration checkout's node_modules)
+npm --prefix web run build: exit 0 (1 build completed)
+npm --prefix web run lint: exit 0, 94 warnings, 0 errors
+PORT=5186 npm --prefix web run test:planner: exit 0
+{"flowCount":20,"recoveryChecks":["editing failed save uses current draft","metadata actions retain unsaved fields","failed conflict reload retains draft and blocks stale save","denied reload suppress
+PORT=5187 npm --prefix web run test:resources: exit 0
+{"scope":"Chromium UI with mocked API; server rules are tested separately","errors":[],"unmockedGets":[],"desktopViolations":[],"panelViolations":[]}
+TUESDAY_UI_BASE_URL=http://localhost:5185 npm --prefix web run test:counts (shared API on 5080, preview database): exit 0
+288 counts checked, 0 mismatches, 0 missing agreed tiles. Report: /private/tmp/claude-501/-Users-jaypatel-PM-Tool/f879a8c1-966b-47f2-8c07-d393d08b7d6e/scratchpad/acc/counts-report.json
+
+== Spec
+up to date
+818 IDs, 0 not cited; 271 sections, 0 not cited; 0 unknown
+
+== Wording: git diff 9beace03..4760e2c4 and its commit messages, case-insensitive grep for the competitor product list (the list is kept out of the repository): 0 hits in the diff, 0 in commit messages
+
+== Merge
+9beace03 is an ancestor of 4760e2c4: the merge into the base is a fast-forward, no conflicts
+Commits touching HubDbModelSnapshot.cs since 9beace03: 299e8be3 Add open roles, StartedAt, link types and home discipline to the schema
+Migration files changed since 9beace03: A	src/Hub.Api/Data/Migrations/20261012014621_StaffingSignals.Designer.cs A	src/Hub.Api/Data/Migrations/20261012014621_StaffingSignals.cs M	src/Hub.Api/Data/Migrations/HubDbModelSnapshot.cs 
+dotnet ef migrations has-pending-model-changes: No changes have been made to the model since the last migration.
+
+== Packet 029 and 034 files
+git diff --numstat 9beace03..4760e2c4 -- tests/:
+10	0	tests/Hub.Tests/Api/AllocationApiTests.cs
+304	0	tests/Hub.Tests/Api/DependencyTypeApiTests.cs
+20	0	tests/Hub.Tests/Api/FoundationsTests.cs
+300	0	tests/Hub.Tests/Api/OpenRoleApiTests.cs
+66	0	tests/Hub.Tests/Api/PlanningApiTests.cs
+3	2	tests/Hub.Tests/Api/ProjectsTests.cs
+5	0	tests/Hub.Tests/Api/ReadinessApiTests.cs
+131	0	tests/Hub.Tests/Api/SignalTrustApiTests.cs
+216	0	tests/Hub.Tests/Api/StaffingSignalsSchemaTests.cs
+46	0	tests/Hub.Tests/Api/WorkloadApiTests.cs
+180	0	tests/Hub.Tests/Domain/DependencyLagTests.cs
+143	5	tests/Hub.Tests/Domain/EvaluatorTests.cs
+git diff --stat 86e40ef6..4760e2c4 -- src/Hub.Api/Features/Planning.cs: ''
+git diff --numstat 9beace03..4760e2c4 -- src/Hub.Api/Features/Planning.cs: 14	3	src/Hub.Api/Features/Planning.cs
+
+== Performance: hub_scale does not exist on 127.0.0.1:55432 (databases there: hub, postgres, template0, template1, tuesday_finish_preview), so the api-scale setup was not started.

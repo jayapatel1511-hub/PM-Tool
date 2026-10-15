@@ -5,7 +5,7 @@ import { ShellSlots } from '@/app/slots'
 import { Field, selectCls } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useProject } from '@/hooks/data'
 import { get } from '@/lib/api'
@@ -32,8 +32,11 @@ export function NewTaskDialog({ onClose, projectId }: { onClose: (created?: stri
     return <CreateTask p={project.data} deliverables={lists.deliverables} milestones={lists.milestones} onClose={(id) => { onClose(id); if (id) openPanel('Task', id) }} />
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader><DialogTitle>{t('task.new')}</DialogTitle></DialogHeader>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t('task.new')}</DialogTitle>
+          <DialogDescription>{t('mywork.newTaskHint')}</DialogDescription>
+        </DialogHeader>
         {list.isFetched && live.length === 0 ? <p className="text-sm text-muted-foreground">{t('mywork.noProjects')}</p> : (
           <Field label={t('mywork.inProject')} htmlFor="nt-project" hint={project.data && !allowed ? t('mywork.cannotCreate') : undefined}>
             <select id="nt-project" className={selectCls} value={picked ?? live[0]?.id ?? ''} onChange={(e) => setPicked(e.target.value)}>
@@ -41,10 +44,10 @@ export function NewTaskDialog({ onClose, projectId }: { onClose: (created?: stri
             </select>
           </Field>
         )}
-        <div className="flex justify-end gap-2">
+        <DialogFooter>
           <Button variant="outline" onClick={() => onClose()}>{t('common.cancel')}</Button>
           <Button disabled={!allowed} onClick={() => setChosen(true)}>{t('mywork.continue')}</Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
@@ -59,7 +62,7 @@ function NewItemMenu() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="sm" className="gap-1" aria-label={t('new.label')}><Plus className="size-4" /><span className="hidden sm:inline">{t('new.label')}</span></Button>
+          <Button className="gap-1.5" aria-label={t('new.label')}><Plus className="size-4" /><span className="hidden sm:inline">{t('new.label')}</span></Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {me.capabilities.createProject && <DropdownMenuItem onSelect={() => setOpen('project')}>{t('new.project')}</DropdownMenuItem>}

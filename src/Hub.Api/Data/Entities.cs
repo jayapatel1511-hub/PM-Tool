@@ -6,7 +6,9 @@ namespace Hub.Api.Data;
 
 public abstract class Entity { public Guid Id { get; set; } = Guid.CreateVersion7(); }
 
-public abstract class Audited : Entity
+public interface IVersioned { int RowVersion { get; set; } }
+
+public abstract class Audited : Entity, IVersioned
 {
     public DateTimeOffset CreatedAt { get; set; }
     public Guid? CreatedBy { get; set; }
@@ -37,6 +39,9 @@ public class AppUser : Audited, IAuditable
     public string? JobTitle { get; set; }
     public Guid? OfficeId { get; set; }
     public Guid? SupervisorId { get; set; }
+    public Guid? HomeDisciplineId { get; set; } // FR-GRP-01, edited by an Admin (D7)
+    public string? HrSourceSystem { get; set; }
+    public string? HrPersonKey { get; set; }
     public bool IsActive { get; set; } = true;
     public decimal? WeeklyCapacityHours { get; set; }
     public DateTimeOffset? LastSignInAt { get; set; }
@@ -95,6 +100,7 @@ public class UserSetting
 {
     public Guid UserId { get; set; }
     public bool DigestEnabled { get; set; } = true;
+    public bool HoldDigestWhenAway { get; set; } = true;
     public string? DigestTimeLocal { get; set; }
     public bool DenseRows { get; set; } = true;
     public bool WeeklySummaryEnabled { get; set; } = true;
@@ -191,8 +197,9 @@ public class Project : Audited, IAuditable
     public string? AuditName => Name;
 }
 
-public class ProjectDiscipline : Entity, IAuditable
+public class ProjectDiscipline : Entity, IAuditable, IVersioned
 {
+    public int RowVersion { get; set; } = 1;
     public Guid ProjectId { get; set; }
     public Guid DisciplineId { get; set; }
     public Guid? LeadUserId { get; set; }
@@ -206,8 +213,9 @@ public class ProjectDiscipline : Entity, IAuditable
     public Guid? AuditDisciplineId => Id;
 }
 
-public class ProjectMember : Entity, IAuditable
+public class ProjectMember : Entity, IAuditable, IVersioned
 {
+    public int RowVersion { get; set; } = 1;
     public Guid ProjectId { get; set; }
     public Guid UserId { get; set; }
     public List<string> Roles { get; set; } = [];
@@ -315,6 +323,7 @@ public class Deliverable : ProjectItem, IAuditable
     public Guid? TemplateDeliverableId { get; set; }
     public DateTimeOffset LastActivityAt { get; set; }
     public DateTimeOffset? StatusChangedAt { get; set; }
+    public DateTimeOffset? StartedAt { get; set; } // first left Not Started (D4)
     public int SortOrder { get; set; }
     public string AuditType => ItemType.Deliverable;
     public Guid? AuditProjectId => ProjectId;
@@ -460,6 +469,7 @@ public class WorkTask : ProjectItem, IAuditable
     public DateTimeOffset LastActivityAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
     public DateTimeOffset? StatusChangedAt { get; set; }
+    public DateTimeOffset? StartedAt { get; set; } // first left Not Started (D4)
     public DateTimeOffset? ReviewRequestedAt { get; set; }
     public int SortOrder { get; set; }
     public Guid? TemplateTaskId { get; set; }
@@ -493,6 +503,7 @@ public class DeliverableDependency : Entity, ISoftDeletable, IAuditable
     public Guid ProjectId { get; set; }
     public Guid PredecessorDeliverableId { get; set; }
     public Guid SuccessorDeliverableId { get; set; }
+    public string DependencyType { get; set; } = DependencyTypes.FinishToStart;
     public int LagDays { get; set; }
     public string? Note { get; set; }
     public Guid? CreatedBy { get; set; }
@@ -699,8 +710,9 @@ public class Comment : Entity, IAuditable
 
 public class CommentMention : Entity { public Guid CommentId { get; set; } public Guid UserId { get; set; } }
 
-public class DocumentLink : Entity, ISoftDeletable, IAuditable
+public class DocumentLink : Entity, ISoftDeletable, IAuditable, IVersioned
 {
+    public int RowVersion { get; set; } = 1;
     public Guid ProjectId { get; set; }
     public string ItemType { get; set; } = "";
     public Guid ItemId { get; set; }
@@ -764,6 +776,7 @@ public class Notification : Entity
 
 public class EmailMessage : Entity
 {
+    public Guid[] RequiredPlanningEntryIds { get; set; } = [];
     public Guid[] RequiredProjectIds { get; set; } = [];
     public DateTimeOffset? SuppressedAt { get; set; }
     public Guid? UserId { get; set; }
@@ -977,8 +990,9 @@ public class SavedView : Audited
     public bool IsDefault { get; set; }
 }
 
-public class Workspace : Entity
+public class Workspace : Entity, IVersioned
 {
+    public int RowVersion { get; set; } = 1;
     public string Name { get; set; } = "";
     public Guid OwnerId { get; set; }
     public DateTimeOffset CreatedAt { get; set; }

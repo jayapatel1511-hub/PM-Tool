@@ -64,7 +64,7 @@ public static class DocumentLinkEndpoints
             var names = await db.Users.Where(u => ids.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
             object Row(DocumentLink l, bool mine) => new
             {
-                l.Id, l.Title, l.Url, l.LinkType, IsNetworkPath = Links.IsUnc(l.Url), l.AddedBy, AddedByName = names.GetValueOrDefault(l.AddedBy), l.AddedAt,
+                l.Id, l.Title, l.Url, l.LinkType, l.RowVersion, IsNetworkPath = Links.IsUnc(l.Url), l.AddedBy, AddedByName = names.GetValueOrDefault(l.AddedBy), l.AddedAt,
                 CanChange = mine && CanChange(l, access.Actor, ctx),
             };
             return new { CanAdd = CanAdd(type, access.Actor, ctx).Ok, Links = own.Select(l => Row(l, true)), Inherited = inherited.Select(l => Row(l, false)) };
@@ -77,28 +77,30 @@ public static class DocumentLinkEndpoints
             var (_, ctx) = await access.Project(o.ProjectId);
             Access.Demand(CanAdd(type, access.Actor, ctx));
             var link = await Add(db, o.ProjectId, type, id, o.Key, body, access.Me.Id, clock.GetUtcNow());
-            return Results.Created($"/api/v1/links/{link.Id}", new { link.Id, link.Title, link.Url, link.LinkType });
+            return Results.Created($"/api/v1/links/{link.Id}", new { link.Id, link.Title, link.Url, link.LinkType, link.RowVersion });
         });
 
-        api.MapPatch("/links/{id:guid}", async (Guid id, System.Text.Json.JsonElement body, Access access, HubDb db) =>
+        api.MapPatch("/links/{id:guid}", async (Guid id, System.Text.Json.JsonElement body, Access access, HubDb db, HttpContext http) =>
         {
             var l = await db.DocumentLinks.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
             var (_, ctx) = await access.Project(l.ProjectId);
             Access.Demand(CanChange(l, access.Actor, ctx) ? Allow.Yes : Allow.No("perm.owner"));
             var patch = new Patch(body);
+            await Http.CheckVersion(db, http, l, patch.Int("rowVersion"));
             if (patch.Has("url")) { var url = Check.Required(patch.Str("url"), "url", 2000); Check.That(Links.IsValid(url), "url", "link.invalid"); l.Url = url; }
             if (patch.Has("title")) l.Title = Check.Required(patch.Str("title"), "title", 200);
             if (patch.Has("linkType")) { var lt = patch.Str("linkType"); Check.OneOf(lt, LinkType.All, "linkType"); l.LinkType = lt!; }
             l.AuditKey = (await Owner(db, l.ItemType, l.ItemId))?.Key;
             await db.SaveChangesAsync();
-            return Results.Ok(new { l.Id, l.Title, l.Url, l.LinkType });
+            return Results.Ok(new { l.Id, l.Title, l.Url, l.LinkType, l.RowVersion });
         });
 
-        api.MapDelete("/links/{id:guid}", async (Guid id, Access access, HubDb db, TimeProvider clock) =>
+        api.MapDelete("/links/{id:guid}", async (Guid id, Access access, HubDb db, TimeProvider clock, HttpContext http) =>
         {
             var l = await db.DocumentLinks.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
             var (_, ctx) = await access.Project(l.ProjectId);
             Access.Demand(CanChange(l, access.Actor, ctx) ? Allow.Yes : Allow.No("perm.owner"));
+            await Http.CheckVersion(db, http, l);
             l.DeletedAt = clock.GetUtcNow(); // DOC-03: soft delete, logged
             l.DeletedBy = access.Me.Id;
             l.AuditKey = (await Owner(db, l.ItemType, l.ItemId))?.Key;

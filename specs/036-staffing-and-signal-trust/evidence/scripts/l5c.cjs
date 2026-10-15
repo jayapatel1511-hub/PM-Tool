@@ -1,0 +1,15 @@
+const fs = require('node:fs')
+const { open, shot, settle, close, base } = require('./lib.cjs')
+;(async () => {
+  const id = fs.readFileSync(`${__dirname}/../l5-task.txt`, 'utf8').trim()
+  const page = await open('priya', { width: 1600, height: 1000 })
+  await page.goto(`${base}/projects/SYN-105/tasks?panel=Task:${id}`); await settle(page, 1800)
+  const header = await page.getByRole('dialog').last().innerText()
+  const shown = /Finished before predecessor/.test(header), flag = /Date inconsistent/.test(header)
+  await shot(page, 'SC-003-L5-date-C-note')
+  const file = `${__dirname}/results-part2.json`; const r = JSON.parse(fs.readFileSync(file, 'utf8'))
+  r['SC-003-L5-dateC'] = { ok: shown && !flag, base, note: shown, dateFlag: flag, how: 'Fresh database seeded through the HEAD API (seed_staffing.py, relative shapes, today = date B); Quantity estimate (L5 FF successor) completed by Jill while Specifications is In Progress, which is the L5 date C shape.', screenshot: 'SC-003-L5-date-C-note.png' }
+  fs.writeFileSync(file, JSON.stringify(r, null, 1))
+  console.log(JSON.stringify(r['SC-003-L5-dateC']))
+  await close()
+})()

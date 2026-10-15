@@ -37,18 +37,21 @@ sealed class Scenario
 
     public TaskSnap Task(string key, string status = TaskStatuses.InProgress, DateOnly? start = null, DateOnly? due = null, Guid? assignee = null, Guid? discipline = null,
         Guid? deliverable = null, Guid? milestone = null, string priority = Priority.Medium, DateOnly? lastActivity = null, decimal? est = null, int progress = 0,
-        string? block = null, DateOnly? reviewRequested = null, Guid? reviewer = null, int dueChanges = 0, DateOnly? completed = null, bool unassigned = false)
+        string? block = null, DateOnly? reviewRequested = null, Guid? reviewer = null, int dueChanges = 0, DateOnly? completed = null, bool unassigned = false,
+        DateOnly? startedOn = null, DateOnly? statusChanged = null)
     {
         var t = new TaskSnap(Guid.NewGuid(), key, key + " name", discipline ?? Civil, deliverable, milestone, unassigned ? null : assignee ?? Alex, reviewer, status, priority,
-            start, due, progress, est, block, block is null ? null : "reason text", block is null ? null : Today.AddDays(-3), lastActivity ?? Today, reviewRequested, dueChanges, completed);
+            start, due, progress, est, block, block is null ? null : "reason text", block is null ? null : Today.AddDays(-3), lastActivity ?? Today, reviewRequested, dueChanges, completed,
+            StartedOn: startedOn, StatusChangedOn: statusChanged);
         Tasks.Add(t);
         return t;
     }
 
     public DeliverableSnap Deliverable(string key, DateOnly? due = null, Guid? milestone = null, string status = DeliverableStatus.InProgress, Guid? owner = null, Guid? discipline = null,
-        DateOnly? originalDue = null, DateOnly? start = null, DateOnly? issued = null)
+        DateOnly? originalDue = null, DateOnly? start = null, DateOnly? issued = null, DateOnly? startedOn = null, DateOnly? statusChanged = null, DateOnly? lastActivity = null)
     {
-        var d = new DeliverableSnap(Guid.NewGuid(), key, key + " name", discipline ?? Civil, owner ?? CivilLead, null, milestone, start, due, originalDue ?? due, status, Priority.Medium, Today, issued);
+        var d = new DeliverableSnap(Guid.NewGuid(), key, key + " name", discipline ?? Civil, owner ?? CivilLead, null, milestone, start, due, originalDue ?? due, status, Priority.Medium,
+            lastActivity ?? Today, issued, startedOn, statusChanged);
         Deliverables.Add(d);
         return d;
     }
@@ -60,7 +63,8 @@ sealed class Scenario
         return m;
     }
 
-    public void Depends(TaskSnap successor, TaskSnap predecessor, int lag = 0) => Deps.Add(new DependencySnap(Guid.NewGuid(), predecessor.Id, successor.Id, lag));
+    public void Depends(TaskSnap successor, TaskSnap predecessor, int lag = 0, string type = DependencyTypes.FinishToStart) =>
+        Deps.Add(new DependencySnap(Guid.NewGuid(), predecessor.Id, successor.Id, lag, type));
 
     public EvalResult Run() => Evaluator.Evaluate(new EvalInput(
         new ProjectSnap(Guid.NewGuid(), "1234", Status, Pm, [Pm], OverrideHealth, OverrideExpires, new DateTimeOffset(Today.ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero)),
@@ -369,6 +373,140 @@ public sealed class EvaluatorTests
         Assert.Equal([s.Diane, s.CivilLead, s.Pm], a.RouteTo);
         Assert.Contains(r.A(t.Id), x => x.RuleId == "A-20" && x.Severity == Severity.Info);
         Assert.Contains("due_moved", r.T(t).Notes);
+    }
+
+    // ---------- A-21 "Status not moving" (packet 036, FR-STALE, verification.md §6.3) ----------
+
+    [Fact]
+    public void Status_not_moving_fires_for_touched_work_whose_status_is_still() // AC-STALE-01
+    {
+        var s = new Scenario();
+        var t = s.Task("T21a", statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-1), due: s.Today.AddDays(20));
+        var a = s.Run().A(t.Id).Single();
+        Assert.Equal(("A-21", Severity.Info), (a.RuleId, a.Severity));
+        Assert.Contains("16 days", a.Message);
+        Assert.Contains("threshold 15 days", a.Why.Text);
+        Assert.StartsWith("A-21 Status not moving: ", a.Why.Text);
+        Assert.Equal(15, a.Why.Threshold);
+        Assert.Equal([s.Alex, s.CivilLead], a.RouteTo);
+
+        s.Replace(s.Tasks, t, t with { DueDate = s.Today.AddDays(3) }); // due within task_due_soon_days
+        Assert.Equal(Severity.Warning, s.Run().A(t.Id).Single(x => x.RuleId == "A-21").Severity);
+    }
+
+    [Fact]
+    public void Status_not_moving_counts_working_days_when_they_are_on() // AC-STALE-01
+    {
+        var s = new Scenario(); // Friday 2026-09-11
+        var t = s.Task("T21a", statusChanged: new DateOnly(2026, 8, 26), lastActivity: s.Today.AddDays(-1), due: s.Today.AddDays(20)); // 16 calendar days
+        Assert.Contains(s.Run().A(t.Id), x => x.RuleId == "A-21");
+        s.Settings = s.Settings with { WorkingDaysEnabled = true };
+        Assert.DoesNotContain(s.Run().A(t.Id), x => x.RuleId == "A-21"); // 12 working days
+        s.Replace(s.Tasks, t, t with { StatusChangedOn = new DateOnly(2026, 8, 20) }); // 16 working days
+        Assert.Contains("16 days", s.Run().A(t.Id).Single(x => x.RuleId == "A-21").Message);
+    }
+
+    [Fact]
+    public void Stale_work_and_stalled_review_win_over_status_not_moving() // AC-STALE-02, AC-STALE-02b
+    {
+        var s = new Scenario();
+        var idle = s.Task("T21b", statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-16), due: s.Today.AddDays(20));
+        var review = s.Task("T21c", TaskStatuses.InReview, statusChanged: s.Today.AddDays(-16), reviewRequested: s.Today.AddDays(-16), reviewer: s.Diane,
+            lastActivity: s.Today.AddDays(-1), due: s.Today.AddDays(20));
+        var r = s.Run();
+        Assert.Equal(["A-10"], r.A(idle.Id).Select(x => x.RuleId));
+        Assert.Equal(["A-11"], r.A(review.Id).Select(x => x.RuleId));
+    }
+
+    [Fact]
+    public void Status_not_moving_covers_deliverables_in_progress_or_in_review() // AC-STALE-02c
+    {
+        var s = new Scenario();
+        var d = s.Deliverable("D21", s.Today.AddDays(40), status: DeliverableStatus.InReview, statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-1));
+        var issued = s.Deliverable("D22", s.Today.AddDays(40), status: DeliverableStatus.ReadyToIssue, statusChanged: s.Today.AddDays(-16));
+        var r = s.Run();
+        var a = r.A(d.Id).Single(x => x.RuleId == "A-21");
+        Assert.Equal((Severity.Info, ItemType.Deliverable, (Guid?)s.CivilLead), (a.Severity, a.ItemType, a.OwnerId));
+        Assert.Contains("In Review for 16 days", a.Message);
+        Assert.DoesNotContain(r.A(issued.Id), x => x.RuleId == "A-21");
+    }
+
+    [Fact]
+    public void Status_not_moving_needs_strictly_more_than_the_threshold() // AC-STALE-02d
+    {
+        var s = new Scenario();
+        var t = s.Task("T", statusChanged: s.Today.AddDays(-15), due: s.Today.AddDays(20));
+        var held = s.Task("H", TaskStatuses.OnHold, statusChanged: s.Today.AddDays(-30), due: s.Today.AddDays(20));
+        var unknown = s.Task("U", due: s.Today.AddDays(20)); // no status date: nothing to count from
+        var r = s.Run();
+        Assert.Empty(r.A(t.Id));
+        Assert.Empty(r.A(held.Id));
+        Assert.Empty(r.A(unknown.Id));
+        s.Settings = s.Settings with { StatusStaleDays = 14 };
+        Assert.Contains(s.Run().A(t.Id), x => x.RuleId == "A-21");
+    }
+
+    [Fact]
+    public void Status_not_moving_has_a_rule_switch_a_snooze_and_a_ranged_setting() // AC-STALE-03a, AC-STALE-03b, AC-STALE-04
+    {
+        var s = new Scenario();
+        var t = s.Task("T21a", statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-1), due: s.Today.AddDays(20));
+        s.Snoozes.Add(new SnoozeSnap("A-21", ItemType.Task, t.Id, new DateTimeOffset(s.Today.AddDays(2).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero), Severity.Info));
+        Assert.True(s.Run().A(t.Id).Single().Snoozed);
+        s.Settings = s.Settings with { RuleEnabled = Rules.Ids.ToDictionary(x => x, x => x != "A-21") };
+        Assert.Empty(s.Run().A(t.Id));
+
+        Assert.Contains("A-21", Rules.Ids);
+        Assert.Equal((true, (object)15, "thresholds"), (OrgSettings.Def("rule_enabled.A-21") is not null, OrgSettings.Def("status_stale_days")!.Default, OrgSettings.Def("status_stale_days")!.Group));
+        var def = OrgSettings.Def("status_stale_days")!;
+        string? Check(int n) => OrgSettings.Validate(def, System.Text.Json.JsonSerializer.SerializeToElement(n));
+        Assert.Equal(["setting.int", null, null, "setting.int"], new[] { 0, 1, 365, 366 }.Select(Check));
+        Assert.Equal(30, OrgSettings.From(new Dictionary<string, System.Text.Json.JsonElement> { ["status_stale_days"] = System.Text.Json.JsonSerializer.SerializeToElement(30) }).StatusStaleDays);
+        Assert.Equal(15, new OrgSettings().StatusStaleDays);
+    }
+
+    // A5: A-21 needs an unchanged status AND activity within task_stale_days; neither the A-10 switch nor whether A-10 applies decides it.
+    [Fact]
+    public void Status_not_moving_needs_recent_activity_even_when_stale_work_is_off()
+    {
+        var s = new Scenario();
+        s.Settings = s.Settings with { RuleEnabled = new Dictionary<string, bool> { ["A-10"] = false } };
+        var idle = s.Task("T21b", statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-16), due: s.Today.AddDays(20));
+        var idleReview = s.Task("T21d", TaskStatuses.InReview, statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-16),
+            reviewRequested: s.Today.AddDays(-1), reviewer: s.Diane, due: s.Today.AddDays(20)); // A-10 never covers a review status
+        var idleDeliverable = s.Deliverable("D21b", s.Today.AddDays(40), statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-16));
+        var r = s.Run();
+        Assert.Empty(r.A(idle.Id));
+        Assert.Empty(r.A(idleReview.Id));
+        Assert.DoesNotContain(r.A(idleDeliverable.Id), x => x.RuleId == "A-21");
+    }
+
+    [Fact]
+    public void Status_not_moving_fires_while_activity_is_within_the_stale_window()
+    {
+        var s = new Scenario();
+        var edge = s.Task("T21e", statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-s.Settings.TaskStaleDays), due: s.Today.AddDays(20));
+        var review = s.Task("T21f", TaskStatuses.InReview, statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-1),
+            reviewRequested: s.Today.AddDays(-2), reviewer: s.Diane, due: s.Today.AddDays(20));
+        var touched = s.Deliverable("D21c", s.Today.AddDays(40), statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-s.Settings.TaskStaleDays));
+        var untouched = s.Deliverable("D21d", s.Today.AddDays(40), statusChanged: s.Today.AddDays(-16), lastActivity: s.Today.AddDays(-s.Settings.TaskStaleDays - 1));
+        var r = s.Run();
+        Assert.Equal(["A-21"], r.A(edge.Id).Select(x => x.RuleId));
+        Assert.Equal(["A-21"], r.A(review.Id).Select(x => x.RuleId));
+        Assert.Contains(r.A(touched.Id), x => x.RuleId == "A-21");
+        Assert.DoesNotContain(r.A(untouched.Id), x => x.RuleId == "A-21");
+    }
+
+    [Fact]
+    public void Status_not_moving_never_fires_while_the_review_is_stalled()
+    {
+        var s = new Scenario();
+        s.Settings = s.Settings with { RuleEnabled = new Dictionary<string, bool> { ["A-11"] = false } };
+        var t = s.Task("T21c", TaskStatuses.InReview, statusChanged: s.Today.AddDays(-16), reviewRequested: s.Today.AddDays(-16), reviewer: s.Diane,
+            lastActivity: s.Today.AddDays(-1), due: s.Today.AddDays(20));
+        var r = s.Run();
+        Assert.True(r.T(t).IsReviewStalled);
+        Assert.Empty(r.A(t.Id));
     }
 
     [Fact]

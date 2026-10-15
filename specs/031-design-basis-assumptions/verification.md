@@ -153,3 +153,20 @@ On executable `ac494a8ba70d50517f540ad7e0acced85d84897e`, two new independently 
 This is PASS for a bounded AC-BAS-04 slice, not replacement/adoption, template copy, complete readiness, assistive technology or company engineering acceptance. Credential-free evidence is `pm-tool/data/hosted-basis-conflict-ac494a8b.json`. See the [hosted acceptance checkpoint](../../docs/reviews/2026-10-03-hosted-acceptance-ac494a8b.md); T006 remains open.
 
 A separate hosted keyboard slice passed Enter activation, Tab wrapping inside the inspector, and Escape close with focus restored to its original entry button. No record was changed. Full form and assistive-technology acceptance remain UNPROVEN.
+
+
+## Template provisional confirmation boundary — 2026-10-03
+
+PASS locally: the existing template-copy test now proves that an independently appointed
+approver receives 400 on confirmation while the copied Proposed version's project
+confirmation date is unknown. Persisted version, confirmation attribution and current
+head remain unchanged. The owner then supplies an explicit project-specific date;
+independent confirmation succeeds and retains that date and attribution. This extends
+regression coverage of existing guards; no API/UI behaviour changed and no date was
+invented for template-derived operational data.
+
+`TemplatesTests` passed 7/7 with zero failures/skips against isolated branch base
+`4b853602`; independent changed-test review found no actionable findings. Final commit
+CI/merge and hosted redesigned acceptance are separate gates. Jay requested committing
+completed work and recording the remainder before the incoming redesign; see the
+[checkpoint](../../docs/handoffs/2026-10-03-redesign-checkpoint.md). T006 remains open.

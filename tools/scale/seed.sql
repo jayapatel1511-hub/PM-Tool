@@ -1,10 +1,50 @@
+-- planning_only isolates the small packet 034 fixture from the legacy 100,000-task stress data.
+\if :{?planning_only}
+\else
+\set planning_only false
+\endif
+\if :planning_only
+SET search_path = hub;
+BEGIN;
+CREATE TEMP TABLE planning_scope AS SELECT gen_random_uuid() id, g n FROM generate_series(0,11) g;
+INSERT INTO app_user(id,email,display_name,job_title,office_id,supervisor_id,is_active,is_template_editor,weekly_capacity_hours,created_at,updated_at,row_version)
+SELECT id, CASE WHEN n=0 THEN 'planning-scale-supervisor@hub.test' ELSE format('planning-scale-%s@hub.test',n) END,
+format('Synthetic planning scale person %s',n), 'Synthetic fixture', (SELECT office_id FROM app_user WHERE email='sam@hub.test'),
+CASE WHEN n=0 THEN NULL ELSE (SELECT id FROM planning_scope WHERE n=0) END, true,false,40,now(),now(),1 FROM planning_scope
+ON CONFLICT (email) DO NOTHING;
+UPDATE planning_scope x SET id=u.id FROM app_user u WHERE u.email=CASE WHEN x.n=0 THEN 'planning-scale-supervisor@hub.test' ELSE format('planning-scale-%s@hub.test',x.n) END;
+INSERT INTO user_system_role(id,user_id,role,source,granted_at)
+SELECT gen_random_uuid(),id,'Supervisor','Manual',now() FROM planning_scope x WHERE n=0 AND NOT EXISTS(SELECT 1 FROM user_system_role r WHERE r.user_id=x.id AND r.role='Supervisor');
+INSERT INTO project_member(id,project_id,user_id,roles,added_at)
+SELECT gen_random_uuid(),p.id,x.id,'{TeamMember}',now() FROM planning_scope x CROSS JOIN project p WHERE p.project_number='SYN-101'
+AND NOT EXISTS(SELECT 1 FROM project_member m WHERE m.project_id=p.id AND m.user_id=x.id);
+-- Idempotent fixture marker; all records and people explicitly say synthetic.
+INSERT INTO planning_entry(id,person_id,hours_per_week,start_week,end_week,label,source_category,project_id,confidence,visibility,notes,last_validated_at,created_by,updated_by,created_at,updated_at,row_version)
+SELECT gen_random_uuid(),x.id,0.5+(g%8)*0.5,date_trunc('week',current_date)::date+(g%12)*7,date_trunc('week',current_date)::date+(g%12)*7,
+format('Synthetic planning scale entry %s',g),'MajorProject',p.id,(ARRAY['Confirmed','Expected','Possible'])[1+g%3],
+CASE WHEN x.n=0 THEN 'Confirmed' ELSE 'Published' END,'Synthetic packet 034 performance fixture',now(),sup.id,sup.id,now(),now(),1
+FROM generate_series(1,500) g JOIN planning_scope x ON x.n=g%12 CROSS JOIN planning_scope sup CROSS JOIN project p
+WHERE sup.n=0 AND p.project_number='SYN-101' AND NOT EXISTS(SELECT 1 FROM planning_entry e WHERE e.label=format('Synthetic planning scale entry %s',g));
+INSERT INTO resource_allocation(id,person_id,project_id,purpose,from_date,through_date,planned_hours,status,confirmed_by,confirmed_at,over_capacity_reason,created_by,updated_by,created_at,updated_at,row_version)
+SELECT gen_random_uuid(),x.id,p.id,'Production',date_trunc('week',current_date)::date+(g%12)*7,date_trunc('week',current_date)::date+(g%12)*7+4,
+5,'Confirmed',sup.id,now(),format('Synthetic planning scale allocation %s',g),sup.id,sup.id,now(),now(),1
+FROM generate_series(1,50) g JOIN planning_scope x ON x.n=g%12 CROSS JOIN planning_scope sup CROSS JOIN project p
+WHERE sup.n=0 AND p.project_number='SYN-101' AND NOT EXISTS(SELECT 1 FROM resource_allocation a WHERE a.over_capacity_reason=format('Synthetic planning scale allocation %s',g));
+COMMIT;
+ANALYZE hub.planning_entry;
+SELECT (SELECT count(*) FROM planning_scope) scoped_people,
+(SELECT count(*) FROM planning_entry WHERE label LIKE 'Synthetic planning scale entry %') entries,
+(SELECT count(*) FROM resource_allocation WHERE over_capacity_reason LIKE 'Synthetic planning scale allocation %') allocations;
+\else
 -- Full-scale synthetic data for the §22 performance check (packet 011 FR-013, US5):
 -- 480 more people, 600 projects (500 Active, 100 Setup), about 100,000 open tasks (one 5,000-task and one 2,000-task
 -- project), 6,000 deliverables, 3,000 milestones, about 17,000 dependencies and 2,000,000 activity entries over a year.
 -- Synthetic only: never load into, or copy from, a real environment (§21, FR-007).
 --
 -- Run against an empty database the API has migrated and seeded once (reference data and development users):
---   docker exec -i pm-tool-db-1 psql -U hub -d hub_scale -v ON_ERROR_STOP=1 < tools/scale/seed.sql
+--   Use a disposable synthetic database; never an operational database.
+-- Packet 034 only (12 scoped people, 500 entries, 50 allocations), on the Tuesday preview:
+--   docker exec -i pm-tuesday-preview-db psql -U hub -d hub -v planning_only=true -v ON_ERROR_STOP=1 < tools/scale/seed.sql
 SET search_path = hub;
 SET synchronous_commit = off;
 BEGIN;
@@ -108,3 +148,5 @@ END $$;
 ANALYZE;
 SELECT (SELECT count(*) FROM project) AS projects, (SELECT count(*) FROM task WHERE status NOT IN ('Complete', 'Cancelled')) AS open_tasks,
   (SELECT count(*) FROM task) AS tasks, (SELECT count(*) FROM activity_log) AS activity, (SELECT count(*) FROM app_user) AS people;
+
+\endif

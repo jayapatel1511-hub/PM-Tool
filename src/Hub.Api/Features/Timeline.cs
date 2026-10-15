@@ -62,12 +62,13 @@ public static class TimelineEndpoints
         var ids = byId.Keys.ToList();
         // §12.16: an arrow is highlighted while its predecessor is unfinished and overdue.
         var deps = (await db.Dependencies.AsNoTracking().Where(d => ids.Contains(d.PredecessorTaskId) && ids.Contains(d.SuccessorTaskId)).ToListAsync())
-            .Select(d => new { d.Id, d.PredecessorTaskId, d.SuccessorTaskId, d.LagDays, Highlighted = byId[d.PredecessorTaskId].Overdue && !TaskStatuses.IsTerminal(byId[d.PredecessorTaskId].Status) }).ToList();
+            .Select(d => new { d.Id, d.PredecessorTaskId, d.SuccessorTaskId, Type = d.DependencyType, d.LagDays, Highlighted = byId[d.PredecessorTaskId].Overdue && !TaskStatuses.IsTerminal(byId[d.PredecessorTaskId].Status) }).ToList();
         var derived = deps.Where(d => byId[d.PredecessorTaskId].DeliverableId is { } a1 && byId[d.SuccessorTaskId].DeliverableId is { } b1 && a1 != b1)
             .GroupBy(d => (From: byId[d.PredecessorTaskId].DeliverableId!.Value, To: byId[d.SuccessorTaskId].DeliverableId!.Value))
-            .Select(g => new { g.Key.From, g.Key.To, Highlighted = g.Any(x => x.Highlighted), Derived = true }).ToList();
+            .Select(g => new { g.Key.From, g.Key.To, Type = g.Select(x => x.Type).Distinct().Count() == 1 ? g.First().Type : DependencyTypes.FinishToStart, // mixed task links draw as Finish-to-Start
+                LagDays = (int?)null, Highlighted = g.Any(x => x.Highlighted), Derived = true }).ToList(); // AC-DEPT-06: a derived link has no lag of its own
         var explicitLinks = await db.DeliverableDependencies.AsNoTracking().Where(x => x.ProjectId == id)
-            .Select(x => new { From = x.PredecessorDeliverableId, To = x.SuccessorDeliverableId,
+            .Select(x => new { From = x.PredecessorDeliverableId, To = x.SuccessorDeliverableId, Type = x.DependencyType, LagDays = (int?)x.LagDays,
                 Highlighted = db.DeliverableStates.Any(s => s.DeliverableId == x.PredecessorDeliverableId && s.IsOverdue), Derived = false }).ToListAsync();
         var deliverables = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == id)
             .Select(d => new
@@ -75,15 +76,17 @@ public static class TimelineEndpoints
                 d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.ReviewerId, d.StartDate, d.DueDate, d.OriginalStartDate, d.OriginalDueDate, d.Status, d.RowVersion, d.CreatedAt,
                 State = db.DeliverableStates.Where(x => x.DeliverableId == d.Id).Select(x => new { x.ProgressPct, x.IsOverdue }).FirstOrDefault(),
             }).ToListAsync();
-        var milestones = await db.Milestones.AsNoTracking().Where(m => m.ProjectId == id && !m.IsCancelled && m.Date != null)
+        // AC-TL-03: undated milestones come back too (Date null, last), so the views list them under Unscheduled.
+        var milestones = await db.Milestones.AsNoTracking().Where(m => m.ProjectId == id && !m.IsCancelled)
             .Select(m => new { m.Id, m.Key, m.Name, m.Date, m.IsComplete, Status = m.IsComplete ? MilestoneStatus.Complete : db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault() })
-            .OrderBy(m => m.Date).ToListAsync();
+            .OrderBy(m => m.Date == null).ThenBy(m => m.Date).ToListAsync();
         return new
         {
             Permissions = new { ManageMilestones = Permissions.ManageMilestones(a, ctx).Ok, NeedsReason = p.Status == ProjectStatus.Complete },
             Tasks = taskRows,
             Dependencies = deps,
-            DeliverableLinks = explicitLinks.Concat(derived).GroupBy(l => (l.From, l.To)).Select(g => new { g.Key.From, g.Key.To, Highlighted = g.Any(x => x.Highlighted), Derived = g.All(x => x.Derived) }),
+            DeliverableLinks = explicitLinks.Concat(derived).GroupBy(l => (l.From, l.To)).Select(g => new { g.Key.From, g.Key.To,
+                Type = (g.FirstOrDefault(x => !x.Derived) ?? g.First()).Type, LagDays = g.FirstOrDefault(x => !x.Derived)?.LagDays, Highlighted = g.Any(x => x.Highlighted), Derived = g.All(x => x.Derived) }),
             Deliverables = deliverables.Select(d => new
             {
                 d.Id, d.Key, d.Name, d.StartDate, d.DueDate, d.OriginalStartDate, d.OriginalDueDate, d.Status, d.RowVersion, CreatedOn = Clock.LocalDate(d.CreatedAt, s),

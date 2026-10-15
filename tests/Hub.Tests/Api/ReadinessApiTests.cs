@@ -11,6 +11,11 @@ public sealed class ReadinessApiTests(HubFactory f)
 {
     readonly TestData data = new(f);
 
+    [Fact] // EvaluateCurrent without a supplied store falls back to this path: the application's one cached store
+    public void Readiness_reaches_the_shared_settings_store_through_the_context() =>
+        Assert.Same(f.Services.GetService(typeof(Hub.Api.Infrastructure.SettingsStore)),
+            f.Db(db => Microsoft.EntityFrameworkCore.Infrastructure.AccessorExtensions.GetService<Hub.Api.Infrastructure.SettingsStore>(db)));
+
     async Task<Guid> IsolatedOwner(Project project)
     {
         var disciplineId = data.ProjectDiscipline(project.Id, "Civil");

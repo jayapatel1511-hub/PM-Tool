@@ -31,6 +31,7 @@ import { TemplatePage, TemplatesPage } from '@/pages/Templates'
 import { ReassignWorkPage } from '@/pages/ReassignWork'
 import { PortfolioPage } from '@/pages/Portfolio'
 import { WorkloadPage } from '@/pages/Workload'
+import { VacationPage } from '@/pages/Vacation'
 import { CalendarPage } from '@/pages/Calendar'
 import { TimePage } from '@/pages/Time'
 import { HomePage } from '@/pages/Home'
@@ -55,6 +56,7 @@ import { DashboardTab } from '@/pages/projects/Dashboard'
 import { CoordinationTab } from '@/pages/projects/Coordination'
 import { PreferencesPage } from '@/pages/Preferences'
 import { ReadinessTab } from '@/pages/projects/Readiness'
+import { PlannerPage } from '@/pages/Planner'
 
 const admin = (el: React.ReactNode) => <AdminLayout>{el}</AdminLayout>
 /** A workspace view shown for the current project only (FR-VIS-01 project tabs). */
@@ -100,7 +102,8 @@ export const routes: RouteObject[] = [
       { path: 'issues', element: <IssuesTab /> },
       { path: 'meetings', element: <MeetingsTab /> },
       { path: 'files', element: <InProject><FilesPage /></InProject> },
-      { path: 'calendar', element: <InProject><CalendarPage /></InProject> },
+      { path: 'vacation', element: <VacationPage /> },
+  { path: 'calendar', element: <InProject><CalendarPage /></InProject> },
       { path: 'team', element: <TeamTab /> },
       { path: 'activity', element: <ProjectActivityTab /> },
       { path: 'settings', element: <ProjectSettingsTab /> },
@@ -115,6 +118,8 @@ export const routes: RouteObject[] = [
   { path: 'staff', element: <StaffPage /> },
   { path: 'portfolio', element: <PortfolioPage /> },
   { path: 'workload', element: <WorkloadPage /> },
+  { path: 'planner', element: <PlannerPage /> },
+  { path: 'vacation', element: <VacationPage /> },
   { path: 'calendar', element: <CalendarPage /> },
   { path: 'time', element: <TimePage /> },
   { path: 'people/:id/reassign-work', element: <ReassignWorkPage /> },

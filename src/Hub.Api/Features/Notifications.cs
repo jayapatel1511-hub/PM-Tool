@@ -12,7 +12,7 @@ public static class NotificationEndpoints
 {
     public sealed record ReadBody(Guid[]? Ids, bool? All);
     public sealed record ChannelBody(bool App, bool Email);
-    public sealed record DigestBody(bool Enabled, string? Time, string[]? SectionsOff, bool? WeeklySummary);
+    public sealed record DigestBody(bool Enabled, string? Time, string[]? SectionsOff, bool? WeeklySummary, bool? HoldDigestWhenAway = null);
     public sealed record FollowBody(string Level);
 
     public static void Map(RouteGroupBuilder api)
@@ -23,7 +23,7 @@ public static class NotificationEndpoints
         {
             var (pg, size) = Http.Paging(page, pageSize ?? 50);
             var visible = access.VisibleProjectIds();
-            var q = db.Notifications.AsNoTracking().Where(n => n.UserId == me.Id && (n.ProjectId == null || visible.Contains(n.ProjectId.Value)));
+            var q = (await PlanningEndpoints.VisibleNotifications(db, access)).AsNoTracking();
             if (unread == true) q = q.Where(n => n.ReadAt == null);
             var types = Http.List(type);
             if (types.Length > 0) q = q.Where(n => types.Contains(n.EventType));
@@ -44,7 +44,7 @@ public static class NotificationEndpoints
         api.MapGet("/me/notifications/pulse", async (HubDb db, Access access, CurrentUser me) =>
         {
             var visible = access.VisibleProjectIds();
-            var permitted = db.Notifications.Where(n => n.UserId == me.Id && (n.ProjectId == null || visible.Contains(n.ProjectId.Value)));
+            var permitted = (await PlanningEndpoints.VisibleNotifications(db, access));
             var unread = await permitted.CountAsync(n => n.ReadAt == null);
             var latest = await permitted.MaxAsync(n => (DateTimeOffset?)n.CreatedAt);
             var follows = await db.Follows.AsNoTracking().Where(f => f.UserId == me.Id && f.Level != FollowLevel.Muted && visible.Contains(f.ProjectId)).Select(f => new { f.ProjectId, f.LastSeenAt }).ToListAsync();
@@ -58,14 +58,14 @@ public static class NotificationEndpoints
         api.MapGet("/me/notifications/unread-count", async (HubDb db, Access access, CurrentUser me, TimeProvider clock) =>
         {
             var visible = access.VisibleProjectIds();
-            var personal = await db.Notifications.CountAsync(n => n.UserId == me.Id && n.ReadAt == null && (n.ProjectId == null || visible.Contains(n.ProjectId.Value)));
+            var personal = await (await PlanningEndpoints.VisibleNotifications(db, access)).CountAsync(n => n.ReadAt == null);
             var following = (await FollowingUnread(db, access, me.Id)).Values.Sum();
             return new { notifications = personal, following };
         });
 
-        api.MapPost("/me/notifications/read", async (ReadBody body, HubDb db, CurrentUser me, TimeProvider clock) =>
+        api.MapPost("/me/notifications/read", async (ReadBody body, HubDb db, CurrentUser me, TimeProvider clock, Access access) =>
         {
-            var q = db.Notifications.Where(n => n.UserId == me.Id && n.ReadAt == null);
+            var q = (await PlanningEndpoints.VisibleNotifications(db, access)).Where(n => n.ReadAt == null);
             if (body.All != true) { var ids = body.Ids ?? []; q = q.Where(n => ids.Contains(n.Id)); }
             var now = clock.GetUtcNow();
             var n = await q.ExecuteUpdateAsync(s => s.SetProperty(x => x.ReadAt, now));
@@ -92,7 +92,7 @@ public static class NotificationEndpoints
                 }),
                 Digest = new
                 {
-                    set.DigestEnabled, Time = set.DigestTimeLocal ?? s.DigestSendTimeLocal, OrgTime = s.DigestSendTimeLocal, s.WeekendDigests,
+                    set.DigestEnabled, set.HoldDigestWhenAway, Time = set.DigestTimeLocal ?? s.DigestSendTimeLocal, OrgTime = s.DigestSendTimeLocal, s.WeekendDigests,
                     Sections = Digest.SectionCodes, SectionsOff = JsonSerializer.Deserialize<string[]>(set.DigestSectionsOff) ?? [], // FR-002
                     set.WeeklySummaryEnabled, ManagesProjects = await WeeklySummary.Managed(db, me.Id).AnyAsync(), // FR-001
                 },
@@ -120,16 +120,16 @@ public static class NotificationEndpoints
         api.MapPut("/me/preferences/digest", async (DigestBody body, HubDb db, CurrentUser me) =>
         {
             if (body.Time is { Length: > 0 } t) Check.That(TimeOnly.TryParseExact(t, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out _), "time", "setting.time");
-            var set = await db.UserSettings.FirstOrDefaultAsync(x => x.UserId == me.Id);
-            if (set is null) db.UserSettings.Add(set = new UserSetting { UserId = me.Id });
+            if (body.SectionsOff is { } sections) Check.That(sections.All(Digest.SectionCodes.Contains), "sectionsOff", "error.one_of", string.Join(", ", Digest.SectionCodes));
+            var set = await UserPreferences.GetOrCreate(db, me.Id);
             set.DigestEnabled = body.Enabled;
             set.DigestTimeLocal = string.IsNullOrWhiteSpace(body.Time) ? null : body.Time;
             if (body.SectionsOff is { } off)
             {
-                Check.That(off.All(Digest.SectionCodes.Contains), "sectionsOff", "error.one_of", string.Join(", ", Digest.SectionCodes));
                 set.DigestSectionsOff = JsonSerializer.Serialize(off.Distinct().ToArray());
             }
             if (body.WeeklySummary is { } w) set.WeeklySummaryEnabled = w;
+            if (body.HoldDigestWhenAway is { } hold) set.HoldDigestWhenAway = hold;
             await db.SaveChangesAsync();
             return Results.NoContent();
         });
@@ -242,10 +242,9 @@ public static class NotificationEndpoints
         foreach (var f in (await Followed(db, access, userId)).Where(f => f.Status != ProjectStatus.Setup))
         {
             var since = f.LastSeenAt ?? DateTimeOffset.MinValue;
-            var rows = await (await ActivityEndpoints.Visible(db, access, f.ProjectId)).Where(a => a.OccurredAt > since && a.ActorUserId != userId)
-                .OrderByDescending(a => a.OccurredAt).Take(1000).ToListAsync();
-            var notified = await NotifiedKeys(db, userId, rows);
-            var n = rows.Where(r => !notified.Contains(Key(r))).GroupBy(r => r.CorrelationId is { } c ? c.ToString() : r.Id.ToString()).Count();
+            var rows = (await ActivityEndpoints.Visible(db, access, f.ProjectId)).Where(a => a.OccurredAt > since && a.ActorUserId != userId
+                && (a.CorrelationId == null || !db.Notifications.Any(n => n.UserId == userId && n.CorrelationId == a.CorrelationId)));
+            var n = await rows.Select(r => r.CorrelationId ?? r.Id).Distinct().CountAsync();
             if (n > 0) result[f.ProjectId] = n;
         }
         return result;

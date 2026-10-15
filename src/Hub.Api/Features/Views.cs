@@ -38,6 +38,7 @@ public static class ViewEndpoints
         ["projects"] = ["q", "status", "pmId", "clientId", "officeId", "phaseId", "disciplineId", "health", "projectTypeId", "includeArchived", "mine", "starred", "priority", "sort", "submissionWithinDays"],
         ["portfolio"] = ["q", "status", "pmId", "clientId", "officeId", "phaseId", "disciplineId", "health", "projectTypeId", "mine", "submissionWithinDays"],
         ["workload"] = ["supervisorId", "disciplineId", "officeId", "projectId", "indicator", "from", "sort"],
+        ["planner"] = ["view", "from", "weeks", "week", "supervisorId", "disciplineId", "officeId", "personId", "projectId", "source", "confidence", "visibility", "indicator", "q", "sort", "includeMyDrafts"],
         // Cross-project lists keep their project scope too (§36.1, FR-VIS-02); it is re-read against access when opened.
         ["workspace-tasks"] = [.. TaskKeys, "projects", "ws", "projectId"],
         ["workspace-board"] = [.. TaskKeys, "projects", "ws", "projectId", "swim", "side"],
@@ -51,6 +52,7 @@ public static class ViewEndpoints
         api.MapGet("/views", async (string listType, Guid? projectId, Access access, HubDb db, CurrentUser me) =>
         {
             Check.OneOf(listType, [.. Lists.Keys], "listType");
+            if (listType == "planner") { Access.Demand(Permissions.ViewWorkload(access.Actor)); Check.That(projectId == null, "projectId", "view.personal_only"); }
             var ctx = projectId is { } pid ? (await access.Project(pid, track: false)).Ctx : null;
             var views = await db.SavedViews.AsNoTracking().Where(v => v.ListType == listType
                 && ((v.Scope == Personal && v.OwnerId == me.Id && v.ProjectId == projectId) || (projectId != null && v.Scope == ProjectScope && v.ProjectId == projectId)))
@@ -74,6 +76,7 @@ public static class ViewEndpoints
         {
             Check.OneOf(body.ListType, [.. Lists.Keys], "listType");
             var scope = body.Scope ?? Personal;
+            if (body.ListType == "planner") { Access.Demand(Permissions.ViewWorkload(access.Actor)); Check.That(scope == Personal && body.ProjectId == null, "scope", "view.personal_only"); }
             Check.OneOf(scope, [Personal, ProjectScope], "scope");
             if (body.ProjectId is { } pid)
             {
@@ -133,6 +136,7 @@ public static class ViewEndpoints
     static async Task<SavedView> Editable(HubDb db, Access access, CurrentUser me, Guid id)
     {
         var v = await db.SavedViews.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
+        if (v.ListType == "planner") Access.Demand(Permissions.ViewWorkload(access.Actor));
         if (v.Scope == Personal) { if (v.OwnerId != me.Id) throw ApiException.NotFound(); return v; }
         var (_, ctx) = await access.Project(v.ProjectId!.Value, track: false);
         Access.Demand(Permissions.ManageSavedProjectView(access.Actor, ctx)); // members see project views; only the PM and leads change them

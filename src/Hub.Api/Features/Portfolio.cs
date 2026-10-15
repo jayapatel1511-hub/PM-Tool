@@ -27,14 +27,18 @@ public static class PortfolioEndpoints
         {
             var (rows, ownOnly) = await Rows(f, access, db, me, store, clock);
             var today = clock.Today(await store.Get(db));
-            var active = rows.Where(r => r!["status"]!.GetValue<string>() == ProjectStatus.Active).ToList();
+            // AC-CNT-01: the Active tile sets status and keeps the other filters; a health tile also replaces computedHealth.
+            // So both count the rows without the status and computed-health filters, which is what their links open.
+            var open = f.Status is null && f.ComputedHealth is null ? rows : (await Rows(f with { Status = null, ComputedHealth = null }, access, db, me, store, clock)).Rows;
+            var active = open.Where(r => r!["status"]!.GetValue<string>() == ProjectStatus.Active).ToList();
+            var computed = Http.List(f.ComputedHealth);
             int Count(string health) => active.Count(r => r!["computedHealth"]?.GetValue<string>() == health);
             return new
             {
                 OwnOnly = ownOnly,
                 Tiles = new
                 {
-                    Active = active.Count, Red = Count(Health.Red), Yellow = Count(Health.Yellow), Green = Count(Health.Green),
+                    Active = active.Count(r => computed.Length == 0 || computed.Contains(r!["computedHealth"]?.GetValue<string>() ?? "")), Red = Count(Health.Red), Yellow = Count(Health.Yellow), Green = Count(Health.Green),
                     Submissions14 = rows.Count(r => r!["nextSubmission"]?["date"]?.GetValue<string>() is { } d && DateOnly.Parse(d) >= today && DateOnly.Parse(d) <= today.AddDays(14)),
                     OverdueDecisions = rows.Sum(r => r!["overdueDecisions"]?.GetValue<int>() ?? 0),
                 },

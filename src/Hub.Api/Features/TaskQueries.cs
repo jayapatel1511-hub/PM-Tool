@@ -14,7 +14,7 @@ public sealed class TaskFilter
     public DateOnly? DueFrom, DueTo, StartFrom, StartTo, CompletedFrom, CompletedTo, DoneSince;
     /// A named workspace whose personal manual order a board sorted by "board" uses (§36.3); checked by the endpoint.
     public Guid? WorkspaceId;
-    public bool? RequiresReview, HasDependencies, Mine, IncludeCancelled;
+    public bool? RequiresReview, HasDependencies, Mine, IncludeCancelled, OnHold;
     public bool Unassigned, NoDeliverable;
     public string? Q, Sort;
     public int Page = 1, PageSize = 200;
@@ -36,7 +36,7 @@ public sealed class TaskFilter
             MilestoneIds = I("milestoneId"), ProjectIds = I("projectId"), CreatedBy = I("createdBy"), Ids = I("ids"),
             DueFrom = D("dueFrom"), DueTo = D("dueTo"), StartFrom = D("startFrom"), StartTo = D("startTo"), CompletedFrom = D("completedFrom"), CompletedTo = D("completedTo"), DoneSince = D("doneSince"),
             WorkspaceId = Guid.TryParse(q["workspaceId"], out var ws) ? ws : null,
-            RequiresReview = B("requiresReview"), HasDependencies = B("hasDependencies"), Mine = B("mine"), IncludeCancelled = B("includeCancelled"),
+            RequiresReview = B("requiresReview"), HasDependencies = B("hasDependencies"), Mine = B("mine"), IncludeCancelled = B("includeCancelled"), OnHold = B("onHold"),
             Q = q["q"], Sort = q["sort"], NoDeliverable = B("noDeliverable") == true,
         };
         f.Unassigned = f.Indicators.Contains("unassigned");
@@ -72,6 +72,7 @@ public static class TaskQueries
         // Board Done lane (§13.4, FR-020): open tasks plus those completed since the date.
         if (f.DoneSince is { } ds) { var ts = new DateTimeOffset(ds.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero); q = q.Where(t => t.Status != TaskStatuses.Complete || t.CompletedAt >= ts); }
         if (f.RequiresReview is { } rr) q = q.Where(t => t.RequiresReview == rr);
+        if (f.OnHold is { } oh) q = q.Where(t => (t.Status == TaskStatuses.OnHold) == oh); // AC-CNT-02: onHold=false matches the discipline Open count
         if (f.HasDependencies is { } hd) q = q.Where(t => db.Dependencies.Any(d => d.PredecessorTaskId == t.Id || d.SuccessorTaskId == t.Id) == hd);
         // Assignee or collaborator as two index-friendly halves (an OR across them scans every task in scope).
         if (f.Mine == true) q = q.Where(t => t.AssigneeId == me).Concat(q.Where(t => t.AssigneeId != me && db.Collaborators.Any(c => c.TaskId == t.Id && c.UserId == me)));

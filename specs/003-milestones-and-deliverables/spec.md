@@ -113,7 +113,7 @@ table shows "2 of 5 issued" and expands to the deliverables.
 
 - **FR-001**: The PM MUST be able to create milestones with name, date, type (Kickoff, Field Work, Design Submission, Client Workshop, Permit Submission, Tender, Construction, IFC, Record Drawings, Closeout, Other), description, optional discipline tag, optional completes-phase, and client-facing flag. *(FR-MS-01, §12.3, M-01)*
 - **FR-002**: System MUST treat Design Submission, Permit Submission, Tender, and IFC as submissions and show the next milestone and next submission for each project. *(M-08)*
-- **FR-003**: System MUST keep each milestone's original date permanently and show slip as the difference from the current date. *(FR-MS-03)*
+- **FR-003**: System MUST keep each milestone's original date permanently and show slip as the difference from the current date; when a PM has re-baselined the milestone, a separate "since re-baseline" figure is added beside the slip, and neither the original date nor the slip changes (§50.5). *(FR-MS-03)*
 - **FR-004**: Changing a milestone date MUST be limited to the PM, require a reason, log old and new values, and notify the PM and all Discipline Leads. *(FR-MS-04, M-02, G-09)*
 - **FR-005**: Only the PM MAY mark a milestone Complete or Cancelled; completing with deliverables not Issued, Accepted, or Cancelled MUST require confirmation, default the completed date to today (editable to a past date only), and be refused more than 7 days before the milestone date. *(FR-MS-02, FR-MS-07, M-05, M-06, M-09)*
 - **FR-006**: Completing a milestone that completes a phase MUST offer to advance the project phase and MUST NOT advance it automatically. *(§12.3, §9.3)*

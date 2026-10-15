@@ -1,0 +1,195 @@
+
+AC-CALM-06 crawl
+✓ priya / → /my-work sidebar /my-work group -
+✓ priya /my-work → /my-work sidebar /my-work group -
+✓ priya /home → /home sidebar /home group -
+✓ priya /boards → /boards sidebar /tasks group -
+✓ priya /tasks → /tasks sidebar /tasks group -
+✓ priya /timeline → /timeline sidebar /tasks group -
+✓ priya /files → /files sidebar /files group -
+✓ priya /team → /team sidebar /team group -
+✓ priya /projects → /projects sidebar /projects group -
+✓ priya /tasks/01a10454-7a0a-709a-8124-f55927334353 → /tasks/01a10454-7a0a-709a-8124-f55927334353 sidebar /tasks group -
+✓ priya /notifications → /notifications sidebar - group -
+✓ priya /search → /search sidebar - group -
+✓ priya /reports → /reports sidebar /reports group -
+✓ priya /reports/tasks-due-this-week → /reports/tasks-due-this-week sidebar /reports group -
+✓ jordan /staff → /staff sidebar /staff group -
+✓ priya /portfolio → /portfolio sidebar /projects group -
+✓ priya /workload → /workload sidebar /planner group -
+✓ priya /planner → /planner sidebar /planner group -
+✓ priya /vacation → /vacation sidebar - group -
+✓ priya /calendar → /calendar sidebar /tasks group -
+✓ priya /time → /time sidebar /time group -
+✓ sam /people/01a10450-4bf3-774f-b3bd-cd6861d66ea7/reassign-work → /people/01a10450-4bf3-774f-b3bd-cd6861d66ea7/reassign-work sidebar - group -
+✓ priya /preferences → /preferences sidebar - group -
+✓ jordan /templates → /templates sidebar /templates group -
+✓ jordan /templates/01a10450-4c51-7309-92c3-ac43fa412efc → /templates/01a10450-4c51-7309-92c3-ac43fa412efc sidebar /templates group -
+✓ jordan /admin → /admin/reference/disciplines sidebar /admin group -
+✓ jordan /admin/reference/disciplines → /admin/reference/disciplines sidebar /admin group -
+✓ jordan /admin/settings → /admin/settings sidebar /admin group -
+✓ jordan /admin/users → /admin/users sidebar /admin group -
+✓ jordan /admin/activity → /admin/activity sidebar /admin group -
+✓ jordan /admin/operations → /admin/operations sidebar /admin group -
+✓ jordan /admin/holidays → /admin/holidays sidebar /admin group -
+✓ priya /no-such-page → /no-such-page sidebar - group -
+✓ priya /projects/SYN-101 → /projects/SYN-101/dashboard sidebar /projects group Overview
+✓ priya /projects/SYN-101/dashboard → /projects/SYN-101/dashboard sidebar /projects group Overview
+✓ priya /projects/SYN-101/coordination → /projects/SYN-101/coordination sidebar /projects group Coordination
+✓ priya /projects/SYN-101/readiness → /projects/SYN-101/readiness sidebar /projects group Deliverables
+✓ priya /projects/SYN-101/handoffs → /projects/SYN-101/handoffs sidebar /projects group Coordination
+✓ priya /projects/SYN-101/reviews → /projects/SYN-101/reviews sidebar /projects group Deliverables
+✓ priya /projects/SYN-101/changes → /projects/SYN-101/changes sidebar /projects group Coordination
+✓ priya /projects/SYN-101/submissions → /projects/SYN-101/submissions sidebar /projects group Deliverables
+✓ priya /projects/SYN-101/allocations → /projects/SYN-101/allocations sidebar /projects group People
+✓ priya /projects/SYN-101/design-basis → /projects/SYN-101/design-basis sidebar /projects group Coordination
+✓ priya /projects/SYN-101/tasks → /projects/SYN-101/tasks sidebar /projects group Work
+✓ priya /projects/SYN-101/board → /projects/SYN-101/board sidebar /projects group Work
+✓ priya /projects/SYN-101/milestones → /projects/SYN-101/milestones sidebar /projects group Work
+✓ priya /projects/SYN-101/timeline → /projects/SYN-101/timeline sidebar /projects group Work
+✓ priya /projects/SYN-101/deliverables → /projects/SYN-101/deliverables sidebar /projects group Deliverables
+✓ priya /projects/SYN-101/decisions → /projects/SYN-101/decisions sidebar /projects group Coordination
+✓ priya /projects/SYN-101/risks → /projects/SYN-101/risks sidebar /projects group Coordination
+✓ priya /projects/SYN-101/issues → /projects/SYN-101/issues sidebar /projects group Coordination
+✓ priya /projects/SYN-101/meetings → /projects/SYN-101/meetings sidebar /projects group Coordination
+✓ priya /projects/SYN-101/files → /projects/SYN-101/files sidebar /projects group Files
+✓ priya /projects/SYN-101/vacation → /projects/SYN-101/vacation sidebar /projects group More
+✓ priya /projects/SYN-101/calendar → /projects/SYN-101/calendar sidebar /projects group Work
+✓ priya /projects/SYN-101/team → /projects/SYN-101/team sidebar /projects group People
+✓ priya /projects/SYN-101/activity → /projects/SYN-101/activity sidebar /projects group Activity
+✓ priya /projects/SYN-101/settings → /projects/SYN-101/settings sidebar /projects group Settings
+
+AC-CALM-07 filter behaviour
+✓ /projects/SYN-101/tasks: ✓ "Discipline" sets the same URL parameter as the base; ✓ a removable chip shows the filter; ✓ the Filters button counts it; ✓ chip "Overdue" sets the same URL parameter as the base; ✓ the count includes the chip; ✓ reload keeps the URL; ✓ reload keeps the chips and the count; ✓ reload keeps the field value; ✓ a chip removes its filter; ✓ Clear resets every filter
+✓ /projects/SYN-101/deliverables: ✓ "Discipline" sets the same URL parameter as the base; ✓ a removable chip shows the filter; ✓ the Filters button counts it; ✓ reload keeps the URL; ✓ reload keeps the chips and the count; ✓ reload keeps the field value; ✓ a chip removes its filter; ✓ Clear resets every filter
+✓ /planner: ✓ "Discipline" sets the same URL parameter as the base; ✓ a removable chip shows the filter; ✓ the Filters button counts it; ✓ chip "Over-planned" sets the same URL parameter as the base; ✓ the count includes the chip; ✓ reload keeps the URL; ✓ reload keeps the chips and the count; ✓ reload keeps the field value; ✓ a chip removes its filter; ✓ Clear resets every filter
+✓ /my-work: ✓ "Status" sets the same URL parameter as the base; ✓ a removable chip shows the filter; ✓ the Filters button counts it; ✓ chip "Hide waiting" sets the same URL parameter as the base; ✓ the count includes the chip; ✓ reload keeps the URL; ✓ reload keeps the chips and the count; ✓ reload keeps the field value; ✓ a chip removes its filter; ✓ Clear resets every filter
+✓ /tasks: ✓ "Project" sets the same URL parameter as the base; ✓ a removable chip shows the filter; ✓ the Filters button counts it; ✓ chip "Blocked" sets the same URL parameter as the base; ✓ the count includes the chip; ✓ reload keeps the URL; ✓ reload keeps the chips and the count; ✓ reload keeps the field value; ✓ a chip removes its filter; ✓ Clear resets every filter
+
+AC-CALM-08 keyboard
+/home: Filters -; menus All views ✓
+/my-work: Filters ✓; menus Views ✓, My Work views: Today ✓
+/boards: Filters ✓; menus Views ✓, All views ✓
+/projects: Filters ✓; menus Views ✓, Export ✓, Group by: Status ✓, Columns ✓
+/tasks: Filters ✓; menus Views ✓, All views ✓
+/calendar: Filters ✓; menus All views ✓
+/portfolio: Filters ✓; menus Views ✓, Export ✓
+/workload: Filters ✓; menus Views ✓, Export ✓, More actions ✓, All views ✓, Group by: Reports to ✓, Sort: Load ✓
+/planner: Filters ✓; menus More actions ✓, Views ✓, Export ✓, Group by: Reports to ✓, Sort: Remaining capacity ✓
+/reports: Filters -; menus -
+/team: Filters -; menus All views ✓
+/projects/SYN-101/dashboard: Filters -; menus More ✓
+/projects/SYN-101/tasks: Filters ✓; menus More ✓, Views ✓, Group by: Deliverable ✓, More actions ✓
+/projects/SYN-101/deliverables: Filters ✓; menus More ✓, Columns ✓, Views ✓, Export ✓, Group by: Discipline ✓
+/projects/SYN-101/timeline: Filters ✓; menus More ✓, Zoom: Month ✓
+/projects/SYN-101/allocations: Filters ✓; menus More ✓, Views ✓, Export ✓
+/projects/SYN-101/coordination: Filters ✓; menus More ✓, Views ✓, More actions ✓, Change status of SYN-101-T0001, now Not  ✓, Change status of SYN-101-T0005, now Not  ✓, Change status of SYN-101-T0002, now Not  ✓, Change status of SYN-101-T0010, now Not  ✓, Change status of SYN-101-T0004, now Not  ✓, Change status of SYN-101-T0006, now Not  ✓, Change status of SYN-101-T0008, now Not  ✓, Change status of SYN-101-T0001, now Not  ✓, Change status of SYN-101-T0005, now Not  ✓, Change status of SYN-101-T0002, now Not  ✓, Change status of SYN-101-T0010, now Not  ✓, Change status of SYN-101-T0008, now Not  ✓, Change status of SYN-101-T0009, now Not  ✓
+sidebar More: {"expands":true,"tabIntoItems":true}
+
+AC-CALM-08 axe (wcag2a, wcag2aa, wcag21a, wcag21aa)
+✓ priya /home (closed): no violations
+✓ priya /home (menu open): no violations
+✓ priya /my-work (closed): no violations
+✓ priya /my-work (filters open): no violations
+✓ priya /my-work (menu open): no violations
+✓ priya /boards (closed): no violations
+✓ priya /boards (filters open): no violations
+✓ priya /boards (menu open): no violations
+✓ priya /projects (closed): no violations
+✓ priya /projects (filters open): no violations
+✓ priya /projects (menu open): no violations
+✓ priya /tasks (closed): no violations
+✓ priya /tasks (filters open): no violations
+✓ priya /tasks (menu open): no violations
+✓ priya /calendar (closed): no violations
+✓ priya /calendar (filters open): no violations
+✓ priya /calendar (menu open): no violations
+✓ priya /portfolio (closed): no violations
+✓ priya /portfolio (filters open): no violations
+✓ priya /portfolio (menu open): no violations
+✓ priya /workload (closed): no violations
+✓ priya /workload (filters open): no violations
+✓ priya /workload (menu open): no violations
+✓ priya /planner (closed): no violations
+✓ priya /planner (filters open): no violations
+✓ priya /planner (menu open): no violations
+✓ priya /reports (closed): no violations
+✓ priya /team (closed): no violations
+✓ priya /team (menu open): no violations
+✓ priya /projects/SYN-101/dashboard (closed): no violations
+✓ priya /projects/SYN-101/dashboard (menu open): no violations
+✓ priya /projects/SYN-101/tasks (closed): no violations
+✓ priya /projects/SYN-101/tasks (filters open): no violations
+✓ priya /projects/SYN-101/tasks (menu open): no violations
+✓ priya /projects/SYN-101/deliverables (closed): no violations
+✓ priya /projects/SYN-101/deliverables (filters open): no violations
+✓ priya /projects/SYN-101/deliverables (menu open): no violations
+✓ priya /projects/SYN-101/timeline (closed): no violations
+✓ priya /projects/SYN-101/timeline (filters open): no violations
+✓ priya /projects/SYN-101/timeline (menu open): no violations
+✓ priya /projects/SYN-101/allocations (closed): no violations
+✓ priya /projects/SYN-101/allocations (filters open): no violations
+✓ priya /projects/SYN-101/allocations (menu open): no violations
+✓ priya /projects/SYN-101/coordination (closed): no violations
+✓ priya /projects/SYN-101/coordination (filters open): no violations
+✓ priya /projects/SYN-101/coordination (menu open): no violations
+✓ sam /home (closed): no violations
+✓ sam /home (menu open): no violations
+✓ sam /my-work (closed): no violations
+✓ sam /my-work (filters open): no violations
+✓ sam /my-work (menu open): no violations
+✓ sam /boards (closed): no violations
+✓ sam /boards (filters open): no violations
+✓ sam /boards (menu open): no violations
+✓ sam /projects (closed): no violations
+✓ sam /projects (filters open): no violations
+✓ sam /projects (menu open): no violations
+✓ sam /tasks (closed): no violations
+✓ sam /tasks (filters open): no violations
+✓ sam /tasks (menu open): no violations
+✓ sam /calendar (closed): no violations
+✓ sam /calendar (filters open): no violations
+✓ sam /calendar (menu open): no violations
+✓ sam /portfolio (closed): no violations
+✓ sam /portfolio (filters open): no violations
+✓ sam /portfolio (menu open): no violations
+✓ sam /workload (closed): no violations
+✓ sam /workload (filters open): no violations
+✓ sam /workload (menu open): no violations
+✓ sam /planner (closed): no violations
+✓ sam /planner (filters open): no violations
+✓ sam /planner (menu open): no violations
+✓ sam /reports (closed): no violations
+✓ sam /team (closed): no violations
+✓ sam /team (menu open): no violations
+✓ sam /projects/SYN-101/dashboard (closed): no violations
+✓ sam /projects/SYN-101/dashboard (menu open): no violations
+✓ sam /projects/SYN-101/tasks (closed): no violations
+✓ sam /projects/SYN-101/tasks (filters open): no violations
+✓ sam /projects/SYN-101/tasks (menu open): no violations
+✓ sam /projects/SYN-101/deliverables (closed): no violations
+✓ sam /projects/SYN-101/deliverables (filters open): no violations
+✓ sam /projects/SYN-101/deliverables (menu open): no violations
+✓ sam /projects/SYN-101/timeline (closed): no violations
+✓ sam /projects/SYN-101/timeline (filters open): no violations
+✓ sam /projects/SYN-101/timeline (menu open): no violations
+✓ sam /projects/SYN-101/allocations (closed): no violations
+✓ sam /projects/SYN-101/allocations (filters open): no violations
+✓ sam /projects/SYN-101/allocations (menu open): no violations
+✓ sam /projects/SYN-101/coordination (closed): no violations
+✓ sam /projects/SYN-101/coordination (filters open): no violations
+✓ sam /projects/SYN-101/coordination (menu open): no violations
+
+AC-CALM-09 one signal per row
+✓ priya /planner: 24 rows, 0 with two or more chips, 7 with +n, week chips ▲Over-planned · Oct 12, Oct 19 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 19, Oct 26, Nov 2 +8 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ▲Over-planned · Dec 7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Oct 19 | ▲Over-planned · Oct 26 | ○Under-planned · Oct 12, Oct 19, Nov 9 +7 | ▲Over-planned · Nov 9 | ▲Over-planned · Nov 16 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Nov 30 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9
+✓ lena /planner: 28 rows, 0 with two or more chips, 7 with +n, week chips ▲Over-planned · Oct 12, Oct 19 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 19, Oct 26, Nov 2 +8 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ▲Over-planned · Dec 7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Oct 19 | ▲Over-planned · Oct 26 | ○Under-planned · Oct 12, Oct 19, Nov 9 +7 | ▲Over-planned · Nov 9 | ▲Over-planned · Nov 16 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Nov 30 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9
+✓ priya /workload: 27 rows, 0 with two or more chips, 2 with +n, week chips ■Over-assigned · Oct 12 | ■Over-assigned · Oct 12
+✓ sam /workload: 9 rows, 0 with two or more chips, 2 with +n, week chips ■Over-assigned · Oct 12 | ■Over-assigned · Oct 12
+✓ priya /tasks: 31 rows, 0 with two or more chips, 3 with +n, week chips -
+✓ priya /my-work?tab=overdue: 0 rows, 0 with two or more chips, 0 with +n, week chips -
+✓ priya /projects/SYN-101/tasks: 16 rows, 0 with two or more chips, 0 with +n, week chips -
+✓ priya /projects/SYN-101/deliverables: 12 rows, 0 with two or more chips, 2 with +n, week chips -
+✓ priya /projects/SYN-105/tasks: 17 rows, 0 with two or more chips, 3 with +n, week chips -
+✓ priya /projects/SYN-105/deliverables: 3 rows, 0 with two or more chips, 0 with +n, week chips -
+
+PASS: crawl, keyboard, axe, signals, filters. Report in <session scratch directory>

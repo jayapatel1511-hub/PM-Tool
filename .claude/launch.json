@@ -14,6 +14,24 @@
       "port": 5080
     },
     {
+      "name": "api-preview",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "run",
+        "--project",
+        "src/Hub.Api",
+        "--no-launch-profile",
+        "--",
+        "--environment",
+        "Development",
+        "--urls",
+        "http://localhost:5080",
+        "--ConnectionStrings:Hub",
+        "Host=localhost;Port=55433;Database=hub;Username=hub"
+      ],
+      "port": 5080
+    },
+    {
       "name": "web",
       "runtimeExecutable": "npm",
       "runtimeArgs": [

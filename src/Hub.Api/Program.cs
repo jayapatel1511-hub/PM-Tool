@@ -15,6 +15,8 @@ using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 var cfg = builder.Configuration;
+// Subscription URLs contain a bearer capability; hosting request logs must not record query strings.
+builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
 
 // ---------- Database (one PostgreSQL database, §23.1) ----------
 var dsb = new NpgsqlDataSourceBuilder(cfg.GetConnectionString("Hub") ?? "Host=localhost;Port=55432;Database=hub;Username=hub");
@@ -106,7 +108,7 @@ if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"
 }
 app.UseDefaultFiles();
 app.UseStaticFiles();
-if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
+if (AuthSetup.LocalAuthAllowed(app.Environment, cfg) || cfg["Auth:Mode"] == SocialAuth.Scheme)
     app.Use(async (ctx, next) =>
     {
         if (ctx.Request.Path.StartsWithSegments("/api") && !HttpMethods.IsGet(ctx.Request.Method) && !HttpMethods.IsHead(ctx.Request.Method) && !HttpMethods.IsOptions(ctx.Request.Method))
@@ -136,6 +138,7 @@ app.MapGet("/health", async (HubDb db, TimeProvider clock) =>
 }).AllowAnonymous();
 
 var api = app.MapGroup("/api/v1");
+if (cfg["Auth:Mode"] == SocialAuth.Scheme) SocialAuth.Map(api);
 if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
 {
     api.MapPost("/auth/local/sign-in", async (LocalPasswordStore store, HubDb db, HttpContext ctx, LocalSignIn input, PartitionedRateLimiter<string> perName, TimeProvider clock) =>

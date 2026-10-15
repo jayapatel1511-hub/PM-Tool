@@ -110,13 +110,13 @@ public sealed class CollaborationTests(HubFactory f)
         Assert.False(inherited["canChange"]!.GetValue<bool>()); // DOC-04: read-only on the task
 
         Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).DeleteAsync($"/api/v1/links/{unc.S("id")}")).StatusCode);
-        (await marc.DeleteAsync($"/api/v1/links/{unc.S("id")}")).EnsureSuccessStatusCode();
+        (await marc.Delete($"/api/v1/links/{unc.S("id")}", unc.I("rowVersion"))).EnsureSuccessStatusCode();
         Assert.Empty((await marc.GetAsync($"/api/v1/items/Task/{t.S("id")}/links").Result.Json())["links"]!.AsArray());
         Assert.True(await f.DbAsync(db => db.DocumentLinks.IgnoreQueryFilters().AnyAsync(l => l.Id == unc.G("id") && l.DeletedAt != null)));
 
         var pl = await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/links", new { title = "Teams", url = "https://teams.microsoft.com/l/channel/abc" }).Result.Json(201);
         Assert.Equal(LinkType.Teams, (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}").Result.Json())["links"]![0]!.S("linkType"));
-        (await f.As(TestData.Pm).DeleteAsync($"/api/v1/projects/{p.Id}/links/{pl.S("id")}")).EnsureSuccessStatusCode();
+        (await f.As(TestData.Pm).Delete($"/api/v1/projects/{p.Id}/links/{pl.S("id")}", pl.I("rowVersion"))).EnsureSuccessStatusCode();
         Assert.Empty((await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}").Result.Json())["links"]!.AsArray());
         Assert.True(await f.DbAsync(db => db.ActivityLog.AnyAsync(a => a.ItemId == pl.G("id") && a.Categories.Contains("deletion"))));
     }
@@ -196,17 +196,18 @@ public sealed class CollaborationTests(HubFactory f)
 
         (await alex.Put($"/api/v1/projects/{p.Id}/follow", new { level = FollowLevel.MyItemsOnly })).EnsureSuccessStatusCode();
         var member = await f.DbAsync(db => db.ProjectMembers.FirstAsync(m => m.ProjectId == p.Id && m.UserId == U(TestData.Alex)));
-        (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}/members/{member.Id}", new { roles = new[] { ProjectRole.TeamMember, ProjectRole.Reviewer } })).EnsureSuccessStatusCode();
+        (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}/members/{member.Id}", new { roles = new[] { ProjectRole.TeamMember, ProjectRole.Reviewer } }, member.RowVersion)).EnsureSuccessStatusCode();
         var follow = await f.DbAsync(db => db.Follows.FirstAsync(x => x.ProjectId == p.Id && x.UserId == U(TestData.Alex)));
         Assert.Equal(FollowLevel.MyItemsOnly, follow.Level); // ASG-02: the system never overrides the user's choice
         Assert.Equal(FollowSource.Manual, follow.Source);
-        (await f.As(TestData.Pm).DeleteAsync($"/api/v1/projects/{p.Id}/members/{member.Id}")).EnsureSuccessStatusCode();
+        member = await f.DbAsync(db => db.ProjectMembers.FirstAsync(m => m.Id == member.Id));
+        (await f.As(TestData.Pm).Delete($"/api/v1/projects/{p.Id}/members/{member.Id}", member.RowVersion)).EnsureSuccessStatusCode();
         Assert.True(await f.DbAsync(db => db.Follows.AnyAsync(x => x.ProjectId == p.Id && x.UserId == U(TestData.Alex)))); // manual follow kept on an open project
 
         await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/members", new { userId = U(TestData.Jill), roles = new[] { ProjectRole.TeamMember } }).Result.Json(201);
         var jillMember = await f.DbAsync(db => db.ProjectMembers.FirstAsync(m => m.ProjectId == p.Id && m.UserId == U(TestData.Jill) && m.RemovedAt == null));
         Assert.Equal(FollowSource.Assignment, (await f.DbAsync(db => db.Follows.FirstAsync(x => x.ProjectId == p.Id && x.UserId == U(TestData.Jill)))).Source);
-        (await f.As(TestData.Pm).DeleteAsync($"/api/v1/projects/{p.Id}/members/{jillMember.Id}")).EnsureSuccessStatusCode();
+        (await f.As(TestData.Pm).Delete($"/api/v1/projects/{p.Id}/members/{jillMember.Id}", jillMember.RowVersion)).EnsureSuccessStatusCode();
         Assert.False(await f.DbAsync(db => db.Follows.AnyAsync(x => x.ProjectId == p.Id && x.UserId == U(TestData.Jill)))); // assignment follow removed with the membership
     }
 
@@ -226,6 +227,7 @@ public sealed class CollaborationTests(HubFactory f)
             await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/transition", new { toStatus = "Active", rowVersion = pr.I("rowVersion") }).Result.Json();
             var batch = await f.DbAsync(db => db.Notifications.Where(n => n.UserId == U(TestData.Alex) && n.ProjectId == p.Id && n.EventType == NotificationEvents.TaskAssigned).ToListAsync());
             Assert.Contains("3 tasks", Assert.Single(batch).Title);
+            Assert.Equal($"/my-work?tab=overview&project={p.Id}", batch[0].LinkPath); // Overview lists the new work; Today shows only what is due now (§41 E3)
             var marker = await f.DbAsync(db => db.Follows.Where(x => x.ProjectId == p.Id && x.UserId == U(TestData.Alex)).Select(x => x.LastSeenAt).FirstAsync());
             Assert.Equal(f.Clock.Now, marker); // set-up work does not arrive as a flood of unread changes
             Assert.Equal(0, (await f.As(TestData.Alex).GetAsync($"/api/v1/me/following?projectId={p.Id}").Result.Json())["projects"]!.AsArray()

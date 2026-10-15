@@ -329,7 +329,7 @@ public sealed class TasksTests(HubFactory f)
         var member = await f.DbAsync(db => db.ProjectMembers.FirstAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Alex)));
         var items = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/members/{member.Id}/open-items").Result.Json();
         Assert.Equal(5, items.I("count"));
-        (await f.As(TestData.Pm).DeleteAsync($"/api/v1/projects/{p.Id}/members/{member.Id}")).EnsureSuccessStatusCode();
+        (await f.As(TestData.Pm).Delete($"/api/v1/projects/{p.Id}/members/{member.Id}", member.RowVersion)).EnsureSuccessStatusCode();
         await f.Evaluate(p.Id);
         var flagged = await f.DbAsync(db => db.TaskStates.Where(s => s.ProjectId == p.Id).ToListAsync());
         Assert.Equal(5, flagged.Count(s => s.Notes.Contains("assignee_not_on_project")));

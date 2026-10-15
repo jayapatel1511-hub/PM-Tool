@@ -158,6 +158,34 @@ public static class Permissions
     public static Allow ActOnStaff(Actor a, Guid? personSupervisorId) =>
         a.ReadOnly ? Allow.No("perm.read_only") : a.Admin || (a.Supervisor && personSupervisorId == a.Id) ? Allow.Yes : Allow.No("perm.supervisor");
 
+    public static Allow CreatePlanningEntry(Actor a, Guid personId, Guid? personSupervisorId)
+    {
+        if (!a.IsActive || a.ReadOnly) return Allow.No(a.ReadOnly ? "perm.read_only" : "perm.inactive");
+        if (personId == a.Id) return Allow.Yes;
+        return a.Admin || (a.Supervisor && personSupervisorId == a.Id) ? Allow.Yes : Allow.No("perm.supervisor");
+    }
+
+    public static Allow ManagePlanningEntry(Actor a, PlanningEntryFacts e)
+    {
+        if (!a.IsActive || !e.IsActive || a.ReadOnly) return Allow.No(a.ReadOnly ? "perm.read_only" : "perm.inactive");
+        if (a.Admin && e.OwnerId != a.Id) return Allow.Yes; // Endpoint requires an explicit correction reason.
+        if (e.OwnerId != a.Id) return Allow.No("perm.owner");
+        if (e.IsSelfEntry) return e.PersonId == a.Id ? Allow.Yes : Allow.No("perm.owner");
+        return e.OwnerStillManages && (a.Admin || a.Supervisor && e.PersonSupervisorId == a.Id)
+            ? Allow.Yes : Allow.No("planning.owner_authority");
+    }
+
+    public static Allow SeePlanningEntry(Actor a, PlanningEntryFacts e, bool dataCorrection = false)
+    {
+        if (!a.IsActive || !e.IsActive) return Allow.No("perm.inactive");
+        var row = a.Id == e.PersonId || a.Admin || a.Executive || a.Supervisor && e.PersonSupervisorId == a.Id || e.InViewerScope;
+        if (!row || !e.ProjectVisible) return Allow.No("perm.scope");
+        return e.Visibility != PlanningVisibility.Draft || e.OwnerId == a.Id || a.Admin && dataCorrection ? Allow.Yes : Allow.No("planning.private");
+    }
+
+    public static Allow RecordTimeAway(Actor a, Guid? personSupervisorId, Guid personId)
+        => !a.IsActive ? Allow.No("perm.inactive") : a.ReadOnly ? Allow.No("perm.read_only") : personId == a.Id ? Allow.No("perm.self_time_away") : ActOnStaff(a, personSupervisorId);
+
     public static bool ViewPersonWork(Actor a, Guid personId, Guid? personSupervisorId) =>
         a.Id == personId || a.Admin || a.Executive || (a.Supervisor && personSupervisorId == a.Id);
 

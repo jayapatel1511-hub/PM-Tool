@@ -122,6 +122,13 @@ public static class HttpJson
         return c.SendAsync(req);
     }
 
+    public static Task<HttpResponseMessage> Delete(this HttpClient c, string url, int? rowVersion)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Delete, url);
+        if (rowVersion is { } v) req.Headers.TryAddWithoutValidation("If-Match", $"\"{v}\"");
+        return c.SendAsync(req);
+    }
+
     public static Task<HttpResponseMessage> Action(this HttpClient c, string url, object body, int? rowVersion)
     {
         var req = new HttpRequestMessage(HttpMethod.Post, url) { Content = JsonContent.Create(body, options: Web) };

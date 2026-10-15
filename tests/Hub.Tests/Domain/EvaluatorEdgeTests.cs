@@ -8,6 +8,18 @@ public sealed class EvaluatorEdgeTests
 {
     static DateOnly D(int m, int d, int y = 2026) => new(y, m, d);
 
+    [Theory]
+    [InlineData(1, "1 day overdue")]
+    [InlineData(2, "2 days overdue")]
+    public void Overdue_attention_preserves_the_count_and_uses_the_correct_day_unit(int days, string label)
+    {
+        var s = new Scenario();
+        var task = s.Task("T1", due: s.Today.AddDays(-days));
+        var result = s.Run();
+        Assert.Equal(days, result.T(task).DaysOverdue);
+        Assert.Contains(label, result.A(task.Id).Single(a => a.RuleId == "A-01").Message);
+    }
+
     [Fact]
     public void Edges_to_items_outside_the_project_are_ignored()
     {

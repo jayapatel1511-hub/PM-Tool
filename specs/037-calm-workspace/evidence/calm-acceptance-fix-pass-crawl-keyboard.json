@@ -1,0 +1,1773 @@
+{
+  "base": "http://localhost:5098",
+  "baseUi": null,
+  "commit": "79882c20c3a04b0318614ed8687c9f8a9f6757c8",
+  "at": "2026-10-12T07:42:48.974Z",
+  "fixtures": {
+    "project": "01a10454-76c6-7d32-ae72-72e709e168be",
+    "alex": "01a10450-4bf3-774f-b3bd-cd6861d66ea7",
+    "template": "01a10450-4c51-7309-92c3-ac43fa412efc",
+    "task": "01a10454-7a0a-709a-8124-f55927334353",
+    "deliverable": "01a10495-03b5-7016-ac6a-06a4b9bee8cc",
+    "milestone": "01a10495-02c2-7f3f-946b-abc01267d5ef",
+    "decision": "01a10495-054c-7904-a177-317ffe19f5f7",
+    "risk": "01a10495-0579-7132-ba02-aecd1eddd92f",
+    "issue": "01a10495-05d2-7b45-affb-183fa9f6e290",
+    "handoff": "01a10495-0927-7999-b623-b7afd2e607c9",
+    "change": "01a10495-0b8d-7b65-b65e-0966aa36845d",
+    "review": "01a10495-0a24-79ff-9861-116da60b27bd",
+    "submission": "01a10495-0c66-7b1a-bf1c-a8cb7170559e",
+    "action": "01a10495-06da-7bb2-ab92-2531a8e1b441",
+    "allocation": "30ecbb3d-8058-4d57-a1cc-bbd22e3fd6e4",
+    "basis": "01a10495-0d51-7011-8e7b-b2a6ee7a0974"
+  },
+  "crawl": [
+    {
+      "route": "/",
+      "url": "/",
+      "who": "priya",
+      "pathname": "/my-work",
+      "search": "",
+      "sidebar": [
+        "/my-work"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "My Work",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/my-work",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/my-work",
+      "url": "/my-work",
+      "who": "priya",
+      "pathname": "/my-work",
+      "search": "",
+      "sidebar": [
+        "/my-work"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "My Work",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/my-work",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/home",
+      "url": "/home",
+      "who": "priya",
+      "pathname": "/home",
+      "search": "",
+      "sidebar": [
+        "/home"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Home",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/home",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/boards",
+      "url": "/boards",
+      "who": "priya",
+      "pathname": "/boards",
+      "search": "",
+      "sidebar": [
+        "/tasks"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Boards",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/tasks",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/tasks",
+      "url": "/tasks",
+      "who": "priya",
+      "pathname": "/tasks",
+      "search": "",
+      "sidebar": [
+        "/tasks"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Tasks",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/tasks",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/timeline",
+      "url": "/timeline",
+      "who": "priya",
+      "pathname": "/timeline",
+      "search": "",
+      "sidebar": [
+        "/tasks"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Timeline",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/tasks",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/files",
+      "url": "/files",
+      "who": "priya",
+      "pathname": "/files",
+      "search": "",
+      "sidebar": [
+        "/files"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Files",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/files",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/team",
+      "url": "/team",
+      "who": "priya",
+      "pathname": "/team",
+      "search": "",
+      "sidebar": [
+        "/team"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Team",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/team",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/projects",
+      "url": "/projects",
+      "who": "priya",
+      "pathname": "/projects",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Projects",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/tasks/:id",
+      "url": "/tasks/01a10454-7a0a-709a-8124-f55927334353",
+      "who": "priya",
+      "pathname": "/tasks/01a10454-7a0a-709a-8124-f55927334353",
+      "search": "",
+      "sidebar": [
+        "/tasks"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Survey base plan QA and topographic gap list",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/tasks",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/notifications",
+      "url": "/notifications",
+      "who": "priya",
+      "pathname": "/notifications",
+      "search": "",
+      "sidebar": [],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Notifications",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": null,
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/search",
+      "url": "/search",
+      "who": "priya",
+      "pathname": "/search",
+      "search": "",
+      "sidebar": [],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Search results",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": null,
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/reports",
+      "url": "/reports",
+      "who": "priya",
+      "pathname": "/reports",
+      "search": "",
+      "sidebar": [
+        "/reports"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Reports",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/reports",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/reports/:code",
+      "url": "/reports/tasks-due-this-week",
+      "who": "priya",
+      "pathname": "/reports/tasks-due-this-week",
+      "search": "",
+      "sidebar": [
+        "/reports"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Tasks Due This Week",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/reports",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/staff",
+      "url": "/staff",
+      "who": "jordan",
+      "pathname": "/staff",
+      "search": "",
+      "sidebar": [
+        "/staff"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "My Staff",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/staff",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/portfolio",
+      "url": "/portfolio",
+      "who": "priya",
+      "pathname": "/portfolio",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Portfolio",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/workload",
+      "url": "/workload",
+      "who": "priya",
+      "pathname": "/workload",
+      "search": "",
+      "sidebar": [
+        "/planner"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Workload",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/planner",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/planner",
+      "url": "/planner",
+      "who": "priya",
+      "pathname": "/planner",
+      "search": "",
+      "sidebar": [
+        "/planner"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Team Planner",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/planner",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/vacation",
+      "url": "/vacation",
+      "who": "priya",
+      "pathname": "/vacation",
+      "search": "",
+      "sidebar": [],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Vacation & Coverage",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": null,
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/calendar",
+      "url": "/calendar",
+      "who": "priya",
+      "pathname": "/calendar",
+      "search": "",
+      "sidebar": [
+        "/tasks"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Calendar",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/tasks",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/time",
+      "url": "/time",
+      "who": "priya",
+      "pathname": "/time",
+      "search": "",
+      "sidebar": [
+        "/time"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Time",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/time",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/people/:id/reassign-work",
+      "url": "/people/01a10450-4bf3-774f-b3bd-cd6861d66ea7/reassign-work",
+      "who": "sam",
+      "pathname": "/people/01a10450-4bf3-774f-b3bd-cd6861d66ea7/reassign-work",
+      "search": "",
+      "sidebar": [],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Reassign work: Alex Chen",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": null,
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/preferences",
+      "url": "/preferences",
+      "who": "priya",
+      "pathname": "/preferences",
+      "search": "",
+      "sidebar": [],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Notification preferences",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": null,
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/templates",
+      "url": "/templates",
+      "who": "jordan",
+      "pathname": "/templates",
+      "search": "",
+      "sidebar": [
+        "/templates"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Templates",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/templates",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/templates/:id",
+      "url": "/templates/01a10450-4c51-7309-92c3-ac43fa412efc",
+      "who": "jordan",
+      "pathname": "/templates/01a10450-4c51-7309-92c3-ac43fa412efc",
+      "search": "",
+      "sidebar": [
+        "/templates"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Municipal Infrastructure Design",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/templates",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/admin",
+      "url": "/admin",
+      "who": "jordan",
+      "pathname": "/admin/reference/disciplines",
+      "search": "",
+      "sidebar": [
+        "/admin"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Administration",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/admin",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/admin/reference/:kind",
+      "url": "/admin/reference/disciplines",
+      "who": "jordan",
+      "pathname": "/admin/reference/disciplines",
+      "search": "",
+      "sidebar": [
+        "/admin"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Administration",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/admin",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/admin/settings",
+      "url": "/admin/settings",
+      "who": "jordan",
+      "pathname": "/admin/settings",
+      "search": "",
+      "sidebar": [
+        "/admin"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Administration",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/admin",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/admin/users",
+      "url": "/admin/users",
+      "who": "jordan",
+      "pathname": "/admin/users",
+      "search": "",
+      "sidebar": [
+        "/admin"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Administration",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/admin",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/admin/activity",
+      "url": "/admin/activity",
+      "who": "jordan",
+      "pathname": "/admin/activity",
+      "search": "",
+      "sidebar": [
+        "/admin"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Administration",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/admin",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/admin/operations",
+      "url": "/admin/operations",
+      "who": "jordan",
+      "pathname": "/admin/operations",
+      "search": "",
+      "sidebar": [
+        "/admin"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Administration",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/admin",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/admin/holidays",
+      "url": "/admin/holidays",
+      "who": "jordan",
+      "pathname": "/admin/holidays",
+      "search": "",
+      "sidebar": [
+        "/admin"
+      ],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Administration",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/admin",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/*",
+      "url": "/no-such-page",
+      "who": "priya",
+      "pathname": "/no-such-page",
+      "search": "",
+      "sidebar": [],
+      "group": null,
+      "more": null,
+      "groupPage": [],
+      "heading": "Page not available",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": null,
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/projects/SYN-101",
+      "url": "/projects/SYN-101",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/dashboard",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Overview"
+      ],
+      "more": "More",
+      "groupPage": [],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "overview",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/dashboard",
+      "url": "/projects/SYN-101/dashboard",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/dashboard",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Overview"
+      ],
+      "more": "More",
+      "groupPage": [],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "overview",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/coordination",
+      "url": "/projects/SYN-101/coordination",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/coordination",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Coordination"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Weekly Coordination"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "coordination",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/readiness",
+      "url": "/projects/SYN-101/readiness",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/readiness",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Deliverables"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Readiness"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "deliverables",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/handoffs",
+      "url": "/projects/SYN-101/handoffs",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/handoffs",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Coordination"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Handoffs"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "coordination",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/reviews",
+      "url": "/projects/SYN-101/reviews",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/reviews",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Deliverables"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Reviews"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "deliverables",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/changes",
+      "url": "/projects/SYN-101/changes",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/changes",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Coordination"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Changes"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "coordination",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/submissions",
+      "url": "/projects/SYN-101/submissions",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/submissions",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Deliverables"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Submissions"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "deliverables",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/allocations",
+      "url": "/projects/SYN-101/allocations",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/allocations",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "People"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Allocations"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "people",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/design-basis",
+      "url": "/projects/SYN-101/design-basis",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/design-basis",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Coordination"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Design basis"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "coordination",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/tasks",
+      "url": "/projects/SYN-101/tasks",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/tasks",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Work"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Tasks"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "work",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/board",
+      "url": "/projects/SYN-101/board",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/board",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Work"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Board"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "work",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/milestones",
+      "url": "/projects/SYN-101/milestones",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/milestones",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Work"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Milestones"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "work",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/timeline",
+      "url": "/projects/SYN-101/timeline",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/timeline",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Work"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Timeline"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "work",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/deliverables",
+      "url": "/projects/SYN-101/deliverables",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/deliverables",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Deliverables"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Deliverables"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "deliverables",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/decisions",
+      "url": "/projects/SYN-101/decisions",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/decisions",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Coordination"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Decisions"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "coordination",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/risks",
+      "url": "/projects/SYN-101/risks",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/risks",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Coordination"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Risks"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "coordination",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/issues",
+      "url": "/projects/SYN-101/issues",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/issues",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Coordination"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Issues"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "coordination",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/meetings",
+      "url": "/projects/SYN-101/meetings",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/meetings",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Coordination"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Meetings & Actions"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "coordination",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/files",
+      "url": "/projects/SYN-101/files",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/files",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Files"
+      ],
+      "more": "More",
+      "groupPage": [],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "files",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/vacation",
+      "url": "/projects/SYN-101/vacation",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/vacation",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [],
+      "more": "More",
+      "groupPage": [],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": null,
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/calendar",
+      "url": "/projects/SYN-101/calendar",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/calendar",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "Work"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Calendar"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "work",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/team",
+      "url": "/projects/SYN-101/team",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/team",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [
+        "People"
+      ],
+      "more": "More",
+      "groupPage": [
+        "Team & Disciplines"
+      ],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "people",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/activity",
+      "url": "/projects/SYN-101/activity",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/activity",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [],
+      "more": "Activity",
+      "groupPage": [],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "more",
+      "problems": []
+    },
+    {
+      "route": "/projects/:number/settings",
+      "url": "/projects/SYN-101/settings",
+      "who": "priya",
+      "pathname": "/projects/SYN-101/settings",
+      "search": "",
+      "sidebar": [
+        "/projects"
+      ],
+      "group": [],
+      "more": "Settings",
+      "groupPage": [],
+      "heading": "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase",
+      "alerts": [],
+      "dialog": null,
+      "expectedSidebar": "/projects",
+      "expectedGroup": "more",
+      "problems": []
+    }
+  ],
+  "keyboard": [
+    {
+      "url": "/home",
+      "filters": null,
+      "menus": [
+        {
+          "menu": "All views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/my-work",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "My Work views: Today",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/boards",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "All views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/projects",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Export",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Group by: Status",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Columns",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/tasks",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "All views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/calendar",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "All views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/portfolio",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Export",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/workload",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Export",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "More actions",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "All views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Group by: Reports to",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Sort: Load",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/planner",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "More actions",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Export",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Group by: Reports to",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Sort: Remaining capacity",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/reports",
+      "filters": null,
+      "menus": []
+    },
+    {
+      "url": "/team",
+      "filters": null,
+      "menus": [
+        {
+          "menu": "All views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/projects/SYN-101/dashboard",
+      "filters": null,
+      "menus": [
+        {
+          "menu": "More",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/projects/SYN-101/tasks",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "More",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Group by: Deliverable",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "More actions",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/projects/SYN-101/deliverables",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "More",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Columns",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Export",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Group by: Discipline",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/projects/SYN-101/timeline",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "More",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Zoom: Month",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/projects/SYN-101/allocations",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "More",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Export",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/projects/SYN-101/coordination",
+      "filters": {
+        "opensWithEnter": true,
+        "focusInside": true,
+        "closesWithEsc": true,
+        "focusReturns": true
+      },
+      "menus": [
+        {
+          "menu": "More",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Views",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "More actions",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0001, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0005, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0002, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0010, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0004, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0006, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0008, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0001, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0005, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0002, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0010, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0008, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        },
+        {
+          "menu": "Change status of SYN-101-T0009, now Not ",
+          "opensWithEnter": true,
+          "arrowMoves": true,
+          "closesWithEsc": true,
+          "focusReturns": true
+        }
+      ]
+    },
+    {
+      "url": "/my-work sidebar More",
+      "sidebar": {
+        "expands": true,
+        "tabIntoItems": true
+      }
+    }
+  ],
+  "failures": []
+}

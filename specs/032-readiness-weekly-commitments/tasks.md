@@ -1,6 +1,6 @@
 # Tasks: Ready-to-Start Planning and Weekly Commitments
 
-All tasks are pending. This list is the proposed build scope; this commit contains specifications only.
+Historical planning checklist: runtime implementation is present in the integrated Tuesday baseline. Unchecked items below retain their original contract-wide acceptance scope; they do not indicate absent code. See `verification.md` for implemented increments and remaining scenarios, and [the current deployment handoff](../../docs/handoffs/2026-10-12-deployment-ready.md) for the final local release checks. Full acceptance remains pending.
 
 - [ ] T001 Add canonical records, constraints and an additive migration in `src/Hub.Api/Data/` (FR-RDY-01, FR-RDY-02, FR-RDY-03, FR-RDY-04, FR-RDY-05, FR-RDY-06, FR-RDY-07).
 - [ ] T002 Implement pure transitions/derived rules in `src/Hub.Domain/Readiness.cs` and permission cases in `Permissions.cs` (FR-MDC-01, FR-MDC-02, FR-MDC-03, FR-MDC-04, FR-MDC-05, FR-MDC-06, FR-MDC-07, FR-MDC-08).

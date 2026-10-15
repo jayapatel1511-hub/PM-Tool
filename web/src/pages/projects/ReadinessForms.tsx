@@ -5,13 +5,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ErrorBanner, Field, Loading } from '@/components/hub/common'
-import { StatusPill } from '@/components/hub/pills'
+import { ErrorBanner, Field, Loading, Notice } from '@/components/hub/common'
+import { Key, Pill, type Tone } from '@/components/hub/pills'
 import { ApiError, get } from '@/lib/api'
 import { itemHref } from '@/components/hub/search'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
-import { CommandForm, SelectField, personName, workChoices, workRef, type CoordOptions, type WorkRef } from './CoordinationForms'
+import { CommandForm, CoordStatus, PersonLabel, SelectField, personName, workChoices, workRef, type CoordOptions, type WorkRef } from './CoordinationForms'
 
 type Assessment = { id: string; rowVersion: number; ownerId: string; state: string; intendedOutput: string; completionCriteria: string; evaluatedAt: string }
 type Check = { id: string; rowVersion: number; code: string; applies: boolean | null; satisfied: boolean | null; reason?: string; evidenceUrl?: string; recordedBy?: string }
@@ -30,6 +30,11 @@ const LINK_TYPES = ['Decision', 'Issue', 'Handoff']
 type PackageRef = { id: string; key: string; title: string; status: string }
 type Prerequisite = { id: string; rowVersion: number; packageId: string; reason: string; createdAt: string; createdBy?: string; removedAt?: string
   removedBy?: string; removalReason?: string; package: PackageRef; effective: PackageRef | null; listsOutput: boolean }
+const card = 'space-y-2 rounded-lg border p-4', subhead = 'text-base/6 font-semibold', link = 'text-primary underline underline-offset-4'
+const dl = 'grid grid-cols-[minmax(8rem,auto)_1fr] gap-x-4 gap-y-2'
+/** An unassessed answer stays visibly unknown (▲); it never reads as satisfied. */
+const answer = (value: boolean | null, yes: string, no: string, noTone: Tone) =>
+  value === null ? <Pill tone="warn">{t('readiness.unassessed')}</Pill> : <Pill tone={value ? 'done' : noTone}>{t(value ? yes : no)}</Pill>
 
 export function ReadinessInspector({ projectId, number, options, initial, close, done }: { projectId: string; number: string; options: CoordOptions
   initial?: string; close: () => void; done: () => void }) {
@@ -76,82 +81,90 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
   return <Dialog open onOpenChange={o => !o && close()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
     <DialogHeader><DialogTitle>{t('readiness.inspect')}</DialogTitle><DialogDescription>{t('readiness.inspectHint')}</DialogDescription></DialogHeader>
     <SelectField label={t('readiness.work')} value={target} onChange={v => { setTarget(v); setEditing(null) }} choices={workChoices(options)} />
-    {work && (q.isPending ? <Loading rows={4} /> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : !q.data ? <div className="space-y-3">
-      <p>{t('readiness.noAssessment')}</p>{canCreate && <Button onClick={() => setCreating(true)}>{t('readiness.createAssessment')}</Button>}
-    </div> : <div className="space-y-4 text-sm">
-      <StatusPill status={q.data.assessment.state} />
-      <p>{t('readiness.performer')}: {personName(options, q.data.assessment.ownerId)}</p>
-      <p>{t('readiness.output')}: {q.data.assessment.intendedOutput}</p><p>{t('readiness.criteria')}: {q.data.assessment.completionCriteria}</p>
+    {work && (q.isPending ? <Loading rows={4} /> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : !q.data
+      ? <Notice title={t('readiness.noAssessment')} action={canCreate && <Button onClick={() => setCreating(true)}>{t('readiness.createAssessment')}</Button>} />
+      : <div className="space-y-5 text-sm">
+      <div className="flex flex-wrap items-center gap-2"><CoordStatus status={q.data.assessment.state} /><span className="text-xs/[18px] text-muted-foreground">{t('readiness.evaluated')}: <span className="tabular-nums">{fmtTime(q.data.assessment.evaluatedAt)}</span></span></div>
+      <dl className={dl}>
+        <dt className="text-muted-foreground">{t('readiness.performer')}</dt><dd><PersonLabel options={options} id={q.data.assessment.ownerId} /></dd>
+        <dt className="text-muted-foreground">{t('readiness.output')}</dt><dd className="whitespace-pre-wrap">{q.data.assessment.intendedOutput}</dd>
+        <dt className="text-muted-foreground">{t('readiness.criteria')}</dt><dd className="whitespace-pre-wrap">{q.data.assessment.completionCriteria}</dd>
+      </dl>
       {canCreate && q.data.assessment.ownerId !== work.ownerId && <Button size="sm" variant="outline" onClick={() => setCreating(true)}>{t('readiness.recoverAssessment')}</Button>}
-      <p className="text-xs text-muted-foreground">{t('readiness.evaluated')}: {fmtTime(q.data.assessment.evaluatedAt)}</p>
-      {q.data.unknown.length > 0 && <p>{t('readiness.unknown')}: {q.data.unknown.map(tv).join(', ')}</p>}
-      {q.data.blocked.length > 0 && <p>{t('readiness.blocked')}: {q.data.blocked.map(tv).join(', ')}</p>}
-      <ul className="space-y-2">{q.data.checks.map(c => <li key={c.id} className="space-y-2 rounded border p-3">
-        <h3 className="font-medium">{tv(c.code)}</h3>
-        <p>{t('readiness.applicability')}: {t(c.applies === null ? 'readiness.unassessed' : c.applies ? 'readiness.applies' : 'readiness.notApplicable')}</p>
-        {c.applies !== false && <p>{t('readiness.result')}: {t(c.satisfied === null ? 'readiness.unassessed' : c.satisfied ? 'readiness.satisfied' : 'readiness.unsatisfied')}</p>}
-        {c.reason && <p>{c.reason}</p>}
+      {q.data.unknown.length > 0 && <p className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-warn"><span aria-hidden>▲</span><span>{t('readiness.unknown')}: {q.data.unknown.map(tv).join(', ')}</span></p>}
+      {q.data.blocked.length > 0 && <p className="flex gap-2 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-bad"><span aria-hidden>■</span><span>{t('readiness.blocked')}: {q.data.blocked.map(tv).join(', ')}</span></p>}
+      <ul className="space-y-2">{q.data.checks.map(c => <li key={c.id} className={card}>
+        <h3 className="font-semibold">{tv(c.code)}</h3>
+        <dl className={dl}>
+          <dt className="text-muted-foreground">{t('readiness.applicability')}</dt><dd>{answer(c.applies, 'readiness.applies', 'readiness.notApplicable', 'idle')}</dd>
+          {c.applies !== false && <><dt className="text-muted-foreground">{t('readiness.result')}</dt><dd>{answer(c.satisfied, 'readiness.satisfied', 'readiness.unsatisfied', 'bad')}</dd></>}
+        </dl>
+        {c.reason && <p className="whitespace-pre-wrap">{c.reason}</p>}
         {(q.data!.sources ?? []).some(s => s.code === c.code) && <ul aria-label={t('readiness.sources')} className="space-y-1">
-          {(q.data!.sources ?? []).filter(s => s.code === c.code).map(({ record: r }) => <li key={`${r.type}:${r.id}`}><Link className="text-primary underline" to={itemHref(r.type, number, r.id)}>{r.key} · {r.title}</Link> · {tv(r.status)}</li>)}
+          {(q.data!.sources ?? []).filter(s => s.code === c.code).map(({ record: r }) => <li key={`${r.type}:${r.id}`} className="flex flex-wrap items-center gap-2"><Link className={link} to={itemHref(r.type, number, r.id)}><span className="key">{r.key}</span> · {r.title}</Link><CoordStatus status={r.status} /></li>)}
         </ul>}
-        {c.evidenceUrl && <a className="text-primary underline" href={c.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
-        {c.recordedBy && <p className="text-xs text-muted-foreground">{t('readiness.recordedBy')}: {personName(options, c.recordedBy)}</p>}
+        {c.evidenceUrl && <a className={link} href={c.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
+        {c.recordedBy && <p className="text-xs/[18px] text-muted-foreground">{t('readiness.recordedBy')}: {personName(options, c.recordedBy)}</p>}
         {canAssess && <Button size="sm" variant="outline" onClick={() => setEditing(c)}>{t('readiness.recordApplicability')} · {tv(c.code)}</Button>}
       </li>)}</ul>
       <section className="space-y-3" aria-labelledby="readiness-exceptions">
-        <h3 id="readiness-exceptions" className="font-medium">{t('readiness.exceptions')}</h3>
+        <h3 id="readiness-exceptions" className={subhead}>{t('readiness.exceptions')}</h3>
         {assumptions.error && <ErrorBanner error={assumptions.error} retry={() => assumptions.refetch()} />}
-        {q.data.exceptions.length === 0 ? <p>{t('readiness.exceptionNone')}</p> : <ul className="space-y-2">{[...q.data.exceptions].reverse().map((x, i) => {
+        {q.data.exceptions.length === 0 ? <p className="text-muted-foreground">{t('readiness.exceptionNone')}</p> : <ul className="space-y-2">{[...q.data.exceptions].reverse().map((x, i) => {
           const basis = assumptions.data?.find(a => a.version.id === x.basisVersionId)
           const status = x.expiresOn < today() ? 'readiness.exceptionExpired' : i === 0 && q.data!.assessment.state === 'Proceed under Assumption' ? 'readiness.exceptionActive' : 'readiness.exceptionInactive'
-          return <li key={x.id} className="space-y-1 rounded border p-3">
-            <p className="font-medium">{t(status)}</p>
+          return <li key={x.id} className={card}>
+            <Pill tone={status === 'readiness.exceptionActive' ? 'warn' : 'idle'}>{t(status)}</Pill>
             <p>{t('readiness.exceptionBasis')}: {basis ? `${basis.key} · ${t('basis.version')} ${basis.version.number} · ${basis.title}` : t('coord.unavailable')}</p>
             {basis && <p>{t('basis.scope')}: {basis.version.scope}</p>}
             <p>{t('readiness.exceptionLimitedWork')}: {x.limitedWork}</p><p>{t('readiness.exceptionRisk')}: {x.risk}</p>
-            <p>{t('basis.approvedBy')}: {personName(options, x.approvedBy)} · {fmtDate(x.createdAt)}</p>
-            <p>{t('readiness.exceptionVerifier')}: {personName(options, x.verifierId)}</p><p>{t('basis.expiry')}: {fmtDate(x.expiresOn)}</p>
+            <p>{t('basis.approvedBy')}: {personName(options, x.approvedBy)} · <span className="tabular-nums">{fmtDate(x.createdAt)}</span></p>
+            <p>{t('readiness.exceptionVerifier')}: {personName(options, x.verifierId)}</p><p>{t('basis.expiry')}: <span className="tabular-nums">{fmtDate(x.expiresOn)}</span></p>
           </li>
         })}</ul>}
         {canAssess && (assumptions.isPending ? <Loading rows={1} /> : assumptions.data?.some(a => a.eligible)
           ? <Button size="sm" variant="outline" onClick={() => setExcepting(true)}>{t('readiness.exceptionApprove')}</Button>
-          : !assumptions.error && <p className="text-xs text-muted-foreground">{t('readiness.exceptionIneligible')}</p>)}
+          : !assumptions.error && <p className="text-xs/[18px] text-muted-foreground">{t('readiness.exceptionIneligible')}</p>)}
       </section>
     </div>)}
     {work && <section className="space-y-3 text-sm" aria-label={t('readiness.constraints')}>
-      <h3 className="font-medium">{t('readiness.constraints')}</h3>
-      {(canCreate || canAssess) && <Button size="sm" variant="outline" onClick={() => setRaising(true)}>{t('readiness.raiseConstraint')}</Button>}
-      {constraints.isPending ? <Loading rows={3} /> : constraints.error ? <ErrorBanner error={constraints.error} retry={() => constraints.refetch()} /> : constraints.data?.length === 0 ? <p>{t('readiness.noWorkConstraints')}</p> :
-        <ul className="space-y-2">{constraints.data?.map(c => <li key={c.id} className="space-y-2 rounded border p-3">
-          <StatusPill status={c.state} /><p className="font-medium"><span className="mr-2 font-mono text-xs text-muted-foreground">{c.key}</span>{c.description}</p><p>{tv(c.category)} · {fmtDate(c.neededBy)}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2"><h3 className={subhead}>{t('readiness.constraints')}</h3>
+        {(canCreate || canAssess) && <Button size="sm" variant="outline" onClick={() => setRaising(true)}>{t('readiness.raiseConstraint')}</Button>}</div>
+      {constraints.isPending ? <Loading rows={3} /> : constraints.error ? <ErrorBanner error={constraints.error} retry={() => constraints.refetch()} /> : constraints.data?.length === 0 ? <p className="text-muted-foreground">{t('readiness.noWorkConstraints')}</p> :
+        <ul className="space-y-2">{constraints.data?.map(c => <li key={c.id} className={card}>
+          <div className="flex flex-wrap items-center gap-2"><Key>{c.key}</Key><CoordStatus status={c.state} /></div>
+          <p className="font-medium">{c.description}</p><p className="text-muted-foreground">{tv(c.category)} · <span className="tabular-nums">{fmtDate(c.neededBy)}</span></p>
           {c.linkedType && <p className="flex flex-wrap items-center gap-2">{t('readiness.linkedRecord')}: {c.linked
-            ? <><Link className="text-primary underline" to={itemHref(c.linked.type, number, c.linked.id)}>{tv(c.linked.type)} {c.linked.key} · {c.linked.title}</Link><StatusPill status={c.linked.status} /></>
-            : t('coord.unavailable')}</p>}
-          <p>{t('readiness.removalOwner')}: {personName(options, c.removalOwnerId)}</p><p>{t('readiness.affectedOwner')}: {personName(options, c.affectedOwnerId)}</p>
-          <a className="text-primary underline" href={c.sourceUrl} target="_blank" rel="noopener noreferrer">{t('readiness.constraintSource')}</a>
-          {c.resolutionEvidenceUrl && <p><a className="text-primary underline" href={c.resolutionEvidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a></p>}
-          {c.verifiedBy && <p>{t('readiness.verifiedBy')}: {personName(options, c.verifiedBy)} · {fmtTime(c.verifiedAt)}</p>}
+            ? <><Link className={link} to={itemHref(c.linked.type, number, c.linked.id)}>{tv(c.linked.type)} <span className="key">{c.linked.key}</span> · {c.linked.title}</Link><CoordStatus status={c.linked.status} /></>
+            : <span className="text-muted-foreground">{t('coord.unavailable')}</span>}</p>}
+          <dl className={dl}>
+            <dt className="text-muted-foreground">{t('readiness.removalOwner')}</dt><dd><PersonLabel options={options} id={c.removalOwnerId} /></dd>
+            <dt className="text-muted-foreground">{t('readiness.affectedOwner')}</dt><dd><PersonLabel options={options} id={c.affectedOwnerId} /></dd>
+          </dl>
+          <a className={link} href={c.sourceUrl} target="_blank" rel="noopener noreferrer">{t('readiness.constraintSource')}</a>
+          {c.resolutionEvidenceUrl && <p><a className={link} href={c.resolutionEvidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a></p>}
+          {c.verifiedBy && <p>{t('readiness.verifiedBy')}: {personName(options, c.verifiedBy)} · <span className="tabular-nums">{fmtTime(c.verifiedAt)}</span></p>}
           <div className="flex flex-wrap gap-2">
             {options.canWrite && c.state === 'Open' && c.removalOwnerId === options.actorId && <Button size="sm" onClick={() => setMoving({ row: c, state: 'Resolution Proposed' })}>{t('readiness.proposeResolution')}</Button>}
             {options.canWrite && c.state === 'Resolution Proposed' && c.affectedOwnerId === options.actorId && work.ownerId === c.affectedOwnerId && <Button size="sm" onClick={() => setMoving({ row: c, state: 'Verified Removed' })}>{t('readiness.verifyRemoval')}</Button>}
-            {canAssess && ['Open', 'Resolution Proposed'].includes(c.state) && <Button size="sm" variant="outline" onClick={() => setMoving({ row: c, state: 'Cancelled' })}>{t('readiness.cancelConstraint')}</Button>}
+            {canAssess && ['Open', 'Resolution Proposed'].includes(c.state) && <Button size="sm" variant="ghost" className="text-bad hover:text-bad" onClick={() => setMoving({ row: c, state: 'Cancelled' })}>{t('readiness.cancelConstraint')}</Button>}
           </div>
         </li>)}</ul>}
     </section>}
     {work && <section className="space-y-3 text-sm" aria-labelledby="readiness-prerequisites">
-      <h3 id="readiness-prerequisites" className="font-medium">{t('readiness.prerequisites')}</h3>
-      <p className="text-xs text-muted-foreground">{t('readiness.prerequisitesHint')}</p>
-      {canAssess && <Button size="sm" variant="outline" onClick={() => setLinking(true)}>{t('readiness.addPrerequisite')}</Button>}
+      <div className="flex flex-wrap items-center justify-between gap-2"><h3 id="readiness-prerequisites" className={subhead}>{t('readiness.prerequisites')}</h3>
+        {canAssess && <Button size="sm" variant="outline" onClick={() => setLinking(true)}>{t('readiness.addPrerequisite')}</Button>}</div>
+      <p className="text-xs/[18px] text-muted-foreground">{t('readiness.prerequisitesHint')}</p>
       {prerequisites.isPending ? <Loading rows={2} /> : prerequisites.error ? <ErrorBanner error={prerequisites.error} retry={() => prerequisites.refetch()} /> :
-        prerequisites.data?.length === 0 ? <p>{t('readiness.noPrerequisites')}</p> :
-        <ul className="space-y-2">{prerequisites.data?.map(l => <li key={l.id} className="space-y-1 rounded border p-3">
-          <p className="font-medium"><Link className="text-primary underline" to={`/projects/${number}/submissions?panel=SubmissionPackage:${l.packageId}`}>{l.package.key} · {l.package.title}</Link></p>
-          <p className="flex flex-wrap items-center gap-2"><StatusPill status={l.package.status} />
-            {l.effective && l.effective.id !== l.package.id && <>{t('readiness.prerequisiteCurrent')}: {l.effective.key} <StatusPill status={l.effective.status} /></>}</p>
-          {l.listsOutput && <p role="status" className="text-warn">{t('readiness.prerequisiteListsOutput')}</p>}
-          <p>{l.reason}</p>
-          <p className="text-xs text-muted-foreground">{t('readiness.linkedBy')}: {personName(options, l.createdBy)} · {fmtDate(l.createdAt)}</p>
-          {l.removedAt ? <p>{t('readiness.prerequisiteRemoved')}: {personName(options, l.removedBy)} · {fmtDate(l.removedAt)} · {l.removalReason}</p>
+        prerequisites.data?.length === 0 ? <p className="text-muted-foreground">{t('readiness.noPrerequisites')}</p> :
+        <ul className="space-y-2">{prerequisites.data?.map(l => <li key={l.id} className={card}>
+          <p className="font-medium"><Link className={link} to={`/projects/${number}/submissions?panel=SubmissionPackage:${l.packageId}`}><span className="key">{l.package.key}</span> · {l.package.title}</Link></p>
+          <p className="flex flex-wrap items-center gap-2"><CoordStatus status={l.package.status} />
+            {l.effective && l.effective.id !== l.package.id && <>{t('readiness.prerequisiteCurrent')}: <span className="key">{l.effective.key}</span> <CoordStatus status={l.effective.status} /></>}</p>
+          {l.listsOutput && <p role="status" className="flex gap-2 text-warn"><span aria-hidden>▲</span><span>{t('readiness.prerequisiteListsOutput')}</span></p>}
+          <p className="whitespace-pre-wrap">{l.reason}</p>
+          <p className="text-xs/[18px] text-muted-foreground">{t('readiness.linkedBy')}: {personName(options, l.createdBy)} · <span className="tabular-nums">{fmtDate(l.createdAt)}</span></p>
+          {l.removedAt ? <p>{t('readiness.prerequisiteRemoved')}: {personName(options, l.removedBy)} · <span className="tabular-nums">{fmtDate(l.removedAt)}</span> · {l.removalReason}</p>
             : canAssess && <Button size="sm" variant="outline" onClick={() => setUnlinking(l)}>{t('readiness.removePrerequisite')}</Button>}
         </li>)}</ul>}
     </section>}
@@ -174,7 +187,7 @@ function RemovePrerequisite({ path, row, close, done }: { path: string; row: Pre
   const [reason, setReason] = useState('')
   return <CommandForm path={path} title={t('readiness.removePrerequisite')} hint={t('readiness.prerequisitesHint')} onClose={close} onDone={done}
     submitLabel={t('readiness.removePrerequisite')} payload={() => ({ rowVersion: row.rowVersion, reason })}>
-    <p>{row.package.key} · {row.package.title}</p>
+    <p className="rounded-md bg-muted px-4 py-3 text-sm font-medium"><span className="key">{row.package.key}</span> · {row.package.title}</p>
     <Field label={t('basis.reason')} htmlFor="prerequisite-remove-reason"><Textarea id="prerequisite-remove-reason" required minLength={5} maxLength={4000} value={reason} onChange={e => setReason(e.target.value)} /></Field>
   </CommandForm>
 }
@@ -189,8 +202,10 @@ function RaiseConstraint({ path, projectId, work, options, close, done }: { path
       linkedType: linkedType || null, linkedId: linkedType ? linkedId : null })}>
     <SelectField label={t('readiness.category')} value={category} onChange={setCategory} choices={['Handoff', 'Decision', 'Basis', 'Capacity', 'Review', 'Scope', 'Other'].map(v => ({ value: v, label: tv(v) }))} />
     <Field label={t('readiness.constraintDescription')} htmlFor="constraint-description"><Textarea id="constraint-description" required maxLength={2000} value={description} onChange={e => setDescription(e.target.value)} /></Field>
-    <SelectField label={t('readiness.removalOwner')} value={removalOwnerId} onChange={setOwner} choices={options.people.filter(p => p.id !== work.ownerId).map(p => ({ value: p.id, label: p.displayName }))} />
-    <Field label={t('readiness.neededBy')} htmlFor="constraint-needed"><Input id="constraint-needed" required type="date" value={neededBy} onChange={e => setNeeded(e.target.value)} /></Field>
+    <div className="grid gap-3 sm:grid-cols-2">
+      <SelectField label={t('readiness.removalOwner')} value={removalOwnerId} onChange={setOwner} choices={options.people.filter(p => p.id !== work.ownerId).map(p => ({ value: p.id, label: p.displayName }))} />
+      <Field label={t('readiness.neededBy')} htmlFor="constraint-needed"><Input id="constraint-needed" required type="date" value={neededBy} onChange={e => setNeeded(e.target.value)} /></Field>
+    </div>
     <Field label={t('readiness.constraintSource')} htmlFor="constraint-source"><Input id="constraint-source" required type="url" value={sourceUrl} onChange={e => setSource(e.target.value)} /></Field>
     <SelectField label={t('readiness.linkedType')} value={linkedType} onChange={v => { setLinkedType(v); setLinkedId('') }} required={false}
       choices={LINK_TYPES.map(v => ({ value: v, label: tv(v) }))} />
@@ -205,7 +220,7 @@ function MoveConstraint({ path, row, state, close, done }: { path: string; row: 
   const title = t(state === 'Resolution Proposed' ? 'readiness.proposeResolution' : state === 'Verified Removed' ? 'readiness.verifyRemoval' : 'readiness.cancelConstraint')
   return <CommandForm path={path} title={title} hint={t('readiness.resolutionHint')} onClose={close} onDone={done} submitLabel={title}
     payload={() => ({ rowVersion: row.rowVersion, toState: state, reason, evidenceUrl: evidenceUrl || null })}>
-    <p>{row.description}</p>{row.resolutionEvidenceUrl && <a className="text-primary underline" href={row.resolutionEvidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
+    <div className="space-y-1 rounded-md bg-muted px-4 py-3 text-sm"><p className="whitespace-pre-wrap">{row.description}</p>{row.resolutionEvidenceUrl && <a className={link} href={row.resolutionEvidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}</div>
     <Field label={t('basis.reason')} htmlFor="constraint-reason"><Textarea id="constraint-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>
     {state === 'Resolution Proposed' && <Field label={t('basis.evidence')} htmlFor="constraint-evidence"><Input id="constraint-evidence" required type="url" value={evidenceUrl} onChange={e => setEvidence(e.target.value)} /></Field>}
   </CommandForm>
@@ -228,7 +243,7 @@ function Applicability({ path, check, assessmentVersion, close, done }: { path: 
     <SelectField label={t('readiness.applicability')} value={applies} onChange={setApplies} choices={[
       { value: 'true', label: t('readiness.applies') }, ...(check.code === 'Production Owner' ? [] : [{ value: 'false', label: t('readiness.notApplicable') }])]} />
     <Field label={t('basis.reason')} htmlFor="applicability-reason"><Textarea id="applicability-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>
-    <Field label={t('basis.evidence')} htmlFor="applicability-evidence"><Input id="applicability-evidence" type="url" value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} /></Field>
+    <Field label={t('basis.evidence')} htmlFor="applicability-evidence" optional><Input id="applicability-evidence" type="url" value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} /></Field>
   </CommandForm>
 }
 
@@ -243,12 +258,14 @@ function ApproveException({ path, assessment, work, options, candidates, close, 
       verifierId, limitedWork, risk, expiresOn })}>
     <SelectField label={t('readiness.exceptionBasis')} value={versionId} onChange={setVersion}
       choices={candidates.map(c => ({ value: c.version.id, label: `${c.key} · ${t('basis.version')} ${c.version.number} · ${c.title}` }))} />
-    {chosen && <p>{t('basis.scope')}: {chosen.version.scope} · {t('readiness.exceptionDisposedUntil', { date: fmtDate(chosen.disposedUntil) })}</p>}
+    {chosen && <p className="rounded-md bg-muted px-4 py-3 text-sm">{t('basis.scope')}: {chosen.version.scope} · {t('readiness.exceptionDisposedUntil', { date: fmtDate(chosen.disposedUntil) })}</p>}
     <Field label={t('readiness.exceptionLimitedWork')} htmlFor="exception-limited"><Textarea id="exception-limited" required maxLength={2000} value={limitedWork} onChange={e => setLimited(e.target.value)} /></Field>
     <Field label={t('readiness.exceptionRisk')} htmlFor="exception-risk"><Textarea id="exception-risk" required maxLength={2000} value={risk} onChange={e => setRisk(e.target.value)} /></Field>
-    <SelectField label={t('readiness.exceptionVerifier')} value={verifierId} onChange={setVerifier}
-      choices={options.people.filter(p => p.id !== work.ownerId && p.id !== options.actorId).map(p => ({ value: p.id, label: p.displayName }))} />
-    <Field label={t('basis.expiry')} htmlFor="exception-expiry"><Input id="exception-expiry" required type="date" min={today()} max={chosen?.disposedUntil}
-      value={expiresOn} onChange={e => setExpiry(e.target.value)} /></Field>
+    <div className="grid gap-3 sm:grid-cols-2">
+      <SelectField label={t('readiness.exceptionVerifier')} value={verifierId} onChange={setVerifier}
+        choices={options.people.filter(p => p.id !== work.ownerId && p.id !== options.actorId).map(p => ({ value: p.id, label: p.displayName }))} />
+      <Field label={t('basis.expiry')} htmlFor="exception-expiry"><Input id="exception-expiry" required type="date" min={today()} max={chosen?.disposedUntil}
+        value={expiresOn} onChange={e => setExpiry(e.target.value)} /></Field>
+    </div>
   </CommandForm>
 }

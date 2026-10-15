@@ -217,7 +217,7 @@ public static class MyWorkEndpoints
         var rows = await db.ProjectMembers.AsNoTracking().Where(m => m.UserId == userId && m.RemovedAt == null && visible.Contains(m.ProjectId))
             .Select(m => new
             {
-                MemberId = m.Id, m.ProjectId, m.Roles, m.AddedAt,
+                MemberId = m.Id, MemberRowVersion = m.RowVersion, m.ProjectId, m.Roles, m.AddedAt,
                 Project = db.Projects.Where(p => p.Id == m.ProjectId).Select(p => new { p.ProjectNumber, p.Name, p.Status, p.Visibility, p.ProjectManagerId, p.HealthOverride, p.HealthOverrideExpiresAt, p.AllowViewerComments }).First(),
                 PrimaryDiscipline = db.ProjectDisciplines.Where(d => d.Id == m.PrimaryDisciplineId).Select(d => d.Discipline!.Name).FirstOrDefault(),
                 Leads = db.ProjectDisciplines.Where(d => d.ProjectId == m.ProjectId && d.LeadUserId == userId).Select(d => d.Discipline!.Name).ToList(),
@@ -236,7 +236,7 @@ public static class MyWorkEndpoints
             var reported = r.Project.Status == ProjectStatus.Active && r.Project.HealthOverride is { } ho && r.Project.HealthOverrideExpiresAt > now ? ho : r.Project.Status == ProjectStatus.Active ? r.Computed ?? Health.Grey : Health.Grey;
             return new
             {
-                r.MemberId, r.ProjectId, r.Project.ProjectNumber, r.Project.Name, r.Project.Status, ReportedHealth = reported, Roles = r.Roles.Concat(r.Leads.Count > 0 ? ["DisciplineLead"] : []),
+                r.MemberId, RowVersion = r.MemberRowVersion, r.ProjectId, r.Project.ProjectNumber, r.Project.Name, r.Project.Status, ReportedHealth = reported, Roles = r.Roles.Concat(r.Leads.Count > 0 ? ["DisciplineLead"] : []),
                 r.Leads, r.PrimaryDiscipline, r.AddedAt, r.Open, r.Overdue, NextDue = r.Next, CanRemove = canRemove,
             };
         }).ToList();

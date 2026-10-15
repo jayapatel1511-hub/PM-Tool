@@ -106,7 +106,7 @@ public sealed class ExtrasTests(HubFactory f)
             requiredByDate = "2026-10-01", impactLevel = "Low", impactDescription = "Spec waits" }).Result.Json(201);
         var t3 = await d.NewTask(p2.Id, TestData.Pm, new { assigneeId = leaver });
         var elec = d.ProjectDiscipline(p3.Id, "Electrical");
-        (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p3.Id}/disciplines/{elec}", new { leadUserId = leaver }, null)).EnsureSuccessStatusCode();
+        (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p3.Id}/disciplines/{elec}", new { leadUserId = leaver }, f.Db(db => db.ProjectDisciplines.Single(d => d.Id == elec).RowVersion))).EnsureSuccessStatusCode();
         var t4 = await d.NewTask(p3.Id, TestData.Pm, new { assigneeId = leaver });
         var t5 = await d.NewTask(p3.Id, TestData.Pm, new { assigneeId = leaver });
         var done = await d.NewTask(p3.Id, TestData.Pm, new { assigneeId = leaver });

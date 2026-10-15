@@ -55,9 +55,11 @@ both successful first automatic runs and approved encrypted review recovery.
 
 ## Browser and remaining gates
 
-**UNPROVEN:** fresh signed-in browser verification of the deployed Unassigned label
-and saved submission after full reload. The previous session expired; sign-in is
-pending. The API preservation result does not replace this browser gate.
+**UNPROVEN, now deferred at Jay’s request:** fresh signed-in browser verification of
+the deployed Unassigned label and saved submission after full reload. The previous
+session expired. The incoming UI/behaviour redesign will define the next browser
+acceptance target; the API preservation result does not replace this gate. See the
+[redesign checkpoint and remaining work](../handoffs/2026-10-03-redesign-checkpoint.md).
 
 Native print remains unproven because the dialog was cancelled. The separate
 sensitive pilot recovery transfer is awaiting its specific approval; no pilot dump,

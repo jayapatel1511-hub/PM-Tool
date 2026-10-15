@@ -181,21 +181,25 @@ mv() { return 98; }
             self.assertEqual(module.call(module.LOOPBACK, "GET", "/api/v1/me"), (0, b"", ""))
             self.assertEqual(connection.close.call_count, 2)
 
-    def test_verifier_replays_secure_cookie_from_mocked_sign_in(self):
+    def test_verifier_rejects_copied_cookie_after_mocked_sign_out(self):
         spec = importlib.util.spec_from_file_location("pilot_verify", ROOT / "scripts/verify-homedev-pilot.py")
         module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
         calls = []
+        revoked = False
         def fake_call(base, method, path, body=None, host=module.HOST, origin=None, cookie=None):
+            nonlocal revoked
             calls.append((method, path, body, host, origin, cookie))
             if path == "/health" and host == module.HOST: return 200, b"Healthy", ""
             if path == "/health": return 400, b"", ""
-            if path == "/api/v1/me": return (200, b"{}", "") if cookie == "__Host-hub-review=secure-token" else (401, b"", "")
+            if path == "/api/v1/me": return (200, b"{}", "") if cookie == "__Host-hub-review=secure-token" and not revoked else (401, b"", "")
             if path == "/api/v1/auth/local/sign-in" and origin == "https://evil.example": return 403, b"", ""
             if path == "/api/v1/auth/local/sign-in":
                 if body["password"] == "wrong": return 401, b"", ""
                 return 204, b"", "__Host-hub-review=secure-token; Path=/; Secure; HttpOnly; SameSite=Strict"
-            if path == "/api/v1/projects": return (200, b"[]", "") if cookie == "__Host-hub-review=secure-token" else (401, b"", "")
-            if path == "/api/v1/auth/local/sign-out": return 204, b"", "__Host-hub-review=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0"
+            if path == "/api/v1/projects": return (200, b"[]", "") if cookie == "__Host-hub-review=secure-token" and not revoked else (401, b"", "")
+            if path == "/api/v1/auth/local/sign-out":
+                revoked = True
+                return 204, b"", "__Host-hub-review=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0"
             return 403, b"", ""
         with tempfile.TemporaryDirectory() as temp:
             credentials = pathlib.Path(temp) / "pilot-verify.json"
@@ -204,6 +208,7 @@ mv() { return 98; }
             with contextlib.redirect_stdout(output):
                 self.assertEqual(module.run(["--credentials-file", str(credentials)], fake_call), 0, output.getvalue())
             self.assertTrue(any(path == "/api/v1/me" and cookie == "__Host-hub-review=secure-token" for _, path, _, _, _, cookie in calls))
+            self.assertGreaterEqual(sum(path == "/api/v1/me" and cookie == "__Host-hub-review=secure-token" for _, path, _, _, _, cookie in calls), 2)
             self.assertIn("RESULT PASS", output.getvalue())
 
 if __name__ == "__main__":

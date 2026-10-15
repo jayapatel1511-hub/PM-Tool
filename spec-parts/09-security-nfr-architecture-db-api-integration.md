@@ -1,11 +1,11 @@
 ## 21. Security Requirements
 
-The Hub is an internal line-of-business application holding project coordination data (not financial or personal-sensitive data beyond employee names, emails, and job titles). Security is proportionate: standard enterprise controls, no over-engineering.
+The Hub is an internal line-of-business application holding internal-confidential project coordination and employee availability data (names, work identities, approved absence dates/hours; no HR reasons or balances). Security is proportionate: standard enterprise controls, no over-engineering.
 
 | Area | Requirement | Class |
 |---|---|---|
 | Transport | HTTPS only; TLS 1.2+; HSTS; HTTP redirects to HTTPS. | MVP |
-| Authentication | Microsoft Entra ID via OpenID Connect / OAuth 2.0 with PKCE for the SPA; API accepts only bearer tokens issued for the Hub API audience; no local accounts, no passwords stored. | MVP |
+| Authentication | Microsoft Entra ID via OpenID Connect / OAuth 2.0 with PKCE for the SPA; API accepts only bearer tokens issued for the Hub API audience; the optional read-only ICS endpoint uses a revocable personal capability (§12.19) as its sole exception. No local accounts or passwords stored. | MVP |
 | Authorisation | Role-based access control per Section 8 enforced in the application service layer for every command and query; deny by default; permission tests derived from the matrix. | MVP |
 | Least privilege | App Service uses a system-assigned managed identity to reach Key Vault and (if Graph is used) Graph with the minimum application permissions (`User.Read.All` for sync; `Mail.Send` restricted to one mailbox via an Application Access Policy). Database role for the app has only the needed DML; `activity_log` INSERT/SELECT only (Rec). | MVP |
 | Secret management | No secrets in code or config files; connection strings and client secrets in Azure Key Vault referenced by App Service; rotate on schedule (TBD). Prefer Entra-authenticated PostgreSQL (managed identity) to avoid database passwords entirely. | MVP |
@@ -18,6 +18,7 @@ The Hub is an internal line-of-business application holding project coordination
 | Environment separation | Separate Azure resource groups (and ideally subscriptions) for dev, test/UAT, prod; separate Entra app registrations per environment; no production data in dev; anonymised copy for test if needed (TBD). | MVP |
 | Rate limiting | Basic per-user request rate limit on the API (e.g., 600 requests/minute) to protect against runaway clients. | Rec |
 | Data classification | All project data treated as internal-confidential; Restricted projects (if enabled) additionally limited to members. | MVP |
+| Leave and calendar privacy | Enforce §8.7 in queries, reports, notifications and feeds. Do not retain raw HR CSV files or private reasons. Calendar capability tokens are hashed, revocable and never logged; feed access rechecks account state and permissions. | MVP (calendar if shipped) |
 | Security review | Threat-model walkthrough before pilot; automated OWASP dependency and static analysis in CI; penetration test before organisation-wide rollout (**TBD**). | Rec |
 | Not in scope | Customer-facing security certifications, DLP integration, field-level encryption, bring-your-own-key. | — |
 
@@ -102,6 +103,7 @@ One deployable API with clear internal module boundaries (separate projects/asse
 | `Workspace` | Named project selections, cross-project board and timeline queries, dashboard layout, calendar events and deadline projections (§36) |
 | `Registers` | Decisions, external parties; P2 risks, issues, meetings, actions; item links |
 | `Collaboration` | Comments, mentions, watchers, document links |
+| `Resources` | Capacity, leave, allocations, visibility filtering (Draft is enforced here, not in the UI), HR-approved leave import, office holidays, weekly copy/publish, conflict rules RES-08…13/RES-19 and `resource_conflict` materialisation |
 | `Evaluation` | Pure rules (indicators, milestone status, health, attention) + state materialisation + change detection |
 | `Notifications` | Event → notification mapping, preferences, in-app store, email rendering and sending, digest |
 | `Templates` (P2) | Template CRUD and instantiation |
@@ -117,7 +119,7 @@ Layering inside each module: API endpoints (thin) → application services / com
 - Generated typed API client from OpenAPI; server state via TanStack Query with per-project cache keys and invalidation on mutations.
 - Shared component library: status pill, indicator chip, people picker, date picker, data table (virtualised, column chooser, group-by), side panel, filter bar, confirmation dialog with consequence text, "Why?" popover.
 - Filter/sort/group state encoded in the URL; panels deep-linkable.
-- Feature flags (simple config) for MVP-Recommended items and P2 modules so they can ship dark.
+- Feature flags as organisation settings (§43.4) so unreleased additions can merge dark; an existing feature is never put behind a flag.
 - Strings externalised (i18n-ready) from the first component.
 
 ### 23.5 Rules evaluation and background processing
@@ -128,7 +130,7 @@ Layering inside each module: API endpoints (thin) → application services / com
 2. After any write in a project that can affect derived state (task/deliverable/milestone/decision/dependency/project status), the transaction commits and publishes a `ProjectChanged(project_id)` event through a transactional **outbox** table. A background worker consumes it (debounced per project for ~2 seconds) and re-evaluates the whole project, writing results to `task_state`, `deliverable_state`, `milestone_state`, and `project_state` tables and upserting `attention_item` rows. Whole-project evaluation is simple and fast at the expected scale (thousands of tasks), and avoids incremental-graph bugs.
 3. The worker **diffs** new state against previous state to detect transitions (became Blocked, became unblocked, milestone became At Risk, new Critical attention item) and emits notification events for exactly those transitions — this is how "notify when something *becomes* overdue" works without spamming.
 4. A **nightly job** (after midnight in `org_time_zone`) re-evaluates every Active project (date rollovers), writes health snapshots, expires health overrides and snoozes, and queues the daily digest for `digest_send_time_local`.
-5. A **15-minute job** re-evaluates projects whose outbox processing failed and retries email sends. A **daily** Graph user sync marks leavers inactive (§23.6).
+5. A **15-minute job** re-evaluates projects whose outbox processing failed and retries email sends. An outbox event that fails 10 times is dead-lettered and waits for an Admin to retry it on Admin > Operations (§48.4); the nightly job still re-evaluates every Active project. A **daily** Graph user sync marks leavers inactive (§23.6).
 6. Reads (dashboards, lists, My Work, portfolio) query the materialised state tables with ordinary SQL — fast filtering and sorting by indicator, no rule logic in SQL.
 
 > **Design note.** This hybrid avoids the two classic failure modes. Pure compute-on-read puts rule logic in SQL views and again in application code for notifications, and the two drift. Pure nightly batch leaves a task showing "not blocked" all day after its predecessor slipped. Evaluating the whole project on every change through one pure function, then diffing against the last result, gives a single source of truth, near-real-time indicators, and transition-based notifications from the same code path. Whole-project recomputation sounds wasteful but a project rarely exceeds a few thousand tasks, and simplicity wins.
@@ -143,7 +145,7 @@ Scheduling implementation: Quartz.NET (or Hangfire) hosted in the API process wi
 - **Directory sync** (Recommendation): nightly Graph query of users in the organisation (or in the licensed groups) to update `is_active` from `accountEnabled`, `job_title`, `office_location`, and `manager` → `supervisor_id`. Requires `User.Read.All` application permission (**TBD — IT approval**). Fallback without Graph: users who fail sign-in due to a disabled account are marked inactive on the next attempted token use (weak), plus an Admin "deactivate" action.
 - **Disabled accounts**: cannot obtain tokens (Entra); marked Inactive by sync; A-18 flags their work; the "Reassign work" tool lists everything they own.
 - **Security groups**: five groups mapped to app roles, managed by IT; membership changes take effect at next token issuance.
-- **Session management**: API is stateless (no server sessions). SPA sign-out clears MSAL cache and redirects to Entra logout. Idle timeout in the SPA (e.g., 8 h) forces re-authentication (**TBD**). No refresh tokens stored server-side.
+- **Session management**: Entra bearer-token authentication is stateless. SPA sign-out clears MSAL cache and redirects to Entra logout. Individual local-password review sign-in uses eight-hour, non-sliding PostgreSQL-backed session tickets; sign-out removes the current ticket, so copied cookies are refused across API instances and restarts. Existing stateless review cookies require a fresh sign-in after activation. Idle timeout in the SPA (e.g., 8 h) forces re-authentication (**TBD**). No refresh tokens stored server-side.
 - **Service-to-service**: none in MVP other than the API's managed identity to Key Vault/Graph/PostgreSQL.
 
 ### 23.7 Environments, CI/CD, IaC
@@ -152,11 +154,11 @@ Scheduling implementation: Quartz.NET (or Hangfire) hosted in the API process wi
 - IaC: Bicep modules for App Service plan and app, PostgreSQL Flexible Server (with private endpoint/VNet integration), Key Vault, App Insights/Log Analytics, and (if used) Static Web App. Parameter files per environment.
 - CI: build, unit tests, rules-engine tests, lint, dependency scan, OpenAPI generation, SPA build, accessibility checks on key pages; PR required for main.
 - CD: GitHub Actions or Azure DevOps Pipelines (**TBD** by existing tooling); database migrations run as a deployment step with backup-before-migrate in prod; blue/green via App Service deployment slots (Rec).
-- Configuration: environment variables from App Service settings referencing Key Vault; feature flags as configuration.
+- Configuration: environment variables from App Service settings referencing Key Vault; feature flags as organisation settings (§43.4).
 
 ### 23.8 Observability
 
-Application Insights (browser + server): requests, dependencies, exceptions, custom events (evaluation duration per project, attention items count, digest sent count, emails failed), availability test on `/health` (checks database and outbox lag). Dashboards and alerts: error rate > 2% for 10 min; outbox lag > 10 min; nightly job failed; digest not sent by 08:00; database CPU > 80% sustained.
+Application Insights (browser + server): requests, dependencies, exceptions, custom events (evaluation duration per project, attention items count, digest sent count, emails failed, and, while the organisation setting `route_counter_enabled` is on, aggregate daily screen-open counts and load-time bands per route with no user, item or text under §51.4), availability test on `/health` (checks database and outbox lag; dead-lettered outbox events are left out of the lag, §48.4). Dashboards and alerts: error rate > 2% for 10 min; outbox lag > 10 min; any dead-lettered outbox event (§48.4); nightly job failed; digest not sent by 08:00; database CPU > 80% sustained. Browser errors also reach the application log through the log-only client-error endpoint (§48.5).
 
 ### 23.9 Azure services and sizing (assumptions)
 
@@ -224,7 +226,7 @@ Only the important fields are listed; standard audit columns are implied.
 
 | Entity | Purpose | Key fields | PK | FKs / relationships |
 |---|---|---|---|---|
-| `app_user` | Employees who can use the Hub | `entra_object_id` (unique), `email` (unique), `display_name`, `job_title`, `office_id`, `supervisor_id`, `is_active`, `weekly_capacity_hours`, `last_sign_in_at` | `id` | `office_id → office`; `supervisor_id → app_user` (self) |
+| `app_user` | Employees who can use the Hub | `entra_object_id` (unique), `email` (unique), `hr_source_system`, `hr_person_key` (nullable pair, Admin-mapped; unique together), `display_name`, `job_title`, `office_id`, `supervisor_id`, `discipline_id`, `skills` (text[]), `is_active`, `last_sign_in_at` | `id` | `office_id → office`; `supervisor_id → app_user` (self); `discipline_id → discipline`. Capacity lives in `person_capacity`. |
 | `user_system_role` | System roles per user | `user_id`, `role` (Admin, Executive, Supervisor, ProjectManager, ReadOnly), `source` (Group, Manual), `granted_by`, `granted_at` | `id`; unique(`user_id`,`role`) | `user_id → app_user` |
 | `office` | Offices | `name`, `code`, `time_zone`, `is_active` | `id` | — |
 | `discipline` | Organisation discipline list | `name`, `code`, `colour`, `sort_order`, `is_active` | `id` | — |
@@ -291,6 +293,20 @@ The first-release Created by Me view (§36.7) requires `task.created_by_id`, ret
 | `comment_mention` | Users mentioned in a comment | `comment_id`, `user_id` | `id`; unique | → `comment` (cascade), `app_user` |
 | `document_link` | Links to documents | `project_id`, `item_type` (Project, Deliverable, Task), `item_id`, `title`, `url`, `link_type`, `added_by`, `added_at`, `deleted_at` | `id` | polymorphic item |
 
+#### Resources
+
+| Table | Purpose | Key columns | PK / uniqueness | FKs and constraints |
+|---|---|---|---|---|
+| `person_capacity` | Weekly capacity history | `user_id`, `effective_from` (date), `weekly_capacity_hours` (numeric(4,1)), `working_days` (smallint[] 1–7), `set_by`, `set_at` | `id`; unique(`user_id`,`effective_from`) | → `app_user`; require non-empty distinct working days and non-negative weekly capacity. Replaces the single `app_user.weekly_capacity_hours` column from v1.0 (drop it). |
+| `leave` | Copy of HR-approved absence | `user_id`, `start_date`, `end_date`, `hours_per_day` (null = full working day), `source_kind` (HRImport/ManualHR), `status` (Approved/Cancelled/Unverified), `source_system`, `external_id`, `source_updated_at`, `imported_at`, `created_by`, `created_at`, `updated_at`, `row_version` | `id`; unique(`source_system`,`external_id`) when verified | → `app_user`; CHECK `start_date <= end_date`; CHECK `hours_per_day IS NULL OR hours_per_day > 0`. Source keys required for verified leave; cancellations retained, imported fields read-only. No HR reason/balance column. |
+| `office_holiday` | Office-specific non-working date | `office_id`, `date`, `name`, `created_by`, `updated_at`, `row_version` | `id`; unique(`office_id`,`date`) | → `office`; administered dates, not an assumed statutory calendar. |
+| `allocation` | Planning layer rows | `user_id`, `created_by`, `owner_kind` (Employee, Manager), `hours_per_week` (numeric(4,1)), `start_week` (date, Monday), `end_week` (date, Monday), `label`, `source_category`, `project_id` (nullable), `project_discipline_id` (nullable), `confidence` (Confirmed, Expected, Possible), `visibility` (Draft, Published, Confirmed), `notes`, `last_confirmed_at`, `created_at`, `updated_at`, `deleted_at`, `row_version` | `id` | → `app_user` ×2, `project`, `project_discipline` (both `ON DELETE SET NULL`). CHECK `start_week <= end_week`; CHECK `extract(isodow from start_week) = 1`; CHECK `hours_per_week > 0 AND hours_per_week = round(hours_per_week*2)/2`; CHECK `(owner_kind = 'Employee') = (visibility = 'Confirmed' AND created_by = user_id) OR owner_kind = 'Manager'`. Index (`user_id`,`start_week`,`end_week`); index (`created_by`) where `visibility = 'Draft'`. |
+| `allocation_week` | Materialised expansion of allocations to weeks for fast aggregation (rebuilt per allocation on write) | `allocation_id`, `user_id`, `week`, `hours`, `confidence`, `visibility`, `created_by`, `source_category` | PK(`allocation_id`,`week`) | → `allocation` (cascade). Index (`user_id`,`week`). Every totals query reads this table with a visibility predicate: `visibility <> 'Draft' OR created_by = :viewer`. |
+| `person_week_state` | Materialised per person-week figures | `user_id`, `week`, `capacity_hours`, `leave_hours`, `holiday_hours`, `confirmed_hours`, `expected_hours`, `possible_hours`, `task_estimate_hours`, `unestimated_task_count`, `evaluated_at` | PK(`user_id`,`week`) | → `app_user`. Excludes Draft hours; viewers add their own drafts at read time from `allocation_week`. |
+| `resource_conflict` | Current conflicts (RES-08…13, RES-19) | `rule_id`, `user_id`, `week`, `severity`, `message`, `route_to_user_ids` (uuid[]), `involved_allocation_ids` (uuid[]), `involved_work_items` (jsonb: item type/id/project for permission-filtered coverage links), `first_detected_at`, `last_evaluated_at` | `id`; unique(`rule_id`,`user_id`,`week`) | → `app_user`. Snoozes reuse `attention_snooze` with `project_id` null and `item_type = 'PersonWeek'`. |
+
+Calendar subscription storage (if shipped): one per-user hashed capability with created/revoked times, plus emitted event UID/sequence metadata needed for cancellation tombstones; no duplicate staffing or leave store. Import history and last successful import/source time use the existing ActivityLog.
+
 #### System
 
 | Entity | Purpose | Key fields | PK | FKs / relationships |
@@ -299,7 +315,7 @@ The first-release Created by Me view (§36.7) requires `task.created_by_id`, ret
 | `notification` | In-app notifications | `user_id`, `event_type`, `project_id`, `item_type`, `item_id`, `item_key`, `title`, `body`, `link_path`, `collapse_key`, `created_at`, `read_at`, `emailed_at`, `digest_included_at` | `id` | → `app_user`; index (`user_id`,`read_at`,`created_at desc`) |
 | `notification_preference` | Per-user, per-event channels | `user_id`, `event_type`, `in_app`, `email` | `id`; unique(`user_id`,`event_type`) | → `app_user` |
 | `project_follow` | Per-user project following; the Muted level replaces a separate mute table (§12.18) | `user_id`, `project_id`, `level` (AllActivity, MyItemsOnly, Muted), `source` (Assignment, Manual), `last_seen_at` (Following feed read marker), `created_at`, `updated_at` | `id`; unique(`user_id`,`project_id`) | → `app_user`, `project` (cascade) |
-| `outbox_event` | Transactional outbox | `id`, `event_type`, `payload` (jsonb), `created_at`, `processed_at`, `attempts`, `last_error` | `id` | index on (`processed_at`) where null |
+| `outbox_event` | Transactional outbox | `id`, `event_type`, `payload` (jsonb), `created_at`, `processed_at`, `attempts`, `last_error`, `dead_lettered_at` (§48.4) | `id` | index on (`processed_at`) where null |
 | `task_state` | Materialised derived state | `task_id`, `project_id`, `is_overdue`, `days_overdue`, `is_due_soon`, `is_waiting`, `is_blocked`, `blocked_since`, `blocked_by` (jsonb: tasks/decisions/manual), `is_blocking`, `blocking_count`, `is_stale`, `is_unassigned`, `is_missing_due_date`, `is_date_inconsistent`, `inconsistency_detail`, `affected_milestone_ids` (uuid[]), `evaluated_at` | `task_id` | → `task` (cascade) |
 | `deliverable_state` | Materialised derived state | `deliverable_id`, `project_id`, `progress_pct`, `task_total`, `task_complete`, `task_open`, `task_overdue`, `task_blocked`, `estimated_hours_total`, `remaining_hours`, `is_overdue`, `is_due_soon`, `is_at_risk`, `is_unassigned`, `is_date_inconsistent`, `slip_days`, `derived_predecessor_ids`, `derived_successor_ids`, `evaluated_at` | `deliverable_id` | → `deliverable` (cascade) |
 | `milestone_state` | Materialised status | `milestone_id`, `project_id`, `status`, `status_reasons` (jsonb), `days_remaining`, `slip_days`, `deliverable_total`, `deliverable_issued`, `task_open`, `task_overdue`, `task_blocked`, `evaluated_at` | `milestone_id` | → `milestone` (cascade) |
@@ -313,7 +329,7 @@ The first-release Created by Me view (§36.7) requires `task.created_by_id`, ret
 
 | Entity | Key fields | PK | FKs |
 |---|---|---|---|
-| `project_template` | `name`, `description`, `project_type_id`, `version`, `status`, `published_at`, `created_by` | `id` | → `project_type` |
+| `project_template` | `name`, `description`, `project_type_id`, `version`, `status`, `offset_day_kind` (CalendarDays or WorkingDays, default CalendarDays, CHECK), `published_at`, `created_by` | `id` | → `project_type` |
 | `template_discipline` | `template_id`, `discipline_id`, `sort_order`, `is_default_included` | `id` | → `project_template`, `discipline` |
 | `template_milestone` | `template_id`, `name`, `milestone_type`, `sort_order`, `anchor`, `offset_days_from_anchor`, `completes_phase_id`, `is_client_facing` | `id` | → `project_template`, `phase` |
 | `template_deliverable` | `template_id`, `template_discipline_id`, `name`, `deliverable_type_id`, `template_milestone_id`, `due_offset_days`, `requires_review`, `sort_order`, `description` | `id` | → template tables, `deliverable_type` |
@@ -420,7 +436,7 @@ erDiagram
 
 ### 25.2 Authentication and authorisation
 
-- `Authorization: Bearer <access token>` issued by Entra ID for the API's audience. Missing/invalid → `401`.
+- `Authorization: Bearer <access token>` issued by Entra ID for the API’s audience. Missing/invalid → `401`. The optional `/calendar/{token}.ics` endpoint instead verifies its personal capability, active user and current permissions; it exposes no general API access. Subscription management still requires Entra authentication.
 - Every endpoint declares its required permission (e.g., `Task.Update`) and scope resolution (project from route or body). The authorisation service resolves the caller's system roles (from app-role claims + manual grants) and project roles (from `project_member`, `project_discipline`, `project.project_manager_id`) and ownership, and evaluates the matrix (§8.5). Denied → `403` with a problem detail explaining the missing role in plain language (used by the UI for hover text).
 - List endpoints apply visibility filtering server-side (Restricted projects).
 
@@ -482,7 +498,25 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET /me/work` | My Work aggregate (sections with counts and top rows) | any |
 | `GET /me/tasks`, `/me/reviews`, `/me/deliverables`, `/me/decisions`, `/me/attention` | Section lists with filters | any |
 | `GET /me/notifications`, `POST /me/notifications:markRead`, `PATCH /me/preferences` | Notification centre and preferences | any |
-| `GET /me/following`, `GET /me/feed?projectId=…&since=…`, `POST /me/feed:markRead` | Followed projects, Following feed, feed read markers | any |
+| `GET /me/week?from=&weeks=` | My Week strip (own row, Drafts excluded) | any |
+| `GET /manager/home?supervisorId=&weeks=` | Manager Home cards | Resources.ViewTeam |
+| `GET /people`, `GET /people/{id}` | People list and profile | any |
+| `GET/POST /people/{id}/capacity` | Capacity history | Resources.EditPerson (Supervisor/Admin) |
+| `GET /people/{id}/leave`, `POST/PATCH /people/{id}/leave[/{leaveId}]` | Scoped availability; manual HR-referenced fallback only. Reject writes to imported HR fields; cancellation requires HR evidence. | Leave.View / Leave.RecordManualHR (Supervisor/Admin) |
+| `POST /resources/leave-import:preview`, `POST /resources/leave-import:apply` | Validated CSV preview; atomic version-checked/idempotent apply with explicit Approved/Cancelled rows | Admin |
+| `GET /resources/vacation?year=&supervisorId=&officeId=` | Scoped daily availability, coverage concerns and import/source times | Leave.View |
+| `GET/POST/PATCH/DELETE /admin/office-holidays[/{id}]` | Office holiday configuration with expected versions; recompute old/new dates on changes | Admin |
+| `GET /resources/planner?view=people-or-projects&supervisorId=&disciplineId=&from=&weeks=&includeDrafts=` | Grid payload: people × weeks with per-band hours, remaining, indicators; Drafts only for the caller | Resources.View |
+| `GET /resources/planner/{userId}/{week}` | Contribution list for one cell | Resources.View |
+| `POST /allocations` | Create (quick add sends `{ userId, week, text }`; full form sends all fields) | Allocation.Create (self or supervised) |
+| `PATCH /allocations/{id}`, `DELETE /allocations/{id}` | Edit / delete (creator only) | Allocation.Edit |
+| `POST /allocations/{id}:transition` | `{ toVisibility }` | Allocation.Edit (Manager-owned only) |
+| `POST /allocations/{id}:confirmStillValid`, `:copy`, `:move` | Reset staleness; copy; `{ userId?, startWeek?, endWeek? }` | Allocation.Edit |
+| `POST /resources/allocations:copyWeekPreview`, `:copyWeekApply` | Source/target weeks and selected creator-owned rows; preview then atomic version-checked/idempotent Draft copies | Allocation.Create (Manager) |
+| `POST /resources/allocations:publishPreview`, `:publishApply` | Selected creator-owned Drafts; atomic version-checked transition and batched notifications | Allocation.Edit (Manager) |
+| `POST/DELETE /me/calendar-subscription` [MVP-Recommended] | Create/rotate or revoke personal capability; URL returned only to the owner | any active user |
+| `GET /calendar/{token}.ics` [MVP-Recommended] | Read-only dated events, stable UIDs and sanitised cancellation tombstones; permissions rechecked per fetch | Revocable personal capability |
+| `GET /resources/conflicts?supervisorId=&from=&weeks=`, `POST /resources/conflicts/{id}:snooze` | Conflict list and snooze | Resources.View |
 | `GET /projects` | Project list with filters/sort | any (visibility-filtered) |
 | `POST /projects` | Create project | Project.Create |
 | `GET /projects/{id}` | Project header and summary (includes `state`) | Project.View |
@@ -501,6 +535,7 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 | `GET/POST /projects/{id}/deliverables`, `GET/PATCH/DELETE /deliverables/{id}` | Deliverables (list includes `state`) | Deliverable.* |
 | `POST /deliverables/{id}:transition` | `{ toStatus, reason }` | Deliverable.ChangeStatus |
 | `POST /deliverables/{id}:issue` | `{ issuedDate, revision, issuedTo, note, confirmOpenTasks }` | Deliverable.ChangeStatus |
+| `GET /projects/{id}/deleted?type={type}`, `GET /projects/{id}/deleted/export`, `POST /tasks/{id}/restore`, `POST /deliverables/{id}/restore`, `POST /milestones/{id}/restore` | Show deleted and Restore for tasks, deliverables and milestones; `If-Match` checked when sent (§49.2) | Project.PM |
 | `GET/POST /projects/{id}/tasks`, `GET/PATCH/DELETE /tasks/{id}` | Tasks (list includes `state`) | Task.* |
 | `POST /tasks/{id}:transition` | `{ toStatus, reason, comment }` | Task.ChangeStatus (role/ownership evaluated per transition) |
 | `POST /tasks/{id}:assign` | `{ assigneeId, reviewerId }` | Task.Assign |
@@ -532,7 +567,7 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 
 ### 25.8 Optimistic concurrency
 
-Every mutable resource returns `rowVersion`. `PATCH` and action endpoints require `If-Match: "<rowVersion>"` (or `rowVersion` in the body); a mismatch returns `409` with `code: "concurrency_conflict"`, the current representation, and the conflicting fields when determinable, so the UI can show "changed by Marc 2 minutes ago" and offer reload. Comments and links are append-only and exempt. Bulk operations check each row.
+Every mutable resource returns `rowVersion`. `PATCH`, `DELETE` and action endpoints require `If-Match: "<rowVersion>"` (or `rowVersion` in the body); a mismatch returns `409` with `code: "concurrency_conflict"`, the current representation, and the conflicting fields when determinable, so the UI can show "changed by Marc 2 minutes ago" and offer reload. This includes project memberships, project disciplines, named workspaces and editable document links. Document-link edits and soft deletion remain permitted by §12.7 and use this version protection. Comments retain their explicit author/time-window edit and soft-deletion rules in §12.6; these operations remain exempt. Immutable published records use append-only superseding records. Bulk operations check each row.
 
 ### 25.9 Representative payload — task
 
@@ -584,7 +619,7 @@ Including `permissions.allowedTransitions` lets the UI render only valid actions
 
 ### 25.10 Rate limits and idempotency
 
-Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-After`. Create endpoints accept an optional `Idempotency-Key` header (Rec) to make retries safe on flaky connections; not required for MVP.
+Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-After`. Create endpoints accept an optional `Idempotency-Key` header (Rec) to make retries safe on flaky connections; not required for MVP. The server claims the key before it runs the request, so two identical requests sent together create one item: the second gets the first response or `409` with `code: "idempotency_in_progress"` (§48.7).
 
 ---
 
@@ -592,7 +627,7 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 
 ### 26.1 Principles
 
-- MVP integrates with exactly one external system: **Microsoft Entra ID** (plus Microsoft Graph for user sync and, if approved, mail). Everything else is a link or an export.
+- MVP uses **Microsoft Entra ID** (plus Microsoft Graph for user sync and, if approved, mail) and a validated, Admin-applied HR-approved leave CSV import. No live HR API is assumed. A personal read-only ICS subscription is MVP-Recommended; other integrations remain links/exports or later phases.
 - Integrations are **adapters** behind interfaces (`IUserDirectory`, `IEmailSender`, `IChatNotifier`, `IProjectMasterSource`) so they can be swapped or stubbed in dev/test.
 - The Hub never writes to systems of record it does not own (no writes to ERP, SharePoint, Exchange beyond sending mail).
 - No inbound webhooks or public API for third parties in MVP–P2.
@@ -609,8 +644,10 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 | SharePoint (Graph) | Read | Browse/pick documents from a project library | Graph Sites/Drives | P3 |
 | ERP / Vantagepoint | Inbound (sync) | Project master data (number, name, client, PM, office, status) | Nightly import via vendor API or file drop; Hub fields marked "managed by ERP" become read-only | P3 (**TBD** capabilities and licensing — not assumed) |
 | Excel | Outbound | Report and list exports | CSV/XLSX download | MVP |
-| Calendar (ICS) | Outbound | Personal feed of due dates and milestones | Signed per-user ICS URL | P3 (optional) |
-| HR / leave system | Inbound | Availability for workload | — | Out of scope unless P3 requested |
+| Calendar (ICS) | Outbound | Personal approved leave and permitted dated commitments; no weekly-hour appointments | Revocable per-user subscription, stable UIDs/cancellations (§12.19) | MVP-Recommended |
+| HR / leave export | Inbound | Approved leave availability, changes and explicit cancellations | Validated Admin CSV import (§12.18.2); source mapping TBD | MVP |
+| HR live API/calendar sync | Inbound | Automate the same availability import | TBD actual system, API/export capability, identity mapping and consent; no write-back | P3 |
+| Outlook / other calendar service | Inbound / bidirectional (later) | Meeting/free-busy context and optional two-way dated-event sync | TBD provider APIs/consent; reconcile identities and prevent double counting; HR remains leave authority | P3 |
 
 ### 26.3 Design for the Phase 3 ERP integration (so MVP does not preclude it)
 

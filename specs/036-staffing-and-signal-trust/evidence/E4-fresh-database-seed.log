@@ -1,0 +1,66 @@
+== seed_resources.py
+Synthetic preview data at http://localhost:5092 (organisation today 2026-10-12):
+  SYN-101 Active, Open, PM Priya Nair: Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase 2 detailed design)
+    allocation Alex Chen 2026-10-19..2026-10-23 30 h Confirmed
+    allocation Jill Martin 2026-10-19..2026-10-23 16 h Proposed
+    allocation Omar Haddad 2026-10-19..2026-10-23 6 h Completed
+    allocation Alex Chen 2026-10-26..2026-10-30 12 h Declined
+    allocation Jill Martin 2026-11-02..2026-11-06 8 h Cancelled
+  SYN-102 Active, Open, PM Marc Dubois: Waterfront site servicing
+    allocation Alex Chen 2026-10-26..2026-10-30 20 h Proposed
+  SYN-103 Active, Restricted, PM Marc Dubois: Restricted client study
+  People (Admin view; committed/available hours for this week, next week and the week after):
+    Alex Chen: capacity 40 h; 52/40, 50/32, 32/40; 6 open, 0 unestimated, 1 overdue; over
+    Jill Martin: capacity 30 h (custom); 20/30, 26/30, 26/30; 5 open, 0 unestimated, 0 overdue; ok
+    Diane Roy: capacity 40 h; 0/40, 0/40, 0/40; 0 open, 0 unestimated, 0 overdue; under
+    Marc Dubois: capacity 40 h; 0/40, 0/40, 0/40; 0 open, 0 unestimated, 0 overdue; under
+    Omar Haddad: capacity 40 h; 0/40, 6/40, 0/40; 3 open, 2 unestimated, 0 overdue; ok
+exit 0
+== seed_modules.py
+Synthetic preview module data at http://localhost:5092 (organisation today 2026-10-12):
+  Milestones and deliverables: 16 created — SYN-101-M01; SYN-101-M02; SYN-101-M03; SYN-101-M04; SYN-102-M01; SYN-102-M02; SYN-103-M01; SYN-101-D001; SYN-101-D002; SYN-101-D003; SYN-101-D004; SYN-101-D005; SYN-101-D006; SYN-102-D001; SYN-102-D002; SYN-103-D001
+  Decisions: 5 created — SYN-101-DEC01; SYN-101-DEC02; SYN-101-DEC03; SYN-102-DEC01; SYN-103-DEC01
+  Risks and issues: 9 created — SYN-101-R01; SYN-101-R02; SYN-101-R03; SYN-101-I01; SYN-102-R01; SYN-101-I02; SYN-101-I03; SYN-101-I04; SYN-102-I01
+  Meetings and actions: 9 created — Weekly coordination meeting (Coordination); SYN-101-A01; SYN-101-A02; SYN-101-A03; SYN-101-A04; Client design review (Client); SYN-101-A05; Waterfront servicing coordination (Coordination); SYN-102-A01
+  Comments: 5 created — SYN-101-D001 by priya; SYN-101-T0006 by marc; SYN-101-DEC01 by jill; SYN-102-T0003 by alex; SYN-103-D001 by marc
+  Calendar events: 5 created — Weekly coordination meeting (Meeting, priya); Borehole logging site visit (Site Work, omar); Focus time: storm sewer profiles (Internal Task, alex); Waterfront servicing check-in (Meeting, marc); Restricted study working session (Meeting, marc)
+  Links: 4 created — Project network folder; Project document library; Waterfront servicing document library; 60 % storm sewer sheet set
+  Time entries: 7 created — alex 5 × 4.5 h (base plan QA and topographic gap list); alex 3 × 2 h (design standards check); alex 3 × 3 h (gap list follow-up); alex 2 × 4 h (existing services review); jill 3 × 3 h (watermain layout); jill 2 × 1.5 h (restricted options inputs); jill 5 × 4 h (drainage areas and runoff summary)
+  Handoffs: 2 created — Groundwater and bedding inputs for storm sewer design; Geotechnical constraints for the utility relocation register
+  Review package: 5 created — revision P02 of SYN-101-D001 registered by jill; 60 % storm sewer drawings review; Changes Required by diane; blocking finding by diane; Approved by omar
+  Change notice: 5 created — SYN-STD-01 revision 2025-A registered by marc; input use on SYN-101-T0002 recorded by alex; SYN-101-CH001 (revision 2026-B); published with assessments for alex and jill; assessment Update Required by alex
+  Submission package: 3 created — SYN-101-SUB001; checking started by marc; optional check Pass by alex
+  Design basis: 4 created — Minor storm design return period (Criterion); criterion confirmed by marc; criterion used by jill's storm sewer task; Groundwater stays below trench invert (Assumption)
+  Readiness constraints: 4 created — Decision constraint on SYN-101-T0006 by jill; output defined for SYN-101-T0006 by jill; Capacity constraint on SYN-101-T0002 by priya; resolution proposed by marc
+  Weekly commitments: 2 created — SYN-101-T0002 for the week of 2026-10-19 proposed by priya; SYN-101-T0006 for the week of 2026-10-19 proposed by jill
+  Template: 2 created — Small site servicing template (Draft); structure: 2 disciplines, 2 milestones, 2 deliverables, 3 tasks, 1 dependency
+  SYN-101 milestones: SYN-101-M01 Complete; SYN-101-M02 At Risk (slipped 5 d); SYN-101-M03 On Track; SYN-101-M04 On Track
+  SYN-102 milestones: SYN-102-M01 Complete; SYN-102-M02 On Track
+  SYN-103 milestones: SYN-103-M01 On Track
+  Unread notifications: jordan 0, lena 2, sam 7, priya 13, marc 18, alex 23, jill 25, diane 6, omar 17, rita 0
+exit 0
+== seed_planning.py
+Synthetic planning examples ready; no real records were used.
+exit 0
+== seed_staffing.py
+Packet 036 preview data at http://localhost:5092 (organisation today 2026-10-12, week W 2026-10-19, SYN-105 holiday 2026-10-14):
+  SYN-104 Setup: Civil technologist 2026-10-26..2026-11-20 80 h Open; Geotechnical engineer 2026-10-26..2026-11-06 40 h Filled; Senior reviewer 2026-11-02..2026-11-13 20 h Open; Drafting support 2026-11-09..2026-11-20 24 h Open
+  SYN-103 Active: Hydraulic modeller 2026-10-26..2026-11-06 30 h Open
+    SYN-105 Utility locate review [Complete] clear
+    SYN-105 Topographic survey processing [Complete] clear
+    SYN-105 Design report [Not Started] clear
+    SYN-105 Drawing checklist [In Progress] clear — after Design report, FinishToFinish lag 1, satisfied True
+    SYN-105 Quantity estimate [In Progress] isDateInconsistent — after Specifications, FinishToFinish lag 0, satisfied True
+    SYN-105 Utility conflict drawings [Not Started] isBlocked, isDateInconsistent — after Utility locate review, FinishToStart lag 2, satisfied False
+    SYN-105 Storm sewer layout [In Progress] clear
+    SYN-105 Storm sewer profiles [Not Started] clear — after Storm sewer layout, StartToStart lag 0, satisfied True
+    SYN-105 Specifications [In Progress] clear
+    SYN-105 Permit drawing markups [Not Started] clear
+    SYN-105 No start date task [Not Started] clear
+    SYN-105 Grading design [Not Started] clear — after Topographic survey processing, FinishToStart lag 0, satisfied True
+    SYN-105 Grading model [In Progress] clear
+    SYN-105 Drainage area plan [Not Started] isBlocked, isDateInconsistent — after Grading model, StartToStart lag 2, satisfied False
+  Home disciplines: alex 01a12e73-fb14-7d80-a818-612e35779ec4, diane not set, jill 01a12e73-fb14-7d80-a818-612e35779ec4, omar 01a12e73-fb14-7e81-a9fd-2902266397e6
+  REFUSED SYN-101 Alex 20 h in week W, proposed by Priya, confirmed by Sam: POST API request failed: HTTP 409
+Fixture setup stopped with refused API steps; review the reported failures before continuing.
+exit 1

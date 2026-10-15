@@ -17,6 +17,7 @@ public sealed record OrgSettings
     public int DecisionDueSoonDays { get; init; } = 5;
     public int TaskStaleDays { get; init; } = 10;
     public int ReviewStaleDays { get; init; } = 5;
+    public int StatusStaleDays { get; init; } = 15;
     public int BlockedAttentionDays { get; init; } = 0;
     public int HealthOverdueTaskPctYellow { get; init; } = 10;
     public int HealthOverdueTaskPctRed { get; init; } = 25;
@@ -28,6 +29,12 @@ public sealed record OrgSettings
     public int CompleteProjectEditWindowDays { get; init; } = 30;
     public int DefaultWeeklyCapacityHours { get; init; } = 40;
     public int CoordinationLookaheadWeeks { get; init; } = 3;
+    public int PlanningHorizonWeeks { get; init; } = 12;
+    public int PlanningOverPct { get; init; } = 105;
+    public int PlanningUnderPct { get; init; } = 50;
+    public int PlanningUnderWeeks { get; init; } = 2;
+    public int PlanningStaleDays { get; init; } = 28;
+    public int PlanningMaxHoursPerWeek { get; init; } = 80;
     public string OrgTimeZone { get; init; } = "America/Halifax";
     public string DigestSendTimeLocal { get; init; } = "07:00";
     public bool WeekendDigests { get; init; }
@@ -51,6 +58,7 @@ public sealed record OrgSettings
         new("decision_due_soon_days", SettingKind.Int, 5, "thresholds"),
         new("task_stale_days", SettingKind.Int, 10, "thresholds"),
         new("review_stale_days", SettingKind.Int, 5, "thresholds"),
+        new("status_stale_days", SettingKind.Int, 15, "thresholds"),
         new("blocked_attention_days", SettingKind.Int, 0, "thresholds"),
         new("health_overdue_task_pct_yellow", SettingKind.Int, 10, "health"),
         new("health_overdue_task_pct_red", SettingKind.Int, 25, "health"),
@@ -62,6 +70,12 @@ public sealed record OrgSettings
         new("complete_project_edit_window_days", SettingKind.Int, 30, "work"),
         new("default_weekly_capacity_hours", SettingKind.Int, 40, "work"),
         new("coordination_lookahead_weeks", SettingKind.Int, 3, "work"),
+        new("planning_horizon_weeks", SettingKind.Int, 12, "planning"),
+        new("planning_over_pct", SettingKind.Int, 105, "planning"),
+        new("planning_under_pct", SettingKind.Int, 50, "planning"),
+        new("planning_under_weeks", SettingKind.Int, 2, "planning"),
+        new("planning_stale_days", SettingKind.Int, 28, "planning"),
+        new("planning_max_hours_per_week", SettingKind.Int, 80, "planning"),
         new("restricted_projects_enabled", SettingKind.Bool, false, "work"),
         new("viewer_comments_default", SettingKind.Bool, true, "work"),
         new("project_number_format", SettingKind.Regex, "^[A-Za-z0-9][A-Za-z0-9-]{0,31}$", "work"),
@@ -91,6 +105,7 @@ public sealed record OrgSettings
             DecisionDueSoonDays = I("decision_due_soon_days", s.DecisionDueSoonDays),
             TaskStaleDays = I("task_stale_days", s.TaskStaleDays),
             ReviewStaleDays = I("review_stale_days", s.ReviewStaleDays),
+            StatusStaleDays = I("status_stale_days", s.StatusStaleDays),
             BlockedAttentionDays = I("blocked_attention_days", s.BlockedAttentionDays),
             HealthOverdueTaskPctYellow = I("health_overdue_task_pct_yellow", s.HealthOverdueTaskPctYellow),
             HealthOverdueTaskPctRed = I("health_overdue_task_pct_red", s.HealthOverdueTaskPctRed),
@@ -102,6 +117,12 @@ public sealed record OrgSettings
             CompleteProjectEditWindowDays = I("complete_project_edit_window_days", s.CompleteProjectEditWindowDays),
             DefaultWeeklyCapacityHours = I("default_weekly_capacity_hours", s.DefaultWeeklyCapacityHours),
             CoordinationLookaheadWeeks = I("coordination_lookahead_weeks", s.CoordinationLookaheadWeeks),
+            PlanningHorizonWeeks = I("planning_horizon_weeks", s.PlanningHorizonWeeks),
+            PlanningOverPct = I("planning_over_pct", s.PlanningOverPct),
+            PlanningUnderPct = I("planning_under_pct", s.PlanningUnderPct),
+            PlanningUnderWeeks = I("planning_under_weeks", s.PlanningUnderWeeks),
+            PlanningStaleDays = I("planning_stale_days", s.PlanningStaleDays),
+            PlanningMaxHoursPerWeek = I("planning_max_hours_per_week", s.PlanningMaxHoursPerWeek),
             RestrictedProjectsEnabled = B("restricted_projects_enabled", s.RestrictedProjectsEnabled),
             ViewerCommentsDefault = B("viewer_comments_default", s.ViewerCommentsDefault),
             ProjectNumberFormat = S("project_number_format", s.ProjectNumberFormat),
@@ -122,8 +143,7 @@ public sealed record OrgSettings
     /// Validates an Admin-entered value; returns an error message key or null.
     public static string? Validate(SettingDef def, JsonElement value) => def.Kind switch
     {
-        SettingKind.Int => value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var n) &&
-            (def.Key == "coordination_lookahead_weeks" ? n is >= 1 and <= 12 : n is >= 0 and <= 3650) ? null : "setting.int",
+        SettingKind.Int => value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var n) && IntRange(def.Key, n) ? null : "setting.int",
         SettingKind.Bool => value.ValueKind is JsonValueKind.True or JsonValueKind.False ? null : "setting.bool",
         SettingKind.Time => value.ValueKind == JsonValueKind.String && TimeOnly.TryParseExact(value.GetString(), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out _) ? null : "setting.time",
         SettingKind.TimeZone => value.ValueKind == JsonValueKind.String && TryZone(value.GetString()!) ? null : "setting.timezone",
@@ -131,6 +151,17 @@ public sealed record OrgSettings
         SettingKind.Channels => value.ValueKind == JsonValueKind.Object && value.TryGetProperty("app", out var a) && a.ValueKind is JsonValueKind.True or JsonValueKind.False
             && value.TryGetProperty("email", out var e) && e.ValueKind is JsonValueKind.True or JsonValueKind.False ? null : "setting.channels",
         _ => value.ValueKind == JsonValueKind.String && value.GetString()!.Length is > 0 and <= 200 ? null : "setting.text",
+    };
+
+    static bool IntRange(string key, int n) => key switch
+    {
+        "coordination_lookahead_weeks" or "planning_under_weeks" => n is >= 1 and <= 12,
+        "planning_horizon_weeks" => n is >= 6 and <= 26,
+        "planning_over_pct" => n is >= 50 and <= 300,
+        "planning_under_pct" => n is >= 0 and <= 100,
+        "planning_stale_days" or "status_stale_days" => n is >= 1 and <= 365,
+        "planning_max_hours_per_week" => n is >= 1 and <= 168,
+        _ => n is >= 0 and <= 3650,
     };
 
     static bool TryZone(string id) { try { TimeZoneInfo.FindSystemTimeZoneById(id); return true; } catch { return false; } }
@@ -160,7 +191,7 @@ public static class NotificationEvents
         ReadinessExceptionApproved = "ReadinessExceptionApproved",
         CommitmentProposed = "CommitmentProposed", CommitmentChanged = "CommitmentChanged",
         BasisImpactPending = "BasisImpactPending", BasisConflictRaised = "BasisConflictRaised",
-        TaskStartAuthorised = "TaskStartAuthorised";
+        TaskStartAuthorised = "TaskStartAuthorised", PlanningEntryChanged = "PlanningEntryChanged";
     public const string IssueAffectedDiscipline = "IssueAffectedDiscipline";
 
     public static readonly NotificationEventDef[] All =
@@ -184,6 +215,7 @@ public static class NotificationEvents
         new(BasisImpactPending, true, false, true), new(BasisConflictRaised, true, false),
         new(IssueAffectedDiscipline, true, false),
         new(TaskStartAuthorised, true, false, true),
+        new(PlanningEntryChanged, true, false),
     ];
 
     /// Coordination events whose recipients must hold current project access when the notice is composed and
@@ -196,8 +228,8 @@ public static class NotificationEvents
     public static NotificationEventDef Get(string code) => All.First(e => e.Code == code);
 }
 
-/// Attention rule identifiers (§12.12). A-07 activates with the Phase 2 issue register.
+/// Attention rule identifiers (§12.12, A-21 in §40). A-07 activates with the Phase 2 issue register.
 public static class Rules
 {
-    public static readonly string[] Ids = Enumerable.Range(1, 20).Select(i => $"A-{i:00}").ToArray();
+    public static readonly string[] Ids = Enumerable.Range(1, 21).Select(i => $"A-{i:00}").ToArray();
 }

@@ -43,23 +43,29 @@ public static class AdminEndpoints
         g.MapGet("/holidays", async (Guid? officeId, int? year, HubDb db) => await db.Holidays.AsNoTracking()
             .Where(h => (officeId == null || h.OfficeId == officeId) && (year == null || h.Date.Year == year)).OrderBy(h => h.Date)
             .Select(h => new { h.Id, h.OfficeId, Office = db.Offices.Where(o => o.Id == h.OfficeId).Select(o => o.Name).FirstOrDefault(), h.Date, h.Name }).ToListAsync());
-        g.MapPost("/holidays", async (HolidayBody b, HubDb db) =>
+        g.MapPost("/holidays", async (HolidayBody b, HubDb db) => await Tx.Run(db, async () =>
         {
             var date = b.Date ?? throw ApiException.Invalid("date", "error.required");
             if (b.OfficeId is { } o) Check.That(await db.Offices.AnyAsync(x => x.Id == o), "officeId", "error.not_found");
             if (await db.Holidays.AnyAsync(h => h.OfficeId == b.OfficeId && h.Date == date)) throw ApiException.Conflict("holiday_exists", "holiday.exists");
             var h = new Holiday { OfficeId = b.OfficeId, Date = date, Name = Check.Required(b.Name, "name", 120) };
+            var people = await db.Users.Where(u => b.OfficeId == null || u.OfficeId == b.OfficeId).Select(u => u.Id).ToArrayAsync();
+            await PersonCapacity.LockPeople(db, people);
             db.Holidays.Add(h);
+            foreach (var person in people) await PersonCapacity.Touch(db, person, date, date);
             await db.SaveChangesAsync();
             return Results.Created($"/api/v1/admin/holidays/{h.Id}", new { h.Id });
-        });
-        g.MapDelete("/holidays/{id:guid}", async (Guid id, HubDb db) =>
+        }));
+        g.MapDelete("/holidays/{id:guid}", async (Guid id, HubDb db) => await Tx.Run(db, async () =>
         {
             var h = await db.Holidays.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
+            var people = await db.Users.Where(u => h.OfficeId == null || u.OfficeId == h.OfficeId).Select(u => u.Id).ToArrayAsync();
+            await PersonCapacity.LockPeople(db, people);
+            foreach (var person in people) await PersonCapacity.Touch(db, person, h.Date, h.Date);
             db.Holidays.Remove(h); // configuration, not a work item; the removal is logged
             await db.SaveChangesAsync();
             return Results.NoContent();
-        });
+        }));
 
         // ---------- Settings (FR-014) ----------
         g.MapGet("/settings", async (HubDb db) =>
@@ -116,7 +122,7 @@ public static class AdminEndpoints
             if (!string.IsNullOrWhiteSpace(q)) query = query.Where(u => EF.Functions.ILike(u.DisplayName, $"%{q.Trim()}%") || EF.Functions.ILike(u.Email, $"%{q.Trim()}%"));
             return await query.OrderBy(u => u.DisplayName).Take(1000).Select(u => new
             {
-                u.Id, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.SupervisorId, u.IsActive, u.WeeklyCapacityHours, u.IsTemplateEditor,
+                u.Id, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.SupervisorId, u.HomeDisciplineId, u.IsActive, u.WeeklyCapacityHours, u.IsTemplateEditor,
                 u.LastSignInAt, u.RowVersion, Roles = u.Roles.Select(r => new { r.Role, r.Source }),
             }).ToListAsync();
         });
@@ -150,10 +156,17 @@ public static class AdminEndpoints
             {
                 var sup = p.Id("supervisorId");
                 Check.That(sup != u.Id, "supervisorId", "admin.self_supervisor");
-                if (sup is { } s) Check.That(await db.Users.AnyAsync(x => x.Id == s && x.IsActive), "supervisorId", "error.not_found");
+                // An unchanged value is kept even when it is no longer active, so editing anything else still saves.
+                if (sup is { } s && s != u.SupervisorId) Check.That(await db.Users.AnyAsync(x => x.Id == s && x.IsActive), "supervisorId", "error.not_found");
                 u.SupervisorId = sup;
             }
             if (p.Has("officeId")) u.OfficeId = p.Id("officeId");
+            if (p.Has("homeDisciplineId")) // FR-GRP-01 (D7): edited by an Admin, audited on the user record
+            {
+                var discipline = p.Id("homeDisciplineId");
+                if (discipline is { } d && d != u.HomeDisciplineId) Check.That(await db.Disciplines.AnyAsync(x => x.Id == d && x.IsActive), "homeDisciplineId", "error.not_found");
+                u.HomeDisciplineId = discipline;
+            }
             if (p.Has("weeklyCapacityHours"))
             {
                 var c = p.Dec("weeklyCapacityHours");
@@ -197,14 +210,15 @@ public static class AdminEndpoints
         });
 
         // Organisation-level history of administrative changes (FR-021).
-        g.MapGet("/activity", async (HubDb db, DateOnly? from, DateOnly? to, Guid? actorId, string? itemType, string? category, int? page, int? pageSize) =>
+        g.MapGet("/activity", async (HubDb db, DateOnly? from, DateOnly? to, Guid? actorId, string? itemType, string? category, string? excludeAction, int? page, int? pageSize) =>
         {
             var (pg, size) = Http.Paging(page, pageSize);
-            var q = db.ActivityLog.AsNoTracking().AsQueryable();
+            var q = db.ActivityLog.AsNoTracking().Where(a => a.ItemType != "PlanningEntry");
             if (from is { } f) q = q.Where(a => a.OccurredAt >= f.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
             if (to is { } t) q = q.Where(a => a.OccurredAt < t.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
             if (actorId is { } aid) q = q.Where(a => a.ActorUserId == aid);
             if (!string.IsNullOrWhiteSpace(itemType)) q = q.Where(a => a.ItemType == itemType);
+            if (!string.IsNullOrWhiteSpace(excludeAction)) q = q.Where(a => a.Action != excludeAction); // sign-ins swamp the organisation log
             if (!string.IsNullOrWhiteSpace(category)) q = q.Where(a => a.Categories.Contains(category));
             else q = q.Where(a => a.ProjectId == null);
             var total = await q.CountAsync();

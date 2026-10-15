@@ -11,7 +11,7 @@ export function ExportMenu({ path, params, name, label }: { path: string; params
     .catch((e) => toast.error(e instanceof ApiError ? e.message : t('app.error')))
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild><Button variant="outline" size="sm"><Download className="size-4" />{label ?? t('export.label')}</Button></DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild><Button variant="outline"><Download className="size-4" />{label ?? t('export.label')}</Button></DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onSelect={() => run('xlsx')}>{t('export.xlsx')}</DropdownMenuItem>
         <DropdownMenuItem onSelect={() => run('csv')}>{t('export.csv')}</DropdownMenuItem>

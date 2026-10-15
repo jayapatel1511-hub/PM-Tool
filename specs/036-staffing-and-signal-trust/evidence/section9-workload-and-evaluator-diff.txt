@@ -1,0 +1,40 @@
+Packet 036 section 9: Workload numbers and Evaluator output, before and after (2026-10-12)
+
+Temporary container pm-acc036-temp (postgres:17-alpine, 127.0.0.1:55440, trust auth), database hub, fresh.
+1. Base API built from a temporary worktree at 9beace03 (port 5090) created the schema; fixtures loaded through it with
+   tools/preview/seed_resources.py, seed_modules.py, seed_planning.py, then seed_staffing.py (the base API refuses the open-role
+   and type steps and stores every link as Finish-to-Start; 5 projects, 34 tasks, 13 deliverables, 6 task links).
+2. Capture (capture.py): every project_state marked as evaluated two days ago, then GET /projects/{id}/state as Jordan, so each
+   evaluator recomputes on the same day; then the evaluator tables (task, deliverable, milestone, decision and project state,
+   attention items; ids and timestamps left out), GET /projects/{id}/attention?includeSnoozed=true and /state for each
+   project, and GET /workload as Jordan, Lena, Sam, Priya and Marc. A second base capture was identical apart from evaluatedAt.
+3. Base API stopped; HEAD API (temporary worktree at 4760e2c4, port 5091) started on the same database and applied
+   20261012014621_StaffingSignals; capture repeated.
+4. diff_check.py ignores only unfilledRoles, the person fields officeId, jobTitle and homeDisciplineId, evaluatedAt, and A-21 items.
+
+diff_check.py before after:
+SAME api-attention-SYN-101.json
+SAME api-attention-SYN-102.json
+SAME api-attention-SYN-103.json
+SAME api-attention-SYN-104.json
+SAME api-attention-SYN-105.json
+SAME api-state-SYN-101.json
+SAME api-state-SYN-102.json
+SAME api-state-SYN-103.json
+SAME api-state-SYN-104.json
+SAME api-state-SYN-105.json
+SAME db-attention_item.json
+SAME db-decision_state.json
+SAME db-deliverable_state.json
+SAME db-milestone_state.json
+SAME db-project_state.json
+SAME db-task_state.json
+SAME workload-jordan.json  (new person fields ['homeDisciplineId', 'jobTitle', 'officeId'], new top-level ['unfilledRoles'])
+SAME workload-lena.json  (new person fields ['homeDisciplineId', 'jobTitle', 'officeId'], new top-level ['unfilledRoles'])
+SAME workload-marc.json  (new person fields ['homeDisciplineId', 'jobTitle', 'officeId'], new top-level ['unfilledRoles'])
+SAME workload-priya.json  (new person fields ['homeDisciplineId', 'jobTitle', 'officeId'], new top-level ['unfilledRoles'])
+SAME workload-sam.json  (new person fields ['homeDisciplineId', 'jobTitle', 'officeId'], new top-level ['unfilledRoles'])
+A-21 items after: 0; files differing beyond the documented new fields: 0
+exit 0
+
+Attention items in both captures, by rule: {'A-01': 2, 'A-02': 5, 'A-04': 2, 'A-05': 3, 'A-06': 1, 'A-07': 1}

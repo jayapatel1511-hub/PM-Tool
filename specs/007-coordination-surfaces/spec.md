@@ -8,7 +8,7 @@
 
 **Input**: User description: "Convert the Engineering Project Coordination Hub specification into Spec Kit: packet 007, coordination surfaces (the Project Dashboard, Weekly Coordination with meeting mode, My Work, and My Staff with manager staffing)."
 
-**Source**: Product specification §1, §2.1–§2.4, §3.1, §3.2, §6, §7.1–§7.5, §11.9 (FR-DASH, FR-WC, FR-MYW), §11.13 (FR-ASG-05–07), §12.13, §12.17, §12.18 (ASG-08–11), §13.1, §13.9, §13.10, §13.19, §14 Workflows 9 and 14, §15.13, §31.13, §31.16
+**Source**: Product specification §1, §2.1–§2.4, §3.1, §3.2, §6, §7.1–§7.5, §11.9 (FR-DASH, FR-WC, FR-MYW), §11.13 (FR-ASG-05–07), §12.13, §12.17, §12.20 (ASG-08–11), §13.1, §13.9, §13.10, §13.19, §14 Workflows 9 and 14, §15.13, §31.13, §31.16
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -167,3 +167,5 @@ notifications and log entries.
 Packet 030 extends Weekly Coordination/My Work with incoming/outgoing handoffs, revision-use and impact checks, readiness and fixed weekly commitments (§37.7, §38.2). Marking a meeting reviewed is not an approval or a change to those source workflows.
 
 This is approved specification scope with implementation pending in the named new packets. Historical verification for this packet does not verify the added behaviour.
+
+Existing Project Assignments and Following acceptance remains governed by §31.18.

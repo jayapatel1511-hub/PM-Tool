@@ -14,6 +14,37 @@ import sys
 import time
 import urllib.request
 
+# Packet 034 is read-only measurement against the small synthetic preview fixture.
+if len(sys.argv) > 1 and sys.argv[1] == '--planning':
+    import platform
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'preview'))
+    from preview_target import verify_preview_target
+    base = sys.argv[2] if len(sys.argv) > 2 else 'http://localhost:5080'
+    verify_preview_target(base)
+    rounds = int(sys.argv[3]) if len(sys.argv) > 3 else 30
+    if rounds < 20:
+        sys.exit('Use at least 20 measured samples for p95 evidence.')
+    def request(route, user):
+        req = urllib.request.Request(f'{base}/api/v1/{route}', headers={'X-Dev-User': user})
+        before = time.perf_counter()
+        with urllib.request.urlopen(req, timeout=30) as response:
+            result = json.load(response)
+        return (time.perf_counter()-before)*1000, result
+    _, person = request('me', 'planning-scale-1@hub.test')
+    paths = [('Planner grid', 'planning/grid?weeks=12', 'planning-scale-supervisor@hub.test', 1500),
+             ('My Week', f"planning/grid?personId={person['id']}&weeks=6&includeMyDrafts=false", 'planning-scale-1@hub.test', 500)]
+    output = {'synthetic': True, 'base': base, 'platform': platform.platform(), 'machine': platform.machine(), 'samples': rounds, 'results': []}
+    for name, route, user, limit in paths:
+        _, warm = request(route,user)
+        if len(warm.get('people',[])) != (12 if name=='Planner grid' else 1):
+            sys.exit(f'{name}: fixture scope differs from required 12 people / one self row')
+        samples = sorted(request(route,user)[0] for _ in range(rounds))
+        p95 = samples[min(len(samples)-1, int(len(samples)*0.95))]
+        output['results'].append({'name':name,'people':len(warm['people']),'weeks':len(warm['weeks']),'p50_ms':statistics.median(samples),'p95_ms':p95,'max_ms':samples[-1],'limit_ms':limit,'pass':p95<=limit})
+    print(json.dumps(output,indent=2))
+    sys.exit(0 if all(x['pass'] for x in output['results']) else 1)
+
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5081"
 USERS = int(sys.argv[2]) if len(sys.argv) > 2 else 100
 ROUNDS = int(sys.argv[3]) if len(sys.argv) > 3 else 5

@@ -109,6 +109,8 @@ def run(argv, call_fn=call):
     check("sign-out", status == 204, f"HTTP {status}")
     status, _, _ = call_fn(base, "GET", "/api/v1/me", cookie=cleared or None)
     check("/me after sign-out denied", status == 401, f"HTTP {status}")
+    status, _, _ = call_fn(base, "GET", "/api/v1/me", cookie=cookie)
+    check("copied cookie after sign-out denied", status == 401, f"HTTP {status}")
     print("RESULT", "PASS" if failures == 0 else f"FAIL ({failures})")
     return 1 if failures else 0
 

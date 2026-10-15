@@ -1,0 +1,48 @@
+// Development-only smoke against the real API; all created records are visibly synthetic.
+const { chromium } = require('playwright')
+const assert = require('node:assert/strict')
+const fs = require('node:fs/promises')
+const path = require('node:path')
+const base = process.env.TUESDAY_LIVE_BASE_URL
+assert.ok(base && ['127.0.0.1', 'localhost'].includes(new URL(base).hostname), 'Use an explicitly supplied loopback development URL')
+const api = async (endpoint, email, body) => {
+  const response = await fetch(`${base}/api/v1/${endpoint}`, { headers: { 'X-Dev-User': email, 'Content-Type': 'application/json' }, method: body ? 'POST' : 'GET', body: body ? JSON.stringify(body) : undefined })
+  assert.ok(response.ok, `${endpoint}: HTTP ${response.status}`)
+  return response.json()
+}
+;(async () => {
+  assert.equal((await (await fetch(`${base}/api/v1/config`)).json()).authMode, 'Development')
+  const person = await api('me', 'alex@hub.test')
+  const available = await api(`planning/availability?from=2026-10-12&through=2026-10-13&personId=${person.id}`, 'sam@hub.test')
+  const leave = available.people[0].leave.find(row => row.externalId === 'SYNTHETIC-LEAVE-001')
+  if (!leave) await api('planning/leave/manual', 'sam@hub.test', { personId: person.id, sourceSystem: 'Synthetic HR', externalId: 'SYNTHETIC-LEAVE-001', fromDate: '2026-10-12', throughDate: '2026-10-13', status: 'Approved', rowVersion: 0 })
+  else assert.equal(leave.status, 'Approved', 'Use the disposable synthetic preview fixture')
+  const label = `Synthetic live planning ${crypto.randomUUID().slice(0, 8)}`
+  await api('planning/entries', 'sam@hub.test', { personId: person.id, hoursPerWeek: 8, startWeek: '2026-10-05', endWeek: '2026-10-05', sourceCategory: 'FieldWork', confidence: 'Possible', label })
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
+    const errors = []; page.on('pageerror', error => errors.push(error.message))
+    await page.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'sam@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
+    await page.goto(`${base}/planner?from=2026-10-12`)
+    await page.getByRole('button', { name: 'Copy last week', exact: true }).click()
+    let dialog = page.getByRole('dialog'); await dialog.getByRole('checkbox', { name: `Select ${label} for Alex Chen`, exact: true }).check()
+    await dialog.getByRole('button', { name: 'Copy selected as Drafts', exact: true }).click(); await dialog.waitFor({ state: 'detached' })
+    await page.getByRole('button', { name: 'Publish weekly plan', exact: true }).click()
+    dialog = page.getByRole('dialog'); await dialog.getByRole('checkbox', { name: `Select ${label} for Alex Chen`, exact: true }).check()
+    await dialog.getByRole('button', { name: 'Publish selected', exact: true }).click(); await dialog.waitFor({ state: 'detached' })
+    const plan = await api('planning/entries', 'sam@hub.test')
+    const copied = plan.items.find(row => row.label === label && row.startWeek === '2026-10-12')
+    assert.ok(copied); assert.equal(copied.visibility, 'Published'); assert.equal(copied.confidence, 'Possible')
+    await page.goto(`${base}/planner?from=2026-10-12&view=projects`); await page.getByText(label, { exact: true }).waitFor()
+    await page.goto(`${base}/vacation?view=list`); await page.getByRole('heading', { name: 'Vacation & Coverage', exact: true }).waitFor()
+    await page.getByText(/SYNTHETIC-LEAVE-001/).waitFor()
+    await page.route(`${base}/__test-axe.js`, route => route.fulfill({ contentType: 'application/javascript', body: require('node:fs').readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8') }))
+    await page.addScriptTag({ url: `${base}/__test-axe.js` })
+    const violations = await page.evaluate(async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] } })).violations.map(v => v.id))
+    assert.deepEqual(violations, []); assert.deepEqual(errors, [])
+    const output = path.resolve(__dirname, '../test-results/planning-live'); await fs.mkdir(output, { recursive: true })
+    await page.screenshot({ path: path.join(output, 'approved-leave.png'), fullPage: false })
+    console.log(JSON.stringify({ scope: 'Real local Development API and synthetic database', copied: true, published: true, confidencePreserved: true, projectsView: true, savedLeaveVisible: true, violations, errors }))
+  } finally { await browser.close() }
+})().catch(error => { console.error(error); process.exitCode = 1 })

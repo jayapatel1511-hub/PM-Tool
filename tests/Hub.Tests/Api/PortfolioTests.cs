@@ -58,6 +58,16 @@ public sealed class PortfolioTests(HubFactory f)
         Assert.Equal("Priya Nair", y.S("overrideBy"));
         Assert.NotNull(y["healthOverrideAt"]);
 
+        // AC-CNT-01 with a filter set: a health tile opens computedHealth=X&status=Active with the other filters kept, and the
+        // Active tile sets status only, so each count is the number of rows its link opens, not of the rows on screen.
+        var reds = await f.As(TestData.Lena).GetAsync($"/api/v1/portfolio?ids={Ids(red, yellow, green, held)}&computedHealth=Red").Result.Json();
+        Assert.Equal((1, 1, 1, 1), (reds["tiles"]!.I("active"), reds["tiles"]!.I("red"), reds["tiles"]!.I("yellow"), reds["tiles"]!.I("green")));
+        var onHold = await f.As(TestData.Lena).GetAsync($"/api/v1/portfolio?ids={Ids(red, yellow, green, held)}&status=On%20Hold").Result.Json();
+        Assert.Equal(new[] { held.ProjectNumber }, onHold["projects"]!.AsArray().Select(x => x!.S("projectNumber")));
+        Assert.Equal((3, 1, 1, 1), (onHold["tiles"]!.I("active"), onHold["tiles"]!.I("red"), onHold["tiles"]!.I("yellow"), onHold["tiles"]!.I("green")));
+        foreach (var h in new[] { "Red", "Yellow", "Green" })
+            Assert.Single((await f.As(TestData.Lena).GetAsync($"/api/v1/portfolio?ids={Ids(red, yellow, green, held)}&computedHealth={h}&status=Active").Result.Json())["projects"]!.AsArray());
+
         // Filters narrow the same list; a Standard User has no portfolio.
         var office = await f.As(TestData.Lena).GetAsync($"/api/v1/portfolio?ids={Ids(red, yellow, green, held)}&health=Red").Result.Json();
         Assert.Equal(new[] { red.ProjectNumber }, office["projects"]!.AsArray().Select(x => x!.S("projectNumber")));

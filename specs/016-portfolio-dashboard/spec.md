@@ -89,7 +89,7 @@ from it.
 
 ### Functional Requirements
 
-- **FR-001**: The portfolio MUST show tiles for active projects, Red, Yellow, and Green counts, submissions in the next 14 days, and overdue decisions, and a table with project, PM, client, office, phase, computed and reported health with reasons, next milestone, next submission, overdue and blocked tasks, overdue decisions, high issues, Critical and Warning attention counts, and an 8-week health trend. *(FR-PORT-01, §13.12)*
+- **FR-001**: The portfolio MUST show tiles for active projects, Red, Yellow, and Green counts, submissions in the next 14 days, and overdue decisions, and a table with project, PM, client, office, phase, computed and reported health with reasons, next milestone, next submission, overdue and blocked tasks, overdue deliverables (§49.6), overdue decisions, high issues, Critical and Warning attention counts, and an 8-week health trend. *(FR-PORT-01, §13.12)*
 - **FR-002**: The portfolio MUST filter by PM, discipline, client, office, status, phase, health, project type, and submission within N days, sort by health severity then next submission by default, and export. *(§13.12)*
 - **FR-003**: Executives and Supervisors MUST see all projects they may view; PMs MUST see their own projects by default and all with a filter. *(§8.5.1)*
 - **FR-004**: When reported and computed health differ, both MUST be shown with the PM's note and its age. *(§16.4)*

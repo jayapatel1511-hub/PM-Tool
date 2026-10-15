@@ -1,0 +1,102 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { ArrowUpDown, ChevronLeft, ChevronRight, Ellipsis, List, Lock, Monitor, Table2 } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Link, useSearchParams } from 'react-router'
+import { toast } from 'sonner'
+import { ActiveFilters, ChipToggle, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, selectCls } from '@/components/hub/common'
+import { ExportMenu } from '@/components/hub/export'
+import { PeoplePicker } from '@/components/hub/people'
+import { ViewMenu } from '@/components/hub/views'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import { UrlSearchInput } from '@/components/hub/url-search'
+import { useMe } from '@/lib/auth'
+import { addDays, fmtDate, shortDate, today } from '@/lib/format'
+import { ApiError, api, get, qs } from '@/lib/api'
+import { t, tv } from '@/lib/i18n'
+import { cn } from '@/lib/utils'
+import { ContributionList } from '@/components/planner/ContributionList'
+import { EntryPanel } from '@/components/planner/EntryPanel'
+import { PlannerGrid } from '@/components/planner/PlannerGrid'
+import { BulkWeekDialog } from '@/components/planner/BulkWeekDialog'
+import { ProjectPlanningGrid } from '@/components/planner/ProjectPlanningGrid'
+import { TimeAwayDialog } from '@/components/planner/TimeAwayDialog'
+import { GROUP_BY, GROUP_LABEL, SOURCE_OPTIONS, confidenceLabel, hoursLabel, sourceLabel, type PlannerEntry, type PlannerGridData, type PlannerPerson, visibilityLabel } from '@/components/planner/labels'
+import { MenuSelect } from './projects/Tasks'
+
+const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'personId', 'projectId', 'source', 'confidence', 'visibility', 'indicator', 'q', 'sort', 'week', 'from', 'to', 'stale', 'includeMyDrafts', 'draftAccessReason', 'page'] as const
+type EntryPage = { items: PlannerEntry[]; page: number; pageSize: number; totalCount: number }
+
+export function PlannerPage() {
+  return <DesktopOnly notice={<Page eyebrow={t('nav.resources')} title={t('planner.title')} subtitle={t('planner.subtitle')}><Notice icon={Monitor} title={t('app.phoneNotice')} action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('planner.phoneHint')}</Notice></Page>}><Planner /></DesktopOnly>
+}
+
+function Planner() {
+  const [bulk, setBulk] = useState<'Copy' | 'Publish' | null>(null); const me = useMe(); const [sp, setSp] = useSearchParams(); const qc = useQueryClient(); const view = sp.get('view') === 'list' ? 'list' : sp.get('view') === 'projects' ? 'projects' : 'grid'; const [entry, setEntry] = useState<PlannerEntry | null>(null); const [cell, setCell] = useState<{ personId: string; week: string } | null>(null); const [away, setAway] = useState<PlannerPerson | null>(null); const [draftReason, setDraftReason] = useState(''); const [announcement, setAnnouncement] = useState(''); const [wide, setWide] = useState(() => typeof window !== 'undefined' ? window.matchMedia('(min-width: 1280px)').matches : false)
+  useEffect(() => { const media = window.matchMedia('(min-width: 1280px)'); const update = () => setWide(media.matches); update(); media.addEventListener('change', update); return () => media.removeEventListener('change', update) }, [])
+  const set = (k: string, value?: string | null) => { const n = new URLSearchParams(sp); if (value) n.set(k, value); else n.delete(k); setSp(n, { replace: true }) }
+  const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k) ?? undefined]))
+  const entryId = sp.get('entry')
+  const entryQ = useQuery({ queryKey: ['planning-entry-deeplink', entryId, filters.draftAccessReason], queryFn: () => get<PlannerEntry>(`planning/entries/${entryId}${qs({ draftAccessReason: filters.draftAccessReason })}`), enabled: !!entryId && !entry })
+  const gridQ = useQuery({ queryKey: ['planning-grid', filters], queryFn: () => get<PlannerGridData>(`planning/grid${qs(filters)}`), enabled: view !== 'list' })
+  const listQ = useQuery({ queryKey: ['planning-entries', filters], queryFn: () => get<EntryPage>(`planning/entries${qs({ ...filters, pageSize: 50 })}`), enabled: view === 'list' })
+  const data = gridQ.data; const editable = view !== 'list' && wide
+  const projectsQ = useQuery({ queryKey: ['planner-projects-filter'], queryFn: () => get<{ items: { id: string; projectNumber?: string; name: string; status?: string }[] }>('projects?mine=true&pageSize=200') })
+  const referenceQ = useQuery({ queryKey: ['planner-reference'], queryFn: () => get<{ disciplines?: { id: string; name: string }[]; offices?: { id: string; name: string }[] }>('reference') })
+  const activeTokens = ([['q', t('common.search'), filters.q], ['supervisorId', t('planner.supervisor'), filters.supervisorId], ['disciplineId', t('planner.discipline'), filters.disciplineId], ['officeId', t('planner.office'), filters.officeId], ['projectId', t('planner.project'), filters.projectId], ['source', t('planner.source'), filters.source && filters.source.split(',').map(sourceLabel).join(', ')], ['confidence', t('planner.confidence'), filters.confidence && filters.confidence.split(',').map(confidenceLabel).join(', ')], ['visibility', t('planner.visibility'), filters.visibility && filters.visibility.split(',').map((x) => visibilityLabel(x)).join(', ')], ['indicator', t('planner.indicator'), filters.indicator && tv(filters.indicator)], ['stale', t('planner.stale'), filters.stale], ['includeMyDrafts', t('planner.showMyDrafts'), filters.includeMyDrafts === 'false' && t('common.no')], ['draftAccessReason', t('planner.draftAccess'), filters.draftAccessReason]] as const).filter((x) => x[2]).map(([key, label, value]) => ({ key, label, value: value! }))
+  const groupBy = (GROUP_BY as readonly string[]).includes(sp.get('groupBy') ?? '') ? sp.get('groupBy')! : 'supervisor'
+  const clear = () => { const n = new URLSearchParams(sp); activeTokens.forEach((x) => n.delete(x.key)); setSp(n, { replace: true }) }
+  const changeWeek = (days: number) => set('from', addDays(data?.weeks[0] ?? today(), days))
+  const refresh = () => { qc.invalidateQueries({ queryKey: ['planning-grid'] }); qc.invalidateQueries({ queryKey: ['planning-entries'] }) }
+  const quickAdd = async (personId: string, week: string, text: string, idempotencyKey: string) => { try { await api('planning/entries/quick', { method: 'POST', idempotencyKey, body: { personId, week, text } }); toast.success(t('planner.quickAdded')); setAnnouncement(t('planner.quickAdded')); refresh() } catch (error) { setAnnouncement(t('planner.saveFailed')); throw error } }
+  const openEntry = (e: PlannerEntry) => { setEntry(e); const n = new URLSearchParams(sp); n.set('entry', e.id); setSp(n, { replace: true }) }
+  const closeEntry = () => { setEntry(null); const n = new URLSearchParams(sp); n.delete('entry'); setSp(n, { replace: true }) }
+  const openCell = (person: PlannerPerson, c: { week: string }) => setCell({ personId: person.id, week: c.week })
+  const viewError = view !== 'list' ? gridQ.error : listQ.error
+  if (viewError instanceof ApiError && viewError.status === 403) return <Page eyebrow={t('nav.resources')} title={t('planner.title')} subtitle={t('planner.subtitle')}><ErrorBanner error={viewError} retry={refresh} /><Button asChild variant="outline" className="self-start"><Link to="/my-work">{t('nav.myWork')}</Link></Button></Page>
+  const chip = (value: string, label: string) => <ChipToggle key={value} on={filters.indicator === value} onClick={() => set('indicator', filters.indicator === value ? null : value)}>{t(label)}</ChipToggle>
+  const viewButton = (v: 'grid' | 'list' | 'projects', icon: ReactNode, label: string) => <Button size="sm" variant={view === v ? 'default' : 'ghost'} aria-pressed={view === v} onClick={() => set('view', v === 'grid' ? null : v)}>{icon}{t(label)}</Button>
+  return <Page eyebrow={t('nav.resources')} title={t('planner.title')} subtitle={t('planner.subtitle')} actions={<>
+    <Button variant="outline" size="icon" aria-label={t('planner.previousWeek')} onClick={() => changeWeek(-7)}><ChevronLeft className="size-5" /></Button><Button variant="outline" onClick={() => set('from', null)}>{t('planner.thisWeek')}</Button><Button variant="outline" size="icon" aria-label={t('planner.nextWeek')} onClick={() => changeWeek(7)}><ChevronRight className="size-5" /></Button>
+    {editable && <Button disabled={!data || gridQ.isFetching} onClick={() => setBulk('Publish')}>{t('planner.publishWeek')}</Button>}
+    {/* §41 R1: the less frequent week actions share one overflow menu. */}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild><Button variant="outline" size="icon" aria-label={t('calm.moreActions')} title={t('calm.moreActions')}><Ellipsis className="size-4" aria-hidden /></Button></DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {editable && <DropdownMenuItem disabled={!data || gridQ.isFetching} onSelect={() => setBulk('Copy')}>{t('planner.copyWeek')}</DropdownMenuItem>}
+        <DropdownMenuItem asChild><Link to="/vacation">{t('availability.title')}</Link></DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+    <ViewMenu listType="planner" /><ExportMenu path={view !== 'list' ? 'planning/grid/export' : 'planning/entries/export'} params={filters} name="planner" />
+  </>}>
+    <div role="status" aria-live="polite" className="sr-only">{announcement}</div>
+    <FilterBar activeCount={activeTokens.length}
+      search={<Field label={t('common.search')} htmlFor="planner-q"><UrlSearchInput id="planner-q" value={filters.q ?? ''} onValueChange={(value) => set('q', value)} placeholder={t('planner.searchPlaceholder')} /></Field>}
+      quick={<>
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('planner.indicator')}>{chip('OverPlanned', 'planner.indicator.over')}{chip('UnderPlanned', 'planner.indicator.under')}{chip('StalePlan', 'planner.indicator.stale')}</div>
+        {view === 'grid' && <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={GROUP_BY.map((g) => ({ value: g, label: t(GROUP_LABEL[g]) }))} />}
+        {view !== 'list' && <MenuSelect label={t('planner.sort')} icon={ArrowUpDown} value={filters.sort ?? 'remaining'} onChange={(v) => set('sort', v === 'remaining' ? null : v)}
+          options={[{ value: 'remaining', label: t('planner.sortRemaining') }, { value: 'name', label: t('planner.sortName') }, { value: 'over', label: t('planner.sortOver') }]}>
+          {data && <><DropdownMenuSeparator /><DropdownMenuLabel>{t('planner.sortWeek')}</DropdownMenuLabel>
+            <DropdownMenuRadioGroup value={filters.week ?? data.currentWeek} onValueChange={(v) => set('week', v === data.currentWeek ? null : v)}>
+              {data.weeks.map((w) => <DropdownMenuRadioItem key={w} value={w}>{t('planner.weekOf')} {shortDate(w)}</DropdownMenuRadioItem>)}
+            </DropdownMenuRadioGroup></>}
+        </MenuSelect>}
+      </>}
+      active={<ActiveFilters tokens={activeTokens} onRemove={(k) => set(k, null)} onClear={clear} />}
+      actions={<div className="inline-flex rounded-md border border-input bg-muted p-0.5" role="group" aria-label={t('planner.view')}>{viewButton('grid', <Table2 className="size-4" />, 'planner.gridView')}{viewButton('list', <List className="size-4" />, 'planner.listView')}{viewButton('projects', null, 'planner.projectsView')}</div>}>
+      <div className="flex flex-wrap items-end gap-3"><Field label={t('planner.person')} htmlFor="planner-person" className="w-full sm:w-56"><PeoplePicker id="planner-person" value={filters.personId} onChange={(v) => set('personId', v)} placeholder={t('planner.anyPerson')} /></Field><Field label={t('planner.supervisor')} htmlFor="planner-supervisor" className="w-full sm:w-56"><PeoplePicker id="planner-supervisor" value={filters.supervisorId} onChange={(v) => set('supervisorId', v)} placeholder={t('planner.anySupervisor')} /></Field><Field label={t('planner.discipline')} htmlFor="planner-discipline" className="w-full sm:w-48"><select id="planner-discipline" className={selectCls} value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}><option value="">{t('planner.anyDiscipline')}</option>{(referenceQ.data?.disciplines ?? []).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field><Field label={t('planner.office')} htmlFor="planner-office" className="w-full sm:w-48"><select id="planner-office" className={selectCls} value={filters.officeId ?? ''} onChange={(e) => set('officeId', e.target.value)}><option value="">{t('planner.anyOffice')}</option>{(referenceQ.data?.offices ?? []).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field><Field label={t('planner.project')} htmlFor="planner-project" className="w-full sm:w-56"><select id="planner-project" className={selectCls} value={filters.projectId ?? ''} onChange={(e) => set('projectId', e.target.value)}><option value="">{t('planner.anyProject')}</option>{(projectsQ.data?.items ?? []).map((project) => <option key={project.id} value={project.id}>{project.projectNumber ? `${project.projectNumber} · ` : ''}{project.name}</option>)}</select></Field><Field label={t('planner.source')} htmlFor="planner-source" className="w-full sm:w-48"><select id="planner-source" className={selectCls} value={filters.source ?? ''} onChange={(e) => set('source', e.target.value)}><option value="">{t('planner.anySource')}</option>{SOURCE_OPTIONS.map((x) => <option key={x} value={x}>{sourceLabel(x)}</option>)}</select></Field><Field label={t('planner.confidence')} htmlFor="planner-confidence" className="w-full sm:w-44"><select id="planner-confidence" className={selectCls} value={filters.confidence ?? ''} onChange={(e) => set('confidence', e.target.value)}><option value="">{t('planner.anyConfidence')}</option>{['Confirmed', 'Expected', 'Possible'].map((x) => <option key={x} value={x}>{confidenceLabel(x)}</option>)}</select></Field><Field label={t('planner.visibility')} htmlFor="planner-visibility" className="w-full sm:w-52"><select id="planner-visibility" className={selectCls} value={filters.visibility ?? ''} onChange={(e) => set('visibility', e.target.value)}><option value="">{t('planner.anyVisibility')}</option>{['Draft', 'Published', 'Confirmed', 'Self'].map((x) => <option key={x} value={x}>{visibilityLabel(x, x === 'Self')}</option>)}</select></Field></div>
+      <div className="flex flex-wrap items-center gap-2"><span className="mr-1 text-sm font-medium">{t('calm.moreQuick')}</span><ChipToggle on={filters.stale === 'true'} onClick={() => set('stale', filters.stale === 'true' ? null : 'true')}>{t('planner.stale')}</ChipToggle><ChipToggle on={filters.includeMyDrafts !== 'false'} onClick={() => set('includeMyDrafts', filters.includeMyDrafts === 'false' ? 'true' : 'false')}>{t('planner.showMyDrafts')}</ChipToggle></div>
+      {/* §41 R1: the Admin's private-drafts access is a view of the data, so it sits with the filters; an active token shows while it is on. */}
+      {me.capabilities.admin && <div className="flex flex-wrap items-end gap-2 rounded-lg border bg-muted p-3"><Field label={t('planner.draftAccess')} htmlFor="planner-draft-reason" hint={t('planner.draftAccessHint')}><Input id="planner-draft-reason" minLength={5} value={draftReason} onChange={(e) => setDraftReason(e.target.value)} /></Field><Button variant="outline" disabled={draftReason.trim().length < 5} onClick={() => { const n = new URLSearchParams(sp); n.set('draftAccessReason', draftReason.trim()); n.set('includeMyDrafts', 'true'); setSp(n, { replace: true }) }}>{t('planner.enableDraftAccess')}</Button></div>}
+    </FilterBar>
+    {data?.partialView && <Notice icon={Lock} title={t('planner.partialTitle')}>{t('planner.partialHint')}</Notice>}
+    {(gridQ.error || listQ.error || entryQ.error) && <ErrorBanner error={gridQ.error ?? listQ.error ?? entryQ.error} retry={refresh} />}
+    {viewError ? null : view === 'projects' ? gridQ.isPending ? <Loading rows={8} /> : data && <ProjectPlanningGrid data={data} projectId={filters.projectId} onEntry={openEntry} /> : view === 'grid' ? gridQ.isPending ? <Loading rows={8} /> : !data || data.people.length === 0 ? <div className="rounded-lg border bg-card"><Empty title={t('planner.emptyTitle')}>{t('planner.emptyHint')}</Empty></div> : <PlannerGrid data={data} editable={editable} onQuickAdd={quickAdd} onCell={openCell} onEntry={openEntry} onTimeAway={editable ? setAway : undefined} groupBy={groupBy} reference={referenceQ.data} /> : listQ.isPending ? <Loading rows={8} /> : <><EntryList rows={listQ.data?.items ?? []} onOpen={openEntry} /><div className="flex items-center justify-between border-t pt-3 text-sm"><span>{t('planner.pageSummary', { page: listQ.data?.page ?? 1, total: listQ.data?.totalCount ?? 0 })}</span><div className="flex gap-2"><Button variant="outline" disabled={(listQ.data?.page ?? 1) <= 1} onClick={() => set('page', String((listQ.data?.page ?? 1) - 1))}>{t('planner.previousPage')}</Button><Button variant="outline" disabled={(listQ.data?.page ?? 1) * (listQ.data?.pageSize ?? 50) >= (listQ.data?.totalCount ?? 0)} onClick={() => set('page', String((listQ.data?.page ?? 1) + 1))}>{t('planner.nextPage')}</Button></div></div></>}
+    {bulk && <BulkWeekDialog operation={bulk} week={data?.weeks[0] ?? data?.currentWeek ?? today()} onClose={() => setBulk(null)} onChanged={refresh} />}
+    {cell && <ContributionList personId={cell.personId} week={cell.week} includeMyDrafts={filters.includeMyDrafts !== 'false'} draftAccessReason={filters.draftAccessReason} onClose={() => setCell(null)} />}{away && <TimeAwayDialog person={away} onClose={() => setAway(null)} onChanged={refresh} />}<EntryPanel key={(entry ?? entryQ.data)?.id ?? 'closed'} entry={entry ?? entryQ.data ?? null} open={!!(entry ?? entryQ.data)} draftAccessReason={filters.draftAccessReason} readOnly={!wide || me.capabilities.readOnly} onClose={closeEntry} onChanged={refresh} />
+  </Page>
+}
+
+  function EntryList({ rows, onOpen }: { rows: PlannerEntry[]; onOpen: (entry: PlannerEntry) => void }) { return <div className="overflow-x-auto rounded-lg border bg-card"><table className="w-full min-w-[900px] text-sm"><thead className="bg-muted"><tr>{[t('planner.person'), t('planner.owner'), t('planner.label'), t('planner.source'), t('planner.hours'), t('planner.startWeek'), t('planner.endWeek'), t('planner.confidence'), t('planner.visibility'), t('planner.lastValidated')].map((x, i) => <th key={x} scope="col" className={cn('px-3 py-3 font-medium', i === 4 ? 'text-right' : 'text-left')}>{x}</th>)}</tr></thead><tbody>{rows.map((r) => <tr key={r.id} className="border-t hover:bg-muted"><td className="px-3 py-3">{r.personName}</td><td className="px-3 py-3">{r.ownerName}</td><td className="px-3 py-3"><button type="button" className="font-medium text-primary underline-offset-4 hover:underline" onClick={() => onOpen(r)}>{r.label}</button></td><td className="px-3 py-3">{sourceLabel(r.sourceCategory)}</td><td className="px-3 py-3 text-right tabular-nums">{hoursLabel(r.hoursPerWeek)}</td><td className="px-3 py-3 tabular-nums">{fmtDate(r.startWeek)}</td><td className="px-3 py-3 tabular-nums">{fmtDate(r.endWeek)}</td><td className="px-3 py-3">{confidenceLabel(r.confidence)}</td><td className="px-3 py-3">{visibilityLabel(r.visibility, r.ownerKind === 'Self')}</td><td className="px-3 py-3 tabular-nums">{fmtDate(r.lastValidatedAt?.slice(0, 10))}</td></tr>)}</tbody></table></div> }

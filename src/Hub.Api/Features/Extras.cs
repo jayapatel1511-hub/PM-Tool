@@ -88,13 +88,13 @@ public sealed class CopyStructureHook(HubDb db, Access access, TimeProvider cloc
         foreach (var e in await db.Dependencies.AsNoTracking().Where(x => ids.Contains(x.PredecessorTaskId) && ids.Contains(x.SuccessorTaskId)).ToListAsync())
         {
             var (pred, succ) = (tMap[e.PredecessorTaskId], tMap[e.SuccessorTaskId]);
-            db.Dependencies.Add(Copied(new TaskDependency { ProjectId = p.Id, PredecessorTaskId = pred.Id, SuccessorTaskId = succ.Id, LagDays = e.LagDays, Note = e.Note,
+            db.Dependencies.Add(Copied(new TaskDependency { ProjectId = p.Id, PredecessorTaskId = pred.Id, SuccessorTaskId = succ.Id, DependencyType = e.DependencyType, LagDays = e.LagDays, Note = e.Note,
                 CreatedBy = access.Me.Id, CreatedAt = now, AuditKey = $"{pred.Key} → {succ.Key}" }));
         }
         var dids = deliverables.Select(d => d.Id).ToList();
         foreach (var e in await db.DeliverableDependencies.AsNoTracking().Where(x => dids.Contains(x.PredecessorDeliverableId) && dids.Contains(x.SuccessorDeliverableId)).ToListAsync())
             db.DeliverableDependencies.Add(Copied(new DeliverableDependency { ProjectId = p.Id, PredecessorDeliverableId = dMap[e.PredecessorDeliverableId],
-                SuccessorDeliverableId = dMap[e.SuccessorDeliverableId], LagDays = e.LagDays, Note = e.Note, CreatedBy = access.Me.Id, CreatedAt = now }));
+                SuccessorDeliverableId = dMap[e.SuccessorDeliverableId], DependencyType = e.DependencyType, LagDays = e.LagDays, Note = e.Note, CreatedBy = access.Me.Id, CreatedAt = now }));
         await db.SaveChangesAsync();
     }
 }

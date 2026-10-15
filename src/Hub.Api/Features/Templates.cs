@@ -455,7 +455,7 @@ public static class TemplateEndpoints
         });
         if (p.Status != ProjectStatus.Setup) // Setup holds assignment notices until activation (§17.5)
             foreach (var (user, n) in result.Assigned)
-                await notify.Send(NotificationEvents.TaskAssigned, user, TeamService.Item(p) with { Link = $"/my-work?project={p.Id}" }, Text.Get("notify.batched_assignments", n, p.ProjectNumber, p.Name));
+                await notify.Send(NotificationEvents.TaskAssigned, user, TeamService.Item(p) with { Link = $"/my-work?tab=overview&project={p.Id}" }, Text.Get("notify.batched_assignments", n, p.ProjectNumber, p.Name));
         return new { result.Deliverables, result.Tasks, result.Dependencies };
     }
 

@@ -32,15 +32,17 @@ public sealed class EvaluationService(HubDb db, SettingsStore store, TimeProvide
             .Select(m => new MilestoneSnap(m.Id, m.Key, m.Name, m.MilestoneType, m.Date, m.OriginalDate, m.IsComplete, m.IsCancelled, m.ProjectDisciplineId)).ToListAsync(ct);
         var deliverablesRaw = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == projectId).ToListAsync(ct);
         var deliverables = deliverablesRaw.Select(d => new DeliverableSnap(d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.ReviewerId, d.MilestoneId, d.StartDate,
-            d.DueDate, d.OriginalDueDate, d.Status, d.Priority, L(d.LastActivityAt), d.IssuedDate)).ToList();
+            d.DueDate, d.OriginalDueDate, d.Status, d.Priority, L(d.LastActivityAt), d.IssuedDate, d.StartedAt is { } ds ? L(ds) : null,
+            d.StatusChangedAt is { } dsc ? L(dsc) : null)).ToList();
         var tasksRaw = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId).ToListAsync(ct);
         var taskIds = tasksRaw.Select(t => t.Id).ToList();
         var collaborators = await db.Collaborators.AsNoTracking().Where(c => taskIds.Contains(c.TaskId)).ToListAsync(ct);
         var tasks = tasksRaw.Select(t => new TaskSnap(t.Id, t.Key, t.Name, t.ProjectDisciplineId, t.DeliverableId, t.MilestoneId, t.AssigneeId, t.ReviewerId, t.Status,
             t.Priority, t.StartDate, t.DueDate, t.ProgressPct, t.EstimatedHours, t.ManualBlockType, t.ManualBlockReason, t.ManualBlockSetAt is { } mb ? L(mb) : null,
             L(t.LastActivityAt), t.ReviewRequestedAt is { } rr ? L(rr) : null, t.DueDateChangeCount, t.CompletedAt is { } ca ? L(ca) : null,
-            collaborators.Where(c => c.TaskId == t.Id).Select(c => c.UserId).ToList())).ToList();
-        var deps = await db.Dependencies.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DependencySnap(d.Id, d.PredecessorTaskId, d.SuccessorTaskId, d.LagDays)).ToListAsync(ct);
+            collaborators.Where(c => c.TaskId == t.Id).Select(c => c.UserId).ToList(), t.StartedAt is { } ts ? L(ts) : null,
+            t.StatusChangedAt is { } tsc ? L(tsc) : null)).ToList();
+        var deps = await db.Dependencies.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DependencySnap(d.Id, d.PredecessorTaskId, d.SuccessorTaskId, d.LagDays, d.DependencyType)).ToListAsync(ct);
         var links = await db.ItemLinks.AsNoTracking().Where(l => l.ProjectId == projectId && l.SourceType == ItemType.Decision && l.TargetType == ItemType.Task && l.Relation == ItemRelation.BlockedByDecision)
             .Select(l => new { l.SourceId, l.TargetId }).ToListAsync(ct);
         var decisions = (await db.Decisions.AsNoTracking().Where(d => d.ProjectId == projectId).ToListAsync(ct))
@@ -49,7 +51,7 @@ public sealed class EvaluationService(HubDb db, SettingsStore store, TimeProvide
         var issues = await db.Issues.AsNoTracking().Where(x => x.ProjectId == projectId).Select(x => new IssueSnap(x.Id, x.Key, x.Title, x.Status, x.Severity, x.OwnerId, x.TargetResolutionDate, x.ProjectDisciplineId)).ToListAsync(ct);
         var risks = await db.Risks.AsNoTracking().Where(x => x.ProjectId == projectId).Select(x => new RiskSnap(x.Id, x.Key, x.Title, x.Status, x.Probability, x.Impact, x.ReviewDate, x.OwnerId, x.ProjectDisciplineId)).ToListAsync(ct);
         var actions = await db.Actions.AsNoTracking().Where(x => x.ProjectId == projectId).Select(x => new ActionSnap(x.Id, x.Key, x.Text, x.Status, x.OwnerType, x.OwnerUserId, x.OwnerDisciplineId, x.DueDate)).ToListAsync(ct);
-        var dlDeps = await db.DeliverableDependencies.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DependencySnap(d.Id, d.PredecessorDeliverableId, d.SuccessorDeliverableId, d.LagDays)).ToListAsync(ct);
+        var dlDeps = await db.DeliverableDependencies.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DependencySnap(d.Id, d.PredecessorDeliverableId, d.SuccessorDeliverableId, d.LagDays, d.DependencyType)).ToListAsync(ct);
         var snoozes = await db.Snoozes.AsNoTracking().Where(z => z.ProjectId == projectId && z.EndedAt == null && z.SnoozedUntil > now)
             .Select(z => new SnoozeSnap(z.RuleId, z.ItemType, z.ItemId, z.SnoozedUntil, z.SeverityAtSnooze)).ToListAsync(ct);
         var prevStates = await db.TaskStates.Where(x => x.ProjectId == projectId).ToDictionaryAsync(x => x.TaskId, ct);

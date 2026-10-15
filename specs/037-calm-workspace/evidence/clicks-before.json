@@ -1,0 +1,294 @@
+{
+  "version": "base",
+  "base": "http://localhost:5187",
+  "nextWeek": "2026-10-19",
+  "at": "2026-10-12T05:38:07.586Z",
+  "paths": [
+    {
+      "path": "1 Open my most overdue task from My Work",
+      "clicks": 1
+    },
+    {
+      "path": "2 Show SYN-101 Civil tasks that are overdue",
+      "clicks": 3
+    },
+    {
+      "path": "3 Open SYN-101 high risks",
+      "clicks": 3
+    },
+    {
+      "path": "4 Add 8 h of planning for Alex next week",
+      "clicks": 2
+    },
+    {
+      "path": "5 Export SYN-101 deliverables",
+      "clicks": 5
+    },
+    {
+      "path": "6 Change a task's owner",
+      "clicks": 4
+    }
+  ],
+  "log": [
+    {
+      "path": "1 Open my most overdue task from My Work",
+      "who": "alex",
+      "route": "My Work list",
+      "clicks": 1,
+      "keys": 0,
+      "ok": true,
+      "end": "/my-work?panel=Task%3A01a12e5e-0c2b-7906-95a4-11b9bffa1829",
+      "steps": [
+        {
+          "kind": "click",
+          "note": "first task in the Overdue group",
+          "clicks": 1,
+          "url": "/my-work?panel=Task%3A01a12e5e-0c2b-7906-95a4-11b9bffa1829"
+        }
+      ]
+    },
+    {
+      "path": "2 Show SYN-101 Civil tasks that are overdue",
+      "who": "priya",
+      "route": "dashboard discipline row",
+      "clicks": 3,
+      "keys": 0,
+      "ok": true,
+      "end": "/projects/SYN-101/tasks?disciplineId=01a12e5e-08a8-7df8-9d3c-367fcc3163dc&overdue=true",
+      "steps": [
+        {
+          "kind": "click",
+          "note": "sidebar Projects",
+          "clicks": 1,
+          "url": "/projects"
+        },
+        {
+          "kind": "click",
+          "note": "SYN-101 in the project list",
+          "clicks": 2,
+          "url": "/projects/SYN-101/dashboard"
+        },
+        {
+          "kind": "click",
+          "note": "Civil row, Overdue count",
+          "clicks": 3,
+          "url": "/projects/SYN-101/tasks?disciplineId=01a12e5e-08a8-7df8-9d3c-367fcc3163dc&overdue=true"
+        }
+      ]
+    },
+    {
+      "path": "2 Show SYN-101 Civil tasks that are overdue",
+      "who": "priya",
+      "route": "Tasks filters",
+      "clicks": 6,
+      "keys": 0,
+      "ok": true,
+      "end": "/projects/SYN-101/tasks?disciplineId=01a12e5e-08a8-7df8-9d3c-367fcc3163dc&overdue=true",
+      "steps": [
+        {
+          "kind": "click",
+          "note": "sidebar Projects",
+          "clicks": 1,
+          "url": "/projects"
+        },
+        {
+          "kind": "click",
+          "note": "SYN-101 in the project list",
+          "clicks": 2,
+          "url": "/projects/SYN-101/dashboard"
+        },
+        {
+          "kind": "click",
+          "note": "Tasks tab",
+          "clicks": 3,
+          "url": "/projects/SYN-101/tasks"
+        },
+        {
+          "kind": "choose",
+          "note": "Discipline: Civil",
+          "clicks": 5,
+          "url": "/projects/SYN-101/tasks?disciplineId=01a12e5e-08a8-7df8-9d3c-367fcc3163dc"
+        },
+        {
+          "kind": "click",
+          "note": "Overdue chip",
+          "clicks": 6,
+          "url": "/projects/SYN-101/tasks?disciplineId=01a12e5e-08a8-7df8-9d3c-367fcc3163dc&overdue=true"
+        }
+      ]
+    },
+    {
+      "path": "3 Open SYN-101 high risks",
+      "who": "priya",
+      "route": "dashboard tile",
+      "clicks": 3,
+      "keys": 0,
+      "ok": true,
+      "end": "/projects/SYN-101/risks?indicator=open&severity=High",
+      "steps": [
+        {
+          "kind": "click",
+          "note": "sidebar Projects",
+          "clicks": 1,
+          "url": "/projects"
+        },
+        {
+          "kind": "click",
+          "note": "SYN-101 in the project list",
+          "clicks": 2,
+          "url": "/projects/SYN-101/dashboard"
+        },
+        {
+          "kind": "click",
+          "note": "High risks count",
+          "clicks": 3,
+          "url": "/projects/SYN-101/risks?indicator=open&severity=High"
+        }
+      ]
+    },
+    {
+      "path": "3 Open SYN-101 high risks",
+      "who": "priya",
+      "route": "Risks filters",
+      "clicks": 5,
+      "keys": 0,
+      "ok": true,
+      "end": "/projects/SYN-101/risks?severity=High",
+      "steps": [
+        {
+          "kind": "click",
+          "note": "sidebar Projects",
+          "clicks": 1,
+          "url": "/projects"
+        },
+        {
+          "kind": "click",
+          "note": "SYN-101 in the project list",
+          "clicks": 2,
+          "url": "/projects/SYN-101/dashboard"
+        },
+        {
+          "kind": "click",
+          "note": "Risks tab",
+          "clicks": 3,
+          "url": "/projects/SYN-101/risks"
+        },
+        {
+          "kind": "choose",
+          "note": "Severity: High",
+          "clicks": 5,
+          "url": "/projects/SYN-101/risks?severity=High"
+        }
+      ]
+    },
+    {
+      "path": "4 Add 8 h of planning for Alex next week",
+      "who": "sam",
+      "route": "Planner quick add",
+      "clicks": 2,
+      "keys": 4,
+      "ok": true,
+      "end": "/planner",
+      "steps": [
+        {
+          "kind": "click",
+          "note": "sidebar Team Planner",
+          "clicks": 1,
+          "url": "/planner"
+        },
+        {
+          "kind": "click",
+          "note": "Alex, week of 2026-10-19",
+          "clicks": 2,
+          "url": "/planner"
+        },
+        {
+          "kind": "type",
+          "note": "type the hours",
+          "clicks": 2,
+          "url": "/planner"
+        },
+        {
+          "kind": "key",
+          "note": "Enter saves (not pressed)"
+        }
+      ]
+    },
+    {
+      "path": "5 Export SYN-101 deliverables",
+      "who": "priya",
+      "route": "Deliverables export",
+      "clicks": 5,
+      "keys": 0,
+      "ok": true,
+      "end": "/projects/SYN-101/deliverables",
+      "steps": [
+        {
+          "kind": "click",
+          "note": "sidebar Projects",
+          "clicks": 1,
+          "url": "/projects"
+        },
+        {
+          "kind": "click",
+          "note": "SYN-101 in the project list",
+          "clicks": 2,
+          "url": "/projects/SYN-101/dashboard"
+        },
+        {
+          "kind": "click",
+          "note": "Deliverables tab",
+          "clicks": 3,
+          "url": "/projects/SYN-101/deliverables"
+        },
+        {
+          "kind": "click",
+          "note": "Export",
+          "clicks": 4,
+          "url": "/projects/SYN-101/deliverables"
+        },
+        {
+          "kind": "last",
+          "note": "CSV (download not started)",
+          "clicks": 5,
+          "url": "/projects/SYN-101/deliverables"
+        }
+      ]
+    },
+    {
+      "path": "6 Change a task's owner",
+      "who": "priya",
+      "route": "task panel",
+      "clicks": 4,
+      "keys": 0,
+      "ok": true,
+      "end": "/tasks?panel=Task%3A01a12e5e-0c2b-7906-95a4-11b9bffa1829",
+      "steps": [
+        {
+          "kind": "click",
+          "note": "sidebar Tasks",
+          "clicks": 1,
+          "url": "/tasks"
+        },
+        {
+          "kind": "click",
+          "note": "task SYN-101-T0001",
+          "clicks": 2,
+          "url": "/tasks?panel=Task%3A01a12e5e-0c2b-7906-95a4-11b9bffa1829"
+        },
+        {
+          "kind": "click",
+          "note": "Owner field",
+          "clicks": 3,
+          "url": "/tasks?panel=Task%3A01a12e5e-0c2b-7906-95a4-11b9bffa1829"
+        },
+        {
+          "kind": "last",
+          "note": "another person (not saved)",
+          "clicks": 4,
+          "url": "/tasks?panel=Task%3A01a12e5e-0c2b-7906-95a4-11b9bffa1829"
+        }
+      ]
+    }
+  ]
+}

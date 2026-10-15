@@ -30,9 +30,9 @@ export function useTable<T>(storageKey: string, columns: Column<T>[], rows: T[],
     setSp(n, { replace: true })
   }
   const header = (c: Column<T>) => (
-    <th key={c.id} scope="col" className="whitespace-nowrap px-3 py-2 font-medium" aria-sort={field === c.id ? (dir === 'desc' ? 'descending' : 'ascending') : c.sort ? 'none' : undefined}>
+    <th key={c.id} scope="col" className={cn('whitespace-nowrap px-(--cell-px) py-2.5 text-left font-medium', c.className)} aria-sort={field === c.id ? (dir === 'desc' ? 'descending' : 'ascending') : c.sort ? 'none' : undefined}>
       {c.sort ? (
-        <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => setSort(c.id)}>
+        <button type="button" className={cn('inline-flex items-center gap-1 hover:text-foreground', c.className?.includes('text-right') && 'justify-end')} onClick={() => setSort(c.id)}>
           {c.label}{field === c.id && (dir === 'desc' ? <ArrowDown className="size-3" aria-hidden /> : <ArrowUp className="size-3" aria-hidden />)}
         </button>
       ) : c.label}
@@ -55,6 +55,6 @@ export function useTable<T>(storageKey: string, columns: Column<T>[], rows: T[],
       </DropdownMenuContent>
     </DropdownMenu>
   )
-  const cell = (c: Column<T>, r: T) => <td key={c.id} className={cn('px-3 py-1.5', c.className)}>{c.cell(r)}</td>
+  const cell = (c: Column<T>, r: T) => <td key={c.id} className={cn('h-(--row-min) px-(--cell-px) py-(--cell-py)', c.className)}>{c.cell(r)}</td>
   return { sorted, visible, header, cell, menu, colsParam }
 }

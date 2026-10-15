@@ -131,6 +131,52 @@ public sealed class FoundationsTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Admin_sets_a_home_discipline_and_the_user_history_shows_it() // packet 036 AC-GRP-01a, -01b
+    {
+        var email = $"home{Guid.NewGuid():N}"[..12] + "@hub.test";
+        await (await f.As(email).GetAsync("/api/v1/me")).Json();
+        var u = await f.DbAsync(db => db.Users.FirstAsync(x => x.Email == email));
+        var civil = await f.DbAsync(db => db.Disciplines.Where(x => x.Name == "Civil").Select(x => x.Id).FirstAsync());
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As("priya@hub.test").Patch($"/api/v1/admin/users/{u.Id}", new { homeDisciplineId = civil }, u.RowVersion)).StatusCode);
+        var unknown = await (await f.As(Admin).Patch($"/api/v1/admin/users/{u.Id}", new { homeDisciplineId = Guid.NewGuid() }, u.RowVersion)).Json(400);
+        Assert.Equal("Not found.", unknown["errors"]!["homeDisciplineId"]![0]!.GetValue<string>());
+        (await f.As(Admin).Patch($"/api/v1/admin/users/{u.Id}", new { homeDisciplineId = civil }, u.RowVersion)).EnsureSuccessStatusCode();
+        var history = await (await f.As(Admin).GetAsync($"/api/v1/admin/activity?itemType=User&pageSize=200")).Json();
+        var change = history["items"]!.AsArray().Where(a => a!.G("itemId") == u.Id).SelectMany(a => a!["changes"]!.AsArray()).Single(c => c!.S("field") == "HomeDisciplineId")!;
+        Assert.Null(change["old"]);
+        Assert.Equal(civil.ToString(), change.S("new"));
+        Assert.Equal("Civil", change.S("newLabel")); // 036-D5: shown by name, like a supervisor or office
+        var listed = await (await f.As(Admin).GetAsync($"/api/v1/admin/users?q={email}")).Json();
+        Assert.Equal(civil, listed[0]!.G("homeDisciplineId"));
+        Assert.Equal(civil, (await (await f.As("alex@hub.test").GetAsync($"/api/v1/users?ids={u.Id}")).Json())[0]!.G("homeDisciplineId"));
+    }
+
+    [Fact]
+    public async Task An_inactive_home_discipline_or_supervisor_that_is_unchanged_does_not_block_other_edits() // packet 036 FR-GRP-01
+    {
+        async Task<Guid> Person(string prefix)
+        {
+            var email = $"{prefix}{Guid.NewGuid():N}"[..12] + "@hub.test";
+            await (await f.As(email).GetAsync("/api/v1/me")).Json();
+            return await f.DbAsync(db => db.Users.Where(x => x.Email == email).Select(x => x.Id).FirstAsync());
+        }
+        var (id, boss) = (await Person("keep"), await Person("boss"));
+        var (retired, other) = (Guid.NewGuid(), Guid.NewGuid());
+        await f.DbAsync(db => { db.Disciplines.AddRange(new Discipline { Id = retired, Name = $"Retired {retired:N}"[..20], Code = $"R{retired:N}"[..6] }, new Discipline { Id = other, Name = $"Other {other:N}"[..20], Code = $"O{other:N}"[..6], IsActive = false }); return db.SaveChangesAsync(); });
+        Task<AppUser> Load() => f.DbAsync(db => db.Users.AsNoTracking().FirstAsync(x => x.Id == id));
+        (await f.As(Admin).Patch($"/api/v1/admin/users/{id}", new { homeDisciplineId = retired, supervisorId = boss }, (await Load()).RowVersion)).EnsureSuccessStatusCode();
+        await f.DbAsync(db => db.Disciplines.Where(x => x.Id == retired).ExecuteUpdateAsync(x => x.SetProperty(y => y.IsActive, false)));
+        await f.DbAsync(db => db.Users.Where(x => x.Id == boss).ExecuteUpdateAsync(x => x.SetProperty(y => y.IsActive, false)));
+
+        // The user editor sends every field; only the capacity changed.
+        (await f.As(Admin).Patch($"/api/v1/admin/users/{id}", new { homeDisciplineId = retired, supervisorId = boss, weeklyCapacityHours = 32 }, (await Load()).RowVersion)).EnsureSuccessStatusCode();
+        var u = await Load();
+        Assert.Equal((retired, boss, 32m), (u.HomeDisciplineId!.Value, u.SupervisorId!.Value, u.WeeklyCapacityHours!.Value));
+        var moved = await (await f.As(Admin).Patch($"/api/v1/admin/users/{id}", new { homeDisciplineId = other }, u.RowVersion)).Json(400); // a new choice must still be active
+        Assert.NotNull(moved["errors"]!["homeDisciplineId"]);
+    }
+
+    [Fact]
     public async Task Activity_log_rows_cannot_be_changed_or_deleted() // AC-AUD-04
     {
         var ex = await Assert.ThrowsAsync<PostgresException>(() => f.DbAsync(db => db.Database.ExecuteSqlRawAsync("UPDATE hub.activity_log SET action = 'x'")));

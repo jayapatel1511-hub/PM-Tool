@@ -1,0 +1,108 @@
+
+AC-CALM-08 axe (wcag2a, wcag2aa, wcag21a, wcag21aa)
+✓ priya /home (closed): no violations
+✓ priya /home (menu open): no violations
+✓ priya /my-work (closed): no violations
+✓ priya /my-work (filters open): no violations
+✓ priya /my-work (menu open): no violations
+✓ priya /boards (closed): no violations
+✓ priya /boards (filters open): no violations
+✓ priya /boards (menu open): no violations
+✓ priya /projects (closed): no violations
+✓ priya /projects (filters open): no violations
+✓ priya /projects (menu open): no violations
+✓ priya /tasks (closed): no violations
+✓ priya /tasks (filters open): no violations
+✓ priya /tasks (menu open): no violations
+✓ priya /calendar (closed): no violations
+✓ priya /calendar (filters open): no violations
+✓ priya /calendar (menu open): no violations
+✓ priya /portfolio (closed): no violations
+✓ priya /portfolio (filters open): no violations
+✓ priya /portfolio (menu open): no violations
+✓ priya /workload (closed): no violations
+✓ priya /workload (filters open): no violations
+✓ priya /workload (menu open): no violations
+✓ priya /planner (closed): no violations
+✓ priya /planner (filters open): no violations
+✓ priya /planner (menu open): no violations
+✓ priya /reports (closed): no violations
+✓ priya /team (closed): no violations
+✓ priya /team (menu open): no violations
+✓ priya /projects/SYN-101/dashboard (closed): no violations
+✓ priya /projects/SYN-101/dashboard (menu open): no violations
+✓ priya /projects/SYN-101/tasks (closed): no violations
+✓ priya /projects/SYN-101/tasks (filters open): no violations
+✓ priya /projects/SYN-101/tasks (menu open): no violations
+✓ priya /projects/SYN-101/deliverables (closed): no violations
+✓ priya /projects/SYN-101/deliverables (filters open): no violations
+✓ priya /projects/SYN-101/deliverables (menu open): no violations
+✓ priya /projects/SYN-101/timeline (closed): no violations
+✓ priya /projects/SYN-101/timeline (filters open): no violations
+✓ priya /projects/SYN-101/timeline (menu open): no violations
+✓ priya /projects/SYN-101/allocations (closed): no violations
+✓ priya /projects/SYN-101/allocations (filters open): no violations
+✓ priya /projects/SYN-101/allocations (menu open): no violations
+✓ priya /projects/SYN-101/coordination (closed): no violations
+✓ priya /projects/SYN-101/coordination (filters open): no violations
+✓ priya /projects/SYN-101/coordination (menu open): no violations
+✓ sam /home (closed): no violations
+✓ sam /home (menu open): no violations
+✓ sam /my-work (closed): no violations
+✓ sam /my-work (filters open): no violations
+✓ sam /my-work (menu open): no violations
+✓ sam /boards (closed): no violations
+✓ sam /boards (filters open): no violations
+✓ sam /boards (menu open): no violations
+✓ sam /projects (closed): no violations
+✓ sam /projects (filters open): no violations
+✓ sam /projects (menu open): no violations
+✓ sam /tasks (closed): no violations
+✓ sam /tasks (filters open): no violations
+✓ sam /tasks (menu open): no violations
+✓ sam /calendar (closed): no violations
+✓ sam /calendar (filters open): no violations
+✓ sam /calendar (menu open): no violations
+✓ sam /portfolio (closed): no violations
+✓ sam /portfolio (filters open): no violations
+✓ sam /portfolio (menu open): no violations
+✓ sam /workload (closed): no violations
+✓ sam /workload (filters open): no violations
+✓ sam /workload (menu open): no violations
+✓ sam /planner (closed): no violations
+✓ sam /planner (filters open): no violations
+✓ sam /planner (menu open): no violations
+✓ sam /reports (closed): no violations
+✓ sam /team (closed): no violations
+✓ sam /team (menu open): no violations
+✓ sam /projects/SYN-101/dashboard (closed): no violations
+✓ sam /projects/SYN-101/dashboard (menu open): no violations
+✓ sam /projects/SYN-101/tasks (closed): no violations
+✓ sam /projects/SYN-101/tasks (filters open): no violations
+✓ sam /projects/SYN-101/tasks (menu open): no violations
+✓ sam /projects/SYN-101/deliverables (closed): no violations
+✓ sam /projects/SYN-101/deliverables (filters open): no violations
+✓ sam /projects/SYN-101/deliverables (menu open): no violations
+✓ sam /projects/SYN-101/timeline (closed): no violations
+✓ sam /projects/SYN-101/timeline (filters open): no violations
+✓ sam /projects/SYN-101/timeline (menu open): no violations
+✓ sam /projects/SYN-101/allocations (closed): no violations
+✓ sam /projects/SYN-101/allocations (filters open): no violations
+✓ sam /projects/SYN-101/allocations (menu open): no violations
+✓ sam /projects/SYN-101/coordination (closed): no violations
+✓ sam /projects/SYN-101/coordination (filters open): no violations
+✓ sam /projects/SYN-101/coordination (menu open): no violations
+
+AC-CALM-09 one signal per row
+✓ priya /planner: 24 rows, 0 with two or more chips, 7 with +n, week chips ▲Over-planned · Oct 12, Oct 19 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 19, Oct 26, Nov 2 +8 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ▲Over-planned · Dec 7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Oct 19 | ▲Over-planned · Oct 26 | ○Under-planned · Oct 12, Oct 19, Nov 9 +7 | ▲Over-planned · Nov 9 | ▲Over-planned · Nov 16 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Nov 30 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9
+✓ lena /planner: 28 rows, 0 with two or more chips, 7 with +n, week chips ▲Over-planned · Oct 12, Oct 19 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 19, Oct 26, Nov 2 +8 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ▲Over-planned · Dec 7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Oct 19 | ▲Over-planned · Oct 26 | ○Under-planned · Oct 12, Oct 19, Nov 9 +7 | ▲Over-planned · Nov 9 | ▲Over-planned · Nov 16 | ○Under-planned · Oct 12, Oct 19, Oct 26 +7 | ▲Over-planned · Nov 30 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 26, Nov 2, Nov 9 +7 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9 | ○Under-planned · Oct 12, Oct 19, Oct 26 +9
+✓ priya /workload: 27 rows, 0 with two or more chips, 2 with +n, week chips ■Over-assigned · Oct 12 | ■Over-assigned · Oct 12
+✓ sam /workload: 9 rows, 0 with two or more chips, 2 with +n, week chips ■Over-assigned · Oct 12 | ■Over-assigned · Oct 12
+✓ priya /tasks: 31 rows, 0 with two or more chips, 3 with +n, week chips -
+✓ priya /my-work?tab=overdue: 0 rows, 0 with two or more chips, 0 with +n, week chips -
+✓ priya /projects/SYN-101/tasks: 16 rows, 0 with two or more chips, 0 with +n, week chips -
+✓ priya /projects/SYN-101/deliverables: 12 rows, 0 with two or more chips, 2 with +n, week chips -
+✓ priya /projects/SYN-105/tasks: 17 rows, 0 with two or more chips, 3 with +n, week chips -
+✓ priya /projects/SYN-105/deliverables: 3 rows, 0 with two or more chips, 0 with +n, week chips -
+
+PASS: axe, signals. Report in /private/tmp/claude-501/-Users-jaypatel-PM-Tool/f879a8c1-966b-47f2-8c07-d393d08b7d6e/scratchpad/calmout2

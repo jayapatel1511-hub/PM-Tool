@@ -1,6 +1,7 @@
 import { createStandardPublicClientApplication, type IPublicClientApplication } from '@azure/msal-browser'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { api, configureApi, get } from '@/lib/api'
 import { setDateContext } from '@/lib/format'
@@ -41,15 +42,21 @@ const DEV_KEY = 'hub.devUser'
 const ACTIVITY_KEY = 'hub.lastActivity'
 const SIGNIN_KEY = 'hub.signedIn'
 
-interface Config { authMode: 'Development' | 'LocalPassword' | 'Entra'; entra: { clientId?: string; tenantId?: string; apiScope?: string } }
+interface Config { authMode: 'Development' | 'LocalPassword' | 'Entra' | 'Social'; providers?: string[]; entra: { clientId?: string; tenantId?: string; apiScope?: string } }
+
+export function socialSignInError() {
+  const reason = new URLSearchParams(window.location.search).get('authError')
+  return reason ? t(`auth.socialError.${['failed', 'profile', 'email_exists', 'connected', 'inactive'].includes(reason) ? reason : 'failed'}`) : ''
+}
 
 let msal: IPublicClientApplication | null = null
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState<'loading' | 'public' | 'ready' | 'error'>('loading')
   const [idleNotice, setIdleNotice] = useState(false)
-  const [signInError, setSignInError] = useState('')
+  const [signInError, setSignInError] = useState(socialSignInError)
   const [authMode, setAuthMode] = useState<Config['authMode']>('Entra')
+  const [providers, setProviders] = useState<string[]>([])
   const cfg = useRef<Config | null>(null)
   const qc = useQueryClient()
 
@@ -60,13 +67,14 @@ export function AuthGate({ children }: { children: ReactNode }) {
         const c: Config = await (await fetch('/api/v1/config')).json()
         cfg.current = c
         setAuthMode(c.authMode)
+        setProviders(c.providers ?? [])
         if (idleExpired(8)) { sessionStorage.removeItem(DEV_KEY); setIdleNotice(true) }
         if (c.authMode === 'Development') {
           configureApi(async (): Promise<Record<string, string>> => { const u = sessionStorage.getItem(DEV_KEY); return u ? { 'X-Dev-User': u } : {} }, () => { sessionStorage.removeItem(DEV_KEY); preparePublicRoute(); setReady('public') })
           if (!cancelled) { const signedIn = !!sessionStorage.getItem(DEV_KEY); if (signedIn) finishSignIn(); else preparePublicRoute(); setReady(signedIn ? 'ready' : 'public') }
           return
         }
-        if (c.authMode === 'LocalPassword') {
+        if (c.authMode === 'LocalPassword' || c.authMode === 'Social') {
           configureApi(async () => ({}), () => { qc.removeQueries({ queryKey: ['me'] }); preparePublicRoute(); setReady('public') })
           try { await get<Me>('me'); if (!cancelled) { finishSignIn(); setReady('ready') } }
           catch { if (!cancelled) { preparePublicRoute(); setReady('public') } }
@@ -100,8 +108,12 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   if (ready === 'loading') return window.location.pathname === '/' ? <LandingPage /> : <Splash text={t('auth.signingIn')} />
   if (ready === 'error') return window.location.pathname === '/' ? <LandingPage /> : <Splash text={t('app.error')} />
-  if (ready === 'public') return window.location.pathname === '/' ? <LandingPage /> : <PublicLogin mode={authMode} idle={idleNotice} error={signInError} onSignIn={() => {
+  if (ready === 'public') return window.location.pathname === '/' ? <LandingPage /> : <PublicLogin mode={authMode} providers={providers} idle={idleNotice} error={signInError} onSignIn={provider => {
     setSignInError('')
+    if (authMode === 'Social' && provider && providers.includes(provider)) {
+      window.location.assign(`/api/v1/auth/social/sign-in/${encodeURIComponent(provider)}`)
+      return
+    }
     msal?.loginRedirect({ scopes: [cfg.current!.entra.apiScope!] }).catch(() => setSignInError('Microsoft sign-in could not start. Please try again.'))
   }} onLocalSignIn={async (userName, password) => {
     try { await api('auth/local/sign-in', { method: 'POST', body: { userName, password } }); qc.removeQueries({ queryKey: ['me'] }); sessionStorage.removeItem(SIGNIN_KEY); touch(); finishSignIn(); setReady('ready') }
@@ -110,7 +122,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
   return <Signed onSignOut={() => {
     sessionStorage.removeItem(SIGNIN_KEY)
     if (cfg.current?.authMode === 'Development') { sessionStorage.removeItem(DEV_KEY); window.location.replace('/') }
-    else if (cfg.current?.authMode === 'LocalPassword') { api('auth/local/sign-out', { method: 'POST' }).catch(() => {}).finally(() => { qc.removeQueries({ queryKey: ['me'] }); window.location.replace('/') }) }
+    else if (cfg.current?.authMode === 'LocalPassword') { api('auth/local/sign-out', { method: 'POST' }).then(() => { qc.removeQueries({ queryKey: ['me'] }); window.location.replace('/') }).catch(() => toast.error(t('auth.signOutFailed'))) }
+    else if (cfg.current?.authMode === 'Social') { api('auth/social/sign-out', { method: 'POST' }).then(() => { qc.removeQueries({ queryKey: ['me'] }); window.location.replace('/') }).catch(() => toast.error(t('auth.signOutFailed'))) }
     else msal?.logoutRedirect()
   }}>{children}</Signed>
 }
@@ -127,13 +140,13 @@ function finishSignIn() {
     window.location.replace(target?.startsWith('/') && !target.startsWith('//') && target !== '/login' ? target : '/my-work')
 }
 
-function PublicLogin({ mode, onSignIn, onLocalSignIn, onPick, idle, error }: { mode: Config['authMode']; onSignIn: () => void; onLocalSignIn: (userName: string, password: string) => Promise<void>; onPick: (email: string) => void; idle: boolean; error: string }) {
+function PublicLogin({ mode, providers, onSignIn, onLocalSignIn, onPick, idle, error }: { mode: Config['authMode']; providers: string[]; onSignIn: (provider?: string) => void; onLocalSignIn: (userName: string, password: string) => Promise<void>; onPick: (email: string) => void; idle: boolean; error: string }) {
   const users = useQuery({ queryKey: ['dev-users'], enabled: mode === 'Development', queryFn: async () => {
     const response = await fetch('/api/dev/users')
     if (!response.ok) throw new Error('Could not load test users')
     return response.json() as Promise<{ email: string; displayName: string; jobTitle?: string; roles: string[] }[]>
   } })
-  return <LoginPage mode={mode} onSignIn={onSignIn} onLocalSignIn={onLocalSignIn} users={mode === 'Development' ? users.data : undefined} onPick={onPick} idle={idle} error={error || (users.error ? 'Test users could not be loaded. Refresh to try again.' : undefined)} />
+  return <LoginPage mode={mode} providers={providers} onSignIn={onSignIn} onLocalSignIn={onLocalSignIn} users={mode === 'Development' ? users.data : undefined} onPick={onPick} idle={idle} error={error || (users.error ? 'Test users could not be loaded. Refresh to try again.' : undefined)} />
 }
 
 function Signed({ children, onSignOut }: { children: ReactNode; onSignOut: () => void }) {
@@ -170,12 +183,16 @@ function useIdleSignOut(hours: number, signOut: () => void) {
   }, [hours, signOut])
 }
 
+/** Sign-in and loading states on the white canvas the entrance and app content share, with the shell's mint brand mark. */
 function Splash({ text, action }: { text: string; action?: ReactNode }) {
   return (
-    <div className="grid min-h-screen place-items-center bg-frame text-frame-foreground">
+    <div className="grid min-h-dvh place-items-center bg-background p-4 text-foreground">
       <div className="space-y-4 text-center" role="status">
-        <div className="text-lg font-semibold">{t('app.name')}</div>
-        <p className="text-frame-muted">{text}</p>
+        <div className="flex items-center justify-center gap-2.5 text-xl font-semibold tracking-[-0.4px]">
+          <span aria-hidden data-accent="mint" className="grid size-8 shrink-0 place-items-center rounded-[10px] bg-(--acc-bg) text-lg text-(--acc-fg)">t</span>
+          {t('app.name')}
+        </div>
+        <p className="max-w-sm text-base/6 text-muted-foreground">{text}</p>
         {action}
       </div>
     </div>

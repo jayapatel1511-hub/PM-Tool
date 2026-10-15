@@ -20,3 +20,7 @@ data/backups/
 incoming/
 releases/
 __pycache__/
+ios/.build/
+ios/DerivedData/
+*.xcresult/
+xcuserdata/

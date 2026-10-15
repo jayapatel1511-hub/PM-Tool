@@ -69,4 +69,9 @@ export function localIso(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export const hours = (h: number | null | undefined) => (h == null ? t('common.dash') : `${Number(h).toFixed(2).replace(/\.?0+$/, '')} h`)
+/** "12.5 h"; a negative value keeps a true minus sign ("−8 h"), and rounding never leaves "−0 h". */
+export const hours = (h: number | null | undefined) => {
+  if (h == null) return t('common.dash')
+  const r = Math.round(Number(h) * 100) / 100
+  return `${r < 0 ? '−' : ''}${Math.abs(r).toFixed(2).replace(/\.?0+$/, '')} h`
+}

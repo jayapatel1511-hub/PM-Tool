@@ -70,6 +70,10 @@ public sealed class EmailJob : IJob
         {
             if (m.RequiredProjectIds.Length > 0 && (m.UserId is not { } uid || !await EmailProjectAccess.Allowed(db, uid, m.RequiredProjectIds)))
             { m.SuppressedAt = now; m.LastError = "ProjectAccessRemoved"; continue; }
+            if (m.Kind == "PlanningWithdrawal" && (m.UserId is not { } recipient || !await db.Users.AnyAsync(u => u.Id == recipient && u.IsActive)))
+            { m.SuppressedAt = now; m.LastError = "PlanningAccessRemoved"; continue; }
+            if (m.RequiredPlanningEntryIds.Length > 0 && (m.UserId is not { } planningUser || !await Hub.Api.Features.PlanningEndpoints.PlanningEmailAllowed(db, planningUser, m.RequiredPlanningEntryIds)))
+            { m.SuppressedAt = now; m.LastError = "PlanningAccessRemoved"; continue; }
             try { await sender.Send(m, ct); m.SentAt = now; sent++; }
             catch (Exception e) when (!ct.IsCancellationRequested)
             {

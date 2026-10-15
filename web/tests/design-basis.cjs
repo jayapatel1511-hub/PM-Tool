@@ -56,7 +56,7 @@ let server, browser;
     window.__printedTaskIds = [];
     window.print = () => {
       window.__printCalls++;
-      window.__printedTaskIds = [...new Set([...document.querySelectorAll('section[aria-labelledby="dcv-using"] a[href*="panel"]')]
+      window.__printedTaskIds = [...new Set([...document.querySelectorAll('article[aria-labelledby="dcv-using"] a[href*="panel"]')]
         .map(a => new URL(a.href).searchParams.get('panel')).filter(panel => panel?.startsWith('Task:')).map(panel => panel.slice('Task:'.length)))].sort();
     };
   });
@@ -112,6 +112,7 @@ let server, browser;
     else if (p === `projects/${pid}/design-basis`) { lists.push(u.search); data = { items: [row(e1, 'P-DEMO-B001', v12, 'Confirmed'), row(e2, 'P-DEMO-B002', null, 'Withdrawn')], pageSize: 50, totalCount: 101 } }
     else if (p === `projects/${pid}/submissions`) { registerQueries.push({ list: 'submissions', params: Object.fromEntries(u.searchParams) }); data = { items: [{ id: id(100), key: 'P-DEMO-SUB0001', title: 'Synthetic permit', coordinatorId: consumer, targetDate: '2026-10-05', status: 'Checking', blockerCount: 2 }], pageSize: 50, totalCount: 101 } }
     else if (p === `projects/${pid}/allocations`) { registerQueries.push({ list: 'allocations', params: Object.fromEntries(u.searchParams) }); data = { items: [{ id: id(110), personName: 'Alex Consumer', purpose: 'Production', fromDate: '2026-10-01', throughDate: '2026-10-05', plannedHours: 8, status: 'Proposed' }], pageSize: 50, totalCount: 101 } }
+    else if (p === `projects/${pid}/open-roles`) data = [];
     else if (p === `projects/${pid}/readiness/window`) { registerQueries.push({ list: 'window', params: Object.fromEntries(u.searchParams) }); data = { constraints: [{ id: id(130), targetType: 'Task', targetId: task, category: 'Handoff', description: 'Synthetic constraint', neededBy: '2026-10-05', sourceUrl: 'https://example.test/input' }], constraintsTotal: 101, constraintsTruncated: false, readyOutputs: [{ id: id(131), targetType: 'Task', targetId: task, key: 'P-DEMO-T0001', name: 'Watermain layout', dueDate: '2026-10-05', intendedOutput: 'Synthetic layout', completionCriteria: 'Checked', state: 'Ready' }], readyOutputsTotal: 101, readyOutputsTruncated: false, pageSize: 50 } }
     else if (p === `projects/${pid}/weekly-commitments`) { registerQueries.push({ list: 'commitments', params: Object.fromEntries(u.searchParams) }); data = { commitments: [{ id: id(120), key: 'P-DEMO-WC0001', targetType: 'Task', targetId: task, performerId: consumer, weekStart: '2026-09-28', targetDate: '2026-10-05', intendedOutput: 'Synthetic output', completionCriteria: 'Checked', state: 'Proposed', rowVersion: 1 }], snapshots: [], total: 101, truncated: false, page: Number(u.searchParams.get('page') ?? 1), pageSize: 50 } }
     else if (p === `projects/${pid}/issues`) data = Array.from({ length: 51 }, (_, n) => ({ id: id(200 + n), key: `P-DEMO-I${String(n + 1).padStart(4, '0')}`, title: `Synthetic issue ${String(n + 1).padStart(3, '0')}`, issueType: 'Coordination', severity: 'High', status: 'Open', ownerId: consumer, ownerName: 'Alex Consumer', raisedByName: 'Alex Consumer', projectDisciplineId: civil, disciplineName: 'Civil', affectedDisciplineNames: [], affectedDisciplineSummary: '', dateRaised: '2026-10-01', targetResolutionDate: '2026-10-05', daysOverdue: 0, isOverdue: false, locationLabels: ['North', 'South'], locationSummary: 'North; South', documentLabels: [], documentRevisions: [], documentSummary: '', rowVersion: 1, verificationStatus: 'None' }));
@@ -125,7 +126,8 @@ let server, browser;
   await page.goto(`${base}/projects/P-DEMO/design-basis`); await page.getByRole('heading', { name: 'Design basis and assumptions' }).waitFor();
 
   // D2: the affected-work filter sends the bare task id the API binds.
-  await register.getByLabel('Affected task or deliverable', { exact: true }).selectOption({ label: 'P-DEMO-T0001 · Watermain layout' });
+  await register.getByRole('button', { name: /^Filters/ }).click();
+  await page.getByRole('dialog', { name: 'Filters' }).getByLabel('Affected task or deliverable', { exact: true }).selectOption({ label: 'P-DEMO-T0001 · Watermain layout' });
   await page.waitForFunction(() => location.search.includes('affectedWorkId='));
   await page.waitForTimeout(200);
   assert.ok(lists.some(q => new URLSearchParams(q).get('affectedWorkId') === task), `list queries: ${lists.join(' ')}`);
@@ -169,7 +171,7 @@ let server, browser;
   await using.waitFor();
   for (let n = 1; n <= 4; n++) await page.getByRole('link', { name: `P-DEMO-T${String(n).padStart(3, '0')}`, exact: true }).waitFor();
   assert.equal(await page.getByRole('link', { name: 'P-DEMO-T005', exact: true }).count(), 0);
-  await page.locator('section[aria-labelledby="dcv-using"] a[href="https://example.test/source/1"]').waitFor();
+  await page.locator('article[aria-labelledby="dcv-using"] a[href="https://example.test/source/1"]').waitFor();
   await page.getByRole('heading', { name: /^What changed\?/ }).locator('..').locator('..').getByRole('link', { name: 'P-DEMO-C001', exact: true }).waitFor();
   await page.getByRole('heading', { name: 'Pending reviews · 1', exact: true }).waitFor();
   await page.getByRole('link', { name: 'P-DEMO-SUB0001', exact: true }).waitFor();
@@ -184,15 +186,21 @@ let server, browser;
   assert.ok(coordinationQueries.some(q => q.params.page === '2' && q.params.pageSize === '4'), 'Coordination uses page two reaches the fifth row');
   await page.goto(`${base}/projects/P-DEMO/coordination`);
   await page.getByRole('heading', { name: 'Discipline coordination', exact: true }).waitFor();
-  await page.getByRole('button', { name: 'Print', exact: true }).click();
+  // Print is in the More actions menu; its item is enabled again once the last print has finished. The menu that the
+  // last Print closed must have finished closing first, or it takes the next click on its trigger as a click outside.
+  const print = async () => {
+    await page.getByRole('menu').waitFor({ state: 'hidden' });
+    await page.getByRole('button', { name: 'More actions', exact: true }).click();
+    await page.locator('[role=menuitem]:not([data-disabled])').filter({ hasText: /^Print$/ }).click();
+  };
+  await print();
   await page.waitForFunction(() => window.__printCalls === 1);
   const printed = await page.evaluate(() => window.__printedTaskIds);
   assert.deepEqual(printed, coordinationUses.map(u => u.targetId).sort(), 'Print captures all five rendered input-use target ids');
   assert.ok(coordinationQueries.some(q => q.print && q.params.page === undefined && q.params.pageSize === undefined), 'Print requests the unpaged coordination projection');
-  await page.waitForFunction(() => [...document.querySelectorAll('button')].some(button => button.textContent?.trim() === 'Print' && !button.disabled));
   coordinationUses[4].targetId = id(699);
   const secondProjection = page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/discipline-coordination') && !u.searchParams.has('page') && !u.searchParams.has('pageSize'); });
-  await page.getByRole('button', { name: 'Print', exact: true }).click();
+  await print();
   await secondProjection;
   await page.waitForFunction(() => window.__printCalls === 2);
   const reprinted = await page.evaluate(() => window.__printedTaskIds);
@@ -202,7 +210,8 @@ let server, browser;
   await page.goto(`${base}/projects/P-DEMO/design-basis`);
   await Promise.all([page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/design-basis') && u.searchParams.get('page') === '2' }), register.getByRole('button', { name: 'Next', exact: true }).click()]);
   await page.waitForURL(/page=2/);
-  await register.getByLabel('Kind', { exact: true }).selectOption('Assumption');
+  await register.getByRole('button', { name: /^Filters/ }).click();
+  await page.getByRole('dialog', { name: 'Filters' }).getByLabel('Kind', { exact: true }).selectOption('Assumption');
   await page.waitForFunction(() => location.search.includes('kind=Assumption') && !new URLSearchParams(location.search).has('page'));
   assert.ok(lists.some(q => new URLSearchParams(q).get('page') === '2'), 'Basis Next reaches page two');
 
@@ -247,8 +256,10 @@ let server, browser;
   const promises = register.getByRole('navigation', { name: 'Weekly promises', exact: true });
   await Promise.all([page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/weekly-commitments') && u.searchParams.get('page') === '2' }), promises.getByRole('button', { name: 'Next', exact: true }).click()]);
   await page.waitForURL(/promisePage=2/);
-  await register.getByLabel('From', { exact: true }).fill('2026-10-02');
+  await register.getByRole('button', { name: /^Filters/ }).click();
+  await page.getByRole('dialog', { name: 'Filters' }).getByLabel('From', { exact: true }).fill('2026-10-02');
   await page.waitForFunction(() => location.search.includes('from=2026-10-02') && !new URLSearchParams(location.search).has('promisePage'));
+  await page.keyboard.press('Escape');
   await promises.getByRole('button', { name: 'Next', exact: true }).waitFor();
   assert.ok(registerQueries.some(q => q.list === 'commitments' && q.params.page === '2'), 'Promise Next reaches page two');
   assert.ok(registerQueries.some(q => q.list === 'commitments' && q.params.targetFrom === '2026-10-02' && q.params.page === '1'), 'Window filtering happens in the API before paging');
@@ -260,6 +271,7 @@ let server, browser;
   const dateNameFailures = [];
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
+    await page.waitForFunction((isPhone) => Boolean(document.querySelector(`[data-task-layout="${isPhone ? 'phone' : 'desktop'}"]`)), width <= 639);
     for (const [dateLabel, dateValue] of dateFields) {
       const taskTitle = register.getByRole('button', { name: 'Watermain layout', exact: true });
       await taskTitle.waitFor();
@@ -294,6 +306,23 @@ let server, browser;
       assert.equal(new URL(page.url()).searchParams.has('panel'), false);
     }
   }
+  // A live resize while a task control owns focus must preserve the same logical control.
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.waitForSelector('[data-task-layout="desktop"]');
+  const resizeTitle = register.getByRole('button', { name: 'Watermain layout', exact: true });
+  await resizeTitle.waitFor();
+  await resizeTitle.focus();
+  await page.setViewportSize({ width: 320, height: 1000 });
+  await page.waitForFunction(() => document.activeElement?.getAttribute('data-task-focus') === 'title');
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-task-id')), task, 'Resize keeps focus on the same task');
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.waitForSelector('[data-task-layout="desktop"]');
+  await page.waitForFunction(() => document.activeElement?.getAttribute('data-task-focus') === 'title');
+  const filter = register.getByRole('searchbox', { name: 'Search', exact: true });
+  await filter.focus();
+  await page.setViewportSize({ width: 320, height: 1000 });
+  await page.waitForSelector('[data-task-layout="phone"]');
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-task-focus')), null, 'Resize does not steal focus from a filter');
   assert.deepEqual(dateNameFailures, [], 'Native date editors are associated with their visible field labels');
   const fits = (control, panel, width) => control && panel && control.width > 0 && control.height > 0 &&
     control.x >= Math.max(0, panel.x) - 1 && control.x + control.width <= Math.min(width, panel.x + panel.width) + 1 &&

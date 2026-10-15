@@ -6994,7 +6994,7 @@ td,th{font-variant-numeric:tabular-nums}
 <li><strong>Directory sync</strong> (Recommendation): nightly Graph query of users in the organisation (or in the licensed groups) to update <code>is_active</code> from <code>accountEnabled</code>, <code>job_title</code>, <code>office_location</code>, and <code>manager</code> → <code>supervisor_id</code>. Requires <code>User.Read.All</code> application permission (<span class="tbd">TBD — IT approval</span>). Fallback without Graph: users who fail sign-in due to a disabled account are marked inactive on the next attempted token use (weak), plus an Admin "deactivate" action.</li>
 <li><strong>Disabled accounts</strong>: cannot obtain tokens (Entra); marked Inactive by sync; A-18 flags their work; the "Reassign work" tool lists everything they own.</li>
 <li><strong>Security groups</strong>: five groups mapped to app roles, managed by IT; membership changes take effect at next token issuance.</li>
-<li><strong>Session management</strong>: API is stateless (no server sessions). SPA sign-out clears MSAL cache and redirects to Entra logout. Idle timeout in the SPA (e.g., 8 h) forces re-authentication (<span class="tbd">TBD</span>). No refresh tokens stored server-side.</li>
+<li><strong>Session management</strong>: Entra bearer-token authentication is stateless. SPA sign-out clears MSAL cache and redirects to Entra logout. Individual local-password review sign-in uses eight-hour, non-sliding PostgreSQL-backed session tickets; sign-out removes the current ticket, so copied cookies are refused across API instances and restarts. Existing stateless review cookies require a fresh sign-in after activation. Idle timeout in the SPA (e.g., 8 h) forces re-authentication (<span class="tbd">TBD</span>). No refresh tokens stored server-side.</li>
 <li><strong>Service-to-service</strong>: none in MVP other than the API's managed identity to Key Vault/Graph/PostgreSQL.</li>
 </ul>
 <h3 id="237-environments-cicd-iac"><span class="num">23.7</span> Environments, CI/CD, IaC</h3>
@@ -8149,7 +8149,7 @@ The first-release Created by Me view (§36.7) requires <code>task.created_by_id<
 </tbody>
 </table></div>
 <h3 id="258-optimistic-concurrency"><span class="num">25.8</span> Optimistic concurrency</h3>
-<p>Every mutable resource returns <code>rowVersion</code>. <code>PATCH</code> and action endpoints require <code>If-Match: "&lt;rowVersion&gt;"</code> (or <code>rowVersion</code> in the body); a mismatch returns <code>409</code> with <code>code: "concurrency_conflict"</code>, the current representation, and the conflicting fields when determinable, so the UI can show "changed by Marc 2 minutes ago" and offer reload. Comments and links are append-only and exempt. Bulk operations check each row.</p>
+<p>Every mutable resource returns <code>rowVersion</code>. <code>PATCH</code>, <code>DELETE</code> and action endpoints require <code>If-Match: "&lt;rowVersion&gt;"</code> (or <code>rowVersion</code> in the body); a mismatch returns <code>409</code> with <code>code: "concurrency_conflict"</code>, the current representation, and the conflicting fields when determinable, so the UI can show "changed by Marc 2 minutes ago" and offer reload. This includes project memberships, project disciplines, named workspaces and editable document links. Document-link edits and soft deletion remain permitted by §12.7 and use this version protection. Comments retain their explicit author/time-window edit and soft-deletion rules in §12.6; these operations remain exempt. Immutable published records use append-only superseding records. Bulk operations check each row.</p>
 <h3 id="259-representative-payload-task"><span class="num">25.9</span> Representative payload — task</h3>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;0192f1c2-…&quot;,
@@ -11160,7 +11160,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <p><strong>FR-PLN-18.</strong> A Private draft MUST be returned only to its owner (PLN-04). Everyone else's lists, grid rows, cells, band totals, coverage, indicators, contribution lists, search results, exports, saved-view results, notifications, digests, activity histories and counts exclude it, and no total or count differs because of it. The owner's own totals include it, and a "Show my private drafts" control lets the owner see the totals other viewers see. An Admin sees another owner's drafts only in an explicit data-correction mode that requires a reason; each such request writes an activity entry naming the Admin, the time, the reason and the people in scope. Enforcement is in the server queries, never only in the interface.</p>
 </li>
 <li>
-<p><strong>FR-PLN-19.</strong> An entry linked to a project the viewer cannot view MUST be excluded from that viewer's lists, totals and coverage. Every person's totals carry the partial-view label for a viewer who is not an Admin or Executive (PLN-15), as in Workload, so no person-specific difference reveals restricted work, and a partial view never claims spare capacity (AC-CAP-04). A project link requires a Setup, Active or On Hold project that both the actor and the person can view (PLN-18).</p>
+<p><strong>FR-PLN-19.</strong> Entries and Confirmed allocations linked to a project the viewer cannot view MUST be excluded from that viewer's lists, totals and coverage. When either overlaps the requested weeks, that person's totals carry the partial-view label (PLN-15); no inaccessible project identity, detail or hours are returned, and a partial view never claims spare capacity (AC-CAP-04). Jay confirmed this shared rule for Planner, the person picker and My Staff on 2026-10-12. A project link requires a Setup, Active or On Hold project that both the actor and the person can view (PLN-18).</p>
 </li>
 <li>
 <p><strong>FR-PLN-20.</strong> Planner rows MUST be the Workload scope plus the viewer's own row (PLN-14): all active people for Admins and Executives, direct reports for Supervisors (Q19), and members of Setup or Active projects a Project Manager manages. A viewer outside that scope for a person cannot see the person's row or entries and receives "not found". Users without planner access see only their own row, through My Week.</p>
@@ -11267,7 +11267,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 </tr>
 <tr>
 <td>PLN-15</td>
-<td><strong>Partial view.</strong> For a viewer who is not an Admin or Executive, every person's totals are partial (the Workload rule of FR-CAP-06). Partial totals carry the label "Partial view: totals include only projects you can see" and suppress Under-planned.</td>
+<td><strong>Partial view.</strong> A person's totals are partial when planning entries or Confirmed allocations on inaccessible projects overlap the requested weeks. Partial totals carry the label "Partial view: totals include only projects you can see" and suppress Under-planned. The person picker and My Staff reuse this rule and show no free-hours figure for partial totals. No inaccessible project identity, detail or hours are returned.</td>
 </tr>
 <tr>
 <td>PLN-16</td>
@@ -11323,7 +11323,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <p><strong>AC-PLN-11.</strong> Given existing proposed and confirmed resource allocations, when planning entries are created, changed, published, moved and deleted, then every resource allocation, allocation work link, availability override and person/date version, the Workload grid and export responses and the readiness capacity results are identical to their values before those commands, and the existing packet 017, 029 and 032 automated tests pass unchanged.</p>
 </li>
 <li>
-<p><strong>AC-PLN-12.</strong> Given an entry linked to a Restricted project, then a viewer who cannot view that project sees neither the entry nor its hours, sees the person's totals labelled partial and never sees Under-planned for that person; linking a project that the person cannot view is refused.</p>
+<p><strong>AC-PLN-12.</strong> Given an entry or Confirmed allocation linked to a Restricted project overlapping the requested weeks, then a viewer who cannot view that project sees neither the record nor its hours, sees the person's totals labelled partial and never sees Under-planned for that person; linking a project that the person cannot view is refused.</p>
 </li>
 <li>
 <p><strong>AC-PLN-13.</strong> Given two editors read version 3 of an entry, when both save, then the second receives a conflict with the current version and the name and time of the first change, and none of the second change is stored; a quick add retried with the same idempotency key creates one entry.</p>
@@ -11429,7 +11429,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <tr>
 <td>14</td>
 <td>Partial-view rule</td>
-<td>Workload's rule: partial unless the viewer is an Admin or Executive. A finer rule that never leaks restricted existence is a follow-up.</td>
+<td>Per person when hidden planning entries or Confirmed allocations overlap the requested weeks; exclude their details and hours and suppress free-hours claims. Jay confirmed this shared Planner/picker/My Staff rule on 2026-10-12.</td>
 </tr>
 <tr>
 <td>15</td>
@@ -11922,10 +11922,10 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 </ul>
 <p>People checks: two working Project Managers, shown project Tasks, My Work and the Weekly Planner for 5 seconds each, both name each page's purpose and the first thing they would click; and Jay approves the 17 screens at 1440 px and 1024 px widths against the baseline as neat, clean and complete. Phone layouts keep today's behaviour.</p>
 <h2 id="42-supervisor-capacity-signals-amendment"><span class="num">42</span><span class="ttl">Supervisor Capacity Signals Amendment</span></h2>
-<p>Approved scope: on 2026-10-12 a gap review of the October 2026 product research against §39–§41 found two of its recommendations still open, delivered by packet 038 with the default for every open decision (§42.5). This section records the product contract; implementation and acceptance remain pending. It puts the Weekly Planner's figures for the current week on My Staff, where a Supervisor already looks at their people, and holds the daily digest on days a person has no availability. Both reuse records, rules and reads that exist: §39's planning entries and capacity, the FR-PICK-01 batch read, §12.18's approved leave and office holidays, and §17.3's digest. Nothing here adds a rule, threshold, record, permission or endpoint.</p>
-<p>Where this section adds to §13.19 (My Staff), §17.3 (daily digest) and §17.4 (preferences), this section governs. §39, §40 and §41 are unchanged. The research's other open recommendations stay deferred as §40.10 lists them.</p>
+<p>Approved scope: on 2026-10-12 a gap review of the October 2026 product research against §39–§41 found two of its recommendations still open, delivered by packet 038 with the defaults for D1–D7 (§42.5) under Jay's request to build the remaining scope. This section records the product contract; local implementation and verification are recorded in packet 038, separately from hosted and human acceptance. It puts the Weekly Planner's figures for the current week on My Staff, where a Supervisor already looks at their people, and holds the daily digest on days a person has no availability. Both reuse records, rules and reads that exist: §39's planning entries and capacity, the FR-PICK-01 batch read, §12.18's approved leave and office holidays, and §17.3's digest. It adds the hold preference, without a new capacity threshold, business record, permission or endpoint.</p>
+<p>Where this section adds to §13.19 (My Staff), §17.3 (daily digest) and §17.4 (preferences), this section governs. On 2026-10-12 Jay confirmed that the shared partial-view rule also includes hidden Confirmed allocations overlapping the requested weeks: Planner, the person picker and My Staff show "Partial view", while inaccessible work and its hours stay excluded. This corrects the partial label in §39 and §40 without changing visible capacity calculations. §41 is unchanged. The research's other open recommendations stay deferred as §40.10 lists them.</p>
 <h3 id="421-scope-and-boundary"><span class="num">42.1</span> Scope and boundary</h3>
-<p>Part A (§42.2) is one column on My Staff. Part B (§42.3) is one condition in the daily digest and one user preference. Outside this amendment: a Manager Home or exception dashboard; changes to the planner's figures, indicators or scope (PLN-05 to PLN-16); new capacity signals or thresholds; holding immediate in-app or email notices; redirecting notices to a delegate; an "away" marker beside names elsewhere in the product; changes to the Staff Assignments report or any export.</p>
+<p>Part A (§42.2) is one column on My Staff. Part B (§42.3) is one condition in the daily digest and one user preference. The approved partial-view correction above also governs the planner's hidden-work flag and suppression of Under-planned when its lookahead contains hidden work. Outside this amendment: a Manager Home or exception dashboard; other changes to the planner's figures, indicators or scope (PLN-05 to PLN-16); new capacity signals or thresholds; holding immediate in-app or email notices; redirecting notices to a delegate; an "away" marker beside names elsewhere in the product; changes to the Staff Assignments report or any export.</p>
 <h3 id="422-capacity-on-my-staff"><span class="num">42.2</span> Capacity on My Staff</h3>
 <ul>
 <li>
@@ -11941,7 +11941,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <p><strong>FR-SUP-04.</strong> The planner's indicators for that person and the current week, Over-planned (PLN-10) and the count of Stale plan entries (PLN-12), MUST join the row's signal set and follow §41 R7: the row shows its most severe signal plus "+n", and the capacity chips name their week (for example "Over-planned · W42"). Under-planned is not shown on My Staff. A week with neither indicator shows no chip.</p>
 </li>
 <li>
-<p><strong>FR-SUP-05.</strong> The column MUST be information only. It is not a filter, sort key or export column; the Staff Assignments report (§19) is unchanged; it stores nothing, notifies no one and changes no figure, indicator or response of the Weekly Planner, Workload, My Week or readiness. On phones the column appears in the read-only card as one line of text.</p>
+<p><strong>FR-SUP-05.</strong> The column MUST be information only. It is not a filter, sort key or export column; the Staff Assignments report (§19) is unchanged; it stores nothing and notifies no one. Visible planner hours, Workload, My Week and readiness calculations stay unchanged. The shared planner read MUST apply the approved hidden-work partial-view correction and suppress Under-planned when its lookahead contains hidden work; it MUST NOT disclose inaccessible records or hours. On phones the column appears in the read-only card as one line of text.</p>
 </li>
 </ul>
 <h3 id="423-digest-hold-during-time-away"><span class="num">42.3</span> Digest hold during time away</h3>
@@ -11974,7 +11974,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <p><strong>AC-SUP-04.</strong> Given a person who is Over-planned in the current week with two Stale plan entries, then the row's signal set includes "Over-planned · W42" and "Stale plan 2", shown as the most severe signal plus "+n" under §41 R7; a person with neither shows no capacity chip.</p>
 </li>
 <li>
-<p><strong>AC-SUP-05.</strong> Given My Staff is opened with the column visible, then the Weekly Planner grid, My Week, Workload and readiness responses, and the Staff Assignments report, are identical to their values before packet 038, and the existing packet 034 and 036 automated tests pass unchanged.</p>
+<p><strong>AC-SUP-05.</strong> Given My Staff is opened with the column visible, then visible planner hours, My Week, Workload and readiness calculations, and the Staff Assignments report, retain their existing values. Hidden Confirmed allocations overlapping the displayed weeks set Partial view; hidden work only in the extended lookahead suppresses Under-planned without labelling the displayed week partial. Inaccessible records and hours are absent from both responses. Existing packet 034 and 036 regressions pass alongside focused tests of this approved correction.</p>
 </li>
 <li>
 <p><strong>AC-DIG-01.</strong> Given Yagmur has digest on and an Unavailable override of 0 h on Tuesday, a working day of her calendar, when 07:00 Tuesday organisation time passes, then no digest email is queued for her, the job counts one held digest, and an immediate notice that day is sent as usual.</p>

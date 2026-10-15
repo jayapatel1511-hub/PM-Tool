@@ -10,10 +10,11 @@ public static class PersonCapacity
 
     public static async Task<Dictionary<(Guid, DateOnly), Day>> Load(HubDb db, Guid[] people, DateOnly from, DateOnly through, OrgSettings settings)
     {
-        var users = await db.Users.AsNoTracking().Where(u => people.Contains(u.Id)).ToListAsync();
+        var users = await db.Users.AsNoTracking().Where(u => people.Contains(u.Id)).Select(u => new { u.Id, u.OfficeId, u.WeeklyCapacityHours }).ToListAsync();
         var schedules = await db.PersonSchedules.AsNoTracking().Where(s => people.Contains(s.PersonId) && s.FromDate <= through).OrderByDescending(s => s.FromDate).ToListAsync();
         var overrides = await db.AvailabilityOverrides.AsNoTracking().Where(o => people.Contains(o.PersonId) && o.ReconciledLeaveId == null && o.WorkDate >= from && o.WorkDate <= through).ToDictionaryAsync(o => (o.PersonId, o.WorkDate));
-        var leaves = await db.ApprovedLeaves.AsNoTracking().Where(l => people.Contains(l.PersonId) && l.Status != "Cancelled" && l.FromDate <= through && l.ThroughDate >= from).ToListAsync();
+        var leaves = await db.ApprovedLeaves.AsNoTracking().Where(l => people.Contains(l.PersonId) && l.Status != "Cancelled" && l.FromDate <= through && l.ThroughDate >= from)
+            .Select(l => new { l.PersonId, l.Status, l.FromDate, l.ThroughDate, l.HoursPerDay }).ToListAsync();
         var holidays = await db.Holidays.AsNoTracking().Where(h => h.Date >= from && h.Date <= through).ToListAsync();
         var result = new Dictionary<(Guid, DateOnly), Day>();
         foreach (var user in users)

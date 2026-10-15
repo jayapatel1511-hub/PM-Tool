@@ -19,7 +19,7 @@ import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ProjectsPicker } from '@/pages/Reports'
 
-export interface WorkspaceRow { id: string; name: string; projectIds: string[]; hidden: number }
+export interface WorkspaceRow { id: string; name: string; projectIds: string[]; hidden: number; rowVersion: number }
 interface Stored { ws?: string; projects?: string }
 
 /** The views that read the project scope (§36.1, FR-VIS-02); switching among them keeps it. */
@@ -187,7 +187,7 @@ function WorkspaceDialog({ m, initial, onClose }: { m: Mode; initial: string[] |
     if (!save) { setScope({ projects: ids }); onClose(); return }
     setBusy(true)
     try {
-      const row = ws ? await patch<WorkspaceRow>(`workspaces/${ws.id}`, { name: name.trim(), projectIds: chosen }) : await post<WorkspaceRow>('workspaces', { name: name.trim(), projectIds: chosen })
+      const row = ws ? await patch<WorkspaceRow>(`workspaces/${ws.id}`, { name: name.trim(), projectIds: chosen }, ws.rowVersion) : await post<WorkspaceRow>('workspaces', { name: name.trim(), projectIds: chosen })
       await qc.invalidateQueries({ queryKey: ['workspaces'] })
       setScope({ ws: row.id })
       toast.success(t('scope.saved', { name: row.name }))
@@ -219,7 +219,7 @@ function WorkspaceDialog({ m, initial, onClose }: { m: Mode; initial: string[] |
       {deleting && ws && (
         <ConfirmDialog open destructive title={t('scope.deleteTitle', { name: ws.name })} body={t('scope.deleteBody')} confirmLabel={t('scope.delete')}
           onOpenChange={(o) => { if (!o) setDeleting(false) }}
-          onConfirm={async () => { await del(`workspaces/${ws.id}`); await qc.invalidateQueries({ queryKey: ['workspaces'] }); setScope({ projects: 'mine' }); onClose() }} />
+          onConfirm={async () => { await del(`workspaces/${ws.id}`, undefined, ws.rowVersion); await qc.invalidateQueries({ queryKey: ['workspaces'] }); setScope({ projects: 'mine' }); onClose() }} />
       )}
     </>
   )

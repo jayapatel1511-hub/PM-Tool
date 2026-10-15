@@ -14,6 +14,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public AuditContext Audit => audit;
 
     public DbSet<AppUser> Users => Set<AppUser>();
+    public DbSet<LocalAuthSession> LocalAuthSessions => Set<LocalAuthSession>();
+    public DbSet<ExternalIdentity> ExternalIdentities => Set<ExternalIdentity>();
     public DbSet<UserSystemRole> UserRoles => Set<UserSystemRole>();
     public DbSet<Office> Offices => Set<Office>();
     public DbSet<Discipline> Disciplines => Set<Discipline>();
@@ -138,6 +140,16 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.HasPostgresExtension("citext");
         mb.HasPostgresExtension("pg_trgm");
 
+        mb.Entity<LocalAuthSession>().HasIndex(x => x.ExpiresAt);
+        mb.Entity<ExternalIdentity>(e =>
+        {
+            e.HasKey(x => new { x.Provider, x.Subject });
+            e.Property(x => x.Provider).HasMaxLength(20);
+            e.Property(x => x.Subject).HasMaxLength(200);
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => new { x.UserId, x.Provider }).IsUnique();
+        });
+
         mb.Entity<AppUser>(e =>
         {
             e.ToTable("app_user");
@@ -165,7 +177,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             mb.Entity(t).HasIndex(nameof(RefData.Name));
         Fk<DeliverableType, Discipline>(mb, x => x.DefaultDisciplineId);
         mb.Entity<OrgSetting>(e => { e.HasKey(x => x.Key); e.Property(x => x.Value).HasColumnType("jsonb"); });
-        mb.Entity<UserSetting>(e => { e.HasKey(x => x.UserId); e.Property(x => x.DigestSectionsOff).HasColumnType("jsonb"); });
+        mb.Entity<UserSetting>(e => { e.HasKey(x => x.UserId); e.Property(x => x.DigestSectionsOff).HasColumnType("jsonb"); e.Property(x => x.HoldDigestWhenAway).HasDefaultValue(true); });
         mb.Entity<NotificationPreference>().HasIndex(x => new { x.UserId, x.EventType }).IsUnique();
         Fk<Holiday, Office>(mb, x => x.OfficeId);
         mb.Entity<IdempotencyRecord>(e => e.HasIndex(x => new { x.UserId, x.Key }).IsUnique());
@@ -195,6 +207,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         {
             e.HasIndex(x => new { x.ProjectId, x.DisciplineId }).IsUnique();
             e.HasOne(x => x.Discipline).WithMany().HasForeignKey(x => x.DisciplineId).OnDelete(DeleteBehavior.Restrict);
+            e.Property(x => x.RowVersion).IsConcurrencyToken();
         });
         Fk<ProjectDiscipline, Project>(mb, x => x.ProjectId);
         Fk<ProjectDiscipline, AppUser>(mb, x => x.LeadUserId);
@@ -203,6 +216,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.HasIndex(x => new { x.ProjectId, x.UserId }).IsUnique().HasFilter("removed_at IS NULL");
             e.HasIndex(x => x.UserId);
             e.ToTable(t => t.HasCheckConstraint("ck_member_roles", $"cardinality(roles) >= 1 AND roles <@ ARRAY[{In(ProjectRole.All)}]::text[]"));
+            e.Property(x => x.RowVersion).IsConcurrencyToken();
         });
         Fk<ProjectMember, Project>(mb, x => x.ProjectId);
         Fk<ProjectMember, AppUser>(mb, x => x.UserId);
@@ -388,7 +402,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         });
         Fk<Comment, AppUser>(mb, x => x.AuthorId);
         Fk<CommentMention, Comment>(mb, x => x.CommentId, DeleteBehavior.Cascade);
-        mb.Entity<DocumentLink>(e => { e.HasIndex(x => new { x.ItemType, x.ItemId }); e.HasQueryFilter(x => x.DeletedAt == null); e.Ignore(x => x.AuditKey); });
+        mb.Entity<DocumentLink>(e => { e.HasIndex(x => new { x.ItemType, x.ItemId }); e.HasQueryFilter(x => x.DeletedAt == null); e.Ignore(x => x.AuditKey); e.Property(x => x.RowVersion).IsConcurrencyToken(); });
 
         mb.Entity<ActivityLog>(e =>
         {
@@ -452,6 +466,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.Entity<Workspace>(e =>
         {
             e.HasIndex(x => new { x.OwnerId, x.Name }).IsUnique();
+            e.Property(x => x.RowVersion).IsConcurrencyToken();
             e.HasMany(x => x.Projects).WithOne().HasForeignKey(p => p.WorkspaceId).OnDelete(DeleteBehavior.Cascade);
         });
         mb.Entity<WorkspaceProject>().HasIndex(x => new { x.WorkspaceId, x.ProjectId }).IsUnique();
@@ -986,6 +1001,16 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         }
         var now = clock.GetUtcNow();
         if (await FollowTasks(now, ct)) ChangeTracker.DetectChanges();
+        var comments = ChangeTracker.Entries<Comment>()
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified && e.Property(nameof(Comment.Body)).IsModified)
+            .Select(e => (Comment)e.Entity).ToList();
+        var taskCommentIds = comments.Where(c => c.ItemType == ItemType.Task).Select(c => c.ItemId).Distinct().ToList();
+        var deliverableCommentIds = comments.Where(c => c.ItemType == ItemType.Deliverable).Select(c => c.ItemId).Distinct().ToList();
+        if (taskCommentIds.Count > 0)
+            foreach (var task in await Tasks.Where(t => taskCommentIds.Contains(t.Id)).ToListAsync(ct)) task.LastActivityAt = now;
+        if (deliverableCommentIds.Count > 0)
+            foreach (var deliverable in await Deliverables.Where(d => deliverableCommentIds.Contains(d.Id)).ToListAsync(ct)) deliverable.LastActivityAt = now;
+        if (taskCommentIds.Count > 0 || deliverableCommentIds.Count > 0) ChangeTracker.DetectChanges();
         var projects = new HashSet<Guid>();
         var users = new HashSet<Guid>();
         foreach (var entry in ChangeTracker.Entries().ToList())
@@ -994,11 +1019,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             if (entry.State is EntityState.Modified or EntityState.Deleted
                 && entry.Entity is SourceRevision or HandoffRevision or HandoffReceiptEvent or HandoffCommand or CoordinationCommand or ReviewManifestItem or FindingEvent or InputAdoption)
                 throw new InvalidOperationException("Published coordination evidence is immutable.");
+            if (entry.Entity is IVersioned versioned && entry.State == EntityState.Modified)
+                versioned.RowVersion++;
             if (entry.Entity is Audited a)
             {
                 if (entry.State == EntityState.Added) { a.CreatedAt = now; a.CreatedBy ??= audit.ActorId; }
                 if (entry.State is EntityState.Added or EntityState.Modified) { a.UpdatedAt = now; a.UpdatedBy = audit.ActorId; }
-                if (entry.State == EntityState.Modified) a.RowVersion++;
             }
             if (entry.Entity is IAuditable item && AuditRules.Fields.TryGetValue(entry.Metadata.ClrType, out var fields))
             {

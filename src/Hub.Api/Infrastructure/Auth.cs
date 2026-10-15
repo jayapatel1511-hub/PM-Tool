@@ -72,6 +72,7 @@ public static class AuthSetup
     {
         var dev = DevAuthAllowed(b.Environment, b.Configuration);
         var local = LocalAuthAllowed(b.Environment, b.Configuration);
+        var social = b.Configuration["Auth:Mode"] == SocialAuth.Scheme;
         if (b.Configuration["Auth:Mode"] == LocalScheme && !local)
             throw new InvalidOperationException("LocalPassword authentication is permitted only in Development, Staging or Testing.");
         if (local)
@@ -85,9 +86,17 @@ public static class AuthSetup
             Directory.CreateDirectory(keys);
             if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(keys, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
             b.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keys));
+            b.Services.AddSingleton<LocalSessionStore>();
+            b.Services.AddOptions<CookieAuthenticationOptions>(LocalScheme).Configure<LocalSessionStore, TimeProvider>((o, sessions, clock) =>
+            {
+                o.SessionStore = sessions;
+                o.TimeProvider = clock;
+            });
         }
-        var auth = b.Services.AddAuthentication(dev ? DevScheme : local ? LocalScheme : JwtBearerDefaults.AuthenticationScheme);
-        if (dev)
+        var auth = b.Services.AddAuthentication(dev ? DevScheme : local ? LocalScheme : social ? SocialAuth.Scheme : JwtBearerDefaults.AuthenticationScheme);
+        if (social)
+            SocialAuth.Add(b, auth);
+        else if (dev)
             auth.AddScheme<AuthenticationSchemeOptions, DevAuthHandler>(DevScheme, _ => { });
         else if (local)
             auth.AddCookie(LocalScheme, o =>
@@ -224,12 +233,13 @@ public sealed class ProvisioningMiddleware(RequestDelegate next)
             if (string.IsNullOrEmpty(oid)) { ctx.Response.StatusCode = 401; return; }
 
             var isLocal = ctx.User.Identity.AuthenticationType == AuthSetup.LocalScheme;
-            var localId = isLocal && Guid.TryParse(ctx.User.FindFirst("local_user_id")?.Value, out var parsed) ? parsed : Guid.Empty;
-            var user = isLocal ? await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == localId) :
+            var isSession = isLocal || ctx.User.Identity.AuthenticationType == SocialAuth.Scheme;
+            var localId = isSession && Guid.TryParse(ctx.User.FindFirst("local_user_id")?.Value, out var parsed) ? parsed : Guid.Empty;
+            var user = isSession ? await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == localId) :
                 await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.EntraObjectId == oid)
                 ?? await db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.EntraObjectId == null && u.Email == email);
             var isDev = ctx.User.Identity.AuthenticationType == AuthSetup.DevScheme;
-            if (isLocal && (user is null || !user.IsActive)) { ctx.Response.StatusCode = 401; return; }
+            if (isSession && (user is null || !user.IsActive)) { ctx.Response.StatusCode = 401; return; }
             if (user is null)
             {
                 user = new AppUser { EntraObjectId = oid, Email = email, DisplayName = name, IsActive = true };
@@ -239,12 +249,12 @@ public sealed class ProvisioningMiddleware(RequestDelegate next)
             }
             else
             {
-                if (!isLocal) user.EntraObjectId ??= oid;
+                if (!isSession) user.EntraObjectId ??= oid;
                 // Matched by directory identity, so an email change in the directory updates the Hub (edge case).
-                if (!isLocal && !string.IsNullOrEmpty(email) && user.Email != email) user.Email = email;
-                if (!isDev && !isLocal && user.DisplayName != name) user.DisplayName = name;
+                if (!isSession && !string.IsNullOrEmpty(email) && user.Email != email) user.Email = email;
+                if (!isDev && !isSession && user.DisplayName != name) user.DisplayName = name;
             }
-            if (!isLocal && (!isDev || ctx.User.HasClaim(c => c.Type == "dev_roles_present")))
+            if (!isSession && (!isDev || ctx.User.HasClaim(c => c.Type == "dev_roles_present")))
                 SyncGroupRoles(db, user, ctx.User.FindAll("roles").Select(c => c.Value));
             if (db.ChangeTracker.HasChanges())
             {

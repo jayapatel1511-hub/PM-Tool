@@ -1,10 +1,11 @@
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  Activity, AlertTriangle, AtSign, Bell, CalendarClock, CheckCircle2, Eye, Flag, Link2Off, MessageSquare, Scale, Unlock, UserPlus, Users,
+  Activity, AlertTriangle, AtSign, Bell, CalendarClock, Check, CheckCircle2, Eye, Flag, Link2Off, MessageSquare, Scale, Unlock, UserPlus, Users,
   type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { toast } from 'sonner'
 import { Empty, Loading } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -63,8 +64,11 @@ export function useMarkRead() {
 export function NotificationItem({ n, onOpen }: { n: NotificationRow; onOpen: (n: NotificationRow) => void }) {
   const Icon = eventIcon(n.eventType)
   const unread = !n.readAt
+  const markRead = useMarkRead()
+  const [marking, setMarking] = useState(false)
   return (
-    <button type="button" onClick={() => onOpen(n)} className={cn('flex w-full items-start gap-3 px-4 py-3 text-left text-sm hover:bg-muted', unread && 'bg-accent/40')}>
+    <div className={cn('flex items-center', unread && 'bg-accent/40')}>
+    <button type="button" onClick={() => onOpen(n)} className="flex min-w-0 flex-1 items-start gap-3 px-4 py-3 text-left text-sm hover:bg-muted">
       <Icon className="mt-0.5 size-[18px] shrink-0 text-muted-foreground" aria-hidden />
       <span className="min-w-0 flex-1">
         <span className={cn('block break-words', unread && 'font-semibold')}>{n.title}</span>
@@ -76,6 +80,9 @@ export function NotificationItem({ n, onOpen }: { n: NotificationRow; onOpen: (n
       </span>
       {unread && <><span aria-hidden className="mt-1.5 size-2.5 shrink-0 rounded-full bg-primary" /><span className="sr-only">{t('notif.unread')}</span></>}
     </button>
+    {unread && <Button variant="ghost" size="icon-sm" className="mr-3 shrink-0" disabled={marking} aria-label={t('notif.markOne', { title: n.title })}
+      onClick={async () => { setMarking(true); try { await markRead({ ids: [n.id] }) } catch (e) { toast.error(e instanceof Error ? e.message : t('notif.markFailed')) } finally { setMarking(false) } }}><Check className="size-4" /></Button>}
+    </div>
   )
 }
 

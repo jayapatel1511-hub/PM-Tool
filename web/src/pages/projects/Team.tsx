@@ -17,9 +17,9 @@ import { useCurrentProject } from './ProjectLayout'
 import { AddFromTemplateDialog, usePublishedTemplates } from './FromTemplate'
 
 interface TeamData {
-  disciplines: { id: string; disciplineId: string; name: string; code: string; colour: string; leadUserId?: string; isActive: boolean }[]
+  disciplines: { id: string; disciplineId: string; name: string; code: string; colour: string; leadUserId?: string; isActive: boolean; rowVersion: number }[]
   members: { id: string; userId: string; displayName: string; email: string; jobTitle?: string; isActive: boolean; roles: string[]; primaryDisciplineId?: string
-    addedAt: string; leadOf: string[]; isPrimaryPm: boolean; canStaff: boolean }[]
+    addedAt: string; leadOf: string[]; isPrimaryPm: boolean; canStaff: boolean; rowVersion: number }[]
   canManage: boolean; manageReason?: string
 }
 
@@ -61,13 +61,13 @@ export function TeamTab() {
                 </span>
                 <div className="min-w-48 flex-1">
                   {d.canManage && x.isActive
-                    ? <PeoplePicker value={x.leadUserId} valueName={name(x.leadUserId)} placeholder={t('team.noLead')} onChange={(id) => run(() => patch(`projects/${p.id}/disciplines/${x.id}`, { leadUserId: id }))} />
+                    ? <PeoplePicker value={x.leadUserId} valueName={name(x.leadUserId)} placeholder={t('team.noLead')} onChange={(id) => run(() => patch(`projects/${p.id}/disciplines/${x.id}`, { leadUserId: id }, x.rowVersion))} />
                     : <span className="text-sm">{t('team.lead')}: <PersonName name={name(x.leadUserId)} /></span>}
                 </div>
                 {!x.leadUserId && x.isActive && <Chip tone="warn">{t('team.leadMissing')}</Chip>}
                 {d.canManage && (x.isActive
-                  ? <Button size="sm" variant="ghost" className="text-bad hover:text-bad" aria-label={t('team.removeNamed', { name: x.name })} onClick={() => run(() => del(`projects/${p.id}/disciplines/${x.id}`))}>{t('common.remove')}</Button>
-                  : <Button size="sm" variant="outline" onClick={() => run(() => patch(`projects/${p.id}/disciplines/${x.id}`, { isActive: true }))}>{t('admin.activate')}</Button>)}
+                  ? <Button size="sm" variant="ghost" className="text-bad hover:text-bad" aria-label={t('team.removeNamed', { name: x.name })} onClick={() => run(() => del(`projects/${p.id}/disciplines/${x.id}`, undefined, x.rowVersion))}>{t('common.remove')}</Button>
+                  : <Button size="sm" variant="outline" onClick={() => run(() => patch(`projects/${p.id}/disciplines/${x.id}`, { isActive: true }, x.rowVersion))}>{t('admin.activate')}</Button>)}
               </li>
             ))}
           </ul>
@@ -89,8 +89,8 @@ export function TeamTab() {
           <AddMember projectId={p.id} disciplines={d.disciplines} canManage={d.canManage} onDone={reload} />
           {phone ? <ul className="divide-y">{d.members.map(m => <li key={m.id} className="space-y-3 p-4 text-sm">
             <div className="flex items-start gap-2.5"><Avatar id={m.userId} name={m.displayName} /><div className="min-w-0"><h4 className="flex items-center gap-1 break-words font-semibold">{m.isPrimaryPm && <Crown className="size-4 shrink-0 text-warn" aria-label={t('team.primaryPm')} />}<PersonName name={m.displayName} active={m.isActive} /></h4><p className="break-words text-xs/[18px] text-muted-foreground">{m.jobTitle}{m.leadOf.length > 0 && ` · ${t('role.DisciplineLead')}: ${m.leadOf.map(id => d.disciplines.find(x => x.id === id)?.name).join(', ')}`}</p></div></div>
-            <fieldset className="flex flex-wrap gap-x-4 gap-y-2"><legend className="sr-only">{t('team.role')}</legend>{ROLES.map(r => <label key={r} className="flex min-h-10 items-center gap-2"><Checkbox aria-label={`${t(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')} onCheckedChange={c => { const roles = c ? [...m.roles, r] : m.roles.filter(x => x !== r); if (roles.length) run(() => patch(`projects/${p.id}/members/${m.id}`, { roles })) }} />{t(`role.${r}`)}</label>)}</fieldset>
-            <Field label={t('field.PrimaryDisciplineId')} htmlFor={`member-disc-${m.id}`}><select id={`member-disc-${m.id}`} className={selectCls} value={m.primaryDisciplineId ?? ''} disabled={!d.canManage} onChange={e => run(() => patch(`projects/${p.id}/members/${m.id}`, { primaryDisciplineId: e.target.value || null }))}><option value="">{t('team.noPrimary')}</option>{d.disciplines.filter(x => x.isActive).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
+                    <fieldset className="flex flex-wrap gap-x-4 gap-y-2"><legend className="sr-only">{t('team.role')}</legend>{ROLES.map(r => <label key={r} className="flex min-h-10 items-center gap-2"><Checkbox aria-label={`${t(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')} onCheckedChange={c => { const roles = c ? [...m.roles, r] : m.roles.filter(x => x !== r); if (roles.length) run(() => patch(`projects/${p.id}/members/${m.id}`, { roles }, m.rowVersion)) }} />{t(`role.${r}`)}</label>)}</fieldset>
+            <Field label={t('field.PrimaryDisciplineId')} htmlFor={`member-disc-${m.id}`}><select id={`member-disc-${m.id}`} className={selectCls} value={m.primaryDisciplineId ?? ''} disabled={!d.canManage} onChange={e => run(() => patch(`projects/${p.id}/members/${m.id}`, { primaryDisciplineId: e.target.value || null }, m.rowVersion))}><option value="">{t('team.noPrimary')}</option>{d.disciplines.filter(x => x.isActive).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
             <p className="text-xs/[18px] text-muted-foreground">{t('team.added')}: {fmtDate(m.addedAt)}</p>
             {(d.canManage || m.canStaff) && !m.isPrimaryPm && <Button size="sm" variant="ghost" className="text-bad hover:text-bad" aria-label={t('team.removeNamed', { name: m.displayName })} onClick={() => setRemoving(m)}>{t('common.remove')}</Button>}
           </li>)}</ul> :           <TableRegion role="region" aria-label={t('team.members')}>
@@ -124,13 +124,13 @@ export function TeamTab() {
                         <Checkbox aria-label={`${t(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')}
                           onCheckedChange={(c) => {
                             const roles = c ? [...m.roles, r] : m.roles.filter((x) => x !== r)
-                            if (roles.length) run(() => patch(`projects/${p.id}/members/${m.id}`, { roles }))
+                            if (roles.length) run(() => patch(`projects/${p.id}/members/${m.id}`, { roles }, m.rowVersion))
                           }} />
                       </td>
                     ))}
                     <td className={tdCls}>
                       <select className={cn(selectCls, 'h-(--control-row-h) w-auto min-w-44')} value={m.primaryDisciplineId ?? ''} disabled={!d.canManage} aria-label={t('field.PrimaryDisciplineId')}
-                        onChange={(e) => run(() => patch(`projects/${p.id}/members/${m.id}`, { primaryDisciplineId: e.target.value || null }))}>
+                        onChange={(e) => run(() => patch(`projects/${p.id}/members/${m.id}`, { primaryDisciplineId: e.target.value || null }, m.rowVersion))}>
                         <option value="">{t('team.noPrimary')}</option>
                         {d.disciplines.filter((x) => x.isActive).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
                       </select>
@@ -198,7 +198,7 @@ function RemoveMember({ projectId, member, onClose }: { projectId: string; membe
       title={t('team.removeTitle', { name: member.displayName })}
       body={items.isPending ? t('app.loading') : n === 0 ? t('team.removeNoItems') : t('team.removeItems', { n })}
       confirmLabel={t('common.remove')} busy={n > 0 && choice === 'reassign' && !to}
-      onConfirm={(reason) => del(`projects/${projectId}/members/${member.id}${qs({ reassignTo: n > 0 && choice === 'reassign' ? to : undefined, reason })}`)}>
+      onConfirm={(reason) => del(`projects/${projectId}/members/${member.id}${qs({ reassignTo: n > 0 && choice === 'reassign' ? to : undefined, reason })}`, undefined, member.rowVersion)}>
       {n > 0 && (
         <div className="space-y-3 text-sm">
           <ul className="max-h-40 space-y-1 overflow-y-auto rounded-md border bg-muted p-3">

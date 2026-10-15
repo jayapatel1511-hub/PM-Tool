@@ -15,13 +15,17 @@ public static class Http
     }
 
     /// Refuses a stale write with who changed the item and when (AC-TSK-12).
-    public static async Task CheckVersion(HubDb db, HttpContext ctx, Audited entity, int? bodyVersion = null)
+    public static async Task CheckVersion(HubDb db, HttpContext ctx, IVersioned entity, int? bodyVersion = null)
     {
         var v = IfMatch(ctx, bodyVersion) ?? throw new ApiException(428, "precondition_required", Text.Get("error.if_match"));
         if (v == entity.RowVersion) return;
-        var by = entity.UpdatedBy is { } uid ? await db.Users.Where(u => u.Id == uid).Select(u => u.DisplayName).FirstOrDefaultAsync() : null;
-        throw new ApiException(409, "concurrency_conflict", Text.Get("error.concurrency_by", by ?? "someone", entity.UpdatedAt.ToString("u")),
-            extra: new { changedBy = by, changedAt = entity.UpdatedAt, currentRowVersion = entity.RowVersion });
+        if (entity is Audited audited)
+        {
+            var by = audited.UpdatedBy is { } uid ? await db.Users.Where(u => u.Id == uid).Select(u => u.DisplayName).FirstOrDefaultAsync() : null;
+            throw new ApiException(409, "concurrency_conflict", Text.Get("error.concurrency_by", by ?? "someone", audited.UpdatedAt.ToString("u")),
+                extra: new { changedBy = by, changedAt = audited.UpdatedAt, currentRowVersion = entity.RowVersion });
+        }
+        throw ApiException.Conflict("concurrency_conflict", "error.concurrency", new { currentRowVersion = entity.RowVersion });
     }
 
     public static void ETag(HttpContext ctx, Audited e) => ctx.Response.Headers.ETag = $"\"{e.RowVersion}\"";
@@ -40,7 +44,8 @@ public sealed record Page<T>(IReadOnlyList<T> Items, [property: System.Text.Json
 public sealed class SecurityHeaders(RequestDelegate next, IConfiguration cfg)
 {
     readonly string csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; "
-        + $"connect-src 'self' https://login.microsoftonline.com {cfg["Csp:ConnectSrc"]}; frame-src https://login.microsoftonline.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
+        + $"connect-src 'self' https://login.microsoftonline.com {cfg["Csp:ConnectSrc"]}; frame-src https://login.microsoftonline.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        + (cfg["Auth:Mode"] == SocialAuth.Scheme ? " https://accounts.google.com https://login.microsoftonline.com" : "");
 
     public Task Invoke(HttpContext ctx)
     {

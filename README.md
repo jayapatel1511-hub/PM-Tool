@@ -6,15 +6,19 @@ Coordination, decisions, risks and issues, meeting actions, templates, a workspa
 Timeline, Files, Team), a team calendar, task hours, reports, notifications and an append-only activity history.
 
 The product specification is [`Engineering-Project-Coordination-Hub-Specification.md`](Engineering-Project-Coordination-Hub-Specification.md)
-(built from `spec-parts/`). It is written as 33 Spec Kit packets in [`specs/`](specs/README.md), each with its plan,
+(built from `spec-parts/`). It is written as 38 Spec Kit packets in [`specs/`](specs/README.md), each with its plan,
 tasks and verification. What is built and what still needs a real environment to prove is in
 [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md).
 
+## Current local deployment candidate — 2026-10-12
+
+`codex/deployment-ready` starts from integrated Tuesday baseline `68c56f28`. The remaining supervisor-capacity and digest-hold scope, shared partial-view correction and review fixes are implemented locally. Release tests pass 1,132/1,132, coverage gates pass, and a built container passed migrations, authentication, background jobs and signed-in browser checks. Changes remain uncommitted; no push or deployment occurred in this pass. See the [deployment handoff](docs/handoffs/2026-10-12-deployment-ready.md) for artifact identity, evidence, rollback conditions and outstanding hosted/company acceptance.
+
 ## Approved coordination expansion
 
-The nine additions approved on 2026-09-26 are captured in packets **025–033**: handoffs, multidisciplinary reviews, revision/change impact, submission readiness, dated resource allocations, discipline coordination, design basis/assumptions, ready-to-start planning/weekly commitments, and location-linked issues. Packets **025–027 now have foundation implementations** for handoffs, multidisciplinary reviews and revision/change impact. CI passed 373 tests, coverage gates and the mocked-API browser workflows/accessibility checks. Full acceptance, deployment and implementation of **028–033 remain pending**. See the [handoff](specs/025-discipline-handoffs/verification.md), [review](specs/026-multidisciplinary-reviews/verification.md) and [change-impact](specs/027-revision-change-impact/verification.md) verification records. The earlier 24-packet runtime and its verification limitations remain documented below.
+The nine additions approved on 2026-09-26 are captured in packets **025–033**: handoffs, multidisciplinary reviews, revision/change impact, submission readiness, dated resource allocations, discipline coordination, design basis/assumptions, ready-to-start planning/weekly commitments, and location-linked issues. Their domain/API/UI implementations and automated regressions are present in the integrated baseline. Each packet's verification record retains its historical evidence and remaining acceptance scenarios; the current full release suite does not replace complete hosted or human acceptance.
 
-Start with [DESIGN.md](DESIGN.md), the [packet index](specs/README.md), the [research rationale](docs/research/multidisciplinary-coordination.md) and the [validation record](docs/coordination-spec-validation.md). “Tuesday” is the product name in these planning documents; application branding still displays Coordination Hub until a separately implemented change.
+Start with [DESIGN.md](DESIGN.md), the [packet index](specs/README.md), the [research rationale](docs/research/multidisciplinary-coordination.md) and the [validation record](docs/coordination-spec-validation.md). Tuesday is the current product and interface name.
 
 ## Repository
 
@@ -102,6 +106,8 @@ environment runbook, [`docs/runbooks/environments.md`](docs/runbooks/environment
 in [`restore.md`](docs/runbooks/restore.md) and jobs and alerts in [`jobs.md`](docs/runbooks/jobs.md).
 
 ## Microsoft Entra ID
+
+Microsoft and Google sign-in is now the default server mode. It permits immediate registration with any email domain, preserves server-owned permissions, and uses revocable cookie sessions. Configure both provider registrations and private credentials before starting it outside Development. See the [social sign-in runbook](docs/runbooks/social-sign-in.md), including the mapping required for existing profiles and the real-account acceptance checks. The single-tenant Entra configuration below remains available as an alternative mode.
 
 Each environment has two app registrations in the organisation's tenant:
 

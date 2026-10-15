@@ -2953,6 +2953,11 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("project_id");
 
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text")
@@ -3052,6 +3057,32 @@ namespace Hub.Api.Data.Migrations
                         .HasDatabaseName("ix_email_message_sent_at");
 
                     b.ToTable("email_message", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ExternalIdentity", b =>
+                {
+                    b.Property<string>("Provider")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("provider");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("subject");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Provider", "Subject")
+                        .HasName("pk_external_identity");
+
+                    b.HasIndex("UserId", "Provider")
+                        .IsUnique()
+                        .HasDatabaseName("ix_external_identity_user_id_provider");
+
+                    b.ToTable("external_identity", "hub");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.ExternalParty", b =>
@@ -4651,6 +4682,31 @@ namespace Hub.Api.Data.Migrations
                         .HasDatabaseName("ix_leave_import_state_source_system");
 
                     b.ToTable("leave_import_state", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.LocalAuthSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("Ticket")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ticket");
+
+                    b.HasKey("Id")
+                        .HasName("pk_local_auth_session");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("ix_local_auth_session_expires_at");
+
+                    b.ToTable("local_auth_session", "hub");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.Meeting", b =>
@@ -6262,6 +6318,11 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("project_id");
 
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
                     b.Property<int>("SortOrder")
                         .HasColumnType("integer")
                         .HasColumnName("sort_order");
@@ -6414,6 +6475,11 @@ namespace Hub.Api.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text[]")
                         .HasColumnName("roles");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -8948,6 +9014,12 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("digest_time_local");
 
+                    b.Property<bool>("HoldDigestWhenAway")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("hold_digest_when_away");
+
                     b.Property<DateTimeOffset?>("LastDigestAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_digest_at");
@@ -9466,6 +9538,11 @@ namespace Hub.Api.Data.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
+
+                    b.Property<int>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
 
                     b.HasKey("Id")
                         .HasName("pk_workspace");
@@ -10104,6 +10181,16 @@ namespace Hub.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_discipline_review_review_rounds_round_id");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.ExternalIdentity", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_external_identity_app_user_user_id");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.ExternalParty", b =>

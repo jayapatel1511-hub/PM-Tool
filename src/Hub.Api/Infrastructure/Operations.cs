@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -60,10 +61,13 @@ public static class OpsChecks
             var dayStart = new DateTimeOffset(today.ToDateTime(TimeOnly.MinValue), zone.GetUtcOffset(today.ToDateTime(TimeOnly.MinValue))).ToUniversalTime();
             // Digests due by 08:00: each active person with digests on whose chosen time is at or before it.
             var prefs = await db.UserSettings.AsNoTracking().ToDictionaryAsync(x => x.UserId, ct);
-            foreach (var id in await db.Users.Where(u => u.IsActive).Select(u => u.Id).ToListAsync(ct))
+            var people = await db.Users.Where(u => u.IsActive).Select(u => u.Id).ToArrayAsync(ct);
+            var held = await DigestJob.HeldPeople(db, people, prefs, today, s);
+            foreach (var id in people)
             {
                 var p = prefs.GetValueOrDefault(id);
-                if (p is { DigestEnabled: false }) continue;
+                if (p is { DigestEnabled: false } || held.Contains(id)
+                    || DigestJob.SectionsAllOff((JsonSerializer.Deserialize<string[]>(p?.DigestSectionsOff ?? "[]") ?? []).ToHashSet())) continue;
                 if (!TimeOnly.TryParseExact(p?.DigestTimeLocal ?? s.DigestSendTimeLocal, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var at) || at > DigestDeadline) continue;
                 var scheduled = new DateTimeOffset(today.ToDateTime(at), zone.GetUtcOffset(today.ToDateTime(at))).ToUniversalTime();
                 if (p?.LastDigestAt is not { } last || last < scheduled) notBuilt++;

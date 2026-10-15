@@ -1,0 +1,10 @@
+# Explicit opt-in for either existing homedev stack; does not change its database, hostname or port.
+services:
+  api:
+    env_file:
+      - ../.runtime/social-auth.env
+    environment:
+      Auth__Mode: Social
+      Auth__Social__KeyDirectory: /run/social/keys
+    volumes:
+      - ../.runtime/keys:/run/social/keys

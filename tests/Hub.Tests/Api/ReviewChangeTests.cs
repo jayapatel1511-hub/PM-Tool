@@ -345,7 +345,8 @@ public sealed class ReviewChangeTests(HubFactory f)
         foreach (var who in new[] { TestData.Alex, TestData.Marc })
         {
             var member = f.Db(db => db.ProjectMembers.Single(m => m.ProjectId == s.P.Id && m.UserId == data.User(who) && m.RemovedAt == null).Id);
-            (await f.As(TestData.Pm).DeleteAsync($"{Root(s)}/members/{member}?reason=Left%20the%20team")).EnsureSuccessStatusCode();
+            var version = f.Db(db => db.ProjectMembers.Single(m => m.Id == member).RowVersion);
+            (await f.As(TestData.Pm).Delete($"{Root(s)}/members/{member}?reason=Left%20the%20team", version)).EnsureSuccessStatusCode();
         }
         foreach (var who in new[] { TestData.Alex, TestData.Marc })
             await Post(who, $"/api/v1/issues/{issueId}/reference-impacts/{impact.G("id")}",

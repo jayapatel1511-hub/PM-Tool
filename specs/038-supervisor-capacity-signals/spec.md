@@ -1,9 +1,9 @@
 # Feature Specification: Supervisor Capacity Signals
 
 **Packet**: 038 | **Feature directory**: `specs/038-supervisor-capacity-signals` | **Date**: 2026-10-12
-**Status**: Specified. Jay has not yet confirmed the defaults for D1–D7; no code has been written.
+**Status**: Implemented and verified locally on 2026-10-12, using defaults D1–D7 under Jay's build request. Jay explicitly confirmed the shared hidden-allocation Partial view rule. Source changes remain uncommitted; hosted and human acceptance are pending. See [verification.md](verification.md).
 **Input**: a 2026-10-12 gap review of the October 2026 product research (kept outside the repository) against §39–§41. Two of its recommendations were still open and cheap: show a supervisor their people's capacity where they already look, and stop sending the daily digest to people who are away.
-**Source**: product specification §42 (§42.1–§42.5) in `spec-parts/17-supervisor-capacity-signals.md`. Related, unchanged contracts: §39 (weekly planning, packet 034), §40.6 (capacity in the person picker, packet 036), §12.18 (approved leave and office holidays, packet 035), §17.3–§17.5 (daily digest), §13.19 (My Staff), §41 R7 (one signal per row).
+**Source**: product specification §42 (§42.1–§42.5) in `spec-parts/17-supervisor-capacity-signals.md`. Related contracts: §39 (weekly planning, packet 034), §40.6 (capacity in the person picker, packet 036), §12.18 (approved leave and office holidays, packet 035), §17.3–§17.5 (daily digest), §13.19 (My Staff), §41 R7 (one signal per row). The approved hidden-work correction amends §39 and §40 as recorded in §42.
 
 ## User outcome
 
@@ -17,11 +17,11 @@ A Supervisor opening My Staff sees, beside each direct report's task counts, how
 ## Non-goals
 
 - A Manager Home or exception dashboard; People and Person Profile; Overlapping Plans; Deliverable Pressure (all still deferred under §39.12).
-- Any change to the planner's figures, indicators, scope or permissions (PLN-05 to PLN-16), to Workload, My Week, readiness, or the Staff Assignments report.
+- Changes to visible planner hours, scope or permissions (PLN-05 to PLN-16), Workload, My Week, readiness, or the Staff Assignments report. The approved hidden-work partial-view correction and Under-planned lookahead suppression are included.
 - Holding or redirecting immediate in-app or email notices, the weekly summary or the Following feed.
 - An "away" marker beside names elsewhere in the product; sorting or filtering My Staff by free hours; a next-week column.
 
-## Open decisions (defaults used until Jay decides)
+## Decisions (defaults used under the build request)
 
 | # | Decision | Default |
 |---|---|---|
@@ -43,7 +43,7 @@ Taylor opens My Staff on Tuesday. Each direct report's row shows "12 h free · 8
 - **AC-SUP-02.** One request per 50 listed rows, never one per person; people outside the viewer's planner scope show no figure and are absent from the response.
 - **AC-SUP-03.** "Partial view" on My Staff exactly when the owner picker would show it, with the PLN-15 label as tooltip and accessible description.
 - **AC-SUP-04.** Over-planned and "Stale plan n" for the current week join the row's signal set under §41 R7, naming their week.
-- **AC-SUP-05.** Planner, My Week, Workload and readiness responses and the Staff Assignments report are unchanged; packet 034 and 036 tests pass unchanged.
+- **AC-SUP-05.** Visible planner hours, My Week, Workload and readiness calculations and the Staff Assignments report retain their values. Hidden Confirmed allocations overlapping displayed weeks set Partial view; hidden work only in the extended lookahead suppresses Under-planned without labelling the displayed week partial. Hidden records and hours remain absent. Packet 034 and 036 regressions and the focused correction tests pass.
 
 ### Story 2: No digest while away (P1)
 

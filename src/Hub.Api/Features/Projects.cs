@@ -50,13 +50,14 @@ public static class ProjectEndpoints
             var (p, ctx) = await access.Project(id);
             Access.Demand(Permissions.EditProject(access.Actor, ctx));
             var link = await DocumentLinkEndpoints.Add(db, id, ItemType.Project, id, p.ProjectNumber, new(body.Url, body.Title, body.LinkType), access.Me.Id, clock.GetUtcNow());
-            return Results.Created($"/api/v1/links/{link.Id}", new { link.Id, link.Title, link.Url, link.LinkType });
+            return Results.Created($"/api/v1/links/{link.Id}", new { link.Id, link.Title, link.Url, link.LinkType, link.RowVersion });
         });
-        api.MapDelete("/projects/{id:guid}/links/{linkId:guid}", async (Guid id, Guid linkId, Access access, HubDb db, TimeProvider clock) =>
+        api.MapDelete("/projects/{id:guid}/links/{linkId:guid}", async (Guid id, Guid linkId, Access access, HubDb db, TimeProvider clock, HttpContext http) =>
         {
             var (p, ctx) = await access.Project(id);
             Access.Demand(Permissions.EditProject(access.Actor, ctx));
             var link = await db.DocumentLinks.FirstOrDefaultAsync(l => l.Id == linkId && l.ItemType == ItemType.Project && l.ItemId == id) ?? throw ApiException.NotFound();
+            await Http.CheckVersion(db, http, link);
             link.DeletedAt = clock.GetUtcNow(); // DOC-03: soft delete, logged
             link.DeletedBy = access.Me.Id;
             link.AuditKey = p.ProjectNumber;
@@ -235,7 +236,7 @@ public static class ProjectEndpoints
         var names = await db.Users.Where(u => u.Id == p.ProjectManagerId || u.Id == p.HealthOverrideBy || u.Id == p.LastCoordinationReviewedBy)
             .ToDictionaryAsync(u => u.Id, u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)");
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == p.Id).OrderBy(d => d.SortOrder)
-            .Select(d => new { d.Id, d.DisciplineId, d.Discipline!.Name, d.Discipline.Code, d.Discipline.Colour, d.LeadUserId, d.IsActive,
+            .Select(d => new { d.Id, d.DisciplineId, d.Discipline!.Name, d.Discipline.Code, d.Discipline.Colour, d.LeadUserId, d.IsActive, d.RowVersion,
                 LeadName = db.Users.Where(u => u.Id == d.LeadUserId).Select(u => u.DisplayName).FirstOrDefault() }).ToListAsync();
         var milestones = await db.Milestones.AsNoTracking().Where(m => m.ProjectId == p.Id && !m.IsCancelled)
             .Select(m => new { m.Id, m.Key, m.Name, m.Date, m.MilestoneType, m.IsComplete,
@@ -260,7 +261,7 @@ public static class ProjectEndpoints
             Client = await db.Clients.Where(c => c.Id == p.ClientId).Select(c => c.Name).FirstOrDefaultAsync(),
             Office = await db.Offices.Where(o => o.Id == p.OfficeId).Select(o => o.Name).FirstOrDefaultAsync(),
             Phase = await db.Phases.Where(x => x.Id == p.PhaseId).Select(x => x.Name).FirstOrDefaultAsync(),
-            Links = await DocumentLinkEndpoints.Of(db, ItemType.Project, p.Id).Select(l => new { l.Id, l.Title, l.Url, l.LinkType }).ToListAsync(),
+            Links = await DocumentLinkEndpoints.Of(db, ItemType.Project, p.Id).Select(l => new { l.Id, l.Title, l.Url, l.LinkType, l.RowVersion }).ToListAsync(),
             Disciplines = disciplines,
             Health = new
             {

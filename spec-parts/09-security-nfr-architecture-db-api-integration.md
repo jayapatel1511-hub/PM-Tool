@@ -145,7 +145,7 @@ Scheduling implementation: Quartz.NET (or Hangfire) hosted in the API process wi
 - **Directory sync** (Recommendation): nightly Graph query of users in the organisation (or in the licensed groups) to update `is_active` from `accountEnabled`, `job_title`, `office_location`, and `manager` → `supervisor_id`. Requires `User.Read.All` application permission (**TBD — IT approval**). Fallback without Graph: users who fail sign-in due to a disabled account are marked inactive on the next attempted token use (weak), plus an Admin "deactivate" action.
 - **Disabled accounts**: cannot obtain tokens (Entra); marked Inactive by sync; A-18 flags their work; the "Reassign work" tool lists everything they own.
 - **Security groups**: five groups mapped to app roles, managed by IT; membership changes take effect at next token issuance.
-- **Session management**: API is stateless (no server sessions). SPA sign-out clears MSAL cache and redirects to Entra logout. Idle timeout in the SPA (e.g., 8 h) forces re-authentication (**TBD**). No refresh tokens stored server-side.
+- **Session management**: Entra bearer-token authentication is stateless. SPA sign-out clears MSAL cache and redirects to Entra logout. Individual local-password review sign-in uses eight-hour, non-sliding PostgreSQL-backed session tickets; sign-out removes the current ticket, so copied cookies are refused across API instances and restarts. Existing stateless review cookies require a fresh sign-in after activation. Idle timeout in the SPA (e.g., 8 h) forces re-authentication (**TBD**). No refresh tokens stored server-side.
 - **Service-to-service**: none in MVP other than the API's managed identity to Key Vault/Graph/PostgreSQL.
 
 ### 23.7 Environments, CI/CD, IaC
@@ -566,7 +566,7 @@ Warnings (non-blocking rule outcomes) are returned alongside successful response
 
 ### 25.8 Optimistic concurrency
 
-Every mutable resource returns `rowVersion`. `PATCH` and action endpoints require `If-Match: "<rowVersion>"` (or `rowVersion` in the body); a mismatch returns `409` with `code: "concurrency_conflict"`, the current representation, and the conflicting fields when determinable, so the UI can show "changed by Marc 2 minutes ago" and offer reload. Comments and links are append-only and exempt. Bulk operations check each row.
+Every mutable resource returns `rowVersion`. `PATCH`, `DELETE` and action endpoints require `If-Match: "<rowVersion>"` (or `rowVersion` in the body); a mismatch returns `409` with `code: "concurrency_conflict"`, the current representation, and the conflicting fields when determinable, so the UI can show "changed by Marc 2 minutes ago" and offer reload. This includes project memberships, project disciplines, named workspaces and editable document links. Document-link edits and soft deletion remain permitted by §12.7 and use this version protection. Comments retain their explicit author/time-window edit and soft-deletion rules in §12.6; these operations remain exempt. Immutable published records use append-only superseding records. Bulk operations check each row.
 
 ### 25.9 Representative payload — task
 

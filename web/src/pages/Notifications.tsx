@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCheck, Settings } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router'
@@ -109,7 +109,7 @@ function Personal() {
 }
 
 interface FeedItem { entry: ActivityRow & { projectId: string }; count: number; projectNumber: string; projectName: string; notified: boolean; unread: boolean }
-interface Feed { projects: { projectId: string; projectNumber: string; name: string; status: string; unread: number }[]; items: FeedItem[]; totalCount: number }
+interface Feed { projects: { projectId: string; projectNumber: string; name: string; status: string; unread: number }[]; items: FeedItem[]; totalCount: number; page: number; pageSize: number }
 
 const PROJECT_ITEM = 'flex min-h-(--control-row-h) w-full items-center gap-2 rounded-md px-2.5 py-1 text-left hover:bg-muted'
 const PROJECT_ON = 'bg-accent font-semibold text-accent-foreground shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent'
@@ -121,11 +121,22 @@ function Following() {
   const projectId = sp.get('projectId') ?? undefined
   const important = sp.get('important') === 'true'
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
-  const q = useQuery({ queryKey: ['following', projectId, important], queryFn: () => get<Feed>(`me/following${qs({ projectId, importantOnly: important, pageSize: 200 })}`) })
+  const q = useInfiniteQuery({ queryKey: ['following', projectId, important],
+    queryFn: ({ pageParam }) => get<Feed>(`me/following${qs({ projectId, importantOnly: important, page: pageParam, pageSize: 200 })}`),
+    initialPageParam: 1, getNextPageParam: (last) => last.page * last.pageSize < last.totalCount ? last.page + 1 : undefined,
+  })
   const markRead = async (id: string) => { await post(`me/following/${id}/read`); qc.invalidateQueries({ queryKey: ['following'] }); qc.invalidateQueries({ queryKey: ['unread'] }) }
   if (q.isPending) return <Loading rows={5} />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
-  const { projects, items } = q.data
+  const projects = q.data.pages[0].projects
+  const merged = new Map<string, FeedItem>()
+  for (const item of q.data.pages.flatMap((p) => p.items)) {
+    const key = `${item.entry.projectId}:${item.entry.correlationId ?? item.entry.id}`
+    const previous = merged.get(key)
+    const notified = !!previous?.notified || item.notified
+    merged.set(key, previous ? { ...previous, count: previous.count + item.count, notified, unread: !notified && (previous.unread || item.unread) } : item)
+  }
+  const items = [...merged.values()]
   const groups = new Map<string, FeedItem[]>()
   for (const i of items) groups.set(i.projectNumber, [...(groups.get(i.projectNumber) ?? []), i])
   return (
@@ -193,6 +204,7 @@ function Following() {
             ))}
           </div>
         )}
+        {q.hasNextPage && <div className="p-4 text-center"><Button variant="outline" size="sm" disabled={q.isFetchingNextPage} onClick={() => q.fetchNextPage()}>{t('notif.more')}</Button></div>}
       </div>
     </div>
   )

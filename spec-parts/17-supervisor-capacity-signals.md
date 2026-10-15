@@ -1,12 +1,12 @@
 ## 42. Supervisor Capacity Signals Amendment
 
-Approved scope: on 2026-10-12 a gap review of the October 2026 product research against §39–§41 found two of its recommendations still open, delivered by packet 038 with the default for every open decision (§42.5). This section records the product contract; implementation and acceptance remain pending. It puts the Weekly Planner's figures for the current week on My Staff, where a Supervisor already looks at their people, and holds the daily digest on days a person has no availability. Both reuse records, rules and reads that exist: §39's planning entries and capacity, the FR-PICK-01 batch read, §12.18's approved leave and office holidays, and §17.3's digest. Nothing here adds a rule, threshold, record, permission or endpoint.
+Approved scope: on 2026-10-12 a gap review of the October 2026 product research against §39–§41 found two of its recommendations still open, delivered by packet 038 with the defaults for D1–D7 (§42.5) under Jay's request to build the remaining scope. This section records the product contract; local implementation and verification are recorded in packet 038, separately from hosted and human acceptance. It puts the Weekly Planner's figures for the current week on My Staff, where a Supervisor already looks at their people, and holds the daily digest on days a person has no availability. Both reuse records, rules and reads that exist: §39's planning entries and capacity, the FR-PICK-01 batch read, §12.18's approved leave and office holidays, and §17.3's digest. It adds the hold preference, without a new capacity threshold, business record, permission or endpoint.
 
-Where this section adds to §13.19 (My Staff), §17.3 (daily digest) and §17.4 (preferences), this section governs. §39, §40 and §41 are unchanged. The research's other open recommendations stay deferred as §40.10 lists them.
+Where this section adds to §13.19 (My Staff), §17.3 (daily digest) and §17.4 (preferences), this section governs. On 2026-10-12 Jay confirmed that the shared partial-view rule also includes hidden Confirmed allocations overlapping the requested weeks: Planner, the person picker and My Staff show "Partial view", while inaccessible work and its hours stay excluded. This corrects the partial label in §39 and §40 without changing visible capacity calculations. §41 is unchanged. The research's other open recommendations stay deferred as §40.10 lists them.
 
 ### 42.1 Scope and boundary
 
-Part A (§42.2) is one column on My Staff. Part B (§42.3) is one condition in the daily digest and one user preference. Outside this amendment: a Manager Home or exception dashboard; changes to the planner's figures, indicators or scope (PLN-05 to PLN-16); new capacity signals or thresholds; holding immediate in-app or email notices; redirecting notices to a delegate; an "away" marker beside names elsewhere in the product; changes to the Staff Assignments report or any export.
+Part A (§42.2) is one column on My Staff. Part B (§42.3) is one condition in the daily digest and one user preference. The approved partial-view correction above also governs the planner's hidden-work flag and suppression of Under-planned when its lookahead contains hidden work. Outside this amendment: a Manager Home or exception dashboard; other changes to the planner's figures, indicators or scope (PLN-05 to PLN-16); new capacity signals or thresholds; holding immediate in-app or email notices; redirecting notices to a delegate; an "away" marker beside names elsewhere in the product; changes to the Staff Assignments report or any export.
 
 ### 42.2 Capacity on My Staff
 
@@ -18,7 +18,7 @@ Part A (§42.2) is one column on My Staff. Part B (§42.3) is one condition in t
 
 - **FR-SUP-04.** The planner's indicators for that person and the current week, Over-planned (PLN-10) and the count of Stale plan entries (PLN-12), MUST join the row's signal set and follow §41 R7: the row shows its most severe signal plus "+n", and the capacity chips name their week (for example "Over-planned · W42"). Under-planned is not shown on My Staff. A week with neither indicator shows no chip.
 
-- **FR-SUP-05.** The column MUST be information only. It is not a filter, sort key or export column; the Staff Assignments report (§19) is unchanged; it stores nothing, notifies no one and changes no figure, indicator or response of the Weekly Planner, Workload, My Week or readiness. On phones the column appears in the read-only card as one line of text.
+- **FR-SUP-05.** The column MUST be information only. It is not a filter, sort key or export column; the Staff Assignments report (§19) is unchanged; it stores nothing and notifies no one. Visible planner hours, Workload, My Week and readiness calculations stay unchanged. The shared planner read MUST apply the approved hidden-work partial-view correction and suppress Under-planned when its lookahead contains hidden work; it MUST NOT disclose inaccessible records or hours. On phones the column appears in the read-only card as one line of text.
 
 ### 42.3 Digest hold during time away
 
@@ -40,7 +40,7 @@ Part A (§42.2) is one column on My Staff. Part B (§42.3) is one condition in t
 
 - **AC-SUP-04.** Given a person who is Over-planned in the current week with two Stale plan entries, then the row's signal set includes "Over-planned · W42" and "Stale plan 2", shown as the most severe signal plus "+n" under §41 R7; a person with neither shows no capacity chip.
 
-- **AC-SUP-05.** Given My Staff is opened with the column visible, then the Weekly Planner grid, My Week, Workload and readiness responses, and the Staff Assignments report, are identical to their values before packet 038, and the existing packet 034 and 036 automated tests pass unchanged.
+- **AC-SUP-05.** Given My Staff is opened with the column visible, then visible planner hours, My Week, Workload and readiness calculations, and the Staff Assignments report, retain their existing values. Hidden Confirmed allocations overlapping the displayed weeks set Partial view; hidden work only in the extended lookahead suppresses Under-planned without labelling the displayed week partial. Inaccessible records and hours are absent from both responses. Existing packet 034 and 036 regressions pass alongside focused tests of this approved correction.
 
 - **AC-DIG-01.** Given Yagmur has digest on and an Unavailable override of 0 h on Tuesday, a working day of her calendar, when 07:00 Tuesday organisation time passes, then no digest email is queued for her, the job counts one held digest, and an immediate notice that day is sent as usual.
 

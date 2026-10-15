@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { Check, ChevronsUpDown, X } from 'lucide-react'
-import { createContext, useContext, useEffect, useRef, useState, type ComponentProps } from 'react'
+import { createContext, useContext, useId, useState, type ComponentProps } from 'react'
 import type { PlannerCell, PlannerGridData } from '@/components/planner/labels'
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
@@ -37,37 +37,37 @@ export const weekOf = (d: string) => addDays(d, -((new Date(`${d}T00:00:00Z`).ge
 /** The week whose capacity a picker shows, for pickers rendered by shared fields that cannot pass the prop (FR-PICK-02). */
 export const CapacityWeek = createContext<string | undefined>(undefined)
 
-type PickerCell = PlannerCell & { partial?: boolean }
+export type CapacityCell = PlannerCell & { partial?: boolean }
 
 /** Each candidate's remaining and time-away hours for one week (FR-PICK-01/02, D8). Only viewers who can open Workload ask,
  *  in one planning-grid request for the candidates not yet asked about (chunks of 50, the server's limit, for longer
  *  lists); the server drops anyone outside the viewer's scope, and those people simply show no figure. */
-function usePickerCapacity(week: string | undefined, open: boolean, ids: string[]) {
-  const allowed = useMe().capabilities.workload
-  const [cells, setCells] = useState<Record<string, PickerCell>>({})
-  const asked = useRef(new Set<string>())
-  const idsKey = week && open && allowed ? ids.join(',') : ''
-  useEffect(() => {
-    if (!week || !idsKey) return
-    const wanted = idsKey.split(',').filter((id) => !asked.current.has(`${week}:${id}`))
-    for (const id of wanted) asked.current.add(`${week}:${id}`)
-    for (let i = 0; i < wanted.length; i += 50)
-      get<PlannerGridData>(`planning/grid${qs({ personIds: wanted.slice(i, i + 50).join(','), from: week, weeks: 1 })}`)
-        .then((g) => setCells((c) => ({ ...c, ...Object.fromEntries(g.people.filter((p) => p.cells[0]).map((p) => [`${week}:${p.id}`, { ...p.cells[0], partial: p.partial }])) })))
-        .catch(() => { /* no figure: the plain picker still works */ })
-  }, [week, idsKey])
-  return (id: string) => (week ? cells[`${week}:${id}`] : undefined)
+export function usePeopleCapacity(week: string | undefined, open: boolean, ids: string[]) {
+  const me = useMe()
+  const batches: string[][] = []
+  if (week && open && me.capabilities.workload)
+    for (let i = 0; i < ids.length; i += 50) batches.push(ids.slice(i, i + 50))
+  const results = useQueries({ queries: batches.map((batch) => ({
+    queryKey: ['people-capacity', me.id, week, batch],
+    queryFn: () => get<PlannerGridData>(`planning/grid${qs({ personIds: batch.join(','), from: week, weeks: 1 })}`),
+    staleTime: 60_000,
+  })) })
+  const cells: Record<string, CapacityCell> = Object.fromEntries(results.flatMap((r) =>
+    (r.data?.people ?? []).filter((p) => p.cells[0]).map((p) => [p.id, { ...p.cells[0], partial: p.partial }])))
+  return (id: string) => cells[id]
 }
 
 /** "12 h free · 16 h away", short and right-aligned beside a candidate; nothing without data. When the person has planned
  *  work on projects the viewer cannot see, the free hours would be too high, so the figure says "Partial view" instead,
  *  as Workload and the Planner do (FR-CAP-06, AC-PLN-12). */
-function CapacityFigure({ cell }: { cell?: PickerCell }) {
+export function CapacityFigure({ cell }: { cell?: CapacityCell }) {
+  const description = useId()
   if (!cell) return null
   const free = cell.partial ? t('workload.partialChip') : cell.remaining < 0 ? t('people.overBy', { h: hours(-cell.remaining) }) : t('people.free', { h: hours(cell.remaining) })
   return (
-    <span data-capacity title={cell.partial ? t('workload.partial') : undefined} className={cn('shrink-0 text-xs tabular-nums', cell.remaining < 0 && !cell.partial ? 'font-medium text-warn' : 'text-muted-foreground')}>
-      {free}{cell.timeAway > 0 && ` · ${t('people.away', { h: hours(cell.timeAway) })}`}
+    <span data-capacity aria-describedby={cell.partial ? description : undefined} title={cell.partial ? t('workload.partial') : undefined} className={cn('shrink-0 text-xs tabular-nums', cell.remaining < 0 && !cell.partial ? 'font-medium text-warn' : 'text-muted-foreground')}>
+      {free}{!cell.partial && cell.timeAway > 0 && ` · ${t('people.away', { h: hours(cell.timeAway) })}`}
+      {cell.partial && <span id={description} className="sr-only">{t('workload.partial')}</span>}
     </span>
   )
 }
@@ -87,7 +87,7 @@ export function PeoplePicker({ value, valueName, onChange, placeholder, allowCle
     queryFn: () => get<Person[]>(`users${qs({ q, limit: 30 })}`), staleTime: 60_000,
   })
   const pool = (candidates ?? search.data ?? []).filter((p) => !exclude.includes(p.id) && (!candidates || !q || p.displayName.toLowerCase().includes(q.toLowerCase())))
-  const capacity = usePickerCapacity(week, open, pool.map((p) => p.id))
+  const capacity = usePeopleCapacity(week, open, pool.map((p) => p.id))
   const selectedName = valueName ?? pool.find((p) => p.id === value)?.displayName
   return (
     <div className="flex items-center gap-1">

@@ -4,12 +4,14 @@ import { Fragment, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { AccentDot, ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Segmented, SummaryTile, selectCls, tdCls, thCls, TableRegion } from '@/components/hub/common'
-import { Avatar, PeoplePicker } from '@/components/hub/people'
+import { Avatar, CapacityFigure, PeoplePicker, usePeopleCapacity, weekOf } from '@/components/hub/people'
+import { OneSignal, type Signal } from '@/components/hub/indicators'
 import { HealthPill, Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { useProject, useReference } from '@/hooks/data'
 import { del, get, post, qs } from '@/lib/api'
-import { ago, fmtDate } from '@/lib/format'
+import { useMe } from '@/lib/auth'
+import { ago, fmtDate, shortDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { Page as PageOf, ProjectRow } from '@/lib/types'
 import { cn, type Accent } from '@/lib/utils'
@@ -21,7 +23,7 @@ interface StaffRow {
 }
 interface StaffData { scope: string; canSeeAll: boolean; tiles: { staff: number; assignments: number; withOverdue: number; withBlocked: number; reviewsStalled: number }; people: StaffRow[] }
 interface Assignment {
-  memberId: string; projectId: string; projectNumber: string; name: string; status: string; reportedHealth: string; roles: string[]; leads: string[]
+  memberId: string; rowVersion: number; projectId: string; projectNumber: string; name: string; status: string; reportedHealth: string; roles: string[]; leads: string[]
   primaryDiscipline?: string; addedAt: string; open: number; overdue: number; nextDue?: { id: string; key: string; name: string; dueDate: string } | null; canRemove: boolean
 }
 
@@ -36,6 +38,8 @@ export function StaffPage() {
   const f = { scope: sp.get('scope') ?? undefined, showInactive: sp.get('inactive') === '1' || undefined, officeId: sp.get('office') ?? undefined,
     disciplineId: sp.get('discipline') ?? undefined, indicator: sp.get('indicator') ?? undefined }
   const q = useQuery({ queryKey: ['staff', f], queryFn: () => get<StaffData>(`staff${qs(f)}`) })
+  const showCapacity = useMe().capabilities.workload
+  const capacity = usePeopleCapacity(weekOf(today()), !!q.data, q.data?.people.map((p) => p.id) ?? [])
   const [open, setOpen] = useState<Set<string>>(new Set())
   const [sort, setSort] = useState<{ key: string; desc: boolean } | null>(null)
   const header = { eyebrow: t('nav.resources'), title: t('nav.staff') }
@@ -55,6 +59,16 @@ export function StaffPage() {
   }
   const roleChips = (r: StaffRow['roles']) => (['pm', 'dl', 'team', 'reviewer', 'viewer'] as const).filter((k) => r[k] > 0).map((k) => `${t(`staff.role.${k}`)} ${r[k]}`).join(' · ')
   const count = (p: StaffRow, n: number, section: string, bad = false) => <Link to={`/my-work?userId=${p.id}#mw-${section}`} className={cn('tabular-nums hover:underline', bad && n > 0 && 'font-medium text-bad')}>{n}</Link>
+  const signals = (p: StaffRow): Signal[] => {
+    const cell = capacity(p.id)
+    const result: Signal[] = []
+    if (p.overdue) result.push({ key: 'overdue', tone: 'bad', label: t('ind.overdue') })
+    if (p.blocked) result.push({ key: 'blocked', tone: 'bad', label: t('ind.blocked') })
+    if (p.reviewsStalled) result.push({ key: 'reviews', tone: 'warn', label: t('staff.stalled', { n: p.reviewsStalled }) })
+    if (cell?.overPlanned) result.push({ key: 'over', tone: 'warn', label: t('signal.withWeek', { label: t('planner.indicator.over'), week: shortDate(cell.week) }) })
+    if (cell?.staleEntries) result.push({ key: 'stale', tone: 'warn', label: t('signal.withWeek', { label: t('staff.stalePlan', { n: cell.staleEntries }), week: shortDate(cell.week) }) })
+    return result
+  }
   return (
     <Page {...header} subtitle={d.scope === 'all' ? t('staff.allSubtitle') : t('staff.directSubtitle')}>
       <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4 text-sm md:p-5">
@@ -87,6 +101,8 @@ export function StaffPage() {
             <li key={p.id} className="rounded-lg border bg-card p-4 text-sm">
               <div className="flex items-center gap-2.5 font-semibold"><Avatar id={p.id} name={p.displayName} />{p.isActive ? p.displayName : t('common.inactiveSuffix', { name: p.displayName })}</div>
               <div className="text-xs text-muted-foreground">{[p.jobTitle, office(p.officeId), roleChips(p.roles)].filter(Boolean).join(' · ')}</div>
+              {showCapacity && <div className="mt-1"><span className="mr-2 text-xs text-muted-foreground">{t('staff.thisWeek')}</span><CapacityFigure cell={capacity(p.id)} /></div>}
+              <OneSignal signals={signals(p)} />
               <dl className="mt-2 grid grid-cols-4 gap-2 text-center text-xs">
                 {([['dash.open', p.open, false], ['ind.overdue', p.overdue, true], ['ind.blocked', p.blocked, true], ['staff.reviews', p.reviews, false]] as const).map(([label, n, bad]) => (
                   <div key={label}><dt className="text-muted-foreground">{t(label)}</dt><dd className={cn('text-base font-semibold tabular-nums', bad && n > 0 && 'text-bad')}>{n}</dd></div>
@@ -104,7 +120,7 @@ export function StaffPage() {
                 <th key={k} scope="col" className={cn(thCls, k !== 'name' && k !== 'lastActivityAt' && 'text-right')} aria-sort={sort?.key === k ? (sort.desc ? 'descending' : 'ascending') : 'none'}>
                   <button className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => setSort(sort?.key === k ? { key: k, desc: !sort.desc } : { key: k, desc: k !== 'name' })}>
                     {t(label)}{sort?.key === k && <span aria-hidden>{sort.desc ? '↓' : '↑'}</span>}</button>
-                </th>))}<th scope="col" className={thCls}>{t('staff.roles')}</th></tr>
+                </th>))}{showCapacity && <th scope="col" className={thCls}>{t('staff.thisWeek')}</th>}<th scope="col" className={thCls}>{t('staff.roles')}</th></tr>
             </thead>
             <tbody>
               {rows.map((p) => (
@@ -116,7 +132,7 @@ export function StaffPage() {
                     <td className={tdCls}>
                       <div className="flex min-w-56 items-center gap-2.5"><Avatar id={p.id} name={p.displayName} />
                         <div className="min-w-0"><Link to={`/my-work?userId=${p.id}`} className="font-semibold hover:underline">{p.isActive ? p.displayName : t('common.inactiveSuffix', { name: p.displayName })}</Link>
-                          <div className="text-xs/[18px] text-muted-foreground">{[p.jobTitle, office(p.officeId)].filter(Boolean).join(' · ')}</div></div></div>
+                          <div className="text-xs/[18px] text-muted-foreground">{[p.jobTitle, office(p.officeId)].filter(Boolean).join(' · ')}</div><OneSignal signals={signals(p)} /></div></div>
                     </td>
                     <td className="px-(--cell-px) py-(--cell-py) text-right tabular-nums">{p.projects}</td>
                     <td className="px-(--cell-px) py-(--cell-py) text-right">{count(p, p.open, 'tasks')}</td>
@@ -126,9 +142,10 @@ export function StaffPage() {
                     <td className="px-(--cell-px) py-(--cell-py) text-right">{count(p, p.reviews, 'reviews')}{p.reviewsStalled > 0 && <span className="ml-1 text-xs text-warn">({t('staff.stalled', { n: p.reviewsStalled })})</span>}</td>
                     <td className="px-(--cell-px) py-(--cell-py) text-right">{count(p, p.deliverablesDue, 'deliverables')}</td>
                     <td className="whitespace-nowrap px-(--cell-px) py-(--cell-py) text-xs text-muted-foreground">{p.lastActivityAt ? ago(p.lastActivityAt) : t('common.dash')}</td>
+                    {showCapacity && <td className={cn(tdCls, 'whitespace-nowrap')}><CapacityFigure cell={capacity(p.id)} /></td>}
                     <td className="whitespace-nowrap px-(--cell-px) py-(--cell-py) text-xs">{roleChips(p.roles) || t('common.dash')}</td>
                   </tr>
-                  {open.has(p.id) && <tr className="border-t bg-muted"><td /><td colSpan={COLS.length + 1} className="px-(--cell-px) py-3"><Assignments person={p} scope={f.scope} onChanged={() => q.refetch()} /></td></tr>}
+                  {open.has(p.id) && <tr className="border-t bg-muted"><td /><td colSpan={COLS.length + 1 + Number(showCapacity)} className="px-(--cell-px) py-3"><Assignments person={p} scope={f.scope} onChanged={() => q.refetch()} /></td></tr>}
                 </Fragment>
               ))}
             </tbody>
@@ -211,7 +228,7 @@ function RemoveDialog({ person, a, onClose }: { person: StaffRow; a: Assignment;
   return (
     <ConfirmDialog open destructive reason onOpenChange={(o) => !o && onClose(false)} title={t('staff.removeTitle', { name: person.displayName, number: a.projectNumber })} confirmLabel={t('staff.remove')}
       body={items.data ? (items.data.count > 0 ? t('staff.openItems', { n: items.data.count }) : t('staff.noOpenItems')) : undefined}
-      onConfirm={async (reason) => { await del(`projects/${a.projectId}/members/${a.memberId}${qs({ reassignTo: to, reason })}`); toast.success(t('staff.removed')); onClose(true) }}>
+      onConfirm={async (reason) => { await del(`projects/${a.projectId}/members/${a.memberId}${qs({ reassignTo: to, reason })}`, undefined, a.rowVersion); toast.success(t('staff.removed')); onClose(true) }}>
       {items.data && items.data.count > 0 && (
         <Field label={t('staff.reassignTo')} hint={t('staff.reassignHint')}><PeoplePicker value={to} onChange={setTo} exclude={[person.id]} /></Field>
       )}

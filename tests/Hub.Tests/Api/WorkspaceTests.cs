@@ -26,6 +26,25 @@ public sealed class WorkspaceTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Named_workspace_rejects_stale_patch_and_delete() // G-07, §25.8
+    {
+        var p = await d.Project();
+        var pm = f.As(TestData.Pm);
+        var ws = await pm.Post("/api/v1/workspaces", new { name = "Concurrency " + Guid.NewGuid().ToString("N"), projectIds = new[] { p.Id } }).Result.Json(201);
+        var version = ws.I("rowVersion");
+
+        var stale = await pm.Patch($"/api/v1/workspaces/{ws.S("id")}", new { name = "Stale" }, version - 1);
+        var problem = await stale.Json(409);
+        Assert.Equal("concurrency_conflict", problem.S("code"));
+        Assert.Equal(version, (await Get(TestData.Pm, "workspaces")).AsArray().Single(w => w!.G("id") == ws.G("id"))!.I("rowVersion"));
+
+        var updated = await pm.Patch($"/api/v1/workspaces/{ws.S("id")}", new { name = "Updated", projectIds = new[] { p.Id } }, version).Result.Json();
+        Assert.True(updated.I("rowVersion") > version);
+        Assert.Equal(HttpStatusCode.Conflict, (await pm.Delete($"/api/v1/workspaces/{ws.S("id")}", version)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await pm.Delete($"/api/v1/workspaces/{ws.S("id")}", updated.I("rowVersion"))).StatusCode);
+    }
+
+    [Fact]
     public async Task A_named_workspace_keeps_its_scope_and_never_discloses_a_restricted_project() // US1, FR-VIS-02, AC-VIS-07
     {
         await WithRestricted(async () =>
@@ -70,7 +89,7 @@ public sealed class WorkspaceTests(HubFactory f)
             var after = (await Get(TestData.Alex, "workspaces")).AsArray().Single(w => w!.G("id") == ws.G("id"))!;
             Assert.Equal((1, 1), (after["projectIds"]!.AsArray().Count, after.I("hidden")));
             Assert.Equal(new[] { a.ProjectNumber }, (await Get(TestData.Alex, $"tasks?projects={b.Id},{a.Id}"))["items"]!.AsArray().Select(t => t!.S("projectNumber")).Distinct());
-            Assert.Equal(HttpStatusCode.NoContent, (await alex.DeleteAsync($"/api/v1/workspaces/{ws.S("id")}")).StatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, (await alex.Delete($"/api/v1/workspaces/{ws.S("id")}", ws.I("rowVersion"))).StatusCode);
         });
     }
 
@@ -137,7 +156,7 @@ public sealed class WorkspaceTests(HubFactory f)
         Assert.Equal(HttpStatusCode.NoContent, (await f.As(TestData.Alex).Put($"/api/v1/workspaces/{alexWs.S("id")}/board-order", new { taskIds = new[] { todo.G("id") } })).StatusCode);
         Assert.Equal(todo.G("id"), (await Get(TestData.Alex, $"tasks?projects={scope}&sort=board&workspaceId={alexWs.S("id")}"))["items"]![0]!.G("id"));
         Assert.Equal(review.G("id"), (await Get(TestData.Pm, $"tasks?projects={scope}&sort=board&workspaceId={alexWs.S("id")}"))["items"]![0]!.G("id")); // ignored: due-date order
-        Assert.Equal(HttpStatusCode.NoContent, (await f.As(TestData.Pm).DeleteAsync($"/api/v1/workspaces/{ws.S("id")}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await f.As(TestData.Pm).Delete($"/api/v1/workspaces/{ws.S("id")}", ws.I("rowVersion"))).StatusCode);
         Assert.Equal(0, await f.DbAsync(db => db.BoardOrders.CountAsync(o => o.WorkspaceId == ws.G("id"))));
     }
 

@@ -1,0 +1,21 @@
+{
+  "repositoryBase": "163996828ddbfc6bbb4900ccea022ba9e92bd6ee",
+  "state": "local, uncommitted simulator-fixture sources",
+  "bundleIdentifier": "com.engcalchub.tuesday",
+  "version": "0.1.0 (1)",
+  "xcode": "27.0 (27A266a)",
+  "testedRuntime": "iOS Simulator 26.5 (23F77)",
+  "sha256": {
+    ".gitignore": "108e615e1fcade1cf4f9c4d3551754ab3ba69d01c24ea90a864ad3a8a76f5d2e",
+    "ios/Tuesday/AppStore.swift": "4ab5a3450655f6996cbdae70a1a7bacb659430730693e02ffe0cd8594ae0f49b",
+    "ios/Tuesday/DraftEditor.swift": "f529c459b8420f96856e3928a18d997d8c063fb30f4a8237b8b4bdd69857f6c3",
+    "ios/Tuesday/FixtureServer.swift": "5cdee06e83417f05030fd322678fcd4a27fbf519995d01999f6fbcff868f967b",
+    "ios/Tuesday/Models.swift": "8d454be066e21b37f724347262b5291b71ccea433b9e1edeb46e1274400da187",
+    "ios/Tuesday/TuesdayApp.swift": "2df8442d306670e8b37b3dc5fab75eba049abe82d5e14163d53e587c5c377cf7",
+    "ios/Tuesday/WorkspaceViews.swift": "6e47236f687f34e585fd221867f815185d5f4bc5270f8709b21acdc7f944c310",
+    "ios/TuesdayTests/TuesdayTests.swift": "476f30bd95c68e33b4437762a8684c19fb6fe5954f6a3ce93332dfedf90f3487",
+    "ios/TuesdayUITests/TuesdayUITests.swift": "fc01d783791691e416ab42acfb7bd11c28f47684192ddc2e63302d11230de260",
+    "ios/Tuesday.xcodeproj/project.pbxproj": "40b3aa2abd746235334503ea84acd072f38d7a456b65f0c0cc433548de32b229",
+    "ios/Tuesday.xcodeproj/xcshareddata/xcschemes/Tuesday.xcscheme": "ad9c85a187dd5b7726e0145086976ebb2fd48bb52c70217210b934acd1fa74bd"
+  }
+}

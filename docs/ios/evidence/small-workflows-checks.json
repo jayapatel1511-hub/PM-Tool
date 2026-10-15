@@ -1,0 +1,16 @@
+{
+  "sourceBundle": "/tmp/Tuesday-small-final-20261014.xcresult",
+  "note": "Two passed cases from a mixed run. The failed conflict case is superseded by small-conflict-summary.json.",
+  "tests": [
+    {
+      "nodeIdentifier": "TuesdayUITests/testCommentAndActualTimeDailyWorkflow()",
+      "result": "Passed",
+      "durationInSeconds": 103.78394591808319
+    },
+    {
+      "nodeIdentifier": "TuesdayUITests/testLostAcknowledgmentResolvesOriginalRequest()",
+      "result": "Passed",
+      "durationInSeconds": 76.86361002922058
+    }
+  ]
+}

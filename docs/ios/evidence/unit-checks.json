@@ -1,0 +1,109 @@
+{
+  "sourceBundle": "/tmp/Tuesday-final-regression-20261014.xcresult",
+  "target": "TuesdayTests",
+  "passed": 19,
+  "failed": 0,
+  "skipped": 1,
+  "tests": [
+    {
+      "nodeIdentifier": "TuesdayTests/testConcurrentTimeCannotDefeatDailyCap()",
+      "result": "Passed",
+      "durationInSeconds": 0.39304399490356445
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testCreateReturnsOneIdentityAndValidatesScopeAndOwner()",
+      "result": "Passed",
+      "durationInSeconds": 0.7647320032119751
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testDeviceFileProtection()",
+      "result": "Skipped",
+      "durationInSeconds": 0.012804031372070312
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testDraftRecoveryIsolationAndBackupExclusion()",
+      "result": "Passed",
+      "durationInSeconds": 0.4010169506072998
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testExpiredDraftRequiresExplicitReconciliation()",
+      "result": "Passed",
+      "durationInSeconds": 0.2666020393371582
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testExplicitAccountChangeAndRevocationPurgeDrafts()",
+      "result": "Passed",
+      "durationInSeconds": 0.5214629173278809
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testInboxOnlyExplicitAcknowledgmentAndOfflineFailure()",
+      "result": "Passed",
+      "durationInSeconds": 0.3739689588546753
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testLostReplyAndOverlappingReplayPersistExactlyOnce()",
+      "result": "Passed",
+      "durationInSeconds": 1.0125689506530762
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testOfflineForegroundLocksUntilRevalidatedAndConflictKeepsInput()",
+      "result": "Passed",
+      "durationInSeconds": 1.0308899879455566
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testOrganisationDatesDSTAndUnknownCapacity()",
+      "result": "Passed",
+      "durationInSeconds": 0.003692030906677246
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testPrivacyShieldCoversPresentedWorkspaceOnSceneDeactivation()",
+      "result": "Passed",
+      "durationInSeconds": 0.004813075065612793
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testReadOnlyScopeBlockersAndRevocation()",
+      "result": "Passed",
+      "durationInSeconds": 0.375512957572937
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testRetryWindowRequiresReconciliation()",
+      "result": "Passed",
+      "durationInSeconds": 0.24741506576538086
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testReviewRequiresIndependentReviewerAndCannotCompleteDirectly()",
+      "result": "Passed",
+      "durationInSeconds": 0.8851019144058228
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testStaleAndMissingVersionsPreserveCurrentTask()",
+      "result": "Passed",
+      "durationInSeconds": 0.5021740198135376
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testStoreUnknownOutcomeIsImmutableAndRecoveredAcrossRelaunch()",
+      "result": "Passed",
+      "durationInSeconds": 0.6487979888916016
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testStrictLinksRejectBroadenedViewsAndArbitraryHosts()",
+      "result": "Passed",
+      "durationInSeconds": 0.0012290477752685547
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testTimeValidationCombinedCapAndVersionedCorrection()",
+      "result": "Passed",
+      "durationInSeconds": 0.8966139554977417
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testUnreadableRetainedInputCannotBeOverwritten()",
+      "result": "Passed",
+      "durationInSeconds": 0.1398850679397583
+    },
+    {
+      "nodeIdentifier": "TuesdayTests/testUnsentDraftKeepsTaskIdentityBeforeFirstWrite()",
+      "result": "Passed",
+      "durationInSeconds": 0.5283800363540649
+    }
+  ]
+}

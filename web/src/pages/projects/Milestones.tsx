@@ -101,7 +101,7 @@ export function MilestonesTab() {
             {m.taskBlocked > 0 && <Chip tone="bad">{t('ind.blockedN', { n: m.taskBlocked })}</Chip>}
             <Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><span className="text-sm text-primary underline">{t('common.why')}</span></Why>
           </div>
-          <Button className="mt-3" variant="outline" aria-expanded={open.has(m.id)} onClick={() => { const n = new Set(open); if (n.has(m.id)) n.delete(m.id); else n.add(m.id); setOpen(n) }}>{t('milestone.showDeliverables', { key: m.key })}</Button>
+          <Button className="mt-3 h-auto min-h-(--control-h) max-w-full whitespace-normal text-left" variant="outline" aria-expanded={open.has(m.id)} onClick={() => { const n = new Set(open); if (n.has(m.id)) n.delete(m.id); else n.add(m.id); setOpen(n) }}>{t('milestone.showDeliverables', { key: m.key })}</Button>
           {open.has(m.id) && <div className="mt-3 border-t pt-3"><TargetedDeliverables milestoneId={m.id} /></div>}
         </li>)}</ul>
       ) : (

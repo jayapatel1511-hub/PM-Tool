@@ -66,7 +66,7 @@ export function ReassignWorkPage() {
               <h2 className="border-b px-5 py-3 text-base/6 font-semibold">{project} <span className="ml-1 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{list.length}</span></h2>
               <ul className="divide-y">
                 {list.map((i) => (
-                  <li key={id(i)} className="flex min-h-(--row-min) flex-wrap items-center gap-x-3 gap-y-1 px-5 py-(--cell-py) text-sm hover:bg-muted">
+                  <li key={id(i)} className="flex min-h-(--row-min) flex-wrap items-center gap-x-3 gap-y-1 px-5 py-(--cell-py) text-sm hover:bg-muted [&>.flex-1]:basis-full sm:[&>.flex-1]:basis-auto">
                     <Checkbox checked={picked.has(id(i))} onCheckedChange={() => toggle(id(i))} aria-label={t('reassign.pick', { item: `${i.key ?? ''} ${i.name}` })} />
                     <span className="w-32 text-xs text-muted-foreground">{t(`reassign.kind.${i.kind}`)}</span>
                     {i.key && <Key>{i.key}</Key>}

@@ -43,7 +43,7 @@ export function PlannerGrid({ data, editable, onQuickAdd, onCell, onEntry, onTim
     const person = data.people[personIndex + dy]
     if (target && person) cellRefs.current[`${person.id}:${target.week}`]?.focus()
   }
-  return <div className="scroll-region max-h-[76dvh] overflow-auto rounded-lg border bg-card" role="region" aria-label={t('planner.grid')}>{saveError != null && <ErrorBanner error={saveError} retry={() => void submitQuick()} />}
+  return <div className="scroll-region max-h-[76dvh] overflow-auto rounded-lg border bg-card" role="region" aria-label={t('planner.grid')} aria-describedby="planner-basis"><p id="planner-basis" className="sticky left-0 max-w-xl px-3 py-2 text-xs text-muted-foreground">{t('planner.remainingBasis')}</p>{saveError != null && <ErrorBanner error={saveError} retry={() => void submitQuick()} />}
     <table className="w-full min-w-max border-separate border-spacing-0 text-sm" role="grid" aria-label={t('planner.grid')}>
       <caption className="sr-only">{t('planner.gridCaption')}</caption>
       <thead><tr>

@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { get, qs } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { plural, t, tv } from '@/lib/i18n'
 import { accentOf, cn } from '@/lib/utils'
+import { milestoneLabelLayout } from './gantt-labels'
 import { DepArrow, HATCH, Legend, MoveDialog, PrintLegend, ZOOM, ZoomMenu, assumedWidth, depPath, depTitle, tone, toneBg, type Move, type Zoom } from './projects/Timeline'
 
 interface Dated { id: string; key: string; name: string; startDate?: string | null; dueDate?: string | null; originalStartDate?: string | null; originalDueDate?: string | null
@@ -30,7 +31,7 @@ type Row =
   | { kind: 'deliverable' | 'task'; id: string; g: GProject; item: Dated; span: Span; indent: boolean }
 
 const LABEL = 240
-const H = { project: 56, deliverable: 36, task: 32 } as const
+const H = { project: 76, deliverable: 36, task: 32 } as const
 /** Bar heights inside their rows: deliverables stand out from their tasks. */
 const BAR = { deliverable: 22, task: 18 } as const
 /** Days shown per zoom; previous and next move by half of it (FR-VIS-05). */
@@ -143,7 +144,7 @@ export function GanttPage() {
     const slip = span.ghost ? daysBetween(span.ghost.end, span.end) : 0
     // Overdue and moved dates are spoken as well as drawn (hatch, dashed baseline), never colour alone.
     const label = [t('timeline.barLabel', { key: item.key, name: item.name, from: fmtDate(span.start), to: fmtDate(span.end), status: tv(item.status), pct: item.progressPct }),
-      span.assumed && t('sig.startNotSet'), late > 0 && t('timeline.overdueBy', { n: late }), span.ghost && t('timeline.baseline', { from: fmtDate(span.ghost.start), to: fmtDate(span.ghost.end) })].filter(Boolean).join(' · ')
+      span.assumed && t('sig.startNotSet'), late > 0 && plural(late, 'timeline.overdueByOne', 'timeline.overdueBy', { n: late }), span.ghost && t('timeline.baseline', { from: fmtDate(span.ghost.start), to: fmtDate(span.ghost.end) })].filter(Boolean).join(' · ')
     const drop = (n: number) => setMove({ kind: r.kind, id: item.id, key: item.key, name: item.name, start: item.startDate, due: item.dueDate!, days: n, rowVersion: item.rowVersion,
       needsReason: r.kind === 'task' && (item as GTask).dueNeedsReason, projectComplete: r.g.data.permissions.needsReason })
     const props = dragProps(item.id, item.canEditDates, drop, () => openPanel(type, item.id))
@@ -161,7 +162,7 @@ export function GanttPage() {
           <span data-meter-fill className="absolute bottom-0 left-0 h-[3px]" style={{ width: `${item.progressPct}%`, background: tone(item.status) }} />
         </button>
         {dx !== 0 && <span className="absolute z-30 rounded-md bg-primary px-1.5 text-xs/[18px] font-medium text-primary-foreground tabular-nums" style={{ left: right + dx + 4, top }}>{shift!.days > 0 ? '+' : ''}{shift!.days} d</span>}
-        {span.late && <span aria-hidden className="absolute rounded-r-md border border-l-0 border-bad" title={t('timeline.overdueBy', { n: late })}
+        {span.late && <span aria-hidden className="absolute rounded-r-md border border-l-0 border-bad" title={plural(late, 'timeline.overdueByOne', 'timeline.overdueBy', { n: late })}
           style={{ left: right, width: Math.max(late * px, 2), top, height, background: HATCH }} />}
         {dx === 0 && slip !== 0 && <span aria-hidden className="absolute whitespace-nowrap text-xs/[18px] text-muted-foreground tabular-nums" style={{ left: after, top: (H[r.kind] - 18) / 2 }}>
           {t('gantt.slip', { n: slip > 0 ? `+${slip}` : `−${-slip}` })}</span>}
@@ -196,7 +197,7 @@ export function GanttPage() {
           <div className="relative" style={{ width: LABEL + width }}>
             {/* Time axis, kept in view while the rows scroll; the item column stays put while the dates scroll. */}
             <div className="sticky top-0 z-30 flex border-b bg-muted text-xs/[18px] text-muted-foreground">
-              <div className="sticky left-0 z-10 flex shrink-0 items-end border-r bg-muted px-3 py-1.5 font-medium" style={{ width: LABEL }}>{t('timeline.items')}</div>
+              <div className="sticky left-0 z-20 flex shrink-0 items-end border-r bg-muted px-3 py-1.5 font-medium" style={{ width: LABEL }}>{t('timeline.items')}</div>
               <div className="relative h-12 overflow-hidden" style={{ width }} aria-hidden>
                 {upper.map((d) => <span key={`u${d}`} className="absolute top-0 flex h-6 items-center whitespace-nowrap border-l pl-1.5 font-semibold text-foreground" style={{ left: x(d) }}>{upperLabel(d)}</span>)}
                 {minors.map((d) => <span key={`l${d}`} className="absolute top-6 flex h-6 items-center whitespace-nowrap border-l pl-1 tabular-nums" style={{ left: x(d) }}>{lowerLabel(d)}</span>)}
@@ -214,6 +215,7 @@ export function GanttPage() {
                   const open = !closed.has(p.id)
                   const ps = p.startDate && p.targetCompletionDate ? { l: Math.max(x(p.startDate), 0), r: Math.min(x(p.targetCompletionDate) + px, width) } : null
                   const ms = r.g.data.milestones.flatMap((m) => (m.date && m.date >= start && m.date <= end ? [{ ...m, date: m.date }] : [])).sort((a, b) => a.date.localeCompare(b.date))
+                  const labels = milestoneLabelLayout(ms.map(m => x(m.date) + px / 2), width)
                   return (
                     <div key={r.id} data-accent={accentOf(p.id)} className="flex border-b bg-muted" style={{ height: H.project }}>
                       <div className="sticky left-0 z-20 flex shrink-0 items-center gap-1 border-r bg-muted pl-1 pr-3" style={{ width: LABEL }}>
@@ -230,17 +232,13 @@ export function GanttPage() {
                         {ps && ps.r > ps.l && <span aria-hidden className="absolute bottom-1.5 h-1 rounded-full bg-(--acc-stripe)" style={{ left: ps.l, width: ps.r - ps.l }} title={t('gantt.projectSpan', { from: fmtDate(p.startDate), to: fmtDate(p.targetCompletionDate) })} />}
                         {ms.map((m, i) => {
                           const at = x(m.date) + px / 2
-                          // Labels stop before the next diamond; when that leaves no room, the label takes the second line and may run to the one after.
-                          const near = i + 1 < ms.length && x(ms[i + 1].date) - x(m.date) < 120
-                          const stop = i + 1 < ms.length ? (near && i + 2 < ms.length ? x(ms[i + 2].date) : near ? width : x(ms[i + 1].date)) + px / 2 : width
-                          const room = stop - at - 24
                           return (
                             <Fragment key={m.id}>
                               <button type="button" className="absolute top-[6px] grid size-6 -translate-x-1/2 place-items-center rounded-md" style={{ left: at }} onClick={() => openPanel('Milestone', m.id)}
                                 aria-label={t('timeline.milestoneLabel', { key: m.key, name: m.name, date: fmtDate(m.date), status: tv(m.status) })} title={`${m.key} ${m.name} · ${fmtDate(m.date)} · ${tv(m.status)}`}>
                                 <span className="block size-3.5 rotate-45 border border-card" style={{ background: tone(m.status) }} />
                               </button>
-                              {room >= 32 && <span aria-hidden className={cn('pointer-events-none absolute truncate text-xs/[18px] font-medium text-foreground', near ? 'top-[31px]' : 'top-[9px]')} style={{ left: at + (near ? -6 : 14), maxWidth: room + (near ? 20 : 0) }}>{m.name}</span>}
+                              {labels[i].maxWidth > 0 && <span aria-hidden className="pointer-events-none absolute truncate text-xs/[18px] font-medium text-foreground" style={labels[i]}>{m.name}</span>}
                             </Fragment>
                           )
                         })}

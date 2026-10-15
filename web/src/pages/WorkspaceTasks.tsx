@@ -156,7 +156,7 @@ export function WorkspaceTasksPage() {
             <thead className="bg-muted">
               <tr>{th('key', 'col.key')}{th('name', 'col.name')}<th scope="col" className={thCls}>{t('col.project')}</th>
                 {th('status', 'col.status')}<th scope="col" className={thCls}>{t('col.assignee')}</th>{th('dueDate', 'col.due')}{th('priority', 'col.priority')}
-                {th('progress', 'col.progress', true)}<th scope="col" className={thCls}><span className="sr-only">{t('col.indicators')}</span></th></tr>
+                {th('progress', 'col.progress', true)}<th scope="col" className={thCls}>{t('col.indicators')}</th></tr>
             </thead>
             <tbody>
               {rows.map((r) => (

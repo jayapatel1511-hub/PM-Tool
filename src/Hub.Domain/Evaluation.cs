@@ -462,7 +462,7 @@ public static class Evaluator
             var affected = string.Join(", ", r.AffectedMilestoneIds.Where(milestones.ContainsKey).Select(m => milestones[m].Name));
             if (r.IsOverdue) // A-01
                 Add("A-01", r.DaysOverdue > 5 || t.Priority == Priority.Critical ? Severity.Critical : Severity.Warning, ItemType.Task, t.Id, t.Key, t.Name,
-                    $"Due {due} — {r.DaysOverdue} days overdue" + (affected.Length > 0 ? $"; affects {affected}" : ""),
+                    $"Due {due} — {DayCount(r.DaysOverdue)} overdue" + (affected.Length > 0 ? $"; affects {affected}" : ""),
                     [t.AssigneeId, dl, .. pms.Cast<Guid?>()], t.AssigneeId, t.DisciplineId, r.DaysOverdue, t.Priority, t.DueDate, 5,
                     new() { ["dueDate"] = due, ["daysOverdue"] = r.DaysOverdue, ["priority"] = t.Priority });
             if (r.IsBlocked && r.DaysBlocked >= s.BlockedAttentionDays) // A-02
@@ -474,7 +474,7 @@ public static class Evaluator
             {
                 var succ = r.BlockingTaskIds.Select(x => tasks[x]).ToList();
                 Add("A-03", Severity.Critical, ItemType.Task, t.Id, t.Key, t.Name,
-                    $"Due {due} — {r.DaysOverdue} days overdue; blocking {string.Join(" and ", succ.Select(x => x.Key))}" + (affected.Length > 0 ? $"; affects {affected}" : ""),
+                    $"Due {due} — {DayCount(r.DaysOverdue)} overdue; blocking {string.Join(" and ", succ.Select(x => x.Key))}" + (affected.Length > 0 ? $"; affects {affected}" : ""),
                     [t.AssigneeId, dl, .. succ.Select(x => Lead(x.DisciplineId)), .. pms.Cast<Guid?>()], t.AssigneeId, t.DisciplineId, r.DaysOverdue, t.Priority, t.DueDate, null,
                     new() { ["daysOverdue"] = r.DaysOverdue, ["blocking"] = succ.Select(x => x.Key).ToList() });
             }
@@ -521,7 +521,7 @@ public static class Evaluator
         {
             var r = decr[d.Id];
             if (r.IsOverdue) // A-04
-                Add("A-04", Severity.Critical, ItemType.Decision, d.Id, d.Key, d.Subject, $"Required by {d.RequiredBy:yyyy-MM-dd} — {r.DaysOverdue} days overdue; blocking {d.BlockedTaskIds.Count(x => tasks.ContainsKey(x) && !TaskStatuses.IsTerminal(tasks[x].Status))} tasks",
+                Add("A-04", Severity.Critical, ItemType.Decision, d.Id, d.Key, d.Subject, $"Required by {d.RequiredBy:yyyy-MM-dd} — {DayCount(r.DaysOverdue)} overdue; blocking {d.BlockedTaskIds.Count(x => tasks.ContainsKey(x) && !TaskStatuses.IsTerminal(tasks[x].Status))} tasks",
                     [d.RequestedById, d.OwnerUserId, .. pms.Cast<Guid?>()], d.OwnerUserId, null, r.DaysOverdue, d.Impact, d.RequiredBy, null, new() { ["requiredBy"] = d.RequiredBy, ["daysOverdue"] = r.DaysOverdue });
             else if (r.IsDueSoon && d.Impact == Impact.High)
                 Add("A-04", Severity.Warning, ItemType.Decision, d.Id, d.Key, d.Subject, $"High impact, required by {d.RequiredBy:yyyy-MM-dd} (in {until(d.RequiredBy)} days)",
@@ -594,7 +594,7 @@ public static class Evaluator
         {
             var route = a.OwnerType == ActionOwnerType.Discipline && a.OwnerDisciplineId is { } od ? Lead(od) : a.OwnerUserId;
             if (a.OwnerType == ActionOwnerType.Discipline && a.OwnerDisciplineId is { } od2 && Lead(od2) is null) route = i.Project.PrimaryPmId; // flagged to the PM when the discipline has no lead
-            Add("A-01", Severity.Warning, ItemType.Action, a.Id, a.Key, a.Text, $"Action due {a.DueDate:yyyy-MM-dd} — {today.DayNumber - a.DueDate!.Value.DayNumber} days overdue",
+            Add("A-01", Severity.Warning, ItemType.Action, a.Id, a.Key, a.Text, $"Action due {a.DueDate:yyyy-MM-dd} — {DayCount(today.DayNumber - a.DueDate!.Value.DayNumber)} overdue",
                 [route, .. pms.Cast<Guid?>()], a.OwnerUserId, a.OwnerDisciplineId, today.DayNumber - a.DueDate.Value.DayNumber, null, a.DueDate, null, new());
         }
 
@@ -612,6 +612,8 @@ public static class Evaluator
     static string? LinkReason(DependencySnap e, LinkState state, bool predecessorOnHold) => state == LinkState.InLag
         ? e.Type == DependencyTypes.StartToStart ? $"start link, lag {e.LagDays} days" : $"lag {e.LagDays} days"
         : predecessorOnHold ? "predecessor on hold" : e.Type == DependencyTypes.StartToStart ? "start link" : null;
+
+    static string DayCount(int count) => $"{count} {(count == 1 ? "day" : "days")}";
 
     /// ATT-04: severity, then days overdue or blocked (descending), then priority, then due date.
     public static List<AttentionResult> Rank(IEnumerable<AttentionResult> items) =>

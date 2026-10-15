@@ -49,12 +49,12 @@ export function WorkspaceTeamPage() {
                       <div className="min-w-0"><div className="break-words font-semibold">{p.displayName}</div>
                         {p.jobTitle && <div className="text-xs/[18px] text-muted-foreground">{p.jobTitle}</div>}</div></div>
                   </td>
-                  <td className={tdCls}>
+                  <td className={`${tdCls} min-w-80`}>
                     <ul className="space-y-1.5">
                       {p.projects.map((m) => (
                         <li key={m.projectId} className="flex flex-wrap items-center gap-x-2 gap-y-1">
                           <Link to={`/projects/${m.projectNumber}/team`} className="inline-flex min-w-0 items-center gap-2 hover:underline" title={m.projectName}>
-                            <AccentDot id={m.projectId} /><Key>{m.projectNumber}</Key><span className="break-words">{m.projectName}</span>
+                            <AccentDot id={m.projectId} /><span className="shrink-0 whitespace-nowrap"><Key>{m.projectNumber}</Key></span><span className="break-words">{m.projectName}</span>
                           </Link>
                           {m.roles.map((r) => <span key={r} className={tag}>{t(`role.${r}`)}</span>)}
                           {m.leads.map((l) => <span key={l} className={tag}>{t('team.leadOf', { name: l })}</span>)}

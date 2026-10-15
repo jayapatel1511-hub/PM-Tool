@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { type ActivityRow, ChangeList } from '@/components/hub/activity'
 import { AttentionPanel } from '@/components/hub/attention'
-import { Empty, ErrorBanner, Loading, Missing, Page, Section, SummaryTile, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { Empty, ErrorBanner, Loading, Missing, Page, Section, SummaryTile, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Avatar } from '@/components/hub/people'
 import { Chip, HealthPill, Key, StatusPill } from '@/components/hub/pills'
@@ -73,7 +73,7 @@ export function DashboardTab() {
             </Section>
             <Section title={t('dash.disciplines')} id="disciplines" accent="mint">
               {q.data.disciplines.length === 0 ? <Empty>{t('dash.notEvaluated')}</Empty> : (
-                <div className="scroll-region overflow-x-auto">
+                <TableRegion className="rounded-none border-0" role="region" aria-label={t('dash.disciplines')}>
                   <table className="w-full text-sm">
                     <thead className="bg-muted">
                       <tr>{([['common.discipline'], ['dash.lead'], ['common.status'], ['dash.open', true], ['ind.overdue', true], ['ind.blocked', true], ['dash.due14', true], ['dash.nextDue']] as const)
@@ -100,7 +100,7 @@ export function DashboardTab() {
                       })}
                     </tbody>
                   </table>
-                </div>
+                </TableRegion>
               )}
             </Section>
           </div>

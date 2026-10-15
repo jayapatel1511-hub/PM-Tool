@@ -8,7 +8,7 @@ import { ExportMenu } from '@/components/hub/export'
 import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
 import { get, qs } from '@/lib/api'
-import { t, tv } from '@/lib/i18n'
+import { plural, t, tv } from '@/lib/i18n'
 import { fmtDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
@@ -51,7 +51,7 @@ export function CoordinationRegister({ kind, statuses, create, detail, extra }: 
     </FilterBar>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : <>
-      <p role="status" className="text-sm text-muted-foreground">{t('coord.count', { n: list.data.totalCount })}</p>
+      <p role="status" className="text-sm text-muted-foreground">{plural(list.data.totalCount, 'coord.countOne', 'coord.count')}</p>
       {!list.data.items.length ? <div className="rounded-lg border bg-card"><Empty title={t(`${kind}.empty`)}>{t(tokens.length ? 'register.noMatch' : `${kind}.emptyHint`)}</Empty></div> :
         phone ? <ul className="space-y-2">{list.data.items.map(r => <li key={r.id} className={cn('space-y-3 rounded-lg border bg-card p-4 text-sm', panel === r.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)]')}><button className="break-words text-left font-semibold text-primary hover:underline" aria-current={panel === r.id || undefined} onClick={() => open(r.id)}><span className="key font-normal">{r.key}</span> · {r.title}</button><CoordStatus status={r.status} /><dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2"><dt className="text-muted-foreground">{ownerLabel}</dt><dd>{ctx ? <PersonLabel options={ctx.options} id={r.coordinatorId ?? r.ownerId} /> : <Missing />}</dd>{reviews ? <><dt>{t('review.round')}</dt><dd>{r.roundNumber ?? <Missing />}</dd><dt>{t('review.outstanding')}</dt><dd>{r.outstandingDisciplines ?? <Missing />}</dd><dt>{t('review.blocking')}</dt><dd><Count n={r.blockingFindings} tone="bad" /></dd><dt>{t('review.waiting')}</dt><dd>{r.waitingDays ?? <Missing />}</dd></> : <><dt>{t('change.due')}</dt><dd>{r.assessmentDueDate ? fmtDate(r.assessmentDueDate) : <Missing />}</dd><dt>{t('change.pending')}</dt><dd><Count n={r.pendingAssessments} tone="warn" /></dd></>}</dl></li>)}</ul> :
         <TableRegion><table className="w-full text-left text-sm"><caption className="sr-only">{t(`${kind}.title`)}</caption>

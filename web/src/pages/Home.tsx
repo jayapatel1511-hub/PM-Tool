@@ -149,7 +149,7 @@ export function HomePage() {
                   <button type="button" className="flex min-h-(--row-min) w-full flex-wrap items-center gap-x-3 gap-y-1 px-5 py-(--cell-py) text-left text-sm hover:bg-muted" onClick={() => openPanel(x.type, x.id)}>
                     <span className={cn('w-24 shrink-0 tabular-nums', x.overdue && 'font-semibold text-bad')}>{fmtDate(x.date)}</span>
                     <span className="w-24 shrink-0 text-xs/[18px] text-muted-foreground">{t(`itemType.${x.type}`)}</span>
-                    <span className="flex min-w-[10rem] flex-1 items-center gap-2"><AccentDot id={x.projectId} /><Key>{x.key}</Key><span className="min-w-0 truncate font-medium">{x.name}</span></span>
+                    <span className="flex min-w-[10rem] flex-1 basis-full flex-wrap items-center gap-2 sm:basis-auto sm:flex-nowrap"><AccentDot id={x.projectId} /><span className="shrink-0 whitespace-nowrap"><Key>{x.key}</Key></span><span className="w-full min-w-0 break-words font-medium sm:w-auto sm:truncate">{x.name}</span></span>
                     {x.owner && <span className="text-xs/[18px] text-muted-foreground">{x.owner}</span>}
                     <span className="text-xs/[18px] text-muted-foreground">{relative(x.date)}</span>
                     {/* Overdue never travels by colour alone (§13.0). */}
@@ -216,8 +216,8 @@ function ByProject({ d, scope }: { d: HomeData; scope: Scope }) {
       {rows.length === 0 ? <Empty>{t('home.noTasks')}</Empty> : (
         <ul className="space-y-2 px-5 pt-5">
           {rows.map((p) => (
-            <li key={p.projectId} className="grid grid-cols-[minmax(0,14rem)_1fr_3rem] items-center gap-3 text-sm">
-              <span className="flex min-w-0 items-center gap-2" title={`${p.projectNumber} ${p.name}`}>
+            <li key={p.projectId} className="grid grid-cols-[minmax(0,1fr)_3rem] items-center gap-3 text-sm sm:grid-cols-[minmax(0,14rem)_1fr_3rem]">
+              <span className="col-span-2 flex min-w-0 items-center gap-2 sm:col-span-1" title={`${p.projectNumber} ${p.name}`}>
                 <AccentDot id={p.projectId} /><span className="truncate"><Key>{p.projectNumber}</Key> {p.name}</span>
               </span>
               <span className="flex h-4 overflow-hidden rounded-full bg-secondary" style={{ width: `${(p.total / max) * 100}%` }}>

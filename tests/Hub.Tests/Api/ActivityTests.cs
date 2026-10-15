@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using Hub.Domain;
 using Hub.Api.Infrastructure;
+using Hub.Api.Features;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Tests.Api;
@@ -121,6 +122,44 @@ public sealed class ActivityTests(HubFactory f)
     }
 
     static readonly string[] ActivityImportant = ["status", "assignment", "date", "deletion"];
+
+    [Fact]
+    public async Task Deleted_dependency_snapshots_keep_raw_references_and_resolve_their_labels()
+    {
+        var p = await d.Project();
+        var predecessor = await d.NewTask(p.Id, TestData.Pm, new { name = "Synthetic snapshot predecessor" });
+        var successor = await d.NewTask(p.Id, TestData.Pm, new { name = "Synthetic snapshot successor", dependsOn = new[] { predecessor.G("id") } });
+        var edge = f.Db(db => db.Dependencies.Single(x => x.PredecessorTaskId == predecessor.G("id") && x.SuccessorTaskId == successor.G("id")).Id);
+        (await f.As(TestData.Pm).DeleteAsync($"/api/v1/dependencies/{edge}")).EnsureSuccessStatusCode();
+        var history = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/activity?itemType=Dependency")).Json();
+        var deleted = history["items"]!.AsArray().Single(x => x!.S("action") == "Deleted")!;
+        Assert.Equal(predecessor.S("id"), deleted["snapshot"]!.S("PredecessorTaskId"));
+        Assert.Equal(successor.S("id"), deleted["snapshot"]!.S("SuccessorTaskId"));
+        Assert.Contains(predecessor.S("key"), deleted["snapshotLabels"]!.S("PredecessorTaskId"));
+        Assert.Contains(successor.S("key"), deleted["snapshotLabels"]!.S("SuccessorTaskId"));
+        Assert.Contains(predecessor.S("key"), deleted.S("summary"));
+        Assert.Contains(successor.S("key"), deleted.S("summary"));
+    }
+
+    [Fact]
+    public async Task Activity_reference_labels_keep_unresolved_old_values_and_name_source_revisions()
+    {
+        var p = await d.Project();
+        var missing = Guid.NewGuid();
+        var revision = new Hub.Api.Data.SourceRevision { ProjectId = p.Id, SourceKey = "SYN-QA-SOURCE", Title = "Synthetic audit reference", Revision = "R2", Url = "https://example.invalid/qa" };
+        await f.DbAsync(async db => { db.SourceRevisions.Add(revision); return await db.SaveChangesAsync(); });
+        var row = new Hub.Api.Data.ActivityLog { ProjectId = p.Id, ItemType = "InputUse", Action = "Updated", ActorType = "System",
+            Changes = System.Text.Json.JsonSerializer.Serialize(new[] { new { field = "SourceRevisionId", old = missing, @new = revision.Id } }) };
+        var rendered = await f.DbAsync(db => ActivityEndpoints.Render(db, [row]));
+        var json = System.Text.Json.JsonSerializer.SerializeToNode(rendered, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web))!;
+        var change = json[0]!["changes"]![0]!;
+        Assert.Equal("System", json[0]!.S("actorName"));
+        Assert.Equal(missing.ToString(), change.S("oldLabel"));
+        Assert.Contains("SYN-QA-SOURCE", change.S("newLabel"));
+        Assert.Contains("R2", change.S("newLabel"));
+        Assert.Equal(missing.ToString(), change.S("old"));
+        Assert.Equal(revision.Id.ToString(), change.S("new"));
+    }
 
     [Fact]
     public async Task Item_history_includes_dependencies_that_name_the_item()

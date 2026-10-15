@@ -85,7 +85,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   ] as const).filter(([k]) => filters[k]).map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))
   return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} />{canPropose && propose}</>}>
     <FilterBar activeCount={tokens.length}
-      search={view === 'allocations' && <Field label={t('common.search')} htmlFor="allocation-search"><UrlSearchInput id="allocation-search" value={filters.q} onValueChange={value => change('q', value)} /></Field>}
+      search={view === 'allocations' && <Field label={t('common.search')} htmlFor="allocation-search"><UrlSearchInput id="allocation-search" placeholder={t('allocation.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
       active={view === 'allocations' && <ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />}
       actions={<Segmented label={t('openRole.view')} value={view} onChange={v => change('view', v === 'roles' ? 'roles' : '')}
         options={[{ value: 'allocations', label: t('allocation.title') }, { value: 'roles', label: openRoles ? t('openRole.tabCount', { n: openRoles }) : t('openRole.tab') }]} />}>

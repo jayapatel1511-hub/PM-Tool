@@ -12,6 +12,7 @@ import { Switch } from '@/components/ui/switch'
 import { SaveStatus } from '@/components/hub/fields'
 import { del, get, put } from '@/lib/api'
 import { t } from '@/lib/i18n'
+import { useMe } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { FollowLevelSelect } from './projects/Follow'
 
@@ -24,6 +25,7 @@ interface Prefs {
 /** Preferences (§17.4, §13.17): channel per event, the daily digest, and follow level per project. A form page: the
  *  fields sit in a 760 px region (design §5). */
 export function PreferencesPage() {
+  const me = useMe()
   const qc = useQueryClient()
   const q = useQuery({ queryKey: ['preferences'], queryFn: () => get<Prefs>('me/preferences') })
   const [err, setErr] = useState<unknown>(null)
@@ -58,7 +60,7 @@ export function PreferencesPage() {
               </label>
             </div>
             <div className="px-5 py-4">
-              <Field label={t('prefs.digestTimeLabel')} htmlFor="digest-time" hint={digest.weekendDigests ? t('prefs.weekendOn') : t('prefs.weekendOff')}>
+              <Field label={t('prefs.digestTimeLabel')} htmlFor="digest-time" hint={<>{t('prefs.digestZone', { zone: me.settings.orgTimeZone })} {digest.weekendDigests ? t('prefs.weekendOn') : t('prefs.weekendOff')}</>}>
                 <SaveStatus current={p.digest.time}>
                   {(track) => (
                     <Input id="digest-time" type="time" className="w-40" value={digest.time} disabled={!digest.digestEnabled || !!pending.digest}
@@ -151,7 +153,7 @@ export function PreferencesPage() {
                 <tbody>
                   {p.follows.map((f) => (
                     <tr key={f.projectId} className="border-t hover:bg-muted">
-                      <td className={cn(tdCls, 'align-middle')}><span className="flex items-center gap-2"><AccentDot id={f.projectId} /><span className="min-w-0 break-words"><Key>{f.projectNumber}</Key> {f.name}</span></span></td>
+                      <td className={cn(tdCls, 'min-w-56 align-middle')}><span className="flex items-center gap-2"><AccentDot id={f.projectId} /><span className="min-w-0 break-words"><Key>{f.projectNumber}</Key> {f.name}</span></span></td>
                       <td className={cn(tdCls, 'align-middle')}><StatusPill status={f.status} /></td>
                       <td className={cn(tdCls, 'align-middle text-xs/[18px] text-muted-foreground')}>{t(`follow.source.${f.source}`)}</td>
                       <td className={cn(tdCls, 'align-middle')}><FollowLevelSelect projectId={f.projectId} level={f.level} onChanged={reload} projectName={`${f.projectNumber} ${f.name}`} /></td>

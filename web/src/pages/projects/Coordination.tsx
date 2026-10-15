@@ -67,7 +67,7 @@ function Who({ id, name }: { id?: string | null; name?: string | null }) {
 // A context section keeps one header accent every week (design §3); urgent sections stay plain so the accent never reads as urgency.
 const SECTION_ACCENT: Record<string, Accent> = { headline: 'blue', attention: 'peach', round: 'mint' }
 const badge = 'rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums'
-const rowCls = 'flex min-h-(--row-min) flex-wrap items-center gap-x-3 gap-y-1 px-5 py-(--cell-py)'
+const rowCls = 'flex min-h-(--row-min) flex-wrap items-center gap-x-3 gap-y-1 px-5 py-(--cell-py) [&>.flex-1]:basis-full sm:[&>.flex-1]:basis-auto'
 
 /** Weekly Coordination (§12.13, §13.9): the meeting agenda computed from live data, with meeting mode. */
 export function CoordinationTab() {
@@ -196,7 +196,7 @@ export function CoordinationTab() {
         {meeting && canCapture && <Button variant="ghost" size="icon-sm" className="no-print" aria-label={t('wc.actionOn', { key: d.key })}
           onClick={() => setCapturing({ decisionId: d.id, label: `${d.key} ${d.subject}` })}><ListPlus className="size-4" /></Button>}
       </li>))) },
-    { id: 'blocked', title: t('wc.s.blocked'), count: c.blocked.length, body: blockedGroups.length === 0 ? list([]) : blockedGroups.map((g) => (
+    { id: 'blocked', title: t('wc.s.blocked'), count: c.blocked.length, body: blockedGroups.length === 0 ? <p className="px-5 py-3 text-muted-foreground">{t('wc.noneBlocked')}</p> : blockedGroups.map((g) => (
       <div key={g.label}>
         <div className="flex flex-wrap items-center gap-2 border-b bg-bad-bg px-5 py-2 text-sm font-semibold text-bad">
           <span aria-hidden>■</span>{t('wc.blockedBy', { what: g.label })}{g.blocker.overdue && <span className="text-xs font-normal">({t('ind.overdue')})</span>}

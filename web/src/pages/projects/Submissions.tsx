@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { download, get, qs } from '@/lib/api'
 import { fmtDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { plural, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
 import { CommandForm, CoordStatus, Count, FieldsCommand, PersonLabel, RegisterPager, SelectField, discName, personName, peopleChoices, type CoordOptions, type RecordVersion } from './CoordinationForms'
@@ -67,7 +67,7 @@ export function SubmissionsTab() {
       </div>
     </FilterBar>
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : <>
-      <p role="status" className="text-sm text-muted-foreground">{t('coord.count', { n: list.data.totalCount })}</p>
+      <p role="status" className="text-sm text-muted-foreground">{plural(list.data.totalCount, 'coord.countOne', 'coord.count')}</p>
       {!list.data.items.length ? <div className="rounded-lg border bg-card"><Empty title={t('submissions.empty')}>{t(tokens.length ? 'register.noMatch' : 'submissions.emptyHint')}</Empty></div> :
         phone ? <ul className="space-y-2">{list.data.items.map(row => <li key={row.id} className={cn('space-y-3 rounded-lg border bg-card p-4 text-sm', panel === row.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)]')}><button className="break-words text-left font-semibold text-primary hover:underline" aria-current={panel === row.id || undefined} onClick={() => open(row.id)}><span className="key font-normal">{row.key}</span> · {row.title}</button><CoordStatus status={row.status} /><dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2"><dt className="text-muted-foreground">{t('coord.coordinator')}</dt><dd>{options.data ? <PersonLabel options={options.data} id={row.coordinatorId} /> : <Missing />}</dd><dt className="text-muted-foreground">{t('submissions.targetDate')}</dt><dd>{row.targetDate ? fmtDate(row.targetDate) : <Missing />}</dd><dt className="text-muted-foreground">{t('submissions.blockers')}</dt><dd><Count n={row.blockerCount} tone="bad" /></dd></dl></li>)}</ul> :
         <TableRegion><table className="w-full text-left text-sm"><caption className="sr-only">{t('submissions.title')}</caption>

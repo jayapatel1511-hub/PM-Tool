@@ -114,7 +114,7 @@ export function StaffPage() {
                       onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(p.id)) n.delete(p.id); else n.add(p.id); return n })}>
                       {open.has(p.id) ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}</button></td>
                     <td className={tdCls}>
-                      <div className="flex items-center gap-2.5"><Avatar id={p.id} name={p.displayName} />
+                      <div className="flex min-w-56 items-center gap-2.5"><Avatar id={p.id} name={p.displayName} />
                         <div className="min-w-0"><Link to={`/my-work?userId=${p.id}`} className="font-semibold hover:underline">{p.isActive ? p.displayName : t('common.inactiveSuffix', { name: p.displayName })}</Link>
                           <div className="text-xs/[18px] text-muted-foreground">{[p.jobTitle, office(p.officeId)].filter(Boolean).join(' · ')}</div></div></div>
                     </td>

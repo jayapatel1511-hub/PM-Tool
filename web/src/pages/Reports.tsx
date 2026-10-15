@@ -61,11 +61,15 @@ export function ReportPage() {
   const cat = useCatalogue()
   const def = cat.data?.find((r) => r.code === code)
   const [sp, setSp] = useSearchParams()
-  const chosen = useMemo(() => Object.fromEntries([...sp.entries()].filter(([k]) => k !== 'panel')), [sp])
+  const chosen = useMemo(() => Object.fromEntries([...sp.entries()].filter(([k]) => k !== 'panel' && k !== 'history')), [sp])
   // An activity log without dates covers the last 30 days rather than the whole project history.
-  const defaulted = code === 'project-activity-log' && !chosen.from && !chosen.to
-  const params = useMemo(() => (defaulted ? { ...chosen, from: addDays(today(), -30) } : chosen), [chosen, defaulted])
-  const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); n.delete('panel'); setSp(n, { replace: true }) }
+  const defaulted = code === 'project-activity-log' && sp.get('history') !== 'all' && !chosen.from && !chosen.to
+  const params = useMemo(() => {
+    if (defaulted) return { ...chosen, from: addDays(today(), -30) }
+    if (code === 'tasks-due-this-week' && !chosen.week) return { ...chosen, week: addDays(today(), -((new Date(today() + 'T00:00:00Z').getUTCDay() + 6) % 7)) }
+    return chosen
+  }, [chosen, defaulted, code])
+  const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); if (code === 'project-activity-log' && (k === 'from' || k === 'to')) n.set('history', 'all'); n.delete('panel'); setSp(n, { replace: true }) }
   const needsProject = def?.params.some((p) => p.type === 'project') && !params.projectId
   const run = useQuery({ queryKey: ['report', code, params], queryFn: () => get<ReportRun>(`reports/${code}${qs(params)}`), enabled: !!def && !needsProject })
   if (cat.isPending) return <Page title={t('nav.reports')}><div className={card}><Loading rows={6} /></div></Page>
@@ -79,6 +83,9 @@ export function ReportPage() {
       </>}>
       <form className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4 md:p-5" onSubmit={(e) => e.preventDefault()} aria-label={t('reports.parameters')}>
         {def.params.map((p) => <ParamInput key={p.key} p={p} value={params[p.key]} onChange={(v) => set(p.key, v)} />)}
+        {code === 'project-activity-log' && <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={!defaulted && !chosen.from && !chosen.to} onCheckedChange={on => {
+          const n = new URLSearchParams(sp); n.delete('from'); n.delete('to'); n.delete('panel'); if (on) n.set('history', 'all'); else n.delete('history'); setSp(n, { replace: true })
+        }} />{t('reports.allHistory')}</label>}
         {Object.keys(chosen).length > 0 && <Button type="button" variant="ghost" onClick={() => setSp(new URLSearchParams(), { replace: true })}>{t('common.clear')}</Button>}
         {defaulted && <p className="w-full text-xs/[18px] text-muted-foreground">{t('reports.defaultRange')}</p>}
       </form>
@@ -152,10 +159,11 @@ function ReportTable({ r, itemType, asOf }: { r: ReportRun; itemType?: string | 
   const openPanel = useItemPanel()
   const cell = (row: Record<string, any>, c: Column) => {
     const v = at(row, c.path)
-    if (v == null || v === '') return <Missing />
     // Activity rows carry their structured changes: show them as the Activity tab does, not as raw field names.
     if (c.path === 'action' && Array.isArray(row.categories)) return t(`action.${v}`)
     if (c.path === 'summary' && Array.isArray(row.changes)) return <ChangeList row={row as ActivityRow} />
+    if (c.path === 'item' && row.itemType) return <><Key>{row.itemKey}</Key> {row.itemName || t(`itemType.${row.itemType}`)}</>
+    if (v == null || v === '') return <Missing />
     switch (c.type) {
       case 'key': {
         const type = row.itemType ?? itemType
@@ -164,7 +172,7 @@ function ReportTable({ r, itemType, asOf }: { r: ReportRun; itemType?: string | 
           : <Key>{v}</Key>
       }
       case 'date': return fmtDate(v)
-      case 'datetime': return fmtTime(v)
+      case 'datetime': return <time dateTime={v} title={v}>{fmtTime(v)}</time>
       case 'percent': return `${v}%`
       default: return c.path === 'status' || c.path === 'projectStatus' ? <StatusPill status={v} /> : typeof v === 'string' ? tv(v) : String(v)
     }
@@ -184,7 +192,7 @@ function ReportTable({ r, itemType, asOf }: { r: ReportRun; itemType?: string | 
             <tbody>
               {r.rows.map((row, i) => (
                 <tr key={`${row.id ?? 'row'}:${i}`} className="border-t hover:bg-muted">
-                  {r.columns.map((c) => <td key={c.path} className={cn(tdCls, NUMERIC.includes(c.type) ? 'text-right tabular-nums' : c.type === 'text' ? 'min-w-[8rem]' : 'whitespace-nowrap', ['date', 'datetime'].includes(c.type) && 'tabular-nums')}>{cell(row, c)}</td>)}
+                  {r.columns.map((c) => <td key={c.path} className={cn(tdCls, NUMERIC.includes(c.type) ? 'text-right tabular-nums' : c.path === 'summary' ? 'min-w-64' : c.type === 'text' ? 'min-w-[8rem]' : 'whitespace-nowrap', ['date', 'datetime'].includes(c.type) && 'tabular-nums')}>{cell(row, c)}</td>)}
                 </tr>
               ))}
             </tbody>

@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { get } from '@/lib/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { plural, t, tv } from '@/lib/i18n'
 import { Chip, Key } from '@/components/hub/pills'
 import { useMe } from '@/lib/auth'
 import { cn } from '@/lib/utils'
@@ -188,7 +188,7 @@ export function ReadinessTab() {
 
 function WindowPager({ label, page, total, pageSize, onPage, className }: { label: string; page: number; total: number; pageSize: number; onPage: (page: number) => void; className?: string }) {
   return <nav aria-label={label} className={cn('flex flex-wrap items-center justify-end gap-3 px-5 py-3', className)}>
-    <span className="mr-auto text-sm text-muted-foreground tabular-nums">{t('coord.count', { n: total })}</span>
+    <span className="mr-auto text-sm text-muted-foreground tabular-nums">{plural(total, 'coord.countOne', 'coord.count')}</span>
     {total > pageSize && <>
       <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t('handoff.previous')}</Button>
       <span className="text-sm tabular-nums">{t('common.pageOf', { page, pages: Math.max(1, Math.ceil(total / Math.max(1, pageSize))) })}</span>

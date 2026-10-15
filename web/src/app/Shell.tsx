@@ -1,4 +1,5 @@
 import { Bell, CheckSquare, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, LogOut, MoreHorizontal, Search, User } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router'
 import { useDensity, type Density } from '@/components/hub/common'
@@ -11,6 +12,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useProject } from '@/hooks/data'
 import { useAuth } from '@/lib/auth'
+import { get } from '@/lib/api'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { PROJECT_TABS } from '@/pages/projects/ProjectLayout'
@@ -175,7 +177,7 @@ function BottomLink({ to, icon: Icon, label }: { to: string; icon: React.Compone
 }
 
 /** Pages the navigation lists under another entry, or not at all, still name themselves in the breadcrumb. */
-const CRUMBS: Record<string, string> = { '/timeline': 'wsview.timeline', '/search': 'search.title', '/preferences': 'top.preferences', '/planner': 'planner.title', '/workload': 'nav.workload', '/boards': 'nav.boards', '/calendar': 'nav.calendar' }
+const CRUMBS: Record<string, string> = { '/timeline': 'wsview.timeline', '/search': 'search.title', '/preferences': 'top.preferences', '/planner': 'planner.title', '/workload': 'nav.workload', '/boards': 'nav.boards', '/calendar': 'nav.calendar', '/admin/users': 'admin.users', '/admin/settings': 'admin.settings', '/admin/activity': 'admin.activity', '/admin/operations': 'ops.title', '/admin/holidays': 'holiday.title' }
 
 /** Where you are: the app, the section from the navigation, and inside a project its number, name and tab. The project
  *  name comes from the same cached query as the project header, so this adds no request. */
@@ -184,6 +186,9 @@ function Breadcrumbs() {
   const inProject = useMatch('/projects/:number/*')
   const number = inProject?.params.number
   const project = useProject(number)
+  const taskMatch = useMatch('/tasks/:id')
+  const taskId = taskMatch?.params.id
+  const task = useQuery({ queryKey: ['task', taskId], enabled: !!taskId, queryFn: () => get<{ task: { key: string } }>(`tasks/${taskId}`) })
   const crumbs: { label: string; to?: string; long?: boolean }[] = []
   if (number) {
     const tab = PROJECT_TABS.find((tb) => typeof tb.path === 'string' && tb.path === inProject.params['*']?.split('/')[0])
@@ -192,7 +197,13 @@ function Breadcrumbs() {
     if (tab) crumbs.push({ label: t(tab.label) })
   } else if (/^\/people\/[^/]+\/reassign-work$/.test(pathname)) {
     crumbs.push({ label: t('nav.staff'), to: '/staff' }, { label: t('reassign.action') })
+  } else if (taskId) {
+    crumbs.push({ label: t('nav.tasks'), to: '/tasks' }, { label: task.data?.task.key ?? t('itemType.Task'), long: true })
+  } else if (pathname.startsWith('/admin/reference/')) {
+    crumbs.push({ label: t('nav.admin'), to: '/admin' }, { label: t(`admin.${pathname.split('/').pop()}`) })
   } else if (CRUMBS[pathname]) {
+    if (pathname.startsWith('/admin/')) crumbs.push({ label: t('nav.admin'), to: '/admin' })
+    if (pathname === '/planner' || pathname === '/workload') crumbs.push({ label: t('nav.resources') })
     crumbs.push({ label: t(CRUMBS[pathname]) })
   } else {
     const n = NAV.find((x) => pathname === x.path || pathname.startsWith(`${x.path}/`))

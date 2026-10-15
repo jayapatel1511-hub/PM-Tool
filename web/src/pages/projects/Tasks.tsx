@@ -3,10 +3,10 @@ import { UrlSearchInput } from '@/components/hub/url-search'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { ArrowDown, ArrowUp, ChevronDown, Columns3, Ellipsis, KanbanSquare, List, Plus, Rows3, type LucideIcon } from 'lucide-react'
-import { isValidElement, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { InlineDate } from '@/components/hub/fields'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Avatar, PeoplePicker, weekOf } from '@/components/hub/people'
@@ -28,6 +28,7 @@ import { cn } from '@/lib/utils'
 import type { DeliverableRow } from './Deliverables'
 import type { MilestoneRow } from './Milestones'
 import { useCurrentProject } from './ProjectLayout'
+import { showPhoneTaskField } from './phone-task-fields'
 import { NOTE_LABEL, OneSignal, type Signal } from '@/components/hub/indicators'
 import { ViewMenu } from '@/components/hub/views'
 import { StartAuthorisationDialog, type StartRequest } from './TaskStart'
@@ -71,7 +72,7 @@ export function blockerReasons(s?: TaskStateView | null): Reason[] {
 
 /** Indicator chips (§10.3) from the stored derived state: one per row in lists (§41 R7), every one with `all` in the task
  *  panel. The blocked and waiting chips open their blockers without opening the panel (§13.3 UX). */
-export function TaskIndicators({ r, all }: { r: TaskRow; all?: boolean }) {
+function taskSignals(r: TaskRow) {
   const s = r.state
   const why = (tone: 'bad' | 'warn', label: string) => <Why reasons={blockerReasons(s)} title={t('task.blockersOf', { key: r.key })}><Chip tone={tone}>{label}</Chip></Why>
   const blocked = s && (s.daysBlocked > 0 ? t('ind.blockedD', { n: s.daysBlocked }) : t('ind.blocked'))
@@ -92,7 +93,11 @@ export function TaskIndicators({ r, all }: { r: TaskRow; all?: boolean }) {
     r.dueDateChangeCount >= 3 && { key: 'dueMoved', tone: 'warn', label: t('ind.dueMoved', { n: r.dueDateChangeCount }) },
     ...(s?.notes ?? []).filter((n) => NOTE_LABEL[n]).map((n) => ({ key: n, tone: 'warn', label: t(NOTE_LABEL[n]) })),
   ] as (Signal | false | undefined)[]).filter(Boolean) as Signal[]
-  return <OneSignal signals={signals} all={all} />
+  return signals
+}
+
+export function TaskIndicators({ r, all }: { r: TaskRow; all?: boolean }) {
+  return <OneSignal signals={taskSignals(r)} all={all} />
 }
 
 /** A toolbar menu button for one choice, such as Group or Sort (§41 R1): the button shows the current choice, the menu is a
@@ -515,8 +520,6 @@ export function TasksTab() {
   const canCreate = p.permissions.createTaskIn.length > 0
   const toggle = (id: string) => setSelected((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
   const dash = <span className="text-muted-foreground">{t('common.dash')}</span>
-  // Phone cards leave out fields with nothing in them (a dash or a Missing mark), so a card lists what the task has.
-  const blank = (v: ReactNode) => v === dash || v === t('common.dash') || (isValidElement(v) && v.type === Missing)
 
   const all: Col[] = [
     { id: 'key', label: 'milestone.key', sort: 'key', cls: 'whitespace-nowrap', cell: (r) => <button type="button" data-task-focus="key" data-task-id={r.id} className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button> },
@@ -547,7 +550,7 @@ export function TasksTab() {
     { id: 'progress', label: 'deliverable.progress', sort: 'progress', num: true, pad: CONTROL, cell: (r) => hints.edit(r) && r.status !== 'Complete' && r.status !== 'Cancelled'
       ? <select className={rowSelect} value={r.progressPct} aria-label={t('task.progressOf', { key: r.key })} onChange={(e) => actions.setProgress(r, Number(e.target.value))}>{PROGRESS.map((x) => <option key={x} value={x}>{x}%</option>)}</select>
       : <span className="flex min-h-(--control-row-h) items-center justify-end">{r.progressPct}%</span> },
-    { id: 'estimate', label: 'task.estimate', sort: 'estimate', num: true, cls: 'whitespace-nowrap', cell: (r) => r.estimatedHours == null ? <Missing /> : hours(r.estimatedHours) },
+    { id: 'estimate', label: 'task.estimate', sort: 'estimate', num: true, cls: 'whitespace-nowrap', cell: (r) => r.estimatedHours == null ? <span className="text-muted-foreground">{t('task.unestimated')}</span> : hours(r.estimatedHours) },
     { id: 'lastActivity', label: 'task.lastActivity', sort: 'lastActivity', cls: 'whitespace-nowrap text-muted-foreground', cell: (r) => <span title={r.lastActivityAt}>{ago(r.lastActivityAt)}</span> },
     { id: 'milestone', label: 'field.MilestoneId', optional: true, cls: 'whitespace-nowrap', cell: (r) => r.milestoneKey ? <span title={r.milestoneName}><span className="key">{r.milestoneKey}</span>{r.milestoneDerived && <span className="text-muted-foreground"> ↳</span>}</span> : dash },
     { id: 'created', label: 'task.createdCol', sort: 'created', optional: true, cls: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.createdAt) },
@@ -618,7 +621,7 @@ export function TasksTab() {
       ) : (
         phone ? <div data-task-layout="phone" className="space-y-2"><Checkbox aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={c => setSelected(c ? new Set(rows.map(r => r.id)) : new Set())} /><ul className="space-y-2">{flat.map(f => f.kind === 'group' ? <li key={`g-${f.id}`} className="flex flex-wrap items-center gap-2 py-2"><h3 className="break-words text-sm font-semibold">{f.label}</h3><span className="text-xs text-muted-foreground">{f.count}</span>{f.status && <StatusPill status={f.status} />}{group === 'deliverable' && canCreate && <Button size="sm" variant="outline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" />{t('task.addHere')}</Button>}</li> : <li key={f.r.id} className={cn('rounded-lg border bg-card p-4', (current === f.r.id || selected.has(f.r.id)) && 'bg-accent', current === f.r.id && 'shadow-[inset_3px_0_0_var(--primary)]')}>
           <div className="mb-3 flex items-start gap-3"><Checkbox aria-label={`${t('bulk.select')} ${f.r.key}`} checked={selected.has(f.r.id)} onCheckedChange={() => toggle(f.r.id)} /><div className="min-w-0 flex-1">{all.find(c => c.id === 'key')?.cell(f.r)}<div className="mt-1 break-words font-semibold">{all.find(c => c.id === 'name')?.cell(f.r)}</div></div></div>
-          <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name' && !blank(c.cell(f.r))).map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{t(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
+          <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name' && showPhoneTaskField(c.id, f.r) && (c.id !== 'indicators' || taskSignals(f.r).length > 0)).map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{t(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
         </li>)}</ul>{q.isFetchingNextPage && <p role="status" className="text-xs text-muted-foreground">{t('task.loadingMore', { n: rows.length, total })}</p>}</div> :
         <TableRegion ref={scroller} data-task-layout="desktop" className="max-h-[calc(100dvh-10rem)] min-h-64 overflow-auto">
           <table className="w-full text-sm" aria-rowcount={flat.length + 1}>

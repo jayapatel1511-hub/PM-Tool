@@ -273,7 +273,7 @@ export function TimelineTab() {
           {!thin && w > 44 && <span className="relative px-1 text-xs/4 tabular-nums">{pct}%</span>}
         </button>
         {shift?.id === id && <span className="absolute z-30 whitespace-nowrap rounded-md bg-primary px-1.5 text-xs/[18px] text-primary-foreground tabular-nums" style={{ left: left + dx(id) + w + 4, top: top - 1 }}>{shift.days > 0 ? '+' : ''}{shift.days} d</span>}
-        {span.late && <span aria-hidden className="absolute rounded-r-sm border border-l-0 border-bad" title={t('timeline.overdueBy', { n: daysBetween(span.end, now) })}
+        {span.late && <span aria-hidden className="absolute rounded-r-sm border border-l-0 border-bad" title={plural(daysBetween(span.end, now), 'timeline.overdueByOne', 'timeline.overdueBy')}
           style={{ left: x(span.end) + px, width: Math.max(daysBetween(span.end, now) * px, 2), top, height, background: HATCH }} />}
       </>
     )

@@ -105,12 +105,15 @@ public static class ActivityEndpoints
     /// Renders log rows for people: IDs resolved to names at read time (§20.3), and a one-line summary.
     public static async Task<List<object>> Render(HubDb db, List<ActivityLog> rows)
     {
-        var parsed = rows.Select(r => (Row: r, Changes: JsonSerializer.Deserialize<List<Change>>(r.Changes, JsonOpts.Web) ?? [])).ToList();
+        var parsed = rows.Select(r => (Row: r, Changes: JsonSerializer.Deserialize<List<Change>>(r.Changes, JsonOpts.Web) ?? [],
+            Snapshot: r.Snapshot is null ? (JsonElement?)null : JsonSerializer.Deserialize<JsonElement>(r.Snapshot))).ToList();
         var ids = new HashSet<Guid>();
-        foreach (var (r, cs) in parsed)
+        foreach (var (r, cs, snapshot) in parsed)
         {
             if (r.ActorUserId is { } a) ids.Add(a);
             foreach (var c in cs) { AddId(c.Old, ids); AddId(c.New, ids); }
+            if (snapshot is { ValueKind: JsonValueKind.Object } s)
+                foreach (var field in s.EnumerateObject()) AddId(field.Value, ids);
         }
         var names = await Names(db, ids);
         string? L(JsonElement? v) => v is { ValueKind: JsonValueKind.String } s && Guid.TryParse(s.GetString(), out var g) && names.TryGetValue(g, out var n) ? n
@@ -118,14 +121,18 @@ public static class ActivityEndpoints
         return parsed.Select(p =>
         {
             var changes = p.Changes.Select(c => new { c.Field, Old = c.Old, New = c.New, OldLabel = L(c.Old), NewLabel = L(c.New) }).ToList();
-            var summary = string.Join("; ", changes.Select(c => $"{Label(c.Field)}: {c.OldLabel ?? "—"} → {c.NewLabel ?? "—"}"));
+            var snapshotLabels = p.Snapshot is { ValueKind: JsonValueKind.Object } s
+                ? s.EnumerateObject().ToDictionary(field => field.Name, field => L(field.Value)) : null;
+            var summary = p.Row.Action == "Deleted" && snapshotLabels is not null
+                ? string.Join("; ", snapshotLabels.Select(field => $"{Label(field.Key)}: {field.Value ?? "—"}"))
+                : string.Join("; ", changes.Select(c => $"{Label(c.Field)}: {c.OldLabel ?? "—"} → {c.NewLabel ?? "—"}"));
             return (object)new
             {
                 p.Row.Id, p.Row.OccurredAt, ActorId = p.Row.ActorUserId,
-                ActorName = p.Row.ActorUserId is { } a && names.TryGetValue(a, out var an) ? an : null,
+                ActorName = p.Row.ActorUserId is { } a && names.TryGetValue(a, out var an) ? an : p.Row.ActorType == "System" ? Text.Get("common.system") : null,
                 p.Row.ActorType, p.Row.ProjectId, p.Row.ItemType, p.Row.ItemId, p.Row.ItemKey, p.Row.ItemName, p.Row.Action,
                 p.Row.Categories, Changes = changes, Summary = summary, p.Row.Reason, p.Row.Source, p.Row.CorrelationId,
-                Snapshot = p.Row.Snapshot is null ? (JsonElement?)null : JsonDocument.Parse(p.Row.Snapshot).RootElement.Clone(),
+                p.Snapshot, SnapshotLabels = snapshotLabels,
             };
         }).ToList();
     }
@@ -158,6 +165,9 @@ public static class ActivityEndpoints
         Add((await db.Issues.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Title }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Title}")));
         Add((await db.Actions.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Text }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Text}")));
         Add((await db.Meetings.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Title }).ToListAsync()).Select(x => (x.Id, x.Title)));
+        Add((await db.Projects.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.ProjectNumber, x.Name }).ToListAsync()).Select(x => (x.Id, $"{x.ProjectNumber} {x.Name}")));
+        Add((await db.SourceRevisions.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.SourceKey, x.Title, x.Revision }).ToListAsync()).Select(x => (x.Id, $"{x.SourceKey} {x.Title} · {x.Revision}")));
+        Add((await db.ChangeNotices.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Title }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Title}")));
         // An allocation has no key or name: the person and dates, which its own log rows already show to the same readers.
         Add((await db.Allocations.Where(x => list.Contains(x.Id))
             .Select(x => new { x.Id, Person = db.Users.Where(u => u.Id == x.PersonId).Select(u => u.DisplayName).FirstOrDefault(), x.FromDate, x.ThroughDate }).ToListAsync())

@@ -174,7 +174,7 @@ export function ReferenceData() {
 
 // ---------- Settings (FR-014) ----------
 
-interface SettingRow { key: string; kind: string; group: string; default: any; value: any }
+interface SettingRow { key: string; kind: string; group: string; default: any; value: any; packet?: string }
 
 export function Settings() {
   const qc = useQueryClient()
@@ -203,7 +203,8 @@ export function Settings() {
   if (list.error) return <ErrorBanner error={list.error} retry={() => list.refetch()} />
   const groups = [...new Set(list.data.map((s) => s.group))]
   const label = (s: SettingRow) => s.key.startsWith('rule_enabled.') ? t('rule.enabled', { rule: s.key.slice(13), name: t(`rule.${s.key.slice(13)}`) })
-    : s.key.startsWith('notify_default.') ? t(`event.${s.key.slice(15)}`) : t(`setting.${s.key}`)
+    : s.key.startsWith('notify_default.') ? t(`event.${s.key.slice(15)}`)
+    : s.key.startsWith('flag.') ? t('admin.flagLabel', { name: s.key.slice(5), packet: s.packet ?? '' }) : t(`setting.${s.key}`)
   const fallback = (s: SettingRow) => s.default != null && typeof s.default === 'object'
     ? [s.default.app && t('pref.app'), s.default.email && t('pref.email')].filter(Boolean).join(' + ') : String(s.default)
   // Form page (design §5): a 760 px field region; each setting shows its current value, its default and its own error.

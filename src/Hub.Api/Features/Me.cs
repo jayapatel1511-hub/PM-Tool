@@ -48,6 +48,7 @@ public static class MeEndpoints
                     s.CoordinationLookaheadWeeks, s.WorkingDaysEnabled,
                 },
                 Preferences = new { pref.DigestEnabled, pref.DigestTimeLocal, pref.DenseRows, pref.WeeklySummaryEnabled },
+                s.Flags, // §43.4 FR-DLV-08: every declared flag, on or off
             };
         });
 

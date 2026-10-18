@@ -50,8 +50,11 @@ public sealed record OrgSettings
     public IReadOnlyDictionary<string, bool> RuleEnabled { get; init; } = Rules.Ids.ToDictionary(r => r, _ => true);
     public IReadOnlyDictionary<string, Channels> NotificationDefaults { get; init; } =
         NotificationEvents.All.ToDictionary(e => e.Code, e => new Channels(e.App, e.Email));
+    public IReadOnlyDictionary<string, bool> Flags { get; init; } = Hub.Domain.Flags.All.ToDictionary(f => f.Name, _ => false);
 
     public bool IsRuleEnabled(string id) => !RuleEnabled.TryGetValue(id, out var on) || on;
+    /// A missing name is off (FR-DLV-08).
+    public bool IsFlagOn(string name) => Flags.TryGetValue(name, out var on) && on;
 
     public static readonly SettingDef[] Defs =
     [
@@ -93,6 +96,7 @@ public sealed record OrgSettings
         new("idle_timeout_hours", SettingKind.Int, 8, "security"),
         .. Rules.Ids.Select(r => new SettingDef($"rule_enabled.{r}", SettingKind.Bool, true, "rules")),
         .. NotificationEvents.All.Select(e => new SettingDef($"notify_default.{e.Code}", SettingKind.Channels, new Channels(e.App, e.Email), "notifications")),
+        .. Hub.Domain.Flags.Defs(Hub.Domain.Flags.All),
     ];
 
     public static SettingDef? Def(string key) => Defs.FirstOrDefault(d => d.Key == key);
@@ -146,6 +150,7 @@ public sealed record OrgSettings
                 v.TryGetValue($"notify_default.{e.Code}", out var c) && c.ValueKind == JsonValueKind.Object
                     ? new Channels(c.TryGetProperty("app", out var a) && a.GetBoolean(), c.TryGetProperty("email", out var m) && m.GetBoolean())
                     : new Channels(e.App, e.Email)),
+            Flags = Hub.Domain.Flags.All.ToDictionary(f => f.Name, f => B($"flag.{f.Name}", false)),
         };
     }
 

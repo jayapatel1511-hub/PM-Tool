@@ -71,11 +71,13 @@ public static class AdminEndpoints
         g.MapGet("/settings", async (HubDb db) =>
         {
             var rows = await db.Settings.AsNoTracking().ToDictionaryAsync(r => r.Key, r => r.Value);
-            return OrgSettings.Defs.Select(d => new
+            return OrgSettings.Defs.Select(d =>
             {
-                d.Key, Kind = d.Kind.ToString(), d.Group,
-                Default = d.Default,
-                Value = rows.TryGetValue(d.Key, out var v) ? JsonDocument.Parse(v).RootElement.Clone() : JsonSerializer.SerializeToElement(d.Default, JsonOpts.Web),
+                var value = rows.TryGetValue(d.Key, out var v) ? JsonDocument.Parse(v).RootElement.Clone() : JsonSerializer.SerializeToElement(d.Default, JsonOpts.Web);
+                // Flag rows also name their packet (§43.4 FR-DLV-07); every other row is unchanged.
+                return Flags.Find(d.Key) is { } flag
+                    ? (object)new { d.Key, Kind = d.Kind.ToString(), d.Group, Default = d.Default, Value = value, flag.Packet }
+                    : new { d.Key, Kind = d.Kind.ToString(), d.Group, Default = d.Default, Value = value };
             });
         });
 

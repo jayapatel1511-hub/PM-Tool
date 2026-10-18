@@ -1,6 +1,6 @@
 # Decision log
 
-One table of the open product and process decisions for packets 038 to 048 and the build-approach report. Each row has a default.
+One table of the open product and process decisions for packets 038 to 049 and the build-approach report. Each row has a default.
 
 - Defaults apply while work ships dark. A pending row never blocks a merge or a review deployment; it blocks only a flag flip, that is, turning its addition on for pilot users.
 - Only Jay confirms or overrules a decision. Statuses: Open (the default applies), Decided, Done, Deferred (waits for its trigger).
@@ -166,3 +166,9 @@ One table of the open product and process decisions for packets 038 to 048 and t
 | 048-D8 | 048 | Met confirmation? | Off by default; when on, the PM or the Discipline Lead of the work confirms, never the performer. | Open |
 | 048-D9 | 048 | Revision convention presets? | Letters (A, B, C …), numbers (0, 1, 2 …), and two-stage P01… then C01…; or a custom ordered list. Default none. | Open |
 | 048-D10 | 048 | How many flags? | One per part: flag.verifiable_log, flag.commitment_reliability, flag.allocation_preview, flag.baseline_history, flag.revision_check. | Open |
+| 049-D1 | 049 | Approve the §53 Task Pickup scope? | Approve with the listed defaults (049-D2 to 049-D6 stay Open with their defaults). | Decided by Jay 2026-10-18 |
+| 049-D2 | 049 | Who may request pickup? | Project team members only. | Open |
+| 049-D3 | 049 | Who approves a pickup? | PM or Discipline Lead of the task's discipline; self-approve setting off. | Open |
+| 049-D4 | 049 | Whole task or a share of it? | Whole task only; collaborators stay the way to share. | Open |
+| 049-D5 | 049 | Previous assignee after pickup? | Becomes a watcher unless they opt out. | Open |
+| 049-D6 | 049 | Do offers expire? | No automatic expiry. | Open |

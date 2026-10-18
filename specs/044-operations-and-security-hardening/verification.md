@@ -23,7 +23,7 @@ Slice builds in progress; see the build notes below.
 | AC-OPS-17 | PASS (local) |
 | AC-OPS-18 | UNRUN |
 | AC-OPS-19 | UNRUN |
-| AC-OPS-20 | UNRUN |
+| AC-OPS-20 | PASS (local) |
 | AC-OPS-21 | UNRUN |
 
 ## Build 044-S06
@@ -64,3 +64,12 @@ Admin route sweep test. Test-only; no runtime change.
 - AC-OPS-17: PASS (local). `AdminSweepTests` reads the endpoint data source and calls every `/api/v1/admin` route, including `POST /api/v1/admin/evaluate/{projectId}` (mapped outside the Admin group), as a team member and as a Project Manager; every call returns 403 and the activity log gains no rows. The builder removed the evaluate route's inline admin check and saw the test fail (204 for both users), then reverted it. The `BindsFirst` exception list is empty.
 - Assumptions: the team member is `alex@hub.test` and the Project Manager is `priya@hub.test` (seeded dev users, neither an app-level Admin); placeholder route values are a new GUID for guid or `*id` parameters, 1 for int or long, otherwise "x"; write methods send `{}`; no 044 decision (D1-D11) affects this slice; the packet ships without a flag (§48.1); merge tier A (test-only).
 - Left for Jay: nothing.
+
+## Build 044-S12
+
+Notification and digest email footers name Tuesday. Only `email.footer` and `digest.footer` in `src/Hub.Api/Text.cs` change.
+
+- Checks on the merged tree: `dotnet build Hub.slnx` 0 errors; `dotnet test --filter CollaborationTests|NotificationSearchTests|Digest|Text` 41 passed. No web files changed.
+- AC-OPS-20: PASS (local). The assignment notification email and daily digest footers (the body's last paragraph) name Tuesday and contain neither "Coordination Hub" nor "the Hub". Subjects stay pinned: the "[KEY] " prefix on the notification email and the exact digest subjects "Hub digest — 2 overdue, 1 review, 1 blocked" and "Hub digest — 1 overdue".
+- Assumptions: 044-D9 default (only the two footer strings change; `email.open`, the "Hub digest" and "Hub weekly summary" subjects and `weekly.footer` stay); 044-D11 default (ships unflagged as a correction, Tier B); the footer is the body's last paragraph after the final blank line, where Notify.cs and Digest.cs add it; new wording "This message was sent by Tuesday. Replies are not read; change your notification preferences in Tuesday.", with the digest footer using the same opening sentence.
+- Left for Jay: Tier B merge (a user-visible change without a flag; D11), so Jay reviews and merges `build/044-S12`.

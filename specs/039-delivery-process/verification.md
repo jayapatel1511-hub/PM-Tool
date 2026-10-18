@@ -17,7 +17,7 @@ Per FR-DLV-24, this file records checks until `trace_spec.py --report` (slice S1
 | AC-DLV-09 | S09 | PARTIAL: list is empty, full backend suite passes (1164/1164 on the slice), no existing route, setting or response gains a flag check; browser suites and coverage gates not run |
 | AC-DLV-10 | S02 | PARTIAL: `tools/test_ci_tests.py` shows every API class in exactly one of 3 shards, a new class file lands in a shard without edits, and a new `ci_steps.txt` line runs in its own job only; on the merged tree domain 635 + shards 162, 227 and 159 = 1183 = `dotnet test --list-tests`; three consecutive green GitHub runs not yet done |
 | AC-DLV-11 | S02 | PASS (local): `tools/test_coverage_gate.py`: a line hit only in the second file is counted once; one file gives the same result as before on a fixture and on real coverage files; merging the 4 real files from the builder run clears both gates (96.3 % branches, 95.0 % lines) |
-| AC-DLV-12 | S03 | UNRUN |
+| AC-DLV-12 | S03 | PARTIAL: `tools/test_ci_tests.py` (11 count tests) covers a missed shard (fails and names the cases), a case run twice, a missing test list, a drop below main for backend and browser suites, the `replace-test` label, a first run that passes and publishes, and the real step list; locally 1183 listed = 1183 run (635 + 162 + 227 + 159) and removing api-3 names the 159 missing cases; the GitHub run, main artifact download and label event not yet proven |
 | AC-DLV-13 | S07 | UNRUN |
 | AC-DLV-14 | S04 | UNRUN |
 | AC-DLV-15 | S08 | UNRUN |
@@ -103,3 +103,18 @@ Left for Jay:
 - Push and open the pull request; get three consecutive green GitHub Actions runs whose domain plus API shard totals equal the last serial run's total (1183 on the integration branch now). Add the `large` label if the size check needs it.
 - When S05 protects main, the required checks become `domain`, `api-1`, `api-2`, `api-3`, `web`, `checks` and `gate` instead of `build`.
 - Run the port-bound browser suites (handoffs, sign-in, coordination, design-basis, planner, resources, supervisor-capacity) in the `web` job; not run locally.
+
+## Build 039-S03
+
+Checks on the merged tree (clean merge): `dotnet build Hub.slnx` 0 errors; `python3 tools/test_ci_tests.py` 21 tests OK; `tools/test_coverage_gate.py` OK; `.github/workflows/ci.yml` parses; `python3 tools/trace_spec.py --check` clean. Builder on the slice: real domain filter and API shards 1 to 3 against Postgres, 1183 listed and 1183 run, 8 browser suites counted; `ci_tests.py count` exited 0 and, with api-3 removed, reported 159 cases not run. No web code changed. No flag: CI tooling only.
+
+Assumptions:
+- The drop-below-main check fails only on `pull_request` events; on a main push it only reports, since the merged pull request already passed or carried `replace-test`. The missed-shard check fails on every event.
+- The browser-suite count is the number of `npm run test:` commands on web lines of `tools/ci_steps.txt` (8 now); `gate` does not wait for `web`, whose failure already fails CI.
+- Cases are compared as a multiset of display names from `--list-tests` and TRX (data rows count separately); skipped tests count as run.
+- "Latest green main run" is the newest successful push run of workflow `ci` on main; earlier main runs without a `test-counts` artifact count as no earlier count, so the gate passes.
+- No Open decision default from `specs/DECISIONS.md` was relied on.
+
+Left for Jay:
+- First remote CI runs on a pull request and on main: confirm `gh run list` / `gh run download` work with `actions: read`, main publishes `test-counts`, and the `replace-test` label exists and re-runs `gate` when applied.
+- Making `gate` a required check belongs to S05.

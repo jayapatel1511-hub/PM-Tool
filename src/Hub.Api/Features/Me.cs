@@ -84,6 +84,7 @@ public static class MeEndpoints
             DeliverableTypes = await db.DeliverableTypes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new { x.Id, x.Name, x.DefaultDisciplineId, x.IsActive }).ToListAsync(),
             Phases = await db.Phases.AsNoTracking().OrderBy(x => x.SortOrder).Select(x => new { x.Id, x.Name, x.IsActive, x.SortOrder }).ToListAsync(),
             ProjectTypes = await db.ProjectTypes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new { x.Id, x.Name, x.IsActive }).ToListAsync(),
+            Limits = new { RoleLabel = OpenRoleLimits.Label }, // FR-FIG-12
         });
     }
 }

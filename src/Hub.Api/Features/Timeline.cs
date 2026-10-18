@@ -82,7 +82,7 @@ public static class TimelineEndpoints
             .OrderBy(m => m.Date == null).ThenBy(m => m.Date).ToListAsync();
         return new
         {
-            Permissions = new { ManageMilestones = Permissions.ManageMilestones(a, ctx).Ok, NeedsReason = p.Status == ProjectStatus.Complete },
+            Permissions = new { ManageMilestones = Permissions.ManageMilestones(a, ctx).Ok, NeedsReason = ProjectStatus.NeedsCorrectionReason(p.Status) },
             Tasks = taskRows,
             Dependencies = deps,
             DeliverableLinks = explicitLinks.Concat(derived).GroupBy(l => (l.From, l.To)).Select(g => new { g.Key.From, g.Key.To,

@@ -729,7 +729,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
                 t.HasCheckConstraint("ck_open_role_dates", "through_date >= from_date");
                 t.HasCheckConstraint("ck_open_role_hours", "planned_hours > 0");
                 t.HasCheckConstraint("ck_open_role_status", $"status IN ({In(OpenRoleStatus.All)})");
-                t.HasCheckConstraint("ck_open_role_label", "char_length(btrim(role_label)) BETWEEN 1 AND 80");
+                t.HasCheckConstraint("ck_open_role_label", $"char_length(btrim(role_label)) BETWEEN 1 AND {OpenRoleLimits.Label}");
             });
         });
         Fk<OpenRole, Project>(mb, x => x.ProjectId);

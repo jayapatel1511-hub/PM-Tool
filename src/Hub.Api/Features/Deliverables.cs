@@ -200,7 +200,7 @@ public static class DeliverableEndpoints
                 LinkDeliverables = Permissions.ManageDeliverableDependency(a, ctx, d.ProjectDisciplineId, d.ProjectDisciplineId).Ok, // the other end's lead may also link
                 IssueNeedsConfirm = d.Status != DeliverableStatus.ReadyToIssue,
                 ReadyToIssueGuard = guard is null ? null : Text.Get(guard), Comment = Permissions.Comment(a, ctx).Ok,
-                CreateTask = Permissions.CreateTask(a, ctx, d.ProjectDisciplineId).Ok, NeedsReason = p.Status == ProjectStatus.Complete,
+                CreateTask = Permissions.CreateTask(a, ctx, d.ProjectDisciplineId).Ok, NeedsReason = ProjectStatus.NeedsCorrectionReason(p.Status),
             },
         };
     }

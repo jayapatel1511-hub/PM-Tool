@@ -38,14 +38,11 @@ public static class OpenRoleEndpoints
         catch (ArgumentException) { return new Dictionary<DateOnly, decimal>(); } // a later holiday removed every working day
     }
 
-    static bool CanManage(Actor actor, ProjectContext ctx, OpenRole r) =>
-        Permissions.ProposeAllocation(actor, ctx).Ok && (Permissions.IsPM(actor, ctx) || r.CreatedBy == actor.Id);
-
     static Row ToRow(OpenRole r, string? disciplineName, bool canManage) => new(r.Id, r.ProjectId, r.RoleLabel, r.ProjectDisciplineId, disciplineName,
         r.FromDate, r.ThroughDate, r.PlannedHours, r.Status, r.FilledAllocationId, r.Note, r.RowVersion, canManage);
 
     /// A6, P-05: on a Complete project every change is a correction that needs a reason, as allocation proposals do.
-    static string? Reason(Project p, string? reason) => p.Status == ProjectStatus.Complete ? Check.Reason(reason) : Check.Optional(reason, "reason", 2000);
+    static string? Reason(Project p, string? reason) => ProjectStatus.NeedsCorrectionReason(p.Status) ? Check.Reason(reason) : Check.Optional(reason, "reason", 2000);
 
     static Task<string?> DisciplineName(HubDb db, Guid? id) =>
         db.ProjectDisciplines.Where(d => d.Id == id).Select(d => d.Discipline!.Name).FirstOrDefaultAsync();
@@ -56,12 +53,12 @@ public static class OpenRoleEndpoints
         var roles = await db.OpenRoles.AsNoTracking().Where(r => r.ProjectId == projectId).OrderBy(r => r.FromDate).ThenBy(r => r.RoleLabel)
             .Select(r => new { Role = r, DisciplineName = db.ProjectDisciplines.Where(d => d.Id == r.ProjectDisciplineId).Select(d => d.Discipline!.Name).FirstOrDefault() })
             .ToListAsync();
-        return roles.Select(x => ToRow(x.Role, x.DisciplineName, CanManage(access.Actor, ctx, x.Role)));
+        return roles.Select(x => ToRow(x.Role, x.DisciplineName, Permissions.ManageOpenRole(access.Actor, ctx, x.Role.CreatedBy).Ok));
     }
 
     static async Task Apply(HubDb db, Guid projectId, OpenRole r, Patch p, bool create)
     {
-        if (create || p.Has("roleLabel")) r.RoleLabel = Check.Required(p.Str("roleLabel"), "roleLabel", 80);
+        if (create || p.Has("roleLabel")) r.RoleLabel = Check.Required(p.Str("roleLabel"), "roleLabel", OpenRoleLimits.Label);
         if (create || p.Has("projectDisciplineId"))
         {
             r.ProjectDisciplineId = p.Id("projectDisciplineId");
@@ -96,8 +93,7 @@ public static class OpenRoleEndpoints
     {
         var role = await db.OpenRoles.FirstOrDefaultAsync(r => r.Id == id) ?? throw ApiException.NotFound();
         var (project, ctx) = await access.Project(role.ProjectId, false);
-        Access.Demand(Permissions.ProposeAllocation(access.Actor, ctx));
-        Access.Demand(Permissions.IsPM(access.Actor, ctx) || role.CreatedBy == access.Actor.Id ? Allow.Yes : Allow.No("perm.owner"));
+        Access.Demand(Permissions.ManageOpenRole(access.Actor, ctx, role.CreatedBy));
         return (role, project);
     }
 

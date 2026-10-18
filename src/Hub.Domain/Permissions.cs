@@ -88,6 +88,12 @@ public static class Permissions
         var gate = CoordinationWrite(a, p); if (!gate) return gate;
         return IsPM(a, p) || IsAnyDL(p) ? Allow.Yes : Allow.No("perm.pm_or_dl");
     }
+    /// FR-FIG-10: change or cancel an open role. The proposal gate first (FR-ROLE-02), then PM or the role's creator (FR-ROLE-01).
+    public static Allow ManageOpenRole(Actor a, ProjectContext p, Guid? createdBy)
+    {
+        var gate = ProposeAllocation(a, p); if (!gate) return gate;
+        return IsPM(a, p) || createdBy == a.Id ? Allow.Yes : Allow.No("perm.owner");
+    }
     public static Allow ConfirmAllocation(Actor a, ProjectContext p, Guid? personSupervisorId)
     {
         var gate = CoordinationWrite(a, p); if (!gate) return gate;

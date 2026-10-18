@@ -382,4 +382,26 @@ public sealed class PermissionMatrixTests
     [InlineData("ProjectManager", false)] [InlineData("Standard", false)] [InlineData("ReadOnly", false)]
     public void Planner_settings_are_admin_only(string role, bool allowed)
         => Assert.Equal(allowed, Permissions.Administer(PlannerActor(role)).Ok);
+
+    [Theory]
+    [InlineData("PM", true, true, null)]
+    [InlineData("DL", true, false, "perm.owner")]
+    [InlineData("TM", false, false, "perm.pm_or_dl")]
+    [InlineData("Viewer", false, false, "perm.pm_or_dl")]
+    [InlineData("none", false, false, "perm.not_member")]
+    public void Open_role_changes_need_the_proposal_gate_and_pm_or_creator(string role, bool asCreator, bool asOther, string? otherWhy) // FR-FIG-10
+    {
+        var ctx = Ctx(role, visibility: Visibility.Restricted);
+        Assert.Equal(asCreator, Permissions.ManageOpenRole(Std, ctx, Me).Ok);
+        Assert.Equal(asOther, Permissions.ManageOpenRole(Std, ctx, Other).Ok);
+        Assert.Equal(otherWhy, Permissions.ManageOpenRole(Std, ctx, Other).Why);
+        Assert.Equal(role == "PM", Permissions.ManageOpenRole(Std, Ctx(role, ProjectStatus.Complete), Me).Ok);
+        Assert.False(Permissions.ManageOpenRole(Std, Ctx(role, ProjectStatus.Archived), Me).Ok);
+        Assert.False(Permissions.ManageOpenRole(RO, Ctx(role), Me).Ok);
+    }
+
+    [Fact]
+    public void Corrections_need_a_reason_on_complete_projects_only() // P-05, FR-FIG-11
+        => Assert.Equal([ProjectStatus.Complete], ProjectStatus.All.Where(ProjectStatus.NeedsCorrectionReason));
 }
+

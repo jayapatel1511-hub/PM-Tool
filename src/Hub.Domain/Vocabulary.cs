@@ -30,6 +30,8 @@ public static class ProjectStatus
     public static readonly string[] All = [Setup, Active, OnHold, Complete, Archived, Cancelled];
     public static bool IsReadOnly(string s) => s is Archived or Cancelled;
     public static bool IsLive(string s) => s is Setup or Active or OnHold;
+    /// P-05, FR-FIG-11: every change to a Complete project is a correction that needs a reason.
+    public static bool NeedsCorrectionReason(string s) => s == Complete;
 }
 
 public static class TaskStatuses
@@ -144,6 +146,12 @@ public static class OpenRoleStatus
 {
     public const string Open = "Open", Filled = "Filled", Cancelled = "Cancelled";
     public static readonly string[] All = [Open, Filled, Cancelled];
+}
+
+/// FR-FIG-12: the open-role label is 1 to 80 characters (FR-ROLE-01), for the endpoint, the CHECK and GET /reference.
+public static class OpenRoleLimits
+{
+    public const int Label = 80;
 }
 
 public static class BlockType

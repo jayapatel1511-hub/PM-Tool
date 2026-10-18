@@ -302,7 +302,7 @@ public static class ProjectEndpoints
                 Transitions = Workflow.ProjectNext(p.Status).Where(to => Permissions.ChangeProjectStatus(a, ctx, to).Ok),
                 ChangeNumber = a.Admin,
                 SetVisibility = s.RestrictedProjectsEnabled && Permissions.EditProject(a, ctx).Ok,
-                NeedsReason = p.Status == ProjectStatus.Complete,
+                NeedsReason = ProjectStatus.NeedsCorrectionReason(p.Status),
             },
         };
     }
@@ -310,7 +310,7 @@ public static class ProjectEndpoints
     static object Perm(Allow a, string status) => new { a.Ok, Reason = a.Why is null ? null : Text.Get(a.Why, a.Arg ?? status) };
 
     /// P-05 / AC-PRJ-06: edits to a Complete project are corrections that need a reason.
-    public static void CorrectionReason(Project p, string? reason) { if (p.Status == ProjectStatus.Complete) Check.Reason(reason); }
+    public static void CorrectionReason(Project p, string? reason) { if (ProjectStatus.NeedsCorrectionReason(p.Status)) Check.Reason(reason); }
 
     // ---------- Edit (FR-003, P-07, FR-016) ----------
 

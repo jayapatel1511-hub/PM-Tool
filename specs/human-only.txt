@@ -1,0 +1,1 @@
+AC-DLV-01 Branch protection is a GitHub repository setting; Jay applies it and records the readback in specs/039-delivery-process/acceptance.md (docs/runbooks/delivery.md).

@@ -16,8 +16,8 @@ Slice builds in progress; see the build notes below.
 | AC-OPS-10 | UNRUN |
 | AC-OPS-11 | UNRUN |
 | AC-OPS-12 | PASS (local) |
-| AC-OPS-13 | UNRUN |
-| AC-OPS-14 | UNRUN |
+| AC-OPS-13 | PASS (local) |
+| AC-OPS-14 | PASS (local) |
 | AC-OPS-15 | PASS (local) |
 | AC-OPS-16 | PASS (local) |
 | AC-OPS-17 | PASS (local) |
@@ -34,6 +34,17 @@ Mocked review-probe copied-cookie test and a SKIP line in the probe's social mod
 - AC-OPS-12: PASS (local). Server tests unchanged and pass. Removing the review probe's copied-cookie check fails the new mocked test (mutation checked by the builder). In social mode the probe prints a SKIP line naming the server test. The pilot probe's test is unchanged and passes.
 - Assumptions: no 044 decision (D1-D11) affects this slice; the packet ships without a flag (§48.1), so no flag was added; the SKIP line is printed only with `--social` and does not count as a failure.
 - Left for Jay: nothing. The next social-mode run of the review probe on homedev will print the new SKIP line.
+
+## Build 044-S07
+
+`IdempotencyMiddleware` claims the key with `INSERT ... ON CONFLICT (user_id, key) DO NOTHING` before the handler runs (generic path only); a 2xx answer of 256 KB or less fills the receipt with `ExecuteUpdate`, anything else (including an exception) deletes the claim. The middleware no longer calls `SaveChanges`. Planning, handoff, coordination and calendar-subscription paths are unchanged. New text `error.idempotency_in_progress`.
+
+- Checks on the merged tree: `dotnet build Hub.slnx` 0 errors; `dotnet test --filter Idempotency|Planning` 138 passed; full `tests/Hub.Tests` suite 1190 passed, 0 failed. The builder ran `IdempotencyTests` 3 times after the final edits, 5/5 each time.
+- AC-OPS-13: PASS (local). `Racing_retries_with_one_key_create_one_task` sends 4 identical keyed creates at once: exactly 1 task and 1 fresh 201; every other answer is a replayed 201 or 409 `idempotency_in_progress` with `Retry-After: 1`, and a later retry replays. Thread timing decides whether a real overlap happens on a given run; the assertions hold either way.
+- AC-OPS-14: PASS (local). `A_refused_keyed_create_leaves_no_receipt` (400 on create, 422 `start_authorisation_required` on transition) leaves no receipt and the corrected retry with the same key runs. `An_abandoned_claim_or_old_receipt_is_replaced` covers a live claim (409; 422 on another path), a 3-minute-old claim (runs) and a receipt older than a day (runs, then replays). The existing replay test and planning idempotency tests pass unchanged.
+- FR-OPS-14 previous-image lookup: PASS (local). `A_pending_claim_is_invisible_to_a_one_day_receipt_lookup` runs the old one-day query against a fresh claim and gets null; a second claim on the same key returns null.
+- Assumptions: 044-D7 default (in-progress answer is 409 `idempotency_in_progress` with `Retry-After: 1`, abandon window 2 minutes, generic path compares the path only); the packet ships without a flag (§48.1), so S07 has none; error text "This request is still being processed. Try again in a moment."; order of checks for a live row is path mismatch (422), then pending (409), then replay; known limit from the plan: a crash after the handler commits but before the receipt is filled leaves a pending claim that answers 409 until the 2-minute abandon window passes.
+- Left for Jay: Tier B merge (changes approved behaviour), so Jay reviews and merges `build/044-S07` to main. Nothing needs homedev, GitHub or sudo.
 
 ## Build 044-S08
 

@@ -85,6 +85,37 @@ public sealed class WorkloadTests
     }
 
     [Fact]
+    public void Load_bands_follow_settings_and_default_to_todays_shades() // AC-FIG-05
+    {
+        Assert.Equal(
+            [Workload.Band.Light, Workload.Band.Within, Workload.Band.Within, Workload.Band.Near, Workload.Band.Near, Workload.Band.Over],
+            new decimal[] { 39, 40, 90, 91, 110, 111 }.Select(p => Workload.LoadBand(p)));
+        Assert.Equal(Workload.Band.Over, Workload.LoadBand(Workload.Pct(5, 0))); // no availability, committed hours
+        Assert.Equal(Workload.Band.Light, Workload.LoadBand(Workload.Pct(0, 0)));
+        var defaults = new OrgSettings();
+        Assert.All(new decimal[] { 0, 39, 40, 90, 91, 110, 111, 999 }, p => Assert.Equal(Workload.LoadBand(p), Workload.LoadBand(p, defaults)));
+        var set = defaults with { WorkloadAmberPct = 80, WorkloadOverPct = 120 };
+        Assert.Equal(Workload.Band.Near, Workload.LoadBand(100, set));
+        Assert.Equal(Workload.Band.Near, Workload.LoadBand(115, set));
+        Assert.Equal(Workload.Band.Over, Workload.LoadBand(121, set));
+        Assert.Equal(Workload.Band.Within, Workload.LoadBand(80, set));
+        var noNear = defaults with { WorkloadAmberPct = 150 }; // amber at or above over leaves no Near band
+        Assert.Equal(Workload.Band.Over, Workload.LoadBand(111, noNear));
+        Assert.Equal(Workload.Band.Within, Workload.LoadBand(110, noNear));
+    }
+
+    [Fact]
+    public void Over_and_under_assigned_read_their_settings() // AC-FIG-06
+    {
+        Assert.False(Workload.OverAssigned(115, 120, 120));
+        Assert.True(Workload.OverAssigned(100, 121, 120));
+        Assert.True(Workload.OverAssigned(111, 0, Workload.OverPct));
+        Assert.True(Workload.UnderAssigned(45, 49, 0, 50));
+        Assert.False(Workload.UnderAssigned(45, 50, 0, 50));
+        Assert.False(Workload.UnderAssigned(10, 10, 1, 50));
+    }
+
+    [Fact]
     public void Deadline_clusters_need_three_tasks_across_two_projects_within_three_days() // FR-004, US2 scenario 3
     {
         Assert.True(Workload.DeadlineCluster([(Monday.AddDays(3), P1), (Monday.AddDays(4), P1), (Monday.AddDays(5), P2)], Monday));

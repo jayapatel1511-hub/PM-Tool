@@ -128,6 +128,8 @@ public sealed class NotificationSearchTests(HubFactory f)
             Assert.Contains("project update", on.Subject);
             Assert.Contains("PROJECT UPDATES", on.BodyText);
             Assert.Equal("Hub digest — 1 overdue", off.Subject); // no update count
+            var footer = off.BodyText.TrimEnd()[(off.BodyText.TrimEnd().LastIndexOf("\n\n", StringComparison.Ordinal) + 2)..]; // AC-OPS-20
+            Assert.Equal("This message was sent by Tuesday. Replies are not read.", footer);
             Assert.DoesNotContain("PROJECT UPDATES", off.BodyText);
             Assert.Contains("OVERDUE (1)", off.BodyText);
         });

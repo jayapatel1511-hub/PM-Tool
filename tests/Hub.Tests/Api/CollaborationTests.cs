@@ -131,6 +131,9 @@ public sealed class CollaborationTests(HubFactory f)
             await db.Emails.CountAsync(e => e.UserId == U(TestData.Alex) && e.Subject.Contains(t.S("key")))));
         Assert.Equal(1, app);
         Assert.Equal(1, mail);
+        var assigned = await f.DbAsync(db => db.Emails.SingleAsync(e => e.UserId == U(TestData.Alex) && e.Subject.Contains(t.S("key"))));
+        Assert.StartsWith($"[{t.S("key")}] ", assigned.Subject); // AC-OPS-20: subject unchanged
+        AssertTuesdayFooter(assigned.BodyText);
         await d.Move(TestData.Alex, t, TaskStatuses.InProgress);
         Assert.False(await f.DbAsync(db => db.Notifications.AnyAsync(n => n.UserId == U(TestData.Alex) && n.ItemId == t.G("id") && n.EventType != NotificationEvents.TaskAssigned)));
 
@@ -265,6 +268,7 @@ public sealed class CollaborationTests(HubFactory f)
             await f.RunJob<DigestJob>();
             var mail = await f.DbAsync(db => db.Emails.SingleAsync(e => e.UserId == me && e.Kind == "Digest"));
             Assert.Equal("Hub digest — 2 overdue, 1 review, 1 blocked", mail.Subject);
+            AssertTuesdayFooter(mail.BodyText); // AC-OPS-20
             Assert.Contains("OVERDUE (2)", mail.BodyText);
             Assert.Contains("BLOCKED (1)", mail.BodyText);
             Assert.Contains("REVIEWS WAITING ON YOU (1)", mail.BodyText);
@@ -364,5 +368,14 @@ public sealed class CollaborationTests(HubFactory f)
             Assert.EndsWith("2 project updates", mail.Subject);
             Assert.DoesNotContain("Assigned to follower", mail.BodyText.Split("PROJECT UPDATES")[1]);
         });
+    }
+
+    /// AC-OPS-20: the footer (the last paragraph) names Tuesday, not the old product name.
+    private static void AssertTuesdayFooter(string body)
+    {
+        var footer = body.TrimEnd()[(body.TrimEnd().LastIndexOf("\n\n", StringComparison.Ordinal) + 2)..];
+        Assert.Contains("Tuesday", footer);
+        Assert.DoesNotContain("Coordination Hub", footer);
+        Assert.DoesNotContain("the Hub", footer);
     }
 }

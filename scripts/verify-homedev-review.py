@@ -69,6 +69,8 @@ if args.social:
               and query.get("code_challenge_method") == ["S256"] and bool(query.get("state")) and "client_secret" not in query)
         cookie = headers.get("set-cookie", "").lower()
         check(provider + " secure correlation cookie", "secure" in cookie and "httponly" in cookie and "samesite=none" in cookie)
+    print("SKIP copied cookie after sign-out — no password sign-in in social mode; covered by "
+          "SocialAuthTests.Logout_revokes_copied_cookie_and_inactive_users_cannot_sign_in_or_use_existing_sessions")
     print("Real-account sign-in and consent require browser verification.")
     print("RESULT", "PASS" if failures == 0 else f"FAIL ({failures})")
     sys.exit(1 if failures else 0)

@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import mock_open, patch
 from urllib.parse import urlencode
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -90,6 +90,68 @@ class SocialActivationTests(unittest.TestCase):
         code, _, requests = self.probe(origin="https://evil.example")
         self.assertEqual(code, "Refusing unexpected verification origin")
         self.assertEqual(requests, [])
+
+    def local_probe(self, revokes):
+        signed_out = []
+
+        class Connection:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def request(self, method, path, body, headers):
+                self.path, self.headers, self.body = path, headers, json.loads(body) if body else None
+
+            def getresponse(self):
+                status, body, headers = 200, b"Healthy", []
+                cookie = self.headers.get("Cookie")
+                live = cookie == "hub=synthetic-token" and not (revokes and signed_out)
+                if self.headers["Host"] == "evil.example":
+                    status = 400
+                elif self.headers.get("Origin") == "https://evil.example":
+                    status = 403
+                elif self.path.endswith("/sign-in"):
+                    status = 401 if self.body["password"] != "synthetic-password" else 204
+                    if status == 204:
+                        headers = [("Set-Cookie", "hub=synthetic-token; Path=/; Secure; HttpOnly")]
+                elif self.path.endswith("/sign-out"):
+                    signed_out.append(True)
+                    status, headers = 204, [("Set-Cookie", "hub=; Path=/; Max-Age=0")]
+                elif self.path.endswith("/me") or self.path.endswith("/projects"):
+                    status, body = (200, b'{"email": "a@example.com"}') if live else (401, b"")
+                self.status, self.response_body, self.response_headers = status, body, headers
+                return self
+
+            def read(self):
+                return self.response_body
+
+            def getheaders(self):
+                return self.response_headers
+
+            def close(self):
+                pass
+
+        handoff = json.dumps({"credentials": [{"login": "a@example.com", "password": "synthetic-password"}]})
+        output = io.StringIO()
+        with patch.object(sys, "argv", ["verify"]), patch("http.client.HTTPConnection", Connection), \
+             patch("builtins.open", mock_open(read_data=handoff)), \
+             contextlib.redirect_stdout(output), self.assertRaises(SystemExit) as ended:
+            runpy.run_path(str(ROOT / "scripts/verify-homedev-review.py"), run_name="__main__")
+        return ended.exception.code, output.getvalue()
+
+    def test_review_probe_rejects_copied_cookie_after_mocked_sign_out(self):
+        code, output = self.local_probe(revokes=True)
+        self.assertEqual(code, 0, output)
+        self.assertIn("PASS copied cookie after sign-out denied", output)
+        self.assertNotIn("synthetic-password", output)
+        self.assertNotIn("synthetic-token", output)
+        code, output = self.local_probe(revokes=False)
+        self.assertEqual(code, 1, output)
+        self.assertIn("FAIL copied cookie after sign-out denied", output)
+
+    def test_social_probe_reports_copied_cookie_skip(self):
+        code, output, _ = self.probe()
+        self.assertEqual(code, 0, output)
+        self.assertRegex(output, r"(?m)^SKIP copied cookie after sign-out .*SocialAuthTests\.Logout_revokes_copied_cookie")
 
     def test_activation_selects_social_override_and_verifier_only_when_requested(self):
         source = (ROOT / "scripts/activate-homedev-review.sh").read_text().split("\nlog() {", 1)[0]

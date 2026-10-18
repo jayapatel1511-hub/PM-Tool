@@ -242,7 +242,7 @@ public static class Text
         ["task.start_auth_unusable"] = " The start authorisation recorded by {0} can no longer be used because they are no longer an active Project Manager or Discipline Lead for this work.",
         ["notify.task_start_authorised"] = "{0} authorised starting {1} {2} while it is {3}",
         ["dep.same_project"] = "Both tasks must be in the same project.",
-        ["dep.self"] = "An item cannot depend on itself.", ["holiday.exists"] = "That day is already a holiday on this calendar.", ["error.idempotency_reused"] = "That Idempotency-Key was already used for a different request.", ["dep.one_end"] = "Choose either the predecessor or the successor.", ["dep.lag"] = "Lag is between 0 and 365 days.",
+        ["dep.self"] = "An item cannot depend on itself.", ["holiday.exists"] = "That day is already a holiday on this calendar.", ["error.idempotency_reused"] = "That Idempotency-Key was already used for a different request.", ["error.idempotency_in_progress"] = "This request is still being processed. Try again in a moment.", ["dep.one_end"] = "Choose either the predecessor or the successor.", ["dep.lag"] = "Lag is between 0 and 365 days.",
         ["dep.duplicate"] = "This dependency already exists.",
         ["dep.cycle"] = "This would create a loop: {0}.",
         ["dep.would_cycle"] = "Would create a loop",

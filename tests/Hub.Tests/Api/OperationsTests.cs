@@ -145,6 +145,117 @@ public sealed class IdempotencyTests(HubFactory f)
         var otherPerson = await f.As(TestData.Pm).SendAsync(Req($"/api/v1/projects/{p.Id}/tasks", body)); // keys belong to one person
         Assert.NotEqual((await first.Json(201)).S("id"), (await otherPerson.Json(201)).S("id"));
     }
+
+    static HttpRequestMessage Keyed(string key, string path, object body)
+    {
+        var m = new HttpRequestMessage(HttpMethod.Post, path) { Content = System.Net.Http.Json.JsonContent.Create(body) };
+        m.Headers.Add("Idempotency-Key", key);
+        return m;
+    }
+
+    Task<int> Receipts(string key) => f.DbAsync(db => db.Idempotency.CountAsync(r => r.Key == key));
+
+    /// AC-OPS-13: two identical creates racing with one key make one task.
+    [Fact]
+    public async Task Racing_retries_with_one_key_create_one_task()
+    {
+        var p = await d.Project();
+        var key = Guid.NewGuid().ToString("N");
+        var body = new { name = "Sent twice at once", projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil") };
+        var path = $"/api/v1/projects/{p.Id}/tasks";
+        var answers = await Task.WhenAll(Enumerable.Range(0, 4).Select(_ => f.As(TestData.Marc).SendAsync(Keyed(key, path, body))));
+        Assert.Equal(1, await f.DbAsync(db => db.Tasks.CountAsync(t => t.ProjectId == p.Id && t.Name == "Sent twice at once")));
+        Assert.Equal(1, answers.Count(a => a.StatusCode == HttpStatusCode.Created && !a.Headers.Contains("Idempotent-Replayed")));
+        foreach (var other in answers.Where(a => a.StatusCode != HttpStatusCode.Created || a.Headers.Contains("Idempotent-Replayed")))
+            if (other.StatusCode == HttpStatusCode.Conflict)
+            {
+                Assert.Equal("idempotency_in_progress", (await other.Json(409)).S("code"));
+                Assert.Equal("1", other.Headers.RetryAfter?.ToString());
+            }
+            else Assert.Equal(HttpStatusCode.Created, other.StatusCode);
+        var later = await f.As(TestData.Marc).SendAsync(Keyed(key, path, body));
+        Assert.Equal(HttpStatusCode.Created, later.StatusCode);
+        Assert.True(later.Headers.Contains("Idempotent-Replayed"));
+    }
+
+    /// AC-OPS-14: a refused keyed request (400 or 422) leaves no receipt, and a corrected retry with the key runs.
+    [Fact]
+    public async Task A_refused_keyed_create_leaves_no_receipt()
+    {
+        var p = await d.Project();
+        var key = Guid.NewGuid().ToString("N");
+        var path = $"/api/v1/projects/{p.Id}/tasks";
+        var invalid = await f.As(TestData.Marc).SendAsync(Keyed(key, path, new { name = "", projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil") }));
+        Assert.Equal(HttpStatusCode.BadRequest, invalid.StatusCode);
+        Assert.Equal(0, await Receipts(key));
+        var corrected = await f.As(TestData.Marc).SendAsync(Keyed(key, path, new { name = "Corrected after a refusal", projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil") }));
+        Assert.Equal(HttpStatusCode.Created, corrected.StatusCode);
+        Assert.False(corrected.Headers.Contains("Idempotent-Replayed"));
+
+        var t = await d.NewTask(p.Id);
+        var ruleKey = Guid.NewGuid().ToString("N");
+        var refused = await f.As(TestData.Marc).SendAsync(Keyed(ruleKey, $"/api/v1/tasks/{t.G("id")}/transition",
+            new { toStatus = TaskStatuses.InProgress, rowVersion = await d.TaskVersion(t) })); // not Ready, no acknowledgement
+        Assert.Equal("start_authorisation_required", (await refused.Json(422)).S("code"));
+        Assert.Equal(0, await Receipts(ruleKey));
+        var retried = await f.As(TestData.Marc).SendAsync(Keyed(ruleKey, $"/api/v1/tasks/{t.G("id")}/transition",
+            new { toStatus = TaskStatuses.OnHold, rowVersion = await d.TaskVersion(t), reason = "Waiting for the survey" }));
+        Assert.True(retried.IsSuccessStatusCode, await retried.Content.ReadAsStringAsync());
+        Assert.Equal(1, await Receipts(ruleKey));
+    }
+
+    /// AC-OPS-14 and §48.11 D7: a live pending claim answers 409; an abandoned claim or an old receipt is replaced and the request runs.
+    [Fact]
+    public async Task An_abandoned_claim_or_old_receipt_is_replaced()
+    {
+        var p = await d.Project();
+        var marc = d.User(TestData.Marc);
+        var path = $"/api/v1/projects/{p.Id}/tasks";
+        var now = f.Clock.GetUtcNow();
+        object Body(string name) => new { name, projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil") };
+
+        var live = Guid.NewGuid().ToString("N");
+        await f.DbAsync(db => IdempotencyMiddleware.Claim(db, marc, live, path, now.AddMinutes(-1)));
+        var busy = await f.As(TestData.Marc).SendAsync(Keyed(live, path, Body("Waits for the first request")));
+        Assert.Equal(HttpStatusCode.Conflict, busy.StatusCode);
+        Assert.Equal("idempotency_in_progress", (await busy.Json(409)).S("code"));
+        Assert.Equal("1", busy.Headers.RetryAfter?.ToString());
+        var reusedWhilePending = await f.As(TestData.Marc).SendAsync(Keyed(live, $"/api/v1/projects/{p.Id}/decisions", new { subject = "x" }));
+        Assert.Equal(422, (int)reusedWhilePending.StatusCode);
+
+        var abandoned = Guid.NewGuid().ToString("N");
+        await f.DbAsync(db => IdempotencyMiddleware.Claim(db, marc, abandoned, path, now.AddMinutes(-3)));
+        var runs = await f.As(TestData.Marc).SendAsync(Keyed(abandoned, path, Body("Runs after an abandoned claim")));
+        Assert.Equal(HttpStatusCode.Created, runs.StatusCode);
+        Assert.False(runs.Headers.Contains("Idempotent-Replayed"));
+
+        var old = Guid.NewGuid().ToString("N");
+        await f.DbAsync(async db =>
+        {
+            db.Idempotency.Add(new IdempotencyRecord { UserId = marc, Key = old, Path = "/api/v1/elsewhere", Status = 201, Body = [], CreatedAt = now.AddDays(-1).AddMinutes(-1) });
+            return await db.SaveChangesAsync();
+        });
+        var fresh = await f.As(TestData.Marc).SendAsync(Keyed(old, path, Body("Runs after an old receipt")));
+        Assert.Equal(HttpStatusCode.Created, fresh.StatusCode);
+        Assert.False(fresh.Headers.Contains("Idempotent-Replayed"));
+        Assert.Equal(1, await Receipts(old));
+        var replay = await f.As(TestData.Marc).SendAsync(Keyed(old, path, Body("Runs after an old receipt")));
+        Assert.True(replay.Headers.Contains("Idempotent-Replayed"));
+    }
+
+    /// FR-OPS-14: the previous image's lookup (receipts younger than one day) never returns a pending claim after a rollback.
+    [Fact]
+    public async Task A_pending_claim_is_invisible_to_a_one_day_receipt_lookup()
+    {
+        var marc = d.User(TestData.Marc);
+        var key = Guid.NewGuid().ToString("N");
+        var now = f.Clock.GetUtcNow();
+        Assert.NotNull(await f.DbAsync(db => IdempotencyMiddleware.Claim(db, marc, key, "/api/v1/anything", now)));
+        Assert.Null(await f.DbAsync(db => IdempotencyMiddleware.Claim(db, marc, key, "/api/v1/anything", now)));
+        Assert.Equal(1, await Receipts(key));
+        var previousImage = await f.DbAsync(db => db.Idempotency.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == marc && x.Key == key && x.CreatedAt > now.AddDays(-1)));
+        Assert.Null(previousImage);
+    }
 }
 
 /// Packet 011 threat model finding T-05: exported CSV text never runs as a spreadsheet formula.

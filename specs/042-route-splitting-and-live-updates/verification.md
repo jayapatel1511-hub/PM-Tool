@@ -22,7 +22,7 @@ In progress. S01 and S04 are checked locally; other slices are not yet run.
 | AC-LIVE-16 | `LiveEventsTests` (S10), `web/tests/live-events.cjs` (S11) | UNRUN |
 | AC-LIVE-17 | `scripts/check-live-stream.py` on the review origin (after S12; needs an authorised activation) | UNRUN |
 | AC-LIVE-18 | `web/tests/live-refresh.cjs` (S08), `web/tests/live-events.cjs` (S11, S13) | UNRUN |
-| AC-LIVE-19 | `LiveFeedTests` (S09) | UNRUN |
+| AC-LIVE-19 | `LiveFeedTests` (S09) | PASS (local) |
 
 ## Build 042-S01
 
@@ -39,3 +39,11 @@ In progress. S01 and S04 are checked locally; other slices are not yet run.
 - Checks on the merged tree: `dotnet build Hub.slnx` 0 errors; `StaticCacheTests`, `FoundationsTests`, `DeploymentConformanceTests` 25/25 passed. No web change, so npm build, lint and browser suites were not run.
 - Assumptions: 042-D6 default, caching ships unflagged (the packet gives S04 no flag). The test points the web root at a temporary folder through the HubFactory `webroot` setting.
 - Left for Jay: after a deploy, optionally confirm the headers on the review origin with `curl -I` on an `/assets` file and on `/`.
+
+## Build 042-S09
+
+- Merged into `claude/build-039-050` (slice commit c0fd9b66). `LiveFeed` in `src/Hub.Api/Infrastructure/LiveFeed.cs` is a singleton hosted service registered in `src/Hub.Api/Program.cs`; `Live:*` settings added to `appsettings.json` (FR-LIVE-15).
+- AC-LIVE-19 PASS (local): `LiveFeedTests` 7/7 (uuid v7 ordering, a late-committing row delivered exactly once, evaluated rows once per evaluation, no rows written, outbox untouched, subscribers). The review fix prunes the de-duplication set against the same millisecond-rounded lower bound as the query; `Row_in_the_boundary_millisecond_is_delivered_once` fails without it.
+- Checks on the merged tree: `dotnet build Hub.slnx` 0 errors; `LiveFeedTests` 7/7; full `dotnet test Hub.slnx` 1197/1197 passed (`Program.cs` auto-merged). Builder also ran `tools/coverage_gate.py` (rules engine branch 96.6%, service line 94.7%). No web change, so npm build, lint and browser suites were not run.
+- Assumptions: no Open decision from `specs/DECISIONS.md` relied on. The feed stays idle until a stream subscribes (S10), so behaviour is unchanged until `flag.live_events` lands with S10. The prune bound is rounded down instead of rounding the public `Cursor` at construction.
+- Left for Jay: nothing new; pushing, the pull request and merging remain his.

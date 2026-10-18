@@ -49,6 +49,7 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<JobHost>());
 // §46.6 change feed: idle until a stream subscribes (S10).
 builder.Services.AddSingleton<LiveFeed>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<LiveFeed>());
+builder.Services.AddSingleton<LiveStreams>();
 HubModules.AddServices(builder.Services, cfg);
 
 // Requests, dependencies and logs go to Application Insights when the environment provides it (§23.8): the failed-request
@@ -200,6 +201,7 @@ else app.MapOpenApi("/api/v1/openapi.json");
 MeEndpoints.Map(api);
 AdminEndpoints.Map(api);
 ActivityEndpoints.Map(api);
+EventEndpoints.Map(api);
 HubModules.Map(api);
 app.MapFallback("/api/{**rest}", (HttpContext _) => throw ApiException.NotFound()); // §25.6: an unknown API path is a 404 problem, not the SPA page
 app.MapFallbackToFile("index.html", staticFiles).AllowAnonymous();

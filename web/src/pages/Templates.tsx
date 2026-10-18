@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useReference } from '@/hooks/data'
 import { ApiError, del, get, post, put } from '@/lib/api'
-import { useMe } from '@/lib/auth'
+import { useMe, useFlag } from '@/lib/auth'
 import { fmtDate, fmtTime } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -28,12 +28,13 @@ interface Ms { ref: string; name: string; milestoneType: string; anchor: string;
 interface Dl { ref: string; disciplineId: string; name: string; deliverableTypeId: string; milestoneRef?: string | null; offset?: number | null; requiresReview: boolean; description?: string | null }
 interface Tk { ref: string; disciplineId: string; deliverableRef?: string | null; name: string; description?: string | null; requiresReview: boolean; priority: string; estimatedHours?: number | null; offset?: number | null; assignTo: string }
 interface Dep { predecessor: string; successor: string }
+interface TplRole { ref: string; disciplineId?: string | null; label: string; startMilestoneRef?: string | null; startOffsetDays: number; endMilestoneRef?: string | null; endOffsetDays: number; hours: number; note?: string | null }
 interface Basis { id: string; disciplineId: string; kind: string; title: string; scope: string; statement: string; numericValue?: number | null; units?: string | null
   sourceSystem?: string | null; stableSourceId?: string | null; sourceUrl?: string | null; declaredRevision?: string | null }
 interface Detail {
   id: string; familyId: string; name: string; description?: string | null; projectTypeId?: string | null; version?: number | null; status: string; publishedAt?: string; rowVersion: number
   offsetDayKind?: string; canEdit: boolean; family: { id: string; version?: number | null; status: string; publishedAt?: string }[]
-  disciplines: { disciplineId: string; isDefaultIncluded: boolean; templateDisciplineId?: string }[]; milestones: Ms[]; deliverables: Dl[]; tasks: Tk[]; dependencies: Dep[]
+  disciplines: { disciplineId: string; isDefaultIncluded: boolean; templateDisciplineId?: string }[]; milestones: Ms[]; deliverables: Dl[]; tasks: Tk[]; dependencies: Dep[]; roles: TplRole[]
   basisSuggestions: Basis[]
 }
 
@@ -132,12 +133,13 @@ export function TemplatePage() {
 }
 
 function TemplateEditor() {
+  const rolesOn = useFlag('template_roles')
   const { id } = useParams()
   const navigate = useNavigate()
   const qc = useQueryClient()
   const ref = useReference()
   const me = useMe()
-  const q = useQuery({ queryKey: ['template', id], queryFn: () => get<Detail>(`templates/${id}`) })
+  const q = useQuery({ queryKey: ['template', id], queryFn: async () => { const result = await get<Detail>(`templates/${id}`); return { ...result, roles: result.roles ?? [] } } })
   const [d, setD] = useState<Detail | null>(null)
   const [dirty, setDirty] = useState(false)
   const [err, setErr] = useState<unknown>(null)
@@ -163,7 +165,7 @@ function TemplateEditor() {
     try {
       const r = await put<Detail>(`templates/${id}/structure`, {
         rowVersion: d.rowVersion, header: { name: d.name, description: d.description || null, projectTypeId: d.projectTypeId || null, ...(d.offsetDayKind ? { offsetDayKind: d.offsetDayKind } : {}) },
-        disciplines: d.disciplines, milestones: d.milestones, deliverables: d.deliverables, tasks: d.tasks, dependencies: d.dependencies,
+        disciplines: d.disciplines, milestones: d.milestones, deliverables: d.deliverables, tasks: d.tasks, dependencies: d.dependencies, ...(rolesOn ? { roles: d.roles } : {}),
       })
       qc.setQueryData(['template', id], r); setD(r); setDirty(false); toast.success(t('tpl.saved')); refresh()
       return r
@@ -357,6 +359,24 @@ function TemplateEditor() {
           </ul>
         )}
       </Section>
+
+      {rolesOn && <Section title={t('tpl.roles')} count={d.roles.length} actions={edit && <Button size="sm" variant="outline" disabled={!!busy}
+        onClick={() => change({ roles: [...d.roles, { ref: newRef(), disciplineId: null, label: '', startMilestoneRef: d.milestones[0]?.ref, startOffsetDays: 0, endMilestoneRef: d.milestones.at(-1)?.ref, endOffsetDays: 0, hours: 1 }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
+        {d.roles.length === 0 ? <Empty>{t('tpl.noRoles')}</Empty> : <ul className="divide-y">{d.roles.map((r, i) => {
+          const set = (p: Partial<TplRole>) => change({ roles: d.roles.map((x, j) => j === i ? { ...x, ...p } : x) })
+          return <li key={r.ref} className="grid gap-3 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Field label={t('tpl.roleLabel')} htmlFor={`role-label-${i}`}><Input id={`role-label-${i}`} maxLength={80} value={r.label} disabled={!edit || !!busy} onChange={e => set({ label: e.target.value })} /></Field>
+            <Field label={t('tpl.roleDiscipline')} htmlFor={`role-discipline-${i}`}><select id={`role-discipline-${i}`} className={cls} value={r.disciplineId ?? ''} disabled={!edit || !!busy} onChange={e => set({ disciplineId: e.target.value || null })}><option value="">{t('tpl.noDiscipline')}</option>{ref.data?.disciplines.filter(x => inTemplate.includes(x.id)).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
+            <Field label={t('tpl.roleStart')} htmlFor={`role-start-${i}`}><select id={`role-start-${i}`} className={cls} value={r.startMilestoneRef ?? ''} disabled={!edit || !!busy} onChange={e => set({ startMilestoneRef: e.target.value || null })}><option value="">{t('common.selectPlaceholder')}</option>{d.milestones.map(m => <option key={m.ref} value={m.ref}>{m.name}</option>)}</select></Field>
+            <Field label={t('tpl.roleStartOffset')} htmlFor={`role-start-offset-${i}`}><Input id={`role-start-offset-${i}`} type="number" min={-3650} max={3650} step={1} value={r.startOffsetDays} disabled={!edit || !!busy} onChange={e => set({ startOffsetDays: Number(e.target.value) })} /></Field>
+            <Field label={t('tpl.roleEnd')} htmlFor={`role-end-${i}`}><select id={`role-end-${i}`} className={cls} value={r.endMilestoneRef ?? ''} disabled={!edit || !!busy} onChange={e => set({ endMilestoneRef: e.target.value || null })}><option value="">{t('common.selectPlaceholder')}</option>{d.milestones.map(m => <option key={m.ref} value={m.ref}>{m.name}</option>)}</select></Field>
+            <Field label={t('tpl.roleEndOffset')} htmlFor={`role-end-offset-${i}`}><Input id={`role-end-offset-${i}`} type="number" min={-3650} max={3650} step={1} value={r.endOffsetDays} disabled={!edit || !!busy} onChange={e => set({ endOffsetDays: Number(e.target.value) })} /></Field>
+            <Field label={t('tpl.roleHours')} htmlFor={`role-hours-${i}`}><Input id={`role-hours-${i}`} type="number" min={0.001} max={10000} step={0.001} value={r.hours} disabled={!edit || !!busy} onChange={e => set({ hours: Number(e.target.value) })} /></Field>
+            <Field label={t('tpl.roleNote')} htmlFor={`role-note-${i}`}><Textarea id={`role-note-${i}`} maxLength={2000} value={r.note ?? ''} disabled={!edit || !!busy} onChange={e => set({ note: e.target.value || null })} /></Field>
+            {edit && rowBtn(t('common.remove'), () => change({ roles: d.roles.filter(x => x.ref !== r.ref) }), <Trash2 className="size-4" />)}
+          </li>
+        })}</ul>}
+      </Section>}
 
       {/* A suggestion saves on its own and the refetch after it would drop unsaved structure edits, so Add waits for Save. */}
       <Section title={t('templates.basisTitle')} count={d.basisSuggestions.length} actions={edit && saved.disciplines.length > 0 &&

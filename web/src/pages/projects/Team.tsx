@@ -4,13 +4,15 @@ import { Crown, Lock, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ConfirmDialog, ErrorBanner, Field, Loading, Notice, Page, Section, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
-import { Avatar, PeoplePicker, PersonName } from '@/components/hub/people'
+import { Avatar, PeoplePicker, PersonName, usePeopleCapacity, weekOf } from '@/components/hub/people'
 import { Chip } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useProjectRefresh, useReference } from '@/hooks/data'
 import { del, get, patch, post, qs } from '@/lib/api'
-import { fmtDate } from '@/lib/format'
+import { useFlag } from '@/lib/auth'
+import { hoursLabel } from '@/components/planner/labels'
+import { fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
@@ -32,6 +34,9 @@ export function TeamTab() {
   const ref = useReference()
   const refresh = useProjectRefresh()
   const q = useQuery({ queryKey: ['p', p.id, 'team'], queryFn: () => get<TeamData>(`projects/${p.id}/team`) })
+  const polish = useFlag('capacity_polish')
+  const capacity = usePeopleCapacity(weekOf(today()), polish && !!q.data, q.data?.members.map(m => m.userId) ?? [])
+  const away = (id: string) => { const hours = capacity(id)?.timeAway; return hours ? <Chip tone="idle">{t('planner.awayHours', { hours: hoursLabel(hours) })}</Chip> : null }
   const [removing, setRemoving] = useState<TeamData['members'][number] | null>(null)
   const [addDisc, setAddDisc] = useState('')
   const [fromTemplate, setFromTemplate] = useState(false)
@@ -88,7 +93,7 @@ export function TeamTab() {
         <Section title={t('team.members')} count={d.members.length} accent="mint">
           <AddMember projectId={p.id} disciplines={d.disciplines} canManage={d.canManage} onDone={reload} />
           {phone ? <ul className="divide-y">{d.members.map(m => <li key={m.id} className="space-y-3 p-4 text-sm">
-            <div className="flex items-start gap-2.5"><Avatar id={m.userId} name={m.displayName} /><div className="min-w-0"><h4 className="flex items-center gap-1 break-words font-semibold">{m.isPrimaryPm && <Crown className="size-4 shrink-0 text-warn" aria-label={t('team.primaryPm')} />}<PersonName name={m.displayName} active={m.isActive} /></h4><p className="break-words text-xs/[18px] text-muted-foreground">{m.jobTitle}{m.leadOf.length > 0 && ` · ${t('role.DisciplineLead')}: ${m.leadOf.map(id => d.disciplines.find(x => x.id === id)?.name).join(', ')}`}</p></div></div>
+            <div className="flex items-start gap-2.5"><Avatar id={m.userId} name={m.displayName} /><div className="min-w-0"><h4 className="flex items-center gap-1 break-words font-semibold">{m.isPrimaryPm && <Crown className="size-4 shrink-0 text-warn" aria-label={t('team.primaryPm')} />}<PersonName name={m.displayName} active={m.isActive} />{away(m.userId)}</h4><p className="break-words text-xs/[18px] text-muted-foreground">{m.jobTitle}{m.leadOf.length > 0 && ` · ${t('role.DisciplineLead')}: ${m.leadOf.map(id => d.disciplines.find(x => x.id === id)?.name).join(', ')}`}</p></div></div>
                     <fieldset className="flex flex-wrap gap-x-4 gap-y-2"><legend className="sr-only">{t('team.role')}</legend>{ROLES.map(r => <label key={r} className="flex min-h-10 items-center gap-2"><Checkbox aria-label={`${t(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')} onCheckedChange={c => { const roles = c ? [...m.roles, r] : m.roles.filter(x => x !== r); if (roles.length) run(() => patch(`projects/${p.id}/members/${m.id}`, { roles }, m.rowVersion)) }} />{t(`role.${r}`)}</label>)}</fieldset>
             <Field label={t('field.PrimaryDisciplineId')} htmlFor={`member-disc-${m.id}`}><select id={`member-disc-${m.id}`} className={selectCls} value={m.primaryDisciplineId ?? ''} disabled={!d.canManage} onChange={e => run(() => patch(`projects/${p.id}/members/${m.id}`, { primaryDisciplineId: e.target.value || null }, m.rowVersion))}><option value="">{t('team.noPrimary')}</option>{d.disciplines.filter(x => x.isActive).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
             <p className="text-xs/[18px] text-muted-foreground">{t('team.added')}: {fmtDate(m.addedAt)}</p>
@@ -113,7 +118,7 @@ export function TeamTab() {
                         <Avatar id={m.userId} name={m.displayName} />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1 font-semibold">
-                            {m.isPrimaryPm && <Crown role="img" className="size-4 shrink-0 text-warn" aria-label={t('team.primaryPm')} />}<PersonName name={m.displayName} active={m.isActive} />
+                            {m.isPrimaryPm && <Crown role="img" className="size-4 shrink-0 text-warn" aria-label={t('team.primaryPm')} />}<PersonName name={m.displayName} active={m.isActive} />{away(m.userId)}
                           </div>
                           <div className="text-xs/[18px] text-muted-foreground">{m.jobTitle}{m.leadOf.length > 0 && ` · ${t('role.DisciplineLead')}: ${m.leadOf.map((id) => d.disciplines.find((x) => x.id === id)?.name).join(', ')}`}</div>
                         </div>

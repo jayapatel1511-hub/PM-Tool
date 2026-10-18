@@ -255,13 +255,18 @@ public static class ChangeEndpoints
         var published = new HashSet<Guid>();
         foreach (var r in sources) if (await Coordination.Published(db, r)) published.Add(r.Id);
         var disciplines = await db.ProjectDisciplines.Where(d => d.ProjectId == p.Id && d.IsActive).Select(d => d.Id).ToListAsync();
+        var managed = disciplines.Where(d => Permissions.ManageCoordination(access.Actor, ctx, d).Ok).ToHashSet();
+        var ownedDeliverables = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id && d.OwnerId == access.Actor.Id && d.Status != DeliverableStatus.Cancelled).Select(d => d.ProjectDisciplineId).ToListAsync();
+        bool CanManage(Guid discipline) => managed.Contains(discipline);
+        bool CanCommit(Guid? owner, Guid discipline) => owner is { } id && Permissions.NamedCoordinationAction(access.Actor, ctx, id).Ok || CanManage(discipline);
         return new { ActorId = access.Me.Id, CanWrite = Permissions.CoordinationWrite(access.Actor, ctx).Ok,
-            ManageDisciplineIds = disciplines.Where(d => Permissions.ManageCoordination(access.Actor, ctx, d).Ok).ToArray(),
+            ManageDisciplineIds = managed.ToArray(),
+            CanCreate = new { Changes = managed.Count > 0 || ownedDeliverables.Any(d => Permissions.PublishSource(access.Actor, ctx, d, access.Actor.Id).Ok) || heads.Any(h => Permissions.PublishSource(access.Actor, ctx, h.ProjectDisciplineId, h.OwnerId).Ok), Reviews = managed.Count > 0 },
             People = await Coordination.People(db, p).OrderBy(u => u.DisplayName).Select(u => new { u.Id, u.DisplayName }).ToListAsync(),
             Disciplines = await db.ProjectDisciplines.Where(d => d.ProjectId == p.Id && d.IsActive).Select(d => new { d.Id, d.Discipline!.Name }).ToListAsync(),
             Sources = sources.Select(r => new { Revision = r, Identity = Coordination.Identity(r), Published = published.Contains(r.Id), IsCurrent = !heads.Any(h => h.Identity == Coordination.Identity(r)) || heads.Any(h => h.CurrentRevisionId == r.Id) }), Heads = heads,
-            Deliverables = await db.Deliverables.Where(d => d.ProjectId == p.Id && d.Status != DeliverableStatus.Cancelled).Select(d => new { d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.RowVersion, d.Revision, d.TransmittalUrl, d.Status }).ToListAsync(),
-            Tasks = await db.Tasks.Where(t => t.ProjectId == p.Id && t.Status != TaskStatuses.Cancelled).Select(t => new { t.Id, t.Key, t.Name, t.ProjectDisciplineId, OwnerId = t.AssigneeId, t.RowVersion, t.Status }).ToListAsync() };
+            Deliverables = (await db.Deliverables.Where(d => d.ProjectId == p.Id && d.Status != DeliverableStatus.Cancelled).Select(d => new { d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.RowVersion, d.Revision, d.TransmittalUrl, d.Status }).ToListAsync()).Select(d => new { d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.RowVersion, d.Revision, d.TransmittalUrl, d.Status, CanCommit = CanCommit(d.OwnerId, d.ProjectDisciplineId), CanManage = CanManage(d.ProjectDisciplineId) }),
+            Tasks = (await db.Tasks.Where(t => t.ProjectId == p.Id && t.Status != TaskStatuses.Cancelled).Select(t => new { t.Id, t.Key, t.Name, t.ProjectDisciplineId, OwnerId = t.AssigneeId, t.RowVersion, t.Status }).ToListAsync()).Select(t => new { t.Id, t.Key, t.Name, t.ProjectDisciplineId, t.OwnerId, t.RowVersion, t.Status, CanCommit = CanCommit(t.OwnerId, t.ProjectDisciplineId), CanManage = CanManage(t.ProjectDisciplineId) }) };
     }
     static async Task<object> Uses(Guid projectId, string? targetType, Guid? targetId, int? page, int? pageSize, Access access, HubDb db)
     {

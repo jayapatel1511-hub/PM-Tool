@@ -49,7 +49,11 @@ public static class PortfolioEndpoints
         {
             var (rows, _) = await Rows(f, access, db, me, store, clock, overdueDecisions);
             var parameters = http.Request.Query.Where(k => k.Key != "format" && !string.IsNullOrWhiteSpace(k.Value)).Select(k => (Text.Get($"param.{k.Key}"), k.Value.ToString())).ToList();
-            return await ExportFile.Send(db, store, format, Text.Get("nav.portfolio"), (await store.Get(db)).IsFlagOn(DashboardEndpoints.RollupsFlag) ? [.. Cols, new("overdueDeliverables", "overdueDeliverables", "number"), new("projectType", "projectType")] : Cols, rows, parameters, null, "portfolio", clock);
+            var settings = await store.Get(db);
+            Col[] columns = [.. Cols,
+                .. settings.IsFlagOn(DashboardEndpoints.RollupsFlag) ? new Col[] { new("overdueDeliverables", "overdueDeliverables", "number"), new("projectType", "projectType") } : [],
+                .. settings.IsFlagOn("project_status_note") ? new Col[] { new("statusNote.text", "statusNote") } : []];
+            return await ExportFile.Send(db, store, format, Text.Get("nav.portfolio"), columns, rows, parameters, null, "portfolio", clock);
         });
     }
 
@@ -74,8 +78,10 @@ public static class PortfolioEndpoints
         var since = today.AddDays(-7 * 8 + 1);
         var snaps = (await db.HealthSnapshots.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && x.SnapshotDate >= since)
             .Select(x => new { x.ProjectId, x.SnapshotDate, x.ComputedHealth, x.ReportedHealth }).ToListAsync()).ToLookup(x => x.ProjectId);
+        var notes = s.IsFlagOn("project_status_note") ? await ProjectStatusNote.ReadMany(await db.Projects.AsNoTracking().Where(p => ids.Contains(p.Id)).ToListAsync(), db, clock) : null;
         foreach (var r in rows)
         {
+            if (notes is not null) r!["statusNote"] = notes.GetValueOrDefault(Guid.Parse(r!["id"]!.GetValue<string>()))?.DeepClone();
             var mine = snaps[Guid.Parse(r!["id"]!.GetValue<string>())].ToList();
             // FR-HLT-03: one point per week, the last snapshot of that week, oldest first.
             r["trend"] = new JsonArray([.. Enumerable.Range(0, 8).Select(i =>

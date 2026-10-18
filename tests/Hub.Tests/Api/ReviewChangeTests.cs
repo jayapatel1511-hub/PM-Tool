@@ -36,6 +36,28 @@ public sealed class ReviewChangeTests(HubFactory f)
     Guid Assignment(Guid package, Guid discipline) => f.Db(db => db.DisciplineReviews.Single(a => a.ProjectDisciplineId == discipline && db.ReviewPackages.Any(p => p.Id == package && p.CurrentRoundId == a.RoundId)).Id);
 
     [Fact]
+    public async Task Coordination_option_flags_match_their_endpoints()
+    {
+        var s = await New();
+        var task = await data.NewTask(s.P.Id, extra: new { assigneeId = data.User(TestData.Alex) });
+        foreach (var who in new[] { TestData.Pm, TestData.Marc, TestData.Alex, TestData.Omar, TestData.Rita })
+        {
+            var options = await Get(who, Root(s) + "/changes/options");
+            var managed = options["manageDisciplineIds"]!.AsArray().Select(x => x!.GetValue<Guid>()).ToHashSet();
+            Assert.Equal(managed.Count > 0, options["canCreate"]!["changes"]!.GetValue<bool>());
+            Assert.Equal(managed.Count > 0, options["canCreate"]!["reviews"]!.GetValue<bool>());
+
+            var deliverable = options["deliverables"]!.AsArray().Single(x => x!["id"]!.GetValue<Guid>() == s.Deliverable);
+            Assert.Equal(managed.Contains(s.Civil), deliverable["canManage"]!.GetValue<bool>());
+            Assert.Equal(data.User(TestData.Alex) == data.User(who) || managed.Contains(s.Civil), deliverable["canCommit"]!.GetValue<bool>());
+
+            var taskRow = options["tasks"]!.AsArray().Single(x => x!["id"]!.GetValue<Guid>() == task.G("id"));
+            Assert.Equal(managed.Contains(s.Civil), taskRow["canManage"]!.GetValue<bool>());
+            Assert.Equal(data.User(TestData.Alex) == data.User(who) || managed.Contains(s.Civil), taskRow["canCommit"]!.GetValue<bool>());
+        }
+    }
+
+    [Fact]
     public async Task Another_discipline_lead_cannot_set_a_deliverable_issue_gate()
     {
         var s = await New();

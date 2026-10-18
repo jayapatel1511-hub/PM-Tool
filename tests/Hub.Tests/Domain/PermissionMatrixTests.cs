@@ -405,6 +405,16 @@ public sealed class PermissionMatrixTests
         Assert.False(Permissions.ManageOpenRole(RO, Ctx(role), Me).Ok);
     }
 
+    [Theory]
+    [InlineData("PM", true)] [InlineData("DL", true)] [InlineData("TM", false)] [InlineData("Reviewer", false)] [InlineData("Viewer", false)] [InlineData("None", false)]
+    public void Review_dates_is_for_the_pm_and_any_discipline_lead(string role, bool expected) // FR-FIG-08 decision 5: today's client rule, on every status
+    {
+        foreach (var status in ProjectStatus.All) Assert.Equal(expected, Permissions.ReviewDates(Std, Ctx(role, status)).Ok);
+        Assert.Equal(expected, Permissions.ReviewDates(RO, Ctx(role)).Ok);
+        Assert.True(Permissions.ReviewDates(Admin, Ctx(role)).Ok);
+        Assert.Equal(expected ? null : "perm.pm_or_dl", Permissions.ReviewDates(Std, Ctx(role)).Why);
+    }
+
     [Fact]
     public void Corrections_need_a_reason_on_complete_projects_only() // P-05, FR-FIG-11
         => Assert.Equal([ProjectStatus.Complete], ProjectStatus.All.Where(ProjectStatus.NeedsCorrectionReason));

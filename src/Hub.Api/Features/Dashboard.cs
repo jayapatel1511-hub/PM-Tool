@@ -136,8 +136,8 @@ public static class DashboardEndpoints
             },
             Disciplines = disciplines,
             DisciplineDue14 = due14,
-            DueThisWeek = new { Items = await TaskQueries.Rows(db, TaskQueries.Sort(dueThisWeek, null).Take(8)), Total = await dueThisWeek.CountAsync(), Link = sc.Link(("dueThisWeek", "true")) },
-            Blocked = new { Items = await TaskQueries.Rows(db, TaskQueries.Sort(blocked, null).Take(8)), Total = await blocked.CountAsync(), Link = sc.Link(("blocked", "true")) },
+            DueThisWeek = new { Items = await TaskQueries.Rows(db, TaskQueries.Sort(dueThisWeek, null).Take(8), access.Actor), Total = await dueThisWeek.CountAsync(), Link = sc.Link(("dueThisWeek", "true")) },
+            Blocked = new { Items = await TaskQueries.Rows(db, TaskQueries.Sort(blocked, null).Take(8), access.Actor), Total = await blocked.CountAsync(), Link = sc.Link(("blocked", "true")) },
             Activity = await ActivityEndpoints.Render(db, recent),
             State = state is null ? null : new { state.EvaluatedAt },
         };
@@ -226,7 +226,7 @@ public static class DashboardEndpoints
         var topIds = open.GroupBy(t => t.ProjectDisciplineId).ToDictionary(g => g.Key, g => g.OrderByDescending(t => t.Overdue).ThenByDescending(t => t.Blocked)
             .ThenBy(t => t.DueDate ?? DateOnly.MaxValue).Take(3).Select(t => t.Id).ToList());
         var allTop = topIds.Values.SelectMany(x => x).ToList();
-        var topRows = (await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(t => allTop.Contains(t.Id)))).ToDictionary(r => (Guid)((dynamic)r).Id);
+        var topRows = (await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(t => allTop.Contains(t.Id)), access.Actor)).ToDictionary(r => (Guid)((dynamic)r).Id);
         var top = topIds.ToDictionary(kv => kv.Key, kv => kv.Value.Select(x => topRows[x]).ToList());
 
         // Recently completed since the last review (11).
@@ -264,18 +264,18 @@ public static class DashboardEndpoints
             Milestones = milestones,
             Deliverables = await DeliverableEndpoints.Rows(db, delDue),
             Decisions = decisions,
-            Blocked = await TaskQueries.Rows(db, blockedTasks),
-            Overdue = await TaskQueries.Rows(db, overdueTasks),
-            DueThisWeek = await TaskQueries.Rows(db, sc.Tasks(("dueFrom", D(today)), ("dueTo", D(end)), ("open", "true")).Where(t => t.Status != TaskStatuses.OnHold)),
+            Blocked = await TaskQueries.Rows(db, blockedTasks, access.Actor),
+            Overdue = await TaskQueries.Rows(db, overdueTasks, access.Actor),
+            DueThisWeek = await TaskQueries.Rows(db, sc.Tasks(("dueFrom", D(today)), ("dueTo", D(end)), ("open", "true")).Where(t => t.Status != TaskStatuses.OnHold), access.Actor),
             Disciplines = disciplineStates.Select(x => new { Discipline = x, Top = top.GetValueOrDefault(x.GetProperty("disciplineId").GetGuid()) ?? [] }),
             Issues = issues, Risks = risks, Waiting = waiting,
-            Completed = new { Tasks = await TaskQueries.Rows(db, completedTasks), Deliverables = await DeliverableEndpoints.Rows(db, issuedDels), Decisions = decided },
+            Completed = new { Tasks = await TaskQueries.Rows(db, completedTasks, access.Actor), Deliverables = await DeliverableEndpoints.Rows(db, issuedDels), Decisions = decided },
             Upcoming = new
             {
-                Tasks = await TaskQueries.Rows(db, sc.Tasks(("dueFrom", D(nextStart)), ("dueTo", D(nextEnd)), ("open", "true"))),
+                Tasks = await TaskQueries.Rows(db, sc.Tasks(("dueFrom", D(nextStart)), ("dueTo", D(nextEnd)), ("open", "true")), access.Actor),
                 Deliverables = await DeliverableEndpoints.Rows(db, sc.Deliverables(dueFrom: end.AddDays(1), dueTo: end.AddDays(14), indicator: "open")),
             },
-            Held = new { Tasks = await TaskQueries.Rows(db, heldTasks), Deliverables = await DeliverableEndpoints.Rows(db, heldDels) },
+            Held = new { Tasks = await TaskQueries.Rows(db, heldTasks, access.Actor), Deliverables = await DeliverableEndpoints.Rows(db, heldDels) },
         };
     }
 }

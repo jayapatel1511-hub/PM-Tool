@@ -64,3 +64,5 @@ Use representative permitted project data to walk through these end-to-end scena
 9. The discipline view reconciles all of the above with the source screens and permission-filtered exports.
 
 Record observed usefulness, time-consuming fields, missed handoffs and unclear responsibility as pilot feedback. Do not claim a productivity improvement or change existing success targets without actual evidence. Continue the existing weekly review and go/no-go process.
+
+When route counting is enabled, Preferences explains that Tuesday stores daily route-pattern totals and coarse load-time bands; no person, session, project identifier, URL or query is stored.

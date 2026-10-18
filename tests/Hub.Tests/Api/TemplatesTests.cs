@@ -42,6 +42,57 @@ public sealed class TemplatesTests(HubFactory f)
         return (res, number);
     }
 
+    [Fact] // AC-PRO-10, AC-PRO-11, AC-PRO-23
+    public async Task Template_roles_preview_copy_preserve_and_instantiate_only_for_whole_projects_when_enabled()
+    {
+        var admin = f.As(TestData.Admin); var civil = await d.Discipline("Civil");
+        async Task Flag(bool value) => (await admin.Put("/api/v1/admin/settings/flag.template_roles", new { value })).EnsureSuccessStatusCode();
+        await Flag(true);
+        try
+        {
+            var template = await (await admin.Post("/api/v1/templates", new { name = "Synthetic role template " + Guid.NewGuid().ToString("N")[..6] })).Json(201);
+            var id = template.G("id");
+            var saved = await (await admin.Put($"/api/v1/templates/{id}/structure", new
+            {
+                rowVersion = template.I("rowVersion"), disciplines = new[] { new { disciplineId = civil, isDefaultIncluded = true } },
+                milestones = new[] {
+                    new { @ref = "start", name = "Start", milestoneType = MilestoneType.Kickoff, anchor = TemplateAnchor.ProjectStart, offset = (int?)0, isClientFacing = false },
+                    new { @ref = "end", name = "End", milestoneType = MilestoneType.Closeout, anchor = TemplateAnchor.ProjectStart, offset = (int?)10, isClientFacing = false },
+                    new { @ref = "unknown", name = "Not dated", milestoneType = MilestoneType.Other, anchor = TemplateAnchor.None, offset = (int?)null, isClientFacing = false } },
+                deliverables = Array.Empty<object>(), tasks = Array.Empty<object>(), dependencies = Array.Empty<object>(),
+                roles = new[] {
+                    new TemplateEndpoints.TemplateRoleIn("role", civil, "Civil reviewer", "start", 0, "end", 0, 12m, "Synthetic staffing demand"),
+                    new TemplateEndpoints.TemplateRoleIn("skip", null, "Undated demand", "unknown", 0, "end", 0, 4m, null) },
+            })).Json();
+            Assert.Equal(2, saved["roles"]!.AsArray().Count);
+            var omission = saved.DeepClone().AsObject(); omission.Remove("roles");
+            saved = await (await admin.Put($"/api/v1/templates/{id}/structure", omission)).Json();
+            Assert.Equal(2, saved["roles"]!.AsArray().Count); // Older structure clients preserve roles.
+            var invalid = saved.DeepClone().AsObject(); invalid["milestones"]![0]!["offset"] = int.MinValue;
+            Assert.Equal(HttpStatusCode.BadRequest, (await admin.Put($"/api/v1/templates/{id}/structure", invalid)).StatusCode);
+            var preview = await (await admin.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-02", disciplineIds = new[] { civil } })).Json();
+            Assert.Equal(2, preview["roles"]!.AsArray().Count);
+            Assert.Equal("2026-10-02", preview["roles"]![0]!.S("from"));
+            Assert.Equal("start_milestone_undated", preview["roles"]![1]!.S("skipReason"));
+            (await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = saved.I("rowVersion") })).EnsureSuccessStatusCode();
+            async Task<Project> Create() => await d.Project(activate: false, tweak: body => {
+                body["templateId"] = id; body["startDate"] = "2026-10-02";
+                body["disciplines"] = new[] { new { disciplineId = civil, leadUserId = (Guid?)U(TestData.Marc) } };
+            });
+            var project = await Create();
+            var role = await f.DbAsync(db => db.OpenRoles.AsNoTracking().SingleAsync(r => r.ProjectId == project.Id));
+            Assert.Equal(("Civil reviewer", OpenRoleStatus.Open, 12m, U(TestData.Pm)), (role.RoleLabel, role.Status, role.PlannedHours, role.CreatedBy));
+            Assert.True(await f.DbAsync(db => db.ActivityLog.AnyAsync(a => a.ItemType == "OpenRole" && a.ItemId == role.Id && a.Action == "Created")));
+            var draft = await (await admin.Post($"/api/v1/templates/{id}/draft", new { })).Json(201);
+            Assert.Equal(2, (await Template(draft.G("id"), TestData.Admin))["roles"]!.AsArray().Count);
+            await Flag(false);
+            Assert.False((await Template(id)).AsObject().ContainsKey("roles"));
+            var off = await Create(); Assert.False(await f.DbAsync(db => db.OpenRoles.AnyAsync(r => r.ProjectId == off.Id)));
+            Assert.False((await (await admin.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-02", disciplineIds = new[] { civil } })).Json()).AsObject().ContainsKey("roles"));
+        }
+        finally { await Flag(false); }
+    }
+
     [Fact]
     public async Task Template_basis_suggestions_copy_as_proposed_without_approval_or_links()
     {

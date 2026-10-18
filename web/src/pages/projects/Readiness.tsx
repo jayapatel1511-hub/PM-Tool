@@ -120,7 +120,7 @@ export function ReadinessTab() {
   const href = (type: string, id: string) => `${base}/${type === 'Task' ? 'tasks' : 'deliverables'}?panel=${type}:${id}`
   // The linked work's readable key and name, when this viewer's options include it.
   const work = (type: string, id: string) => { const w = options.data && workRef(options.data, type, id); return w ? <><span className="key font-normal">{w.key}</span> · {w.name}</> : null }
-  const canCapture = p.permissions.isPm && options.data?.canWrite
+  const canCapture = p.permissions.captureWeeklyPlan.ok // FR-FIG-08 decision 6
   return (
     <Page {...header} actions={
       <><ViewMenu listType="readiness" projectId={p.id} />{options.data && <Button variant="outline" onClick={() => setInspecting(true)}>{t('readiness.inspect')}</Button>}
@@ -202,8 +202,7 @@ function ProposePromise({ projectId, options, week, day, complete, close, done }
   const [target, setTarget] = useState(''), [start, setStart] = useState(week), [targetDate, setTargetDate] = useState(week)
   const [output, setOutput] = useState(''), [criteria, setCriteria] = useState(''), [reason, setReason] = useState('')
   const [type, id] = target.split(':'), work = workRef(options, type, id)
-  const eligible = { ...options, tasks: options.tasks.filter(w => w.ownerId === options.actorId || options.manageDisciplineIds.includes(w.projectDisciplineId)),
-    deliverables: options.deliverables.filter(w => w.ownerId === options.actorId || options.manageDisciplineIds.includes(w.projectDisciplineId)) }
+  const eligible = { ...options, tasks: options.tasks.filter(w => w.canCommit), deliverables: options.deliverables.filter(w => w.canCommit) }
   return <CommandForm path={`projects/${projectId}/weekly-commitments/${type}/${id}`} title={t('readiness.propose')}
     hint={t('readiness.proposeHint')} onClose={close} onDone={done} submitLabel={t('common.save')}
     payload={() => { if (!work) throw new Error(t('coord.unavailable')); return { targetRowVersion: work.rowVersion, weekStart: start, targetDate,

@@ -169,6 +169,33 @@ public sealed class WorkloadApiTests(HubFactory f)
         Assert.Equal(before, cancelled["people"]!.ToJsonString());
     }
 
+    [Fact] // AC-PRO-13, AC-PRO-23
+    public async Task Unassigned_tasks_are_dark_and_the_scoped_show_all_count_matches()
+    {
+        var project = await d.Project(); var other = await d.Project();
+        var first = await d.NewTask(project.Id, TestData.Pm, new { estimatedHours = 4m, startDate = "2026-09-14", dueDate = "2026-09-18" });
+        await d.NewTask(project.Id, TestData.Pm, new { estimatedHours = 6m, dueDate = "2026-09-19" });
+        await d.NewTask(project.Id, TestData.Pm, new { estimatedHours = 8m }, "Electrical");
+        await d.NewTask(other.Id, TestData.Pm);
+        var civil = await d.Discipline("Civil"); var pm = f.As(TestData.Pm); var admin = f.As(TestData.Admin);
+        var path = $"/api/v1/workload?projectId={project.Id}&disciplineId={civil}";
+        var off = await (await pm.GetAsync(path)).Json(); Assert.False(off.AsObject().ContainsKey("unassigned"));
+        var export = await (await pm.GetAsync(path.Replace("workload?", "workload/export?format=csv&"))).Content.ReadAsByteArrayAsync();
+        (await admin.Put("/api/v1/admin/settings/flag.unfilled_beside_capacity", new { value = true })).EnsureSuccessStatusCode();
+        try
+        {
+            var response = await (await pm.GetAsync(path)).Json(); var unassigned = response["unassigned"]!;
+            Assert.Equal(2, unassigned.I("totalCount")); Assert.Equal(2, unassigned["tasks"]!.AsArray().Count);
+            Assert.All(unassigned["tasks"]!.AsArray(), task => Assert.True(task!["canAssign"]!.GetValue<bool>()));
+            Assert.Equal("2026-09-14", unassigned["tasks"]!.AsArray().Single(t => t!.G("id") == first.G("id"))!.S("startDate"));
+            var list = await (await pm.GetAsync("/api/v1" + unassigned.S("showAllPath"))).Json();
+            Assert.Equal(unassigned.I("totalCount"), list.I("total"));
+            Assert.Equal(off["people"]!.ToJsonString(), response["people"]!.ToJsonString());
+            Assert.Equal(export, await (await pm.GetAsync(path.Replace("workload?", "workload/export?format=csv&"))).Content.ReadAsByteArrayAsync());
+        }
+        finally { (await admin.Put("/api/v1/admin/settings/flag.unfilled_beside_capacity", new { value = false })).EnsureSuccessStatusCode(); }
+    }
+
     [Fact]
     public async Task Person_rows_carry_office_job_title_and_home_discipline() // packet 036 FR-GRP-02
     {

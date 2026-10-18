@@ -25,21 +25,21 @@ export interface AttentionList { items: AttentionItem[]; snoozed: number; total:
 const TONE: Record<string, 'bad' | 'warn' | 'idle'> = { Critical: 'bad', Warning: 'warn', Info: 'idle' }
 
 /** One project's attention list with "Why?" and snooze for the PM and leads (FR-ATT-01..03). */
-export function AttentionPanel({ projectId, canSnooze, limit, disciplineId, severity }: { projectId: string; canSnooze: boolean; limit?: number; disciplineId?: string; severity?: string }) {
+export function AttentionPanel({ projectId, canSnooze, refused, limit, disciplineId, severity }: { projectId: string; canSnooze: boolean; refused?: string; limit?: number; disciplineId?: string; severity?: string }) {
   const [showSnoozed, setShowSnoozed] = useState(false)
   const q = useQuery({ queryKey: ['p', projectId, 'attention', { showSnoozed, disciplineId, severity }],
     queryFn: () => get<AttentionList>(`projects/${projectId}/attention${qs({ includeSnoozed: showSnoozed || undefined, disciplineId, severity })}`) })
   if (q.isPending) return <Loading rows={3} />
   if (q.error) return <div className="p-3"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   return (
-    <AttentionRows items={q.data.items} canSnooze={canSnooze} limit={limit} onChanged={() => q.refetch()}
+    <AttentionRows items={q.data.items} canSnooze={canSnooze} refused={refused} limit={limit} onChanged={() => q.refetch()}
       footer={(q.data.snoozed > 0 || showSnoozed) && <button className="hover:text-foreground" onClick={() => setShowSnoozed(!showSnoozed)}>{showSnoozed ? t('attention.hideSnoozed') : t('attention.showSnoozed', { n: q.data.snoozed })}</button>} />
   )
 }
 
 /** Ranked attention rows: severity, item, rule with "Why?", message, owner and age (§12.12, AC-ATT-06). */
-export function AttentionRows({ items, canSnooze, limit, onChanged, footer, showProject }: {
-  items: AttentionItem[]; canSnooze: boolean; limit?: number; onChanged: () => void; footer?: React.ReactNode; showProject?: boolean
+export function AttentionRows({ items, canSnooze, refused, limit, onChanged, footer, showProject }: {
+  items: AttentionItem[]; canSnooze: boolean; refused?: string; limit?: number; onChanged: () => void; footer?: React.ReactNode; showProject?: boolean
 }) {
   const openPanel = useItemPanel()
   const [snoozing, setSnoozing] = useState<AttentionItem | null>(null)
@@ -64,7 +64,7 @@ export function AttentionRows({ items, canSnooze, limit, onChanged, footer, show
                   {a.snoozed && <span> · {t('attention.snoozedUntil', { date: fmtDate(a.snoozedUntil), note: a.snoozeNote ?? '' })}</span>}
                 </div>
               </div>
-              {canSnooze && !a.snoozed && <Button size="sm" variant="ghost" onClick={() => setSnoozing(a)} aria-label={t('attention.snoozeItem', { item: a.itemKey ?? a.itemName ?? '' })}><BellOff className="size-3.5" />{t('attention.snooze')}</Button>}
+              {canSnooze && !a.snoozed && <Button size="sm" variant="ghost" disabled={!!refused} title={refused} onClick={() => setSnoozing(a)} aria-label={t('attention.snoozeItem', { item: a.itemKey ?? a.itemName ?? '' })}><BellOff className="size-3.5" />{t('attention.snooze')}</Button>}
             </li>
           ))}
         </ul>

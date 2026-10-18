@@ -263,4 +263,77 @@ public sealed class ProjectsTests(HubFactory f)
         }
         finally { f.Clock.Now = saved; }
     }
+
+    /// AC-FIG-08 for decisions 1, 2, 3, 5, 6, 9 and 10 of §45.5: each project-level flag equals its endpoint's decision for Admin,
+    /// project PM, Discipline Lead, Team Member, Read Only and Executive on every project status. Every case where today's client
+    /// rule differs is one the client offered and the endpoint refuses, and the page keeps it visible, disabled (FR-FIG-09, D5).
+    [Fact]
+    public async Task Project_permission_flags_match_their_endpoints_for_every_role_and_status()
+    {
+        string[] users = [TestData.Admin, TestData.Pm, TestData.Marc, TestData.Alex, TestData.Rita, TestData.Lena];
+        var mismatches = new List<string>();
+        var differences = new List<string>();
+        foreach (var status in ProjectStatus.All)
+        {
+            var p = await d.Project(activate: status != ProjectStatus.Setup);
+            await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/members", new { userId = d.User(TestData.Rita), roles = new[] { "TeamMember" } }); // kept if allowed
+            var party = await f.As(TestData.Pm).Post($"/api/v1/projects/{p.Id}/external-parties", new { name = "Karen Li" }).Result.Json(201);
+            if (status != ProjectStatus.Setup && status != ProjectStatus.Active)
+                await f.DbAsync(async db => { (await db.Projects.SingleAsync(x => x.Id == p.Id)).Status = status; return await db.SaveChangesAsync(); });
+            var day = Weekday.Parse(p.CoordinationDay);
+            var week = Enumerable.Range(0, 7).Select(i => new DateOnly(2026, 10, 5).AddDays(i)).First(x => x.DayOfWeek == day);
+            foreach (var user in users)
+            {
+                var c = f.As(user);
+                var perms = (await c.GetAsync($"/api/v1/projects/{p.Id}").Result.Json())["permissions"]!;
+                bool Flag(string name) => perms[name]!["ok"]!.GetValue<bool>();
+                async Task<bool> Refused(Task<HttpResponseMessage> call) => (await call).StatusCode == HttpStatusCode.Forbidden;
+                // Each call passes the permission check only to fail validation after it, so nothing is written.
+                // Evaluation may clear attention rows it did not raise, so a fresh row is added just before each call.
+                var attention = await f.DbAsync(async db =>
+                {
+                    var a = new Hub.Api.Data.AttentionItem { ProjectId = p.Id, RuleId = "ATT-TEST", ItemType = ItemType.Project, ItemId = Guid.NewGuid(), Message = "Parity",
+                        FirstDetectedAt = DateTimeOffset.UtcNow, LastEvaluatedAt = DateTimeOffset.UtcNow };
+                    db.Attention.Add(a);
+                    await db.SaveChangesAsync();
+                    return a.Id;
+                });
+                var endpoint = new Dictionary<string, bool>
+                {
+                    ["proposeAllocation"] = !await Refused(c.Post($"/api/v1/projects/{p.Id}/allocations", new { requestId = Guid.NewGuid(), personId = Guid.Empty,
+                        purpose = "Production", fromDate = week, throughDate = week, plannedHours = 0, days = Array.Empty<object>(), links = Array.Empty<object>() })),
+                    ["snooze"] = !await Refused(c.Post($"/api/v1/attention/{attention}/snooze", new { days = 0, note = "" })),
+                    ["manageExternalParties"] = !await Refused(c.Patch($"/api/v1/external-parties/{party.S("id")}", new { name = "" })),
+                    ["reviewDates"] = !await Refused(c.GetAsync($"/api/v1/projects/{p.Id}/date-review")),
+                    ["captureWeeklyPlan"] = !await Refused(c.Post($"/api/v1/projects/{p.Id}/weekly-commitments/snapshot", new { requestId = Guid.NewGuid(), weekStart = week, reason = "" })),
+                    ["createSubmission"] = !await Refused(c.Post($"/api/v1/projects/{p.Id}/submissions", new { requestId = Guid.NewGuid(), title = "", purpose = "", recipientReference = "",
+                        coordinatorId = Guid.Empty, milestoneId = Guid.Empty, targetDate = week, manifest = Array.Empty<object>(), optionalChecks = Array.Empty<object>() })),
+                };
+                foreach (var (name, allowed) in endpoint)
+                    if (Flag(name) != allowed) mismatches.Add($"{user} {status} {name}: flag {Flag(name)}, endpoint {allowed}");
+
+                // Today's client rules (Allocations.tsx, Dashboard.tsx, Decisions.tsx, ProjectLayout.tsx, Readiness.tsx, Submissions.tsx).
+                var isPm = perms["isPm"]!.GetValue<bool>();
+                var lead = perms["leadOf"]!.AsArray().Count > 0;
+                var options = await c.GetAsync($"/api/v1/projects/{p.Id}/changes/options");
+                var o = options.IsSuccessStatusCode ? await options.Json() : null;
+                var manages = o?["manageDisciplineIds"]!.AsArray().Count > 0;
+                var client = new Dictionary<string, bool>
+                {
+                    ["proposeAllocation"] = isPm || manages, ["snooze"] = isPm || lead, ["manageExternalParties"] = isPm && Flag("edit"),
+                    ["reviewDates"] = isPm || lead, ["captureWeeklyPlan"] = isPm && o?["canWrite"]!.GetValue<bool>() == true, ["createSubmission"] = isPm || manages,
+                };
+                foreach (var (name, offered) in client)
+                    if (offered != Flag(name))
+                    {
+                        differences.Add($"{user} {status} {name}: client {offered}, flag {Flag(name)} ({perms[name]!["reason"]})");
+                        // The page keeps such a control visible and disabled: the client offered it, and the account or status refuses it.
+                        Assert.True(offered && (user == TestData.Rita || status is ProjectStatus.Complete or ProjectStatus.Archived or ProjectStatus.Cancelled),
+                            differences[^1]);
+                    }
+            }
+        }
+        Assert.True(mismatches.Count == 0, string.Join("\n", mismatches));
+        Assert.NotEmpty(differences); // e.g. the PM on an Archived project, which today's client offers and every endpoint refuses
+    }
 }

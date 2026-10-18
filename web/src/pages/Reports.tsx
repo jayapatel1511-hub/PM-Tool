@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils'
 interface Param { key: string; label: string; type: string; default?: string | null; options?: { value: string; label: string }[] | null }
 interface Column { path: string; header: string; type: string }
 interface ReportDef { code: string; title: string; description: string; params: Param[]; columns: Column[]; itemType?: string | null }
-interface ReportRun { code: string; title: string; itemType?: string | null; columns: Column[]; rows: Record<string, any>[]; total: number; totalIsLowerBound?: boolean; truncated: boolean; listLink?: string | null; parameters: { label: string; value: string }[] }
+interface ReportRun { partialView?: boolean; code: string; title: string; itemType?: string | null; columns: Column[]; rows: Record<string, any>[]; total: number; totalIsLowerBound?: boolean; truncated: boolean; listLink?: string | null; parameters: { label: string; value: string }[] }
 
 const useCatalogue = () => useQuery({ queryKey: ['reports'], queryFn: () => get<ReportDef[]>('reports'), staleTime: 5 * 60_000 })
 const card = 'rounded-lg border bg-card'
@@ -90,7 +90,7 @@ export function ReportPage() {
         {defaulted && <p className="w-full text-xs/[18px] text-muted-foreground">{t('reports.defaultRange')}</p>}
       </form>
       {needsProject ? <div className={card}><Empty>{t('reports.chooseProject')}</Empty></div> : run.error ? <ErrorBanner error={run.error} retry={() => run.refetch()} /> : run.isPending ? <div className={card}><Loading rows={8} /></div> : (
-        <ReportTable r={run.data} itemType={def.itemType} asOf={run.dataUpdatedAt} />
+        <>{code === 'team-capacity' && <p className="mb-3 text-sm text-muted-foreground">{t('capacityReport.basis')}</p>}{run.data.parameters.some(p => p.label === t('planner.partialTitle')) && <p className="mb-3 text-sm">{t('planner.partialHint')}</p>}<ReportTable r={run.data} itemType={def.itemType} asOf={run.dataUpdatedAt} /></>
       )}
     </Page>
   )
@@ -110,7 +110,7 @@ function ParamInput({ p, value, onChange }: { p: Param; value?: string; onChange
     case 'person': return box(<PeoplePicker id={id} value={value} onChange={(v) => onChange(v)} placeholder={t('reports.anyone')} label={p.label} />, 'sm:w-52')
     case 'date': return box(<Input id={id} type="date" value={value ?? ''} onChange={(e) => onChange(e.target.value || null)} />)
     case 'number': return box(<Input id={id} type="number" min={0} className="tabular-nums" placeholder={p.default ?? ''} value={value ?? ''} onChange={(e) => onChange(e.target.value || null)} />, 'sm:w-28')
-    case 'bool': return <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={value === 'true'} onCheckedChange={(c) => onChange(c ? 'true' : null)} />{p.label}</label>
+    case 'bool': return <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={(value ?? p.default) === 'true'} onCheckedChange={(c) => onChange(c ? 'true' : p.default === 'true' ? 'false' : null)} />{p.label}</label>
     default: return box(<select id={id} className={selectCls} value={value ?? p.default ?? ''} onChange={(e) => onChange(e.target.value || null)}>
       {!p.default && <option value="">{t('reports.any')}</option>}{p.options?.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select>)
   }

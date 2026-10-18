@@ -20,7 +20,7 @@ public static class AvailabilityEndpoints
     public sealed record ReconcileBody(Guid PersonId, Guid LeaveId, PlanningEndpoints.DateVersionInput[] Dates);
     public sealed record ManualBody(Guid PersonId, string SourceSystem, string ExternalId, DateOnly FromDate, DateOnly ThroughDate, decimal? HoursPerDay, string Status, int RowVersion);
     public sealed record IdentityBody(string? SourceSystem, string? PersonKey, int RowVersion);
-    public sealed record ScheduleBody(DateOnly FromDate, decimal WeeklyHours, int[] WorkingDays, int RowVersion);
+    public sealed record ScheduleBody(DateOnly FromDate, decimal WeeklyHours, int[] WorkingDays, int RowVersion, decimal[]? WeekdayHours = null);
     public static readonly string[] Headers = ["source_system", "external_id", "person_key", "status", "start_date", "end_date", "hours_per_day", "source_updated_at"];
 
     public static void Map(RouteGroupBuilder api)
@@ -74,7 +74,8 @@ public static class AvailabilityEndpoints
     {
         Dates(from, through); var people = People(db, access); if (personId is { } id) people = people.Where(u => u.Id == id);
         var users = await people.OrderBy(u => u.DisplayName).ToListAsync(); var ids = users.Select(u => u.Id).ToArray();
-        var capacity = await PersonCapacity.Load(db, ids, from, through, await store.Get(db));
+        var settings = await store.Get(db);
+        var capacity = await PersonCapacity.Load(db, ids, from, through, settings);
         var leaves = await db.ApprovedLeaves.AsNoTracking().Where(l => ids.Contains(l.PersonId) && l.FromDate <= through && l.ThroughDate >= from).OrderBy(l => l.FromDate).ToListAsync();
         var schedules = await db.PersonSchedules.AsNoTracking().Where(s => ids.Contains(s.PersonId)).OrderBy(s => s.FromDate).ToListAsync();
         var legacy = await db.AvailabilityOverrides.AsNoTracking().Where(o => ids.Contains(o.PersonId) && o.WorkDate >= from && o.WorkDate <= through && o.Category != "Additional" && o.ReconciledLeaveId == null).ToListAsync();
@@ -106,7 +107,7 @@ public static class AvailabilityEndpoints
             From = from, Through = through, CanImport = access.Actor.Admin,
             People = users.Select(u => new { u.Id, u.DisplayName, CanManage = Manage(access, u), WeeklyHours = u.WeeklyCapacityHours,
                 Days = capacity.Where(x => x.Key.Item1 == u.Id).Select(x => new { Date = x.Key.Item2, x.Value.Normal, x.Value.Available, x.Value.Leave, x.Value.Holiday, x.Value.Provisional }),
-                Schedules = Manage(access, u) ? schedules.Where(s => s.PersonId == u.Id).Select(s => new { s.FromDate, s.WeeklyHours, s.WorkingDays, s.RowVersion }) : null,
+                Schedules = Manage(access, u) ? schedules.Where(s => s.PersonId == u.Id).Select(s => ScheduleRow(s, settings.IsFlagOn("capacity_polish"))) : null,
                 Leave = leaves.Where(l => l.PersonId == u.Id).Select(l => new { l.Id, l.FromDate, l.ThroughDate, l.HoursPerDay, l.Status, l.SourceKind, l.SourceUpdatedAt, l.ImportedAt, l.RowVersion,
                     SourceSystem = Manage(access, u) ? l.SourceSystem : null, ExternalId = Manage(access, u) ? l.ExternalId : null, CanEdit = Manage(access, u) && l.SourceKind == "ManualHR" }),
                 Unverified = legacy.Where(o => o.PersonId == u.Id).Select(o => new { o.WorkDate, o.AvailableHours, o.RowVersion }) }),
@@ -198,9 +199,9 @@ public static class AvailabilityEndpoints
         foreach (var row in partial)
         for (var date = row.FromDate; date <= row.ThroughDate; date = date.AddDays(1)) {
             var schedule = schedules.FirstOrDefault(s => s.PersonId == row.PersonId && s.FromDate <= date);
-            var days = schedule?.WorkingDays ?? [1, 2, 3, 4, 5];
-            if (!days.Contains((int)date.DayOfWeek)) continue;
-            Check.That(row.HoursPerDay <= (schedule?.WeeklyHours ?? users[row.PersonId].WeeklyCapacityHours ?? settings.DefaultWeeklyCapacityHours) / days.Length, "hoursPerDay", "availability.schedule_hours");
+            var normal = PersonCapacity.Normal(schedule, date, users[row.PersonId].WeeklyCapacityHours ?? settings.DefaultWeeklyCapacityHours, settings.IsFlagOn("capacity_polish"));
+            if (normal == 0) continue;
+            Check.That(row.HoursPerDay <= normal, "hoursPerDay", "availability.schedule_hours");
             Check.That(!partial.Any(other => other != row && other.PersonId == row.PersonId && other.FromDate <= date && other.ThroughDate >= date), "rows", "availability.partial_overlap");
         }
     }
@@ -294,17 +295,31 @@ public static class AvailabilityEndpoints
         });
     }
 
+    static object ScheduleRow(PersonSchedule row, bool weekdayHours)
+    {
+        var result = new { row.FromDate, row.WeeklyHours, row.WorkingDays, row.RowVersion };
+        if (!weekdayHours) return result;
+        var json = System.Text.Json.JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
+        json["weekdayHours"] = System.Text.Json.JsonSerializer.SerializeToNode(row.WeekdayHours, JsonOpts.Web); return json;
+    }
+
     static async Task<IResult> Schedule(Guid personId, ScheduleBody body, Access access, HubDb db, TimeProvider clock, SettingsStore store)
     {
-        var today = clock.Today(await store.Get(db));
+        var settings = await store.Get(db);
+        var today = clock.Today(settings);
+        var weekdayHours = settings.IsFlagOn("capacity_polish") ? body.WeekdayHours : null;
+        if (weekdayHours is not null) Check.That(weekdayHours.Length == 7 && weekdayHours.All(h => h is >= 0 and <= 24 && h * 2 == decimal.Truncate(h * 2)), "weekdayHours", "error.range");
         Check.That(body.FromDate != default && body.FromDate >= today.AddYears(-2) && body.FromDate <= today.AddYears(2), "fromDate", "error.date_range");
-        Check.That(body.WorkingDays is { Length: > 0 and <= 7 } && body.WorkingDays.All(d => d is >= 0 and <= 6) && body.WorkingDays.Distinct().Count() == body.WorkingDays.Length && body.WeeklyHours is >= 0 and <= 168 && body.WeeklyHours == Math.Round(body.WeeklyHours, 1) && body.WeeklyHours / body.WorkingDays.Length <= 24, "workingDays", "error.range");
+        Check.That(weekdayHours is not null || body.WorkingDays is { Length: > 0 and <= 7 } && body.WorkingDays.All(d => d is >= 0 and <= 6) && body.WorkingDays.Distinct().Count() == body.WorkingDays.Length && body.WeeklyHours is >= 0 and <= 168 && body.WeeklyHours == Math.Round(body.WeeklyHours, 1) && body.WeeklyHours / body.WorkingDays.Length <= 24, "workingDays", "error.range");
         return await Tx.Run(db, async () => {
             await PersonCapacity.LockPeople(db, [personId]); var user = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == personId && u.IsActive) ?? throw ApiException.NotFound();
             Access.Demand(Manage(access, user) ? Allow.Yes : Allow.No("perm.supervised_staff"));
             var row = await db.PersonSchedules.SingleOrDefaultAsync(s => s.PersonId == personId && s.FromDate == body.FromDate); Version(row?.RowVersion ?? 0, body.RowVersion);
             if (row == null) { row = new() { PersonId = personId, FromDate = body.FromDate }; db.PersonSchedules.Add(row); }
-            row.WeeklyHours = body.WeeklyHours; row.WorkingDays = body.WorkingDays.Order().ToArray();
+            row.WeekdayHours = weekdayHours;
+            row.WeeklyHours = weekdayHours?.Sum() ?? body.WeeklyHours;
+            var effectiveDays = weekdayHours is null ? body.WorkingDays.Order().ToArray() : Enumerable.Range(0, 7).Where(d => weekdayHours[d] > 0).ToArray();
+            row.WorkingDays = effectiveDays.Length > 0 ? effectiveDays : row.WorkingDays; // Keep the legacy representation valid; effective days come from the vector.
             await PersonCapacity.Touch(db, personId, body.FromDate, today.AddYears(2)); await db.SaveChangesAsync(); return Results.Ok(new { row.Id, row.RowVersion });
         });
     }

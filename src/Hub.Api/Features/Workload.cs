@@ -32,7 +32,7 @@ public static class WorkloadEndpoints
         {
             var (weeks, people, today) = await Grid(f, access, db, me, store, clock);
             var s = await store.Get(db);
-            return new
+            var result = new
             {
                 Weeks = weeks, Today = today, CurrentWeek = Workload.WeekOf(today), DefaultCapacity = s.DefaultWeeklyCapacityHours,
                 // The thresholds in use (FR-FIG-06), so the legend and the Method text name them.
@@ -49,6 +49,10 @@ public static class WorkloadEndpoints
                 }),
                 UnfilledRoles = await UnfilledRoles(f, weeks, access, db),
             };
+            if (!s.IsFlagOn("unfilled_beside_capacity")) return (object)result;
+            var enriched = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
+            enriched["unassigned"] = JsonSerializer.SerializeToNode(await Unassigned(f, access, db), JsonOpts.Web);
+            return enriched;
         });
         api.MapGet("/workload/export", async (string? format, [AsParameters] WorkloadQuery f, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
@@ -212,7 +216,7 @@ public static class WorkloadEndpoints
 
     /// FR-ROLE-04 (D3): Open roles on visible Setup and Active projects, spread over working days like an allocation. They are
     /// demand without a person, so they never enter a person's row, percentage or indicator (AC-ROLE-02).
-    static async Task<object[]> UnfilledRoles(WorkloadQuery f, List<DateOnly> weeks, Access access, HubDb db)
+    internal static async Task<object[]> UnfilledRoles(WorkloadQuery f, List<DateOnly> weeks, Access access, HubDb db, bool fillLinks = false)
     {
         var first = weeks[0]; var last = weeks[^1].AddDays(6);
         var projects = access.VisibleProjects().Where(p => LiveProjects.Contains(p.Status)).Select(p => p.Id);
@@ -224,13 +228,58 @@ public static class WorkloadEndpoints
             DisciplineName = db.ProjectDisciplines.Where(pd => pd.Id == r.ProjectDisciplineId).Select(pd => pd.Discipline!.Name).FirstOrDefault() })
             .ToListAsync();
         var calendar = await OpenRoleEndpoints.Calendars(db, roles.Select(x => x.Role.ProjectId).Distinct().ToArray());
+        var canFill = new Dictionary<Guid, bool>();
+        foreach (var projectId in roles.Where(_ => fillLinks).Select(x => x.Role.ProjectId).Distinct())
+        {
+            var project = await db.Projects.AsNoTracking().SingleAsync(p => p.Id == projectId);
+            canFill[projectId] = Permissions.ProposeAllocation(access.Actor, await access.Context(project)).Ok;
+        }
         return roles.OrderBy(x => x.Project.ProjectNumber).ThenBy(x => x.Role.FromDate).Select(x =>
         {
             var spread = OpenRoleEndpoints.Spread(x.Role, calendar(x.Role.ProjectId));
-            return (object)new { x.Role.Id, x.Role.ProjectId, x.Project.ProjectNumber, ProjectName = x.Project.Name, x.Role.RoleLabel,
+            var row = new { x.Role.Id, x.Role.ProjectId, x.Project.ProjectNumber, ProjectName = x.Project.Name, x.Role.RoleLabel,
                 x.Role.ProjectDisciplineId, x.DisciplineName, x.Role.FromDate, x.Role.ThroughDate, x.Role.PlannedHours,
                 Cells = weeks.Select(w => new { Week = w, Hours = Math.Round(spread.Where(day => Workload.WeekOf(day.Key) == w).Sum(day => day.Value), 1) }) };
+            if (!fillLinks) return (object)row;
+            var enriched = JsonSerializer.SerializeToNode(row, JsonOpts.Web)!.AsObject();
+            enriched["canFill"] = canFill.GetValueOrDefault(x.Role.ProjectId);
+            enriched["fillPath"] = $"/projects/{x.Role.ProjectId}/allocations?view=roles&fill={x.Role.Id}";
+            return enriched;
         }).ToArray();
+    }
+
+    internal static async Task<object> Unassigned(WorkloadQuery f, Access access, HubDb db)
+    {
+        var projects = access.VisibleProjects().Where(p => LiveProjects.Contains(p.Status));
+        if (f.ProjectId is { } pid) projects = projects.Where(p => p.Id == pid);
+        var projectIds = await projects.Select(p => p.Id).ToArrayAsync();
+        var q = db.Tasks.AsNoTracking().Where(t => t.AssigneeId == null && projectIds.Contains(t.ProjectId)
+            && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled);
+        if (f.DisciplineId is { } disciplineId) q = q.Where(t => db.ProjectDisciplines.Any(d => d.Id == t.ProjectDisciplineId && d.DisciplineId == disciplineId));
+        var total = await q.CountAsync();
+        var rows = await q.OrderBy(t => t.DueDate == null).ThenBy(t => t.DueDate).ThenBy(t => t.Key).Take(50)
+            .Select(t => new { t.Id, t.Key, t.Name, t.ProjectId, t.ProjectDisciplineId, t.StartDate, t.DueDate, t.EstimatedHours, t.RowVersion,
+                ProjectNumber = db.Projects.Where(p => p.Id == t.ProjectId).Select(p => p.ProjectNumber).First(),
+                ProjectName = db.Projects.Where(p => p.Id == t.ProjectId).Select(p => p.Name).First(),
+                DisciplineName = db.ProjectDisciplines.Where(d => d.Id == t.ProjectDisciplineId).Select(d => d.Discipline!.Name).FirstOrDefault(),
+                t.Status, t.CreatedBy, t.ReviewerId }).ToListAsync();
+        var result = new List<object>(rows.Count);
+        var contexts = new Dictionary<Guid, ProjectContext>();
+        foreach (var t in rows)
+        {
+            if (!contexts.TryGetValue(t.ProjectId, out var ctx))
+                contexts[t.ProjectId] = ctx = await access.Context(await db.Projects.AsNoTracking().SingleAsync(p => p.Id == t.ProjectId));
+            var facts = new TaskFacts(t.ProjectDisciplineId, null, t.ReviewerId, t.CreatedBy, new HashSet<Guid>(), t.Status);
+            result.Add(new { t.Id, t.Key, t.Name, t.ProjectId, t.ProjectNumber, t.ProjectName, t.ProjectDisciplineId, t.DisciplineName,
+                t.StartDate, t.DueDate, t.EstimatedHours, t.RowVersion, CanAssign = Permissions.AssignTask(access.Actor, ctx, facts).Ok,
+                EditPath = $"/tasks/{t.Id}" });
+        }
+        // Task lists filter project disciplines, while Workload filters the shared discipline catalogue.
+        var disciplineIds = f.DisciplineId is { } discipline
+            ? await db.ProjectDisciplines.Where(d => projectIds.Contains(d.ProjectId) && d.DisciplineId == discipline).Select(d => d.Id).ToArrayAsync() : [];
+        var showAll = $"/tasks?unassigned=true&projects={string.Join(',', projectIds.Length == 0 ? [Guid.Empty] : projectIds)}";
+        if (f.DisciplineId is not null) showAll += $"&disciplineId={string.Join(',', disciplineIds.Length == 0 ? [Guid.Empty] : disciplineIds)}";
+        return new { TotalCount = total, ShowAllPath = showAll, Tasks = result };
     }
 
     /// Person → Project → tasks with each task's hours per week (§13.11 expand row), and whether the viewer may reassign it.

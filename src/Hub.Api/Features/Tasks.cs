@@ -24,7 +24,7 @@ public static class TaskEndpoints
             await access.Project(id, track: false);
             var s = await store.Get(db);
             var f = TaskFilter.From(http.Request.Query);
-            return await TaskQueries.Page(db, TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id), f, me.Id, clock.Today(s), s), f, s.IsFlagOn("small_ux"));
+            return await TaskQueries.Page(db, TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id), f, me.Id, clock.Today(s), s), f, access.Actor, s.IsFlagOn("small_ux"));
         });
         // Cross-project task list for the workspace views (§36.1, §36.3): only projects the caller may see, within the
         // selected scope; a workspace's manual order applies only to its owner.
@@ -33,7 +33,7 @@ public static class TaskEndpoints
             var s = await store.Get(db);
             var f = TaskFilter.From(http.Request.Query);
             if (f.WorkspaceId is { } ws && !await db.Workspaces.AnyAsync(w => w.Id == ws && w.OwnerId == me.Id)) f.WorkspaceId = null;
-            return await TaskQueries.Page(db, TaskQueries.Apply(db, InScope(access, db, projects), f, me.Id, clock.Today(s), s), f, s.IsFlagOn("small_ux"));
+            return await TaskQueries.Page(db, TaskQueries.Apply(db, InScope(access, db, projects), f, me.Id, clock.Today(s), s), f, access.Actor, s.IsFlagOn("small_ux"));
         });
         api.MapPost("/projects/{id:guid}/tasks", Create);
         api.MapPost("/projects/{id:guid}/tasks/bulk", Bulk);
@@ -189,7 +189,7 @@ public static class TaskEndpoints
             : await db.Tasks.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(t.ProjectId, track: false);
         var s = await store.Get(db);
-        var row = (await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(x => x.Id == t.Id))).Single();
+        var row = (await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(x => x.Id == t.Id), access.Actor)).Single();
         var facts = await Facts(db, t);
         var a = access.Actor;
         var dname = await DisciplineName(db, t.ProjectDisciplineId);

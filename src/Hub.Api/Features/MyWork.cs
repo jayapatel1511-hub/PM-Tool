@@ -46,9 +46,9 @@ public static class MyWorkEndpoints
         var collab = await db.Collaborators.AsNoTracking().Where(c => c.UserId == pid).Select(c => c.TaskId).ToListAsync();
         var myTasks = db.Tasks.AsNoTracking().Where(t => pids.Contains(t.ProjectId) && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled
             && (t.AssigneeId == pid || collab.Contains(t.Id)));
-        var tasks = await TaskQueries.Rows(db, TaskQueries.Sort(myTasks, null));
+        var tasks = await TaskQueries.Rows(db, TaskQueries.Sort(myTasks, null), access.Actor);
         var reviewTasks = await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(t => pids.Contains(t.ProjectId) && t.ReviewerId == pid
-            && (t.Status == TaskStatuses.ReadyForReview || t.Status == TaskStatuses.InReview)).OrderBy(t => t.ReviewRequestedAt));
+            && (t.Status == TaskStatuses.ReadyForReview || t.Status == TaskStatuses.InReview)).OrderBy(t => t.ReviewRequestedAt), access.Actor);
         var reviewDeliverables = await DeliverableEndpoints.Rows(db, db.Deliverables.AsNoTracking().Where(d => pids.Contains(d.ProjectId) && d.ReviewerId == pid && d.Status == DeliverableStatus.InReview));
         var deliverables = await DeliverableEndpoints.Rows(db, db.Deliverables.AsNoTracking().Where(d => pids.Contains(d.ProjectId) && d.OwnerId == pid
             && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled));
@@ -98,7 +98,7 @@ public static class MyWorkEndpoints
             }).ToListAsync();
         var since = now.AddDays(-14);
         var completed = await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(t => pids.Contains(t.ProjectId) && t.AssigneeId == pid && t.Status == TaskStatuses.Complete && t.CompletedAt >= since)
-            .OrderByDescending(t => t.CompletedAt));
+            .OrderByDescending(t => t.CompletedAt), access.Actor);
         var attention = await EvaluationEndpoints.Items(db, db.Attention.AsNoTracking().Where(a => pids.Contains(a.ProjectId) && a.RouteToUserIds.Contains(pid)), now, false, limit: 100);
 
         return new

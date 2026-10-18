@@ -13,6 +13,13 @@ public static class MeEndpoints
     public sealed record CurrentSettings(string? DateFormat, string? OrgTimeZone, DateOnly Today, int IdleTimeoutHours, bool RestrictedProjectsEnabled, bool AllowSelfReview,
         int TaskDueSoonDays, int MilestoneApproachingDays, int ChainDepthLimit, int DefaultWeeklyCapacityHours, int CoordinationLookaheadWeeks, bool WorkingDaysEnabled,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? ActivityBurstMinutes = null);
+    static object CounterSetting(object values, OrgSettings settings)
+    {
+        if (!settings.IsFlagOn("route_counter")) return values;
+        var json = System.Text.Json.JsonSerializer.SerializeToNode(values, JsonOpts.Web)!.AsObject();
+        json["routeCounterEnabled"] = settings.RouteCounterEnabled; return json;
+    }
+
     public static void Map(RouteGroupBuilder api)
     {
         // Current user, roles, capabilities and the settings the SPA needs to render dates (§25.7 GET /me).
@@ -47,9 +54,9 @@ public static class MeEndpoints
                     ReadOnly = a.ReadOnly,
                     DirectReports = directReports,
                 },
-                Settings = new CurrentSettings(s.DateFormat, s.OrgTimeZone, clock.Today(s), s.IdleTimeoutHours, s.RestrictedProjectsEnabled, s.AllowSelfReview,
+                Settings = CounterSetting(new CurrentSettings(s.DateFormat, s.OrgTimeZone, clock.Today(s), s.IdleTimeoutHours, s.RestrictedProjectsEnabled, s.AllowSelfReview,
                     s.TaskDueSoonDays, s.MilestoneApproachingDays, s.ChainDepthLimit, s.DefaultWeeklyCapacityHours, s.CoordinationLookaheadWeeks, s.WorkingDaysEnabled,
-                    s.IsFlagOn("small_ux") ? s.ActivityBurstMinutes : null),
+                    s.IsFlagOn("small_ux") ? s.ActivityBurstMinutes : null), s),
                 Preferences = new { pref.DigestEnabled, pref.DigestTimeLocal, pref.DenseRows, pref.WeeklySummaryEnabled },
                 Flags = s.Flags,
             };

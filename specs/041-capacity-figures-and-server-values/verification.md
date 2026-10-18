@@ -100,3 +100,21 @@ Assumptions:
 - No open decision in specs/DECISIONS.md applied to this slice.
 
 Left for Jay: nothing for this slice.
+
+## 2026-10-18 isolated takeover: S07, S09–S12
+
+Locally implemented on `codex/capacity-planning-041-047` from `a6e0104b`. Recovered the saved b-041-S07 and b-041-S12 tracked patches, then completed project permission flags, design-basis discipline permissions, coordination row/create flags, task row flags and kept-row request state. All TaskQueries callers pass the actor; list flags include the creator edit window and assignee supervisor facts. Kept ids reset on filter change and do not enter saved URLs or exports. No review/pilot flags enabled and no Accepted status assigned.
+
+| Check | Result / evidence |
+|---|---|
+| Release solution build | PASS, 0 errors (`/private/tmp/capacity-release-build.log`) |
+| Focused pure-domain regression | PASS, 132 passed / 0 failed / 0 skipped; OnboardingAndRouteCounterTests, TemplatePlannerTests, WorkloadTests, PermissionMatrixTests; `/private/tmp/capacity-041-047-test-results/capacity-domain-final.trx` |
+| Web build and lint | PASS; lint warnings remain (`/private/tmp/capacity-webbuild-final2.log`, `/private/tmp/capacity-weblint-final2.log`) |
+| Mocked browser suites | PASS: resources, planner, supervisor-capacity, design-basis, coordination and handoffs. Final resources includes task-week picker/version-conflict/scoped-link checks; planner includes 17 empty axe checkpoints. |
+| Independent source review | Latest reread: no open actionable P1/P2 in reviewed permission, kept-state, Workload and context paths. Source review is not API execution. |
+| Specification / traceability | PASS: generated specification current; 1,299 IDs and 405 sections, no gaps (`/private/tmp/capacity-spec-check.log`, `/private/tmp/capacity-trace-check.log`) |
+| API permission/parity tests | Authored and compiled; BLOCKED at fixture startup by missing combined 047 migration / EF PendingModelChangesWarning. Not suppressed. Integrator owns combined API run. |
+| S08 ratchet / generated contract | BLOCKED on packet040 owner integration. This lane has no ratchet files. Publish load-percentage literal baseline0 and failing permission-derivation counter; final references to permissions.isPm/leadOf under web/src are0. Integrator must refresh generated response contracts. |
+| Full suite / coverage gate | Not run in this isolated lane; integrator owns once combined schema/source lands. No 95% branch-coverage claim. |
+
+The first final .NET attempt raced Vite replacing generated static assets; sequential rebuild/domain verification passed. The initial supervisor browser attempt used occupied5178; free5198 passed. Neither was accepted as an application failure. S07/S09–S12 remain pending combined verification and Tier B review; S08 and S13 are not complete. Human review, pilot decisions and cleanup remain gated.

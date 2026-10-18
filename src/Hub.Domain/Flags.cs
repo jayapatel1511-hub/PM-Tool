@@ -10,6 +10,7 @@ public static class Flags
     public static readonly FlagDef[] All =
     [
         new("figure_names", "041"), // §45.2 and §45.3: the Uncommitted name, the basis lines, the Partial view row label and "at most"
+        new("planner_kept_rows", "041"), // §45.7: retain edited planner rows while filters stay active
         new("show_deleted", "045"), // §49.2: the deleted-items list, export and deliverable/milestone restore
         new("template_working_days", "045"), // §49.4: office-calendar offsets in templates
         new("status_rollups", "045"), // §49.5 and §49.6: discipline status segments and the Portfolio overdue deliverables count
@@ -19,6 +20,15 @@ public static class Flags
         new("schedule_baseline", "046"),
         new("small_ux", "046"),
         new("timeline_handoffs_chain", "046"),
+        new("onboarding_card", "047"),
+        new("capacity_reports", "047"),
+        new("route_counter", "047"),
+        new("template_roles", "047"),
+        new("unfilled_beside_capacity", "047"),
+        new("project_status_note", "047"),
+        new("my_work_follow_up", "047"),
+        new("project_import", "047"),
+        new("capacity_polish", "047"),
     ];
 
     /// `flag.<name>` as a Bool setting, default off, group `flags`, generated like `rule_enabled.*`.

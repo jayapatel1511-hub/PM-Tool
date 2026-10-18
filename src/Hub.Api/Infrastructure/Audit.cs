@@ -35,7 +35,7 @@ public static class AuditRules
     {
         [typeof(ApprovedLeave)] = ["PersonId", "SourceSystem", "ExternalId", "SourceKind", "Status", "FromDate", "ThroughDate", "HoursPerDay", "SourceUpdatedAt", "ImportedAt"],
         [typeof(LeaveImportState)] = ["SourceSystem", "ImportedAt", "SourceUpdatedAt"],
-        [typeof(PersonSchedule)] = ["PersonId", "FromDate", "WeeklyHours", "WorkingDays"],
+        [typeof(PersonSchedule)] = ["PersonId", "FromDate", "WeeklyHours", "WorkingDays", "WeekdayHours"],
         [typeof(CalendarSubscription)] = ["UserId"], // A capability hash is never written to the activity log.
         [typeof(AppUser)] = ["DisplayName", "Email", "JobTitle", "OfficeId", "SupervisorId", "HomeDisciplineId", "IsActive", "WeeklyCapacityHours", "IsTemplateEditor", "HrSourceSystem", "HrPersonKey"],
         [typeof(UserSystemRole)] = ["UserId", "Role", "Source"],
@@ -47,7 +47,7 @@ public static class AuditRules
         [typeof(DeliverableType)] = ["Name", "DefaultDisciplineId", "IsActive", "SortOrder"],
         [typeof(OrgSetting)] = ["Value"],
         [typeof(Holiday)] = ["OfficeId", "Date", "Name"],
-        [typeof(Project)] = ["ProjectNumber", "Name", "ClientId", "ClientReference", "ProjectManagerId", "OfficeId", "ProjectTypeId", "Description",
+        [typeof(Project)] = ["StatusNote", "StatusNoteBy", "StatusNoteAt", "ProjectNumber", "Name", "ClientId", "ClientReference", "ProjectManagerId", "OfficeId", "ProjectTypeId", "Description",
             "Location", "Status", "PhaseId", "StartDate", "TargetCompletionDate", "Priority", "Visibility", "InternalNotes", "CoordinationDay",
             "AllowViewerComments", "HealthOverride", "HealthOverrideNote", "HealthOverrideExpiresAt", "LastCoordinationReviewedAt"],
         [typeof(ProjectDiscipline)] = ["DisciplineId", "LeadUserId", "IsActive", "SortOrder"],

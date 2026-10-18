@@ -1,5 +1,7 @@
 # Tasks: Planning, Reporting and Onboarding
 
+2026-10-18: local implementation and partial checks are recorded in `verification.md`. Unchecked slices remain pending integrated verification, dependencies or human gates; implementation alone does not mark them accepted.
+
 Each slice is one PR that merges dark behind its §51.11 flag and adds that flag's pair test (off: identical to before; on: present), which covers AC-PRO-23 for its area. Every slice needs packet 039's flags slice first. Sizes are effort only.
 
 ## Part A: card, reports, route counter

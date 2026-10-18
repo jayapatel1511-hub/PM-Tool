@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { download, get, qs } from '@/lib/api'
+import { useOffer, type Offer } from '@/lib/auth'
 import { fmtDate, today } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -40,7 +41,7 @@ export function SubmissionsTab() {
   const refresh = () => { qc.invalidateQueries({ queryKey: ['submissions', project.id] }); qc.invalidateQueries({ queryKey: ['submission-detail', project.id] }); qc.invalidateQueries({ queryKey: ['coord-options', project.id] }) }
   const open = (id?: string) => { const next = new URLSearchParams(sp); if (id) next.set('panel', `SubmissionPackage:${id}`); else next.delete('panel'); setSp(next) }
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'panel') next.delete('page'); setSp(next) }
-  const canCreate = project.permissions.isPm || (options.data?.manageDisciplineIds.length ?? 0) > 0
+  const create = useOffer()(project.permissions.createSubmission, project.status) // FR-FIG-08 decision 9
   const milestone = milestones.data?.find(m => m.id === filters.milestoneId)
   // Active filters as removable tokens (§13.0 Filters); the URL keeps the same parameters.
   const tokens = [
@@ -52,7 +53,7 @@ export function SubmissionsTab() {
     filters.targetTo && { key: 'targetTo', label: `${t('submissions.targetDate')} ${t('common.to')}`, value: fmtDate(filters.targetTo) },
   ].filter(x => !!x)
   const clear = () => { const next = new URLSearchParams(sp); for (const k of Object.keys(filters)) next.delete(k); next.delete('page'); setSp(next) }
-  return <Page title={t('submissions.title')} subtitle={t('submissions.subtitle')} actions={<><ViewMenu listType="submissions" projectId={project.id} /><ExportMenu path={`projects/${project.id}/submissions/export`} params={filters} name={`${project.projectNumber}-submissions`} />{canCreate && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('submissions.new')}</Button>}</>}>
+  return <Page title={t('submissions.title')} subtitle={t('submissions.subtitle')} actions={<><ViewMenu listType="submissions" projectId={project.id} /><ExportMenu path={`projects/${project.id}/submissions/export`} params={filters} name={`${project.projectNumber}-submissions`} />{create.shown && <Button {...create.props} onClick={() => setAdding(true)}><Plus className="size-4" />{t('submissions.new')}</Button>}</>}>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
     {milestones.error && <ErrorBanner error={milestones.error} retry={() => milestones.refetch()} />}
     <FilterBar activeCount={tokens.length}
@@ -82,7 +83,7 @@ export function SubmissionsTab() {
       <RegisterPager label={t('submissions.pager')} page={page} total={list.data.totalCount} pageSize={list.data.pageSize} onPage={n => setSp(p => { const next = new URLSearchParams(p); next.set('page', String(n)); return next })} />
     </>}
     {adding && options.data && milestones.data && <SubmissionForm projectId={project.id} options={options.data} milestones={milestones.data} onClose={() => setAdding(false)} onDone={id => { setAdding(false); refresh(); open(id) }} />}
-    {panel && options.data && milestones.data && <SubmissionDetail projectId={project.id} number={project.projectNumber} id={panel} options={options.data} milestones={milestones.data} close={() => open()} onCreated={id => { refresh(); open(id) }} refresh={refresh} />}
+    {panel && options.data && milestones.data && <SubmissionDetail projectId={project.id} number={project.projectNumber} id={panel} options={options.data} milestones={milestones.data} supersede={create} close={() => open()} onCreated={id => { refresh(); open(id) }} refresh={refresh} />}
   </Page>
 }
 
@@ -122,7 +123,7 @@ function CheckStatus({ check, detail }: { check: Check; detail: Detail }) {
   return <CoordStatus status={check.status} />
 }
 
-function SubmissionDetail({ projectId, number, id, options, milestones, close, onCreated, refresh }: { projectId: string; number: string; id: string; options: CoordOptions; milestones: Milestone[]; close: () => void; onCreated: (id: string) => void; refresh: () => void }) {
+function SubmissionDetail({ projectId, number, id, options, milestones, supersede, close, onCreated, refresh }: { projectId: string; number: string; id: string; options: CoordOptions; milestones: Milestone[]; supersede: Offer; close: () => void; onCreated: (id: string) => void; refresh: () => void }) {
   const q = useQuery({ queryKey: ['submission-detail', projectId, id], queryFn: () => get<Detail>(`projects/${projectId}/submissions/${id}`) })
   const [action, setAction] = useState<Action | null>(null), d = q.data, p = d?.package
   const done = () => { setAction(null); refresh(); q.refetch() }
@@ -142,7 +143,7 @@ function SubmissionDetail({ projectId, number, id, options, milestones, close, o
         {d.canCoordinate && ['Draft', 'Checking', 'Ready'].includes(p.status) && <><Button size="sm" variant="outline" onClick={() => setAction({ type: 'manifest' })}>{t('submissions.replaceManifest')}</Button><Button size="sm" variant="outline" onClick={() => setAction({ type: 'edit' })}>{t('submissions.edit')}</Button></>}
         {d.canAuthorise && ['Draft', 'Checking', 'Ready'].includes(p.status) && <><Button size="sm" variant="outline" onClick={() => setAction({ type: 'assign' })}>{t('submissions.assign')}</Button><Button size="sm" variant="ghost" className="text-bad hover:text-bad" onClick={() => setAction({ type: 'cancel' })}>{t('review.cancel')}</Button></>}
         {d.canAuthorise && d.readiness?.ready && ['Checking', 'Ready'].includes(p.status) && <Button size="sm" onClick={() => setAction({ type: 'issue' })}>{t('submissions.issue')}</Button>}
-        {p.status === 'Issued' && (d.canAuthorise || options.manageDisciplineIds.length > 0) && <Button size="sm" variant="outline" onClick={() => setAction({ type: 'supersede' })}>{t('submissions.supersede')}</Button>}
+        {p.status === 'Issued' && supersede.shown && <Button size="sm" variant="outline" {...supersede.props} onClick={() => setAction({ type: 'supersede' })}>{t('submissions.supersede')}</Button>}
       </div>
       <dl className="grid grid-cols-[minmax(8rem,auto)_1fr] gap-x-4 gap-y-2">
         <dt className="text-muted-foreground">{t('coord.coordinator')}</dt><dd><PersonLabel options={options} id={p.coordinatorId} /></dd>

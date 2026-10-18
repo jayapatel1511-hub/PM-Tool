@@ -3,10 +3,10 @@ import { ArrowUpDown, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Elli
 import { Fragment, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { AccentDot, ActiveFilters, ChipToggle, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Missing, Notice, Page, PageHelp, Section, Spinner, selectCls, useDensity, type Density } from '@/components/hub/common'
+import { AccentDot, ActiveFilters, ChipToggle, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Missing, Notice, Page, PageHelp, Section, Spinner, selectCls, tdCls, thCls, useDensity, type Density } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { OneSignal, type Signal } from '@/components/hub/indicators'
-import { Avatar, PeoplePicker } from '@/components/hub/people'
+import { Avatar, PeoplePicker, weekOf } from '@/components/hub/people'
 import { Key, StatusPill } from '@/components/hub/pills'
 import { itemHref } from '@/components/hub/search'
 import { ViewMenu } from '@/components/hub/views'
@@ -37,7 +37,9 @@ interface PersonRow {
 }
 /** Open demand with no person named yet (FR-ROLE-04): shown apart from people, never in anyone's load. */
 interface UnfilledRole { id: string; projectId: string; projectNumber: string; projectName: string; roleLabel: string; disciplineName?: string | null; fromDate: string; throughDate: string; plannedHours: number; cells: { week: string; hours: number }[] }
-interface Grid { weeks: string[]; today: string; currentWeek: string; defaultCapacity: number; thresholds: Thresholds; people: PersonRow[]; unfilledRoles?: UnfilledRole[] }
+interface UnassignedTask { id: string; key: string; name: string; projectId: string; projectNumber: string; projectName: string; disciplineName?: string | null; startDate?: string | null; dueDate?: string | null; estimatedHours?: number | null; rowVersion: number; canAssign: boolean; editPath: string }
+interface Unassigned { totalCount: number; showAllPath: string; tasks: UnassignedTask[] }
+interface Grid { weeks: string[]; today: string; currentWeek: string; defaultCapacity: number; thresholds: Thresholds; people: PersonRow[]; unfilledRoles?: UnfilledRole[]; unassigned?: Unassigned }
 interface TaskLoadRow { id: string; key: string; name: string; status: string; dueDate?: string; estimatedHours?: number | null; progressPct: number; remaining?: number | null; overdue: boolean; noDueDate: number; rowVersion: number; weeks: number[]; canReassign: boolean }
 interface PersonTasks { weeks: string[]; projects: { id: string; projectNumber: string; name: string; tasks: TaskLoadRow[] }[] }
 
@@ -231,11 +233,27 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
           </div>
         )}
         {q.data && unfilled.length > 0 && <UnfilledRoles roles={unfilled} weeks={q.data.weeks} currentWeek={q.data.currentWeek} />}
+        {q.data?.unassigned && <UnassignedTasks data={q.data.unassigned} />}
       </>}
       {capacity && <CapacityDialog p={capacity} defaultCapacity={q.data?.defaultCapacity ?? 40} onClose={(ok) => { setCapacity(null); if (ok) q.refetch() }} />}
       {availability && <AvailabilityDialog p={availability} onClose={(ok) => { setAvailability(null); if (ok) q.refetch() }} />}
     </Page>
   )
+}
+
+function UnassignedTasks({ data }: { data: Unassigned }) {
+  const qc = useQueryClient()
+  const [state, setState] = useState<Record<string, RowState>>({})
+  const assign = async (task: UnassignedTask, personId: string | null) => {
+    if (!personId || !task.canAssign) return
+    setState(s => ({ ...s, [task.id]: { status: 'saving' } }))
+    try { await patch(`tasks/${task.id}`, { assigneeId: personId }, task.rowVersion); toast.success(t('workload.assigned', { key: task.key })); setState(s => { const n = { ...s }; delete n[task.id]; return n }); void qc.invalidateQueries({ queryKey: ['workload'] }) }
+    catch (e) { setState(s => ({ ...s, [task.id]: { status: 'failed', error: e } })) }
+  }
+  if (data.tasks.length === 0) return null
+  return <Section id="wl-unassigned" title={t('workload.unassignedTitle')} count={data.totalCount} actions={data.totalCount > data.tasks.length && <Button asChild variant="outline" size="sm"><Link to={data.showAllPath}>{t('workload.showAll', { n: data.totalCount })}</Link></Button>}>
+    <div className="overflow-x-auto rounded-lg border"><table className="w-full min-w-[48rem] text-sm"><thead><tr><th className={thCls}>{t('common.task')}</th><th className={thCls}>{t('portfolio.project')}</th><th className={thCls}>{t('workload.taskDueLabel')}</th><th className={cn(thCls, 'text-right')}>{t('workload.estimate')}</th><th className={thCls}>{t('workload.assignee')}</th></tr></thead><tbody>{data.tasks.map(task => { const st = state[task.id]; return <tr key={task.id}><th className={tdCls + ' text-left font-normal'}><Link className="hover:underline" to={task.editPath}><Key>{task.key}</Key> {task.name}</Link></th><td className={tdCls}>{task.projectNumber} {task.projectName}{task.disciplineName ? ` · ${task.disciplineName}` : ''}</td><td className={tdCls}>{task.dueDate ? fmtDate(task.dueDate) : t('workload.sum.noDue')}</td><td className={cn(tdCls, 'text-right tabular-nums')}>{task.estimatedHours == null ? <Missing /> : hours(task.estimatedHours)}</td><td className={tdCls}>{task.canAssign ? <PeoplePicker capacityWeek={weekOf(task.startDate ?? task.dueDate ?? today())} value={null} onChange={v => void assign(task, v)} disabled={st?.status === 'saving'} placeholder={t('workload.assignTo')} label={t('workload.assignTask', { key: task.key })} /> : <span className="text-xs text-muted-foreground">{t('workload.cannotAssign')}</span>}{st?.status === 'failed' && <p role="alert" className="text-xs text-bad">{t('workload.reassignFailed')}: {errorText(st.error)}</p>}</td></tr> })}</tbody></table></div>
+  </Section>
 }
 
 /** The week columns' header row, on one line so the first person sits higher (§41 AC-CALM-01). */

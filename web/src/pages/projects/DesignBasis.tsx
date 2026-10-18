@@ -74,11 +74,8 @@ export function DesignBasisTab() {
   const base = `projects/${project.id}/design-basis`
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
   const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => get<Team>(`projects/${project.id}/team`) })
-  const memberDisciplineId = team.data?.members.find(m => m.userId === options.data?.actorId)?.primaryDisciplineId
-  const canAssign = project.permissions.isPm || project.permissions.leadOf.length > 0
-  const allowedDisciplines = project.permissions.isPm ? project.disciplines.map(d => d.id)
-    : project.permissions.leadOf.length ? project.permissions.leadOf
-      : memberDisciplineId && project.myRoles.includes('TeamMember') ? [memberDisciplineId] : []
+  const canAssign = project.permissions.assignBasisIn.length > 0
+  const allowedDisciplines = project.permissions.createBasisIn
   const canCreate = !!options.data?.canWrite && allowedDisciplines.length > 0
   const filters = { kind, status, disciplineId: discipline, scope, overdue, affectedWorkId }
   const params = new URLSearchParams({ page: String(page) })

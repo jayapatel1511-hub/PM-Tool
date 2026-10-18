@@ -5,6 +5,31 @@ namespace Hub.Tests.Domain;
 /// §12.14 and Appendix A worked examples for instantiation dates (packet 012, FR-004, FR-005).
 public sealed class TemplatePlannerTests
 {
+    [Fact]
+    public void Template_roles_use_anchor_offsets_and_report_each_skip_reason()
+    {
+        var start = new DateOnly(2026, 10, 5);
+        var from = Guid.NewGuid(); var through = Guid.NewGuid(); var selected = Guid.NewGuid(); var omitted = Guid.NewGuid();
+        var roles = new[]
+        {
+            new TplRole(Guid.NewGuid(), "Civil technologist", selected, from, 0, through, -5, 120, null),
+            new TplRole(Guid.NewGuid(), "Optional discipline", omitted, from, 0, through, 0, 80, null),
+            new TplRole(Guid.NewGuid(), "Undated anchor", selected, Guid.NewGuid(), 0, through, 0, 80, null),
+        };
+        var plan = TemplateRolePlanner.Plan(roles, new Dictionary<Guid, DateOnly?> { [from] = start, [through] = start.AddDays(30) }, new HashSet<Guid> { selected }, "CalendarDays");
+        Assert.Equal((start, start.AddDays(25)), (plan[0].From, plan[0].Through));
+        Assert.Equal("discipline_not_selected", plan[1].SkipReason);
+        Assert.Equal("start_milestone_undated", plan[2].SkipReason);
+    }
+
+    [Fact]
+    public void Template_roles_follow_the_project_office_working_calendar()
+    {
+        var selected = Guid.NewGuid(); var from = Guid.NewGuid(); var through = Guid.NewGuid();
+        var role = new TplRole(Guid.NewGuid(), "Surveyor", selected, from, 1, through, 0, 40, null);
+        var plan = TemplateRolePlanner.Plan([role], new Dictionary<Guid, DateOnly?> { [from] = new DateOnly(2026, 10, 9), [through] = new DateOnly(2026, 10, 20) }, new HashSet<Guid> { selected }, "WorkingDays", WorkCalendar.Weekdays);
+        Assert.Equal(new DateOnly(2026, 10, 12), plan.Single().From);
+    }
     static readonly DateOnly Start = new(2026, 10, 5); // Appendix A.2
     static readonly Guid Pm = Guid.NewGuid(), Civil = Guid.NewGuid(), Geo = Guid.NewGuid(), Transport = Guid.NewGuid();
     static readonly Guid M01 = Guid.NewGuid(), M02 = Guid.NewGuid(), M03 = Guid.NewGuid(), M04 = Guid.NewGuid(), M05 = Guid.NewGuid(), M08 = Guid.NewGuid();

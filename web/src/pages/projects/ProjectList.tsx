@@ -1,3 +1,4 @@
+import { ProjectImportDialog } from '@/components/hub/project-import'
 import { useQuery } from '@tanstack/react-query'
 import { Columns3, Plus, Rows3, Star } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
@@ -6,11 +7,11 @@ import { AccentDot, ActiveFilters, ChoiceMenu, Empty, ErrorBanner, Field, Filter
 import { Chip, HealthPill, Key, PriorityBadge, ProgressBar, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { useReference } from '@/hooks/data'
 import { del, get, post, qs } from '@/lib/api'
-import { useMe } from '@/lib/auth'
+import { useMe, useFlag } from '@/lib/auth'
 import { ago, fmtDate, relative } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import type { Page as P, ProjectRow } from '@/lib/types'
@@ -32,6 +33,8 @@ export function ProjectListPage() {
   const [sp, setSp] = useSearchParams()
   const ref = useReference()
   const navigate = useNavigate()
+  const importEnabled = useFlag('project_import')
+  const [importing, setImporting] = useState(false)
   const [creating, setCreating] = useState(false)
   const search = useRef<HTMLInputElement>(null)
   const [cols, setCols] = useState<Col[]>(() => JSON.parse(localStorage.getItem('hub.projectCols') ?? 'null') ?? DEFAULT_COLS)
@@ -75,10 +78,12 @@ export function ProjectListPage() {
 
   return (
     <Page title={t('nav.projects')} subtitle={t('projects.subtitle')} actions={<>
+      {me.capabilities.admin && importEnabled && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline">{t('common.more')}</Button></DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem onSelect={() => setImporting(true)}>{t('projectImport.title')}</DropdownMenuItem></DropdownMenuContent></DropdownMenu>}
       <ViewMenu listType="projects" />
       <ExportMenu path="projects/export" params={{ ...filters, mine }} name="projects" />
       {me.capabilities.createProject && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('projects.create')}</Button>}
     </>}>
+      {importing && <ProjectImportDialog onClose={() => setImporting(false)} onChanged={() => list.refetch()} />}
       <FilterBar activeCount={tokens.length}
         search={<Field label={t('common.search')} htmlFor="pl-search">
           <Input ref={search} id="pl-search" type="search" placeholder={t('projects.search')} defaultValue={sp.get('q') ?? ''} onChange={(e) => set('q', e.target.value)} />

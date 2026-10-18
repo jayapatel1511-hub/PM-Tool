@@ -2,7 +2,7 @@ import { useFlag } from '@/lib/auth'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, CheckCircle2, Ellipsis, Lock, Monitor, Plus, X } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, PageHelp, Segmented, Spinner, TableRegion, selectCls, tdCls as td, thCls as th } from '@/components/hub/common'
@@ -18,6 +18,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
 import { Textarea } from '@/components/ui/textarea'
 import { useReference } from '@/hooks/data'
 import { ApiError, get, patch, post, qs } from '@/lib/api'
+import { useOffer, type Offer } from '@/lib/auth'
 import { fmtDate, hours, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -63,19 +64,23 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   const base = `projects/${project.id}/allocations`
   const list = useQuery({ queryKey: ['allocations', project.id, filters, page], queryFn: () => get<AllocationPage>(`${base}${qs({ ...filters, page })}`) })
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
-  const canPropose = project.permissions.isPm || (options.data?.manageDisciplineIds.length ?? 0) > 0
+  const proposal = useOffer()(project.permissions.proposeAllocation, project.status) // FR-FIG-08 decision 1
+  const [roleForm, setRoleForm] = useState<OpenRole | 'new' | null>(null), [filling, setFilling] = useState<Fill | null>(null), [cancelling, setCancelling] = useState<OpenRole | null>(null)
   const refresh = () => { qc.invalidateQueries({ queryKey: ['allocations', project.id] }); qc.invalidateQueries({ queryKey: ['workload'] }) }
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'allocation') next.delete('page'); setSp(next) }
   const clear = () => { const next = new URLSearchParams(sp); for (const k of Object.keys(filters)) next.delete(k); next.delete('page'); setSp(next) }
   const pages = list.data ? Math.max(1, Math.ceil(list.data.totalCount / list.data.pageSize)) : 1
   const view = sp.get('view') === 'roles' ? 'roles' : 'allocations'
   const roles = useQuery({ queryKey: ['allocations', project.id, 'open-roles'], queryFn: () => get<OpenRole[]>(`projects/${project.id}/open-roles`) })
+  useEffect(() => {
+    const id = sp.get('fill'); const role = id && roles.data?.find(r => r.id === id && r.status === 'Open')
+    if (role && proposal.shown && filling?.openRoleId !== role.id) setFilling({ openRoleId: role.id, roleLabel: role.roleLabel, fromDate: role.fromDate, throughDate: role.throughDate, plannedHours: role.plannedHours })
+  }, [roles.data, proposal.shown, sp, filling?.openRoleId])
   const openRoles = roles.data?.filter(r => r.status === 'Open').length ?? 0
   const complete = project.permissions.needsReason // P-05, FR-FIG-11: changes to a Complete project are corrections with a reason (A6)
-  const [roleForm, setRoleForm] = useState<OpenRole | 'new' | null>(null), [filling, setFilling] = useState<Fill | null>(null), [cancelling, setCancelling] = useState<OpenRole | null>(null)
   const propose = view === 'roles'
-    ? <Button onClick={() => setRoleForm('new')}><Plus className="size-4" />{t('openRole.new')}</Button>
-    : <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>
+    ? <Button {...proposal.props} onClick={() => setRoleForm('new')}><Plus className="size-4" />{t('openRole.new')}</Button>
+    : <Button {...proposal.props} onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>
   // Active filters as removable chips (§41 R1); the fields themselves open from the Filters button.
   const tokens = ([
     ['q', t('common.search'), filters.q],
@@ -85,7 +90,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
     ['from', t('allocation.from'), filters.from && fmtDate(filters.from)],
     ['to', t('allocation.through'), filters.to && fmtDate(filters.to)],
   ] as const).filter(([k]) => filters[k]).map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))
-  return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} />{canPropose && propose}</>}>
+  return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} />{proposal.shown && propose}</>}>
     <FilterBar activeCount={tokens.length}
       search={view === 'allocations' && <Field label={t('common.search')} htmlFor="allocation-search"><UrlSearchInput id="allocation-search" placeholder={t('allocation.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
       active={view === 'allocations' && <ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />}
@@ -100,13 +105,13 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
       </div>}
     </FilterBar>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
-    {view === 'roles' ? <OpenRoles roles={roles} base={base} canPropose={canPropose} canFill={canPropose && !!options.data}
+    {view === 'roles' ? <OpenRoles roles={roles} base={base} proposal={proposal} canFill={proposal.shown && !!options.data}
       onAdd={() => setRoleForm('new')} onEdit={setRoleForm} onCancel={setCancelling} onOpenAllocation={open}
       onFill={r => setFilling({ openRoleId: r.id, roleLabel: r.roleLabel, fromDate: r.fromDate, throughDate: r.throughDate, plannedHours: r.plannedHours })} /> : <>
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.items.length ?
       <div className="rounded-lg border bg-card">{filtered
         ? <Empty title={t('allocation.emptyFilteredTitle')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('allocation.emptyFiltered')}</Empty>
-        : <Empty title={t('allocation.empty')} action={canPropose && <Button variant="outline" onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>}>{canPropose && t('allocation.emptyHint')}</Empty>}</div>
+        : <Empty title={t('allocation.empty')} action={proposal.shown && <Button variant="outline" {...proposal.props} onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>}>{proposal.shown && t('allocation.emptyHint')}</Empty>}</div>
       : <TableRegion><table className="w-full text-left text-sm">
         <caption className="sr-only">{t('allocation.title')}</caption>
         <thead className="bg-muted"><tr>
@@ -300,13 +305,13 @@ function AllocationDetail({ base, id, projectNumber, options, close, refresh }: 
 }
 
 /** The project's open roles (FR-ROLE-01..04): demand before a person is named. Fill proposes a normal allocation for it. */
-function OpenRoles({ roles, base, canPropose, canFill, onAdd, onEdit, onCancel, onFill, onOpenAllocation }: {
-  roles: ReturnType<typeof useQuery<OpenRole[]>>; base: string; canPropose: boolean; canFill: boolean
+function OpenRoles({ roles, base, proposal, canFill, onAdd, onEdit, onCancel, onFill, onOpenAllocation }: {
+  roles: ReturnType<typeof useQuery<OpenRole[]>>; base: string; proposal: Offer; canFill: boolean
   onAdd: () => void; onEdit: (r: OpenRole) => void; onCancel: (r: OpenRole) => void; onFill: (r: OpenRole) => void; onOpenAllocation: (id: string) => void
 }) {
   if (roles.isPending) return <div className="rounded-lg border bg-card"><Loading rows={3} /></div>
   if (roles.error) return <ErrorBanner error={roles.error} retry={() => roles.refetch()} />
-  if (!roles.data.length) return <div className="rounded-lg border bg-card"><Empty title={t('openRole.empty')} action={canPropose && <Button variant="outline" onClick={onAdd}><Plus className="size-4" />{t('openRole.new')}</Button>}>{t('openRole.emptyHint')}</Empty></div>
+  if (!roles.data.length) return <div className="rounded-lg border bg-card"><Empty title={t('openRole.empty')} action={proposal.shown && <Button variant="outline" {...proposal.props} onClick={onAdd}><Plus className="size-4" />{t('openRole.new')}</Button>}>{t('openRole.emptyHint')}</Empty></div>
   return <TableRegion><table className="w-full text-left text-sm">
     <caption className="sr-only">{t('openRole.tab')}</caption>
     <thead className="bg-muted"><tr>
@@ -322,7 +327,7 @@ function OpenRoles({ roles, base, canPropose, canFill, onAdd, onEdit, onCancel, 
       <td className={td}><Pill tone={ROLE_TONE[r.status] ?? 'idle'}>{t(`openRole.status.${r.status}`)}</Pill></td>
       <td className={td}>{r.filledAllocationId ? <FilledBy base={base} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span>}</td>
       <td className={cn(td, 'py-1 text-right')}>{r.status === 'Open' && <div className="flex items-center justify-end gap-1">
-        {canFill && <Button size="sm" variant="outline" onClick={() => onFill(r)} aria-label={t('openRole.fillLabel', { role: r.roleLabel })}>{t('openRole.fill')}</Button>}
+        {canFill && <Button size="sm" variant="outline" {...proposal.props} onClick={() => onFill(r)} aria-label={t('openRole.fillLabel', { role: r.roleLabel })}>{t('openRole.fill')}</Button>}
         {r.canManage && <DropdownMenu>
           <DropdownMenuTrigger asChild><Button size="icon-sm" variant="ghost" aria-label={t('openRole.actions', { role: r.roleLabel })}><Ellipsis className="size-4" aria-hidden /></Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end">

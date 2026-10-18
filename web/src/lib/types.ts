@@ -1,3 +1,4 @@
+export interface ProjectStatusNoteData { text: string; author?: string; at?: string; header: { computedHealth: string; reportedHealth?: string; nextMilestone?: { name: string; date?: string }; openAttention: number } }
 // Response shapes of the Hub API used by the SPA.
 
 export interface RefItem { id: string; name: string; isActive: boolean; code?: string; colour?: string; sortOrder?: number; shortName?: string; timeZone?: string; defaultDisciplineId?: string }
@@ -7,6 +8,7 @@ export interface Perm { ok: boolean; reason?: string | null }
 export interface MilestoneRef { id: string; key: string; name: string; date?: string | null; status?: string | null; milestoneType?: string }
 
 export interface ProjectRow {
+  statusNote?: ProjectStatusNoteData | null
   id: string; projectNumber: string; name: string; status: string; priority: string; visibility: string
   startDate?: string; targetCompletionDate?: string; client: { id: string; name: string }; pm: { id: string; displayName: string }
   office?: string; phase?: string; computedHealth: string; reportedHealth: string; healthReasons?: HealthReason[] | null
@@ -20,6 +22,7 @@ export interface HealthReason { text: string; rule?: string; colour?: string | n
 export interface ProjectDiscipline { id: string; disciplineId: string; name: string; code: string; colour: string; leadUserId?: string; leadName?: string; isActive: boolean; rowVersion: number }
 
 export interface ProjectDetail {
+  statusNote?: ProjectStatusNoteData | null
   id: string; projectNumber: string; name: string; clientId: string; clientReference?: string; projectManagerId: string; pmName: string
   officeId: string; projectTypeId?: string; description?: string; location?: string; status: string; phaseId?: string
   startDate?: string; targetCompletionDate?: string; priority: string; visibility: string; internalNotes?: string; coordinationDay?: string
@@ -38,6 +41,8 @@ export interface ProjectDetail {
     edit: Perm; manageTeam: Perm; manageMilestones: Perm; healthOverride: Perm; comment: Perm; raiseRegister: Perm; runCoordination: Perm
     createEvent: Perm; enterTime: Perm; createTaskIn: string[]; createDeliverableIn: string[]; leadOf: string[]; isPm: boolean
     transitions: string[]; changeNumber: boolean; setVisibility: boolean; needsReason: boolean; restore?: Perm
+    proposeAllocation: Perm; snooze: Perm; manageExternalParties: Perm; reviewDates: Perm; captureWeeklyPlan: Perm; createSubmission: Perm
+    createBasisIn: string[]; assignBasisIn: string[]
   }
 }
 

@@ -1,0 +1,88 @@
+using System.Text.Json.Nodes;
+using Hub.Domain;
+using Hub.Api.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+
+namespace Hub.Api.Features;
+
+public static partial class ReportEndpoints
+{
+    static Param[] CapacityParams => [new("supervisorId", "person"), Discipline, new("from", "date"), new("weeks", "number"), new("includeMyDrafts", "bool", Default: "true")];
+
+    static async Task<PlanningEndpoints.GridResult> CapacityGrid(Ctx c)
+    {
+        var weeks = c.Int("weeks") ?? c.S.PlanningHorizonWeeks;
+        Check.That(weeks is >= 1 and <= 26, "weeks", "error.range");
+        var grid = await PlanningEndpoints.ReportGrid(new(From: c.Date("from"), Weeks: weeks, SupervisorId: c.Id("supervisorId"),
+            DisciplineId: c.Id("disciplineId"), IncludeMyDrafts: c.Str("includeMyDrafts") != "false"), c.Access, c.Db, c.Store, c.Clock);
+        c.Partial = grid.PartialView;
+        return grid;
+    }
+
+    static Col[] CapacityColumns(PlanningEndpoints.GridResult grid) => [new("measure", "measure"), ..grid.Weeks.Select((w, i) => new Col($"w{i}", "hours", "number", w.ToString("yyyy-MM-dd")))];
+
+    static string CapacityLink(Ctx c, string view, PlanningEndpoints.GridResult grid) => "/planner?" + string.Join("&", new[] { ("view", view), ("supervisorId", c.Str("supervisorId")),
+        ("disciplineId", c.Str("disciplineId")), ("from", grid.Weeks[0].ToString("yyyy-MM-dd")), ("weeks", grid.Weeks.Length.ToString(System.Globalization.CultureInfo.InvariantCulture)), ("includeMyDrafts", c.Str("includeMyDrafts") ?? "true"),
+        ("source", c.Str("source")), ("confidence", c.Str("confidence")) }.Where(x => x.Item2 != null).Select(x => $"{x.Item1}={Uri.EscapeDataString(x.Item2!)}"));
+
+    static async Task<Result> TeamCapacity(Ctx c)
+    {
+        var grid = await CapacityGrid(c);
+        (string Key, Func<PlanningEndpoints.PersonRow, PlanningEndpoints.CellRow, decimal> Value)[] measures = [
+            ("capacity", (_, v) => v.Capacity), ("timeAway", (_, v) => v.TimeAway), ("confirmed", (_, v) => v.Confirmed),
+            ("expected", (_, v) => v.Expected), ("possible", (_, v) => v.Possible), ("remaining", (_, v) => v.Remaining),
+            ("overPlanned", (_, v) => v.OverPlanned ? 1 : 0), ("underPlanned", (p, v) => !p.Partial && v.UnderPlanned ? 1 : 0),
+            ("partial", (p, _) => p.Partial ? 1 : 0)];
+        var rows = new JsonArray();
+        foreach (var (key, value) in measures) {
+            var row = new JsonObject { ["measure"] = Text.Get($"capacityReport.{key}") };
+            for (var i = 0; i < grid.Weeks.Length; i++) row[$"w{i}"] = decimal.Round(grid.People.Sum(p => value(p, p.Cells[i])), 1);
+            rows.Add(row);
+        }
+        return new(rows, CapacityLink(c, "grid", grid), CapacityColumns(grid));
+    }
+
+    static async Task<Result> AllocationsBySource(Ctx c)
+    {
+        var grid = await CapacityGrid(c);
+        if (c.Str("show") == "entries-without-project") {
+            var entries = grid.People.SelectMany(p => p.Entries).Where(e => e.ProjectId == null && (c.Str("source") == null || e.SourceCategory == c.Str("source"))
+                && (c.Str("confidence") == null || e.Confidence == c.Str("confidence"))).Select(e => new { e.PersonName, e.OwnerName, e.Label,
+                    Source = Text.Get($"planning.source.{e.SourceCategory}"), e.HoursPerWeek, e.StartWeek, e.EndWeek, e.Confidence,
+                    Visibility = Text.Get(e.OwnerKind == "Self" ? "planning.visibility.Self" : $"planning.visibility.{e.Visibility}") });
+            return new(Json(entries), CapacityLink(c, "list", grid) + "&withoutProject=true", [new("personName", "person"), new("ownerName", "owner"), new("label", "label"),
+                new("source", "source"), new("hoursPerWeek", "hours", "number"), new("startWeek", "start", "date"), new("endWeek", "end", "date"), new("confidence", "confidence"), new("visibility", "visibility")]);
+        }
+        var entryIds = grid.People.SelectMany(p => p.Entries).Select(e => e.Id).Distinct().ToArray();
+        var createdAt = await c.Db.PlanningEntries.AsNoTracking().Where(e => entryIds.Contains(e.Id)).ToDictionaryAsync(e => e.Id, e => e.CreatedAt);
+        var sources = PlanningSource.All.Where(x => c.Str("source") == null || c.Str("source") == x).ToArray();
+        var values = sources.Append("approved").ToDictionary(x => x, _ => new decimal[grid.Weeks.Length]);
+        foreach (var person in grid.People)
+        for (var i = 0; i < grid.Weeks.Length; i++) {
+            var week = grid.Weeks[i]; var entries = person.Entries.Where(e => e.StartWeek <= week && e.EndWeek >= week).ToArray();
+            var approved = person.ApprovedAllocations.GroupBy(a => a.ProjectId).ToDictionary(g => g.Key, g => g.Sum(a => a.Weeks[i].Hours));
+            var bands = PlanningRules.Combine(person.Cells[i].Capacity, entries.Select(e => new EntryWeek(e.Id, e.ProjectId, e.Confidence, e.HoursPerWeek, e.StartWeek, createdAt[e.Id])).ToArray(), approved);
+            if (c.Str("source") == null && (c.Str("confidence") == null || c.Str("confidence") == PlanningConfidence.Confirmed)) values["approved"][i] += bands.Approved;
+            foreach (var entry in entries.Where(e => values.ContainsKey(e.SourceCategory) && (c.Str("confidence") == null || e.Confidence == c.Str("confidence"))))
+                values[entry.SourceCategory][i] += bands.Entries.Single(x => x.Id == entry.Id).Counted;
+        }
+        var rows = new JsonArray();
+        foreach (var source in sources.Append("approved").Append("total")) {
+            var row = new JsonObject { ["measure"] = Text.Get(source is "approved" or "total" ? $"capacityReport.{source}" : $"planning.source.{source}") };
+            for (var i = 0; i < grid.Weeks.Length; i++) row[$"w{i}"] = decimal.Round(source == "total" ? values.Values.Sum(x => x[i]) : values[source][i], 1);
+            rows.Add(row);
+        }
+        return new(rows, CapacityLink(c, "list", grid), CapacityColumns(grid));
+    }
+    static async Task<Result> PilotRouteUse(Ctx c)
+    {
+        var weeks = c.Int("weeks") ?? 8; Check.That(weeks is >= 1 and <= 26, "weeks", "error.range");
+        var first = Workload.WeekOf(c.Today).AddDays(-7 * (weeks - 1));
+        var days = await c.Db.RouteCounts.AsNoTracking().Where(r => r.Day >= first && r.Day <= c.Today).ToListAsync();
+        return new(Json(days.GroupBy(r => new { r.RouteKey, Week = Workload.WeekOf(r.Day) }).OrderBy(g => g.Key.Week).ThenBy(g => g.Key.RouteKey)
+            .Select(g => new { g.Key.RouteKey, g.Key.Week, Opens = g.Sum(x => x.Opens), Under500Ms = g.Sum(x => x.Under500Ms),
+                From500To999Ms = g.Sum(x => x.From500To999Ms), From1000To1999Ms = g.Sum(x => x.From1000To1999Ms),
+                From2000To4999Ms = g.Sum(x => x.From2000To4999Ms), Over5000Ms = g.Sum(x => x.Over5000Ms) })));
+    }
+
+}

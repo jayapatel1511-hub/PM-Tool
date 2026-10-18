@@ -720,7 +720,7 @@ function PartyForm({ p, party, onClose }: { p: ProjectDetail; party?: Party; onC
 function PartiesDialog({ p, onClose }: { p: ProjectDetail; onClose: () => void }) {
   const q = useParties(p.id)
   const [form, setForm] = useState<Party | 'new' | null>(null)
-  const canEdit = p.permissions.isPm && p.permissions.edit.ok
+  const canEdit = p.permissions.manageExternalParties.ok // FR-FIG-08 decision 3
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-2xl">

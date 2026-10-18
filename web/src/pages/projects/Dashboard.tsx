@@ -1,3 +1,6 @@
+import { ProjectStatusNote } from '@/components/hub/project-status-note'
+import { useFlag } from '@/lib/auth'
+import { useProjectRefresh } from '@/hooks/data'
 import { useQuery } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
@@ -13,6 +16,7 @@ import { Why } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { get, qs } from '@/lib/api'
+import { useOffer } from '@/lib/auth'
 import { fmtDate, fmtTime, relative } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { cn, type Accent } from '@/lib/utils'
@@ -41,6 +45,8 @@ interface Dash {
 /** Project Dashboard (§13.1): state and what needs attention, each number opening the list behind it. */
 export function DashboardTab() {
   const p = useCurrentProject()
+  const statusNote = useFlag('project_status_note')
+  const refresh = useProjectRefresh()
   const [sp, setSp] = useSearchParams()
   const [important, setImportant] = useState(false)
   const [creating, setCreating] = useState(false)
@@ -50,7 +56,7 @@ export function DashboardTab() {
   const q = useQuery({ queryKey: ['p', p.id, 'dashboard', disciplineId, important], queryFn: () => get<Dash>(`projects/${p.id}/dashboard${qs({ disciplineId, importantOnly: important })}`) })
   const base = `/projects/${p.projectNumber}`
   const lead = (id?: string) => p.disciplines.find((x) => x.leadUserId === id)?.leadName
-  const canSnooze = p.permissions.isPm || p.permissions.leadOf.length > 0
+  const snooze = useOffer()(p.permissions.snooze, p.status) // FR-FIG-08 decision 2
   return (
     <Page title={t('ptab.dashboard')} actions={<>
       <div className="flex items-center gap-2">
@@ -67,6 +73,7 @@ export function DashboardTab() {
         <>
           {/* §41 R9: the counts lead; the milestone strip follows at reduced height (less padding round its axis). */}
           <Counts d={q.data} base={base} scoped={!!disciplineId} />
+          {statusNote && <ProjectStatusNote note={p.statusNote} edit={p.permissions.edit.ok ? { id: p.id, rowVersion: p.rowVersion, needsReason: p.permissions.needsReason, refresh: () => { refresh(p.id); q.refetch() } } : undefined} />}
           {q.data.milestones.length > 0 && <div className="[&>div>div]:py-2">
             <MilestoneStrip rows={q.data.milestones.map((m) => ({ ...m, isComplete: false, isCancelled: false }) as MilestoneRow)} onOpen={(m) => openPanel('Milestone', m.id)} />
           </div>}
@@ -74,7 +81,7 @@ export function DashboardTab() {
           <ScheduleNote value={(p as typeof p & { latestPlanned?: PlannedTarget }).latestPlanned} />
           <div className="grid items-start gap-6 xl:grid-cols-[3fr_2fr]">
             <Section title={t('dash.attention')} id="attention" accent="peach">
-              <AttentionPanel projectId={p.id} canSnooze={canSnooze} limit={10} disciplineId={disciplineId} severity={sp.get('severity') ?? undefined} />
+              <AttentionPanel projectId={p.id} canSnooze={snooze.shown} refused={snooze.props.title} limit={10} disciplineId={disciplineId} severity={sp.get('severity') ?? undefined} />
             </Section>
             <Section title={t('dash.disciplines')} id="disciplines" accent="mint">
               {q.data.disciplines.length === 0 ? <Empty>{t('dash.notEvaluated')}</Empty> : (

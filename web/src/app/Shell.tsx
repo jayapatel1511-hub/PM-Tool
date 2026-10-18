@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils'
 import { PROJECT_TABS } from '@/pages/projects/ProjectLayout'
 import { BUILT, NAV, type NavItem } from './nav'
 import { ShellSlots } from './slots'
+import { useRouteCounter } from '@/lib/route-counter'
 
 /** The application frame (§13.0, FR-022–FR-025, design §5): a 232 px sidebar at ≥ 1280 px (collapsible to the rail), a
  *  76 px icon rail with labelled tooltips from 768 px, a phone bottom bar below that, and a 64 px top bar. */
@@ -28,6 +29,7 @@ export function Shell() {
   const search = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  useRouteCounter(pathname)
   const items = NAV.filter((n) => BUILT.has(n.id) && n.sidebar !== false && n.show(me))
   const primary = items.filter((n) => n.primary)
   const more = items.filter((n) => !n.primary)

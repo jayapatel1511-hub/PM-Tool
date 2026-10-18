@@ -55,7 +55,7 @@ export function ProjectLayout() {
         <ProjectHeader p={p} />
         <ProjectTabs p={p} me={me} />
         <StatusBanner p={p} />
-        {p.status === 'Active' && (p.permissions.isPm || p.permissions.leadOf.length > 0) && <DateReviewBanner p={p} />}
+        {p.status === 'Active' && p.permissions.reviewDates.ok && <DateReviewBanner p={p} />}
         <div className="flex-1"><InProject.Provider value><PickerProject.Provider value={p.id}><Outlet /></PickerProject.Provider></InProject.Provider></div>
       </div>
     </Ctx.Provider>

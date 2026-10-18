@@ -130,7 +130,7 @@ public static class DependencyEndpoints
             var up = Walk(true);
             var down = Walk(false);
             var ids = up.Select(x => x.Id).Concat(down.Select(x => x.Id)).Append(t.Id).ToList();
-            var rows = (await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(x => ids.Contains(x.Id)))).ToDictionary(r => (Guid)((dynamic)r).Id);
+            var rows = (await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(x => ids.Contains(x.Id)), access.Actor)).ToDictionary(r => (Guid)((dynamic)r).Id);
             return new
             {
                 task = rows[t.Id], depth = limit,

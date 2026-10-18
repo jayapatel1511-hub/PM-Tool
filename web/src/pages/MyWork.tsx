@@ -1,3 +1,5 @@
+import { useFlag } from '@/lib/auth'
+import { MyWorkFollowUp } from '@/components/hub/my-work-follow-up'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCheck, ChevronDown, Plus } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
@@ -27,6 +29,7 @@ import { FollowLevelSelect } from './projects/Follow'
 import { BUCKETS, PRIORITIES, StatusMenu, TASK_STATUSES, TaskIndicators, dueBucket, useTaskActions, type TaskRow } from './projects/Tasks'
 import { WorkspaceCoordination } from './WorkspaceCoordination'
 import { MyWeekStrip } from '@/components/planner/MyWeekStrip'
+import { OnboardingCard } from '@/components/hub/onboarding'
 
 interface Work {
   person: { id: string; displayName: string; jobTitle?: string; isActive: boolean }; readOnly: boolean; today: string
@@ -61,7 +64,9 @@ const ProjectTag = ({ id, number, name }: { id: string; number: string; name?: s
  *  Overview of everything assigned to, waiting on or held up by them are one menu away, all within the selected scope. */
 export function MyWorkPage() {
   const [sp] = useSearchParams()
+  const followUp = useFlag('my_work_follow_up')
   const tab = sp.get('userId') ? 'overview' : sp.get('tab') ?? 'today'
+  if (followUp && !sp.get('userId') && (tab === 'watching' || tab === 'requested')) return <MyWorkFollowUp view={tab} menu={<MyWorkViews />} />
   if (tab === 'coordination') return <><div className="px-4 pt-4 md:px-6 md:pt-6 xl:px-8 xl:pt-8"><MyWorkViews /></div><WorkspaceCoordination /></>
   if (tab === 'inbox') return <Inbox />
   // Today for Assigned to Me or Created by Me stays the due-today task view; My Tasks today is the focus list.
@@ -74,8 +79,10 @@ export function MyWorkPage() {
 function MyWorkViews({ sections }: { sections?: { id: string; title: string; count?: number }[] }) {
   const [sp] = useSearchParams()
   const navigate = useNavigate()
+  const followUp = useFlag('my_work_follow_up') && !sp.get('userId')
+  const views = followUp ? [...VIEWS, 'watching', 'requested'] : VIEWS
   const toSection = useRef(false)
-  const current = (VIEWS as readonly string[]).includes(sp.get('tab') ?? '') ? sp.get('tab')! : 'today'
+  const current = (views as readonly string[]).includes(sp.get('tab') ?? '') ? sp.get('tab')! : 'today'
   const link = (x: string, hash = '') => {
     const n = new URLSearchParams()
     for (const k of ['projects', 'ws', 'who']) if (sp.get(k)) n.set(k, sp.get(k)!)
@@ -89,7 +96,7 @@ function MyWorkViews({ sections }: { sections?: { id: string; title: string; cou
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64" onCloseAutoFocus={(e) => { if (toSection.current) { e.preventDefault(); toSection.current = false } }}>
         <DropdownMenuRadioGroup value={current} onValueChange={(x) => navigate(link(x))}>
-          {VIEWS.map((x) => <DropdownMenuRadioItem key={x} value={x}>{t(`mywork.tab.${x}`)}</DropdownMenuRadioItem>)}
+          {views.map((x) => <DropdownMenuRadioItem key={x} value={x}>{t(`mywork.tab.${x}`)}</DropdownMenuRadioItem>)}
         </DropdownMenuRadioGroup>
         {sections && <>
           <DropdownMenuSeparator />
@@ -275,6 +282,7 @@ function Overview({ focus }: { focus: boolean }) {
   return (
     <Page title={ro ? t('mywork.of', { name: w.person.displayName }) : t('mywork.title')} subtitle={ro && t('mywork.readOnly')}
       actions={!ro && <><ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
+      {!userId && !ro && <OnboardingCard />}
       <div className="flex flex-wrap items-start gap-2">
         {!ro && <MyWorkViews sections={menu} />}
         <FilterBar className="flex-1" activeCount={tokens.length}

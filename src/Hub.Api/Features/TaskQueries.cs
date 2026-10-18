@@ -132,7 +132,7 @@ public static class TaskQueries
         };
     }
 
-    public static async Task<List<object>> Rows(HubDb db, IQueryable<WorkTask> q, bool includeActivityActor = false)
+    public static async Task<List<object>> Rows(HubDb db, IQueryable<WorkTask> q, Actor? actor = null, bool includeActivityActor = false)
     {
         // Scalar columns and counts in one query; related rows by id in a few keyed ones. (Multi-column First() inside the
         // projection made EF rank whole tables — every task state, project and person — per list: packet 011 scale run.)
@@ -141,6 +141,8 @@ public static class TaskQueries
             t.Id, t.ProjectId, t.Key, t.Name, t.ProjectDisciplineId, t.DeliverableId, t.MilestoneId, t.AssigneeId, t.ReviewerId, t.RequiresReview, t.Priority,
             t.StartDate, t.DueDate, t.OriginalStartDate, t.OriginalDueDate, t.Status, t.ProgressPct, t.EstimatedHours, t.ReviewRound, t.DueDateChangeCount, t.LastActivityAt,
             t.StatusChangedAt, t.CompletedAt, t.CreatedAt, t.CreatedBy, t.SortOrder, t.RowVersion, t.ManualBlockType, t.ManualBlockReason, t.ManualBlockSetAt,
+            CreatorWindowOpen = t.Status == TaskStatuses.NotStarted && !db.Comments.Any(c => c.ItemType == ItemType.Task && c.ItemId == t.Id && c.AuthorId != t.CreatedBy),
+            AssigneeSupervisorId = db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.SupervisorId).FirstOrDefault(),
             Comments = db.Comments.Count(c => c.ItemType == ItemType.Task && c.ItemId == t.Id && c.DeletedAt == null),
             Predecessors = db.Dependencies.Count(d => d.SuccessorTaskId == t.Id),
             Successors = db.Dependencies.Count(d => d.PredecessorTaskId == t.Id),
@@ -153,11 +155,13 @@ public static class TaskQueries
         var pdIds = rows.Select(t => t.ProjectDisciplineId).Distinct().ToList();
         var dIds = rows.Select(t => t.DeliverableId).OfType<Guid>().Distinct().ToList();
         var uIds = rows.SelectMany(t => new[] { t.AssigneeId, t.ReviewerId, t.CreatedBy }).OfType<Guid>().Distinct().ToList();
-        var projects = await db.Projects.AsNoTracking().Where(p => pids.Contains(p.Id)).Select(p => new { p.Id, p.ProjectNumber, p.Name, p.Status }).ToDictionaryAsync(p => p.Id);
+        var projects = await db.Projects.AsNoTracking().Where(p => pids.Contains(p.Id)).Select(p => new { p.Id, p.ProjectNumber, p.Name, p.Status, p.Visibility, p.ProjectManagerId, p.AllowViewerComments }).ToDictionaryAsync(p => p.Id);
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(x => pdIds.Contains(x.Id))
             .Select(x => new { x.Id, x.Discipline!.Name, x.Discipline.Code, x.Discipline.Colour, x.SortOrder }).ToDictionaryAsync(x => x.Id);
         var dels = await db.Deliverables.AsNoTracking().Where(d => dIds.Contains(d.Id)).Select(d => new { d.Id, d.Key, d.Name, d.DueDate, d.Status, d.MilestoneId, d.SortOrder }).ToDictionaryAsync(d => d.Id);
         var users = await db.Users.AsNoTracking().Where(u => uIds.Contains(u.Id)).Select(u => new { u.Id, u.DisplayName, u.IsActive }).ToDictionaryAsync(u => u.Id);
+        List<ProjectMember> memberships = actor is null ? [] : await db.ProjectMembers.AsNoTracking().Where(m => pids.Contains(m.ProjectId) && m.UserId == actor.Id && m.RemovedAt == null).ToListAsync();
+        List<Guid> leads = actor is null ? [] : await db.ProjectDisciplines.AsNoTracking().Where(d => pdIds.Contains(d.Id) && d.LeadUserId == actor.Id).Select(d => d.Id).ToListAsync();
         var collaborators = (await db.Collaborators.AsNoTracking().Where(c => ids.Contains(c.TaskId)).Select(c => new { c.TaskId, c.UserId }).ToListAsync())
             .ToLookup(c => c.TaskId, c => c.UserId);
         var states = await db.TaskStates.AsNoTracking().Where(x => ids.Contains(x.TaskId)).ToDictionaryAsync(x => x.TaskId);
@@ -171,7 +175,7 @@ public static class TaskQueries
             Assignee = t.AssigneeId is { } a ? users.GetValueOrDefault(a) : null,
             Reviewer = t.ReviewerId is { } r ? users.GetValueOrDefault(r) : null,
             CreatedByName = t.CreatedBy is { } c ? users.GetValueOrDefault(c)?.DisplayName : null,
-            t.Comments, t.Predecessors, t.Successors, t.ActivityActorName, Collaborators = collaborators[t.Id].ToList(), State = states.GetValueOrDefault(t.Id),
+            t.CreatorWindowOpen, t.AssigneeSupervisorId, t.ActivityActorName, t.Comments, t.Predecessors, t.Successors, Collaborators = collaborators[t.Id].ToList(), State = states.GetValueOrDefault(t.Id),
         }).ToList();
         var msIds = list.Select(t => t.MilestoneId ?? t.Deliverable?.MilestoneId).OfType<Guid>().Distinct().ToList();
         var ms = await db.Milestones.AsNoTracking().Where(m => msIds.Contains(m.Id)).Select(m => new { m.Id, m.Key, m.Name, m.Date }).ToDictionaryAsync(m => m.Id);
@@ -179,6 +183,11 @@ public static class TaskQueries
         {
             var mid = t.MilestoneId ?? t.Deliverable?.MilestoneId;
             var m = mid is { } x && ms.TryGetValue(x, out var mm) ? mm : null;
+            var p = t.Project;
+            var ctx = actor is null ? null : new ProjectContext(p.Id, p.Status, p.Visibility, p.ProjectManagerId, p.AllowViewerComments,
+                memberships.Where(x => x.ProjectId == p.Id).SelectMany(x => x.Roles).ToHashSet(), leads.Contains(t.ProjectDisciplineId) ? new[] { t.ProjectDisciplineId }.ToHashSet() : new HashSet<Guid>(), null);
+            var facts = new TaskFacts(t.ProjectDisciplineId, t.AssigneeId, t.ReviewerId, t.CreatedBy, t.Collaborators.ToHashSet(), t.Status, t.Predecessors + t.Successors > 0, t.CreatorWindowOpen, t.AssigneeSupervisorId);
+            var can = actor is null || ctx is null ? null : new { Assign = Permissions.AssignTask(actor, ctx, facts).Ok, Edit = Permissions.EditTask(actor, ctx, facts).Ok, ChangeDue = Permissions.ChangeDueDate(actor, ctx, facts).Ok };
             var body = new
             {
                 t.Id, t.ProjectId, ProjectNumber = t.Project.ProjectNumber, ProjectName = t.Project.Name, ProjectStatus = t.Project.Status, t.Key, t.Name,
@@ -190,7 +199,7 @@ public static class TaskQueries
                 t.ReviewerId, ReviewerName = t.Reviewer?.DisplayName, t.RequiresReview, t.Priority, t.StartDate, t.DueDate, t.OriginalStartDate, t.OriginalDueDate,
                 t.Status, Lane = Workflow.Lane(t.Status), t.ProgressPct, t.EstimatedHours, t.ReviewRound, t.DueDateChangeCount, t.LastActivityAt, t.StatusChangedAt, t.CompletedAt,
                 t.CreatedAt, t.CreatedBy, t.CreatedByName, t.SortOrder, t.RowVersion, t.ManualBlockType, t.ManualBlockReason, t.ManualBlockSetAt,
-                CommentCount = t.Comments, PredecessorCount = t.Predecessors, SuccessorCount = t.Successors, CollaboratorIds = t.Collaborators,
+                CommentCount = t.Comments, PredecessorCount = t.Predecessors, SuccessorCount = t.Successors, CollaboratorIds = t.Collaborators, Can = can,
                 State = t.State is null ? null : new
                 {
                     t.State.IsOverdue, t.State.DaysOverdue, t.State.IsDueSoon, t.State.IsWaiting, t.State.IsBlocked, t.State.BlockedSince, t.State.DaysBlocked,
@@ -206,10 +215,10 @@ public static class TaskQueries
         }).ToList();
     }
 
-    public static async Task<Page<object>> Page(HubDb db, IQueryable<WorkTask> q, TaskFilter f, bool includeActivityActor = false)
+    public static async Task<Page<object>> Page(HubDb db, IQueryable<WorkTask> q, TaskFilter f, Actor? actor = null, bool includeActivityActor = false)
     {
         var total = await q.CountAsync();
-        var rows = await Rows(db, Sort(q, f.Sort, db, f.WorkspaceId).Skip((f.Page - 1) * f.PageSize).Take(f.PageSize), includeActivityActor);
+        var rows = await Rows(db, Sort(q, f.Sort, db, f.WorkspaceId).Skip((f.Page - 1) * f.PageSize).Take(f.PageSize), actor, includeActivityActor);
         return new Page<object>(rows, f.Page, f.PageSize, total, f.Sort);
     }
 }

@@ -38,7 +38,7 @@ export function CoordinationRegister({ kind, statuses, create, detail, extra }: 
   ].filter(x => !!x)
   const clear = () => { const next = new URLSearchParams(sp); for (const k of Object.keys(filters)) next.delete(k); next.delete('page'); setSp(next) }
   const num = cn(tdCls, 'text-right tabular-nums')
-  return <Page title={t(`${kind}.title`)} subtitle={t(`${kind}.subtitle`)} actions={<><ViewMenu listType={kind} projectId={p.id} /><ExportMenu path={`projects/${p.id}/${kind}/export`} params={filters} name={`${p.projectNumber}-${kind}`} />{ctx?.options.canWrite && (kind === 'changes' || ctx.options.manageDisciplineIds.length > 0) && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t(`${kind}.new`)}</Button>}</>}>
+  return <Page title={t(`${kind}.title`)} subtitle={t(`${kind}.subtitle`)} actions={<><ViewMenu listType={kind} projectId={p.id} /><ExportMenu path={`projects/${p.id}/${kind}/export`} params={filters} name={`${p.projectNumber}-${kind}`} />{ctx?.options.canWrite && ctx.options.canCreate?.[kind] && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t(`${kind}.new`)}</Button>}</>}>
     <FilterBar activeCount={tokens.length}
       search={<Field label={t('common.search')} htmlFor={`${kind}-search`}><UrlSearchInput id={`${kind}-search`} placeholder={t('common.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
       quick={<ChipToggle on={filters.mine === 'true'} onClick={() => change('mine', filters.mine === 'true' ? '' : 'true')}>{t('coord.mine')}</ChipToggle>}

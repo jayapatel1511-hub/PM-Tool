@@ -1,3 +1,4 @@
+import { useFlag } from '@/lib/auth'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -16,11 +17,12 @@ import type { ProjectDetail } from '@/lib/types'
 import { CREATE_SOURCES, type CreateContext } from './CreateProject'
 import { SETTINGS_SECTIONS } from './ProjectSettings'
 
-export interface TemplateRow { id: string; familyId: string; name: string; description?: string; version?: number; status: string; milestones: number; deliverables: number; tasks: number; projects: number }
+export interface TemplateRow { id: string; familyId: string; name: string; description?: string; version?: number; status: string; milestones: number; deliverables: number; tasks: number; roles: number; projects: number }
 interface TemplateDetail { id: string; offsetDayKind?: string; disciplines: { disciplineId: string; isDefaultIncluded: boolean }[]; basisSuggestions: { disciplineId: string }[] }
 interface Preview {
   milestones: { id: string; name: string; milestoneType: string; date?: string | null; source: 'Contract' | 'Offset' | 'None' }[]
-  counts: { milestones: number; deliverables: number; tasks: number; dependencies: number }; undated: { milestones: number; deliverables: number; tasks: number }
+  roles: { id: string; label: string; disciplineId?: string | null; disciplineName?: string | null; from?: string | null; through?: string | null; hours: number; note?: string | null; skipReason?: string | null }[]
+  counts: { milestones: number; deliverables: number; tasks: number; dependencies: number; roles: number }; undated: { milestones: number; deliverables: number; tasks: number }
 }
 type Value = { templateId: string; dates: Record<string, string | null> } | null
 
@@ -99,6 +101,7 @@ function TemplateSource({ value, onChange, ctx }: { value: Value; onChange: (v: 
 /** The last step's summary (FR-005): what will be created, and what will be undated. Basis suggestions of the chosen
  *  disciplines are copied as Proposed only (031 FR-BAS-07, AC-BAS-05); the others are left out, as on the server. */
 function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateContext }) {
+  const rolesOn = useFlag('template_roles')
   const preview = usePreview(value, ctx)
   const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => get<TemplateDetail>(`templates/${value!.templateId}`) })
   const p = preview.data
@@ -110,7 +113,8 @@ function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateContext }) {
     <section aria-labelledby="tpl-summary" className="space-y-1.5 rounded-lg border bg-muted p-4 text-sm">
       <h3 id="tpl-summary" className="text-base/6 font-semibold">{t('tpl.summary')}</h3>
       {detail.data?.offsetDayKind === 'WorkingDays' && <p className="text-xs/[18px] text-muted-foreground">{t('rcv.workingDaysNote')}</p>}
-      <p>{t('tpl.creates', { m: p.counts.milestones, d: p.counts.deliverables, k: p.counts.tasks, x: p.counts.dependencies })}</p>
+      <p>{t('tpl.creates', { m: p.counts.milestones, d: p.counts.deliverables, k: p.counts.tasks, x: p.counts.dependencies })}{rolesOn && ` · ${t('tpl.roleCount', { count: p.counts.roles ?? 0 })}`}</p>
+      {rolesOn && (p.roles ?? []).length > 0 && <ul className="space-y-1 text-xs/[18px]">{p.roles.map(r => <li key={r.id} className={r.skipReason ? 'text-warn' : 'text-muted-foreground'}>{r.label} · {r.disciplineName ?? t('tpl.noDiscipline')} · {r.hours} h · {r.skipReason ? t(`tpl.roleSkip.${r.skipReason}`) : `${t('tpl.roleWillCreate')} ${fmtDate(r.from)} → ${fmtDate(r.through)}`}</li>)}</ul>}
       {basis.length > 0 && <p>{plural(copied, 'templates.basisCopiedOne', 'templates.basisCopied')}{copied < basis.length && ` ${t('templates.basisSkipped', { n: basis.length - copied })}`}</p>}
       {undated > 0 && <p className="text-warn" role="status"><span aria-hidden>▲ </span>{t('tpl.undatedWarning', { m: p.undated.milestones, d: p.undated.deliverables, k: p.undated.tasks })}</p>}
       <p className="text-xs/[18px] text-muted-foreground">{t('tpl.setupNote')}</p>

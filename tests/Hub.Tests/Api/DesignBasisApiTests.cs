@@ -11,7 +11,31 @@ public sealed class DesignBasisApiTests(HubFactory f)
 {
     readonly TestData data = new(f);
     async Task<JsonNode> Post(string who, string path, object body, int status = 200) => await (await f.As(who).Post(path, body)).Json(status);
+    async Task<JsonNode> Get(string who, string path) => await (await f.As(who).GetAsync(path)).Json();
     int Version<T>(Guid id) where T : Audited => f.Db(db => db.Set<T>().AsNoTracking().Single(x => x.Id == id).RowVersion);
+
+    [Fact]
+    public async Task Basis_discipline_lists_match_create_basis_for_every_role()
+    {
+        var project = await data.Project();
+        var disciplines = new[] { data.ProjectDiscipline(project.Id, "Civil"), data.ProjectDiscipline(project.Id, "Electrical") };
+        var root = $"/api/v1/projects/{project.Id}/design-basis";
+
+        foreach (var who in new[] { TestData.Admin, TestData.Pm, TestData.Marc, TestData.Alex, TestData.Omar })
+        {
+            var detail = await Get(who, $"/api/v1/projects/{project.Id}");
+            var allowed = detail["permissions"]!["createBasisIn"]!.AsArray().Select(x => x!.GetValue<Guid>()).ToHashSet();
+            var owner = data.User(who);
+            foreach (var discipline in disciplines)
+            {
+                var body = new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Assumption,
+                    $"Parity probe {who} {discipline}", owner, discipline, null,
+                    new DesignBasisEndpoints.VersionInput("Scope", "Parity probe", null, null, null, null, null, null,
+                        new DateOnly(2026, 10, 5), null), null);
+                await Post(who, root, body, allowed.Contains(discipline) ? 200 : 403);
+            }
+        }
+    }
 
     [Fact]
     public async Task New_proposed_basis_requires_a_confirmation_due_date()

@@ -65,7 +65,7 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
   const changed = () => { setCreating(false); setEditing(null); setRaising(false); setMoving(null); setExcepting(false); setLinking(false); setUnlinking(null)
     q.refetch(); constraints.refetch(); assumptions.refetch(); prerequisites.refetch(); done() }
   const canCreate = options.canWrite && work?.ownerId === options.actorId
-  const canAssess = options.canWrite && work && options.manageDisciplineIds.includes(work.projectDisciplineId)
+  const canAssess = options.canWrite && work?.canManage === true
   if (creating && work) return <CreateAssessment path={path} rowVersion={work.rowVersion} assessmentVersion={q.data?.assessment.rowVersion} close={() => setCreating(false)} done={changed} />
   if (editing && q.data) return <Applicability path={`${path}/checks/${encodeURIComponent(editing.code)}/applicability`} check={editing}
     assessmentVersion={q.data.assessment.rowVersion} close={() => setEditing(null)} done={changed} />

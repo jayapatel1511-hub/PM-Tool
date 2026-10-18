@@ -18,10 +18,10 @@ public sealed record Col(string Path, string Header, string Type = "text", strin
 /// Standard reports (§19, FR-RPT-01, FR-ASG-08): fixed, rule-based queries with a few parameters, permission-filtered,
 /// shown as tables and exported to CSV or XLSX. Each report reuses the list query it corresponds to, so its rows equal
 /// the list "Open as filtered list" opens (SC-004).
-public static class ReportEndpoints
+public static partial class ReportEndpoints
 {
     public sealed record Param(string Key, string Type, string[]? Options = null, string? Default = null);
-    sealed record Def(string Code, Param[] Params, Col[] Cols, Func<Ctx, Task<Result>> Run, Func<Actor, bool>? Allowed = null);
+    sealed record Def(string Code, Param[] Params, Col[] Cols, Func<Ctx, Task<Result>> Run, Func<Actor, bool>? Allowed = null, string? Flag = null);
     sealed record Result(JsonArray Rows, string? ListLink = null, Col[]? Columns = null);
 
     static readonly string[] Live = [ProjectStatus.Setup, ProjectStatus.Active, ProjectStatus.OnHold, ProjectStatus.Complete];
@@ -34,6 +34,9 @@ public static class ReportEndpoints
 
     static readonly Def[] All =
     [
+        new("pilot-route-use", [new("weeks", "number", Default: "8")], [new("routeKey", "route"), new("week", "pilotWeek", "date"), new("opens", "opens", "number"), new("under500Ms", "under500Ms", "number"), new("from500To999Ms", "from500To999Ms", "number"), new("from1000To1999Ms", "from1000To1999Ms", "number"), new("from2000To4999Ms", "from2000To4999Ms", "number"), new("over5000Ms", "over5000Ms", "number")], PilotRouteUse, a => Permissions.ViewPortfolio(a).Ok, "route_counter"),
+        new("team-capacity", CapacityParams, [], TeamCapacity, a => Permissions.ViewWorkload(a).Ok, "capacity_reports"),
+        new("allocations-by-source", [..CapacityParams, new("show", "select", ["hours-by-source", "entries-without-project"], "hours-by-source"), new("source", "select", PlanningSource.All), new("confidence", "select", PlanningConfidence.All)], [], AllocationsBySource, a => Permissions.ViewWorkload(a).Ok, "capacity_reports"),
         new("tasks-due-this-week", [Projects, Discipline, new("assigneeId", "person"), new("week", "date"), new("mine", "bool")],
             [new("key", "key", "key"), new("name", "task"), new("projectNumber", "project"), new("deliverableKey", "deliverable"), new("disciplineName", "discipline"),
              new("assigneeName", "assignee"), new("dueDate", "due", "date"), new("status", "status"), new("indicators", "indicators")], DueThisWeek),
@@ -98,14 +101,14 @@ public static class ReportEndpoints
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/reports", (CurrentUser me) => All.Where(r => r.Allowed?.Invoke(me.Actor) ?? true).Select(r => new
+        api.MapGet("/reports", async (CurrentUser me, HubDb db, SettingsStore store) => { var settings = await store.Get(db); return All.Where(r => (r.Allowed?.Invoke(me.Actor) ?? true) && (r.Flag == null || settings.IsFlagOn(r.Flag))).Select(r => new
         {
             r.Code, Title = Text.Get($"report.{r.Code}"), Description = Text.Get($"report.{r.Code}.about"),
-            Params = r.Params.Select(p => new { p.Key, Label = Text.Get($"param.{p.Key}"), p.Type, p.Default,
+            Params = r.Params.Select(p => new { p.Key, Label = Text.Get($"param.{p.Key}"), p.Type, Default = p.Key == "weeks" && r.Flag == "capacity_reports" ? settings.PlanningHorizonWeeks.ToString(CultureInfo.InvariantCulture) : p.Default,
                 Options = p.Options?.Where(o => !(p.Key == "scope" && o == "all" && !Permissions.ViewAllStaff(me.Actor))).Select(o => new { Value = o, Label = Text.Get($"opt.{o}") }) }),
             ItemType = ItemTypeOf(r.Code),
             Columns = r.Cols.Select(c => new { c.Path, Header = c.Title, c.Type }),
-        }));
+        }); });
         api.MapGet("/reports/{code}", async (string code, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (def, ctx) = await Prepare(code, http, db, access, me, store, clock);
@@ -134,7 +137,7 @@ public static class ReportEndpoints
         "upcoming-milestones" => ItemType.Milestone,
         "open-decisions" => ItemType.Decision,
         "meeting-actions-outstanding" => ItemType.Action,
-        "project-activity-log" or "staff-assignments" or "review-queue" or "open-issues-high-risks" or "projects-at-risk" or "health-history" or "workload-employee" or "workload-discipline" or "task-hours" => null,
+        "team-capacity" or "allocations-by-source" or "pilot-route-use" or "project-activity-log" or "staff-assignments" or "review-queue" or "open-issues-high-risks" or "projects-at-risk" or "health-history" or "workload-employee" or "workload-discipline" or "task-hours" => null,
         _ => ItemType.Task,
     };
 
@@ -143,6 +146,7 @@ public static class ReportEndpoints
         var def = All.FirstOrDefault(r => r.Code == code) ?? throw ApiException.NotFound();
         if (def.Allowed is { } ok && !ok(me.Actor)) throw ApiException.Forbidden("perm.staff");
         var s = await store.Get(db);
+        if (def.Flag is not null && !s.IsFlagOn(def.Flag)) throw ApiException.NotFound();
         return (def, new Ctx(http.Request.Query, db, access, me, s, clock.Today(s), clock.GetUtcNow(), store, clock));
     }
 
@@ -152,6 +156,7 @@ public static class ReportEndpoints
     {
         public HubDb Db => db; public Access Access => access; public CurrentUser Me => me; public OrgSettings S => s; public DateOnly Today => today; public DateTimeOffset Now => now;
         public SettingsStore Store => store; public TimeProvider Clock => clock;
+        public bool Partial { get; set; }
         public string? Str(string k) => string.IsNullOrWhiteSpace(q[k]) ? null : q[k].ToString();
         public Guid? Id(string k) => Guid.TryParse(q[k], out var g) ? g : null;
         public Guid[] Ids(string k) => Http.Ids(q[k]);
@@ -186,7 +191,7 @@ public static class ReportEndpoints
             foreach (var p in ps)
             {
                 var raw = Str(p.Key) ?? p.Default;
-                if (raw is null || raw == "false") continue;
+                if (raw is null || raw == "false" && p.Key != "includeMyDrafts") continue;
                 var ids = Http.Ids(raw);
                 var value = p.Type switch
                 {
@@ -195,13 +200,14 @@ public static class ReportEndpoints
                     "discipline" => string.Join(", ", await db.Disciplines.Where(x => ids.Contains(x.Id)).Select(x => x.Name).ToListAsync()),
                     "office" => string.Join(", ", await db.Offices.Where(x => ids.Contains(x.Id)).Select(x => x.Name).ToListAsync()),
                     "person" => string.Join(", ", await db.Users.Where(x => ids.Contains(x.Id)).Select(x => x.DisplayName).ToListAsync()),
-                    "bool" => Text.Get("common.yes"),
+                    "bool" => Text.Get(raw == "false" ? "common.no" : "common.yes"),
                     "select" => Text.Get($"opt.{raw}"),
                     _ => raw,
                 };
                 list.Add((Text.Get($"param.{p.Key}"), value));
             }
             if (list.All(x => x.Item1 != Text.Get("param.projectId")) && ps.Any(p => p.Type == "projects")) list.Insert(0, (Text.Get("param.projectId"), Text.Get("report.allVisible")));
+            if (Partial) list.Add((Text.Get("planning.partial"), Text.Get("planning.partial_hint")));
             return list;
         }
     }
@@ -273,7 +279,7 @@ public static class ReportEndpoints
         var from = day.AddDays(-(((int)day.DayOfWeek + 6) % 7));
         var to = from.AddDays(6);
         var f = new TaskFilter { DueFrom = from, DueTo = to, Indicators = ["open"], AssigneeIds = c.Id("assigneeId") is { } a ? [a] : [], Mine = c.Bool("mine") ? true : null };
-        var rows = Json(await TaskQueries.Rows(c.Db, TaskQueries.Sort(Tasks(c, f), null).Take(Cap)));
+        var rows = Json(await TaskQueries.Rows(c.Db, TaskQueries.Sort(Tasks(c, f), null).Take(Cap), c.Me.Actor));
         foreach (var r in rows) r!["indicators"] = Indicators(r["state"]);
         return new(rows, await Link(c, "tasks", ("dueFrom", $"{from:yyyy-MM-dd}"), ("dueTo", $"{to:yyyy-MM-dd}"), ("open", "true"), ("assigneeId", c.Str("assigneeId")), ("mine", c.Bool("mine") ? "true" : null)));
     }
@@ -283,7 +289,7 @@ public static class ReportEndpoints
         var min = Math.Max(c.Int("minDaysOverdue") ?? 1, 1);
         var f = new TaskFilter { Indicators = ["overdue"], AssigneeIds = c.Id("assigneeId") is { } a ? [a] : [] };
         var q = Tasks(c, f).Where(t => c.Db.TaskStates.Any(s => s.TaskId == t.Id && s.DaysOverdue >= min));
-        var rows = await WithMilestones(c.Db, Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap))));
+        var rows = await WithMilestones(c.Db, Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap), c.Me.Actor)));
         return new(rows, min > 1 ? null : await Link(c, "tasks", ("overdue", "true"), ("assigneeId", c.Str("assigneeId"))));
     }
 
@@ -301,7 +307,7 @@ public static class ReportEndpoints
                 """);
             q = q.Where(t => matching.Contains(t.Id));
         }
-        var rows = await WithMilestones(c.Db, Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap))));
+        var rows = await WithMilestones(c.Db, Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap), c.Me.Actor)));
         var kept = new JsonArray();
         foreach (var r in rows.ToList())
         {
@@ -317,7 +323,7 @@ public static class ReportEndpoints
 
     static async Task<Result> Blocking(Ctx c)
     {
-        var rows = Json(await TaskQueries.Rows(c.Db, Tasks(c, new TaskFilter { Indicators = ["blocking"] }).OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap)));
+        var rows = Json(await TaskQueries.Rows(c.Db, Tasks(c, new TaskFilter { Indicators = ["blocking"] }).OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap), c.Me.Actor));
         var succIds = rows.SelectMany(r => GuidList(r!["state"]?["blockingTaskIds"])).Distinct().ToList();
         var succ = await c.Db.Tasks.AsNoTracking().Where(t => succIds.Contains(t.Id))
             .Select(t => new { t.Id, Milestone = t.MilestoneId ?? c.Db.Deliverables.Where(d => d.Id == t.DeliverableId).Select(d => d.MilestoneId).FirstOrDefault() }).ToListAsync();
@@ -430,7 +436,7 @@ public static class ReportEndpoints
         var reviewer = c.Id("reviewerId");
         var f = new TaskFilter { Indicators = ["readyForReview"], ReviewerIds = reviewer is { } r ? [r] : [] };
         var tasks = Json(await TaskQueries.Rows(c.Db, Tasks(c, f).OrderBy(t => t.ReviewRequestedAt == null && t.StatusChangedAt == null)
-            .ThenBy(t => t.ReviewRequestedAt ?? t.StatusChangedAt).ThenBy(t => t.Key).Take(Cap)));
+            .ThenBy(t => t.ReviewRequestedAt ?? t.StatusChangedAt).ThenBy(t => t.Key).Take(Cap), c.Me.Actor));
         var taskIds = tasks.Select(x => Guid.Parse(x!["id"]!.GetValue<string>())).ToList();
         var requested = await c.Db.Tasks.AsNoTracking().Where(t => taskIds.Contains(t.Id)).ToDictionaryAsync(t => t.Id, t => t.ReviewRequestedAt ?? t.StatusChangedAt);
         var dq = c.Db.Deliverables.AsNoTracking().Where(d => c.ProjectIds().Contains(d.ProjectId) && d.Status == DeliverableStatus.InReview);
@@ -469,7 +475,7 @@ public static class ReportEndpoints
         var days = Math.Max(c.Int("days") ?? c.S.TaskStaleDays, 1);
         var cutoff = c.Now.AddDays(-days);
         var q = Tasks(c, new TaskFilter { Indicators = ["open"] }).Where(t => t.Status != TaskStatuses.OnHold && t.LastActivityAt < cutoff);
-        var rows = Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.LastActivityAt).Take(Cap)));
+        var rows = Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.LastActivityAt).Take(Cap), c.Me.Actor));
         foreach (var r in rows)
             r!["staleDays"] = c.Today.DayNumber - Clock.LocalDate(DateTimeOffset.Parse(r["lastActivityAt"]!.GetValue<string>(), CultureInfo.InvariantCulture), c.S).DayNumber;
         return new(rows, days == c.S.TaskStaleDays ? await Link(c, "tasks", ("stale", "true")) : null);

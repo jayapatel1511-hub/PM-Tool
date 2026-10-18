@@ -49,6 +49,7 @@ public sealed record OrgSettings
     public bool RestrictedProjectsEnabled { get; init; }
     public bool ViewerCommentsDefault { get; init; } = true;
     public int IdleTimeoutHours { get; init; } = 8;
+    public bool RouteCounterEnabled { get; init; }
     public bool WorkingDaysEnabled { get; init; }
     public IReadOnlyDictionary<string, bool> RuleEnabled { get; init; } = Rules.Ids.ToDictionary(r => r, _ => true);
     public IReadOnlyDictionary<string, Channels> NotificationDefaults { get; init; } =
@@ -61,6 +62,7 @@ public sealed record OrgSettings
 
     public static readonly SettingDef[] Defs =
     [
+        new("route_counter_enabled", SettingKind.Bool, false, "pilot"),
         new("task_due_soon_days", SettingKind.Int, 5, "thresholds"),
         new("deliverable_due_soon_days", SettingKind.Int, 10, "thresholds"),
         new("milestone_approaching_days", SettingKind.Int, 14, "thresholds"),
@@ -148,6 +150,7 @@ public sealed record OrgSettings
             RestrictedProjectsEnabled = B("restricted_projects_enabled", s.RestrictedProjectsEnabled),
             ViewerCommentsDefault = B("viewer_comments_default", s.ViewerCommentsDefault),
             ProjectNumberFormat = S("project_number_format", s.ProjectNumberFormat),
+            RouteCounterEnabled = B("route_counter_enabled", false),
             WorkingDaysEnabled = B("working_days_enabled", s.WorkingDaysEnabled),
             OrgTimeZone = S("org_time_zone", s.OrgTimeZone),
             DateFormat = S("date_format", s.DateFormat),

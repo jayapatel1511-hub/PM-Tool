@@ -18,8 +18,13 @@ public static class TemplateEndpoints
     public sealed record DeliverableIn(string Ref, Guid DisciplineId, string Name, Guid DeliverableTypeId, string? MilestoneRef, int? Offset, bool RequiresReview, string? Description);
     public sealed record TaskIn(string Ref, Guid DisciplineId, string? DeliverableRef, string Name, string? Description, bool RequiresReview, string? Priority,
         decimal? EstimatedHours, int? Offset, string? AssignTo);
+    public sealed record TemplateRoleIn(string Ref, Guid? DisciplineId, string Label, string? StartMilestoneRef, int StartOffsetDays,
+        string? EndMilestoneRef, int EndOffsetDays, decimal Hours, string? Note);
     public sealed record DependencyIn(string Predecessor, string Successor);
-    public sealed record StructureBody(HeaderBody? Header, DisciplineIn[] Disciplines, MilestoneIn[] Milestones, DeliverableIn[] Deliverables, TaskIn[] Tasks, DependencyIn[] Dependencies, int? RowVersion);
+    public sealed record StructureBody(HeaderBody? Header, DisciplineIn[] Disciplines, MilestoneIn[] Milestones, DeliverableIn[] Deliverables, TaskIn[] Tasks, DependencyIn[] Dependencies, int? RowVersion)
+    {
+        public TemplateRoleIn[]? Roles { get; init; }
+    }
     public sealed record PreviewBody(DateOnly? StartDate, Dictionary<Guid, DateOnly?>? MilestoneDates, Guid[]? DisciplineIds, Guid? OfficeId = null);
     public sealed record PackBody(Guid TemplateId, Guid DisciplineId, Guid? LeadUserId, Dictionary<Guid, Guid?>? Mapping);
     public sealed record VersionBody(int? RowVersion);
@@ -74,13 +79,20 @@ public static class TemplateEndpoints
             var (snap, parts) = await Snapshot(db, t.Id);
             var included = body.DisciplineIds is { } ids ? parts.Disciplines.Where(d => ids.Contains(d.DisciplineId)) : parts.Disciplines.Where(d => d.IsDefaultIncluded);
             var plan = TemplatePlanner.Plan(snap, body.StartDate, body.MilestoneDates ?? [], included.Select(d => d.Id).ToHashSet(), await Calendar(db, store, t, body.OfficeId));
+            var holidays = body.OfficeId is { } office ? await db.Holidays.AsNoTracking().Where(h => h.OfficeId == null || h.OfficeId == office).Select(h => h.Date).ToListAsync() : [];
+            var rolePlan = TemplateRolePlanner.Plan(parts.Roles.Select(r => new TplRole(r.Id, r.RoleLabel, r.TemplateDisciplineId,
+                r.StartMilestoneId, r.StartOffsetDays, r.EndMilestoneId, r.EndOffsetDays, r.PlannedHours, r.Note)),
+                plan.Milestones.ToDictionary(m => m.Id, m => m.Date), included.Select(d => d.Id).ToHashSet(), await Calendar(db, store, t, body.OfficeId) is null ? "CalendarDays" : "WorkingDays", new WorkCalendar(holidays));
+            var disciplineNames = await db.Disciplines.AsNoTracking().ToDictionaryAsync(d => d.Id, d => d.Name);
             var names = parts.Milestones.ToDictionary(m => m.Id);
-            return new
+            var result = new
             {
                 Milestones = plan.Milestones.Select(m => new { m.Id, names[m.Id].Name, names[m.Id].MilestoneType, names[m.Id].SortOrder, m.Date, m.Source }),
-                Counts = new { Milestones = plan.Milestones.Count, Deliverables = plan.Deliverables.Count, Tasks = plan.Tasks.Count, Dependencies = plan.Dependencies.Count },
+                Roles = rolePlan.Select(r => new { r.Id, r.Label, r.DisciplineId, DisciplineName = r.DisciplineId is { } rd ? disciplineNames.GetValueOrDefault(parts.Disciplines.Single(d => d.Id == rd).DisciplineId) : null, r.From, r.Through, r.Hours, r.Note, r.SkipReason }),
+                Counts = new { Milestones = plan.Milestones.Count, Deliverables = plan.Deliverables.Count, Tasks = plan.Tasks.Count, Dependencies = plan.Dependencies.Count, Roles = rolePlan.Count },
                 Undated = new { Milestones = plan.UndatedMilestones, Deliverables = plan.UndatedDeliverables, Tasks = plan.UndatedTasks },
             };
+            return await RolesEnabled(db) ? result : WithoutRoles(result);
         });
 
         api.MapGet("/projects/{id:guid}/template-packs", PackProposal);
@@ -126,6 +138,15 @@ public static class TemplateEndpoints
         return Results.NoContent();
     }
 
+    static async Task<bool> RolesEnabled(HubDb db) => await db.Settings.AsNoTracking().AnyAsync(s => s.Key == "flag.template_roles" && s.Value == "true");
+
+    static object WithoutRoles(object result)
+    {
+        var json = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject(); json.Remove("roles");
+        if (json["counts"] is System.Text.Json.Nodes.JsonObject counts) counts.Remove("roles");
+        return json;
+    }
+
     // ---------- Reading ----------
 
     /// Editors see every version and draft; everyone else sees published templates, for the creation wizard (§8.5.1).
@@ -138,10 +159,10 @@ public static class TemplateEndpoints
         {
             t.Id, t.FamilyId, t.Name, t.Description, t.ProjectTypeId, t.Version, t.Status, t.PublishedAt, t.UpdatedAt, t.RowVersion,
             Disciplines = db.TemplateDisciplines.Count(x => x.TemplateId == t.Id), Milestones = db.TemplateMilestones.Count(x => x.TemplateId == t.Id),
-            Deliverables = db.TemplateDeliverables.Count(x => x.TemplateId == t.Id), Tasks = db.TemplateTasks.Count(x => x.TemplateId == t.Id),
+            Deliverables = db.TemplateDeliverables.Count(x => x.TemplateId == t.Id), Tasks = db.TemplateTasks.Count(x => x.TemplateId == t.Id), Roles = db.TemplateRoles.Count(x => x.TemplateId == t.Id),
             Projects = db.Projects.Count(p => p.CreatedFromTemplateId == t.Id),
         }).ToListAsync();
-        return new { CanEdit = editor, Templates = rows };
+        return new { CanEdit = editor, Templates = await RolesEnabled(db) ? rows.Cast<object>().ToArray() : rows.Select(WithoutRoles).ToArray() };
     }
 
     static async Task<ProjectTemplate> Visible(HubDb db, Access access, Guid id)
@@ -151,7 +172,7 @@ public static class TemplateEndpoints
         return t;
     }
 
-    public sealed record Parts(List<TemplateDiscipline> Disciplines, List<TemplateMilestone> Milestones, List<TemplateDeliverable> Deliverables, List<TemplateTask> Tasks, List<TemplateDependency> Dependencies);
+    public sealed record Parts(List<TemplateDiscipline> Disciplines, List<TemplateMilestone> Milestones, List<TemplateDeliverable> Deliverables, List<TemplateTask> Tasks, List<TemplateDependency> Dependencies, List<TemplateRole> Roles);
 
     static async Task<(TemplateSnap Snap, Parts Parts)> Snapshot(HubDb db, Guid id)
     {
@@ -160,7 +181,8 @@ public static class TemplateEndpoints
             await db.TemplateMilestones.AsNoTracking().Where(x => x.TemplateId == id).OrderBy(x => x.SortOrder).ToListAsync(),
             await db.TemplateDeliverables.AsNoTracking().Where(x => x.TemplateId == id).OrderBy(x => x.SortOrder).ToListAsync(),
             await db.TemplateTasks.AsNoTracking().Where(x => x.TemplateId == id).OrderBy(x => x.SortOrder).ToListAsync(),
-            await db.TemplateDependencies.AsNoTracking().Where(x => x.TemplateId == id).ToListAsync());
+            await db.TemplateDependencies.AsNoTracking().Where(x => x.TemplateId == id).ToListAsync(),
+            await db.TemplateRoles.AsNoTracking().Where(x => x.TemplateId == id).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync());
         var position = parts.Tasks.ToDictionary(k => k.Id, k => k.SortOrder); // dependencies in task order, so every read lists them the same way
         parts.Dependencies.Sort((a, b) => (position[a.PredecessorTemplateTaskId], position[a.SuccessorTemplateTaskId]).CompareTo((position[b.PredecessorTemplateTaskId], position[b.SuccessorTemplateTaskId])));
         var snap = new TemplateSnap(
@@ -194,7 +216,7 @@ public static class TemplateEndpoints
         var family = await db.Templates.AsNoTracking().Where(x => x.FamilyId == t.FamilyId).OrderByDescending(x => x.Version)
             .Select(x => new { x.Id, x.Version, x.Status, x.PublishedAt }).ToListAsync();
         var basis = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == t.Id).OrderBy(x => x.Id).ToListAsync();
-        return new
+        var result = new
         {
             t.Id, t.FamilyId, t.Name, t.Description, t.ProjectTypeId, t.Version, t.Status, t.PublishedAt, t.RowVersion, CanEdit = IsEditor(access) && t.Status == TemplateStatus.Draft,
             Family = family,
@@ -205,8 +227,10 @@ public static class TemplateEndpoints
             Milestones = p.Milestones.Select(m => new MilestoneIn(m.Id.ToString(), m.Name, m.MilestoneType, m.Anchor, m.OffsetDaysFromAnchor, m.CompletesPhaseId, m.IsClientFacing)),
             Deliverables = p.Deliverables.Select(d => new DeliverableIn(d.Id.ToString(), disc[d.TemplateDisciplineId], d.Name, d.DeliverableTypeId, d.TemplateMilestoneId?.ToString(), d.DueOffsetDays, d.RequiresReview, d.Description)),
             Tasks = p.Tasks.Select(k => new TaskIn(k.Id.ToString(), disc[k.TemplateDisciplineId], k.TemplateDeliverableId?.ToString(), k.Name, k.Description, k.RequiresReview, k.Priority, k.EstimatedHours, k.DueOffsetDays, k.AssignToRole)),
+            Roles = p.Roles.Select(r => new TemplateRoleIn(r.Id.ToString(), r.TemplateDisciplineId is { } rd ? disc[rd] : null, r.RoleLabel, p.Milestones.FirstOrDefault(m => m.Id == r.StartMilestoneId)?.Id.ToString(), r.StartOffsetDays, p.Milestones.FirstOrDefault(m => m.Id == r.EndMilestoneId)?.Id.ToString(), r.EndOffsetDays, r.PlannedHours, r.Note)),
             Dependencies = p.Dependencies.Select(d => new DependencyIn(d.PredecessorTemplateTaskId.ToString(), d.SuccessorTemplateTaskId.ToString())),
         };
+        return await RolesEnabled(db) ? result : WithoutRoles(result);
     }
 
     // ---------- Editing a Draft (FR-001) ----------
@@ -228,6 +252,7 @@ public static class TemplateEndpoints
         await db.TemplateDesignBases.Where(x => x.TemplateId == id).ExecuteDeleteAsync(); // they reference the disciplines
         await db.TemplateDependencies.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
         await db.TemplateTasks.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
+        await db.TemplateRoles.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
         await db.TemplateDeliverables.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
         await db.TemplateMilestones.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
         await db.TemplateDisciplines.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
@@ -246,14 +271,15 @@ public static class TemplateEndpoints
         Guid NewRef(string r, string field)
         {
             Check.That(!string.IsNullOrWhiteSpace(r) && !refIds.ContainsKey(r), field, "template.bad_ref");
-            return refIds[r] = Guid.CreateVersion7();
+            return refIds[r] = Guid.TryParse(r, out var existing) ? existing : Guid.CreateVersion7();
         }
         var active = await db.Disciplines.Where(d => d.IsActive).Select(d => d.Id).ToListAsync();
         Check.That(body.Disciplines.Select(d => d.DisciplineId).Distinct().Count() == body.Disciplines.Length && body.Disciplines.All(d => active.Contains(d.DisciplineId)), "disciplines", "template.bad_discipline");
         var discRows = body.Disciplines.Select((d, i) => new TemplateDiscipline { Id = Guid.CreateVersion7(), TemplateId = id, DisciplineId = d.DisciplineId, IsDefaultIncluded = d.IsDefaultIncluded, SortOrder = i }).ToList();
         var byDiscipline = discRows.ToDictionary(d => d.DisciplineId, d => d.Id);
         Guid Disc(Guid disciplineId, string field) => byDiscipline.TryGetValue(disciplineId, out var x) ? x : throw ApiException.Invalid(field, "template.bad_discipline");
-        static int? Off(int? o, string field) { Check.That(o is null || Math.Abs(o.Value) <= MaxOffset, field, "template.offset"); return o; }
+        Guid? OptionalDisc(Guid? disciplineId, string field) => disciplineId is null ? null : Disc(disciplineId.Value, field);
+        static int? Off(int? o, string field) { Check.That(o is null || o.Value >= -MaxOffset && o.Value <= MaxOffset, field, "template.offset"); return o; }
 
         var phases = await db.Phases.Select(x => x.Id).ToListAsync();
         var milestones = body.Milestones.Select((m, i) =>
@@ -305,6 +331,34 @@ public static class TemplateEndpoints
         }).ToList();
         Check.That(deps.All(d => d.PredecessorTemplateTaskId != d.SuccessorTemplateTaskId) && deps.DistinctBy(d => (d.PredecessorTemplateTaskId, d.SuccessorTemplateTaskId)).Count() == deps.Count, "dependencies", "template.bad_dependency");
         Check.That(!HasCycle(deps), "dependencies", "template.cycle");
+        var rolesEnabled = await RolesEnabled(db);
+        var roles = (rolesEnabled ? body.Roles ?? [] : []).Select((r, i) =>
+        {
+            var discipline = OptionalDisc(r.DisciplineId, "roles");
+            var start = Ref(r.StartMilestoneRef, msIds, "roles");
+            var end = Ref(r.EndMilestoneRef, msIds, "roles");
+            Check.That(start != null && end != null, "roles", "template.role_anchors");
+            Check.That(r.StartOffsetDays is >= -MaxOffset and <= MaxOffset, "roles", "template.offset");
+            Check.That(r.EndOffsetDays is >= -MaxOffset and <= MaxOffset, "roles", "template.offset");
+            Check.That(r.Hours > 0 && r.Hours <= 10000, "roles", "template.role_hours");
+            return new TemplateRole { Id = NewRef(r.Ref, "roles"), TemplateId = id, TemplateDisciplineId = discipline,
+                RoleLabel = Check.Required(r.Label, "roles", 80), SortOrder = i, StartMilestoneId = start, StartOffsetDays = r.StartOffsetDays,
+                EndMilestoneId = end, EndOffsetDays = r.EndOffsetDays,
+                PlannedHours = r.Hours, Note = Check.Optional(r.Note, "roles", 2000) };
+        }).ToList();
+
+        if (!rolesEnabled || body.Roles is null)
+        {
+            var previous = await db.TemplateRoles.AsNoTracking().Where(x => x.TemplateId == id).OrderBy(x => x.SortOrder).ToListAsync();
+            var previousDisciplines = await db.TemplateDisciplines.AsNoTracking().Where(x => x.TemplateId == id).ToDictionaryAsync(x => x.Id, x => x.DisciplineId);
+            Check.That(previous.All(r => (r.TemplateDisciplineId is not { } d || previousDisciplines.TryGetValue(d, out var discipline) && byDiscipline.ContainsKey(discipline))
+                && (r.StartMilestoneId is null || msIds.Contains(r.StartMilestoneId.Value)) && (r.EndMilestoneId is null || msIds.Contains(r.EndMilestoneId.Value))), "roles", "template.roles_in_use");
+            roles = previous.Select((r, i) => new TemplateRole { Id = r.Id, TemplateId = id,
+                TemplateDisciplineId = r.TemplateDisciplineId is { } rd && previousDisciplines.TryGetValue(rd, out var discipline) && byDiscipline.TryGetValue(discipline, out var mapped) ? mapped : null,
+                RoleLabel = r.RoleLabel, SortOrder = i, StartMilestoneId = r.StartMilestoneId, StartOffsetDays = r.StartOffsetDays,
+                EndMilestoneId = r.EndMilestoneId, EndOffsetDays = r.EndOffsetDays,
+                PlannedHours = r.PlannedHours, Note = r.Note }).ToList();
+        }
 
         // Basis suggestions move to their discipline's new row. Removing a discipline that still has suggestions is refused
         // until they are removed, so a save never drops one silently; one added meanwhile moves the version, refusing this save.
@@ -328,6 +382,7 @@ public static class TemplateEndpoints
             db.TemplateDeliverables.AddRange(deliverables);
             db.TemplateTasks.AddRange(tasks);
             db.TemplateDependencies.AddRange(deps);
+            db.TemplateRoles.AddRange(roles);
             db.TemplateDesignBases.AddRange(basis);
             t.UpdatedAt = DateTimeOffset.UtcNow; // the header carries the draft's version even when only children changed
             db.Audit.Note(t, action: "StructureSaved");
@@ -380,6 +435,11 @@ public static class TemplateEndpoints
                 EstimatedHours = k.EstimatedHours, DueOffsetDays = k.DueOffsetDays, AssignToRole = k.AssignToRole, SortOrder = k.SortOrder }).ToList());
             db.TemplateDependencies.AddRange(p.Dependencies.Select(d => new TemplateDependency { Id = Guid.CreateVersion7(), TemplateId = draft.Id,
                 PredecessorTemplateTaskId = map[d.PredecessorTemplateTaskId], SuccessorTemplateTaskId = map[d.SuccessorTemplateTaskId] }).ToList());
+            db.TemplateRoles.AddRange(p.Roles.Select(r => new TemplateRole { Id = N(r.Id), TemplateId = draft.Id,
+                TemplateDisciplineId = r.TemplateDisciplineId is { } rd ? map[rd] : null, RoleLabel = r.RoleLabel, SortOrder = r.SortOrder,
+                StartMilestoneId = r.StartMilestoneId is { } sm ? map[sm] : null, StartOffsetDays = r.StartOffsetDays,
+                EndMilestoneId = r.EndMilestoneId is { } em ? map[em] : null,
+                EndOffsetDays = r.EndOffsetDays, PlannedHours = r.PlannedHours, Note = r.Note }).ToList());
             db.TemplateDesignBases.AddRange(basis.Select(b => new TemplateDesignBasis { Id = Guid.CreateVersion7(), TemplateId = draft.Id,
                 TemplateDisciplineId = map[b.TemplateDisciplineId], Kind = b.Kind, Title = b.Title, Scope = b.Scope, Statement = b.Statement,
                 NumericValue = b.NumericValue, Units = b.Units, SourceSystem = b.SourceSystem, StableSourceId = b.StableSourceId,
@@ -584,6 +644,21 @@ public sealed class TemplateHook(HubDb db, TeamService team, CurrentUser me, Tim
             }
         var plan = TemplatePlanner.Plan(snap, p.StartDate, typed, pds.Keys.ToHashSet(), await TemplateEndpoints.Calendar(db, store, t, p.OfficeId));
         var created = await TemplateEndpoints.Instantiate(db, team, p, parts, plan, pds, null, me.Id, clock.GetUtcNow(), createMilestones: true);
+        if ((await store.Get(db)).IsFlagOn("template_roles"))
+        {
+            var calendarFactory = await OpenRoleEndpoints.Calendars(db, [p.Id]);
+            var rolePlan = TemplateRolePlanner.Plan(parts.Roles.Select(r => new TplRole(r.Id, r.RoleLabel, r.TemplateDisciplineId, r.StartMilestoneId,
+                r.StartOffsetDays, r.EndMilestoneId, r.EndOffsetDays, r.PlannedHours, r.Note)),
+                plan.Milestones.ToDictionary(m => m.Id, m => m.Date), pds.Keys.ToHashSet(), await TemplateEndpoints.Calendar(db, store, t, p.OfficeId) is null ? "CalendarDays" : "WorkingDays", calendarFactory(p.Id));
+            foreach (var role in rolePlan.Where(x => x.SkipReason is null))
+            {
+                var disciplineId = role.DisciplineId is { } discipline ? pds[discipline].Id : (Guid?)null;
+                var open = new OpenRole { ProjectId = p.Id, ProjectDisciplineId = disciplineId, RoleLabel = role.Label,
+                    FromDate = role.From!.Value, ThroughDate = role.Through!.Value, PlannedHours = role.Hours, Note = role.Note };
+                db.OpenRoles.Add(open);
+                db.Audit.Note(open, action: "Created", reason: "TemplateRole");
+            }
+        }
         var basisSuggestions = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == t.Id).ToListAsync();
         if (basisSuggestions.Count > 0)
         {

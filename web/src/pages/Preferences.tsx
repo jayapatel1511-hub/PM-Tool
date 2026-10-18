@@ -10,9 +10,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { SaveStatus } from '@/components/hub/fields'
-import { del, get, put } from '@/lib/api'
+import { del, get, post, put } from '@/lib/api'
 import { t } from '@/lib/i18n'
-import { socialSignInError, useMe } from '@/lib/auth'
+import { socialSignInError, useFlag, useMe } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { FollowLevelSelect } from './projects/Follow'
 
@@ -52,6 +52,7 @@ export function PreferencesPage() {
   return (
     <Page {...header}>
       <div className="flex w-full max-w-[760px] flex-col gap-6">
+        <OnboardingPreference />{me.settings.routeCounterEnabled && <p className="text-sm text-muted-foreground">{t('onboarding.counterNotice')}</p>}
         {err != null && <ErrorBanner error={err} />}
         {signInConfig.data?.authMode === 'Social' && <Section title={t('auth.signInMethods')} id="sign-in-methods">
           <div className="space-y-3 px-5 py-4">
@@ -186,4 +187,17 @@ export function PreferencesPage() {
       </div>
     </Page>
   )
+}
+
+function OnboardingPreference() {
+  const enabled = useFlag('onboarding_card')
+  const q = useQuery({ queryKey: ['onboarding'], enabled, queryFn: () => get<{ hidden: boolean }>('me/onboarding') })
+  const qc = useQueryClient()
+  if (!enabled || q.isPending || q.isError || !q.data?.hidden) return null
+  return <Section title={t('onboarding.title')} id="getting-started">
+    <div className="flex items-center justify-between gap-4 px-5 py-4 text-sm">
+      <span>{t('onboarding.restoreHint')}</span>
+      <Button variant="outline" onClick={() => void post('me/onboarding/show').then(() => qc.invalidateQueries({ queryKey: ['onboarding'] }))}>{t('onboarding.restore')}</Button>
+    </div>
+  </Section>
 }

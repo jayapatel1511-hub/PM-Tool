@@ -6,6 +6,13 @@ namespace Hub.Api.Features;
 
 public static class PersonCapacity
 {
+    internal static decimal Normal(PersonSchedule? schedule, DateOnly date, decimal fallback, bool weekdayHours)
+    {
+        if (weekdayHours && schedule?.WeekdayHours is { Length: 7 } hours) return hours[(int)date.DayOfWeek];
+        var days = schedule?.WorkingDays ?? [1, 2, 3, 4, 5];
+        return days.Length > 0 && days.Contains((int)date.DayOfWeek) ? (schedule?.WeeklyHours ?? fallback) / days.Length : 0;
+    }
+
     public sealed record Day(decimal Normal, decimal Available, decimal Holiday, decimal Leave, decimal Additional, bool Provisional);
 
     public static async Task<Dictionary<(Guid, DateOnly), Day>> Load(HubDb db, Guid[] people, DateOnly from, DateOnly through, OrgSettings settings)
@@ -21,8 +28,7 @@ public static class PersonCapacity
         for (var date = from; date <= through; date = date.AddDays(1))
         {
             var schedule = schedules.FirstOrDefault(s => s.PersonId == user.Id && s.FromDate <= date);
-            var days = schedule?.WorkingDays ?? [1, 2, 3, 4, 5];
-            var normal = days.Contains((int)date.DayOfWeek) ? (schedule?.WeeklyHours ?? user.WeeklyCapacityHours ?? settings.DefaultWeeklyCapacityHours) / days.Length : 0;
+            var normal = Normal(schedule, date, user.WeeklyCapacityHours ?? settings.DefaultWeeklyCapacityHours, settings.IsFlagOn("capacity_polish"));
             var holiday = holidays.Any(h => h.Date == date && (h.OfficeId == null || h.OfficeId == user.OfficeId));
             var value = overrides.GetValueOrDefault((user.Id, date));
             var baseline = holiday ? 0 : normal;
@@ -44,8 +50,9 @@ public static class PersonCapacity
         var users = await db.Users.AsNoTracking().Where(u => people.Contains(u.Id)).ToListAsync();
         var schedules = await db.PersonSchedules.AsNoTracking().Where(s => people.Contains(s.PersonId) && s.FromDate <= through).OrderByDescending(s => s.FromDate).ToListAsync();
         var holidays = await db.Holidays.AsNoTracking().ToListAsync();
+        var weekdayHours = await db.Settings.AnyAsync(s => s.Key == "flag.capacity_polish" && s.Value == "true");
         return users.ToDictionary(u => u.Id, u => new WorkCalendar(holidays.Where(h => h.OfficeId == null || h.OfficeId == u.OfficeId).Select(h => h.Date),
-            date => (schedules.FirstOrDefault(s => s.PersonId == u.Id && s.FromDate <= date)?.WorkingDays ?? [1, 2, 3, 4, 5]).Contains((int)date.DayOfWeek)));
+            date => { var schedule = schedules.FirstOrDefault(s => s.PersonId == u.Id && s.FromDate <= date); return weekdayHours && schedule?.WeekdayHours is { Length: 7 } hours ? hours[(int)date.DayOfWeek] > 0 : (schedule?.WorkingDays ?? [1, 2, 3, 4, 5]).Contains((int)date.DayOfWeek); }));
     }
 
     internal static async Task LockPeople(HubDb db, IEnumerable<Guid> people)

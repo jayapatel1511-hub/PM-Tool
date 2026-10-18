@@ -9,10 +9,14 @@ const pid = id(1), consumer = id(2), lead = id(3), civil = id(4), task = id(7), 
 const coordinationUses = Array.from({ length: 5 }, (_, n) => ({ id: id(600 + n), targetType: 'Task', targetId: id(610 + n), sourceRevisionId: id(620 + n), targetKey: `P-DEMO-T${String(n + 1).padStart(3, '0')}`, targetName: `Coordination target ${n + 1}`, sourceKey: `P-DEMO-B${String(n + 1).padStart(3, '0')}`, sourceUrl: `https://example.test/source/${n + 1}`, revision: `R${n + 1}`, intendedUse: `Input use ${n + 1}` }));
 let who = 'consumer', needsReason = false;
 const actor = () => (who === 'consumer' ? consumer : lead);
+// FR-FIG-08: the project flags the server computes for a Team Member (refused) and the Civil Discipline Lead.
+const pmOrDl = { ok: false, reason: 'Only the Project Manager or the Discipline Lead can do this.' }, pmOnly = { ok: false, reason: 'Only the Project Manager can do this.' };
+const flags = (member) => ({ proposeAllocation: member ? pmOrDl : { ok: true }, snooze: member ? pmOrDl : { ok: true }, manageExternalParties: pmOnly,
+  reviewDates: member ? pmOrDl : { ok: true }, captureWeeklyPlan: pmOrDl, createSubmission: member ? pmOrDl : { ok: true } });
 const project = () => ({ id: pid, projectNumber: 'P-DEMO', name: 'Basis checks', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1, links: [], starred: false,
   disciplines: [{ id: civil, disciplineId: id(5), name: 'Civil', code: 'CIV', colour: '#2563eb', leadUserId: lead, isActive: true, leadName: 'Marc Lead' }],
   myRoles: who === 'consumer' ? ['TeamMember'] : ['DisciplineLead'], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] },
-  permissions: { raiseRegister: { ok: false }, edit: { ok: false }, healthOverride: { ok: false }, isPm: false, leadOf: who === 'consumer' ? [] : [civil], createTaskIn: [civil], createDeliverableIn: [civil], transitions: [], needsReason } });
+  permissions: { raiseRegister: { ok: false }, edit: { ok: false }, healthOverride: { ok: false }, ...flags(who === 'consumer'), isPm: false, leadOf: who === 'consumer' ? [] : [civil], createTaskIn: [civil], createDeliverableIn: [civil], createBasisIn: [civil], assignBasisIn: [civil], transitions: [], needsReason } });
 const me = () => ({ id: actor(), displayName: who, email: `${who}@hub.test`, roles: [], systemRoles: [], capabilities: { createProject: false, createTask: true, portfolio: false, workload: false, staff: false, admin: false, templates: false, readOnly: false, directReports: 0 },
   settings: { coordinationLookaheadWeeks: 6, today: '2026-10-01', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 }, preferences: { denseRows: true, digestEnabled: true } });
 const options = () => ({ actorId: actor(), canWrite: true, manageDisciplineIds: who === 'consumer' ? [] : [civil], people: [{ id: consumer, displayName: 'Alex Consumer' }, { id: lead, displayName: 'Marc Lead' }],

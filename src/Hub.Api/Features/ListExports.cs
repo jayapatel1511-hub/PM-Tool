@@ -135,7 +135,7 @@ public static class ListExportEndpoints
             var s = await store.Get(db);
             var f = TaskFilter.From(http.Request.Query);
             var q = TaskQueries.Sort(TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id), f, me.Id, clock.Today(s), s), f.Sort).Take(Export.MaxRows + 1);
-            var rows = Indicators(Json(await TaskQueries.Rows(db, q)));
+            var rows = Indicators(Json(await TaskQueries.Rows(db, q, access.Actor)));
             return await ExportFile.Send(db, store, format, Text.Get("export.tasks", p.ProjectNumber), TaskCols, rows, await Filters(db, http, access), p.Id, $"{p.ProjectNumber}-tasks", clock);
         });
         api.MapGet("/projects/{id:guid}/deliverables/export", async (Guid id, string? format, [AsParameters] DeliverableEndpoints.DeliverableQuery f, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>

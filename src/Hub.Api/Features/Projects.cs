@@ -295,8 +295,17 @@ public static class ProjectEndpoints
                 RunCoordination = Perm(Permissions.RunCoordination(a, ctx), p.Status),
                 CreateEvent = Perm(Permissions.CreateProjectEvent(a, ctx), p.Status),
                 EnterTime = Perm(Permissions.EnterTime(a, ctx), p.Status),
+                // FR-FIG-08 decisions 1, 2, 3, 5, 6, 9 and 10: each flag is the function its endpoint enforces.
+                ProposeAllocation = Perm(Permissions.ProposeAllocation(a, ctx), p.Status),
+                Snooze = Perm(Permissions.Snooze(a, ctx), p.Status),
+                ManageExternalParties = Perm(Permissions.ManageExternalParties(a, ctx), p.Status),
+                ReviewDates = Perm(Permissions.ReviewDates(a, ctx), p.Status),
+                CaptureWeeklyPlan = Perm(Permissions.ManageCoordination(a, ctx, Guid.Empty), p.Status),
+                CreateSubmission = Perm(Permissions.CreateSubmission(a, ctx), p.Status),
                 CreateTaskIn = disciplines.Where(d => d.IsActive && Permissions.CreateTask(a, ctx, d.Id)).Select(d => d.Id),
                 CreateDeliverableIn = disciplines.Where(d => d.IsActive && Permissions.CreateDeliverable(a, ctx, d.Id)).Select(d => d.Id),
+                CreateBasisIn = disciplines.Where(d => d.IsActive && Permissions.CreateBasis(a, ctx, d.Id, a.Id, null).Ok).Select(d => d.Id),
+                AssignBasisIn = disciplines.Where(d => d.IsActive && (Permissions.IsPM(a, ctx) || Permissions.IsDL(ctx, d.Id))).Select(d => d.Id),
                 LeadOf = ctx.LeadDisciplineIds,
                 IsPm = Permissions.IsPM(a, ctx),
                 Transitions = Workflow.ProjectNext(p.Status).Where(to => Permissions.ChangeProjectStatus(a, ctx, to).Ok),
@@ -305,15 +314,18 @@ public static class ProjectEndpoints
                 NeedsReason = ProjectStatus.NeedsCorrectionReason(p.Status),
             }, s.IsFlagOn(RecoveryEndpoints.Flag) ? Perm(Permissions.RestoreItem(a, ctx), p.Status) : null),
         };
-        if (!s.IsFlagOn("schedule_baseline")) return result;
-        var latest = Evaluator.LatestPlanned(p.Status, p.TargetCompletionDate,
-            milestones.Select(m => new DateItem(m.Id, m.Key, null, m.Date, m.IsComplete))
-                .Concat(await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id)
-                    .Select(d => new DateItem(d.Id, d.Key, d.StartDate, d.DueDate,
-                        d.Status == DeliverableStatus.Issued || d.Status == DeliverableStatus.Accepted || d.Status == DeliverableStatus.Cancelled)).ToListAsync()));
-        if (latest is null) return result;
+        if (!s.IsFlagOn("schedule_baseline") && !s.IsFlagOn("project_status_note")) return result;
         var json = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
-        json["latestPlanned"] = JsonSerializer.SerializeToNode(latest, JsonOpts.Web);
+        if (s.IsFlagOn("project_status_note")) json["statusNote"] = await ProjectStatusNote.Read(p, db, clock);
+        if (s.IsFlagOn("schedule_baseline"))
+        {
+            var latest = Evaluator.LatestPlanned(p.Status, p.TargetCompletionDate,
+                milestones.Select(m => new DateItem(m.Id, m.Key, null, m.Date, m.IsComplete))
+                    .Concat(await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id)
+                        .Select(d => new DateItem(d.Id, d.Key, d.StartDate, d.DueDate,
+                            d.Status == DeliverableStatus.Issued || d.Status == DeliverableStatus.Accepted || d.Status == DeliverableStatus.Cancelled)).ToListAsync()));
+            if (latest is not null) json["latestPlanned"] = JsonSerializer.SerializeToNode(latest, JsonOpts.Web);
+        }
         return json;
     }
 
@@ -333,7 +345,7 @@ public static class ProjectEndpoints
 
     // ---------- Edit (FR-003, P-07, FR-016) ----------
 
-    static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store)
+    static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock)
     {
         var (p, ctx) = await access.Project(id);
         var patch = new Patch(body);
@@ -350,6 +362,10 @@ public static class ProjectEndpoints
             Check.That(Regex.IsMatch(number, s.ProjectNumberFormat), "projectNumber", "project.number_format");
             if (number != p.ProjectNumber && await db.Projects.AnyAsync(x => x.ProjectNumber == number && x.Id != p.Id)) throw ApiException.Conflict("duplicate_project_number", "project.duplicate_simple");
             p.ProjectNumber = number;
+        }
+        if (s.IsFlagOn("project_status_note") && patch.Has("statusNote")) {
+            var note = Check.Optional(patch.Str("statusNote"), "statusNote", 500);
+            if (p.StatusNote != note) { p.StatusNote = note; p.StatusNoteBy = note == null ? null : access.Actor.Id; p.StatusNoteAt = note == null ? null : clock.GetUtcNow(); }
         }
         if (patch.Has("name")) p.Name = Check.Required(patch.Str("name"), "name", 200);
         if (patch.Has("clientId")) { var c = patch.Id("clientId") ?? throw ApiException.Invalid("clientId", "error.required"); Check.That(await db.Clients.AnyAsync(x => x.Id == c), "clientId", "error.not_found"); p.ClientId = c; }
@@ -412,7 +428,8 @@ public static class ProjectEndpoints
     /// listed once they have moved, or 30 days after the resume.
     static async Task<object> DateReview(Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
-        var (p, _) = await access.Project(id, track: false);
+        var (p, ctx) = await access.Project(id, track: false);
+        Access.Demand(Permissions.ReviewDates(access.Actor, ctx));
         var s = await store.Get(db);
         var today = clock.Today(s);
         const string resumed = """[{"field": "Status", "old": "On Hold", "new": "Active"}]""", held = """[{"field": "Status", "new": "On Hold"}]""";
@@ -425,7 +442,7 @@ public static class ProjectEndpoints
             return new { Window = (object?)null, Tasks = new List<object>(), Deliverables = new List<object>() };
         var (start, end) = (Clock.LocalDate(heldAt, s), Clock.LocalDate(resumedAt, s));
         var tasks = await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled
-            && t.DueDate >= start && t.DueDate <= end));
+            && t.DueDate >= start && t.DueDate <= end), access.Actor);
         var deliverables = await DeliverableEndpoints.Rows(db, db.Deliverables.AsNoTracking().Where(d => d.ProjectId == id && d.Status != DeliverableStatus.Issued
             && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled && d.DueDate >= start && d.DueDate <= end));
         return new { Window = new { HeldFrom = start, ResumedOn = end, Days = end.DayNumber - start.DayNumber }, Tasks = tasks, Deliverables = deliverables };

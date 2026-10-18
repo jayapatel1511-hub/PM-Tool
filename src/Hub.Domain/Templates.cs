@@ -19,6 +19,43 @@ public sealed record TemplatePlan(IReadOnlyList<PlannedMilestone> Milestones, IR
     public int UndatedTasks => Tasks.Count(t => t.Due is null);
 }
 
+public sealed record TplRole(Guid Id, string Label, Guid? DisciplineId, Guid? StartMilestoneId, int StartOffsetDays,
+    Guid? EndMilestoneId, int EndOffsetDays, decimal Hours, string? Note);
+public sealed record PlannedRole(Guid Id, string Label, Guid? DisciplineId, DateOnly? From, DateOnly? Through, decimal Hours, string? Note, string? SkipReason);
+
+/// Role dates use the same anchor and day-kind contract as template milestones. A skipped role is
+/// returned with a reason so the wizard can explain it without making project creation fail.
+public static class TemplateRolePlanner
+{
+    const string CalendarDays = "CalendarDays";
+    const string WorkingDays = "WorkingDays";
+    public static IReadOnlyList<PlannedRole> Plan(IEnumerable<TplRole> roles, IReadOnlyDictionary<Guid, DateOnly?> milestones,
+        IReadOnlySet<Guid> disciplines, WorkCalendar? calendar = null) => Plan(roles, milestones, disciplines, CalendarDays, calendar);
+
+    public static IReadOnlyList<PlannedRole> Plan(IEnumerable<TplRole> roles, IReadOnlyDictionary<Guid, DateOnly?> milestones,
+        IReadOnlySet<Guid> disciplines, string offsetDayKind, WorkCalendar? calendar = null)
+    {
+        DateOnly? Shift(DateOnly? date, int days) =>
+            date is null ? null : offsetDayKind == WorkingDays ? (calendar ?? WorkCalendar.Weekdays).Add(date.Value, days) : date.Value.AddDays(days);
+        return roles.Select(role =>
+        {
+            if (role.DisciplineId is { } discipline && !disciplines.Contains(discipline)) return new PlannedRole(role.Id, role.Label, role.DisciplineId, null, null, role.Hours, role.Note, "discipline_not_selected");
+            if (!milestones.TryGetValue(role.StartMilestoneId ?? Guid.Empty, out var start) || start is null)
+                return new PlannedRole(role.Id, role.Label, role.DisciplineId, null, null, role.Hours, role.Note, "start_milestone_undated");
+            if (!milestones.TryGetValue(role.EndMilestoneId ?? Guid.Empty, out var end) || end is null)
+                return new PlannedRole(role.Id, role.Label, role.DisciplineId, null, null, role.Hours, role.Note, "end_milestone_undated");
+            var from = Shift(start, role.StartOffsetDays);
+            var through = Shift(end, role.EndOffsetDays);
+            if (from is null || through is null) return new PlannedRole(role.Id, role.Label, role.DisciplineId, from, through, role.Hours, role.Note, "anchor_milestone_undated");
+            if (through < from) return new PlannedRole(role.Id, role.Label, role.DisciplineId, from, through, role.Hours, role.Note, "through_before_from");
+            if (through.Value.DayNumber - from.Value.DayNumber > 366) return new PlannedRole(role.Id, role.Label, role.DisciplineId, from, through, role.Hours, role.Note, "range_over_366_days");
+            if (!(calendar ?? WorkCalendar.Weekdays).WorkingDays(from.Value, through.Value).Any())
+                return new PlannedRole(role.Id, role.Label, role.DisciplineId, from, through, role.Hours, role.Note, "no_working_day");
+            return new PlannedRole(role.Id, role.Label, role.DisciplineId, from, through, role.Hours, role.Note, null);
+        }).ToList();
+    }
+}
+
 /// Instantiation dates (§12.14 steps 2, 3 and 6). A typed date wins; a milestone explicitly left blank stays undated;
 /// otherwise its anchor and offset decide (project start, or the milestone before it). A deliverable is due its target
 /// milestone's date plus its offset; a task its deliverable's due date plus its offset, or the project start plus its

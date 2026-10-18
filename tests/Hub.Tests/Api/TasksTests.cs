@@ -11,6 +11,40 @@ public sealed class TasksTests(HubFactory f)
 {
     readonly TestData d = new(f);
 
+    [Fact] // AC-FIG-10, AC-FIG-11
+    public async Task Task_row_flags_match_assign_edit_and_due_permissions()
+    {
+        var p = await d.Project();
+        var t = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex), dueDate = "2026-10-30" });
+        foreach (var who in new[] { TestData.Pm, TestData.Marc, TestData.Alex, TestData.Diane, TestData.Rita, TestData.Sam })
+        {
+            var list = await (await f.As(who).GetAsync($"/api/v1/projects/{p.Id}/tasks?pageSize=200")).Json();
+            var row = list["items"]!.AsArray().Single(x => x!["id"]!.GetValue<Guid>() == t.G("id"));
+            var can = row["can"]!;
+            var detail = await (await f.As(who).GetAsync($"/api/v1/tasks/{t.G("id")}")).Json();
+            var permissions = detail["permissions"]!;
+            Assert.Equal(permissions["assign"]!["ok"]!.GetValue<bool>(), can["assign"]!.GetValue<bool>());
+            Assert.Equal(permissions["edit"]!["ok"]!.GetValue<bool>(), can["edit"]!.GetValue<bool>());
+            Assert.Equal(permissions["dueDate"]!["ok"]!.GetValue<bool>(), can["changeDue"]!.GetValue<bool>());
+        }
+    }
+
+    [Fact] // AC-FIG-10, AC-FIG-11
+    public async Task Unassigned_task_creator_edit_window_matches_list_and_detail()
+    {
+        var p = await d.Project(); var task = await d.NewTask(p.Id, TestData.Alex); var alex = f.As(TestData.Alex);
+        async Task AssertEdit(bool expected)
+        {
+            var detail = await (await alex.GetAsync($"/api/v1/tasks/{task.G("id")}")).Json();
+            var row = (await (await alex.GetAsync($"/api/v1/projects/{p.Id}/tasks?pageSize=200")).Json())["items"]!.AsArray().Single(x => x!.G("id") == task.G("id"))!;
+            Assert.Equal(expected, detail["permissions"]!["edit"]!["ok"]!.GetValue<bool>());
+            Assert.Equal(expected, row["can"]!["edit"]!.GetValue<bool>());
+        }
+        await AssertEdit(true);
+        await f.DbAsync(async db => { db.Comments.Add(new Hub.Api.Data.Comment { ItemType = ItemType.Task, ItemId = task.G("id"), ProjectId = p.Id, AuthorId = d.User(TestData.Pm), Body = "Another person acted", CreatedAt = f.Clock.GetUtcNow() }); return await db.SaveChangesAsync(); });
+        await AssertEdit(false);
+    }
+
     [Fact]
     public async Task Same_status_transition_still_requires_authority()
     {

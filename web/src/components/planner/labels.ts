@@ -20,10 +20,14 @@ export type PlannerPerson = {
   officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null
   /** This person has planned work on projects the viewer cannot see (AC-PLN-12), so their totals are partial. */
   partial?: boolean
+  /** §45.7 (flag.planner_kept_rows): returned only because the viewer just edited it; it no longer matches the filters. */
+  kept?: boolean
   canCreateSelfEntry: boolean; canCreateManagerEntry: boolean; canRecordTimeAway: boolean; indicators: string[]
   cells: PlannerCell[]; entries: PlannerEntry[]; approvedAllocations: ApprovedAllocation[]
+  taskContexts?: { projectId: string; projectNumber: string; projectName: string; weeks: { week: string; hours: number; unestimatedTasks: number }[] }[]
 }
-export type PlannerGridData = { weeks: string[]; currentWeek: string; evaluatedAt?: string; partialView: boolean; draftAccess: boolean; settings: { horizonWeeks: number; overPct: number; underPct: number; underWeeks: number; staleDays: number; maxHoursPerWeek: number }; people: PlannerPerson[] }
+export type UnfilledRole = { id: string; projectId: string; projectNumber?: string; projectName: string; roleLabel: string; disciplineName?: string | null; plannedHours: number; canFill: boolean; fillPath: string; cells: { week: string; hours: number }[] }
+export type PlannerGridData = { weeks: string[]; currentWeek: string; evaluatedAt?: string; partialView: boolean; draftAccess: boolean; settings: { horizonWeeks: number; overPct: number; underPct: number; underWeeks: number; staleDays: number; maxHoursPerWeek: number }; people: PlannerPerson[]; unfilledRoles?: UnfilledRole[] }
 
 export const CONFIDENCE_KEYS: Record<string, string> = { Confirmed: 'planner.confidence.confirmed', Expected: 'planner.confidence.expected', Possible: 'planner.confidence.possible' }
 export const VISIBILITY_KEYS: Record<string, string> = { Draft: 'planner.visibility.privateDraft', Published: 'planner.visibility.proposed', Confirmed: 'planner.visibility.confirmedAssignment', Self: 'planner.visibility.selfEntered' }

@@ -29,6 +29,49 @@ public sealed class PlanningApiTests(HubFactory f)
         })).Json(201);
 
     [Fact]
+    public async Task Capacity_polish_contexts_reconcile_project_plans_and_task_estimates_without_changing_capacity() // packet 047 AC-PRO-20
+    {
+        var person = await FreshReport();
+        var p = await d.Project();
+        var q = await d.Project();
+        await d.NewTask(p.Id, TestData.Pm, new { assigneeId = person, estimatedHours = 10m, dueDate = Week.AddDays(4) });
+        await d.NewTask(q.Id, TestData.Pm, new { assigneeId = person, estimatedHours = 4m, dueDate = Week.AddDays(4) });
+        var entry = await (await f.As(TestData.Sam).Post("/api/v1/planning/entries", new
+        {
+            personId = person, projectId = p.Id, hoursPerWeek = 8m, startWeek = Week, endWeek = Week,
+            label = "Planned P work", sourceCategory = PlanningSource.Proposal, confidence = PlanningConfidence.Expected,
+        })).Json(201);
+        try
+        {
+            await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.capacity_polish", new { value = false });
+            var off = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/cells/{person}/{Week:yyyy-MM-dd}")).Json();
+            var offGrid = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/grid?personId={person}&from={Week:yyyy-MM-dd}&weeks=1")).Json();
+            Assert.False(off.AsObject().ContainsKey("projectContexts"));
+            Assert.False(offGrid["people"]![0]!.AsObject().ContainsKey("taskContexts"));
+            await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.capacity_polish", new { value = true });
+            var on = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/cells/{person}/{Week:yyyy-MM-dd}")).Json();
+            var onGrid = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/grid?personId={person}&from={Week:yyyy-MM-dd}&weeks=1")).Json();
+            Assert.Equal(off["remaining"]!.GetValue<decimal>(), on["remaining"]!.GetValue<decimal>());
+            Assert.Equal(off["bands"]!.ToJsonString(), on["bands"]!.ToJsonString());
+            var contexts = on["projectContexts"]!.AsArray();
+            var pContext = contexts.Single(x => x!.G("projectId") == p.Id);
+            var qContext = contexts.Single(x => x!.G("projectId") == q.Id);
+            Assert.Equal(8m, pContext["plannedHours"]!.GetValue<decimal>());
+            Assert.Equal(10m, pContext["taskEstimates"]!.GetValue<decimal>());
+            Assert.Equal(0m, qContext["plannedHours"]!.GetValue<decimal>());
+            Assert.Equal(4m, qContext["taskEstimates"]!.GetValue<decimal>());
+            Assert.Equal(14m, contexts.Sum(x => x!["taskEstimates"]!.GetValue<decimal>()));
+            var taskContexts = onGrid["people"]![0]!["taskContexts"]!.AsArray();
+            Assert.Contains(taskContexts, x => x!.G("projectId") == p.Id);
+            Assert.Contains(taskContexts, x => x!.G("projectId") == q.Id);
+            Assert.Equal(entry.G("projectId"), pContext.G("projectId"));
+            var filtered = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/grid?personId={person}&projectId={q.Id}&from={Week:yyyy-MM-dd}&weeks=1")).Json();
+            Assert.Contains(filtered["people"]!.AsArray(), row => row!.G("id") == person);
+        }
+        finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.capacity_polish", new { value = false }); }
+    }
+
+    [Fact]
     public async Task Create_quick_add_and_list_return_weekly_entry_contract()
     {
         var alex = await FreshReport();
@@ -230,6 +273,84 @@ public sealed class PlanningApiTests(HubFactory f)
         Assert.DoesNotContain(project.ProjectNumber, Row(samLoad).ToJsonString());
         var adminLoad = Row(await (await f.As(TestData.Admin).GetAsync(workload)).Json());
         Assert.Equal((false, 20m), (adminLoad["partialScope"]!.GetValue<bool>(), adminLoad["cells"]![0]!["uncommitted"]!.GetValue<decimal>()));
+    }
+
+    async Task KeptRowsFlag(bool on) => await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.planner_kept_rows", new { value = on }).Result.Json();
+
+    [Fact]
+    public async Task Projects_grid_open_roles_are_opt_in_and_do_not_change_people_or_exports() // packet 047 AC-PRO-12
+    {
+        var project = await d.Project();
+        var role = await (await f.As(TestData.Pm).Post($"/api/v1/projects/{project.Id}/open-roles",
+            new { roleLabel = "Civil reviewer", fromDate = Week, throughDate = Week.AddDays(4), plannedHours = 10m })).Json(201);
+        var route = $"/api/v1/planning/grid?from={Week:yyyy-MM-dd}&weeks=1&includeOpenRoles=true";
+        var exportRoute = $"/api/v1/planning/grid/export?format=csv&from={Week:yyyy-MM-dd}&weeks=1&includeOpenRoles=true";
+        try
+        {
+            await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.unfilled_beside_capacity", new { value = false });
+            var off = await (await f.As(TestData.Pm).GetAsync(route)).Json();
+            Assert.False(off.AsObject().ContainsKey("unfilledRoles"));
+            await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.unfilled_beside_capacity", new { value = true });
+            var on = await (await f.As(TestData.Pm).GetAsync(route)).Json();
+            Assert.Equal(off["people"]!.ToJsonString(), on["people"]!.ToJsonString());
+            var row = on["unfilledRoles"]!.AsArray().Single(x => x!.G("id") == role.G("id"));
+            Assert.Equal(10m, row["plannedHours"]!.GetValue<decimal>());
+            Assert.DoesNotContain("unfilledRoles", await (await f.As(TestData.Pm).GetAsync(exportRoute)).Content.ReadAsStringAsync());
+        }
+        finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.unfilled_beside_capacity", new { value = false }); }
+    }
+
+    /// Jill's only Proposal entry, changed to Training, under a Proposal filter (AC-FIG-12).
+    async Task<(Guid Jill, Guid Entry, string Route)> MovedOutOfFilter()
+    {
+        var jill = await FreshReport();
+        var entry = (await CreateDraft(jill)).G("id");
+        await f.DbAsync(async db => { (await db.PlanningEntries.SingleAsync(e => e.Id == entry)).SourceCategory = PlanningSource.Training; return await db.SaveChangesAsync(); });
+        return (jill, entry, $"/api/v1/planning/grid?supervisorId={d.User(TestData.Sam)}&source={PlanningSource.Proposal}&from={Week:yyyy-MM-dd}&weeks=1");
+    }
+
+    [Fact, Trait("flag-on", "planner_kept_rows")]
+    public async Task Kept_entries_and_rows_survive_filters_inside_visibility() // packet 041 AC-FIG-12, FR-FIG-13
+    {
+        await KeptRowsFlag(true);
+        try
+        {
+            var (jill, entry, route) = await MovedOutOfFilter();
+            JsonNode? Row(JsonNode body) => body["people"]!.AsArray().SingleOrDefault(p => p!.G("id") == jill);
+            var plain = await (await f.As(TestData.Sam).GetAsync(route)).Json();
+            Assert.Null(Row(plain)); Assert.DoesNotContain("\"kept\"", plain.ToJsonString()); // without keep: today's people and fields
+            foreach (var keep in new[] { entry, jill })
+            {
+                var kept = Row(await (await f.As(TestData.Sam).GetAsync($"{route}&keep={keep}")).Json())!;
+                Assert.True(kept["kept"]!.GetValue<bool>());
+                var keptEntry = kept["entries"]!.AsArray().Single(e => e!.G("id") == entry)!;
+                Assert.False(keptEntry["matchesFilter"]!.GetValue<bool>());
+            }
+            // A kept id the viewer cannot see changes nothing: an Admin's private draft for Jill.
+            var hidden = (await (await f.As(TestData.Admin).Post("/api/v1/planning/entries", new { personId = jill, hoursPerWeek = 4m, startWeek = Week, endWeek = Week,
+                label = "Admin private draft", sourceCategory = PlanningSource.Training })).Json(201)).G("id");
+            Assert.Null(Row(await (await f.As(TestData.Sam).GetAsync($"{route}&keep={hidden}")).Json()));
+            Assert.Null(Row(await (await f.As(TestData.Sam).GetAsync($"{route}&keep={Guid.NewGuid()}")).Json()));
+            // At most 50 ids; exports ignore keep.
+            var tooMany = string.Join(',', Enumerable.Range(0, 51).Select(_ => Guid.NewGuid()));
+            Assert.Equal(HttpStatusCode.BadRequest, (await f.As(TestData.Sam).GetAsync($"{route}&keep={tooMany}")).StatusCode);
+            var name = (await f.DbAsync(db => db.Users.SingleAsync(u => u.Id == jill))).DisplayName;
+            var csv = await (await f.As(TestData.Sam).GetAsync($"{route.Replace("/planning/grid?", "/planning/grid/export?format=csv&")}&keep={entry}")).Content.ReadAsStringAsync();
+            Assert.DoesNotContain(name, csv);
+        }
+        finally { await KeptRowsFlag(false); }
+    }
+
+    [Fact, Trait("flag-off", "planner_kept_rows")]
+    public async Task Grid_ignores_keep_while_the_flag_is_off() // packet 041 FR-FIG-14: with the flag off, keep is ignored and kept is absent
+    {
+        var (jill, entry, route) = await MovedOutOfFilter();
+        var plain = await (await f.As(TestData.Sam).GetAsync(route)).Content.ReadAsStringAsync();
+        var kept = await (await f.As(TestData.Sam).GetAsync($"{route}&keep={entry},{jill}")).Content.ReadAsStringAsync();
+        Assert.DoesNotContain(jill.ToString(), kept); Assert.DoesNotContain("\"kept\"", kept);
+        Assert.Equal(JsonNode.Parse(plain)!["people"]!.ToJsonString(), JsonNode.Parse(kept)!["people"]!.ToJsonString());
+        var unfiltered = await (await f.As(TestData.Sam).GetAsync($"/api/v1/planning/grid?personId={jill}&from={Week:yyyy-MM-dd}&weeks=1&keep={entry}")).Content.ReadAsStringAsync();
+        Assert.Contains(jill.ToString(), unfiltered); Assert.DoesNotContain("\"kept\"", unfiltered);
     }
 
     [Fact]

@@ -1,5 +1,7 @@
 # Tasks: Capacity Figures and Server Values
 
+2026-10-18: local implementation and partial checks are recorded in `verification.md`. Unchecked slices remain pending integrated verification, dependencies or human gates; implementation alone does not mark them accepted.
+
 One slice is one pull request. Each new test cites its AC ID in its name or on its declaration line. "Unchanged" means the test passes without edits.
 
 - [x] S01 Workload thresholds and band function in Hub.Domain (S, Tier B: the three settings appear on Admin settings unflagged, D9). Add `workload_over_pct`, `workload_amber_pct` and `workload_under_pct` to `OrgSettings` with defaults, ranges and `setting.*` labels; add the ordered band function; give `OverAssigned` and `UnderAssigned` threshold parameters that default to today's constants. FR-FIG-05, FR-FIG-06, FR-FIG-07; AC-FIG-05, AC-FIG-06. Tests: `WorkloadTests.Load_bands_follow_settings_and_default_to_todays_shades` (AC-FIG-05), `WorkloadTests.Over_and_under_assigned_read_their_settings` (AC-FIG-06), `DomainHelpersTests.Workload_threshold_settings_have_defaults_and_ranges` (AC-FIG-06); existing `WorkloadTests` unchanged.

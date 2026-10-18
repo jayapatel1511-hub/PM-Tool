@@ -74,6 +74,8 @@ builder.Services.AddRateLimiter(o =>
     o.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
         RateLimitPartition.GetFixedWindowLimiter(ctx.User.FindFirst("oid")?.Value ?? AuthSetup.ClientKey(ctx, tunnelProxy),
             _ => new FixedWindowRateLimiterOptions { PermitLimit = int.TryParse(cfg["RateLimit:PerMinute"], out var n) ? n : 600, Window = TimeSpan.FromMinutes(1) }));
+    o.AddPolicy("route-counter", ctx => RateLimitPartition.GetFixedWindowLimiter(ctx.User.FindFirst("oid")?.Value ?? AuthSetup.ClientKey(ctx, tunnelProxy),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 120, Window = TimeSpan.FromMinutes(1) }));
     o.AddPolicy("local-sign-in", ctx => RateLimitPartition.GetFixedWindowLimiter(AuthSetup.ClientKey(ctx, tunnelProxy),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(1) }));
     o.AddPolicy("client-errors", ctx => RateLimitPartition.GetFixedWindowLimiter(ctx.User.FindFirst("oid")?.Value ?? "anonymous",

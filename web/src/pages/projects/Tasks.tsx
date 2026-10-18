@@ -54,7 +54,7 @@ export interface TaskRow {
   progressPct: number; estimatedHours?: number | null; reviewRound: number; dueDateChangeCount: number; lastActivityAt: string; lastActivityActorName?: string; statusChangedAt?: string; completedAt?: string
   createdAt: string; createdBy?: string; createdByName?: string; sortOrder: number; rowVersion: number
   manualBlockType?: string; manualBlockReason?: string; manualBlockSetAt?: string; commentCount: number; predecessorCount: number; successorCount: number
-  collaboratorIds: string[]; state?: TaskStateView | null
+  collaboratorIds: string[]; can?: { assign: boolean; edit: boolean; changeDue: boolean } | null; state?: TaskStateView | null
 }
 export interface Transition { to: string; allowed: boolean; reason?: string | null; needsReason: boolean; via?: string | null }
 export interface MoveRequest { id: string; key: string; rowVersion: number; to: string; needsReason: boolean; needsReviewer?: boolean; via?: string | null }
@@ -130,15 +130,14 @@ export function errorText(e: unknown) {
 }
 
 /** Client-side hints that mirror the server's permission checks (the server still decides, §8.5). */
-export function useTaskHints(p: Pick<ProjectDetail, 'status' | 'permissions'>) {
+export function useTaskHints(_p: Pick<ProjectDetail, 'status' | 'permissions'>) {
   const me = useMe()
-  const writable = !['Archived', 'Cancelled'].includes(p.status)
-  const manages = (r: TaskRow) => writable && (p.permissions.isPm || p.permissions.leadOf.includes(r.projectDisciplineId))
+  const manages = (r: TaskRow) => r.can?.assign === true
   return {
     me: me.id,
     manages,
-    edit: (r: TaskRow) => manages(r) || (writable && (r.assigneeId === me.id || r.collaboratorIds.includes(me.id))),
-    due: (r: TaskRow) => manages(r) || (writable && r.assigneeId === me.id),
+    edit: (r: TaskRow) => r.can?.edit === true,
+    due: (r: TaskRow) => r.can?.changeDue === true,
   }
 }
 

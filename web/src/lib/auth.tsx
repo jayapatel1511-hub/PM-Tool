@@ -7,6 +7,7 @@ import { api, configureApi, get } from '@/lib/api'
 import { setDateContext } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { configureClientErrorReporter, disableClientErrorReporter } from '@/lib/client-errors'
+import type { Perm } from '@/lib/types'
 import { LandingPage, LoginPage } from '@/pages/Entrance'
 
 // Entra uses PKCE through MSAL. The isolated review deployment uses individual
@@ -29,7 +30,7 @@ export interface Me {
   settings: {
     dateFormat: string; orgTimeZone: string; today: string; idleTimeoutHours: number; restrictedProjectsEnabled: boolean
     allowSelfReview: boolean; taskDueSoonDays: number; milestoneApproachingDays: number; chainDepthLimit: number
-    defaultWeeklyCapacityHours: number; coordinationLookaheadWeeks: number; workingDaysEnabled: boolean
+    defaultWeeklyCapacityHours: number; coordinationLookaheadWeeks: number; workingDaysEnabled: boolean; routeCounterEnabled?: boolean
   }
   preferences: { digestEnabled: boolean; digestTimeLocal?: string; denseRows: boolean; weeklySummaryEnabled: boolean }
   flags?: Record<string, boolean>
@@ -41,6 +42,17 @@ export const useMe = () => useContext(Ctx)!.me
 /** §43.4 FR-DLV-08: a release toggle; a missing map or name is off. */
 export const useFlag = (name: string) => useMe().flags?.[name] === true
 export const useAuth = () => useContext(Ctx)!
+/** FR-FIG-09 (D5): how a control shows a server permission flag. Offered when the server allows it. Where the account or the
+ *  project's status refuses it, the control stays visible, disabled, with the server's reason as its title, as it was offered
+ *  before the flags; otherwise it is hidden. */
+export function useOffer() {
+  const readOnly = useMe().capabilities.readOnly
+  return (perm: Perm, status: string) => ({
+    shown: perm.ok || readOnly || ['Complete', 'Archived', 'Cancelled'].includes(status),
+    props: { disabled: !perm.ok, title: perm.ok ? undefined : perm.reason ?? undefined },
+  })
+}
+export type Offer = ReturnType<ReturnType<typeof useOffer>>
 
 const DEV_KEY = 'hub.devUser'
 const ACTIVITY_KEY = 'hub.lastActivity'

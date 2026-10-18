@@ -42,6 +42,10 @@ public static class HubModules
         DashboardEndpoints.Map(api);
         DisciplineCoordinationEndpoints.Map(api);
         MyWorkEndpoints.Map(api);
+        MyWorkFollowUpEndpoints.Map(api);
+        ProjectImportEndpoints.Map(api);
+        OnboardingEndpoints.Map(api);
+        RouteCounterEndpoints.Map(api);
         DecisionEndpoints.Map(api);
         SearchEndpoints.Map(api);
         ReportEndpoints.Map(api);

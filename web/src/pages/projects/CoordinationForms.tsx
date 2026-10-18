@@ -14,10 +14,10 @@ import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 export type RecordVersion = { id: string; rowVersion: number }
-export type WorkRef = RecordVersion & { key: string; name: string; ownerId?: string; projectDisciplineId: string; status: string; revision?: string; transmittalUrl?: string }
+export type WorkRef = RecordVersion & { key: string; name: string; ownerId?: string; projectDisciplineId: string; status: string; revision?: string; transmittalUrl?: string; canCommit?: boolean; canManage?: boolean }
 export type SourceRevision = RecordVersion & { sourceKey: string; title: string; revision: string; url: string; sourceIdentity: string; sourceSystem: string; externalIdentifier: string; issuer: string; scope: string; sourceCheckedAt?: string; deliverableId?: string; supersedesId?: string; authorIds: string[]; createdAt: string }
 export type SourceHead = RecordVersion & { identity: string; currentRevisionId: string; ownerId: string; projectDisciplineId: string }
-export type CoordOptions = { actorId: string; canWrite: boolean; manageDisciplineIds: string[]; people: { id: string; displayName: string }[]; disciplines: { id: string; name: string }[]; sources: { revision: SourceRevision; identity: string; published: boolean; isCurrent: boolean }[]; heads: SourceHead[]; deliverables: WorkRef[]; tasks: WorkRef[] }
+export type CoordOptions = { actorId: string; canWrite: boolean; manageDisciplineIds: string[]; canCreate?: { changes: boolean; reviews: boolean }; people: { id: string; displayName: string }[]; disciplines: { id: string; name: string }[]; sources: { revision: SourceRevision; identity: string; published: boolean; isCurrent: boolean }[]; heads: SourceHead[]; deliverables: WorkRef[]; tasks: WorkRef[] }
 export type InputUse = RecordVersion & { targetType: string; targetId: string; ownerId: string; sourceIdentity: string; sourceRevisionId: string; intendedUse: string; adoptedAt: string; adoptedBy: string }
 export type Choice = { value: string; label: string }
 export const peopleChoices = (o: CoordOptions): Choice[] => o.people.map(p => ({ value: p.id, label: p.displayName }))

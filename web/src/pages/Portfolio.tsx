@@ -1,3 +1,4 @@
+import { ProjectStatusNote } from '@/components/hub/project-status-note'
 import { useQuery } from '@tanstack/react-query'
 import { Monitor } from 'lucide-react'
 import { Fragment, type ReactNode } from 'react'
@@ -166,6 +167,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
               {rows.map((r) => (
                 <tr key={r.id} className="border-t hover:bg-muted">
                   <td className={cn(tdCls, 'min-w-60')}>
+                    {r.statusNote && <details className="mb-2"><summary>{t('statusNote.title')}</summary><ProjectStatusNote note={r.statusNote} /></details>}
                     <div className="flex items-start gap-2">
                       <AccentDot id={r.id} className="mt-1.5" />
                       <div className="min-w-0">

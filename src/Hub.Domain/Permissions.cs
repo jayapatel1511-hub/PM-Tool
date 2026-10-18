@@ -407,6 +407,9 @@ public static class Permissions
 
     public static Allow Snooze(Actor a, ProjectContext p) => RunCoordination(a, p);
 
+    /// FR-FIG-08 decision 5: the date review after an On Hold spell is for the PM and any Discipline Lead, as the client offered it.
+    public static Allow ReviewDates(Actor a, ProjectContext p) => IsPM(a, p) || IsAnyDL(p) ? Allow.Yes : Allow.No("perm.pm_or_dl");
+
     public static Allow ManageSavedProjectView(Actor a, ProjectContext p) => a.ReadOnly ? Allow.No("perm.read_only") : IsPM(a, p) || IsAnyDL(p) ? Allow.Yes : Allow.No("perm.pm_or_dl");
 
     /// §13.4: the team arranges cards on the project board; the order is shared by the project's members.

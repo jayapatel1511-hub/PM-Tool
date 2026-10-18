@@ -16,21 +16,27 @@ const shadeBefore = pct => pct > 110 ? 'bg-bad-bg' : pct > 90 ? 'bg-warn-bg' : p
 const cells = (set) => weeks.map((week, i) => { const c = { week, hours: 0, pct: 0, available: 40, confirmed: 0, proposed: 0, committed: 0, ...set[i] }; const u = c.available - c.committed; return { ...c, band: band(c.pct), uncommitted: u < 0 || !partial ? u : null } });
 const person = (pid_, name, extra) => ({ id: pid_, displayName: name, supervisorId: sam, supervisorName: 'Sam Supervisor', capacity: 40, capacityOverride: false, noDueDate: 0,
   openTasks: 2, unestimated: 0, overdue: 0, projects: 1, overAssigned: false, underAssigned: false, cluster: false, canSetCapacity: true, indicator: 'ok', ...extra });
-let partial = true, forbidden = false, figureNames = false;
+let partial = true, forbidden = false, figureNames = false, unassignedOn = false, assigned = false, assignmentConflict = true;
+const assignmentCalls = [], capacityCalls = [];
+const taskId = id(90);
 const grid = (sort) => {
   const people = [
     person(alex, 'Alex Overloaded', { overAssigned: true, indicator: 'over', partialScope: partial, overWeek: weeks[0],
       cells: cells([{ committed: 52, pct: 130, hours: 52 }, { committed: 50, available: 32, pct: 156, confirmed: 30, hours: 44, proposed: 20 }]) }),
     person(jill, 'Jill Partial', { partialScope: partial, unestimated: 2, cells: cells([{ committed: 20, pct: 50, hours: 20 }, {}, { committed: 38, pct: 95, hours: 38 }]) }),
   ]
-  return { weeks, today: '2026-10-03', currentWeek: weeks[0], defaultCapacity: 40, thresholds: { overPct: 110, amberPct: 90, underPct: 40 }, people: sort === 'name' ? people.reverse() : people }
+  return { weeks, today: '2026-10-03', currentWeek: weeks[0], defaultCapacity: 40, thresholds: { overPct: 110, amberPct: 90, underPct: 40 }, people: sort === 'name' ? people.reverse() : people,
+    ...(unassignedOn ? { unassigned: { totalCount: assigned ? 0 : 51, showAllPath: `/tasks?unassigned=true&projects=${pid}`, tasks: assigned ? [] : [{ id: taskId, key: 'P-DEMO-T0090', name: 'Synthetic unassigned task', projectId: pid, projectNumber: 'P-DEMO', projectName: 'Synthetic resource checks', startDate: '2026-10-12', dueDate: '2026-10-16', estimatedHours: 4, rowVersion: 7, canAssign: true, editPath: `/tasks/${taskId}` }] } } : {}) }
 }
 const me = { id: sam, displayName: 'Sam Supervisor', email: 'sam@hub.test', roles: [], systemRoles: ['Supervisor'],
   capabilities: { createProject: false, createTask: true, portfolio: false, workload: true, staff: true, allStaff: false, admin: false, templates: false, readOnly: false, directReports: 2 },
   settings: { today: '2026-10-03', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 }, preferences: { denseRows: true, digestEnabled: true } };
+// FR-FIG-08: Sam is neither PM nor Discipline Lead, so the server refuses every project-level flag.
+const pmOrDl = { ok: false, reason: 'Only the Project Manager or the Discipline Lead can do this.' }, pmOnly = { ok: false, reason: 'Only the Project Manager can do this.' };
+const refusedFlags = { proposeAllocation: pmOrDl, snooze: pmOrDl, manageExternalParties: pmOnly, reviewDates: pmOrDl, captureWeeklyPlan: pmOrDl, createSubmission: pmOrDl };
 const project = { id: pid, projectNumber: 'P-DEMO', name: 'Synthetic resource checks', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1,
   links: [], disciplines: [], starred: false, myRoles: [], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] },
-  permissions: { edit: { ok: false }, healthOverride: { ok: false }, raiseRegister: { ok: false }, isPm: false, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [], needsReason: false } };
+  permissions: { edit: { ok: false }, healthOverride: { ok: false }, raiseRegister: { ok: false }, ...refusedFlags, isPm: false, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [], needsReason: false } };
 const allocation = (aid, status) => ({ id: aid, personId: jill, personName: 'Jill Partial', purpose: 'Production', fromDate: '2026-10-05', throughDate: '2026-10-09', plannedHours: 16, status, rowVersion: 0, personState: 'Eligible' });
 const errors = [], unknown = [];
 let server, browser;
@@ -45,7 +51,7 @@ let server, browser;
     const u = new URL(route.request().url()), p = u.pathname.replace('/api/v1/', '')
     let data = {}, status = 200
     if (p === 'config') data = { authMode: 'Development', entra: {} }
-    else if (p === 'me') data = { ...me, flags: { figure_names: figureNames } }
+    else if (p === 'me') data = { ...me, flags: { figure_names: figureNames, unfilled_beside_capacity: unassignedOn } }
     else if (p === 'me/sign-in') data = {}
     else if (p === 'me/notifications/pulse') data = { stamp: '0' }
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
@@ -53,6 +59,13 @@ let server, browser;
     else if (p === 'views') data = { views: [], canShare: false }
     else if (p === 'reference') data = { disciplines: [], clients: [], offices: [], deliverableTypes: [], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
     else if (p === 'projects') data = { items: [project], page: 1, pageSize: 200, totalCount: 1 }
+    else if (p === 'users') data = [{ id: jill, displayName: 'Jill Partial', isActive: true }]
+    else if (p === 'planning/grid') { capacityCalls.push(Object.fromEntries(u.searchParams)); data = { weeks: ['2026-10-12'], people: [{ id: jill, partial: false, cells: [{ remaining: 12, timeAway: 8 }] }] } }
+    else if (p === `tasks/${taskId}` && route.request().method() === 'PATCH') {
+      assignmentCalls.push({ body: route.request().postDataJSON(), version: route.request().headers()['if-match'] });
+      if (assignmentConflict) { assignmentConflict = false; status = 409; data = { code: 'concurrency_conflict', detail: 'Synthetic stale task version' } }
+      else { assigned = true; data = { id: taskId, rowVersion: 8 } }
+    }
     else if (p === 'workload') [status, data] = forbidden ? [403, { code: 'forbidden', detail: 'You cannot open the workload view.' }] : [200, grid(u.searchParams.get('sort'))]
     else if (p === 'projects/P-DEMO' || p === `projects/${pid}`) data = project
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }
@@ -127,6 +140,23 @@ let server, browser;
   assert.match(await row('Jill Partial').innerText(), /Uncommitted 20 h/);
   figureNames = false;
 
+  // Packet047 AC-PRO-13: dark payload, task-week picker, row version and conflict feedback.
+  assert.equal(await page.getByRole('region', { name: 'Unassigned tasks' }).count(), 0);
+  unassignedOn = true; await page.reload(); await grid1.waitFor();
+  const unassigned = page.getByRole('region', { name: 'Unassigned tasks' }); await unassigned.waitFor();
+  assert.equal(await unassigned.getByRole('link', { name: 'Show all 51' }).getAttribute('href'), `/tasks?unassigned=true&projects=${pid}`);
+  await unassigned.getByRole('button', { name: 'Assign P-DEMO-T0090' }).click();
+  await page.getByRole('option', { name: /Jill Partial/ }).waitFor();
+  await page.getByText('12 h free · 8 h away').waitFor();
+  assert.equal(capacityCalls.at(-1).from, '2026-10-12');
+  await page.getByRole('option', { name: /Jill Partial/ }).click();
+  await unassigned.getByRole('alert').filter({ hasText: 'Synthetic stale task version' }).waitFor();
+  assert.equal(assignmentCalls[0].body.assigneeId, jill); assert.equal(assignmentCalls[0].version, '"7"');
+  await unassigned.getByRole('button', { name: 'Assign P-DEMO-T0090' }).click();
+  await page.getByRole('option', { name: /Jill Partial/ }).click();
+  await unassigned.waitFor({ state: 'detached' }); assert.equal(assignmentCalls.length, 2);
+  unassignedOn = false;
+
   // Denied access explains itself and offers no export or saved views.
   forbidden = true; await page.reload();
   await page.getByText('Resources is not part of your access').waitFor();
@@ -152,7 +182,7 @@ let server, browser;
   // FR-FIG-11, FR-FIG-12 (AC-FIG-10, AC-FIG-11): the role form asks for a reason exactly when the server's needsReason says so,
   // and takes its label limit from GET /reference.
   const roleForm = async () => { await page.goto(`${base}/projects/P-DEMO/allocations?view=roles`); await page.getByRole('button', { name: 'Add open role' }).first().click(); return page.getByRole('dialog') }
-  project.permissions.isPm = true; project.permissions.needsReason = true; project.status = 'Complete';
+  project.permissions.isPm = true; project.permissions.proposeAllocation = { ok: true }; project.permissions.needsReason = true; project.status = 'Complete';
   let dialog = await roleForm();
   await page.waitForFunction(() => document.querySelector('#role-label')?.getAttribute('maxlength') === '80');
   assert.equal(await dialog.getByLabel('Role').getAttribute('maxlength'), '80', 'Label limit from /reference');
@@ -160,6 +190,14 @@ let server, browser;
   project.permissions.needsReason = false;
   dialog = await roleForm(); await dialog.getByLabel('Role').waitFor();
   assert.equal(await dialog.getByLabel('Reason').count(), 0, 'No reason field without needsReason, whatever the status');
+
+  // FR-FIG-09 (D5): a control today's client offered the PM but the server refuses stays visible, disabled, with the server's reason.
+  project.status = 'Archived'; project.permissions.proposeAllocation = { ok: false, reason: 'This project is Archived and read-only.' };
+  await page.goto(`${base}/projects/P-DEMO/allocations`);
+  const refusedPropose = page.getByRole('main').getByRole('button', { name: 'Propose allocation' }).first();
+  await refusedPropose.waitFor();
+  assert.ok(await refusedPropose.isDisabled(), 'Refused proposal is disabled');
+  assert.equal(await refusedPropose.getAttribute('title'), 'This project is Archived and read-only.', 'Refused proposal carries the server reason');
 
   const report = { scope: 'Chromium UI with mocked API; server rules are tested separately', errors, unmockedGets: [...new Set(unknown)], desktopViolations, namedViolations, panelViolations };
   console.log(JSON.stringify(report));

@@ -182,6 +182,69 @@ public sealed class WorkloadApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Cells_carry_bands_over_week_and_thresholds_from_settings() // packet 041 AC-FIG-05, AC-FIG-06, AC-FIG-07
+    {
+        var p = await d.Project();
+        var person = await Report();
+        await d.NewTask(p.Id, TestData.Pm, new { assigneeId = person.Id, estimatedHours = 40, dueDate = "2026-09-18" });                        // 100 % this week
+        await d.NewTask(p.Id, TestData.Pm, new { assigneeId = person.Id, estimatedHours = 46, startDate = "2026-09-21", dueDate = "2026-09-25" }); // 115 % next week
+        var none = await Report();
+        await d.NewTask(p.Id, TestData.Pm, new { assigneeId = none.Id, estimatedHours = 8, dueDate = "2026-09-18" });
+        (await f.As(TestData.Sam).Put($"/api/v1/users/{none.Id}/capacity", new { hours = 0 })).EnsureSuccessStatusCode();
+        var admin = f.As(TestData.Admin);
+        string[] Bands(JsonNode row) => [.. row["cells"]!.AsArray().Take(2).Select(c => c!.S("band"))];
+        (int, int, int) Thresholds(JsonNode grid) => (grid["thresholds"]!.I("overPct"), grid["thresholds"]!.I("amberPct"), grid["thresholds"]!.I("underPct"));
+
+        var grid = await f.As(TestData.Sam).GetAsync("/api/v1/workload").Result.Json();
+        var row = Person(grid, person.Id);
+        Assert.Equal((110, 90, 40), Thresholds(grid));
+        Assert.Equal(new[] { "near", "over" }, Bands(row));
+        Assert.Equal("2026-09-21", row.S("overWeek")); // AC-FIG-07: the first Over week of this and next week
+        Assert.True(row["overAssigned"]!.GetValue<bool>());
+        Assert.Equal("over", Person(grid, none.Id)["cells"]![0]!.S("band")); // no availability with committed hours is 999 %
+        try
+        {
+            await admin.Put("/api/v1/admin/settings/workload_amber_pct", new { value = 80 }).Result.Json();
+            await admin.Put("/api/v1/admin/settings/workload_over_pct", new { value = 120 }).Result.Json();
+            var moved = await f.As(TestData.Sam).GetAsync("/api/v1/workload").Result.Json();
+            var after = Person(moved, person.Id);
+            Assert.Equal((120, 80, 40), Thresholds(moved));
+            Assert.Equal(new[] { "near", "near" }, Bands(after));
+            Assert.Null(after["overWeek"]);
+            Assert.False(after["overAssigned"]!.GetValue<bool>()); // Over-assigned fires only above 120 %
+        }
+        finally
+        {
+            await admin.Put("/api/v1/admin/settings/workload_amber_pct", new { value = 90 }).Result.Json();
+            await admin.Put("/api/v1/admin/settings/workload_over_pct", new { value = 110 }).Result.Json();
+        }
+        var restored = Person(await f.As(TestData.Sam).GetAsync("/api/v1/workload").Result.Json(), person.Id);
+        Assert.Equal(new[] { "near", "over" }, Bands(restored));
+        Assert.True(restored["overAssigned"]!.GetValue<bool>());
+    }
+
+    [Fact]
+    public async Task Workload_threshold_changes_are_audited_and_validated() // packet 041 AC-FIG-06
+    {
+        var admin = f.As(TestData.Admin);
+        Assert.Equal(HttpStatusCode.BadRequest, (await admin.Put("/api/v1/admin/settings/workload_over_pct", new { value = 49 })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await admin.Put("/api/v1/admin/settings/workload_amber_pct", new { value = 301 })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await admin.Put("/api/v1/admin/settings/workload_under_pct", new { value = 101 })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Sam).Put("/api/v1/admin/settings/workload_over_pct", new { value = 120 })).StatusCode);
+        int Entries(string key) => f.Db(db => db.ActivityLog.Count(a => a.ItemType == ItemType.Setting && a.ItemKey == key));
+        foreach (var (key, value, fallback) in new[] { ("workload_over_pct", 120, 110), ("workload_amber_pct", 80, 90), ("workload_under_pct", 30, 40) })
+        {
+            var before = Entries(key);
+            try
+            {
+                (await admin.Put($"/api/v1/admin/settings/{key}", new { value })).EnsureSuccessStatusCode();
+                Assert.Equal(before + 1, Entries(key));
+            }
+            finally { (await admin.Put($"/api/v1/admin/settings/{key}", new { value = fallback })).EnsureSuccessStatusCode(); }
+        }
+    }
+
+    [Fact]
     public async Task Workload_reports_and_export() // FR-007, §19
     {
         var p = await d.Project();

@@ -154,6 +154,7 @@ let server, browser;
   const roleForm = async () => { await page.goto(`${base}/projects/P-DEMO/allocations?view=roles`); await page.getByRole('button', { name: 'Add open role' }).first().click(); return page.getByRole('dialog') }
   project.permissions.isPm = true; project.permissions.needsReason = true; project.status = 'Complete';
   let dialog = await roleForm();
+  await page.waitForFunction(() => document.querySelector('#role-label')?.getAttribute('maxlength') === '80');
   assert.equal(await dialog.getByLabel('Role').getAttribute('maxlength'), '80', 'Label limit from /reference');
   await dialog.getByLabel('Reason').waitFor();
   project.permissions.needsReason = false;

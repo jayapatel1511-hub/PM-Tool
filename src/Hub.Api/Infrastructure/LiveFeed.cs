@@ -103,7 +103,7 @@ public sealed class LiveFeed(IServiceProvider root, IConfiguration cfg, ILogger<
             if (at > state.Cursor) state.Cursor = at;
             if (state.Seen.TryAdd(r.Id, at)) rows.Add(r);
         }
-        var floor = state.Cursor - overlap;
+        var floor = Timestamp(LowerBound(state.Cursor - overlap)); // the next read's bound, floored to the millisecond like the query
         foreach (var id in state.Seen.Where(x => x.Value < floor).Select(x => x.Key).ToList()) state.Seen.Remove(id);
 
         // ponytail: reads every project_state row (one per project) each second; filter on evaluated_at if projects reach the thousands.

@@ -101,6 +101,18 @@ public sealed class LiveFeedTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Row_in_the_boundary_millisecond_is_delivered_once() // FR-LIVE-15, AC-LIVE-19
+    {
+        var state = new LiveFeedState { Cursor = DateTimeOffset.UtcNow.AddTicks(5_000) }; // sub-millisecond part, as UtcNow carries
+        var id = Guid.CreateVersion7(LiveFeed.Timestamp(LiveFeed.LowerBound(state.Cursor - Overlap)));
+        var pid = Guid.NewGuid();
+        await using (var c = new NpgsqlConnection(Cs)) { await c.OpenAsync(); await Insert(c, null, id, pid); }
+        var delivered = 0;
+        for (var i = 0; i < 3; i++) delivered += (await Tick(state)).Rows.Count(r => r.Id == id);
+        Assert.Equal(1, delivered);
+    }
+
+    [Fact]
     public async Task Rows_written_before_the_overlap_are_not_read()
     {
         var pid = Guid.NewGuid();

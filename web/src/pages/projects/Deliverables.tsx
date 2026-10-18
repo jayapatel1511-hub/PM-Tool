@@ -44,7 +44,7 @@ export interface DeliverableRow {
 }
 
 const GROUP_LABEL: Record<string, string> = { discipline: 'common.discipline', milestone: 'field.MilestoneId', status: 'common.status', owner: 'common.owner', none: 'dgroup.none' }
-const STATUSES = ['Not Started', 'In Progress', 'In Review', 'Revision Required', 'Ready to Issue', 'Issued', 'Accepted', 'On Hold', 'Cancelled']
+export const STATUSES = ['Not Started', 'In Progress', 'In Review', 'Revision Required', 'Ready to Issue', 'Issued', 'Accepted', 'On Hold', 'Cancelled']
 
 /** Deliverables Register (§13.6): grouped by discipline by default, filters in the URL, expandable to tasks. */
 export function DeliverablesTab() {

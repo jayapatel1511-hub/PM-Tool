@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ChevronRight, Lock, Monitor, MoreHorizontal, Plus } from 'lucide-react'
 import { Fragment, useState } from 'react'
+import { Link } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineText, TabBar } from '@/components/hub/fields'
@@ -20,6 +21,7 @@ import { t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { CommentsSlot, ItemSlots } from './slots-items'
+import { STATUSES as DELIVERABLE_STATUSES } from './Deliverables'
 import { useCurrentProject } from './ProjectLayout'
 import { ExportMenu } from '@/components/hub/export'
 
@@ -36,6 +38,41 @@ const TYPES = ['Kickoff', 'Field Work', 'Design Submission', 'Client Workshop', 
 export function milestoneStatusLabel(m: MilestoneRow) {
   if (!m.date && !m.isComplete && !m.isCancelled) return t('milestone.undated')
   return m.status ?? t('milestone.notEvaluated')
+}
+
+/** The lists behind a milestone's counts (FR-RCV-09): each opens rows whose number equals the figure shown. Totals leave out
+ *  Cancelled, as the milestone's evaluated counts do, so the deliverable total carries every other status. */
+function milestoneLinks(base: string, m: Pick<MilestoneRow, 'id'>) {
+  const del = (status: string[]) => `${base}/deliverables?${new URLSearchParams({ milestoneId: m.id, status: status.join(',') })}`
+  const tasks = (extra = '') => `${base}/tasks?milestoneId=${m.id}${extra}`
+  return {
+    deliverables: del(DELIVERABLE_STATUSES.filter((s) => s !== 'Cancelled')), issued: del(['Issued', 'Accepted']),
+    tasks: tasks(), complete: tasks('&status=Complete'), overdue: tasks('&overdue=true'), blocked: tasks('&blocked=true'),
+  }
+}
+
+const countLink = 'rounded-sm underline-offset-2 hover:underline'
+/** "2/3 issued" and "1/3" tasks with each number opening its list; data-count names the figure for the counts suite. */
+function DeliverableCount({ m, base }: { m: MilestoneRow; base: string }) {
+  const l = milestoneLinks(base, m)
+  return <span className="tabular-nums">
+    <Link className={countLink} to={l.issued} data-count="Issued" aria-label={t('milestone.link.issued', { n: m.deliverableIssued, key: m.key })}>{m.deliverableIssued}</Link>/<Link
+      className={countLink} to={l.deliverables} data-count="Deliverables" aria-label={t('milestone.link.deliverables', { n: m.deliverableTotal, key: m.key })}>{m.deliverableTotal}</Link> {t('milestone.issuedWord')}
+  </span>
+}
+function TaskCount({ m, base }: { m: MilestoneRow; base: string }) {
+  const l = milestoneLinks(base, m)
+  return <span className="tabular-nums">
+    <Link className={countLink} to={l.complete} data-count="Complete" aria-label={t('milestone.link.complete', { n: m.taskComplete, key: m.key })}>{m.taskComplete}</Link>/<Link
+      className={countLink} to={l.tasks} data-count="Tasks" aria-label={t('milestone.link.tasks', { n: m.taskTotal, key: m.key })}>{m.taskTotal}</Link>
+  </span>
+}
+function TaskChips({ m, base }: { m: MilestoneRow; base: string }) {
+  const l = milestoneLinks(base, m)
+  return <>
+    {m.taskOverdue > 0 && <Link to={l.overdue} data-count="Overdue" className="rounded-full"><Chip tone="bad">{t('ind.overdueN', { n: m.taskOverdue })}</Chip></Link>}
+    {m.taskBlocked > 0 && <Link to={l.blocked} data-count="Blocked" className="rounded-full"><Chip tone="bad">{t('ind.blockedN', { n: m.taskBlocked })}</Chip></Link>}
+  </>
 }
 
 /** "+5 d", "−3 d", "0 d": slip from the original date, with a true minus sign. */
@@ -58,6 +95,7 @@ export function MilestonesTab() {
   const can = p.permissions.manageMilestones.ok
   const rows = q.data ?? []
   const disc = (id?: string) => p.disciplines.find((d) => d.id === id)?.name
+  const base = `/projects/${p.projectNumber}`
   const create = (variant?: 'outline') => <DesktopOnly notice={null}><Button variant={variant} onClick={() => setDialog({ kind: 'new' })}><Plus className="size-4" />{t('milestone.new')}</Button></DesktopOnly>
   return (
     <Page title={t('ptab.milestones')} actions={<>
@@ -90,15 +128,14 @@ export function MilestonesTab() {
               [t('common.date'), fmtDate(m.date)], [t('milestone.original'), fmtDate(m.originalDate)],
               [t('milestone.slip'), slip(m.slipDays)],
               [t('milestone.remaining'), m.isComplete ? fmtDate(m.completedDate) : m.date ? relative(m.date) : t('common.dash')],
-              [t('milestone.deliverables'), t('milestone.issuedOf', { n: m.deliverableIssued, total: m.deliverableTotal })],
-              [t('milestone.tasks'), `${m.taskComplete}/${m.taskTotal}`],
+              [t('milestone.deliverables'), <DeliverableCount key="d" m={m} base={base} />],
+              [t('milestone.tasks'), <TaskCount key="t" m={m} base={base} />],
               [t('common.discipline'), disc(m.projectDisciplineId) ?? t('common.dash')],
               [t('milestone.clientFacing'), m.isClientFacing ? t('common.yes') : t('common.no')],
-            ].map(([label, value]) => <Fragment key={label}><dt className="text-muted-foreground">{label}</dt><dd className="min-w-0 break-words tabular-nums">{value}</dd></Fragment>)}
+            ].map(([label, value]) => <Fragment key={label as string}><dt className="text-muted-foreground">{label}</dt><dd className="min-w-0 break-words tabular-nums">{value}</dd></Fragment>)}
           </dl>
           <div className="mt-3 flex flex-wrap gap-2">
-            {m.taskOverdue > 0 && <Chip tone="bad">{t('ind.overdueN', { n: m.taskOverdue })}</Chip>}
-            {m.taskBlocked > 0 && <Chip tone="bad">{t('ind.blockedN', { n: m.taskBlocked })}</Chip>}
+            <TaskChips m={m} base={base} />
             <Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><span className="text-sm text-primary underline">{t('common.why')}</span></Why>
           </div>
           <Button className="mt-3 h-auto min-h-(--control-h) max-w-full whitespace-normal text-left" variant="outline" aria-expanded={open.has(m.id)} onClick={() => { const n = new Set(open); if (n.has(m.id)) n.delete(m.id); else n.add(m.id); setOpen(n) }}>{t('milestone.showDeliverables', { key: m.key })}</Button>
@@ -134,15 +171,10 @@ export function MilestonesTab() {
                     <td className={cn(tdCls, 'whitespace-nowrap text-right tabular-nums', m.slipDays > 0 && 'font-semibold text-warn')}>{m.slipDays > 0 && <span aria-hidden className="mr-1 text-xs">▲</span>}{slip(m.slipDays)}</td>
                     <td className={tdCls}><Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><StatusPill status={milestoneStatusLabel(m)} /></Why></td>
                     <td className={cn(tdCls, 'whitespace-nowrap tabular-nums')}>{m.isComplete ? fmtDate(m.completedDate) : m.date ? relative(m.date) : t('common.dash')}</td>
-                    <td className={cn(tdCls, 'whitespace-nowrap tabular-nums')}>{t('milestone.issuedOf', { n: m.deliverableIssued, total: m.deliverableTotal })}</td>
+                    <td className={cn(tdCls, 'whitespace-nowrap')}><DeliverableCount m={m} base={base} /></td>
                     <td className={tdCls}>
-                      <span className="tabular-nums">{m.taskComplete}/{m.taskTotal}</span>
-                      {(m.taskOverdue > 0 || m.taskBlocked > 0) && (
-                        <span className="mt-1 flex flex-wrap gap-1">
-                          {m.taskOverdue > 0 && <Chip tone="bad">{t('ind.overdueN', { n: m.taskOverdue })}</Chip>}
-                          {m.taskBlocked > 0 && <Chip tone="bad">{t('ind.blockedN', { n: m.taskBlocked })}</Chip>}
-                        </span>
-                      )}
+                      <TaskCount m={m} base={base} />
+                      {(m.taskOverdue > 0 || m.taskBlocked > 0) && <span className="mt-1 flex flex-wrap gap-1"><TaskChips m={m} base={base} /></span>}
                     </td>
                     <td className={tdCls}>{disc(m.projectDisciplineId) ?? t('common.dash')}</td>
                     <td className={tdCls}>{m.isClientFacing ? t('common.yes') : t('common.no')}</td>

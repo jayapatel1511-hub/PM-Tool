@@ -26,6 +26,8 @@ interface Dash {
   deliverables: Record<'upcoming' | 'atRisk' | 'issued' | 'total', Count>
   decisions: Record<'pending' | 'overdue', Count>
   issues: { open: number; high: number }; risks: { high: number }
+  registers: Record<'issuesOpen' | 'issuesHigh' | 'risksHigh', Count>
+  disciplineDue14: Record<string, Count>
   disciplines: { disciplineId: string; name: string; leadId?: string; health: string; reasons: { text: string }[]; open: number; overdue: number; blocked: number; waiting: number
     deliverablesDue14: number; nextDueKey?: string; nextDueName?: string; nextDueDate?: string; nextDueType?: string; nextDueId?: string }[]
   dueThisWeek: { items: TaskRow[]; total: number; link: string }
@@ -83,6 +85,7 @@ export function DashboardTab() {
                       {q.data.disciplines.map((d) => {
                         const name = lead(d.leadId)
                         const tasks = `${base}/tasks?disciplineId=${d.disciplineId}`
+                        const due14 = q.data.disciplineDue14?.[d.disciplineId]
                         return (
                           <tr key={d.disciplineId} className="border-t hover:bg-muted">
                             <td className={tdCls}><Link className="font-semibold hover:underline" to={tasks}>{d.name}</Link></td>
@@ -93,7 +96,8 @@ export function DashboardTab() {
                             <td className={cn(tdCls, 'text-right tabular-nums')}><Link className="hover:underline" to={`${tasks}&open=true&onHold=false`}>{d.open}</Link></td>
                             <td className={cn(tdCls, 'text-right tabular-nums', d.overdue > 0 && 'font-semibold text-bad')}><Link className="hover:underline" to={`${tasks}&overdue=true`}>{d.overdue}</Link></td>
                             <td className={cn(tdCls, 'text-right tabular-nums', d.blocked > 0 && 'font-semibold text-bad')}><Link className="hover:underline" to={`${tasks}&blocked=true`}>{d.blocked}</Link></td>
-                            <td className={cn(tdCls, 'text-right tabular-nums')}>{d.deliverablesDue14}</td>
+                            <td className={cn(tdCls, 'text-right tabular-nums')}>{due14
+                              ? <Link className="hover:underline" to={`${base}/deliverables?${due14.link}`}>{due14.value}</Link> : d.deliverablesDue14}</td>
                             <td className={cn(tdCls, 'whitespace-nowrap')} title={d.nextDueName}>{d.nextDueKey ? <><Key>{d.nextDueKey}</Key> <span className="tabular-nums">{fmtDate(d.nextDueDate)}</span></> : <Missing />}</td>
                           </tr>
                         )
@@ -211,9 +215,9 @@ function Counts({ d, base, scoped }: { d: Dash; base: string; scoped: boolean })
       {tile('mint', t('ptab.deliverables'), t('sig.def.dashDeliverables'), false, [dels('total'), dels('upcoming'), dels('atRisk'), dels('issued')])}
       {tile('lavender', t('ptab.decisions'), t('sig.def.dashDecisions'), true, [decs('pending'), decs('overdue')])}
       {tile('peach', t('dash.registers'), t('sig.def.dashRegisters'), true, [
-        ['issuesOpen', { value: d.issues.open, link: '' }, `${base}/issues?indicator=open`],
-        ['issuesHigh', { value: d.issues.high, link: '' }, `${base}/issues?indicator=open&severity=High`],
-        ['risksHigh', { value: d.risks.high, link: '' }, `${base}/risks?indicator=open&severity=High`],
+        ['issuesOpen', d.registers.issuesOpen, `${base}/issues?${d.registers.issuesOpen.link}`],
+        ['issuesHigh', d.registers.issuesHigh, `${base}/issues?${d.registers.issuesHigh.link}`],
+        ['risksHigh', d.registers.risksHigh, `${base}/risks?${d.registers.risksHigh.link}`],
       ])}
     </div>
   )

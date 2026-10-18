@@ -1,6 +1,6 @@
 // SC-002 count reconciliation (packet 036 verification.md section 7), read-only against the local Development preview
 // with the section 8 fixtures loaded. For Jordan, Priya and Sam (signed in through the development picker), every linked
-// count on Home, the SYN-101..103 Project Dashboards they can see and Portfolio is compared with the total of the list
+// count on Home, the SYN-101..103 Project Dashboards and Milestones views they can see and Portfolio is compared with the total of the list
 // request its destination page sends, as the same person. Fails on any difference, on a list that drops the link's
 // filters, and on a missing agreed tile.
 //   TUESDAY_UI_BASE_URL (default http://localhost:5173), COUNTS_REPORT (JSON report path).
@@ -64,10 +64,15 @@ function extract() {
   // Dashboard: the discipline table, then the Due this week and Blocked cards (their link appears only beyond the shown rows).
   for (const tr of main.querySelectorAll('#disciplines tbody tr')) {
     const discipline = own(tr.cells[0])
-    for (const [flag, label] of [['open', 'Open'], ['overdue', 'Overdue'], ['blocked', 'Blocked']]) {
-      const a = tr.querySelector(`a[href*="${flag}=true"]`)
+    for (const [flag, label] of [['open=true', 'Open'], ['overdue=true', 'Overdue'], ['blocked=true', 'Blocked'], ['dueTo=', 'Due ≤ 14 d']]) {
+      const a = tr.querySelector(`a[href*="${flag}"]`)
       if (a) out.push({ name: `${discipline} · ${label}`, shown: num(own(a)), href: a.getAttribute('href') })
     }
+  }
+  // Milestones view (packet 045 FR-RCV-09): each figure is a link naming itself in data-count, in a row led by the milestone key.
+  for (const a of main.querySelectorAll('table a[data-count]')) {
+    const key = own(a.closest('tr').cells[1])
+    out.push({ name: `${key} · ${a.dataset.count}`, shown: num(own(a)), href: a.getAttribute('href') })
   }
   for (const section of main.querySelectorAll('section')) {
     const heading = section.querySelector('h2, h3')
@@ -110,11 +115,11 @@ async function listTotal(page, href, attempt = 0) {
 }
 
 /** Opens a source page and waits for its counts to render. */
-async function open(page, source, ready) {
+async function open(page, source, ready, rendered = 'main [data-accent] span') {
   const loaded = page.waitForResponse((r) => new URL(r.url()).pathname.slice(8) === ready && r.request().method() === 'GET', { timeout: 20000 })
   await page.goto(`${base}${source}`)
   const data = await (await loaded).json()
-  await page.waitForFunction(() => document.querySelector('main [data-accent] span'), null, { timeout: 15000 })
+  if (!Array.isArray(data) || data.length) await page.waitForFunction((sel) => document.querySelector(sel), rendered, { timeout: 15000 })
   await page.waitForTimeout(300)
   return data
 }
@@ -136,7 +141,11 @@ async function open(page, source, ready) {
       const sources = [['Home', '/home', 'home', 'home']]
       for (const number of PROJECTS) {
         const p = await api(who, `projects/${number}`)
-        if (p.ok) sources.push([`Dashboard ${number}`, `/projects/${number}/dashboard`, `projects/${(await p.json()).id}/dashboard`, 'dashboard'])
+        if (p.ok) {
+          const id = (await p.json()).id
+          sources.push([`Dashboard ${number}`, `/projects/${number}/dashboard`, `projects/${id}/dashboard`, 'dashboard'])
+          sources.push([`Milestones ${number}`, `/projects/${number}/milestones`, `projects/${id}/milestones`, 'milestones'])
+        }
         else skipped.push(`${who}: ${number} not visible (HTTP ${p.status})`)
       }
       if (me.capabilities.portfolio) sources.push(['Portfolio', '/portfolio', 'portfolio', 'portfolio'])
@@ -144,9 +153,9 @@ async function open(page, source, ready) {
       sources.push(['Home (all projects)', '/home?projects=all', 'home', 'home']) // last: the app remembers the chosen scope
       for (const [label, source, ready, kind] of sources) {
         await pace()
-        const data = await open(page, source, ready)
+        const data = await open(page, source, ready, kind === 'milestones' ? 'main table a[data-count]' : undefined)
         const tiles = await page.evaluate(extract)
-        const required = AGREED[kind].filter((name) => kind !== 'home' || !name.startsWith('On Track') || data.metrics.onTrack.evaluated > 0)
+        const required = (AGREED[kind] ?? []).filter((name) => kind !== 'home' || !name.startsWith('On Track') || data.metrics.onTrack.evaluated > 0)
         if (kind === 'home') {
           // Lanes, On hold and segments are named by their link, so a renamed lane still counts as present.
           const status = (t) => new URL(t.href, base).searchParams.get('status')
@@ -158,9 +167,11 @@ async function open(page, source, ready) {
               missing.push(`${who} ${label}: Tasks by Project segment ${p.projectNumber} ${l.lane}`)
         }
         if (kind === 'dashboard') {
-          required.push(...data.disciplines.flatMap((d) => ['Open', 'Overdue', 'Blocked'].map((x) => `${d.name} · ${x}`)))
+          required.push(...data.disciplines.flatMap((d) => ['Open', 'Overdue', 'Blocked', 'Due ≤ 14 d'].map((x) => `${d.name} · ${x}`)))
           for (const card of tiles.filter((t) => t.card && !t.href)) card.href = `${source.replace('/dashboard', '')}/tasks?${data[card.name === 'Blocked' ? 'blocked' : 'dueThisWeek'].link}`
         }
+        if (kind === 'milestones') required.push(...data.flatMap((m) => ['Issued', 'Deliverables', 'Complete', 'Tasks',
+          ...(m.taskOverdue > 0 ? ['Overdue'] : []), ...(m.taskBlocked > 0 ? ['Blocked'] : [])].map((x) => `${m.key} · ${x}`)))
         for (const name of required) if (!tiles.some((t) => t.name === name && (t.href || kind === 'portfolio'))) missing.push(`${who} ${label}: ${name}`)
         if (kind === 'portfolio') for (const tile of tiles.filter((t) => !t.href && AGREED.portfolio.includes(t.name))) {
           // A filter tile has no link of its own: clicking it sets the page's filters, and that URL is its list.

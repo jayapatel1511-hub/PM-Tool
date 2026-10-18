@@ -6,8 +6,8 @@ Slice S01 merged into claude/build-039-050; other slices not started.
 |---|---|---|
 | AC-FIG-01 | S04, S13 | UNRUN |
 | AC-FIG-02 | S04 | UNRUN |
-| AC-FIG-03 | S03, S13 | UNRUN |
-| AC-FIG-04 | S03, S13 | UNRUN |
+| AC-FIG-03 | S03, S13 | PASS (local): Uncommitted is 12 while the Planner's remaining is 24; a partial row returns null at 12 and -3 at -3 (`WorkloadTests.Uncommitted_never_claims_spare_capacity_for_a_partial_row`, `WorkloadApiTests.Uncommitted_is_computed_on_the_server`). `resources.cjs`: flag on shows "Uncommitted −12 h" and no Workload cell says Remaining; flag off shows "Remaining N h". AC-PLN-11 regression test passes unchanged. The picker's "24 h free" is not asserted in a browser test; the API test pins its Planner value. S13 flag removal pending. |
+| AC-FIG-04 | S03, S13 | PARTIAL: Workload with the flag on: the grid's aria-describedby is the uncommitted basis line and the Method step names Uncommitted. My Staff: the free figure's tooltip and description are the remaining-capacity basis (`supervisor-capacity.cjs`); flag off has no tooltip or description. `resources.cjs` and `supervisor-capacity.cjs` report 0 axe violations. The picker uses the same `CapacityFigure` component but has no browser check of its own; the planner suite was not run. |
 | AC-FIG-05 | S01, S02 | PASS (local): domain edges 39/40/90/91/110/111 % (S01, `WorkloadTests.Load_bands_follow_settings_and_default_to_todays_shades`); API cells carry `band`: 100 % Near, 115 % Over, no-availability with committed hours Over (`WorkloadApiTests.Cells_carry_bands_over_week_and_thresholds_from_settings`); `resources.cjs` keeps every fixture cell's shade (130, 156, 95, 50, 0 %). |
 | AC-FIG-06 | S01, S02 | PASS (local): with amber 80 and over 120, 100 % and 115 % are Near, Over-assigned is false and the response thresholds are 120/80/40; restoring defaults restores bands (`Cells_carry_bands_over_week_and_thresholds_from_settings`). Each change writes one activity entry; 49, 301 and 101 and a non-Admin change are refused (`Workload_threshold_changes_are_audited_and_validated`). Legend renders the server thresholds; the browser check covers the defaults (110, 90, 40 %). |
 | AC-FIG-07 | S02 | PASS (local): 100 % this week and 115 % next week give `overWeek` 2026-09-21 (`Cells_carry_bands_over_week_and_thresholds_from_settings`); `resources.cjs` checks the Over-assigned chip names the server's week. |
@@ -45,6 +45,23 @@ Assumptions (defaults from specs/DECISIONS.md):
 - Over-assigned and Under-assigned now read `workload_over_pct` and `workload_under_pct`; the export is unchanged.
 
 Left for Jay: Tier B review. Nothing needs GitHub, homedev or sudo.
+
+## Build 041-S03
+
+Merged build/041-S03 (29c14945) into claude/build-039-050 with no conflicts. On the merged tree: `dotnet build Hub.slnx` 0 errors; full `dotnet test Hub.slnx` 1200 passed, 0 failed; `web` `npm run build` and `npm run lint` pass. Builder ran `resources.cjs` (3 runs) and `supervisor-capacity.cjs` on the slice branch with 0 axe violations with the flag off and on; browser suites not re-run on the merged tree. Not run: coverage gate, `npm run test:planner`, ui-review, calm-acceptance.
+
+Assumptions (defaults from specs/DECISIONS.md):
+
+- 041-D1: the Workload figure is named "Uncommitted".
+- 041-D3: Workload keeps today's partial rule for every row (viewer cannot see every Restricted project, or a project filter is applied).
+- 041-D9: only the new name and the basis lines are behind `flag.figure_names`; the server returns `uncommitted` whether the flag is on or off.
+- The flag is declared as `FlagDef("figure_names", "041")`, the first declared flag; `FlagsTests` and `FlagsApiTests` now check that only declared flags are flag settings and each starts off.
+- `uncommitted` is computed from the 1-decimal rounded available and committed values, matching the previous client computation (no -0).
+- The wording of `workload.method5Named` was chosen by the builder.
+- A Partial view figure in the picker and My Staff keeps its PLN-15 tooltip; only non-partial figures get the new basis tooltip.
+- The flag-off "no at most wording" check is on the Workload page; the Planner's "at most" wording belongs to S04.
+
+Left for Jay: turning on `flag.figure_names` in review and pilot, which S13 depends on. Nothing needs GitHub, homedev or sudo.
 
 ## Build 041-S05
 

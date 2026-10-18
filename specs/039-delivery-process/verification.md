@@ -19,7 +19,7 @@ Per FR-DLV-24, this file records checks until `trace_spec.py --report` (slice S1
 | AC-DLV-11 | S02 | PASS (local): `tools/test_coverage_gate.py`: a line hit only in the second file is counted once; one file gives the same result as before on a fixture and on real coverage files; merging the 4 real files from the builder run clears both gates (96.3 % branches, 95.0 % lines) |
 | AC-DLV-12 | S03 | PARTIAL: `tools/test_ci_tests.py` (11 count tests) covers a missed shard (fails and names the cases), a case run twice, a missing test list, a drop below main for backend and browser suites, the `replace-test` label, a first run that passes and publishes, and the real step list; locally 1183 listed = 1183 run (635 + 162 + 227 + 159) and removing api-3 names the 159 missing cases; the GitHub run, main artifact download and label event not yet proven |
 | AC-DLV-13 | S07 | UNRUN |
-| AC-DLV-14 | S04 | UNRUN |
+| AC-DLV-14 | S04 | PARTIAL: `tools/test_pr_checks.py` fixtures pass: additive changes, guard triggers and the `contract` label pass; drop, rename, alter, dropped check constraint, destructive `Sql` and unreadable `Sql` (concatenation, identifier, second positional argument, dynamic EXECUTE) fail; not yet run as a GitHub check on a real pull request |
 | AC-DLV-15 | S08 | UNRUN |
 | AC-DLV-16 | S14 | UNRUN |
 | AC-DLV-17 | S14 | UNRUN |
@@ -118,3 +118,17 @@ Assumptions:
 Left for Jay:
 - First remote CI runs on a pull request and on main: confirm `gh run list` / `gh run download` work with `actions: read`, main publishes `test-counts`, and the `replace-test` label exists and re-runs `gate` when applied.
 - Making `gate` a required check belongs to S05.
+
+## Build 039-S04
+
+Checks on the merged tree (clean merge; only `tools/pr_checks.py`, `tools/test_pr_checks.py` and `tools/ci_steps.txt` changed): `dotnet build Hub.slnx` 0 errors; `python3 -m unittest tools/test_pr_checks.py` 15 tests OK; `python3 tools/test_ci_tests.py` OK; `python3 tools/pr_checks.py migrations --base HEAD^1` exit 0; `python3 tools/trace_spec.py --check` clean. No web code changed. No flag: the lint runs only in the pull_request `checks` step, so app behaviour is unchanged.
+
+Assumptions:
+- No Open decision default from `specs/DECISIONS.md` was relied on.
+- A literal followed by `, suppressTransaction:` counts as readable; a second positional argument or `+` concatenation counts as unreadable and fails without the `contract` label.
+- Interpolated strings (`$"...{x}..."`) are read as literals; values inside the braces are not checked.
+- Trigger-event clauses (BEFORE/AFTER/INSTEAD OF ... ON) are ignored like ON DELETE/ON UPDATE, so the five existing guard-trigger migrations report no operations; existing migrations are never linted.
+
+Left for Jay:
+- Run the migrations check on a real GitHub pull request (and create the `contract` label) so AC-DLV-14 can be marked PASS.
+- Making it a required check in branch protection belongs to S05.

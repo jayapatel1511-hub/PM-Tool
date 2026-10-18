@@ -90,6 +90,120 @@ class SizeCheckTests(unittest.TestCase):
         self.assertEqual(pr_checks.size_verdict(1001, set())[0], 1)
 
 
+def migration(up, name="Change"):
+    return f"""using Microsoft.EntityFrameworkCore.Migrations;
+
+namespace Hub.Api.Data.Migrations
+{{
+    public partial class {name} : Migration
+    {{
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {{
+{up}
+        }}
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {{
+            migrationBuilder.DropColumn(name: "x", schema: "hub", table: "t");
+            migrationBuilder.Sql("DROP TABLE hub.t;");
+        }}
+    }}
+}}
+"""
+
+
+ADDITIVE = """            migrationBuilder.AddColumn<string>(name: "x", schema: "hub", table: "t", type: "text", nullable: true);
+            migrationBuilder.CreateTable(name: "u", schema: "hub", columns: table => new { id = table.Column<Guid>(type: "uuid", nullable: false),
+                deleted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true) },
+                constraints: table => table.ForeignKey(name: "fk", column: x => x.id, principalTable: "t", onDelete: ReferentialAction.Cascade));
+            migrationBuilder.CreateIndex(name: "ix", schema: "hub", table: "t", column: "x");
+            // Idempotent backfill: safe to re-run.
+            migrationBuilder.Sql(\"\"\"
+                UPDATE hub.t SET x = 'drop me' WHERE x IS NULL; -- DELETE nothing
+                ALTER TABLE hub.u ADD CONSTRAINT fk2 FOREIGN KEY (id) REFERENCES hub.t (id) ON DELETE CASCADE;
+                \"\"\");"""
+
+
+class MigrationLintTests(unittest.TestCase):
+    """AC-DLV-14: contract operations in added migrations fail unless `contract` is applied."""
+
+    def setUp(self):
+        self.repo = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.repo)
+        git(self.repo, "init", "-q")
+        git(self.repo, "config", "user.email", "t@example.invalid")
+        git(self.repo, "config", "user.name", "t")
+        # An existing migration that drops a column is not linted.
+        self.write("20200101000000_Old.cs", migration('            migrationBuilder.DropColumn(name: "y", schema: "hub", table: "t");', "Old"))
+        git(self.repo, "add", ".")
+        git(self.repo, "commit", "-qm", "base")
+        self.base = subprocess.run(["git", "-C", self.repo, "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+
+    def write(self, name, text):
+        file = pathlib.Path(self.repo, pr_checks.MIGRATIONS, name)
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.write_text(text)
+
+    def add(self, up, designer=""):
+        self.write("20990101000000_Change.cs", migration(up))
+        self.write("20990101000000_Change.Designer.cs", designer or 'migrationBuilder.DropTable(name: "generated");')
+        self.write("HubDbModelSnapshot.cs", 'b.DropColumn("generated");')
+        # The existing migration is edited too: still not linted.
+        self.write("20200101000000_Old.cs", migration('            migrationBuilder.RenameColumn(name: "a", table: "t", newName: "b");', "Old"))
+        git(self.repo, "add", ".")
+        git(self.repo, "commit", "-qm", "change")
+
+    def run_lint(self, labels=""):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.chdir(self.repo):
+            code = pr_checks.main(["migrations", "--base", self.base, "--labels", labels])
+        return code, out.getvalue()
+
+    def test_additive_migration_with_idempotent_backfill_passes(self):
+        self.add(ADDITIVE)
+        self.assertEqual(self.run_lint(), (0, "No contract operations in added migrations.\n"))
+
+    def test_each_contract_operation_fails_and_names_file_and_operation(self):
+        cases = {
+            'migrationBuilder.DropColumn(name: "x", schema: "hub", table: "t");': "DropColumn",
+            'migrationBuilder.RenameColumn(name: "x", schema: "hub", table: "t", newName: "y");': "RenameColumn",
+            'migrationBuilder.RenameTable(name: "t", schema: "hub", newName: "u");': "RenameTable",
+            'migrationBuilder.AlterColumn<string>(name: "x", schema: "hub", table: "t", nullable: false);': "AlterColumn",
+            'migrationBuilder.DropCheckConstraint(name: "ck", schema: "hub", table: "t");': "DropCheckConstraint",
+            'migrationBuilder.DropForeignKey(name: "fk", schema: "hub", table: "t");': "DropForeignKey",
+            'migrationBuilder.DropTable(name: "t", schema: "hub");': "DropTable",
+            'migrationBuilder.Sql("DROP TABLE hub.t;");': "Sql DROP",
+            'migrationBuilder.Sql(@"truncate hub.t");': "Sql TRUNCATE",
+            'migrationBuilder.Sql($"DELETE FROM hub.{table} WHERE x IS NULL");': "Sql DELETE",
+            'migrationBuilder.Sql("ALTER TABLE hub.t RENAME COLUMN x TO y");': "Sql RENAME",
+            'migrationBuilder.Sql("""\n    ALTER TABLE hub.t ALTER COLUMN x TYPE integer USING x::integer;\n    """);': "Sql ALTER ... TYPE",
+        }
+        for up, op in cases.items():
+            with self.subTest(op=op):
+                self.setUp()
+                self.add(ADDITIVE + "\n            " + up)
+                code, out = self.run_lint()
+                self.assertEqual(code, 1)
+                self.assertEqual(out, f"::error file={pr_checks.MIGRATIONS}20990101000000_Change.cs::{op} is a contract operation."
+                                      " Expand only, or Jay applies the label `contract`.\n")
+
+    def test_contract_label_passes(self):
+        self.add('            migrationBuilder.DropColumn(name: "x", schema: "hub", table: "t");')
+        code, out = self.run_lint("tier-b, contract")
+        self.assertEqual(code, 0)
+        self.assertIn("::warning file=", out)
+        self.assertIn("DropColumn (label `contract` applied)", out)
+
+    def test_down_designer_snapshot_and_existing_migrations_are_not_linted(self):
+        self.add(ADDITIVE)
+        self.assertEqual(self.run_lint()[0], 0)
+        self.assertEqual(pr_checks.added_migrations(self.base, cwd=self.repo), [f"{pr_checks.MIGRATIONS}20990101000000_Change.cs"])
+
+    def test_repository_migrations_are_existing_and_not_linted(self):
+        # The current tree adds no migration against itself; the lint passes on an empty diff.
+        self.assertEqual(pr_checks.migrations("HEAD", "HEAD", cwd=str(ROOT)), (0, "No contract operations in added migrations."))
+
+
 class GeneratedAttributeTests(unittest.TestCase):
     """AC-DLV-03: `git check-attr` on the repository's own paths."""
 

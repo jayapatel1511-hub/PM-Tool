@@ -6,7 +6,7 @@ Per FR-DLV-24, this file records checks until `trace_spec.py --report` (slice S1
 
 | AC | Slice | Status |
 |---|---|---|
-| AC-DLV-01 | S05 | UNRUN |
+| AC-DLV-01 | S05 | UNRUN (human-only: Jay applies the settings with the `gh api` commands in `docs/runbooks/delivery.md` and records the readback in `acceptance.md`) |
 | AC-DLV-02 | S01 | PARTIAL: passes locally against a temporary git repo (350 hand-written lines plus an 11,000-line Designer file pass with no warning, 450 warns and passes, 1,050 fails, 1,050 with label `large` passes); not yet run in GitHub CI on a real pull request |
 | AC-DLV-03 | S01 | PASS (local): `git check-attr` reports `linguist-generated` set and `diff` unset for a Designer file, the snapshot, both combined spec files, `TRACEABILITY.md` and `package-lock.json`; nothing else in `git ls-files` is marked |
 | AC-DLV-04 | S09 | PASS (local): FlagsTests: a one-entry list gives `flag.demo` as an on/off setting, default off, group `flags`; the empty list adds nothing to `OrgSettings.Defs` |
@@ -132,3 +132,20 @@ Assumptions:
 Left for Jay:
 - Run the migrations check on a real GitHub pull request (and create the `contract` label) so AC-DLV-14 can be marked PASS.
 - Making it a required check in branch protection belongs to S05.
+
+## Build 039-S05
+
+Checks on the merged tree (clean merge; only `docs/runbooks/delivery.md` and `specs/human-only.txt` added): `dotnet build Hub.slnx` 0 errors; `python3 -m unittest tools/test_pr_checks.py` OK; `python3 tools/build_spec.py --check` up to date; `python3 tools/trace_spec.py --check` clean. Documentation only: no flag, no code change, app behaviour unchanged.
+
+Assumptions:
+- 039-D3 default: the drift limit is 50 commits on origin/main since the branch started.
+- 039-D2 default: no machine account, so protection requires a pull request with 0 approvals and Tier B stays a label control.
+- Required check names are the `ci.yml` job names (domain, api-1, api-2, api-3, web, checks, gate); the trace check is required through `checks`, which runs `trace_spec.py --check`.
+- Admins are included in the protection, so direct pushes by Jay are refused, as AC-DLV-01 needs.
+- The `tier` and `review` checks and automatic merge are left to S13; the runbook says to add them then.
+- `acceptance.md` is not created here; S11 owns its template.
+- `specs/human-only.txt` format is the ID, a space, then the reason; S12 may tighten it.
+
+Left for Jay:
+- Apply the repository merge settings and the protection on main with the two `gh api` commands in `docs/runbooks/delivery.md`, run the readback commands and paste the output into `specs/039-delivery-process/acceptance.md`.
+- Confirm AC-DLV-01 by hand: a direct push is refused, a pull request with a failing check cannot merge, and a merge lands as a squash commit with the head branch deleted.

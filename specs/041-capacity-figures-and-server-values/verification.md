@@ -13,8 +13,8 @@ Slice S01 merged into claude/build-039-050; other slices not started.
 | AC-FIG-07 | S02 | PASS (local): 100 % this week and 115 % next week give `overWeek` 2026-09-21 (`Cells_carry_bands_over_week_and_thresholds_from_settings`); `resources.cjs` checks the Over-assigned chip names the server's week. |
 | AC-FIG-08 | S07, S09, S10, S11 | UNRUN |
 | AC-FIG-09 | S05 | PASS (local): `PermissionSweepTests.Open_role_changes_follow_the_owner_rule` and the `PermissionMatrixTests` theory `Open_role_changes_need_the_proposal_gate_and_pm_or_creator` (role created by a Discipline Lead: PM and creator allowed, another Discipline Lead gets `perm.owner`, Team Member gets the proposal refusal, all refused on Archived); the row's `canManage` calls the same `Permissions.ManageOpenRole`; OpenRoleApiTests unchanged and passing. |
-| AC-FIG-10 | S05, S06 | PARTIAL: server side passes (S05). `Changing_roles_on_a_complete_project_needs_a_correction_reason` passes unchanged; all four sites share `ProjectStatus.NeedsCorrectionReason`. Allocations and readiness forms reading `permissions.needsReason` are S06. |
-| AC-FIG-11 | S05, S06 | PARTIAL: server side passes (S05). Endpoint still refuses an 81-character label, CHECK text unchanged, no pending model changes, `Reference_returns_the_role_label_limit` confirms `limits.roleLabel` is 80. Role form reading its maximum length from `/reference` is S06. |
+| AC-FIG-10 | S05, S06 | PASS (local): server side passes (S05). Client (S06): the open-role and propose-promise forms ask for a reason exactly when `permissions.needsReason` is true; `resources.cjs` covers the role form with needsReason true and false on a Complete project, `design-basis.cjs` the propose form with needsReason true and false on an Active project. |
+| AC-FIG-11 | S05, S06 | PASS (local): server side passes (S05). Client (S06): the role label maxlength comes from `/reference` `limits.roleLabel` instead of a hard-coded 80; `resources.cjs` checks maxlength 80. |
 | AC-FIG-12 | S12, S13 | UNRUN |
 | AC-FIG-13 | S08, S11 | UNRUN |
 
@@ -58,3 +58,15 @@ Assumptions (defaults from specs/DECISIONS.md):
 - `OpenRoleLimits.Label = 80` feeds the HubDb CHECK through an interpolated string with identical SQL text, so no migration.
 
 Left for Jay: Tier B review. The client half of AC-FIG-10 and AC-FIG-11 is slice S06.
+
+### Build 041-S06
+
+Merged build/041-S06 (d2052572) into claude/build-039-050 with no conflicts. On the merged tree: `dotnet build Hub.slnx` 0 errors; `npm run build` passed; `npm run lint` no errors (existing warnings only); `node tests/resources.cjs` and `node tests/design-basis.cjs` passed with no errors and no unmocked calls. Builder also ran OpenRoleApiTests (9 passed).
+
+Assumptions:
+
+- S06 has no flag in tasks.md or plan.md, so it ships unflagged; the client reads values the server already sends (S05).
+- Until `/reference` has loaded, the role label input has no maxlength; the server still enforces 80 characters.
+- No open decision in specs/DECISIONS.md applied to this slice.
+
+Left for Jay: nothing for this slice.

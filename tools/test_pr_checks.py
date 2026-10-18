@@ -177,6 +177,10 @@ class MigrationLintTests(unittest.TestCase):
             'migrationBuilder.Sql($"DELETE FROM hub.{table} WHERE x IS NULL");': "Sql DELETE",
             'migrationBuilder.Sql("ALTER TABLE hub.t RENAME COLUMN x TO y");': "Sql RENAME",
             'migrationBuilder.Sql("""\n    ALTER TABLE hub.t ALTER COLUMN x TYPE integer USING x::integer;\n    """);': "Sql ALTER ... TYPE",
+            'migrationBuilder.Sql("ALTER TABLE hub.t " +\n                "DROP COLUMN x;");': pr_checks.UNVERIFIABLE,
+            'migrationBuilder.Sql(DropSql);': pr_checks.UNVERIFIABLE,
+            'migrationBuilder.Sql("SELECT 1", false);': pr_checks.UNVERIFIABLE,
+            'migrationBuilder.Sql("DO $$ BEGIN EXECUTE \'DROP TABLE hub.t\'; END $$");': "Sql dynamic EXECUTE",
         }
         for up, op in cases.items():
             with self.subTest(op=op):
@@ -186,6 +190,30 @@ class MigrationLintTests(unittest.TestCase):
                 self.assertEqual(code, 1)
                 self.assertEqual(out, f"::error file={pr_checks.MIGRATIONS}20990101000000_Change.cs::{op} is a contract operation."
                                       " Expand only, or Jay applies the label `contract`.\n")
+
+    def test_append_only_guard_trigger_passes(self):
+        # Copied from 20261001213118_TaskStartAuthorisation and 20260925015745_InitialSchema.
+        self.add(ADDITIVE + """
+            migrationBuilder.Sql(\"\"\"
+                CREATE FUNCTION hub.guard_task_start_authorisation() RETURNS trigger LANGUAGE plpgsql AS $$
+                BEGIN
+                    IF TG_OP = 'DELETE' THEN RAISE EXCEPTION 'Task start authorisations cannot be deleted'; END IF;
+                    RETURN NEW;
+                END $$;
+                CREATE TRIGGER guard_task_start_authorisation BEFORE UPDATE OR DELETE ON hub.task_start_authorisation
+                    FOR EACH ROW EXECUTE FUNCTION hub.guard_task_start_authorisation();
+                CREATE TRIGGER guard_output_commitment BEFORE INSERT OR UPDATE OF status, owner OR DELETE ON hub.output_commitment
+                    FOR EACH ROW EXECUTE FUNCTION hub.guard_task_start_authorisation();
+                \"\"\", suppressTransaction: false);
+            migrationBuilder.Sql(@"CREATE TRIGGER activity_log_no_truncate BEFORE TRUNCATE ON hub.activity_log FOR EACH STATEMENT EXECUTE FUNCTION hub.activity_log_immutable();");""")
+        self.assertEqual(self.run_lint(), (0, "No contract operations in added migrations.\n"))
+
+    def test_repository_guard_trigger_migrations_have_no_sql_contract_operations(self):
+        for name in ("20260925015745_InitialSchema", "20260927210259_SubmissionReadinessSchema", "20260927234721_DesignBasisSchema",
+                     "20260928003457_ReadinessSchema", "20261001213118_TaskStartAuthorisation"):
+            with self.subTest(name=name):
+                source = (ROOT / pr_checks.MIGRATIONS / f"{name}.cs").read_text()
+                self.assertEqual(pr_checks.contract_operations(source), [])
 
     def test_contract_label_passes(self):
         self.add('            migrationBuilder.DropColumn(name: "x", schema: "hub", table: "t");')

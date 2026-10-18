@@ -89,7 +89,7 @@ Each slice is one PR. It merges dark behind its §52.7 flag and adds that flag's
 ## Part C: allocation preview
 
 - [ ] S07 Allocation preview (S). After packet 041 S01 and S02.
-  - `preview=true` on allocation create, edit and confirm: same validation, rolled-back transaction, the planner read returns the affected person-weeks.
+  - `preview=true` on allocation create, edit and confirm: same validation, rolled-back transaction, the planner read returns the affected person-weeks. Capacity, planned, free, load band and existing capacity warnings are included; Overlapping Plans and Deliverable Pressure stay deferred (Jay, 2026-10-18), without fabricated indicator values.
   - "After this change" line in the allocation form and planner edit, refreshed after a short pause in typing.
   - Flag: `flag.allocation_preview`.
   - Covers FR-VER-12, FR-VER-13, FR-VER-18; AC-VER-09, AC-VER-12.

@@ -29,6 +29,7 @@ Reuse first. New storage is a few columns and three small tables.
 - **Preview** (§52.4):
   - Allocation create, edit and confirm (`src/Hub.Api/Features/Allocations.cs:44-52`) take `preview`. The handler runs inside a transaction that is rolled back after computing the person-week figures with the planner's existing read.
   - Notifications and log rows are queued in the same transaction, so rollback discards them.
+  - Return existing capacity/load warnings only. Overlapping Plans and Deliverable Pressure stay deferred (Jay, 2026-10-18); omit those unavailable indicators rather than returning false or zero.
 - **Baselines** (§52.5):
   - One `DeliverableBaseline` table (number, dates, owner, estimate, remaining hours, reason, actor, time), written by packet 046's re-baseline command.
   - The panel and export add the delta and the list.

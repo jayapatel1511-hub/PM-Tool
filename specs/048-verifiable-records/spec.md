@@ -27,7 +27,7 @@
    - a required miss category on Not Met;
    - an optional Met confirmation step;
    - a six-week trend and a "Why commitments were missed" table and report.
-3. **Allocation preview** (§52.4; FR-VER-12, FR-VER-13): `preview=true` on allocation create, edit and confirm, through the save path in a rolled-back transaction, and "After this change" figures in the form.
+3. **Allocation preview** (§52.4; FR-VER-12, FR-VER-13): `preview=true` on allocation create, edit and confirm, through the save path in a rolled-back transaction, and "After this change" figures in the form. Figures cover capacity, planned, free, load band and existing capacity warnings; Overlapping Plans and Deliverable Pressure remain deferred by Jay's 2026-10-18 clarification.
 4. **Baseline effort and owner** (§52.5; FR-VER-14, FR-VER-15): numbered, never-edited deliverable baselines B1 to Bn holding dates, owner, estimate and remaining hours, with the change since the current baseline.
 5. **Revision-code check** (§52.6; FR-VER-16, FR-VER-17): an optional project convention, with Non-standard and Out-of-sequence marks that never block, and a re-check job.
 6. **Shipping dark** (§52.7; FR-VER-18): one flag per part; flag off is today's behaviour.

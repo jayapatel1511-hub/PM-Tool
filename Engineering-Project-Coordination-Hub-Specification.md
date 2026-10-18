@@ -6887,7 +6887,7 @@ Every addition is deterministic and explainable. Nothing here scores or ranks pe
 
 ### 52.4 Allocation preview
 
-- **FR-VER-12.** The allocation create, edit and confirm commands (§37.6) MUST accept `preview=true`. A preview runs the same validation and figure computation as the save inside a transaction that is always rolled back. It returns the affected person-weeks after the change: capacity, planned, free, the load band (packet 041) and the Over-allocated, Overlapping Plans and Deliverable Pressure indicators. It writes nothing, logs nothing and notifies no one.
+- **FR-VER-12.** The allocation create, edit and confirm commands (§37.6) MUST accept `preview=true`. A preview runs the same validation and figure computation as the save inside a transaction that is always rolled back. It returns the affected person-weeks after the change: capacity, planned, free, the load band (packet 041) and the existing over-capacity/load warnings. Overlapping Plans and Deliverable Pressure remain deferred under §39.12; a preview MUST NOT return fabricated false or zero values for those unavailable indicators. It writes nothing, logs nothing and notifies no one.
 
 - **FR-VER-13.** The allocation form and planner edit MUST show "After this change: [planned] of [capacity] h, [band]" for each affected week before save, refreshed after a short pause in typing. The save recomputes everything. If the saved figures differ from the last preview because of a concurrent change, the form shows the new figures. The over-capacity reason of FR-CAP-07 and the rowVersion rules are unchanged.
 
@@ -6947,7 +6947,7 @@ Each decision below uses its default until Jay decides otherwise. The rows are a
 
 | # | Decision | Default used |
 |---|---|---|
-| D1 | Approve this amendment's scope | Approved by Jay 2026-10-18 with the listed defaults |
+| D1 | Approve this amendment's scope | Approved by Jay 2026-10-18 with the listed defaults; Jay also confirmed that allocation previews use existing capacity warnings and keep Overlapping Plans and Deliverable Pressure deferred |
 | D2 | Chain granularity | One chain per project plus one organisation chain |
 | D3 | Where the head hash is kept off the database | In the nightly off-host backup manifest of packet 044 |
 | D4 | May `flag.verifiable_log` be switched off once on? | No; switching off needs a recorded decision, and the chain then records a "Chain paused" entry |

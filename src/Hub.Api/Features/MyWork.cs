@@ -22,10 +22,13 @@ public static class MyWorkEndpoints
 
     /// The projects whose work the viewer may see for this person: every visible project for themselves, their direct
     /// reports (Supervisors), Executives and Admins; for a PM only the projects they manage (FR-009, AC-MYW-04).
-    static async Task<List<Guid>> Scope(HubDb db, Access access, Guid personId, Guid? personSupervisorId)
+    static async Task<List<Guid>> Scope(HubDb db, Access access, Guid personId, Guid? personSupervisorId, OrgSettings settings)
     {
         var visible = access.VisibleProjects().Where(p => p.Status != ProjectStatus.Archived && p.Status != ProjectStatus.Cancelled);
         var a = access.Actor;
+        if (settings.IsFlagOn("org_structure") && (a.Supervisor || await PeopleScope.LeadsUnit(db, a))
+            && (await PeopleScope.Load(db, a, settings.IncludeIndirectReports)).Contains(personId))
+            return await visible.Select(p => p.Id).ToListAsync();
         if (Permissions.ViewPersonWork(a, personId, personSupervisorId)) return await visible.Select(p => p.Id).ToListAsync();
         var managed = await visible.Where(p => (p.ProjectManagerId == a.Id || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == a.Id && m.RemovedAt == null && m.Roles.Contains(ProjectRole.PM)))
             && db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == personId && m.RemovedAt == null)).Select(p => p.Id).ToListAsync();
@@ -36,8 +39,8 @@ public static class MyWorkEndpoints
     static async Task<object> Work(Guid? userId, Access access, HubDb db, SettingsStore store, TimeProvider clock, CurrentUser me)
     {
         var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == (userId ?? me.Id)) ?? throw ApiException.NotFound();
-        var pids = await Scope(db, access, person.Id, person.SupervisorId);
         var s = await store.Get(db);
+        var pids = await Scope(db, access, person.Id, person.SupervisorId, s);
         var today = clock.Today(s);
         var now = clock.GetUtcNow();
         var pid = person.Id;
@@ -122,13 +125,35 @@ public static class MyWorkEndpoints
 
     sealed record PersonRow(Guid Id, string DisplayName, string? JobTitle, Guid? OfficeId, bool IsActive, Guid? SupervisorId);
 
-    static async Task<(List<PersonRow> People, List<Guid> Visible)> StaffScope(HubDb db, Access access, string? scope, bool? showInactive)
+    static async Task<(List<PersonRow> People, List<Guid> Visible)> StaffScope(HubDb db, Access access, string? scope, bool? showInactive, SettingsStore? store = null)
     {
         var a = access.Actor;
-        Access.Demand(Permissions.ViewStaff(a)); // AC-ASG-07: Supervisors, Executives and Admins
+        var settings = store == null ? new OrgSettings() : await store.Get(db);
+        var structure = settings.IsFlagOn("org_structure");
+        var unitLeader = structure && await PeopleScope.LeadsUnit(db, a);
+        Access.Demand(Permissions.ViewStaff(a).Ok || unitLeader ? Allow.Yes : Permissions.ViewStaff(a));
         var all = scope == "all";
         if (all && !Permissions.ViewAllStaff(a)) throw ApiException.Forbidden("perm.all_staff");
-        var q = db.Users.AsNoTracking().Where(u => all || u.SupervisorId == a.Id); // ASG-08: direct reports, read at request time
+        var q = db.Users.AsNoTracking().Where(u => all || u.SupervisorId == a.Id);
+        if (!all && structure)
+        {
+            HashSet<Guid>? scoped = null;
+            if (scope?.StartsWith("unit:") == true)
+            {
+                Check.That(Guid.TryParse(scope[5..], out _), "scope", "error.invalid");
+                var unit = Guid.Parse(scope[5..]);
+                Check.That(await db.Set<OrgUnit>().AnyAsync(u => u.Id == unit && u.LeaderId == a.Id && u.ClosedOn == null), "scope", "error.invalid");
+                scoped = await PeopleScope.LoadUnit(db, a, unit);
+            }
+            else if (scope == "reports")
+            {
+                Check.That(settings.IncludeIndirectReports, "scope", "error.invalid");
+                scoped = await PeopleScope.Load(db, a, true, includeLedUnits: false);
+            }
+            else if (unitLeader && !a.Supervisor)
+                scoped = await PeopleScope.Load(db, a, settings.IncludeIndirectReports);
+            if (scoped != null) q = db.Users.AsNoTracking().Where(u => scoped.Contains(u.Id));
+        }
         if (showInactive != true) q = q.Where(u => u.IsActive);
         var people = await q.OrderBy(u => u.DisplayName).Select(u => new PersonRow(u.Id, u.DisplayName, u.JobTitle, u.OfficeId, u.IsActive, u.SupervisorId)).ToListAsync();
         var visible = await access.VisibleProjects().Where(p => Live.Contains(p.Status)).Select(p => p.Id).ToListAsync(); // ASG-09: only work the viewer may see
@@ -138,7 +163,7 @@ public static class MyWorkEndpoints
     static async Task<object> Staff(string? scope, bool? showInactive, Guid? officeId, Guid? disciplineId, Guid? projectId, string? indicator,
         Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
-        var (people, visible) = await StaffScope(db, access, scope, showInactive);
+        var (people, visible) = await StaffScope(db, access, scope, showInactive, store);
         var s = await store.Get(db);
         var today = clock.Today(s);
         if (officeId is { } o) people = people.Where(p => p.OfficeId == o).ToList();
@@ -198,7 +223,7 @@ public static class MyWorkEndpoints
         rows = [.. rows.OrderByDescending(r => r.Overdue).ThenByDescending(r => r.Blocked).ThenBy(r => r.DisplayName)]; // FR-017 default sort
         return new
         {
-            Scope = scope == "all" ? "all" : "direct", CanSeeAll = Permissions.ViewAllStaff(access.Actor),
+            Scope = scope ?? "direct", CanSeeAll = Permissions.ViewAllStaff(access.Actor),
             Tiles = new
             {
                 Staff = rows.Count, Assignments = rows.Sum(r => r.Projects), WithOverdue = rows.Count(r => r.Overdue > 0), WithBlocked = rows.Count(r => r.Blocked > 0),
@@ -210,7 +235,7 @@ public static class MyWorkEndpoints
 
     static async Task<object> Assignments(Guid userId, string? scope, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
-        var (people, visible) = await StaffScope(db, access, scope, showInactive: true);
+        var (people, visible) = await StaffScope(db, access, scope, showInactive: true, store);
         var person = people.FirstOrDefault(p => p.Id == userId) ?? throw ApiException.Forbidden("perm.supervisor");
         var s = await store.Get(db);
         var today = clock.Today(s);

@@ -107,6 +107,8 @@ public class OutputCommitment : CoordinationRecord
 
 public class OutputCommitmentEvent : CoordinationRecord
 {
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid? MissCategoryId { get; set; }
     public Guid CommitmentId { get; set; }
     public string FromState { get; set; } = "";
     public string ToState { get; set; } = "";

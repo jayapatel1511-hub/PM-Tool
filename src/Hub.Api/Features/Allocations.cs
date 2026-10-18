@@ -41,15 +41,15 @@ public static class AllocationEndpoints
         api.MapGet("/projects/{projectId:guid}/allocations/export", ExportRows);
         api.MapGet("/projects/{projectId:guid}/allocations/review-options", ReviewOptions);
         api.MapGet("/projects/{projectId:guid}/allocations/{id:guid}", Detail);
-        api.MapPost("/projects/{projectId:guid}/allocations", Create).WithMetadata(new Coordination.AtomicCommand());
-        api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/edit", Edit).WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/allocations", Create).AddEndpointFilter<AllocationPreviewFilter>().WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/edit", Edit).AddEndpointFilter<AllocationPreviewFilter>().WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/cancel", Cancel).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/decline", Decline).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/complete", Complete).WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/users/{personId:guid}/availability", Availability);
         api.MapPut("/users/{personId:guid}/availability/{date}", SetAvailability);
         api.MapGet("/projects/{projectId:guid}/allocations/{id:guid}/confirmation-preview", ConfirmationPreview);
-        api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/confirm", Confirm).WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/confirm", Confirm).AddEndpointFilter<AllocationPreviewFilter>().WithMetadata(new Coordination.AtomicCommand());
     }
 
     static async Task NotifyChanged(HubDb db, Notifier notify, Project project, ResourceAllocation a)
@@ -106,14 +106,15 @@ public static class AllocationEndpoints
         await Validate(db, project, a.PersonId, a.Purpose, a.FromDate, a.ThroughDate, a.PlannedHours, days, links, store);
     }
 
-    static async Task<List<CapacityDay>> Capacity(HubDb db, Access access, ResourceAllocation candidate,
-        SettingsStore store, TimeProvider clock)
+    internal static async Task<List<CapacityDay>> Capacity(HubDb db, Access access, ResourceAllocation candidate,
+        SettingsStore store, TimeProvider clock, DateOnly? viewFrom = null, DateOnly? viewThrough = null)
     {
         var settings = await store.Get(db);
+        var first = viewFrom ?? candidate.FromDate; var last = viewThrough ?? candidate.ThroughDate;
         var today = clock.Today(settings);
         var person = await db.Users.AsNoTracking().SingleAsync(u => u.Id == candidate.PersonId);
         var confirmed = await db.Allocations.AsNoTracking().Where(a => a.PersonId == person.Id && a.Id != candidate.Id
-            && a.Status == AllocationStatus.Confirmed && a.FromDate <= candidate.ThroughDate && a.ThroughDate >= candidate.FromDate).ToListAsync();
+            && a.Status == AllocationStatus.Confirmed && a.FromDate <= last && a.ThroughDate >= first).ToListAsync();
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.AssigneeId == person.Id && t.DeletedAt == null
             && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold
             && db.Projects.Any(p => p.Id == t.ProjectId && (p.Status == ProjectStatus.Setup || p.Status == ProjectStatus.Active)))
@@ -131,19 +132,19 @@ public static class AllocationEndpoints
         var allocationIds = all.Select(a => a.Id).ToArray();
         var overrides = await db.AllocationDayOverrides.AsNoTracking().Where(d => allocationIds.Contains(d.AllocationId)).ToListAsync();
         var links = await db.AllocationWorkLinks.AsNoTracking().Where(l => allocationIds.Contains(l.AllocationId) && l.ReleasedAt == null).ToListAsync();
-        var personCalendar = (await PersonCapacity.Calendars(db, [person.Id], all.Max(a => a.ThroughDate)))[person.Id];
+        var personCalendar = (await PersonCapacity.Calendars(db, [person.Id], new[] { last, all.Max(a => a.ThroughDate) }.Max()))[person.Id];
         var reservations = new Dictionary<Guid, IReadOnlyDictionary<DateOnly, decimal>>();
         foreach (var a in all)
         {
             var dayHours = overrides.Where(d => d.AllocationId == a.Id).ToDictionary(d => d.WorkDate, d => d.Hours);
-            try { reservations[a.Id] = AllocationRules.Spread(a.FromDate, a.ThroughDate, a.PlannedHours, personCalendar, dayHours); }
+            try { reservations[a.Id] = a.PlannedHours == 0 ? new Dictionary<DateOnly, decimal>() : AllocationRules.Spread(a.FromDate, a.ThroughDate, a.PlannedHours, personCalendar, dayHours); }
             catch (ArgumentException) { throw ApiException.Conflict("allocation_calendar_changed", "coord.stale"); }
         }
-        var capacityOverrides = await PersonCapacity.Load(db, [person.Id], candidate.FromDate, candidate.ThroughDate, settings);
+        var capacityOverrides = await PersonCapacity.Load(db, [person.Id], first, last, settings);
         var versions = await db.PersonDateVersions.AsNoTracking().Where(v => v.PersonId == person.Id
-            && v.WorkDate >= candidate.FromDate && v.WorkDate <= candidate.ThroughDate).ToDictionaryAsync(v => v.WorkDate, v => v.RowVersion);
+            && v.WorkDate >= first && v.WorkDate <= last).ToDictionaryAsync(v => v.WorkDate, v => v.RowVersion);
         var result = new List<CapacityDay>();
-        for (var date = candidate.FromDate; date <= candidate.ThroughDate; date = date.AddDays(1))
+        for (var date = first; date <= last; date = date.AddDays(1))
         {
             var taskHours = taskDemand.Values.Sum(days => days.GetValueOrDefault(date));
             var linkedTaskHours = 0m;

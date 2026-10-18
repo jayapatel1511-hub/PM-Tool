@@ -26,6 +26,7 @@ import { fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { useFlag } from '@/lib/auth'
 import { DateText, FieldGroup, GroupRow, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
 import type { MilestoneRow } from './Milestones'
 import { CommentsSlot, ItemSlots, LinksSlot, RaiseSlot } from './slots-items'
@@ -46,6 +47,7 @@ export interface DeliverableRow {
   state?: (DeliverableStateView & { derivedPredecessorIds: string[]; derivedSuccessorIds: string[] }) | null
   tasks?: { id: string; key: string; name: string; status: string; dueDate?: string; assignee?: string }[]
 }
+type RevisionCheckSummary = { deliverables: { id: string; marks: string[]; issues: { id: string; revision: string; marks: string[] }[] }[] }
 
 const GROUP_LABEL: Record<string, string> = { discipline: 'common.discipline', milestone: 'field.MilestoneId', status: 'common.status', owner: 'common.owner', none: 'dgroup.none' }
 export const STATUSES = ['Not Started', 'In Progress', 'In Review', 'Revision Required', 'Ready to Issue', 'Issued', 'Accepted', 'On Hold', 'Cancelled']
@@ -62,8 +64,12 @@ function LiveDeliverablesTab() {
   const [bulk, setBulk] = useState<string | null>(null)
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = { disciplineId: sp.get('disciplineId'), status: sp.get('status'), milestoneId: sp.get('milestoneId'), ownerId: sp.get('ownerId'), typeId: sp.get('typeId'),
-    indicator: sp.get('indicator'), dueFrom: sp.get('dueFrom'), dueTo: sp.get('dueTo'), q: sp.get('q'), requiresReview: sp.get('requiresReview') }
-  const q = useQuery({ queryKey: ['p', p.id, 'deliverables', filters], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables${qs({ ...filters, includeTasks: true })}`) })
+    indicator: sp.get('indicator'), dueFrom: sp.get('dueFrom'), dueTo: sp.get('dueTo'), q: sp.get('q'), requiresReview: sp.get('requiresReview'), revisionWarning: sp.get('revisionWarning') }
+  const revisionEnabled = useFlag('revision_check')
+  const q = useQuery({ queryKey: ['p', p.id, 'deliverables', filters], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables${qs({ ...filters, revisionWarning: revisionEnabled ? filters.revisionWarning : undefined, includeTasks: true })}`) })
+  const revisionQ = useQuery({ queryKey: ['project', p.id, 'revision-check'], queryFn: () => get<RevisionCheckSummary>(`projects/${p.id}/revision-check`), enabled: revisionEnabled })
+  const marks = new Map((revisionQ.data?.deliverables ?? []).map((x) => [x.id, [...x.marks, ...x.issues.flatMap((i) => i.marks)]]))
+  const warningOnly = sp.get('revisionWarning') === 'true'
   const milestones = useQuery({ queryKey: ['p', p.id, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones`) })
   const group = sp.get('group') ?? 'discipline'
   const panel = sp.get('panel')
@@ -83,10 +89,10 @@ function LiveDeliverablesTab() {
     { id: 'progress', label: t('deliverable.progress'), sort: (d) => d.state?.progressPct, className: 'whitespace-nowrap text-right',
       cell: (d) => <span className="inline-flex items-center gap-2"><ProgressBar pct={d.state?.progressPct} label={progressLabel(d.state)} /><span className="text-xs/[18px] text-muted-foreground tabular-nums">{progressLabel(d.state)}</span></span> },
     { id: 'indicators', label: t('deliverable.indicators'), className: 'min-w-32', cell: (d) => <DeliverableIndicators s={d.state} /> },
-    { id: 'revision', label: t('field.Revision'), sort: (d) => d.revision, cell: (d) => d.revision || <Missing /> },
+    { id: 'revision', label: t('field.Revision'), sort: (d) => d.revision, cell: (d) => <span className="inline-flex items-center gap-2">{d.revision || <Missing />}{revisionEnabled && (marks.get(d.id)?.length ?? 0) > 0 && <span className="rounded bg-warn-bg px-1 text-xs text-warn">{marks.get(d.id)!.length}</span>}</span> },
     { id: 'issued', label: t('field.IssuedDate'), sort: (d) => d.issuedDate, className: 'text-right', cell: (d) => <DateText date={d.issuedDate} /> },
   ], q.data ?? [], (d) => [d.dueDate, d.key])
-  const rows = table.sorted
+  const rows = table.sorted.filter((d) => !warningOnly || (marks.get(d.id)?.length ?? 0) > 0)
   const groups = useMemo(() => {
     const key = (d: DeliverableRow) => group === 'milestone' ? (d.milestoneKey ? `${d.milestoneKey} ${d.milestoneName}` : t('deliverable.noMilestone'))
       : group === 'status' ? tv(d.status) : group === 'owner' ? d.ownerName ?? t('ind.unassigned') : group === 'none' ? '' : d.disciplineName ?? ''
@@ -162,6 +168,7 @@ function LiveDeliverablesTab() {
           <Field label={t('tfilter.dueTo')} htmlFor="deliverable-due-to" className="w-full sm:w-44">
             <Input id="deliverable-due-to" type="date" value={filters.dueTo ?? ''} onChange={(e) => set('dueTo', e.target.value)} />
           </Field>
+          {revisionEnabled && <Field label={t('revisionCheck.warningFilter')} htmlFor="deliverable-revision-warning" className="w-full sm:w-44"><select id="deliverable-revision-warning" className={selectCls} value={filters.revisionWarning ?? ''} onChange={(e) => set('revisionWarning', e.target.value)}><option value="">{t('revisionCheck.all')}</option><option value="true">{t('revisionCheck.withWarnings')}</option></select></Field>}
         </div>
       </FilterBar>
       {selected.size > 0 && (
@@ -325,6 +332,9 @@ function DeliverablePanel({ id }: PanelProps) {
   const project = useProject(q.data?.project.projectNumber)
   const milestones = useQuery({ queryKey: ['p', q.data?.project.id, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${q.data!.project.id}/milestones`), enabled: !!q.data })
   const openPanel = useItemPanel()
+  const baselineEnabled = useFlag('baseline_history')
+  const revisionEnabled = useFlag('revision_check')
+  const revisionQ = useQuery({ queryKey: ['project', q.data?.project.id, 'revision-check'], queryFn: () => get<RevisionCheckSummary>(`projects/${q.data!.project.id}/revision-check`), enabled: revisionEnabled && !!q.data })
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const data = q.data
@@ -404,6 +414,7 @@ function DeliverablePanel({ id }: PanelProps) {
       </FieldGroup>
       {q.data.relatedTasks?.length > 0 && <div className="px-4 py-3 text-sm">{t('interaction.relatedTasks')}: {q.data.relatedTasks.map((r: {id:string;key:string;name:string})=><button key={r.id} className="ml-2 underline underline-offset-2" onClick={()=>openPanel('Task',r.id)}>{r.key} {r.name}</button>)}</div>}
       <TabBar tabs={[{ id: 'tasks', label: t('ptab.tasks'), count: d.tasks?.length }, { id: 'deps', label: t('deliverable.dependencies') }, { id: 'issues', label: t('deliverable.issues'), count: data.issues.length },
+        ...(baselineEnabled ? [{ id: 'baselines', label: t('baseline.history') }] : []),
         ...(ItemSlots.Links ? [{ id: 'links', label: t('common.links') }] : []), ...(ItemSlots.Comments ? [{ id: 'comments', label: t('common.comments') }] : []),
         ...DELIVERABLE_TABS.map((x) => ({ id: x.id, label: x.label })), { id: 'history', label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'tasks' && (
@@ -431,7 +442,8 @@ function DeliverablePanel({ id }: PanelProps) {
           ))}
         </div>
       )}
-      {tab === 'issues' && <IssueHistory issues={data.issues} />}
+      {tab === 'issues' && <IssueHistory issues={data.issues} marks={revisionQ.data?.deliverables.find((x) => x.id === d.id)?.issues.flatMap((i) => i.marks) ?? []} />}
+      {tab === 'baselines' && baselineEnabled && <BaselineHistory deliverableId={d.id} people={data.people ?? data.project?.people ?? []} />}
       {tab === 'links' && <LinksSlot type="Deliverable" id={d.id} projectId={d.projectId} />}
       {tab === 'comments' && <CommentsSlot type="Deliverable" id={d.id} projectId={d.projectId} />}
       {DELIVERABLE_TABS.filter((x) => x.id === tab).map((x) => <div key={x.id}>{x.render(data)}</div>)}
@@ -442,6 +454,16 @@ function DeliverablePanel({ id }: PanelProps) {
       {issuing && <IssueDialog d={d} needsConfirm={perms.issueNeedsConfirm} onClose={() => { setIssuing(false); reload() }} />}
     </div></PickerProject.Provider>
   )
+}
+
+type Baseline = { id: string; number: number; startDate?: string; dueDate?: string; ownerId?: string; estimatedHoursTotal?: number; remainingHours?: number; reason?: string; actorId?: string; recordedAt: string }
+type BaselineResponse = { records: Baseline[]; people?: { id: string; displayName: string }[]; current?: string | null; delta?: { estimateHours?: number; remainingHours?: number; dueDays?: number; ownerBefore?: string; ownerAfter?: string } }
+function BaselineHistory({ deliverableId, people }: { deliverableId: string; people: { id: string; displayName: string }[] }) {
+  const q = useQuery({ queryKey: ['deliverable', deliverableId, 'baselines'], queryFn: () => get<BaselineResponse>(`deliverables/${deliverableId}/baselines`) })
+  if (q.isPending) return <div className="p-4"><Loading rows={3} /></div>
+  if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
+  const name = (id?: string) => [...(q.data.people ?? []), ...people].find((x) => x.id === id)?.displayName ?? id ?? '—'
+  return <div className="space-y-3 p-4">{!q.data.delta ? <p className="text-sm text-muted-foreground">{t('baseline.noCurrent')}</p> : <div className="grid gap-2 rounded-md border bg-muted p-3 text-sm sm:grid-cols-4"><span>Estimate Δ: {q.data.delta?.estimateHours ?? 0}h</span><span>Remaining Δ: {q.data.delta?.remainingHours ?? 0}h</span><span>Due Δ: {q.data.delta?.dueDays ?? 0}d</span><span>Owner: {name(q.data.delta?.ownerBefore)} → {name(q.data.delta?.ownerAfter)}</span></div>}<ol className="space-y-2">{q.data.records.map((r) => <li key={r.id} className="rounded-md border px-3 py-2 text-sm"><div className="flex flex-wrap justify-between gap-2"><strong>B{r.number}</strong><span className="text-muted-foreground">{r.recordedAt} · {name(r.actorId)}</span></div><div className="mt-1 grid gap-x-4 gap-y-1 text-muted-foreground sm:grid-cols-3"><span>{r.startDate ?? '—'} → {r.dueDate ?? '—'}</span><span>Owner: {name(r.ownerId)}</span><span>{r.estimatedHoursTotal ?? 0}h estimate · {r.remainingHours ?? 0}h remaining</span></div>{r.reason && <p className="mt-1">{r.reason}</p>}</li>)}</ol></div>
 }
 
 function ReviewRequiredCheckbox({ value, disabled, onSave }: { value: boolean; disabled: boolean; onSave: (v: boolean) => Promise<boolean> }) {
@@ -553,7 +575,7 @@ function LinkDeliverable({ d, direction, exclude, onClose }: { d: DeliverableRow
 interface IssueRow { id: string; issuedDate: string; revision?: string; issuedTo?: string; transmittalUrl?: string; note?: string; issuedBy?: string }
 
 /** Every issue of the deliverable, newest first, so Rev A stays on record after Rev B goes out (FR-DEL-08, E-24). */
-function IssueHistory({ issues }: { issues: IssueRow[] }) {
+function IssueHistory({ issues, marks = [] }: { issues: IssueRow[]; marks?: string[] }) {
   if (!issues.length) return <div className="p-4"><Empty>{t('deliverable.noIssues')}</Empty></div>
   return (
     <div className="scroll-region overflow-x-auto p-4">
@@ -564,7 +586,7 @@ function IssueHistory({ issues }: { issues: IssueRow[] }) {
         <tbody>{issues.map((x) => (
           <tr key={x.id} className="border-t align-top">
             <td className="py-2 pr-3"><DateText date={x.issuedDate} /></td>
-            <td className="whitespace-nowrap py-2 pr-3 font-medium">{x.revision ?? <Missing />}</td>
+            <td className="whitespace-nowrap py-2 pr-3 font-medium">{x.revision ?? <Missing />}{marks.length > 0 && <span className="ml-2 rounded bg-warn-bg px-1 text-xs text-warn">{marks.length}</span>}</td>
             <td className="py-2 pr-3">{x.issuedTo}</td>
             <td className="py-2 pr-3">{x.transmittalUrl && <a className="text-primary underline underline-offset-4" href={x.transmittalUrl} title={x.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a>}</td>
             <td className="whitespace-pre-wrap py-2 pr-3">{x.note}</td>

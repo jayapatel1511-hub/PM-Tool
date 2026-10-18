@@ -37,6 +37,8 @@ export const NAV: NavItem[] = [
   { id: 'team', path: '/team', icon: Users, label: 'nav.team', show: all },
   { id: 'files', path: '/files', icon: FileStack, label: 'nav.files', show: all },
   { id: 'vacation', path: '/vacation', icon: CalendarDays, label: 'availability.title', show: (me) => !me.capabilities.readOnly },
+  { id: 'organisation', path: '/organisation', icon: Users, label: 'organisation.title', show: m => m.flags?.org_structure === true },
+  { id: 'pickup', path: '/pickup', icon: ListChecks, label: 'pickup.title', show: m => m.flags?.task_pickup === true },
   { id: 'staff', path: '/staff', icon: UserCog, label: 'nav.staff', show: (m) => m.capabilities.staff },
   { id: 'notifications', path: '/notifications', icon: Bell, label: 'nav.notifications', show: all, sidebar: false },
   { id: 'templates', path: '/templates', icon: LayoutTemplate, label: 'nav.templates', show: (m) => m.capabilities.templates },
@@ -44,4 +46,4 @@ export const NAV: NavItem[] = [
 ]
 
 /** Routes whose packets are built; others stay hidden rather than becoming dead links (§36.1). */
-export const BUILT = new Set<string>(['home', 'mywork', 'boards', 'projects', 'tasks', 'calendar', 'files', 'time', 'reports', 'team', 'portfolio', 'workload', 'planner', 'staff', 'notifications', 'templates', 'admin'])
+export const BUILT = new Set<string>(['organisation', 'pickup', 'home', 'mywork', 'boards', 'projects', 'tasks', 'calendar', 'files', 'time', 'reports', 'team', 'portfolio', 'workload', 'planner', 'staff', 'notifications', 'templates', 'admin'])

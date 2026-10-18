@@ -1,0 +1,237 @@
+{
+  "scope": "Disposable localhost PostgreSQL plus domain and flag-metadata tests; operational databases untouched",
+  "command": "dotnet test tests/Hub.Tests/Hub.Tests.csproj --no-restore --nologo -v:q -p:UseSharedCompilation=false -p:WarningLevel=0 -p:RunAnalyzers=false -m:1 --filter AuditChain|OrgTree|TaskPickup|OrgStructure|RevisionConvention|CommitmentReliability|VerifiableWorkflow|BaselineHistory|FlagsTests",
+  "passed": 57,
+  "failed": 0,
+  "skipped": 0,
+  "cases": [
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Outside_team_and_read_only_picker_are_forbidden_without_mutation",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Deleted_task_offer_remains_in_historical_pickup_report_for_same_team_viewer",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.FlagsTests.A_declared_flag_becomes_a_bool_setting_default_off_in_the_flags_group",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.FlagsTests.Pair_check_names_the_flag_and_the_missing_tag",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.TaskPickupRulesTests.Same_team_without_org_structure_requires_the_same_non_null_manager",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.RevisionConventionTests.Custom_codes_are_ordered_and_case_insensitive",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Offer_leaves_task_fields_unchanged_and_pickup_closes_offer_watches_previous_assignee",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Parallel_same_team_pickup_is_first_wins",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.TaskPickupRulesTests.Org_structure_uses_home_unit_and_does_not_fallback_to_manager",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AuditChainApiTests.Legacy_ten_thousand_rows_are_sealed_once_and_saved_records_survive_append_then_detect_tampering",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.OrgStructureTests.Import_preview_rejects_manager_cycle_and_unknown_manager_without_mutation",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.OrgTreeTests.Leader_scope_includes_unit_subtree_once",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.AuditChainTests.Rfc_numbers(input: \"1e-7\", expected: \"1e-7\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.RevisionConventionTests.Presets_mark_without_rejecting(preset: \"pc\", code: \"P99\", prior: \"C01\", mark: \"Out of sequence\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.AuditChainTests.Canonical_objects_sort_recursively_and_keep_unicode",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.OrgStructureTests.Corrected_import_applies_all_rows_atomically",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.OrgStructureTests.Structure_is_dark_when_flag_is_off",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.AuditChainTests.Rfc_numbers(input: \"1e21\", expected: \"1e+21\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Direct_manager_without_supervisor_role_cannot_use_manager_pickup_actions",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.OrgTreeTests.Viewer_on_reporting_cycle_gets_no_indirect_scope",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.AuditChainTests.Rfc_numbers(input: \"1e20\", expected: \"100000000000000000000\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.Confirmation_is_independent_of_performer_and_requires_manager",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AuditChainApiTests.Runtime_insert_select_role_appends_but_cannot_initialize_or_update_seals",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.FlagsTests.No_declared_flag_has_its_pilot_sign_off_recorded",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.FlagsTests.Retirement_names_a_flag_signed_off_in_pilot_and_still_declared",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.OrgStructureTests.Unit_filter_is_shared_by_screen_and_export_reads",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.Allocation_preview_returns_week_projection_and_rolls_back_writes",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.RevisionConventionTests.Presets_mark_without_rejecting(preset: \"letters\", code: \"Rev 1\", prior: \"C\", mark: \"Non-standard revision: expected A, B, C \u2026\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.FlagsTests.Only_declared_flags_are_flag_settings_and_each_starts_off",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.FlagsTests.Every_declared_flag_has_a_flag_off_and_a_flag_on_test",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.OrgTreeTests.Refuses_parent_cycles_and_invalid_level_order",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.OrgTreeTests.Indirect_scope_is_empty_when_reporting_cycle_exists",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AuditChainApiTests.Partial_checks_cannot_promote_an_unverified_prefix",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.OrgStructureTests.Unit_leader_without_supervisor_role_can_read_subtree_but_cannot_write",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.AuditChainTests.Stored_fields_affect_hash_but_microsecond_normalization_round_trips",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.OrgStructureTests.Closed_parent_refuses_new_or_imported_open_children",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.FlagsTests.The_guard_answers_404_while_off_and_passes_when_on",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.AuditChainTests.Rfc_numbers(input: \"1e-6\", expected: \"0.000001\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Manager_can_assign_only_an_inside_team_target",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.BaselineHistoryTests.Numbered_snapshots_are_immutable_clear_retains_history_and_exports_show_deltas",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.OrgTreeTests.Unit_scope_predicate_is_read_only_and_requires_a_nonempty_scope",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.AuditChainTests.Rfc_numbers(input: \"333333333.33333329\", expected: \"333333333.3333333\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Org_structure_units_override_shared_manager_fallback_for_pickup_teams",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.AuditChainTests.Rfc_numbers(input: \"-0\", expected: \"0\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.RevisionConventionTests.Presets_mark_without_rejecting(preset: \"numbers\", code: \"2\", prior: \"10\", mark: \"Out of sequence\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.RevisionConventionTests.Presets_mark_without_rejecting(preset: \"letters\", code: \" b \", prior: \"C\", mark: \"Out of sequence\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AuditChainApiTests.Fifty_parallel_edits_have_gap_free_sequences_and_failed_hash_rolls_back_the_change",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.CommitmentReliabilityTests.Snapshot_denominator_keeps_withdrawn_and_rounds_half_up",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.OrgStructureTests.Structure_is_admin_only_and_refuses_cycles",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Completion_and_direct_reassignment_close_open_offers",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.Reliability_returns_null_percent_for_zero_commitments",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.New_workflow_routes_are_dark_by_default",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Project_completion_and_archive_close_open_offers",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.Nonstandard_revision_does_not_block_issue_and_clearing_convention_removes_marks",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.Not_met_requires_active_category_and_records_the_category",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Domain.TaskPickupRulesTests.Legacy_overload_never_groups_unassigned_or_inactive_people",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Pickup_routes_are_inert_when_the_flag_is_off",
+      "outcome": "Passed"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ namespace Hub.Api.Features;
 /// eight weeks, from projects the viewer may see, with the unestimated count always beside the hours.
 public static class WorkloadEndpoints
 {
-    public sealed record WorkloadQuery(Guid? SupervisorId, Guid? DisciplineId, Guid? OfficeId, Guid? ProjectId, string? Indicator, DateOnly? From, string? Sort);
+    public sealed record WorkloadQuery(Guid? SupervisorId, Guid? DisciplineId, Guid? OfficeId, Guid? ProjectId, string? Indicator, DateOnly? From, string? Sort, Guid? UnitId = null);
     public sealed record CapacityBody(decimal? Hours);
 
     public const int Weeks = 8;
@@ -100,12 +100,14 @@ public static class WorkloadEndpoints
     public static async Task<(List<DateOnly> Weeks, List<PersonLoad> People, DateOnly Today)> Grid(WorkloadQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
         var actor = access.Actor;
-        Access.Demand(Permissions.ViewWorkload(actor));
         var s = await store.Get(db);
+        var unitRead = s.IsFlagOn("org_structure") && await PeopleScope.LeadsUnit(db, actor);
+        Access.Demand(Permissions.ViewWorkload(actor).Ok || unitRead ? Allow.Yes : Permissions.ViewWorkload(actor));
         var today = clock.Today(s);
         var first = Workload.WeekOf(f.From ?? today);
         var weeks = Enumerable.Range(0, Weeks).Select(i => first.AddDays(7 * i)).ToList();
-        var people = People(db, access, me);
+        var people = await PeopleScope.Widen(db, actor, People(db, access, me));
+        people = await PeopleScope.FilterUnit(db, people, f.UnitId);
         if (f.SupervisorId is { } sup) people = people.Where(u => u.SupervisorId == sup);
         if (f.OfficeId is { } office) people = people.Where(u => u.OfficeId == office);
         var list = await people.Select(u => new { u.Id, u.DisplayName, u.SupervisorId, u.OfficeId, u.JobTitle, u.HomeDisciplineId, u.WeeklyCapacityHours,
@@ -285,8 +287,8 @@ public static class WorkloadEndpoints
     /// Person → Project → tasks with each task's hours per week (§13.11 expand row), and whether the viewer may reassign it.
     static async Task<object> PersonTasks(Guid userId, DateOnly? from, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
-        Access.Demand(Permissions.ViewWorkload(access.Actor));
-        var person = await People(db, access, me).Where(u => u.Id == userId).Select(u => new { u.Id, u.SupervisorId }).FirstOrDefaultAsync() ?? throw ApiException.NotFound();
+        await PeopleScope.DemandWorkload(db, access.Actor);
+        var person = await (await PeopleScope.Widen(db, access.Actor, People(db, access, me))).Where(u => u.Id == userId).Select(u => new { u.Id, u.SupervisorId }).FirstOrDefaultAsync() ?? throw ApiException.NotFound();
         var s = await store.Get(db);
         var today = clock.Today(s);
         var first = Workload.WeekOf(from ?? today);
@@ -318,11 +320,11 @@ public static class WorkloadEndpoints
     /// Workload by Discipline (§19): the same hours summed by discipline across the people in the viewer's scope.
     public static async Task<(Col[] Cols, JsonArray Rows)> DisciplineRows(Guid? officeId, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
-        Access.Demand(Permissions.ViewWorkload(access.Actor));
+        await PeopleScope.DemandWorkload(db, access.Actor);
         var s = await store.Get(db);
         var today = clock.Today(s);
         var weeks = Enumerable.Range(0, Weeks).Select(i => Workload.WeekOf(today).AddDays(7 * i)).ToList();
-        var people = People(db, access, me);
+        var people = await PeopleScope.Widen(db, access.Actor, People(db, access, me));
         if (officeId is { } o) people = people.Where(u => u.OfficeId == o);
         var tasks = await Tasks(db, access, people.Select(u => u.Id), null, null);
         var cal = await Calendars.For(db, s, [.. tasks.Select(t => t.ProjectId).Distinct()]);

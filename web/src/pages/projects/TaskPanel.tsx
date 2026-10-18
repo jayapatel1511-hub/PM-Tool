@@ -26,6 +26,7 @@ import { useFlag, useMe } from '@/lib/auth'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
+import type { PickupOffer } from '../Pickup'
 import { CommentsSlot, ItemSlots, LinksSlot, RaiseSlot } from './slots-items'
 import { PRIORITIES, TaskIndicators, errorText, moveFrom, readableDisabled, useProjectLists, useTaskActions, type Blocker, type TaskRow, type Transition } from './Tasks'
 
@@ -40,7 +41,7 @@ export interface TaskDetailData {
   permissions: {
     edit: P; assign: P; setReviewer: P; dueDate: P; dueNeedsReason: boolean; block: P; delete: P; restore: boolean; comment: boolean
     transitions: Transition[]; completeHint?: string; isReviewer: boolean; dependencies: boolean; enterTime: boolean; needsReason: boolean; allowSelfReview: boolean
-    authoriseStart?: boolean
+    authoriseStart?: boolean; offerPickup?: boolean
   }
 }
 interface P { ok: boolean; reason?: string | null }
@@ -51,6 +52,8 @@ const BLOCK_TYPES = ['Client', 'External Party', 'Internal', 'Decision', 'Inform
  *  dependencies, manual block, links, comments and history. Every field saves on its own and says so (design §8). */
 export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: string; onClose?: () => void; heading?: 'h1' | 'h2' }) {
   const q = useQuery({ queryKey: ['task', id], queryFn: () => get<TaskDetailData>(`tasks/${id}`) })
+  const pickupEnabled = useFlag('task_pickup')
+  const pickup = useQuery({ queryKey: ['pickup-offers', id], enabled: pickupEnabled, queryFn: () => get<PickupOffer>(`tasks/${id}/pickup-offer`) })
   const qc = useQueryClient()
   const refresh = useProjectRefresh()
   const openPanel = useItemPanel()
@@ -61,6 +64,10 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
   const [blocking, setBlocking] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [err, setErr] = useState<unknown>(null)
+  const [offerOpen, setOfferOpen] = useState(false)
+  const [reason, setReason] = useState('')
+  const [keepWatching, setKeepWatching] = useState(true)
+  const [assignTo, setAssignTo] = useState('')
   const reload = () => { qc.invalidateQueries({ queryKey: ['task', id] }); refresh(q.data?.project.id) }
   const small = useFlag('small_ux')
   const [creatingDeliverable, setCreatingDeliverable] = useState(false)
@@ -77,6 +84,10 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
   const act = (to: string) => { const x = find(to); if (x) actions.move(moveFrom(d, x)) }
   const milestoneName = (mid: string) => lists.milestones.find((m) => m.id === mid)
   const run = async (f: () => Promise<unknown>) => { setErr(null); try { await f(); reload() } catch (e) { setErr(e) } }
+  const openOffer = pickup.data
+  const offer = async () => { await post(`tasks/${id}/pickup-offer`, { reason, keepWatching }); setOfferOpen(false); setReason(''); pickup.refetch(); reload() }
+  const withdraw = async () => { await del(`tasks/${id}/pickup-offer`); pickup.refetch(); reload() }
+  const assign = async () => { if (!assignTo) return; await post(`tasks/${id}/pickup-offer/assign`, { userId: assignTo, rowVersion: openOffer?.rowVersion }); setAssignTo(''); pickup.refetch(); reload() }
 
   return (
     <PickerProject.Provider value={r.projectId}><div>
@@ -100,6 +111,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
             </DropdownMenuContent>
           </DropdownMenu>
           <PriorityBadge priority={r.priority} />
+          {pickupEnabled && openOffer && <span className="rounded-md border border-warn/40 bg-warn-bg px-2 py-0.5 text-xs font-medium text-warn">Open for pickup</span>}
           <span className="inline-flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><AccentDot id={d.project.id} />{d.project.projectNumber}</span>
         </div>
         <Heading aria-label={r.name} className="-mx-2 break-words text-2xl/8 font-semibold tracking-[-0.4px]"><InlineText value={r.name} disabled={!perms.edit.ok} title={perms.edit.ok ? t('common.name') : perms.edit.reason ?? undefined} onSave={(v) => save({ name: v })} /></Heading>
@@ -113,9 +125,19 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
           {perms.edit.ok && <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/handoffs?targetTask=${r.id}`}>{t('handoff.new')}</Link></Button>}
           <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/changes?target=Task:${r.id}`}>{t('change.inputs')}</Link></Button>
           {perms.authoriseStart && <Button size="sm" variant="outline" onClick={() => actions.authoriseStart(r)}>{t('tasks.startAuthAuthorise')}</Button>}
+          {pickupEnabled && d.permissions.offerPickup && !terminal && !openOffer && <Button size="sm" variant="outline" onClick={() => setOfferOpen(true)}>Offer for pickup</Button>}
+          {pickupEnabled && openOffer?.allowed?.withdraw && <Button size="sm" variant="outline" onClick={() => run(withdraw)}>Withdraw pickup offer</Button>}
+          {pickupEnabled && openOffer?.allowed?.assign && <><select className="h-(--control-row-h) rounded-md border bg-card px-2 text-sm" aria-label="Assign pickup offer" value={assignTo} onChange={(e) => setAssignTo(e.target.value)}><option value="">Assign to…</option>{(openOffer.candidates ?? []).map((c) => <option key={c.id} value={c.id}>{c.displayName}</option>)}</select><Button size="sm" disabled={!assignTo} onClick={() => run(assign)}>Assign pickup</Button></>}
           <RaiseSlot projectId={r.projectId} targetType="Task" targetId={r.id} targetKey={r.key} targetName={r.name} disciplineId={r.projectDisciplineId} />
         </div>
       </div>
+      <Dialog open={offerOpen} onOpenChange={setOfferOpen}>
+        <DialogContent><DialogHeader><DialogTitle>Offer {r.key} for pickup</DialogTitle><DialogDescription>Keep ownership until a teammate picks it up.</DialogDescription></DialogHeader>
+          <Field label="Reason" htmlFor="pickup-reason"><Textarea id="pickup-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} required /></Field>
+          <label className="flex items-center gap-2 text-sm"><Checkbox checked={keepWatching} onCheckedChange={(v) => setKeepWatching(!!v)} /> Keep watching after pickup</label>
+          <DialogFooter><Button variant="outline" onClick={() => setOfferOpen(false)}>Cancel</Button><Button disabled={!reason.trim()} onClick={() => run(offer)}>Offer for pickup</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
       {!perms.edit.ok && perms.edit.reason && <div className="px-4 pb-4"><Notice icon={Lock} title={t('task.readOnlyTitle')}>{perms.edit.reason}</Notice></div>}
       {err != null && <div className="px-4 pb-4"><ErrorBanner error={err} retry={() => { setErr(null); reload() }} /></div>}
 

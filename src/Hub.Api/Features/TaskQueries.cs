@@ -179,6 +179,8 @@ public static class TaskQueries
         }).ToList();
         var msIds = list.Select(t => t.MilestoneId ?? t.Deliverable?.MilestoneId).OfType<Guid>().Distinct().ToList();
         var ms = await db.Milestones.AsNoTracking().Where(m => msIds.Contains(m.Id)).Select(m => new { m.Id, m.Key, m.Name, m.Date }).ToDictionaryAsync(m => m.Id);
+        var pickupOn = await db.Settings.AnyAsync(s => s.Key == "flag.task_pickup" && s.Value == "true");
+        var offers = pickupOn ? (await db.Set<TaskPickupOffer>().AsNoTracking().Where(o => ids.Contains(o.TaskId) && o.ClosedAt == null).Select(o => o.TaskId).ToListAsync()).ToHashSet() : [];
         return list.Select(t =>
         {
             var mid = t.MilestoneId ?? t.Deliverable?.MilestoneId;
@@ -208,9 +210,10 @@ public static class TaskQueries
                     t.State.IsInactiveOwner, t.State.IsHeldPastDue, t.State.IsReviewStalled, t.State.AffectedMilestoneIds, t.State.Notes, t.State.EvaluatedAt,
                 },
             };
-            if (!includeActivityActor) return (object)body;
+            if (!includeActivityActor && !pickupOn) return (object)body;
             var json = JsonSerializer.SerializeToNode(body, JsonOpts.Web)!.AsObject();
-            json["lastActivityActorName"] = t.ActivityActorName;
+            if (includeActivityActor) json["lastActivityActorName"] = t.ActivityActorName;
+            if (pickupOn) json["pickupOfferOpen"] = offers.Contains(t.Id);
             return (object)json;
         }).ToList();
     }

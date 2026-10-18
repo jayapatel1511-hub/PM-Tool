@@ -12,12 +12,13 @@ import { get } from '@/lib/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import { Chip, Key } from '@/components/hub/pills'
-import { useMe } from '@/lib/auth'
+import { useFlag, useMe } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
 import { CommandForm, CoordStatus, PersonLabel, SelectField, personName, workChoices, workRef, type CoordOptions } from './CoordinationForms'
 import { ReadinessInspector } from './ReadinessForms'
 import { ExportMenu } from '@/components/hub/export'
+import { CommitmentReliability } from './CommitmentReliability'
 
 type Commitment = {
   id: string; key: string; targetType: string; targetId: string; performerId: string; weekStart: string; targetDate: string
@@ -48,6 +49,7 @@ const Truncated = ({ children }: { children: string }) => <p role="status" class
 /** Packet 032 readiness window and explicit weekly promise signatures. */
 export function ReadinessTab() {
   const p = useCurrentProject()
+  const reliabilityEnabled = useFlag('commitment_reliability')
   const qc = useQueryClient(), [proposing, setProposing] = useState(false), [snapshotWeek, setSnapshotWeek] = useState<string | null>(null)
   const [inspecting, setInspecting] = useState(false)
   const options = useQuery({ queryKey: ['coord-options', p.id], queryFn: () => get<CoordOptions>(`projects/${p.id}/changes/options`) })
@@ -129,6 +131,7 @@ export function ReadinessTab() {
       {options.data?.canWrite && <Button onClick={() => setProposing(true)}><Plus className="size-4" />{t('readiness.propose')}</Button>}</>
     }>
       {filters}
+      {reliabilityEnabled && <CommitmentReliability projectId={p.id} onOpenCommitment={(id) => set('promise', id)} />}
       {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
       {linked.error && <ErrorBanner error={linked.error} />}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -265,12 +268,16 @@ function PromiseDetail({ projectId, id, options, close, done }: { projectId: str
 
 function PromiseMove({ projectId, row, state, close, done }: { projectId: string; row: Commitment; state: string; close: () => void; done: () => void }) {
   const [reason, setReason] = useState(''), [evidenceUrl, setEvidenceUrl] = useState('')
+  const reliabilityEnabled = useFlag('commitment_reliability')
+  const [missCategoryId, setMissCategoryId] = useState('')
+  const categories = useQuery({ queryKey: ['commitment-miss-categories'], enabled: reliabilityEnabled && state === 'Not Met', queryFn: () => get<{ id: string; name: string; isActive: boolean }[]>('commitment-miss-categories') })
   const label = state === 'Committed' ? 'readiness.sign' : state === 'Met' ? 'readiness.recordMet' : state === 'Not Met' ? 'readiness.recordNotMet' : 'readiness.withdrawPromise'
   return <CommandForm path={`projects/${projectId}/weekly-commitments/${row.id}/transition`} title={t(label)}
     hint={t('readiness.promiseHint')} onClose={close} onDone={done} submitLabel={t(label)}
-    payload={() => ({ rowVersion: row.rowVersion, toState: state, reason, evidenceUrl: evidenceUrl || null })}>
+    payload={() => ({ rowVersion: row.rowVersion, toState: state, reason, evidenceUrl: evidenceUrl || null, ...(state === 'Not Met' && reliabilityEnabled ? { missCategoryId: missCategoryId || null } : {}) })}>
     <div className="space-y-1 rounded-md bg-muted px-4 py-3 text-sm"><p className="whitespace-pre-wrap">{row.intendedOutput}</p><p className="text-muted-foreground">{t('readiness.criteria')}: {row.completionCriteria}</p></div>
     <Field label={t('basis.reason')} htmlFor="promise-reason"><Textarea id="promise-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>
+    {state === 'Not Met' && reliabilityEnabled && <SelectField label={t('reliability.missCategory')} value={missCategoryId} onChange={setMissCategoryId} choices={(categories.data ?? []).filter(c => c.isActive).map(c => ({ value: c.id, label: c.name }))} />}
     {state !== 'Committed' && <Field label={t('basis.evidence')} htmlFor="promise-evidence" optional={state !== 'Met'}><Input id="promise-evidence" type="url" required={state === 'Met'} value={evidenceUrl} onChange={e => setEvidenceUrl(e.target.value)} /></Field>}
   </CommandForm>
 }

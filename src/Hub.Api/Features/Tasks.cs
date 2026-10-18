@@ -226,12 +226,14 @@ public static class TaskEndpoints
                 AuthoriseStart = t.Status == TaskStatuses.NotStarted && Permissions.ManageCoordination(a, ctx, t.ProjectDisciplineId).Ok,
             },
         };
-        if (!s.IsFlagOn("small_ux")) return result;
+        if (!s.IsFlagOn("small_ux") && !s.IsFlagOn("task_pickup")) return result;
         var json = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
-        json["relatedDeliverables"] = JsonSerializer.SerializeToNode(await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id
+        if (s.IsFlagOn("small_ux")) json["relatedDeliverables"] = JsonSerializer.SerializeToNode(await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id
             && db.ItemLinks.Any(l => l.ProjectId == p.Id && l.SourceType == ItemType.Task && l.SourceId == t.Id
                 && l.TargetType == ItemType.Deliverable && l.TargetId == d.Id && l.Relation == ItemRelation.Related))
             .OrderBy(d => d.Key).Select(d => new { d.Id, d.Key, d.Name, d.Status }).ToListAsync(), JsonOpts.Web);
+        if (s.IsFlagOn("task_pickup")) json["permissions"]!["offerPickup"] = Permissions.Writable(a, ctx).Ok && (t.AssigneeId == a.Id || Permissions.IsPM(a, ctx)
+            || Permissions.IsDL(ctx, t.ProjectDisciplineId) || a.Supervisor && facts.AssigneeSupervisorId == a.Id);
         return json;
     }
 
@@ -288,10 +290,8 @@ public static class TaskEndpoints
             if (na != t.AssigneeId)
             {
                 Need(Permissions.AssignTask(a, ctx, facts));
-                if (na is { } u) { await DeliverableEndpoints.ActivePerson(db, u, "assigneeId"); if (u == t.ReviewerId && !s.AllowSelfReview) throw ApiException.Invalid("assigneeId", "task.self_review"); }
                 var old = t.AssigneeId;
-                t.AssigneeId = na;
-                await team.EnsureMember(p, na, ProjectRole.TeamMember);
+                await AssignTo(db, p, t, na, team, s);
                 await notify.Send(NotificationEvents.TaskAssigned, na, Item(p, t), Text.Get("notify.task_assigned", actor, t.Key, t.Name));
                 await notify.Send(NotificationEvents.WorkReassignedAway, old, Item(p, t), Text.Get("notify.reassigned_away", actor, t.Key, t.Name));
                 if (!Permissions.IsPM(a, ctx) && !Permissions.IsDL(ctx, t.ProjectDisciplineId)) // Workflow 10: a supervisor's move reaches the PM too
@@ -701,4 +701,16 @@ public static class TaskEndpoints
     }
 
     public static NotifyItem Item(Project p, WorkTask t) => new(p.Id, ItemType.Task, t.Id, t.Key, $"/projects/{p.ProjectNumber}/tasks?panel=Task:{t.Id}", p.ProjectNumber);
+    // One mutation path for normal reassignment and same-team pickup; callers enforce their own authorization.
+    public static async Task AssignTo(HubDb db, Project project, WorkTask task, Guid? personId, TeamService team, OrgSettings settings)
+    {
+        if (personId is { } id)
+        {
+            await DeliverableEndpoints.ActivePerson(db, id, "assigneeId");
+            Check.That(settings.AllowSelfReview || id != task.ReviewerId, "assigneeId", "task.self_review");
+        }
+        task.AssigneeId = personId;
+        await team.EnsureMember(project, personId, ProjectRole.TeamMember);
+    }
+
 }

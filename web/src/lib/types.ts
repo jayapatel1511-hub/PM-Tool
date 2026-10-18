@@ -12,6 +12,7 @@ export interface ProjectRow {
   id: string; projectNumber: string; name: string; status: string; priority: string; visibility: string
   startDate?: string; targetCompletionDate?: string; client: { id: string; name: string }; pm: { id: string; displayName: string }
   office?: string; phase?: string; computedHealth: string; reportedHealth: string; healthReasons?: HealthReason[] | null
+  leadUnitId?: string | null
   healthOverrideNote?: string; healthOverrideAt?: string; progressPct?: number | null; overdueTasks: number; blockedTasks: number
   overdueDecisions: number; highIssues: number; attentionCritical: number; attentionWarning: number
   nextMilestone?: MilestoneRef | null; nextSubmission?: MilestoneRef | null; myRoles: string[]; starred: boolean; lastActivityAt?: string
@@ -23,7 +24,7 @@ export interface ProjectDiscipline { id: string; disciplineId: string; name: str
 
 export interface ProjectDetail {
   statusNote?: ProjectStatusNoteData | null
-  id: string; projectNumber: string; name: string; clientId: string; clientReference?: string; projectManagerId: string; pmName: string
+  id: string; projectNumber: string; name: string; clientId: string; clientReference?: string; projectManagerId: string; leadUnitId?: string; pmName: string
   officeId: string; projectTypeId?: string; description?: string; location?: string; status: string; phaseId?: string
   startDate?: string; targetCompletionDate?: string; priority: string; visibility: string; internalNotes?: string; coordinationDay?: string
   allowViewerComments: boolean; lastCoordinationReviewedAt?: string; lastCoordinationReviewedBy?: string; statusChangedAt?: string

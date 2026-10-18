@@ -9,6 +9,13 @@ public static class Flags
 {
     public static readonly FlagDef[] All =
     [
+        new("verifiable_log", "048"),
+        new("commitment_reliability", "048"),
+        new("allocation_preview", "048"),
+        new("baseline_history", "048"),
+        new("revision_check", "048"),
+        new("task_pickup", "049"),
+        new("org_structure", "050"),
         new("figure_names", "041"), // §45.2 and §45.3: the Uncommitted name, the basis lines, the Partial view row label and "at most"
         new("planner_kept_rows", "041"), // §45.7: retain edited planner rows while filters stay active
         new("show_deleted", "045"), // §49.2: the deleted-items list, export and deliverable/milestone restore

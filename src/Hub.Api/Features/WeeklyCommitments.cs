@@ -10,7 +10,7 @@ public static class WeeklyCommitmentsEndpoints
 {
     public sealed record ProposeBody(Guid RequestId, int TargetRowVersion, DateOnly WeekStart, DateOnly TargetDate,
         string IntendedOutput, string CompletionCriteria, string? Reason = null);
-    public sealed record MoveBody(Guid RequestId, int RowVersion, string ToState, string Reason, string? EvidenceUrl);
+    public sealed record MoveBody(Guid RequestId, int RowVersion, string ToState, string Reason, string? EvidenceUrl, Guid? MissCategoryId = null);
     public sealed record SnapshotBody(Guid RequestId, DateOnly WeekStart, string Reason);
 
     public static void Map(RouteGroupBuilder api)
@@ -118,11 +118,17 @@ public static class WeeklyCommitmentsEndpoints
                     if (body.ToState == CommitmentState.Met)
                         row.CompletionEvidenceUrl = Coordination.Url(body.EvidenceUrl);
                 }
-                row.State = body.ToState;
+                var org = await settings.Get(db);
+                var reliability = org.IsFlagOn("commitment_reliability");
+                if (reliability && body.ToState == CommitmentState.NotMet)
+                    Check.That(body.MissCategoryId != null && await db.Set<CommitmentMissCategory>()
+                        .AnyAsync(c => c.Id == body.MissCategoryId && c.IsActive), "missCategoryId", "error.required");
+                row.State = reliability && org.CommitmentMetConfirmation && body.ToState == CommitmentState.Met
+                    ? CommitmentState.AwaitingConfirmation : body.ToState;
                 db.OutputCommitmentEvents.Add(new OutputCommitmentEvent { ProjectId = project.Id,
                     CommitmentId = row.Id, FromState = prior, ToState = row.State, Reason = reason,
                     EvidenceUrl = string.IsNullOrWhiteSpace(body.EvidenceUrl) ? null : Coordination.Url(body.EvidenceUrl),
-                    ActorId = access.Me.Id });
+                    ActorId = access.Me.Id, MissCategoryId = reliability && body.ToState == CommitmentState.NotMet ? body.MissCategoryId : null });
                 db.Audit.Note(row, reason: reason);
                 var key = row.TargetType == "Task"
                     ? await db.Tasks.Where(t => t.Id == row.TargetId).Select(t => t.Key).FirstAsync()
@@ -210,7 +216,7 @@ public static class WeeklyCommitmentsEndpoints
     /// earlier coordination day stay visible beside the current ones. Target dates filter rows, not snapshot outcomes;
     /// paging is opt-in so existing recorded-week callers retain their response contract.
     static async Task<object> List(Guid projectId, DateOnly? weekStart, DateOnly? from, DateOnly? to,
-        DateOnly? targetFrom, DateOnly? targetTo, int? page, int? pageSize, Access access, HubDb db)
+        DateOnly? targetFrom, DateOnly? targetTo, int? page, int? pageSize, Access access, HubDb db, SettingsStore settings)
     {
         var (project, _) = await access.Project(projectId, false);
         if (weekStart is { } week) await Week(db, project, week, allowRecorded: true);

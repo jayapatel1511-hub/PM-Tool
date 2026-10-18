@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Copy, ExternalLink, Lock, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, ErrorBanner, Field, Notice, Page, Section, Spinner, selectCls } from '@/components/hub/common'
@@ -10,11 +10,12 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh, useReference } from '@/hooks/data'
-import { ApiError, del, get, patch, post } from '@/lib/api'
+import { ApiError, del, get, patch, post, put } from '@/lib/api'
 import { t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
+import { useFlag } from '@/lib/auth'
 
 /** Extra settings sections from later packets (health override, export at archive). */
 export const SETTINGS_SECTIONS: { id: string; render: (p: ProjectDetail) => React.ReactNode }[] = []
@@ -22,7 +23,12 @@ export const SETTINGS_SECTIONS: { id: string; render: (p: ProjectDetail) => Reac
 /** Project Settings tab (§13.16): information, links, coordination day, visibility, status, danger zone. */
 export function ProjectSettingsTab() {
   const p = useCurrentProject()
+  const structureEnabled = useFlag('org_structure')
+  const revisionEnabled = useFlag('revision_check')
   const ref = useReference()
+  const structure = useQuery({ queryKey: ['organisation'], queryFn: () => get<{ units: { id: string; name: string; parentId?: string | null; closedOn?: string | null }[] }>('organisation'), enabled: structureEnabled })
+  const leadUnit = useQuery({ queryKey: ['project', p.id, 'lead-unit'], queryFn: () => get<{ leadUnitId?: string | null }>(`projects/${p.id}/lead-unit`), enabled: structureEnabled })
+  const revision = useQuery({ queryKey: ['project', p.id, 'revision-check'], queryFn: () => get<RevisionCheck>(`projects/${p.id}/revision-check`), enabled: revisionEnabled })
   const refresh = useProjectRefresh()
   const navigate = useNavigate()
   const canEdit = p.permissions.edit.ok
@@ -31,7 +37,7 @@ export function ProjectSettingsTab() {
   const [err, setErr] = useState<ApiError | null>(null)
   const [saving, setSaving] = useState(false)
   const [transition, setTransition] = useState<string | null>(null)
-  const v = (k: keyof ProjectDetail) => (k in f ? f[k] : (p[k] ?? '')) as string
+  const v = (k: keyof ProjectDetail) => (k in f ? f[k] : (k === 'leadUnitId' && structureEnabled ? (leadUnit.data?.leadUnitId ?? '') : (p[k] ?? ''))) as string
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value })
   const dirty = Object.keys(f).length > 0
   const save = async () => {
@@ -75,6 +81,11 @@ export function ProjectSettingsTab() {
                 {ref.data?.offices.filter((o) => o.isActive || o.id === p.officeId).map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
               </select>
             </Field>
+            {structureEnabled && <Field label="Lead unit" htmlFor="s-lead-unit" optional>
+              <select id="s-lead-unit" className={selectCls} value={v('leadUnitId')} onChange={set('leadUnitId')} disabled={!canEdit}>
+                <option value="">No unit</option>{structure.data?.units.filter((u) => !u.closedOn).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+              </select>
+            </Field>}
             <Field label={t('projects.type')} htmlFor="s-type" optional>
               <select id="s-type" className={selectCls} value={v('projectTypeId')} onChange={set('projectTypeId')} disabled={!canEdit}>
                 <option value="">{t('common.none')}</option>
@@ -126,6 +137,7 @@ export function ProjectSettingsTab() {
 
         <div className="min-w-0 space-y-6">
           <LinksSection p={p} onChange={() => refresh(p.id)} />
+          {revisionEnabled && <RevisionCheckSection projectId={p.id} rowVersion={p.rowVersion} initial={revision.data} canEdit={canEdit} />}
           {SETTINGS_SECTIONS.map((s) => <div key={s.id}>{s.render(p)}</div>)}
           <Section title={t('settings.status')}>
             <div className="space-y-3 px-5 py-4 text-sm">
@@ -151,6 +163,17 @@ export function ProjectSettingsTab() {
       {transition && <TransitionDialog p={p} to={transition} onClose={() => { setTransition(null); refresh(p.id) }} />}
     </Page>
   )
+}
+
+type RevisionCheck = { convention: { preset?: string | null; codes?: string[] | null } | null; deliverables: { id: string; marks: string[]; issues: { id: string; revision: string; marks: string[] }[] }[] }
+function RevisionCheckSection({ projectId, rowVersion, initial, canEdit }: { projectId: string; rowVersion: number; initial?: RevisionCheck; canEdit: boolean }) {
+  const qc = useQueryClient()
+  const refresh = useProjectRefresh()
+  const [preset, setPreset] = useState<string | null>(null); const [codes, setCodes] = useState(''); const [saving, setSaving] = useState(false); const [error, setError] = useState<Error | null>(null)
+  useEffect(() => { setPreset(null); setCodes(initial?.convention?.codes?.join(', ') ?? '') }, [initial])
+  const selected = preset ?? initial?.convention?.preset ?? ''
+  const save = async () => { setSaving(true); setError(null); try { await put(`projects/${projectId}/revision-check`, { rowVersion, preset: selected || null, codes: selected === 'custom' ? codes.split(',').map((x) => x.trim()).filter(Boolean) : null }); await qc.invalidateQueries({ queryKey: ['project', projectId, 'revision-check'] }); refresh(projectId) } catch (e) { setError(e instanceof Error ? e : new Error(String(e))) } finally { setSaving(false) } }
+  return <Section title={t('revisionCheck.title')}><div className="space-y-3 px-5 py-4"><div className="flex flex-wrap items-end gap-3"><Field label={t('revisionCheck.convention')} htmlFor="revision-preset"><select id="revision-preset" className={selectCls} value={selected} disabled={!canEdit || saving} onChange={(e) => { setPreset(e.target.value); if (e.target.value !== 'custom') setCodes('') }}><option value="">{t('revisionCheck.none')}</option><option value="letters">{t('revisionCheck.letters')}</option><option value="numbers">{t('revisionCheck.numbers')}</option><option value="pc">{t('revisionCheck.pc')}</option><option value="custom">{t('revisionCheck.custom')}</option></select></Field>{selected === 'custom' && <Field label={t('revisionCheck.customCodes')} htmlFor="revision-codes"><Input id="revision-codes" value={codes} onChange={(e) => setCodes(e.target.value)} placeholder="A, B, C" /></Field>}{canEdit && <Button disabled={saving} onClick={() => void save()}>{saving ? <Spinner /> : null}{saving ? t('common.saving') : t('common.save')}</Button>}</div>{error && <ErrorBanner error={error} />} {initial?.deliverables.some((d) => d.issues.length > 0) && <div className="space-y-2 text-sm"><h4 className="font-semibold">{t('revisionCheck.warnings')}</h4>{initial.deliverables.flatMap((d) => d.issues.filter((i) => i.marks.length > 0).map((i) => <p key={i.id} className="rounded-md border border-warn/40 bg-warn-bg px-3 py-2">{i.revision}: {i.marks.join(', ')}</p>))}</div>}</div></Section>
 }
 
 function LinksSection({ p, onChange }: { p: ProjectDetail; onChange: () => void }) {

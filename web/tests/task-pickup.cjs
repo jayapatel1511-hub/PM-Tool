@@ -1,0 +1,20 @@
+// Focused source contract checks for the dark Task Pickup UI.
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+
+const path = (file) => fs.readFileSync(`${__dirname}/../${file}`, 'utf8')
+const panel = path('src/pages/projects/TaskPanel.tsx')
+const pickup = path('src/pages/Pickup.tsx')
+const tasks = path('src/pages/projects/Tasks.tsx')
+const myWork = path('src/pages/MyWork.tsx')
+
+assert.match(panel, /useFlag\('task_pickup'\)/)
+assert.match(panel, /pickup-offer/)
+assert.match(panel, /Keep watching/)
+assert.match(pickup, /enabled, queryFn/)
+assert.match(pickup, /projectId/)
+assert.match(pickup, /disciplineId/)
+assert.match(pickup, /neededBy/)
+assert.match(tasks, /pickupOfferOpen/)
+assert.match(myWork, /\/pickup/)
+console.log('task-pickup source checks: 7 passed')

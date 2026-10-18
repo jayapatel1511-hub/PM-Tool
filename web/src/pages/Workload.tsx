@@ -24,6 +24,7 @@ import { t } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { GROUP_BY, GROUP_LABEL, groupPeople } from '@/components/planner/labels'
+import { descendantUnitIds, useOrgPlacement } from '@/hooks/useOrgPlacement'
 import { MenuSelect, errorText } from './projects/Tasks'
 
 /** The server's load band for the week (FR-FIG-05), from the organisation's workload thresholds. */
@@ -43,7 +44,7 @@ interface Grid { weeks: string[]; today: string; currentWeek: string; defaultCap
 interface TaskLoadRow { id: string; key: string; name: string; status: string; dueDate?: string; estimatedHours?: number | null; progressPct: number; remaining?: number | null; overdue: boolean; noDueDate: number; rowVersion: number; weeks: number[]; canReassign: boolean }
 interface PersonTasks { weeks: string[]; projects: { id: string; projectNumber: string; name: string; tasks: TaskLoadRow[] }[] }
 
-const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'projectId', 'indicator', 'from', 'sort'] as const
+const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'projectId', 'unitId', 'indicator', 'from', 'sort'] as const
 const INDICATORS = ['over', 'under', 'cluster', 'unestimated'] as const
 const SORTS = ['load', 'overdue', 'tasks', 'name'] as const
 
@@ -89,9 +90,13 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
   const forbidden = (q.error as ApiError | null)?.status === 403
   const toggle = (id: string) => setOpen((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
-  const groupBy = (GROUP_BY as readonly string[]).includes(sp.get('groupBy') ?? '') ? sp.get('groupBy')! : 'supervisor'
   const people = q.data?.people ?? []
-  const groups = groupPeople(people, groupBy, ref.data)
+  const org = useOrgPlacement(people.map(p => p.id))
+  const groupBy = (GROUP_BY as readonly string[]).includes(sp.get('groupBy') ?? '') || (org.enabled && sp.get('groupBy') === 'homeUnit') ? sp.get('groupBy')! : 'supervisor'
+  const unitIds = filters.unitId ? descendantUnitIds(org.units, filters.unitId) : null
+  const scopedPeople = org.enabled && filters.unitId ? people.filter(p => org.placementMap.has(p.id) && unitIds!.has(org.placementMap.get(p.id) as string)) : people
+  const unitName = (id: string | null | undefined) => id == null ? t('staff.group.notSet') : org.units.find(u => u.id === id)?.name ?? t('staff.group.unknown')
+  const groups = groupBy === 'homeUnit' ? [...scopedPeople.reduce((m, p) => { const unit = org.placementMap.get(p.id); const key = unit === undefined ? t('staff.group.unknown') : unitName(unit); m.set(key, [...(m.get(key) ?? []), p]); return m }, new Map<string, PersonRow[]>())] : groupPeople(scopedPeople, groupBy, ref.data)
   const allPartial = people.length > 0 && people.every((p) => p.partialScope)
   const named = useFlag('figure_names')
 
@@ -104,6 +109,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
     ['projectId', t('portfolio.project'), projects.data?.items.find((p) => p.id === filters.projectId)?.projectNumber],
     ['indicator', t('workload.indicator'), filters.indicator ? t(`workload.ind.${filters.indicator}`) : null],
     ['from', t('workload.from'), filters.from ? fmtDate(filters.from) : null],
+    ['unitId', t('org.unit'), filters.unitId ? unitName(filters.unitId) : null],
   ] as const).filter(([k]) => filters[k])
   const unfilled = q.data?.unfilledRoles ?? []
   // One indicator at a time; choosing the selected chip again shows every person (the former "Any" chip).
@@ -122,7 +128,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
         <FilterBar activeCount={tokens.length}
           quick={<>
             <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('workload.indicator')}>{INDICATORS.slice(0, 3).map(indicatorChip)}</div>
-            <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={GROUP_BY.map((g) => ({ value: g, label: t(GROUP_LABEL[g]) }))} />
+            <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={[...GROUP_BY.map((g) => ({ value: g, label: t(GROUP_LABEL[g]) })), ...(org.enabled ? [{ value: 'homeUnit', label: t('org.homeUnit') }] : [])]} />
             <MenuSelect label={t('common.sort')} icon={ArrowUpDown} value={filters.sort ?? 'load'} onChange={(v) => set('sort', v === 'load' ? null : v)} options={SORTS.map((v) => ({ value: v, label: t(`workload.sortBy.${v}`) }))} />
           </>}
           active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}
@@ -156,6 +162,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
                 <option value="">{t('workload.anyProject')}</option>{projects.data?.items.map((p) => <option key={p.id} value={p.id}>{p.projectNumber} {p.name}</option>)}
               </select>
             </Field>
+            {org.enabled && <Field label={t('org.unit')} htmlFor="wl-unit" className="w-full sm:w-56"><select id="wl-unit" className={selectCls} value={filters.unitId ?? ''} onChange={(e) => set('unitId', e.target.value)}><option value="">{t('org.anyUnit')}</option>{org.units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}</select></Field>}
             <Field label={t('workload.from')} htmlFor="wl-from" className="w-full sm:w-44">
               <Input id="wl-from" type="date" value={filters.from ?? ''} onChange={(e) => set('from', e.target.value)} />
             </Field>

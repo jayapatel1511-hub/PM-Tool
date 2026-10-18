@@ -1,0 +1,49 @@
+{
+  "scope": "Chromium UI with mocked API responses; source checks and backend rules are separate",
+  "port": "19505",
+  "passes": 6,
+  "calls": 49,
+  "post": {
+    "method": "POST",
+    "path": "tasks/00000000-0000-0000-0000-000000000030/pickup",
+    "body": {
+      "rowVersion": 7
+    }
+  },
+  "axe": [
+    {
+      "label": "flagoff-pickup",
+      "violations": []
+    },
+    {
+      "label": "pickup",
+      "violations": []
+    },
+    {
+      "label": "organisation",
+      "violations": []
+    },
+    {
+      "label": "admin-structure",
+      "violations": []
+    },
+    {
+      "label": "audit-chains",
+      "violations": []
+    },
+    {
+      "label": "readiness-reliability-route",
+      "violations": []
+    }
+  ],
+  "screenshots": [
+    "/Users/jaypatel/.codex/worktrees/schema-workflows/PM-Tool/web/test-results/schema-workflows/flagoff-pickup.png",
+    "/Users/jaypatel/.codex/worktrees/schema-workflows/PM-Tool/web/test-results/schema-workflows/pickup.png",
+    "/Users/jaypatel/.codex/worktrees/schema-workflows/PM-Tool/web/test-results/schema-workflows/organisation.png",
+    "/Users/jaypatel/.codex/worktrees/schema-workflows/PM-Tool/web/test-results/schema-workflows/admin-structure.png",
+    "/Users/jaypatel/.codex/worktrees/schema-workflows/PM-Tool/web/test-results/schema-workflows/audit-chains.png",
+    "/Users/jaypatel/.codex/worktrees/schema-workflows/PM-Tool/web/test-results/schema-workflows/readiness-reliability-route.png"
+  ],
+  "pageErrors": [],
+  "unknownGets": []
+}

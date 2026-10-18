@@ -22,6 +22,9 @@ public static class HubModules
         s.AddSingleton<IJob, DigestJob>();
         s.AddSingleton<IJob, WeeklySummaryJob>();
         s.AddSingleton<IJob, OpsWatchdogJob>();
+        s.AddSingleton<IJob, AuditChainNightlyJob>();
+        s.AddSingleton<IJob, RevisionRecheckJob>();
+        s.AddSingleton<IJob, AuditChainWeeklyJob>();
         if (cfg["Graph:Mail"] == "true") s.AddSingleton<IEmailSender, GraphEmailSender>();
         else if (cfg["Email:Mode"] == "Smtp") s.AddSingleton<IEmailSender, SmtpEmailSender>();
         else s.AddSingleton<IEmailSender, LogEmailSender>();
@@ -29,6 +32,8 @@ public static class HubModules
 
     public static void Map(RouteGroupBuilder api)
     {
+        BaselineHistoryEndpoints.Map(api);
+        RevisionCheckEndpoints.Map(api);
         ProjectEndpoints.Map(api);
         TeamEndpoints.Map(api);
         MilestoneEndpoints.Map(api);
@@ -75,6 +80,10 @@ public static class HubModules
         DesignBasisEndpoints.Map(api);
         ReadinessEndpoints.Map(api);
         WeeklyCommitmentsEndpoints.Map(api);
+        AuditChainEndpoints.Map(api);
+        CommitmentReliabilityEndpoints.Map(api);
+        TaskPickupEndpoints.Map(api);
+        OrgStructureEndpoints.Map(api);
         RecoveryEndpoints.Map(api);
         // Support: an Admin can re-run a project's evaluation on demand.
         api.MapPost("/admin/evaluate/{projectId:guid}", async (Guid projectId, CurrentUser me, EvaluationService eval) =>

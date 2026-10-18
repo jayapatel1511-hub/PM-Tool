@@ -29,6 +29,7 @@ public static class MeEndpoints
             var s = await store.Get(db);
             var pref = await db.UserSettings.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == me.Id) ?? new UserSetting { UserId = me.Id };
             var a = me.Actor;
+            var unitRead = s.IsFlagOn("org_structure") && await PeopleScope.LeadsUnit(db, a);
             var directReports = await db.Users.CountAsync(x => x.SupervisorId == me.Id && x.IsActive);
             // New Item offers Task only to someone who may create one somewhere (§36.1); each project still checks it.
             var uid = me.Id;
@@ -46,8 +47,8 @@ public static class MeEndpoints
                     CreateProject = Permissions.CreateProject(a).Ok,
                     CreateTask = createTask,
                     Portfolio = Permissions.ViewPortfolio(a).Ok,
-                    Workload = Permissions.ViewWorkload(a).Ok,
-                    Staff = Permissions.ViewStaff(a).Ok,
+                    Workload = Permissions.ViewWorkload(a).Ok || unitRead,
+                    Staff = Permissions.ViewStaff(a).Ok || unitRead,
                     AllStaff = Permissions.ViewAllStaff(a),
                     Admin = a.Admin,
                     Templates = Permissions.ManageTemplates(a, u.IsTemplateEditor).Ok,

@@ -37,6 +37,12 @@ public static partial class ReportEndpoints
         new("pilot-route-use", [new("weeks", "number", Default: "8")], [new("routeKey", "route"), new("week", "pilotWeek", "date"), new("opens", "opens", "number"), new("under500Ms", "under500Ms", "number"), new("from500To999Ms", "from500To999Ms", "number"), new("from1000To1999Ms", "from1000To1999Ms", "number"), new("from2000To4999Ms", "from2000To4999Ms", "number"), new("over5000Ms", "over5000Ms", "number")], PilotRouteUse, a => Permissions.ViewPortfolio(a).Ok, "route_counter"),
         new("team-capacity", CapacityParams, [], TeamCapacity, a => Permissions.ViewWorkload(a).Ok, "capacity_reports"),
         new("allocations-by-source", [..CapacityParams, new("show", "select", ["hours-by-source", "entries-without-project"], "hours-by-source"), new("source", "select", PlanningSource.All), new("confidence", "select", PlanningConfidence.All)], [], AllocationsBySource, a => Permissions.ViewWorkload(a).Ok, "capacity_reports"),
+        new("pickup-offers", [Projects, Discipline, new("from", "date"), new("to", "date")],
+            [new("project", "project"), new("discipline", "discipline"), new("offered", "date", "datetime", "Offered"),
+             new("closed", "date", "datetime", "Closed"), new("closeCause", "status", Label: "Closing cause"), new("daysOpen", "daysOverdue", "number", "Days open")], PickupOffers, Flag: "task_pickup"),
+        new("commitment-misses", [Projects, Discipline, new("from", "date"), new("to", "date")],
+            [new("project", "project"), new("discipline", "discipline"), new("category", "category", Label: "Miss category"),
+             new("count", "count", "number", "Count")], CommitmentMisses, Flag: "commitment_reliability"),
         new("tasks-due-this-week", [Projects, Discipline, new("assigneeId", "person"), new("week", "date"), new("mine", "bool")],
             [new("key", "key", "key"), new("name", "task"), new("projectNumber", "project"), new("deliverableKey", "deliverable"), new("disciplineName", "discipline"),
              new("assigneeName", "assignee"), new("dueDate", "due", "date"), new("status", "status"), new("indicators", "indicators")], DueThisWeek),
@@ -99,16 +105,29 @@ public static partial class ReportEndpoints
              new("hours", "hours", "number"), new("note", "note")], TaskHours),
     ];
 
+    static bool UnitReadableReport(string code) => code is "staff-assignments" or "workload-employee" or "workload-discipline" or "team-capacity" or "allocations-by-source";
+
+    static Param[] ReportParams(Def def, OrgSettings settings, string[]? units = null) =>
+        settings.IsFlagOn("org_structure") && def.Code is "staff-assignments" or "team-capacity"
+            ? [.. def.Params, new("unitId", "select", units), .. def.Code == "staff-assignments" ? new Param[] { new("week", "date") } : []]
+            : def.Params;
+
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/reports", async (CurrentUser me, HubDb db, SettingsStore store) => { var settings = await store.Get(db); return All.Where(r => (r.Allowed?.Invoke(me.Actor) ?? true) && (r.Flag == null || settings.IsFlagOn(r.Flag))).Select(r => new
+        api.MapGet("/reports", async (CurrentUser me, HubDb db, SettingsStore store) =>
+        {
+            var settings = await store.Get(db);
+            var unitNames = settings.IsFlagOn("org_structure") ? await db.Set<OrgUnit>().AsNoTracking().OrderBy(u => u.Name).ToDictionaryAsync(u => u.Id.ToString(), u => u.Name) : new Dictionary<string, string>();
+            var unitRead = settings.IsFlagOn("org_structure") && await PeopleScope.LeadsUnit(db, me.Actor);
+            return All.Where(r => ((r.Allowed?.Invoke(me.Actor) ?? true) || unitRead && (UnitReadableReport(r.Code))) && (r.Flag == null || settings.IsFlagOn(r.Flag))).Select(r => new
         {
             r.Code, Title = Text.Get($"report.{r.Code}"), Description = Text.Get($"report.{r.Code}.about"),
-            Params = r.Params.Select(p => new { p.Key, Label = Text.Get($"param.{p.Key}"), p.Type, Default = p.Key == "weeks" && r.Flag == "capacity_reports" ? settings.PlanningHorizonWeeks.ToString(CultureInfo.InvariantCulture) : p.Default,
-                Options = p.Options?.Where(o => !(p.Key == "scope" && o == "all" && !Permissions.ViewAllStaff(me.Actor))).Select(o => new { Value = o, Label = Text.Get($"opt.{o}") }) }),
+            Params = ReportParams(r, settings, unitNames.Keys.ToArray()).Select(p => new { p.Key, Label = Text.Get($"param.{p.Key}"), p.Type, Default = p.Key == "weeks" && r.Flag == "capacity_reports" ? settings.PlanningHorizonWeeks.ToString(CultureInfo.InvariantCulture) : p.Default,
+                Options = p.Options?.Where(o => !(p.Key == "scope" && o == "all" && !Permissions.ViewAllStaff(me.Actor))).Select(o => new { Value = o, Label = p.Key == "unitId" ? unitNames.GetValueOrDefault(o, o) : Text.Get($"opt.{o}") }) }),
             ItemType = ItemTypeOf(r.Code),
             Columns = r.Cols.Select(c => new { c.Path, Header = c.Title, c.Type }),
-        }); });
+        });
+        });
         api.MapGet("/reports/{code}", async (string code, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (def, ctx) = await Prepare(code, http, db, access, me, store, clock);
@@ -117,7 +136,7 @@ public static partial class ReportEndpoints
             {
                 def.Code, Title = Text.Get($"report.{def.Code}"), ItemType = ItemTypeOf(def.Code), Columns = (r.Columns ?? def.Cols).Select(c => new { c.Path, Header = c.Title, c.Type }),
                 Rows = new JsonArray([.. r.Rows.Take(ScreenRows).Select(x => x?.DeepClone())]), Total = r.Rows.Count, TotalIsLowerBound = r.Rows.Count >= Cap, Truncated = r.Rows.Count > ScreenRows, r.ListLink,
-                Parameters = (await ctx.Describe(def.Params)).Select(p => new { Label = p.Item1, Value = p.Item2 }),
+                Parameters = (await ctx.Describe(ReportParams(def, ctx.S))).Select(p => new { Label = p.Item1, Value = p.Item2 }),
             };
         });
         api.MapGet("/reports/{code}/export", async (string code, string? format, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
@@ -125,7 +144,7 @@ public static partial class ReportEndpoints
             var (def, ctx) = await Prepare(code, http, db, access, me, store, clock);
             var r = await def.Run(ctx);
             var title = Text.Get($"report.{def.Code}");
-            var parameters = await ctx.Describe(def.Params);
+            var parameters = await ctx.Describe(ReportParams(def, ctx.S));
             return await ExportFile.Send(db, store, format, title, r.Columns ?? def.Cols, r.Rows, parameters, await ctx.SingleProjectId(), def.Code, clock);
         });
     }
@@ -144,9 +163,10 @@ public static partial class ReportEndpoints
     static async Task<(Def, Ctx)> Prepare(string code, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
         var def = All.FirstOrDefault(r => r.Code == code) ?? throw ApiException.NotFound();
-        if (def.Allowed is { } ok && !ok(me.Actor)) throw ApiException.Forbidden("perm.staff");
         var s = await store.Get(db);
-        if (def.Flag is not null && !s.IsFlagOn(def.Flag)) throw ApiException.NotFound();
+        if (def.Allowed is { } ok && !ok(me.Actor) && !(s.IsFlagOn("org_structure") && UnitReadableReport(code) && await PeopleScope.LeadsUnit(db, me.Actor)))
+            throw ApiException.Forbidden("perm.staff");
+        if (def.Flag != null) Http.RequireFlag(s, def.Flag);
         return (def, new Ctx(http.Request.Query, db, access, me, s, clock.Today(s), clock.GetUtcNow(), store, clock));
     }
 
@@ -201,6 +221,7 @@ public static partial class ReportEndpoints
                     "office" => string.Join(", ", await db.Offices.Where(x => ids.Contains(x.Id)).Select(x => x.Name).ToListAsync()),
                     "person" => string.Join(", ", await db.Users.Where(x => ids.Contains(x.Id)).Select(x => x.DisplayName).ToListAsync()),
                     "bool" => Text.Get(raw == "false" ? "common.no" : "common.yes"),
+                    "select" when p.Key == "unitId" && Guid.TryParse(raw, out var unit) => await db.Set<OrgUnit>().Where(u => u.Id == unit).Select(u => u.Name).FirstOrDefaultAsync() ?? raw,
                     "select" => Text.Get($"opt.{raw}"),
                     _ => raw,
                 };
@@ -342,7 +363,9 @@ public static partial class ReportEndpoints
             dueFrom: c.Today, dueTo: c.Today.AddDays(days), indicator: "open"));
         var rows = await WithProject(c.Db, Json(await DeliverableEndpoints.Rows(c.Db, q.OrderBy(d => d.DueDate).ThenBy(d => d.Seq).Take(Cap))));
         foreach (var r in rows) r!["indicators"] = Indicators(r["state"]);
-        return new(rows, await Link(c, "deliverables", ("dueFrom", $"{c.Today:yyyy-MM-dd}"), ("dueTo", $"{c.Today.AddDays(days):yyyy-MM-dd}"), ("indicator", "open")));
+        if (c.S.IsFlagOn("baseline_history")) await BaselineHistory.AddDeltas(c.Db, rows);
+        return new(rows, await Link(c, "deliverables", ("dueFrom", $"{c.Today:yyyy-MM-dd}"), ("dueTo", $"{c.Today.AddDays(days):yyyy-MM-dd}"), ("indicator", "open")),
+            Columns: c.S.IsFlagOn("baseline_history") ? [.. All.Single(r => r.Code == "upcoming-deliverables").Cols, .. BaselineHistory.DeltaColumns] : null);
     }
 
     static async Task<Result> DeliverableStatus_(Ctx c)
@@ -350,7 +373,8 @@ public static partial class ReportEndpoints
         var q = ByDiscipline(c, c.Db.Deliverables.AsNoTracking().Where(d => c.ProjectIds().Contains(d.ProjectId) && d.Status != DeliverableStatus.Cancelled));
         var rows = await WithProject(c.Db, Json(await DeliverableEndpoints.Rows(c.Db, q.OrderBy(d => c.Db.Projects.Where(p => p.Id == d.ProjectId).Select(p => p.ProjectNumber).First()).ThenBy(d => d.Key).Take(Cap))));
         var sorted = new JsonArray([.. rows.Select(r => r!.DeepClone()).OrderBy(r => r["projectNumber"]?.GetValue<string>()).ThenBy(r => r["key"]?.GetValue<string>())]);
-        return new(sorted, await Link(c, "deliverables"));
+        if (c.S.IsFlagOn("baseline_history")) await BaselineHistory.AddDeltas(c.Db, sorted);
+        return new(sorted, await Link(c, "deliverables"), Columns: c.S.IsFlagOn("baseline_history") ? [.. All.Single(r => r.Code == "deliverable-status-by-project").Cols, .. BaselineHistory.DeltaColumns] : null);
     }
 
     static async Task<JsonArray> WithProject(HubDb db, JsonArray rows)
@@ -584,12 +608,49 @@ public static partial class ReportEndpoints
     }
 
     /// FR-ASG-08: Supervisors see their direct reports; Executives and Admins may ask for all staff.
+    static async Task<Result> PickupOffers(Ctx c)
+    {
+        var offers = TaskPickupReporting.Rows(c.Db, c.Access.VisibleProjectIds(), await c.Db.Users.AsNoTracking().SingleAsync(u => u.Id == c.Me.Id), c.S.IsFlagOn("org_structure"));
+        var from = c.Date("from") ?? c.Today.AddDays(-42); var to = c.Date("to") ?? c.Today;
+        Check.That(to >= from, "to", "error.invalid");
+        var start = from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc); var end = to.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        var rows = await offers.Where(o => o.OpenedAt >= start && o.OpenedAt < end)
+            .Join(c.Db.Tasks.IgnoreQueryFilters(), o => o.TaskId, t => t.Id, (o, t) => new { o, t })
+            .Where(r => c.ProjectIds().Contains(r.t.ProjectId) && (c.Id("disciplineId") == null || r.t.ProjectDisciplineId == c.Id("disciplineId")))
+            .OrderBy(r => r.o.OpenedAt).Take(Cap).Select(r => new { Project = c.Db.Projects.Where(p => p.Id == r.t.ProjectId).Select(p => p.ProjectNumber).First(),
+                Discipline = c.Db.ProjectDisciplines.Where(d => d.Id == r.t.ProjectDisciplineId).Select(d => d.Discipline!.Name).First(),
+                Offered = r.o.OpenedAt, Closed = r.o.ClosedAt, r.o.CloseCause }).ToListAsync();
+        return new(Json(rows.Select(r => new { r.Project, r.Discipline, r.Offered, r.Closed, r.CloseCause,
+            DaysOpen = (int)((r.Closed ?? c.Now) - r.Offered).TotalDays })), "/pickup");
+    }
+
+    static async Task<Result> CommitmentMisses(Ctx c)
+    {
+        var from = c.Date("from") ?? c.Today.AddDays(-42); var to = c.Date("to") ?? c.Today;
+        var commitments = await c.Db.OutputCommitments.AsNoTracking().Where(o => c.ProjectIds().Contains(o.ProjectId) && o.State == CommitmentState.NotMet && o.TargetDate >= from && o.TargetDate <= to)
+            .ToListAsync();
+        var ids = commitments.Select(o => o.Id).ToArray();
+        var events = await c.Db.OutputCommitmentEvents.AsNoTracking().Where(e => ids.Contains(e.CommitmentId) && e.ToState == CommitmentState.NotMet)
+            .OrderByDescending(e => e.CreatedAt).ThenByDescending(e => e.Id).ToListAsync();
+        var categories = await c.Db.Set<CommitmentMissCategory>().ToDictionaryAsync(x => x.Id, x => x.Name);
+        var projects = await c.Db.Projects.Where(p => c.ProjectIds().Contains(p.Id)).ToDictionaryAsync(p => p.Id, p => p.ProjectNumber);
+        var targetIds = commitments.Select(o => o.TargetId).ToArray();
+        var tasks = await c.Db.Tasks.IgnoreQueryFilters().Where(t => targetIds.Contains(t.Id)).ToDictionaryAsync(t => t.Id, t => t.ProjectDisciplineId);
+        var deliverables = await c.Db.Deliverables.IgnoreQueryFilters().Where(d => targetIds.Contains(d.Id)).ToDictionaryAsync(d => d.Id, d => d.ProjectDisciplineId);
+        var disciplines = await c.Db.ProjectDisciplines.Include(d => d.Discipline).ToDictionaryAsync(d => d.Id, d => d.Discipline!.Name);
+        var data = commitments.Select(o => new { o.ProjectId, DisciplineId = o.TargetType == "Task" ? tasks.GetValueOrDefault(o.TargetId) : deliverables.GetValueOrDefault(o.TargetId),
+            CategoryId = events.FirstOrDefault(e => e.CommitmentId == o.Id)?.MissCategoryId }).Where(o => c.Id("disciplineId") == null || o.DisciplineId == c.Id("disciplineId"));
+        return new(Json(data.GroupBy(o => new { o.ProjectId, o.DisciplineId, o.CategoryId }).Select(g => new { Project = projects.GetValueOrDefault(g.Key.ProjectId),
+            Discipline = disciplines.GetValueOrDefault(g.Key.DisciplineId), Category = g.Key.CategoryId is { } category ? categories.GetValueOrDefault(category) : "Not recorded", Count = g.Count() })));
+    }
+
     static async Task<Result> StaffAssignments(Ctx c)
     {
         var a = c.Me.Actor;
         var all = c.Str("scope") == "all";
         if (all && !Permissions.ViewAllStaff(a)) throw ApiException.Forbidden("perm.all_staff");
         var people = c.Db.Users.AsNoTracking().Where(u => u.IsActive && (all || u.SupervisorId == c.Me.Id));
+        if (!all) people = await PeopleScope.Widen(c.Db, a, people);
         if (c.Id("officeId") is { } office) people = people.Where(u => u.OfficeId == office);
         var projects = c.Access.VisibleProjects().Where(p => p.Status != ProjectStatus.Archived && p.Status != ProjectStatus.Cancelled);
         if (c.Ids("projectId") is { Length: > 0 } chosen) projects = projects.Where(p => chosen.Contains(p.Id));
@@ -606,12 +667,32 @@ public static partial class ReportEndpoints
             OpenTasks = c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled),
             OverdueTasks = c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && c.Db.TaskStates.Any(s => s.TaskId == t.Id && s.IsOverdue)),
         }).OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Take(Cap).ToListAsync();
-        return new(Json(rows.OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Select(r => (object)new
+        var data = Json(rows.OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Select(r => (object)new
         {
             r.Person, r.Project.ProjectNumber, ProjectName = r.Project.Name, ProjectStatus = r.Project.Status,
             Roles = string.Join(", ", r.Roles.Select(x => Text.Get($"role.{x}"))), r.PrimaryDiscipline,
             AddedAt = Clock.LocalDate(r.AddedAt, c.S), r.AddedBy, r.OpenTasks, r.OverdueTasks,
-        })));
+        }));
+        if (!c.S.IsFlagOn("org_structure")) return new(data);
+        var ids = rows.Select(r => r.UserId).Distinct().ToArray();
+        var week = c.Date("week");
+        var end = week is { } date ? new DateTimeOffset(Hub.Domain.Workload.WeekOf(date).AddDays(7).ToDateTime(TimeOnly.MinValue), Clock.Zone(c.S).GetUtcOffset(Hub.Domain.Workload.WeekOf(date).AddDays(7).ToDateTime(TimeOnly.MinValue))).ToUniversalTime() : c.Now.AddTicks(1);
+        var placements = await OrgStructureReports.At(c.Db, ids, end);
+        var units = await c.Db.Set<OrgUnit>().AsNoTracking().ToDictionaryAsync(u => u.Id);
+        HashSet<Guid>? chosenUnits = null;
+        if (c.Id("unitId") is { } unit)
+            chosenUnits = OrgTree.Descendants(unit, units.Values.Select(u => new OrgTree.Unit(u.Id, u.ParentId, 0, u.LeaderId))).ToHashSet();
+        var filtered = new JsonArray();
+        for (var i = 0; i < rows.Count; i++)
+        {
+            var placement = placements.GetValueOrDefault(rows[i].UserId);
+            if (chosenUnits != null && (placement == null || !chosenUnits.Contains(placement.Value))) continue;
+            var row = data[i]!.DeepClone(); row["unit"] = placement is { } id && units.TryGetValue(id, out var value) ? value.Name : "No unit";
+            row["unitPath"] = OrgStructureReports.UnitPath(placement, units); filtered.Add(row);
+        }
+        var columns = All.Single(d => d.Code == "staff-assignments").Cols.Concat(new[] { new Col("unit", "unit", Label: "Unit"), new Col("unitPath", "unitPath", Label: "Unit path") }).ToArray();
+        return new(filtered, Columns: columns);
+
     }
 }
 

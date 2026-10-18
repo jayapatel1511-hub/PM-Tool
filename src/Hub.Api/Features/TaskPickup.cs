@@ -1,0 +1,258 @@
+using Hub.Api.Data;
+using Hub.Api.Infrastructure;
+using Hub.Domain;
+using Microsoft.EntityFrameworkCore;
+
+namespace Hub.Api.Features;
+
+/// Task pickup rules and route handlers. HubModules.Map must call Map(api) from the integration slice.
+public static class TaskPickupEndpoints
+{
+    public sealed record OfferBody(string Reason, decimal? HoursRemaining, DateOnly? NeededBy, string? Note, bool? KeepWatching = null);
+    public sealed record PickupBody(int? RowVersion);
+    public sealed record AssignBody(Guid UserId, int? RowVersion);
+
+    public static void Map(RouteGroupBuilder api)
+    {
+        api.MapPost("/tasks/{id:guid}/pickup-offer", Offer).AddEndpointFilter<PickupCommandFilter>();
+        api.MapDelete("/tasks/{id:guid}/pickup-offer", Withdraw).AddEndpointFilter<PickupCommandFilter>();
+        api.MapPost("/tasks/{id:guid}/pickup", PickUp).AddEndpointFilter<PickupCommandFilter>();
+        api.MapPost("/tasks/{id:guid}/pickup-offer/assign", Assign).AddEndpointFilter<PickupCommandFilter>();
+        api.MapGet("/tasks/{id:guid}/pickup-offer", Detail);
+        api.MapGet("/pickup-offers", List);
+    }
+
+    static async Task<bool> Enabled(HubDb db, SettingsStore store) => (await store.Get(db)).IsFlagOn("task_pickup");
+
+    static async Task<IResult> Offer(Guid id, OfferBody body, Access access, HubDb db, CurrentUser me, TimeProvider clock, SettingsStore store, Notifier notify)
+    {
+        if (!await Enabled(db, store)) throw ApiException.NotFound();
+        var (task, project, ctx) = await TaskEndpoints.Load(db, access, id);
+        if (task.Status is TaskStatuses.Complete or TaskStatuses.Cancelled || task.DeletedAt is not null)
+            throw ApiException.Rule("task_closed", "task.pickup_closed");
+        var assignee = task.AssigneeId is { } aid ? await db.Users.FirstOrDefaultAsync(u => u.Id == aid) : null;
+        var canOffer = task.AssigneeId == me.Id || Permissions.IsPM(access.Actor, ctx) || Permissions.IsDL(ctx, task.ProjectDisciplineId)
+            || access.Actor.Supervisor && assignee?.SupervisorId == me.Id;
+        Access.Demand(canOffer ? Allow.Yes : Allow.No("perm.pickup_offer"));
+        Check.That(!string.IsNullOrWhiteSpace(body.Reason) && body.Reason.Trim().Length <= 2000, "reason", "error.required");
+        Check.That(body.Note is null or { Length: <= 4000 }, "note", "error.length");
+        Check.That(body.HoursRemaining is null or >= 0, "hoursRemaining", "error.positive");
+        Check.That(!await db.Set<TaskPickupOffer>().AnyAsync(x => x.TaskId == id && x.ClosedAt == null), "taskId", "task.pickup_already_open");
+        var now = clock.GetUtcNow();
+        db.Set<TaskPickupOffer>().Add(new TaskPickupOffer
+        {
+            TaskId = id, OfferedById = me.Id, AssigneeId = task.AssigneeId, Reason = body.Reason.Trim(),
+            HoursRemaining = body.HoursRemaining, NeededBy = body.NeededBy, Note = body.Note?.Trim(), KeepWatching = body.KeepWatching ?? true, OpenedAt = now,
+        });
+        db.Audit.Reason = body.Reason.Trim();
+        db.LogEvent(ItemType.Task, task.Id, "PickupOffered", "assignment", project.Id, task.Key, task.Name,
+            new[] { new { field = "PickupOffer", old = (object?)null, @new = body.Reason.Trim() } }, reason: body.Reason.Trim(), disciplineId: task.ProjectDisciplineId);
+        Check.That(assignee is { IsActive: true }, "assigneeId", "coord.person");
+        var structure = (await store.Get(db)).IsFlagOn("org_structure");
+        var peers = await db.Users.Where(u => u.IsActive).ToListAsync();
+        var recipients = peers.Where(u => TaskPickupRules.SameTeam(structure, assignee!.UnitId, u.UnitId, assignee.SupervisorId, u.SupervisorId, assignee.IsActive, u.IsActive)).Select(u => (Guid?)u.Id).ToList();
+        recipients.Add(assignee!.SupervisorId);
+        recipients.Add(assignee.Id);
+        recipients.Add(project.ProjectManagerId);
+        var lead = await db.ProjectDisciplines.Where(d => d.Id == task.ProjectDisciplineId).Select(d => d.LeadUserId).FirstOrDefaultAsync(); recipients.Add(lead);
+        await notify.Send(NotificationEvents.TaskPickupOffered, recipients, TaskEndpoints.Item(project, task), Text.Get("notify.task_pickup_offered", task.Key, task.Name), body.Reason.Trim());
+        await db.SaveChangesAsync();
+        return Results.Created($"/api/v1/tasks/{id}/pickup-offer", new { taskId = id });
+    }
+
+    static async Task<IResult> Withdraw(Guid id, Access access, HubDb db, CurrentUser me, TimeProvider clock, SettingsStore store, Notifier notify)
+    {
+        if (!await Enabled(db, store)) throw ApiException.NotFound();
+        var (task, _, ctx) = await TaskEndpoints.Load(db, access, id);
+        var offer = await db.Set<TaskPickupOffer>().FirstOrDefaultAsync(x => x.TaskId == id && x.ClosedAt == null) ?? throw ApiException.NotFound();
+        var assignee = task.AssigneeId is { } aid ? await db.Users.Where(u => u.Id == aid).Select(u => new { u.SupervisorId }).FirstOrDefaultAsync() : null;
+        Access.Demand(offer.OfferedById == me.Id || offer.AssigneeId == me.Id || access.Actor.Supervisor && assignee?.SupervisorId == me.Id || Permissions.IsPM(access.Actor, ctx) || Permissions.IsDL(ctx, task.ProjectDisciplineId)
+            ? Allow.Yes : Allow.No("perm.pickup_withdraw"));
+        offer.ClosedAt = clock.GetUtcNow(); offer.CloseCause = TaskPickupOffer.Withdrawn;
+        db.Audit.Reason = "withdrawn";
+        db.LogEvent(ItemType.Task, task.Id, "PickupWithdrawn", "assignment", task.ProjectId, task.Key, task.Name, reason: "withdrawn", disciplineId: task.ProjectDisciplineId);
+        await notify.Send(NotificationEvents.TaskPickupClosed, offer.OfferedById, TaskEndpoints.Item(await db.Projects.FirstAsync(p => p.Id == task.ProjectId), task), Text.Get("notify.task_pickup_closed", task.Key, task.Name), "withdrawn");
+        await db.SaveChangesAsync();
+        return Results.NoContent();
+    }
+
+    static async Task<IResult> PickUp(Guid id, PickupBody body, HttpContext http, Access access, HubDb db, CurrentUser me, TeamService team, TimeProvider clock, SettingsStore store, Notifier notify)
+    {
+        if (!await Enabled(db, store)) throw ApiException.NotFound();
+        var (task, project, ctx) = await TaskEndpoints.Load(db, access, id);
+        await Http.CheckVersion(db, http, task, body.RowVersion);
+        var offer = await db.Set<TaskPickupOffer>().FirstOrDefaultAsync(x => x.TaskId == id && x.ClosedAt == null) ?? throw ApiException.NotFound();
+        var assignee = task.AssigneeId is { } aid ? await db.Users.FirstOrDefaultAsync(u => u.Id == aid) : null;
+        var picker = await db.Users.FirstOrDefaultAsync(u => u.Id == me.Id && u.IsActive) ?? throw ApiException.Forbidden("perm.inactive");
+        var orgStructure = (await store.Get(db)).IsFlagOn("org_structure");
+        Access.Demand(assignee is not null && TaskPickupRules.SameTeam(orgStructure, assignee.UnitId, picker.UnitId, assignee.SupervisorId, picker.SupervisorId, assignee.IsActive, picker.IsActive) && picker.Id != assignee.Id
+            ? Allow.Yes : Allow.No("perm.pickup_team"));
+        var old = task.AssigneeId;
+        await Tx.Run<int>(db, async () =>
+        {
+            await TaskEndpoints.AssignTo(db, project, task, picker.Id, team, await store.Get(db));
+            offer.ClosedAt = clock.GetUtcNow(); offer.CloseCause = TaskPickupOffer.PickedUp;
+            if (old is { } previous && offer.KeepWatching) await TaskEndpoints.Watch(db, project.Id, ItemType.Task, task.Id, previous, "Pickup");
+            db.Audit.Reason = offer.Reason;
+            db.Audit.Note(task, action: "TaskPickedUp", reason: offer.Reason);
+            var manager = old is { } oa ? await db.Users.Where(u => u.Id == oa).Select(u => u.SupervisorId).FirstOrDefaultAsync() : null;
+            var lead = await db.ProjectDisciplines.Where(d => d.Id == task.ProjectDisciplineId).Select(d => d.LeadUserId).FirstOrDefaultAsync();
+            await notify.Send(NotificationEvents.TaskPickedUp, new Guid?[] { old, offer.OfferedById, manager, project.ProjectManagerId, lead }, TaskEndpoints.Item(project, task), Text.Get("notify.task_picked_up", task.Key, task.Name));
+            return await db.SaveChangesAsync();
+        });
+        return Results.Ok(new { task.Id, task.AssigneeId, offer.CloseCause });
+    }
+
+    static async Task<IResult> Assign(Guid id, AssignBody body, HttpContext http, Access access, HubDb db, TeamService team, TimeProvider clock, SettingsStore store, Notifier notify)
+    {
+        if (!await Enabled(db, store)) throw ApiException.NotFound();
+        var (task, project, ctx) = await TaskEndpoints.Load(db, access, id);
+        await Http.CheckVersion(db, http, task, body.RowVersion);
+        var offer = await db.Set<TaskPickupOffer>().FirstOrDefaultAsync(x => x.TaskId == id && x.ClosedAt == null) ?? throw ApiException.NotFound();
+        var assignee = task.AssigneeId is { } aid ? await db.Users.FirstOrDefaultAsync(u => u.Id == aid) : null;
+        var target = await db.Users.FirstOrDefaultAsync(u => u.Id == body.UserId && u.IsActive) ?? throw ApiException.Invalid("userId", "error.not_found");
+        Access.Demand(Permissions.IsPM(access.Actor, ctx) || Permissions.IsDL(ctx, task.ProjectDisciplineId) || access.Actor.Supervisor && assignee?.SupervisorId == access.Actor.Id
+            ? Allow.Yes : Allow.No("perm.pickup_assign"));
+        var orgStructure = (await store.Get(db)).IsFlagOn("org_structure");
+        Access.Demand(assignee is not null && TaskPickupRules.SameTeam(orgStructure, assignee.UnitId, target.UnitId, assignee.SupervisorId, target.SupervisorId, assignee.IsActive, target.IsActive)
+            ? Allow.Yes : Allow.No("perm.pickup_team"));
+        var old = task.AssigneeId;
+        await Tx.Run<int>(db, async () =>
+        {
+            await TaskEndpoints.AssignTo(db, project, task, target.Id, team, await store.Get(db));
+            offer.ClosedAt = clock.GetUtcNow(); offer.CloseCause = TaskPickupOffer.AssignedByManager;
+            db.Audit.Reason = offer.Reason;
+            db.Audit.Note(task, action: "TaskAssignedFromPickup", reason: offer.Reason);
+            await notify.Send(NotificationEvents.TaskPickupAssigned, new Guid?[] { target.Id, old, offer.OfferedById }, TaskEndpoints.Item(project, task), Text.Get("notify.task_pickup_assigned", task.Key, task.Name));
+            return await db.SaveChangesAsync();
+        });
+        return Results.Ok(new { task.Id, task.AssigneeId, offer.CloseCause });
+    }
+
+    static async Task<IResult> List(Access access, HubDb db, CurrentUser me, DateOnly? neededBy, Guid? projectId, Guid? disciplineId, Guid? taskId, SettingsStore store)
+    {
+        if (!await Enabled(db, store)) return Results.Ok(Array.Empty<object>());
+        var visible = access.VisibleProjectIds();
+        var q = db.Set<TaskPickupOffer>().AsNoTracking().Where(o => o.ClosedAt == null && visible.Contains(db.Tasks.Where(t => t.Id == o.TaskId).Select(t => t.ProjectId).FirstOrDefault()));
+        if (projectId is { } pid) q = q.Where(o => db.Tasks.Any(t => t.Id == o.TaskId && t.ProjectId == pid));
+        if (disciplineId is { } did) q = q.Where(o => db.Tasks.Any(t => t.Id == o.TaskId && t.ProjectDisciplineId == did));
+        if (taskId is { } tid) q = q.Where(o => o.TaskId == tid);
+        if (neededBy is { } date) q = q.Where(o => o.NeededBy == date);
+        var viewer = await db.Users.AsNoTracking().Where(u => u.Id == me.Id).Select(u => new { u.Id, u.UnitId, u.SupervisorId, u.IsActive }).FirstAsync();
+        var orgStructure = (await store.Get(db)).IsFlagOn("org_structure");
+        var rows = await q.OrderBy(o => o.NeededBy).ThenBy(o => db.Tasks.Where(t => t.Id == o.TaskId).Select(t => t.DueDate).FirstOrDefault()).ThenBy(o => o.OpenedAt).Select(o => new
+        {
+            o.Id, o.TaskId, o.OfferedById, OfferedBy = db.Users.Where(u => u.Id == o.OfferedById).Select(u => u.DisplayName).First(),
+            o.Reason, o.HoursRemaining, o.NeededBy, o.Note, o.OpenedAt,
+            Task = db.Tasks.Where(t => t.Id == o.TaskId).Select(t => new { t.Key, t.Name, t.ProjectId, t.ProjectDisciplineId, DisciplineName = db.ProjectDisciplines.Where(d => d.Id == t.ProjectDisciplineId).Select(d => d.Discipline!.Name).First(), t.DueDate, t.AssigneeId, t.RowVersion }).First(),
+        }).ToListAsync();
+        var assignees = await db.Users.AsNoTracking().Where(u => rows.Select(r => r.Task.AssigneeId).Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id, u => u);
+        return Results.Ok(rows.Where(row => row.Task.AssigneeId is { } aid && assignees.TryGetValue(aid, out var assignee)
+            && TaskPickupRules.SameTeam(orgStructure, assignee.UnitId, viewer.UnitId, assignee.SupervisorId, viewer.SupervisorId, assignee.IsActive, viewer.IsActive)
+            && aid != viewer.Id).Select(row => new
+            {
+                row.Id, row.TaskId, row.OfferedById, row.OfferedBy, row.Reason, row.HoursRemaining, row.NeededBy, row.Note, row.OpenedAt,
+                Task = new { row.Task.Key, row.Task.Name, row.Task.ProjectId, row.Task.ProjectDisciplineId, row.Task.DisciplineName, row.Task.DueDate, row.Task.RowVersion },
+            }));
+    }
+
+    static async Task<IResult> Detail(Guid id, Access access, HubDb db, CurrentUser me, SettingsStore store)
+    {
+        if (!await Enabled(db, store)) throw ApiException.NotFound();
+        var (task, project, ctx) = await TaskEndpoints.Load(db, access, id);
+        var offer = await db.Set<TaskPickupOffer>().AsNoTracking().FirstOrDefaultAsync(x => x.TaskId == id && x.ClosedAt == null) ?? throw ApiException.NotFound();
+        var viewer = await db.Users.AsNoTracking().FirstAsync(u => u.Id == me.Id);
+        var owner = task.AssigneeId is { } ownerId ? await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == ownerId) : null;
+        var org = (await store.Get(db)).IsFlagOn("org_structure");
+        var sameTeam = owner is not null && owner.Id != me.Id && TaskPickupRules.SameTeam(org, owner.UnitId, viewer.UnitId, owner.SupervisorId, viewer.SupervisorId, owner.IsActive, viewer.IsActive);
+        var canAssign = Permissions.IsPM(access.Actor, ctx) || Permissions.IsDL(ctx, task.ProjectDisciplineId) || access.Actor.Supervisor && owner?.SupervisorId == me.Id;
+        var candidates = canAssign ? await db.Users.AsNoTracking().Where(u => u.IsActive && u.Id != task.AssigneeId).ToListAsync() : [];
+        var eligible = candidates.Where(u => owner is not null && TaskPickupRules.SameTeam(org, owner.UnitId, u.UnitId, owner.SupervisorId, u.SupervisorId, owner.IsActive, u.IsActive))
+            .Select(u => new { u.Id, u.DisplayName }).ToList();
+        return Results.Ok(new { offer.Id, offer.Reason, offer.Note, offer.OpenedAt, offer.KeepWatching, task.RowVersion, Task = new { task.Key, task.Name, task.ProjectId, task.ProjectDisciplineId, task.DueDate }, Allowed = new { PickUp = sameTeam && Permissions.Writable(access.Actor, ctx).Ok, Assign = canAssign && Permissions.Writable(access.Actor, ctx).Ok,
+            Withdraw = Permissions.Writable(access.Actor, ctx).Ok && (offer.OfferedById == me.Id || owner?.Id == me.Id || canAssign) }, Candidates = eligible });
+    }
+
+}
+
+public static class TaskPickupRules
+{
+    /// Fallback team rule for the pre-org-structure schema. Root can use the UnitId overload when enabled.
+    public static bool SameTeam(AppUser assignee, AppUser picker) => assignee.IsActive && picker.IsActive && assignee.SupervisorId is { } supervisor && supervisor == picker.SupervisorId;
+    public static bool SameTeam(bool orgStructureOn, Guid? assigneeUnitId, Guid? pickerUnitId, Guid? assigneeSupervisorId, Guid? pickerSupervisorId, bool assigneeActive, bool pickerActive)
+        => assigneeActive && pickerActive && (orgStructureOn && assigneeUnitId is { } unit
+            ? pickerUnitId == unit
+            : assigneeSupervisorId is { } supervisor && pickerSupervisorId == supervisor);
+}
+
+public static class TaskPickupLifecycle
+{
+    public static async Task BeforeSave(HubDb db, DateTimeOffset now, CancellationToken ct = default)
+    {
+        var closedProjects = db.ChangeTracker.Entries<Project>().Where(e => e.State == EntityState.Modified
+            && e.Property(p => p.Status).IsModified && e.Entity.Status is ProjectStatus.Complete or ProjectStatus.Archived).Select(e => e.Entity.Id).ToArray();
+        var projectOffers = await db.Set<TaskPickupOffer>().Where(o => o.ClosedAt == null && db.Tasks.Any(t => t.Id == o.TaskId && closedProjects.Contains(t.ProjectId))).ToListAsync(ct);
+        foreach (var offer in projectOffers)
+        {
+            var task = await db.Tasks.SingleAsync(t => t.Id == offer.TaskId, ct);
+            offer.ClosedAt = now; offer.CloseCause = TaskPickupOffer.TaskClosed;
+            if (offer.OfferedById != db.Audit.ActorId)
+                db.Notifications.Add(new Notification { UserId = offer.OfferedById, EventType = NotificationEvents.TaskPickupClosed,
+                    ProjectId = task.ProjectId, ItemType = ItemType.Task, ItemId = task.Id, Title = "Pickup offer closed", Body = "Project closed", CreatedAt = now, UpdatedAt = now });
+            db.LogEvent(ItemType.Task, task.Id, "PickupClosed", "assignment", task.ProjectId, task.Key, task.Name, reason: "Project closed", disciplineId: task.ProjectDisciplineId);
+        }
+        var changed = db.ChangeTracker.Entries<WorkTask>().Where(e => e.State is EntityState.Modified or EntityState.Deleted).ToList();
+        foreach (var entry in changed)
+        {
+            var deleted = entry.Entity.DeletedAt is not null && entry.Property(x => x.DeletedAt).IsModified;
+            var statusClosed = (entry.Entity.Status is TaskStatuses.Complete or TaskStatuses.Cancelled) && entry.Property(x => x.Status).IsModified;
+            var reassigned = entry.Property(x => x.AssigneeId).IsModified && entry.Property(x => x.AssigneeId).OriginalValue != entry.Entity.AssigneeId;
+            if (!deleted && !statusClosed && !reassigned) continue;
+            var cause = deleted || statusClosed ? TaskPickupOffer.TaskClosed : TaskPickupOffer.ReassignedElsewhere;
+            var offers = await db.Set<TaskPickupOffer>().Where(o => o.TaskId == entry.Entity.Id && o.ClosedAt == null).ToListAsync(ct);
+            foreach (var offer in offers.Where(o => o.ClosedAt == null))
+            {
+                offer.ClosedAt = now; offer.CloseCause = cause;
+                if (offer.OfferedById != db.Audit.ActorId)
+                    db.Notifications.Add(new Notification { UserId = offer.OfferedById, EventType = NotificationEvents.TaskPickupClosed,
+                        ProjectId = entry.Entity.ProjectId, ItemType = ItemType.Task, ItemId = entry.Entity.Id,
+                        Title = "Pickup offer closed", Body = cause, CreatedAt = now, UpdatedAt = now });
+                db.LogEvent(ItemType.Task, entry.Entity.Id, "PickupClosed", "assignment", entry.Entity.ProjectId, entry.Entity.Key, entry.Entity.Name,
+                    reason: cause, disciplineId: entry.Entity.ProjectDisciplineId);
+            }
+        }
+    }
+}
+
+public static class TaskPickupReporting
+{
+    public static IQueryable<TaskPickupOffer> Rows(HubDb db, IQueryable<Guid> visibleProjects) => db.Set<TaskPickupOffer>().AsNoTracking()
+        .Where(o => visibleProjects.Contains(db.Tasks.IgnoreQueryFilters().Where(t => t.Id == o.TaskId).Select(t => t.ProjectId).FirstOrDefault()));
+
+    public static IQueryable<TaskPickupOffer> Rows(HubDb db, IQueryable<Guid> visibleProjects, AppUser viewer, bool orgStructureOn)
+        => Rows(db, visibleProjects).Where(o => db.Tasks.IgnoreQueryFilters().Where(t => t.Id == o.TaskId).Select(t => t.AssigneeId).Any(aid => aid != null && aid != viewer.Id && db.Users.Any(u => u.Id == aid && u.IsActive && viewer.IsActive
+            && (orgStructureOn && u.UnitId != null ? u.UnitId == viewer.UnitId : u.SupervisorId != null && u.SupervisorId == viewer.SupervisorId))));
+}
+
+/// Serialize offer state with task changes before handlers read either row; an offer never races a terminal save.
+public sealed class PickupCommandFilter : IEndpointFilter
+{
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        var sp = context.HttpContext.RequestServices;
+        var db = sp.GetRequiredService<HubDb>();
+        var access = sp.GetRequiredService<Access>();
+        Http.RequireFlag(await sp.GetRequiredService<SettingsStore>().Get(db), "task_pickup");
+        var id = Guid.Parse(context.HttpContext.Request.RouteValues["id"]!.ToString()!);
+        var projectId = await db.Tasks.Where(t => t.Id == id).Select(t => (Guid?)t.ProjectId).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
+        await using var tx = await db.Database.BeginTransactionAsync();
+        await Coordination.Lock(db, projectId);
+        await db.Database.SqlQuery<Guid>($"SELECT id AS \"Value\" FROM hub.task WHERE id={id} FOR UPDATE").ToListAsync();
+        var (_, ctx) = await access.Project(projectId, false);
+        Access.Demand(Permissions.Writable(access.Actor, ctx));
+        var result = await next(context);
+        await tx.CommitAsync();
+        return result;
+    }
+}

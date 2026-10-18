@@ -23,6 +23,7 @@ interface StaffRow {
   open: number; overdue: number; blocked: number; blocking: number; reviews: number; reviewsStalled: number; deliverablesDue: number; lastActivityAt?: string
 }
 interface StaffData { scope: string; canSeeAll: boolean; tiles: { staff: number; assignments: number; withOverdue: number; withBlocked: number; reviewsStalled: number }; people: StaffRow[] }
+interface OrganisationUnits { includeIndirectReports?: boolean; units: { id: string; name: string; parentId?: string; leaderId?: string; closedOn?: string }[] }
 interface Assignment {
   memberId: string; rowVersion: number; projectId: string; projectNumber: string; name: string; status: string; reportedHealth: string; roles: string[]; leads: string[]
   primaryDiscipline?: string; addedAt: string; open: number; overdue: number; nextDue?: { id: string; key: string; name: string; dueDate: string } | null; canRemove: boolean
@@ -36,6 +37,8 @@ export function StaffPage() {
   const small = useFlag('small_ux')
   const [sp, setSp] = useSearchParams()
   const ref = useReference()
+  const me = useMe()
+  const org = useQuery({ enabled: me.flags?.org_structure === true, queryKey: ['organisation'], queryFn: () => get<OrganisationUnits>('organisation') })
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const f = { scope: sp.get('scope') ?? undefined, showInactive: sp.get('inactive') === '1' || undefined, officeId: sp.get('office') ?? undefined,
     disciplineId: sp.get('discipline') ?? undefined, indicator: sp.get('indicator') ?? undefined }
@@ -74,9 +77,9 @@ export function StaffPage() {
   return (
     <Page {...header} actions={small && <ViewMenu listType="staff" />} subtitle={d.scope === 'all' ? t('staff.allSubtitle') : t('staff.directSubtitle')}>
       <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4 text-sm md:p-5">
-        {d.canSeeAll && (
+        {(d.canSeeAll || org.data?.includeIndirectReports || (org.data?.units.some((u) => u.leaderId === me.id) ?? false)) && (
           <Segmented label={t('staff.scope')} value={f.scope ?? 'direct'} onChange={(s) => set('scope', s === 'direct' ? undefined : s)}
-            options={['direct', 'all'].map((s) => ({ value: s, label: t(`staff.scope.${s}`) }))} />
+            options={[{ value: 'direct', label: t('staff.scope.direct') }, ...(d.canSeeAll ? [{ value: 'all', label: t('staff.scope.all') }] : []), ...(org.data?.includeIndirectReports ? [{ value: 'reports', label: t('staff.scope.reports') }] : []), ...(org.data?.units.filter((u) => u.leaderId === me.id && !u.closedOn).map((u) => ({ value: `unit:${u.id}`, label: u.name })) ?? [])]} />
         )}
         <Field label={t('field.OfficeId')} htmlFor="staff-office" className="w-full sm:w-44">
           <select id="staff-office" className={selectCls} value={f.officeId ?? ''} onChange={(e) => set('office', e.target.value || undefined)}>

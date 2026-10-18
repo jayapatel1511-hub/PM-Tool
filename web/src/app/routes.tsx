@@ -1,3 +1,8 @@
+import { useFlag } from '@/lib/auth'
+import { PickupPage } from '@/pages/Pickup'
+import { OrganisationPage } from '@/pages/Organisation'
+import { StructureAdmin } from '@/pages/admin/Structure'
+import { AuditChains } from '@/pages/admin/AuditChains'
 import type { RouteObject } from 'react-router'
 import { Navigate } from 'react-router'
 import { AdminIndex, AdminLayout, OrgActivity, ReferenceData, Settings, Users } from '@/pages/admin/Admin'
@@ -58,6 +63,8 @@ import { PreferencesPage } from '@/pages/Preferences'
 import { ReadinessTab } from '@/pages/projects/Readiness'
 import { PlannerPage } from '@/pages/Planner'
 
+function Flagged({ name, children }: { name: string; children: React.ReactNode }) { return useFlag(name) ? children : <NotFound /> }
+
 const admin = (el: React.ReactNode) => <AdminLayout>{el}</AdminLayout>
 /** A workspace view shown for the current project only (FR-VIS-01 project tabs). */
 function InProject({ children }: { children: React.ReactNode }) {
@@ -72,6 +79,10 @@ export const PROJECT_HOME = 'dashboard'
 /** Route table; each packet adds its screens here. */
 export const routes: RouteObject[] = [
   { index: true, element: <Navigate to="/my-work" replace /> },
+  { path: 'pickup', element: <Flagged name="task_pickup"><PickupPage /></Flagged> },
+  { path: 'organisation', element: <Flagged name="org_structure"><OrganisationPage /></Flagged> },
+  { path: 'admin/structure', element: <Flagged name="org_structure">{admin(<StructureAdmin />)}</Flagged> },
+  { path: 'admin/audit-chains', element: <Flagged name="verifiable_log">{admin(<AuditChains />)}</Flagged> },
   { path: 'my-work', element: <MyWorkPage /> },
   { path: 'home', element: <HomePage /> },
   { path: 'boards', element: <WorkspaceBoardPage /> },

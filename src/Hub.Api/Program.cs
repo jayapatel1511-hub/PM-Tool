@@ -214,6 +214,8 @@ if (reviewDemo && !(app.Environment.IsDevelopment() || app.Environment.IsStaging
     throw new InvalidOperationException("Seed:ReviewDemo is permitted only in Development, Staging or Testing.");
 
 var migrateOnly = cfg.GetValue<bool>("Db:MigrateOnly");
+if (cfg.GetValue<bool>("Db:InitializeAuditChains") && !migrateOnly)
+    throw new InvalidOperationException("Audit-chain initialization requires the privileged migration-only step.");
 if (migrateOnly && cfg["Db:Migrate"] == "false")
     throw new InvalidOperationException("Migration-only execution requires Db:Migrate.");
 
@@ -231,6 +233,8 @@ if (cfg["Db:Migrate"] != "false")
     if (reviewDemo)
         await ReviewDemoSeed.Seed(db, scope.ServiceProvider.GetRequiredService<TimeProvider>());
     await AuthSetup.BootstrapAdmins(db, cfg, app.Environment, app.Logger);
+    if (cfg.GetValue<bool>("Db:InitializeAuditChains"))
+        await AuditChainInitialization.Run(db, scope.ServiceProvider.GetRequiredService<TimeProvider>().GetUtcNow());
 }
 
 if (migrateOnly) return; // Privileged release step exits before the ordinary HTTP/background host starts.

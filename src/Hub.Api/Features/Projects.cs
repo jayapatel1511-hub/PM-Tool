@@ -70,7 +70,7 @@ public static class ProjectEndpoints
 
     public sealed record ProjectQuery(string? Q, string? Status, Guid? PmId, Guid? ClientId, Guid? OfficeId, Guid? PhaseId, Guid? DisciplineId, string? Health,
         Guid? ProjectTypeId, bool? IncludeArchived, bool? Mine, bool? Starred, string? Priority, string? Ids, string? Sort, int? Page, int? PageSize, int? SubmissionWithinDays,
-        string? ComputedHealth = null);
+        string? ComputedHealth = null, Guid? LeadUnitId = null);
 
     static async Task<object> List([AsParameters] ProjectQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
@@ -82,7 +82,7 @@ public static class ProjectEndpoints
     /// The project list's rows in list order, unpaged (the list pages them; exports take them all).
     public static async Task<List<object>> Sorted(ProjectQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
-        var (q, status, pmId, clientId, officeId, phaseId, disciplineId, health, projectTypeId, includeArchived, mine, starred, priority, ids, sort, _, _, submissionWithinDays, computedHealth) = f;
+        var (q, status, pmId, clientId, officeId, phaseId, disciplineId, health, projectTypeId, includeArchived, mine, starred, priority, ids, sort, _, _, submissionWithinDays, computedHealth, leadUnitId) = f;
         var s = await store.Get(db);
         var today = clock.Today(s);
         var query = access.VisibleProjects().AsNoTracking();
@@ -103,6 +103,12 @@ public static class ProjectEndpoints
         if (disciplineId is { } d) query = query.Where(p => db.ProjectDisciplines.Any(x => x.ProjectId == p.Id && x.DisciplineId == d && x.IsActive));
         if (mine == true) query = query.Where(p => p.ProjectManagerId == me.Id || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == me.Id && m.RemovedAt == null));
         if (starred == true) query = query.Where(p => db.ProjectStars.Any(x => x.ProjectId == p.Id && x.UserId == me.Id));
+        if (leadUnitId is { } lead && (await store.Get(db)).IsFlagOn("org_structure"))
+        {
+            var units = await db.Set<OrgUnit>().AsNoTracking().Select(x => new OrgTree.Unit(x.Id, x.ParentId, 0, null)).ToListAsync();
+            var descendants = OrgTree.Descendants(lead, units);
+            query = lead == Guid.Empty ? query.Where(p => p.LeadUnitId == null) : query.Where(p => p.LeadUnitId != null && descendants.Contains(p.LeadUnitId.Value));
+        }
 
         var rows = await query.Select(p => new
         {
@@ -400,6 +406,12 @@ public static class ProjectEndpoints
             var pm = patch.Id("projectManagerId") ?? throw ApiException.Invalid("projectManagerId", "error.required");
             Check.That(await db.Users.AnyAsync(u => u.Id == pm && u.IsActive), "projectManagerId", "team.inactive_user");
             await team.ChangePrimaryPm(p, pm);
+        }
+        if (patch.Has("leadUnitId") && (await store.Get(db)).IsFlagOn("org_structure"))
+        {
+            var unit = patch.Id("leadUnitId");
+            Check.That(unit is null || await db.Set<OrgUnit>().AnyAsync(x => x.Id == unit && x.ClosedOn == null), "leadUnitId", "error.not_found");
+            p.LeadUnitId = unit;
         }
         await db.SaveChangesAsync();
         Http.ETag(http, p);

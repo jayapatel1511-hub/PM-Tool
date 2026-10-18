@@ -126,6 +126,7 @@ function scopeWork(w: Work, keep: (pid?: string | null) => boolean): Work {
 }
 
 function Overview({ focus }: { focus: boolean }) {
+  const pickupOn = useFlag('task_pickup')
   const me = useMe()
   const qc = useQueryClient()
   const [sp, setSp] = useSearchParams()
@@ -281,7 +282,7 @@ function Overview({ focus }: { focus: boolean }) {
 
   return (
     <Page title={ro ? t('mywork.of', { name: w.person.displayName }) : t('mywork.title')} subtitle={ro && t('mywork.readOnly')}
-      actions={!ro && <><ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
+      actions={!ro && <>{pickupOn && <Button variant="outline" asChild><Link to="/pickup">{t('pickup.title')}</Link></Button>}<ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
       {!userId && !ro && <OnboardingCard />}
       <div className="flex flex-wrap items-start gap-2">
         {!ro && <MyWorkViews sections={menu} />}
@@ -341,6 +342,7 @@ function Overview({ focus }: { focus: boolean }) {
 /** Today, Upcoming, Overdue and Completed (FR-VIS-08) for one membership view: My Tasks (assignee or collaborator),
  *  Assigned to Me (assignee) or Created by Me (creator). The checkbox completes through the guarded transition. */
 function TaskView({ tab }: { tab: string }) {
+  const pickupOn = useFlag('task_pickup')
   const me = useMe()
   const qc = useQueryClient()
   const scope = useScope()
@@ -361,7 +363,7 @@ function TaskView({ tab }: { tab: string }) {
   const rows = q.data?.items ?? []
   return (
     <Page title={t('mywork.title')}
-      actions={<><ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
+      actions={<>{pickupOn && <Button variant="outline" asChild><Link to="/pickup">{t('pickup.title')}</Link></Button>}<ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
       <div className="flex flex-wrap items-start gap-2">
         <MyWorkViews />
         <FilterBar className="flex-1" activeCount={['from', 'to'].filter((k) => sp.has(k)).length}

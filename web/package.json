@@ -23,7 +23,10 @@
     "test:client-errors": "node tests/client-errors.cjs",
     "test:interaction": "node tests/interaction.cjs",
     "test:recovery-counts": "node tests/recovery-counts.cjs",
-    "test:planning-reporting": "node tests/planning-reporting.cjs"
+    "test:planning-reporting": "node tests/planning-reporting.cjs",
+    "test:task-pickup": "node tests/task-pickup.cjs",
+    "test:verifiable-records": "node tests/verifiable-records.cjs",
+    "test:schema-workflows": "node tests/schema-workflows.cjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.23.0",

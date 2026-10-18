@@ -24,7 +24,7 @@ const COLUMNS = ['client', 'pm', 'office', 'phase', 'status', 'health', 'priorit
 type Col = (typeof COLUMNS)[number]
 const DEFAULT_COLS: Col[] = ['client', 'pm', 'status', 'health', 'priority', 'due', 'progress', 'nextMilestone', 'overdue', 'blocked', 'myRole']
 /** URL filters shown as removable tokens; scope (mine), grouping and sort are view choices, not filters. */
-const FILTERS = ['q', 'status', 'health', 'officeId', 'disciplineId', 'includeArchived', 'ids', 'computedHealth'] as const
+const FILTERS = ['q', 'status', 'health', 'officeId', 'disciplineId', 'leadUnitId', 'includeArchived', 'ids', 'computedHealth'] as const
 const href = (r: ProjectRow) => `/projects/${encodeURIComponent(r.projectNumber)}`
 
 /** Project list and grouped board presentation (§13.2, FR-021, §36.2 FR-VIS-03). Filters live in the URL. */
@@ -32,6 +32,7 @@ export function ProjectListPage() {
   const me = useMe()
   const [sp, setSp] = useSearchParams()
   const ref = useReference()
+  const org = useQuery({ enabled: me.flags?.org_structure === true, queryKey: ['organisation'], queryFn: () => get<{ units: { id: string; name: string; parentId?: string; closedOn?: string }[] }>('organisation') })
   const navigate = useNavigate()
   const importEnabled = useFlag('project_import')
   const [importing, setImporting] = useState(false)
@@ -67,6 +68,7 @@ export function ProjectListPage() {
     ['health', t('projects.health'), sp.get('health') && t(`health.${sp.get('health')}`)],
     ['officeId', t('admin.office'), ref.data?.offices.find((o) => o.id === sp.get('officeId'))?.name],
     ['disciplineId', t('common.discipline'), ref.data?.disciplines.find((d) => d.id === sp.get('disciplineId'))?.name],
+    ['leadUnitId', 'Lead unit', org.data?.units.find((u) => u.id === sp.get('leadUnitId'))?.name ?? (sp.get('leadUnitId') ? 'No unit' : undefined)],
     ['includeArchived', t('projects.includeArchived'), t('common.yes')],
     ['ids', t('projects.filter.chosen'), ids && ids.split(',').filter((x) => x && x !== 'none').length],
     ['computedHealth', t('projects.filter.computedHealth'), sp.get('computedHealth')?.split(',').map((h) => t(`health.${h}`)).join(', ')],
@@ -126,6 +128,11 @@ export function ProjectListPage() {
               {ref.data?.disciplines.filter((d) => d.isActive).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
           </Field>
+          {me.flags?.org_structure === true && <Field label="Lead unit" htmlFor="pl-lead-unit" className="w-full sm:w-48">
+            <select id="pl-lead-unit" className={selectCls} value={sp.get('leadUnitId') ?? ''} onChange={(e) => set('leadUnitId', e.target.value)}>
+              <option value="">Any unit</option><option value="00000000-0000-0000-0000-000000000000">No unit</option>{org.data?.units.filter((u) => !u.closedOn).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+            </select>
+          </Field>}
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm">
             <Checkbox checked={sp.get('includeArchived') === 'true'} onCheckedChange={(c) => set('includeArchived', c ? 'true' : null)} />{t('projects.includeArchived')}
           </label>

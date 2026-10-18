@@ -68,13 +68,26 @@ public static class AvailabilityEndpoints
         return db.Users.AsNoTracking().Where(u => u.IsActive && (u.Id == access.Actor.Id || supervisor != null && u.SupervisorId == supervisor));
     }
 
+    internal static async Task<IQueryable<AppUser>> VisiblePeople(HubDb db, Access access)
+    {
+        var unitRead = await db.Settings.AnyAsync(s => s.Key == "flag.org_structure" && s.Value == "true") && await PeopleScope.LeadsUnit(db, access.Actor);
+        var baseline = access.Actor.ReadOnly && unitRead ? db.Users.AsNoTracking().Where(_ => false) : People(db, access);
+        return await PeopleScope.Widen(db, access.Actor, baseline);
+    }
+
     static bool Manage(Access access, AppUser user) => access.Actor.Admin || access.Actor.Supervisor && user.SupervisorId == access.Actor.Id;
 
-    static async Task<object> View(DateOnly from, DateOnly through, Guid? personId, Access access, HubDb db, SettingsStore store)
+    static async Task<object> View(DateOnly from, DateOnly through, Guid? personId, Guid? unitId, Access access, HubDb db, SettingsStore store)
     {
-        Dates(from, through); var people = People(db, access); if (personId is { } id) people = people.Where(u => u.Id == id);
+        Dates(from, through); var settings = await store.Get(db); var people = await VisiblePeople(db, access);
+        if (unitId is { } unit && settings.IsFlagOn("org_structure"))
+        {
+            var units = await db.Set<OrgUnit>().AsNoTracking().Select(u => new OrgTree.Unit(u.Id, u.ParentId, 0, u.LeaderId)).ToListAsync();
+            var descendants = OrgTree.Descendants(unit, units);
+            people = unit == Guid.Empty ? people.Where(u => u.UnitId == null) : people.Where(u => u.UnitId != null && descendants.Contains(u.UnitId.Value));
+        }
+        if (personId is { } id) people = people.Where(u => u.Id == id);
         var users = await people.OrderBy(u => u.DisplayName).ToListAsync(); var ids = users.Select(u => u.Id).ToArray();
-        var settings = await store.Get(db);
         var capacity = await PersonCapacity.Load(db, ids, from, through, settings);
         var leaves = await db.ApprovedLeaves.AsNoTracking().Where(l => ids.Contains(l.PersonId) && l.FromDate <= through && l.ThroughDate >= from).OrderBy(l => l.FromDate).ToListAsync();
         var schedules = await db.PersonSchedules.AsNoTracking().Where(s => ids.Contains(s.PersonId)).OrderBy(s => s.FromDate).ToListAsync();
@@ -116,9 +129,9 @@ public static class AvailabilityEndpoints
         };
     }
 
-    static async Task<IResult> Export(DateOnly from, DateOnly through, Guid? personId, string? format, string? kind, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<IResult> Export(DateOnly from, DateOnly through, Guid? personId, Guid? unitId, string? format, string? kind, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
-        var view = JsonSerializer.SerializeToNode(await View(from, through, personId, access, db, store), JsonOpts.Web)!;
+        var view = JsonSerializer.SerializeToNode(await View(from, through, personId, unitId, access, db, store), JsonOpts.Web)!;
         var rows = new JsonArray();
         var leave = kind == "leave";
         foreach (var person in view["people"]!.AsArray())

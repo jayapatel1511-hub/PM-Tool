@@ -28,7 +28,7 @@ function personSignals(person: PlannerPerson): Signal[] {
   return signals
 }
 
-export function PlannerGrid({ data, editable, onQuickAdd, onCell, onEntry, onTimeAway, groupBy = 'supervisor', reference, kept = [] }: { kept?: string[]; data: PlannerGridData; editable: boolean; onQuickAdd: (personId: string, week: string, text: string, idempotencyKey: string) => Promise<void>; onCell: (person: PlannerPerson, cell: PlannerCell) => void; onEntry: (entry: PlannerEntry) => void; onTimeAway?: (person: PlannerPerson) => void; groupBy?: string; reference?: { offices?: { id: string; name: string }[]; disciplines?: { id: string; name: string }[] } }) {
+export function PlannerGrid({ data, editable, onQuickAdd, onCell, onEntry, onTimeAway, groupBy = 'supervisor', reference, kept = [], unitByPerson, unitNames }: { kept?: string[]; data: PlannerGridData; editable: boolean; onQuickAdd: (personId: string, week: string, text: string, idempotencyKey: string) => Promise<void>; onCell: (person: PlannerPerson, cell: PlannerCell) => void; onEntry: (entry: PlannerEntry) => void; onTimeAway?: (person: PlannerPerson) => void; groupBy?: string; reference?: { offices?: { id: string; name: string }[]; disciplines?: { id: string; name: string }[] }; unitByPerson?: Map<string, string | null>; unitNames?: Map<string, string> }) {
   const [open, setOpen] = useState<Set<string>>(new Set())
   const named = useFlag('figure_names')
   const [quick, setQuick] = useState<{ personId: string; week: string } | null>(null)
@@ -37,7 +37,7 @@ export function PlannerGrid({ data, editable, onQuickAdd, onCell, onEntry, onTim
   const origin = useRef<string | null>(null)
   const cellRefs = useRef<Record<string, HTMLButtonElement | null>>({})
   useEffect(() => { if (!quick && origin.current) { const key = origin.current; requestAnimationFrame(() => cellRefs.current[key]?.focus()); origin.current = null } }, [quick])
-  const groups = groupPeople(data.people, groupBy, reference)
+  const groups = groupBy === 'homeUnit' ? [...data.people.reduce((m, p) => { const unit = unitByPerson?.get(p.id); const key = unitByPerson?.has(p.id) ? unitNames?.get(unit ?? '') ?? t('staff.group.notSet') : t('staff.group.unknown'); m.set(key, [...(m.get(key) ?? []), p]); return m }, new Map<string, PlannerPerson[]>())] : groupPeople(data.people, groupBy, reference)
   const toggle = (id: string) => setOpen((old) => { const next = new Set(old); if (next.has(id)) next.delete(id); else next.add(id); return next })
   const submitQuick = async () => { if (!quick || !text.trim() || saving) return; setSaving(true); setSaveError(null); try { await onQuickAdd(quick.personId, quick.week, text.trim(), quickKey.current ?? (quickKey.current = crypto.randomUUID())); setText(''); setQuick(null); quickKey.current = null } catch (error) { setSaveError(error) } finally { setSaving(false) } }
   const move = (personIndex: number, weekIndex: number, dx: number, dy: number) => {

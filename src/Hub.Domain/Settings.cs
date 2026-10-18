@@ -31,6 +31,11 @@ public sealed record OrgSettings
     public int WorkloadOverPct { get; init; } = (int)Workload.OverPct;
     public int WorkloadAmberPct { get; init; } = (int)Workload.AmberPct;
     public int WorkloadUnderPct { get; init; } = (int)Workload.UnderPct;
+    public bool IncludeIndirectReports { get; init; }
+    public int CommitmentReliabilityGoodPct { get; init; } = 80;
+    public int CommitmentReliabilityWatchPct { get; init; } = 60;
+    public int CommitmentTrendWeeks { get; init; } = 6;
+    public bool CommitmentMetConfirmation { get; init; }
     public bool AllowSelfReview { get; init; }
     public int CompleteProjectEditWindowDays { get; init; } = 30;
     public int DefaultWeeklyCapacityHours { get; init; } = 40;
@@ -83,6 +88,11 @@ public sealed record OrgSettings
         new("workload_over_pct", SettingKind.Int, (int)Workload.OverPct, "thresholds"),
         new("workload_amber_pct", SettingKind.Int, (int)Workload.AmberPct, "thresholds"),
         new("workload_under_pct", SettingKind.Int, (int)Workload.UnderPct, "thresholds"),
+        new("include_indirect_reports", SettingKind.Bool, false, "work"),
+        new("commitment_reliability_good_pct", SettingKind.Int, 80, "work"),
+        new("commitment_reliability_watch_pct", SettingKind.Int, 60, "work"),
+        new("commitment_trend_weeks", SettingKind.Int, 6, "work"),
+        new("commitment_met_confirmation", SettingKind.Bool, false, "work"),
         new("allow_self_review", SettingKind.Bool, false, "work"),
         new("complete_project_edit_window_days", SettingKind.Int, 30, "work"),
         new("default_weekly_capacity_hours", SettingKind.Int, 40, "work"),
@@ -137,6 +147,11 @@ public sealed record OrgSettings
             WorkloadOverPct = I("workload_over_pct", s.WorkloadOverPct),
             WorkloadAmberPct = I("workload_amber_pct", s.WorkloadAmberPct),
             WorkloadUnderPct = I("workload_under_pct", s.WorkloadUnderPct),
+            IncludeIndirectReports = B("include_indirect_reports", s.IncludeIndirectReports),
+            CommitmentReliabilityGoodPct = I("commitment_reliability_good_pct", s.CommitmentReliabilityGoodPct),
+            CommitmentReliabilityWatchPct = I("commitment_reliability_watch_pct", s.CommitmentReliabilityWatchPct),
+            CommitmentTrendWeeks = I("commitment_trend_weeks", s.CommitmentTrendWeeks),
+            CommitmentMetConfirmation = B("commitment_met_confirmation", s.CommitmentMetConfirmation),
             AllowSelfReview = B("allow_self_review", s.AllowSelfReview),
             CompleteProjectEditWindowDays = I("complete_project_edit_window_days", s.CompleteProjectEditWindowDays),
             DefaultWeeklyCapacityHours = I("default_weekly_capacity_hours", s.DefaultWeeklyCapacityHours),
@@ -181,6 +196,8 @@ public sealed record OrgSettings
 
     static bool IntRange(string key, int n) => key switch
     {
+        "commitment_reliability_good_pct" or "commitment_reliability_watch_pct" => n is >= 0 and <= 100,
+        "commitment_trend_weeks" => n is >= 1 and <= 52,
         "coordination_lookahead_weeks" or "planning_under_weeks" => n is >= 1 and <= 12,
         "planning_horizon_weeks" => n is >= 6 and <= 26,
         "planning_over_pct" or "workload_over_pct" => n is >= 50 and <= 300,
@@ -211,7 +228,7 @@ public static class NotificationEvents
         AttentionCritical = "AttentionCritical", HealthOverride = "HealthOverride", WorkReassignedAway = "WorkReassignedAway",
         DependencyRemoved = "DependencyRemoved", StaffAssignment = "StaffAssignment", SupervisorStaffing = "SupervisorStaffing",
         MemberAutoAdded = "MemberAutoAdded", DeliverableOwned = "DeliverableOwned", ActionAssigned = "ActionAssigned",
-        TaskChanged = "TaskChanged", HandoffChanged = "HandoffChanged", ReviewPackageChanged = "ReviewPackageChanged", ChangeImpact = "ChangeImpact",
+        TaskChanged = "TaskChanged", TaskPickupOffered = "TaskPickupOffered", TaskPickedUp = "TaskPickedUp", TaskPickupAssigned = "TaskPickupAssigned", TaskPickupClosed = "TaskPickupClosed", HandoffChanged = "HandoffChanged", ReviewPackageChanged = "ReviewPackageChanged", ChangeImpact = "ChangeImpact",
         AllocationChanged = "AllocationChanged", SubmissionChanged = "SubmissionChanged",
         IssueVerifierAssigned = "IssueVerifierAssigned", IssueVerificationOutcome = "IssueVerificationOutcome",
         ConstraintAction = "ConstraintAction", ConstraintOutcome = "ConstraintOutcome",
@@ -232,7 +249,7 @@ public static class NotificationEvents
         new(AttentionCritical, true, false), new(HealthOverride, true, false), new(WorkReassignedAway, true, false),
         new(DependencyRemoved, true, false), new(StaffAssignment, true, false), new(SupervisorStaffing, true, false),
         new(MemberAutoAdded, true, false), new(DeliverableOwned, true, false, true), new(ActionAssigned, true, false, true),
-        new(TaskChanged, true, false),
+        new(TaskChanged, true, false), new(TaskPickupOffered, true, true), new(TaskPickedUp, true, true), new(TaskPickupAssigned, true, true, true), new(TaskPickupClosed, true, false),
         new(HandoffChanged, true, false, true), new(ReviewPackageChanged, true, false, true), new(ChangeImpact, true, false, true),
         new(AllocationChanged, true, false), new(SubmissionChanged, true, false),
         new(IssueVerifierAssigned, true, false, true), new(IssueVerificationOutcome, true, false),

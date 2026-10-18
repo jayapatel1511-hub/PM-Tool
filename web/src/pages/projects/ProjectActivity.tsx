@@ -23,6 +23,8 @@ export function ProjectActivityTab() {
   const p = useCurrentProject()
   const small = useFlag('small_ux')
   const burst = (useMe().settings as {activityBurstMinutes?:number}).activityBurstMinutes ?? 10
+  const chain = useFlag('verifiable_log')
+  const integrity = useQuery({ queryKey: ['p', p.id, 'integrity'], enabled: chain, queryFn: () => get<{ entries: number; checkedAt?: string; valid?: boolean; firstBrokenSeq?: number } | null>(`projects/${p.id}/activity/integrity`) })
   const [sp, setSp] = useSearchParams()
   const open = useItemPanel()
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); if (k !== 'page') n.delete('page'); setSp(n, { replace: true }) }
@@ -44,6 +46,7 @@ export function ProjectActivityTab() {
   const clear = () => { const n = new URLSearchParams(sp); for (const k of FILTERS) n.delete(k); n.delete('page'); setSp(n, { replace: true }) }
   return (
     <Page title={t('ptab.activity')} actions={<ExportMenu path={`projects/${p.id}/activity/export`} params={params} name={`${p.projectNumber}-activity`} />}>
+      {chain && integrity.data && <p role="status" className="text-sm">{integrity.data.firstBrokenSeq ? t('audit.failed', { n: integrity.data.firstBrokenSeq }) : integrity.data.valid === true ? t('audit.verified', { n: integrity.data.entries, time: integrity.data.checkedAt }) : t('audit.pending')}</p>}
       <FilterBar activeCount={tokens.length} active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.from')} htmlFor="pa-from" className="w-full sm:w-40"><Input id="pa-from" type="date" value={sp.get('from') ?? ''} onChange={(e) => set('from', e.target.value)} /></Field>

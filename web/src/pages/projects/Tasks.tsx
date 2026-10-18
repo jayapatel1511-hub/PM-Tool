@@ -55,6 +55,7 @@ export interface TaskRow {
   createdAt: string; createdBy?: string; createdByName?: string; sortOrder: number; rowVersion: number
   manualBlockType?: string; manualBlockReason?: string; manualBlockSetAt?: string; commentCount: number; predecessorCount: number; successorCount: number
   collaboratorIds: string[]; can?: { assign: boolean; edit: boolean; changeDue: boolean } | null; state?: TaskStateView | null
+  pickupOfferOpen?: boolean
 }
 export interface Transition { to: string; allowed: boolean; reason?: string | null; needsReason: boolean; via?: string | null }
 export interface MoveRequest { id: string; key: string; rowVersion: number; to: string; needsReason: boolean; needsReviewer?: boolean; via?: string | null }
@@ -99,7 +100,7 @@ function taskSignals(r: TaskRow) {
 }
 
 export function TaskIndicators({ r, all }: { r: TaskRow; all?: boolean }) {
-  return <OneSignal signals={taskSignals(r)} all={all} />
+  return <span className="inline-flex flex-wrap items-center gap-1"><OneSignal signals={taskSignals(r)} all={all} />{r.pickupOfferOpen && <Chip tone="work">Open for pickup</Chip>}</span>
 }
 
 /** A toolbar menu button for one choice, such as Group or Sort (§41 R1): the button shows the current choice, the menu is a

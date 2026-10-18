@@ -188,7 +188,7 @@ public static partial class SearchEndpoints
         }
         if (want.Contains("planning"))
         {
-            var pq = PlanningEndpoints.VisibleEntries(db, access).Where(e => EF.Functions.ILike(e.Label, contains, @"\")
+            var pq = (await PlanningEndpoints.VisibleEntries(db, access)).Where(e => EF.Functions.ILike(e.Label, contains, @"\")
                 || e.Notes != null && EF.Functions.ILike(e.Notes, contains, @"\"));
             counts["planning"] = await pq.CountAsync();
             groups["planning"] = await Page(pq.OrderBy(e => e.StartWeek)).Select(e => new

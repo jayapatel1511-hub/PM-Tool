@@ -58,8 +58,8 @@ public static class ReadinessRules
 
 public static class CommitmentState
 {
-    public const string Proposed = "Proposed", Committed = "Committed", Met = "Met", NotMet = "Not Met", Withdrawn = "Withdrawn";
-    public static readonly string[] All = [Proposed, Committed, Met, NotMet, Withdrawn];
+    public const string Proposed = "Proposed", Committed = "Committed", Met = "Met", AwaitingConfirmation = "Met, awaiting confirmation", NotMet = "Not Met", Withdrawn = "Withdrawn";
+    public static readonly string[] All = [Proposed, Committed, Met, AwaitingConfirmation, NotMet, Withdrawn];
 }
 
 public static class ConstraintState

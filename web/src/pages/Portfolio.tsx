@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { useReference } from '@/hooks/data'
+import { useOrgPlacement } from '@/hooks/useOrgPlacement'
 import { get, qs } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate } from '@/lib/format'
@@ -23,7 +24,7 @@ import { ViewMenu } from '@/components/hub/views'
 interface Row extends ProjectRow { officeId?: string; projectTypeId?: string; projectType?: string; overdueDeliverables?: number; office?: string; phase?: string; overrideBy?: string | null; overrideActive: boolean; trend: { weekEnding: string; computed?: string | null; reported?: string | null }[] }
 interface Portfolio { ownOnly: boolean; tiles: { active: number; red: number; yellow: number; green: number; submissions14: number; overdueDecisions: number }; projects: Row[] }
 
-const FILTERS = ['q', 'pmId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'computedHealth', 'projectTypeId', 'submissionWithinDays', 'mine', 'overdueDecisions'] as const
+const FILTERS = ['q', 'pmId', 'leadUnitId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'computedHealth', 'projectTypeId', 'submissionWithinDays', 'mine', 'overdueDecisions'] as const
 const STATUSES = ['Setup', 'Active', 'On Hold', 'Complete']
 const HEALTHS = ['Red', 'Yellow', 'Green', 'Grey']
 const SWATCH: Record<string, string> = { Red: 'var(--bad)', Yellow: 'var(--warn)', Green: 'var(--ok)', Grey: 'var(--idle)' }
@@ -51,6 +52,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
   const small = useFlag('small_ux')
   const planner = useMe().capabilities.workload
   const ref = useReference()
+  const org = useOrgPlacement([])
   const [sp, setSp] = useSearchParams()
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const group = rollups ? sp.get('group') ?? 'none' : 'none'
@@ -70,6 +72,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
   const tokens = ([
     ['q', t('common.search'), filters.q],
     ['pmId', t('portfolio.pm'), pmName ?? t('portfolio.selectedPm')],
+    ['leadUnitId', t('org.leadUnit'), org.units.find(u => u.id === filters.leadUnitId)?.name],
     ['disciplineId', t('common.discipline'), name(ref.data?.disciplines, filters.disciplineId)],
     ['clientId', t('portfolio.client'), name(ref.data?.clients, filters.clientId)],
     ['officeId', t('admin.office'), name(ref.data?.offices, filters.officeId)],
@@ -124,6 +127,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
           <Field label={t('portfolio.pm')} htmlFor="pf-pm" className="w-full sm:w-52">
             <PeoplePicker id="pf-pm" value={filters.pmId} valueName={pmName} onChange={(v) => set('pmId', v)} placeholder={t('portfolio.anyPm')} label={t('portfolio.pm')} />
           </Field>
+          {org.enabled && <Field label={t('org.leadUnit')} htmlFor="pf-lead-unit" className="w-full sm:w-52"><select id="pf-lead-unit" className={selectCls} value={filters.leadUnitId ?? ''} onChange={(e) => set('leadUnitId', e.target.value)}><option value="">{t('org.anyUnit')}</option><option value="00000000-0000-0000-0000-000000000000">{t('staff.group.noUnit')}</option>{org.units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}</select></Field>}
           {refSelect('disciplineId', t('common.discipline'), ref.data?.disciplines, t('projects.anyDiscipline'))}
           {refSelect('clientId', t('portfolio.client'), ref.data?.clients, t('portfolio.anyClient'))}
           {refSelect('officeId', t('admin.office'), ref.data?.offices, t('reports.anyOffice'))}

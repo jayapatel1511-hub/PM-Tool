@@ -31,12 +31,12 @@ public static class WeeklyPlanningEndpoints
     {
         Validate(operation, week);
         var source = operation == "Copy" ? week.AddDays(-7) : week;
-        var entries = await PlanningEndpoints.VisibleEntries(db, access).Where(e => e.CreatedBy == access.Actor.Id && e.PersonId != access.Actor.Id
+        var entries = await (await PlanningEndpoints.VisibleEntries(db, access)).Where(e => e.CreatedBy == access.Actor.Id && e.PersonId != access.Actor.Id
             && e.StartWeek <= source && e.EndWeek >= source && (operation != "Publish" || e.Visibility == PlanningVisibility.Draft)).OrderBy(e => e.Id).ToListAsync();
         var people = await db.Users.AsNoTracking().Where(u => entries.Select(e => e.PersonId).Contains(u.Id)).ToDictionaryAsync(u => u.Id);
         entries = entries.Where(e => people[e.PersonId].IsActive && Permissions.CreatePlanningEntry(access.Actor, e.PersonId, people[e.PersonId].SupervisorId).Ok).ToList();
         var ids = entries.Select(e => e.PersonId).Distinct().ToArray();
-        var target = await PlanningEndpoints.VisibleEntries(db, access).Where(e => ids.Contains(e.PersonId) && e.StartWeek <= week && e.EndWeek >= week).OrderBy(e => e.Id).ToListAsync();
+        var target = await (await PlanningEndpoints.VisibleEntries(db, access)).Where(e => ids.Contains(e.PersonId) && e.StartWeek <= week && e.EndWeek >= week).OrderBy(e => e.Id).ToListAsync();
         var capacity = await PersonCapacity.Load(db, ids, week, week.AddDays(6), await store.Get(db));
         var projects = await db.Projects.AsNoTracking().Where(p => entries.Select(e => e.ProjectId).Contains(p.Id)).ToDictionaryAsync(p => p.Id);
         var candidates = entries.Select(e => {

@@ -38,6 +38,8 @@ public class AppUser : Audited, IAuditable
     public string DisplayName { get; set; } = "";
     public string? JobTitle { get; set; }
     public Guid? OfficeId { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid? UnitId { get; set; }
     public Guid? SupervisorId { get; set; }
     public Guid? HomeDisciplineId { get; set; } // FR-GRP-01, edited by an Admin (D7)
     public string? HrSourceSystem { get; set; }
@@ -148,6 +150,10 @@ public class Project : Audited, IAuditable
     public string ProjectNumber { get; set; } = "";
     public string Name { get; set; } = "";
     public Guid ClientId { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid? LeadUnitId { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? RevisionConvention { get; set; }
     public string? ClientReference { get; set; }
     public Guid ProjectManagerId { get; set; }
     public Guid OfficeId { get; set; }
@@ -279,8 +285,9 @@ public class Milestone : ProjectItem, IAuditable
     public string Name { get; set; } = "";
     public string MilestoneType { get; set; } = Domain.MilestoneType.Other;
     public DateOnly? Date { get; set; }
-    public DateOnly? OriginalDate { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
     public DateOnly? BaselineDate { get; set; }
+    public DateOnly? OriginalDate { get; set; }
     public string? Description { get; set; }
     public Guid? ProjectDisciplineId { get; set; }
     public Guid? CompletesPhaseId { get; set; }
@@ -311,10 +318,14 @@ public class Deliverable : ProjectItem, IAuditable
     public Guid? MilestoneId { get; set; }
     public DateOnly? StartDate { get; set; }
     public DateOnly? DueDate { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public DateOnly? BaselineStartDate { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public DateOnly? BaselineDueDate { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid? CurrentBaselineId { get; set; }
     public DateOnly? OriginalStartDate { get; set; }
     public DateOnly? OriginalDueDate { get; set; }
-    public DateOnly? BaselineStartDate { get; set; }
-    public DateOnly? BaselineDueDate { get; set; }
     public string Priority { get; set; } = Domain.Priority.Medium;
     public string Status { get; set; } = DeliverableStatus.NotStarted;
     public string? PreviousStatus { get; set; }
@@ -740,6 +751,14 @@ public class DocumentLink : Entity, ISoftDeletable, IAuditable, IVersioned
 
 public class ActivityLog
 {
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid? ChainId { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public long? ChainSeq { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? PrevHash { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? RowHash { get; set; }
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public DateTimeOffset OccurredAt { get; set; }
     public Guid? ActorUserId { get; set; }

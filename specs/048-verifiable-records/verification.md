@@ -1,18 +1,38 @@
 # Verification: Verifiable Records
 
-Not started. No checks have run. Scope approved by Jay on 2026-10-18 (048-D1).
+Local implementation and focused evidence are ready for integration. No human Accepted decision is asserted.
 
-| AC ID | Area | Slice | Status |
-|---|---|---|---|
-| AC-VER-01 | Gap-free chain under concurrency | S01 | UNRUN |
-| AC-VER-02 | Tamper detection and alert | S02, S04 | UNRUN |
-| AC-VER-03 | No change without its log row | S01 | UNRUN |
-| AC-VER-04 | Verification record proves later tampering | S02, S04 | UNRUN |
-| AC-VER-05 | Backfill of existing rows | S03 | UNRUN |
-| AC-VER-06 | Reliability figure and bands | S05, S06 | UNRUN |
-| AC-VER-07 | Miss categories | S05, S06 | UNRUN |
-| AC-VER-08 | Met confirmation | S05, S06 | UNRUN |
-| AC-VER-09 | Allocation preview | S07 | UNRUN |
-| AC-VER-10 | Baseline history | S08 | UNRUN |
-| AC-VER-11 | Revision-code marks | S09 | UNRUN |
-| AC-VER-12 | Flags off change nothing | S01 to S09 | UNRUN |
+| AC ID | Local result | Evidence and remaining boundary |
+|---|---|---|
+| AC-VER-01 | PASS | 50 parallel edits; gap-free sequence and previous hashes |
+| AC-VER-02 | PASS API | Operator tampering detected at exact sequence; email dedup; mocked integrity UI; full live UI remains unproven |
+| AC-VER-03 | PASS | Failed canonical hash rolls back task change; immutable application guard and DB triggers |
+| AC-VER-04 | PASS | Stored record still verifies after append; altered evidence fails; JSON record API exercised; CSV UI request/source reviewed |
+| AC-VER-05 | PASS | 10,000 legacy rows sealed once, ordered, counted retroactively; runtime SELECT/INSERT role cannot initialize or UPDATE seals |
+| AC-VER-06 | PASS | Half-up domain vectors, C=0 API null, Chromium Met 78 of 100 (78%) / Watch |
+| AC-VER-07 | PASS API | Required active category and immutable event ID; category UI source reviewed, full form browser scenario unproven |
+| AC-VER-08 | PASS | Performer cannot confirm; PM confirms; mocked browser confirmation body includes version/requestId |
+| AC-VER-09 | PASS API / PARTIAL UI evidence | Real create/confirm preview rolls back, actual confirmation reuses same request; create/edit/confirm UI source reviewed; allocation-specific Chromium scenario unproven |
+| AC-VER-10 | PASS contract / INTEGRATION REQUIRED | B1/B2, captured effort, clear preserves history, application/SQL immutability, delta export exercised; integration must attach Capture to reviewed 046 command |
+| AC-VER-11 | PASS API/domain / PARTIAL UI evidence | Nonstandard issue saves, marks appear, clear removes; register/detail/filter/settings implemented; settings/issue browser scenario unproven |
+| AC-VER-12 | PASS focused / combined gate pending | Dark endpoint/default metadata/source checks; existing full flag-off suites remain integration gate |
+
+## Reviewed seams
+
+`BaselineHistory.Capture` must run after 046 assigns BaselineStartDate/BaselineDueDate and before that command's final SaveChangesAsync, within its existing Tx.Run/project lock. Exact hook: `await BaselineHistory.Capture(db, d, body.Clear == true, Check.Reason(body.Reason), access.Me.Id, clock.GetUtcNow());`. Add TimeProvider injection; no duplicate route or transaction. Reviewed 046 source: 7553f954e82c98a36d998acbfde1c4edd7f88557. Delta export/report helpers and baseline UI are in this lane.
+
+Legacy sealing is explicitly privileged, never a runtime UPDATE grant. See `audit-initialization.md`: migration-only mode validates the migration identity, starts all chains transactionally before hosting, and normal writes refuse uninitialized history. Prefix checks cannot promote unverified prefixes or advertise a full verified head; checkpoint mismatch fails at the saved checkpoint.
+
+Jay directly resolved the preview scope question: "Keep both deferred; use existing capacity warnings". Overlapping Plans and Deliverable Pressure stay deferred; no false/zero substitute is emitted. Integration owns the narrow specification amendment (1867801); this is a resolved scope decision, not an open acceptance conflict.
+
+The original recovered template migration is preserved; the sole new combined migration is `20261018232730_DeliveryWorkflowRecords`. It retains ck_person_schedule unchanged, one template OffsetDayKind and no unsupported per-role daykind fields. It extends the commitment state CHECK and history guard for independent Met confirmation while preserving immutable content and closed outcomes. Tier B approval remains a separate release gate.
+
+## Final local evidence (2026-10-18)
+
+- PASS: focused domain/API/flag-metadata run, 57 passed, 0 failed/skipped. Full case list: `../048-verifiable-records/evidence/focused-tests.json`. PostgreSQL factories create/drop their own synthetic databases on localhost:55432.
+- PASS: final API compilation through that test command. Compiler warnings and analyzers were suppressed for this focused run; this is not a clean analyzer claim.
+- PASS: TypeScript app/node checks with incremental disabled; direct Vite build. Workspace dependencies are reused through a read-only node_modules symlink, so the ordinary incremental npm build could not write its cache; the explicit no-incremental checks and Vite build passed.
+- PASS: actual Chromium with mocked API, six workflows, 49 calls, zero page errors, zero unknown GETs and zero axe violations in six scopes. `../048-verifiable-records/evidence/mocked-chromium.json`. This proves the exercised UI/requests against fixtures, not live integration or human acceptance.
+- PASS: EF `has-pending-model-changes` reports none. Fresh disposable databases apply all migrations. Original recovered TemplateOffsetDayKind migration and Designer are byte-for-byte identical to the saved handoff (SHA256 f31c0544e0f4a9541096bbd95c17a9720e7d09c163b06ec6a7ac08f91f5d747d / d697cfbb6d1ac70cc71bcd198f04c1f40533e2c3f50e9d4cea8deebd273b7008).
+- PASS: independent source review after fixes; `git diff --check`; combined-spec freshness and trace (1299 IDs, 405 sections, no gaps).
+- UNPROVEN here: full combined Release/regression/coverage gates, existing populated schema upgrade/Down/previous-image compatibility, hosted transport, real identity, native/iOS, comprehensive phone/keyboard/screen-reader and Jay's acceptance. Integration owns the combined release checks. Flags remain dark in maintained settings; only disposable tests enable them. No operational DB migration, push, PR, deployment, pilot activation or Accepted status.

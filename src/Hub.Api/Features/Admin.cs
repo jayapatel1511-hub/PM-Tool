@@ -19,6 +19,8 @@ public static class AdminEndpoints
             return await next(ctx);
         });
 
+        Ref<CommitmentMissCategory>(g.MapGroup("").RequireFlag("commitment_reliability"), "commitmentMissCategories",
+            (db, id) => db.OutputCommitmentEvents.CountAsync(e => e.MissCategoryId == id), (_, _) => { });
         Ref<Discipline>(g, "disciplines", (db, id) => db.ProjectDisciplines.Where(x => x.DisciplineId == id).Select(x => x.ProjectId).Distinct().CountAsync(),
             (e, p) => { if (p.Has("code")) e.Code = Check.Required(p.Str("code"), "code", 10); if (p.Has("colour")) e.Colour = Check.Required(p.Str("colour"), "colour", 20); });
         Ref<Client>(g, "clients", (db, id) => db.Projects.CountAsync(x => x.ClientId == id),
@@ -86,6 +88,12 @@ public static class AdminEndpoints
             var def = OrgSettings.Def(key) ?? throw ApiException.Invalid("key", "setting.unknown");
             var value = body.ValueKind == JsonValueKind.Object && body.TryGetProperty("value", out var v) ? v : body;
             if (OrgSettings.Validate(def, value) is { } err) throw ApiException.Invalid("value", err);
+            if (key == "flag.verifiable_log" && value.ValueKind == JsonValueKind.False
+                && await db.Set<ActivityChainHead>().AnyAsync())
+                throw ApiException.Invalid("value", "audit.cannot_disable");
+            if (key == "flag.verifiable_log" && value.ValueKind == JsonValueKind.True
+                && await db.ActivityLog.AnyAsync(a => a.ChainId == null))
+                throw ApiException.Invalid("value", "audit.initialize_required");
             var json = value.GetRawText();
             var row = await db.Settings.FirstOrDefaultAsync(s => s.Key == key) ?? throw ApiException.Invalid("key", "setting.unknown");
             if (row.Value != json) { row.Value = json; row.UpdatedAt = clock.GetUtcNow(); row.UpdatedBy = db.Audit.ActorId; }
@@ -100,6 +108,9 @@ public static class AdminEndpoints
             var s = await store.Get(db);
             var now = clock.GetUtcNow();
             var problems = OpsChecks.Evaluate(await OpsChecks.Gather(db, s, now, now.AddHours(-24)));
+            if (s.IsFlagOn("verifiable_log"))
+                problems.AddRange(await db.Set<ActivityChainHead>().Where(h => h.FirstBrokenSeq != null)
+                    .Select(h => new OpsProblem("AuditChainBroken", "Chain " + h.ChainId + "; entry " + h.FirstBrokenSeq)).ToListAsync());
             var jobs = new List<object>();
             foreach (var name in (await db.JobRuns.Select(r => r.JobName).Distinct().ToListAsync()).Order())
             {

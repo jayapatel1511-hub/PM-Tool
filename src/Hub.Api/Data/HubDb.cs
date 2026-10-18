@@ -11,6 +11,8 @@ namespace Hub.Api.Data;
 
 public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, TimeProvider clock, EvaluationSignal signal) : DbContext(options)
 {
+    internal bool initializingAuditChains;
+
     public AuditContext Audit => audit;
 
     public DbSet<AppUser> Users => Set<AppUser>();
@@ -206,6 +208,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
                 t.HasCheckConstraint("ck_project_override", "health_override IS NULL OR health_override IN ('Green','Yellow','Red')");
             });
         });
+        Fk<Project, AppUser>(mb, x => x.StatusNoteBy);
         Fk<Project, Client>(mb, x => x.ClientId);
         Fk<Project, AppUser>(mb, x => x.ProjectManagerId);
         Fk<Project, AppUser>(mb, x => x.StatusNoteBy);
@@ -911,6 +914,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<TaskStartAuthorisation, AppUser>(mb, x => x.StartedBy);
 
 
+        VerifiableRecordsModel.Configure(mb);
+        TaskPickupModel.Configure(mb);
+        OrgStructureModel.Configure(mb);
+        Fk<AppUser, OrgUnit>(mb, x => x.UnitId);
+        Fk<Project, OrgUnit>(mb, x => x.LeadUnitId);
+
         foreach (var et in mb.Model.GetEntityTypes().Where(t => typeof(Audited).IsAssignableFrom(t.ClrType)))
             et.FindProperty(nameof(Audited.RowVersion))!.IsConcurrencyToken = true;
 
@@ -999,6 +1008,30 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
     {
         ChangeTracker.DetectChanges();
+        if (ChangeTracker.Entries<ActivityLog>().Any(e => e.State is EntityState.Modified or EntityState.Deleted)
+            || ChangeTracker.Entries<DeliverableBaseline>().Any(e => e.State is EntityState.Modified or EntityState.Deleted))
+            throw new InvalidOperationException("Published history is immutable.");
+        var structureOn = await Settings.AnyAsync(s => s.Key == "flag.org_structure" && s.Value == "true", ct);
+        if (structureOn && ChangeTracker.Entries().Any(e => e.State is EntityState.Added or EntityState.Modified && e.Entity is AppUser or OrgUnit or OrgLevel))
+        {
+            if (Database.CurrentTransaction == null) return await Tx.Run(this, () => SaveChangesAsync(ct));
+            await Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock(hashtext({"hub-org-structure"}))", ct);
+            await Hub.Api.Features.OrgStructureValidation.BeforeSave(this, ct);
+        }
+        var chainOn = Settings.Local.Any(s => s.Key == "flag.verifiable_log" && s.Value == "true") || await Settings.AnyAsync(s => s.Key == "flag.verifiable_log" && s.Value == "true", ct)
+            || await Set<ActivityChainHead>().AnyAsync(ct);
+        if (chainOn && Database.CurrentTransaction == null) return await Tx.Run(this, () => SaveChangesAsync(ct));
+        var pickupOn = await Settings.AnyAsync(s => s.Key == "flag.task_pickup" && s.Value == "true", ct);
+        var changedProjects = ChangeTracker.Entries().Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+            .Select(e => e.Entity is IAuditable item ? item.AuditProjectId : null).OfType<Guid>().Distinct().Order().ToArray();
+        if ((chainOn || pickupOn) && changedProjects.Length > 0)
+        {
+            if (Database.CurrentTransaction == null) return await Tx.Run(this, () => SaveChangesAsync(ct));
+            foreach (var project in changedProjects) await Coordination.Lock(this, project);
+        }
+        if (pickupOn)
+            foreach (var task in ChangeTracker.Entries<WorkTask>().Where(e => e.State is EntityState.Modified or EntityState.Deleted).Select(e => e.Entity.Id).Order())
+                await Database.SqlQuery<Guid>($"SELECT id AS \"Value\" FROM hub.task WHERE id={task} FOR UPDATE").ToListAsync(ct);
         var authorship = ChangeTracker.Entries().Where(e =>
             e.Entity is WorkTask && (e.State == EntityState.Added || e.State == EntityState.Modified && (e.Property("AssigneeId").IsModified || e.Property("DeliverableId").IsModified))
             || e.Entity is Deliverable && (e.State == EntityState.Added || e.State == EntityState.Modified && e.Property("OwnerId").IsModified)).ToList();
@@ -1018,6 +1051,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             }
         }
         var now = clock.GetUtcNow();
+        await Hub.Api.Features.TaskPickupLifecycle.BeforeSave(this, now, ct);
+        ChangeTracker.DetectChanges();
         if (await FollowTasks(now, ct)) ChangeTracker.DetectChanges();
         var comments = ChangeTracker.Entries<Comment>()
             .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified && e.Property(nameof(Comment.Body)).IsModified)
@@ -1058,6 +1093,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             Outbox.Add(new OutboxEvent { EventType = "ProjectChanged", ProjectId = pid, CreatedAt = now, Payload = JsonSerializer.Serialize(new { correlationId = audit.CorrelationId }) });
         foreach (var uid in users)
             Outbox.Add(new OutboxEvent { EventType = "UserChanged", CreatedAt = now, Payload = JsonSerializer.Serialize(new { userId = uid }) });
+        if (chainOn) await AuditChainRows.Assign(this, now, ct, initializingAuditChains);
         var n = await base.SaveChangesAsync(ct);
         audit.Clear();
         if (projects.Count > 0 || users.Count > 0) signal.Poke();

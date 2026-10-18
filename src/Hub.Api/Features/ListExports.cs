@@ -142,7 +142,13 @@ public static class ListExportEndpoints
         {
             var (p, _) = await access.Project(id, track: false);
             var rows = Indicators(Json(await DeliverableEndpoints.List(id, f, access, db, store)));
-            return await ExportFile.Send(db, store, format, Text.Get("export.deliverables", p.ProjectNumber), (await store.Get(db)).IsFlagOn("schedule_baseline") ? [.. DeliverableCols, new("sinceBaselineDays", "sinceBaseline", "number")] : DeliverableCols, rows, await Filters(db, http, access), p.Id, $"{p.ProjectNumber}-deliverables", clock);
+            var settings = await store.Get(db);
+            var history = settings.IsFlagOn("baseline_history");
+            if (history) await BaselineHistory.AddDeltas(db, rows);
+            Col[] columns = [.. DeliverableCols,
+                .. settings.IsFlagOn("schedule_baseline") ? new Col[] { new("sinceBaselineDays", "sinceBaseline", "number") } : [],
+                .. history ? BaselineHistory.DeltaColumns : []];
+            return await ExportFile.Send(db, store, format, Text.Get("export.deliverables", p.ProjectNumber), columns, rows, await Filters(db, http, access), p.Id, $"{p.ProjectNumber}-deliverables", clock);
         });
         api.MapGet("/projects/{id:guid}/decisions/export", async (Guid id, string? format, [AsParameters] DecisionEndpoints.DecisionQuery f, HttpContext http, Access access, HubDb db,
             EvaluationService eval, SettingsStore store, TimeProvider clock) =>

@@ -45,7 +45,7 @@ public static class DeliverableEndpoints
     // ---------- Register (FR-DEL-05, §13.6) ----------
 
     public sealed record DeliverableQuery(string? DisciplineId, string? Status, string? MilestoneId, string? OwnerId, string? TypeId, DateOnly? DueFrom, DateOnly? DueTo,
-        string? Indicator, bool? RequiresReview, string? Q, string? Sort, bool? IncludeTasks);
+        string? Indicator, bool? RequiresReview, string? Q, string? Sort, bool? IncludeTasks, bool? RevisionWarning = null);
     public sealed record DeliverableRow(Guid Id, Guid ProjectId, string Key, string Name, Guid ProjectDisciplineId, Guid DeliverableTypeId,
         Guid? OwnerId, Guid? ReviewerId, Guid? MilestoneId, DateOnly? StartDate, DateOnly? DueDate, DateOnly? OriginalDueDate, DateOnly? OriginalStartDate,
         string Priority, string Status, string? Revision, DateOnly? IssuedDate, string? IssuedTo, bool RequiresReview, Guid? RequiredReviewPackageId,
@@ -68,6 +68,12 @@ public static class DeliverableEndpoints
     {
         await access.Project(id, track: false);
         var query = Filter(db, db.Deliverables.AsNoTracking().Where(d => d.ProjectId == id), f.DisciplineId, f.Status, f.MilestoneId, f.OwnerId, f.TypeId, f.DueFrom, f.DueTo, f.Indicator, f.RequiresReview, f.Q);
+        if (f.RevisionWarning == true && await db.Settings.AnyAsync(s => s.Key == "flag.revision_check" && s.Value == "true"))
+        {
+            var project = await db.Projects.AsNoTracking().SingleAsync(p => p.Id == id);
+            var marked = (await RevisionCheckEndpoints.Marks(db, project)).Where(d => d.Marks.Length > 0).Select(d => d.Id).ToArray();
+            query = query.Where(d => marked.Contains(d.Id));
+        }
         return await Rows(db, query, f.IncludeTasks == true, await store.Get(db));
     }
 
@@ -194,7 +200,7 @@ public static class DeliverableEndpoints
     public static async Task ActivePerson(HubDb db, Guid id, string field) =>
         Check.That(await db.Users.AnyAsync(u => u.Id == id && u.IsActive), field, "team.inactive_user"); // G-11
 
-    static async Task<Ok<MilestoneEndpoints.RebaselineRead>> Rebaseline(Guid id, MilestoneEndpoints.RebaselineBody body, HttpContext http, Access access, HubDb db, SettingsStore store)
+    static async Task<Ok<MilestoneEndpoints.RebaselineRead>> Rebaseline(Guid id, MilestoneEndpoints.RebaselineBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         Http.RequireFlag(await store.Get(db), "schedule_baseline");
         return await Tx.Run(db, async () =>
@@ -210,6 +216,7 @@ public static class DeliverableEndpoints
         Check.That(body.Clear == true || d.StartDate is not null || d.DueDate is not null, "dueDate", "error.required");
         d.BaselineStartDate = body.Clear == true ? null : d.StartDate;
         d.BaselineDueDate = body.Clear == true ? null : d.DueDate;
+        await BaselineHistory.Capture(db, d, body.Clear == true, db.Audit.Reason!, access.Me.Id, clock.GetUtcNow());
         await db.SaveChangesAsync();
         return TypedResults.Ok(new MilestoneEndpoints.RebaselineRead(d.Id, d.RowVersion));
         });

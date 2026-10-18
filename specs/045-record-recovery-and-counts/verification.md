@@ -17,9 +17,9 @@ Slice builds in progress; see the build notes below.
 | AC-RCV-11 | S05 | UNRUN |
 | AC-RCV-12 | S05 | UNRUN |
 | AC-RCV-13 | S03, S04 | UNRUN: S03 API tests show new values equal the existing fields; counts suite against packet 036 fixtures not run |
-| AC-RCV-14 | S06, S07 | UNRUN |
-| AC-RCV-15 | S06 | UNRUN |
-| AC-RCV-16 | S06 | UNRUN |
+| AC-RCV-14 | S06, S07 | PARTIAL: S06 domain level PASS (local); office calendar wiring is S07 |
+| AC-RCV-15 | S06 | PASS (local), domain level |
+| AC-RCV-16 | S06 | PASS (local), domain level |
 | AC-RCV-17 | S07, S08, S12 | UNRUN |
 | AC-RCV-18 | S09, S10, S12 | UNRUN |
 | AC-RCV-19 | S11, S12 | UNRUN |
@@ -51,3 +51,14 @@ Project Dashboard and Milestones counts as `{value, link}`, unflagged (Tier B, 0
 - AC-RCV-13: UNRUN. The API tests assert the new values equal the existing snapshot fields, but `npm run test:counts` against the packet 036 fixtures was not run.
 - Assumptions: defaults 045-D6 (a summed count gets a one-line definition plus a link; none of this slice's counts is a sum), 045-D8 (existing count values and definitions unchanged; new fields sit beside old ones; deliverable links carry an explicit status list without Cancelled), 045-D13 (Part B unflagged, Tier B). Issues and Risks counts stay project-wide under a discipline scope, so their links carry no `disciplineId` (AC-CNT-07, the tile's "Whole project" chip). Field names `registers` and `disciplineDue14` are the builder's choice. "n/total issued" and complete/total tasks each became two links, one per number.
 - Left for Jay: run `npm run test:counts` against the local Development preview with the packet 036 fixtures (set `TUESDAY_UI_BASE_URL`) to finish AC-RCV-13 and the browser parts of AC-RCV-08 and AC-RCV-09; Tier B review of the merge into claude/build-039-050.
+
+## Build 045-S06
+
+Domain only, no flag (nothing passes a calendar until S07). `WorkCalendar.Add` in `Calendar.cs` now steps both ways: a negative count goes back to a working day, 0 keeps the date. Its only existing caller (`Evaluation.After`) already skips lag of 0 or less, so dependency lag is unchanged. `TemplatePlanner.Plan` in `Templates.cs` takes an optional `WorkCalendar? calendar = null`; null keeps calendar days.
+
+- Checks on the merged tree (clean merge, no conflicts): `dotnet build Hub.slnx` 0 errors; `dotnet test --filter TemplatePlannerTests|DependencyLag|Calendar` 39 passed, 0 failed. The builder ran the full suite on the slice branch (1207 passed) and the coverage gate (rules engine 96.6% branch, services 94.8% line, PASS); `Calendar.cs` and `Templates.cs` have no uncovered branches.
+- AC-RCV-14: PARTIAL. Domain level PASS (local): `Calendar_days_are_unchanged_without_a_calendar`, also with an all-working-days calendar. Building the calendar from the office is S07.
+- AC-RCV-15: PASS (local), domain level. `Working_days_skip_weekends_and_office_holidays`: Friday +1 lands on Monday, or Tuesday when that Monday is a holiday; previous-milestone anchors, deliverables and tasks also checked.
+- AC-RCV-16: PASS (local), domain level. `Negative_offsets_count_back_to_a_working_day` (Tuesday -2 lands on the Friday before) and `Offset_zero_and_typed_dates_never_move` (a typed Saturday and offsets of 0 or none stay on it).
+- Assumptions: default 045-D9 (the template working-day calendar is weekdays without organisation and office holidays, independent of `working_days_enabled`; the domain function takes whatever `WorkCalendar` the caller builds, and S07 builds it). `WorkCalendar.Add` was changed in place rather than adding a second method.
+- Left for Jay: nothing for this slice.

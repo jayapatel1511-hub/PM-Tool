@@ -1,5 +1,6 @@
 import contextlib
 import io
+import json
 import pathlib
 import re
 import shutil
@@ -109,6 +110,107 @@ class StepsTests(unittest.TestCase):
                      "test_backup_helpers", "test_pilot_initializer", "test_pilot_operations", "test_pilot_pitr",
                      "test_social_activation", "test_fixture_api", "test_seed_homedev_tuesday_review"):
             self.assertIn(kept, commands)
+
+
+class CountTests(unittest.TestCase):
+    """AC-DLV-12: missed shard, drop below main, replace-test label, first run."""
+
+    STEPS = "web: cd web && npm run build\nweb: cd web && npm run test:a\nweb: cd web && npm run test:b\nchecks: npm run test:x\n"
+
+    def setUp(self):
+        self.dir = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.dir)
+        (self.dir / "steps.txt").write_text(self.STEPS)
+        (self.dir / "in" / "domain").mkdir(parents=True)
+        (self.dir / "in" / "domain" / "listed-tests.txt").write_text(
+            "Test run for Hub.Tests.dll\nThe following Tests are available:\n"
+            "    Hub.Tests.Domain.A.One\n    Hub.Tests.Domain.A.Two(x: \"1\")\n    Hub.Tests.Api.B.Three\n")
+
+    def trx(self, job, names):
+        folder = self.dir / "in" / job / "coverage"
+        folder.mkdir(parents=True, exist_ok=True)
+        rows = "".join(f'<UnitTestResult executionId="{i}" testName="{n.replace(chr(34), "&quot;")}" outcome="Passed" />' for i, n in enumerate(names))
+        (folder / f"{job}.trx").write_text(f'<TestRun><Results>{rows}</Results></TestRun>')
+
+    def count(self, main=None, labels="", event="pull_request"):
+        main_file = None
+        if main is not None:
+            main_file = self.dir / "main.json"
+            main_file.write_text(json.dumps(main))
+        out = self.dir / "out" / "test-counts.json"
+        code, messages = ci_tests.count(self.dir / "in", main_file, labels, event, out, self.dir / "steps.txt")
+        return code, "\n".join(messages), json.loads(out.read_text())
+
+    def all_shards(self):
+        self.trx("domain", ["Hub.Tests.Domain.A.One", 'Hub.Tests.Domain.A.Two(x: "1")'])
+        self.trx("api-1", ["Hub.Tests.Api.B.Three"])
+
+    def test_first_run_passes_and_publishes(self):
+        self.all_shards()
+        code, text, counts = self.count()
+        self.assertEqual(code, 0, text)
+        self.assertEqual(counts, {"backend": 3, "browser_suites": 2})
+        self.assertIn("no earlier main count", text)
+
+    def test_missed_shard_fails_and_names_the_cases(self):
+        self.trx("domain", ["Hub.Tests.Domain.A.One", 'Hub.Tests.Domain.A.Two(x: "1")'])
+        code, text, _ = self.count()
+        self.assertEqual(code, 1)
+        self.assertIn("executed backend cases (2) differ from listed cases (3)", text)
+        self.assertIn("not run 1: Hub.Tests.Api.B.Three", text)
+
+    def test_case_run_twice_fails(self):
+        self.all_shards()
+        self.trx("api-2", ["Hub.Tests.Api.B.Three"])
+        code, text, _ = self.count()
+        self.assertEqual(code, 1)
+        self.assertIn("run but not listed 1: Hub.Tests.Api.B.Three", text)
+
+    def test_missing_list_fails(self):
+        (self.dir / "in" / "domain" / "listed-tests.txt").unlink()
+        self.all_shards()
+        self.assertEqual(self.count()[0], 1)
+
+    def test_drop_below_main_fails(self):
+        self.all_shards()
+        code, text, _ = self.count({"backend": 4, "browser_suites": 2})
+        self.assertEqual(code, 1)
+        self.assertIn("backend 3 < main 4", text)
+        code, text, _ = self.count({"backend": 3, "browser_suites": 3})
+        self.assertEqual(code, 1)
+        self.assertIn("browser_suites 2 < main 3", text)
+
+    def test_equal_or_higher_than_main_passes(self):
+        self.all_shards()
+        self.assertEqual(self.count({"backend": 3, "browser_suites": 1})[0], 0)
+
+    def test_replace_test_label_passes(self):
+        self.all_shards()
+        code, text, _ = self.count({"backend": 9, "browser_suites": 9}, labels="tier-b,replace-test")
+        self.assertEqual(code, 0, text)
+        self.assertIn("replace-test", text)
+
+    def test_label_does_not_excuse_a_missed_shard(self):
+        self.trx("domain", ["Hub.Tests.Domain.A.One"])
+        self.assertEqual(self.count(labels="replace-test")[0], 1)
+
+    def test_main_push_after_accepted_drop_stays_green(self):
+        self.all_shards()
+        code, text, _ = self.count({"backend": 9, "browser_suites": 2}, event="push")
+        self.assertEqual(code, 0, text)
+
+    def test_repository_lists_cases_and_counts_suites(self):
+        steps = ci_tests.STEPS.read_text()
+        self.assertGreaterEqual(ci_tests.browser_suites(steps), 8)
+        commands = [cmd for jobs, _, cmd in ci_tests.parse_steps(steps) if "domain" in jobs or "api-1" in jobs]
+        self.assertTrue(any("--list-tests" in c and "listed-tests.txt" in c for c in commands))
+        self.assertEqual(sum("--logger \"trx;" in c for c in commands), 2)
+        gate = [cmd for jobs, _, cmd in ci_tests.parse_steps(steps) if "gate" in jobs]
+        self.assertTrue(any("ci_tests.py count" in c for c in gate))
+
+    def test_listed_cases_parses_dotnet_output(self):
+        text = "Build...\nThe following Tests are available:\n    A.B.C\n    A.B.C\n    A.B.D(x: 1)\n"
+        self.assertEqual(ci_tests.listed_cases(text), {"A.B.C": 2, "A.B.D(x: 1)": 1})
 
 
 if __name__ == "__main__":

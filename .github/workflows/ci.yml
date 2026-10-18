@@ -66,11 +66,21 @@ jobs:
   gate:
     needs: [domain, api]
     runs-on: ubuntu-latest
+    permissions: { contents: read, actions: read }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: { pattern: ci-artifacts-*, path: ci-artifacts-in }
+      # The latest green main run's counts (FR-DLV-13); none yet means this run only publishes its own.
+      - env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          id=$(gh run list -R "$GITHUB_REPOSITORY" --workflow ci --branch main --event push --status success --limit 1 --json databaseId -q '.[0].databaseId' || true)
+          if [ -n "$id" ]; then gh run download "$id" -R "$GITHUB_REPOSITORY" -n test-counts -D ci-artifacts-main || echo "run $id has no test-counts artifact"; fi
       - run: python3 tools/ci_tests.py steps gate
+        env: { LABELS: "${{ join(github.event.pull_request.labels.*.name, ',') }}" }
       - if: always()
         uses: actions/upload-artifact@v4
         with: { name: ci-artifacts-gate, path: ci-artifacts/, if-no-files-found: ignore }
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with: { name: test-counts, path: ci-artifacts/test-counts.json }

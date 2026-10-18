@@ -1,6 +1,7 @@
 using System.Net;
 using Hub.Api.Data;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -200,6 +201,64 @@ public sealed class FoundationsTests(HubFactory f)
         Assert.Equal("Entra", (await c.GetAsync("/api/v1/config").Result.Json()).S("authMode"));
         c.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "not-a-token");
         Assert.Equal(HttpStatusCode.Unauthorized, (await c.GetAsync("/api/v1/projects")).StatusCode);
+    }
+
+    [Theory] // FR-OPS-17, AC-OPS-16: today's start-up refusals, pinned
+    [InlineData("Production")]
+    [InlineData("Staging")]
+    public async Task Outside_development_there_is_no_development_sign_in_or_review_seed(string environment)
+    {
+        WebApplicationFactory<Program> Host(params (string Key, string Value)[] settings) => f.WithWebHostBuilder(b =>
+        {
+            b.UseEnvironment(environment);
+            b.UseSetting("Auth:Mode", "Development");
+            b.UseSetting("Auth:Entra:TenantId", "00000000-0000-0000-0000-000000000001");
+            b.UseSetting("Auth:Entra:Audience", "api://hub-test");
+            foreach (var (key, value) in settings) b.UseSetting(key, value);
+        });
+        using var app = Host();
+        var c = app.CreateClient();
+        Assert.Equal(HttpStatusCode.Unauthorized, (await c.GetAsync("/api/dev/users")).StatusCode);
+        c.DefaultRequestHeaders.Add("X-Dev-User", TestData.Admin);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await c.GetAsync("/api/v1/me")).StatusCode); // the header is ignored
+        Assert.Equal(HttpStatusCode.Unauthorized, (await c.GetAsync("/api/dev/users")).StatusCode); // not mapped, so never 200
+        if (environment != "Production") return; // Staging permits LocalPassword and the review seed (the pilot keeps the seed off in compose)
+
+        void Refuses((string, string) setting, string message)
+        {
+            using var refused = Host(setting);
+            var ex = Assert.ThrowsAny<Exception>(() => refused.CreateClient());
+            Assert.Contains(message, (ex.InnerException ?? ex).Message + ex.Message);
+        }
+        Refuses(("Auth:Mode", "LocalPassword"), "LocalPassword authentication is permitted only");
+        Refuses(("Seed:ReviewDemo", "true"), "Seed:ReviewDemo is permitted only");
+    }
+
+    [Fact]
+    public async Task Security_headers_are_on_every_kind_of_response() // FR-OPS-16, AC-OPS-15
+    {
+        var root = Directory.CreateTempSubdirectory("hub-webroot-").FullName;
+        try
+        {
+            File.WriteAllText(Path.Combine(root, "index.html"), "<!doctype html><title>Hub</title>");
+            using var app = f.WithWebHostBuilder(b => b.UseSetting("webroot", root));
+            var c = app.CreateClient();
+            c.DefaultRequestHeaders.Add("X-Dev-User", TestData.Alex);
+            foreach (var (url, api) in new[] { ("/health", false), ("/api/v1/me", true), ("/projects/P-1/tasks", false) })
+            {
+                var r = await c.GetAsync(url);
+                Assert.True(r.IsSuccessStatusCode, $"{url} answered {(int)r.StatusCode}");
+                string H(string name) => string.Join(",", r.Headers.TryGetValues(name, out var v) ? v : []);
+                Assert.Equal("nosniff", H("X-Content-Type-Options"));
+                Assert.Equal("strict-origin-when-cross-origin", H("Referrer-Policy"));
+                Assert.Equal("DENY", H("X-Frame-Options"));
+                var csp = H("Content-Security-Policy");
+                foreach (var directive in new[] { "default-src 'self'", "script-src 'self'", "frame-ancestors 'none'" }) Assert.Contains(directive, csp);
+                if (api) Assert.Equal("no-store", r.Headers.CacheControl?.ToString());
+            }
+            Assert.Contains("<title>Hub</title>", await c.GetStringAsync("/projects/P-1/tasks"));
+        }
+        finally { Directory.Delete(root, true); }
     }
 
     [Fact]

@@ -228,6 +228,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
 
         Item<Milestone>(mb, e =>
         {
+            e.Property(x => x.BaselineDate).HasColumnType("date");
             e.HasIndex(x => new { x.ProjectId, x.Date });
             e.HasIndex(x => x.Name, "ix_milestone_name_trgm").HasMethod("gin").HasOperators("gin_trgm_ops"); // search (§18.1)
             e.ToTable(t => t.HasCheckConstraint("ck_milestone_type", $"milestone_type IN ({In(MilestoneType.All)})"));
@@ -236,6 +237,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<Milestone, Phase>(mb, x => x.CompletesPhaseId);
         Item<Deliverable>(mb, e =>
         {
+            e.Property(x => x.BaselineStartDate).HasColumnType("date");
+            e.Property(x => x.BaselineDueDate).HasColumnType("date");
             e.HasIndex(x => new { x.ProjectId, x.Status });
             e.HasIndex(x => x.Name, "ix_deliverable_name_trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
             e.HasIndex(x => x.Key, "ix_deliverable_key_trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
@@ -478,7 +481,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.ToTable(t => t.HasCheckConstraint("ck_event_times", "end_at > start_at"));
         });
         mb.Entity<DashboardLayout>(e => { e.HasKey(x => x.UserId); e.Property(x => x.Widgets).HasColumnType("jsonb"); });
-        mb.Entity<ProjectTemplate>().HasIndex(x => x.FamilyId);
+        mb.Entity<ProjectTemplate>(e =>
+        {
+            e.HasIndex(x => x.FamilyId);
+            e.Property(x => x.OffsetDayKind).HasDefaultValue(DayKind.CalendarDays);
+            e.ToTable(t => t.HasCheckConstraint("ck_template_offset_day_kind", $"offset_day_kind IN ({In(DayKind.All)})"));
+        });
         mb.Entity<TemplateDesignBasis>(e =>
         {
             e.HasIndex(x => new { x.TemplateId, x.TemplateDisciplineId });

@@ -276,6 +276,7 @@ public class Milestone : ProjectItem, IAuditable
     public string MilestoneType { get; set; } = Domain.MilestoneType.Other;
     public DateOnly? Date { get; set; }
     public DateOnly? OriginalDate { get; set; }
+    public DateOnly? BaselineDate { get; set; }
     public string? Description { get; set; }
     public Guid? ProjectDisciplineId { get; set; }
     public Guid? CompletesPhaseId { get; set; }
@@ -308,6 +309,8 @@ public class Deliverable : ProjectItem, IAuditable
     public DateOnly? DueDate { get; set; }
     public DateOnly? OriginalStartDate { get; set; }
     public DateOnly? OriginalDueDate { get; set; }
+    public DateOnly? BaselineStartDate { get; set; }
+    public DateOnly? BaselineDueDate { get; set; }
     public string Priority { get; set; } = Domain.Priority.Medium;
     public string Status { get; set; } = DeliverableStatus.NotStarted;
     public string? PreviousStatus { get; set; }
@@ -1036,6 +1039,7 @@ public class ProjectTemplate : Audited, IAuditable
     public int? Version { get; set; }
     public string Status { get; set; } = TemplateStatus.Draft;
     public DateTimeOffset? PublishedAt { get; set; }
+    public string OffsetDayKind { get; set; } = DayKind.CalendarDays; // FR-RCV-10
     public string AuditType => ItemType.Template;
     public Guid? AuditProjectId => null;
     public string? AuditKey => Version is null ? "draft" : $"v{Version}";

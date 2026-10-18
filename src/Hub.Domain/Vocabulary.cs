@@ -219,6 +219,9 @@ public static class ActionOwnerType { public const string User = "User", Discipl
 
 public static class TemplateStatus { public const string Draft = "Draft", Published = "Published", Retired = "Retired"; }
 
+/// What a template's offsets count (FR-RCV-10): calendar days, the default, or working days of the project office.
+public static class DayKind { public const string CalendarDays = "CalendarDays", WorkingDays = "WorkingDays"; public static readonly string[] All = [CalendarDays, WorkingDays]; }
+
 public static class AssignToRole { public const string DisciplineLead = "DisciplineLead", PM = "PM", Unassigned = "Unassigned"; }
 
 public static class Weekday

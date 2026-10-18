@@ -54,7 +54,7 @@ public static class AuditRules
         [typeof(ProjectMember)] = ["UserId", "Roles", "PrimaryDisciplineId", "RemovedAt"],
         [typeof(ExternalParty)] = ["Name", "Organisation", "Email", "Role", "IsClient", "Notes", "IsActive"],
         [typeof(Milestone)] = ["Name", "MilestoneType", "Date", "Description", "ProjectDisciplineId", "CompletesPhaseId", "IsClientFacing",
-            "IsComplete", "CompletedDate", "IsCancelled", "CancelledReason", "DeletedAt"],
+            "IsComplete", "CompletedDate", "IsCancelled", "CancelledReason", "BaselineDate", "DeletedAt"],
         [typeof(ReviewPackage)] = ["Title", "Purpose", "CoordinatorId", "ProjectDisciplineId", "Status", "CurrentRoundId", "RoundNumber", "RequiredForIssue"],
         [typeof(ReviewRound)] = ["PackageId", "Number", "Purpose", "Reason", "RemovalImpact", "StartedAt", "Status"],
         [typeof(ReviewManifestItem)] = ["RoundId", "SourceRevisionId", "DeliverableId", "AuthorIds"],
@@ -83,7 +83,7 @@ public static class AuditRules
             "Status", "CurrentRevisionId", "IncorporatedRevisionId", "DeletedAt"],
         [typeof(SourceRevision)] = ["DeliverableId", "SourceRowVersion", "SourceKey", "Title", "Revision", "Url", "SourceIdentity", "SourceSystem", "ExternalIdentifier", "Issuer", "Scope", "SourceCheckedAt", "SupersedesId", "AuthorIds"],
         [typeof(Deliverable)] = ["Name", "ProjectDisciplineId", "DeliverableTypeId", "Description", "OwnerId", "ReviewerId", "MilestoneId",
-            "StartDate", "DueDate", "Priority", "Status", "Revision", "IssuedDate", "IssuedTo", "TransmittalUrl", "AcceptedDate",
+            "StartDate", "DueDate", "BaselineStartDate", "BaselineDueDate", "Priority", "Status", "Revision", "IssuedDate", "IssuedTo", "TransmittalUrl", "AcceptedDate",
             "OnHoldReason", "CancelledReason", "RequiresReview", "RequiredReviewPackageId", "StartedAt", "DeletedAt"],
         [typeof(WorkTask)] = ["Name", "Description", "ProjectDisciplineId", "DeliverableId", "MilestoneId", "AssigneeId", "ReviewerId",
             "RequiresReview", "Priority", "StartDate", "DueDate", "Status", "ProgressPct", "EstimatedHours", "ManualBlockType",
@@ -124,7 +124,7 @@ public static class AuditRules
         [typeof(OutputCommitmentEvent)] = ["CommitmentId", "FromState", "ToState", "Reason", "EvidenceUrl", "ActorId"],
         [typeof(TaskStartAuthorisation)] = ["TaskId", "AuthorisedBy", "Reason", "ReadinessAtAuthorisation", "Unknown", "Blocked", "StartedBy", "StartedAt"],
         [typeof(CalendarEvent)] = ["ProjectId", "Type", "Title", "StartAt", "EndAt", "OwnerId", "Location", "Description", "Visibility", "CancelledAt"],
-        [typeof(ProjectTemplate)] = ["Name", "Description", "ProjectTypeId", "Version", "Status"],
+        [typeof(ProjectTemplate)] = ["Name", "Description", "ProjectTypeId", "Version", "Status", "OffsetDayKind"],
     };
 
     static readonly Dictionary<string, string> FieldCategory = new()

@@ -25,6 +25,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<DeliverableType> DeliverableTypes => Set<DeliverableType>();
     public DbSet<OrgSetting> Settings => Set<OrgSetting>();
     public DbSet<UserSetting> UserSettings => Set<UserSetting>();
+    public DbSet<RouteCount> RouteCounts => Set<RouteCount>();
+    public DbSet<TemplateRole> TemplateRoles => Set<TemplateRole>();
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
     public DbSet<Holiday> Holidays => Set<Holiday>();
     public DbSet<IdempotencyRecord> Idempotency => Set<IdempotencyRecord>();
@@ -177,6 +179,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             mb.Entity(t).HasIndex(nameof(RefData.Name));
         Fk<DeliverableType, Discipline>(mb, x => x.DefaultDisciplineId);
         mb.Entity<OrgSetting>(e => { e.HasKey(x => x.Key); e.Property(x => x.Value).HasColumnType("jsonb"); });
+        mb.Entity<RouteCount>(e => { e.HasIndex(x => new { x.Day, x.RouteKey }).IsUnique(); e.Property(x => x.RouteKey).HasMaxLength(100); });
+        mb.Entity<TemplateRole>(e => { e.Property(x => x.RoleLabel).HasMaxLength(80); e.Property(x => x.Note).HasMaxLength(2000); e.Property(x => x.PlannedHours).HasPrecision(9, 3); });
+        Fk<TemplateRole, ProjectTemplate>(mb, x => x.TemplateId, DeleteBehavior.Cascade);
+        Fk<TemplateRole, TemplateDiscipline>(mb, x => x.TemplateDisciplineId);
+        Fk<TemplateRole, TemplateMilestone>(mb, x => x.StartMilestoneId);
+        Fk<TemplateRole, TemplateMilestone>(mb, x => x.EndMilestoneId);
         mb.Entity<UserSetting>(e => { e.HasKey(x => x.UserId); e.Property(x => x.DigestSectionsOff).HasColumnType("jsonb"); e.Property(x => x.HoldDigestWhenAway).HasDefaultValue(true); });
         mb.Entity<NotificationPreference>().HasIndex(x => new { x.UserId, x.EventType }).IsUnique();
         Fk<Holiday, Office>(mb, x => x.OfficeId);
@@ -184,6 +192,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
 
         mb.Entity<Project>(e =>
         {
+            e.Property(x => x.StatusNote).HasMaxLength(500);
             e.Property(x => x.ProjectNumber).HasColumnType("citext");
             e.HasIndex(x => x.ProjectNumber).IsUnique();
             e.HasIndex(x => x.ProjectNumber, "ix_project_number_trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
@@ -199,6 +208,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         });
         Fk<Project, Client>(mb, x => x.ClientId);
         Fk<Project, AppUser>(mb, x => x.ProjectManagerId);
+        Fk<Project, AppUser>(mb, x => x.StatusNoteBy);
         Fk<Project, Office>(mb, x => x.OfficeId);
         Fk<Project, ProjectType>(mb, x => x.ProjectTypeId);
         Fk<Project, Phase>(mb, x => x.PhaseId);

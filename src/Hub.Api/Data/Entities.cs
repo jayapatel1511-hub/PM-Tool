@@ -99,6 +99,7 @@ public class OrgSetting : IAuditable
 public class UserSetting
 {
     public Guid UserId { get; set; }
+    public DateTimeOffset? OnboardingHiddenAt { get; set; }
     public bool DigestEnabled { get; set; } = true;
     public bool HoldDigestWhenAway { get; set; } = true;
     public string? DigestTimeLocal { get; set; }
@@ -159,6 +160,9 @@ public class Project : Audited, IAuditable
     public DateOnly? TargetCompletionDate { get; set; }
     public string Priority { get; set; } = Domain.Priority.Medium;
     public string Visibility { get; set; } = Domain.Visibility.Open;
+    public string? StatusNote { get; set; }
+    public Guid? StatusNoteBy { get; set; }
+    public DateTimeOffset? StatusNoteAt { get; set; }
     public string? InternalNotes { get; set; }
     public string? CoordinationDay { get; set; }
     public bool AllowViewerComments { get; set; } = true;

@@ -36,6 +36,7 @@ public sealed class PersonSchedule : Audited, IAuditable
     public PersonSchedule() { RowVersion = 1; }
     public Guid PersonId { get; set; }
     public DateOnly FromDate { get; set; }
+    public decimal[]? WeekdayHours { get; set; }
     public decimal WeeklyHours { get; set; }
     public int[] WorkingDays { get; set; } = [1, 2, 3, 4, 5];
     public string AuditType => "PersonSchedule";

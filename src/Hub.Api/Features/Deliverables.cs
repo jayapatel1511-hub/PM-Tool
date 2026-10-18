@@ -25,6 +25,7 @@ public static class DeliverableEndpoints
         api.MapPost("/deliverables/{id:guid}/transition", Transition);
         api.MapPost("/deliverables/{id:guid}/issue", Issue);
         api.MapDelete("/deliverables/{id:guid}", Delete);
+        api.MapPost("/deliverables/{id:guid}/restore", Restore).RequireFlag(RecoveryEndpoints.Flag);
     }
 
     public static async Task<(Deliverable D, Project P, ProjectContext Ctx)> Load(HubDb db, Access access, Guid id)
@@ -398,6 +399,19 @@ public static class DeliverableEndpoints
         d.DeletedBy = me.Id;
         await db.SaveChangesAsync();
         return Results.NoContent();
+    }
+
+    /// FR-RCV-03: like the task restore; the save hook logs "Restored" and queues re-evaluation. Its deleted tasks stay deleted.
+    static async Task<IResult> Restore(Guid id, HttpContext http, Access access, HubDb db)
+    {
+        var d = await db.Deliverables.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt != null) ?? throw ApiException.NotFound();
+        var (_, ctx) = await access.Project(d.ProjectId);
+        Access.Demand(Permissions.RestoreItem(access.Actor, ctx));
+        await RecoveryEndpoints.Guard(db, http, d, null, d.MilestoneId);
+        d.DeletedAt = null;
+        d.DeletedBy = null;
+        await db.SaveChangesAsync();
+        return Results.Ok(new { d.Id, d.RowVersion });
     }
 
     // ---------- Bulk (§13.6: set milestone, shift due dates, set owner; T-23 row by row) ----------

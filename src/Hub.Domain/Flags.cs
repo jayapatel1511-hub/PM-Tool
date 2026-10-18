@@ -7,7 +7,7 @@ public sealed record FlagDef(string Name, string Packet);
 /// feature is ever flagged. The list starts empty; each packet that adds a flag ends with the cleanup slice that removes it.
 public static class Flags
 {
-    public static readonly FlagDef[] All = [];
+    public static readonly FlagDef[] All = [new("show_deleted", "045")];
 
     /// `flag.<name>` as a Bool setting, default off, group `flags`, generated like `rule_enabled.*`.
     public static IEnumerable<SettingDef> Defs(IEnumerable<FlagDef> flags) =>

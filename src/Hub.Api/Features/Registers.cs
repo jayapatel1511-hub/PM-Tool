@@ -137,6 +137,12 @@ public static class RegisterEndpoints
     {
         await access.Project(id, track: false);
         var today = clock.Today(await store.Get(db));
+        return await RiskRows(db, RiskQuery(db, id, f, today), today);
+    }
+
+    /// The risk register's filters, shared with the dashboard counts so a number always equals the list it opens (FR-RCV-08).
+    public static IQueryable<Risk> RiskQuery(HubDb db, Guid id, RegisterQuery f, DateOnly today)
+    {
         var q = db.Risks.AsNoTracking().Where(r => r.ProjectId == id);
         var st = Http.List(f.Status); if (st.Length > 0) q = q.Where(r => st.Contains(r.Status));
         var bands = Http.List(f.Severity); if (bands.Length > 0) { var scores = Scores(bands); q = q.Where(r => scores.Contains(r.Probability * r.Impact)); }
@@ -150,7 +156,7 @@ public static class RegisterEndpoints
                 "reviewOverdue" => q.Where(r => (r.Status == RiskStatus.Open || r.Status == RiskStatus.Monitoring) && r.ReviewDate < today),
                 _ => q,
             };
-        return await RiskRows(db, q, today);
+        return q;
     }
 
     /// Default sort (§13.13): severity descending, then review date, then key.
@@ -297,6 +303,12 @@ public static class RegisterEndpoints
     {
         await access.Project(id, track: false);
         var today = clock.Today(await store.Get(db));
+        return await IssueRows(db, IssueQuery(db, id, f, today), today, Http.List(f.Verification));
+    }
+
+    /// The issue register's filters, shared with the dashboard counts so a number always equals the list it opens (FR-RCV-08).
+    public static IQueryable<Issue> IssueQuery(HubDb db, Guid id, RegisterQuery f, DateOnly today)
+    {
         var q = db.Issues.AsNoTracking().Where(i => i.ProjectId == id);
         var st = Http.List(f.Status); if (st.Length > 0) q = q.Where(i => st.Contains(i.Status));
         var sev = Http.List(f.Severity); if (sev.Length > 0) q = q.Where(i => sev.Contains(i.Severity));
@@ -342,7 +354,7 @@ public static class RegisterEndpoints
                 "overdue" => q.Where(i => (i.Status == IssueStatus.Open || i.Status == IssueStatus.InProgress) && i.TargetResolutionDate < today),
                 _ => q,
             };
-        return await IssueRows(db, q, today, Http.List(f.Verification));
+        return q;
     }
 
     /// Default sort (§13.13): severity descending, then target resolution date, then key.

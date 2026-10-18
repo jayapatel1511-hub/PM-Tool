@@ -65,6 +65,17 @@ public static class DashboardEndpoints
         var recent = await activity.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Take(15).ToListAsync();
         var disciplines = JsonSerializer.Deserialize<List<JsonElement>>(state?.DisciplineStates ?? "[]", JsonOpts.Web) ?? [];
         if (disciplineId is { } dsc) disciplines = disciplines.Where(x => x.GetProperty("disciplineId").GetGuid() == dsc).ToList();
+        // Open deliverables due in the next 14 days, the Upcoming tile and each discipline's "Due ≤ 14 d" (AC-DASH-02, FR-RCV-09).
+        Task<object> Due14(Scope x) => Count(x.Deliverables(dueFrom: today, dueTo: today.AddDays(14), indicator: "open"),
+            x.Link(("dueFrom", today.ToString("yyyy-MM-dd")), ("dueTo", today.AddDays(14).ToString("yyyy-MM-dd")), ("indicator", "open")));
+        var due14 = new Dictionary<string, object>();
+        foreach (var row in disciplines)
+        {
+            var dId = row.GetProperty("disciplineId").GetGuid();
+            due14[dId.ToString()] = await Due14(new Scope(db, id, dId, me.Id, today, s));
+        }
+        // Issues and risks are project-wide whatever the scope (AC-CNT-07), counted by the register's own query (FR-RCV-08).
+        RegisterEndpoints.RegisterQuery Reg(string? severity) => new(null, severity, null, null, "open", null);
 
         return new
         {
@@ -82,8 +93,7 @@ public static class DashboardEndpoints
             },
             Deliverables = new
             {
-                Upcoming = await Count(sc.Deliverables(dueFrom: today, dueTo: today.AddDays(14), indicator: "open"),
-                    sc.Link(("dueFrom", today.ToString("yyyy-MM-dd")), ("dueTo", today.AddDays(14).ToString("yyyy-MM-dd")), ("indicator", "open"))),
+                Upcoming = await Due14(sc),
                 AtRisk = await Count(sc.Deliverables(indicator: "atRisk"), sc.Link(("indicator", "atRisk"))),
                 Issued = await Count(sc.Deliverables(status: $"{DeliverableStatus.Issued},{DeliverableStatus.Accepted}"), sc.Link(("status", $"{DeliverableStatus.Issued},{DeliverableStatus.Accepted}"))),
                 Total = await Count(sc.Deliverables(), sc.Link()),
@@ -95,7 +105,14 @@ public static class DashboardEndpoints
             },
             Issues = new { Open = counts.GetValueOrDefault("issuesOpen"), High = counts.GetValueOrDefault("issuesHigh") },
             Risks = new { High = counts.GetValueOrDefault("risksHigh") },
+            Registers = new
+            {
+                IssuesOpen = await Count(RegisterEndpoints.IssueQuery(db, id, Reg(null), today), "indicator=open"),
+                IssuesHigh = await Count(RegisterEndpoints.IssueQuery(db, id, Reg(Impact.High), today), $"indicator=open&severity={Impact.High}"),
+                RisksHigh = await Count(RegisterEndpoints.RiskQuery(db, id, Reg(Impact.High), today), $"indicator=open&severity={Impact.High}"),
+            },
             Disciplines = disciplines,
+            DisciplineDue14 = due14,
             DueThisWeek = new { Items = await TaskQueries.Rows(db, TaskQueries.Sort(dueThisWeek, null).Take(8)), Total = await dueThisWeek.CountAsync(), Link = sc.Link(("dueThisWeek", "true")) },
             Blocked = new { Items = await TaskQueries.Rows(db, TaskQueries.Sort(blocked, null).Take(8)), Total = await blocked.CountAsync(), Link = sc.Link(("blocked", "true")) },
             Activity = await ActivityEndpoints.Render(db, recent),

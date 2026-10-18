@@ -24,7 +24,7 @@ Per FR-DLV-24, this file records checks until `trace_spec.py --report` (slice S1
 | AC-DLV-16 | S14 | UNRUN |
 | AC-DLV-17 | S14 | UNRUN |
 | AC-DLV-18 | S15 | UNRUN |
-| AC-DLV-19 | S11 | UNRUN |
+| AC-DLV-19 | S11 | PARTIAL: `tools/test_trace_report.py` fixture passes (AC cited by a passing test, a failing test, no test, and a human-only AC, plus a browser suite whose step failed); the report shows pass, fail, unrun and human with the run URL and prints the records ratio; `--check` exit 0 with unchanged output and TRACEABILITY.md on the current tree; publishing on a real main CI run not yet verified |
 | AC-DLV-20 | S12 | UNRUN |
 | AC-DLV-21 | S10 | PASS (local) |
 | AC-DLV-22 | S13 | UNRUN |
@@ -149,3 +149,22 @@ Assumptions:
 Left for Jay:
 - Apply the repository merge settings and the protection on main with the two `gh api` commands in `docs/runbooks/delivery.md`, run the readback commands and paste the output into `specs/039-delivery-process/acceptance.md`.
 - Confirm AC-DLV-01 by hand: a direct push is refused, a pull request with a failing check cannot merge, and a merge lands as a squash commit with the head branch deleted.
+
+## Build 039-S11
+
+Checks on the merged tree (clean merge): `dotnet build Hub.slnx` 0 errors; `python3 tools/test_trace_report.py` OK; `python3 tools/test_ci_tests.py` OK; `python3 tools/test_coverage_gate.py` OK (1 skipped); `python3 tools/test_decisions.py` OK; `python3 tools/test_pr_checks.py` OK; `python3 tools/build_spec.py --check` up to date; `python3 tools/trace_spec.py --check` clean. No web change. No product flag: tooling, CI and templates only, app behaviour unchanged.
+
+Assumptions:
+- Records ratio: code lines are lines added by non-merge commits whose subject names a slice of the packet (`039-S11: ...` or `039 S11: ...`); files under `specs/` and `spec-parts/`, `*.md`, `package-lock.json`, `*.Designer.cs` and model snapshots are not code. The ratio is reported, never enforced.
+- Records lines are all files under `specs/<packet>/`, the spec-parts file named in the packet spec.md, and the `specs/DECISIONS.md` rows for that packet.
+- "ACs tested of total" counts ACs with at least one passing citing test and no failing one, out of the ACs the packet spec.md cites.
+- Slices done counts every checkbox line in tasks.md, so older T-numbered packets count too.
+- The flag shown is the first backticked `flag.*` name in the packet spec.md, otherwise "none".
+- Browser suites and Python test files cite IDs anywhere in the file; their result is the outcome of the CI step that runs them (from `ci-artifacts/step-outcomes.jsonl`), so a combined step gives one outcome for every file in it.
+- A test citing a human-only ID leaves it human.
+- The report is published on main push runs only, not pull requests.
+- `specs/human-only.txt` (created in S05, seeded in S12) is read when present.
+- No 039 decision default was needed for this slice.
+
+Left for Jay:
+- After this reaches main, confirm on GitHub that the `report` job runs (it downloads all job artifacts and needs a full-history checkout) and uploads the `spec-report` artifact. Until then the FR-DLV-24 transition clause keeps verification.md in use.

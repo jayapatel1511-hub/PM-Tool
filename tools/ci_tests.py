@@ -8,6 +8,9 @@
                                             under <dir>) must equal the listed cases (listed-tests.txt under
                                             <dir>); on pull requests the backend and browser-suite counts
                                             must not fall below --main unless labelled replace-test
+  python3 tools/ci_tests.py image <ref> --sha SHA
+                                            release image check (FR-DLV-14): the local image's OCI revision
+                                            label and HUB_BUILD both equal SHA
 
 ci_steps.txt: one step per line, `<job>[,<job>...]: <command>`; `#` starts a comment. A job name
 followed by ` [always]` runs that step even after an earlier step failed (evidence copies).
@@ -168,7 +171,33 @@ def count(folder, main_file=None, labels="", event="", out=None, steps_file=STEP
     return (1 if errors else 0), notes + [f"::error::{e}" for e in errors]
 
 
+REVISION = "org.opencontainers.image.revision"
+
+
+def image_errors(inspect, sha):
+    """FR-DLV-14: what is wrong with `docker image inspect` output for an image built from sha."""
+    config = inspect[0].get("Config") or {}
+    label = (config.get("Labels") or {}).get(REVISION)
+    builds = [e.partition("=")[2] for e in config.get("Env") or [] if e.startswith("HUB_BUILD=")]
+    errors = []
+    if label != sha:
+        errors.append(f"label {REVISION} is {label!r}, expected {sha!r}")
+    if builds != [sha]:
+        errors.append(f"HUB_BUILD is {builds[0] if builds else None!r}, expected {sha!r}")
+    return errors
+
+
 def main(argv):
+    if argv and argv[0] == "image":
+        p = argparse.ArgumentParser(prog="ci_tests.py image")
+        p.add_argument("ref")
+        p.add_argument("--sha", required=True)
+        a = p.parse_args(argv[1:])
+        out = subprocess.run(["docker", "image", "inspect", a.ref], capture_output=True, text=True, check=True).stdout
+        errors = image_errors(json.loads(out), a.sha)
+        print("\n".join(f"::error::{e}" for e in errors) or f"{a.ref}: revision and HUB_BUILD are {a.sha}")
+        return 1 if errors else 0
+
     if argv and argv[0] == "count":
         p = argparse.ArgumentParser(prog="ci_tests.py count")
         p.add_argument("dir")

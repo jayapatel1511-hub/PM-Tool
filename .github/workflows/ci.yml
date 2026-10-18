@@ -99,3 +99,38 @@ jobs:
       - if: always()
         uses: actions/upload-artifact@v4
         with: { name: spec-report, path: ci-artifacts/spec-report.md }
+
+  # The release image (§43.6, FR-DLV-14): built once from a green main commit, pushed to GHCR with a provenance
+  # attestation. The only job that may write packages; every other job keeps the read-only default.
+  image:
+    needs: [domain, api, web, checks, gate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions: { contents: read, packages: write, id-token: write, attestations: write }
+    steps:
+      - uses: actions/checkout@v4
+      - id: name
+        run: echo "repo=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/pm-tool" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v3
+        with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
+      - id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: hosting/Dockerfile.review
+          platforms: linux/amd64
+          build-args: RELEASE_SHA=${{ github.sha }}
+          tags: ${{ steps.name.outputs.repo }}:${{ github.sha }}
+          push: true
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ steps.name.outputs.repo }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+      - run: python3 tools/ci_tests.py steps image
+        env:
+          IMAGE: "${{ steps.name.outputs.repo }}@${{ steps.push.outputs.digest }}"
+          GH_TOKEN: "${{ github.token }}"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: ci-artifacts-image, path: ci-artifacts/, if-no-files-found: ignore }

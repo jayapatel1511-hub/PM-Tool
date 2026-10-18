@@ -10,6 +10,7 @@ public static class Flags
     public static readonly FlagDef[] All =
     [
         new("figure_names", "041"), // §45.2 and §45.3: the Uncommitted name, the basis lines, the Partial view row label and "at most"
+        new("show_deleted", "045"), // §49.2: the deleted-items list, export and deliverable/milestone restore
     ];
 
     /// `flag.<name>` as a Bool setting, default off, group `flags`, generated like `rule_enabled.*`.

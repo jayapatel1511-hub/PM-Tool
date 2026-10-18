@@ -70,6 +70,7 @@ public static class HubModules
         DesignBasisEndpoints.Map(api);
         ReadinessEndpoints.Map(api);
         WeeklyCommitmentsEndpoints.Map(api);
+        RecoveryEndpoints.Map(api);
         // Support: an Admin can re-run a project's evaluation on demand.
         api.MapPost("/admin/evaluate/{projectId:guid}", async (Guid projectId, CurrentUser me, EvaluationService eval) =>
         {

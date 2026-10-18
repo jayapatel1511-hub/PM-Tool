@@ -25,6 +25,7 @@ public static class MilestoneEndpoints
         api.MapPost("/milestones/{id:guid}/reopen", Reopen);
         api.MapPost("/milestones/{id:guid}/cancel", Cancel);
         api.MapDelete("/milestones/{id:guid}", Delete);
+        api.MapPost("/milestones/{id:guid}/restore", Restore).RequireFlag(RecoveryEndpoints.Flag);
     }
 
     public static async Task<(Milestone M, Project P, ProjectContext Ctx)> Load(HubDb db, Access access, Guid id)
@@ -247,6 +248,19 @@ public static class MilestoneEndpoints
         m.DeletedBy = me.Id;
         await db.SaveChangesAsync();
         return Results.NoContent();
+    }
+
+    /// FR-RCV-03: like the task restore; the save hook logs "Restored" and queues re-evaluation.
+    static async Task<IResult> Restore(Guid id, HttpContext http, Access access, HubDb db)
+    {
+        var m = await db.Milestones.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt != null) ?? throw ApiException.NotFound();
+        var (_, ctx) = await access.Project(m.ProjectId);
+        Access.Demand(Permissions.RestoreItem(access.Actor, ctx));
+        await RecoveryEndpoints.Guard(db, http, m, null, null);
+        m.DeletedAt = null;
+        m.DeletedBy = null;
+        await db.SaveChangesAsync();
+        return Results.Ok(new { m.Id, m.RowVersion });
     }
 
     public static NotifyItem Item(Project p, Milestone m) => new(p.Id, ItemType.Milestone, m.Id, m.Key, $"/projects/{p.ProjectNumber}/milestones?panel=Milestone:{m.Id}", p.ProjectNumber);

@@ -284,7 +284,7 @@ public static class ProjectEndpoints
             } : null,
             SuggestArchive = p.Status == ProjectStatus.Complete && completeFor > s.CompleteProjectEditWindowDays,
             EditWindowDaysLeft = p.Status == ProjectStatus.Complete ? Math.Max(0, s.CompleteProjectEditWindowDays - completeFor) : (int?)null,
-            Permissions = new
+            Permissions = WithRestore(new
             {
                 Edit = Perm(Permissions.EditProject(a, ctx), p.Status),
                 ManageTeam = Perm(Permissions.ManageTeam(a, ctx), p.Status),
@@ -303,8 +303,17 @@ public static class ProjectEndpoints
                 ChangeNumber = a.Admin,
                 SetVisibility = s.RestrictedProjectsEnabled && Permissions.EditProject(a, ctx).Ok,
                 NeedsReason = ProjectStatus.NeedsCorrectionReason(p.Status),
-            },
+            }, s.IsFlagOn(RecoveryEndpoints.Flag) ? Perm(Permissions.RestoreItem(a, ctx), p.Status) : null),
         };
+    }
+
+    /// FR-RCV-01: the `restore` field exists only while `flag.show_deleted` is on (FR-DLV-08), so the block is unchanged with it off.
+    static object WithRestore(object permissions, object? restore)
+    {
+        if (restore is null) return permissions;
+        var o = JsonSerializer.SerializeToNode(permissions, JsonOpts.Web)!.AsObject();
+        o["restore"] = JsonSerializer.SerializeToNode(restore, JsonOpts.Web);
+        return o;
     }
 
     static object Perm(Allow a, string status) => new { a.Ok, Reason = a.Why is null ? null : Text.Get(a.Why, a.Arg ?? status) };

@@ -580,11 +580,13 @@ public static class TaskEndpoints
         return Results.Ok(new { removedDependencies = edges.Count });
     }
 
-    static async Task<IResult> Restore(Guid id, Access access, HubDb db)
+    static async Task<IResult> Restore(Guid id, HttpContext http, Access access, HubDb db, SettingsStore store)
     {
         var t = await db.Tasks.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt != null) ?? throw ApiException.NotFound();
         var (_, ctx) = await access.Project(t.ProjectId);
         Access.Demand(Permissions.RestoreItem(access.Actor, ctx));
+        // FR-RCV-04, FR-RCV-05: with the flag off, the undo toast's restore behaves exactly as before.
+        if ((await store.Get(db)).IsFlagOn(RecoveryEndpoints.Flag)) await RecoveryEndpoints.Guard(db, http, t, t.DeliverableId, t.MilestoneId);
         t.DeletedAt = null;
         t.DeletedBy = null;
         var deletedAt = await db.ActivityLog.Where(a => a.ItemId == id && a.Action == "Deleted").OrderByDescending(a => a.OccurredAt).Select(a => a.OccurredAt).FirstOrDefaultAsync();

@@ -106,8 +106,18 @@ if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"
     app.UseHsts();
     app.UseHttpsRedirection();
 }
+// FR-LIVE-10: hashed /assets files never change, so cache them for a year; index.html (by name or as the SPA
+// fallback) is revalidated on every load so a deploy is picked up. Other static files keep today's headers.
+var staticFiles = new StaticFileOptions
+{
+    OnPrepareResponse = c =>
+    {
+        if (c.File.Name == "index.html") c.Context.Response.Headers.CacheControl = "no-cache";
+        else if (c.Context.Request.Path.StartsWithSegments("/assets")) c.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+    },
+};
 app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseStaticFiles(staticFiles);
 if (AuthSetup.LocalAuthAllowed(app.Environment, cfg) || cfg["Auth:Mode"] == SocialAuth.Scheme)
     app.Use(async (ctx, next) =>
     {
@@ -172,7 +182,7 @@ AdminEndpoints.Map(api);
 ActivityEndpoints.Map(api);
 HubModules.Map(api);
 app.MapFallback("/api/{**rest}", (HttpContext _) => throw ApiException.NotFound()); // §25.6: an unknown API path is a 404 problem, not the SPA page
-app.MapFallbackToFile("index.html").AllowAnonymous();
+app.MapFallbackToFile("index.html", staticFiles).AllowAnonymous();
 
 // Development-only sign-in list: lets the SPA's user picker work without Entra (never mapped in production).
 if (AuthSetup.DevAuthAllowed(app.Environment, cfg))

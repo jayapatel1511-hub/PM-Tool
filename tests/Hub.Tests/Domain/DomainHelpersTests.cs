@@ -92,6 +92,24 @@ public sealed class DomainHelpersTests
         Assert.Equal(new Channels(rr.App, rr.Email), s.NotificationDefaults[NotificationEvents.ReviewRequested]);
     }
 
+    [Theory] // AC-FIG-06
+    [InlineData("workload_over_pct", 110, 50, 300)]
+    [InlineData("workload_amber_pct", 90, 0, 300)]
+    [InlineData("workload_under_pct", 40, 0, 100)]
+    public void Workload_threshold_settings_have_defaults_and_ranges(string key, int dflt, int min, int max)
+    {
+        var def = OrgSettings.Def(key)!;
+        Assert.Equal((SettingKind.Int, dflt, "thresholds"), (def.Kind, (int)def.Default, def.Group));
+        Assert.Null(OrgSettings.Validate(def, J(min)));
+        Assert.Null(OrgSettings.Validate(def, J(max)));
+        Assert.Equal("setting.int", OrgSettings.Validate(def, J(min - 1)));
+        Assert.Equal("setting.int", OrgSettings.Validate(def, J(max + 1)));
+        var read = OrgSettings.From(new Dictionary<string, JsonElement> { [key] = J(min) });
+        Assert.Equal(min, key switch { "workload_over_pct" => read.WorkloadOverPct, "workload_amber_pct" => read.WorkloadAmberPct, _ => read.WorkloadUnderPct });
+        var defaults = OrgSettings.From(new Dictionary<string, JsonElement>());
+        Assert.Equal((110, 90, 40), (defaults.WorkloadOverPct, defaults.WorkloadAmberPct, defaults.WorkloadUnderPct));
+    }
+
     [Fact]
     public void Setting_values_are_validated_by_kind()
     {

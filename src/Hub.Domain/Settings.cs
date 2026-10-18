@@ -25,6 +25,9 @@ public sealed record OrgSettings
     public int HealthBlockedDaysYellow { get; init; } = 5;
     public int HealthOverrideExpiryDays { get; init; } = 14;
     public int ChainDepthLimit { get; init; } = 10;
+    public int WorkloadOverPct { get; init; } = (int)Workload.OverPct;
+    public int WorkloadAmberPct { get; init; } = (int)Workload.AmberPct;
+    public int WorkloadUnderPct { get; init; } = (int)Workload.UnderPct;
     public bool AllowSelfReview { get; init; }
     public int CompleteProjectEditWindowDays { get; init; } = 30;
     public int DefaultWeeklyCapacityHours { get; init; } = 40;
@@ -66,6 +69,9 @@ public sealed record OrgSettings
         new("health_blocked_days_yellow", SettingKind.Int, 5, "health"),
         new("health_override_expiry_days", SettingKind.Int, 14, "health"),
         new("chain_depth_limit", SettingKind.Int, 10, "thresholds"),
+        new("workload_over_pct", SettingKind.Int, (int)Workload.OverPct, "thresholds"),
+        new("workload_amber_pct", SettingKind.Int, (int)Workload.AmberPct, "thresholds"),
+        new("workload_under_pct", SettingKind.Int, (int)Workload.UnderPct, "thresholds"),
         new("allow_self_review", SettingKind.Bool, false, "work"),
         new("complete_project_edit_window_days", SettingKind.Int, 30, "work"),
         new("default_weekly_capacity_hours", SettingKind.Int, 40, "work"),
@@ -113,6 +119,9 @@ public sealed record OrgSettings
             HealthBlockedDaysYellow = I("health_blocked_days_yellow", s.HealthBlockedDaysYellow),
             HealthOverrideExpiryDays = I("health_override_expiry_days", s.HealthOverrideExpiryDays),
             ChainDepthLimit = I("chain_depth_limit", s.ChainDepthLimit),
+            WorkloadOverPct = I("workload_over_pct", s.WorkloadOverPct),
+            WorkloadAmberPct = I("workload_amber_pct", s.WorkloadAmberPct),
+            WorkloadUnderPct = I("workload_under_pct", s.WorkloadUnderPct),
             AllowSelfReview = B("allow_self_review", s.AllowSelfReview),
             CompleteProjectEditWindowDays = I("complete_project_edit_window_days", s.CompleteProjectEditWindowDays),
             DefaultWeeklyCapacityHours = I("default_weekly_capacity_hours", s.DefaultWeeklyCapacityHours),
@@ -157,8 +166,9 @@ public sealed record OrgSettings
     {
         "coordination_lookahead_weeks" or "planning_under_weeks" => n is >= 1 and <= 12,
         "planning_horizon_weeks" => n is >= 6 and <= 26,
-        "planning_over_pct" => n is >= 50 and <= 300,
-        "planning_under_pct" => n is >= 0 and <= 100,
+        "planning_over_pct" or "workload_over_pct" => n is >= 50 and <= 300,
+        "planning_under_pct" or "workload_under_pct" => n is >= 0 and <= 100,
+        "workload_amber_pct" => n is >= 0 and <= 300,
         "planning_stale_days" or "status_stale_days" => n is >= 1 and <= 365,
         "planning_max_hours_per_week" => n is >= 1 and <= 168,
         _ => n is >= 0 and <= 3650,

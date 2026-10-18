@@ -11,7 +11,16 @@ public sealed record TaskDailyLoad(decimal? Remaining, IReadOnlyDictionary<DateO
 /// leave, holidays and logged hours (§12.15 "What it deliberately does not do", §36.8).
 public static class Workload
 {
-    public const decimal OverPct = 110, UnderPct = 40;
+    public const decimal OverPct = 110, AmberPct = 90, UnderPct = 40;
+
+    /// Load bands tested in order (§45.4, FR-FIG-05): Over above the over setting, Near above the amber setting,
+    /// Within from the under setting, Light below. An amber value at or above the over value leaves no Near band.
+    public enum Band { Over, Near, Within, Light }
+
+    public static Band LoadBand(decimal pct, decimal overPct = OverPct, decimal amberPct = AmberPct, decimal underPct = UnderPct) =>
+        pct > overPct ? Band.Over : pct > amberPct ? Band.Near : pct >= underPct ? Band.Within : Band.Light;
+
+    public static Band LoadBand(decimal pct, OrgSettings s) => LoadBand(pct, s.WorkloadOverPct, s.WorkloadAmberPct, s.WorkloadUnderPct);
 
     public static DateOnly WeekOf(DateOnly d) => d.AddDays(-(((int)d.DayOfWeek + 6) % 7));
 
@@ -49,11 +58,12 @@ public static class Workload
 
     public static decimal Pct(decimal hours, decimal capacity) => capacity <= 0 ? (hours > 0 ? 999 : 0) : Math.Round(hours * 100 / capacity, 0);
 
-    /// Over-assigned: above 110 % in the current or the next week.
-    public static bool OverAssigned(decimal thisWeekPct, decimal nextWeekPct) => thisWeekPct > OverPct || nextWeekPct > OverPct;
+    /// Over-assigned: above the over setting (default 110 %) in the current or the next week.
+    public static bool OverAssigned(decimal thisWeekPct, decimal nextWeekPct, decimal overPct = OverPct) => thisWeekPct > overPct || nextWeekPct > overPct;
 
-    /// Under-assigned: below 40 % for the next two weeks, and never while any of the person's work is unestimated.
-    public static bool UnderAssigned(decimal thisWeekPct, decimal nextWeekPct, int unestimated) => unestimated == 0 && thisWeekPct < UnderPct && nextWeekPct < UnderPct;
+    /// Under-assigned: below the under setting (default 40 %) for the next two weeks, and never while any of the person's work is unestimated.
+    public static bool UnderAssigned(decimal thisWeekPct, decimal nextWeekPct, int unestimated, decimal underPct = UnderPct) =>
+        unestimated == 0 && thisWeekPct < underPct && nextWeekPct < underPct;
 
     /// Deadline cluster: three or more tasks across two or more projects due within any three-day window in the next 14 days.
     public static bool DeadlineCluster(IEnumerable<(DateOnly Due, Guid ProjectId)> tasks, DateOnly today)

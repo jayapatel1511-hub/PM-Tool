@@ -29,7 +29,7 @@ const me = { id: sam, displayName: 'Sam Supervisor', email: 'sam@hub.test', role
   settings: { today: '2026-10-03', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 }, preferences: { denseRows: true, digestEnabled: true } };
 const project = { id: pid, projectNumber: 'P-DEMO', name: 'Synthetic resource checks', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1,
   links: [], disciplines: [], starred: false, myRoles: [], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] },
-  permissions: { edit: { ok: false }, healthOverride: { ok: false }, raiseRegister: { ok: false }, isPm: false, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [] } };
+  permissions: { edit: { ok: false }, healthOverride: { ok: false }, raiseRegister: { ok: false }, isPm: false, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [], needsReason: false } };
 const allocation = (aid, status) => ({ id: aid, personId: jill, personName: 'Jill Partial', purpose: 'Production', fromDate: '2026-10-05', throughDate: '2026-10-09', plannedHours: 16, status, rowVersion: 0, personState: 'Eligible' });
 const errors = [], unknown = [];
 let server, browser;
@@ -50,7 +50,7 @@ let server, browser;
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
     else if (p === 'workspaces') data = []
     else if (p === 'views') data = { views: [], canShare: false }
-    else if (p === 'reference') data = { disciplines: [], clients: [], offices: [], deliverableTypes: [], phases: [], projectTypes: [] }
+    else if (p === 'reference') data = { disciplines: [], clients: [], offices: [], deliverableTypes: [], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
     else if (p === 'projects') data = { items: [project], page: 1, pageSize: 200, totalCount: 1 }
     else if (p === 'workload') [status, data] = forbidden ? [403, { code: 'forbidden', detail: 'You cannot open the workload view.' }] : [200, grid(u.searchParams.get('sort'))]
     else if (p === 'projects/P-DEMO' || p === `projects/${pid}`) data = project
@@ -127,6 +127,17 @@ let server, browser;
   await page.getByRole('dialog').getByText('Capacity can’t be checked with your access').waitFor();
   assert.equal(await page.getByText('You cannot open the workload view.').count(), 0, 'The refusal is explained in context');
   const panelViolations = await axe();
+
+  // FR-FIG-11, FR-FIG-12 (AC-FIG-10, AC-FIG-11): the role form asks for a reason exactly when the server's needsReason says so,
+  // and takes its label limit from GET /reference.
+  const roleForm = async () => { await page.goto(`${base}/projects/P-DEMO/allocations?view=roles`); await page.getByRole('button', { name: 'Add open role' }).first().click(); return page.getByRole('dialog') }
+  project.permissions.isPm = true; project.permissions.needsReason = true; project.status = 'Complete';
+  let dialog = await roleForm();
+  assert.equal(await dialog.getByLabel('Role').getAttribute('maxlength'), '80', 'Label limit from /reference');
+  await dialog.getByLabel('Reason').waitFor();
+  project.permissions.needsReason = false;
+  dialog = await roleForm(); await dialog.getByLabel('Role').waitFor();
+  assert.equal(await dialog.getByLabel('Reason').count(), 0, 'No reason field without needsReason, whatever the status');
 
   const report = { scope: 'Chromium UI with mocked API; server rules are tested separately', errors, unmockedGets: [...new Set(unknown)], desktopViolations, panelViolations };
   console.log(JSON.stringify(report));

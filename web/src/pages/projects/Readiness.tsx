@@ -175,7 +175,7 @@ export function ReadinessTab() {
       <WindowPager className="rounded-lg border bg-card" label={t('readiness.promises')} page={promisePage} total={data.total} pageSize={data.pageSize} onPage={n => set('promisePage', String(n))} />
       <p className="flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><ExternalLink className="size-3.5 shrink-0" aria-hidden />{t('readiness.sourceNote')}</p>
       {proposing && options.data && <ProposePromise projectId={p.id} options={options.data} week={weeks[0]} day={day}
-        complete={p.status === 'Complete'} close={() => setProposing(false)} done={done} />}
+        complete={p.permissions.needsReason} close={() => setProposing(false)} done={done} />}
       {(inspecting || linked.data) && options.data && <ReadinessInspector projectId={p.id} number={p.projectNumber} options={options.data}
         initial={linked.data && !inspecting ? `${linked.data.targetType}:${linked.data.targetId}` : undefined}
         close={() => { setInspecting(false); clear('panel') }} done={done} />}

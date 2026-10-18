@@ -7,12 +7,12 @@ const port = process.env.PORT ?? '5176', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const pid = id(1), consumer = id(2), lead = id(3), civil = id(4), task = id(7), e1 = id(20), e2 = id(21), v11 = id(30), v12 = id(31), v21 = id(32), u1 = id(40), u2 = id(41), i1 = id(50), i2 = id(51);
 const coordinationUses = Array.from({ length: 5 }, (_, n) => ({ id: id(600 + n), targetType: 'Task', targetId: id(610 + n), sourceRevisionId: id(620 + n), targetKey: `P-DEMO-T${String(n + 1).padStart(3, '0')}`, targetName: `Coordination target ${n + 1}`, sourceKey: `P-DEMO-B${String(n + 1).padStart(3, '0')}`, sourceUrl: `https://example.test/source/${n + 1}`, revision: `R${n + 1}`, intendedUse: `Input use ${n + 1}` }));
-let who = 'consumer';
+let who = 'consumer', needsReason = false;
 const actor = () => (who === 'consumer' ? consumer : lead);
 const project = () => ({ id: pid, projectNumber: 'P-DEMO', name: 'Basis checks', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1, links: [], starred: false,
   disciplines: [{ id: civil, disciplineId: id(5), name: 'Civil', code: 'CIV', colour: '#2563eb', leadUserId: lead, isActive: true, leadName: 'Marc Lead' }],
   myRoles: who === 'consumer' ? ['TeamMember'] : ['DisciplineLead'], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] },
-  permissions: { raiseRegister: { ok: false }, edit: { ok: false }, healthOverride: { ok: false }, isPm: false, leadOf: who === 'consumer' ? [] : [civil], createTaskIn: [civil], createDeliverableIn: [civil], transitions: [] } });
+  permissions: { raiseRegister: { ok: false }, edit: { ok: false }, healthOverride: { ok: false }, isPm: false, leadOf: who === 'consumer' ? [] : [civil], createTaskIn: [civil], createDeliverableIn: [civil], transitions: [], needsReason } });
 const me = () => ({ id: actor(), displayName: who, email: `${who}@hub.test`, roles: [], systemRoles: [], capabilities: { createProject: false, createTask: true, portfolio: false, workload: false, staff: false, admin: false, templates: false, readOnly: false, directReports: 0 },
   settings: { coordinationLookaheadWeeks: 6, today: '2026-10-01', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 }, preferences: { denseRows: true, digestEnabled: true } });
 const options = () => ({ actorId: actor(), canWrite: true, manageDisciplineIds: who === 'consumer' ? [] : [civil], people: [{ id: consumer, displayName: 'Alex Consumer' }, { id: lead, displayName: 'Marc Lead' }],
@@ -264,6 +264,15 @@ let server, browser;
   assert.ok(registerQueries.some(q => q.list === 'commitments' && q.params.page === '2'), 'Promise Next reaches page two');
   assert.ok(registerQueries.some(q => q.list === 'commitments' && q.params.targetFrom === '2026-10-02' && q.params.page === '1'), 'Window filtering happens in the API before paging');
   assert.ok(registerQueries.some(q => q.list === 'window' && q.params.from === '2026-10-02' && q.params.constraintsPage === '1' && q.params.readyPage === '1'), 'Date changes reset both aggregate list pages');
+
+  // FR-FIG-11 (AC-FIG-10): the propose form asks for a reason exactly when the server's needsReason is true; the status stays Active.
+  for (const flag of [true, false]) {
+    needsReason = flag; await page.goto(`${base}/projects/P-DEMO/readiness`);
+    await page.getByRole('button', { name: 'Propose promise' }).click();
+    const form = page.getByRole('dialog', { name: 'Propose promise' }); await form.getByLabel('Intended output').waitFor();
+    assert.equal(await form.getByLabel('Reason', { exact: true }).count(), flag ? 1 : 0, `Reason field follows needsReason=${flag}`);
+  }
+  needsReason = false;
 
   // Shared Sheet: preserve keyboard focus and keep editable people/date controls inside the panel at each viewport.
   await page.goto(`${base}/projects/P-DEMO/tasks`);

@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
+import { useReference } from '@/hooks/data'
 import { ApiError, get, patch, post, qs } from '@/lib/api'
 import { fmtDate, hours, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
@@ -69,7 +70,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   const view = sp.get('view') === 'roles' ? 'roles' : 'allocations'
   const roles = useQuery({ queryKey: ['allocations', project.id, 'open-roles'], queryFn: () => get<OpenRole[]>(`projects/${project.id}/open-roles`) })
   const openRoles = roles.data?.filter(r => r.status === 'Open').length ?? 0
-  const complete = project.status === 'Complete' // P-05: changes to a Complete project are corrections with a reason (A6)
+  const complete = project.permissions.needsReason // P-05, FR-FIG-11: changes to a Complete project are corrections with a reason (A6)
   const [roleForm, setRoleForm] = useState<OpenRole | 'new' | null>(null), [filling, setFilling] = useState<Fill | null>(null), [cancelling, setCancelling] = useState<OpenRole | null>(null)
   const propose = view === 'roles'
     ? <Button onClick={() => setRoleForm('new')}><Plus className="size-4" />{t('openRole.new')}</Button>
@@ -349,6 +350,7 @@ function RoleDialog({ projectId, disciplines, role, complete, onClose, onDone }:
   const [f, setF] = useState({ roleLabel: role?.roleLabel ?? '', projectDisciplineId: role?.projectDisciplineId ?? '', fromDate: role?.fromDate ?? today(), throughDate: role?.throughDate ?? today(),
     plannedHours: role ? String(role.plannedHours) : '', note: role?.note ?? '', reason: '' })
   const [err, setErr] = useState<ApiError | null>(null), [busy, setBusy] = useState(false)
+  const labelMax = useReference().data?.limits.roleLabel // FR-FIG-12: the server's one limit
   const up = (k: keyof typeof f) => (e: { target: { value: string } }) => setF(x => ({ ...x, [k]: e.target.value }))
   const fe = err?.fieldErrors ?? {}
   const submit = async (e: React.FormEvent) => {
@@ -360,7 +362,7 @@ function RoleDialog({ projectId, disciplines, role, complete, onClose, onDone }:
   return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
     <DialogHeader><DialogTitle>{t(role ? 'openRole.edit' : 'openRole.new')}</DialogTitle><DialogDescription>{t('openRole.formHint')}</DialogDescription></DialogHeader>
     <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
-      <Field label={t('openRole.label')} htmlFor="role-label" error={fe.roleLabel} className="sm:col-span-2"><Input id="role-label" required maxLength={80} autoFocus value={f.roleLabel} onChange={up('roleLabel')} placeholder={t('openRole.labelPlaceholder')} /></Field>
+      <Field label={t('openRole.label')} htmlFor="role-label" error={fe.roleLabel} className="sm:col-span-2"><Input id="role-label" required maxLength={labelMax} autoFocus value={f.roleLabel} onChange={up('roleLabel')} placeholder={t('openRole.labelPlaceholder')} /></Field>
       <Field label={t('common.discipline')} htmlFor="role-discipline" error={fe.projectDisciplineId} optional className="sm:col-span-2">
         <select id="role-discipline" className={selectCls} value={f.projectDisciplineId} onChange={up('projectDisciplineId')}>
           <option value="">{t('common.none')}</option>{disciplines.filter(d => d.isActive || d.id === f.projectDisciplineId).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}

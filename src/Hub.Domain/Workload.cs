@@ -56,6 +56,11 @@ public static class Workload
         return new(remaining, daysByDate, 0, false);
     }
 
+    /// Uncommitted (§45.3, FR-FIG-03): available capacity − committed load. A partial row never claims spare capacity
+    /// (FR-CAP-06), so its value is null unless it is negative.
+    public static decimal? Uncommitted(decimal available, decimal committed, bool partial) =>
+        available - committed is var u && (u < 0 || !partial) ? u : null;
+
     public static decimal Pct(decimal hours, decimal capacity) => capacity <= 0 ? (hours > 0 ? 999 : 0) : Math.Round(hours * 100 / capacity, 0);
 
     /// Over-assigned: above the over setting (default 110 %) in the current or the next week.

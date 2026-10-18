@@ -20,12 +20,13 @@ public sealed class FlagsTests
     }
 
     [Fact]
-    public void The_list_starts_empty_and_no_existing_setting_is_a_flag() // AC-DLV-04, AC-DLV-09
+    public void Only_declared_flags_are_flag_settings_and_each_starts_off() // AC-DLV-04, AC-DLV-09
     {
-        Assert.Empty(Flags.All);
-        Assert.DoesNotContain(OrgSettings.Defs, d => d.Group == "flags" || d.Key.StartsWith("flag.", StringComparison.Ordinal));
-        Assert.Empty(new OrgSettings().Flags);
-        Assert.Empty(OrgSettings.From(new Dictionary<string, System.Text.Json.JsonElement>()).Flags);
+        Assert.Equal(Flags.All.Select(f => $"flag.{f.Name}"), OrgSettings.Defs.Where(d => d.Group == "flags" || d.Key.StartsWith("flag.", StringComparison.Ordinal)).Select(d => d.Key));
+        Assert.All(OrgSettings.Defs.Where(d => d.Group == "flags"), d => Assert.Equal(false, d.Default));
+        Assert.Equal(Flags.All.Select(f => f.Name), new OrgSettings().Flags.Keys);
+        Assert.DoesNotContain(true, new OrgSettings().Flags.Values);
+        Assert.DoesNotContain(true, OrgSettings.From(new Dictionary<string, System.Text.Json.JsonElement>()).Flags.Values);
     }
 
     [Fact]

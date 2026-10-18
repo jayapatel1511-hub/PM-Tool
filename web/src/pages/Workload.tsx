@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Skeleton } from '@/components/ui/skeleton'
 import { useReference } from '@/hooks/data'
 import { ApiError, get, patch, put, qs } from '@/lib/api'
+import { useFlag } from '@/lib/auth'
 import { addDays, fmtDate, hours, shortDate, today } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
@@ -27,7 +28,7 @@ import { MenuSelect, errorText } from './projects/Tasks'
 
 /** The server's load band for the week (FR-FIG-05), from the organisation's workload thresholds. */
 type Band = 'over' | 'near' | 'within' | 'light'
-interface Cell { week: string; hours: number; pct: number; available: number; confirmed: number; proposed: number; committed: number; band: Band }
+interface Cell { week: string; hours: number; pct: number; available: number; confirmed: number; proposed: number; committed: number; band: Band; uncommitted: number | null }
 interface Thresholds { overPct: number; amberPct: number; underPct: number }
 interface PersonRow {
   id: string; displayName: string; supervisorId?: string; supervisorName?: string; capacity: number; capacityOverride: boolean; cells: Cell[]; noDueDate: number
@@ -90,6 +91,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   const people = q.data?.people ?? []
   const groups = groupPeople(people, groupBy, ref.data)
   const allPartial = people.length > 0 && people.every((p) => p.partialScope)
+  const named = useFlag('figure_names')
 
   // Active filters as removable tokens (§13.0 Filters); sort is an order, not a filter.
   const supervisorName = people.find((p) => p.supervisorId === filters.supervisorId)?.supervisorName
@@ -170,7 +172,8 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
           </div>
         ) : (
           // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- axe scrollable-region-focusable: keyboard users scroll the grid
-          <div className="scroll-region max-h-[78dvh] overflow-auto rounded-lg border bg-card" role="region" aria-label={t('workload.grid')} tabIndex={0}>
+          <div className="scroll-region max-h-[78dvh] overflow-auto rounded-lg border bg-card" role="region" aria-label={t('workload.grid')} aria-describedby={named ? 'workload-basis' : undefined} tabIndex={0}>
+            {named && <p id="workload-basis" className="sticky left-0 max-w-xl px-3 py-2 text-xs text-muted-foreground">{t('workload.uncommittedBasis')}</p>}
             <table className="w-full min-w-max border-separate border-spacing-0 text-sm">
               <caption className="sr-only">{t('workload.gridCaption')}</caption>
               <WeekHead weeks={q.data.weeks} currentWeek={q.data.currentWeek} first={t('workload.person')} last={t('workload.summary')} />
@@ -216,7 +219,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
                             </div>
                           </div>
                         </th>
-                        {p.cells.map((c) => <td key={c.week} className="border-b border-r p-0 align-top"><WeekCell c={c} capacity={p.capacity} partial={p.partialScope} /></td>)}
+                        {p.cells.map((c) => <td key={c.week} className="border-b border-r p-0 align-top"><WeekCell c={c} capacity={p.capacity} named={named} /></td>)}
                         <td className="border-b px-4 py-3 align-top"><Summary p={p} /></td>
                       </tr>
                       {open.has(p.id) && <PersonTasksRows id={p.id} name={p.displayName} from={filters.from} weeks={q.data!.weeks.length} onChanged={() => q.refetch()} />}
@@ -286,9 +289,10 @@ function UnfilledRoles({ roles, weeks, currentWeek }: { roles: UnfilledRole[]; w
 
 /** One person-week: committed load of available capacity, then what it is made of. Proposed requests sit outside the
  *  load (dotted), and a partial view never claims spare capacity (FR-CAP-04, FR-CAP-06). */
-function WeekCell({ c, capacity, partial }: { c: Cell; capacity: number; partial: boolean }) {
+function WeekCell({ c, capacity, named }: { c: Cell; capacity: number; named: boolean }) {
   const tone = TONE[c.band]
-  const remaining = c.available - c.committed
+  // The server's Uncommitted (FR-FIG-03): null on a partial row unless negative; "Remaining" until flag.figure_names is on.
+  const figure = c.uncommitted == null ? null : t(named ? 'workload.uncommitted' : 'workload.remaining', { h: hours(c.uncommitted) })
   const scale = Math.max(c.available, c.committed + c.proposed, 1)
   return (
     <div data-band={c.band} className={cn('flex h-full min-h-28 flex-col gap-1.5 px-(--cell-px) py-(--cell-py)', SHADE[tone])}>
@@ -303,8 +307,8 @@ function WeekCell({ c, capacity, partial }: { c: Cell; capacity: number; partial
       </div>
       <p className="text-xs/[18px] tabular-nums">
         <span className="text-muted-foreground">{c.available <= 0 ? t('workload.noAvailability') : t('workload.loadPct', { pct: c.pct })}</span>
-        {remaining < 0 ? <span className={cn('ml-1.5 font-semibold', tone === 'bad' ? 'text-bad' : 'text-warn')}><span aria-hidden>{tone === 'bad' ? '■' : '▲'} </span>{t('workload.remaining', { h: hours(remaining) })}</span>
-          : !partial && <span className="ml-1.5 text-muted-foreground">{t('workload.remaining', { h: hours(remaining) })}</span>}
+        {c.uncommitted != null && c.uncommitted < 0 ? <span className={cn('ml-1.5 font-semibold', tone === 'bad' ? 'text-bad' : 'text-warn')}><span aria-hidden>{tone === 'bad' ? '■' : '▲'} </span>{figure}</span>
+          : figure && <span className="ml-1.5 text-muted-foreground">{figure}</span>}
       </p>
       {(c.confirmed > 0 || c.hours > 0) && (
         <p className="text-xs/[18px] text-muted-foreground tabular-nums">{[c.confirmed > 0 && t('workload.reserved', { h: hours(c.confirmed) }), c.hours > 0 && t('workload.forecast', { h: hours(c.hours) })].filter(Boolean).join(' · ')}</p>
@@ -500,13 +504,14 @@ function DensityMenu() {
 
 /** The method in plain words (§12.15 step 4), so nobody over-reads the numbers. */
 function Method({ thresholds }: { thresholds?: Thresholds }) {
+  const named = useFlag('figure_names')
   return (
     <Popover>
       <PopoverTrigger asChild><Button variant="outline" size="icon" aria-label={t('workload.method')} title={t('workload.method')}><Info className="size-4" aria-hidden /></Button></PopoverTrigger>
       <PopoverContent className="w-[28rem] max-w-[calc(100vw-2rem)] space-y-2 text-sm" align="end">
         <p>{t('workload.about')}</p>
         <p className="font-semibold">{t('workload.methodTitle')}</p>
-        <ul className="list-disc space-y-1.5 pl-4">{[1, 2, 3, 4, 5, 6].map((n) => <li key={n}>{t(`workload.method${n}`)}</li>)}</ul>
+        <ul className="list-disc space-y-1.5 pl-4">{[1, 2, 3, 4, 5, 6].map((n) => <li key={n}>{t(n === 5 && named ? 'workload.method5Named' : `workload.method${n}`)}</li>)}</ul>
         <p className="pt-1 font-semibold">{t('workload.legend')}</p>
         <Legend thresholds={thresholds} />
       </PopoverContent>

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { get, qs } from '@/lib/api'
-import { useMe } from '@/lib/auth'
+import { useFlag, useMe } from '@/lib/auth'
 import { addDays, hours } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { accentOf, cn } from '@/lib/utils'
@@ -62,12 +62,15 @@ export function usePeopleCapacity(week: string | undefined, open: boolean, ids: 
  *  as Workload and the Planner do (FR-CAP-06, AC-PLN-12). */
 export function CapacityFigure({ cell }: { cell?: CapacityCell }) {
   const description = useId()
+  const named = useFlag('figure_names')
   if (!cell) return null
+  // §45.3 (flag.figure_names): a figure that is not partial carries the remaining-capacity basis as its tooltip and description.
+  const basis = cell.partial ? t('workload.partial') : named ? t('people.freeBasis') : undefined
   const free = cell.partial ? t('workload.partialChip') : cell.remaining < 0 ? t('people.overBy', { h: hours(-cell.remaining) }) : t('people.free', { h: hours(cell.remaining) })
   return (
-    <span data-capacity aria-describedby={cell.partial ? description : undefined} title={cell.partial ? t('workload.partial') : undefined} className={cn('shrink-0 text-xs tabular-nums', cell.remaining < 0 && !cell.partial ? 'font-medium text-warn' : 'text-muted-foreground')}>
+    <span data-capacity aria-describedby={basis ? description : undefined} title={basis} className={cn('shrink-0 text-xs tabular-nums', cell.remaining < 0 && !cell.partial ? 'font-medium text-warn' : 'text-muted-foreground')}>
       {free}{!cell.partial && cell.timeAway > 0 && ` · ${t('people.away', { h: hours(cell.timeAway) })}`}
-      {cell.partial && <span id={description} className="sr-only">{t('workload.partial')}</span>}
+      {basis && <span id={description} className="sr-only">{basis}</span>}
     </span>
   )
 }

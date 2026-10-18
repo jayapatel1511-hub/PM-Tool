@@ -12,10 +12,11 @@ const weeks = ['2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19', '2026-10-
 // every fixture cell keeps its shade (AC-FIG-05).
 const band = pct => pct > 110 ? 'over' : pct > 90 ? 'near' : pct >= 40 ? 'within' : 'light';
 const shadeBefore = pct => pct > 110 ? 'bg-bad-bg' : pct > 90 ? 'bg-warn-bg' : pct >= 40 ? 'bg-ok-bg/50' : null;
-const cells = (set) => weeks.map((week, i) => { const c = { week, hours: 0, pct: 0, available: 40, confirmed: 0, proposed: 0, committed: 0, ...set[i] }; return { ...c, band: band(c.pct) } });
+// `uncommitted` is the server's FR-FIG-03 value: available − committed, null on a partial row unless negative.
+const cells = (set) => weeks.map((week, i) => { const c = { week, hours: 0, pct: 0, available: 40, confirmed: 0, proposed: 0, committed: 0, ...set[i] }; const u = c.available - c.committed; return { ...c, band: band(c.pct), uncommitted: u < 0 || !partial ? u : null } });
 const person = (pid_, name, extra) => ({ id: pid_, displayName: name, supervisorId: sam, supervisorName: 'Sam Supervisor', capacity: 40, capacityOverride: false, noDueDate: 0,
   openTasks: 2, unestimated: 0, overdue: 0, projects: 1, overAssigned: false, underAssigned: false, cluster: false, canSetCapacity: true, indicator: 'ok', ...extra });
-let partial = true, forbidden = false;
+let partial = true, forbidden = false, figureNames = false;
 const grid = (sort) => {
   const people = [
     person(alex, 'Alex Overloaded', { overAssigned: true, indicator: 'over', partialScope: partial, overWeek: weeks[0],
@@ -44,7 +45,7 @@ let server, browser;
     const u = new URL(route.request().url()), p = u.pathname.replace('/api/v1/', '')
     let data = {}, status = 200
     if (p === 'config') data = { authMode: 'Development', entra: {} }
-    else if (p === 'me') data = me
+    else if (p === 'me') data = { ...me, flags: { figure_names: figureNames } }
     else if (p === 'me/sign-in') data = {}
     else if (p === 'me/notifications/pulse') data = { stamp: '0' }
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
@@ -105,6 +106,26 @@ let server, browser;
   partial = false; await page.reload(); await grid1.waitFor();
   assert.match(await row('Jill Partial').innerText(), /Remaining 20 h/);
   assert.equal(await page.getByRole('status').filter({ hasText: 'Partial view' }).count(), 0);
+  // flag.figure_names off: today's "Remaining", no basis line, no grid description, no "at most" wording.
+  assert.equal(await page.getByText('Uncommitted', { exact: false }).count(), 0, 'No Uncommitted wording with the flag off');
+  assert.equal(await grid1.getAttribute('aria-describedby'), null);
+  assert.doesNotMatch(await grid1.innerText(), /at most/);
+
+  // AC-FIG-03, AC-FIG-04 (flag on): "Uncommitted N h" from the server value, no cell says "Remaining", the grid's accessible
+  // description is the basis line, and the Method popover's committed-load step names Uncommitted.
+  figureNames = true; partial = true; await page.reload(); await grid1.waitFor();
+  const named = { alex: await row('Alex Overloaded').innerText(), jill: await row('Jill Partial').innerText() };
+  assert.match(named.alex, /Uncommitted −12 h/); assert.doesNotMatch(named.jill, /Uncommitted 20 h/, 'A partial row still withholds spare capacity');
+  assert.equal(await grid1.locator('[data-band]').filter({ hasText: 'Remaining' }).count(), 0, 'No Workload cell says Remaining');
+  const basis = 'Uncommitted = available − committed load (confirmed reservations and forecast task work). Planning entries are not counted.';
+  assert.equal(await page.locator(`[id="${await grid1.getAttribute('aria-describedby')}"]`).textContent(), basis);
+  await page.getByRole('button', { name: 'How this is calculated' }).click();
+  assert.match(await page.getByRole('dialog').innerText(), /Uncommitted is available capacity minus committed load/);
+  await page.keyboard.press('Escape'); await page.getByRole('list', { name: 'How to read a week' }).waitFor({ state: 'detached' });
+  const namedViolations = await axe();
+  partial = false; await page.reload(); await grid1.waitFor();
+  assert.match(await row('Jill Partial').innerText(), /Uncommitted 20 h/);
+  figureNames = false;
 
   // Denied access explains itself and offers no export or saved views.
   forbidden = true; await page.reload();
@@ -139,8 +160,8 @@ let server, browser;
   dialog = await roleForm(); await dialog.getByLabel('Role').waitFor();
   assert.equal(await dialog.getByLabel('Reason').count(), 0, 'No reason field without needsReason, whatever the status');
 
-  const report = { scope: 'Chromium UI with mocked API; server rules are tested separately', errors, unmockedGets: [...new Set(unknown)], desktopViolations, panelViolations };
+  const report = { scope: 'Chromium UI with mocked API; server rules are tested separately', errors, unmockedGets: [...new Set(unknown)], desktopViolations, namedViolations, panelViolations };
   console.log(JSON.stringify(report));
   assert.deepEqual(errors, []); assert.deepEqual(report.unmockedGets, [], 'Every API call is mocked');
-  assert.deepEqual(desktopViolations, [], 'Workload accessibility'); assert.deepEqual(panelViolations, [], 'Allocation panel accessibility');
+  assert.deepEqual(desktopViolations, [], 'Workload accessibility'); assert.deepEqual(namedViolations, [], 'Workload accessibility with flag.figure_names on'); assert.deepEqual(panelViolations, [], 'Allocation panel accessibility');
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(async () => { await browser?.close(); server?.kill() });

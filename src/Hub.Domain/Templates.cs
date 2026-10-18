@@ -23,11 +23,13 @@ public sealed record TemplatePlan(IReadOnlyList<PlannedMilestone> Milestones, IR
 /// otherwise its anchor and offset decide (project start, or the milestone before it). A deliverable is due its target
 /// milestone's date plus its offset; a task its deliverable's due date plus its offset, or the project start plus its
 /// offset when it has no deliverable. Anything whose basis is undated is undated. Only the chosen disciplines' items are
-/// planned, and a dependency is kept only when both of its tasks are.
+/// planned, and a dependency is kept only when both of its tasks are. With a calendar, offsets count its working days
+/// (FR-RCV-12); without one they count calendar days exactly as before (FR-RCV-11).
 public static class TemplatePlanner
 {
-    public static TemplatePlan Plan(TemplateSnap t, DateOnly? start, IReadOnlyDictionary<Guid, DateOnly?> typed, IReadOnlySet<Guid> disciplines)
+    public static TemplatePlan Plan(TemplateSnap t, DateOnly? start, IReadOnlyDictionary<Guid, DateOnly?> typed, IReadOnlySet<Guid> disciplines, WorkCalendar? calendar = null)
     {
+        DateOnly Shift(DateOnly d, int days) => calendar is null ? d.AddDays(days) : calendar.Add(d, days);
         var milestones = new List<PlannedMilestone>();
         DateOnly? previous = null;
         foreach (var m in t.Milestones.OrderBy(m => m.SortOrder))
@@ -37,7 +39,7 @@ public static class TemplatePlanner
             else
             {
                 var basis = m.Anchor switch { TemplateAnchor.ProjectStart => start, TemplateAnchor.PreviousMilestone => previous, _ => null };
-                var computed = basis is { } b && m.Offset is { } o ? b.AddDays(o) : (DateOnly?)null;
+                var computed = basis is { } b && m.Offset is { } o ? Shift(b, o) : (DateOnly?)null;
                 planned = new(m.Id, computed, computed is null ? DateSource.None : DateSource.Offset);
             }
             milestones.Add(planned);
@@ -46,13 +48,13 @@ public static class TemplatePlanner
         var msDate = milestones.ToDictionary(m => m.Id, m => m.Date);
 
         var deliverables = t.Deliverables.Where(d => disciplines.Contains(d.DisciplineId))
-            .Select(d => new PlannedItem(d.Id, d.MilestoneId is { } mid && msDate.GetValueOrDefault(mid) is { } md ? md.AddDays(d.Offset ?? 0) : null)).ToList();
+            .Select(d => new PlannedItem(d.Id, d.MilestoneId is { } mid && msDate.GetValueOrDefault(mid) is { } md ? Shift(md, d.Offset ?? 0) : null)).ToList();
         var delDue = deliverables.ToDictionary(d => d.Id, d => d.Due);
 
         var tasks = t.Tasks.Where(k => disciplines.Contains(k.DisciplineId) && (k.DeliverableId is null || delDue.ContainsKey(k.DeliverableId.Value)))
             .Select(k => new PlannedItem(k.Id, k.DeliverableId is { } did
-                ? delDue[did] is { } due ? due.AddDays(k.Offset ?? 0) : null
-                : start is { } s && k.Offset is { } off ? s.AddDays(off) : null)).ToList();
+                ? delDue[did] is { } due ? Shift(due, k.Offset ?? 0) : null
+                : start is { } s && k.Offset is { } off ? Shift(s, off) : null)).ToList();
         var kept = tasks.Select(k => k.Id).ToHashSet();
 
         return new TemplatePlan(milestones, deliverables, tasks, t.Dependencies.Where(d => kept.Contains(d.Predecessor) && kept.Contains(d.Successor)).ToList());

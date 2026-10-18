@@ -89,4 +89,66 @@ public sealed class TemplatePlannerTests
         Assert.DoesNotContain(noCivil.Tasks, x => x.Id == PmReview); // a PM task on a Civil deliverable leaves with the deliverable
         Assert.Equal(new DateOnly(2027, 5, 10), without.Tasks.Single(x => x.Id == PmReview).Due);
     }
+
+    // Packet 045 S06 (§49.4): optional working-day offsets. 2026-10-09 is a Friday.
+    static readonly DateOnly Fri = new(2026, 10, 9), Sat = new(2026, 10, 10), Mon = new(2026, 10, 12), Tue = new(2026, 10, 13);
+    static readonly Guid A = Guid.NewGuid(), B = Guid.NewGuid(), Dl = Guid.NewGuid(), Dl0 = Guid.NewGuid(), Tk = Guid.NewGuid(), Tk0 = Guid.NewGuid(), Loose1 = Guid.NewGuid();
+    static TemplateSnap Small(int? msOffset, int? delOffset, int? taskOffset) => new(
+        [new(A, 1, TemplateAnchor.ProjectStart, msOffset), new(B, 2, TemplateAnchor.PreviousMilestone, 1)],
+        [new(Dl, Pm, A, delOffset), new(Dl0, Pm, A, null)],
+        [new(Tk, Pm, Dl, taskOffset), new(Tk0, Pm, Dl, 0), new(Loose1, Pm, null, 1)],
+        []);
+    static readonly HashSet<Guid> PmOnly = [Pm];
+    static readonly Dictionary<Guid, DateOnly?> NoTyped = [];
+
+    [Fact]
+    public void Calendar_days_are_unchanged_without_a_calendar() // FR-RCV-11, AC-RCV-14
+    {
+        var before = TemplatePlanner.Plan(Snap, Start, Contract, Six);
+        var after = TemplatePlanner.Plan(Snap, Start, Contract, Six, null);
+        Assert.Equal(before.Milestones, after.Milestones);
+        Assert.Equal(before.Deliverables, after.Deliverables);
+        Assert.Equal(before.Tasks, after.Tasks);
+        var everyDay = new WorkCalendar(scheduled: _ => true); // a calendar where every day works counts like calendar days
+        Assert.Equal(before.Tasks, TemplatePlanner.Plan(Snap, Start, Contract, Six, everyDay).Tasks);
+        Assert.Equal(before.Deliverables, TemplatePlanner.Plan(Snap, Start, Contract, Six, everyDay).Deliverables);
+    }
+
+    [Fact]
+    public void Working_days_skip_weekends_and_office_holidays() // FR-RCV-12, AC-RCV-15
+    {
+        var plan = TemplatePlanner.Plan(Small(1, 1, 1), Fri, NoTyped, PmOnly, WorkCalendar.Weekdays);
+        Assert.Equal((Mon, DateSource.Offset), (plan.Milestones[0].Date!.Value, plan.Milestones[0].Source));
+        Assert.Equal(Tue, plan.Milestones[1].Date); // previous milestone + 1 working day
+        Assert.Equal(Tue, plan.Deliverables.Single(x => x.Id == Dl).Due);
+        Assert.Equal(new DateOnly(2026, 10, 14), plan.Tasks.Single(x => x.Id == Tk).Due);
+        Assert.Equal(Mon, plan.Tasks.Single(x => x.Id == Loose1).Due); // no deliverable: start + 1 working day
+
+        var holiday = TemplatePlanner.Plan(Small(1, 1, 1), Fri, NoTyped, PmOnly, new WorkCalendar([Mon]));
+        Assert.Equal(Tue, holiday.Milestones[0].Date); // the Monday is an office holiday
+        Assert.Equal(Tue, holiday.Tasks.Single(x => x.Id == Loose1).Due);
+        Assert.Equal(Sat, TemplatePlanner.Plan(Small(1, 1, 1), Fri, NoTyped, PmOnly).Milestones[0].Date); // calendar days: Fri + 1 is Saturday
+    }
+
+    [Fact]
+    public void Negative_offsets_count_back_to_a_working_day() // FR-RCV-12, AC-RCV-16
+    {
+        var plan = TemplatePlanner.Plan(Small(1, -2, -1), Fri, new Dictionary<Guid, DateOnly?> { [A] = Tue }, PmOnly, WorkCalendar.Weekdays);
+        Assert.Equal(Fri, plan.Deliverables.Single(x => x.Id == Dl).Due); // Tuesday − 2 working days
+        Assert.Equal(new DateOnly(2026, 10, 8), plan.Tasks.Single(x => x.Id == Tk).Due);
+        Assert.Equal(new DateOnly(2026, 10, 8), TemplatePlanner.Plan(Small(1, -2, -1), Fri, new Dictionary<Guid, DateOnly?> { [A] = Tue }, PmOnly, new WorkCalendar([Mon])).Deliverables.Single(x => x.Id == Dl).Due);
+        Assert.Equal(new DateOnly(2026, 10, 11), TemplatePlanner.Plan(Small(1, -2, -1), Fri, new Dictionary<Guid, DateOnly?> { [A] = Tue }, PmOnly).Deliverables.Single(x => x.Id == Dl).Due); // calendar days unchanged
+    }
+
+    [Fact]
+    public void Offset_zero_and_typed_dates_never_move() // FR-RCV-12, AC-RCV-16
+    {
+        var plan = TemplatePlanner.Plan(Small(1, 0, 0), Fri, new Dictionary<Guid, DateOnly?> { [A] = Sat }, PmOnly, WorkCalendar.Weekdays);
+        Assert.Equal((Sat, DateSource.Contract), (plan.Milestones[0].Date!.Value, plan.Milestones[0].Source)); // typed Saturday stays
+        Assert.Equal(Sat, plan.Deliverables.Single(x => x.Id == Dl).Due); // offset 0
+        Assert.Equal(Sat, plan.Deliverables.Single(x => x.Id == Dl0).Due); // no offset
+        Assert.Equal(Sat, plan.Tasks.Single(x => x.Id == Tk0).Due);
+        Assert.Equal(Mon, plan.Milestones[1].Date); // a later offset still lands on a working day
+        Assert.Equal(Sat, WorkCalendar.Weekdays.Add(Sat, 0));
+    }
 }

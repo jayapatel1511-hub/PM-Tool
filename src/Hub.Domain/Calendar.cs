@@ -18,11 +18,12 @@ public sealed class WorkCalendar(IEnumerable<DateOnly>? holidays = null, Func<Da
         return n;
     }
 
-    /// The date `days` working days after `from`.
+    /// The date `days` working days after `from`, or before it when `days` is negative; 0 keeps `from` (FR-RCV-12).
     public DateOnly Add(DateOnly from, int days)
     {
         var d = from;
-        while (days > 0) { d = d.AddDays(1); if (IsWorkingDay(d)) days--; }
+        var step = Math.Sign(days);
+        while (days != 0) { d = d.AddDays(step); if (IsWorkingDay(d)) days -= step; }
         return d;
     }
 

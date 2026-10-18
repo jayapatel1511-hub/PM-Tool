@@ -8,17 +8,21 @@ const port = process.env.PORT ?? '5177', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const sam = id(1), alex = id(2), jill = id(3), pid = id(10), proposed = id(20), confirmed = id(21);
 const weeks = ['2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02', '2026-11-09', '2026-11-16'];
-const cells = (set) => weeks.map((week, i) => ({ week, hours: 0, pct: 0, available: 40, confirmed: 0, proposed: 0, committed: 0, ...set[i] }));
+// The server's band at the default thresholds (FR-FIG-05); `shadeBefore` is the client rule it replaced, kept here only to prove
+// every fixture cell keeps its shade (AC-FIG-05).
+const band = pct => pct > 110 ? 'over' : pct > 90 ? 'near' : pct >= 40 ? 'within' : 'light';
+const shadeBefore = pct => pct > 110 ? 'bg-bad-bg' : pct > 90 ? 'bg-warn-bg' : pct >= 40 ? 'bg-ok-bg/50' : null;
+const cells = (set) => weeks.map((week, i) => { const c = { week, hours: 0, pct: 0, available: 40, confirmed: 0, proposed: 0, committed: 0, ...set[i] }; return { ...c, band: band(c.pct) } });
 const person = (pid_, name, extra) => ({ id: pid_, displayName: name, supervisorId: sam, supervisorName: 'Sam Supervisor', capacity: 40, capacityOverride: false, noDueDate: 0,
   openTasks: 2, unestimated: 0, overdue: 0, projects: 1, overAssigned: false, underAssigned: false, cluster: false, canSetCapacity: true, indicator: 'ok', ...extra });
 let partial = true, forbidden = false;
 const grid = (sort) => {
   const people = [
-    person(alex, 'Alex Overloaded', { overAssigned: true, indicator: 'over', partialScope: partial,
+    person(alex, 'Alex Overloaded', { overAssigned: true, indicator: 'over', partialScope: partial, overWeek: weeks[0],
       cells: cells([{ committed: 52, pct: 130, hours: 52 }, { committed: 50, available: 32, pct: 156, confirmed: 30, hours: 44, proposed: 20 }]) }),
-    person(jill, 'Jill Partial', { partialScope: partial, unestimated: 2, cells: cells([{ committed: 20, pct: 50, hours: 20 }]) }),
+    person(jill, 'Jill Partial', { partialScope: partial, unestimated: 2, cells: cells([{ committed: 20, pct: 50, hours: 20 }, {}, { committed: 38, pct: 95, hours: 38 }]) }),
   ]
-  return { weeks, today: '2026-10-03', currentWeek: weeks[0], defaultCapacity: 40, people: sort === 'name' ? people.reverse() : people }
+  return { weeks, today: '2026-10-03', currentWeek: weeks[0], defaultCapacity: 40, thresholds: { overPct: 110, amberPct: 90, underPct: 40 }, people: sort === 'name' ? people.reverse() : people }
 }
 const me = { id: sam, displayName: 'Sam Supervisor', email: 'sam@hub.test', roles: [], systemRoles: ['Supervisor'],
   capabilities: { createProject: false, createTask: true, portfolio: false, workload: true, staff: true, allStaff: false, admin: false, templates: false, readOnly: false, directReports: 2 },
@@ -75,8 +79,19 @@ let server, browser;
   const alexRow = await row('Alex Overloaded').innerText(), jillRow = await row('Jill Partial').innerText();
   assert.match(alexRow, /Remaining −12 h/, 'Negative remaining keeps a true minus sign');
   assert.match(alexRow, /\+20 h proposed · not counted/, 'Proposed requests are labelled and kept out of load');
-  assert.match(alexRow, /Over-assigned/); assert.match(jillRow, /2 unestimated/, 'Unestimated work sits beside the hours');
+  assert.match(alexRow, /Over-assigned · \S/, 'Over-assigned names the server overWeek (AC-FIG-07)'); assert.match(jillRow, /2 unestimated/, 'Unestimated work sits beside the hours');
   assert.doesNotMatch(jillRow, /Remaining 20 h/, 'A partial view never claims spare capacity');
+  // AC-FIG-05: every fixture cell keeps the shade the client rule gave it before bands came from the server.
+  for (const p of grid().people) {
+    const shown = await row(p.displayName).locator('[data-band]').evaluateAll(els => els.map(e => e.className))
+    assert.equal(shown.length, p.cells.length)
+    p.cells.forEach((c, i) => { const want = shadeBefore(c.pct); assert.ok(want ? shown[i].split(' ').includes(want) : !/bg-(bad|warn|ok)-bg/.test(shown[i]), `${p.displayName} week ${i} keeps its shade`) })
+  }
+  // FR-FIG-06: the legend in the Method popover names the thresholds the server returned.
+  await page.getByRole('button', { name: 'How this is calculated' }).click();
+  const legend = await page.getByRole('list', { name: 'How to read a week' }).innerText();
+  assert.match(legend, /amber to 110 % load/); assert.match(legend, /light below 40 % load, calm to 90 %, amber to 110 %, red above/);
+  await page.keyboard.press('Escape'); await page.getByRole('list', { name: 'How to read a week' }).waitFor({ state: 'detached' });
   const accent = await row('Alex Overloaded').locator('[data-accent]').first().getAttribute('data-accent');
   const desktopViolations = await axe();
 

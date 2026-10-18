@@ -21,26 +21,29 @@ public static class WorkloadEndpoints
         DateOnly? StartDate, DateOnly? DueDate, string Status, int RowVersion);
 
     public sealed record PersonLoad(Guid Id, string DisplayName, Guid? SupervisorId, string? SupervisorName, decimal Capacity, bool CapacityOverride,
-        IReadOnlyList<(DateOnly Week, decimal Hours, decimal Pct, decimal Available, decimal Confirmed, decimal Proposed, decimal Committed)> Cells,
+        IReadOnlyList<(DateOnly Week, decimal Hours, decimal Pct, decimal Available, decimal Confirmed, decimal Proposed, decimal Committed, Workload.Band Band)> Cells,
         decimal NoDueDate, int OpenTasks, int Unestimated, int Overdue, int Projects,
         bool OverAssigned, bool UnderAssigned, bool Cluster, bool CanSetCapacity, bool PartialScope,
-        Guid? OfficeId = null, string? JobTitle = null, Guid? HomeDisciplineId = null);
+        Guid? OfficeId = null, string? JobTitle = null, Guid? HomeDisciplineId = null, DateOnly? OverWeek = null);
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/workload", async ([AsParameters] WorkloadQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (weeks, people, today) = await Grid(f, access, db, me, store, clock);
+            var s = await store.Get(db);
             return new
             {
-                Weeks = weeks, Today = today, CurrentWeek = Workload.WeekOf(today), DefaultCapacity = (await store.Get(db)).DefaultWeeklyCapacityHours,
+                Weeks = weeks, Today = today, CurrentWeek = Workload.WeekOf(today), DefaultCapacity = s.DefaultWeeklyCapacityHours,
+                // The thresholds in use (FR-FIG-06), so the legend and the Method text name them.
+                Thresholds = new { OverPct = s.WorkloadOverPct, AmberPct = s.WorkloadAmberPct, UnderPct = s.WorkloadUnderPct },
                 People = people.Select(p => new
                 {
                     p.Id, p.DisplayName, p.SupervisorId, p.SupervisorName, p.OfficeId, p.JobTitle, p.HomeDisciplineId, p.Capacity, p.CapacityOverride,
                     Cells = p.Cells.Select(c => new { c.Week, Hours = Math.Round(c.Hours, 1), c.Pct,
                         Available = Math.Round(c.Available, 1), Confirmed = Math.Round(c.Confirmed, 1),
-                        Proposed = Math.Round(c.Proposed, 1), Committed = Math.Round(c.Committed, 1) }), NoDueDate = Math.Round(p.NoDueDate, 1),
-                    p.OpenTasks, p.Unestimated, p.Overdue, p.Projects, p.OverAssigned, p.UnderAssigned, p.Cluster, p.CanSetCapacity, p.PartialScope,
+                        Proposed = Math.Round(c.Proposed, 1), Committed = Math.Round(c.Committed, 1), Band = c.Band.ToString().ToLowerInvariant() }), NoDueDate = Math.Round(p.NoDueDate, 1),
+                    p.OpenTasks, p.Unestimated, p.Overdue, p.Projects, p.OverAssigned, p.UnderAssigned, p.Cluster, p.CanSetCapacity, p.PartialScope, p.OverWeek,
                     Indicator = p.OverAssigned ? "over" : p.UnderAssigned ? "under" : "ok",
                 }),
                 UnfilledRoles = await UnfilledRoles(f, weeks, access, db),
@@ -169,19 +172,22 @@ public static class WorkloadEndpoints
                     var day = w.AddDays(i);
                     return availability[(u.Id, day)].Available;
                 });
-                return (Week: w, Hours: Hours(w), Pct: Workload.Pct(committed, available), Available: available,
-                    Confirmed: weekReservations.Sum(r => r.ReservedHours), Proposed: proposed, Committed: committed);
+                var pct = Workload.Pct(committed, available);
+                return (Week: w, Hours: Hours(w), Pct: pct, Available: available,
+                    Confirmed: weekReservations.Sum(r => r.ReservedHours), Proposed: proposed, Committed: committed, Band: Workload.LoadBand(pct, s));
             }).ToList();
             var thisWeek = cells.FirstOrDefault(c => c.Week == now).Pct;
             var nextWeek = cells.FirstOrDefault(c => c.Week == now.AddDays(7)).Pct;
+            // FR-FIG-06: the first of the current and next week whose band is Over.
+            DateOnly? overWeek = cells.Where(c => (c.Week == now || c.Week == now.AddDays(7)) && c.Band == Workload.Band.Over).Select(c => (DateOnly?)c.Week).FirstOrDefault();
             var unestimated = mine.Count(t => t.EstimatedHours is null);
             result.Add(new PersonLoad(u.Id, u.DisplayName, u.SupervisorId, u.Supervisor, capacity, u.WeeklyCapacityHours is not null,
                 cells, loads.Sum(l => l.NoDueDate), mine.Count, unestimated,
-                loads.Count(l => l.Overdue), mine.Select(t => t.ProjectId).Distinct().Count(), Workload.OverAssigned(thisWeek, nextWeek),
-                access.SeesAllRestricted && f.ProjectId is null && Workload.UnderAssigned(thisWeek, nextWeek, unestimated),
+                loads.Count(l => l.Overdue), mine.Select(t => t.ProjectId).Distinct().Count(), Workload.OverAssigned(thisWeek, nextWeek, s.WorkloadOverPct),
+                access.SeesAllRestricted && f.ProjectId is null && Workload.UnderAssigned(thisWeek, nextWeek, unestimated, s.WorkloadUnderPct),
                 Workload.DeadlineCluster(mine.Where(t => t.DueDate is not null).Select(t => (t.DueDate!.Value, t.ProjectId)), today),
                 Permissions.ActOnStaff(actor, u.SupervisorId).Ok, !access.SeesAllRestricted || f.ProjectId is not null,
-                u.OfficeId, u.JobTitle, u.HomeDisciplineId));
+                u.OfficeId, u.JobTitle, u.HomeDisciplineId, overWeek));
         }
         result = f.Indicator switch
         {

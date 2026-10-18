@@ -25,15 +25,18 @@ import { cn } from '@/lib/utils'
 import { GROUP_BY, GROUP_LABEL, groupPeople } from '@/components/planner/labels'
 import { MenuSelect, errorText } from './projects/Tasks'
 
-interface Cell { week: string; hours: number; pct: number; available: number; confirmed: number; proposed: number; committed: number }
+/** The server's load band for the week (FR-FIG-05), from the organisation's workload thresholds. */
+type Band = 'over' | 'near' | 'within' | 'light'
+interface Cell { week: string; hours: number; pct: number; available: number; confirmed: number; proposed: number; committed: number; band: Band }
+interface Thresholds { overPct: number; amberPct: number; underPct: number }
 interface PersonRow {
   id: string; displayName: string; supervisorId?: string; supervisorName?: string; capacity: number; capacityOverride: boolean; cells: Cell[]; noDueDate: number
-  openTasks: number; unestimated: number; overdue: number; projects: number; overAssigned: boolean; underAssigned: boolean; cluster: boolean; canSetCapacity: boolean; partialScope: boolean; indicator: string
+  openTasks: number; unestimated: number; overdue: number; projects: number; overAssigned: boolean; underAssigned: boolean; cluster: boolean; canSetCapacity: boolean; partialScope: boolean; indicator: string; overWeek?: string | null
   officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null
 }
 /** Open demand with no person named yet (FR-ROLE-04): shown apart from people, never in anyone's load. */
 interface UnfilledRole { id: string; projectId: string; projectNumber: string; projectName: string; roleLabel: string; disciplineName?: string | null; fromDate: string; throughDate: string; plannedHours: number; cells: { week: string; hours: number }[] }
-interface Grid { weeks: string[]; today: string; currentWeek: string; defaultCapacity: number; people: PersonRow[]; unfilledRoles?: UnfilledRole[] }
+interface Grid { weeks: string[]; today: string; currentWeek: string; defaultCapacity: number; thresholds: Thresholds; people: PersonRow[]; unfilledRoles?: UnfilledRole[] }
 interface TaskLoadRow { id: string; key: string; name: string; status: string; dueDate?: string; estimatedHours?: number | null; progressPct: number; remaining?: number | null; overdue: boolean; noDueDate: number; rowVersion: number; weeks: number[]; canReassign: boolean }
 interface PersonTasks { weeks: string[]; projects: { id: string; projectNumber: string; name: string; tasks: TaskLoadRow[] }[] }
 
@@ -41,10 +44,10 @@ const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'projectId', 'indic
 const INDICATORS = ['over', 'under', 'cluster', 'unestimated'] as const
 const SORTS = ['load', 'overdue', 'tasks', 'name'] as const
 
-/** The row's indicators, most severe first (§41 R7). Over-assigned names the week that tripped it (this or next week);
- *  Under-assigned is judged on this week and next week together, so it names both. */
+/** The row's indicators, most severe first (§41 R7). Over-assigned names the week that tripped it (this or next week, from the
+ *  server's `overWeek`); Under-assigned is judged on this week and next week together, so it names both. */
 function personSignals(p: PersonRow, currentWeek: string): Signal[] {
-  const overWeek = p.cells.find((c) => (c.week === currentWeek || c.week === addDays(currentWeek, 7)) && c.pct > 110)?.week
+  const overWeek = p.overWeek
   const underWeeks = `${shortDate(currentWeek)}, ${shortDate(addDays(currentWeek, 7))}`
   return ([
     p.overAssigned && { key: 'over', tone: 'bad', label: overWeek ? t('signal.withWeek', { label: t('workload.ind.over'), week: shortDate(overWeek) }) : t('workload.ind.over') },
@@ -54,8 +57,8 @@ function personSignals(p: PersonRow, currentWeek: string): Signal[] {
   ] as (Signal | false)[]).filter(Boolean) as Signal[]
 }
 
-/** Heat shading by load with the number always shown (§13.11): light under 40 %, calm to 90 %, amber to 110 %, red above. */
-const loadTone = (pct: number) => (pct > 110 ? 'bad' : pct > 90 ? 'warn' : pct >= 40 ? 'ok' : 'idle')
+/** Heat shading by the server's load band with the number always shown (§13.11, FR-FIG-05); the thresholds are settings. */
+const TONE = { over: 'bad', near: 'warn', within: 'ok', light: 'idle' } as const
 const SHADE = { bad: 'bg-bad-bg', warn: 'bg-warn-bg', ok: 'bg-ok-bg/50', idle: '' }
 const METER = { bad: 'bg-bad', warn: 'bg-warn', ok: 'bg-ok', idle: 'bg-ok' }
 
@@ -107,7 +110,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
 
   return (
     // Without access the page holds only the notice, so the description and the method help, which explain data the person cannot see, are left out.
-    <Page {...header} subtitle={forbidden ? undefined : header.subtitle} actions={forbidden ? undefined : <><Method /><ViewMenu listType="workload" /><ExportMenu path="workload/export" params={filters} name="workload" /><DensityMenu /></>}>
+    <Page {...header} subtitle={forbidden ? undefined : header.subtitle} actions={forbidden ? undefined : <><Method thresholds={q.data?.thresholds} /><ViewMenu listType="workload" /><ExportMenu path="workload/export" params={filters} name="workload" /><DensityMenu /></>}>
       <WorkspaceTabs />
       {forbidden ? <Notice icon={Lock} title={t('workload.noAccessTitle')}
         action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('workload.noAccess')}</Notice> : <>
@@ -284,11 +287,11 @@ function UnfilledRoles({ roles, weeks, currentWeek }: { roles: UnfilledRole[]; w
 /** One person-week: committed load of available capacity, then what it is made of. Proposed requests sit outside the
  *  load (dotted), and a partial view never claims spare capacity (FR-CAP-04, FR-CAP-06). */
 function WeekCell({ c, capacity, partial }: { c: Cell; capacity: number; partial: boolean }) {
-  const tone = loadTone(c.pct)
+  const tone = TONE[c.band]
   const remaining = c.available - c.committed
   const scale = Math.max(c.available, c.committed + c.proposed, 1)
   return (
-    <div className={cn('flex h-full min-h-28 flex-col gap-1.5 px-(--cell-px) py-(--cell-py)', SHADE[tone])}>
+    <div data-band={c.band} className={cn('flex h-full min-h-28 flex-col gap-1.5 px-(--cell-px) py-(--cell-py)', SHADE[tone])}>
       <p className="tabular-nums">
         <span className="text-lg/6 font-semibold">{hours(c.committed)}</span>
         <span className="text-xs text-muted-foreground"> <span aria-hidden>/</span><span className="sr-only">{t('workload.ofAvailable')}</span> {hours(c.available)}</span>
@@ -331,13 +334,14 @@ function Summary({ p }: { p: PersonRow }) {
   )
 }
 
-function Legend() {
+function Legend({ thresholds: th = { overPct: 110, amberPct: 90, underPct: 40 } }: { thresholds?: Thresholds }) {
   return (
     <ul aria-label={t('workload.legend')} className="space-y-1.5 text-xs/[18px] text-muted-foreground">
       <li className="flex items-center gap-1.5"><span aria-hidden className="h-1.5 w-6 rounded-full bg-ok" />{t('workload.legend.committed')}</li>
       <li className="flex items-center gap-1.5"><span aria-hidden className="h-1.5 w-6 rounded-full border border-dotted border-work bg-work-bg" />{t('workload.legend.proposed')}</li>
       <li className="flex items-center gap-1.5"><span aria-hidden className="h-3 w-0.5 bg-foreground" />{t('workload.legend.available')}</li>
-      <li className="flex items-center gap-1.5"><span aria-hidden>■ ▲</span>{t('workload.legend.over')}</li>
+      <li className="flex items-center gap-1.5"><span aria-hidden>■ ▲</span>{t('workload.legend.over', { over: th.overPct })}</li>
+      <li>{t('workload.legend.bands', { under: th.underPct, amber: th.amberPct, over: th.overPct })}</li>
     </ul>
   )
 }
@@ -495,7 +499,7 @@ function DensityMenu() {
 }
 
 /** The method in plain words (§12.15 step 4), so nobody over-reads the numbers. */
-function Method() {
+function Method({ thresholds }: { thresholds?: Thresholds }) {
   return (
     <Popover>
       <PopoverTrigger asChild><Button variant="outline" size="icon" aria-label={t('workload.method')} title={t('workload.method')}><Info className="size-4" aria-hidden /></Button></PopoverTrigger>
@@ -504,7 +508,7 @@ function Method() {
         <p className="font-semibold">{t('workload.methodTitle')}</p>
         <ul className="list-disc space-y-1.5 pl-4">{[1, 2, 3, 4, 5, 6].map((n) => <li key={n}>{t(`workload.method${n}`)}</li>)}</ul>
         <p className="pt-1 font-semibold">{t('workload.legend')}</p>
-        <Legend />
+        <Legend thresholds={thresholds} />
       </PopoverContent>
     </Popover>
   )

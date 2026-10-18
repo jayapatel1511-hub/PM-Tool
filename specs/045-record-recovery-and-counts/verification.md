@@ -21,10 +21,10 @@ Slice builds in progress; see the build notes below.
 | AC-RCV-15 | S06 | PASS (local), domain level |
 | AC-RCV-16 | S06 | PASS (local), domain level |
 | AC-RCV-17 | S07, S08, S12 | UNRUN |
-| AC-RCV-18 | S09, S10, S12 | UNRUN |
+| AC-RCV-18 | S09, S10, S12 | PARTIAL: S09 API level PASS (local); interface is S10, flag removal S12 |
 | AC-RCV-19 | S11, S12 | UNRUN |
-| AC-RCV-20 | S09, S11 | UNRUN |
-| AC-RCV-21 | S09 | UNRUN |
+| AC-RCV-20 | S09, S11 | PARTIAL: S09 API level PASS (local); export columns are S11 |
+| AC-RCV-21 | S09 | PASS (local), API level |
 
 ## Build 045-S01
 
@@ -62,3 +62,14 @@ Domain only, no flag (nothing passes a calendar until S07). `WorkCalendar.Add` i
 - AC-RCV-16: PASS (local), domain level. `Negative_offsets_count_back_to_a_working_day` (Tuesday -2 lands on the Friday before) and `Offset_zero_and_typed_dates_never_move` (a typed Saturday and offsets of 0 or none stay on it).
 - Assumptions: default 045-D9 (the template working-day calendar is weekdays without organisation and office holidays, independent of `working_days_enabled`; the domain function takes whatever `WorkCalendar` the caller builds, and S07 builds it). `WorkCalendar.Add` was changed in place rather than adding a second method.
 - Left for Jay: nothing for this slice.
+
+## Build 045-S09
+
+Server side of the status rollups behind `flag.status_rollups` (declared in `Flags.cs`; the constant is `DashboardEndpoints.RollupsFlag`, reused by Portfolio). `/projects/{id}/dashboard` gains `disciplineStatus`, keyed by discipline id like `disciplineDue14`, with four `{Value, Link}` segments (`notStarted`, `inProgress`, `issued`, `onHold`, in bar order), each counted by the same deliverable list query its link opens. Portfolio rows gain `overdueDeliverables`, one grouped query using the deliverable list's `indicator=overdue` filter over the rows the viewer can see; saved reports reusing Portfolio rows pick it up while the flag is on. With the flag off neither field appears.
+
+- Checks on the merged tree (clean merge, no conflicts): `dotnet build Hub.slnx` 0 errors; `dotnet test --filter CountLinkTests|PortfolioTests|DashboardTests|ReportsTests|Flag` 37 passed, 0 failed. The builder ran the full suite on the slice branch (1222 passed); the coverage gate was not run. No web changes.
+- AC-RCV-18: PARTIAL. API level PASS (local): `Status_segments_equal_their_filtered_registers_and_leave_out_Cancelled` (segments 2, 3, 4 and 1, Cancelled left out; each link opens exactly that many rows for the PM, a Discipline Lead and a Supervisor, with and without a discipline scope; field absent with the flag off). Interface is S10; flag removal S12.
+- AC-RCV-20: PARTIAL. API level PASS (local): `Overdue_deliverables_counts_overdue_not_at_risk` (3 overdue, equal to the `indicator=overdue` list; the At Risk list has 5; Issued never counted; absent with the flag off). Export columns are S11.
+- AC-RCV-21: PASS (local), API level. `Rollups_ignore_projects_the_viewer_cannot_see`: a Supervisor not on a Restricted project gets no row or figure from it and its dashboard answers 404; an Executive sees both, each counting only its own deliverables.
+- Assumptions: defaults 045-D10 (status groups: Not started; In progress = In Progress, In Review, Revision Required, Ready to Issue; Issued = Issued, Accepted; On hold; Cancelled left out), 045-D12 (Portfolio figure counts Overdue, G-01, not At Risk), 045-D13 (Part D behind `flag.status_rollups`; new fields absent, not null, with the flag off). Field names `disciplineStatus` and `overdueDeliverables` are the builder's choice. `overdueDeliverables` is a plain integer with no server link, since Portfolio row links are built by the client (FR-RCV-08). The server does not return the "n of m issued" total; the client sums the four segments.
+- Left for Jay: when to turn `flag.status_rollups` on in review and pilot (flag removal is S12).

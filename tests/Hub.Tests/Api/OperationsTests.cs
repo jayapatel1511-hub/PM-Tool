@@ -113,6 +113,121 @@ public sealed class OperationsTests(HubFactory f)
             await f.DbAsync(async db => { var e = await db.Outbox.FirstAsync(x => x.Id == outbox); e.ProcessedAt = clock; return await db.SaveChangesAsync(); });
         }
     }
+
+    async Task<string> Health(DateTimeOffset at)
+    {
+        // At a date before every other test's events, so only this test's events count toward the lag.
+        var saved = f.Clock.Now;
+        f.Clock.Now = at;
+        try { return (await f.CreateClient().GetAsync("/health").Result.Json()).S("status"); }
+        finally { f.Clock.Now = saved; }
+    }
+
+    async Task<int> PendingChanges() => (await f.As(TestData.Admin).GetAsync("/api/v1/admin/operations").Result.Json()).I("pendingChanges");
+
+    [Fact]
+    public async Task Ten_failed_evaluations_dead_letter_the_event_and_health_recovers() // FR-OPS-06, FR-OPS-07, AC-OPS-06
+    {
+        var p = await new TestData(f).Project();
+        var past = new DateTimeOffset(2020, 1, 1, 12, 0, 0, TimeSpan.Zero);
+        var trigger = "fail_eval_" + p.Id.ToString("N")[^8..];
+        var id = await f.DbAsync(async db =>
+        {
+            await db.Outbox.Where(o => o.ProjectId == p.Id).ExecuteUpdateAsync(u => u.SetProperty(o => o.ProcessedAt, f.Clock.Now));
+            var e = new OutboxEvent { ProjectId = p.Id, CreatedAt = past.AddMinutes(-20), Payload = "{}" };
+            db.Outbox.Add(e);
+            await db.SaveChangesAsync();
+            // Every evaluation of this project fails when it writes the project's state.
+            await db.Database.ExecuteSqlRawAsync($"""
+                CREATE FUNCTION hub.{trigger}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'test failure'; END $$;
+                CREATE TRIGGER {trigger} BEFORE INSERT OR UPDATE ON hub.project_state FOR EACH ROW WHEN (NEW.project_id = '{p.Id}') EXECUTE FUNCTION hub.{trigger}();
+                """);
+            return e.Id;
+        });
+        try
+        {
+            Assert.Equal("Degraded", await Health(past));
+            var pendingBefore = 0;
+            for (var i = 1; i <= 10; i++)
+            {
+                if (i == 10) pendingBefore = await PendingChanges();
+                await EvaluationWorker.ProcessOnce(f.Services, f.Clock, CancellationToken.None);
+                var e = await f.DbAsync(db => db.Outbox.AsNoTracking().FirstAsync(x => x.Id == id));
+                Assert.Equal((i, i == 10, (DateTimeOffset?)null), (e.Attempts, e.DeadLetteredAt is not null, e.ProcessedAt));
+            }
+            await EvaluationWorker.ProcessOnce(f.Services, f.Clock, CancellationToken.None);
+            Assert.Equal(10, (await f.DbAsync(db => db.Outbox.AsNoTracking().FirstAsync(x => x.Id == id))).Attempts); // no longer selected
+
+            Assert.Equal("Healthy", await Health(past));
+            Assert.Equal(pendingBefore - 1, await PendingChanges());
+            var ops = await f.As(TestData.Admin).GetAsync("/api/v1/admin/operations").Result.Json();
+            var dead = ops["problems"]!.AsArray().Single(x => x!.S("kind") == "OutboxDeadLettered")!;
+            Assert.StartsWith("1 ", dead.S("detail"));
+            await f.RunJob<OpsWatchdogJob>();
+            var run = await f.DbAsync(db => db.JobRuns.Where(r => r.JobName == "ops-watchdog").OrderByDescending(r => r.StartedAt).FirstAsync());
+            Assert.Contains("OutboxDeadLettered", run.Details);
+
+            // A live event waiting 11 minutes still degrades /health.
+            var live = await f.DbAsync(async db => { var e = new OutboxEvent { CreatedAt = past.AddMinutes(-11), Payload = "{}" }; db.Outbox.Add(e); await db.SaveChangesAsync(); return e.Id; });
+            Assert.Equal("Degraded", await Health(past));
+            await f.DbAsync(db => db.Outbox.Where(o => o.Id == live).ExecuteDeleteAsync());
+        }
+        finally
+        {
+            await f.DbAsync(async db =>
+            {
+                await db.Database.ExecuteSqlRawAsync($"DROP TRIGGER IF EXISTS {trigger} ON hub.project_state; DROP FUNCTION IF EXISTS hub.{trigger}();");
+                return await db.Outbox.Where(o => o.Id == id).ExecuteDeleteAsync();
+            });
+        }
+    }
+
+    [Fact]
+    public async Task Dead_letters_raise_their_own_problem_and_leave_the_lag() // FR-OPS-07
+    {
+        Assert.Equal(["OutboxDeadLettered"], Kinds(Facts() with { DeadLettered = 1 }));
+        Assert.Equal(["EvaluationDelayed", "OutboxDeadLettered"], Kinds(Facts(outbox: Now.AddMinutes(-11)) with { DeadLettered = 2 }));
+        Assert.Empty(Kinds(Facts() with { DeadLettered = 0 }));
+
+        var old = new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var e = new OutboxEvent { CreatedAt = old, Payload = "{}", Attempts = 10, DeadLetteredAt = old };
+        await f.DbAsync(db => { db.Outbox.Add(e); return db.SaveChangesAsync(); });
+        try
+        {
+            var facts = await f.DbAsync(db => OpsChecks.Gather(db, Halifax, Now, Now));
+            Assert.NotEqual(old, facts.OldestPendingOutbox);
+            Assert.True(facts.DeadLettered >= 1);
+        }
+        finally { await f.DbAsync(db => db.Outbox.Where(o => o.Id == e.Id).ExecuteDeleteAsync()); }
+    }
+
+    [Fact]
+    public async Task Migration_marks_stranded_events_dead_lettered() // FR-OPS-06, AC-OPS-07 (backfill part)
+    {
+        var at = f.Clock.Now;
+        var marked = at.AddDays(-3);
+        OutboxEvent E(int attempts, DateTimeOffset? processed = null, DateTimeOffset? dead = null) =>
+            new() { CreatedAt = at, Payload = "{}", Attempts = attempts, ProcessedAt = processed, DeadLetteredAt = dead };
+        var (stranded, retrying, done, already) = (E(10), E(9), E(10, processed: at), E(12, dead: marked));
+        var ids = new[] { stranded.Id, retrying.Id, done.Id, already.Id };
+        await f.DbAsync(async db =>
+        {
+            Assert.Contains(await db.Database.GetAppliedMigrationsAsync(), m => m.EndsWith("_OutboxDeadLetter"));
+            db.Outbox.AddRange(stranded, retrying, done, already);
+            await db.SaveChangesAsync();
+            for (var run = 0; run < 2; run++) await db.Database.ExecuteSqlRawAsync(Hub.Api.Data.Migrations.OutboxDeadLetter.Backfill); // safe to re-run
+            return 0;
+        });
+        try
+        {
+            var rows = await f.DbAsync(db => db.Outbox.AsNoTracking().Where(o => ids.Contains(o.Id)).ToDictionaryAsync(o => o.Id));
+            Assert.NotNull(rows[stranded.Id].DeadLetteredAt);
+            Assert.Null(rows[retrying.Id].DeadLetteredAt);
+            Assert.Null(rows[done.Id].DeadLetteredAt);
+            Assert.Equal(marked, rows[already.Id].DeadLetteredAt);
+        }
+        finally { await f.DbAsync(db => db.Outbox.Where(o => ids.Contains(o.Id)).ExecuteDeleteAsync()); }
+    }
 }
 
 /// §25 (Rec): a create retried with the same Idempotency-Key returns the first response and makes nothing new.

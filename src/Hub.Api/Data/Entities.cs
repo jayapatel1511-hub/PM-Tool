@@ -813,6 +813,8 @@ public class OutboxEvent : Entity
     public DateTimeOffset? ProcessedAt { get; set; }
     public int Attempts { get; set; }
     public string? LastError { get; set; }
+    /// Set at the tenth failed evaluation; the worker, `/health` lag and pending count leave it out (§48.4, FR-OPS-06).
+    public DateTimeOffset? DeadLetteredAt { get; set; }
 }
 
 public class TaskState

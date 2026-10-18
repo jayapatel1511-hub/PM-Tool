@@ -11,12 +11,12 @@ Slice builds in progress; see the build notes below.
 | AC-RCV-05 | S01 | PASS (local) |
 | AC-RCV-06 | S01, S02, S12 | PARTIAL: server side PASS (local); dialog and toast are S02, flag removal S12 |
 | AC-RCV-07 | S01 | PASS (local) |
-| AC-RCV-08 | S03 | UNRUN |
-| AC-RCV-09 | S03 | UNRUN |
+| AC-RCV-08 | S03 | PARTIAL: API level PASS (local) in `CountLinkTests`; browser counts suite not run |
+| AC-RCV-09 | S03 | PARTIAL: API level PASS (local); `counts.cjs` Milestones check added, not run |
 | AC-RCV-10 | S04 | UNRUN |
 | AC-RCV-11 | S05 | UNRUN |
 | AC-RCV-12 | S05 | UNRUN |
-| AC-RCV-13 | S03, S04 | UNRUN |
+| AC-RCV-13 | S03, S04 | UNRUN: S03 API tests show new values equal the existing fields; counts suite against packet 036 fixtures not run |
 | AC-RCV-14 | S06, S07 | UNRUN |
 | AC-RCV-15 | S06 | UNRUN |
 | AC-RCV-16 | S06 | UNRUN |
@@ -40,3 +40,14 @@ Server side of Show deleted and Restore behind `flag.show_deleted` (declared in 
 - AC-RCV-07: PASS (local). `Deleted_list_export_matches_the_screen_and_is_logged`: CSV rows equal the screen, XLSX content type, both logged without content.
 - Assumptions: defaults 045-D1 (RestoreItem: project PM or Admin), 045-D2 (tasks, deliverables and milestones only), 045-D4 (refuse naming the parent, no cascade), 045-D5 (no reason; `If-Match` checked only when sent), 045-D13 (Part A behind `flag.show_deleted`; task restore unchanged with the flag off). Route shape `/projects/{id}/{tasks|deliverables|milestones}/deleted` and `/deleted/export` is the builder's choice; S02 uses these paths. Milestone status at deletion is Complete, Cancelled or its last evaluated state. Rows deleted at the same moment order by key ascending. Pages hold 200 rows (`pageSize` capped at 200). `permissions.restore` has the `{ok, reason}` shape and is absent, not null, with the flag off.
 - Left for Jay: when to turn `flag.show_deleted` on in review and pilot (S12 cleanup).
+
+## Build 045-S03
+
+Project Dashboard and Milestones counts as `{value, link}`, unflagged (Tier B, 045-D13). `RiskQuery` and `IssueQuery` in `Features/Registers.cs` are shared by the register lists and the dashboard. The dashboard response gains `registers` (`issuesOpen`, `issuesHigh`, `risksHigh`) and `disciplineDue14` beside the unchanged `issues`, `risks` and `disciplines[].deliverablesDue14`. `Dashboard.tsx` uses the server links; every count on `Milestones.tsx` (table and phone cards) links to its list through one helper, `milestoneLinks`.
+
+- Checks on the merged tree (clean merge, no conflicts): `dotnet build Hub.slnx` 0 errors; `dotnet test --filter CountLinkTests|RegistersApiTests|SignalTrustApiTests|MilestonesDeliverablesTests|SurfacesTests` 25 passed, 0 failed; `npm run build` succeeded; `npm run lint` no errors (warnings only, none new apart from the existing export-components rule on the exported status list and helper). The builder ran the full suite on the slice branch (1200 passed).
+- AC-RCV-08: PARTIAL. `Dashboard_issue_and_risk_counts_equal_their_register_lists` and `Discipline_due_14_count_equals_its_deliverable_list` pass for a PM, a Discipline Lead and a Supervisor, with and without a discipline scope. Browser counts suite not run.
+- AC-RCV-09: PARTIAL. `Milestone_counts_equal_the_lists_they_open` passes, using the same parameters as `milestoneLinks`, including cancelled items and tasks attached through a deliverable. The `counts.cjs` Milestones check was added but not run.
+- AC-RCV-13: UNRUN. The API tests assert the new values equal the existing snapshot fields, but `npm run test:counts` against the packet 036 fixtures was not run.
+- Assumptions: defaults 045-D6 (a summed count gets a one-line definition plus a link; none of this slice's counts is a sum), 045-D8 (existing count values and definitions unchanged; new fields sit beside old ones; deliverable links carry an explicit status list without Cancelled), 045-D13 (Part B unflagged, Tier B). Issues and Risks counts stay project-wide under a discipline scope, so their links carry no `disciplineId` (AC-CNT-07, the tile's "Whole project" chip). Field names `registers` and `disciplineDue14` are the builder's choice. "n/total issued" and complete/total tasks each became two links, one per number.
+- Left for Jay: run `npm run test:counts` against the local Development preview with the packet 036 fixtures (set `TUESDAY_UI_BASE_URL`) to finish AC-RCV-13 and the browser parts of AC-RCV-08 and AC-RCV-09; Tier B review of the merge into claude/build-039-050.

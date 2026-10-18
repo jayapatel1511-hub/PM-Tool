@@ -46,6 +46,9 @@ builder.Services.AddSingleton<IUserDirectory, GraphDirectory>();
 builder.Services.AddSingleton<IJob, DirectorySyncJob>();
 builder.Services.AddSingleton<JobHost>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<JobHost>());
+// §46.6 change feed: idle until a stream subscribes (S10).
+builder.Services.AddSingleton<LiveFeed>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<LiveFeed>());
 HubModules.AddServices(builder.Services, cfg);
 
 // Requests, dependencies and logs go to Application Insights when the environment provides it (§23.8): the failed-request

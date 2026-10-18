@@ -32,7 +32,7 @@ interface Basis { id: string; disciplineId: string; kind: string; title: string;
   sourceSystem?: string | null; stableSourceId?: string | null; sourceUrl?: string | null; declaredRevision?: string | null }
 interface Detail {
   id: string; familyId: string; name: string; description?: string | null; projectTypeId?: string | null; version?: number | null; status: string; publishedAt?: string; rowVersion: number
-  canEdit: boolean; family: { id: string; version?: number | null; status: string; publishedAt?: string }[]
+  offsetDayKind?: string; canEdit: boolean; family: { id: string; version?: number | null; status: string; publishedAt?: string }[]
   disciplines: { disciplineId: string; isDefaultIncluded: boolean; templateDisciplineId?: string }[]; milestones: Ms[]; deliverables: Dl[]; tasks: Tk[]; dependencies: Dep[]
   basisSuggestions: Basis[]
 }
@@ -162,7 +162,7 @@ function TemplateEditor() {
     setErr(null)
     try {
       const r = await put<Detail>(`templates/${id}/structure`, {
-        rowVersion: d.rowVersion, header: { name: d.name, description: d.description || null, projectTypeId: d.projectTypeId || null },
+        rowVersion: d.rowVersion, header: { name: d.name, description: d.description || null, projectTypeId: d.projectTypeId || null, ...(d.offsetDayKind ? { offsetDayKind: d.offsetDayKind } : {}) },
         disciplines: d.disciplines, milestones: d.milestones, deliverables: d.deliverables, tasks: d.tasks, dependencies: d.dependencies,
       })
       qc.setQueryData(['template', id], r); setD(r); setDirty(false); toast.success(t('tpl.saved')); refresh()
@@ -226,6 +226,11 @@ function TemplateEditor() {
               <option value="">{t('common.none')}</option>{ref.data?.projectTypes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
             </select>
           </Field>
+          {d.offsetDayKind && <Field label={t('rcv.offsetsCount')} htmlFor="t-offset-kind">
+            <select id="t-offset-kind" className={selectCls} value={d.offsetDayKind} disabled={!edit || !!busy} onChange={(e) => change({ offsetDayKind: e.target.value })}>
+              <option value="CalendarDays">{t('rcv.calendarDays')}</option><option value="WorkingDays">{t('rcv.workingDays')}</option>
+            </select>
+          </Field>}
           <Field label={t('common.description')} htmlFor="t-desc" className="sm:col-span-2"><Textarea id="t-desc" rows={2} value={d.description ?? ''} disabled={!edit || !!busy} onChange={(e) => change({ description: e.target.value })} /></Field>
         </div>
       </Section>

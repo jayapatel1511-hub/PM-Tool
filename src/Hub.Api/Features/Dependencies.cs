@@ -2,6 +2,7 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 namespace Hub.Api.Features;
 
@@ -10,9 +11,14 @@ public static class DependencyEndpoints
 {
     public sealed record AddBody(Guid? PredecessorTaskId, Guid? SuccessorTaskId, string? Note, int? LagDays, string? Type = null);
     public sealed record DeliverableBody(Guid? PredecessorDeliverableId, Guid? SuccessorDeliverableId, string? Note, int? LagDays, string? Type = null);
+    public sealed record UnavailableDate(DateOnly Date, string Message, DateOnly? NextAvailableDate);
+    public sealed record DateContextRead(DateContext Dates,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] UnavailableDate[]? Availability = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateSuccessor[]? Tasks = null);
 
     public static void Map(RouteGroupBuilder api)
     {
+        api.MapGet("/items/{type}/{id:guid}/date-context", Dates);
         api.MapGet("/tasks/{id:guid}/dependencies", async (Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
         {
             var (t, p, _) = await TaskEndpoints.Load(db, access, id);
@@ -150,6 +156,71 @@ public static class DependencyEndpoints
                 return new { x.Id, x.Key, x.Name, x.Status, x.DueDate, disabled = existing || cycle is not null, reason = existing ? Text.Get("dep.duplicate") : cycle is not null ? Text.Get("dep.would_cycle") : null };
             });
         });
+    }
+
+    static async Task<DateContextRead> Dates(string type, Guid id, string? startDate, string? dueDate,
+        Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    {
+        var settings = await store.Get(db);
+        Http.RequireFlag(settings, "date_context");
+        Project project; Guid? person; DateLimit? parent = null; List<DateItem> items; List<DependencySnap> links;
+        var task = type == ItemType.Task;
+        if (task)
+        {
+            var (item, p, _) = await TaskEndpoints.Load(db, access, id); project = p; person = item.AssigneeId;
+            if (item.DeliverableId is { } did)
+                parent = await db.Deliverables.AsNoTracking().Where(d => d.Id == did && d.DueDate != null).Select(d => new DateLimit(d.Key, d.DueDate!.Value)).FirstOrDefaultAsync();
+            items = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == project.Id)
+                .Select(t => new DateItem(t.Id, t.Key, t.StartDate, t.DueDate, t.Status == TaskStatuses.Complete || t.Status == TaskStatuses.Cancelled)).ToListAsync();
+            links = await db.Dependencies.AsNoTracking().Where(e => e.ProjectId == project.Id)
+                .Select(e => new DependencySnap(e.Id, e.PredecessorTaskId, e.SuccessorTaskId, e.LagDays, e.DependencyType)).ToListAsync();
+        }
+        else if (type == ItemType.Deliverable)
+        {
+            var item = await db.Deliverables.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id) ?? throw ApiException.NotFound();
+            (project, _) = await access.Project(item.ProjectId); person = item.OwnerId;
+            if (item.MilestoneId is { } mid)
+                parent = await db.Milestones.AsNoTracking().Where(m => m.Id == mid && !m.IsCancelled && m.Date != null).Select(m => new DateLimit(m.Key, m.Date!.Value)).FirstOrDefaultAsync();
+            items = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == project.Id)
+                .Select(d => new DateItem(d.Id, d.Key, d.StartDate, d.DueDate, d.Status == DeliverableStatus.Issued || d.Status == DeliverableStatus.Accepted || d.Status == DeliverableStatus.Cancelled)).ToListAsync();
+            links = await db.DeliverableDependencies.AsNoTracking().Where(e => e.ProjectId == project.Id)
+                .Select(e => new DependencySnap(e.Id, e.PredecessorDeliverableId, e.SuccessorDeliverableId, e.LagDays, e.DependencyType)).ToListAsync();
+        }
+        else throw ApiException.NotFound();
+        var original = items.SingleOrDefault(item => item.Id == id) ?? throw ApiException.NotFound();
+        DateOnly? Proposed(string? value, DateOnly? current, string field) => value is null ? current : value.Length == 0 ? null
+            : DateOnly.TryParseExact(value, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date)
+                ? date : throw ApiException.Invalid(field, "error.date");
+        var proposed = original with { StartDate = Proposed(startDate, original.StartDate, "startDate"), DueDate = Proposed(dueDate, original.DueDate, "dueDate") };
+        var judge = await Judge(db, project, settings, clock.Today(settings));
+        var dates = DependencyRules.Context(proposed, items, links, parent, task, project.Status == ProjectStatus.Active, judge.After);
+        DateSuccessor[]? children = null;
+        if (!task)
+        {
+            var rows = project.Status != ProjectStatus.Active ? [] : await db.Tasks.AsNoTracking()
+                .Where(t => t.DeliverableId == id && t.ProjectId == project.Id && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.DueDate != null)
+                .OrderBy(t => t.Seq).Select(t => new DateItem(t.Id, t.Key, null, t.DueDate, false)).ToListAsync();
+            children = rows.Select(t => (Task: t, Reason: DependencyRules.ParentDates(proposed.Key, proposed.DueDate, t.DueDate, true)))
+                .Where(t => t.Reason is not null).Select(t => new DateSuccessor(t.Task.Id, t.Task.Key, t.Reason!)).ToArray();
+        }
+        UnavailableDate[]? availability = null;
+        if (person is { } uid && await PlanningEndpoints.People(db, access).AnyAsync(u => u.Id == uid))
+        {
+            var from = Workload.WeekOf(judge.Today); var through = from.AddDays(settings.PlanningHorizonWeeks * 7 - 1);
+            var days = await PersonCapacity.Load(db, [uid], from, through, settings);
+            var chosen = new[] { proposed.StartDate, proposed.DueDate, dates.EarliestStart?.Date, dates.EarliestDue?.Date }.OfType<DateOnly>().Distinct().Order().ToArray();
+            var warnings = new List<UnavailableDate>();
+            foreach (var date in chosen)
+            {
+                if (!days.TryGetValue((uid, date), out var day))
+                    day = (await PersonCapacity.Load(db, [uid], date, date, settings))[(uid, date)];
+                if (day.Available > 0) continue;
+                var next = days.Where(d => d.Key.Item2 > date && d.Value.Available > 0).OrderBy(d => d.Key.Item2).Select(d => (DateOnly?)d.Key.Item2).FirstOrDefault();
+                warnings.Add(new(date, Text.Get("date_context.unavailable"), next));
+            }
+            availability = warnings.ToArray();
+        }
+        return new(dates, availability, children);
     }
 
     static async Task<List<object>> Edges(HubDb db, LinkJudge judge, Guid taskId, bool predecessors) =>

@@ -1,3 +1,6 @@
+import { PickerProject } from '@/components/hub/people'
+import { CreateDeliverable } from './Deliverables'
+import { DateHint } from '@/components/hub/date-context'
 import { FieldGroup } from '@/components/hub/registers'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Ban, Check, ChevronDown, Eye, EyeOff, GitBranch, Link2, Lock, Plus, RotateCcw, Trash2, X } from 'lucide-react'
@@ -19,7 +22,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { ApiError, del, get, post, qs } from '@/lib/api'
-import { useMe } from '@/lib/auth'
+import { useFlag, useMe } from '@/lib/auth'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -30,6 +33,7 @@ import { PRIORITIES, TaskIndicators, errorText, moveFrom, readableDisabled, useP
 export const TASK_SECTIONS: { id: string; render: (d: TaskDetailData, reload: () => void) => ReactNode }[] = []
 
 export interface TaskDetailData {
+  relatedDeliverables?: {id:string;key:string;name:string}[];
   task: TaskRow; description?: string; onHoldReason?: string; cancelledReason?: string; previousStatus?: string; reviewRequestedAt?: string
   project: { id: string; projectNumber: string; name: string; status: string }
   collaborators: { id: string; displayName: string; isActive: boolean }[]; watchers: { id: string; displayName: string; source: string }[]
@@ -58,6 +62,8 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
   const [deleting, setDeleting] = useState(false)
   const [err, setErr] = useState<unknown>(null)
   const reload = () => { qc.invalidateQueries({ queryKey: ['task', id] }); refresh(q.data?.project.id) }
+  const small = useFlag('small_ux')
+  const [creatingDeliverable, setCreatingDeliverable] = useState(false)
   const actions = useTaskActions(reload)
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
@@ -73,7 +79,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
   const run = async (f: () => Promise<unknown>) => { setErr(null); try { await f(); reload() } catch (e) { setErr(e) } }
 
   return (
-    <div>
+    <PickerProject.Provider value={r.projectId}><div>
       <div className="space-y-3 p-4">
         <div className="flex flex-wrap items-center gap-2">
           <Key>{r.key}</Key>
@@ -98,10 +104,12 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
         </div>
         <Heading aria-label={r.name} className="-mx-2 break-words text-2xl/8 font-semibold tracking-[-0.4px]"><InlineText value={r.name} disabled={!perms.edit.ok} title={perms.edit.ok ? t('common.name') : perms.edit.reason ?? undefined} onSave={(v) => save({ name: v })} /></Heading>
         <TaskIndicators r={r} all />
+        {d.relatedDeliverables?.length ? <p className="text-sm">{t('interaction.relatedDeliverables')}: {d.relatedDeliverables.map(x=><button className="ml-2 underline underline-offset-2" key={x.id} onClick={()=>openPanel('Deliverable',x.id)}>{x.key} {x.name}</button>)}</p> : null}
         <div className="flex flex-wrap items-center gap-2">
           {perms.isReviewer && r.status === 'Ready for Review' && find('In Review') && <Button size="sm" onClick={() => act('In Review')}>{t('task.startReview')}</Button>}
           {perms.isReviewer && r.status === 'In Review' && find('Complete') && <Button size="sm" onClick={() => act('Complete')}><Check className="size-4" aria-hidden />{t('task.approve')}</Button>}
           {perms.isReviewer && r.status === 'In Review' && find('Revision Required') && <Button size="sm" variant="outline" onClick={() => act('Revision Required')}>{t('task.requestRevision')}</Button>}
+          {small && project.data?.permissions.createDeliverableIn.includes(r.projectDisciplineId) && <Button size="sm" variant="outline" onClick={()=>setCreatingDeliverable(true)}>{t('interaction.deliverableFromTask')}</Button>}
           {perms.edit.ok && <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/handoffs?targetTask=${r.id}`}>{t('handoff.new')}</Link></Button>}
           <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/changes?target=Task:${r.id}`}>{t('change.inputs')}</Link></Button>
           {perms.authoriseStart && <Button size="sm" variant="outline" onClick={() => actions.authoriseStart(r)}>{t('tasks.startAuthAuthorise')}</Button>}
@@ -152,9 +160,9 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
       </FieldGroup>
 
       <FieldGroup title={t('task.group.dates')}>
-        <FieldRow label={t('field.StartDate')}><InlineDate value={r.startDate} disabled={!perms.edit.ok} onSave={(v) => save({ startDate: v })} /></FieldRow>
+        <FieldRow label={t('field.StartDate')}><InlineDate hint={(draft) => <DateHint type="Task" id={r.id} startDate={draft} dueDate={r.dueDate} />} value={r.startDate} disabled={!perms.edit.ok} onSave={(v) => save({ startDate: v })} /></FieldRow>
         <FieldRow label={t('field.DueDate')}>
-          <InlineDate value={r.dueDate} disabled={!perms.dueDate.ok} title={perms.dueDate.reason ?? (perms.dueNeedsReason ? t('task.dueReasonHint') : undefined)} onSave={(v) => save({ dueDate: v })} />
+          <InlineDate hint={(draft) => <DateHint type="Task" id={r.id} startDate={r.startDate} dueDate={draft} />} value={r.dueDate} disabled={!perms.dueDate.ok} title={perms.dueDate.reason ?? (perms.dueNeedsReason ? t('task.dueReasonHint') : undefined)} onSave={(v) => save({ dueDate: v })} />
           {((r.originalDueDate && r.originalDueDate !== r.dueDate) || r.dueDateChangeCount >= 3) && (
             <div className="flex flex-wrap items-center gap-2 px-2 pt-1">
               {r.originalDueDate && r.originalDueDate !== r.dueDate && <span className="text-xs/[18px] text-muted-foreground tabular-nums">{t('deliverable.originally', { date: fmtDate(r.originalDueDate) })}</span>}
@@ -208,8 +216,9 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
       )}
       {blocking && <BlockDialog r={r} onClose={(ok) => { setBlocking(false); if (ok) reload() }} />}
       {deleting && <DeleteDialog d={d} onMove={(m) => { setDeleting(false); actions.move(m) }} onClose={(gone) => { setDeleting(false); if (gone) { refresh(r.projectId); onClose?.() } }} />}
+      {creatingDeliverable && project.data && <CreateDeliverable p={project.data} milestones={lists.milestones} fromTask={r} onClose={()=>{setCreatingDeliverable(false);reload()}} />}
       {actions.dialogs}
-    </div>
+    </div></PickerProject.Provider>
   )
 }
 
@@ -421,7 +430,7 @@ function People({ d, me, canManage, onChanged, onError }: { d: TaskDetailData; m
   )
 }
 
-function BlockDialog({ r, onClose }: { r: TaskRow; onClose: (ok: boolean) => void }) {
+export function BlockDialog({ r, onClose }: { r: TaskRow; onClose: (ok: boolean) => void }) {
   const [type, setType] = useState('Client')
   const [reason, setReason] = useState('')
   return (

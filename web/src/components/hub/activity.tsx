@@ -10,6 +10,21 @@ export interface ActivityRow {
   summary: string; reason?: string; source: string; correlationId?: string; snapshot?: Record<string, unknown>; snapshotLabels?: Record<string, string | null>
 }
 
+export interface ActivityGroup { rows: ActivityRow[] }
+/** Groups adjacent changes by actor and item. The API rows remain untouched; this only changes presentation. */
+export function groupActivity(rows: ActivityRow[], burstMinutes = 10): ActivityGroup[] {
+  const groups: ActivityGroup[] = []
+  for (const row of rows) {
+    const previous = groups.at(-1)
+    const first = previous?.rows[0]
+    const last = previous?.rows.at(-1)
+    const within = last && Math.abs(new Date(last.occurredAt).getTime() - new Date(row.occurredAt).getTime()) <= burstMinutes * 60_000
+    if (previous && first && within && first.actorType === row.actorType && first.actorId === row.actorId && first.itemType === row.itemType && first.itemId === row.itemId) previous.rows.push(row)
+    else groups.push({ rows: [row] })
+  }
+  return groups
+}
+
 const isDate = (v?: string) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v)
 const isStamp = (v?: string) => !!v && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(v)
 const isGuid = (v: unknown) => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
@@ -41,12 +56,13 @@ export function ChangeList({ row }: { row: ActivityRow }) {
   )
 }
 
-export function ActivityTable({ rows, total, page, pageSize, onPage, onOpen }: {
-  rows: ActivityRow[]; total: number; page: number; pageSize: number; onPage: (p: number) => void; onOpen?: (r: ActivityRow) => void
+export function ActivityTable({ rows, total, page, pageSize, onPage, onOpen, grouped = false, burst = 10 }: {
+  rows: ActivityRow[]; total: number; page: number; pageSize: number; onPage: (p: number) => void; onOpen?: (r: ActivityRow) => void; grouped?: boolean; burst?: number
 }) {
   if (!rows.length) return <div className="rounded-lg border bg-card"><Empty>{t('activity.empty')}</Empty></div>
   return (
     <div className="rounded-lg border bg-card">
+      {grouped ? <ol className="divide-y">{groupActivity(rows, burst).map(g=><li key={g.rows[0].id} className="p-3"><details><summary className="cursor-pointer text-sm">{t('activity.groupSummary',{name:g.rows[0].actorName??t('common.system'),n:g.rows.length})} · {fmtTime(g.rows[g.rows.length-1].occurredAt)} – {fmtTime(g.rows[0].occurredAt)}</summary><ActivityTable rows={g.rows} total={g.rows.length} page={1} pageSize={g.rows.length} onPage={()=>{}} onOpen={onOpen}/></details></li>)}</ol> : <>
       {/* Text-only rows: the scroll region itself takes focus so the keyboard can scroll it (WCAG 2.1.1). */}
       <div className="scroll-region overflow-x-auto" tabIndex={0} role="region" aria-label={t('activity.tableLabel')}>
         <table className="w-full text-sm">
@@ -76,6 +92,7 @@ export function ActivityTable({ rows, total, page, pageSize, onPage, onOpen }: {
           </tbody>
         </table>
       </div>
+      </>}
       {total > pageSize && (
         <div className="flex items-center justify-end gap-2 border-t px-4 py-2.5 text-sm">
           <span className="text-muted-foreground">{t('paging.range', { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, total), total })}</span>

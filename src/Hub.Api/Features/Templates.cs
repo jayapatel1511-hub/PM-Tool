@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -11,7 +12,7 @@ namespace Hub.Api.Features;
 /// and a project copies the version it was made from, so later versions never touch it (E-12).
 public static class TemplateEndpoints
 {
-    public sealed record HeaderBody(string Name, string? Description, Guid? ProjectTypeId);
+    public sealed record HeaderBody(string Name, string? Description, Guid? ProjectTypeId, string? OffsetDayKind = null);
     public sealed record DisciplineIn(Guid DisciplineId, bool IsDefaultIncluded);
     public sealed record MilestoneIn(string Ref, string Name, string MilestoneType, string Anchor, int? Offset, Guid? CompletesPhaseId, bool IsClientFacing);
     public sealed record DeliverableIn(string Ref, Guid DisciplineId, string Name, Guid DeliverableTypeId, string? MilestoneRef, int? Offset, bool RequiresReview, string? Description);
@@ -19,28 +20,31 @@ public static class TemplateEndpoints
         decimal? EstimatedHours, int? Offset, string? AssignTo);
     public sealed record DependencyIn(string Predecessor, string Successor);
     public sealed record StructureBody(HeaderBody? Header, DisciplineIn[] Disciplines, MilestoneIn[] Milestones, DeliverableIn[] Deliverables, TaskIn[] Tasks, DependencyIn[] Dependencies, int? RowVersion);
-    public sealed record PreviewBody(DateOnly? StartDate, Dictionary<Guid, DateOnly?>? MilestoneDates, Guid[]? DisciplineIds);
+    public sealed record PreviewBody(DateOnly? StartDate, Dictionary<Guid, DateOnly?>? MilestoneDates, Guid[]? DisciplineIds, Guid? OfficeId = null);
     public sealed record PackBody(Guid TemplateId, Guid DisciplineId, Guid? LeadUserId, Dictionary<Guid, Guid?>? Mapping);
     public sealed record VersionBody(int? RowVersion);
     public sealed record BasisSuggestionBody(Guid TemplateDisciplineId, string Kind, string Title, string Scope, string Statement,
         decimal? NumericValue, string? Units, string? SourceSystem, string? StableSourceId, string? SourceUrl, string? DeclaredRevision);
 
+    /// §49.4 (FR-RCV-10 to FR-RCV-13): the "Offsets count" setting and working-day offsets. Off, templates read, save and
+    /// plan exactly as before.
+    public const string WorkingDaysFlag = "template_working_days";
     const int MaxOffset = 3650;
     static readonly string[] Roles = [AssignToRole.DisciplineLead, AssignToRole.PM, AssignToRole.Unassigned];
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/templates", List);
-        api.MapPost("/templates", async (HeaderBody body, Access access, HubDb db) =>
+        api.MapPost("/templates", async (HeaderBody body, Access access, HubDb db, SettingsStore store) =>
         {
             Editor(access);
             var t = new ProjectTemplate { FamilyId = Guid.CreateVersion7(), Status = TemplateStatus.Draft };
-            await Header(t, body, db);
+            await Header(t, body, db, (await store.Get(db)).IsFlagOn(WorkingDaysFlag));
             db.Templates.Add(t);
             await db.SaveChangesAsync();
             return Results.Created($"/api/v1/templates/{t.Id}", new { t.Id, t.RowVersion });
         });
-        api.MapGet("/templates/{id:guid}", async (Guid id, Access access, HubDb db) => await Read(await Visible(db, access, id), db, access));
+        api.MapGet("/templates/{id:guid}", async (Guid id, Access access, HubDb db, SettingsStore store) => await Read(await Visible(db, access, id), db, access, store));
         api.MapPut("/templates/{id:guid}/structure", Save);
         api.MapPost("/templates/{id:guid}/design-basis", AddBasisSuggestion);
         api.MapDelete("/templates/{id:guid}/design-basis/{suggestionId:guid}", RemoveBasisSuggestion);
@@ -64,12 +68,12 @@ public static class TemplateEndpoints
             await Tx.Run(db, async () => { await ClearChildren(db, id); db.Audit.Note(t, action: "Discarded"); db.Templates.Remove(t); return await db.SaveChangesAsync(); });
             return Results.NoContent();
         });
-        api.MapPost("/templates/{id:guid}/preview", async (Guid id, PreviewBody body, Access access, HubDb db) =>
+        api.MapPost("/templates/{id:guid}/preview", async (Guid id, PreviewBody body, Access access, HubDb db, SettingsStore store) =>
         {
             var t = await Visible(db, access, id);
             var (snap, parts) = await Snapshot(db, t.Id);
             var included = body.DisciplineIds is { } ids ? parts.Disciplines.Where(d => ids.Contains(d.DisciplineId)) : parts.Disciplines.Where(d => d.IsDefaultIncluded);
-            var plan = TemplatePlanner.Plan(snap, body.StartDate, body.MilestoneDates ?? [], included.Select(d => d.Id).ToHashSet());
+            var plan = TemplatePlanner.Plan(snap, body.StartDate, body.MilestoneDates ?? [], included.Select(d => d.Id).ToHashSet(), await Calendar(db, store, t, body.OfficeId));
             var names = parts.Milestones.ToDictionary(m => m.Id);
             return new
             {
@@ -167,6 +171,22 @@ public static class TemplateEndpoints
         return (snap, parts);
     }
 
+    /// FR-RCV-12: a working-day template counts the office's calendar (weekdays without organisation-wide and that office's
+    /// holidays, whatever working_days_enabled says); a calendar-day template, or any template with the flag off, gets none.
+    public static async Task<WorkCalendar?> Calendar(HubDb db, SettingsStore store, ProjectTemplate t, Guid? officeId) =>
+        t.OffsetDayKind == DayKind.WorkingDays && (await store.Get(db)).IsFlagOn(WorkingDaysFlag)
+            ? new WorkCalendar(await db.Holidays.AsNoTracking().Where(h => h.OfficeId == null || h.OfficeId == officeId).Select(h => h.Date).ToListAsync())
+            : null;
+
+    static async Task<object> Read(ProjectTemplate t, HubDb db, Access access, SettingsStore store)
+    {
+        var body = await Read(t, db, access);
+        if (!(await store.Get(db)).IsFlagOn(WorkingDaysFlag)) return body;
+        var o = JsonSerializer.SerializeToNode(body, JsonOpts.Web)!.AsObject(); // the field exists only while the flag is on (FR-DLV-08)
+        o["offsetDayKind"] = t.OffsetDayKind;
+        return o;
+    }
+
     static async Task<object> Read(ProjectTemplate t, HubDb db, Access access)
     {
         var (_, p) = await Snapshot(db, t.Id);
@@ -194,8 +214,9 @@ public static class TemplateEndpoints
     static bool IsEditor(Access access) => Permissions.ManageTemplates(access.Actor, access.Me.IsTemplateEditor).Ok;
     static void Editor(Access access) => Access.Demand(Permissions.ManageTemplates(access.Actor, access.Me.IsTemplateEditor));
 
-    static async Task Header(ProjectTemplate t, HeaderBody body, HubDb db)
+    static async Task Header(ProjectTemplate t, HeaderBody body, HubDb db, bool workingDays)
     {
+        if (workingDays && body.OffsetDayKind is { } kind) { Check.OneOf(kind, DayKind.All, "offsetDayKind"); t.OffsetDayKind = kind; }
         t.Name = Check.Required(body.Name, "name", 200);
         t.Description = Check.Optional(body.Description, "description", 4000);
         if (body.ProjectTypeId is { } pt) Check.That(await db.ProjectTypes.AnyAsync(x => x.Id == pt), "projectTypeId", "error.not_found");
@@ -213,13 +234,13 @@ public static class TemplateEndpoints
     }
 
     /// The whole structure is saved at once, so references between rows (by `ref`) are checked together.
-    static async Task<object> Save(Guid id, StructureBody body, HttpContext http, Access access, HubDb db)
+    static async Task<object> Save(Guid id, StructureBody body, HttpContext http, Access access, HubDb db, SettingsStore store)
     {
         Editor(access);
         var t = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         if (t.Status != TemplateStatus.Draft) throw ApiException.Rule("template_not_draft", "template.not_draft");
         await Http.CheckVersion(db, http, t, body.RowVersion);
-        if (body.Header is { } h) await Header(t, h, db);
+        if (body.Header is { } h) await Header(t, h, db, (await store.Get(db)).IsFlagOn(WorkingDaysFlag));
 
         var refIds = new Dictionary<string, Guid>();
         Guid NewRef(string r, string field)
@@ -312,7 +333,7 @@ public static class TemplateEndpoints
             db.Audit.Note(t, action: "StructureSaved");
             return await db.SaveChangesAsync();
         });
-        return await Read(t, db, access);
+        return await Read(t, db, access, store);
     }
 
     /// Dependencies must leave the tasks orderable (Kahn); a cycle could never be scheduled.
@@ -340,7 +361,8 @@ public static class TemplateEndpoints
             return Results.Ok(new { existing.Id, existing.RowVersion });
         var (_, p) = await Snapshot(db, id);
         var basis = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == id).ToListAsync();
-        var draft = new ProjectTemplate { FamilyId = src.FamilyId, Name = src.Name, Description = src.Description, ProjectTypeId = src.ProjectTypeId, Status = TemplateStatus.Draft };
+        var draft = new ProjectTemplate { FamilyId = src.FamilyId, Name = src.Name, Description = src.Description, ProjectTypeId = src.ProjectTypeId, Status = TemplateStatus.Draft,
+            OffsetDayKind = src.OffsetDayKind };
         var map = new Dictionary<Guid, Guid>();
         Guid N(Guid old) => map[old] = Guid.CreateVersion7();
         await Tx.Run(db, async () =>
@@ -421,7 +443,7 @@ public static class TemplateEndpoints
         };
     }
 
-    static async Task<object> AddPack(Guid id, PackBody body, Access access, HubDb db, TeamService team, Notifier notify, TimeProvider clock)
+    static async Task<object> AddPack(Guid id, PackBody body, Access access, HubDb db, TeamService team, Notifier notify, TimeProvider clock, SettingsStore store)
     {
         var (p, ctx) = await access.Project(id);
         Access.Demand(Permissions.ManageTeam(access.Actor, ctx));
@@ -434,7 +456,7 @@ public static class TemplateEndpoints
         Check.That(mapping.Values.All(v => v is null || projectMs.ContainsKey(v.Value)), "mapping", "error.not_found");
         // Every template milestone takes its mapped project milestone's date; unmapped ones leave their items undated.
         var typed = parts.Milestones.ToDictionary(m => m.Id, m => mapping.GetValueOrDefault(m.Id) is { } pm ? projectMs[pm].Date : null);
-        var plan = TemplatePlanner.Plan(snap, p.StartDate, typed, new HashSet<Guid> { tdisc.Id });
+        var plan = TemplatePlanner.Plan(snap, p.StartDate, typed, new HashSet<Guid> { tdisc.Id }, await Calendar(db, store, t, p.OfficeId));
         var result = await Tx.Run(db, async () =>
         {
             var pd = await db.ProjectDisciplines.FirstOrDefaultAsync(x => x.ProjectId == id && x.DisciplineId == body.DisciplineId);
@@ -541,7 +563,7 @@ public static class TemplateEndpoints
 
 /// Creating a project from a template (§12.14, FR-004..FR-006). The wizard's chosen disciplines arrive as the project's
 /// disciplines (with their leads); the template's other disciplines, and their items and dependencies, are left out.
-public sealed class TemplateHook(HubDb db, TeamService team, CurrentUser me, TimeProvider clock) : IProjectCreateHook
+public sealed class TemplateHook(HubDb db, TeamService team, CurrentUser me, TimeProvider clock, SettingsStore store) : IProjectCreateHook
 {
     public async Task AfterCreate(Project p, ProjectEndpoints.CreateBody body)
     {
@@ -560,7 +582,7 @@ public sealed class TemplateHook(HubDb db, TeamService team, CurrentUser me, Tim
                 typed[mid] = d.Value.ValueKind == JsonValueKind.Null ? null
                     : DateOnly.TryParse(d.Value.GetString(), System.Globalization.CultureInfo.InvariantCulture, out var date) ? date : throw ApiException.Invalid("template", "error.date");
             }
-        var plan = TemplatePlanner.Plan(snap, p.StartDate, typed, pds.Keys.ToHashSet());
+        var plan = TemplatePlanner.Plan(snap, p.StartDate, typed, pds.Keys.ToHashSet(), await TemplateEndpoints.Calendar(db, store, t, p.OfficeId));
         var created = await TemplateEndpoints.Instantiate(db, team, p, parts, plan, pds, null, me.Id, clock.GetUtcNow(), createMilestones: true);
         var basisSuggestions = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == t.Id).ToListAsync();
         if (basisSuggestions.Count > 0)

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -23,7 +24,7 @@ public static class TaskEndpoints
             await access.Project(id, track: false);
             var s = await store.Get(db);
             var f = TaskFilter.From(http.Request.Query);
-            return await TaskQueries.Page(db, TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id), f, me.Id, clock.Today(s), s), f);
+            return await TaskQueries.Page(db, TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id), f, me.Id, clock.Today(s), s), f, s.IsFlagOn("small_ux"));
         });
         // Cross-project task list for the workspace views (§36.1, §36.3): only projects the caller may see, within the
         // selected scope; a workspace's manual order applies only to its owner.
@@ -32,7 +33,7 @@ public static class TaskEndpoints
             var s = await store.Get(db);
             var f = TaskFilter.From(http.Request.Query);
             if (f.WorkspaceId is { } ws && !await db.Workspaces.AnyAsync(w => w.Id == ws && w.OwnerId == me.Id)) f.WorkspaceId = null;
-            return await TaskQueries.Page(db, TaskQueries.Apply(db, InScope(access, db, projects), f, me.Id, clock.Today(s), s), f);
+            return await TaskQueries.Page(db, TaskQueries.Apply(db, InScope(access, db, projects), f, me.Id, clock.Today(s), s), f, s.IsFlagOn("small_ux"));
         });
         api.MapPost("/projects/{id:guid}/tasks", Create);
         api.MapPost("/projects/{id:guid}/tasks/bulk", Bulk);
@@ -209,7 +210,7 @@ public static class TaskEndpoints
         var block = Permissions.ManualBlock(a, ctx, facts);
         var del = Permissions.DeleteTask(a, ctx, facts);
         object P(Allow x) => new { x.Ok, Reason = x.Ok ? null : Reason(x, dname) };
-        return new
+        var result = new
         {
             Task = row, t.Description, t.OnHoldReason, t.CancelledReason, t.PreviousStatus, t.ReviewRequestedAt,
             Project = new { p.Id, p.ProjectNumber, p.Name, p.Status },
@@ -225,6 +226,13 @@ public static class TaskEndpoints
                 AuthoriseStart = t.Status == TaskStatuses.NotStarted && Permissions.ManageCoordination(a, ctx, t.ProjectDisciplineId).Ok,
             },
         };
+        if (!s.IsFlagOn("small_ux")) return result;
+        var json = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
+        json["relatedDeliverables"] = JsonSerializer.SerializeToNode(await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id
+            && db.ItemLinks.Any(l => l.ProjectId == p.Id && l.SourceType == ItemType.Task && l.SourceId == t.Id
+                && l.TargetType == ItemType.Deliverable && l.TargetId == d.Id && l.Relation == ItemRelation.Related))
+            .OrderBy(d => d.Key).Select(d => new { d.Id, d.Key, d.Name, d.Status }).ToListAsync(), JsonOpts.Web);
+        return json;
     }
 
     // ---------- Edit (T-15..T-22, R-02, R-04, E-03) ----------

@@ -1,7 +1,10 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -13,6 +16,8 @@ public static class MilestoneEndpoints
     public sealed record ChangeDateBody(DateOnly NewDate, string? Reason, bool? CascadeDeliverables, bool? IncludeTasks, bool? DryRun, int? RowVersion);
     public sealed record CompleteBody(DateOnly? CompletedDate, bool? Confirm, int? RowVersion);
     public sealed record ReasonBody(string? Reason, int? RowVersion);
+    public sealed record RebaselineBody(string? Reason, bool? Clear, int? RowVersion);
+    public sealed record RebaselineRead(Guid Id, int RowVersion);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -21,6 +26,7 @@ public static class MilestoneEndpoints
         api.MapGet("/milestones/{id}", Get);
         api.MapPatch("/milestones/{id:guid}", Edit);
         api.MapPost("/milestones/{id:guid}/change-date", ChangeDate);
+        api.MapPost("/milestones/{id:guid}/rebaseline", Rebaseline);
         api.MapPost("/milestones/{id:guid}/complete", Complete);
         api.MapPost("/milestones/{id:guid}/reopen", Reopen);
         api.MapPost("/milestones/{id:guid}/cancel", Cancel);
@@ -36,8 +42,17 @@ public static class MilestoneEndpoints
     }
 
     public sealed record MilestoneQuery(string? Type, string? Status, Guid? DisciplineId, bool? ShowCompleted);
+    public sealed record MilestoneRow(Guid Id, Guid ProjectId, string Key, string Name, string MilestoneType, DateOnly? Date, DateOnly? OriginalDate,
+        string? Description, Guid? ProjectDisciplineId, Guid? CompletesPhaseId, bool IsClientFacing, bool IsComplete, DateOnly? CompletedDate,
+        bool IsCancelled, string? CancelledReason, int RowVersion, bool IsSubmission, string? Status, JsonElement? StatusReasons, int SlipDays,
+        int? DaysRemaining, int DeliverableTotal, int DeliverableIssued, int TaskTotal, int TaskComplete, int TaskOpen, int TaskOverdue, int TaskBlocked,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? SlipShown,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateOnly? BaselineDate = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? SinceBaselineDays = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? BaselineSlipShown = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? CanRebaseline = null);
 
-    public static async Task<List<object>> List(Guid id, [AsParameters] MilestoneQuery f, Access access, HubDb db)
+    public static async Task<List<object>> List(Guid id, [AsParameters] MilestoneQuery f, Access access, HubDb db, SettingsStore store)
     {
         var (type, status, disciplineId, showCompleted) = f;
         await access.Project(id, track: false);
@@ -45,35 +60,34 @@ public static class MilestoneEndpoints
         if (!string.IsNullOrEmpty(type)) q = q.Where(m => m.MilestoneType == type);
         if (disciplineId is { } d) q = q.Where(m => m.ProjectDisciplineId == d);
         if (showCompleted != true) q = q.Where(m => !m.IsComplete && !m.IsCancelled);
-        var rows = await Rows(db, q);
+        var rows = await Rows(db, q, await store.Get(db));
         var statuses = Http.List(status);
         return statuses.Length == 0 ? rows : rows.Where(r => statuses.Contains((string)((dynamic)r).Status ?? "")).ToList();
     }
 
-    public static async Task<List<object>> Rows(HubDb db, IQueryable<Milestone> q)
+    public static async Task<List<object>> Rows(HubDb db, IQueryable<Milestone> q, OrgSettings? schedule = null)
     {
         var list = await q.OrderBy(m => m.Date == null).ThenBy(m => m.Date).ThenBy(m => m.SortOrder).Select(m => new
         {
-            m.Id, m.ProjectId, m.Key, m.Name, m.MilestoneType, m.Date, m.OriginalDate, m.Description, m.ProjectDisciplineId, m.CompletesPhaseId,
+            m.Id, m.ProjectId, m.Key, m.Name, m.MilestoneType, m.Date, m.OriginalDate, m.BaselineDate, m.Description, m.ProjectDisciplineId, m.CompletesPhaseId,
             m.IsClientFacing, m.IsComplete, m.CompletedDate, m.IsCancelled, m.CancelledReason, m.RowVersion,
             State = db.MilestoneStates.Where(s => s.MilestoneId == m.Id).Select(s => new { s.Status, s.StatusReasons, s.DaysRemaining, s.SlipDays, s.DeliverableTotal,
                 s.DeliverableIssued, s.TaskTotal, s.TaskComplete, s.TaskOpen, s.TaskOverdue, s.TaskBlocked }).FirstOrDefault(),
             Deliverables = db.Deliverables.Count(d => d.MilestoneId == m.Id && d.Status != DeliverableStatus.Cancelled),
             Issued = db.Deliverables.Count(d => d.MilestoneId == m.Id && (d.Status == DeliverableStatus.Issued || d.Status == DeliverableStatus.Accepted)),
         }).ToListAsync();
-        return list.Select(m => (object)new
-        {
+        return list.Select(m => (object)new MilestoneRow(
             m.Id, m.ProjectId, m.Key, m.Name, m.MilestoneType, m.Date, m.OriginalDate, m.Description, m.ProjectDisciplineId, m.CompletesPhaseId,
             m.IsClientFacing, m.IsComplete, m.CompletedDate, m.IsCancelled, m.CancelledReason, m.RowVersion,
-            IsSubmission = MilestoneType.IsSubmission(m.MilestoneType),
-            Status = m.IsComplete ? MilestoneStatus.Complete : m.IsCancelled ? MilestoneStatus.Cancelled : m.State?.Status,
-            StatusReasons = J.El(m.State?.StatusReasons),
-            SlipDays = m.Date is { } d && m.OriginalDate is { } o ? d.DayNumber - o.DayNumber : 0,
-            DaysRemaining = m.State?.DaysRemaining,
-            DeliverableTotal = m.Deliverables, DeliverableIssued = m.Issued,
-            TaskTotal = m.State?.TaskTotal ?? 0, TaskComplete = m.State?.TaskComplete ?? 0, TaskOpen = m.State?.TaskOpen ?? 0,
-            TaskOverdue = m.State?.TaskOverdue ?? 0, TaskBlocked = m.State?.TaskBlocked ?? 0,
-        }).ToList();
+            MilestoneType.IsSubmission(m.MilestoneType),
+            m.IsComplete ? MilestoneStatus.Complete : m.IsCancelled ? MilestoneStatus.Cancelled : m.State?.Status,
+            J.El(m.State?.StatusReasons), m.Date is { } d && m.OriginalDate is { } o ? d.DayNumber - o.DayNumber : 0,
+            m.State?.DaysRemaining, m.Deliverables, m.Issued,
+            m.State?.TaskTotal ?? 0, m.State?.TaskComplete ?? 0, m.State?.TaskOpen ?? 0, m.State?.TaskOverdue ?? 0, m.State?.TaskBlocked ?? 0,
+            schedule?.IsFlagOn("schedule_baseline") == true ? Evaluator.SlipShown(null, m.Date, null, m.OriginalDate, schedule.SlipDisplayDays) : null,
+            schedule?.IsFlagOn("schedule_baseline") == true ? m.BaselineDate : null,
+            schedule?.IsFlagOn("schedule_baseline") == true ? Evaluator.SinceBaseline(m.Date, m.BaselineDate) : null,
+            schedule?.IsFlagOn("schedule_baseline") == true && m.BaselineDate is not null ? Evaluator.SlipShown(null, m.Date, null, m.BaselineDate, schedule.SlipDisplayDays) : null)).ToList();
     }
 
     static async Task<IResult> Create(Guid id, CreateBody body, Access access, HubDb db)
@@ -99,13 +113,15 @@ public static class MilestoneEndpoints
         return Results.Created($"/api/v1/milestones/{m.Id}", new { m.Id, m.Key, m.RowVersion });
     }
 
-    static async Task<object> Get(string id, Access access, HubDb db)
+    static async Task<object> Get(string id, Access access, HubDb db, SettingsStore store)
     {
         var m = (Guid.TryParse(id, out var g) ? await db.Milestones.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Milestones.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(m.ProjectId, track: false);
-        var row = (await Rows(db, db.Milestones.AsNoTracking().Where(x => x.Id == m.Id))).Single();
-        var deliverables = await DeliverableEndpoints.Rows(db, db.Deliverables.AsNoTracking().Where(d => d.MilestoneId == m.Id));
+        var settings = await store.Get(db);
+        var row = (MilestoneRow)(await Rows(db, db.Milestones.AsNoTracking().Where(x => x.Id == m.Id), settings)).Single();
+        row = row with { CanRebaseline = settings.IsFlagOn("schedule_baseline") ? Permissions.Rebaseline(access.Actor, ctx, m.IsComplete || m.IsCancelled).Ok : null };
+        var deliverables = await DeliverableEndpoints.Rows(db, db.Deliverables.AsNoTracking().Where(d => d.MilestoneId == m.Id), schedule: settings);
         var directTasks = await db.Tasks.AsNoTracking().Where(t => t.MilestoneId == m.Id).OrderBy(t => t.Seq)
             .Select(t => new { t.Id, t.Key, t.Name, t.Status, t.DueDate, t.AssigneeId }).ToListAsync();
         var phase = m.CompletesPhaseId is { } ph ? await db.Phases.Where(x => x.Id == ph).Select(x => new { x.Id, x.Name }).FirstOrDefaultAsync() : null;
@@ -146,6 +162,19 @@ public static class MilestoneEndpoints
         }
         await db.SaveChangesAsync();
         return Results.Ok(new { m.Id, m.RowVersion });
+    }
+
+    static async Task<Ok<RebaselineRead>> Rebaseline(Guid id, RebaselineBody body, HttpContext http, Access access, HubDb db, SettingsStore store)
+    {
+        Http.RequireFlag(await store.Get(db), "schedule_baseline");
+        var (m, _, ctx) = await Load(db, access, id);
+        Access.Demand(Permissions.Rebaseline(access.Actor, ctx, m.IsComplete || m.IsCancelled));
+        await Http.CheckVersion(db, http, m, body.RowVersion);
+        db.Audit.Reason = Check.Reason(body.Reason);
+        Check.That(body.Clear == true || m.Date is not null, "date", "error.required");
+        m.BaselineDate = body.Clear == true ? null : m.Date;
+        await db.SaveChangesAsync();
+        return TypedResults.Ok(new RebaselineRead(m.Id, m.RowVersion));
     }
 
     /// M-02..M-04, AC-MS-04, AC-MS-05, FR-MS-05; `includeTasks` extends the cascade to tasks (packet 018).

@@ -1,15 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Check, Pencil } from 'lucide-react'
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
-import { ChangeList, type ActivityRow } from '@/components/hub/activity'
+import { ChangeList, groupActivity, type ActivityRow } from '@/components/hub/activity'
 import { Empty, ErrorBanner, Loading, Spinner } from '@/components/hub/common'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { useFlag, useMe } from '@/lib/auth'
 import { get, type ApiError } from '@/lib/api'
 import { ago, fmtDate, fmtTime } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
+import { useSearchParams } from 'react-router'
 
 // Inline edit on click for detail panels; each field saves on its own (§13.0 interaction, §13.3.1 autosave).
 
@@ -84,33 +86,34 @@ function Display({ children, onEdit, disabled, title }: { children: ReactNode; o
   )
 }
 
-export function InlineText({ value, onSave, multiline, disabled, placeholder, title, render }: {
-  value?: string | null; onSave: (v: string | null) => Promise<unknown>; multiline?: boolean; disabled?: boolean; placeholder?: string; title?: string; render?: (v: string) => ReactNode
+export function InlineText({ value, onSave, multiline, disabled, placeholder, title, render, initiallyEditing = false, onCancel }: {
+  value?: string | null; onSave: (v: string | null) => Promise<unknown>; multiline?: boolean; disabled?: boolean; placeholder?: string; title?: string; render?: (v: string) => ReactNode; initiallyEditing?: boolean; onCancel?: () => void
 }) {
   const labelId = useContext(FieldLabelContext)
-  const [editing, setEditing] = useState(false)
+  const [editing, setEditing] = useState(initiallyEditing)
   const [v, setV] = useState(value ?? '')
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
   const save = useSaveStatus(value)
   useEffect(() => { if (!editing && save.state?.status !== 'saving' && save.state?.status !== 'failed') setV(value ?? '') }, [value, editing, save.state?.status])
   useEffect(() => { if (editing) ref.current?.focus() }, [editing])
-  const commit = async () => { setEditing(false); if ((v || null) !== (value || null)) await save.track(onSave(v.trim() || null), v.trim() || null) }
+  const commit = async () => { setEditing(false); if ((v || null) === (value || null)) { onCancel?.(); return } if ((v || null) !== (value || null)) await save.track(onSave(v.trim() || null), v.trim() || null) }
   const note = <SaveNote state={save.state} />
   if (!editing) return <><Display onEdit={() => setEditing(true)} disabled={disabled} title={title}>{value ? (render ? render(value) : value) : <span className="text-muted-foreground">{placeholder ?? t('common.dash')}</span>}</Display>{note}</>
   const props = { ref, value: v, 'aria-labelledby': labelId, 'aria-label': labelId ? undefined : title, onChange: (e: any) => setV(e.target.value), onBlur: commit,
-    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Escape') { save.clear(); setV(value ?? ''); setEditing(false) } if (e.key === 'Enter' && (!multiline || e.ctrlKey || e.metaKey)) { e.preventDefault(); commit() } } }
+    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Escape') { save.clear(); setV(value ?? ''); setEditing(false); onCancel?.() } if (e.key === 'Enter' && (!multiline || e.ctrlKey || e.metaKey)) { e.preventDefault(); commit() } } }
   return <>{!labelId && title && <span className="mb-1 block text-xs/[18px] font-normal text-muted-foreground">{title}</span>}{multiline ? <Textarea rows={4} {...props} /> : <Input className="min-h-(--control-row-h)" {...props} />}{note}</>
 }
 
-export function InlineDate({ value, onSave, disabled, title }: { value?: string | null; onSave: (v: string | null) => Promise<unknown>; disabled?: boolean; title?: string }) {
+export function InlineDate({ value, onSave, disabled, title, hint }: { value?: string | null; onSave: (v: string | null) => Promise<unknown>; disabled?: boolean; title?: string; hint?: ReactNode | ((draft: string | null) => ReactNode) }) {
   const labelId = useContext(FieldLabelContext)
   const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value ?? null)
   const save = useSaveStatus(value)
   const note = <SaveNote state={save.state} />
-  if (!editing) return <><Display onEdit={() => setEditing(true)} disabled={disabled} title={title}><span className="tabular-nums">{fmtDate(value)}</span></Display>{note}</>
-  return <><Input type="date" aria-labelledby={labelId} title={title} className="min-h-(--control-row-h) w-44" autoFocus defaultValue={save.state?.status === 'failed' ? String(save.state.value ?? '') : value ?? ''}
+  if (!editing) return <><Display onEdit={() => { setDraft(value ?? null); setEditing(true) }} disabled={disabled} title={title}><span className="tabular-nums">{fmtDate(value)}</span></Display>{note}</>
+  return <><Input type="date" aria-labelledby={labelId} title={title} className="min-h-(--control-row-h) w-44" autoFocus onChange={e=>setDraft(e.target.value || null)} defaultValue={save.state?.status === 'failed' ? String(save.state.value ?? '') : value ?? ''}
     onBlur={async (e) => { setEditing(false); if ((e.target.value || null) !== (value ?? null)) await save.track(onSave(e.target.value || null), e.target.value || null) }}
-    onKeyDown={(e) => { if (e.key === 'Escape') { save.clear(); setEditing(false) } if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />{note}</>
+    onKeyDown={(e) => { if (e.key === 'Escape') { save.clear(); setEditing(false) } if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />{hint && <span className="mt-1 block text-xs text-muted-foreground">{typeof hint === 'function' ? hint(draft) : hint}</span>}{note}</>
 }
 
 export function InlineSelect({ value, options, onSave, disabled, allowEmpty, title }: {
@@ -153,13 +156,22 @@ export function InlinePerson({ value, name, onSave, disabled, title, allowClear 
 
 /** Item History tab: field-level changes, newest first (FR-AUD-02, §12.8 "history is facts"). */
 export function HistoryList({ type, id }: { type: string; id: string }) {
+  const [sp, setSp] = useSearchParams()
+  const small = useFlag('small_ux')
+  const burst = (useMe().settings as { activityBurstMinutes?: number }).activityBurstMinutes ?? 10
+  const grouped = small && sp.get('groupChanges') === 'true'
   const q = useQuery({ queryKey: ['history', type, id], queryFn: () => get<{ items: ActivityRow[] }>(`items/${type}/${id}/activity?pageSize=100`) })
   if (q.isPending) return <Loading rows={3} />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   if (!q.data?.items.length) return <Empty>{t('activity.empty')}</Empty>
+  const groups = grouped ? groupActivity(q.data.items, burst) : q.data.items.map((r) => ({ rows: [r] }))
   return (
-    <ol className="divide-y px-4">
-      {q.data.items.map((r) => (
+    <>
+      {small && <label className="flex items-center gap-2 px-4 py-3 text-sm"><input type="checkbox" checked={grouped} onChange={(e) => { const n = new URLSearchParams(sp); if (e.target.checked) n.set('groupChanges', 'true'); else n.delete('groupChanges'); setSp(n, { replace: true }) }} />{t('activity.groupChanges')}</label>}
+      <ol className="divide-y px-4">
+      {groups.map((g) => {
+        const r = g.rows[0]
+        return (
         <li key={r.id} className="flex gap-3 py-3 text-sm">
           <Avatar id={r.actorId} name={r.actorName ?? t('common.system')} className="mt-0.5" />
           <div className="min-w-0 flex-1">
@@ -168,12 +180,14 @@ export function HistoryList({ type, id }: { type: string; id: string }) {
               <span className="text-muted-foreground">{t(`action.${r.action}`)}{r.itemType !== type ? ` · ${t(`itemType.${r.itemType}`)} ${r.itemKey ?? ''}` : ''}</span>
               <time className="text-xs/[18px] text-muted-foreground tabular-nums" dateTime={r.occurredAt} title={r.occurredAt}>{fmtTime(r.occurredAt)}</time>
             </div>
-            <div className="mt-1"><ChangeList row={r} /></div>
+            {g.rows.length > 1 ? <details className="mt-1"><summary className="cursor-pointer text-muted-foreground">{t('activity.groupSummary', { name: r.actorName ?? t('common.system'), n: g.rows.length })} · {fmtTime(g.rows[g.rows.length-1].occurredAt)} – {fmtTime(r.occurredAt)}</summary><div className="mt-1 space-y-2">{g.rows.map((x) => <div key={x.id}><time dateTime={x.occurredAt}>{fmtTime(x.occurredAt)}</time> · {t(`action.${x.action}`)}<ChangeList row={x} />{x.reason && <p>{t('common.reason')}: {x.reason}</p>}</div>)}</div></details> : <div className="mt-1"><ChangeList row={r} /></div>}
             {r.reason && <p className="mt-1 text-xs/[18px] text-muted-foreground">{t('common.reason')}: {r.reason}</p>}
           </div>
         </li>
-      ))}
-    </ol>
+        )
+      })}
+      </ol>
+    </>
   )
 }
 

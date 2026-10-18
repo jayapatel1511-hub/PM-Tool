@@ -1,3 +1,4 @@
+import { useFlag } from '@/lib/auth'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, CheckCircle2, Ellipsis, Lock, Monitor, Plus, X } from 'lucide-react'
@@ -202,6 +203,7 @@ const ACTION_BODY = { decline: 'allocation.declineBody', cancel: 'allocation.can
 
 /** The allocation's detail panel (§13.0: a 560 px right panel on desktop, full width below), deep-linked by ?allocation=. */
 function AllocationDetail({ base, id, projectNumber, options, close, refresh }: { base: string; id: string; projectNumber: string; options?: CoordOptions; close: () => void; refresh: () => void }) {
+  const small = useFlag('small_ux')
   const [preview, setPreview] = useState<Preview | null>(null), [action, setAction] = useState<'confirm' | 'decline' | 'cancel' | 'complete' | null>(null)
   const [editing, setEditing] = useState(false)
   const [error, setError] = useState<unknown>(null)
@@ -278,7 +280,7 @@ function AllocationDetail({ base, id, projectNumber, options, close, refresh }: 
         }}>
         {action === 'confirm' && preview && <>
           {over.length > 0
-            ? <p role="alert" className="flex gap-2 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad"><AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />{t('allocation.overDays', { n: over.length, h: hours(over.reduce((s, d) => s + d.overByHours, 0)) })}</p>
+            ? <p role="alert" className="flex gap-2 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad"><AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />{t(small ? 'allocation.overDaysOf' : 'allocation.overDays', { n: over.length, m: preview.days.length, h: hours(over.reduce((s, d) => s + d.overByHours, 0)) })}</p>
             : <p className="flex gap-2 rounded-md border border-ok/30 bg-ok-bg px-4 py-3 text-sm text-ok"><CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden />{t('allocation.withinCapacity')}</p>}
           {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- axe scrollable-region-focusable: keyboard users scroll the dated rows */}
           <div className="scroll-region max-h-64 overflow-auto rounded-md border text-sm" tabIndex={0} role="region" aria-label={t('allocation.reviewCapacity')}><table className="w-full">

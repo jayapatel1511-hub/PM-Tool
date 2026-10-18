@@ -1,3 +1,4 @@
+import { PickerProject } from '@/components/hub/people'
 import { disciplineColour } from '@/lib/discipline-colour'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -6,6 +7,7 @@ import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, PageHelp, Spinner, TableRegion, selectCls } from '@/components/hub/common'
+import { DateHint } from '@/components/hub/date-context'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, SaveStatus, TabBar } from '@/components/hub/fields'
 import { DepTypeChip, DepTypeField, DeliverableIndicators, progressLabel, type DeliverableStateView } from '@/components/hub/indicators'
 import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
@@ -32,10 +34,12 @@ import { MenuSelect, errorText } from './Tasks'
 import { ExportMenu } from '@/components/hub/export'
 import { useTable } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
+import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/deleted'
 
 export interface DeliverableRow {
   requiredReviewPackageId?: string
   id: string; projectId: string; key: string; name: string; projectDisciplineId: string; deliverableTypeId: string; ownerId?: string; reviewerId?: string
+  baselineStartDate?: string; baselineDueDate?: string; sinceBaselineDays?: number; canRebaseline?: boolean; baselineSlipShown?: boolean; slipShown?: boolean
   milestoneId?: string; startDate?: string; dueDate?: string; originalDueDate?: string; originalStartDate?: string; priority: string; status: string; revision?: string; issuedDate?: string
   issuedTo?: string; requiresReview: boolean; rowVersion: number; createdAt: string; disciplineName?: string; disciplineColour?: string; disciplineOrder: number
   typeName?: string; ownerName?: string; ownerActive: boolean; reviewerName?: string; milestoneKey?: string; milestoneName?: string; milestoneDate?: string
@@ -47,7 +51,7 @@ const GROUP_LABEL: Record<string, string> = { discipline: 'common.discipline', m
 export const STATUSES = ['Not Started', 'In Progress', 'In Review', 'Revision Required', 'Ready to Issue', 'Issued', 'Accepted', 'On Hold', 'Cancelled']
 
 /** Deliverables Register (§13.6): grouped by discipline by default, filters in the URL, expandable to tasks. */
-export function DeliverablesTab() {
+function LiveDeliverablesTab() {
   const p = useCurrentProject()
   const ref = useReference()
   const [sp, setSp] = useSearchParams()
@@ -124,6 +128,7 @@ export function DeliverablesTab() {
         quick={<MenuSelect label={t('common.groupBy')} value={group} onChange={(v) => set('group', v === 'discipline' ? null : v)}
           options={Object.entries(GROUP_LABEL).map(([value, label]) => ({ value, label: t(label) }))} />}
         active={<ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />}>
+        <DeletedToggle project={p} />
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.discipline')} htmlFor="deliverable-discipline" className="w-full sm:w-44">
             <select id="deliverable-discipline" className={selectCls} value={filters.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
@@ -218,6 +223,12 @@ export function DeliverablesTab() {
   )
 }
 
+export function DeliverablesTab() {
+  const p = useCurrentProject()
+  if (useShowDeleted(p)) return <Page title={t('ptab.deliverables')}><FilterBar><DeletedToggle project={p} /></FilterBar><DeletedList project={p} kind="deliverables" /></Page>
+  return <LiveDeliverablesTab />
+}
+
 function BulkDialog({ p, op, ids, milestones, onClose }: { p: ProjectDetail; op: string; ids: string[]; milestones: MilestoneRow[]; onClose: (ok: boolean) => void }) {
   const [v, setV] = useState<string | null>('')
   return (
@@ -237,11 +248,11 @@ function BulkDialog({ p, op, ids, milestones, onClose }: { p: ProjectDetail; op:
   )
 }
 
-function CreateDeliverable({ p, milestones, onClose }: { p: ProjectDetail; milestones: MilestoneRow[]; onClose: () => void }) {
+export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: ProjectDetail; milestones: MilestoneRow[]; onClose: () => void; fromTask?: { id: string; name: string; projectDisciplineId: string; milestoneId?: string; startDate?: string; dueDate?: string; priority: string } }) {
   const ref = useReference()
   const refresh = useProjectRefresh()
   const allowed = p.disciplines.filter((d) => d.isActive && p.permissions.createDeliverableIn.includes(d.id))
-  const [f, setF] = useState<Record<string, any>>({ projectDisciplineId: allowed[0]?.id, requiresReview: true, priority: 'Medium' })
+  const [f, setF] = useState<Record<string, any>>({ projectDisciplineId: fromTask?.projectDisciplineId ?? allowed[0]?.id, requiresReview: true, priority: 'Medium', ...(fromTask ? {name:fromTask.name, milestoneId:fromTask.milestoneId,startDate:fromTask.startDate,dueDate:fromTask.dueDate,priority:fromTask.priority} : {}) })
   const [owner, setOwner] = useState<{ id: string | null; name?: string }>({ id: null })
   const [reviewer, setReviewer] = useState<string | null>(null)
   const [err, setErr] = useState<ApiError | null>(null)
@@ -251,7 +262,7 @@ function CreateDeliverable({ p, milestones, onClose }: { p: ProjectDetail; miles
     if (busy) return
     setErr(null); setBusy(true)
     try {
-      const r = await post(`projects/${p.id}/deliverables`, { ...f, ownerId: owner.id ?? lead?.leadUserId ?? null, reviewerId: reviewer, milestoneId: f.milestoneId || null,
+      const r = await post(`projects/${p.id}/deliverables`, { ...f, ...(fromTask ? { fromTaskId: fromTask.id } : {}), ownerId: owner.id ?? lead?.leadUserId ?? null, reviewerId: reviewer, milestoneId: f.milestoneId || null,
         startDate: f.startDate || null, dueDate: f.dueDate || null })
       toast.success(t('deliverable.created', { key: r.key }))
       r.warnings?.forEach((w: string) => toast.warning(w))
@@ -307,6 +318,7 @@ function DeliverablePanel({ id }: PanelProps) {
   const refresh = useProjectRefresh()
   const ref = useReference()
   const [tab, setTab] = useState('tasks')
+  const [baseline, setBaseline] = useState<'set' | 'clear' | null>(null)
   const [transition, setTransition] = useState<{ to: string; needsReason: boolean } | null>(null)
   const [issuing, setIssuing] = useState(false)
   const [err, setErr] = useState<unknown>(null)
@@ -335,7 +347,7 @@ function DeliverablePanel({ id }: PanelProps) {
   }
   const s = d.state
   return (
-    <div>
+    <PickerProject.Provider value={d.projectId}><div>
       <PanelHead title={d.name} meta={<>
         <Key>{d.key}</Key>
         <DropdownMenu>
@@ -359,6 +371,7 @@ function DeliverablePanel({ id }: PanelProps) {
           {perms.issue && <Button size="sm" onClick={() => setIssuing(true)}><Send className="size-4" />{t('deliverable.issue')}</Button>}
         </div>
       </PanelHead>
+      {d.canRebaseline && <div className="flex flex-wrap gap-2 px-4 pt-3"><Button size="sm" variant="outline" onClick={() => setBaseline('set')}>{t('baseline.rebaseline')}</Button>{(d.baselineStartDate || d.baselineDueDate) && <Button size="sm" variant="ghost" onClick={() => setBaseline('clear')}>{t('baseline.useOriginal')}</Button>}</div>}
       {err != null && <div className="px-4 pb-4"><ErrorBanner error={err} retry={() => { setErr(null); reload() }} /></div>}
       <FieldGroup title={t('common.details')}>
         <FieldRow label={t('common.name')}><InlineText value={d.name} disabled={!can} onSave={(v) => save({ name: v })} /></FieldRow>
@@ -373,8 +386,9 @@ function DeliverablePanel({ id }: PanelProps) {
       </FieldGroup>
       <FieldGroup title={t('register.group.schedule')}>
         <FieldRow label={t('field.MilestoneId')}><InlineSelect value={d.milestoneId} allowEmpty disabled={!can} options={(milestones.data ?? []).map((m) => ({ value: m.id, label: `${m.key} ${m.name}` }))} onSave={(v) => save({ milestoneId: v })} title={t('field.MilestoneId')} /></FieldRow>
-        <FieldRow label={t('field.StartDate')}><InlineDate value={d.startDate} disabled={!can} onSave={(v) => save({ startDate: v })} /></FieldRow>
-        <FieldRow label={t('field.DueDate')}><InlineDate value={d.dueDate} disabled={!can} onSave={(v) => save({ dueDate: v })} />{d.originalDueDate && d.originalDueDate !== d.dueDate && <span className="px-2 text-xs/[18px] text-muted-foreground tabular-nums">{t('deliverable.originally', { date: fmtDate(d.originalDueDate) })}</span>}</FieldRow>
+        <FieldRow label={t('field.StartDate')}><InlineDate hint={(draft) => <DateHint type="Deliverable" id={d.id} startDate={draft} dueDate={d.dueDate} />} value={d.startDate} disabled={!can} onSave={(v) => save({ startDate: v })} /></FieldRow>
+        {(d.baselineStartDate || d.baselineDueDate) && <FieldRow label={t('baseline.rebaseline')}><span className="px-2 py-1.5 tabular-nums">{fmtDate(d.baselineStartDate)} → {fmtDate(d.baselineDueDate)} · {t('interaction.sinceBaseline', { n: d.sinceBaselineDays ?? 0 })}</span></FieldRow>}
+        <FieldRow label={t('field.DueDate')}><InlineDate hint={(draft) => <DateHint type="Deliverable" id={d.id} startDate={d.startDate} dueDate={draft} />} value={d.dueDate} disabled={!can} onSave={(v) => save({ dueDate: v })} />{d.originalDueDate && d.originalDueDate !== d.dueDate && <span className="px-2 text-xs/[18px] text-muted-foreground tabular-nums">{t('deliverable.originally', { date: fmtDate(d.originalDueDate) })}</span>}</FieldRow>
         <FieldRow label={t('deliverable.progress')}><div className="px-2 py-1.5"><span className="inline-flex items-center gap-2"><ProgressBar pct={s?.progressPct} /><span className="text-xs/[18px] text-muted-foreground tabular-nums">{progressLabel(s) ?? t('deliverable.noTasks')}</span></span>
           {s && <div className="mt-1 text-xs/[18px] text-muted-foreground tabular-nums">{t('deliverable.breakdown', { open: s.taskOpen, overdue: s.taskOverdue, blocked: s.taskBlocked })}</div>}</div></FieldRow>
       </FieldGroup>
@@ -388,6 +402,7 @@ function DeliverablePanel({ id }: PanelProps) {
         {d.issuedDate && <FieldRow label={t('deliverable.issued')}><div className="px-2 py-1.5"><span className="tabular-nums">{fmtDate(d.issuedDate)}</span> · {d.revision} · {d.issuedTo}{data.transmittalUrl && <> · <a className="text-primary underline underline-offset-4" href={data.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a></>}</div></FieldRow>}
         {data.onHoldReason && d.status === 'On Hold' && <FieldRow label={t('field.OnHoldReason')}><div className="px-2 py-1.5">{data.onHoldReason}</div></FieldRow>}
       </FieldGroup>
+      {q.data.relatedTasks?.length > 0 && <div className="px-4 py-3 text-sm">{t('interaction.relatedTasks')}: {q.data.relatedTasks.map((r: {id:string;key:string;name:string})=><button key={r.id} className="ml-2 underline underline-offset-2" onClick={()=>openPanel('Task',r.id)}>{r.key} {r.name}</button>)}</div>}
       <TabBar tabs={[{ id: 'tasks', label: t('ptab.tasks'), count: d.tasks?.length }, { id: 'deps', label: t('deliverable.dependencies') }, { id: 'issues', label: t('deliverable.issues'), count: data.issues.length },
         ...(ItemSlots.Links ? [{ id: 'links', label: t('common.links') }] : []), ...(ItemSlots.Comments ? [{ id: 'comments', label: t('common.comments') }] : []),
         ...DELIVERABLE_TABS.map((x) => ({ id: x.id, label: x.label })), { id: 'history', label: t('common.history') }]} value={tab} onChange={setTab} />
@@ -421,9 +436,11 @@ function DeliverablePanel({ id }: PanelProps) {
       {tab === 'comments' && <CommentsSlot type="Deliverable" id={d.id} projectId={d.projectId} />}
       {DELIVERABLE_TABS.filter((x) => x.id === tab).map((x) => <div key={x.id}>{x.render(data)}</div>)}
       {tab === 'history' && <HistoryList type="Deliverable" id={d.id} />}
+      {baseline && <ConfirmDialog open onOpenChange={(o) => !o && setBaseline(null)} title={baseline === 'clear' ? t('baseline.useOriginal') : t('baseline.rebaseline')} reason
+        onConfirm={async (reason) => { await post(`deliverables/${d.id}/rebaseline`, { reason, clear: baseline === 'clear', rowVersion: d.rowVersion }); setBaseline(null); reload() }} />}
       {transition && <DeliverableTransition d={d} to={transition.to} needsReason={transition.needsReason} onClose={() => { setTransition(null); reload() }} />}
       {issuing && <IssueDialog d={d} needsConfirm={perms.issueNeedsConfirm} onClose={() => { setIssuing(false); reload() }} />}
-    </div>
+    </div></PickerProject.Provider>
   )
 }
 

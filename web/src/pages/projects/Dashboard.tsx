@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { type ActivityRow, ChangeList } from '@/components/hub/activity'
+import { ScheduleNote, type PlannedTarget } from '@/components/hub/schedule-note'
 import { AttentionPanel } from '@/components/hub/attention'
 import { Empty, ErrorBanner, Loading, Missing, Page, Section, SummaryTile, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
@@ -28,6 +29,7 @@ interface Dash {
   issues: { open: number; high: number }; risks: { high: number }
   registers: Record<'issuesOpen' | 'issuesHigh' | 'risksHigh', Count>
   disciplineDue14: Record<string, Count>
+  disciplineStatus?: Record<string, Record<'notStarted' | 'inProgress' | 'issued' | 'onHold', Count>>
   disciplines: { disciplineId: string; name: string; leadId?: string; health: string; reasons: { text: string }[]; open: number; overdue: number; blocked: number; waiting: number
     deliverablesDue14: number; nextDueKey?: string; nextDueName?: string; nextDueDate?: string; nextDueType?: string; nextDueId?: string }[]
   dueThisWeek: { items: TaskRow[]; total: number; link: string }
@@ -69,16 +71,17 @@ export function DashboardTab() {
             <MilestoneStrip rows={q.data.milestones.map((m) => ({ ...m, isComplete: false, isCancelled: false }) as MilestoneRow)} onOpen={(m) => openPanel('Milestone', m.id)} />
           </div>}
           <Headline />
+          <ScheduleNote value={(p as typeof p & { latestPlanned?: PlannedTarget }).latestPlanned} />
           <div className="grid items-start gap-6 xl:grid-cols-[3fr_2fr]">
             <Section title={t('dash.attention')} id="attention" accent="peach">
-              <AttentionPanel projectId={p.id} canSnooze={canSnooze} limit={10} disciplineId={disciplineId} />
+              <AttentionPanel projectId={p.id} canSnooze={canSnooze} limit={10} disciplineId={disciplineId} severity={sp.get('severity') ?? undefined} />
             </Section>
             <Section title={t('dash.disciplines')} id="disciplines" accent="mint">
               {q.data.disciplines.length === 0 ? <Empty>{t('dash.notEvaluated')}</Empty> : (
                 <TableRegion className="rounded-none border-0" role="region" aria-label={t('dash.disciplines')}>
                   <table className="w-full text-sm">
                     <thead className="bg-muted">
-                      <tr>{([['common.discipline'], ['dash.lead'], ['common.status'], ['dash.open', true], ['ind.overdue', true], ['ind.blocked', true], ['dash.due14', true], ['dash.nextDue']] as const)
+                      <tr>{([['common.discipline'], ['dash.lead'], ['common.status'], ...(q.data.disciplineStatus ? [['deliverable.progress']] as const : []), ['dash.open', true], ['ind.overdue', true], ['ind.blocked', true], ['dash.due14', true], ['dash.nextDue']] as const)
                         .map(([h, num]) => <th key={h} scope="col" className={cn(thCls, num && 'text-right')}>{t(h)}</th>)}</tr>
                     </thead>
                     <tbody>
@@ -93,6 +96,7 @@ export function DashboardTab() {
                               {name ? <span className="inline-flex items-center gap-2"><Avatar id={d.leadId} name={name} />{name}</span> : <Chip tone="warn">{t('dash.noLead')}</Chip>}
                             </td>
                             <td className={tdCls}><Why reasons={d.reasons} title={d.name}><HealthPill health={d.health} /></Why></td>
+                            {q.data.disciplineStatus && <td className={tdCls}><DisciplineStatus segments={q.data.disciplineStatus[d.disciplineId]} base={base} /></td>}
                             <td className={cn(tdCls, 'text-right tabular-nums')}><Link className="hover:underline" to={`${tasks}&open=true&onHold=false`}>{d.open}</Link></td>
                             <td className={cn(tdCls, 'text-right tabular-nums', d.overdue > 0 && 'font-semibold text-bad')}><Link className="hover:underline" to={`${tasks}&overdue=true`}>{d.overdue}</Link></td>
                             <td className={cn(tdCls, 'text-right tabular-nums', d.blocked > 0 && 'font-semibold text-bad')}><Link className="hover:underline" to={`${tasks}&blocked=true`}>{d.blocked}</Link></td>
@@ -244,4 +248,13 @@ function TaskListCard({ title, empty, data, to }: { title: string; empty: string
       )}
     </Section>
   )
+}
+
+/** Fixed status groups share the register's server links; each remains readable without colour. */
+function DisciplineStatus({ segments, base }: { segments?: Record<'notStarted' | 'inProgress' | 'issued' | 'onHold', Count>; base: string }) {
+  const keys = ['notStarted', 'inProgress', 'issued', 'onHold'] as const
+  const total = keys.reduce((sum, key) => sum + (segments?.[key].value ?? 0), 0)
+  if (!total || !segments) return <span className="text-xs text-muted-foreground">{t('rcv.noDeliverables')}</span>
+  const colours = ['bg-idle', 'bg-primary', 'bg-ok', 'bg-warn']
+  return <div className="min-w-32 space-y-1"><div className="hidden h-3 overflow-hidden rounded sm:flex">{keys.map((key, index) => <Link key={key} to={`${base}/deliverables?${segments[key].link}`} aria-label={`${t(`rcv.${key}`)}: ${segments[key].value}`} title={`${t(`rcv.${key}`)}: ${segments[key].value}`} className={colours[index]} style={{ width: `${100 * segments[key].value / total}%` }} />)}</div><span className="text-xs tabular-nums">{t('rcv.issued', { n: segments.issued.value, m: total })}</span></div>
 }

@@ -8,6 +8,8 @@ public static class Text
 {
     static readonly Dictionary<string, string> En = new()
     {
+        ["date_context.unavailable"] = "Not available on that date",
+        ["col.sinceBaseline"] = "Days since re-baseline",
         ["availability.preview_required"] = "Preview the complete valid HR import again before applying it.",
         ["availability.partial_overlap"] = "Overlapping partial-day HR records need reconciliation in HR before import.",
         ["availability.schedule_hours"] = "Absent hours cannot exceed the person's contracted hours on a working day.",
@@ -381,7 +383,7 @@ public static class Text
         ["param.mine"] = "My tasks only", ["param.minDaysOverdue"] = "Minimum days overdue", ["param.blockerType"] = "Blocked by", ["param.daysAhead"] = "Days ahead",
         ["param.type"] = "Milestone type", ["param.ownerType"] = "Owner type", ["param.overdueOnly"] = "Overdue only", ["param.reviewerId"] = "Reviewer",
         ["param.days"] = "Days without activity", ["param.from"] = "From", ["param.to"] = "To", ["param.category"] = "Action type", ["param.scope"] = "Staff",
-        ["param.officeId"] = "Office", ["param.role"] = "Role",
+        ["param.officeId"] = "Office", ["param.office"] = "Office", ["param.discipline"] = "Discipline", ["param.role"] = "Role",
         ["opt.task"] = "A task", ["opt.decision"] = "A decision", ["opt.manual"] = "A manual block", ["opt.internal"] = "Internal", ["opt.external"] = "External",
         ["opt.client"] = "Client", ["opt.direct"] = "My direct reports", ["opt.all"] = "All staff", ["opt.PM"] = "Project Manager", ["opt.TeamMember"] = "Team Member",
         ["opt.Reviewer"] = "Reviewer", ["opt.Viewer"] = "Viewer", ["opt.status"] = "Status changes", ["opt.assignment"] = "Assignments", ["opt.date"] = "Date changes",
@@ -421,7 +423,7 @@ public static class Text
         ["param.pmId"] = "Project Manager", ["opt.Red"] = "Red", ["opt.Yellow"] = "Yellow", ["nav.portfolio"] = "Portfolio",
         ["col.computedHealth"] = "Computed health", ["col.reportedHealth"] = "Reported health", ["col.why"] = "Why", ["col.overrideNote"] = "Override note",
         ["col.nextMilestoneDate"] = "Next milestone date", ["col.nextSubmission"] = "Next submission", ["col.nextSubmissionDate"] = "Submission date",
-        ["col.blockedTasks"] = "Blocked tasks", ["col.overdueDecisions"] = "Overdue decisions", ["col.highIssues"] = "High issues", ["col.critical"] = "Critical",
+        ["col.blockedTasks"] = "Blocked tasks", ["col.overdueDecisions"] = "Overdue decisions", ["col.overdueDeliverables"] = "Overdue deliverables", ["col.projectType"] = "Project type", ["col.highIssues"] = "High issues", ["col.critical"] = "Critical",
         ["col.warning"] = "Warning",
         ["reassign.same_person"] = "Choose someone else to take the work.", ["reassign.not_open"] = "Some items are no longer open for this person. Refresh the list.",
         ["reassign.reason"] = "Work reassigned from {0}",

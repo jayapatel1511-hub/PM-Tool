@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useMe, type Me } from '@/lib/auth'
 import { ProjectSlots } from './slots'
+import { PickerProject } from '@/components/hub/people'
 
 const Ctx = createContext<ProjectDetail | null>(null)
 export const useCurrentProject = () => useContext(Ctx)!
@@ -55,7 +56,7 @@ export function ProjectLayout() {
         <ProjectTabs p={p} me={me} />
         <StatusBanner p={p} />
         {p.status === 'Active' && (p.permissions.isPm || p.permissions.leadOf.length > 0) && <DateReviewBanner p={p} />}
-        <div className="flex-1"><InProject.Provider value><Outlet /></InProject.Provider></div>
+        <div className="flex-1"><InProject.Provider value><PickerProject.Provider value={p.id}><Outlet /></PickerProject.Provider></InProject.Provider></div>
       </div>
     </Ctx.Provider>
   )

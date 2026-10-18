@@ -125,4 +125,39 @@ public sealed class PortfolioTests(HubFactory f)
         Assert.Contains("Decisions overdue", atRisk.Single(x => x!.S("projectNumber") == yellow.ProjectNumber)!.S("why"));
         Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).GetAsync("/api/v1/reports/projects-at-risk")).StatusCode);
     }
+    [Fact]
+    [Trait("Spec", "AC-RCV-10")]
+    public async Task Overdue_decisions_tile_filters_to_projects_with_one_and_keeps_its_sum()
+    {
+        var (_, withDecision, withoutDecision, _) = await Four();
+        var c = f.As(TestData.Lena);
+        var filtered = await c.GetAsync($"/api/v1/portfolio?ids={Ids(withDecision, withoutDecision)}&overdueDecisions=true").Result.Json();
+        var rows = filtered["projects"]!.AsArray();
+        Assert.Single(rows);
+        Assert.Equal(withDecision.Id, rows[0]!.G("id"));
+        Assert.Equal(rows.Sum(r => r!.I("overdueDecisions")), filtered["tiles"]!.I("overdueDecisions"));
+        Assert.Equal(1, (await c.GetAsync($"/api/v1/projects/{withDecision.Id}/decisions?indicator=overdue").Result.Json()).AsArray().Count);
+    }
+
+    [Fact]
+    [Trait("Spec", "AC-RCV-20")]
+    public async Task Export_adds_overdue_deliverables_and_project_type_only_when_the_flag_is_on()
+    {
+        var p = await d.Project();
+        var admin = f.As(TestData.Admin);
+        try
+        {
+            foreach (var on in new[] { false, true })
+            {
+                (await admin.Put("/api/v1/admin/settings/flag.status_rollups", new { value = on })).EnsureSuccessStatusCode();
+                var response = await f.As(TestData.Lena).GetAsync($"/api/v1/portfolio/export?format=csv&ids={p.Id}");
+                response.EnsureSuccessStatusCode();
+                var csv = await response.Content.ReadAsStringAsync();
+                Assert.Equal(on, csv.Contains("Overdue deliverables"));
+                Assert.Equal(on, csv.Contains("Project type"));
+            }
+        }
+        finally { (await admin.Put("/api/v1/admin/settings/flag.status_rollups", new { value = false })).EnsureSuccessStatusCode(); }
+    }
+
 }

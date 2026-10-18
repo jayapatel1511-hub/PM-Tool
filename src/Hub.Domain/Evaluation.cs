@@ -8,10 +8,11 @@ public sealed record ProjectSnap(Guid Id, string Number, string Status, Guid Pri
     string? HealthOverride, DateTimeOffset? OverrideExpiresAt, DateTimeOffset Now);
 public sealed record UserSnap(Guid Id, string Name, bool IsActive, Guid? SupervisorId);
 public sealed record DisciplineSnap(Guid Id, string Name, Guid? LeadId, bool IsActive, int SortOrder);
-public sealed record MilestoneSnap(Guid Id, string Key, string Name, string Type, DateOnly? Date, DateOnly? OriginalDate, bool IsComplete, bool IsCancelled, Guid? DisciplineId);
+public sealed record MilestoneSnap(Guid Id, string Key, string Name, string Type, DateOnly? Date, DateOnly? OriginalDate, bool IsComplete, bool IsCancelled, Guid? DisciplineId,
+    DateOnly? BaselineDate = null);
 public sealed record DeliverableSnap(Guid Id, string Key, string Name, Guid DisciplineId, Guid? OwnerId, Guid? ReviewerId, Guid? MilestoneId,
     DateOnly? StartDate, DateOnly? DueDate, DateOnly? OriginalDueDate, string Status, string Priority, DateOnly LastActivity, DateOnly? IssuedDate = null,
-    DateOnly? StartedOn = null, DateOnly? StatusChangedOn = null);
+    DateOnly? StartedOn = null, DateOnly? StatusChangedOn = null, DateOnly? BaselineStartDate = null, DateOnly? BaselineDueDate = null);
 public sealed record TaskSnap(Guid Id, string Key, string Name, Guid DisciplineId, Guid? DeliverableId, Guid? MilestoneId, Guid? AssigneeId, Guid? ReviewerId,
     string Status, string Priority, DateOnly? StartDate, DateOnly? DueDate, int ProgressPct, decimal? EstimatedHours, string? ManualBlockType,
     string? ManualBlockReason, DateOnly? ManualBlockSince, DateOnly LastActivity, DateOnly? ReviewRequestedOn, int DueDateChangeCount, DateOnly? CompletedOn,
@@ -62,6 +63,30 @@ public static class Evaluator
 {
     public static bool IsTaskTerminal(string s) => TaskStatuses.IsTerminal(s);
 
+    public sealed record PlannedTarget(DateOnly Date, string ItemKey, DateOnly TargetDate)
+    {
+        public string Rule => "FR-INT-15";
+    }
+
+    public static PlannedTarget? LatestPlanned(string projectStatus, DateOnly? target, IEnumerable<DateItem> items)
+    {
+        if (projectStatus != ProjectStatus.Active || target is null) return null;
+        return items.Where(item => !item.Terminal && (item.DueDate ?? item.StartDate) > target)
+            .OrderByDescending(item => item.DueDate ?? item.StartDate).ThenBy(item => item.Key, StringComparer.Ordinal)
+            .Select(item => new PlannedTarget((item.DueDate ?? item.StartDate)!.Value, item.Key, target.Value)).FirstOrDefault();
+    }
+
+    public static int? SinceBaseline(DateOnly? planned, DateOnly? baseline) =>
+        planned is { } p && baseline is { } b ? p.DayNumber - b.DayNumber : null;
+
+    // Display only: the evaluator's slip, indicators and calendar rules keep measuring from the original dates.
+    public static bool SlipShown(DateOnly? start, DateOnly? due, DateOnly? originalStart, DateOnly? originalDue, int threshold)
+    {
+        bool Moved(DateOnly? planned, DateOnly? original) => planned != original &&
+            (threshold == 0 || planned is { } p && original is { } o && Math.Abs(p.DayNumber - o.DayNumber) > threshold);
+        return Moved(start, originalStart) || Moved(due, originalDue);
+    }
+
     public static EvalResult Evaluate(EvalInput i)
     {
         var s = i.Settings;
@@ -84,18 +109,6 @@ public static class Evaluator
 
         LinkState Link(DependencySnap e) { var p = tasks[e.PredecessorId]; return DependencyRules.State(e.Type, p.Status, p.StartedOn, p.CompletedOn, e.LagDays, after, today); }
         bool Satisfied(DependencySnap e) => Link(e) == LinkState.Satisfied;
-        // D-12 by link type (FR-DEPT-04); the lag extends the predecessor's date (packet 021). Deliverables check the start only.
-        Reason? LinkDates(DependencySnap e, string predKey, DateOnly? predStart, DateOnly? predDue, DateOnly? start, DateOnly? due, bool checkDue)
-        {
-            if (e.Type == DependencyTypes.StartToStart) // nothing is flagged when either start date is missing
-                return predStart is { } ps && start is { } st && st < after(ps, e.LagDays) ? new Reason($"Starts {st:yyyy-MM-dd} before {predKey} starts {after(ps, e.LagDays):yyyy-MM-dd}", "D-12") : null;
-            if (predDue is not { } pd) return null;
-            var pde = after(pd, e.LagDays);
-            if (e.Type == DependencyTypes.FinishToFinish) // D5: the successor finishes no earlier than its predecessor
-                return due is { } fd && fd < pde ? new Reason($"Due {fd:yyyy-MM-dd} before {predKey} is due {pde:yyyy-MM-dd}", "D-12") : null;
-            if (start is { } ts && ts < pde) return new Reason($"Starts {ts:yyyy-MM-dd} before {predKey} is due {pde:yyyy-MM-dd}", "D-12");
-            return checkDue && due is { } td && td < pde ? new Reason($"Due {td:yyyy-MM-dd} before {predKey} is due {pde:yyyy-MM-dd}", "D-12") : null;
-        }
         bool TaskOverdue(TaskSnap t) => active && t.DueDate is { } d && d < today && !TaskStatuses.IsTerminal(t.Status) && t.Status != TaskStatuses.OnHold; // G-01
 
         // ---------- Tasks ----------
@@ -152,10 +165,9 @@ public static class Evaluator
             var inconsistencies = new List<Reason>();
             if (active && !terminal)
             {
-                if (parent?.DueDate is { } pdd && t.DueDate is { } tdd && tdd > pdd) // T-04
-                    inconsistencies.Add(new Reason($"Due {tdd:yyyy-MM-dd} is after deliverable {parent.Key} due {pdd:yyyy-MM-dd}", "T-04"));
+                if (DependencyRules.ParentDates(parent?.Key, parent?.DueDate, t.DueDate, true) is { } parentWhy) inconsistencies.Add(parentWhy); // T-04
                 foreach (var e in preds[t.Id]) // D-12
-                    if (tasks[e.PredecessorId] is var p && LinkDates(e, p.Key, p.StartDate, p.DueDate, t.StartDate, t.DueDate, true) is { } why) inconsistencies.Add(why);
+                    if (tasks[e.PredecessorId] is var p && DependencyRules.LinkDates(e, p.Key, p.StartDate, p.DueDate, t.StartDate, t.DueDate, true, after) is { } why) inconsistencies.Add(why);
             }
             var notes = new List<string>();
             if (preds[t.Id].Any(e => tasks[e.PredecessorId].Status == TaskStatuses.Cancelled)) notes.Add("predecessor_cancelled");
@@ -244,8 +256,8 @@ public static class Evaluator
                 if (msOverdue) atRisk.Add(new Reason($"Milestone {ms!.Key} is overdue", "DL-08"));
             }
             var inconsistencies = new List<Reason>();
-            if (active && !terminal && ms is { IsCancelled: false, Date: { } mdate } && d.DueDate is { } ddue && ddue > mdate) // DL-03
-                inconsistencies.Add(new Reason($"Due {ddue:yyyy-MM-dd} is after milestone {ms.Key} on {mdate:yyyy-MM-dd}", "DL-03"));
+            if (active && !terminal && ms is { IsCancelled: false } && DependencyRules.ParentDates(ms.Key, ms.Date, d.DueDate, false) is { } parentWhy) // DL-03
+                inconsistencies.Add(parentWhy);
             var remaining = openTasks.Where(t => t.EstimatedHours is not null && t.Status != TaskStatuses.OnHold).Sum(t => t.EstimatedHours!.Value * (1 - t.ProgressPct / 100m));
             // Explicit deliverable dependencies (packet 021) produce the same waiting/blocked states.
             var dBlockers = new List<Blocker>();
@@ -265,7 +277,7 @@ public static class Evaluator
                 }
             if (active && !terminal)
                 foreach (var e in dlPreds[d.Id]) // D-12 for deliverables
-                    if (deliverables[e.PredecessorId] is var pr && LinkDates(e, pr.Key, pr.StartDate, pr.DueDate, d.StartDate, d.DueDate, false) is { } why)
+                    if (deliverables[e.PredecessorId] is var pr && DependencyRules.LinkDates(e, pr.Key, pr.StartDate, pr.DueDate, d.StartDate, d.DueDate, false, after) is { } why)
                         inconsistencies.Add(why);
             List<string> dNotes = d.Status is DeliverableStatus.Issued or DeliverableStatus.Accepted // AC-DEPT-03: the note replaces the D-12 flag
                 && dlPreds[d.Id].Any(e => e.Type == DependencyTypes.FinishToFinish && !DeliverableStatus.IsTerminal(deliverables[e.PredecessorId].Status))
@@ -633,6 +645,13 @@ public static class Evaluator
 
 public enum LinkState { Satisfied, Waiting, InLag }
 
+public sealed record DateItem(Guid Id, string Key, DateOnly? StartDate, DateOnly? DueDate, bool Terminal);
+public sealed record DateLimit(string Key, DateOnly Date);
+public sealed record DateBound(DateOnly Date, IReadOnlyList<Reason> Reasons);
+public sealed record DateSuccessor(Guid Id, string Key, Reason Reason);
+public sealed record DateContext(DateBound? EarliestStart, DateBound? EarliestDue, DateBound? LatestDue,
+    IReadOnlyList<Reason> Inconsistencies, IReadOnlyList<DateSuccessor> Successors, IReadOnlyList<Reason> NewInconsistencies);
+
 /// FR-DEPT-03: the one satisfaction rule for task and deliverable links. The evaluator, the dependency lists and
 /// Readiness all call it, so no caller recomputes it (AC-DEPT-05).
 public static class DependencyRules
@@ -640,6 +659,79 @@ public static class DependencyRules
     /// A lag counts working days when the calendar is on, calendar days when it is null (packet 021).
     public static Func<DateOnly, int, DateOnly> After(WorkCalendar? calendar) =>
         (d, lag) => lag <= 0 ? d : calendar is null ? d.AddDays(lag) : calendar.Add(d, lag);
+
+    // D-12: task FS checks both dates; deliverable FS checks only the start. Missing anchors impose no bound.
+    public static (DateOnly? Start, DateOnly? Due) Bounds(DependencySnap e, DateOnly? predStart, DateOnly? predDue,
+        bool task, Func<DateOnly, int, DateOnly> after)
+    {
+        var anchor = e.Type == DependencyTypes.StartToStart ? predStart : predDue;
+        if (anchor is not { } date) return (null, null);
+        var bound = after(date, e.LagDays);
+        return e.Type == DependencyTypes.StartToStart ? (bound, null)
+            : e.Type == DependencyTypes.FinishToFinish ? (null, bound) : (bound, task ? bound : null);
+    }
+
+    public static Reason? LinkDates(DependencySnap e, string predKey, DateOnly? predStart, DateOnly? predDue,
+        DateOnly? start, DateOnly? due, bool task, Func<DateOnly, int, DateOnly> after)
+    {
+        var bounds = Bounds(e, predStart, predDue, task, after);
+        var anchor = e.Type == DependencyTypes.StartToStart ? "starts" : "is due";
+        if (bounds.Start is { } minStart && start is { } st && st < minStart)
+            return new Reason($"Starts {st:yyyy-MM-dd} before {predKey} {anchor} {minStart:yyyy-MM-dd}", "D-12");
+        return bounds.Due is { } minDue && due is { } dd && dd < minDue
+            ? new Reason($"Due {dd:yyyy-MM-dd} before {predKey} is due {minDue:yyyy-MM-dd}", "D-12") : null;
+    }
+
+    public static Reason? ParentDates(string? key, DateOnly? parentDue, DateOnly? due, bool task) =>
+        parentDue is { } latest && due is { } date && date > latest
+            ? new Reason(task ? $"Due {date:yyyy-MM-dd} is after deliverable {key} due {latest:yyyy-MM-dd}"
+                : $"Due {date:yyyy-MM-dd} is after milestone {key} on {latest:yyyy-MM-dd}", task ? "T-04" : "DL-03") : null;
+
+    /// FR-INT-08: advisory bounds and newly inconsistent direct successors, using the evaluator's exact checks.
+    public static DateContext Context(DateItem proposed, IReadOnlyList<DateItem> items, IReadOnlyList<DependencySnap> links,
+        DateLimit? parent, bool task, bool active, Func<DateOnly, int, DateOnly> after)
+    {
+        var byId = items.ToDictionary(item => item.Id);
+        var predecessors = links.Where(e => e.SuccessorId == proposed.Id && byId.ContainsKey(e.PredecessorId)).ToArray();
+        DateBound? Earliest(bool start)
+        {
+            var bounds = predecessors.Select(e => {
+                var p = byId[e.PredecessorId]; var bound = Bounds(e, p.StartDate, p.DueDate, task, after);
+                return (Edge: e, Pred: p, Date: start ? bound.Start : bound.Due);
+            }).Where(x => x.Date is not null).ToArray();
+            return bounds.Length == 0 ? null : new DateBound(bounds.Max(x => x.Date!.Value), bounds.Select(x =>
+                new Reason($"{x.Pred.Key} ({x.Edge.Type}, lag {x.Edge.LagDays}): {(start ? "start" : "due")} no earlier than {x.Date:yyyy-MM-dd}", "D-12")).ToArray());
+        }
+        var original = byId[proposed.Id];
+        var own = new List<Reason>(); var ownNew = new List<Reason>(); var successors = new List<DateSuccessor>();
+        if (active && !proposed.Terminal)
+        {
+            if (ParentDates(parent?.Key, parent?.Date, proposed.DueDate, task) is { } why)
+            {
+                own.Add(why);
+                if (ParentDates(parent?.Key, parent?.Date, original.DueDate, task) is null) ownNew.Add(why);
+            }
+            foreach (var e in predecessors)
+            {
+                var p = byId[e.PredecessorId];
+                if (LinkDates(e, p.Key, p.StartDate, p.DueDate, proposed.StartDate, proposed.DueDate, task, after) is { } reason)
+                {
+                    own.Add(reason);
+                    if (LinkDates(e, p.Key, p.StartDate, p.DueDate, original.StartDate, original.DueDate, task, after) is null) ownNew.Add(reason);
+                }
+            }
+        }
+        if (active)
+            foreach (var e in links.Where(e => e.PredecessorId == proposed.Id && byId.ContainsKey(e.SuccessorId)).DistinctBy(e => e.SuccessorId))
+            {
+                var successor = byId[e.SuccessorId];
+                if (!successor.Terminal && LinkDates(e, original.Key, original.StartDate, original.DueDate, successor.StartDate, successor.DueDate, task, after) is null
+                    && LinkDates(e, proposed.Key, proposed.StartDate, proposed.DueDate, successor.StartDate, successor.DueDate, task, after) is { } reason)
+                    successors.Add(new(successor.Id, successor.Key, reason));
+            }
+        return new(Earliest(true), Earliest(false), parent is null ? null : new DateBound(parent.Date,
+            [new Reason(task ? $"Deliverable {parent.Key} due {parent.Date:yyyy-MM-dd}" : $"Milestone {parent.Key} on {parent.Date:yyyy-MM-dd}", task ? "T-04" : "DL-03")]), own, successors, ownNew);
+    }
 
     /// Waiting: the predecessor has not reached the link's trigger; InLag: it has, and the lag is still running.
     /// Statuses are task or deliverable statuses: both share Not Started, On Hold and Cancelled, and a predecessor

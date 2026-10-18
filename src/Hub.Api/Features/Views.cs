@@ -15,6 +15,7 @@ public static class ViewEndpoints
     public sealed record OrderBody(Guid[] TaskIds);
 
     const string Personal = "Personal", ProjectScope = "Project";
+    static readonly string[] PortfolioGroups = ["none", "client", "office", "projectType"];
     static readonly string[] TaskKeys = ["q", "disciplineId", "deliverableId", "status", "priority", "mine", "overdue", "blocked", "blocking", "dueThisWeek", "unassigned",
         "readyForReview", "waiting", "open", "stale", "dueSoon", "noDueDate", "dateInconsistent", "heldPastDue", "dueFrom", "dueTo", "milestoneId", "assigneeId", "ids",
         "sort", "group", "cols"];
@@ -36,7 +37,8 @@ public static class ViewEndpoints
         ["decisions"] = ["q", "status", "ownerId", "ownerType", "impact", "requiredFrom", "requiredTo", "blocking", "indicator", "sort", "cols"],
         ["milestones"] = ["type", "showCompleted"],
         ["projects"] = ["q", "status", "pmId", "clientId", "officeId", "phaseId", "disciplineId", "health", "projectTypeId", "includeArchived", "mine", "starred", "priority", "sort", "submissionWithinDays"],
-        ["portfolio"] = ["q", "status", "pmId", "clientId", "officeId", "phaseId", "disciplineId", "health", "projectTypeId", "mine", "submissionWithinDays"],
+        ["portfolio"] = ["q", "status", "pmId", "clientId", "officeId", "phaseId", "disciplineId", "health", "projectTypeId", "mine", "submissionWithinDays", "group", "overdueDecisions"],
+        ["staff"] = ["scope", "inactive", "office", "discipline", "indicator"],
         ["workload"] = ["supervisorId", "disciplineId", "officeId", "projectId", "indicator", "from", "sort"],
         ["planner"] = ["view", "from", "weeks", "week", "supervisorId", "disciplineId", "officeId", "personId", "projectId", "source", "confidence", "visibility", "indicator", "q", "sort", "includeMyDrafts"],
         // Cross-project lists keep their project scope too (§36.1, FR-VIS-02); it is re-read against access when opened.
@@ -49,10 +51,12 @@ public static class ViewEndpoints
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/views", async (string listType, Guid? projectId, Access access, HubDb db, CurrentUser me) =>
+        api.MapGet("/views", async (string listType, Guid? projectId, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
         {
+            var settings = await store.Get(db);
             Check.OneOf(listType, [.. Lists.Keys], "listType");
             if (listType == "planner") { Access.Demand(Permissions.ViewWorkload(access.Actor)); Check.That(projectId == null, "projectId", "view.personal_only"); }
+            if (listType == "staff") { Http.RequireFlag(settings, "small_ux"); Access.Demand(Permissions.ViewStaff(access.Actor)); Check.That(projectId == null, "projectId", "view.personal_only"); }
             var ctx = projectId is { } pid ? (await access.Project(pid, track: false)).Ctx : null;
             var views = await db.SavedViews.AsNoTracking().Where(v => v.ListType == listType
                 && ((v.Scope == Personal && v.OwnerId == me.Id && v.ProjectId == projectId) || (projectId != null && v.Scope == ProjectScope && v.ProjectId == projectId)))
@@ -72,11 +76,13 @@ public static class ViewEndpoints
             }
             return new { Views = rows, CanShare = canShare };
         });
-        api.MapPost("/views", async (ViewBody body, Access access, HubDb db, CurrentUser me) =>
+        api.MapPost("/views", async (ViewBody body, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
         {
+            var settings = await store.Get(db);
             Check.OneOf(body.ListType, [.. Lists.Keys], "listType");
             var scope = body.Scope ?? Personal;
             if (body.ListType == "planner") { Access.Demand(Permissions.ViewWorkload(access.Actor)); Check.That(scope == Personal && body.ProjectId == null, "scope", "view.personal_only"); }
+            if (body.ListType == "staff") { Http.RequireFlag(settings, "small_ux"); Access.Demand(Permissions.ViewStaff(access.Actor)); Check.That(scope == Personal && body.ProjectId == null, "scope", "view.personal_only"); }
             Check.OneOf(scope, [Personal, ProjectScope], "scope");
             if (body.ProjectId is { } pid)
             {
@@ -91,9 +97,9 @@ public static class ViewEndpoints
             await db.SaveChangesAsync();
             return Results.Created($"/api/v1/views/{v.Id}", new { v.Id, v.RowVersion });
         });
-        api.MapPatch("/views/{id:guid}", async (Guid id, JsonElement body, HttpContext http, Access access, HubDb db, CurrentUser me) =>
+        api.MapPatch("/views/{id:guid}", async (Guid id, JsonElement body, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
         {
-            var v = await Editable(db, access, me, id);
+            var v = await Editable(db, access, me, id, await store.Get(db));
             var patch = new Patch(body);
             await Http.CheckVersion(db, http, v, patch.RowVersion);
             if (patch.Has("name")) v.Name = Check.Required(patch.Str("name"), "name", 100);
@@ -106,9 +112,9 @@ public static class ViewEndpoints
             await db.SaveChangesAsync();
             return Results.Ok(new { v.Id, v.RowVersion });
         });
-        api.MapDelete("/views/{id:guid}", async (Guid id, Access access, HubDb db, CurrentUser me) =>
+        api.MapDelete("/views/{id:guid}", async (Guid id, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
         {
-            db.SavedViews.Remove(await Editable(db, access, me, id)); // a preference, not a work item: removed outright
+            db.SavedViews.Remove(await Editable(db, access, me, id, await store.Get(db))); // a preference, not a work item: removed outright
             await db.SaveChangesAsync();
             return Results.NoContent();
         });
@@ -133,10 +139,11 @@ public static class ViewEndpoints
         });
     }
 
-    static async Task<SavedView> Editable(HubDb db, Access access, CurrentUser me, Guid id)
+    static async Task<SavedView> Editable(HubDb db, Access access, CurrentUser me, Guid id, OrgSettings settings)
     {
         var v = await db.SavedViews.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         if (v.ListType == "planner") Access.Demand(Permissions.ViewWorkload(access.Actor));
+        if (v.ListType == "staff") { Http.RequireFlag(settings, "small_ux"); Access.Demand(Permissions.ViewStaff(access.Actor)); }
         if (v.Scope == Personal) { if (v.OwnerId != me.Id) throw ApiException.NotFound(); return v; }
         var (_, ctx) = await access.Project(v.ProjectId!.Value, track: false);
         Access.Demand(Permissions.ManageSavedProjectView(access.Actor, ctx)); // members see project views; only the PM and leads change them
@@ -149,6 +156,7 @@ public static class ViewEndpoints
         var known = Lists[listType];
         var kept = ps.Where(p => known.Contains(p.Key) && !string.IsNullOrWhiteSpace(p.Value)).ToDictionary(p => p.Key, p => p.Value.Trim());
         Check.That(kept.Values.All(x => x.Length <= 2000), "params", "error.too_long", 2000);
+        if (listType == "portfolio" && kept.TryGetValue("group", out var group)) Check.OneOf(group, PortfolioGroups, "group");
         v.Filters = JsonSerializer.Serialize(kept);
         v.Sort = kept.GetValueOrDefault("sort");
         v.GroupBy = kept.GetValueOrDefault("group") ?? kept.GetValueOrDefault("swim");
@@ -178,6 +186,7 @@ public static class ViewEndpoints
                 "disciplineId" when projectId is not null => await Count(db.ProjectDisciplines.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.IsActive).Select(x => x.Id), ids),
                 "discipline" when projectId is not null => await Count(db.ProjectDisciplines.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.IsActive).Select(x => x.Id), ids),
                 "disciplineId" => await Count(db.Disciplines.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
+                "discipline" => await Count(db.Disciplines.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "owner" when projectId is not null => await Count(db.Users.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "deliverableId" => await Count(db.Deliverables.Where(x => ids.Contains(x.Id)).Select(x => x.Id), ids),
                 "milestoneId" => await Count(db.Milestones.Where(x => ids.Contains(x.Id) && !x.IsCancelled).Select(x => x.Id), ids),
@@ -190,6 +199,7 @@ public static class ViewEndpoints
                 "typeId" => await Count(db.DeliverableTypes.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "clientId" => await Count(db.Clients.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "officeId" => await Count(db.Offices.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
+                "office" => await Count(db.Offices.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "phaseId" => await Count(db.Phases.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "projectTypeId" => await Count(db.ProjectTypes.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "projectId" => await Count(db.Projects.Where(x => ids.Contains(x.Id)).Select(x => x.Id), ids),

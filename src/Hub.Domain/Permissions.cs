@@ -223,6 +223,13 @@ public static class Permissions
     public static Allow HealthOverride(Actor a, ProjectContext p) => PmOnly(a, p);
     public static Allow ManageMilestones(Actor a, ProjectContext p) => PmOnly(a, p);
 
+    public static Allow Rebaseline(Actor a, ProjectContext p, bool closed)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        if (closed) return Allow.No("baseline.closed");
+        return p.PrimaryPmId == a.Id || p.Has(ProjectRole.PM) ? Allow.Yes : Allow.No("perm.pm");
+    }
+
     public static Allow ChangeProjectStatus(Actor a, ProjectContext p, string to)
     {
         if (a.ReadOnly) return Allow.No("perm.read_only");

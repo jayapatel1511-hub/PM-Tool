@@ -1,5 +1,7 @@
 # Tasks: Task and Timeline Interaction
 
+Local takeover implementation is present for S01–S15 source/UI/model (combined schema and acceptance checks pending). The unchecked slices remain open until their required integration/acceptance checks pass; see [verification.md](verification.md). Flag cleanup remains gated on Jay.
+
 Each slice is one PR, merged dark behind its flag (FR-INT-01). The first slice of each part adds that part's flag name to §43's `Flags.cs` and its flag pair test (AC-INT-01: off unchanged, on works). Every slice keeps today's behaviour with its flag off and names the tests that cite its AC IDs. Effort: S or M.
 
 Dependencies: every slice comes after §43's flag slice (packet 039). S02 after S01. S05 after S04. S07 after S06. S08 after S07. The rest are independent.

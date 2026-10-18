@@ -11,7 +11,14 @@ public static class Flags
     [
         new("figure_names", "041"), // §45.2 and §45.3: the Uncommitted name, the basis lines, the Partial view row label and "at most"
         new("show_deleted", "045"), // §49.2: the deleted-items list, export and deliverable/milestone restore
+        new("template_working_days", "045"), // §49.4: office-calendar offsets in templates
         new("status_rollups", "045"), // §49.5 and §49.6: discipline status segments and the Portfolio overdue deliverables count
+        new("picker_project_rank", "046"),
+        new("row_quick_actions", "046"),
+        new("date_context", "046"),
+        new("schedule_baseline", "046"),
+        new("small_ux", "046"),
+        new("timeline_handoffs_chain", "046"),
     ];
 
     /// `flag.<name>` as a Bool setting, default off, group `flags`, generated like `rule_enabled.*`.

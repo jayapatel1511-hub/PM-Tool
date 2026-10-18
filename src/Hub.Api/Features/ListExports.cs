@@ -141,8 +141,8 @@ public static class ListExportEndpoints
         api.MapGet("/projects/{id:guid}/deliverables/export", async (Guid id, string? format, [AsParameters] DeliverableEndpoints.DeliverableQuery f, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
         {
             var (p, _) = await access.Project(id, track: false);
-            var rows = Indicators(Json(await DeliverableEndpoints.List(id, f, access, db)));
-            return await ExportFile.Send(db, store, format, Text.Get("export.deliverables", p.ProjectNumber), DeliverableCols, rows, await Filters(db, http, access), p.Id, $"{p.ProjectNumber}-deliverables", clock);
+            var rows = Indicators(Json(await DeliverableEndpoints.List(id, f, access, db, store)));
+            return await ExportFile.Send(db, store, format, Text.Get("export.deliverables", p.ProjectNumber), (await store.Get(db)).IsFlagOn("schedule_baseline") ? [.. DeliverableCols, new("sinceBaselineDays", "sinceBaseline", "number")] : DeliverableCols, rows, await Filters(db, http, access), p.Id, $"{p.ProjectNumber}-deliverables", clock);
         });
         api.MapGet("/projects/{id:guid}/decisions/export", async (Guid id, string? format, [AsParameters] DecisionEndpoints.DecisionQuery f, HttpContext http, Access access, HubDb db,
             EvaluationService eval, SettingsStore store, TimeProvider clock) =>
@@ -159,9 +159,9 @@ public static class ListExportEndpoints
         api.MapGet("/projects/{id:guid}/milestones/export", async (Guid id, string? format, [AsParameters] MilestoneEndpoints.MilestoneQuery f, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
         {
             var (p, _) = await access.Project(id, track: false);
-            var rows = Json(await MilestoneEndpoints.List(id, f, access, db));
+            var rows = Json(await MilestoneEndpoints.List(id, f, access, db, store));
             foreach (var r in rows) r!["deliverablesIssued"] = $"{r["deliverableIssued"]}/{r["deliverableTotal"]}";
-            return await ExportFile.Send(db, store, format, Text.Get("export.milestones", p.ProjectNumber), MilestoneCols, rows, await Filters(db, http, access), p.Id, $"{p.ProjectNumber}-milestones", clock);
+            return await ExportFile.Send(db, store, format, Text.Get("export.milestones", p.ProjectNumber), (await store.Get(db)).IsFlagOn("schedule_baseline") ? [.. MilestoneCols, new("sinceBaselineDays", "sinceBaseline", "number")] : MilestoneCols, rows, await Filters(db, http, access), p.Id, $"{p.ProjectNumber}-milestones", clock);
         });
         api.MapGet("/projects/export", async (string? format, [AsParameters] ProjectEndpoints.ProjectQuery f, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {

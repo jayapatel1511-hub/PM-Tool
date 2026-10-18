@@ -37,7 +37,7 @@ export interface ProjectDetail {
   permissions: {
     edit: Perm; manageTeam: Perm; manageMilestones: Perm; healthOverride: Perm; comment: Perm; raiseRegister: Perm; runCoordination: Perm
     createEvent: Perm; enterTime: Perm; createTaskIn: string[]; createDeliverableIn: string[]; leadOf: string[]; isPm: boolean
-    transitions: string[]; changeNumber: boolean; setVisibility: boolean; needsReason: boolean
+    transitions: string[]; changeNumber: boolean; setVisibility: boolean; needsReason: boolean; restore?: Perm
   }
 }
 

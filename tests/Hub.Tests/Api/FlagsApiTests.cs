@@ -27,4 +27,21 @@ public sealed class FlagsApiTests(HubFactory f)
         Assert.Equal(Flags.All.Select(x => $"flag.{x.Name}"), rows.Where(r => r!.S("group") == "flags").Select(r => r!.S("key")));
         Assert.All(rows.Where(r => r!.S("group") == "flags"), r => Assert.Equal(Flags.Find(r!.S("key"))!.Packet, r!.S("packet")));
     }
+    // Row actions are client-only; browser flag pairs cover rendering, this covers their authenticated setting bridge.
+    [Fact, Trait("flag-off", "row_quick_actions"), Trait("flag-on", "row_quick_actions")]
+    public async Task Row_actions_flag_starts_dark_and_admin_can_expose_it_to_the_client()
+    {
+        var admin = f.As(TestData.Admin);
+        try
+        {
+            foreach (var on in new[] { false, true })
+            {
+                (await admin.Put("/api/v1/admin/settings/flag.row_quick_actions", new { value = on })).EnsureSuccessStatusCode();
+                var me = await f.As(TestData.Pm).GetAsync("/api/v1/me").Result.Json();
+                Assert.Equal(on, me["flags"]!["row_quick_actions"]!.GetValue<bool>());
+            }
+        }
+        finally { (await admin.Put("/api/v1/admin/settings/flag.row_quick_actions", new { value = false })).EnsureSuccessStatusCode(); }
+    }
+
 }

@@ -133,6 +133,45 @@ public sealed class ViewsTests(HubFactory f)
         await f.As(TestData.Rita).GetAsync($"/api/v1/views?listType={kind}&projectId={project.Id}").Result.Json(404);
     }
 
+    [Fact, Trait("Spec", "AC-INT-19")]
+    public async Task Staff_views_are_personal_restore_filters_and_name_missing_references()
+    {
+        var admin = f.As(TestData.Admin);
+        await admin.Put("/api/v1/admin/settings/flag.small_ux", new { value = false }).Result.Json();
+        Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Sam).GetAsync("/api/v1/views?listType=staff")).StatusCode);
+        await admin.Put("/api/v1/admin/settings/flag.small_ux", new { value = true }).Result.Json();
+        try
+        {
+            var sam = f.As(TestData.Sam); var office = await d.Office(); var discipline = await d.Discipline("Civil");
+            var made = await sam.Post("/api/v1/views", new { name = "Synthetic staff view", listType = "staff", isDefault = true,
+                @params = new Dictionary<string, string> { ["office"] = office.ToString(), ["discipline"] = discipline.ToString(), ["indicator"] = "reviewsStalled", ["panel"] = "unused" } }).Result.Json(201);
+            var id = made.G("id");
+            var opened = (await sam.GetAsync("/api/v1/views?listType=staff").Result.Json())["views"]!.AsArray().Single(v => v!.G("id") == id)!;
+            Assert.Equal("Personal", opened.S("scope")); Assert.True(opened["isDefault"]!.GetValue<bool>());
+            Assert.Equal(office.ToString(), opened["params"]!.S("office")); Assert.Equal(discipline.ToString(), opened["params"]!.S("discipline"));
+            Assert.Equal("reviewsStalled", opened["params"]!.S("indicator")); Assert.Null(opened["params"]!["panel"]);
+            Assert.Equal(HttpStatusCode.BadRequest, (await sam.Post("/api/v1/views", new { name = "Forbidden shared staff", listType = "staff", scope = "Project", projectId = Guid.NewGuid() })).StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).GetAsync("/api/v1/views?listType=staff")).StatusCode);
+            Assert.DoesNotContain((await f.As(TestData.Lena).GetAsync("/api/v1/views?listType=staff").Result.Json())["views"]!.AsArray(), v => v!.G("id") == id);
+            await f.DbAsync(async db => { var v = await db.SavedViews.SingleAsync(v => v.Id == id); v.Filters = v.Filters.Replace(office.ToString(), Guid.NewGuid().ToString()); return await db.SaveChangesAsync(); });
+            var cleaned = (await sam.GetAsync("/api/v1/views?listType=staff").Result.Json())["views"]!.AsArray().Single(v => v!.G("id") == id)!;
+            Assert.Null(cleaned["params"]!["office"]); Assert.Contains("office", cleaned["dropped"]!.AsArray().Select(x => x!.GetValue<string>()));
+            Assert.Equal("reviewsStalled", cleaned["params"]!.S("indicator"));
+        }
+        finally { await admin.Put("/api/v1/admin/settings/flag.small_ux", new { value = false }).Result.Json(); }
+    }
+
+    [Fact, Trait("Spec", "AC-RCV-10"), Trait("Spec", "AC-RCV-19")]
+    public async Task Portfolio_views_keep_group_and_overdue_decisions_and_refuse_unknown_groups()
+    {
+        var pm = f.As(TestData.Pm);
+        var made = await pm.Post("/api/v1/views", new { name = "Synthetic grouped portfolio", listType = "portfolio",
+            @params = new Dictionary<string, string> { ["group"] = "client", ["overdueDecisions"] = "true" } }).Result.Json(201);
+        var opened = (await pm.GetAsync("/api/v1/views?listType=portfolio").Result.Json())["views"]!.AsArray().Single(v => v!.G("id") == made.G("id"))!;
+        Assert.Equal("client", opened["params"]!.S("group")); Assert.Equal("true", opened["params"]!.S("overdueDecisions"));
+        Assert.Equal(HttpStatusCode.BadRequest, (await pm.Post("/api/v1/views", new { name = "Invalid group", listType = "portfolio", @params = new { group = "unknown" } })).StatusCode);
+    }
+
     [Fact]
     public async Task Manual_board_order_is_shared_by_the_team() // FR-004, US3, SC-002
     {

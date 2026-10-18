@@ -2,8 +2,11 @@ import { disciplineColour } from '@/lib/discipline-colour'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, ListTree, Monitor, Printer, ZoomIn } from 'lucide-react'
 import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
+import { useFlag } from '@/lib/auth'
+import type { DateContextRead } from '@/components/hub/date-context'
+import { ScheduleNote, type PlannedTarget } from '@/components/hub/schedule-note'
 import { ActiveFilters, ChoiceMenu, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, selectCls, useIsPhone } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key, toneOf } from '@/components/hub/pills'
@@ -12,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useProjectRefresh } from '@/hooks/data'
-import { get, patch } from '@/lib/api'
+import { get, patch, qs } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, shortDate, today } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -52,7 +55,7 @@ export function DepArrow({ d, hot, title, marker }: { d: string; hot: boolean; t
   )
 }
 const LABEL = 224
-const H = { group: 28, deliverable: 32, loose: 24, task: 24 } as const
+const H = { handoff: 32, group: 28, deliverable: 32, loose: 24, task: 24 } as const
 const CLOSED = ['Issued', 'Accepted', 'Cancelled']
 const STATUSES = ['Not Started', 'In Progress', 'In Review', 'Revision Required', 'Ready to Issue', 'Issued', 'Accepted', 'On Hold']
 export const tone = (status?: string | null) => `var(--${toneOf(status)})`
@@ -60,23 +63,26 @@ export const toneBg = (status?: string | null) => `var(--${toneOf(status)}-bg)`
 const min = (xs: (string | null | undefined)[]) => xs.filter(Boolean).reduce<string | undefined>((a, b) => (!a || b! < a ? b! : a), undefined)
 const max = (xs: (string | null | undefined)[]) => xs.filter(Boolean).reduce<string | undefined>((a, b) => (!a || b! > a ? b! : a), undefined)
 export const HATCH = 'repeating-linear-gradient(135deg, var(--bad) 0 3px, transparent 3px 7px)'
-const FILTERS = ['disciplineId', 'milestoneId', 'status', 'hideCompleted', 'from', 'to'] as const
+const FILTERS = ['disciplineId', 'milestoneId', 'status', 'hideCompleted', 'from', 'to', 'chainTo'] as const
 
 interface TimelineTask {
   id: string; key: string; name: string; deliverableId?: string | null; projectDisciplineId: string; milestoneId?: string | null; startDate?: string | null; dueDate?: string | null
   originalStartDate?: string | null; originalDueDate?: string | null; status: string; progressPct: number; assignee?: string | null; rowVersion: number; createdOn: string
-  isOverdue: boolean; canEditDates: boolean; dueNeedsReason: boolean
+  isOverdue: boolean; slipShown?: boolean; affectedMilestoneIds?: string[]; canEditDates: boolean; dueNeedsReason: boolean
 }
+interface TimelineHandoff { id: string; key: string; title: string; status: string; sendingDisciplineId: string; receivingDisciplineId: string; neededBy: string; promisedBy?: string; dateMismatch: boolean; isOverdue: boolean; daysOverdue: number }
 interface TimelineData {
+  latestPlanned?: PlannedTarget; handoffs?: TimelineHandoff[]
   permissions: { manageMilestones: boolean; needsReason: boolean }
   tasks: TimelineTask[]
   dependencies: { id: string; predecessorTaskId: string; successorTaskId: string; type: string; lagDays: number; highlighted: boolean }[]
   deliverableLinks: { from: string; to: string; type: string; lagDays?: number | null; highlighted: boolean; derived: boolean }[]
-  deliverables: { id: string; canEditDates: boolean; createdOn: string }[]
+  deliverables: { id: string; canEditDates: boolean; createdOn: string; slipShown?: boolean; baselineStartDate?: string; baselineDueDate?: string; baselineSlipShown?: boolean }[]
 }
 /** `assumed`: no start date, so the bar starts at the creation date (§40 AC-TL-01). */
-interface Span { start: string; end: string; late: boolean; assumed?: boolean; ghost?: { start: string; end: string } | null }
+interface Span { start: string; end: string; late: boolean; assumed?: boolean; ghost?: { start: string; end: string } | null; baseline?: { start: string; end: string } | null }
 type RowT =
+  | { kind: 'handoff'; id: string; h: TimelineHandoff }
   | { kind: 'group'; id: string; name: string; colour?: string; count: number }
   | { kind: 'deliverable'; id: string; d: DeliverableRow; span: Span; tasks: number }
   | { kind: 'loose'; id: string; count: number }
@@ -87,6 +93,7 @@ export type Move = { kind: 'task' | 'deliverable'; id: string; key: string; name
  *  dependency arrows (red while the predecessor is unfinished and overdue), ghost bars at original dates, and dragging
  *  to a new date with a confirmation. Only the confirmed item's dates change; nothing is rescheduled automatically. */
 export function TimelineTab() {
+  const chainEnabled = useFlag('timeline_handoffs_chain')
   const p = useCurrentProject()
   const [sp, setSp] = useSearchParams()
   const openPanel = useItemPanel()
@@ -113,6 +120,13 @@ export function TimelineTab() {
   const now = today()
   const px = ZOOM[zoom]
   const data = tl.data
+  const chainTo = chainEnabled ? sp.get('chainTo') : null
+  const chain = new Set(data.tasks.filter(t => chainTo && t.affectedMilestoneIds?.includes(chainTo)).map(t => t.id))
+  const chainDeliverables = new Set(dels.data.filter(d => d.milestoneId === chainTo || data.tasks.some(t=>t.deliverableId===d.id && chain.has(t.id))).map(d=>d.id))
+  const chainLabel = ms.data.find(m=>m.id===chainTo)?.key ?? ''
+  const handoffs = (data.handoffs ?? []).filter(h => h.status !== 'Cancelled' && (!f.hide || h.status !== 'Incorporated') && (!f.disciplineId || h.sendingDisciplineId === f.disciplineId || h.receivingDisciplineId === f.disciplineId) && inHandoffRange(h))
+  function inHandoffRange(h: TimelineHandoff) { const dates = [h.neededBy, h.promisedBy].filter(Boolean).sort() as string[]; return (!f.from || dates[dates.length-1] >= f.from) && (!f.to || dates[0] <= f.to) }
+  const scheduleDels = new Map(data.deliverables.map(d => [d.id, d]))
   const canDel = new Map(data.deliverables.map((x) => [x.id, x.canEditDates]))
   const inRange = (a?: string | null, b?: string | null) => (!f.from || (b ?? a ?? '') >= f.from) && (!f.to || (a ?? b ?? '') <= f.to)
   const ghostOf = (os?: string | null, od?: string | null, s?: string | null, d?: string | null) => (od && (od !== d || (os ?? null) !== (s ?? null)) ? { start: os ?? od, end: od } : null)
@@ -125,7 +139,7 @@ export function TimelineTab() {
   // AC-TL-04: the creation date is the server's local date, not a cut UTC timestamp.
   const createdOn = new Map(data.deliverables.map((x) => [x.id, x.createdOn]))
   const delSpans = new Map(items.filter((d) => d.dueDate).map((d) => [d.id, { ...spanOf(d.startDate, createdOn.get(d.id) ?? d.dueDate!, d.dueDate!, !!d.state?.isOverdue),
-    ghost: ghostOf(d.originalStartDate, d.originalDueDate, d.startDate, d.dueDate) } as Span]))
+    ghost: scheduleDels.get(d.id)?.slipShown === false ? null : ghostOf(d.originalStartDate, d.originalDueDate, d.startDate, d.dueDate), baseline: scheduleDels.get(d.id)?.baselineSlipShown === false ? null : ghostOf(scheduleDels.get(d.id)?.baselineStartDate, scheduleDels.get(d.id)?.baselineDueDate, d.startDate, d.dueDate) } as Span]))
   const visibleDel = new Set([...delSpans.keys()].filter((id) => { const s = delSpans.get(id)!; return inRange(s.start, s.late ? now : s.end) }))
   // A task follows its deliverable through the filters; one under a deliverable without a bar here (undated or outside the
   // date range) is drawn as a top-level row instead of being dropped (AC-TL-02).
@@ -133,7 +147,7 @@ export function TimelineTab() {
   const tasks = data.tasks.filter((tk) => (!f.hide || tk.status !== 'Complete') && (!f.disciplineId || tk.projectDisciplineId === f.disciplineId)
     && (!f.milestoneId || (tk.milestoneId ?? (tk.deliverableId ? delById.get(tk.deliverableId)?.milestoneId : null)) === f.milestoneId)
     && (tk.deliverableId && delById.has(tk.deliverableId) ? shownDel.has(tk.deliverableId) : !f.status))
-  const taskSpan = (tk: TimelineTask): Span | null => tk.dueDate ? { ...spanOf(tk.startDate, tk.createdOn, tk.dueDate, tk.isOverdue), ghost: ghostOf(tk.originalStartDate, tk.originalDueDate, tk.startDate, tk.dueDate) } : null
+  const taskSpan = (tk: TimelineTask): Span | null => tk.dueDate ? { ...spanOf(tk.startDate, tk.createdOn, tk.dueDate, tk.isOverdue), ghost: tk.slipShown === false ? null : ghostOf(tk.originalStartDate, tk.originalDueDate, tk.startDate, tk.dueDate) } : null
   const nested = (tk: TimelineTask) => !!tk.deliverableId && visibleDel.has(tk.deliverableId)
   const loose = tasks.filter((tk) => { const sp = taskSpan(tk); return !nested(tk) && sp && inRange(sp.start, sp.late ? now : sp.end) })
   const unscheduled = [...items.filter((d) => !d.dueDate).map((d) => ({ type: 'Deliverable' as const, id: d.id, key: d.key, name: d.name, sub: d.disciplineName })),
@@ -161,10 +175,11 @@ export function TimelineTab() {
       if (expanded.has(`loose:${pd}`)) for (const tk of solo.sort((a, b) => a.dueDate!.localeCompare(b.dueDate!))) rows.push({ kind: 'task', id: tk.id, tk, span: taskSpan(tk)! })
     }
   }
+  if (handoffs.length) { rows.push({ kind: 'group', id: 'handoffs', name: t('ptab.handoffs'), count: handoffs.length }); if (!closed.has('handoffs')) handoffs.forEach(h => rows.push({ kind: 'handoff', id: h.id, h })) }
   const spans = rows.flatMap((r) => (r.kind === 'deliverable' || r.kind === 'task' ? [r.span] : []))
 
-  const start = addDays(f.from ?? min([p.startDate, addDays(now, -7), ...spans.flatMap((s) => [s.start, s.ghost?.start]), ...milestones.flatMap((m) => [m.date, m.originalDate])])!, -3)
-  const end = addDays(f.to ?? max([p.targetCompletionDate, addDays(now, 14), ...spans.flatMap((s) => [s.late ? now : s.end, s.ghost?.end]), ...milestones.flatMap((m) => [m.date, m.originalDate])])!, 7)
+  const start = addDays(f.from ?? min([p.startDate, addDays(now, -7), ...spans.flatMap((s) => [s.start, s.ghost?.start, s.baseline?.start]), ...milestones.flatMap((m) => [m.date, m.originalDate, m.baselineDate]), ...handoffs.flatMap(h => [h.neededBy, h.promisedBy])])!, -3)
+  const end = addDays(f.to ?? max([p.targetCompletionDate, addDays(now, 14), ...spans.flatMap((s) => [s.late ? now : s.end, s.ghost?.end, s.baseline?.end]), ...milestones.flatMap((m) => [m.date, m.originalDate, m.baselineDate]), ...handoffs.flatMap(h => [h.neededBy, h.promisedBy])])!, 7)
   const days = daysBetween(start, end) + 1
   const width = Math.round(days * px)
   const x = (d: string) => daysBetween(start, d) * px
@@ -201,7 +216,7 @@ export function TimelineTab() {
     const a = pos.get(fromId), b = pos.get(toId)
     if (!a || !b) return null
     const d = depPath(type, { s: x(fromSpan.start), e: x(fromSpan.end) + px, y: a.y + a.h / 2 }, { s: x(toSpan.start), e: x(toSpan.end) + px, y: b.y + b.h / 2 })
-    return <DepArrow key={key} d={d} hot={hot} title={depTitle(type, lag)} marker="arrow" />
+    return <DepArrow key={key} d={d} hot={chainTo ? chain.has(fromId) && chain.has(toId) : hot} title={depTitle(type, lag)} marker="arrow" />
   }
   const taskRows = new Map(rows.flatMap((r) => (r.kind === 'task' ? [[r.id, r] as const] : [])))
   const delRows = new Map(rows.flatMap((r) => (r.kind === 'deliverable' ? [[r.id, r] as const] : [])))
@@ -244,6 +259,7 @@ export function TimelineTab() {
   const reload = () => { qc.invalidateQueries({ queryKey: ['p', p.id] }); refresh(p.id) }
   // Active filters as removable tokens with Clear (§13.0 Filters); zoom is a view choice, not a filter.
   const tokens = ([
+    ['chainTo', t('interaction.chain'), ms.data.find(m => m.id === chainTo)?.name],
     ['disciplineId', t('common.discipline'), p.disciplines.find((d) => d.id === f.disciplineId)?.name],
     ['milestoneId', t('field.MilestoneId'), ms.data.find((m) => m.id === f.milestoneId)?.key],
     ['status', t('common.status'), f.status && tv(f.status)],
@@ -265,6 +281,7 @@ export function TimelineTab() {
           <span aria-hidden className="absolute rounded-sm border border-dashed border-foreground/40" title={t('timeline.baseline', { from: fmtDate(span.ghost.start), to: fmtDate(span.ghost.end) })}
             style={{ left: Math.max(x(span.ghost.start), 0), width: Math.max((daysBetween(span.ghost.start, span.ghost.end) + 1) * px, 4), top: top - 3, height: height + 6 }} />
         )}
+        {span.baseline && visible(span.baseline.end) && <span aria-hidden className="absolute rounded-sm border-2 border-dotted border-primary/60" title={t('interaction.baselineRange', { from: fmtDate(span.baseline.start), to: fmtDate(span.baseline.end) })} style={{ left: Math.max(x(span.baseline.start), 0), width: Math.max((daysBetween(span.baseline.start, span.baseline.end) + 1) * px, 4), top: top - 5, height: height + 10 }} />}
         <button type="button" {...dragProps(id, can, onDrop, open)} aria-label={label} title={label + (can ? ` · ${t('timeline.dragHint')}` : '')}
           className={cn('absolute overflow-hidden rounded-sm border text-left focus-visible:ring-2', shift?.id === id && 'ring-2 ring-primary')}
           style={{ ...dragProps(id, can, onDrop, open).style, left: left + dx(id), width: w, top, height, borderColor: tone(status), background: toneBg(status) }}>
@@ -281,6 +298,8 @@ export function TimelineTab() {
 
   return (
     <Page {...header} actions={<Button variant="outline" className="no-print" onClick={() => window.print()}><Printer className="size-4" />{t('wc.print')}</Button>}>
+      <ScheduleNote value={data.latestPlanned} />
+      {chainTo && <p role="status" className="text-sm">{t('interaction.chainCount', { n: chain.size, m: data.tasks.length })}</p>}
       <FilterBar className="no-print" activeCount={tokens.length}
         quick={<ZoomMenu value={zoom} onChange={(z) => set('zoom', z === 'month' ? null : z)} />}
         active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}
@@ -290,6 +309,7 @@ export function TimelineTab() {
             {allOpen ? <ChevronsDownUp className="size-4" /> : <ChevronsUpDown className="size-4" />}{allOpen ? t('timeline.collapseTasks') : t('timeline.expandTasks')}</Button>}
         </>}>
         <div className="flex flex-wrap items-end gap-3">
+          {chainEnabled && <Field label={t('interaction.chain')} htmlFor="tl-chain" className="w-full sm:w-56"><select id="tl-chain" className={selectCls} value={chainTo ?? ''} onChange={e=>set('chainTo',e.target.value)}><option value="">{t('common.none')}</option>{ms.data.filter(m=>!m.isCancelled).map(m=><option key={m.id} value={m.id}>{m.key} {m.name}</option>)}</select></Field>}
           <Field label={t('common.discipline')} htmlFor="tl-discipline" className="w-full sm:w-44">
             <select id="tl-discipline" className={selectCls} value={f.disciplineId ?? ''} onChange={(e) => set('disciplineId', e.target.value)}>
               <option value="">{t('projects.anyDiscipline')}</option>{p.disciplines.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -333,13 +353,14 @@ export function TimelineTab() {
               <div className="relative" style={{ width }} role="cell">
                 {placed.map(({ m, left, w, row }) => {
                   const status = milestoneStatusLabel(m)
-                  const slipped = m.originalDate && m.originalDate !== m.date && !m.isComplete && visible(m.originalDate)
+                  const slipped = m.slipShown !== false && m.originalDate && m.originalDate !== m.date && !m.isComplete && visible(m.originalDate)
                   const can = data.permissions.manageMilestones && !m.isComplete && !phone
                   const drop = (n: number) => setMsMove({ m, date: addDays(m.date!, n) })
                   return (
                     <Fragment key={m.id}>
                       {slipped && <span aria-hidden title={t('timeline.originalDate', { date: fmtDate(m.originalDate) })} className="absolute top-[7px] size-3 rotate-45 border-2 bg-card"
                         style={{ left: x(m.originalDate!) - 6 + px / 2, borderColor: tone(status) }} />}
+                      {m.baselineDate && m.baselineSlipShown !== false && visible(m.baselineDate) && <span aria-hidden className="absolute top-[5px] size-4 rotate-45 border-2 border-dotted border-primary bg-card" style={{ left: x(m.baselineDate) - 8 + px / 2 }} title={t('interaction.baselineDate', { date: fmtDate(m.baselineDate) })} />}
                       <button type="button" {...dragProps(m.id, can, drop, () => openPanel('Milestone', m.id))} className="group absolute top-px grid size-6 -translate-x-1/2 place-items-center rounded-md"
                         style={{ ...dragProps(m.id, can, drop, () => openPanel('Milestone', m.id)).style, left: left + px / 2 + dx(m.id) }}
                         aria-label={t('timeline.milestoneLabel', { key: m.key, name: m.name, date: fmtDate(m.date), status: tv(status) })} title={`${m.key} ${m.name} · ${fmtDate(m.date)} · ${tv(status)}`}>
@@ -385,11 +406,11 @@ export function TimelineTab() {
                   const pct = d.state?.progressPct ?? 0
                   const can = !!canDel.get(d.id)
                   return (
-                    <div key={r.id} className="flex border-b" style={{ height: H.deliverable }} role="row">
+                    <div key={r.id} data-chain={chainTo ? chainDeliverables.has(r.id) ? 'highlight' : 'dim' : undefined} className={cn("flex border-b", chainTo && (chainDeliverables.has(r.id) ? "bg-accent" : "opacity-40"))} style={{ height: H.deliverable }} role="row">
                       <div className="sticky left-0 z-20 flex shrink-0 items-center gap-1 border-r bg-card pl-1 pr-3 text-sm" style={{ width: LABEL }} role="rowheader">
                         {r.tasks > 0 ? <button type="button" className="grid size-6 shrink-0 place-items-center rounded-md hover:bg-muted" aria-expanded={expanded.has(d.id)} aria-label={t('timeline.showTasks', { key: d.key, n: r.tasks })} onClick={() => toggle(setExpanded, d.id)}>
                           {expanded.has(d.id) ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</button> : <span className="w-6 shrink-0" />}
-                        <button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left hover:underline" onClick={() => openPanel('Deliverable', d.id)} title={`${d.key} ${d.name}`}>
+                        <button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left hover:underline" onClick={() => openPanel('Deliverable', d.id)} title={`${d.key} ${d.name}`} aria-label={chainTo && chainDeliverables.has(d.id) ? `${d.key} ${d.name} · ${t('interaction.inChain', { key: chainLabel })}` : undefined}>
                           <Key>{d.key.split('-').pop()}</Key><span className="truncate">{d.name}</span>
                         </button>
                       </div>
@@ -401,12 +422,13 @@ export function TimelineTab() {
                     </div>
                   )
                 }
+                if (r.kind === 'handoff') { const h = r.h; return <div key={r.id} className="flex border-b" style={{ height: H.handoff }} role="row"><div role="rowheader" className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-card px-3 text-xs" style={{width:LABEL}}><Link to={`/projects/${p.projectNumber}/handoffs?panel=Handoff:${h.id}`} className="truncate hover:underline">{h.key} {h.title} · {p.disciplines.find(d=>d.id===h.sendingDisciplineId)?.name} → {p.disciplines.find(d=>d.id===h.receivingDisciplineId)?.name}</Link></div><div role="cell" className="relative" style={{width}}>{[['neededBy',h.neededBy],['promisedBy',h.promisedBy]].map(([kind,date])=>date && <Link key={kind} to={`/projects/${p.projectNumber}/handoffs?panel=Handoff:${h.id}`} className="absolute top-1 inline-flex h-6 items-center whitespace-nowrap text-xs" style={{left:x(date)}} aria-label={`${h.key} · ${t(`handoff.${kind}`)} ${fmtDate(date)} · ${tv(h.status)}`} title={`${h.key} · ${t(`handoff.${kind}`)} ${fmtDate(date)} · ${tv(h.status)}`}><span aria-hidden>{kind==='neededBy'?'◆':'○'}</span></Link>)}{(h.dateMismatch||h.isOverdue) && <span className="absolute top-1.5 text-xs text-warn" style={{left:x(h.promisedBy??h.neededBy)+20}}>{h.dateMismatch?t('interaction.mismatchDays',{n:daysBetween(h.neededBy,h.promisedBy!)}):''} {h.isOverdue?t('interaction.overdueDays',{n:h.daysOverdue}):''}</span>}</div></div> }
                 const tk = r.tk
                 return (
-                  <div key={r.id} className="flex border-b border-border/60" style={{ height: H.task }} role="row">
+                  <div key={r.id} data-chain={chainTo ? chain.has(tk.id) ? 'highlight' : 'dim' : undefined} className={cn("flex border-b border-border/60", chainTo && (chain.has(tk.id) ? "bg-accent ring-1 ring-inset ring-primary/30" : "opacity-40"))} style={{ height: H.task }} role="row">
                     <div role="rowheader" className="sticky left-0 z-20 flex shrink-0 border-r bg-card" style={{ width: LABEL }}>
                       <button type="button" className="flex w-full min-w-0 items-center gap-2 pl-8 pr-3 text-left text-xs/4 hover:bg-muted"
-                        onClick={() => openPanel('Task', tk.id)} title={`${tk.key} ${tk.name}${tk.assignee ? ` · ${tk.assignee}` : ''}`}>
+                        aria-label={chainTo && chain.has(tk.id) ? `${tk.key} ${tk.name} · ${t('interaction.inChain', { key: chainLabel })}` : undefined} onClick={() => openPanel('Task', tk.id)} title={`${tk.key} ${tk.name}${tk.assignee ? ` · ${tk.assignee}` : ''}`}>
                         <span className="key text-muted-foreground">{tk.key.split('-').pop()}</span><span className="truncate">{tk.name}</span>
                       </button>
                     </div>
@@ -458,6 +480,8 @@ export function MoveDialog({ move, projectComplete, onClose }: { move: Move; pro
   const newStart = move.start ? addDays(move.start, move.days) : null
   const newDue = addDays(move.due, move.days)
   const reason = move.needsReason || projectComplete
+  const dateContext = useFlag('date_context')
+  const context = useQuery({ queryKey: ['date-context', move.kind, move.id, newStart, newDue], enabled: dateContext, queryFn: () => get<DateContextRead>(`items/${move.kind === 'task' ? 'Task' : 'Deliverable'}/${move.id}/date-context${qs({ startDate: newStart, dueDate: newDue })}`) })
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} reason={reason ? true : undefined} title={t('timeline.moveTitle', { key: move.key, name: move.name })}
       confirmLabel={t('timeline.moveConfirm')}
@@ -468,6 +492,8 @@ export function MoveDialog({ move, projectComplete, onClose }: { move: Move; pro
           <li>{t('timeline.dueChange', { from: fmtDate(move.due), to: fmtDate(newDue) })}</li>
         </ul>
         <p className="text-muted-foreground">{t('timeline.onlyThis')}</p>
+        {context.data?.dates.newInconsistencies.map((r,i)=><p className="text-warn" key={i}>{r.text}</p>)}
+        {context.data && <ul className="list-disc pl-5 text-warn">{[...context.data.dates.successors, ...(context.data.tasks ?? [])].map(s=><li key={s.id}>{s.key}: {s.reason.text}</li>)}</ul>}
       </>}
       onConfirm={async (why) => {
         const body: Record<string, unknown> = { dueDate: newDue, reason: why || undefined }

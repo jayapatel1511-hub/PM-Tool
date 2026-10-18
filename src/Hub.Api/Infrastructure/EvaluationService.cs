@@ -29,11 +29,11 @@ public sealed class EvaluationService(HubDb db, SettingsStore store, TimeProvide
         var members = await db.ProjectMembers.AsNoTracking().Where(m => m.ProjectId == projectId && m.RemovedAt == null).Select(m => new { m.UserId, m.Roles }).ToListAsync(ct);
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DisciplineSnap(d.Id, d.Discipline!.Name, d.LeadUserId, d.IsActive, d.SortOrder)).ToListAsync(ct);
         var milestones = await db.Milestones.AsNoTracking().Where(m => m.ProjectId == projectId)
-            .Select(m => new MilestoneSnap(m.Id, m.Key, m.Name, m.MilestoneType, m.Date, m.OriginalDate, m.IsComplete, m.IsCancelled, m.ProjectDisciplineId)).ToListAsync(ct);
+            .Select(m => new MilestoneSnap(m.Id, m.Key, m.Name, m.MilestoneType, m.Date, m.OriginalDate, m.IsComplete, m.IsCancelled, m.ProjectDisciplineId, m.BaselineDate)).ToListAsync(ct);
         var deliverablesRaw = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == projectId).ToListAsync(ct);
         var deliverables = deliverablesRaw.Select(d => new DeliverableSnap(d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.ReviewerId, d.MilestoneId, d.StartDate,
             d.DueDate, d.OriginalDueDate, d.Status, d.Priority, L(d.LastActivityAt), d.IssuedDate, d.StartedAt is { } ds ? L(ds) : null,
-            d.StatusChangedAt is { } dsc ? L(dsc) : null)).ToList();
+            d.StatusChangedAt is { } dsc ? L(dsc) : null, d.BaselineStartDate, d.BaselineDueDate)).ToList();
         var tasksRaw = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId).ToListAsync(ct);
         var taskIds = tasksRaw.Select(t => t.Id).ToList();
         var collaborators = await db.Collaborators.AsNoTracking().Where(c => taskIds.Contains(c.TaskId)).ToListAsync(ct);
@@ -226,9 +226,7 @@ public sealed class EvaluationService(HubDb db, SettingsStore store, TimeProvide
 /// Consumes outbox events a moment after each save and re-evaluates the affected projects (§23.5 steps 2–3).
 public sealed class EvaluationWorker(IServiceProvider root, EvaluationSignal signal, IConfiguration cfg, ILogger<EvaluationWorker> log, TimeProvider clock) : BackgroundService
 {
-    /// Failed evaluations before an event is dead-lettered (FR-OPS-06).
     public const int MaxAttempts = 10;
-
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
         if (cfg["Evaluation:Worker"] == "false") return;
@@ -254,7 +252,7 @@ public sealed class EvaluationWorker(IServiceProvider root, EvaluationSignal sig
         try
         {
             if (!await db.Database.SqlQuery<bool>($"SELECT pg_try_advisory_lock(hashtext('evaluation-worker')) AS \"Value\"").SingleAsync(ct)) return 0;
-            var events = await db.Outbox.Where(o => o.ProcessedAt == null && o.Attempts < MaxAttempts).OrderBy(o => o.CreatedAt).Take(500).ToListAsync(ct);
+            var events = await db.Outbox.Where(o => o.ProcessedAt == null && o.DeadLetteredAt == null && o.Attempts < MaxAttempts).OrderBy(o => o.CreatedAt).Take(500).ToListAsync(ct);
             var projects = events.Where(e => e.ProjectId is not null).Select(e => e.ProjectId!.Value).ToHashSet();
             foreach (var e in events.Where(e => e.EventType == "UserChanged"))
             {
@@ -272,8 +270,7 @@ public sealed class EvaluationWorker(IServiceProvider root, EvaluationSignal sig
                 catch (Exception ex) when (!ct.IsCancellationRequested)
                 {
                     root.GetRequiredService<ILogger<EvaluationWorker>>().LogError(ex, "Evaluation failed for project {ProjectId}", pid);
-                    foreach (var e in events.Where(e => e.ProjectId == pid))
-                    {
+                    foreach (var e in events.Where(e => e.ProjectId == pid)) {
                         e.Attempts++; e.LastError = ex.GetType().Name;
                         if (e.Attempts >= MaxAttempts) e.DeadLetteredAt = clock.GetUtcNow();
                     }

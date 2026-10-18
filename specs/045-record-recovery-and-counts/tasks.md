@@ -1,5 +1,7 @@
 # Tasks: Record Recovery and Counts
 
+Local takeover implementation is present for S02, S04, S05, S07 source/model (schema checks pending), S08, S10 and S11. The unchecked slices remain open until their required integration/acceptance checks pass; see [verification.md](verification.md). Flag cleanup remains gated on Jay.
+
 Each slice is one PR. Tests cite their AC IDs in the test name or a `[Trait("Spec", "AC-RCV-NN")]`. Paths are as in plan.md.
 
 ## Part A: Show deleted and Restore

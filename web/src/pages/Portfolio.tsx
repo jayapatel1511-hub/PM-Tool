@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Monitor } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { AccentDot, ActiveFilters, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, PageHelp, SummaryTile, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
@@ -12,16 +12,17 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { useReference } from '@/hooks/data'
 import { get, qs } from '@/lib/api'
+import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { ProjectRow } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ViewMenu } from '@/components/hub/views'
 
-interface Row extends ProjectRow { office?: string; phase?: string; overrideBy?: string | null; overrideActive: boolean; trend: { weekEnding: string; computed?: string | null; reported?: string | null }[] }
+interface Row extends ProjectRow { officeId?: string; projectTypeId?: string; projectType?: string; overdueDeliverables?: number; office?: string; phase?: string; overrideBy?: string | null; overrideActive: boolean; trend: { weekEnding: string; computed?: string | null; reported?: string | null }[] }
 interface Portfolio { ownOnly: boolean; tiles: { active: number; red: number; yellow: number; green: number; submissions14: number; overdueDecisions: number }; projects: Row[] }
 
-const FILTERS = ['q', 'pmId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'computedHealth', 'projectTypeId', 'submissionWithinDays', 'mine'] as const
+const FILTERS = ['q', 'pmId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'computedHealth', 'projectTypeId', 'submissionWithinDays', 'mine', 'overdueDecisions'] as const
 const STATUSES = ['Setup', 'Active', 'On Hold', 'Complete']
 const HEALTHS = ['Red', 'Yellow', 'Green', 'Grey']
 const SWATCH: Record<string, string> = { Red: 'var(--bad)', Yellow: 'var(--warn)', Green: 'var(--ok)', Grey: 'var(--idle)' }
@@ -45,9 +46,13 @@ export function PortfolioPage() {
 }
 
 function Dashboard(header: { title: string; subtitle: ReactNode }) {
+  const rollups = useFlag('status_rollups')
+  const small = useFlag('small_ux')
+  const planner = useMe().capabilities.workload
   const ref = useReference()
   const [sp, setSp] = useSearchParams()
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
+  const group = rollups ? sp.get('group') ?? 'none' : 'none'
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
   const q = useQuery({ queryKey: ['portfolio', filters], queryFn: () => get<Portfolio>(`portfolio${qs(filters)}`) })
   const refSelect = (key: string, label: string, items: { id: string; name: string; isActive?: boolean }[] | undefined, any: string) => (
@@ -73,6 +78,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
     ['health', t('portfolio.health'), filters.health && t(`health.${filters.health}`)],
     ['computedHealth', t('projects.filter.computedHealth'), filters.computedHealth?.split(',').map((h) => t(`health.${h}`)).join(', ')],
     ['submissionWithinDays', t('portfolio.within'), filters.submissionWithinDays],
+    ['overdueDecisions', t('portfolio.decisions'), t('common.yes')],
     ['mine', t('portfolio.mine'), filters.mine === 'false' ? t('common.no') : filters.mine],
   ] as const).filter(([k]) => filters[k])
   const clear = () => setSp(new URLSearchParams(), { replace: true })
@@ -82,8 +88,19 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
   const tiles = q.data?.tiles
   // AC-CNT-01: a health tile counts Active projects by computed health, so it opens exactly those rows.
   const healthLink = (h: string) => { const n = new URLSearchParams(sp); n.set('computedHealth', h); n.set('status', 'Active'); return `?${n}` }
+  const rowLinks = (r: Row) => {
+    const base = `/projects/${encodeURIComponent(r.projectNumber)}`
+    return { overdue: `${base}/tasks?overdue=true`, blocked: `${base}/tasks?blocked=true`, decisions: `${base}/decisions?indicator=overdue`,
+      issues: `${base}/issues?indicator=open&severity=High`, critical: `${base}/dashboard?severity=Critical#attention`, warning: `${base}/dashboard?severity=Warning#attention`, deliverables: `${base}/deliverables?indicator=overdue` }
+  }
+  const groupKey = (r: Row) => group === 'client' ? r.client.id : group === 'office' ? r.officeId ?? '' : group === 'projectType' ? r.projectTypeId ?? '' : ''
+  const groupName = (r: Row) => group === 'client' ? r.client.name : group === 'office' ? r.office ?? t('rcv.notSet') : r.projectType ?? name(ref.data?.projectTypes, r.projectTypeId ?? null) ?? t('rcv.notSet')
+  const groups = new Map<string, Row[]>()
+  for (const r of q.data?.projects ?? []) { const key = groupKey(r); groups.set(key, [...(groups.get(key) ?? []), r]) }
+  const grouped = [...groups.entries()].sort(([a, ar], [b, br]) => !a ? 1 : !b ? -1 : groupName(ar[0]).localeCompare(groupName(br[0])))
+  const groupLink = (key: string, health?: string) => `?${new URLSearchParams({ ...Object.fromEntries(sp), [group === 'client' ? 'clientId' : group === 'office' ? 'officeId' : 'projectTypeId']: key, ...(health ? { computedHealth: health } : {}) })}`
   return (
-    <Page {...header} actions={<><ViewMenu listType="portfolio" /><ExportMenu path="portfolio/export" params={filters} name="portfolio" /></>}>
+    <Page {...header} actions={<>{small && planner && <Button asChild variant="outline"><Link to="/planner?groupBy=homeDiscipline">{t('interaction.capacityByDiscipline')}</Link></Button>}<ViewMenu listType="portfolio" /><ExportMenu path="portfolio/export" params={filters} name="portfolio" /></>}>
       {tiles && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
           <SummaryTile label={t('portfolio.active')} value={tiles.active} accent="blue" hint={t('sig.def.pfActive')} onClick={() => set('status', 'Active')} />
@@ -91,9 +108,12 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
             <SummaryTile key={h} label={healthLabel(h, `portfolio.${h.toLowerCase()}`)} value={tiles[h.toLowerCase() as 'red']} accent="lavender" hint={t('sig.def.pfHealth', { health: t(`health.${h}`) })} to={healthLink(h)} />
           ))}
           <SummaryTile label={t('portfolio.submissions')} value={tiles.submissions14} accent="mint" hint={t('sig.def.pfSubmissions')} onClick={() => set('submissionWithinDays', '14')} />
-          <SummaryTile label={t('portfolio.decisions')} value={tiles.overdueDecisions} accent="peach" hint={t('sig.def.pfDecisions')} />
+          <SummaryTile label={t('portfolio.decisions')} value={tiles.overdueDecisions} accent="peach" hint={t('sig.def.pfDecisions')} onClick={() => set('overdueDecisions', 'true')} />
         </div>
       )}
+      {rollups && <Field label={t('rcv.group')} htmlFor="pf-group" className="w-48"><select id="pf-group" className={selectCls} value={group} onChange={(e) => set('group', e.target.value === 'none' ? null : e.target.value)}>
+        {[['none', 'groupNone'], ['client', 'groupClient'], ['office', 'groupOffice'], ['projectType', 'groupProjectType']].map(([value, label]) => <option key={value} value={value}>{t(`rcv.${label}`)}</option>)}
+      </select></Field>}
       <FilterBar activeCount={tokens.length}
         search={<Field label={t('common.search')} htmlFor="pf-q">
           <Input id="pf-q" key={filters.q ? 'q' : 'empty'} type="search" placeholder={t('common.search')} defaultValue={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
@@ -134,10 +154,16 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
           <table className="w-full text-sm">
             <caption className="sr-only">{t('nav.portfolio')}</caption>
             <thead className="bg-muted">
-              <tr>{COLS.map(([h, numeric], i) => <th key={i} scope="col" className={cn(thCls, numeric && 'text-right')}>{h ? t(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
+              <tr>{(rollups ? [...COLS.slice(0, 12), ['rcv.overdueDeliverables', true] as [string, boolean], ...COLS.slice(12)] : COLS).map(([h, numeric], i) => <th key={i} scope="col" className={cn(thCls, numeric && 'text-right')}>{h ? t(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
             </thead>
             <tbody>
-              {q.data.projects.map((r) => (
+              {(group === 'none' ? [['', q.data.projects] as [string, Row[]]] : grouped).map(([key, rows]) => <Fragment key={key}>
+                {group !== 'none' && <tr className="border-t bg-muted" data-portfolio-group={key}><th scope="rowgroup" colSpan={8} className={thCls}>
+                  {groupName(rows[0])} · {key ? <Link to={groupLink(key)} className="underline underline-offset-2">{rows.length} {t('nav.projects')}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.length} {t('nav.projects')}</span>}
+                  <span className="ml-3 inline-flex gap-3">{['Red', 'Yellow', 'Green'].map((health) => <span key={health}>{key ? <Link to={groupLink(key, health)}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</Link> : <span title={t('rcv.notSetDefinition')}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</span>}</span>)}</span>
+                </th>{(['overdueTasks', 'blockedTasks', 'overdueDecisions', 'highIssues', 'overdueDeliverables'] as const).map((column) => <td key={column} className={cn(tdCls, 'text-right tabular-nums')}>{key ? <Link to={groupLink(key)} aria-label={`${rows.reduce((sum,r)=>sum+(r[column]??0),0)} · ${t('rcv.subtotalDefinition')}`} title={t('rcv.subtotalDefinition')} className="underline underline-offset-2">{rows.reduce((sum,r)=>sum+(r[column]??0),0)}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.reduce((sum,r)=>sum+(r[column]??0),0)}</span>}</td>)}
+                <td className={cn(tdCls, 'text-right tabular-nums')}><span title={t('rcv.subtotalDefinition')}>■ {rows.reduce((sum,r)=>sum+r.attentionCritical,0)} · ▲ {rows.reduce((sum,r)=>sum+r.attentionWarning,0)}</span></td><td colSpan={2} /></tr>}
+              {rows.map((r) => (
                 <tr key={r.id} className="border-t hover:bg-muted">
                   <td className={cn(tdCls, 'min-w-60')}>
                     <div className="flex items-start gap-2">
@@ -156,18 +182,19 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
                   <td className={cn(tdCls, 'min-w-40')}>{r.nextMilestone ? <><div>{r.nextMilestone.name}</div>
                     <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs/[18px] text-muted-foreground tabular-nums">{fmtDate(r.nextMilestone.date)} {r.nextMilestone.status && <StatusPill status={r.nextMilestone.status} />}</div></> : <Missing />}</td>
                   <td className={cn(tdCls, 'min-w-36')}>{r.nextSubmission ? <><div>{r.nextSubmission.name}</div><div className="mt-0.5 text-xs/[18px] text-muted-foreground tabular-nums">{fmtDate(r.nextSubmission.date)}</div></> : <Missing />}</td>
-                  <Count n={r.overdueTasks} bad />
-                  <Count n={r.blockedTasks} bad />
-                  <Count n={r.overdueDecisions} bad />
-                  <Count n={r.highIssues} />
+                  <Count n={r.overdueTasks} to={rowLinks(r).overdue} bad />
+                  <Count n={r.blockedTasks} to={rowLinks(r).blocked} bad />
+                  <Count n={r.overdueDecisions} to={rowLinks(r).decisions} bad />
+                  <Count n={r.highIssues} to={rowLinks(r).issues} />
+                  {rollups && <Count n={r.overdueDeliverables ?? 0} to={rowLinks(r).deliverables} bad />}
                   <td className={cn(tdCls, 'whitespace-nowrap text-right tabular-nums')}>
-                    <span className={cn(r.attentionCritical > 0 && 'font-semibold text-bad')}><span aria-hidden>■</span><span className="sr-only">{tv('Critical')}</span> {r.attentionCritical}</span>
-                    <span className={cn('ml-3', r.attentionWarning > 0 && 'font-semibold text-warn')}><span aria-hidden>▲</span><span className="sr-only">{tv('Warning')}</span> {r.attentionWarning}</span>
+                    <Link to={rowLinks(r).critical} className={cn(r.attentionCritical > 0 && 'font-semibold text-bad')}><span aria-hidden>■</span><span className="sr-only">{tv('Critical')}</span> {r.attentionCritical}</Link>
+                    <Link to={rowLinks(r).warning} className={cn('ml-3', r.attentionWarning > 0 && 'font-semibold text-warn')}><span aria-hidden>▲</span><span className="sr-only">{tv('Warning')}</span> {r.attentionWarning}</Link>
                   </td>
                   <td className={tdCls}><Trend points={r.trend} /></td>
                   <td className={cn(tdCls, 'whitespace-nowrap')}><Link className="text-primary underline underline-offset-4 hover:text-foreground" to={`/projects/${encodeURIComponent(r.projectNumber)}/coordination`}>{t('portfolio.coordination')}</Link></td>
                 </tr>
-              ))}
+              ))}</Fragment>)}
             </tbody>
           </table>
         </TableRegion>
@@ -177,8 +204,8 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
 }
 
 /** A count column: right-aligned figures; a non-zero overdue or blocked count is emphasised (its header names it). */
-function Count({ n, bad }: { n: number; bad?: boolean }) {
-  return <td className={cn(tdCls, 'text-right tabular-nums', bad && n > 0 && 'font-semibold text-bad')}>{n}</td>
+function Count({ n, bad, to }: { n: number; bad?: boolean; to: string }) {
+  return <td className={cn(tdCls, 'text-right tabular-nums', bad && n > 0 && 'font-semibold text-bad')}><Link to={to} className="hover:underline">{n}</Link></td>
 }
 
 /** §16.4: when they differ, both values are shown, with the PM's note and its age. */

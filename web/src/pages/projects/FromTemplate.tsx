@@ -17,7 +17,7 @@ import { CREATE_SOURCES, type CreateContext } from './CreateProject'
 import { SETTINGS_SECTIONS } from './ProjectSettings'
 
 export interface TemplateRow { id: string; familyId: string; name: string; description?: string; version?: number; status: string; milestones: number; deliverables: number; tasks: number; projects: number }
-interface TemplateDetail { id: string; disciplines: { disciplineId: string; isDefaultIncluded: boolean }[]; basisSuggestions: { disciplineId: string }[] }
+interface TemplateDetail { id: string; offsetDayKind?: string; disciplines: { disciplineId: string; isDefaultIncluded: boolean }[]; basisSuggestions: { disciplineId: string }[] }
 interface Preview {
   milestones: { id: string; name: string; milestoneType: string; date?: string | null; source: 'Contract' | 'Offset' | 'None' }[]
   counts: { milestones: number; deliverables: number; tasks: number; dependencies: number }; undated: { milestones: number; deliverables: number; tasks: number }
@@ -29,7 +29,7 @@ export function usePublishedTemplates() {
 }
 
 function usePreview(value: Value, ctx: CreateContext) {
-  const body = value && { startDate: ctx.form.startDate || null, milestoneDates: value.dates, disciplineIds: ctx.disciplines.map((d) => d.disciplineId) }
+  const body = value && { officeId: ctx.form.officeId || null, startDate: ctx.form.startDate || null, milestoneDates: value.dates, disciplineIds: ctx.disciplines.map((d) => d.disciplineId) }
   return useQuery({ queryKey: ['template-preview', body && { id: value!.templateId, ...body }], enabled: !!value,
     queryFn: () => post<Preview>(`templates/${value!.templateId}/preview`, body) })
 }
@@ -39,6 +39,7 @@ function usePreview(value: Value, ctx: CreateContext) {
 function TemplateSource({ value, onChange, ctx }: { value: Value; onChange: (v: Value) => void; ctx: CreateContext }) {
   const list = usePublishedTemplates()
   const preview = usePreview(value, ctx)
+  const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => get<TemplateDetail>(`templates/${value!.templateId}`) })
   if (!list.data?.length) return null
   const choose = async (id: string) => {
     if (!id) { onChange(null); return }
@@ -61,6 +62,7 @@ function TemplateSource({ value, onChange, ctx }: { value: Value; onChange: (v: 
       </Field>
       {value && (
         <>
+          {detail.data?.offsetDayKind === 'WorkingDays' && <p className="text-xs/[18px] text-muted-foreground">{t('rcv.workingDaysNote')}</p>}
           {!ctx.form.startDate && <p className="text-xs/[18px] text-warn"><span aria-hidden>▲ </span>{t('tpl.needStart')}</p>}
           <div className="scroll-region overflow-x-auto rounded-md border bg-card">
             <table className="w-full text-sm">
@@ -107,6 +109,7 @@ function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateContext }) {
   return (
     <section aria-labelledby="tpl-summary" className="space-y-1.5 rounded-lg border bg-muted p-4 text-sm">
       <h3 id="tpl-summary" className="text-base/6 font-semibold">{t('tpl.summary')}</h3>
+      {detail.data?.offsetDayKind === 'WorkingDays' && <p className="text-xs/[18px] text-muted-foreground">{t('rcv.workingDaysNote')}</p>}
       <p>{t('tpl.creates', { m: p.counts.milestones, d: p.counts.deliverables, k: p.counts.tasks, x: p.counts.dependencies })}</p>
       {basis.length > 0 && <p>{plural(copied, 'templates.basisCopiedOne', 'templates.basisCopied')}{copied < basis.length && ` ${t('templates.basisSkipped', { n: basis.length - copied })}`}</p>}
       {undated > 0 && <p className="text-warn" role="status"><span aria-hidden>▲ </span>{t('tpl.undatedWarning', { m: p.undated.milestones, d: p.undated.deliverables, k: p.undated.tasks })}</p>}

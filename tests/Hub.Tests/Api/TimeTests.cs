@@ -176,4 +176,22 @@ public sealed class TimeTests(HubFactory f)
         }
         finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }).Result.Json(); }
     }
+    [Fact]
+    [Trait("Spec", "AC-RCV-12")]
+    public async Task Project_and_task_totals_equal_their_filtered_entries()
+    {
+        var p = await d.Project(); var me = await Member(p);
+        var first = await d.NewTask(p.Id, TestData.Pm); var second = await d.NewTask(p.Id, TestData.Pm);
+        (await Add(me.Email, first, "2026-09-15", 2.5m)).EnsureSuccessStatusCode();
+        (await Add(me.Email, second, "2026-09-16", 1.25m)).EnsureSuccessStatusCode();
+        var c = f.As(me.Email);
+        var view = await c.GetAsync("/api/v1/time?from=2026-09-14&to=2026-09-20").Result.Json();
+        foreach (var (key, list) in new[] { ("projectId", "byProject"), ("taskId", "byTask") })
+            foreach (var row in view[list]!.AsArray())
+            {
+                var filtered = await c.GetAsync($"/api/v1/time?from=2026-09-14&to=2026-09-20&{key}={row!.S(key)}").Result.Json();
+                Assert.Equal(row["hours"]!.GetValue<decimal>(), filtered["entries"]!.AsArray().Sum(e => e!["hours"]!.GetValue<decimal>()));
+            }
+    }
+
 }

@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -130,7 +132,7 @@ public static class TaskQueries
         };
     }
 
-    public static async Task<List<object>> Rows(HubDb db, IQueryable<WorkTask> q)
+    public static async Task<List<object>> Rows(HubDb db, IQueryable<WorkTask> q, bool includeActivityActor = false)
     {
         // Scalar columns and counts in one query; related rows by id in a few keyed ones. (Multi-column First() inside the
         // projection made EF rank whole tables — every task state, project and person — per list: packet 011 scale run.)
@@ -142,6 +144,9 @@ public static class TaskQueries
             Comments = db.Comments.Count(c => c.ItemType == ItemType.Task && c.ItemId == t.Id && c.DeletedAt == null),
             Predecessors = db.Dependencies.Count(d => d.SuccessorTaskId == t.Id),
             Successors = db.Dependencies.Count(d => d.PredecessorTaskId == t.Id),
+            ActivityActorName = includeActivityActor ? db.ActivityLog.Where(log => log.ItemType == ItemType.Task && log.ItemId == t.Id)
+                .OrderByDescending(log => log.OccurredAt).ThenByDescending(log => log.Id)
+                .Select(log => log.ActorType == "System" ? Text.Get("common.system") : db.Users.Where(u => u.Id == log.ActorUserId).Select(u => u.DisplayName).FirstOrDefault()).FirstOrDefault() : null,
         }).ToListAsync();
         var ids = rows.Select(t => t.Id).ToList();
         var pids = rows.Select(t => t.ProjectId).Distinct().ToList();
@@ -166,7 +171,7 @@ public static class TaskQueries
             Assignee = t.AssigneeId is { } a ? users.GetValueOrDefault(a) : null,
             Reviewer = t.ReviewerId is { } r ? users.GetValueOrDefault(r) : null,
             CreatedByName = t.CreatedBy is { } c ? users.GetValueOrDefault(c)?.DisplayName : null,
-            t.Comments, t.Predecessors, t.Successors, Collaborators = collaborators[t.Id].ToList(), State = states.GetValueOrDefault(t.Id),
+            t.Comments, t.Predecessors, t.Successors, t.ActivityActorName, Collaborators = collaborators[t.Id].ToList(), State = states.GetValueOrDefault(t.Id),
         }).ToList();
         var msIds = list.Select(t => t.MilestoneId ?? t.Deliverable?.MilestoneId).OfType<Guid>().Distinct().ToList();
         var ms = await db.Milestones.AsNoTracking().Where(m => msIds.Contains(m.Id)).Select(m => new { m.Id, m.Key, m.Name, m.Date }).ToDictionaryAsync(m => m.Id);
@@ -174,7 +179,7 @@ public static class TaskQueries
         {
             var mid = t.MilestoneId ?? t.Deliverable?.MilestoneId;
             var m = mid is { } x && ms.TryGetValue(x, out var mm) ? mm : null;
-            return (object)new
+            var body = new
             {
                 t.Id, t.ProjectId, ProjectNumber = t.Project.ProjectNumber, ProjectName = t.Project.Name, ProjectStatus = t.Project.Status, t.Key, t.Name,
                 t.ProjectDisciplineId, DisciplineName = t.Discipline.Name, DisciplineCode = t.Discipline.Code, DisciplineColour = t.Discipline.Colour, DisciplineOrder = t.Discipline.SortOrder,
@@ -194,13 +199,17 @@ public static class TaskQueries
                     t.State.IsInactiveOwner, t.State.IsHeldPastDue, t.State.IsReviewStalled, t.State.AffectedMilestoneIds, t.State.Notes, t.State.EvaluatedAt,
                 },
             };
+            if (!includeActivityActor) return (object)body;
+            var json = JsonSerializer.SerializeToNode(body, JsonOpts.Web)!.AsObject();
+            json["lastActivityActorName"] = t.ActivityActorName;
+            return (object)json;
         }).ToList();
     }
 
-    public static async Task<Page<object>> Page(HubDb db, IQueryable<WorkTask> q, TaskFilter f)
+    public static async Task<Page<object>> Page(HubDb db, IQueryable<WorkTask> q, TaskFilter f, bool includeActivityActor = false)
     {
         var total = await q.CountAsync();
-        var rows = await Rows(db, Sort(q, f.Sort, db, f.WorkspaceId).Skip((f.Page - 1) * f.PageSize).Take(f.PageSize));
+        var rows = await Rows(db, Sort(q, f.Sort, db, f.WorkspaceId).Skip((f.Page - 1) * f.PageSize).Take(f.PageSize), includeActivityActor);
         return new Page<object>(rows, f.Page, f.PageSize, total, f.Sort);
     }
 }

@@ -42,6 +42,7 @@ export function TimePage() {
   const to = sp.get('to') ?? addDays(from, 6)
   const scope = sp.get('scope') === 'all' ? 'all' : undefined
   const filters = { from, to, scope, projectId: sp.get('projectId'), userId: sp.get('userId'), taskId: sp.get('taskId') }
+  const totalLink = (key: 'projectId' | 'taskId', id: string) => `/time${qs({ ...filters, [key]: id })}`
   const q = useQuery({ queryKey: ['time', filters], queryFn: () => get<TimeView>(`time${qs(filters)}`) })
   const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
   const [adding, setAdding] = useState(false)
@@ -153,10 +154,10 @@ export function TimePage() {
             )}
           </div>
           <aside className="space-y-4" aria-label={t('time.totals')}>
-            <SummaryTile label={t('time.weekTotal')} value={`${h(q.data.total)} h`} accent="blue" />
-            {q.data.byProject.length > 0 && <Totals title={t('time.byProject')} rows={q.data.byProject.map((x) => ({ id: x.projectId, title: `${x.projectNumber} ${x.projectName}`, hours: x.hours,
+            <SummaryTile label={t('time.weekTotal')} value={`${h(q.data.total)} h`} accent="blue" hint={t('rcv.hoursDefinition')} />
+            {q.data.byProject.length > 0 && <Totals title={t('time.byProject')} rows={q.data.byProject.map((x) => ({ id: x.projectId, to: totalLink('projectId', x.projectId), title: `${x.projectNumber} ${x.projectName}`, hours: x.hours,
               label: <><AccentDot id={x.projectId} className="mr-2" /><Key>{x.projectNumber}</Key> {x.projectName}</> }))} />}
-            {q.data.byTask.length > 0 && <Totals title={t('time.byTask')} rows={q.data.byTask.map((x) => ({ id: x.taskId, title: `${x.taskKey} ${x.taskName}`, hours: x.hours,
+            {q.data.byTask.length > 0 && <Totals title={t('time.byTask')} rows={q.data.byTask.map((x) => ({ id: x.taskId, to: totalLink('taskId', x.taskId), title: `${x.taskKey} ${x.taskName}`, hours: x.hours,
               label: <><Key>{x.taskKey}</Key> {x.taskName}</> }))} />}
             <p className="text-xs/[18px] text-muted-foreground">{t('time.separate')}</p>
           </aside>
@@ -172,7 +173,7 @@ export function TimePage() {
 }
 
 /** A read-only total per project or task: sums of the entries shown, right-aligned in hours. */
-function Totals({ title, rows }: { title: string; rows: { id: string; label: ReactNode; title: string; hours: number }[] }) {
+function Totals({ title, rows }: { title: string; rows: { id: string; label: ReactNode; title: string; hours: number; to: string }[] }) {
   return (
     <section className="overflow-hidden rounded-lg border bg-card">
       <h2 className="border-b px-4 py-2.5 text-sm font-semibold">{title}</h2>
@@ -180,7 +181,7 @@ function Totals({ title, rows }: { title: string; rows: { id: string; label: Rea
         <tbody>{rows.map((r) => (
           <tr key={r.id} className="border-t first:border-t-0">
             <th scope="row" className="w-full max-w-0 truncate px-4 py-2 text-left font-normal" title={r.title}>{r.label}</th>
-            <td className="whitespace-nowrap px-4 py-2 text-right font-medium tabular-nums">{h(r.hours)} h</td>
+            <td className="whitespace-nowrap px-4 py-2 text-right font-medium tabular-nums"><Link to={r.to} className="underline underline-offset-2">{h(r.hours)} h</Link></td>
           </tr>
         ))}</tbody>
       </table>

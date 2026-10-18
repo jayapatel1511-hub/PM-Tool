@@ -11,7 +11,7 @@ import { addDays, hours } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { accentOf, cn } from '@/lib/utils'
 
-export interface Person { id: string; displayName: string; email?: string; jobTitle?: string; isActive?: boolean }
+export interface Person { id: string; displayName: string; email?: string; jobTitle?: string; homeDiscipline?: string; isActive?: boolean; onProject?: boolean }
 
 export function initials(name?: string | null) { return (name ?? '?').split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase() }
 
@@ -36,6 +36,8 @@ export const weekOf = (d: string) => addDays(d, -((new Date(`${d}T00:00:00Z`).ge
 
 /** The week whose capacity a picker shows, for pickers rendered by shared fields that cannot pass the prop (FR-PICK-02). */
 export const CapacityWeek = createContext<string | undefined>(undefined)
+/** Project context for people reads. Pickers inside a project send this once so the server can rank the team first. */
+export const PickerProject = createContext<string | undefined>(undefined)
 
 export type CapacityCell = PlannerCell & { partial?: boolean }
 
@@ -84,10 +86,11 @@ export function PeoplePicker({ value, valueName, onChange, placeholder, allowCle
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
   const providedWeek = useContext(CapacityWeek)
+  const projectId = useContext(PickerProject)
   const week = capacityWeek ?? providedWeek
   const search = useQuery({
-    queryKey: ['people', q], enabled: open && !candidates,
-    queryFn: () => get<Person[]>(`users${qs({ q, limit: 30 })}`), staleTime: 60_000,
+    queryKey: ['people', q, projectId ?? null], enabled: open && !candidates,
+    queryFn: () => get<Person[]>(`users${qs({ q, limit: 30, projectId })}`), staleTime: 60_000,
   })
   const pool = (candidates ?? search.data ?? []).filter((p) => !exclude.includes(p.id) && (!candidates || !q || p.displayName.toLowerCase().includes(q.toLowerCase())))
   const capacity = usePeopleCapacity(week, open, pool.map((p) => p.id))
@@ -112,6 +115,7 @@ export function PeoplePicker({ value, valueName, onChange, placeholder, allowCle
                   <CommandItem key={p.id} value={p.id} onSelect={() => { onChange(p.id, p); setOpen(false) }}>
                     <Check className={cn('size-3.5', value === p.id ? 'opacity-100' : 'opacity-0')} />
                     <span className="truncate">{p.displayName}</span>
+                    {p.onProject && <span className="ml-1 shrink-0 text-xs text-muted-foreground">{t('people.onProject')}</span>}
                     {p.jobTitle && <span className="ml-auto truncate text-xs text-muted-foreground">{p.jobTitle}</span>}
                     {week && <span className={cn('flex shrink-0 justify-end', !p.jobTitle && 'ml-auto')}><CapacityFigure cell={capacity(p.id)} /></span>}
                   </CommandItem>

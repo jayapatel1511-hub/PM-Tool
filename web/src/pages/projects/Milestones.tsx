@@ -1,3 +1,4 @@
+import { PickerProject } from '@/components/hub/people'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ChevronRight, Lock, Monitor, MoreHorizontal, Plus } from 'lucide-react'
 import { Fragment, useState } from 'react'
@@ -24,11 +25,12 @@ import { CommentsSlot, ItemSlots } from './slots-items'
 import { STATUSES as DELIVERABLE_STATUSES } from './Deliverables'
 import { useCurrentProject } from './ProjectLayout'
 import { ExportMenu } from '@/components/hub/export'
+import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/deleted'
 
 export interface MilestoneRow {
   id: string; projectId: string; key: string; name: string; milestoneType: string; date?: string; originalDate?: string; description?: string
   projectDisciplineId?: string; completesPhaseId?: string; isClientFacing: boolean; isComplete: boolean; completedDate?: string; isCancelled: boolean
-  cancelledReason?: string; rowVersion: number; isSubmission: boolean; status?: string | null; statusReasons?: any[] | null; slipDays: number
+  cancelledReason?: string; rowVersion: number; isSubmission: boolean; status?: string | null; statusReasons?: any[] | null; slipDays: number; baselineDate?: string; sinceBaselineDays?: number; canRebaseline?: boolean; baselineSlipShown?: boolean; slipShown?: boolean
   daysRemaining?: number | null; deliverableTotal: number; deliverableIssued: number; taskTotal: number; taskComplete: number; taskOpen: number
   taskOverdue: number; taskBlocked: number
 }
@@ -82,7 +84,7 @@ const slip = (n: number) => t('milestone.slipDays', { n: n > 0 ? `+${n}` : n < 0
 const PhoneNotice = ({ className }: { className?: string }) => <Notice icon={Monitor} title={t('milestone.phoneTitle')} className={className}>{t('milestone.phoneHint')}</Notice>
 
 /** Milestone View (§13.7): strip with slip ghosts, table with readiness, and the PM's lifecycle actions. */
-export function MilestonesTab() {
+function LiveMilestonesTab() {
   const p = useCurrentProject()
   const phone = useIsPhone()
   const ref = useReference()
@@ -106,6 +108,7 @@ export function MilestonesTab() {
       {can && <DesktopOnly notice={<PhoneNotice />}>{null}</DesktopOnly>}
       <MilestoneStrip rows={rows} onOpen={(m) => openPanel('Milestone', m.id)} />
       <FilterBar activeCount={(type ? 1 : 0) + (showCompleted ? 1 : 0)}>
+        <DeletedToggle project={p} />
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.type')} htmlFor="ms-type" className="w-full sm:w-56">
             <select id="ms-type" className={selectCls} value={type} onChange={(e) => setType(e.target.value)}>
@@ -192,6 +195,12 @@ export function MilestonesTab() {
   )
 }
 
+export function MilestonesTab() {
+  const p = useCurrentProject()
+  if (useShowDeleted(p)) return <Page title={t('ptab.milestones')}><FilterBar><DeletedToggle project={p} /></FilterBar><DeletedList project={p} kind="milestones" /></Page>
+  return <LiveMilestonesTab />
+}
+
 function MilestoneMenu({ m, onPick }: { m: MilestoneRow; onPick: (k: 'edit' | 'date' | 'complete' | 'cancel' | 'reopen') => void }) {
   return (
     <DropdownMenu>
@@ -249,7 +258,7 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
   const dated = rows.filter((m) => m.date && !m.isCancelled).slice(0, limit ?? 100)
   if (!dated.length) return null
   const now = today()
-  const dates = [...dated.flatMap((m) => [m.date!, m.originalDate ?? m.date!]), now]
+  const dates = [...dated.flatMap((m) => [m.date!, m.originalDate ?? m.date!, m.baselineDate ?? m.date!]), now]
   const min = dates.reduce((a, b) => (a < b ? a : b)), max = dates.reduce((a, b) => (a > b ? a : b))
   const span = Math.max(daysBetween(min, max), 1)
   const x = (d: string) => 4 + (daysBetween(min, d) / span) * 92
@@ -282,11 +291,12 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
             : { left: `${left}%`, transform: 'translateX(-50%)', textAlign: 'center' as const }
           return (
             <div role="listitem" key={m.id} className="contents">
-              {m.originalDate && m.originalDate !== m.date && (
+              {m.slipShown !== false && m.originalDate && m.originalDate !== m.date && (
                 <span aria-hidden className="absolute size-3 rotate-45 border-2 bg-card" style={{ left: `calc(${x(m.originalDate)}% - 6px)`, top: AXIS - 6, borderColor: color }}
                   title={`${m.name}: ${t('milestone.original')} ${fmtDate(m.originalDate)}`} />
               )}
               {lane > 0 && <span aria-hidden className="absolute w-px bg-border" style={{ left: `${left}%`, top: AXIS + 12, height: lane * LANE }} />}
+              {m.baselineDate && m.baselineSlipShown !== false && m.baselineDate !== m.date && <span aria-hidden className="absolute size-3 rotate-45 border-2 border-dotted bg-card" style={{ left: `calc(${x(m.baselineDate)}% - 6px)`, top: AXIS - 6, borderColor: color }} title={t('interaction.baselineDate', { date: fmtDate(m.baselineDate) })} />}
               <button type="button" className="absolute z-10 grid size-6 -translate-x-1/2 place-items-center rounded-md hover:bg-muted" style={{ left: `${left}%`, top: AXIS - 12 }} onClick={() => onOpen(m)}
                 title={`${m.key} ${m.name} · ${fmtDate(m.date)} · ${tv(status)}`} aria-label={`${m.key} ${m.name}, ${fmtDate(m.date)}, ${tv(status)}`}>
                 <span className="block size-3.5 rotate-45 border border-white shadow-[0_0_0_1px_rgba(25,27,32,0.3)]" style={{ background: color }} />
@@ -294,7 +304,7 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
               <span aria-hidden className="pointer-events-none absolute w-max max-w-32 text-xs/[18px]" style={{ ...label, top: AXIS + 14 + lane * LANE }}>
                 <span className="block font-medium">{m.key}</span>
                 <span className="block whitespace-nowrap text-muted-foreground tabular-nums">
-                  {SYMBOL[tone(m)]} {shortDate(m.date)}{m.slipDays > 0 && <span className="text-warn"> · {slip(m.slipDays)}</span>}
+                  {SYMBOL[tone(m)]} {shortDate(m.date)}{m.slipShown !== false && m.slipDays > 0 && <span className="text-warn"> · {slip(m.slipDays)}</span>}
                 </span>
               </span>
             </div>
@@ -453,6 +463,7 @@ function CancelDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Mileston
 function MilestonePanel({ id }: PanelProps) {
   const q = useQuery({ queryKey: ['milestone', id], queryFn: () => get(`milestones/${id}`) })
   const [tab, setTab] = useState<'deliverables' | 'comments' | 'history'>('deliverables')
+  const [baseline, setBaseline] = useState<'set' | 'clear' | null>(null)
   const qc = useQueryClient()
   const refresh = useProjectRefresh()
   const ref = useReference()
@@ -466,19 +477,21 @@ function MilestonePanel({ id }: PanelProps) {
     <DesktopOnly notice={<InlineText value={value} multiline={multiline} disabled onSave={onSave} />}><InlineText value={value} multiline={multiline} disabled={!can} onSave={onSave} /></DesktopOnly>
   )
   return (
-    <div>
+    <PickerProject.Provider value={m.projectId}><div>
       <div className="space-y-2 border-b px-6 py-5">
         <div className="flex flex-wrap items-center gap-2"><Key>{m.key}</Key><StatusPill status={milestoneStatusLabel(m)} /></div>
         <h2 className="break-words text-2xl/8 font-semibold tracking-[-0.4px]">{m.isSubmission && '◆ '}{m.name}</h2>
         {m.statusReasons?.length ? <Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><span className="text-sm text-muted-foreground">{t('common.why')}</span></Why> : null}
       </div>
       {can && <DesktopOnly notice={<PhoneNotice className="mx-6 mt-4" />}>{null}</DesktopOnly>}
+      {m.canRebaseline && <div className="flex flex-wrap gap-2 px-6 pt-3"><Button size="sm" variant="outline" onClick={() => setBaseline('set')}>{t('baseline.rebaseline')}</Button>{m.baselineDate && <Button size="sm" variant="ghost" onClick={() => setBaseline('clear')}>{t('baseline.useOriginal')}</Button>}</div>}
       <div className="px-6 py-3">
         <FieldRow label={t('common.name')}>{text(m.name, (v) => save({ name: v }))}</FieldRow>
         <FieldRow label={t('common.type')}><div className="px-2 py-1.5">{t(`mtype.${m.milestoneType}`)}</div></FieldRow>
         <FieldRow label={t('common.date')}><div className="px-2 py-1.5 tabular-nums">{fmtDate(m.date)} {m.date && <span className="text-muted-foreground">({relative(m.date)})</span>}</div></FieldRow>
         <FieldRow label={t('milestone.original')}><div className="px-2 py-1.5 tabular-nums">{fmtDate(m.originalDate)}{m.slipDays > 0 && <span className="ml-2 text-warn"><span aria-hidden>▲ </span>{t('milestone.slipped', { n: m.slipDays })}</span>}</div></FieldRow>
         <FieldRow label={t('milestone.readiness')}><div className="px-2 py-1.5 tabular-nums">{t('milestone.issuedOf', { n: m.deliverableIssued, total: m.deliverableTotal })} · {t('milestone.tasksComplete', { n: m.taskComplete, total: m.taskTotal })}</div></FieldRow>
+        {m.baselineDate && <FieldRow label={t('baseline.rebaseline')}><span className="px-2 py-1.5 tabular-nums">{fmtDate(m.baselineDate)} · {t('interaction.sinceBaseline', { n: m.sinceBaselineDays ?? 0 })}</span></FieldRow>}
         <FieldRow label={t('field.CompletesPhaseId')}><div className="px-2 py-1.5">{q.data.completesPhase?.name ?? t('common.dash')}</div></FieldRow>
         <FieldRow label={t('common.description')}>{text(m.description, (v) => save({ description: v }), true)}</FieldRow>
         {m.isCancelled && <p className="mt-2 rounded-md bg-idle-bg px-3 py-2 text-sm text-idle">{t('milestone.cancelledNote', { reason: m.cancelledReason ?? '' })}</p>}
@@ -488,7 +501,9 @@ function MilestonePanel({ id }: PanelProps) {
       {tab === 'deliverables' && <div className="p-6"><TargetedDeliverables milestoneId={m.id} /></div>}
       {tab === 'comments' && <CommentsSlot type="Milestone" id={m.id} projectId={m.projectId} />}
       {tab === 'history' && <HistoryList type="Milestone" id={m.id} />}
-    </div>
+      {baseline && <ConfirmDialog open onOpenChange={(o) => !o && setBaseline(null)} title={baseline === 'clear' ? t('baseline.useOriginal') : t('baseline.rebaseline')} reason
+        onConfirm={async (reason) => { await post(`milestones/${m.id}/rebaseline`, { reason, clear: baseline === 'clear', rowVersion: m.rowVersion }); setBaseline(null); qc.invalidateQueries({ queryKey: ['milestone', id] }); refresh(m.projectId) }} />}
+    </div></PickerProject.Provider>
   )
 }
 

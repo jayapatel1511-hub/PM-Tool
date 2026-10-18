@@ -1,3 +1,4 @@
+import { useFlag, useMe } from '@/lib/auth'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
 import { ActivityTable, type ActivityRow } from '@/components/hub/activity'
@@ -20,6 +21,8 @@ const FILTERS = ['from', 'to', 'itemType', 'category', 'disciplineId', 'importan
 /** Project Activity History (§13.14, FR-VIEW-03, FR-AUD-02/03): filters in the URL, read-only, exportable. */
 export function ProjectActivityTab() {
   const p = useCurrentProject()
+  const small = useFlag('small_ux')
+  const burst = (useMe().settings as {activityBurstMinutes?:number}).activityBurstMinutes ?? 10
   const [sp, setSp] = useSearchParams()
   const open = useItemPanel()
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); if (k !== 'page') n.delete('page'); setSp(n, { replace: true }) }
@@ -66,10 +69,11 @@ export function ProjectActivityTab() {
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={params.importantOnly} onCheckedChange={(c) => set('importantOnly', c ? 'true' : null)} />{t('activity.important')}</label>
         </div>
       </FilterBar>
+      {small && <label className="flex min-h-6 items-center gap-2 text-sm"><Checkbox checked={sp.get('groupChanges')==='true'} onCheckedChange={on=>set('groupChanges',on?'true':null)} />{t('activity.groupChanges')}</label>}
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <div className="rounded-lg border bg-card"><Loading /></div> : q.data && (q.data.items.length === 0 && tokens.length > 0
         ? <div className="rounded-lg border bg-card"><Empty action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('activity.empty')}</Empty></div>
-        : <ActivityTable rows={q.data.items} total={q.data.totalCount} page={page} pageSize={50} onPage={(n) => set('page', String(n))}
+        : <ActivityTable grouped={small && sp.get('groupChanges')==='true'} burst={burst} rows={q.data.items} total={q.data.totalCount} page={page} pageSize={50} onPage={(n) => set('page', String(n))}
             onOpen={(r) => r.itemId && open(r.itemType, r.itemId)} />)}
     </Page>
   )

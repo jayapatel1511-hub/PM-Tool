@@ -25,6 +25,11 @@ public sealed class PermissionMatrixTests
         Guid? discipline = null, bool collaborator = false, bool deps = false, bool window = false) =>
         new(discipline ?? Civil, assignee, reviewer, creator ?? Other, collaborator ? new HashSet<Guid> { Me } : new HashSet<Guid>(), status, deps, window);
 
+    [Theory]
+    [InlineData("PM", true)] [InlineData("DL", false)] [InlineData("TM", false)] [InlineData("Viewer", false)]
+    public void Only_project_pm_may_rebaseline_open_items(string role, bool expected)
+        => Assert.Equal(expected, Permissions.Rebaseline(A(), Ctx(role), closed: false).Ok);
+
     // ---------- §8.5.1 system level ----------
 
     [Theory]

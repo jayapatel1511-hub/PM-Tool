@@ -1,3 +1,4 @@
+import { useFlag } from '@/lib/auth'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Bookmark, Check, Star } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -31,7 +32,9 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
   const qc = useQueryClient()
   const key = ['views', listType, projectId ?? null]
   const q = useQuery({ queryKey: key, queryFn: () => get<ViewList>(`views?listType=${listType}${projectId ? `&projectId=${projectId}` : ''}`) })
+  const small = useFlag('small_ux')
   const [saving, setSaving] = useState(false)
+  const [copying, setCopying] = useState(false)
   const applied = useRef(false)
   const active = q.data?.views.find((v) => v.id === sp.get('view'))
   const apply = (v: SavedView, replace = false) => {
@@ -70,23 +73,24 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
           {shared.length > 0 && <><DropdownMenuLabel>{t('views.project')}</DropdownMenuLabel>{shared.map(item)}</>}
           {personal.length + shared.length === 0 && <DropdownMenuLabel className="font-normal text-muted-foreground">{t('views.none')}</DropdownMenuLabel>}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => setSaving(true)}>{t('views.save')}</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => { setCopying(false); setSaving(true) }}>{t('views.save')}</DropdownMenuItem>
           {active?.canEdit && <>
             <DropdownMenuItem onSelect={() => run(() => patch(`views/${active.id}`, { params: current(sp, extra?.(), panelParam) }, active.rowVersion), t('views.updated', { name: active.name }))}>{t('views.update', { name: active.name })}</DropdownMenuItem>
             {!active.isDefault && active.scope === 'Personal' && <DropdownMenuItem onSelect={() => run(() => patch(`views/${active.id}`, { isDefault: true }, active.rowVersion), t('views.madeDefault', { name: active.name }))}>{t('views.makeDefault')}</DropdownMenuItem>}
             <DropdownMenuItem className="text-bad" onSelect={() => run(async () => { await del(`views/${active.id}`); const n = new URLSearchParams(sp); n.delete('view'); setSp(n, { replace: true }) }, t('views.deleted', { name: active.name }))}>{t('views.delete')}</DropdownMenuItem>
           </>}
+          {small && active && <DropdownMenuItem onSelect={() => { setCopying(true); setSaving(true) }}>{t('views.copyPersonal')}</DropdownMenuItem>}
           {sp.get('view') && <DropdownMenuItem onSelect={() => { const n = new URLSearchParams(fixed); for (const key of new Set(['panel', panelParam])) { const panel = sp.get(key); if (panel) n.set(key, panel) } setSp(n) }}>{t('views.clear')}</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
-      {saving && <SaveDialog listType={listType} projectId={projectId} canShare={!!q.data?.canShare} params={current(sp, extra?.(), panelParam)}
+      {saving && <SaveDialog listType={listType} projectId={projectId} canShare={!copying && !!q.data?.canShare} initialName={copying && active ? `${active.name} (copy)` : ''} params={copying && active ? active.params : current(sp, extra?.(), panelParam)}
         onClose={(id) => { setSaving(false); if (id) { refresh(); const n = new URLSearchParams(sp); n.set('view', id); setSp(n, { replace: true }) } }} />}
     </>
   )
 }
 
-function SaveDialog({ listType, projectId, canShare, params, onClose }: { listType: string; projectId?: string; canShare: boolean; params: Record<string, string>; onClose: (id?: string) => void }) {
-  const [name, setName] = useState('')
+function SaveDialog({ listType, projectId, canShare, initialName = '', params, onClose }: { listType: string; projectId?: string; canShare: boolean; initialName?: string; params: Record<string, string>; onClose: (id?: string) => void }) {
+  const [name, setName] = useState(initialName)
   const [share, setShare] = useState(false)
   const [isDefault, setDefault] = useState(false)
   const [err, setErr] = useState<ApiError | null>(null)

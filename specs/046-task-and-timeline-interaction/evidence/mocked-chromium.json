@@ -1,0 +1,16 @@
+{
+  "scope": "Mocked synthetic API in Chromium; no production or native evidence",
+  "rowActions": true,
+  "viewerDeepLink": true,
+  "closedProjectOpenOnly": true,
+  "flagParity": true,
+  "draftDateHint": true,
+  "rebaselineReason": true,
+  "timelineHandoffChain": true,
+  "startAuthorizationRefusal": true,
+  "axeViolations": [],
+  "writes": 3,
+  "errors": [],
+  "unknown": [],
+  "untested": []
+}

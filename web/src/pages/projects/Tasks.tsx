@@ -2,12 +2,12 @@ import { disciplineColour } from '@/lib/discipline-colour'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { ArrowDown, ArrowUp, ChevronDown, Columns3, Ellipsis, KanbanSquare, List, Plus, Rows3, type LucideIcon } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronDown, Columns3, Ellipsis, KanbanSquare, List, Pencil, Plus, Rows3, type LucideIcon } from 'lucide-react'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
-import { InlineDate } from '@/components/hub/fields'
+import { InlineDate, InlineText } from '@/components/hub/fields'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Avatar, PeoplePicker, weekOf } from '@/components/hub/people'
 import { Chip, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh } from '@/hooks/data'
 import { ApiError, download, get, patch, post, qs } from '@/lib/api'
-import { useMe } from '@/lib/auth'
+import { useFlag, useMe } from '@/lib/auth'
 import { addDays, ago, fmtDate, hours, today } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import type { Page as PageOf, ProjectDetail } from '@/lib/types'
@@ -28,9 +28,11 @@ import { cn } from '@/lib/utils'
 import type { DeliverableRow } from './Deliverables'
 import type { MilestoneRow } from './Milestones'
 import { useCurrentProject } from './ProjectLayout'
+import { BlockDialog } from './TaskPanel'
 import { showPhoneTaskField } from './phone-task-fields'
 import { NOTE_LABEL, OneSignal, type Signal } from '@/components/hub/indicators'
 import { ViewMenu } from '@/components/hub/views'
+import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/deleted'
 import { StartAuthorisationDialog, type StartRequest } from './TaskStart'
 
 // ---------- Shapes (GET /projects/{id}/tasks, /tasks/{id}) ----------
@@ -49,7 +51,7 @@ export interface TaskRow {
   milestoneId?: string; effectiveMilestoneId?: string; milestoneKey?: string; milestoneName?: string; milestoneDate?: string; milestoneDerived: boolean
   assigneeId?: string; assigneeName?: string; assigneeActive: boolean; reviewerId?: string; reviewerName?: string; requiresReview: boolean
   priority: string; startDate?: string; dueDate?: string; originalStartDate?: string; originalDueDate?: string; status: string; lane: string
-  progressPct: number; estimatedHours?: number | null; reviewRound: number; dueDateChangeCount: number; lastActivityAt: string; statusChangedAt?: string; completedAt?: string
+  progressPct: number; estimatedHours?: number | null; reviewRound: number; dueDateChangeCount: number; lastActivityAt: string; lastActivityActorName?: string; statusChangedAt?: string; completedAt?: string
   createdAt: string; createdBy?: string; createdByName?: string; sortOrder: number; rowVersion: number
   manualBlockType?: string; manualBlockReason?: string; manualBlockSetAt?: string; commentCount: number; predecessorCount: number; successorCount: number
   collaboratorIds: string[]; state?: TaskStateView | null
@@ -265,21 +267,25 @@ export function moveFrom(detail: any, x: Transition): MoveRequest {
 export const readableDisabled = 'data-[disabled]:opacity-100 data-[disabled]:text-disabled-foreground'
 
 /** Status pill that lists only the transitions the server allows for this user, fetched when opened (FR-004). */
-export function StatusMenu({ r, onMove, disabled }: { r: TaskRow; onMove: (m: MoveRequest) => void; disabled?: boolean }) {
+export function StatusMenu({ r, onMove, disabled }: { r: TaskRow; onMove: (m: MoveRequest) => Promise<boolean | null> | void; disabled?: boolean }) {
   const [open, setOpen] = useState(false)
+  const optimistic = useFlag('small_ux')
+  const [pending, setPending] = useState<string | null>(null)
+  const requestMove = async (m: MoveRequest) => { if (optimistic && (r.status !== 'Not Started' || readiness.data?.needsAuthorisation === false) && !m.needsReason && m.to !== 'Revision Required' && !m.needsReviewer) setPending(m.to); try { await onMove(m) } finally { setPending(null) } }
   const q = useQuery({ queryKey: ['task', r.id, r.rowVersion], queryFn: () => get(`tasks/${r.id}`), enabled: open })
+  const readiness = useQuery({ queryKey: ['task-start-readiness', r.id, r.rowVersion], enabled: optimistic && open && r.status === 'Not Started', queryFn: () => get<{needsAuthorisation:boolean}>(`tasks/${r.id}/start-readiness`) })
   if (disabled) return <StatusPill status={r.status} />
   const list: Transition[] = q.data?.permissions.transitions ?? []
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <button type="button" className="inline-flex min-h-6 items-center gap-0.5 rounded-md hover:bg-muted" aria-label={t('task.changeStatus', { key: r.key, status: tv(r.status) })}>
-          <StatusPill status={r.status} /><ChevronDown className="size-3.5 text-muted-foreground" aria-hidden />
+          <StatusPill status={pending ?? r.status} />{pending && <span role="status">{t('common.saving')}</span>}<ChevronDown className="size-3.5 text-muted-foreground" aria-hidden />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="max-w-80">
         {q.isPending ? <div role="status" aria-label={t('app.loading')} className="p-2"><Spinner /></div> : list.map((x) => (
-          <DropdownMenuItem key={x.to} disabled={!x.allowed} onSelect={() => onMove(moveFrom(q.data, x))} className={cn('flex-col items-start gap-0', readableDisabled)}>
+          <DropdownMenuItem key={x.to} disabled={!x.allowed} onSelect={() => requestMove(moveFrom(q.data, x))} className={cn('flex-col items-start gap-0', readableDisabled)}>
             <span>{tv(x.to)}{x.via && <span className="ml-1 text-xs text-muted-foreground">{t('task.viaShort', { via: tv(x.via) })}</span>}</span>
             {!x.allowed && x.reason && <span className="text-xs text-muted-foreground">{x.reason}</span>}
           </DropdownMenuItem>
@@ -364,6 +370,7 @@ export function TaskFilterBar({ p, deliverables, extra, actions, pinned = PINNED
         </Field>
         {extra}
       </div>
+      <DeletedToggle project={p} />
       <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="tasks-quick">
         <span id="tasks-quick" className="mr-1 text-sm font-medium">{t(pinned.length ? 'calm.moreQuick' : 'task.quickFilters')}</span>
         {QUICK.filter((k) => !pinned.includes(k)).map(chip)}
@@ -454,7 +461,8 @@ function readCols(): string[] | null {
   try { const v = localStorage.getItem(COLS_KEY); return v ? JSON.parse(v) : null } catch { return null }
 }
 
-export function TasksTab() {
+function LiveTasksTab() {
+  const quick = useFlag('row_quick_actions')
   const phone = useIsPhone()
   const focusRestore = useRef<{ id: string; control: 'key' | 'title'; mode: 'phone' | 'desktop' } | null>(null)
   // Record focus while the control is still mounted. Layout-effect cleanup can
@@ -498,6 +506,8 @@ export function TasksTab() {
   const [creating, setCreating] = useState<{ deliverableId?: string } | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulk, setBulk] = useState<string | null>(null)
+  const [editingName, setEditingName] = useState<string | null>(null)
+  const [block, setBlock] = useState<TaskRow | null>(null)
   const [visible, setVisible] = useState<string[] | null>(readCols)
   const sort = sp.get('sort') ?? ''
   const group = sp.get('group') ?? 'deliverable'
@@ -517,13 +527,21 @@ export function TasksTab() {
   const flat = useMemo(() => groupRows(rows, group, byId), [rows, group, byId])
   const reload = () => { q.refetch(); refresh(p.id) }
   const actions = useTaskActions(reload)
+  const startTask = async (r: TaskRow) => {
+    try {
+      const detail = await get(`tasks/${r.id}`)
+      const transition = detail.permissions.transitions.find((x: Transition) => x.to === 'In Progress')
+      if (!transition?.allowed) { toast.error(transition?.reason ?? t('app.error')); return }
+      await actions.move({ ...moveFrom(detail, transition), needsReason: transition.needsReason || detail.permissions.needsReason })
+    } catch (e) { toast.error(errorText(e)) }
+  }
   const canCreate = p.permissions.createTaskIn.length > 0
   const toggle = (id: string) => setSelected((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
   const dash = <span className="text-muted-foreground">{t('common.dash')}</span>
 
   const all: Col[] = [
     { id: 'key', label: 'milestone.key', sort: 'key', cls: 'whitespace-nowrap', cell: (r) => <button type="button" data-task-focus="key" data-task-id={r.id} className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button> },
-    { id: 'name', label: 'task.name', sort: 'name', cls: 'min-w-56', cell: (r) => <button type="button" data-task-focus="title" data-task-id={r.id} aria-current={current === r.id || undefined} className="text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button> },
+    { id: 'name', label: 'task.name', sort: 'name', cls: 'min-w-56', cell: (r) => editingName === r.id ? <InlineText initiallyEditing onCancel={()=>setEditingName(null)} value={r.name} title={t('common.name')} onSave={async (v) => { if (!v?.trim()) return false; const result = await actions.save(r, {name:v.trim()}); if (result != null) setEditingName(null); return result }} /> : <span className="group/name inline-flex items-center gap-1"><button type="button" data-task-focus="title" data-task-id={r.id} aria-current={current === r.id || undefined} className="text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>{quick && !phone && hints.edit(r) && <Button size="icon-sm" variant="ghost" className="opacity-0 group-hover/task:opacity-100 group-focus-within/task:opacity-100" aria-label={t('interaction.rename',{key:r.key})} onClick={()=>setEditingName(r.id)}><Pencil className="size-3.5" /></Button>}</span> },
     { id: 'deliverable', label: 'task.deliverable', cell: (r) => r.deliverableId ? <button type="button" className="block max-w-44 truncate text-left hover:underline" title={`${r.deliverableKey} ${r.deliverableName}`} onClick={() => openPanel('Deliverable', r.deliverableId!)}>{r.deliverableName}</button> : dash },
     { id: 'discipline', label: 'common.discipline', cls: 'whitespace-nowrap', cell: (r) => <span className="inline-flex items-center gap-1.5"><span className="size-2.5 shrink-0 rounded-sm" style={{ background: disciplineColour(r.disciplineColour) }} aria-hidden />{r.disciplineName}</span> },
     { id: 'assignee', label: 'field.AssigneeId', cls: 'min-w-48', pad: CONTROL, cell: (r) => {
@@ -551,16 +569,17 @@ export function TasksTab() {
       ? <select className={rowSelect} value={r.progressPct} aria-label={t('task.progressOf', { key: r.key })} onChange={(e) => actions.setProgress(r, Number(e.target.value))}>{PROGRESS.map((x) => <option key={x} value={x}>{x}%</option>)}</select>
       : <span className="flex min-h-(--control-row-h) items-center justify-end">{r.progressPct}%</span> },
     { id: 'estimate', label: 'task.estimate', sort: 'estimate', num: true, cls: 'whitespace-nowrap', cell: (r) => r.estimatedHours == null ? <span className="text-muted-foreground">{t('task.unestimated')}</span> : hours(r.estimatedHours) },
-    { id: 'lastActivity', label: 'task.lastActivity', sort: 'lastActivity', cls: 'whitespace-nowrap text-muted-foreground', cell: (r) => <span title={r.lastActivityAt}>{ago(r.lastActivityAt)}</span> },
+    { id: 'lastActivity', label: 'task.lastActivity', sort: 'lastActivity', cls: 'whitespace-nowrap text-muted-foreground', cell: (r) => <span title={r.lastActivityAt}>{ago(r.lastActivityAt)}{r.lastActivityActorName && ` · ${r.lastActivityActorName}`}</span> },
     { id: 'milestone', label: 'field.MilestoneId', optional: true, cls: 'whitespace-nowrap', cell: (r) => r.milestoneKey ? <span title={r.milestoneName}><span className="key">{r.milestoneKey}</span>{r.milestoneDerived && <span className="text-muted-foreground"> ↳</span>}</span> : dash },
     { id: 'created', label: 'task.createdCol', sort: 'created', optional: true, cls: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.createdAt) },
     { id: 'completed', label: 'task.completedCol', sort: 'completed', optional: true, cls: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.completedAt) },
     { id: 'blocking', label: 'task.blockingCount', optional: true, num: true, cell: (r) => r.state?.blockingCount || dash },
     { id: 'reviewRound', label: 'task.reviewRound', optional: true, num: true, cell: (r) => r.reviewRound || dash },
     { id: 'dueChanges', label: 'task.dueChanges', optional: true, num: true, cell: (r) => r.dueDateChangeCount || dash },
+    ...(quick ? [{ id: 'quick', label: 'common.actions', cls: 'w-40 min-w-40', cell: (r: TaskRow) => <div className="flex gap-1 opacity-0 group-hover/task:opacity-100 group-focus-within/task:opacity-100 focus-within:opacity-100"><Button size="sm" variant="ghost" aria-label={t('interaction.openTask',{key:r.key})} onClick={() => openPanel('Task', r.id)}>{t('common.open')}</Button>{hints.edit(r) && r.status === 'Not Started' && <Button size="sm" variant="ghost" aria-label={t('interaction.startTask',{key:r.key})} onClick={() => startTask(r)}>{t('tasks.startAuthStartNow')}</Button>}{hints.edit(r) && !r.manualBlockType && <Button size="sm" variant="ghost" aria-label={t('interaction.blockTask',{key:r.key})} onClick={() => setBlock(r)}>{t('task.setBlock')}</Button>}</div> }] as Col[] : []),
   ]
   const urlCols = sp.get('cols')?.split(',') // a saved view or shared link carries its columns
-  const shown = all.filter((c) => (urlCols ? urlCols.includes(c.id) || c.id === 'key' || c.id === 'name' : visible ? visible.includes(c.id) : !c.optional))
+  const shown = all.filter((c) => (urlCols ? urlCols.includes(c.id) || c.id === 'key' || c.id === 'name' || c.id === 'quick' : visible ? visible.includes(c.id) || c.id === 'quick' : !c.optional))
   const setCols = (ids: string[]) => { setVisible(ids); try { localStorage.setItem(COLS_KEY, JSON.stringify(ids)) } catch { /* per-viewer convenience only */ } if (urlCols) set('cols', null) }
 
   const scroller = useRef<HTMLDivElement>(null)
@@ -621,7 +640,7 @@ export function TasksTab() {
       ) : (
         phone ? <div data-task-layout="phone" className="space-y-2"><Checkbox aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={c => setSelected(c ? new Set(rows.map(r => r.id)) : new Set())} /><ul className="space-y-2">{flat.map(f => f.kind === 'group' ? <li key={`g-${f.id}`} className="flex flex-wrap items-center gap-2 py-2"><h3 className="break-words text-sm font-semibold">{f.label}</h3><span className="text-xs text-muted-foreground">{f.count}</span>{f.status && <StatusPill status={f.status} />}{group === 'deliverable' && canCreate && <Button size="sm" variant="outline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" />{t('task.addHere')}</Button>}</li> : <li key={f.r.id} className={cn('rounded-lg border bg-card p-4', (current === f.r.id || selected.has(f.r.id)) && 'bg-accent', current === f.r.id && 'shadow-[inset_3px_0_0_var(--primary)]')}>
           <div className="mb-3 flex items-start gap-3"><Checkbox aria-label={`${t('bulk.select')} ${f.r.key}`} checked={selected.has(f.r.id)} onCheckedChange={() => toggle(f.r.id)} /><div className="min-w-0 flex-1">{all.find(c => c.id === 'key')?.cell(f.r)}<div className="mt-1 break-words font-semibold">{all.find(c => c.id === 'name')?.cell(f.r)}</div></div></div>
-          <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name' && showPhoneTaskField(c.id, f.r) && (c.id !== 'indicators' || taskSignals(f.r).length > 0)).map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{t(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
+          <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name' && c.id !== 'quick' && showPhoneTaskField(c.id, f.r) && (c.id !== 'indicators' || taskSignals(f.r).length > 0)).map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{t(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
         </li>)}</ul>{q.isFetchingNextPage && <p role="status" className="text-xs text-muted-foreground">{t('task.loadingMore', { n: rows.length, total })}</p>}</div> :
         <TableRegion ref={scroller} data-task-layout="desktop" className="max-h-[calc(100dvh-10rem)] min-h-64 overflow-auto">
           <table className="w-full text-sm" aria-rowcount={flat.length + 1}>
@@ -661,7 +680,7 @@ export function TasksTab() {
                 const open = current === r.id
                 return (
                   <tr key={r.id} data-index={vi.index} ref={virtual.measureElement}
-                    className={cn('border-t hover:bg-muted', (open || selected.has(r.id)) && 'bg-accent hover:bg-accent', open && 'shadow-[inset_3px_0_0_var(--primary)]')}>
+                    className={cn('group group/task border-t hover:bg-muted', (open || selected.has(r.id)) && 'bg-accent hover:bg-accent', open && 'shadow-[inset_3px_0_0_var(--primary)]')}>
                     <td className={cn(tdCls, 'sticky left-0 z-10 w-10 min-w-10 bg-card', (open || selected.has(r.id)) && 'bg-accent')}><Checkbox className="mt-0.5" aria-label={`${t('bulk.select')} ${r.key}`} checked={selected.has(r.id)} onCheckedChange={() => toggle(r.id)} /></td>
                     {shown.map((c) => <td key={c.id} className={cn(tdCls, c.pad, c.num && 'text-right tabular-nums', c.cls, c.id === 'key' && 'sticky left-10 z-10 w-40 min-w-40 max-w-40 bg-card', c.id === 'name' && 'sticky left-50 z-10 min-w-64 bg-card', (c.id === 'key' || c.id === 'name') && (open || selected.has(r.id)) && 'bg-accent')}>{c.cell(r)}</td>)}
                   </tr>
@@ -673,11 +692,18 @@ export function TasksTab() {
           {q.isFetchingNextPage && <div role="status" className="flex items-center gap-2 border-t px-(--cell-px) py-2 text-xs/[18px] text-muted-foreground"><Spinner />{t('task.loadingMore', { n: rows.length, total })}</div>}
         </TableRegion>
       )}
+      {block && <BlockDialog r={block} onClose={(ok) => { setBlock(null); if (ok) reload() }} />}
       {creating && <CreateTask p={p} deliverables={deliverables} milestones={milestones} defaults={creating} onClose={(id) => { setCreating(null); if (id) { reload(); openPanel('Task', id) } }} />}
       {bulk && <TaskBulkDialog p={p} op={bulk} ids={[...selected]} deliverables={deliverables} onClose={(ok) => { setBulk(null); if (ok) { setSelected(new Set()); reload() } }} />}
       {actions.dialogs}
     </Page>
   )
+}
+
+export function TasksTab() {
+  const p = useCurrentProject()
+  if (useShowDeleted(p)) return <Page title={t('ptab.tasks')}><FilterBar><DeletedToggle project={p} /></FilterBar><DeletedList project={p} kind="tasks" /></Page>
+  return <LiveTasksTab />
 }
 
 /** Bulk actions with per-row permission checks and one summary (FR-TSK-09, T-23, E-20). */

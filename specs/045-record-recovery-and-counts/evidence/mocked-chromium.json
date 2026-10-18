@@ -1,0 +1,15 @@
+{
+  "scope": "Mocked synthetic API in Chromium; no server transaction or permission evidence",
+  "requests": [
+    {
+      "path": "tasks/00000000-0000-0000-0000-000000000006/restore",
+      "ifMatch": "\"4\""
+    }
+  ],
+  "errors": [],
+  "unknown": [],
+  "deletedAxe": [],
+  "rollupAxe": [],
+  "portfolioAxe": [],
+  "timeAxe": []
+}

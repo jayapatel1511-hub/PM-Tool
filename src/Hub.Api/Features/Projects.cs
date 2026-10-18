@@ -249,7 +249,7 @@ public static class ProjectEndpoints
         if (ctx.LeadDisciplineIds.Count > 0) myRoles.Add("DisciplineLead");
         var today = clock.Today(s);
         var completeFor = p.CompletedAt is { } ca ? today.DayNumber - Clock.LocalDate(ca, s).DayNumber : 0;
-        return new
+        var result = new
         {
             p.Id, p.ProjectNumber, p.Name, p.ClientId, p.ClientReference, p.ProjectManagerId, PmName = names.GetValueOrDefault(p.ProjectManagerId),
             p.OfficeId, p.ProjectTypeId, p.Description, p.Location, p.Status, p.PhaseId, p.StartDate, p.TargetCompletionDate, p.Priority, p.Visibility,
@@ -305,6 +305,16 @@ public static class ProjectEndpoints
                 NeedsReason = ProjectStatus.NeedsCorrectionReason(p.Status),
             }, s.IsFlagOn(RecoveryEndpoints.Flag) ? Perm(Permissions.RestoreItem(a, ctx), p.Status) : null),
         };
+        if (!s.IsFlagOn("schedule_baseline")) return result;
+        var latest = Evaluator.LatestPlanned(p.Status, p.TargetCompletionDate,
+            milestones.Select(m => new DateItem(m.Id, m.Key, null, m.Date, m.IsComplete))
+                .Concat(await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id)
+                    .Select(d => new DateItem(d.Id, d.Key, d.StartDate, d.DueDate,
+                        d.Status == DeliverableStatus.Issued || d.Status == DeliverableStatus.Accepted || d.Status == DeliverableStatus.Cancelled)).ToListAsync()));
+        if (latest is null) return result;
+        var json = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
+        json["latestPlanned"] = JsonSerializer.SerializeToNode(latest, JsonOpts.Web);
+        return json;
     }
 
     /// FR-RCV-01: the `restore` field exists only while `flag.show_deleted` is on (FR-DLV-08), so the block is unchanged with it off.

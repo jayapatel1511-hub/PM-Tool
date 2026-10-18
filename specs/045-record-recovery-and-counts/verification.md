@@ -1,30 +1,42 @@
 # Verification: Record Recovery and Counts
 
-Slice builds in progress; see the build notes below.
+Local implementation is present on `codex/recovery-interaction-045-046`, based on `a6e0104b0b00ea58b9098e41b2f155305063aeed`. This record separates current checks from the historical slice evidence below. No review/pilot flag was enabled and no acceptance decision was made.
 
-| AC | Delivered by | Status |
-|---|---|---|
-| AC-RCV-01 | S01, S02 | PARTIAL: S01 API level PASS (local); interface is S02 |
-| AC-RCV-02 | S01 | PASS (local) |
-| AC-RCV-03 | S01, S02 | PARTIAL: S01 API level PASS (local); interface is S02 |
-| AC-RCV-04 | S01, S02 | PARTIAL: S01 API level PASS (local); interface is S02 |
-| AC-RCV-05 | S01 | PASS (local) |
-| AC-RCV-06 | S01, S02, S12 | PARTIAL: server side PASS (local); dialog and toast are S02, flag removal S12 |
-| AC-RCV-07 | S01 | PASS (local) |
-| AC-RCV-08 | S03 | PARTIAL: API level PASS (local) in `CountLinkTests`; browser counts suite not run |
-| AC-RCV-09 | S03 | PARTIAL: API level PASS (local); `counts.cjs` Milestones check added, not run |
-| AC-RCV-10 | S04 | UNRUN |
-| AC-RCV-11 | S05 | UNRUN |
-| AC-RCV-12 | S05 | UNRUN |
-| AC-RCV-13 | S03, S04 | UNRUN: S03 API tests show new values equal the existing fields; counts suite against packet 036 fixtures not run |
-| AC-RCV-14 | S06, S07 | PARTIAL: S06 domain level PASS (local); office calendar wiring is S07 |
-| AC-RCV-15 | S06 | PASS (local), domain level |
-| AC-RCV-16 | S06 | PASS (local), domain level |
-| AC-RCV-17 | S07, S08, S12 | UNRUN |
-| AC-RCV-18 | S09, S10, S12 | PARTIAL: S09 API level PASS (local); interface is S10, flag removal S12 |
-| AC-RCV-19 | S11, S12 | UNRUN |
-| AC-RCV-20 | S09, S11 | PARTIAL: S09 API level PASS (local); export columns are S11 |
-| AC-RCV-21 | S09 | PASS (local), API level |
+## Current takeover evidence
+
+- Recovered the saved Claude 045-S07 tracked patch (SHA256 `5ef8eeb3af475ff0d94fd3068232d48a6b579709dcd528d49556319db05a3f50`) without its migration or snapshot. Model-only commit `ea202b19` adds the template offset kind and the three 046 baseline fields. The sole schema lane owns the combined migration, rollback smoke and EF drift check.
+- Added the shared Show deleted interface, parent-first disabled action, versioned restore and exports on Tasks, Deliverables and Milestones; Portfolio count links/filter, Staff definitions/stalled-review action, Time total links, working-day editor/wizard, dashboard status segments, Portfolio groups/subtotals and conditional export columns.
+- PASS: `dotnet build Hub.slnx --no-restore --nologo -v quiet` (0 errors; warnings recorded, chiefly existing xUnit blocking-operation diagnostics). PASS: `npm run build`. PASS: `npm run lint` (warnings only).
+- PASS: focused domain/flags/permissions/template-calendar checks, 176 passed, 0 failed; existing evaluator regression checks, 53 passed, 0 failed; settings/default/validation checks, 28 passed, 0 failed. Commands are in packet 046's current evidence.
+- PASS: `RECOVERY_TEST_PORT=19504 npm run test:recovery-counts` against a Vite preview with synthetic intercepted API responses in Chromium. The restore carried `If-Match: "4"`; parent reason and flag/permission visibility, Published template control, rollup labels/links, Portfolio project/health subtotals and Staff/Time navigation were exercised. Four axe scopes returned zero violations; no page errors or unknown API routes. Durable report: [mocked Chromium](evidence/mocked-chromium.json). This does not verify server transactions, real count reconciliation or screen-reader use.
+- BLOCKED: current API execution before assertions by EF `PendingModelChangesWarning`, reproduced with the new baseline API case. The additive model is deliberately ahead of this lane's migration snapshot. No warning suppression or migration was added here. New count, template, export and saved-view API tests compile but are not claimed as passing.
+- UNPROVEN: `npm run test:counts` against packet 036's real API fixtures, complete desktop/phone keyboard/screen-reader coverage, performance targets, schema smoke/drift and combined regression. Historical S01/S03/S06/S09 results below are preserved; they were not rerun as current API evidence.
+
+| AC | Current status |
+|---|---|
+| AC-RCV-01 | PARTIAL: restore UI/mock PASS; current server transaction/dependency result blocked by schema |
+| AC-RCV-02 | PARTIAL: historical server evidence below; current API not rerun |
+| AC-RCV-03 | PARTIAL: parent reason/disabled control mock PASS; current refusal/restore sequence blocked |
+| AC-RCV-04 | PARTIAL: flag/permission UI mock PASS; full role/closed/restricted matrix current API blocked |
+| AC-RCV-05 | PARTIAL: browser sends current If-Match; server conflict/idempotence current API blocked |
+| AC-RCV-06 | PARTIAL: UI flag-off mock PASS; full existing-suite parity and S12 gated |
+| AC-RCV-07 | PARTIAL: interface uses existing export route; current CSV/XLSX/log reconciliation blocked |
+| AC-RCV-08 | PARTIAL: existing count links retained; real fixture reconciliation UNPROVEN |
+| AC-RCV-09 | PARTIAL: existing milestone links retained; real fixture reconciliation UNPROVEN |
+| AC-RCV-10 | PARTIAL: row/tile navigation implemented; new API case compiled, not executed past schema |
+| AC-RCV-11 | PARTIAL: definition/action mock PASS; exact stalled-review API case compiled, schema blocked |
+| AC-RCV-12 | PARTIAL: total definition/project-link mock PASS; sum reconciliation API case schema blocked |
+| AC-RCV-13 | UNPROVEN: packet 036 live count suite not run |
+| AC-RCV-14 | PARTIAL: domain calendar parity PASS; recovered API case schema blocked |
+| AC-RCV-15 | PARTIAL: working-day domain PASS; office-calendar API integration schema blocked |
+| AC-RCV-16 | PASS at domain level; real preview/create/add-pack parity pending |
+| AC-RCV-17 | PARTIAL: Published control/flag-off mock PASS; wizard note implemented but untested; audit/draft/API parity schema blocked; cleanup gated |
+| AC-RCV-18 | PARTIAL: segment labels/links and axe mock PASS; actual register reconciliation pending |
+| AC-RCV-19 | PARTIAL: project/health subtotals and group URL mock PASS; all-column sum reconciliation pending; saved-view API case compiled, schema blocked; S12 gated |
+| AC-RCV-20 | PARTIAL: conditional UI/export implemented; new export API case schema blocked |
+| AC-RCV-21 | PARTIAL: historical restricted-project API evidence below; combined current check pending |
+
+S12 remains gated on Jay's review/pilot flag decisions. Flags stay dark: `show_deleted`, `template_working_days`, `status_rollups`. No Tier B approval or Accepted status is implied by this lane's local changes.
 
 ## Build 045-S01
 

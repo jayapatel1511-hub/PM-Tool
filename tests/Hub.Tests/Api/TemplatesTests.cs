@@ -344,4 +344,147 @@ public sealed class TemplatesTests(HubFactory f)
         Assert.True(await f.DbAsync(db => db.ProjectDisciplines.AnyAsync(x => x.ProjectId == pid && x.DisciplineId == transport && x.LeadUserId == U(TestData.Rita))));
         Assert.Equal(1, await f.DbAsync(db => db.ActivityLog.CountAsync(a => a.ProjectId == pid && a.Action == "AddedFromTemplate")));
     }
+
+    // ---------- Packet 045 S07, §49.4: working-day offsets behind flag.template_working_days ----------
+
+    async Task WorkingDays(bool on) => await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.template_working_days", new { value = on }).Result.Json();
+
+    async Task WithWorkingDays(Func<Task> body)
+    {
+        await WorkingDays(true);
+        try { await body(); } finally { await WorkingDays(false); }
+    }
+
+    static object Milestone(string @ref, string anchor, int offset) =>
+        new { @ref, name = "M " + @ref, milestoneType = "Kickoff", anchor, offset = (int?)offset, completesPhaseId = (Guid?)null, isClientFacing = false };
+
+    [Fact]
+    [Trait("flag-off", "template_working_days"), Trait("flag-on", "template_working_days")]
+    public async Task Existing_templates_count_calendar_days_and_give_the_same_dates() => await WithWorkingDays(async () => // AC-RCV-14, FR-RCV-11
+    {
+        var tid = await Reference();
+        Assert.Equal(DayKind.CalendarDays, await f.DbAsync(db => db.Templates.Where(x => x.Id == tid).Select(x => x.OffsetDayKind).SingleAsync()));
+        Assert.Equal(DayKind.CalendarDays, (await Template(tid)).S("offsetDayKind"));
+        var on = await f.As(TestData.Pm).Post($"/api/v1/templates/{tid}/preview", new { startDate = "2026-10-05", officeId = await d.Office() }).Result.Json();
+        await WorkingDays(false);
+        Assert.Null((await Template(tid))["offsetDayKind"]); // flag off: the read model is today's
+        var off = await f.As(TestData.Pm).Post($"/api/v1/templates/{tid}/preview", new { startDate = "2026-10-05" }).Result.Json();
+        Assert.Equal(off["milestones"]!.ToJsonString(), on["milestones"]!.ToJsonString());
+        await WorkingDays(true);
+        var (res, _) = await FromTemplate(tid); // Appendix A's calendar-day dates, as before this packet
+        var pid = (await res.Json(201)).G("id");
+        Assert.Equal(new DateOnly?[] { new(2026, 10, 12), new(2026, 11, 19) },
+            await f.DbAsync(db => db.Milestones.Where(m => m.ProjectId == pid).OrderBy(m => m.SortOrder).Select(m => m.Date).Take(2).ToListAsync()));
+        Assert.Equal(new DateOnly(2027, 5, 11), await f.DbAsync(db => db.Deliverables.Where(x => x.ProjectId == pid && x.Name == "85% Civil Drawing Package").Select(x => x.DueDate).SingleAsync()));
+    });
+
+    [Fact]
+    public async Task Preview_create_and_add_pack_give_identical_working_day_dates() => await WithWorkingDays(async () => // AC-RCV-15, AC-RCV-16, AC-RCV-17, FR-RCV-12, FR-RCV-13
+    {
+        var admin = f.As(TestData.Admin);
+        var civil = await d.Discipline("Civil");
+        var geo = await d.Discipline("Geotechnical");
+        var report = await d.DeliverableType("Report");
+        // An office whose Monday 2031-01-06 is a holiday; the project starts Friday 2031-01-03.
+        var office = await f.DbAsync(async db =>
+        {
+            var o = new Office { Name = "Synthetic working-day office", Code = Guid.NewGuid().ToString("N") };
+            db.Offices.Add(o);
+            db.Holidays.Add(new Holiday { Date = new DateOnly(2031, 1, 6), OfficeId = o.Id, Name = "Synthetic office holiday" });
+            await db.SaveChangesAsync();
+            return o.Id;
+        });
+        var t = await (await admin.Post("/api/v1/templates", new { name = "Working Days " + Guid.NewGuid().ToString("N")[..4], offsetDayKind = DayKind.WorkingDays })).Json(201);
+        var id = t.G("id");
+        var saved = await (await admin.Put($"/api/v1/templates/{id}/structure", new
+        {
+            rowVersion = t.I("rowVersion"),
+            disciplines = new[] { new { disciplineId = civil, isDefaultIncluded = true }, new { disciplineId = geo, isDefaultIncluded = false } },
+            milestones = new[] { Milestone("m1", "ProjectStart", 1), Milestone("m2", "PreviousMilestone", 3) },
+            deliverables = new[]
+            {
+                new { @ref = "d1", disciplineId = civil, name = "Civil report", deliverableTypeId = report, milestoneRef = "m2", offset = (int?)-2, requiresReview = false, description = (string?)null },
+                new { @ref = "d2", disciplineId = geo, name = "Geo report", deliverableTypeId = report, milestoneRef = "m2", offset = (int?)-2, requiresReview = false, description = (string?)null },
+            },
+            tasks = new[]
+            {
+                new { @ref = "t1", disciplineId = civil, deliverableRef = (string?)"d1", name = "Civil draft", offset = (int?)-1 },
+                new { @ref = "t2", disciplineId = geo, deliverableRef = (string?)"d2", name = "Geo draft", offset = (int?)-1 },
+                new { @ref = "t3", disciplineId = civil, deliverableRef = (string?)null, name = "Civil setup", offset = (int?)2 },
+            }.Select(k => new { k.@ref, k.disciplineId, k.deliverableRef, k.name, description = (string?)null, requiresReview = false, priority = "Medium", estimatedHours = (decimal?)null, k.offset, assignTo = "Unassigned" }),
+            dependencies = Array.Empty<object>(),
+        })).Json();
+        Assert.Equal(DayKind.WorkingDays, saved.S("offsetDayKind"));
+        (await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = saved.I("rowVersion") })).EnsureSuccessStatusCode();
+
+        string[] Dates(JsonNode preview) => preview["milestones"]!.AsArray().Select(m => m!.S("date")).ToArray();
+        var preview = await f.As(TestData.Pm).Post($"/api/v1/templates/{id}/preview", new { startDate = "2031-01-03", officeId = office }).Result.Json();
+        Assert.Equal(["2031-01-07", "2031-01-10"], Dates(preview)); // Friday + 1 skips the weekend and the office's Monday holiday
+        var noOffice = await f.As(TestData.Pm).Post($"/api/v1/templates/{id}/preview", new { startDate = "2031-01-03" }).Result.Json();
+        Assert.Equal("2031-01-06", Dates(noOffice)[0]); // without an office only organisation-wide holidays count
+
+        var number = TestData.Number();
+        var pid = (await f.As(TestData.Pm).Post("/api/v1/projects", new
+        {
+            projectNumber = number, name = "Working days " + number, clientId = await d.Client(), officeId = office, startDate = "2031-01-03",
+            disciplines = new[] { new { disciplineId = civil, leadUserId = (Guid?)U(TestData.Marc) } }, templateId = id,
+        }).Result.Json(201)).G("id");
+        var ms = await f.DbAsync(db => db.Milestones.AsNoTracking().Where(m => m.ProjectId == pid).OrderBy(m => m.SortOrder).ToListAsync());
+        Assert.Equal(Dates(preview), ms.Select(m => m.Date!.Value.ToString("yyyy-MM-dd")));
+        var dueOf = async (string name) => await f.DbAsync(db => db.Deliverables.Where(x => x.ProjectId == pid && x.Name == name).Select(x => x.DueDate).SingleAsync());
+        var taskDue = async (string name) => await f.DbAsync(db => db.Tasks.Where(x => x.ProjectId == pid && x.Name == name).Select(x => x.DueDate).SingleAsync());
+        Assert.Equal(new DateOnly(2031, 1, 8), await dueOf("Civil report")); // Friday − 2 working days
+        Assert.Equal(new DateOnly(2031, 1, 7), await taskDue("Civil draft"));
+        Assert.Equal(new DateOnly(2031, 1, 8), await taskDue("Civil setup")); // start + 2 skips the holiday
+
+        var tplMs = (await Template(id))["milestones"]!.AsArray().Select(m => m!.S("ref")).ToList();
+        (await f.As(TestData.Pm).Post($"/api/v1/projects/{pid}/template-packs", new
+        {
+            templateId = id, disciplineId = geo, leadUserId = U(TestData.Omar), mapping = new Dictionary<string, Guid?> { [tplMs[1]] = ms[1].Id },
+        })).EnsureSuccessStatusCode();
+        Assert.Equal(await dueOf("Civil report"), await dueOf("Geo report"));
+        Assert.Equal(await taskDue("Civil draft"), await taskDue("Geo draft"));
+
+        await WorkingDays(false); // flag off: the same template counts calendar days, exactly as today
+        var off = await f.As(TestData.Pm).Post($"/api/v1/templates/{id}/preview", new { startDate = "2031-01-03", officeId = office }).Result.Json();
+        Assert.Equal(["2031-01-04", "2031-01-07"], Dates(off));
+    });
+
+    [Fact]
+    public async Task Offset_kind_is_audited_copied_to_drafts_and_fixed_once_published() => await WithWorkingDays(async () => // AC-RCV-17, FR-RCV-10
+    {
+        var admin = f.As(TestData.Admin);
+        var civil = await d.Discipline("Civil");
+        var name = "Offset Kind " + Guid.NewGuid().ToString("N")[..4];
+        var t = await (await admin.Post("/api/v1/templates", new { name })).Json(201);
+        var id = t.G("id");
+        Assert.Equal(DayKind.CalendarDays, (await Template(id, TestData.Admin)).S("offsetDayKind")); // new templates default to calendar days
+        object Body(int rowVersion, string kind) => new
+        {
+            rowVersion, header = new { name, description = (string?)null, projectTypeId = (Guid?)null, offsetDayKind = kind },
+            disciplines = new[] { new { disciplineId = civil, isDefaultIncluded = true } },
+            milestones = new[] { Milestone("m1", "ProjectStart", 5) },
+            deliverables = Array.Empty<object>(), tasks = Array.Empty<object>(), dependencies = Array.Empty<object>(),
+        };
+        var bad = await (await admin.Put($"/api/v1/templates/{id}/structure", Body(t.I("rowVersion"), "Fortnights"))).Json(400);
+        Assert.NotNull(bad["errors"]?["offsetDayKind"]);
+        var saved = await (await admin.Put($"/api/v1/templates/{id}/structure", Body(t.I("rowVersion"), DayKind.WorkingDays))).Json();
+        Assert.Equal(DayKind.WorkingDays, saved.S("offsetDayKind"));
+        var change = (await f.DbAsync(db => db.ActivityLog.Where(a => a.ItemType == ItemType.Template && a.ItemId == id).Select(a => a.Changes).ToListAsync()))
+            .Single(c => c.Contains("OffsetDayKind") && c.Contains(DayKind.WorkingDays)); // the change, old and new
+        Assert.Contains(DayKind.CalendarDays, change);
+
+        var v1 = await (await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = saved.I("rowVersion") })).Json();
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, (await admin.Put($"/api/v1/templates/{id}/structure", Body(v1.I("rowVersion"), DayKind.CalendarDays))).StatusCode);
+        Assert.Equal(DayKind.WorkingDays, (await Template(id, TestData.Admin)).S("offsetDayKind"));
+        var draft = await (await admin.Post($"/api/v1/templates/{id}/draft", new { })).Json(201);
+        Assert.Equal(DayKind.WorkingDays, (await Template(draft.G("id"), TestData.Admin)).S("offsetDayKind"));
+
+        // Flag off: the field is neither read nor written.
+        await WorkingDays(false);
+        var draftBody = await Template(draft.G("id"), TestData.Admin);
+        Assert.Null(draftBody["offsetDayKind"]);
+        (await admin.Put($"/api/v1/templates/{draft.S("id")}/structure", Body(draftBody.I("rowVersion"), DayKind.CalendarDays))).EnsureSuccessStatusCode();
+        Assert.Equal(DayKind.WorkingDays, await f.DbAsync(db => db.Templates.Where(x => x.Id == draft.G("id")).Select(x => x.OffsetDayKind).SingleAsync()));
+    });
 }

@@ -20,7 +20,9 @@
     "test:counts": "node tests/counts.cjs",
     "test:ui-review": "node tests/ui-review.cjs",
     "test:operations": "node tests/operations.cjs",
-    "test:client-errors": "node tests/client-errors.cjs"
+    "test:client-errors": "node tests/client-errors.cjs",
+    "test:interaction": "node tests/interaction.cjs",
+    "test:recovery-counts": "node tests/recovery-counts.cjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.23.0",

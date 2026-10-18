@@ -5,12 +5,13 @@ import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { AccentDot, ConfirmDialog, Empty, ErrorBanner, Field, Loading, Page, Segmented, SummaryTile, selectCls, tdCls, thCls, TableRegion } from '@/components/hub/common'
 import { Avatar, CapacityFigure, PeoplePicker, usePeopleCapacity, weekOf } from '@/components/hub/people'
+import { ViewMenu } from '@/components/hub/views'
 import { OneSignal, type Signal } from '@/components/hub/indicators'
 import { HealthPill, Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { useProject, useReference } from '@/hooks/data'
 import { del, get, post, qs } from '@/lib/api'
-import { useMe } from '@/lib/auth'
+import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate, shortDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import type { Page as PageOf, ProjectRow } from '@/lib/types'
@@ -32,6 +33,7 @@ const COLS: [keyof StaffRow | 'name', string][] = [['name', 'staff.name'], ['pro
 
 /** My Staff (§13.19): a manager's direct reports, their assignments and work counts, and staffing them on projects. */
 export function StaffPage() {
+  const small = useFlag('small_ux')
   const [sp, setSp] = useSearchParams()
   const ref = useReference()
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
@@ -53,9 +55,9 @@ export function StaffPage() {
   }) : d.people
   const office = (id?: string) => ref.data?.offices.find((o) => o.id === id)?.name
   // Summary tiles (§13.19) filter the table; the selected one is outlined and checked, never tinted alone.
-  const tile = (label: string, n: number, accent: Accent, indicator?: string) => {
+  const tile = (label: string, n: number, accent: Accent, definition: string, indicator?: string) => {
     const on = !!indicator && f.indicator === indicator
-    return <SummaryTile label={label} value={n} accent={accent} selected={indicator ? on : undefined} onClick={() => set('indicator', on ? undefined : indicator)} />
+    return <SummaryTile label={label} value={n} accent={accent} hint={definition} selected={indicator ? on : undefined} onClick={() => set('indicator', on ? undefined : indicator)} />
   }
   const roleChips = (r: StaffRow['roles']) => (['pm', 'dl', 'team', 'reviewer', 'viewer'] as const).filter((k) => r[k] > 0).map((k) => `${t(`staff.role.${k}`)} ${r[k]}`).join(' · ')
   const count = (p: StaffRow, n: number, section: string, bad = false) => <Link to={`/my-work?userId=${p.id}#mw-${section}`} className={cn('tabular-nums hover:underline', bad && n > 0 && 'font-medium text-bad')}>{n}</Link>
@@ -70,7 +72,7 @@ export function StaffPage() {
     return result
   }
   return (
-    <Page {...header} subtitle={d.scope === 'all' ? t('staff.allSubtitle') : t('staff.directSubtitle')}>
+    <Page {...header} actions={small && <ViewMenu listType="staff" />} subtitle={d.scope === 'all' ? t('staff.allSubtitle') : t('staff.directSubtitle')}>
       <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4 text-sm md:p-5">
         {d.canSeeAll && (
           <Segmented label={t('staff.scope')} value={f.scope ?? 'direct'} onChange={(s) => set('scope', s === 'direct' ? undefined : s)}
@@ -89,11 +91,11 @@ export function StaffPage() {
         <label className="flex min-h-(--control-h) items-center gap-2"><input type="checkbox" className="size-4 accent-(--primary)" checked={!!f.showInactive} onChange={(e) => set('inactive', e.target.checked ? '1' : undefined)} />{t('staff.showInactive')}</label>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-5">
-        {tile(t('staff.tile.staff'), d.tiles.staff, 'blue')}
-        {tile(t('staff.tile.assignments'), d.tiles.assignments, 'mint')}
-        {tile(t('staff.tile.overdue'), d.tiles.withOverdue, 'lavender', 'overdue')}
-        {tile(t('staff.tile.blocked'), d.tiles.withBlocked, 'peach', 'blocked')}
-        {tile(t('staff.tile.reviews'), d.tiles.reviewsStalled, 'rose', 'reviews')}
+        {tile(t('staff.tile.staff'), d.tiles.staff, 'blue', t('rcv.staffDefinition'))}
+        {tile(t('staff.tile.assignments'), d.tiles.assignments, 'mint', t('rcv.assignmentsDefinition'))}
+        {tile(t('staff.tile.overdue'), d.tiles.withOverdue, 'lavender', t('rcv.overdueDefinition'), 'overdue')}
+        {tile(t('staff.tile.blocked'), d.tiles.withBlocked, 'peach', t('rcv.blockedDefinition'), 'blocked')}
+        {tile(t('staff.tile.reviews'), d.tiles.reviewsStalled, 'rose', t('rcv.reviewsDefinition'), 'reviewsStalled')}
       </div>
       {rows.length > 0 && (
         <ul className="space-y-2 md:hidden" aria-label={t('nav.staff')}>

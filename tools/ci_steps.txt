@@ -50,6 +50,8 @@ web: cd web && npm run test:planner
 web: cd web && npm run test:resources
 web: cd web && npm run test:supervisor-capacity
 web: cd web && npm run test:ui-review
+web: cd web && npm run test:interaction
+web: cd web && npm run test:recovery-counts
 web: cd web && npm audit --audit-level=critical --omit=dev
 web [always]: mkdir -p ci-artifacts && if [ -d web/test-results ]; then cp -R web/test-results ci-artifacts/browser-evidence; fi
 

@@ -237,4 +237,29 @@ public sealed class CountLinkTests(HubFactory f)
         }
         finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }).Result.Json(); }
     }
+    [Fact]
+    [Trait("Spec", "AC-RCV-11")]
+    public async Task Reviews_stalled_opens_the_people_who_hold_them_and_old_links_still_work()
+    {
+        var p = await d.Project();
+        var owners = new[] { TestData.Alex, TestData.Alex, TestData.Marc, TestData.Jill };
+        for (var i = 0; i < owners.Length; i++)
+        {
+            var task = await d.NewTask(p.Id, TestData.Pm);
+            var tid = task.G("id"); var reviewer = U(owners[i]);
+            await f.DbAsync(async db =>
+            {
+                await db.Tasks.Where(t => t.Id == tid).ExecuteUpdateAsync(u => u.SetProperty(t => t.Status, TaskStatuses.InReview).SetProperty(t => t.ReviewerId, reviewer));
+                db.TaskStates.Add(new Hub.Api.Data.TaskState { TaskId = tid, IsReviewStalled = i < 3 });
+                return await db.SaveChangesAsync();
+            });
+        }
+        var c = f.As(TestData.Sam);
+        var stalled = await c.GetAsync($"/api/v1/staff?projectId={p.Id}&indicator=reviewsStalled").Result.Json();
+        Assert.Equal(2, stalled["people"]!.AsArray().Count);
+        Assert.Equal(3, stalled["tiles"]!.I("reviewsStalled"));
+        var reviews = await c.GetAsync("/api/v1/staff?indicator=reviews").Result.Json();
+        Assert.Contains(reviews["people"]!.AsArray(), r => r!.G("id") == U(TestData.Jill));
+    }
+
 }

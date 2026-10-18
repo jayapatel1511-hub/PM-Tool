@@ -25,6 +25,9 @@ public sealed record OrgSettings
     public int HealthBlockedDaysYellow { get; init; } = 5;
     public int HealthOverrideExpiryDays { get; init; } = 14;
     public int ChainDepthLimit { get; init; } = 10;
+    public int PickerRecentDays { get; init; } = 90;
+    public int SlipDisplayDays { get; init; }
+    public int ActivityBurstMinutes { get; init; } = 10;
     public int WorkloadOverPct { get; init; } = (int)Workload.OverPct;
     public int WorkloadAmberPct { get; init; } = (int)Workload.AmberPct;
     public int WorkloadUnderPct { get; init; } = (int)Workload.UnderPct;
@@ -72,6 +75,9 @@ public sealed record OrgSettings
         new("health_blocked_days_yellow", SettingKind.Int, 5, "health"),
         new("health_override_expiry_days", SettingKind.Int, 14, "health"),
         new("chain_depth_limit", SettingKind.Int, 10, "thresholds"),
+        new("picker_recent_days", SettingKind.Int, 90, "thresholds"),
+        new("slip_display_days", SettingKind.Int, 0, "thresholds"),
+        new("activity_burst_minutes", SettingKind.Int, 10, "thresholds"),
         new("workload_over_pct", SettingKind.Int, (int)Workload.OverPct, "thresholds"),
         new("workload_amber_pct", SettingKind.Int, (int)Workload.AmberPct, "thresholds"),
         new("workload_under_pct", SettingKind.Int, (int)Workload.UnderPct, "thresholds"),
@@ -123,6 +129,9 @@ public sealed record OrgSettings
             HealthBlockedDaysYellow = I("health_blocked_days_yellow", s.HealthBlockedDaysYellow),
             HealthOverrideExpiryDays = I("health_override_expiry_days", s.HealthOverrideExpiryDays),
             ChainDepthLimit = I("chain_depth_limit", s.ChainDepthLimit),
+            PickerRecentDays = I("picker_recent_days", s.PickerRecentDays),
+            SlipDisplayDays = I("slip_display_days", s.SlipDisplayDays),
+            ActivityBurstMinutes = I("activity_burst_minutes", s.ActivityBurstMinutes),
             WorkloadOverPct = I("workload_over_pct", s.WorkloadOverPct),
             WorkloadAmberPct = I("workload_amber_pct", s.WorkloadAmberPct),
             WorkloadUnderPct = I("workload_under_pct", s.WorkloadUnderPct),

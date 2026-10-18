@@ -192,6 +192,7 @@ public static class MyWorkEndpoints
             "blocked" => rows.Where(r => r.Blocked > 0).ToList(),
             "blocking" => rows.Where(r => r.Blocking > 0).ToList(),
             "reviews" => rows.Where(r => r.Reviews > 0).ToList(),
+            "reviewsStalled" => rows.Where(r => r.ReviewsStalled > 0).ToList(),
             _ => rows,
         };
         rows = [.. rows.OrderByDescending(r => r.Overdue).ThenByDescending(r => r.Blocked).ThenBy(r => r.DisplayName)]; // FR-017 default sort

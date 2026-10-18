@@ -361,9 +361,9 @@ public static class ReportEndpoints
         var until = c.Today.AddDays(days);
         var q = c.Db.Milestones.AsNoTracking().Where(m => c.ProjectIds().Contains(m.ProjectId) && !m.IsComplete && !m.IsCancelled && m.Date >= c.Today && m.Date <= until);
         if (c.Str("type") is { } type) q = q.Where(m => m.MilestoneType == type);
-        var rows = await WithProject(c.Db, Json(await MilestoneEndpoints.Rows(c.Db, q.OrderBy(m => m.Date).ThenBy(m => m.Id).Take(Cap))));
+        var rows = await WithProject(c.Db, Json(await MilestoneEndpoints.Rows(c.Db, q.OrderBy(m => m.Date).ThenBy(m => m.Id).Take(Cap), c.S)));
         foreach (var r in rows) r!["deliverablesIssued"] = $"{r["deliverableIssued"]}/{r["deliverableTotal"]}";
-        return new(rows, await Link(c, "milestones", ("type", c.Str("type"))));
+        return new(rows, await Link(c, "milestones", ("type", c.Str("type"))), c.S.IsFlagOn("schedule_baseline") ? [.. All.Single(d => d.Code == "upcoming-milestones").Cols, new("sinceBaselineDays", "sinceBaseline", "number")] : null);
     }
 
     static async Task<Result> OpenDecisions(Ctx c)

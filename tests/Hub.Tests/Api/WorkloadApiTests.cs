@@ -189,7 +189,7 @@ public sealed class WorkloadApiTests(HubFactory f)
             Assert.All(unassigned["tasks"]!.AsArray(), task => Assert.True(task!["canAssign"]!.GetValue<bool>()));
             Assert.Equal("2026-09-14", unassigned["tasks"]!.AsArray().Single(t => t!.G("id") == first.G("id"))!.S("startDate"));
             var list = await (await pm.GetAsync("/api/v1" + unassigned.S("showAllPath"))).Json();
-            Assert.Equal(unassigned.I("totalCount"), list.I("total"));
+            Assert.Equal(unassigned.I("totalCount"), list.I("totalCount"));
             Assert.Equal(off["people"]!.ToJsonString(), response["people"]!.ToJsonString());
             Assert.Equal(export, await (await pm.GetAsync(path.Replace("workload?", "workload/export?format=csv&"))).Content.ReadAsByteArrayAsync());
         }

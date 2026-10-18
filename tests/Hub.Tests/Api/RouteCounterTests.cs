@@ -59,12 +59,13 @@ public sealed class RouteCounterTests(HubFactory f)
         await Enabled(true);
         try
         {
+            var before = await f.DbAsync(db => db.RouteCounts.Where(r => r.RouteKey == "preferences").Select(r => new { r.Opens, r.From500To999Ms }).SingleOrDefaultAsync());
             var responses = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ =>
                 f.As(TestData.Pm).Post("/api/v1/route-counts", new { route = "preferences", elapsedMs = 750 })));
             Assert.All(responses, r => r.EnsureSuccessStatusCode());
             var row = await f.DbAsync(db => db.RouteCounts.SingleAsync(x => x.RouteKey == "preferences"));
-            Assert.Equal(8, row.Opens);
-            Assert.Equal(8, row.From500To999Ms);
+            Assert.Equal(8, row.Opens - (before?.Opens ?? 0));
+            Assert.Equal(8, row.From500To999Ms - (before?.From500To999Ms ?? 0));
         }
         finally { await Enabled(false); }
     }

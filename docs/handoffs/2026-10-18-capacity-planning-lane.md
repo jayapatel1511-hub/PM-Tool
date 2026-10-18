@@ -5,7 +5,7 @@ Source: `codex/capacity-planning-041-047`, isolated worktree `/Users/jaypatel/.c
 ## Adoption
 
 - Model commit `bb8c95a5587f1c6eb7cec93331ee411ce649ae0c` plus required alignment `939a6b7`: original schedule CHECK retained, one canonical ProjectTemplate.OffsetDayKind, no per-role kind columns. Integration already aligned these at8c1ae565; do not reapply the early model uncorrected.
-- Source commit is published in `/private/tmp/tuesday-039-050-coordination/capacity-planning.md` after staged review. This source commit excludes migrations/snapshot and can apply after the integrated model.
+- Reviewed core source commit: `ca18b3732bb3607a8e2b218870fc7d6dacf93016`. It excludes migrations/snapshot and can apply after the integrated model. The companion test/CI commit is published in `/private/tmp/tuesday-039-050-coordination/capacity-planning.md`; adopt both before running combined regression.
 - Recovered b-041-S07 and b-041-S12 tracked.patch content, including baseline status_rollups registry reconciliation. Original snapshots were not cleaned or rewritten by this lane.
 
 ## Implemented
@@ -26,3 +26,7 @@ API regressions are authored and compile but runtime is BLOCKED at fixture migra
 4.Shared migration, API/full-coverage regression, human Tier B review, pilot choices and flag cleanup remain open. Do not mark041/047 Accepted from this handoff.
 
 Browser data is synthetic and mocked. It does not prove real API privacy, database migration, Entra, hosted, native CAD or human acceptance.
+
+## Final companion evidence
+
+Built preview planning-reporting suite PASS16posts/no errors/no unknown calls/axe clean, including Draft role edit/add/remove and editor preview summary. Planner PASS20flows/17empty axe checkpoints; exact P8planned/10estimate and Q0planned/4estimate context. Supervisor suite PASS12-member one-batch partial/out-of-scope scenario plus original120-member/three-batch coverage. Resources PASS task-week capacity/assignment conflict/row version/scoped link. API source Release compile PASS0errors after fixture review; API runtime remains unproven. See packet records for precise limits, including wizard skip-text and no-access Team browser cases not fully covered.

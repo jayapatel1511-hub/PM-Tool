@@ -39,7 +39,7 @@ public sealed class PlanningApiTests(HubFactory f)
         var entry = await (await f.As(TestData.Sam).Post("/api/v1/planning/entries", new
         {
             personId = person, projectId = p.Id, hoursPerWeek = 8m, startWeek = Week, endWeek = Week,
-            label = "Planned P work", sourceCategory = PlanningSource.Proposal, confidence = PlanningConfidence.Expected,
+            label = "Planned P work", sourceCategory = PlanningSource.MajorProject, confidence = PlanningConfidence.Expected,
         })).Json(201);
         try
         {

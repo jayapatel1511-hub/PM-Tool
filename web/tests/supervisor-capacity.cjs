@@ -79,9 +79,13 @@ const prefs = holdDigestWhenAway => ({
       else if (endpoint === 'planning/grid') {
         gridRequests.push({ personIds: url.searchParams.get('personIds')?.split(',') ?? [], from: url.searchParams.get('from'), weeks: url.searchParams.get('weeks') })
         const ids = url.searchParams.get('personIds')?.split(',') ?? []
-        data = grid(ids.filter(id_ => id_ !== missing).map(id_ => id_ === free
+        data = grid(ids.filter(id_ => id_ !== missing && !(id_.startsWith('00000000-0000-0000-0000-0000000005') && Number(id_.slice(-3)) >= 510)).map(id_ => id_ === free
           ? { id: free, displayName: 'Free Engineer', partial: false, cells: [cell(free, { overPlanned: true, staleEntries: 2 })] }
-          : { id: partial, displayName: 'Partial Engineer', partial: true, cells: [cell(partial, { remaining: 99 })] }))
+          : id_ === partial
+            ? { id: partial, displayName: 'Partial Engineer', partial: true, cells: [cell(partial, { remaining: 99 })] }
+            : id_.startsWith('00000000-0000-0000-0000-0000000005')
+              ? Number(id_.slice(-3)) >= 508 ? { id: id_, displayName: `Team Person ${Number(id_.slice(-3)) - 499}`, partial: true, cells: [cell(id_, { remaining: 99 })] } : { id: id_, displayName: `Team Person ${Number(id_.slice(-3)) - 499}`, partial: false, cells: [cell(id_)] }
+              : { id: partial, displayName: 'Partial Engineer', partial: true, cells: [cell(partial, { remaining: 99 })] }))
       } else if (endpoint.startsWith('staff/')) data = []
       else { unknown.push(endpoint); data = {} }
       await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) })
@@ -119,6 +123,15 @@ const prefs = holdDigestWhenAway => ({
     const flagOnViolations = await page.evaluate(async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] } })).violations.map(v => v.id))
     assert.deepEqual(flagOnViolations, [], `Accessibility violations with flag.figure_names on: ${flagOnViolations.join(', ')}`)
     figureNames = false
+
+    // Team Away capacity uses one batched request for a 12-member team, preserving partial and out-of-scope states.
+    const teamPeople = Array.from({ length: 12 }, (_, i) => staffRow(id(500 + i), `Team Person ${i + 1}`))
+    people = teamPeople; gridRequests.length = 0
+    await page.reload(); await page.getByRole('columnheader', { name: 'This week' }).waitFor()
+    assert.equal(gridRequests.length, 1); assert.equal(gridRequests[0].personIds.length, 12)
+    assert.match(await page.getByRole('row').filter({ hasText: 'Team Person 1' }).first().innerText(), /8 h away/)
+    assert.match(await page.getByRole('row').filter({ hasText: 'Team Person 9' }).first().innerText(), /Partial view/)
+    assert.equal(await page.getByRole('row').filter({ hasText: 'Team Person 11' }).first().locator('[data-capacity]').count(), 0)
 
     // The shared hook batches 120 people into three requests, each within the server's 50-person limit.
     people = Array.from({ length: 120 }, (_, i) => staffRow(id(100 + i), `Person ${i + 1}`))

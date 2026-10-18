@@ -18,9 +18,9 @@ public sealed class PlanningReportingWorkflowTests(HubFactory f)
         var before = await (await pm.GetAsync(path)).Json(); Assert.Null(before["statusNote"]);
         await Flag("project_status_note", true);
         try {
-            (await pm.Patch(path, new { statusNote = new string('n', 480) }, before.I("rowVersion"))).EnsureSuccessStatusCode();
+            (await pm.Patch(path, new { statusNote = new string('n', 500) }, before.I("rowVersion"))).EnsureSuccessStatusCode();
             var current = await (await pm.GetAsync(path)).Json(); var viewer = await (await f.As(TestData.Rita).GetAsync(path)).Json();
-            Assert.Equal(new string('n', 480), viewer["statusNote"]!["text"]!.GetValue<string>());
+            Assert.Equal(new string('n', 500), viewer["statusNote"]!["text"]!.GetValue<string>());
             Assert.Equal(before["health"]!["computed"]!.ToJsonString(), current["health"]!["computed"]!.ToJsonString());
             Assert.NotNull(viewer["statusNote"]!["header"]!["openAttention"]);
             Assert.Equal(HttpStatusCode.BadRequest, (await pm.Patch(path, new { statusNote = new string('n', 501) }, current.I("rowVersion"))).StatusCode);
@@ -28,7 +28,7 @@ public sealed class PlanningReportingWorkflowTests(HubFactory f)
             var activity = await f.DbAsync(db => db.ActivityLog.Where(a => a.ItemId == project.Id).ToListAsync());
             Assert.Contains(activity, a => a.Changes.Contains("StatusNote"));
             var portfolio = await (await f.As(TestData.Admin).GetAsync($"/api/v1/portfolio?projectId={project.Id}&mine=false")).Json();
-            Assert.Contains(portfolio["projects"]!.AsArray(), p => p!["id"]!.GetValue<Guid>() == project.Id && p["statusNote"]?["text"]?.GetValue<string>() == new string('n', 480));
+            Assert.Contains(portfolio["projects"]!.AsArray(), p => p!["id"]!.GetValue<Guid>() == project.Id && p["statusNote"]?["text"]?.GetValue<string>() == new string('n', 500));
             await f.DbAsync(async db => { var row = await db.Projects.SingleAsync(p => p.Id == project.Id); row.Status = ProjectStatus.Complete; row.CompletedAt = f.Clock.GetUtcNow(); return await db.SaveChangesAsync(); });
             current = await (await pm.GetAsync(path)).Json();
             Assert.Equal(HttpStatusCode.BadRequest, (await pm.Patch(path, new { statusNote = "correction" }, current.I("rowVersion"))).StatusCode);

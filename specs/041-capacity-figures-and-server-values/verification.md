@@ -118,3 +118,5 @@ Locally implemented on `codex/capacity-planning-041-047` from `a6e0104b`. Recove
 | Full suite / coverage gate | Not run in this isolated lane; integrator owns once combined schema/source lands. No 95% branch-coverage claim. |
 
 The first final .NET attempt raced Vite replacing generated static assets; sequential rebuild/domain verification passed. The initial supervisor browser attempt used occupied5178; free5198 passed. Neither was accepted as an application failure. S07/S09–S12 remain pending combined verification and Tier B review; S08 and S13 are not complete. Human review, pilot decisions and cleanup remain gated.
+
+Final companion: Planner's20flows and17axe checkpoints PASS after the optional-context guard; the exact capacity-polish context fixture and preserved kept-row scenarios share that suite. Final new API test-source Release compile PASS0errors; normalized report links and the corrected cross-project list totalCount are compiled but runtime pending combined schema. Companion browser/CI changes are published after core sourceca18b37; see lane handoff.

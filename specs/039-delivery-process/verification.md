@@ -1,6 +1,6 @@
 # Verification: Delivery Process
 
-Slices S01, S09 and S10 built and merged into the integration branch; other slices not started.
+Slices S01, S02, S09 and S10 built and merged into the integration branch; other slices not started.
 
 Per FR-DLV-24, this file records checks until `trace_spec.py --report` (slice S11) is published on main; after that, this packet's verification is the report of the CI run for the deployed commit, and human checks go in `acceptance.md`.
 
@@ -15,8 +15,8 @@ Per FR-DLV-24, this file records checks until `trace_spec.py --report` (slice S1
 | AC-DLV-07 | S09 | PASS (local): retirement check names a flag whose `acceptance.md` records its pilot sign-off and passes without one; also run on the real (empty) list against `specs/<packet>-*/acceptance.md` |
 | AC-DLV-08 | S09 | PASS (local): pair check names the flag and the missing tag (`flag-off` or `flag-on`) and passes when both exist; also scans the test assembly traits for the real list |
 | AC-DLV-09 | S09 | PARTIAL: list is empty, full backend suite passes (1164/1164 on the slice), no existing route, setting or response gains a flag check; browser suites and coverage gates not run |
-| AC-DLV-10 | S02 | UNRUN |
-| AC-DLV-11 | S02 | UNRUN |
+| AC-DLV-10 | S02 | PARTIAL: `tools/test_ci_tests.py` shows every API class in exactly one of 3 shards, a new class file lands in a shard without edits, and a new `ci_steps.txt` line runs in its own job only; on the merged tree domain 635 + shards 162, 227 and 159 = 1183 = `dotnet test --list-tests`; three consecutive green GitHub runs not yet done |
+| AC-DLV-11 | S02 | PASS (local): `tools/test_coverage_gate.py`: a line hit only in the second file is counted once; one file gives the same result as before on a fixture and on real coverage files; merging the 4 real files from the builder run clears both gates (96.3 % branches, 95.0 % lines) |
 | AC-DLV-12 | S03 | UNRUN |
 | AC-DLV-13 | S07 | UNRUN |
 | AC-DLV-14 | S04 | UNRUN |
@@ -85,3 +85,21 @@ Assumptions:
 
 Left for Jay:
 - Run every browser suite and the coverage gates on a port assigned to this branch to finish AC-DLV-06 and AC-DLV-09.
+
+## Build 039-S02
+
+Checks on the merged tree (clean merge): `dotnet build Hub.slnx -c Release` 0 errors; `python3 tools/test_ci_tests.py`, `tools/test_coverage_gate.py` and `tools/test_decisions.py` OK; domain filter 635 passed and API shards 1 to 3 run one after another 162, 227 and 159 passed, 1183 in all, equal to `dotnet test --list-tests`; `python3 tools/trace_spec.py --check` clean. Builder on the slice: coverage collected per shard and merged by `gate` (96.3 % branches, 95.0 % lines); `ci_tests.py steps checks` OK; web `npm run build`, `npm run lint` and `test:ui-review` pass. No flag: CI tooling only, no product behaviour change. Integration step added `python3 tools/test_decisions.py` to the `checks` line of `tools/ci_steps.txt` (left for S02 by S10).
+
+Assumptions:
+- No Open decision in `specs/DECISIONS.md` applies to S02; Q15 (GitHub-hosted runners) is settled in the spec.
+- The migration lint, `tier` check, AC-to-test ratchet and test-count ratchet belong to S04, S13, S12 and S03; each adds its own line to `tools/ci_steps.txt`.
+- `gate` needs only `domain` and the API shards for coverage; S03 can add `web` and `checks` when it adds test counts.
+- `test_pr_checks` and the PR-size check still run only on `pull_request` events, now guarded by `GITHUB_EVENT_NAME` in the step.
+- The API jobs are one matrix with display names `api-1`, `api-2` and `api-3`.
+- Browser evidence, formerly two artifacts, is under `ci-artifacts/browser-evidence/` in the `ci-artifacts-web` artifact.
+- Running the three API shards at once in one worktree corrupts coverage files (shared test binaries); on GitHub each shard has its own runner.
+
+Left for Jay:
+- Push and open the pull request; get three consecutive green GitHub Actions runs whose domain plus API shard totals equal the last serial run's total (1183 on the integration branch now). Add the `large` label if the size check needs it.
+- When S05 protects main, the required checks become `domain`, `api-1`, `api-2`, `api-3`, `web`, `checks` and `gate` instead of `build`.
+- Run the port-bound browser suites (handoffs, sign-in, coordination, design-basis, planner, resources, supervisor-capacity) in the `web` job; not run locally.

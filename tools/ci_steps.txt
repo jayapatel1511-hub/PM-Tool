@@ -13,7 +13,7 @@ api-1,api-2,api-3: dotnet test Hub.slnx --no-build -c Release --filter "$(python
 gate: python3 tools/coverage_gate.py ci-artifacts-in
 
 # Python safety regressions and repository checks.
-checks: python3 tools/test_ci_tests.py && python3 tools/test_coverage_gate.py
+checks: python3 tools/test_ci_tests.py && python3 tools/test_coverage_gate.py && python3 tools/test_decisions.py
 checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/test_pr_checks.py && python3 tools/pr_checks.py size --base HEAD^1 --labels "${LABELS:-}"; fi
 checks: python3 tools/test_backup_helpers.py && python3 tools/test_pilot_initializer.py && python3 tools/test_pilot_operations.py && python3 tools/test_pilot_pitr.py
 checks: python3 -m unittest tools.test_social_activation

@@ -111,5 +111,37 @@ elif 'psql' in sys.argv:
             self.assertEqual(payloads.count(b''), 4)  # pg_dump, createdb, psql and cleanup receive no terminal input.
 
 
+class OffhostDrillTests(unittest.TestCase):
+    """AC-OPS-04/05: wrapper stays on the temporary review restore path and cleans scratch."""
+    def test_review_delegation_cleanup_on_success_and_failure(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root/'scripts').mkdir()
+            source = root/'hub-review-20261018T220000123456Z.dump'
+            source.write_bytes(b'synthetic')
+            helper = root/'scripts/restore-homedev-review-drill.sh'
+            script = ROOT/'scripts/offhost-restore-drill.sh'
+            for status in (0,42):
+                helper.write_text('echo "$1" > scratch-path\nexit '+str(status)+'\n')
+                result=subprocess.run(['bash',str(script),'review',str(source)],cwd=root,capture_output=True,text=True)
+                self.assertEqual(result.returncode,status,result.stderr)
+                scratch=Path((root/'scratch-path').read_text().strip())
+                self.assertFalse(scratch.exists())
+                self.assertTrue(source.exists())
+                self.assertIn('restore-homedev-review-drill.sh',script.read_text())
+                self.assertNotIn('docker volume',script.read_text())
+
+    def test_cross_stack_and_unapproved_pilot_fail_before_helper(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);(root/'scripts').mkdir()
+            helper=root/'scripts/restore-homedev-review-drill.sh'
+            helper.write_text('touch called\n')
+            dump=root/'hub-pilot-20261018T220000123456Z.dump';dump.write_text('synthetic')
+            for stack in ['review','pilot']:
+                result=subprocess.run(['bash',str(ROOT/'scripts/offhost-restore-drill.sh'),stack,str(dump)],cwd=root,capture_output=True)
+                self.assertNotEqual(result.returncode,0)
+                self.assertFalse((root/'called').exists())
+
+
 if __name__ == '__main__':
     unittest.main()

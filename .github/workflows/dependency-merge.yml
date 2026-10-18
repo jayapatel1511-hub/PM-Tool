@@ -1,0 +1,25 @@
+name: dependency-merge
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge-patch-minor:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dependabot/fetch-metadata@v2
+        id: metadata
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Enable automatic squash merge for non-major updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          PR: "${{ github.event.pull_request.html_url }}"
+        run: gh pr merge "$PR" --auto --squash --delete-branch

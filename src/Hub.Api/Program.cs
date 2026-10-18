@@ -76,6 +76,8 @@ builder.Services.AddRateLimiter(o =>
             _ => new FixedWindowRateLimiterOptions { PermitLimit = int.TryParse(cfg["RateLimit:PerMinute"], out var n) ? n : 600, Window = TimeSpan.FromMinutes(1) }));
     o.AddPolicy("local-sign-in", ctx => RateLimitPartition.GetFixedWindowLimiter(AuthSetup.ClientKey(ctx, tunnelProxy),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(1) }));
+    o.AddPolicy("client-errors", ctx => RateLimitPartition.GetFixedWindowLimiter(ctx.User.FindFirst("oid")?.Value ?? "anonymous",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
 });
 // The same five attempts a minute per login name, so guesses at one login cannot be spread over many client addresses.
 builder.Services.AddSingleton(_ => PartitionedRateLimiter.Create<string, string>(name =>
@@ -119,6 +121,16 @@ var staticFiles = new StaticFileOptions
         else if (c.Context.Request.Path.StartsWithSegments("/assets")) c.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
     },
 };
+// FR-OPS-02: private build metadata is never served, including Vite's manifest.
+app.Use(async (ctx, next) =>
+{
+    if (!ctx.Request.Path.StartsWithSegments("/api") && (ctx.Request.Path.Value ?? "").Split('/').Any(part => part.StartsWith('.')))
+    {
+        ctx.Response.StatusCode = 404;
+        return;
+    }
+    await next(ctx);
+});
 app.UseDefaultFiles();
 app.UseStaticFiles(staticFiles);
 if (AuthSetup.LocalAuthAllowed(app.Environment, cfg) || cfg["Auth:Mode"] == SocialAuth.Scheme)

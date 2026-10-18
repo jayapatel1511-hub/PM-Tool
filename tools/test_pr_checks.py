@@ -232,6 +232,89 @@ class MigrationLintTests(unittest.TestCase):
         self.assertEqual(pr_checks.migrations("HEAD", "HEAD", cwd=str(ROOT)), (0, "No contract operations in added migrations."))
 
 
+class NewestContractTests(unittest.TestCase):
+    """FR-DLV-15: the image's contract-migration label is the newest migration the lint would flag."""
+
+    def test_newest_flagged_migration_by_id(self):
+        folder = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, folder)
+        self.assertEqual(pr_checks.newest_contract(folder), "none")
+        drop = "void Up(MigrationBuilder m) { m.DropColumn(name: \"x\", table: \"t\"); }\nvoid Down() { }"
+        add = "void Up(MigrationBuilder m) { m.AddColumn<int>(name: \"y\", table: \"t\"); }\nvoid Down() { m.DropColumn(); }"
+        (folder / "20990101000000_Drop.cs").write_text(drop)
+        (folder / "20990102000000_Add.cs").write_text(add)
+        (folder / "20990103000000_Later.Designer.cs").write_text(drop)
+        (folder / "HubDbModelSnapshot.cs").write_text(drop)
+        self.assertEqual(pr_checks.newest_contract(folder), "20990101000000_Drop")
+
+    def test_repository_has_a_contract_migration(self):
+        self.assertRegex(pr_checks.newest_contract(), r"^\d{14}_\w+$")
+
+
+class TierCheckTests(unittest.TestCase):
+    """AC-DLV-22: Tier B paths and labels wait for Jay's explicit merge label."""
+
+    def setUp(self):
+        self.repo = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.repo)
+        git(self.repo, "init", "-q")
+        git(self.repo, "config", "user.email", "t@example.invalid")
+        git(self.repo, "config", "user.name", "t")
+        pathlib.Path(self.repo, "README.md").write_text("base\n")
+        git(self.repo, "add", ".")
+        git(self.repo, "commit", "-qm", "base")
+        self.base = subprocess.run(["git", "-C", self.repo, "rev-parse", "HEAD"], capture_output=True,
+                                   text=True, check=True).stdout.strip()
+
+    def change(self, path, text):
+        file = pathlib.Path(self.repo, path)
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.write_text(text)
+        git(self.repo, "add", ".")
+        git(self.repo, "commit", "-qm", "change")
+
+    def test_tier_b_path_waits_for_label(self):
+        self.change("src/Hub.Domain/Permissions.cs", "x\n")
+        self.assertEqual(pr_checks.tier(self.base, cwd=self.repo)[0], 1)
+        self.assertEqual(pr_checks.tier(self.base, labels=["tier-b-ok"], cwd=self.repo)[0], 0)
+
+    def test_tier_b_label_waits_for_tier_b_ok(self):
+        self.change("docs/notes.md", "x\n")
+        self.assertEqual(pr_checks.tier(self.base, labels=["tier-b"], cwd=self.repo)[0], 1)
+        self.assertEqual(pr_checks.tier(self.base, labels=["tier-b", "tier-b-ok"], cwd=self.repo)[0], 0)
+
+    def test_documentation_only_pull_request_is_tier_a(self):
+        self.change("docs/notes.md", "x\n")
+        self.assertEqual(pr_checks.tier(self.base, cwd=self.repo)[0], 0)
+
+    def test_packet_verification_and_tasks_are_tier_a(self):
+        self.change("specs/999-fixture/verification.md", "checks\n")
+        self.assertEqual(pr_checks.tier(self.base, cwd=self.repo)[0], 0)
+
+    def test_large_and_replace_test_labels_are_tier_b(self):
+        self.change("src/Example.cs", "x\n")
+        self.assertEqual(pr_checks.tier(self.base, labels=["large"], cwd=self.repo)[0], 1)
+        self.assertEqual(pr_checks.tier(self.base, labels=["replace-test", "tier-b-ok"], cwd=self.repo)[0], 0)
+
+    def test_added_ci_step_is_tier_a_but_removed_step_is_tier_b(self):
+        self.change("tools/ci_steps.txt", "checks: python3 -m unittest\n")
+        self.assertEqual(pr_checks.tier(self.base, cwd=self.repo)[0], 0)
+        first = subprocess.run(["git", "-C", self.repo, "rev-parse", "HEAD"], capture_output=True,
+                               text=True, check=True).stdout.strip()
+        self.change("tools/ci_steps.txt", "")
+        self.assertEqual(pr_checks.tier(first, cwd=self.repo)[0], 1)
+
+    def test_additive_migration_is_tier_a_contract_migration_is_tier_b(self):
+        self.change("src/Hub.Api/Data/Migrations/20990101000000_Add.cs",
+                    "void Up(MigrationBuilder m) { m.AddColumn<int>(name: \"x\", table: \"t\"); }\n")
+        self.assertEqual(pr_checks.tier(self.base, cwd=self.repo)[0], 0)
+        contract = subprocess.run(["git", "-C", self.repo, "rev-parse", "HEAD"], capture_output=True,
+                                  text=True, check=True).stdout.strip()
+        self.change("src/Hub.Api/Data/Migrations/20990102000000_Drop.cs",
+                    "void Up(MigrationBuilder m) { m.DropColumn(name: \"x\", table: \"t\"); }\n")
+        self.assertEqual(pr_checks.tier(contract, cwd=self.repo)[0], 1)
+
+
 class GeneratedAttributeTests(unittest.TestCase):
     """AC-DLV-03: `git check-attr` on the repository's own paths."""
 

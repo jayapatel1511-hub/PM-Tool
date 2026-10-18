@@ -4,6 +4,7 @@ import json
 import pathlib
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -102,7 +103,7 @@ class StepsTests(unittest.TestCase):
     def test_repository_step_list(self):
         steps = ci_tests.parse_steps(ci_tests.STEPS.read_text())
         jobs = {j for js, _, _ in steps for j in js}
-        self.assertEqual(jobs, {"domain", "api-1", "api-2", "api-3", "web", "checks", "gate", "report", "image"})
+        self.assertEqual(jobs, {"domain", "api-1", "api-2", "api-3", "web", "checks", "gate", "report", "image", "rollback", "main-tag", "nightly", "tier"})
         commands = " ".join(cmd for _, _, cmd in steps)
         for kept in ("test:handoffs", "test:sign-in", "test:coordination", "test:design-basis", "test:planner",
                      "test:resources", "test:supervisor-capacity", "test:ui-review", "npm audit", "npm run lint",
@@ -128,9 +129,17 @@ class ImageTests(unittest.TestCase):
         self.assertEqual(len(ci_tests.image_errors(self.inspect("dev", ["HUB_BUILD=dev"]), self.SHA)), 2)
         self.assertEqual(len(ci_tests.image_errors(self.inspect(self.SHA, ["HUB_BUILD=dev"]), self.SHA)), 1)
 
+    def test_contract_label_checked_when_given(self):
+        inspect = self.inspect(self.SHA, [f"HUB_BUILD={self.SHA}"])
+        self.assertEqual(len(ci_tests.image_errors(inspect, self.SHA, "20990101000000_Drop")), 1)
+        inspect[0]["Config"]["Labels"][ci_tests.CONTRACT] = "20990101000000_Drop"
+        self.assertEqual(ci_tests.image_errors(inspect, self.SHA, "20990101000000_Drop"), [])
+        self.assertEqual(len(ci_tests.image_errors(inspect, self.SHA, "none")), 1)
+
     def test_main_workflow_alone_writes_packages(self):
         workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
         self.assertIn("permissions: { contents: read }\n", workflow)
+        # The image job alone pushes and moves main after compatibility passes.
         self.assertEqual(workflow.count("packages: write"), 1)
         image = workflow[workflow.index("\n  image:"):]
         self.assertIn("if: github.event_name == 'push' && github.ref == 'refs/heads/main'", image)
@@ -139,6 +148,144 @@ class ImageTests(unittest.TestCase):
             self.assertIn(needed, image)
         self.assertIn("LABEL org.opencontainers.image.revision=$RELEASE_SHA",
                       (ROOT / "hosting" / "Dockerfile.review").read_text())
+
+
+class RollbackTests(unittest.TestCase):
+    """AC-DLV-15: previous image, new image, previous again on one fresh stack; `main` moves only on pass."""
+
+    PREV, NEW = "ghcr.io/o/pm-tool:main", "ghcr.io/o/pm-tool@sha256:abc"
+
+    def setUp(self):
+        self.dir = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.dir)
+        self.calls, self.local, self.failing_probe, self.volume = [], set(), None, False
+        self.probes = 0
+
+    def sh(self, cmd, cwd=None, env=None, check=True, capture=False):
+        self.calls.append((cmd, (env or {}).get("RELEASE_SHA")))
+        code, out, err = 0, "", ""
+        if cmd[:3] == ["docker", "volume", "inspect"]:
+            code = 0 if self.volume else 1
+        elif cmd[:3] == ["docker", "image", "inspect"]:
+            code = 0 if cmd[3] in self.local else 1
+        elif cmd[:2] == ["docker", "pull"]:
+            code, err = (1, "manifest unknown") if cmd[2] not in self.remote else (0, "")
+        elif cmd[-1] == "scripts/init-homedev-review.py":
+            (self.dir / ".runtime" / "keys").mkdir(parents=True, mode=0o700)
+            (self.dir / ".runtime" / "review-users.json").write_text('{"users": []}')
+            (self.dir / ".runtime" / "review-users.json").chmod(0o600)
+        elif "up" in cmd or "restart" in cmd:
+            self.assertEqual((self.dir / ".runtime" / "review-users.json").stat().st_mode & 0o077, 0)
+            self.assertEqual((self.dir / ".runtime" / "keys").stat().st_mode & 0o077, 0)
+        elif "psql" in cmd:
+            out = "11111111-1111-1111-1111-111111111111\n"
+        elif cmd[-1] == "scripts/verify-homedev-review.py":
+            self.probes += 1
+            code = 1 if self.probes == self.failing_probe else 0
+        if check and code:
+            raise ci_tests.RollbackError("failed")
+        return subprocess.CompletedProcess(cmd, code, out, err)
+
+    def run_rollback(self, new=None):
+        self.remote = getattr(self, "remote", {self.PREV, self.NEW})
+        return ci_tests.rollback(self.PREV, new or self.NEW, "f" * 40, cwd=self.dir, sh=self.sh, wait=lambda: None)
+
+    def ups(self):
+        return [tag for cmd, tag in self.calls if "up" in cmd]
+
+    def test_additive_schema_passes_in_order(self):
+        code, notes = self.run_rollback()
+        self.assertEqual(code, 0, notes)
+        self.assertEqual(self.ups(), ["previous", "new", "previous"])
+        self.assertEqual(self.probes, 3)
+        self.assertEqual(sum(c[:3] == ["sudo", "chown", "1000:1000"] for c, _ in self.calls), 2)
+        self.assertEqual([n for n in notes if n.startswith("PASS")], [f"PASS {s}" for s in ci_tests.STAGES])
+        bootstrap = next(c for c, _ in self.calls if "scripts/bootstrap-review-credentials.py" in c)
+        self.assertEqual(bootstrap[-1], "taylor:11111111-1111-1111-1111-111111111111")
+        restart = self.calls.index(next(x for x in self.calls if "restart" in x[0]))
+        self.assertLess(self.calls.index(next(x for x in self.calls if "bootstrap-review-credentials.py" in " ".join(x[0]))), restart)
+        self.assertIn(["docker", "tag", self.PREV, "pm-tool-review:previous"], [c for c, _ in self.calls])
+        self.assertIn(["docker", "tag", self.NEW, "pm-tool-review:new"], [c for c, _ in self.calls])
+
+    def test_previous_image_failing_on_new_schema_fails(self):
+        self.failing_probe = 3
+        code, notes = self.run_rollback()
+        self.assertEqual(code, 1)
+        self.assertIn("previous image on the new schema", notes[-1])
+
+    def test_no_previous_image_passes_and_says_so(self):
+        self.remote = {self.NEW}
+        code, notes = self.run_rollback()
+        self.assertEqual(code, 0)
+        self.assertIn("no previous main image", notes[-1])
+        self.assertEqual(self.ups(), [])
+
+    def test_existing_volume_is_refused_and_never_deleted(self):
+        self.volume = True
+        code, notes = self.run_rollback()
+        self.assertEqual(code, 1)
+        self.assertEqual(self.ups(), [])
+        self.assertFalse(any("down" in c or "rm" in c for c, _ in self.calls))
+
+    def test_pull_error_other_than_missing_fails(self):
+        def sh(cmd, **kw):
+            if cmd[:2] == ["docker", "pull"]:
+                return subprocess.CompletedProcess(cmd, 1, "", "denied: unauthorized")
+            return self.sh(cmd, **kw)
+        code, notes = ci_tests.rollback(self.PREV, self.NEW, cwd=self.dir, sh=sh, wait=lambda: None)
+        self.assertEqual(code, 1)
+        self.assertIn("unauthorized", notes[-1])
+
+    def test_manual_run_builds_this_branch(self):
+        code, _ = self.run_rollback("build")
+        self.assertEqual(code, 0)
+        build = next(c for c, _ in self.calls if c[:2] == ["docker", "build"])
+        self.assertIn("RELEASE_SHA=" + "f" * 40, build)
+        self.assertIn("pm-tool-review:new", build)
+
+    def test_workflow_moves_main_only_after_rollback_on_main(self):
+        workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
+        self.assertIn("workflow_dispatch:", workflow)
+        rollback = workflow[workflow.index("\n  rollback:"):]
+        self.assertIn("permissions: { contents: read, packages: read }", rollback)
+        self.assertIn("github.event_name == 'workflow_dispatch'", rollback)
+        image = workflow[workflow.index("\n  image:"):workflow.index("\n  rollback:")]
+        self.assertLess(image.index("steps rollback"), image.index("steps main-tag"))
+        self.assertIn('commits/main', image)
+        self.assertEqual(workflow.count('packages: write'), 1)
+        steps = ci_tests.parse_steps(ci_tests.STEPS.read_text())
+        self.assertTrue(any("main-tag" in j and "imagetools create" in c for j, _, c in steps))
+
+
+class NightlyWiringTests(unittest.TestCase):
+    """AC-DLV-23: fixed guard target and persisted reports; hosted execution stays a separate gate."""
+    def test_seed_guard_and_evidence_contract(self):
+        workflow = (ROOT/'.github/workflows/nightly.yml').read_text()
+        for required in ['--ConnectionStrings:Hub=', '127.0.0.1:55433:5432', 'pm-tuesday-preview-db',
+                         'playwright install --with-deps chromium', '--branch main', 'ci-artifacts/']:
+            self.assertIn(required, workflow)
+        self.assertNotIn('[ "$base" != "$GITHUB_SHA" ]', workflow)
+        nightly = [command for jobs, _, command in ci_tests.parse_steps(ci_tests.STEPS.read_text()) if 'nightly' in jobs]
+        self.assertEqual(sum('node web/tests/' in command or 'test:counts' in command for command in nightly), 6)
+        self.assertTrue(any('COUNTS_REPORT=' in command and 'ci-artifacts/nightly/' in command for command in nightly))
+        self.assertTrue(any('CALM_OUT=' in command and 'calm-acceptance' in command for command in nightly))
+        self.assertTrue(any('base.json' in command and 'now.json' in command for command in nightly))
+        # The last green nightly already has the current route layout; base means the comparison URL.
+        self.assertFalse(any('CALM_VERSION=base' in command for command in nightly))
+
+    def test_dependency_configuration_is_monthly_grouped_and_positive_only(self):
+        """AC-DLV-24 configuration part: all ecosystems grouped; unknown/major types never auto-enable."""
+        config = (ROOT/'.github/dependabot.yml').read_text()
+        self.assertEqual(config.count('schedule: { interval: monthly }'), 3)
+        self.assertEqual(config.count('update-types: ["minor", "patch"]'), 3)
+        for ecosystem in ['nuget', 'npm', 'github-actions']:
+            self.assertIn('package-ecosystem: '+ecosystem, config)
+        merge = (ROOT/'.github/workflows/dependency-merge.yml').read_text()
+        self.assertIn("== 'version-update:semver-patch'", merge)
+        self.assertIn("== 'version-update:semver-minor'", merge)
+        self.assertNotIn("!= 'version-update:semver-major'", merge)
+        self.assertIn("github.actor == 'dependabot[bot]'", merge)
+        self.assertNotIn('actions/checkout', merge)
 
 
 class CountTests(unittest.TestCase):

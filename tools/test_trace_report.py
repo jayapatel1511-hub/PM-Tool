@@ -154,5 +154,70 @@ class CheckUnchangedTests(unittest.TestCase):
         self.assertEqual(table.read_bytes(), before)
 
 
+class RatchetTests(unittest.TestCase):
+    """AC-DLV-20: citations cannot disappear and new ACs need a test or explicit exemption."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name) / "repo"
+        for path, text in {
+            "Engineering-Project-Coordination-Hub-Specification.md": "# Spec\n## 1. Fixture\nAC-FIX-01\n",
+            "spec-parts/99-fixture.md": "## 99. Fixture\n\n**AC-FIX-01.** Existing.\n",
+            "specs/999-fixture/spec.md": "AC-FIX-01\n",
+            "specs/999-fixture/tasks.md": "- [ ] S01 AC-FIX-01\n",
+            "tools/test_fixture.py": "# AC-FIX-01\n",
+        }.items():
+            file = self.root / path
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_text(text)
+        git(self.root, "init", "-q")
+        git(self.root, "-c", "user.name=t", "-c", "user.email=t@example.test", "add", ".")
+        git(self.root, "-c", "user.name=t", "-c", "user.email=t@example.test", "commit", "-qm", "base")
+        self.base = subprocess.run(["git", "-C", str(self.root), "rev-parse", "HEAD"], capture_output=True,
+                                   text=True, check=True).stdout.strip()
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def commit(self, path, text):
+        (self.root / path).write_text(text)
+        git(self.root, "add", ".")
+        git(self.root, "-c", "user.name=t", "-c", "user.email=t@example.test", "commit", "-qm", "change")
+
+    def test_removed_citation_fails(self):
+        self.commit("tools/test_fixture.py", "# no citation\n")
+        code, message = trace_spec.ratchet(self.root, self.base)
+        self.assertEqual(code, 1)
+        self.assertIn("removed citations: AC-FIX-01", message)
+
+    def test_new_ac_unchecked_slice_is_exempt_until_ticked(self):
+        self.commit("spec-parts/99-fixture.md", "## 99. Fixture\n\n**AC-FIX-01.** Existing.\n**AC-FIX-02.** New.\n")
+        self.commit("specs/999-fixture/tasks.md", "- [x] S01 AC-FIX-01\n- [ ] S02 AC-FIX-02\n")
+        code, _ = trace_spec.ratchet(self.root, self.base)
+        self.assertEqual(code, 0)
+        self.commit("specs/999-fixture/tasks.md", "- [x] S01 AC-FIX-01\n- [x] S02 AC-FIX-02\n")
+        code, message = trace_spec.ratchet(self.root, self.base)
+        self.assertEqual(code, 1)
+        self.assertIn("AC-FIX-02", message)
+
+    def test_ticking_existing_uncited_ac_fails_without_spec_text_change(self):
+        self.commit("tools/test_fixture.py", "# no citation\n")
+        self.base = subprocess.run(["git", "-C", str(self.root), "rev-parse", "HEAD"], capture_output=True,
+                                   text=True, check=True).stdout.strip()
+        # The base has an unchecked exemption and no test citation; ticking it must remove that exemption.
+        code, _ = trace_spec.ratchet(self.root, self.base)
+        self.assertEqual(code, 0)
+        self.commit("specs/999-fixture/tasks.md", "- [x] S01 AC-FIX-01\n")
+        code, message = trace_spec.ratchet(self.root, self.base)
+        self.assertEqual(code, 1)
+        self.assertIn("AC-FIX-01", message)
+
+    def test_human_only_ac_is_exempt(self):
+        self.commit("spec-parts/99-fixture.md", "## 99. Fixture\n\n**AC-FIX-01.** Existing.\n**AC-FIX-02.** Human.\n")
+        self.commit("specs/human-only.txt", "AC-FIX-02  # requires a human session\n")
+        code, _ = trace_spec.ratchet(self.root, self.base)
+        self.assertEqual(code, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

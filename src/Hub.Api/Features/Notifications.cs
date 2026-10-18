@@ -13,6 +13,7 @@ public static class NotificationEndpoints
     public sealed record ReadBody(Guid[]? Ids, bool? All);
     public sealed record ChannelBody(bool App, bool Email);
     public sealed record DigestBody(bool Enabled, string? Time, string[]? SectionsOff, bool? WeeklySummary, bool? HoldDigestWhenAway = null);
+    public sealed record DensityBody(bool DenseRows);
     public sealed record FollowBody(string Level);
 
     public static void Map(RouteGroupBuilder api)
@@ -130,6 +131,14 @@ public static class NotificationEndpoints
             }
             if (body.WeeklySummary is { } w) set.WeeklySummaryEnabled = w;
             if (body.HoldDigestWhenAway is { } hold) set.HoldDigestWhenAway = hold;
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        });
+
+        api.MapPut("/me/preferences/density", async (DensityBody body, HubDb db, CurrentUser me) =>
+        {
+            var set = await UserPreferences.GetOrCreate(db, me.Id);
+            set.DenseRows = body.DenseRows;
             await db.SaveChangesAsync();
             return Results.NoContent();
         });

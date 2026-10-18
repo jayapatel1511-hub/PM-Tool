@@ -64,6 +64,18 @@ feature. `/speckit-taskstoissues` runs only on request.
 6. Use sub-agents or `specify workflow run` only when Jay asks. Commit, push, open issues, or
    deploy only on request.
 
+## Delivery tiers and agent boundaries
+
+Packet 039 uses one slice branch per pull request, named `a/<packet>-<slice>`, from `origin/main`. At most five agents
+write at once, each with disjoint paths; one schema-lane writer may add migrations, and every pull request has a
+separate reviewer. Tier A changes (dark additions, guards, tests, documentation, unchanged-test refactors, added
+`tools/ci_steps.txt` lines and patch or minor dependency updates) may merge automatically after green required checks
+and a clear `review` status. Tier B changes (specification or decisions, `.github/`, hosting, homedev scripts, auth,
+permissions, migrations, approved behaviour and `large` or `replace-test` changes) wait for Jay's `tier-b-ok` label.
+Agents never apply forbidden labels, change decision status, turn on a flag, deploy or delete worktrees. The boy-scout
+rule stays inside files already changed by the slice. Hostnames and origins are environment-specific and require a
+current-target check before hosted evidence is claimed.
+
 ## Installation health
 
 ```sh

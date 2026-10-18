@@ -114,3 +114,38 @@ application side (a restored database starts, migrates as a no-op and answers).
 | Date | Environment | Restore point | Data loss | Time to recover | By | Result |
 |---|---|---|---|---|---|---|
 | | | | | | | |
+
+## Packet 044 off-host diagnosis — 18 October 2026
+
+Read-only checks on the Mac and homedev found the review/pilot **local** timers had triggered at
+22:00:02/22:15:02 UTC on 18 October. The loaded Mac LaunchAgent reports zero runs since load; its saved
+status records a generic platform-export success at 2026-10-17 23:49:50 UTC. This does not identify whether
+that run was scheduled or establish a current review recovery point. The installed Mac `backup-mac.py`
+lacks the review hook present in the maintained `Personal Server/platform/backup-mac.py`; the optional
+`backup-review-offhost.py` helper and enable marker are absent. The generic platform export includes the
+review project and excludes `pm-tool-pilot`, so the missing optional hook alone does **not** establish why
+review freshness is unproven. Do not replace this unknown with a claim that no dump was copied.
+
+No scheduler, root-owned unit, backup data, repository or running stack was changed. Exact scheduled-copy
+cause, a fresh off-host member inventory and the next automatic run remain operator gates. Before a fix,
+inspect the next scheduled job's exit result and the retrieved archive inventory, then record the failure
+and correction here. Refresh only the existing approved export/schedule; do not introduce another service.
+
+To check an explicitly selected, verified encrypted platform snapshot without writing plaintext to disk,
+pipe its `personal-ubuntu.tar` through `python3 scripts/check-offhost-backup.py`. Alternatively use
+`--archive <private-retrieved-platform.tar>`. It reads tar member metadata, prints only review timestamp/age,
+fails above 26 hours or when the review dump is missing, and refuses any pilot member while approval is
+absent. Run it after the existing scheduled export is encrypted; retain its timestamp/result here. No
+check has yet been run on an actual off-host archive. Pilot/company transfer has no recorded approval.
+
+For a retrieved review logical dump, from its prepared release run
+`bash scripts/offhost-restore-drill.sh review <private-offhost-dump>`. It checks the stack before invoking
+the existing temporary-database restore helper, preserves the retrieved source, and cleans its scratch copy
+on success or failure. This is **partial logical restore evidence**. The full application drill remains:
+record markers before/after the dump; retrieve the selected snapshot into private scratch; start the same
+image on a **new isolated drill database**, loopback only, with `Seed__ReviewDemo=false`,
+`Seed__DevUsers=false`, `Jobs__Enabled=false`, `Evaluation__Worker=false`, `Db__Migrate=false`; then run
+Healthy, Operations, marker inclusion/exclusion, known task key search and export checks. Never attach the
+live database volume to a drill API. Record the measured loss window and retrieval-to-Healthy duration in
+the drill table, remove only labelled drill resources, and retain the source snapshot. This application
+phase and host-loss recovery targets are UNPROVEN; daily dump frequency does not meet the 15-minute RPO.

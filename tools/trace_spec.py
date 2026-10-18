@@ -15,7 +15,11 @@ by a packet or listed as a planning input.
 """
 import pathlib
 import re
+import io
+import subprocess
 import sys
+import tarfile
+import tempfile
 from collections import defaultdict
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -123,7 +127,8 @@ def main():
         for i in sorted(groups[k], key=lambda x: (re.sub(r"-?\d+$", "", x), int(re.search(r"(\d+)$", x)[1]))):
             lines.append(f"| {i} | {', '.join(sorted(cited_by.get(i, []))) or '**none**'} |")
         lines.append("")
-    OUT.write_text("\n".join(lines), encoding="utf-8")
+    if "--check" not in sys.argv:
+        OUT.write_text("\n".join(lines), encoding="utf-8")
 
     problems = len(missing) + len(sec_missing) + len(unknown)
     print(f"{len(universe)} IDs, {len(missing)} not cited; {len(sections)} sections, {len(sec_missing)} not cited; "
@@ -224,7 +229,102 @@ def results(folder):
 def human_only(path):
     if not path.is_file():
         return set()
-    return {ln.split("#")[0].strip() for ln in path.read_text().splitlines()} - {""}
+    return {m[1] for ln in path.read_text(encoding="utf-8").splitlines()
+            if (m := re.match(r"\s*(AC-[A-Z]+-\d{2})\b", ln))}
+
+
+def test_citations(root):
+    """Return the AC IDs cited by at least one test in this checkout."""
+    tests = {**backend_citations(root / "tests"), **browser_citations(root / "web"), **python_citations(root)}
+    return {i for ids in tests.values() for i in ids if i.startswith("AC-")}
+
+
+def acceptance_texts(root):
+    """Return complete AC definition blocks, including continuation lines."""
+    found = {}
+    pattern = re.compile(r"\*\*(AC-[A-Z]+-\d{2})\.\*\*")
+    for file in sorted((root / "spec-parts").glob("*.md")):
+        text = file.read_text(encoding="utf-8")
+        markers = list(pattern.finditer(text))
+        for index, match in enumerate(markers):
+            end = markers[index + 1].start() if index + 1 < len(markers) else len(text)
+            found[match[1]] = re.sub(r"\s+", " ", text[match.end():end]).strip()
+    return found
+
+
+def changed_acceptance_ids(root, base, head="HEAD"):
+    """AC IDs added or whose complete specification text changed in spec-parts."""
+    tmp, base_root = _checkout(root, base)
+    try:
+        before = acceptance_texts(base_root)
+    finally:
+        tmp.cleanup()
+    if head == "HEAD":
+        after = acceptance_texts(pathlib.Path(root))
+    else:
+        tmp, head_root = _checkout(root, head)
+        try:
+            after = acceptance_texts(head_root)
+        finally:
+            tmp.cleanup()
+    return {i for i in before.keys() | after.keys() if before.get(i) != after.get(i)}
+
+
+def _checkout(root, ref):
+    """Yield a temporary checkout of ref for comparing citations without changing the worktree."""
+    tmp = tempfile.TemporaryDirectory()
+    target = pathlib.Path(tmp.name) / "base"
+    target.mkdir()
+    try:
+        archive = subprocess.run(["git", "-C", str(root), "archive", ref], capture_output=True, check=True).stdout
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        tmp.cleanup()
+        raise RuntimeError(f"cannot read git ref {ref}: {exc}") from exc
+    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as tar:
+        tar.extractall(target)
+    return tmp, target
+
+
+def unchecked_slice_exemptions(root):
+    """AC IDs named by unchecked packet slices; checked slices provide no exemption."""
+    out = set()
+    for packet in sorted((root / "specs").glob("[0-9][0-9][0-9]-*")):
+        tasks = packet / "tasks.md"
+        if not tasks.is_file():
+            continue
+        for line in tasks.read_text(encoding="utf-8").splitlines():
+            if re.match(r"\s*- \[ \]", line):
+                out.update(i for i in ids_in(line) if i.startswith("AC-"))
+    return out
+
+
+def ratchet(root, base, head="HEAD"):
+    """Return (exit code, message) for the AC-to-test ratchet (FR-DLV-23)."""
+    head_root = pathlib.Path(root)
+    head_ids = test_citations(head_root)
+    try:
+        tmp, base_root = _checkout(head_root, base)
+        try:
+            base_ids = test_citations(base_root)
+            base_exempt = unchecked_slice_exemptions(base_root)
+        finally:
+            tmp.cleanup()
+        changed = changed_acceptance_ids(head_root, base, head)
+    except (RuntimeError, OSError) as exc:
+        return 1, f"AC-to-test ratchet blocked: {exc}"
+    human = human_only(head_root / "specs" / "human-only.txt")
+    exempt = unchecked_slice_exemptions(head_root)
+    missing_base = sorted(base_ids - head_ids)
+    lost_exemptions = sorted(base_exempt - exempt - human - head_ids)
+    required = sorted((changed | set(lost_exemptions)) - human - exempt - head_ids)
+    problems = []
+    if missing_base:
+        problems.append("removed citations: " + ", ".join(missing_base))
+    if required:
+        problems.append("uncited changed ACs: " + ", ".join(required))
+    if problems:
+        return 1, "AC-to-test ratchet failed: " + "; ".join(problems)
+    return 0, f"AC-to-test ratchet passed ({len(base_ids)} base cited, {len(head_ids)} head cited)."
 
 
 def code_lines(root, packet):
@@ -331,4 +431,13 @@ def report_main(argv):
 if __name__ == "__main__":
     if "--report" in sys.argv:
         sys.exit(report_main([a for a in sys.argv[1:] if a != "--report"]))
+    if "--ratchet" in sys.argv:
+        import argparse
+        parser = argparse.ArgumentParser(prog="trace_spec.py --ratchet")
+        parser.add_argument("--base", required=True)
+        parser.add_argument("--head", default="HEAD")
+        args = parser.parse_args([a for a in sys.argv[1:] if a != "--ratchet"])
+        code, message = ratchet(ROOT, args.base, args.head)
+        print(message)
+        sys.exit(code)
     sys.exit(main())

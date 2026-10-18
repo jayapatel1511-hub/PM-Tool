@@ -1,0 +1,11 @@
+[Unit]
+Description=Deploy only a proven CI image to Tuesday review
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/pm-tool-review-deploy
+UMask=0022
+NoNewPrivileges=true
+TimeoutStartSec=10min

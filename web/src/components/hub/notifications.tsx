@@ -99,6 +99,7 @@ function BellButton() {
   const unread = useUnread()
   const [open, setOpen] = useState(false)
   const count = unread.data?.notifications ?? 0
+  useEffect(() => { document.title = count > 99 ? '(99+) Tuesday' : count > 0 ? `(${count}) Tuesday` : 'Tuesday' }, [count])
   const recent = useQuery({ queryKey: ['notifications', 'recent'], queryFn: () => get<Page<NotificationRow>>('me/notifications?pageSize=8'), enabled: open })
   const markRead = useMarkRead()
   const openItem = useOpenNotification()

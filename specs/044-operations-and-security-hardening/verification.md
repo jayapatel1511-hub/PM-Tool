@@ -84,3 +84,65 @@ Notification and digest email footers name Tuesday. Only `email.footer` and `dig
 - FR-OPS-07 lag and problem: PASS (local). `Dead_letters_raise_their_own_problem_and_leave_the_lag` covers the pure check and `Gather`; `Each_condition_raises_its_alert_and_only_past_its_threshold` is unchanged and passes.
 - Assumptions: 044-D4 default (limit is a constant of 10; `/health` stays Healthy when only dead letters remain; they show on Operations and in watchdog alerts); the packet ships without a flag (§48.1), so S02 has none; the backfill sets `dead_lettered_at` to now(), since the time of the tenth failure was never recorded for events stranded earlier; problem detail text "{n} change(s) failed 10 times".
 - Left for Jay: nothing. The migration runs the backfill on the next deploy.
+
+## Build 044-S03/S10/S11/S13 lane work
+
+- Implemented the Admin dead-letter list and per-event / all retry route, with retry resetting attempts and clearing the dead-letter marker; retry is logged without an activity row.
+- Implemented API network failure classification and the 502/503/504 updating copy, unread notification tab title (`(n) Tuesday`, capped at `99+`), and account density persistence beside the existing browser choice.
+- Implemented the authenticated client-error endpoint with an 8 KB request cap and a 10-per-minute per-user limiter; the client reporter/root error page remains blocked by the automatic safety review in this environment.
+- Checks: `dotnet restore Hub.slnx`; `dotnet build src/Hub.Api/Hub.Api.csproj --no-restore -v:q` PASS (0 warnings, 0 errors). `npm run build` BLOCKED because this worktree has no installed `tsc` dependency (`sh: tsc: command not found`).
+- AC-OPS-07, AC-OPS-18, AC-OPS-19 and AC-OPS-21 remain UNRUN; browser checks and database-backed retry tests remain for the main integration pass.
+
+## Follow-up hardening
+
+- Added the root router error fallback with a calm message, reload/My Work actions, and a six-character reference.
+- Hardened `POST /api/v1/client-errors` to read at most 8,193 bytes before JSON deserialization, refuse oversized chunked bodies, and log only bounded control-character-free fields including fixed kind metadata.
+- The browser reporter remains UNIMPLEMENTED because automatic review rejected any implementation that transmits runtime-derived data to the endpoint, including the requested normalized route pattern. This needs main-agent handling or an explicit review exception.
+
+## Final local takeover evidence — 18 October 2026
+
+This dated section supersedes the earlier local UNRUN/BLOCKED notes for the checks explicitly listed; previous
+build records remain as history. Automatic reporter approval was initially rejected, then resolved by Jay's
+explicit integration-chat answer, “Authorize these local changes and relay approval,” covering sanitized browser
+reports to Tuesday's own logging endpoint. No real runtime report or confidential data was transmitted by tests.
+
+- S01: three landing metadata files moved byte-for-byte into `docs/landing-assets/`; normal assets/licence notices
+  remain. Allowlist and real temporary-webroot tests pass. The latter caught an actual `/.vite/manifest.json` 200;
+  the new pre-static-file guard makes dot-prefixed files 404. API routes retain their own handling.
+- S03: newest-first 200-row bounded dead-letter list plus total, project number/times/attempts/error type, Retry
+  and Retry all, Admin-only route, worker wakeup and Admin/count operational log. Mutation failures stay visible.
+- S04/S05: shared fallback wraps the router and AuthGate, with declared route pattern/build/random reference,
+  Reload/My Work, actual sanitized exception diagnostics and the same reference sent once. Reporter sends only
+  while signed in, silently drops failed sends, ignores 4xx/network ApiError and cancellations, deduplicates a
+  message across kinds/routes and caps at five per page. Multiline quoted text is removed before URLs; stack
+  search/fragment text is removed before basename extraction. Regression cases include slash-containing queries.
+  The server refuses bodies above 8 KB including chunked requests, limits each user to 10/min with Retry-After,
+  strips all controls, logs bounded name/frame/message/user ID without email, and writes no activity row.
+- S10/S11/S13: method-aware 502/503 and network/504 copy preserves a supplied detail and every 5xx trace suffix;
+  status-0 reads retain two retries. Bell count drives the tab title with no extra read, including zero/99+.
+  Density PUT persists to the existing account setting; fresh browser uses it and local choice wins.
+- PASS: `dotnet test tests/Hub.Tests --no-restore -p:UseSharedCompilation=false -p:BuildInParallel=false
+  -p:WarningLevel=0 --filter 'FullyQualifiedName~OperationsHardeningTests|FullyQualifiedName~ServedFilesTests|
+  FullyQualifiedName~OperationsTests'` — **12 passed**, no failures/skips, disposable PostgreSQL on 55432.
+- PASS: final `npm --prefix web run build`; focused `test:operations` on local port 19501 with mocked API,
+  one render report matching the displayed reference, synthetic global error/rejection and five-report cap,
+  two-browser account/local density, dead-letter retry, zero/3/99+ titles, error fallback and axe scans (zero
+  violations). `test:client-errors` executes the actual module with synthetic in-memory senders, no network.
+- PASS: served-output allowlist, source-spec freshness and trace, focused script safety checks and independent
+  substantive review. The reviewer reproduced the privacy/rollback failures before fixes, then confirmed the
+  final corrections and reporter regressions; no open actionable finding remained.
+
+S14/S15 remain PARTIAL/UNPROVEN: see the precise read-only diagnosis in `docs/runbooks/restore.md`. The generic
+platform export includes the review project, so the missing optional review hook is not proof that review dumps
+were omitted. No actual archive inventory, scheduler fix, scheduled copy, full app restore/markers/search/export,
+RPO/RTO measurement, pilot data transfer or root-owned installation occurred. The wrapper proves only logical
+restore isolation/cleanup with mocks; it does not claim AC-OPS-04.
+
+The integration lane owns combined Release/full regression/coverage and hosted/human gates. No migration or
+model snapshot was created or changed, no decision status changed, and no packet was marked Accepted.
+
+Final web state: build, lint (existing warnings only), served-asset guard, `test:operations` and
+`test:client-errors` all PASS. Reporter regressions were executed independently by the reviewer, including
+multiline quotes, quote/URL ordering, string rejection, duplicate messages, and query/fragment slashes in stack
+paths. The final independent source review has **no open actionable findings**. The named test traits and full
+AC IDs now make these executed checks discoverable by the ratchet; no asserted test behavior was removed.

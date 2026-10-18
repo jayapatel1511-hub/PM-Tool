@@ -1,0 +1,70 @@
+name: nightly
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions: { contents: read, actions: read }
+
+jobs:
+  real-api:
+    if: github.ref == 'refs/heads/main'
+    # This is an informational regression net. It is deliberately not a required check.
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: "10.0.x" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: npm, cache-dependency-path: web/package-lock.json }
+      - name: Start named preview database
+        run: |
+          docker run -d --name pm-tuesday-preview-db -e POSTGRES_DB=hub -e POSTGRES_USER=hub \
+            -e POSTGRES_HOST_AUTH_METHOD=trust -p 127.0.0.1:55433:5432 postgres:17-alpine
+          for i in $(seq 1 30); do docker exec pm-tuesday-preview-db pg_isready -U hub && break; sleep 2; done
+      - name: Start Development API
+        run: |
+          ASPNETCORE_ENVIRONMENT=Development \
+          ConnectionStrings__Hub='Host=localhost;Port=55433;Database=hub;Username=hub;Password=' \
+          dotnet run --project src/Hub.Api --urls http://127.0.0.1:5080 --no-launch-profile -- \
+            --ConnectionStrings:Hub='Host=localhost;Port=55433;Database=hub;Username=hub;Password=' \
+            > api.log 2>&1 &
+          for i in $(seq 1 60); do curl --fail --silent http://127.0.0.1:5080/health && exit 0; sleep 2; done
+          cat api.log
+          exit 1
+      - name: Seed existing preview fixtures and start web server
+        run: |
+          python3 tools/preview/seed_resources.py http://127.0.0.1:5080
+          python3 tools/preview/seed_modules.py http://127.0.0.1:5080
+          python3 tools/preview/seed_planning.py http://127.0.0.1:5080
+          cd web && npm ci && npx playwright install --with-deps chromium && npm run dev -- --host 127.0.0.1 --port 5173 > ../web.log 2>&1 &
+          for i in $(seq 1 30); do curl --fail --silent http://127.0.0.1:5173/ && break; sleep 2; done
+      - name: Use the last green nightly as the comparison UI
+        env:
+          GH_TOKEN: "${{ github.token }}"
+        run: |
+          base=$(gh run list -R "$GITHUB_REPOSITORY" --workflow nightly.yml --branch main --status success --limit 1 --json headSha -q '.[0].headSha' || true)
+          if [ -n "$base" ]; then
+            git worktree add /tmp/pm-tool-nightly-base "$base"
+            (cd /tmp/pm-tool-nightly-base/web && npm ci && npm run dev -- --host 127.0.0.1 --port 5174 > /tmp/nightly-base.log 2>&1) &
+            for i in $(seq 1 30); do curl --fail --silent http://127.0.0.1:5174/ && break; sleep 2; done
+            echo CALM_BASE_UI_URL=http://127.0.0.1:5174 >> "$GITHUB_ENV"
+          else
+            # D10: the first run has no green base, so comparison-only checks are skipped.
+            echo CALM_CHECKS=crawl,reach,keyboard,axe,signals,shots >> "$GITHUB_ENV"
+          fi
+      - name: Run nightly suites
+        run: python3 tools/ci_tests.py steps nightly
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-evidence
+          path: |
+            ci-artifacts/
+            web/test-results/
+            api.log
+            web.log
+          if-no-files-found: ignore

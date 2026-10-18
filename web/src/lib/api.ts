@@ -1,18 +1,26 @@
 import { toast } from 'sonner'
+import { t } from '@/lib/i18n'
 
 /** RFC 9457 problem returned by the API (§25.6). */
 export class ApiError extends Error {
   status: number
   code: string
   body: Record<string, any>
-  constructor(status: number, body: Record<string, any>) {
-    super(body?.detail ?? `HTTP ${status}`)
+  constructor(status: number, body: Record<string, any>, method = 'GET') {
+    const write = !['GET', 'HEAD', 'OPTIONS'].includes(method.toUpperCase())
+    const fallback = status === 502 || status === 503 ? t(write ? 'error.updatingWrite' : 'error.updatingRead')
+      : status === 0 || status === 504 ? t(write ? 'error.unreachableWrite' : 'error.unreachableRead') : `HTTP ${status}`
+    const detail = body?.detail ?? fallback
+    super(status >= 500 && body?.traceId ? `${detail} (ref ${body.traceId})` : detail)
     this.status = status
     this.code = body?.code ?? 'error'
     this.body = body ?? {}
   }
   get fieldErrors(): Record<string, string[]> { return this.body.errors ?? {} }
 }
+
+// FR-OPS-19: network reads retain the existing two retries; application refusals do not.
+export const shouldRetryRead = (n: number, e: unknown) => !(e instanceof ApiError && e.status > 0 && e.status < 500) && n < 2
 
 type HeaderSource = () => Promise<Record<string, string>>
 let authHeaders: HeaderSource = async () => ({})
@@ -35,17 +43,19 @@ export async function api<T = any>(path: string, o: ApiOptions = {}): Promise<T>
   if (o.body !== undefined) headers['Content-Type'] = 'application/json'
   if (o.idempotencyKey) headers['Idempotency-Key'] = o.idempotencyKey
   if (o.ifMatch != null) headers['If-Match'] = `"${o.ifMatch}"`
-  const res = await fetch(path.startsWith('/') ? path : `/api/v1/${path}`, {
-    method: o.method ?? (o.body !== undefined ? 'POST' : 'GET'),
+  const method = o.method ?? (o.body !== undefined ? 'POST' : 'GET')
+  let res: Response
+  try { res = await fetch(path.startsWith('/') ? path : `/api/v1/${path}`, {
+    method,
     headers,
     body: o.body !== undefined ? JSON.stringify(o.body) : undefined,
     signal: o.signal,
-  })
+  }) } catch (e) { if (e instanceof DOMException && e.name === 'AbortError') throw e; throw new ApiError(0, { code: 'network' }, method) }
   if (res.status === 401) { onUnauthorized(); throw new ApiError(401, { detail: 'Signed out' }) }
   if (!res.ok) {
     let body: any = {}
     try { body = await res.json() } catch { /* not JSON */ }
-    throw new ApiError(res.status, body)
+    throw new ApiError(res.status, body, method)
   }
   if (o.raw) return res as unknown as T
   if (res.status === 204) return undefined as T

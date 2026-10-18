@@ -12,11 +12,11 @@ Implements §48 with defaults D1 to D11. Fifteen small slices, one pull request 
 
 | Slice | Files |
 |---|---|
-| S01 served files | `web/public/landing/capture.json`, `web/public/landing/README.md`, `web/public/landing/fonts/sources.json` moved to `docs/landing-assets/`; new `tools/check_served_assets.py`, `tools/test_served_assets.py`, new `tests/Hub.Tests/Api/ServedFilesTests.cs`; `tools/ci_steps.txt` (or `.github/workflows/ci.yml` before packet 039's list exists) |
+| S01 served files | `web/public/landing/capture.json`, `web/public/landing/README.md`, `web/public/landing/fonts/sources.json` moved to `docs/landing-assets/`; new `tools/check_served_assets.py`, `tools/test_served_assets.py`, new `tests/Hub.Tests/Api/ServedFilesTests.cs`; `src/Hub.Api/Program.cs` (dot-prefixed static path guard); `tools/ci_steps.txt` (or `.github/workflows/ci.yml` before packet 039's list exists) |
 | S02 dead-letter server | `src/Hub.Api/Data/Entities.cs` (`OutboxEvent.DeadLetteredAt`), `src/Hub.Api/Data/HubDb.cs`, new migration under `src/Hub.Api/Data/Migrations/` with its snapshot, `src/Hub.Api/Infrastructure/EvaluationService.cs`, `src/Hub.Api/Infrastructure/Operations.cs`, `src/Hub.Api/Program.cs` (`/health`), `src/Hub.Api/Features/Admin.cs` (GET operations), `tests/Hub.Tests/Api/OperationsTests.cs` |
 | S03 retry UI | `src/Hub.Api/Features/Admin.cs` (retry route), `web/src/pages/admin/Operations.tsx`, `web/src/i18n/en.ts`, new `web/tests/operations.cjs`, `web/package.json`, `tools/ci_steps.txt`, `tests/Hub.Tests/Api/OperationsTests.cs` |
 | S04 error page, trace ref | `web/src/main.tsx`, new `web/src/components/hub/error-page.tsx`, `web/src/lib/api.ts`, `web/src/i18n/en.ts`, `web/tests/operations.cjs` |
-| S05 client-error log | `src/Hub.Api/Features/Modules.cs` (route beside `/config`), `src/Hub.Api/Program.cs` (rate-limit policy), new `web/src/lib/client-errors.ts`, `web/src/main.tsx`, `web/src/components/hub/error-page.tsx`, `tests/Hub.Tests/Api/OperationsTests.cs`, `web/tests/operations.cjs` |
+| S05 client-error log | `src/Hub.Api/Features/Modules.cs` (route beside `/config`), `src/Hub.Api/Program.cs` (rate-limit policy), new `web/src/lib/client-errors.ts`, new `web/tests/client-errors.cjs`, `web/src/lib/auth.tsx` (reporter authentication lifecycle), `web/src/main.tsx`, `web/src/components/hub/error-page.tsx`, `tests/Hub.Tests/Api/OperationsTests.cs`, `web/tests/operations.cjs` |
 | S06 probe guard | `scripts/verify-homedev-review.py` (one SKIP line), `tools/test_social_activation.py` |
 | S07 idempotency | `src/Hub.Api/Infrastructure/Idempotency.cs`, `src/Hub.Api/Text.cs` (`error.idempotency_in_progress`), `tests/Hub.Tests/Api/OperationsTests.cs` (`IdempotencyTests`) |
 | S08 header and start-up tests | `tests/Hub.Tests/Api/FoundationsTests.cs`, `tools/test_pilot_operations.py` |
@@ -54,3 +54,5 @@ Notes that keep diffs small and behaviour safe:
 - `npm run build`, `npm run lint`, then `python3 tools/check_served_assets.py src/Hub.Api/wwwroot` (from S01) and `npm run test:operations` (from S03).
 - The Python safety suites already in CI, plus `tools/test_served_assets.py` and `scripts/test_check_offhost_backup.py`.
 - `python3 tools/trace_spec.py --check` (run by the integrator for this spec PR).
+
+Takeover verification uses one additional focused `tests/Hub.Tests/Api/OperationsHardeningTests.cs` class for retry, density and bounded client-error logging. The served-file test disproved the assumed dot-path refusal; S01 therefore adds the guard before static-file serving. No model or migration change was required.

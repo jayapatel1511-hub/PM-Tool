@@ -8,10 +8,12 @@ fail() { echo "pilot activation refused: $*" >&2; exit 1; }
 [[ $# -ge 1 ]] || fail "release SHA is required"
 release_sha="$1"; shift
 [[ "$release_sha" =~ ^[0-9a-f]{40}$ ]] || fail "release SHA must be 40 lowercase hex characters"
-install_timer=0; verify_file=""
+install_timer=0; verify_file=""; image_digest=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --install-timer) install_timer=1 ;;
+    --image-digest) shift; [[ $# -gt 0 ]] || fail "missing image digest"; image_digest="$1" ;;
+    --image-digest=*) image_digest="${1#*=}" ;;
     --verify-file) shift; [[ $# -gt 0 ]] || fail "missing verifier file"; verify_file="$1" ;;
     --verify-file=*) verify_file="${1#*=}" ;;
     *) fail "unknown option $1" ;;
@@ -82,7 +84,16 @@ cleanup_activation() {
   if [[ "$api_started" == 1 ]]; then "${compose_cmd[@]}" stop api </dev/null >/dev/null 2>&1 || true; fi
 }
 trap cleanup_activation EXIT
-"${compose_cmd[@]}" build api </dev/null
+if [[ -n "${image_digest:-}" ]]; then
+  # Jay chooses a review-proven digest; verify its origin before pulling it.
+  [[ "$image_digest" =~ ^ghcr.io/jayapatel1511-hub/pm-tool@sha256:[0-9a-f]{64}$ ]] || fail "invalid CI image digest"
+  gh attestation verify "oci://$image_digest" -R jayapatel1511-hub/PM-Tool --signer-workflow jayapatel1511-hub/PM-Tool/.github/workflows/ci.yml --source-ref refs/heads/main </dev/null >/dev/null 2>&1 || fail "image provenance did not verify"
+  sudo docker pull "$image_digest" </dev/null >/dev/null
+  sudo docker image inspect "$image_digest" </dev/null | python3 -c 'import json,sys; c=json.load(sys.stdin)[0]["Config"]; sha=sys.argv[1]; sys.exit(0 if c.get("Labels",{}).get("org.opencontainers.image.revision")==sha and "HUB_BUILD="+sha in c.get("Env",[]) else 1)' "$release_sha" || fail "image revision or build differs from requested release"
+  sudo docker tag "$image_digest" "pm-tool-pilot:$release_sha" </dev/null
+else
+  "${compose_cmd[@]}" build api </dev/null
+fi
 # Preserve the volume/data. Stop the old API before any privileged migration or grant change.
 "${compose_cmd[@]}" stop api </dev/null
 "${compose_cmd[@]}" up -d --no-build db </dev/null

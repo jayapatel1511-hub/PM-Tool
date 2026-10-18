@@ -226,5 +226,44 @@ mv() { return 98; }
             self.assertGreaterEqual(sum(path == "/api/v1/me" and cookie == "__Host-hub-review=secure-token" for _, path, _, _, _, cookie in calls), 2)
             self.assertIn("RESULT PASS", output.getvalue())
 
+class PilotDigestTests(unittest.TestCase):
+    """AC-DLV-18: digest verifies and tags without building; the old path still builds."""
+    def test_digest_pull_verification_and_existing_build_path(self):
+        script = (ROOT / 'scripts/activate-homedev-pilot.sh').read_text()
+        body = script[script.index('if [[ -n "${image_digest:-}" ]]'):script.index('# Preserve the volume/data.')]
+        for digest, reject in [('', False), ('ghcr.io/jayapatel1511-hub/pm-tool@sha256:'+'d'*64, False), ('ghcr.io/jayapatel1511-hub/pm-tool@sha256:'+'d'*64, True)]:
+            stubs = r'''set -euo pipefail
+release_sha=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+compose_cmd=(fake_compose)
+fail() { echo "$*" >&2; exit 1; }
+fake_compose() { echo "COMPOSE $*"; }
+gh() { echo VERIFY; [[ "$REJECT" == no ]]; }
+sudo() {
+  if [[ "$*" == *"image inspect"* ]]; then
+    echo '{"unused":true}' >/dev/null
+    echo '[{"Config":{"Labels":{"org.opencontainers.image.revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"Env":["HUB_BUILD=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]}}]'
+  else
+    echo "$*" >>"$CALL_LOG"
+  fi
+}
+'''
+            with tempfile.TemporaryDirectory() as folder:
+                log = pathlib.Path(folder)/'calls'
+                result = subprocess.run(['bash'], input=stubs+body, text=True, capture_output=True,
+                    env={**os.environ, 'image_digest':digest, 'REJECT':'yes' if reject else 'no', 'CALL_LOG':str(log)})
+                calls = log.read_text() if log.exists() else ''
+                if reject:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertNotIn('pull', calls)
+                elif digest:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertIn('pull '+digest, calls)
+                    self.assertIn('tag '+digest+' pm-tool-pilot:', calls)
+                    self.assertNotIn('COMPOSE build', result.stdout)
+                else:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertIn('COMPOSE build api', result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

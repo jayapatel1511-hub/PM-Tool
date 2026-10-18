@@ -116,3 +116,35 @@ with the existing pilot initializer and root backup helper. Four backup-helper, 
 operation regressions passed on both Mac and homedev Ubuntu using fake Docker/sudo commands. They cover private
 backup/restore inputs, timer dump names, stdin isolation, preflight credential refusal, cookie replay and transport
 failure. This does not prove real pilot activation, installed timers, public TLS or company acceptance.
+
+## Optional CI-image review timer (packet 039)
+
+Source and mocked tests are prepared; **not installed or activated**. Jay first provisions
+`/etc/pm-tool-review-deploy/ghcr-token` as a root-owned mode-600 file containing a read-only package token,
+with root-owned mode-755 parent. Never put it in a release or print it. From the prepared, manually verified
+release, the explicit `--install-deploy-timer` option on `activate-homedev-review.sh` copies the compose and
+probe to root-owned paths, keeps review runtime credentials private, authenticates root Docker with the token
+on stdin into `/etc/pm-tool-review-deploy/docker`, installs the root helper/service/timer and enables the
+five-minute timer. This needs Jay's sudo and is a deployment action, outside local source verification.
+The ordinary activation path and existing `--install-timer` daily backup option keep their previous meaning.
+
+The timer verifies CI provenance for the exact digest, installed compose/probe hashes and any newest contract
+migration before pulling. It preserves the running immutable image under a separate rollback tag, takes a
+verified dump, starts only review API without building, then runs the installed private probe. A failed
+candidate is recorded and never retried; a different digest can deploy after rollback. Root-owned state at
+`/var/lib/pm-tool-review-deploy/state.json` is readable by Jay and records SHA, digest and UTC time. `current`
+continues to mean the last manual activation. No database volume or down migration is used by rollback.
+
+After a compose, social override, probe or credential change, repeat the explicit installation option to
+refresh root-owned copies. Packet 042 compose/probe changes require this refresh. Until then the hash guard
+stops the timer. A contract migration also stops it until Jay applies that contract manually. Check
+`journalctl -u pm-tool-review-deploy.service` for stop reasons; the helper suppresses subprocess output that
+could include secrets. A failed rollback needs manual recovery; do not retry a failed digest by editing state.
+
+For manual pilot promotion, choose a review-proven digest (review probes passed, default two-day soak and a
+green nightly for the same commit) and use the pilot activation script's optional
+`--image-digest ghcr.io/jayapatel1511-hub/pm-tool@sha256:<digest>`. It verifies CI provenance, the SHA/build
+labels and tags the pulled image; without that option it builds as before. Pilot/production remain manual.
+Live registry/timer installation, same-volume deployment and failed-probe rehearsal are UNPROVEN locally.
+
+Registry metadata reads use Docker's documented [`imagetools inspect` JSON configuration fields](https://docs.docker.com/reference/cli/docker/buildx/imagetools/inspect/#json-output), before the candidate image is pulled. Registry-backed execution remains a separate operator check.

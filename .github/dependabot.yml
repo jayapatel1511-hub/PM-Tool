@@ -4,9 +4,21 @@ updates:
   - package-ecosystem: nuget
     directory: "/"
     schedule: { interval: monthly }
+    groups:
+      nuget-patch-minor:
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
   - package-ecosystem: npm
     directory: "/web"
     schedule: { interval: monthly }
+    groups:
+      npm-patch-minor:
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule: { interval: monthly }
+    groups:
+      actions-patch-minor:
+        update-types: ["minor", "patch"]
+        patterns: ["*"]

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Hub.Api.Infrastructure;
 
 namespace Hub.Api.Features;
@@ -78,6 +79,29 @@ public static class HubModules
             await eval.EvaluateProject(projectId);
             return Results.NoContent();
         });
+        api.MapPost("/client-errors", async (HttpContext ctx, CurrentUser me, ILoggerFactory logs) =>
+        {
+            if (ctx.Request.ContentLength is > 8192) throw ApiException.Invalid("body", "error.too_long", 8192);
+            var bytes = new byte[8193]; var length = 0;
+            while (length < bytes.Length)
+            {
+                var read = await ctx.Request.Body.ReadAsync(bytes.AsMemory(length, bytes.Length - length));
+                if (read == 0) break;
+                length += read;
+            }
+            if (length > 8192) throw ApiException.Invalid("body", "error.too_long", 8192);
+            ClientErrorBody body;
+            try { body = JsonSerializer.Deserialize<ClientErrorBody>(bytes.AsSpan(0, length), JsonOpts.Web) ?? throw new JsonException(); }
+            catch (JsonException) { throw ApiException.Invalid("body", "error.bad_json"); }
+            static string Clean(string? value, int max = 200)
+            {
+                var clean = new string((value ?? "").Where(c => !char.IsControl(c)).ToArray()).Replace("\r", " ").Replace("\n", " ");
+                return clean[..Math.Min(max, clean.Length)];
+            }
+            logs.CreateLogger("Hub.ClientErrors").LogWarning("Client error {Reference} kind={Kind} route={Route} build={Build} user={User} name={Name} frame={Frame}: {Message}",
+                Clean(body.Reference, 256), Clean(body.Kind, 32), Clean(body.Route, 200), Clean(body.Build, 64), me.Id, Clean(body.Name, 80), Clean(body.StackFrame, 200), Clean(body.Message));
+            return Results.NoContent();
+        }).RequireRateLimiting("client-errors");
         // Public client configuration for the SPA sign-in (no secrets: client and tenant IDs are public values).
         api.MapGet("/config", (IConfiguration cfg, IHostEnvironment env) => new
         {
@@ -86,4 +110,6 @@ public static class HubModules
             entra = new { clientId = cfg["Auth:Entra:SpaClientId"], tenantId = cfg["Auth:Entra:TenantId"], apiScope = cfg["Auth:Entra:ApiScope"] },
         }).AllowAnonymous();
     }
+
+    public sealed record ClientErrorBody(string? Reference, string? Route, string? Build, string? Message, string? Kind = null, string? Name = null, string? StackFrame = null);
 }

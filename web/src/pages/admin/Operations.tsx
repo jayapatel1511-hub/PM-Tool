@@ -1,16 +1,17 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Empty, ErrorBanner, Loading, Missing, Section, tdCls, thCls } from '@/components/hub/common'
 import { Pill } from '@/components/hub/pills'
-import { get } from '@/lib/api'
+import { get, post } from '@/lib/api'
 import { ago, fmtTime } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { ADMIN_EXTRA } from './Admin'
 
 interface Ops {
-  asOf: string; pendingChanges: number
+  asOf: string; pendingChanges: number; deadLetterCount: number
   problems: { kind: string; detail: string }[]
   jobs: { job: string; startedAt: string; finishedAt?: string; status: string; lastSuccess?: string; failed24h: number }[]
+  deadLetters: { id: string; eventType: string; projectNumber?: string; attempts: number; lastError?: string; createdAt: string; deadLetteredAt: string }[]
 }
 
 /** Operations (§23.8, packet 011 FR-006): the conditions operators are alerted on, checked now, and each background job's
@@ -20,6 +21,7 @@ const jobLabel = (job: string) => { const k = `ops.job.${job}`; const s = t(k); 
 
 export function Operations() {
   const q = useQuery({ queryKey: ['admin', 'operations'], queryFn: () => get<Ops>('admin/operations'), refetchInterval: 60_000 })
+  const retry = useMutation({ mutationFn: (id?: string) => post(`admin/operations/outbox/retry${id ? `?id=${id}` : ''}`), onSuccess: () => { void q.refetch() } })
   if (q.isPending) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
   if (q.error) return <ErrorBanner error={q.error} retry={() => q.refetch()} />
   const d = q.data
@@ -56,6 +58,10 @@ export function Operations() {
           </div>
         )}
       </Section>
+      {retry.error && <ErrorBanner error={retry.error} />}
+      {(d.deadLetters?.length ?? 0) > 0 && <Section title={t('ops.deadLetterCount', { n: d.deadLetterCount })} actions={<button className="text-sm text-primary hover:underline" disabled={retry.isPending} onClick={() => retry.mutate(undefined)}>{t('ops.retryAll')}</button>}>
+        <ul className="divide-y text-sm">{d.deadLetters.map((e) => <li key={e.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3"><span><strong>{e.eventType}</strong> {e.projectNumber} <span className="text-muted-foreground">{fmtTime(e.createdAt)} · {t('ops.attempts', { n: e.attempts })} · {fmtTime(e.deadLetteredAt)} · {e.lastError}</span></span><button className="text-primary hover:underline" disabled={retry.isPending} onClick={() => retry.mutate(e.id)}>{t('ops.retry')}</button></li>)}</ul>
+      </Section>}
     </div>
   )
 }

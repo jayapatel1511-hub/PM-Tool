@@ -18,7 +18,9 @@
     "test:ui-consistency": "node tests/ui-consistency.cjs",
     "test:clutter": "node tests/clutter.cjs",
     "test:counts": "node tests/counts.cjs",
-    "test:ui-review": "node tests/ui-review.cjs"
+    "test:ui-review": "node tests/ui-review.cjs",
+    "test:operations": "node tests/operations.cjs",
+    "test:client-errors": "node tests/client-errors.cjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.23.0",

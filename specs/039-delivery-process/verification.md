@@ -187,3 +187,74 @@ Left for Jay:
 - Confirm the GHCR package is private (D1) and that the repository's Actions settings let `GITHUB_TOKEN` write packages and attestations.
 - Changes under `hosting/` and `.github/` are Tier B: the pull request needs the tier-b label or Jay's review.
 - On homedev, run `scripts/verify-homedev-review.py` against an image built without `RELEASE_SHA`.
+
+## Build 039-S12 / S13 / S16 / S17
+
+Focused local checks: `/opt/homebrew/bin/python3.13 -m unittest tools.test_pr_checks tools.test_trace_report tools.test_auto_merge -v` (35
+tests PASS); `python3 tools/trace_spec.py --check` (1299 IDs, 405 sections, zero gaps);
+`python3 tools/trace_spec.py --ratchet --base HEAD^1` (PASS, 211 base cited and 216 head cited); `git diff --check`
+(PASS). The ratchet fixtures cover removed citations, new uncited ACs, unchecked and ticked slice exemptions, and
+human-only exemptions. Tier fixtures cover Tier B paths, the `tier-b` label, `tier-b-ok`, documentation-only changes,
+and added versus removed `tools/ci_steps.txt` lines.
+
+S12 adds `specs/human-only.txt` candidates and the base/head AC-to-test ratchet, including lost unchecked-slice
+exemptions and full continuation-text comparison. S13 adds the deterministic Tier B check, trusted Tier A auto-merge
+workflow and the agent/hostname rules in `AGENTS.md`, `CLAUDE.md` and this workflow guide. S16 adds the non-required
+nightly job, six real-API suite lines, preview database/API/web startup, existing seeders and artifact upload; the
+first nightly skips comparison-only calm checks when no green base exists, and later runs use the last green nightly
+UI. S17 adds monthly per-ecosystem Dependabot groups and a Dependabot-only automatic squash merge workflow for
+patch/minor updates; major updates remain for Jay.
+
+Remaining evidence: GitHub branch protection, review status behavior, first and second scheduled nightly runs,
+Dependabot pull requests and hosted preview execution remain UNPROVEN locally. The nightly workflow is intentionally
+not a required check and no activation, merge, deploy or timer installation was performed. Auto-merge makes no GitHub
+mutation during local checks; it requires exact-head green CI plus an actual reviewer `review` status.
+
+## Codex takeover local completion — 18 October 2026
+
+This section supersedes the earlier UNRUN entries only for the local evidence described here. It is not a
+remote CI run, deployment, Tier B merge, decision confirmation or acceptance sign-off.
+
+- Baseline `a6e0104b0b00ea58b9098e41b2f155305063aeed`, isolated branch `codex/delivery-ops-039-044`.
+  Recovered the six-file `b-039-S08/tracked.patch` byte-preserved snapshot cleanly; inspected S12, whose saved
+  patch is empty and whose HEAD is the baseline. Original source worktrees were not reset or edited by this lane.
+- S06: [read-only inventory](branch-inventory.txt) records exact local tips, missing commits and worktrees.
+  Archive refs were not pushed and nothing was removed; the six-worktree target and each deletion remain Jay gates.
+- S08: rollback probes previous/new/previous against one fresh disposable review schema, contract label and
+  gated main-tag move prepared; only the image job has package write. Older delayed main runs cannot move the
+  tag over a newer head. Actual registry job and the throwaway rename failure remain UNPROVEN.
+- S12/S13: complete-AC-text and checked-slice ratchet, human-only IDs, Tier B paths/labels, named `tier` job,
+  reviewer commit status and trusted exact-head auto-merge sources prepared. Auto-merge handles reviewer status
+  posted after CI, refuses incomplete >100-file inventories and follows the newest check result. No reviewer
+  status, label, protection or remote merge was created by this lane.
+- S14/S15: root-owned deploy helper plus optional operator installation and pilot digest path prepared. Mocks
+  cover provenance/contract/copy guards, dump-before-start, immutable same-SHA rollback, failed digest refusal,
+  a different digest succeeding after rollback, and pilot digest verification without a build. Root Docker
+  credentials are installed privately with token stdin. These sources have not run on homedev.
+- S16/S17: named seeded preview/guard arguments, Playwright prerequisites, previous-green-nightly comparison,
+  uploaded reports/screenshots and monthly ecosystem groups with positive patch/minor merge selection prepared.
+  First scheduled runs, major-update waiting and actual grouped PR behavior remain UNPROVEN. GitHub Actions
+  dependency edits also cross the general `.github/` Tier B path rule; retain that conservative path gate
+  until Jay resolves any desired dependency exception.
+- Focused local safety checks: `/opt/homebrew/bin/python3.13 -m unittest tools.test_review_deploy
+  tools.test_ci_tests tools.test_pr_checks tools.test_trace_report tools.test_auto_merge tools.test_served_assets
+  tools.test_backup_helpers tools.test_pilot_operations scripts.test_check_offhost_backup` passed **93 tests**
+  before two final auto-merge boundary tests; those two tests also pass separately. Spec freshness and trace
+  checks pass (1,299 IDs / 405 sections, no gaps), AC ratchet against baseline passes (211 base / 220 head citations
+  at that checkpoint), five changed workflow/config YAML files parse, and `git diff --check` is clean.
+- Independent reviewer examined the actual diff and reproduced same-SHA rollback followed by a new successful
+  digest using fake commands. Earlier review findings were corrected; the last review had no open source
+  findings before the final reporter extension in packet 044. Combined regression/coverage belongs to integration.
+
+[Acceptance gates](acceptance.md) remain pending. S18's real packet journey is human-only and has not occurred.
+
+Final follow-up: **97/97** focused Python safety tests pass on the final state (including the two nightly/config
+contract checks). The AC ratchet passes with newly ticked local slices (211 base / 229 head cited ACs). The named
+`tier` job also uses `ci_tests.py steps tier` and uploads its evidence; the runbook's prepared protection command
+now includes `tier`, actual reviewer `review` and auto-merge enablement. No command was applied to GitHub.
+
+Recovered-S08 follow-up: the saved patch opened the synthetic verifier to mode 644 and key ring to 777. That
+would violate `LocalPasswordStore`'s existing owner-only start-up check. The disposable CI runner now changes
+ownership to the image's UID 1000 while keeping 600/700 modes, briefly returning the verifier to the runner
+only for synthetic credential bootstrap. The fake-runner test enforces private modes at each start/restart.
+No sudo/Docker operation from this compatibility path was executed locally or on homedev.

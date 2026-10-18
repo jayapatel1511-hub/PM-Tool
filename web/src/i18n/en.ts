@@ -824,7 +824,12 @@ export const en: Record<string, string> = {
   'common.when': 'When',
   'common.selectPlaceholder': 'Choose…',
   'common.empty': 'Nothing here.',
-  'error.conflict': 'This item was changed by {who} {when}. Reload to see the latest version.',
+  'error.updatingRead': 'Tuesday is updating. Try again in a moment.',
+  'error.updatingWrite': 'Tuesday is updating. This change was not saved. Try again in a moment.',
+  'error.unreachableRead': 'Tuesday could not be reached. Try again in a moment.',
+  'error.unreachableWrite': 'Tuesday could not be reached. This change may not have been saved. Check before trying again.',
+  'ops.deadLetterCount': '{n} failed changes', 'ops.attempts': '{n} attempts',
+  'error.conflict': 'This item was changed by {who} {when}. Reload to see the latest version.', 'error.pageTitle': 'Tuesday hit a snag', 'error.pageBody': 'Something went wrong while loading this page. Reload and try again.', 'error.pageReference': 'Reference: {ref}',
   'error.reload': 'Reload',
   'error.forbidden': 'You cannot do this.',
 
@@ -1977,7 +1982,7 @@ export const en: Record<string, string> = {
   'ops.pending': '{n} changes waiting for evaluation.', 'ops.alertNote': 'These checks run every five minutes and alert the operators.',
   'ops.kind.EvaluationDelayed': 'Evaluation delayed', 'ops.kind.NightlyMissed': 'Nightly run missed', 'ops.kind.JobFailed': 'Job failed', 'ops.kind.DigestLate': 'Digest late',
   'ops.col.job': 'Job', 'ops.job.daily-digest': 'Daily digest', 'ops.job.directory-sync': 'Directory sync', 'ops.job.email-send': 'Email delivery', 'ops.job.evaluation-retry': 'Evaluation retry', 'ops.job.nightly-evaluation': 'Nightly evaluation', 'ops.job.ops-watchdog': 'Operations watchdog', 'ops.job.weekly-summary': 'Weekly summary', 'ops.col.lastRun': 'Last run', 'ops.col.status': 'Status', 'ops.col.lastSuccess': 'Last success', 'ops.col.failed24h': 'Failures (24 h)',
-  'ops.status.Succeeded': 'Succeeded', 'ops.status.Failed': 'Failed', 'ops.status.Running': 'Running',
+  'ops.status.Succeeded': 'Succeeded', 'ops.status.Failed': 'Failed', 'ops.status.Running': 'Running', 'ops.deadLetters': 'Failed changes', 'ops.retry': 'Retry', 'ops.retryAll': 'Retry all',
   // Project templates (packet 012)
   'common.create': 'Create', 'tpl.noneChosen': 'No template', 'value.Draft': 'Draft', 'value.Published': 'Published', 'value.Retired': 'Retired',
   'tpl.subtitle': 'Structures a project can start from: disciplines, milestones, deliverables, tasks and their dependencies.', 'tpl.new': 'New template',

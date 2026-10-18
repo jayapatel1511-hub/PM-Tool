@@ -19,6 +19,8 @@ gate [always]: python3 tools/ci_tests.py count ci-artifacts-in --main ci-artifac
 checks: python3 tools/test_ci_tests.py && python3 tools/test_coverage_gate.py && python3 tools/test_decisions.py
 checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/test_pr_checks.py && python3 tools/pr_checks.py size --base HEAD^1 --labels "${LABELS:-}"; fi
 checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/pr_checks.py migrations --base HEAD^1 --labels "${LABELS:-}"; fi
+checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/pr_checks.py tier --base HEAD^1 --labels "${LABELS:-}"; fi
+checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/trace_spec.py --ratchet --base HEAD^1; fi
 checks: python3 tools/test_backup_helpers.py && python3 tools/test_pilot_initializer.py && python3 tools/test_pilot_operations.py && python3 tools/test_pilot_pitr.py
 checks: python3 -m unittest tools.test_social_activation
 checks: python3 -m unittest tools/preview/test_fixture_api.py tools/preview/test_refresh_fixture_copy.py tools/preview/test_seed_resources.py tools/preview/test_seed_staffing.py scripts/test_extend_review_credentials.py scripts/test_seed_homedev_tuesday_review.py -v
@@ -30,12 +32,14 @@ report: python3 tools/trace_spec.py --report ci-artifacts-in --out ci-artifacts/
 
 # Main runs only (ci.yml): the release image pushed as $IMAGE (repository@digest) carries this commit and its
 # provenance names this repository's CI workflow on main (§43.6, FR-DLV-14).
-image: docker pull "$IMAGE" && python3 tools/ci_tests.py image "$IMAGE" --sha "$GITHUB_SHA"
+image: docker pull "$IMAGE" && python3 tools/ci_tests.py image "$IMAGE" --sha "$GITHUB_SHA" --contract "$CONTRACT_MIGRATION"
 image: gh attestation verify "oci://$IMAGE" -R "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/ci.yml" --source-ref refs/heads/main
 
 # Web: build, lint (with accessibility rules, §22), mocked-API browser suites, renderer regressions, audit.
 web: cd web && npm ci
 web: cd web && npm run build
+web: python3 tools/check_served_assets.py src/Hub.Api/wwwroot
+checks: python3 -m unittest tools.test_served_assets
 web: cd web && npm run lint
 web: cd web && npx playwright install --with-deps chromium --only-shell
 web: cd web && npm run test:handoffs
@@ -48,3 +52,26 @@ web: cd web && npm run test:supervisor-capacity
 web: cd web && npm run test:ui-review
 web: cd web && npm audit --audit-level=critical --omit=dev
 web [always]: mkdir -p ci-artifacts && if [ -d web/test-results ]; then cp -R web/test-results ci-artifacts/browser-evidence; fi
+
+# Nightly real-API regression net (FR-DLV-30). The workflow starts the named preview database,
+# Development API and Vite server; preview_target.py remains the write guard for seeders.
+nightly: mkdir -p ci-artifacts/nightly/counts && TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 COUNTS_REPORT="$PWD/ci-artifacts/nightly/counts/counts.json" npm --prefix web run test:counts
+nightly: TUESDAY_LIVE_BASE_URL=http://127.0.0.1:5173 node web/tests/planning-live.cjs
+nightly: TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 node web/tests/ui-consistency.cjs
+nightly: TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 node web/tests/clutter.cjs
+nightly: mkdir -p ci-artifacts/nightly/calm-acceptance && TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 CALM_OUT="$PWD/ci-artifacts/nightly/calm-acceptance" node web/tests/calm-acceptance.cjs
+nightly: mkdir -p ci-artifacts/nightly/calm-clicks && if [ -n "${CALM_BASE_UI_URL:-}" ]; then TUESDAY_UI_BASE_URL="$CALM_BASE_UI_URL" CALM_VERSION=now CALM_OUT="$PWD/ci-artifacts/nightly/calm-clicks/base.json" node web/tests/calm-clicks.cjs && TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 CALM_VERSION=now CALM_OUT="$PWD/ci-artifacts/nightly/calm-clicks/now.json" node web/tests/calm-clicks.cjs; else TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 CALM_VERSION=now CALM_OUT="$PWD/ci-artifacts/nightly/calm-clicks/now.json" node web/tests/calm-clicks.cjs; fi
+
+# Rollback compatibility (§43.7, FR-DLV-17): the image `main` names, then the new image ($NEW_IMAGE on main, this
+# branch built when started by hand), then the first again, each probed on one fresh review stack.
+rollback: python3 tools/ci_tests.py rollback --previous "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/pm-tool:main" --new "${NEW_IMAGE:-build}" --sha "$GITHUB_SHA"
+
+# Main runs only (ci.yml), after rollback passed: move `main` to $IMAGE without changing its digest.
+main-tag: docker buildx imagetools create -t "$REPO:main" "$IMAGE" && test "$(docker buildx imagetools inspect "$REPO:main" --format '{{.Manifest.Digest}}')" = "${IMAGE#*@}"
+
+checks: python3 -m unittest tools.test_review_deploy tools.test_auto_merge scripts.test_check_offhost_backup
+web: cd web && npm run test:operations
+
+web: cd web && npm run test:client-errors
+
+tier: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/pr_checks.py tier --base HEAD^1 --labels "${LABELS:-}"; else echo "Tier labels are evaluated on pull requests."; fi

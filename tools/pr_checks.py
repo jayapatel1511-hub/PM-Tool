@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """Pull request checks (§43). `size`: hand-written changed lines against the limits of FR-DLV-06 (039-D4).
 `migrations`: the expand-only lint of FR-DLV-15 over migrations the pull request adds.
+`newest-contract`: the newest migration in the tree whose Up() holds a contract operation, or `none`; CI records it
+as the release image's contract-migration label (FR-DLV-15).
+`tier`: require Jay's `tier-b-ok` label for Tier B paths or an explicit `tier-b` label (FR-DLV-28).
 
     python3 tools/pr_checks.py size --base <sha> [--head HEAD] [--labels large,other]
     python3 tools/pr_checks.py migrations --base <sha> [--head HEAD] [--labels contract,other]
+    python3 tools/pr_checks.py newest-contract
+    python3 tools/pr_checks.py tier --base <sha> [--head HEAD] [--labels tier-b,tier-b-ok]
 """
+import pathlib
 import argparse
 import re
 import subprocess
@@ -127,6 +133,59 @@ def migrations(base, head="HEAD", labels=(), cwd=None):
                          for p, op in problems)
 
 
+def newest_contract(folder=pathlib.Path(__file__).resolve().parents[1] / MIGRATIONS):
+    """Newest migration ID (file name without .cs) whose Up() the lint would flag, or "none". IDs start with a
+    timestamp, so name order is migration order. SQL the lint cannot read counts, as in the lint."""
+    found = [f.stem for f in sorted(pathlib.Path(folder).glob("*.cs"))
+             if not f.name.endswith((".Designer.cs", "ModelSnapshot.cs")) and contract_operations(f.read_text())]
+    return found[-1] if found else "none"
+
+
+TIER_B_EXACT = {
+    "src/Hub.Domain/Permissions.cs",
+    "src/Hub.Api/Infrastructure/Auth.cs",
+    "src/Hub.Api/Infrastructure/SocialAuth.cs",
+}
+
+
+def tier_b_paths(base, head="HEAD", cwd=None):
+    """Return changed paths that require Jay's Tier B merge control."""
+    paths = set(git("diff", "--name-only", base, head, cwd=cwd).splitlines())
+    result = {p for p in paths if p in TIER_B_EXACT or p.startswith(("spec-parts/", ".specify/", "hosting/", ".github/"))
+              or p in {"specs/DECISIONS.md", "specs/human-only.txt"}
+              or (p.startswith("specs/") and p.endswith("/spec.md"))
+              or (p.startswith("scripts/") and "homedev" in pathlib.PurePosixPath(p).name)}
+    for path in paths:
+        if not path.startswith("src/Hub.Api/Data/Migrations/"):
+            continue
+        for ref in (head, base):
+            try:
+                source = git("show", f"{ref}:{path}", cwd=cwd)
+            except subprocess.CalledProcessError:
+                continue
+            if contract_operations(source):
+                result.add(path)
+                break
+    if "tools/ci_steps.txt" in paths:
+        diff = git("diff", "--unified=0", base, head, "--", "tools/ci_steps.txt", cwd=cwd)
+        if any(line.startswith("-") and not line.startswith("---") for line in diff.splitlines()):
+            result.add("tools/ci_steps.txt")
+    return result
+
+
+def tier(base, head="HEAD", labels=(), cwd=None):
+    """(exit code, message) for the required Tier B label control."""
+    labels = set(labels)
+    paths = tier_b_paths(base, head, cwd)
+    if "tier-b" in labels or "large" in labels or "replace-test" in labels:
+        paths.add("(explicit Tier B label)")
+    if paths and "tier-b-ok" not in labels:
+        return 1, "Tier B merge control required for: " + ", ".join(sorted(paths)) + "; Jay must apply `tier-b-ok`."
+    if paths:
+        return 0, "Tier B merge control satisfied by `tier-b-ok`."
+    return 0, "Tier A paths; automatic merge remains allowed after green checks and a clear `review` status."
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="check", required=True)
@@ -138,7 +197,19 @@ def main(argv=None):
     m.add_argument("--base", required=True)
     m.add_argument("--head", default="HEAD")
     m.add_argument("--labels", default="", help="comma-separated pull request labels")
+    sub.add_parser("newest-contract")
+    t = sub.add_parser("tier")
+    t.add_argument("--base", required=True)
+    t.add_argument("--head", default="HEAD")
+    t.add_argument("--labels", default="", help="comma-separated pull request labels")
     args = parser.parse_args(argv)
+    if args.check == "newest-contract":
+        print(newest_contract())
+        return 0
+    if args.check == "tier":
+        code, message = tier(args.base, args.head, [l.strip() for l in args.labels.split(",") if l.strip()])
+        print(message)
+        return code
     check = size if args.check == "size" else migrations
     code, message = check(args.base, args.head, [l.strip() for l in args.labels.split(",") if l.strip()])
     print(message)

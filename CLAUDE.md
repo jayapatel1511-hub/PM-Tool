@@ -33,3 +33,15 @@ pull requests, flags, merge tiers and verification.
 - A planning request is not permission to write application code. Implement only the tasks
   named in the request, and record checks in the packet's `verification.md`.
 - Do not commit, push, open issues, deploy, or start sub-agents unless Jay asks.
+
+## Delivery process rules (packet 039)
+
+- Work from `origin/main` on one `a/<packet>-<slice>` branch with disjoint file ownership. At most five agents write
+  concurrently; one schema-lane writer and one separate reviewer agent serve each pull request.
+- Tier A changes are dark additions, guards, tests, documentation, unchanged-test refactors, added lines in
+  `tools/ci_steps.txt`, and patch or minor dependency updates. Tier B includes specification and decision files,
+  `.github/`, hosting, homedev scripts, auth and permissions, migrations, approved behaviour and `large` or
+  `replace-test` changes. Jay applies `tier-b-ok` and merges Tier B.
+- Agents never apply `tier-b-ok`, `contract`, `large` or `replace-test`, change decision status, turn on flags, deploy,
+  or delete branches/worktrees. The boy-scout rule stays inside files already changed by the slice.
+- Hostnames and origins are environment-specific; verify the current target before treating one as hosted evidence.

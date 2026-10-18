@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { api, configureApi, get } from '@/lib/api'
 import { setDateContext } from '@/lib/format'
 import { t } from '@/lib/i18n'
+import { configureClientErrorReporter, disableClientErrorReporter } from '@/lib/client-errors'
 import { LandingPage, LoginPage } from '@/pages/Entrance'
 
 // Entra uses PKCE through MSAL. The isolated review deployment uses individual
@@ -74,12 +75,12 @@ export function AuthGate({ children }: { children: ReactNode }) {
         if (idleExpired(8)) { sessionStorage.removeItem(DEV_KEY); setIdleNotice(true) }
         if (c.authMode === 'Development') {
           configureApi(async (): Promise<Record<string, string>> => { const u = sessionStorage.getItem(DEV_KEY); return u ? { 'X-Dev-User': u } : {} }, () => { sessionStorage.removeItem(DEV_KEY); preparePublicRoute(); setReady('public') })
-          if (!cancelled) { const signedIn = !!sessionStorage.getItem(DEV_KEY); if (signedIn) finishSignIn(); else preparePublicRoute(); setReady(signedIn ? 'ready' : 'public') }
+          if (!cancelled) { const signedIn = !!sessionStorage.getItem(DEV_KEY); if (signedIn) { configureErrorReporter(() => ({ 'X-Dev-User': sessionStorage.getItem(DEV_KEY)! })); finishSignIn() } else preparePublicRoute(); setReady(signedIn ? 'ready' : 'public') }
           return
         }
         if (c.authMode === 'LocalPassword' || c.authMode === 'Social') {
           configureApi(async () => ({}), () => { qc.removeQueries({ queryKey: ['me'] }); preparePublicRoute(); setReady('public') })
-          try { await get<Me>('me'); if (!cancelled) { finishSignIn(); setReady('ready') } }
+          try { await get<Me>('me'); if (!cancelled) { configureErrorReporter(() => ({})); finishSignIn(); setReady('ready') } }
           catch { if (!cancelled) { preparePublicRoute(); setReady('public') } }
           return
         }
@@ -100,8 +101,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
             await msal!.acquireTokenRedirect({ scopes: [c.entra.apiScope!] })
             return {}
           }
-        }, () => msal?.loginRedirect({ scopes: [c.entra.apiScope!] }))
-        if (!cancelled) { finishSignIn(); setReady('ready') }
+        }, () => { disableClientErrorReporter(); void msal?.loginRedirect({ scopes: [c.entra.apiScope!] }) })
+        if (!cancelled) { configureErrorReporter(async () => ({ Authorization: `Bearer ${(await msal!.acquireTokenSilent({ scopes: [c.entra.apiScope!], account: msal!.getActiveAccount()! })).accessToken}` })); finishSignIn(); setReady('ready') }
       } catch {
         if (!cancelled) setReady('error')
       }
@@ -119,20 +120,34 @@ export function AuthGate({ children }: { children: ReactNode }) {
     }
     msal?.loginRedirect({ scopes: [cfg.current!.entra.apiScope!] }).catch(() => setSignInError('Microsoft sign-in could not start. Please try again.'))
   }} onLocalSignIn={async (userName, password) => {
-    try { await api('auth/local/sign-in', { method: 'POST', body: { userName, password } }); qc.removeQueries({ queryKey: ['me'] }); sessionStorage.removeItem(SIGNIN_KEY); touch(); finishSignIn(); setReady('ready') }
+    try { await api('auth/local/sign-in', { method: 'POST', body: { userName, password } }); qc.removeQueries({ queryKey: ['me'] }); sessionStorage.removeItem(SIGNIN_KEY); touch(); configureErrorReporter(() => ({})); finishSignIn(); setReady('ready') }
     catch { setSignInError(t('auth.localFailed')) }
-  }} onPick={email => { sessionStorage.setItem(DEV_KEY, email); touch(); finishSignIn(); setReady('ready') }} />
+  }} onPick={email => { sessionStorage.setItem(DEV_KEY, email); configureErrorReporter(() => ({ 'X-Dev-User': sessionStorage.getItem(DEV_KEY)! })); touch(); finishSignIn(); setReady('ready') }} />
   return <Signed onSignOut={() => {
     sessionStorage.removeItem(SIGNIN_KEY)
-    if (cfg.current?.authMode === 'Development') { sessionStorage.removeItem(DEV_KEY); window.location.replace('/') }
-    else if (cfg.current?.authMode === 'LocalPassword') { api('auth/local/sign-out', { method: 'POST' }).then(() => { qc.removeQueries({ queryKey: ['me'] }); window.location.replace('/') }).catch(() => toast.error(t('auth.signOutFailed'))) }
-    else if (cfg.current?.authMode === 'Social') { api('auth/social/sign-out', { method: 'POST' }).then(() => { qc.removeQueries({ queryKey: ['me'] }); window.location.replace('/') }).catch(() => toast.error(t('auth.signOutFailed'))) }
-    else msal?.logoutRedirect()
+    if (cfg.current?.authMode === 'Development') { disableClientErrorReporter(); sessionStorage.removeItem(DEV_KEY); window.location.replace('/') }
+    else if (cfg.current?.authMode === 'LocalPassword') { api('auth/local/sign-out', { method: 'POST' }).then(() => { disableClientErrorReporter(); qc.removeQueries({ queryKey: ['me'] }); window.location.replace('/') }).catch(() => toast.error(t('auth.signOutFailed'))) }
+    else if (cfg.current?.authMode === 'Social') { api('auth/social/sign-out', { method: 'POST' }).then(() => { disableClientErrorReporter(); qc.removeQueries({ queryKey: ['me'] }); window.location.replace('/') }).catch(() => toast.error(t('auth.signOutFailed'))) }
+    else void msal?.logoutRedirect().then(() => disableClientErrorReporter())
   }}>{children}</Signed>
+}
+
+function configureErrorReporter(headers: () => Promise<Record<string, string>> | Record<string, string>) {
+  configureClientErrorReporter({
+    send: async body => {
+      const response = await fetch('/api/v1/client-errors', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...(await headers()) },
+        body: JSON.stringify(body),
+      })
+      if (!response.ok) throw new Error('client error report rejected')
+    },
+  })
 }
 
 const RETURN_TO = 'hub.returnTo'
 function preparePublicRoute() {
+  disableClientErrorReporter()
   const path = window.location.pathname
   if (path !== '/' && path !== '/login') { sessionStorage.setItem(RETURN_TO, path + window.location.search + window.location.hash); window.history.replaceState(null, '', '/login') }
 }

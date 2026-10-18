@@ -1,0 +1,29 @@
+name: tier-a-auto-merge
+
+on:
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
+  status:
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  actions: read
+  statuses: read
+
+jobs:
+  merge:
+    if: (github.event_name == 'status' && github.event.state == 'success' && github.event.context == 'review') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      # Trusted default-branch tooling only; the pull request tree is never checked out or executed.
+      - uses: actions/checkout@v4
+        with: { ref: main }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - run: >-
+          python3 tools/auto_merge.py --repo "$GITHUB_REPOSITORY"
+          ${{ github.event_name == 'status' && format('--sha {0}', github.event.sha) || format('--run-id {0}', github.event.workflow_run.id) }}
+        env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }

@@ -8,9 +8,13 @@
                                             under <dir>) must equal the listed cases (listed-tests.txt under
                                             <dir>); on pull requests the backend and browser-suite counts
                                             must not fall below --main unless labelled replace-test
-  python3 tools/ci_tests.py image <ref> --sha SHA
+  python3 tools/ci_tests.py image <ref> --sha SHA [--contract ID]
                                             release image check (FR-DLV-14): the local image's OCI revision
-                                            label and HUB_BUILD both equal SHA
+                                            label and HUB_BUILD both equal SHA; its contract-migration label
+                                            equals ID (FR-DLV-15)
+  python3 tools/ci_tests.py rollback --previous REF --new REF|build
+                                            rollback compatibility (FR-DLV-17) on a fresh review stack:
+                                            previous image, new image, previous image again, probes each time
 
 ci_steps.txt: one step per line, `<job>[,<job>...]: <command>`; `#` starts a comment. A job name
 followed by ` [always]` runs that step even after an earlier step failed (evidence copies).
@@ -18,12 +22,14 @@ Commands run from the repository root under bash with CI_JOB set to the job name
 import argparse
 import collections
 import html
+import http.client
 import json
 import os
 import pathlib
 import re
 import subprocess
 import sys
+import time
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 STEPS = ROOT / "tools" / "ci_steps.txt"
@@ -172,19 +178,124 @@ def count(folder, main_file=None, labels="", event="", out=None, steps_file=STEP
 
 
 REVISION = "org.opencontainers.image.revision"
+CONTRACT = "hub.contract-migration"
 
 
-def image_errors(inspect, sha):
-    """FR-DLV-14: what is wrong with `docker image inspect` output for an image built from sha."""
+def image_errors(inspect, sha, contract=None):
+    """FR-DLV-14: what is wrong with `docker image inspect` output for an image built from sha. With contract,
+    the contract-migration label must equal it (FR-DLV-15)."""
     config = inspect[0].get("Config") or {}
-    label = (config.get("Labels") or {}).get(REVISION)
+    labels = config.get("Labels") or {}
+    label = labels.get(REVISION)
     builds = [e.partition("=")[2] for e in config.get("Env") or [] if e.startswith("HUB_BUILD=")]
     errors = []
     if label != sha:
         errors.append(f"label {REVISION} is {label!r}, expected {sha!r}")
     if builds != [sha]:
         errors.append(f"HUB_BUILD is {builds[0] if builds else None!r}, expected {sha!r}")
+    if contract is not None and labels.get(CONTRACT) != contract:
+        errors.append(f"label {CONTRACT} is {labels.get(CONTRACT)!r}, expected {contract!r}")
     return errors
+
+
+# Rollback compatibility (FR-DLV-17): the review stack as it is, on a fresh database. Never deletes a volume.
+REVIEW_COMPOSE = ["docker", "compose", "--env-file", ".runtime/review.env", "-f", "hosting/homedev.compose.yml"]
+REVIEW_VOLUME = "pm-tool-review-db"
+REVIEWER = "taylor"  # a synthetic review person every review seed creates
+STAGES = ("previous image on its own schema", "new image after migrating", "previous image on the new schema")
+
+
+class RollbackError(Exception):
+    pass
+
+
+def shell(cmd, cwd=ROOT, env=None, check=True, capture=False):
+    r = subprocess.run(cmd, cwd=cwd, env={**os.environ, **(env or {})}, text=True, capture_output=capture)
+    if check and r.returncode:
+        raise RollbackError(f"{' '.join(cmd[:4])} ... exited {r.returncode}" + (f": {r.stderr.strip()}" if capture else ""))
+    return r
+
+
+def wait_healthy(timeout=240):
+    """Polls the review origin's /health as the probes call it, until 200."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            conn = http.client.HTTPConnection("127.0.0.1", 3080, timeout=5)
+            conn.request("GET", "/health", headers={"Host": "pm.engcalchub.com", "X-Forwarded-Proto": "https"})
+            if conn.getresponse().status == 200:
+                return
+        except OSError:
+            pass
+        time.sleep(3)
+    raise RollbackError(f"/health not ready within {timeout}s")
+
+
+def rollback(previous, new, sha="dev", cwd=ROOT, sh=shell, wait=wait_healthy):
+    """(exit code, messages). previous and new are image references; new == "build" builds this tree."""
+    cwd = pathlib.Path(cwd)
+    notes = []
+
+    def sh_(cmd, **kw):
+        return sh(cmd, cwd=cwd, **kw)
+
+    def fetch(ref):
+        if sh_(["docker", "image", "inspect", ref], check=False, capture=True).returncode == 0:
+            return True
+        r = sh_(["docker", "pull", ref], check=False, capture=True)
+        if r.returncode == 0:
+            return True
+        if re.search(r"not found|manifest unknown", r.stderr or "", re.I):
+            return False
+        raise RollbackError(f"cannot pull {ref}: {(r.stderr or '').strip()}")
+
+    def up(tag):
+        sh_(REVIEW_COMPOSE + ["up", "-d", "--no-build"], env={"RELEASE_SHA": tag})
+        wait()
+
+    def probe(stage):
+        if sh_(["python3", "scripts/verify-homedev-review.py"], check=False).returncode:
+            logs = sh_(REVIEW_COMPOSE + ["logs", "--no-color", "--tail", "80", "api"], check=False, capture=True).stdout or ""
+            notes.extend(l for l in logs.splitlines() if not re.search(r"password|secret|token", l, re.I))
+            raise RollbackError(f"{stage}: probes failed")
+        notes.append(f"PASS {stage}")
+
+    try:
+        if sh_(["docker", "volume", "inspect", REVIEW_VOLUME], check=False, capture=True).returncode == 0:
+            raise RollbackError(f"volume {REVIEW_VOLUME} exists; this job needs a fresh database and never deletes one")
+        if not previous or not fetch(previous):
+            return 0, notes + [f"no previous main image ({previous or 'none named'}): passes without a rollback check"]
+        if new == "build":
+            sh_(["docker", "build", "-f", "hosting/Dockerfile.review", "--build-arg", f"RELEASE_SHA={sha}",
+                 "-t", "pm-tool-review:new", "."])
+        elif fetch(new):
+            sh_(["docker", "tag", new, "pm-tool-review:new"])
+        else:
+            raise RollbackError(f"new image {new} not found")
+        sh_(["docker", "tag", previous, "pm-tool-review:previous"])
+
+        sh_(["python3", "scripts/init-homedev-review.py"])
+        runtime, users = cwd / ".runtime", cwd / ".runtime" / "review-users.json"
+        # Match the image's UID without weakening LocalPasswordStore's owner-only mode guard.
+        sh_(["sudo", "chown", "1000:1000", str(runtime / "keys"), str(users)])
+        up("previous")
+        user_id = sh_(REVIEW_COMPOSE + ["exec", "-T", "db", "psql", "-U", "hub_review", "-d", "hub_review", "-Atc",
+                                        f"SELECT id FROM hub.app_user WHERE email = '{REVIEWER}@hub.test' AND is_active"],
+                      capture=True).stdout.strip()
+        sh_(["sudo", "chown", f"{os.getuid()}:{os.getgid()}", str(users)])
+        sh_(["python3", "scripts/bootstrap-review-credentials.py", ".runtime/review-users.json",
+             ".runtime/review-login-handoff.json", f"{REVIEWER}:{user_id}"])
+        sh_(["sudo", "chown", "1000:1000", str(users)])
+        sh_(REVIEW_COMPOSE + ["restart", "api"])
+        wait()
+        probe(STAGES[0])
+        up("new")
+        probe(STAGES[1])
+        up("previous")
+        probe(STAGES[2])
+    except RollbackError as e:
+        return 1, notes + [f"::error::{e}"]
+    return 0, notes + ["rollback compatible: the previous image runs on the new schema"]
 
 
 def main(argv):
@@ -192,11 +303,22 @@ def main(argv):
         p = argparse.ArgumentParser(prog="ci_tests.py image")
         p.add_argument("ref")
         p.add_argument("--sha", required=True)
+        p.add_argument("--contract")
         a = p.parse_args(argv[1:])
         out = subprocess.run(["docker", "image", "inspect", a.ref], capture_output=True, text=True, check=True).stdout
-        errors = image_errors(json.loads(out), a.sha)
+        errors = image_errors(json.loads(out), a.sha, a.contract)
         print("\n".join(f"::error::{e}" for e in errors) or f"{a.ref}: revision and HUB_BUILD are {a.sha}")
         return 1 if errors else 0
+
+    if argv and argv[0] == "rollback":
+        p = argparse.ArgumentParser(prog="ci_tests.py rollback")
+        p.add_argument("--previous", default="")
+        p.add_argument("--new", required=True)
+        p.add_argument("--sha", default="dev")
+        a = p.parse_args(argv[1:])
+        code, messages = rollback(a.previous, a.new, a.sha)
+        print("\n".join(messages))
+        return code
 
     if argv and argv[0] == "count":
         p = argparse.ArgumentParser(prog="ci_tests.py count")

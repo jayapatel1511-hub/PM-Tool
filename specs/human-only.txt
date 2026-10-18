@@ -1,1 +1,9 @@
-AC-DLV-01 Branch protection is a GitHub repository setting; Jay applies it and records the readback in specs/039-delivery-process/acceptance.md (docs/runbooks/delivery.md).
+# Acceptance criteria that require a real repository, homedev or Jay review.
+AC-DLV-01  # GitHub branch protection is a repository setting; Jay records the readback and direct-push attempt.
+AC-DLV-16  # Homedev review timer, dump, probes and rollback rehearsal.
+AC-DLV-25  # One-time branch and worktree inventory before deletion.
+AC-DLV-26  # End-to-end packet journey and Jay's pilot promotion.
+AC-DLV-27  # Human review of agent rules and tracked guidance consistency.
+AC-OPS-03  # Homedev off-host backup freshness and approval run.
+AC-OPS-04  # Homedev off-host restore drill and measured recovery window.
+AC-OPS-05  # Homedev backup refusal and recovery safety checks.

@@ -16,7 +16,7 @@ release is a green `main` commit.
 | Squash commit title | The pull request title (`039 S03: ...`) |
 | Head branch | Deleted automatically on merge |
 | Pull request required | Yes, with no required approvals (agents push as Jay's account; Tier B is a label control, D2) |
-| Required checks | `domain`, `api-1`, `api-2`, `api-3`, `web`, `checks`, `gate` |
+| Required checks | `domain`, `api-1`, `api-2`, `api-3`, `web`, `checks`, `gate`, `tier`, `review` |
 | Require branches to be up to date | Off, because main's own CI run gates the release image |
 | Include administrators | On |
 | Force pushes and deletion of `main` | Refused |
@@ -24,7 +24,10 @@ release is a green `main` commit.
 The required checks are the jobs of `.github/workflows/ci.yml` from slices S01 to S04. `checks` carries the size
 check (S01), the migration lint (S04) and the trace check `python3 tools/trace_spec.py --check`; `gate` carries the
 coverage merge and the test-count ratchet (S02, S03). Slice S13 adds the `tier` and `review` checks and automatic
-merge; add them to this list then.
+merge. The `tier` check runs in `checks` from `tools/ci_steps.txt`; the `review` status is set by the separate
+reviewer session only after it has no open findings. Add both status names to branch protection after S13 is merged.
+Tier A auto-merge is allowed only when all required checks, including `tier` and `review`, are green; Tier B waits for
+Jay's `tier-b-ok` label and merge.
 
 Apply, from Jay's terminal with `gh` signed in as the repository owner:
 
@@ -32,12 +35,12 @@ Apply, from Jay's terminal with `gh` signed in as the repository owner:
 repo=jayapatel1511-hub/PM-Tool
 gh api -X PATCH "repos/$repo" \
   -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
-  -F delete_branch_on_merge=true -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY
+  -F delete_branch_on_merge=true -F allow_auto_merge=true -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY
 gh api -X PUT "repos/$repo/branches/main/protection" --input - <<'JSON'
 {
   "required_status_checks": {
     "strict": false,
-    "contexts": ["domain", "api-1", "api-2", "api-3", "web", "checks", "gate"]
+    "contexts": ["domain", "api-1", "api-2", "api-3", "web", "checks", "gate", "tier", "review"]
   },
   "enforce_admins": true,
   "required_pull_request_reviews": { "required_approving_review_count": 0 },
@@ -103,3 +106,11 @@ Use the cheapest step that works, in this order:
 
 A down migration is never run and a database volume is never deleted. The daily dump timers and restore drills stay
 unchanged; see [restore](restore.md).
+
+## Reviewer status and local handoffs
+
+A separate reviewer inspects the actual head diff and checks, resolves every finding and only then sets the
+`review` commit status for that exact PR head. An author summary or a passing test is not a review. The trusted
+Tier A workflow reevaluates on successful CI and on a later successful `review` status; it checks the exact head
+and refuses Tier B paths/labels. No status was set during this local takeover. Jay applies the protection and
+auto-merge settings above; source preparation does not change the repository settings.

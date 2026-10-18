@@ -10,7 +10,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { ApiError } from '@/lib/api'
+import { ApiError, put } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { ago } from '@/lib/format'
 import { t } from '@/lib/i18n'
@@ -128,6 +128,7 @@ export function useDensity(): [Density, (d: Density) => void] {
   const set = (d: Density) => {
     chosenDensity = d
     try { localStorage.setItem(DENSITY_KEY, d) } catch { /* private window: kept for this visit only */ }
+    void put('me/preferences/density', { denseRows: d === 'compact' }).catch(() => {})
     densityListeners.forEach((l) => l())
   }
   return [density, set]

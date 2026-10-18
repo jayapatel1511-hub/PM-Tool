@@ -15,6 +15,7 @@ revision=$(basename "$PWD")
 compose=(sudo env RELEASE_SHA="$revision" docker compose --env-file .runtime/review.env -f hosting/homedev.compose.yml)
 verify_args=(http://127.0.0.1:3080)
 install_timer=0
+install_deploy_timer=0
 for option in "${@:2}"; do
   case "$option" in
     --social-auth)
@@ -23,6 +24,7 @@ for option in "${@:2}"; do
       verify_args+=(--social)
       ;;
     --install-timer) install_timer=1 ;;
+    --install-deploy-timer) install_deploy_timer=1 ;;
     *) echo "Unknown activation option: $option" >&2; exit 1 ;;
   esac
 done
@@ -67,6 +69,47 @@ if [[ "$install_timer" == 1 ]]; then
   latest=$(ls -t data/backups/hub-review-*.dump | head -1)
   log "Restore drill on timer-produced dump $latest"
   bash scripts/restore-homedev-review-drill.sh "$latest"
+fi
+
+if [[ "$install_deploy_timer" == 1 ]]; then
+  # Explicit operator installation only; regular activation remains unchanged.
+  target=/etc/pm-tool-review-deploy
+  sudo test -s "$target/ghcr-token" || { echo 'Install a root-owned read-only GHCR token first (runbook).' >&2; exit 1; }
+  sudo install -d -o root -g root -m 0755 "$target" "$target/hosting" "$target/scripts"
+  sudo install -d -o root -g root -m 0700 "$target/.runtime" "$target/docker"
+  # Keep the registry password on stdin and root-owned, outside release trees.
+  sudo python3 - "$target" <<'REGISTRY_PY'
+import os, pathlib, stat, subprocess, sys
+root = pathlib.Path(sys.argv[1])
+token = root/'ghcr-token'
+info = token.lstat()
+if not stat.S_ISREG(info.st_mode) or info.st_uid != 0 or stat.S_IMODE(info.st_mode) != 0o600:
+    sys.exit('GHCR token must be a root-owned mode-600 regular file')
+result = subprocess.run(['docker', '--config', str(root/'docker'), 'login', 'ghcr.io', '-u', 'jayapatel1511-hub', '--password-stdin'],
+                        input=token.read_bytes(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+if result.returncode:
+    sys.exit('Root GHCR login failed; deploy timer not installed')
+REGISTRY_PY
+  sudo install -o root -g root -m 0644 hosting/homedev.compose.yml "$target/hosting/homedev.compose.yml"
+  sudo install -o root -g root -m 0644 scripts/verify-homedev-review.py "$target/scripts/verify-homedev-review.py"
+  for file in review.env review-login-handoff.json; do
+    sudo install -o root -g root -m 0600 ".runtime/$file" "$target/.runtime/$file"
+  done
+  sudo install -o 1000 -g 1000 -m 0600 .runtime/review-users.json "$target/.runtime/review-users.json"
+  # The existing key ring keeps its container-user ownership; root never executes anything in it.
+  sudo ln -sfn "$(cd .runtime/keys && pwd -P)" "$target/.runtime/keys"
+  if [[ " ${verify_args[*]} " == *" --social "* ]]; then
+    sudo install -o root -g root -m 0644 hosting/social-auth.override.yml "$target/hosting/social-auth.override.yml"
+    sudo install -o root -g root -m 0600 .runtime/social-auth.env "$target/.runtime/social-auth.env"
+  else
+    sudo rm -f "$target/hosting/social-auth.override.yml" "$target/.runtime/social-auth.env"
+  fi
+  sudo install -D -o root -g root -m 0755 hosting/pm-tool-review-deploy-root.sh /usr/local/libexec/pm-tool-review-deploy
+  sudo install -o root -g root -m 0644 hosting/pm-tool-review-deploy.service /etc/systemd/system/pm-tool-review-deploy.service
+  sudo install -o root -g root -m 0644 hosting/pm-tool-review-deploy.timer /etc/systemd/system/pm-tool-review-deploy.timer
+  sudo systemctl daemon-reload
+  sudo systemd-analyze verify /etc/systemd/system/pm-tool-review-deploy.service /etc/systemd/system/pm-tool-review-deploy.timer
+  sudo systemctl enable --now pm-tool-review-deploy.timer
 fi
 
 ln -sfn "releases/$revision" ../../current.new && mv -T ../../current.new ../../current

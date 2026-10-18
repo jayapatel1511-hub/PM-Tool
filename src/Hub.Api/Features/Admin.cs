@@ -111,7 +111,24 @@ public static class AdminEndpoints
                     Failed24h = await db.JobRuns.CountAsync(r => r.JobName == name && r.Status == "Failed" && r.StartedAt >= now.AddHours(-24)),
                 });
             }
-            return new { AsOf = now, Problems = problems, Jobs = jobs, PendingChanges = await db.Outbox.CountAsync(o => o.ProcessedAt == null && o.DeadLetteredAt == null) };
+            var deadLetters = await db.Outbox.AsNoTracking().Where(o => o.ProcessedAt == null && o.DeadLetteredAt != null)
+                .OrderByDescending(o => o.DeadLetteredAt).Take(200).Select(o => new { o.Id, o.EventType,
+                    ProjectNumber = db.Projects.Where(p => p.Id == o.ProjectId).Select(p => p.ProjectNumber).FirstOrDefault(),
+                    o.Attempts, o.LastError, o.CreatedAt, o.DeadLetteredAt }).ToListAsync();
+            var deadLetterCount = await db.Outbox.CountAsync(o => o.ProcessedAt == null && o.DeadLetteredAt != null);
+            return new { AsOf = now, Problems = problems, Jobs = jobs, PendingChanges = await db.Outbox.CountAsync(o => o.ProcessedAt == null && o.DeadLetteredAt == null), DeadLetters = deadLetters, DeadLetterCount = deadLetterCount };
+        });
+
+        g.MapPost("/operations/outbox/retry", async (Guid? id, HubDb db, CurrentUser me, EvaluationSignal signal, ILoggerFactory logs) =>
+        {
+            var q = db.Outbox.Where(o => o.ProcessedAt == null && o.DeadLetteredAt != null);
+            if (id is { } one) q = q.Where(o => o.Id == one);
+            var rows = await q.ToListAsync();
+            foreach (var e in rows) { e.Attempts = 0; e.DeadLetteredAt = null; e.LastError = null; }
+            await db.SaveChangesAsync();
+            signal.Poke();
+            logs.CreateLogger("Hub.Operations").LogInformation("Admin {UserId} retried {Count} dead-lettered outbox events", me.Id, rows.Count);
+            return Results.Ok(new { retried = rows.Count });
         });
 
         // ---------- Users and roles (FR-004, FR-016, FR-017, FR-027, E-26) ----------

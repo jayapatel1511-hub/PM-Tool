@@ -1,10 +1,10 @@
 # Verification: Route Splitting and Live Updates
 
-In progress. S04 is checked locally; other slices are not yet run.
+In progress. S01 and S04 are checked locally; other slices are not yet run.
 
 | AC | Where it is checked | Status |
 |---|---|---|
-| AC-LIVE-01 | `BuildStampTests` (S01) | UNRUN |
+| AC-LIVE-01 | `BuildStampTests` (S01) | PARTIAL: in-process only; a real image built with `RELEASE_SHA` not checked (needs Docker or homedev) |
 | AC-LIVE-02 | `web/tests/build-stamp.cjs` (S02) | UNRUN |
 | AC-LIVE-03 | `scripts/test_verify_homedev_review.py`, `tools/test_pilot_operations.py` (S03) | UNRUN |
 | AC-LIVE-04 | `web/tests/registrations.cjs` (S05, re-run in S07) | UNRUN |
@@ -23,6 +23,14 @@ In progress. S04 is checked locally; other slices are not yet run.
 | AC-LIVE-17 | `scripts/check-live-stream.py` on the review origin (after S12; needs an authorised activation) | UNRUN |
 | AC-LIVE-18 | `web/tests/live-refresh.cjs` (S08), `web/tests/live-events.cjs` (S11, S13) | UNRUN |
 | AC-LIVE-19 | `LiveFeedTests` (S09) | UNRUN |
+
+## Build 042-S01
+
+- Merged into `claude/build-039-050` (slice commit 0dcf17a0). `hosting/Dockerfile.review` takes `RELEASE_SHA` (default `dev`), exposed as `VITE_HUB_BUILD` in the web stage and `HUB_BUILD` at runtime; both compose files pass `RELEASE_SHA: ${RELEASE_SHA:-dev}`. `SecurityHeaders` in `src/Hub.Api/Infrastructure/Http.cs` adds `X-Hub-Build` to every response; `/health` returns `build` beside `status` with `Cache-Control: no-store` (FR-LIVE-01, FR-LIVE-02).
+- AC-LIVE-01 PARTIAL: `BuildStampTests` checks the header on an API call, a static file, a 404 and `/health`, and the `/health` body and `no-store`, for `dev` (unset) and a configured 40-character SHA. The hosted half (a real image built with `RELEASE_SHA=<sha>`) was not run.
+- Checks on the merged tree: `dotnet build Hub.slnx` 0 errors; `BuildStampTests`, `StaticCacheTests`, `FoundationsTests`, `OperationsTests`, `DeploymentConformanceTests` 34/34 passed; `tools/test_backup_helpers.py`, `tools/test_pilot_pitr.py`, `tools/test_pilot_operations.py` OK. No web change, so npm build, lint and browser suites were not run.
+- Assumptions: 039-D15 default (RELEASE_SHA becomes HUB_BUILD; this slice owns the argument and compose wiring). No flag, Tier B, as the packet says. A review build without a SHA reports `dev`; the pilot file already refuses to start without `RELEASE_SHA`. The pilot migrate service reuses the api image tag, so only services that build an image got the argument.
+- Left for Jay: refresh the root-owned compose copies on homedev before the §43 review timer deploys again (FR-DLV-18); then check a real image built with `RELEASE_SHA=<sha>` (`/health` returns that build and `X-Hub-Build` matches). The §43 CI image must pass the commit it builds as `RELEASE_SHA`.
 
 ## Build 042-S04
 

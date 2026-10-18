@@ -28,6 +28,8 @@ services:
     build:
       context: ..
       dockerfile: hosting/Dockerfile.review
+      args:
+        RELEASE_SHA: ${RELEASE_SHA:-dev}
     user: "1000:1000"
     restart: unless-stopped
     mem_limit: 1g

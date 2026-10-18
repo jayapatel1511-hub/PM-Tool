@@ -311,4 +311,22 @@ public sealed class PermissionSweepTests
         foreach (var x in People)
             Assert.True(Permissions.ManageSavedProjectView(x.Actor, Ctx(x, ProjectStatus.Active)).Ok == With("dl", "dlOther").Contains(x.Name), x.Name);
     }
+
+    [Fact]
+    public void Open_role_changes_follow_the_owner_rule() // AC-FIG-09, FR-FIG-10
+    {
+        var creator = Ids["dl"];
+        foreach (var x in People)
+        {
+            var allow = Permissions.ManageOpenRole(x.Actor, Ctx(x, ProjectStatus.Active), creator);
+            var proposal = Permissions.ProposeAllocation(x.Actor, Ctx(x, ProjectStatus.Active));
+            Assert.True(allow.Ok == With("dl").Contains(x.Name), x.Name);
+            // The proposal refusal comes first, then perm.owner.
+            Assert.Equal(proposal.Ok ? (x.Name == "dlOther" ? "perm.owner" : null) : proposal.Why, allow.Why);
+            Assert.False(Permissions.ManageOpenRole(x.Actor, Ctx(x, ProjectStatus.Archived), creator).Ok, x.Name);
+            Assert.True(Permissions.ManageOpenRole(x.Actor, Ctx(x, ProjectStatus.Complete), creator).Ok == Pms.Contains(x.Name), x.Name);
+        }
+        Assert.Equal("perm.pm_or_dl", Permissions.ManageOpenRole(People.Single(x => x.Name == "tm").Actor, Ctx(People.Single(x => x.Name == "tm"), ProjectStatus.Active), creator).Why);
+        Assert.Equal("perm.owner", Permissions.ManageOpenRole(People.Single(x => x.Name == "dl").Actor, Ctx(People.Single(x => x.Name == "dl"), ProjectStatus.Active), Ids["pm"]).Why);
+    }
 }

@@ -29,7 +29,7 @@ public static class Coordination
                 if (prior.PayloadHash != hash) throw ApiException.Rule("idempotency_key_reused", "error.idempotency_reused");
                 return new Result(prior.ResultId, prior.ResultVersion);
             }
-            if (p.Status == ProjectStatus.Complete) {
+            if (ProjectStatus.NeedsCorrectionReason(p.Status)) {
                 var body = JsonSerializer.SerializeToElement(payload, JsonOpts.Web).GetProperty("body");
                 var reason = new[] { "reason", "rationale", "description" }.Select(k => body.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
                 Check.Reason(reason);

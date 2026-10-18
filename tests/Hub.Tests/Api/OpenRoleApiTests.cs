@@ -4,6 +4,7 @@ using Hub.Api.Data;
 using Hub.Api.Features;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Hub.Tests.Api;
 
@@ -135,6 +136,16 @@ public sealed class OpenRoleApiTests(HubFactory f)
         await (await f.As(TestData.Pm).Post(path + "/cancel", new { rowVersion = edited.I("rowVersion"), reason = "Never staffed" })).Json();
         var history = f.Db(db => db.ActivityLog.Where(a => a.ItemId == added.G("id") || a.ItemId == role.G("id")).Select(a => a.Reason).ToList());
         Assert.Equal(["Hours were booked late", "Missed at close-out", "Never staffed"], history.OfType<string>().Order());
+    }
+
+    [Fact]
+    public async Task Reference_returns_the_role_label_limit() // AC-FIG-11, FR-FIG-12
+    {
+        var reference = await (await f.As(TestData.Pm).GetAsync("/api/v1/reference")).Json();
+        Assert.Equal(80, reference["limits"]!.I("roleLabel"));
+        Assert.Equal(OpenRoleLimits.Label, reference["limits"]!.I("roleLabel"));
+        var check = f.Db(db => db.GetService<Microsoft.EntityFrameworkCore.Metadata.IDesignTimeModel>().Model.FindEntityType(typeof(OpenRole))!.GetCheckConstraints().Single(c => c.Name == "ck_open_role_label").Sql);
+        Assert.Equal("char_length(btrim(role_label)) BETWEEN 1 AND 80", check);
     }
 
     [Fact]

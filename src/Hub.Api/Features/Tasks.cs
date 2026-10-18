@@ -221,7 +221,7 @@ public static class TaskEndpoints
                 Restore = Permissions.RestoreItem(a, ctx).Ok, Comment = Permissions.Comment(a, ctx).Ok,
                 Transitions = transitions, CompleteHint = notAllowedComplete, IsReviewer = t.ReviewerId == a.Id,
                 Dependencies = Permissions.ManageDependency(a, ctx, facts, facts).Ok, EnterTime = Permissions.EnterTime(a, ctx).Ok,
-                NeedsReason = p.Status == ProjectStatus.Complete, AllowSelfReview = s.AllowSelfReview,
+                NeedsReason = ProjectStatus.NeedsCorrectionReason(p.Status), AllowSelfReview = s.AllowSelfReview,
                 AuthoriseStart = t.Status == TaskStatuses.NotStarted && Permissions.ManageCoordination(a, ctx, t.ProjectDisciplineId).Ok,
             },
         };

@@ -1637,6 +1637,7 @@ export const en: Record<string, string> = {
   'dep.lagN': 'lag {n}d', 'dep.notePlaceholder': 'e.g. Client review period',
   // 036 staffing UI: open roles, link types, capacity grouping, picker capacity, and one signal per row (packet 037 T011).
   'people.free': '{h} free', 'people.away': '{h} away', 'people.overBy': '{h} over',
+  'people.freeBasis': 'Remaining capacity in the Weekly Planner: capacity − Confirmed − Expected', // §45.3, flag.figure_names
   'signal.more': '{n} more: {list}', 'signal.withWeek': '{label} · {week}',
   'ind.finishedBeforePredecessor': 'Finished before predecessor',
   'dep.type': 'Link type', 'dep.type.FinishToStart': 'Finish-to-Start', 'dep.type.StartToStart': 'Start-to-Start', 'dep.type.FinishToFinish': 'Finish-to-Finish',
@@ -1845,6 +1846,10 @@ export const en: Record<string, string> = {
   'workload.method2': 'Those hours are spread evenly over the working days (Monday to Friday) from the later of its start date and today to its due date.',
   'workload.method3': 'Overdue work counts entirely in this week. Work without a due date is shown separately and not spread.',
   'workload.method4': 'Tasks without an estimate add no hours; their count is shown beside the hours so the numbers are not over-read.',
+  // §45.3 (flag.figure_names): the Workload figure's name and basis line, and the Method step that names it.
+  'workload.method5Named': 'Committed load counts the larger of each confirmed reservation and its linked remaining work, plus unlinked remaining work. Uncommitted is available capacity minus committed load. Proposed requests stay separate. A partial project view never claims spare capacity.',
+  'workload.uncommitted': 'Uncommitted {h}',
+  'workload.uncommittedBasis': 'Uncommitted = available − committed load (confirmed reservations and forecast task work). Planning entries are not counted.',
   'workload.method5': 'Committed load counts the larger of each confirmed reservation and its linked remaining work, plus unlinked remaining work. Proposed requests stay separate. A partial project view never claims spare capacity.',
   // Time (packet 024)
   'time.subtitle': 'Hours you worked on tasks. Actual hours are kept apart from estimates, progress and workload.', 'time.report': 'Task Hours report',

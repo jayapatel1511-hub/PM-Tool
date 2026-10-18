@@ -223,6 +223,47 @@ public sealed class WorkloadApiTests(HubFactory f)
         Assert.True(restored["overAssigned"]!.GetValue<bool>());
     }
 
+    [Fact, Trait("flag-off", "figure_names")]
+    public async Task Uncommitted_is_computed_on_the_server() // packet 041 AC-FIG-03
+    {
+        var p = await d.Project();
+        var person = await Report();
+        await d.NewTask(p.Id, TestData.Pm, new { assigneeId = person.Id, estimatedHours = 28, startDate = "2026-09-14", dueDate = "2026-09-18" });
+        foreach (var (hours, confidence) in new[] { (10m, PlanningConfidence.Confirmed), (6m, PlanningConfidence.Expected) })
+            await (await f.As(TestData.Sam).Post("/api/v1/planning/entries", new { personId = person.Id, hoursPerWeek = hours, startWeek = "2026-09-14",
+                endWeek = "2026-09-14", label = "Figure basis", sourceCategory = PlanningSource.Proposal, confidence })).Json(201);
+        decimal? Uncommitted(JsonNode grid) => Person(grid, person.Id)["cells"]![0]!["uncommitted"]?.GetValue<decimal>();
+
+        // Planning entries do not count: 40 − 28 = 12, while the Weekly Planner's remaining capacity is 40 − 10 − 6 = 24 (AC-PLN-11).
+        Assert.Equal(12, Uncommitted(await f.As(TestData.Admin).GetAsync("/api/v1/workload").Result.Json())); // Admin sees every project
+        var planner = await f.As(TestData.Sam).GetAsync($"/api/v1/planning/grid?personIds={person.Id}&from=2026-09-14&weeks=1").Result.Json();
+        Assert.Equal(24, planner["people"]![0]!["cells"]![0]!["remaining"]!.GetValue<decimal>());
+
+        // Sam cannot see every Restricted project, so his rows are partial: spare capacity is withheld, an overload is not.
+        var partial = await f.As(TestData.Sam).GetAsync("/api/v1/workload").Result.Json();
+        Assert.True(Person(partial, person.Id)["partialScope"]!.GetValue<bool>());
+        Assert.Null(Uncommitted(partial));
+        await d.NewTask(p.Id, TestData.Pm, new { assigneeId = person.Id, estimatedHours = 15, startDate = "2026-09-14", dueDate = "2026-09-18" });
+        Assert.Equal(-3, Uncommitted(await f.As(TestData.Sam).GetAsync("/api/v1/workload").Result.Json()));
+    }
+
+    [Fact, Trait("flag-on", "figure_names")]
+    public async Task Figure_names_flag_changes_no_workload_value() // packet 041 AC-FIG-03, FR-FIG-04: only labels change
+    {
+        var person = await Report();
+        await d.NewTask((await d.Project()).Id, TestData.Pm, new { assigneeId = person.Id, estimatedHours = 28, startDate = "2026-09-14", dueDate = "2026-09-18" });
+        async Task<string> Row() => Person(await f.As(TestData.Sam).GetAsync("/api/v1/workload").Result.Json(), person.Id).ToJsonString();
+        var off = await Row();
+        var admin = f.As(TestData.Admin);
+        try
+        {
+            await admin.Put("/api/v1/admin/settings/flag.figure_names", new { value = true }).Result.Json();
+            Assert.True((await f.As(TestData.Sam).GetAsync("/api/v1/me").Result.Json())["flags"]!["figure_names"]!.GetValue<bool>());
+            Assert.Equal(off, await Row());
+        }
+        finally { await admin.Put("/api/v1/admin/settings/flag.figure_names", new { value = false }).Result.Json(); }
+    }
+
     [Fact]
     public async Task Workload_threshold_changes_are_audited_and_validated() // packet 041 AC-FIG-06
     {

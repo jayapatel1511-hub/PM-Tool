@@ -116,6 +116,17 @@ public sealed class WorkloadTests
     }
 
     [Fact]
+    public void Uncommitted_never_claims_spare_capacity_for_a_partial_row() // AC-FIG-03
+    {
+        Assert.Equal(12, Workload.Uncommitted(40, 28, partial: false));
+        Assert.Equal(0, Workload.Uncommitted(40, 40, partial: false));
+        Assert.Null(Workload.Uncommitted(40, 28, partial: true));
+        Assert.Null(Workload.Uncommitted(40, 40, partial: true));
+        Assert.Equal(-3, Workload.Uncommitted(40, 43, partial: true));
+        Assert.Equal(-3, Workload.Uncommitted(40, 43, partial: false));
+    }
+
+    [Fact]
     public void Deadline_clusters_need_three_tasks_across_two_projects_within_three_days() // FR-004, US2 scenario 3
     {
         Assert.True(Workload.DeadlineCluster([(Monday.AddDays(3), P1), (Monday.AddDays(4), P1), (Monday.AddDays(5), P2)], Monday));

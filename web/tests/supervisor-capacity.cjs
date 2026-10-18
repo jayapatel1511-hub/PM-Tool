@@ -45,6 +45,7 @@ const prefs = holdDigestWhenAway => ({
   let people = initialPeople
   let workload = true
   let digestHold = true
+  let figureNames = false
   const personalNotification = { id: id(80), eventType: 'TaskAssigned', title: 'Review the harbour task', body: 'A task needs your attention', count: 1, createdAt: '2027-01-03T09:00:00Z', updatedAt: '2027-01-03T09:00:00Z', readAt: null }
   const feedItem = (n) => ({ entry: { id: id(90 + n), occurredAt: '2027-01-03T09:00:00Z', actorId: supervisor, actorName: 'Sam Supervisor', actorType: 'User', projectId: id(70), itemType: 'Task', itemId: id(71), itemKey: `P-DEMO-T${String(n).padStart(4, '0')}`, itemName: n === 201 ? 'Beyond first page' : `Feed item ${n}`, action: 'Updated', categories: [], changes: [], summary: '', source: 'Activity', ...(n === 1 || n === 201 ? { correlationId: 'corr-1' } : {}) }, count: 1, projectNumber: 'P-DEMO', projectName: 'Synthetic followed project', notified: false, unread: true })
   try {
@@ -59,7 +60,7 @@ const prefs = holdDigestWhenAway => ({
       const endpoint = url.pathname.replace('/api/v1/', '')
       let status = 200, data = {}
       if (endpoint === 'config') data = { authMode: 'Development', entra: {} }
-      else if (endpoint === 'me') data = { ...me, capabilities: { ...me.capabilities, workload } }
+      else if (endpoint === 'me') data = { ...me, capabilities: { ...me.capabilities, workload }, flags: { figure_names: figureNames } }
       else if (endpoint === 'me/sign-in') data = {}
       else if (endpoint === 'me/notifications/pulse') data = { stamp: '0' }
       else if (endpoint === 'me/notifications/unread-count') data = { notifications: 1, following: 1 }
@@ -102,6 +103,22 @@ const prefs = holdDigestWhenAway => ({
     assert.equal(await partialRow.locator('[data-capacity] span.sr-only').count(), 1)
     const missingRow = page.getByRole('row').filter({ hasText: 'Out of Scope Engineer' }).first()
     assert.equal(await missingRow.locator('[data-capacity]').count(), 0)
+    // flag.figure_names off: the free figure has today's bare text, no tooltip and no description.
+    const freeFigure = freeRow.locator('[data-capacity]')
+    assert.equal(await freeFigure.getAttribute('title'), null); assert.equal(await freeFigure.getAttribute('aria-describedby'), null)
+
+    // AC-FIG-04 (flag on): the free figure's tooltip and accessible description are the remaining-capacity basis; Partial view keeps its own.
+    figureNames = true; await page.reload(); await page.getByRole('columnheader', { name: 'This week' }).waitFor()
+    const basis = 'Remaining capacity in the Weekly Planner: capacity − Confirmed − Expected'
+    assert.match(await freeFigure.innerText(), /12 h free · 8 h away/)
+    assert.equal(await freeFigure.getAttribute('title'), basis)
+    assert.equal(await page.locator(`[id="${await freeFigure.getAttribute('aria-describedby')}"]`).textContent(), basis)
+    assert.match(await partialFigure.innerText(), /^Partial view/)
+    assert.notEqual(await partialFigure.getAttribute('title'), basis)
+    await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') })
+    const flagOnViolations = await page.evaluate(async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] } })).violations.map(v => v.id))
+    assert.deepEqual(flagOnViolations, [], `Accessibility violations with flag.figure_names on: ${flagOnViolations.join(', ')}`)
+    figureNames = false
 
     // The shared hook batches 120 people into three requests, each within the server's 50-person limit.
     people = Array.from({ length: 120 }, (_, i) => staffRow(id(100 + i), `Person ${i + 1}`))

@@ -204,6 +204,35 @@ public sealed class PlanningApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Every_free_hours_reader_marks_hidden_confirmed_work_partial() // packet 041 AC-FIG-02, FR-FIG-02
+    {
+        var person = await FreshReport();
+        var project = await d.Project();
+        await f.DbAsync(async db => { (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted; db.Allocations.Add(new() { PersonId = person, ProjectId = project.Id,
+            Purpose = AllocationPurpose.Production, FromDate = Week, ThroughDate = Week.AddDays(4), PlannedHours = 20, Status = AllocationStatus.Confirmed }); return await db.SaveChangesAsync(); });
+        // The Planner grid, the picker's batch read and My Staff (the same batch read) all go through the planning grid.
+        var readers = new[] { $"/api/v1/planning/grid?supervisorId={d.User(TestData.Sam)}&from={Week:yyyy-MM-dd}&weeks=2", $"/api/v1/planning/grid?personIds={person}&from={Week:yyyy-MM-dd}&weeks=1" };
+        const string workload = "/api/v1/workload?from=2026-09-14&to=2026-09-20";
+        JsonNode Row(JsonNode body) => body["people"]!.AsArray().Single(p => p!.G("id") == person)!;
+        foreach (var route in readers)
+        {
+            var sam = await (await f.As(TestData.Sam).GetAsync(route)).Json();
+            Assert.True(Row(sam)["partial"]!.GetValue<bool>(), route);
+            Assert.Equal(40m, Row(sam)["cells"]![0]!["remaining"]!.GetValue<decimal>()); // the value is unchanged; the flag says it is an upper bound
+            Assert.Empty(Row(sam)["approvedAllocations"]!.AsArray());
+            Assert.DoesNotContain(project.Id.ToString(), sam.ToJsonString()); Assert.DoesNotContain(project.ProjectNumber, sam.ToJsonString());
+            var admin = await (await f.As(TestData.Admin).GetAsync(route)).Json();
+            Assert.Equal((false, 20m), (Row(admin)["partial"]!.GetValue<bool>(), Row(admin)["cells"]![0]!["remaining"]!.GetValue<decimal>()));
+        }
+        var samLoad = await (await f.As(TestData.Sam).GetAsync(workload)).Json();
+        Assert.True(Row(samLoad)["partialScope"]!.GetValue<bool>());
+        Assert.Null(Row(samLoad)["cells"]![0]!["uncommitted"]?.GetValue<decimal>()); // partial and not negative
+        Assert.DoesNotContain(project.ProjectNumber, Row(samLoad).ToJsonString());
+        var adminLoad = Row(await (await f.As(TestData.Admin).GetAsync(workload)).Json());
+        Assert.Equal((false, 20m), (adminLoad["partialScope"]!.GetValue<bool>(), adminLoad["cells"]![0]!["uncommitted"]!.GetValue<decimal>()));
+    }
+
+    [Fact]
     public async Task Person_ids_are_limited_scoped_for_project_managers_and_rows_carry_person_fields() // packet 036 AC-PICK-02b, -03c, FR-GRP-02
     {
         var root = $"/api/v1/planning/grid?from={Week:yyyy-MM-dd}&weeks=1&personIds=";

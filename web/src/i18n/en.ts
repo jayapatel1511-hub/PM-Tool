@@ -2197,6 +2197,7 @@ export const en: Record<string, string> = {
   'planner.indicator.stale': 'Stale plan',
   'planner.partialTitle': 'Partial view',
   'planner.partialHint': 'Some project records are outside your scope, so spare capacity is not shown as available.',
+  'planner.atMost': 'at most {hours}', // §45.2 (flag.figure_names): a partial person's remaining capacity is an upper bound
   'planner.searchPlaceholder': 'Search labels or notes',
   'planner.anyPerson': 'Any person',
   'planner.anySource': 'Any source',

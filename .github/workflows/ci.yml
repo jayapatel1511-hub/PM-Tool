@@ -84,3 +84,18 @@ jobs:
       - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with: { name: test-counts, path: ci-artifacts/test-counts.json }
+
+  # The specification report (§43.9, FR-DLV-22): every main run publishes it; it is not committed.
+  report:
+    needs: [domain, api, web, checks]
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/download-artifact@v4
+        with: { pattern: ci-artifacts-*, path: ci-artifacts-in }
+      - run: python3 tools/ci_tests.py steps report
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: spec-report, path: ci-artifacts/spec-report.md }

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json.Nodes;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -130,5 +131,110 @@ public sealed class CountLinkTests(HubFactory f)
         Assert.Equal(row.I("taskComplete"), await Tasks("&status=Complete"));
         Assert.Equal(row.I("taskOverdue"), await Tasks("&overdue=true"));
         Assert.Equal(row.I("taskBlocked"), await Tasks("&blocked=true"));
+    }
+
+    // ---------- Part D (§49.5, §49.6), behind `flag.status_rollups` ----------
+
+    async Task Rollups(bool on) => await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.status_rollups", new { value = on }).Result.Json();
+
+    async Task WithRollups(Func<Task> body)
+    {
+        await Rollups(true);
+        try { await body(); } finally { await Rollups(false); }
+    }
+
+    [Fact, Trait("flag-on", "status_rollups"), Trait("flag-off", "status_rollups")]
+    [Trait("Spec", "AC-RCV-18")]
+    public async Task Status_segments_equal_their_filtered_registers_and_leave_out_Cancelled()
+    {
+        var p = await d.Project();
+        foreach (var (status, n) in new[] { (DeliverableStatus.NotStarted, 2), (DeliverableStatus.InProgress, 2), (DeliverableStatus.InReview, 1), (DeliverableStatus.Issued, 3),
+                     (DeliverableStatus.Accepted, 1), (DeliverableStatus.OnHold, 1), (DeliverableStatus.Cancelled, 1) })
+            for (var i = 0; i < n; i++) await SetStatus(await Deliverable(p.Id, "Civil", new { }), status);
+        await Deliverable(p.Id, "Electrical", new { });
+        await f.Evaluate(p.Id);
+        var civil = d.ProjectDiscipline(p.Id, "Civil").ToString();
+
+        // Flag off: the field is absent, so the response is today's (FR-DLV-08).
+        Assert.Null((await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/dashboard").Result.Json())["disciplineStatus"]);
+
+        await WithRollups(async () =>
+        {
+            foreach (var who in new[] { TestData.Pm, TestData.Marc, TestData.Sam })
+                foreach (var scope in new[] { "", $"?disciplineId={civil}" })
+                {
+                    var c = f.As(who);
+                    var dash = await c.GetAsync($"/api/v1/projects/{p.Id}/dashboard{scope}").Result.Json();
+                    foreach (var row in dash["disciplines"]!.AsArray())
+                        foreach (var seg in dash["disciplineStatus"]![row!.S("disciplineId")]!.AsObject())
+                        {
+                            Assert.Contains($"disciplineId={row.S("disciplineId")}", seg.Value!.S("link"));
+                            var rows = (await c.GetAsync($"/api/v1/projects/{p.Id}/deliverables?{seg.Value.S("link")}").Result.Json()).AsArray();
+                            Assert.True(seg.Value.I("value") == rows.Count, $"{who}{scope} {seg.Key}: {seg.Value.I("value")} vs {rows.Count}");
+                        }
+                }
+            var s = (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/dashboard").Result.Json())["disciplineStatus"]![civil]!;
+            // 2 Not Started, 3 In Progress or In Review, 4 Issued or Accepted, 1 On Hold; the Cancelled one is in no segment: "4 of 10 issued".
+            Assert.Equal((2, 3, 4, 1), (s["notStarted"]!.I("value"), s["inProgress"]!.I("value"), s["issued"]!.I("value"), s["onHold"]!.I("value")));
+            Assert.Equal(["notStarted", "inProgress", "issued", "onHold"], s.AsObject().Select(x => x.Key));
+        });
+    }
+
+    [Fact, Trait("flag-on", "status_rollups"), Trait("flag-off", "status_rollups")]
+    [Trait("Spec", "AC-RCV-20")]
+    public async Task Overdue_deliverables_counts_overdue_not_at_risk()
+    {
+        var p = await d.Project();
+        string In(int days) => Today.AddDays(days).ToString("yyyy-MM-dd");
+        for (var i = 0; i < 3; i++) await Deliverable(p.Id, "Civil", new { dueDate = In(-2 - i) });
+        await SetStatus(await Deliverable(p.Id, "Civil", new { dueDate = In(-4) }), DeliverableStatus.Issued); // terminal: never overdue
+        var atRisk = new[] { await Deliverable(p.Id, "Civil", new { dueDate = In(5) }), await Deliverable(p.Id, "Electrical", new { dueDate = In(6) }) };
+        await f.Evaluate(p.Id);
+        var ids = atRisk.Select(x => x.G("id")).ToList();
+        await f.DbAsync(db => db.DeliverableStates.Where(x => ids.Contains(x.DeliverableId)).ExecuteUpdateAsync(x => x.SetProperty(y => y.IsAtRisk, true)));
+
+        var lena = f.As(TestData.Lena);
+        Assert.Null((await lena.GetAsync($"/api/v1/portfolio?ids={p.Id}").Result.Json())["projects"]![0]!["overdueDeliverables"]); // flag off: today's row
+
+        await WithRollups(async () =>
+        {
+            var row = (await lena.GetAsync($"/api/v1/portfolio?ids={p.Id}").Result.Json())["projects"]!.AsArray().Single()!;
+            Assert.Equal(3, row.I("overdueDeliverables"));
+            Assert.Equal(3, (await lena.GetAsync($"/api/v1/projects/{p.Id}/deliverables?indicator=overdue").Result.Json()).AsArray().Count);
+            // The At Risk list also holds the two that are not overdue, so the figure is not the At Risk count (D12).
+            var risky = (await lena.GetAsync($"/api/v1/projects/{p.Id}/deliverables?indicator=atRisk").Result.Json()).AsArray().Select(x => x!.G("id")).ToList();
+            Assert.Superset(ids.ToHashSet(), risky.ToHashSet());
+            Assert.NotEqual(row.I("overdueDeliverables"), risky.Count);
+        });
+    }
+
+    [Fact, Trait("flag-on", "status_rollups")]
+    [Trait("Spec", "AC-RCV-21")]
+    public async Task Rollups_ignore_projects_the_viewer_cannot_see()
+    {
+        await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true }).Result.Json();
+        try
+        {
+            var open = await d.Project();
+            var hidden = await d.Project();
+            foreach (var p in new[] { open, hidden })
+            {
+                await Deliverable(p.Id, "Civil", new { dueDate = Today.AddDays(-3).ToString("yyyy-MM-dd") });
+                await f.Evaluate(p.Id);
+            }
+            (await f.As(TestData.Pm).Patch($"/api/v1/projects/{hidden.Id}", new { visibility = Visibility.Restricted }, d.Version(hidden.Id))).EnsureSuccessStatusCode();
+            await WithRollups(async () =>
+            {
+                // Sam supervises but is not on the Restricted project: no row, no figure and no dashboard from it.
+                var rows = (await f.As(TestData.Sam).GetAsync($"/api/v1/portfolio?ids={open.Id},{hidden.Id}").Result.Json())["projects"]!.AsArray();
+                Assert.Equal([open.Id], rows.Select(r => r!.G("id")));
+                Assert.Equal(1, rows[0]!.I("overdueDeliverables"));
+                Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Sam).GetAsync($"/api/v1/projects/{hidden.Id}/dashboard")).StatusCode);
+                // An Executive sees both, each counting only its own deliverables.
+                var all = (await f.As(TestData.Lena).GetAsync($"/api/v1/portfolio?ids={open.Id},{hidden.Id}").Result.Json())["projects"]!.AsArray();
+                Assert.Equal([1, 1], all.Select(r => r!.I("overdueDeliverables")));
+            });
+        }
+        finally { await f.As(TestData.Admin).Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = false }).Result.Json(); }
     }
 }

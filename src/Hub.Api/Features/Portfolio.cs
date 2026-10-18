@@ -61,7 +61,14 @@ public static class PortfolioEndpoints
         var ownOnly = f.Mine ?? (a.SystemPM && !(a.Admin || a.Executive || a.Supervisor));
         var rows = JsonSerializer.SerializeToNode(await ProjectEndpoints.Sorted(f with { Mine = ownOnly, Sort = f.Sort ?? "submission" }, access, db, me, store, clock), JsonOpts.Web)!.AsArray();
         var ids = rows.Select(r => Guid.Parse(r!["id"]!.GetValue<string>())).ToList();
-        var today = clock.Today(await store.Get(db));
+        var s = await store.Get(db);
+        var today = clock.Today(s);
+        // FR-RCV-16: overdue deliverables per row, counted by the deliverable list's `indicator=overdue` predicate, only while
+        // `flag.status_rollups` is on. Rows are already the projects this viewer may see (AC-RCV-21).
+        var overdue = s.IsFlagOn(DashboardEndpoints.RollupsFlag)
+            ? await DeliverableEndpoints.Filter(db, db.Deliverables.AsNoTracking().Where(x => ids.Contains(x.ProjectId)), indicator: "overdue")
+                .GroupBy(x => x.ProjectId).Select(g => new { g.Key, Count = g.Count() }).ToDictionaryAsync(x => x.Key, x => x.Count)
+            : null;
         var since = today.AddDays(-7 * 8 + 1);
         var snaps = (await db.HealthSnapshots.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && x.SnapshotDate >= since)
             .Select(x => new { x.ProjectId, x.SnapshotDate, x.ComputedHealth, x.ReportedHealth }).ToListAsync()).ToLookup(x => x.ProjectId);
@@ -75,6 +82,7 @@ public static class PortfolioEndpoints
                 var snap = mine.Where(x => x.SnapshotDate > end.AddDays(-7) && x.SnapshotDate <= end).MaxBy(x => x.SnapshotDate);
                 return (JsonNode)new JsonObject { ["weekEnding"] = end.ToString("yyyy-MM-dd"), ["computed"] = snap?.ComputedHealth, ["reported"] = snap?.ReportedHealth };
             })]);
+            if (overdue is not null) r["overdueDeliverables"] = overdue.GetValueOrDefault(Guid.Parse(r["id"]!.GetValue<string>()));
             r["why"] = string.Join("; ", (r["healthReasons"] as JsonArray ?? []).Select(x => x?["text"]?.GetValue<string>()).OfType<string>());
         }
         return (rows, ownOnly);

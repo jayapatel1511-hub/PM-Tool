@@ -11,6 +11,7 @@ public static class Flags
     [
         new("figure_names", "041"), // §45.2 and §45.3: the Uncommitted name, the basis lines, the Partial view row label and "at most"
         new("show_deleted", "045"), // §49.2: the deleted-items list, export and deliverable/milestone restore
+        new("status_rollups", "045"), // §49.5 and §49.6: discipline status segments and the Portfolio overdue deliverables count
     ];
 
     /// `flag.<name>` as a Bool setting, default off, group `flags`, generated like `rule_enabled.*`.

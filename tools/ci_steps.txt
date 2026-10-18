@@ -1,0 +1,38 @@
+# CI steps (§43.5, FR-DLV-11), run by `python3 tools/ci_tests.py steps <job>` from the repository root.
+# One step per line: `<job>[,<job>...]: <command>`. Add ` [always]` after the job names to run a step
+# after an earlier one failed. Each job uploads what its steps write under ci-artifacts/.
+# A new browser suite or check adds a line here; services and permissions stay in .github/workflows/ci.yml.
+
+# Backend build, shared by the test jobs.
+domain,api-1,api-2,api-3,checks: dotnet restore Hub.slnx
+domain,api-1,api-2,api-3: dotnet build Hub.slnx --no-restore -c Release
+
+# Tests with coverage (rules engine ≥ 95 % branches, services ≥ 70 %); `gate` merges the shards' files.
+domain: dotnet test Hub.slnx --no-build -c Release --filter "FullyQualifiedName~Hub.Tests.Domain." --collect:"XPlat Code Coverage" --results-directory ci-artifacts/coverage
+api-1,api-2,api-3: dotnet test Hub.slnx --no-build -c Release --filter "$(python3 tools/ci_tests.py shard "$CI_JOB")" --collect:"XPlat Code Coverage" --results-directory ci-artifacts/coverage
+gate: python3 tools/coverage_gate.py ci-artifacts-in
+
+# Python safety regressions and repository checks.
+checks: python3 tools/test_ci_tests.py && python3 tools/test_coverage_gate.py
+checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/test_pr_checks.py && python3 tools/pr_checks.py size --base HEAD^1 --labels "${LABELS:-}"; fi
+checks: python3 tools/test_backup_helpers.py && python3 tools/test_pilot_initializer.py && python3 tools/test_pilot_operations.py && python3 tools/test_pilot_pitr.py
+checks: python3 -m unittest tools.test_social_activation
+checks: python3 -m unittest tools/preview/test_fixture_api.py tools/preview/test_refresh_fixture_copy.py tools/preview/test_seed_resources.py tools/preview/test_seed_staffing.py scripts/test_extend_review_credentials.py scripts/test_seed_homedev_tuesday_review.py -v
+checks: mkdir -p ci-artifacts && dotnet list Hub.slnx package --vulnerable --include-transitive | tee ci-artifacts/vuln.txt && ! grep -q "Critical" ci-artifacts/vuln.txt
+checks: python3 tools/trace_spec.py --check
+
+# Web: build, lint (with accessibility rules, §22), mocked-API browser suites, renderer regressions, audit.
+web: cd web && npm ci
+web: cd web && npm run build
+web: cd web && npm run lint
+web: cd web && npx playwright install --with-deps chromium --only-shell
+web: cd web && npm run test:handoffs
+web: cd web && npm run test:sign-in
+web: cd web && npm run test:coordination
+web: cd web && npm run test:design-basis
+web: cd web && npm run test:planner
+web: cd web && npm run test:resources
+web: cd web && npm run test:supervisor-capacity
+web: cd web && npm run test:ui-review
+web: cd web && npm audit --audit-level=critical --omit=dev
+web [always]: mkdir -p ci-artifacts && if [ -d web/test-results ]; then cp -R web/test-results ci-artifacts/browser-evidence; fi

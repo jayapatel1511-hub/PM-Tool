@@ -4,8 +4,8 @@ Slice S01 merged into claude/build-039-050; other slices not started.
 
 | AC ID | Slice | Status |
 |---|---|---|
-| AC-FIG-01 | S04, S13 | UNRUN |
-| AC-FIG-02 | S04 | UNRUN |
+| AC-FIG-01 | S04, S13 | PASS (local): `planner.cjs` with the flag on: the partial person's row shows "Partial view" with the PLN-15 partial-view text as title and aria-describedby; the cell, its accessible name and the contribution list read "at most 40 h"; the page notice still shows. A person with no hidden work has no label and no "at most". Flag off: no label, no "at most", notice shows. 0 axe violations. The mocked fixture uses a person with no planned hours instead of the AC's 30 h entry; the visible value is 40 h either way. No restricted name or hours is covered by the server tests. S13 flag removal pending. |
+| AC-FIG-02 | S04 | PASS (local): `PlanningApiTests.Every_free_hours_reader_marks_hidden_confirmed_work_partial` (Planner grid read and the personIds batch read used by the picker and My Staff: partial, remaining 40, no project id or number; Workload partialScope true and uncommitted null; Admin sees partial false, remaining 20, uncommitted 20); `Picker_rows_say_when_a_person_has_planned_work_the_viewer_cannot_see` and `DeploymentConformanceTests.Hidden_confirmed_allocations_mark_capacity_partial_without_returning_private_work` pass unchanged. |
 | AC-FIG-03 | S03, S13 | PASS (local): Uncommitted is 12 while the Planner's remaining is 24; a partial row returns null at 12 and -3 at -3 (`WorkloadTests.Uncommitted_never_claims_spare_capacity_for_a_partial_row`, `WorkloadApiTests.Uncommitted_is_computed_on_the_server`). `resources.cjs`: flag on shows "Uncommitted −12 h" and no Workload cell says Remaining; flag off shows "Remaining N h". AC-PLN-11 regression test passes unchanged. The picker's "24 h free" is not asserted in a browser test; the API test pins its Planner value. S13 flag removal pending. |
 | AC-FIG-04 | S03, S13 | PARTIAL: Workload with the flag on: the grid's aria-describedby is the uncommitted basis line and the Method step names Uncommitted. My Staff: the free figure's tooltip and description are the remaining-capacity basis (`supervisor-capacity.cjs`); flag off has no tooltip or description. `resources.cjs` and `supervisor-capacity.cjs` report 0 axe violations. The picker uses the same `CapacityFigure` component but has no browser check of its own; the planner suite was not run. |
 | AC-FIG-05 | S01, S02 | PASS (local): domain edges 39/40/90/91/110/111 % (S01, `WorkloadTests.Load_bands_follow_settings_and_default_to_todays_shades`); API cells carry `band`: 100 % Near, 115 % Over, no-availability with committed hours Over (`WorkloadApiTests.Cells_carry_bands_over_week_and_thresholds_from_settings`); `resources.cjs` keeps every fixture cell's shade (130, 156, 95, 50, 0 %). |
@@ -62,6 +62,19 @@ Assumptions (defaults from specs/DECISIONS.md):
 - The flag-off "no at most wording" check is on the Workload page; the Planner's "at most" wording belongs to S04.
 
 Left for Jay: turning on `flag.figure_names` in review and pilot, which S13 depends on. Nothing needs GitHub, homedev or sudo.
+
+## Build 041-S04
+
+Merged build/041-S04 (9e10d410) into claude/build-039-050 with no conflicts (en.ts auto-merged). On the merged tree: `dotnet build Hub.slnx` 0 errors; `dotnet test` filtered to PlanningApiTests, WorkloadApiTests and FlagsTests 29 passed, 0 failed; `web` `npm run build` and `npm run lint` pass (warnings only, in files this slice did not touch). Builder ran `planner.cjs` (15 checks, 0 axe violations, including planner-grid-partial-row and contribution-partial) and `supervisor-capacity.cjs` on the slice branch; browser suites not re-run on the merged tree. No server code changed; one new i18n key, `planner.atMost`.
+
+Assumptions:
+
+- No Open decision in specs/DECISIONS.md is named by this slice, so no default was needed.
+- The row label's tooltip and accessible description reuse the existing `planner.partialHint` text as the PLN-15 text.
+- The picker and My Staff both read through `usePeopleCapacity` (planning/grid with personIds), so the batch-read route in the test covers both readers.
+- "at most" wording also applies to a negative remaining value; it is still an upper bound.
+
+Left for Jay: turning on `flag.figure_names` in review and pilot, then the S13 flag cleanup. Nothing needs GitHub, homedev or sudo.
 
 ## Build 041-S05
 

@@ -99,6 +99,21 @@ mv() { return 98; }
         self.assertEqual(calls[-2:], ['VERIFIER_REJECTED', 'stop api'])
         self.assertEqual(calls.count('stop api'), 2)
 
+    def test_pilot_compose_keeps_both_seed_flags_off(self):  # FR-OPS-17, AC-OPS-16
+        text = (ROOT / 'hosting/homedev-pilot.compose.yml').read_text()
+        services = text.split('\nservices:\n', 1)[1].split('\nvolumes:\n', 1)[0]
+        blocks = {}
+        for line in services.splitlines():
+            if line.startswith('  ') and not line.startswith('   ') and line.rstrip().endswith(':'):
+                name = line.strip()[:-1]
+                blocks[name] = []
+            elif blocks:
+                blocks[name].append(line.strip())
+        for name in ('api', 'migrate'):
+            self.assertIn(name, blocks)
+            for flag in ('Seed__ReviewDemo', 'Seed__DevUsers'):
+                self.assertIn(f'{flag}: "false"', blocks[name], f'{name} must set {flag} to "false"')
+
     def test_shell_scripts_have_valid_syntax(self):
         for script in SHELLS:
             self.assertEqual(subprocess.run(["bash", "-n", str(script)]).returncode, 0, script)

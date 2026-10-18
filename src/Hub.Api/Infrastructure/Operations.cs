@@ -10,7 +10,7 @@ namespace Hub.Api.Infrastructure;
 public sealed record OpsFacts(
     DateTimeOffset Now, OrgSettings Settings,
     DateTimeOffset? OldestPendingOutbox, DateTimeOffset? LastNightlySuccess, DateTimeOffset? FirstJobRun,
-    IReadOnlyList<(string Job, DateTimeOffset At)> FailedSince, int DigestsNotBuilt, int DigestsUnsent);
+    IReadOnlyList<(string Job, DateTimeOffset At)> FailedSince, int DigestsNotBuilt, int DigestsUnsent, int DeadLettered = 0);
 
 public sealed record OpsProblem(string Kind, string Detail);
 
@@ -27,6 +27,7 @@ public static class OpsChecks
         var problems = new List<OpsProblem>();
         if (f.OldestPendingOutbox is { } oldest && f.Now - oldest > EvaluationLag)
             problems.Add(new("EvaluationDelayed", $"oldest change waiting {(int)(f.Now - oldest).TotalMinutes} min"));
+        if (f.DeadLettered > 0) problems.Add(new("OutboxDeadLettered", $"{f.DeadLettered} change(s) failed {EvaluationWorker.MaxAttempts} times"));
         // A new installation has had no night yet: count from the first job run.
         var since = f.LastNightlySuccess ?? f.FirstJobRun;
         if (since is { } s && f.Now - s > NightlyGrace)
@@ -48,7 +49,8 @@ public static class OpsChecks
     /// Reads the facts from the database; `since` is when the previous watchdog run started.
     public static async Task<OpsFacts> Gather(HubDb db, OrgSettings s, DateTimeOffset now, DateTimeOffset since, CancellationToken ct = default)
     {
-        var oldest = await db.Outbox.Where(o => o.ProcessedAt == null).MinAsync(o => (DateTimeOffset?)o.CreatedAt, ct);
+        var oldest = await db.Outbox.Where(o => o.ProcessedAt == null && o.DeadLetteredAt == null).MinAsync(o => (DateTimeOffset?)o.CreatedAt, ct);
+        var deadLettered = await db.Outbox.CountAsync(o => o.ProcessedAt == null && o.DeadLetteredAt != null, ct);
         var nightly = await db.JobRuns.Where(r => r.JobName == NightlyJob.JobName && r.Status == "Succeeded").MaxAsync(r => (DateTimeOffset?)r.StartedAt, ct);
         var first = await db.JobRuns.MinAsync(r => (DateTimeOffset?)r.StartedAt, ct);
         var failed = (await db.JobRuns.Where(r => r.Status == "Failed" && r.StartedAt >= since).OrderBy(r => r.StartedAt).Select(r => new { r.JobName, r.StartedAt }).ToListAsync(ct))
@@ -74,7 +76,7 @@ public static class OpsChecks
             }
             unsent = await db.Emails.CountAsync(e => e.Kind == "Digest" && e.CreatedAt >= dayStart && e.SentAt == null, ct);
         }
-        return new OpsFacts(now, s, oldest, nightly, first, failed, notBuilt, unsent);
+        return new OpsFacts(now, s, oldest, nightly, first, failed, notBuilt, unsent, deadLettered);
     }
 }
 

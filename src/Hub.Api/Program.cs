@@ -138,11 +138,12 @@ app.UseMiddleware<IdempotencyMiddleware>();
 var hubBuild = SecurityHeaders.Build(cfg);
 app.MapGet("/health", async (HubDb db, TimeProvider clock, HttpContext ctx) =>
 {
-    // Reveals availability and the build stamp only (FR-LIVE-02); outbox lag above 10 minutes reports Degraded (§23.8).
+    // Reveals availability and the build stamp only (FR-LIVE-02); outbox lag above 10 minutes reports Degraded (§23.8);
+    // dead-lettered events leave the lag and show on Operations instead (FR-OPS-07).
     ctx.Response.Headers.CacheControl = "no-store";
     try
     {
-        var oldest = await db.Outbox.Where(o => o.ProcessedAt == null).MinAsync(o => (DateTimeOffset?)o.CreatedAt);
+        var oldest = await db.Outbox.Where(o => o.ProcessedAt == null && o.DeadLetteredAt == null).MinAsync(o => (DateTimeOffset?)o.CreatedAt);
         var degraded = oldest is { } t && clock.GetUtcNow() - t > TimeSpan.FromMinutes(10);
         return Results.Json(new { status = degraded ? "Degraded" : "Healthy", build = hubBuild });
     }

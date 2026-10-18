@@ -226,6 +226,9 @@ public sealed class EvaluationService(HubDb db, SettingsStore store, TimeProvide
 /// Consumes outbox events a moment after each save and re-evaluates the affected projects (§23.5 steps 2–3).
 public sealed class EvaluationWorker(IServiceProvider root, EvaluationSignal signal, IConfiguration cfg, ILogger<EvaluationWorker> log, TimeProvider clock) : BackgroundService
 {
+    /// Failed evaluations before an event is dead-lettered (FR-OPS-06).
+    public const int MaxAttempts = 10;
+
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
         if (cfg["Evaluation:Worker"] == "false") return;
@@ -251,7 +254,7 @@ public sealed class EvaluationWorker(IServiceProvider root, EvaluationSignal sig
         try
         {
             if (!await db.Database.SqlQuery<bool>($"SELECT pg_try_advisory_lock(hashtext('evaluation-worker')) AS \"Value\"").SingleAsync(ct)) return 0;
-            var events = await db.Outbox.Where(o => o.ProcessedAt == null && o.Attempts < 10).OrderBy(o => o.CreatedAt).Take(500).ToListAsync(ct);
+            var events = await db.Outbox.Where(o => o.ProcessedAt == null && o.Attempts < MaxAttempts).OrderBy(o => o.CreatedAt).Take(500).ToListAsync(ct);
             var projects = events.Where(e => e.ProjectId is not null).Select(e => e.ProjectId!.Value).ToHashSet();
             foreach (var e in events.Where(e => e.EventType == "UserChanged"))
             {
@@ -269,7 +272,11 @@ public sealed class EvaluationWorker(IServiceProvider root, EvaluationSignal sig
                 catch (Exception ex) when (!ct.IsCancellationRequested)
                 {
                     root.GetRequiredService<ILogger<EvaluationWorker>>().LogError(ex, "Evaluation failed for project {ProjectId}", pid);
-                    foreach (var e in events.Where(e => e.ProjectId == pid)) { e.Attempts++; e.LastError = ex.GetType().Name; }
+                    foreach (var e in events.Where(e => e.ProjectId == pid))
+                    {
+                        e.Attempts++; e.LastError = ex.GetType().Name;
+                        if (e.Attempts >= MaxAttempts) e.DeadLetteredAt = clock.GetUtcNow();
+                    }
                     events.RemoveAll(e => e.ProjectId == pid);
                 }
             }

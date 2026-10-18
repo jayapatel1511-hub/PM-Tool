@@ -5435,6 +5435,10 @@ namespace Hub.Api.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<DateTimeOffset?>("DeadLetteredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("dead_lettered_at");
+
                     b.Property<string>("EventType")
                         .IsRequired()
                         .HasColumnType("text")

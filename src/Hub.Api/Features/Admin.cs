@@ -111,7 +111,7 @@ public static class AdminEndpoints
                     Failed24h = await db.JobRuns.CountAsync(r => r.JobName == name && r.Status == "Failed" && r.StartedAt >= now.AddHours(-24)),
                 });
             }
-            return new { AsOf = now, Problems = problems, Jobs = jobs, PendingChanges = await db.Outbox.CountAsync(o => o.ProcessedAt == null) };
+            return new { AsOf = now, Problems = problems, Jobs = jobs, PendingChanges = await db.Outbox.CountAsync(o => o.ProcessedAt == null && o.DeadLetteredAt == null) };
         });
 
         // ---------- Users and roles (FR-004, FR-016, FR-017, FR-027, E-26) ----------

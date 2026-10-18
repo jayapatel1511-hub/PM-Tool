@@ -9,8 +9,8 @@ Slice builds in progress; see the build notes below.
 | AC-OPS-03 | UNRUN |
 | AC-OPS-04 | UNRUN |
 | AC-OPS-05 | UNRUN |
-| AC-OPS-06 | UNRUN |
-| AC-OPS-07 | UNRUN |
+| AC-OPS-06 | PASS (local) |
+| AC-OPS-07 | PARTIAL: backfill part PASS (local); retry and Operations list are S03 |
 | AC-OPS-08 | UNRUN |
 | AC-OPS-09 | UNRUN |
 | AC-OPS-10 | UNRUN |
@@ -73,3 +73,14 @@ Notification and digest email footers name Tuesday. Only `email.footer` and `dig
 - AC-OPS-20: PASS (local). The assignment notification email and daily digest footers (the body's last paragraph) name Tuesday and contain neither "Coordination Hub" nor "the Hub". Subjects stay pinned: the "[KEY] " prefix on the notification email and the exact digest subjects "Hub digest — 2 overdue, 1 review, 1 blocked" and "Hub digest — 1 overdue".
 - Assumptions: 044-D9 default (only the two footer strings change; `email.open`, the "Hub digest" and "Hub weekly summary" subjects and `weekly.footer` stay); 044-D11 default (ships unflagged as a correction, Tier B); the footer is the body's last paragraph after the final blank line, where Notify.cs and Digest.cs add it; new wording "This message was sent by Tuesday. Replies are not read; change your notification preferences in Tuesday.", with the digest footer using the same opening sentence.
 - Left for Jay: Tier B merge (a user-visible change without a flag; D11), so Jay reviews and merges `build/044-S12`.
+
+## Build 044-S02
+
+`outbox_event.dead_lettered_at` (nullable) with the additive migration `20261018214033_OutboxDeadLetter` and its backfill; the worker's limit is the constant `EvaluationWorker.MaxAttempts = 10` and the tenth failure sets `dead_lettered_at`. `/health`, the lag check in `OpsChecks.Gather` and the pending count on `GET /admin/operations` leave dead letters out; a non-zero count raises the new `OutboxDeadLettered` problem, which the watchdog logs as an `OpsAlert`.
+
+- Checks on the merged tree: `dotnet build Hub.slnx` 0 errors; `dotnet test --filter OperationsTests|EvaluationTests|FoundationsTests` 35 passed; `dotnet ef migrations has-pending-model-changes` reports no changes. The builder ran the full suite on the slice branch: 1193 passed, 0 failed. Not run: the Release build with the coverage gate.
+- AC-OPS-06: PASS (local). `Ten_failed_evaluations_dead_letter_the_event_and_health_recovers` (failure forced by a temporary trigger on `hub.project_state`): `dead_lettered_at` is set on the tenth failure and not before, the worker stops selecting the event, `/health` goes from Degraded to Healthy, the pending count drops by 1, Operations shows `OutboxDeadLettered` with count 1 and the watchdog logs it; a live event waiting 11 minutes still makes `/health` Degraded.
+- AC-OPS-07 (backfill part): PASS (local). `Migration_marks_stranded_events_dead_lettered` marks only unprocessed events with 10 or more attempts; events at 9 attempts, processed events and already-marked events (time kept) are untouched, and a second run changes nothing. The retry and Operations list belong to S03.
+- FR-OPS-07 lag and problem: PASS (local). `Dead_letters_raise_their_own_problem_and_leave_the_lag` covers the pure check and `Gather`; `Each_condition_raises_its_alert_and_only_past_its_threshold` is unchanged and passes.
+- Assumptions: 044-D4 default (limit is a constant of 10; `/health` stays Healthy when only dead letters remain; they show on Operations and in watchdog alerts); the packet ships without a flag (§48.1), so S02 has none; the backfill sets `dead_lettered_at` to now(), since the time of the tenth failure was never recorded for events stranded earlier; problem detail text "{n} change(s) failed 10 times".
+- Left for Jay: nothing. The migration runs the backfill on the next deploy.

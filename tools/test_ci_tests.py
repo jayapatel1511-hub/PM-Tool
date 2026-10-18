@@ -102,7 +102,7 @@ class StepsTests(unittest.TestCase):
     def test_repository_step_list(self):
         steps = ci_tests.parse_steps(ci_tests.STEPS.read_text())
         jobs = {j for js, _, _ in steps for j in js}
-        self.assertEqual(jobs, {"domain", "api-1", "api-2", "api-3", "web", "checks", "gate", "report"})
+        self.assertEqual(jobs, {"domain", "api-1", "api-2", "api-3", "web", "checks", "gate", "report", "image"})
         commands = " ".join(cmd for _, _, cmd in steps)
         for kept in ("test:handoffs", "test:sign-in", "test:coordination", "test:design-basis", "test:planner",
                      "test:resources", "test:supervisor-capacity", "test:ui-review", "npm audit", "npm run lint",
@@ -110,6 +110,35 @@ class StepsTests(unittest.TestCase):
                      "test_backup_helpers", "test_pilot_initializer", "test_pilot_operations", "test_pilot_pitr",
                      "test_social_activation", "test_fixture_api", "test_seed_homedev_tuesday_review"):
             self.assertIn(kept, commands)
+
+
+class ImageTests(unittest.TestCase):
+    """AC-DLV-13: the pushed image carries the commit as its OCI revision label and HUB_BUILD."""
+
+    SHA = "0123456789abcdef0123456789abcdef01234567"
+
+    def inspect(self, label, env):
+        return [{"Config": {"Labels": {ci_tests.REVISION: label} if label else None, "Env": env}}]
+
+    def test_matching_label_and_build_pass(self):
+        self.assertEqual(ci_tests.image_errors(self.inspect(self.SHA, ["PATH=/bin", f"HUB_BUILD={self.SHA}"]), self.SHA), [])
+
+    def test_missing_or_wrong_values_fail(self):
+        self.assertEqual(len(ci_tests.image_errors(self.inspect(None, None), self.SHA)), 2)
+        self.assertEqual(len(ci_tests.image_errors(self.inspect("dev", ["HUB_BUILD=dev"]), self.SHA)), 2)
+        self.assertEqual(len(ci_tests.image_errors(self.inspect(self.SHA, ["HUB_BUILD=dev"]), self.SHA)), 1)
+
+    def test_main_workflow_alone_writes_packages(self):
+        workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
+        self.assertIn("permissions: { contents: read }\n", workflow)
+        self.assertEqual(workflow.count("packages: write"), 1)
+        image = workflow[workflow.index("\n  image:"):]
+        self.assertIn("if: github.event_name == 'push' && github.ref == 'refs/heads/main'", image)
+        for needed in ("needs: [domain, api, web, checks, gate]", "hosting/Dockerfile.review", "linux/amd64",
+                       "RELEASE_SHA=${{ github.sha }}", "attest-build-provenance", "steps image"):
+            self.assertIn(needed, image)
+        self.assertIn("LABEL org.opencontainers.image.revision=$RELEASE_SHA",
+                      (ROOT / "hosting" / "Dockerfile.review").read_text())
 
 
 class CountTests(unittest.TestCase):

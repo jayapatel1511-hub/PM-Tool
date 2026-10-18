@@ -19,6 +19,8 @@ RUN dotnet publish src/Hub.Api/Hub.Api.csproj -c Release -o /out
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 ARG RELEASE_SHA
 ENV HUB_BUILD=$RELEASE_SHA
+# FR-DLV-14: the OCI revision label the release image is inspected for.
+LABEL org.opencontainers.image.revision=$RELEASE_SHA
 WORKDIR /app
 COPY --from=build /out/ ./
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080

@@ -28,6 +28,11 @@ checks: python3 tools/trace_spec.py --check && python3 tools/test_trace_report.p
 # Main runs only (ci.yml): the specification report over every job's artifacts (FR-DLV-22).
 report: python3 tools/trace_spec.py --report ci-artifacts-in --out ci-artifacts/spec-report.md
 
+# Main runs only (ci.yml): the release image pushed as $IMAGE (repository@digest) carries this commit and its
+# provenance names this repository's CI workflow on main (§43.6, FR-DLV-14).
+image: docker pull "$IMAGE" && python3 tools/ci_tests.py image "$IMAGE" --sha "$GITHUB_SHA"
+image: gh attestation verify "oci://$IMAGE" -R "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/ci.yml" --source-ref refs/heads/main
+
 # Web: build, lint (with accessibility rules, §22), mocked-API browser suites, renderer regressions, audit.
 web: cd web && npm ci
 web: cd web && npm run build

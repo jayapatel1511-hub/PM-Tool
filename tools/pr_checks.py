@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Pull request checks (§43). `size`: hand-written changed lines against the limits of FR-DLV-06 (039-D4).
+`migrations`: the expand-only lint of FR-DLV-15 over migrations the pull request adds.
 
     python3 tools/pr_checks.py size --base <sha> [--head HEAD] [--labels large,other]
+    python3 tools/pr_checks.py migrations --base <sha> [--head HEAD] [--labels contract,other]
 """
 import argparse
+import re
 import subprocess
 import sys
 
@@ -50,6 +53,80 @@ def size(base, head="HEAD", labels=(), cwd=None):
     return size_verdict(sum(n for path, n in counts.items() if path not in skip), set(labels))
 
 
+MIGRATIONS = "src/Hub.Api/Data/Migrations/"
+CONTRACT_CALL = re.compile(r"\.\s*(Drop\w*|Rename\w*|AlterColumn)\s*[<(]")
+SQL_CALL = re.compile(r"\.\s*Sql\s*\(\s*")
+CONTRACT_SQL = re.compile(r"\b(DROP|TRUNCATE|DELETE|RENAME)\b|\bALTER\b[^;]*?\bTYPE\b", re.I)
+EVENT = r"(?:INSERT|UPDATE(?:\s+OF\s+[\w\s,\"]+?)?|DELETE|TRUNCATE)"
+NOT_AN_OPERATION = re.compile(r"\bON\s+(DELETE|UPDATE)\b|'(?:[^']|'')*'|--[^\n]*"
+                              rf"|\b(?:BEFORE|AFTER|INSTEAD\s+OF)\s+{EVENT}(?:\s+OR\s+{EVENT})*\s+ON\b", re.I)
+DYNAMIC_SQL = re.compile(r"\bEXECUTE\b(?!\s+(?:FUNCTION|PROCEDURE)\b)", re.I)
+UNVERIFIABLE = "Sql argument that is not a single literal"
+
+
+def up_body(source):
+    """Text of Up(): EF Core scaffolds Up before Down, so it runs from `void Up(` to `void Down(` or the end."""
+    start = source.find("void Up(")
+    if start < 0:
+        return ""
+    end = source.find("void Down(", start)
+    return source[start:] if end < 0 else source[start:end]
+
+
+def sql_literal(text):
+    """The text of a Sql( argument that is one complete string literal (raw, verbatim or regular, with $ and @
+    prefixes), optionally followed by `suppressTransaction:`. None when the SQL cannot be read: an identifier, a
+    call, or a literal joined with `+` or followed by another argument."""
+    m = re.match(r'\$*@?\$*("{3,}|")', text)
+    if not m:
+        return None
+    quote, start = m.group(1), m.end()
+    if len(quote) >= 3:
+        end = text.find(quote, start)
+        sql, after = (text[start:end], text[end + len(quote):]) if end >= 0 else (text[start:], "")
+    else:
+        verbatim = "@" in text[:m.start(1)]
+        sql = re.match(r'(?:[^"]|"")*' if verbatim else r'(?:[^"\\]|\\.)*', text[start:], re.S).group(0)
+        after = text[start + len(sql) + 1:]
+    return sql if re.match(r"\s*(?:\)|,\s*suppressTransaction\s*:)", after) else None
+
+
+def contract_operations(source):
+    """Contract operations in a migration's Up(): drop, rename and alter-column calls, and Sql text with
+    DROP, TRUNCATE, DELETE, RENAME or ALTER ... TYPE. Quoted SQL text, `--` comments, ON DELETE / ON UPDATE
+    referential actions and trigger events (BEFORE UPDATE OR DELETE ON) are not operations. SQL the lint cannot
+    read, a non-literal Sql argument or dynamic EXECUTE, counts as one."""
+    body = up_body(source)
+    found = [m.group(1) for m in CONTRACT_CALL.finditer(body)]
+    for m in SQL_CALL.finditer(body):
+        literal = sql_literal(body[m.end():])
+        if literal is None:
+            found.append(UNVERIFIABLE)
+            continue
+        sql = NOT_AN_OPERATION.sub("", literal)
+        found += [f"Sql {(k.group(1) or 'ALTER ... TYPE').upper()}" for k in CONTRACT_SQL.finditer(sql)]
+        found += ["Sql dynamic EXECUTE" for _ in DYNAMIC_SQL.finditer(sql)]
+    return found
+
+
+def added_migrations(base, head="HEAD", cwd=None):
+    """Migration files the pull request adds; Designer files and the model snapshot are generated."""
+    paths = git("diff", "--name-only", "-z", "--diff-filter=A", base, head, "--", MIGRATIONS, cwd=cwd).split("\0")
+    return [p for p in paths if p.endswith(".cs") and not p.endswith(".Designer.cs") and not p.endswith("ModelSnapshot.cs")]
+
+
+def migrations(base, head="HEAD", labels=(), cwd=None):
+    """(exit code, message): fails on any contract operation in an added migration unless `contract` is applied."""
+    problems = [(path, op) for path in added_migrations(base, head, cwd)
+                for op in contract_operations(git("show", f"{head}:{path}", cwd=cwd))]
+    if not problems:
+        return 0, "No contract operations in added migrations."
+    if "contract" in labels:
+        return 0, "\n".join(f"::warning file={p}::{op} (label `contract` applied)." for p, op in problems)
+    return 1, "\n".join(f"::error file={p}::{op} is a contract operation. Expand only, or Jay applies the label `contract`."
+                         for p, op in problems)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="check", required=True)
@@ -57,8 +134,13 @@ def main(argv=None):
     s.add_argument("--base", required=True)
     s.add_argument("--head", default="HEAD")
     s.add_argument("--labels", default="", help="comma-separated pull request labels")
+    m = sub.add_parser("migrations")
+    m.add_argument("--base", required=True)
+    m.add_argument("--head", default="HEAD")
+    m.add_argument("--labels", default="", help="comma-separated pull request labels")
     args = parser.parse_args(argv)
-    code, message = size(args.base, args.head, [l.strip() for l in args.labels.split(",") if l.strip()])
+    check = size if args.check == "size" else migrations
+    code, message = check(args.base, args.head, [l.strip() for l in args.labels.split(",") if l.strip()])
     print(message)
     return code
 

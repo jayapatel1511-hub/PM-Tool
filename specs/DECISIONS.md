@@ -1,6 +1,6 @@
 # Decision log
 
-One table of the open product and process decisions for packets 038 to 049 and the build-approach report. Each row has a default.
+One table of the open product and process decisions for packets 038 to 050 and the build-approach report. Each row has a default.
 
 - Defaults apply while work ships dark. A pending row never blocks a merge or a review deployment; it blocks only a flag flip, that is, turning its addition on for pilot users.
 - Only Jay confirms or overrules a decision. Statuses: Open (the default applies), Decided, Done, Deferred (waits for its trigger).
@@ -167,8 +167,16 @@ One table of the open product and process decisions for packets 038 to 049 and t
 | 048-D9 | 048 | Revision convention presets? | Letters (A, B, C …), numbers (0, 1, 2 …), and two-stage P01… then C01…; or a custom ordered list. Default none. | Open |
 | 048-D10 | 048 | How many flags? | One per part: flag.verifiable_log, flag.commitment_reliability, flag.allocation_preview, flag.baseline_history, flag.revision_check. | Open |
 | 049-D1 | 049 | Approve the §53 Task Pickup scope? | Approve with the listed defaults (049-D2 to 049-D6 stay Open with their defaults). | Decided by Jay 2026-10-18 |
-| 049-D2 | 049 | Who may request pickup? | Project team members only. | Open |
-| 049-D3 | 049 | Who approves a pickup? | PM or Discipline Lead of the task's discipline; self-approve setting off. | Open |
+| 049-D2 | 049 | Who may pick up? | Only the assignee's team: same home unit under §54, otherwise same direct manager; picker added to the project team if needed. | Decided by Jay 2026-10-18 |
+| 049-D3 | 049 | Approval, and who may assign? | No approval for a same-team pick-up; the direct manager, PM or Discipline Lead may assign an offered task within the team. | Decided by Jay 2026-10-18 |
 | 049-D4 | 049 | Whole task or a share of it? | Whole task only; collaborators stay the way to share. | Open |
-| 049-D5 | 049 | Previous assignee after pickup? | Becomes a watcher unless they opt out. | Open |
+| 049-D5 | 049 | Previous assignee after pickup? | Becomes a watcher unless they opt out when offering. | Open |
 | 049-D6 | 049 | Do offers expire? | No automatic expiry. | Open |
+| 050-D1 | 050 | Approve the §54 Company Structure scope? | Approve with the listed defaults (050-D2 to 050-D8 stay Open with their defaults). | Decided by Jay 2026-10-18 |
+| 050-D2 | 050 | Default level names? | Region, Business unit, Team; Admin renames. | Open |
+| 050-D3 | 050 | Do unit leaders get edit rights over their unit's people? | No; read and roll-up only. | Open |
+| 050-D4 | 050 | Include indirect reports by default? | No; setting include_indirect_reports, off. | Open |
+| 050-D5 | 050 | Source of manager and unit data? | Admin screens and CSV import; Entra ID manager sync stays TBD. | Open |
+| 050-D6 | 050 | Project lead unit? | Optional, filter only, no access effect. | Open |
+| 050-D7 | 050 | Placement history for past reports? | Home unit at each week's end, from the activity log. | Open |
+| 050-D8 | 050 | Who sees the person list of a unit outside their scope? | Executives and Admins only; names, levels, leaders and head counts visible to all. | Open |

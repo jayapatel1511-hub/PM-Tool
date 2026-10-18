@@ -173,6 +173,7 @@ td,th{font-variant-numeric:tabular-nums}
 <a href="#51-planning-reporting-and-onboarding-amendment"><span class="n">51</span><span>Planning, Reporting and Onboarding Amendment</span></a>
 <a href="#52-verifiable-records-amendment"><span class="n">52</span><span>Verifiable Records Amendment</span></a>
 <a href="#53-task-pickup-amendment"><span class="n">53</span><span>Task Pickup Amendment</span></a>
+<a href="#54-company-structure-amendment"><span class="n">54</span><span>Company Structure Amendment</span></a>
     </div></details>
   </nav>
   <main>
@@ -14933,13 +14934,13 @@ Only labels and descriptions change. No value, sort, filter, indicator or export
 </table></div>
 <h2 id="53-task-pickup-amendment"><span class="num">53</span><span class="ttl">Task Pickup Amendment</span></h2>
 <p>Approved scope: drafted on 2026-10-18 from Jay's request for a way for overloaded people to put a task up so someone else can pick it up, and approved by Jay the same day with the listed defaults (049-D1). The amendment is additive only: nothing in this section removes, hides, narrows or freezes a current feature, screen, route, report, setting or rule. Where an addition touches existing behaviour, today's behaviour stays the default. Packet 049 delivers this section.</p>
-<p>A pickup offer is not a new item type. It is a short-lived state on an existing task: the task keeps its one accountable assignee until a pickup is approved, and the handover then runs through the existing reassignment path (§8.5, Assign / reassign task), with its notification, log entry and version check. Nothing here assigns work automatically, ranks volunteers or scores people (§30, constitution II).</p>
+<p>A pickup offer is not a new item type. It is a short-lived state on an existing task: the task keeps its one accountable assignee until someone in the same team picks it up or a manager assigns it, and the handover then runs through the existing reassignment path (§8.5, Assign / reassign task), with its notification, log entry and version check. Nothing here assigns work automatically, ranks volunteers or scores people (§30, constitution II).</p>
 <p>Where this section adds to §8.5 and §8.6 (permissions), §13.10 (My Work), §13.11 (Workload), §17 (notifications) and §20.1 (what is logged), this section governs.</p>
 <h3 id="531-scope-and-boundary"><span class="num">53.1</span> Scope and boundary</h3>
 <ul>
 <li>Offering a task for pickup and withdrawing the offer: §53.2.</li>
 <li>The Open for pickup list: §53.3.</li>
-<li>Requesting, approving and declining a pickup: §53.4.</li>
+<li>Who may pick up, and manager assignment: §53.4.</li>
 <li>Notifications and log: §53.5.</li>
 </ul>
 <p>§53.6 sets how it ships. Out of scope: splitting a task's hours between people, offering deliverables, reviews, decisions or actions, cross-organisation pickup, a points or reward scheme for picking up work, and any automatic matching of offers to people.</p>
@@ -14958,25 +14959,28 @@ Only labels and descriptions change. No value, sort, filter, indicator or export
 <h3 id="533-open-for-pickup-list"><span class="num">53.3</span> Open for pickup list</h3>
 <ul>
 <li>
-<p><strong>FR-PKP-04.</strong> A new <strong>Open for pickup</strong> list MUST show every open offer on tasks the viewer can already see (§8.7). It is reachable from My Work and from each project's Work tab group as a filter, and lists task key and name, project, discipline, offerer, reason, hours remaining, needed-by date, due date and offer age. It filters by project, discipline and needed-by date and sorts by needed-by date, then due date. No new visibility is granted: a Restricted project's offers appear only to people who can view that project.</p>
+<p><strong>FR-PKP-04.</strong> A new <strong>Open for pickup</strong> list MUST show the open offers the viewer may pick up (FR-PKP-06) or assign (FR-PKP-07), on tasks the viewer can already see (§8.7). It is reachable from My Work and from each project's Work tab group as a filter, and lists task key and name, project, discipline, offerer, reason, hours remaining, needed-by date, due date and offer age. It filters by project, discipline and needed-by date and sorts by needed-by date, then due date. Offers outside the viewer's team are not listed. No new visibility is granted: a Restricted project's offers appear only to people who can view that project.</p>
 </li>
 <li>
-<p><strong>FR-PKP-05.</strong> The viewer's own load band for the needed-by week (§45.4) MUST be shown beside the <strong>Request pickup</strong> action as information only. It never hides, blocks or orders offers.</p>
+<p><strong>FR-PKP-05.</strong> The viewer's own load band for the needed-by week (§45.4) MUST be shown beside the <strong>Pick up</strong> action as information only. It never hides, blocks or orders offers.</p>
 </li>
 </ul>
-<h3 id="534-requesting-and-approving"><span class="num">53.4</span> Requesting and approving</h3>
+<h3 id="534-who-may-pick-up-and-manager-assignment"><span class="num">53.4</span> Who may pick up, and manager assignment</h3>
 <ul>
 <li>
-<p><strong>FR-PKP-06.</strong> A member of the project team (§12.2, TM rules) MAY <strong>Request pickup</strong> on an open offer, with an optional note. Several people may request the same offer; each request is listed on the offer in the order received. A person cannot request their own task.</p>
+<p><strong>FR-PKP-06.</strong> Only a person in the <strong>same team</strong> as the task's assignee MAY <strong>Pick up</strong> an open offer:
+  - when the company structure is on (§54, <code>flag.org_structure</code>) and the assignee has a home unit, the same team is every active person whose home unit is that unit;
+  - otherwise, it is every active person who shares the assignee's direct manager (<code>supervisor_id</code>, §8.8).</p>
+<p>The picker must also be able to view the project. A person cannot pick up their own task. The server checks the team at the moment of the pick and returns 403 for anyone outside it.</p>
 </li>
 <li>
-<p><strong>FR-PKP-07.</strong> The project's PM or the Discipline Lead of the task's discipline MUST approve one request or decline any request with a reason. The server enforces who may approve. Approving reassigns the task to the requester through the existing reassignment command in the same transaction, closes the offer and declines the other open requests with the reason "Picked up by [name]". The approval is refused, and nothing changes, if the task's rowVersion changed since the approver loaded it.</p>
+<p><strong>FR-PKP-07.</strong> Picking up MUST reassign the task to the picker at once, with no approval step, through the existing reassignment command in one transaction, and close the offer. A picker who is not on the project team is added as a Team Member in the same transaction. When two people pick up the same offer, the first save wins; the second is refused with the existing conflict message because the task's rowVersion changed. The assignee's direct manager, the project's PM and the Discipline Lead of the task's discipline MAY instead <strong>Assign</strong> an offered task to any person in the same team, which closes the offer in the same way. The server enforces both rules.</p>
 </li>
 <li>
-<p><strong>FR-PKP-08.</strong> An organisation setting <code>task_pickup_self_approve</code> (default off) MUST, when on, let the requester take the task on request without approval when they are a member of the task's discipline on that project. The server checks discipline membership at the moment of the request.</p>
+<p><strong>FR-PKP-08.</strong> No one outside the same team MAY pick up an offer, and no setting widens the team. A PM or Discipline Lead who wants someone outside the team keeps today's reassignment path (§8.5), which closes the offer as "reassigned elsewhere" (FR-PKP-03).</p>
 </li>
 <li>
-<p><strong>FR-PKP-09.</strong> After a pickup, the previous assignee MUST become a watcher of the task (§8.6, participants) unless they opt out at approval, so context is not lost. Hours already logged against the task (§36.8) stay with the person who logged them.</p>
+<p><strong>FR-PKP-09.</strong> After a pickup, the previous assignee MUST become a watcher of the task (§8.6, participants) unless they opt out when offering, so context is not lost. Hours already logged against the task (§36.8) stay with the person who logged them.</p>
 </li>
 </ul>
 <h3 id="535-notifications-and-log"><span class="num">53.5</span> Notifications and log</h3>
@@ -14995,31 +14999,25 @@ Only labels and descriptions change. No value, sort, filter, indicator or export
 <tbody>
 <tr>
 <td>Task offered for pickup</td>
-<td>PM, Discipline Lead of the discipline, assignee (when offered on their behalf), assignee's Supervisor</td>
+<td>Everyone in the same team (FR-PKP-06), assignee's direct manager, PM, Discipline Lead of the discipline, assignee (when offered on their behalf)</td>
 <td>●</td>
 <td>●</td>
 </tr>
 <tr>
-<td>Pickup requested</td>
-<td>PM, Discipline Lead of the discipline, offerer</td>
-<td>●</td>
-<td></td>
-</tr>
-<tr>
-<td>Pickup approved</td>
-<td>Requester, previous assignee, offerer</td>
+<td>Task picked up</td>
+<td>Previous assignee, offerer, assignee's direct manager, PM, Discipline Lead of the discipline</td>
 <td>●</td>
 <td>●</td>
 </tr>
 <tr>
-<td>Pickup declined</td>
-<td>Requester</td>
+<td>Task assigned from an offer</td>
+<td>New assignee, previous assignee, offerer</td>
 <td>●</td>
-<td></td>
+<td>●</td>
 </tr>
 <tr>
 <td>Offer closed on its own (FR-PKP-03)</td>
-<td>Offerer and open requesters</td>
+<td>Offerer</td>
 <td>●</td>
 <td></td>
 </tr>
@@ -15027,10 +15025,10 @@ Only labels and descriptions change. No value, sort, filter, indicator or export
 </table></div>
 <ul>
 <li>
-<p><strong>FR-PKP-11.</strong> Offering, withdrawing, closing, requesting, approving and declining MUST each write one activity entry on the task (§20.1), with actor, reason or note, and, for approval, the old and new assignee.</p>
+<p><strong>FR-PKP-11.</strong> Offering, withdrawing, closing, picking up and assigning from an offer MUST each write one activity entry on the task (§20.1), with actor, reason or note, and, for a pick-up or assignment, the old and new assignee.</p>
 </li>
 <li>
-<p><strong>FR-PKP-12.</strong> A <strong>Pickup offers</strong> catalogue report MUST list offers in a date range with project, discipline, offered, closed, closing cause (picked up, withdrawn, task closed, reassigned elsewhere) and days open, with CSV and XLSX export, under the list's visibility rules. Counts are by project and discipline, never per person.</p>
+<p><strong>FR-PKP-12.</strong> A <strong>Pickup offers</strong> catalogue report MUST list offers in a date range with project, discipline, offered, closed, closing cause (picked up, assigned by manager, withdrawn, task closed, reassigned elsewhere) and days open, with CSV and XLSX export, under the list's visibility rules. Counts are by project and discipline, never per person.</p>
 </li>
 </ul>
 <h3 id="536-shipping-dark"><span class="num">53.6</span> Shipping dark</h3>
@@ -15040,32 +15038,32 @@ Only labels and descriptions change. No value, sort, filter, indicator or export
 <h3 id="537-acceptance-criteria"><span class="num">53.7</span> Acceptance criteria</h3>
 <ul>
 <li>
-<p><strong>AC-PKP-01.</strong> Given Alex is Over-allocated and assigned to task 1234-T0042, when Alex offers it with reason "Two deliverables due W42", then the task shows "Open for pickup", its assignee, status, dates and health are unchanged, and the PM, the Structural Discipline Lead and Alex's Supervisor are notified.</p>
+<p><strong>AC-PKP-01.</strong> Given Alex is Over-allocated and assigned to task 1234-T0042, when Alex offers it with reason "Two deliverables due W42", then the task shows "Open for pickup", its assignee, status, dates and health are unchanged, and Alex's teammates, Alex's manager, the PM and the Structural Discipline Lead are notified.</p>
 </li>
 <li>
-<p><strong>AC-PKP-02.</strong> Given an open offer, when Jill and Sam both request pickup and the Discipline Lead approves Jill, then the task is assigned to Jill, Alex becomes a watcher, Sam's request is declined with "Picked up by Jill", and the activity log holds the offer, both requests, the approval with old and new assignee, and the decline.</p>
+<p><strong>AC-PKP-02.</strong> Given Alex's open offer and Jill in Alex's team, when Jill picks it up, then the task is assigned to Jill at once with no approval, Alex becomes a watcher, the offer closes as picked up, and the activity log holds the offer and the pick-up with old and new assignee.</p>
 </li>
 <li>
-<p><strong>AC-PKP-03.</strong> Given a Team Member who is not the PM or the Discipline Lead, when they call the approve endpoint, then the server returns 403 and nothing changes.</p>
+<p><strong>AC-PKP-03.</strong> Given Sam is not in Alex's team, then the offer is not in Sam's Open for pickup list, and calling the pick-up endpoint returns 403 and changes nothing.</p>
 </li>
 <li>
-<p><strong>AC-PKP-04.</strong> Given the task was edited after the approver loaded it, when they approve, then the approval is refused with the existing conflict message and no reassignment happens.</p>
+<p><strong>AC-PKP-04.</strong> Given Jill and Kim, both in Alex's team, pick up the same offer at the same moment, then exactly one of them gets the task and the other sees the existing conflict message.</p>
 </li>
 <li>
-<p><strong>AC-PKP-05.</strong> Given an open offer, when the task is completed, or reassigned by the PM directly, then the offer closes with that cause and the offerer and requesters are notified once.</p>
+<p><strong>AC-PKP-05.</strong> Given an open offer, when the task is completed, or reassigned by the PM directly to someone outside the team, then the offer closes with that cause and the offerer is notified once.</p>
 </li>
 <li>
 <p><strong>AC-PKP-06.</strong> Given an offer on a Restricted project, then it appears in the Open for pickup list only for people who can view that project, and its hours are absent from everyone else's list and report.</p>
 </li>
 <li>
-<p><strong>AC-PKP-07.</strong> Given <code>task_pickup_self_approve</code> is on, when a member of the task's discipline requests pickup, then the task is reassigned immediately; when a member of another discipline requests, then approval is still required.</p>
+<p><strong>AC-PKP-07.</strong> Given Alex's open offer, when Alex's direct manager assigns it to Kim in Alex's team, then the task is assigned to Kim and the offer closes as assigned by manager; when the manager tries to assign it to someone outside the team from the offer, then the server refuses.</p>
 </li>
 <li>
 <p><strong>AC-PKP-08.</strong> Given <code>flag.task_pickup</code> is off, then existing API tests and browser suites pass unchanged, and responses, reports, notifications and exports carry no new fields.</p>
 </li>
 </ul>
 <h3 id="538-decisions"><span class="num">53.8</span> Decisions</h3>
-<p>Each decision below uses its default until Jay decides otherwise. The rows are also in <code>specs/DECISIONS.md</code> as 049-D1 to 049-D6.</p>
+<p>Each open decision below uses its default until Jay decides otherwise. The rows are also in <code>specs/DECISIONS.md</code> as 049-D1 to 049-D6.</p>
 <div class="tbl"><table>
 <thead>
 <tr>
@@ -15082,13 +15080,13 @@ Only labels and descriptions change. No value, sort, filter, indicator or export
 </tr>
 <tr>
 <td>D2</td>
-<td>Who may request pickup?</td>
-<td>Project team members only; anyone else is added to the team first through the existing team path</td>
+<td>Who may pick up?</td>
+<td>Decided by Jay 2026-10-18: only the same team as the assignee (same home unit under §54, otherwise the same direct manager); a picker not on the project team is added as Team Member</td>
 </tr>
 <tr>
 <td>D3</td>
-<td>Who approves?</td>
-<td>PM or Discipline Lead of the task's discipline; self-approval off (<code>task_pickup_self_approve</code>)</td>
+<td>Approval, and who may assign?</td>
+<td>Decided by Jay 2026-10-18: no approval for a same-team pick-up; the assignee's direct manager, PM or Discipline Lead may assign an offered task to someone in the same team</td>
 </tr>
 <tr>
 <td>D4</td>
@@ -15098,12 +15096,188 @@ Only labels and descriptions change. No value, sort, filter, indicator or export
 <tr>
 <td>D5</td>
 <td>Previous assignee after pickup</td>
-<td>Becomes a watcher unless they opt out at approval</td>
+<td>Becomes a watcher unless they opt out when offering</td>
 </tr>
 <tr>
 <td>D6</td>
 <td>Does an offer expire?</td>
 <td>No automatic expiry; the offer closes only by FR-PKP-03</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="54-company-structure-amendment"><span class="num">54</span><span class="ttl">Company Structure Amendment</span></h2>
+<p>Approved scope: drafted on 2026-10-18 from Jay's request: "we will have to make company structure for managers". It follows the organisation model Jay chose for the separate Friday capacity app: a free tree of units, levels the company names itself, one leader per unit and one direct manager per person. Approved by Jay the same day with the listed defaults (050-D1). The amendment is additive only: nothing in this section removes, hides, narrows or freezes a current feature, screen, route, report, setting or rule. Where an addition touches existing behaviour, today's behaviour stays the default.</p>
+<p>The Hub serves one organisation, so this section has no companies or tenants. It keeps <code>User.supervisor_id</code>, maintained under FR-ORG-07, as the one direct manager (§8.8, Q19) and adds a unit tree beside it. Units change who a manager can <strong>see and roll up</strong>; they never widen who may <strong>edit</strong> work. Project visibility (§8.7), Restricted projects and every write permission in §8.5, §8.6 and §8.10 are unchanged. Nothing here ranks or scores people (§30, constitution II).</p>
+<p>Where this section adds to §8.2 and §8.8 (roles and how they are assigned), §13.11 (Workload and Planner), §13.12 (Portfolio), §13.15 (Administration), §13.19 (My Staff), §19 (reports), §20.1 (what is logged) and §42 (supervisor capacity), this section governs.</p>
+<h3 id="541-scope-and-boundary"><span class="num">54.1</span> Scope and boundary</h3>
+<ul>
+<li>Levels and units: §54.2.</li>
+<li>People in the structure: §54.3.</li>
+<li>What a manager sees: §54.4.</li>
+<li>Structure on existing screens and reports: §54.5.</li>
+<li>Administration, import and history: §54.6.</li>
+</ul>
+<p>§54.7 sets how it ships. Out of scope: several companies, editing rights granted by unit, matrix (dotted-line) managers, cost centres or finance hierarchies, approval chains, headcount budgets, and synchronising units from another system.</p>
+<h3 id="542-levels-and-units"><span class="num">54.2</span> Levels and units</h3>
+<ul>
+<li>
+<p><strong>FR-UNT-01.</strong> A System Administrator MUST be able to define an ordered list of <strong>levels</strong> and name each one, for example Region, Business unit, Operating centre, Team. The default list is Region, Business unit, Team. A level in use can be renamed and reordered but not deleted.</p>
+</li>
+<li>
+<p><strong>FR-UNT-02.</strong> A <strong>unit</strong> MUST have a name, a level, an optional parent unit, an optional leader (one active user), an optional discipline (§12.2 reference list), an optional office (§8.2 reference list) and an optional closed date. Units form one tree with any number of roots. A unit's level MUST sit below its parent's level in the level order; skipping levels is allowed. The server refuses a parent change that would create a cycle.</p>
+</li>
+<li>
+<p><strong>FR-UNT-03.</strong> A unit with active people or open child units cannot be closed. A closed unit keeps its history, is hidden from pickers and appears in reports only for dates before it closed. Units are never deleted once anyone has been placed in them.</p>
+</li>
+<li>
+<p><strong>FR-UNT-04.</strong> The same discipline MAY appear on several units, and one unit MAY span offices. The discipline and office on a unit are labels used for filters and defaults; they do not change any person's home discipline (FR-GRP-01) or office.</p>
+</li>
+</ul>
+<h3 id="543-people-in-the-structure"><span class="num">54.3</span> People in the structure</h3>
+<ul>
+<li>
+<p><strong>FR-UNT-05.</strong> Each active user MUST have at most one <strong>home unit</strong> (<code>User.unit_id</code>). A person's direct manager stays <code>User.supervisor_id</code>; it MAY sit in another unit. A unit leader need not be placed in the unit they lead.</p>
+</li>
+<li>
+<p><strong>FR-UNT-06.</strong> The server MUST refuse a manager change that makes a person their own direct or indirect manager, and MUST list existing cycles on the Admin structure page. A cycle grants no indirect scope (FR-UNT-08) from any person on it.</p>
+</li>
+<li>
+<p><strong>FR-UNT-07.</strong> Users without a home unit MUST appear under "No unit" wherever the structure is shown, and in an Admin to-do list with users who have no manager.</p>
+</li>
+</ul>
+<h3 id="544-what-a-manager-sees"><span class="num">54.4</span> What a manager sees</h3>
+<ul>
+<li>
+<p><strong>FR-UNT-08.</strong> A user's <strong>people scope</strong> MUST be the union of:
+  - their direct reports (today's supervised staff, §8.8);
+  - when the organisation setting <code>include_indirect_reports</code> is on (default off), every person below them in the reporting line;
+  - for each unit they lead, every person whose home unit is that unit or one of its descendants.</p>
+<p>Executives and System Administrators keep their existing all-staff scope.</p>
+</li>
+<li>
+<p><strong>FR-UNT-09.</strong> People scope MUST govern read access only: My Staff (§13.19), the person's My Work read-only view, the Workload and Planner rows, Vacation and Coverage, and §42's capacity column. The rights to staff people on projects, reassign their tasks and approve their records stay with the direct manager, PM and Discipline Lead exactly as today. A unit leader who is not someone's direct manager sees that person but gains no edit right over them.</p>
+</li>
+<li>
+<p><strong>FR-UNT-10.</strong> Restricted projects stay restricted. A person's work on a project the viewer cannot see MUST be excluded from the viewer's lists, totals and counts in the same way as FR-PLN-19, with the same partial-view note.</p>
+</li>
+<li>
+<p><strong>FR-UNT-11.</strong> A unit leader holds the Supervisor system role's read capabilities over their unit scope without being added to <code>HUB-Supervisors</code>. Holding the Supervisor role still requires the existing group or override for direct-report edit rights.</p>
+</li>
+</ul>
+<h3 id="545-structure-on-screens-and-reports"><span class="num">54.5</span> Structure on screens and reports</h3>
+<ul>
+<li>
+<p><strong>FR-UNT-12.</strong> My Staff MUST add a scope switcher: "My direct reports", "All my reports" (only when <code>include_indirect_reports</code> is on) and each unit the user leads. The cards of §13.19 and §42 are computed for the chosen scope. With only direct reports in scope, the page is unchanged.</p>
+</li>
+<li>
+<p><strong>FR-UNT-13.</strong> Workload, Weekly Planner and Vacation and Coverage MUST add "Group by unit" beside the existing groupings, and a unit filter that includes descendants. Group subtotals add the people in that unit subtree; a person appears once, under their home unit.</p>
+</li>
+<li>
+<p><strong>FR-UNT-14.</strong> A project MAY name an optional <strong>lead unit</strong>, set by its PM or an Admin. Portfolio (§13.12) and the project list MUST add a lead-unit filter that includes descendants, and "No unit" for projects without one. A lead unit never changes who can view or edit the project.</p>
+</li>
+<li>
+<p><strong>FR-UNT-15.</strong> An <strong>Organisation</strong> page MUST show the tree with each unit's level, leader, discipline, office, active head count and, for people the viewer has in scope, the person list. Every signed-in user can see unit names, levels and leaders; person lists follow people scope.</p>
+</li>
+<li>
+<p><strong>FR-UNT-16.</strong> The Staff Assignments report and the Team Capacity report (§51.3) MUST add unit and unit-path columns and a unit filter. Counts are by unit, never a per-person score.</p>
+</li>
+</ul>
+<h3 id="546-administration-import-and-history"><span class="num">54.6</span> Administration, import and history</h3>
+<ul>
+<li>
+<p><strong>FR-UNT-17.</strong> The Admin screens (§13.15) MUST let a System Administrator create, rename, move and close units; set levels; set leaders; and place people, singly or in bulk. Moving a unit moves its whole subtree. Every change MUST write one activity entry with old and new values (§20.1).</p>
+</li>
+<li>
+<p><strong>FR-UNT-18.</strong> An Admin MAY import units and placements from a CSV file with columns <code>unit_path</code> (names joined by " / "), <code>level</code>, <code>leader_email</code>, <code>discipline</code>, <code>office</code> and, in a second file, <code>email</code>, <code>unit_path</code>, <code>manager_email</code>. The import MUST validate everything first, show a preview of creates, moves and unchanged rows, and apply all or nothing. It never deletes a unit or clears a field left blank.</p>
+</li>
+<li>
+<p><strong>FR-UNT-19.</strong> Placement and leadership changes MUST be effective from the time they are saved. Reports for past weeks use each person's home unit at the end of that week, read from the activity log of FR-UNT-17, so earlier totals do not move when someone changes unit.</p>
+</li>
+</ul>
+<h3 id="547-shipping-dark"><span class="num">54.7</span> Shipping dark</h3>
+<ul>
+<li><strong>FR-UNT-20.</strong> The amendment MUST merge dark behind <code>flag.org_structure</code> under §43's flag rules and is turned on by Jay. With the flag off, every screen, response, report and export is as it was before this amendment, and <code>supervisor_id</code> keeps its current meaning.</li>
+</ul>
+<h3 id="548-acceptance-criteria"><span class="num">54.8</span> Acceptance criteria</h3>
+<ul>
+<li>
+<p><strong>AC-UNT-01.</strong> Given levels Region &gt; Business unit &gt; Team, when an Admin creates Atlantic &gt; Civil &gt; Civil Halifax Team and places Alex there, then the Organisation page shows the path, leader and a head count of 1 at every level.</p>
+</li>
+<li>
+<p><strong>AC-UNT-02.</strong> Given a unit at level Team, when an Admin tries to make it the parent of a Region unit, or to move a unit under its own descendant, then the server refuses with a reason and nothing changes.</p>
+</li>
+<li>
+<p><strong>AC-UNT-03.</strong> Given Pat leads Civil and is not Alex's direct manager, then Pat sees Alex on My Staff under the Civil scope, opens Alex's My Work read-only, and is refused when reassigning Alex's task or adding Alex to a project team.</p>
+</li>
+<li>
+<p><strong>AC-UNT-04.</strong> Given Alex has work on a Restricted project Pat cannot see, then that work and its hours are absent from Pat's My Staff, Workload and reports for Civil, and the partial-view note is shown.</p>
+</li>
+<li>
+<p><strong>AC-UNT-05.</strong> Given <code>include_indirect_reports</code> is off, then Sam sees only direct reports; when it is turned on, "All my reports" lists every person below Sam, and a reporting cycle grants no indirect scope and is listed for Admins.</p>
+</li>
+<li>
+<p><strong>AC-UNT-06.</strong> Given Workload grouped by unit and filtered to Atlantic, then every person whose home unit is in Atlantic's subtree appears exactly once, and the subtotals add up to the Atlantic total.</p>
+</li>
+<li>
+<p><strong>AC-UNT-07.</strong> Given a CSV import with one unknown manager email, then the preview lists the error, nothing is applied, and a corrected file applies every row in one transaction.</p>
+</li>
+<li>
+<p><strong>AC-UNT-08.</strong> Given Alex moved from Civil to Structural in week 44, then the Team Capacity report for week 43 still counts Alex under Civil.</p>
+</li>
+<li>
+<p><strong>AC-UNT-09.</strong> Given <code>flag.org_structure</code> is off, then existing API tests and browser suites pass unchanged, and responses, reports and exports carry no new fields.</p>
+</li>
+</ul>
+<h3 id="549-decisions"><span class="num">54.9</span> Decisions</h3>
+<p>Each decision below uses its default until Jay decides otherwise. The rows are also in <code>specs/DECISIONS.md</code> as 050-D1 to 050-D8.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Default used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>Approve this amendment's scope</td>
+<td>Approved by Jay 2026-10-18 with the listed defaults</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>Default level names</td>
+<td>Region, Business unit, Team; Admin renames</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>Do unit leaders get edit rights over their unit's people?</td>
+<td>No; read and roll-up only; edits stay with the direct manager, PM and Discipline Lead</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Include indirect reports by default?</td>
+<td>No; organisation setting <code>include_indirect_reports</code>, off</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>Source of manager and unit data</td>
+<td>Hub Admin screens and CSV import; Entra ID <code>manager</code> sync stays TBD (§8.8)</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>Project lead unit</td>
+<td>Optional, filter only; no access effect</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>History for past reports</td>
+<td>Home unit at the end of each week, read from the activity log</td>
+</tr>
+<tr>
+<td>D8</td>
+<td>Who may see the person list of a unit outside their scope?</td>
+<td>Nobody but Executives and Admins; unit names, levels, leaders and head counts are visible to all</td>
 </tr>
 </tbody>
 </table></div>

@@ -10,6 +10,18 @@ namespace Hub.Api.Features;
 /// count of the list its link opens, computed by the same list query (§12.17 "same code path").
 public static class DashboardEndpoints
 {
+    /// §49.5 and §49.6 (packet 045 Part D): the discipline status segments here and Portfolio's overdue deliverables.
+    public const string RollupsFlag = "status_rollups";
+
+    /// FR-RCV-14 / D10: the four status bar segments, in order. Cancelled is in none of them.
+    static readonly (string Key, string[] Statuses)[] Segments =
+    [
+        ("notStarted", [DeliverableStatus.NotStarted]),
+        ("inProgress", [DeliverableStatus.InProgress, DeliverableStatus.InReview, DeliverableStatus.RevisionRequired, DeliverableStatus.ReadyToIssue]),
+        ("issued", [DeliverableStatus.Issued, DeliverableStatus.Accepted]),
+        ("onHold", [DeliverableStatus.OnHold]),
+    ];
+
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{id:guid}/dashboard", Dashboard);
@@ -69,15 +81,26 @@ public static class DashboardEndpoints
         Task<object> Due14(Scope x) => Count(x.Deliverables(dueFrom: today, dueTo: today.AddDays(14), indicator: "open"),
             x.Link(("dueFrom", today.ToString("yyyy-MM-dd")), ("dueTo", today.AddDays(14).ToString("yyyy-MM-dd")), ("indicator", "open")));
         var due14 = new Dictionary<string, object>();
+        var rollups = s.IsFlagOn(RollupsFlag);
+        var status = new Dictionary<string, object>();
         foreach (var row in disciplines)
         {
             var dId = row.GetProperty("disciplineId").GetGuid();
-            due14[dId.ToString()] = await Due14(new Scope(db, id, dId, me.Id, today, s));
+            var ds = new Scope(db, id, dId, me.Id, today, s);
+            due14[dId.ToString()] = await Due14(ds);
+            // FR-RCV-14: each segment is counted by the deliverable list query its link opens.
+            if (rollups)
+            {
+                var seg = new Dictionary<string, object>();
+                foreach (var (key, statuses) in Segments)
+                    seg[key] = await Count(ds.Deliverables(status: string.Join(",", statuses)), ds.Link(("status", string.Join(",", statuses))));
+                status[dId.ToString()] = seg;
+            }
         }
         // Issues and risks are project-wide whatever the scope (AC-CNT-07), counted by the register's own query (FR-RCV-08).
         RegisterEndpoints.RegisterQuery Reg(string? severity) => new(null, severity, null, null, "open", null);
 
-        return new
+        var result = new
         {
             Milestones = milestones,
             Tasks = new
@@ -118,6 +141,11 @@ public static class DashboardEndpoints
             Activity = await ActivityEndpoints.Render(db, recent),
             State = state is null ? null : new { state.EvaluatedAt },
         };
+        if (!rollups) return result;
+        // FR-DLV-08: the field exists only while `flag.status_rollups` is on, so the response is unchanged with it off.
+        var o = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
+        o["disciplineStatus"] = JsonSerializer.SerializeToNode(status, JsonOpts.Web);
+        return o;
     }
 
     public sealed record MilestoneRow(Guid Id, string Key, string Name, string MilestoneType, DateOnly Date, DateOnly? OriginalDate, Guid? ProjectDisciplineId,

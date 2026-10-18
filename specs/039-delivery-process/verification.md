@@ -18,7 +18,7 @@ Per FR-DLV-24, this file records checks until `trace_spec.py --report` (slice S1
 | AC-DLV-10 | S02 | PARTIAL: `tools/test_ci_tests.py` shows every API class in exactly one of 3 shards, a new class file lands in a shard without edits, and a new `ci_steps.txt` line runs in its own job only; on the merged tree domain 635 + shards 162, 227 and 159 = 1183 = `dotnet test --list-tests`; three consecutive green GitHub runs not yet done |
 | AC-DLV-11 | S02 | PASS (local): `tools/test_coverage_gate.py`: a line hit only in the second file is counted once; one file gives the same result as before on a fixture and on real coverage files; merging the 4 real files from the builder run clears both gates (96.3 % branches, 95.0 % lines) |
 | AC-DLV-12 | S03 | PARTIAL: `tools/test_ci_tests.py` (11 count tests) covers a missed shard (fails and names the cases), a case run twice, a missing test list, a drop below main for backend and browser suites, the `replace-test` label, a first run that passes and publishes, and the real step list; locally 1183 listed = 1183 run (635 + 162 + 227 + 159) and removing api-3 names the 159 missing cases; the GitHub run, main artifact download and label event not yet proven |
-| AC-DLV-13 | S07 | UNRUN |
+| AC-DLV-13 | S07 | PARTIAL: on the Mac the label and `HUB_BUILD` check (`tools/ci_tests.py image`) passed with fake inspect data and with real local images built with and without `RELEASE_SHA`, and the image built without the argument starts and answers `/health` 200 with build `dev`; the image job on a green main commit (GHCR push, attestation and `gh attestation verify`) not yet run, needs GitHub |
 | AC-DLV-14 | S04 | PARTIAL: `tools/test_pr_checks.py` fixtures pass: additive changes, guard triggers and the `contract` label pass; drop, rename, alter, dropped check constraint, destructive `Sql` and unreadable `Sql` (concatenation, identifier, second positional argument, dynamic EXECUTE) fail; not yet run as a GitHub check on a real pull request |
 | AC-DLV-15 | S08 | UNRUN |
 | AC-DLV-16 | S14 | UNRUN |
@@ -168,3 +168,22 @@ Assumptions:
 
 Left for Jay:
 - After this reaches main, confirm on GitHub that the `report` job runs (it downloads all job artifacts and needs a full-history checkout) and uploads the `spec-report` artifact. Until then the FR-DLV-24 transition clause keeps verification.md in use.
+
+## Build 039-S07
+
+Checks on the merged tree (clean merge): `dotnet build Hub.slnx` 0 errors; `python3 tools/test_ci_tests.py` 24 tests OK (`ImageTests` cites AC-DLV-13); `.github/workflows/ci.yml` parses as YAML; `python3 tools/trace_spec.py --check` clean. No web or C# change. No product flag: CI and image only, app behaviour unchanged.
+
+Assumptions:
+- 039-D15 default: packet 042 S01 already added the `RELEASE_SHA` argument and `HUB_BUILD`, so S07 only adds the `org.opencontainers.image.revision` label (FR-DLV-14) in the final stage of `hosting/Dockerfile.review`.
+- 039-D1 default: the GHCR package is private; the workflow changes no visibility setting.
+- Image name is `ghcr.io/<lowercased repository owner>/pm-tool:<full sha>`; the checks run against repository@digest, the exact image pushed.
+- The `image` job runs only on a push to main after domain, api, web, checks and gate pass, and is the only job with `packages: write`; top-level permissions stay read-only.
+- Action versions: docker/login-action@v3, docker/build-push-action@v6, actions/attest-build-provenance@v2.
+- The probe check for the build without the argument was done locally (`/health`); `scripts/verify-homedev-review.py` only accepts the homedev origins.
+- The moving `main` tag and the contract-migration label are left to S08.
+
+Left for Jay:
+- After this reaches main, let the image job run once: confirm it pushes `pm-tool:<sha>` to GHCR and that the label, `HUB_BUILD` and `gh attestation verify` steps pass.
+- Confirm the GHCR package is private (D1) and that the repository's Actions settings let `GITHUB_TOKEN` write packages and attestations.
+- Changes under `hosting/` and `.github/` are Tier B: the pull request needs the tier-b label or Jay's review.
+- On homedev, run `scripts/verify-homedev-review.py` against an image built without `RELEASE_SHA`.

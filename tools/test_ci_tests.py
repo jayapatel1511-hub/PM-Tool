@@ -102,11 +102,11 @@ class StepsTests(unittest.TestCase):
     def test_repository_step_list(self):
         steps = ci_tests.parse_steps(ci_tests.STEPS.read_text())
         jobs = {j for js, _, _ in steps for j in js}
-        self.assertEqual(jobs, {"domain", "api-1", "api-2", "api-3", "web", "checks", "gate"})
+        self.assertEqual(jobs, {"domain", "api-1", "api-2", "api-3", "web", "checks", "gate", "report"})
         commands = " ".join(cmd for _, _, cmd in steps)
         for kept in ("test:handoffs", "test:sign-in", "test:coordination", "test:design-basis", "test:planner",
                      "test:resources", "test:supervisor-capacity", "test:ui-review", "npm audit", "npm run lint",
-                     "--vulnerable", "trace_spec.py --check", "coverage_gate.py", "pr_checks.py size",
+                     "--vulnerable", "trace_spec.py --check", "trace_spec.py --report", "test_trace_report", "coverage_gate.py", "pr_checks.py size",
                      "test_backup_helpers", "test_pilot_initializer", "test_pilot_operations", "test_pilot_pitr",
                      "test_social_activation", "test_fixture_api", "test_seed_homedev_tuesday_review"):
             self.assertIn(kept, commands)

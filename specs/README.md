@@ -4,6 +4,8 @@ The product specification has 50 Spec Kit packets: the original 18 first-release
 saved views, and three new workspace/calendar/task-hour packets into the first release (§36). Each folder holds a `spec.md` in Spec Kit's format and a quality checklist;
 `plan.md`, `tasks.md`, and `verification.md` are added as each packet is planned and built. Packets 039 to 047 follow the shorter shape of packet 039 (§43.9): `spec.md`, `plan.md`, `tasks.md` as a list of one-pull-request slices, and `verification.md`, with their decisions in [DECISIONS.md](DECISIONS.md).
 
+Packets written after §43.9 start from [`_templates/`](_templates/) (`spec.md`, `plan.md`, `tasks.md`, a one-page `acceptance.md`); their status, ACs passing, slices done and records ratio are in the packet table of the specification report (`python3 tools/trace_spec.py --report`), published with every main CI run.
+
 - Product specification: [`Engineering-Project-Coordination-Hub-Specification.md`](../Engineering-Project-Coordination-Hub-Specification.md).
   It remains the source of truth (constitution, principle IV); every packet requirement cites the
   specification ID it comes from, written like *(FR-TSK-03, R-01)*.

@@ -3,6 +3,10 @@
 
     python3 tools/trace_spec.py           write specs/TRACEABILITY.md and report gaps
     python3 tools/trace_spec.py --check   exit 1 if any ID or section is uncovered or unknown
+    python3 tools/trace_spec.py --report [RESULTS_DIR] [--run-url URL] [--out FILE]
+                                          FR-DLV-22: each FR and AC ID with its citing tests, pass, fail,
+                                          unrun or human-only, and the run URL; per packet ACs passing,
+                                          slices done, flag and records ratio (FR-DLV-25). Not committed.
 
 Every requirement (FR-), acceptance (AC-), rule (G-, P-, TM-, M-, DL-, T-, R-, D-, DEC-, C-, DOC-,
 ATT-, ASG-, RSK-, ISS-, MTG-), attention (A-), edge-case (E-), decision (Q), and goal (G1, T1) ID in
@@ -130,5 +134,201 @@ def main():
     return 1 if ("--check" in sys.argv and problems) else 0
 
 
+# --report (§43.9, FR-DLV-22, FR-DLV-25). Results are the CI artifacts: *.trx from `domain` and the
+# API shards, step-outcomes.jsonl from each job (tools/ci_tests.py). Specification records are measured, not gated.
+METHOD_ID = re.compile(r"(?<![A-Za-z0-9])(FR|AC)_([A-Z]+)_(\d{2})(?![0-9])")
+TRAIT = re.compile(r'\[Trait\("Spec",\s*"([^"]+)"\)\]')
+CLASS = re.compile(r"\bclass\s+(\w+)")
+METHOD = re.compile(r"\b(?:void|Task)\s+(\w+)\s*\(")
+RECORD_FILES = re.compile(r"(^specs/|^spec-parts/|\.md$|package-lock\.json$|\.Designer\.cs$|ModelSnapshot\.cs$)")
+
+
+def ids_in(text):
+    """FR and AC IDs, with `AC-XXX-01..06` ranges expanded as `expand` does for FR ranges."""
+    ids = {i for i in expand(text) if i.startswith(("FR-", "AC-"))}
+    for m in re.finditer(r"\b(AC-[A-Z]+)-(\d{2})\.\.(\d{2})\b", text):
+        ids.update(f"{m[1]}-{n:02d}" for n in range(int(m[2]), int(m[3]) + 1))
+    return ids
+
+
+def backend_citations(tests_dir):
+    """{"Class.Method": IDs} for every [Fact]/[Theory]: method name, Spec trait, declaration-line comment, class summary."""
+    found = {}
+    for f in sorted(pathlib.Path(tests_dir).rglob("*.cs")):
+        cls, cls_ids, doc, traits, is_test = None, set(), [], set(), False
+        for line in f.read_text(encoding="utf-8").splitlines():
+            s = line.strip()
+            if s.startswith("///"):
+                doc.append(s)
+                continue
+            if s.startswith("["):
+                is_test |= bool(re.match(r"\[(?:Fact|Theory)\b", s))
+                traits |= {i for i in TRAIT.findall(s)}
+                continue
+            if (c := CLASS.search(s)) and "(" not in s.split("class")[0]:
+                cls, cls_ids = c[1], ids_in(" ".join(doc) + " " + s)
+            elif is_test and cls and (m := METHOD.search(s)):
+                found[f"{cls}.{m[1]}"] = (cls_ids | ids_in(s) | traits
+                                          | {f"{a}-{b}-{n}" for a, b, n in METHOD_ID.findall(m[1])})
+            doc, traits, is_test = [], set(), False
+    return found
+
+
+def browser_citations(web):
+    """{"browser:<script>": IDs}: a suite cites the IDs written anywhere in its file."""
+    pkg = web / "package.json"
+    if not pkg.is_file():
+        return {}
+    import json
+    scripts = json.loads(pkg.read_text())["scripts"]
+    found = {}
+    for name, cmd in scripts.items():
+        m = re.fullmatch(r"node (tests/\S+)", cmd)
+        if name.startswith("test:") and m and (web / m[1]).is_file():
+            found[f"browser:{name}"] = ids_in((web / m[1]).read_text(encoding="utf-8"))
+    return found
+
+
+def python_citations(root):
+    """{"<path>": IDs}: a Python test file cites the IDs written anywhere in it, like a browser suite."""
+    files = [f for d in ("tools", "scripts", "tools/preview") for f in sorted((root / d).glob("test_*.py"))]
+    return {str(f.relative_to(root)): ids_in(f.read_text(encoding="utf-8")) for f in files}
+
+
+def results(folder):
+    """{test key: "pass" | "fail"} from *.trx and step-outcomes.jsonl under folder."""
+    import html
+    import json
+    out = {}
+    if not folder:
+        return out
+    for f in sorted(pathlib.Path(folder).rglob("*.trx")):
+        for name, outcome in re.findall(r'<UnitTestResult [^>]*?testName="([^"]*)"[^>]*?outcome="([^"]*)"', f.read_text()):
+            parts = html.unescape(name).split("(")[0].replace("+", ".").split(".")
+            key = ".".join(parts[-2:])
+            res = {"Passed": "pass", "Failed": "fail"}.get(outcome)
+            if res and out.get(key) != "fail":
+                out[key] = res
+    for f in sorted(pathlib.Path(folder).rglob("step-outcomes.jsonl")):
+        for line in f.read_text().splitlines():
+            step = json.loads(line)
+            keys = [f"browser:{s}" for s in re.findall(r"npm run (test:[\w-]+)", step["command"])]
+            for path in re.findall(r"[\w/.]*test_\w+(?:\.py)?", step["command"]):
+                keys.append(path if path.endswith(".py") else path.replace(".", "/") + ".py")
+            for key in keys:
+                if step["outcome"] in ("pass", "fail") and out.get(key) != "fail":
+                    out[key] = step["outcome"]
+    return out
+
+
+def human_only(path):
+    if not path.is_file():
+        return set()
+    return {ln.split("#")[0].strip() for ln in path.read_text().splitlines()} - {""}
+
+
+def code_lines(root, packet):
+    """Hand-written lines added by commits whose subject names a slice of the packet (`039-S11: ...`, `039 S11: ...`)."""
+    import subprocess
+    try:
+        log = subprocess.run(["git", "-C", str(root), "log", "--no-merges", "--numstat", "--format=@%s", "-E",
+                              f"--grep=^(Merge )?{packet}[ -][sS][0-9]+"], capture_output=True, text=True, check=True).stdout
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return 0
+    total, counting = 0, False
+    for line in log.splitlines():
+        if line.startswith("@"):
+            counting = bool(re.match(rf"{packet}[ -][sS]\d+", line[1:]))
+        elif counting and (cols := line.split("\t")) and len(cols) == 3 and cols[0].isdigit():
+            if not RECORD_FILES.search(cols[2]):
+                total += int(cols[0])
+    return total
+
+
+def record_lines(root, folder, spec_text):
+    lines = sum(len(f.read_text(encoding="utf-8", errors="replace").splitlines()) for f in folder.rglob("*") if f.is_file())
+    if (m := re.search(r"`(spec-parts/[\w.-]+\.md)`", spec_text)) and (root / m[1]).is_file():
+        lines += len((root / m[1]).read_text(encoding="utf-8").splitlines())
+    decisions = root / "specs" / "DECISIONS.md"
+    if decisions.is_file():
+        lines += len(re.findall(rf"^\|[^|]*\|\s*{folder.name[:3]}\s*\|", decisions.read_text(encoding="utf-8"), re.M))
+    return lines
+
+
+def report(root=ROOT, results_dir=None, run_url=""):
+    """The FR-DLV-22 report as Markdown."""
+    spec = (root / SPEC.name).read_text(encoding="utf-8")
+    universe = ids_in(spec[spec.index("## 1. "):])
+    tests = {**backend_citations(root / "tests"), **browser_citations(root / "web"), **python_citations(root)}
+    outcome = results(results_dir)
+    human = human_only(root / "specs" / "human-only.txt")
+    citing = defaultdict(list)
+    for test, ids in tests.items():
+        for i in ids:
+            citing[i].append(test)
+
+    def status(i):
+        if i in human:
+            return "human"
+        got = [outcome.get(t) for t in citing[i]]
+        return "fail" if "fail" in got else "pass" if "pass" in got else "unrun"
+
+    run = run_url or "(local run)"
+    packets = sorted((root / "specs").glob("[0-9][0-9][0-9]-*/spec.md"))
+    by_packet = defaultdict(set)
+    rows = ["| Packet | ACs passing | Human-only | Slices done | Flag | Records lines | Code lines | Records ratio |",
+            "|---|---|---|---|---|---|---|---|"]
+    for p in packets:
+        text = p.read_text(encoding="utf-8")
+        acs = {i for i in ids_in(text) if i.startswith("AC-") and i in universe}
+        for i in ids_in(text):
+            by_packet[i].add(p.parent.name[:3])
+        tasks = p.parent / "tasks.md"
+        boxes = re.findall(r"^\s*- \[([ xX])\]", tasks.read_text(encoding="utf-8"), re.M) if tasks.is_file() else []
+        flag = re.search(r"`(flag\.[\w.]+)`", text)
+        rec, code = record_lines(root, p.parent, text), code_lines(root, p.parent.name[:3])
+        ratio = f"{rec / code:.2f}:1" + (" (over 1:1)" if rec > code else "") if code else "no code yet"
+        rows.append(f"| {p.parent.name} | {sum(status(a) == 'pass' for a in acs)} of {len(acs)} | "
+                    f"{sum(a in human for a in acs)} | {sum(b != ' ' for b in boxes)} of {len(boxes)} | "
+                    f"{flag[1] if flag else 'none'} | {rec} | {code} | {ratio} |")
+
+    order = sorted(universe, key=lambda x: (x[:2], re.sub(r"-\d+$", "", x), int(x[-2:])))
+    counts = defaultdict(int)
+    ids = ["| ID | Packets | Citing tests | Result | Human-only | Run |", "|---|---|---|---|---|---|"]
+    for i in order:
+        st = status(i)
+        counts[st] += 1
+        ids.append(f"| {i} | {', '.join(sorted(by_packet[i])) or '-'} | {', '.join(sorted(citing[i])) or '-'} | "
+                   f"{st} | {'yes' if i in human else 'no'} | {run} |")
+    return "\n".join([
+        "# Specification report", "",
+        "Generated by `python3 tools/trace_spec.py --report` (FR-DLV-22); published with each main CI run, not committed.", "",
+        f"- Run: {run}",
+        f"- FR and AC IDs: {len(order)}; pass {counts['pass']}, fail {counts['fail']}, unrun {counts['unrun']}, human {counts['human']}",
+        "- Records ratio: lines under `specs/<packet>/`, its spec-parts file and its decision rows, against code and test "
+        "lines of commits naming the packet's slices; soft target at most 1:1, measured, not gated (FR-DLV-25).", "",
+        "## Packets", "", *rows, "", "## IDs", "", *ids, ""])
+
+
+def report_main(argv):
+    import argparse
+    import os
+    p = argparse.ArgumentParser(prog="trace_spec.py --report")
+    p.add_argument("results", nargs="?", help="folder holding the CI artifacts (*.trx, step-outcomes.jsonl)")
+    p.add_argument("--run-url", default=(f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/"
+                                         f"{os.environ['GITHUB_RUN_ID']}" if os.environ.get("GITHUB_RUN_ID") else ""))
+    p.add_argument("--out")
+    a = p.parse_args(argv)
+    text = report(ROOT, a.results, a.run_url)
+    if a.out:
+        pathlib.Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        pathlib.Path(a.out).write_text(text, encoding="utf-8")
+    else:
+        print(text)
+    return 0
+
+
 if __name__ == "__main__":
+    if "--report" in sys.argv:
+        sys.exit(report_main([a for a in sys.argv[1:] if a != "--report"]))
     sys.exit(main())

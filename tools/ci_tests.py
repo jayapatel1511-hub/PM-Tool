@@ -46,18 +46,28 @@ def parse_steps(text):
 
 
 def run_steps(job, steps_file=STEPS, cwd=ROOT):
+    """Runs the job's steps; each outcome goes to ci-artifacts/step-outcomes.jsonl for `trace_spec.py --report`."""
     steps = [(always, cmd) for jobs, always, cmd in parse_steps(pathlib.Path(steps_file).read_text()) if job in jobs]
     if not steps:
         sys.exit(f"no steps for job {job!r} in {steps_file}")
     env = {**os.environ, "CI_JOB": job}
     failed = None
+    log = pathlib.Path(cwd) / "ci-artifacts" / "step-outcomes.jsonl"
+    log.parent.mkdir(parents=True, exist_ok=True)
+
+    def record(cmd, outcome):
+        with log.open("a") as f:
+            f.write(json.dumps({"job": job, "command": cmd, "outcome": outcome}) + "\n")
+
     for always, cmd in steps:
         if failed and not always:
             print(f"::group::skip {cmd}\n::endgroup::", flush=True)
+            record(cmd, "skip")
             continue
         print(f"::group::{cmd}", flush=True)
         code = subprocess.run(["bash", "-eo", "pipefail", "-c", cmd], cwd=cwd, env=env).returncode
         print("::endgroup::", flush=True)
+        record(cmd, "fail" if code else "pass")
         if code and not failed:
             failed = (cmd, code)
             print(f"::error::step failed ({code}): {cmd}", flush=True)

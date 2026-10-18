@@ -55,9 +55,13 @@ public static class Http
 
 public sealed record Page<T>(IReadOnlyList<T> Items, [property: System.Text.Json.Serialization.JsonPropertyName("page")] int PageNumber, int PageSize, int TotalCount, string? Sort = null, object? Filters = null);
 
-/// Security headers (§21): CSP, no sniffing, referrer policy, framing denied.
+/// Security headers (§21): CSP, no sniffing, referrer policy, framing denied. Also the build stamp (FR-LIVE-02).
 public sealed class SecurityHeaders(RequestDelegate next, IConfiguration cfg)
 {
+    /// FR-LIVE-01: the image's commit SHA (HUB_BUILD), or "dev" for local runs and tests.
+    public static string Build(IConfiguration cfg) => cfg["HUB_BUILD"] is { Length: > 0 } b ? b : "dev";
+
+    readonly string build = Build(cfg);
     readonly string csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; "
         + $"connect-src 'self' https://login.microsoftonline.com {cfg["Csp:ConnectSrc"]}; frame-src https://login.microsoftonline.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         + (cfg["Auth:Mode"] == SocialAuth.Scheme ? " https://accounts.google.com https://login.microsoftonline.com" : "");
@@ -70,6 +74,8 @@ public sealed class SecurityHeaders(RequestDelegate next, IConfiguration cfg)
         h["X-Frame-Options"] = "DENY";
         h["Content-Security-Policy"] = csp;
         if (ctx.Request.Path.StartsWithSegments("/api")) h.CacheControl = "no-store";
+        // Set as the response starts so problem responses, which clear the headers, still carry it.
+        ctx.Response.OnStarting(() => { h["X-Hub-Build"] = build; return Task.CompletedTask; });
         return next(ctx);
     }
 }

@@ -135,16 +135,18 @@ app.UseRateLimiter();
 app.UseAuthorization();
 app.UseMiddleware<IdempotencyMiddleware>();
 
-app.MapGet("/health", async (HubDb db, TimeProvider clock) =>
+var hubBuild = SecurityHeaders.Build(cfg);
+app.MapGet("/health", async (HubDb db, TimeProvider clock, HttpContext ctx) =>
 {
-    // Reveals availability only; outbox lag above 10 minutes reports Degraded (§23.8).
+    // Reveals availability and the build stamp only (FR-LIVE-02); outbox lag above 10 minutes reports Degraded (§23.8).
+    ctx.Response.Headers.CacheControl = "no-store";
     try
     {
         var oldest = await db.Outbox.Where(o => o.ProcessedAt == null).MinAsync(o => (DateTimeOffset?)o.CreatedAt);
         var degraded = oldest is { } t && clock.GetUtcNow() - t > TimeSpan.FromMinutes(10);
-        return Results.Json(new { status = degraded ? "Degraded" : "Healthy" });
+        return Results.Json(new { status = degraded ? "Degraded" : "Healthy", build = hubBuild });
     }
-    catch { return Results.Json(new { status = "Unhealthy" }, statusCode: 503); }
+    catch { return Results.Json(new { status = "Unhealthy", build = hubBuild }, statusCode: 503); }
 }).AllowAnonymous();
 
 var api = app.MapGroup("/api/v1");

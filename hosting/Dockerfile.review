@@ -1,4 +1,9 @@
+# FR-LIVE-01: the full commit SHA, passed by the compose files; builds without it say "dev".
+ARG RELEASE_SHA=dev
+
 FROM node:24-alpine AS web
+ARG RELEASE_SHA
+ENV VITE_HUB_BUILD=$RELEASE_SHA
 WORKDIR /work
 COPY web/package.json web/package-lock.json web/
 RUN cd web && npm ci
@@ -12,6 +17,8 @@ COPY --from=web /work/src/Hub.Api/wwwroot/ src/Hub.Api/wwwroot/
 RUN dotnet publish src/Hub.Api/Hub.Api.csproj -c Release -o /out
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
+ARG RELEASE_SHA
+ENV HUB_BUILD=$RELEASE_SHA
 WORKDIR /app
 COPY --from=build /out/ ./
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080

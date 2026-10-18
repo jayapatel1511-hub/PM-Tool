@@ -1,6 +1,6 @@
 # Verification: Delivery Process
 
-Slice S01 built and merged into the integration branch; other slices not started.
+Slices S01, S09 and S10 built and merged into the integration branch; other slices not started.
 
 Per FR-DLV-24, this file records checks until `trace_spec.py --report` (slice S11) is published on main; after that, this packet's verification is the report of the CI run for the deployed commit, and human checks go in `acceptance.md`.
 
@@ -9,12 +9,12 @@ Per FR-DLV-24, this file records checks until `trace_spec.py --report` (slice S1
 | AC-DLV-01 | S05 | UNRUN |
 | AC-DLV-02 | S01 | PARTIAL: passes locally against a temporary git repo (350 hand-written lines plus an 11,000-line Designer file pass with no warning, 450 warns and passes, 1,050 fails, 1,050 with label `large` passes); not yet run in GitHub CI on a real pull request |
 | AC-DLV-03 | S01 | PASS (local): `git check-attr` reports `linguist-generated` set and `diff` unset for a Designer file, the snapshot, both combined spec files, `TRACEABILITY.md` and `package-lock.json`; nothing else in `git ls-files` is marked |
-| AC-DLV-04 | S09 | UNRUN |
-| AC-DLV-05 | S09 | UNRUN |
-| AC-DLV-06 | S09 | UNRUN |
-| AC-DLV-07 | S09 | UNRUN |
-| AC-DLV-08 | S09 | UNRUN |
-| AC-DLV-09 | S09 | UNRUN |
+| AC-DLV-04 | S09 | PASS (local): FlagsTests: a one-entry list gives `flag.demo` as an on/off setting, default off, group `flags`; the empty list adds nothing to `OrgSettings.Defs` |
+| AC-DLV-05 | S09 | PASS (local): FlagsApiTests: `/me` keys are the existing ones plus an empty `flags` map; Admin settings keys equal `OrgSettings.Defs` and each row has only key, kind, group, default and value |
+| AC-DLV-06 | S09 | PARTIAL: guard off/on logic (404 while off or missing, passes when on) tested on settings built in the test; endpoint wrapper not exercised through HTTP because no flag is declared; client hook treats a missing map or name as off, but browser suites not run (no port assigned) |
+| AC-DLV-07 | S09 | PASS (local): retirement check names a flag whose `acceptance.md` records its pilot sign-off and passes without one; also run on the real (empty) list against `specs/<packet>-*/acceptance.md` |
+| AC-DLV-08 | S09 | PASS (local): pair check names the flag and the missing tag (`flag-off` or `flag-on`) and passes when both exist; also scans the test assembly traits for the real list |
+| AC-DLV-09 | S09 | PARTIAL: list is empty, full backend suite passes (1164/1164 on the slice), no existing route, setting or response gains a flag check; browser suites and coverage gates not run |
 | AC-DLV-10 | S02 | UNRUN |
 | AC-DLV-11 | S02 | UNRUN |
 | AC-DLV-12 | S03 | UNRUN |
@@ -69,3 +69,19 @@ Assumptions:
 Left for Jay:
 - Confirm or overrule new rows 036-D20 to 036-D28 and 037-D1 to 037-D2 (all default-active).
 - Add `python3 tools/test_decisions.py` to `.github/workflows/ci.yml` (with S02 or by Jay; Tier B file).
+
+## Build 039-S09
+
+Checks on the merged tree (clean merge): `dotnet build Hub.slnx` 0 errors; `dotnet test tests/Hub.Tests --filter` Flags, Me, Admin and Settings classes 456/456 pass; `web npm run build` succeeds; `web npm run lint` exit 0 (one new fast-refresh warning on the `useFlag` hook, same as `useMe` and `useAuth`); `python3 tools/trace_spec.py --check` clean. Builder ran the full backend suite on the slice: 1164/1164. The flag list is empty, so with every flag off behaviour is unchanged; `/me` gains only an empty `flags` map. Browser suites not run (no port assigned).
+
+Assumptions:
+- 039-D7 default: a flag is retired after its pilot sign-off is recorded in the packet's `acceptance.md`; the check reads no date.
+- 039-D8 default: every signed-in user receives flag names and on/off through `/me`; the packet appears only on Admin settings rows.
+- Sign-off line format (not defined by the packet): a line in `specs/<packet>-*/acceptance.md` containing "pilot sign-off" (any case) and the flag in backticks as `` `flag.<name>` ``. `FlagDef.Packet` is the packet number prefix, for example "048".
+- Test tags are xUnit traits: `[Trait("flag-off", "<name>")]` and `[Trait("flag-on", "<name>")]`.
+- Retirement and pair-check logic lives in `FlagsTests.cs`, not production code.
+- `OrgSettings.Flags` is built only from the declared list; stored `flag.*` rows for undeclared names are ignored, so a removed flag's leftover row is never read (FR-DLV-09).
+- The packet field is added only to flag rows, so the Admin settings response is unchanged while no flag is declared.
+
+Left for Jay:
+- Run every browser suite and the coverage gates on a port assigned to this branch to finish AC-DLV-06 and AC-DLV-09.

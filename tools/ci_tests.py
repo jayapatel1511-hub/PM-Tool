@@ -3,10 +3,19 @@
 
   python3 tools/ci_tests.py steps <job>     run the job's lines of tools/ci_steps.txt in order
   python3 tools/ci_tests.py shard <n|api-n> print the dotnet test filter for API shard n of 3
+  python3 tools/ci_tests.py count <dir> [--main FILE] [--labels a,b] [--event NAME] [--out FILE]
+                                            test-count ratchet (FR-DLV-13): executed backend cases (*.trx
+                                            under <dir>) must equal the listed cases (listed-tests.txt under
+                                            <dir>); on pull requests the backend and browser-suite counts
+                                            must not fall below --main unless labelled replace-test
 
 ci_steps.txt: one step per line, `<job>[,<job>...]: <command>`; `#` starts a comment. A job name
 followed by ` [always]` runs that step even after an earlier step failed (evidence copies).
 Commands run from the repository root under bash with CI_JOB set to the job name."""
+import argparse
+import collections
+import html
+import json
 import os
 import pathlib
 import re
@@ -85,7 +94,83 @@ def shard_filter(n, folder=API_TESTS):
     return "|".join(f"FullyQualifiedName~Hub.Tests.Api.{c}." for c in names)
 
 
+def listed_cases(text):
+    """Multiset of test names from `dotnet test --list-tests` output."""
+    _, _, tail = text.partition("The following Tests are available:")
+    return collections.Counter(line.strip() for line in tail.splitlines() if line.startswith("    ") and line.strip())
+
+
+def executed_cases(folder):
+    """Multiset of test names in every TRX file under folder (each shard writes one)."""
+    found = collections.Counter()
+    for f in sorted(pathlib.Path(folder).rglob("*.trx")):
+        found.update(html.unescape(n) for n in re.findall(r'<UnitTestResult [^>]*?testName="([^"]*)"', f.read_text()))
+    return found
+
+
+def browser_suites(steps_text):
+    """Browser suites CI runs: the web lines of ci_steps.txt that run an `npm run test:` script."""
+    return sum(cmd.count("npm run test:") for jobs, _, cmd in parse_steps(steps_text) if "web" in jobs)
+
+
+def diff_names(label, counter, limit=20):
+    names = sorted(counter.elements())
+    more = f" (+{len(names) - limit} more)" if len(names) > limit else ""
+    return f"{label} {len(names)}: " + "; ".join(names[:limit]) + more
+
+
+def count(folder, main_file=None, labels="", event="", out=None, steps_file=STEPS):
+    """FR-DLV-13. Returns (exit code, messages); writes the counts JSON to out."""
+    errors = []
+    listed_files = sorted(pathlib.Path(folder).rglob("listed-tests.txt"))
+    listed = collections.Counter()
+    for f in listed_files:
+        listed.update(listed_cases(f.read_text()))
+    executed = executed_cases(folder)
+    if not listed_files:
+        errors.append("no listed-tests.txt: the domain job must list the test project's cases")
+    elif not executed:
+        errors.append("no .trx results from the domain and API jobs")
+    elif executed != listed:
+        msg = f"executed backend cases ({sum(executed.values())}) differ from listed cases ({sum(listed.values())})"
+        if listed - executed:
+            msg += "; " + diff_names("not run", listed - executed)
+        if executed - listed:
+            msg += "; " + diff_names("run but not listed", executed - listed)
+        errors.append(msg)
+    counts = {"backend": sum(executed.values()), "browser_suites": browser_suites(pathlib.Path(steps_file).read_text())}
+    notes = [f"counts: backend {counts['backend']}, browser suites {counts['browser_suites']}"]
+    main_counts = json.loads(pathlib.Path(main_file).read_text()) if main_file and pathlib.Path(main_file).is_file() else None
+    if main_counts is None:
+        notes.append("no earlier main count: passes and publishes this run's counts")
+    else:
+        drops = [f"{k} {counts[k]} < main {main_counts[k]}" for k in counts if k in main_counts and counts[k] < main_counts[k]]
+        if drops and "replace-test" in [x.strip() for x in labels.split(",")]:
+            notes.append("below main, accepted by label replace-test: " + ", ".join(drops))
+        elif drops and event != "pull_request":
+            # The pull request already passed this check (or carried replace-test); main stays green.
+            notes.append("below the previous main count after merge: " + ", ".join(drops))
+        elif drops:
+            errors.append("test count below the latest green main run: " + ", ".join(drops) + " (Jay may apply replace-test)")
+    if out:
+        pathlib.Path(out).parent.mkdir(parents=True, exist_ok=True)
+        pathlib.Path(out).write_text(json.dumps(counts, indent=2) + "\n")
+    return (1 if errors else 0), notes + [f"::error::{e}" for e in errors]
+
+
 def main(argv):
+    if argv and argv[0] == "count":
+        p = argparse.ArgumentParser(prog="ci_tests.py count")
+        p.add_argument("dir")
+        p.add_argument("--main")
+        p.add_argument("--labels", default="")
+        p.add_argument("--event", default="")
+        p.add_argument("--out", default="ci-artifacts/test-counts.json")
+        a = p.parse_args(argv[1:])
+        code, messages = count(a.dir, a.main, a.labels, a.event, a.out)
+        print("\n".join(messages))
+        return code
+
     if len(argv) == 2 and argv[0] == "steps":
         return run_steps(argv[1])
     if len(argv) == 2 and argv[0] == "shard":

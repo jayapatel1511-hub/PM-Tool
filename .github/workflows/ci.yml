@@ -3,6 +3,7 @@ name: ci
 on:
   push: { branches: [main] }
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 permissions: { contents: read }
 jobs:
   build:
@@ -15,6 +16,7 @@ jobs:
         options: --health-cmd "pg_isready -U hub" --health-interval 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
       - uses: actions/setup-dotnet@v4
         with: { dotnet-version: "10.0.x" }
       - uses: actions/setup-node@v4
@@ -24,6 +26,10 @@ jobs:
       - name: Tests with coverage (rules engine ≥ 95 % branches, services ≥ 70 %)
         run: dotnet test Hub.slnx --no-build -c Release --collect:"XPlat Code Coverage" --results-directory coverage
       - run: python3 tools/coverage_gate.py coverage
+      - name: Pull request size (hand-written lines; label `large` above 1,000)
+        if: github.event_name == 'pull_request'
+        env: { LABELS: "${{ join(github.event.pull_request.labels.*.name, ',') }}" }
+        run: python3 tools/test_pr_checks.py && python3 tools/pr_checks.py size --base HEAD^1 --labels "$LABELS"
       - name: Private backup and pilot bootstrap safety regressions
         run: python3 tools/test_backup_helpers.py && python3 tools/test_pilot_initializer.py && python3 tools/test_pilot_operations.py && python3 tools/test_pilot_pitr.py
       - name: Social activation and provider redirect probes

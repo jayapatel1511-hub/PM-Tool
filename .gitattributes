@@ -1,0 +1,7 @@
+# Generated files (§43.3 FR-DLV-05): committed, collapsed in diffs, skipped by the PR-size check.
+src/Hub.Api/Data/Migrations/*.Designer.cs linguist-generated -diff
+src/Hub.Api/Data/Migrations/HubDbModelSnapshot.cs linguist-generated -diff
+/Engineering-Project-Coordination-Hub-Specification.md linguist-generated -diff
+/Engineering-Project-Coordination-Hub-Specification.html linguist-generated -diff
+specs/TRACEABILITY.md linguist-generated -diff
+web/package-lock.json linguist-generated -diff

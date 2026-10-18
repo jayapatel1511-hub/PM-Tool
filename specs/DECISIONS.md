@@ -1,6 +1,6 @@
 # Decision log
 
-One table of the open product and process decisions for packets 038 to 047 and the build-approach report. Each row has a default.
+One table of the open product and process decisions for packets 038 to 048 and the build-approach report. Each row has a default.
 
 - Defaults apply while work ships dark. A pending row never blocks a merge or a review deployment; it blocks only a flag flip, that is, turning its addition on for pilot users.
 - Only Jay confirms or overrules a decision. Statuses: Open (the default applies), Decided, Done, Deferred (waits for its trigger).
@@ -156,3 +156,13 @@ One table of the open product and process decisions for packets 038 to 047 and t
 | 047-D17 | 047 | Step size for per-weekday hours? | 0.5 h, as planning entries use. | Open |
 | 047-D18 | 047 | Does the Team tab away chip show for a person with a partial view? | Yes, because time away carries no project detail. | Open |
 | 047-D19 | 047 | How many flags? | One per area: flag.onboarding_card, flag.capacity_reports, flag.route_counter (release only; route_counter_enabled is the lasting control), flag.template_roles, flag.unfilled_beside_capacity, flag.project_status_note, flag.my_work_follow_up, flag.project_import, flag.capacity_polish. | Open |
+| 048-D1 | 048 | Approve the §52 Verifiable Records scope? | Approve with the listed defaults (048-D2 to 048-D10 stay Open with their defaults). | Decided by Jay 2026-10-18 |
+| 048-D2 | 048 | Chain granularity for the activity log? | One chain per project plus one organisation chain for rows without a project. | Open |
+| 048-D3 | 048 | Where is the chain head kept off the database? | In the nightly off-host backup manifest (packet 044 S14); until then, the downloadable verification record only. | Open |
+| 048-D4 | 048 | May flag.verifiable_log be switched off once on? | No; switching off needs a recorded decision, and the chain then records a "Chain paused" entry. | Open |
+| 048-D5 | 048 | Do commitments withdrawn after capture stay in the reliability denominator? | Yes, listed separately (AC-RDY-04). | Open |
+| 048-D6 | 048 | Reliability bands? | Good at 80 % or above, Watch at 60 % or above, Low below; project and discipline level only, never per person. | Open |
+| 048-D7 | 048 | Default miss categories? | Missing input, Decision delay, Changed scope, Unavailable capacity, Technical problem, Other; the free-text reason stays required. | Open |
+| 048-D8 | 048 | Met confirmation? | Off by default; when on, the PM or the Discipline Lead of the work confirms, never the performer. | Open |
+| 048-D9 | 048 | Revision convention presets? | Letters (A, B, C …), numbers (0, 1, 2 …), and two-stage P01… then C01…; or a custom ordered list. Default none. | Open |
+| 048-D10 | 048 | How many flags? | One per part: flag.verifiable_log, flag.commitment_reliability, flag.allocation_preview, flag.baseline_history, flag.revision_check. | Open |

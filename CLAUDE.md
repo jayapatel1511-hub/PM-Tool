@@ -14,7 +14,7 @@ internal web app for coordinating multidisciplinary engineering projects. Applic
   six-panel image records confirmed feature scope; older wireframes are historical detail.
   The product specification and packets govern behavior and acceptance.
 - `.specify/memory/constitution.md`: the rules every change follows.
-- `specs/`: the whole specification as Spec Kit packets 001 to 047, indexed in `specs/README.md`.
+- `specs/`: the whole specification as Spec Kit packets 001 to 048, indexed in `specs/README.md`.
   Open product and process decisions, each with a default, are in `specs/DECISIONS.md`.
   `specs/TRACEABILITY.md` maps every specification ID to its packets; regenerate it with
   `python3 tools/trace_spec.py` (`--check` fails on any gap).

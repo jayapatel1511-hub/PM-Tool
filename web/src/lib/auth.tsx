@@ -31,11 +31,14 @@ export interface Me {
     defaultWeeklyCapacityHours: number; coordinationLookaheadWeeks: number; workingDaysEnabled: boolean
   }
   preferences: { digestEnabled: boolean; digestTimeLocal?: string; denseRows: boolean; weeklySummaryEnabled: boolean }
+  flags?: Record<string, boolean>
 }
 
 interface AuthState { me: Me; signOut: () => void }
 const Ctx = createContext<AuthState | null>(null)
 export const useMe = () => useContext(Ctx)!.me
+/** §43.4 FR-DLV-08: a release toggle; a missing map or name is off. */
+export const useFlag = (name: string) => useMe().flags?.[name] === true
 export const useAuth = () => useContext(Ctx)!
 
 const DEV_KEY = 'hub.devUser'

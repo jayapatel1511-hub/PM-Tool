@@ -35,6 +35,21 @@ public static class Http
 
     public static string[] List(string? csv) => string.IsNullOrWhiteSpace(csv) ? [] : csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
+    /// §43.4 FR-DLV-08: the one shared flag guard. While a flag is off, its addition answers 404.
+    public static void RequireFlag(OrgSettings s, string flag)
+    {
+        if (!s.IsFlagOn(flag)) throw ApiException.NotFound();
+    }
+
+    /// Puts an addition's endpoint or group behind a flag: `group.MapGet(...).RequireFlag("name")`.
+    public static TBuilder RequireFlag<TBuilder>(this TBuilder builder, string flag) where TBuilder : IEndpointConventionBuilder =>
+        builder.AddEndpointFilter(async (ctx, next) =>
+        {
+            var sp = ctx.HttpContext.RequestServices;
+            RequireFlag(await sp.GetRequiredService<SettingsStore>().Get(sp.GetRequiredService<HubDb>()), flag);
+            return await next(ctx);
+        });
+
     public static Guid[] Ids(string? csv) => List(csv).Select(s => Guid.TryParse(s, out var g) ? g : Guid.Empty).Where(g => g != Guid.Empty).ToArray();
 }
 

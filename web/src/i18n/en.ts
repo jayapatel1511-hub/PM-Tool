@@ -934,6 +934,7 @@ export const en: Record<string, string> = {
   'admin.group.notifications': 'Notifications',
   'admin.group.security': 'Security',
   'admin.group.rules': 'Attention rules',
+  'admin.group.flags': 'Feature flags', 'admin.flagLabel': '{name} (packet {packet})',
   'admin.usersIntro': 'In local-password staging, add the account here and hand off credentials privately. Directory users are added when they first sign in; roles from directory groups follow the groups and roles added here stay until removed here.',
   'admin.noSupervisor': 'No supervisor',
   'admin.supervisor': 'Supervisor',

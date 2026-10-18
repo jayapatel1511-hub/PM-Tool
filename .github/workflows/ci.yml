@@ -1,4 +1,5 @@
 # Build, test and scan on every pull request and push to main (§23.7, Q15: the repository is on GitHub).
+# Parallel jobs (§43.5, FR-DLV-11): the steps live in tools/ci_steps.txt; this file keeps services and permissions.
 name: ci
 on:
   push: { branches: [main] }
@@ -6,8 +7,23 @@ on:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 permissions: { contents: read }
 jobs:
-  build:
+  domain:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: "10.0.x" }
+      - run: python3 tools/ci_tests.py steps domain
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: ci-artifacts-domain, path: ci-artifacts/, if-no-files-found: ignore }
+
+  api:
+    name: api-${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: { shard: [1, 2, 3] }
     services:
       db:
         image: postgres:17-alpine
@@ -16,74 +32,45 @@ jobs:
         options: --health-cmd "pg_isready -U hub" --health-interval 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: "10.0.x" }
+      - run: python3 tools/ci_tests.py steps api-${{ matrix.shard }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: "ci-artifacts-api-${{ matrix.shard }}", path: ci-artifacts/, if-no-files-found: ignore }
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: npm, cache-dependency-path: web/package-lock.json }
+      - run: python3 tools/ci_tests.py steps web
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: ci-artifacts-web, path: ci-artifacts/, if-no-files-found: ignore }
+
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
         with: { fetch-depth: 2 }
       - uses: actions/setup-dotnet@v4
         with: { dotnet-version: "10.0.x" }
-      - uses: actions/setup-node@v4
-        with: { node-version: "24", cache: npm, cache-dependency-path: web/package-lock.json }
-      - run: dotnet restore Hub.slnx
-      - run: dotnet build Hub.slnx --no-restore -c Release
-      - name: Tests with coverage (rules engine ≥ 95 % branches, services ≥ 70 %)
-        run: dotnet test Hub.slnx --no-build -c Release --collect:"XPlat Code Coverage" --results-directory coverage
-      - run: python3 tools/coverage_gate.py coverage
-      - name: Pull request size (hand-written lines; label `large` above 1,000)
-        if: github.event_name == 'pull_request'
+      - run: python3 tools/ci_tests.py steps checks
         env: { LABELS: "${{ join(github.event.pull_request.labels.*.name, ',') }}" }
-        run: python3 tools/test_pr_checks.py && python3 tools/pr_checks.py size --base HEAD^1 --labels "$LABELS"
-      - name: Private backup and pilot bootstrap safety regressions
-        run: python3 tools/test_backup_helpers.py && python3 tools/test_pilot_initializer.py && python3 tools/test_pilot_operations.py && python3 tools/test_pilot_pitr.py
-      - name: Social activation and provider redirect probes
-        run: python3 -m unittest tools.test_social_activation
-      - name: Hosted review fixture and credential safety regressions
-        run: python3 -m unittest tools/preview/test_fixture_api.py tools/preview/test_refresh_fixture_copy.py tools/preview/test_seed_resources.py tools/preview/test_seed_staffing.py scripts/test_extend_review_credentials.py scripts/test_seed_homedev_tuesday_review.py -v
-      - name: Vulnerable NuGet packages
-        run: dotnet list Hub.slnx package --vulnerable --include-transitive | tee vuln.txt && ! grep -q "Critical" vuln.txt
-      - run: npm ci
-        working-directory: web
-      - run: npm run build
-        working-directory: web
-      - name: Lint, including accessibility rules (§22, packet 011 FR-002)
-        run: npm run lint
-        working-directory: web
-      - name: Install Chromium for handoff UI checks
-        run: npx playwright install --with-deps chromium --only-shell
-        working-directory: web
-      - name: Handoff UI workflow and dialog accessibility (mocked API)
-        run: npm run test:handoffs
-        working-directory: web
-      - name: Microsoft and Google login UI and accessibility (mocked API)
-        run: npm run test:sign-in
-        working-directory: web
-      - name: Review and revision change UI workflows and accessibility (mocked API)
-        run: npm run test:coordination
-        working-directory: web
-      - name: Design basis impact and focus regression (mocked API)
-        run: npm run test:design-basis
-        working-directory: web
-      - name: Weekly planner recovery, permissions and keyboard regressions (mocked API)
-        run: npm run test:planner
-        working-directory: web
-      - name: Resource capacity and allocation accessibility (mocked API)
-        run: npm run test:resources
-        working-directory: web
-      - name: Supervisor capacity signals and digest preference (mocked API)
-        run: npm run test:supervisor-capacity
-        working-directory: web
-      - name: Coordination browser evidence
-        if: always()
+      - if: always()
         uses: actions/upload-artifact@v4
-        with:
-          name: review-change-browser-evidence
-          path: web/test-results/coordination
-          if-no-files-found: ignore
-      - name: Handoff browser evidence
-        if: always()
+        with: { name: ci-artifacts-checks, path: ci-artifacts/, if-no-files-found: ignore }
+
+  gate:
+    needs: [domain, api]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { pattern: ci-artifacts-*, path: ci-artifacts-in }
+      - run: python3 tools/ci_tests.py steps gate
+      - if: always()
         uses: actions/upload-artifact@v4
-        with:
-          name: handoff-browser-evidence
-          path: web/test-results/handoffs
-          if-no-files-found: ignore
-      - run: npm audit --audit-level=critical --omit=dev
-        working-directory: web
-      - name: Specification is current and fully traced
-        run: python3 tools/trace_spec.py --check
+        with: { name: ci-artifacts-gate, path: ci-artifacts/, if-no-files-found: ignore }

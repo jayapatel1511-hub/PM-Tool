@@ -87,7 +87,9 @@ python3 tools/trace_spec.py --check
 ```
 
 The same run in CI on every push and pull request (`.github/workflows/ci.yml`), with the vulnerable-package and
-`npm audit` checks. The accessibility audit (`tools/a11y/audit.js`) runs axe-core over every screen in a signed-in
+`npm audit` checks, as parallel jobs whose steps are listed in `tools/ci_steps.txt` (run one job locally with
+`python3 tools/ci_tests.py steps <job>`; the API tests split into three shards and `tools/coverage_gate.py` merges
+their coverage files). The accessibility audit (`tools/a11y/audit.js`) runs axe-core over every screen in a signed-in
 browser session; see the comment at the top of the file.
 
 ## Build for deployment

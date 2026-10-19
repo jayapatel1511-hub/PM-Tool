@@ -89,7 +89,7 @@ web: cd web && npm run test:browser-verification
 web: node --test web/scripts/run-smoke-live.test.mjs
 web: node web/scripts/run-smoke-live.mjs
 nightly: TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 TUESDAY_API_BASE_URL=http://127.0.0.1:5080 node web/tests/smoke-live.cjs
-nightly: TUESDAY_SYNTHETIC_API=1 TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 TUESDAY_LIVE_BASE_URL=http://127.0.0.1:5080 node web/tests/live-real.cjs
+nightly: TUESDAY_SYNTHETIC_API=1 TUESDAY_LIVE_UI_URL=http://127.0.0.1:5173 TUESDAY_LIVE_API_URL=http://127.0.0.1:5080 node web/tests/live-real.cjs
 # Typed contract and registry (§44).
 gate: python3 tools/shapes.py check --input ci-artifacts-in
 checks: python3 tools/test_shapes.py

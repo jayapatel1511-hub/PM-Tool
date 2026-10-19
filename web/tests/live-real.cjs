@@ -42,7 +42,7 @@ async function browserWrite(page, pathname, body, who) {
     return { status: response.status, body: response.ok && response.status !== 204 ? await response.json() : null }
   }, { pathname, body, who })
 }
-async function waitForText(page, text, timeout = 2000) { await page.getByText(text, { exact: true }).first().waitFor({ state: 'visible', timeout }) }
+async function waitForText(page, text, timeout = 2000) { await page.locator('button:visible').filter({ hasText: text }).first().waitFor({ state: 'visible', timeout }) }
 
 ;(async () => {
   const config = await (await fetch(`${apiBase}/api/v1/config`)).json()
@@ -57,8 +57,6 @@ async function waitForText(page, text, timeout = 2000) { await page.getByText(te
     browser = await chromium.launch({ headless: true })
     const contextA = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
     const contextB = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
-    await contextA.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'priya@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
-    await contextB.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'alex@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
     const writerPage = await contextA.newPage(); const viewerPage = await contextB.newPage(); const errors = []
     for (const page of [writerPage, viewerPage]) { page.on('pageerror', e => errors.push(e.message.slice(0, 180))); page.on('console', m => { if (m.type() === 'error') errors.push(m.text().slice(0, 180)) }) }
     const streamRequests = []; viewerPage.on('request', request => { if (request.url().includes('/api/v1/events')) streamRequests.push({ url: request.url(), headers: request.headers() }) })
@@ -69,7 +67,7 @@ async function waitForText(page, text, timeout = 2000) { await page.getByText(te
     assert.ok(streamRequests.every(x => x.headers['x-dev-user'] === 'alex@hub.test'), 'event stream must carry the viewer development header')
     const riskTitle = `Synthetic live risk ${Date.now().toString(36)}`
     const risk = await browserWrite(writerPage, `projects/${fixture.id}/risks`, { title: riskTitle, description: 'live smoke', probability: 2, impact: 2, mitigation: 'observe', triggerIndicator: 'change' }, 'priya')
-    assert.equal(risk.status, 201, `risk write failed: HTTP ${risk.status}`); await waitForText(viewerPage, riskTitle); await viewerPage.getByText(riskTitle, { exact: true }).click(); await waitForText(viewerPage, riskTitle)
+    assert.equal(risk.status, 201, `risk write failed: HTTP ${risk.status}`); await waitForText(viewerPage, riskTitle); await viewerPage.locator('button:visible').filter({ hasText: riskTitle }).first().click(); await waitForText(viewerPage, riskTitle)
     await viewerPage.goto(`${ui}/projects/${fixture.number}/tasks`, { waitUntil: 'domcontentloaded', timeout: 60000 }); await viewerPage.locator('main').first().waitFor({ timeout: 30000 })
     const taskName = `Synthetic live task ${Date.now().toString(36)}`
     const task = await browserWrite(writerPage, `projects/${fixture.id}/tasks`, { name: taskName, projectDisciplineId: fixture.discipline }, 'priya')

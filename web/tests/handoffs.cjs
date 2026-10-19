@@ -2,6 +2,8 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const port = process.env.PORT ?? '5173';
+const base = `http://127.0.0.1:${port}`;
 const results = path.resolve(__dirname, '../test-results/handoffs');
 fs.mkdirSync(results, { recursive: true });
 let server, browser;
@@ -15,8 +17,8 @@ const options={canCreate:true,people:[{id:sender,displayName:'Alex Engineer'},{i
 let row=null, history=[], revisions=[], requests=[];
 const errors=[], unknown=[];
 (async()=>{
- server=spawn(process.execPath, ['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','5173','--strictPort'], {cwd:path.resolve(__dirname,'..'),stdio:'inherit'});
- for(let attempt=0;attempt<50;attempt++){try{if((await fetch('http://127.0.0.1:5173')).ok)break;}catch{} await new Promise(r=>setTimeout(r,100));}
+ server=spawn(process.execPath, ['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port',port,'--strictPort'], {cwd:path.resolve(__dirname,'..'),stdio:'inherit'});
+ for(let attempt=0;attempt<50;attempt++){try{if((await fetch(base)).ok)break;}catch{} await new Promise(r=>setTimeout(r,100));}
  browser=await chromium.launch({headless:true,...(process.env.CHROME_EXECUTABLE_PATH?{executablePath:process.env.CHROME_EXECUTABLE_PATH}:{})});
  const page=await browser.newPage({viewport:{width:1440,height:1000}});
  await page.addInitScript(()=>sessionStorage.setItem('hub.devUser','alex@hub.test'));
@@ -51,7 +53,7 @@ const errors=[], unknown=[];
   } else {unknown.push(path); data={};}
   await route.fulfill({status:method==='POST'&&path===`projects/${pid}/handoffs`?201:200,contentType:'application/json',body:JSON.stringify(data)});
  });
- await page.goto('http://127.0.0.1:5173/projects/P-DEMO/handoffs');
+ await page.goto(`${base}/projects/P-DEMO/handoffs`);
  await page.getByRole('button',{name:'New handoff',exact:true}).click();
  await page.getByLabel('Source deliverable',{exact:true}).selectOption(source);
  await page.getByLabel('Receiving discipline',{exact:true}).selectOption(electrical);

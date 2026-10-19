@@ -21,6 +21,28 @@ public sealed class OnboardingAndRouteCounterTests
         Assert.Empty(Onboarding.Groups([SystemRole.ReadOnly], new()));
     }
 
+    [Fact]
+    public void Combined_role_catalogue_has_expected_groups_and_completion_facts()
+    {
+        var facts = new OnboardingFacts(true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
+        var groups = Onboarding.Groups([SystemRole.ProjectManager, "DisciplineLead", SystemRole.Supervisor, SystemRole.Executive, SystemRole.Admin], facts);
+
+        Assert.Equal(new[] { "Everyone", SystemRole.ProjectManager, "DisciplineLead", SystemRole.Supervisor, SystemRole.Executive, SystemRole.Admin }, groups.Select(x => x.Role));
+        Assert.Equal(new[] { 3, 4, 2, 3, 2, 3 }, groups.Select(x => x.Steps.Count));
+        Assert.Equal(17, groups.SelectMany(x => x.Steps).Select(x => x.Key).Distinct().Count());
+        Assert.All(groups.SelectMany(x => x.Steps), step => Assert.True(step.Done));
+    }
+
+    [Fact]
+    public void Admin_gets_project_manager_steps_and_admin_steps_without_pm_role()
+    {
+        var groups = Onboarding.Groups([SystemRole.Admin], new());
+
+        Assert.Equal(new[] { "Everyone", SystemRole.ProjectManager, SystemRole.Admin }, groups.Select(x => x.Role));
+        Assert.Contains(groups.Single(x => x.Role == SystemRole.ProjectManager).Steps, x => x.Key == "create-project");
+        Assert.Contains(groups.Single(x => x.Role == SystemRole.Admin).Steps, x => x.Key == "import-projects");
+    }
+
     [Theory] // AC-PRO-08
     [InlineData("projects/:number/tasks", "projects/:number/tasks")]
     [InlineData("my-work", "my-work")]

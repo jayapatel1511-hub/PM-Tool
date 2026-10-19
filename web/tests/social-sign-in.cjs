@@ -4,13 +4,14 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
 
-const origin = 'http://127.0.0.1:5189';
+const port = process.env.PORT ?? '5189';
+const origin = `http://127.0.0.1:${port}`;
 const output = path.resolve(__dirname, '../test-results/social-sign-in');
 let server, browser;
 
 (async () => {
   fs.mkdirSync(output, { recursive: true });
-  server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', '5189', '--strictPort'], { cwd: path.resolve(__dirname, '..'), stdio: 'ignore' });
+  server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', port, '--strictPort'], { cwd: path.resolve(__dirname, '..'), stdio: 'ignore' });
   for (let n = 0; n < 100; n++) {
     try { if ((await fetch(origin)).ok) break; } catch {}
     await new Promise(resolve => setTimeout(resolve, 100));

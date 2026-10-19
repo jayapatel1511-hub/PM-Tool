@@ -4,7 +4,7 @@ const assert = require('node:assert/strict')
 const { chromium } = require('playwright')
 
 const taskId = '00000000-0000-0000-0000-000000000001'
-const project = { id: '00000000-0000-0000-0000-000000000010', projectNumber: 'P-MOCK', name: 'Synthetic live project', status: 'Active', visibility: 'Open', rowVersion: 1, disciplines: [{ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil', leadUserId: null }], projectDisciplines: [{ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil', leadUserId: null }], links: [], permissions: { edit: { ok: true }, isPm: true, needsReason: false } }
+const project = { id: '00000000-0000-0000-0000-000000000010', projectNumber: 'P-MOCK', name: 'Synthetic live project', status: 'Active', visibility: 'Open', rowVersion: 1, disciplines: [{ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil', leadUserId: null }], projectDisciplines: [{ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil', leadUserId: null }], links: [], permissions: { edit: { ok: true }, reviewDates: { ok: false }, isPm: true, needsReason: false } }
 Object.assign(project, { client: 'Synthetic client', pmName: 'Alex Chen', phase: null, nextMilestone: null, starred: false, health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, permissions: { ...project.permissions, isPm: false, leadOf: [], createTaskIn: [] } })
 const task = { id: taskId, projectId: project.id, projectDisciplineId: '00000000-0000-0000-0000-000000000011', key: 'T-001', name: 'Synthetic task', status: 'Not Started', priority: 'Medium', rowVersion: 1, startDate: null, dueDate: null, assigneeId: null, assigneeName: null, reviewerId: null, reviewerName: null, reviewRound: 0, dueDateChangeCount: 0, effortHours: 0, state: { isWaiting: false, isBlocked: false, daysBlocked: 0, blockedBy: [], affectedMilestoneIds: [], isOverdue: false, isDueSoon: false, isBlocking: false, blockingCount: 0, isStale: false, isUnassigned: true, isMissingDueDate: true, isDateInconsistent: false, notes: [] } }
 const work = { person: { id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen', isActive: true }, readOnly: false, today: '2026-10-03', attention: { items: [], total: 0 }, tasks: [task], reviews: { tasks: [], deliverables: [] }, deliverables: [], people: {}, successors: [], decisions: [], actions: [], projects: [{ id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status, roles: ['TeamMember'], leads: [], follow: null, computedHealth: 'Green', reportedHealth: 'Green', nextMilestone: null }], milestones: [], completed: [] }
@@ -17,6 +17,7 @@ const me = { id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen
 const taskDetail = { task, description: 'Synthetic fixture task', project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status }, collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: true }, setReviewer: { ok: true }, dueDate: { ok: true }, dueNeedsReason: false, block: { ok: true }, delete: { ok: true }, restore: true, comment: true, transitions: [], dependencies: true, enterTime: true, needsReason: false, allowSelfReview: true } }
 
 async function startPreview(port = Number(process.env.TUESDAY_MOCK_PORT ?? 5189)) {
+  port = Number(process.env.TUESDAY_MOCK_PORT ?? port)
   const cwd = path.resolve(__dirname, '..')
   const child = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', String(port), '--strictPort'], { cwd, stdio: 'ignore' })
   let exited = false; child.once('exit', () => { exited = true })
@@ -62,7 +63,7 @@ function mockPlatformApi(page, { build, buildIds = ['mock-build-a', 'mock-build-
   return { eventRequests, pulseRequests, apiErrors, unknownGets, setBuild: (next) => { currentBuild = next }, stop: () => page.unroute('**/api/**', routePromise) }
 }
 async function newMockPage(base, opts) {
-  const browser = await chromium.launch({ headless: true })
+  const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'alex@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })

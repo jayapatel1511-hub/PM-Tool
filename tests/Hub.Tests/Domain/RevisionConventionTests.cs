@@ -14,4 +14,48 @@ public sealed class RevisionConventionTests
         Assert.True(c.Valid); Assert.Empty(c.Marks(" final ", "Draft")); Assert.Equal(["Out of sequence"], c.Marks("Draft", "Final"));
         Assert.False(new RevisionConvention("custom", ["a", " A "]).Valid);
     }
+
+    [Theory]
+    [InlineData("01")]
+    [InlineData("2147483648")]
+    [InlineData(null)]
+    [InlineData("")]
+    public void Numeric_invalid_values_are_nonstandard(string? code)
+    {
+        var c = new RevisionConvention("numbers");
+        Assert.Null(c.Position(code));
+        Assert.Equal(["Non-standard revision: expected 0, 1, 2 …"], c.Marks(code, null));
+    }
+
+    [Fact]
+    public void Pc_sequence_accepts_c01_after_p99_but_rejects_p00()
+    {
+        var c = new RevisionConvention("pc");
+        Assert.Equal(101, c.Position("C01"));
+        Assert.Empty(c.Marks("C01", "P99"));
+        Assert.Null(c.Position("P00"));
+        Assert.Equal(["Non-standard revision: expected P01, P02 … then C01, C02 …"], c.Marks("P00", null));
+    }
+
+    [Fact]
+    public void Custom_missing_or_blank_values_are_nonstandard()
+    {
+        var c = new RevisionConvention("custom", ["Draft", "For review", "Final"]);
+        Assert.Null(c.Position("Missing"));
+        Assert.Null(c.Position(null));
+        Assert.Equal(["Non-standard revision: expected Draft, For review, Final"], c.Marks(" ", null));
+    }
+
+    [Fact]
+    public void Builtin_conventions_are_valid_and_custom_limits_are_enforced()
+    {
+        Assert.All(new[] { "letters", "numbers", "pc" }, preset => Assert.True(new RevisionConvention(preset).Valid));
+        Assert.False(new RevisionConvention("custom", null).Valid);
+        Assert.False(new RevisionConvention("custom", []).Valid);
+        Assert.False(new RevisionConvention("custom", Enumerable.Repeat("x", 201).ToArray()).Valid);
+        Assert.False(new RevisionConvention("custom", [" "]).Valid);
+        Assert.False(new RevisionConvention("custom", [new string('x', 51)]).Valid);
+        Assert.False(new RevisionConvention("custom", ["A", " a "]).Valid);
+        Assert.True(new RevisionConvention("custom", Enumerable.Range(0, 200).Select(i => $"R{i}").ToArray()).Valid);
+    }
 }

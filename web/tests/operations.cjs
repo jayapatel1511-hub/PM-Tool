@@ -6,7 +6,7 @@ const cache = new Map();
 function sourceModule(file) {
   if (cache.has(file)) return cache.get(file);
   const module = { exports: {} }; cache.set(file, module.exports);
-  const source = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+  const source = ts.transpileModule(fs.readFileSync(file, 'utf8').replaceAll('import.meta.env.VITE_HUB_BUILD', '"dev"'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   new Function('require', 'module', 'exports', source)(name => name === 'sonner' ? { toast: { warning() {} } } : sourceModule(path.join(root, 'src', name.replace('@/', '') + '.ts')), module, module.exports);
   return module.exports;
 }
@@ -109,7 +109,7 @@ let server, browser;
   await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
   assert.deepEqual(await page.evaluate(async () => (await axe.run()).violations.map(v => v.id)), []);
   await page.screenshot({ path: path.join(root, 'test-results', 'operations', 'error-page.png'), fullPage: true });
-  const unexpected = unexpectedErrors.filter(error => !error.includes('n.jobs.map is not a function'));
+  const unexpected = unexpectedErrors.filter(error => !/TypeError: [\w$]+\.jobs\.map is not a function/.test(error));
   assert.deepEqual(unexpected, [], `unexpected browser errors: ${unexpected.join('; ')}`);
   console.log('PASS operations: error copy, trace refs, read retries, dead-letter retry, title counts and error fallback/axe, sanitized reports/cap and two-browser density');
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(async () => { await browser?.close(); server?.kill() });

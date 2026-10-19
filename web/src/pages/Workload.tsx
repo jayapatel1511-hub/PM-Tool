@@ -110,7 +110,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   ] as const).filter(([k]) => filters[k])
   const unfilled = q.data?.unfilledRoles ?? []
   // One indicator at a time; choosing the selected chip again shows every person (the former "Any" chip).
-  const indicatorChip = (x: string) => <ChipToggle key={x} on={filters.indicator === x} onClick={() => set('indicator', filters.indicator === x ? null : x)}>{runtimeText(`workload.ind.${x}`)}</ChipToggle>
+  const indicatorChip = (x: (typeof INDICATORS)[number]) => <ChipToggle key={x} on={filters.indicator === x} onClick={() => set('indicator', filters.indicator === x ? null : x)}>{t(`workload.ind.${x}`)}</ChipToggle>
   const clear = () => { const n = new URLSearchParams(sp); for (const [k] of tokens) n.delete(k); setSp(n, { replace: true }) }
   const weeks = q.data?.weeks ?? []
   const shiftWeeks = (days: number) => set('from', addDays(weeks[0] ?? today(), days))
@@ -125,8 +125,8 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
         <FilterBar activeCount={tokens.length}
           quick={<>
             <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('workload.indicator')}>{INDICATORS.slice(0, 3).map(indicatorChip)}</div>
-            <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={[...GROUP_BY.map((g) => ({ value: g, label: runtimeText(GROUP_LABEL[g]) })), ...(org.enabled ? [{ value: 'homeUnit', label: t('org.homeUnit') }] : [])]} />
-            <MenuSelect label={t('common.sort')} icon={ArrowUpDown} value={filters.sort ?? 'load'} onChange={(v) => set('sort', v === 'load' ? null : v)} options={SORTS.map((v) => ({ value: v, label: runtimeText(`workload.sortBy.${v}`) }))} />
+            <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={[...GROUP_BY.map((g) => ({ value: g, label: t(GROUP_LABEL[g]) })), ...(org.enabled ? [{ value: 'homeUnit', label: t('org.homeUnit') }] : [])]} />
+            <MenuSelect label={t('common.sort')} icon={ArrowUpDown} value={filters.sort ?? 'load'} onChange={(v) => set('sort', v === 'load' ? null : v)} options={SORTS.map((v) => ({ value: v, label: t(`workload.sortBy.${v}`) }))} />
           </>}
           active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}
           actions={<>

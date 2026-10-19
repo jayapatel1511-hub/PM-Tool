@@ -8,7 +8,10 @@ namespace Hub.Api.Features;
 /// Document links on projects, deliverables and tasks (§12.7, DOC-01..DOC-04, FR-DOC-01..03): pointers only, never files.
 public static class DocumentLinkEndpoints
 {
-    public sealed record AddBody(string Url, string? Title, string? LinkType);
+    public sealed record AddBody(string Url, string? Title = null, string? LinkType = null);
+    public sealed record LinkRow(Guid Id, string Title, string Url, string LinkType, int RowVersion, bool IsNetworkPath, Guid AddedBy, string? AddedByName, DateTimeOffset AddedAt, bool CanChange);
+    public sealed record LinkListResponse(bool CanAdd, IReadOnlyList<LinkRow> Links, IReadOnlyList<LinkRow> Inherited);
+    public sealed record LinkResponse(Guid Id, string Title, string Url, string LinkType, int RowVersion);
 
     public static async Task<(Guid ProjectId, string Key, Guid? DeliverableId)?> Owner(HubDb db, string type, Guid id)
     {
@@ -62,12 +65,10 @@ public static class DocumentLinkEndpoints
             var inherited = o.DeliverableId is { } did ? await Of(db, ItemType.Deliverable, did).ToListAsync() : []; // DOC-04
             var ids = own.Concat(inherited).Select(l => l.AddedBy).Distinct().ToList();
             var names = await db.Users.Where(u => ids.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
-            object Row(DocumentLink l, bool mine) => new
-            {
-                l.Id, l.Title, l.Url, l.LinkType, l.RowVersion, IsNetworkPath = Links.IsUnc(l.Url), l.AddedBy, AddedByName = names.GetValueOrDefault(l.AddedBy), l.AddedAt,
-                CanChange = mine && CanChange(l, access.Actor, ctx),
-            };
-            return new { CanAdd = CanAdd(type, access.Actor, ctx).Ok, Links = own.Select(l => Row(l, true)), Inherited = inherited.Select(l => Row(l, false)) };
+            LinkRow Row(DocumentLink l, bool mine) => new(l.Id, l.Title, l.Url, l.LinkType, l.RowVersion, Links.IsUnc(l.Url), l.AddedBy,
+                names.GetValueOrDefault(l.AddedBy), l.AddedAt, mine && CanChange(l, access.Actor, ctx));
+            return TypedResults.Ok(new LinkListResponse(CanAdd(type, access.Actor, ctx).Ok,
+                own.Select(l => Row(l, true)).ToList(), inherited.Select(l => Row(l, false)).ToList()));
         });
 
         api.MapPost("/items/{type}/{id:guid}/links", async (string type, Guid id, AddBody body, Access access, HubDb db, TimeProvider clock) =>
@@ -77,7 +78,7 @@ public static class DocumentLinkEndpoints
             var (_, ctx) = await access.Project(o.ProjectId);
             Access.Demand(CanAdd(type, access.Actor, ctx));
             var link = await Add(db, o.ProjectId, type, id, o.Key, body, access.Me.Id, clock.GetUtcNow());
-            return Results.Created($"/api/v1/links/{link.Id}", new { link.Id, link.Title, link.Url, link.LinkType, link.RowVersion });
+            return TypedResults.Created($"/api/v1/links/{link.Id}", new LinkResponse(link.Id, link.Title, link.Url, link.LinkType, link.RowVersion));
         });
 
         api.MapPatch("/links/{id:guid}", async (Guid id, System.Text.Json.JsonElement body, Access access, HubDb db, HttpContext http) =>
@@ -92,7 +93,7 @@ public static class DocumentLinkEndpoints
             if (patch.Has("linkType")) { var lt = patch.Str("linkType"); Check.OneOf(lt, LinkType.All, "linkType"); l.LinkType = lt!; }
             l.AuditKey = (await Owner(db, l.ItemType, l.ItemId))?.Key;
             await db.SaveChangesAsync();
-            return Results.Ok(new { l.Id, l.Title, l.Url, l.LinkType, l.RowVersion });
+            return TypedResults.Ok(new LinkResponse(l.Id, l.Title, l.Url, l.LinkType, l.RowVersion));
         });
 
         api.MapDelete("/links/{id:guid}", async (Guid id, Access access, HubDb db, TimeProvider clock, HttpContext http) =>
@@ -105,7 +106,7 @@ public static class DocumentLinkEndpoints
             l.DeletedBy = access.Me.Id;
             l.AuditKey = (await Owner(db, l.ItemType, l.ItemId))?.Key;
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
     }
 }

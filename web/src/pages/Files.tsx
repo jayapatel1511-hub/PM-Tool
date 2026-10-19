@@ -64,7 +64,7 @@ export function FilesPage() {
         <Section key={p.projectId} id={`f-${p.projectId}`} accent={accentOf(p.projectId)} count={p.count}
           title={<Link className="hover:underline" to={`/projects/${p.projectNumber}`}><span className="key mr-2 text-(--acc-fg)">{p.projectNumber}</span>{p.name}</Link>}
           actions={p.canAdd && adding !== p.projectId && <Button size="sm" variant="outline" onClick={() => setAdding(p.projectId)}><Plus className="size-4" />{t('links.add')}</Button>}>
-          {adding === p.projectId && <div className="border-b p-4"><AddLink path={`items/Project/${p.projectId}/links`} onDone={(ok) => { setAdding(null); if (ok) q.refetch() }} /></div>}
+          {adding === p.projectId && <div className="border-b p-4"><AddLink type="Project" id={p.projectId} onDone={() => setAdding(null)} /></div>}
           {p.items.length === 0 ? <Empty>{t('files.noneHere')}</Empty> : (
             <ul className="divide-y">
               {p.items.map((i) => (

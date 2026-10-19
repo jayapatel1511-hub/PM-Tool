@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useProjectRefresh } from '@/hooks/data'
 import { del, put } from '@/lib/api'
-import { t , runtimeText } from '@/lib/i18n'
+import { runtimeText, t } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
-const LEVELS = ['AllActivity', 'MyItemsOnly', 'Muted']
+const LEVELS = ['AllActivity', 'MyItemsOnly', 'Muted'] as const
 
 async function change(projectId: string, level: string | null) {
   if (level) await put(`projects/${projectId}/follow`, { level })
@@ -21,7 +21,7 @@ export function FollowLevelSelect({ projectId, level, onChanged, projectName }: 
   return (
     <select className={cn(selectCls, 'h-(--control-row-h)')} value={level ?? ''} aria-label={projectName ? t('follow.levelFor', { project: projectName }) : t('follow.level')}
       onChange={async (e) => { await change(projectId, e.target.value || null); onChanged() }}>
-      {LEVELS.map((l) => <option key={l} value={l}>{runtimeText(`follow.${l}`)}</option>)}
+      {LEVELS.map((l) => <option key={l} value={l}>{t(`follow.${l}`)}</option>)}
       <option value="">{t('follow.none')}</option>
     </select>
   )
@@ -44,8 +44,8 @@ export function FollowControl({ p }: { p: ProjectDetail }) {
         <DropdownMenuRadioGroup value={f?.level ?? ''}>
           {LEVELS.map((l) => (
             <DropdownMenuRadioItem key={l} value={l} onSelect={() => set(l)} className="flex-col items-start gap-0 py-2">
-              <span>{runtimeText(`follow.${l}`)}</span>
-              <span className="text-xs/[18px] text-muted-foreground">{runtimeText(`follow.${l}.hint`)}</span>
+              <span>{t(`follow.${l}`)}</span>
+              <span className="text-xs/[18px] text-muted-foreground">{t(`follow.${l}.hint`)}</span>
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

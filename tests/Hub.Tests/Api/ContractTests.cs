@@ -155,5 +155,15 @@ public sealed class ContractTests(HubFactory f)
         Assert.Equal("array", week["properties"]!["indicators"]!["type"]!.GetValue<string>());
     }
 
+    [Fact]
+    public async Task Client_error_report_success_is_documented_as_bodyless_204()
+    {
+        var document = await (await f.As(TestData.Alex).GetAsync("/api/v1/openapi.json")).Json();
+        var responses = document["paths"]!["/api/v1/client-errors"]!["post"]!["responses"]!.AsObject();
+        Assert.True(responses.ContainsKey("204"));
+        Assert.Null(responses["204"]!["content"]);
+        Assert.False(responses.ContainsKey("200"));
+    }
+
 
 }

@@ -16,7 +16,7 @@ import { useOrgPlacement } from '@/hooks/useOrgPlacement'
 import { get, qs } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate } from '@/lib/format'
-import { runtimeText, t, tv } from '@/lib/i18n'
+import { runtimeText, t, tv, type TextKey } from '@/lib/i18n'
 import type { ProjectRow } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ViewMenu } from '@/components/hub/views'
@@ -27,12 +27,20 @@ interface Portfolio { ownOnly: boolean; tiles: { active: number; red: number; ye
 
 const FILTERS = ['q', 'pmId', 'leadUnitId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'computedHealth', 'projectTypeId', 'submissionWithinDays', 'mine', 'overdueDecisions'] as const satisfies readonly (SavedViewKeys['portfolio'] | 'page' | 'panel' | 'draftAccessReason')[]
 const STATUSES = ['Setup', 'Active', 'On Hold', 'Complete']
-const HEALTHS = ['Red', 'Yellow', 'Green', 'Grey']
+const HEALTHS = ['Red', 'Yellow', 'Green', 'Grey'] as const
+type Health = (typeof HEALTHS)[number]
+const HEALTH_TILE_LABELS: Record<Exclude<Health, 'Grey'>, TextKey> = { Red: 'portfolio.red', Yellow: 'portfolio.yellow', Green: 'portfolio.green' }
+const GROUP_OPTIONS = [
+  { value: 'none', label: 'rcv.groupNone' },
+  { value: 'client', label: 'rcv.groupClient' },
+  { value: 'office', label: 'rcv.groupOffice' },
+  { value: 'projectType', label: 'rcv.groupProjectType' },
+] as const
 const SWATCH: Record<string, string> = { Red: 'var(--bad)', Yellow: 'var(--warn)', Green: 'var(--ok)', Grey: 'var(--idle)' }
 /** Health keeps its status symbol and colour (§13.0); the tiles' pastel accent only groups the three health counts. */
-const HEALTH_MARK: Record<string, [string, string]> = { Red: ['■', 'text-bad'], Yellow: ['▲', 'text-warn'], Green: ['●', 'text-ok'] }
+const HEALTH_MARK: Record<Exclude<Health, 'Grey'>, [string, string]> = { Red: ['■', 'text-bad'], Yellow: ['▲', 'text-warn'], Green: ['●', 'text-ok'] }
 // Table columns: label key and whether the column is numeric (right-aligned).
-const COLS: [string, boolean][] = [['portfolio.project', false], ['portfolio.pm', false], ['portfolio.client', false], ['admin.office', false], ['field.PhaseId', false],
+const COLS: [TextKey | '', boolean][] = [['portfolio.project', false], ['portfolio.pm', false], ['portfolio.client', false], ['admin.office', false], ['field.PhaseId', false],
   ['portfolio.health', false], ['portfolio.nextMilestone', false], ['portfolio.nextSubmission', false], ['portfolio.overdue', true], ['portfolio.blocked', true],
   ['portfolio.decisionsOverdue', true], ['portfolio.highIssues', true], ['portfolio.attention', true], ['portfolio.trend', false], ['', false]]
 
@@ -87,8 +95,8 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
     ['mine', t('portfolio.mine'), filters.mine === 'false' ? t('common.no') : filters.mine],
   ] as const).filter(([k]) => filters[k])
   const clear = () => setSp(new URLSearchParams(), { replace: true })
-  const healthLabel = (h: string, key: string) => (
-    <span className="inline-flex items-center gap-1.5"><span aria-hidden className={HEALTH_MARK[h][1]}>{HEALTH_MARK[h][0]}</span>{runtimeText(key)}</span>
+  const healthLabel = (h: Exclude<Health, 'Grey'>, key: TextKey) => (
+    <span className="inline-flex items-center gap-1.5"><span aria-hidden className={HEALTH_MARK[h][1]}>{HEALTH_MARK[h][0]}</span>{t(key)}</span>
   )
   const tiles = q.data?.tiles
   // AC-CNT-01: a health tile counts Active projects by computed health, so it opens exactly those rows.
@@ -110,14 +118,14 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
           <SummaryTile label={t('portfolio.active')} value={tiles.active} accent="blue" hint={t('sig.def.pfActive')} onClick={() => set('status', 'Active')} />
           {(['Red', 'Yellow', 'Green'] as const).map((h) => (
-            <SummaryTile key={h} label={healthLabel(h, `portfolio.${h.toLowerCase()}`)} value={tiles[h.toLowerCase() as 'red']} accent="lavender" hint={t('sig.def.pfHealth', { health: runtimeText(`health.${h}`) })} to={healthLink(h)} />
+            <SummaryTile key={h} label={healthLabel(h, HEALTH_TILE_LABELS[h])} value={tiles[h.toLowerCase() as 'red']} accent="lavender" hint={t('sig.def.pfHealth', { health: runtimeText(`health.${h}`) })} to={healthLink(h)} />
           ))}
           <SummaryTile label={t('portfolio.submissions')} value={tiles.submissions14} accent="mint" hint={t('sig.def.pfSubmissions')} onClick={() => set('submissionWithinDays', '14')} />
           <SummaryTile label={t('portfolio.decisions')} value={tiles.overdueDecisions} accent="peach" hint={t('sig.def.pfDecisions')} onClick={() => set('overdueDecisions', 'true')} />
         </div>
       )}
       {rollups && <Field label={t('rcv.group')} htmlFor="pf-group" className="w-48"><select id="pf-group" className={selectCls} value={group} onChange={(e) => set('group', e.target.value === 'none' ? null : e.target.value)}>
-        {[['none', 'groupNone'], ['client', 'groupClient'], ['office', 'groupOffice'], ['projectType', 'groupProjectType']].map(([value, label]) => <option key={value} value={value}>{runtimeText(`rcv.${label}`)}</option>)}
+        {GROUP_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{t(label)}</option>)}
       </select></Field>}
       <FilterBar activeCount={tokens.length}
         search={<Field label={t('common.search')} htmlFor="pf-q">
@@ -141,7 +149,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
           </Field>
           <Field label={t('portfolio.health')} htmlFor="pf-health" className="w-full sm:w-40">
             <select id="pf-health" className={selectCls} value={filters.health ?? ''} onChange={(e) => set('health', e.target.value)}>
-              <option value="">{t('portfolio.anyHealth')}</option>{HEALTHS.map((h) => <option key={h} value={h}>{runtimeText(`health.${h}`)}</option>)}
+              <option value="">{t('portfolio.anyHealth')}</option>{HEALTHS.map((h) => <option key={h} value={h}>{t(`health.${h}`)}</option>)}
             </select>
           </Field>
           <Field label={t('portfolio.within')} htmlFor="pf-within" className="w-full sm:w-48">
@@ -160,13 +168,13 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
           <table className="w-full text-sm">
             <caption className="sr-only">{t('nav.portfolio')}</caption>
             <thead className="bg-muted">
-              <tr>{(rollups ? [...COLS.slice(0, 12), ['rcv.overdueDeliverables', true] as [string, boolean], ...COLS.slice(12)] : COLS).map(([h, numeric], i) => <th key={i} scope="col" className={cn(thCls, numeric && 'text-right')}>{h ? runtimeText(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
+              <tr>{(rollups ? [...COLS.slice(0, 12), ['rcv.overdueDeliverables', true] as [TextKey, boolean], ...COLS.slice(12)] : COLS).map(([h, numeric], i) => <th key={i} scope="col" className={cn(thCls, numeric && 'text-right')}>{h ? t(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
             </thead>
             <tbody>
               {(group === 'none' ? [['', q.data.projects] as [string, Row[]]] : grouped).map(([key, rows]) => <Fragment key={key}>
                 {group !== 'none' && <tr className="border-t bg-muted" data-portfolio-group={key}><th scope="rowgroup" colSpan={8} className={thCls}>
                   {groupName(rows[0])} · {key ? <Link to={groupLink(key)} className="underline underline-offset-2">{rows.length} {t('nav.projects')}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.length} {t('nav.projects')}</span>}
-                  <span className="ml-3 inline-flex gap-3">{['Red', 'Yellow', 'Green'].map((health) => <span key={health}>{key ? <Link to={groupLink(key, health)}>{runtimeText(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</Link> : <span title={t('rcv.notSetDefinition')}>{runtimeText(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</span>}</span>)}</span>
+                  <span className="ml-3 inline-flex gap-3">{(['Red', 'Yellow', 'Green'] as const).map((health) => <span key={health}>{key ? <Link to={groupLink(key, health)}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</Link> : <span title={t('rcv.notSetDefinition')}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</span>}</span>)}</span>
                 </th>{(['overdueTasks', 'blockedTasks', 'overdueDecisions', 'highIssues', 'overdueDeliverables'] as const).map((column) => <td key={column} className={cn(tdCls, 'text-right tabular-nums')}>{key ? <Link to={groupLink(key)} aria-label={`${rows.reduce((sum,r)=>sum+(r[column]??0),0)} · ${t('rcv.subtotalDefinition')}`} title={t('rcv.subtotalDefinition')} className="underline underline-offset-2">{rows.reduce((sum,r)=>sum+(r[column]??0),0)}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.reduce((sum,r)=>sum+(r[column]??0),0)}</span>}</td>)}
                 <td className={cn(tdCls, 'text-right tabular-nums')}><span title={t('rcv.subtotalDefinition')}>■ {rows.reduce((sum,r)=>sum+r.attentionCritical,0)} · ▲ {rows.reduce((sum,r)=>sum+r.attentionWarning,0)}</span></td><td colSpan={2} /></tr>}
               {rows.map((r) => (

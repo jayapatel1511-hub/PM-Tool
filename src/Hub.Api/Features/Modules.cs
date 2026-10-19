@@ -113,7 +113,7 @@ public static class HubModules
             }
             logs.CreateLogger("Hub.ClientErrors").LogWarning("Client error {Reference} kind={Kind} route={Route} build={Build} user={User} name={Name} frame={Frame}: {Message}",
                 Clean(body.Reference, 256), Clean(body.Kind, 32), Clean(body.Route, 200), Clean(body.Build, 64), me.Id, Clean(body.Name, 80), Clean(body.StackFrame, 200), Clean(body.Message));
-            return Results.NoContent();
+            return TypedResults.NoContent();
         }).RequireRateLimiting("client-errors");
         // Public client configuration for the SPA sign-in (no secrets: client and tenant IDs are public values).
         api.MapGet("/config", (IConfiguration cfg, IHostEnvironment env) => new

@@ -1970,31 +1970,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfbooleanAndIEnumerableOfObjectAndIEnumerableOfObject": {
-        "properties": {
-          "canAdd": {
-            "type": "boolean"
-          },
-          "inherited": {
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "links": {
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "canAdd",
-          "links",
-          "inherited"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint": {
         "properties": {
           "admin": {
@@ -5366,9 +5341,7 @@
           }
         },
         "required": [
-          "url",
-          "title",
-          "linkType"
+          "url"
         ],
         "type": "object"
       },
@@ -6807,6 +6780,116 @@
           "title",
           "url",
           "linkType"
+        ],
+        "type": "object"
+      },
+      "LinkListResponse": {
+        "properties": {
+          "canAdd": {
+            "type": "boolean"
+          },
+          "inherited": {
+            "items": {
+              "$ref": "#/components/schemas/LinkRow"
+            },
+            "type": "array"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/LinkRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "canAdd",
+          "links",
+          "inherited"
+        ],
+        "type": "object"
+      },
+      "LinkResponse": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "linkType": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "url",
+          "linkType",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "LinkRow": {
+        "properties": {
+          "addedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "addedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "addedByName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "canChange": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isNetworkPath": {
+            "type": "boolean"
+          },
+          "linkType": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "url",
+          "linkType",
+          "rowVersion",
+          "isNetworkPath",
+          "addedBy",
+          "addedByName",
+          "addedAt",
+          "canChange"
         ],
         "type": "object"
       },
@@ -15838,8 +15921,8 @@
     "/api/v1/client-errors": {
       "post": {
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -17314,7 +17397,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfbooleanAndIEnumerableOfObjectAndIEnumerableOfObject"
+                  "$ref": "#/components/schemas/LinkListResponse"
                 }
               }
             },
@@ -17356,8 +17439,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkResponse"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -17499,8 +17589,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -17531,6 +17621,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkResponse"
+                }
+              }
+            },
             "description": "OK"
           }
         },

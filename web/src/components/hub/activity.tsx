@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Empty, tdCls, thCls } from '@/components/hub/common'
 import { fmtDate, fmtTime } from '@/lib/format'
-import { t, tv , runtimeText } from '@/lib/i18n'
+import { runtimeText, t, tv } from '@/lib/i18n'
 
 export interface ActivityRow {
   id: string; occurredAt: string; actorId?: string; actorName?: string; actorType: string; projectId?: string
@@ -67,7 +67,7 @@ export function ActivityTable({ rows, total, page, pageSize, onPage, onOpen, gro
       <div className="scroll-region overflow-x-auto" tabIndex={0} role="region" aria-label={t('activity.tableLabel')}>
         <table className="w-full text-sm">
           <thead className="bg-muted">
-            <tr>{['common.when', 'common.actor', 'common.action', 'common.item', 'common.change', 'common.reason', 'common.source'].map((h) => <th key={h} scope="col" className={thCls}>{runtimeText(h)}</th>)}</tr>
+            <tr>{(['common.when', 'common.actor', 'common.action', 'common.item', 'common.change', 'common.reason', 'common.source'] as const).map((h) => <th key={h} scope="col" className={thCls}>{t(h)}</th>)}</tr>
           </thead>
           <tbody>
             {rows.map((r) => {

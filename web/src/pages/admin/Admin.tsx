@@ -297,7 +297,7 @@ export function Users() {
           <table className="w-full text-sm">
             <caption className="sr-only">{t('admin.users')}</caption>
             <thead className="bg-muted">
-              <tr>{['common.name', 'admin.jobTitle', 'admin.office', 'admin.supervisor', 'admin.roles', 'common.status', 'admin.lastSignIn', ''].map((h) => <th key={h} scope="col" className={thCls}>{h ? runtimeText(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
+              <tr>{(['common.name', 'admin.jobTitle', 'admin.office', 'admin.supervisor', 'admin.roles', 'common.status', 'admin.lastSignIn', ''] as const).map((h) => <th key={h} scope="col" className={thCls}>{h ? t(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
             </thead>
             <tbody>
               {rows.map((u) => (

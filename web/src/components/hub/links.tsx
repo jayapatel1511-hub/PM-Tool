@@ -5,14 +5,16 @@ import { toast } from 'sonner'
 import { ConfirmDialog, ErrorBanner, Field, Loading, Spinner, selectCls } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { del, get, post } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { t , runtimeText } from '@/lib/i18n'
+import type { components } from '@/gen/api'
+import { invalidateChange } from '@/lib/keys'
 import type { ItemPartProps } from '@/pages/projects/slots-items'
 
 // Document links (§12.7): where the files live. The Hub stores pointers only, never files (FR-DOC-03).
 
-interface LinkRow { id: string; title: string; url: string; linkType: string; rowVersion: number; isNetworkPath: boolean; addedByName?: string; addedAt: string; canChange: boolean }
-interface LinkList { canAdd: boolean; links: LinkRow[]; inherited: LinkRow[] }
+type LinkRow = components['schemas']['LinkRow']
+type LinkList = components['schemas']['LinkListResponse']
 
 const LINK_TYPES = ['SharePoint', 'OneDrive', 'Teams', 'Network Folder', 'External DMS', 'Client Portal', 'Other']
 export const LINK_ICON: Record<string, typeof Link2> = {
@@ -38,10 +40,10 @@ export function LinkAnchor({ l }: { l: Pick<LinkRow, 'title' | 'url' | 'linkType
 }
 export function LinksPanel({ type, id }: ItemPartProps) {
   const qc = useQueryClient()
-  const q = useQuery({ queryKey: ['links', type, id], queryFn: () => get<LinkList>(`items/${type}/${id}/links`) })
+  const q = useQuery<LinkList>({ queryKey: ['links', type, id], queryFn: () => typedRequest('get', '/api/v1/items/{type}/{id}/links', { params: { type, id } }) })
   const [adding, setAdding] = useState(false)
   const [removing, setRemoving] = useState<LinkRow | null>(null)
-  const reload = () => { qc.invalidateQueries({ queryKey: ['links', type, id] }); qc.invalidateQueries({ queryKey: ['history', type, id] }) }
+  const reload = () => { void invalidateChange(qc, 'DocumentLink') }
   if (q.isPending) return <Loading rows={2} />
   if (q.error) return <ErrorBanner error={q.error} />
   const { links, inherited, canAdd } = q.data
@@ -62,35 +64,36 @@ export function LinksPanel({ type, id }: ItemPartProps) {
           </li>
         ))}
       </ul>}
-      {adding ? <AddLink onDone={(ok) => { setAdding(false); if (ok) reload() }} path={`items/${type}/${id}/links`} />
+      {adding ? <AddLink onDone={() => setAdding(false)} type={type} id={id} />
         : canAdd && <Button size="sm" variant="outline" onClick={() => setAdding(true)}><Plus className="size-4" />{t('links.add')}</Button>}
       {removing && (
         <ConfirmDialog open title={t('links.removeTitle', { title: removing.title })} body={t('links.removeBody')} confirmLabel={t('common.remove')}
-          onOpenChange={(o) => !o && setRemoving(null)} onConfirm={async () => { await del(`links/${removing.id}`, undefined, removing.rowVersion); setRemoving(null); reload() }} />
+          onOpenChange={(o) => !o && setRemoving(null)} onConfirm={async () => { await typedRequest('delete', '/api/v1/links/{id}', { params: { id: removing.id }, ifMatch: removing.rowVersion }); setRemoving(null); reload() }} />
       )}
     </div>
   )
 }
 
 /** Title defaults to the last path segment and the type is detected from the address (DOC-02, FR-DOC-02). */
-export function AddLink({ path, onDone }: { path: string; onDone: (ok: boolean) => void }) {
+export function AddLink({ type, id, onDone }: { type: string; id: string; onDone: (ok: boolean) => void }) {
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
-  const [type, setType] = useState('')
+  const [linkType, setLinkType] = useState('')
   const [err, setErr] = useState<unknown>(null)
   const [busy, setBusy] = useState(false)
+  const qc = useQueryClient()
   const detected = detect(url)
   return (
     <form className="grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-2" onSubmit={async (e) => {
       e.preventDefault(); setErr(null); setBusy(true)
-      try { await post(path, { url: url.trim(), title: title.trim() || undefined, linkType: type || undefined }); onDone(true) } catch (x) { setErr(x) } finally { setBusy(false) }
+      try { await typedRequest('post', '/api/v1/items/{type}/{id}/links', { params: { type, id }, body: { url: url.trim(), title: title.trim() || undefined, linkType: linkType || undefined } }); await invalidateChange(qc, 'DocumentLink'); onDone(true) } catch (x) { setErr(x) } finally { setBusy(false) }
     }}>
       <Field label={t('links.address')} htmlFor="link-url" className="sm:col-span-2" hint={url ? t('links.detected', { type: t(`linkType.${detected}`) }) : t('links.addressHint')}>
         <Input id="link-url" required autoFocus placeholder={t('links.urlPlaceholder')} value={url} onChange={(e) => setUrl(e.target.value)} />
       </Field>
       <Field label={t('field.Title')} htmlFor="link-title" optional><Input id="link-title" value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
       <Field label={t('common.type')} htmlFor="link-type">
-        <select id="link-type" className={selectCls} value={type} onChange={(e) => setType(e.target.value)}>
+        <select id="link-type" className={selectCls} value={linkType} onChange={(e) => setLinkType(e.target.value)}>
           <option value="">{t('links.autoType')}</option>{LINK_TYPES.map((x) => <option key={x} value={x}>{runtimeText(`linkType.${x}`)}</option>)}
         </select>
       </Field>

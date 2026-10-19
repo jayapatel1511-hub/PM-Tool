@@ -13,7 +13,7 @@ import { useProject, useReference } from '@/hooks/data'
 import { del, get, post, qs } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate, shortDate, today } from '@/lib/format'
-import { runtimeText, t, tv } from '@/lib/i18n'
+import { runtimeText, t, tv, type TextKey } from '@/lib/i18n'
 import type { Page as PageOf, ProjectRow } from '@/lib/types'
 import { cn, type Accent } from '@/lib/utils'
 
@@ -29,8 +29,9 @@ interface Assignment {
   primaryDiscipline?: string; addedAt: string; open: number; overdue: number; nextDue?: { id: string; key: string; name: string; dueDate: string } | null; canRemove: boolean
 }
 
-const COLS: [keyof StaffRow | 'name', string][] = [['name', 'staff.name'], ['projects', 'staff.projects'], ['open', 'dash.open'], ['overdue', 'ind.overdue'], ['blocked', 'ind.blocked'],
+const COLS: [keyof StaffRow | 'name', TextKey][] = [['name', 'staff.name'], ['projects', 'staff.projects'], ['open', 'dash.open'], ['overdue', 'ind.overdue'], ['blocked', 'ind.blocked'],
   ['blocking', 'staff.blocking'], ['reviews', 'staff.reviews'], ['deliverablesDue', 'dash.due14'], ['lastActivityAt', 'task.lastActivity']]
+
 
 /** My Staff (§13.19): a manager's direct reports, their assignments and work counts, and staffing them on projects. */
 export function StaffPage() {
@@ -62,7 +63,7 @@ export function StaffPage() {
     const on = !!indicator && f.indicator === indicator
     return <SummaryTile label={label} value={n} accent={accent} hint={definition} selected={indicator ? on : undefined} onClick={() => set('indicator', on ? undefined : indicator)} />
   }
-  const roleChips = (r: StaffRow['roles']) => (['pm', 'dl', 'team', 'reviewer', 'viewer'] as const).filter((k) => r[k] > 0).map((k) => `${runtimeText(`staff.role.${k}`)} ${r[k]}`).join(' · ')
+    const roleChips = (r: StaffRow['roles']) => (['pm', 'dl', 'team', 'reviewer', 'viewer'] as const).filter((k) => r[k] > 0).map((k) => `${t(`staff.role.${k}`)} ${r[k]}`).join(' · ')
   const count = (p: StaffRow, n: number, section: string, bad = false) => <Link to={`/my-work?userId=${p.id}#mw-${section}`} className={cn('tabular-nums hover:underline', bad && n > 0 && 'font-medium text-bad')}>{n}</Link>
   const signals = (p: StaffRow): Signal[] => {
     const cell = capacity(p.id)
@@ -124,7 +125,7 @@ export function StaffPage() {
               <tr><th scope="col" className="w-12"><span className="sr-only">{t('common.details')}</span></th>{COLS.map(([k, label]) => (
                 <th key={k} scope="col" className={cn(thCls, k !== 'name' && k !== 'lastActivityAt' && 'text-right')} aria-sort={sort?.key === k ? (sort.desc ? 'descending' : 'ascending') : 'none'}>
                   <button className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => setSort(sort?.key === k ? { key: k, desc: !sort.desc } : { key: k, desc: k !== 'name' })}>
-                    {runtimeText(label)}{sort?.key === k && <span aria-hidden>{sort.desc ? '↓' : '↑'}</span>}</button>
+                    {t(label)}{sort?.key === k && <span aria-hidden>{sort.desc ? '↓' : '↑'}</span>}</button>
                 </th>))}{showCapacity && <th scope="col" className={thCls}>{t('staff.thisWeek')}</th>}<th scope="col" className={thCls}>{t('staff.roles')}</th></tr>
             </thead>
             <tbody>

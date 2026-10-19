@@ -2383,8 +2383,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3923,7 +3923,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfbooleanAndIEnumerableOfObjectAndIEnumerableOfObject"];
+                        "application/json": components["schemas"]["LinkListResponse"];
                     };
                 };
             };
@@ -3945,12 +3945,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["LinkResponse"];
+                    };
                 };
             };
         };
@@ -4080,8 +4082,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4111,7 +4113,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["LinkResponse"];
+                    };
                 };
             };
         };
@@ -16232,11 +16236,6 @@ export interface components {
             projects: components["schemas"]["JsonArray"];
             tiles: components["schemas"]["AnonymousTypeOfintAndintAndintAndintAndintAndint"];
         };
-        AnonymousTypeOfbooleanAndIEnumerableOfObjectAndIEnumerableOfObject: {
-            canAdd: boolean;
-            inherited: null | unknown[];
-            links: null | unknown[];
-        };
         AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint: {
             admin: boolean;
             allStaff: boolean;
@@ -17090,8 +17089,8 @@ export interface components {
             versionRowVersion: number;
         };
         DocumentLinkAddBody: {
-            linkType: null | string;
-            title: null | string;
+            linkType?: null | string;
+            title?: null | string;
             url: string;
         };
         DraftBody: {
@@ -17459,6 +17458,36 @@ export interface components {
         };
         LinkBody: {
             linkType: null | string;
+            title: string;
+            url: string;
+        };
+        LinkListResponse: {
+            canAdd: boolean;
+            inherited: components["schemas"]["LinkRow"][];
+            links: components["schemas"]["LinkRow"][];
+        };
+        LinkResponse: {
+            /** Format: uuid */
+            id: string;
+            linkType: string;
+            /** Format: int32 */
+            rowVersion: number;
+            title: string;
+            url: string;
+        };
+        LinkRow: {
+            /** Format: date-time */
+            addedAt: string;
+            /** Format: uuid */
+            addedBy: string;
+            addedByName: null | string;
+            canChange: boolean;
+            /** Format: uuid */
+            id: string;
+            isNetworkPath: boolean;
+            linkType: string;
+            /** Format: int32 */
+            rowVersion: number;
             title: string;
             url: string;
         };

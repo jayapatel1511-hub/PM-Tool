@@ -13,6 +13,25 @@ public sealed class SchemaResponseShapeTests
 {
     [Fact]
     [Trait("shape", "integration")]
+    public async Task Following_feed_preserves_boolean_audit_change_values()
+    {
+        using var f = new HubFactory();
+        var d = new TestData(f);
+        var project = await d.Project();
+        var task = await d.NewTask(project.Id);
+        var viewer = f.As(TestData.Alex);
+        await (await viewer.Put($"/api/v1/projects/{project.Id}/follow", new { level = FollowLevel.AllActivity })).Json();
+        await (await f.As(TestData.Pm).Patch($"/api/v1/tasks/{task.G("id")}", new { requiresReview = true }, await d.TaskVersion(task))).Json();
+        var feed = await (await viewer.GetAsync($"/api/v1/me/following?projectId={project.Id}")).Json();
+        var change = feed["items"]!.AsArray().Select(row => row!["entry"]!)
+            .Where(entry => entry.G("itemId") == task.G("id")).SelectMany(entry => entry["changes"]!.AsArray())
+            .Single(change => change!.S("field") == "RequiresReview")!;
+        Assert.False(change["old"]!.GetValue<bool>());
+        Assert.True(change["new"]!.GetValue<bool>());
+    }
+
+    [Fact]
+    [Trait("shape", "integration")]
     public async Task Audit_and_commitment_category_reads_record_full_shapes()
     {
         using var f = new HubFactory();
@@ -70,6 +89,38 @@ public sealed class SchemaResponseShapeTests
         Assert.Equal(unitId.ToString(), placement["unitId"]!.GetValue<string>());
         var leadUnit = await (await admin.GetAsync($"/api/v1/projects/{project.Id}/lead-unit")).Json();
         Assert.Equal(unitId.ToString(), leadUnit["leadUnitId"]!.GetValue<string>());
+    }
+
+    [Fact]
+    [Trait("shape", "integration")]
+    public async Task Organisation_edits_and_import_preview_preserve_versions_and_validation_atomicity()
+    {
+        using var f = new HubFactory();
+        var admin = f.As(TestData.Admin);
+        await (await admin.Put("/api/v1/admin/settings/flag.org_structure", new { value = true })).Json();
+        var levels = (await (await admin.GetAsync("/api/v1/admin/organisation/levels")).Json()).AsArray();
+        var ids = levels.Select(l => l!.G("id")).ToArray();
+        var versions = levels.ToDictionary(l => l!.G("id"), l => l!.I("rowVersion"));
+        var reordered = (await (await admin.Post("/api/v1/admin/organisation/levels/order", new { ids, versions })).Json()).AsArray();
+        Assert.Equal(ids, reordered.Select(l => l!.G("id")));
+        var region = reordered.First(l => l!.S("name") == "Region")!;
+        var renamed = await (await admin.Patch($"/api/v1/admin/organisation/levels/{region.G("id")}", new { name = "Shape Region" }, region.I("rowVersion"))).Json();
+        Assert.Equal("Shape Region", renamed.S("name"));
+        Assert.True(renamed.I("rowVersion") > region.I("rowVersion"));
+        var unit = await (await admin.Post("/api/v1/admin/organisation/units", new { name = "Shape root", levelId = region.G("id") })).Json(201);
+        var edited = await (await admin.Patch($"/api/v1/admin/organisation/units/{unit.G("id")}", new { name = "Shape renamed root" }, unit.I("rowVersion"))).Json();
+        Assert.Equal("Shape renamed root", edited.S("name"));
+        Assert.True(edited.I("rowVersion") > unit.I("rowVersion"));
+        var before = (await (await admin.GetAsync("/api/v1/admin/organisation/units")).Json()).AsArray().Count;
+        var preview = await (await admin.Post("/api/v1/admin/organisation/import/preview", new { csv = "unit_path,level\nPreview root,Shape Region" })).Json();
+        Assert.Equal(1, preview.I("rows"));
+        Assert.Equal(1, preview.I("creates"));
+        Assert.False(preview["applied"]!.GetValue<bool>());
+        Assert.NotEmpty(preview["changes"]!.AsArray());
+        var invalid = await (await admin.Post("/api/v1/admin/organisation/import/apply", new { csv = "unit_path,level\nInvalid root,Missing level" })).Json(422);
+        Assert.False(invalid["applied"]!.GetValue<bool>());
+        Assert.NotEmpty(invalid["errors"]!.AsArray());
+        Assert.Equal(before, (await (await admin.GetAsync("/api/v1/admin/organisation/units")).Json()).AsArray().Count);
     }
 
     [Fact]

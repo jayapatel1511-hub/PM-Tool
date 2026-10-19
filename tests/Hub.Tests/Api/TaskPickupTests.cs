@@ -120,6 +120,15 @@ public sealed class TaskPickupTests
             var version = await d.TaskVersion(task);
             Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Sam).Post($"/api/v1/tasks/{id}/pickup-offer/assign", new { userId = d.User(TestData.Diane), rowVersion = version })).StatusCode);
             Assert.Equal(d.User(TestData.Alex), await f.DbAsync(db => db.Tasks.Where(t => t.Id == id).Select(t => t.AssigneeId).SingleAsync()));
+            var offers = await (await f.As(TestData.Jill).GetAsync("/api/v1/pickup-offers")).Json();
+            Assert.Contains(offers.AsArray(), offer => offer!.G("taskId") == id);
+            var detail = await (await f.As(TestData.Sam).GetAsync($"/api/v1/tasks/{id}/pickup-offer")).Json();
+            Assert.True(detail["allowed"]!["assign"]!.GetValue<bool>());
+            Assert.Contains(detail["candidates"]!.AsArray(), candidate => candidate!.G("id") == d.User(TestData.Jill));
+            var assigned = await (await f.As(TestData.Sam).Post($"/api/v1/tasks/{id}/pickup-offer/assign", new { userId = d.User(TestData.Jill), rowVersion = version })).Json();
+            Assert.Equal(d.User(TestData.Jill), assigned.G("assigneeId"));
+            Assert.Equal(TaskPickupOffer.AssignedByManager, assigned.S("closeCause"));
+            Assert.Equal(d.User(TestData.Jill), await f.DbAsync(db => db.Tasks.Where(t => t.Id == id).Select(t => t.AssigneeId).SingleAsync()));
         }
     }
 

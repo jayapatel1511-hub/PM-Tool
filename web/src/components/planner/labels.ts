@@ -1,4 +1,4 @@
-import { t, tv , runtimeText } from '@/lib/i18n'
+import { t, tv, type TextKey } from '@/lib/i18n'
 
 export type PlannerEntry = {
   id: string; personId: string; personName?: string; ownerId?: string; ownerName?: string; ownerKind?: string
@@ -29,28 +29,29 @@ export type PlannerPerson = {
 export type UnfilledRole = { id: string; projectId: string; projectNumber?: string; projectName: string; roleLabel: string; disciplineName?: string | null; plannedHours: number; canFill: boolean; fillPath: string; cells: { week: string; hours: number }[] }
 export type PlannerGridData = { weeks: string[]; currentWeek: string; evaluatedAt?: string; partialView: boolean; draftAccess: boolean; settings: { horizonWeeks: number; overPct: number; underPct: number; underWeeks: number; staleDays: number; maxHoursPerWeek: number }; people: PlannerPerson[]; unfilledRoles?: UnfilledRole[] }
 
-export const CONFIDENCE_KEYS: Record<string, string> = { Confirmed: 'planner.confidence.confirmed', Expected: 'planner.confidence.expected', Possible: 'planner.confidence.possible' }
-export const VISIBILITY_KEYS: Record<string, string> = { Draft: 'planner.visibility.privateDraft', Published: 'planner.visibility.proposed', Confirmed: 'planner.visibility.confirmedAssignment', Self: 'planner.visibility.selfEntered' }
-export const APPROVAL_KEYS: Record<string, string> = { Confirmed: 'planner.approval.confirmed' }
+export const CONFIDENCE_KEYS: Record<string, TextKey> = { Confirmed: 'planner.confidence.confirmed', Expected: 'planner.confidence.expected', Possible: 'planner.confidence.possible' }
+export const VISIBILITY_KEYS: Record<string, TextKey> = { Draft: 'planner.visibility.privateDraft', Published: 'planner.visibility.proposed', Confirmed: 'planner.visibility.confirmedAssignment', Self: 'planner.visibility.selfEntered' }
+export const APPROVAL_KEYS: Record<string, TextKey> = { Confirmed: 'planner.approval.confirmed' }
 // Source is a planning origin, not a confidence or visibility state. Keep the
 // five canonical Tuesday accents distinct and let the other origins stay quiet.
 export const SOURCE_TONES: Record<string, string> = { MajorProject: 'blue', OtherProject: 'mint', Proposal: 'lavender', BusinessDevelopment: 'neutral', Admin: 'amber', Supervision: 'neutral', Training: 'peach', InternalInitiative: 'neutral', FieldWork: 'neutral', Other: 'neutral' }
-export const SOURCE_KEYS: Record<string, string> = { MajorProject: 'planner.source.majorProject', OtherProject: 'planner.source.otherProject', Proposal: 'planner.source.proposal', BusinessDevelopment: 'planner.source.businessDevelopment', Admin: 'planner.source.admin', Supervision: 'planner.source.supervision', Training: 'planner.source.training', InternalInitiative: 'planner.source.internalInitiative', FieldWork: 'planner.source.fieldWork', Other: 'planner.source.other' }
+export const SOURCE_KEYS: Record<string, TextKey> = { MajorProject: 'planner.source.majorProject', OtherProject: 'planner.source.otherProject', Proposal: 'planner.source.proposal', BusinessDevelopment: 'planner.source.businessDevelopment', Admin: 'planner.source.admin', Supervision: 'planner.source.supervision', Training: 'planner.source.training', InternalInitiative: 'planner.source.internalInitiative', FieldWork: 'planner.source.fieldWork', Other: 'planner.source.other' }
 
-export const confidenceLabel = (value: string) => runtimeText(CONFIDENCE_KEYS[value] ?? 'planner.unknown')
-export const visibilityLabel = (value: string, self = false) => runtimeText(VISIBILITY_KEYS[self ? 'Self' : value] ?? 'planner.unknown')
-export const approvalLabel = (value: string) => runtimeText(APPROVAL_KEYS[value] ?? 'planner.unknown')
+export const confidenceLabel = (value: string) => t(CONFIDENCE_KEYS[value] ?? 'planner.unknown')
+export const visibilityLabel = (value: string, self = false) => t(VISIBILITY_KEYS[self ? 'Self' : value] ?? 'planner.unknown')
+export const approvalLabel = (value: string) => t(APPROVAL_KEYS[value] ?? 'planner.unknown')
 export const SOURCE_OPTIONS = Object.keys(SOURCE_KEYS)
-export const sourceLabel = (value: string) => runtimeText(SOURCE_KEYS[value] ?? 'planner.source.other')
+export const sourceLabel = (value: string) => t(SOURCE_KEYS[value] ?? 'planner.source.other')
 export const sourceTone = (value: string) => SOURCE_TONES[value] ?? 'neutral'
-export const indicatorLabel = (value: string) => runtimeText(({ OverPlanned: 'planner.indicator.over', UnderPlanned: 'planner.indicator.under', StalePlan: 'planner.indicator.stale' } as Record<string, string>)[value] ?? 'planner.unknown')
+const INDICATOR_KEYS: Record<string, TextKey> = { OverPlanned: 'planner.indicator.over', UnderPlanned: 'planner.indicator.under', StalePlan: 'planner.indicator.stale' }
+export const indicatorLabel = (value: string) => t(INDICATOR_KEYS[value] ?? 'planner.unknown')
 export const hoursLabel = (value: number) => `${value.toFixed(1).replace(/\.0$/, '')} h`
 export const storedStatusLabel = (value: string) => tv(value)
 
 /** Capacity grouping (§40, FR-GRP-02): Reports to (the default), Office, Job title, Home discipline, or none. People with no
  *  value form a "Not set" group, listed last and never hidden. Grouping is done here, over the rows already loaded. */
 export const GROUP_BY = ['supervisor', 'office', 'jobTitle', 'homeDiscipline', 'none'] as const
-export const GROUP_LABEL: Record<string, string> = { supervisor: 'staff.group.supervisor', office: 'admin.office', jobTitle: 'admin.jobTitle', homeDiscipline: 'admin.homeDiscipline', none: 'tgroup.none' }
+export const GROUP_LABEL: Record<(typeof GROUP_BY)[number], TextKey> = { supervisor: 'staff.group.supervisor', office: 'admin.office', jobTitle: 'admin.jobTitle', homeDiscipline: 'admin.homeDiscipline', none: 'tgroup.none' }
 type Groupable = { supervisorName?: string | null; officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null }
 export function groupPeople<T extends Groupable>(rows: T[], by: string, ref?: { offices?: { id: string; name: string }[]; disciplines?: { id: string; name: string }[] }): [string, T[]][] {
   const notSet = t('staff.group.notSet')

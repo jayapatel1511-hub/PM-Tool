@@ -30,6 +30,7 @@ import { ExportMenu } from '@/components/hub/export'
 import { useTable } from '@/components/hub/table'
 import { DateText, FieldGroup, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
 import { ViewMenu } from '@/components/hub/views'
+import type { SavedViewKeys } from '@/gen/registry.gen'
 
 export interface DecisionRow {
   id: string; projectId: string; key: string; subject: string; status: string; requestedById: string; requestedByName?: string
@@ -53,7 +54,7 @@ const STATUSES = ['Pending', 'Under Review', 'Decided', 'Deferred', 'Cancelled']
 const OPEN = 'Pending,Under Review,Deferred'
 const IMPACTS = ['High', 'Medium', 'Low']
 const IMPACT_TONE = { High: 'bad', Medium: 'warn', Low: 'idle' } as const
-const FILTERS = ['q', 'status', 'ownerId', 'ownerType', 'impact', 'requiredFrom', 'requiredTo', 'blocking', 'indicator'] as const
+const FILTERS = ['q', 'status', 'ownerId', 'ownerType', 'impact', 'requiredFrom', 'requiredTo', 'blocking', 'indicator'] as const satisfies readonly (SavedViewKeys['decisions'] | 'page' | 'panel' | 'draftAccessReason')[]
 
 const useParties = (projectId: string) => useQuery({ queryKey: ['p', projectId, 'parties'], queryFn: () => get<Party[]>(`projects/${projectId}/external-parties`), enabled: !!projectId })
 

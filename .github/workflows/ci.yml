@@ -43,6 +43,7 @@ jobs:
 
   web:
     runs-on: ubuntu-latest
+    env: { VITE_HUB_BUILD: "${{ github.sha }}" }
     services:
       postgres:
         image: postgres:17-alpine

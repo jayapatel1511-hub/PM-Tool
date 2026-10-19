@@ -1,3 +1,4 @@
+import type { SavedViewKeys } from '@/gen/registry.gen'
 import { usePageMode } from '@/hooks/page-mode'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowUpDown, ChevronLeft, ChevronRight, Ellipsis, List, Lock, Monitor, Table2 } from 'lucide-react'
@@ -27,7 +28,7 @@ import { GROUP_BY, GROUP_LABEL, SOURCE_OPTIONS, confidenceLabel, hoursLabel, sou
 import { MenuSelect } from './projects/Tasks'
 import { descendantUnitIds, useOrgPlacement } from '@/hooks/useOrgPlacement'
 
-const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'personId', 'projectId', 'unitId', 'source', 'confidence', 'visibility', 'indicator', 'q', 'sort', 'week', 'from', 'to', 'weeks', 'withoutProject', 'stale', 'includeMyDrafts', 'draftAccessReason', 'page'] as const
+const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'personId', 'projectId', 'unitId', 'source', 'confidence', 'visibility', 'indicator', 'q', 'sort', 'week', 'from', 'to', 'weeks', 'withoutProject', 'stale', 'includeMyDrafts', 'draftAccessReason', 'page'] as const satisfies readonly (SavedViewKeys['planner'] | 'page' | 'panel' | 'draftAccessReason')[]
 type EntryPage = { items: PlannerEntry[]; page: number; pageSize: number; totalCount: number }
 
 export function PlannerPage() {

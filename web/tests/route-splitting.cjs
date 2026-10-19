@@ -2,9 +2,10 @@
 const assert = require('node:assert/strict')
 const { startPreview, newMockPage, mockPlatformApi } = require('./platform-fixtures.cjs')
 ;(async () => {
-  const preview = await startPreview()
+  const preview = await startPreview(5190)
   const session = await newMockPage(preview.base)
-  let { browser, page } = session
+  let { browser, page, mock } = session
+  const mocks = [mock]
   const failedChunks = new Set(); const responses = []; const errors = []
   const expected = { '/my-work': /My Work|Today/i, '/projects': /Projects/i, '/admin/users': /Users|Administration/i }
   try {
@@ -20,7 +21,7 @@ const { startPreview, newMockPage, mockPlatformApi } = require('./platform-fixtu
       await page.close()
       page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
       await page.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'alex@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
-      mockPlatformApi(page)
+      mock = mockPlatformApi(page); mocks.push(mock)
       await page.route(target, async route => { failedChunks.add(target); await route.abort() })
       await page.goto(`${preview.base}/my-work`, { waitUntil: 'networkidle' })
       await page.goto(`${preview.base}/projects`, { waitUntil: 'domcontentloaded' })
@@ -36,6 +37,7 @@ const { startPreview, newMockPage, mockPlatformApi } = require('./platform-fixtu
       assert.ok(responses.some(response => response.url().includes('/assets/')), 'routes loaded hashed production assets')
       assert.ok(responses.every(response => response.ok()), 'all route chunks returned successfully')
     }
+    assert.deepEqual(mocks.flatMap(x => x.unknownGets), [], 'all mocked GETs must have an explicit response shape')
     console.log(JSON.stringify({ result: 'PASS', routes: Object.keys(expected), chunks: responses.length, failedChunks: failedChunks.size }))
   } finally { await browser.close(); preview.child.kill() }
 })().catch(error => { console.error(error); process.exitCode = 1 })

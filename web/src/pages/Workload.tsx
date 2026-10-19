@@ -24,6 +24,7 @@ import { addDays, fmtDate, hours, shortDate, today } from '@/lib/format'
 import { runtimeText, t } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import type { SavedViewKeys } from '@/gen/registry.gen'
 import { GROUP_BY, GROUP_LABEL, groupPeople } from '@/components/planner/labels'
 import { descendantUnitIds, useOrgPlacement } from '@/hooks/useOrgPlacement'
 import { MenuSelect, errorText } from './projects/Tasks'
@@ -39,7 +40,7 @@ interface UnassignedTask { id: string; key: string; name: string; projectId: str
 interface TaskLoadRow { id: string; key: string; name: string; status: string; dueDate?: string; estimatedHours?: number | null; progressPct: number; remaining?: number | null; overdue: boolean; noDueDate: number; rowVersion: number; weeks: number[]; canReassign: boolean }
 interface PersonTasks { weeks: string[]; projects: { id: string; projectNumber: string; name: string; tasks: TaskLoadRow[] }[] }
 
-const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'projectId', 'unitId', 'indicator', 'from', 'sort'] as const
+const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'projectId', 'unitId', 'indicator', 'from', 'sort'] as const satisfies readonly (SavedViewKeys['workload'] | 'page' | 'panel' | 'draftAccessReason')[]
 const INDICATORS = ['over', 'under', 'cluster', 'unestimated'] as const
 const SORTS = ['load', 'overdue', 'tasks', 'name'] as const
 

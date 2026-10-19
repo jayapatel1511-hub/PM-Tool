@@ -31,6 +31,7 @@ import { useCurrentProject } from './ProjectLayout'
 import { CommentsSlot, ItemSlots, type RaiseProps } from './slots-items'
 import { errorText } from './Tasks'
 import type { components } from '@/gen/api'
+import type { SavedViewKeys } from '@/gen/registry.gen'
 
 // Risk and Issue Registers (§12.10, §13.13, packet 014).
 
@@ -67,7 +68,7 @@ const SEVERITIES = ['High', 'Medium', 'Low']
 const ISSUE_TYPES = ['General', 'Coordination']
 const LEVELS = [1, 2, 3] as const
 const TONE = { High: 'bad', Medium: 'warn', Low: 'idle' } as const
-const FILTERS = ['q', 'status', 'severity', 'ownerId', 'disciplineId', 'indicator'] as const
+const FILTERS = ['q', 'status', 'severity', 'ownerId', 'disciplineId', 'indicator'] as const satisfies readonly (SavedViewKeys['issues'] | 'page' | 'panel' | 'draftAccessReason')[]
 const SOURCE_FILTERS = ['issueType', 'location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits'] as const
 /** Live preview only; saved risks carry the band worked out by the server (§12.10: Low 1–2, Medium 3–4, High 6–9). */
 const bandOf = (score: number) => (score >= 6 ? 'High' : score >= 3 ? 'Medium' : 'Low')

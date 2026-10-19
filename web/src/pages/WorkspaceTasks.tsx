@@ -20,12 +20,13 @@ import { addDays, fmtDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import type { SavedViewKeys } from '@/gen/registry.gen'
 import { CardBody, LANES, MAX_CARDS, SIDE, Swimlane, fetchUpTo, useLaneDrop } from './projects/Board'
 import { PINNED_QUICK, PRIORITIES, QUICK, StatusMenu, TASK_STATUSES, TaskIndicators, ViewSwitch, errorText, useTaskActions, type TaskRow } from './projects/Tasks'
 
 const PATHS = { tasks: '/tasks', board: '/boards' }
 /** URL parameters that are task filters (everything else is scope, view or layout). */
-const FILTERS = ['q', 'status', 'priority', 'assigneeId', 'projectId', 'createdBy', 'dueFrom', 'dueTo', 'open', ...QUICK] as const
+const FILTERS = ['q', 'status', 'priority', 'assigneeId', 'projectId', 'createdBy', 'dueFrom', 'dueTo', 'open', ...QUICK] as const satisfies readonly (SavedViewKeys['workspace-tasks'] | 'page' | 'panel' | 'draftAccessReason')[]
 
 function useFilters() {
   const [sp, setSp] = useSearchParams()

@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process'
 import { createWriteStream, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { once } from 'node:events'
+import { createServer } from 'node:net'
 
 const root = path.resolve(import.meta.dirname, '../..')
 const apiPort = Number(process.env.TUESDAY_SMOKE_API_PORT ?? 18502)
@@ -11,11 +12,11 @@ const api = `http://127.0.0.1:${apiPort}`, ui = `http://127.0.0.1:${uiPort}`
 const database = `hub_smoke_${process.pid}_${Date.now()}`
 const output = path.join(root, 'ci-artifacts/smoke-live')
 mkdirSync(output, { recursive: true })
-const processes = [], streams = []
+const processes = []
 function start(command, args, label, env) {
-  const log = createWriteStream(path.join(output, `${label}.log`)); streams.push(log)
-  const child = spawn(command, args, { cwd: root, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] })
-  child.stdout.pipe(log); child.stderr.pipe(log); processes.push(child)
+  const log = createWriteStream(path.join(output, `${label}.log`))
+  const child = spawn(command, args, { cwd: root, env: { ...process.env, ...env }, detached: true, stdio: ['ignore', 'pipe', 'pipe'] })
+  child.stdout.pipe(log, { end: false }); child.stderr.pipe(log, { end: false }); child.once('close', () => log.end()); processes.push(child)
   return child
 }
 async function ready(url, child) {
@@ -27,9 +28,16 @@ async function ready(url, child) {
   }
   throw new Error(`verification service did not become ready: ${url}`)
 }
-function stop() { for (const child of processes) if (child.exitCode === null) child.kill('SIGTERM'); for (const stream of streams) stream.end() }
+function stop() { for (const child of processes) { try { process.kill(-child.pid, 'SIGTERM') } catch (error) { if (error.code !== 'ESRCH') throw error } } }
+async function requireFreePort(port) {
+  const server = createServer()
+  try { server.listen(port, '127.0.0.1'); await once(server, 'listening') }
+  catch { throw new Error(`verification port ${port} is already in use; refusing to attach to another service`) }
+  finally { if (server.listening) await new Promise(resolve => server.close(resolve)) }
+}
 process.once('SIGINT', stop); process.once('SIGTERM', stop)
 try {
+  await requireFreePort(apiPort); await requireFreePort(uiPort)
   const backend = start('dotnet', ['run', '--project', 'src/Hub.Api', '-c', 'Release', '--no-launch-profile', '--urls', api], 'api', {
     ASPNETCORE_ENVIRONMENT: 'Development', Auth__Mode: 'Development',
     ConnectionStrings__Hub: `Host=localhost;Port=55432;Database=${database};Username=hub`,

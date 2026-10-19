@@ -19,12 +19,13 @@ import { accentOf, cn } from '@/lib/utils'
 import { CreateProjectDialog } from './CreateProject'
 import { ExportMenu } from '@/components/hub/export'
 import { ViewMenu } from '@/components/hub/views'
+import type { SavedViewKeys } from '@/gen/registry.gen'
 
 const COLUMNS = ['client', 'pm', 'office', 'phase', 'status', 'health', 'priority', 'due', 'progress', 'nextMilestone', 'overdue', 'blocked', 'myRole', 'activity'] as const
 type Col = (typeof COLUMNS)[number]
 const DEFAULT_COLS: Col[] = ['client', 'pm', 'status', 'health', 'priority', 'due', 'progress', 'nextMilestone', 'overdue', 'blocked', 'myRole']
 /** URL filters shown as removable tokens; scope (mine), grouping and sort are view choices, not filters. */
-const FILTERS = ['q', 'status', 'health', 'officeId', 'disciplineId', 'leadUnitId', 'includeArchived', 'ids', 'computedHealth'] as const
+const FILTERS = ['q', 'status', 'health', 'officeId', 'disciplineId', 'leadUnitId', 'includeArchived', 'ids', 'computedHealth'] as const satisfies readonly (SavedViewKeys['projects'] | 'page' | 'panel' | 'draftAccessReason')[]
 const href = (r: ProjectRow) => `/projects/${encodeURIComponent(r.projectNumber)}`
 
 /** Project list and grouped board presentation (§13.2, FR-021, §36.2 FR-VIS-03). Filters live in the URL. */

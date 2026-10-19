@@ -25,6 +25,7 @@ import { addDays, ago, fmtDate, hours, today } from '@/lib/format'
 import { runtimeText, plural, t, tv } from '@/lib/i18n'
 import type { Page as PageOf, ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import type { SavedViewKeys } from '@/gen/registry.gen'
 import type { DeliverableRow } from './Deliverables'
 import type { MilestoneRow } from './Milestones'
 import { useCurrentProject } from './ProjectLayout'
@@ -311,8 +312,8 @@ export function useTaskFilters() {
   return { sp, set, filters, clear, active: FILTER_KEYS.some((k) => sp.has(k)) }
 }
 /** Filters that links from the dashboard and elsewhere may carry beyond the visible controls; shown as removable tokens. */
-const EXTRA = ['waiting', 'open', 'onHold', 'stale', 'dueSoon', 'noDueDate', 'dateInconsistent', 'heldPastDue', 'dueFrom', 'dueTo', 'milestoneId', 'assigneeId', 'ids']
-const FILTER_KEYS = ['q', 'disciplineId', 'deliverableId', 'status', 'priority', ...QUICK, ...EXTRA]
+const EXTRA = ['waiting', 'open', 'onHold', 'stale', 'dueSoon', 'noDueDate', 'dateInconsistent', 'heldPastDue', 'dueFrom', 'dueTo', 'milestoneId', 'assigneeId', 'ids'] as const
+const FILTER_KEYS = ['q', 'disciplineId', 'deliverableId', 'status', 'priority', ...QUICK, ...EXTRA] as const satisfies readonly (SavedViewKeys['tasks'] | 'page' | 'panel' | 'draftAccessReason')[]
 /** Flags (quick chips and linked indicator filters) are on or absent; the rest carry a value. */
 const FLAGS = new Set<string>([...QUICK, 'waiting', 'open', 'stale', 'dueSoon', 'noDueDate', 'dateInconsistent', 'heldPastDue'])
 const TOKEN_LABEL: Record<string, string> = { q: 'common.search', disciplineId: 'common.discipline', deliverableId: 'task.deliverable', status: 'common.status', priority: 'common.priority' }

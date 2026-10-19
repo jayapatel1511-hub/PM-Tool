@@ -1,0 +1,45 @@
+// Required web-job real-API check. Every invocation creates its own synthetic database.
+import { spawn } from 'node:child_process'
+import { createWriteStream, mkdirSync } from 'node:fs'
+import path from 'node:path'
+import { once } from 'node:events'
+
+const root = path.resolve(import.meta.dirname, '../..')
+const apiPort = Number(process.env.TUESDAY_SMOKE_API_PORT ?? 18502)
+const uiPort = Number(process.env.TUESDAY_SMOKE_UI_PORT ?? 19502)
+const api = `http://127.0.0.1:${apiPort}`, ui = `http://127.0.0.1:${uiPort}`
+const database = `hub_smoke_${process.pid}_${Date.now()}`
+const output = path.join(root, 'ci-artifacts/smoke-live')
+mkdirSync(output, { recursive: true })
+const processes = [], streams = []
+function start(command, args, label, env) {
+  const log = createWriteStream(path.join(output, `${label}.log`)); streams.push(log)
+  const child = spawn(command, args, { cwd: root, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] })
+  child.stdout.pipe(log); child.stderr.pipe(log); processes.push(child)
+  return child
+}
+async function ready(url, child) {
+  const deadline = Date.now() + 120000
+  while (Date.now() < deadline) {
+    if (child.exitCode !== null) throw new Error(`verification service exited (${child.exitCode}); see ${output}`)
+    try { if ((await fetch(url, { signal: AbortSignal.timeout(2000) })).ok) return } catch {}
+    await new Promise(resolve => setTimeout(resolve, 200))
+  }
+  throw new Error(`verification service did not become ready: ${url}`)
+}
+function stop() { for (const child of processes) if (child.exitCode === null) child.kill('SIGTERM'); for (const stream of streams) stream.end() }
+process.once('SIGINT', stop); process.once('SIGTERM', stop)
+try {
+  const backend = start('dotnet', ['run', '--project', 'src/Hub.Api', '-c', 'Release', '--no-launch-profile', '--urls', api], 'api', {
+    ASPNETCORE_ENVIRONMENT: 'Development', Auth__Mode: 'Development',
+    ConnectionStrings__Hub: `Host=localhost;Port=55432;Database=${database};Username=hub`,
+    Seed__DevUsers: 'true', Seed__ReviewDemo: 'false', Jobs__Enabled: 'false', Evaluation__Worker: 'true', RateLimit__PerMinute: '100000',
+  })
+  await ready(`${api}/health`, backend)
+  const preview = start(process.execPath, ['web/node_modules/vite/bin/vite.js', 'preview', 'web', '--config', 'web/vite.config.ts', '--host', '127.0.0.1', '--port', String(uiPort), '--strictPort'], 'preview', { HUB_API_ORIGIN: api })
+  await ready(ui, preview)
+  const test = start(process.execPath, ['web/tests/smoke-live.cjs'], 'browser', { TUESDAY_UI_BASE_URL: ui, TUESDAY_API_BASE_URL: api, TUESDAY_SYNTHETIC_API: '1' })
+  const [code] = await once(test, 'exit')
+  if (code !== 0) throw new Error(`real-API smoke failed (${code}); see ${output}/browser.log`)
+  console.log(`PASS: synthetic real-API smoke; evidence ${output}`)
+} catch (error) { console.error(error.message); process.exitCode = 1 } finally { stop() }

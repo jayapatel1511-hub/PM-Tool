@@ -222,7 +222,8 @@ public static class DecisionEndpoints
     }
 
     /// The linked sources of a register item, oldest link first, with their status and date.
-    internal static async Task<List<object>> LinkRows(HubDb db, Guid sourceId)
+    public sealed record ItemLinkRow(Guid Id, string TargetType, Guid TargetId, string Relation, string Key, string Name, string? Status, DateOnly? Date, string? Person);
+    internal static async Task<List<ItemLinkRow>> LinkRows(HubDb db, Guid sourceId)
     {
         var links = await db.ItemLinks.AsNoTracking().Where(l => l.SourceId == sourceId && l.DeletedAt == null && ActionLinkTargets.Contains(l.TargetType)).OrderBy(l => l.CreatedAt).ToListAsync();
         var ids = links.Select(l => l.TargetId).ToList();
@@ -233,8 +234,10 @@ public static class DecisionEndpoints
             .Concat(await db.Handoffs.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new Target(x.Id, x.Key, x.Title, x.Status, x.NeededBy, null)).ToListAsync())
             .Concat(await db.ChangeNotices.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new Target(x.Id, x.Key, x.Title, x.Status, x.AssessmentDueDate, null)).ToListAsync())
             .ToDictionary(x => x.Id);
-        return [.. links.Where(l => targets.ContainsKey(l.TargetId)).Select(l => targets[l.TargetId] is var t
-            ? (object)new { l.Id, l.TargetType, l.TargetId, l.Relation, t.Key, t.Name, t.Status, t.Date, t.Person } : null!)];
+        return [.. links.Where(l => targets.ContainsKey(l.TargetId)).Select(l => {
+            var t = targets[l.TargetId];
+            return new ItemLinkRow(l.Id, l.TargetType, l.TargetId, l.Relation, t.Key, t.Name, t.Status, t.Date, t.Person);
+        })];
     }
 
     // ---------- Detail, edit, links ----------

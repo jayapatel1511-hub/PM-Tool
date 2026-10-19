@@ -83,24 +83,8 @@ public static class ActivityEndpoints
         return q;
     }
 
-    public static async Task<Guid?> ItemProject(HubDb db, string type, Guid id) => type switch
-    {
-        ItemType.Task => await db.Tasks.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        ItemType.Deliverable => await db.Deliverables.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        ItemType.Milestone => await db.Milestones.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        ItemType.Decision => await db.Decisions.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        ItemType.Risk => await db.Risks.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        ItemType.Issue => await db.Issues.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        ItemType.Action => await db.Actions.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        "ReviewPackage" => await db.ReviewPackages.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        "ChangeNotice" => await db.ChangeNotices.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        "ReviewFinding" => await db.ReviewFindings.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        "ChangeAssessment" => await db.ChangeAssessments.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        "Handoff" => await db.Handoffs.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        "OpenRole" => await db.OpenRoles.IgnoreQueryFilters().Where(x => x.Id == id).Select(x => (Guid?)x.ProjectId).FirstOrDefaultAsync(),
-        ItemType.Project => await db.Projects.Where(x => x.Id == id).Select(x => (Guid?)x.Id).FirstOrDefaultAsync(),
-        _ => null,
-    };
+    public static Task<Guid?> ItemProject(HubDb db, string type, Guid id) =>
+        Hub.Api.Records.EntityRegistry.History(type)?.Project!(db, id) ?? Task.FromResult<Guid?>(null);
 
     /// Renders log rows for people: IDs resolved to names at read time (§20.3), and a one-line summary.
     public static async Task<List<object>> Render(HubDb db, List<ActivityLog> rows)
@@ -147,38 +131,6 @@ public static class ActivityEndpoints
     /// Field labels for summaries; the SPA translates field names itself.
     static string Label(string field) => field.EndsWith("Id") && field.Length > 2 ? field[..^2] : field;
 
-    public static async Task<Dictionary<Guid, string>> Names(HubDb db, HashSet<Guid> ids)
-    {
-        var d = new Dictionary<Guid, string>();
-        if (ids.Count == 0) return d;
-        var list = ids.ToList();
-        void Add(IEnumerable<(Guid Id, string Name)> xs) { foreach (var (id, n) in xs) d.TryAdd(id, n); }
-        Add((await db.Users.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.DisplayName, x.IsActive }).ToListAsync())
-            .Select(x => (x.Id, x.IsActive ? x.DisplayName : x.DisplayName + " (Inactive)")));
-        Add((await db.ProjectDisciplines.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Discipline!.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
-        Add((await db.Disciplines.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
-        Add((await db.Tasks.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Name }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Name}")));
-        Add((await db.Deliverables.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Name }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Name}")));
-        Add((await db.Milestones.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Name }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Name}")));
-        Add((await db.Decisions.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Subject }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Subject}")));
-        Add((await db.Risks.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Title }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Title}")));
-        Add((await db.Issues.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Title }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Title}")));
-        Add((await db.Actions.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Text }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Text}")));
-        Add((await db.Meetings.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Title }).ToListAsync()).Select(x => (x.Id, x.Title)));
-        Add((await db.Projects.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.ProjectNumber, x.Name }).ToListAsync()).Select(x => (x.Id, $"{x.ProjectNumber} {x.Name}")));
-        Add((await db.SourceRevisions.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.SourceKey, x.Title, x.Revision }).ToListAsync()).Select(x => (x.Id, $"{x.SourceKey} {x.Title} · {x.Revision}")));
-        Add((await db.ChangeNotices.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Title }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Title}")));
-        // An allocation has no key or name: the person and dates, which its own log rows already show to the same readers.
-        Add((await db.Allocations.Where(x => list.Contains(x.Id))
-            .Select(x => new { x.Id, Person = db.Users.Where(u => u.Id == x.PersonId).Select(u => u.DisplayName).FirstOrDefault(), x.FromDate, x.ThroughDate }).ToListAsync())
-            .Select(x => (x.Id, $"{x.Person}, {x.FromDate:yyyy-MM-dd} to {x.ThroughDate:yyyy-MM-dd}")));
-        Add((await db.Clients.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
-        Add((await db.Offices.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
-        Add((await db.Phases.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
-        Add((await db.ProjectTypes.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
-        Add((await db.DeliverableTypes.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
-        Add((await db.ExternalParties.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Name, x.Organisation }).ToListAsync())
-            .Select(x => (x.Id, x.Organisation is null ? x.Name : $"{x.Name} ({x.Organisation})")));
-        return d;
-    }
+    public static Task<Dictionary<Guid, string>> Names(HubDb db, HashSet<Guid> ids) =>
+        Hub.Api.Records.EntityRegistry.Names(db, ids);
 }

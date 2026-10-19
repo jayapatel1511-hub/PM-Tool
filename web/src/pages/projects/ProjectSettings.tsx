@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh, useReference } from '@/hooks/data'
 import { ApiError, del, get, patch, post, put } from '@/lib/api'
-import { t, tv } from '@/lib/i18n'
+import { runtimeText, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
@@ -101,12 +101,12 @@ export function ProjectSettingsTab() {
             <Field label={t('field.StartDate')} htmlFor="s-start" optional><Input id="s-start" type="date" value={v('startDate')} onChange={set('startDate')} disabled={!canEdit} /></Field>
             <Field label={t('field.TargetCompletionDate')} htmlFor="s-target" optional><Input id="s-target" type="date" value={v('targetCompletionDate')} onChange={set('targetCompletionDate')} disabled={!canEdit} /></Field>
             <Field label={t('common.priority')} htmlFor="s-prio">
-              <select id="s-prio" className={selectCls} value={v('priority')} onChange={set('priority')} disabled={!canEdit}>{['Low', 'Medium', 'High', 'Critical'].map((x) => <option key={x} value={x}>{t(`value.${x}`)}</option>)}</select>
+              <select id="s-prio" className={selectCls} value={v('priority')} onChange={set('priority')} disabled={!canEdit}>{['Low', 'Medium', 'High', 'Critical'].map((x) => <option key={x} value={x}>{runtimeText(`value.${x}`)}</option>)}</select>
             </Field>
             <Field label={t('field.CoordinationDay')} htmlFor="s-day">
               <select id="s-day" className={selectCls} value={v('coordinationDay')} onChange={set('coordinationDay')} disabled={!canEdit}>
                 <option value="">{t('projects.mondayDefault')}</option>
-                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((d) => <option key={d} value={d}>{t(`day.${d}`)}</option>)}
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((d) => <option key={d} value={d}>{runtimeText(`day.${d}`)}</option>)}
               </select>
             </Field>
             <Field label={t('field.Location')} htmlFor="s-loc" optional className="sm:col-span-2"><Input id="s-loc" value={v('location')} onChange={set('location')} disabled={!canEdit} /></Field>
@@ -141,10 +141,10 @@ export function ProjectSettingsTab() {
           {SETTINGS_SECTIONS.map((s) => <div key={s.id}>{s.render(p)}</div>)}
           <Section title={t('settings.status')}>
             <div className="space-y-3 px-5 py-4 text-sm">
-              <p>{t('settings.currentStatus', { status: t(`value.${p.status}`) })}</p>
+              <p>{t('settings.currentStatus', { status: runtimeText(`value.${p.status}`) })}</p>
               {p.permissions.transitions.some((s) => s !== 'Cancelled') && (
                 <div className="flex flex-wrap gap-2">
-                  {p.permissions.transitions.filter((s) => s !== 'Cancelled').map((s) => <Button key={s} variant="outline" size="sm" onClick={() => setTransition(s)}>{t(`settings.to.${s}`, { from: t(`value.${p.status}`) })}</Button>)}
+                  {p.permissions.transitions.filter((s) => s !== 'Cancelled').map((s) => <Button key={s} variant="outline" size="sm" onClick={() => setTransition(s)}>{runtimeText(`settings.to.${s}`, { from: runtimeText(`value.${p.status}`) })}</Button>)}
                 </div>
               )}
               {p.permissions.transitions.length === 0 && <p className="text-muted-foreground">{t('settings.noTransitions')}</p>}
@@ -196,7 +196,7 @@ function LinksSection({ p, onChange }: { p: ProjectDetail; onChange: () => void 
         <ul className="divide-y">
           {p.links.map((l) => (
             <li key={l.id} className="flex min-h-(--row-min) items-center gap-3 px-5 py-2 text-sm">
-              <span className="w-28 shrink-0 text-xs/[18px] text-muted-foreground">{t(`linkType.${l.linkType}`)}</span>
+              <span className="w-28 shrink-0 text-xs/[18px] text-muted-foreground">{runtimeText(`linkType.${l.linkType}`)}</span>
               {l.linkType === 'Network Folder'
                 ? <><span className="min-w-0 truncate font-mono text-xs" title={l.url}>{l.url}</span><Button size="icon-sm" variant="ghost" aria-label={t('links.copyPath')} onClick={() => { navigator.clipboard?.writeText(l.url); toast.success(t('links.pathCopied')) }}><Copy className="size-4" /></Button></>
                 : <a href={l.url} target="_blank" rel="noreferrer noopener" className="inline-flex min-w-0 items-center gap-1 text-primary underline underline-offset-4 hover:text-foreground"><span className="truncate">{l.title}</span><ExternalLink className="size-3.5 shrink-0" aria-hidden /></a>}
@@ -237,8 +237,8 @@ function TransitionDialog({ p, to, onClose }: { p: ProjectDetail; to: string; on
     </select>
   )
   return (
-    <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('settings.transitionTitle', { from: t(`value.${p.status}`), to: t(`value.${to}`) })}
-      body={consequence} reason={needsReason ? true : 'optional'} destructive={to === 'Cancelled'} confirmLabel={t(`settings.to.${to}`, { from: '' })}
+    <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('settings.transitionTitle', { from: runtimeText(`value.${p.status}`), to: runtimeText(`value.${to}`) })}
+      body={consequence} reason={needsReason ? true : 'optional'} destructive={to === 'Cancelled'} confirmLabel={runtimeText(`settings.to.${to}`, { from: '' })}
       onConfirm={(reason) => post(`projects/${p.id}/transition`, { toStatus: to, reason, rowVersion: p.rowVersion, closeout: to === 'Complete' ? choices : undefined })}>
       {to === 'Complete' && d && (
         <div className="space-y-2 text-sm">
@@ -246,8 +246,8 @@ function TransitionDialog({ p, to, onClose }: { p: ProjectDetail; to: string; on
           {groups.map(([k, items]) => (
             <div key={k} className="rounded-md border p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span>{t(`settings.closeout.${k}`, { n: items.length })}</span>
-                {items.length > 0 && choice(k, t(`settings.closeout.${k}`, { n: items.length }))}
+                <span>{runtimeText(`settings.closeout.${k}`, { n: items.length })}</span>
+                {items.length > 0 && choice(k, runtimeText(`settings.closeout.${k}`, { n: items.length }))}
               </div>
               {items.length > 0 && <ul className="mt-2 max-h-24 space-y-0.5 overflow-y-auto text-xs/[18px] text-muted-foreground">{items.map((i: any) => <li key={i.id}><span className="key">{i.key}</span> {i.name} · {tv(i.status)}</li>)}</ul>}
             </div>

@@ -22,7 +22,7 @@ const AGREED = {
     'Issues and risks · Open issues', 'Issues and risks · High issues', 'Issues and risks · High risks', 'Due this week', 'Blocked'],
   portfolio: ['Red (computed)', 'Yellow (computed)', 'Green (computed)', 'Active projects', 'Submissions in 14 days'],
 }
-const VIEW = new Set(['panel', 'group', 'sort', 'view', 'page', 'side', 'swim', 'ws']) // link parameters that are layout, not filters
+const VIEW = new Set(['panel', 'group', 'sort', 'view', 'tab', 'layout', 'page', 'side', 'swim', 'ws']) // link parameters that are layout, not filters
 const BUDGET = 300 // API requests per person per minute: half the API's 600, so other sessions as the same person keep working
 const PLUMBING = new Set(['page', 'pageSize', 'sort', 'includeTasks', 'projects', 'mine']) // request parameters that are not filters
 

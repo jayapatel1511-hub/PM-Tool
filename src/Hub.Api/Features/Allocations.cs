@@ -29,11 +29,7 @@ public static class AllocationEndpoints
         db.Allocations.AsNoTracking().Where(a => managedProjectIds.Contains(a.ProjectId) || a.CreatedBy == actor.Id || ((actor.Supervisor || actor.Admin)
             && db.Users.Any(u => u.Id == a.PersonId && (actor.Admin || u.SupervisorId == actor.Id))));
 
-    static readonly Col[] ExportColumns =
-    [
-        new("personName", "person"), new("personState", "person", Label: "Person eligibility"), new("purpose", "type"), new("fromDate", "date", "date", "From date"),
-        new("throughDate", "date", "date", "Through date"), new("plannedHours", "hours", "number"), new("status", "status"),
-    ];
+    static readonly Col[] ExportColumns = Hub.Api.Records.ResourceAllocationRecord.AllocationsExportColumns;
 
     public static void Map(RouteGroupBuilder api)
     {

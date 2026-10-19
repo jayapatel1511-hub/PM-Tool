@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
-import { ShellSlots } from '@/app/slots'
 import { Field, selectCls } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Button } from '@/components/ui/button'
@@ -52,9 +51,8 @@ export function NewTaskDialog({ onClose, projectId }: { onClose: (created?: stri
     </Dialog>
   )
 }
-
 /** New Item (FR-VIS-01): only the types this person may create. */
-function NewItemMenu() {
+export function NewItemMenu() {
   const me = useMe()
   const [open, setOpen] = useState<'project' | 'task' | 'event' | null>(null)
   const close = () => setOpen(null)
@@ -76,5 +74,3 @@ function NewItemMenu() {
     </>
   )
 }
-
-ShellSlots.QuickCreate = NewItemMenu

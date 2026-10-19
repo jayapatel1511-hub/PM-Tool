@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { ApiError, del, get, patch, post, put, qs } from '@/lib/api'
 import { fmtTime } from '@/lib/format'
-import { t } from '@/lib/i18n'
+import { runtimeText, t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useFlag } from '@/lib/auth'
 import { toast } from 'sonner'
@@ -34,7 +34,7 @@ const Active = ({ on }: { on: boolean }) => <Pill tone={on ? 'ok' : 'idle'}>{on 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const structure = useFlag('org_structure'), chain = useFlag('verifiable_log')
   const title = t('admin.title')
-  const links = [...KINDS.map((k) => ({ to: `/admin/reference/${k}`, label: t(`admin.${k}`) })),
+  const links = [...KINDS.map((k) => ({ to: `/admin/reference/${k}`, label: runtimeText(`admin.${k}`) })),
     { to: '/admin/settings', label: t('admin.settings') }, { to: '/admin/users', label: t('admin.users') }, { to: '/admin/activity', label: t('admin.activity') },
     ...(structure ? [{ to: '/admin/structure', label: t('admin.structure.title') }] : []),
     ...(chain ? [{ to: '/admin/audit-chains', label: t('auditChains.title') }] : []),
@@ -85,7 +85,7 @@ export function ReferenceData() {
     refresh()
   }
   const hasCode = kind === 'disciplines' || kind === 'offices'
-  const title = t(`admin.${kind}`)
+  const title = runtimeText(`admin.${kind}`)
   const addLabel = t('admin.add', { kind: title.toLowerCase() })
   return (
     <div className="space-y-4">
@@ -207,9 +207,9 @@ export function Settings() {
   if (list.isPending) return <div className={card}><Loading /></div>
   if (list.error) return <ErrorBanner error={list.error} retry={() => list.refetch()} />
   const groups = [...new Set(list.data.map((s) => s.group))]
-  const label = (s: SettingRow) => s.key.startsWith('rule_enabled.') ? t('rule.enabled', { rule: s.key.slice(13), name: t(`rule.${s.key.slice(13)}`) })
-    : s.key.startsWith('notify_default.') ? t(`event.${s.key.slice(15)}`)
-    : s.key.startsWith('flag.') ? t('admin.flagLabel', { name: s.key.slice(5), packet: s.packet ?? '' }) : t(`setting.${s.key}`)
+  const label = (s: SettingRow) => s.key.startsWith('rule_enabled.') ? t('rule.enabled', { rule: s.key.slice(13), name: runtimeText(`rule.${s.key.slice(13)}`) })
+    : s.key.startsWith('notify_default.') ? runtimeText(`event.${s.key.slice(15)}`)
+    : s.key.startsWith('flag.') ? t('admin.flagLabel', { name: s.key.slice(5), packet: s.packet ?? '' }) : runtimeText(`setting.${s.key}`)
   const fallback = (s: SettingRow) => s.default != null && typeof s.default === 'object'
     ? [s.default.app && t('pref.app'), s.default.email && t('pref.email')].filter(Boolean).join(' + ') : String(s.default)
   // Form page (design §5): a 760 px field region; each setting shows its current value, its default and its own error.
@@ -217,10 +217,10 @@ export function Settings() {
     <div className="max-w-[760px] space-y-6">
       <p className="text-base/6 text-muted-foreground">{t('admin.settingsIntro')}</p>
       <nav aria-label={t('admin.settingsSections')} className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-        {groups.map((g) => <a key={g} href={`#set-group-${g}`} className="text-primary underline-offset-4 hover:underline" onClick={(e) => { e.preventDefault(); document.getElementById(`set-group-${g}`)?.scrollIntoView({ block: 'start' }) }}>{t(`admin.group.${g}`)}</a>)}
+        {groups.map((g) => <a key={g} href={`#set-group-${g}`} className="text-primary underline-offset-4 hover:underline" onClick={(e) => { e.preventDefault(); document.getElementById(`set-group-${g}`)?.scrollIntoView({ block: 'start' }) }}>{runtimeText(`admin.group.${g}`)}</a>)}
       </nav>
       {groups.map((g) => (
-        <Section key={g} id={`set-group-${g}`} title={t(`admin.group.${g}`)}>
+        <Section key={g} id={`set-group-${g}`} title={runtimeText(`admin.group.${g}`)}>
           <ul className="divide-y">
             {list.data.filter((s) => s.group === g).map((s) => {
               const v = s.key in draft ? draft[s.key] : s.value
@@ -262,7 +262,7 @@ interface UserRow { id: string; displayName: string; email: string; jobTitle?: s
 
 /** A system role with where it comes from: directory-group roles are filled, roles added in the Hub are outlined. */
 const RoleBadge = ({ r, children }: { r: UserRow['roles'][number]; children: React.ReactNode }) => (
-  <Badge variant={r.source === 'Group' ? 'secondary' : 'outline'} className="gap-1 rounded-md text-xs/[18px]" title={t(`role.source.${r.source}`)}>{children}</Badge>
+  <Badge variant={r.source === 'Group' ? 'secondary' : 'outline'} className="gap-1 rounded-md text-xs/[18px]" title={runtimeText(`role.source.${r.source}`)}>{children}</Badge>
 )
 
 export function Users() {
@@ -297,7 +297,7 @@ export function Users() {
           <table className="w-full text-sm">
             <caption className="sr-only">{t('admin.users')}</caption>
             <thead className="bg-muted">
-              <tr>{['common.name', 'admin.jobTitle', 'admin.office', 'admin.supervisor', 'admin.roles', 'common.status', 'admin.lastSignIn', ''].map((h) => <th key={h} scope="col" className={thCls}>{h ? t(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
+              <tr>{['common.name', 'admin.jobTitle', 'admin.office', 'admin.supervisor', 'admin.roles', 'common.status', 'admin.lastSignIn', ''].map((h) => <th key={h} scope="col" className={thCls}>{h ? runtimeText(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
             </thead>
             <tbody>
               {rows.map((u) => (
@@ -310,7 +310,7 @@ export function Users() {
                   <td className={tdCls}>{u.jobTitle || <Missing />}</td>
                   <td className={tdCls}>{ref.data?.offices.find((o: any) => o.id === u.officeId)?.name ?? <Missing />}</td>
                   <td className={tdCls}>{u.supervisorId ? supervisor(u.supervisorId) : <Chip tone="warn">{t('admin.noSupervisor')}</Chip>}</td>
-                  <td className={tdCls}><div className="flex flex-wrap gap-1">{u.roles.map((r) => <RoleBadge key={r.role + r.source} r={r}>{t(`role.${r.role}`)}</RoleBadge>)}</div></td>
+                  <td className={tdCls}><div className="flex flex-wrap gap-1">{u.roles.map((r) => <RoleBadge key={r.role + r.source} r={r}>{runtimeText(`role.${r.role}`)}</RoleBadge>)}</div></td>
                   <td className={tdCls}><Active on={u.isActive} /></td>
                   <td className={cn(tdCls, 'whitespace-nowrap tabular-nums')}>{u.lastSignInAt ? fmtTime(u.lastSignInAt) : <Missing />}</td>
                   <td className={ctl}>
@@ -421,15 +421,15 @@ function UserDialog({ user, users, offices, disciplines, onClose }: { user: User
             <div className="flex flex-wrap gap-1.5">
               {roles.map((r) => (
                 <RoleBadge key={r.role + r.source} r={r}>
-                  {t(`role.${r.role}`)} · {t(`role.source.${r.source}`)}
-                  {r.source === 'Manual' && <button type="button" className="-my-0.5 -mr-1 grid size-6 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-bad" onClick={() => removeRole(r.role)} aria-label={`${t('common.remove')} ${t(`role.${r.role}`)}`}><X className="size-3.5" aria-hidden /></button>}
+                  {runtimeText(`role.${r.role}`)} · {runtimeText(`role.source.${r.source}`)}
+                  {r.source === 'Manual' && <button type="button" className="-my-0.5 -mr-1 grid size-6 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-bad" onClick={() => removeRole(r.role)} aria-label={`${t('common.remove')} ${runtimeText(`role.${r.role}`)}`}><X className="size-3.5" aria-hidden /></button>}
                 </RoleBadge>
               ))}
             </div>
             <div className="flex gap-2">
               <select className={selectCls} value={role} onChange={(e) => setRole(e.target.value)} aria-label={t('admin.addRole')}>
                 <option value="">{t('admin.addRole')}</option>
-                {['Admin', 'Executive', 'Supervisor', 'ProjectManager', 'ReadOnly'].filter((r) => !roles.some((x) => x.role === r && x.source === 'Manual')).map((r) => <option key={r} value={r}>{t(`role.${r}`)}</option>)}
+                {['Admin', 'Executive', 'Supervisor', 'ProjectManager', 'ReadOnly'].filter((r) => !roles.some((x) => x.role === r && x.source === 'Manual')).map((r) => <option key={r} value={r}>{runtimeText(`role.${r}`)}</option>)}
               </select>
               <Button variant="outline" onClick={addRole} disabled={!role}>{t('common.add')}</Button>
             </div>

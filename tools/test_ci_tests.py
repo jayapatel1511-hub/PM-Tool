@@ -266,7 +266,9 @@ class NightlyWiringTests(unittest.TestCase):
             self.assertIn(required, workflow)
         self.assertNotIn('[ "$base" != "$GITHUB_SHA" ]', workflow)
         nightly = [command for jobs, _, command in ci_tests.parse_steps(ci_tests.STEPS.read_text()) if 'nightly' in jobs]
-        self.assertEqual(sum('node web/tests/' in command or 'test:counts' in command for command in nightly), 6)
+        self.assertEqual(sum('node web/tests/' in command or 'test:counts' in command for command in nightly), 8)
+        for suite in ('smoke-live.cjs', 'live-real.cjs'):
+            self.assertEqual(sum(suite in command for command in nightly), 1)
         self.assertTrue(any('COUNTS_REPORT=' in command and 'ci-artifacts/nightly/' in command for command in nightly))
         self.assertTrue(any('CALM_OUT=' in command and 'calm-acceptance' in command for command in nightly))
         self.assertTrue(any('base.json' in command and 'now.json' in command for command in nightly))

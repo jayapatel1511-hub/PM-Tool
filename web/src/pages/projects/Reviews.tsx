@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { get } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 import { CoordinationRegister, type RegisterContext } from './CoordinationRegister'
 import { CommandForm, CoordStatus, FieldsCommand, PersonLabel, SelectField, SourceLink, discName, personName, peopleChoices, disciplineChoices, type RecordVersion, type SourceRevision, type FormField } from './CoordinationForms'
 
@@ -95,7 +95,7 @@ function ReviewDetail(c: RegisterContext & { id: string; close: () => void }) {
 function ReviewCommand({ c, d, action, close, done }: { c: RegisterContext & { id: string }; d: Detail; action: { type: string; assignment?: Assignment; finding?: Finding }; close: () => void; done: () => void }) {
   const { type, assignment: a, finding: f } = action, p = d.package, o = c.options, base = `projects/${c.projectId}/reviews/${p.id}`
   const issues = useQuery({ queryKey: ['review-issues', c.projectId], queryFn: () => get<ReviewIssue[]>(`projects/${c.projectId}/issues`), enabled: type === 'finding', staleTime: 30_000 })
-  let path = `${base}/action`, title = t(`review.command.${type}`), fields: FormField[] = [reason], initial: Record<string, string> = {}, build: (v: Record<string, string>) => object = v => ({ rowVersion: p.rowVersion, action: type, reason: v.reason })
+  let path = `${base}/action`, title = runtimeText(`review.command.${type}`), fields: FormField[] = [reason], initial: Record<string, string> = {}, build: (v: Record<string, string>) => object = v => ({ rowVersion: p.rowVersion, action: type, reason: v.reason })
   if (type === 'start') fields = []
   if (type === 'coordinator' || type === 'reviewer') { path = type === 'reviewer' ? `${base}/assignments/${a!.id}/assign` : `${base}/assign`; fields = [{ name: 'ownerId', label: type === 'reviewer' ? 'review.reviewer' : 'coord.coordinator', choices: peopleChoices(o) }, reason]; build = v => ({ ...v, rowVersion: a?.rowVersion ?? p.rowVersion }) }
   if (type === 'decision') { path = `${base}/assignments/${a!.id}/decision`; fields = [{ name: 'status', label: 'common.status', choices: ['In Review', 'Changes Required', 'Approved'].map(s => ({ value: s, label: tv(s) })) }, { name: 'rationale', label: 'coord.rationale', type: 'textarea' }]; initial = { status: a!.status === 'Pending' ? 'In Review' : a!.status }; build = v => ({ ...v, rowVersion: a!.rowVersion }) }

@@ -13,13 +13,13 @@ import { Button } from '@/components/ui/button'
 import { get, post, qs } from '@/lib/api'
 import { fmtDate, fmtTime, localIso, today, addDays } from '@/lib/format'
 import { en } from '@/i18n/en'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 // Every event with a label (the same `event.*` table Preferences uses), so new events appear in the filter automatically.
 const EVENTS = Object.keys(en).filter((k) => k.startsWith('event.')).map((k) => k.slice(6))
-  .sort((a, b) => t(`event.${a}`).localeCompare(t(`event.${b}`)))
+  .sort((a, b) => runtimeText(`event.${a}`).localeCompare(runtimeText(`event.${b}`)))
 
 /** "Today", "Yesterday" or the date, for grouping by day (§13.17). */
 function dayLabel(ts: string) {
@@ -65,7 +65,7 @@ function Personal() {
   // Active filters as removable tokens with Clear (§13.0 Filters).
   const tokens = ([
     ['unread', t('notif.unreadOnly'), filters.unread && t('common.yes')],
-    ['type', t('common.type'), filters.type && t(`event.${filters.type}`)],
+    ['type', t('common.type'), filters.type && runtimeText(`event.${filters.type}`)],
     ['projectId', t('common.project'), projects.find(([id]) => id === filters.projectId)?.[1]],
   ] as const).filter(([k]) => sp.get(k))
   const clear = () => { const n = new URLSearchParams(sp); for (const [k] of tokens) n.delete(k); setSp(n, { replace: true }) }
@@ -75,7 +75,7 @@ function Personal() {
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.type')} htmlFor="notif-type" className="w-full sm:w-64">
             <select id="notif-type" className={selectCls} value={filters.type ?? ''} onChange={(e) => set('type', e.target.value || undefined)}>
-              <option value="">{t('notif.anyType')}</option>{EVENTS.map((e) => <option key={e} value={e}>{t(`event.${e}`)}</option>)}
+              <option value="">{t('notif.anyType')}</option>{EVENTS.map((e) => <option key={e} value={e}>{runtimeText(`event.${e}`)}</option>)}
             </select>
           </Field>
           <Field label={t('common.project')} htmlFor="notif-project" className="w-full sm:w-44">
@@ -182,7 +182,7 @@ function Following() {
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                                 <span className="font-semibold">{e.actorName ?? t('common.system')}</span>
-                                <span className="text-muted-foreground">{t(`action.${e.action}`)}</span>
+                                <span className="text-muted-foreground">{runtimeText(`action.${e.action}`)}</span>
                                 {e.itemId && e.action !== 'Deleted'
                                   ? <Link className="break-words text-primary underline underline-offset-4 hover:text-foreground" to={itemHref(e.itemType, num, e.itemId)}>{item}</Link>
                                   : <span className="break-words">{item}</span>}

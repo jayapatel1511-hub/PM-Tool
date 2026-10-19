@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 
 // Status colour language (§13.0): every colour carries text and an icon; colour is never the only signal.
 type Tone = 'ok' | 'warn' | 'bad' | 'idle' | 'done' | 'work'
@@ -47,7 +47,7 @@ export function StatusPill({ status, className }: { status?: string | null; clas
 
 export function HealthPill({ health, label, className }: { health?: string | null; label?: string; className?: string }) {
   const h = health ?? 'Grey'
-  return <Pill tone={toneOf(h)} className={className}>{label ? `${label}: ` : ''}{t(`health.${h}`)}</Pill>
+  return <Pill tone={toneOf(h)} className={className}>{label ? `${label}: ` : ''}{runtimeText(`health.${h}`)}</Pill>
 }
 
 const PRIORITY: Record<string, string> = {

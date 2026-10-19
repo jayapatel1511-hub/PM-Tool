@@ -10,7 +10,7 @@ import { Key, Pill, type Tone } from '@/components/hub/pills'
 import { ApiError, get } from '@/lib/api'
 import { itemHref } from '@/components/hub/search'
 import { fmtDate, fmtTime, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 import { CommandForm, CoordStatus, PersonLabel, SelectField, personName, workChoices, workRef, type CoordOptions, type WorkRef } from './CoordinationForms'
 
 type Assessment = { id: string; rowVersion: number; ownerId: string; state: string; intendedOutput: string; completionCriteria: string; evaluatedAt: string }
@@ -34,7 +34,7 @@ const card = 'space-y-2 rounded-lg border p-4', subhead = 'text-base/6 font-semi
 const dl = 'grid grid-cols-[minmax(8rem,auto)_1fr] gap-x-4 gap-y-2'
 /** An unassessed answer stays visibly unknown (▲); it never reads as satisfied. */
 const answer = (value: boolean | null, yes: string, no: string, noTone: Tone) =>
-  value === null ? <Pill tone="warn">{t('readiness.unassessed')}</Pill> : <Pill tone={value ? 'done' : noTone}>{t(value ? yes : no)}</Pill>
+  value === null ? <Pill tone="warn">{t('readiness.unassessed')}</Pill> : <Pill tone={value ? 'done' : noTone}>{runtimeText(value ? yes : no)}</Pill>
 
 export function ReadinessInspector({ projectId, number, options, initial, close, done }: { projectId: string; number: string; options: CoordOptions
   initial?: string; close: () => void; done: () => void }) {

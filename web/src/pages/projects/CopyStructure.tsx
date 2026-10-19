@@ -4,10 +4,9 @@ import { Label } from '@/components/ui/label'
 import { get } from '@/lib/api'
 import { t } from '@/lib/i18n'
 import type { Page, ProjectRow } from '@/lib/types'
-import { CREATE_SOURCES } from './CreateProject'
 
 /** §27.1: start from another project's structure (disciplines, undated milestones, deliverables, unassigned tasks, dependencies). */
-function CopyFrom({ value, onChange }: { value?: string | null; onChange: (v: string | null) => void }) {
+export function CopyFrom({ value, onChange }: { value?: string | null; onChange: (v: string | null) => void }) {
   const q = useQuery({ queryKey: ['projects', 'copy-sources'], queryFn: () => get<Page<ProjectRow>>('projects?includeArchived=true&pageSize=200&sort=number:desc') })
   return (
     <div className="space-y-1.5">
@@ -21,4 +20,4 @@ function CopyFrom({ value, onChange }: { value?: string | null; onChange: (v: st
   )
 }
 
-CREATE_SOURCES.push({ id: 'copy', label: 'copy.label', render: (v, set) => <CopyFrom value={v} onChange={set} />, body: (v) => (v ? { copyFromProjectId: v } : {}) })
+export const copySource = { id: 'copy', label: 'copy.label', render: (v: any, set: (value: any) => void) => <CopyFrom value={v as string | null} onChange={set} />, body: (v: any) => (v ? { copyFromProjectId: v } : {}) }

@@ -11,7 +11,7 @@ import { get, patch, post, qs, del } from '@/lib/api'
 import { fmtTime } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
-import { ItemSlots, type ItemPartProps } from '@/pages/projects/slots-items'
+import type { ItemPartProps } from '@/pages/projects/slots-items'
 
 // Comments (§12.8): conversation on the item, newest last; the facts stay in History (C-08).
 
@@ -74,7 +74,6 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
     </div>
   )
 }
-
 /** Comment box: Enter adds a line, Ctrl+Enter posts; "@" opens people, project members first (C-05). */
 function Composer({ projectId, initial = '', submitLabel, onSubmit, onCancel }: {
   projectId: string; initial?: string; submitLabel: string; onSubmit: (body: string) => Promise<unknown>; onCancel?: () => void
@@ -158,5 +157,3 @@ function Composer({ projectId, initial = '', submitLabel, onSubmit, onCancel }: 
     </div>
   )
 }
-
-ItemSlots.Comments = CommentsPanel

@@ -7,12 +7,14 @@ namespace Hub.Api.Infrastructure;
 
 /// One committed activity row with a project. The actor is kept for the visibility rule only and never leaves the server (FR-LIVE-15, FR-LIVE-16).
 public sealed record LiveRow(Guid Id, Guid ProjectId, string ItemType, Guid? ActorUserId);
+sealed record LiveRead(Guid Id, Guid? ProjectId, string ItemType, Guid? ActorUserId);
 sealed record LiveEval(Guid ProjectId, DateTimeOffset EvaluatedAt);
 
-/// What one read of the feed found: new activity rows and projects evaluated since the last read.
-public sealed record LiveBatch(IReadOnlyList<LiveRow> Rows, IReadOnlyList<Guid> Evaluated)
+/// What one read of the feed found: new activity rows, projects evaluated since the last read, and whether any user or system role
+/// changed. `Users` is a server-side signal for recomputing visibility only; user rows have no project and are never streamed (FR-LIVE-16).
+public sealed record LiveBatch(IReadOnlyList<LiveRow> Rows, IReadOnlyList<Guid> Evaluated, bool Users = false)
 {
-    public bool IsEmpty => Rows.Count == 0 && Evaluated.Count == 0;
+    public bool IsEmpty => Rows.Count == 0 && Evaluated.Count == 0 && !Users;
 }
 
 /// Where the feed has read up to. Ids are uuid v7, created from the system clock, so the cursor uses it too (not TimeProvider).
@@ -92,16 +94,20 @@ public sealed class LiveFeed(IServiceProvider root, IConfiguration cfg, ILogger<
     {
         var lower = state.Cursor - overlap;
         var from = LowerBound(lower);
-        var found = await db.Database.SqlQuery<LiveRow>($"""
+        var user = Hub.Domain.ItemType.User;
+        var found = await db.Database.SqlQuery<LiveRead>($"""
             SELECT id AS "Id", project_id AS "ProjectId", item_type AS "ItemType", actor_user_id AS "ActorUserId"
-            FROM hub.activity_log WHERE id >= {from} AND project_id IS NOT NULL ORDER BY id
+            FROM hub.activity_log WHERE id >= {from} AND (project_id IS NOT NULL OR item_type = {user}) ORDER BY id
             """).ToListAsync(ct);
         var rows = new List<LiveRow>();
+        var users = false;
         foreach (var r in found)
         {
             var at = Timestamp(r.Id);
             if (at > state.Cursor) state.Cursor = at;
-            if (state.Seen.TryAdd(r.Id, at)) rows.Add(r);
+            if (!state.Seen.TryAdd(r.Id, at)) continue;
+            if (r.ProjectId is { } pid) rows.Add(new LiveRow(r.Id, pid, r.ItemType, r.ActorUserId));
+            else users = true;
         }
         var floor = Timestamp(LowerBound(state.Cursor - overlap)); // the next read's bound, floored to the millisecond like the query
         foreach (var id in state.Seen.Where(x => x.Value < floor).Select(x => x.Key).ToList()) state.Seen.Remove(id);
@@ -118,7 +124,7 @@ public sealed class LiveFeed(IServiceProvider root, IConfiguration cfg, ILogger<
             if (!first && (!state.Evaluations.TryGetValue(e.ProjectId, out var was) || was != e.EvaluatedAt)) evaluated.Add(e.ProjectId);
             state.Evaluations[e.ProjectId] = e.EvaluatedAt;
         }
-        return new LiveBatch(rows, evaluated);
+        return new LiveBatch(rows, evaluated, users);
     }
 
     /// The smallest uuid v7 for a time: the 48-bit Unix milliseconds big-endian, the rest zero. PostgreSQL compares uuids byte by byte.

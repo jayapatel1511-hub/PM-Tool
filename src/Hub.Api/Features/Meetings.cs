@@ -21,11 +21,7 @@ public static class MeetingEndpoints
     public sealed record ActionQuery(string? Status, string? OwnerType, Guid? OwnerId, Guid? MeetingId, string? Indicator, string? Q);
 
     static readonly string[] OwnerTypes = [ActionOwnerType.User, ActionOwnerType.Discipline, ActionOwnerType.ExternalParty];
-    static readonly Col[] ActionCols =
-    [
-        new("key", "key", "key"), new("text", "actionText"), new("meetingTitle", "meeting"), new("meetingDate", "meetingDate", "date"), new("ownerName", "owner"),
-        new("ownerTypeLabel", "ownerType"), new("dueDate", "due", "date"), new("daysOverdue", "daysOverdue", "number"), new("status", "status"), new("taskKey", "task"),
-    ];
+    static readonly Col[] ActionCols = Hub.Api.Records.MeetingActionRecord.MeetingsActionCols;
 
     public static void Map(RouteGroupBuilder api)
     {

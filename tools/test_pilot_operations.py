@@ -164,6 +164,26 @@ mv() { return 98; }
             self.assertNotEqual(result.returncode, 0)
             self.assertNotIn(b"unique-private-secret", result.stdout + result.stderr)
 
+    def test_verify_checks_expected_build(self):
+        spec = importlib.util.spec_from_file_location("pilot_verify_build", ROOT / "scripts/verify-homedev-pilot.py")
+        module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        def fake_call(base, method, path, body=None, host=module.HOST, origin=None, cookie=None):
+            if path == "/health": return 200, b'{"status":"Healthy","build":"' + expected.encode() + b'"}', ""
+            return 401, b"", ""
+        expected = "a" * 40
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(module.run(["--expect-build", expected], fake_call), 2)
+        self.assertIn("PASS health build", output.getvalue())
+
+        def missing_call(base, method, path, body=None, host=module.HOST, origin=None, cookie=None):
+            if path == "/health": return 200, b'{"status":"Healthy"}', ""
+            return 401, b"", ""
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(module.run(["--expect-build", expected], missing_call), 2)
+        self.assertIn("FAIL health build", output.getvalue())
+
     def test_verifier_refuses_remote_or_review_credentials_before_network(self):
         spec = importlib.util.spec_from_file_location("pilot_verify", ROOT / "scripts/verify-homedev-pilot.py")
         module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)

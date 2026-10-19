@@ -42,7 +42,7 @@ public static class NotificationEndpoints
 
         // FR-003 (§17.6, packet 020): a cheap stamp the SPA polls every few seconds; it asks for the counts again only when
         // the stamp changes — a notification arrives or is read, a followed project changes, or a read marker moves.
-        api.MapGet("/me/notifications/pulse", async (HubDb db, Access access, CurrentUser me) =>
+        api.MapGet("/me/notifications/pulse", async (HubDb db, Access access, CurrentUser me, SettingsStore store, Guid? projectId) =>
         {
             var visible = access.VisibleProjectIds();
             var permitted = (await PlanningEndpoints.VisibleNotifications(db, access));
@@ -52,7 +52,17 @@ public static class NotificationEndpoints
             var ids = follows.Select(f => f.ProjectId).ToList();
             var activity = ids.Count == 0 ? null : await VisibleFollowed(db, access, ids, me.Id).MaxAsync(a => (DateTimeOffset?)a.OccurredAt);
             var seen = follows.Max(f => f.LastSeenAt);
-            return new { Stamp = $"{unread}:{latest?.UtcTicks}:{activity?.UtcTicks}:{seen?.UtcTicks}" };
+            var stamp = $"{unread}:{latest?.UtcTicks}:{activity?.UtcTicks}:{seen?.UtcTicks}";
+            if (!(await store.Get(db)).IsFlagOn("live_project_stamp") || projectId is not { } pid)
+                return new Dictionary<string, object?> { ["stamp"] = stamp };
+            // Check visibility before either source read so restricted and unknown projects remain indistinguishable.
+            var visibleIds = await access.VisibleProjectIdSet();
+            if (!visibleIds.Contains(pid)) return new Dictionary<string, object?> { ["stamp"] = stamp };
+            var projectActivity = await (await ActivityEndpoints.Visible(db, access, pid))
+                .Select(a => (DateTimeOffset?)a.OccurredAt).MaxAsync();
+            var evaluated = await db.ProjectStates.AsNoTracking().Where(s => s.ProjectId == pid)
+                .Select(s => (DateTimeOffset?)s.EvaluatedAt).FirstOrDefaultAsync();
+            return new Dictionary<string, object?> { ["stamp"] = stamp, ["projectStamp"] = $"{projectActivity?.UtcTicks}:{evaluated?.UtcTicks}" };
         });
 
         // The counts behind the bell and the Following tab; the SPA re-reads them when the pulse changes.

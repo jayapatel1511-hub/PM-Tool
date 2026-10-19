@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run gen && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "test:handoffs": "node tests/handoffs.cjs",
@@ -26,7 +26,16 @@
     "test:planning-reporting": "node tests/planning-reporting.cjs",
     "test:task-pickup": "node tests/task-pickup.cjs",
     "test:verifiable-records": "node tests/verifiable-records.cjs",
-    "test:schema-workflows": "node tests/schema-workflows.cjs"
+    "test:schema-workflows": "node tests/schema-workflows.cjs",
+    "gen": "openapi-typescript src/gen/openapi.json -o src/gen/api.d.ts",
+    "test:keys": "node --test src/lib/keys.test.ts src/lib/page-mode.test.ts",
+    "typecheck:tests": "tsc -p tests/tsconfig.json",
+    "test:registrations": "node tests/registrations.cjs",
+    "test:browser-verification": "node tests/registrations-browser.cjs && node tests/route-splitting.cjs && node tests/live-browser.cjs",
+    "test:route-splitting": "node tests/route-splitting.cjs",
+    "test:live-browser": "node tests/live-browser.cjs",
+    "test:smoke-live": "node tests/smoke-live.cjs",
+    "test:live-real": "node tests/live-real.cjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.23.0",
@@ -57,6 +66,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "axe-core": "^4.13.0",
+    "openapi-typescript": "7.13.0",
     "oxlint": "^1.81.0",
     "playwright": "1.61.1",
     "typescript": "~6.0.2",

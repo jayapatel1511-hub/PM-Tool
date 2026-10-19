@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { get, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
-import { plural, t } from '@/lib/i18n'
+import { plural, t , runtimeText } from '@/lib/i18n'
 import { accentOf } from '@/lib/utils'
 
 interface FileLink { id: string; title: string; url: string; linkType: string; isNetworkPath: boolean; addedBy?: string; addedAt: string }
@@ -34,7 +34,7 @@ export function FilesPage() {
   const q = useQuery({ queryKey: ['files', scope.api, f], enabled: scope.ready,
     queryFn: () => get<{ projects: FileProject[]; total: number; truncated: boolean; types: string[] }>(`files${qs({ projects: scope.api, ...f })}`) })
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
-  const tokens = ([['q', t('common.search'), f.q && `“${f.q}”`], ['type', t('common.type'), f.type && t(`linkType.${f.type}`)]] as const).filter(([, , v]) => v)
+  const tokens = ([['q', t('common.search'), f.q && `“${f.q}”`], ['type', t('common.type'), f.type && runtimeText(`linkType.${f.type}`)]] as const).filter(([, , v]) => v)
   const clear = () => { const n = new URLSearchParams(sp); n.delete('q'); n.delete('type'); setSp(n, { replace: true }) }
   return (
     <Page title={t('nav.files')} subtitle={q.data ? plural(q.data.total, 'files.one', 'files.many', { n: q.data.total }) : scope.label}>
@@ -50,7 +50,7 @@ export function FilesPage() {
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.type')} htmlFor="files-type" className="w-full sm:w-48">
             <select id="files-type" className={selectCls} value={f.type ?? ''} onChange={(e) => set('type', e.target.value)}>
-              <option value="">{t('files.anyType')}</option>{q.data?.types.map((x) => <option key={x} value={x}>{t(`linkType.${x}`)}</option>)}
+              <option value="">{t('files.anyType')}</option>{q.data?.types.map((x) => <option key={x} value={x}>{runtimeText(`linkType.${x}`)}</option>)}
             </select>
           </Field>
           <p className="text-sm text-muted-foreground sm:pb-2.5">{t('files.note')}</p>
@@ -70,7 +70,7 @@ export function FilesPage() {
               {p.items.map((i) => (
                 <li key={`${i.itemType}-${i.itemId}`} className="px-5 py-3">
                   <p className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs/[18px] text-muted-foreground">
-                    <span className="font-medium">{t(`itemType.${i.itemType}`)}</span>
+                    <span className="font-medium">{runtimeText(`itemType.${i.itemType}`)}</span>
                     {i.itemType === 'Project' ? <span>{i.name}</span>
                       : <button type="button" className="text-left text-sm text-foreground hover:underline" onClick={() => openPanel(i.itemType, i.itemId)}><Key>{i.key}</Key> {i.name}</button>}
                   </p>
@@ -78,7 +78,7 @@ export function FilesPage() {
                     {i.links.map((l) => (
                       <li key={l.id} className="flex min-h-8 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                         <LinkAnchor l={l} />
-                        <span className="text-xs/[18px] text-muted-foreground">{t(`linkType.${l.linkType}`)}</span>
+                        <span className="text-xs/[18px] text-muted-foreground">{runtimeText(`linkType.${l.linkType}`)}</span>
                         <span className="ml-auto text-xs/[18px] text-muted-foreground tabular-nums">{t('files.added', { name: l.addedBy ?? '', date: fmtDate(l.addedAt.slice(0, 10)) })}</span>
                       </li>
                     ))}

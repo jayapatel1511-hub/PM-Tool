@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ApiError, del, get, put, qs } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { fmtDate, fmtTime, relative } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 interface Lane { lane: string; statuses: string; count: number }
@@ -32,7 +32,7 @@ interface HomeData {
 const LANE_TONE: Record<string, string> = { 'To Do': 'var(--idle)', 'In Progress': 'var(--work)', Review: 'var(--warn)', Done: 'var(--done)' }
 /** Home counts every Complete task as Done; the board's Done lane shows only the last 14 days. Home's Review lane also
  *  holds Revision Required, so it is named for both (§40 D9). */
-const laneName = (lane: string) => (lane === 'Done' ? t('home.laneDone') : lane === 'Review' ? t('sig.laneReview') : t(`lane.${lane}`))
+const laneName = (lane: string) => (lane === 'Done' ? t('home.laneDone') : lane === 'Review' ? t('sig.laneReview') : runtimeText(`lane.${lane}`))
 /** A lane's definition: the canonical statuses it counts, as the server reports them. */
 const laneDef = (l: Lane) => `${laneName(l.lane)}: ${l.statuses.split(',').map((x) => tv(x)).join(', ')}`
 
@@ -148,7 +148,7 @@ export function HomePage() {
                 <li key={`${x.type}-${x.id}`}>
                   <button type="button" className="flex min-h-(--row-min) w-full flex-wrap items-center gap-x-3 gap-y-1 px-5 py-(--cell-py) text-left text-sm hover:bg-muted" onClick={() => openPanel(x.type, x.id)}>
                     <span className={cn('w-24 shrink-0 tabular-nums', x.overdue && 'font-semibold text-bad')}>{fmtDate(x.date)}</span>
-                    <span className="w-24 shrink-0 text-xs/[18px] text-muted-foreground">{t(`itemType.${x.type}`)}</span>
+                    <span className="w-24 shrink-0 text-xs/[18px] text-muted-foreground">{runtimeText(`itemType.${x.type}`)}</span>
                     <span className="flex min-w-[10rem] flex-1 basis-full flex-wrap items-center gap-2 sm:basis-auto sm:flex-nowrap"><AccentDot id={x.projectId} /><span className="shrink-0 whitespace-nowrap"><Key>{x.key}</Key></span><span className="w-full min-w-0 break-words font-medium sm:w-auto sm:truncate">{x.name}</span></span>
                     {x.owner && <span className="text-xs/[18px] text-muted-foreground">{x.owner}</span>}
                     <span className="text-xs/[18px] text-muted-foreground">{relative(x.date)}</span>
@@ -180,7 +180,7 @@ export function HomePage() {
           {editing && <Notice icon={Pencil} title={t('home.edit')}>{t('home.editHint')}</Notice>}
           {shown.map((w) => {
             const i = layout.findIndex((x) => x.id === w.id)
-            const name = t(`home.widget.${w.id}`)
+            const name = runtimeText(`home.widget.${w.id}`)
             return (
               <div key={w.id} className={cn(editing && 'rounded-xl border border-dashed border-input p-3')}>
                 {editing && (

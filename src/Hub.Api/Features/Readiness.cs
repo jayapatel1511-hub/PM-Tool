@@ -864,12 +864,8 @@ public static class ReadinessEndpoints
             ReadyOutputsTotal = readyTotal, ReadyOutputsTruncated = !paged && readyTotal > size };
     }
 
-    static readonly Col[] ConstraintColumns = [new("key", "key"), new("work", "item"), new("category", "constraintCategory"),
-        new("description", "description"), new("removalOwner", "removalOwner"), new("affectedOwner", "affectedOwner"),
-        new("neededBy", "neededBy", "date"), new("state", "status"), new("linked", "linkedRecord"), new("sourceUrl", "sourceEvidence")];
-    static readonly Col[] ReadyColumns = [new("key", "key"), new("name", "name"), new("targetType", "type"), new("owner", "owner"),
-        new("discipline", "discipline"), new("dueDate", "due", "date"), new("intendedOutput", "intendedOutput"),
-        new("completionCriteria", "completionCriteria"), new("state", "readiness")];
+    static readonly Col[] ConstraintColumns = Hub.Api.Records.WorkConstraintRecord.ReadinessConstraintColumns;
+    static readonly Col[] ReadyColumns = Hub.Api.Records.ScreenLists.ReadinessReadyColumns;
 
     /// FR-MDC-06: the page's constraint or ready-output list as a file, from the same window query and permission scope.
     static async Task<IResult> ExportWindow(Guid projectId, DateOnly? from, DateOnly? to, string list, string? format, HttpContext http,

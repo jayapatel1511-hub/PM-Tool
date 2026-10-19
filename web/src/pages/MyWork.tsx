@@ -17,9 +17,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { get, qs } from '@/lib/api'
-import { useMe } from '@/lib/auth'
+import { useMe } from '@/lib/auth-context'
 import { addDays, fmtDate, relative, today } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn, type Accent } from '@/lib/utils'
 import { useLaneDrop } from './projects/Board'
@@ -92,11 +92,11 @@ function MyWorkViews({ sections }: { sections?: { id: string; title: string; cou
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="no-print self-start" aria-label={`${t('mywork.views')}: ${t(`mywork.tab.${current}`)}`}>{t(`mywork.tab.${current}`)}<ChevronDown className="size-4" aria-hidden /></Button>
+        <Button variant="outline" className="no-print self-start" aria-label={`${t('mywork.views')}: ${runtimeText(`mywork.tab.${current}`)}`}>{runtimeText(`mywork.tab.${current}`)}<ChevronDown className="size-4" aria-hidden /></Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64" onCloseAutoFocus={(e) => { if (toSection.current) { e.preventDefault(); toSection.current = false } }}>
         <DropdownMenuRadioGroup value={current} onValueChange={(x) => navigate(link(x))}>
-          {views.map((x) => <DropdownMenuRadioItem key={x} value={x}>{t(`mywork.tab.${x}`)}</DropdownMenuRadioItem>)}
+          {views.map((x) => <DropdownMenuRadioItem key={x} value={x}>{runtimeText(`mywork.tab.${x}`)}</DropdownMenuRadioItem>)}
         </DropdownMenuRadioGroup>
         {sections && <>
           <DropdownMenuSeparator />
@@ -217,7 +217,7 @@ function Overview({ focus }: { focus: boolean }) {
     : <div className="divide-y">{groups.map(([b, rows]) => (
       <div key={b}>
         <h3 className={cn('border-b bg-muted px-5 py-2 text-xs/[18px] font-semibold', b === 'overdue' ? 'text-bad' : 'text-muted-foreground')}>
-          {b === 'overdue' && <span aria-hidden>■ </span>}{b === 'blocked' ? t('ind.blocked') : t(`tbucket.${b}`)} <span className="tabular-nums">({rows.length})</span>
+          {b === 'overdue' && <span aria-hidden>■ </span>}{b === 'blocked' ? t('ind.blocked') : runtimeText(`tbucket.${b}`)} <span className="tabular-nums">({rows.length})</span>
         </h3>
         <ul className="divide-y">{rows.map((r) => taskRow(r))}</ul>
       </div>))}</div>
@@ -242,7 +242,7 @@ function Overview({ focus }: { focus: boolean }) {
       <li key={d.id} className={ROW}>
         <ProjectTag id={d.projectId} number={d.projectNumber} />
         <button type="button" className="min-w-[10rem] flex-1 break-words text-left hover:underline" onClick={() => openPanel('Decision', d.id)}><Key>{d.key}</Key> <span className="font-medium">{d.subject}</span></button>
-        <span className="text-xs/[18px] text-muted-foreground">{t(`mywork.role.${d.role}`)}</span>
+        <span className="text-xs/[18px] text-muted-foreground">{runtimeText(`mywork.role.${d.role}`)}</span>
         <span className={cn('tabular-nums', d.isOverdue && 'font-semibold text-bad', d.isDueSoon && !d.isOverdue && 'text-warn')}>{t('wc.requiredBy', { date: fmtDate(d.requiredByDate) })}</span>
         {d.isOverdue ? <Chip tone="bad">{t('ind.overdue')}</Chip> : d.isDueSoon && <Chip tone="warn">{t('ind.dueSoon')}</Chip>}
         <StatusPill status={d.status} />
@@ -262,7 +262,7 @@ function Overview({ focus }: { focus: boolean }) {
         <Link className="flex min-w-[10rem] flex-1 items-center gap-2 hover:underline" to={`/projects/${p.projectNumber}`}>
           <AccentDot id={p.id} /><Key>{p.projectNumber}</Key><span className="min-w-0 truncate font-medium">{p.name}</span>
         </Link>
-        <span className="flex flex-wrap gap-1">{p.roles.map((r) => <span key={r} className="rounded-md bg-secondary px-2 py-0.5 text-xs/[18px] font-medium">{t(`role.${r}`)}</span>)}</span>
+        <span className="flex flex-wrap gap-1">{p.roles.map((r) => <span key={r} className="rounded-md bg-secondary px-2 py-0.5 text-xs/[18px] font-medium">{runtimeText(`role.${r}`)}</span>)}</span>
         <HealthPill health={p.reportedHealth} />
         {p.nextMilestone && <span className="text-xs/[18px] text-muted-foreground"><span aria-hidden>◆ </span>{p.nextMilestone.name} {relative(p.nextMilestone.date)}</span>}
         {!ro && <span className="w-44"><FollowLevelSelect projectId={p.id} level={p.follow?.level} onChanged={reload} projectName={`${p.projectNumber} ${p.name}`} /></span>}
@@ -318,7 +318,7 @@ function Overview({ focus }: { focus: boolean }) {
             </Field>
             <Field label={t('mywork.sort')} htmlFor="mw-sort" className="w-full sm:w-44">
               <select id="mw-sort" className={selectCls} value={f.sort} onChange={(e) => set('sort', e.target.value === 'due' ? undefined : e.target.value)}>
-                {SORTS.map((x) => <option key={x} value={x}>{t(`mywork.sort.${x}`)}</option>)}
+                {SORTS.map((x) => <option key={x} value={x}>{runtimeText(`mywork.sort.${x}`)}</option>)}
               </select>
             </Field>
           </div>
@@ -369,7 +369,7 @@ function TaskView({ tab }: { tab: string }) {
         <FilterBar className="flex-1" activeCount={['from', 'to'].filter((k) => sp.has(k)).length}
           quick={<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Segmented label={t('mywork.show')} value={who} onChange={(x) => set('who', x === 'mine' ? null : x)} options={WHO.map((x) => ({ value: x, label: t(`mywork.who.${x}`) }))} />
-            <p className="text-sm text-muted-foreground">{t(`mywork.who.${who}.about`)}</p>
+            <p className="text-sm text-muted-foreground">{runtimeText(`mywork.who.${who}.about`)}</p>
           </div>}>
           {tab === 'completed' && (
             <div className="flex flex-wrap items-end gap-3">
@@ -384,9 +384,9 @@ function TaskView({ tab }: { tab: string }) {
         </FilterBar>
       </div>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      <Section title={t(`mywork.tab.${tab}`)} count={q.data?.totalCount} accent="blue">
+      <Section title={runtimeText(`mywork.tab.${tab}`)} count={q.data?.totalCount} accent="blue">
         {q.isPending ? <Loading rows={5} /> : rows.length === 0
-          ? <Empty action={me.capabilities.createTask && <Button variant="outline" onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}>{t(`mywork.empty.${tab}`)}</Empty> : (
+          ? <Empty action={me.capabilities.createTask && <Button variant="outline" onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}>{runtimeText(`mywork.empty.${tab}`)}</Empty> : (
           <ul className="divide-y">
             {rows.map((r) => (
               <li key={r.id} className={ROW}>

@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { get, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { useCurrentProject } from './ProjectLayout'
 import { ExportMenu } from '@/components/hub/export'
@@ -37,8 +37,8 @@ export function ProjectActivityTab() {
   const tokens = ([
     ['from', t('common.from'), params.from && fmtDate(params.from)],
     ['to', t('common.to'), params.to && fmtDate(params.to)],
-    ['itemType', t('common.item'), params.itemType && t(`itemType.${params.itemType}`)],
-    ['category', t('common.action'), params.category && t(`category.${params.category}`)],
+    ['itemType', t('common.item'), params.itemType && runtimeText(`itemType.${params.itemType}`)],
+    ['category', t('common.action'), params.category && runtimeText(`category.${params.category}`)],
     ['disciplineId', t('common.discipline'), p.disciplines.find((d) => d.id === params.disciplineId)?.name],
     ['importantOnly', t('activity.important'), t('common.yes')],
     ['actorId', t('activity.actor'), actorName],
@@ -53,12 +53,12 @@ export function ProjectActivityTab() {
           <Field label={t('common.to')} htmlFor="pa-to" className="w-full sm:w-40"><Input id="pa-to" type="date" value={sp.get('to') ?? ''} onChange={(e) => set('to', e.target.value)} /></Field>
           <Field label={t('common.item')} htmlFor="pa-item" className="w-full sm:w-44">
             <select id="pa-item" className={selectCls} value={sp.get('itemType') ?? ''} onChange={(e) => set('itemType', e.target.value)}>
-              <option value="">{t('activity.anyItem')}</option>{TYPES.map((x) => <option key={x} value={x}>{t(`itemType.${x}`)}</option>)}
+              <option value="">{t('activity.anyItem')}</option>{TYPES.map((x) => <option key={x} value={x}>{runtimeText(`itemType.${x}`)}</option>)}
             </select>
           </Field>
           <Field label={t('common.action')} htmlFor="pa-action" className="w-full sm:w-48">
             <select id="pa-action" className={selectCls} value={sp.get('category') ?? ''} onChange={(e) => set('category', e.target.value)}>
-              <option value="">{t('activity.anyAction')}</option>{CATEGORIES.map((x) => <option key={x} value={x}>{t(`category.${x}`)}</option>)}
+              <option value="">{t('activity.anyAction')}</option>{CATEGORIES.map((x) => <option key={x} value={x}>{runtimeText(`category.${x}`)}</option>)}
             </select>
           </Field>
           <Field label={t('common.discipline')} htmlFor="pa-discipline" className="w-full sm:w-44">

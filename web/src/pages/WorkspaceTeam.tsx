@@ -8,7 +8,7 @@ import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { get, qs } from '@/lib/api'
-import { plural, t } from '@/lib/i18n'
+import { plural, t , runtimeText } from '@/lib/i18n'
 
 interface Member {
   userId: string; displayName: string; jobTitle?: string; email?: string
@@ -56,7 +56,7 @@ export function WorkspaceTeamPage() {
                           <Link to={`/projects/${m.projectNumber}/team`} className="inline-flex min-w-0 items-center gap-2 hover:underline" title={m.projectName}>
                             <AccentDot id={m.projectId} /><span className="shrink-0 whitespace-nowrap"><Key>{m.projectNumber}</Key></span><span className="break-words">{m.projectName}</span>
                           </Link>
-                          {m.roles.map((r) => <span key={r} className={tag}>{t(`role.${r}`)}</span>)}
+                          {m.roles.map((r) => <span key={r} className={tag}>{runtimeText(`role.${r}`)}</span>)}
                           {m.leads.map((l) => <span key={l} className={tag}>{t('team.leadOf', { name: l })}</span>)}
                         </li>
                       ))}

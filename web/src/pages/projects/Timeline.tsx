@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useProjectRefresh } from '@/hooks/data'
 import { get, patch, qs } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, shortDate, today } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { DeliverableRow } from './Deliverables'
 import { ChangeDateDialog, milestoneStatusLabel, type MilestoneRow } from './Milestones'
@@ -43,7 +43,7 @@ export function depPath(type: string | undefined, a: { s: number; e: number; y: 
 /** An arrow's tooltip: its link type and lag (left out when the link has no lag of its own, as for a deliverable link
  *  derived from task links). */
 export const depTitle = (type: string | undefined, lag?: number) =>
-  [t(`sig.dep.${type ?? 'FinishToStart'}`), lag === undefined ? null : lag ? plural(lag, 'sig.depLag1', 'sig.depLag') : t('sig.depNoLag')].filter(Boolean).join(' · ')
+  [runtimeText(`sig.dep.${type ?? 'FinishToStart'}`), lag === undefined ? null : lag ? plural(lag, 'sig.depLag1', 'sig.depLag') : t('sig.depNoLag')].filter(Boolean).join(' · ')
 /** One dependency arrow with a hover target and a tooltip naming its type and lag. */
 export function DepArrow({ d, hot, title, marker }: { d: string; hot: boolean; title: string; marker: string }) {
   return (
@@ -422,7 +422,7 @@ export function TimelineTab() {
                     </div>
                   )
                 }
-                if (r.kind === 'handoff') { const h = r.h; return <div key={r.id} className="flex border-b" style={{ height: H.handoff }} role="row"><div role="rowheader" className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-card px-3 text-xs" style={{width:LABEL}}><Link to={`/projects/${p.projectNumber}/handoffs?panel=Handoff:${h.id}`} className="truncate hover:underline">{h.key} {h.title} · {p.disciplines.find(d=>d.id===h.sendingDisciplineId)?.name} → {p.disciplines.find(d=>d.id===h.receivingDisciplineId)?.name}</Link></div><div role="cell" className="relative" style={{width}}>{[['neededBy',h.neededBy],['promisedBy',h.promisedBy]].map(([kind,date])=>date && <Link key={kind} to={`/projects/${p.projectNumber}/handoffs?panel=Handoff:${h.id}`} className="absolute top-1 inline-flex h-6 items-center whitespace-nowrap text-xs" style={{left:x(date)}} aria-label={`${h.key} · ${t(`handoff.${kind}`)} ${fmtDate(date)} · ${tv(h.status)}`} title={`${h.key} · ${t(`handoff.${kind}`)} ${fmtDate(date)} · ${tv(h.status)}`}><span aria-hidden>{kind==='neededBy'?'◆':'○'}</span></Link>)}{(h.dateMismatch||h.isOverdue) && <span className="absolute top-1.5 text-xs text-warn" style={{left:x(h.promisedBy??h.neededBy)+20}}>{h.dateMismatch?t('interaction.mismatchDays',{n:daysBetween(h.neededBy,h.promisedBy!)}):''} {h.isOverdue?t('interaction.overdueDays',{n:h.daysOverdue}):''}</span>}</div></div> }
+                if (r.kind === 'handoff') { const h = r.h; return <div key={r.id} className="flex border-b" style={{ height: H.handoff }} role="row"><div role="rowheader" className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-card px-3 text-xs" style={{width:LABEL}}><Link to={`/projects/${p.projectNumber}/handoffs?panel=Handoff:${h.id}`} className="truncate hover:underline">{h.key} {h.title} · {p.disciplines.find(d=>d.id===h.sendingDisciplineId)?.name} → {p.disciplines.find(d=>d.id===h.receivingDisciplineId)?.name}</Link></div><div role="cell" className="relative" style={{width}}>{[['neededBy',h.neededBy],['promisedBy',h.promisedBy]].map(([kind,date])=>date && <Link key={kind} to={`/projects/${p.projectNumber}/handoffs?panel=Handoff:${h.id}`} className="absolute top-1 inline-flex h-6 items-center whitespace-nowrap text-xs" style={{left:x(date)}} aria-label={`${h.key} · ${runtimeText(`handoff.${kind}`)} ${fmtDate(date)} · ${tv(h.status)}`} title={`${h.key} · ${runtimeText(`handoff.${kind}`)} ${fmtDate(date)} · ${tv(h.status)}`}><span aria-hidden>{kind==='neededBy'?'◆':'○'}</span></Link>)}{(h.dateMismatch||h.isOverdue) && <span className="absolute top-1.5 text-xs text-warn" style={{left:x(h.promisedBy??h.neededBy)+20}}>{h.dateMismatch?t('interaction.mismatchDays',{n:daysBetween(h.neededBy,h.promisedBy!)}):''} {h.isOverdue?t('interaction.overdueDays',{n:h.daysOverdue}):''}</span>}</div></div> }
                 const tk = r.tk
                 return (
                   <div key={r.id} data-chain={chainTo ? chain.has(tk.id) ? 'highlight' : 'dim' : undefined} className={cn("flex border-b border-border/60", chainTo && (chain.has(tk.id) ? "bg-accent ring-1 ring-inset ring-primary/30" : "opacity-40"))} style={{ height: H.task }} role="row">

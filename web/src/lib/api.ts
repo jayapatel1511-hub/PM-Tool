@@ -1,3 +1,4 @@
+import type { paths } from '@/gen/api'
 import { toast } from 'sonner'
 import { t } from '@/lib/i18n'
 
@@ -27,6 +28,30 @@ let authHeaders: HeaderSource = async () => ({})
 let onUnauthorized: () => void = () => {}
 export function configureApi(h: HeaderSource, unauthorized: () => void) { authHeaders = h; onUnauthorized = unauthorized }
 
+/** Build embedded in the SPA by Vite; an unset value is the local development build. */
+export const HUB_BUILD = (import.meta.env.VITE_HUB_BUILD as string | undefined) || 'dev'
+const BUILD_NOTICE_KEY = 'hub.buildNotice'
+let observedBuilds = new Set<string>()
+try {
+  const saved = JSON.parse(sessionStorage.getItem(BUILD_NOTICE_KEY) ?? '[]')
+  if (Array.isArray(saved)) observedBuilds = new Set(saved.filter((x): x is string => typeof x === 'string'))
+} catch { /* storage can be unavailable in a restricted browser context */ }
+
+function observeBuild(res: Response) {
+  const serverBuild = res.headers.get('X-Hub-Build')
+  if (!serverBuild || serverBuild === 'dev' || HUB_BUILD === 'dev' || serverBuild === HUB_BUILD) return
+  if (observedBuilds.has(serverBuild)) return
+  observedBuilds.add(serverBuild)
+  try {
+    sessionStorage.setItem(BUILD_NOTICE_KEY, JSON.stringify([...observedBuilds]))
+  } catch { /* storage can be unavailable in a restricted browser context */ }
+  toast.info(t('app.updated'), { duration: Infinity, action: { label: t('common.reload'), onClick: () => window.location.reload() } })
+}
+
+function requestHeaders(extra?: Record<string, string>) {
+  return authHeaders().then(h => ({ 'X-Hub-Source': 'UI', ...h, ...extra }))
+}
+
 export interface ApiOptions {
   method?: string
   body?: unknown
@@ -39,7 +64,7 @@ export interface ApiOptions {
 }
 
 export async function api<T = any>(path: string, o: ApiOptions = {}): Promise<T> {
-  const headers: Record<string, string> = { 'X-Hub-Source': 'UI', ...(await authHeaders()) }
+  const headers: Record<string, string> = await requestHeaders()
   if (o.body !== undefined) headers['Content-Type'] = 'application/json'
   if (o.idempotencyKey) headers['Idempotency-Key'] = o.idempotencyKey
   if (o.ifMatch != null) headers['If-Match'] = `"${o.ifMatch}"`
@@ -51,6 +76,7 @@ export async function api<T = any>(path: string, o: ApiOptions = {}): Promise<T>
     body: o.body !== undefined ? JSON.stringify(o.body) : undefined,
     signal: o.signal,
   }) } catch (e) { if (e instanceof DOMException && e.name === 'AbortError') throw e; throw new ApiError(0, { code: 'network' }, method) }
+  observeBuild(res)
   if (res.status === 401) { onUnauthorized(); throw new ApiError(401, { detail: 'Signed out' }) }
   if (!res.ok) {
     let body: any = {}
@@ -62,6 +88,38 @@ export async function api<T = any>(path: string, o: ApiOptions = {}): Promise<T>
   const data = await res.json()
   if (!o.quiet && Array.isArray(data?.warnings)) data.warnings.forEach((w: string) => toast.warning(w))
   return data as T
+}
+
+/** Read the authenticated fetch-based event stream; callers own cancellation and reconnect policy. */
+export async function* readEventStream(path = '/api/v1/events', signal?: AbortSignal): AsyncGenerator<Record<string, unknown> | null> {
+  const res = await fetch(path.startsWith('/') ? path : `/api/v1/${path}`, { headers: await requestHeaders({ Accept: 'text/event-stream' }), signal })
+  observeBuild(res)
+  if (res.status === 401) { onUnauthorized(); throw new ApiError(401, { detail: 'Signed out' }) }
+  if (!res.ok) {
+    let body: any = {}
+    try { body = await res.json() } catch { /* not JSON */ }
+    throw new ApiError(res.status, body)
+  }
+  if (!res.body) throw new Error('Event stream has no body')
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let pending = ''
+  try {
+    while (true) {
+      const next = await reader.read()
+      pending += decoder.decode(next.value ?? new Uint8Array(), { stream: !next.done })
+      const frames = pending.split('\n\n')
+      pending = frames.pop() ?? ''
+      for (const frame of frames) {
+        const data = frame.split('\n').filter(line => line.startsWith('data:')).map(line => line.slice(5).trimStart()).join('\n')
+        if (data) yield JSON.parse(data) as Record<string, unknown>
+        else if (frame.split('\n').some(line => line.startsWith(':'))) yield null
+      }
+      if (next.done) break
+    }
+  } finally {
+    reader.releaseLock()
+  }
 }
 
 export const get = <T = any>(path: string, signal?: AbortSignal) => api<T>(path, { signal })
@@ -91,4 +149,25 @@ export async function download(path: string, fallbackName: string) {
   a.download = name
   a.click()
   URL.revokeObjectURL(a.href)
+}
+
+
+type HttpMethod = 'get' | 'post' | 'patch' | 'put' | 'delete'
+type PathsFor<M extends HttpMethod> = { [P in keyof paths]: M extends keyof paths[P] ? paths[P][M] extends undefined ? never : P : never }[keyof paths]
+type Operation<M extends HttpMethod, P extends PathsFor<M>> = M extends keyof paths[P] ? paths[P][M] : never
+type ParametersOf<O, K extends string> = O extends { parameters: infer P } ? K extends keyof P ? Exclude<P[K], undefined> : never : never
+type JsonBody<O> = O extends { requestBody: { content: { 'application/json': infer B } } } ? B : unknown
+type JsonReply<R> = R extends { content: { 'application/json': infer B } } ? B : void
+type Reply<O> = O extends { responses: infer R } ? JsonReply<R[Extract<keyof R, 200 | 201 | 202 | 204>]> : never
+type TypedOptions<O> = Omit<ApiOptions, 'method' | 'body'> & {
+  query?: ParametersOf<O, 'query'>
+  body?: JsonBody<O>
+} & ([ParametersOf<O, 'path'>] extends [never] ? { params?: never } : { params: ParametersOf<O, 'path'> })
+
+/** Generated contract, existing transport: authentication, source, version and retry headers stay in api(). */
+export function typedRequest<M extends HttpMethod, P extends PathsFor<M>>(method: M, path: P, options: TypedOptions<Operation<M, P>>): Promise<Reply<Operation<M, P>>> {
+  const { params, query, ...rest } = options
+  let url = String(path)
+  for (const [key, value] of Object.entries(params ?? {})) url = url.replace(`{${key}}`, encodeURIComponent(String(value)))
+  return api(url + qs(query ?? {}), { ...rest, method: method.toUpperCase() })
 }

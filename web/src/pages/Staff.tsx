@@ -13,7 +13,7 @@ import { useProject, useReference } from '@/hooks/data'
 import { del, get, post, qs } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate, shortDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { runtimeText, t, tv } from '@/lib/i18n'
 import type { Page as PageOf, ProjectRow } from '@/lib/types'
 import { cn, type Accent } from '@/lib/utils'
 
@@ -62,7 +62,7 @@ export function StaffPage() {
     const on = !!indicator && f.indicator === indicator
     return <SummaryTile label={label} value={n} accent={accent} hint={definition} selected={indicator ? on : undefined} onClick={() => set('indicator', on ? undefined : indicator)} />
   }
-  const roleChips = (r: StaffRow['roles']) => (['pm', 'dl', 'team', 'reviewer', 'viewer'] as const).filter((k) => r[k] > 0).map((k) => `${t(`staff.role.${k}`)} ${r[k]}`).join(' · ')
+  const roleChips = (r: StaffRow['roles']) => (['pm', 'dl', 'team', 'reviewer', 'viewer'] as const).filter((k) => r[k] > 0).map((k) => `${runtimeText(`staff.role.${k}`)} ${r[k]}`).join(' · ')
   const count = (p: StaffRow, n: number, section: string, bad = false) => <Link to={`/my-work?userId=${p.id}#mw-${section}`} className={cn('tabular-nums hover:underline', bad && n > 0 && 'font-medium text-bad')}>{n}</Link>
   const signals = (p: StaffRow): Signal[] => {
     const cell = capacity(p.id)
@@ -124,7 +124,7 @@ export function StaffPage() {
               <tr><th scope="col" className="w-12"><span className="sr-only">{t('common.details')}</span></th>{COLS.map(([k, label]) => (
                 <th key={k} scope="col" className={cn(thCls, k !== 'name' && k !== 'lastActivityAt' && 'text-right')} aria-sort={sort?.key === k ? (sort.desc ? 'descending' : 'ascending') : 'none'}>
                   <button className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => setSort(sort?.key === k ? { key: k, desc: !sort.desc } : { key: k, desc: k !== 'name' })}>
-                    {t(label)}{sort?.key === k && <span aria-hidden>{sort.desc ? '↓' : '↑'}</span>}</button>
+                    {runtimeText(label)}{sort?.key === k && <span aria-hidden>{sort.desc ? '↓' : '↑'}</span>}</button>
                 </th>))}{showCapacity && <th scope="col" className={thCls}>{t('staff.thisWeek')}</th>}<th scope="col" className={thCls}>{t('staff.roles')}</th></tr>
             </thead>
             <tbody>
@@ -178,7 +178,7 @@ function Assignments({ person, scope, onChanged }: { person: StaffRow; scope?: s
               <Link to={`/projects/${a.projectNumber}`} className="flex min-w-0 flex-1 items-center gap-2 hover:underline">
                 <AccentDot id={a.projectId} /><Key>{a.projectNumber}</Key><span className="break-words">{a.name}</span></Link>
               <HealthPill health={a.reportedHealth} />
-              <span className="text-xs">{a.roles.map((r) => t(`role.${r}`)).join(', ')}{a.leads.length > 0 && ` (${a.leads.join(', ')})`}</span>
+              <span className="text-xs">{a.roles.map((r) => runtimeText(`role.${r}`)).join(', ')}{a.leads.length > 0 && ` (${a.leads.join(', ')})`}</span>
               <span className="text-xs text-muted-foreground">{a.primaryDiscipline ?? t('common.dash')} · {t('staff.added', { date: fmtDate(a.addedAt) })}</span>
               <span className="text-xs tabular-nums">{t('staff.openOverdue', { open: a.open, overdue: a.overdue })}</span>
               <span className="text-xs text-muted-foreground">{a.nextDue ? `${a.nextDue.key} ${fmtDate(a.nextDue.dueDate)}` : ''}</span>

@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { Briefcase, CalendarCheck, CheckSquare, Flag, FileText, Link2Off, MessageSquare, Scale, Search, User, type LucideIcon } from 'lucide-react'
 import { useEffect, useId, useMemo, useState, type RefObject } from 'react'
 import { useNavigate } from 'react-router'
-import { ShellSlots } from '@/app/slots'
 import { useIsPhone } from '@/components/hub/common'
 import { get, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
@@ -33,7 +32,6 @@ export function itemHref(type: string, projectNumber: string, id?: string | null
   if (id && type === 'PlanningEntry') return `/planner?entry=${id}`
   return type === 'Project' || !id ? base : `${base}/${TAB[type] ?? 'dashboard'}?panel=${type}:${id}`
 }
-
 export function toHits(group: Group, rows: any[] = []): Hit[] {
   const icon = ICON[group]
   if (group === 'projects') return rows.map((p) => ({ id: p.id, icon, key: p.projectNumber, title: p.name, sub: [p.client, p.pm, tv(p.status)].filter(Boolean).join(' · '), href: itemHref('Project', p.projectNumber) }))
@@ -50,7 +48,7 @@ export function toHits(group: Group, rows: any[] = []): Hit[] {
 export const searchQuery = (q: string, extra: Record<string, unknown> = {}) => get<SearchResult>(`search${qs({ q, ...extra })}`)
 
 /** Top-bar search (§18.1): top five per type as you type, arrow keys and Enter, "See all results" for the results page. */
-function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> }) {
+export function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> }) {
   const phone = useIsPhone()
   const navigate = useNavigate()
   const listId = useId()
@@ -108,7 +106,6 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
     </div>
   )
 }
-
 /** The search words marked inside a snippet (FR-004). */
 export function Highlight({ text, term }: { text: string; term: string }) {
   const q = term.trim()
@@ -129,5 +126,3 @@ function Option({ h, id, active, onPick, term }: { h: Hit; id: string; active: b
     </div>
   )
 }
-
-ShellSlots.Search = SearchBox

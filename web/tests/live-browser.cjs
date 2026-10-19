@@ -1,0 +1,37 @@
+// Stable S02/S08/S11 browser contract against a self-started production preview and mocked API.
+const assert = require('node:assert/strict')
+const { startPreview, newMockPage, project } = require('./platform-fixtures.cjs')
+
+;(async () => {
+  const preview = await startPreview()
+  const { browser, page, mock } = await newMockPage(preview.base, { buildIds: ['mock-build-a', 'mock-build-b', 'mock-build-a'] })
+  const requests = []; const errors = []
+  page.on('request', request => { if (request.url().includes('/api/v1/events')) requests.push(request) })
+  page.on('pageerror', error => errors.push(error.message))
+  try {
+    await page.goto(`${preview.base}/projects/${project.projectNumber}/tasks`, { waitUntil: 'domcontentloaded' })
+    await page.getByRole('main').waitFor({ state: 'visible', timeout: 20000 })
+    const reload = page.getByRole('button', { name: /reload/i })
+    assert.equal(await reload.count(), 1, 'first distinct server build shows one reload action')
+    await reload.click()
+    await page.waitForLoadState('domcontentloaded')
+    assert.equal(await reload.count(), 1, 'second distinct server build shows one reload action')
+    await reload.click()
+    await page.waitForLoadState('domcontentloaded')
+    assert.equal(await page.getByRole('button', { name: /reload/i }).count(), 0, 'A→B→A does not repeat a build notice')
+    await page.getByRole('main').waitFor({ state: 'visible', timeout: 20000 })
+    const event = requests.find(request => new URL(request.url()).search === '')
+    assert.ok(event, 'live stream opened without query parameters')
+    assert.equal(event.headers()['x-dev-user'], 'alex@hub.test', 'stream carries the Development auth header')
+    await page.waitForTimeout(300)
+    assert.ok(mock.pulseRequests.some(url => new URL(url).searchParams.get('projectId') === project.id), 'project pulse carries the open project id')
+    await page.getByRole('button', { name: /reload/i }).count().then(count => assert.equal(count, 0))
+    await page.getByRole('main').focus().catch(() => {})
+    await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') })
+    const violations = await page.evaluate(async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] } })).violations.filter(x => ['serious', 'critical'].includes(x.impact)))
+    assert.deepEqual(violations, [], 'live preview has no serious/critical accessibility violations')
+    assert.deepEqual(errors, [], `browser errors: ${errors.join('; ')}`)
+    assert.deepEqual(mock.apiErrors, [])
+    console.log(JSON.stringify({ result: 'PASS', notices: ['mock-build-a', 'mock-build-b'], liveStream: true, projectPulse: true, axe: 0 }))
+  } finally { await browser.close(); preview.child.kill() }
+})().catch(error => { console.error(error); process.exitCode = 1 })

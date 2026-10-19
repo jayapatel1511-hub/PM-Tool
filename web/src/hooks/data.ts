@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { get } from '@/lib/api'
+import { refreshProject } from '@/lib/keys'
 import type { ProjectDetail, Reference } from '@/lib/types'
 
 /** Active and inactive reference data for pickers and labels (inactive entries only label existing items). */
@@ -14,16 +15,5 @@ export function useProject(idOrNumber: string | undefined) {
 /** Invalidate everything derived from one project after a change (lists, header, derived state). */
 export function useProjectRefresh() {
   const qc = useQueryClient()
-  return (projectId?: string) => {
-    qc.invalidateQueries({ queryKey: ['project'] })
-    qc.invalidateQueries({ queryKey: ['projects'] })
-    if (projectId) qc.invalidateQueries({ queryKey: ['p', projectId] })
-    qc.invalidateQueries({ queryKey: ['mywork'] })
-    // Derived state is re-evaluated just after the save (§23.5); refresh once more when it lands.
-    setTimeout(() => {
-      qc.invalidateQueries({ queryKey: ['project'] })
-      if (projectId) qc.invalidateQueries({ queryKey: ['p', projectId] })
-      qc.invalidateQueries({ queryKey: ['mywork'] })
-    }, 1500)
-  }
+  return (projectId?: string) => refreshProject(qc, projectId)
 }

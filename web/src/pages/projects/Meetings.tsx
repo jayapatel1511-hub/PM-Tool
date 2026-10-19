@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { FieldRow, HistoryList, InlineDate, InlineText, TabBar } from '@/components/hub/fields'
-import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
+import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
 import { Chip, Key, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { ApiError, get, patch, post, qs } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { DateText, FieldGroup, PanelHead, Person, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
 import { useCurrentProject } from './ProjectLayout'
@@ -39,7 +39,6 @@ interface ActionDetail {
   links: { id: string; targetType: string; targetId: string; key: string; name: string; status?: string | null }[]
   permissions: { edit: Perm; transitions: { to: string; ok: boolean; reason?: string | null }[]; convert: boolean; comment: boolean }
 }
-
 const ACTION_LINK_ROUTES: Record<string, string> = { Task: 'tasks', Deliverable: 'deliverables', Milestone: 'milestones', Handoff: 'handoffs', ChangeNotice: 'changes' }
 
 const TYPES = ['Coordination', 'Client', 'Design Review', 'Site', 'Other']
@@ -116,7 +115,6 @@ function OwnerFields({ projectId, value, onChange, errors, prefix }: { projectId
     </fieldset>
   )
 }
-
 const CURRENT = '__current'
 
 /** New meeting action: against a chosen meeting, or today's coordination meeting in meeting mode (MTG-04). From a handoff or
@@ -218,7 +216,6 @@ export function ActionForm({ projectId, meetingId, related, links, linkedActionI
     </Dialog>
   )
 }
-
 // ---------- Meetings (FR-001) ----------
 
 function MeetingForm({ projectId, meeting, onClose }: { projectId: string; meeting?: MeetingRow; onClose: () => void }) {
@@ -288,7 +285,7 @@ export function MeetingsTab() {
   const tokens = [
     filters.q && { key: 'q', label: t('common.search'), value: filters.q },
     filters.status && { key: 'status', label: t('common.status'), value: filters.status === 'Open,In Progress' ? t('register.openStatuses') : tv(filters.status) },
-    filters.ownerType && { key: 'ownerType', label: t('action.ownerType'), value: t(`action.owner.${filters.ownerType}`) },
+    filters.ownerType && { key: 'ownerType', label: t('action.ownerType'), value: runtimeText(`action.owner.${filters.ownerType}`) },
     filters.indicator && { key: 'indicator', label: t('deliverable.indicator'), value: filters.indicator === 'overdue' ? t('ind.overdue') : filters.indicator },
   ].filter(Boolean) as { key: string; label: string; value: ReactNode }[]
   return (
@@ -419,7 +416,7 @@ function ConvertDialog({ a, disciplineId, onClose }: { a: ActionRow; disciplineI
 
 const STEP: Record<string, string> = { Open: 'register.toOpen', 'In Progress': 'action.start', Complete: 'action.complete', Cancelled: 'action.cancel' }
 
-function ActionPanel({ id }: PanelProps) {
+export function ActionPanel({ id }: PanelProps) {
   const q = useQuery({ queryKey: ['action', id], queryFn: () => get<ActionDetail>(`actions/${id}`) })
   const done = useActionRefresh()
   const openPanel = useItemPanel()
@@ -449,7 +446,7 @@ function ActionPanel({ id }: PanelProps) {
         {q.data.task && a.converted && <p className="text-sm">{t('action.followsTask')} <button className="hover:underline" onClick={() => openPanel('Task', q.data.task!.id)}><Key>{q.data.task.key}</Key> {q.data.task.name}</button> <StatusPill status={q.data.task.status} /></p>}
         <div className="flex flex-wrap gap-2">
           {perm.transitions.map((s) => <Button key={s.to} size="sm" variant={s.to === 'Complete' ? 'default' : 'outline'} disabled={!s.ok} title={s.reason ?? undefined}
-            onClick={() => onStep(s.to)}>{t(s.to === 'In Progress' && a.status === 'Complete' ? 'action.reopen' : STEP[s.to])}</Button>)}
+            onClick={() => onStep(s.to)}>{runtimeText(s.to === 'In Progress' && a.status === 'Complete' ? 'action.reopen' : STEP[s.to])}</Button>)}
           {perm.convert && <Button size="sm" variant="outline" onClick={() => setStep('convert')}>{t('action.convert')}</Button>}
         </div>
       </PanelHead>
@@ -486,5 +483,3 @@ function ActionPanel({ id }: PanelProps) {
     </div>
   )
 }
-
-PANELS.Action = { component: ActionPanel }

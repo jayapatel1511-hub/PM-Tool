@@ -21,9 +21,7 @@ public static class HandoffEndpoints
     public sealed record Filter(string? Q, string? Status, string? Direction, Guid? DisciplineId, bool? Overdue);
     public sealed record CommandResult(Guid Id, int RowVersion);
 
-    static readonly Col[] Columns = [new("key", "key"), new("title", "name"), new("senderName", "handoffSender"),
-        new("receiverName", "handoffReceiver"), new("status", "status"), new("declaredRevision", "revision"),
-        new("neededBy", "handoffNeeded", "date"), new("promisedBy", "handoffPromised", "date"), new("intendedUse", "handoffPurpose")];
+    static readonly Col[] Columns = Hub.Api.Records.HandoffRecord.HandoffsColumns;
 
     public static void Map(RouteGroupBuilder api)
     {

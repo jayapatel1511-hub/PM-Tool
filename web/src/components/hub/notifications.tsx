@@ -4,17 +4,18 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Empty, Loading } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { get, post } from '@/lib/api'
+import { get, post, qs } from '@/lib/api'
+import { useFlag } from '@/lib/auth'
+import { useProject, useProjectRefresh } from '@/hooks/data'
 import { ago, fmtTime } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import type { Page } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { ShellSlots } from '@/app/slots'
 
 // Notification centre entry point (§13.17, §17.6): unread count polled every 60 seconds (FR-015).
 
@@ -22,7 +23,6 @@ export interface NotificationRow {
   id: string; eventType: string; projectId?: string; projectNumber?: string; itemType?: string; itemId?: string; itemKey?: string
   title: string; body?: string; linkPath?: string; actorName?: string; count: number; createdAt: string; updatedAt: string; readAt?: string | null
 }
-
 const ICON: Record<string, LucideIcon> = {
   TaskAssigned: UserPlus, ReviewerSet: Eye, ReviewRequested: Eye, ReviewOutcome: CheckCircle2, TaskBlocked: Link2Off, TaskUnblocked: Unlock,
   BlockingOverdue: AlertTriangle, DueDateChanged: CalendarClock, CommentOnItem: MessageSquare, Mention: AtSign, DecisionAssigned: Scale,
@@ -38,14 +38,27 @@ export const eventIcon = (code: string) => ICON[code] ?? Bell
  *  feed are read again only when it changes. */
 export function useUnread() {
   const qc = useQueryClient()
-  const pulse = useQuery({ queryKey: ['unread-pulse'], queryFn: () => get<{ stamp: string }>('me/notifications/pulse'), refetchInterval: 4_000 })
+  const { pathname } = useLocation()
+  const liveStamp = useFlag('live_project_stamp')
+  const number = pathname.match(/^\/projects\/([^/]+)/)?.[1]
+  const project = useProject(number)
+  const refreshProject = useProjectRefresh()
+  const projectId = liveStamp ? project.data?.id : undefined
+  const pulse = useQuery({ queryKey: projectId ? ['unread-pulse', projectId] : ['unread-pulse'], queryFn: () => get<{ stamp: string; projectStamp?: string }>(`me/notifications/pulse${qs({ projectId })}`), refetchInterval: 4_000 })
   const stamp = pulse.data?.stamp
+  const projectStamp = pulse.data?.projectStamp
   const seen = useRef(stamp)
+  const seenProjectStamp = useRef(projectStamp)
   useEffect(() => {
     if (!stamp || seen.current === stamp) return
     if (seen.current) { qc.invalidateQueries({ queryKey: ['notifications'] }); qc.invalidateQueries({ queryKey: ['following'] }) }
     seen.current = stamp
   }, [stamp, qc])
+  useEffect(() => {
+    if (!projectStamp || seenProjectStamp.current === projectStamp) return
+    if (seenProjectStamp.current) refreshProject(projectId)
+    seenProjectStamp.current = projectStamp
+  }, [projectId, projectStamp, refreshProject])
   return useQuery({ queryKey: ['unread', stamp], queryFn: () => get<{ notifications: number; following: number }>('me/notifications/unread-count'),
     enabled: pulse.isFetched, placeholderData: keepPreviousData })
 }
@@ -85,7 +98,6 @@ export function NotificationItem({ n, onOpen }: { n: NotificationRow; onOpen: (n
     </div>
   )
 }
-
 export function useOpenNotification() {
   const navigate = useNavigate()
   const markRead = useMarkRead()
@@ -95,7 +107,7 @@ export function useOpenNotification() {
   }
 }
 
-function BellButton() {
+export function BellButton() {
   const unread = useUnread()
   const [open, setOpen] = useState(false)
   const count = unread.data?.notifications ?? 0
@@ -128,5 +140,3 @@ function BellButton() {
     </Popover>
   )
 }
-
-ShellSlots.Bell = BellButton

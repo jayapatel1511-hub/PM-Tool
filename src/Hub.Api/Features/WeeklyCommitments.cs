@@ -182,10 +182,7 @@ public static class WeeklyCommitmentsEndpoints
             CanWithdraw = own && proposed || (own || manage) && closable };
     }
 
-    static readonly Col[] ExportColumns = [new("key", "key"), new("work", "item"), new("performer", "performer"),
-        new("weekStart", "weekStart", "date"), new("targetDate", "promiseTargetDate", "date"), new("intendedOutput", "intendedOutput"),
-        new("completionCriteria", "completionCriteria"), new("state", "status"), new("readinessAtCommit", "readinessAtCommit"),
-        new("snapshotAt", "snapshotAt", "datetime"), new("completionEvidenceUrl", "completionEvidence")];
+    static readonly Col[] ExportColumns = Hub.Api.Records.ScreenLists.WeeklyCommitmentsExportColumns;
 
     static IQueryable<OutputCommitment> TargetWindow(IQueryable<OutputCommitment> query, DateOnly? from, DateOnly? to) =>
         query.Where(c => (!from.HasValue || c.TargetDate >= from.Value) && (!to.HasValue || c.TargetDate <= to.Value));

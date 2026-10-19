@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { download, get, qs } from '@/lib/api'
 import { useOffer, type Offer } from '@/lib/auth'
 import { fmtDate, today } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
 import { CommandForm, CoordStatus, Count, FieldsCommand, PersonLabel, RegisterPager, SelectField, discName, personName, peopleChoices, type CoordOptions, type RecordVersion } from './CoordinationForms'
@@ -72,7 +72,7 @@ export function SubmissionsTab() {
       {!list.data.items.length ? <div className="rounded-lg border bg-card"><Empty title={t('submissions.empty')}>{t(tokens.length ? 'register.noMatch' : 'submissions.emptyHint')}</Empty></div> :
         phone ? <ul className="space-y-2">{list.data.items.map(row => <li key={row.id} className={cn('space-y-3 rounded-lg border bg-card p-4 text-sm', panel === row.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)]')}><button className="break-words text-left font-semibold text-primary hover:underline" aria-current={panel === row.id || undefined} onClick={() => open(row.id)}><span className="key font-normal">{row.key}</span> · {row.title}</button><CoordStatus status={row.status} /><dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2"><dt className="text-muted-foreground">{t('coord.coordinator')}</dt><dd>{options.data ? <PersonLabel options={options.data} id={row.coordinatorId} /> : <Missing />}</dd><dt className="text-muted-foreground">{t('submissions.targetDate')}</dt><dd>{row.targetDate ? fmtDate(row.targetDate) : <Missing />}</dd><dt className="text-muted-foreground">{t('submissions.blockers')}</dt><dd><Count n={row.blockerCount} tone="bad" /></dd></dl></li>)}</ul> :
         <TableRegion><table className="w-full text-left text-sm"><caption className="sr-only">{t('submissions.title')}</caption>
-          <thead className="bg-muted"><tr>{['coord.item', 'coord.coordinator', 'common.status', 'submissions.targetDate'].map(k => <th scope="col" key={k} className={thCls}>{t(k)}</th>)}<th scope="col" className={cn(thCls, 'text-right')}>{t('submissions.blockers')}</th></tr></thead>
+          <thead className="bg-muted"><tr>{['coord.item', 'coord.coordinator', 'common.status', 'submissions.targetDate'].map(k => <th scope="col" key={k} className={thCls}>{runtimeText(k)}</th>)}<th scope="col" className={cn(thCls, 'text-right')}>{t('submissions.blockers')}</th></tr></thead>
           <tbody>{list.data.items.map(row => <tr key={row.id} className={cn('border-t hover:bg-muted', panel === row.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent')}>
             <td className={cn(tdCls, 'min-w-64')}><button className="break-words text-left font-semibold text-primary underline-offset-4 hover:underline" aria-current={panel === row.id || undefined} onClick={() => open(row.id)}><span className="key font-normal">{row.key}</span> · {row.title}</button></td>
             <td className={tdCls}>{options.data ? <PersonLabel options={options.data} id={row.coordinatorId} /> : <Missing />}</td>

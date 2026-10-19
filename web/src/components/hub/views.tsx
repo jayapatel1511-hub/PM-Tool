@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { ApiError, del, get, patch, post } from '@/lib/api'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 interface SavedView { id: string; name: string; scope: 'Personal' | 'Project'; projectId?: string | null; isDefault: boolean; rowVersion: number; params: Record<string, string>; dropped: string[]; owner?: string; canEdit: boolean }
@@ -41,7 +41,7 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
     const n = new URLSearchParams({ ...v.params, ...fixed, view: v.id })
     for (const key of new Set(['panel', panelParam])) { const panel = sp.get(key); if (panel) n.set(key, panel) }
     setSp(n, { replace })
-    if (v.dropped.length) toast.warning(t('views.dropped', { name: v.name, list: v.dropped.map((d) => t(`views.param.${d}`) === `views.param.${d}` ? d : t(`views.param.${d}`)).join(', ') }))
+    if (v.dropped.length) toast.warning(t('views.dropped', { name: v.name, list: v.dropped.map((d) => runtimeText(`views.param.${d}`) === `views.param.${d}` ? d : runtimeText(`views.param.${d}`)).join(', ') }))
   }
   useEffect(() => {
     if (applied.current || !q.data) return

@@ -9,7 +9,7 @@ import { Link, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { AccentDot, ConfirmDialog, Empty, ErrorBanner, Field, Loading, Notice, Spinner, selectCls } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, SaveStatus, TabBar } from '@/components/hub/fields'
-import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
+import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Avatar, CapacityWeek, PeoplePicker, weekOf } from '@/components/hub/people'
 import { DepTypeChip, DepTypeField } from '@/components/hub/indicators'
 import { Chip, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
@@ -493,12 +493,10 @@ function DeleteDialog({ d, onMove, onClose }: { d: TaskDetailData; onMove: (m: R
   )
 }
 
-function TaskPanel({ id, onClose }: PanelProps) { return <TaskDetail id={id} onClose={onClose} /> }
+export function TaskPanel({ id, onClose }: PanelProps) { return <TaskDetail id={id} onClose={onClose} /> }
 
 /** Full-page task (§13.3.1 "open full page"). */
 export function TaskPage() {
   const { id } = useParams()
   return <div className="mx-auto w-full max-w-3xl p-4 md:p-6 xl:p-8"><div className="overflow-hidden rounded-xl border bg-card"><TaskDetail id={id!} heading="h1" /></div></div>
 }
-
-PANELS.Task = { component: TaskPanel, fullPage: (id) => `/tasks/${id}` }

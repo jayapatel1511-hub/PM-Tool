@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ApiError, del, get, patch, post, qs } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { addDays, fmtDate, today } from '@/lib/format'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -29,7 +29,7 @@ interface TimeView {
 }
 const monday = (d: string) => addDays(d, -((new Date(d + 'T00:00:00Z').getUTCDay() + 6) % 7))
 const h = (n: number) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2))))
-const weekday = (d: string) => t(`calendar.dow.${new Date(d + 'T00:00:00Z').getUTCDay()}`)
+const weekday = (d: string) => runtimeText(`calendar.dow.${new Date(d + 'T00:00:00Z').getUTCDay()}`)
 
 /** Time (§36.8, FR-VIS-10): my task hours by day and week, Add Time, corrections, and — for PMs, leads and supervisors —
  *  the entries they may review. Totals are sums of the entries shown; hours never change estimates or progress. */

@@ -85,7 +85,26 @@ builder.Services.AddRateLimiter(o =>
 // The same five attempts a minute per login name, so guesses at one login cannot be spread over many client addresses.
 builder.Services.AddSingleton(_ => PartitionedRateLimiter.Create<string, string>(name =>
     RateLimitPartition.GetFixedWindowLimiter(name, _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(1) })));
-builder.Services.AddOpenApi();
+var duplicateDtoNames = typeof(HubDb).Assembly.GetTypes().Where(t => t.IsNested).GroupBy(t => t.Name)
+    .Where(g => g.Count() > 1).Select(g => g.Key).ToHashSet();
+builder.Services.AddOpenApi(o =>
+{
+    o.CreateSchemaReferenceId = info =>
+    {
+        var name = Microsoft.AspNetCore.OpenApi.OpenApiOptions.CreateDefaultSchemaReferenceId(info);
+        return name is not null && duplicateDtoNames.Contains(info.Type.Name)
+            ? info.Type.DeclaringType!.Name.Replace("Endpoints", "") + name : name;
+    };
+    o.AddSchemaTransformer((schema, context, cancellationToken) =>
+{
+    var type = Nullable.GetUnderlyingType(context.JsonTypeInfo.Type) ?? context.JsonTypeInfo.Type;
+    // Responses write JSON numbers; permissive input-number handling must not widen client reads.
+    if (type == typeof(decimal) || type == typeof(double) || type == typeof(float) || type == typeof(int) || type == typeof(long)
+        || type == typeof(short) || type == typeof(byte) || type == typeof(uint) || type == typeof(ulong) || type == typeof(ushort))
+        schema.Type &= ~Microsoft.OpenApi.JsonSchemaType.String;
+    return Task.CompletedTask;
+    });
+});
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase);
 
 var app = builder.Build();

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Empty, tdCls, thCls } from '@/components/hub/common'
 import { fmtDate, fmtTime } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 
 export interface ActivityRow {
   id: string; occurredAt: string; actorId?: string; actorName?: string; actorType: string; projectId?: string
@@ -28,7 +28,7 @@ export function groupActivity(rows: ActivityRow[], burstMinutes = 10): ActivityG
 const isDate = (v?: string) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v)
 const isStamp = (v?: string) => !!v && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(v)
 const isGuid = (v: unknown) => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
-const fieldLabel = (name: string) => { const key = `field.${name}`; const label = t(key); return label === key ? name.replace(/Id$/, '').replace(/([a-z])([A-Z])/g, '$1 $2') : label }
+const fieldLabel = (name: string) => { const key = `field.${name}`; const label = runtimeText(key); return label === key ? name.replace(/Id$/, '').replace(/([a-z])([A-Z])/g, '$1 $2') : label }
 const rawLabel = (value: unknown) => value == null ? null : typeof value === 'string' ? value : JSON.stringify(value)
 const show = (v?: string | null) => {
   if (v == null || v === '') return t('common.dash')
@@ -67,7 +67,7 @@ export function ActivityTable({ rows, total, page, pageSize, onPage, onOpen, gro
       <div className="scroll-region overflow-x-auto" tabIndex={0} role="region" aria-label={t('activity.tableLabel')}>
         <table className="w-full text-sm">
           <thead className="bg-muted">
-            <tr>{['common.when', 'common.actor', 'common.action', 'common.item', 'common.change', 'common.reason', 'common.source'].map((h) => <th key={h} scope="col" className={thCls}>{t(h)}</th>)}</tr>
+            <tr>{['common.when', 'common.actor', 'common.action', 'common.item', 'common.change', 'common.reason', 'common.source'].map((h) => <th key={h} scope="col" className={thCls}>{runtimeText(h)}</th>)}</tr>
           </thead>
           <tbody>
             {rows.map((r) => {
@@ -76,12 +76,12 @@ export function ActivityTable({ rows, total, page, pageSize, onPage, onOpen, gro
               <tr key={r.id} className="border-t align-top">
                 <td className={`${tdCls} whitespace-nowrap tabular-nums`} title={r.occurredAt}>{fmtTime(r.occurredAt)}</td>
                 <td className={tdCls}>{r.actorName ?? t('common.system')}</td>
-                <td className={tdCls}>{t(`action.${r.action}`)}</td>
+                <td className={tdCls}>{runtimeText(`action.${r.action}`)}</td>
                 <td className={tdCls}>
                   {/* Some records (allocation links, availability) have no key or name: fall back to the item type so the button is named. */}
-                  {onOpen && r.itemId ? <button className="text-left hover:underline" onClick={() => onOpen(r)}>{r.itemKey || itemName ? <><span className="key">{r.itemKey}</span> {itemName}</> : t(`itemType.${r.itemType}`)}</button>
+                  {onOpen && r.itemId ? <button className="text-left hover:underline" onClick={() => onOpen(r)}>{r.itemKey || itemName ? <><span className="key">{r.itemKey}</span> {itemName}</> : runtimeText(`itemType.${r.itemType}`)}</button>
                     : <><span className="key">{r.itemKey}</span> {itemName}</>}
-                  <div className="text-xs text-muted-foreground">{t(`itemType.${r.itemType}`)}</div>
+                  <div className="text-xs text-muted-foreground">{runtimeText(`itemType.${r.itemType}`)}</div>
                 </td>
                 <td className={`${tdCls} min-w-64`}><ChangeList row={r} /></td>
                 <td className={tdCls}>{r.reason}</td>

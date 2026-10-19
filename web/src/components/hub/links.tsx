@@ -6,8 +6,8 @@ import { ConfirmDialog, ErrorBanner, Field, Loading, Spinner, selectCls } from '
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { del, get, post } from '@/lib/api'
-import { t } from '@/lib/i18n'
-import { ItemSlots, type ItemPartProps } from '@/pages/projects/slots-items'
+import { t , runtimeText } from '@/lib/i18n'
+import type { ItemPartProps } from '@/pages/projects/slots-items'
 
 // Document links (§12.7): where the files live. The Hub stores pointers only, never files (FR-DOC-03).
 
@@ -18,7 +18,6 @@ const LINK_TYPES = ['SharePoint', 'OneDrive', 'Teams', 'Network Folder', 'Extern
 export const LINK_ICON: Record<string, typeof Link2> = {
   SharePoint: Files, OneDrive: Cloud, Teams: MessagesSquare, 'Network Folder': FolderOpen, 'External DMS': Archive, 'Client Portal': Globe, Other: Link2,
 }
-
 /** A UNC path cannot be opened by a browser, so it offers "Copy path" instead of a link (AC-DOC-02). */
 export function LinkAnchor({ l }: { l: Pick<LinkRow, 'title' | 'url' | 'linkType' | 'isNetworkPath'> }) {
   const Icon = LINK_ICON[l.linkType] ?? Link2
@@ -37,7 +36,6 @@ export function LinkAnchor({ l }: { l: Pick<LinkRow, 'title' | 'url' | 'linkType
     </a>
   )
 }
-
 export function LinksPanel({ type, id }: ItemPartProps) {
   const qc = useQueryClient()
   const q = useQuery({ queryKey: ['links', type, id], queryFn: () => get<LinkList>(`items/${type}/${id}/links`) })
@@ -54,7 +52,7 @@ export function LinksPanel({ type, id }: ItemPartProps) {
         {links.map((l) => (
           <li key={l.id} className="flex min-h-(--row-min) items-center gap-2 px-3 py-1">
             <LinkAnchor l={l} />
-            <span className="ml-auto shrink-0 text-xs/[18px] text-muted-foreground">{t(`linkType.${l.linkType}`)}</span>
+            <span className="ml-auto shrink-0 text-xs/[18px] text-muted-foreground">{runtimeText(`linkType.${l.linkType}`)}</span>
             {l.canChange && <Button variant="ghost" size="icon-sm" className="text-bad hover:text-bad" aria-label={t('links.remove', { title: l.title })} onClick={() => setRemoving(l)}><Trash2 className="size-4" /></Button>}
           </li>
         ))}
@@ -93,7 +91,7 @@ export function AddLink({ path, onDone }: { path: string; onDone: (ok: boolean) 
       <Field label={t('field.Title')} htmlFor="link-title" optional><Input id="link-title" value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
       <Field label={t('common.type')} htmlFor="link-type">
         <select id="link-type" className={selectCls} value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="">{t('links.autoType')}</option>{LINK_TYPES.map((x) => <option key={x} value={x}>{t(`linkType.${x}`)}</option>)}
+          <option value="">{t('links.autoType')}</option>{LINK_TYPES.map((x) => <option key={x} value={x}>{runtimeText(`linkType.${x}`)}</option>)}
         </select>
       </Field>
       {err != null && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
@@ -116,5 +114,3 @@ function detect(url: string) {
   if (host === 'teams.microsoft.com' || host === 'teams.live.com' || host.endsWith('.teams.microsoft.com')) return 'Teams'
   return 'Other'
 }
-
-ItemSlots.Links = LinksPanel

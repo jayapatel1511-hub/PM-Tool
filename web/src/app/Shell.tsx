@@ -1,9 +1,10 @@
 import { Bell, CheckSquare, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, LogOut, MoreHorizontal, Search, User } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate, useNavigation } from 'react-router'
 import { useDensity, type Density } from '@/components/hub/common'
 import { PanelHost } from '@/components/hub/panel-host'
+import { Loading } from '@/components/hub/common'
 import { Avatar } from '@/components/hub/people'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,9 +12,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useProject } from '@/hooks/data'
-import { useAuth } from '@/lib/auth'
+import { useLiveEvents } from '@/hooks/live'
+import { useAuth } from '@/lib/auth-context'
 import { get } from '@/lib/api'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { PROJECT_TABS } from '@/pages/projects/ProjectLayout'
 import { BUILT, NAV, type NavItem } from './nav'
@@ -24,10 +26,12 @@ import { useRouteCounter } from '@/lib/route-counter'
  *  76 px icon rail with labelled tooltips from 768 px, a phone bottom bar below that, and a 64 px top bar. */
 export function Shell() {
   const { me, signOut } = useAuth()
+  useLiveEvents()
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('hub.rail') === 'collapsed' } catch { return false } })
   const [density, setDensity] = useDensity()
   const search = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
+  const navigation = useNavigation()
   const { pathname } = useLocation()
   useRouteCounter(pathname)
   const items = NAV.filter((n) => BUILT.has(n.id) && n.sidebar !== false && n.show(me))
@@ -97,10 +101,10 @@ export function Shell() {
       <div className="flex min-w-0 flex-1 flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0 print:block print:pb-0">
         <header className="no-print flex h-16 shrink-0 items-center gap-2 border-b bg-card px-4 md:gap-3 md:px-6 xl:px-8">
           <Breadcrumbs />
-          <div className="flex min-w-0 flex-1 justify-end lg:flex-none"><ShellSlots.Search inputRef={search} /></div>
+          <Suspense fallback={null}><div className="flex min-w-0 flex-1 justify-end lg:flex-none"><ShellSlots.Search inputRef={search} /></div>
           <ShellSlots.Workspace />
           <ShellSlots.QuickCreate />
-          <ShellSlots.Bell />
+          <ShellSlots.Bell /></Suspense>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2 px-1.5 lg:px-2" aria-label={t('top.account')}>
@@ -113,7 +117,7 @@ export function Shell() {
                 <div className="font-semibold">{me.displayName}</div>
                 <div className="text-xs font-normal text-muted-foreground">{me.email}</div>
                 <div className="mt-1 text-xs font-normal text-muted-foreground">
-                  {t('top.roles')}: {[t('role.StandardUser'), ...me.systemRoles.map((r) => t(`role.${r}`))].join(', ')}
+                  {t('top.roles')}: {[t('role.StandardUser'), ...me.systemRoles.map((r) => runtimeText(`role.${r}`))].join(', ')}
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -129,7 +133,7 @@ export function Shell() {
           </DropdownMenu>
         </header>
         <main id="content" tabIndex={-1} className="relative min-h-0 flex-1 overflow-auto outline-none print:overflow-visible print:pb-0">
-          <Outlet />
+          <Suspense fallback={<Loading rows={6} />}><div aria-busy={navigation.state !== 'idle' || undefined}><Outlet /></div></Suspense>
         </main>
         <PanelHost />
       </div>
@@ -152,7 +156,7 @@ function RailLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   // A plain Link: the item is current for its own route and for its views (`also`), which NavLink cannot express.
   const active = isActive(useLocation().pathname, item)
   const { icon: Icon } = item
-  const label = t(item.label)
+  const label = runtimeText(item.label)
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -196,20 +200,20 @@ function Breadcrumbs() {
     const tab = PROJECT_TABS.find((tb) => typeof tb.path === 'string' && tb.path === inProject.params['*']?.split('/')[0])
     crumbs.push({ label: t('nav.projects'), to: '/projects' })
     crumbs.push({ label: project.data ? `${project.data.projectNumber} ${project.data.name}` : number, to: tab ? `/projects/${encodeURIComponent(number)}` : undefined, long: true })
-    if (tab) crumbs.push({ label: t(tab.label) })
+    if (tab) crumbs.push({ label: runtimeText(tab.label) })
   } else if (/^\/people\/[^/]+\/reassign-work$/.test(pathname)) {
     crumbs.push({ label: t('nav.staff'), to: '/staff' }, { label: t('reassign.action') })
   } else if (taskId) {
     crumbs.push({ label: t('nav.tasks'), to: '/tasks' }, { label: task.data?.task.key ?? t('itemType.Task'), long: true })
   } else if (pathname.startsWith('/admin/reference/')) {
-    crumbs.push({ label: t('nav.admin'), to: '/admin' }, { label: t(`admin.${pathname.split('/').pop()}`) })
+    crumbs.push({ label: t('nav.admin'), to: '/admin' }, { label: runtimeText(`admin.${pathname.split('/').pop()}`) })
   } else if (CRUMBS[pathname]) {
     if (pathname.startsWith('/admin/')) crumbs.push({ label: t('nav.admin'), to: '/admin' })
     if (pathname === '/planner' || pathname === '/workload') crumbs.push({ label: t('nav.resources') })
-    crumbs.push({ label: t(CRUMBS[pathname]) })
+    crumbs.push({ label: runtimeText(CRUMBS[pathname]) })
   } else {
     const n = NAV.find((x) => pathname === x.path || pathname.startsWith(`${x.path}/`))
-    if (n) crumbs.push({ label: t(n.label), to: pathname === n.path ? undefined : n.path })
+    if (n) crumbs.push({ label: runtimeText(n.label), to: pathname === n.path ? undefined : n.path })
   }
   return (
     <nav aria-label={t('nav.breadcrumb')} className="hidden min-w-0 flex-1 lg:block">

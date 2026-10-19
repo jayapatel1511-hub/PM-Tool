@@ -1,0 +1,20 @@
+[
+  "AppUser",
+  "Project",
+  "ProjectDiscipline",
+  "Discipline",
+  "WorkTask",
+  "Deliverable",
+  "Milestone",
+  "Decision",
+  "Risk",
+  "Issue",
+  "MeetingAction",
+  "Meeting",
+  "Client",
+  "Office",
+  "Phase",
+  "ProjectType",
+  "DeliverableType",
+  "ExternalParty"
+]

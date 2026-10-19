@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Section, Spinner, TableRegion, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
-import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
+import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
 import { Chip, Key, StatusPill } from '@/components/hub/pills'
 import { useTable, type Column } from '@/components/hub/table'
@@ -21,7 +21,7 @@ import { useProject, useProjectRefresh } from '@/hooks/data'
 import { useMe } from '@/lib/auth'
 import { ApiError, del, get, patch, post, qs } from '@/lib/api'
 import { fmtDate, fmtTime, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 import type { ProjectDiscipline } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { DateText, FieldGroup, GroupRow, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
@@ -30,14 +30,11 @@ import { ActionForm } from './Meetings'
 import { useCurrentProject } from './ProjectLayout'
 import { CommentsSlot, ItemSlots, type RaiseProps } from './slots-items'
 import { errorText } from './Tasks'
+import type { components } from '@/gen/api'
 
 // Risk and Issue Registers (§12.10, §13.13, packet 014).
 
-export interface RiskRow {
-  id: string; projectId: string; key: string; title: string; status: string; ownerId: string; ownerName?: string; probability: number; impact: number
-  score: number; band: string; mitigation?: string; triggerIndicator?: string; reviewDate?: string; isReviewOverdue: boolean; reviewOverdueDays: number
-  projectDisciplineId?: string; disciplineName?: string; realisedIssueId?: string; realisedIssueKey?: string; rowVersion: number
-}
+export type RiskRow = components['schemas']['RiskListRow']
 export interface IssueRow {
   id: string; projectId: string; key: string; title: string; status: string; issueType: string; raisedById: string; raisedByName?: string; ownerId: string; ownerName?: string
   severity: string; dateRaised: string; targetResolutionDate?: string; isOverdue: boolean; daysOverdue: number; resolution?: string; resolvedDate?: string
@@ -47,7 +44,7 @@ export interface IssueRow {
   groupLabel?: string
 }
 interface Perm { ok: boolean; reason?: string | null }
-interface LinkRow { id: string; targetType: string; targetId: string; key: string; name: string; status?: string; date?: string; person?: string }
+interface LinkRow { id: string; targetType: string; targetId: string; key: string; name: string; status?: string | null; date?: string | null; person?: string | null }
 interface Detail { description?: string; project: { id: string; projectNumber: string; name: string }; links: LinkRow[]; permissions: { edit: Perm; changeType?: Perm; transitions: { to: string; ok: boolean; reason?: string | null }[]; comment: boolean } }
 interface RiskDetail extends Detail { risk: RiskRow; realisedIssue?: { id: string; key: string; title: string; status: string } | null }
 interface IssueDetail extends Detail { issue: IssueRow; originRisk?: { id: string; key: string; title: string; status: string } | null }
@@ -68,7 +65,7 @@ const RISK_STATUSES = ['Open', 'Monitoring', 'Closed', 'Realised']
 const ISSUE_STATUSES = ['Open', 'In Progress', 'Resolved', 'Cancelled']
 const SEVERITIES = ['High', 'Medium', 'Low']
 const ISSUE_TYPES = ['General', 'Coordination']
-const LEVELS = [1, 2, 3]
+const LEVELS = [1, 2, 3] as const
 const TONE = { High: 'bad', Medium: 'warn', Low: 'idle' } as const
 const FILTERS = ['q', 'status', 'severity', 'ownerId', 'disciplineId', 'indicator'] as const
 const SOURCE_FILTERS = ['issueType', 'location', 'document', 'revision', 'verification', 'alignment', 'stationFrom', 'stationTo', 'stationUnits'] as const
@@ -114,7 +111,7 @@ function RegisterFilters({ f, statuses, open, indicator, owners, disciplines, ex
     severity && { key: 'severity', label: t('register.severity'), value: tv(severity) },
     ownerId && { key: 'ownerId', label: t('common.owner'), value: owners.find(([id]) => id === ownerId)?.[1] ?? <Missing /> },
     disciplineId && { key: 'disciplineId', label: t('common.discipline'), value: disciplines.find((d) => d.id === disciplineId)?.name ?? <Missing /> },
-    shown && { key: 'indicator', label: t('deliverable.indicator'), value: on ? t(indicator[1]) : shown },
+    shown && { key: 'indicator', label: t('deliverable.indicator'), value: on ? runtimeText(indicator[1]) : shown },
   ].filter(Boolean) as Token[]
   return (
     <FilterBar activeCount={tokens.length + extraTokens.length}
@@ -122,7 +119,7 @@ function RegisterFilters({ f, statuses, open, indicator, owners, disciplines, ex
         <UrlSearchInput id="register-search" placeholder={t('common.search')} value={q ?? ''} onValueChange={value => f.set('q', value)} />
       </Field>}
       quick={<div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('task.quickFilters')}>
-        <ChipToggle on={on} onClick={() => f.set('indicator', on ? null : indicator[0])}>{t(indicator[1])}</ChipToggle>
+        <ChipToggle on={on} onClick={() => f.set('indicator', on ? null : indicator[0])}>{runtimeText(indicator[1])}</ChipToggle>
       </div>}
       active={<ActiveFilters tokens={[...tokens, ...extraTokens]} onRemove={(k) => f.set(k, null)} onClear={onClear} />}>
       <div className="flex flex-wrap items-end gap-3">
@@ -153,7 +150,7 @@ function RegisterFilters({ f, statuses, open, indicator, owners, disciplines, ex
   )
 }
 
-function owners(rows: { ownerId: string; ownerName?: string }[] | undefined): [string, string][] {
+function owners(rows: { ownerId: string; ownerName?: string | null }[] | undefined): [string, string][] {
   const m = new Map<string, string>()
   for (const r of rows ?? []) if (r.ownerName) m.set(r.ownerId, r.ownerName)
   return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]))
@@ -397,8 +394,8 @@ function ScoreFields({ p, i, onChange, errors }: { p?: number; i?: number; onCha
       {LEVELS.map((n) => (
         <label key={n} className={cn('grid cursor-pointer grid-cols-[auto_1fr] items-start gap-x-2.5 rounded-md border px-3 py-2 text-sm hover:bg-muted', value === n && 'border-primary bg-accent hover:bg-accent')}>
           <input type="radio" name={`risk-${name}`} className="row-span-2 mt-0.5 size-4 accent-(--primary)" checked={value === n} onChange={() => onChange({ [name]: n })} />
-          <span className="font-medium">{n} · {t(`risk.${name}.${n}`)}</span>
-          <span className="text-xs/[18px] text-muted-foreground">{t(`risk.${name}.${n}.hint`)}</span>
+          <span className="font-medium">{n} · {runtimeText(`risk.${name}.${n}`)}</span>
+          <span className="text-xs/[18px] text-muted-foreground">{runtimeText(`risk.${name}.${n}.hint`)}</span>
         </label>
       ))}
     </fieldset>
@@ -524,7 +521,7 @@ const issueBody = (f: Record<string, any>) => {
   const coordination = f.issueType === 'Coordination'
   const byLocation = (f.referenceKind ?? 'location') === 'location'
   const reference = coordination ? (byLocation ? locationBody(f.location ?? NEW_LOCATION) : documentBody(f.document ?? NEW_DOCUMENT)) : null
-  if (typeof reference === 'string') throw new Error(t(reference))
+  if (typeof reference === 'string') throw new Error(runtimeText(reference))
   return {
     title: f.title, description: f.description, severity: f.severity, ownerId: f.ownerId || null, targetResolutionDate: f.targetResolutionDate || null,
     dateRaised: f.dateRaised || null, projectDisciplineId: f.projectDisciplineId || null, issueType: f.issueType ?? 'General',
@@ -564,7 +561,7 @@ function IssueForm({ projectId, link, disciplineId, onClose }: { projectId: stri
 }
 
 /** "Raise from here" on task and deliverable panels (§13.13): the new risk or issue is linked to the item. */
-function RaiseMenu({ projectId, targetType, targetId, targetKey, targetName, disciplineId }: RaiseProps) {
+export function RaiseMenu({ projectId, targetType, targetId, targetKey, targetName, disciplineId }: RaiseProps) {
   const [open, setOpen] = useState<'risk' | 'issue' | 'action' | null>(null)
   const link: Target = { type: targetType, id: targetId, key: targetKey, name: targetName }
   return (
@@ -669,7 +666,7 @@ function ResolveDialog({ i, onClose }: { i: IssueRow; onClose: () => void }) {
 
 // ---------- Panels ----------
 
-const STEP: Record<string, string> = {
+const STEP: Record<string, import('@/lib/i18n').TextKey> = {
   Open: 'register.toOpen', Monitoring: 'risk.toMonitoring', Closed: 'risk.close', Realised: 'risk.realise',
   'In Progress': 'issue.toInProgress', Resolved: 'issue.resolve', Cancelled: 'issue.cancel',
 }
@@ -682,7 +679,7 @@ function Links({ links, canEdit, projectId, onAdd, onChange }: { links: LinkRow[
       {links.length === 0 ? <p className="text-sm text-muted-foreground">{t('decision.noLinks')}</p> : (
         <ul className="divide-y rounded-md border">{links.map((l) => (
           <li key={l.id} className="flex min-h-(--row-min) flex-wrap items-center gap-x-2.5 gap-y-1 px-3 py-1 text-sm">
-            <span className="w-20 shrink-0 text-xs/[18px] text-muted-foreground">{t(`itemType.${l.targetType}`)}</span><Key>{l.key}</Key>
+            <span className="w-20 shrink-0 text-xs/[18px] text-muted-foreground">{runtimeText(`itemType.${l.targetType}`)}</span><Key>{l.key}</Key>
             <button className="min-w-0 flex-1 truncate text-left hover:underline" onClick={() => openPanel(l.targetType, l.targetId)}>{l.name}</button>
             {l.status && <StatusPill status={l.status} />}<DateText date={l.date} />
             {canEdit && <Button variant="ghost" size="icon-sm" aria-label={t('decision.unlink', { key: l.key })}
@@ -707,9 +704,10 @@ function Steps({ transitions, label, onStep }: { transitions: Detail['permission
   )
 }
 
+
 const levelOptions = (name: 'probability' | 'impact') => LEVELS.map((n) => ({ value: String(n), label: `${n} · ${t(`risk.${name}.${n}`)}` }))
 
-function RiskPanel({ id }: PanelProps) {
+export function RiskPanel({ id }: PanelProps) {
   const q = useQuery({ queryKey: ['risk', id], queryFn: () => get<RiskDetail>(`risks/${id}`) })
   const done = useRegisterRefresh()
   const openPanel = useItemPanel()
@@ -735,7 +733,7 @@ function RiskPanel({ id }: PanelProps) {
         {r.isReviewOverdue && <Chip tone="bad">{t('risk.reviewOverdue')}</Chip>}
       </>}>
         {q.data.realisedIssue && <p className="text-sm">{t('risk.realisedAsLabel')} <button className="hover:underline" onClick={() => openPanel('Issue', q.data.realisedIssue!.id)}><Key>{q.data.realisedIssue.key}</Key> {q.data.realisedIssue.title}</button></p>}
-        <Steps transitions={perm.transitions} label={(to) => t(to === 'Open' && r.status === 'Closed' ? 'risk.reopen' : STEP[to])} onStep={onStep} />
+        <Steps transitions={perm.transitions} label={(to) => runtimeText(to === 'Open' && r.status === 'Closed' ? 'risk.reopen' : STEP[to])} onStep={onStep} />
       </PanelHead>
       <FieldGroup title={t('common.details')}>
         <FieldRow label={t('register.title')}><InlineText value={r.title} disabled={!can} title={perm.edit.reason ?? undefined} onSave={(v) => save({ title: v })} /></FieldRow>
@@ -765,7 +763,7 @@ function RiskPanel({ id }: PanelProps) {
   )
 }
 
-function IssuePanel({ id }: PanelProps) {
+export function IssuePanel({ id }: PanelProps) {
   const q = useQuery({ queryKey: ['issue', id], queryFn: () => get<IssueDetail>(`issues/${id}`) })
   const done = useRegisterRefresh()
   const openPanel = useItemPanel()
@@ -795,7 +793,7 @@ function IssuePanel({ id }: PanelProps) {
         {i.severity === 'High' && open && <Chip tone="bad">{t('issue.attention')}</Chip>}
       </>}>
         {q.data.originRisk && <p className="text-sm">{t('issue.fromRiskLabel')} <button className="hover:underline" onClick={() => openPanel('Risk', q.data.originRisk!.id)}><Key>{q.data.originRisk.key}</Key> {q.data.originRisk.title}</button></p>}
-        <Steps transitions={perm.transitions} label={(to) => t(reopening(to) ? 'issue.reopen' : STEP[to])} onStep={onStep} />
+        <Steps transitions={perm.transitions} label={(to) => runtimeText(reopening(to) ? 'issue.reopen' : STEP[to])} onStep={onStep} />
       </PanelHead>
       {i.status === 'Resolved' && (
         <div className="mx-4 mb-4 rounded-md border border-done/30 bg-done-bg px-4 py-3 text-sm">
@@ -936,7 +934,7 @@ function documentBody(d: DocumentDraft): Record<string, unknown> | string {
 function LocationInputs({ value: l, onChange }: { value: LocationDraft; onChange: (v: LocationDraft) => void }) {
   const id = useId()
   const input = (key: keyof LocationDraft, label: string, type?: string) =>
-    <Field label={t(label)} htmlFor={`${id}-${key}`}><Input id={`${id}-${key}`} value={l[key]} onChange={(e) => onChange({ ...l, [key]: e.target.value })} type={type} /></Field>
+    <Field label={runtimeText(label)} htmlFor={`${id}-${key}`}><Input id={`${id}-${key}`} value={l[key]} onChange={(e) => onChange({ ...l, [key]: e.target.value })} type={type} /></Field>
   return <>
     <Field label={t('issue.locationKind')} htmlFor={`${id}-kind`}>
       <select id={`${id}-kind`} className={selectCls} value={l.kind} onChange={(e) => onChange({ ...l, kind: e.target.value })}>
@@ -954,7 +952,7 @@ function LocationInputs({ value: l, onChange }: { value: LocationDraft; onChange
 function DocumentInputs({ value: d, onChange }: { value: DocumentDraft; onChange: (v: DocumentDraft) => void }) {
   const id = useId()
   const input = (key: Exclude<keyof DocumentDraft, 'available' | 'kind'>, label: string) =>
-    <Field label={t(label)} htmlFor={`${id}-${key}`}><Input id={`${id}-${key}`} value={d[key]} onChange={(e) => onChange({ ...d, [key]: e.target.value })} /></Field>
+    <Field label={runtimeText(label)} htmlFor={`${id}-${key}`}><Input id={`${id}-${key}`} value={d[key]} onChange={(e) => onChange({ ...d, [key]: e.target.value })} /></Field>
   return <>
     <Field label={t('issue.documentKind')} htmlFor={`${id}-kind`}>
       <select id={`${id}-kind`} className={selectCls} value={d.kind} onChange={(e) => onChange({ ...d, kind: e.target.value })}><option>Drawing</option><option>Model</option><option>Markup</option><option>Screenshot</option></select>
@@ -978,7 +976,7 @@ function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit
   const [verifier, setVerifier] = useState<string | null>(null); const [note, setNote] = useState(''); const [evidence, setEvidence] = useState(''); const [busy, setBusy] = useState(false)
   const reload = async () => { await Promise.all([locations.refetch(), documents.refetch(), verification.refetch()]); onChanged() }
   const submit = async (path: string, body: Record<string, unknown>) => { setBusy(true); try { await post(path, { ...body, rowVersion: issue.rowVersion }, issue.rowVersion); await reload(); toast.success(t('issue.metadataSaved')); return true } catch (e) { toast.error(errorText(e)); return false } finally { setBusy(false) } }
-  const add = (path: string, body: Record<string, unknown> | string) => { if (typeof body === 'string') toast.error(t(body)); else submit(path, body) }
+  const add = (path: string, body: Record<string, unknown> | string) => { if (typeof body === 'string') toast.error(runtimeText(body)); else submit(path, body) }
   const appoint = () => verifier && submit(`issues/${issue.id}/verification`, { verifierId: verifier, status: 'Proposed', note })
   const decide = (v: IssueVerification, status: 'Verified' | 'Rejected') => submit(`issues/${issue.id}/verification`, { verifierId: v.verifierId, status, evidenceUrl: evidence || null, note })
   const replace = (x: IssueDocument) => {
@@ -988,7 +986,7 @@ function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit
   }
   const saveReference = async () => {
     const body = documentBody(doc)
-    if (typeof body === 'string') { toast.error(t(body)); return }
+    if (typeof body === 'string') { toast.error(runtimeText(body)); return }
     if (!replacing) { add(`issues/${issue.id}/documents`, body); return }
     if (!replacementReason.trim()) { toast.error(t('coord.reasonRequired')); return }
     if (await submit(`issues/${issue.id}/documents/${replacing.id}/replace`, { requestId: crypto.randomUUID(),
@@ -1040,7 +1038,3 @@ function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit
     </div>
   </section>
 }
-
-PANELS.Risk = { component: RiskPanel }
-PANELS.Issue = { component: IssuePanel }
-ItemSlots.Raise = RaiseMenu

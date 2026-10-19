@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -167,6 +168,42 @@ public sealed class LiveEventsTests(LiveEventsHost host) : IClassFixture<LiveEve
 
     [Fact]
     [Trait("flag-on", "live_events")]
+    public async Task A_demoted_Admin_stops_receiving_restricted_events_while_connected() // FR-LIVE-16, AC-LIVE-14
+    {
+        await SetFlag(f, true);
+        var data = d;
+        var r = await data.Project();     // Jill is not a member
+        var marker = await data.Project();
+        await f.DbAsync(async db => { (await db.Projects.FindAsync(r.Id))!.Visibility = Visibility.Restricted; return await db.SaveChangesAsync(); });
+        var jill = data.User(TestData.Jill);
+        var marc = data.User(TestData.Marc);
+        var admin = f.As(TestData.Admin);
+        (await admin.PostAsJsonAsync($"/api/v1/admin/users/{jill}/roles", new { role = SystemRole.Admin })).EnsureSuccessStatusCode();
+        try
+        {
+            using var live = await Open(f, TestData.Jill);
+            var feed = f.Services.GetRequiredService<LiveFeed>();
+            bool End(JsonObject o) => (string?)o["topic"] == "evaluated" && o["projectId"]!.GetValue<Guid>() == marker.Id;
+            feed.Publish(new LiveBatch([Row(r.Id, ItemType.Task, marc)], [marker.Id]));
+            Assert.Contains(await live.Until(End), o => o["projectId"]!.GetValue<Guid>() == r.Id); // an Admin sees R
+
+            var state = new LiveFeedState();
+            (await admin.DeleteAsync($"/api/v1/admin/users/{jill}/roles/{SystemRole.Admin}")).EnsureSuccessStatusCode();
+            using (var scope = f.Services.CreateScope())
+            {
+                var batch = await LiveFeed.TickOnce(scope.ServiceProvider.GetRequiredService<Hub.Api.Data.HubDb>(), state, TimeSpan.FromSeconds(3));
+                Assert.True(batch.Users); // the project-less role row reaches the feed as a signal only
+                Assert.All(batch.Rows, row => Assert.NotEqual(ItemType.User, row.ItemType));
+                feed.Publish(batch);
+            }
+            feed.Publish(new LiveBatch([Row(r.Id, ItemType.Task, marc)], [r.Id, marker.Id]));
+            Assert.DoesNotContain(await live.Until(End), o => o["projectId"]!.GetValue<Guid>() == r.Id);
+        }
+        finally { await admin.DeleteAsync($"/api/v1/admin/users/{jill}/roles/{SystemRole.Admin}"); }
+    }
+
+    [Fact]
+    [Trait("flag-on", "live_events")]
     public async Task Heartbeat_arrives_on_the_configured_interval() // FR-LIVE-17, AC-LIVE-16
     {
         await SetFlag(f, true);
@@ -240,4 +277,38 @@ public sealed class LiveEventsTests(LiveEventsHost host) : IClassFixture<LiveEve
             Assert.True(watch.Elapsed < TimeSpan.FromSeconds(15), $"host stop took {watch.Elapsed}");
         }
     }
+    [Fact]
+    public async Task Invisible_batches_do_not_starve_viewer_heartbeats() // AC-LIVE-15, AC-LIVE-16
+    {
+        await SetFlag(f, true);
+        using var live = await Open(f, TestData.Jill);
+        var feed = f.Services.GetRequiredService<LiveFeed>();
+        using var stop = new CancellationTokenSource();
+        var publisher = Task.Run(async () =>
+        {
+            while (!stop.IsCancellationRequested)
+            {
+                feed.Publish(new LiveBatch([Row(Guid.NewGuid(), ItemType.Task, d.User(TestData.Alex))], []));
+                await Task.Delay(100, stop.Token);
+            }
+        });
+        try
+        {
+            var hearts = 0;
+            var deadline = Stopwatch.StartNew();
+            while (hearts < 2 && deadline.Elapsed < TimeSpan.FromSeconds(4))
+            {
+                var line = await live.Line(TimeSpan.FromSeconds(3));
+                Assert.False(line?.StartsWith("data:", StringComparison.Ordinal));
+                if (line == ": heartbeat") hearts++;
+            }
+            Assert.Equal(2, hearts);
+        }
+        finally
+        {
+            stop.Cancel();
+            try { await publisher; } catch (OperationCanceledException) { }
+        }
+    }
+
 }

@@ -18,7 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { get, qs } from '@/lib/api'
 import { useOffer } from '@/lib/auth'
 import { fmtDate, fmtTime, relative } from '@/lib/format'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
 import { cn, type Accent } from '@/lib/utils'
 import { MilestoneStrip, type MilestoneRow } from './Milestones'
 import { useCurrentProject } from './ProjectLayout'
@@ -133,7 +133,7 @@ export function DashboardTab() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-baseline gap-x-2">
                         <span className="font-semibold">{r.actorName ?? t('common.system')}</span>
-                        <span className="text-muted-foreground">{t(`action.${r.action}`)}</span>
+                        <span className="text-muted-foreground">{runtimeText(`action.${r.action}`)}</span>
                         {r.itemKey && <Key>{r.itemKey}</Key>}<span className="break-words">{r.itemName}</span>
                         <time className="ml-auto whitespace-nowrap text-xs/[18px] text-muted-foreground tabular-nums" dateTime={r.occurredAt}>{fmtTime(r.occurredAt)}</time>
                       </div>
@@ -166,7 +166,7 @@ function Headline() {
         <p className={label}>{t('dash.health')}</p>
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {h.overrideActive && <HealthPill health={h.reported} label={t('health.reported')} />}
-          <Why reasons={h.reasons} title={t('health.whyTitle', { health: t(`health.${h.computed}`) })}><HealthPill health={h.computed} label={h.overrideActive ? t('health.computed') : undefined} /></Why>
+          <Why reasons={h.reasons} title={t('health.whyTitle', { health: runtimeText(`health.${h.computed}`) })}><HealthPill health={h.computed} label={h.overrideActive ? t('health.computed') : undefined} /></Why>
         </div>
         {h.overrideActive && h.healthOverrideNote && <p className="mt-2 line-clamp-2 text-xs/[18px] text-muted-foreground" title={h.healthOverrideNote}>{h.healthOverrideNote}</p>}
       </div>
@@ -201,7 +201,7 @@ function Counts({ d, base, scoped }: { d: Dash; base: string; scoped: boolean })
     <article aria-label={title} className="grid">
       <SummaryTile accent={accent} hint={hint} to={to}
         label={<>{title}{whole && scoped && <Chip tone="idle">{t('sig.wholeProject')}</Chip>}</>}
-        value={<span className="inline-flex items-baseline gap-2">{c.value}<span className="text-sm font-medium tracking-normal text-muted-foreground">{t(`dash.count.${key}`)}</span></span>}>
+        value={<span className="inline-flex items-baseline gap-2">{c.value}<span className="text-sm font-medium tracking-normal text-muted-foreground">{runtimeText(`dash.count.${key}`)}</span></span>}>
         {rest.length > 0 && (
           <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 border-t border-(color:--acc-stripe) pt-3">
             {rest.map(([k, n, href]) => {
@@ -209,7 +209,7 @@ function Counts({ d, base, scoped }: { d: Dash; base: string; scoped: boolean })
               return (
                 <li key={k}>
                   <Link to={href} className="flex min-h-6 items-baseline justify-between gap-2 rounded-md text-sm hover:underline">
-                    <span className="text-muted-foreground">{t(`dash.count.${k}`)}</span>
+                    <span className="text-muted-foreground">{runtimeText(`dash.count.${k}`)}</span>
                     <span className={cn('font-semibold tabular-nums', tone === 'bad' && 'text-bad', tone === 'warn' && 'text-warn')}>{tone && <span aria-hidden className="mr-1 text-xs">{tone === 'bad' ? '■' : '▲'}</span>}{n.value}</span>
                   </Link>
                 </li>

@@ -22,7 +22,7 @@ import { useProjectRefresh } from '@/hooks/data'
 import { ApiError, download, get, patch, post, qs } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { addDays, ago, fmtDate, hours, today } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { runtimeText, plural, t, tv } from '@/lib/i18n'
 import type { Page as PageOf, ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import type { DeliverableRow } from './Deliverables'
@@ -94,7 +94,7 @@ function taskSignals(r: TaskRow) {
     s?.isReviewStalled && { key: 'reviewStalled', tone: 'warn', label: t('ind.reviewStalled') },
     r.reviewRound > 0 && { key: 'reviewRound', tone: 'work', label: t('ind.reviewRound', { n: r.reviewRound }) },
     r.dueDateChangeCount >= 3 && { key: 'dueMoved', tone: 'warn', label: t('ind.dueMoved', { n: r.dueDateChangeCount }) },
-    ...(s?.notes ?? []).filter((n) => NOTE_LABEL[n]).map((n) => ({ key: n, tone: 'warn', label: t(NOTE_LABEL[n]) })),
+    ...(s?.notes ?? []).filter((n) => NOTE_LABEL[n]).map((n) => ({ key: n, tone: 'warn', label: runtimeText(NOTE_LABEL[n]) })),
   ] as (Signal | false | undefined)[]).filter(Boolean) as Signal[]
   return signals
 }
@@ -232,7 +232,7 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
 function describe(body: Record<string, unknown>): string {
   return Object.entries(body).filter(([k]) => k !== 'reason').map(([k, v]) =>
     k === 'dueDate' ? `${t('field.DueDate')} ${fmtDate(v as string | null)}` : k === 'assigneeId' ? t('meeting.reassigned') : k === 'progressPct' ? `${t('deliverable.progress')} ${v}%`
-      : k === 'priority' ? `${t('common.priority')} ${tv(v as string)}` : t(`field.${k.charAt(0).toUpperCase()}${k.slice(1)}`)).join(', ')
+      : k === 'priority' ? `${t('common.priority')} ${tv(v as string)}` : runtimeText(`field.${k.charAt(0).toUpperCase()}${k.slice(1)}`)).join(', ')
 }
 
 /** Status change with the reason, review comment, reviewer or status note it needs (R-03, AC-TSK-03, G-09, C-08). */
@@ -336,10 +336,10 @@ export function TaskFilterBar({ p, deliverables, extra, actions, pinned = PINNED
   }
   const tokens = FILTER_KEYS.filter((k) => sp.has(k)).map((k) => ({
     key: k,
-    label: t(TOKEN_LABEL[k] ?? ((QUICK as readonly string[]).includes(k) ? `tquick.${k}` : `tfilter.${k}`)),
+    label: runtimeText(TOKEN_LABEL[k] ?? ((QUICK as readonly string[]).includes(k) ? `tquick.${k}` : `tfilter.${k}`)),
     value: FLAGS.has(k) ? (on(k) ? t('common.yes') : sp.get(k) ?? '') : value(k, sp.get(k) ?? '') ?? t('task.filterSelected'),
   }))
-  const chip = (k: string) => <ChipToggle key={k} on={on(k)} onClick={() => set(k, on(k) ? null : 'true')}>{t(`tquick.${k}`)}</ChipToggle>
+  const chip = (k: string) => <ChipToggle key={k} on={on(k)} onClick={() => set(k, on(k) ? null : 'true')}>{runtimeText(`tquick.${k}`)}</ChipToggle>
   return (
     <FilterBar activeCount={tokens.length} actions={actions}
       search={<Field label={t('common.search')} htmlFor="tasks-q">
@@ -437,7 +437,7 @@ function groupRows(rows: TaskRow[], by: string, deliverables: Map<string, Delive
       case 'milestone': return [r.effectiveMilestoneId ?? '', r.milestoneKey ? `${r.milestoneKey} ${r.milestoneName}` : t('task.noMilestone'), r.milestoneDate ?? '9999']
       case 'assignee': return [r.assigneeId ?? '', r.assigneeName ?? t('ind.unassigned'), r.assigneeName ?? '']
       case 'status': return [r.status, tv(r.status), TASK_STATUSES.indexOf(r.status)]
-      case 'due': { const b = dueBucket(r, now); return [b, t(`tbucket.${b}`), BUCKETS.indexOf(b)] }
+      case 'due': { const b = dueBucket(r, now); return [b, runtimeText(`tbucket.${b}`), BUCKETS.indexOf(b)] }
       default: return [r.deliverableId ?? '', r.deliverableKey ? `${r.deliverableKey} ${r.deliverableName}` : t('task.noDeliverable'), r.deliverableOrder ?? 1e9]
     }
   }
@@ -603,18 +603,18 @@ function LiveTasksTab() {
       {/* §41 R1: the quick filters sit in the Filters popover, Group is a menu, and Export and Columns share the overflow. */}
       <TaskFilterBar p={p} deliverables={deliverables} pinned={[]}
         lead={<MenuSelect label={t('common.groupBy')} value={group} onChange={(v) => set('group', v === 'deliverable' ? null : v)}
-          options={GROUPS.map((g) => ({ value: g, label: t(GROUP_LABEL[g]) }))} />}
+          options={GROUPS.map((g) => ({ value: g, label: runtimeText(GROUP_LABEL[g]) }))} />}
         actions={
         <DropdownMenu>
           <DropdownMenuTrigger asChild><Button variant="outline" size="icon" aria-label={t('calm.moreActions')} title={t('calm.moreActions')}><Ellipsis className="size-4" aria-hidden /></Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {(['xlsx', 'csv'] as const).map((format) => <DropdownMenuItem key={format} onSelect={() => exportAs(format)}>{t(`export.${format}`)}</DropdownMenuItem>)}
+            {(['xlsx', 'csv'] as const).map((format) => <DropdownMenuItem key={format} onSelect={() => exportAs(format)}>{runtimeText(`export.${format}`)}</DropdownMenuItem>)}
             <DropdownMenuSub>
               <DropdownMenuSubTrigger><Columns3 className="size-4" aria-hidden />{t('task.columns')}</DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 {all.filter((c) => c.id !== 'key' && c.id !== 'name').map((c) => (
                   <DropdownMenuCheckboxItem key={c.id} checked={shown.includes(c)} onSelect={(e) => e.preventDefault()}
-                    onCheckedChange={(on) => setCols((on ? [...shown.map((x) => x.id), c.id] : shown.map((x) => x.id).filter((x) => x !== c.id)))}>{t(c.label)}</DropdownMenuCheckboxItem>
+                    onCheckedChange={(on) => setCols((on ? [...shown.map((x) => x.id), c.id] : shown.map((x) => x.id).filter((x) => x !== c.id)))}>{runtimeText(c.label)}</DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuSubContent>
             </DropdownMenuSub>
@@ -625,7 +625,7 @@ function LiveTasksTab() {
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-accent px-4 py-3 text-sm" role="region" aria-label={t('bulk.actions')}>
           <span className="mr-2 font-semibold text-accent-foreground tabular-nums">{t('bulk.selected', { n: selected.size })}</span>
           {BULK.map((op) => (
-            <Button key={op} variant="outline" className={cn(op === 'cancel' && 'text-bad hover:text-bad')} onClick={() => setBulk(op)}>{t(`tbulk.${op}`)}</Button>
+            <Button key={op} variant="outline" className={cn(op === 'cancel' && 'text-bad hover:text-bad')} onClick={() => setBulk(op)}>{runtimeText(`tbulk.${op}`)}</Button>
           ))}
           <Button variant="ghost" className="sm:ml-auto" onClick={() => setSelected(new Set())}>{t('common.clear')}</Button>
         </div>
@@ -640,7 +640,7 @@ function LiveTasksTab() {
       ) : (
         phone ? <div data-task-layout="phone" className="space-y-2"><Checkbox aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={c => setSelected(c ? new Set(rows.map(r => r.id)) : new Set())} /><ul className="space-y-2">{flat.map(f => f.kind === 'group' ? <li key={`g-${f.id}`} className="flex flex-wrap items-center gap-2 py-2"><h3 className="break-words text-sm font-semibold">{f.label}</h3><span className="text-xs text-muted-foreground">{f.count}</span>{f.status && <StatusPill status={f.status} />}{group === 'deliverable' && canCreate && <Button size="sm" variant="outline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" />{t('task.addHere')}</Button>}</li> : <li key={f.r.id} className={cn('rounded-lg border bg-card p-4', (current === f.r.id || selected.has(f.r.id)) && 'bg-accent', current === f.r.id && 'shadow-[inset_3px_0_0_var(--primary)]')}>
           <div className="mb-3 flex items-start gap-3"><Checkbox aria-label={`${t('bulk.select')} ${f.r.key}`} checked={selected.has(f.r.id)} onCheckedChange={() => toggle(f.r.id)} /><div className="min-w-0 flex-1">{all.find(c => c.id === 'key')?.cell(f.r)}<div className="mt-1 break-words font-semibold">{all.find(c => c.id === 'name')?.cell(f.r)}</div></div></div>
-          <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name' && c.id !== 'quick' && showPhoneTaskField(c.id, f.r) && (c.id !== 'indicators' || taskSignals(f.r).length > 0)).map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{t(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
+          <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name' && c.id !== 'quick' && showPhoneTaskField(c.id, f.r) && (c.id !== 'indicators' || taskSignals(f.r).length > 0)).map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{runtimeText(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
         </li>)}</ul>{q.isFetchingNextPage && <p role="status" className="text-xs text-muted-foreground">{t('task.loadingMore', { n: rows.length, total })}</p>}</div> :
         <TableRegion ref={scroller} data-task-layout="desktop" className="max-h-[calc(100dvh-10rem)] min-h-64 overflow-auto">
           <table className="w-full text-sm" aria-rowcount={flat.length + 1}>
@@ -652,8 +652,8 @@ function LiveTasksTab() {
                   const dir = sort === c.sort ? 'ascending' : sort === `${c.sort}:desc` ? 'descending' : undefined
                   return (
                     <th key={c.id} scope="col" className={cn(thCls, c.num && 'text-right', c.id === 'key' && 'sticky left-10 z-20 w-40 min-w-40 max-w-40 bg-muted', c.id === 'name' && 'sticky left-50 z-20 min-w-64 bg-muted')} aria-sort={c.sort ? dir ?? 'none' : undefined}>
-                      {c.sort ? <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => sortBy(c.sort!)}>{t(c.label)}
-                        {dir === 'ascending' && <ArrowUp className="size-3.5" aria-hidden />}{dir === 'descending' && <ArrowDown className="size-3.5" aria-hidden />}</button> : t(c.label)}
+                      {c.sort ? <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => sortBy(c.sort!)}>{runtimeText(c.label)}
+                        {dir === 'ascending' && <ArrowUp className="size-3.5" aria-hidden />}{dir === 'descending' && <ArrowDown className="size-3.5" aria-hidden />}</button> : runtimeText(c.label)}
                     </th>
                   )
                 })}
@@ -712,7 +712,7 @@ function TaskBulkDialog({ p, op, ids, deliverables, onClose }: { p: ProjectDetai
   const needs = op === 'shiftDueDates' || op === 'hold' || op === 'cancel'
   const ready = op === 'hold' || op === 'cancel' || op === 'setDeliverable' || (v != null && v !== '')
   return (
-    <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={t(`tbulk.${op}`)} body={t('bulk.selected', { n: ids.length })}
+    <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={runtimeText(`tbulk.${op}`)} body={t('bulk.selected', { n: ids.length })}
       reason={needs ? true : op === 'setDueDate' ? 'optional' : undefined} busy={!ready} destructive={op === 'cancel'}
       onConfirm={async (reason) => {
         const params = op === 'assign' ? { assigneeId: v } : op === 'setDueDate' ? { dueDate: v } : op === 'shiftDueDates' ? { days: Number(v) }

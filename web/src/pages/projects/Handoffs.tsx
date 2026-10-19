@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ApiError, get, post, qs } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
 import { CoordStatus, RegisterPager, useCoordRefresh } from './CoordinationForms'
@@ -107,7 +107,7 @@ export function HandoffsTab() {
       {!list.data.items.length ? <div className="rounded-lg border bg-card"><Empty title={t('handoff.empty')}>{t(tokens.length ? 'register.noMatch' : 'handoff.emptyHint')}</Empty></div> :
         phone ? <ul className="space-y-2">{list.data.items.map(h => <li key={h.id} className={cn('space-y-3 rounded-lg border bg-card p-4 text-sm', panel === h.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)]')}><button className="break-words text-left font-semibold text-primary hover:underline" aria-current={panel === h.id || undefined} onClick={() => open(h.id)}><span className="key font-normal">{h.key}</span> · {h.title}</button><CoordStatus status={h.status} /><p className="break-words text-xs/[18px] text-muted-foreground"><span className="key">{h.sourceKey}</span> → <span className="key">{h.targetKey}</span><br />{discipline(h.sendingDisciplineId)} → {discipline(h.receivingDisciplineId)}</p><div className="space-y-1"><div className="flex items-center gap-2"><Avatar id={h.sendingOwnerId} name={h.senderName} />{t('handoff.from', { name: h.senderName })}</div><div className="flex items-center gap-2"><Avatar id={h.receivingOwnerId} name={h.receiverName} />{t('handoff.to', { name: h.receiverName })}</div>{!h.ownersAvailable && <Flag tone="bad">{t('handoff.ownerUnavailable')}</Flag>}</div><dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2"><dt className="text-muted-foreground">{t('handoff.revision')}</dt><dd>{h.declaredRevision}{h.sourceChanged && <Flag tone="warn">{t('handoff.sourceChanged')}</Flag>}</dd><dt className="text-muted-foreground">{t('handoff.needed')}</dt><dd>{fmtDate(h.neededBy)}{h.isOverdue && <Flag tone="bad">{t('handoff.overdue')}</Flag>}</dd><dt className="text-muted-foreground">{t('handoff.promised')}</dt><dd>{h.promisedBy ? fmtDate(h.promisedBy) : <Missing />}{h.dateMismatch && <Flag tone="warn">{t('handoff.dateMismatch')}</Flag>}</dd></dl></li>)}</ul> :
         <TableRegion><table className="w-full text-left text-sm"><caption className="sr-only">{t('handoff.title')}</caption>
-          <thead className="bg-muted"><tr>{['item', 'owners', 'revision', 'needed', 'promised', 'state'].map(k => <th key={k} scope="col" className={thCls}>{t(`handoff.${k}`)}</th>)}</tr></thead>
+          <thead className="bg-muted"><tr>{['item', 'owners', 'revision', 'needed', 'promised', 'state'].map(k => <th key={k} scope="col" className={thCls}>{runtimeText(`handoff.${k}`)}</th>)}</tr></thead>
           <tbody>{list.data.items.map(h => <tr key={h.id} className={cn('border-t hover:bg-muted', panel === h.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent')}>
             <td className={cn(tdCls, 'min-w-64')}><button className="break-words text-left font-semibold text-primary underline-offset-4 hover:underline" aria-current={panel === h.id || undefined} onClick={() => open(h.id)}><span className="key font-normal">{h.key}</span> · {h.title}</button><p className="mt-1 text-xs/[18px] text-muted-foreground"><span className="key">{h.sourceKey}</span> → <span className="key">{h.targetKey}</span></p>
               {options.data && <p className="text-xs/[18px] text-muted-foreground">{discipline(h.sendingDisciplineId)} → {discipline(h.receivingDisciplineId)}</p>}</td>
@@ -204,11 +204,11 @@ function HandoffDetail({ projectId, projectNumber, id, options, onClose, refresh
     {query.isPending ? <Loading rows={6} /> : query.error ? <ErrorBanner error={query.error} retry={() => query.refetch()} /> : d && <div className="space-y-5 text-sm">
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2"><CoordStatus status={d.row.status} /><span className="flex-1" />
-          {d.permissions.transitions.map(a => <Button size="sm" key={a.to} variant={a.to === next ? 'default' : a.to === 'Cancelled' ? 'ghost' : 'outline'} className={cn(a.to === 'Cancelled' && 'text-bad hover:text-bad')} disabled={!a.permission.ok} title={a.permission.reason} onClick={() => setAction(a.to)}>{t(`handoff.action.${a.to}`)}</Button>)}
+          {d.permissions.transitions.map(a => <Button size="sm" key={a.to} variant={a.to === next ? 'default' : a.to === 'Cancelled' ? 'ghost' : 'outline'} className={cn(a.to === 'Cancelled' && 'text-bad hover:text-bad')} disabled={!a.permission.ok} title={a.permission.reason} onClick={() => setAction(a.to)}>{runtimeText(`handoff.action.${a.to}`)}</Button>)}
           {d.permissions.edit.ok && options && <Button size="sm" variant="outline" onClick={() => setEdit(true)}>{t('handoff.edit')}</Button>}
           {d.permissions.assign.ok && options && !['Cancelled', 'Incorporated'].includes(d.row.status) && <Button size="sm" variant="outline" onClick={() => setAction('assign')}>{t('handoff.reassign')}</Button>}
         </div>
-        {refused.length > 0 && <ul className="space-y-1 text-xs/[18px] text-muted-foreground">{refused.map(a => <li key={a.to}><span className="font-medium text-foreground">{t(`handoff.action.${a.to}`)}</span> · {a.permission.reason}</li>)}</ul>}
+        {refused.length > 0 && <ul className="space-y-1 text-xs/[18px] text-muted-foreground">{refused.map(a => <li key={a.to}><span className="font-medium text-foreground">{runtimeText(`handoff.action.${a.to}`)}</span> · {a.permission.reason}</li>)}</ul>}
       </div>
       {!d.row.ownersAvailable && <p role="status" className="flex gap-2 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-bad"><span aria-hidden>■</span><span>{t('handoff.ownerUnavailable')}</span></p>}
       {d.row.sourceChanged && <p role="status" className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-warn"><span aria-hidden>▲</span><span>{t('handoff.sourceChangedHint', { revision: d.row.declaredRevision })}</span></p>}
@@ -249,7 +249,7 @@ function ActionDialog({ projectId, row, action, people, onClose, onDone }: { pro
       toast.success(t('handoff.saved')); onDone()
     } catch (e) { setError(e as ApiError) } finally { setBusy(false) }
   }
-  return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent><DialogHeader><DialogTitle>{t(assign ? 'handoff.reassign' : `handoff.action.${action}`)}</DialogTitle><DialogDescription>{t('handoff.receiptHint')}</DialogDescription></DialogHeader>
+  return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent><DialogHeader><DialogTitle>{runtimeText(assign ? 'handoff.reassign' : `handoff.action.${action}`)}</DialogTitle><DialogDescription>{t('handoff.receiptHint')}</DialogDescription></DialogHeader>
     <form className="space-y-4" onSubmit={e => { e.preventDefault(); run() }}>
       {assign && <><Field label={t('handoff.sender')} htmlFor="ha-sender"><PersonSelect id="ha-sender" value={sender} onChange={setSender} people={people} /></Field><Field label={t('handoff.receiver')} htmlFor="ha-receiver"><PersonSelect id="ha-receiver" value={receiver} onChange={setReceiver} people={people} /></Field></>}
       {needsOutcome && <Field label={t(action === 'Accepted' ? 'handoff.criteriaOutcome' : 'handoff.incorporationEvidence')} htmlFor="ha-outcome" hint={row.acceptanceCriteria}><Textarea id="ha-outcome" required maxLength={4000} value={outcome} onChange={e => setOutcome(e.target.value)} /></Field>}

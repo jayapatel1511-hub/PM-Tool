@@ -14,7 +14,7 @@ import { useReference } from '@/hooks/data'
 import { ApiError, del, get, post, put } from '@/lib/api'
 import { useMe, useFlag } from '@/lib/auth'
 import { fmtDate, fmtTime } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { FieldsCommand } from './projects/CoordinationForms'
 import type { TemplateRow } from './projects/FromTemplate'
@@ -89,7 +89,7 @@ function Templates() {
           <table className="w-full text-sm">
             <caption className="sr-only">{t('nav.templates')}</caption>
             <thead className="bg-muted">
-              <tr>{['name', 'versions', 'structure', 'projects'].map((c) => <th key={c} scope="col" className={cn(thCls, c === 'projects' && 'text-right')}>{t(`tpl.col.${c}`)}</th>)}</tr>
+              <tr>{['name', 'versions', 'structure', 'projects'].map((c) => <th key={c} scope="col" className={cn(thCls, c === 'projects' && 'text-right')}>{runtimeText(`tpl.col.${c}`)}</th>)}</tr>
             </thead>
             <tbody>
               {families.map((rows) => {
@@ -194,7 +194,7 @@ function TemplateEditor() {
     <Button type="button" variant="ghost" size="icon-sm" aria-label={label} disabled={disabled || !!busy} onClick={onClick}>{icon}</Button>)
   const move = <T,>(list: T[], i: number, by: number) => { const n = [...list]; [n[i], n[i + by]] = [n[i + by], n[i]]; return n }
   const head = (cols: string[], prefix: string, numeric: string[] = []) => (
-    <thead className="bg-muted"><tr>{cols.map((c) => <th key={c} scope="col" className={cn(thCls, numeric.includes(c) && 'text-right')}>{t(`${prefix}.${c}`)}</th>)}
+    <thead className="bg-muted"><tr>{cols.map((c) => <th key={c} scope="col" className={cn(thCls, numeric.includes(c) && 'text-right')}>{runtimeText(`${prefix}.${c}`)}</th>)}
       <th scope="col" className={thCls}><span className="sr-only">{t('common.actions')}</span></th></tr></thead>
   )
 
@@ -267,7 +267,7 @@ function TemplateEditor() {
                     <td className={cell}>{edit ? <Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.mcol.name')} value={m.name} disabled={!!busy} onChange={(e) => set({ name: e.target.value })} /> : <span className="block min-w-48 py-1">{m.name}</span>}
                       {planned?.date && <div className="mt-0.5 text-xs/[18px] text-muted-foreground tabular-nums">{t('tpl.wouldBe', { date: fmtDate(planned.date) })}</div>}</td>
                     <td className={cell}><select className={cls} aria-label={t('tpl.mcol.type')} value={m.milestoneType} disabled={!edit || !!busy} onChange={(e) => set({ milestoneType: e.target.value })}>{MILESTONE_TYPES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select></td>
-                    <td className={cell}><select className={cls} aria-label={t('tpl.mcol.anchor')} value={m.anchor} disabled={!edit || !!busy} onChange={(e) => set({ anchor: e.target.value })}>{ANCHORS.map((x) => <option key={x} value={x}>{t(`tpl.anchor.${x}`)}</option>)}</select></td>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.mcol.anchor')} value={m.anchor} disabled={!edit || !!busy} onChange={(e) => set({ anchor: e.target.value })}>{ANCHORS.map((x) => <option key={x} value={x}>{runtimeText(`tpl.anchor.${x}`)}</option>)}</select></td>
                     <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.mcol.offset')} value={m.offset ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ offset: num(e.target.value) })} /></td>
                     <td className={cell}><select className={cls} aria-label={t('tpl.mcol.phase')} value={m.completesPhaseId ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ completesPhaseId: e.target.value || null })}>
                       <option value="">{t('common.none')}</option>{ref.data?.phases.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></td>
@@ -315,7 +315,7 @@ function TemplateEditor() {
         disabled={!!busy} onClick={() => change({ tasks: [...d.tasks, { ref: newRef(), disciplineId: inTemplate[0], deliverableRef: null, name: '', requiresReview: false, priority: 'Medium', estimatedHours: null, offset: null, assignTo: 'Unassigned' }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
         <Scroll label={t('ptab.tasks')} className="max-h-[32rem] overflow-auto">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 z-10 bg-muted"><tr>{['deliverable', 'name', 'discipline', 'assign', 'estimate', 'offset', 'review'].map((c) => <th key={c} scope="col" className={cn(thCls, ['estimate', 'offset'].includes(c) && 'text-right')}>{t(`tpl.tcol.${c}`)}</th>)}
+            <thead className="sticky top-0 z-10 bg-muted"><tr>{['deliverable', 'name', 'discipline', 'assign', 'estimate', 'offset', 'review'].map((c) => <th key={c} scope="col" className={cn(thCls, ['estimate', 'offset'].includes(c) && 'text-right')}>{runtimeText(`tpl.tcol.${c}`)}</th>)}
               <th scope="col" className={thCls}><span className="sr-only">{t('common.actions')}</span></th></tr></thead>
             <tbody>
               {d.tasks.map((k) => {
@@ -326,7 +326,7 @@ function TemplateEditor() {
                       <option value="">{t('common.none')}</option>{d.deliverables.map((x) => <option key={x.ref} value={x.ref}>{x.name}</option>)}</select></td>
                     <td className={cell}>{edit ? <Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.tcol.name')} value={k.name} disabled={!!busy} onChange={(e) => set({ name: e.target.value })} /> : <span className="block min-w-48 py-1">{k.name}</span>}</td>
                     <td className={cell}><select className={cls} aria-label={t('tpl.tcol.discipline')} value={k.disciplineId} disabled={!edit || !!busy} onChange={(e) => set({ disciplineId: e.target.value })}>{inTemplate.map((id) => <option key={id} value={id}>{disciplines.get(id)}</option>)}</select></td>
-                    <td className={cell}><select className={cls} aria-label={t('tpl.tcol.assign')} value={k.assignTo} disabled={!edit || !!busy} onChange={(e) => set({ assignTo: e.target.value })}>{ROLES.map((x) => <option key={x} value={x}>{t(`tpl.role.${x}`)}</option>)}</select></td>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.tcol.assign')} value={k.assignTo} disabled={!edit || !!busy} onChange={(e) => set({ assignTo: e.target.value })}>{ROLES.map((x) => <option key={x} value={x}>{runtimeText(`tpl.role.${x}`)}</option>)}</select></td>
                     <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.tcol.estimate')} value={k.estimatedHours ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ estimatedHours: num(e.target.value) })} /></td>
                     <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.tcol.offset')} value={k.offset ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ offset: num(e.target.value) })} /></td>
                     <td className={cell}><div className="flex items-center gap-2"><Checkbox aria-label={t('tpl.tcol.review')} checked={k.requiresReview} disabled={!edit || !!busy} onCheckedChange={(c) => set({ requiresReview: !!c })} />

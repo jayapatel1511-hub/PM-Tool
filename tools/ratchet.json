@@ -1,0 +1,138 @@
+{
+  "counters": {
+    "anonymous_objects": {
+      "ratchet": true,
+      "value": 795
+    },
+    "api_helpers_without_type": {
+      "ratchet": true,
+      "value": 159
+    },
+    "client_permission_derivations": {
+      "ratchet": false,
+      "value": 62
+    },
+    "direct_invalidate_queries": {
+      "ratchet": true,
+      "value": 75
+    },
+    "html_tables": {
+      "ratchet": false,
+      "value": 51
+    },
+    "load_percentage_literals": {
+      "ratchet": true,
+      "value": 0
+    },
+    "page_permission_derivations": {
+      "ratchet": true,
+      "value": 25
+    },
+    "runtime_text_keys": {
+      "ratchet": true,
+      "value": 236
+    },
+    "task_object_handlers": {
+      "ratchet": true,
+      "value": 80
+    },
+    "untyped_results": {
+      "ratchet": true,
+      "value": 145
+    }
+  },
+  "text_differences": {
+    "basis.assumption": {
+      "client": "Assumption",
+      "server": "An unconfirmed assumption needs an approved, unexpired disposition before use."
+    },
+    "basis.current": {
+      "client": "Current registered version",
+      "server": "This basis version is no longer the current registered version."
+    },
+    "basis.duplicate": {
+      "client": "An entry with this title and scope exists. Open it before acknowledging a separate entry.",
+      "server": "A basis entry with this title, discipline and scope already exists. Inspect it before creating another."
+    },
+    "basis.units": {
+      "client": "Units",
+      "server": "Numeric design criteria need explicit units before confirmation."
+    },
+    "calendar.cancelled": {
+      "client": "Event cancelled",
+      "server": "This event was cancelled."
+    },
+    "change.correction": {
+      "client": "Correction task",
+      "server": "The linked correction task must be complete and independently verified with evidence."
+    },
+    "change.current": {
+      "client": "Current registered revision",
+      "server": "The current revision changed. Refresh and confirm the intended revision."
+    },
+    "col.name": {
+      "client": "Task",
+      "server": "Name"
+    },
+    "coord.stale": {
+      "client": "This record changed. Close this form, refresh the record and review the latest information before trying again.",
+      "server": "This record changed. Refresh and review it before trying again."
+    },
+    "dep.lag": {
+      "client": "Lag (days)",
+      "server": "Lag is between 0 and 365 days."
+    },
+    "dep.type": {
+      "client": "Link type",
+      "server": "Choose Finish-to-Start, Start-to-Start or Finish-to-Finish."
+    },
+    "digest.section.planning": {
+      "client": "Planning",
+      "server": "PLANNING"
+    },
+    "handoff.receiver": {
+      "client": "Receiving owner",
+      "server": "Only the named receiving owner can record this receipt."
+    },
+    "handoff.sender": {
+      "client": "Sending owner",
+      "server": "Only the named sending owner can submit or respond."
+    },
+    "home.range": {
+      "client": "{from} \u2013 {to}",
+      "server": "Choose a range of at most a year, ending after it starts."
+    },
+    "ind.atRisk": {
+      "client": "At Risk",
+      "server": "At risk"
+    },
+    "ind.blocking": {
+      "client": "Blocking {n}",
+      "server": "Blocking {0}"
+    },
+    "ind.overdue": {
+      "client": "Overdue",
+      "server": "Overdue {0}d"
+    },
+    "itemType.Action": {
+      "client": "Meeting action",
+      "server": "Action"
+    },
+    "review.manifest": {
+      "client": "Revision manifest",
+      "server": "Choose one current revision per deliverable, from 1 to 200 deliverables."
+    },
+    "time.entries": {
+      "client": "Time entries by work date",
+      "server": "Entries"
+    },
+    "time.hours": {
+      "client": "Hours",
+      "server": "Enter hours greater than 0 and at most 24."
+    },
+    "workload.partial": {
+      "client": "Partial project scope; spare capacity is unknown",
+      "server": "Partial project scope"
+    }
+  }
+}

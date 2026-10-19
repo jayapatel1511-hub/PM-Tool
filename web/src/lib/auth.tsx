@@ -1,58 +1,23 @@
-import { createStandardPublicClientApplication, type IPublicClientApplication } from '@azure/msal-browser'
+import type { IPublicClientApplication } from '@azure/msal-browser'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { lazy, useEffect, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { api, configureApi, get } from '@/lib/api'
 import { setDateContext } from '@/lib/format'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
+import { lazyImport } from '@/lib/lazy'
+const LandingPage = lazy(() => lazyImport(() => import('@/pages/Entrance').then(module => ({ default: module.LandingPage }))))
+const LoginPage = lazy(() => lazyImport(() => import('@/pages/Entrance').then(module => ({ default: module.LoginPage }))))
 import { configureClientErrorReporter, disableClientErrorReporter } from '@/lib/client-errors'
-import type { Perm } from '@/lib/types'
-import { LandingPage, LoginPage } from '@/pages/Entrance'
 
 // Entra uses PKCE through MSAL. The isolated review deployment uses individual
 // password accounts and an HttpOnly cookie until company identity is ready.
 
-export interface Me {
-  id: string
-  displayName: string
-  email: string
-  jobTitle?: string
-  officeId?: string
-  supervisorId?: string
-  isTemplateEditor: boolean
-  roles: { role: string; source: string }[]
-  systemRoles: string[]
-  capabilities: {
-    createProject: boolean; createTask: boolean; portfolio: boolean; workload: boolean; staff: boolean; allStaff: boolean
-    admin: boolean; templates: boolean; readOnly: boolean; directReports: number
-  }
-  settings: {
-    dateFormat: string; orgTimeZone: string; today: string; idleTimeoutHours: number; restrictedProjectsEnabled: boolean
-    allowSelfReview: boolean; taskDueSoonDays: number; milestoneApproachingDays: number; chainDepthLimit: number
-    defaultWeeklyCapacityHours: number; coordinationLookaheadWeeks: number; workingDaysEnabled: boolean; routeCounterEnabled?: boolean
-  }
-  preferences: { digestEnabled: boolean; digestTimeLocal?: string; denseRows: boolean; weeklySummaryEnabled: boolean }
-  flags?: Record<string, boolean>
-}
+export type { Me, Offer } from './auth-context'
+export { Ctx, useFlag, useMe, useAuth, useOffer } from './auth-context'
+import { Ctx, type Me } from './auth-context'
 
-interface AuthState { me: Me; signOut: () => void }
-const Ctx = createContext<AuthState | null>(null)
-export const useMe = () => useContext(Ctx)!.me
-/** §43.4 FR-DLV-08: a release toggle; a missing map or name is off. */
-export const useFlag = (name: string) => useMe().flags?.[name] === true
-export const useAuth = () => useContext(Ctx)!
-/** FR-FIG-09 (D5): how a control shows a server permission flag. Offered when the server allows it. Where the account or the
- *  project's status refuses it, the control stays visible, disabled, with the server's reason as its title, as it was offered
- *  before the flags; otherwise it is hidden. */
-export function useOffer() {
-  const readOnly = useMe().capabilities.readOnly
-  return (perm: Perm, status: string) => ({
-    shown: perm.ok || readOnly || ['Complete', 'Archived', 'Cancelled'].includes(status),
-    props: { disabled: !perm.ok, title: perm.ok ? undefined : perm.reason ?? undefined },
-  })
-}
-export type Offer = ReturnType<ReturnType<typeof useOffer>>
 
 const DEV_KEY = 'hub.devUser'
 const ACTIVITY_KEY = 'hub.lastActivity'
@@ -62,7 +27,7 @@ interface Config { authMode: 'Development' | 'LocalPassword' | 'Entra' | 'Social
 
 export function socialSignInError() {
   const reason = new URLSearchParams(window.location.search).get('authError')
-  return reason ? t(`auth.socialError.${['failed', 'profile', 'email_exists', 'connected', 'inactive'].includes(reason) ? reason : 'failed'}`) : ''
+  return reason ? runtimeText(`auth.socialError.${['failed', 'profile', 'email_exists', 'connected', 'inactive'].includes(reason) ? reason : 'failed'}`) : ''
 }
 
 let msal: IPublicClientApplication | null = null
@@ -97,6 +62,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
           return
         }
         if (!c.entra.clientId || !c.entra.tenantId || !c.entra.apiScope) throw new Error('Entra sign-in is not configured')
+        const { createStandardPublicClientApplication } = await lazyImport(() => import('@azure/msal-browser'))
         msal = await createStandardPublicClientApplication({
           auth: { clientId: c.entra.clientId!, authority: `https://login.microsoftonline.com/${c.entra.tenantId}`, redirectUri: window.location.origin },
           cache: { cacheLocation: 'sessionStorage' },

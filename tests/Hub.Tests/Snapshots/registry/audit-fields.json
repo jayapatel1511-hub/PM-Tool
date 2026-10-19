@@ -1,0 +1,787 @@
+{
+  "AllocationDayOverride": [
+    "AllocationId",
+    "WorkDate",
+    "Hours"
+  ],
+  "AllocationWorkLink": [
+    "AllocationId",
+    "PersonId",
+    "WorkType",
+    "WorkId",
+    "WorkDate",
+    "ReviewHours",
+    "ReleasedAt"
+  ],
+  "AppUser": [
+    "DisplayName",
+    "Email",
+    "JobTitle",
+    "OfficeId",
+    "SupervisorId",
+    "HomeDisciplineId",
+    "IsActive",
+    "WeeklyCapacityHours",
+    "IsTemplateEditor",
+    "HrSourceSystem",
+    "HrPersonKey"
+  ],
+  "ApprovedLeave": [
+    "PersonId",
+    "SourceSystem",
+    "ExternalId",
+    "SourceKind",
+    "Status",
+    "FromDate",
+    "ThroughDate",
+    "HoursPerDay",
+    "SourceUpdatedAt",
+    "ImportedAt"
+  ],
+  "BasisAssumptionDisposition": [
+    "VersionId",
+    "Scope",
+    "OwnerId",
+    "ApprovedBy",
+    "ExpiresOn",
+    "Reason"
+  ],
+  "BasisConflict": [
+    "LeftVersionId",
+    "RightVersionId",
+    "Resolved",
+    "ResolutionVersionId",
+    "ResolvedBy",
+    "ResolvedAt"
+  ],
+  "BasisImpactAssessment": [
+    "BasisUseId",
+    "OldVersionId",
+    "NewVersionId",
+    "WithdrawalVersionId",
+    "OwnerId",
+    "Status",
+    "Rationale",
+    "EvidenceUrl",
+    "DecidedBy",
+    "DecidedAt"
+  ],
+  "BasisUse": [
+    "VersionId",
+    "TargetType",
+    "TargetId",
+    "OwnerId",
+    "IntendedUse"
+  ],
+  "CalendarEvent": [
+    "ProjectId",
+    "Type",
+    "Title",
+    "StartAt",
+    "EndAt",
+    "OwnerId",
+    "Location",
+    "Description",
+    "Visibility",
+    "CancelledAt"
+  ],
+  "CalendarSubscription": [
+    "UserId"
+  ],
+  "ChangeAssessment": [
+    "ChangeNoticeId",
+    "TargetType",
+    "TargetId",
+    "OwnerId",
+    "ReviewerId",
+    "InputUseId",
+    "HandoffId",
+    "RevisionUsedId",
+    "Status",
+    "AcknowledgedAt",
+    "Rationale",
+    "EvidenceUrl",
+    "CorrectionTaskId",
+    "EffortImpactHours",
+    "DateImpactDays",
+    "RetainOldRevision",
+    "RetentionApprovedBy",
+    "RetentionReason",
+    "VerifiedBy",
+    "VerifiedAt"
+  ],
+  "ChangeNotice": [
+    "Title",
+    "OwnerId",
+    "ProjectDisciplineId",
+    "OldRevisionId",
+    "NewRevisionId",
+    "Description",
+    "Scope",
+    "EffectiveDate",
+    "AssessmentDueDate",
+    "Status",
+    "PublishedAt"
+  ],
+  "CheckEvidence": [
+    "CheckId",
+    "EvidenceUrl",
+    "Note"
+  ],
+  "Client": [
+    "Name",
+    "ShortName",
+    "IsActive",
+    "SortOrder"
+  ],
+  "Comment": [
+    "CommentKind",
+    "ReviewRound",
+    "DeletedAt"
+  ],
+  "Decision": [
+    "Subject",
+    "Description",
+    "OwnerUserId",
+    "OwnerExternalPartyId",
+    "RequiredByDate",
+    "ImpactLevel",
+    "ImpactDescription",
+    "Status",
+    "DecisionText",
+    "DecisionDate",
+    "DecidedById",
+    "DeferralReason",
+    "CancelledReason",
+    "DeletedAt"
+  ],
+  "Deliverable": [
+    "Name",
+    "ProjectDisciplineId",
+    "DeliverableTypeId",
+    "Description",
+    "OwnerId",
+    "ReviewerId",
+    "MilestoneId",
+    "StartDate",
+    "DueDate",
+    "Priority",
+    "Status",
+    "Revision",
+    "IssuedDate",
+    "IssuedTo",
+    "TransmittalUrl",
+    "AcceptedDate",
+    "OnHoldReason",
+    "CancelledReason",
+    "RequiresReview",
+    "RequiredReviewPackageId",
+    "StartedAt",
+    "DeletedAt"
+  ],
+  "DeliverableDependency": [
+    "PredecessorDeliverableId",
+    "SuccessorDeliverableId",
+    "DependencyType",
+    "LagDays",
+    "Note",
+    "DeletedAt"
+  ],
+  "DeliverableType": [
+    "Name",
+    "DefaultDisciplineId",
+    "IsActive",
+    "SortOrder"
+  ],
+  "DesignBasisEntry": [
+    "Kind",
+    "Title",
+    "OwnerId",
+    "ProjectDisciplineId",
+    "IndependentApproverId",
+    "CurrentVersionId"
+  ],
+  "DesignBasisVersion": [
+    "EntryId",
+    "Number",
+    "SupersedesVersionId",
+    "Status",
+    "Scope",
+    "Statement",
+    "NumericValue",
+    "Units",
+    "SourceSystem",
+    "StableSourceId",
+    "SourceUrl",
+    "DeclaredRevision",
+    "ConfirmationDueDate",
+    "DecisionId",
+    "ConfirmedBy",
+    "ConfirmedAt",
+    "ConfirmationRationale"
+  ],
+  "Discipline": [
+    "Name",
+    "Code",
+    "Colour",
+    "IsActive",
+    "SortOrder"
+  ],
+  "DisciplineReview": [
+    "RoundId",
+    "ProjectDisciplineId",
+    "ReviewerId",
+    "DueDate",
+    "Status",
+    "Rationale",
+    "DecidedAt",
+    "DecidedBy"
+  ],
+  "DocumentLink": [
+    "Title",
+    "Url",
+    "LinkType",
+    "DeletedAt"
+  ],
+  "ExternalParty": [
+    "Name",
+    "Organisation",
+    "Email",
+    "Role",
+    "IsClient",
+    "Notes",
+    "IsActive"
+  ],
+  "FindingEvent": [
+    "FindingId",
+    "Action",
+    "Reason",
+    "EvidenceUrl"
+  ],
+  "Handoff": [
+    "Title",
+    "SourceDeliverableId",
+    "SourceRowVersion",
+    "DeclaredRevision",
+    "SourceUrl",
+    "SendingDisciplineId",
+    "ReceivingDisciplineId",
+    "SendingOwnerId",
+    "ReceivingOwnerId",
+    "TargetTaskId",
+    "TargetDeliverableId",
+    "IntendedUse",
+    "AcceptanceCriteria",
+    "NeededBy",
+    "PromisedBy",
+    "Status",
+    "CurrentRevisionId",
+    "IncorporatedRevisionId",
+    "DeletedAt"
+  ],
+  "Holiday": [
+    "OfficeId",
+    "Date",
+    "Name"
+  ],
+  "InputAdoption": [
+    "InputUseId",
+    "SourceRevisionId",
+    "IntendedUse",
+    "Reason"
+  ],
+  "InputUse": [
+    "TargetType",
+    "TargetId",
+    "OwnerId",
+    "SourceIdentity",
+    "SourceRevisionId",
+    "IntendedUse",
+    "AdoptedAt",
+    "AdoptedBy"
+  ],
+  "Issue": [
+    "Title",
+    "Description",
+    "OwnerId",
+    "Severity",
+    "TargetResolutionDate",
+    "Resolution",
+    "ResolvedDate",
+    "Status",
+    "IssueType",
+    "OriginRiskId",
+    "ProjectDisciplineId",
+    "DeletedAt"
+  ],
+  "IssueAffectedDiscipline": [
+    "IssueId",
+    "ProjectDisciplineId"
+  ],
+  "IssueDocumentReference": [
+    "IssueId",
+    "Kind",
+    "Identifier",
+    "Revision",
+    "SourceUrl",
+    "SourceSystem",
+    "StableSourceId",
+    "ExternalTopicId",
+    "ModelElementGuid",
+    "ViewpointUrl",
+    "IsAvailable",
+    "ReplacedById"
+  ],
+  "IssueLocation": [
+    "IssueId",
+    "Kind",
+    "SiteArea",
+    "Building",
+    "Level",
+    "Room",
+    "AssetSystem",
+    "Alignment",
+    "StartStation",
+    "EndStation",
+    "StationUnits",
+    "CoordinateX",
+    "CoordinateY",
+    "CoordinateZ",
+    "CoordinateReferenceSystem",
+    "CoordinateUnits"
+  ],
+  "IssueReferenceImpactAssessment": [
+    "IssueId",
+    "DocumentReferenceId",
+    "PreviousRevisionId",
+    "CurrentRevisionId",
+    "OwnerId",
+    "VerifierId",
+    "Status",
+    "OwnerDisposition",
+    "OwnerReason",
+    "OwnerDecidedBy",
+    "OwnerDecidedAt",
+    "VerifierDisposition",
+    "VerifierReason",
+    "VerifierDecidedBy",
+    "VerifierDecidedAt"
+  ],
+  "IssueVerification": [
+    "IssueId",
+    "VerifierId",
+    "Status",
+    "EvidenceUrl",
+    "Note",
+    "VerifiedAt"
+  ],
+  "ItemLink": [
+    "TargetType",
+    "TargetId",
+    "Relation",
+    "DeletedAt"
+  ],
+  "LeaveImportState": [
+    "SourceSystem",
+    "ImportedAt",
+    "SourceUpdatedAt"
+  ],
+  "Meeting": [
+    "Title",
+    "MeetingDate",
+    "MeetingType",
+    "NotesLink",
+    "CalendarEventId",
+    "DeletedAt"
+  ],
+  "MeetingAction": [
+    "Text",
+    "OwnerType",
+    "OwnerUserId",
+    "OwnerDisciplineId",
+    "OwnerExternalPartyId",
+    "DueDate",
+    "Status",
+    "RelatedTaskId",
+    "RelatedDecisionId",
+    "DeletedAt"
+  ],
+  "Milestone": [
+    "Name",
+    "MilestoneType",
+    "Date",
+    "Description",
+    "ProjectDisciplineId",
+    "CompletesPhaseId",
+    "IsClientFacing",
+    "IsComplete",
+    "CompletedDate",
+    "IsCancelled",
+    "CancelledReason",
+    "DeletedAt"
+  ],
+  "Office": [
+    "Name",
+    "Code",
+    "TimeZone",
+    "IsActive",
+    "SortOrder"
+  ],
+  "OpenRole": [
+    "RoleLabel",
+    "ProjectDisciplineId",
+    "FromDate",
+    "ThroughDate",
+    "PlannedHours",
+    "Status",
+    "FilledAllocationId",
+    "Note",
+    "DeletedAt"
+  ],
+  "OrgSetting": [
+    "Value"
+  ],
+  "OutputCommitment": [
+    "SnapshotId",
+    "TargetType",
+    "TargetId",
+    "PerformerId",
+    "IntendedOutput",
+    "CompletionCriteria",
+    "TargetDate",
+    "WeekStart",
+    "ReadinessAtCommit",
+    "State",
+    "CompletionEvidenceUrl"
+  ],
+  "OutputCommitmentEvent": [
+    "CommitmentId",
+    "FromState",
+    "ToState",
+    "Reason",
+    "EvidenceUrl",
+    "ActorId"
+  ],
+  "PersonAvailabilityOverride": [
+    "PersonId",
+    "WorkDate",
+    "AvailableHours",
+    "Category",
+    "ReconciledLeaveId"
+  ],
+  "PersonSchedule": [
+    "PersonId",
+    "FromDate",
+    "WeeklyHours",
+    "WorkingDays"
+  ],
+  "Phase": [
+    "Name",
+    "IsActive",
+    "SortOrder"
+  ],
+  "PlanningEntry": [
+    "PersonId",
+    "HoursPerWeek",
+    "StartWeek",
+    "EndWeek",
+    "Label",
+    "SourceCategory",
+    "ProjectId",
+    "ProjectDisciplineId",
+    "Confidence",
+    "Visibility",
+    "Notes",
+    "LastValidatedAt",
+    "DeletedAt"
+  ],
+  "Project": [
+    "ProjectNumber",
+    "Name",
+    "ClientId",
+    "ClientReference",
+    "ProjectManagerId",
+    "OfficeId",
+    "ProjectTypeId",
+    "Description",
+    "Location",
+    "Status",
+    "PhaseId",
+    "StartDate",
+    "TargetCompletionDate",
+    "Priority",
+    "Visibility",
+    "InternalNotes",
+    "CoordinationDay",
+    "AllowViewerComments",
+    "HealthOverride",
+    "HealthOverrideNote",
+    "HealthOverrideExpiresAt",
+    "LastCoordinationReviewedAt"
+  ],
+  "ProjectDiscipline": [
+    "DisciplineId",
+    "LeadUserId",
+    "IsActive",
+    "SortOrder"
+  ],
+  "ProjectMember": [
+    "UserId",
+    "Roles",
+    "PrimaryDisciplineId",
+    "RemovedAt"
+  ],
+  "ProjectTemplate": [
+    "Name",
+    "Description",
+    "ProjectTypeId",
+    "Version",
+    "Status"
+  ],
+  "ProjectType": [
+    "Name",
+    "IsActive",
+    "SortOrder"
+  ],
+  "ReadinessAssessment": [
+    "TargetType",
+    "TargetId",
+    "OwnerId",
+    "IntendedOutput",
+    "CompletionCriteria",
+    "State"
+  ],
+  "ReadinessCheckRecord": [
+    "AssessmentId",
+    "Code",
+    "Applies",
+    "Satisfied",
+    "Reason",
+    "EvidenceUrl",
+    "RecordedBy"
+  ],
+  "ReadinessException": [
+    "AssessmentId",
+    "BasisVersionId",
+    "ApprovedBy",
+    "VerifierId",
+    "LimitedWork",
+    "Risk",
+    "ExpiresOn"
+  ],
+  "ReadinessSubmissionPrerequisite": [
+    "TargetType",
+    "TargetId",
+    "PackageId",
+    "Reason",
+    "RemovedAt",
+    "RemovedBy",
+    "RemovalReason"
+  ],
+  "ResourceAllocation": [
+    "PersonId",
+    "Purpose",
+    "FromDate",
+    "ThroughDate",
+    "PlannedHours",
+    "Status",
+    "ConfirmedBy",
+    "ConfirmedAt"
+  ],
+  "ReviewFinding": [
+    "PackageId",
+    "RoundId",
+    "CarriedFromId",
+    "IssueId",
+    "SourceRevisionId",
+    "ProjectDisciplineId",
+    "OriginatorId",
+    "ResolverId",
+    "VerifierId",
+    "Text",
+    "Severity",
+    "Status",
+    "Response",
+    "EvidenceUrl",
+    "WithdrawalAcknowledgedBy"
+  ],
+  "ReviewManifestItem": [
+    "RoundId",
+    "SourceRevisionId",
+    "DeliverableId",
+    "AuthorIds"
+  ],
+  "ReviewPackage": [
+    "Title",
+    "Purpose",
+    "CoordinatorId",
+    "ProjectDisciplineId",
+    "Status",
+    "CurrentRoundId",
+    "RoundNumber",
+    "RequiredForIssue"
+  ],
+  "ReviewRound": [
+    "PackageId",
+    "Number",
+    "Purpose",
+    "Reason",
+    "RemovalImpact",
+    "StartedAt",
+    "Status"
+  ],
+  "Risk": [
+    "Title",
+    "Description",
+    "OwnerId",
+    "Probability",
+    "Impact",
+    "Mitigation",
+    "TriggerIndicator",
+    "ReviewDate",
+    "Status",
+    "RealisedIssueId",
+    "ProjectDisciplineId",
+    "DeletedAt"
+  ],
+  "SourceHead": [
+    "Identity",
+    "CurrentRevisionId",
+    "OwnerId",
+    "ProjectDisciplineId"
+  ],
+  "SourceRevision": [
+    "DeliverableId",
+    "SourceRowVersion",
+    "SourceKey",
+    "Title",
+    "Revision",
+    "Url",
+    "SourceIdentity",
+    "SourceSystem",
+    "ExternalIdentifier",
+    "Issuer",
+    "Scope",
+    "SourceCheckedAt",
+    "SupersedesId",
+    "AuthorIds"
+  ],
+  "SubmissionCheck": [
+    "PackageId",
+    "ManifestVersion",
+    "Kind",
+    "SourceId",
+    "ProjectDisciplineId",
+    "OwnerId",
+    "Required",
+    "Status",
+    "EvidenceRule",
+    "EvidenceUrl",
+    "Reason",
+    "ApprovedBy",
+    "ApprovedAt"
+  ],
+  "SubmissionIssue": [
+    "PackageId",
+    "ManifestVersion",
+    "AuthorisedBy",
+    "AuthorisedAt",
+    "Destination",
+    "TransmittalUrl"
+  ],
+  "SubmissionManifestItem": [
+    "PackageId",
+    "ManifestVersion",
+    "DeliverableId",
+    "SourceRevisionId",
+    "ReviewRoundId",
+    "Required"
+  ],
+  "SubmissionPackage": [
+    "Title",
+    "Purpose",
+    "RecipientReference",
+    "CoordinatorId",
+    "MilestoneId",
+    "TargetDate",
+    "Status",
+    "ManifestVersion",
+    "SupersedesPackageId"
+  ],
+  "TaskDependency": [
+    "PredecessorTaskId",
+    "SuccessorTaskId",
+    "DependencyType",
+    "LagDays",
+    "Note",
+    "DeletedAt"
+  ],
+  "TaskStartAuthorisation": [
+    "TaskId",
+    "AuthorisedBy",
+    "Reason",
+    "ReadinessAtAuthorisation",
+    "Unknown",
+    "Blocked",
+    "StartedBy",
+    "StartedAt"
+  ],
+  "TaskTimeEntry": [
+    "TaskId",
+    "UserId",
+    "WorkDate",
+    "Hours",
+    "Note",
+    "DeletedAt"
+  ],
+  "UserSystemRole": [
+    "UserId",
+    "Role",
+    "Source"
+  ],
+  "WeeklyPlanSnapshot": [
+    "WeekStart",
+    "CapturedAt",
+    "CapturedBy",
+    "CommittedCount"
+  ],
+  "WorkConstraint": [
+    "TargetType",
+    "TargetId",
+    "Category",
+    "Description",
+    "RemovalOwnerId",
+    "AffectedOwnerId",
+    "NeededBy",
+    "SourceUrl",
+    "State",
+    "ResolutionEvidenceUrl",
+    "VerifiedBy",
+    "VerifiedAt",
+    "LinkedType",
+    "LinkedId"
+  ],
+  "WorkTask": [
+    "Name",
+    "Description",
+    "ProjectDisciplineId",
+    "DeliverableId",
+    "MilestoneId",
+    "AssigneeId",
+    "ReviewerId",
+    "RequiresReview",
+    "Priority",
+    "StartDate",
+    "DueDate",
+    "Status",
+    "ProgressPct",
+    "EstimatedHours",
+    "ManualBlockType",
+    "ManualBlockReason",
+    "OnHoldReason",
+    "CancelledReason",
+    "ReviewRound",
+    "StartedAt",
+    "DeletedAt"
+  ]
+}

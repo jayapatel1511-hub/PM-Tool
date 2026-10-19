@@ -1,4 +1,4 @@
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 
 export type PlannerEntry = {
   id: string; personId: string; personName?: string; ownerId?: string; ownerName?: string; ownerKind?: string
@@ -37,13 +37,13 @@ export const APPROVAL_KEYS: Record<string, string> = { Confirmed: 'planner.appro
 export const SOURCE_TONES: Record<string, string> = { MajorProject: 'blue', OtherProject: 'mint', Proposal: 'lavender', BusinessDevelopment: 'neutral', Admin: 'amber', Supervision: 'neutral', Training: 'peach', InternalInitiative: 'neutral', FieldWork: 'neutral', Other: 'neutral' }
 export const SOURCE_KEYS: Record<string, string> = { MajorProject: 'planner.source.majorProject', OtherProject: 'planner.source.otherProject', Proposal: 'planner.source.proposal', BusinessDevelopment: 'planner.source.businessDevelopment', Admin: 'planner.source.admin', Supervision: 'planner.source.supervision', Training: 'planner.source.training', InternalInitiative: 'planner.source.internalInitiative', FieldWork: 'planner.source.fieldWork', Other: 'planner.source.other' }
 
-export const confidenceLabel = (value: string) => t(CONFIDENCE_KEYS[value] ?? 'planner.unknown')
-export const visibilityLabel = (value: string, self = false) => t(VISIBILITY_KEYS[self ? 'Self' : value] ?? 'planner.unknown')
-export const approvalLabel = (value: string) => t(APPROVAL_KEYS[value] ?? 'planner.unknown')
+export const confidenceLabel = (value: string) => runtimeText(CONFIDENCE_KEYS[value] ?? 'planner.unknown')
+export const visibilityLabel = (value: string, self = false) => runtimeText(VISIBILITY_KEYS[self ? 'Self' : value] ?? 'planner.unknown')
+export const approvalLabel = (value: string) => runtimeText(APPROVAL_KEYS[value] ?? 'planner.unknown')
 export const SOURCE_OPTIONS = Object.keys(SOURCE_KEYS)
-export const sourceLabel = (value: string) => t(SOURCE_KEYS[value] ?? 'planner.source.other')
+export const sourceLabel = (value: string) => runtimeText(SOURCE_KEYS[value] ?? 'planner.source.other')
 export const sourceTone = (value: string) => SOURCE_TONES[value] ?? 'neutral'
-export const indicatorLabel = (value: string) => t(({ OverPlanned: 'planner.indicator.over', UnderPlanned: 'planner.indicator.under', StalePlan: 'planner.indicator.stale' } as Record<string, string>)[value] ?? 'planner.unknown')
+export const indicatorLabel = (value: string) => runtimeText(({ OverPlanned: 'planner.indicator.over', UnderPlanned: 'planner.indicator.under', StalePlan: 'planner.indicator.stale' } as Record<string, string>)[value] ?? 'planner.unknown')
 export const hoursLabel = (value: number) => `${value.toFixed(1).replace(/\.0$/, '')} h`
 export const storedStatusLabel = (value: string) => tv(value)
 

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useReference } from '@/hooks/data'
 import { ApiError, post } from '@/lib/api'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 export interface DisciplinePick { disciplineId: string; leadUserId: string | null; leadName?: string }
@@ -20,12 +20,9 @@ interface MemberPick { userId: string; name: string; roles: string[]; discipline
 
 /** Extra first-step sources contributed by later packets (copy a project's structure, start from a template). */
 /** What a source can see and change in the dialog: the first step's fields and the chosen disciplines. */
+export { CREATE_SOURCES } from '@/app/extension-slots'
+import { CREATE_SOURCES } from '@/app/extension-slots'
 export interface CreateContext { form: Record<string, string>; disciplines: DisciplinePick[]; setDisciplines: (d: DisciplinePick[]) => void }
-export const CREATE_SOURCES: {
-  id: string; label: string; render: (v: any, set: (v: any) => void, ctx: CreateContext) => React.ReactNode; body: (v: any) => Record<string, unknown>
-  /** Shown on the last step, before Create (packet 012: what a template will create). */
-  summary?: (v: any, ctx: CreateContext) => React.ReactNode
-}[] = []
 
 /** Two-step create dialog: identity, then team and disciplines (§12.1 UI behaviour, Workflow 1). Creating projects is
  *  desktop/tablet only (§13.0), so phones get a notice instead of the form. */
@@ -105,12 +102,12 @@ export function CreateProjectDialog({ onClose }: { onClose: () => void }) {
               <Field label={t('field.StartDate')} htmlFor="p-start" optional><Input id="p-start" type="date" value={v('startDate')} onChange={set('startDate')} /></Field>
               <Field label={t('field.TargetCompletionDate')} htmlFor="p-target" optional><Input id="p-target" type="date" value={v('targetCompletionDate')} onChange={set('targetCompletionDate')} /></Field>
               <Field label={t('common.priority')} htmlFor="p-prio">
-                <select id="p-prio" className={selectCls} value={v('priority')} onChange={set('priority')}>{['Low', 'Medium', 'High', 'Critical'].map((p) => <option key={p} value={p}>{t(`value.${p}`)}</option>)}</select>
+                <select id="p-prio" className={selectCls} value={v('priority')} onChange={set('priority')}>{(['Low', 'Medium', 'High', 'Critical'] as const).map((p) => <option key={p} value={p}>{t(`value.${p}`)}</option>)}</select>
               </Field>
               <Field label={t('field.CoordinationDay')} htmlFor="p-day">
                 <select id="p-day" className={selectCls} value={v('coordinationDay')} onChange={set('coordinationDay')}>
                   <option value="">{t('projects.mondayDefault')}</option>
-                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((d) => <option key={d} value={d}>{t(`day.${d}`)}</option>)}
+                  {(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] as const).map((d) => <option key={d} value={d}>{t(`day.${d}`)}</option>)}
                 </select>
               </Field>
               <Field label={t('field.Location')} htmlFor="p-loc" optional className="sm:col-span-2"><Input id="p-loc" value={v('location')} onChange={set('location')} /></Field>
@@ -156,7 +153,7 @@ export function CreateProjectDialog({ onClose }: { onClose: () => void }) {
                         <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
                           {['PM', 'TeamMember', 'Reviewer', 'Viewer'].map((r) => (
                             <label key={r} className="flex min-h-6 items-center gap-1.5">
-                              <Checkbox aria-label={`${t(`role.${r}`)} — ${m.name}`} checked={m.roles.includes(r)} onCheckedChange={(c) => setMembers(members.map((x) => x.userId === m.userId ? { ...x, roles: c ? [...x.roles, r] : x.roles.filter((y) => y !== r) } : x))} />{t(`role.${r}`)}
+                              <Checkbox aria-label={`${runtimeText(`role.${r}`)} — ${m.name}`} checked={m.roles.includes(r)} onCheckedChange={(c) => setMembers(members.map((x) => x.userId === m.userId ? { ...x, roles: c ? [...x.roles, r] : x.roles.filter((y) => y !== r) } : x))} />{runtimeText(`role.${r}`)}
                             </label>
                           ))}
                         </span>

@@ -8,14 +8,14 @@ import { HealthPill, Key, StatusPill } from '@/components/hub/pills'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { del, get, post } from '@/lib/api'
 import { fmtDate, relative } from '@/lib/format'
-import { plural, t } from '@/lib/i18n'
+import { plural, t , runtimeText } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { accentOf, cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useMe, type Me } from '@/lib/auth'
+import { useMe, type Me } from '@/lib/auth-context'
 import { ProjectSlots } from './slots'
 import { PickerProject } from '@/components/hub/people'
 
@@ -76,19 +76,19 @@ function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
   return (
     <div className="no-print flex min-w-0 flex-wrap items-center gap-x-6 border-b bg-card px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8">
       <nav aria-label={t('ptab.label')} className="flex min-w-0 flex-wrap items-center gap-1">
-        {groups.map((g) => <Link key={g.id} to={to(g.pages[0])} aria-current={g === current ? (g.pages[0].path === segment ? 'page' : 'true') : undefined} className={tab(g === current)}>{t(g.label)}</Link>)}
+        {groups.map((g) => <Link key={g.id} to={to(g.pages[0])} aria-current={g === current ? (g.pages[0].path === segment ? 'page' : 'true') : undefined} className={tab(g === current)}>{runtimeText(g.label)}</Link>)}
         {more.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className={cn(tab(!!moreActive), 'gap-1')}>{moreActive ? t(moreActive.label) : t('calm.more')}<ChevronDown className="size-4" aria-hidden /></DropdownMenuTrigger>
+            <DropdownMenuTrigger className={cn(tab(!!moreActive), 'gap-1')}>{moreActive ? runtimeText(moreActive.label) : t('calm.more')}<ChevronDown className="size-4" aria-hidden /></DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              {more.map((x) => <DropdownMenuItem key={x.label} asChild><Link to={to(x)} aria-current={x === moreActive ? 'page' : undefined}>{t(x.label)}</Link></DropdownMenuItem>)}
+              {more.map((x) => <DropdownMenuItem key={x.label} asChild><Link to={to(x)} aria-current={x === moreActive ? 'page' : undefined}>{runtimeText(x.label)}</Link></DropdownMenuItem>)}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
       </nav>
       {current && current.pages.length > 1 && (
-        <nav aria-label={t('calm.groupPages', { group: t(current.label) })} className="flex min-w-0 flex-wrap gap-0.5 py-1.5">
-          {current.pages.map((x) => <NavLink key={x.label} to={to(x)} className={({ isActive }) => cn('inline-flex min-h-8 items-center rounded-md px-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', isActive && 'bg-muted font-semibold text-foreground')}>{t(x.label)}</NavLink>)}
+        <nav aria-label={t('calm.groupPages', { group: runtimeText(current.label) })} className="flex min-w-0 flex-wrap gap-0.5 py-1.5">
+          {current.pages.map((x) => <NavLink key={x.label} to={to(x)} className={({ isActive }) => cn('inline-flex min-h-8 items-center rounded-md px-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', isActive && 'bg-muted font-semibold text-foreground')}>{runtimeText(x.label)}</NavLink>)}
         </nav>
       )}
     </div>

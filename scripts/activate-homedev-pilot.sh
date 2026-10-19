@@ -164,7 +164,7 @@ volume="$(inspect '{{ range .Mounts }}{{ if eq .Name "pm-tool-pilot-db" }}{{ .Na
 seed_counts="$("${compose_cmd[@]}" exec -T db psql -U hub_pilot -d hub_pilot -Atc "SELECT (SELECT count(*) FROM hub.app_user WHERE email LIKE '%@hub.test') || ':' || (SELECT count(*) FROM hub.project WHERE external_source = 'ReviewDemo')" </dev/null | tr -d '[:space:]')"
 [[ "$seed_counts" == 0:0 ]] || fail "review seed records found: $seed_counts"
 
-verify=(python3 "$expected/scripts/verify-homedev-pilot.py" http://127.0.0.1:3081)
+verify=(python3 "$expected/scripts/verify-homedev-pilot.py" http://127.0.0.1:3081 --expect-build "$release_sha")
 [[ -n "$verify_file" ]] && verify+=(--credentials-file "$verify_file")
 "${verify[@]}"
 

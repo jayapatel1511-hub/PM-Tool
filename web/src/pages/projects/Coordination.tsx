@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { get, post, qs } from '@/lib/api'
 import { fmtDate, fmtTime, relative, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn, type Accent } from '@/lib/utils'
 import { RecordDecisionDialog } from './Decisions'
 import type { DeliverableRow } from './Deliverables'
@@ -330,7 +330,7 @@ function daysSince(ts?: string) {
 export function summaryText(number: string, name: string, c: Coord) {
   const lines = [`${number} ${name} — ${t('ptab.coordination')} ${fmtDate(today())}`, '']
   const h = c.headline
-  lines.push(`${t('wc.s.headline')}: ${t(`health.${h.computedHealth ?? 'Grey'}`)} · ${t('wc.overdueN', { n: h.overdueTasks.value })} · ${t('wc.blockedN', { n: h.blockedTasks.value })} · ${t('wc.decisionsOverdueN', { n: h.decisionsOverdue })} · ${t('wc.atRiskN', { n: h.deliverablesAtRisk.value })}`)
+  lines.push(`${t('wc.s.headline')}: ${runtimeText(`health.${h.computedHealth ?? 'Grey'}`)} · ${t('wc.overdueN', { n: h.overdueTasks.value })} · ${t('wc.blockedN', { n: h.blockedTasks.value })} · ${t('wc.decisionsOverdueN', { n: h.decisionsOverdue })} · ${t('wc.atRiskN', { n: h.deliverablesAtRisk.value })}`)
   if (h.nextMilestone) lines.push(`${t('dash.nextMilestone')}: ${h.nextMilestone.key} ${h.nextMilestone.name} ${fmtDate(h.nextMilestone.date)} (${relative(h.nextMilestone.date)})`)
   const block = (title: string, rows: string[]) => { lines.push('', title); lines.push(...(rows.length ? rows.map((r) => `- ${r}`) : [`- ${t('wc.nothing')}`])) }
   block(t('wc.s.milestones'), c.milestones.map((m) => `${m.key} ${m.name} — ${fmtDate(m.date)} (${relative(m.date)}) — ${tv(m.status ?? '')} — ${t('wc.prereqs', { issued: m.deliverableIssued, total: m.deliverableTotal, done: m.taskComplete, tasks: m.taskTotal })}`))

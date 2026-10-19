@@ -5,7 +5,6 @@ import {
 import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ShellSlots } from '@/app/slots'
 import { ConfirmDialog, Field, Notice, Spinner, selectCls } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -13,8 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { ApiError, del, get, patch, post } from '@/lib/api'
-import { useMe, type Me } from '@/lib/auth'
-import { plural, t } from '@/lib/i18n'
+import { useMe, type Me } from '@/lib/auth-context'
+import { plural, t , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ProjectsPicker } from '@/pages/Reports'
@@ -135,7 +134,7 @@ async function share(scope: Scope) {
 
 type Mode = { mode: 'choose' | 'new' } | { mode: 'edit'; ws: WorkspaceRow }
 
-function WorkspaceSelector() {
+export function WorkspaceSelector() {
   const scope = useScope()
   const list = useWorkspaces()
   const setScope = useSetScope()
@@ -225,7 +224,6 @@ function WorkspaceDialog({ m, initial, onClose }: { m: Mode; initial: string[] |
   )
 }
 
-ShellSlots.Workspace = WorkspaceSelector
 
 // ---------- View tabs (FR-VIS-01) ----------
 
@@ -256,7 +254,7 @@ export function WorkspaceTabs() {
       {/* Phones get one select instead of nine tabs over three rows; the plus menu and share stay beside it. */}
       <label className="flex min-h-11 items-center gap-2 py-1 text-sm md:hidden"><span className="sr-only">{t('wsview.label')}</span>
         <select className={selectCls} value={views.some((v) => v.path === pathname) ? pathname : ''} onChange={(e) => navigate({ pathname: e.target.value, search })}>
-          {views.map((v) => <option key={v.id} value={v.path}>{t(v.label)}</option>)}
+          {views.map((v) => <option key={v.id} value={v.path}>{runtimeText(v.label)}</option>)}
         </select></label>
       <nav aria-label={t('wsview.label')} className="hidden flex-wrap items-center md:flex">
         {views.map((v) => {
@@ -264,7 +262,7 @@ export function WorkspaceTabs() {
           return (
             <Link key={v.id} to={{ pathname: v.path, search }} aria-current={on ? 'page' : undefined}
               className={cn('inline-flex min-h-11 items-center gap-1.5 px-3 text-sm outline-offset-[-2px]', on ? 'font-semibold text-foreground shadow-[inset_0_-2px_0_var(--primary)]' : 'text-muted-foreground shadow-none hover:bg-muted hover:text-foreground')}>
-              <v.icon className="size-4" aria-hidden />{t(v.label)}
+              <v.icon className="size-4" aria-hidden />{runtimeText(v.label)}
             </Link>
           )
         })}
@@ -274,7 +272,7 @@ export function WorkspaceTabs() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
             <DropdownMenuLabel>{t('wsview.switcher')}</DropdownMenuLabel>
-            {views.map((v) => <DropdownMenuItem key={v.id} asChild><Link to={{ pathname: v.path, search }}><v.icon className="size-4" />{t(v.label)}</Link></DropdownMenuItem>)}
+            {views.map((v) => <DropdownMenuItem key={v.id} asChild><Link to={{ pathname: v.path, search }}><v.icon className="size-4" />{runtimeText(v.label)}</Link></DropdownMenuItem>)}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild><Link to={{ pathname: '/my-work', search }}>{t('nav.myWork')}</Link></DropdownMenuItem>
             <DropdownMenuItem asChild><Link to="/projects">{t('nav.projects')}</Link></DropdownMenuItem>

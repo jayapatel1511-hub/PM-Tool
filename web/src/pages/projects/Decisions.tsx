@@ -1,3 +1,4 @@
+import { usePageMode } from '@/hooks/page-mode'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Building2, Check, ChevronDown, ChevronRight, Download, Lock, Plus, Scale, Trash2, Users, X } from 'lucide-react'
@@ -6,7 +7,7 @@ import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Segmented, Spinner, TableRegion, selectCls } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineDate, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
-import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
+import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
 import { Chip, Key, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -17,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh } from '@/hooks/data'
 import { ApiError, del, download, get, patch, post, qs } from '@/lib/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf, ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import type { MilestoneRow } from './Milestones'
@@ -59,7 +60,6 @@ const useParties = (projectId: string) => useQuery({ queryKey: ['p', projectId, 
 function Impact({ level }: { level: string }) {
   return <Chip tone={IMPACT_TONE[level as keyof typeof IMPACT_TONE] ?? 'idle'}>{tv(level)}</Chip>
 }
-
 /** Owner with external parties set apart by icon and organisation (§13.8 UX). */
 function Owner({ d }: { d: DecisionRow }) {
   if (!d.ownerExternalPartyId) return <Person id={d.ownerUserId} name={d.ownerName} />
@@ -71,14 +71,12 @@ function Owner({ d }: { d: DecisionRow }) {
     </span>
   )
 }
-
 function Due({ d }: { d: DecisionRow }) {
   if (d.isOverdue) return <Chip tone="bad">{t('ind.overdueD', { n: d.daysOverdue })}</Chip>
   if (d.daysUntil == null) return <Missing />
   const text = d.daysUntil === 0 ? t('common.today') : d.daysUntil < 0 ? t('ind.overdueD', { n: -d.daysUntil }) : t('decision.inDays', { n: d.daysUntil })
   return d.isDueSoon ? <Chip tone="warn">{text}</Chip> : <span className="tabular-nums">{text}</span>
 }
-
 function Blocking({ d }: { d: DecisionRow }) {
   if (!d.blockingTaskIds.length) return <span className="text-muted-foreground">{t('common.dash')}</span>
   return <Link to={`../tasks?ids=${d.blockingTaskIds.join(',')}`} relative="path" className="inline-flex items-center gap-1 font-medium text-bad underline underline-offset-4">
@@ -123,18 +121,18 @@ export function DecisionsTab() {
   const toggle = (id: string) => { const n = new Set(open); if (n.has(id)) n.delete(id); else n.add(id); setOpen(n) }
   const active = FILTERS.some((k) => sp.has(k))
   const clear = () => { const n = new URLSearchParams(sp); FILTERS.forEach((k) => n.delete(k)); setSp(n, { replace: true }) }
-  const view = sp.get('view') === 'log' ? 'log' : 'register'
+  const view = usePageMode('tab', ['log'], 'register')
   // Active filters as removable tokens (§13.0 Filters), including those that arrive by link (indicator).
   const tokens = [
     filters.q && { key: 'q', label: t('common.search'), value: filters.q },
     filters.status && { key: 'status', label: t('common.status'), value: filters.status === OPEN ? t('decision.openStatuses') : tv(filters.status) },
-    filters.ownerType && { key: 'ownerType', label: t('decision.ownerType'), value: t(`decision.ownerType.${filters.ownerType}`) },
+    filters.ownerType && { key: 'ownerType', label: t('decision.ownerType'), value: runtimeText(`decision.ownerType.${filters.ownerType}`) },
     filters.ownerId && { key: 'ownerId', label: t('common.owner'), value: owners.find(([id]) => id === filters.ownerId)?.[1] ?? <Missing /> },
     filters.impact && { key: 'impact', label: t('decision.impact'), value: tv(filters.impact) },
     filters.requiredFrom && { key: 'requiredFrom', label: t('decision.requiredFrom'), value: fmtDate(filters.requiredFrom) },
     filters.requiredTo && { key: 'requiredTo', label: t('decision.requiredTo'), value: fmtDate(filters.requiredTo) },
     filters.blocking && { key: 'blocking', label: t('decision.blockingWork'), value: filters.blocking === 'true' ? t('common.yes') : t('common.no') },
-    filters.indicator && { key: 'indicator', label: t('deliverable.indicator'), value: t(`decision.ind.${filters.indicator}`) },
+    filters.indicator && { key: 'indicator', label: t('deliverable.indicator'), value: runtimeText(`decision.ind.${filters.indicator}`) },
   ].filter(Boolean) as { key: string; label: string; value: ReactNode }[]
   return (
     <Page title={t('ptab.decisions')} subtitle={t('decision.subtitle')}
@@ -146,7 +144,7 @@ export function DecisionsTab() {
         {can.ok && <Button onClick={() => setDialog('new')}><Plus className="size-4" />{t('decision.new')}</Button>}
       </>}>
       {!can.ok && can.reason && <Notice icon={Lock} title={can.reason} />}
-      <div><Segmented label={t('decision.view')} value={view} onChange={(v) => set('view', v === 'log' ? v : null)}
+      <div><Segmented label={t('decision.view')} value={view} onChange={(v) => set('tab', v === 'log' ? v : null)}
         options={(['register', 'log'] as const).map((v) => ({ value: v, label: t(`decision.view.${v}`) }))} /></div>
       {view === 'log' ? <DecisionLog projectId={p.id} /> : <>
       <FilterBar activeCount={tokens.length}
@@ -166,7 +164,7 @@ export function DecisionsTab() {
           </Field>
           <Field label={t('decision.ownerType')} htmlFor="decision-owner-type" className="w-full sm:w-44">
             <select id="decision-owner-type" className={selectCls} value={filters.ownerType ?? ''} onChange={(e) => set('ownerType', e.target.value)}>
-              <option value="">{t('decision.anyOwnerType')}</option>{['internal', 'external', 'client'].map((x) => <option key={x} value={x}>{t(`decision.ownerType.${x}`)}</option>)}
+              <option value="">{t('decision.anyOwnerType')}</option>{['internal', 'external', 'client'].map((x) => <option key={x} value={x}>{runtimeText(`decision.ownerType.${x}`)}</option>)}
             </select>
           </Field>
           <Field label={t('common.owner')} htmlFor="decision-owner" className="w-full sm:w-48">
@@ -222,7 +220,6 @@ export function DecisionsTab() {
     </Page>
   )
 }
-
 interface LogEntry {
   decisionId: string; itemKey: string; subject: string; kind: string; occurredAt: string; recordedBy?: string; owner?: string
   text?: string; decisionDate?: string; newRequiredBy?: string
@@ -291,7 +288,6 @@ function ClientExportDialog({ p, onClose }: { p: ProjectDetail; onClose: () => v
     </Dialog>
   )
 }
-
 function useDecision(id: string) {
   return useQuery({ queryKey: ['decision', id], queryFn: () => get<DecisionDetail>(`decisions/${id}`) })
 }
@@ -309,7 +305,7 @@ function LinkedItems({ id, canRemove }: { id: string; canRemove?: boolean }) {
       <tbody>
         {links.map((l) => (
           <tr key={l.id} className="border-b last:border-0">
-            <td className="py-1.5 pr-3 text-xs/[18px] text-muted-foreground">{t(`decision.rel.${l.relation}`)}</td>
+            <td className="py-1.5 pr-3 text-xs/[18px] text-muted-foreground">{runtimeText(`decision.rel.${l.relation}`)}</td>
             <td className="whitespace-nowrap py-1.5 pr-3"><Key>{l.key}</Key></td>
             <td className="py-1.5 pr-3"><button className="break-words text-left hover:underline" onClick={() => openPanel(l.targetType, l.targetId)}>{l.name}</button></td>
             <td className="py-1.5 pr-3">{l.status && <StatusPill status={l.status} />}</td>
@@ -537,7 +533,7 @@ const STEP_LABEL: Record<string, string> = { Decided: 'decision.record', Deferre
 
 // ---------- Decision panel ----------
 
-function DecisionPanel({ id }: PanelProps) {
+export function DecisionPanel({ id }: PanelProps) {
   const q = useDecision(id)
   const done = useDecisionRefresh()
   const parties = useParties(q.data?.project.id ?? '')
@@ -567,7 +563,7 @@ function DecisionPanel({ id }: PanelProps) {
         <div className="flex flex-wrap gap-2">
           {perm.transitions.map((s) => (
             <Button key={s.to} size="sm" variant={s.to === 'Decided' ? 'default' : 'outline'} disabled={!s.ok} title={s.reason ?? undefined} onClick={() => quick(s)}>
-              {t(s.to === 'Pending' && d.status === 'Decided' ? 'decision.reopen' : STEP_LABEL[s.to])}
+              {runtimeText(s.to === 'Pending' && d.status === 'Decided' ? 'decision.reopen' : STEP_LABEL[s.to])}
             </Button>
           ))}
         </div>
@@ -729,7 +725,7 @@ function PartiesDialog({ p, onClose }: { p: ProjectDetail; onClose: () => void }
           <div className="scroll-region max-h-80 overflow-y-auto rounded-md border">
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-muted text-left text-muted-foreground"><tr>
-                {['common.name', 'party.organisation', 'party.role', 'party.email'].map((h) => <th key={h} scope="col" className="px-3 py-2 font-medium">{t(h)}</th>)}
+                {['common.name', 'party.organisation', 'party.role', 'party.email'].map((h) => <th key={h} scope="col" className="px-3 py-2 font-medium">{runtimeText(h)}</th>)}
                 <th scope="col"><span className="sr-only">{t('common.actions')}</span></th>
               </tr></thead>
               <tbody>{q.data.map((x) => (
@@ -750,5 +746,3 @@ function PartiesDialog({ p, onClose }: { p: ProjectDetail; onClose: () => void }
     </Dialog>
   )
 }
-
-PANELS.Decision = { component: DecisionPanel }

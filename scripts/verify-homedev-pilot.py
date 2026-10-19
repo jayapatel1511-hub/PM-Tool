@@ -65,6 +65,7 @@ def run(argv, call_fn=call):
     parser = argparse.ArgumentParser()
     parser.add_argument("base_url", nargs="?", default=LOOPBACK)
     parser.add_argument("--credentials-file")
+    parser.add_argument("--expect-build", help="Require /health to report this release SHA")
     args = parser.parse_args(argv)
     try:
         base = validate_base(args.base_url)
@@ -82,6 +83,13 @@ def run(argv, call_fn=call):
 
     status, body, _ = call_fn(base, "GET", "/health")
     check("health", status == 200 and b"Healthy" in body, f"HTTP {status}")
+    if args.expect_build:
+        try:
+            health = json.loads(body)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            health = {}
+        check("health build", health.get("build") == args.expect_build,
+              f"expected {args.expect_build}, got {health.get('build', '<missing>')}")
     status, _, _ = call_fn(base, "GET", "/api/v1/me")
     check("anonymous /me denied", status == 401, f"HTTP {status}")
     status, _, _ = call_fn(base, "GET", "/health", host="evil.example")

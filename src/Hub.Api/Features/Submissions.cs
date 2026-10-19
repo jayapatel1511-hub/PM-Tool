@@ -21,10 +21,7 @@ public static class SubmissionEndpoints
     public sealed record IssueBody(Guid RequestId, int RowVersion, int ManifestVersion, string ExpectedFingerprint, string Destination, string TransmittalUrl, string? Reason);
     public sealed record CancelBody(Guid RequestId, int RowVersion, string Reason);
     public sealed record Filter(string? Q, string? Status, Guid? CoordinatorId, Guid? MilestoneId, DateOnly? TargetFrom, DateOnly? TargetTo);
-    static readonly Col[] ListColumns = [
-        new("key", "key"), new("title", "name"), new("status", "status"),
-        new("coordinatorName", "owner", Label: "Coordinator"), new("milestoneName", "milestone"),
-        new("targetDate", "targetDate", "date", "Target date"), new("blockerCount", "blockers", "number", "Readiness blockers")];
+    static readonly Col[] ListColumns = Hub.Api.Records.SubmissionPackageRecord.SubmissionsListColumns;
 
     sealed record ListRow(Guid Id, string Key, string Title, string Purpose, string Status, Guid CoordinatorId, string? CoordinatorName,
         Guid MilestoneId, string? MilestoneName, DateOnly TargetDate, int ManifestVersion, int RowVersion, int BlockerCount);

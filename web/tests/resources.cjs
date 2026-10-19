@@ -1,3 +1,4 @@
+const { openRoles, contractExample } = require('./open-roles.fixture.cjs')
 // Resources workflow UI checks with mocked API responses (run after `npm run build`); API tests cover server rules.
 // Tuesday visual batch 1: a partial view never claims spare capacity (FR-CAP-06), proposed requests stay outside load
 // (FR-CAP-04), negative remaining keeps its minus sign, person accents survive a re-sort, denied access, phones and a
@@ -17,6 +18,7 @@ const cells = (set) => weeks.map((week, i) => { const c = { week, hours: 0, pct:
 const person = (pid_, name, extra) => ({ id: pid_, displayName: name, supervisorId: sam, supervisorName: 'Sam Supervisor', capacity: 40, capacityOverride: false, noDueDate: 0,
   openTasks: 2, unestimated: 0, overdue: 0, projects: 1, overAssigned: false, underAssigned: false, cluster: false, canSetCapacity: true, indicator: 'ok', ...extra });
 let partial = true, forbidden = false, figureNames = false, unassignedOn = false, assigned = false, assignmentConflict = true;
+let typedPatchHeaders;
 const assignmentCalls = [], capacityCalls = [];
 const taskId = id(90);
 const grid = (sort) => {
@@ -71,7 +73,8 @@ let server, browser;
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }
     else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' }
     else if (p === `projects/${pid}/changes/options`) data = { actorId: sam, canWrite: true, manageDisciplineIds: [], people: [{ id: jill, displayName: 'Jill Partial' }], disciplines: [], sources: [], heads: [], deliverables: [], tasks: [] }
-    else if (p === `projects/${pid}/open-roles`) data = []
+    else if (p === `projects/${pid}/open-roles`) data = openRoles
+    else if (p === `open-roles/${contractExample.id}` && route.request().method() === 'PATCH') { typedPatchHeaders = route.request().headers(); data = { ...contractExample, rowVersion: contractExample.rowVersion + 1 } }
     else if (p === `projects/${pid}/allocations`) data = { items: [allocation(proposed, 'Proposed'), allocation(confirmed, 'Confirmed')], page: 1, pageSize: 50, totalCount: 2 }
     else if (p === `projects/${pid}/allocations/${proposed}/confirmation-preview`) [status, data] = [403, { code: 'forbidden', detail: 'You cannot open the workload view.' }]
     else if (p.startsWith(`projects/${pid}/allocations/`)) {
@@ -191,6 +194,20 @@ let server, browser;
   dialog = await roleForm(); await dialog.getByLabel('Role').waitFor();
   assert.equal(await dialog.getByLabel('Reason').count(), 0, 'No reason field without needsReason, whatever the status');
 
+  // AC-PLAT-13: generated PATCH helpers preserve shared transport headers.
+  await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+  openRoles.push({ ...contractExample, projectId: pid, roleLabel: 'Synthetic typed role' });
+  await page.goto(`${base}/projects/P-DEMO/allocations?tab=roles`);
+  await page.getByRole('button', { name: 'More actions for Synthetic typed role' }).click();
+  await page.getByRole('menuitem', { name: 'Edit', exact: true }).click();
+  const editRole = page.getByRole('dialog');
+  await editRole.getByLabel('Role', { exact: true }).fill('Synthetic typed role edited');
+  await editRole.getByRole('button', { name: 'Save', exact: true }).click();
+  await editRole.waitFor({ state: 'hidden' });
+  assert.equal(typedPatchHeaders?.['if-match'], `"${contractExample.rowVersion}"`);
+  assert.equal(typedPatchHeaders?.['x-hub-source'], 'UI');
+  openRoles.length = 0;
+
   // FR-FIG-09 (D5): a control today's client offered the PM but the server refuses stays visible, disabled, with the server's reason.
   project.status = 'Archived'; project.permissions.proposeAllocation = { ok: false, reason: 'This project is Archived and read-only.' };
   await page.goto(`${base}/projects/P-DEMO/allocations`);
@@ -198,6 +215,7 @@ let server, browser;
   await refusedPropose.waitFor();
   assert.ok(await refusedPropose.isDisabled(), 'Refused proposal is disabled');
   assert.equal(await refusedPropose.getAttribute('title'), 'This project is Archived and read-only.', 'Refused proposal carries the server reason');
+
 
   const report = { scope: 'Chromium UI with mocked API; server rules are tested separately', errors, unmockedGets: [...new Set(unknown)], desktopViolations, namedViolations, panelViolations };
   console.log(JSON.stringify(report));

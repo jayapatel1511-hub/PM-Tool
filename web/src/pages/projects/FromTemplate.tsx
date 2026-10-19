@@ -11,11 +11,10 @@ import { Input } from '@/components/ui/input'
 import { useReference } from '@/hooks/data'
 import { ApiError, get, post } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { runtimeText, plural, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { ProjectDetail } from '@/lib/types'
-import { CREATE_SOURCES, type CreateContext } from './CreateProject'
-import { SETTINGS_SECTIONS } from './ProjectSettings'
+import type { CreateContext } from './CreateProject'
 
 export interface TemplateRow { id: string; familyId: string; name: string; description?: string; version?: number; status: string; milestones: number; deliverables: number; tasks: number; roles: number; projects: number }
 interface TemplateDetail { id: string; offsetDayKind?: string; disciplines: { disciplineId: string; isDefaultIncluded: boolean }[]; basisSuggestions: { disciplineId: string }[] }
@@ -38,7 +37,7 @@ function usePreview(value: Value, ctx: CreateContext) {
 
 /** Step 1 (§12.14 steps 1–2, FR-004): choose a template; its default disciplines are ticked for step 2, and each
  *  milestone shows the date its offset gives — type a contractual date over it, or leave it undated. */
-function TemplateSource({ value, onChange, ctx }: { value: Value; onChange: (v: Value) => void; ctx: CreateContext }) {
+export function TemplateSource({ value, onChange, ctx }: { value: Value; onChange: (v: Value) => void; ctx: CreateContext }) {
   const list = usePublishedTemplates()
   const preview = usePreview(value, ctx)
   const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => get<TemplateDetail>(`templates/${value!.templateId}`) })
@@ -79,7 +78,7 @@ function TemplateSource({ value, onChange, ctx }: { value: Value; onChange: (v: 
                       <td className={cn(tdCls, 'whitespace-nowrap')}>
                         <Input type="date" className="min-h-(--control-row-h) w-40" aria-label={t('tpl.dateFor', { name: m.name })} value={m.date ?? ''} disabled={typed && value.dates[m.id] === null}
                           onChange={(e) => setDate(m.id, e.target.value || null)} />
-                        <span className={cn('ml-2 text-xs/[18px]', m.source === 'None' ? 'text-warn' : 'text-muted-foreground')}>{t(`tpl.source.${m.source}`)}</span>
+                        <span className={cn('ml-2 text-xs/[18px]', m.source === 'None' ? 'text-warn' : 'text-muted-foreground')}>{runtimeText(`tpl.source.${m.source}`)}</span>
                       </td>
                       <td className={tdCls}>
                         <label className="flex min-h-(--control-row-h) items-center gap-1.5 whitespace-nowrap"><Checkbox aria-label={t('tpl.undatedFor', { name: m.name })} checked={typed && value.dates[m.id] === null} onCheckedChange={(c) => setDate(m.id, c ? null : undefined)} />{t('tpl.undated')}</label>
@@ -100,7 +99,7 @@ function TemplateSource({ value, onChange, ctx }: { value: Value; onChange: (v: 
 
 /** The last step's summary (FR-005): what will be created, and what will be undated. Basis suggestions of the chosen
  *  disciplines are copied as Proposed only (031 FR-BAS-07, AC-BAS-05); the others are left out, as on the server. */
-function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateContext }) {
+export function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateContext }) {
   const rolesOn = useFlag('template_roles')
   const preview = usePreview(value, ctx)
   const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => get<TemplateDetail>(`templates/${value!.templateId}`) })
@@ -114,7 +113,7 @@ function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateContext }) {
       <h3 id="tpl-summary" className="text-base/6 font-semibold">{t('tpl.summary')}</h3>
       {detail.data?.offsetDayKind === 'WorkingDays' && <p className="text-xs/[18px] text-muted-foreground">{t('rcv.workingDaysNote')}</p>}
       <p>{t('tpl.creates', { m: p.counts.milestones, d: p.counts.deliverables, k: p.counts.tasks, x: p.counts.dependencies })}{rolesOn && ` · ${t('tpl.roleCount', { count: p.counts.roles ?? 0 })}`}</p>
-      {rolesOn && (p.roles ?? []).length > 0 && <ul className="space-y-1 text-xs/[18px]">{p.roles.map(r => <li key={r.id} className={r.skipReason ? 'text-warn' : 'text-muted-foreground'}>{r.label} · {r.disciplineName ?? t('tpl.noDiscipline')} · {r.hours} h · {r.skipReason ? t(`tpl.roleSkip.${r.skipReason}`) : `${t('tpl.roleWillCreate')} ${fmtDate(r.from)} → ${fmtDate(r.through)}`}</li>)}</ul>}
+      {rolesOn && (p.roles ?? []).length > 0 && <ul className="space-y-1 text-xs/[18px]">{p.roles.map(r => <li key={r.id} className={r.skipReason ? 'text-warn' : 'text-muted-foreground'}>{r.label} · {r.disciplineName ?? t('tpl.noDiscipline')} · {r.hours} h · {r.skipReason ? runtimeText(`tpl.roleSkip.${r.skipReason}`) : `${t('tpl.roleWillCreate')} ${fmtDate(r.from)} → ${fmtDate(r.through)}`}</li>)}</ul>}
       {basis.length > 0 && <p>{plural(copied, 'templates.basisCopiedOne', 'templates.basisCopied')}{copied < basis.length && ` ${t('templates.basisSkipped', { n: basis.length - copied })}`}</p>}
       {undated > 0 && <p className="text-warn" role="status"><span aria-hidden>▲ </span>{t('tpl.undatedWarning', { m: p.undated.milestones, d: p.undated.deliverables, k: p.undated.tasks })}</p>}
       <p className="text-xs/[18px] text-muted-foreground">{t('tpl.setupNote')}</p>
@@ -123,12 +122,6 @@ function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateContext }) {
 }
 
 // Templates are the recommended start once any is published (FR-009), so this source comes first.
-CREATE_SOURCES.unshift({
-  id: 'template', label: 'tpl.from',
-  render: (v, set, ctx) => <TemplateSource value={v} onChange={set} ctx={ctx} />,
-  summary: (v, ctx) => <TemplateSummary value={v} ctx={ctx} />,
-  body: (v: Value) => (v ? { templateId: v.templateId, template: { milestoneDates: v.dates } } : {}),
-})
 
 interface Proposal {
   templateId: string; name: string; version: number; projectMilestones: { id: string; key: string; name: string; date?: string }[]
@@ -218,11 +211,7 @@ export function AddFromTemplateDialog({ projectId, onClose }: { projectId: strin
 }
 
 /** FR-008: which template and version the project was made from; later versions never change it (E-12). */
-SETTINGS_SECTIONS.push({
-  id: 'template-origin',
-  render: (p: ProjectDetail) => p.createdFromTemplateId ? (
-    <Section title={t('tpl.origin')}>
-      <p className="px-5 py-4 text-sm">{t('tpl.originText', { name: p.templateName ?? t('tpl.aTemplate'), v: p.templateVersion ?? '' })}</p>
-    </Section>
-  ) : null,
-})
+
+export function TemplateSettings({ project: p }: { project: ProjectDetail }) {
+  return p.createdFromTemplateId ? <Section title={t('tpl.origin')}><p className="px-5 py-4 text-sm">{t('tpl.originText', { name: p.templateName ?? t('tpl.aTemplate'), v: p.templateVersion ?? '' })}</p></Section> : null
+}

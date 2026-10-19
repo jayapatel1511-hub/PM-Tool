@@ -1,3 +1,4 @@
+import type { components } from '@/gen/api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowUpDown, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Ellipsis, EyeOff, Info, Lock, Monitor, Pencil } from 'lucide-react'
 import { Fragment, useState } from 'react'
@@ -17,10 +18,10 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useReference } from '@/hooks/data'
-import { ApiError, get, patch, put, qs } from '@/lib/api'
+import { ApiError, get, patch, put, qs, typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 import { addDays, fmtDate, hours, shortDate, today } from '@/lib/format'
-import { t } from '@/lib/i18n'
+import { runtimeText, t } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { GROUP_BY, GROUP_LABEL, groupPeople } from '@/components/planner/labels'
@@ -28,19 +29,13 @@ import { descendantUnitIds, useOrgPlacement } from '@/hooks/useOrgPlacement'
 import { MenuSelect, errorText } from './projects/Tasks'
 
 /** The server's load band for the week (FR-FIG-05), from the organisation's workload thresholds. */
-type Band = 'over' | 'near' | 'within' | 'light'
-interface Cell { week: string; hours: number; pct: number; available: number; confirmed: number; proposed: number; committed: number; band: Band; uncommitted: number | null }
-interface Thresholds { overPct: number; amberPct: number; underPct: number }
-interface PersonRow {
-  id: string; displayName: string; supervisorId?: string; supervisorName?: string; capacity: number; capacityOverride: boolean; cells: Cell[]; noDueDate: number
-  openTasks: number; unestimated: number; overdue: number; projects: number; overAssigned: boolean; underAssigned: boolean; cluster: boolean; canSetCapacity: boolean; partialScope: boolean; indicator: string; overWeek?: string | null
-  officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null
-}
+type Cell = components['schemas']['LoadCell']
+type Thresholds = components['schemas']['LoadThresholds']
+type PersonRow = components['schemas']['LoadPerson']
+type Unassigned = components['schemas']['UnassignedWork']
 /** Open demand with no person named yet (FR-ROLE-04): shown apart from people, never in anyone's load. */
 interface UnfilledRole { id: string; projectId: string; projectNumber: string; projectName: string; roleLabel: string; disciplineName?: string | null; fromDate: string; throughDate: string; plannedHours: number; cells: { week: string; hours: number }[] }
 interface UnassignedTask { id: string; key: string; name: string; projectId: string; projectNumber: string; projectName: string; disciplineName?: string | null; startDate?: string | null; dueDate?: string | null; estimatedHours?: number | null; rowVersion: number; canAssign: boolean; editPath: string }
-interface Unassigned { totalCount: number; showAllPath: string; tasks: UnassignedTask[] }
-interface Grid { weeks: string[]; today: string; currentWeek: string; defaultCapacity: number; thresholds: Thresholds; people: PersonRow[]; unfilledRoles?: UnfilledRole[]; unassigned?: Unassigned }
 interface TaskLoadRow { id: string; key: string; name: string; status: string; dueDate?: string; estimatedHours?: number | null; progressPct: number; remaining?: number | null; overdue: boolean; noDueDate: number; rowVersion: number; weeks: number[]; canReassign: boolean }
 interface PersonTasks { weeks: string[]; projects: { id: string; projectNumber: string; name: string; tasks: TaskLoadRow[] }[] }
 
@@ -86,7 +81,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   const [availability, setAvailability] = useState<PersonRow | null>(null)
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
-  const q = useQuery({ queryKey: ['workload', filters], queryFn: () => get<Grid>(`workload${qs(filters)}`) })
+  const q = useQuery({ queryKey: ['workload', filters], queryFn: () => typedRequest('get', '/api/v1/workload', { query: filters }) })
   const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
   const forbidden = (q.error as ApiError | null)?.status === 403
   const toggle = (id: string) => setOpen((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
@@ -107,13 +102,13 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
     ['disciplineId', t('common.discipline'), ref.data?.disciplines.find((d) => d.id === filters.disciplineId)?.name],
     ['officeId', t('admin.office'), ref.data?.offices.find((d) => d.id === filters.officeId)?.name],
     ['projectId', t('portfolio.project'), projects.data?.items.find((p) => p.id === filters.projectId)?.projectNumber],
-    ['indicator', t('workload.indicator'), filters.indicator ? t(`workload.ind.${filters.indicator}`) : null],
+    ['indicator', t('workload.indicator'), filters.indicator ? runtimeText(`workload.ind.${filters.indicator}`) : null],
     ['from', t('workload.from'), filters.from ? fmtDate(filters.from) : null],
     ['unitId', t('org.unit'), filters.unitId ? unitName(filters.unitId) : null],
   ] as const).filter(([k]) => filters[k])
   const unfilled = q.data?.unfilledRoles ?? []
   // One indicator at a time; choosing the selected chip again shows every person (the former "Any" chip).
-  const indicatorChip = (x: string) => <ChipToggle key={x} on={filters.indicator === x} onClick={() => set('indicator', filters.indicator === x ? null : x)}>{t(`workload.ind.${x}`)}</ChipToggle>
+  const indicatorChip = (x: string) => <ChipToggle key={x} on={filters.indicator === x} onClick={() => set('indicator', filters.indicator === x ? null : x)}>{runtimeText(`workload.ind.${x}`)}</ChipToggle>
   const clear = () => { const n = new URLSearchParams(sp); for (const [k] of tokens) n.delete(k); setSp(n, { replace: true }) }
   const weeks = q.data?.weeks ?? []
   const shiftWeeks = (days: number) => set('from', addDays(weeks[0] ?? today(), days))
@@ -128,8 +123,8 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
         <FilterBar activeCount={tokens.length}
           quick={<>
             <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('workload.indicator')}>{INDICATORS.slice(0, 3).map(indicatorChip)}</div>
-            <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={[...GROUP_BY.map((g) => ({ value: g, label: t(GROUP_LABEL[g]) })), ...(org.enabled ? [{ value: 'homeUnit', label: t('org.homeUnit') }] : [])]} />
-            <MenuSelect label={t('common.sort')} icon={ArrowUpDown} value={filters.sort ?? 'load'} onChange={(v) => set('sort', v === 'load' ? null : v)} options={SORTS.map((v) => ({ value: v, label: t(`workload.sortBy.${v}`) }))} />
+            <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={[...GROUP_BY.map((g) => ({ value: g, label: runtimeText(GROUP_LABEL[g]) })), ...(org.enabled ? [{ value: 'homeUnit', label: t('org.homeUnit') }] : [])]} />
+            <MenuSelect label={t('common.sort')} icon={ArrowUpDown} value={filters.sort ?? 'load'} onChange={(v) => set('sort', v === 'load' ? null : v)} options={SORTS.map((v) => ({ value: v, label: runtimeText(`workload.sortBy.${v}`) }))} />
           </>}
           active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}
           actions={<>
@@ -259,7 +254,7 @@ function UnassignedTasks({ data }: { data: Unassigned }) {
   }
   if (data.tasks.length === 0) return null
   return <Section id="wl-unassigned" title={t('workload.unassignedTitle')} count={data.totalCount} actions={data.totalCount > data.tasks.length && <Button asChild variant="outline" size="sm"><Link to={data.showAllPath}>{t('workload.showAll', { n: data.totalCount })}</Link></Button>}>
-    <div className="overflow-x-auto rounded-lg border"><table className="w-full min-w-[48rem] text-sm"><thead><tr><th className={thCls}>{t('common.task')}</th><th className={thCls}>{t('portfolio.project')}</th><th className={thCls}>{t('workload.taskDueLabel')}</th><th className={cn(thCls, 'text-right')}>{t('workload.estimate')}</th><th className={thCls}>{t('workload.assignee')}</th></tr></thead><tbody>{data.tasks.map(task => { const st = state[task.id]; return <tr key={task.id}><th className={tdCls + ' text-left font-normal'}><Link className="hover:underline" to={task.editPath}><Key>{task.key}</Key> {task.name}</Link></th><td className={tdCls}>{task.projectNumber} {task.projectName}{task.disciplineName ? ` · ${task.disciplineName}` : ''}</td><td className={tdCls}>{task.dueDate ? fmtDate(task.dueDate) : t('workload.sum.noDue')}</td><td className={cn(tdCls, 'text-right tabular-nums')}>{task.estimatedHours == null ? <Missing /> : hours(task.estimatedHours)}</td><td className={tdCls}>{task.canAssign ? <PeoplePicker capacityWeek={weekOf(task.startDate ?? task.dueDate ?? today())} value={null} onChange={v => void assign(task, v)} disabled={st?.status === 'saving'} placeholder={t('workload.assignTo')} label={t('workload.assignTask', { key: task.key })} /> : <span className="text-xs text-muted-foreground">{t('workload.cannotAssign')}</span>}{st?.status === 'failed' && <p role="alert" className="text-xs text-bad">{t('workload.reassignFailed')}: {errorText(st.error)}</p>}</td></tr> })}</tbody></table></div>
+    <div className="overflow-x-auto rounded-lg border"><table className="w-full min-w-[48rem] text-sm"><thead><tr><th className={thCls}>{t('itemType.Task')}</th><th className={thCls}>{t('portfolio.project')}</th><th className={thCls}>{t('workload.taskDueLabel')}</th><th className={cn(thCls, 'text-right')}>{t('workload.estimate')}</th><th className={thCls}>{t('workload.assignee')}</th></tr></thead><tbody>{data.tasks.map(task => { const st = state[task.id]; return <tr key={task.id}><th className={tdCls + ' text-left font-normal'}><Link className="hover:underline" to={task.editPath}><Key>{task.key}</Key> {task.name}</Link></th><td className={tdCls}>{task.projectNumber} {task.projectName}{task.disciplineName ? ` · ${task.disciplineName}` : ''}</td><td className={tdCls}>{task.dueDate ? fmtDate(task.dueDate) : t('workload.sum.noDue')}</td><td className={cn(tdCls, 'text-right tabular-nums')}>{task.estimatedHours == null ? <Missing /> : hours(task.estimatedHours)}</td><td className={tdCls}>{task.canAssign ? <PeoplePicker capacityWeek={weekOf(task.startDate ?? task.dueDate ?? today())} value={null} onChange={v => void assign(task, v)} disabled={st?.status === 'saving'} placeholder={t('workload.assignTo')} label={t('workload.assignTask', { key: task.key })} /> : <span className="text-xs text-muted-foreground">{t('workload.cannotAssign')}</span>}{st?.status === 'failed' && <p role="alert" className="text-xs text-bad">{t('workload.reassignFailed')}: {errorText(st.error)}</p>}</td></tr> })}</tbody></table></div>
   </Section>
 }
 
@@ -315,7 +310,7 @@ function UnfilledRoles({ roles, weeks, currentWeek }: { roles: UnfilledRole[]; w
 /** One person-week: committed load of available capacity, then what it is made of. Proposed requests sit outside the
  *  load (dotted), and a partial view never claims spare capacity (FR-CAP-04, FR-CAP-06). */
 function WeekCell({ c, capacity, named }: { c: Cell; capacity: number; named: boolean }) {
-  const tone = TONE[c.band]
+  const tone = TONE[c.band as keyof typeof TONE] ?? 'idle'
   // The server's Uncommitted (FR-FIG-03): null on a partial row unless negative; "Remaining" until flag.figure_names is on.
   const figure = c.uncommitted == null ? null : t(named ? 'workload.uncommitted' : 'workload.remaining', { h: hours(c.uncommitted) })
   const scale = Math.max(c.available, c.committed + c.proposed, 1)
@@ -487,12 +482,12 @@ function AvailabilityDialog({ p, onClose }: { p: PersonRow; onClose: (ok: boolea
     <Field label={t('workload.dayDate')} htmlFor="availability-date"><Input id="availability-date" type="date" required value={date} onChange={e => chooseDate(e.target.value)} /></Field>
     {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
     {q.isPending ? <p className="flex items-center gap-2 text-sm text-muted-foreground"><Spinner />{t('app.loading')}</p>
-      : existing && hoursValue === '' && <Notice icon={Info} title={t('workload.existingAvailability', { h: existing.availableHours, category: t(`workload.availability.${existing.category}`) })} />}
+      : existing && hoursValue === '' && <Notice icon={Info} title={t('workload.existingAvailability', { h: existing.availableHours, category: runtimeText(`workload.availability.${existing.category}`) })} />}
     <Field label={t('workload.dayHours')} htmlFor="availability-hours" hint={t('workload.dayHoursHint')} error={invalid ? t('workload.dayHoursRange') : undefined}>
       <div className="flex items-center gap-2"><Input id="availability-hours" className="w-32" type="number" min={0} max={24} step={0.25} required value={hoursValue} aria-invalid={invalid || undefined} onChange={e => setHours(e.target.value)} /><span className="text-sm text-muted-foreground">h</span></div>
     </Field>
     <Field label={t('workload.dayCategory')} htmlFor="availability-category"><select id="availability-category" className={selectCls} value={category} onChange={e => setCategory(e.target.value)}>
-      {['Unavailable', 'Reduced', 'Additional'].map(value => <option key={value} value={value}>{t(`workload.availability.${value}`)}</option>)}
+      {['Unavailable', 'Reduced', 'Additional'].map(value => <option key={value} value={value}>{runtimeText(`workload.availability.${value}`)}</option>)}
     </select></Field>
   </ConfirmDialog>
 }
@@ -520,7 +515,7 @@ function DensityMenu() {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>{t('density.label')}</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={density} onValueChange={(v) => setDensity(v as Density)}>
-          {(['compact', 'comfortable'] as const).map((d) => <DropdownMenuRadioItem key={d} value={d}>{t(`density.${d}`)}</DropdownMenuRadioItem>)}
+          {(['compact', 'comfortable'] as const).map((d) => <DropdownMenuRadioItem key={d} value={d}>{runtimeText(`density.${d}`)}</DropdownMenuRadioItem>)}
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -536,7 +531,7 @@ function Method({ thresholds }: { thresholds?: Thresholds }) {
       <PopoverContent className="w-[28rem] max-w-[calc(100vw-2rem)] space-y-2 text-sm" align="end">
         <p>{t('workload.about')}</p>
         <p className="font-semibold">{t('workload.methodTitle')}</p>
-        <ul className="list-disc space-y-1.5 pl-4">{[1, 2, 3, 4, 5, 6].map((n) => <li key={n}>{t(n === 5 && named ? 'workload.method5Named' : `workload.method${n}`)}</li>)}</ul>
+        <ul className="list-disc space-y-1.5 pl-4">{[1, 2, 3, 4, 5, 6].map((n) => <li key={n}>{runtimeText(n === 5 && named ? 'workload.method5Named' : `workload.method${n}`)}</li>)}</ul>
         <p className="pt-1 font-semibold">{t('workload.legend')}</p>
         <Legend thresholds={thresholds} />
       </PopoverContent>

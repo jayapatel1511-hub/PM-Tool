@@ -1,7 +1,7 @@
 import { HelpCircle } from 'lucide-react'
 import { Fragment, type ReactNode } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
 
 export interface Reason { rule?: string; text: string; colour?: string | null; threshold?: string | number | null; values?: Record<string, unknown> | null }
 
@@ -29,7 +29,7 @@ export function Why({ reasons, children, title, defaultOpen }: { reasons?: Reaso
                 )}
                 {r.values && Object.keys(r.values).length > 0 && (
                   <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 text-xs">
-                    {Object.entries(r.values).map(([k, v]) => <Fragment key={k}><dt className="text-muted-foreground">{t(`whyv.${k}`)}</dt><dd>{Array.isArray(v) ? v.join(', ') : String(v ?? t('common.dash'))}</dd></Fragment>)}
+                    {Object.entries(r.values).map(([k, v]) => <Fragment key={k}><dt className="text-muted-foreground">{runtimeText(`whyv.${k}`)}</dt><dd>{Array.isArray(v) ? v.join(', ') : String(v ?? t('common.dash'))}</dd></Fragment>)}
                   </dl>
                 )}
               </li>

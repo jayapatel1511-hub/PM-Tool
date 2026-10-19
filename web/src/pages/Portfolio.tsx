@@ -16,7 +16,7 @@ import { useOrgPlacement } from '@/hooks/useOrgPlacement'
 import { get, qs } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { runtimeText, t, tv } from '@/lib/i18n'
 import type { ProjectRow } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ViewMenu } from '@/components/hub/views'
@@ -79,15 +79,15 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
     ['phaseId', t('field.PhaseId'), name(ref.data?.phases, filters.phaseId)],
     ['projectTypeId', t('projects.type'), name(ref.data?.projectTypes, filters.projectTypeId)],
     ['status', t('common.status'), filters.status && tv(filters.status)],
-    ['health', t('portfolio.health'), filters.health && t(`health.${filters.health}`)],
-    ['computedHealth', t('projects.filter.computedHealth'), filters.computedHealth?.split(',').map((h) => t(`health.${h}`)).join(', ')],
+    ['health', t('portfolio.health'), filters.health && runtimeText(`health.${filters.health}`)],
+    ['computedHealth', t('projects.filter.computedHealth'), filters.computedHealth?.split(',').map((h) => runtimeText(`health.${h}`)).join(', ')],
     ['submissionWithinDays', t('portfolio.within'), filters.submissionWithinDays],
     ['overdueDecisions', t('portfolio.decisions'), t('common.yes')],
     ['mine', t('portfolio.mine'), filters.mine === 'false' ? t('common.no') : filters.mine],
   ] as const).filter(([k]) => filters[k])
   const clear = () => setSp(new URLSearchParams(), { replace: true })
   const healthLabel = (h: string, key: string) => (
-    <span className="inline-flex items-center gap-1.5"><span aria-hidden className={HEALTH_MARK[h][1]}>{HEALTH_MARK[h][0]}</span>{t(key)}</span>
+    <span className="inline-flex items-center gap-1.5"><span aria-hidden className={HEALTH_MARK[h][1]}>{HEALTH_MARK[h][0]}</span>{runtimeText(key)}</span>
   )
   const tiles = q.data?.tiles
   // AC-CNT-01: a health tile counts Active projects by computed health, so it opens exactly those rows.
@@ -109,14 +109,14 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
           <SummaryTile label={t('portfolio.active')} value={tiles.active} accent="blue" hint={t('sig.def.pfActive')} onClick={() => set('status', 'Active')} />
           {(['Red', 'Yellow', 'Green'] as const).map((h) => (
-            <SummaryTile key={h} label={healthLabel(h, `portfolio.${h.toLowerCase()}`)} value={tiles[h.toLowerCase() as 'red']} accent="lavender" hint={t('sig.def.pfHealth', { health: t(`health.${h}`) })} to={healthLink(h)} />
+            <SummaryTile key={h} label={healthLabel(h, `portfolio.${h.toLowerCase()}`)} value={tiles[h.toLowerCase() as 'red']} accent="lavender" hint={t('sig.def.pfHealth', { health: runtimeText(`health.${h}`) })} to={healthLink(h)} />
           ))}
           <SummaryTile label={t('portfolio.submissions')} value={tiles.submissions14} accent="mint" hint={t('sig.def.pfSubmissions')} onClick={() => set('submissionWithinDays', '14')} />
           <SummaryTile label={t('portfolio.decisions')} value={tiles.overdueDecisions} accent="peach" hint={t('sig.def.pfDecisions')} onClick={() => set('overdueDecisions', 'true')} />
         </div>
       )}
       {rollups && <Field label={t('rcv.group')} htmlFor="pf-group" className="w-48"><select id="pf-group" className={selectCls} value={group} onChange={(e) => set('group', e.target.value === 'none' ? null : e.target.value)}>
-        {[['none', 'groupNone'], ['client', 'groupClient'], ['office', 'groupOffice'], ['projectType', 'groupProjectType']].map(([value, label]) => <option key={value} value={value}>{t(`rcv.${label}`)}</option>)}
+        {[['none', 'groupNone'], ['client', 'groupClient'], ['office', 'groupOffice'], ['projectType', 'groupProjectType']].map(([value, label]) => <option key={value} value={value}>{runtimeText(`rcv.${label}`)}</option>)}
       </select></Field>}
       <FilterBar activeCount={tokens.length}
         search={<Field label={t('common.search')} htmlFor="pf-q">
@@ -127,7 +127,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
           <Field label={t('portfolio.pm')} htmlFor="pf-pm" className="w-full sm:w-52">
             <PeoplePicker id="pf-pm" value={filters.pmId} valueName={pmName} onChange={(v) => set('pmId', v)} placeholder={t('portfolio.anyPm')} label={t('portfolio.pm')} />
           </Field>
-          {org.enabled && <Field label={t('org.leadUnit')} htmlFor="pf-lead-unit" className="w-full sm:w-52"><select id="pf-lead-unit" className={selectCls} value={filters.leadUnitId ?? ''} onChange={(e) => set('leadUnitId', e.target.value)}><option value="">{t('org.anyUnit')}</option><option value="00000000-0000-0000-0000-000000000000">{t('staff.group.noUnit')}</option>{org.units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}</select></Field>}
+          {org.enabled && <Field label={t('org.leadUnit')} htmlFor="pf-lead-unit" className="w-full sm:w-52"><select id="pf-lead-unit" className={selectCls} value={filters.leadUnitId ?? ''} onChange={(e) => set('leadUnitId', e.target.value)}><option value="">{t('org.anyUnit')}</option><option value="00000000-0000-0000-0000-000000000000">{t('organisation.noUnit')}</option>{org.units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}</select></Field>}
           {refSelect('disciplineId', t('common.discipline'), ref.data?.disciplines, t('projects.anyDiscipline'))}
           {refSelect('clientId', t('portfolio.client'), ref.data?.clients, t('portfolio.anyClient'))}
           {refSelect('officeId', t('admin.office'), ref.data?.offices, t('reports.anyOffice'))}
@@ -140,7 +140,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
           </Field>
           <Field label={t('portfolio.health')} htmlFor="pf-health" className="w-full sm:w-40">
             <select id="pf-health" className={selectCls} value={filters.health ?? ''} onChange={(e) => set('health', e.target.value)}>
-              <option value="">{t('portfolio.anyHealth')}</option>{HEALTHS.map((h) => <option key={h} value={h}>{t(`health.${h}`)}</option>)}
+              <option value="">{t('portfolio.anyHealth')}</option>{HEALTHS.map((h) => <option key={h} value={h}>{runtimeText(`health.${h}`)}</option>)}
             </select>
           </Field>
           <Field label={t('portfolio.within')} htmlFor="pf-within" className="w-full sm:w-48">
@@ -159,13 +159,13 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
           <table className="w-full text-sm">
             <caption className="sr-only">{t('nav.portfolio')}</caption>
             <thead className="bg-muted">
-              <tr>{(rollups ? [...COLS.slice(0, 12), ['rcv.overdueDeliverables', true] as [string, boolean], ...COLS.slice(12)] : COLS).map(([h, numeric], i) => <th key={i} scope="col" className={cn(thCls, numeric && 'text-right')}>{h ? t(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
+              <tr>{(rollups ? [...COLS.slice(0, 12), ['rcv.overdueDeliverables', true] as [string, boolean], ...COLS.slice(12)] : COLS).map(([h, numeric], i) => <th key={i} scope="col" className={cn(thCls, numeric && 'text-right')}>{h ? runtimeText(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
             </thead>
             <tbody>
               {(group === 'none' ? [['', q.data.projects] as [string, Row[]]] : grouped).map(([key, rows]) => <Fragment key={key}>
                 {group !== 'none' && <tr className="border-t bg-muted" data-portfolio-group={key}><th scope="rowgroup" colSpan={8} className={thCls}>
                   {groupName(rows[0])} · {key ? <Link to={groupLink(key)} className="underline underline-offset-2">{rows.length} {t('nav.projects')}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.length} {t('nav.projects')}</span>}
-                  <span className="ml-3 inline-flex gap-3">{['Red', 'Yellow', 'Green'].map((health) => <span key={health}>{key ? <Link to={groupLink(key, health)}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</Link> : <span title={t('rcv.notSetDefinition')}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</span>}</span>)}</span>
+                  <span className="ml-3 inline-flex gap-3">{['Red', 'Yellow', 'Green'].map((health) => <span key={health}>{key ? <Link to={groupLink(key, health)}>{runtimeText(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</Link> : <span title={t('rcv.notSetDefinition')}>{runtimeText(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</span>}</span>)}</span>
                 </th>{(['overdueTasks', 'blockedTasks', 'overdueDecisions', 'highIssues', 'overdueDeliverables'] as const).map((column) => <td key={column} className={cn(tdCls, 'text-right tabular-nums')}>{key ? <Link to={groupLink(key)} aria-label={`${rows.reduce((sum,r)=>sum+(r[column]??0),0)} · ${t('rcv.subtotalDefinition')}`} title={t('rcv.subtotalDefinition')} className="underline underline-offset-2">{rows.reduce((sum,r)=>sum+(r[column]??0),0)}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.reduce((sum,r)=>sum+(r[column]??0),0)}</span>}</td>)}
                 <td className={cn(tdCls, 'text-right tabular-nums')}><span title={t('rcv.subtotalDefinition')}>■ {rows.reduce((sum,r)=>sum+r.attentionCritical,0)} · ▲ {rows.reduce((sum,r)=>sum+r.attentionWarning,0)}</span></td><td colSpan={2} /></tr>}
               {rows.map((r) => (
@@ -219,7 +219,7 @@ function Health({ r }: { r: Row }) {
   const differs = r.reportedHealth !== r.computedHealth
   return (
     <div className="space-y-1">
-      <Why reasons={r.healthReasons} title={`${r.projectNumber} · ${t('health.whyTitle', { health: t(`health.${r.computedHealth}`) })}`}>
+      <Why reasons={r.healthReasons} title={`${r.projectNumber} · ${t('health.whyTitle', { health: runtimeText(`health.${r.computedHealth}`) })}`}>
         {differs ? <span className="flex flex-wrap gap-1"><HealthPill health={r.computedHealth} label={t('health.computed')} /><HealthPill health={r.reportedHealth} label={t('health.reported')} /></span>
           : <HealthPill health={r.reportedHealth} />}
       </Why>
@@ -230,7 +230,7 @@ function Health({ r }: { r: Row }) {
 
 /** FR-HLT-03: eight weeks of computed health, oldest first. */
 function Trend({ points }: { points: Row['trend'] }) {
-  const label = points.map((p) => `${fmtDate(p.weekEnding)}: ${p.computed ? t(`health.${p.computed}`) : t('portfolio.noSnapshot')}`).join('; ')
+  const label = points.map((p) => `${fmtDate(p.weekEnding)}: ${p.computed ? runtimeText(`health.${p.computed}`) : t('portfolio.noSnapshot')}`).join('; ')
   return (
     <span className="flex gap-0.5" role="img" aria-label={t('portfolio.trendLabel', { list: label })} title={label}>
       {points.map((p) => <span key={p.weekEnding} className={cn('inline-block h-4 w-2 rounded-[2px]', !p.computed && 'border border-dashed border-input')} style={p.computed ? { background: SWATCH[p.computed] } : undefined} />)}

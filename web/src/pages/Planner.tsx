@@ -1,3 +1,4 @@
+import { usePageMode } from '@/hooks/page-mode'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowUpDown, ChevronLeft, ChevronRight, Ellipsis, List, Lock, Monitor, Table2 } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -14,7 +15,7 @@ import { UrlSearchInput } from '@/components/hub/url-search'
 import { useFlag, useMe } from '@/lib/auth'
 import { addDays, fmtDate, shortDate, today } from '@/lib/format'
 import { ApiError, api, get, qs } from '@/lib/api'
-import { t, tv } from '@/lib/i18n'
+import { runtimeText, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { ContributionList } from '@/components/planner/ContributionList'
 import { EntryPanel } from '@/components/planner/EntryPanel'
@@ -34,7 +35,7 @@ export function PlannerPage() {
 }
 
 function Planner() {
-  const [bulk, setBulk] = useState<'Copy' | 'Publish' | null>(null); const me = useMe(); const [sp, setSp] = useSearchParams(); const qc = useQueryClient(); const view = sp.get('view') === 'list' ? 'list' : sp.get('view') === 'projects' ? 'projects' : 'grid'; const [entry, setEntry] = useState<PlannerEntry | null>(null); const [cell, setCell] = useState<{ personId: string; week: string } | null>(null); const [away, setAway] = useState<PlannerPerson | null>(null); const [draftReason, setDraftReason] = useState(''); const [announcement, setAnnouncement] = useState(''); const [wide, setWide] = useState(() => typeof window !== 'undefined' ? window.matchMedia('(min-width: 1280px)').matches : false)
+  const [bulk, setBulk] = useState<'Copy' | 'Publish' | null>(null); const me = useMe(); const [sp, setSp] = useSearchParams(); const qc = useQueryClient(); const view = usePageMode('layout', ['list', 'projects'], 'grid'); const [entry, setEntry] = useState<PlannerEntry | null>(null); const [cell, setCell] = useState<{ personId: string; week: string } | null>(null); const [away, setAway] = useState<PlannerPerson | null>(null); const [draftReason, setDraftReason] = useState(''); const [announcement, setAnnouncement] = useState(''); const [wide, setWide] = useState(() => typeof window !== 'undefined' ? window.matchMedia('(min-width: 1280px)').matches : false)
   useEffect(() => { const media = window.matchMedia('(min-width: 1280px)'); const update = () => setWide(media.matches); update(); media.addEventListener('change', update); return () => media.removeEventListener('change', update) }, [])
   const set = (k: string, value?: string | null) => { const n = new URLSearchParams(sp); if (value) n.set(k, value); else n.delete(k); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k) ?? undefined]))
@@ -68,8 +69,8 @@ function Planner() {
   const openCell = (person: PlannerPerson, c: { week: string }) => setCell({ personId: person.id, week: c.week })
   const viewError = view !== 'list' ? gridQ.error : listQ.error
   if (viewError instanceof ApiError && viewError.status === 403) return <Page eyebrow={t('nav.resources')} title={t('planner.title')} subtitle={t('planner.subtitle')}><ErrorBanner error={viewError} retry={refresh} /><Button asChild variant="outline" className="self-start"><Link to="/my-work">{t('nav.myWork')}</Link></Button></Page>
-  const chip = (value: string, label: string) => <ChipToggle key={value} on={filters.indicator === value} onClick={() => set('indicator', filters.indicator === value ? null : value)}>{t(label)}</ChipToggle>
-  const viewButton = (v: 'grid' | 'list' | 'projects', icon: ReactNode, label: string) => <Button size="sm" variant={view === v ? 'default' : 'ghost'} aria-pressed={view === v} onClick={() => set('view', v === 'grid' ? null : v)}>{icon}{t(label)}</Button>
+  const chip = (value: string, label: string) => <ChipToggle key={value} on={filters.indicator === value} onClick={() => set('indicator', filters.indicator === value ? null : value)}>{runtimeText(label)}</ChipToggle>
+  const viewButton = (v: 'grid' | 'list' | 'projects', icon: ReactNode, label: string) => <Button size="sm" variant={view === v ? 'default' : 'ghost'} aria-pressed={view === v} onClick={() => set('layout', v === 'grid' ? null : v)}>{icon}{runtimeText(label)}</Button>
   return <Page eyebrow={t('nav.resources')} title={t('planner.title')} subtitle={t('planner.subtitle')} actions={<>
     <Button variant="outline" size="icon" aria-label={t('planner.previousWeek')} onClick={() => changeWeek(-7)}><ChevronLeft className="size-5" /></Button><Button variant="outline" onClick={() => set('from', null)}>{t('planner.thisWeek')}</Button><Button variant="outline" size="icon" aria-label={t('planner.nextWeek')} onClick={() => changeWeek(7)}><ChevronRight className="size-5" /></Button>
     {editable && <Button disabled={!data || gridQ.isFetching} onClick={() => setBulk('Publish')}>{t('planner.publishWeek')}</Button>}
@@ -88,7 +89,7 @@ function Planner() {
       search={<Field label={t('common.search')} htmlFor="planner-q"><UrlSearchInput id="planner-q" value={filters.q ?? ''} onValueChange={(value) => set('q', value)} placeholder={t('planner.searchPlaceholder')} /></Field>}
       quick={<>
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('planner.indicator')}>{chip('OverPlanned', 'planner.indicator.over')}{chip('UnderPlanned', 'planner.indicator.under')}{chip('StalePlan', 'planner.indicator.stale')}</div>
-        {view === 'grid' && <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={[...GROUP_BY.map((g) => ({ value: g, label: t(GROUP_LABEL[g]) })), ...(org.enabled ? [{ value: 'homeUnit', label: t('org.homeUnit') }] : [])]} />}
+        {view === 'grid' && <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={[...GROUP_BY.map((g) => ({ value: g, label: runtimeText(GROUP_LABEL[g]) })), ...(org.enabled ? [{ value: 'homeUnit', label: t('org.homeUnit') }] : [])]} />}
         {view !== 'list' && <MenuSelect label={t('planner.sort')} icon={ArrowUpDown} value={filters.sort ?? 'remaining'} onChange={(v) => set('sort', v === 'remaining' ? null : v)}
           options={[{ value: 'remaining', label: t('planner.sortRemaining') }, { value: 'name', label: t('planner.sortName') }, { value: 'over', label: t('planner.sortOver') }]}>
           {data && <><DropdownMenuSeparator /><DropdownMenuLabel>{t('planner.sortWeek')}</DropdownMenuLabel>

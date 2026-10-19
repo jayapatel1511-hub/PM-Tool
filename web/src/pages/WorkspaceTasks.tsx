@@ -17,7 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { get, put, qs } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { addDays, fmtDate, today } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { CardBody, LANES, MAX_CARDS, SIDE, Swimlane, fetchUpTo, useLaneDrop } from './projects/Board'
@@ -118,7 +118,7 @@ export function WorkspaceTasksPage() {
   const th = (k: string, label: string, numeric?: boolean) => (
     <th scope="col" className={cn(thCls, numeric && 'text-right')} aria-sort={field === k ? (dir === 'desc' ? 'descending' : 'ascending') : undefined}>
       <button type="button" className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => set('sort', field === k && dir !== 'desc' ? `${k}:desc` : `${k}:asc`)}>
-        {t(label)}{field === k && (dir === 'desc' ? <ArrowDown className="size-3.5" /> : <ArrowUp className="size-3.5" />)}
+        {runtimeText(label)}{field === k && (dir === 'desc' ? <ArrowDown className="size-3.5" /> : <ArrowUp className="size-3.5" />)}
       </button>
     </th>
   )
@@ -210,7 +210,7 @@ export function WorkspaceBoardPage() {
   const { onDrop, dialog } = useLaneDrop(actions)
   const [creating, setCreating] = useState(false)
   const lanes = side ? [...LANES, ...SIDE] : LANES
-  const columns = lanes.map((l) => ({ id: l, name: t(`lane.${l}`) }))
+  const columns = lanes.map((l) => ({ id: l, name: runtimeText(`lane.${l}`) }))
   const all = q.data?.items ?? []
   const rows = all.filter((r) => lanes.includes(r.lane))
   const groups = useMemo(() => {
@@ -235,7 +235,7 @@ export function WorkspaceBoardPage() {
       <TaskFilters rows={all} extra={<>
         <Field label={t('board.swimlanes')} htmlFor="wb-swim" className="w-full sm:w-52">
           <select id="wb-swim" className={selectCls} value={swim} onChange={(e) => set('swim', e.target.value === 'none' ? null : e.target.value)}>
-            {SWIM.map((x) => <option key={x} value={x}>{t(`board.swim.${x}`)}</option>)}
+            {SWIM.map((x) => <option key={x} value={x}>{runtimeText(`board.swim.${x}`)}</option>)}
           </select>
         </Field>
         <Field label={t('board.sort')} htmlFor="wb-sort" className="w-full sm:w-60">

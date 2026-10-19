@@ -11,40 +11,12 @@ namespace Hub.Api.Features;
 /// query string, so the file holds exactly the filtered rows.
 public static class ListExportEndpoints
 {
-    static readonly Col[] TaskCols =
-    [
-        new("key", "key", "key"), new("name", "task"), new("deliverableKey", "deliverable"), new("disciplineName", "discipline"), new("assigneeName", "assignee"),
-        new("reviewerName", "reviewer"), new("status", "status"), new("priority", "priority"), new("startDate", "start", "date"), new("dueDate", "due", "date"),
-        new("progressPct", "progress", "percent"), new("estimatedHours", "estimate", "number"), new("indicators", "indicators"), new("lastActivityAt", "lastActivity", "datetime"),
-    ];
-    static readonly Col[] DeliverableCols =
-    [
-        new("key", "key", "key"), new("name", "deliverable"), new("typeName", "type"), new("disciplineName", "discipline"), new("ownerName", "owner"),
-        new("reviewerName", "reviewer"), new("milestoneKey", "milestone"), new("dueDate", "due", "date"), new("status", "status"), new("state.progressPct", "progress", "percent"),
-        new("indicators", "indicators"), new("revision", "revision"), new("issuedDate", "issued", "date"),
-    ];
-    static readonly Col[] DecisionCols =
-    [
-        new("key", "key", "key"), new("subject", "subject"), new("ownerName", "owner"), new("requestedByName", "requestedBy"), new("dateRequested", "requested", "date"),
-        new("requiredByDate", "requiredBy", "date"), new("days", "days", "number"), new("impactLevel", "impact"), new("status", "status"), new("blocking", "blockingCount", "number"),
-        new("decisionText", "decision"), new("decisionDate", "decisionDate", "date"),
-    ];
-    static readonly Col[] MilestoneCols =
-    [
-        new("key", "key", "key"), new("name", "milestone"), new("milestoneType", "type"), new("date", "date", "date"), new("slipDays", "slip", "number"), new("status", "status"),
-        new("deliverablesIssued", "deliverablesIssued"), new("taskOpen", "openTasks", "number"),
-    ];
-    static readonly Col[] ProjectCols =
-    [
-        new("projectNumber", "project"), new("name", "name"), new("client.name", "client"), new("pm.displayName", "pm"), new("status", "status"), new("phase", "phase"),
-        new("office", "office"), new("reportedHealth", "health"), new("progressPct", "progress", "percent"), new("overdueTasks", "overdueTasks", "number"),
-        new("nextMilestone.name", "nextMilestone"), new("targetCompletionDate", "target", "date"), new("priority", "priority"),
-    ];
-    static readonly Col[] ActivityCols =
-    [
-        new("occurredAt", "timestamp", "datetime"), new("actorName", "actor"), new("action", "action"), new("item", "item"), new("summary", "change"),
-        new("reason", "reason"), new("source", "source"),
-    ];
+    static readonly Col[] TaskCols = Hub.Api.Records.WorkTaskRecord.ListExportsTaskCols;
+    static readonly Col[] DeliverableCols = Hub.Api.Records.DeliverableRecord.ListExportsDeliverableCols;
+    static readonly Col[] DecisionCols = Hub.Api.Records.DecisionRecord.ListExportsDecisionCols;
+    static readonly Col[] MilestoneCols = Hub.Api.Records.MilestoneRecord.ListExportsMilestoneCols;
+    static readonly Col[] ProjectCols = Hub.Api.Records.ProjectRecord.ListExportsProjectCols;
+    static readonly Col[] ActivityCols = Hub.Api.Records.ScreenLists.ListExportsActivityCols;
 
     static JsonArray Json(IEnumerable<object> rows) => JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray();
 
@@ -70,62 +42,8 @@ public static class ListExportEndpoints
 
     /// Resolves filter IDs only through records in projects visible to the caller. Unknown or
     /// out-of-scope IDs deliberately remain raw query values in the Parameters sheet.
-    static async Task<Dictionary<Guid, string>> VisibleNames(HubDb db, Access access, HashSet<Guid> ids)
-    {
-        var names = new Dictionary<Guid, string>();
-        if (ids.Count == 0) return names;
-        var visible = access.VisibleProjectIds();
-        var list = ids.ToList();
-        void Add(IEnumerable<(Guid Id, string Name)> values) { foreach (var value in values) names.TryAdd(value.Id, value.Name); }
-
-        Add((await db.Users.Where(u => list.Contains(u.Id) &&
-                (db.Projects.Any(p => visible.Contains(p.Id) && p.ProjectManagerId == u.Id) ||
-                 db.ProjectMembers.Any(m => visible.Contains(m.ProjectId) && m.UserId == u.Id && m.RemovedAt == null) ||
-                 db.ProjectDisciplines.Any(d => visible.Contains(d.ProjectId) && d.LeadUserId == u.Id) ||
-                 db.Tasks.IgnoreQueryFilters().Any(t => visible.Contains(t.ProjectId) && (t.AssigneeId == u.Id || t.ReviewerId == u.Id)) ||
-                 db.Deliverables.IgnoreQueryFilters().Any(d => visible.Contains(d.ProjectId) && (d.OwnerId == u.Id || d.ReviewerId == u.Id)) ||
-                 db.Decisions.IgnoreQueryFilters().Any(d => visible.Contains(d.ProjectId) && (d.OwnerUserId == u.Id || d.RequestedById == u.Id)) ||
-                 db.Risks.IgnoreQueryFilters().Any(r => visible.Contains(r.ProjectId) && r.OwnerId == u.Id) ||
-                 db.Issues.IgnoreQueryFilters().Any(i => visible.Contains(i.ProjectId) && i.OwnerId == u.Id) ||
-                 db.Actions.IgnoreQueryFilters().Any(a => visible.Contains(a.ProjectId) && a.OwnerUserId == u.Id) ||
-                 db.ActivityLog.Any(a => a.ProjectId != null && visible.Contains(a.ProjectId.Value) && a.ActorUserId == u.Id)))
-            .Select(u => new { u.Id, u.DisplayName, u.IsActive }).ToListAsync()).Select(u => (u.Id, u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)")));
-        Add((await db.Projects.Where(p => visible.Contains(p.Id) && list.Contains(p.Id)).Select(p => new { p.Id, p.ProjectNumber, p.Name }).ToListAsync())
-            .Select(p => (p.Id, p.ProjectNumber + " " + p.Name)));
-        Add((await db.ProjectDisciplines.Where(p => visible.Contains(p.ProjectId) && list.Contains(p.Id)).Join(db.Disciplines, p => p.DisciplineId, d => d.Id,
-                (p, d) => new { p.Id, d.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
-        Add((await db.Disciplines.Where(d => list.Contains(d.Id) && db.ProjectDisciplines.Any(p => visible.Contains(p.ProjectId) && p.DisciplineId == d.Id))
-                .Select(d => new { d.Id, d.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
-        Add((await db.Tasks.IgnoreQueryFilters().Where(t => list.Contains(t.Id) && visible.Contains(t.ProjectId)).Select(t => new { t.Id, t.Key, t.Name }).ToListAsync())
-            .Select(x => (x.Id, x.Key + " " + x.Name)));
-        Add((await db.Deliverables.IgnoreQueryFilters().Where(d => list.Contains(d.Id) && visible.Contains(d.ProjectId)).Select(d => new { d.Id, d.Key, d.Name }).ToListAsync())
-            .Select(x => (x.Id, x.Key + " " + x.Name)));
-        Add((await db.Milestones.IgnoreQueryFilters().Where(m => list.Contains(m.Id) && visible.Contains(m.ProjectId)).Select(m => new { m.Id, m.Key, m.Name }).ToListAsync())
-            .Select(x => (x.Id, x.Key + " " + x.Name)));
-        Add((await db.Decisions.IgnoreQueryFilters().Where(d => list.Contains(d.Id) && visible.Contains(d.ProjectId)).Select(d => new { d.Id, d.Key, d.Subject }).ToListAsync())
-            .Select(x => (x.Id, x.Key + " " + x.Subject)));
-        Add((await db.Risks.IgnoreQueryFilters().Where(r => list.Contains(r.Id) && visible.Contains(r.ProjectId)).Select(r => new { r.Id, r.Key, r.Title }).ToListAsync())
-            .Select(x => (x.Id, x.Key + " " + x.Title)));
-        Add((await db.Issues.IgnoreQueryFilters().Where(i => list.Contains(i.Id) && visible.Contains(i.ProjectId)).Select(i => new { i.Id, i.Key, i.Title }).ToListAsync())
-            .Select(x => (x.Id, x.Key + " " + x.Title)));
-        Add((await db.Actions.IgnoreQueryFilters().Where(a => list.Contains(a.Id) && visible.Contains(a.ProjectId)).Select(a => new { a.Id, a.Key, a.Text }).ToListAsync())
-            .Select(x => (x.Id, x.Key + " " + x.Text)));
-        Add((await db.Meetings.IgnoreQueryFilters().Where(m => list.Contains(m.Id) && visible.Contains(m.ProjectId)).Select(m => new { m.Id, m.Title }).ToListAsync())
-            .Select(x => (x.Id, x.Title)));
-        Add((await db.Clients.Where(c => list.Contains(c.Id) && db.Projects.Any(p => visible.Contains(p.Id) && p.ClientId == c.Id)).Select(c => new { c.Id, c.Name }).ToListAsync())
-            .Select(x => (x.Id, x.Name)));
-        Add((await db.Offices.Where(o => list.Contains(o.Id) && db.Projects.Any(p => visible.Contains(p.Id) && p.OfficeId == o.Id)).Select(o => new { o.Id, o.Name }).ToListAsync())
-            .Select(x => (x.Id, x.Name)));
-        Add((await db.Phases.Where(p => list.Contains(p.Id) && db.Projects.Any(x => visible.Contains(x.Id) && x.PhaseId == p.Id)).Select(p => new { p.Id, p.Name }).ToListAsync())
-            .Select(x => (x.Id, x.Name)));
-        Add((await db.ProjectTypes.Where(t => list.Contains(t.Id) && db.Projects.Any(p => visible.Contains(p.Id) && p.ProjectTypeId == t.Id)).Select(t => new { t.Id, t.Name }).ToListAsync())
-            .Select(x => (x.Id, x.Name)));
-        Add((await db.DeliverableTypes.Where(t => list.Contains(t.Id) && db.Deliverables.IgnoreQueryFilters().Any(d => visible.Contains(d.ProjectId) && d.DeliverableTypeId == t.Id))
-                .Select(t => new { t.Id, t.Name }).ToListAsync()).Select(x => (x.Id, x.Name)));
-        Add((await db.ExternalParties.Where(e => list.Contains(e.Id) && db.Actions.IgnoreQueryFilters().Any(a => visible.Contains(a.ProjectId) && a.OwnerExternalPartyId == e.Id))
-                .Select(e => new { e.Id, e.Name, e.Organisation }).ToListAsync()).Select(x => (x.Id, x.Organisation is null ? x.Name : x.Name + " (" + x.Organisation + ")")));
-        return names;
-    }
+    static Task<Dictionary<Guid, string>> VisibleNames(HubDb db, Access access, HashSet<Guid> ids) =>
+        Hub.Api.Records.EntityRegistry.Names(db, ids, access);
 
     public static void Map(RouteGroupBuilder api)
     {

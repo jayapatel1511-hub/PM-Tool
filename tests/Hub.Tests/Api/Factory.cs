@@ -26,6 +26,7 @@ public sealed class HubFactory : WebApplicationFactory<Program>
     public Dictionary<string, string> Settings { get; } = [];
     public string Database { get; } = "hub_test_" + Guid.NewGuid().ToString("N")[..8];
     public TestClock Clock { get; } = new();
+    readonly ShapeRecorder shapes = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder b)
     {
@@ -47,12 +48,14 @@ public sealed class HubFactory : WebApplicationFactory<Program>
         {
             s.RemoveAll<TimeProvider>();
             s.AddSingleton<TimeProvider>(Clock);
+            s.AddSingleton<IStartupFilter>(shapes);
         });
     }
 
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
+        if (disposing) shapes.Write(Database);
         NpgsqlConnection.ClearAllPools();
         using var c = new NpgsqlConnection("Host=localhost;Port=55432;Database=hub;Username=hub");
         c.Open();

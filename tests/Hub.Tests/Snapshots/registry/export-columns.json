@@ -1,0 +1,1400 @@
+{
+  "Handoffs.Columns": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "title",
+      "header": "name",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "senderName",
+      "header": "handoffSender",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "receiverName",
+      "header": "handoffReceiver",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "declaredRevision",
+      "header": "revision",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "neededBy",
+      "header": "handoffNeeded",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "promisedBy",
+      "header": "handoffPromised",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "intendedUse",
+      "header": "handoffPurpose",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "Changes.Columns": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "title",
+      "header": "name",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "assessmentDueDate",
+      "header": "due",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "pendingAssessments",
+      "header": "changePending",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "scope",
+      "header": "changeScope",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "DecisionExtras.ClientCols": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "key",
+      "label": null
+    },
+    {
+      "path": "subject",
+      "header": "subject",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "description",
+      "header": "toDecide",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "requiredBy",
+      "header": "requiredBy",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "timing",
+      "header": "timing",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "impact",
+      "header": "impact",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "owner",
+      "header": "owner",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "ListExports.DecisionCols": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "key",
+      "label": null
+    },
+    {
+      "path": "subject",
+      "header": "subject",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "ownerName",
+      "header": "owner",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "requestedByName",
+      "header": "requestedBy",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "dateRequested",
+      "header": "requested",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "requiredByDate",
+      "header": "requiredBy",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "days",
+      "header": "days",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "impactLevel",
+      "header": "impact",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "blocking",
+      "header": "blockingCount",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "decisionText",
+      "header": "decision",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "decisionDate",
+      "header": "decisionDate",
+      "type": "date",
+      "label": null
+    }
+  ],
+  "ListExports.DeliverableCols": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "key",
+      "label": null
+    },
+    {
+      "path": "name",
+      "header": "deliverable",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "typeName",
+      "header": "type",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "disciplineName",
+      "header": "discipline",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "ownerName",
+      "header": "owner",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "reviewerName",
+      "header": "reviewer",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "milestoneKey",
+      "header": "milestone",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "dueDate",
+      "header": "due",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "state.progressPct",
+      "header": "progress",
+      "type": "percent",
+      "label": null
+    },
+    {
+      "path": "indicators",
+      "header": "indicators",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "revision",
+      "header": "revision",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "issuedDate",
+      "header": "issued",
+      "type": "date",
+      "label": null
+    }
+  ],
+  "Portfolio.Cols": [
+    {
+      "path": "projectNumber",
+      "header": "project",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "name",
+      "header": "name",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "pm.displayName",
+      "header": "pm",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "client.name",
+      "header": "client",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "office",
+      "header": "office",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "phase",
+      "header": "phase",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "computedHealth",
+      "header": "computedHealth",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "reportedHealth",
+      "header": "reportedHealth",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "why",
+      "header": "why",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "healthOverrideNote",
+      "header": "overrideNote",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "nextMilestone.name",
+      "header": "nextMilestone",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "nextMilestone.date",
+      "header": "nextMilestoneDate",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "nextSubmission.name",
+      "header": "nextSubmission",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "nextSubmission.date",
+      "header": "nextSubmissionDate",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "overdueTasks",
+      "header": "overdueTasks",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "blockedTasks",
+      "header": "blockedTasks",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "overdueDecisions",
+      "header": "overdueDecisions",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "highIssues",
+      "header": "highIssues",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "attentionCritical",
+      "header": "critical",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "attentionWarning",
+      "header": "warning",
+      "type": "number",
+      "label": null
+    }
+  ],
+  "WeeklyCommitments.ExportColumns": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "work",
+      "header": "item",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "performer",
+      "header": "performer",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "weekStart",
+      "header": "weekStart",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "targetDate",
+      "header": "promiseTargetDate",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "intendedOutput",
+      "header": "intendedOutput",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "completionCriteria",
+      "header": "completionCriteria",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "state",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "readinessAtCommit",
+      "header": "readinessAtCommit",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "snapshotAt",
+      "header": "snapshotAt",
+      "type": "datetime",
+      "label": null
+    },
+    {
+      "path": "completionEvidenceUrl",
+      "header": "completionEvidence",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "Readiness.ReadyColumns": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "name",
+      "header": "name",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "targetType",
+      "header": "type",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "owner",
+      "header": "owner",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "discipline",
+      "header": "discipline",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "dueDate",
+      "header": "due",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "intendedOutput",
+      "header": "intendedOutput",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "completionCriteria",
+      "header": "completionCriteria",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "state",
+      "header": "readiness",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "ListExports.ActivityCols": [
+    {
+      "path": "occurredAt",
+      "header": "timestamp",
+      "type": "datetime",
+      "label": null
+    },
+    {
+      "path": "actorName",
+      "header": "actor",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "action",
+      "header": "action",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "item",
+      "header": "item",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "summary",
+      "header": "change",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "reason",
+      "header": "reason",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "source",
+      "header": "source",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "Allocations.ExportColumns": [
+    {
+      "path": "personName",
+      "header": "person",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "personState",
+      "header": "person",
+      "type": "text",
+      "label": "Person eligibility"
+    },
+    {
+      "path": "purpose",
+      "header": "type",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "fromDate",
+      "header": "date",
+      "type": "date",
+      "label": "From date"
+    },
+    {
+      "path": "throughDate",
+      "header": "date",
+      "type": "date",
+      "label": "Through date"
+    },
+    {
+      "path": "plannedHours",
+      "header": "hours",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "Submissions.ListColumns": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "title",
+      "header": "name",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "coordinatorName",
+      "header": "owner",
+      "type": "text",
+      "label": "Coordinator"
+    },
+    {
+      "path": "milestoneName",
+      "header": "milestone",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "targetDate",
+      "header": "targetDate",
+      "type": "date",
+      "label": "Target date"
+    },
+    {
+      "path": "blockerCount",
+      "header": "blockers",
+      "type": "number",
+      "label": "Readiness blockers"
+    }
+  ],
+  "Readiness.ConstraintColumns": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "work",
+      "header": "item",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "category",
+      "header": "constraintCategory",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "description",
+      "header": "description",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "removalOwner",
+      "header": "removalOwner",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "affectedOwner",
+      "header": "affectedOwner",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "neededBy",
+      "header": "neededBy",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "state",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "linked",
+      "header": "linkedRecord",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "sourceUrl",
+      "header": "sourceEvidence",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "Registers.IssueCols": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "key",
+      "label": null
+    },
+    {
+      "path": "title",
+      "header": "title",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "issueType",
+      "header": "issueType",
+      "type": "text",
+      "label": "Issue type"
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "severity",
+      "header": "severity",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "ownerName",
+      "header": "owner",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "raisedByName",
+      "header": "raisedBy",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "disciplineName",
+      "header": "discipline",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "affectedDisciplineSummary",
+      "header": "affectedDisciplines",
+      "type": "text",
+      "label": "Affected disciplines"
+    },
+    {
+      "path": "dateRaised",
+      "header": "dateRaised",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "targetResolutionDate",
+      "header": "targetDate",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "daysOverdue",
+      "header": "daysOverdue",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "resolvedDate",
+      "header": "resolvedDate",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "resolution",
+      "header": "resolution",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "originRiskKey",
+      "header": "originRisk",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "locationSummary",
+      "header": "locationSummary",
+      "type": "text",
+      "label": "Location"
+    },
+    {
+      "path": "documentSummary",
+      "header": "documentSummary",
+      "type": "text",
+      "label": "References"
+    },
+    {
+      "path": "verificationStatus",
+      "header": "verificationStatus",
+      "type": "text",
+      "label": "Verification"
+    }
+  ],
+  "ListExports.MilestoneCols": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "key",
+      "label": null
+    },
+    {
+      "path": "name",
+      "header": "milestone",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "milestoneType",
+      "header": "type",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "date",
+      "header": "date",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "slipDays",
+      "header": "slip",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "deliverablesIssued",
+      "header": "deliverablesIssued",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "taskOpen",
+      "header": "openTasks",
+      "type": "number",
+      "label": null
+    }
+  ],
+  "DesignBasis.ExportColumns": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "title",
+      "header": "name",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "kind",
+      "header": "kind",
+      "type": "text",
+      "label": "Kind"
+    },
+    {
+      "path": "discipline",
+      "header": "discipline",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "owner",
+      "header": "owner",
+      "type": "text",
+      "label": "Owner"
+    },
+    {
+      "path": "version",
+      "header": "revision",
+      "type": "text",
+      "label": "Version"
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "scope",
+      "header": "scope",
+      "type": "text",
+      "label": "Scope"
+    },
+    {
+      "path": "statement",
+      "header": "statement",
+      "type": "text",
+      "label": "Value or statement"
+    },
+    {
+      "path": "numericValue",
+      "header": "value",
+      "type": "number",
+      "label": "Numeric value"
+    },
+    {
+      "path": "units",
+      "header": "units",
+      "type": "text",
+      "label": "Units"
+    },
+    {
+      "path": "sourceSystem",
+      "header": "sourceSystem",
+      "type": "text",
+      "label": "Source system"
+    },
+    {
+      "path": "stableSourceId",
+      "header": "sourceId",
+      "type": "text",
+      "label": "Stable source ID"
+    },
+    {
+      "path": "sourceUrl",
+      "header": "sourceUrl",
+      "type": "text",
+      "label": "Source URL"
+    },
+    {
+      "path": "declaredRevision",
+      "header": "declaredRevision",
+      "type": "text",
+      "label": "Declared source revision"
+    },
+    {
+      "path": "confirmationDueDate",
+      "header": "due",
+      "type": "date",
+      "label": "Confirmation due date"
+    }
+  ],
+  "Meetings.ActionCols": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "key",
+      "label": null
+    },
+    {
+      "path": "text",
+      "header": "actionText",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "meetingTitle",
+      "header": "meeting",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "meetingDate",
+      "header": "meetingDate",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "ownerName",
+      "header": "owner",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "ownerTypeLabel",
+      "header": "ownerType",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "dueDate",
+      "header": "due",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "daysOverdue",
+      "header": "daysOverdue",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "taskKey",
+      "header": "task",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "ListExports.ProjectCols": [
+    {
+      "path": "projectNumber",
+      "header": "project",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "name",
+      "header": "name",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "client.name",
+      "header": "client",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "pm.displayName",
+      "header": "pm",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "phase",
+      "header": "phase",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "office",
+      "header": "office",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "reportedHealth",
+      "header": "health",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "progressPct",
+      "header": "progress",
+      "type": "percent",
+      "label": null
+    },
+    {
+      "path": "overdueTasks",
+      "header": "overdueTasks",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "nextMilestone.name",
+      "header": "nextMilestone",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "targetCompletionDate",
+      "header": "target",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "priority",
+      "header": "priority",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "Time.Cols": [
+    {
+      "path": "workDate",
+      "header": "date",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "person",
+      "header": "person",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "projectNumber",
+      "header": "project",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "taskKey",
+      "header": "key",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "taskName",
+      "header": "task",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "hours",
+      "header": "hours",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "note",
+      "header": "note",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "Reviews.Columns": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "title",
+      "header": "name",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "roundNumber",
+      "header": "round",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "outstandingDisciplines",
+      "header": "reviewOutstanding",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "blockingFindings",
+      "header": "reviewBlocking",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "waitingDays",
+      "header": "reviewWaiting",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "Registers.RiskCols": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "key",
+      "label": null
+    },
+    {
+      "path": "title",
+      "header": "title",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "band",
+      "header": "severity",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "score",
+      "header": "score",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "probability",
+      "header": "probability",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "impact",
+      "header": "impactScore",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "ownerName",
+      "header": "owner",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "disciplineName",
+      "header": "discipline",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "reviewDate",
+      "header": "reviewDate",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "mitigation",
+      "header": "mitigation",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "triggerIndicator",
+      "header": "trigger",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "realisedIssueKey",
+      "header": "realisedAs",
+      "type": "text",
+      "label": null
+    }
+  ],
+  "ListExports.TaskCols": [
+    {
+      "path": "key",
+      "header": "key",
+      "type": "key",
+      "label": null
+    },
+    {
+      "path": "name",
+      "header": "task",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "deliverableKey",
+      "header": "deliverable",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "disciplineName",
+      "header": "discipline",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "assigneeName",
+      "header": "assignee",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "reviewerName",
+      "header": "reviewer",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "status",
+      "header": "status",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "priority",
+      "header": "priority",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "startDate",
+      "header": "start",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "dueDate",
+      "header": "due",
+      "type": "date",
+      "label": null
+    },
+    {
+      "path": "progressPct",
+      "header": "progress",
+      "type": "percent",
+      "label": null
+    },
+    {
+      "path": "estimatedHours",
+      "header": "estimate",
+      "type": "number",
+      "label": null
+    },
+    {
+      "path": "indicators",
+      "header": "indicators",
+      "type": "text",
+      "label": null
+    },
+    {
+      "path": "lastActivityAt",
+      "header": "lastActivity",
+      "type": "datetime",
+      "label": null
+    }
+  ]
+}

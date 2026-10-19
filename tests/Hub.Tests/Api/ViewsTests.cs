@@ -192,4 +192,5 @@ public sealed class ViewsTests(HubFactory f)
         var other = await d.NewTask((await d.Project()).Id, TestData.Pm);
         Assert.Equal(HttpStatusCode.BadRequest, (await f.As(TestData.Alex).Put($"/api/v1/projects/{p.Id}/board-order", new { taskIds = new[] { other.G("id") } })).StatusCode);
     }
+
 }

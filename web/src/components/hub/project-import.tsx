@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { api, post } from '@/lib/api'
-import { t } from '@/lib/i18n'
+import { runtimeText, t  } from '@/lib/i18n'
 
 type Preview = { rows: { row: number; projectNumber: string; name: string; classification: string; error?: string }[]; creates: number; exists: number; errors: number; canApply: boolean }
 export function ProjectImportDialog({ onClose, onChanged }: { onClose: () => void; onChanged: () => void }) {
@@ -23,7 +23,7 @@ export function ProjectImportDialog({ onClose, onChanged }: { onClose: () => voi
     {error != null && <ErrorBanner error={error} />}
     <Field label={t('projectImport.file')} htmlFor="project-import-file"><Input id="project-import-file" type="file" accept=".csv,text/csv" disabled={busy} onChange={e => { const file = e.target.files?.[0]; if (file) void file.text().then(change).catch(setError) }} /></Field>
     <Field label={t('projectImport.csv')} htmlFor="project-import-csv"><Textarea id="project-import-csv" value={csv} rows={6} disabled={busy} onChange={e => change(e.target.value)} /></Field>
-    {preview && <><p role="status">{t(done ? 'projectImport.complete' : 'projectImport.summary', { creates: preview.creates, exists: preview.exists, errors: preview.errors })}</p><TableRegion role="region" aria-label={t('projectImport.preview')}><table className="w-full text-sm"><thead><tr>{['row', 'number', 'name', 'classification', 'error'].map(key => <th key={key} scope="col" className={thCls}>{t(`projectImport.${key}`)}</th>)}</tr></thead><tbody>{preview.rows.map(row => <tr key={row.row}><td className={tdCls}>{row.row}</td><td className={tdCls}>{row.projectNumber}</td><td className={tdCls}>{row.name}</td><td className={tdCls}>{t(`projectImport.${row.classification}`)}</td><td className={tdCls}>{row.error ?? '—'}</td></tr>)}</tbody></table></TableRegion></>}
+    {preview && <><p role="status">{t(done ? 'projectImport.complete' : 'projectImport.summary', { creates: preview.creates, exists: preview.exists, errors: preview.errors })}</p><TableRegion role="region" aria-label={t('projectImport.preview')}><table className="w-full text-sm"><thead><tr>{['row', 'number', 'name', 'classification', 'error'].map(key => <th key={key} scope="col" className={thCls}>{runtimeText(`projectImport.${key}`)}</th>)}</tr></thead><tbody>{preview.rows.map(row => <tr key={row.row}><td className={tdCls}>{row.row}</td><td className={tdCls}>{row.projectNumber}</td><td className={tdCls}>{row.name}</td><td className={tdCls}>{runtimeText(`projectImport.${row.classification}`)}</td><td className={tdCls}>{row.error ?? '—'}</td></tr>)}</tbody></table></TableRegion></>}
     <DialogFooter><Button variant="outline" onClick={onClose} disabled={busy}>{t('common.close')}</Button><Button variant="outline" disabled={busy || !csv || done} onClick={() => void run(false)}>{t('projectImport.preview')}</Button><Button disabled={busy || !preview?.canApply || done || preview.creates === 0} onClick={() => void run(true)}>{t('projectImport.commit')}</Button></DialogFooter>
   </DialogContent></Dialog>
 }

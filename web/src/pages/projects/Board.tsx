@@ -17,7 +17,7 @@ import { useProjectRefresh } from '@/hooks/data'
 import { ViewMenu } from '@/components/hub/views'
 import { get, put, qs } from '@/lib/api'
 import { addDays, shortDate, today } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
@@ -63,7 +63,7 @@ export function BoardTab() {
   const { onDrop, dialog } = useLaneDrop(actions)
   const [creating, setCreating] = useState(false)
   const lanes = side ? [...LANES, ...SIDE] : LANES
-  const columns = lanes.map((l) => ({ id: l, name: t(`lane.${l}`) }))
+  const columns = lanes.map((l) => ({ id: l, name: runtimeText(`lane.${l}`) }))
   const all = q.data?.items ?? []
   const rows = all.filter((r) => lanes.includes(r.lane))
   const hidden = all.length - rows.length
@@ -91,7 +91,7 @@ export function BoardTab() {
       <TaskFilterBar p={p} deliverables={deliverables} extra={<>
         <Field label={t('board.swimlanes')} htmlFor="board-swim" className="w-full sm:w-56">
           <select id="board-swim" className={selectCls} value={swim} onChange={(e) => set('swim', e.target.value === 'none' ? null : e.target.value)}>
-            {SWIMLANES.map((x) => <option key={x} value={x}>{t(`board.swim.${x}`)}</option>)}
+            {SWIMLANES.map((x) => <option key={x} value={x}>{runtimeText(`board.swim.${x}`)}</option>)}
           </select>
         </Field>
         <Field label={t('board.sort')} htmlFor="board-sort" className="w-full sm:w-44">
@@ -154,7 +154,7 @@ export function useLaneDrop(actions: ReturnType<typeof useTaskActions>) {
       if (allowed.length === 0) {
         snapBack()
         const review = lane === 'Done' && r.requiresReview ? t('board.needsReview', { key: r.key, reviewer: r.reviewerName ?? t('ind.noReviewer') }) : null
-        toast.error(options.find((x) => x.reason)?.reason ?? (lane === 'Done' ? detail.permissions.completeHint : null) ?? review ?? t('board.notAllowed', { key: r.key, lane: t(`lane.${lane}`) }))
+        toast.error(options.find((x) => x.reason)?.reason ?? (lane === 'Done' ? detail.permissions.completeHint : null) ?? review ?? t('board.notAllowed', { key: r.key, lane: runtimeText(`lane.${lane}`) }))
         return
       }
       if (allowed.length > 1) { snapBack(); setChoose({ detail, options: allowed }); return }

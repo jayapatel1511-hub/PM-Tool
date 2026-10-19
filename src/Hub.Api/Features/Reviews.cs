@@ -17,7 +17,7 @@ public static class ReviewEndpoints
     public sealed record FindingBody(Guid RequestId, int RowVersion, Guid SourceRevisionId, Guid ProjectDisciplineId, Guid ResolverId, string Text, string Severity, Guid? IssueId = null);
     public sealed record FindingAction(Guid RequestId, int RowVersion, string Action, string Reason, string? EvidenceUrl, Guid? OwnerId);
     public sealed record Filter(string? Q, string? Status, Guid? OwnerId, Guid? DisciplineId, bool? Mine);
-    static readonly Col[] Columns = [new("key", "key"), new("title", "name"), new("status", "status"), new("roundNumber", "round"), new("outstandingDisciplines", "reviewOutstanding"), new("blockingFindings", "reviewBlocking"), new("waitingDays", "reviewWaiting")];
+    static readonly Col[] Columns = Hub.Api.Records.ReviewPackageRecord.ReviewsColumns;
 
     public static void Map(RouteGroupBuilder api)
     {

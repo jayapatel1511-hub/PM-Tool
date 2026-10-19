@@ -1,9 +1,12 @@
+using System.Diagnostics;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
+using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
 
@@ -27,12 +30,12 @@ public sealed class LiveStreams
 public static class EventEndpoints
 {
     public const string Flag = "live_events";
-    static readonly string[] Recompute = [ItemType.Project, ItemType.Member, ItemType.User];
+    static readonly string[] Recompute = [ItemType.Project, ItemType.Member];
     static readonly string[] ActorOnly = [ItemType.TimeEntry, ItemType.CalendarEvent];
     static readonly JsonSerializerOptions Web = new(JsonSerializerDefaults.Web);
 
     public static void Map(RouteGroupBuilder api) =>
-        api.MapGet("/events", async (HttpContext ctx, Access access, LiveFeed feed, LiveStreams streams, IConfiguration cfg,
+        api.MapGet("/events", async (HttpContext ctx, Access access, HubDb db, LiveFeed feed, LiveStreams streams, IConfiguration cfg,
             IHostApplicationLifetime host, TimeProvider clock) =>
         {
             var me = access.Me.Id;
@@ -56,19 +59,32 @@ public static class EventEndpoints
                 try
                 {
                     await Write(ctx, ": open\n\n", ct);
+                    var sinceWrite = Stopwatch.StartNew();
                     while (true)
                     {
                         using (var beat = CancellationTokenSource.CreateLinkedTokenSource(ct))
                         {
-                            beat.CancelAfter(heartbeat);
+                            var remaining = heartbeat - sinceWrite.Elapsed;
+                            beat.CancelAfter(remaining > TimeSpan.Zero ? remaining : TimeSpan.FromTicks(1));
                             try { if (!await sub.Reader.WaitToReadAsync(beat.Token)) break; } // completed: shutdown or a full channel
-                            catch (OperationCanceledException) when (!ct.IsCancellationRequested) { await Write(ctx, ": heartbeat\n\n", ct); continue; }
+                            catch (OperationCanceledException) when (!ct.IsCancellationRequested) { await Write(ctx, ": heartbeat\n\n", ct); sinceWrite.Restart(); continue; }
                         }
                         while (sub.Reader.TryRead(out var batch))
                         {
-                            if (batch.Rows.Any(r => Recompute.Contains(r.ItemType))) visible = await access.VisibleProjectIdSet();
+                            if (batch.Users || batch.Rows.Any(r => Recompute.Contains(r.ItemType)))
+                            {
+                                // Reload the viewer's system roles and active state, so a demoted Admin or Executive or a deactivated user
+                                // stops receiving at once rather than at the life limit (FR-LIVE-16).
+                                var u = await db.Users.AsNoTracking().Where(x => x.Id == me)
+                                    .Select(x => new { x.IsActive, Roles = x.Roles.Select(r => r.Role).ToList() }).FirstOrDefaultAsync(ct);
+                                if (u is not { IsActive: true }) return Results.Empty; // deactivated: end the stream
+                                access.Me.Roles = [.. u.Roles];
+                                visible = await access.VisibleProjectIdSet();
+                            }
                             var text = Frame(batch, visible, me);
-                            if (text.Length > 0) await Write(ctx, text, ct);
+                            if (text.Length > 0) { await Write(ctx, text, ct); sinceWrite.Restart(); }
+                            // Invisible traffic must never postpone the heartbeat seen by this viewer.
+                            if (sinceWrite.Elapsed >= heartbeat) { await Write(ctx, ": heartbeat\n\n", ct); sinceWrite.Restart(); }
                         }
                     }
                 }

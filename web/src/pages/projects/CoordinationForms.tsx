@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ApiError, post } from '@/lib/api'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 export type RecordVersion = { id: string; rowVersion: number }
@@ -92,7 +92,7 @@ export function FieldsCommand({ fields, initial = {}, build, ...props }: Omit<Pa
   const [v, set] = useState(initial), prefix = useId()
   return <CommandForm {...props} payload={() => build(v)}>{fields.map(f => {
     const id = `${prefix}-${f.name}`, value = v[f.name] ?? '', update = (val: string) => set(old => ({ ...old, [f.name]: val }))
-    if (f.choices) return <SelectField key={f.name} label={t(f.label)} value={value} onChange={update} choices={f.choices} required={!f.optional} />
-    return <Field key={f.name} label={t(f.label)} htmlFor={id} optional={f.optional}>{f.type === 'textarea' ? <Textarea id={id} value={value} required={!f.optional} maxLength={4000} onChange={e => update(e.target.value)} /> : <Input id={id} type={f.type ?? 'text'} value={value} required={!f.optional} min={f.min} step={f.type === 'number' ? 'any' : undefined} maxLength={2000} onChange={e => update(e.target.value)} />}</Field>
+    if (f.choices) return <SelectField key={f.name} label={runtimeText(f.label)} value={value} onChange={update} choices={f.choices} required={!f.optional} />
+    return <Field key={f.name} label={runtimeText(f.label)} htmlFor={id} optional={f.optional}>{f.type === 'textarea' ? <Textarea id={id} value={value} required={!f.optional} maxLength={4000} onChange={e => update(e.target.value)} /> : <Input id={id} type={f.type ?? 'text'} value={value} required={!f.optional} min={f.min} step={f.type === 'number' ? 'any' : undefined} maxLength={2000} onChange={e => update(e.target.value)} />}</Field>
   })}</CommandForm>
 }

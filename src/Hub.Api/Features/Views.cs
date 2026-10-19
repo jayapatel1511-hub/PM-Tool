@@ -16,38 +16,7 @@ public static class ViewEndpoints
 
     const string Personal = "Personal", ProjectScope = "Project";
     static readonly string[] PortfolioGroups = ["none", "client", "office", "projectType"];
-    static readonly string[] TaskKeys = ["q", "disciplineId", "deliverableId", "status", "priority", "mine", "overdue", "blocked", "blocking", "dueThisWeek", "unassigned",
-        "readyForReview", "waiting", "open", "stale", "dueSoon", "noDueDate", "dateInconsistent", "heldPastDue", "dueFrom", "dueTo", "milestoneId", "assigneeId", "ids",
-        "sort", "group", "cols"];
-
-    /// The parameters each list accepts (§18.3); anything else in a stored view is dropped when it is opened.
-    public static readonly Dictionary<string, string[]> Lists = new()
-    {
-        ["tasks"] = TaskKeys,
-        ["reviews"] = ["q", "status", "ownerId", "disciplineId", "mine"],
-        ["changes"] = ["q", "status", "ownerId", "mine"],
-        ["handoffs"] = ["q", "status", "direction", "disciplineId", "overdue"],
-        ["submissions"] = ["q", "status", "coordinatorId", "milestoneId", "targetFrom", "targetTo"],
-        ["allocations"] = ["q", "personId", "purpose", "status", "from", "to"],
-        ["design-basis"] = ["kind", "status", "discipline", "scope", "overdue", "affectedWorkId"],
-        ["readiness"] = ["from", "to"],
-        ["issues"] = ["q", "status", "severity", "ownerId", "disciplineId", "indicator", "location", "document", "revision", "verification", "alignment", "issueType", "stationFrom", "stationTo", "stationUnits", "group", "sort", "cols"],
-        ["board"] = [.. TaskKeys, "swim", "side"],
-        ["deliverables"] = ["q", "disciplineId", "status", "milestoneId", "ownerId", "typeId", "indicator", "dueFrom", "dueTo", "requiresReview", "group", "sort", "cols"],
-        ["decisions"] = ["q", "status", "ownerId", "ownerType", "impact", "requiredFrom", "requiredTo", "blocking", "indicator", "sort", "cols"],
-        ["milestones"] = ["type", "showCompleted"],
-        ["projects"] = ["q", "status", "pmId", "clientId", "officeId", "phaseId", "disciplineId", "health", "projectTypeId", "includeArchived", "mine", "starred", "priority", "sort", "submissionWithinDays"],
-        ["portfolio"] = ["q", "status", "pmId", "clientId", "officeId", "phaseId", "disciplineId", "health", "projectTypeId", "mine", "submissionWithinDays", "group", "overdueDecisions"],
-        ["staff"] = ["scope", "inactive", "office", "discipline", "indicator"],
-        ["workload"] = ["supervisorId", "disciplineId", "officeId", "projectId", "indicator", "from", "sort"],
-        ["planner"] = ["view", "from", "weeks", "week", "supervisorId", "disciplineId", "officeId", "personId", "projectId", "source", "confidence", "visibility", "indicator", "q", "sort", "includeMyDrafts"],
-        // Cross-project lists keep their project scope too (§36.1, FR-VIS-02); it is re-read against access when opened.
-        ["workspace-tasks"] = [.. TaskKeys, "projects", "ws", "projectId"],
-        ["workspace-board"] = [.. TaskKeys, "projects", "ws", "projectId", "swim", "side"],
-        ["mywork"] = ["tab", "who", "projects", "ws", "project", "discipline", "status", "priority", "from", "to", "hideWaiting", "sort"],
-        ["coordination"] = ["discipline", "owner", "from", "to"],
-        ["workspace-coordination"] = ["tab", "projects", "ws", "projectId", "disciplineId", "ownerId", "from", "to"],
-    };
+    public static readonly IReadOnlyDictionary<string, string[]> Lists = Hub.Api.Records.ScreenLists.SavedViewKeys;
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -153,6 +122,12 @@ public static class ViewEndpoints
     /// Definitions only (FR-003): the list's own parameters, with sort, grouping and columns also kept in their fields.
     static void Apply(SavedView v, Dictionary<string, string> ps, string listType)
     {
+        if (listType == "planner" && ps.TryGetValue("view", out var legacy) && legacy is "list" or "projects")
+        {
+            ps = new Dictionary<string, string>(ps);
+            ps.TryAdd("layout", legacy);
+            ps.Remove("view");
+        }
         var known = Lists[listType];
         var kept = ps.Where(p => known.Contains(p.Key) && !string.IsNullOrWhiteSpace(p.Value)).ToDictionary(p => p.Key, p => p.Value.Trim());
         Check.That(kept.Values.All(x => x.Length <= 2000), "params", "error.too_long", 2000);
@@ -174,41 +149,22 @@ public static class ViewEndpoints
     /// Drops parameters the list no longer accepts and references that no longer resolve (edge case of the spec).
     static async Task<(Dictionary<string, string> Kept, List<string> Dropped)> Clean(HubDb db, string listType, Guid? projectId, Dictionary<string, string> ps)
     {
+        if (listType == "planner" && ps.TryGetValue("view", out var legacy) && legacy is "list" or "projects")
+        {
+            ps = new Dictionary<string, string>(ps);
+            ps.TryAdd("layout", legacy);
+            ps.Remove("view");
+        }
         var known = Lists[listType];
         var kept = new Dictionary<string, string>();
         var dropped = new List<string>();
         foreach (var (k, value) in ps)
         {
             if (!known.Contains(k)) { dropped.Add(k); continue; }
-            var ids = Http.Ids(value);
-            var ok = k switch
-            {
-                "disciplineId" when projectId is not null => await Count(db.ProjectDisciplines.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.IsActive).Select(x => x.Id), ids),
-                "discipline" when projectId is not null => await Count(db.ProjectDisciplines.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.IsActive).Select(x => x.Id), ids),
-                "disciplineId" => await Count(db.Disciplines.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
-                "discipline" => await Count(db.Disciplines.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
-                "owner" when projectId is not null => await Count(db.Users.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
-                "deliverableId" => await Count(db.Deliverables.Where(x => ids.Contains(x.Id)).Select(x => x.Id), ids),
-                "milestoneId" => await Count(db.Milestones.Where(x => ids.Contains(x.Id) && !x.IsCancelled).Select(x => x.Id), ids),
-                "coordinatorId" or "personId" when projectId is not null => await Count(db.Users.Where(x => ids.Contains(x.Id) && x.IsActive
-                    && db.ProjectMembers.Any(m => m.ProjectId == projectId && m.UserId == x.Id && m.RemovedAt == null)).Select(x => x.Id), ids),
-                "affectedWorkId" when projectId is not null => await Count(db.Tasks.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.DeletedAt == null).Select(x => x.Id)
-                    .Concat(db.Deliverables.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.DeletedAt == null).Select(x => x.Id)), ids),
-                "assigneeId" or "ownerId" or "pmId" or "supervisorId" => await Count(db.Users.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids)
-                    || (k == "ownerId" && await Count(db.ExternalParties.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids)),
-                "typeId" => await Count(db.DeliverableTypes.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
-                "clientId" => await Count(db.Clients.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
-                "officeId" => await Count(db.Offices.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
-                "office" => await Count(db.Offices.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
-                "phaseId" => await Count(db.Phases.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
-                "projectTypeId" => await Count(db.ProjectTypes.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
-                "projectId" => await Count(db.Projects.Where(x => ids.Contains(x.Id)).Select(x => x.Id), ids),
-                _ => true,
-            };
+            var ok = await Hub.Api.Records.ScreenLists.ValidReference(db, projectId, k, value);
             if (ok) kept[k] = value; else dropped.Add(k);
         }
         return (kept, dropped);
     }
 
-    static async Task<bool> Count(IQueryable<Guid> found, Guid[] ids) => ids.Length > 0 && await found.CountAsync() == ids.Length;
 }

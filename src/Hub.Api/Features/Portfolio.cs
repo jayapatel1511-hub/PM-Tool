@@ -11,15 +11,7 @@ namespace Hub.Api.Features;
 /// the project list's own query (same filters and permissions) plus tiles and an 8-week health trend from snapshots.
 public static class PortfolioEndpoints
 {
-    static readonly Col[] Cols =
-    [
-        new("projectNumber", "project"), new("name", "name"), new("pm.displayName", "pm"), new("client.name", "client"), new("office", "office"), new("phase", "phase"),
-        new("status", "status"), new("computedHealth", "computedHealth"), new("reportedHealth", "reportedHealth"), new("why", "why"), new("healthOverrideNote", "overrideNote"),
-        new("nextMilestone.name", "nextMilestone"), new("nextMilestone.date", "nextMilestoneDate", "date"), new("nextSubmission.name", "nextSubmission"),
-        new("nextSubmission.date", "nextSubmissionDate", "date"), new("overdueTasks", "overdueTasks", "number"), new("blockedTasks", "blockedTasks", "number"),
-        new("overdueDecisions", "overdueDecisions", "number"), new("highIssues", "highIssues", "number"), new("attentionCritical", "critical", "number"),
-        new("attentionWarning", "warning", "number"),
-    ];
+    static readonly Col[] Cols = Hub.Api.Records.ScreenLists.PortfolioCols;
 
     public static void Map(RouteGroupBuilder api)
     {

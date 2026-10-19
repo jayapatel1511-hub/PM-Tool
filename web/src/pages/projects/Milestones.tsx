@@ -6,7 +6,7 @@ import { Link } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineText, TabBar } from '@/components/hub/fields'
-import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
+import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Chip, Key, ProgressBar, StatusPill, toneOf } from '@/components/hub/pills'
 import { Why } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh, useReference } from '@/hooks/data'
 import { ApiError, get, patch, post, qs } from '@/lib/api'
 import { daysBetween, fmtDate, relative, shortDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { CommentsSlot, ItemSlots } from './slots-items'
@@ -35,7 +35,7 @@ export interface MilestoneRow {
   taskOverdue: number; taskBlocked: number
 }
 
-const TYPES = ['Kickoff', 'Field Work', 'Design Submission', 'Client Workshop', 'Permit Submission', 'Tender', 'Construction', 'IFC', 'Record Drawings', 'Closeout', 'Other']
+const TYPES = ['Kickoff', 'Field Work', 'Design Submission', 'Client Workshop', 'Permit Submission', 'Tender', 'Construction', 'IFC', 'Record Drawings', 'Closeout', 'Other'] as const
 
 export function milestoneStatusLabel(m: MilestoneRow) {
   if (!m.date && !m.isComplete && !m.isCancelled) return t('milestone.undated')
@@ -127,7 +127,7 @@ function LiveMilestonesTab() {
           <button type="button" className="mb-3 break-words text-left text-base/6 font-semibold text-primary hover:underline" onClick={() => openPanel('Milestone', m.id)}>{m.isSubmission && '◆ '}{m.name}</button>
           <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">
             {[
-              [t('common.type'), t(`mtype.${m.milestoneType}`)],
+              [t('common.type'), runtimeText(`mtype.${m.milestoneType}`)],
               [t('common.date'), fmtDate(m.date)], [t('milestone.original'), fmtDate(m.originalDate)],
               [t('milestone.slip'), slip(m.slipDays)],
               [t('milestone.remaining'), m.isComplete ? fmtDate(m.completedDate) : m.date ? relative(m.date) : t('common.dash')],
@@ -168,7 +168,7 @@ function LiveMilestonesTab() {
                     </td>
                     <td className={cn(tdCls, 'whitespace-nowrap')}><Key>{m.key}</Key></td>
                     <td className={cn(tdCls, 'min-w-48')}><button type="button" className="break-words text-left font-semibold hover:underline" onClick={() => openPanel('Milestone', m.id)}>{m.isSubmission && '◆ '}{m.name}</button></td>
-                    <td className={tdCls}>{t(`mtype.${m.milestoneType}`)}</td>
+                    <td className={tdCls}>{runtimeText(`mtype.${m.milestoneType}`)}</td>
                     <td className={cn(tdCls, 'whitespace-nowrap tabular-nums')}>{fmtDate(m.date)}</td>
                     <td className={cn(tdCls, 'whitespace-nowrap tabular-nums text-muted-foreground')}>{fmtDate(m.originalDate)}</td>
                     <td className={cn(tdCls, 'whitespace-nowrap text-right tabular-nums', m.slipDays > 0 && 'font-semibold text-warn')}>{m.slipDays > 0 && <span aria-hidden className="mr-1 text-xs">▲</span>}{slip(m.slipDays)}</td>
@@ -229,7 +229,7 @@ function TargetedDeliverables({ milestoneId }: { milestoneId: string }) {
       <table className="w-full text-sm">
         <caption className="sr-only">{t('milestone.deliverables')}</caption>
         <thead className="bg-muted">
-          <tr>{['milestone.key', 'common.name', 'common.status', 'common.owner', 'common.due', 'projects.col.progress', 'milestone.tasks'].map((h) => <th key={h} scope="col" className={thCls}>{t(h)}</th>)}</tr>
+          <tr>{(['milestone.key', 'common.name', 'common.status', 'common.owner', 'common.due', 'projects.col.progress', 'milestone.tasks'] as const).map((h) => <th key={h} scope="col" className={thCls}>{t(h)}</th>)}</tr>
         </thead>
         <tbody>
           {list.map((d) => (
@@ -460,7 +460,7 @@ function CancelDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Mileston
 
 // ---------- Milestone panel (§13.7) ----------
 
-function MilestonePanel({ id }: PanelProps) {
+export function MilestonePanel({ id }: PanelProps) {
   const q = useQuery({ queryKey: ['milestone', id], queryFn: () => get(`milestones/${id}`) })
   const [tab, setTab] = useState<'deliverables' | 'comments' | 'history'>('deliverables')
   const [baseline, setBaseline] = useState<'set' | 'clear' | null>(null)
@@ -487,7 +487,7 @@ function MilestonePanel({ id }: PanelProps) {
       {m.canRebaseline && <div className="flex flex-wrap gap-2 px-6 pt-3"><Button size="sm" variant="outline" onClick={() => setBaseline('set')}>{t('baseline.rebaseline')}</Button>{m.baselineDate && <Button size="sm" variant="ghost" onClick={() => setBaseline('clear')}>{t('baseline.useOriginal')}</Button>}</div>}
       <div className="px-6 py-3">
         <FieldRow label={t('common.name')}>{text(m.name, (v) => save({ name: v }))}</FieldRow>
-        <FieldRow label={t('common.type')}><div className="px-2 py-1.5">{t(`mtype.${m.milestoneType}`)}</div></FieldRow>
+        <FieldRow label={t('common.type')}><div className="px-2 py-1.5">{runtimeText(`mtype.${m.milestoneType}`)}</div></FieldRow>
         <FieldRow label={t('common.date')}><div className="px-2 py-1.5 tabular-nums">{fmtDate(m.date)} {m.date && <span className="text-muted-foreground">({relative(m.date)})</span>}</div></FieldRow>
         <FieldRow label={t('milestone.original')}><div className="px-2 py-1.5 tabular-nums">{fmtDate(m.originalDate)}{m.slipDays > 0 && <span className="ml-2 text-warn"><span aria-hidden>▲ </span>{t('milestone.slipped', { n: m.slipDays })}</span>}</div></FieldRow>
         <FieldRow label={t('milestone.readiness')}><div className="px-2 py-1.5 tabular-nums">{t('milestone.issuedOf', { n: m.deliverableIssued, total: m.deliverableTotal })} · {t('milestone.tasksComplete', { n: m.taskComplete, total: m.taskTotal })}</div></FieldRow>
@@ -507,6 +507,5 @@ function MilestonePanel({ id }: PanelProps) {
   )
 }
 
-PANELS.Milestone = { component: MilestonePanel }
 
 export { Section }

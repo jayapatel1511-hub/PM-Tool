@@ -11,6 +11,7 @@ HOST = "pm.engcalchub.com"
 parser = argparse.ArgumentParser()
 parser.add_argument("base_url", nargs="?", default="http://127.0.0.1:3080")
 parser.add_argument("--social", action="store_true", help="Check Microsoft/Google redirects without reading password credentials")
+parser.add_argument("--expect-build", help="Require /health to report this release SHA")
 args = parser.parse_args()
 if args.base_url.rstrip("/") not in {"http://127.0.0.1:3080", "https://pm.engcalchub.com"}:
     sys.exit("Refusing unexpected verification origin")
@@ -47,7 +48,15 @@ def check(name, ok, detail=""):
 
 good = f"https://{HOST}"
 s, d, _, _ = call("GET", "/health")
+health = {}
+try:
+    health = json.loads(d)
+except (json.JSONDecodeError, UnicodeDecodeError):
+    pass
 check("health", s == 200 and b"Healthy" in d, f"HTTP {s}")
+if args.expect_build:
+    check("health build", health.get("build") == args.expect_build,
+          f"expected {args.expect_build}, got {health.get('build', '<missing>')}")
 s, _, _, _ = call("GET", "/api/v1/me")
 check("anonymous /me denied", s == 401, f"HTTP {s}")
 if not public:

@@ -8,7 +8,7 @@ import { ExportMenu } from '@/components/hub/export'
 import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
 import { get, qs } from '@/lib/api'
-import { plural, t, tv } from '@/lib/i18n'
+import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { fmtDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
@@ -55,7 +55,7 @@ export function CoordinationRegister({ kind, statuses, create, detail, extra }: 
       {!list.data.items.length ? <div className="rounded-lg border bg-card"><Empty title={t(`${kind}.empty`)}>{t(tokens.length ? 'register.noMatch' : `${kind}.emptyHint`)}</Empty></div> :
         phone ? <ul className="space-y-2">{list.data.items.map(r => <li key={r.id} className={cn('space-y-3 rounded-lg border bg-card p-4 text-sm', panel === r.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)]')}><button className="break-words text-left font-semibold text-primary hover:underline" aria-current={panel === r.id || undefined} onClick={() => open(r.id)}><span className="key font-normal">{r.key}</span> · {r.title}</button><CoordStatus status={r.status} /><dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2"><dt className="text-muted-foreground">{ownerLabel}</dt><dd>{ctx ? <PersonLabel options={ctx.options} id={r.coordinatorId ?? r.ownerId} /> : <Missing />}</dd>{reviews ? <><dt>{t('review.round')}</dt><dd>{r.roundNumber ?? <Missing />}</dd><dt>{t('review.outstanding')}</dt><dd>{r.outstandingDisciplines ?? <Missing />}</dd><dt>{t('review.blocking')}</dt><dd><Count n={r.blockingFindings} tone="bad" /></dd><dt>{t('review.waiting')}</dt><dd>{r.waitingDays ?? <Missing />}</dd></> : <><dt>{t('change.due')}</dt><dd>{r.assessmentDueDate ? fmtDate(r.assessmentDueDate) : <Missing />}</dd><dt>{t('change.pending')}</dt><dd><Count n={r.pendingAssessments} tone="warn" /></dd></>}</dl></li>)}</ul> :
         <TableRegion><table className="w-full text-left text-sm"><caption className="sr-only">{t(`${kind}.title`)}</caption>
-          <thead className="bg-muted"><tr>{headings.map(([h, numeric]) => <th scope="col" key={h} className={cn(thCls, numeric && 'text-right')}>{t(h)}</th>)}</tr></thead>
+          <thead className="bg-muted"><tr>{headings.map(([h, numeric]) => <th scope="col" key={h} className={cn(thCls, numeric && 'text-right')}>{runtimeText(h)}</th>)}</tr></thead>
           <tbody>{list.data.items.map(r => <tr key={r.id} className={cn('border-t hover:bg-muted', panel === r.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent')}>
             <td className={cn(tdCls, 'min-w-64')}><button className="break-words text-left font-semibold text-primary underline-offset-4 hover:underline" aria-current={panel === r.id || undefined} onClick={() => open(r.id)}><span className="key font-normal">{r.key}</span> · {r.title}</button></td>
             <td className={tdCls}>{ctx ? <PersonLabel options={ctx.options} id={r.coordinatorId ?? r.ownerId} /> : <Missing />}</td>

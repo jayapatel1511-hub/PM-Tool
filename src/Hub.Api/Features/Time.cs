@@ -16,11 +16,7 @@ public static class TimeEndpoints
     public sealed record TimeQuery(DateOnly? From, DateOnly? To, Guid? ProjectId, Guid? TaskId, Guid? UserId, string? Scope);
     public sealed record ReasonBody(string? Reason, int? RowVersion);
 
-    static readonly Col[] Cols =
-    [
-        new("workDate", "date", "date"), new("person", "person"), new("projectNumber", "project"), new("taskKey", "key"), new("taskName", "task"),
-        new("hours", "hours", "number"), new("note", "note"),
-    ];
+    static readonly Col[] Cols = Hub.Api.Records.TaskTimeEntryRecord.TimeCols;
 
     public static void Map(RouteGroupBuilder api)
     {

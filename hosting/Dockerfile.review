@@ -5,7 +5,7 @@ FROM node:24-alpine AS web
 ARG RELEASE_SHA
 ENV VITE_HUB_BUILD=$RELEASE_SHA
 WORKDIR /work
-COPY web/package.json web/package-lock.json web/
+COPY web/package.json web/package-lock.json web/.npmrc web/
 RUN cd web && npm ci
 COPY web/ web/
 RUN mkdir -p src/Hub.Api && cd web && npm run build

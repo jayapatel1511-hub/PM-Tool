@@ -49,7 +49,7 @@ public static class ProjectImportEndpoints
         Check.That(body.Csv != null && Encoding.UTF8.GetByteCount(body.Csv) <= 256 * 1024, "csv", "error.too_long", 262144);
         using var parser = new TextFieldParser(new StringReader(body.Csv!.TrimStart('\uFEFF'))) { TextFieldType = FieldType.Delimited, HasFieldsEnclosedInQuotes = true, TrimWhiteSpace = true };
         parser.SetDelimiters(",");
-        string[]? Fields() { try { return parser.ReadFields(); } catch (MalformedLineException) { throw ApiException.Invalid("csv", "projectImport.csv"); } }
+        string[]? Fields() { try { return parser.ReadFields(); } catch (MalformedLineException) { throw ApiException.Invalid("csv", "projectImport.invalidCsv"); } }
         var headers = Fields();
         string[] expected = ["project number", "name", "client", "office", "project manager email"];
         Check.That(headers != null && headers.Select(h => h.ToLowerInvariant()).SequenceEqual(expected), "csv", "projectImport.headers");
@@ -68,7 +68,7 @@ public static class ProjectImportEndpoints
             var office = offices.Where(o => Eq(o.Name, officeName) || Eq(o.Code, officeName)).ToArray();
             var pm = pms.SingleOrDefault(u => Eq(u.Email, email));
             var error = !seen.Add(number) ? "projectImport.duplicate" : number.Length > 32 || !Regex.IsMatch(number, settings.ProjectNumberFormat) ? "project.number_format"
-                : name.Length is < 1 or > 200 ? "projectImport.name" : client.Length != 1 ? "projectImport.client" : office.Length != 1 ? "projectImport.office" : pm == null ? "projectImport.pm" : null;
+                : name.Length is < 1 or > 200 ? "projectImport.invalidName" : client.Length != 1 ? "projectImport.client" : office.Length != 1 ? "projectImport.office" : pm == null ? "projectImport.pm" : null;
             rows.Add(new(row, number, name, clientName, officeName, email, error != null ? "Error" : existing.Contains(number) ? "Exists" : "Create", error == null ? null : Text.Get(error),
                 client.Length == 1 ? client[0].Id : null, office.Length == 1 ? office[0].Id : null, pm?.Id));
         }

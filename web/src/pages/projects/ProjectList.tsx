@@ -13,7 +13,7 @@ import { useReference } from '@/hooks/data'
 import { del, get, post, qs } from '@/lib/api'
 import { useMe, useFlag } from '@/lib/auth'
 import { ago, fmtDate, relative } from '@/lib/format'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
 import type { Page as P, ProjectRow } from '@/lib/types'
 import { accentOf, cn } from '@/lib/utils'
 import { CreateProjectDialog } from './CreateProject'
@@ -64,14 +64,14 @@ export function ProjectListPage() {
   const ids = sp.get('ids')
   const tokens = ([
     ['q', t('common.search'), sp.get('q')],
-    ['status', t('common.status'), sp.get('status') && t(`value.${sp.get('status')}`)],
-    ['health', t('projects.health'), sp.get('health') && t(`health.${sp.get('health')}`)],
+    ['status', t('common.status'), sp.get('status') && runtimeText(`value.${sp.get('status')}`)],
+    ['health', t('projects.health'), sp.get('health') && runtimeText(`health.${sp.get('health')}`)],
     ['officeId', t('admin.office'), ref.data?.offices.find((o) => o.id === sp.get('officeId'))?.name],
     ['disciplineId', t('common.discipline'), ref.data?.disciplines.find((d) => d.id === sp.get('disciplineId'))?.name],
     ['leadUnitId', 'Lead unit', org.data?.units.find((u) => u.id === sp.get('leadUnitId'))?.name ?? (sp.get('leadUnitId') ? 'No unit' : undefined)],
     ['includeArchived', t('projects.includeArchived'), t('common.yes')],
     ['ids', t('projects.filter.chosen'), ids && ids.split(',').filter((x) => x && x !== 'none').length],
-    ['computedHealth', t('projects.filter.computedHealth'), sp.get('computedHealth')?.split(',').map((h) => t(`health.${h}`)).join(', ')],
+    ['computedHealth', t('projects.filter.computedHealth'), sp.get('computedHealth')?.split(',').map((h) => runtimeText(`health.${h}`)).join(', ')],
   ] as const).filter(([k]) => sp.get(k))
   // The search box stays uncontrolled (URL updates arrive in a transition), so removing its filter empties it here.
   const remove = (k: string) => { if (k === 'q' && search.current) search.current.value = ''; set(k, null) }
@@ -107,13 +107,13 @@ export function ProjectListPage() {
           <Field label={t('common.status')} htmlFor="pl-status" className="w-full sm:w-48">
             <select id="pl-status" className={selectCls} value={sp.get('status') ?? ''} onChange={(e) => set('status', e.target.value)}>
               <option value="">{t('projects.liveStatuses')}</option>
-              {['Setup', 'Active', 'On Hold', 'Complete', 'Archived', 'Cancelled'].map((s) => <option key={s} value={s}>{t(`value.${s}`)}</option>)}
+              {['Setup', 'Active', 'On Hold', 'Complete', 'Archived', 'Cancelled'].map((s) => <option key={s} value={s}>{runtimeText(`value.${s}`)}</option>)}
             </select>
           </Field>
           <Field label={t('projects.health')} htmlFor="pl-health" className="w-full sm:w-40">
             <select id="pl-health" className={selectCls} value={sp.get('health') ?? ''} onChange={(e) => set('health', e.target.value)}>
               <option value="">{t('projects.anyHealth')}</option>
-              {['Red', 'Yellow', 'Green', 'Grey'].map((h) => <option key={h} value={h}>{t(`health.${h}`)}</option>)}
+              {['Red', 'Yellow', 'Green', 'Grey'].map((h) => <option key={h} value={h}>{runtimeText(`health.${h}`)}</option>)}
             </select>
           </Field>
           <Field label={t('admin.office')} htmlFor="pl-office" className="w-full sm:w-44">
@@ -220,7 +220,7 @@ export function ProjectListPage() {
                       {shown.includes('nextMilestone') && <td className={cn(tdCls, 'min-w-44')}><NextMilestone r={r} /></td>}
                       {shown.includes('overdue') && <td className={cn(tdCls, 'text-right tabular-nums', r.overdueTasks > 0 && 'font-semibold text-bad')}>{r.overdueTasks}</td>}
                       {shown.includes('blocked') && <td className={cn(tdCls, 'text-right tabular-nums', r.blockedTasks > 0 && 'font-semibold text-bad')}>{r.blockedTasks}</td>}
-                      {shown.includes('myRole') && <td className={tdCls}>{r.myRoles.map((x) => t(`role.${x}`)).join(', ')}</td>}
+                      {shown.includes('myRole') && <td className={tdCls}>{r.myRoles.map((x) => runtimeText(`role.${x}`)).join(', ')}</td>}
                       {shown.includes('activity') && <td className={cn(tdCls, 'whitespace-nowrap text-xs/[18px] text-muted-foreground')}>{ago(r.lastActivityAt)}</td>}
                     </tr>
                   ))}

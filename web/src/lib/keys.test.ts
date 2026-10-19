@@ -1,0 +1,65 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { keysForChange, refreshProject } from './keys.ts'
+import type { QueryClient } from '@tanstack/react-query'
+
+test('item changes keep the previous project and item-specific invalidations (AC-PLAT-19)', () => {
+  const before: Record<string, string[]> = {
+    OpenRole: ['allocations', 'open-roles', 'workload', 'planning-grid', 'my-week'],
+    ResourceAllocation: ['allocations', 'workload'], Task: ['task', 'mywork', 'p'],
+    Decision: ['decision', 'coordination'], Action: ['action', 'coordination', 'mywork'],
+    Risk: ['risk', 'coordination'], Issue: ['issue', 'coordination'], Milestone: ['milestone', 'p'],
+    Deliverable: ['deliverable', 'p'], Handoff: ['handoffs', 'handoff-detail', 'handoff-options', 'search'],
+    SubmissionPackage: ['submissions', 'submission-detail', 'coord-options'],
+    PersonAvailabilityOverride: ['availability', 'availability-view', 'planning-grid', 'my-week'],
+    ReviewRound: ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'workspace-coordination', 'deliverable'],
+    PlanningEntry: ['planning-grid', 'planning-entries'], DesignBasisEntry: ['design-basis', 'design-basis-detail'],
+  }
+  for (const root of ['history', 'comments', 'links']) assert.ok(keysForChange('Risk', 'p1').some(k => k[0] === root))
+  for (const [type, roots] of Object.entries(before)) {
+    const keys = keysForChange(type, 'p1', 'i1')
+    for (const root of [...roots, 'project', 'projects', 'mywork']) assert.ok(keys.some(k => k[0] === root), `${type}: ${root}`)
+    assert.ok(keys.some(k => k.join('/') === `history/${type}/i1`))
+  }
+})
+
+test('project refresh retains its 1.5 second derived-state pass', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const calls: string[] = []
+  const qc = { invalidateQueries: ({ queryKey }: { queryKey: string[] }) => { calls.push(queryKey.join('/')); return Promise.resolve() } } as unknown as QueryClient
+  refreshProject(qc, 'p1')
+  assert.ok(calls.includes('projects')); assert.ok(calls.includes('p/p1'))
+  calls.length = 0
+  t.mock.timers.tick(1499); assert.equal(calls.length, 0)
+  t.mock.timers.tick(1); assert.deepEqual(calls, ['project', 'mywork', 'p/p1'])
+})
+
+
+test('child audit types refresh mounted details and dependent pickers; reconnect repairs missed events', () => {
+  const required: Record<string, string[]> = {
+    IssueLocation: ['issue', 'issue-locations'], IssueDocumentReference: ['issue-documents', 'issue-reference-impacts'],
+    IssueVerification: ['issue-verification'], IssueReferenceImpactAssessment: ['issue-reference-impacts'], IssueAffectedDiscipline: ['issue', 'review-issues'],
+    ReadinessCheck: ['readiness-detail', 'readiness-constraints', 'readiness-prerequisites', 'readiness-assumptions', 'task-start'],
+    TaskStartAuthorisation: ['task-start'], BasisUse: ['readiness-assumptions'], Decision: ['basis-decision-options'],
+    Milestone: ['submission-milestones'], SubmissionManifestItem: ['submission-choices'],
+    TaskPickupOffer: ['pickup-offers', 'pickup-load', 'task', 'mywork-tasks', 'workload'],
+    OrgUnit: ['admin', 'organisation', 'organisation-placements', 'staff', 'workload', 'planning-grid'],
+    OrgLevel: ['admin', 'organisation'], CommitmentMissCategory: ['admin', 'weekly-promise'],
+  }
+  for (const [type, roots] of Object.entries(required)) for (const root of roots)
+    assert.ok(keysForChange(type, 'p1').some(key => key[0] === root), `${type}: ${root}`)
+  for (const root of ['task', 'risk', 'issue', ...Object.values(required).flat()])
+    assert.ok(keysForChange(undefined, 'p1').some(key => key[0] === root), `reconnect: ${root}`)
+})
+
+
+test('invalidation prefixes match actual mounted screen query keys', () => {
+  const mounted: Record<string, string[][]> = {
+    Task: [['wtasks', 'scope'], ['wboard', 'scope'], ['gantt', 'scope'], ['closeout', 'p1']],
+    Deliverable: [['gantt', 'scope']], DocumentLink: [['files', 'scope']],
+    Risk: [['search-counts', 'scope'], ['search-page', 'scope']],
+    IssueLocation: [['issue-locations', 'i1']], ReadinessAssessment: [['readiness-detail', 'p1', 'i1']],
+  }
+  for (const [type, queries] of Object.entries(mounted)) for (const query of queries)
+    assert.ok(keysForChange(type, 'p1').some(prefix => prefix.every((part, i) => query[i] === part)), `${type}: ${query}`)
+})

@@ -13,11 +13,7 @@ public static class DecisionExtraEndpoints
 {
     public sealed record BulkLinkBody(string TargetType, Guid[] TargetIds, string? Relation);
 
-    static readonly Col[] ClientCols =
-    [
-        new("key", "key", "key"), new("subject", "subject"), new("description", "toDecide"), new("requiredBy", "requiredBy", "date"),
-        new("timing", "timing"), new("impact", "impact"), new("status", "status"), new("owner", "owner"),
-    ];
+    static readonly Col[] ClientCols = Hub.Api.Records.DecisionRecord.DecisionExtrasClientCols;
 
     public static void Map(RouteGroupBuilder api)
     {

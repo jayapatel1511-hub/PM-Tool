@@ -13,7 +13,7 @@ import { del, get, patch, post, qs } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 import { hoursLabel } from '@/components/planner/labels'
 import { fmtDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { runtimeText, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
 import { AddFromTemplateDialog, usePublishedTemplates } from './FromTemplate'
@@ -94,7 +94,7 @@ export function TeamTab() {
           <AddMember projectId={p.id} disciplines={d.disciplines} canManage={d.canManage} onDone={reload} />
           {phone ? <ul className="divide-y">{d.members.map(m => <li key={m.id} className="space-y-3 p-4 text-sm">
             <div className="flex items-start gap-2.5"><Avatar id={m.userId} name={m.displayName} /><div className="min-w-0"><h4 className="flex items-center gap-1 break-words font-semibold">{m.isPrimaryPm && <Crown className="size-4 shrink-0 text-warn" aria-label={t('team.primaryPm')} />}<PersonName name={m.displayName} active={m.isActive} />{away(m.userId)}</h4><p className="break-words text-xs/[18px] text-muted-foreground">{m.jobTitle}{m.leadOf.length > 0 && ` · ${t('role.DisciplineLead')}: ${m.leadOf.map(id => d.disciplines.find(x => x.id === id)?.name).join(', ')}`}</p></div></div>
-                    <fieldset className="flex flex-wrap gap-x-4 gap-y-2"><legend className="sr-only">{t('team.role')}</legend>{ROLES.map(r => <label key={r} className="flex min-h-10 items-center gap-2"><Checkbox aria-label={`${t(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')} onCheckedChange={c => { const roles = c ? [...m.roles, r] : m.roles.filter(x => x !== r); if (roles.length) run(() => patch(`projects/${p.id}/members/${m.id}`, { roles }, m.rowVersion)) }} />{t(`role.${r}`)}</label>)}</fieldset>
+                    <fieldset className="flex flex-wrap gap-x-4 gap-y-2"><legend className="sr-only">{t('team.role')}</legend>{ROLES.map(r => <label key={r} className="flex min-h-10 items-center gap-2"><Checkbox aria-label={`${runtimeText(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')} onCheckedChange={c => { const roles = c ? [...m.roles, r] : m.roles.filter(x => x !== r); if (roles.length) run(() => patch(`projects/${p.id}/members/${m.id}`, { roles }, m.rowVersion)) }} />{runtimeText(`role.${r}`)}</label>)}</fieldset>
             <Field label={t('field.PrimaryDisciplineId')} htmlFor={`member-disc-${m.id}`}><select id={`member-disc-${m.id}`} className={selectCls} value={m.primaryDisciplineId ?? ''} disabled={!d.canManage} onChange={e => run(() => patch(`projects/${p.id}/members/${m.id}`, { primaryDisciplineId: e.target.value || null }, m.rowVersion))}><option value="">{t('team.noPrimary')}</option>{d.disciplines.filter(x => x.isActive).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
             <p className="text-xs/[18px] text-muted-foreground">{t('team.added')}: {fmtDate(m.addedAt)}</p>
             {(d.canManage || m.canStaff) && !m.isPrimaryPm && <Button size="sm" variant="ghost" className="text-bad hover:text-bad" aria-label={t('team.removeNamed', { name: m.displayName })} onClick={() => setRemoving(m)}>{t('common.remove')}</Button>}
@@ -104,7 +104,7 @@ export function TeamTab() {
               <thead className="bg-muted">
                 <tr>
                   <th scope="col" className={thCls}>{t('common.name')}</th>
-                  {ROLES.map((r) => <th key={r} scope="col" className={cn(thCls, 'text-center')}>{t(`role.${r}`)}</th>)}
+                  {ROLES.map((r) => <th key={r} scope="col" className={cn(thCls, 'text-center')}>{runtimeText(`role.${r}`)}</th>)}
                   <th scope="col" className={thCls}>{t('field.PrimaryDisciplineId')}</th>
                   <th scope="col" className={thCls}>{t('team.added')}</th>
                   <th scope="col" className="w-24"><span className="sr-only">{t('common.actions')}</span></th>
@@ -126,7 +126,7 @@ export function TeamTab() {
                     </td>
                     {ROLES.map((r) => (
                       <td key={r} className={cn(tdCls, 'text-center')}>
-                        <Checkbox aria-label={`${t(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')}
+                        <Checkbox aria-label={`${runtimeText(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')}
                           onCheckedChange={(c) => {
                             const roles = c ? [...m.roles, r] : m.roles.filter((x) => x !== r)
                             if (roles.length) run(() => patch(`projects/${p.id}/members/${m.id}`, { roles }, m.rowVersion))
@@ -171,7 +171,7 @@ function AddMember({ projectId, disciplines, canManage, onDone }: { projectId: s
         {canManage && (
           <Field label={t('team.role')} htmlFor="team-add-role" className="w-full sm:w-44">
             <select id="team-add-role" className={selectCls} value={role} onChange={(e) => setRole(e.target.value)}>
-              {['TeamMember', 'Reviewer', 'Viewer', 'PM'].map((r) => <option key={r} value={r}>{t(`role.${r}`)}</option>)}
+              {['TeamMember', 'Reviewer', 'Viewer', 'PM'].map((r) => <option key={r} value={r}>{runtimeText(`role.${r}`)}</option>)}
             </select>
           </Field>
         )}

@@ -10,7 +10,7 @@ import { ActiveFilters, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loa
 import { DateHint } from '@/components/hub/date-context'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, SaveStatus, TabBar } from '@/components/hub/fields'
 import { DepTypeChip, DepTypeField, DeliverableIndicators, progressLabel, type DeliverableStateView } from '@/components/hub/indicators'
-import { PANELS, useItemPanel, type PanelProps } from '@/components/hub/panel-host'
+import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
 import { Key, PriorityBadge, ProgressBar, StatusPill } from '@/components/hub/pills'
 import { Why } from '@/components/hub/why'
@@ -23,7 +23,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh, useReference } from '@/hooks/data'
 import { ApiError, del, get, patch, post, qs } from '@/lib/api'
 import { fmtDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { runtimeText, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useFlag } from '@/lib/auth'
@@ -113,7 +113,7 @@ function LiveDeliverablesTab() {
     filters.milestoneId && { key: 'milestoneId', label: t('field.MilestoneId'), value: milestone ? `${milestone.key} ${milestone.name}` : <Missing /> },
     filters.ownerId && { key: 'ownerId', label: t('common.owner'), value: q.data?.find((d) => d.ownerId === filters.ownerId)?.ownerName ?? <Missing /> },
     filters.typeId && { key: 'typeId', label: t('common.type'), value: ref.data?.deliverableTypes.find((x) => x.id === filters.typeId)?.name ?? <Missing /> },
-    filters.indicator && { key: 'indicator', label: t('deliverable.indicator'), value: t(`dfilter.${filters.indicator}`) },
+    filters.indicator && { key: 'indicator', label: t('deliverable.indicator'), value: runtimeText(`dfilter.${filters.indicator}`) },
     filters.dueFrom && { key: 'dueFrom', label: t('tfilter.dueFrom'), value: fmtDate(filters.dueFrom) },
     filters.dueTo && { key: 'dueTo', label: t('tfilter.dueTo'), value: fmtDate(filters.dueTo) },
     filters.requiresReview && { key: 'requiresReview', label: t('field.RequiresReview'), value: filters.requiresReview === 'true' ? t('common.yes') : t('common.no') },
@@ -132,7 +132,7 @@ function LiveDeliverablesTab() {
           <UrlSearchInput id="deliverable-search" placeholder={t('common.search')} value={filters.q ?? ''} onValueChange={value => set('q', value)} />
         </Field>}
         quick={<MenuSelect label={t('common.groupBy')} value={group} onChange={(v) => set('group', v === 'discipline' ? null : v)}
-          options={Object.entries(GROUP_LABEL).map(([value, label]) => ({ value, label: t(label) }))} />}
+          options={Object.entries(GROUP_LABEL).map(([value, label]) => ({ value, label: runtimeText(label) }))} />}
         active={<ActiveFilters tokens={tokens} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <DeletedToggle project={p} />
         <div className="flex flex-wrap items-end gap-3">
@@ -159,7 +159,7 @@ function LiveDeliverablesTab() {
           <Field label={t('deliverable.indicator')} htmlFor="deliverable-indicator" className="w-full sm:w-44">
             <select id="deliverable-indicator" className={selectCls} value={filters.indicator ?? ''} onChange={(e) => set('indicator', e.target.value)}>
               <option value="">{t('deliverable.anyIndicator')}</option>
-              {['overdue', 'atRisk', 'dueSoon', 'unassigned', 'dateInconsistent', 'slipped', 'open'].map((x) => <option key={x} value={x}>{t(`dfilter.${x}`)}</option>)}
+              {['overdue', 'atRisk', 'dueSoon', 'unassigned', 'dateInconsistent', 'slipped', 'open'].map((x) => <option key={x} value={x}>{runtimeText(`dfilter.${x}`)}</option>)}
             </select>
           </Field>
           <Field label={t('tfilter.dueFrom')} htmlFor="deliverable-due-from" className="w-full sm:w-44">
@@ -239,7 +239,7 @@ export function DeliverablesTab() {
 function BulkDialog({ p, op, ids, milestones, onClose }: { p: ProjectDetail; op: string; ids: string[]; milestones: MilestoneRow[]; onClose: (ok: boolean) => void }) {
   const [v, setV] = useState<string | null>('')
   return (
-    <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={t(`bulk.${op === 'setMilestone' ? 'setMilestone' : op === 'setOwner' ? 'setOwner' : 'shiftDue'}`)} reason={op === 'shiftDueDates'}
+    <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={runtimeText(`bulk.${op === 'setMilestone' ? 'setMilestone' : op === 'setOwner' ? 'setOwner' : 'shiftDue'}`)} reason={op === 'shiftDueDates'}
       body={t('bulk.selected', { n: ids.length })} busy={!v}
       onConfirm={async (reason) => {
         const params = op === 'setMilestone' ? { milestoneId: v } : op === 'setOwner' ? { ownerId: v } : { days: Number(v) }
@@ -319,7 +319,7 @@ export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: Pro
 
 export const DELIVERABLE_TABS: { id: string; label: string; render: (d: any) => React.ReactNode }[] = []
 
-function DeliverablePanel({ id }: PanelProps) {
+export function DeliverablePanel({ id }: PanelProps) {
   const q = useQuery({ queryKey: ['deliverable', id], queryFn: () => get(`deliverables/${id}`) })
   const qc = useQueryClient()
   const refresh = useProjectRefresh()
@@ -503,7 +503,7 @@ function ExplicitDeps({ d, data, onChange }: { d: DeliverableRow; data: any; onC
   const remove = async (x: DepRow) => { try { await del(`deliverable-dependencies/${x.dependencyId}`); onChange() } catch (e) { toast.error(errorText(e)) } }
   const list = (rows: DepRow[], label: string, dir: 'predecessor' | 'successor') => (
     <div>
-      <div className="mb-1 flex items-center justify-between font-medium">{t(label)}
+      <div className="mb-1 flex items-center justify-between font-medium">{runtimeText(label)}
         {can && <Button size="sm" variant="ghost" onClick={() => setAdding(dir)}><Plus className="size-4" />{t('common.add')}</Button>}</div>
       {rows.length === 0 ? <p className="text-muted-foreground">{t('common.none')}</p> : (
         <ul className="divide-y rounded-md border bg-card">{rows.map((x) => (
@@ -581,7 +581,7 @@ function IssueHistory({ issues, marks = [] }: { issues: IssueRow[]; marks?: stri
     <div className="scroll-region overflow-x-auto p-4">
       <table className="w-full text-sm">
         <thead className="text-left text-muted-foreground">
-          <tr>{['field.IssuedDate', 'field.Revision', 'field.IssuedTo', 'deliverable.transmittalLink', 'common.notes', 'deliverable.issuedBy'].map((h) => <th key={h} scope="col" className="whitespace-nowrap py-2 pr-3 font-medium">{t(h)}</th>)}</tr>
+          <tr>{['field.IssuedDate', 'field.Revision', 'field.IssuedTo', 'deliverable.transmittalLink', 'common.notes', 'deliverable.issuedBy'].map((h) => <th key={h} scope="col" className="whitespace-nowrap py-2 pr-3 font-medium">{runtimeText(h)}</th>)}</tr>
         </thead>
         <tbody>{issues.map((x) => (
           <tr key={x.id} className="border-t align-top">
@@ -620,5 +620,3 @@ function IssueDialog({ d, needsConfirm, onClose }: { d: DeliverableRow; needsCon
     </ConfirmDialog>
   )
 }
-
-PANELS.Deliverable = { component: DeliverablePanel }

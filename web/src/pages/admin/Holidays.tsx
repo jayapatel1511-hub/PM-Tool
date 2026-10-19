@@ -10,7 +10,6 @@ import { ApiError, del, get, post, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
-import { ADMIN_EXTRA } from './Admin'
 
 interface HolidayRow { id: string; officeId?: string | null; office?: string | null; date: string; name: string }
 
@@ -89,5 +88,3 @@ export function Holidays() {
     </div>
   )
 }
-
-ADMIN_EXTRA.push({ to: '/admin/holidays', label: t('holiday.title') })

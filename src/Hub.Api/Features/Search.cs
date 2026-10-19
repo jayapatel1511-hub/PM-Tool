@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
+using Hub.Api.Records;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,8 +12,7 @@ namespace Hub.Api.Features;
 /// ones included only for their members, as everywhere); archived and cancelled projects on request.
 public static partial class SearchEndpoints
 {
-    public static readonly string[] Groups = ["projects", "tasks", "deliverables", "milestones", "decisions", "handoffs", "reviews", "changes",
-        "submissions", "allocations", "planning", "design-basis", "constraints", "commitments", "comments", "people"];
+    public static readonly string[] Groups = [.. ScreenLists.SearchGroups];
 
     [GeneratedRegex(@"@\[([^\]]+)\]\([0-9a-fA-F-]{36}\)")]
     private static partial Regex Mention();

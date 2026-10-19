@@ -1,4 +1,5 @@
-import { useFlag } from '@/lib/auth'
+import type { components } from '@/gen/api'
+import { usePageMode } from '@/hooks/page-mode'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, CheckCircle2, Ellipsis, Lock, Monitor, Plus, X } from 'lucide-react'
@@ -18,10 +19,10 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
 import { Textarea } from '@/components/ui/textarea'
 import { useReference } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
-import { ApiError, get, patch, post, qs } from '@/lib/api'
+import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { useOffer, type Offer } from '@/lib/auth'
 import { fmtDate, hours, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { runtimeText, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { CommandForm, SelectField, type CoordOptions, WorkLink } from './CoordinationForms'
 import { useCurrentProject } from './ProjectLayout'
@@ -33,7 +34,7 @@ type Preview = { id: string; rowVersion: number; days: { date: string; available
 type AllocationPreview = { preview: true; weeks: { personId: string; week: string; capacity: number; planned: number; free: number; band: string; indicators: string[] }[] }
 type ReviewOption = { id: string; reviewerId: string; dueDate: string; packageId: string; packageKey: string; packageTitle: string }
 /** Unfilled project demand (§40, FR-ROLE-01): filled by proposing a normal allocation that names it (D1). */
-type OpenRole = { id: string; projectId: string; roleLabel: string; projectDisciplineId?: string | null; disciplineName?: string | null; fromDate: string; throughDate: string; plannedHours: number; status: 'Open' | 'Filled' | 'Cancelled'; filledAllocationId?: string | null; note?: string | null; rowVersion: number; canManage: boolean }
+type OpenRole = components['schemas']['OpenRoleRow']
 type Fill = { openRoleId: string; roleLabel: string; fromDate: string; throughDate: string; plannedHours: number }
 const ROLE_TONE: Record<string, Tone> = { Open: 'work', Filled: 'done', Cancelled: 'idle' }
 
@@ -45,7 +46,7 @@ const AllocationStatus = ({ status }: { status: string }) => <Pill tone={STATUS_
 /** Purpose is a category (identity tint), not a status. */
 const PURPOSE_ACCENT: Record<string, string> = { Production: 'blue', Review: 'lavender' }
 const Purpose = ({ purpose }: { purpose: string }) => (
-  <span data-accent={PURPOSE_ACCENT[purpose] ?? 'blue'} className="inline-flex items-center whitespace-nowrap rounded-md bg-(--acc-bg) px-2 py-0.5 text-xs/[18px] font-medium text-(--acc-fg)">{t(`allocation.purpose.${purpose}`)}</span>
+  <span data-accent={PURPOSE_ACCENT[purpose] ?? 'blue'} className="inline-flex items-center whitespace-nowrap rounded-md bg-(--acc-bg) px-2 py-0.5 text-xs/[18px] font-medium text-(--acc-fg)">{runtimeText(`allocation.purpose.${purpose}`)}</span>
 )
 const eligibility = (state: Allocation['personState']) => t(state === 'Inactive' ? 'allocation.personInactiveWarning' : state === 'Removed' ? 'allocation.personRemovedWarning' : 'allocation.personMissingWarning')
 
@@ -72,8 +73,8 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'allocation') next.delete('page'); setSp(next) }
   const clear = () => { const next = new URLSearchParams(sp); for (const k of Object.keys(filters)) next.delete(k); next.delete('page'); setSp(next) }
   const pages = list.data ? Math.max(1, Math.ceil(list.data.totalCount / list.data.pageSize)) : 1
-  const view = sp.get('view') === 'roles' ? 'roles' : 'allocations'
-  const roles = useQuery({ queryKey: ['allocations', project.id, 'open-roles'], queryFn: () => get<OpenRole[]>(`projects/${project.id}/open-roles`) })
+  const view = usePageMode('tab', ['roles'], 'allocations')
+  const roles = useQuery({ queryKey: ['allocations', project.id, 'open-roles'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/open-roles', { params: { projectId: project.id } }) })
   useEffect(() => {
     const id = sp.get('fill'); const role = id && roles.data?.find(r => r.id === id && r.status === 'Open')
     if (role && proposal.shown && filling?.openRoleId !== role.id) setFilling({ openRoleId: role.id, roleLabel: role.roleLabel, fromDate: role.fromDate, throughDate: role.throughDate, plannedHours: role.plannedHours })
@@ -87,7 +88,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   const tokens = ([
     ['q', t('common.search'), filters.q],
     ['personId', t('workload.person'), options.data?.people.find(p => p.id === filters.personId)?.displayName ?? t('task.filterSelected')],
-    ['purpose', t('allocation.purpose'), filters.purpose && t(`allocation.purpose.${filters.purpose}`)],
+    ['purpose', t('allocation.purpose'), filters.purpose && runtimeText(`allocation.purpose.${filters.purpose}`)],
     ['status', t('allocation.status'), filters.status && tv(filters.status)],
     ['from', t('allocation.from'), filters.from && fmtDate(filters.from)],
     ['to', t('allocation.through'), filters.to && fmtDate(filters.to)],
@@ -96,11 +97,11 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
     <FilterBar activeCount={tokens.length}
       search={view === 'allocations' && <Field label={t('common.search')} htmlFor="allocation-search"><UrlSearchInput id="allocation-search" placeholder={t('allocation.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
       active={view === 'allocations' && <ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />}
-      actions={<Segmented label={t('openRole.view')} value={view} onChange={v => change('view', v === 'roles' ? 'roles' : '')}
+      actions={<Segmented label={t('openRole.view')} value={view} onChange={v => change('tab', v === 'roles' ? 'roles' : '')}
         options={[{ value: 'allocations', label: t('allocation.title') }, { value: 'roles', label: openRoles ? t('openRole.tabCount', { n: openRoles }) : t('openRole.tab') }]} />}>
       {view === 'allocations' && <div className="flex flex-wrap items-end gap-3">
         <div className="w-full sm:w-48"><SelectField label={t('workload.person')} value={filters.personId} onChange={v => change('personId', v)} required={false} choices={options.data?.people.map(p => ({ value: p.id, label: p.displayName })) ?? []} /></div>
-        <div className="w-full sm:w-40"><SelectField label={t('allocation.purpose')} value={filters.purpose} onChange={v => change('purpose', v)} required={false} choices={['Production', 'Review'].map(v => ({ value: v, label: t(`allocation.purpose.${v}`) }))} /></div>
+        <div className="w-full sm:w-40"><SelectField label={t('allocation.purpose')} value={filters.purpose} onChange={v => change('purpose', v)} required={false} choices={['Production', 'Review'].map(v => ({ value: v, label: runtimeText(`allocation.purpose.${v}`) }))} /></div>
         <div className="w-full sm:w-44"><SelectField label={t('allocation.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={['Proposed', 'Confirmed', 'Declined', 'Cancelled', 'Completed'].map(v => ({ value: v, label: tv(v) }))} /></div>
         <Field label={t('allocation.from')} htmlFor="allocation-filter-from" className="w-full sm:w-40"><Input id="allocation-filter-from" type="date" value={filters.from} onChange={e => change('from', e.target.value)} /></Field>
         <Field label={t('allocation.through')} htmlFor="allocation-filter-to" className="w-full sm:w-40"><Input id="allocation-filter-to" type="date" value={filters.to} onChange={e => change('to', e.target.value)} /></Field>
@@ -272,7 +273,7 @@ function AllocationDetail({ base, id, projectNumber, options, close, refresh }: 
             <div className="flex flex-wrap items-center gap-2"><Purpose purpose={row.purpose} /><AllocationStatus status={row.status} /></div>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">{t(`allocation.statusHint.${row.status}`)}</p>
+        <p className="text-sm text-muted-foreground">{runtimeText(`allocation.statusHint.${row.status}`)}</p>
         {!row.personEligible && <div role="alert" className="rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn">
           <p><span aria-hidden>▲ </span>{eligibility(row.personState)}</p>
           {row.canManage && <p className="mt-1">{t('allocation.replacePersonHint')}</p>}
@@ -308,9 +309,9 @@ function AllocationDetail({ base, id, projectNumber, options, close, refresh }: 
           : <ErrorBanner error={error} />)}
       </div>}
 
-      {action && row && <ConfirmDialog open onOpenChange={o => !o && setAction(null)} title={t(`allocation.${action}`)} destructive={action === 'cancel'}
+      {action && row && <ConfirmDialog open onOpenChange={o => !o && setAction(null)} title={runtimeText(`allocation.${action}`)} destructive={action === 'cancel'}
         className={action === 'confirm' ? 'sm:max-w-2xl' : undefined}
-        confirmLabel={t(`allocation.${action}`)}
+        confirmLabel={runtimeText(`allocation.${action}`)}
         body={action === 'confirm' ? t('allocation.confirmHint') : t(ACTION_BODY[action])}
         reason={action === 'confirm' ? !previewEnabled && over.length > 0 : true}
         busy={action === 'confirm' && previewEnabled && (confirmPreviewPending || !allocationPreview)}
@@ -368,7 +369,7 @@ function OpenRoles({ roles, base, proposal, canFill, onAdd, onEdit, onCancel, on
         {(r.disciplineName || r.note) && <div className="text-xs/[18px] text-muted-foreground">{[r.disciplineName, r.note].filter(Boolean).join(' · ')}</div>}</td>
       <td className={cn(td, 'whitespace-nowrap tabular-nums')}>{fmtDate(r.fromDate)} – {fmtDate(r.throughDate)}</td>
       <td className={cn(td, 'text-right font-medium tabular-nums')}>{hours(r.plannedHours)}</td>
-      <td className={td}><Pill tone={ROLE_TONE[r.status] ?? 'idle'}>{t(`openRole.status.${r.status}`)}</Pill></td>
+      <td className={td}><Pill tone={ROLE_TONE[r.status] ?? 'idle'}>{runtimeText(`openRole.status.${r.status}`)}</Pill></td>
       <td className={td}>{r.filledAllocationId ? <FilledBy base={base} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span>}</td>
       <td className={cn(td, 'py-1 text-right')}>{r.status === 'Open' && <div className="flex items-center justify-end gap-1">
         {canFill && <Button size="sm" variant="outline" {...proposal.props} onClick={() => onFill(r)} aria-label={t('openRole.fillLabel', { role: r.roleLabel })}>{t('openRole.fill')}</Button>}

@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { get } from '@/lib/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { Chip, Key } from '@/components/hub/pills'
 import { useFlag, useMe } from '@/lib/auth'
 import { cn } from '@/lib/utils'
@@ -213,7 +213,7 @@ function ProposePromise({ projectId, options, week, day, complete, close, done }
     <SelectField label={t('readiness.work')} value={target} onChange={setTarget} choices={workChoices(eligible)} />
     {work && <p className="flex flex-wrap items-center gap-2 text-sm"><span className="text-muted-foreground">{t('readiness.performer')}:</span><PersonLabel options={options} id={work.ownerId} /></p>}
     <div className="grid gap-3 sm:grid-cols-2">
-      <Field label={t('readiness.weekStart')} htmlFor="promise-week" hint={t('readiness.weekStartHint', { day: t(`day.${day}`) })}>
+      <Field label={t('readiness.weekStart')} htmlFor="promise-week" hint={t('readiness.weekStartHint', { day: runtimeText(`day.${day}`) })}>
         <Input id="promise-week" type="date" required min={week} step={7} value={start} onChange={e => { setStart(e.target.value); setTargetDate(e.target.value) }} /></Field>
       <Field label={t('readiness.targetDate')} htmlFor="promise-date"><Input id="promise-date" type="date" required min={start} max={dateValue(start) === null ? undefined : addDays(start, 6)} value={targetDate} onChange={e => setTargetDate(e.target.value)} /></Field>
     </div>

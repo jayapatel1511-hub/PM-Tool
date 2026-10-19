@@ -13,7 +13,7 @@ revision=$(basename "$PWD")
   echo "Run from releases/$expected (current directory is $revision)." >&2; exit 1; }
 [[ -L .runtime && -L data && -f .runtime/review.env ]] || { echo 'Shared .runtime/data links missing.' >&2; exit 1; }
 compose=(sudo env RELEASE_SHA="$revision" docker compose --env-file .runtime/review.env -f hosting/homedev.compose.yml)
-verify_args=(http://127.0.0.1:3080)
+verify_args=(http://127.0.0.1:3080 --expect-build "$revision")
 install_timer=0
 install_deploy_timer=0
 for option in "${@:2}"; do

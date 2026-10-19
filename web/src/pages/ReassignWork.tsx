@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { get, post } from '@/lib/api'
 import { fmtDate, today } from '@/lib/format'
-import { t } from '@/lib/i18n'
+import { t , runtimeText } from '@/lib/i18n'
 import { accentOf } from '@/lib/utils'
 import { errorText } from './projects/Tasks'
 
@@ -68,7 +68,7 @@ export function ReassignWorkPage() {
                 {list.map((i) => (
                   <li key={id(i)} className="flex min-h-(--row-min) flex-wrap items-center gap-x-3 gap-y-1 px-5 py-(--cell-py) text-sm hover:bg-muted [&>.flex-1]:basis-full sm:[&>.flex-1]:basis-auto">
                     <Checkbox checked={picked.has(id(i))} onCheckedChange={() => toggle(id(i))} aria-label={t('reassign.pick', { item: `${i.key ?? ''} ${i.name}` })} />
-                    <span className="w-32 text-xs text-muted-foreground">{t(`reassign.kind.${i.kind}`)}</span>
+                    <span className="w-32 text-xs text-muted-foreground">{runtimeText(`reassign.kind.${i.kind}`)}</span>
                     {i.key && <Key>{i.key}</Key>}
                     {TYPE[i.kind] ? <Link className="min-w-0 flex-1 break-words hover:underline" to={itemHref(TYPE[i.kind], i.projectNumber, i.id)}>{i.name}</Link> : <span className="min-w-0 flex-1 break-words">{i.name}</span>}
                     {i.status && <StatusPill status={i.status} />}

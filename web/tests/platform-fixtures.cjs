@@ -1,0 +1,57 @@
+const path = require('node:path')
+const { spawn } = require('node:child_process')
+const assert = require('node:assert/strict')
+const { chromium } = require('playwright')
+
+const taskId = '00000000-0000-0000-0000-000000000001'
+const project = { id: '00000000-0000-0000-0000-000000000010', projectNumber: 'P-MOCK', name: 'Synthetic live project', status: 'Active', visibility: 'Open', rowVersion: 1, disciplines: [{ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil', leadUserId: null }], projectDisciplines: [{ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil', leadUserId: null }], links: [], permissions: { edit: { ok: true }, isPm: true, needsReason: false } }
+const task = { id: taskId, projectId: project.id, projectDisciplineId: '00000000-0000-0000-0000-000000000011', key: 'T-001', name: 'Synthetic task', status: 'Not Started', priority: 'Medium', state: { isWaiting: false, isBlocked: false, daysBlocked: 0, blockedBy: [], affectedMilestoneIds: [] } }
+const me = { id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen', email: 'alex@hub.test', roles: [], systemRoles: ['StandardUser'], capabilities: { createProject: false, createTask: true, portfolio: false, workload: true, staff: false, allStaff: false, admin: true, templates: false, readOnly: false, directReports: 0 }, settings: { today: '2026-10-03', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: true }, preferences: { denseRows: true, digestEnabled: true, weeklySummaryEnabled: true }, flags: { live_events: true, live_project_stamp: true } }
+const taskDetail = { task, description: 'Synthetic fixture task', project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status }, collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: true }, setReviewer: { ok: true }, dueDate: { ok: true }, dueNeedsReason: false, block: { ok: true }, delete: { ok: true }, restore: true, comment: true, transitions: [], dependencies: true, enterTime: true, needsReason: false, allowSelfReview: true } }
+
+async function startPreview(port = Number(process.env.TUESDAY_MOCK_PORT ?? 5189)) {
+  const cwd = path.resolve(__dirname, '..')
+  const child = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', String(port), '--strictPort'], { cwd, stdio: 'ignore' })
+  const base = `http://127.0.0.1:${port}`
+  for (let i = 0; i < 100; i++) { try { if ((await fetch(base)).ok) return { base, child } } catch {} await new Promise(resolve => setTimeout(resolve, 100)) }
+  child.kill(); throw new Error(`preview did not start at ${base}`)
+}
+function mockPlatformApi(page, { buildIds = ['mock-build-a', 'mock-build-b', 'mock-build-a'], events = true } = {}) {
+  let meCalls = 0
+  const eventRequests = []
+  const pulseRequests = []
+  const apiErrors = []
+  const routePromise = page.route('**/api/**', async route => {
+    const request = route.request(); const url = new URL(request.url()); const p = url.pathname.replace('/api/v1/', '')
+    let status = 200; let data = {}
+    if (p === 'config') data = { authMode: 'Development', entra: {} }
+    else if (p === 'me') { data = me; const build = buildIds[Math.min(meCalls++, buildIds.length - 1)]; await route.fulfill({ status, contentType: 'application/json', headers: { 'x-hub-build': build }, body: JSON.stringify(data) }); return }
+    else if (p === 'me/work') data = { projects: [project], tasks: [task], attention: { items: [task] } }
+    else if (p === `projects/${project.projectNumber}` || p === `projects/${project.id}`) data = project
+    else if (p === `tasks/${taskId}`) data = taskDetail
+    else if (p === `projects/${project.id}/milestones` || p === `projects/${project.projectNumber}/milestones`) data = []
+    else if (p === `projects/${project.id}/deliverables` || p === `projects/${project.projectNumber}/deliverables`) data = []
+    else if (p === `tasks/${taskId}/dependencies`) data = { dependsOn: [], blocks: [] }
+    else if (p === 'projects') data = { items: [project], page: 1, pageSize: 200, totalCount: 1 }
+    else if (p === 'reference') data = { disciplines: [], clients: [], offices: [], deliverableTypes: [], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
+    else if (p === 'workspaces') data = []
+    else if (p === 'me/notifications/pulse') { pulseRequests.push(url.toString()); data = { stamp: String(pulseRequests.length), projectStamp: String(pulseRequests.length) } }
+    else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
+    else if (p === 'me/sign-in' || p.startsWith('admin/settings/flag.')) data = {}
+    else if (p === 'events') { eventRequests.push(request); if (!events) status = 404; else { await route.fulfill({ status: 200, contentType: 'text/event-stream', headers: { 'cache-control': 'no-cache' }, body: ': heartbeat\n\ndata: {"topic":"project","projectId":"'+project.id+'","itemType":"Task","itemId":"'+taskId+'"}\n\n' }); return } }
+    else if (p.startsWith('projects/')) data = {}
+    else if (request.method() !== 'GET') data = {}
+    else data = {}
+    if (status >= 400) apiErrors.push(`${request.method()} ${p} ${status}`)
+    await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) })
+  })
+  return { eventRequests, pulseRequests, apiErrors, stop: () => page.unroute('**/api/**', routePromise) }
+}
+async function newMockPage(base, opts) {
+  const browser = await chromium.launch({ headless: true })
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
+  await page.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'alex@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
+  const mock = mockPlatformApi(page, opts)
+  return { browser, page, mock }
+}
+module.exports = { startPreview, newMockPage, mockPlatformApi, project, task, taskDetail }

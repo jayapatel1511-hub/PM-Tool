@@ -16,7 +16,7 @@ import { useReference } from '@/hooks/data'
 import { get, qs } from '@/lib/api'
 import { ChangeList, type ActivityRow } from '@/components/hub/activity'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
-import { plural, t, tv } from '@/lib/i18n'
+import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -160,9 +160,9 @@ function ReportTable({ r, itemType, asOf }: { r: ReportRun; itemType?: string | 
   const cell = (row: Record<string, any>, c: Column) => {
     const v = at(row, c.path)
     // Activity rows carry their structured changes: show them as the Activity tab does, not as raw field names.
-    if (c.path === 'action' && Array.isArray(row.categories)) return t(`action.${v}`)
+    if (c.path === 'action' && Array.isArray(row.categories)) return runtimeText(`action.${v}`)
     if (c.path === 'summary' && Array.isArray(row.changes)) return <ChangeList row={row as ActivityRow} />
-    if (c.path === 'item' && row.itemType) return <><Key>{row.itemKey}</Key> {row.itemName || t(`itemType.${row.itemType}`)}</>
+    if (c.path === 'item' && row.itemType) return <><Key>{row.itemKey}</Key> {row.itemName || runtimeText(`itemType.${row.itemType}`)}</>
     if (v == null || v === '') return <Missing />
     switch (c.type) {
       case 'key': {

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { SaveStatus } from '@/components/hub/fields'
 import { del, get, post, put } from '@/lib/api'
-import { t } from '@/lib/i18n'
+import { runtimeText, t } from '@/lib/i18n'
 import { socialSignInError, useFlag, useMe } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { FollowLevelSelect } from './projects/Follow'
@@ -102,7 +102,7 @@ export function PreferencesPage() {
                           const sectionsOff = c ? digest.sectionsOff.filter((x) => x !== code) : [...digest.sectionsOff, code]
                           setDigestDraft((d) => ({ ...d, sectionsOff })); void track(run('digest', () => put('me/preferences/digest', { enabled: digest.digestEnabled, time: digest.time, sectionsOff }), () => setDigestDraft((d) => { const next = { ...d }; delete next.sectionsOff; return next })), !!c)
                         }} />}</SaveStatus>
-                        {t(`prefs.section.${code}`)}
+                        {runtimeText(`prefs.section.${code}`)}
                       </label>
                     )
                   })}
@@ -143,7 +143,7 @@ export function PreferencesPage() {
               </thead>
               <tbody>
                 {events.map((e) => {
-                  const name = t(`event.${e.code}`)
+                  const name = runtimeText(`event.${e.code}`)
                   return (
                     <tr key={e.code} className="border-t hover:bg-muted">
                       <td className={cn(tdCls, 'align-middle')}>{name}{e.direct && <span className="block text-xs/[18px] text-muted-foreground">{t('prefs.direct')}</span>}</td>
@@ -175,7 +175,7 @@ export function PreferencesPage() {
                     <tr key={f.projectId} className="border-t hover:bg-muted">
                       <td className={cn(tdCls, 'min-w-56 align-middle')}><span className="flex items-center gap-2"><AccentDot id={f.projectId} /><span className="min-w-0 break-words"><Key>{f.projectNumber}</Key> {f.name}</span></span></td>
                       <td className={cn(tdCls, 'align-middle')}><StatusPill status={f.status} /></td>
-                      <td className={cn(tdCls, 'align-middle text-xs/[18px] text-muted-foreground')}>{t(`follow.source.${f.source}`)}</td>
+                      <td className={cn(tdCls, 'align-middle text-xs/[18px] text-muted-foreground')}>{runtimeText(`follow.source.${f.source}`)}</td>
                       <td className={cn(tdCls, 'align-middle')}><FollowLevelSelect projectId={f.projectId} level={f.level} onChanged={reload} projectName={`${f.projectNumber} ${f.name}`} /></td>
                     </tr>
                   ))}

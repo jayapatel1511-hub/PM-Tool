@@ -95,11 +95,12 @@ def main():
             migrate = command(['docker', 'run', '--rm', '--name', migration_container, '--pull', 'never', '--network', network,
                                '--mount', 'type=volume,src=' + runtime + ',dst=/run/pilot', '--env-file', migration_env, args.image])
             assert b'Now listening' not in migrate.stdout
-            assert sql('SELECT count(*) FROM hub.__ef_migrations').stdout.strip() == b'29'
+            expected = sorted(p.stem for p in (ROOT / 'src/Hub.Api/Data/Migrations').glob('[0-9]*.cs') if not p.name.endswith('.Designer.cs'))
+            assert expected and sql('SELECT "MigrationId" FROM hub.__ef_migrations ORDER BY "MigrationId"').stdout.decode().splitlines() == expected
             assert sql('SELECT count(*) FROM hub.project').stdout.strip() == b'0'
             admin_id = sql("SELECT id FROM hub.app_user WHERE email='permission-check@example.test'").stdout.decode().strip()
             assert str(uuid.UUID(admin_id)) == admin_id
-            report['migrationOnly'] = {'exit': 0, 'httpHostStarted': False, 'migrations': 29, 'fixtureProjects': 0}
+            report['migrationOnly'] = {'exit': 0, 'httpHostStarted': False, 'migrations': len(expected), 'fixtureProjects': 0}
             stage = 'runtime role grants'
             command(['docker', 'exec', '-i', database, 'psql', '-X', '-q', '-v', 'ON_ERROR_STOP=1', '-U', 'hub_pilot', '-d', 'hub_pilot'],
                     ("\\set app_password '" + app_password + "'\n" + (ROOT / 'hosting/pilot-runtime-role.sql').read_text()).encode())

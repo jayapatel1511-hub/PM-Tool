@@ -34,15 +34,7 @@ public static class DesignBasisEndpoints
         decimal? NumericValue, string? Units);
     public sealed record Filter(string? Kind, string? Status, Guid? DisciplineId, string? Scope,
         bool? Overdue, Guid? AffectedWorkId);
-    static readonly Col[] ExportColumns = [new("key", "key"), new("title", "name"),
-        new("kind", "kind", Label: "Kind"), new("discipline", "discipline"),
-        new("owner", "owner", Label: "Owner"), new("version", "revision", Label: "Version"),
-        new("status", "status"), new("scope", "scope", Label: "Scope"),
-        new("statement", "statement", Label: "Value or statement"), new("numericValue", "value", "number", "Numeric value"),
-        new("units", "units", Label: "Units"), new("sourceSystem", "sourceSystem", Label: "Source system"),
-        new("stableSourceId", "sourceId", Label: "Stable source ID"), new("sourceUrl", "sourceUrl", Label: "Source URL"),
-        new("declaredRevision", "declaredRevision", Label: "Declared source revision"),
-        new("confirmationDueDate", "due", "date", "Confirmation due date")];
+    static readonly Col[] ExportColumns = Hub.Api.Records.DesignBasisEntryRecord.DesignBasisExportColumns;
 
     public static void Map(RouteGroupBuilder api)
     {

@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace Hub.Tests.Api;
 
 /// FR-LIVE-10, AC-LIVE-09: immutable hashed assets, no-cache index.html, other static files and the API unchanged.
@@ -30,6 +32,9 @@ public sealed class StaticCacheTests
             Assert.Equal("no-cache", await CacheControl("/projects/P-1/tasks", "<title>Hub</title>"));
             Assert.Null(await CacheControl("/favicon.svg", "<svg"));
             Assert.Equal("no-store", await CacheControl("/api/v1/me"));
+
+            var privateManifest = await c.GetAsync("/.vite/manifest.json");
+            Assert.Equal(HttpStatusCode.NotFound, privateManifest.StatusCode);
         }
         finally { Directory.Delete(root, true); }
     }

@@ -47,3 +47,16 @@ In progress. S01 and S04 are checked locally; other slices are not yet run.
 - Checks on the merged tree: `dotnet build Hub.slnx` 0 errors; `LiveFeedTests` 7/7; full `dotnet test Hub.slnx` 1197/1197 passed (`Program.cs` auto-merged). Builder also ran `tools/coverage_gate.py` (rules engine branch 96.6%, service line 94.7%). No web change, so npm build, lint and browser suites were not run.
 - Assumptions: no Open decision from `specs/DECISIONS.md` relied on. The feed stays idle until a stream subscribes (S10), so behaviour is unchanged until `flag.live_events` lands with S10. The prune bound is rounded down instead of rounding the public `Cursor` at construction.
 - Left for Jay: nothing new; pushing, the pull request and merging remain his.
+
+
+## Local implementation handoff — 2026-10-18
+
+Recovered b4541e89 as ccdddc85 and retained the saved 042-S10 follow-up. Existing flags were preserved. The follow-up adds User visibility reload and actor-only routing; the invisible-batch heartbeat starvation defect found in review is fixed with a monotonic heartbeat budget and a regression.
+
+- PASS: focused LiveEvents/LiveStamp checks in the 40-test contract/registry/live handoff run; query-prefix tests preserve existing refreshes and the 1.5-second follow-up, and cover reconnect/open-panel and child-record invalidations.
+- PASS: production build, eager registration source guard and scoped Python probe regressions. The retry marker is persisted before an automatic chunk reload; denied storage reaches the error page without an automatic reload loop.
+- PASS (raw bytes): manifest entry plus all transitive static imports for `/my-work`: verified a6e0104b baseline 2,233,051 bytes, candidate 1,226,771 bytes, a 45.06% reduction. Gzip totals are 572,815 and 370,455 bytes (35.33% reduction); D4 is stated in uncompressed bytes. Both local reports are under `ci-artifacts/platform/chunks-*.json`.
+- Routes use React Router lazy descriptors; My Work stays eager. Entrance and the Entra provider load only when needed. Panel and shell slot suspensions have local fallbacks. The reviewed 044 error page/client reporter files were adopted from 0535311e; route reporting retains the route pattern.
+- FAIL: the new mocked registration/route/live browser acceptance suite currently fails its Task deep-link fixture after the heading wait; its application error/fixture cause is under investigation. It is wired into CI and must be fixed before the web gate can pass. The real two-browser suite, complete route sweep and hosted/tunnel checks remain unproven.
+- CI wiring includes the stable mocked suite and explicit nightly real suites. Record parity is a separate 043 handoff and is not part of this source commit.
+- S13 flag retirement, hosted activation, tunnel acceptance and human review remain pending. No review/pilot flag was turned on; only disposable local test databases were changed.

@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ApiError, get, patch, post, qs } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, shortDate, today } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { accentOf, cn } from '@/lib/utils'
 import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
@@ -38,7 +38,7 @@ const HOUR = 48, FIRST = 6, LAST = 20
 const monday = (d: string) => addDays(d, -((new Date(d + 'T00:00:00Z').getUTCDay() + 6) % 7))
 const dayOf = (e: Entry) => (e.kind === 'deadline' ? e.date : e.start.slice(0, 10))
 const time = (s: string) => s.slice(11, 16)
-const weekday = (d: string) => t(`calendar.dow.${new Date(d + 'T00:00:00Z').getUTCDay()}`)
+const weekday = (d: string) => runtimeText(`calendar.dow.${new Date(d + 'T00:00:00Z').getUTCDay()}`)
 const late = (e: Entry) => e.kind === 'deadline' && e.overdue
 const TodayTag = () => <span className="rounded-md bg-primary px-1.5 text-xs/[18px] font-medium text-primary-foreground">{t('common.today')}</span>
 
@@ -106,7 +106,7 @@ function shiftMonth(d: string, n: number) {
   const date = new Date(Date.UTC(y, m - 1 + n, 1))
   return date.toISOString().slice(0, 10)
 }
-function monthTitle(d: string) { const [y, m] = d.split('-'); return `${t(`calendar.month.${Number(m)}`)} ${y}` }
+function monthTitle(d: string) { const [y, m] = d.split('-'); return `${runtimeText(`calendar.month.${Number(m)}`)} ${y}` }
 
 /** The type's icon, with its name for screen readers. */
 function Marks({ e }: { e: Entry }) {

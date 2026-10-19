@@ -30,26 +30,28 @@ public static class RegisterEndpoints
         IssueDocumentBody Document, string Reason);
     public sealed record IssueVerificationBody(Guid VerifierId, string Status, string? EvidenceUrl, string? Note, int RowVersion);
 
-    static readonly Col[] RiskCols =
-    [
-        new("key", "key", "key"), new("title", "title"), new("status", "status"), new("band", "severity"), new("score", "score", "number"),
-        new("probability", "probability", "number"), new("impact", "impactScore", "number"), new("ownerName", "owner"), new("disciplineName", "discipline"),
-        new("reviewDate", "reviewDate", "date"), new("mitigation", "mitigation"), new("triggerIndicator", "trigger"), new("realisedIssueKey", "realisedAs"),
-    ];
-    static readonly Col[] IssueCols =
-    [
-        new("key", "key", "key"), new("title", "title"), new("issueType", "issueType", Label: "Issue type"), new("status", "status"), new("severity", "severity"),
-        new("ownerName", "owner"), new("raisedByName", "raisedBy"), new("disciplineName", "discipline"), new("affectedDisciplineSummary", "affectedDisciplines", Label: "Affected disciplines"), new("dateRaised", "dateRaised", "date"), new("targetResolutionDate", "targetDate", "date"),
-        new("daysOverdue", "daysOverdue", "number"), new("resolvedDate", "resolvedDate", "date"), new("resolution", "resolution"), new("originRiskKey", "originRisk"),
-        new("locationSummary", "locationSummary", Label: "Location"), new("documentSummary", "documentSummary", Label: "References"),
-        new("verificationStatus", "verificationStatus", Label: "Verification"),
-    ];
+    public sealed record RiskListRow(Guid Id, Guid ProjectId, string Key, string Title, string Status, Guid OwnerId, string? OwnerName,
+        int Probability, int Impact, int Score, string Band, string? Mitigation, string? TriggerIndicator, DateOnly? ReviewDate,
+        bool IsReviewOverdue, int ReviewOverdueDays, Guid? ProjectDisciplineId, string? DisciplineName, Guid? RealisedIssueId,
+        string? RealisedIssueKey, int RowVersion, DateTimeOffset LastActivityAt);
+    public sealed record RiskProject(Guid Id, string ProjectNumber, string Name, string Status);
+    public sealed record RealisedRiskIssue(Guid Id, string Key, string Title, string Status);
+    public sealed record RegisterPermission(bool Ok, string? Reason);
+    public sealed record RegisterTransition(string To, bool Ok, string? Reason);
+    public sealed record RiskPermissions(RegisterPermission Edit, IEnumerable<RegisterTransition> Transitions, bool Comment);
+    public sealed record RiskDetailData(RiskListRow Risk, string? Description, RiskProject Project, RealisedRiskIssue? RealisedIssue,
+        List<DecisionEndpoints.ItemLinkRow> Links, RiskPermissions Permissions);
+
+    static readonly Col[] RiskCols = Hub.Api.Records.RiskRecord.RegistersRiskCols;
+    static readonly Col[] IssueCols = Hub.Api.Records.IssueRecord.RegistersIssueCols;
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/projects/{id:guid}/risks", RiskList);
+        api.MapGet("/projects/{id:guid}/risks", async (Guid id, [AsParameters] RegisterQuery f, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
+            TypedResults.Ok(await RiskList(id, f, access, db, store, clock)));
         api.MapPost("/projects/{id:guid}/risks", CreateRisk);
-        api.MapGet("/risks/{id}", GetRisk);
+        api.MapGet("/risks/{id}", async (string id, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
+            TypedResults.Ok(await GetRisk(id, access, db, store, clock)));
         api.MapPatch("/risks/{id:guid}", EditRisk);
         api.MapPost("/risks/{id:guid}/transition", MoveRisk);
         api.MapPost("/risks/{id:guid}/links", async (Guid id, DecisionEndpoints.LinkInput body, Access access, HubDb db) =>
@@ -133,7 +135,7 @@ public static class RegisterEndpoints
 
     // ---------- Risks ----------
 
-    public static async Task<List<object>> RiskList(Guid id, [AsParameters] RegisterQuery f, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    public static async Task<List<RiskListRow>> RiskList(Guid id, [AsParameters] RegisterQuery f, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         await access.Project(id, track: false);
         var today = clock.Today(await store.Get(db));
@@ -160,7 +162,7 @@ public static class RegisterEndpoints
     }
 
     /// Default sort (§13.13): severity descending, then review date, then key.
-    public static async Task<List<object>> RiskRows(HubDb db, IQueryable<Risk> q, DateOnly today)
+    public static async Task<List<RiskListRow>> RiskRows(HubDb db, IQueryable<Risk> q, DateOnly today)
     {
         var rows = await q.Select(r => new
         {
@@ -175,12 +177,9 @@ public static class RegisterEndpoints
             {
                 var (r, score) = x;
                 var late = Registers.ReviewOverdueDays(r.Status, r.ReviewDate, today);
-                return (object)new
-                {
-                    r.Id, r.ProjectId, r.Key, r.Title, r.Status, r.OwnerId, r.OwnerName, r.Probability, r.Impact, Score = score, Band = Registers.Band(score),
-                    r.Mitigation, r.TriggerIndicator, r.ReviewDate, IsReviewOverdue = late > 0, ReviewOverdueDays = late, r.ProjectDisciplineId, r.DisciplineName,
-                    r.RealisedIssueId, r.RealisedIssueKey, r.RowVersion, r.LastActivityAt,
-                };
+                return new RiskListRow(r.Id, r.ProjectId, r.Key, r.Title, r.Status, r.OwnerId, r.OwnerName, r.Probability, r.Impact,
+                    score, Registers.Band(score), r.Mitigation, r.TriggerIndicator, r.ReviewDate, late > 0, late,
+                    r.ProjectDisciplineId, r.DisciplineName, r.RealisedIssueId, r.RealisedIssueKey, r.RowVersion, r.LastActivityAt);
             })];
     }
 
@@ -212,26 +211,19 @@ public static class RegisterEndpoints
         return Results.Created($"/api/v1/risks/{r.Id}", new { r.Id, r.Key, r.RowVersion });
     }
 
-    static async Task<object> GetRisk(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    internal static async Task<RiskDetailData> GetRisk(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var r = (Guid.TryParse(id, out var g) ? await db.Risks.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Risks.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(r.ProjectId, track: false);
         var row = (await RiskRows(db, db.Risks.AsNoTracking().Where(x => x.Id == r.Id), clock.Today(await store.Get(db)))).Single();
         var edit = Permissions.EditRegisterItem(access.Actor, ctx, Facts(r));
-        return new
-        {
-            Risk = row, r.Description,
-            Project = new { p.Id, p.ProjectNumber, p.Name, p.Status },
-            RealisedIssue = r.RealisedIssueId is { } ri ? await db.Issues.Where(x => x.Id == ri).Select(x => new { x.Id, x.Key, x.Title, x.Status }).FirstOrDefaultAsync() : null,
-            Links = await DecisionEndpoints.LinkRows(db, r.Id),
-            Permissions = new
-            {
-                Edit = Perm(edit, p),
-                Transitions = RiskStatus.All.Where(to => Workflow.RiskStep(r.Status, to)).Select(to => new { To = to, edit.Ok, Reason = edit.Ok ? null : Text.Get(edit.Why!, edit.Arg ?? p.Status) }),
-                Comment = Permissions.Comment(access.Actor, ctx).Ok,
-            },
-        };
+        var reason = edit.Ok ? null : Text.Get(edit.Why!, edit.Arg ?? p.Status);
+        return new RiskDetailData(row, r.Description, new(p.Id, p.ProjectNumber, p.Name, p.Status),
+            r.RealisedIssueId is { } ri ? await db.Issues.Where(x => x.Id == ri).Select(x => new RealisedRiskIssue(x.Id, x.Key, x.Title, x.Status)).FirstOrDefaultAsync() : null,
+            await DecisionEndpoints.LinkRows(db, r.Id),
+            new(new(edit.Ok, reason), RiskStatus.All.Where(to => Workflow.RiskStep(r.Status, to)).Select(to => new RegisterTransition(to, edit.Ok, reason)),
+                Permissions.Comment(access.Actor, ctx).Ok));
     }
 
     static async Task<IResult> EditRisk(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, TimeProvider clock)

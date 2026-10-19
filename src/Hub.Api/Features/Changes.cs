@@ -20,7 +20,7 @@ public static class ChangeEndpoints
         int? InputUseRowVersion, Guid? ExpectedCurrentRevisionId);
     public sealed record IssueImpactBody(Guid RequestId, int RowVersion, string Disposition, string Reason);
     public sealed record Filter(string? Q, string? Status, Guid? OwnerId, bool? Mine);
-    static readonly Col[] Columns = [new("key", "key"), new("title", "name"), new("status", "status"), new("assessmentDueDate", "due", "date"), new("pendingAssessments", "changePending"), new("scope", "changeScope")];
+    static readonly Col[] Columns = Hub.Api.Records.ChangeNoticeRecord.ChangesColumns;
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/changes", List);

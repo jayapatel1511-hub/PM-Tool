@@ -11,6 +11,12 @@ namespace Hub.Api.Features;
 public static partial class CommentEndpoints
 {
     public sealed record CommentBody(string Body);
+    public sealed record CommentCreated(Guid Id);
+    public sealed record MentionRow(Guid Id, string? Name);
+    public sealed record CommentRow(Guid Id, Guid AuthorId, string? AuthorName, string CommentKind, int? ReviewRound,
+        DateTimeOffset CreatedAt, DateTimeOffset? EditedAt, bool Deleted, bool DeletedByPm, string? Body,
+        IEnumerable<MentionRow> Mentions, bool CanEdit, bool CanDelete);
+    public sealed record CommentListResponse(bool CanComment, string? CommentReason, IEnumerable<CommentRow> Items);
 
     /// Mentions are stored in the text as `@[Display Name](user-id)`, inserted by the composer's people picker.
     [GeneratedRegex(@"@\[([^\]\n]{1,120})\]\(([0-9a-fA-F-]{36})\)")]
@@ -72,24 +78,19 @@ public static partial class CommentEndpoints
             var people = list.Select(c => c.AuthorId).Concat(mentions.Select(m => m.UserId)).Distinct().ToList();
             var names = await db.Users.Where(u => people.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)");
             var readOnly = ProjectStatus.IsReadOnly(ctx.Status);
-            return new
-            {
-                CanComment = Permissions.Comment(a, ctx).Ok,
-                CommentReason = Permissions.Comment(a, ctx) is { Ok: false } no ? Text.Get(no.Why!, no.Arg ?? ctx.Status) : null,
-                Items = list.Select(c =>
+            return TypedResults.Ok(new CommentListResponse(Permissions.Comment(a, ctx).Ok,
+                Permissions.Comment(a, ctx) is { Ok: false } no ? Text.Get(no.Why!, no.Arg ?? ctx.Status) : null,
+                list.Select(c =>
                 {
                     var deleted = c.DeletedAt is not null;
-                    return new
-                    {
-                        c.Id, c.AuthorId, AuthorName = names.GetValueOrDefault(c.AuthorId), c.CommentKind, c.ReviewRound, c.CreatedAt, c.EditedAt,
-                        Deleted = deleted, c.DeletedByPm,
-                        Body = deleted ? (a.Admin ? c.Body : null) : c.Body, // C-03: the text stays for Admin audit only
-                        Mentions = mentions.Where(m => m.CommentId == c.Id).Select(m => new { Id = m.UserId, Name = names.GetValueOrDefault(m.UserId) }),
-                        CanEdit = !deleted && !readOnly && c.CommentKind == CommentKind.General && Permissions.EditComment(a, c.AuthorId, c.CreatedAt, now).Ok,
-                        CanDelete = !deleted && !readOnly && Permissions.DeleteComment(a, ctx, c.AuthorId).Ok,
-                    };
-                }),
-            };
+                    return new CommentRow(c.Id, c.AuthorId, names.GetValueOrDefault(c.AuthorId), c.CommentKind, c.ReviewRound,
+                        c.CreatedAt, c.EditedAt, deleted, c.DeletedByPm,
+                        deleted ? (a.Admin ? c.Body : null) : c.Body, // C-03: deleted text stays visible only for Admin audit.
+                        mentions.Where(m => m.CommentId == c.Id).Select(m => new MentionRow(m.UserId, names.GetValueOrDefault(m.UserId))),
+                        !deleted && !readOnly && c.CommentKind == CommentKind.General && Permissions.EditComment(a, c.AuthorId, c.CreatedAt, now).Ok,
+                        !deleted && !readOnly && Permissions.DeleteComment(a, ctx, c.AuthorId).Ok);
+                })));
+
         });
 
         api.MapPost("/items/{type}/{id:guid}/comments", async (string type, Guid id, CommentBody body, Access access, HubDb db, Notifier notify, TimeProvider clock) =>
@@ -105,7 +106,7 @@ public static partial class CommentEndpoints
             await db.SaveChangesAsync();
             await Notices(db, notify, p, type, id, target, mentioned, []);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/v1/comments/{c.Id}", new { c.Id });
+            return TypedResults.Created($"/api/v1/comments/{c.Id}", new CommentCreated(c.Id));
         });
 
         api.MapPatch("/comments/{id:guid}", async (Guid id, CommentBody body, Access access, HubDb db, Notifier notify, TimeProvider clock) =>
@@ -124,7 +125,7 @@ public static partial class CommentEndpoints
             await db.SaveChangesAsync();
             await Notices(db, notify, p, c.ItemType, c.ItemId, target, mentioned.Where(m => !before.Contains(m)).ToList(), [], commentOnItem: false);
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
         api.MapDelete("/comments/{id:guid}", async (Guid id, Access access, HubDb db, TimeProvider clock) =>
@@ -132,13 +133,13 @@ public static partial class CommentEndpoints
             var c = await db.Comments.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
             var (_, ctx) = await access.Project(c.ProjectId);
             if (ProjectStatus.IsReadOnly(ctx.Status)) throw ApiException.Forbidden("perm.project_read_only", ctx.Status);
-            if (c.DeletedAt is not null) return Results.NoContent();
+            if (c.DeletedAt is not null) return TypedResults.NoContent();
             Access.Demand(Permissions.DeleteComment(access.Actor, ctx, c.AuthorId)); // C-03, C-04
             c.DeletedAt = clock.GetUtcNow();
             c.DeletedBy = access.Me.Id;
             c.DeletedByPm = c.AuthorId != access.Me.Id;
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
     }
 

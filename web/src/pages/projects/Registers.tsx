@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { useMe } from '@/lib/auth'
-import { ApiError, del, get, patch, post, qs } from '@/lib/api'
+import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import type { ProjectDiscipline } from '@/lib/types'
@@ -684,7 +684,7 @@ function Links({ links, canEdit, projectId, onAdd, onChange }: { links: LinkRow[
             <button className="min-w-0 flex-1 truncate text-left hover:underline" onClick={() => openPanel(l.targetType, l.targetId)}>{l.name}</button>
             {l.status && <StatusPill status={l.status} />}<DateText date={l.date} />
             {canEdit && <Button variant="ghost" size="icon-sm" aria-label={t('decision.unlink', { key: l.key })}
-              onClick={async () => { try { await del(`item-links/${l.id}`); onChange() } catch (e) { toast.error(errorText(e)) } }}><Trash2 className="size-4" /></Button>}
+              onClick={async () => { try { await typedRequest('delete', '/api/v1/item-links/{id}', { params: { id: l.id } }); onChange() } catch (e) { toast.error(errorText(e)) } }}><Trash2 className="size-4" /></Button>}
           </li>))}</ul>
       )}
       {canEdit && (adding ? (

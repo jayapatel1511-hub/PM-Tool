@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
-import { ApiError, get, patch, post, qs } from '@/lib/api'
+import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -89,7 +89,7 @@ export const ownerBody = (o: Owner) => ({
 
 function OwnerFields({ projectId, value, onChange, errors, prefix }: { projectId: string; value: Owner; onChange: (o: Owner) => void; errors?: string[]; prefix: string }) {
   const project = useProject(projectId)
-  const parties = useQuery({ queryKey: ['p', projectId, 'parties'], queryFn: () => get<{ id: string; name: string; organisation?: string; isClient: boolean; isActive: boolean }[]>(`projects/${projectId}/external-parties`) })
+  const parties = useQuery({ queryKey: ['p', projectId, 'parties'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/external-parties', { params: { id: projectId } }) })
   return (
     <fieldset className="space-y-1.5 sm:col-span-2">
       <legend className="text-sm font-medium">{t('common.owner')}</legend>

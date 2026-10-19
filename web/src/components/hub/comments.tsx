@@ -7,7 +7,9 @@ import { RichText } from '@/components/hub/richtext'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { get, patch, post, qs, del } from '@/lib/api'
+import { get, qs, typedRequest } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { invalidateChange } from '@/lib/keys'
 import { fmtTime } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -15,19 +17,16 @@ import type { ItemPartProps } from '@/pages/projects/slots-items'
 
 // Comments (§12.8): conversation on the item, newest last; the facts stay in History (C-08).
 
-interface CommentRow {
-  id: string; authorId: string; authorName?: string; commentKind: string; reviewRound?: number | null; createdAt: string; editedAt?: string | null
-  deleted: boolean; deletedByPm: boolean; body?: string | null; mentions: { id: string; name?: string }[]; canEdit: boolean; canDelete: boolean
-}
-interface CommentList { canComment: boolean; commentReason?: string | null; items: CommentRow[] }
+type CommentRow = components['schemas']['CommentRow']
+type CommentList = components['schemas']['CommentListResponse']
 interface TeamMember { userId: string; displayName: string; jobTitle?: string; isActive: boolean }
 
 export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
   const qc = useQueryClient()
-  const q = useQuery({ queryKey: ['comments', type, id], queryFn: () => get<CommentList>(`items/${type}/${id}/comments`) })
+  const q = useQuery<CommentList>({ queryKey: ['comments', type, id], queryFn: () => typedRequest('get', '/api/v1/items/{type}/{id}/comments', { params: { type, id } }) })
   const [editing, setEditing] = useState<string | null>(null)
   const [removing, setRemoving] = useState<CommentRow | null>(null)
-  const reload = () => { qc.invalidateQueries({ queryKey: ['comments', type, id] }); qc.invalidateQueries({ queryKey: ['history', type, id] }); qc.invalidateQueries({ queryKey: ['task', id] }) }
+  const reload = () => { void invalidateChange(qc, 'Comment') }
   if (q.isPending) return <Loading rows={3} />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const items = q.data.items
@@ -57,7 +56,7 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
                   </div>
                 ) : editing === c.id ? (
                   <Composer projectId={projectId} initial={c.body ?? ''} submitLabel={t('common.save')} onCancel={() => setEditing(null)}
-                    onSubmit={async (body) => { await patch(`comments/${c.id}`, { body }); setEditing(null); reload() }} />
+                    onSubmit={async (body) => { await typedRequest('patch', '/api/v1/comments/{id}', { params: { id: c.id }, body: { body } }); setEditing(null); reload() }} />
                 ) : <RichText text={c.body} className="text-sm" />}
               </div>
             </li>
@@ -65,11 +64,11 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
         </ol>
       )}
       {q.data.canComment
-        ? <Composer projectId={projectId} submitLabel={t('comments.post')} onSubmit={async (body) => { await post(`items/${type}/${id}/comments`, { body }); reload() }} />
+        ? <Composer projectId={projectId} submitLabel={t('comments.post')} onSubmit={async (body) => { await typedRequest('post', '/api/v1/items/{type}/{id}/comments', { params: { type, id }, body: { body } }); reload() }} />
         : <p className="text-sm text-muted-foreground">{q.data.commentReason ?? t('comments.readOnly')}</p>}
       {removing && (
         <ConfirmDialog open destructive title={t('comments.deleteTitle')} body={t('comments.deleteBody')} confirmLabel={t('common.delete')}
-          onOpenChange={(o) => !o && setRemoving(null)} onConfirm={async () => { await del(`comments/${removing.id}`); setRemoving(null); reload() }} />
+          onOpenChange={(o) => !o && setRemoving(null)} onConfirm={async () => { await typedRequest('delete', '/api/v1/comments/{id}', { params: { id: removing.id } }); setRemoving(null); reload() }} />
       )}
     </div>
   )

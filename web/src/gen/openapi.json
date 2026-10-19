@@ -524,92 +524,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfGuidAndGuidAndstringAndstringAndintAndDateTimeOffsetAndDateTimeOffsetAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndstringAndbooleanAndboolean": {
-        "properties": {
-          "authorId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "authorName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "body": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "canDelete": {
-            "type": "boolean"
-          },
-          "canEdit": {
-            "type": "boolean"
-          },
-          "commentKind": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "deleted": {
-            "type": "boolean"
-          },
-          "deletedByPm": {
-            "type": "boolean"
-          },
-          "editedAt": {
-            "format": "date-time",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "mentions": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstring"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "reviewRound": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "null",
-              "integer"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "authorId",
-          "authorName",
-          "commentKind",
-          "reviewRound",
-          "createdAt",
-          "editedAt",
-          "deleted",
-          "deletedByPm",
-          "body",
-          "mentions",
-          "canEdit",
-          "canDelete"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndboolean": {
         "properties": {
           "addedAt": {
@@ -775,25 +689,6 @@
           "isActive",
           "sortOrder",
           "rowVersion"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstring": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name"
         ],
         "type": "object"
       },
@@ -1500,67 +1395,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndbooleanAndstringAndbooleanAndint": {
-        "properties": {
-          "email": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "isClient": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "notes": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "organisation": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "role": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "organisation",
-          "email",
-          "role",
-          "isClient",
-          "notes",
-          "isActive",
-          "rowVersion"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring": {
         "properties": {
           "level": {
@@ -2094,34 +1928,6 @@
         "required": [
           "enabled",
           "rowVersion"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndintAndDateTimeOffsetAndDateTimeOffsetAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndstringAndbooleanAndboolean": {
-        "properties": {
-          "canComment": {
-            "type": "boolean"
-          },
-          "commentReason": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndGuidAndstringAndstringAndintAndDateTimeOffsetAndDateTimeOffsetAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndstringAndbooleanAndboolean"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "canComment",
-          "commentReason",
-          "items"
         ],
         "type": "object"
       },
@@ -3398,6 +3204,123 @@
         ],
         "type": "object"
       },
+      "CommentCreated": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "CommentListResponse": {
+        "properties": {
+          "canComment": {
+            "type": "boolean"
+          },
+          "commentReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CommentRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "canComment",
+          "commentReason",
+          "items"
+        ],
+        "type": "object"
+      },
+      "CommentRow": {
+        "properties": {
+          "authorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "authorName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "body": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "canDelete": {
+            "type": "boolean"
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "commentKind": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "deletedByPm": {
+            "type": "boolean"
+          },
+          "editedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "mentions": {
+            "items": {
+              "$ref": "#/components/schemas/MentionRow"
+            },
+            "type": "array"
+          },
+          "reviewRound": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "authorId",
+          "authorName",
+          "commentKind",
+          "reviewRound",
+          "createdAt",
+          "editedAt",
+          "deleted",
+          "deletedByPm",
+          "body",
+          "mentions",
+          "canEdit",
+          "canDelete"
+        ],
+        "type": "object"
+      },
       "CommitmentMissCategory": {
         "properties": {
           "auditKey": {
@@ -4180,6 +4103,79 @@
         ],
         "type": "object"
       },
+      "DecisionCreated": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "DecisionDetailResponse": {
+        "properties": {
+          "cancelledReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "decidedBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionRow"
+          },
+          "deferralReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/ItemLinkRow"
+            },
+            "type": "array"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/DecisionPermissions"
+          },
+          "project": {
+            "$ref": "#/components/schemas/DecisionProject"
+          }
+        },
+        "required": [
+          "decision",
+          "description",
+          "deferralReason",
+          "cancelledReason",
+          "decidedBy",
+          "project",
+          "links",
+          "permissions"
+        ],
+        "type": "object"
+      },
       "DecisionLinkInput": {
         "properties": {
           "relation": {
@@ -4198,8 +4194,311 @@
         },
         "required": [
           "targetType",
-          "targetId",
-          "relation"
+          "targetId"
+        ],
+        "type": "object"
+      },
+      "DecisionLinkMutation": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "DecisionLinkSummary": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name"
+        ],
+        "type": "object"
+      },
+      "DecisionMutation": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "DecisionPermission": {
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "ok",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "DecisionPermissions": {
+        "properties": {
+          "comment": {
+            "type": "boolean"
+          },
+          "edit": {
+            "$ref": "#/components/schemas/DecisionPermission"
+          },
+          "transitions": {
+            "items": {
+              "$ref": "#/components/schemas/DecisionTransition"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "edit",
+          "transitions",
+          "comment"
+        ],
+        "type": "object"
+      },
+      "DecisionProject": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
+      "DecisionRow": {
+        "properties": {
+          "blockingTaskIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dateRequested": {
+            "format": "date",
+            "type": "string"
+          },
+          "daysOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "daysUntil": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "decisionDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "decisionText": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DecisionLinkSummary"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "impactDescription": {
+            "type": "string"
+          },
+          "impactLevel": {
+            "type": "string"
+          },
+          "isDueSoon": {
+            "type": "boolean"
+          },
+          "isInactiveOwner": {
+            "type": "boolean"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/DecisionLinkSummary"
+            },
+            "type": "array"
+          },
+          "originalRequiredByDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "ownerExternalPartyId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerIsClient": {
+            "type": "boolean"
+          },
+          "ownerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerOrganisation": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerUserId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestedById": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requestedByName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "requiredByDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "key",
+          "subject",
+          "status",
+          "requestedById",
+          "requestedByName",
+          "ownerUserId",
+          "ownerExternalPartyId",
+          "ownerName",
+          "ownerOrganisation",
+          "ownerIsClient",
+          "dateRequested",
+          "requiredByDate",
+          "originalRequiredByDate",
+          "impactLevel",
+          "impactDescription",
+          "decisionText",
+          "decisionDate",
+          "rowVersion",
+          "daysUntil",
+          "isOverdue",
+          "daysOverdue",
+          "isDueSoon",
+          "isInactiveOwner",
+          "blockingTaskIds",
+          "deliverables",
+          "milestones"
+        ],
+        "type": "object"
+      },
+      "DecisionTransition": {
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "to",
+          "ok",
+          "reason"
         ],
         "type": "object"
       },
@@ -4250,12 +4549,28 @@
           }
         },
         "required": [
-          "toStatus",
-          "reason",
-          "decisionText",
-          "decisionDate",
-          "newRequiredBy",
-          "notifyAssignees",
+          "toStatus"
+        ],
+        "type": "object"
+      },
+      "DecisionTransitionMutation": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
           "rowVersion"
         ],
         "type": "object"
@@ -5613,6 +5928,115 @@
           "limitedWork",
           "risk",
           "expiresOn"
+        ],
+        "type": "object"
+      },
+      "ExternalPartyCreated": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isClient": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "organisation": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "organisation",
+          "isClient",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ExternalPartyMutation": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ExternalPartyRow": {
+        "properties": {
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isClient": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "organisation": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "role": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "organisation",
+          "email",
+          "role",
+          "isClient",
+          "notes",
+          "isActive",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -7499,6 +7923,25 @@
           "userId",
           "roles",
           "disciplineId"
+        ],
+        "type": "object"
+      },
+      "MentionRow": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ],
         "type": "object"
       },
@@ -15944,8 +16387,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -15975,8 +16418,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -16041,7 +16484,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionDetailResponse"
+                }
               }
             },
             "description": "OK"
@@ -16075,6 +16520,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionMutation"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -16107,8 +16559,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionLinkMutation"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -16179,6 +16638,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionTransitionMutation"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -16640,11 +17106,18 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalPartyMutation"
+                }
+              }
+            },
             "description": "OK"
           }
         },
         "tags": [
-          "Hub.Api"
+          "DecisionEndpoints"
         ]
       }
     },
@@ -17177,8 +17650,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -17268,7 +17741,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndintAndDateTimeOffsetAndDateTimeOffsetAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndstringAndbooleanAndboolean"
+                  "$ref": "#/components/schemas/CommentListResponse"
                 }
               }
             },
@@ -17310,8 +17783,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -21699,6 +22179,9 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DecisionRow"
+                  },
                   "type": "array"
                 }
               }
@@ -21733,8 +22216,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -22407,7 +22897,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndbooleanAndstringAndbooleanAndint"
+                    "$ref": "#/components/schemas/ExternalPartyRow"
                   },
                   "type": "array"
                 }
@@ -22417,7 +22907,7 @@
           }
         },
         "tags": [
-          "Hub.Api"
+          "DecisionEndpoints"
         ]
       },
       "post": {
@@ -22443,12 +22933,19 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalPartyCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
-          "Hub.Api"
+          "DecisionEndpoints"
         ]
       }
     },

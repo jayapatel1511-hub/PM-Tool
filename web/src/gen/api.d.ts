@@ -2419,8 +2419,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2445,8 +2445,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2550,7 +2550,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["DecisionDetailResponse"];
                     };
                 };
             };
@@ -2580,7 +2580,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DecisionMutation"];
+                    };
                 };
             };
         };
@@ -2610,12 +2612,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DecisionLinkMutation"];
+                    };
                 };
             };
         };
@@ -2695,7 +2699,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DecisionTransitionMutation"];
+                    };
                 };
             };
         };
@@ -3196,7 +3202,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ExternalPartyMutation"];
+                    };
                 };
             };
         };
@@ -3740,8 +3748,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3820,7 +3828,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndintAndDateTimeOffsetAndDateTimeOffsetAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndstringAndbooleanAndboolean"];
+                        "application/json": components["schemas"]["CommentListResponse"];
                     };
                 };
             };
@@ -3842,12 +3850,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CommentCreated"];
+                    };
                 };
             };
         };
@@ -7506,7 +7516,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown[];
+                        "application/json": components["schemas"]["DecisionRow"][];
                     };
                 };
             };
@@ -7527,12 +7537,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DecisionCreated"];
+                    };
                 };
             };
         };
@@ -7993,7 +8005,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndbooleanAndstringAndbooleanAndint"][];
+                        "application/json": components["schemas"]["ExternalPartyRow"][];
                     };
                 };
             };
@@ -8014,12 +8026,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ExternalPartyCreated"];
+                    };
                 };
             };
         };
@@ -15917,26 +15931,6 @@ export interface components {
             /** Format: uuid */
             officeId: null | string;
         };
-        AnonymousTypeOfGuidAndGuidAndstringAndstringAndintAndDateTimeOffsetAndDateTimeOffsetAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndstringAndbooleanAndboolean: {
-            /** Format: uuid */
-            authorId: string;
-            authorName: null | string;
-            body: null | string;
-            canDelete: boolean;
-            canEdit: boolean;
-            commentKind: null | string;
-            /** Format: date-time */
-            createdAt: string;
-            deleted: boolean;
-            deletedByPm: boolean;
-            /** Format: date-time */
-            editedAt: null | string;
-            /** Format: uuid */
-            id: string;
-            mentions: null | components["schemas"]["AnonymousTypeOfGuidAndstring"][];
-            /** Format: int32 */
-            reviewRound: null | number;
-        };
         AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndboolean: {
             /** Format: date-time */
             addedAt: string;
@@ -15976,11 +15970,6 @@ export interface components {
             rowVersion: number;
             /** Format: int32 */
             sortOrder: number;
-        };
-        AnonymousTypeOfGuidAndstring: {
-            /** Format: uuid */
-            id: string;
-            name: null | string;
         };
         AnonymousTypeOfGuidAndstringAndGuidAndboolean: {
             /** Format: uuid */
@@ -16145,19 +16134,6 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndbooleanAndstringAndbooleanAndint: {
-            email: null | string;
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
-            isClient: boolean;
-            name: null | string;
-            notes: null | string;
-            organisation: null | string;
-            role: null | string;
-            /** Format: int32 */
-            rowVersion: number;
-        };
         AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring: {
             level: null | string;
             name: null | string;
@@ -16264,11 +16240,6 @@ export interface components {
             enabled: boolean;
             /** Format: int32 */
             rowVersion: number;
-        };
-        AnonymousTypeOfbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndintAndDateTimeOffsetAndDateTimeOffsetAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndstringAndbooleanAndboolean: {
-            canComment: boolean;
-            commentReason: null | string;
-            items: null | components["schemas"]["AnonymousTypeOfGuidAndGuidAndstringAndstringAndintAndDateTimeOffsetAndDateTimeOffsetAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfGuidAndstringAndbooleanAndboolean"][];
         };
         AnonymousTypeOfbooleanAndstringAndbooleanAndboolean: {
             denseRows: boolean;
@@ -16583,6 +16554,35 @@ export interface components {
         CommentBody: {
             body: string;
         };
+        CommentCreated: {
+            /** Format: uuid */
+            id: string;
+        };
+        CommentListResponse: {
+            canComment: boolean;
+            commentReason: null | string;
+            items: components["schemas"]["CommentRow"][];
+        };
+        CommentRow: {
+            /** Format: uuid */
+            authorId: string;
+            authorName: null | string;
+            body: null | string;
+            canDelete: boolean;
+            canEdit: boolean;
+            commentKind: string;
+            /** Format: date-time */
+            createdAt: string;
+            deleted: boolean;
+            deletedByPm: boolean;
+            /** Format: date-time */
+            editedAt: null | string;
+            /** Format: uuid */
+            id: string;
+            mentions: components["schemas"]["MentionRow"][];
+            /** Format: int32 */
+            reviewRound: null | number;
+        };
         CommitmentMissCategory: {
             auditKey?: null | string;
             auditName?: null | string;
@@ -16782,23 +16782,126 @@ export interface components {
             requiredByDate: null | string;
             subject: string;
         };
+        DecisionCreated: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        DecisionDetailResponse: {
+            cancelledReason: null | string;
+            decidedBy: null | string;
+            decision: components["schemas"]["DecisionRow"];
+            deferralReason: null | string;
+            description: string;
+            links: components["schemas"]["ItemLinkRow"][];
+            permissions: components["schemas"]["DecisionPermissions"];
+            project: components["schemas"]["DecisionProject"];
+        };
         DecisionLinkInput: {
-            relation: null | string;
+            relation?: null | string;
             /** Format: uuid */
             targetId: string;
             targetType: string;
         };
-        DecisionTransitionBody: {
+        DecisionLinkMutation: {
+            /** Format: uuid */
+            id: string;
+        };
+        DecisionLinkSummary: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+        };
+        DecisionMutation: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        DecisionPermission: {
+            ok: boolean;
+            reason: null | string;
+        };
+        DecisionPermissions: {
+            comment: boolean;
+            edit: components["schemas"]["DecisionPermission"];
+            transitions: components["schemas"]["DecisionTransition"][];
+        };
+        DecisionProject: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+            status: string;
+        };
+        DecisionRow: {
+            blockingTaskIds: string[];
+            /** Format: date */
+            dateRequested: string;
+            /** Format: int32 */
+            daysOverdue: number;
+            /** Format: int32 */
+            daysUntil: null | number;
             /** Format: date */
             decisionDate: null | string;
             decisionText: null | string;
+            deliverables: components["schemas"]["DecisionLinkSummary"][];
+            /** Format: uuid */
+            id: string;
+            impactDescription: string;
+            impactLevel: string;
+            isDueSoon: boolean;
+            isInactiveOwner: boolean;
+            isOverdue: boolean;
+            key: string;
+            milestones: components["schemas"]["DecisionLinkSummary"][];
             /** Format: date */
-            newRequiredBy: null | string;
-            notifyAssignees: null | boolean;
-            reason: null | string;
+            originalRequiredByDate: string;
+            /** Format: uuid */
+            ownerExternalPartyId: null | string;
+            ownerIsClient: boolean;
+            ownerName: null | string;
+            ownerOrganisation: null | string;
+            /** Format: uuid */
+            ownerUserId: null | string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: uuid */
+            requestedById: string;
+            requestedByName: null | string;
+            /** Format: date */
+            requiredByDate: string;
             /** Format: int32 */
-            rowVersion: null | number;
+            rowVersion: number;
+            status: string;
+            subject: string;
+        };
+        DecisionTransition: {
+            ok: boolean;
+            reason: null | string;
+            to: string;
+        };
+        DecisionTransitionBody: {
+            /** Format: date */
+            decisionDate?: null | string;
+            decisionText?: null | string;
+            /** Format: date */
+            newRequiredBy?: null | string;
+            notifyAssignees?: null | boolean;
+            reason?: null | string;
+            /** Format: int32 */
+            rowVersion?: null | number;
             toStatus: string;
+        };
+        DecisionTransitionMutation: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
         };
         DeliverableBaseline: {
             /** Format: uuid */
@@ -17170,6 +17273,34 @@ export interface components {
             risk: string;
             /** Format: uuid */
             verifierId: string;
+        };
+        ExternalPartyCreated: {
+            /** Format: uuid */
+            id: string;
+            isClient: boolean;
+            name: string;
+            organisation: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        ExternalPartyMutation: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        ExternalPartyRow: {
+            email: null | string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            isClient: boolean;
+            name: string;
+            notes: null | string;
+            organisation: null | string;
+            role: null | string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         FindingAction: {
             action: string;
@@ -17656,6 +17787,11 @@ export interface components {
             roles: string[];
             /** Format: uuid */
             userId: string;
+        };
+        MentionRow: {
+            /** Format: uuid */
+            id: string;
+            name: null | string;
         };
         MilestoneCreateBody: {
             /** Format: uuid */

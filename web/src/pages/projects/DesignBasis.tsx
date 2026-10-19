@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Spinner, TableRegion, tdCls, thCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { Pill } from '@/components/hub/pills'
-import { ApiError, get, post } from '@/lib/api'
+import { ApiError, get, post, typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -163,8 +163,9 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
   const [draft, setDraft] = useState<VersionDraft>(() => fromVersion(current))
   const [reason, setReason] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null)
   const [duplicateId, setDuplicateId] = useState(''), [inspected, setInspected] = useState(false)
-  const decisions = useQuery({ queryKey: ['basis-decision-options', base],
-    queryFn: () => get<{ id: string; key: string; subject: string; status: string }[]>(base.replace(/\/design-basis$/, '/decisions')) })
+  const projectId = base.match(/^projects\/([^/]+)\/design-basis$/)?.[1] ?? ''
+  const decisions = useQuery({ queryKey: ['basis-decision-options', base], enabled: !!projectId,
+    queryFn: () => typedRequest('get', '/api/v1/projects/{id}/decisions', { params: { id: projectId } }) })
   const decisionChoices = decisions.data?.map(d => ({ value: d.id, label: `${d.key} · ${d.subject} · ${tv(d.status)}` })) ?? []
   if (draft.decisionId && !decisionChoices.some(d => d.value === draft.decisionId))
     decisionChoices.push({ value: draft.decisionId, label: t('coord.unavailable') })

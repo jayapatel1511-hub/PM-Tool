@@ -3,6 +3,7 @@
 // filter sends a bare id (D2), dialogs return focus to their opener (D3) and withdrawn-version uses are flagged (D4).
 const { chromium } = require('playwright');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
+const { decisionRow, externalParty } = require('./decisions.fixture.cjs');
 const port = process.env.PORT ?? '5176', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const pid = id(1), consumer = id(2), lead = id(3), civil = id(4), task = id(7), e1 = id(20), e2 = id(21), v11 = id(30), v12 = id(31), v21 = id(32), u1 = id(40), u2 = id(41), i1 = id(50), i2 = id(51);
@@ -107,7 +108,9 @@ let server, browser;
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }; else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' };
     else if (p.endsWith('/changes/options')) data = options();
     else if (p === `projects/${pid}/team`) data = { members: [{ userId: consumer, displayName: 'Alex Consumer', primaryDisciplineId: civil }, { userId: lead, displayName: 'Marc Lead', primaryDisciplineId: civil }] };
-    else if (p === `projects/${pid}/decisions` || p === `projects/${pid}/deliverables` || p === `projects/${pid}/milestones`) data = [];
+    else if (p === `projects/${pid}/decisions`) data = [decisionRow];
+    else if (p === `projects/${pid}/external-parties`) data = [externalParty];
+    else if (p === `projects/${pid}/deliverables` || p === `projects/${pid}/milestones`) data = [];
     else if (p === `projects/${pid}/tasks`) data = { items: [taskRow()], page: 1, pageSize: 200, totalCount: 1 };
     else if (p === `tasks/${task}`) data = taskDetail();
     else if (p === `tasks/${task}/dependencies`) data = { dependsOn: [], blocks: [] };

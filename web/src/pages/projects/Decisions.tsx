@@ -16,11 +16,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh } from '@/hooks/data'
-import { ApiError, del, download, get, patch, post, qs } from '@/lib/api'
+import { ApiError, download, get, post, qs, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf, ProjectDetail } from '@/lib/types'
+import type { components } from '@/gen/api'
 import { cn } from '@/lib/utils'
+import { invalidateChange } from '@/lib/keys'
 import type { MilestoneRow } from './Milestones'
 import type { DeliverableRow } from './Deliverables'
 import { CommentsSlot, ItemSlots } from './slots-items'
@@ -32,23 +34,8 @@ import { DateText, FieldGroup, PanelHead, Person, RegisterCards, SELECTED_ROW, T
 import { ViewMenu } from '@/components/hub/views'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 
-export interface DecisionRow {
-  id: string; projectId: string; key: string; subject: string; status: string; requestedById: string; requestedByName?: string
-  ownerUserId?: string; ownerExternalPartyId?: string; ownerName?: string; ownerOrganisation?: string; ownerIsClient: boolean
-  dateRequested: string; requiredByDate: string; originalRequiredByDate: string; impactLevel: string; impactDescription: string
-  decisionText?: string; decisionDate?: string; rowVersion: number; daysUntil?: number | null
-  isOverdue: boolean; daysOverdue: number; isDueSoon: boolean; isInactiveOwner: boolean; blockingTaskIds: string[]
-  deliverables: { id: string; key: string; name: string }[]; milestones: { id: string; key: string; name: string }[]
-}
-interface Perm { ok: boolean; reason?: string | null }
-interface LinkRow { id: string; targetType: string; targetId: string; relation: string; key: string; name: string; status?: string; date?: string; person?: string }
-interface DecisionDetail {
-  decision: DecisionRow; description: string; deferralReason?: string; cancelledReason?: string; decidedBy?: string
-  project: { id: string; projectNumber: string; name: string; status: string }
-  links: LinkRow[]
-  permissions: { edit: Perm; transitions: { to: string; ok: boolean; reason?: string | null }[]; comment: boolean }
-}
-export interface Party { id: string; name: string; organisation?: string; email?: string; role?: string; isClient: boolean; notes?: string; isActive: boolean; rowVersion: number }
+export type DecisionRow = components['schemas']['DecisionRow']
+export type Party = components['schemas']['ExternalPartyRow']
 
 const STATUSES = ['Pending', 'Under Review', 'Decided', 'Deferred', 'Cancelled']
 const OPEN = 'Pending,Under Review,Deferred'
@@ -56,7 +43,7 @@ const IMPACTS = ['High', 'Medium', 'Low']
 const IMPACT_TONE = { High: 'bad', Medium: 'warn', Low: 'idle' } as const
 const FILTERS = ['q', 'status', 'ownerId', 'ownerType', 'impact', 'requiredFrom', 'requiredTo', 'blocking', 'indicator'] as const satisfies readonly (SavedViewKeys['decisions'] | 'page' | 'panel' | 'draftAccessReason')[]
 
-const useParties = (projectId: string) => useQuery({ queryKey: ['p', projectId, 'parties'], queryFn: () => get<Party[]>(`projects/${projectId}/external-parties`), enabled: !!projectId })
+const useParties = (projectId: string) => useQuery({ queryKey: ['p', projectId, 'parties'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/external-parties', { params: { id: projectId } }), enabled: !!projectId })
 
 function Impact({ level }: { level: string }) {
   return <Chip tone={IMPACT_TONE[level as keyof typeof IMPACT_TONE] ?? 'idle'}>{tv(level)}</Chip>
@@ -93,7 +80,10 @@ export function DecisionsTab() {
   const [open, setOpen] = useState<Set<string>>(new Set())
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
-  const q = useQuery({ queryKey: ['p', p.id, 'decisions', filters], queryFn: () => get<DecisionRow[]>(`projects/${p.id}/decisions${qs(filters)}`) })
+  const q = useQuery({
+    queryKey: ['p', p.id, 'decisions', filters],
+    queryFn: () => typedRequest('get', '/api/v1/projects/{id}/decisions', { params: { id: p.id }, query: filters }),
+  })
   const panel = sp.get('panel')
   const table = useTable<DecisionRow>('hub.decisionColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (d) => d.key, className: 'whitespace-nowrap', cell: (d) => <Key>{d.key}</Key> },
@@ -290,7 +280,7 @@ function ClientExportDialog({ p, onClose }: { p: ProjectDetail; onClose: () => v
   )
 }
 function useDecision(id: string) {
-  return useQuery({ queryKey: ['decision', id], queryFn: () => get<DecisionDetail>(`decisions/${id}`) })
+  return useQuery({ queryKey: ['decision', id], queryFn: () => typedRequest('get', '/api/v1/decisions/{id}', { params: { id } }) })
 }
 
 function LinkedItems({ id, canRemove }: { id: string; canRemove?: boolean }) {
@@ -313,7 +303,7 @@ function LinkedItems({ id, canRemove }: { id: string; canRemove?: boolean }) {
             <td className="whitespace-nowrap py-1.5 pr-3">{l.person}</td>
             <td className="py-1.5 pr-3"><DateText date={l.date} /></td>
             <td className="py-1 text-right">{canRemove && <Button variant="ghost" size="icon-sm" aria-label={t('decision.unlink', { key: l.key })}
-              onClick={async () => { try { await del(`item-links/${l.id}`); done(q.data.decision.projectId, id) } catch (e) { toast.error(errorText(e)) } }}><Trash2 className="size-4" /></Button>}</td>
+              onClick={async () => { try { await typedRequest('delete', '/api/v1/item-links/{id}', { params: { id: l.id } }); done(q.data.decision.projectId, id) } catch (e) { toast.error(errorText(e)) } }}><Trash2 className="size-4" /></Button>}</td>
           </tr>
         ))}
       </tbody>
@@ -325,8 +315,7 @@ function useDecisionRefresh() {
   const qc = useQueryClient()
   const refresh = useProjectRefresh()
   return (projectId: string, id?: string) => {
-    if (id) qc.invalidateQueries({ queryKey: ['decision', id] })
-    qc.invalidateQueries({ queryKey: ['coordination'] })
+    void invalidateChange(qc, 'Decision', projectId, id)
     refresh(projectId)
   }
 }
@@ -378,8 +367,9 @@ function DecisionForm({ p, onClose }: { p: ProjectDetail; onClose: () => void })
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
-      const r = await post(`projects/${p.id}/decisions`, { ...f, ownerUserId: f.ownerUserId || null, ownerExternalPartyId: f.ownerExternalPartyId || null,
-        requestedById: f.requestedById || null, links: links.map((l) => ({ targetType: l.targetType, targetId: l.targetId })) })
+      const r = await typedRequest('post', '/api/v1/projects/{id}/decisions', { params: { id: p.id }, body: { ...f, subject: f.subject, description: f.description, dateRequested: f.dateRequested, requiredByDate: f.requiredByDate,
+        impactLevel: f.impactLevel, impactDescription: f.impactDescription, ownerUserId: f.ownerUserId || null, ownerExternalPartyId: f.ownerExternalPartyId || null,
+        requestedById: f.requestedById || null, links: links.map((l) => ({ targetType: l.targetType, targetId: l.targetId })) } })
       toast.success(t('decision.raised', { key: r.key }))
       done(p.id); onClose(); openPanel('Decision', r.id)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
@@ -481,7 +471,7 @@ export function RecordDecisionDialog({ id, onClose }: { id: string; onClose: (ok
     if (!d) return
     setErr(null); setBusy(true)
     try {
-      await post(`decisions/${id}/transition`, { toStatus: 'Decided', decisionText: text, decisionDate: date, notifyAssignees: notify }, d.rowVersion)
+      await typedRequest('post', '/api/v1/decisions/{id}/transition', { params: { id }, body: { toStatus: 'Decided', decisionText: text, decisionDate: date, notifyAssignees: notify }, ifMatch: d.rowVersion })
       toast.success(t('decision.recorded', { key: d.key })); done(d.projectId, id); onClose(true)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
@@ -512,7 +502,7 @@ function DeferDialog({ d, onClose }: { d: DecisionRow; onClose: () => void }) {
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose()} reason title={t('decision.deferTitle', { key: d.key })} body={t('decision.deferHint', { date: fmtDate(d.requiredByDate) })}
       confirmLabel={t('decision.defer')} busy={!date || date <= today()}
-      onConfirm={async (reason) => { await post(`decisions/${d.id}/transition`, { toStatus: 'Deferred', newRequiredBy: date, reason }, d.rowVersion); done(d.projectId, d.id) }}>
+      onConfirm={async (reason) => { await typedRequest('post', '/api/v1/decisions/{id}/transition', { params: { id: d.id }, body: { toStatus: 'Deferred', newRequiredBy: date, reason }, ifMatch: d.rowVersion }); done(d.projectId, d.id) }}>
       <Field label={t('decision.newRequiredBy')} htmlFor="def-date" hint={t('decision.laterThanToday')}><Input id="def-date" type="date" min={addDays(today(), 1)} value={date} onChange={(e) => setDate(e.target.value)} /></Field>
     </ConfirmDialog>
   )
@@ -520,7 +510,7 @@ function DeferDialog({ d, onClose }: { d: DecisionRow; onClose: () => void }) {
 
 function StepDialogs({ d, step, onClose }: { d: DecisionRow; step: string; onClose: () => void }) {
   const done = useDecisionRefresh()
-  const go = (body: object) => post(`decisions/${d.id}/transition`, body, d.rowVersion).then(() => done(d.projectId, d.id))
+  const go = (body: { toStatus: string; reason?: string }) => typedRequest('post', '/api/v1/decisions/{id}/transition', { params: { id: d.id }, body, ifMatch: d.rowVersion }).then(() => done(d.projectId, d.id))
   if (step === 'Decided') return <RecordDecisionDialog id={d.id} onClose={onClose} />
   if (step === 'Deferred') return <DeferDialog d={d} onClose={onClose} />
   if (step === 'Cancelled') return <ConfirmDialog open onOpenChange={(o) => !o && onClose()} destructive reason title={t('decision.cancelTitle', { key: d.key })}
@@ -546,10 +536,10 @@ export function DecisionPanel({ id }: PanelProps) {
   const { decision: d, permissions: perm } = q.data
   const can = perm.edit.ok
   const isOpen = ['Pending', 'Under Review', 'Deferred'].includes(d.status)
-  const save = (body: object) => patch(`decisions/${d.id}`, body, d.rowVersion).then(() => { done(d.projectId, d.id); return true }).catch((e) => { toast.error(errorText(e)); return false })
+  const save = (body: object) => typedRequest('patch', '/api/v1/decisions/{id}', { params: { id: d.id }, body, ifMatch: d.rowVersion }).then(() => { done(d.projectId, d.id); return true }).catch((e) => { toast.error(errorText(e)); return false })
   const quick = async (s: Step) => {
     if (['Decided', 'Deferred', 'Cancelled'].includes(s.to) || (s.to === 'Pending' && d.status === 'Decided')) { setStep(s.to); return }
-    try { await post(`decisions/${d.id}/transition`, { toStatus: s.to }, d.rowVersion); done(d.projectId, d.id) } catch (e) { toast.error(errorText(e)) }
+    try { await typedRequest('post', '/api/v1/decisions/{id}/transition', { params: { id: d.id }, body: { toStatus: s.to }, ifMatch: d.rowVersion }); done(d.projectId, d.id) } catch (e) { toast.error(errorText(e)) }
   }
   const partyOptions = (parties.data ?? []).filter((x) => x.isActive || x.id === d.ownerExternalPartyId).map((x) => ({ value: x.id, label: `${x.name}${x.organisation ? ` · ${x.organisation}` : ''}` }))
   return (
@@ -689,8 +679,10 @@ function PartyForm({ p, party, onClose }: { p: ProjectDetail; party?: Party; onC
     setErr(null)
     try {
       const body = { name: f.name, organisation: f.organisation || null, email: f.email || null, role: f.role || null, isClient: !!f.isClient, notes: f.notes || null, ...(party ? { isActive: f.isActive } : {}) }
-      const r = party ? await patch(`external-parties/${party.id}`, body, party.rowVersion) : await post(`projects/${p.id}/external-parties`, body)
-      qc.invalidateQueries({ queryKey: ['p', p.id, 'parties'] })
+      const r = party
+        ? await typedRequest('patch', '/api/v1/external-parties/{id}', { params: { id: party.id }, body, ifMatch: party.rowVersion })
+        : await typedRequest('post', '/api/v1/projects/{id}/external-parties', { params: { id: p.id }, body })
+      void invalidateChange(qc, 'ExternalParty', p.id)
       toast.success(t('common.saved')); onClose(party ? undefined : r)
     } catch (e) { setErr(e as ApiError) }
   }

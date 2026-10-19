@@ -216,6 +216,28 @@ public sealed class EvaluationTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Clearing_health_override_preserves_version_checks_and_missing_state_is_rebuilt()
+    {
+        var project = await d.Project();
+        var pm = f.As(TestData.Pm);
+        var beforeVersion = d.Version(project.Id);
+        var set = await (await pm.Post($"/api/v1/projects/{project.Id}/health-override", new { health = "Yellow", note = "Synthetic review", rowVersion = beforeVersion })).Json();
+        var currentVersion = set.I("rowVersion");
+        Assert.Equal(HttpStatusCode.Conflict, (await pm.Delete($"/api/v1/projects/{project.Id}/health-override", beforeVersion)).StatusCode);
+        Assert.Equal("Yellow", f.Db(db => db.Projects.Single(p => p.Id == project.Id).HealthOverride));
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).Delete($"/api/v1/projects/{project.Id}/health-override", currentVersion)).StatusCode);
+        var cleared = await (await pm.Delete($"/api/v1/projects/{project.Id}/health-override", currentVersion)).Json();
+        Assert.Equal(project.Id, cleared.G("id"));
+        Assert.True(cleared.I("rowVersion") > currentVersion);
+        Assert.Null(f.Db(db => db.Projects.Single(p => p.Id == project.Id).HealthOverride));
+        await f.DbAsync(db => db.ProjectStates.Where(p => p.ProjectId == project.Id).ExecuteDeleteAsync());
+        var state = await (await pm.GetAsync($"/api/v1/projects/{project.Id}/state")).Json();
+        Assert.Equal("Grey", state.S("computedHealth")); // An active project without work has no health inputs.
+        Assert.NotNull(state["healthReasons"]);
+        Assert.True(f.Db(db => db.ProjectStates.Any(p => p.ProjectId == project.Id)));
+    }
+
+    [Fact]
     public async Task Nightly_run_writes_one_snapshot_per_active_project_and_rolls_the_date() // AC-HLT-05, §16.7
     {
         var p = await d.Project();

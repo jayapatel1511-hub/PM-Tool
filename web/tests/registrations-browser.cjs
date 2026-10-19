@@ -14,6 +14,8 @@ const { startPreview, newMockPage, task, project } = require('./platform-fixture
     let text = ''
     for (let i = 0; i < 40; i++) { text = await dialog.innerText(); if (await dialog.getByRole('heading', { name: task.name }).count()) break; await page.waitForTimeout(250) }
     assert.ok(await dialog.getByRole('heading', { name: task.name }).count(), `task panel body did not mount: ${text}; page errors: ${pageErrors.join('; ')}`)
+    await dialog.getByText('Synthetic coordination note', { exact: true }).waitFor({ state: 'visible' })
+    await dialog.getByText('Current drawings', { exact: true }).waitFor({ state: 'visible' })
     assert.match(text, /T-001|Synthetic task/)
     assert.doesNotMatch(text, /Page not found|\bLoading\b/)
     assert.equal(new URL(page.url()).searchParams.get('panel'), `Task:${task.id}`)

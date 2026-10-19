@@ -3,17 +3,37 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Hub.Api.Features;
 
 /// Decision Register (§12.9, §13.8, DEC-01..DEC-07, FR-DEC-01..04) and project external parties (FR-ORG-08).
 public static class DecisionEndpoints
 {
-    public sealed record LinkInput(string TargetType, Guid TargetId, string? Relation);
+    public sealed record LinkInput(string TargetType, Guid TargetId, string? Relation = null);
     public sealed record CreateBody(string Subject, string Description, Guid? RequestedById, Guid? OwnerUserId, Guid? OwnerExternalPartyId, DateOnly? DateRequested,
         DateOnly? RequiredByDate, string ImpactLevel, string ImpactDescription, LinkInput[]? Links);
-    public sealed record TransitionBody(string ToStatus, string? Reason, string? DecisionText, DateOnly? DecisionDate, DateOnly? NewRequiredBy, bool? NotifyAssignees, int? RowVersion);
+    public sealed record TransitionBody(string ToStatus, string? Reason = null, string? DecisionText = null, DateOnly? DecisionDate = null, DateOnly? NewRequiredBy = null, bool? NotifyAssignees = null, int? RowVersion = null);
     public sealed record PartyBody(string Name, string? Organisation, string? Email, string? Role, bool? IsClient, string? Notes);
+    public sealed record ExternalPartyRow(Guid Id, string Name, string? Organisation, string? Email, string? Role, bool IsClient, string? Notes, bool IsActive, int RowVersion);
+    public sealed record ExternalPartyCreated(Guid Id, string Name, string? Organisation, bool IsClient, int RowVersion);
+    public sealed record ExternalPartyMutation(Guid Id, int RowVersion);
+    public sealed record DecisionLinkSummary(Guid Id, string Key, string Name);
+    public sealed record DecisionRow(Guid Id, Guid ProjectId, string Key, string Subject, string Status, Guid RequestedById, string? RequestedByName,
+        Guid? OwnerUserId, Guid? OwnerExternalPartyId, string? OwnerName, string? OwnerOrganisation, bool OwnerIsClient, DateOnly DateRequested,
+        DateOnly RequiredByDate, DateOnly OriginalRequiredByDate, string ImpactLevel, string ImpactDescription, string? DecisionText, DateOnly? DecisionDate,
+        int RowVersion, int? DaysUntil, bool IsOverdue, int DaysOverdue, bool IsDueSoon, bool IsInactiveOwner, IReadOnlyList<Guid> BlockingTaskIds,
+        IReadOnlyList<DecisionLinkSummary> Deliverables, IReadOnlyList<DecisionLinkSummary> Milestones);
+    public sealed record DecisionProject(Guid Id, string ProjectNumber, string Name, string Status);
+    public sealed record DecisionPermission(bool Ok, string? Reason);
+    public sealed record DecisionTransition(string To, bool Ok, string? Reason);
+    public sealed record DecisionPermissions(DecisionPermission Edit, IReadOnlyList<DecisionTransition> Transitions, bool Comment);
+    public sealed record DecisionDetailResponse(DecisionRow Decision, string Description, string? DeferralReason, string? CancelledReason, string? DecidedBy,
+        DecisionProject Project, IReadOnlyList<ItemLinkRow> Links, DecisionPermissions Permissions);
+    public sealed record DecisionCreated(Guid Id, string Key, int RowVersion);
+    public sealed record DecisionMutation(Guid Id, int RowVersion);
+    public sealed record DecisionTransitionMutation(Guid Id, string Status, int RowVersion);
+    public sealed record DecisionLinkMutation(Guid Id);
     sealed record Target(Guid Id, string Key, string Name, string? Status, DateOnly? Date, string? Person);
 
     internal static readonly string[] Open = [DecisionStatus.Pending, DecisionStatus.UnderReview, DecisionStatus.Deferred];
@@ -29,42 +49,42 @@ public static class DecisionEndpoints
         api.MapPost("/decisions/{id:guid}/transition", Transition);
         api.MapPost("/decisions/{id:guid}/links", AddLink);
         api.MapDelete("/item-links/{id:guid}", RemoveLink);
-        api.MapGet("/projects/{id:guid}/external-parties", async (Guid id, Access access, HubDb db) =>
-        {
-            await access.Project(id, track: false);
-            return await db.ExternalParties.AsNoTracking().Where(x => x.ProjectId == id).OrderByDescending(x => x.IsActive).ThenBy(x => x.Name)
-                .Select(x => new { x.Id, x.Name, x.Organisation, x.Email, x.Role, x.IsClient, x.Notes, x.IsActive, x.RowVersion }).ToListAsync();
-        });
-        api.MapPost("/projects/{id:guid}/external-parties", async (Guid id, PartyBody b, Access access, HubDb db) =>
-        {
-            var (_, ctx) = await access.Project(id);
-            Access.Demand(Permissions.CreateExternalParty(access.Actor, ctx)); // FR-009: any team member creates
-            var x = new ExternalParty
-            {
-                ProjectId = id, Name = Check.Required(b.Name, "name", 200), Organisation = Check.Optional(b.Organisation, "organisation", 200),
-                Email = Check.Optional(b.Email, "email", 200), Role = Check.Optional(b.Role, "role", 200), IsClient = b.IsClient ?? false, Notes = Check.Optional(b.Notes, "notes", 2000),
-            };
-            db.ExternalParties.Add(x);
-            await db.SaveChangesAsync();
-            return Results.Created($"/api/v1/external-parties/{x.Id}", new { x.Id, x.Name, x.Organisation, x.IsClient, x.RowVersion });
-        });
-        api.MapPatch("/external-parties/{id:guid}", async (Guid id, JsonElement body, HttpContext http, Access access, HubDb db) =>
-        {
-            var x = await db.ExternalParties.FirstOrDefaultAsync(e => e.Id == id) ?? throw ApiException.NotFound();
-            var (_, ctx) = await access.Project(x.ProjectId);
-            Access.Demand(Permissions.ManageExternalParties(access.Actor, ctx)); // and the PM edits them
-            var patch = new Patch(body);
-            await Http.CheckVersion(db, http, x, patch.RowVersion);
-            if (patch.Has("name")) x.Name = Check.Required(patch.Str("name"), "name", 200);
-            if (patch.Has("organisation")) x.Organisation = Check.Optional(patch.Str("organisation"), "organisation", 200);
-            if (patch.Has("email")) x.Email = Check.Optional(patch.Str("email"), "email", 200);
-            if (patch.Has("role")) x.Role = Check.Optional(patch.Str("role"), "role", 200);
-            if (patch.Has("isClient")) x.IsClient = patch.Bool("isClient") ?? false;
-            if (patch.Has("notes")) x.Notes = Check.Optional(patch.Str("notes"), "notes", 2000);
-            if (patch.Has("isActive")) x.IsActive = patch.Bool("isActive") ?? true;
-            await db.SaveChangesAsync();
-            return Results.Ok(new { x.Id, x.RowVersion });
-        });
+        api.MapGet("/projects/{id:guid}/external-parties", ListParties);
+        api.MapPost("/projects/{id:guid}/external-parties", CreateParty);
+        api.MapPatch("/external-parties/{id:guid}", EditParty);
+    }
+
+    static async Task<Ok<IReadOnlyList<ExternalPartyRow>>> ListParties(Guid id, Access access, HubDb db)
+    {
+        await access.Project(id, track: false);
+        var rows = await db.ExternalParties.AsNoTracking().Where(x => x.ProjectId == id).OrderByDescending(x => x.IsActive).ThenBy(x => x.Name)
+            .Select(x => new ExternalPartyRow(x.Id, x.Name, x.Organisation, x.Email, x.Role, x.IsClient, x.Notes, x.IsActive, x.RowVersion)).ToListAsync();
+        return TypedResults.Ok<IReadOnlyList<ExternalPartyRow>>(rows);
+    }
+
+    static async Task<Created<ExternalPartyCreated>> CreateParty(Guid id, PartyBody b, Access access, HubDb db)
+    {
+        var (_, ctx) = await access.Project(id);
+        Access.Demand(Permissions.CreateExternalParty(access.Actor, ctx));
+        var x = new ExternalParty { ProjectId = id, Name = Check.Required(b.Name, "name", 200), Organisation = Check.Optional(b.Organisation, "organisation", 200),
+            Email = Check.Optional(b.Email, "email", 200), Role = Check.Optional(b.Role, "role", 200), IsClient = b.IsClient ?? false, Notes = Check.Optional(b.Notes, "notes", 2000) };
+        db.ExternalParties.Add(x); await db.SaveChangesAsync();
+        return TypedResults.Created($"/api/v1/external-parties/{x.Id}", new ExternalPartyCreated(x.Id, x.Name, x.Organisation, x.IsClient, x.RowVersion));
+    }
+
+    static async Task<Ok<ExternalPartyMutation>> EditParty(Guid id, JsonElement body, HttpContext http, Access access, HubDb db)
+    {
+        var x = await db.ExternalParties.FirstOrDefaultAsync(e => e.Id == id) ?? throw ApiException.NotFound();
+        var (_, ctx) = await access.Project(x.ProjectId); Access.Demand(Permissions.ManageExternalParties(access.Actor, ctx));
+        var patch = new Patch(body); await Http.CheckVersion(db, http, x, patch.RowVersion);
+        if (patch.Has("name")) x.Name = Check.Required(patch.Str("name"), "name", 200);
+        if (patch.Has("organisation")) x.Organisation = Check.Optional(patch.Str("organisation"), "organisation", 200);
+        if (patch.Has("email")) x.Email = Check.Optional(patch.Str("email"), "email", 200);
+        if (patch.Has("role")) x.Role = Check.Optional(patch.Str("role"), "role", 200);
+        if (patch.Has("isClient")) x.IsClient = patch.Bool("isClient") ?? false;
+        if (patch.Has("notes")) x.Notes = Check.Optional(patch.Str("notes"), "notes", 2000);
+        if (patch.Has("isActive")) x.IsActive = patch.Bool("isActive") ?? true;
+        await db.SaveChangesAsync(); return TypedResults.Ok(new ExternalPartyMutation(x.Id, x.RowVersion));
     }
 
     public static async Task<(Decision D, Project P, ProjectContext Ctx)> Load(HubDb db, Access access, Guid id)
@@ -84,7 +104,7 @@ public static class DecisionEndpoints
     public sealed record DecisionQuery(string? Status, Guid? OwnerId, string? OwnerType, string? Impact, DateOnly? RequiredFrom, DateOnly? RequiredTo, bool? Blocking,
         string? Indicator, string? Q);
 
-    public static async Task<List<object>> Register(Guid id, [AsParameters] DecisionQuery f, Access access, HubDb db, EvaluationService eval, SettingsStore store, TimeProvider clock)
+    public static async Task<List<DecisionRow>> Register(Guid id, [AsParameters] DecisionQuery f, Access access, HubDb db, EvaluationService eval, SettingsStore store, TimeProvider clock)
     {
         var (status, ownerId, ownerType, impact, requiredFrom, requiredTo, blocking, indicator, q) = f;
         await access.Project(id, track: false);
@@ -115,7 +135,7 @@ public static class DecisionEndpoints
         return await Rows(db, query, clock.Today(await store.Get(db)));
     }
 
-    public static async Task<List<object>> Rows(HubDb db, IQueryable<Decision> query, DateOnly today)
+    public static async Task<List<DecisionRow>> Rows(HubDb db, IQueryable<Decision> query, DateOnly today)
     {
         var rows = await query.Select(d => new
         {
@@ -137,21 +157,19 @@ public static class DecisionEndpoints
             {
                 var open = DecisionStatus.IsOpen(r.Status);
                 var st = open ? r.State : null; // closed decisions are never overdue or blocking, even before re-evaluation
-                return (object)new
-                {
-                    r.Id, r.ProjectId, r.Key, r.Subject, r.Status, r.RequestedById, r.RequestedByName, r.OwnerUserId, r.OwnerExternalPartyId,
-                    OwnerName = r.OwnerName ?? r.External?.Name, OwnerOrganisation = r.External?.Organisation, OwnerIsClient = r.External?.IsClient ?? false,
-                    r.DateRequested, r.RequiredByDate, r.OriginalRequiredByDate, r.ImpactLevel, r.ImpactDescription, r.DecisionText, r.DecisionDate, r.RowVersion,
-                    DaysUntil = open ? r.RequiredByDate.DayNumber - today.DayNumber : (int?)null,
-                    IsOverdue = st?.IsOverdue ?? false, DaysOverdue = st?.DaysOverdue ?? 0, IsDueSoon = st?.IsDueSoon ?? false, IsInactiveOwner = st?.IsInactiveOwner ?? false,
-                    BlockingTaskIds = st?.BlockingTaskIds ?? [], r.Deliverables, r.Milestones,
-                };
+                return new DecisionRow(r.Id, r.ProjectId, r.Key, r.Subject, r.Status, r.RequestedById, r.RequestedByName, r.OwnerUserId, r.OwnerExternalPartyId,
+                    r.OwnerName ?? r.External?.Name, r.External?.Organisation, r.External?.IsClient ?? false, r.DateRequested, r.RequiredByDate,
+                    r.OriginalRequiredByDate, r.ImpactLevel, r.ImpactDescription, r.DecisionText, r.DecisionDate, r.RowVersion,
+                    open ? r.RequiredByDate.DayNumber - today.DayNumber : null, st?.IsOverdue ?? false, st?.DaysOverdue ?? 0,
+                    st?.IsDueSoon ?? false, st?.IsInactiveOwner ?? false, st?.BlockingTaskIds ?? [],
+                    r.Deliverables.Select(x => new DecisionLinkSummary(x.Id, x.Key, x.Name)).ToList(),
+                    r.Milestones.Select(x => new DecisionLinkSummary(x.Id, x.Key, x.Name)).ToList());
             }).ToList();
     }
 
     // ---------- Raise (FR-001, DEC-01, §17.2) ----------
 
-    static async Task<IResult> Create(Guid id, CreateBody body, Access access, HubDb db, Notifier notify, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me)
+    static async Task<Created<DecisionCreated>> Create(Guid id, CreateBody body, Access access, HubDb db, Notifier notify, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me)
     {
         var (p, ctx) = await access.Project(id);
         Access.Demand(Permissions.RaiseRegisterItem(access.Actor, ctx));
@@ -178,7 +196,7 @@ public static class DecisionEndpoints
             await db.SaveChangesAsync();
             return d;
         });
-        return Results.Created($"/api/v1/decisions/{d.Id}", new { d.Id, d.Key, d.RowVersion });
+        return TypedResults.Created($"/api/v1/decisions/{d.Id}", new DecisionCreated(d.Id, d.Key, d.RowVersion));
     }
 
     /// DEC-01: exactly one owner, an active person or one of the project's active external parties.
@@ -242,7 +260,7 @@ public static class DecisionEndpoints
 
     // ---------- Detail, edit, links ----------
 
-    static async Task<object> Get(string id, Access access, HubDb db, EvaluationService eval, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<DecisionDetailResponse>> Get(string id, Access access, HubDb db, EvaluationService eval, SettingsStore store, TimeProvider clock)
     {
         var d = (Guid.TryParse(id, out var g) ? await db.Decisions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Decisions.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
@@ -250,21 +268,13 @@ public static class DecisionEndpoints
         await eval.EnsureFresh(p.Id);
         var row = (await Rows(db, db.Decisions.AsNoTracking().Where(x => x.Id == d.Id), clock.Today(await store.Get(db)))).Single();
         var a = access.Actor;
-        object P(Allow x) => new { x.Ok, Reason = x.Ok ? null : Text.Get(x.Why!, x.Arg ?? p.Status) };
-        return new
-        {
-            Decision = row, d.Description, d.DeferralReason, d.CancelledReason,
-            DecidedBy = d.DecidedById is { } by ? await db.Users.Where(u => u.Id == by).Select(u => u.DisplayName).FirstOrDefaultAsync() : null,
-            Project = new { p.Id, p.ProjectNumber, p.Name, p.Status },
-            Links = await LinkRows(db, d.Id),
-            Permissions = new
-            {
-                Edit = P(Permissions.EditRegisterItem(a, ctx, Facts(d))),
-                Transitions = DecisionStatus.All.Where(to => Workflow.DecisionStep(d.Status, to))
-                    .Select(to => Allowed(a, ctx, d, to) is var x ? new { To = to, x.Ok, Reason = x.Ok ? null : Text.Get(x.Why!, x.Arg ?? to) } : null),
-                Comment = Permissions.Comment(a, ctx).Ok,
-            },
-        };
+        static DecisionPermission P(Allow x, string fallback) => new(x.Ok, x.Ok ? null : Text.Get(x.Why!, x.Arg ?? fallback));
+        var transitions = DecisionStatus.All.Where(to => Workflow.DecisionStep(d.Status, to))
+            .Select(to => { var x = Allowed(a, ctx, d, to); return new DecisionTransition(to, x.Ok, x.Ok ? null : Text.Get(x.Why!, x.Arg ?? to)); }).ToList();
+        var permissions = new DecisionPermissions(P(Permissions.EditRegisterItem(a, ctx, Facts(d)), p.Status), transitions, Permissions.Comment(a, ctx).Ok);
+        var project = new DecisionProject(p.Id, p.ProjectNumber, p.Name, p.Status);
+        var decidedBy = d.DecidedById is { } by ? await db.Users.Where(u => u.Id == by).Select(u => u.DisplayName).FirstOrDefaultAsync() : null;
+        return TypedResults.Ok(new DecisionDetailResponse(row, d.Description, d.DeferralReason, d.CancelledReason, decidedBy, project, await LinkRows(db, d.Id), permissions));
     }
 
     /// The owner or PM decide, defer and cancel (§8.5.2 "Record a decision outcome"); only the PM reopens (DEC-07);
@@ -276,7 +286,7 @@ public static class DecisionEndpoints
         _ => Permissions.EditRegisterItem(a, ctx, Facts(d)),
     };
 
-    static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, Notifier notify, TeamService team, TimeProvider clock)
+    static async Task<Ok<DecisionMutation>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, Notifier notify, TeamService team, TimeProvider clock)
     {
         var (d, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(d)));
@@ -312,20 +322,20 @@ public static class DecisionEndpoints
         }
         await db.SaveChangesAsync();
         Http.ETag(http, d);
-        return Results.Ok(new { d.Id, d.RowVersion });
+        return TypedResults.Ok(new DecisionMutation(d.Id, d.RowVersion));
     }
 
-    static async Task<IResult> AddLink(Guid id, LinkInput body, Access access, HubDb db)
+    static async Task<Created<DecisionLinkMutation>> AddLink(Guid id, LinkInput body, Access access, HubDb db)
     {
         var (d, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(d)));
         var link = await Link(db, access, p, d, body);
         await db.SaveChangesAsync();
-        return Results.Created($"/api/v1/item-links/{link.Id}", new { link.Id });
+        return TypedResults.Created($"/api/v1/item-links/{link.Id}", new DecisionLinkMutation(link.Id));
     }
 
     /// Unlinks a decision's, risk's or issue's item.
-    static async Task<IResult> RemoveLink(Guid id, Access access, HubDb db, TimeProvider clock)
+    static async Task<NoContent> RemoveLink(Guid id, Access access, HubDb db, TimeProvider clock)
     {
         var l = await db.ItemLinks.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         var (key, ctx, facts) = l.SourceType switch
@@ -341,12 +351,12 @@ public static class DecisionEndpoints
         l.AuditKey = key;
         db.Audit.Note(l, action: "Unlinked");
         await db.SaveChangesAsync();
-        return Results.NoContent();
+        return TypedResults.NoContent();
     }
 
     // ---------- Record, defer, cancel, reopen (DEC-02, DEC-03, DEC-07, FR-011, Workflow 11) ----------
 
-    static async Task<IResult> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, SettingsStore store, TimeProvider clock, CurrentUser me)
+    static async Task<Ok<DecisionTransitionMutation>> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, SettingsStore store, TimeProvider clock, CurrentUser me)
     {
         var (d, p, ctx) = await Load(db, access, id);
         await Http.CheckVersion(db, http, d, body.RowVersion);
@@ -427,6 +437,6 @@ public static class DecisionEndpoints
                 Text.Get("notify.decision_recorded", await notify.ActorName(), d.Key, d.Subject), d.DecisionText);
         }
         await db.SaveChangesAsync();
-        return Results.Ok(new { d.Id, d.Status, d.RowVersion });
+        return TypedResults.Ok(new DecisionTransitionMutation(d.Id, d.Status, d.RowVersion));
     }
 }

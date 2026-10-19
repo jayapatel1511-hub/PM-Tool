@@ -8,14 +8,16 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { get, post, qs } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
-import { fmtDate } from '@/lib/format'
+import { t } from '@/lib/i18n'
+import { weekOf } from '@/components/hub/people'
+import { ago, fmtDate, today } from '@/lib/format'
 import { errorText } from './projects/Tasks'
 import { useScopeProjects, useScope } from '@/components/hub/workspace'
 
 export interface PickupOffer {
   id: string; taskId: string; offeredById: string; offeredBy: string; reason: string; hoursRemaining?: number | null
   neededBy?: string | null; note?: string | null; openedAt: string
-  task: { key: string; name: string; projectId: string; projectDisciplineId: string; disciplineName?: string; dueDate?: string | null; rowVersion?: number }
+  task: { key: string; name: string; projectId: string; projectNumber?: string; projectDisciplineId: string; disciplineName?: string; dueDate?: string | null; rowVersion?: number }
   rowVersion?: number
   allowed?: { pickUp: boolean; assign: boolean; withdraw?: boolean }
   candidates?: { id: string; displayName: string }[]
@@ -36,7 +38,7 @@ export function PickupPage() {
   const pick = async () => {
     if (!selected) return
     setBusy(true)
-    try { await post(`tasks/${selected.taskId}/pickup`, { rowVersion: selected.task.rowVersion ?? selected.rowVersion }); toast.success('Task picked up'); setSelected(null); qc.invalidateQueries({ queryKey: ['pickup-offers'] }) }
+    try { await post(`tasks/${selected.taskId}/pickup`, { rowVersion: selected.task.rowVersion ?? selected.rowVersion }); toast.success('Task picked up'); setSelected(null); qc.invalidateQueries({ queryKey: ['pickup-offers'] }); qc.invalidateQueries({ queryKey: ['pickup-own-load'] }) }
     catch (e) { toast.error(errorText(e)) } finally { setBusy(false) }
   }
   if (!enabled) return <Page title="Open for pickup" subtitle="This feature is not enabled for your organisation."><></></Page>
@@ -52,7 +54,9 @@ export function PickupPage() {
         {q.data.map((o) => <li key={o.id} className="flex flex-wrap items-center gap-3 p-4">
           <Key>{o.task.key}</Key><span className="min-w-48 flex-1 font-medium">{o.task.name}</span>
           <span className="text-sm text-muted-foreground">{o.reason}</span>
+          <span className="text-xs text-muted-foreground">{o.task.projectNumber ?? projects.data?.find(p => p.id === o.task.projectId)?.projectNumber} · {o.task.disciplineName} · {o.offeredBy} · {ago(o.openedAt)} · {t('pickup.remaining', { h: o.hoursRemaining ?? '—' })}</span>
           <span className="text-xs text-muted-foreground">Needed by {fmtDate(o.neededBy)} · Due {fmtDate(o.task.dueDate)}</span>
+          <OwnLoadHint date={o.neededBy ?? undefined} />
           <Button size="sm" onClick={() => setSelected(o)}>Pick up</Button>
         </li>)}
       </ul>
@@ -67,3 +71,11 @@ export function PickupPage() {
 }
 
 export default PickupPage
+
+function OwnLoadHint({ date }: { date?: string }) {
+  const week = weekOf(date ?? today())
+  const q = useQuery({ queryKey: ['pickup-own-load', week], queryFn: () => get<{ week: string; band: string | null; hours: number | null; capacity: number; partial: boolean }>(`pickup-offers/my-load?week=${week}`) })
+  if (q.error) return <span className="text-xs text-muted-foreground">{t('pickup.loadUnavailable')}</span>
+  if (!q.data) return null
+  return <span className="text-xs text-muted-foreground">{q.data.partial ? t('workload.partial') : t('pickup.ownLoad', { week: fmtDate(q.data.week), band: q.data.band ?? '—', hours: q.data.hours ?? '—', capacity: q.data.capacity })}</span>
+}

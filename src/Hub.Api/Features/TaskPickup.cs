@@ -19,7 +19,22 @@ public static class TaskPickupEndpoints
         api.MapPost("/tasks/{id:guid}/pickup", PickUp).AddEndpointFilter<PickupCommandFilter>();
         api.MapPost("/tasks/{id:guid}/pickup-offer/assign", Assign).AddEndpointFilter<PickupCommandFilter>();
         api.MapGet("/tasks/{id:guid}/pickup-offer", Detail);
-        api.MapGet("/pickup-offers", List);
+        api.MapGet("/pickup-offers", List).RequireFlag("task_pickup");
+        api.MapGet("/pickup-offers/my-load", async (DateOnly? week, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
+        {
+            Check.That(week == null || week.Value.Year is >= 1900 and <= 9998, "week", "error.date_range");
+            var (weeks, people, _) = await WorkloadEndpoints.Grid(new(null, null, null, null, null, week, null), access, db, me, store, clock, ownOnly: true);
+            var person = people.SingleOrDefault() ?? throw ApiException.NotFound();
+            var cell = person.Cells[0];
+            var visible = access.VisibleProjectIds();
+            var live = db.Projects.Where(p => WorkloadEndpoints.LiveProjects.Contains(p.Status)).Select(p => p.Id);
+            var partial = !access.SeesAllRestricted && (await db.Tasks.AnyAsync(t => t.AssigneeId == me.Id && live.Contains(t.ProjectId)
+                && !visible.Contains(t.ProjectId) && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
+                || await db.Allocations.AnyAsync(a => a.PersonId == me.Id && a.Status == AllocationStatus.Confirmed && live.Contains(a.ProjectId)
+                    && !visible.Contains(a.ProjectId) && a.FromDate <= weeks[0].AddDays(6) && a.ThroughDate >= weeks[0]));
+            return new { Week = weeks[0], Band = partial ? null : cell.Band.ToString(),
+                Hours = partial ? (decimal?)null : cell.Committed, Capacity = cell.Available, Partial = partial };
+        }).RequireFlag("task_pickup");
     }
 
     static async Task<bool> Enabled(HubDb db, SettingsStore store) => (await store.Get(db)).IsFlagOn("task_pickup");
@@ -36,7 +51,7 @@ public static class TaskPickupEndpoints
         Access.Demand(canOffer ? Allow.Yes : Allow.No("perm.pickup_offer"));
         Check.That(!string.IsNullOrWhiteSpace(body.Reason) && body.Reason.Trim().Length <= 2000, "reason", "error.required");
         Check.That(body.Note is null or { Length: <= 4000 }, "note", "error.length");
-        Check.That(body.HoursRemaining is null or >= 0, "hoursRemaining", "error.positive");
+        Check.That(body.HoursRemaining is null || body.HoursRemaining is >= 0 and <= 99999.99m && body.HoursRemaining == Math.Round(body.HoursRemaining.Value, 2), "hoursRemaining", "error.range");
         Check.That(!await db.Set<TaskPickupOffer>().AnyAsync(x => x.TaskId == id && x.ClosedAt == null), "taskId", "task.pickup_already_open");
         var now = clock.GetUtcNow();
         db.Set<TaskPickupOffer>().Add(new TaskPickupOffer
@@ -132,6 +147,7 @@ public static class TaskPickupEndpoints
     static async Task<IResult> List(Access access, HubDb db, CurrentUser me, DateOnly? neededBy, Guid? projectId, Guid? disciplineId, Guid? taskId, SettingsStore store)
     {
         if (!await Enabled(db, store)) return Results.Ok(Array.Empty<object>());
+        if (access.Actor.ReadOnly) return Results.Ok(Array.Empty<object>());
         var visible = access.VisibleProjectIds();
         var q = db.Set<TaskPickupOffer>().AsNoTracking().Where(o => o.ClosedAt == null && visible.Contains(db.Tasks.Where(t => t.Id == o.TaskId).Select(t => t.ProjectId).FirstOrDefault()));
         if (projectId is { } pid) q = q.Where(o => db.Tasks.Any(t => t.Id == o.TaskId && t.ProjectId == pid));
@@ -144,7 +160,7 @@ public static class TaskPickupEndpoints
         {
             o.Id, o.TaskId, o.OfferedById, OfferedBy = db.Users.Where(u => u.Id == o.OfferedById).Select(u => u.DisplayName).First(),
             o.Reason, o.HoursRemaining, o.NeededBy, o.Note, o.OpenedAt,
-            Task = db.Tasks.Where(t => t.Id == o.TaskId).Select(t => new { t.Key, t.Name, t.ProjectId, t.ProjectDisciplineId, DisciplineName = db.ProjectDisciplines.Where(d => d.Id == t.ProjectDisciplineId).Select(d => d.Discipline!.Name).First(), t.DueDate, t.AssigneeId, t.RowVersion }).First(),
+            Task = db.Tasks.Where(t => t.Id == o.TaskId).Select(t => new { t.Key, t.Name, t.ProjectId, ProjectNumber = db.Projects.Where(p => p.Id == t.ProjectId).Select(p => p.ProjectNumber).First(), t.ProjectDisciplineId, DisciplineName = db.ProjectDisciplines.Where(d => d.Id == t.ProjectDisciplineId).Select(d => d.Discipline!.Name).First(), t.DueDate, t.AssigneeId, t.RowVersion }).First(),
         }).ToListAsync();
         var assignees = await db.Users.AsNoTracking().Where(u => rows.Select(r => r.Task.AssigneeId).Contains(u.Id))
             .ToDictionaryAsync(u => u.Id, u => u);
@@ -153,7 +169,7 @@ public static class TaskPickupEndpoints
             && aid != viewer.Id).Select(row => new
             {
                 row.Id, row.TaskId, row.OfferedById, row.OfferedBy, row.Reason, row.HoursRemaining, row.NeededBy, row.Note, row.OpenedAt,
-                Task = new { row.Task.Key, row.Task.Name, row.Task.ProjectId, row.Task.ProjectDisciplineId, row.Task.DisciplineName, row.Task.DueDate, row.Task.RowVersion },
+                Task = new { row.Task.Key, row.Task.Name, row.Task.ProjectId, row.Task.ProjectNumber, row.Task.ProjectDisciplineId, row.Task.DisciplineName, row.Task.DueDate, row.Task.RowVersion },
             }));
     }
 

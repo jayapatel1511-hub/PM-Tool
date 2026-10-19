@@ -1,0 +1,22 @@
+{
+  "status": "BLOCKED",
+  "phase": "test-host setup before assertions",
+  "reason": "Connection refused at 127.0.0.1:55432; local Docker daemon is stopped; no local PostgreSQL server binary found",
+  "command": "dotnet test tests/Hub.Tests/Hub.Tests.csproj --no-restore --nologo -v:q -p:UseSharedCompilation=false -p:WarningLevel=0 -p:RunAnalyzers=false -m:1 --filter FullyQualifiedName~Own_load_hint|FullyQualifiedName~Offer_leaves_task_fields",
+  "compilation": "PASS",
+  "assertionsExecuted": false,
+  "cases": [
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Own_load_hint_does_not_grant_workspace_workload_access",
+      "runnerOutcome": "Failed",
+      "classification": "BLOCKED_ENVIRONMENT",
+      "message": "Npgsql.NpgsqlException : Failed to connect to 127.0.0.1:55432\n---- System.Net.Sockets.SocketException : Connection refused"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Offer_leaves_task_fields_unchanged_and_pickup_closes_offer_watches_previous_assignee",
+      "runnerOutcome": "Failed",
+      "classification": "BLOCKED_ENVIRONMENT",
+      "message": "Npgsql.NpgsqlException : Failed to connect to 127.0.0.1:55432\n---- System.Net.Sockets.SocketException : Connection refused"
+    }
+  ]
+}

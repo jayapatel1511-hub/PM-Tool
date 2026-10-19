@@ -136,7 +136,7 @@ public static partial class ReportEndpoints
             {
                 def.Code, Title = Text.Get($"report.{def.Code}"), ItemType = ItemTypeOf(def.Code), Columns = (r.Columns ?? def.Cols).Select(c => new { c.Path, Header = c.Title, c.Type }),
                 Rows = new JsonArray([.. r.Rows.Take(ScreenRows).Select(x => x?.DeepClone())]), Total = r.Rows.Count, TotalIsLowerBound = r.Rows.Count >= Cap, Truncated = r.Rows.Count > ScreenRows, r.ListLink,
-                Parameters = (await ctx.Describe(ReportParams(def, ctx.S))).Select(p => new { Label = p.Item1, Value = p.Item2 }),
+                Parameters = (await ctx.Describe(ReportParams(def, ctx.S), def.Code == "project-activity-log")).Select(p => new { Label = p.Item1, Value = p.Item2 }),
             };
         });
         api.MapGet("/reports/{code}/export", async (string code, string? format, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
@@ -144,7 +144,7 @@ public static partial class ReportEndpoints
             var (def, ctx) = await Prepare(code, http, db, access, me, store, clock);
             var r = await def.Run(ctx);
             var title = Text.Get($"report.{def.Code}");
-            var parameters = await ctx.Describe(ReportParams(def, ctx.S));
+            var parameters = await ctx.Describe(ReportParams(def, ctx.S), def.Code == "project-activity-log");
             return await ExportFile.Send(db, store, format, title, r.Columns ?? def.Cols, r.Rows, parameters, await ctx.SingleProjectId(), def.Code, clock);
         });
     }
@@ -205,7 +205,7 @@ public static partial class ReportEndpoints
 
         public async Task<Guid?> SingleProjectId() => (await Single())?.Id;
 
-        public async Task<List<(string, string)>> Describe(Param[] ps)
+        public async Task<List<(string, string)>> Describe(Param[] ps, bool integrity = false)
         {
             var list = new List<(string, string)>();
             foreach (var p in ps)
@@ -229,6 +229,20 @@ public static partial class ReportEndpoints
             }
             if (list.All(x => x.Item1 != Text.Get("param.projectId")) && ps.Any(p => p.Type == "projects")) list.Insert(0, (Text.Get("param.projectId"), Text.Get("report.allVisible")));
             if (Partial) list.Add((Text.Get("planning.partial"), Text.Get("planning.partial_hint")));
+            if (integrity && s.IsFlagOn("verifiable_log"))
+            {
+                var projects = await Projects().Select(p => new { p.Id, p.ProjectNumber }).ToListAsync();
+                var ids = projects.Select(p => p.Id).ToArray();
+                var heads = await db.Set<ActivityChainHead>().AsNoTracking().Where(h => ids.Contains(h.ChainId)).ToDictionaryAsync(h => h.ChainId);
+                foreach (var project in projects)
+                {
+                    var h = heads.GetValueOrDefault(project.Id);
+                    var status = h?.FirstBrokenSeq is { } broken ? Text.Get("audit.log_failed", broken)
+                        : h?.LastVerifiedAt is { } at && h.LastVerifiedSeq == h.HeadSeq ? Text.Get("audit.log_verified", h.HeadSeq, Hub.Api.Infrastructure.Clock.Local(at, s).ToString("g"))
+                        : Text.Get("audit.log_pending");
+                    list.Add(($"{Text.Get("audit.log_integrity")} · {project.ProjectNumber}", status));
+                }
+            }
             return list;
         }
     }

@@ -68,6 +68,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
   const [reason, setReason] = useState('')
   const [keepWatching, setKeepWatching] = useState(true)
   const [assignTo, setAssignTo] = useState('')
+  const [pickupHours, setPickupHours] = useState(''), [pickupNeededBy, setPickupNeededBy] = useState(''), [pickupNote, setPickupNote] = useState('')
   const reload = () => { qc.invalidateQueries({ queryKey: ['task', id] }); refresh(q.data?.project.id) }
   const small = useFlag('small_ux')
   const [creatingDeliverable, setCreatingDeliverable] = useState(false)
@@ -85,7 +86,8 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
   const milestoneName = (mid: string) => lists.milestones.find((m) => m.id === mid)
   const run = async (f: () => Promise<unknown>) => { setErr(null); try { await f(); reload() } catch (e) { setErr(e) } }
   const openOffer = pickup.data
-  const offer = async () => { await post(`tasks/${id}/pickup-offer`, { reason, keepWatching }); setOfferOpen(false); setReason(''); pickup.refetch(); reload() }
+  const offer = async () => { await post(`tasks/${id}/pickup-offer`, { reason, keepWatching, hoursRemaining: pickupHours === '' ? null : Number(pickupHours), neededBy: pickupNeededBy || null, note: pickupNote || null }); setOfferOpen(false); setReason(''); pickup.refetch(); reload() }
+  const pickUp = async () => { await post(`tasks/${id}/pickup`, { rowVersion: openOffer?.rowVersion }); qc.invalidateQueries({ queryKey: ['pickup-own-load'] }); qc.invalidateQueries({ queryKey: ['pickup-offers'] }); reload() }
   const withdraw = async () => { await del(`tasks/${id}/pickup-offer`); pickup.refetch(); reload() }
   const assign = async () => { if (!assignTo) return; await post(`tasks/${id}/pickup-offer/assign`, { userId: assignTo, rowVersion: openOffer?.rowVersion }); setAssignTo(''); pickup.refetch(); reload() }
 
@@ -127,13 +129,16 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
           {perms.authoriseStart && <Button size="sm" variant="outline" onClick={() => actions.authoriseStart(r)}>{t('tasks.startAuthAuthorise')}</Button>}
           {pickupEnabled && d.permissions.offerPickup && !terminal && !openOffer && <Button size="sm" variant="outline" onClick={() => setOfferOpen(true)}>Offer for pickup</Button>}
           {pickupEnabled && openOffer?.allowed?.withdraw && <Button size="sm" variant="outline" onClick={() => run(withdraw)}>Withdraw pickup offer</Button>}
+          {pickupEnabled && openOffer?.allowed?.pickUp && <Button size="sm" variant="outline" onClick={() => run(pickUp)}>{t('pickup.pick')}</Button>}
           {pickupEnabled && openOffer?.allowed?.assign && <><select className="h-(--control-row-h) rounded-md border bg-card px-2 text-sm" aria-label="Assign pickup offer" value={assignTo} onChange={(e) => setAssignTo(e.target.value)}><option value="">Assign to…</option>{(openOffer.candidates ?? []).map((c) => <option key={c.id} value={c.id}>{c.displayName}</option>)}</select><Button size="sm" disabled={!assignTo} onClick={() => run(assign)}>Assign pickup</Button></>}
           <RaiseSlot projectId={r.projectId} targetType="Task" targetId={r.id} targetKey={r.key} targetName={r.name} disciplineId={r.projectDisciplineId} />
         </div>
       </div>
       <Dialog open={offerOpen} onOpenChange={setOfferOpen}>
         <DialogContent><DialogHeader><DialogTitle>Offer {r.key} for pickup</DialogTitle><DialogDescription>Keep ownership until a teammate picks it up.</DialogDescription></DialogHeader>
-          <Field label="Reason" htmlFor="pickup-reason"><Textarea id="pickup-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} required /></Field>
+          <Field label="Reason" htmlFor="pickup-reason"><Textarea id="pickup-reason" rows={3} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} required /></Field>
+          <div className="grid gap-3 sm:grid-cols-2"><Field label={t('pickup.hoursRemaining')} htmlFor="pickup-hours" optional><Input id="pickup-hours" type="number" min="0" max="99999.99" step="0.01" value={pickupHours} onChange={e => setPickupHours(e.target.value)} /></Field><Field label={t('pickup.neededBy')} htmlFor="pickup-needed-by" optional><Input id="pickup-needed-by" type="date" value={pickupNeededBy} onChange={e => setPickupNeededBy(e.target.value)} /></Field></div>
+          <Field label={t('common.notes')} htmlFor="pickup-note" optional><Textarea id="pickup-note" maxLength={4000} value={pickupNote} onChange={e => setPickupNote(e.target.value)} /></Field>
           <label className="flex items-center gap-2 text-sm"><Checkbox checked={keepWatching} onCheckedChange={(v) => setKeepWatching(!!v)} /> Keep watching after pickup</label>
           <DialogFooter><Button variant="outline" onClick={() => setOfferOpen(false)}>Cancel</Button><Button disabled={!reason.trim()} onClick={() => run(offer)}>Offer for pickup</Button></DialogFooter>
         </DialogContent>

@@ -126,6 +126,8 @@ public static class AuditChainInitialization
             {
                 db.Audit.AsSystem("Migration");
                 var flag = await db.Settings.SingleAsync(s => s.Key == "flag.verifiable_log", ct);
+                if (flag.Value != "true") db.LogEvent("Setting", null, "Changed", "admin", key: flag.Key,
+                    changes: new[] { new { field = "Value", old = false, @new = true } });
                 flag.Value = "true";
                 await db.SaveChangesAsync(ct);
                 var projects = await db.ActivityLog.Select(a => a.ProjectId).Distinct().ToListAsync(ct);

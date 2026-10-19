@@ -16,7 +16,7 @@ const project = { id: projectId, projectNumber: 'P-DEMO', name: 'Synthetic workf
 const me = { id: id(1), displayName: 'Sam Supervisor', email: 'sam@hub.test', isTemplateEditor: false, roles: [], systemRoles: ['Admin'], capabilities: { createProject: true, createTask: true, portfolio: true, workload: true, staff: true, allStaff: true, admin: true, templates: true, readOnly: false, directReports: 2 }, settings: { today: '2026-10-03', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: false, allowSelfReview: false, taskDueSoonDays: 7, milestoneApproachingDays: 14, chainDepthLimit: 100, defaultWeeklyCapacityHours: 40, coordinationLookaheadWeeks: 6, workingDaysEnabled: true }, preferences: { digestEnabled: true, denseRows: true, weeklySummaryEnabled: true }, flags: { task_pickup: false, org_structure: false, verifiable_log: false, commitment_reliability: false } }
 
 const errors = [], unknownGets = [], calls = [], axeReports = [], shots = []
-let failImport = false, featurePhase = 'off'
+let failImport = false, featurePhase = 'off', totalApiCalls = 0
 let server, browser
 const levels = [{ id: levelId, name: 'Department', sortOrder: 1, rowVersion: 0 }]
 const units = [{ id: unitId, name: 'Design', parentId: null, levelId, leaderId: personId, disciplineId: null, officeId: null, headCount: 1, rowVersion: 0 }]
@@ -26,7 +26,7 @@ const chain = { chainId, headSeq: 3, headHash: 'sha256-head', lastVerifiedAt: '2
 const confirmId = id(73)
 const reliability = { snapshots: [{ id: id(70), weekStart: '2026-09-28', reliability: { met: 78, committed: 100, percent: 78, band: 'Watch', withdrawn: 2, notYetRecorded: 20, awaiting: 1 } }], misses: [{ categoryId: id(71), category: 'Blocked by dependency', count: 2, commitments: [{ id: id(72), key: 'PROM-12' }] }], awaiting: [{ id: confirmId, key: 'PROM-13', rowVersion: 4, canConfirm: true }] }
 
-function responseFor(method, p, body) {
+function responseFor(method, p, body, query) {
   if (p === 'config') return { authMode: 'Development', entra: {} }
   if (p === 'me') return { ...me, flags: featurePhase === 'off' ? { task_pickup: false, org_structure: false, verifiable_log: false, commitment_reliability: false } : { task_pickup: true, org_structure: true, verifiable_log: true, commitment_reliability: true } }
   if (p === 'me/sign-in') return {}
@@ -34,6 +34,7 @@ function responseFor(method, p, body) {
   if (p === 'workspaces') return []
   if (p === `projects/${projectId}` || p === 'projects/P-DEMO') return project
   if (p === 'pickup-offers') return [offer]
+  if (p === 'pickup-offers/my-load') return { week: query?.get('week') ?? '2026-09-28', band: 'Within', hours: 24, capacity: 40, partial: false }
   if (p === 'organisation') return { levels, units, people }
   if (p === 'admin/organisation/levels' && method === 'POST') { levels.push({ id: id(22), name: body?.name || 'Region', sortOrder: 2, rowVersion: 0 }); return levels.at(-1) }
   if (p === 'admin/organisation/units' && method === 'POST') { units.push({ id: id(23), name: body?.name || 'Water', parentId: body?.parentId ?? null, levelId: body?.levelId || levelId, headCount: 0, rowVersion: 0 }); return units.at(-1) }
@@ -72,9 +73,10 @@ async function waitForApi(page) { await page.waitForLoadState('networkidle'); aw
   page.on('pageerror', e => errors.push(e.message))
   await page.route('**/api/**', async route => {
     const req = route.request(), u = new URL(req.url()), p = u.pathname.replace('/api/v1/', ''), method = req.method()
+    totalApiCalls++
     let body; try { body = req.postDataJSON() } catch {}
-    calls.push({ method, path: p, body })
-    const data = responseFor(method, p, body)
+    calls.push({ method, path: p, query: u.searchParams.toString(), body })
+    const data = responseFor(method, p, body, u.searchParams)
     if (data === undefined) { if (method === 'GET') unknownGets.push(p); return route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ detail: `unmocked ${p}` }) }) }
     const status = data.__status || 200; if (data.__status) delete data.__status
     return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) })
@@ -90,9 +92,12 @@ async function waitForApi(page) { await page.waitForLoadState('networkidle'); aw
 
   // Pickup: real row, confirmation dialog, and rowVersion POST.
   featurePhase = 'on'; me.flags.task_pickup = true; calls.length = 0
-  await page.goto(`${base}/pickup`); await page.getByText('T-101', { exact: true }).waitFor(); await axe(page, 'pickup'); await shot(page, 'pickup')
+  await page.goto(`${base}/pickup`); await page.getByText('T-101', { exact: true }).waitFor(); await page.getByText(/Your workload for/).waitFor(); await axe(page, 'pickup'); await shot(page, 'pickup')
   await page.getByRole('button', { name: 'Pick up', exact: true }).click(); await page.getByRole('dialog').getByRole('button', { name: 'Pick up task', exact: true }).click(); await page.getByText('Task picked up').waitFor()
   const pickupPost = calls.find(c => c.method === 'POST' && c.path === `tasks/${taskId}/pickup`); assert.deepEqual(pickupPost.body, { rowVersion: 7 })
+  await waitForApi(page)
+  assert.ok(calls.some(c => c.path === 'pickup-offers/my-load' && c.query === 'week=2026-10-12'), 'load hint uses needed-by week')
+  assert.ok(calls.filter(c => c.path === 'pickup-offers/my-load').length >= 2, 'pickup refreshes own load')
 
   // Organisation: null roots render as roots; expansion exposes person/headcount.
   me.flags.org_structure = true; calls.length = 0
@@ -108,7 +113,7 @@ async function waitForApi(page) { await page.waitForLoadState('networkidle'); aw
   me.flags.commitment_reliability = true
   await page.reload(); await page.goto(`${base}/projects/P-DEMO/readiness`); await page.getByRole('heading', { name: /Readiness/i }).waitFor(); await page.getByText(/78%/).waitFor(); await page.getByText('Watch', { exact: true }).waitFor(); await page.getByText('Blocked by dependency', { exact: true }).waitFor(); assert.ok(calls.some(c => c.path === `projects/${projectId}/commitment-reliability`), 'reliability API requested'); await page.getByRole('button', { name: 'Confirm met', exact: true }).click(); await page.waitForTimeout(100); const confirmCall = calls.find(c => c.method === 'POST' && c.path === `projects/${projectId}/weekly-commitments/${confirmId}/confirm`); assert.ok(confirmCall?.body?.requestId); assert.equal(confirmCall.body.rowVersion, 4); assert.equal(confirmCall.body.return, false); assert.equal(confirmCall.body.reason, null); await axe(page, 'readiness-reliability-route'); await shot(page, 'readiness-reliability-route')
 
-  const report = { scope: 'Chromium UI with mocked API responses; source checks and backend rules are separate', port, passes: 6, calls: calls.length, post: pickupPost, axe: axeReports, screenshots: shots, pageErrors: errors, unknownGets: [...new Set(unknownGets)] }
+  const report = { scope: 'Chromium UI with mocked API responses; source checks and backend rules are separate', port, passes: 6, calls: totalApiCalls, retainedCalls: calls.length, assertions: ['needed-by week load hint', 'load refresh after pickup'], post: pickupPost, axe: axeReports, screenshots: shots, pageErrors: errors, unknownGets: [...new Set(unknownGets)] }
   fs.writeFileSync(path.join(out, 'schema-workflows.json'), JSON.stringify(report, null, 2))
   if (fs.existsSync('/private/tmp/tuesday-039-050-coordination')) fs.writeFileSync('/private/tmp/tuesday-039-050-coordination/schema-browser.md', `# Browser evidence: packets 048–050\n\n- Command: \`PORT=19505 node web/tests/schema-workflows.cjs\`\n- Chromium mocked API workflows: PASS for flag gating, pickup, organisation, admin structure/error display, audit-chain verification, and readiness reliability.\n- Reliability assertions: rendered \`Met 78 of 100 (78%)\`, \`Watch\`, \`Blocked by dependency\`; verified POST confirmation with rowVersion 4 and requestId.\n- Accessibility: PASS, six page checks with zero violations.\n- Runtime: PASS, zero page errors and zero unmocked GETs.\n- Pickup POST body: \`${JSON.stringify(pickupPost.body)}\`.\n- Boundary: browser UI against mocked API responses; backend/native/deployed acceptance is not established.\n\nArtifacts are in \`web/test-results/schema-workflows/\`.\n`)
   console.log(JSON.stringify(report))

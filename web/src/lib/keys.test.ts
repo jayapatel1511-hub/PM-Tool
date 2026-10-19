@@ -42,7 +42,7 @@ test('child audit types refresh mounted details and dependent pickers; reconnect
     ReadinessCheck: ['readiness-detail', 'readiness-constraints', 'readiness-prerequisites', 'readiness-assumptions', 'task-start'],
     TaskStartAuthorisation: ['task-start'], BasisUse: ['readiness-assumptions'], Decision: ['basis-decision-options'],
     Milestone: ['submission-milestones'], SubmissionManifestItem: ['submission-choices'],
-    TaskPickupOffer: ['pickup-offers', 'pickup-load', 'task', 'mywork-tasks', 'workload'],
+    TaskPickupOffer: ['pickup-offers', 'pickup-own-load', 'task', 'mywork-tasks', 'workload'],
     OrgUnit: ['admin', 'organisation', 'organisation-placements', 'staff', 'workload', 'planning-grid'],
     OrgLevel: ['admin', 'organisation'], CommitmentMissCategory: ['admin', 'weekly-promise'],
   }

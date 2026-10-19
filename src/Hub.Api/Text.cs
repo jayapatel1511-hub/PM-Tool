@@ -77,6 +77,10 @@ public static class Text
         ["onboarding.import-leave"] = "Import approved leave",
         ["onboarding.import-projects"] = "Import the project list",
 
+        ["audit.log_integrity"] = "Log integrity",
+        ["audit.log_pending"] = "Log awaiting verification",
+        ["audit.log_verified"] = "Log verified · {0} entries · checked {1}",
+        ["audit.log_failed"] = "Log check failed at entry {0}",
         ["perm.pickup_assign"] = "Only the direct manager, PM or discipline lead can assign this pickup offer.",
         ["perm.pickup_withdraw"] = "You cannot withdraw this pickup offer.",
         ["perm.pickup_offer"] = "Only the assignee, their manager, the PM or the discipline lead can offer this task.",

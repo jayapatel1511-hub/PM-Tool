@@ -2,10 +2,16 @@
   "scope": "Chromium UI with mocked API responses; source checks and backend rules are separate",
   "port": "19505",
   "passes": 6,
-  "calls": 49,
+  "calls": 72,
+  "retainedCalls": 49,
+  "assertions": [
+    "needed-by week load hint",
+    "load refresh after pickup"
+  ],
   "post": {
     "method": "POST",
     "path": "tasks/00000000-0000-0000-0000-000000000030/pickup",
+    "query": "",
     "body": {
       "rowVersion": 7
     }

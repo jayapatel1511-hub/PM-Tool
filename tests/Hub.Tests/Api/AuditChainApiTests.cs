@@ -95,6 +95,8 @@ public sealed class AuditChainApiTests
         await (await admin.GetAsync($"/api/v1/admin/audit-chains/{p.Id}/verify?headSeq=1")).Json();
         var prefixIntegrity = await (await admin.GetAsync($"/api/v1/projects/{p.Id}/activity/integrity")).Json();
         Assert.Null(prefixIntegrity["valid"]); Assert.Equal(1, prefixIntegrity["verifiedEntries"]!.GetValue<long>());
+        var report = await (await admin.GetAsync($"/api/v1/reports/project-activity-log?projectId={p.Id}")).Json();
+        Assert.Contains(report["parameters"]!.AsArray(), x => x!["label"]!.GetValue<string>().StartsWith("Log integrity") && x["value"]!.GetValue<string>() == "Log awaiting verification");
         await (await admin.GetAsync($"/api/v1/admin/audit-chains/{p.Id}/verify")).Json();
         await d.NewTask(p.Id);
         var verified = await (await admin.GetAsync($"/api/v1/admin/audit-chains/{p.Id}/verify?from={head.HeadSeq + 1}")).Json();

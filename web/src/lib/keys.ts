@@ -27,7 +27,7 @@ export const itemKeys: Readonly<Record<string, readonly string[]>> = {
   DesignBasisEntry: ['design-basis', 'design-basis-detail'],
   CalendarEvent: ['calendar'], TimeEntry: ['time'], User: ['me', 'staff', 'reference', 'admin', 'organisation', 'organisation-placements', 'workload', 'planning-grid'],
   Comment: ['history', 'comments', 'task'], DocumentLink: ['links', 'history', 'files'],
-  TaskPickupOffer: ['pickup-offers', 'pickup-load', 'task', 'mywork-tasks', 'workload', 'planning-grid'],
+  TaskPickupOffer: ['pickup-offers', 'pickup-own-load', 'task', 'mywork-tasks', 'workload', 'planning-grid'],
   OrgLevel: ['admin', 'organisation', 'organisation-placements', 'staff', 'workload', 'planning-grid', 'report'],
   OrgUnit: ['admin', 'organisation', 'organisation-placements', 'staff', 'workload', 'planning-grid', 'report'],
   CommitmentMissCategory: ['admin', 'weekly-promise', 'readiness-detail'],

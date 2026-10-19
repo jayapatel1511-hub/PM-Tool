@@ -123,6 +123,8 @@ public sealed class VerifiableWorkflowTests
     {
         using var f = new HubFactory(); var d = new TestData(f); var p = await d.Project(); var admin = f.As(TestData.Admin);
         Assert.Equal(System.Net.HttpStatusCode.NotFound, (await admin.GetAsync("/api/v1/admin/audit-chains")).StatusCode);
+        var activity = await (await admin.GetAsync($"/api/v1/reports/project-activity-log?projectId={p.Id}")).Json();
+        Assert.DoesNotContain(activity["parameters"]!.AsArray(), x => x!["label"]!.GetValue<string>().StartsWith("Log integrity"));
         Assert.Equal(System.Net.HttpStatusCode.NotFound, (await admin.GetAsync($"/api/v1/projects/{p.Id}/commitment-reliability")).StatusCode);
         Assert.Equal(System.Net.HttpStatusCode.NotFound, (await admin.GetAsync($"/api/v1/projects/{p.Id}/revision-check")).StatusCode);
         var preview = new AllocationEndpoints.CreateBody(Guid.NewGuid(), d.User(TestData.Alex), AllocationPurpose.Production,

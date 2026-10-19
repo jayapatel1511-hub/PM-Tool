@@ -107,16 +107,17 @@ public static class WorkloadEndpoints
             t.StartDate, t.DueDate, t.Status, t.RowVersion)).ToListAsync();
     }
 
-    public static async Task<(List<DateOnly> Weeks, List<PersonLoad> People, DateOnly Today)> Grid(WorkloadQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
+    public static async Task<(List<DateOnly> Weeks, List<PersonLoad> People, DateOnly Today)> Grid(WorkloadQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock, bool ownOnly = false)
     {
         var actor = access.Actor;
         var s = await store.Get(db);
         var unitRead = s.IsFlagOn("org_structure") && await PeopleScope.LeadsUnit(db, actor);
-        Access.Demand(Permissions.ViewWorkload(actor).Ok || unitRead ? Allow.Yes : Permissions.ViewWorkload(actor));
+        Access.Demand(ownOnly || Permissions.ViewWorkload(actor).Ok || unitRead ? Allow.Yes : Permissions.ViewWorkload(actor));
         var today = clock.Today(s);
         var first = Workload.WeekOf(f.From ?? today);
         var weeks = Enumerable.Range(0, Weeks).Select(i => first.AddDays(7 * i)).ToList();
-        var people = await PeopleScope.Widen(db, actor, People(db, access, me));
+        // The pickup hint requests only the authenticated viewer; no client selects this read boundary.
+        var people = ownOnly ? db.Users.AsNoTracking().Where(u => u.IsActive && u.Id == actor.Id) : await PeopleScope.Widen(db, actor, People(db, access, me));
         people = await PeopleScope.FilterUnit(db, people, f.UnitId);
         if (f.SupervisorId is { } sup) people = people.Where(u => u.SupervisorId == sup);
         if (f.OfficeId is { } office) people = people.Where(u => u.OfficeId == office);

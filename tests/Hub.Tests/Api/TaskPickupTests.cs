@@ -52,6 +52,8 @@ public sealed class TaskPickupTests
         var task = await d.NewTask(project.Id, extra: new { assigneeId = d.User(TestData.Alex) });
         var response = await f.As(TestData.Alex).Post($"/api/v1/tasks/{task.G("id")}/pickup-offer", new { reason = "Needs cover" });
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Alex).GetAsync("/api/v1/pickup-offers")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Alex).GetAsync("/api/v1/pickup-offers/my-load")).StatusCode);
         var detail = await (await f.As(TestData.Alex).GetAsync($"/api/v1/tasks/{task.G("id")}")).Json();
         Assert.Null(detail["task"]?["pickupOfferOpen"]);
     }
@@ -68,6 +70,7 @@ public sealed class TaskPickupTests
             var task = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex), dueDate = "2026-10-30" });
             var id = task.G("id");
             var before = await f.DbAsync(db => db.Tasks.Where(t => t.Id == id).Select(t => new { t.Name, t.Status, t.DueDate, t.AssigneeId, t.RowVersion }).SingleAsync());
+            await (await f.As(TestData.Alex).Post($"/api/v1/tasks/{id}/pickup-offer", new { reason = "Invalid hours", hoursRemaining = 100000m })).Json(400);
             await (await f.As(TestData.Alex).Post($"/api/v1/tasks/{id}/pickup-offer", new { reason = "Needs cover", keepWatching = true })).Json(201);
             var marked = await (await f.As(TestData.Alex).GetAsync($"/api/v1/tasks/{id}")).Json();
             Assert.True(marked["task"]?["pickupOfferOpen"]?.GetValue<bool>());
@@ -271,6 +274,28 @@ public sealed class TaskPickupTests
             });
             var report = await (await f.As(TestData.Jill).GetAsync($"/api/v1/reports/pickup-offers?projectId={project.Id}")).Json();
             Assert.Contains(report["rows"]!.AsArray(), row => row?["project"]?.GetValue<string>() == project.ProjectNumber);
+        }
+    }
+
+    [Fact]
+    [Trait("flag-on", "task_pickup")]
+    public async Task Own_load_hint_does_not_grant_workspace_workload_access()
+    {
+        var (f, d) = await EnabledFactory(); using (f)
+        {
+            var viewer = f.As(TestData.Jill);
+            var hint = await (await viewer.GetAsync("/api/v1/pickup-offers/my-load?week=2026-10-26")).Json();
+            Assert.NotNull(hint["band"]); Assert.NotNull(hint["capacity"]); Assert.Equal("2026-10-26", hint.S("week"));
+            Assert.Equal(HttpStatusCode.Forbidden, (await viewer.GetAsync("/api/v1/workload")).StatusCode);
+            var admin = f.As(TestData.Admin);
+            await (await admin.Put("/api/v1/admin/settings/restricted_projects_enabled", new { value = true })).Json();
+            var project = await d.Project();
+            await d.NewTask(project.Id, extra: new { assigneeId = d.User(TestData.Jill), estimatedHours = 40m, dueDate = "2026-10-26" });
+            await (await f.As(TestData.Pm).Patch($"/api/v1/projects/{project.Id}", new { visibility = "Restricted" }, d.Version(project.Id))).Json();
+            var jill = d.User(TestData.Jill);
+            await f.DbAsync(async db => { foreach (var member in await db.ProjectMembers.Where(m => m.ProjectId == project.Id && m.UserId == jill).ToListAsync()) member.RemovedAt = f.Clock.Now; return await db.SaveChangesAsync(); });
+            var partial = await (await viewer.GetAsync("/api/v1/pickup-offers/my-load?week=2026-10-26")).Json();
+            Assert.True(partial["partial"]!.GetValue<bool>()); Assert.Null(partial["band"]); Assert.Null(partial["hours"]);
         }
     }
 }

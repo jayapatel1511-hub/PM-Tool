@@ -1,0 +1,92 @@
+{
+  "scope": "Final companion; disposable synthetic PostgreSQL only",
+  "command": "dotnet test --filter FullyQualifiedName~AuditChainApiTests|FullyQualifiedName~TaskPickupTests|FullyQualifiedName~VerifiableWorkflowTests (same focused no-restore/no-analyzer/single-worker options as core)",
+  "passed": 21,
+  "failed": 0,
+  "cases": [
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.Allocation_preview_returns_week_projection_and_rolls_back_writes",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.Reliability_returns_null_percent_for_zero_commitments",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Project_completion_and_archive_close_open_offers",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.Confirmation_is_independent_of_performer_and_requires_manager",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Manager_can_assign_only_an_inside_team_target",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AuditChainApiTests.Partial_checks_cannot_promote_an_unverified_prefix",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Parallel_same_team_pickup_is_first_wins",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AuditChainApiTests.Fifty_parallel_edits_have_gap_free_sequences_and_failed_hash_rolls_back_the_change",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.New_workflow_routes_are_dark_by_default",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Deleted_task_offer_remains_in_historical_pickup_report_for_same_team_viewer",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Outside_team_and_read_only_picker_are_forbidden_without_mutation",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AuditChainApiTests.Runtime_insert_select_role_appends_but_cannot_initialize_or_update_seals",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.Nonstandard_revision_does_not_block_issue_and_clearing_convention_removes_marks",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Offer_leaves_task_fields_unchanged_and_pickup_closes_offer_watches_previous_assignee",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Direct_manager_without_supervisor_role_cannot_use_manager_pickup_actions",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AuditChainApiTests.Legacy_ten_thousand_rows_are_sealed_once_and_saved_records_survive_append_then_detect_tampering",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Pickup_routes_are_inert_when_the_flag_is_off",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Org_structure_units_override_shared_manager_fallback_for_pickup_teams",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Completion_and_direct_reassignment_close_open_offers",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.VerifiableWorkflowTests.Not_met_requires_active_category_and_records_the_category",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskPickupTests.Own_load_hint_does_not_grant_workspace_workload_access",
+      "outcome": "Passed"
+    }
+  ]
+}

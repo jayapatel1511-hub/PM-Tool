@@ -25,6 +25,7 @@ const offer = { id: offerId, taskId, offeredById: id(2), offeredBy: 'Pat PM', re
 const chain = { chainId, headSeq: 3, headHash: 'sha256-head', lastVerifiedAt: '2026-10-03T12:00:00Z', firstBrokenSeq: null }
 const confirmId = id(73)
 const reliability = { snapshots: [{ id: id(70), weekStart: '2026-09-28', reliability: { met: 78, committed: 100, percent: 78, band: 'Watch', withdrawn: 2, notYetRecorded: 20, awaiting: 1 } }], misses: [{ categoryId: id(71), category: 'Blocked by dependency', count: 2, commitments: [{ id: id(72), key: 'PROM-12' }] }], awaiting: [{ id: confirmId, key: 'PROM-13', rowVersion: 4, canConfirm: true }] }
+const myWork = { person: { id: id(1), displayName: 'Sam Supervisor', isActive: true }, readOnly: false, today: '2026-10-03', attention: { total: 0, items: [] }, tasks: [], reviews: { tasks: [], deliverables: [] }, deliverables: [], people: {}, successors: [], decisions: [], actions: [], projects: [], milestones: [], completed: [] }
 
 function responseFor(method, p, body, query) {
   if (p === 'config') return { authMode: 'Development', entra: {} }
@@ -50,7 +51,9 @@ function responseFor(method, p, body, query) {
   if (p === 'admin/organisation/import/preview' && failImport) return { __status: 422, detail: 'CSV header is missing email.' }
   if (p === `projects/${projectId}/changes/options`) return { canWrite: false, people: [], disciplines: [], sources: [], heads: [], deliverables: [], tasks: [] }
   if (p === 'notifications/pulse' || p === 'me/notifications/pulse' || p === 'notifications/unread-count' || p === 'me/notifications/unread-count') return p.endsWith('count') ? { notifications: 0, following: 0 } : { stamp: '0' }
-  if (p === 'me/work') return { items: [], page: 1, pageSize: 50, totalCount: 0 }
+  if (p === 'me/work') return myWork
+  if (p === 'tasks') return { items: [], page: 1, pageSize: 200, totalCount: 0 }
+  if (p === 'planning/grid') return { weeks: ['2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02'], currentWeek: '2026-09-28', people: [{ id: id(1), displayName: 'Sam Supervisor', canCreateSelfEntry: false, cells: [{ week: '2026-09-28', capacity: 40, timeAway: 0, additionalAvailability: 0, confirmed: 0, expected: 0, possible: 0, remaining: 40, taskEstimates: 0, unestimatedTasks: 0, staleEntries: 0, overPlanned: false, underPlanned: false }], entries: [] }] }
   if (p === 'views') return { views: [], canShare: false }
   if (p === 'projects') return { items: [project], page: 1, pageSize: 200, totalCount: 1 }
   return undefined
@@ -67,7 +70,7 @@ async function waitForApi(page) { await page.waitForLoadState('networkidle'); aw
 (async () => {
   server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', port, '--strictPort'], { cwd: path.resolve(__dirname, '..'), stdio: 'inherit' })
   for (let i = 0; i < 50; i++) { try { if ((await fetch(base)).ok) break } catch {} await new Promise(r => setTimeout(r, 100)) }
-  browser = await chromium.launch({ headless: true })
+  browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
   await page.addInitScript(() => sessionStorage.setItem('hub.devUser', 'sam@hub.test'))
   page.on('pageerror', e => errors.push(e.message))
@@ -84,7 +87,9 @@ async function waitForApi(page) { await page.waitForLoadState('networkidle'); aw
 
   // Feature gates: off means no nav entry, no feature GET, and direct routes are Not Found.
   await page.goto(`${base}/my-work`); await waitForApi(page)
-  assert.equal(await page.getByRole('link', { name: 'Open for pickup', exact: true }).count(), 0)
+  const assertMyWork = async (url, view, pickupVisible) => { await page.goto(`${base}${url}`); await page.getByRole('heading', { name: 'My Work', exact: true }).waitFor(); await page.getByRole('button', { name: new RegExp(`My Work views: ${view}`) }).waitFor(); await page.getByRole('main').getByRole('button', { name: 'Views', exact: true }).waitFor(); await page.getByRole('main').getByRole('button', { name: 'New task', exact: true }).first().waitFor(); const pickup = page.getByRole('main').getByRole('link', { name: 'Open for pickup', exact: true }); if (pickupVisible) await pickup.waitFor(); assert.equal(await pickup.count(), pickupVisible ? 1 : 0, `${view} pickup link flag state`); return { view, pickupVisible, viewSwitcher: true, savedViews: true, newTask: true } }
+  const flagPairAssertions = []
+  flagPairAssertions.push(await assertMyWork('/my-work?tab=overview', 'Overview', false)); flagPairAssertions.push(await assertMyWork('/my-work?tab=upcoming', 'Upcoming', false))
   assert.equal(await page.getByRole('link', { name: 'Organisation', exact: true }).count(), 0)
   const offGets = calls.filter(c => c.method === 'GET').map(c => c.path)
   assert.equal(offGets.some(p => p === 'pickup-offers' || p === 'organisation'), false)
@@ -92,6 +97,7 @@ async function waitForApi(page) { await page.waitForLoadState('networkidle'); aw
 
   // Pickup: real row, confirmation dialog, and rowVersion POST.
   featurePhase = 'on'; me.flags.task_pickup = true; calls.length = 0
+  flagPairAssertions.push(await assertMyWork('/my-work?tab=overview', 'Overview', true)); flagPairAssertions.push(await assertMyWork('/my-work?tab=upcoming', 'Upcoming', true))
   await page.goto(`${base}/pickup`); await page.getByText('T-101', { exact: true }).waitFor(); await page.getByText(/Your workload for/).waitFor(); await axe(page, 'pickup'); await shot(page, 'pickup')
   await page.getByRole('button', { name: 'Pick up', exact: true }).click(); await page.getByRole('dialog').getByRole('button', { name: 'Pick up task', exact: true }).click(); await page.getByText('Task picked up').waitFor()
   const pickupPost = calls.find(c => c.method === 'POST' && c.path === `tasks/${taskId}/pickup`); assert.deepEqual(pickupPost.body, { rowVersion: 7 })
@@ -113,11 +119,11 @@ async function waitForApi(page) { await page.waitForLoadState('networkidle'); aw
   me.flags.commitment_reliability = true
   await page.reload(); await page.goto(`${base}/projects/P-DEMO/readiness`); await page.getByRole('heading', { name: /Readiness/i }).waitFor(); await page.getByText(/78%/).waitFor(); await page.getByText('Watch', { exact: true }).waitFor(); await page.getByText('Blocked by dependency', { exact: true }).waitFor(); assert.ok(calls.some(c => c.path === `projects/${projectId}/commitment-reliability`), 'reliability API requested'); await page.getByRole('button', { name: 'Confirm met', exact: true }).click(); await page.waitForTimeout(100); const confirmCall = calls.find(c => c.method === 'POST' && c.path === `projects/${projectId}/weekly-commitments/${confirmId}/confirm`); assert.ok(confirmCall?.body?.requestId); assert.equal(confirmCall.body.rowVersion, 4); assert.equal(confirmCall.body.return, false); assert.equal(confirmCall.body.reason, null); await axe(page, 'readiness-reliability-route'); await shot(page, 'readiness-reliability-route')
 
-  const report = { scope: 'Chromium UI with mocked API responses; source checks and backend rules are separate', port, passes: 6, calls: totalApiCalls, retainedCalls: calls.length, assertions: ['needed-by week load hint', 'load refresh after pickup'], post: pickupPost, axe: axeReports, screenshots: shots, pageErrors: errors, unknownGets: [...new Set(unknownGets)] }
-  fs.writeFileSync(path.join(out, 'schema-workflows.json'), JSON.stringify(report, null, 2))
-  if (fs.existsSync('/private/tmp/tuesday-039-050-coordination')) fs.writeFileSync('/private/tmp/tuesday-039-050-coordination/schema-browser.md', `# Browser evidence: packets 048–050\n\n- Command: \`PORT=19505 node web/tests/schema-workflows.cjs\`\n- Chromium mocked API workflows: PASS for flag gating, pickup, organisation, admin structure/error display, audit-chain verification, and readiness reliability.\n- Reliability assertions: rendered \`Met 78 of 100 (78%)\`, \`Watch\`, \`Blocked by dependency\`; verified POST confirmation with rowVersion 4 and requestId.\n- Accessibility: PASS, six page checks with zero violations.\n- Runtime: PASS, zero page errors and zero unmocked GETs.\n- Pickup POST body: \`${JSON.stringify(pickupPost.body)}\`.\n- Boundary: browser UI against mocked API responses; backend/native/deployed acceptance is not established.\n\nArtifacts are in \`web/test-results/schema-workflows/\`.\n`)
-  console.log(JSON.stringify(report))
   assert.deepEqual(errors, [], 'page errors')
   assert.deepEqual([...new Set(unknownGets)], [], 'unknown GETs')
   assert.deepEqual(axeReports.flatMap(x => x.violations), [], 'axe')
+  const report = { scope: 'Chromium UI with mocked API responses; source checks and backend rules are separate', port, passes: 8, calls: totalApiCalls, retainedCalls: calls.length, assertions: ['My Work overview/upcoming flag-off and flag-on render', 'needed-by week load hint', 'load refresh after pickup'], flagPairAssertions, post: pickupPost, axe: axeReports, screenshots: shots, pageErrors: errors, unknownGets: [...new Set(unknownGets)] }
+  fs.writeFileSync(path.join(out, 'schema-workflows.json'), JSON.stringify(report, null, 2))
+  if (fs.existsSync('/private/tmp/tuesday-039-050-coordination')) fs.writeFileSync('/private/tmp/tuesday-039-050-coordination/schema-browser.md', `# Browser evidence: packets 048–050\n\n- Command: \`PORT=19505 node web/tests/schema-workflows.cjs\`\n- Chromium mocked API workflows: PASS, 8 bounded workflows including My Work overview/upcoming with feature flag off/on, pickup, organisation, admin structure/error display, audit-chain verification, and readiness reliability.\n- My Work flag pairs: overview and upcoming each asserted pickup link count 0 with flag off and 1 with flag on; view switcher, saved Views control, and New task remained available in all four cases.\n- Reliability assertions: rendered \`Met 78 of 100 (78%)\`, \`Watch\`, \`Blocked by dependency\`; verified POST confirmation with rowVersion 4 and requestId.\n- Accessibility: PASS, six page checks with zero violations.\n- Runtime: PASS, zero page errors and zero unmocked GETs.\n- Pickup POST body: \`${JSON.stringify(pickupPost.body)}\`.\n- Boundary: browser UI against mocked API responses; backend/native/deployed acceptance is not established.\n\nArtifacts are in \`web/test-results/schema-workflows/\`.\n`)
+  console.log(JSON.stringify(report))
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(async () => { await browser?.close(); server?.kill() })

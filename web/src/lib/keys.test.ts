@@ -63,3 +63,9 @@ test('invalidation prefixes match actual mounted screen query keys', () => {
   for (const [type, queries] of Object.entries(mounted)) for (const query of queries)
     assert.ok(keysForChange(type, 'p1').some(prefix => prefix.every((part, i) => query[i] === part)), `${type}: ${query}`)
 })
+
+
+test('workload changes refresh the pickup own-load hint', () => {
+  for (const type of ['Task', 'ResourceAllocation', 'PlanningEntry', 'PersonSchedule', 'ApprovedLeave', 'PersonAvailabilityOverride', 'User', 'Project', 'Member'])
+    assert.ok(keysForChange(type, 'p1').some(key => key[0] === 'pickup-own-load'), type)
+})

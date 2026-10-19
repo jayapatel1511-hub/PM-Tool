@@ -1,12 +1,43 @@
 {
   "scope": "Chromium UI with mocked API responses; source checks and backend rules are separate",
   "port": "19505",
-  "passes": 6,
-  "calls": 72,
+  "passes": 8,
+  "calls": 104,
   "retainedCalls": 49,
   "assertions": [
+    "My Work overview/upcoming flag-off and flag-on render",
     "needed-by week load hint",
     "load refresh after pickup"
+  ],
+  "flagPairAssertions": [
+    {
+      "view": "Overview",
+      "pickupVisible": false,
+      "viewSwitcher": true,
+      "savedViews": true,
+      "newTask": true
+    },
+    {
+      "view": "Upcoming",
+      "pickupVisible": false,
+      "viewSwitcher": true,
+      "savedViews": true,
+      "newTask": true
+    },
+    {
+      "view": "Overview",
+      "pickupVisible": true,
+      "viewSwitcher": true,
+      "savedViews": true,
+      "newTask": true
+    },
+    {
+      "view": "Upcoming",
+      "pickupVisible": true,
+      "viewSwitcher": true,
+      "savedViews": true,
+      "newTask": true
+    }
   ],
   "post": {
     "method": "POST",

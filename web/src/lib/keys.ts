@@ -49,6 +49,7 @@ export function keysForChange(itemType?: string, projectId?: string, itemId?: st
   if (itemType && /^(Review|DisciplineReview|Finding|Change|Input|Source|Handoff|Submission|CheckEvidence)/.test(itemType))
     for (const root of coordination) keys.push([root])
   for (const root of itemKeys[itemType ?? ''] ?? []) keys.push([root])
+  if (keys.some(key => key[0] === 'workload')) keys.push(['pickup-own-load'])
   if (itemType && itemId) keys.push(['history', itemType, itemId], ['links', itemType, itemId], ['comments', itemType, itemId])
   return keys
 }

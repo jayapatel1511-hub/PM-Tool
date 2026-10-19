@@ -1,0 +1,44 @@
+{
+  "scope": "Local integrated schema/report/baseline seams; disposable PostgreSQL, no hosted or human acceptance",
+  "source": "schema4f92c6ea integratedd0cbff74 plus historical report seam",
+  "build": {
+    "configuration": "Release",
+    "errors": 0,
+    "warnings": 639
+  },
+  "tests": {
+    "filter": "OrgCapacityIntegrationTests|ScheduleBaselineTests|BaselineHistoryTests",
+    "counters": {
+      "total": "5",
+      "executed": "5",
+      "passed": "5",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    }
+  },
+  "modelDrift": "No changes since last migration",
+  "sourceSha256": {
+    "src/Hub.Api/Features/CapacityReports.cs": "87085161b9ee34afc60128a06f8a7d3659472684cca60453e95661bda8b2f231",
+    "tests/Hub.Tests/Api/OrgCapacityIntegrationTests.cs": "f3d9163928c528968c64f365764f7a82257da2684fecdecd07caa534261955b5",
+    "src/Hub.Api/Features/Deliverables.cs": "859b1cac3c4dc54b04164e94a6c74e5122a5085b1d37fcb55fd16fc7fcb0da15",
+    "src/Hub.Api/Features/Reports.cs": "87e8c748b242318c4b00edb3bc238261a83d190f9c033b793046f3033c5353b8"
+  },
+  "evidence": {
+    "ci-artifacts/integration/schema-merge-build.log": "2da77f4307e624c06dffe78dacb1ed96c70039f9f68fdc03616bf785b349820f",
+    "ci-artifacts/integration/model-drift.log": "815c5cd494b61a9d8737ba7653cd05fb05926e7b40a924683fa4eef4ca87566c",
+    "ci-artifacts/integration/schema-seams.trx": "e249c467c5466c328953daf87659ac22b48d8161ffc0fd2b9884823d816c47b7",
+    "ci-artifacts/integration/schema-seams.log": "de9381180694c62d581d60a389c177916eebebf08df7a6f29aa4dcc484300aee"
+  },
+  "remaining": "Platform/companion integration, full regression/coverage, browser checks, populated-upgrade/previous-image and human gates"
+}

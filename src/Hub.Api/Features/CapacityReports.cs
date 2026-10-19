@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Hub.Api.Data;
 using Hub.Domain;
 using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -21,9 +22,9 @@ public static partial class ReportEndpoints
 
     static Col[] CapacityColumns(PlanningEndpoints.GridResult grid) => [new("measure", "measure"), ..grid.Weeks.Select((w, i) => new Col($"w{i}", "hours", "number", w.ToString("yyyy-MM-dd")))];
 
-    static string CapacityLink(Ctx c, string view, PlanningEndpoints.GridResult grid) => "/planner?" + string.Join("&", new[] { ("view", view), ("supervisorId", c.Str("supervisorId")),
+    static string CapacityLink(Ctx c, string view, PlanningEndpoints.GridResult grid, bool includeUnit = false) => "/planner?" + string.Join("&", new[] { ("view", view), ("supervisorId", c.Str("supervisorId")),
         ("disciplineId", c.Str("disciplineId")), ("from", grid.Weeks[0].ToString("yyyy-MM-dd")), ("weeks", grid.Weeks.Length.ToString(System.Globalization.CultureInfo.InvariantCulture)), ("includeMyDrafts", c.Str("includeMyDrafts") ?? "true"),
-        ("source", c.Str("source")), ("confidence", c.Str("confidence")) }.Where(x => x.Item2 != null).Select(x => $"{x.Item1}={Uri.EscapeDataString(x.Item2!)}"));
+        ("source", c.Str("source")), ("confidence", c.Str("confidence")), ("unitId", includeUnit ? c.Str("unitId") : null) }.Where(x => x.Item2 != null).Select(x => $"{x.Item1}={Uri.EscapeDataString(x.Item2!)}"));
 
     static async Task<Result> TeamCapacity(Ctx c)
     {
@@ -33,13 +34,62 @@ public static partial class ReportEndpoints
             ("expected", (_, v) => v.Expected), ("possible", (_, v) => v.Possible), ("remaining", (_, v) => v.Remaining),
             ("overPlanned", (_, v) => v.OverPlanned ? 1 : 0), ("underPlanned", (p, v) => !p.Partial && v.UnderPlanned ? 1 : 0),
             ("partial", (p, _) => p.Partial ? 1 : 0)];
-        var rows = new JsonArray();
-        foreach (var (key, value) in measures) {
-            var row = new JsonObject { ["measure"] = Text.Get($"capacityReport.{key}") };
-            for (var i = 0; i < grid.Weeks.Length; i++) row[$"w{i}"] = decimal.Round(grid.People.Sum(p => value(p, p.Cells[i])), 1);
-            rows.Add(row);
+        // The organisation slice is additive. Keep the pre-050 rows and columns byte-for-byte
+        // equivalent while the flag is dark; historical placement is only consulted when enabled.
+        if (!c.S.IsFlagOn("org_structure"))
+        {
+            var rows = new JsonArray();
+            foreach (var (key, value) in measures)
+            {
+                var row = new JsonObject { ["measure"] = Text.Get($"capacityReport.{key}") };
+                for (var i = 0; i < grid.Weeks.Length; i++) row[$"w{i}"] = decimal.Round(grid.People.Sum(p => value(p, p.Cells[i])), 1);
+                rows.Add(row);
+            }
+            return new(rows, CapacityLink(c, "grid", grid), CapacityColumns(grid));
         }
-        return new(rows, CapacityLink(c, "grid", grid), CapacityColumns(grid));
+
+        var people = grid.People;
+        var ids = people.Select(p => p.Id).Distinct().ToArray();
+        var units = await c.Db.Set<OrgUnit>().AsNoTracking().ToDictionaryAsync(u => u.Id);
+        var tree = units.Values.Select(u => new OrgTree.Unit(u.Id, u.ParentId, 0, u.LeaderId)).ToArray();
+        HashSet<Guid>? selected = null;
+        if (c.Id("unitId") is { } unitId) selected = OrgTree.Descendants(unitId, tree).ToHashSet();
+
+        var placements = new Dictionary<int, Dictionary<Guid, Guid?>>();
+        for (var i = 0; i < grid.Weeks.Length; i++)
+        {
+            var week = grid.Weeks[i];
+            var localEnd = week.AddDays(7).ToDateTime(TimeOnly.MinValue);
+            var end = new DateTimeOffset(localEnd, Clock.Zone(c.S).GetUtcOffset(localEnd)).ToUniversalTime();
+            placements[i] = await OrgStructureReports.At(c.Db, ids, end);
+        }
+
+        var groupKeys = placements.Values.SelectMany(x => x.Values)
+            .Where(id => selected is null || id is { } value && selected.Contains(value))
+            .Distinct().OrderBy(id => id is null ? "" : OrgStructureReports.UnitPath(id, units), StringComparer.Ordinal)
+            .ThenBy(id => id is null ? "No unit" : units.GetValueOrDefault(id.Value)?.Name ?? "No unit", StringComparer.Ordinal)
+            .ToArray();
+        var data = new JsonArray();
+        foreach (var group in groupKeys)
+        foreach (var (key, value) in measures)
+        {
+            var unit = group is { } id && units.TryGetValue(id, out var definition) ? definition.Name : "No unit";
+            var row = new JsonObject
+            {
+                ["measure"] = Text.Get($"capacityReport.{key}"),
+                ["unit"] = unit,
+                ["unitPath"] = OrgStructureReports.UnitPath(group, units),
+            };
+            for (var i = 0; i < grid.Weeks.Length; i++)
+            {
+                var members = people.Where(p => placements[i].GetValueOrDefault(p.Id) == group);
+                row[$"w{i}"] = decimal.Round(members.Sum(p => value(p, p.Cells[i])), 1);
+            }
+            data.Add(row);
+        }
+        var columns = new[] { new Col("measure", "measure"), new Col("unit", "unit", Label: "Unit"), new Col("unitPath", "unitPath", Label: "Unit path") }
+            .Concat(grid.Weeks.Select((w, i) => new Col($"w{i}", "hours", "number", w.ToString("yyyy-MM-dd")))).ToArray();
+        return new(data, CapacityLink(c, "grid", grid, includeUnit: true), columns);
     }
 
     static async Task<Result> AllocationsBySource(Ctx c)

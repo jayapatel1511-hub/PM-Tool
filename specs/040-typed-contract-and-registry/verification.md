@@ -1,6 +1,6 @@
 # Verification: Typed Contract and Entity Registry
 
-Local foundations implemented and independently reviewed; final integration and human acceptance remain open. Statuses below describe local evidence only.
+Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
 
 | Acceptance criterion | Slice | Status |
 |---|---|---|
@@ -17,14 +17,14 @@ Local foundations implemented and independently reviewed; final integration and 
 | AC-PLAT-11 | S05, S08 | PASS local: strict key and shared-text checks; missing-key compiler control |
 | AC-PLAT-12 | S10 | PASS local: golden contract checks |
 | AC-PLAT-13 | S10, S12 | PASS local: regeneration/build and typed PATCH transport browser checks |
-| AC-PLAT-14 | S12, S15.n | PARTIAL: typed callers/fixtures negative controls pass; final integrated shape gate pending |
+| AC-PLAT-14 | S12, S15.n | PASS local checkpoint: typed caller/fixture negative controls and 798-response observed shape gate pass; later S15 slices require their own checks |
 | AC-PLAT-15 | S11 | PASS local: recorder and shape merger regression controls |
-| AC-PLAT-16 | S11, S15.n | UNPROVEN: final full API capture and shape coverage gate owned by integration |
+| AC-PLAT-16 | S11, S15.n | PASS local checkpoint: one final full-run capture; all declared JSON responses observed, 381/429 mapped endpoints called (88.8%) |
 | AC-PLAT-17 | S12 | PASS local: actual JSDoc fixture rejects renamed DTO property |
-| AC-PLAT-18 | S13 | PASS local: owned synthetic PostgreSQL/API/browser smoke; final followup rerun pending |
+| AC-PLAT-18 | S13 | PASS local: final owned synthetic PostgreSQL/API/browser smoke and two-browser live flow |
 | AC-PLAT-19 | S14 | PASS local: invalidation map tests including delayed legacy refresh |
-| AC-PLAT-20 | S01 | PASS local: seeded ratchet regression controls; combined-lane accounting owned by integration |
-| AC-PLAT-21 | S16 (human check) | UNPROVEN: fifth-feature measurements and Jay ruling pending |
+| AC-PLAT-20 | S01 | PASS local: seeded ratchet regression controls; all enforced combined-lane counters pass original limits, then baselines lowered |
+| AC-PLAT-21 | S16 (human check) | UNPROVEN: qualifying five-feature cohort not established; measurement and subsequent Jay ruling remain pending |
 
 
 ## Local implementation handoff — 2026-10-18

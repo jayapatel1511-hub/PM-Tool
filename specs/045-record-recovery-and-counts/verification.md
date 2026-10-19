@@ -1,6 +1,6 @@
 # Verification: Record Recovery and Counts
 
-Local implementation is present on `codex/recovery-interaction-045-046`, based on `a6e0104b0b00ea58b9098e41b2f155305063aeed`. This record separates current checks from the historical slice evidence below. No review/pilot flag was enabled and no acceptance decision was made.
+Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
 
 ## Current takeover evidence
 

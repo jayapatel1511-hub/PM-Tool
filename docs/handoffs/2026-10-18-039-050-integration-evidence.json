@@ -1,0 +1,249 @@
+{
+  "schema": "local-integration-evidence.v1",
+  "recordedAtUtc": "2026-10-19T03:13:00.803055+00:00",
+  "runtimeSource": "1b649f57f4f6c28abeb36fabdd9607b51ae13dde",
+  "scope": "Local integration039-050;043 spike excluded. No push/deployment/pilot flag change/Accepted.",
+  "backend": {
+    "command": "dotnet test Hub.slnx --no-build -c Release --collect:'XPlat Code Coverage' --logger 'trx;LogFileName=final.trx' --results-directory ci-artifacts/integration/final-1b649-tests",
+    "counts": {
+      "total": 1491,
+      "executed": 1491,
+      "passed": 1491,
+      "failed": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "inconclusive": 0,
+      "passedButRunAborted": 0,
+      "notRunnable": 0,
+      "notExecuted": 0,
+      "disconnected": 0,
+      "warning": 0,
+      "completed": 0,
+      "inProgress": 0,
+      "pending": 0
+    },
+    "coverage": {
+      "uniqueReports": 1,
+      "identicalAttachmentCopies": 2,
+      "sha256": "d2b1df2a6f4d4432560198a0701659443fe4e70dde1e0b103bc9080dcf023c6b",
+      "rulesBranchesCovered": 3029,
+      "rulesBranchesTotal": 3155,
+      "serviceLinesCovered": 13070,
+      "serviceLinesTotal": 13665
+    },
+    "identityBoundary": "The test artifacts do not embed a git SHA; the invocation followed the final source build and1b649 commit, with no runtime source changes. Duplicate coverage attachments are identical, not additional coverage."
+  },
+  "shapes": {
+    "singleRun": "abf2523f1a1645b6862c206345157394",
+    "files": 76,
+    "responses": 798,
+    "mappedEndpointsCalled": 381,
+    "mappedEndpoints": 429,
+    "allTypedJsonResponsesObserved": true,
+    "review": "Independent read-only approval; no product removals; only health-override DELETE200/403/409 newly observed; DTO/status/optional metadata reviewed. Null and empty branches only prove observed variants."
+  },
+  "mockedBrowserCommands": [
+    {
+      "test": "test:design-basis",
+      "exit": 0,
+      "status": "PASS",
+      "log": "ci-artifacts/integration/browser-1b649/test-design-basis.log"
+    },
+    {
+      "test": "test:resources",
+      "exit": 0,
+      "status": "PASS",
+      "log": "ci-artifacts/integration/browser-1b649/test-resources.log"
+    },
+    {
+      "test": "test:planner",
+      "exit": 0,
+      "status": "PASS",
+      "log": "ci-artifacts/integration/browser-1b649/test-planner.log"
+    },
+    {
+      "test": "test:recovery-counts",
+      "exit": 0,
+      "status": "PASS",
+      "log": "ci-artifacts/integration/browser-1b649/test-recovery-counts.log"
+    },
+    {
+      "test": "test:interaction",
+      "exit": 0,
+      "status": "PASS",
+      "log": "ci-artifacts/integration/browser-1b649/test-interaction.log"
+    },
+    {
+      "test": "test:browser-verification",
+      "exit": 0,
+      "status": "PASS",
+      "log": "ci-artifacts/integration/browser-1b649/test-browser-verification.log"
+    }
+  ],
+  "image": {
+    "reference": "pm-tool-integration:1b649f57f4f6",
+    "id": "sha256:3d50c1efeb785348eb2beb3e61a23d44691fbdf015ce8a4d3a159013665604cf",
+    "ociRevision": "1b649f57f4f6c28abeb36fabdd9607b51ae13dde",
+    "hubBuild": "1b649f57f4f6c28abeb36fabdd9607b51ae13dde",
+    "permissionsCommand": "python3 tools/check_pilot_database_permissions.py --image pm-tool-integration:1b649f57f4f6",
+    "permissionsVerdict": "PASS",
+    "permissionsIdentityBoundary": "The permission receipt has no embedded image SHA; the recorded invocation and separately inspected image identity bind it to this locally built image.",
+    "compatibilityChecks": 29,
+    "compatibilityVerdict": "PASS"
+  },
+  "realApiBrowser": {
+    "verdict": "PASS",
+    "healthObservedBuild": "1b649f57f4f6c28abeb36fabdd9607b51ae13dde",
+    "command": "HUB_BUILD=1b649f57f4f6c28abeb36fabdd9607b51ae13dde VITE_HUB_BUILD=1b649f57f4f6c28abeb36fabdd9607b51ae13dde TUESDAY_SMOKE_API_PORT=18506 TUESDAY_SMOKE_UI_PORT=19506 node web/scripts/run-smoke-live.mjs",
+    "scope": "Owned synthetic database, Development auth, local API and Chromium; processes stopped; synthetic database retained by established runner."
+  },
+  "ratchets": {
+    "sourceCommit": "1b649f57f4f6c28abeb36fabdd9607b51ae13dde",
+    "checkedAtUtc": "2026-10-19T03:02:42.202820+00:00",
+    "counts": {
+      "api_helpers_without_type": 141,
+      "task_object_handlers": 77,
+      "untyped_results": 129,
+      "anonymous_objects": 794,
+      "direct_invalidate_queries": 66,
+      "runtime_text_keys": 233,
+      "html_tables": 59,
+      "load_percentage_literals": 0,
+      "page_permission_derivations": 2,
+      "client_permission_derivations": 65
+    },
+    "enforcedBaselineReductions": {
+      "anonymous_objects": {
+        "before": 795,
+        "after": 794
+      },
+      "api_helpers_without_type": {
+        "before": 159,
+        "after": 141
+      },
+      "direct_invalidate_queries": {
+        "before": 75,
+        "after": 66
+      },
+      "page_permission_derivations": {
+        "before": 25,
+        "after": 2
+      },
+      "runtime_text_keys": {
+        "before": 236,
+        "after": 233
+      },
+      "task_object_handlers": {
+        "before": 80,
+        "after": 77
+      },
+      "untyped_results": {
+        "before": 145,
+        "after": 129
+      }
+    },
+    "reportOnlyCountersUnchanged": true,
+    "counterImplementationSha256": "bb54113de222431d13a2dfe83a64890b1e29058bf98927b74e415d3a3aa2fdff",
+    "allEnforcedPassedOriginalBaseline": true
+  },
+  "primaryPreservation": {
+    "checkedAtUtc": "2026-10-19T03:02:23.718826+00:00",
+    "primaryHead": "cf96389def081c99e243a03a88cd258302aa6673",
+    "trackedPatchBytes": 215154,
+    "trackedPatchSha256": "481681a6acde7b6d227a6a33ffa383cbf593ff906195315227495f531479a4ec",
+    "expectedSha256": "481681a6acde7b6d227a6a33ffa383cbf593ff906195315227495f531479a4ec",
+    "accidentalRecordsFilesRemaining": 0,
+    "temporaryCleanupArchiveCurrentlyPresent": false,
+    "unchanged": true
+  },
+  "limitations": [
+    "043 strict parity KILL remains separate; no adoption or Jay verdict",
+    "S16 qualifying cohort and subsequent ruling unproven; no invented median or pre-cleanup approval gate",
+    "Hosted/Entra/company-account/native-phone and full human acceptance not established",
+    "Decision-detail fixture typechecked only; new browser coverage is decision choices",
+    "Historical temporary cleanup archive is no longer present; original tracked work remains verified unchanged"
+  ],
+  "rawEvidence": [
+    {
+      "path": "ci-artifacts/integration/final-1b649-tests/final.trx",
+      "sha256": "a8a5217b808b5e0e2f23122985d1f9bbbb9ac9e03bc8635ca18288cc3b04b680"
+    },
+    {
+      "path": "ci-artifacts/integration/coverage-1b649.log",
+      "sha256": "d73b620f92f4208b3669c76e0fe9d82b2e50f67a632ba23183d4d865f2dcbb62"
+    },
+    {
+      "path": "ci-artifacts/integration/browser-1b649/summary.jsonl",
+      "sha256": "c9ba77c180351c4d644939da01599cd2aab29254787be3a55b28b13b7fa61168"
+    },
+    {
+      "path": "ci-artifacts/integration/web-1b649.log",
+      "sha256": "5ca0bab090c7b38d1b9d707583fc60ee4857ae2853cf29d11233eb17f451f7a3"
+    },
+    {
+      "path": "ci-artifacts/integration/assets-1b649-provenance.json",
+      "sha256": "bf7884778509c44fa0bd0dc0ed20765145445465bf1089805f3ffd1d799f888e"
+    },
+    {
+      "path": "ci-artifacts/integration/permissions-1b649.log",
+      "sha256": "b246a7b466753f7a4968bcef420c40003e2fa78130b50aa1d9fa8b055b3da69c"
+    },
+    {
+      "path": "ci-artifacts/integration/compat-1b649.json",
+      "sha256": "85083628e6be48817ab177897c1494502534bc7cd7c57187520e758da8655a89"
+    },
+    {
+      "path": "ci-artifacts/integration/image-1b649-identity.txt",
+      "sha256": "52534f22aa46883a63fc77196fdd9207e14db848756cdb801ca5c61202569ece"
+    },
+    {
+      "path": "ci-artifacts/integration/live-1b649.log",
+      "sha256": "02155984498b1d820510fb76b050aed5b8491f14ba93f1a56a0e18741f54e98e"
+    },
+    {
+      "path": "ci-artifacts/integration/live-1b649-health.json",
+      "sha256": "96f72e2c81310472930c4979b31c511c1ce0299577568c1da698ff5eb3b07f10"
+    },
+    {
+      "path": "ci-artifacts/integration/live-1b649/browser.log",
+      "sha256": "eebb27f5b134a469ca80429a661c3eed4b7b9ff670b3db2cc43086763d09467d"
+    },
+    {
+      "path": "ci-artifacts/integration/live-1b649/live-browser.log",
+      "sha256": "b4747d1875e7c5c85e172b71e1e245fb516f5fce32e541f2161088033013978b"
+    },
+    {
+      "path": "ci-artifacts/integration/ratchet-1b649.log",
+      "sha256": "1315a91fefae0ed13db31b6095c76304a36f1aadbc1a0f48eb28eccf03a11411"
+    },
+    {
+      "path": "ci-artifacts/integration/ratchet-1b649-provenance.json",
+      "sha256": "8dae0f7b62e2bcac774df5d5a1f9300d69935a3fc7565df7433228faf5569f77"
+    },
+    {
+      "path": "ci-artifacts/integration/ratchet-final-lowered.log",
+      "sha256": "2278ad1f60a2729b3e7c6e0380c2954df3fb39e975e0dfb8519ebd7637258fe3"
+    },
+    {
+      "path": "ci-artifacts/integration/shapes-1b649-final.log",
+      "sha256": "23aafb346ac12423cb6567cda042862a9cccf9ce2fbce09223483f59d34955ea"
+    },
+    {
+      "path": "ci-artifacts/integration/shape-1b649-review.json",
+      "sha256": "2540fd8907cc60f5eeaa03f066b7b0642e952a85ff9e7e21c48e1a84903bd40e"
+    },
+    {
+      "path": "ci-artifacts/integration/primary-preservation-1b649.json",
+      "sha256": "2b6c313f92f3dbe1e959dd8240beb3546bff7ebc1e3bc6f0f50b2ef1f37904ab"
+    },
+    {
+      "path": "ci-artifacts/integration/spec-1b649.log",
+      "sha256": "e2ecc38689f0c857742ca45352970b54b5abb12045c441130194b82860f72c24"
+    },
+    {
+      "path": "ci-artifacts/integration/trace-1b649.log",
+      "sha256": "a9bb3d3307aa35acc1e6658d1616d399ae4e5e18544cc19d604834babedf4e41"
+    }
+  ]
+}

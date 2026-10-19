@@ -88,7 +88,9 @@ public sealed class TemplatesTests(HubFactory f)
             await Flag(false);
             Assert.False((await Template(id)).AsObject().ContainsKey("roles"));
             var off = await Create(); Assert.False(await f.DbAsync(db => db.OpenRoles.AnyAsync(r => r.ProjectId == off.Id)));
-            Assert.False((await (await admin.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-02", disciplineIds = new[] { civil } })).Json()).AsObject().ContainsKey("roles"));
+            var flagOffPreview = await (await admin.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-02", disciplineIds = new[] { civil } })).Json();
+            Assert.False(flagOffPreview.AsObject().ContainsKey("roles"));
+            Assert.False(flagOffPreview["counts"]!.AsObject().ContainsKey("roles"));
         }
         finally { await Flag(false); }
     }

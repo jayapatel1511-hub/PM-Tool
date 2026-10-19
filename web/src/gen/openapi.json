@@ -1506,7 +1506,7 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndObjectAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean": {
+      "AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndCurrentSettingsAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean": {
         "properties": {
           "capabilities": {
             "$ref": "#/components/schemas/AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint"
@@ -1564,7 +1564,9 @@
               "array"
             ]
           },
-          "settings": {},
+          "settings": {
+            "$ref": "#/components/schemas/CurrentSettings"
+          },
           "supervisorId": {
             "format": "uuid",
             "type": [
@@ -4150,6 +4152,94 @@
         },
         "required": [
           "csv"
+        ],
+        "type": "object"
+      },
+      "CurrentSettings": {
+        "properties": {
+          "activityBurstMinutes": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "allowSelfReview": {
+            "type": "boolean"
+          },
+          "chainDepthLimit": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "coordinationLookaheadWeeks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "dateFormat": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "defaultWeeklyCapacityHours": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "idleTimeoutHours": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "milestoneApproachingDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "orgTimeZone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "restrictedProjectsEnabled": {
+            "type": "boolean"
+          },
+          "routeCounterEnabled": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "taskDueSoonDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "today": {
+            "format": "date",
+            "type": "string"
+          },
+          "workingDaysEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "dateFormat",
+          "orgTimeZone",
+          "today",
+          "idleTimeoutHours",
+          "restrictedProjectsEnabled",
+          "allowSelfReview",
+          "taskDueSoonDays",
+          "milestoneApproachingDays",
+          "chainDepthLimit",
+          "defaultWeeklyCapacityHours",
+          "coordinationLookaheadWeeks",
+          "workingDaysEnabled"
         ],
         "type": "object"
       },
@@ -8217,6 +8307,206 @@
           "startDate",
           "milestoneDates",
           "disciplineIds"
+        ],
+        "type": "object"
+      },
+      "PreviewCounts": {
+        "properties": {
+          "deliverables": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "dependencies": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "milestones": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "roles": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "tasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "milestones",
+          "deliverables",
+          "tasks",
+          "dependencies"
+        ],
+        "type": "object"
+      },
+      "PreviewMilestone": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "milestoneType": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "milestoneType",
+          "sortOrder",
+          "date",
+          "source"
+        ],
+        "type": "object"
+      },
+      "PreviewResult": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/PreviewCounts"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewMilestone"
+            },
+            "type": "array"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewRole"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "undated": {
+            "$ref": "#/components/schemas/PreviewUndated"
+          }
+        },
+        "required": [
+          "milestones",
+          "counts",
+          "undated"
+        ],
+        "type": "object"
+      },
+      "PreviewRole": {
+        "properties": {
+          "disciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplineName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "from": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "skipReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "through": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "disciplineId",
+          "disciplineName",
+          "from",
+          "through",
+          "hours",
+          "note",
+          "skipReason"
+        ],
+        "type": "object"
+      },
+      "PreviewUndated": {
+        "properties": {
+          "deliverables": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "milestones": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "tasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "milestones",
+          "deliverables",
+          "tasks"
         ],
         "type": "object"
       },
@@ -14988,7 +15278,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndObjectAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean"
+                  "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndCurrentSettingsAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean"
                 }
               }
             },
@@ -27779,7 +28069,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewResult"
+                }
               }
             },
             "description": "OK"

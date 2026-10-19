@@ -26,6 +26,14 @@ public sealed class ContractTests(HubFactory f)
         _ => node?.DeepClone(),
     };
 
+    static JsonObject Resolve(JsonNode document, JsonNode schema)
+    {
+        var reference = schema["$ref"]?.GetValue<string>();
+        if (reference is null) return schema.AsObject();
+        var name = reference.Split('/').Last();
+        return document["components"]!["schemas"]![name]!.AsObject();
+    }
+
     [Fact]
     public async Task Openapi_matches_the_committed_golden_document() // AC-PLAT-12
     {
@@ -58,6 +66,35 @@ public sealed class ContractTests(HubFactory f)
         Assert.Equal(new[] { "rowVersion", "reason" }.Order(), properties.Select(p => p.Key).Order());
         Assert.Contains("null", properties["reason"]!["type"]!.ToJsonString());
         Assert.DoesNotContain("string", properties["rowVersion"]!["type"]!.ToJsonString());
+    }
+
+    [Fact]
+    public async Task Me_settings_are_typed_and_route_counter_field_is_flag_scoped()
+    {
+        var document = await (await f.As(TestData.Alex).GetAsync("/api/v1/openapi.json")).Json();
+        var me = Resolve(document, document["paths"]!["/api/v1/me"]!["get"]!["responses"]!["200"]!["content"]!["application/json"]!["schema"]!);
+        var settings = Resolve(document, me["properties"]!["settings"]!);
+        var required = settings["required"]!.AsArray().Select(x => x!.GetValue<string>()).ToHashSet();
+        foreach (var key in new[] { "dateFormat", "orgTimeZone", "today", "idleTimeoutHours", "chainDepthLimit", "workingDaysEnabled" })
+            Assert.Contains(key, settings["properties"]!.AsObject().Select(p => p.Key));
+        Assert.Contains("routeCounterEnabled", settings["properties"]!.AsObject().Select(p => p.Key));
+        Assert.DoesNotContain("routeCounterEnabled", required);
+        Assert.Contains("null", settings["properties"]!["routeCounterEnabled"]!["type"]!.ToJsonString());
+    }
+
+    [Fact]
+    public async Task Template_preview_contract_keeps_nested_counts_and_role_fields()
+    {
+        var document = await (await f.As(TestData.Alex).GetAsync("/api/v1/openapi.json")).Json();
+        var preview = Resolve(document, document["paths"]!["/api/v1/templates/{id}/preview"]!["post"]!["responses"]!["200"]!["content"]!["application/json"]!["schema"]!);
+        var counts = Resolve(document, preview["properties"]!["counts"]!);
+        foreach (var key in new[] { "milestones", "deliverables", "tasks", "dependencies", "roles" })
+            Assert.Contains(key, counts["properties"]!.AsObject().Select(p => p.Key));
+        Assert.DoesNotContain("roles", counts["required"]!.AsArray().Select(x => x!.GetValue<string>()));
+        var roles = preview["properties"]!["roles"]!;
+        var role = Resolve(document, roles["items"]!);
+        foreach (var key in new[] { "id", "label", "disciplineId", "disciplineName", "from", "through", "hours", "note", "skipReason" })
+            Assert.Contains(key, role["properties"]!.AsObject().Select(p => p.Key));
     }
 
 

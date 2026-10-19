@@ -12,13 +12,8 @@ public static class MeEndpoints
         Guid? HomeDisciplineId, bool IsActive, Guid? SupervisorId, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? OnProject = null);
     public sealed record CurrentSettings(string? DateFormat, string? OrgTimeZone, DateOnly Today, int IdleTimeoutHours, bool RestrictedProjectsEnabled, bool AllowSelfReview,
         int TaskDueSoonDays, int MilestoneApproachingDays, int ChainDepthLimit, int DefaultWeeklyCapacityHours, int CoordinationLookaheadWeeks, bool WorkingDaysEnabled,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? ActivityBurstMinutes = null);
-    static object CounterSetting(object values, OrgSettings settings)
-    {
-        if (!settings.IsFlagOn("route_counter")) return values;
-        var json = System.Text.Json.JsonSerializer.SerializeToNode(values, JsonOpts.Web)!.AsObject();
-        json["routeCounterEnabled"] = settings.RouteCounterEnabled; return json;
-    }
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? ActivityBurstMinutes = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? RouteCounterEnabled = null);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -55,9 +50,10 @@ public static class MeEndpoints
                     ReadOnly = a.ReadOnly,
                     DirectReports = directReports,
                 },
-                Settings = CounterSetting(new CurrentSettings(s.DateFormat, s.OrgTimeZone, clock.Today(s), s.IdleTimeoutHours, s.RestrictedProjectsEnabled, s.AllowSelfReview,
+                Settings = new CurrentSettings(s.DateFormat, s.OrgTimeZone, clock.Today(s), s.IdleTimeoutHours, s.RestrictedProjectsEnabled, s.AllowSelfReview,
                     s.TaskDueSoonDays, s.MilestoneApproachingDays, s.ChainDepthLimit, s.DefaultWeeklyCapacityHours, s.CoordinationLookaheadWeeks, s.WorkingDaysEnabled,
-                    s.IsFlagOn("small_ux") ? s.ActivityBurstMinutes : null), s),
+                    s.IsFlagOn("small_ux") ? s.ActivityBurstMinutes : null,
+                    s.IsFlagOn("route_counter") ? s.RouteCounterEnabled : null),
                 Preferences = new { pref.DigestEnabled, pref.DigestTimeLocal, pref.DenseRows, pref.WeeklySummaryEnabled },
                 Flags = s.Flags,
             };

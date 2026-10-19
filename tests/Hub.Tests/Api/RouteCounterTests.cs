@@ -75,11 +75,17 @@ public sealed class RouteCounterTests(HubFactory f)
     {
         await Enabled(false);
         var me = await (await f.As(TestData.Pm).GetAsync("/api/v1/me")).Json();
-        Assert.False(me["settings"]?["routeCounterEnabled"]?.GetValue<bool>() ?? false);
+        Assert.False(me["settings"]!.AsObject().ContainsKey("routeCounterEnabled"));
 
         await Enabled(true);
         try
         {
+            await (await f.As(TestData.Admin).Put("/api/v1/admin/settings/route_counter_enabled", new { value = false })).Json();
+            var disabled = await (await f.As(TestData.Pm).GetAsync("/api/v1/me")).Json();
+            Assert.False(disabled["settings"]!["routeCounterEnabled"]!.GetValue<bool>());
+            await (await f.As(TestData.Admin).Put("/api/v1/admin/settings/route_counter_enabled", new { value = true })).Json();
+            var enabled = await (await f.As(TestData.Pm).GetAsync("/api/v1/me")).Json();
+            Assert.True(enabled["settings"]!["routeCounterEnabled"]!.GetValue<bool>());
             var reports = await (await f.As(TestData.Admin).GetAsync("/api/v1/reports")).Json();
             Assert.Contains(reports.AsArray(), r => r!["code"]?.GetValue<string>() == "pilot-route-use");
             var report = await (await f.As(TestData.Admin).GetAsync("/api/v1/reports/pilot-route-use?weeks=1")).Json();

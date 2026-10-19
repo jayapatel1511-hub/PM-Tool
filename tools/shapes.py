@@ -12,6 +12,8 @@ def merge(documents):
     merged = {}
     for document in documents:
         for operation, paths in document.items():
+            # Route-group roots retain a slash in RawText; OpenAPI omits it.
+            operation = re.sub(r"^([A-Z]+ /\S*?)/ (\d{3})$", r"\1 \2", operation)
             dest = merged.setdefault(operation, {})
             for path, kinds in paths.items():
                 # Dictionary IDs vary per fixture; their values still carry the complete shape.

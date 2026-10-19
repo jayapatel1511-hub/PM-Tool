@@ -4105,7 +4105,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndObjectAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean"];
+                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndCurrentSettingsAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean"];
                     };
                 };
             };
@@ -14645,7 +14645,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PreviewResult"];
                     };
                 };
             };
@@ -16030,7 +16030,7 @@ export interface components {
             /** Format: double */
             weeklyCapacityHours: null | number;
         };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndObjectAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean: {
+        AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndCurrentSettingsAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean: {
             capabilities: components["schemas"]["AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint"];
             displayName: null | string;
             email: null | string;
@@ -16045,7 +16045,7 @@ export interface components {
             officeId: null | string;
             preferences: components["schemas"]["AnonymousTypeOfbooleanAndstringAndbooleanAndboolean"];
             roles: null | components["schemas"]["AnonymousTypeOfstringAndstring"][];
-            settings: unknown;
+            settings: components["schemas"]["CurrentSettings"];
             /** Format: uuid */
             supervisorId: null | string;
             systemRoles: null | string[];
@@ -16645,6 +16645,30 @@ export interface components {
         };
         CsvBody: {
             csv: string;
+        };
+        CurrentSettings: {
+            /** Format: int32 */
+            activityBurstMinutes?: null | number;
+            allowSelfReview: boolean;
+            /** Format: int32 */
+            chainDepthLimit: number;
+            /** Format: int32 */
+            coordinationLookaheadWeeks: number;
+            dateFormat: null | string;
+            /** Format: int32 */
+            defaultWeeklyCapacityHours: number;
+            /** Format: int32 */
+            idleTimeoutHours: number;
+            /** Format: int32 */
+            milestoneApproachingDays: number;
+            orgTimeZone: null | string;
+            restrictedProjectsEnabled: boolean;
+            routeCounterEnabled?: null | boolean;
+            /** Format: int32 */
+            taskDueSoonDays: number;
+            /** Format: date */
+            today: string;
+            workingDaysEnabled: boolean;
         };
         DateBound: {
             /** Format: date */
@@ -17718,6 +17742,59 @@ export interface components {
             officeId?: null | string;
             /** Format: date */
             startDate: null | string;
+        };
+        PreviewCounts: {
+            /** Format: int32 */
+            deliverables: number;
+            /** Format: int32 */
+            dependencies: number;
+            /** Format: int32 */
+            milestones: number;
+            /** Format: int32 */
+            roles?: null | number;
+            /** Format: int32 */
+            tasks: number;
+        };
+        PreviewMilestone: {
+            /** Format: date */
+            date: null | string;
+            /** Format: uuid */
+            id: string;
+            milestoneType: string;
+            name: string;
+            /** Format: int32 */
+            sortOrder: number;
+            source: string;
+        };
+        PreviewResult: {
+            counts: components["schemas"]["PreviewCounts"];
+            milestones: components["schemas"]["PreviewMilestone"][];
+            roles?: null | components["schemas"]["PreviewRole"][];
+            undated: components["schemas"]["PreviewUndated"];
+        };
+        PreviewRole: {
+            /** Format: uuid */
+            disciplineId: null | string;
+            disciplineName: null | string;
+            /** Format: date */
+            from: null | string;
+            /** Format: double */
+            hours: number;
+            /** Format: uuid */
+            id: string;
+            label: string;
+            note: null | string;
+            skipReason: null | string;
+            /** Format: date */
+            through: null | string;
+        };
+        PreviewUndated: {
+            /** Format: int32 */
+            deliverables: number;
+            /** Format: int32 */
+            milestones: number;
+            /** Format: int32 */
+            tasks: number;
         };
         ProjectCreateBody: {
             /** Format: uuid */

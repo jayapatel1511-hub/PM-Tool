@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -26,6 +27,14 @@ public static class TemplateEndpoints
         public TemplateRoleIn[]? Roles { get; init; }
     }
     public sealed record PreviewBody(DateOnly? StartDate, Dictionary<Guid, DateOnly?>? MilestoneDates, Guid[]? DisciplineIds, Guid? OfficeId = null);
+    public sealed record PreviewMilestone(Guid Id, string Name, string MilestoneType, int SortOrder, DateOnly? Date, string Source);
+    public sealed record PreviewCounts(int Milestones, int Deliverables, int Tasks, int Dependencies,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? Roles = null);
+    public sealed record PreviewUndated(int Milestones, int Deliverables, int Tasks);
+    public sealed record PreviewRole(Guid Id, string Label, Guid? DisciplineId, string? DisciplineName, DateOnly? From, DateOnly? Through,
+        decimal Hours, string? Note, string? SkipReason);
+    public sealed record PreviewResult(IEnumerable<PreviewMilestone> Milestones, PreviewCounts Counts, PreviewUndated Undated,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<PreviewRole>? Roles = null);
     public sealed record PackBody(Guid TemplateId, Guid DisciplineId, Guid? LeadUserId, Dictionary<Guid, Guid?>? Mapping);
     public sealed record VersionBody(int? RowVersion);
     public sealed record BasisSuggestionBody(Guid TemplateDisciplineId, string Kind, string Title, string Scope, string Statement,
@@ -85,14 +94,14 @@ public static class TemplateEndpoints
                 plan.Milestones.ToDictionary(m => m.Id, m => m.Date), included.Select(d => d.Id).ToHashSet(), await Calendar(db, store, t, body.OfficeId) is null ? "CalendarDays" : "WorkingDays", new WorkCalendar(holidays));
             var disciplineNames = await db.Disciplines.AsNoTracking().ToDictionaryAsync(d => d.Id, d => d.Name);
             var names = parts.Milestones.ToDictionary(m => m.Id);
-            var result = new
-            {
-                Milestones = plan.Milestones.Select(m => new { m.Id, names[m.Id].Name, names[m.Id].MilestoneType, names[m.Id].SortOrder, m.Date, m.Source }),
-                Roles = rolePlan.Select(r => new { r.Id, r.Label, r.DisciplineId, DisciplineName = r.DisciplineId is { } rd ? disciplineNames.GetValueOrDefault(parts.Disciplines.Single(d => d.Id == rd).DisciplineId) : null, r.From, r.Through, r.Hours, r.Note, r.SkipReason }),
-                Counts = new { Milestones = plan.Milestones.Count, Deliverables = plan.Deliverables.Count, Tasks = plan.Tasks.Count, Dependencies = plan.Dependencies.Count, Roles = rolePlan.Count },
-                Undated = new { Milestones = plan.UndatedMilestones, Deliverables = plan.UndatedDeliverables, Tasks = plan.UndatedTasks },
-            };
-            return await RolesEnabled(db) ? result : WithoutRoles(result);
+            var result = new PreviewResult(
+                plan.Milestones.Select(m => new PreviewMilestone(m.Id, names[m.Id].Name, names[m.Id].MilestoneType, names[m.Id].SortOrder, m.Date, m.Source)),
+                new PreviewCounts(plan.Milestones.Count, plan.Deliverables.Count, plan.Tasks.Count, plan.Dependencies.Count, rolePlan.Count),
+                new PreviewUndated(plan.UndatedMilestones, plan.UndatedDeliverables, plan.UndatedTasks),
+                rolePlan.Select(r => new PreviewRole(r.Id, r.Label, r.DisciplineId,
+                    r.DisciplineId is { } rd ? disciplineNames.GetValueOrDefault(parts.Disciplines.Single(d => d.Id == rd).DisciplineId) : null,
+                    r.From, r.Through, r.Hours, r.Note, r.SkipReason)).ToArray());
+            return await RolesEnabled(db) ? result : WithoutPreviewRoles(result);
         });
 
         api.MapGet("/projects/{id:guid}/template-packs", PackProposal);
@@ -140,10 +149,12 @@ public static class TemplateEndpoints
 
     static async Task<bool> RolesEnabled(HubDb db) => await db.Settings.AsNoTracking().AnyAsync(s => s.Key == "flag.template_roles" && s.Value == "true");
 
+    static PreviewResult WithoutPreviewRoles(PreviewResult result) => result with { Counts = result.Counts with { Roles = null }, Roles = null };
+
     static object WithoutRoles(object result)
     {
         var json = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject(); json.Remove("roles");
-        if (json["counts"] is System.Text.Json.Nodes.JsonObject counts) counts.Remove("roles");
+        if (json["counts"] is JsonObject counts) counts.Remove("roles");
         return json;
     }
 

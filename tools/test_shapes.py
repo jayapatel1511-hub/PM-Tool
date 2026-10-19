@@ -24,6 +24,15 @@ class ShapeTests(unittest.TestCase):
         self.assertEqual(['GET /x 200'], typed)
         self.assertNotIn(typed[0], merge([{}]))
 
+    def test_group_root_slash_matches_openapi_without_hiding_shape_drift(self):
+        before = {'GET /api/v1/organisation 200': {'$': ['object'], '$.name': ['string']}}
+        recorded = {'GET /api/v1/organisation/ 200': {'$': ['object'], '$.name': ['string']}}
+        self.assertEqual(before, merge([recorded]))
+        self.assertTrue(differences(before, merge([{'GET /api/v1/organisation/ 200': {'$': ['object']}}])))
+        self.assertTrue(differences(before, merge([{'GET /api/v1/organisation/ 200': {'$': ['object'], '$.name': ['number']}}])))
+        self.assertIn('GET / 200', merge([{'GET / 200': {'$': ['object']}}]))
+        self.assertIn('POST /api/v1/organisation 403', merge([{'POST /api/v1/organisation/ 403': {'$': ['object']}}]))
+
     def test_previous_run_cannot_mask_a_removed_field(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

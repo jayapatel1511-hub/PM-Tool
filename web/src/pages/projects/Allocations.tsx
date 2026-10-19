@@ -19,11 +19,12 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
 import { Textarea } from '@/components/ui/textarea'
 import { useReference } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
-import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
+import { ApiError, get, post, qs, typedRequest } from '@/lib/api'
 import { useOffer, type Offer } from '@/lib/auth'
 import { fmtDate, hours, today } from '@/lib/format'
 import { runtimeText, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
+import { invalidateChange } from '@/lib/keys'
 import { CommandForm, SelectField, type CoordOptions, WorkLink } from './CoordinationForms'
 import { useCurrentProject } from './ProjectLayout'
 
@@ -143,10 +144,10 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
     {adding && options.data && <Proposal base={base} options={options.data} complete={complete} close={() => setAdding(false)} done={id => { setAdding(false); refresh(); open(id) }} />}
     {filling && options.data && <Proposal base={base} options={options.data} complete={complete} fill={filling} close={() => setFilling(null)} done={id => { setFilling(null); refresh(); open(id) }} />}
     {roleForm && <RoleDialog projectId={project.id} disciplines={project.disciplines} role={roleForm === 'new' ? undefined : roleForm} complete={complete}
-      onClose={() => setRoleForm(null)} onDone={() => { setRoleForm(null); refresh() }} />}
+      onClose={() => setRoleForm(null)} onDone={() => { setRoleForm(null); invalidateChange(qc, 'OpenRole', project.id) }} />}
     {cancelling && <ConfirmDialog open onOpenChange={o => !o && setCancelling(null)} title={t('openRole.cancelTitle', { role: cancelling.roleLabel })} destructive
       body={t('openRole.cancelBody')} confirmLabel={t('openRole.cancel')} reason={complete ? true : 'optional'}
-      onConfirm={async reason => { await post(`open-roles/${cancelling.id}/cancel`, { rowVersion: cancelling.rowVersion, reason: reason || null }); toast.success(t('common.saved')); setCancelling(null); refresh() }} />}
+      onConfirm={async reason => { await typedRequest('post', '/api/v1/open-roles/{id}/cancel', { params: { id: cancelling.id }, body: { rowVersion: cancelling.rowVersion, reason: reason || null } }); toast.success(t('common.saved')); setCancelling(null); invalidateChange(qc, 'OpenRole', project.id) }} />}
     {selected && <AllocationDetail base={base} id={selected} projectNumber={project.projectNumber} options={options.data}
       close={() => open(null)} refresh={refresh} />}
   </Page>
@@ -408,7 +409,7 @@ function RoleDialog({ projectId, disciplines, role, complete, onClose, onDone }:
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setErr(null); setBusy(true)
     const body = { roleLabel: f.roleLabel, projectDisciplineId: f.projectDisciplineId || null, fromDate: f.fromDate, throughDate: f.throughDate, plannedHours: Number(f.plannedHours), note: f.note || null, ...(complete ? { reason: f.reason } : {}) }
-    try { await (role ? patch(`open-roles/${role.id}`, body, role.rowVersion) : post(`projects/${projectId}/open-roles`, body)); toast.success(t('common.saved')); onDone() }
+    try { await (role ? typedRequest('patch', '/api/v1/open-roles/{id}', { params: { id: role.id }, body, ifMatch: role.rowVersion }) : typedRequest('post', '/api/v1/projects/{projectId}/open-roles', { params: { projectId }, body })); toast.success(t('common.saved')); onDone() }
     catch (x) { setErr(x as ApiError) } finally { setBusy(false) }
   }
   return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">

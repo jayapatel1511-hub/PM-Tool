@@ -11,7 +11,7 @@ public sealed class CapacityReportsTests(HubFactory f)
     readonly TestData d = new(f);
     async Task Flag(bool on) => (await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.capacity_reports", new { value = on })).EnsureSuccessStatusCode();
 
-    [Fact] // AC-PRO-04, AC-PRO-05, AC-PRO-07, AC-PRO-23
+    [Fact, Trait("flag-off", "capacity_reports"), Trait("flag-on", "capacity_reports")] // AC-PRO-04, AC-PRO-05, AC-PRO-07, AC-PRO-23
     public async Task Team_capacity_reuses_twelve_week_planner_scope_drafts_and_exports()
     {
         await Flag(false);
@@ -43,7 +43,7 @@ public sealed class CapacityReportsTests(HubFactory f)
         } finally { await Flag(false); }
     }
 
-    [Fact] // AC-PRO-06
+    [Fact, Trait("flag-on", "capacity_reports")] // AC-PRO-06
     public async Task Source_hours_apply_approved_coverage_and_unlinked_list_filters()
     {
         var person = (await (await f.As($"synthetic-source-{Guid.NewGuid():N}@hub.test").GetAsync("/api/v1/me")).Json()).G("id");
@@ -69,7 +69,7 @@ public sealed class CapacityReportsTests(HubFactory f)
             Assert.Contains("withoutProject=true", unlinked.S("listLink"));
         } finally { await Flag(false); }
     }
-    [Fact] // AC-PRO-07: the filtered list carries the actual report horizon and Monday, including defaults.
+    [Fact, Trait("flag-on", "capacity_reports")] // AC-PRO-07: the filtered list carries the actual report horizon and Monday, including defaults.
     public async Task Source_report_list_link_preserves_supervisor_default_horizon_and_normalized_week()
     {
         var admin = f.As(TestData.Admin); var sam = d.User(TestData.Sam); var lena = d.User(TestData.Lena); var week = new DateOnly(2026, 9, 14);

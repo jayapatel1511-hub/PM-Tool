@@ -52,12 +52,11 @@ public static class OrgStructureEndpoints
             return await people.Where(u => chosen.Contains(u.Id)).Select(u => new { u.Id, u.UnitId }).ToListAsync();
         });
 
-        var admin = api.MapGroup("/admin/organisation").RequireFlag("org_structure").AddEndpointFilter<OrgWriteFilter>()
-            .AddEndpointFilter(async (ctx, next) =>
+        var admin = api.MapGroup("/admin/organisation").AddEndpointFilter(async (ctx, next) =>
             {
                 Access.Demand(Permissions.Administer(ctx.HttpContext.RequestServices.GetRequiredService<CurrentUser>().Actor));
                 return await next(ctx);
-            });
+            }).RequireFlag("org_structure").AddEndpointFilter<OrgWriteFilter>();
         admin.MapGet("/levels", async (HubDb db) => await db.Set<OrgLevel>().OrderBy(x => x.SortOrder).ToListAsync());
         admin.MapPost("/levels/order", async (LevelOrderBody body, HubDb db) =>
         {

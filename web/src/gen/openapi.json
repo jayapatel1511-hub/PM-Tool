@@ -463,6 +463,44 @@
         ],
         "type": "object"
       },
+      "AnonymousTypeOfDateOnlyAndstringAnddecimalAnddecimalAndboolean": {
+        "properties": {
+          "band": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "capacity": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "week": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "week",
+          "band",
+          "hours",
+          "capacity",
+          "partial"
+        ],
+        "type": "object"
+      },
       "AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint": {
         "properties": {
           "asOf": {
@@ -16031,6 +16069,35 @@
         },
         "tags": [
           "TaskPickupEndpoints"
+        ]
+      }
+    },
+    "/api/v1/pickup-offers/my-load": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "week",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnonymousTypeOfDateOnlyAndstringAnddecimalAnddecimalAndboolean"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Hub.Api"
         ]
       }
     },

@@ -13,7 +13,7 @@ public sealed class RouteCounterTests(HubFactory f)
         await f.As(TestData.Admin).Put("/api/v1/admin/settings/route_counter_enabled", new { value = on }).Result.Json();
     }
 
-    [Fact] // AC-PRO-09, AC-PRO-23
+    [Fact, Trait("flag-off", "route_counter")] // AC-PRO-09, AC-PRO-23
     public async Task Both_gates_off_store_nothing()
     {
         await Enabled(false);
@@ -22,7 +22,7 @@ public sealed class RouteCounterTests(HubFactory f)
         Assert.Equal(before, await f.DbAsync(db => db.RouteCounts.SumAsync(r => r.Opens)));
     }
 
-    [Fact] // AC-PRO-08
+    [Fact, Trait("flag-on", "route_counter")] // AC-PRO-08
     public async Task Raw_urls_queries_and_numeric_routes_are_dropped()
     {
         await Enabled(true);
@@ -36,7 +36,7 @@ public sealed class RouteCounterTests(HubFactory f)
         finally { await Enabled(false); }
     }
 
-    [Fact] // AC-PRO-08
+    [Fact, Trait("flag-on", "route_counter")] // AC-PRO-08
     public async Task Each_band_aggregates_by_day_and_route_without_identity_columns()
     {
         await Enabled(true);
@@ -53,7 +53,7 @@ public sealed class RouteCounterTests(HubFactory f)
         finally { await Enabled(false); }
     }
 
-    [Fact] // AC-PRO-08
+    [Fact, Trait("flag-on", "route_counter")] // AC-PRO-08
     public async Task Concurrent_opens_upsert_without_lost_counts()
     {
         await Enabled(true);
@@ -70,7 +70,7 @@ public sealed class RouteCounterTests(HubFactory f)
         finally { await Enabled(false); }
     }
 
-    [Fact] // AC-PRO-08, AC-PRO-09, AC-PRO-23
+    [Fact, Trait("flag-off", "route_counter"), Trait("flag-on", "route_counter")] // AC-PRO-08, AC-PRO-09, AC-PRO-23
     public async Task Flag_off_hides_route_counter_setting_and_pilot_route_report_has_no_day_column()
     {
         await Enabled(false);
@@ -88,7 +88,7 @@ public sealed class RouteCounterTests(HubFactory f)
         }
         finally { await Enabled(false); }
     }
-    [Fact] // AC-PRO-08: the aggregate endpoint has its own bounded request budget.
+    [Fact, Trait("flag-on", "route_counter")] // AC-PRO-08: the aggregate endpoint has its own bounded request budget.
     public async Task Route_counter_rate_limit_rejects_the_121st_request()
     {
         using var separate = new HubFactory(); var admin = separate.As(TestData.Admin); var client = separate.As(TestData.Pm);

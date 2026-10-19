@@ -25,14 +25,14 @@ public static class RouteCounterEndpoints
             var under500 = band == "under-500" ? 1 : 0; var from500 = band == "500-999" ? 1 : 0;
             var from1000 = band == "1000-1999" ? 1 : 0; var from2000 = band == "2000-4999" ? 1 : 0; var over5000 = band == "5000+" ? 1 : 0;
             await db.Database.ExecuteSqlInterpolatedAsync($@"INSERT INTO hub.route_count
-                (id, day, route_key, opens, under500_ms, from500_to999_ms, from1000_to1999_ms, from2000_to4999_ms, over5000_ms)
+                (id, day, route_key, opens, under500ms, from500to999ms, from1000to1999ms, from2000to4999ms, over5000ms)
                 VALUES ({Guid.NewGuid()}, {day}, {route}, 1, {under500}, {from500}, {from1000}, {from2000}, {over5000})
                 ON CONFLICT (day, route_key) DO UPDATE SET opens = route_count.opens + 1,
-                    under500_ms = route_count.under500_ms + EXCLUDED.under500_ms,
-                    from500_to999_ms = route_count.from500_to999_ms + EXCLUDED.from500_to999_ms,
-                    from1000_to1999_ms = route_count.from1000_to1999_ms + EXCLUDED.from1000_to1999_ms,
-                    from2000_to4999_ms = route_count.from2000_to4999_ms + EXCLUDED.from2000_to4999_ms,
-                    over5000_ms = route_count.over5000_ms + EXCLUDED.over5000_ms");
+                    under500ms = route_count.under500ms + EXCLUDED.under500ms,
+                    from500to999ms = route_count.from500to999ms + EXCLUDED.from500to999ms,
+                    from1000to1999ms = route_count.from1000to1999ms + EXCLUDED.from1000to1999ms,
+                    from2000to4999ms = route_count.from2000to4999ms + EXCLUDED.from2000to4999ms,
+                    over5000ms = route_count.over5000ms + EXCLUDED.over5000ms");
             return Results.NoContent();
         }).RequireRateLimiting("route-counter");
     }

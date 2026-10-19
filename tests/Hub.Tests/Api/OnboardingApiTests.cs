@@ -8,7 +8,7 @@ public sealed class OnboardingApiTests(HubFactory f)
 {
     async Task Flag(bool on) => await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.onboarding_card", new { value = on }).Result.Json();
 
-    [Fact] // AC-PRO-02, AC-PRO-03, AC-PRO-23
+    [Fact, Trait("flag-off", "onboarding_card"), Trait("flag-on", "onboarding_card")] // AC-PRO-02, AC-PRO-03, AC-PRO-23
     public async Task Read_is_flag_gated_and_hide_show_persists_without_activity()
     {
         await Flag(false);
@@ -29,7 +29,7 @@ public sealed class OnboardingApiTests(HubFactory f)
         finally { await Flag(false); }
     }
 
-    [Fact] // AC-PRO-02
+    [Fact, Trait("flag-on", "onboarding_card")] // AC-PRO-02
     public async Task Read_only_gets_no_steps()
     {
         await Flag(true);

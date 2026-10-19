@@ -5498,6 +5498,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/pickup-offers/my-load": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    week?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AnonymousTypeOfDateOnlyAndstringAnddecimalAnddecimalAndboolean"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/planning/availability": {
         parameters: {
             query?: never;
@@ -15739,6 +15776,16 @@ export interface components {
             date: string;
             /** Format: double */
             hours: number;
+        };
+        AnonymousTypeOfDateOnlyAndstringAnddecimalAnddecimalAndboolean: {
+            band: null | string;
+            /** Format: double */
+            capacity: number;
+            /** Format: double */
+            hours: null | number;
+            partial: boolean;
+            /** Format: date */
+            week: string;
         };
         AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint: {
             /** Format: date-time */

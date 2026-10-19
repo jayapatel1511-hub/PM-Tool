@@ -58,6 +58,11 @@ public sealed class AdminSweepTests(HubFactory f)
         Assert.Contains(routes, r => r.Method == "POST" && r.Url.StartsWith("/api/v1/admin/evaluate/")); // mapped outside the Admin group
         Assert.True(routes.Count > 10, $"Expected the Admin route list, found {routes.Count}");
 
+        var admin = f.As(TestData.Admin);
+        foreach (var flag in new[] { "verifiable_log", "org_structure" })
+            (await admin.Put($"/api/v1/admin/settings/flag.{flag}", new { value = false })).EnsureSuccessStatusCode();
+        foreach (var route in new[] { "audit-chains", "organisation/units" })
+            Assert.Equal(HttpStatusCode.NotFound, (await admin.GetAsync($"/api/v1/admin/{route}")).StatusCode);
         var before = await f.DbAsync(db => db.ActivityLog.CountAsync());
         var wrong = new List<string>();
         foreach (var who in new[] { TestData.Alex, TestData.Pm })

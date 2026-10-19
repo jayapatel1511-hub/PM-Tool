@@ -169,7 +169,7 @@ public sealed class WorkloadApiTests(HubFactory f)
         Assert.Equal(before, cancelled["people"]!.ToJsonString());
     }
 
-    [Fact] // AC-PRO-13, AC-PRO-23
+    [Fact, Trait("flag-on", "unfilled_beside_capacity")] // AC-PRO-13, AC-PRO-23
     public async Task Unassigned_tasks_are_dark_and_the_scoped_show_all_count_matches()
     {
         var project = await d.Project(); var other = await d.Project();

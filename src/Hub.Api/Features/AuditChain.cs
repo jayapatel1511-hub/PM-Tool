@@ -14,11 +14,11 @@ public static class AuditChainEndpoints
 {
     public static void Map(RouteGroupBuilder api)
     {
-        var admin = api.MapGroup("/admin/audit-chains").RequireFlag("verifiable_log").AddEndpointFilter(async (ctx, next) =>
+        var admin = api.MapGroup("/admin/audit-chains").AddEndpointFilter(async (ctx, next) =>
         {
             Access.Demand(Permissions.Administer(ctx.HttpContext.RequestServices.GetRequiredService<CurrentUser>().Actor));
             return await next(ctx);
-        });
+        }).RequireFlag("verifiable_log");
         admin.MapGet("", async (HubDb db) => await db.Set<ActivityChainHead>().AsNoTracking().OrderBy(h => h.ChainId).ToListAsync());
         admin.MapGet("/{id:guid}/verify", async (Guid id, long? from, long? headSeq, string? headHash, HubDb db, TimeProvider clock) =>
             await AuditChainVerification.Check(db, id, from ?? 1, clock.GetUtcNow(), db.Audit.ActorId?.ToString() ?? "System", true, headHash, headSeq));

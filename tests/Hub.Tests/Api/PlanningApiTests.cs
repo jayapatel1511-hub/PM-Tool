@@ -28,7 +28,7 @@ public sealed class PlanningApiTests(HubFactory f)
             label, sourceCategory = PlanningSource.Proposal, confidence = PlanningConfidence.Expected,
         })).Json(201);
 
-    [Fact]
+    [Fact, Trait("flag-off", "capacity_polish"), Trait("flag-on", "capacity_polish")]
     public async Task Capacity_polish_contexts_reconcile_project_plans_and_task_estimates_without_changing_capacity() // packet 047 AC-PRO-20
     {
         var person = await FreshReport();
@@ -277,7 +277,7 @@ public sealed class PlanningApiTests(HubFactory f)
 
     async Task KeptRowsFlag(bool on) => await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.planner_kept_rows", new { value = on }).Result.Json();
 
-    [Fact]
+    [Fact, Trait("flag-off", "unfilled_beside_capacity"), Trait("flag-on", "unfilled_beside_capacity")]
     public async Task Projects_grid_open_roles_are_opt_in_and_do_not_change_people_or_exports() // packet 047 AC-PRO-12
     {
         var project = await d.Project();

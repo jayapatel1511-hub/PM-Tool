@@ -13,7 +13,7 @@ public sealed class ProjectImportTests(HubFactory f)
 {
     async Task Flag(bool on) => await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.project_import", new { value = on }).Result.Json();
 
-    [Fact] // AC-PRO-18, AC-PRO-19, AC-PRO-23
+    [Fact, Trait("flag-off", "project_import"), Trait("flag-on", "project_import")] // AC-PRO-18, AC-PRO-19, AC-PRO-23
     public async Task Preview_classifies_create_exists_and_error_and_non_admin_is_refused()
     {
         var d = new TestData(f);
@@ -22,6 +22,11 @@ public sealed class ProjectImportTests(HubFactory f)
         var clientName = await f.DbAsync(db => db.Clients.Where(x => x.Id == client).Select(x => x.Name).SingleAsync());
         var officeName = await f.DbAsync(db => db.Offices.Where(x => x.Id == office).Select(x => x.Name).SingleAsync());
         var csv = $"project number,name,client,office,project manager email\n{existing.ProjectNumber},Existing,{clientName},{officeName},{TestData.Pm}\nP-IMPORT-1,New,{clientName},{officeName},{TestData.Pm}\nP-IMPORT-2,Bad,Unknown,{officeName},{TestData.Pm}";
+        await Flag(false);
+        var unchanged = await f.DbAsync(db => db.Projects.CountAsync());
+        foreach (var route in new[] { "import-preview", "import" })
+            Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Admin).Post($"/api/v1/projects/{route}", new { csv })).StatusCode);
+        Assert.Equal(unchanged, await f.DbAsync(db => db.Projects.CountAsync()));
         await Flag(true);
         try
         {
@@ -34,7 +39,7 @@ public sealed class ProjectImportTests(HubFactory f)
         finally { await Flag(false); }
     }
 
-    [Fact] // AC-PRO-18, AC-PRO-19, AC-PRO-23
+    [Fact, Trait("flag-on", "project_import")] // AC-PRO-18, AC-PRO-19, AC-PRO-23
     public async Task Errors_refuse_commit_without_writes_and_corrected_commit_creates_setup_project_and_audit()
     {
         var d = new TestData(f); var client = await d.Client(); var office = await d.Office();
@@ -62,7 +67,7 @@ public sealed class ProjectImportTests(HubFactory f)
         finally { await Flag(false); }
     }
 
-    [Fact] // AC-PRO-18, AC-PRO-19, AC-PRO-23
+    [Fact, Trait("flag-on", "project_import")] // AC-PRO-18, AC-PRO-19, AC-PRO-23
     public async Task Corrected_commit_replays_idempotency_key_and_does_not_duplicate()
     {
         var d = new TestData(f); var client = await d.Client(); var office = await d.Office();
@@ -89,7 +94,7 @@ public sealed class ProjectImportTests(HubFactory f)
         finally { await Flag(false); }
     }
 
-    [Fact] // AC-PRO-18, AC-PRO-19, AC-PRO-23
+    [Fact, Trait("flag-on", "project_import")] // AC-PRO-18, AC-PRO-19, AC-PRO-23
     public async Task Oversized_and_duplicate_rows_are_rejected_or_classified_as_errors()
     {
         var d = new TestData(f); var client = await d.Client(); var office = await d.Office();

@@ -44,7 +44,8 @@ public sealed class ReviewChangeTests(HubFactory f)
         {
             var options = await Get(who, Root(s) + "/changes/options");
             var managed = options["manageDisciplineIds"]!.AsArray().Select(x => x!.GetValue<Guid>()).ToHashSet();
-            Assert.Equal(managed.Count > 0, options["canCreate"]!["changes"]!.GetValue<bool>());
+            // Alex owns the source deliverable; publishing is also offered to its owner.
+            Assert.Equal(managed.Count > 0 || who == TestData.Alex, options["canCreate"]!["changes"]!.GetValue<bool>());
             Assert.Equal(managed.Count > 0, options["canCreate"]!["reviews"]!.GetValue<bool>());
 
             var deliverable = options["deliverables"]!.AsArray().Single(x => x!["id"]!.GetValue<Guid>() == s.Deliverable);

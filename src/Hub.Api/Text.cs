@@ -8,7 +8,9 @@ public static class Text
 {
     static readonly Dictionary<string, string> En = new()
     {
-        ["date_context.unavailable"] = "Not available on that date",
+        ["common.no"] = "No",
+        ["common.yes"] = "Yes",
+        ["date_context.unavailable"] = "not available on that date",
         ["col.sinceBaseline"] = "Days since re-baseline",
         ["capacityReport.capacity"] = "Capacity",
         ["capacityReport.timeAway"] = "Time away",

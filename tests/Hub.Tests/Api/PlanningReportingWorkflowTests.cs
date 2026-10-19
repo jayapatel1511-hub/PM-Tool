@@ -11,11 +11,12 @@ public sealed class PlanningReportingWorkflowTests(HubFactory f)
     readonly TestData d = new(f);
     async Task Flag(string name, bool on) => (await f.As(TestData.Admin).Put($"/api/v1/admin/settings/flag.{name}", new { value = on })).EnsureSuccessStatusCode();
 
-    [Fact] // AC-PRO-14, AC-PRO-15, AC-PRO-23
+    [Fact, Trait("flag-off", "project_status_note"), Trait("flag-on", "project_status_note")] // AC-PRO-14, AC-PRO-15, AC-PRO-23
     public async Task Project_note_is_versioned_audited_permission_checked_and_never_changes_health()
     {
         var project = await d.Project(); var pm = f.As(TestData.Pm); var path = $"/api/v1/projects/{project.Id}";
-        var before = await (await pm.GetAsync(path)).Json(); Assert.Null(before["statusNote"]);
+        await Flag("project_status_note", false);
+        var before = await (await pm.GetAsync(path)).Json(); Assert.False(before.AsObject().ContainsKey("statusNote"));
         await Flag("project_status_note", true);
         try {
             (await pm.Patch(path, new { statusNote = new string('n', 500) }, before.I("rowVersion"))).EnsureSuccessStatusCode();
@@ -36,7 +37,7 @@ public sealed class PlanningReportingWorkflowTests(HubFactory f)
         } finally { await Flag("project_status_note", false); }
     }
 
-    [Fact] // AC-PRO-21, AC-PRO-23
+    [Fact, Trait("flag-on", "capacity_polish")] // AC-PRO-21, AC-PRO-23
     public async Task Weekday_schedule_has_twenty_hours_and_rejects_leave_above_wednesday_hours()
     {
         var email = $"synthetic-weekday-{Guid.NewGuid():N}@hub.test";
@@ -54,7 +55,7 @@ public sealed class PlanningReportingWorkflowTests(HubFactory f)
         } finally { await Flag("capacity_polish", false); }
     }
 
-    [Fact] // AC-PRO-21, AC-PRO-23: preserve the existing schedule CHECK and legacy zero-hour working days.
+    [Fact, Trait("flag-on", "capacity_polish")] // AC-PRO-21, AC-PRO-23: preserve the existing schedule CHECK and legacy zero-hour working days.
     public async Task Zero_weekday_vector_keeps_legacy_days_valid_and_legacy_zero_schedule_still_uses_its_calendar()
     {
         var person = (await (await f.As($"synthetic-zero-{Guid.NewGuid():N}@hub.test").GetAsync("/api/v1/me")).Json()).G("id");
@@ -76,11 +77,14 @@ public sealed class PlanningReportingWorkflowTests(HubFactory f)
         finally { await Flag("capacity_polish", false); }
     }
 
-    [Fact] // AC-PRO-16, AC-PRO-17, AC-PRO-23
+    [Fact, Trait("flag-off", "my_work_follow_up"), Trait("flag-on", "my_work_follow_up")] // AC-PRO-16, AC-PRO-17, AC-PRO-23
     public async Task Follow_up_views_track_own_open_watches_and_requested_records_without_writes()
     {
         var project = await d.Project(); var task = await d.NewTask(project.Id, TestData.Pm); var me = d.User(TestData.Pm); var pm = f.As(TestData.Pm);
         (await pm.Post($"/api/v1/items/Task/{task.G("id")}/watchers", new { userId = me })).EnsureSuccessStatusCode();
+        await Flag("my_work_follow_up", false);
+        foreach (var route in new[] { "watching", "requested" })
+            Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"/api/v1/me/work/{route}")).StatusCode);
         await Flag("my_work_follow_up", true);
         try {
             var before = await f.DbAsync(db => db.ActivityLog.CountAsync());

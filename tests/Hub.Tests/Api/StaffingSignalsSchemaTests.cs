@@ -178,7 +178,8 @@ public sealed class StaffingSignalsSchemaTests(HubFactory f)
         Assert.Equal(rows, await Counts());
         await isolated.DbAsync(async db =>
         {
-            var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == project.Id).ToDictionaryAsync(t => t.Id);
+            var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == project.Id)
+                .Select(t => new { t.Id, t.StartedAt, t.StatusChangedAt, t.CreatedAt }).ToDictionaryAsync(t => t.Id);
             Assert.Equal(t1, tasks[logged].StartedAt);           // the first change away from Not Started, not the later restart
             Assert.Equal(t1.AddDays(2), tasks[logged].StatusChangedAt);
             Assert.Equal(new DateTimeOffset(2026, 9, 10, 8, 0, 0, TimeSpan.Zero), tasks[fallback].StartedAt);
@@ -187,11 +188,12 @@ public sealed class StaffingSignalsSchemaTests(HubFactory f)
             Assert.Null(tasks[untouched].StartedAt);
             Assert.Null(tasks[held].StartedAt);                  // On Hold is not a start (AC-DEPT-02)
             Assert.Equal(t1.AddDays(2), tasks[heldThenStarted].StartedAt);
-            var dls = await db.Deliverables.AsNoTracking().Where(x => x.ProjectId == project.Id).ToDictionaryAsync(x => x.Id);
+            var dls = await db.Deliverables.AsNoTracking().Where(x => x.ProjectId == project.Id)
+                .Select(x => new { x.Id, x.StartedAt }).ToDictionaryAsync(x => x.Id);
             Assert.Equal(t1, dls[started].StartedAt);
             Assert.Null(dls[notStarted].StartedAt);
-            Assert.Equal(DependencyTypes.FinishToStart, (await db.Dependencies.AsNoTracking().SingleAsync(x => x.Id == taskLink.Id)).DependencyType);
-            Assert.Equal(DependencyTypes.FinishToStart, (await db.DeliverableDependencies.AsNoTracking().SingleAsync(x => x.Id == deliverableLink.Id)).DependencyType);
+            Assert.Equal(DependencyTypes.FinishToStart, await db.Dependencies.AsNoTracking().Where(x => x.Id == taskLink.Id).Select(x => x.DependencyType).SingleAsync());
+            Assert.Equal(DependencyTypes.FinishToStart, await db.DeliverableDependencies.AsNoTracking().Where(x => x.Id == deliverableLink.Id).Select(x => x.DependencyType).SingleAsync());
             Assert.False(await db.Dependencies.IgnoreQueryFilters().AnyAsync(x => x.DependencyType != DependencyTypes.FinishToStart));
             Assert.False(await db.DeliverableDependencies.IgnoreQueryFilters().AnyAsync(x => x.DependencyType != DependencyTypes.FinishToStart));
             return 0;

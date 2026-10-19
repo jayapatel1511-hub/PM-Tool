@@ -25,7 +25,7 @@ public sealed class DesignBasisApiTests(HubFactory f)
         {
             var detail = await Get(who, $"/api/v1/projects/{project.Id}");
             var allowed = detail["permissions"]!["createBasisIn"]!.AsArray().Select(x => x!.GetValue<Guid>()).ToHashSet();
-            var owner = data.User(who);
+            var owner = data.User(who == TestData.Admin ? TestData.Pm : who);
             foreach (var discipline in disciplines)
             {
                 var body = new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Assumption,

@@ -21,11 +21,21 @@ public sealed class FlagsApiTests(HubFactory f)
     [Fact]
     public async Task Admin_settings_list_is_unchanged()
     {
-        var rows = (await f.As(TestData.Admin).GetAsync("/api/v1/admin/settings").Result.Json()).AsArray();
-        Assert.Equal(OrgSettings.Defs.Select(d => d.Key), rows.Select(r => r!.S("key")));
-        Assert.All(rows.Where(r => r!.S("group") != "flags"), r => Assert.Equal(["key", "kind", "group", "default", "value"], r!.AsObject().Select(p => p.Key)));
-        Assert.Equal(Flags.All.Select(x => $"flag.{x.Name}"), rows.Where(r => r!.S("group") == "flags").Select(r => r!.S("key")));
-        Assert.All(rows.Where(r => r!.S("group") == "flags"), r => Assert.Equal(Flags.Find(r!.S("key"))!.Packet, r!.S("packet")));
+        var admin = f.As(TestData.Admin);
+        try
+        {
+            foreach (var enabled in new[] { false, true })
+            {
+                (await admin.Put("/api/v1/admin/settings/flag.route_counter", new { value = enabled })).EnsureSuccessStatusCode();
+                var rows = (await admin.GetAsync("/api/v1/admin/settings").Result.Json()).AsArray();
+                Assert.Equal(OrgSettings.Defs.Where(d => enabled || d.Key != "route_counter_enabled").Select(d => d.Key), rows.Select(r => r!.S("key")));
+                Assert.Equal(enabled, rows.Any(r => r!.S("key") == "route_counter_enabled"));
+                Assert.All(rows.Where(r => r!.S("group") != "flags"), r => Assert.Equal(["key", "kind", "group", "default", "value"], r!.AsObject().Select(p => p.Key)));
+                Assert.Equal(Flags.All.Select(x => $"flag.{x.Name}"), rows.Where(r => r!.S("group") == "flags").Select(r => r!.S("key")));
+                Assert.All(rows.Where(r => r!.S("group") == "flags"), r => Assert.Equal(Flags.Find(r!.S("key"))!.Packet, r!.S("packet")));
+            }
+        }
+        finally { (await admin.Put("/api/v1/admin/settings/flag.route_counter", new { value = false })).EnsureSuccessStatusCode(); }
     }
     // Row actions are client-only; browser flag pairs cover rendering, this covers their authenticated setting bridge.
     [Fact, Trait("flag-off", "row_quick_actions"), Trait("flag-on", "row_quick_actions")]

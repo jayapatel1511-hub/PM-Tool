@@ -42,7 +42,7 @@ public sealed class TemplatesTests(HubFactory f)
         return (res, number);
     }
 
-    [Fact] // AC-PRO-10, AC-PRO-11, AC-PRO-23
+    [Fact, Trait("flag-off", "template_roles"), Trait("flag-on", "template_roles")] // AC-PRO-10, AC-PRO-11, AC-PRO-23
     public async Task Template_roles_preview_copy_preserve_and_instantiate_only_for_whole_projects_when_enabled()
     {
         var admin = f.As(TestData.Admin); var civil = await d.Discipline("Civil");

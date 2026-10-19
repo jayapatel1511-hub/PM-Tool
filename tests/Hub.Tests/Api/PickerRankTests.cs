@@ -75,7 +75,9 @@ public sealed class PickerRankTests(HubFactory f)
             Assert.True(JsonNode.DeepEquals(before, ignored)); Assert.Equal(new[] { named.Id }, Ordered(before));
             Assert.Equal(new[] { "displayName", "email", "homeDisciplineId", "id", "isActive", "jobTitle", "officeId", "supervisorId" }, before[0]!.AsObject().Select(pair => pair.Key).Order());
             var contract = await (await Admin.GetAsync("/api/v1/openapi.json")).Json();
-            var schema = contract["components"]!["schemas"]!["MeEndpoints.PickerUser"]!;
+            var response = contract["paths"]!["/api/v1/users"]!["get"]!["responses"]!["200"]!["content"]!["application/json"]!["schema"]!;
+            var schemaName = response["items"]!["$ref"]!.GetValue<string>().Split('/')[^1];
+            var schema = contract["components"]!["schemas"]![schemaName]!;
             Assert.DoesNotContain(schema["required"]!.AsArray(), field => field!.GetValue<string>() == "onProject");
             foreach (var field in new[] { "displayName", "email" }) Assert.Contains(schema["properties"]![field]!["type"]!.AsArray(), kind => kind!.GetValue<string>() == "null");
             Assert.Empty((await (await Admin.GetAsync($"/api/v1/users?q={inactive.Email}")).Json()).AsArray());

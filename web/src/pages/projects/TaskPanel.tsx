@@ -21,12 +21,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
-import { ApiError, del, get, post, qs } from '@/lib/api'
+import { ApiError, del, get, post, qs, typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { useFlag, useMe } from '@/lib/auth'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
-import type { PickupOffer } from '../Pickup'
 import { CommentsSlot, ItemSlots, LinksSlot, RaiseSlot } from './slots-items'
 import { PRIORITIES, TaskIndicators, errorText, moveFrom, readableDisabled, useProjectLists, useTaskActions, type Blocker, type TaskRow, type Transition } from './Tasks'
 
@@ -53,7 +53,7 @@ const BLOCK_TYPES = ['Client', 'External Party', 'Internal', 'Decision', 'Inform
 export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: string; onClose?: () => void; heading?: 'h1' | 'h2' }) {
   const q = useQuery({ queryKey: ['task', id], queryFn: () => get<TaskDetailData>(`tasks/${id}`) })
   const pickupEnabled = useFlag('task_pickup')
-  const pickup = useQuery({ queryKey: ['pickup-offers', id], enabled: pickupEnabled, queryFn: () => get<PickupOffer>(`tasks/${id}/pickup-offer`) })
+  const pickup = useQuery({ queryKey: ['pickup-offers', id], enabled: pickupEnabled, queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/pickup-offer', { params: { id } }) })
   const qc = useQueryClient()
   const refresh = useProjectRefresh()
   const openPanel = useItemPanel()
@@ -86,10 +86,10 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
   const milestoneName = (mid: string) => lists.milestones.find((m) => m.id === mid)
   const run = async (f: () => Promise<unknown>) => { setErr(null); try { await f(); reload() } catch (e) { setErr(e) } }
   const openOffer = pickup.data
-  const offer = async () => { await post(`tasks/${id}/pickup-offer`, { reason, keepWatching, hoursRemaining: pickupHours === '' ? null : Number(pickupHours), neededBy: pickupNeededBy || null, note: pickupNote || null }); setOfferOpen(false); setReason(''); pickup.refetch(); reload() }
-  const pickUp = async () => { await post(`tasks/${id}/pickup`, { rowVersion: openOffer?.rowVersion }); qc.invalidateQueries({ queryKey: ['pickup-own-load'] }); qc.invalidateQueries({ queryKey: ['pickup-offers'] }); reload() }
-  const withdraw = async () => { await del(`tasks/${id}/pickup-offer`); pickup.refetch(); reload() }
-  const assign = async () => { if (!assignTo) return; await post(`tasks/${id}/pickup-offer/assign`, { userId: assignTo, rowVersion: openOffer?.rowVersion }); setAssignTo(''); pickup.refetch(); reload() }
+  const offer = async () => { await typedRequest('post', '/api/v1/tasks/{id}/pickup-offer', { params: { id }, body: { reason, keepWatching, hoursRemaining: pickupHours === '' ? null : Number(pickupHours), neededBy: pickupNeededBy || null, note: pickupNote || null } }); setOfferOpen(false); setReason(''); pickup.refetch(); reload() }
+  const pickUp = async () => { await typedRequest('post', '/api/v1/tasks/{id}/pickup', { params: { id }, body: { rowVersion: openOffer?.rowVersion ?? null } }); invalidateChange(qc, 'TaskPickupOffer'); reload() }
+  const withdraw = async () => { await typedRequest('delete', '/api/v1/tasks/{id}/pickup-offer', { params: { id } }); pickup.refetch(); reload() }
+  const assign = async () => { if (!assignTo) return; await typedRequest('post', '/api/v1/tasks/{id}/pickup-offer/assign', { params: { id }, body: { userId: assignTo, rowVersion: openOffer?.rowVersion ?? null } }); setAssignTo(''); pickup.refetch(); reload() }
 
   return (
     <PickerProject.Provider value={r.projectId}><div>

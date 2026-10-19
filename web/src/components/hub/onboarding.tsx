@@ -5,12 +5,10 @@ import { Link } from 'react-router'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { get, post } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { useFlag, useMe } from '@/lib/auth'
 
-interface Step { key: string; label: string; route?: string; done: boolean }
-interface Group { role: string; steps: Step[] }
-interface OnboardingResponse { hidden: boolean; done: boolean; groups: Group[]; total: number; completed: number }
 
 /** Collapsed getting-started card for the current person's Today view (§51.2). */
 export function OnboardingCard() {
@@ -18,10 +16,10 @@ export function OnboardingCard() {
   const me = useMe()
   const qc = useQueryClient()
   const [open, setOpen] = useState(false)
-  const q = useQuery({ queryKey: ['onboarding', me.id], enabled, queryFn: () => get<OnboardingResponse>('me/onboarding') })
+  const q = useQuery({ queryKey: ['onboarding', me.id], enabled, queryFn: () => typedRequest('get', '/api/v1/me/onboarding', {}) })
   if (!enabled || me.capabilities.readOnly || q.isPending || q.isError || !q.data || q.data.hidden || q.data.done) return null
   const card = q.data
-  const update = async (path: string) => { await post(path); await qc.invalidateQueries({ queryKey: ['onboarding'] }) }
+  const hide = async () => { await typedRequest('post', '/api/v1/me/onboarding/hide', { body: {} }); await invalidateChange(qc, 'UserPreferences') }
   return (
     <section aria-label={t('onboarding.title')} className="mb-5 rounded-lg border bg-card">
       <div className="flex min-h-12 items-center gap-3 px-4">
@@ -29,7 +27,7 @@ export function OnboardingCard() {
           <ChevronDown className={open ? 'size-4' : 'size-4 -rotate-90'} aria-hidden />
           <span>{t('onboarding.summary', { done: card.completed, total: card.total })}</span><span className="text-xs text-muted-foreground">{t(open ? 'onboarding.hideSteps' : 'onboarding.showSteps')}</span>
         </button>
-        <Button variant="ghost" size="sm" onClick={() => void update('me/onboarding/hide')}>{t('onboarding.hide')}</Button>
+        <Button variant="ghost" size="sm" onClick={() => void hide()}>{t('onboarding.hide')}</Button>
       </div>
       {open && <div className="divide-y border-t px-4">
         {card.groups.map(group => <div key={group.role} className="py-3">

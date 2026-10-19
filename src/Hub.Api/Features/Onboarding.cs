@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -10,6 +11,8 @@ namespace Hub.Api.Features;
 public static class OnboardingEndpoints
 {
     public sealed record Step(string Key, string Label, string? Route, bool Done);
+    public sealed record Group(string Role, IReadOnlyList<Step> Steps);
+    public sealed record Response(bool Hidden, bool Done, int Total, int Completed, IReadOnlyList<Group> Groups);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -20,7 +23,7 @@ public static class OnboardingEndpoints
             var setting = await UserPreferences.GetOrCreate(db, me.Id);
             setting.OnboardingHiddenAt = clock.GetUtcNow();
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
         api.MapPost("/me/onboarding/show", async (HubDb db, CurrentUser me, SettingsStore settingsStore) =>
         {
@@ -28,16 +31,16 @@ public static class OnboardingEndpoints
             var setting = await UserPreferences.GetOrCreate(db, me.Id);
             setting.OnboardingHiddenAt = null;
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
     }
 
-    static async Task<IResult> Read(HubDb db, CurrentUser me, Access access, SettingsStore settings)
+    static async Task<Results<NotFound, Ok<Response>>> Read(HubDb db, CurrentUser me, Access access, SettingsStore settings)
     {
         var release = await settings.Get(db);
-        if (!release.IsFlagOn("onboarding_card")) return Results.NotFound();
+        if (!release.IsFlagOn("onboarding_card")) return TypedResults.NotFound();
         var s = await db.UserSettings.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == me.Id);
-        if (!me.IsActive || me.IsReadOnly) return Results.Ok(new { Hidden = true, Done = false, Total = 0, Completed = 0, Groups = Array.Empty<object>() });
+        if (!me.IsActive || me.IsReadOnly) return TypedResults.Ok(new Response(true, false, 0, 0, []));
         var visible = access.VisibleProjects().Select(p => p.Id);
         var managed = db.Projects.AsNoTracking().Where(p => visible.Contains(p.Id) && p.ProjectManagerId == me.Id);
         var directReports = db.Users.AsNoTracking().Where(u => u.SupervisorId == me.Id && u.IsActive).Select(u => u.Id);
@@ -63,8 +66,8 @@ public static class OnboardingEndpoints
         if (!await directReports.AnyAsync()) roles.Remove(SystemRole.Supervisor);
         if (me.IsAdmin) roles.Remove(SystemRole.ReadOnly);
         if (await db.ProjectDisciplines.AsNoTracking().AnyAsync(d => d.LeadUserId == me.Id && d.IsActive && visible.Contains(d.ProjectId))) roles.Add("DisciplineLead");
-        var groups = Onboarding.Groups(roles, facts).Select(g => new { g.Role, Steps = g.Steps.Select(step => new Step(step.Key, Text.Get($"onboarding.{step.Key}"), step.Route, step.Done)).ToList() }).ToList();
+        var groups = Onboarding.Groups(roles, facts).Select(g => new Group(g.Role, g.Steps.Select(step => new Step(step.Key, Text.Get($"onboarding.{step.Key}"), step.Route, step.Done)).ToList())).ToList();
         var all = groups.SelectMany(g => g.Steps).ToList();
-        return Results.Ok(new { Hidden = s?.OnboardingHiddenAt is not null, Done = all.Count > 0 && all.All(x => x.Done), Total = all.Count, Completed = all.Count(x => x.Done), Groups = groups });
+        return TypedResults.Ok(new Response(s?.OnboardingHiddenAt is not null, all.Count > 0 && all.All(x => x.Done), all.Count, all.Count(x => x.Done), groups));
     }
 }

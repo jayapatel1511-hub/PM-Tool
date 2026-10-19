@@ -28,54 +28,6 @@
         ],
         "type": "object"
       },
-      "ActivityChainHead": {
-        "properties": {
-          "alertedBrokenSeq": {
-            "format": "int64",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "chainId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "firstBrokenSeq": {
-            "format": "int64",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "headHash": {
-            "type": "string"
-          },
-          "headSeq": {
-            "format": "int64",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "lastVerifiedAt": {
-            "format": "date-time",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "lastVerifiedHash": {
-            "type": "string"
-          },
-          "lastVerifiedSeq": {
-            "format": "int64",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          }
-        },
-        "type": "object"
-      },
       "AdoptBody": {
         "properties": {
           "expectedCurrentRevisionId": {
@@ -357,6 +309,25 @@
         ],
         "type": "object"
       },
+      "Allowed": {
+        "properties": {
+          "assign": {
+            "type": "boolean"
+          },
+          "pickUp": {
+            "type": "boolean"
+          },
+          "withdraw": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "pickUp",
+          "assign",
+          "withdraw"
+        ],
+        "type": "object"
+      },
       "AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem": {
         "properties": {
           "items": {
@@ -463,44 +434,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfDateOnlyAndstringAnddecimalAnddecimalAndboolean": {
-        "properties": {
-          "band": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "capacity": {
-            "format": "double",
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
-            "type": "number"
-          },
-          "hours": {
-            "format": "double",
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
-            "type": [
-              "null",
-              "number"
-            ]
-          },
-          "partial": {
-            "type": "boolean"
-          },
-          "week": {
-            "format": "date",
-            "type": "string"
-          }
-        },
-        "required": [
-          "week",
-          "band",
-          "hours",
-          "capacity",
-          "partial"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint": {
         "properties": {
           "asOf": {
@@ -549,41 +482,6 @@
           "pendingChanges",
           "deadLetters",
           "deadLetterCount"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuid": {
-        "properties": {
-          "leadUnitId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "leadUnitId"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndGuid": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "unitId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "unitId"
         ],
         "type": "object"
       },
@@ -880,118 +778,9 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfGuidAndintAndstringAndstringAndGuidAndGuid": {
-        "properties": {
-          "displayName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "email": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "supervisorId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "unitId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "rowVersion",
-          "displayName",
-          "email",
-          "unitId",
-          "supervisorId"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfGuidAndstring": {
         "properties": {
-          "displayName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
           "id": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "displayName"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndGuidAndGuidAndstringAndGuidAndstringAndGuidAndGuidAndDateOnlyAndint": {
-        "properties": {
-          "closedOn": {
-            "format": "date",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "disciplineId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "headCount": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "leader": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "leaderId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "level": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "levelId": {
             "format": "uuid",
             "type": "string"
           },
@@ -1000,34 +789,11 @@
               "null",
               "string"
             ]
-          },
-          "officeId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "parentId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
           }
         },
         "required": [
           "id",
-          "name",
-          "parentId",
-          "levelId",
-          "level",
-          "leaderId",
-          "leader",
-          "disciplineId",
-          "officeId",
-          "closedOn",
-          "headCount"
+          "name"
         ],
         "type": "object"
       },
@@ -1141,31 +907,6 @@
           "displayName",
           "isActive",
           "email"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndint": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "sortOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "sortOrder"
         ],
         "type": "object"
       },
@@ -1981,57 +1722,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfListOfAnonymousTypeOfGuidAndstringAndintAndListOfAnonymousTypeOfGuidAndstringAndGuidAndGuidAndstringAndGuidAndstringAndGuidAndGuidAndDateOnlyAndintAndListOfAnonymousTypeOfGuidAndintAndstringAndstringAndGuidAndGuidAndListOfAnonymousTypeOfGuidAndstringAndboolean": {
-        "properties": {
-          "includeIndirectReports": {
-            "type": "boolean"
-          },
-          "levels": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndint"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "managerCycles": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstring"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "people": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndintAndstringAndstringAndGuidAndGuid"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "units": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndGuidAndGuidAndstringAndGuidAndstringAndGuidAndGuidAndDateOnlyAndint"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "levels",
-          "units",
-          "people",
-          "managerCycles",
-          "includeIndirectReports"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndGuidAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndAnonymousTypeOfint": {
         "properties": {
           "clients": {
@@ -2100,45 +1790,6 @@
           "phases",
           "projectTypes",
           "limits"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfListOfDeliverableBaselineAndListOfAnonymousTypeOfGuidAndstringAndGuidAndAnonymousTypeOfdecimalAnddecimalAndintAndGuidAndGuid": {
-        "properties": {
-          "current": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "delta": {
-            "$ref": "#/components/schemas/AnonymousTypeOfdecimalAnddecimalAndintAndGuidAndGuid"
-          },
-          "people": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstring"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "records": {
-            "items": {
-              "$ref": "#/components/schemas/DeliverableBaseline"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "records",
-          "people",
-          "current",
-          "delta"
         ],
         "type": "object"
       },
@@ -2226,41 +1877,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfObjectAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndObjectAndIEnumerableOfAnonymousTypeOfintAndGuidAndObject": {
-        "properties": {
-          "depth": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "predecessors": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfintAndGuidAndObject"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "successors": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfintAndGuidAndObject"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "task": {}
-        },
-        "required": [
-          "task",
-          "depth",
-          "predecessors",
-          "successors"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfObjectAndintAndstringAndstringAndbooleanAndboolean": {
         "properties": {
           "count": {
@@ -2298,24 +1914,40 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfRevisionConventionAndDeliverableMarks[]": {
+      "AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow": {
         "properties": {
-          "convention": {
-            "$ref": "#/components/schemas/RevisionConvention"
+          "depth": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
           },
-          "deliverables": {
+          "predecessors": {
             "items": {
-              "$ref": "#/components/schemas/DeliverableMarks"
+              "$ref": "#/components/schemas/AnonymousTypeOfintAndGuidAndRow"
             },
             "type": [
               "null",
               "array"
             ]
+          },
+          "successors": {
+            "items": {
+              "$ref": "#/components/schemas/AnonymousTypeOfintAndGuidAndRow"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "task": {
+            "$ref": "#/components/schemas/TaskQueriesRow"
           }
         },
         "required": [
-          "convention",
-          "deliverables"
+          "task",
+          "depth",
+          "predecessors",
+          "successors"
         ],
         "type": "object"
       },
@@ -2544,50 +2176,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfdecimalAnddecimalAndintAndGuidAndGuid": {
-        "properties": {
-          "dueDays": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "estimateHours": {
-            "format": "double",
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
-            "type": "number"
-          },
-          "ownerAfter": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "ownerBefore": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "remainingHours": {
-            "format": "double",
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
-            "type": "number"
-          }
-        },
-        "required": [
-          "estimateHours",
-          "remainingHours",
-          "dueDays",
-          "ownerBefore",
-          "ownerAfter"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfint": {
         "properties": {
           "roleLabel": {
@@ -2601,7 +2189,7 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfintAndGuidAndObject": {
+      "AnonymousTypeOfintAndGuidAndRow": {
         "properties": {
           "level": {
             "format": "int32",
@@ -2612,7 +2200,9 @@
             "format": "uuid",
             "type": "string"
           },
-          "task": {}
+          "task": {
+            "$ref": "#/components/schemas/TaskQueriesRow"
+          }
         },
         "required": [
           "level",
@@ -3300,6 +2890,32 @@
         ],
         "type": "object"
       },
+      "AwaitingRow": {
+        "properties": {
+          "canConfirm": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "rowVersion",
+          "canConfirm"
+        ],
+        "type": "object"
+      },
       "BasisSuggestionBody": {
         "properties": {
           "declaredRevision": {
@@ -3432,6 +3048,25 @@
         },
         "required": [
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "Can": {
+        "properties": {
+          "assign": {
+            "type": "boolean"
+          },
+          "changeDue": {
+            "type": "boolean"
+          },
+          "edit": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "assign",
+          "edit",
+          "changeDue"
         ],
         "type": "object"
       },
@@ -3860,6 +3495,59 @@
         },
         "type": "object"
       },
+      "CommitmentReliability": {
+        "properties": {
+          "awaiting": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "band": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "committed": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "met": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "notYetRecorded": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "percent": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "withdrawn": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "met",
+          "committed",
+          "percent",
+          "band",
+          "withdrawn",
+          "notYetRecorded",
+          "awaiting"
+        ],
+        "type": "object"
+      },
       "CommitmentReliabilityConfirmBody": {
         "properties": {
           "reason": {
@@ -3885,6 +3573,34 @@
         "required": [
           "requestId",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "CommitmentReliabilityReadResponse": {
+        "properties": {
+          "awaiting": {
+            "items": {
+              "$ref": "#/components/schemas/AwaitingRow"
+            },
+            "type": "array"
+          },
+          "misses": {
+            "items": {
+              "$ref": "#/components/schemas/MissRow"
+            },
+            "type": "array"
+          },
+          "snapshots": {
+            "items": {
+              "$ref": "#/components/schemas/SnapshotRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "snapshots",
+          "misses",
+          "awaiting"
         ],
         "type": "object"
       },
@@ -5061,6 +4777,50 @@
         },
         "type": "object"
       },
+      "Delta": {
+        "properties": {
+          "dueDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "estimateHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "ownerAfter": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerBefore": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "remainingHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          }
+        },
+        "required": [
+          "estimateHours",
+          "remainingHours",
+          "dueDays",
+          "ownerBefore",
+          "ownerAfter"
+        ],
+        "type": "object"
+      },
       "DensityBody": {
         "properties": {
           "denseRows": {
@@ -5287,6 +5047,92 @@
           "currentVersionRowVersion",
           "version",
           "reason"
+        ],
+        "type": "object"
+      },
+      "DetailResult": {
+        "properties": {
+          "allowed": {
+            "$ref": "#/components/schemas/Allowed"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/TaskPickupCandidate"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "keepWatching": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "openedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "task": {
+            "$ref": "#/components/schemas/DetailTask"
+          }
+        },
+        "required": [
+          "id",
+          "reason",
+          "note",
+          "openedAt",
+          "keepWatching",
+          "rowVersion",
+          "task",
+          "allowed",
+          "candidates"
+        ],
+        "type": "object"
+      },
+      "DetailTask": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "projectId",
+          "projectDisciplineId",
+          "dueDate"
         ],
         "type": "object"
       },
@@ -5897,6 +5743,104 @@
         ],
         "type": "object"
       },
+      "FollowUpItem": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemType": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "itemType",
+          "key",
+          "title",
+          "projectId",
+          "projectNumber",
+          "status",
+          "dueDate",
+          "ownerId",
+          "ownerName"
+        ],
+        "type": "object"
+      },
+      "FollowUpResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FollowUpItem"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "items"
+        ],
+        "type": "object"
+      },
+      "Group": {
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "role",
+          "steps"
+        ],
+        "type": "object"
+      },
       "HandoffAssignBody": {
         "properties": {
           "reason": {
@@ -5971,6 +5915,64 @@
         ],
         "type": "object"
       },
+      "Head": {
+        "properties": {
+          "alertedBrokenSeq": {
+            "format": "int64",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "chainId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "firstBrokenSeq": {
+            "format": "int64",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "headHash": {
+            "type": "string"
+          },
+          "headSeq": {
+            "format": "int64",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "lastVerifiedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lastVerifiedHash": {
+            "type": "string"
+          },
+          "lastVerifiedSeq": {
+            "format": "int64",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "chainId",
+          "headSeq",
+          "headHash",
+          "lastVerifiedSeq",
+          "lastVerifiedHash",
+          "lastVerifiedAt",
+          "firstBrokenSeq",
+          "alertedBrokenSeq"
+        ],
+        "type": "object"
+      },
       "HeaderBody": {
         "properties": {
           "description": {
@@ -6000,6 +6002,46 @@
           "name",
           "description",
           "projectTypeId"
+        ],
+        "type": "object"
+      },
+      "History": {
+        "properties": {
+          "current": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "delta": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Delta"
+              }
+            ]
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            },
+            "type": "array"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableBaseline"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "records",
+          "people",
+          "current",
+          "delta"
         ],
         "type": "object"
       },
@@ -6124,6 +6166,156 @@
         "required": [
           "previewId",
           "rows"
+        ],
+        "type": "object"
+      },
+      "ImportChange": {
+        "properties": {
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "kind": {
+            "type": "string"
+          },
+          "unitPath": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
+      "ImportResult": {
+        "properties": {
+          "applied": {
+            "type": "boolean"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/ImportChange"
+            },
+            "type": "array"
+          },
+          "creates": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "rows": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rows",
+          "changes",
+          "creates",
+          "applied"
+        ],
+        "type": "object"
+      },
+      "ImportSummary": {
+        "properties": {
+          "canApply": {
+            "type": "boolean"
+          },
+          "creates": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "errors": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "exists": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectImportImportRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows",
+          "creates",
+          "exists",
+          "errors",
+          "canApply"
+        ],
+        "type": "object"
+      },
+      "ImportValidation": {
+        "properties": {
+          "applied": {
+            "type": "boolean"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "errors",
+          "applied"
+        ],
+        "type": "object"
+      },
+      "Integrity": {
+        "properties": {
+          "checkedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "entries": {
+            "format": "int64",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "firstBrokenSeq": {
+            "format": "int64",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "valid": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "verifiedEntries": {
+            "format": "int64",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "entries",
+          "checkedAt",
+          "verifiedEntries",
+          "firstBrokenSeq",
+          "valid"
         ],
         "type": "object"
       },
@@ -6537,6 +6729,21 @@
         ],
         "type": "object"
       },
+      "LeadUnitResponse": {
+        "properties": {
+          "leadUnitId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "leadUnitId"
+        ],
+        "type": "object"
+      },
       "LevelBody": {
         "properties": {
           "name": {
@@ -6628,6 +6835,53 @@
           "key",
           "title",
           "status"
+        ],
+        "type": "object"
+      },
+      "ListTask": {
+        "properties": {
+          "disciplineName": {
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "projectId",
+          "projectNumber",
+          "projectDisciplineId",
+          "disciplineName",
+          "dueDate",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -6825,6 +7079,44 @@
         ],
         "type": "object"
       },
+      "LoadResult": {
+        "properties": {
+          "band": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "capacity": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "week": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "week",
+          "band",
+          "hours",
+          "capacity",
+          "partial"
+        ],
+        "type": "object"
+      },
       "LoadThresholds": {
         "properties": {
           "amberPct": {
@@ -6847,6 +7139,22 @@
           "overPct",
           "amberPct",
           "underPct"
+        ],
+        "type": "object"
+      },
+      "ManagerCycleRow": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName"
         ],
         "type": "object"
       },
@@ -7231,6 +7539,62 @@
         ],
         "type": "object"
       },
+      "MissCategoryRow": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive"
+        ],
+        "type": "object"
+      },
+      "MissRow": {
+        "properties": {
+          "category": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "categoryId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "commitments": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "categoryId",
+          "category",
+          "count",
+          "commitments"
+        ],
+        "type": "object"
+      },
       "NoticeAction": {
         "properties": {
           "action": {
@@ -7303,6 +7667,18 @@
           "hoursRemaining",
           "neededBy",
           "note"
+        ],
+        "type": "object"
+      },
+      "OfferCreated": {
+        "properties": {
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "taskId"
         ],
         "type": "object"
       },
@@ -7614,19 +7990,13 @@
         ],
         "type": "object"
       },
-      "OrgLevel": {
+      "OrgLevelResponse": {
         "properties": {
           "auditKey": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": "string"
           },
           "auditName": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": "string"
           },
           "auditProjectId": {
             "format": "uuid",
@@ -7636,10 +8006,7 @@
             ]
           },
           "auditType": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": "string"
           },
           "createdAt": {
             "format": "date-time",
@@ -7681,21 +8048,29 @@
             ]
           }
         },
+        "required": [
+          "id",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "name",
+          "sortOrder",
+          "auditType",
+          "auditProjectId",
+          "auditKey",
+          "auditName"
+        ],
         "type": "object"
       },
-      "OrgUnit": {
+      "OrgUnitResponse": {
         "properties": {
           "auditKey": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": "string"
           },
           "auditName": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": "string"
           },
           "auditProjectId": {
             "format": "uuid",
@@ -7705,10 +8080,7 @@
             ]
           },
           "auditType": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": "string"
           },
           "closedOn": {
             "format": "date",
@@ -7784,6 +8156,212 @@
             ]
           }
         },
+        "required": [
+          "id",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "name",
+          "parentId",
+          "levelId",
+          "leaderId",
+          "disciplineId",
+          "officeId",
+          "closedOn",
+          "auditType",
+          "auditProjectId",
+          "auditKey",
+          "auditName"
+        ],
+        "type": "object"
+      },
+      "OrganisationLevelRow": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "sortOrder"
+        ],
+        "type": "object"
+      },
+      "OrganisationPersonRow": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "supervisorId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "unitId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "displayName",
+          "email",
+          "unitId",
+          "supervisorId"
+        ],
+        "type": "object"
+      },
+      "OrganisationResponse": {
+        "properties": {
+          "includeIndirectReports": {
+            "type": "boolean"
+          },
+          "levels": {
+            "items": {
+              "$ref": "#/components/schemas/OrganisationLevelRow"
+            },
+            "type": "array"
+          },
+          "managerCycles": {
+            "items": {
+              "$ref": "#/components/schemas/ManagerCycleRow"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/OrganisationPersonRow"
+            },
+            "type": "array"
+          },
+          "units": {
+            "items": {
+              "$ref": "#/components/schemas/OrganisationUnitRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "levels",
+          "units",
+          "people",
+          "managerCycles",
+          "includeIndirectReports"
+        ],
+        "type": "object"
+      },
+      "OrganisationUnitRow": {
+        "properties": {
+          "closedOn": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "headCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "leader": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "leaderId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "level": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "levelId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "parentId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "parentId",
+          "levelId",
+          "level",
+          "leaderId",
+          "leader",
+          "disciplineId",
+          "officeId",
+          "closedOn",
+          "headCount"
+        ],
         "type": "object"
       },
       "OverrideBody": {
@@ -7885,6 +8463,45 @@
         ],
         "type": "object"
       },
+      "PageOfRow": {
+        "properties": {
+          "filters": {},
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sort": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "totalCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object"
+      },
       "PartyBody": {
         "properties": {
           "email": {
@@ -7928,6 +8545,22 @@
           "role",
           "isClient",
           "notes"
+        ],
+        "type": "object"
+      },
+      "Person": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName"
         ],
         "type": "object"
       },
@@ -8086,6 +8719,33 @@
         ],
         "type": "object"
       },
+      "PickupResult": {
+        "properties": {
+          "assigneeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "closeCause": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "assigneeId",
+          "closeCause"
+        ],
+        "type": "object"
+      },
       "PlacementBody": {
         "properties": {
           "rowVersion": {
@@ -8105,6 +8765,26 @@
           }
         },
         "required": [
+          "unitId"
+        ],
+        "type": "object"
+      },
+      "PlacementRow": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unitId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
           "unitId"
         ],
         "type": "object"
@@ -8649,6 +9329,71 @@
         },
         "required": [
           "csv"
+        ],
+        "type": "object"
+      },
+      "ProjectImportImportRow": {
+        "properties": {
+          "classification": {
+            "type": "string"
+          },
+          "client": {
+            "type": "string"
+          },
+          "clientId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "error": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "office": {
+            "type": "string"
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectManagerEmail": {
+            "type": "string"
+          },
+          "projectManagerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "row": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "row",
+          "projectNumber",
+          "name",
+          "client",
+          "office",
+          "projectManagerEmail",
+          "classification",
+          "error"
         ],
         "type": "object"
       },
@@ -9359,6 +10104,53 @@
         ],
         "type": "object"
       },
+      "Response": {
+        "properties": {
+          "completed": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "done": {
+            "type": "boolean"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/Group"
+            },
+            "type": "array"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "total": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hidden",
+          "done",
+          "total",
+          "completed",
+          "groups"
+        ],
+        "type": "object"
+      },
+      "RetryOutboxResponse": {
+        "properties": {
+          "retried": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "retried"
+        ],
+        "type": "object"
+      },
       "ReuseBody": {
         "properties": {
           "links": {
@@ -9506,6 +10298,31 @@
           "rowVersion",
           "ownerId",
           "reason"
+        ],
+        "type": "object"
+      },
+      "RevisionCheckReadResponse": {
+        "properties": {
+          "convention": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RevisionConvention"
+              }
+            ]
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableMarks"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "convention",
+          "deliverables"
         ],
         "type": "object"
       },
@@ -10036,6 +10853,32 @@
         ],
         "type": "object"
       },
+      "SnapshotRow": {
+        "properties": {
+          "capturedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reliability": {
+            "$ref": "#/components/schemas/CommitmentReliability"
+          },
+          "weekStart": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "weekStart",
+          "capturedAt",
+          "reliability"
+        ],
+        "type": "object"
+      },
       "SnoozeBody": {
         "properties": {
           "days": {
@@ -10075,6 +10918,169 @@
           "requestId",
           "rowVersion",
           "reason"
+        ],
+        "type": "object"
+      },
+      "State": {
+        "properties": {
+          "affectedMilestoneIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "blockedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "blockedSince": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "blockingCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "blockingTaskIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "daysBlocked": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "daysOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "inconsistencyDetail": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "isBlocked": {
+            "type": "boolean"
+          },
+          "isBlocking": {
+            "type": "boolean"
+          },
+          "isDateInconsistent": {
+            "type": "boolean"
+          },
+          "isDueSoon": {
+            "type": "boolean"
+          },
+          "isHeldPastDue": {
+            "type": "boolean"
+          },
+          "isInactiveOwner": {
+            "type": "boolean"
+          },
+          "isMissingDueDate": {
+            "type": "boolean"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "isReviewStalled": {
+            "type": "boolean"
+          },
+          "isStale": {
+            "type": "boolean"
+          },
+          "isUnassigned": {
+            "type": "boolean"
+          },
+          "isWaiting": {
+            "type": "boolean"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "staleDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "isOverdue",
+          "daysOverdue",
+          "isDueSoon",
+          "isWaiting",
+          "isBlocked",
+          "blockedSince",
+          "daysBlocked",
+          "blockedBy",
+          "isBlocking",
+          "blockingCount",
+          "blockingTaskIds",
+          "isStale",
+          "staleDays",
+          "isUnassigned",
+          "isMissingDueDate",
+          "isDateInconsistent",
+          "inconsistencyDetail",
+          "isInactiveOwner",
+          "isHeldPastDue",
+          "isReviewStalled",
+          "affectedMilestoneIds",
+          "notes",
+          "evaluatedAt"
+        ],
+        "type": "object"
+      },
+      "Step": {
+        "properties": {
+          "done": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "route": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "route",
+          "done"
         ],
         "type": "object"
       },
@@ -10520,6 +11526,286 @@
         ],
         "type": "object"
       },
+      "TaskDetailCollaborator": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "isActive"
+        ],
+        "type": "object"
+      },
+      "TaskDetailPermission": {
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "ok",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "TaskDetailPermissions": {
+        "properties": {
+          "allowSelfReview": {
+            "type": "boolean"
+          },
+          "assign": {
+            "$ref": "#/components/schemas/TaskDetailPermission"
+          },
+          "authoriseStart": {
+            "type": "boolean"
+          },
+          "block": {
+            "$ref": "#/components/schemas/TaskDetailPermission"
+          },
+          "comment": {
+            "type": "boolean"
+          },
+          "completeHint": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "delete": {
+            "$ref": "#/components/schemas/TaskDetailPermission"
+          },
+          "dependencies": {
+            "type": "boolean"
+          },
+          "dueDate": {
+            "$ref": "#/components/schemas/TaskDetailPermission"
+          },
+          "dueNeedsReason": {
+            "type": "boolean"
+          },
+          "edit": {
+            "$ref": "#/components/schemas/TaskDetailPermission"
+          },
+          "enterTime": {
+            "type": "boolean"
+          },
+          "isReviewer": {
+            "type": "boolean"
+          },
+          "needsReason": {
+            "type": "boolean"
+          },
+          "offerPickup": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "restore": {
+            "type": "boolean"
+          },
+          "setReviewer": {
+            "$ref": "#/components/schemas/TaskDetailPermission"
+          },
+          "transitions": {
+            "items": {
+              "$ref": "#/components/schemas/TaskDetailTransition"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "edit",
+          "assign",
+          "setReviewer",
+          "dueNeedsReason",
+          "dueDate",
+          "block",
+          "delete",
+          "restore",
+          "comment",
+          "transitions",
+          "completeHint",
+          "isReviewer",
+          "dependencies",
+          "enterTime",
+          "needsReason",
+          "allowSelfReview",
+          "authoriseStart"
+        ],
+        "type": "object"
+      },
+      "TaskDetailProject": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
+      "TaskDetailResponse": {
+        "properties": {
+          "cancelledReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "collaborators": {
+            "items": {
+              "$ref": "#/components/schemas/TaskDetailCollaborator"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "onHoldReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/TaskDetailPermissions"
+          },
+          "previousStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "project": {
+            "$ref": "#/components/schemas/TaskDetailProject"
+          },
+          "relatedDeliverables": {
+            "items": {
+              "$ref": "#/components/schemas/TaskRelatedDeliverable"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "reviewRequestedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "task": {
+            "$ref": "#/components/schemas/TaskQueriesRow"
+          },
+          "watchers": {
+            "items": {
+              "$ref": "#/components/schemas/TaskDetailWatcher"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "task",
+          "description",
+          "onHoldReason",
+          "cancelledReason",
+          "previousStatus",
+          "reviewRequestedAt",
+          "project",
+          "collaborators",
+          "watchers",
+          "permissions"
+        ],
+        "type": "object"
+      },
+      "TaskDetailTransition": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "needsReason": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "to": {
+            "type": "string"
+          },
+          "via": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "to",
+          "allowed",
+          "reason",
+          "needsReason",
+          "via"
+        ],
+        "type": "object"
+      },
+      "TaskDetailWatcher": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "source"
+        ],
+        "type": "object"
+      },
       "TaskIn": {
         "properties": {
           "assignTo": {
@@ -10608,6 +11894,880 @@
         "required": [
           "userId",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "TaskPickupCandidate": {
+        "properties": {
+          "displayName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName"
+        ],
+        "type": "object"
+      },
+      "TaskPickupListRow": {
+        "properties": {
+          "hoursRemaining": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "neededBy": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "offeredBy": {
+            "type": "string"
+          },
+          "offeredById": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "openedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "task": {
+            "$ref": "#/components/schemas/ListTask"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "taskId",
+          "offeredById",
+          "offeredBy",
+          "reason",
+          "hoursRemaining",
+          "neededBy",
+          "note",
+          "openedAt",
+          "task"
+        ],
+        "type": "object"
+      },
+      "TaskQueriesRow": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/TaskQueriesRowActivityRow"
+          },
+          {
+            "$ref": "#/components/schemas/TaskQueriesRowBase"
+          }
+        ],
+        "type": "object"
+      },
+      "TaskQueriesRowActivityRow": {
+        "properties": {
+          "assigneeActive": {
+            "type": "boolean"
+          },
+          "assigneeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "assigneeName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "can": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Can"
+              }
+            ]
+          },
+          "collaboratorIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "commentCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdByName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableDueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "deliverableStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplineCode": {
+            "type": "string"
+          },
+          "disciplineColour": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplineName": {
+            "type": "string"
+          },
+          "disciplineOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueDateChangeCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "effectiveMilestoneId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "estimatedHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "lane": {
+            "type": "string"
+          },
+          "lastActivityActorName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lastActivityAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "manualBlockReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "manualBlockSetAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "manualBlockType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneDerived": {
+            "type": "boolean"
+          },
+          "milestoneId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "originalDueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "originalStartDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pickupOfferOpen": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "predecessorCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "progressPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "projectStatus": {
+            "type": "string"
+          },
+          "requiresReview": {
+            "type": "boolean"
+          },
+          "reviewRound": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reviewerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reviewerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "state": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/State"
+              }
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusChangedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "successorCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        }
+      },
+      "TaskQueriesRowBase": {
+        "properties": {
+          "assigneeActive": {
+            "type": "boolean"
+          },
+          "assigneeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "assigneeName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "can": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Can"
+              }
+            ]
+          },
+          "collaboratorIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "commentCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdByName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableDueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "deliverableStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplineCode": {
+            "type": "string"
+          },
+          "disciplineColour": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplineName": {
+            "type": "string"
+          },
+          "disciplineOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueDateChangeCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "effectiveMilestoneId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "estimatedHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "lane": {
+            "type": "string"
+          },
+          "lastActivityActorName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lastActivityAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "manualBlockReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "manualBlockSetAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "manualBlockType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneDerived": {
+            "type": "boolean"
+          },
+          "milestoneId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "originalDueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "originalStartDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pickupOfferOpen": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "predecessorCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "priority": {
+            "type": "string"
+          },
+          "progressPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "projectStatus": {
+            "type": "string"
+          },
+          "requiresReview": {
+            "type": "boolean"
+          },
+          "reviewRound": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "reviewerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reviewerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "state": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/State"
+              }
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusChangedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "successorCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "projectStatus",
+          "key",
+          "name",
+          "projectDisciplineId",
+          "disciplineName",
+          "disciplineCode",
+          "disciplineColour",
+          "disciplineOrder",
+          "deliverableId",
+          "deliverableKey",
+          "deliverableName",
+          "deliverableDueDate",
+          "deliverableStatus",
+          "deliverableOrder",
+          "milestoneId",
+          "effectiveMilestoneId",
+          "milestoneKey",
+          "milestoneName",
+          "milestoneDate",
+          "milestoneDerived",
+          "assigneeId",
+          "assigneeName",
+          "assigneeActive",
+          "reviewerId",
+          "reviewerName",
+          "requiresReview",
+          "priority",
+          "startDate",
+          "dueDate",
+          "originalStartDate",
+          "originalDueDate",
+          "status",
+          "lane",
+          "progressPct",
+          "estimatedHours",
+          "reviewRound",
+          "dueDateChangeCount",
+          "lastActivityAt",
+          "statusChangedAt",
+          "completedAt",
+          "createdAt",
+          "createdBy",
+          "createdByName",
+          "sortOrder",
+          "rowVersion",
+          "manualBlockType",
+          "manualBlockReason",
+          "manualBlockSetAt",
+          "commentCount",
+          "predecessorCount",
+          "successorCount",
+          "collaboratorIds",
+          "can",
+          "state"
+        ]
+      },
+      "TaskRelatedDeliverable": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status"
         ],
         "type": "object"
       },
@@ -11627,6 +13787,35 @@
           "rowVersion"
         ],
         "type": "object"
+      },
+      "WriteResponse": {
+        "properties": {
+          "convention": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RevisionConvention"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "convention"
+        ],
+        "type": "object"
       }
     }
   },
@@ -11874,7 +14063,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ActivityChainHead"
+                    "$ref": "#/components/schemas/Head"
                   },
                   "type": "array"
                 }
@@ -12638,6 +14827,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryOutboxResponse"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -12660,7 +14856,24 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResult"
+                }
+              }
+            },
             "description": "OK"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportValidation"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
           }
         },
         "tags": [
@@ -12682,7 +14895,24 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResult"
+                }
+              }
+            },
             "description": "OK"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportValidation"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
           }
         },
         "tags": [
@@ -12698,7 +14928,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/OrgLevel"
+                    "$ref": "#/components/schemas/OrgLevelResponse"
                   },
                   "type": "array"
                 }
@@ -12723,8 +14953,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgLevelResponse"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -12746,6 +14983,16 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OrgLevelResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -12779,6 +15026,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgLevelResponse"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -12795,7 +15049,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/OrgUnit"
+                    "$ref": "#/components/schemas/OrgUnitResponse"
                   },
                   "type": "array"
                 }
@@ -12820,8 +15074,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgUnitResponse"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -12854,6 +15115,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgUnitResponse"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -12876,8 +15144,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -12909,8 +15177,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -13641,7 +15909,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndboolean"
+                    "$ref": "#/components/schemas/MissCategoryRow"
                   },
                   "type": "array"
                 }
@@ -13956,7 +16224,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfListOfDeliverableBaselineAndListOfAnonymousTypeOfGuidAndstringAndGuidAndAnonymousTypeOfdecimalAnddecimalAndintAndGuidAndGuid"
+                  "$ref": "#/components/schemas/History"
                 }
               }
             },
@@ -15609,7 +17877,17 @@
       "get": {
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response"
+                }
+              }
+            },
             "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
         "tags": [
@@ -15620,8 +17898,8 @@
     "/api/v1/me/onboarding/hide": {
       "post": {
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -15632,8 +17910,8 @@
     "/api/v1/me/onboarding/show": {
       "post": {
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -15673,8 +17951,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -15813,7 +18091,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/FollowUpResponse"
+                }
               }
             },
             "description": "OK"
@@ -15830,7 +18110,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/FollowUpResponse"
+                }
               }
             },
             "description": "OK"
@@ -16273,7 +18555,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfListOfAnonymousTypeOfGuidAndstringAndintAndListOfAnonymousTypeOfGuidAndstringAndGuidAndGuidAndstringAndGuidAndstringAndGuidAndGuidAndDateOnlyAndintAndListOfAnonymousTypeOfGuidAndintAndstringAndstringAndGuidAndGuidAndListOfAnonymousTypeOfGuidAndstringAndboolean"
+                  "$ref": "#/components/schemas/OrganisationResponse"
                 }
               }
             },
@@ -16302,7 +18584,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AnonymousTypeOfGuidAndGuid"
+                    "$ref": "#/components/schemas/PlacementRow"
                   },
                   "type": "array"
                 }
@@ -16354,6 +18636,16 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TaskPickupListRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -16379,7 +18671,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfDateOnlyAndstringAnddecimalAnddecimalAndboolean"
+                  "$ref": "#/components/schemas/LoadResult"
                 }
               }
             },
@@ -18493,7 +20785,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ImportSummary"
+                }
               }
             },
             "description": "OK"
@@ -18520,7 +20814,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ImportSummary"
+                }
               }
             },
             "description": "OK"
@@ -18938,6 +21234,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Integrity"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -20491,7 +22794,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfGuid"
+                  "$ref": "#/components/schemas/LeadUnitResponse"
                 }
               }
             },
@@ -21454,7 +23757,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfObject"
+                  "$ref": "#/components/schemas/PageOfRow"
                 }
               }
             },
@@ -21970,6 +24273,13 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "preview",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
@@ -21987,7 +24297,87 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CoordinationResult"
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "rowVersion": {
+                          "format": "int32",
+                          "pattern": "^-?(?:0|[1-9]\\d*)$",
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "rowVersion"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "preview": {
+                          "type": "boolean"
+                        },
+                        "weeks": {
+                          "items": {
+                            "properties": {
+                              "band": {
+                                "type": "string"
+                              },
+                              "capacity": {
+                                "format": "double",
+                                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+                                "type": "number"
+                              },
+                              "free": {
+                                "format": "double",
+                                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+                                "type": "number"
+                              },
+                              "indicators": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "personId": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "planned": {
+                                "format": "double",
+                                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+                                "type": "number"
+                              },
+                              "week": {
+                                "format": "date",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "personId",
+                              "week",
+                              "capacity",
+                              "planned",
+                              "free",
+                              "band",
+                              "indicators"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "required": [
+                        "preview",
+                        "weeks"
+                      ],
+                      "type": "object"
+                    }
+                  ]
                 }
               }
             },
@@ -22257,6 +24647,13 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "preview",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
@@ -22274,7 +24671,87 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CoordinationResult"
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "rowVersion": {
+                          "format": "int32",
+                          "pattern": "^-?(?:0|[1-9]\\d*)$",
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "rowVersion"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "preview": {
+                          "type": "boolean"
+                        },
+                        "weeks": {
+                          "items": {
+                            "properties": {
+                              "band": {
+                                "type": "string"
+                              },
+                              "capacity": {
+                                "format": "double",
+                                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+                                "type": "number"
+                              },
+                              "free": {
+                                "format": "double",
+                                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+                                "type": "number"
+                              },
+                              "indicators": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "personId": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "planned": {
+                                "format": "double",
+                                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+                                "type": "number"
+                              },
+                              "week": {
+                                "format": "date",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "personId",
+                              "week",
+                              "capacity",
+                              "planned",
+                              "free",
+                              "band",
+                              "indicators"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "required": [
+                        "preview",
+                        "weeks"
+                      ],
+                      "type": "object"
+                    }
+                  ]
                 }
               }
             },
@@ -22392,6 +24869,13 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "preview",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
@@ -22409,7 +24893,87 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CoordinationResult"
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "rowVersion": {
+                          "format": "int32",
+                          "pattern": "^-?(?:0|[1-9]\\d*)$",
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "rowVersion"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "preview": {
+                          "type": "boolean"
+                        },
+                        "weeks": {
+                          "items": {
+                            "properties": {
+                              "band": {
+                                "type": "string"
+                              },
+                              "capacity": {
+                                "format": "double",
+                                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+                                "type": "number"
+                              },
+                              "free": {
+                                "format": "double",
+                                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+                                "type": "number"
+                              },
+                              "indicators": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "personId": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "planned": {
+                                "format": "double",
+                                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+                                "type": "number"
+                              },
+                              "week": {
+                                "format": "date",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "personId",
+                              "week",
+                              "capacity",
+                              "planned",
+                              "free",
+                              "band",
+                              "indicators"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "required": [
+                        "preview",
+                        "weeks"
+                      ],
+                      "type": "object"
+                    }
+                  ]
                 }
               }
             },
@@ -22801,7 +25365,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/CommitmentReliabilityReadResponse"
+                }
               }
             },
             "description": "OK"
@@ -25636,7 +28202,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfRevisionConventionAndDeliverableMarks[]"
+                  "$ref": "#/components/schemas/RevisionCheckReadResponse"
                 }
               }
             },
@@ -25671,6 +28237,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WriteResponse"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -27008,8 +29581,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -27190,7 +29763,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfObject"
+                  "$ref": "#/components/schemas/PageOfRow"
                 }
               }
             },
@@ -27239,7 +29812,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDetailResponse"
+                }
               }
             },
             "description": "OK"
@@ -27341,7 +29916,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfObjectAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndObjectAndIEnumerableOfAnonymousTypeOfintAndGuidAndObject"
+                  "$ref": "#/components/schemas/AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow"
                 }
               }
             },
@@ -27579,6 +30154,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupResult"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -27601,8 +30183,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -27623,6 +30205,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetailResult"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -27653,8 +30242,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -27687,6 +30283,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupResult"
+                }
+              }
+            },
             "description": "OK"
           }
         },

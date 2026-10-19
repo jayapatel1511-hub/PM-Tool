@@ -2,12 +2,15 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Hub.Api.Features;
 
 public static class MyWorkFollowUpEndpoints
 {
     sealed record Row(Guid Id, string ItemType, string Key, string Title, Guid ProjectId, string Status, DateOnly? DueDate, Guid? OwnerId, DateTimeOffset UpdatedAt);
+    public sealed record FollowUpItem(Guid Id, string ItemType, string Key, string Title, Guid ProjectId, string ProjectNumber, string Status, DateOnly? DueDate, Guid? OwnerId, string? OwnerName);
+    public sealed record FollowUpResponse(int Total, IEnumerable<FollowUpItem> Items);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -25,7 +28,7 @@ public static class MyWorkFollowUpEndpoints
         "ChangeNotice" => row.Status is not (ChangeStatus.Closed or ChangeStatus.Cancelled),
         "OpenRole" => row.Status == OpenRoleStatus.Open, _ => false };
 
-    static async Task<object> Read(bool requested, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<FollowUpResponse>> Read(bool requested, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         if (!(await store.Get(db)).IsFlagOn("my_work_follow_up")) throw ApiException.NotFound();
         var me = access.Actor.Id;
@@ -66,7 +69,7 @@ public static class MyWorkFollowUpEndpoints
         var owners = await db.Users.AsNoTracking().Where(u => ownerIds.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
         var externalOwners = await db.ExternalParties.AsNoTracking().Where(p => pids.Contains(p.ProjectId) && ownerIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id, p => p.Name);
         foreach (var (id, name) in externalOwners) owners.TryAdd(id, name);
-        return new { Total = rows.Count, Items = rows.Select(r => new { r.Id, r.ItemType, r.Key, r.Title, r.ProjectId, ProjectNumber = numbers[r.ProjectId], r.Status, r.DueDate,
-            r.OwnerId, OwnerName = r.OwnerId is { } id ? owners.GetValueOrDefault(id) : null }) };
+        return TypedResults.Ok(new FollowUpResponse(rows.Count, rows.Select(r => new FollowUpItem(r.Id, r.ItemType, r.Key, r.Title, r.ProjectId,
+            numbers[r.ProjectId], r.Status, r.DueDate, r.OwnerId, r.OwnerId is { } id ? owners.GetValueOrDefault(id) : null))));
     }
 }

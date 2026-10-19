@@ -1,9 +1,11 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic.FileIO;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Hub.Api.Features;
 
@@ -14,34 +16,61 @@ public static class OrgStructureEndpoints
     public sealed record UnitBody(string Name, Guid LevelId, Guid? ParentId, Guid? LeaderId, Guid? DisciplineId, Guid? OfficeId);
     public sealed record PlacementBody(Guid? UnitId, int? RowVersion = null);
     public sealed record LevelOrderBody(Guid[] Ids, Dictionary<Guid, int> Versions);
+    public sealed record LeadUnitResponse(Guid? LeadUnitId);
+    public sealed record OrganisationLevelRow(Guid Id, string Name, int SortOrder);
+    public sealed record OrganisationUnitRow(Guid Id, string Name, Guid? ParentId, Guid LevelId, string? Level, Guid? LeaderId, string? Leader,
+        Guid? DisciplineId, Guid? OfficeId, DateOnly? ClosedOn, int HeadCount);
+    public sealed record OrganisationPersonRow(Guid Id, int RowVersion, string DisplayName, string Email, Guid? UnitId, Guid? SupervisorId);
+    public sealed record ManagerCycleRow(Guid Id, string DisplayName);
+    public sealed record OrganisationResponse(IEnumerable<OrganisationLevelRow> Levels, IEnumerable<OrganisationUnitRow> Units,
+        IEnumerable<OrganisationPersonRow> People, IEnumerable<ManagerCycleRow>? ManagerCycles, bool IncludeIndirectReports);
+    public sealed record PlacementRow(Guid Id, Guid? UnitId);
+    public sealed record ImportChange(string Kind, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? UnitPath = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Email = null);
+    public sealed record ImportValidation(IEnumerable<string> Errors, bool Applied);
+    public sealed record ImportResult(int Rows, IEnumerable<ImportChange> Changes, int Creates, bool Applied);
+    public sealed record OrgLevelResponse(Guid Id, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy,
+        int RowVersion, string Name, int SortOrder, string AuditType, Guid? AuditProjectId, string AuditKey, string AuditName)
+    {
+        public static OrgLevelResponse From(OrgLevel level) => new(level.Id, level.CreatedAt, level.CreatedBy, level.UpdatedAt, level.UpdatedBy,
+            level.RowVersion, level.Name, level.SortOrder, level.AuditType, level.AuditProjectId, level.AuditKey!, level.AuditName!);
+    }
+    public sealed record OrgUnitResponse(Guid Id, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy,
+        int RowVersion, string Name, Guid? ParentId, Guid LevelId, Guid? LeaderId, Guid? DisciplineId, Guid? OfficeId, DateOnly? ClosedOn,
+        string AuditType, Guid? AuditProjectId, string AuditKey, string AuditName)
+    {
+        public static OrgUnitResponse From(OrgUnit unit) => new(unit.Id, unit.CreatedAt, unit.CreatedBy, unit.UpdatedAt, unit.UpdatedBy,
+            unit.RowVersion, unit.Name, unit.ParentId, unit.LevelId, unit.LeaderId, unit.DisciplineId, unit.OfficeId, unit.ClosedOn,
+            unit.AuditType, unit.AuditProjectId, unit.AuditKey!, unit.AuditName!);
+    }
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{id:guid}/lead-unit", async (Guid id, Access access) =>
-        { var (project, _) = await access.Project(id, false); return new { project.LeadUnitId }; }).RequireFlag("org_structure");
+        { var (project, _) = await access.Project(id, false); return TypedResults.Ok(new LeadUnitResponse(project.LeadUnitId)); }).RequireFlag("org_structure");
         var org = api.MapGroup("/organisation").RequireFlag("org_structure");
         org.MapGet("", async (HubDb db, CurrentUser me) =>
         {
-            var levels = await db.Set<OrgLevel>().AsNoTracking().OrderBy(x => x.SortOrder).Select(x => new { x.Id, x.Name, x.SortOrder }).ToListAsync();
-            var units = await db.Set<OrgUnit>().AsNoTracking().OrderBy(x => x.Name).Select(x => new
+            var levels = await db.Set<OrgLevel>().AsNoTracking().OrderBy(x => x.SortOrder).Select(x => new OrganisationLevelRow(x.Id, x.Name, x.SortOrder)).ToListAsync();
+            var unitRows = await db.Set<OrgUnit>().AsNoTracking().OrderBy(x => x.Name).Select(x => new
             {
                 x.Id, x.Name, x.ParentId, x.LevelId, Level = db.Set<OrgLevel>().Where(l => l.Id == x.LevelId).Select(l => l.Name).FirstOrDefault(),
                 x.LeaderId, Leader = db.Users.Where(u => u.Id == x.LeaderId).Select(u => u.DisplayName).FirstOrDefault(), x.DisciplineId, x.OfficeId, x.ClosedOn,
                 HeadCount = db.Users.Count(u => u.IsActive && EF.Property<Guid?>(u, "UnitId") == x.Id)
             }).ToListAsync();
+            var units = unitRows.Select(x => new OrganisationUnitRow(x.Id, x.Name, x.ParentId, x.LevelId, x.Level, x.LeaderId, x.Leader,
+                x.DisciplineId, x.OfficeId, x.ClosedOn, x.HeadCount)).ToList();
             var settings = await db.Settings.AsNoTracking().Where(s => s.Key == "include_indirect_reports").Select(s => s.Value).SingleOrDefaultAsync();
             var scope = await PeopleScope.Load(db, me.Actor, settings == "true");
             var placements = await db.Users.AsNoTracking().Where(u => u.IsActive).Select(u => u.UnitId).ToListAsync();
             var tree = units.Select(u => new OrgTree.Unit(u.Id, u.ParentId, 0, u.LeaderId)).ToArray();
             units = units.Select(u => u with { HeadCount = placements.Count(id => id != null && OrgTree.Descendants(u.Id, tree).Contains(id.Value)) }).ToList();
-            var people = await db.Users.AsNoTracking().Where(u => u.IsActive && scope.Contains(u.Id)).Select(u => new
-            {
-                u.Id, u.RowVersion, u.DisplayName, u.Email, UnitId = EF.Property<Guid?>(u, "UnitId"), u.SupervisorId
-            }).ToListAsync();
+            var people = await db.Users.AsNoTracking().Where(u => u.IsActive && scope.Contains(u.Id)).Select(u => new OrganisationPersonRow(
+                u.Id, u.RowVersion, u.DisplayName, u.Email, EF.Property<Guid?>(u, "UnitId"), u.SupervisorId)).ToListAsync();
             var managers = await db.Users.AsNoTracking().ToDictionaryAsync(u => u.Id, u => u.SupervisorId);
             var cycleIds = me.Actor.Admin ? managers.Where(u => OrgTree.CreatesCycle(u.Key, u.Value, managers)).Select(u => u.Key).ToArray() : [];
-            var cycles = me.Actor.Admin ? await db.Users.AsNoTracking().Where(u => cycleIds.Contains(u.Id)).Select(u => new { u.Id, u.DisplayName }).ToListAsync() : null;
-            return new { levels, units, people, ManagerCycles = cycles, IncludeIndirectReports = settings == "true" };
+            var cycles = me.Actor.Admin ? await db.Users.AsNoTracking().Where(u => cycleIds.Contains(u.Id)).Select(u => new ManagerCycleRow(u.Id, u.DisplayName)).ToListAsync() : null;
+            return TypedResults.Ok(new OrganisationResponse(levels, units, people, cycles, settings == "true"));
         });
 
         org.MapGet("/placements", async (string? ids, HubDb db, Access access, CurrentUser me) =>
@@ -49,7 +78,7 @@ public static class OrgStructureEndpoints
             var chosen = Http.Ids(ids); Check.That(chosen.Length <= 1000, "ids", "error.range");
             var people = await PeopleScope.Widen(db, access.Actor, WorkloadEndpoints.People(db, access, me));
             if (!access.Actor.ReadOnly) people = people.Union(await AvailabilityEndpoints.VisiblePeople(db, access));
-            return await people.Where(u => chosen.Contains(u.Id)).Select(u => new { u.Id, u.UnitId }).ToListAsync();
+            return TypedResults.Ok(await people.Where(u => chosen.Contains(u.Id)).Select(u => new PlacementRow(u.Id, u.UnitId)).ToListAsync());
         });
 
         var admin = api.MapGroup("/admin/organisation").AddEndpointFilter(async (ctx, next) =>
@@ -57,7 +86,8 @@ public static class OrgStructureEndpoints
                 Access.Demand(Permissions.Administer(ctx.HttpContext.RequestServices.GetRequiredService<CurrentUser>().Actor));
                 return await next(ctx);
             }).RequireFlag("org_structure").AddEndpointFilter<OrgWriteFilter>();
-        admin.MapGet("/levels", async (HubDb db) => await db.Set<OrgLevel>().OrderBy(x => x.SortOrder).ToListAsync());
+        admin.MapGet("/levels", async (HubDb db) => TypedResults.Ok((await db.Set<OrgLevel>().OrderBy(x => x.SortOrder)
+            .ToListAsync()).Select(OrgLevelResponse.From).ToList()));
         admin.MapPost("/levels/order", async (LevelOrderBody body, HubDb db) =>
         {
             var levels = await db.Set<OrgLevel>().ToListAsync();
@@ -68,28 +98,29 @@ public static class OrgStructureEndpoints
             for (var i = 0; i < body.Ids.Length; i++)
             { var level = levels.Single(l => l.Id == body.Ids[i]); level.SortOrder = i; db.Entry(level).Property(l => l.SortOrder).IsModified = true; }
             await db.SaveChangesAsync();
-            return Results.Ok(levels.OrderBy(l => l.SortOrder));
+            return TypedResults.Ok(levels.OrderBy(l => l.SortOrder).Select(OrgLevelResponse.From));
         });
         admin.MapPost("/levels", async (LevelBody body, HubDb db) =>
         {
             var level = new OrgLevel { Name = Check.Required(body.Name, "name", 120), SortOrder = body.SortOrder ?? await db.Set<OrgLevel>().CountAsync() };
             Check.That(level.SortOrder >= 0, "sortOrder", "error.range");
             db.Set<OrgLevel>().Add(level); await db.SaveChangesAsync();
-            return Results.Created($"/api/v1/admin/organisation/levels/{level.Id}", level);
+            return TypedResults.Created($"/api/v1/admin/organisation/levels/{level.Id}", OrgLevelResponse.From(level));
         });
         admin.MapPatch("/levels/{id:guid}", async (Guid id, JsonElement body, HubDb db, HttpContext http) =>
         {
             var level = await db.Set<OrgLevel>().FindAsync(id) ?? throw ApiException.NotFound();
             var patch = new Patch(body); await Http.CheckVersion(db, http, level, patch.RowVersion); if (patch.Has("name")) level.Name = Check.Required(patch.Str("name"), "name", 120); if (patch.Has("sortOrder")) level.SortOrder = patch.Int("sortOrder") ?? level.SortOrder;
             Check.That(level.SortOrder >= 0, "sortOrder", "error.range");
-            await db.SaveChangesAsync(); return Results.Ok(level);
+            await db.SaveChangesAsync(); return TypedResults.Ok(OrgLevelResponse.From(level));
         });
-        admin.MapGet("/units", async (HubDb db) => await db.Set<OrgUnit>().OrderBy(x => x.Name).ToListAsync());
+        admin.MapGet("/units", async (HubDb db) => TypedResults.Ok((await db.Set<OrgUnit>().OrderBy(x => x.Name)
+            .ToListAsync()).Select(OrgUnitResponse.From).ToList()));
         admin.MapPost("/units", async (UnitBody body, HubDb db) =>
         {
             await ValidateUnit(db, body.LevelId, body.ParentId, null);
             var unit = new OrgUnit { Name = Check.Required(body.Name, "name", 200), LevelId = body.LevelId, ParentId = body.ParentId, LeaderId = body.LeaderId, DisciplineId = body.DisciplineId, OfficeId = body.OfficeId };
-            db.Set<OrgUnit>().Add(unit); await db.SaveChangesAsync(); return Results.Created($"/api/v1/admin/organisation/units/{unit.Id}", unit);
+            db.Set<OrgUnit>().Add(unit); await db.SaveChangesAsync(); return TypedResults.Created($"/api/v1/admin/organisation/units/{unit.Id}", OrgUnitResponse.From(unit));
         });
         admin.MapPatch("/units/{id:guid}", async (Guid id, JsonElement body, HubDb db, HttpContext http) =>
         {
@@ -99,7 +130,7 @@ public static class OrgStructureEndpoints
             await ValidateUnit(db, level ?? throw ApiException.Invalid("levelId", "error.required"), parent, id);
             if (p.Has("name")) unit.Name = Check.Required(p.Str("name"), "name", 200); if (p.Has("parentId")) unit.ParentId = parent; if (p.Has("levelId")) unit.LevelId = level.Value;
             if (p.Has("leaderId")) unit.LeaderId = p.Id("leaderId"); if (p.Has("disciplineId")) unit.DisciplineId = p.Id("disciplineId"); if (p.Has("officeId")) unit.OfficeId = p.Id("officeId");
-            await db.SaveChangesAsync(); return Results.Ok(unit);
+            await db.SaveChangesAsync(); return TypedResults.Ok(OrgUnitResponse.From(unit));
         });
         admin.MapPost("/units/{id:guid}/close", async (Guid id, HubDb db, TimeProvider clock, HttpContext http) =>
         {
@@ -107,14 +138,14 @@ public static class OrgStructureEndpoints
             await Http.CheckVersion(db, http, unit, null);
             Check.That(!await db.Set<OrgUnit>().AnyAsync(x => x.ParentId == id && x.ClosedOn == null), "unit", "org.open_children");
             Check.That(!await db.Users.AnyAsync(x => x.IsActive && EF.Property<Guid?>(x, "UnitId") == id), "unit", "org.active_people");
-            unit.ClosedOn ??= DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime); await db.SaveChangesAsync(); return Results.NoContent();
+            unit.ClosedOn ??= DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime); await db.SaveChangesAsync(); return TypedResults.NoContent();
         });
         admin.MapPatch("/users/{id:guid}/placement", async (Guid id, PlacementBody body, HubDb db, HttpContext http) =>
         {
             var user = await db.Users.FindAsync(id) ?? throw ApiException.NotFound();
             await Http.CheckVersion(db, http, user, body.RowVersion);
             if (body.UnitId is { } unit && !await db.Set<OrgUnit>().AnyAsync(x => x.Id == unit && x.ClosedOn == null)) throw ApiException.Invalid("unitId", "error.not_found");
-            db.Entry(user).Property("UnitId").CurrentValue = body.UnitId; await db.SaveChangesAsync(); return Results.NoContent();
+            db.Entry(user).Property("UnitId").CurrentValue = body.UnitId; await db.SaveChangesAsync(); return TypedResults.NoContent();
         });
         admin.MapPost("/import/preview", async (JsonElement body, HubDb db) => await Import(body, db, false));
         admin.MapPost("/import/apply", async (JsonElement body, HubDb db) => await Tx.Run(db, async () => await Import(body, db, true)));
@@ -122,7 +153,7 @@ public static class OrgStructureEndpoints
 
     sealed record ImportRow(string UnitPath, string Level, string LeaderEmail, string Discipline, string Office, string Email, string ManagerEmail);
 
-    static async Task<IResult> Import(JsonElement body, HubDb db, bool apply)
+    static async Task<Results<Ok<ImportResult>, UnprocessableEntity<ImportValidation>>> Import(JsonElement body, HubDb db, bool apply)
     {
         var csv = body.ValueKind == JsonValueKind.String ? body.GetString() : body.TryGetProperty("csv", out var value) ? value.GetString() : null;
         Check.That(!string.IsNullOrWhiteSpace(csv), "csv", "error.required");
@@ -144,7 +175,7 @@ public static class OrgStructureEndpoints
         }
         string Normalize(string path) => string.Join(" / ", path.Split('/', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
         var byPath = planned.Values.ToDictionary(UnitPath, StringComparer.OrdinalIgnoreCase);
-        var changes = new List<object>();
+        var changes = new List<ImportChange>();
         foreach (var row in rows.Where(r => r.Level.Length > 0).OrderBy(r => r.UnitPath.Count(c => c == '/')))
         {
             var path = Normalize(row.UnitPath);
@@ -168,7 +199,7 @@ public static class OrgStructureEndpoints
             if (row.Office.Length > 0)
             { if (!offices.TryGetValue(row.Office, out var office)) errors.Add($"unknown office: {row.Office}"); else unit.OfficeId = office; }
             var original = existing.FirstOrDefault(u => u.Id == unit.Id);
-            changes.Add(new { kind = original == null ? "create" : original.LevelId != unit.LevelId || original.LeaderId != unit.LeaderId || original.DisciplineId != unit.DisciplineId || original.OfficeId != unit.OfficeId ? "update" : "unchanged", unitPath = path });
+            changes.Add(new ImportChange(original == null ? "create" : original.LevelId != unit.LevelId || original.LeaderId != unit.LeaderId || original.DisciplineId != unit.DisciplineId || original.OfficeId != unit.OfficeId ? "update" : "unchanged", UnitPath: path));
         }
         var orders = levels.Values.ToDictionary(l => l.Id, l => l.SortOrder);
         foreach (var unit in planned.Values)
@@ -185,14 +216,14 @@ public static class OrgStructureEndpoints
             if (row.ManagerEmail.Length > 0)
             { if (!userByEmail.TryGetValue(row.ManagerEmail, out var boss) || !boss.IsActive) errors.Add($"unknown manager: {row.ManagerEmail}"); else manager = boss.Id; }
             managers[user.Id] = manager;
-            placements.Add((user, unit, manager)); changes.Add(new { kind = unit != user.UnitId || manager != user.SupervisorId ? "move" : "unchanged", email = row.Email });
+            placements.Add((user, unit, manager)); changes.Add(new ImportChange(unit != user.UnitId || manager != user.SupervisorId ? "move" : "unchanged", Email: row.Email));
         }
         foreach (var placement in placements)
             if (OrgTree.CreatesCycle(placement.User.Id, placement.ManagerId, managers)) errors.Add($"manager cycle: {placement.User.Email}");
         if (errors.Count > 0)
         {
             if (apply) throw ApiException.Rule("org.import_invalid", "error.validation", new { errors, applied = false });
-            return Results.UnprocessableEntity(new { errors, applied = false });
+            return TypedResults.UnprocessableEntity(new ImportValidation(errors, false));
         }
         if (apply)
         {
@@ -206,7 +237,7 @@ public static class OrgStructureEndpoints
             foreach (var placement in placements) { placement.User.UnitId = placement.UnitId; placement.User.SupervisorId = placement.ManagerId; }
             await db.SaveChangesAsync();
         }
-        return Results.Ok(new { rows = rows.Count, changes, creates = planned.Count - existing.Count, applied = apply });
+        return TypedResults.Ok(new ImportResult(rows.Count, changes, planned.Count - existing.Count, apply));
     }
 
     static List<ImportRow> Parse(string csv)

@@ -91,4 +91,21 @@ public sealed class ScheduleBaselineTests(HubFactory f)
         }
         finally { await Flag("small_ux", false); }
     }
+    [Fact]
+    public async Task Task_activity_actor_preserves_enabled_null_and_disabled_omission()
+    {
+        var p = await d.Project();
+        var task = await d.NewTask(p.Id, TestData.Pm);
+        var id = task.G("id");
+        var rows = await f.DbAsync(db => Hub.Api.Features.TaskQueries.Rows(db, db.Tasks.Where(t => t.Id == id)));
+        var row = Assert.Single(rows);
+        var off = System.Text.Json.JsonSerializer.SerializeToNode(row, Hub.Api.Infrastructure.JsonOpts.Web)!.AsObject();
+        var on = System.Text.Json.JsonSerializer.SerializeToNode<Hub.Api.Features.TaskQueries.Row>(new Hub.Api.Features.TaskQueries.ActivityRow(row, null), Hub.Api.Infrastructure.JsonOpts.Web)!.AsObject();
+        Assert.False(off.ContainsKey("lastActivityActorName"));
+        Assert.True(on.ContainsKey("lastActivityActorName"));
+        Assert.Null(on["lastActivityActorName"]);
+        on.Remove("lastActivityActorName");
+        Assert.True(JsonNode.DeepEquals(off, on), "Enabling activity display must preserve every existing task field and add no type discriminator");
+    }
+
 }

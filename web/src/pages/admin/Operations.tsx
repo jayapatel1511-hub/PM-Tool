@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Empty, ErrorBanner, Loading, Missing, Section, tdCls, thCls } from '@/components/hub/common'
 import { Pill } from '@/components/hub/pills'
-import { get, post } from '@/lib/api'
+import { get, typedRequest } from '@/lib/api'
 import { ago, fmtTime } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 export { operationsRegistration } from '@/app/extension-slots'
@@ -21,7 +21,7 @@ const jobLabel = (job: string) => { const k = `ops.job.${job}`; const s = runtim
 
 export function Operations() {
   const q = useQuery({ queryKey: ['admin', 'operations'], queryFn: () => get<Ops>('admin/operations'), refetchInterval: 60_000 })
-  const retry = useMutation({ mutationFn: (id?: string) => post(`admin/operations/outbox/retry${id ? `?id=${id}` : ''}`), onSuccess: () => { void q.refetch() } })
+  const retry = useMutation({ mutationFn: (id?: string) => typedRequest('post', '/api/v1/admin/operations/outbox/retry', { query: { id }, body: {} }), onSuccess: () => { void q.refetch() } })
   if (q.isPending) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
   if (q.error) return <ErrorBanner error={q.error} retry={() => q.refetch()} />
   const d = q.data

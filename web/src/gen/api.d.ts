@@ -243,7 +243,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ActivityChainHead"][];
+                        "application/json": components["schemas"]["Head"][];
                     };
                 };
             };
@@ -1183,7 +1183,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RetryOutboxResponse"];
+                    };
                 };
             };
         };
@@ -1220,7 +1222,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ImportResult"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ImportValidation"];
+                    };
                 };
             };
         };
@@ -1257,7 +1270,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ImportResult"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ImportValidation"];
+                    };
                 };
             };
         };
@@ -1289,7 +1313,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["OrgLevel"][];
+                        "application/json": components["schemas"]["OrgLevelResponse"][];
                     };
                 };
             };
@@ -1308,12 +1332,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["OrgLevelResponse"];
+                    };
                 };
             };
         };
@@ -1350,7 +1376,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["OrgLevelResponse"][];
+                    };
                 };
             };
         };
@@ -1393,7 +1421,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["OrgLevelResponse"];
+                    };
                 };
             };
         };
@@ -1421,7 +1451,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["OrgUnit"][];
+                        "application/json": components["schemas"]["OrgUnitResponse"][];
                     };
                 };
             };
@@ -1440,12 +1470,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["OrgUnitResponse"];
+                    };
                 };
             };
         };
@@ -1488,7 +1520,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["OrgUnitResponse"];
+                    };
                 };
             };
         };
@@ -1514,8 +1548,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1557,8 +1591,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2444,7 +2478,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndstringAndboolean"][];
+                        "application/json": components["schemas"]["MissCategoryRow"][];
                     };
                 };
             };
@@ -2809,7 +2843,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfListOfDeliverableBaselineAndListOfAnonymousTypeOfGuidAndstringAndGuidAndAnonymousTypeOfdecimalAnddecimalAndintAndGuidAndGuid"];
+                        "application/json": components["schemas"]["History"];
                     };
                 };
             };
@@ -4497,6 +4531,15 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
+                    content: {
+                        "application/json": components["schemas"]["Response"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content?: never;
                 };
             };
@@ -4527,8 +4570,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4560,8 +4603,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4631,8 +4674,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4867,7 +4910,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["FollowUpResponse"];
                     };
                 };
             };
@@ -4902,7 +4945,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["FollowUpResponse"];
                     };
                 };
             };
@@ -5410,7 +5453,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfListOfAnonymousTypeOfGuidAndstringAndintAndListOfAnonymousTypeOfGuidAndstringAndGuidAndGuidAndstringAndGuidAndstringAndGuidAndGuidAndDateOnlyAndintAndListOfAnonymousTypeOfGuidAndintAndstringAndstringAndGuidAndGuidAndListOfAnonymousTypeOfGuidAndstringAndboolean"];
+                        "application/json": components["schemas"]["OrganisationResponse"];
                     };
                 };
             };
@@ -5447,7 +5490,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndGuid"][];
+                        "application/json": components["schemas"]["PlacementRow"][];
                     };
                 };
             };
@@ -5486,7 +5529,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TaskPickupListRow"][];
+                    };
                 };
             };
         };
@@ -5522,7 +5567,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfDateOnlyAndstringAnddecimalAnddecimalAndboolean"];
+                        "application/json": components["schemas"]["LoadResult"];
                     };
                 };
             };
@@ -6777,7 +6822,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ImportSummary"];
                     };
                 };
             };
@@ -6816,7 +6861,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ImportSummary"];
                     };
                 };
             };
@@ -7104,7 +7149,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["Integrity"];
+                    };
                 };
             };
         };
@@ -8246,7 +8293,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuid"];
+                        "application/json": components["schemas"]["LeadUnitResponse"];
                     };
                 };
             };
@@ -8997,7 +9044,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfObject"];
+                        "application/json": components["schemas"]["PageOfRow"];
                     };
                 };
             };
@@ -9450,7 +9497,9 @@ export interface paths {
         put?: never;
         post: {
             parameters: {
-                query?: never;
+                query?: {
+                    preview?: boolean;
+                };
                 header?: never;
                 path: {
                     projectId: string;
@@ -9469,7 +9518,28 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["CoordinationResult"];
+                        "application/json": {
+                            /** Format: uuid */
+                            id: string;
+                            /** Format: int32 */
+                            rowVersion: number;
+                        } | {
+                            preview: boolean;
+                            weeks: {
+                                band: string;
+                                /** Format: double */
+                                capacity: number;
+                                /** Format: double */
+                                free: number;
+                                indicators: string[];
+                                /** Format: uuid */
+                                personId: string;
+                                /** Format: double */
+                                planned: number;
+                                /** Format: date */
+                                week: string;
+                            }[];
+                        };
                     };
                 };
             };
@@ -9693,7 +9763,9 @@ export interface paths {
         put?: never;
         post: {
             parameters: {
-                query?: never;
+                query?: {
+                    preview?: boolean;
+                };
                 header?: never;
                 path: {
                     projectId: string;
@@ -9713,7 +9785,28 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["CoordinationResult"];
+                        "application/json": {
+                            /** Format: uuid */
+                            id: string;
+                            /** Format: int32 */
+                            rowVersion: number;
+                        } | {
+                            preview: boolean;
+                            weeks: {
+                                band: string;
+                                /** Format: double */
+                                capacity: number;
+                                /** Format: double */
+                                free: number;
+                                indicators: string[];
+                                /** Format: uuid */
+                                personId: string;
+                                /** Format: double */
+                                planned: number;
+                                /** Format: date */
+                                week: string;
+                            }[];
+                        };
                     };
                 };
             };
@@ -9815,7 +9908,9 @@ export interface paths {
         put?: never;
         post: {
             parameters: {
-                query?: never;
+                query?: {
+                    preview?: boolean;
+                };
                 header?: never;
                 path: {
                     projectId: string;
@@ -9835,7 +9930,28 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["CoordinationResult"];
+                        "application/json": {
+                            /** Format: uuid */
+                            id: string;
+                            /** Format: int32 */
+                            rowVersion: number;
+                        } | {
+                            preview: boolean;
+                            weeks: {
+                                band: string;
+                                /** Format: double */
+                                capacity: number;
+                                /** Format: double */
+                                free: number;
+                                indicators: string[];
+                                /** Format: uuid */
+                                personId: string;
+                                /** Format: double */
+                                planned: number;
+                                /** Format: date */
+                                week: string;
+                            }[];
+                        };
                     };
                 };
             };
@@ -10159,7 +10275,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["CommitmentReliabilityReadResponse"];
                     };
                 };
             };
@@ -12274,7 +12390,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfRevisionConventionAndDeliverableMarks[]"];
+                        "application/json": components["schemas"]["RevisionCheckReadResponse"];
                     };
                 };
             };
@@ -12299,7 +12415,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["WriteResponse"];
+                    };
                 };
             };
         };
@@ -13471,8 +13589,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -13632,7 +13750,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfObject"];
+                        "application/json": components["schemas"]["PageOfRow"];
                     };
                 };
             };
@@ -13669,7 +13787,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["TaskDetailResponse"];
                     };
                 };
             };
@@ -13789,7 +13907,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfObjectAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndObjectAndIEnumerableOfAnonymousTypeOfintAndGuidAndObject"];
+                        "application/json": components["schemas"]["AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow"];
                     };
                 };
             };
@@ -14043,7 +14161,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["PickupResult"];
+                    };
                 };
             };
         };
@@ -14076,7 +14196,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DetailResult"];
+                    };
                 };
             };
         };
@@ -14096,12 +14218,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["OfferCreated"];
+                    };
                 };
             };
         };
@@ -14116,8 +14240,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -14159,7 +14283,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["PickupResult"];
+                    };
                 };
             };
         };
@@ -15655,22 +15781,6 @@ export interface components {
             rowVersion: null | number;
             toStatus: string;
         };
-        ActivityChainHead: {
-            /** Format: int64 */
-            alertedBrokenSeq?: null | number;
-            /** Format: uuid */
-            chainId?: string;
-            /** Format: int64 */
-            firstBrokenSeq?: null | number;
-            headHash?: string;
-            /** Format: int64 */
-            headSeq?: number;
-            /** Format: date-time */
-            lastVerifiedAt?: null | string;
-            lastVerifiedHash?: string;
-            /** Format: int64 */
-            lastVerifiedSeq?: number;
-        };
         AdoptBody: {
             /** Format: uuid */
             expectedCurrentRevisionId: string;
@@ -15754,6 +15864,11 @@ export interface components {
             workId: string;
             workType: string;
         };
+        Allowed: {
+            assign: boolean;
+            pickUp: boolean;
+            withdraw: boolean;
+        };
         AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem: {
             items: null | components["schemas"]["OpenItem"][];
             person: components["schemas"]["AnonymousTypeOfGuidAndstringAndbooleanAndstring"];
@@ -15777,16 +15892,6 @@ export interface components {
             /** Format: double */
             hours: number;
         };
-        AnonymousTypeOfDateOnlyAndstringAnddecimalAnddecimalAndboolean: {
-            band: null | string;
-            /** Format: double */
-            capacity: number;
-            /** Format: double */
-            hours: null | number;
-            partial: boolean;
-            /** Format: date */
-            week: string;
-        };
         AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint: {
             /** Format: date-time */
             asOf: string;
@@ -15797,16 +15902,6 @@ export interface components {
             /** Format: int32 */
             pendingChanges: number;
             problems: null | components["schemas"]["OpsProblem"][];
-        };
-        AnonymousTypeOfGuid: {
-            /** Format: uuid */
-            leadUnitId: null | string;
-        };
-        AnonymousTypeOfGuidAndGuid: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            unitId: null | string;
         };
         AnonymousTypeOfGuidAndGuidAndstringAndDateOnlyAndstring: {
             /** Format: date */
@@ -15878,43 +15973,10 @@ export interface components {
             /** Format: int32 */
             sortOrder: number;
         };
-        AnonymousTypeOfGuidAndintAndstringAndstringAndGuidAndGuid: {
-            displayName: null | string;
-            email: null | string;
-            /** Format: uuid */
-            id: string;
-            /** Format: int32 */
-            rowVersion: number;
-            /** Format: uuid */
-            supervisorId: null | string;
-            /** Format: uuid */
-            unitId: null | string;
-        };
         AnonymousTypeOfGuidAndstring: {
-            displayName: null | string;
             /** Format: uuid */
             id: string;
-        };
-        AnonymousTypeOfGuidAndstringAndGuidAndGuidAndstringAndGuidAndstringAndGuidAndGuidAndDateOnlyAndint: {
-            /** Format: date */
-            closedOn: null | string;
-            /** Format: uuid */
-            disciplineId: null | string;
-            /** Format: int32 */
-            headCount: number;
-            /** Format: uuid */
-            id: string;
-            leader: null | string;
-            /** Format: uuid */
-            leaderId: null | string;
-            level: null | string;
-            /** Format: uuid */
-            levelId: string;
             name: null | string;
-            /** Format: uuid */
-            officeId: null | string;
-            /** Format: uuid */
-            parentId: null | string;
         };
         AnonymousTypeOfGuidAndstringAndGuidAndboolean: {
             /** Format: uuid */
@@ -15944,13 +16006,6 @@ export interface components {
             /** Format: uuid */
             id: string;
             isActive: boolean;
-        };
-        AnonymousTypeOfGuidAndstringAndint: {
-            /** Format: uuid */
-            id: string;
-            name: null | string;
-            /** Format: int32 */
-            sortOrder: number;
         };
         AnonymousTypeOfGuidAndstringAndstring: {
             displayName: null | string;
@@ -16129,13 +16184,6 @@ export interface components {
             manageReason: null | string;
             members: null | components["schemas"]["AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndboolean"][];
         };
-        AnonymousTypeOfListOfAnonymousTypeOfGuidAndstringAndintAndListOfAnonymousTypeOfGuidAndstringAndGuidAndGuidAndstringAndGuidAndstringAndGuidAndGuidAndDateOnlyAndintAndListOfAnonymousTypeOfGuidAndintAndstringAndstringAndGuidAndGuidAndListOfAnonymousTypeOfGuidAndstringAndboolean: {
-            includeIndirectReports: boolean;
-            levels: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndint"][];
-            managerCycles: null | components["schemas"]["AnonymousTypeOfGuidAndstring"][];
-            people: null | components["schemas"]["AnonymousTypeOfGuidAndintAndstringAndstringAndGuidAndGuid"][];
-            units: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndGuidAndGuidAndstringAndGuidAndstringAndGuidAndGuidAndDateOnlyAndint"][];
-        };
         AnonymousTypeOfListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndGuidAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndAnonymousTypeOfint: {
             clients: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndboolean"][];
             deliverableTypes: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndGuidAndboolean"][];
@@ -16144,13 +16192,6 @@ export interface components {
             offices: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndboolean"][];
             phases: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndbooleanAndint"][];
             projectTypes: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndboolean"][];
-        };
-        AnonymousTypeOfListOfDeliverableBaselineAndListOfAnonymousTypeOfGuidAndstringAndGuidAndAnonymousTypeOfdecimalAnddecimalAndintAndGuidAndGuid: {
-            /** Format: uuid */
-            current: null | string;
-            delta: components["schemas"]["AnonymousTypeOfdecimalAnddecimalAndintAndGuidAndGuid"];
-            people: null | components["schemas"]["AnonymousTypeOfGuidAndstring"][];
-            records: null | components["schemas"]["DeliverableBaseline"][];
         };
         AnonymousTypeOfListOfObjectAndListOfObject: {
             blocks: null | unknown[];
@@ -16170,13 +16211,6 @@ export interface components {
             isDefault: boolean;
             layout: null | components["schemas"]["Widget"][];
         };
-        AnonymousTypeOfObjectAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndObjectAndIEnumerableOfAnonymousTypeOfintAndGuidAndObject: {
-            /** Format: int32 */
-            depth: number;
-            predecessors: null | components["schemas"]["AnonymousTypeOfintAndGuidAndObject"][];
-            successors: null | components["schemas"]["AnonymousTypeOfintAndGuidAndObject"][];
-            task: unknown;
-        };
         AnonymousTypeOfObjectAndintAndstringAndstringAndbooleanAndboolean: {
             /** Format: int32 */
             count: number;
@@ -16186,9 +16220,12 @@ export interface components {
             projectNumber: null | string;
             unread: boolean;
         };
-        "AnonymousTypeOfRevisionConventionAndDeliverableMarks[]": {
-            convention: components["schemas"]["RevisionConvention"];
-            deliverables: null | components["schemas"]["DeliverableMarks"][];
+        AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow: {
+            /** Format: int32 */
+            depth: number;
+            predecessors: null | components["schemas"]["AnonymousTypeOfintAndGuidAndRow"][];
+            successors: null | components["schemas"]["AnonymousTypeOfintAndGuidAndRow"][];
+            task: components["schemas"]["TaskQueriesRow"];
         };
         AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray: {
             ownOnly: boolean;
@@ -16240,28 +16277,16 @@ export interface components {
             digestTimeLocal: null | string;
             weeklySummaryEnabled: boolean;
         };
-        AnonymousTypeOfdecimalAnddecimalAndintAndGuidAndGuid: {
-            /** Format: int32 */
-            dueDays: null | number;
-            /** Format: double */
-            estimateHours: number;
-            /** Format: uuid */
-            ownerAfter: null | string;
-            /** Format: uuid */
-            ownerBefore: null | string;
-            /** Format: double */
-            remainingHours: number;
-        };
         AnonymousTypeOfint: {
             /** Format: int32 */
             roleLabel: number;
         };
-        AnonymousTypeOfintAndGuidAndObject: {
+        AnonymousTypeOfintAndGuidAndRow: {
             /** Format: int32 */
             level: number;
             /** Format: uuid */
             parentId: string;
-            task: unknown;
+            task: components["schemas"]["TaskQueriesRow"];
         };
         AnonymousTypeOfintAndint: {
             /** Format: int32 */
@@ -16420,6 +16445,14 @@ export interface components {
             /** Format: date */
             throughDate: string;
         };
+        AwaitingRow: {
+            canConfirm: boolean;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
         BasisSuggestionBody: {
             declaredRevision: null | string;
             kind: string;
@@ -16449,6 +16482,11 @@ export interface components {
         CalendarFeedVersionBody: {
             /** Format: int32 */
             rowVersion: number;
+        };
+        Can: {
+            assign: boolean;
+            changeDue: boolean;
+            edit: boolean;
         };
         CapacityBody: {
             /** Format: double */
@@ -16569,6 +16607,21 @@ export interface components {
             /** Format: uuid */
             updatedBy?: null | string;
         };
+        CommitmentReliability: {
+            /** Format: int32 */
+            awaiting: number;
+            band: null | string;
+            /** Format: int32 */
+            committed: number;
+            /** Format: int32 */
+            met: number;
+            /** Format: int32 */
+            notYetRecorded: number;
+            /** Format: int32 */
+            percent: null | number;
+            /** Format: int32 */
+            withdrawn: number;
+        };
         CommitmentReliabilityConfirmBody: {
             reason?: null | string;
             /** Format: uuid */
@@ -16577,6 +16630,11 @@ export interface components {
             return: boolean;
             /** Format: int32 */
             rowVersion: number;
+        };
+        CommitmentReliabilityReadResponse: {
+            awaiting: components["schemas"]["AwaitingRow"][];
+            misses: components["schemas"]["MissRow"][];
+            snapshots: components["schemas"]["SnapshotRow"][];
         };
         CompleteBody: {
             /** Format: date */
@@ -16869,6 +16927,18 @@ export interface components {
             /** Format: uuid */
             updatedBy?: null | string;
         };
+        Delta: {
+            /** Format: int32 */
+            dueDays: null | number;
+            /** Format: double */
+            estimateHours: number;
+            /** Format: uuid */
+            ownerAfter: null | string;
+            /** Format: uuid */
+            ownerBefore: null | string;
+            /** Format: double */
+            remainingHours: number;
+        };
         DensityBody: {
             denseRows: boolean;
         };
@@ -16933,6 +17003,30 @@ export interface components {
             /** Format: uuid */
             requestId: string;
             version: components["schemas"]["VersionInput"];
+        };
+        DetailResult: {
+            allowed: components["schemas"]["Allowed"];
+            candidates: components["schemas"]["TaskPickupCandidate"][];
+            /** Format: uuid */
+            id: string;
+            keepWatching: boolean;
+            note: null | string;
+            /** Format: date-time */
+            openedAt: string;
+            reason: string;
+            /** Format: int32 */
+            rowVersion: number;
+            task: components["schemas"]["DetailTask"];
+        };
+        DetailTask: {
+            /** Format: date */
+            dueDate: null | string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            projectId: string;
         };
         DigestBody: {
             enabled: boolean;
@@ -17108,6 +17202,31 @@ export interface components {
         FollowBody: {
             level: string;
         };
+        FollowUpItem: {
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            itemType: string;
+            key: string;
+            /** Format: uuid */
+            ownerId: null | string;
+            ownerName: null | string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            status: string;
+            title: string;
+        };
+        FollowUpResponse: {
+            items: components["schemas"]["FollowUpItem"][];
+            /** Format: int32 */
+            total: number;
+        };
+        Group: {
+            role: string;
+            steps: components["schemas"]["Step"][];
+        };
         HandoffAssignBody: {
             reason: string;
             /** Format: uuid */
@@ -17128,12 +17247,35 @@ export interface components {
             rowVersion: null | number;
             toStatus: string;
         };
+        Head: {
+            /** Format: int64 */
+            alertedBrokenSeq: null | number;
+            /** Format: uuid */
+            chainId: string;
+            /** Format: int64 */
+            firstBrokenSeq: null | number;
+            headHash: string;
+            /** Format: int64 */
+            headSeq: number;
+            /** Format: date-time */
+            lastVerifiedAt: null | string;
+            lastVerifiedHash: string;
+            /** Format: int64 */
+            lastVerifiedSeq: number;
+        };
         HeaderBody: {
             description: null | string;
             name: string;
             offsetDayKind?: null | string;
             /** Format: uuid */
             projectTypeId: null | string;
+        };
+        History: {
+            /** Format: uuid */
+            current: null | string;
+            delta: null | components["schemas"]["Delta"];
+            people: components["schemas"]["Person"][];
+            records: components["schemas"]["DeliverableBaseline"][];
         };
         HolidayBody: {
             /** Format: date */
@@ -17167,6 +17309,44 @@ export interface components {
             /** Format: uuid */
             previewId: string;
             rows: components["schemas"]["AvailabilityImportRow"][];
+        };
+        ImportChange: {
+            email?: null | string;
+            kind: string;
+            unitPath?: null | string;
+        };
+        ImportResult: {
+            applied: boolean;
+            changes: components["schemas"]["ImportChange"][];
+            /** Format: int32 */
+            creates: number;
+            /** Format: int32 */
+            rows: number;
+        };
+        ImportSummary: {
+            canApply: boolean;
+            /** Format: int32 */
+            creates: number;
+            /** Format: int32 */
+            errors: number;
+            /** Format: int32 */
+            exists: number;
+            rows: components["schemas"]["ProjectImportImportRow"][];
+        };
+        ImportValidation: {
+            applied: boolean;
+            errors: string[];
+        };
+        Integrity: {
+            /** Format: date-time */
+            checkedAt: null | string;
+            /** Format: int64 */
+            entries: number;
+            /** Format: int64 */
+            firstBrokenSeq: null | number;
+            valid: null | boolean;
+            /** Format: int64 */
+            verifiedEntries: number;
         };
         IssueDocumentBody: {
             externalTopicId: null | string;
@@ -17262,6 +17442,10 @@ export interface components {
         LayoutBody: {
             widgets: components["schemas"]["Widget"][];
         };
+        LeadUnitResponse: {
+            /** Format: uuid */
+            leadUnitId: null | string;
+        };
         LevelBody: {
             name: string;
             /** Format: int32 */
@@ -17285,6 +17469,20 @@ export interface components {
             status: string;
             title: string;
             type: string;
+        };
+        ListTask: {
+            disciplineName: string;
+            /** Format: date */
+            dueDate: null | string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         LoadCell: {
             /** Format: double */
@@ -17340,6 +17538,16 @@ export interface components {
             /** Format: int32 */
             unestimated: number;
         };
+        LoadResult: {
+            band: null | string;
+            /** Format: double */
+            capacity: number;
+            /** Format: double */
+            hours: null | number;
+            partial: boolean;
+            /** Format: date */
+            week: string;
+        };
         LoadThresholds: {
             /** Format: int32 */
             amberPct: number;
@@ -17347,6 +17555,11 @@ export interface components {
             overPct: number;
             /** Format: int32 */
             underPct: number;
+        };
+        ManagerCycleRow: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
         };
         ManifestBody: {
             manifest: components["schemas"]["ManifestInput"][];
@@ -17443,6 +17656,20 @@ export interface components {
             /** Format: int32 */
             rowVersion: null | number;
         };
+        MissCategoryRow: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+        };
+        MissRow: {
+            category: null | string;
+            /** Format: uuid */
+            categoryId: null | string;
+            commitments: string[];
+            /** Format: int32 */
+            count: number;
+        };
         NoticeAction: {
             action: string;
             /** Format: uuid */
@@ -17461,6 +17688,10 @@ export interface components {
             neededBy: null | string;
             note: null | string;
             reason: string;
+        };
+        OfferCreated: {
+            /** Format: uuid */
+            taskId: string;
         };
         Office: {
             auditKey?: null | string;
@@ -17548,59 +17779,106 @@ export interface components {
         OrderBody: {
             taskIds: string[];
         };
-        OrgLevel: {
-            auditKey?: null | string;
-            auditName?: null | string;
+        OrgLevelResponse: {
+            auditKey: string;
+            auditName: string;
             /** Format: uuid */
-            auditProjectId?: null | string;
-            auditType?: null | string;
+            auditProjectId: null | string;
+            auditType: string;
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             /** Format: uuid */
-            createdBy?: null | string;
+            createdBy: null | string;
             /** Format: uuid */
-            id?: string;
-            name?: string;
+            id: string;
+            name: string;
             /** Format: int32 */
-            rowVersion?: number;
+            rowVersion: number;
             /** Format: int32 */
-            sortOrder?: number;
+            sortOrder: number;
             /** Format: date-time */
-            updatedAt?: string;
+            updatedAt: string;
             /** Format: uuid */
-            updatedBy?: null | string;
+            updatedBy: null | string;
         };
-        OrgUnit: {
-            auditKey?: null | string;
-            auditName?: null | string;
+        OrgUnitResponse: {
+            auditKey: string;
+            auditName: string;
             /** Format: uuid */
-            auditProjectId?: null | string;
-            auditType?: null | string;
+            auditProjectId: null | string;
+            auditType: string;
             /** Format: date */
-            closedOn?: null | string;
+            closedOn: null | string;
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             /** Format: uuid */
-            createdBy?: null | string;
+            createdBy: null | string;
             /** Format: uuid */
-            disciplineId?: null | string;
+            disciplineId: null | string;
             /** Format: uuid */
-            id?: string;
+            id: string;
             /** Format: uuid */
-            leaderId?: null | string;
+            leaderId: null | string;
             /** Format: uuid */
-            levelId?: string;
-            name?: string;
+            levelId: string;
+            name: string;
             /** Format: uuid */
-            officeId?: null | string;
+            officeId: null | string;
             /** Format: uuid */
-            parentId?: null | string;
+            parentId: null | string;
             /** Format: int32 */
-            rowVersion?: number;
+            rowVersion: number;
             /** Format: date-time */
-            updatedAt?: string;
+            updatedAt: string;
             /** Format: uuid */
-            updatedBy?: null | string;
+            updatedBy: null | string;
+        };
+        OrganisationLevelRow: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: int32 */
+            sortOrder: number;
+        };
+        OrganisationPersonRow: {
+            displayName: string;
+            email: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: uuid */
+            supervisorId: null | string;
+            /** Format: uuid */
+            unitId: null | string;
+        };
+        OrganisationResponse: {
+            includeIndirectReports: boolean;
+            levels: components["schemas"]["OrganisationLevelRow"][];
+            managerCycles: null | components["schemas"]["ManagerCycleRow"][];
+            people: components["schemas"]["OrganisationPersonRow"][];
+            units: components["schemas"]["OrganisationUnitRow"][];
+        };
+        OrganisationUnitRow: {
+            /** Format: date */
+            closedOn: null | string;
+            /** Format: uuid */
+            disciplineId: null | string;
+            /** Format: int32 */
+            headCount: number;
+            /** Format: uuid */
+            id: string;
+            leader: null | string;
+            /** Format: uuid */
+            leaderId: null | string;
+            level: null | string;
+            /** Format: uuid */
+            levelId: string;
+            name: string;
+            /** Format: uuid */
+            officeId: null | string;
+            /** Format: uuid */
+            parentId: null | string;
         };
         OverrideBody: {
             health: string;
@@ -17630,6 +17908,17 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
+        PageOfRow: {
+            filters?: unknown;
+            items: components["schemas"]["TaskQueriesRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
         PartyBody: {
             email: null | string;
             isClient: null | boolean;
@@ -17637,6 +17926,11 @@ export interface components {
             notes: null | string;
             organisation: null | string;
             role: null | string;
+        };
+        Person: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
         };
         Phase: {
             auditKey?: null | string;
@@ -17680,9 +17974,22 @@ export interface components {
             /** Format: int32 */
             rowVersion: null | number;
         };
+        PickupResult: {
+            /** Format: uuid */
+            assigneeId: null | string;
+            closeCause: null | string;
+            /** Format: uuid */
+            id: string;
+        };
         PlacementBody: {
             /** Format: int32 */
             rowVersion?: null | number;
+            /** Format: uuid */
+            unitId: null | string;
+        };
+        PlacementRow: {
+            /** Format: uuid */
+            id: string;
             /** Format: uuid */
             unitId: null | string;
         };
@@ -17824,6 +18131,23 @@ export interface components {
         };
         ProjectImportBody: {
             csv: string;
+        };
+        ProjectImportImportRow: {
+            classification: string;
+            client: string;
+            /** Format: uuid */
+            clientId?: null | string;
+            error: null | string;
+            name: string;
+            office: string;
+            /** Format: uuid */
+            officeId?: null | string;
+            projectManagerEmail: string;
+            /** Format: uuid */
+            projectManagerId?: null | string;
+            projectNumber: string;
+            /** Format: int32 */
+            row: number;
         };
         ProjectTransitionBody: {
             closeout: null | components["schemas"]["Closeout"];
@@ -18004,6 +18328,19 @@ export interface components {
             /** Format: int32 */
             resolutionVersionRowVersion: number;
         };
+        Response: {
+            /** Format: int32 */
+            completed: number;
+            done: boolean;
+            groups: components["schemas"]["Group"][];
+            hidden: boolean;
+            /** Format: int32 */
+            total: number;
+        };
+        RetryOutboxResponse: {
+            /** Format: int32 */
+            retried: number;
+        };
         ReuseBody: {
             links: null | components["schemas"]["DecisionLinkInput"][];
             reason: null | string;
@@ -18042,6 +18379,10 @@ export interface components {
             requestId: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        RevisionCheckReadResponse: {
+            convention: null | components["schemas"]["RevisionConvention"];
+            deliverables: components["schemas"]["DeliverableMarks"][];
         };
         RevisionConvention: {
             codes?: null | string[];
@@ -18168,6 +18509,15 @@ export interface components {
             /** Format: date */
             weekStart: string;
         };
+        SnapshotRow: {
+            /** Format: date-time */
+            capturedAt: string;
+            /** Format: uuid */
+            id: string;
+            reliability: components["schemas"]["CommitmentReliability"];
+            /** Format: date */
+            weekStart: string;
+        };
         SnoozeBody: {
             /** Format: int32 */
             days: number;
@@ -18179,6 +18529,43 @@ export interface components {
             requestId: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        State: {
+            affectedMilestoneIds: string[];
+            blockedBy: null | components["schemas"]["JsonElement"];
+            /** Format: date */
+            blockedSince: null | string;
+            /** Format: int32 */
+            blockingCount: number;
+            blockingTaskIds: string[];
+            /** Format: int32 */
+            daysBlocked: number;
+            /** Format: int32 */
+            daysOverdue: number;
+            /** Format: date-time */
+            evaluatedAt: string;
+            inconsistencyDetail: null | components["schemas"]["JsonElement"];
+            isBlocked: boolean;
+            isBlocking: boolean;
+            isDateInconsistent: boolean;
+            isDueSoon: boolean;
+            isHeldPastDue: boolean;
+            isInactiveOwner: boolean;
+            isMissingDueDate: boolean;
+            isOverdue: boolean;
+            isReviewStalled: boolean;
+            isStale: boolean;
+            isUnassigned: boolean;
+            isWaiting: boolean;
+            notes: string[];
+            /** Format: int32 */
+            staleDays: number;
+        };
+        Step: {
+            done: boolean;
+            key: string;
+            label: string;
+            route: null | string;
         };
         StructureBody: {
             deliverables: components["schemas"]["DeliverableIn"][];
@@ -18287,6 +18674,70 @@ export interface components {
             /** Format: date */
             startDate: null | string;
         };
+        TaskDetailCollaborator: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+        };
+        TaskDetailPermission: {
+            ok: boolean;
+            reason: null | string;
+        };
+        TaskDetailPermissions: {
+            allowSelfReview: boolean;
+            assign: components["schemas"]["TaskDetailPermission"];
+            authoriseStart: boolean;
+            block: components["schemas"]["TaskDetailPermission"];
+            comment: boolean;
+            completeHint: null | string;
+            delete: components["schemas"]["TaskDetailPermission"];
+            dependencies: boolean;
+            dueDate: components["schemas"]["TaskDetailPermission"];
+            dueNeedsReason: boolean;
+            edit: components["schemas"]["TaskDetailPermission"];
+            enterTime: boolean;
+            isReviewer: boolean;
+            needsReason: boolean;
+            offerPickup?: null | boolean;
+            restore: boolean;
+            setReviewer: components["schemas"]["TaskDetailPermission"];
+            transitions: components["schemas"]["TaskDetailTransition"][];
+        };
+        TaskDetailProject: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+            status: string;
+        };
+        TaskDetailResponse: {
+            cancelledReason: null | string;
+            collaborators: components["schemas"]["TaskDetailCollaborator"][];
+            description: null | string;
+            onHoldReason: null | string;
+            permissions: components["schemas"]["TaskDetailPermissions"];
+            previousStatus: null | string;
+            project: components["schemas"]["TaskDetailProject"];
+            relatedDeliverables?: null | components["schemas"]["TaskRelatedDeliverable"][];
+            /** Format: date-time */
+            reviewRequestedAt: null | string;
+            task: components["schemas"]["TaskQueriesRow"];
+            watchers: components["schemas"]["TaskDetailWatcher"][];
+        };
+        TaskDetailTransition: {
+            allowed: boolean;
+            needsReason: boolean;
+            reason: null | string;
+            to: string;
+            via: null | string;
+        };
+        TaskDetailWatcher: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            source: string;
+        };
         TaskIn: {
             assignTo: null | string;
             deliverableRef: null | string;
@@ -18307,6 +18758,223 @@ export interface components {
             rowVersion: null | number;
             /** Format: uuid */
             userId: string;
+        };
+        TaskPickupCandidate: {
+            displayName: null | string;
+            /** Format: uuid */
+            id: string;
+        };
+        TaskPickupListRow: {
+            /** Format: double */
+            hoursRemaining: null | number;
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            neededBy: null | string;
+            note: null | string;
+            offeredBy: string;
+            /** Format: uuid */
+            offeredById: string;
+            /** Format: date-time */
+            openedAt: string;
+            reason: string;
+            task: components["schemas"]["ListTask"];
+            /** Format: uuid */
+            taskId: string;
+        };
+        TaskQueriesRow: components["schemas"]["TaskQueriesRowActivityRow"] | components["schemas"]["TaskQueriesRowBase"];
+        TaskQueriesRowActivityRow: {
+            assigneeActive?: boolean;
+            /** Format: uuid */
+            assigneeId?: null | string;
+            assigneeName?: null | string;
+            can?: null | components["schemas"]["Can"];
+            collaboratorIds?: string[];
+            /** Format: int32 */
+            commentCount?: number;
+            /** Format: date-time */
+            completedAt?: null | string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: uuid */
+            createdBy?: null | string;
+            createdByName?: null | string;
+            /** Format: date */
+            deliverableDueDate?: null | string;
+            /** Format: uuid */
+            deliverableId?: null | string;
+            deliverableKey?: null | string;
+            deliverableName?: null | string;
+            /** Format: int32 */
+            deliverableOrder?: null | number;
+            deliverableStatus?: null | string;
+            disciplineCode?: string;
+            disciplineColour?: null | string;
+            disciplineName?: string;
+            /** Format: int32 */
+            disciplineOrder?: number;
+            /** Format: date */
+            dueDate?: null | string;
+            /** Format: int32 */
+            dueDateChangeCount?: number;
+            /** Format: uuid */
+            effectiveMilestoneId?: null | string;
+            /** Format: double */
+            estimatedHours?: null | number;
+            /** Format: uuid */
+            id?: string;
+            key?: string;
+            lane?: string;
+            lastActivityActorName?: null | string;
+            /** Format: date-time */
+            lastActivityAt?: string;
+            manualBlockReason?: null | string;
+            /** Format: date-time */
+            manualBlockSetAt?: null | string;
+            manualBlockType?: null | string;
+            /** Format: date */
+            milestoneDate?: null | string;
+            milestoneDerived?: boolean;
+            /** Format: uuid */
+            milestoneId?: null | string;
+            milestoneKey?: null | string;
+            milestoneName?: null | string;
+            name?: string;
+            /** Format: date */
+            originalDueDate?: null | string;
+            /** Format: date */
+            originalStartDate?: null | string;
+            pickupOfferOpen?: null | boolean;
+            /** Format: int32 */
+            predecessorCount?: number;
+            priority?: string;
+            /** Format: int32 */
+            progressPct?: number;
+            /** Format: uuid */
+            projectDisciplineId?: string;
+            /** Format: uuid */
+            projectId?: string;
+            projectName?: string;
+            projectNumber?: string;
+            projectStatus?: string;
+            requiresReview?: boolean;
+            /** Format: int32 */
+            reviewRound?: number;
+            /** Format: uuid */
+            reviewerId?: null | string;
+            reviewerName?: null | string;
+            /** Format: int32 */
+            rowVersion?: number;
+            /** Format: int32 */
+            sortOrder?: number;
+            /** Format: date */
+            startDate?: null | string;
+            state?: null | components["schemas"]["State"];
+            status?: string;
+            /** Format: date-time */
+            statusChangedAt?: null | string;
+            /** Format: int32 */
+            successorCount?: number;
+        };
+        TaskQueriesRowBase: {
+            assigneeActive: boolean;
+            /** Format: uuid */
+            assigneeId: null | string;
+            assigneeName: null | string;
+            can: null | components["schemas"]["Can"];
+            collaboratorIds: string[];
+            /** Format: int32 */
+            commentCount: number | string;
+            /** Format: date-time */
+            completedAt: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            createdByName: null | string;
+            /** Format: date */
+            deliverableDueDate: null | string;
+            /** Format: uuid */
+            deliverableId: null | string;
+            deliverableKey: null | string;
+            deliverableName: null | string;
+            /** Format: int32 */
+            deliverableOrder: null | number | string;
+            deliverableStatus: null | string;
+            disciplineCode: string;
+            disciplineColour: null | string;
+            disciplineName: string;
+            /** Format: int32 */
+            disciplineOrder: number | string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: int32 */
+            dueDateChangeCount: number | string;
+            /** Format: uuid */
+            effectiveMilestoneId: null | string;
+            /** Format: double */
+            estimatedHours: null | number | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            lane: string;
+            lastActivityActorName?: null | string;
+            /** Format: date-time */
+            lastActivityAt: string;
+            manualBlockReason: null | string;
+            /** Format: date-time */
+            manualBlockSetAt: null | string;
+            manualBlockType: null | string;
+            /** Format: date */
+            milestoneDate: null | string;
+            milestoneDerived: boolean;
+            /** Format: uuid */
+            milestoneId: null | string;
+            milestoneKey: null | string;
+            milestoneName: null | string;
+            name: string;
+            /** Format: date */
+            originalDueDate: null | string;
+            /** Format: date */
+            originalStartDate: null | string;
+            pickupOfferOpen?: null | boolean;
+            /** Format: int32 */
+            predecessorCount: number | string;
+            priority: string;
+            /** Format: int32 */
+            progressPct: number | string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+            projectStatus: string;
+            requiresReview: boolean;
+            /** Format: int32 */
+            reviewRound: number | string;
+            /** Format: uuid */
+            reviewerId: null | string;
+            reviewerName: null | string;
+            /** Format: int32 */
+            rowVersion: number | string;
+            /** Format: int32 */
+            sortOrder: number | string;
+            /** Format: date */
+            startDate: null | string;
+            state: null | components["schemas"]["State"];
+            status: string;
+            /** Format: date-time */
+            statusChangedAt: null | string;
+            /** Format: int32 */
+            successorCount: number | string;
+        };
+        TaskRelatedDeliverable: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            status: string;
         };
         TaskTransitionBody: {
             acknowledgeReadiness?: null | boolean;
@@ -18575,6 +19243,13 @@ export interface components {
             id: string;
             name: string;
             projectIds: string[];
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        WriteResponse: {
+            convention: null | components["schemas"]["RevisionConvention"];
+            /** Format: uuid */
+            id: string;
             /** Format: int32 */
             rowVersion: number;
         };

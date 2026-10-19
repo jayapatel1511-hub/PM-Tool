@@ -6,7 +6,8 @@ import { Empty, ErrorBanner, Loading, Page } from '@/components/hub/common'
 import { Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { get, post, qs } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { useFlag } from '@/lib/auth'
 import { t } from '@/lib/i18n'
 import { weekOf } from '@/components/hub/people'
@@ -31,14 +32,14 @@ export function PickupPage() {
   const projects = useScopeProjects(scope)
   const qc = useQueryClient()
   const filters = { projectId: sp.get('projectId') ?? '', disciplineId: sp.get('disciplineId') ?? '', neededBy: sp.get('neededBy') ?? '' }
-  const q = useQuery({ queryKey: ['pickup-offers', filters], enabled, queryFn: () => get<PickupOffer[]>(`pickup-offers${qs(filters)}`) })
+  const q = useQuery({ queryKey: ['pickup-offers', filters], enabled, queryFn: () => typedRequest('get', '/api/v1/pickup-offers', { query: filters }) })
   const disciplines = [...new Map((q.data ?? []).map((o) => [o.task.projectDisciplineId, o.task.disciplineName ?? o.task.projectDisciplineId])).entries()]
   const [selected, setSelected] = useState<PickupOffer | null>(null)
   const [busy, setBusy] = useState(false)
   const pick = async () => {
     if (!selected) return
     setBusy(true)
-    try { await post(`tasks/${selected.taskId}/pickup`, { rowVersion: selected.task.rowVersion ?? selected.rowVersion }); toast.success('Task picked up'); setSelected(null); qc.invalidateQueries({ queryKey: ['pickup-offers'] }); qc.invalidateQueries({ queryKey: ['pickup-own-load'] }) }
+    try { await typedRequest('post', '/api/v1/tasks/{id}/pickup', { params: { id: selected.taskId }, body: { rowVersion: selected.task.rowVersion ?? selected.rowVersion ?? null } }); toast.success('Task picked up'); setSelected(null); invalidateChange(qc, 'TaskPickupOffer', selected.task.projectId, selected.taskId) }
     catch (e) { toast.error(errorText(e)) } finally { setBusy(false) }
   }
   if (!enabled) return <Page title="Open for pickup" subtitle="This feature is not enabled for your organisation."><></></Page>
@@ -74,7 +75,7 @@ export default PickupPage
 
 function OwnLoadHint({ date }: { date?: string }) {
   const week = weekOf(date ?? today())
-  const q = useQuery({ queryKey: ['pickup-own-load', week], queryFn: () => get<{ week: string; band: string | null; hours: number | null; capacity: number; partial: boolean }>(`pickup-offers/my-load?week=${week}`) })
+  const q = useQuery({ queryKey: ['pickup-own-load', week], queryFn: () => typedRequest('get', '/api/v1/pickup-offers/my-load', { query: { week } }) })
   if (q.error) return <span className="text-xs text-muted-foreground">{t('pickup.loadUnavailable')}</span>
   if (!q.data) return null
   return <span className="text-xs text-muted-foreground">{q.data.partial ? t('workload.partial') : t('pickup.ownLoad', { week: fmtDate(q.data.week), band: q.data.band ?? '—', hours: q.data.hours ?? '—', capacity: q.data.capacity })}</span>

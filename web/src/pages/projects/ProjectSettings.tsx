@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh, useReference } from '@/hooks/data'
-import { ApiError, del, get, patch, post, put } from '@/lib/api'
+import { ApiError, del, get, patch, post, typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { runtimeText, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -27,8 +28,8 @@ export function ProjectSettingsTab() {
   const revisionEnabled = useFlag('revision_check')
   const ref = useReference()
   const structure = useQuery({ queryKey: ['organisation'], queryFn: () => get<{ units: { id: string; name: string; parentId?: string | null; closedOn?: string | null }[] }>('organisation'), enabled: structureEnabled })
-  const leadUnit = useQuery({ queryKey: ['project', p.id, 'lead-unit'], queryFn: () => get<{ leadUnitId?: string | null }>(`projects/${p.id}/lead-unit`), enabled: structureEnabled })
-  const revision = useQuery({ queryKey: ['project', p.id, 'revision-check'], queryFn: () => get<RevisionCheck>(`projects/${p.id}/revision-check`), enabled: revisionEnabled })
+  const leadUnit = useQuery({ queryKey: ['project', p.id, 'lead-unit'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/lead-unit', { params: { id: p.id } }), enabled: structureEnabled })
+  const revision = useQuery({ queryKey: ['project', p.id, 'revision-check'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/revision-check', { params: { projectId: p.id } }), enabled: revisionEnabled })
   const refresh = useProjectRefresh()
   const navigate = useNavigate()
   const canEdit = p.permissions.edit.ok
@@ -165,14 +166,14 @@ export function ProjectSettingsTab() {
   )
 }
 
-type RevisionCheck = { convention: { preset?: string | null; codes?: string[] | null } | null; deliverables: { id: string; marks: string[]; issues: { id: string; revision: string; marks: string[] }[] }[] }
+type RevisionCheck = { convention: { preset?: string | null; codes?: string[] | null } | null; deliverables: { id: string; marks: string[]; issues: { id: string; revision: string | null; marks: string[] }[] }[] }
 function RevisionCheckSection({ projectId, rowVersion, initial, canEdit }: { projectId: string; rowVersion: number; initial?: RevisionCheck; canEdit: boolean }) {
   const qc = useQueryClient()
   const refresh = useProjectRefresh()
   const [preset, setPreset] = useState<string | null>(null); const [codes, setCodes] = useState(''); const [saving, setSaving] = useState(false); const [error, setError] = useState<Error | null>(null)
   useEffect(() => { setPreset(null); setCodes(initial?.convention?.codes?.join(', ') ?? '') }, [initial])
   const selected = preset ?? initial?.convention?.preset ?? ''
-  const save = async () => { setSaving(true); setError(null); try { await put(`projects/${projectId}/revision-check`, { rowVersion, preset: selected || null, codes: selected === 'custom' ? codes.split(',').map((x) => x.trim()).filter(Boolean) : null }); await qc.invalidateQueries({ queryKey: ['project', projectId, 'revision-check'] }); refresh(projectId) } catch (e) { setError(e instanceof Error ? e : new Error(String(e))) } finally { setSaving(false) } }
+  const save = async () => { setSaving(true); setError(null); try { await typedRequest('put', '/api/v1/projects/{projectId}/revision-check', { params: { projectId }, body: { rowVersion, preset: selected || null, codes: selected === 'custom' ? codes.split(',').map((x) => x.trim()).filter(Boolean) : null } }); await invalidateChange(qc, 'Project', projectId); refresh(projectId) } catch (e) { setError(e instanceof Error ? e : new Error(String(e))) } finally { setSaving(false) } }
   return <Section title={t('revisionCheck.title')}><div className="space-y-3 px-5 py-4"><div className="flex flex-wrap items-end gap-3"><Field label={t('revisionCheck.convention')} htmlFor="revision-preset"><select id="revision-preset" className={selectCls} value={selected} disabled={!canEdit || saving} onChange={(e) => { setPreset(e.target.value); if (e.target.value !== 'custom') setCodes('') }}><option value="">{t('revisionCheck.none')}</option><option value="letters">{t('revisionCheck.letters')}</option><option value="numbers">{t('revisionCheck.numbers')}</option><option value="pc">{t('revisionCheck.pc')}</option><option value="custom">{t('revisionCheck.custom')}</option></select></Field>{selected === 'custom' && <Field label={t('revisionCheck.customCodes')} htmlFor="revision-codes"><Input id="revision-codes" value={codes} onChange={(e) => setCodes(e.target.value)} placeholder="A, B, C" /></Field>}{canEdit && <Button disabled={saving} onClick={() => void save()}>{saving ? <Spinner /> : null}{saving ? t('common.saving') : t('common.save')}</Button>}</div>{error && <ErrorBanner error={error} />} {initial?.deliverables.some((d) => d.issues.length > 0) && <div className="space-y-2 text-sm"><h4 className="font-semibold">{t('revisionCheck.warnings')}</h4>{initial.deliverables.flatMap((d) => d.issues.filter((i) => i.marks.length > 0).map((i) => <p key={i.id} className="rounded-md border border-warn/40 bg-warn-bg px-3 py-2">{i.revision}: {i.marks.join(', ')}</p>))}</div>}</div></Section>
 }
 

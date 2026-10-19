@@ -31,12 +31,13 @@ export const itemKeys: Readonly<Record<string, readonly string[]>> = {
   OrgLevel: ['admin', 'organisation', 'organisation-placements', 'staff', 'workload', 'planning-grid', 'report'],
   OrgUnit: ['admin', 'organisation', 'organisation-placements', 'staff', 'workload', 'planning-grid', 'report'],
   CommitmentMissCategory: ['admin', 'weekly-promise', 'readiness-detail'],
+  UserPreferences: ['onboarding', 'me'],
   Project: ['projects-pick', 'planner-projects-filter', 'workspace-coordination', 'portfolio', 'workload'],
   Member: ['coord-options', 'staff', 'workload', 'workspace-coordination'],
 }
 
 const coordination = ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'submission-choices', 'deliverable', 'workspace-coordination', 'coordination']
-const readiness = ['weekly-promise', 'readiness-constraint', 'readiness-detail', 'readiness-constraints', 'readiness-prerequisites', 'readiness-assumptions', 'task-start', 'coordination', 'workspace-coordination']
+const readiness = ['commitment-reliability', 'weekly-promise', 'readiness-constraint', 'readiness-detail', 'readiness-constraints', 'readiness-prerequisites', 'readiness-assumptions', 'task-start', 'coordination', 'workspace-coordination']
 const basis = ['design-basis', 'design-basis-detail', 'readiness-assumptions', 'basis-decision-options']
 
 export function keysForChange(itemType?: string, projectId?: string, itemId?: string): QueryKey[] {
@@ -55,7 +56,7 @@ export function keysForChange(itemType?: string, projectId?: string, itemId?: st
 }
 
 export function invalidateChange(qc: QueryClient, itemType?: string, projectId?: string, itemId?: string) {
-  for (const queryKey of keysForChange(itemType, projectId, itemId)) void qc.invalidateQueries({ queryKey })
+  return Promise.all(keysForChange(itemType, projectId, itemId).map(queryKey => qc.invalidateQueries({ queryKey })))
 }
 
 /** Keep both passes: derived project state lands after the command (§23.5). */

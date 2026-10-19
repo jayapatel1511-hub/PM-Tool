@@ -6,7 +6,7 @@ import { ActiveFilters, Empty, ErrorBanner, Field, FilterBar, Loading, Page, sel
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { get, qs } from '@/lib/api'
+import { get, qs, typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import { useItemPanel } from '@/components/hub/panel-host'
@@ -24,7 +24,7 @@ export function ProjectActivityTab() {
   const small = useFlag('small_ux')
   const burst = (useMe().settings as {activityBurstMinutes?:number}).activityBurstMinutes ?? 10
   const chain = useFlag('verifiable_log')
-  const integrity = useQuery({ queryKey: ['p', p.id, 'integrity'], enabled: chain, queryFn: () => get<{ entries: number; checkedAt?: string; valid?: boolean; firstBrokenSeq?: number } | null>(`projects/${p.id}/activity/integrity`) })
+  const integrity = useQuery({ queryKey: ['p', p.id, 'integrity'], enabled: chain, queryFn: () => typedRequest('get', '/api/v1/projects/{id}/activity/integrity', { params: { id: p.id } }) })
   const [sp, setSp] = useSearchParams()
   const open = useItemPanel()
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); if (k !== 'page') n.delete('page'); setSp(n, { replace: true }) }

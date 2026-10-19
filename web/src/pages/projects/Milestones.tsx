@@ -16,7 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh, useReference } from '@/hooks/data'
-import { ApiError, get, patch, post, qs } from '@/lib/api'
+import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { daysBetween, fmtDate, relative, shortDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
@@ -464,14 +464,13 @@ export function MilestonePanel({ id }: PanelProps) {
   const q = useQuery({ queryKey: ['milestone', id], queryFn: () => get(`milestones/${id}`) })
   const [tab, setTab] = useState<'deliverables' | 'comments' | 'history'>('deliverables')
   const [baseline, setBaseline] = useState<'set' | 'clear' | null>(null)
-  const qc = useQueryClient()
   const refresh = useProjectRefresh()
   const ref = useReference()
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-6"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const m: MilestoneRow = q.data.milestone
   const can = q.data.permissions.manage.ok
-  const save = (body: object) => patch(`milestones/${m.id}`, body, m.rowVersion).then(() => { qc.invalidateQueries({ queryKey: ['milestone', id] }); refresh(m.projectId) })
+  const save = (body: object) => patch(`milestones/${m.id}`, body, m.rowVersion).then(() => { refresh(m.projectId) })
   // Phones read the milestone; editing it is desktop/tablet only (§13.0).
   const text = (value: string | undefined, onSave: (v: string | null) => Promise<unknown>, multiline?: boolean) => (
     <DesktopOnly notice={<InlineText value={value} multiline={multiline} disabled onSave={onSave} />}><InlineText value={value} multiline={multiline} disabled={!can} onSave={onSave} /></DesktopOnly>
@@ -502,7 +501,7 @@ export function MilestonePanel({ id }: PanelProps) {
       {tab === 'comments' && <CommentsSlot type="Milestone" id={m.id} projectId={m.projectId} />}
       {tab === 'history' && <HistoryList type="Milestone" id={m.id} />}
       {baseline && <ConfirmDialog open onOpenChange={(o) => !o && setBaseline(null)} title={baseline === 'clear' ? t('baseline.useOriginal') : t('baseline.rebaseline')} reason
-        onConfirm={async (reason) => { await post(`milestones/${m.id}/rebaseline`, { reason, clear: baseline === 'clear', rowVersion: m.rowVersion }); setBaseline(null); qc.invalidateQueries({ queryKey: ['milestone', id] }); refresh(m.projectId) }} />}
+        onConfirm={async (reason) => { await typedRequest('post', '/api/v1/milestones/{id}/rebaseline', { params: { id: m.id }, body: { reason, clear: baseline === 'clear', rowVersion: m.rowVersion } }); setBaseline(null); refresh(m.projectId) }} />}
     </div></PickerProject.Provider>
   )
 }

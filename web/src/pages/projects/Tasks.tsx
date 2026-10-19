@@ -19,7 +19,7 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh } from '@/hooks/data'
-import { ApiError, download, get, patch, post, qs } from '@/lib/api'
+import { ApiError, download, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { addDays, ago, fmtDate, hours, today } from '@/lib/format'
 import { runtimeText, plural, t, tv } from '@/lib/i18n'
@@ -530,7 +530,7 @@ function LiveTasksTab() {
   const actions = useTaskActions(reload)
   const startTask = async (r: TaskRow) => {
     try {
-      const detail = await get(`tasks/${r.id}`)
+      const detail = await typedRequest('get', '/api/v1/tasks/{id}', { params: { id: r.id } })
       const transition = detail.permissions.transitions.find((x: Transition) => x.to === 'In Progress')
       if (!transition?.allowed) { toast.error(transition?.reason ?? t('app.error')); return }
       await actions.move({ ...moveFrom(detail, transition), needsReason: transition.needsReason || detail.permissions.needsReason })

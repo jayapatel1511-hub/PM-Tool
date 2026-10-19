@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -11,6 +12,16 @@ public static class TaskPickupEndpoints
     public sealed record OfferBody(string Reason, decimal? HoursRemaining, DateOnly? NeededBy, string? Note, bool? KeepWatching = null);
     public sealed record PickupBody(int? RowVersion);
     public sealed record AssignBody(Guid UserId, int? RowVersion);
+    public sealed record OfferCreated(Guid TaskId);
+    public sealed record PickupResult(Guid Id, Guid? AssigneeId, string? CloseCause);
+    public sealed record LoadResult(DateOnly Week, string? Band, decimal? Hours, decimal Capacity, bool Partial);
+    public sealed record ListTask(string Key, string Name, Guid ProjectId, string ProjectNumber, Guid ProjectDisciplineId, string DisciplineName, DateOnly? DueDate, int RowVersion);
+    public sealed record ListRow(Guid Id, Guid TaskId, Guid OfferedById, string OfferedBy, string Reason, decimal? HoursRemaining, DateOnly? NeededBy, string? Note, DateTimeOffset OpenedAt, ListTask Task);
+    public sealed record DetailTask(string Key, string Name, Guid ProjectId, Guid ProjectDisciplineId, DateOnly? DueDate);
+    public sealed record Allowed(bool PickUp, bool Assign, bool Withdraw);
+    public sealed record Candidate(Guid Id, string? DisplayName);
+    public sealed record DetailResult(Guid Id, string Reason, string? Note, DateTimeOffset OpenedAt, bool KeepWatching, int RowVersion,
+        DetailTask Task, Allowed Allowed, IReadOnlyList<Candidate> Candidates);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -32,14 +43,14 @@ public static class TaskPickupEndpoints
                 && !visible.Contains(t.ProjectId) && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
                 || await db.Allocations.AnyAsync(a => a.PersonId == me.Id && a.Status == AllocationStatus.Confirmed && live.Contains(a.ProjectId)
                     && !visible.Contains(a.ProjectId) && a.FromDate <= weeks[0].AddDays(6) && a.ThroughDate >= weeks[0]));
-            return new { Week = weeks[0], Band = partial ? null : cell.Band.ToString(),
-                Hours = partial ? (decimal?)null : cell.Committed, Capacity = cell.Available, Partial = partial };
+            return TypedResults.Ok(new LoadResult(weeks[0], partial ? null : cell.Band.ToString(),
+                partial ? (decimal?)null : cell.Committed, cell.Available, partial));
         }).RequireFlag("task_pickup");
     }
 
     static async Task<bool> Enabled(HubDb db, SettingsStore store) => (await store.Get(db)).IsFlagOn("task_pickup");
 
-    static async Task<IResult> Offer(Guid id, OfferBody body, Access access, HubDb db, CurrentUser me, TimeProvider clock, SettingsStore store, Notifier notify)
+    static async Task<Created<OfferCreated>> Offer(Guid id, OfferBody body, Access access, HubDb db, CurrentUser me, TimeProvider clock, SettingsStore store, Notifier notify)
     {
         if (!await Enabled(db, store)) throw ApiException.NotFound();
         var (task, project, ctx) = await TaskEndpoints.Load(db, access, id);
@@ -72,10 +83,10 @@ public static class TaskPickupEndpoints
         var lead = await db.ProjectDisciplines.Where(d => d.Id == task.ProjectDisciplineId).Select(d => d.LeadUserId).FirstOrDefaultAsync(); recipients.Add(lead);
         await notify.Send(NotificationEvents.TaskPickupOffered, recipients, TaskEndpoints.Item(project, task), Text.Get("notify.task_pickup_offered", task.Key, task.Name), body.Reason.Trim());
         await db.SaveChangesAsync();
-        return Results.Created($"/api/v1/tasks/{id}/pickup-offer", new { taskId = id });
+        return TypedResults.Created($"/api/v1/tasks/{id}/pickup-offer", new OfferCreated(id));
     }
 
-    static async Task<IResult> Withdraw(Guid id, Access access, HubDb db, CurrentUser me, TimeProvider clock, SettingsStore store, Notifier notify)
+    static async Task<NoContent> Withdraw(Guid id, Access access, HubDb db, CurrentUser me, TimeProvider clock, SettingsStore store, Notifier notify)
     {
         if (!await Enabled(db, store)) throw ApiException.NotFound();
         var (task, _, ctx) = await TaskEndpoints.Load(db, access, id);
@@ -88,10 +99,10 @@ public static class TaskPickupEndpoints
         db.LogEvent(ItemType.Task, task.Id, "PickupWithdrawn", "assignment", task.ProjectId, task.Key, task.Name, reason: "withdrawn", disciplineId: task.ProjectDisciplineId);
         await notify.Send(NotificationEvents.TaskPickupClosed, offer.OfferedById, TaskEndpoints.Item(await db.Projects.FirstAsync(p => p.Id == task.ProjectId), task), Text.Get("notify.task_pickup_closed", task.Key, task.Name), "withdrawn");
         await db.SaveChangesAsync();
-        return Results.NoContent();
+        return TypedResults.NoContent();
     }
 
-    static async Task<IResult> PickUp(Guid id, PickupBody body, HttpContext http, Access access, HubDb db, CurrentUser me, TeamService team, TimeProvider clock, SettingsStore store, Notifier notify)
+    static async Task<Ok<PickupResult>> PickUp(Guid id, PickupBody body, HttpContext http, Access access, HubDb db, CurrentUser me, TeamService team, TimeProvider clock, SettingsStore store, Notifier notify)
     {
         if (!await Enabled(db, store)) throw ApiException.NotFound();
         var (task, project, ctx) = await TaskEndpoints.Load(db, access, id);
@@ -115,10 +126,10 @@ public static class TaskPickupEndpoints
             await notify.Send(NotificationEvents.TaskPickedUp, new Guid?[] { old, offer.OfferedById, manager, project.ProjectManagerId, lead }, TaskEndpoints.Item(project, task), Text.Get("notify.task_picked_up", task.Key, task.Name));
             return await db.SaveChangesAsync();
         });
-        return Results.Ok(new { task.Id, task.AssigneeId, offer.CloseCause });
+        return TypedResults.Ok(new PickupResult(task.Id, task.AssigneeId, offer.CloseCause));
     }
 
-    static async Task<IResult> Assign(Guid id, AssignBody body, HttpContext http, Access access, HubDb db, TeamService team, TimeProvider clock, SettingsStore store, Notifier notify)
+    static async Task<Ok<PickupResult>> Assign(Guid id, AssignBody body, HttpContext http, Access access, HubDb db, TeamService team, TimeProvider clock, SettingsStore store, Notifier notify)
     {
         if (!await Enabled(db, store)) throw ApiException.NotFound();
         var (task, project, ctx) = await TaskEndpoints.Load(db, access, id);
@@ -141,13 +152,13 @@ public static class TaskPickupEndpoints
             await notify.Send(NotificationEvents.TaskPickupAssigned, new Guid?[] { target.Id, old, offer.OfferedById }, TaskEndpoints.Item(project, task), Text.Get("notify.task_pickup_assigned", task.Key, task.Name));
             return await db.SaveChangesAsync();
         });
-        return Results.Ok(new { task.Id, task.AssigneeId, offer.CloseCause });
+        return TypedResults.Ok(new PickupResult(task.Id, task.AssigneeId, offer.CloseCause));
     }
 
-    static async Task<IResult> List(Access access, HubDb db, CurrentUser me, DateOnly? neededBy, Guid? projectId, Guid? disciplineId, Guid? taskId, SettingsStore store)
+    static async Task<Ok<IReadOnlyList<ListRow>>> List(Access access, HubDb db, CurrentUser me, DateOnly? neededBy, Guid? projectId, Guid? disciplineId, Guid? taskId, SettingsStore store)
     {
-        if (!await Enabled(db, store)) return Results.Ok(Array.Empty<object>());
-        if (access.Actor.ReadOnly) return Results.Ok(Array.Empty<object>());
+        if (!await Enabled(db, store)) return TypedResults.Ok<IReadOnlyList<ListRow>>([]);
+        if (access.Actor.ReadOnly) return TypedResults.Ok<IReadOnlyList<ListRow>>([]);
         var visible = access.VisibleProjectIds();
         var q = db.Set<TaskPickupOffer>().AsNoTracking().Where(o => o.ClosedAt == null && visible.Contains(db.Tasks.Where(t => t.Id == o.TaskId).Select(t => t.ProjectId).FirstOrDefault()));
         if (projectId is { } pid) q = q.Where(o => db.Tasks.Any(t => t.Id == o.TaskId && t.ProjectId == pid));
@@ -164,16 +175,18 @@ public static class TaskPickupEndpoints
         }).ToListAsync();
         var assignees = await db.Users.AsNoTracking().Where(u => rows.Select(r => r.Task.AssigneeId).Contains(u.Id))
             .ToDictionaryAsync(u => u.Id, u => u);
-        return Results.Ok(rows.Where(row => row.Task.AssigneeId is { } aid && assignees.TryGetValue(aid, out var assignee)
+        var result = rows.Where(row => row.Task.AssigneeId is { } aid && assignees.TryGetValue(aid, out var assignee)
             && TaskPickupRules.SameTeam(orgStructure, assignee.UnitId, viewer.UnitId, assignee.SupervisorId, viewer.SupervisorId, assignee.IsActive, viewer.IsActive)
             && aid != viewer.Id).Select(row => new
             {
                 row.Id, row.TaskId, row.OfferedById, row.OfferedBy, row.Reason, row.HoursRemaining, row.NeededBy, row.Note, row.OpenedAt,
                 Task = new { row.Task.Key, row.Task.Name, row.Task.ProjectId, row.Task.ProjectNumber, row.Task.ProjectDisciplineId, row.Task.DisciplineName, row.Task.DueDate, row.Task.RowVersion },
-            }));
+            }).Select(row => new ListRow(row.Id, row.TaskId, row.OfferedById, row.OfferedBy, row.Reason, row.HoursRemaining, row.NeededBy, row.Note, row.OpenedAt,
+                new ListTask(row.Task.Key, row.Task.Name, row.Task.ProjectId, row.Task.ProjectNumber, row.Task.ProjectDisciplineId, row.Task.DisciplineName, row.Task.DueDate, row.Task.RowVersion))).ToList();
+        return TypedResults.Ok<IReadOnlyList<ListRow>>(result);
     }
 
-    static async Task<IResult> Detail(Guid id, Access access, HubDb db, CurrentUser me, SettingsStore store)
+    static async Task<Ok<DetailResult>> Detail(Guid id, Access access, HubDb db, CurrentUser me, SettingsStore store)
     {
         if (!await Enabled(db, store)) throw ApiException.NotFound();
         var (task, project, ctx) = await TaskEndpoints.Load(db, access, id);
@@ -186,8 +199,11 @@ public static class TaskPickupEndpoints
         var candidates = canAssign ? await db.Users.AsNoTracking().Where(u => u.IsActive && u.Id != task.AssigneeId).ToListAsync() : [];
         var eligible = candidates.Where(u => owner is not null && TaskPickupRules.SameTeam(org, owner.UnitId, u.UnitId, owner.SupervisorId, u.SupervisorId, owner.IsActive, u.IsActive))
             .Select(u => new { u.Id, u.DisplayName }).ToList();
-        return Results.Ok(new { offer.Id, offer.Reason, offer.Note, offer.OpenedAt, offer.KeepWatching, task.RowVersion, Task = new { task.Key, task.Name, task.ProjectId, task.ProjectDisciplineId, task.DueDate }, Allowed = new { PickUp = sameTeam && Permissions.Writable(access.Actor, ctx).Ok, Assign = canAssign && Permissions.Writable(access.Actor, ctx).Ok,
-            Withdraw = Permissions.Writable(access.Actor, ctx).Ok && (offer.OfferedById == me.Id || owner?.Id == me.Id || canAssign) }, Candidates = eligible });
+        return TypedResults.Ok(new DetailResult(offer.Id, offer.Reason, offer.Note, offer.OpenedAt, offer.KeepWatching, task.RowVersion,
+            new DetailTask(task.Key, task.Name, task.ProjectId, task.ProjectDisciplineId, task.DueDate),
+            new Allowed(sameTeam && Permissions.Writable(access.Actor, ctx).Ok, canAssign && Permissions.Writable(access.Actor, ctx).Ok,
+                Permissions.Writable(access.Actor, ctx).Ok && (offer.OfferedById == me.Id || owner?.Id == me.Id || canAssign)),
+            eligible.Select(u => new Candidate(u.Id, u.DisplayName)).ToList()));
     }
 
 }

@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -50,6 +49,87 @@ public sealed class TaskFilter
 
 public static class TaskQueries
 {
+    [System.Text.Json.Serialization.JsonDerivedType(typeof(ActivityRow))]
+    public record Row
+    {
+        public required Guid Id { get; init; }
+        public required Guid ProjectId { get; init; }
+        public required string ProjectNumber { get; init; } = "";
+        public required string ProjectName { get; init; } = "";
+        public required string ProjectStatus { get; init; } = "";
+        public required string Key { get; init; } = "";
+        public required string Name { get; init; } = "";
+        public required Guid ProjectDisciplineId { get; init; }
+        public required string DisciplineName { get; init; } = "";
+        public required string DisciplineCode { get; init; } = "";
+        public required string? DisciplineColour { get; init; }
+        public required int DisciplineOrder { get; init; }
+        public required Guid? DeliverableId { get; init; }
+        public required string? DeliverableKey { get; init; }
+        public required string? DeliverableName { get; init; }
+        public required DateOnly? DeliverableDueDate { get; init; }
+        public required string? DeliverableStatus { get; init; }
+        public required int? DeliverableOrder { get; init; }
+        public required Guid? MilestoneId { get; init; }
+        public required Guid? EffectiveMilestoneId { get; init; }
+        public required string? MilestoneKey { get; init; }
+        public required string? MilestoneName { get; init; }
+        public required DateOnly? MilestoneDate { get; init; }
+        public required bool MilestoneDerived { get; init; }
+        public required Guid? AssigneeId { get; init; }
+        public required string? AssigneeName { get; init; }
+        public required bool AssigneeActive { get; init; }
+        public required Guid? ReviewerId { get; init; }
+        public required string? ReviewerName { get; init; }
+        public required bool RequiresReview { get; init; }
+        public required string Priority { get; init; } = "";
+        public required DateOnly? StartDate { get; init; }
+        public required DateOnly? DueDate { get; init; }
+        public required DateOnly? OriginalStartDate { get; init; }
+        public required DateOnly? OriginalDueDate { get; init; }
+        public required string Status { get; init; } = "";
+        public required string Lane { get; init; } = "";
+        public required int ProgressPct { get; init; }
+        public required decimal? EstimatedHours { get; init; }
+        public required int ReviewRound { get; init; }
+        public required int DueDateChangeCount { get; init; }
+        public required DateTimeOffset LastActivityAt { get; init; }
+        public required DateTimeOffset? StatusChangedAt { get; init; }
+        public required DateTimeOffset? CompletedAt { get; init; }
+        public required DateTimeOffset CreatedAt { get; init; }
+        public required Guid? CreatedBy { get; init; }
+        public required string? CreatedByName { get; init; }
+        public required int SortOrder { get; init; }
+        public required int RowVersion { get; init; }
+        public required string? ManualBlockType { get; init; }
+        public required string? ManualBlockReason { get; init; }
+        public required DateTimeOffset? ManualBlockSetAt { get; init; }
+        public required int CommentCount { get; init; }
+        public required int PredecessorCount { get; init; }
+        public required int SuccessorCount { get; init; }
+        public required List<Guid> CollaboratorIds { get; init; } = [];
+        public required Can? Can { get; init; }
+        public required State? State { get; init; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public virtual string? LastActivityActorName { get; init; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public bool? PickupOfferOpen { get; init; }
+    }
+    public sealed record ActivityRow : Row
+    {
+        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+        public ActivityRow(Row source, string? actor) : base(source) => LastActivityActorName = actor;
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public override string? LastActivityActorName { get; init; }
+    }
+
+    public sealed record Can(bool Assign, bool Edit, bool ChangeDue);
+    public sealed record State(bool IsOverdue, int DaysOverdue, bool IsDueSoon, bool IsWaiting, bool IsBlocked, DateOnly? BlockedSince,
+        int DaysBlocked, JsonElement? BlockedBy, bool IsBlocking, int BlockingCount, List<Guid> BlockingTaskIds, bool IsStale, int StaleDays,
+        bool IsUnassigned, bool IsMissingDueDate, bool IsDateInconsistent, JsonElement? InconsistencyDetail, bool IsInactiveOwner,
+        bool IsHeldPastDue, bool IsReviewStalled, List<Guid> AffectedMilestoneIds, List<string> Notes, DateTimeOffset EvaluatedAt);
+
     public static IQueryable<WorkTask> Apply(HubDb db, IQueryable<WorkTask> q, TaskFilter f, Guid me, DateOnly today, OrgSettings s)
     {
         if (f.Ids.Length > 0) q = q.Where(t => f.Ids.Contains(t.Id));
@@ -132,7 +212,7 @@ public static class TaskQueries
         };
     }
 
-    public static async Task<List<object>> Rows(HubDb db, IQueryable<WorkTask> q, Actor? actor = null, bool includeActivityActor = false)
+    public static async Task<List<Row>> Rows(HubDb db, IQueryable<WorkTask> q, Actor? actor = null, bool includeActivityActor = false)
     {
         // Scalar columns and counts in one query; related rows by id in a few keyed ones. (Multi-column First() inside the
         // projection made EF rank whole tables — every task state, project and person — per list: packet 011 scale run.)
@@ -190,38 +270,40 @@ public static class TaskQueries
                 memberships.Where(x => x.ProjectId == p.Id).SelectMany(x => x.Roles).ToHashSet(), leads.Contains(t.ProjectDisciplineId) ? new[] { t.ProjectDisciplineId }.ToHashSet() : new HashSet<Guid>(), null);
             var facts = new TaskFacts(t.ProjectDisciplineId, t.AssigneeId, t.ReviewerId, t.CreatedBy, t.Collaborators.ToHashSet(), t.Status, t.Predecessors + t.Successors > 0, t.CreatorWindowOpen, t.AssigneeSupervisorId);
             var can = actor is null || ctx is null ? null : new { Assign = Permissions.AssignTask(actor, ctx, facts).Ok, Edit = Permissions.EditTask(actor, ctx, facts).Ok, ChangeDue = Permissions.ChangeDueDate(actor, ctx, facts).Ok };
-            var body = new
+            var row = new Row
             {
-                t.Id, t.ProjectId, ProjectNumber = t.Project.ProjectNumber, ProjectName = t.Project.Name, ProjectStatus = t.Project.Status, t.Key, t.Name,
-                t.ProjectDisciplineId, DisciplineName = t.Discipline.Name, DisciplineCode = t.Discipline.Code, DisciplineColour = t.Discipline.Colour, DisciplineOrder = t.Discipline.SortOrder,
-                t.DeliverableId, DeliverableKey = t.Deliverable?.Key, DeliverableName = t.Deliverable?.Name, DeliverableDueDate = t.Deliverable?.DueDate,
-                DeliverableStatus = t.Deliverable?.Status, DeliverableOrder = t.Deliverable?.SortOrder,
-                t.MilestoneId, EffectiveMilestoneId = mid, MilestoneKey = m?.Key, MilestoneName = m?.Name, MilestoneDate = m?.Date, MilestoneDerived = t.MilestoneId is null && mid is not null,
-                t.AssigneeId, AssigneeName = t.Assignee?.DisplayName, AssigneeActive = t.Assignee?.IsActive ?? true,
-                t.ReviewerId, ReviewerName = t.Reviewer?.DisplayName, t.RequiresReview, t.Priority, t.StartDate, t.DueDate, t.OriginalStartDate, t.OriginalDueDate,
-                t.Status, Lane = Workflow.Lane(t.Status), t.ProgressPct, t.EstimatedHours, t.ReviewRound, t.DueDateChangeCount, t.LastActivityAt, t.StatusChangedAt, t.CompletedAt,
-                t.CreatedAt, t.CreatedBy, t.CreatedByName, t.SortOrder, t.RowVersion, t.ManualBlockType, t.ManualBlockReason, t.ManualBlockSetAt,
-                CommentCount = t.Comments, PredecessorCount = t.Predecessors, SuccessorCount = t.Successors, CollaboratorIds = t.Collaborators, Can = can,
-                State = t.State is null ? null : new
-                {
-                    t.State.IsOverdue, t.State.DaysOverdue, t.State.IsDueSoon, t.State.IsWaiting, t.State.IsBlocked, t.State.BlockedSince, t.State.DaysBlocked,
-                    BlockedBy = J.El(t.State.BlockedBy), t.State.IsBlocking, t.State.BlockingCount, t.State.BlockingTaskIds, t.State.IsStale, t.State.StaleDays,
-                    t.State.IsUnassigned, t.State.IsMissingDueDate, t.State.IsDateInconsistent, InconsistencyDetail = J.El(t.State.InconsistencyDetail),
-                    t.State.IsInactiveOwner, t.State.IsHeldPastDue, t.State.IsReviewStalled, t.State.AffectedMilestoneIds, t.State.Notes, t.State.EvaluatedAt,
-                },
+                Id = t.Id, ProjectId = t.ProjectId, ProjectNumber = t.Project.ProjectNumber, ProjectName = t.Project.Name, ProjectStatus = t.Project.Status,
+                Key = t.Key, Name = t.Name, ProjectDisciplineId = t.ProjectDisciplineId, DisciplineName = t.Discipline.Name, DisciplineCode = t.Discipline.Code,
+                DisciplineColour = t.Discipline.Colour, DisciplineOrder = t.Discipline.SortOrder, DeliverableId = t.DeliverableId,
+                DeliverableKey = t.Deliverable?.Key, DeliverableName = t.Deliverable?.Name, DeliverableDueDate = t.Deliverable?.DueDate,
+                DeliverableStatus = t.Deliverable?.Status, DeliverableOrder = t.Deliverable?.SortOrder, MilestoneId = t.MilestoneId,
+                EffectiveMilestoneId = mid, MilestoneKey = m?.Key, MilestoneName = m?.Name, MilestoneDate = m?.Date,
+                MilestoneDerived = t.MilestoneId is null && mid is not null, AssigneeId = t.AssigneeId, AssigneeName = t.Assignee?.DisplayName,
+                AssigneeActive = t.Assignee?.IsActive ?? true, ReviewerId = t.ReviewerId, ReviewerName = t.Reviewer?.DisplayName,
+                RequiresReview = t.RequiresReview, Priority = t.Priority, StartDate = t.StartDate, DueDate = t.DueDate,
+                OriginalStartDate = t.OriginalStartDate, OriginalDueDate = t.OriginalDueDate, Status = t.Status, Lane = Workflow.Lane(t.Status),
+                ProgressPct = t.ProgressPct, EstimatedHours = t.EstimatedHours, ReviewRound = t.ReviewRound, DueDateChangeCount = t.DueDateChangeCount,
+                LastActivityAt = t.LastActivityAt, StatusChangedAt = t.StatusChangedAt, CompletedAt = t.CompletedAt, CreatedAt = t.CreatedAt,
+                CreatedBy = t.CreatedBy, CreatedByName = t.CreatedByName, SortOrder = t.SortOrder, RowVersion = t.RowVersion,
+                ManualBlockType = t.ManualBlockType, ManualBlockReason = t.ManualBlockReason, ManualBlockSetAt = t.ManualBlockSetAt,
+                CommentCount = t.Comments, PredecessorCount = t.Predecessors, SuccessorCount = t.Successors, CollaboratorIds = t.Collaborators,
+                Can = can is null ? null : new Can(can.Assign, can.Edit, can.ChangeDue),
+                State = t.State is null ? null : new State(t.State.IsOverdue, t.State.DaysOverdue, t.State.IsDueSoon, t.State.IsWaiting, t.State.IsBlocked,
+                    t.State.BlockedSince, t.State.DaysBlocked, J.El(t.State.BlockedBy), t.State.IsBlocking, t.State.BlockingCount,
+                    t.State.BlockingTaskIds, t.State.IsStale, t.State.StaleDays, t.State.IsUnassigned, t.State.IsMissingDueDate,
+                    t.State.IsDateInconsistent, J.El(t.State.InconsistencyDetail), t.State.IsInactiveOwner, t.State.IsHeldPastDue,
+                    t.State.IsReviewStalled, t.State.AffectedMilestoneIds, t.State.Notes, t.State.EvaluatedAt),
+                LastActivityActorName = includeActivityActor ? t.ActivityActorName : null,
+                PickupOfferOpen = pickupOn ? offers.Contains(t.Id) : null,
             };
-            if (!includeActivityActor && !pickupOn) return (object)body;
-            var json = JsonSerializer.SerializeToNode(body, JsonOpts.Web)!.AsObject();
-            if (includeActivityActor) json["lastActivityActorName"] = t.ActivityActorName;
-            if (pickupOn) json["pickupOfferOpen"] = offers.Contains(t.Id);
-            return (object)json;
+            return includeActivityActor ? new ActivityRow(row, t.ActivityActorName) : row;
         }).ToList();
     }
 
-    public static async Task<Page<object>> Page(HubDb db, IQueryable<WorkTask> q, TaskFilter f, Actor? actor = null, bool includeActivityActor = false)
+    public static async Task<Page<Row>> Page(HubDb db, IQueryable<WorkTask> q, TaskFilter f, Actor? actor = null, bool includeActivityActor = false)
     {
         var total = await q.CountAsync();
         var rows = await Rows(db, Sort(q, f.Sort, db, f.WorkspaceId).Skip((f.Page - 1) * f.PageSize).Take(f.PageSize), actor, includeActivityActor);
-        return new Page<object>(rows, f.Page, f.PageSize, total, f.Sort);
+        return new Page<Row>(rows, f.Page, f.PageSize, total, f.Sort);
     }
 }

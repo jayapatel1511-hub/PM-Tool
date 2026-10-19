@@ -97,5 +97,63 @@ public sealed class ContractTests(HubFactory f)
             Assert.Contains(key, role["properties"]!.AsObject().Select(p => p.Key));
     }
 
+    [Theory]
+    [InlineData("/api/v1/tasks/{id}", "get", "200", "permissions.transitions[].allowed", "boolean")]
+    [InlineData("/api/v1/me/onboarding", "get", "200", "groups[].steps[].done", "boolean")]
+    [InlineData("/api/v1/me/work/watching", "get", "200", "items[].projectNumber", "string")]
+    [InlineData("/api/v1/me/work/requested", "get", "200", "total", "integer")]
+    [InlineData("/api/v1/pickup-offers", "get", "200", "[].task.rowVersion", "integer")]
+    [InlineData("/api/v1/tasks/{id}/pickup-offer", "get", "200", "allowed.pickUp", "boolean")]
+    [InlineData("/api/v1/admin/organisation/levels", "get", "200", "[].name", "string")]
+    [InlineData("/api/v1/admin/organisation/units", "get", "200", "[].rowVersion", "integer")]
+    [InlineData("/api/v1/admin/organisation/import/preview", "post", "200", "rows", "integer")]
+    [InlineData("/api/v1/admin/organisation/import/preview", "post", "200", "applied", "boolean")]
+    [InlineData("/api/v1/projects/{projectId}/commitment-reliability", "get", "200", "misses[].commitments[]", "string")]
+    [InlineData("/api/v1/projects/{projectId}/revision-check", "get", "200", "deliverables[].issues[].marks[]", "string")]
+    [InlineData("/api/v1/deliverables/{id}/baselines", "get", "200", "people[].displayName", "string")]
+    [InlineData("/api/v1/admin/audit-chains", "get", "200", "[].chainId", "string")]
+    [InlineData("/api/v1/projects/import-preview", "post", "200", "rows[].projectNumber", "string")]
+    [InlineData("/api/v1/admin/operations/outbox/retry", "post", "200", "retried", "integer")]
+    public async Task New_endpoint_contracts_keep_required_nested_wire_types(string route, string method, string status, string field, string type)
+    {
+        var document = await (await f.As(TestData.Alex).GetAsync("/api/v1/openapi.json")).Json();
+        var schema = Resolve(document, document["paths"]![route]![method]!["responses"]![status]!["content"]!["application/json"]!["schema"]!);
+        foreach (var part in field.Replace("[]", ".[]").Split('.', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (part == "[]")
+            {
+                Assert.Equal("array", schema["type"]!.GetValue<string>());
+                schema = Resolve(document, schema["items"]!);
+            }
+            else
+            {
+                Assert.Contains(part, schema["required"]!.AsArray().Select(x => x!.GetValue<string>()));
+                schema = Resolve(document, schema["properties"]![part]!);
+            }
+        }
+        Assert.Equal(type, schema["type"]!.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData("/api/v1/projects/{projectId}/allocations")]
+    [InlineData("/api/v1/projects/{projectId}/allocations/{id}/edit")]
+    [InlineData("/api/v1/projects/{projectId}/allocations/{id}/confirm")]
+    public async Task Allocation_preview_contract_describes_both_saved_and_preview_responses(string route)
+    {
+        var document = await (await f.As(TestData.Alex).GetAsync("/api/v1/openapi.json")).Json();
+        var operation = document["paths"]![route]!["post"]!;
+        var parameter = Assert.Single(operation["parameters"]!.AsArray(), p => p!["name"]!.GetValue<string>() == "preview");
+        Assert.Equal("boolean", parameter!["schema"]!["type"]!.GetValue<string>());
+        var schema = operation["responses"]!["200"]!["content"]!["application/json"]!["schema"]!;
+        var branches = schema["anyOf"]!.AsArray().Select(x => Resolve(document, x!)).ToArray();
+        Assert.Equal(2, branches.Length);
+        var saved = Assert.Single(branches, x => x["properties"]!["id"] is not null);
+        Assert.Contains("rowVersion", saved["required"]!.AsArray().Select(x => x!.GetValue<string>()));
+        var preview = Assert.Single(branches, x => x["properties"]!["preview"] is not null);
+        var week = Resolve(document, preview["properties"]!["weeks"]!["items"]!);
+        Assert.Equal("number", week["properties"]!["capacity"]!["type"]!.GetValue<string>());
+        Assert.Equal("array", week["properties"]!["indicators"]!["type"]!.GetValue<string>());
+    }
+
 
 }

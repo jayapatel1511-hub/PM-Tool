@@ -12,6 +12,8 @@ public sealed record ChainVerification(Guid Chain, long From, bool Valid, long T
 
 public static class AuditChainEndpoints
 {
+    public sealed record Head(Guid ChainId, long HeadSeq, string HeadHash, long LastVerifiedSeq, string LastVerifiedHash, DateTimeOffset? LastVerifiedAt, long? FirstBrokenSeq, long? AlertedBrokenSeq);
+    public sealed record Integrity(long Entries, DateTimeOffset? CheckedAt, long VerifiedEntries, long? FirstBrokenSeq, bool? Valid);
     public static void Map(RouteGroupBuilder api)
     {
         var admin = api.MapGroup("/admin/audit-chains").AddEndpointFilter(async (ctx, next) =>
@@ -19,7 +21,8 @@ public static class AuditChainEndpoints
             Access.Demand(Permissions.Administer(ctx.HttpContext.RequestServices.GetRequiredService<CurrentUser>().Actor));
             return await next(ctx);
         }).RequireFlag("verifiable_log");
-        admin.MapGet("", async (HubDb db) => await db.Set<ActivityChainHead>().AsNoTracking().OrderBy(h => h.ChainId).ToListAsync());
+        admin.MapGet("", async (HubDb db) => await db.Set<ActivityChainHead>().AsNoTracking().OrderBy(h => h.ChainId)
+            .Select(h => new Head(h.ChainId, h.HeadSeq, h.HeadHash, h.LastVerifiedSeq, h.LastVerifiedHash, h.LastVerifiedAt, h.FirstBrokenSeq, h.AlertedBrokenSeq)).ToListAsync());
         admin.MapGet("/{id:guid}/verify", async (Guid id, long? from, long? headSeq, string? headHash, HubDb db, TimeProvider clock) =>
             await AuditChainVerification.Check(db, id, from ?? 1, clock.GetUtcNow(), db.Audit.ActorId?.ToString() ?? "System", true, headHash, headSeq));
         admin.MapGet("/{id:guid}/record", async (Guid id, string? format, HubDb db, TimeProvider clock) =>
@@ -28,18 +31,18 @@ public static class AuditChainEndpoints
             db.LogEvent("AuditChain", id, "Verification record downloaded", "admin", reason: format ?? "json");
             await db.SaveChangesAsync();
             if (format == "csv")
-                return Results.File(Encoding.UTF8.GetBytes("chain,from,total,valid,first_broken_seq,head_seq,head_hash,verified_at,verifier\r\n" +
+                return TypedResults.File(Encoding.UTF8.GetBytes("chain,from,total,valid,first_broken_seq,head_seq,head_hash,verified_at,verifier\r\n" +
                     $"{record.Chain},{record.From},{record.Total},{record.Valid},{record.FirstBrokenSeq},{record.HeadSeq},{record.HeadHash},{record.VerifiedAt:O},{record.Verifier}\r\n"), "text/csv", "verification-record.csv");
             Check.That(format is null or "json", "format", "error.invalid");
-            return Results.File(JsonSerializer.SerializeToUtf8Bytes(record, JsonOpts.Web), "application/json", "verification-record.json");
+            return TypedResults.File(JsonSerializer.SerializeToUtf8Bytes(record, JsonOpts.Web), "application/json", "verification-record.json");
         });
         api.MapGet("/projects/{id:guid}/activity/integrity", async (Guid id, Access access, HubDb db) =>
         {
             await access.Project(id, false);
             var head = await db.Set<ActivityChainHead>().AsNoTracking().SingleOrDefaultAsync(h => h.ChainId == id);
-            return Results.Ok(head == null ? null : new { Entries = head.HeadSeq, CheckedAt = head.LastVerifiedAt,
-                VerifiedEntries = head.LastVerifiedSeq, FirstBrokenSeq = head.FirstBrokenSeq,
-                Valid = head.FirstBrokenSeq != null ? false : head.LastVerifiedAt != null && head.LastVerifiedSeq == head.HeadSeq ? true : (bool?)null });
+            return TypedResults.Ok(head == null ? null : new Integrity(head.HeadSeq, head.LastVerifiedAt,
+                head.LastVerifiedSeq, head.FirstBrokenSeq,
+                head.FirstBrokenSeq != null ? false : head.LastVerifiedAt != null && head.LastVerifiedSeq == head.HeadSeq ? true : (bool?)null));
         }).RequireFlag("verifiable_log");
     }
 }

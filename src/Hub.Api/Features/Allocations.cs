@@ -37,15 +37,15 @@ public static class AllocationEndpoints
         api.MapGet("/projects/{projectId:guid}/allocations/export", ExportRows);
         api.MapGet("/projects/{projectId:guid}/allocations/review-options", ReviewOptions);
         api.MapGet("/projects/{projectId:guid}/allocations/{id:guid}", Detail);
-        api.MapPost("/projects/{projectId:guid}/allocations", Create).AddEndpointFilter<AllocationPreviewFilter>().WithMetadata(new Coordination.AtomicCommand());
-        api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/edit", Edit).AddEndpointFilter<AllocationPreviewFilter>().WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/allocations", Create).AddEndpointFilter<AllocationPreviewFilter>().AddOpenApiOperationTransformer(AllocationPreviewFilter.Describe).WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/edit", Edit).AddEndpointFilter<AllocationPreviewFilter>().AddOpenApiOperationTransformer(AllocationPreviewFilter.Describe).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/cancel", Cancel).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/decline", Decline).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/complete", Complete).WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/users/{personId:guid}/availability", Availability);
         api.MapPut("/users/{personId:guid}/availability/{date}", SetAvailability);
         api.MapGet("/projects/{projectId:guid}/allocations/{id:guid}/confirmation-preview", ConfirmationPreview);
-        api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/confirm", Confirm).AddEndpointFilter<AllocationPreviewFilter>().WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/confirm", Confirm).AddEndpointFilter<AllocationPreviewFilter>().AddOpenApiOperationTransformer(AllocationPreviewFilter.Describe).WithMetadata(new Coordination.AtomicCommand());
     }
 
     static async Task NotifyChanged(HubDb db, Notifier notify, Project project, ResourceAllocation a)

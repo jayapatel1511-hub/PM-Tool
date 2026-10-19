@@ -1,17 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
-import { get, qs } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 
 export type OrgUnit = { id: string; parentId?: string | null; name: string }
 export type Placement = { id: string; unitId?: string | null }
-type Organisation = { units?: OrgUnit[]; people?: { id: string; unitId?: string | null }[] }
 
 /** Placement is a separate, scoped read so existing people/workload payloads stay unchanged. */
 export function useOrgPlacement(ids: string[]) {
   const enabled = useFlag('org_structure')
   const unique = [...new Set(ids)].sort()
-  const org = useQuery({ queryKey: ['organisation'], enabled, queryFn: () => get<Organisation>('organisation') })
-  const placements = useQuery({ queryKey: ['organisation-placements', unique], enabled: enabled && unique.length > 0, queryFn: () => get<Placement[]>(`organisation/placements${qs({ ids: unique.join(',') })}`) })
+  const org = useQuery({ queryKey: ['organisation'], enabled, queryFn: () => typedRequest('get', '/api/v1/organisation', {}) })
+  const placements = useQuery({ queryKey: ['organisation-placements', unique], enabled: enabled && unique.length > 0, queryFn: () => typedRequest('get', '/api/v1/organisation/placements', { query: { ids: unique.join(',') } }) })
   const units = org.data?.units ?? []
   const placementMap = new Map<string, string | null>([...(org.data?.people ?? []).map(p => [p.id, p.unitId ?? null] as const), ...(placements.data ?? []).map(p => [p.id, p.unitId ?? null] as const)])
   return { enabled, units, placementMap, loading: org.isPending || placements.isPending, error: org.error ?? placements.error }

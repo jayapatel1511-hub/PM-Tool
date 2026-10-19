@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { matchRoutes, useLocation } from 'react-router'
 import { routes } from '@/app/routes'
-import { post } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 
 let navigationStarted = performance.now()
@@ -23,6 +23,6 @@ export function useRouteCounter(_pathname: string) {
     if (!route) return
     sent.current = location.key
     const elapsedMs = Math.min(60000, Math.max(0, Math.round(performance.now() - navigationStarted)))
-    void post('route-counts', { route, elapsedMs }).catch(() => undefined)
+    void typedRequest('post', '/api/v1/route-counts', { body: { route, elapsedMs } }).catch(() => undefined)
   }, [enabled, active, location])
 }

@@ -21,7 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh, useReference } from '@/hooks/data'
-import { ApiError, del, get, patch, post, qs } from '@/lib/api'
+import { ApiError, del, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { fmtDate, today } from '@/lib/format'
 import { runtimeText, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
@@ -47,7 +47,6 @@ export interface DeliverableRow {
   state?: (DeliverableStateView & { derivedPredecessorIds: string[]; derivedSuccessorIds: string[] }) | null
   tasks?: { id: string; key: string; name: string; status: string; dueDate?: string; assignee?: string }[]
 }
-type RevisionCheckSummary = { deliverables: { id: string; marks: string[]; issues: { id: string; revision: string; marks: string[] }[] }[] }
 
 const GROUP_LABEL: Record<string, string> = { discipline: 'common.discipline', milestone: 'field.MilestoneId', status: 'common.status', owner: 'common.owner', none: 'dgroup.none' }
 export const STATUSES = ['Not Started', 'In Progress', 'In Review', 'Revision Required', 'Ready to Issue', 'Issued', 'Accepted', 'On Hold', 'Cancelled']
@@ -67,7 +66,7 @@ function LiveDeliverablesTab() {
     indicator: sp.get('indicator'), dueFrom: sp.get('dueFrom'), dueTo: sp.get('dueTo'), q: sp.get('q'), requiresReview: sp.get('requiresReview'), revisionWarning: sp.get('revisionWarning') }
   const revisionEnabled = useFlag('revision_check')
   const q = useQuery({ queryKey: ['p', p.id, 'deliverables', filters], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables${qs({ ...filters, revisionWarning: revisionEnabled ? filters.revisionWarning : undefined, includeTasks: true })}`) })
-  const revisionQ = useQuery({ queryKey: ['project', p.id, 'revision-check'], queryFn: () => get<RevisionCheckSummary>(`projects/${p.id}/revision-check`), enabled: revisionEnabled })
+  const revisionQ = useQuery({ queryKey: ['project', p.id, 'revision-check'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/revision-check', { params: { projectId: p.id } }), enabled: revisionEnabled })
   const marks = new Map((revisionQ.data?.deliverables ?? []).map((x) => [x.id, [...x.marks, ...x.issues.flatMap((i) => i.marks)]]))
   const warningOnly = sp.get('revisionWarning') === 'true'
   const milestones = useQuery({ queryKey: ['p', p.id, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones`) })
@@ -334,7 +333,7 @@ export function DeliverablePanel({ id }: PanelProps) {
   const openPanel = useItemPanel()
   const baselineEnabled = useFlag('baseline_history')
   const revisionEnabled = useFlag('revision_check')
-  const revisionQ = useQuery({ queryKey: ['project', q.data?.project.id, 'revision-check'], queryFn: () => get<RevisionCheckSummary>(`projects/${q.data!.project.id}/revision-check`), enabled: revisionEnabled && !!q.data })
+  const revisionQ = useQuery({ queryKey: ['project', q.data?.project.id, 'revision-check'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/revision-check', { params: { projectId: q.data!.project.id } }), enabled: revisionEnabled && !!q.data })
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const data = q.data
@@ -449,20 +448,18 @@ export function DeliverablePanel({ id }: PanelProps) {
       {DELIVERABLE_TABS.filter((x) => x.id === tab).map((x) => <div key={x.id}>{x.render(data)}</div>)}
       {tab === 'history' && <HistoryList type="Deliverable" id={d.id} />}
       {baseline && <ConfirmDialog open onOpenChange={(o) => !o && setBaseline(null)} title={baseline === 'clear' ? t('baseline.useOriginal') : t('baseline.rebaseline')} reason
-        onConfirm={async (reason) => { await post(`deliverables/${d.id}/rebaseline`, { reason, clear: baseline === 'clear', rowVersion: d.rowVersion }); setBaseline(null); reload() }} />}
+        onConfirm={async (reason) => { await typedRequest('post', '/api/v1/deliverables/{id}/rebaseline', { params: { id: d.id }, body: { reason, clear: baseline === 'clear', rowVersion: d.rowVersion } }); setBaseline(null); reload() }} />}
       {transition && <DeliverableTransition d={d} to={transition.to} needsReason={transition.needsReason} onClose={() => { setTransition(null); reload() }} />}
       {issuing && <IssueDialog d={d} needsConfirm={perms.issueNeedsConfirm} onClose={() => { setIssuing(false); reload() }} />}
     </div></PickerProject.Provider>
   )
 }
 
-type Baseline = { id: string; number: number; startDate?: string; dueDate?: string; ownerId?: string; estimatedHoursTotal?: number; remainingHours?: number; reason?: string; actorId?: string; recordedAt: string }
-type BaselineResponse = { records: Baseline[]; people?: { id: string; displayName: string }[]; current?: string | null; delta?: { estimateHours?: number; remainingHours?: number; dueDays?: number; ownerBefore?: string; ownerAfter?: string } }
 function BaselineHistory({ deliverableId, people }: { deliverableId: string; people: { id: string; displayName: string }[] }) {
-  const q = useQuery({ queryKey: ['deliverable', deliverableId, 'baselines'], queryFn: () => get<BaselineResponse>(`deliverables/${deliverableId}/baselines`) })
+  const q = useQuery({ queryKey: ['deliverable', deliverableId, 'baselines'], queryFn: () => typedRequest('get', '/api/v1/deliverables/{id}/baselines', { params: { id: deliverableId } }) })
   if (q.isPending) return <div className="p-4"><Loading rows={3} /></div>
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
-  const name = (id?: string) => [...(q.data.people ?? []), ...people].find((x) => x.id === id)?.displayName ?? id ?? '—'
+  const name = (id?: string | null) => [...(q.data.people ?? []), ...people].find((x) => x.id === id)?.displayName ?? id ?? '—'
   return <div className="space-y-3 p-4">{!q.data.delta ? <p className="text-sm text-muted-foreground">{t('baseline.noCurrent')}</p> : <div className="grid gap-2 rounded-md border bg-muted p-3 text-sm sm:grid-cols-4"><span>Estimate Δ: {q.data.delta?.estimateHours ?? 0}h</span><span>Remaining Δ: {q.data.delta?.remainingHours ?? 0}h</span><span>Due Δ: {q.data.delta?.dueDays ?? 0}d</span><span>Owner: {name(q.data.delta?.ownerBefore)} → {name(q.data.delta?.ownerAfter)}</span></div>}<ol className="space-y-2">{q.data.records.map((r) => <li key={r.id} className="rounded-md border px-3 py-2 text-sm"><div className="flex flex-wrap justify-between gap-2"><strong>B{r.number}</strong><span className="text-muted-foreground">{r.recordedAt} · {name(r.actorId)}</span></div><div className="mt-1 grid gap-x-4 gap-y-1 text-muted-foreground sm:grid-cols-3"><span>{r.startDate ?? '—'} → {r.dueDate ?? '—'}</span><span>Owner: {name(r.ownerId)}</span><span>{r.estimatedHoursTotal ?? 0}h estimate · {r.remainingHours ?? 0}h remaining</span></div>{r.reason && <p className="mt-1">{r.reason}</p>}</li>)}</ol></div>
 }
 

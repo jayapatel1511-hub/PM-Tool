@@ -9,6 +9,7 @@ namespace Hub.Api.Features;
 /// Administration (§13.15, FR-ADM-01, FR-ADM-03, FR-ORG-01..07). Every route requires the Admin role.
 public static class AdminEndpoints
 {
+    public sealed record RetryOutboxResponse(int Retried);
     public sealed record HolidayBody(Guid? OfficeId, DateOnly? Date, string Name);
 
     public static void Map(RouteGroupBuilder api)
@@ -139,7 +140,7 @@ public static class AdminEndpoints
             await db.SaveChangesAsync();
             signal.Poke();
             logs.CreateLogger("Hub.Operations").LogInformation("Admin {UserId} retried {Count} dead-lettered outbox events", me.Id, rows.Count);
-            return Results.Ok(new { retried = rows.Count });
+            return TypedResults.Ok(new RetryOutboxResponse(rows.Count));
         });
 
         // ---------- Users and roles (FR-004, FR-016, FR-017, FR-027, E-26) ----------

@@ -1,3 +1,4 @@
+import { invalidateChange } from '@/lib/keys'
 import type { components } from '@/gen/api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowUpDown, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Ellipsis, EyeOff, Info, Lock, Monitor, Pencil } from 'lucide-react'
@@ -250,7 +251,7 @@ function UnassignedTasks({ data }: { data: Unassigned }) {
   const assign = async (task: UnassignedTask, personId: string | null) => {
     if (!personId || !task.canAssign) return
     setState(s => ({ ...s, [task.id]: { status: 'saving' } }))
-    try { await patch(`tasks/${task.id}`, { assigneeId: personId }, task.rowVersion); toast.success(t('workload.assigned', { key: task.key })); setState(s => { const n = { ...s }; delete n[task.id]; return n }); void qc.invalidateQueries({ queryKey: ['workload'] }) }
+    try { await typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: task.id }, body: { assigneeId: personId }, ifMatch: task.rowVersion }); toast.success(t('workload.assigned', { key: task.key })); setState(s => { const n = { ...s }; delete n[task.id]; return n }); void invalidateChange(qc, 'Task', task.projectId) }
     catch (e) { setState(s => ({ ...s, [task.id]: { status: 'failed', error: e } })) }
   }
   if (data.tasks.length === 0) return null

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { keysForChange, refreshProject } from './keys.ts'
+import { invalidateChange, keysForChange, refreshProject } from './keys.ts'
 import type { QueryClient } from '@tanstack/react-query'
 
 test('item changes keep the previous project and item-specific invalidations (AC-PLAT-19)', () => {
@@ -68,4 +68,20 @@ test('invalidation prefixes match actual mounted screen query keys', () => {
 test('workload changes refresh the pickup own-load hint', () => {
   for (const type of ['Task', 'ResourceAllocation', 'PlanningEntry', 'PersonSchedule', 'ApprovedLeave', 'PersonAvailabilityOverride', 'User', 'Project', 'Member'])
     assert.ok(keysForChange(type, 'p1').some(key => key[0] === 'pickup-own-load'), type)
+})
+
+
+test('new batch mutations refresh their mounted views and await active refetches', async () => {
+  for (const [type, query] of [['OutputCommitment', ['commitment-reliability', 'p1']], ['OutputCommitment', ['weekly-promise', 'p1']], ['OutputCommitment', ['p', 'p1', 'readiness-window']], ['UserPreferences', ['onboarding', 'u1']]] as const)
+    assert.ok(keysForChange(type, 'p1').some(prefix => prefix.every((part, i) => query[i] === part)), type)
+  let release!: () => void
+  const pending = new Promise<void>(resolve => { release = resolve })
+  const qc = { invalidateQueries: () => pending } as unknown as QueryClient
+  let finished = false
+  const refresh = invalidateChange(qc, 'UserPreferences').then(() => { finished = true })
+  await Promise.resolve()
+  assert.equal(finished, false)
+  release()
+  await refresh
+  assert.equal(finished, true)
 })

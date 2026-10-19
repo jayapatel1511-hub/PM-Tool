@@ -3,6 +3,7 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Hub.Api.Features;
 
@@ -11,13 +12,15 @@ public static class RevisionCheckEndpoints
     public sealed record ConventionBody(int RowVersion, string? Preset, string[]? Codes = null);
     public sealed record IssueMarks(Guid Id, string? Revision, string[] Marks);
     public sealed record DeliverableMarks(Guid Id, string[] Marks, IssueMarks[] Issues);
+    public sealed record ReadResponse(RevisionConvention? Convention, DeliverableMarks[] Deliverables);
+    public sealed record WriteResponse(Guid Id, int RowVersion, RevisionConvention? Convention);
     public static void Map(RouteGroupBuilder api)
     {
         var group = api.MapGroup("/projects/{projectId:guid}/revision-check").RequireFlag("revision_check");
         group.MapGet("", async (Guid projectId, Access access, HubDb db) =>
         {
             var (p, _) = await access.Project(projectId, false);
-            return new { Convention = Parse(p.RevisionConvention), Deliverables = await Marks(db, p) };
+            return TypedResults.Ok(new ReadResponse(Parse(p.RevisionConvention), await Marks(db, p)));
         });
         group.MapPut("", async (Guid projectId, ConventionBody body, HttpContext http, Access access, HubDb db) => await Tx.Run(db, async () =>
         {
@@ -30,7 +33,7 @@ public static class RevisionCheckEndpoints
             p.RevisionConvention = convention == null ? null : JsonSerializer.Serialize(convention, JsonOpts.Web);
             db.Audit.Note(p, action: "RevisionConventionChanged");
             await db.SaveChangesAsync();
-            return Results.Ok(new { p.Id, p.RowVersion, Convention = convention });
+            return TypedResults.Ok(new WriteResponse(p.Id, p.RowVersion, convention));
         }));
     }
     public static RevisionConvention? Parse(string? text) => text == null ? null : JsonSerializer.Deserialize<RevisionConvention>(text, JsonOpts.Web);

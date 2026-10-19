@@ -3,17 +3,14 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 import { Empty, ErrorBanner, Loading, Page, Section } from '@/components/hub/common'
 import { Avatar } from '@/components/hub/people'
-import { get } from '@/lib/api'
+import { get, typedRequest } from '@/lib/api'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
-type Unit = { id: string; name: string; parentId?: string | null; levelId: string; level?: string; leaderId?: string | null; leader?: string | null; disciplineId?: string | null; officeId?: string | null; headCount: number; closedOn?: string | null }
-type Person = { id: string; displayName: string; email: string; unitId?: string; supervisorId?: string; rowVersion?: number }
-type Organisation = { levels: { id: string; name: string; sortOrder: number }[]; units: Unit[]; people: Person[] }
 type Reference = { disciplines?: { id: string; name: string }[]; offices?: { id: string; name: string }[] }
 
 export function OrganisationPage() {
-  const q = useQuery({ queryKey: ['organisation'], queryFn: () => get<Organisation>('organisation') })
+  const q = useQuery({ queryKey: ['organisation'], queryFn: () => typedRequest('get', '/api/v1/organisation', {}) })
   const ref = useQuery({ queryKey: ['reference'], queryFn: () => get<Reference>('reference') })
   const [open, setOpen] = useState<Set<string>>(new Set())
   if (q.isPending) return <Page title="Organisation"><Loading rows={8} /></Page>

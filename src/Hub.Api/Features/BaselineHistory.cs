@@ -55,6 +55,9 @@ public static class BaselineHistory
 
 public static class BaselineHistoryEndpoints
 {
+    public sealed record Person(Guid Id, string DisplayName);
+    public sealed record Delta(decimal EstimateHours, decimal RemainingHours, int? DueDays, Guid? OwnerBefore, Guid? OwnerAfter);
+    public sealed record History(IReadOnlyList<DeliverableBaseline> Records, IReadOnlyList<Person> People, Guid? Current, Delta? Delta);
     public static void Map(RouteGroupBuilder api) => api.MapGet("/deliverables/{id:guid}/baselines", async (Guid id, Access access, HubDb db) =>
     {
         var (d, _, _) = await DeliverableEndpoints.Load(db, access, id);
@@ -63,11 +66,11 @@ public static class BaselineHistoryEndpoints
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.DeliverableId == id && t.Status != TaskStatuses.Cancelled)
             .Select(t => new { t.EstimatedHours, t.ProgressPct, t.Status }).ToListAsync();
         var personIds = records.SelectMany(b => new Guid?[] { b.OwnerId, b.ActorId }).Append(d.OwnerId).OfType<Guid>().Distinct().ToArray();
-        var people = await db.Users.AsNoTracking().Where(u => personIds.Contains(u.Id)).Select(u => new { u.Id, u.DisplayName }).ToListAsync();
-        return new { Records = records, People = people, Current = d.CurrentBaselineId, Delta = current == null ? null : new {
-            EstimateHours = tasks.Sum(t => t.EstimatedHours ?? 0) - current.EstimatedHoursTotal,
-            RemainingHours = tasks.Where(t => t.Status != TaskStatuses.Complete).Sum(t => (t.EstimatedHours ?? 0) * (100 - t.ProgressPct) / 100m) - current.RemainingHours,
-            DueDays = d.DueDate is { } due && current.DueDate is { } baseline ? due.DayNumber - baseline.DayNumber : (int?)null,
-            OwnerBefore = current.OwnerId, OwnerAfter = d.OwnerId } };
+        var people = await db.Users.AsNoTracking().Where(u => personIds.Contains(u.Id)).Select(u => new Person(u.Id, u.DisplayName)).ToListAsync();
+        return new History(records, people, d.CurrentBaselineId, current == null ? null : new Delta(
+            tasks.Sum(t => t.EstimatedHours ?? 0) - current.EstimatedHoursTotal,
+            tasks.Where(t => t.Status != TaskStatuses.Complete).Sum(t => (t.EstimatedHours ?? 0) * (100 - t.ProgressPct) / 100m) - current.RemainingHours,
+            d.DueDate is { } due && current.DueDate is { } baseline ? due.DayNumber - baseline.DayNumber : (int?)null,
+            current.OwnerId, d.OwnerId));
     }).RequireFlag("baseline_history");
 }

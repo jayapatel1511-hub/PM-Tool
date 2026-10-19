@@ -32,7 +32,7 @@ type Allocation = { id: string; personId: string; personName: string | null; pur
 type AllocationPage = { items: Allocation[]; page: number; pageSize: number; totalCount: number }
 type Detail = Allocation & { personEligible: boolean; confirmedBy?: string; confirmedAt?: string; links: { workType: string; workId: string; workDate: string; reviewHours?: number; reviewPackageId?: string }[]; days: { workDate: string; hours: number }[]; overCapacityWarningRecorded: boolean; canConfirm: boolean; canManage: boolean }
 type Preview = { id: string; rowVersion: number; days: { date: string; availableHours: number; confirmedHours: number; proposedHours: number; resultingHours: number; overByHours: number; dateVersion: number }[] }
-type AllocationPreview = { preview: true; weeks: { personId: string; week: string; capacity: number; planned: number; free: number; band: string; indicators: string[] }[] }
+type AllocationPreview = components['schemas']['AllocationPreviewResponse']
 type ReviewOption = { id: string; reviewerId: string; dueDate: string; packageId: string; packageKey: string; packageTitle: string }
 /** Unfilled project demand (§40, FR-ROLE-01): filled by proposing a normal allocation that names it (D1). */
 type OpenRole = components['schemas']['OpenRoleRow']
@@ -141,14 +141,14 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
       <Button variant="outline" disabled={page * list.data.pageSize >= list.data.totalCount} onClick={() => change('page', String(page + 1))}>{t('handoff.next')}</Button>
     </nav>}
     </>}
-    {adding && options.data && <Proposal base={base} options={options.data} complete={complete} close={() => setAdding(false)} done={id => { setAdding(false); refresh(); open(id) }} />}
-    {filling && options.data && <Proposal base={base} options={options.data} complete={complete} fill={filling} close={() => setFilling(null)} done={id => { setFilling(null); refresh(); open(id) }} />}
+    {adding && options.data && <Proposal projectId={project.id} base={base} options={options.data} complete={complete} close={() => setAdding(false)} done={id => { setAdding(false); refresh(); open(id) }} />}
+    {filling && options.data && <Proposal projectId={project.id} base={base} options={options.data} complete={complete} fill={filling} close={() => setFilling(null)} done={id => { setFilling(null); refresh(); open(id) }} />}
     {roleForm && <RoleDialog projectId={project.id} disciplines={project.disciplines} role={roleForm === 'new' ? undefined : roleForm} complete={complete}
       onClose={() => setRoleForm(null)} onDone={() => { setRoleForm(null); invalidateChange(qc, 'OpenRole', project.id) }} />}
     {cancelling && <ConfirmDialog open onOpenChange={o => !o && setCancelling(null)} title={t('openRole.cancelTitle', { role: cancelling.roleLabel })} destructive
       body={t('openRole.cancelBody')} confirmLabel={t('openRole.cancel')} reason={complete ? true : 'optional'}
       onConfirm={async reason => { await typedRequest('post', '/api/v1/open-roles/{id}/cancel', { params: { id: cancelling.id }, body: { rowVersion: cancelling.rowVersion, reason: reason || null } }); toast.success(t('common.saved')); setCancelling(null); invalidateChange(qc, 'OpenRole', project.id) }} />}
-    {selected && <AllocationDetail base={base} id={selected} projectNumber={project.projectNumber} options={options.data}
+    {selected && <AllocationDetail projectId={project.id} base={base} id={selected} projectNumber={project.projectNumber} options={options.data}
       close={() => open(null)} refresh={refresh} />}
   </Page>
 }
@@ -159,7 +159,7 @@ const fieldset = 'space-y-3 rounded-lg border p-4'
 const legend = 'px-1 text-sm font-semibold'
 /** Propose or edit an allocation. With `fill`, the same form fills an open role: prefilled with the role's dates and hours,
  *  sending `openRoleId` so the role is marked Filled in the same transaction (FR-ROLE-03, AC-ROLE-03). */
-function Proposal({ base, options, close, done, existing, fill, complete }: { base: string; options: CoordOptions; close: () => void; done: (id: string) => void; existing?: Detail; fill?: Fill; complete?: boolean }) {
+function Proposal({ projectId, base, options, close, done, existing, fill, complete }: { projectId: string; base: string; options: CoordOptions; close: () => void; done: (id: string) => void; existing?: Detail; fill?: Fill; complete?: boolean }) {
   const previewEnabled = useFlag('allocation_preview')
   const [purpose, setPurpose] = useState<'Production' | 'Review'>((existing?.purpose as 'Production' | 'Review') ?? 'Production')
   const start = existing?.fromDate ?? fill?.fromDate ?? today()
@@ -185,12 +185,15 @@ function Proposal({ base, options, close, done, existing, fill, complete }: { ba
     if (!previewReady) { setAllocationPreview(null); setPreviewError(null); return }
     let cancelled = false
     const timer = window.setTimeout(async () => {
-      try { setPreviewError(null); const result = await post<AllocationPreview>(`${base}${existing ? `/${existing.id}/edit` : ''}?preview=true`, previewBody()); if (!cancelled) setAllocationPreview(result) }
+      try { setPreviewError(null); const body = previewBody(); const result = existing
+          ? await typedRequest('post', '/api/v1/projects/{projectId}/allocations/{id}/edit', { params: { projectId, id: existing.id }, query: { preview: true }, body: { ...body, rowVersion: existing.rowVersion, reason } })
+          : await typedRequest('post', '/api/v1/projects/{projectId}/allocations', { params: { projectId }, query: { preview: true }, body: { ...body, reason: needsReason ? reason : null, openRoleId: fill?.openRoleId ?? null } });
+        if (!('preview' in result)) throw new Error(t('app.error')); if (!cancelled) setAllocationPreview(result) }
       catch (e) { if (!cancelled) { setAllocationPreview(null); setPreviewError(e) } }
     }, 300)
     return () => { cancelled = true; window.clearTimeout(timer) }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- fields are the explicit preview inputs
-  }, [previewReady, base, existing?.id, personId, purpose, fromDate, throughDate, plannedHours, reason, fill?.openRoleId, JSON.stringify(links), JSON.stringify(days)])
+  }, [previewReady, projectId, base, existing?.id, personId, purpose, fromDate, throughDate, plannedHours, reason, fill?.openRoleId, JSON.stringify(links), JSON.stringify(days)])
   return <CommandForm path={existing ? `${base}/${existing.id}/edit` : base} title={fill ? t('openRole.fillTitle', { role: fill.roleLabel }) : t(existing ? 'allocation.edit' : 'allocation.new')}
     hint={fill ? t('openRole.fillHint', { role: fill.roleLabel, from: fmtDate(fill.fromDate), through: fmtDate(fill.throughDate) }) : t(existing?.status === 'Confirmed' ? 'allocation.editConfirmedHint' : 'allocation.proposalHint')} onClose={close} onDone={done}
     submitLabel={t(existing ? 'allocation.saveChanges' : 'allocation.submitProposal')}
@@ -227,7 +230,7 @@ function Proposal({ base, options, close, done, existing, fill, complete }: { ba
 const ACTION_BODY = { decline: 'allocation.declineBody', cancel: 'allocation.cancelBody', complete: 'allocation.completeBody' } as const
 
 /** The allocation's detail panel (§13.0: a 560 px right panel on desktop, full width below), deep-linked by ?allocation=. */
-function AllocationDetail({ base, id, projectNumber, options, close, refresh }: { base: string; id: string; projectNumber: string; options?: CoordOptions; close: () => void; refresh: () => void }) {
+function AllocationDetail({ projectId, base, id, projectNumber, options, close, refresh }: { projectId: string; base: string; id: string; projectNumber: string; options?: CoordOptions; close: () => void; refresh: () => void }) {
   const small = useFlag('small_ux')
   const [preview, setPreview] = useState<Preview | null>(null), [action, setAction] = useState<'confirm' | 'decline' | 'cancel' | 'complete' | null>(null)
   const [allocationPreview, setAllocationPreview] = useState<AllocationPreview | null>(null)
@@ -248,15 +251,16 @@ function AllocationDetail({ base, id, projectNumber, options, close, refresh }: 
     let cancelled = false; setConfirmPreviewPending(true)
     const timer = window.setTimeout(async () => {
       try {
-        const result = await post<AllocationPreview>(`${base}/${id}/confirm?preview=true`, { requestId: crypto.randomUUID(), rowVersion: preview.rowVersion,
-          dateVersions: preview.days.map(d => ({ workDate: d.date, rowVersion: d.dateVersion })), overCapacityReason: confirmReason.trim() || null })
+        const result = await typedRequest('post', '/api/v1/projects/{projectId}/allocations/{id}/confirm', { params: { projectId, id }, query: { preview: true }, body: { requestId: crypto.randomUUID(), rowVersion: preview.rowVersion,
+          dateVersions: preview.days.map(d => ({ workDate: d.date, rowVersion: d.dateVersion })), overCapacityReason: confirmReason.trim() || null } })
+        if (!('preview' in result)) throw new Error(t('app.error'))
         if (!cancelled) setAllocationPreview(result)
       } catch (e) { if (!cancelled) setConfirmPreviewError(e) }
       finally { if (!cancelled) setConfirmPreviewPending(false) }
     }, 300)
     return () => { cancelled = true; window.clearTimeout(timer) }
-  }, [previewEnabled, action, preview, needsConfirmReason, confirmReason, base, id])
-  if (editing && row && options) return <Proposal base={base} options={options} existing={row} close={() => setEditing(false)} done={() => { setEditing(false); done() }} />
+  }, [previewEnabled, action, preview, needsConfirmReason, confirmReason, projectId, base, id])
+  if (editing && row && options) return <Proposal projectId={projectId} base={base} options={options} existing={row} close={() => setEditing(false)} done={() => { setEditing(false); done() }} />
   const live = row && ['Proposed', 'Confirmed'].includes(row.status)
   const over = preview?.days.filter(d => d.overByHours > 0) ?? []
   return <Sheet open onOpenChange={o => !o && close()}>

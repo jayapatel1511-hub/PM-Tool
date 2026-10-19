@@ -16,9 +16,9 @@ public static class RouteCounterEndpoints
         api.MapPost("/route-counts", async (OpenBody body, HubDb db, SettingsStore store, TimeProvider clock) =>
         {
             var settings = await store.Get(db);
-            if (!settings.IsFlagOn("route_counter") || !settings.RouteCounterEnabled) return Results.NoContent();
+            if (!settings.IsFlagOn("route_counter") || !settings.RouteCounterEnabled) return TypedResults.NoContent();
             var route = RouteCounter.Match(body.Route);
-            if (route is null) return Results.NoContent();
+            if (route is null) return TypedResults.NoContent();
             var ms = Math.Clamp(body.ElapsedMs, 0, 60000);
             var day = clock.Today(settings);
             var band = RouteCounter.Band(TimeSpan.FromMilliseconds(ms));
@@ -33,7 +33,7 @@ public static class RouteCounterEndpoints
                     from1000to1999ms = route_count.from1000to1999ms + EXCLUDED.from1000to1999ms,
                     from2000to4999ms = route_count.from2000to4999ms + EXCLUDED.from2000to4999ms,
                     over5000ms = route_count.over5000ms + EXCLUDED.over5000ms");
-            return Results.NoContent();
+            return TypedResults.NoContent();
         }).RequireRateLimiting("route-counter");
     }
 }

@@ -10,6 +10,23 @@ namespace Hub.Api.Features;
 /// Tasks and review (§12.5, §13.3, §13.4, §15.6, §15.7).
 public static class TaskEndpoints
 {
+    public sealed record TaskDetailProject(Guid Id, string ProjectNumber, string Name, string Status);
+    public sealed record TaskDetailTransition(string To, bool Allowed, string? Reason, bool NeedsReason, string? Via);
+    public sealed record TaskDetailPermission(bool Ok, string? Reason);
+    public sealed record TaskDetailPermissions(TaskDetailPermission Edit, TaskDetailPermission Assign, TaskDetailPermission SetReviewer,
+        bool DueNeedsReason, TaskDetailPermission DueDate, TaskDetailPermission Block, TaskDetailPermission Delete, bool Restore, bool Comment,
+        IReadOnlyList<TaskDetailTransition> Transitions, string? CompleteHint, bool IsReviewer, bool Dependencies, bool EnterTime,
+        bool NeedsReason, bool AllowSelfReview, bool AuthoriseStart,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        bool? OfferPickup = null);
+    public sealed record TaskDetailCollaborator(Guid Id, string DisplayName, bool IsActive);
+    public sealed record TaskDetailWatcher(Guid Id, string DisplayName, string Source);
+    public sealed record TaskRelatedDeliverable(Guid Id, string Key, string Name, string Status);
+    public sealed record TaskDetailResponse(TaskQueries.Row Task, string? Description, string? OnHoldReason, string? CancelledReason,
+        string? PreviousStatus, DateTimeOffset? ReviewRequestedAt, TaskDetailProject Project, IReadOnlyList<TaskDetailCollaborator> Collaborators,
+        IReadOnlyList<TaskDetailWatcher> Watchers, TaskDetailPermissions Permissions,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        IReadOnlyList<TaskRelatedDeliverable>? RelatedDeliverables = null);
     public sealed record CreateBody(string Name, string? Description, Guid? ProjectDisciplineId, Guid? DeliverableId, Guid? MilestoneId, Guid? AssigneeId,
         Guid? ReviewerId, bool? RequiresReview, string? Priority, DateOnly? StartDate, DateOnly? DueDate, decimal? EstimatedHours, Guid[]? DependsOn);
     public sealed record TransitionBody(string ToStatus, string? Reason, string? Comment, Guid? ReviewerId, int? RowVersion, bool? AcknowledgeReadiness = null);
@@ -183,7 +200,7 @@ public static class TaskEndpoints
 
     // ---------- Detail (§13.3.1, §25.9 permissions.allowedTransitions) ----------
 
-    static async Task<object> Get(string id, Access access, HubDb db, SettingsStore store)
+    static async Task<TaskDetailResponse> Get(string id, Access access, HubDb db, SettingsStore store)
     {
         var t = (Guid.TryParse(id, out var g) ? await db.Tasks.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Tasks.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
@@ -199,42 +216,30 @@ public static class TaskEndpoints
             .Select(x =>
             {
                 var allow = PathAllowed(a, ctx, facts, t.Status, x.path!);
-                return new { To = x.to, Allowed = allow.Ok, Reason = allow.Ok ? null : Reason(allow, dname), NeedsReason = Workflow.TaskNeedsReason(t.Status, x.to), Via = x.path!.Length > 1 ? x.path[0] : null };
+                return new TaskDetailTransition(x.to, allow.Ok, allow.Ok ? null : Reason(allow, dname), Workflow.TaskNeedsReason(t.Status, x.to), x.path!.Length > 1 ? x.path[0] : null);
             }).ToList();
         var notAllowedComplete = t.RequiresReview && t.Status == TaskStatuses.InProgress ? Text.Get("task.requires_review_hint") : null;
-        var collaborators = await db.Collaborators.Where(c => c.TaskId == t.Id).Join(db.Users, c => c.UserId, u => u.Id, (c, u) => new { u.Id, u.DisplayName, u.IsActive }).ToListAsync();
-        var watchers = await db.Watchers.Where(w => w.ItemType == ItemType.Task && w.ItemId == t.Id).Join(db.Users, w => w.UserId, u => u.Id, (w, u) => new { u.Id, u.DisplayName, w.Source }).ToListAsync();
+        var collaborators = await db.Collaborators.Where(c => c.TaskId == t.Id).Join(db.Users, c => c.UserId, u => u.Id, (c, u) => new TaskDetailCollaborator(u.Id, u.DisplayName, u.IsActive)).ToListAsync();
+        var watchers = await db.Watchers.Where(w => w.ItemType == ItemType.Task && w.ItemId == t.Id).Join(db.Users, w => w.UserId, u => u.Id, (w, u) => new TaskDetailWatcher(u.Id, u.DisplayName, w.Source)).ToListAsync();
         var edit = Permissions.EditTask(a, ctx, facts);
         var assign = Permissions.AssignTask(a, ctx, facts);
         var due = Permissions.ChangeDueDate(a, ctx, facts);
         var block = Permissions.ManualBlock(a, ctx, facts);
         var del = Permissions.DeleteTask(a, ctx, facts);
-        object P(Allow x) => new { x.Ok, Reason = x.Ok ? null : Reason(x, dname) };
-        var result = new
-        {
-            Task = row, t.Description, t.OnHoldReason, t.CancelledReason, t.PreviousStatus, t.ReviewRequestedAt,
-            Project = new { p.Id, p.ProjectNumber, p.Name, p.Status },
-            Collaborators = collaborators, Watchers = watchers,
-            Permissions = new
-            {
-                Edit = P(edit), Assign = P(assign), SetReviewer = P(Permissions.SetReviewer(a, ctx, facts)), DueDate = P(due),
-                DueNeedsReason = Permissions.DueChangeNeedsReason(a, ctx, facts), Block = P(block), Delete = P(del),
-                Restore = Permissions.RestoreItem(a, ctx).Ok, Comment = Permissions.Comment(a, ctx).Ok,
-                Transitions = transitions, CompleteHint = notAllowedComplete, IsReviewer = t.ReviewerId == a.Id,
-                Dependencies = Permissions.ManageDependency(a, ctx, facts, facts).Ok, EnterTime = Permissions.EnterTime(a, ctx).Ok,
-                NeedsReason = ProjectStatus.NeedsCorrectionReason(p.Status), AllowSelfReview = s.AllowSelfReview,
-                AuthoriseStart = t.Status == TaskStatuses.NotStarted && Permissions.ManageCoordination(a, ctx, t.ProjectDisciplineId).Ok,
-            },
-        };
-        if (!s.IsFlagOn("small_ux") && !s.IsFlagOn("task_pickup")) return result;
-        var json = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
-        if (s.IsFlagOn("small_ux")) json["relatedDeliverables"] = JsonSerializer.SerializeToNode(await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id
+        TaskDetailPermission P(Allow x) => new(x.Ok, x.Ok ? null : Reason(x, dname));
+        var permissions = new TaskDetailPermissions(
+            P(edit), P(assign), P(Permissions.SetReviewer(a, ctx, facts)), Permissions.DueChangeNeedsReason(a, ctx, facts), P(due), P(block), P(del),
+            Permissions.RestoreItem(a, ctx).Ok, Permissions.Comment(a, ctx).Ok, transitions, notAllowedComplete, t.ReviewerId == a.Id,
+            Permissions.ManageDependency(a, ctx, facts, facts).Ok, Permissions.EnterTime(a, ctx).Ok, ProjectStatus.NeedsCorrectionReason(p.Status),
+            s.AllowSelfReview, t.Status == TaskStatuses.NotStarted && Permissions.ManageCoordination(a, ctx, t.ProjectDisciplineId).Ok,
+            s.IsFlagOn("task_pickup") ? Permissions.Writable(a, ctx).Ok && (t.AssigneeId == a.Id || Permissions.IsPM(a, ctx)
+                || Permissions.IsDL(ctx, t.ProjectDisciplineId) || a.Supervisor && facts.AssigneeSupervisorId == a.Id) : null);
+        var related = s.IsFlagOn("small_ux") ? await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id
             && db.ItemLinks.Any(l => l.ProjectId == p.Id && l.SourceType == ItemType.Task && l.SourceId == t.Id
                 && l.TargetType == ItemType.Deliverable && l.TargetId == d.Id && l.Relation == ItemRelation.Related))
-            .OrderBy(d => d.Key).Select(d => new { d.Id, d.Key, d.Name, d.Status }).ToListAsync(), JsonOpts.Web);
-        if (s.IsFlagOn("task_pickup")) json["permissions"]!["offerPickup"] = Permissions.Writable(a, ctx).Ok && (t.AssigneeId == a.Id || Permissions.IsPM(a, ctx)
-            || Permissions.IsDL(ctx, t.ProjectDisciplineId) || a.Supervisor && facts.AssigneeSupervisorId == a.Id);
-        return json;
+            .OrderBy(d => d.Key).Select(d => new TaskRelatedDeliverable(d.Id, d.Key, d.Name, d.Status)).ToListAsync() : null;
+        return new TaskDetailResponse(row, t.Description, t.OnHoldReason, t.CancelledReason, t.PreviousStatus, t.ReviewRequestedAt,
+            new TaskDetailProject(p.Id, p.ProjectNumber, p.Name, p.Status), collaborators, watchers, permissions, related);
     }
 
     // ---------- Edit (T-15..T-22, R-02, R-04, E-03) ----------

@@ -150,7 +150,7 @@ public static class NotificationEndpoints
             var set = await UserPreferences.GetOrCreate(db, me.Id);
             set.DenseRows = body.DenseRows;
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
         // The weekly PM summary as it would be sent now (FR-001), so a PM can see it before Monday.

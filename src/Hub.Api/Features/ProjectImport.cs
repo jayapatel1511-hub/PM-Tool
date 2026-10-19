@@ -11,6 +11,7 @@ namespace Hub.Api.Features;
 public static class ProjectImportEndpoints
 {
     public sealed record Body(string Csv);
+    public sealed record ImportSummary(ImportRow[] Rows, int Creates, int Exists, int Errors, bool CanApply);
     public sealed record ImportRow(int Row, string ProjectNumber, string Name, string Client, string Office, string ProjectManagerEmail,
         string Classification, string? Error, Guid? ClientId = null, Guid? OfficeId = null, Guid? ProjectManagerId = null);
 
@@ -38,8 +39,8 @@ public static class ProjectImportEndpoints
             }));
     }
 
-    static object Summary(ImportRow[] rows) => new { Rows = rows, Creates = rows.Count(r => r.Classification == "Create"),
-        Exists = rows.Count(r => r.Classification == "Exists"), Errors = rows.Count(r => r.Classification == "Error"), CanApply = rows.All(r => r.Classification != "Error") };
+    static ImportSummary Summary(ImportRow[] rows) => new(rows, rows.Count(r => r.Classification == "Create"),
+        rows.Count(r => r.Classification == "Exists"), rows.Count(r => r.Classification == "Error"), rows.All(r => r.Classification != "Error"));
 
     static async Task<ImportRow[]> Parse(Body body, Access access, HubDb db, SettingsStore store)
     {

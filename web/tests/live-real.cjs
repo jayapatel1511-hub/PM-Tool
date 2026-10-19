@@ -54,7 +54,7 @@ async function waitForText(page, text, timeout = 2000) { await page.locator('but
   try {
     const fixture = await seed()
     await setting('flag.live_events', true); await setting('flag.live_project_stamp', true)
-    browser = await chromium.launch({ headless: true })
+    browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
     const contextA = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
     const contextB = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
     const writerPage = await contextA.newPage(); const viewerPage = await contextB.newPage(); const errors = []

@@ -8,7 +8,7 @@ using Xunit;
 namespace Hub.Tests.Api;
 
 [Collection("api")]
-public sealed class DesignBasisPermissionMatrixTests(HubFactory f)
+public sealed class DesignBasisPermissionMatrixTests(HubFactory f, Xunit.Abstractions.ITestOutputHelper output)
 {
     readonly TestData d = new(f);
 
@@ -34,15 +34,23 @@ public sealed class DesignBasisPermissionMatrixTests(HubFactory f)
             foreach (var user in users)
             {
                 var project = await (await f.As(user).GetAsync($"/api/v1/projects/{p.Id}")).Json();
+                var options = await (await f.As(user).GetAsync($"/api/v1/projects/{p.Id}/changes/options")).Json();
+                var isPm = project["permissions"]!["isPm"]!.GetValue<bool>();
+                var leads = project["permissions"]!["leadOf"]!.AsArray();
+                var primary = f.Db(db => db.ProjectMembers.Where(m => m.ProjectId == p.Id && m.UserId == d.User(user) && m.RemovedAt == null).Select(m => m.PrimaryDisciplineId).FirstOrDefault());
+                var legacyCreate = options["canWrite"]!.GetValue<bool>() && (isPm || leads.Any(x => x!.GetValue<Guid>() == discipline) || (primary == discipline && project["myRoles"]!.AsArray().Any(x => x!.GetValue<string>() == ProjectRole.TeamMember)));
+                var legacyAssign = isPm || leads.Count > 0;
                 var createAllowed = project["permissions"]!["createBasisIn"]!.AsArray().Any(x => x!.GetValue<Guid>() == discipline);
                 async Task<HttpResponseMessage> Create(string owner) => await f.As(user).Post($"/api/v1/projects/{p.Id}/design-basis", new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), BasisKind.Criterion,
                     $"Create {user} {status} {owner}", d.User(owner), discipline, null,
                     new DesignBasisEndpoints.VersionInput("Scope", "Statement", 1m, "m", "Synthetic", Guid.NewGuid().ToString(), "https://example.test/basis", "A", new DateOnly(2026, 11, 15), null), "Permission matrix correction"));
                 var create = await Create(user);
                 Assert.True(createAllowed ? create.IsSuccessStatusCode : create.StatusCode == HttpStatusCode.Forbidden, $"{user} {status} create returned {(int)create.StatusCode}: {await create.Content.ReadAsStringAsync()}");
+                if (legacyCreate != createAllowed) output.WriteLine($"{user} {status} decision4.create: client {legacyCreate}, flag {createAllowed}, HTTP {(int)create.StatusCode}");
                 var assignAllowed = project["permissions"]!["assignBasisIn"]!.AsArray().Any(x => x!.GetValue<Guid>() == discipline);
                 var assign = await Create(user == TestData.Alex ? TestData.Pm : TestData.Alex);
                 Assert.True(assignAllowed ? assign.IsSuccessStatusCode : assign.StatusCode == HttpStatusCode.Forbidden, $"{user} {status} name another owner returned {(int)assign.StatusCode}: {await assign.Content.ReadAsStringAsync()}");
+                if (legacyAssign != assignAllowed) output.WriteLine($"{user} {status} decision4.assign: client {legacyAssign}, flag {assignAllowed}, HTTP {(int)assign.StatusCode}");
             }
         }
     }

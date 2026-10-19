@@ -1,17 +1,17 @@
 # Verification: Task Pickup
 
-Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
+Runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72` passes **1,514/1,514 backend tests** (zero failures/skips). Rules branch coverage is **3,032/3,155 (96.1%)** and service line coverage **13,084/13,665 (95.7%)**. The 799-response shape gate passes from one full-run manifest. See the [acceptance follow-up](../../docs/handoffs/2026-10-19-039-050-acceptance-followup.md) and its hashed receipt for current browser, image and source boundaries. Earlier slice runs below are historical; their missing-schema/startup blockers are resolved by the combined run. Prior compatibility evidence retains source `1b649f5`; no schema changed afterward. No packet is Accepted; hosted, pilot and human gates remain separate.
 
 | AC ID | Local result | Evidence and remaining boundary |
 |---|---|---|
-| AC-PKP-01 | PASS API / partial UI | Offer preserves task fields; task marker present only flag-on; recipients/catalogue reviewed. Exhaustive notification recipient matrix remains unproven. |
+| AC-PKP-01 | PASS API / partial UI | Offer preserves task fields; task marker present only flag-on; recipients/catalogue reviewed. Follow-up persisted-recipient matrix passes: offer, pickup, manager assignment, withdrawal and automatic closure; actor exclusion, overlapping roles, inactive users, current Restricted membership, preferences and mute policy are asserted. |
 | AC-PKP-02 | PASS | Same-team pickup reassigns, watches prior assignee and closes once; task old/new audit and normal team/authorship safeguards reused. |
 | AC-PKP-03 | PASS | Outside-team and ReadOnly mutation rejected; org unit matching overrides manager fallback. |
 | AC-PKP-04 | PASS | Two simultaneous pickers: one winner and one conflict. |
 | AC-PKP-05 | PASS | Completion, reassignment, project Complete/Archived auto-close; deleted-task history remains in report. |
-| AC-PKP-06 | PARTIAL | Visible-project filtering is shared by list/report and source reviewed; dedicated Restricted pickup API matrix remains a combined acceptance check. |
+| AC-PKP-06 | PASS API | Dedicated Restricted matrix proves member visibility, same-team nonmember/removed-member omission from list/report (including hours, reason and note), and rejected pickup with unchanged task/offer state. |
 | AC-PKP-07 | PASS | Manager target constrained to same team; roleless direct-manager cannot offer/withdraw/assign; normal write permissions unchanged. |
-| AC-PKP-08 | PASS focused / combined gate pending | Default route dark and marker omitted; existing full flag-off suites remain integration gate. |
+| AC-PKP-08 | PASS local API / bounded UI | Default route dark and marker omitted; full combined regression passes, including all 28 TaskPickup cases. The corrected four My Work view/flag browser pairs retain their recorded source boundary. |
 
 UI: real Chromium pick-up flow and versioned POST pass with mocked API. TaskPanel offering, withdrawing and assigning are wired to server capabilities. The companion completes the own load-band hint beside each pick-up action for its needed-by week (current week when no needed-by date is set). It reuses Workload.Grid with a server-only own-person boundary and the same committed-hours basis as the band. A normal picker gains no workspace Workload access. Hidden work yields Partial view with suppressed hours/band. Picking up refreshes the cached hint. The list includes project/discipline/offerer/age/hours/date context; the detail form accepts optional hours/date/note and exposes self-pickup through server capability.
 
@@ -29,7 +29,7 @@ UI: real Chromium pick-up flow and versioned POST pass with mocked API. TaskPane
 
 Core local commit: `4f92c6ea6376b777d51ce7218bd3739f9132bff6`. Companion API checks PASS21/21 (20 relevant retests plus one additional own-load case), no failures/skips, in `../048-verifiable-records/evidence/companion-tests.json`. Needed-by week and lack of broader Workload access are asserted at the API. The final Chromium suite additionally asserts the needed-by week query and own-load refresh after a pick. No new migration/model changes in this companion.
 
-## Recovery-time boundary rerun
+## Historical recovery-time boundary rerun — resolved
 
 After the interrupted session, the local Docker daemon and PostgreSQL listener were unavailable. The latest two strengthened assertions (invalid hours and own-load suppression for a synthetic hidden-project assignment) compile but could not reach assertions: both test hosts fail with Connection refused at 127.0.0.1:55432. This is BLOCKED_ENVIRONMENT, not a new application failure or a passing result. `../048-verifiable-records/evidence/boundary-rerun.json` preserves actual runner outcomes and the reason. Re-run `FullyQualifiedName~Own_load_hint|FullyQualifiedName~Offer_leaves_task_fields` when the disposable test DB is restored. The earlier 57 core tests, 21 companion API checks and previous companion six-workflow Chromium run remain separately recorded passing evidence; the backend production source did not change after that companion API run, only these assertions were strengthened. No shared runtime was started or changed to bypass the missing environment.
 
@@ -39,4 +39,10 @@ Integration found the original My Work flag-off check used a paginated-list fixt
 
 The corrected mocked Chromium run renders Overview and Upcoming Tasks with the real Work/tasks/planning fixtures, then asserts the main-content pickup link is absent with the flag off and visible exactly once with it on. The main scope excludes global navigation. The view switcher, saved Views control and New task remain visible in all four cases. PASS artifacts are written only after page-error, unknown-GET and axe checks pass. CHROME_EXECUTABLE_PATH is supported for an installed browser.
 
-PASS: app/node TypeScript checks with incremental disabled, Vite build, corrected Chromium regression and independent source/test review. The replacement ../048-verifiable-records/evidence/mocked-chromium.json contains the explicit four-pair records. No backend/model/schema change is included in this follow-up; the separate database boundary limitation and combined acceptance gates remain open.
+PASS: app/node TypeScript checks with incremental disabled, Vite build, corrected Chromium regression and independent source/test review. The replacement ../048-verifiable-records/evidence/mocked-chromium.json contains the explicit four-pair records. No backend/model/schema change is included in this follow-up; that historical database/combined-test limitation is resolved by the current 1,514-test run. Human, hosted and pilot acceptance remain open.
+
+## Acceptance follow-up (2026-10-19)
+
+Local source commit `566fe51` fixes automatic closure notifications that bypassed the shared `Notifier`. Eight inactive/preference/removed-member/muted task/project-close cases failed before the fix. The shared notifier now applies the same delivery rules as explicit pickup commands. `TaskPickupTests` passes all 28 cases in `ci-artifacts/integration/acceptance-followup/fourth.trx`; the three source/caller files also pass independent review. The full follow-up passes 1,514 tests, including all 28 TaskPickup tests and the formerly blocked own-load and offer-preservation cases. Earlier 1,491-test evidence belongs to the prior runtime.
+
+The new exact recipient-set checks inspect stored users and count=1, including manager/lead/peer overlap. Assignment retains the existing direct-assignment exception to muted follows. Automatic closure is re-saved to prove no duplicate notice. Tests use disposable synthetic databases; this is neither actual email delivery nor operational acceptance.

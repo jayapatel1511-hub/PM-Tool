@@ -7,7 +7,7 @@ using Xunit;
 namespace Hub.Tests.Api;
 
 [Collection("api")]
-public sealed class SubmissionPermissionMatrixTests(HubFactory f)
+public sealed class SubmissionPermissionMatrixTests(HubFactory f, Xunit.Abstractions.ITestOutputHelper output)
 {
     readonly TestData d = new(f);
 
@@ -43,12 +43,16 @@ public sealed class SubmissionPermissionMatrixTests(HubFactory f)
             {
                 var client = f.As(user);
                 var projectView = await (await client.GetAsync($"/api/v1/projects/{project.Id}")).Json();
+                var detail = await (await client.GetAsync($"/api/v1/projects/{project.Id}/submissions/{originalId}")).Json();
+                var options = await (await client.GetAsync($"/api/v1/projects/{project.Id}/changes/options")).Json();
+                var legacy = detail["canAuthorise"]!.GetValue<bool>() || options["manageDisciplineIds"]!.AsArray().Count > 0;
                 var allowed = projectView["permissions"]!["createSubmission"]!["ok"]!.GetValue<bool>();
                 var response = await client.Post($"/api/v1/projects/{project.Id}/submissions", new SubmissionEndpoints.CreateBody(
                     Guid.NewGuid(), $"Superseding package {user} {status}", "Synthetic supersede validation", "Synthetic recipient", d.User(TestData.Pm),
                     milestoneId, new DateOnly(2026, 11, 15), [new(revision.G("id"))], [], originalId, "Permission matrix correction"));
                 Assert.True(allowed ? response.IsSuccessStatusCode : response.StatusCode == HttpStatusCode.Forbidden,
                     $"{user} {status} supersede returned {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync()}; createSubmission={allowed}");
+                if (legacy != allowed) output.WriteLine($"{user} {status} decision10: client {legacy}, flag {allowed}, HTTP {(int)response.StatusCode}");
             }
         }
     }

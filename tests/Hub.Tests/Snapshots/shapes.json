@@ -5701,6 +5701,7 @@
       "string"
     ],
     "$.items[].entry.itemKey": [
+      "null",
       "string"
     ],
     "$.items[].entry.itemName": [
@@ -56665,7 +56666,8 @@
       "object"
     ],
     "$[].hoursRemaining": [
-      "null"
+      "null",
+      "number"
     ],
     "$[].id": [
       "string"
@@ -56674,7 +56676,8 @@
       "null"
     ],
     "$[].note": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].offeredBy": [
       "string"
@@ -59021,6 +59024,7 @@
       "string"
     ],
     "$.nextMilestone.status": [
+      "null",
       "string"
     ],
     "$.nextSubmission": [
@@ -59049,6 +59053,7 @@
       "string"
     ],
     "$.nextSubmission.status": [
+      "null",
       "string"
     ],
     "$.office": [
@@ -64860,9 +64865,11 @@
       "string"
     ],
     "$.items[].createdBy": [
+      "null",
       "string"
     ],
     "$.items[].createdByName": [
+      "null",
       "string"
     ],
     "$.items[].deliverableDueDate": [
@@ -65132,6 +65139,7 @@
       "string"
     ],
     "$.items[].statusChangedAt": [
+      "null",
       "string"
     ],
     "$.items[].successorCount": [
@@ -66434,7 +66442,8 @@
       "string"
     ],
     "$.sources[].revision.supersedesId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.sources[].revision.title": [
       "string"
@@ -71277,9 +71286,11 @@
       "string"
     ],
     "$.rows[].closeCause": [
+      "null",
       "string"
     ],
     "$.rows[].closed": [
+      "null",
       "string"
     ],
     "$.rows[].collaboratorIds": [
@@ -87479,6 +87490,29 @@
     ]
   },
   "POST /api/v1/tasks/{id}/pickup 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/tasks/{id}/pickup 404": {
     "$": [
       "object"
     ],

@@ -1,8 +1,8 @@
 # Verification: Task and Timeline Interaction
 
-Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
+Runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72` passes **1,514/1,514 backend tests** (zero failures/skips). Rules branch coverage is **3,032/3,155 (96.1%)** and service line coverage **13,084/13,665 (95.7%)**. The 799-response shape gate passes from one full-run manifest. See the [acceptance follow-up](../../docs/handoffs/2026-10-19-039-050-acceptance-followup.md) and its hashed receipt for current browser, image and source boundaries. Earlier slice runs below are historical; their missing-schema/startup blockers are resolved by the combined run. Prior compatibility evidence retains source `1b649f5`; no schema changed afterward. No packet is Accepted; hosted, pilot and human gates remain separate.
 
-## Current evidence
+## Historical lane evidence — superseded by current crosswalk below
 
 - Implemented the project-ranked picker, task quick actions/name editor, shared date-context read/hints and drag warnings, slip threshold and PM re-baseline actions, latest-planned note, personal view copy/Staff views, grouped activity/actor, Related deliverable creation, optimistic status, allocation wording, Gantt URL collapse, Planner link, Timeline handoffs and stored milestone-chain highlighting.
 - Reused the existing flag helper, status/authorisation/reason dialogs, task block/name controls, date editor, saved-view menu, export infrastructure and Related-link transaction. No dependencies added. Off-shape fields are omitted where required.
@@ -14,46 +14,43 @@ Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13
 - PASS: existing settings/default/validation checks via `dotnet test tests/Hub.Tests/Hub.Tests.csproj --no-build --no-restore --filter 'FullyQualifiedName~Hub.Tests.Domain.DomainHelpersTests' --nologo -v quiet`: 28 passed, 0 failed, 0 skipped.
 - BLOCKED: `dotnet test tests/Hub.Tests/Hub.Tests.csproj --no-build --no-restore --filter 'FullyQualifiedName~Baseline_requires_pm_reason_and_current_version_and_preserves_original_slip' --nologo --logger 'console;verbosity=normal'` fails at test-host startup with EF `PendingModelChangesWarning`, before application assertions. Earlier combined focused run was 145 domain passes and 16 API startup failures for the same reason. New picker/date-context/timeline/baseline/related-link/actor/saved-view API tests compile; their runtime outcome is UNPROVEN. No warning suppression, migration or snapshot was generated in this lane.
 
-## Schema/integration contract
+## Historical schema/integration contract — integrated
 
 Model commit `ea202b19` contains nullable `Milestone.BaselineDate`, `Deliverable.BaselineStartDate` and `Deliverable.BaselineDueDate` (EF `date`), plus audited fields. The sole schema lane owns their migration/snapshot and the 048 immutable `DeliverableBaseline` history model. Deliverable re-baseline now uses `Tx.Run`, project advisory lock, reload, current-context permission/deleted/closed checks, row version and required reason. Integration must call `BaselineHistory.Capture(db, d, body.Clear == true, Check.Reason(body.Reason), access.Me.Id, clock.GetUtcNow())` immediately after the date assignments and before its final `SaveChangesAsync`, inside that same transaction. The history helper must be a no-op when its flag is off; clearing clears its pointer and keeps immutable history. This hook is not implemented here because 048 owns the entity.
 
-## Acceptance map
+## Current acceptance crosswalk (2026-10-19)
 
-“PARTIAL” means implemented with the evidence stated, with remaining checks explicitly open; it does not mean Accepted.
+Local PASS covers only the named checks. It is not human acceptance. Backend evidence is the full 1,514-test TRX; browser evidence is `ci-artifacts/integration/interaction-final-566fe51.log` (both scripts pass).
 
 | AC | Current evidence and limit |
 |---|---|
-| AC-INT-01 | PARTIAL: domain flag metadata PASS; selected browser flag-off PASS; complete API/browser parity pending |
-| AC-INT-02 | PARTIAL: actual hover/focus opacity, named Open and archived-viewer Open-only mock PASS; full role matrix pending |
-| AC-INT-03 | PARTIAL: start refusal/authorisation dialog with unchanged status mock PASS; successful real authorisation pending |
-| AC-INT-04 | PARTIAL: existing BlockDialog reused; save/log sequence pending |
-| AC-INT-05 | PARTIAL: Escape/no write and Enter/single PATCH mock PASS; single-log API case compiled, schema blocked; conflict/empty matrix pending |
-| AC-INT-06 | PARTIAL: API ranking/recent-window cases compiled, schema blocked |
-| AC-INT-07 | PARTIAL: API matching/access/off cases compiled, schema blocked |
-| AC-INT-08 | PARTIAL: project context supplied by layout and all three panels; full picker browser case pending |
-| AC-INT-09 | PARTIAL: shared dependency-bound domain PASS; API consistency read schema blocked |
-| AC-INT-10 | PARTIAL: parent/own inconsistency domain PASS; API read schema blocked |
-| AC-INT-11 | PARTIAL: scoped availability/no-detail cases compiled, schema blocked |
-| AC-INT-12 | PARTIAL: real date editor/request/clear/Escape mock PASS; inconsistent save/evaluation pending |
-| AC-INT-13 | PARTIAL: successor/child read and dialog implemented; API tests schema blocked; drag-confirm flow pending |
-| AC-INT-14 | PARTIAL: threshold domain PASS; timeline/export API cases schema blocked; ghost rendering matrix pending |
-| AC-INT-15 | PARTIAL: permission matrix PASS and reason payload mock PASS; database/audit/conflict API case schema blocked |
-| AC-INT-16 | PARTIAL: baseline calculations PASS; clear/original slip/export API case schema blocked; second-ghost visual check pending |
-| AC-INT-17 | PARTIAL: latest planned domain PASS; current-read/health API cases schema blocked; three-surface visual check pending |
-| AC-INT-18 | PARTIAL: active parameters copied as personal in existing menu; shared-copy browser sequence pending |
-| AC-INT-19 | PARTIAL: personal Staff menu/API validation implemented; API case compiled, schema blocked; default replay pending |
-| AC-INT-20 | PARTIAL: actor/item/burst grouping retains expandable original entries; full browser sequence pending |
-| AC-INT-21 | PARTIAL: newest actor scalar projection/name fallback implemented; sort/log API case schema blocked; 500-task timing unrun |
-| AC-INT-22 | PARTIAL: same-transaction Related link and unchanged task covered by compiled API case, schema blocked; panel flow pending |
-| AC-INT-23 | PARTIAL: readiness guards and existing dialogs retained; full pending/refusal browser sequence pending |
-| AC-INT-24 | PARTIAL: wording implemented; numeric allocation-preview browser fixture unrun |
-| AC-INT-25 | PARTIAL: URL-driven collapse including `collapsed=all`; reload/back-forward browser sequence unrun |
-| AC-INT-26 | PARTIAL: capability-gated Planner link implemented; allowed/denied browser pair unrun |
-| AC-INT-27 | PARTIAL: handoff link mock PASS; date marks/mismatch/filter/API matrix pending |
-| AC-INT-28 | PARTIAL: chain URL/count/no-write mock PASS; exact multi-task/deliverable/arrow highlight fixture pending |
-| AC-INT-29 | PARTIAL: focused desktop Timeline axe PASS; complete phone/keyboard/screen-reader and §22 timing UNPROVEN |
+| AC-INT-01 | PASS bounded API/mock flag pairs; complete flag retirement and pilot parity remain gated. |
+| AC-INT-02 | PASS desktop mock hover/focus, named Open, archived viewer Open-only; server role/status matrix passes. |
+| AC-INT-03 | PASS mock start-authorisation refusal with unchanged status; backend authorization regressions pass. |
+| AC-INT-04 | PASS mock Block dialog requires reason and sends expected payload; backend lifecycle regressions pass. |
+| AC-INT-05 | PASS empty/Escape no-write, Enter single PATCH, 409 saved name recovery and rejected-draft retention; `ScheduleBaselineTests.Task_name_edit_logs_once_and_newest_actor_is_flagged_without_changing_sort` passes. |
+| AC-INT-06–07 | PASS all six PickerRank tests: ranking, recent window, search, access and flag-off shape. |
+| AC-INT-08 | PASS browser Task and Deliverable project query and On this project marker; Portfolio query has no project context. Milestone provider wiring is source evidence only (`Milestones.tsx:479`): no PeoplePicker consumer exists in that panel, so no milestone picker interaction is claimed. |
+| AC-INT-09–11 | PASS all 11 DateContext tests: evaluator bounds, own inconsistencies, availability scope and flag-off behavior. |
+| AC-INT-12 | PASS mock proposed/cleared date requests, Escape no write, inconsistent-date save; API bounds/evaluation tests pass. |
+| AC-INT-13 | PASS mock new inconsistency/successor/child warnings and cancel without write; API descendant read and drag regressions pass. |
+| AC-INT-14 | PASS mock two-day/no-ghost and four-day/original-plus-baseline ghosts; API threshold/filter/export cases pass. |
+| AC-INT-15–16 | PASS all four ScheduleBaseline cases plus reason/current version payload, denied controls and second ghost. `BaselineHistory.Capture` is integrated inside the deliverable transaction; baseline/history/audit/conflict checks pass. |
+| AC-INT-17 | PASS API current values/three surfaces/status/health invariants and mock latest-planned Why title. Human visual review remains separate. |
+| AC-INT-18–19 | PASS shared view copied as Personal with identical parameters, no source PATCH and default false; Staff default replay, explicit URL precedence and manual restoration. All 12 Views tests pass. |
+| AC-INT-20 | PASS four entries grouped within ten minutes, separate eleven-minute entry and expand-all originals in Chromium. |
+| AC-INT-21 | PASS actor, sort and log API behavior. LIMIT: task-list p95 is not consistently within 500 ms; see measurement below. |
+| AC-INT-22 | PASS mock create-from-task prefills/type/default owner/reciprocal link and denied action; API preserves original task and rejects cross-project source. |
+| AC-INT-23 | PASS pending Complete/Saving state then refusal rollback to In Progress; existing guards remain. |
+| AC-INT-24 | PASS actual allocation dialog says 2 of 5 dates and renders five date rows; zero axe violations after animation settles. |
+| AC-INT-25 | PASS global Gantt collapse, URL reload/back and all-collapsed state. |
+| AC-INT-26 | PASS allowed/denied Portfolio-to-Planner capability pair. |
+| AC-INT-27 | PASS handoff date marks, mismatch/overdue days, navigation, incorporated/discipline filters and no-write controls; API visibility/status cases pass. |
+| AC-INT-28 | PASS exact one-of-two chain highlight, dimming and clear; API uses stored affected milestones without recalculation. |
+| AC-INT-29 | PASS bounded desktop Timeline/Gantt/allocation axe checks. Phone, keyboard/screen-reader completeness, human review and representative network timing remain UNPROVEN. |
 
-## Open gates
+## Performance and remaining gates
 
-Combined migration up/rollback smoke, EF drift, API runtime/regression, real packet 036 count reconciliation, rules/services coverage gate, 500-task timing, complete desktop/phone accessibility, human visual review and acceptance were not run or granted here. No flags enabled, push, PR, deployment, Tier B approval or Accepted decision. Source and test additions are local integration candidates.
+[The measurement receipt](evidence/scale-measurement.json) preserves the 500-task, 100-concurrent-user, page-size-100, pool-20 samples. Uninstrumented task-list p95 is **912.2 ms flag off (FAIL 500 ms target)** and **392.2 ms flag on**; picker p95 is 68.6/108.8 ms. Fixed off-then-on order prevents a speedup or regression claim. Coverage-instrumented task-list timings also exceed 500 ms. Functional TRX success does not assert latency. One subsequent coverage-disabled OFF→ON→ON→OFF control used the same load, two full-concurrency warmup batches per phase/path and three measured batches. Task-list phase p95 values are 340.7, 366.5, 350.4, 315.9 ms; aggregate OFF 338.4 / ON 362.4 ms (600 samples each). Picker aggregate OFF 57.2 / ON 103.7 ms. This single warmed local control passes 500 ms, while preserving the earlier failure; it does not establish statistical significance or corporate-network/pilot performance.
+
+Combined schema startup, API regression and coverage blockers are resolved. Previous-image compatibility remains the recorded 29-check source-1b649f5 result; no later schema change occurred. Full phone/keyboard/screen-reader and human acceptance, flag retirement and hosted/pilot operation remain separate. No push, deployment, pilot flag change or Accepted status.

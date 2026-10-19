@@ -38,12 +38,23 @@ async function requireFreePort(port) {
 process.once('SIGINT', stop); process.once('SIGTERM', stop)
 try {
   await requireFreePort(apiPort); await requireFreePort(uiPort)
+  const initializer = start('dotnet', ['run', '--project', 'src/Hub.Api', '-c', 'Release', '--no-launch-profile'], 'initialize', {
+    ASPNETCORE_ENVIRONMENT: 'Development', Auth__Mode: 'Development',
+    ConnectionStrings__Hub: `Host=localhost;Port=55432;Database=${database};Username=hub`,
+    Seed__DevUsers: 'true', Seed__ReviewDemo: 'false', Jobs__Enabled: 'false',
+    Db__MigrateOnly: 'true', Db__InitializeAuditChains: 'true',
+  })
+  const [initialized] = await once(initializer, 'exit')
+  if (initialized !== 0) throw new Error(`synthetic migration initializer failed (${initialized}); see ${output}/initialize.log`)
   const backend = start('dotnet', ['run', '--project', 'src/Hub.Api', '-c', 'Release', '--no-launch-profile', '--urls', api], 'api', {
     ASPNETCORE_ENVIRONMENT: 'Development', Auth__Mode: 'Development',
     ConnectionStrings__Hub: `Host=localhost;Port=55432;Database=${database};Username=hub`,
     Seed__DevUsers: 'true', Seed__ReviewDemo: 'false', Jobs__Enabled: 'false', Evaluation__Worker: 'true', RateLimit__PerMinute: '100000',
   })
   await ready(`${api}/health`, backend)
+  const health = await (await fetch(`${api}/health`)).json()
+  if (process.env.HUB_BUILD && health.build !== process.env.HUB_BUILD) throw new Error(`unexpected health build: ${health.build}`)
+  console.log(JSON.stringify({ health, database, api, ui }))
   const preview = start(process.execPath, ['web/node_modules/vite/bin/vite.js', 'preview', 'web', '--config', 'web/vite.config.ts', '--host', '127.0.0.1', '--port', String(uiPort), '--strictPort'], 'preview', { HUB_API_ORIGIN: api })
   await ready(ui, preview)
   for (const [file, label] of [['smoke-live.cjs', 'browser'], ['live-real.cjs', 'live-browser']]) {

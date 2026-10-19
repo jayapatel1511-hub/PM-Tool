@@ -8,7 +8,7 @@ using Xunit;
 namespace Hub.Tests.Api;
 
 [Collection("api")]
-public sealed class ReviewChangePermissionMatrixTests(HubFactory f)
+public sealed class ReviewChangePermissionMatrixTests(HubFactory f, Xunit.Abstractions.ITestOutputHelper output)
 {
     readonly TestData d = new(f);
 
@@ -51,14 +51,18 @@ public sealed class ReviewChangePermissionMatrixTests(HubFactory f)
                 var task = options["tasks"]!.AsArray().Single(x => x!.G("id") == taskId);
                 var deliverableId = deliverables[user];
                 var deliverableRow = options["deliverables"]!.AsArray().Single(x => x!.G("id") == deliverableId);
+                var managed = options["manageDisciplineIds"]!.AsArray().Any(x => x!.GetValue<Guid>() == discipline);
+                var canWrite = options["canWrite"]!.GetValue<bool>();
                 async Task AssertCommit(string type, Guid id, JsonNode row)
                 {
                     var canCommit = row["canCommit"]!.GetValue<bool>();
+                    var legacy = row["ownerId"]!.GetValue<Guid>() == options["actorId"]!.GetValue<Guid>() || managed;
                     var rowVersion = row["rowVersion"]!.GetValue<int>();
                     var response = await f.As(user).Post($"/api/v1/projects/{project.Id}/weekly-commitments/{type}/{id}",
                         new WeeklyCommitmentsEndpoints.ProposeBody(Guid.NewGuid(), rowVersion, new DateOnly(2026, 10, 5), new DateOnly(2026, 10, 7), "Synthetic output", "Synthetic criteria", $"Valid commitment for {user} {status}"));
                     Assert.True(canCommit ? response.IsSuccessStatusCode : response.StatusCode == HttpStatusCode.Forbidden,
                         $"{user} {status} {type} commit returned {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
+                    if (legacy != canCommit) output.WriteLine($"{user} {status} decision7.{type}: client {legacy}, flag {canCommit}, HTTP {(int)response.StatusCode}");
                 }
                 await AssertCommit("Task", taskId, task);
                 await AssertCommit("Deliverable", deliverableId, deliverableRow);
@@ -72,6 +76,7 @@ public sealed class ReviewChangePermissionMatrixTests(HubFactory f)
                         new ReadinessEndpoints.ApplicabilityBody(Guid.NewGuid(), assessment.RowVersion, check.RowVersion, true, "Synthetic applicability", "https://example.test/applicability"));
                     Assert.True(canManage ? response.IsSuccessStatusCode : response.StatusCode == HttpStatusCode.Forbidden,
                         $"{user} {status} {type} applicability returned {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
+                    if ((canWrite && managed) != canManage) output.WriteLine($"{user} {status} decision8.{type}: client {canWrite && managed}, flag {canManage}, HTTP {(int)response.StatusCode}");
                 }
                 await AssertApplicability("Task", taskId, task);
                 await AssertApplicability("Deliverable", deliverableId, deliverableRow);
@@ -85,12 +90,15 @@ public sealed class ReviewChangePermissionMatrixTests(HubFactory f)
                 var canCreateChange = options["canCreate"]!["changes"]!.GetValue<bool>();
                 Assert.True(canCreateChange ? sourceWrite.IsSuccessStatusCode : sourceWrite.StatusCode == HttpStatusCode.Forbidden,
                     $"{user} {status} source returned {(int)sourceWrite.StatusCode}: {await sourceWrite.Content.ReadAsStringAsync()}");
+                if (canWrite != canCreateChange) output.WriteLine($"{user} {status} decision13.changes: client {canWrite}, flag {canCreateChange}, HTTP {(int)sourceWrite.StatusCode}");
                 var reviewBody = new ReviewEndpoints.CreateBody(Guid.NewGuid(), $"Review {user} {status}", "Permission matrix review", discipline, d.User(TestData.Marc),
                     [sourceIds[user]], [new ReviewEndpoints.Assignment(discipline, d.User(TestData.Pm), DateOnly.FromDateTime(f.Clock.Now.UtcDateTime).AddDays(7))], false, $"Valid review for {user} {status}");
                 var review = await f.As(user).Post($"/api/v1/projects/{project.Id}/reviews", reviewBody);
                 var canCreateReview = options["canCreate"]!["reviews"]!.GetValue<bool>();
                 Assert.True(canCreateReview ? review.IsSuccessStatusCode : review.StatusCode == HttpStatusCode.Forbidden,
                     $"{user} {status} review returned {(int)review.StatusCode}: {await review.Content.ReadAsStringAsync()}");
+                var legacyReview = canWrite && options["manageDisciplineIds"]!.AsArray().Count > 0;
+                if (legacyReview != canCreateReview) output.WriteLine($"{user} {status} decision13.reviews: client {legacyReview}, flag {canCreateReview}, HTTP {(int)review.StatusCode}");
             }
         }
     }
@@ -131,6 +139,7 @@ public sealed class ReviewChangePermissionMatrixTests(HubFactory f)
             var options = await (await f.As(user).GetAsync($"/api/v1/projects/{project.Id}/changes/options")).Json();
             var row = options["deliverables"]!.AsArray().Single(x => x!.G("id") == deliverableId);
             var canManage = row["canManage"]!.GetValue<bool>();
+            var legacyManage = options["manageDisciplineIds"]!.AsArray().Any(x => x!.GetValue<Guid>() == discipline);
             var assessmentId = f.Db(db => db.ChangeAssessments.Single(x => x.TargetId == deliverableId).Id);
             var rowVersion = f.Db(db => db.ChangeAssessments.Single(x => x.Id == assessmentId).RowVersion);
             var response = await f.As(user).Post($"/api/v1/projects/{project.Id}/changes/{sourceB.G("id")}/assessments/{assessmentId}",
@@ -138,6 +147,7 @@ public sealed class ReviewChangePermissionMatrixTests(HubFactory f)
                     null, null, null, null, d.User(TestData.Alex), d.User(TestData.Marc), null, null, null));
             Assert.True(canManage ? response.IsSuccessStatusCode : response.StatusCode == HttpStatusCode.Forbidden,
                 $"{user} {status} assessment assignment returned {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync()}; canManage={canManage}");
+            if (legacyManage != canManage) output.WriteLine($"{user} {status} decision12: client {legacyManage}, flag {canManage}, HTTP {(int)response.StatusCode}");
         }
     }
 }

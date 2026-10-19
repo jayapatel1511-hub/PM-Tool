@@ -1,0 +1,1169 @@
+{
+  "schema": "local-integration-acceptance-followup.v1",
+  "recordedAtUtc": "2026-10-19T04:10:58.420577+00:00",
+  "runtimeSource": "566fe5187d72be56a14fd16d0428e8b8e6e34d72",
+  "scope": "Local only; no push/deployment/pilot activation/Accepted. Packet043 remains separate unadopted spike.",
+  "backend": {
+    "command": "dotnet test Hub.slnx -c Release --collect:'XPlat Code Coverage' --logger 'trx;LogFileName=final.trx' --results-directory ci-artifacts/integration/final-566fe51-tests",
+    "counts": {
+      "total": 1514,
+      "executed": 1514,
+      "passed": 1514,
+      "failed": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "inconclusive": 0,
+      "passedButRunAborted": 0,
+      "notRunnable": 0,
+      "notExecuted": 0,
+      "disconnected": 0,
+      "warning": 0,
+      "completed": 0,
+      "inProgress": 0,
+      "pending": 0
+    },
+    "coverage": {
+      "rulesBranchesCovered": 3032,
+      "rulesBranchesTotal": 3155,
+      "serviceLinesCovered": 13084,
+      "serviceLinesTotal": 13665,
+      "uniqueReports": 1,
+      "identicalAttachmentCopies": 2
+    },
+    "identityBoundary": "TRX has no embedded git SHA. Full run followed runtime566fe51; later changes are test diagnostics, harnesses, shape metadata and evidence only. Six diagnostic matrix tests reran after their output-only edits. The test-only scale harness was then revised to balanced order and run once without coverage; the full1514 suite was not repeated for this measurement-only change."
+  },
+  "permissionMatrices": {
+    "focusedDiagnosticTestsPassed": 6,
+    "legacyDifferences": 36,
+    "differenceReceipt": "specs/041-capacity-figures-and-server-values/evidence/permission-differences.json",
+    "limit": "Existing Projects matrix uses validation probes after authorization; new matrices require valid success or403. Browser controls do not cover every matrix cell."
+  },
+  "shapes": {
+    "singleRun": "7da32effd5c04be6a4655f51680f0b34",
+    "files": 106,
+    "responses": 799,
+    "mappedEndpointsCalled": 381,
+    "mappedEndpoints": 429,
+    "allTypedJsonResponsesObserved": true,
+    "review": "798 to799 adds POST /api/v1/tasks/{id}/pickup404 and11 observed type expansions; no removed operations, fields or kinds."
+  },
+  "mockedBrowsers": {
+    "interaction": [
+      {
+        "scope": "Mocked synthetic API in Chromium; no production or native evidence",
+        "rowActions": true,
+        "blockDialog": true,
+        "latestPlannedRule": true,
+        "handoffMarks": true,
+        "createDeliverableFromTask": true,
+        "deniedCreationAndBaseline": true,
+        "dragWarningsCancel": true,
+        "globalTimelineCollapse": true,
+        "groupedActivity": true,
+        "thresholdGhosts": true,
+        "exactChain": true,
+        "handoffFilters": true,
+        "emptyName": true,
+        "nameConflict": true,
+        "pendingStatusRefusal": true,
+        "inconsistentDateSave": true,
+        "viewerDeepLink": true,
+        "closedProjectOpenOnly": true,
+        "flagParity": true,
+        "draftDateHint": true,
+        "rebaselineReason": true,
+        "timelineHandoffChain": true,
+        "startAuthorizationRefusal": true,
+        "axeViolations": [],
+        "writes": 8,
+        "errors": [],
+        "unknown": [],
+        "untested": []
+      },
+      {
+        "scope": "Chromium mocked workflows",
+        "staffDefaultAndRestore": true,
+        "sharedViewCopy": true,
+        "taskAndDeliverableProjectPickers": true,
+        "portfolioPickerUnscoped": true,
+        "allocationTwoOfFive": true,
+        "portfolioPlannerAccess": true,
+        "axeViolations": [],
+        "posts": 1,
+        "errors": [],
+        "unknownGets": []
+      }
+    ],
+    "panelRegistrations": {
+      "result": "PASS",
+      "route": "/my-work",
+      "panels": [
+        "Task",
+        "Milestone",
+        "Deliverable",
+        "Decision",
+        "Action",
+        "Risk",
+        "Issue"
+      ],
+      "project": "P-MOCK"
+    },
+    "boundedChunks": {
+      "result": "PASS",
+      "routes": [
+        "/my-work",
+        "/projects",
+        "/admin/users"
+      ],
+      "chunks": 122,
+      "failedChunks": 0
+    },
+    "live": {
+      "result": "PASS",
+      "notices": [
+        "mock-build-a",
+        "mock-build-b"
+      ],
+      "liveStream": true,
+      "projectPulse": true,
+      "axe": 0
+    },
+    "commands": [
+      "INTERACTION_TEST_PORT=19507 WORKFLOW_TEST_PORT=19508 node web/tests/interaction.cjs",
+      "TUESDAY_MOCK_PORT=19509 npm --prefix web run test:browser-verification",
+      "VITE_HUB_BUILD=566fe5187d72be56a14fd16d0428e8b8e6e34d72 TUESDAY_MOCK_PORT=19509 node web/tests/live-browser.cjs"
+    ],
+    "boundary": "Aggregate platform command passed panels/chunks but failed live because VITE_HUB_BUILD was omitted at invocation. Separate live command passed with matching build. Installed Chrome selected via CHROME_EXECUTABLE_PATH. Workflow axe waits for finite entrance animations; no rule disabled. The earlier interaction-workflows-566fe51.log failed allocation axe during an entrance animation; interaction-final-566fe51.log is the definitive combined PASS for both scripts including axe after finite animation settling."
+  },
+  "realApi": {
+    "command": "HUB_BUILD=566fe5187d72be56a14fd16d0428e8b8e6e34d72 TUESDAY_SMOKE_API_PORT=18506 TUESDAY_SMOKE_UI_PORT=19506 node web/scripts/run-smoke-live.mjs",
+    "health": {
+      "health": {
+        "status": "Healthy",
+        "build": "566fe5187d72be56a14fd16d0428e8b8e6e34d72"
+      },
+      "database": "hub_smoke_46166_1792382897049",
+      "api": "http://127.0.0.1:18506",
+      "ui": "http://127.0.0.1:19506"
+    },
+    "smoke": {
+      "result": "PASS",
+      "project": "PQ9N70SO",
+      "role": "Synthetic 040 unfilled role",
+      "checks": [
+        {
+          "url": "/projects/PQ9N70SO/allocations?tab=roles",
+          "final": "/projects/PQ9N70SO/allocations?tab=roles",
+          "violations": [],
+          "errors": []
+        },
+        {
+          "url": "/workload",
+          "final": "/workload",
+          "violations": [],
+          "errors": []
+        },
+        {
+          "url": "/projects/PQ9N70SO/allocations?view=roles",
+          "final": "/projects/PQ9N70SO/allocations?tab=roles",
+          "violations": [],
+          "errors": []
+        },
+        {
+          "url": "/planner?view=list",
+          "final": "/planner?layout=list",
+          "violations": [],
+          "errors": []
+        },
+        {
+          "url": "/projects/PQ9N70SO/decisions?view=log",
+          "final": "/projects/PQ9N70SO/decisions?tab=log",
+          "violations": [],
+          "errors": []
+        }
+      ],
+      "routeChecks": [
+        {
+          "route": "/pickup",
+          "title": "Open for pickup",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/organisation",
+          "title": "Organisation",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/admin/structure",
+          "title": "Levels",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/admin/audit-chains",
+          "title": "Audit chains",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/my-work",
+          "title": "My Work",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/home",
+          "title": "Home",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/boards",
+          "title": "Boards",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/tasks",
+          "title": "Tasks",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/timeline",
+          "title": "Timeline",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/files",
+          "title": "Files",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/team",
+          "title": "Team",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects",
+          "title": "Projects",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/dashboard",
+          "title": "Dashboard",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/coordination",
+          "title": "Weekly Coordination",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/readiness",
+          "title": "Readiness and weekly commitments",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/handoffs",
+          "title": "Discipline handoffs",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/reviews",
+          "title": "Multidisciplinary reviews",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/changes",
+          "title": "Revisions and change impact",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/submissions",
+          "title": "Submission readiness",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/allocations",
+          "title": "Allocations",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/design-basis",
+          "title": "Design basis and assumptions",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/tasks",
+          "title": "Tasks",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/board",
+          "title": "Board",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/milestones",
+          "title": "Milestones",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/timeline",
+          "title": "Timeline",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/deliverables",
+          "title": "Deliverables",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/decisions",
+          "title": "Decisions",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/risks",
+          "title": "Risks",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/issues",
+          "title": "Issues",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/meetings",
+          "title": "Meetings & Actions",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/files",
+          "title": "Files",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/vacation",
+          "title": "Vacation & Coverage",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/calendar",
+          "title": "Calendar",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/team",
+          "title": "Team & Disciplines",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/activity",
+          "title": "Activity",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/projects/PQ9N70SO/settings",
+          "title": "Settings",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/tasks/01a15258-d4aa-7d6f-af28-9927b648f7ad",
+          "title": "Synthetic route task",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": [
+            "404 /api/v1/tasks/01a15258-d4aa-7d6f-af28-9927b648f7ad/pickup-offer"
+          ]
+        },
+        {
+          "route": "/notifications",
+          "title": "Notifications",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/search",
+          "title": "Search results",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/reports",
+          "title": "Reports",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/reports/pickup-offers",
+          "title": "report.pickup-offers",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/staff",
+          "title": "My Staff",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/portfolio",
+          "title": "Portfolio",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/workload",
+          "title": "Workload",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/planner",
+          "title": "Team Planner",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/vacation",
+          "title": "Vacation & Coverage",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/calendar",
+          "title": "Calendar",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/time",
+          "title": "Time",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/people/01a15258-a1ad-7c93-9e44-fc0a1f4a8eb6/reassign-work",
+          "title": "Reassign work: Alex Chen",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/preferences",
+          "title": "Notification preferences",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/templates",
+          "title": "Templates",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/templates/01a15258-d4e2-7660-a293-41b86cb64930",
+          "title": "Synthetic route template 1792382915805",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/admin",
+          "title": "Disciplines",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/admin/reference/disciplines",
+          "title": "Disciplines",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/admin/settings",
+          "title": "Indicator thresholds",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/admin/users",
+          "title": "Users & roles",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/admin/activity",
+          "title": "Activity",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/admin/operations",
+          "title": "Alert checks",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        },
+        {
+          "route": "/admin/holidays",
+          "title": "Add a holiday",
+          "violations": [],
+          "errors": [],
+          "failedResponses": [],
+          "expectedResponses": []
+        }
+      ]
+    },
+    "live": {
+      "result": "PASS",
+      "project": "LQK53YY7I",
+      "streamRequests": 4,
+      "risk": "Synthetic live risk mveqk6no",
+      "task": "Synthetic live task mveqk7d7",
+      "updatesWithinMs": 2000
+    },
+    "boundary": "Disposable synthetic Development database. Migration-only privileged audit initialization.59 representative route instances,5 legacy URL/mode flows; not every parameter/filter/role combination. Browser observes API/chunk HTTP and transport failures, error banners and serious/critical axe. Narrow absent-pickup-offer404 expected."
+  },
+  "image": {
+    "reference": "pm-tool-integration:566fe518",
+    "id": "sha256:2a50d680a672358ec1b905b90441f0ca3bbce8448bb3fb0dccfe2e98768730dd",
+    "ociRevision": "566fe5187d72be56a14fd16d0428e8b8e6e34d72",
+    "hubBuild": "566fe5187d72be56a14fd16d0428e8b8e6e34d72",
+    "permissions": {
+      "scope": "Disposable local PG17, Staging LocalPassword API; not homedev/company acceptance",
+      "migrationOnly": {
+        "exit": 0,
+        "httpHostStarted": false,
+        "migrations": 41,
+        "fixtureProjects": 0
+      },
+      "forbiddenDatabaseOperationsRefused": 8,
+      "runtime": {
+        "healthy": true,
+        "individualSignIn": true,
+        "userInsertUpdateAndAuditInsert": true,
+        "observedDatabaseSessionRole": "hub_pilot_app",
+        "administratorSecretAbsent": true,
+        "cookieSurvivesRestart": true
+      },
+      "verdict": "PASS"
+    },
+    "permissionsBinding": {
+      "startedAtUtc": "2026-10-19T04:13:38.915285+00:00",
+      "command": [
+        "python3",
+        "tools/check_pilot_database_permissions.py",
+        "--image",
+        "sha256:2a50d680a672358ec1b905b90441f0ca3bbce8448bb3fb0dccfe2e98768730dd"
+      ],
+      "resolvedImageId": "sha256:2a50d680a672358ec1b905b90441f0ca3bbce8448bb3fb0dccfe2e98768730dd",
+      "scope": "Owned disposable PG17 and API; immutable local image ID, no deployment",
+      "exitCode": 0,
+      "finishedAtUtc": "2026-10-19T04:13:51.268036+00:00",
+      "result": {
+        "scope": "Disposable local PG17, Staging LocalPassword API; not homedev/company acceptance",
+        "migrationOnly": {
+          "exit": 0,
+          "httpHostStarted": false,
+          "migrations": 41,
+          "fixtureProjects": 0
+        },
+        "forbiddenDatabaseOperationsRefused": 8,
+        "runtime": {
+          "healthy": true,
+          "individualSignIn": true,
+          "userInsertUpdateAndAuditInsert": true,
+          "observedDatabaseSessionRole": "hub_pilot_app",
+          "administratorSecretAbsent": true,
+          "cookieSurvivesRestart": true
+        },
+        "verdict": "PASS"
+      }
+    }
+  },
+  "priorCompatibility": {
+    "runtimeSource": "1b649f57f4f6c28abeb36fabdd9607b51ae13dde",
+    "checksPassed": 29,
+    "receipt": "2026-10-18-039-050-integration-evidence.json",
+    "boundary": "No schema/migration change since this prior old/new/old check; not rerun or reassigned to566 image."
+  },
+  "limits": [
+    "Task-list original p95 OFF912.2042/ON392.1756ms retained. Single matched/order-balanced warmed control PASS (OFF338.3752/ON362.4487ms aggregate); representative network/pilot and statistical conclusions remain UNPROVEN.",
+    "040S16 cohort and Jay ruling remain open; no threshold relaxation or counter-chasing conversion.",
+    "043 strict parity KILL2/10 pass; unadopted and separate.",
+    "048 two preview indicators explicitly deferred.",
+    "Milestone panel has provider wiring but no PeoplePicker consumer; no picker interaction claimed.",
+    "Hosted identity/tunnel, actual email delivery, native/phone/full keyboard-screen-reader and human/pilot acceptance remain unproven."
+  ],
+  "files": [
+    {
+      "path": "ci-artifacts/integration/final-566fe51-tests/final.trx",
+      "bytes": 2905727,
+      "sha256": "2b9b748bf88be2e30e18274ca70b0132df6307037572f6b2d3fd4c11ff0e023f"
+    },
+    {
+      "path": "ci-artifacts/integration/final-566fe51-tests.log",
+      "bytes": 253900,
+      "sha256": "9480c74ae859e89af6fdfee338d9314a3a5a8841dc314985dd7536b7c6ae78b0"
+    },
+    {
+      "path": "ci-artifacts/integration/acceptance-followup/permission-differences.trx",
+      "bytes": 14470,
+      "sha256": "d735ed072f3c7441c78b95e3d90b4e654d68e34ee9dafaf31438a1153bf2a609"
+    },
+    {
+      "path": "ci-artifacts/integration/acceptance-followup/scale-warm.trx",
+      "bytes": 5195,
+      "sha256": "db5fe26d789286750bb0332d0714f28845bf01afd788cde2ec35372e917971f0"
+    },
+    {
+      "path": "ci-artifacts/integration/shapes-566fe51-final.log",
+      "bytes": 1857,
+      "sha256": "c108018f19621910b4ae05996da612c7890d2a06ccff8213d267ddcdf931971e"
+    },
+    {
+      "path": "ci-artifacts/integration/ratchets-566fe51.log",
+      "bytes": 403,
+      "sha256": "2278ad1f60a2729b3e7c6e0380c2954df3fb39e975e0dfb8519ebd7637258fe3"
+    },
+    {
+      "path": "ci-artifacts/integration/ratchet-self-tests-566fe51.log",
+      "bytes": 416,
+      "sha256": "bcdc4bf4a935bb42f0309348b09ee5d24f233f7f1baa6d4a55959145fa7d1c69"
+    },
+    {
+      "path": "ci-artifacts/integration/web-build-566fe51.log",
+      "bytes": 13961,
+      "sha256": "cb0542f25eea42b361050fd93af449bf454140c2a73637741f53a881dab8465d"
+    },
+    {
+      "path": "ci-artifacts/integration/lint-566fe51.log",
+      "bytes": 26389,
+      "sha256": "568c6b3bef9076a0283d9d2aee4f9e2e602c032232821547772b7cad85c2cd3e"
+    },
+    {
+      "path": "ci-artifacts/integration/interaction-final-566fe51.log",
+      "bytes": 1613,
+      "sha256": "6f29f3d7cb71d0bbc32ceb7af625881a1812a40a213dff999e02e3456a012fad"
+    },
+    {
+      "path": "ci-artifacts/integration/platform-browser-566fe51-final.log",
+      "bytes": 705,
+      "sha256": "b159501f899470405fb7ede73bfd75bfdab0b97702d4b9b43387c4ad354fe618"
+    },
+    {
+      "path": "ci-artifacts/integration/live-browser-566fe51-verified.log",
+      "bytes": 106,
+      "sha256": "21b735327a0225c9e157fe385311b40426250ac8f86c2a6954473971bea235dd"
+    },
+    {
+      "path": "ci-artifacts/integration/real-api-566fe51-verified.log",
+      "bytes": 343,
+      "sha256": "9962a1955655473dcf2ac99dfc9020ef8cab032006d9fbf5e761e5c14b673d33"
+    },
+    {
+      "path": "ci-artifacts/integration/permissions-566fe51.log",
+      "bytes": 520,
+      "sha256": "b246a7b466753f7a4968bcef420c40003e2fa78130b50aa1d9fa8b055b3da69c"
+    },
+    {
+      "path": "ci-artifacts/integration/image-566fe51-inspect.json",
+      "bytes": 1881,
+      "sha256": "102e557deb76b232c895dd646259ad01fd52294e8deae7a70eb00e48c1bb7032"
+    },
+    {
+      "path": "tests/Hub.Tests/Snapshots/shapes.json",
+      "bytes": 2347286,
+      "sha256": "14038ea76c9015bf4b0d709b5483f1d0bbd437bbd6016cd9bae1bf37e15c982f"
+    },
+    {
+      "path": "specs/041-capacity-figures-and-server-values/evidence/permission-differences.json",
+      "bytes": 5125,
+      "sha256": "b3be22ccf66190d7f5fdd2d619ca83d04acc243b24ffc3ff20e51f9df42b08ff"
+    },
+    {
+      "path": "specs/046-task-and-timeline-interaction/evidence/scale-measurement.json",
+      "bytes": 11710,
+      "sha256": "cb7d66e176e35c8c6fb116330b271d7ebe3648504fd8fbdcd934dcc1e4cf9e85"
+    },
+    {
+      "path": "ci-artifacts/integration/real-api-566fe51-verified/browser.log",
+      "bytes": 12530,
+      "sha256": "a7e98d3da4da75e7d469e0cacc471407014ed20edba53d5fce0c65ef02db2abe"
+    },
+    {
+      "path": "ci-artifacts/integration/real-api-566fe51-verified/api.log",
+      "bytes": 2744,
+      "sha256": "d738a98b64972130fcb92436476ac1205be7db3e7fabdbfa329ae539a51de91f"
+    },
+    {
+      "path": "ci-artifacts/integration/real-api-566fe51-verified/initialize.log",
+      "bytes": 375,
+      "sha256": "a178c8dbe616a02dad89dac013bcb7d937f318967501ab561e76f827ade6df99"
+    },
+    {
+      "path": "ci-artifacts/integration/real-api-566fe51-verified/live-browser.log",
+      "bytes": 158,
+      "sha256": "890edd22f6daad29168a9b0685407d6c012aca15e6544f52be383e8c0ec2fc86"
+    },
+    {
+      "path": "ci-artifacts/integration/real-api-566fe51-verified/preview.log",
+      "bytes": 344,
+      "sha256": "d28ea2ab12f70eb473f41e47c3d6dfd83e7626da41661297e9553a13ebe5ce97"
+    },
+    {
+      "path": "ci-artifacts/integration/final-566fe51-tests/8657ce88-95cf-4135-9b57-a04ffc21375e/coverage.cobertura.xml",
+      "bytes": 55095058,
+      "sha256": "72c349ee6612df4857209cd8ea42eb334e8a1fe5398af0a88cee1155ed845ff4"
+    },
+    {
+      "path": "ci-artifacts/integration/final-566fe51-tests/_Jays-MacBook-Pro_2026-10-19_00_42_59/In/Jays-MacBook-Pro/coverage.cobertura.xml",
+      "bytes": 55095058,
+      "sha256": "72c349ee6612df4857209cd8ea42eb334e8a1fe5398af0a88cee1155ed845ff4"
+    },
+    {
+      "path": "web/tests/interaction-browser.cjs",
+      "bytes": 33473,
+      "sha256": "068b1ae59615be5915844123015c1c9cd619502f032f3b098dfb92076268a22c"
+    },
+    {
+      "path": "web/tests/interaction-workflows.cjs",
+      "bytes": 13048,
+      "sha256": "7112213f2f6c1c720849bdbdaab5ef085879982e869e8b589d8f0d2c8474385e"
+    },
+    {
+      "path": "web/tests/interaction.cjs",
+      "bytes": 483,
+      "sha256": "9e3116f547012d47ab0036228b4ad3e8d56940788045e8e32d388180dc43f4e8"
+    },
+    {
+      "path": "web/tests/platform-fixtures.cjs",
+      "bytes": 14753,
+      "sha256": "12087247f9d3cf3b3ff38199ccd1318d7e1a84d8affa5a97dfe193d4ab48f294"
+    },
+    {
+      "path": "web/tests/registrations-browser.cjs",
+      "bytes": 2871,
+      "sha256": "7f1b1f54f5110840795c000d7e701de35afa4a8547fc77d7c967c5eaa3b5db3f"
+    },
+    {
+      "path": "web/tests/smoke-live.cjs",
+      "bytes": 11680,
+      "sha256": "d083e98a226dac5a57c5bb3f797c069b95edf35f8588e51f22ff395779cf15be"
+    },
+    {
+      "path": "web/tests/live-real.cjs",
+      "bytes": 7311,
+      "sha256": "cf1da84f8cb5ca4d1452fc835db2cb19a9ebc45c55e1b53213303489c96f928f"
+    },
+    {
+      "path": "web/scripts/run-smoke-live.mjs",
+      "bytes": 4510,
+      "sha256": "f6e077657da33ad996881e75c608e1f89334b5cd8f3f5353ddc1ec2816a191ca"
+    },
+    {
+      "path": "ci-artifacts/integration/permissions-566fe51-bound.json",
+      "bytes": 1056,
+      "sha256": "0a1c451567e6a4571dc1756db3f1f79acb126f98066a6a73bbb9c3a779bd0dbe"
+    },
+    {
+      "path": "ci-artifacts/integration/permissions-566fe51-bound.log",
+      "bytes": 520,
+      "sha256": "b246a7b466753f7a4968bcef420c40003e2fa78130b50aa1d9fa8b055b3da69c"
+    },
+    {
+      "path": "ci-artifacts/integration/acceptance-followup/scale-balanced.trx",
+      "bytes": 27563,
+      "sha256": "aa358cbeb099eb258ee59aebb1c9f80793ff3a2d25e00ddb0ed58f4eea4aa6c5"
+    },
+    {
+      "path": "ci-artifacts/integration/acceptance-followup/scale-balanced.log",
+      "bytes": 252973,
+      "sha256": "d5d25652528d91a2031f44fa7a2920e3ed3c2a51a1e510e1c1cc3a9b32c24307"
+    },
+    {
+      "path": "ci-artifacts/integration/acceptance-followup/scale-balanced-summary.json",
+      "bytes": 47801,
+      "sha256": "f20f70dc5bf91fb03bb0518f8ca2d9ed3be8a285e94997f9de31d9623e0d3024"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/InteractionScaleTests.cs",
+      "bytes": 4524,
+      "sha256": "221f494af2db192d68621ee0d639cfd1ce541fff7c6f6e9410e8c0dffb6ce852"
+    },
+    {
+      "path": "ci-artifacts/integration/interaction-workflows-566fe51.log",
+      "bytes": 1178,
+      "sha256": "7a0a65beb3609b5a4ff209a3bc4612f609e4f7f2560da26303c1d7194b4bdd71"
+    },
+    {
+      "path": "ci-artifacts/integration/spec-final-followup.log",
+      "bytes": 11,
+      "sha256": "e2ecc38689f0c857742ca45352970b54b5abb12045c441130194b82860f72c24"
+    },
+    {
+      "path": "ci-artifacts/integration/trace-final-followup.log",
+      "bytes": 60,
+      "sha256": "a9bb3d3307aa35acc1e6658d1616d399ae4e5e18544cc19d604834babedf4e41"
+    }
+  ],
+  "performanceControl": {
+    "runtimeSource": "566fe5187d72be56a14fd16d0428e8b8e6e34d72",
+    "coverageInstrumented": false,
+    "receipt": "ci-artifacts/integration/acceptance-followup/scale-balanced.trx",
+    "order": [
+      "OFF",
+      "ON",
+      "ON",
+      "OFF"
+    ],
+    "perPhase": [
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 1,
+        "pairOrder": "OFF-ON",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": false,
+        "request": "task-list-100-with-actor",
+        "samples": 300,
+        "p50Ms": 301.505,
+        "p95Ms": 340.7173,
+        "maxMs": 347.5675,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 1,
+        "pairOrder": "OFF-ON",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": false,
+        "request": "project-ranked-picker-100",
+        "samples": 300,
+        "p50Ms": 48.8673,
+        "p95Ms": 61.231,
+        "maxMs": 62.0436,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 2,
+        "pairOrder": "OFF-ON",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": true,
+        "request": "task-list-100-with-actor",
+        "samples": 300,
+        "p50Ms": 329.8391,
+        "p95Ms": 366.49,
+        "maxMs": 371.4815,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 2,
+        "pairOrder": "OFF-ON",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": true,
+        "request": "project-ranked-picker-100",
+        "samples": 300,
+        "p50Ms": 88.8569,
+        "p95Ms": 106.3965,
+        "maxMs": 108.9958,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 3,
+        "pairOrder": "ON-OFF",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": true,
+        "request": "task-list-100-with-actor",
+        "samples": 300,
+        "p50Ms": 310.3496,
+        "p95Ms": 350.4033,
+        "maxMs": 356.1852,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 3,
+        "pairOrder": "ON-OFF",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": true,
+        "request": "project-ranked-picker-100",
+        "samples": 300,
+        "p50Ms": 79.231,
+        "p95Ms": 93.7248,
+        "maxMs": 95.6607,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 4,
+        "pairOrder": "ON-OFF",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": false,
+        "request": "task-list-100-with-actor",
+        "samples": 300,
+        "p50Ms": 285.7758,
+        "p95Ms": 315.91,
+        "maxMs": 323.2778,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 4,
+        "pairOrder": "ON-OFF",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": false,
+        "request": "project-ranked-picker-100",
+        "samples": 300,
+        "p50Ms": 34.9664,
+        "p95Ms": 45.024,
+        "maxMs": 47.3732,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      }
+    ],
+    "aggregate": [
+      {
+        "request": "project-ranked-picker-100",
+        "flagOn": false,
+        "samples": 600,
+        "p50Ms": 40.9117,
+        "p95Ms": 57.2472,
+        "maxMs": 62.0436,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "request": "project-ranked-picker-100",
+        "flagOn": true,
+        "samples": 600,
+        "p50Ms": 83.948,
+        "p95Ms": 103.6641,
+        "maxMs": 108.9958,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "request": "task-list-100-with-actor",
+        "flagOn": false,
+        "samples": 600,
+        "p50Ms": 293.0252,
+        "p95Ms": 338.3752,
+        "maxMs": 347.5675,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "request": "task-list-100-with-actor",
+        "flagOn": true,
+        "samples": 600,
+        "p50Ms": 317.8825,
+        "p95Ms": 362.4487,
+        "maxMs": 371.4815,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      }
+    ],
+    "rawSamples": {
+      "path": "ci-artifacts/integration/acceptance-followup/scale-balanced-summary.json",
+      "sha256": "f20f70dc5bf91fb03bb0518f8ca2d9ed3be8a285e94997f9de31d9623e0d3024"
+    },
+    "command": "dotnet test tests/Hub.Tests/Hub.Tests.csproj -c Release --filter 'FullyQualifiedName~InteractionScaleTests' --logger 'trx;LogFileName=scale-balanced.trx' --results-directory ci-artifacts/integration/acceptance-followup",
+    "conclusion": "PASS for this single warmed local control; no statistical significance, causal feature attribution or representative corporate-network/pilot performance claim. Earlier912.2042ms failure retained."
+  }
+}

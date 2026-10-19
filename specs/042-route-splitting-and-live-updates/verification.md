@@ -1,27 +1,27 @@
 # Verification: Route Splitting and Live Updates
 
-Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
+Runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72` passes **1,514/1,514 backend tests** (zero failures/skips). Rules branch coverage is **3,032/3,155 (96.1%)** and service line coverage **13,084/13,665 (95.7%)**. The 799-response shape gate passes from one full-run manifest. See the [acceptance follow-up](../../docs/handoffs/2026-10-19-039-050-acceptance-followup.md) and its hashed receipt for current browser, image and source boundaries. Earlier slice runs below are historical; their missing-schema/startup blockers are resolved by the combined run. Prior compatibility evidence retains source `1b649f5`; no schema changed afterward. No packet is Accepted; hosted, pilot and human gates remain separate.
 
 | AC | Where it is checked | Status |
 |---|---|---|
-| AC-LIVE-01 | `BuildStampTests` (S01) | PARTIAL: in-process only; a real image built with `RELEASE_SHA` not checked (needs Docker or homedev) |
+| AC-LIVE-01 | `BuildStampTests` (S01) | PASS local: current 566fe51 image OCI revision/HUB_BUILD match; health build verified; hosted image activation remains unproven |
 | AC-LIVE-02 | `web/tests/build-stamp.cjs` (S02) | PASS local: stamped A→B→A browser notice, one per new build |
 | AC-LIVE-03 | `scripts/test_verify_homedev_review.py`, `tools/test_pilot_operations.py` (S03) | PASS local: Python activation/probe controls; hosted execution unproven |
-| AC-LIVE-04 | `web/tests/registrations.cjs` (S05, re-run in S07) | PARTIAL: source registrations and Task deep link pass; all panels not swept |
+| AC-LIVE-04 | `web/tests/registrations.cjs` (S05, re-run in S07) | PASS local: all seven Task, Milestone, Deliverable, Decision, Action, Risk and Issue cold deep links render their own headings; Task comments/links also checked |
 | AC-LIVE-05 | `web/tests/registrations.cjs` (S05, re-run in S07) | PARTIAL: eager registration source guard passes; all plugin combinations not swept |
 | AC-LIVE-06 | `web/tests/registrations.cjs` self-test (S05) | PASS local: seeded registration guard controls |
-| AC-LIVE-07 | `web/tests/route-splitting.cjs`, existing suites, `tools/preview/sweep.cjs` (S06, S07) | PARTIAL: My Work/Projects/Admin Users plus failed-chunk branch pass; full reachable-route sweep unproven |
+| AC-LIVE-07 | `web/tests/route-splitting.cjs`, existing suites, `tools/preview/sweep.cjs` (S06, S07) | PASS local: 59 representative real-API routes including all 24 project tabs, plus five legacy URL/mode checks; no failed API/chunk transport, error banners or serious/critical axe violations. This is route-pattern coverage, not every parameter/role/filter combination |
 | AC-LIVE-08 | `web/scripts/chunk-report.mjs` CI artifact (S07) | PASS local: raw entry closure 45.06% smaller; gzip 35.33% |
 | AC-LIVE-09 | `StaticCacheTests` (S04) | PASS (local) |
 | AC-LIVE-10 | `web/tests/route-splitting.cjs` (S06) | PASS local: aborted route chunk reaches error boundary; storage-denied loop guard verified |
 | AC-LIVE-11 | `LiveStampTests`, `web/tests/live-refresh.cjs` (S08, S13) | PASS local: project pulse mocked browser and scoped API tests |
 | AC-LIVE-12 | `LiveStampTests` (S08) | PASS local: scoped project-stamp access checks |
-| AC-LIVE-13 | `web/tests/live-real.cjs` as a `nightly` line in `tools/ci_steps.txt` (S12) | UNPROVEN: final real two-browser run pending; no hosted activation |
+| AC-LIVE-13 | `web/tests/live-real.cjs` as a `nightly` line in `tools/ci_steps.txt` (S12) | PASS local: current 566fe51 real two-browser Risk/Task changes arrive within 2 seconds; no hosted activation |
 | AC-LIVE-14 | `LiveEventsTests` visibility sweep (S10) | PASS local: focused API visibility checks |
-| AC-LIVE-15 | `LiveEventsTests` (S10, S13), `web/tests/live-events.cjs` (S11) | PARTIAL: scoped API/stream browser pass; final real two-browser run pending |
+| AC-LIVE-15 | `LiveEventsTests` (S10, S13), `web/tests/live-events.cjs` (S11) | PASS bounded local: scoped API/stream and real two-browser Risk/Task updates pass; full hosted lifecycle remains unproven |
 | AC-LIVE-16 | `LiveEventsTests` (S10), `web/tests/live-events.cjs` (S11) | PARTIAL: heartbeat/retry controls pass; real silence/hidden timing unproven |
 | AC-LIVE-17 | `scripts/check-live-stream.py` on the review origin (after S12; needs an authorised activation) | UNPROVEN: hosted/tunnel activation not authorized or run |
-| AC-LIVE-18 | `web/tests/live-refresh.cjs` (S08), `web/tests/live-events.cjs` (S11, S13) | PARTIAL: unknown/reconnect invalidation tests pass; complete real run pending |
+| AC-LIVE-18 | `web/tests/live-refresh.cjs` (S08), `web/tests/live-events.cjs` (S11, S13) | PARTIAL: unknown/reconnect invalidation tests and bounded real two-browser run pass; complete outage/hidden-tab lifecycle remains unproven |
 | AC-LIVE-19 | `LiveFeedTests` (S09) | PASS (local) |
 
 ## Build 042-S01
@@ -57,7 +57,7 @@ Recovered b4541e89 as ccdddc85 and retained the saved 042-S10 follow-up. Existin
 - PASS: production build, eager registration source guard and scoped Python probe regressions. The retry marker is persisted before an automatic chunk reload; denied storage reaches the error page without an automatic reload loop.
 - PASS (raw bytes): manifest entry plus all transitive static imports for `/my-work`: verified a6e0104b baseline 2,233,051 bytes, candidate 1,226,771 bytes, a 45.06% reduction. Gzip totals are 572,815 and 370,455 bytes (35.33% reduction); D4 is stated in uncompressed bytes. Both local reports are under `ci-artifacts/platform/chunks-*.json`.
 - Routes use React Router lazy descriptors; My Work stays eager. Entrance and the Entra provider load only when needed. Panel and shell slot suspensions have local fallbacks. The reviewed 044 error page/client reporter files were adopted from 0535311e; route reporting retains the route pattern.
-- FAIL: the new mocked registration/route/live browser acceptance suite currently fails its Task deep-link fixture after the heading wait; its application error/fixture cause is under investigation. It is wired into CI and must be fixed before the web gate can pass. The real two-browser suite, complete route sweep and hosted/tunnel checks remain unproven.
+- HISTORICAL FAIL (resolved below): the new mocked registration/route/live browser acceptance suite failed its Task deep-link fixture after the heading wait; its application error/fixture cause is under investigation. It is wired into CI and must be fixed before the web gate can pass. The real two-browser suite, complete route sweep and hosted/tunnel checks remain unproven.
 - CI wiring includes the stable mocked suite and explicit nightly real suites. Record parity is a separate 043 handoff and is not part of this source commit.
 - S13 flag retirement, hosted activation, tunnel acceptance and human review remain pending. No review/pilot flag was turned on; only disposable local test databases were changed.
 
@@ -76,3 +76,9 @@ The maintained live-real.cjs now exercises the actual Development picker (pre-se
 Fresh owned real-API smoke on18522/19522 also passes all five route/mode checks, with zero axe violations and page errors. Existing suites handoffs, sign-in, coordination, design-basis, planner, resources, supervisor-capacity and ui-review pass against the candidate. Design-basis needed only the allowed meta fixture for the converted Allocations page; supervisor capacity used its explicit spare-port setting5278 because another chat owned5178.
 
 The required web-job owned-service runner now executes smoke-live.cjs and live-real.cjs sequentially against its one fresh synthetic database. A final invocation on18542/19542 passes both. This closes the previous source-only nightly wiring gap for those covered live scenarios; the optional nightly command also now uses the actual LIVE_UI_URL/LIVE_API_URL variable names. The occupied-port regression remains PASS and cleanup kills only the owned process groups.
+
+## Acceptance follow-up (2026-10-19)
+
+The current full backend run contains 10 LiveEvents, three LiveStamp and two BuildStamp passes. All seven panel registrations and the bounded three-route chunk test pass (122 asset responses, zero failed chunks). The aggregate mock command then failed because its invocation omitted `VITE_HUB_BUILD` despite using a stamped production build; the separate corrected live command passes A→B→A, authenticated queryless stream, project pulse and axe. This invocation failure is retained, not reported as an aggregate PASS.
+
+The strengthened owned real-API runner passes all 59 representative routes, five legacy URL/mode flows and the two-browser live flow with four streams, Risk/Task updates within 2 seconds and zero browser errors. Its source 566fe51 health stamp is recorded. The runner waits for sign-in to finish, catches API/chunk transport failures and rejects rendered ErrorBanner content. The sole expected HTTP failure is 404 for the seeded task with no pickup offer. It initializes audit chains only in migration-only mode on its newly generated synthetic database. No hosted/pilot flags were changed.

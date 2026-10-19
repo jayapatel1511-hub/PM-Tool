@@ -6,7 +6,7 @@ namespace Hub.Tests.Api;
 
 /// Packet 002: AC-PRJ-01..06, AC-PERM-04/05, AC-TEAM-02/04, TM-01, TM-05, P-07, ASG-01, ASG-10.
 [Collection("api")]
-public sealed class ProjectsTests(HubFactory f)
+public sealed class ProjectsTests(HubFactory f, Xunit.Abstractions.ITestOutputHelper output)
 {
     readonly TestData d = new(f);
 
@@ -334,6 +334,7 @@ public sealed class ProjectsTests(HubFactory f)
             }
         }
         Assert.True(mismatches.Count == 0, string.Join("\n", mismatches));
+        output.WriteLine("Legacy client differences (all endpoint-refused):\n" + string.Join("\n", differences));
         Assert.NotEmpty(differences); // e.g. the PM on an Archived project, which today's client offers and every endpoint refuses
     }
 }

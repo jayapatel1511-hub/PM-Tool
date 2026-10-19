@@ -7,7 +7,7 @@ namespace Hub.Tests.Api;
 
 /// Packet 004: AC-TEAM-01, AC-TEAM-03, AC-PERM-03, AC-TSK-02/03/07/08/09/11/12, AC-REV-02/04/05, T-16, T-23, AC-NOT-06, E-04.
 [Collection("api")]
-public sealed class TasksTests(HubFactory f)
+public sealed class TasksTests(HubFactory f, Xunit.Abstractions.ITestOutputHelper output)
 {
     readonly TestData d = new(f);
 
@@ -46,6 +46,11 @@ public sealed class TasksTests(HubFactory f)
             foreach (var who in users)
             {
                 var (assignTask, editTask, dueTask) = taskSets[who];
+                var projectView = await (await f.As(who).GetAsync($"/api/v1/projects/{p.Id}")).Json();
+                var writable = status is not (ProjectStatus.Archived or ProjectStatus.Cancelled);
+                var legacyAssign = writable && (projectView["permissions"]!["isPm"]!.GetValue<bool>() || projectView["permissions"]!["leadOf"]!.AsArray().Any(x => x!.GetValue<Guid>() == d.ProjectDiscipline(p.Id, "Civil")));
+                var legacyEditDue = legacyAssign || (writable && who == TestData.Alex);
+
                 async Task<JsonNode> Detail(JsonNode task) => await (await f.As(who).GetAsync($"/api/v1/tasks/{task.G("id")}")).Json();
                 async Task<HttpResponseMessage> Write(JsonNode task, object body) => await f.As(who).Patch($"/api/v1/tasks/{task.G("id")}", body, await d.TaskVersion(task));
 
@@ -68,6 +73,8 @@ public sealed class TasksTests(HubFactory f)
                 var due = await Detail(dueTask);
                 var dueAllowed = due["permissions"]!["dueDate"]!["ok"]!.GetValue<bool>();
                 var dueResponse = await Write(dueTask, new { dueDate = "2026-11-15", reason = $"Valid due-date change for {who} in {status}" });
+                foreach (var (decision, legacy, allowed, response) in new[] { ("assign", legacyAssign, assignAllowed, assignResponse), ("edit", legacyEditDue, editAllowed, editResponse), ("due", legacyEditDue, dueAllowed, dueResponse) })
+                    if (legacy != allowed) output.WriteLine($"{who} {status} decision11.{decision}: client {legacy}, flag {allowed}, HTTP {(int)response.StatusCode}");
                 var dueBody = await dueResponse.Content.ReadAsStringAsync();
                 Assert.True(dueAllowed ? dueResponse.IsSuccessStatusCode : dueResponse.StatusCode == HttpStatusCode.Forbidden, $"{who} {status} due returned {(int)dueResponse.StatusCode}: {dueBody}");
             }

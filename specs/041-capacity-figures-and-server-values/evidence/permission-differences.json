@@ -1,0 +1,78 @@
+{
+  "scope": "Six roles by six project statuses; legacy rules reproduced from baseline a6e0104b; all observed disagreements are endpoint403 refusals",
+  "runtimeSource": "566fe518",
+  "receipt": "ci-artifacts/integration/acceptance-followup/permission-differences.trx",
+  "results": [
+    {
+      "test": "Hub.Tests.Api.DesignBasisPermissionMatrixTests.Basis_create_and_assign_flags_match_real_commands_for_every_role_and_status",
+      "outcome": "Passed",
+      "legacyDifferences": [
+        "marc@hub.test Complete decision4.assign: client True, flag False, HTTP 403",
+        "jordan@hub.test Archived decision4.assign: client True, flag False, HTTP 403",
+        "priya@hub.test Archived decision4.assign: client True, flag False, HTTP 403",
+        "marc@hub.test Archived decision4.assign: client True, flag False, HTTP 403",
+        "jordan@hub.test Cancelled decision4.assign: client True, flag False, HTTP 403",
+        "priya@hub.test Cancelled decision4.assign: client True, flag False, HTTP 403",
+        "marc@hub.test Cancelled decision4.assign: client True, flag False, HTTP 403"
+      ]
+    },
+    {
+      "test": "Hub.Tests.Api.ProjectsTests.Project_permission_flags_match_their_endpoints_for_every_role_and_status",
+      "outcome": "Passed",
+      "legacyDifferences": [
+        "Legacy client differences (all endpoint-refused):",
+        "marc@hub.test Complete snooze: client True, flag False (This project is Complete and read-only.)",
+        "jordan@hub.test Archived proposeAllocation: client True, flag False (This project is Archived and read-only.)",
+        "jordan@hub.test Archived snooze: client True, flag False (This project is Archived and read-only.)",
+        "jordan@hub.test Archived createSubmission: client True, flag False (This project is Archived and read-only.)",
+        "priya@hub.test Archived proposeAllocation: client True, flag False (This project is Archived and read-only.)",
+        "priya@hub.test Archived snooze: client True, flag False (This project is Archived and read-only.)",
+        "priya@hub.test Archived createSubmission: client True, flag False (This project is Archived and read-only.)",
+        "marc@hub.test Archived snooze: client True, flag False (This project is Archived and read-only.)",
+        "jordan@hub.test Cancelled proposeAllocation: client True, flag False (This project is Cancelled and read-only.)",
+        "jordan@hub.test Cancelled snooze: client True, flag False (This project is Cancelled and read-only.)",
+        "jordan@hub.test Cancelled createSubmission: client True, flag False (This project is Cancelled and read-only.)",
+        "priya@hub.test Cancelled proposeAllocation: client True, flag False (This project is Cancelled and read-only.)",
+        "priya@hub.test Cancelled snooze: client True, flag False (This project is Cancelled and read-only.)",
+        "priya@hub.test Cancelled createSubmission: client True, flag False (This project is Cancelled and read-only.)",
+        "marc@hub.test Cancelled snooze: client True, flag False (This project is Cancelled and read-only.)"
+      ]
+    },
+    {
+      "test": "Hub.Tests.Api.ReviewChangePermissionMatrixTests.Change_assessment_management_matches_work_row_for_every_role_and_status",
+      "outcome": "Passed",
+      "legacyDifferences": []
+    },
+    {
+      "test": "Hub.Tests.Api.TasksTests.Task_row_flags_and_real_writes_match_for_every_role_and_status",
+      "outcome": "Passed",
+      "legacyDifferences": [
+        "marc@hub.test Complete decision11.assign: client True, flag False, HTTP 403",
+        "marc@hub.test Complete decision11.edit: client True, flag False, HTTP 403",
+        "marc@hub.test Complete decision11.due: client True, flag False, HTTP 403",
+        "alex@hub.test Complete decision11.edit: client True, flag False, HTTP 403",
+        "alex@hub.test Complete decision11.due: client True, flag False, HTTP 403"
+      ]
+    },
+    {
+      "test": "Hub.Tests.Api.ReviewChangePermissionMatrixTests.Coordination_option_flags_match_real_commands_for_every_role_and_status",
+      "outcome": "Passed",
+      "legacyDifferences": [
+        "lena@hub.test Setup decision13.changes: client True, flag False, HTTP 403",
+        "lena@hub.test Active decision13.changes: client True, flag False, HTTP 403",
+        "lena@hub.test On Hold decision13.changes: client True, flag False, HTTP 403",
+        "alex@hub.test Complete decision7.Task: client True, flag False, HTTP 403",
+        "alex@hub.test Complete decision7.Deliverable: client True, flag False, HTTP 403",
+        "alex@hub.test Archived decision7.Task: client True, flag False, HTTP 403",
+        "alex@hub.test Archived decision7.Deliverable: client True, flag False, HTTP 403",
+        "alex@hub.test Cancelled decision7.Task: client True, flag False, HTTP 403",
+        "alex@hub.test Cancelled decision7.Deliverable: client True, flag False, HTTP 403"
+      ]
+    },
+    {
+      "test": "Hub.Tests.Api.SubmissionPermissionMatrixTests.Submission_supersede_matches_create_submission_for_every_role_and_status",
+      "outcome": "Passed",
+      "legacyDifferences": []
+    }
+  ]
+}

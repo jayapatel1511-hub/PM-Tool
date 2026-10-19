@@ -1,4 +1,4 @@
-import type { components } from '@/gen/api'
+import type { components, paths } from '@/gen/api'
 import { usePageMode } from '@/hooks/page-mode'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -32,7 +32,7 @@ type Allocation = { id: string; personId: string; personName: string | null; pur
 type AllocationPage = { items: Allocation[]; page: number; pageSize: number; totalCount: number }
 type Detail = Allocation & { personEligible: boolean; confirmedBy?: string; confirmedAt?: string; links: { workType: string; workId: string; workDate: string; reviewHours?: number; reviewPackageId?: string }[]; days: { workDate: string; hours: number }[]; overCapacityWarningRecorded: boolean; canConfirm: boolean; canManage: boolean }
 type Preview = { id: string; rowVersion: number; days: { date: string; availableHours: number; confirmedHours: number; proposedHours: number; resultingHours: number; overByHours: number; dateVersion: number }[] }
-type AllocationPreview = components['schemas']['AllocationPreviewResponse']
+type AllocationPreview = Extract<paths['/api/v1/projects/{projectId}/allocations']['post']['responses'][200]['content']['application/json'], { preview: boolean }>
 type ReviewOption = { id: string; reviewerId: string; dueDate: string; packageId: string; packageKey: string; packageTitle: string }
 /** Unfilled project demand (§40, FR-ROLE-01): filled by proposing a normal allocation that names it (D1). */
 type OpenRole = components['schemas']['OpenRoleRow']

@@ -32,7 +32,7 @@ public sealed class LiveFeedTests(HubFactory f)
         using var scope = f.Services.CreateScope();
         var sp = scope.ServiceProvider;
         var opts = new DbContextOptionsBuilder<HubDb>(sp.GetRequiredService<DbContextOptions<HubDb>>()).AddInterceptors(cap ?? new Capture()).Options;
-        await using var db = new HubDb(opts, sp.GetRequiredService<AuditContext>(), sp.GetRequiredService<TimeProvider>(), sp.GetRequiredService<EvaluationSignal>());
+        await using var db = new HubDb(opts, sp.GetRequiredService<AuditContext>(), sp.GetRequiredService<TimeProvider>(), sp.GetRequiredService<EvaluationSignal>(), sp.GetRequiredService<SettingsStore>(), sp.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>());
         return await LiveFeed.TickOnce(db, state, Overlap);
     }
 

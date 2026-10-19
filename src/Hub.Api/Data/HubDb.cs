@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Hub.Api.Data;
 
-public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, TimeProvider clock, EvaluationSignal signal) : DbContext(options)
+public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, TimeProvider clock, EvaluationSignal signal, SettingsStore settings, IConfiguration configuration) : DbContext(options)
 {
     internal bool initializingAuditChains;
 
@@ -1051,7 +1051,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             }
         }
         var now = clock.GetUtcNow();
-        await Hub.Api.Features.TaskPickupLifecycle.BeforeSave(this, now, ct);
+        await Hub.Api.Features.TaskPickupLifecycle.BeforeSave(this, now, new Notifier(this, audit, settings, clock, configuration), ct);
         ChangeTracker.DetectChanges();
         if (await FollowTasks(now, ct)) ChangeTracker.DetectChanges();
         var comments = ChangeTracker.Entries<Comment>()

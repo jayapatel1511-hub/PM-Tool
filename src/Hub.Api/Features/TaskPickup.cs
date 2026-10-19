@@ -220,7 +220,7 @@ public static class TaskPickupRules
 
 public static class TaskPickupLifecycle
 {
-    public static async Task BeforeSave(HubDb db, DateTimeOffset now, CancellationToken ct = default)
+    public static async Task BeforeSave(HubDb db, DateTimeOffset now, Notifier notify, CancellationToken ct = default)
     {
         var closedProjects = db.ChangeTracker.Entries<Project>().Where(e => e.State == EntityState.Modified
             && e.Property(p => p.Status).IsModified && e.Entity.Status is ProjectStatus.Complete or ProjectStatus.Archived).Select(e => e.Entity.Id).ToArray();
@@ -229,9 +229,9 @@ public static class TaskPickupLifecycle
         {
             var task = await db.Tasks.SingleAsync(t => t.Id == offer.TaskId, ct);
             offer.ClosedAt = now; offer.CloseCause = TaskPickupOffer.TaskClosed;
-            if (offer.OfferedById != db.Audit.ActorId)
-                db.Notifications.Add(new Notification { UserId = offer.OfferedById, EventType = NotificationEvents.TaskPickupClosed,
-                    ProjectId = task.ProjectId, ItemType = ItemType.Task, ItemId = task.Id, Title = "Pickup offer closed", Body = "Project closed", CreatedAt = now, UpdatedAt = now });
+            var project = await db.Projects.SingleAsync(p => p.Id == task.ProjectId, ct);
+            await notify.Send(NotificationEvents.TaskPickupClosed, offer.OfferedById, TaskEndpoints.Item(project, task),
+                Text.Get("notify.task_pickup_closed", task.Key, task.Name), "Project closed");
             db.LogEvent(ItemType.Task, task.Id, "PickupClosed", "assignment", task.ProjectId, task.Key, task.Name, reason: "Project closed", disciplineId: task.ProjectDisciplineId);
         }
         var changed = db.ChangeTracker.Entries<WorkTask>().Where(e => e.State is EntityState.Modified or EntityState.Deleted).ToList();
@@ -246,10 +246,9 @@ public static class TaskPickupLifecycle
             foreach (var offer in offers.Where(o => o.ClosedAt == null))
             {
                 offer.ClosedAt = now; offer.CloseCause = cause;
-                if (offer.OfferedById != db.Audit.ActorId)
-                    db.Notifications.Add(new Notification { UserId = offer.OfferedById, EventType = NotificationEvents.TaskPickupClosed,
-                        ProjectId = entry.Entity.ProjectId, ItemType = ItemType.Task, ItemId = entry.Entity.Id,
-                        Title = "Pickup offer closed", Body = cause, CreatedAt = now, UpdatedAt = now });
+                var project = await db.Projects.SingleAsync(p => p.Id == entry.Entity.ProjectId, ct);
+                await notify.Send(NotificationEvents.TaskPickupClosed, offer.OfferedById, TaskEndpoints.Item(project, entry.Entity),
+                    Text.Get("notify.task_pickup_closed", entry.Entity.Key, entry.Entity.Name), cause);
                 db.LogEvent(ItemType.Task, entry.Entity.Id, "PickupClosed", "assignment", entry.Entity.ProjectId, entry.Entity.Key, entry.Entity.Name,
                     reason: cause, disciplineId: entry.Entity.ProjectDisciplineId);
             }

@@ -29,6 +29,51 @@ public sealed class TasksTests(HubFactory f)
         }
     }
 
+    [Fact] // AC-FIG-08 decision 11: every role and project status uses the endpoint's own permission result.
+    public async Task Task_row_flags_and_real_writes_match_for_every_role_and_status()
+    {
+        var users = new[] { TestData.Admin, TestData.Pm, TestData.Marc, TestData.Alex, TestData.Rita, TestData.Lena };
+        foreach (var status in ProjectStatus.All)
+        {
+            var p = await d.Project(activate: true);
+            var taskSets = new Dictionary<string, (JsonNode Assign, JsonNode Edit, JsonNode Due)>();
+            foreach (var user in users)
+                taskSets[user] = (await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex), dueDate = "2026-10-30" }),
+                    await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex), dueDate = "2026-10-30" }),
+                    await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex), dueDate = "2026-10-30" }));
+            await f.DbAsync(async db => { (await db.Projects.SingleAsync(x => x.Id == p.Id)).Status = status; return await db.SaveChangesAsync(); });
+
+            foreach (var who in users)
+            {
+                var (assignTask, editTask, dueTask) = taskSets[who];
+                async Task<JsonNode> Detail(JsonNode task) => await (await f.As(who).GetAsync($"/api/v1/tasks/{task.G("id")}")).Json();
+                async Task<HttpResponseMessage> Write(JsonNode task, object body) => await f.As(who).Patch($"/api/v1/tasks/{task.G("id")}", body, await d.TaskVersion(task));
+
+                var rows = (await (await f.As(who).GetAsync($"/api/v1/projects/{p.Id}/tasks?pageSize=200")).Json())["items"]!.AsArray();
+                foreach (var (target, flag, permission) in new[] { (assignTask, "assign", "assign"), (editTask, "edit", "edit"), (dueTask, "changeDue", "dueDate") })
+                {
+                    var row = rows.Single(x => x!.G("id") == target.G("id"))!;
+                    Assert.Equal((await Detail(target))["permissions"]![permission]!["ok"]!.GetValue<bool>(), row["can"]![flag]!.GetValue<bool>());
+                }
+                var assign = await Detail(assignTask);
+                var assignAllowed = assign["permissions"]!["assign"]!["ok"]!.GetValue<bool>();
+                var assignResponse = await Write(assignTask, new { assigneeId = d.User(TestData.Jill), reason = "Permission matrix correction" });
+                Assert.True(assignAllowed ? assignResponse.IsSuccessStatusCode : assignResponse.StatusCode == HttpStatusCode.Forbidden, $"{who} {status} assign returned {(int)assignResponse.StatusCode}");
+
+                var edit = await Detail(editTask);
+                var editAllowed = edit["permissions"]!["edit"]!["ok"]!.GetValue<bool>();
+                var editResponse = await Write(editTask, new { name = $"Status {status} edit {who}", reason = "Permission matrix correction" });
+                Assert.True(editAllowed ? editResponse.IsSuccessStatusCode : editResponse.StatusCode == HttpStatusCode.Forbidden, $"{who} {status} edit returned {(int)editResponse.StatusCode}");
+
+                var due = await Detail(dueTask);
+                var dueAllowed = due["permissions"]!["dueDate"]!["ok"]!.GetValue<bool>();
+                var dueResponse = await Write(dueTask, new { dueDate = "2026-11-15", reason = $"Valid due-date change for {who} in {status}" });
+                var dueBody = await dueResponse.Content.ReadAsStringAsync();
+                Assert.True(dueAllowed ? dueResponse.IsSuccessStatusCode : dueResponse.StatusCode == HttpStatusCode.Forbidden, $"{who} {status} due returned {(int)dueResponse.StatusCode}: {dueBody}");
+            }
+        }
+    }
+
     [Fact] // AC-FIG-10, AC-FIG-11
     public async Task Unassigned_task_creator_edit_window_matches_list_and_detail()
     {

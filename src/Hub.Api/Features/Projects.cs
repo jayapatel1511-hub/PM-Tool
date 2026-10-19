@@ -311,7 +311,7 @@ public static class ProjectEndpoints
                 CreateTaskIn = disciplines.Where(d => d.IsActive && Permissions.CreateTask(a, ctx, d.Id)).Select(d => d.Id),
                 CreateDeliverableIn = disciplines.Where(d => d.IsActive && Permissions.CreateDeliverable(a, ctx, d.Id)).Select(d => d.Id),
                 CreateBasisIn = disciplines.Where(d => d.IsActive && Permissions.CreateBasis(a, ctx, d.Id, a.Id, null).Ok).Select(d => d.Id),
-                AssignBasisIn = disciplines.Where(d => d.IsActive && (Permissions.IsPM(a, ctx) || Permissions.IsDL(ctx, d.Id))).Select(d => d.Id),
+                AssignBasisIn = disciplines.Where(d => d.IsActive && Permissions.CreateBasis(a, ctx, d.Id, Guid.Empty, null).Ok).Select(d => d.Id),
                 LeadOf = ctx.LeadDisciplineIds,
                 IsPm = Permissions.IsPM(a, ctx),
                 Transitions = Workflow.ProjectNext(p.Status).Where(to => Permissions.ChangeProjectStatus(a, ctx, to).Ok),

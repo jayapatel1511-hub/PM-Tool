@@ -180,3 +180,17 @@ One table of the open product and process decisions for packets 038 to 050 and t
 | 050-D6 | 050 | Project lead unit? | Optional, filter only, no access effect. | Open |
 | 050-D7 | 050 | Placement history for past reports? | Home unit at each week's end, from the activity log. | Open |
 | 050-D8 | 050 | Who sees the person list of a unit outside their scope? | Executives and Admins only; names, levels, leaders and head counts visible to all. | Open |
+| 051-D1 | 051 | Approve the §55 User Feedback Round 1 scope (Parts A to C)? | Approve with the listed defaults (051-D2 to 051-D8 stay Open with their defaults). | Decided by Jay 2026-10-25 |
+| 051-D2 | 051 | Where do form drafts live? | Browser local storage only, per device; no server-side draft table. | Open |
+| 051-D3 | 051 | How long is a draft kept? | draft_keep_days = 7, an organisation setting. | Open |
+| 051-D4 | 051 | Is the never-revert retry rule (FR-SAV-02) flagged? | No; an unflagged correction of a data-loss path; its slice (S02) is Tier B. | Open |
+| 051-D5 | 051 | What puts a task in the Backlog? | Derived: open, no due date and no start date; no stored flag and no new status. | Open |
+| 051-D6 | 051 | Quick-add defaults? | Discipline from the creator's home discipline or the project's first discipline; assignee the creator; priority Normal. | Open |
+| 051-D7 | 051 | Does the Backlog include deliverables? | No; tasks only. The Timeline's Unscheduled list keeps the cross-record view. | Open |
+| 051-D8 | 051 | Which checks are in the Admin review? | The nine in FR-ADR-01; a new check needs a spec change. | Open |
+| 051-D9 | 051 | Does a months-ahead capacity and hiring forecast (feedback item 2) come into the Hub? | No; it stays in the separate Friday capacity application; the Hub keeps the 8-week Workload. | Open |
+| 051-D10 | 051 | What does "PM template: security/seniority requirement?" (feedback item 3) mean? | Question back to the author; nothing specified. | Open |
+| 051-D11 | 051 | Admin-defined access levels (feedback item 4)? | Phase 2 candidate; not specified; roles stay as §8.8. | Open |
+| 051-D12 | 051 | Move the ERP (VTP) sync (feedback item 6) from Phase 3 to Phase 2? | No change until the ERP owner confirms capabilities (§29 item 3). | Open |
+| 051-D13 | 051 | "Passwords" (feedback item 9)? | Question back to the author; FR-AUTH-01 stands, no local passwords in pilot or production. | Open |
+| 051-D14 | 051 | Pilot scope (feedback items 11 and 12): one operating centre (OC54) and one discipline first? | Proposed amendment to Q16; no product change needed. | Open |

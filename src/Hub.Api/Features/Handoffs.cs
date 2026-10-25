@@ -35,7 +35,6 @@ public static class HandoffEndpoints
         api.MapPost("/projects/{projectId:guid}/handoffs/{id:guid}/assign", Assign).WithMetadata(new AtomicCommand());
     }
 
-    static string Hash(object payload) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload, JsonOpts.Web))));
     static async Task<Handoff> Load(HubDb db, Guid projectId, Guid id) =>
         await db.Handoffs.FirstOrDefaultAsync(h => h.ProjectId == projectId && h.Id == id) ?? throw ApiException.NotFound();
     static async Task<HandoffFacts> Facts(HubDb db, Handoff h) => new(h.SendingDisciplineId, h.ReceivingDisciplineId,
@@ -54,7 +53,7 @@ public static class HandoffEndpoints
             await db.Database.SqlQueryRaw<Guid>("SELECT id AS \"Value\" FROM hub.project WHERE id = {0} FOR UPDATE", projectId).ToListAsync();
             var (p, ctx) = await access.Project(projectId);
             Access.Demand(Permissions.Writable(access.Actor, ctx));
-            var hash = Hash(payload);
+            var hash = Coordination.Hash(payload);
             var prior = await db.HandoffCommands.AsNoTracking().FirstOrDefaultAsync(c => c.ProjectId == projectId && c.ActorId == access.Me.Id && c.RequestId == requestId);
             if (prior is not null)
             {
@@ -70,16 +69,10 @@ public static class HandoffEndpoints
         });
     }
 
-    static IQueryable<AppUser> EligibleOwners(HubDb db, Project p) => db.Users.Where(u => u.IsActive
-        && (!db.UserRoles.Any(r => r.UserId == u.Id && r.Role == SystemRole.ReadOnly) || db.UserRoles.Any(r => r.UserId == u.Id && r.Role == SystemRole.Admin))
-        && (u.Id == p.ProjectManagerId || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == u.Id && m.RemovedAt == null
-            && (m.Roles.Contains(ProjectRole.TeamMember) || m.Roles.Contains(ProjectRole.PM) || m.Roles.Contains(ProjectRole.Reviewer)))
-            || db.ProjectDisciplines.Any(d => d.ProjectId == p.Id && d.LeadUserId == u.Id && d.IsActive)));
-
     static async Task Owners(HubDb db, Project p, Guid sender, Guid receiver)
     {
-        Check.That(await EligibleOwners(db, p).AnyAsync(u => u.Id == sender), "sendingOwnerId", "handoff.active_member");
-        Check.That(await EligibleOwners(db, p).AnyAsync(u => u.Id == receiver), "receivingOwnerId", "handoff.active_member");
+        Check.That(await Coordination.People(db, p).AnyAsync(u => u.Id == sender), "sendingOwnerId", "handoff.active_member");
+        Check.That(await Coordination.People(db, p).AnyAsync(u => u.Id == receiver), "receivingOwnerId", "handoff.active_member");
     }
 
     static async Task<Deliverable> Source(HubDb db, Guid projectId, Guid id, int version)
@@ -288,7 +281,7 @@ public static class HandoffEndpoints
 
     static async Task<List<object>> Rows(HubDb db, IQueryable<Handoff> query, Project p, DateOnly today)
     {
-        var eligible = EligibleOwners(db, p).Select(u => u.Id);
+        var eligible = Coordination.People(db, p).Select(u => u.Id);
         var rows = await query.Select(h => new { H = h,
             SenderName = db.Users.Where(u => u.Id == h.SendingOwnerId).Select(u => u.DisplayName).FirstOrDefault(),
             ReceiverName = db.Users.Where(u => u.Id == h.ReceivingOwnerId).Select(u => u.DisplayName).FirstOrDefault(),
@@ -323,7 +316,7 @@ public static class HandoffEndpoints
             .OrderBy(d => d.Seq).Select(d => new { d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.Revision, d.TransmittalUrl, d.RowVersion, d.DueDate }).ToListAsync();
         var disciplines = await db.ProjectDisciplines.Where(d => d.ProjectId == p.Id && d.IsActive).Select(d => new { d.Id, d.Discipline!.Name }).ToListAsync();
         return new { Sources = sources, Disciplines = disciplines,
-            People = await EligibleOwners(db, p).OrderBy(u => u.DisplayName).Select(u => new { u.Id, u.DisplayName }).ToListAsync(),
+            People = await Coordination.People(db, p).OrderBy(u => u.DisplayName).Select(u => new { u.Id, u.DisplayName }).ToListAsync(),
             Tasks = await db.Tasks.Where(t => t.ProjectId == p.Id && t.Status != TaskStatuses.Cancelled).OrderBy(t => t.Seq)
                 .Select(t => new { t.Id, t.Key, t.Name, t.ProjectDisciplineId, OwnerId = t.AssigneeId, t.DueDate }).ToListAsync(),
             CanCreate = sources.Any(s => disciplines.Any(d => Permissions.CreateHandoff(access.Actor, ctx, s.ProjectDisciplineId, d.Id, s.OwnerId).Ok)) };

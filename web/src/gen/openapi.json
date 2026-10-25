@@ -2837,6 +2837,9 @@
           "assign": {
             "type": "boolean"
           },
+          "block": {
+            "type": "boolean"
+          },
           "changeDue": {
             "type": "boolean"
           },
@@ -2847,7 +2850,8 @@
         "required": [
           "assign",
           "edit",
-          "changeDue"
+          "changeDue",
+          "block"
         ],
         "type": "object"
       },

@@ -127,9 +127,9 @@ public static class PlanningEndpoints
     static async Task EnsurePerson(HubDb db, Access access, Guid id)
     {
         if (await (await PeopleScope.Widen(db, access.Actor, People(db, access))).AnyAsync(u => u.Id == id)) return;
-        if (await db.Settings.AnyAsync(s => s.Key == "flag.org_structure" && s.Value == "true") && await PeopleScope.LeadsUnit(db, access.Actor))
+        if (await PeopleScope.ReadsAsUnitLeader(db, await db.CurrentSettings(), access.Actor))
         {
-            var indirect = await db.Settings.AnyAsync(s => s.Key == "include_indirect_reports" && s.Value == "true");
+            var indirect = (await db.CurrentSettings()).IncludeIndirectReports;
             if ((await PeopleScope.Load(db, access.Actor, indirect)).Contains(id)) return;
         }
         throw ApiException.NotFound();
@@ -192,7 +192,7 @@ public static class PlanningEndpoints
     static async Task<ReadModel> Read(GridQuery query, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var orgSettings = await store.Get(db);
-        var unitRead = orgSettings.IsFlagOn("org_structure") && await PeopleScope.LeadsUnit(db, access.Actor);
+        var unitRead = await PeopleScope.ReadsAsUnitLeader(db, orgSettings, access.Actor);
         if (query.PersonId != access.Actor.Id) Access.Demand(Permissions.ViewWorkload(access.Actor).Ok || unitRead ? Allow.Yes : Permissions.ViewWorkload(access.Actor));
         if (query.PersonId is { } requested) await EnsurePerson(db, access, requested);
         var correction = Correction(access, query.DraftAccessReason);

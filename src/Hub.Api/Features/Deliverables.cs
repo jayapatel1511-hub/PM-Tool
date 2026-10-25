@@ -68,7 +68,7 @@ public static class DeliverableEndpoints
     {
         await access.Project(id, track: false);
         var query = Filter(db, db.Deliverables.AsNoTracking().Where(d => d.ProjectId == id), f.DisciplineId, f.Status, f.MilestoneId, f.OwnerId, f.TypeId, f.DueFrom, f.DueTo, f.Indicator, f.RequiresReview, f.Q);
-        if (f.RevisionWarning == true && await db.Settings.AnyAsync(s => s.Key == "flag.revision_check" && s.Value == "true"))
+        if (f.RevisionWarning == true && (await db.CurrentSettings()).IsFlagOn("revision_check"))
         {
             var project = await db.Projects.AsNoTracking().SingleAsync(p => p.Id == id);
             var marked = (await RevisionCheckEndpoints.Marks(db, project)).Where(d => d.Marks.Length > 0).Select(d => d.Id).ToArray();

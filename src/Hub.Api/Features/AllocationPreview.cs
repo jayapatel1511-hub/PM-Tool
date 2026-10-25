@@ -46,9 +46,11 @@ public sealed class AllocationPreviewFilter : IEndpointFilter
                 foreach (var group in days.GroupBy(d => Workload.WeekOf(d.Date)))
                 {
                     var capacity = group.Sum(d => d.AvailableHours); var planned = group.Sum(d => d.ResultingHours);
-                    var pct = capacity == 0 ? (planned == 0 ? 0 : decimal.MaxValue) : planned * 100 / capacity;
+                    // The shared §45.4 rules: Workload.Pct and its band (lower case, as /workload sends it), and the
+                    // existing per-day over-capacity warning (FR-VER-12) rather than a second weekly-sum rule.
                     weeks.Add(new PreviewWeek(candidate.PersonId, group.Key, capacity, planned, capacity - planned,
-                        Workload.LoadBand(pct, settings).ToString(), planned > capacity ? ["Over-allocated"] : []));
+                        Workload.LoadBand(Workload.Pct(planned, capacity), settings).ToString().ToLowerInvariant(),
+                        group.Any(d => d.OverByHours > 0) ? ["overCapacity"] : []));
                 }
             }
             var from = before?.PersonId == allocation.PersonId && before.FromDate < allocation.FromDate ? before.FromDate : allocation.FromDate;

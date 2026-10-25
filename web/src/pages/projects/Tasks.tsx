@@ -55,7 +55,7 @@ export interface TaskRow {
   progressPct: number; estimatedHours?: number | null; reviewRound: number; dueDateChangeCount: number; lastActivityAt: string; lastActivityActorName?: string; statusChangedAt?: string; completedAt?: string
   createdAt: string; createdBy?: string; createdByName?: string; sortOrder: number; rowVersion: number
   manualBlockType?: string; manualBlockReason?: string; manualBlockSetAt?: string; commentCount: number; predecessorCount: number; successorCount: number
-  collaboratorIds: string[]; can?: { assign: boolean; edit: boolean; changeDue: boolean } | null; state?: TaskStateView | null
+  collaboratorIds: string[]; can?: { assign: boolean; edit: boolean; changeDue: boolean; block: boolean } | null; state?: TaskStateView | null
   pickupOfferOpen?: boolean
 }
 export interface Transition { to: string; allowed: boolean; reason?: string | null; needsReason: boolean; via?: string | null }
@@ -140,6 +140,8 @@ export function useTaskHints(_p: Pick<ProjectDetail, 'status' | 'permissions'>) 
     manages,
     edit: (r: TaskRow) => r.can?.edit === true,
     due: (r: TaskRow) => r.can?.changeDue === true,
+    // Blocking has its own rule (PM, Discipline Lead or owner), narrower than editing (§41.5 decision 11).
+    block: (r: TaskRow) => r.can?.block === true,
   }
 }
 
@@ -319,7 +321,7 @@ const FLAGS = new Set<string>([...QUICK, 'waiting', 'open', 'stale', 'dueSoon', 
 const TOKEN_LABEL: Record<string, string> = { q: 'common.search', disciplineId: 'common.discipline', deliverableId: 'task.deliverable', status: 'common.status', priority: 'common.priority' }
 
 /** The filter bar (§13.0, §13.3): labelled filters, the quick chips and every active filter as a removable token with Clear. */
-export function TaskFilterBar({ p, deliverables, extra, actions, pinned = PINNED_QUICK, lead }: { p: ProjectDetail; deliverables: DeliverableRow[]; extra?: ReactNode; actions?: ReactNode; pinned?: readonly (typeof QUICK)[number][]; lead?: ReactNode }) {
+export function TaskFilterBar({ p, deliverables, extra, actions, pinned = PINNED_QUICK, lead, showDeleted = false }: { p: ProjectDetail; deliverables: DeliverableRow[]; extra?: ReactNode; actions?: ReactNode; showDeleted?: boolean; pinned?: readonly (typeof QUICK)[number][]; lead?: ReactNode }) {
   const { sp, set, filters, clear } = useTaskFilters()
   const { milestones } = useProjectLists(p.id)
   const on = (k: string) => sp.get(k) === 'true'
@@ -371,7 +373,8 @@ export function TaskFilterBar({ p, deliverables, extra, actions, pinned = PINNED
         </Field>
         {extra}
       </div>
-      <DeletedToggle project={p} />
+      {/* Only the task list renders deleted tasks, so only it offers the toggle (045 S02); the Board does not. */}
+      {showDeleted && <DeletedToggle project={p} />}
       <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="tasks-quick">
         <span id="tasks-quick" className="mr-1 text-sm font-medium">{t(pinned.length ? 'calm.moreQuick' : 'task.quickFilters')}</span>
         {QUICK.filter((k) => !pinned.includes(k)).map(chip)}
@@ -577,7 +580,7 @@ function LiveTasksTab() {
     { id: 'blocking', label: 'task.blockingCount', optional: true, num: true, cell: (r) => r.state?.blockingCount || dash },
     { id: 'reviewRound', label: 'task.reviewRound', optional: true, num: true, cell: (r) => r.reviewRound || dash },
     { id: 'dueChanges', label: 'task.dueChanges', optional: true, num: true, cell: (r) => r.dueDateChangeCount || dash },
-    ...(quick ? [{ id: 'quick', label: 'common.actions', cls: 'w-40 min-w-40', cell: (r: TaskRow) => <div className="flex gap-1 opacity-0 group-hover/task:opacity-100 group-focus-within/task:opacity-100 focus-within:opacity-100"><Button size="sm" variant="ghost" aria-label={t('interaction.openTask',{key:r.key})} onClick={() => openPanel('Task', r.id)}>{t('common.open')}</Button>{hints.edit(r) && r.status === 'Not Started' && <Button size="sm" variant="ghost" aria-label={t('interaction.startTask',{key:r.key})} onClick={() => startTask(r)}>{t('tasks.startAuthStartNow')}</Button>}{hints.edit(r) && !r.manualBlockType && <Button size="sm" variant="ghost" aria-label={t('interaction.blockTask',{key:r.key})} onClick={() => setBlock(r)}>{t('task.setBlock')}</Button>}</div> }] as Col[] : []),
+    ...(quick ? [{ id: 'quick', label: 'common.actions', cls: 'w-40 min-w-40', cell: (r: TaskRow) => <div className="flex gap-1 opacity-0 group-hover/task:opacity-100 group-focus-within/task:opacity-100 focus-within:opacity-100"><Button size="sm" variant="ghost" aria-label={t('interaction.openTask',{key:r.key})} onClick={() => openPanel('Task', r.id)}>{t('common.open')}</Button>{hints.edit(r) && r.status === 'Not Started' && <Button size="sm" variant="ghost" aria-label={t('interaction.startTask',{key:r.key})} onClick={() => startTask(r)}>{t('tasks.startAuthStartNow')}</Button>}{hints.block(r) && !r.manualBlockType && <Button size="sm" variant="ghost" aria-label={t('interaction.blockTask',{key:r.key})} onClick={() => setBlock(r)}>{t('task.setBlock')}</Button>}</div> }] as Col[] : []),
   ]
   const urlCols = sp.get('cols')?.split(',') // a saved view or shared link carries its columns
   const shown = all.filter((c) => (urlCols ? urlCols.includes(c.id) || c.id === 'key' || c.id === 'name' || c.id === 'quick' : visible ? visible.includes(c.id) || c.id === 'quick' : !c.optional))
@@ -602,7 +605,7 @@ function LiveTasksTab() {
         {canCreate && <Button onClick={() => setCreating({})}><Plus className="size-4" />{t('task.new')}</Button>}
       </>}>
       {/* §41 R1: the quick filters sit in the Filters popover, Group is a menu, and Export and Columns share the overflow. */}
-      <TaskFilterBar p={p} deliverables={deliverables} pinned={[]}
+      <TaskFilterBar p={p} deliverables={deliverables} pinned={[]} showDeleted
         lead={<MenuSelect label={t('common.groupBy')} value={group} onChange={(v) => set('group', v === 'deliverable' ? null : v)}
           options={GROUPS.map((g) => ({ value: g, label: runtimeText(GROUP_LABEL[g]) }))} />}
         actions={

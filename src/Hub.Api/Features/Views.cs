@@ -24,7 +24,7 @@ public static class ViewEndpoints
         {
             var settings = await store.Get(db);
             Check.OneOf(listType, [.. Lists.Keys], "listType");
-            if (listType == "planner") { Access.Demand(Permissions.ViewWorkload(access.Actor)); Check.That(projectId == null, "projectId", "view.personal_only"); }
+            if (listType == "planner") { await PeopleScope.DemandWorkload(db, access.Actor); Check.That(projectId == null, "projectId", "view.personal_only"); }
             if (listType == "staff") { Http.RequireFlag(settings, "small_ux"); Access.Demand(Permissions.ViewStaff(access.Actor)); Check.That(projectId == null, "projectId", "view.personal_only"); }
             var ctx = projectId is { } pid ? (await access.Project(pid, track: false)).Ctx : null;
             var views = await db.SavedViews.AsNoTracking().Where(v => v.ListType == listType
@@ -50,7 +50,7 @@ public static class ViewEndpoints
             var settings = await store.Get(db);
             Check.OneOf(body.ListType, [.. Lists.Keys], "listType");
             var scope = body.Scope ?? Personal;
-            if (body.ListType == "planner") { Access.Demand(Permissions.ViewWorkload(access.Actor)); Check.That(scope == Personal && body.ProjectId == null, "scope", "view.personal_only"); }
+            if (body.ListType == "planner") { await PeopleScope.DemandWorkload(db, access.Actor); Check.That(scope == Personal && body.ProjectId == null, "scope", "view.personal_only"); }
             if (body.ListType == "staff") { Http.RequireFlag(settings, "small_ux"); Access.Demand(Permissions.ViewStaff(access.Actor)); Check.That(scope == Personal && body.ProjectId == null, "scope", "view.personal_only"); }
             Check.OneOf(scope, [Personal, ProjectScope], "scope");
             if (body.ProjectId is { } pid)
@@ -111,7 +111,7 @@ public static class ViewEndpoints
     static async Task<SavedView> Editable(HubDb db, Access access, CurrentUser me, Guid id, OrgSettings settings)
     {
         var v = await db.SavedViews.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
-        if (v.ListType == "planner") Access.Demand(Permissions.ViewWorkload(access.Actor));
+        if (v.ListType == "planner") await PeopleScope.DemandWorkload(db, access.Actor);
         if (v.ListType == "staff") { Http.RequireFlag(settings, "small_ux"); Access.Demand(Permissions.ViewStaff(access.Actor)); }
         if (v.Scope == Personal) { if (v.OwnerId != me.Id) throw ApiException.NotFound(); return v; }
         var (_, ctx) = await access.Project(v.ProjectId!.Value, track: false);

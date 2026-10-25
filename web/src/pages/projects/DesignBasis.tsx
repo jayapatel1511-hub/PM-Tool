@@ -74,7 +74,6 @@ export function DesignBasisTab() {
   const base = `projects/${project.id}/design-basis`
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
   const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => get<Team>(`projects/${project.id}/team`) })
-  const canAssign = project.permissions.assignBasisIn.length > 0
   const allowedDisciplines = project.permissions.createBasisIn
   const canCreate = !!options.data?.canWrite && allowedDisciplines.length > 0
   const filters = { kind, status, disciplineId: discipline, scope, overdue, affectedWorkId }
@@ -131,7 +130,7 @@ export function DesignBasisTab() {
       </table></TableRegion>}
     {list.data && <RegisterPager label={t('basis.pager')} page={page} total={list.data.totalCount} pageSize={list.data.pageSize} onPage={n => set('page', String(n))} />}
     {adding && options.data && <BasisForm base={base} number={project.projectNumber} options={options.data}
-      allowedDisciplines={allowedDisciplines} canAssign={canAssign} onClose={() => setAdding(false)} onDone={id => { setAdding(false); refresh(); set('basis', id) }} />}
+      allowedDisciplines={allowedDisciplines} assignIn={project.permissions.assignBasisIn} onClose={() => setAdding(false)} onDone={id => { setAdding(false); refresh(); set('basis', id) }} />}
     {selected && <BasisDetail base={base} id={selected} number={project.projectNumber} options={options.data} name={name}
       close={() => set('basis', '')} refresh={refresh} />}
   </Page>
@@ -153,13 +152,15 @@ function VersionFields({ draft, setDraft }: { draft: VersionDraft; setDraft: (v:
   </div>
 }
 
-function BasisForm({ base, number, options, onClose, onDone, existing, editing, allowedDisciplines, canAssign = true }: { base: string; number: string; options: CoordOptions;
-  onClose: () => void; onDone: (id: string) => void; existing?: Detail; editing?: Version; allowedDisciplines?: string[]; canAssign?: boolean }) {
+function BasisForm({ base, number, options, onClose, onDone, existing, editing, allowedDisciplines, assignIn }: { base: string; number: string; options: CoordOptions;
+  onClose: () => void; onDone: (id: string) => void; existing?: Detail; editing?: Version; allowedDisciplines?: string[]; assignIn?: string[] }) {
   const current = editing ?? existing?.versions.find(v => v.version.id === existing.entry.currentVersionId)?.version
   const [kind, setKind] = useState(existing?.entry.kind ?? 'Assumption'), [title, setTitle] = useState(existing?.entry.title ?? '')
   const [ownerId, setOwnerId] = useState(existing?.entry.ownerId ?? options.actorId)
   const [disciplineId, setDisciplineId] = useState(existing?.entry.projectDisciplineId ?? (allowedDisciplines?.length === 1 ? allowedDisciplines[0] : ''))
   const [approverId, setApproverId] = useState(existing?.entry.independentApproverId ?? '')
+  // Naming another owner or approver is allowed per discipline (assignBasisIn), so it follows the discipline chosen here.
+  const canAssign = !assignIn || assignIn.includes(disciplineId)
   const [draft, setDraft] = useState<VersionDraft>(() => fromVersion(current))
   const [reason, setReason] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null)
   const [duplicateId, setDuplicateId] = useState(''), [inspected, setInspected] = useState(false)
@@ -174,8 +175,8 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
     event.preventDefault(); setError(null); setBusy(true)
     const body = existing ? { entryRowVersion: existing.entry.rowVersion,
       ...(editing ? { versionRowVersion: editing.rowVersion } : { currentVersionRowVersion: current!.rowVersion }),
-      version: payloadVersion(draft), reason, inspectedDuplicateId: inspected ? duplicateId : null } : { kind, title, ownerId, projectDisciplineId: disciplineId,
-      independentApproverId: approverId || null, version: payloadVersion(draft), reason: null,
+      version: payloadVersion(draft), reason, inspectedDuplicateId: inspected ? duplicateId : null } : { kind, title, ownerId: canAssign ? ownerId : options.actorId, projectDisciplineId: disciplineId,
+      independentApproverId: canAssign ? approverId || null : null, version: payloadVersion(draft), reason: null,
       inspectedDuplicateId: inspected ? duplicateId : null }
     const signature = JSON.stringify(body)
     if (!receipt.current || receipt.current.signature !== signature) receipt.current = { signature, requestId: crypto.randomUUID() }

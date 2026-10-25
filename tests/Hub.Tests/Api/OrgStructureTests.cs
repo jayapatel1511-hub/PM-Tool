@@ -98,6 +98,9 @@ public sealed class OrgStructureTests : IDisposable
         Assert.Contains(staff["people"]!.AsArray(), p => p!.G("id") == alex);
         var work = await (await viewer.GetAsync($"/api/v1/me/work?userId={alex}")).Json(); Assert.DoesNotContain("Restricted unit secret", work.ToJsonString());
         Assert.Equal(HttpStatusCode.Forbidden, (await viewer.Patch($"/api/v1/tasks/{task.G("id")}", new { assigneeId = d.User(TestData.Jill) }, await d.TaskVersion(task))).StatusCode);
+        // The Planner admits a unit leader (FR-UNT-11), so its saved views do too.
+        (await viewer.GetAsync("/api/v1/views?listType=planner")).EnsureSuccessStatusCode();
+        await (await viewer.Post("/api/v1/views", new { name = "Unit planner", listType = "planner", @params = new Dictionary<string, string>() })).Json(201);
     }
 
     [Fact]

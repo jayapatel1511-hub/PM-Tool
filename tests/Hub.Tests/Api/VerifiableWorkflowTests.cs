@@ -101,6 +101,15 @@ public sealed class VerifiableWorkflowTests
             var preview = await (await f.As(TestData.Pm).Post(root + "?preview=true", body)).Json();
             Assert.True(preview["preview"]!.GetValue<bool>());
             Assert.NotEmpty(preview["weeks"]!.AsArray());
+            // §45.4: the band is the shared load band in /workload's lower case; 4 h on one day is not over capacity.
+            var week = preview["weeks"]![0]!;
+            Assert.Contains(week.S("band"), new[] { "over", "near", "within", "light" });
+            Assert.Empty(week["indicators"]!.AsArray());
+            // FR-VER-12: the existing per-day warning, so 24 h on one day is flagged even though the week is not over.
+            var heavy = await (await f.As(TestData.Pm).Post(root + "?preview=true", body with { RequestId = Guid.NewGuid(), PlannedHours = 24 })).Json();
+            var heavyWeek = heavy["weeks"]![0]!;
+            Assert.Equal(new[] { "overCapacity" }, heavyWeek["indicators"]!.AsArray().Select(i => i!.GetValue<string>()).ToArray());
+            Assert.True(heavyWeek["planned"]!.GetValue<decimal>() <= heavyWeek["capacity"]!.GetValue<decimal>(), "the week itself stays under capacity");
             Assert.Empty(await f.DbAsync(db => db.Allocations.Where(a => a.ProjectId == project.Id).ToListAsync()));
             var saved = await (await f.As(TestData.Pm).Post(root, body with { RequestId = Guid.NewGuid() })).Json();
             Assert.Equal(1, await f.DbAsync(db => db.Allocations.CountAsync(a => a.Id == saved.G("id"))));

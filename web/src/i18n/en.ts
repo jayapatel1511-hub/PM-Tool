@@ -97,6 +97,8 @@ export const en = {
   'org.unit': 'Home unit',
   "preview.title": "Allocation preview",
   "preview.after": "After this change: {planned} of {capacity} h, {band}",
+  "preview.band.over": "over capacity", "preview.band.near": "near capacity", "preview.band.within": "within capacity", "preview.band.light": "lightly loaded",
+  "preview.overCapacity": "Over capacity on at least one day",
   "audit.verified": "Log verified \u00b7 {n} entries \u00b7 checked {time}",
   "audit.failed": "Log check failed at entry {n}",
   "audit.pending": "Log check pending",

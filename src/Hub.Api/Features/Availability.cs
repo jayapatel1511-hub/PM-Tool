@@ -70,7 +70,7 @@ public static class AvailabilityEndpoints
 
     internal static async Task<IQueryable<AppUser>> VisiblePeople(HubDb db, Access access)
     {
-        var unitRead = await db.Settings.AnyAsync(s => s.Key == "flag.org_structure" && s.Value == "true") && await PeopleScope.LeadsUnit(db, access.Actor);
+        var unitRead = await PeopleScope.ReadsAsUnitLeader(db, await db.CurrentSettings(), access.Actor);
         var baseline = access.Actor.ReadOnly && unitRead ? db.Users.AsNoTracking().Where(_ => false) : People(db, access);
         return await PeopleScope.Widen(db, access.Actor, baseline);
     }

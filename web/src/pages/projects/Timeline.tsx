@@ -266,7 +266,7 @@ export function TimelineTab() {
     ['hideCompleted', t('timeline.hideCompleted'), t('common.yes')],
     ['from', t('common.from'), f.from && fmtDate(f.from)],
     ['to', t('common.to'), f.to && fmtDate(f.to)],
-  ] as const).filter(([k]) => sp.get(k))
+  ] as const).filter(([k]) => sp.get(k) && (k !== 'chainTo' || chainEnabled)) // a chainTo link does nothing while its flag is off
   const clear = () => { const n = new URLSearchParams(sp); for (const k of FILTERS) n.delete(k); n.delete('panel'); setSp(n, { replace: true }) }
 
   const bar = (id: string, span: Span, status: string, pct: number, text: string, thin: boolean, can: boolean, onDrop: (n: number) => void, open: () => void) => {

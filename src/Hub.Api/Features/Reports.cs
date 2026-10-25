@@ -118,7 +118,7 @@ public static partial class ReportEndpoints
         {
             var settings = await store.Get(db);
             var unitNames = settings.IsFlagOn("org_structure") ? await db.Set<OrgUnit>().AsNoTracking().OrderBy(u => u.Name).ToDictionaryAsync(u => u.Id.ToString(), u => u.Name) : new Dictionary<string, string>();
-            var unitRead = settings.IsFlagOn("org_structure") && await PeopleScope.LeadsUnit(db, me.Actor);
+            var unitRead = await PeopleScope.ReadsAsUnitLeader(db, settings, me.Actor);
             return All.Where(r => ((r.Allowed?.Invoke(me.Actor) ?? true) || unitRead && (UnitReadableReport(r.Code))) && (r.Flag == null || settings.IsFlagOn(r.Flag))).Select(r => new
         {
             r.Code, Title = Text.Get($"report.{r.Code}"), Description = Text.Get($"report.{r.Code}.about"),
@@ -164,7 +164,7 @@ public static partial class ReportEndpoints
     {
         var def = All.FirstOrDefault(r => r.Code == code) ?? throw ApiException.NotFound();
         var s = await store.Get(db);
-        if (def.Allowed is { } ok && !ok(me.Actor) && !(s.IsFlagOn("org_structure") && UnitReadableReport(code) && await PeopleScope.LeadsUnit(db, me.Actor)))
+        if (def.Allowed is { } ok && !ok(me.Actor) && !(UnitReadableReport(code) && await PeopleScope.ReadsAsUnitLeader(db, s, me.Actor)))
             throw ApiException.Forbidden("perm.staff");
         if (def.Flag != null) Http.RequireFlag(s, def.Flag);
         return (def, new Ctx(http.Request.Query, db, access, me, s, clock.Today(s), clock.GetUtcNow(), store, clock));

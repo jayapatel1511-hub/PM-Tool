@@ -44,7 +44,7 @@ public static class OnboardingEndpoints
         var visible = access.VisibleProjects().Select(p => p.Id);
         var managed = db.Projects.AsNoTracking().Where(p => visible.Contains(p.Id) && p.ProjectManagerId == me.Id);
         var directReports = db.Users.AsNoTracking().Where(u => u.SupervisorId == me.Id && u.IsActive).Select(u => u.Id);
-        var facts = new OnboardingFacts(CanPlanSelf: Permissions.ViewWorkload(me.Actor).Ok,
+        var facts = new OnboardingFacts(
             ChangedTaskStatus: await db.ActivityLog.AsNoTracking().AnyAsync(a => a.ActorUserId == me.Id && a.ItemType == ItemType.Task && a.Categories.Contains("status") && a.ProjectId != null && visible.Contains(a.ProjectId.Value)),
             Commented: await db.Comments.AsNoTracking().AnyAsync(c => c.AuthorId == me.Id && c.DeletedAt == null && visible.Contains(c.ProjectId)),
             PlannedSelf: await db.PlanningEntries.AsNoTracking().AnyAsync(p => p.PersonId == me.Id && p.CreatedBy == me.Id && p.DeletedAt == null),

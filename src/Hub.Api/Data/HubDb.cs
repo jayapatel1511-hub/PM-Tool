@@ -1002,6 +1002,9 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         return changed;
     }
 
+    /// Organisation settings through the shared 30-second store, the one flag guard every endpoint uses (FR-DLV-08).
+    public Task<OrgSettings> CurrentSettings() => settings.Get(this);
+
     // ---------- Audited save (§20.3, §20.4, G-07, G-10) ----------
 
     public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
@@ -1010,17 +1013,18 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         if (ChangeTracker.Entries<ActivityLog>().Any(e => e.State is EntityState.Modified or EntityState.Deleted)
             || ChangeTracker.Entries<DeliverableBaseline>().Any(e => e.State is EntityState.Modified or EntityState.Deleted))
             throw new InvalidOperationException("Published history is immutable.");
-        var structureOn = await Settings.AnyAsync(s => s.Key == "flag.org_structure" && s.Value == "true", ct);
+        var org = await settings.Get(this); // one settings read per save, shared with the request's own flag checks
+        var structureOn = org.IsFlagOn("org_structure");
         if (structureOn && ChangeTracker.Entries().Any(e => e.State is EntityState.Added or EntityState.Modified && e.Entity is AppUser or OrgUnit or OrgLevel))
         {
             if (Database.CurrentTransaction == null) return await Tx.Run(this, () => SaveChangesAsync(ct));
             await Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock(hashtext({"hub-org-structure"}))", ct);
             await Hub.Api.Features.OrgStructureValidation.BeforeSave(this, ct);
         }
-        var chainOn = Settings.Local.Any(s => s.Key == "flag.verifiable_log" && s.Value == "true") || await Settings.AnyAsync(s => s.Key == "flag.verifiable_log" && s.Value == "true", ct)
+        var chainOn = Settings.Local.Any(s => s.Key == "flag.verifiable_log" && s.Value == "true") || org.IsFlagOn("verifiable_log")
             || await Set<ActivityChainHead>().AnyAsync(ct);
         if (chainOn && Database.CurrentTransaction == null) return await Tx.Run(this, () => SaveChangesAsync(ct));
-        var pickupOn = await Settings.AnyAsync(s => s.Key == "flag.task_pickup" && s.Value == "true", ct);
+        var pickupOn = org.IsFlagOn("task_pickup");
         var changedProjects = ChangeTracker.Entries().Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
             .Select(e => e.Entity is IAuditable item ? item.AuditProjectId : null).OfType<Guid>().Distinct().Order().ToArray();
         if ((chainOn || pickupOn) && changedProjects.Length > 0)

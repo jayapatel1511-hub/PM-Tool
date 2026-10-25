@@ -232,8 +232,8 @@ public static class TaskEndpoints
             Permissions.RestoreItem(a, ctx).Ok, Permissions.Comment(a, ctx).Ok, transitions, notAllowedComplete, t.ReviewerId == a.Id,
             Permissions.ManageDependency(a, ctx, facts, facts).Ok, Permissions.EnterTime(a, ctx).Ok, ProjectStatus.NeedsCorrectionReason(p.Status),
             s.AllowSelfReview, t.Status == TaskStatuses.NotStarted && Permissions.ManageCoordination(a, ctx, t.ProjectDisciplineId).Ok,
-            s.IsFlagOn("task_pickup") ? Permissions.Writable(a, ctx).Ok && (t.AssigneeId == a.Id || Permissions.IsPM(a, ctx)
-                || Permissions.IsDL(ctx, t.ProjectDisciplineId) || a.Supervisor && facts.AssigneeSupervisorId == a.Id) : null);
+            s.IsFlagOn("task_pickup") ? Permissions.Writable(a, ctx).Ok && (t.AssigneeId == a.Id
+                || TaskPickupRules.CanAssign(a, ctx, t.ProjectDisciplineId, facts.AssigneeSupervisorId)) : null);
         var related = s.IsFlagOn("small_ux") ? await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id
             && db.ItemLinks.Any(l => l.ProjectId == p.Id && l.SourceType == ItemType.Task && l.SourceId == t.Id
                 && l.TargetType == ItemType.Deliverable && l.TargetId == d.Id && l.Relation == ItemRelation.Related))

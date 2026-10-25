@@ -60,8 +60,8 @@ public static class OrgStructureEndpoints
             }).ToListAsync();
             var units = unitRows.Select(x => new OrganisationUnitRow(x.Id, x.Name, x.ParentId, x.LevelId, x.Level, x.LeaderId, x.Leader,
                 x.DisciplineId, x.OfficeId, x.ClosedOn, x.HeadCount)).ToList();
-            var settings = await db.Settings.AsNoTracking().Where(s => s.Key == "include_indirect_reports").Select(s => s.Value).SingleOrDefaultAsync();
-            var scope = await PeopleScope.Load(db, me.Actor, settings == "true");
+            var indirect = (await db.CurrentSettings()).IncludeIndirectReports;
+            var scope = await PeopleScope.Load(db, me.Actor, indirect);
             var placements = await db.Users.AsNoTracking().Where(u => u.IsActive).Select(u => u.UnitId).ToListAsync();
             var tree = units.Select(u => new OrgTree.Unit(u.Id, u.ParentId, 0, u.LeaderId)).ToArray();
             units = units.Select(u => u with { HeadCount = placements.Count(id => id != null && OrgTree.Descendants(u.Id, tree).Contains(id.Value)) }).ToList();
@@ -70,7 +70,7 @@ public static class OrgStructureEndpoints
             var managers = await db.Users.AsNoTracking().ToDictionaryAsync(u => u.Id, u => u.SupervisorId);
             var cycleIds = me.Actor.Admin ? managers.Where(u => OrgTree.CreatesCycle(u.Key, u.Value, managers)).Select(u => u.Key).ToArray() : [];
             var cycles = me.Actor.Admin ? await db.Users.AsNoTracking().Where(u => cycleIds.Contains(u.Id)).Select(u => new ManagerCycleRow(u.Id, u.DisplayName)).ToListAsync() : null;
-            return TypedResults.Ok(new OrganisationResponse(levels, units, people, cycles, settings == "true"));
+            return TypedResults.Ok(new OrganisationResponse(levels, units, people, cycles, indirect));
         });
 
         org.MapGet("/placements", async (string? ids, HubDb db, Access access, CurrentUser me) =>

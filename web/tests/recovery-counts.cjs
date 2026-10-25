@@ -62,6 +62,9 @@ let server,browser;const errors=[],requests=[],unknown=[];
  const deletedAxe=await axe();await visibleRestore.click();await page.getByText('No deleted items.',{exact:true}).waitFor();assert.equal(requests[0].ifMatch,'"4"');
  flags.show_deleted=false;await page.reload();assert.equal(await page.getByRole('checkbox',{name:'Show deleted'}).count(),0);
  flags.show_deleted=true;restoreAllowed=false;await page.reload();assert.equal(await page.getByRole('checkbox',{name:'Show deleted'}).count(),0);restoreAllowed=true;
+ // The Board cannot list deleted tasks, so its Filters must not offer Show deleted (only the task list does).
+ await page.goto(`${base}/projects/SYN-RCV/board`);await page.getByRole('main').waitFor();await page.getByRole('button',{name:/^Filters/}).first().click();
+ assert.equal(await page.getByRole('checkbox',{name:'Show deleted'}).count(),0,'Board offers no Show deleted toggle');await page.keyboard.press('Escape');
  // AC-RCV-17: the setting is visible and read-only once published; flag-off parity.
  await page.goto(`${base}/templates/${template}`);await page.getByLabel('Offsets count',{exact:true}).waitFor();assert.equal(await page.getByLabel('Offsets count',{exact:true}).isDisabled(),true);
  flags.template_working_days=false;await page.reload();assert.equal(await page.getByLabel('Offsets count',{exact:true}).count(),0);

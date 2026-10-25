@@ -147,7 +147,7 @@ public static class TemplateEndpoints
         return Results.NoContent();
     }
 
-    static async Task<bool> RolesEnabled(HubDb db) => await db.Settings.AsNoTracking().AnyAsync(s => s.Key == "flag.template_roles" && s.Value == "true");
+    static async Task<bool> RolesEnabled(HubDb db) => (await db.CurrentSettings()).IsFlagOn("template_roles");
 
     static PreviewResult WithoutPreviewRoles(PreviewResult result) => result with { Counts = result.Counts with { Roles = null }, Roles = null };
 
@@ -353,7 +353,7 @@ public static class TemplateEndpoints
             Check.That(r.EndOffsetDays is >= -MaxOffset and <= MaxOffset, "roles", "template.offset");
             Check.That(r.Hours > 0 && r.Hours <= 10000, "roles", "template.role_hours");
             return new TemplateRole { Id = NewRef(r.Ref, "roles"), TemplateId = id, TemplateDisciplineId = discipline,
-                RoleLabel = Check.Required(r.Label, "roles", 80), SortOrder = i, StartMilestoneId = start, StartOffsetDays = r.StartOffsetDays,
+                RoleLabel = Check.Required(r.Label, "roles", OpenRoleLimits.Label), SortOrder = i, StartMilestoneId = start, StartOffsetDays = r.StartOffsetDays,
                 EndMilestoneId = end, EndOffsetDays = r.EndOffsetDays,
                 PlannedHours = r.Hours, Note = Check.Optional(r.Note, "roles", 2000) };
         }).ToList();
@@ -362,12 +362,15 @@ public static class TemplateEndpoints
         {
             var previous = await db.TemplateRoles.AsNoTracking().Where(x => x.TemplateId == id).OrderBy(x => x.SortOrder).ToListAsync();
             var previousDisciplines = await db.TemplateDisciplines.AsNoTracking().Where(x => x.TemplateId == id).ToDictionaryAsync(x => x.Id, x => x.DisciplineId);
-            Check.That(previous.All(r => (r.TemplateDisciplineId is not { } d || previousDisciplines.TryGetValue(d, out var discipline) && byDiscipline.ContainsKey(discipline))
-                && (r.StartMilestoneId is null || msIds.Contains(r.StartMilestoneId.Value)) && (r.EndMilestoneId is null || msIds.Contains(r.EndMilestoneId.Value))), "roles", "template.roles_in_use");
+            // With the flag on, a client that omits roles may not orphan them. With it off the editor cannot see roles, so a
+            // removed milestone or discipline only drops that reference and the save behaves as before the amendment.
+            if (rolesEnabled)
+                Check.That(previous.All(r => (r.TemplateDisciplineId is not { } d || previousDisciplines.TryGetValue(d, out var discipline) && byDiscipline.ContainsKey(discipline))
+                    && (r.StartMilestoneId is null || msIds.Contains(r.StartMilestoneId.Value)) && (r.EndMilestoneId is null || msIds.Contains(r.EndMilestoneId.Value))), "roles", "template.roles_in_use");
             roles = previous.Select((r, i) => new TemplateRole { Id = r.Id, TemplateId = id,
                 TemplateDisciplineId = r.TemplateDisciplineId is { } rd && previousDisciplines.TryGetValue(rd, out var discipline) && byDiscipline.TryGetValue(discipline, out var mapped) ? mapped : null,
-                RoleLabel = r.RoleLabel, SortOrder = i, StartMilestoneId = r.StartMilestoneId, StartOffsetDays = r.StartOffsetDays,
-                EndMilestoneId = r.EndMilestoneId, EndOffsetDays = r.EndOffsetDays,
+                RoleLabel = r.RoleLabel, SortOrder = i, StartMilestoneId = r.StartMilestoneId is { } sm && msIds.Contains(sm) ? sm : null, StartOffsetDays = r.StartOffsetDays,
+                EndMilestoneId = r.EndMilestoneId is { } em && msIds.Contains(em) ? em : null, EndOffsetDays = r.EndOffsetDays,
                 PlannedHours = r.PlannedHours, Note = r.Note }).ToList();
         }
 

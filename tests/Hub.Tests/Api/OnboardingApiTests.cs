@@ -29,6 +29,19 @@ public sealed class OnboardingApiTests(HubFactory f)
         finally { await Flag(false); }
     }
 
+    [Fact, Trait("flag-on", "onboarding_card")] // §51.2 catalogue: "Everyone except Read Only"
+    public async Task Standard_user_without_workload_access_gets_the_own_plan_step()
+    {
+        await Flag(true);
+        try
+        {
+            var card = await (await f.As(TestData.Alex).GetAsync("/api/v1/me/onboarding")).Json();
+            var keys = card["groups"]!.AsArray().SelectMany(g => g!["steps"]!.AsArray()).Select(s => s!["key"]!.GetValue<string>()).ToArray();
+            Assert.Contains("self-plan", keys);
+        }
+        finally { await Flag(false); }
+    }
+
     [Fact, Trait("flag-on", "onboarding_card")] // AC-PRO-02
     public async Task Read_only_gets_no_steps()
     {

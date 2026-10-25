@@ -16455,6 +16455,7 @@ export interface components {
         };
         Can: {
             assign: boolean;
+            block: boolean;
             changeDue: boolean;
             edit: boolean;
         };

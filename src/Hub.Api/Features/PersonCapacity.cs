@@ -50,7 +50,7 @@ public static class PersonCapacity
         var users = await db.Users.AsNoTracking().Where(u => people.Contains(u.Id)).ToListAsync();
         var schedules = await db.PersonSchedules.AsNoTracking().Where(s => people.Contains(s.PersonId) && s.FromDate <= through).OrderByDescending(s => s.FromDate).ToListAsync();
         var holidays = await db.Holidays.AsNoTracking().ToListAsync();
-        var weekdayHours = await db.Settings.AnyAsync(s => s.Key == "flag.capacity_polish" && s.Value == "true");
+        var weekdayHours = (await db.CurrentSettings()).IsFlagOn("capacity_polish");
         return users.ToDictionary(u => u.Id, u => new WorkCalendar(holidays.Where(h => h.OfficeId == null || h.OfficeId == u.OfficeId).Select(h => h.Date),
             date => { var schedule = schedules.FirstOrDefault(s => s.PersonId == u.Id && s.FromDate <= date); return weekdayHours && schedule?.WeekdayHours is { Length: 7 } hours ? hours[(int)date.DayOfWeek] > 0 : (schedule?.WorkingDays ?? [1, 2, 3, 4, 5]).Contains((int)date.DayOfWeek); }));
     }

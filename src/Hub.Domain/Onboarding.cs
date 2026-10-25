@@ -8,7 +8,7 @@ public sealed record OnboardingFacts(
     bool AddedDeliverable = false, bool ProposedAllocationOrRole = false,
     bool PlannedDirectReport = false, bool ConfirmedAllocation = false, bool RecordedAway = false,
     bool StarredProject = false, bool FollowedProject = false, bool SetSupervisors = false,
-    bool ImportedLeave = false, bool ImportedProjects = false, bool CanPlanSelf = true);
+    bool ImportedLeave = false, bool ImportedProjects = false);
 public sealed record OnboardingStep(string Key, string Label, string? Route, bool Done = false);
 public sealed record OnboardingGroup(string Role, IReadOnlyList<OnboardingStep> Steps);
 
@@ -34,7 +34,7 @@ public static class Onboarding
             steps.AddRange([new("star-project", "Star a project", "/projects", f.StarredProject), new("follow-project", "Follow a project", "/projects", f.FollowedProject)]);
         if (r.Contains(SystemRole.Admin))
             steps.AddRange([new("set-supervisors", "Set Supervisors", "/admin/users", f.SetSupervisors), new("import-leave", "Import approved leave", "/vacation", f.ImportedLeave), new("import-projects", "Import the project list", "/projects", f.ImportedProjects)]);
-        return steps.Where(step => step.Key != "self-plan" || f.CanPlanSelf).ToArray();
+        return [.. steps]; // §51.2: every step in a role's rows applies; Read Only gets none (checked by the caller)
     }
 
     public static IReadOnlyList<OnboardingGroup> Groups(IEnumerable<string> roles, OnboardingFacts facts)

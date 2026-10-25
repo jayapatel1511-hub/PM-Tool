@@ -68,7 +68,7 @@ function LiveDeliverablesTab() {
   const q = useQuery({ queryKey: ['p', p.id, 'deliverables', filters], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables${qs({ ...filters, revisionWarning: revisionEnabled ? filters.revisionWarning : undefined, includeTasks: true })}`) })
   const revisionQ = useQuery({ queryKey: ['project', p.id, 'revision-check'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/revision-check', { params: { projectId: p.id } }), enabled: revisionEnabled })
   const marks = new Map((revisionQ.data?.deliverables ?? []).map((x) => [x.id, [...x.marks, ...x.issues.flatMap((i) => i.marks)]]))
-  const warningOnly = sp.get('revisionWarning') === 'true'
+  const warningOnly = revisionEnabled && sp.get('revisionWarning') === 'true' // the filter exists only while flag.revision_check is on
   const milestones = useQuery({ queryKey: ['p', p.id, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones`) })
   const group = sp.get('group') ?? 'discipline'
   const panel = sp.get('panel')
@@ -116,6 +116,7 @@ function LiveDeliverablesTab() {
     filters.dueFrom && { key: 'dueFrom', label: t('tfilter.dueFrom'), value: fmtDate(filters.dueFrom) },
     filters.dueTo && { key: 'dueTo', label: t('tfilter.dueTo'), value: fmtDate(filters.dueTo) },
     filters.requiresReview && { key: 'requiresReview', label: t('field.RequiresReview'), value: filters.requiresReview === 'true' ? t('common.yes') : t('common.no') },
+    warningOnly && { key: 'revisionWarning', label: t('revisionCheck.warningFilter'), value: t('common.yes') },
   ].filter(Boolean) as { key: string; label: string; value: ReactNode }[]
 
   return (

@@ -124,7 +124,7 @@ public static class TaskQueries
         public override string? LastActivityActorName { get; init; }
     }
 
-    public sealed record Can(bool Assign, bool Edit, bool ChangeDue);
+    public sealed record Can(bool Assign, bool Edit, bool ChangeDue, bool Block);
     public sealed record State(bool IsOverdue, int DaysOverdue, bool IsDueSoon, bool IsWaiting, bool IsBlocked, DateOnly? BlockedSince,
         int DaysBlocked, JsonElement? BlockedBy, bool IsBlocking, int BlockingCount, List<Guid> BlockingTaskIds, bool IsStale, int StaleDays,
         bool IsUnassigned, bool IsMissingDueDate, bool IsDateInconsistent, JsonElement? InconsistencyDetail, bool IsInactiveOwner,
@@ -259,7 +259,7 @@ public static class TaskQueries
         }).ToList();
         var msIds = list.Select(t => t.MilestoneId ?? t.Deliverable?.MilestoneId).OfType<Guid>().Distinct().ToList();
         var ms = await db.Milestones.AsNoTracking().Where(m => msIds.Contains(m.Id)).Select(m => new { m.Id, m.Key, m.Name, m.Date }).ToDictionaryAsync(m => m.Id);
-        var pickupOn = await db.Settings.AnyAsync(s => s.Key == "flag.task_pickup" && s.Value == "true");
+        var pickupOn = (await db.CurrentSettings()).IsFlagOn("task_pickup");
         var offers = pickupOn ? (await db.Set<TaskPickupOffer>().AsNoTracking().Where(o => ids.Contains(o.TaskId) && o.ClosedAt == null).Select(o => o.TaskId).ToListAsync()).ToHashSet() : [];
         return list.Select(t =>
         {
@@ -269,7 +269,7 @@ public static class TaskQueries
             var ctx = actor is null ? null : new ProjectContext(p.Id, p.Status, p.Visibility, p.ProjectManagerId, p.AllowViewerComments,
                 memberships.Where(x => x.ProjectId == p.Id).SelectMany(x => x.Roles).ToHashSet(), leads.Contains(t.ProjectDisciplineId) ? new[] { t.ProjectDisciplineId }.ToHashSet() : new HashSet<Guid>(), null);
             var facts = new TaskFacts(t.ProjectDisciplineId, t.AssigneeId, t.ReviewerId, t.CreatedBy, t.Collaborators.ToHashSet(), t.Status, t.Predecessors + t.Successors > 0, t.CreatorWindowOpen, t.AssigneeSupervisorId);
-            var can = actor is null || ctx is null ? null : new { Assign = Permissions.AssignTask(actor, ctx, facts).Ok, Edit = Permissions.EditTask(actor, ctx, facts).Ok, ChangeDue = Permissions.ChangeDueDate(actor, ctx, facts).Ok };
+            var can = actor is null || ctx is null ? null : new { Assign = Permissions.AssignTask(actor, ctx, facts).Ok, Edit = Permissions.EditTask(actor, ctx, facts).Ok, ChangeDue = Permissions.ChangeDueDate(actor, ctx, facts).Ok, Block = Permissions.ManualBlock(actor, ctx, facts).Ok };
             var row = new Row
             {
                 Id = t.Id, ProjectId = t.ProjectId, ProjectNumber = t.Project.ProjectNumber, ProjectName = t.Project.Name, ProjectStatus = t.Project.Status,
@@ -287,7 +287,7 @@ public static class TaskQueries
                 CreatedBy = t.CreatedBy, CreatedByName = t.CreatedByName, SortOrder = t.SortOrder, RowVersion = t.RowVersion,
                 ManualBlockType = t.ManualBlockType, ManualBlockReason = t.ManualBlockReason, ManualBlockSetAt = t.ManualBlockSetAt,
                 CommentCount = t.Comments, PredecessorCount = t.Predecessors, SuccessorCount = t.Successors, CollaboratorIds = t.Collaborators,
-                Can = can is null ? null : new Can(can.Assign, can.Edit, can.ChangeDue),
+                Can = can is null ? null : new Can(can.Assign, can.Edit, can.ChangeDue, can.Block),
                 State = t.State is null ? null : new State(t.State.IsOverdue, t.State.DaysOverdue, t.State.IsDueSoon, t.State.IsWaiting, t.State.IsBlocked,
                     t.State.BlockedSince, t.State.DaysBlocked, J.El(t.State.BlockedBy), t.State.IsBlocking, t.State.BlockingCount,
                     t.State.BlockingTaskIds, t.State.IsStale, t.State.StaleDays, t.State.IsUnassigned, t.State.IsMissingDueDate,

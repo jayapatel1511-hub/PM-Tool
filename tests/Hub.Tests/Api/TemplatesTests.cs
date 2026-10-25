@@ -87,6 +87,14 @@ public sealed class TemplatesTests(HubFactory f)
             Assert.Equal(2, (await Template(draft.G("id"), TestData.Admin))["roles"]!.AsArray().Count);
             await Flag(false);
             Assert.False((await Template(id)).AsObject().ContainsKey("roles"));
+            // Flag off: removing a milestone a hidden role is anchored to saves as before; the role stays, unanchored.
+            var hidden = (await Template(draft.G("id"), TestData.Admin)).DeepClone().AsObject();
+            var hiddenMilestones = hidden["milestones"]!.AsArray();
+            hiddenMilestones.Remove(hiddenMilestones.Single(m => m!["name"]!.GetValue<string>() == "Not dated"));
+            await (await admin.Put($"/api/v1/templates/{draft.G("id")}/structure", hidden)).Json();
+            await Flag(true);
+            Assert.Equal(2, (await Template(draft.G("id"), TestData.Admin))["roles"]!.AsArray().Count);
+            await Flag(false);
             var off = await Create(); Assert.False(await f.DbAsync(db => db.OpenRoles.AnyAsync(r => r.ProjectId == off.Id)));
             var flagOffPreview = await (await admin.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-02", disciplineIds = new[] { civil } })).Json();
             Assert.False(flagOffPreview.AsObject().ContainsKey("roles"));

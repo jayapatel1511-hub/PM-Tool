@@ -22,7 +22,7 @@ import { useFlag } from '@/lib/auth'
 import { ApiError, get, post, qs, typedRequest } from '@/lib/api'
 import { useOffer, type Offer } from '@/lib/auth'
 import { fmtDate, hours, today } from '@/lib/format'
-import { runtimeText, t, tv } from '@/lib/i18n'
+import { runtimeText, t, tv, type TextKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { invalidateChange } from '@/lib/keys'
 import { CommandForm, SelectField, type CoordOptions, WorkLink } from './CoordinationForms'
@@ -37,6 +37,12 @@ type ReviewOption = { id: string; reviewerId: string; dueDate: string; packageId
 /** Unfilled project demand (§40, FR-ROLE-01): filled by proposing a normal allocation that names it (D1). */
 type OpenRole = components['schemas']['OpenRoleRow']
 type Fill = { openRoleId: string; roleLabel: string; fromDate: string; throughDate: string; plannedHours: number }
+
+/** The preview's band and indicator codes (§45.4, FR-VER-12) to text. */
+const PREVIEW_BAND: Record<string, TextKey> = { over: 'preview.band.over', near: 'preview.band.near', within: 'preview.band.within', light: 'preview.band.light' }
+const PREVIEW_INDICATOR: Record<string, TextKey> = { overCapacity: 'preview.overCapacity' }
+const previewBand = (band: string) => t(PREVIEW_BAND[band] ?? 'common.dash')
+const previewIndicators = (codes: string[]) => codes.map(code => t(PREVIEW_INDICATOR[code] ?? 'common.dash')).join(' · ')
 const ROLE_TONE: Record<string, Tone> = { Open: 'work', Filled: 'done', Cancelled: 'idle' }
 
 /** Approval status (FR-CAP-01) with the §13.0 symbol: a request awaiting the supervisor, an accepted commitment, or closed.
@@ -231,7 +237,7 @@ function Proposal({ projectId, base, options, close, done, existing, fill, compl
       <Button type="button" size="sm" variant="outline" className="self-end" onClick={() => setDays(rows => rows.filter(row => row.key !== d.key))}>{t('allocation.removeDay')} {i + 1}</Button>
     </div>)}<Button type="button" size="sm" variant="outline" disabled={days.length >= 366} onClick={() => setDays(rows => [...rows, { key: crypto.randomUUID(), workDate: fromDate, hours: '' }])}><Plus className="size-4" />{t('allocation.addDay')}</Button></fieldset>
     {needsReason && <Field label={t('common.reason')} htmlFor="allocation-reason" hint={t(existing ? 'common.reasonHint' : 'openRole.correctionHint')}><Textarea id="allocation-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
-    {previewEnabled && (previewError ? <ErrorBanner error={previewError} /> : allocationPreview && <section className="rounded-md border bg-muted px-4 py-3 text-sm" aria-live="polite"><h3 className="font-semibold">{t('preview.title')}</h3><ul className="mt-2 space-y-1">{allocationPreview.weeks.map(w => <li key={`${w.personId}:${w.week}`} className="flex flex-wrap justify-between gap-2"><span>{t('preview.after', { planned: w.planned, capacity: w.capacity, band: w.band })}</span>{w.indicators.length > 0 && <span className="text-muted-foreground">{w.indicators.join(' · ')}</span>}</li>)}</ul></section>)}
+    {previewEnabled && (previewError ? <ErrorBanner error={previewError} /> : allocationPreview && <section className="rounded-md border bg-muted px-4 py-3 text-sm" aria-live="polite"><h3 className="font-semibold">{t('preview.title')}</h3><ul className="mt-2 space-y-1">{allocationPreview.weeks.map(w => <li key={`${w.personId}:${w.week}`} className="flex flex-wrap justify-between gap-2"><span>{t('preview.after', { planned: w.planned, capacity: w.capacity, band: previewBand(w.band) })}</span>{w.indicators.length > 0 && <span className="text-muted-foreground">{previewIndicators(w.indicators)}</span>}</li>)}</ul></section>)}
   </CommandForm>
 }
 
@@ -340,7 +346,7 @@ function AllocationDetail({ projectId, base, id, projectNumber, options, close, 
           {previewEnabled && <>
             <Field label={t('common.reason')} htmlFor="allocation-confirm-reason" hint={needsConfirmReason ? undefined : t('common.optional')}><Textarea id="allocation-confirm-reason" value={confirmReason} onChange={e => setConfirmReason(e.target.value)} required={needsConfirmReason} minLength={needsConfirmReason ? 5 : undefined} /></Field>
             {confirmPreviewError != null && <ErrorBanner error={confirmPreviewError} />}
-            {allocationPreview && <ul className="rounded-md border bg-muted px-4 py-2 text-sm" aria-live="polite">{allocationPreview.weeks.map(w => <li key={`${w.personId}:${w.week}`}>{fmtDate(w.week)} · {t('preview.after', { planned: w.planned, capacity: w.capacity, band: w.band })}</li>)}</ul>}
+            {allocationPreview && <ul className="rounded-md border bg-muted px-4 py-2 text-sm" aria-live="polite">{allocationPreview.weeks.map(w => <li key={`${w.personId}:${w.week}`}>{fmtDate(w.week)} · {t('preview.after', { planned: w.planned, capacity: w.capacity, band: previewBand(w.band) })}</li>)}</ul>}
           </>}
           {over.length > 0
             ? <p role="alert" className="flex gap-2 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad"><AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />{t(small ? 'allocation.overDaysOf' : 'allocation.overDays', { n: over.length, m: preview.days.length, h: hours(over.reduce((s, d) => s + d.overByHours, 0)) })}</p>

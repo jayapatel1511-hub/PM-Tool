@@ -111,7 +111,7 @@ public static class WorkloadEndpoints
     {
         var actor = access.Actor;
         var s = await store.Get(db);
-        var unitRead = s.IsFlagOn("org_structure") && await PeopleScope.LeadsUnit(db, actor);
+        var unitRead = await PeopleScope.ReadsAsUnitLeader(db, s, actor);
         Access.Demand(ownOnly || Permissions.ViewWorkload(actor).Ok || unitRead ? Allow.Yes : Permissions.ViewWorkload(actor));
         var today = clock.Today(s);
         var first = Workload.WeekOf(f.From ?? today);

@@ -57,8 +57,7 @@ public static class TaskPickupEndpoints
         if (task.Status is TaskStatuses.Complete or TaskStatuses.Cancelled || task.DeletedAt is not null)
             throw ApiException.Rule("task_closed", "task.pickup_closed");
         var assignee = task.AssigneeId is { } aid ? await db.Users.FirstOrDefaultAsync(u => u.Id == aid) : null;
-        var canOffer = task.AssigneeId == me.Id || Permissions.IsPM(access.Actor, ctx) || Permissions.IsDL(ctx, task.ProjectDisciplineId)
-            || access.Actor.Supervisor && assignee?.SupervisorId == me.Id;
+        var canOffer = task.AssigneeId == me.Id || TaskPickupRules.CanAssign(access.Actor, ctx, task.ProjectDisciplineId, assignee?.SupervisorId);
         Access.Demand(canOffer ? Allow.Yes : Allow.No("perm.pickup_offer"));
         Check.That(!string.IsNullOrWhiteSpace(body.Reason) && body.Reason.Trim().Length <= 2000, "reason", "error.required");
         Check.That(body.Note is null or { Length: <= 4000 }, "note", "error.length");
@@ -92,7 +91,7 @@ public static class TaskPickupEndpoints
         var (task, _, ctx) = await TaskEndpoints.Load(db, access, id);
         var offer = await db.Set<TaskPickupOffer>().FirstOrDefaultAsync(x => x.TaskId == id && x.ClosedAt == null) ?? throw ApiException.NotFound();
         var assignee = task.AssigneeId is { } aid ? await db.Users.Where(u => u.Id == aid).Select(u => new { u.SupervisorId }).FirstOrDefaultAsync() : null;
-        Access.Demand(offer.OfferedById == me.Id || offer.AssigneeId == me.Id || access.Actor.Supervisor && assignee?.SupervisorId == me.Id || Permissions.IsPM(access.Actor, ctx) || Permissions.IsDL(ctx, task.ProjectDisciplineId)
+        Access.Demand(offer.OfferedById == me.Id || offer.AssigneeId == me.Id || TaskPickupRules.CanAssign(access.Actor, ctx, task.ProjectDisciplineId, assignee?.SupervisorId)
             ? Allow.Yes : Allow.No("perm.pickup_withdraw"));
         offer.ClosedAt = clock.GetUtcNow(); offer.CloseCause = TaskPickupOffer.Withdrawn;
         db.Audit.Reason = "withdrawn";
@@ -137,7 +136,7 @@ public static class TaskPickupEndpoints
         var offer = await db.Set<TaskPickupOffer>().FirstOrDefaultAsync(x => x.TaskId == id && x.ClosedAt == null) ?? throw ApiException.NotFound();
         var assignee = task.AssigneeId is { } aid ? await db.Users.FirstOrDefaultAsync(u => u.Id == aid) : null;
         var target = await db.Users.FirstOrDefaultAsync(u => u.Id == body.UserId && u.IsActive) ?? throw ApiException.Invalid("userId", "error.not_found");
-        Access.Demand(Permissions.IsPM(access.Actor, ctx) || Permissions.IsDL(ctx, task.ProjectDisciplineId) || access.Actor.Supervisor && assignee?.SupervisorId == access.Actor.Id
+        Access.Demand(TaskPickupRules.CanAssign(access.Actor, ctx, task.ProjectDisciplineId, assignee?.SupervisorId)
             ? Allow.Yes : Allow.No("perm.pickup_assign"));
         var orgStructure = (await store.Get(db)).IsFlagOn("org_structure");
         Access.Demand(assignee is not null && TaskPickupRules.SameTeam(orgStructure, assignee.UnitId, target.UnitId, assignee.SupervisorId, target.SupervisorId, assignee.IsActive, target.IsActive)
@@ -196,7 +195,7 @@ public static class TaskPickupEndpoints
         var owner = task.AssigneeId is { } ownerId ? await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == ownerId) : null;
         var org = (await store.Get(db)).IsFlagOn("org_structure");
         var sameTeam = owner is not null && owner.Id != me.Id && TaskPickupRules.SameTeam(org, owner.UnitId, viewer.UnitId, owner.SupervisorId, viewer.SupervisorId, owner.IsActive, viewer.IsActive);
-        var canAssign = Permissions.IsPM(access.Actor, ctx) || Permissions.IsDL(ctx, task.ProjectDisciplineId) || access.Actor.Supervisor && owner?.SupervisorId == me.Id;
+        var canAssign = TaskPickupRules.CanAssign(access.Actor, ctx, task.ProjectDisciplineId, owner?.SupervisorId);
         var candidates = canAssign ? await db.Users.AsNoTracking().Where(u => u.IsActive && u.Id != task.AssigneeId).ToListAsync() : [];
         var eligible = candidates.Where(u => owner is not null && TaskPickupRules.SameTeam(org, owner.UnitId, u.UnitId, owner.SupervisorId, u.SupervisorId, owner.IsActive, u.IsActive))
             .Select(u => new { u.Id, u.DisplayName }).ToList();
@@ -211,6 +210,10 @@ public static class TaskPickupEndpoints
 
 public static class TaskPickupRules
 {
+    /// FR-PKP-07: the assignee's direct manager, the project's PM or the task discipline's Lead may assign an offered task.
+    public static bool CanAssign(Actor actor, ProjectContext ctx, Guid disciplineId, Guid? assigneeSupervisorId) =>
+        Permissions.IsPM(actor, ctx) || Permissions.IsDL(ctx, disciplineId) || actor.Supervisor && assigneeSupervisorId == actor.Id;
+
     /// Fallback team rule for the pre-org-structure schema. Root can use the UnitId overload when enabled.
     public static bool SameTeam(bool orgStructureOn, Guid? assigneeUnitId, Guid? pickerUnitId, Guid? assigneeSupervisorId, Guid? pickerSupervisorId, bool assigneeActive, bool pickerActive)
         => assigneeActive && pickerActive && (orgStructureOn && assigneeUnitId is { } unit

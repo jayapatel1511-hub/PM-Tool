@@ -38,7 +38,7 @@ public static class BaselineHistory
 
     public static async Task Capture(HubDb db, Deliverable deliverable, bool clear, string reason, Guid actor, DateTimeOffset now)
     {
-        if (!await db.Settings.AnyAsync(s => s.Key == "flag.baseline_history" && s.Value == "true")) return;
+        if (!(await db.CurrentSettings()).IsFlagOn("baseline_history")) return;
         if (db.Database.CurrentTransaction == null) throw new InvalidOperationException("Baseline capture requires the re-baseline transaction.");
         if (clear) { deliverable.CurrentBaselineId = null; return; }
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.DeliverableId == deliverable.Id && t.DeletedAt == null && t.Status != TaskStatuses.Cancelled)

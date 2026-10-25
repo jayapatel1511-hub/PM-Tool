@@ -47,4 +47,3 @@ export function RichText({ text, className }: { text?: string | null; className?
 }
 
 /** Plain text of a comment for previews: mention tokens become "@Name". */
-export const plainText = (text: string) => text.replace(/@\[([^\]]+)\]\([0-9a-fA-F-]{36}\)/g, '@$1')

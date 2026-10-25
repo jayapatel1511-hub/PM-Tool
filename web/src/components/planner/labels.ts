@@ -1,4 +1,4 @@
-import { t, tv, type TextKey } from '@/lib/i18n'
+import { t, type TextKey } from '@/lib/i18n'
 
 export type PlannerEntry = {
   id: string; personId: string; personName?: string; ownerId?: string; ownerName?: string; ownerKind?: string
@@ -46,8 +46,6 @@ export const sourceTone = (value: string) => SOURCE_TONES[value] ?? 'neutral'
 const INDICATOR_KEYS: Record<string, TextKey> = { OverPlanned: 'planner.indicator.over', UnderPlanned: 'planner.indicator.under', StalePlan: 'planner.indicator.stale' }
 export const indicatorLabel = (value: string) => t(INDICATOR_KEYS[value] ?? 'planner.unknown')
 export const hoursLabel = (value: number) => `${value.toFixed(1).replace(/\.0$/, '')} h`
-export const storedStatusLabel = (value: string) => tv(value)
-
 /** Capacity grouping (§40, FR-GRP-02): Reports to (the default), Office, Job title, Home discipline, or none. People with no
  *  value form a "Not set" group, listed last and never hidden. Grouping is done here, over the rows already loaded. */
 export const GROUP_BY = ['supervisor', 'office', 'jobTitle', 'homeDiscipline', 'none'] as const

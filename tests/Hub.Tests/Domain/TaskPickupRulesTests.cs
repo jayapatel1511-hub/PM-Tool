@@ -27,15 +27,4 @@ public sealed class TaskPickupRulesTests
         Assert.False(TaskPickupRules.SameTeam(true, unit, Guid.NewGuid(), manager, manager, true, true));
         Assert.False(TaskPickupRules.SameTeam(true, unit, unit, manager, manager, false, true));
     }
-
-    [Fact]
-    public void Legacy_overload_never_groups_unassigned_or_inactive_people()
-    {
-        var manager = Guid.NewGuid();
-        var assignee = new AppUser { SupervisorId = manager, IsActive = true };
-        var picker = new AppUser { SupervisorId = manager, IsActive = false };
-        Assert.False(TaskPickupRules.SameTeam(assignee, picker));
-        assignee.SupervisorId = null; picker.IsActive = true;
-        Assert.False(TaskPickupRules.SameTeam(assignee, picker));
-    }
 }

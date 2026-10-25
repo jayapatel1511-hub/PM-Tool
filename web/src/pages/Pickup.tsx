@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
-import { useFlag } from '@/lib/auth'
 import { t } from '@/lib/i18n'
 import { weekOf } from '@/components/hub/people'
 import { ago, fmtDate, today } from '@/lib/format'
@@ -27,12 +26,11 @@ export interface PickupOffer {
 /** Open for pickup (§53.3). The server remains authoritative for team and visibility rules. */
 export function PickupPage() {
   const [sp, setSp] = useSearchParams()
-  const enabled = useFlag('task_pickup')
   const scope = useScope()
   const projects = useScopeProjects(scope)
   const qc = useQueryClient()
   const filters = { projectId: sp.get('projectId') ?? '', disciplineId: sp.get('disciplineId') ?? '', neededBy: sp.get('neededBy') ?? '' }
-  const q = useQuery({ queryKey: ['pickup-offers', filters], enabled, queryFn: () => typedRequest('get', '/api/v1/pickup-offers', { query: filters }) })
+  const q = useQuery({ queryKey: ['pickup-offers', filters], queryFn: () => typedRequest('get', '/api/v1/pickup-offers', { query: filters }) })
   const disciplines = [...new Map((q.data ?? []).map((o) => [o.task.projectDisciplineId, o.task.disciplineName ?? o.task.projectDisciplineId])).entries()]
   const [selected, setSelected] = useState<PickupOffer | null>(null)
   const [busy, setBusy] = useState(false)
@@ -42,7 +40,6 @@ export function PickupPage() {
     try { await typedRequest('post', '/api/v1/tasks/{id}/pickup', { params: { id: selected.taskId }, body: { rowVersion: selected.task.rowVersion ?? selected.rowVersion ?? null } }); toast.success('Task picked up'); setSelected(null); invalidateChange(qc, 'TaskPickupOffer', selected.task.projectId, selected.taskId) }
     catch (e) { toast.error(errorText(e)) } finally { setBusy(false) }
   }
-  if (!enabled) return <Page title="Open for pickup" subtitle="This feature is not enabled for your organisation."><></></Page>
   return <Page title="Open for pickup" subtitle="Work offered by people in your team">
     <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
       <label className="grid gap-1 text-sm">Project<select className="h-9 rounded-md border bg-background px-2" value={filters.projectId} onChange={(e) => { const n = new URLSearchParams(sp); e.target.value ? n.set('projectId', e.target.value) : n.delete('projectId'); setSp(n, { replace: true }) }}><option value="">Any project</option>{projects.data?.map((p) => <option key={p.id} value={p.id}>{p.projectNumber} {p.name}</option>)}</select></label>
@@ -71,7 +68,6 @@ export function PickupPage() {
   </Page>
 }
 
-export default PickupPage
 
 function OwnLoadHint({ date }: { date?: string }) {
   const week = weekOf(date ?? today())

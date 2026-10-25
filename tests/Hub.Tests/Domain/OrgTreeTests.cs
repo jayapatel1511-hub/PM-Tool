@@ -36,13 +36,6 @@ public class OrgTreeTests
     }
 
     [Fact]
-    public void Unit_scope_predicate_is_read_only_and_requires_a_nonempty_scope()
-    {
-        var actor = new Actor(Guid.NewGuid(), true, new HashSet<string>());
-        Assert.False(PeopleScope.MayReadStaff(actor, new HashSet<Guid>()));
-        Assert.True(PeopleScope.MayReadStaff(actor, new HashSet<Guid> { Guid.NewGuid() }));
-    }
-    [Fact]
     public void Viewer_on_reporting_cycle_gets_no_indirect_scope()
     {
         var a = Guid.NewGuid(); var b = Guid.NewGuid(); var c = Guid.NewGuid();

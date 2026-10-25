@@ -20,4 +20,3 @@ export function CopyFrom({ value, onChange }: { value?: string | null; onChange:
   )
 }
 
-export const copySource = { id: 'copy', label: 'copy.label', render: (v: any, set: (value: any) => void) => <CopyFrom value={v as string | null} onChange={set} />, body: (v: any) => (v ? { copyFromProjectId: v } : {}) }

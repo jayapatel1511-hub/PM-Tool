@@ -79,9 +79,6 @@ public static class PlanningEndpoints
         => WorkloadEndpoints.People(db, access, access.Me)
             .Union(db.Users.AsNoTracking().Where(u => u.IsActive && u.Id == access.Actor.Id));
 
-    internal static Task<HashSet<Guid>> ReadScope(HubDb db, Access access, OrgSettings settings)
-        => PeopleScope.Load(db, access.Actor, settings.IncludeIndirectReports);
-
     /// PLN-04 is applied before counting, paging, coverage and aggregation.
     internal static async Task<IQueryable<PlanningEntry>> VisibleEntries(HubDb db, Access access, bool includeMyDrafts = true, bool correction = false)
     {

@@ -212,7 +212,6 @@ public static class TaskPickupEndpoints
 public static class TaskPickupRules
 {
     /// Fallback team rule for the pre-org-structure schema. Root can use the UnitId overload when enabled.
-    public static bool SameTeam(AppUser assignee, AppUser picker) => assignee.IsActive && picker.IsActive && assignee.SupervisorId is { } supervisor && supervisor == picker.SupervisorId;
     public static bool SameTeam(bool orgStructureOn, Guid? assigneeUnitId, Guid? pickerUnitId, Guid? assigneeSupervisorId, Guid? pickerSupervisorId, bool assigneeActive, bool pickerActive)
         => assigneeActive && pickerActive && (orgStructureOn && assigneeUnitId is { } unit
             ? pickerUnitId == unit

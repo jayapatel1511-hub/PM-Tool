@@ -7,9 +7,6 @@ namespace Hub.Api.Infrastructure;
 /// Read-only people scope used by staff, workload and planning queries. Write authorization remains in Permissions.
 public static class PeopleScope
 {
-    /// Explicit read-only predicate for the FR-UNT-11 seam; callers must still keep existing write checks.
-    public static bool MayReadStaff(Actor actor, IReadOnlySet<Guid> scope) => Permissions.ViewStaff(actor).Ok || scope.Count > 0;
-
     public static async Task<IQueryable<AppUser>> Widen(HubDb db, Actor actor, IQueryable<AppUser> baseline)
     {
         if (!await db.Settings.AnyAsync(s => s.Key == "flag.org_structure" && s.Value == "true") || actor.Admin || actor.Executive) return baseline;
@@ -41,7 +38,7 @@ public static class PeopleScope
     {
         var users = await db.Users.AsNoTracking().Where(x => x.IsActive)
             .Select(x => new { x.Id, x.SupervisorId, UnitId = EF.Property<Guid?>(x, "UnitId") }).ToListAsync();
-        if (actor.IsAdmin() || actor.IsExecutive()) return users.Select(x => x.Id).ToHashSet();
+        if (actor.Admin || actor.Executive) return users.Select(x => x.Id).ToHashSet();
         if (!includeLedUnits && !includeIndirectReports) return users.Where(x => x.SupervisorId == actor.Id).Select(x => x.Id).ToHashSet();
         var units = await db.Set<OrgUnit>().AsNoTracking().Select(x => new OrgTree.Unit(x.Id, x.ParentId,
             db.Set<OrgLevel>().Where(l => l.Id == x.LevelId).Select(l => l.SortOrder).FirstOrDefault(), x.LeaderId)).ToListAsync();
@@ -57,6 +54,4 @@ public static class PeopleScope
         return await db.Users.AsNoTracking().Where(x => x.IsActive && EF.Property<Guid?>(x, "UnitId") != null && ids.Contains(EF.Property<Guid?>(x, "UnitId")!.Value)).Select(x => x.Id).ToHashSetAsync();
     }
 
-    public static bool IsAdmin(this Actor actor) => actor.Roles.Contains(SystemRole.Admin);
-    public static bool IsExecutive(this Actor actor) => actor.Roles.Contains(SystemRole.Executive);
 }

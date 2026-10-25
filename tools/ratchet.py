@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BASELINE = ROOT / "tools" / "ratchet.json"
 
 PATTERNS = {
-    "api_helpers_without_type": ("web/src", re.compile(r"\b(?:get|post|put|patch|del)\s*\(")),
+    "api_helpers_without_type": ("web/src", re.compile(r"(?<![.\w])(?:get|post|put|patch|del)\s*\(")),
     "task_object_handlers": ("src/Hub.Api/Features", re.compile(r"Task<object>")),
     "untyped_results": ("src/Hub.Api/Features", re.compile(r"\bResults\.(?:Ok|Created|BadRequest|NotFound|NoContent|Conflict)\b")),
     "anonymous_objects": ("src/Hub.Api/Features", re.compile(r"\bnew\s*\{")),
@@ -28,7 +28,7 @@ PATTERNS = {
     "client_permission_derivations": ("web/src", re.compile(r"\b(?:can|hasPermission|permission)\w*\s*=")),
 }
 
-UN_TYPED_HELPER = re.compile(r"(?<![.\w])(?:get|post|put|patch|del)\s*\(")
+TYPESCRIPT_ONLY = {"api_helpers_without_type"}
 
 
 def _files(path: Path):
@@ -41,11 +41,9 @@ def _files(path: Path):
 def count_sources() -> dict[str, int]:
     values: dict[str, int] = {}
     for name, (relative, pattern) in PATTERNS.items():
-        if name == "api_helpers_without_type":
-            values[name] = sum(len(UN_TYPED_HELPER.findall(p.read_text(encoding="utf-8", errors="ignore"))) for p in _files(ROOT / relative) if p.suffix in {".ts", ".tsx"})
-            continue
         values[name] = sum(len(pattern.findall(p.read_text(encoding="utf-8", errors="ignore"))) for p in _files(ROOT / relative)
-                            if not (name == "direct_invalidate_queries" and p.name == "keys.ts")
+                            if not (name in TYPESCRIPT_ONLY and p.suffix not in {".ts", ".tsx"})
+                            and not (name == "direct_invalidate_queries" and p.name == "keys.ts")
                             and not (name == "html_tables" and p.as_posix().endswith("components/ui/table.tsx")))
     return values
 

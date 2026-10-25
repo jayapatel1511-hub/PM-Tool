@@ -134,12 +134,6 @@ export function useDensity(): [Density, (d: Density) => void] {
   return [density, set]
 }
 
-export function DensityToggle() {
-  const [density, setDensity] = useDensity()
-  return <Segmented label={t('density.label')} value={density} onChange={setDensity}
-    options={(['compact', 'comfortable'] as const).map((d) => ({ value: d, label: t(`density.${d}`) }))} />
-}
-
 /** One choice among a few (view switches, scopes, density): each option is a button with its own pressed state. */
 export function Segmented<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: ReactNode }[]; onChange: (v: T) => void }) {
   return (

@@ -8,17 +8,15 @@ import { Textarea } from '@/components/ui/textarea'
 import { get, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { t } from '@/lib/i18n'
-import { useFlag } from '@/lib/auth'
 
 type Unit = { id: string; name: string; parentId?: string | null; levelId: string; leaderId?: string | null; disciplineId?: string | null; officeId?: string | null; closedOn?: string | null; rowVersion: number }
 type ImportPreview = { rows?: number; changes?: { kind: string; unitPath?: string | null; email?: string | null }[]; creates?: number; applied?: boolean; errors?: string[] }
 type Reference = { disciplines?: { id: string; name: string }[]; offices?: { id: string; name: string }[] }
 
 export function StructureAdmin() {
-  const enabled = useFlag('org_structure'); const qc = useQueryClient(); const [error, setError] = useState<Error | null>(null); const [busy, setBusy] = useState(false)
+  const qc = useQueryClient(); const [error, setError] = useState<Error | null>(null); const [busy, setBusy] = useState(false)
   const [levelName, setLevelName] = useState(''); const [unitName, setUnitName] = useState(''); const [levelId, setLevelId] = useState(''); const [parentId, setParentId] = useState(''); const [csv, setCsv] = useState(''); const [preview, setPreview] = useState<ImportPreview | null>(null); const [previewCsv, setPreviewCsv] = useState('')
-  const levels = useQuery({ queryKey: ['admin', 'org-levels'], queryFn: () => typedRequest('get', '/api/v1/admin/organisation/levels', {}), enabled }); const units = useQuery({ queryKey: ['admin', 'org-units'], queryFn: () => typedRequest('get', '/api/v1/admin/organisation/units', {}), enabled }); const org = useQuery({ queryKey: ['organisation'], queryFn: () => typedRequest('get', '/api/v1/organisation', {}), enabled }); const ref = useQuery({ queryKey: ['reference'], queryFn: () => get<Reference>('reference'), enabled })
-  if (!enabled) return <Section title="Company structure"><Empty>Structure is unavailable.</Empty></Section>
+  const levels = useQuery({ queryKey: ['admin', 'org-levels'], queryFn: () => typedRequest('get', '/api/v1/admin/organisation/levels', {}) }); const units = useQuery({ queryKey: ['admin', 'org-units'], queryFn: () => typedRequest('get', '/api/v1/admin/organisation/units', {}) }); const org = useQuery({ queryKey: ['organisation'], queryFn: () => typedRequest('get', '/api/v1/organisation', {}) }); const ref = useQuery({ queryKey: ['reference'], queryFn: () => get<Reference>('reference') })
   if (levels.isPending || units.isPending || org.isPending) return <Loading rows={8} />
   if (levels.error || units.error || org.error) return <ErrorBanner error={levels.error ?? units.error ?? org.error} />
   const refresh = () => invalidateChange(qc, 'OrgUnit')

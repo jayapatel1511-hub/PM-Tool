@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, Lock, Monitor, MoreHorizontal, Plus } from '
 import { Fragment, useState } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
+import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineText, TabBar } from '@/components/hub/fields'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Chip, Key, ProgressBar, StatusPill, toneOf } from '@/components/hub/pills'
@@ -465,7 +465,6 @@ export function MilestonePanel({ id }: PanelProps) {
   const [tab, setTab] = useState<'deliverables' | 'comments' | 'history'>('deliverables')
   const [baseline, setBaseline] = useState<'set' | 'clear' | null>(null)
   const refresh = useProjectRefresh()
-  const ref = useReference()
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-6"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const m: MilestoneRow = q.data.milestone
@@ -494,7 +493,6 @@ export function MilestonePanel({ id }: PanelProps) {
         <FieldRow label={t('field.CompletesPhaseId')}><div className="px-2 py-1.5">{q.data.completesPhase?.name ?? t('common.dash')}</div></FieldRow>
         <FieldRow label={t('common.description')}>{text(m.description, (v) => save({ description: v }), true)}</FieldRow>
         {m.isCancelled && <p className="mt-2 rounded-md bg-idle-bg px-3 py-2 text-sm text-idle">{t('milestone.cancelledNote', { reason: m.cancelledReason ?? '' })}</p>}
-        {!ref.data && null}
       </div>
       <TabBar tabs={[{ id: 'deliverables' as const, label: t('milestone.deliverables'), count: q.data.deliverables.length }, ...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'deliverables' && <div className="p-6"><TargetedDeliverables milestoneId={m.id} /></div>}
@@ -507,4 +505,3 @@ export function MilestonePanel({ id }: PanelProps) {
 }
 
 
-export { Section }

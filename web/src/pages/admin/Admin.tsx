@@ -20,7 +20,6 @@ import { cn } from '@/lib/utils'
 import { useFlag } from '@/lib/auth'
 import { ADMIN_EXTRA } from '@/app/extension-slots'
 import { toast } from 'sonner'
-export { StructureAdmin } from './Structure'
 
 const KINDS = ['disciplines', 'clients', 'offices', 'deliverableTypes', 'phases', 'projectTypes'] as const
 type Kind = (typeof KINDS)[number]

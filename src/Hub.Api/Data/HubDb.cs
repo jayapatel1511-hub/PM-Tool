@@ -211,7 +211,6 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<Project, AppUser>(mb, x => x.StatusNoteBy);
         Fk<Project, Client>(mb, x => x.ClientId);
         Fk<Project, AppUser>(mb, x => x.ProjectManagerId);
-        Fk<Project, AppUser>(mb, x => x.StatusNoteBy);
         Fk<Project, Office>(mb, x => x.OfficeId);
         Fk<Project, ProjectType>(mb, x => x.ProjectTypeId);
         Fk<Project, Phase>(mb, x => x.PhaseId);

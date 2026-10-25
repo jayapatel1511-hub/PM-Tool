@@ -7,10 +7,6 @@ namespace Hub.Api.Infrastructure;
 /// Past reports use the recorded placement, including the old value when the first change follows the requested week.
 public static class OrgStructureReports
 {
-    public sealed record PlacementChange(Guid PersonId, Guid? UnitId, DateTimeOffset At);
-    public static Guid? UnitAt(IEnumerable<PlacementChange> changes, Guid personId, DateTimeOffset end) =>
-        changes.Where(x => x.PersonId == personId && x.At <= end).OrderByDescending(x => x.At).Select(x => x.UnitId).FirstOrDefault();
-
     public static async Task<Dictionary<Guid, Guid?>> At(HubDb db, Guid[] people, DateTimeOffset end)
     {
         var current = await db.Users.AsNoTracking().Where(u => people.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.UnitId);

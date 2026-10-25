@@ -4,7 +4,6 @@ import { Pill } from '@/components/hub/pills'
 import { get, typedRequest } from '@/lib/api'
 import { ago, fmtTime } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
-export { operationsRegistration } from '@/app/extension-slots'
 import { cn } from '@/lib/utils'
 
 interface Ops {

@@ -218,4 +218,3 @@ function RemoveMember({ projectId, member, onClose }: { projectId: string; membe
   )
 }
 
-export { selectCls }

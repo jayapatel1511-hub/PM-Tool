@@ -35,6 +35,8 @@ public static class OrgStructureModel
     {
         mb.Entity<OrgLevel>(e =>
         {
+            // HubDb renames every table afterwards, but these names still fix the foreign-key names the migrations
+            // recorded (fk_app_user_org_units_unit_id); removing them is a model change.
             e.ToTable("org_levels", "hub");
             e.Property(x => x.Name).HasMaxLength(120).IsRequired();
             e.HasIndex(x => x.SortOrder).IsUnique();

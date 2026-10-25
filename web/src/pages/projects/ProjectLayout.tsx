@@ -4,7 +4,7 @@ import { createContext, useContext, useState } from 'react'
 import { Link, NavLink, Outlet, useMatch, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { ErrorBanner, InProject, Loading, Spinner } from '@/components/hub/common'
-import { HealthPill, Key, StatusPill } from '@/components/hub/pills'
+import { StatusPill } from '@/components/hub/pills'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { del, get, post } from '@/lib/api'
 import { fmtDate, relative } from '@/lib/format'
@@ -208,4 +208,3 @@ function StatusBanner({ p }: { p: ProjectDetail }) {
   return null
 }
 
-export { HealthPill, Key }

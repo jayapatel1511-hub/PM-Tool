@@ -6,21 +6,18 @@ import { Empty, ErrorBanner, Loading, Section } from '@/components/hub/common'
 import { download, typedRequest } from '@/lib/api'
 import { fmtTime } from '@/lib/format'
 import { t } from '@/lib/i18n'
-import { useFlag } from '@/lib/auth'
 
 
 /** Packet 048 S04: operators can verify and export the immutable audit-chain records. */
 export function AuditChains() {
-  const enabled = useFlag('verifiable_log')
   const [verifyId, setVerifyId] = useState<string | null>(null)
-  const list = useQuery({ queryKey: ['admin', 'audit-chains'], enabled, queryFn: () => typedRequest('get', '/api/v1/admin/audit-chains', {}) })
+  const list = useQuery({ queryKey: ['admin', 'audit-chains'], queryFn: () => typedRequest('get', '/api/v1/admin/audit-chains', {}) })
   // Verifying logs an entry and can alert Admins (FR-VER-04), so it runs only on an explicit press, never on focus or remount.
   const verify = useMutation({
     mutationFn: (id: string) => typedRequest('get', '/api/v1/admin/audit-chains/{id}/verify', { params: { id } }),
     onSuccess: () => { void list.refetch() }, // the row's last-verified time changed
   })
   const runVerify = (id: string) => { setVerifyId(id); verify.mutate(id) }
-  if (!enabled) return null
   if (list.isPending) return <Loading rows={5} />
   if (list.error) return <ErrorBanner error={list.error} retry={() => list.refetch()} />
   const chains = list.data

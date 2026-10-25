@@ -18,7 +18,6 @@ export interface SearchResult {
 export interface Hit { id: string; icon: LucideIcon; key?: string; title: string; sub: string; href: string | null; match?: string | null }
 
 /** Item keys such as 1234-T0042 open the item directly (§18.1, FR-SRCH-02). */
-export const KEY_PATTERN = /^[A-Za-z0-9][\w-]*-(T|D|M|DEC|R|I|A|H|RV|CH|CT|WC|SUB|B)\d+$/i
 const TAB: Record<string, string> = { Task: 'tasks', Deliverable: 'deliverables', Milestone: 'milestones', Decision: 'decisions', Risk: 'risks', Issue: 'issues', Action: 'meetings', Handoff: 'handoffs', ReviewPackage: 'reviews', ChangeNotice: 'changes',
   WorkConstraint: 'readiness', OutputCommitment: 'readiness' }
 const TYPE: Record<string, string> = { tasks: 'Task', deliverables: 'Deliverable', milestones: 'Milestone', decisions: 'Decision', handoffs: 'Handoff', reviews: 'ReviewPackage', changes: 'ChangeNotice', submissions: 'SubmissionPackage', allocations: 'ResourceAllocation', 'design-basis': 'DesignBasisEntry', constraints: 'WorkConstraint', commitments: 'OutputCommitment', planning: 'PlanningEntry' }

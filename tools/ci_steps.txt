@@ -18,6 +18,7 @@ gate [always]: python3 tools/ci_tests.py count ci-artifacts-in --main ci-artifac
 # Python safety regressions and repository checks.
 checks: python3 tools/test_ci_tests.py && python3 tools/test_coverage_gate.py && python3 tools/test_decisions.py
 checks: python3 tools/ratchet.py && python3 tools/test_ratchet.py
+checks: python3 tools/text_keys.py && python3 tools/test_text_keys.py
 checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/test_pr_checks.py && python3 tools/pr_checks.py size --base HEAD^1 --labels "${LABELS:-}"; fi
 checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/pr_checks.py migrations --base HEAD^1 --labels "${LABELS:-}"; fi
 checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/pr_checks.py tier --base HEAD^1 --labels "${LABELS:-}"; fi

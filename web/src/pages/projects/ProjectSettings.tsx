@@ -81,9 +81,9 @@ export function ProjectSettingsTab() {
                 {ref.data?.offices.filter((o) => o.isActive || o.id === p.officeId).map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
               </select>
             </Field>
-            {structureEnabled && <Field label="Lead unit" htmlFor="s-lead-unit" optional>
+            {structureEnabled && <Field label={t('org.leadUnit')} htmlFor="s-lead-unit" optional>
               <select id="s-lead-unit" className={selectCls} value={v('leadUnitId')} onChange={set('leadUnitId')} disabled={!canEdit}>
-                <option value="">No unit</option>{structure.data?.units.filter((u) => !u.closedOn).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                <option value="">{t('admin.structure.noUnit')}</option>{structure.data?.units.filter((u) => !u.closedOn).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
               </select>
             </Field>}
             <Field label={t('projects.type')} htmlFor="s-type" optional>

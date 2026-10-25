@@ -13,8 +13,8 @@ export function OrganisationPage() {
   const q = useQuery({ queryKey: ['organisation'], queryFn: () => typedRequest('get', '/api/v1/organisation', {}) })
   const ref = useQuery({ queryKey: ['reference'], queryFn: () => get<Reference>('reference') })
   const [open, setOpen] = useState<Set<string>>(new Set())
-  if (q.isPending) return <Page title="Organisation"><Loading rows={8} /></Page>
-  if (q.error) return <Page title="Organisation"><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
+  if (q.isPending) return <Page title={t('organisation.title')}><Loading rows={8} /></Page>
+  if (q.error) return <Page title={t('organisation.title')}><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
   const d = q.data
   const children = (parentId?: string | null) => d.units.filter((u) => (u.parentId ?? null) === (parentId ?? null)).sort((a, b) => a.name.localeCompare(b.name))
   const branch = (parentId?: string | null, depth = 0): React.ReactNode => children(parentId).map((u) => {

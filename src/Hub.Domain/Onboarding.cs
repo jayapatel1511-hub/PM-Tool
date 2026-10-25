@@ -9,7 +9,8 @@ public sealed record OnboardingFacts(
     bool PlannedDirectReport = false, bool ConfirmedAllocation = false, bool RecordedAway = false,
     bool StarredProject = false, bool FollowedProject = false, bool SetSupervisors = false,
     bool ImportedLeave = false, bool ImportedProjects = false);
-public sealed record OnboardingStep(string Key, string Label, string? Route, bool Done = false);
+/// A getting-started step; its text comes from Text.cs onboarding.{Key} (§51.2).
+public sealed record OnboardingStep(string Key, string? Route, bool Done = false);
 public sealed record OnboardingGroup(string Role, IReadOnlyList<OnboardingStep> Steps);
 
 public static class Onboarding
@@ -20,20 +21,20 @@ public static class Onboarding
         if (r.Contains(SystemRole.ReadOnly)) return [];
         var steps = new List<OnboardingStep>
         {
-            new("change-status", "Move one of your tasks to a new status", "/my-work", f.ChangedTaskStatus),
-            new("comment", "Comment on an item", "/my-work", f.Commented),
-            new("self-plan", "Add your own plan in My Week", "/planner", f.PlannedSelf),
+            new("change-status", "/my-work", f.ChangedTaskStatus),
+            new("comment", "/my-work", f.Commented),
+            new("self-plan", "/planner", f.PlannedSelf),
         };
         if (r.Contains(SystemRole.ProjectManager) || r.Contains(SystemRole.Admin))
-            steps.AddRange([new("create-project", "Create a project", "/projects", f.CreatedProject), new("add-milestone", "Add a milestone", "/projects", f.AddedMilestone), new("assign-task", "Assign a task", "/my-work", f.AssignedTask), new("activate-project", "Activate a project", "/projects", f.ActivatedProject)]);
+            steps.AddRange([new("create-project", "/projects", f.CreatedProject), new("add-milestone", "/projects", f.AddedMilestone), new("assign-task", "/my-work", f.AssignedTask), new("activate-project", "/projects", f.ActivatedProject)]);
         if (r.Contains("DisciplineLead"))
-            steps.AddRange([new("add-deliverable", "Add a deliverable", "/projects", f.AddedDeliverable), new("propose-allocation-or-role", "Propose an allocation or open role", "/planner", f.ProposedAllocationOrRole)]);
+            steps.AddRange([new("add-deliverable", "/projects", f.AddedDeliverable), new("propose-allocation-or-role", "/planner", f.ProposedAllocationOrRole)]);
         if (r.Contains(SystemRole.Supervisor))
-            steps.AddRange([new("plan-direct-report", "Plan a week for a direct report", "/planner", f.PlannedDirectReport), new("confirm-allocation", "Confirm an allocation", "/planner", f.ConfirmedAllocation), new("record-away", "Record time away for a direct report", "/vacation", f.RecordedAway)]);
+            steps.AddRange([new("plan-direct-report", "/planner", f.PlannedDirectReport), new("confirm-allocation", "/planner", f.ConfirmedAllocation), new("record-away", "/vacation", f.RecordedAway)]);
         if (r.Contains(SystemRole.Executive))
-            steps.AddRange([new("star-project", "Star a project", "/projects", f.StarredProject), new("follow-project", "Follow a project", "/projects", f.FollowedProject)]);
+            steps.AddRange([new("star-project", "/projects", f.StarredProject), new("follow-project", "/projects", f.FollowedProject)]);
         if (r.Contains(SystemRole.Admin))
-            steps.AddRange([new("set-supervisors", "Set Supervisors", "/admin/users", f.SetSupervisors), new("import-leave", "Import approved leave", "/vacation", f.ImportedLeave), new("import-projects", "Import the project list", "/projects", f.ImportedProjects)]);
+            steps.AddRange([new("set-supervisors", "/admin/users", f.SetSupervisors), new("import-leave", "/vacation", f.ImportedLeave), new("import-projects", "/projects", f.ImportedProjects)]);
         return [.. steps]; // §51.2: every step in a role's rows applies; Read Only gets none (checked by the caller)
     }
 

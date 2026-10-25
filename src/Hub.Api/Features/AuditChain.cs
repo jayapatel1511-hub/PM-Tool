@@ -91,11 +91,11 @@ public static class AuditChainVerification
             var admins = await db.Users.Include(u => u.Roles).Where(u => u.IsActive && u.Roles.Any(r => r.Role == SystemRole.Admin)).ToListAsync(ct);
             foreach (var admin in admins)
             {
-                var title = $"Log check failed at entry {head.FirstBrokenSeq}";
+                var title = Text.Get("audit.log_failed", head.FirstBrokenSeq!);
                 db.Notifications.Add(new Notification { UserId = admin.Id, EventType = "AuditChainBroken", ItemType = "AuditChain", ItemId = chain,
-                    Title = title, Body = $"Chain {chain}", LinkPath = "/admin/audit-chains", CreatedAt = now });
+                    Title = title, Body = Text.Get("audit.chain_label", chain), LinkPath = "/admin/audit-chains", CreatedAt = now, UpdatedAt = now });
                 db.Emails.Add(new EmailMessage { UserId = admin.Id, ToAddress = admin.Email, Subject = title,
-                    BodyText = $"Chain {chain}; first broken sequence {head.FirstBrokenSeq}. No evidence has been repaired.",
+                    BodyText = Text.Get("audit.chain_broken_email", chain, head.FirstBrokenSeq!),
                     DedupKey = $"audit-chain:{chain}:{head.FirstBrokenSeq}:{admin.Id}", CreatedAt = now });
             }
         }

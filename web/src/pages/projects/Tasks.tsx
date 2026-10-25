@@ -101,7 +101,7 @@ function taskSignals(r: TaskRow) {
 }
 
 export function TaskIndicators({ r, all }: { r: TaskRow; all?: boolean }) {
-  return <span className="inline-flex flex-wrap items-center gap-1"><OneSignal signals={taskSignals(r)} all={all} />{r.pickupOfferOpen && <Chip tone="work">Open for pickup</Chip>}</span>
+  return <span className="inline-flex flex-wrap items-center gap-1"><OneSignal signals={taskSignals(r)} all={all} />{r.pickupOfferOpen && <Chip tone="work">{t('pickup.title')}</Chip>}</span>
 }
 
 /** A toolbar menu button for one choice, such as Group or Sort (§41 R1): the button shows the current choice, the menu is a

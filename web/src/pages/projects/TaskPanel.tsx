@@ -113,7 +113,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
             </DropdownMenuContent>
           </DropdownMenu>
           <PriorityBadge priority={r.priority} />
-          {pickupEnabled && openOffer && <span className="rounded-md border border-warn/40 bg-warn-bg px-2 py-0.5 text-xs font-medium text-warn">Open for pickup</span>}
+          {pickupEnabled && openOffer && <span className="rounded-md border border-warn/40 bg-warn-bg px-2 py-0.5 text-xs font-medium text-warn">{t('pickup.title')}</span>}
           <span className="inline-flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><AccentDot id={d.project.id} />{d.project.projectNumber}</span>
         </div>
         <Heading aria-label={r.name} className="-mx-2 break-words text-2xl/8 font-semibold tracking-[-0.4px]"><InlineText value={r.name} disabled={!perms.edit.ok} title={perms.edit.ok ? t('common.name') : perms.edit.reason ?? undefined} onSave={(v) => save({ name: v })} /></Heading>
@@ -127,20 +127,20 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
           {perms.edit.ok && <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/handoffs?targetTask=${r.id}`}>{t('handoff.new')}</Link></Button>}
           <Button size="sm" variant="outline" asChild><Link to={`/projects/${d.project.projectNumber}/changes?target=Task:${r.id}`}>{t('change.inputs')}</Link></Button>
           {perms.authoriseStart && <Button size="sm" variant="outline" onClick={() => actions.authoriseStart(r)}>{t('tasks.startAuthAuthorise')}</Button>}
-          {pickupEnabled && d.permissions.offerPickup && !terminal && !openOffer && <Button size="sm" variant="outline" onClick={() => setOfferOpen(true)}>Offer for pickup</Button>}
-          {pickupEnabled && openOffer?.allowed?.withdraw && <Button size="sm" variant="outline" onClick={() => run(withdraw)}>Withdraw pickup offer</Button>}
+          {pickupEnabled && d.permissions.offerPickup && !terminal && !openOffer && <Button size="sm" variant="outline" onClick={() => setOfferOpen(true)}>{t('pickup.offer')}</Button>}
+          {pickupEnabled && openOffer?.allowed?.withdraw && <Button size="sm" variant="outline" onClick={() => run(withdraw)}>{t('pickup.withdraw')}</Button>}
           {pickupEnabled && openOffer?.allowed?.pickUp && <Button size="sm" variant="outline" onClick={() => run(pickUp)}>{t('pickup.pick')}</Button>}
-          {pickupEnabled && openOffer?.allowed?.assign && <><select className="h-(--control-row-h) rounded-md border bg-card px-2 text-sm" aria-label="Assign pickup offer" value={assignTo} onChange={(e) => setAssignTo(e.target.value)}><option value="">Assign to…</option>{(openOffer.candidates ?? []).map((c) => <option key={c.id} value={c.id}>{c.displayName}</option>)}</select><Button size="sm" disabled={!assignTo} onClick={() => run(assign)}>Assign pickup</Button></>}
+          {pickupEnabled && openOffer?.allowed?.assign && <><select className="h-(--control-row-h) rounded-md border bg-card px-2 text-sm" aria-label={t('pickup.assignOffer')} value={assignTo} onChange={(e) => setAssignTo(e.target.value)}><option value="">{t('pickup.assignTo')}</option>{(openOffer.candidates ?? []).map((c) => <option key={c.id} value={c.id}>{c.displayName}</option>)}</select><Button size="sm" disabled={!assignTo} onClick={() => run(assign)}>{t('pickup.assign')}</Button></>}
           <RaiseSlot projectId={r.projectId} targetType="Task" targetId={r.id} targetKey={r.key} targetName={r.name} disciplineId={r.projectDisciplineId} />
         </div>
       </div>
       <Dialog open={offerOpen} onOpenChange={setOfferOpen}>
-        <DialogContent><DialogHeader><DialogTitle>Offer {r.key} for pickup</DialogTitle><DialogDescription>Keep ownership until a teammate picks it up.</DialogDescription></DialogHeader>
-          <Field label="Reason" htmlFor="pickup-reason"><Textarea id="pickup-reason" rows={3} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} required /></Field>
+        <DialogContent><DialogHeader><DialogTitle>{t('pickup.offerTitle', { key: r.key })}</DialogTitle><DialogDescription>{t('pickup.offerHint')}</DialogDescription></DialogHeader>
+          <Field label={t('common.reason')} htmlFor="pickup-reason"><Textarea id="pickup-reason" rows={3} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} required /></Field>
           <div className="grid gap-3 sm:grid-cols-2"><Field label={t('pickup.hoursRemaining')} htmlFor="pickup-hours" optional><Input id="pickup-hours" type="number" min="0" max="99999.99" step="0.01" value={pickupHours} onChange={e => setPickupHours(e.target.value)} /></Field><Field label={t('pickup.neededBy')} htmlFor="pickup-needed-by" optional><Input id="pickup-needed-by" type="date" value={pickupNeededBy} onChange={e => setPickupNeededBy(e.target.value)} /></Field></div>
           <Field label={t('common.notes')} htmlFor="pickup-note" optional><Textarea id="pickup-note" maxLength={4000} value={pickupNote} onChange={e => setPickupNote(e.target.value)} /></Field>
-          <label className="flex items-center gap-2 text-sm"><Checkbox checked={keepWatching} onCheckedChange={(v) => setKeepWatching(!!v)} /> Keep watching after pickup</label>
-          <DialogFooter><Button variant="outline" onClick={() => setOfferOpen(false)}>Cancel</Button><Button disabled={!reason.trim()} onClick={() => run(offer)}>Offer for pickup</Button></DialogFooter>
+          <label className="flex items-center gap-2 text-sm"><Checkbox checked={keepWatching} onCheckedChange={(v) => setKeepWatching(!!v)} /> {t('pickup.keepWatching')}</label>
+          <DialogFooter><Button variant="outline" onClick={() => setOfferOpen(false)}>{t('common.cancel')}</Button><Button disabled={!reason.trim()} onClick={() => run(offer)}>{t('pickup.offer')}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
       {!perms.edit.ok && perms.edit.reason && <div className="px-4 pb-4"><Notice icon={Lock} title={t('task.readOnlyTitle')}>{perms.edit.reason}</Notice></div>}

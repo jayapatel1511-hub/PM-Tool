@@ -154,7 +154,8 @@ public sealed class VerifiableWorkflowTests
         var id = deliverable.G("id"); var version = await f.DbAsync(db => db.Deliverables.Where(x => x.Id == id).Select(x => x.RowVersion).SingleAsync());
         await (await pm.Post($"/api/v1/deliverables/{id}/issue", new { revision = "Unexpected-99", issuedTo = "Synthetic recipient", confirmOpenTasks = true, rowVersion = version })).Json();
         var marked = await (await pm.GetAsync($"/api/v1/projects/{p.Id}/revision-check")).Json();
-        Assert.NotEmpty(marked["deliverables"]!.AsArray().Single()!["marks"]!.AsArray());
+        // The mark is a code in the domain and text from Text.cs here, with the convention's pattern (FR-VER-16).
+        Assert.Equal("Non-standard revision: expected A, B, C …", marked["deliverables"]!.AsArray().Single()!["marks"]![0]!.GetValue<string>());
         await (await pm.Put($"/api/v1/projects/{p.Id}/revision-check", new RevisionCheckEndpoints.ConventionBody(d.Version(p.Id), null))).Json();
         var cleared = await (await pm.GetAsync($"/api/v1/projects/{p.Id}/revision-check")).Json();
         Assert.Null(cleared["convention"]); Assert.Empty(cleared["deliverables"]!.AsArray());

@@ -69,7 +69,7 @@ export function ProjectListPage() {
     ['health', t('projects.health'), sp.get('health') && runtimeText(`health.${sp.get('health')}`)],
     ['officeId', t('admin.office'), ref.data?.offices.find((o) => o.id === sp.get('officeId'))?.name],
     ['disciplineId', t('common.discipline'), ref.data?.disciplines.find((d) => d.id === sp.get('disciplineId'))?.name],
-    ['leadUnitId', 'Lead unit', org.data?.units.find((u) => u.id === sp.get('leadUnitId'))?.name ?? (sp.get('leadUnitId') ? 'No unit' : undefined)],
+    ['leadUnitId', t('org.leadUnit'), org.data?.units.find((u) => u.id === sp.get('leadUnitId'))?.name ?? (sp.get('leadUnitId') ? t('admin.structure.noUnit') : undefined)],
     ['includeArchived', t('projects.includeArchived'), t('common.yes')],
     ['ids', t('projects.filter.chosen'), ids && ids.split(',').filter((x) => x && x !== 'none').length],
     ['computedHealth', t('projects.filter.computedHealth'), sp.get('computedHealth')?.split(',').map((h) => runtimeText(`health.${h}`)).join(', ')],
@@ -129,9 +129,9 @@ export function ProjectListPage() {
               {ref.data?.disciplines.filter((d) => d.isActive).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
           </Field>
-          {me.flags?.org_structure === true && <Field label="Lead unit" htmlFor="pl-lead-unit" className="w-full sm:w-48">
+          {me.flags?.org_structure === true && <Field label={t('org.leadUnit')} htmlFor="pl-lead-unit" className="w-full sm:w-48">
             <select id="pl-lead-unit" className={selectCls} value={sp.get('leadUnitId') ?? ''} onChange={(e) => set('leadUnitId', e.target.value)}>
-              <option value="">Any unit</option><option value="00000000-0000-0000-0000-000000000000">No unit</option>{org.data?.units.filter((u) => !u.closedOn).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+              <option value="">{t('org.anyUnit')}</option><option value="00000000-0000-0000-0000-000000000000">{t('admin.structure.noUnit')}</option>{org.data?.units.filter((u) => !u.closedOn).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
             </select>
           </Field>}
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm">

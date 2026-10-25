@@ -139,7 +139,7 @@ public static class TimeEndpoints
 
     static decimal Hours(decimal h, string field)
     {
-        Check.That(h > 0 && h <= 24, field, "time.hours");
+        Check.That(h > 0 && h <= 24, field, "time.hours_rule");
         Check.That(decimal.Round(h, 2) == h, field, "time.hours_precision");
         return h;
     }

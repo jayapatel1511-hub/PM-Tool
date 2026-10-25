@@ -705,21 +705,21 @@ public static class ReadinessEndpoints
                 Coordination.Version(version, body.BasisVersionRowVersion);
                 var entry = await db.DesignBasisEntries.SingleAsync(e => e.ProjectId == project.Id && e.Id == version.EntryId);
                 Check.That(entry.Kind == BasisKind.Assumption && version.Status == BasisStatus.Proposed,
-                    "basisVersionId", "basis.assumption");
+                    "basisVersionId", "basis.assumption_rule");
                 var latestUse = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == project.Id &&
                     u.TargetType == target.Type && u.TargetId == target.Id &&
                     db.DesignBasisVersions.Any(v => v.Id == u.VersionId && v.EntryId == entry.Id))
                     .OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).FirstOrDefaultAsync();
-                Check.That(latestUse?.VersionId == version.Id, "basisVersionId", "basis.assumption");
+                Check.That(latestUse?.VersionId == version.Id, "basisVersionId", "basis.assumption_rule");
                 await Coordination.Person(db, project, body.VerifierId, "verifierId");
                 Check.That(body.VerifierId != target.OwnerId && body.VerifierId != access.Me.Id,
                     "verifierId", "coord.separation");
                 var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
-                Check.That(body.ExpiresOn >= today, "expiresOn", "basis.assumption");
+                Check.That(body.ExpiresOn >= today, "expiresOn", "basis.assumption_rule");
                 Check.That(await db.BasisAssumptionDispositions.AnyAsync(d => d.ProjectId == project.Id &&
                     d.VersionId == version.Id && d.OwnerId == target.OwnerId && d.ExpiresOn >= body.ExpiresOn &&
                     d.ApprovedBy != target.OwnerId && d.Scope.ToLower() == version.Scope.ToLower()),
-                    "basisVersionId", "basis.assumption");
+                    "basisVersionId", "basis.assumption_rule");
                 var row = new ReadinessException { ProjectId = project.Id, AssessmentId = assessment.Id,
                     BasisVersionId = version.Id, ApprovedBy = access.Me.Id, VerifierId = body.VerifierId,
                     LimitedWork = Check.Required(body.LimitedWork, "limitedWork", 2000),

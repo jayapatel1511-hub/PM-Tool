@@ -67,13 +67,13 @@ public static partial class ReportEndpoints
         var groupKeys = placements.Values.SelectMany(x => x.Values)
             .Where(id => selected is null || id is { } value && selected.Contains(value))
             .Distinct().OrderBy(id => id is null ? "" : OrgStructureReports.UnitPath(id, units), StringComparer.Ordinal)
-            .ThenBy(id => id is null ? "No unit" : units.GetValueOrDefault(id.Value)?.Name ?? "No unit", StringComparer.Ordinal)
+            .ThenBy(id => id is null ? Text.Get("report.noUnit") : units.GetValueOrDefault(id.Value)?.Name ?? Text.Get("report.noUnit"), StringComparer.Ordinal)
             .ToArray();
         var data = new JsonArray();
         foreach (var group in groupKeys)
         foreach (var (key, value) in measures)
         {
-            var unit = group is { } id && units.TryGetValue(id, out var definition) ? definition.Name : "No unit";
+            var unit = group is { } id && units.TryGetValue(id, out var definition) ? definition.Name : Text.Get("report.noUnit");
             var row = new JsonObject
             {
                 ["measure"] = Text.Get($"capacityReport.{key}"),
@@ -87,7 +87,7 @@ public static partial class ReportEndpoints
             }
             data.Add(row);
         }
-        var columns = new[] { new Col("measure", "measure"), new Col("unit", "unit", Label: "Unit"), new Col("unitPath", "unitPath", Label: "Unit path") }
+        var columns = new[] { new Col("measure", "measure"), new Col("unit", "unit"), new Col("unitPath", "unitPath") }
             .Concat(grid.Weeks.Select((w, i) => new Col($"w{i}", "hours", "number", w.ToString("yyyy-MM-dd")))).ToArray();
         return new(data, CapacityLink(c, "grid", grid, includeUnit: true), columns);
     }

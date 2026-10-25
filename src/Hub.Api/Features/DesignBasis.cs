@@ -100,7 +100,7 @@ public static class DesignBasisEndpoints
             db.DesignBasisVersions.Any(v => v.EntryId == e.Id && v.Scope.ToLower() == scope.ToLower() && v.Status != BasisStatus.Withdrawn))
             .OrderBy(e => e.Id).Select(e => (Guid?)e.Id).FirstOrDefaultAsync();
         if (duplicate is { } existingId && inspectedId != existingId)
-            throw ApiException.Conflict("basis_duplicate", "basis.duplicate", new { existingId });
+            throw ApiException.Conflict("basis_duplicate", "basis.duplicate_rule", new { existingId });
     }
 
     static Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, TimeProvider clock) =>
@@ -134,12 +134,12 @@ public static class DesignBasisEndpoints
             var entry = await Entry(db, project.Id, id);
             Coordination.Version(entry, body.EntryRowVersion);
             Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId));
-            if (entry.CurrentVersionId is not { } currentId) throw ApiException.Invalid("entryId", "basis.current");
+            if (entry.CurrentVersionId is not { } currentId) throw ApiException.Invalid("entryId", "basis.current_rule");
             var current = await Version(db, project.Id, id, currentId);
             Coordination.Version(current, body.CurrentVersionRowVersion);
-            Check.That(current.Status == BasisStatus.Confirmed, "entryId", "basis.current");
+            Check.That(current.Status == BasisStatus.Confirmed, "entryId", "basis.current_rule");
             Check.That(!await db.BasisImpactAssessments.AnyAsync(a => a.ProjectId == project.Id &&
-                a.NewVersionId == current.Id && a.Status == AssessmentStatus.Pending), "entryId", "basis.current");
+                a.NewVersionId == current.Id && a.Status == AssessmentStatus.Pending), "entryId", "basis.current_rule");
             Check.That(!await db.DesignBasisVersions.AnyAsync(v => v.EntryId == id && v.Status == BasisStatus.Proposed), "entryId", "basis.proposed");
             await ValidateSource(db, project, body.Version);
             RequireConfirmationDueDate(body.Version.ConfirmationDueDate);
@@ -220,18 +220,18 @@ public static class DesignBasisEndpoints
             RequireConfirmationDueDate(version.ConfirmationDueDate);
             Check.That(BasisRules.MayConfirm(version.Status, version.NumericValue, version.Units,
                 !string.IsNullOrWhiteSpace(version.SourceUrl), !string.IsNullOrWhiteSpace(body.Rationale),
-                true), "versionId", version.NumericValue is not null && string.IsNullOrWhiteSpace(version.Units) ? "basis.units" : "basis.source");
+                true), "versionId", version.NumericValue is not null && string.IsNullOrWhiteSpace(version.Units) ? "basis.units_rule" : "basis.source");
             Coordination.Url(version.SourceUrl);
             DesignBasisVersion? prior = null;
             if (entry.CurrentVersionId is { } currentId)
             {
-                Check.That(version.SupersedesVersionId == currentId, "versionId", "basis.current");
+                Check.That(version.SupersedesVersionId == currentId, "versionId", "basis.current_rule");
                 prior = await Version(db, project.Id, id, currentId);
-                Check.That(prior.Status == BasisStatus.Confirmed, "versionId", "basis.current");
+                Check.That(prior.Status == BasisStatus.Confirmed, "versionId", "basis.current_rule");
                 prior.Status = BasisStatus.Superseded;
                 db.Audit.Note(prior, reason: body.Rationale);
             }
-            else Check.That(version.Number == 1 && version.SupersedesVersionId is null, "versionId", "basis.current");
+            else Check.That(version.Number == 1 && version.SupersedesVersionId is null, "versionId", "basis.current_rule");
             version.Status = BasisStatus.Confirmed; version.ConfirmedBy = access.Me.Id;
             version.ConfirmedAt = clock.GetUtcNow(); version.ConfirmationRationale = Check.Reason(body.Rationale);
             entry.CurrentVersionId = version.Id;
@@ -287,7 +287,7 @@ public static class DesignBasisEndpoints
             var version = await Version(db, project.Id, id, versionId);
             Coordination.Version(version, body.VersionRowVersion);
             Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId));
-            Check.That(BasisRules.MayWithdraw(version.Status), "versionId", "basis.withdraw");
+            Check.That(BasisRules.MayWithdraw(version.Status), "versionId", "basis.withdraw_rule");
             if (version.Status == BasisStatus.Confirmed)
                 Check.That(!await db.DesignBasisVersions.AnyAsync(v => v.EntryId == id && v.Status == BasisStatus.Proposed),
                     "versionId", "basis.proposed");
@@ -328,13 +328,13 @@ public static class DesignBasisEndpoints
             Coordination.Version(version, body.VersionRowVersion);
             Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId));
             Check.That(entry.Kind == BasisKind.Assumption && version.Status == BasisStatus.Proposed,
-                "versionId", "basis.assumption");
+                "versionId", "basis.assumption_rule");
             await Coordination.Person(db, project, body.OwnerId);
             Check.That((await settings.Get(db)).AllowSelfReview || access.Me.Id != body.OwnerId,
                 "approvedBy", "basis.independent");
-            Check.That(body.ExpiresOn >= DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime), "expiresOn", "basis.assumption");
+            Check.That(body.ExpiresOn >= DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime), "expiresOn", "basis.assumption_rule");
             var scope = Check.Required(body.Scope, "scope", 500);
-            Check.That(string.Equals(scope, version.Scope, StringComparison.OrdinalIgnoreCase), "scope", "basis.assumption");
+            Check.That(string.Equals(scope, version.Scope, StringComparison.OrdinalIgnoreCase), "scope", "basis.assumption_rule");
             var disposition = new BasisAssumptionDisposition { ProjectId = project.Id, VersionId = version.Id,
                 Scope = scope, OwnerId = body.OwnerId, ApprovedBy = access.Me.Id, ExpiresOn = body.ExpiresOn,
                 Reason = Check.Reason(body.Reason) };
@@ -354,10 +354,10 @@ public static class DesignBasisEndpoints
                     d.OwnerId == target.OwnerId && d.Scope.ToLower() == version.Scope.ToLower() &&
                     d.ExpiresOn >= DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime));
             Check.That(version.Status == BasisStatus.Confirmed && entry.CurrentVersionId == version.Id || proceed,
-                "versionId", "basis.assumption");
+                "versionId", "basis.assumption_rule");
             Check.That(!await db.BasisUses.AnyAsync(u => u.ProjectId == project.Id && u.TargetType == body.TargetType &&
                 u.TargetId == body.TargetId && db.DesignBasisVersions.Any(v => v.Id == u.VersionId && v.EntryId == id)),
-                "targetId", "basis.duplicate");
+                "targetId", "basis.duplicate_rule");
             var use = new BasisUse { ProjectId = project.Id, VersionId = version.Id, TargetType = target.Type,
                 TargetId = target.Id, OwnerId = target.OwnerId, IntendedUse = Check.Required(body.IntendedUse, "intendedUse", 2000) };
             db.BasisUses.Add(use);
@@ -372,7 +372,7 @@ public static class DesignBasisEndpoints
             var impact = await db.BasisImpactAssessments.SingleOrDefaultAsync(a => a.Id == impactId && a.ProjectId == project.Id)
                 ?? throw ApiException.NotFound();
             Coordination.Version(impact, body.AssessmentRowVersion);
-            Check.That(impact.Status == AssessmentStatus.Pending, "status", "basis.current");
+            Check.That(impact.Status == AssessmentStatus.Pending, "status", "basis.current_rule");
             var old = await Version(db, project.Id, id, impact.OldVersionId);
             DesignBasisVersion? next = null;
             if (impact.NewVersionId is { } nextId)
@@ -380,7 +380,7 @@ public static class DesignBasisEndpoints
                 next = await Version(db, project.Id, id, nextId);
                 if (body.NewVersionRowVersion is { } nextRowVersion) Coordination.Version(next, nextRowVersion);
                 Check.That(old.Status == BasisStatus.Superseded && next.Status == BasisStatus.Confirmed &&
-                    entry.CurrentVersionId == next.Id && old.Number < next.Number, "versionId", "basis.current");
+                    entry.CurrentVersionId == next.Id && old.Number < next.Number, "versionId", "basis.current_rule");
             }
             else
             {
@@ -389,17 +389,17 @@ public static class DesignBasisEndpoints
                 var withdrawal = impact.WithdrawalVersionId is { } withdrawalId && await db.DesignBasisVersions.AnyAsync(v =>
                     v.ProjectId == project.Id && v.EntryId == id && v.Id == withdrawalId && v.Status == BasisStatus.Withdrawn);
                 Check.That((withdrawal && entry.CurrentVersionId is null) || decisionReopened,
-                    "versionId", "basis.current");
+                    "versionId", "basis.current_rule");
             }
             var use = await db.BasisUses.SingleOrDefaultAsync(u => u.Id == impact.BasisUseId && u.ProjectId == project.Id)
                 ?? throw ApiException.NotFound();
             Coordination.Version(use, body.BasisUseRowVersion);
-            Check.That(use.VersionId == old.Id && use.OwnerId == impact.OwnerId, "basisUseId", "basis.current");
+            Check.That(use.VersionId == old.Id && use.OwnerId == impact.OwnerId, "basisUseId", "basis.current_rule");
             var target = await Coordination.Target(db, project, use.TargetType, use.TargetId);
             if (target.RowVersion != body.TargetRowVersion || target.OwnerId != use.OwnerId)
                 throw ApiException.Conflict("concurrency_conflict", "coord.stale");
             Check.OneOf(body.Action, ["Adopt", "Unaffected"], "action");
-            Check.That(body.Action != "Adopt" || next is not null, "action", "basis.current");
+            Check.That(body.Action != "Adopt" || next is not null, "action", "basis.current_rule");
             if (body.Action == "Adopt") Access.Demand(Permissions.NamedCoordinationAction(access.Actor, ctx, use.OwnerId));
             else
             {
@@ -413,9 +413,9 @@ public static class DesignBasisEndpoints
             impact.Status = body.Action == "Adopt" ? AssessmentStatus.Resolved : AssessmentStatus.Unaffected;
             if (body.Action == "Adopt")
             {
-                Check.That(next is not null, "action", "basis.current");
+                Check.That(next is not null, "action", "basis.current_rule");
                 Check.That(!await db.BasisUses.AnyAsync(u => u.ProjectId == project.Id && u.VersionId == next!.Id &&
-                    u.TargetType == use.TargetType && u.TargetId == use.TargetId), "basisUseId", "basis.duplicate");
+                    u.TargetType == use.TargetType && u.TargetId == use.TargetId), "basisUseId", "basis.duplicate_rule");
                 db.BasisUses.Add(new BasisUse { ProjectId = project.Id, VersionId = next!.Id, TargetType = use.TargetType,
                     TargetId = use.TargetId, OwnerId = use.OwnerId, IntendedUse = use.IntendedUse });
             }
@@ -440,7 +440,7 @@ public static class DesignBasisEndpoints
             Coordination.Version(resolution, body.ResolutionVersionRowVersion);
             var leftEntry = await Entry(db, project.Id, left.EntryId);
             var rightEntry = await Entry(db, project.Id, right.EntryId);
-            Check.That(resolution.Status == BasisStatus.Confirmed, "resolutionVersionId", "basis.current");
+            Check.That(resolution.Status == BasisStatus.Confirmed, "resolutionVersionId", "basis.current_rule");
             Check.That(resolution.Id != left.Id && resolution.Id != right.Id &&
                 (resolution.SupersedesVersionId == left.Id || resolution.SupersedesVersionId == right.Id),
                 "resolutionVersionId", "basis.conflict_resolution");

@@ -68,7 +68,7 @@ public static class CommitmentReliabilityEndpoints
                     today >= s.WeekStart.AddDays(7) ? rows.Count(c => c.SnapshotId == s.Id && c.State == CommitmentState.Committed) : 0,
                     rows.Count(c => c.SnapshotId == s.Id && c.State == CommitmentState.AwaitingConfirmation), settings))),
             events.GroupBy(e => e.CommitmentId).Select(g => g.First()).GroupBy(e => e.MissCategoryId)
-                .Select(g => new MissRow(g.Key, g.Key is { } key ? categories.GetValueOrDefault(key) : "Not recorded", g.Count(), g.Select(e => e.CommitmentId))),
+                .Select(g => new MissRow(g.Key, g.Key is { } key ? categories.GetValueOrDefault(key) : Text.Get("report.notRecorded"), g.Count(), g.Select(e => e.CommitmentId))),
             rows.Where(c => c.State == CommitmentState.AwaitingConfirmation).Select(c => new AwaitingRow(c.Id, c.Key, c.RowVersion,
                 c.PerformerId != access.Me.Id && (Permissions.IsPM(access.Actor, ctx) || Permissions.IsDL(ctx, disciplines.GetValueOrDefault(c.TargetId)))))
         ));

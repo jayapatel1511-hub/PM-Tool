@@ -28,6 +28,8 @@ export function groupActivity(rows: ActivityRow[], burstMinutes = 10): ActivityG
 const isDate = (v?: string) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v)
 const isStamp = (v?: string) => !!v && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(v)
 const isGuid = (v: unknown) => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
+/** An audit action as text: its action.* entry, or the action name split into words when none exists yet. */
+export const actionLabel = (action: string) => { const key = `action.${action}`; const label = runtimeText(key); return label === key ? action.replace(/([a-z])([A-Z])/g, '$1 $2') : label }
 const fieldLabel = (name: string) => { const key = `field.${name}`; const label = runtimeText(key); return label === key ? name.replace(/Id$/, '').replace(/([a-z])([A-Z])/g, '$1 $2') : label }
 const rawLabel = (value: unknown) => value == null ? null : typeof value === 'string' ? value : JSON.stringify(value)
 const show = (v?: string | null) => {
@@ -76,7 +78,7 @@ export function ActivityTable({ rows, total, page, pageSize, onPage, onOpen, gro
               <tr key={r.id} className="border-t align-top">
                 <td className={`${tdCls} whitespace-nowrap tabular-nums`} title={r.occurredAt}>{fmtTime(r.occurredAt)}</td>
                 <td className={tdCls}>{r.actorName ?? t('common.system')}</td>
-                <td className={tdCls}>{runtimeText(`action.${r.action}`)}</td>
+                <td className={tdCls}>{actionLabel(r.action)}</td>
                 <td className={tdCls}>
                   {/* Some records (allocation links, availability) have no key or name: fall back to the item type so the button is named. */}
                   {onOpen && r.itemId ? <button className="text-left hover:underline" onClick={() => onOpen(r)}>{r.itemKey || itemName ? <><span className="key">{r.itemKey}</span> {itemName}</> : runtimeText(`itemType.${r.itemType}`)}</button>

@@ -164,7 +164,7 @@ public static class WorkspaceEndpoints
         var today = clock.Today(s);
         var start = from ?? today;
         var end = to ?? today.AddDays(13);
-        Check.That(end >= start && end.DayNumber - start.DayNumber <= 366, "to", "home.range");
+        Check.That(end >= start && end.DayNumber - start.DayNumber <= 366, "to", "home.range_rule");
 
         var scope = Scope.Projects(access, db, projects);
         var active = scope.Where(p => p.Status == ProjectStatus.Active);

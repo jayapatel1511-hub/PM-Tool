@@ -135,7 +135,7 @@ public static class Permissions
     {
         var gate = HandoffGate(a, p); if (!gate) return gate;
         if (!HandoffRules.Editable(h.Status)) return Allow.No("handoff.fixed");
-        return a.Id == h.SendingOwnerId || AssignHandoff(a, p, h) ? Allow.Yes : Allow.No("handoff.sender");
+        return a.Id == h.SendingOwnerId || AssignHandoff(a, p, h) ? Allow.Yes : Allow.No("handoff.sender_rule");
     }
 
     public static Allow HandoffTransition(Actor a, ProjectContext p, HandoffFacts h, string to, bool allowSelfReview)
@@ -143,8 +143,8 @@ public static class Permissions
         var gate = HandoffGate(a, p); if (!gate) return gate;
         if (!HandoffRules.Step(h.Status, to)) return Allow.No("handoff.illegal_transition");
         if (to == HandoffStatus.Cancelled) return AssignHandoff(a, p, h);
-        if (to == HandoffStatus.Submitted) return a.Id == h.SendingOwnerId ? Allow.Yes : Allow.No("handoff.sender");
-        if (a.Id != h.ReceivingOwnerId) return Allow.No("handoff.receiver");
+        if (to == HandoffStatus.Submitted) return a.Id == h.SendingOwnerId ? Allow.Yes : Allow.No("handoff.sender_rule");
+        if (a.Id != h.ReceivingOwnerId) return Allow.No("handoff.receiver_rule");
         if (to is HandoffStatus.Accepted or HandoffStatus.Incorporated && !allowSelfReview && HandoffRules.SelfReceipt(h))
             return Allow.No("handoff.self_receipt");
         return Allow.Yes;

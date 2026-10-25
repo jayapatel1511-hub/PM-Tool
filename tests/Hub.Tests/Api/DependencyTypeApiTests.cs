@@ -47,7 +47,7 @@ public sealed class DependencyTypeApiTests(HubFactory f)
         foreach (var bad in new[] { "StartToFinish", "xyz" })
         {
             var refused = await pm.Post($"/api/v1/tasks/{fs.S("id")}/dependencies", new { predecessorTaskId = ss.G("id"), type = bad }).Result.Json(400);
-            Assert.Equal(Hub.Api.Text.Get("dep.type"), TypeError(refused));
+            Assert.Equal(Hub.Api.Text.Get("dep.type_rule"), TypeError(refused));
         }
         Assert.Equal(409, (int)(await pm.Post($"/api/v1/tasks/{ss.S("id")}/dependencies", new { predecessorTaskId = a.G("id"), type = DependencyTypes.FinishToFinish })).StatusCode);
         var kept = await f.DbAsync(db => db.Dependencies.SingleAsync(x => x.SuccessorTaskId == ss.G("id")));
@@ -57,7 +57,7 @@ public sealed class DependencyTypeApiTests(HubFactory f)
         var dp = await Deliverable(p.Id, new { });
         var dsucc = await Deliverable(p.Id, new { });
         var refusedDl = await pm.Post($"/api/v1/deliverables/{dsucc.S("id")}/dependencies", new { predecessorDeliverableId = dp.G("id"), type = "StartToFinish" }).Result.Json(400);
-        Assert.Equal(Hub.Api.Text.Get("dep.type"), TypeError(refusedDl));
+        Assert.Equal(Hub.Api.Text.Get("dep.type_rule"), TypeError(refusedDl));
         await pm.Post($"/api/v1/deliverables/{dsucc.S("id")}/dependencies", new { predecessorDeliverableId = dp.G("id"), type = DependencyTypes.StartToStart, lagDays = 1 }).Result.Json(201);
         Assert.Equal(409, (int)(await pm.Post($"/api/v1/deliverables/{dsucc.S("id")}/dependencies", new { predecessorDeliverableId = dp.G("id"), type = DependencyTypes.FinishToFinish })).StatusCode);
         var link = (await pm.GetAsync($"/api/v1/deliverables/{dsucc.S("id")}").Result.Json())["explicitPredecessors"]!.AsArray().Single()!;

@@ -43,7 +43,7 @@ public static class TaskPickupEndpoints
                 && !visible.Contains(t.ProjectId) && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
                 || await db.Allocations.AnyAsync(a => a.PersonId == me.Id && a.Status == AllocationStatus.Confirmed && live.Contains(a.ProjectId)
                     && !visible.Contains(a.ProjectId) && a.FromDate <= weeks[0].AddDays(6) && a.ThroughDate >= weeks[0]));
-            return TypedResults.Ok(new LoadResult(weeks[0], partial ? null : cell.Band.ToString(),
+            return TypedResults.Ok(new LoadResult(weeks[0], partial ? null : cell.Band.ToString().ToLowerInvariant(),
                 partial ? (decimal?)null : cell.Committed, cell.Available, partial));
         }).RequireFlag("task_pickup");
     }
@@ -94,9 +94,10 @@ public static class TaskPickupEndpoints
         Access.Demand(offer.OfferedById == me.Id || offer.AssigneeId == me.Id || TaskPickupRules.CanAssign(access.Actor, ctx, task.ProjectDisciplineId, assignee?.SupervisorId)
             ? Allow.Yes : Allow.No("perm.pickup_withdraw"));
         offer.ClosedAt = clock.GetUtcNow(); offer.CloseCause = TaskPickupOffer.Withdrawn;
-        db.Audit.Reason = "withdrawn";
-        db.LogEvent(ItemType.Task, task.Id, "PickupWithdrawn", "assignment", task.ProjectId, task.Key, task.Name, reason: "withdrawn", disciplineId: task.ProjectDisciplineId);
-        await notify.Send(NotificationEvents.TaskPickupClosed, offer.OfferedById, TaskEndpoints.Item(await db.Projects.FirstAsync(p => p.Id == task.ProjectId), task), Text.Get("notify.task_pickup_closed", task.Key, task.Name), "withdrawn");
+        var withdrawn = TaskPickupRules.CauseText(TaskPickupOffer.Withdrawn);
+        db.Audit.Reason = withdrawn;
+        db.LogEvent(ItemType.Task, task.Id, "PickupWithdrawn", "assignment", task.ProjectId, task.Key, task.Name, reason: withdrawn, disciplineId: task.ProjectDisciplineId);
+        await notify.Send(NotificationEvents.TaskPickupClosed, offer.OfferedById, TaskEndpoints.Item(await db.Projects.FirstAsync(p => p.Id == task.ProjectId), task), Text.Get("notify.task_pickup_closed", task.Key, task.Name), withdrawn);
         await db.SaveChangesAsync();
         return TypedResults.NoContent();
     }
@@ -210,6 +211,14 @@ public static class TaskPickupEndpoints
 
 public static class TaskPickupRules
 {
+    /// A close cause as people read it; the stored value stays the code (notifications, history, the pickup report).
+    public static string CauseText(string? cause) => cause switch
+    {
+        TaskPickupOffer.PickedUp => Text.Get("pickup.cause.picked_up"), TaskPickupOffer.AssignedByManager => Text.Get("pickup.cause.assigned_by_manager"),
+        TaskPickupOffer.Withdrawn => Text.Get("pickup.cause.withdrawn"), TaskPickupOffer.TaskClosed => Text.Get("pickup.cause.task_closed"),
+        TaskPickupOffer.ReassignedElsewhere => Text.Get("pickup.cause.reassigned_elsewhere"), null => "", _ => cause,
+    };
+
     /// FR-PKP-07: the assignee's direct manager, the project's PM or the task discipline's Lead may assign an offered task.
     public static bool CanAssign(Actor actor, ProjectContext ctx, Guid disciplineId, Guid? assigneeSupervisorId) =>
         Permissions.IsPM(actor, ctx) || Permissions.IsDL(ctx, disciplineId) || actor.Supervisor && assigneeSupervisorId == actor.Id;
@@ -234,8 +243,8 @@ public static class TaskPickupLifecycle
             offer.ClosedAt = now; offer.CloseCause = TaskPickupOffer.TaskClosed;
             var project = await db.Projects.SingleAsync(p => p.Id == task.ProjectId, ct);
             await notify.Send(NotificationEvents.TaskPickupClosed, offer.OfferedById, TaskEndpoints.Item(project, task),
-                Text.Get("notify.task_pickup_closed", task.Key, task.Name), "Project closed");
-            db.LogEvent(ItemType.Task, task.Id, "PickupClosed", "assignment", task.ProjectId, task.Key, task.Name, reason: "Project closed", disciplineId: task.ProjectDisciplineId);
+                Text.Get("notify.task_pickup_closed", task.Key, task.Name), Text.Get("pickup.cause.project_closed"));
+            db.LogEvent(ItemType.Task, task.Id, "PickupClosed", "assignment", task.ProjectId, task.Key, task.Name, reason: Text.Get("pickup.cause.project_closed"), disciplineId: task.ProjectDisciplineId);
         }
         var changed = db.ChangeTracker.Entries<WorkTask>().Where(e => e.State is EntityState.Modified or EntityState.Deleted).ToList();
         foreach (var entry in changed)
@@ -251,9 +260,9 @@ public static class TaskPickupLifecycle
                 offer.ClosedAt = now; offer.CloseCause = cause;
                 var project = await db.Projects.SingleAsync(p => p.Id == entry.Entity.ProjectId, ct);
                 await notify.Send(NotificationEvents.TaskPickupClosed, offer.OfferedById, TaskEndpoints.Item(project, entry.Entity),
-                    Text.Get("notify.task_pickup_closed", entry.Entity.Key, entry.Entity.Name), cause);
+                    Text.Get("notify.task_pickup_closed", entry.Entity.Key, entry.Entity.Name), TaskPickupRules.CauseText(cause));
                 db.LogEvent(ItemType.Task, entry.Entity.Id, "PickupClosed", "assignment", entry.Entity.ProjectId, entry.Entity.Key, entry.Entity.Name,
-                    reason: cause, disciplineId: entry.Entity.ProjectDisciplineId);
+                    reason: TaskPickupRules.CauseText(cause), disciplineId: entry.Entity.ProjectDisciplineId);
             }
         }
     }

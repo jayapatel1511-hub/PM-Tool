@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh, useReference } from '@/hooks/data'
 import { ApiError, del, get, patch, post, qs, typedRequest } from '@/lib/api'
-import { fmtDate, today } from '@/lib/format'
+import { fmtDate, fmtTime, hours, today } from '@/lib/format'
 import { runtimeText, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -443,7 +443,7 @@ export function DeliverablePanel({ id }: PanelProps) {
         </div>
       )}
       {tab === 'issues' && <IssueHistory issues={data.issues} marks={revisionQ.data?.deliverables.find((x) => x.id === d.id)?.issues.flatMap((i) => i.marks) ?? []} />}
-      {tab === 'baselines' && baselineEnabled && <BaselineHistory deliverableId={d.id} people={data.people ?? data.project?.people ?? []} />}
+      {tab === 'baselines' && baselineEnabled && <BaselineHistory deliverableId={d.id} />}
       {tab === 'links' && <LinksSlot type="Deliverable" id={d.id} projectId={d.projectId} />}
       {tab === 'comments' && <CommentsSlot type="Deliverable" id={d.id} projectId={d.projectId} />}
       {DELIVERABLE_TABS.filter((x) => x.id === tab).map((x) => <div key={x.id}>{x.render(data)}</div>)}
@@ -456,12 +456,13 @@ export function DeliverablePanel({ id }: PanelProps) {
   )
 }
 
-function BaselineHistory({ deliverableId, people }: { deliverableId: string; people: { id: string; displayName: string }[] }) {
+function BaselineHistory({ deliverableId }: { deliverableId: string }) {
   const q = useQuery({ queryKey: ['deliverable', deliverableId, 'baselines'], queryFn: () => typedRequest('get', '/api/v1/deliverables/{id}/baselines', { params: { id: deliverableId } }) })
   if (q.isPending) return <div className="p-4"><Loading rows={3} /></div>
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
-  const name = (id?: string | null) => [...(q.data.people ?? []), ...people].find((x) => x.id === id)?.displayName ?? id ?? '—'
-  return <div className="space-y-3 p-4">{!q.data.delta ? <p className="text-sm text-muted-foreground">{t('baseline.noCurrent')}</p> : <div className="grid gap-2 rounded-md border bg-muted p-3 text-sm sm:grid-cols-4"><span>Estimate Δ: {q.data.delta?.estimateHours ?? 0}h</span><span>Remaining Δ: {q.data.delta?.remainingHours ?? 0}h</span><span>Due Δ: {q.data.delta?.dueDays ?? 0}d</span><span>Owner: {name(q.data.delta?.ownerBefore)} → {name(q.data.delta?.ownerAfter)}</span></div>}<ol className="space-y-2">{q.data.records.map((r) => <li key={r.id} className="rounded-md border px-3 py-2 text-sm"><div className="flex flex-wrap justify-between gap-2"><strong>B{r.number}</strong><span className="text-muted-foreground">{r.recordedAt} · {name(r.actorId)}</span></div><div className="mt-1 grid gap-x-4 gap-y-1 text-muted-foreground sm:grid-cols-3"><span>{r.startDate ?? '—'} → {r.dueDate ?? '—'}</span><span>Owner: {name(r.ownerId)}</span><span>{r.estimatedHoursTotal ?? 0}h estimate · {r.remainingHours ?? 0}h remaining</span></div>{r.reason && <p className="mt-1">{r.reason}</p>}</li>)}</ol></div>
+  const name = (id?: string | null) => (q.data.people ?? []).find((x) => x.id === id)?.displayName ?? (id ? id : t('common.dash'))
+  const delta = q.data.delta
+  return <div className="space-y-3 p-4">{!delta ? <p className="text-sm text-muted-foreground">{t('baseline.noCurrent')}</p> : <div className="grid gap-2 rounded-md border bg-muted p-3 text-sm sm:grid-cols-4"><span>{t('baseline.estimateDelta')}: {hours(delta.estimateHours ?? 0)}</span><span>{t('baseline.remainingDelta')}: {hours(delta.remainingHours ?? 0)}</span><span>{t('baseline.dueDelta')}: {t('baseline.days', { n: delta.dueDays ?? 0 })}</span><span>{t('baseline.ownerChange')}: {t('baseline.change', { from: name(delta.ownerBefore), to: name(delta.ownerAfter) })}</span></div>}<ol className="space-y-2">{q.data.records.map((r) => <li key={r.id} className="rounded-md border px-3 py-2 text-sm"><div className="flex flex-wrap justify-between gap-2"><strong>{t('baseline.number', { n: r.number })}</strong><span className="text-muted-foreground">{fmtTime(r.recordedAt)} · {name(r.actorId)}</span></div><div className="mt-1 grid gap-x-4 gap-y-1 text-muted-foreground sm:grid-cols-3"><span>{t('baseline.change', { from: fmtDate(r.startDate), to: fmtDate(r.dueDate) })}</span><span>{t('common.owner')}: {name(r.ownerId)}</span><span>{t('baseline.estimateRemaining', { estimate: hours(r.estimatedHoursTotal ?? 0), remaining: hours(r.remainingHours ?? 0) })}</span></div>{r.reason && <p className="mt-1">{r.reason}</p>}</li>)}</ol></div>
 }
 
 function ReviewRequiredCheckbox({ value, disabled, onSave }: { value: boolean; disabled: boolean; onSave: (v: boolean) => Promise<boolean> }) {

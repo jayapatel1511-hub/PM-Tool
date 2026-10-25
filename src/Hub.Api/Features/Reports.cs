@@ -10,6 +10,7 @@ namespace Hub.Api.Features;
 
 /// A column of a report or list export: a JSON path into the row, a header text key (`col.*`) and a type that decides
 /// how the SPA shows it and how XLSX stores it (dates stay dates, §19).
+/// Label is for a title already resolved through Text.cs (for example with arguments); plain titles use col.{Header}.
 public sealed record Col(string Path, string Header, string Type = "text", string? Label = null)
 {
     public string Title => Label ?? Text.Get($"col.{Header}");
@@ -38,11 +39,11 @@ public static partial class ReportEndpoints
         new("team-capacity", CapacityParams, [], TeamCapacity, a => Permissions.ViewWorkload(a).Ok, "capacity_reports"),
         new("allocations-by-source", [..CapacityParams, new("show", "select", ["hours-by-source", "entries-without-project"], "hours-by-source"), new("source", "select", PlanningSource.All), new("confidence", "select", PlanningConfidence.All)], [], AllocationsBySource, a => Permissions.ViewWorkload(a).Ok, "capacity_reports"),
         new("pickup-offers", [Projects, Discipline, new("from", "date"), new("to", "date")],
-            [new("project", "project"), new("discipline", "discipline"), new("offered", "date", "datetime", "Offered"),
-             new("closed", "date", "datetime", "Closed"), new("closeCause", "status", Label: "Closing cause"), new("daysOpen", "daysOverdue", "number", "Days open")], PickupOffers, Flag: "task_pickup"),
+            [new("project", "project"), new("discipline", "discipline"), new("offered", "offered", "datetime"),
+             new("closed", "closed", "datetime"), new("closeCause", "closeCause"), new("daysOpen", "daysOpen", "number")], PickupOffers, Flag: "task_pickup"),
         new("commitment-misses", [Projects, Discipline, new("from", "date"), new("to", "date")],
-            [new("project", "project"), new("discipline", "discipline"), new("category", "category", Label: "Miss category"),
-             new("count", "count", "number", "Count")], CommitmentMisses, Flag: "commitment_reliability"),
+            [new("project", "project"), new("discipline", "discipline"), new("category", "missCategory"),
+             new("count", "count", "number")], CommitmentMisses, Flag: "commitment_reliability"),
         new("tasks-due-this-week", [Projects, Discipline, new("assigneeId", "person"), new("week", "date"), new("mine", "bool")],
             [new("key", "key", "key"), new("name", "task"), new("projectNumber", "project"), new("deliverableKey", "deliverable"), new("disciplineName", "discipline"),
              new("assigneeName", "assignee"), new("dueDate", "due", "date"), new("status", "status"), new("indicators", "indicators")], DueThisWeek),
@@ -634,7 +635,7 @@ public static partial class ReportEndpoints
             .OrderBy(r => r.o.OpenedAt).Take(Cap).Select(r => new { Project = c.Db.Projects.Where(p => p.Id == r.t.ProjectId).Select(p => p.ProjectNumber).First(),
                 Discipline = c.Db.ProjectDisciplines.Where(d => d.Id == r.t.ProjectDisciplineId).Select(d => d.Discipline!.Name).First(),
                 Offered = r.o.OpenedAt, Closed = r.o.ClosedAt, r.o.CloseCause }).ToListAsync();
-        return new(Json(rows.Select(r => new { r.Project, r.Discipline, r.Offered, r.Closed, r.CloseCause,
+        return new(Json(rows.Select(r => new { r.Project, r.Discipline, r.Offered, r.Closed, CloseCause = TaskPickupRules.CauseText(r.CloseCause),
             DaysOpen = (int)((r.Closed ?? c.Now) - r.Offered).TotalDays })), "/pickup");
     }
 
@@ -655,7 +656,7 @@ public static partial class ReportEndpoints
         var data = commitments.Select(o => new { o.ProjectId, DisciplineId = o.TargetType == "Task" ? tasks.GetValueOrDefault(o.TargetId) : deliverables.GetValueOrDefault(o.TargetId),
             CategoryId = events.FirstOrDefault(e => e.CommitmentId == o.Id)?.MissCategoryId }).Where(o => c.Id("disciplineId") == null || o.DisciplineId == c.Id("disciplineId"));
         return new(Json(data.GroupBy(o => new { o.ProjectId, o.DisciplineId, o.CategoryId }).Select(g => new { Project = projects.GetValueOrDefault(g.Key.ProjectId),
-            Discipline = disciplines.GetValueOrDefault(g.Key.DisciplineId), Category = g.Key.CategoryId is { } category ? categories.GetValueOrDefault(category) : "Not recorded", Count = g.Count() })));
+            Discipline = disciplines.GetValueOrDefault(g.Key.DisciplineId), Category = g.Key.CategoryId is { } category ? categories.GetValueOrDefault(category) : Text.Get("report.notRecorded"), Count = g.Count() })));
     }
 
     static async Task<Result> StaffAssignments(Ctx c)
@@ -701,10 +702,10 @@ public static partial class ReportEndpoints
         {
             var placement = placements.GetValueOrDefault(rows[i].UserId);
             if (chosenUnits != null && (placement == null || !chosenUnits.Contains(placement.Value))) continue;
-            var row = data[i]!.DeepClone(); row["unit"] = placement is { } id && units.TryGetValue(id, out var value) ? value.Name : "No unit";
+            var row = data[i]!.DeepClone(); row["unit"] = placement is { } id && units.TryGetValue(id, out var value) ? value.Name : Text.Get("report.noUnit");
             row["unitPath"] = OrgStructureReports.UnitPath(placement, units); filtered.Add(row);
         }
-        var columns = All.Single(d => d.Code == "staff-assignments").Cols.Concat(new[] { new Col("unit", "unit", Label: "Unit"), new Col("unitPath", "unitPath", Label: "Unit path") }).ToArray();
+        var columns = All.Single(d => d.Code == "staff-assignments").Cols.Concat(new[] { new Col("unit", "unit"), new Col("unitPath", "unitPath") }).ToArray();
         return new(filtered, Columns: columns);
 
     }

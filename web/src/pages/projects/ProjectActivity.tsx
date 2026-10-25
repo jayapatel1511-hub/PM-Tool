@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { get, qs, typedRequest } from '@/lib/api'
-import { fmtDate } from '@/lib/format'
+import { fmtDate, fmtTime } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { useCurrentProject } from './ProjectLayout'
@@ -46,7 +46,7 @@ export function ProjectActivityTab() {
   const clear = () => { const n = new URLSearchParams(sp); for (const k of FILTERS) n.delete(k); n.delete('page'); setSp(n, { replace: true }) }
   return (
     <Page title={t('ptab.activity')} actions={<ExportMenu path={`projects/${p.id}/activity/export`} params={params} name={`${p.projectNumber}-activity`} />}>
-      {chain && integrity.data && <p role="status" className="text-sm">{integrity.data.firstBrokenSeq ? t('audit.failed', { n: integrity.data.firstBrokenSeq }) : integrity.data.valid === true ? t('audit.verified', { n: integrity.data.entries, time: integrity.data.checkedAt }) : t('audit.pending')}</p>}
+      {chain && integrity.data && <p role="status" className="text-sm">{integrity.data.firstBrokenSeq ? t('audit.failed', { n: integrity.data.firstBrokenSeq }) : integrity.data.valid === true ? t('audit.verified', { n: integrity.data.entries, time: fmtTime(integrity.data.checkedAt) }) : t('audit.pending')}</p>}
       <FilterBar activeCount={tokens.length} active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? t('common.dash') }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('common.from')} htmlFor="pa-from" className="w-full sm:w-40"><Input id="pa-from" type="date" value={sp.get('from') ?? ''} onChange={(e) => set('from', e.target.value)} /></Field>

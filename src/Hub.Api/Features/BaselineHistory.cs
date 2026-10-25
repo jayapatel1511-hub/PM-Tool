@@ -9,9 +9,9 @@ namespace Hub.Api.Features;
 /// Called by 046's re-baseline action before its final save, under that command's project lock/transaction.
 public static class BaselineHistory
 {
-    public static readonly Col[] DeltaColumns = [new("baselineNumber", "baseline", "number", "Baseline"),
-        new("estimateDelta", "estimateDelta", "number", "Estimate change (h)"), new("remainingDelta", "remainingDelta", "number", "Remaining change (h)"),
-        new("dueDaysDelta", "dueDaysDelta", "number", "Due-date change (days)"), new("ownerChange", "ownerChange", Label: "Owner change")];
+    public static readonly Col[] DeltaColumns = [new("baselineNumber", "baselineNumber", "number"),
+        new("estimateDelta", "estimateDelta", "number"), new("remainingDelta", "remainingDelta", "number"),
+        new("dueDaysDelta", "dueDaysDelta", "number"), new("ownerChange", "ownerChange")];
 
     public static async Task AddDeltas(HubDb db, JsonArray rows)
     {
@@ -32,7 +32,8 @@ public static class BaselineHistory
             row["estimateDelta"] = b == null ? null : linked.Sum(t => t.EstimatedHours ?? 0) - b.EstimatedHoursTotal;
             row["remainingDelta"] = b == null ? null : linked.Where(t => t.Status != TaskStatuses.Complete).Sum(t => (t.EstimatedHours ?? 0) * (100 - t.ProgressPct) / 100m) - b.RemainingHours;
             row["dueDaysDelta"] = b?.DueDate is { } baseline && d.DueDate is { } due ? due.DayNumber - baseline.DayNumber : null;
-            row["ownerChange"] = b == null || b.OwnerId == d.OwnerId ? null : $"{(b.OwnerId is { } old ? names.GetValueOrDefault(old) : "Unassigned")} → {(d.OwnerId is { } current ? names.GetValueOrDefault(current) : "Unassigned")}";
+            row["ownerChange"] = b == null || b.OwnerId == d.OwnerId ? null : Text.Get("report.change",
+                b.OwnerId is { } old ? names.GetValueOrDefault(old) ?? "" : Text.Get("report.unassigned"), d.OwnerId is { } current ? names.GetValueOrDefault(current) ?? "" : Text.Get("report.unassigned"));
         }
     }
 

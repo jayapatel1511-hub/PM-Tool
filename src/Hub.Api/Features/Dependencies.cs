@@ -82,7 +82,7 @@ public static class DependencyEndpoints
                     throw ApiException.Conflict("dependency_cycle", "dep.cycle", new { cyclePath = path }, string.Join(" → ", path));
                 }
                 var lag = body.LagDays ?? 0;
-                Check.That(lag is >= 0 and <= 365, "lagDays", "dep.lag");
+                Check.That(lag is >= 0 and <= 365, "lagDays", "dep.lag_rule");
                 var edge = new DeliverableDependency { ProjectId = p.Id, PredecessorDeliverableId = pred.Id, SuccessorDeliverableId = succ.Id, DependencyType = type, LagDays = lag,
                     Note = Check.Optional(body.Note, "note", 500), CreatedBy = access.Me.Id, CreatedAt = DateTimeOffset.UtcNow, AuditKey = $"{pred.Key} → {succ.Key}" };
                 db.DeliverableDependencies.Add(edge);
@@ -244,7 +244,7 @@ public static class DependencyEndpoints
     public static string LinkType(string? type)
     {
         var t = type ?? DependencyTypes.FinishToStart;
-        Check.That(DependencyTypes.All.Contains(t), "type", "dep.type");
+        Check.That(DependencyTypes.All.Contains(t), "type", "dep.type_rule");
         return t;
     }
 

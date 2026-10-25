@@ -3,15 +3,15 @@ namespace Hub.Tests.Domain;
 public sealed class RevisionConventionTests
 {
     [Theory]
-    [InlineData("letters", " b ", "C", "Out of sequence")]
-    [InlineData("letters", "Rev 1", "C", "Non-standard revision: expected A, B, C …")]
-    [InlineData("numbers", "2", "10", "Out of sequence")]
-    [InlineData("pc", "P99", "C01", "Out of sequence")]
+    [InlineData("letters", " b ", "C", RevisionConvention.OutOfSequence)]
+    [InlineData("letters", "Rev 1", "C", RevisionConvention.NonStandard)]
+    [InlineData("numbers", "2", "10", RevisionConvention.OutOfSequence)]
+    [InlineData("pc", "P99", "C01", RevisionConvention.OutOfSequence)]
     public void Presets_mark_without_rejecting(string preset, string code, string prior, string mark) => Assert.Equal([mark], new RevisionConvention(preset).Marks(code, prior));
     [Fact] public void Custom_codes_are_ordered_and_case_insensitive()
     {
         var c = new RevisionConvention("custom", ["Draft", "For review", "Final"]);
-        Assert.True(c.Valid); Assert.Empty(c.Marks(" final ", "Draft")); Assert.Equal(["Out of sequence"], c.Marks("Draft", "Final"));
+        Assert.True(c.Valid); Assert.Empty(c.Marks(" final ", "Draft")); Assert.Equal([RevisionConvention.OutOfSequence], c.Marks("Draft", "Final"));
         Assert.False(new RevisionConvention("custom", ["a", " A "]).Valid);
     }
 
@@ -24,7 +24,7 @@ public sealed class RevisionConventionTests
     {
         var c = new RevisionConvention("numbers");
         Assert.Null(c.Position(code));
-        Assert.Equal(["Non-standard revision: expected 0, 1, 2 …"], c.Marks(code, null));
+        Assert.Equal([RevisionConvention.NonStandard], c.Marks(code, null));
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public sealed class RevisionConventionTests
         Assert.Equal(101, c.Position("C01"));
         Assert.Empty(c.Marks("C01", "P99"));
         Assert.Null(c.Position("P00"));
-        Assert.Equal(["Non-standard revision: expected P01, P02 … then C01, C02 …"], c.Marks("P00", null));
+        Assert.Equal([RevisionConvention.NonStandard], c.Marks("P00", null));
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public sealed class RevisionConventionTests
         var c = new RevisionConvention("custom", ["Draft", "For review", "Final"]);
         Assert.Null(c.Position("Missing"));
         Assert.Null(c.Position(null));
-        Assert.Equal(["Non-standard revision: expected Draft, For review, Final"], c.Marks(" ", null));
+        Assert.Equal([RevisionConvention.NonStandard], c.Marks(" ", null));
     }
 
     [Fact]

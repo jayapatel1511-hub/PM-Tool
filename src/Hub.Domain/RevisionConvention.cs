@@ -19,11 +19,14 @@ public sealed record RevisionConvention(string Preset, string[]? Codes = null)
             _ => null,
         };
     }
+    public const string NonStandard = "non_standard", OutOfSequence = "out_of_sequence";
+
+    /// Mark codes for a revision (FR-VER-16); the API turns them into text with Pattern.
     public string[] Marks(string? code, string? lastIssued)
     {
         var position = Position(code);
-        if (position == null) return [$"Non-standard revision: expected {Pattern}"];
-        return Position(lastIssued) is { } previous && position < previous ? ["Out of sequence"] : [];
+        if (position == null) return [NonStandard];
+        return Position(lastIssued) is { } previous && position < previous ? [OutOfSequence] : [];
     }
     public bool Valid => Preset is "letters" or "numbers" or "pc" || Preset == "custom" && Codes is { Length: > 0 and <= 200 }
         && Codes.All(c => !string.IsNullOrWhiteSpace(c) && c.Length <= 50)

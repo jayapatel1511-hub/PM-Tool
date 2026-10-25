@@ -83,7 +83,7 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
           {sp.get('view') && <DropdownMenuItem onSelect={() => { const n = new URLSearchParams(fixed); for (const key of new Set(['panel', panelParam])) { const panel = sp.get(key); if (panel) n.set(key, panel) } setSp(n) }}>{t('views.clear')}</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
-      {saving && <SaveDialog listType={listType} projectId={projectId} canShare={!copying && !!q.data?.canShare} initialName={copying && active ? `${active.name} (copy)` : ''} params={copying && active ? active.params : current(sp, extra?.(), panelParam)}
+      {saving && <SaveDialog listType={listType} projectId={projectId} canShare={!copying && !!q.data?.canShare} initialName={copying && active ? t('views.copyName', { name: active.name }) : ''} params={copying && active ? active.params : current(sp, extra?.(), panelParam)}
         onClose={(id) => { setSaving(false); if (id) { refresh(); const n = new URLSearchParams(sp); n.set('view', id); setSp(n, { replace: true }) } }} />}
     </>
   )

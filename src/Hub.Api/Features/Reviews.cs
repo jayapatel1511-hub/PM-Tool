@@ -77,14 +77,14 @@ public static class ReviewEndpoints
     }
     static async Task<ReviewRound> BuildRound(HubDb db, Project project, ReviewPackage p, string purpose, Guid[] sources, Assignment[] assignments, string? reason, string? impact, bool allowSelf)
     {
-        Check.That(sources is { Length: > 0 and <= 200 } && sources.Distinct().Count() == sources.Length, "sourceRevisionIds", "review.manifest");
+        Check.That(sources is { Length: > 0 and <= 200 } && sources.Distinct().Count() == sources.Length, "sourceRevisionIds", "review.manifest_rule");
         Check.That(assignments is { Length: > 0 and <= 50 } && assignments.Select(a => a.ProjectDisciplineId).Distinct().Count() == assignments.Length, "assignments", "review.assignments");
         var round = new ReviewRound { ProjectId = project.Id, PackageId = p.Id, Number = p.RoundNumber + 1, Purpose = Check.Required(purpose, "purpose", 2000), Reason = reason, RemovalImpact = impact };
         db.ReviewRounds.Add(round);
         var authors = new HashSet<Guid>(); var deliverables = new HashSet<Guid>();
         foreach (var rid in sources!) {
             var r = await Coordination.Revision(db, project.Id, rid);
-            Check.That(r.DeliverableId is not null && deliverables.Add(r.DeliverableId.Value), "sourceRevisionIds", "review.manifest");
+            Check.That(r.DeliverableId is not null && deliverables.Add(r.DeliverableId.Value), "sourceRevisionIds", "review.manifest_rule");
             var work = await Coordination.Target(db, project, "Deliverable", r.DeliverableId!.Value);
             Check.That(await Coordination.Published(db, r), "sourceRevisionIds", "review.source_unpublished");
             var head = await Coordination.Head(db, r);

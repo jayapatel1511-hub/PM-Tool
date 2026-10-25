@@ -36,6 +36,8 @@ public static class RevisionCheckEndpoints
             return TypedResults.Ok(new WriteResponse(p.Id, p.RowVersion, convention));
         }));
     }
+    static string[] Text(RevisionConvention convention, string[] codes) => [.. codes.Select(code => code == RevisionConvention.NonStandard
+        ? Hub.Api.Text.Get("revision.non_standard", convention.Pattern) : Hub.Api.Text.Get("revision.out_of_sequence"))];
     public static RevisionConvention? Parse(string? text) => text == null ? null : JsonSerializer.Deserialize<RevisionConvention>(text, JsonOpts.Web);
     public static async Task<DeliverableMarks[]> Marks(HubDb db, Project project)
     {
@@ -47,11 +49,11 @@ public static class RevisionCheckEndpoints
         return deliverables.Select(d =>
         {
             string? prior = null;
-            var history = issues.Where(i => i.DeliverableId == d.Id).Select(i => { var mark = new IssueMarks(i.Id, i.Revision, convention.Marks(i.Revision, prior)); prior = i.Revision; return mark; }).ToArray();
+            var history = issues.Where(i => i.DeliverableId == d.Id).Select(i => { var mark = new IssueMarks(i.Id, i.Revision, Text(convention, convention.Marks(i.Revision, prior))); prior = i.Revision; return mark; }).ToArray();
             var current = history.LastOrDefault();
             var marks = current is not null && current.Revision == d.Revision ? current.Marks
                 : current is null && string.IsNullOrWhiteSpace(d.Revision) ? []
-                : convention.Marks(d.Revision, prior);
+                : Text(convention, convention.Marks(d.Revision, prior));
             return new DeliverableMarks(d.Id, marks, history);
         }).ToArray();
     }

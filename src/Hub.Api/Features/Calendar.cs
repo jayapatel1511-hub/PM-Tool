@@ -64,7 +64,7 @@ public static class CalendarEndpoints
     {
         ProjectContext? ctx = null;
         if (e.ProjectId is { } pid) ctx = await access.Context(await db.Projects.AsNoTracking().FirstAsync(p => p.Id == pid));
-        return e.CancelledAt is not null ? Allow.No("calendar.cancelled") : Permissions.EditEvent(access.Actor, ctx, e.OwnerId);
+        return e.CancelledAt is not null ? Allow.No("calendar.cancelled_rule") : Permissions.EditEvent(access.Actor, ctx, e.OwnerId);
     }
 
     static async Task Demand(HubDb db, Access access, CalendarEvent e) => Access.Demand(await CanEdit(db, access, e));

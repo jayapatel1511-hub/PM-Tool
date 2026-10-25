@@ -263,11 +263,16 @@ let server, browser;
   const promises = register.getByRole('navigation', { name: 'Weekly promises', exact: true });
   await Promise.all([page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith('/weekly-commitments') && u.searchParams.get('page') === '2' }), promises.getByRole('button', { name: 'Next', exact: true }).click()]);
   await page.waitForURL(/promisePage=2/);
+  // Wait for the refetches the date change causes instead of racing them (they once lost the race under a smaller bundle).
+  const filtered = (list, ok) => page.waitForResponse(r => { const u = new URL(r.url()); return u.pathname.endsWith(list) && ok(u.searchParams) }, { timeout: 15000 });
+  const commitmentsRefetch = filtered('/weekly-commitments', q => q.get('targetFrom') === '2026-10-02' && q.get('page') === '1');
+  const windowRefetch = filtered('/readiness/window', q => q.get('from') === '2026-10-02' && q.get('constraintsPage') === '1' && q.get('readyPage') === '1');
   await register.getByRole('button', { name: /^Filters/ }).click();
   await page.getByRole('dialog', { name: 'Filters' }).getByLabel('From', { exact: true }).fill('2026-10-02');
   await page.waitForFunction(() => location.search.includes('from=2026-10-02') && !new URLSearchParams(location.search).has('promisePage'));
   await page.keyboard.press('Escape');
   await promises.getByRole('button', { name: 'Next', exact: true }).waitFor();
+  await Promise.all([commitmentsRefetch, windowRefetch]);
   assert.ok(registerQueries.some(q => q.list === 'commitments' && q.params.page === '2'), 'Promise Next reaches page two');
   assert.ok(registerQueries.some(q => q.list === 'commitments' && q.params.targetFrom === '2026-10-02' && q.params.page === '1'), 'Window filtering happens in the API before paging');
   assert.ok(registerQueries.some(q => q.list === 'window' && q.params.from === '2026-10-02' && q.params.constraintsPage === '1' && q.params.readyPage === '1'), 'Date changes reset both aggregate list pages');

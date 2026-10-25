@@ -60,8 +60,8 @@ public static class ChangeEndpoints
             SourceRevision? previous = null;
             if (body.SupersedesId is { } old) {
                 previous = await Coordination.Revision(db, p.Id, old); Check.That(Coordination.Identity(previous) == identity, "supersedesId", "change.same_source");
-                if (head is not null) { HeadVersion(head, body.HeadRowVersion); Check.That(head.CurrentRevisionId == old, "supersedesId", "change.current"); }
-                else Check.That(await Coordination.Published(db, previous), "supersedesId", "change.current");
+                if (head is not null) { HeadVersion(head, body.HeadRowVersion); Check.That(head.CurrentRevisionId == old, "supersedesId", "change.current_rule"); }
+                else Check.That(await Coordination.Published(db, previous), "supersedesId", "change.current_rule");
             } else Check.That(head == null, "supersedesId", "change.explicit_supersedes");
             Check.That(body.SourceCheckedAt is null || body.SourceCheckedAt <= clock.GetUtcNow(), "sourceCheckedAt", "change.future_check");
             var revision = new SourceRevision { ProjectId = p.Id, DeliverableId = body.DeliverableId, SourceRowVersion = sourceVersion, SourceIdentity = identity,
@@ -134,7 +134,7 @@ public static class ChangeEndpoints
             Access.Demand(Permissions.PublishSource(access.Actor, ctx, c.ProjectDisciplineId, publisherOwner)); await Coordination.Person(db, p, c.OwnerId); await Coordination.Discipline(db, p.Id, c.ProjectDisciplineId);
             Access.Demand(Permissions.PublishSource(access.Actor, ctx, head.ProjectDisciplineId, head.OwnerId));
             HeadVersion(head, body.HeadRowVersion);
-            if (head.CurrentRevisionId != c.OldRevisionId) throw ApiException.Conflict("source_changed", "change.current", new { currentRevisionId = head.CurrentRevisionId, currentRowVersion = head.RowVersion });
+            if (head.CurrentRevisionId != c.OldRevisionId) throw ApiException.Conflict("source_changed", "change.current_rule", new { currentRevisionId = head.CurrentRevisionId, currentRowVersion = head.RowVersion });
             if (next.DeliverableId is { } source) {
                 var w = await Coordination.Target(db, p, "Deliverable", source);
                 Access.Demand(Permissions.PublishSource(access.Actor, ctx, w.DisciplineId, w.OwnerId));
@@ -166,7 +166,7 @@ public static class ChangeEndpoints
             if (w.RowVersion != body.TargetRowVersion) throw ApiException.Conflict("target_changed", "coord.stale", new { currentRowVersion = w.RowVersion });
             Check.That(w.Status is not (DeliverableStatus.Issued or DeliverableStatus.Accepted), "targetId", "review.issued");
             var r = await Coordination.Revision(db, p.Id, body.SourceRevisionId); var head = await Coordination.Head(db, r);
-            if (head == null || head.CurrentRevisionId != body.ExpectedCurrentRevisionId) throw ApiException.Conflict("source_changed", "change.current");
+            if (head == null || head.CurrentRevisionId != body.ExpectedCurrentRevisionId) throw ApiException.Conflict("source_changed", "change.current_rule");
             Check.That(head.CurrentRevisionId == r.Id, "sourceRevisionId", "change.retain_via_assessment");
             var use = await db.InputUses.SingleOrDefaultAsync(u => u.ProjectId == p.Id && u.TargetType == w.Type && u.TargetId == w.Id && u.SourceIdentity == head.Identity);
             if (use != null) Coordination.Version(use, body.InputUseRowVersion);
@@ -216,7 +216,7 @@ public static class ChangeEndpoints
                 Check.That(a.OwnerId == w.OwnerId && a.Status == AssessmentStatus.UpdateRequired, "status", "change.update_required");
                 var task = a.CorrectionTaskId is { } tid ? await Coordination.Target(db, p, "Task", tid) : null;
                 if (task != null && task.RowVersion != body.CorrectionTaskRowVersion) throw ApiException.Conflict("task_changed", "coord.stale", new { currentRowVersion = task.RowVersion });
-                Check.That(ChangeRules.CorrectionReady(task?.Status, ReviewRules.Independent(reviewer, new[] { a.OwnerId, task?.OwnerId ?? Guid.Empty, task?.AuthorId ?? Guid.Empty }, self), !string.IsNullOrWhiteSpace(a.EvidenceUrl)), "correctionTaskId", "change.correction");
+                Check.That(ChangeRules.CorrectionReady(task?.Status, ReviewRules.Independent(reviewer, new[] { a.OwnerId, task?.OwnerId ?? Guid.Empty, task?.AuthorId ?? Guid.Empty }, self), !string.IsNullOrWhiteSpace(a.EvidenceUrl)), "correctionTaskId", "change.correction_rule");
                 Check.That(!a.RetainOldRevision || a.RetentionApprovedBy != null, "retention", "change.retention");
                 a.VerifiedBy = reviewer; a.VerifiedAt = clock.GetUtcNow(); a.Status = AssessmentStatus.Resolved; Check.Reason(body.Rationale);
             } else {
@@ -227,7 +227,7 @@ public static class ChangeEndpoints
                     if (w.RowVersion != body.TargetRowVersion) throw ApiException.Conflict("target_changed", "coord.stale", new { currentRowVersion = w.RowVersion });
                     Check.That(w.Status is not (DeliverableStatus.Issued or DeliverableStatus.Accepted), "targetId", "review.issued");
                     var revision = await Coordination.Revision(db, p.Id, c.NewRevisionId); var head = await Coordination.Head(db, revision);
-                    if (head == null || head.CurrentRevisionId != body.ExpectedCurrentRevisionId || head.CurrentRevisionId != revision.Id) throw ApiException.Conflict("source_changed", "change.current");
+                    if (head == null || head.CurrentRevisionId != body.ExpectedCurrentRevisionId || head.CurrentRevisionId != revision.Id) throw ApiException.Conflict("source_changed", "change.current_rule");
                     var existing = await db.InputUses.SingleOrDefaultAsync(u => u.ProjectId == p.Id && u.TargetType == w.Type && u.TargetId == w.Id && u.SourceIdentity == head.Identity);
                     if (existing != null) Coordination.Version(existing, body.InputUseRowVersion);
                     var use = await Coordination.Adopt(db, p, w, revision, existing?.IntendedUse ?? c.Scope, Check.Reason(body.Rationale), access.Me.Id, clock.GetUtcNow());

@@ -121,14 +121,14 @@ public static class SubmissionEndpoints
 
     static async Task AddVersion(HubDb db, Project project, SubmissionPackage package, ManifestInput[] manifest, OptionalCheckInput[] optionals)
     {
-        Check.That(manifest is { Length: > 0 and <= 200 } && manifest.Select(m => m.SourceRevisionId).Distinct().Count() == manifest.Length, "manifest", "review.manifest");
+        Check.That(manifest is { Length: > 0 and <= 200 } && manifest.Select(m => m.SourceRevisionId).Distinct().Count() == manifest.Length, "manifest", "review.manifest_rule");
         Check.That(optionals is { Length: <= 50 }, "optionalChecks", "review.assignments");
         var seen = new HashSet<Guid>();
         foreach (var input in manifest)
         {
             var revision = await Coordination.Revision(db, project.Id, input.SourceRevisionId);
-            var deliverableId = revision.DeliverableId ?? throw ApiException.Invalid("manifest", "review.manifest");
-            Check.That(seen.Add(deliverableId), "manifest", "review.manifest");
+            var deliverableId = revision.DeliverableId ?? throw ApiException.Invalid("manifest", "review.manifest_rule");
+            Check.That(seen.Add(deliverableId), "manifest", "review.manifest_rule");
             var work = await Coordination.Target(db, project, "Deliverable", deliverableId);
             Check.That(await Coordination.Published(db, revision), "manifest", "review.source_unpublished");
             var head = await Coordination.Head(db, revision);

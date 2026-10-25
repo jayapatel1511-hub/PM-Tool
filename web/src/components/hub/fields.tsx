@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Check, Pencil } from 'lucide-react'
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
-import { ChangeList, groupActivity, type ActivityRow } from '@/components/hub/activity'
+import { ChangeList, actionLabel, groupActivity, type ActivityRow } from '@/components/hub/activity'
 import { Empty, ErrorBanner, Loading, Spinner } from '@/components/hub/common'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Input } from '@/components/ui/input'
@@ -177,7 +177,7 @@ export function HistoryList({ type, id }: { type: string; id: string }) {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-x-2">
               <span className="font-semibold">{r.actorName ?? t('common.system')}</span>
-              <span className="text-muted-foreground">{runtimeText(`action.${r.action}`)}{r.itemType !== type ? ` · ${runtimeText(`itemType.${r.itemType}`)} ${r.itemKey ?? ''}` : ''}</span>
+              <span className="text-muted-foreground">{actionLabel(r.action)}{r.itemType !== type ? ` · ${runtimeText(`itemType.${r.itemType}`)} ${r.itemKey ?? ''}` : ''}</span>
               <time className="text-xs/[18px] text-muted-foreground tabular-nums" dateTime={r.occurredAt} title={r.occurredAt}>{fmtTime(r.occurredAt)}</time>
             </div>
             {g.rows.length > 1 ? <details className="mt-1"><summary className="cursor-pointer text-muted-foreground">{t('activity.groupSummary', { name: r.actorName ?? t('common.system'), n: g.rows.length })} · {fmtTime(g.rows[g.rows.length-1].occurredAt)} – {fmtTime(r.occurredAt)}</summary><div className="mt-1 space-y-2">{g.rows.map((x) => <div key={x.id}><time dateTime={x.occurredAt}>{fmtTime(x.occurredAt)}</time> · {runtimeText(`action.${x.action}`)}<ChangeList row={x} />{x.reason && <p>{t('common.reason')}: {x.reason}</p>}</div>)}</div></details> : <div className="mt-1"><ChangeList row={r} /></div>}

@@ -1,4 +1,4 @@
-import { t } from '@/lib/i18n'
+import { t, type TextKey } from '@/lib/i18n'
 
 // Dates are calendar dates (YYYY-MM-DD) compared in the organisation time zone (§10.6, G-03).
 let orgToday = new Date().toISOString().slice(0, 10)
@@ -75,3 +75,7 @@ export const hours = (h: number | null | undefined) => {
   const r = Math.round(Number(h) * 100) / 100
   return `${r < 0 ? '−' : ''}${Math.abs(r).toFixed(2).replace(/\.?0+$/, '')} h`
 }
+
+/** A server load band (§45.4: over, near, within, light, in any case) as text. */
+const LOAD_BAND: Record<string, TextKey> = { over: 'load.band.over', near: 'load.band.near', within: 'load.band.within', light: 'load.band.light' }
+export const loadBandText = (band?: string | null) => t(band ? LOAD_BAND[band.toLowerCase()] ?? 'common.dash' : 'common.dash')

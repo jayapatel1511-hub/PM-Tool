@@ -138,8 +138,8 @@ public static class AvailabilityEndpoints
             foreach (var item in person![leave ? "leave" : "days"]!.AsArray()) {
                 var row = item!.DeepClone().AsObject(); row["person"] = person["displayName"]!.DeepClone(); rows.Add(row);
             }
-        Col[] columns = leave ? [new("person", "person"), new("fromDate", "date", "date", "From"), new("throughDate", "date", "date", "Through"), new("hoursPerDay", "hours", "number", "Absent hours per day (blank = full day)"), new("status", "status"), new("sourceKind", "type"), new("sourceUpdatedAt", "date", Label: "Source updated"), new("importedAt", "date", Label: "Imported")]
-            : [new("person", "person"), new("date", "date", "date"), new("normal", "hours", "number", "Contracted hours"), new("available", "hours", "number", "Available hours"), new("leave", "hours", "number", "Leave hours"), new("holiday", "hours", "number", "Holiday hours"), new("provisional", "status", Label: "Provisional")];
+        Col[] columns = leave ? [new("person", "person"), new("fromDate", "awayFrom", "date"), new("throughDate", "awayThrough", "date"), new("hoursPerDay", "absentHoursPerDay", "number"), new("status", "status"), new("sourceKind", "type"), new("sourceUpdatedAt", "sourceUpdated"), new("importedAt", "importedAt")]
+            : [new("person", "person"), new("date", "date", "date"), new("normal", "contractedHours", "number"), new("available", "availableHours", "number"), new("leave", "leaveHours", "number"), new("holiday", "holidayHours", "number"), new("provisional", "provisional")];
         return await ExportFile.Send(db, store, format, Text.Get("availability.export"), columns, rows, [("from", from.ToString("yyyy-MM-dd")), ("through", through.ToString("yyyy-MM-dd"))], null, leave ? "approved-leave" : "availability", clock);
     }
 

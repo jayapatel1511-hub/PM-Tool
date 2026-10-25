@@ -9,7 +9,7 @@ Runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72` passes **1,514/1,514 b
 | AC | Where it is checked | Status |
 |---|---|---|
 | AC-LIVE-01 | `BuildStampTests` (S01) | PASS (local): current 566fe51 image OCI revision/HUB_BUILD match; health build verified; hosted image activation remains unproven |
-| AC-LIVE-02 | `web/tests/build-stamp.cjs` (S02) | PASS (local): stamped A→B→A browser notice, one per new build |
+| AC-LIVE-02 | `web/tests/live-browser.cjs` (S02) | PASS (local): stamped A→B→A browser notice, one per new build |
 | AC-LIVE-03 | `scripts/test_verify_homedev_review.py`, `tools/test_pilot_operations.py` (S03) | PASS (local): Python activation/probe controls; hosted execution unproven |
 | AC-LIVE-04 | `web/tests/registrations.cjs` (S05, re-run in S07) | PASS (local): all seven Task, Milestone, Deliverable, Decision, Action, Risk and Issue cold deep links render their own headings; Task comments/links also checked |
 | AC-LIVE-05 | `web/tests/registrations.cjs` (S05, re-run in S07) | PARTIAL: eager registration source guard passes; all plugin combinations not swept |
@@ -18,14 +18,14 @@ Runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72` passes **1,514/1,514 b
 | AC-LIVE-08 | `web/scripts/chunk-report.mjs` CI artifact (S07) | PASS (local): raw entry closure 45.06% smaller; gzip 35.33% |
 | AC-LIVE-09 | `StaticCacheTests` (S04) | PASS (local) |
 | AC-LIVE-10 | `web/tests/route-splitting.cjs` (S06) | PASS (local): aborted route chunk reaches error boundary; storage-denied loop guard verified |
-| AC-LIVE-11 | `LiveStampTests`, `web/tests/live-refresh.cjs` (S08, S13) | PASS (local): project pulse mocked browser and scoped API tests |
+| AC-LIVE-11 | `LiveStampTests`, `web/tests/live-browser.cjs` (S08, S13) | PASS (local): project pulse mocked browser and scoped API tests |
 | AC-LIVE-12 | `LiveStampTests` (S08) | PASS (local): scoped project-stamp access checks |
 | AC-LIVE-13 | `web/tests/live-real.cjs` as a `nightly` line in `tools/ci_steps.txt` (S12) | PASS (local): current 566fe51 real two-browser Risk/Task changes arrive within 2 seconds; no hosted activation |
 | AC-LIVE-14 | `LiveEventsTests` visibility sweep (S10) | PASS (local): focused API visibility checks |
-| AC-LIVE-15 | `LiveEventsTests` (S10, S13), `web/tests/live-events.cjs` (S11) | PASS (local), bounded: scoped API/stream and real two-browser Risk/Task updates pass; full hosted lifecycle remains unproven |
-| AC-LIVE-16 | `LiveEventsTests` (S10), `web/tests/live-events.cjs` (S11) | PARTIAL: heartbeat/retry controls pass; real silence/hidden timing unproven |
+| AC-LIVE-15 | `LiveEventsTests` (S10, S13), `web/tests/live-browser.cjs` (mocked) and `web/tests/live-real.cjs` (real two-browser) (S11) | PASS (local), bounded: scoped API/stream and real two-browser Risk/Task updates pass; full hosted lifecycle remains unproven |
+| AC-LIVE-16 | `LiveEventsTests` (S10), `web/tests/live-browser.cjs` (mocked) and `web/tests/live-real.cjs` (real two-browser) (S11) | PARTIAL: heartbeat/retry controls pass; real silence/hidden timing unproven |
 | AC-LIVE-17 | `scripts/check-live-stream.py` on the review origin (after S12; needs an authorised activation) | HUMAN: hosted/tunnel run needs an activation Jay authorises; not run |
-| AC-LIVE-18 | `web/tests/live-refresh.cjs` (S08), `web/tests/live-events.cjs` (S11, S13) | PARTIAL: unknown/reconnect invalidation tests and bounded real two-browser run pass; complete outage/hidden-tab lifecycle remains unproven |
+| AC-LIVE-18 | `web/tests/live-browser.cjs` (S08), `web/tests/live-browser.cjs` (mocked) and `web/tests/live-real.cjs` (real two-browser) (S11, S13) | PARTIAL: unknown/reconnect invalidation tests and bounded real two-browser run pass; complete outage/hidden-tab lifecycle remains unproven |
 | AC-LIVE-19 | `LiveFeedTests` (S09) | PASS (local) |
 
 ## Build 042-S01

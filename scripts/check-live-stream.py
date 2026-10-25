@@ -149,6 +149,10 @@ def run(argv=None):
                               "heartbeats": heartbeats, "events": events, "heartbeatCheck": False,
                               "reason": "observation ended without EOF/disconnect"}))
             return 1
+        if heartbeats == 0:
+            # Silence is not proof of a live stream; the server opens every stream with a comment line.
+            print("FAIL no heartbeat observed")
+            return 1
         maximum = max(gaps, default=0)
         print(json.dumps({"result": "PASS", "seconds": args.seconds, "heartbeats": heartbeats, "events": events,
                           "maxGapSeconds": round(maximum, 3), "heartbeatCheck": not args.no_heartbeats}))

@@ -125,7 +125,9 @@ with root-owned mode-755 parent. Never put it in a release or print it. From the
 release, the explicit `--install-deploy-timer` option on `activate-homedev-review.sh` copies the compose and
 probe to root-owned paths, keeps review runtime credentials private, authenticates root Docker with the token
 on stdin into `/etc/pm-tool-review-deploy/docker`, installs the root helper/service/timer and enables the
-five-minute timer. This needs Jay's sudo and is a deployment action, outside local source verification.
+five-minute timer. The review user list and key ring are linked to the release's live `.runtime` files rather than
+copied, so a reviewer added later reaches the next timer deployment, which recreates the API container. This needs
+Jay's sudo and is a deployment action, outside local source verification.
 The ordinary activation path and existing `--install-timer` daily backup option keep their previous meaning.
 
 The timer verifies CI provenance for the exact digest, installed compose/probe hashes and any newest contract

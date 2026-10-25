@@ -26,4 +26,5 @@ jobs:
       - run: >-
           python3 tools/auto_merge.py --repo "$GITHUB_REPOSITORY"
           ${{ github.event_name == 'status' && format('--sha {0}', github.event.sha) || format('--run-id {0}', github.event.workflow_run.id) }}
-        env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+        # REVIEWER_LOGINS: accounts whose `review` status counts; empty means the repository owner only.
+        env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}", REVIEWER_LOGINS: "${{ vars.REVIEWER_LOGINS }}" }

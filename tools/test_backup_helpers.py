@@ -69,7 +69,9 @@ class BackupHelperTests(unittest.TestCase):
                     exec(compile(source, 'backup-helper', 'exec'), {})
                 docker.assert_not_called()
 
-    def test_batch_backup_and_restore_do_not_forward_terminal_stdin(self):
+    @contextlib.contextmanager
+    def review_sandbox(self):
+        """A fake review release whose sudo and docker run locally; docker logs each call in FAKE_IO."""
         with tempfile.TemporaryDirectory(dir=Path(tempfile.gettempdir()).resolve()) as name:
             sandbox = Path(name)
             (sandbox / 'hosting').mkdir()
@@ -82,7 +84,11 @@ class BackupHelperTests(unittest.TestCase):
             (fake_bin / 'docker').write_text("""#!/usr/bin/env python3
 import os, sys
 root = os.environ['FAKE_IO']
-name = ' '.join(sys.argv[1:])
+open(os.path.join(root, 'calls.log'), 'a').write(' '.join(sys.argv[1:]) + '\\n')
+if sys.argv[1] == 'inspect':
+    fmt = sys.argv[3]
+    print(os.environ.get('FAKE_PROJECT', 'pm-tool-review') if 'project' in fmt else 'db' if 'service' in fmt else 'pm-tool-review-db')
+    sys.exit(0)
 safe = str(len(os.listdir(root))) + '.stdin'
 payload = sys.stdin.buffer.read()
 open(os.path.join(root, safe), 'wb').write(payload)
@@ -96,6 +102,10 @@ elif 'psql' in sys.argv:
             io_dir = sandbox / 'io'
             io_dir.mkdir()
             env = {**os.environ, 'PATH': str(fake_bin) + os.pathsep + os.environ['PATH'], 'FAKE_IO': str(io_dir)}
+            yield sandbox, env, io_dir
+
+    def test_batch_backup_and_restore_do_not_forward_terminal_stdin(self):
+        with self.review_sandbox() as (sandbox, env, io_dir):
             backup = ROOT / 'scripts/backup-homedev-review.sh'
             restore = ROOT / 'scripts/restore-homedev-review-drill.sh'
             terminal = b'terminal-input-must-not-reach-batch-container'
@@ -109,6 +119,48 @@ elif 'psql' in sys.argv:
             self.assertIn(b'synthetic-dump', payloads)  # pg_restore receives the explicit dump file.
             self.assertNotIn(terminal, payloads)
             self.assertEqual(payloads.count(b''), 4)  # pg_dump, createdb, psql and cleanup receive no terminal input.
+
+    def test_review_backup_refuses_an_unexpected_database(self):
+        with self.review_sandbox() as (sandbox, env, io_dir):
+            result = subprocess.run(['bash', str(ROOT / 'scripts/backup-homedev-review.sh')], cwd=sandbox,
+                                    env={**env, 'FAKE_PROJECT': 'pm-tool-pilot'}, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('unexpected database', result.stderr)
+            self.assertNotIn('pg_dump', (io_dir / 'calls.log').read_text())
+            self.assertFalse((sandbox / 'data/backups').exists())
+
+    def test_review_restore_refuses_unsafe_dumps_before_creating_a_database(self):
+        with self.review_sandbox() as (sandbox, env, io_dir):
+            name = 'hub-review-20261025T010203123456789Z.dump'
+            (sandbox / 'data/backups').mkdir(parents=True)
+            good = sandbox / 'data/backups' / name
+            good.write_bytes(b'synthetic-dump')
+            good.chmod(0o600)
+            link = sandbox / 'link' / name
+            link.parent.mkdir()
+            link.symlink_to(good)
+            renamed = sandbox / 'data/backups/other.dump'
+            renamed.write_bytes(b'synthetic-dump')
+            renamed.chmod(0o600)
+            pilot = sandbox / 'pilot' / name
+            pilot.parent.mkdir()
+            pilot.write_bytes(b'synthetic-dump')
+            pilot.chmod(0o600)
+            loose = sandbox / 'loose' / name
+            loose.parent.mkdir()
+            loose.write_bytes(b'synthetic-dump')
+            loose.chmod(0o644)
+            cases = [(link, env, 'symlink'), (renamed, env, 'not a review dump'), (pilot, env, 'pilot dump path'),
+                     (loose, env, 'owner-only'), (good, {**env, 'FAKE_PROJECT': 'pm-tool-pilot'}, 'identity')]
+            for dump, case_env, reason in cases:
+                with self.subTest(reason):
+                    result = subprocess.run(['bash', str(ROOT / 'scripts/restore-homedev-review-drill.sh'), str(dump)],
+                                            cwd=sandbox, env=case_env, capture_output=True, text=True)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn('refused', result.stderr)
+                    self.assertIn(reason, result.stderr)
+            calls = io_dir / 'calls.log'
+            self.assertNotIn('createdb', calls.read_text() if calls.exists() else '')
 
 
 class OffhostDrillTests(unittest.TestCase):

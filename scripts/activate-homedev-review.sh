@@ -95,8 +95,9 @@ REGISTRY_PY
   for file in review.env review-login-handoff.json; do
     sudo install -o root -g root -m 0600 ".runtime/$file" "$target/.runtime/$file"
   done
-  sudo install -o 1000 -g 1000 -m 0600 .runtime/review-users.json "$target/.runtime/review-users.json"
-  # The existing key ring keeps its container-user ownership; root never executes anything in it.
+  # The user list and key ring stay the live, container-user-owned files: a copy would go stale when reviewers are
+  # added. Root only bind-mounts them into the API container and never executes anything in them.
+  sudo ln -sfn "$(cd .runtime && pwd -P)/review-users.json" "$target/.runtime/review-users.json"
   sudo ln -sfn "$(cd .runtime/keys && pwd -P)" "$target/.runtime/keys"
   if [[ " ${verify_args[*]} " == *" --social "* ]]; then
     sudo install -o root -g root -m 0644 hosting/social-auth.override.yml "$target/hosting/social-auth.override.yml"

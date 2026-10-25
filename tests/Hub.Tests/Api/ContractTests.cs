@@ -41,13 +41,16 @@ public sealed class ContractTests(HubFactory f)
         var document = Normalize(await response.Json())!;
         var file = Path.Combine(Root, "web/src/gen/openapi.json");
         var json = document.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n";
-        if (Environment.GetEnvironmentVariable("HUB_UPDATE_CONTRACT") == "1")
+        var golden = File.Exists(file) ? File.ReadAllText(file) : null;
+        if (Environment.GetEnvironmentVariable("HUB_UPDATE_CONTRACT") == "1" && golden != json)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(file)!);
             File.WriteAllText(file, json);
+            // An update run still fails on drift, so a variable left set cannot hide a contract change.
+            Assert.Fail("Updated web/src/gen/openapi.json; review the diff, run npm run gen, and rerun without HUB_UPDATE_CONTRACT");
         }
-        Assert.True(File.Exists(file), "Missing golden contract; regenerate with HUB_UPDATE_CONTRACT=1");
-        Assert.Equal(File.ReadAllText(file), json);
+        Assert.True(golden is not null, "Missing golden contract; regenerate with HUB_UPDATE_CONTRACT=1");
+        Assert.Equal(golden, json);
     }
 
     [Fact]

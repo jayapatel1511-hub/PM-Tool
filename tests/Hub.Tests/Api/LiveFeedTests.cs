@@ -13,7 +13,8 @@ namespace Hub.Tests.Api;
 public sealed class LiveFeedTests(HubFactory f)
 {
     readonly TestData d = new(f);
-    static readonly TimeSpan Overlap = TimeSpan.FromSeconds(3);
+    /// Wider than the 3-second default so a slow host cannot push a test's own rows out of the window mid-test.
+    static readonly TimeSpan Overlap = TimeSpan.FromSeconds(30);
     /// Touching Services starts the host, which creates and migrates the test database.
     string Cs => f.Services is null ? "" : $"Host=localhost;Port=55432;Database={f.Database};Username=hub";
 
@@ -116,7 +117,7 @@ public sealed class LiveFeedTests(HubFactory f)
     public async Task Rows_written_before_the_overlap_are_not_read()
     {
         var pid = Guid.NewGuid();
-        await using (var c = new NpgsqlConnection(Cs)) { await c.OpenAsync(); await Insert(c, null, Guid.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(-10)), pid); }
+        await using (var c = new NpgsqlConnection(Cs)) { await c.OpenAsync(); await Insert(c, null, Guid.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(-60)), pid); }
         var batch = await Tick(new LiveFeedState());
         Assert.DoesNotContain(batch.Rows, r => r.ProjectId == pid);
     }

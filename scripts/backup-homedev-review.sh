@@ -8,6 +8,15 @@ umask 077
   echo 'Run from the homedev PM-Tool directory after review bootstrap.' >&2
   exit 1
 }
+# Same identity guard as the root helper: dump only the review stack's own database volume.
+inspect() { sudo docker inspect --format "$1" pm-tool-review-db-1 </dev/null; }
+project="$(inspect '{{ index .Config.Labels "com.docker.compose.project" }}')"
+service="$(inspect '{{ index .Config.Labels "com.docker.compose.service" }}')"
+volume="$(inspect '{{ range .Mounts }}{{ if eq .Destination "/var/lib/postgresql/data" }}{{ .Name }}{{ end }}{{ end }}')"
+[[ "$project" == pm-tool-review && "$service" == db && "$volume" == pm-tool-review-db ]] || {
+  echo 'Refusing to back up an unexpected database container or volume.' >&2
+  exit 1
+}
 mkdir -p data/backups
 stamp=$(date -u +%Y%m%dT%H%M%S%NZ)
 target="data/backups/hub-review-${stamp}.dump"

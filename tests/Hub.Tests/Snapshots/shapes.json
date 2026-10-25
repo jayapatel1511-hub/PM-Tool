@@ -6803,6 +6803,9 @@
     "$.reviews.tasks[].can.assign": [
       "boolean"
     ],
+    "$.reviews.tasks[].can.block": [
+      "boolean"
+    ],
     "$.reviews.tasks[].can.changeDue": [
       "boolean"
     ],
@@ -7085,6 +7088,9 @@
       "object"
     ],
     "$.tasks[].can.assign": [
+      "boolean"
+    ],
+    "$.tasks[].can.block": [
       "boolean"
     ],
     "$.tasks[].can.changeDue": [
@@ -12604,6 +12610,12 @@
       "object"
     ],
     "$.components.schemas.Can.properties.assign.type": [
+      "string"
+    ],
+    "$.components.schemas.Can.properties.block": [
+      "object"
+    ],
+    "$.components.schemas.Can.properties.block.type": [
       "string"
     ],
     "$.components.schemas.Can.properties.changeDue": [
@@ -59924,6 +59936,9 @@
     "$.blocked[].can.assign": [
       "boolean"
     ],
+    "$.blocked[].can.block": [
+      "boolean"
+    ],
     "$.blocked[].can.changeDue": [
       "boolean"
     ],
@@ -60222,6 +60237,9 @@
       "object"
     ],
     "$.completed.tasks[].can.assign": [
+      "boolean"
+    ],
+    "$.completed.tasks[].can.block": [
       "boolean"
     ],
     "$.completed.tasks[].can.changeDue": [
@@ -60780,6 +60798,9 @@
     "$.disciplines[].top[].can.assign": [
       "boolean"
     ],
+    "$.disciplines[].top[].can.block": [
+      "boolean"
+    ],
     "$.disciplines[].top[].can.changeDue": [
       "boolean"
     ],
@@ -61245,6 +61266,9 @@
       "object"
     ],
     "$.overdue[].can.assign": [
+      "boolean"
+    ],
+    "$.overdue[].can.block": [
       "boolean"
     ],
     "$.overdue[].can.changeDue": [
@@ -61751,6 +61775,9 @@
     "$.upcoming.tasks[].can.assign": [
       "boolean"
     ],
+    "$.upcoming.tasks[].can.block": [
+      "boolean"
+    ],
     "$.upcoming.tasks[].can.changeDue": [
       "boolean"
     ],
@@ -62239,6 +62266,9 @@
       "object"
     ],
     "$.blocked.items[].can.assign": [
+      "boolean"
+    ],
+    "$.blocked.items[].can.block": [
       "boolean"
     ],
     "$.blocked.items[].can.changeDue": [
@@ -62745,6 +62775,9 @@
       "object"
     ],
     "$.dueThisWeek.items[].can.assign": [
+      "boolean"
+    ],
+    "$.dueThisWeek.items[].can.block": [
       "boolean"
     ],
     "$.dueThisWeek.items[].can.changeDue": [
@@ -63346,6 +63379,9 @@
       "object"
     ],
     "$.tasks[].can.assign": [
+      "boolean"
+    ],
+    "$.tasks[].can.block": [
       "boolean"
     ],
     "$.tasks[].can.changeDue": [
@@ -64845,6 +64881,9 @@
     "$.items[].can.assign": [
       "boolean"
     ],
+    "$.items[].can.block": [
+      "boolean"
+    ],
     "$.items[].can.changeDue": [
       "boolean"
     ],
@@ -64865,11 +64904,9 @@
       "string"
     ],
     "$.items[].createdBy": [
-      "null",
       "string"
     ],
     "$.items[].createdByName": [
-      "null",
       "string"
     ],
     "$.items[].deliverableDueDate": [
@@ -65139,7 +65176,6 @@
       "string"
     ],
     "$.items[].statusChangedAt": [
-      "null",
       "string"
     ],
     "$.items[].successorCount": [
@@ -70057,9 +70093,11 @@
       "string"
     ],
     "$.package.updatedBy": [
+      "null",
       "string"
     ],
     "$.readiness": [
+      "null",
       "object"
     ],
     "$.readiness.blockers": [
@@ -71232,6 +71270,9 @@
     "$.rows[].can.assign": [
       "boolean"
     ],
+    "$.rows[].can.block": [
+      "boolean"
+    ],
     "$.rows[].can.changeDue": [
       "boolean"
     ],
@@ -71286,7 +71327,6 @@
       "string"
     ],
     "$.rows[].closeCause": [
-      "null",
       "string"
     ],
     "$.rows[].closed": [
@@ -73074,6 +73114,9 @@
     "$.items[].can.assign": [
       "boolean"
     ],
+    "$.items[].can.block": [
+      "boolean"
+    ],
     "$.items[].can.changeDue": [
       "boolean"
     ],
@@ -73533,6 +73576,9 @@
     "$.task.can.assign": [
       "boolean"
     ],
+    "$.task.can.block": [
+      "boolean"
+    ],
     "$.task.can.changeDue": [
       "boolean"
     ],
@@ -73770,6 +73816,9 @@
     "$.predecessors[].task.can.assign": [
       "boolean"
     ],
+    "$.predecessors[].task.can.block": [
+      "boolean"
+    ],
     "$.predecessors[].task.can.changeDue": [
       "boolean"
     ],
@@ -73968,6 +74017,9 @@
     "$.successors[].task.can.assign": [
       "boolean"
     ],
+    "$.successors[].task.can.block": [
+      "boolean"
+    ],
     "$.successors[].task.can.changeDue": [
       "boolean"
     ],
@@ -74152,6 +74204,9 @@
       "object"
     ],
     "$.task.can.assign": [
+      "boolean"
+    ],
+    "$.task.can.block": [
       "boolean"
     ],
     "$.task.can.changeDue": [
@@ -74993,6 +75048,7 @@
       "string"
     ],
     "$.roles[].startMilestoneRef": [
+      "null",
       "string"
     ],
     "$.roles[].startOffsetDays": [
@@ -83737,6 +83793,9 @@
     ],
     "$.weeks[].indicators": [
       "array"
+    ],
+    "$.weeks[].indicators[]": [
+      "string"
     ],
     "$.weeks[].personId": [
       "string"

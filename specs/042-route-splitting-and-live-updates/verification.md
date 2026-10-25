@@ -10,7 +10,7 @@ Runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72` passes **1,514/1,514 b
 |---|---|---|
 | AC-LIVE-01 | `BuildStampTests` (S01) | PASS (local): current 566fe51 image OCI revision/HUB_BUILD match; health build verified; hosted image activation remains unproven |
 | AC-LIVE-02 | `web/tests/live-browser.cjs` (S02) | PASS (local): stamped A→B→A browser notice, one per new build |
-| AC-LIVE-03 | `scripts/test_verify_homedev_review.py`, `tools/test_pilot_operations.py` (S03) | PASS (local): Python activation/probe controls; hosted execution unproven |
+| AC-LIVE-03 | `tools/test_social_activation.py` (`test_review_probe_checks_the_expected_build`, which replaced the source-text check `scripts/test_verify_homedev_review.py` on 2026-10-25), `tools/test_pilot_operations.py` (S03) | PASS (local): Python activation/probe controls; hosted execution unproven |
 | AC-LIVE-04 | `web/tests/registrations.cjs` (S05, re-run in S07) | PASS (local): all seven Task, Milestone, Deliverable, Decision, Action, Risk and Issue cold deep links render their own headings; Task comments/links also checked |
 | AC-LIVE-05 | `web/tests/registrations.cjs` (S05, re-run in S07) | PARTIAL: eager registration source guard passes; all plugin combinations not swept |
 | AC-LIVE-06 | `web/tests/registrations.cjs` self-test (S05) | PASS (local): seeded registration guard controls |

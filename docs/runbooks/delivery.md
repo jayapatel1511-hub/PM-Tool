@@ -24,8 +24,8 @@ release is a green `main` commit.
 The required checks are the jobs of `.github/workflows/ci.yml` from slices S01 to S04. `checks` carries the size
 check (S01), the migration lint (S04) and the trace check `python3 tools/trace_spec.py --check`; `gate` carries the
 coverage merge and the test-count ratchet (S02, S03). Slice S13 adds the `tier` and `review` checks and automatic
-merge. The `tier` check runs in `checks` from `tools/ci_steps.txt`; the `review` status is set by the separate
-reviewer session only after it has no open findings. Add both status names to branch protection after S13 is merged.
+merge. The `tier` check runs as its own `tier` job from `tools/ci_steps.txt`, so a Tier B label wait never holds up
+`checks`; the `review` status is set by the separate reviewer session only after it has no open findings. Add both status names to branch protection after S13 is merged.
 Tier A auto-merge is allowed only when all required checks, including `tier` and `review`, are green; Tier B waits for
 Jay's `tier-b-ok` label and merge.
 
@@ -107,10 +107,30 @@ Use the cheapest step that works, in this order:
 A down migration is never run and a database volume is never deleted. The daily dump timers and restore drills stay
 unchanged; see [restore](restore.md).
 
+## Regenerating generated contracts
+
+Three committed files are generated from the running API. CI fails when any of them drifts; regenerate them only for
+an intended contract change, and review each diff in the pull request.
+
+| File | Regenerate | Checked by |
+|---|---|---|
+| `web/src/gen/openapi.json` and `web/src/gen/api.d.ts` | `HUB_UPDATE_CONTRACT=1 dotnet test tests/Hub.Tests --filter ContractTests`, then `cd web && npm run gen` | `ContractTests`; `git diff --exit-code -- web/src/gen` in `web` |
+| `web/src/gen/registry.gen.ts` | `HUB_UPDATE_REGISTRY=1 dotnet test tests/Hub.Tests --filter RegistryTests` | `RegistryTests` |
+| `tests/Hub.Tests/Snapshots/shapes.json` | Run the whole backend suite (it records every JSON response under `ci-artifacts/shapes/`), then `python3 tools/shapes.py update` | `python3 tools/shapes.py check` in `gate` |
+
+An update run writes the file and then fails, so a variable left set cannot hide drift; rerun without it to see the
+tests pass. Regenerate the shape snapshot only from a full suite run: a filtered run records fewer operations and
+`update` refuses when a typed response has no recorded shape. `shapes.py` merges every `shapes/latest.json` under
+its input, so delete older runs from `ci-artifacts/` first, or pass `--input` with a folder holding only this run. The snapshot keeps every status the suite records,
+including error bodies (FR-PLAT-16); a path recorded only as `null` or as an empty array is unknown, so removals beneath
+it are not reported until a test returns it filled.
+
 ## Reviewer status and local handoffs
 
 A separate reviewer inspects the actual head diff and checks, resolves every finding and only then sets the
 `review` commit status for that exact PR head. An author summary or a passing test is not a review. The trusted
 Tier A workflow reevaluates on successful CI and on a later successful `review` status; it checks the exact head
-and refuses Tier B paths/labels. No status was set during this local takeover. Jay applies the protection and
+and refuses Tier B paths/labels. It counts only a `review` status created by the repository owner's account, or by an
+account listed in the `REVIEWER_LOGINS` repository variable (comma-separated); a status set by any other account or
+workflow is ignored. No status was set during this local takeover. Jay applies the protection and
 auto-merge settings above; source preparation does not change the repository settings.

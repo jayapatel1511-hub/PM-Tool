@@ -88,7 +88,13 @@ public sealed class RegistryTests
             + "export type GeneratedItemTypeKey = typeof itemTypeKeys[number]\nexport type GeneratedFieldKey = typeof fieldKeys[number]\nexport type VocabularyValue = typeof vocabularyValues[number]\n"
             + "export interface SavedViewKeys {\n" + string.Join("\n", ScreenLists.All.OrderBy(l => l.Code).Select(l => "  " + JsonSerializer.Serialize(l.Code) + ": " + string.Join(" | ", l.Keys.Concat(l.NotKept.Keys).Distinct().Order().Select(k => JsonSerializer.Serialize(k))))) + "\n}\n";
         var file = Path.Combine(ContractTests.Root, "web/src/gen/registry.gen.ts");
-        if (Environment.GetEnvironmentVariable("HUB_UPDATE_REGISTRY") == "1") File.WriteAllText(file, text);
-        Assert.Equal(File.ReadAllText(file), text);
+        var golden = File.ReadAllText(file);
+        if (Environment.GetEnvironmentVariable("HUB_UPDATE_REGISTRY") == "1" && golden != text)
+        {
+            File.WriteAllText(file, text);
+            // An update run still fails on drift, so a variable left set cannot hide a registry change.
+            Assert.Fail("Updated web/src/gen/registry.gen.ts; review the diff and rerun without HUB_UPDATE_REGISTRY");
+        }
+        Assert.Equal(golden, text);
     }
 }

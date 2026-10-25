@@ -18,7 +18,7 @@ Implement §46 with defaults D1 to D11. Every slice is one PR off `origin/main`,
 |---|---|
 | S01 | `hosting/Dockerfile.review`, `hosting/homedev.compose.yml`, `hosting/homedev-pilot.compose.yml`, `src/Hub.Api/Program.cs` (`/health`), `src/Hub.Api/Infrastructure/Http.cs` (`SecurityHeaders`), `tests/Hub.Tests/Api/BuildStampTests.cs` |
 | S02 | `web/src/lib/api.ts`, `web/src/i18n/en.ts`, `web/tests/build-stamp.cjs`, `web/package.json`, `tools/ci_steps.txt` |
-| S03 | `scripts/verify-homedev-review.py`, `scripts/verify-homedev-pilot.py`, `scripts/activate-homedev-review.sh`, `scripts/activate-homedev-pilot.sh`, `scripts/test_verify_homedev_review.py`, `tools/test_pilot_operations.py`, `tools/ci_steps.txt` |
+| S03 | `scripts/verify-homedev-review.py`, `scripts/verify-homedev-pilot.py`, `scripts/activate-homedev-review.sh`, `scripts/activate-homedev-pilot.sh`, `tools/test_social_activation.py`, `tools/test_pilot_operations.py`, `tools/ci_steps.txt` |
 | S04 | `src/Hub.Api/Program.cs` (static files, fallback), `tests/Hub.Tests/Api/StaticCacheTests.cs` |
 | S05 | `web/src/app/registrations.tsx` (new), `web/src/main.tsx`, `web/src/app/routes.tsx`; registration lines removed from `web/src/pages/projects/{TaskPanel,Milestones,Deliverables,Decisions,Meetings,Registers,Health,Follow,CopyStructure,FromTemplate}.tsx`, `web/src/pages/admin/{Holidays,Operations}.tsx`, `web/src/components/hub/{comments,links,new-item,notifications,search,workspace}.tsx` (exports added where a component was private); `web/tests/registrations.cjs`, `web/package.json`, `tools/ci_steps.txt` |
 | S06 | `web/src/app/routes.tsx`, `web/src/lib/auth.tsx` (lazy entrance pages), `web/src/lib/lazy.ts` (new), `web/src/pages/admin/area.ts` and `web/src/pages/planning-area.ts` (new), `web/vite.config.ts` (`build.manifest`), `web/scripts/chunk-report.mjs` (new), `web/tests/route-splitting.cjs`, `tests/Hub.Tests/Api/StaticCacheTests.cs`, `web/package.json`, `tools/ci_steps.txt` |
@@ -58,5 +58,5 @@ Open product decisions from §34 this plan depends on: none.
 - `dotnet test Hub.slnx` (full suite) with `python3 tools/coverage_gate.py coverage`; new classes `BuildStampTests`, `StaticCacheTests`, `LiveStampTests`, `LiveFeedTests`, `LiveEventsTests`.
 - `npm run build`, `npm run lint`, and in `web/`: `test:build-stamp`, `test:registrations`, `test:route-splitting`, `test:live-refresh`, `test:live-events`, plus every existing mocked suite unchanged.
 - The local-only suites (`calm-acceptance`, `calm-clicks`, `clutter`, `counts`, `planning-live`, `ui-consistency`) and `tools/preview/sweep.cjs` before and after S06 and S07.
-- `python3 -m unittest scripts/test_verify_homedev_review.py scripts/test_check_live_stream.py` and `python3 tools/test_pilot_operations.py`.
+- `python3 -m unittest tools.test_social_activation scripts/test_check_live_stream.py` and `python3 tools/test_pilot_operations.py`.
 - `web/tests/live-real.cjs` in the §43 nightly real-API job; `scripts/check-live-stream.py` against a cloudflared quick tunnel to a local stack, then against the review origin.

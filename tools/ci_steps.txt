@@ -21,7 +21,6 @@ checks: python3 tools/ratchet.py && python3 tools/test_ratchet.py
 checks: python3 tools/text_keys.py && python3 tools/test_text_keys.py
 checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/test_pr_checks.py && python3 tools/pr_checks.py size --base HEAD^1 --labels "${LABELS:-}"; fi
 checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/pr_checks.py migrations --base HEAD^1 --labels "${LABELS:-}"; fi
-checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/pr_checks.py tier --base HEAD^1 --labels "${LABELS:-}"; fi
 checks: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then python3 tools/trace_spec.py --ratchet --base HEAD^1; fi
 checks: python3 tools/test_backup_helpers.py && python3 tools/test_pilot_initializer.py && python3 tools/test_pilot_operations.py && python3 tools/test_pilot_pitr.py
 checks: python3 -m unittest tools.test_social_activation
@@ -94,6 +93,6 @@ nightly: TUESDAY_SYNTHETIC_API=1 TUESDAY_LIVE_UI_URL=http://127.0.0.1:5173 TUESD
 # Typed contract and registry (§44).
 gate: python3 tools/shapes.py check --input ci-artifacts-in
 checks: python3 tools/test_shapes.py
-checks: python3 -m unittest scripts/test_check_live_stream.py scripts/test_verify_homedev_review.py
+checks: python3 -m unittest scripts/test_check_live_stream.py
 web: git diff --exit-code -- web/src/gen
 web: cd web && npm run test:keys && npm run typecheck:tests

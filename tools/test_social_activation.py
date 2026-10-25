@@ -91,7 +91,7 @@ class SocialActivationTests(unittest.TestCase):
         self.assertEqual(code, "Refusing unexpected verification origin")
         self.assertEqual(requests, [])
 
-    def local_probe(self, revokes):
+    def local_probe(self, revokes, health=b"Healthy", argv=("verify",)):
         signed_out = []
 
         class Connection:
@@ -102,7 +102,7 @@ class SocialActivationTests(unittest.TestCase):
                 self.path, self.headers, self.body = path, headers, json.loads(body) if body else None
 
             def getresponse(self):
-                status, body, headers = 200, b"Healthy", []
+                status, body, headers = 200, health, []
                 cookie = self.headers.get("Cookie")
                 live = cookie == "hub=synthetic-token" and not (revokes and signed_out)
                 if self.headers["Host"] == "evil.example":
@@ -132,7 +132,7 @@ class SocialActivationTests(unittest.TestCase):
 
         handoff = json.dumps({"credentials": [{"login": "a@example.com", "password": "synthetic-password"}]})
         output = io.StringIO()
-        with patch.object(sys, "argv", ["verify"]), patch("http.client.HTTPConnection", Connection), \
+        with patch.object(sys, "argv", list(argv)), patch("http.client.HTTPConnection", Connection), \
              patch("builtins.open", mock_open(read_data=handoff)), \
              contextlib.redirect_stdout(output), self.assertRaises(SystemExit) as ended:
             runpy.run_path(str(ROOT / "scripts/verify-homedev-review.py"), run_name="__main__")
@@ -147,6 +147,18 @@ class SocialActivationTests(unittest.TestCase):
         code, output = self.local_probe(revokes=False)
         self.assertEqual(code, 1, output)
         self.assertIn("FAIL copied cookie after sign-out denied", output)
+
+    def test_review_probe_checks_the_expected_build(self):
+        health = b'{"status": "Healthy", "build": "abc"}'
+        code, output = self.local_probe(True, health, ["verify", "--expect-build", "abc"])
+        self.assertEqual(code, 0, output)
+        self.assertIn("PASS health build", output)
+        code, output = self.local_probe(True, health, ["verify", "--expect-build", "other"])
+        self.assertEqual(code, 1, output)
+        self.assertIn("FAIL health build — expected other, got abc", output)
+        code, output = self.local_probe(True, argv=["verify", "--expect-build", "abc"])
+        self.assertEqual(code, 1, output)
+        self.assertIn("got <missing>", output)
 
     def test_social_probe_reports_copied_cookie_skip(self):
         code, output, _ = self.probe()

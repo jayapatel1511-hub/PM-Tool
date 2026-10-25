@@ -2,6 +2,7 @@
 """Safely enable Tier A squash auto-merge after trusted CI and reviewer status pass."""
 import argparse
 import json
+import os
 import re
 import subprocess
 
@@ -32,8 +33,12 @@ def checks_green(check_runs):
     return all(latest.get(name, {}).get("conclusion") == "success" for name in REQUIRED)
 
 
-def review_green(statuses):
-    return any(status.get("context") == "review" and status.get("state") == "success" for status in statuses)
+def review_green(statuses, reviewers):
+    """The newest `review` status set by a trusted reviewer account decides; `statuses` is newest first."""
+    for status in statuses:
+        if status.get("context") == "review" and (status.get("creator") or {}).get("login") in reviewers:
+            return status.get("state") == "success"
+    return False
 
 
 def gh(repo, path):
@@ -80,8 +85,10 @@ def main(argv=None):
     if tier_b_paths([file["filename"] for file in files if file["filename"] not in changed_steps], contract_migrations) or changed_steps:
         return 0
     checks = gh(args.repo, f"commits/{sha}/check-runs?per_page=100").get("check_runs", [])
-    statuses = gh(args.repo, f"commits/{sha}/status").get("statuses", [])
-    if not checks_green(checks) or not review_green(statuses):
+    # The full status list carries each creator; the combined status endpoint does not.
+    statuses = gh(args.repo, f"commits/{sha}/statuses?per_page=100")
+    reviewers = {login for login in os.environ.get("REVIEWER_LOGINS", "").split(",") if login} or {args.repo.split("/")[0]}
+    if not checks_green(checks) or not review_green(statuses, reviewers):
         return 0
     subprocess.run(["gh", "pr", "merge", "-R", args.repo, str(pr_number), "--auto", "--squash", "--delete-branch",
                     "--match-head-commit", sha], check=True)

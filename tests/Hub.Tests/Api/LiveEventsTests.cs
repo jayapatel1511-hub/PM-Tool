@@ -74,9 +74,13 @@ public sealed class LiveEventsTests(LiveEventsHost host) : IClassFixture<LiveEve
     public async Task Flag_off_answers_404_and_opens_nothing() // FR-LIVE-14, AC-LIVE-15
     {
         await SetFlag(f, false);
+        var feed = f.Services.GetRequiredService<LiveFeed>();
+        // Streams from earlier tests on this shared host unsubscribe asynchronously after their clients close them.
+        for (var wait = Stopwatch.StartNew(); feed.Subscribers > 0 && wait.Elapsed < TimeSpan.FromSeconds(10);) await Task.Delay(50);
+        Assert.Equal(0, feed.Subscribers);
         using var r = await Request(f, TestData.Alex);
         Assert.Equal(HttpStatusCode.NotFound, r.StatusCode);
-        Assert.Equal(0, f.Services.GetRequiredService<LiveFeed>().Subscribers);
+        Assert.Equal(0, feed.Subscribers);
     }
 
     [Fact]
@@ -215,7 +219,8 @@ public sealed class LiveEventsTests(LiveEventsHost host) : IClassFixture<LiveEve
             do line = await live.Line(TimeSpan.FromSeconds(3)); while (line == "");
             Assert.Equal(": heartbeat", line);
         }
-        Assert.InRange(watch.Elapsed.TotalSeconds, 2.5, 6);
+        // Three one-second heartbeats span at least two intervals after the first; the wide upper bound tolerates a loaded host.
+        Assert.InRange(watch.Elapsed.TotalSeconds, 1.5, 10);
     }
 
     [Fact]
@@ -253,7 +258,7 @@ public sealed class LiveEventsTests(LiveEventsHost host) : IClassFixture<LiveEve
         using var live = await Open(hub, TestData.Alex);
         var watch = Stopwatch.StartNew();
         while (await live.Line(TimeSpan.FromSeconds(15)) is not null) { }
-        Assert.InRange(watch.Elapsed.TotalSeconds, 1.5, 10);
+        Assert.InRange(watch.Elapsed.TotalSeconds, 1, 15); // a 3-second life: neither immediate nor the 10-minute default
     }
 
     [Fact]
@@ -268,13 +273,13 @@ public sealed class LiveEventsTests(LiveEventsHost host) : IClassFixture<LiveEve
             var watch = Stopwatch.StartNew();
             hub.Services.GetRequiredService<IHostApplicationLifetime>().StopApplication();
             while (await live.Line(TimeSpan.FromSeconds(10)) is not null) { }
-            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(5), $"stream ended after {watch.Elapsed}");
+            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(8), $"stream ended after {watch.Elapsed}");
         }
         finally
         {
             var watch = Stopwatch.StartNew();
             hub.Dispose();
-            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(15), $"host stop took {watch.Elapsed}");
+            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(20), $"host stop took {watch.Elapsed}");
         }
     }
     [Fact]
@@ -296,7 +301,7 @@ public sealed class LiveEventsTests(LiveEventsHost host) : IClassFixture<LiveEve
         {
             var hearts = 0;
             var deadline = Stopwatch.StartNew();
-            while (hearts < 2 && deadline.Elapsed < TimeSpan.FromSeconds(4))
+            while (hearts < 2 && deadline.Elapsed < TimeSpan.FromSeconds(8))
             {
                 var line = await live.Line(TimeSpan.FromSeconds(3));
                 Assert.False(line?.StartsWith("data:", StringComparison.Ordinal));

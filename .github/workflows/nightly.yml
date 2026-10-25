@@ -40,8 +40,11 @@ jobs:
           python3 tools/preview/seed_resources.py http://127.0.0.1:5080
           python3 tools/preview/seed_modules.py http://127.0.0.1:5080
           python3 tools/preview/seed_planning.py http://127.0.0.1:5080
-          cd web && npm ci && npx playwright install --with-deps chromium && npm run dev -- --host 127.0.0.1 --port 5173 > ../web.log 2>&1 &
-          for i in $(seq 1 30); do curl --fail --silent http://127.0.0.1:5173/ && break; sleep 2; done
+          # Install in the foreground; only the dev server runs in the background, and the step fails if it never answers.
+          cd web && npm ci && npx playwright install --with-deps chromium
+          npm run dev -- --host 127.0.0.1 --port 5173 > ../web.log 2>&1 &
+          for i in $(seq 1 30); do curl --fail --silent http://127.0.0.1:5173/ > /dev/null && break; sleep 2; done
+          curl --fail --silent http://127.0.0.1:5173/ > /dev/null || { cat ../web.log; exit 1; }
       - name: Use the last green nightly as the comparison UI
         env:
           GH_TOKEN: "${{ github.token }}"
@@ -50,7 +53,8 @@ jobs:
           if [ -n "$base" ]; then
             git worktree add /tmp/pm-tool-nightly-base "$base"
             (cd /tmp/pm-tool-nightly-base/web && npm ci && npm run dev -- --host 127.0.0.1 --port 5174 > /tmp/nightly-base.log 2>&1) &
-            for i in $(seq 1 30); do curl --fail --silent http://127.0.0.1:5174/ && break; sleep 2; done
+            for i in $(seq 1 30); do curl --fail --silent http://127.0.0.1:5174/ > /dev/null && break; sleep 2; done
+            curl --fail --silent http://127.0.0.1:5174/ > /dev/null || { cat /tmp/nightly-base.log; exit 1; }
             echo CALM_BASE_UI_URL=http://127.0.0.1:5174 >> "$GITHUB_ENV"
           else
             # D10: the first run has no green base, so comparison-only checks are skipped.

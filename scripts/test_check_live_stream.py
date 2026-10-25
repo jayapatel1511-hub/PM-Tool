@@ -15,27 +15,39 @@ SPEC.loader.exec_module(MODULE)
 
 class LiveStreamCheckerTests(unittest.TestCase):
     class _SseHandler(BaseHTTPRequestHandler):
+        body = b": heartbeat\n\n"
         close_after = False
+        echo_writes = False
 
         def do_GET(self):
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Cache-Control", "no-cache")
             self.end_headers()
-            self.wfile.write(b": heartbeat\\n\\n")
+            self.wfile.write(self.body)
             self.wfile.flush()
             if self.close_after:
                 self.connection.shutdown(1)
-            else:
-                self.server.stop = threading.Event()
-                self.server.stop.wait(2)
+                return
+            if self.echo_writes and self.server.wrote.wait(2):
+                self.wfile.write(b"data: {}\n\n")
+                self.wfile.flush()
+            threading.Event().wait(2)
+
+        def do_POST(self):
+            self.rfile.read(int(self.headers["Content-Length"]))
+            self.send_response(204)
+            self.end_headers()
+            if self.echo_writes:
+                self.server.wrote.set()
 
         def log_message(self, *_args):
             pass
 
-    def _serve(self, close_after):
-        self._SseHandler.close_after = close_after
-        server = ThreadingHTTPServer(("127.0.0.1", 0), self._SseHandler)
+    def _serve(self, close_after=False, **behaviour):
+        handler = type("Handler", (self._SseHandler,), {"close_after": close_after, **behaviour})
+        server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        server.wrote = threading.Event()
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
         return server, thread
@@ -51,29 +63,54 @@ class LiveStreamCheckerTests(unittest.TestCase):
         self.assertEqual(result, 1)
         self.assertNotIn("X-Dev-User", output.getvalue())
 
-    def test_uses_select_before_buffered_reads_and_checks_write_latency(self):
-        source = (ROOT / "scripts/check-live-stream.py").read_text()
-        self.assertIn("threading.Thread", source)
-        self.assertIn("event latency", source)
-        self.assertIn("idleCutoffSeconds", source)
-
-    def test_short_observation_does_not_fail_for_a_larger_heartbeat_gap(self):
-        source = (ROOT / "scripts/check-live-stream.py").read_text()
-        self.assertIn("if observation_left <= 0", source)
+    def _check(self, server, *extra):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            result = MODULE.run([f"http://127.0.0.1:{server.server_port}", "--dev-user", "alex@hub.test", *extra])
+        return result, output.getvalue()
 
     def test_local_stream_heartbeat_passes(self):
-        server, thread = self._serve(False)
+        # A one-second look at a stream whose gap limit is two seconds ends without a gap failure.
+        server, thread = self._serve()
         try:
-            output = io.StringIO()
-            with redirect_stdout(output):
-                result = MODULE.run([f"http://127.0.0.1:{server.server_port}", "--dev-user", "alex@hub.test", "--seconds", "1", "--heartbeat-max-gap", "2"])
+            result, output = self._check(server, "--seconds", "1", "--heartbeat-max-gap", "2")
             self.assertEqual(result, 0)
-            self.assertIn('"result": "PASS"', output.getvalue())
+            self.assertIn('"result": "PASS"', output)
+            self.assertIn('"heartbeats": 1', output)
+        finally:
+            server.shutdown(); server.server_close(); thread.join(timeout=2)
+
+    def test_silent_stream_fails(self):
+        server, thread = self._serve(body=b"")
+        try:
+            result, output = self._check(server, "--seconds", "1", "--heartbeat-max-gap", "2")
+            self.assertEqual(result, 1)
+            self.assertIn("FAIL no heartbeat observed", output)
+            result, output = self._check(server, "--seconds", "1", "--heartbeat-max-gap", ".3")
+            self.assertEqual(result, 1)
+            self.assertIn("FAIL heartbeat gap", output)
+        finally:
+            server.shutdown(); server.server_close(); thread.join(timeout=2)
+
+    def test_write_must_produce_a_live_event(self):
+        write = ["--seconds", "1", "--heartbeat-max-gap", "2", "--write-path", "tasks", "--write-body", "{}"]
+        server, thread = self._serve(echo_writes=True)
+        try:
+            result, output = self._check(server, *write)
+            self.assertEqual(result, 0, output)
+            self.assertIn('"events": 1', output)
+        finally:
+            server.shutdown(); server.server_close(); thread.join(timeout=2)
+        server, thread = self._serve()
+        try:
+            result, output = self._check(server, *write)
+            self.assertEqual(result, 1)
+            self.assertIn("FAIL write produced no live event", output)
         finally:
             server.shutdown(); server.server_close(); thread.join(timeout=2)
 
     def test_no_heartbeat_requires_real_eof(self):
-        server, thread = self._serve(False)
+        server, thread = self._serve()
         try:
             output = io.StringIO()
             with redirect_stdout(output):
@@ -84,7 +121,7 @@ class LiveStreamCheckerTests(unittest.TestCase):
             server.shutdown(); server.server_close(); thread.join(timeout=2)
 
     def test_no_heartbeat_reports_cutoff_only_after_eof(self):
-        server, thread = self._serve(True)
+        server, thread = self._serve(close_after=True)
         try:
             output = io.StringIO()
             with redirect_stdout(output):

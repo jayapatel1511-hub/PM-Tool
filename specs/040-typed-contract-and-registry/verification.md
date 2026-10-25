@@ -1,30 +1,30 @@
 # Verification: Typed Contract and Entity Registry
 
-Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
+**Status: S01–S14 integrated locally on codex/integrate-039-050 (S03, S04, S06 and S13 with gaps noted); S15.n in progress under D8; S16 open. Not Accepted, not hosted.** Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
 
 | Acceptance criterion | Slice | Status |
 |---|---|---|
-| AC-PLAT-01 | S02 | PARTIAL: completeness/snapshot checks pass; explicit negative deletion controls not all recorded |
-| AC-PLAT-02 | S03 | PARTIAL: original 78-type ordered snapshots pass; before/after seeded audit bytes not separately compared |
-| AC-PLAT-03 | S04 | PARTIAL: original 14 history mappings preserved; full endpoint sweep belongs to integration |
-| AC-PLAT-04 | S04 | PARTIAL: original name/export query snapshots preserved; binary before/after comparison unproven |
-| AC-PLAT-05 | S06, S07 | PASS local: snapshot supersets and generated saved-view keys |
-| AC-PLAT-06 | S06 | PARTIAL: four-list onHold=false API round trips and typed page negative control pass; browser reopen unproven |
-| AC-PLAT-07 | S06 | PARTIAL: groupBy=office API round trips pass; grouped browser reopen unproven |
-| AC-PLAT-08 | S09 | PASS local: legacy-link real browser smoke and saved-mode API round trips |
-| AC-PLAT-09 | S09 | PASS local: reserved page-mode guard and unit tests |
-| AC-PLAT-10 | S05 | PASS local: generated label completeness and missing-label compiler control |
-| AC-PLAT-11 | S05, S08 | PASS local: strict key and shared-text checks; missing-key compiler control |
-| AC-PLAT-12 | S10 | PASS local: golden contract checks |
-| AC-PLAT-13 | S10, S12 | PASS local: regeneration/build and typed PATCH transport browser checks |
-| AC-PLAT-14 | S12, S15.n | PASS local checkpoint: typed caller/fixture negative controls and 798-response observed shape gate pass; later S15 slices require their own checks |
-| AC-PLAT-15 | S11 | PASS local: recorder and shape merger regression controls |
-| AC-PLAT-16 | S11, S15.n | PASS local checkpoint: one final full-run capture; all declared JSON responses observed, 381/429 mapped endpoints called (88.8%) |
-| AC-PLAT-17 | S12 | PASS local: actual JSDoc fixture rejects renamed DTO property |
-| AC-PLAT-18 | S13 | PASS local: final owned synthetic PostgreSQL/API/browser smoke and two-browser live flow |
-| AC-PLAT-19 | S14 | PASS local: invalidation map tests including delayed legacy refresh |
-| AC-PLAT-20 | S01 | PASS local: seeded ratchet regression controls; all enforced combined-lane counters pass original limits, then baselines lowered |
-| AC-PLAT-21 | S16 (human check) | UNPROVEN: qualifying five-feature cohort not established; measurement and subsequent Jay ruling remain pending |
+| AC-PLAT-01 | S02 | PARTIAL: `RegistryTests` completeness and snapshot checks pass (full run 1,491); explicit negative deletion controls not all recorded |
+| AC-PLAT-02 | S03 | PARTIAL: `RegistryTests` 78-type ordered snapshots and PlannedHours check pass; seeded before/after activity rows not separately compared |
+| AC-PLAT-03 | S04 | PARTIAL: original 14 history mappings preserved in `RegistryTests`; per-endpoint 404 sweep not recorded |
+| AC-PLAT-04 | S04 | PARTIAL: name/export snapshot supersets pass; byte-identical before/after export comparison not recorded |
+| AC-PLAT-05 | S06, S07 | PASS (local): `RegistryTests` snapshot supersets and generated saved-view keys |
+| AC-PLAT-06 | S06 | PARTIAL: four-list onHold API round trips, `PlatformViewKeysTests` 3/3 and typed page compiler control pass; mocked browser reopen not recorded |
+| AC-PLAT-07 | S06 | PARTIAL: groupBy=office API round trips pass; `planner.cjs` grouped-view reopen not recorded |
+| AC-PLAT-08 | S09 | PASS (local): legacy-link real-API browser smoke and saved-mode API round trips |
+| AC-PLAT-09 | S09 | PASS (local): reserved-name check in `tools/ratchet.py`; `tools/test_ratchet.py` and `npm run test:keys` 7/7 rerun 2026-10-25 |
+| AC-PLAT-10 | S05 | PASS (local): generated label completeness and missing-label compiler control |
+| AC-PLAT-11 | S05, S08 | PASS (local): strict key and shared-text checks; missing-key compiler control |
+| AC-PLAT-12 | S10 | PASS (local): `ContractTests` golden contract; generated client regeneration clean |
+| AC-PLAT-13 | S10, S12 | PASS (local): regeneration/build and typed PATCH If-Match and source-header checks in `resources.cjs` |
+| AC-PLAT-14 | S12, S15.n | PASS (local, checkpoint): typed caller/fixture compiler controls and 798-response shape gate; later S15 files need their own checks |
+| AC-PLAT-15 | S11 | PASS (local): `ShapeRecorderTests` and `tools/test_shapes.py` (rerun 2026-10-25) |
+| AC-PLAT-16 | S11, S15.n | PASS (local, checkpoint): full-run capture, all declared JSON responses observed; 381/429 mapped endpoints called (88.8%) |
+| AC-PLAT-17 | S12 | PASS (local): JSDoc fixture rejects renamed `plannedHours` |
+| AC-PLAT-18 | S13 | PASS (local): owned synthetic PostgreSQL/API/browser smoke and two-browser live flow; GitHub web-job run UNRUN |
+| AC-PLAT-19 | S14 | PASS (local): `npm run test:keys` 7/7 including delayed legacy refresh (rerun 2026-10-25) |
+| AC-PLAT-20 | S01 | PASS (local): `tools/test_ratchet.py` seeded regressions; `tools/ratchet.py` exits 0 on current counts (rerun 2026-10-25) |
+| AC-PLAT-21 | S16 (human check) | HUMAN: five-feature cohort not established (see `acceptance.md`); measurement and Jay ruling pending |
 
 
 ## Local implementation handoff — 2026-10-18

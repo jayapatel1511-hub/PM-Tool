@@ -1,5 +1,9 @@
 # Verification: Task and Timeline Interaction
 
+Status (2026-10-25): S01–S15 built on `codex/integrate-039-050` and locally checked. AC-INT-01 and AC-INT-29 are PARTIAL (AC-INT-21 corrected to PASS (local) on 2026-10-25); the rest PASS (local). Human, phone, keyboard, hosted and pilot checks are not run. S16 flag cleanup waits on Jay. Not Accepted. The 2026-10-25 records check confirmed the code and tests exist; tests were not rerun (local Postgres was down), so results below are from the 566fe51 run.
+
+Review-fix run 2026-10-25 (Release, local; `cf3ce8ee` plus the Code review and cleanup session's uncommitted fixes; full backend 1,516 passed, 1 skipped, 0 failed): `InteractionScaleTests` now asserts p95 ≤ 500 ms per phase and path, cites §22 instead of AC-INT-21, and runs only with `HUB_SCALE=1` (skipped otherwise; still counted by the CI test-count gate). `HUB_SCALE=1` run: PASS, now asserted. Release, no coverage, local TestServer and PostgreSQL, 500 tasks, 100 concurrent readers, pool 20, 2 warm-up and 3 measured batches, flag OFF→ON→ON→OFF. Task-list p95 342.4 / 349.2 / 333.6 / 308.9 ms; picker p95 56.6 / 95.2 / 88.1 / 45.9 ms. One warmed local run, not corporate-network or pilot evidence. Not committed yet.
+
 Runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72` passes **1,514/1,514 backend tests** (zero failures/skips). Rules branch coverage is **3,032/3,155 (96.1%)** and service line coverage **13,084/13,665 (95.7%)**. The 799-response shape gate passes from one full-run manifest. See the [acceptance follow-up](../../docs/handoffs/2026-10-19-039-050-acceptance-followup.md) and its hashed receipt for current browser, image and source boundaries. Earlier slice runs below are historical; their missing-schema/startup blockers are resolved by the combined run. Prior compatibility evidence retains source `1b649f5`; no schema changed afterward. No packet is Accepted; hosted, pilot and human gates remain separate.
 
 ## Historical lane evidence — superseded by current crosswalk below
@@ -22,35 +26,35 @@ Model commit `ea202b19` contains nullable `Milestone.BaselineDate`, `Deliverable
 
 Local PASS covers only the named checks. It is not human acceptance. Backend evidence is the full 1,514-test TRX; browser evidence is `ci-artifacts/integration/interaction-final-566fe51.log` (both scripts pass).
 
-| AC | Current evidence and limit |
-|---|---|
-| AC-INT-01 | PASS bounded API/mock flag pairs; complete flag retirement and pilot parity remain gated. |
-| AC-INT-02 | PASS desktop mock hover/focus, named Open, archived viewer Open-only; server role/status matrix passes. |
-| AC-INT-03 | PASS mock start-authorisation refusal with unchanged status; backend authorization regressions pass. |
-| AC-INT-04 | PASS mock Block dialog requires reason and sends expected payload; backend lifecycle regressions pass. |
-| AC-INT-05 | PASS empty/Escape no-write, Enter single PATCH, 409 saved name recovery and rejected-draft retention; `ScheduleBaselineTests.Task_name_edit_logs_once_and_newest_actor_is_flagged_without_changing_sort` passes. |
-| AC-INT-06–07 | PASS all six PickerRank tests: ranking, recent window, search, access and flag-off shape. |
-| AC-INT-08 | PASS browser Task and Deliverable project query and On this project marker; Portfolio query has no project context. Milestone provider wiring is source evidence only (`Milestones.tsx:479`): no PeoplePicker consumer exists in that panel, so no milestone picker interaction is claimed. |
-| AC-INT-09–11 | PASS all 11 DateContext tests: evaluator bounds, own inconsistencies, availability scope and flag-off behavior. |
-| AC-INT-12 | PASS mock proposed/cleared date requests, Escape no write, inconsistent-date save; API bounds/evaluation tests pass. |
-| AC-INT-13 | PASS mock new inconsistency/successor/child warnings and cancel without write; API descendant read and drag regressions pass. |
-| AC-INT-14 | PASS mock two-day/no-ghost and four-day/original-plus-baseline ghosts; API threshold/filter/export cases pass. |
-| AC-INT-15–16 | PASS all four ScheduleBaseline cases plus reason/current version payload, denied controls and second ghost. `BaselineHistory.Capture` is integrated inside the deliverable transaction; baseline/history/audit/conflict checks pass. |
-| AC-INT-17 | PASS API current values/three surfaces/status/health invariants and mock latest-planned Why title. Human visual review remains separate. |
-| AC-INT-18–19 | PASS shared view copied as Personal with identical parameters, no source PATCH and default false; Staff default replay, explicit URL precedence and manual restoration. All 12 Views tests pass. |
-| AC-INT-20 | PASS four entries grouped within ten minutes, separate eleven-minute entry and expand-all originals in Chromium. |
-| AC-INT-21 | PASS actor, sort and log API behavior. LIMIT: task-list p95 is not consistently within 500 ms; see measurement below. |
-| AC-INT-22 | PASS mock create-from-task prefills/type/default owner/reciprocal link and denied action; API preserves original task and rejects cross-project source. |
-| AC-INT-23 | PASS pending Complete/Saving state then refusal rollback to In Progress; existing guards remain. |
-| AC-INT-24 | PASS actual allocation dialog says 2 of 5 dates and renders five date rows; zero axe violations after animation settles. |
-| AC-INT-25 | PASS global Gantt collapse, URL reload/back and all-collapsed state. |
-| AC-INT-26 | PASS allowed/denied Portfolio-to-Planner capability pair. |
-| AC-INT-27 | PASS handoff date marks, mismatch/overdue days, navigation, incorporated/discipline filters and no-write controls; API visibility/status cases pass. |
-| AC-INT-28 | PASS exact one-of-two chain highlight, dimming and clear; API uses stored affected milestones without recalculation. |
-| AC-INT-29 | PASS bounded desktop Timeline/Gantt/allocation axe checks. Phone, keyboard/screen-reader completeness, human review and representative network timing remain UNPROVEN. |
+| AC | Status | Current evidence and limit |
+|---|---|---|
+| AC-INT-01 | PARTIAL | PASS bounded API/mock flag pairs; complete flag retirement and pilot parity remain gated. |
+| AC-INT-02 | PASS (local) | PASS desktop mock hover/focus, named Open, archived viewer Open-only; server role/status matrix passes. |
+| AC-INT-03 | PASS (local) | PASS mock start-authorisation refusal with unchanged status; backend authorization regressions pass. |
+| AC-INT-04 | PASS (local) | PASS mock Block dialog requires reason and sends expected payload; backend lifecycle regressions pass. |
+| AC-INT-05 | PASS (local) | PASS empty/Escape no-write, Enter single PATCH, 409 saved name recovery and rejected-draft retention; `ScheduleBaselineTests.Task_name_edit_logs_once_and_newest_actor_is_flagged_without_changing_sort` passes. |
+| AC-INT-06–07 | PASS (local) | PASS all six PickerRank tests: ranking, recent window, search, access and flag-off shape. |
+| AC-INT-08 | PASS (local) | PASS browser Task and Deliverable project query and On this project marker; Portfolio query has no project context. Milestone provider wiring is source evidence only (`Milestones.tsx:479`): no PeoplePicker consumer exists in that panel, so no milestone picker interaction is claimed. |
+| AC-INT-09–11 | PASS (local) | PASS all 11 DateContext tests: evaluator bounds, own inconsistencies, availability scope and flag-off behavior. |
+| AC-INT-12 | PASS (local) | PASS mock proposed/cleared date requests, Escape no write, inconsistent-date save; API bounds/evaluation tests pass. |
+| AC-INT-13 | PASS (local) | PASS mock new inconsistency/successor/child warnings and cancel without write; API descendant read and drag regressions pass. |
+| AC-INT-14 | PASS (local) | PASS mock two-day/no-ghost and four-day/original-plus-baseline ghosts; API threshold/filter/export cases pass. |
+| AC-INT-15–16 | PASS (local) | PASS all four ScheduleBaseline cases plus reason/current version payload, denied controls and second ghost. `BaselineHistory.Capture` is integrated inside the deliverable transaction; baseline/history/audit/conflict checks pass. |
+| AC-INT-17 | PASS (local) | PASS API current values/three surfaces/status/health invariants and mock latest-planned Why title. Human visual review remains separate. |
+| AC-INT-18–19 | PASS (local) | PASS shared view copied as Personal with identical parameters, no source PATCH and default false; Staff default replay, explicit URL precedence and manual restoration. All 12 Views tests pass. |
+| AC-INT-20 | PASS (local) | PASS four entries grouped within ten minutes, separate eleven-minute entry and expand-all originals in Chromium. |
+| AC-INT-21 | PASS (local) | Newest actor and unchanged sort pass (`ScheduleBaselineTests.Task_name_edit_logs_once_and_newest_actor_is_flagged_without_changing_sort`); a system-written entry returns a null actor, which the client shows as "System" (`Task_activity_actor_preserves_enabled_null_and_disabled_omission`). The task-list p95 limit recorded here earlier belongs to §22 Performance — API, not to this AC; see the measurement below. |
+| AC-INT-22 | PASS (local) | PASS mock create-from-task prefills/type/default owner/reciprocal link and denied action; API preserves original task and rejects cross-project source. |
+| AC-INT-23 | PASS (local) | PASS pending Complete/Saving state then refusal rollback to In Progress; existing guards remain. |
+| AC-INT-24 | PASS (local) | PASS actual allocation dialog says 2 of 5 dates and renders five date rows; zero axe violations after animation settles. |
+| AC-INT-25 | PASS (local) | PASS global Gantt collapse, URL reload/back and all-collapsed state. |
+| AC-INT-26 | PASS (local) | PASS allowed/denied Portfolio-to-Planner capability pair. |
+| AC-INT-27 | PASS (local) | PASS handoff date marks, mismatch/overdue days, navigation, incorporated/discipline filters and no-write controls; API visibility/status cases pass. |
+| AC-INT-28 | PASS (local) | PASS exact one-of-two chain highlight, dimming and clear; API uses stored affected milestones without recalculation. |
+| AC-INT-29 | PARTIAL | PASS bounded desktop Timeline/Gantt/allocation axe checks. Phone, keyboard/screen-reader completeness, human review and representative network timing remain UNPROVEN. |
 
 ## Performance and remaining gates
 
-[The measurement receipt](evidence/scale-measurement.json) preserves the 500-task, 100-concurrent-user, page-size-100, pool-20 samples. Uninstrumented task-list p95 is **912.2 ms flag off (FAIL 500 ms target)** and **392.2 ms flag on**; picker p95 is 68.6/108.8 ms. Fixed off-then-on order prevents a speedup or regression claim. Coverage-instrumented task-list timings also exceed 500 ms. Functional TRX success does not assert latency. One subsequent coverage-disabled OFF→ON→ON→OFF control used the same load, two full-concurrency warmup batches per phase/path and three measured batches. Task-list phase p95 values are 340.7, 366.5, 350.4, 315.9 ms; aggregate OFF 338.4 / ON 362.4 ms (600 samples each). Picker aggregate OFF 57.2 / ON 103.7 ms. This single warmed local control passes 500 ms, while preserving the earlier failure; it does not establish statistical significance or corporate-network/pilot performance.
+[The measurement receipt](evidence/scale-measurement.json) preserves the 500-task, 100-concurrent-user, page-size-100, pool-20 samples. Uninstrumented task-list p95 is **912.2 ms flag off (FAIL 500 ms target)** and **392.2 ms flag on**; picker p95 is 68.6/108.8 ms. Fixed off-then-on order prevents a speedup or regression claim. Coverage-instrumented task-list timings also exceed 500 ms. Functional TRX success does not assert latency. One subsequent coverage-disabled OFF→ON→ON→OFF control used the same load, two full-concurrency warmup batches per phase/path and three measured batches. Task-list phase p95 values are 340.7, 366.5, 350.4, 315.9 ms; aggregate OFF 338.4 / ON 362.4 ms (600 samples each). Picker aggregate OFF 57.2 / ON 103.7 ms. This single warmed local control passes 500 ms, while preserving the earlier failure; it does not establish statistical significance or corporate-network/pilot performance. Update 2026-10-25: the test now asserts p95 ≤ 500 ms under `HUB_SCALE=1` (§22 Performance — API) and passed on the review-fix source: task-list p95 342.4 / 349.2 / 333.6 / 308.9 ms (one warmed local run, not network or pilot evidence).
 
 Combined schema startup, API regression and coverage blockers are resolved. Previous-image compatibility remains the recorded 29-check source-1b649f5 result; no later schema change occurred. Full phone/keyboard/screen-reader and human acceptance, flag retirement and hosted/pilot operation remain separate. No push, deployment, pilot flag change or Accepted status.

@@ -1,38 +1,40 @@
 # Verification: Delivery Process
 
+Status (25 October 2026, branch `codex/integrate-039-050` at `cf3ce8ee`): slices S01 to S17 are built locally and their local checks pass; S06 is a read-only inventory only; S18 has not started. Rechecked today: the eight packet Python test modules (`tools.test_pr_checks`, `test_ci_tests`, `test_coverage_gate`, `test_decisions`, `test_trace_report`, `test_auto_merge`, `test_review_deploy`, `test_pilot_operations`) run 100 tests OK with Python 3.13, and `trace_spec.py --check` is clean (1299 IDs, 405 sections). The backend Flags tests that need Postgres were not rerun (Docker was down); the 19 October receipt records the full backend suite at 1514/1514. Every GitHub, homedev and human gate below is still open. Nothing is Accepted.
+
 Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
 
 Per FR-DLV-24, this file records checks until `trace_spec.py --report` (slice S11) is published on main; after that, this packet's verification is the report of the CI run for the deployed commit, and human checks go in `acceptance.md`.
 
 | AC | Slice | Status |
 |---|---|---|
-| AC-DLV-01 | S05 | UNRUN (human-only: Jay applies the settings with the `gh api` commands in `docs/runbooks/delivery.md` and records the readback in `acceptance.md`) |
+| AC-DLV-01 | S05 | HUMAN: human-only (`specs/human-only.txt`). Settings commands are in `docs/runbooks/delivery.md`; Jay applies them and records the readback in `acceptance.md`; not done |
 | AC-DLV-02 | S01 | PARTIAL: passes locally against a temporary git repo (350 hand-written lines plus an 11,000-line Designer file pass with no warning, 450 warns and passes, 1,050 fails, 1,050 with label `large` passes); not yet run in GitHub CI on a real pull request |
 | AC-DLV-03 | S01 | PASS (local): `git check-attr` reports `linguist-generated` set and `diff` unset for a Designer file, the snapshot, both combined spec files, `TRACEABILITY.md` and `package-lock.json`; nothing else in `git ls-files` is marked |
 | AC-DLV-04 | S09 | PASS (local): FlagsTests: a one-entry list gives `flag.demo` as an on/off setting, default off, group `flags`; the empty list adds nothing to `OrgSettings.Defs` |
 | AC-DLV-05 | S09 | PASS (local): FlagsApiTests: `/me` keys are the existing ones plus an empty `flags` map; Admin settings keys equal `OrgSettings.Defs` and each row has only key, kind, group, default and value |
-| AC-DLV-06 | S09 | PARTIAL: guard off/on logic (404 while off or missing, passes when on) tested on settings built in the test; endpoint wrapper not exercised through HTTP because no flag is declared; client hook treats a missing map or name as off, but browser suites not run (no port assigned) |
+| AC-DLV-06 | S09 | PASS (local): FlagsTests cover the guard off/on logic; flagged endpoints from packets 045 and 048 to 050 now use the guard and their `flag-off` tests get 404 through HTTP (full backend suite 1514/1514 in the 19 October receipt); mocked browser suites pass with the client hook (`flagParity` in the same receipt) |
 | AC-DLV-07 | S09 | PASS (local): retirement check names a flag whose `acceptance.md` records its pilot sign-off and passes without one; also run on the real (empty) list against `specs/<packet>-*/acceptance.md` |
 | AC-DLV-08 | S09 | PASS (local): pair check names the flag and the missing tag (`flag-off` or `flag-on`) and passes when both exist; also scans the test assembly traits for the real list |
-| AC-DLV-09 | S09 | PARTIAL: list is empty, full backend suite passes (1164/1164 on the slice), no existing route, setting or response gains a flag check; browser suites and coverage gates not run |
+| AC-DLV-09 | S09 | PARTIAL: on the slice commit the list was empty and the full backend suite passed (1164/1164); browser suites and coverage gates were not run on that commit. Later combined runs pass the full suite, coverage gates and the browser suites with flags declared, which is not the same commit |
 | AC-DLV-10 | S02 | PARTIAL: `tools/test_ci_tests.py` shows every API class in exactly one of 3 shards, a new class file lands in a shard without edits, and a new `ci_steps.txt` line runs in its own job only; on the merged tree domain 635 + shards 162, 227 and 159 = 1183 = `dotnet test --list-tests`; three consecutive green GitHub runs not yet done |
 | AC-DLV-11 | S02 | PASS (local): `tools/test_coverage_gate.py`: a line hit only in the second file is counted once; one file gives the same result as before on a fixture and on real coverage files; merging the 4 real files from the builder run clears both gates (96.3 % branches, 95.0 % lines) |
 | AC-DLV-12 | S03 | PARTIAL: `tools/test_ci_tests.py` (11 count tests) covers a missed shard (fails and names the cases), a case run twice, a missing test list, a drop below main for backend and browser suites, the `replace-test` label, a first run that passes and publishes, and the real step list; locally 1183 listed = 1183 run (635 + 162 + 227 + 159) and removing api-3 names the 159 missing cases; the GitHub run, main artifact download and label event not yet proven |
 | AC-DLV-13 | S07 | PARTIAL: on the Mac the label and `HUB_BUILD` check (`tools/ci_tests.py image`) passed with fake inspect data and with real local images built with and without `RELEASE_SHA`, and the image built without the argument starts and answers `/health` 200 with build `dev`; the image job on a green main commit (GHCR push, attestation and `gh attestation verify`) not yet run, needs GitHub |
 | AC-DLV-14 | S04 | PARTIAL: `tools/test_pr_checks.py` fixtures pass: additive changes, guard triggers and the `contract` label pass; drop, rename, alter, dropped check constraint, destructive `Sql` and unreadable `Sql` (concatenation, identifier, second positional argument, dynamic EXECUTE) fail; not yet run as a GitHub check on a real pull request |
-| AC-DLV-15 | S08 | UNRUN |
-| AC-DLV-16 | S14 | UNRUN |
-| AC-DLV-17 | S14 | UNRUN |
-| AC-DLV-18 | S15 | UNRUN |
+| AC-DLV-15 | S08 | PARTIAL: `tools/test_ci_tests.py` `RollbackTests` (previous, new, previous on one fresh stack; `main` tag moves only on pass) pass locally with fake commands; the job on main and the throwaway column-rename run need GitHub |
+| AC-DLV-16 | S14 | PARTIAL: `tools/test_review_deploy.py` (fake `docker` and `sudo`) passes for dump, start, probes and recorded SHA and digest; the real timer run on homedev is human-only and not done (D12) |
+| AC-DLV-17 | S14 | PARTIAL: `tools/test_review_deploy.py` passes for failed probe and return, digest not retried, unverified provenance, unapplied contract migration and changed compose or probe copy; homedev failing-probe rehearsal not done |
+| AC-DLV-18 | S15 | PASS (local): `tools/test_pilot_operations.py` existing cases unchanged and `PilotDigestTests` (digest pulled, verified and tagged, no build); not run on homedev |
 | AC-DLV-19 | S11 | PARTIAL: `tools/test_trace_report.py` fixture passes (AC cited by a passing test, a failing test, no test, and a human-only AC, plus a browser suite whose step failed); the report shows pass, fail, unrun and human with the run URL and prints the records ratio; `--check` exit 0 with unchanged output and TRACEABILITY.md on the current tree; publishing on a real main CI run not yet verified |
-| AC-DLV-20 | S12 | UNRUN |
-| AC-DLV-21 | S10 | PASS (local) |
-| AC-DLV-22 | S13 | UNRUN |
-| AC-DLV-23 | S16 | UNRUN |
-| AC-DLV-24 | S17 | UNRUN |
-| AC-DLV-25 | S06 | UNRUN |
-| AC-DLV-26 | S18 | UNRUN |
-| AC-DLV-27 | S13 | UNRUN |
+| AC-DLV-20 | S12 | PASS (local): `tools/test_trace_report.py` fixtures fail on a removed citation and an uncited new AC, and pass for human-only IDs and unchecked slices, failing when the slice is ticked; not yet a GitHub check on a real pull request |
+| AC-DLV-21 | S10 | PASS (local): `tools/test_decisions.py` (see Build 039-S10) |
+| AC-DLV-22 | S13 | PARTIAL: `tools/test_pr_checks.py` tier fixtures (Tier B path, `tier-b` label, `tier-b-ok`, documentation-only) and `tools/test_auto_merge.py` pass; the GitHub `tier` and `review` checks and a Tier A pull request merging by itself are not done |
+| AC-DLV-23 | S16 | PARTIAL: `tools/test_ci_tests.py` `NightlyWiringTests` check the six suite lines, preview guard and uploaded reports; no scheduled nightly run on main yet |
+| AC-DLV-24 | S17 | PARTIAL: `tools/test_ci_tests.py` checks the monthly grouped configuration and that only patch and minor updates auto-merge; no grouped pull request has arrived yet |
+| AC-DLV-25 | S06 | HUMAN: human-only. Read-only inventory in [branch-inventory.txt](branch-inventory.txt); no archive refs pushed, nothing deleted, six-worktree limit not met; each item awaits Jay |
+| AC-DLV-26 | S18 | HUMAN: human-only end-to-end packet journey (S18); not started |
+| AC-DLV-27 | S13 | HUMAN: human-only. `CLAUDE.md`, tracked `AGENTS.md` and `docs/SPEC-KIT-WORKFLOW.md` carry the rules on this branch; Jay's review not done |
 
 ## Build 039-S01
 

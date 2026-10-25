@@ -1,6 +1,6 @@
 # Verification: Record Recovery and Counts
 
-Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
+Status: S01 to S11 built locally on `codex/integrate-039-050`; S12 gated on Jay's flag decisions. No AC is Accepted. Latest local evidence: runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72`, full Release backend 1,514 passed, 0 failed, including all eight `RecoveryApiTests`, seven `CountLinkTests`, ten `TemplatePlannerTests`, twelve `ViewsTests` and the named `PortfolioTests`, `TimeTests` and `TemplatesTests` cases (`ci-artifacts/integration/final-566fe51-tests/final.trx`; [follow-up handoff](../../docs/handoffs/2026-10-19-039-050-acceptance-followup.md)). The mocked `test:recovery-counts` browser check passed in the final 1b649f5 run ([integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md)). Not run: `npm run test:counts` against the packet 036 fixtures, a Down-migration rollback smoke, screen-reader and phone review, hosted or human checks. Earlier lane tables below are historical slice records.
 
 ## Current takeover evidence
 
@@ -9,32 +9,32 @@ Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13
 - PASS: `dotnet build Hub.slnx --no-restore --nologo -v quiet` (0 errors; warnings recorded, chiefly existing xUnit blocking-operation diagnostics). PASS: `npm run build`. PASS: `npm run lint` (warnings only).
 - PASS: focused domain/flags/permissions/template-calendar checks, 176 passed, 0 failed; existing evaluator regression checks, 53 passed, 0 failed; settings/default/validation checks, 28 passed, 0 failed. Commands are in packet 046's current evidence.
 - PASS: `RECOVERY_TEST_PORT=19504 npm run test:recovery-counts` against a Vite preview with synthetic intercepted API responses in Chromium. The restore carried `If-Match: "4"`; parent reason and flag/permission visibility, Published template control, rollup labels/links, Portfolio project/health subtotals and Staff/Time navigation were exercised. Four axe scopes returned zero violations; no page errors or unknown API routes. Durable report: [mocked Chromium](evidence/mocked-chromium.json). This does not verify server transactions, real count reconciliation or screen-reader use.
-- BLOCKED: current API execution before assertions by EF `PendingModelChangesWarning`, reproduced with the new baseline API case. The additive model is deliberately ahead of this lane's migration snapshot. No warning suppression or migration was added here. New count, template, export and saved-view API tests compile but are not claimed as passing.
+- Historical, now resolved: the combined schema landed and these API tests pass in the 566fe51 run. BLOCKED: current API execution before assertions by EF `PendingModelChangesWarning`, reproduced with the new baseline API case. The additive model is deliberately ahead of this lane's migration snapshot. No warning suppression or migration was added here. New count, template, export and saved-view API tests compile but are not claimed as passing.
 - UNPROVEN: `npm run test:counts` against packet 036's real API fixtures, complete desktop/phone keyboard/screen-reader coverage, performance targets, schema smoke/drift and combined regression. Historical S01/S03/S06/S09 results below are preserved; they were not rerun as current API evidence.
 
 | AC | Current status |
 |---|---|
-| AC-RCV-01 | PARTIAL: restore UI/mock PASS; current server transaction/dependency result blocked by schema |
-| AC-RCV-02 | PARTIAL: historical server evidence below; current API not rerun |
-| AC-RCV-03 | PARTIAL: parent reason/disabled control mock PASS; current refusal/restore sequence blocked |
-| AC-RCV-04 | PARTIAL: flag/permission UI mock PASS; full role/closed/restricted matrix current API blocked |
-| AC-RCV-05 | PARTIAL: browser sends current If-Match; server conflict/idempotence current API blocked |
-| AC-RCV-06 | PARTIAL: UI flag-off mock PASS; full existing-suite parity and S12 gated |
-| AC-RCV-07 | PARTIAL: interface uses existing export route; current CSV/XLSX/log reconciliation blocked |
-| AC-RCV-08 | PARTIAL: existing count links retained; real fixture reconciliation UNPROVEN |
-| AC-RCV-09 | PARTIAL: existing milestone links retained; real fixture reconciliation UNPROVEN |
-| AC-RCV-10 | PARTIAL: row/tile navigation implemented; new API case compiled, not executed past schema |
-| AC-RCV-11 | PARTIAL: definition/action mock PASS; exact stalled-review API case compiled, schema blocked |
-| AC-RCV-12 | PARTIAL: total definition/project-link mock PASS; sum reconciliation API case schema blocked |
-| AC-RCV-13 | UNPROVEN: packet 036 live count suite not run |
-| AC-RCV-14 | PARTIAL: domain calendar parity PASS; recovered API case schema blocked |
-| AC-RCV-15 | PARTIAL: working-day domain PASS; office-calendar API integration schema blocked |
-| AC-RCV-16 | PASS at domain level; real preview/create/add-pack parity pending |
-| AC-RCV-17 | PARTIAL: Published control/flag-off mock PASS; wizard note implemented but untested; audit/draft/API parity schema blocked; cleanup gated |
-| AC-RCV-18 | PARTIAL: segment labels/links and axe mock PASS; actual register reconciliation pending |
-| AC-RCV-19 | PARTIAL: project/health subtotals and group URL mock PASS; all-column sum reconciliation pending; saved-view API case compiled, schema blocked; S12 gated |
-| AC-RCV-20 | PARTIAL: conditional UI/export implemented; new export API case schema blocked |
-| AC-RCV-21 | PARTIAL: historical restricted-project API evidence below; combined current check pending |
+| AC-RCV-01 | PASS (local): `Deleted_list_shows_who_and_when_and_restore_brings_dependencies_back`; restore UI in mocked browser |
+| AC-RCV-02 | PASS (local): `Deliverable_and_milestone_restore_log_Restored_and_reevaluate` |
+| AC-RCV-03 | PASS (local): `A_child_of_a_deleted_parent_is_refused_naming_it`; disabled Restore with the parent reason in mocked browser |
+| AC-RCV-04 | PASS (local): `Only_PMs_and_Admins_read_or_restore`; toggle hidden by flag and permission in mocked browser. Archived not exercised separately |
+| AC-RCV-05 | PASS (local): `Stale_version_conflicts_and_a_second_restore_is_404`; browser sends `If-Match` |
+| AC-RCV-06 | PASS (local): `Lists_counts_search_and_exports_never_show_deleted_items`, `Task_restore_with_the_flag_off_behaves_as_today`, existing `TasksTests` restore case; flag-off UI in mocked browser |
+| AC-RCV-07 | PASS (local): `Deleted_list_export_matches_the_screen_and_is_logged` |
+| AC-RCV-08 | PARTIAL: API PASS (local) for PM, Discipline Lead and Supervisor (`CountLinkTests`); browser `test:counts` not run |
+| AC-RCV-09 | PARTIAL: `Milestone_counts_equal_the_lists_they_open` PASS (local); `counts.cjs` Milestones check not run |
+| AC-RCV-10 | PARTIAL: `Overdue_decisions_tile_filters_to_projects_with_one_and_keeps_its_sum` PASS (local); row-count links only in mocked browser; `Portfolio_row_counts_equal_their_project_lists` not written |
+| AC-RCV-11 | PARTIAL: `Reviews_stalled_opens_the_people_who_hold_them_and_old_links_still_work` PASS (local); definition reachable by keyboard in mocked browser; screen-reader check UNRUN |
+| AC-RCV-12 | PASS (local): `Project_and_task_totals_equal_their_filtered_entries`; total links in mocked browser |
+| AC-RCV-13 | UNRUN: `npm run test:counts` against the packet 036 fixtures not run |
+| AC-RCV-14 | PASS (local): `Calendar_days_are_unchanged_without_a_calendar`, `Existing_templates_count_calendar_days_and_give_the_same_dates` |
+| AC-RCV-15 | PASS (local): `Working_days_skip_weekends_and_office_holidays`; office calendar at preview, create and add-pack in `Preview_create_and_add_pack_give_identical_working_day_dates` |
+| AC-RCV-16 | PASS (local), domain level: `Negative_offsets_count_back_to_a_working_day`, `Offset_zero_and_typed_dates_never_move` |
+| AC-RCV-17 | PARTIAL: `Preview_create_and_add_pack_give_identical_working_day_dates` and `Offset_kind_is_audited_copied_to_drafts_and_fixed_once_published` PASS (local); Published control in mocked browser; wizard note built but not tested; flag removal (S12) gated |
+| AC-RCV-18 | PARTIAL: `Status_segments_equal_their_filtered_registers_and_leave_out_Cancelled` PASS (local); segment labels, links and axe in mocked browser; `counts.cjs` not extended; flag removal (S12) gated |
+| AC-RCV-19 | PARTIAL: project and health subtotals, group URL in mocked browser; `group` saved view PASS (local) in `ViewsTests`; column-sum check and real-data reconciliation not run; flag removal (S12) gated |
+| AC-RCV-20 | PASS (local): `Overdue_deliverables_counts_overdue_not_at_risk`, `Export_adds_overdue_deliverables_and_project_type_only_when_the_flag_is_on` |
+| AC-RCV-21 | PASS (local), API level: `Rollups_ignore_projects_the_viewer_cannot_see` |
 
 S12 remains gated on Jay's review/pilot flag decisions. Flags stay dark: `show_deleted`, `template_working_days`, `status_rollups`. No Tier B approval or Accepted status is implied by this lane's local changes.
 

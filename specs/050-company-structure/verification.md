@@ -1,18 +1,20 @@
 # Verification: Company Structure
 
+Status (2026-10-25): S01–S06 implemented locally on `codex/integrate-039-050`, dark behind `flag.org_structure`. Six ACs PASS (local), three PARTIAL. Not Accepted; hosted, pilot and human checks are open.
+
 Runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72` passes **1,514/1,514 backend tests** (zero failures/skips). Rules branch coverage is **3,032/3,155 (96.1%)** and service line coverage **13,084/13,665 (95.7%)**. The 799-response shape gate passes from one full-run manifest. See the [acceptance follow-up](../../docs/handoffs/2026-10-19-039-050-acceptance-followup.md) and its hashed receipt for current browser, image and source boundaries. Earlier slice runs below are historical; their missing-schema/startup blockers are resolved by the combined run. Prior compatibility evidence retains source `1b649f5`; no schema changed afterward. No packet is Accepted; hosted, pilot and human gates remain separate.
 
 | AC ID | Local result | Evidence and remaining boundary |
 |---|---|---|
-| AC-UNT-01 | PASS source / partial browser | Server subtree headcount, null-root tree and real rendered Organisation fixture; full live three-level headcount case remains unproven. |
-| AC-UNT-02 | PASS | Cycle/level-order refusal; closed parent cannot acquire open API/CSV children; prospective graph validation under shared lock. |
-| AC-UNT-03 | PASS | Unit leader without Supervisor sees subtree Staff/My Work but cannot reassign. Explicit direct human read-scope authorization relayed by integration; writes unchanged. |
-| AC-UNT-04 | PASS focused | Real Restricted project fixture created with existing PATCH path; its work absent from leader My Work. Existing broader totals matrix remains integration gate. |
-| AC-UNT-05 | PASS domain/source | Indirect cycles do not grant scope; direct/reports/unit switcher and Admin-only affected reporting-cycle list; full toggled browser case unproven. |
-| AC-UNT-06 | PASS reads / partial UI | Shared descendant filter used by Workload/Planner/Availability and CSV exports; group UI implemented; complex subtree subtotal/browser comparison unproven. |
-| AC-UNT-07 | PASS | CSV validates unknown manager/cycle without mutation and corrected file applies all rows; successful preview retained in UI. |
-| AC-UNT-08 | PASS local API | `OrgCapacityIntegrationTests.Team_capacity_uses_end_of_week_home_unit_and_descendant_filter` proves historical week-end placement, descendant filtering, unit-only leader reads, denied planning writes and flag-off omission. All seven OrgStructure tests also pass. |
-| AC-UNT-09 | PASS local combined API | Endpoint/default flag gates; new UnitId/LeadUnitId properties JSON-hidden; all added DTO/report/UI fields guarded; full combined regression passes; broader hierarchy UI acceptance remains unproven. |
+| AC-UNT-01 | PARTIAL | Server subtree headcount, null-root tree and real rendered Organisation fixture; full live three-level headcount case remains unproven. |
+| AC-UNT-02 | PASS (local) | `OrgTreeTests.Refuses_parent_cycles_and_invalid_level_order`, `OrgStructureTests.Structure_is_admin_only_and_refuses_cycles` and `Closed_parent_refuses_new_or_imported_open_children`. Cycle/level-order refusal; closed parent cannot acquire open API/CSV children; prospective graph validation under shared lock. |
+| AC-UNT-03 | PASS (local) | `OrgStructureTests.Unit_leader_without_supervisor_role_can_read_subtree_but_cannot_write`. Unit leader without Supervisor sees subtree Staff/My Work but cannot reassign. Explicit direct human read-scope authorization relayed by integration; writes unchanged. |
+| AC-UNT-04 | PASS (local) | Real Restricted project fixture created with existing PATCH path; its work absent from leader My Work. Existing broader totals matrix remains integration gate. |
+| AC-UNT-05 | PARTIAL | Indirect cycles do not grant scope; direct/reports/unit switcher and Admin-only affected reporting-cycle list; full toggled browser case unproven. |
+| AC-UNT-06 | PARTIAL | Shared descendant filter used by Workload/Planner/Availability and CSV exports; group UI implemented; complex subtree subtotal/browser comparison unproven. |
+| AC-UNT-07 | PASS (local) | `OrgStructureTests.Import_preview_rejects_manager_cycle_and_unknown_manager_without_mutation` and `Corrected_import_applies_all_rows_atomically`. CSV validates unknown manager/cycle without mutation and corrected file applies all rows; successful preview retained in UI. |
+| AC-UNT-08 | PASS (local) | `OrgCapacityIntegrationTests.Team_capacity_uses_end_of_week_home_unit_and_descendant_filter` proves historical week-end placement, descendant filtering, unit-only leader reads, denied planning writes and flag-off omission. All seven OrgStructure tests also pass. |
+| AC-UNT-09 | PASS (local) | `OrgStructureTests.Structure_is_dark_when_flag_is_off`; flag-off browser pairs in `web/tests/schema-workflows.cjs`. Endpoint/default flag gates; new UnitId/LeadUnitId properties JSON-hidden; all added DTO/report/UI fields guarded; full combined regression passes; broader hierarchy UI acceptance remains unproven. |
 
 Scope is additive for reads: existing authorised people union indirect/led subtree. Availability retains its existing baseline. Shared server filters govern screen and export; placements reveal only people already available through scoped reads. No ActOnStaff, AssignTask, planning writes, approval or Restricted visibility permission is broadened. API placements expose versioned IDs/home units through a separate flagged endpoint; ordinary payloads remain unchanged.
 

@@ -1,21 +1,25 @@
 # Verification: Verifiable Records
 
+Status (2026-10-25, branch `codex/integrate-039-050` at `cf3ce8ee`): S01–S09 implemented locally; 8 ACs PASS (local), 4 PARTIAL. Not Accepted. Tier B migration approval, flag flips, hosted checks and Jay's acceptance remain open. Postgres was not running on 2026-10-25, so no tests were rerun for this update; results below come from the recorded evidence.
+
+Review-fix run 2026-10-25 (Release, local; `cf3ce8ee` plus the Code review and cleanup session's uncommitted fixes; full backend 1,516 passed, 1 skipped, 0 failed): (1) Revision check no longer returns 500 for a deliverable with no revision and no issues; it reads without marks. New test `Deliverable_without_a_revision_or_issues_reads_without_marks` also runs the re-check job; it fails on `cf3ce8ee` (AC-VER-11, FR-VER-16/17). (2) Audit chain: dead initialization loop removed from the job; new test `Nightly_and_weekly_jobs_verify_every_chain` covers `AuditChainJobs.Run` (AC-VER-02, FR-VER-04). The Admin page verifies only on button press; the endpoint stays a GET. Not committed yet.
+
 Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
 
 | AC ID | Local result | Evidence and remaining boundary |
 |---|---|---|
-| AC-VER-01 | PASS | 50 parallel edits; gap-free sequence and previous hashes |
-| AC-VER-02 | PASS API | Operator tampering detected at exact sequence; email dedup; mocked integrity UI; full live UI remains unproven |
-| AC-VER-03 | PASS | Failed canonical hash rolls back task change; immutable application guard and DB triggers |
-| AC-VER-04 | PASS | Stored record still verifies after append; altered evidence fails; JSON record API exercised; CSV UI request/source reviewed |
-| AC-VER-05 | PASS | 10,000 legacy rows sealed once, ordered, counted retroactively; runtime SELECT/INSERT role cannot initialize or UPDATE seals |
-| AC-VER-06 | PASS | Half-up domain vectors, C=0 API null, Chromium Met 78 of 100 (78%) / Watch |
-| AC-VER-07 | PASS API | Required active category and immutable event ID; category UI source reviewed, full form browser scenario unproven |
-| AC-VER-08 | PASS | Performer cannot confirm; PM confirms; mocked browser confirmation body includes version/requestId |
-| AC-VER-09 | PASS API / PARTIAL UI evidence | Real create/confirm preview rolls back, actual confirmation reuses same request; create/edit/confirm UI source reviewed; allocation-specific Chromium scenario unproven |
-| AC-VER-10 | PASS contract / INTEGRATION REQUIRED | B1/B2, captured effort, clear preserves history, application/SQL immutability, delta export exercised; integration must attach Capture to reviewed 046 command |
-| AC-VER-11 | PASS API/domain / PARTIAL UI evidence | Nonstandard issue saves, marks appear, clear removes; register/detail/filter/settings implemented; settings/issue browser scenario unproven |
-| AC-VER-12 | PASS focused / combined gate pending | Dark endpoint/default metadata/source checks; existing full flag-off suites remain integration gate |
+| AC-VER-01 | PASS (local) | 50 parallel edits; gap-free sequence and previous hashes |
+| AC-VER-02 | PARTIAL | Operator tampering detected at exact sequence; email dedup; mocked integrity UI; full live UI remains unproven |
+| AC-VER-03 | PASS (local) | Failed canonical hash rolls back task change; immutable application guard and DB triggers |
+| AC-VER-04 | PASS (local) | Stored record still verifies after append; altered evidence fails; JSON record API exercised; CSV UI request/source reviewed |
+| AC-VER-05 | PASS (local) | 10,000 legacy rows sealed once, ordered, counted retroactively; runtime SELECT/INSERT role cannot initialize or UPDATE seals |
+| AC-VER-06 | PASS (local) | Half-up domain vectors, C=0 API null, Chromium Met 78 of 100 (78%) / Watch |
+| AC-VER-07 | PARTIAL | Required active category and immutable event ID; category UI source reviewed, full form browser scenario unproven |
+| AC-VER-08 | PASS (local) | Performer cannot confirm; PM confirms; mocked browser confirmation body includes version/requestId |
+| AC-VER-09 | PARTIAL | Real create/confirm preview rolls back, actual confirmation reuses same request; create/edit/confirm UI source reviewed; allocation-specific Chromium scenario unproven |
+| AC-VER-10 | PASS (local) | B1/B2, captured effort, clear preserves history, application/SQL immutability, delta export exercised (`BaselineHistoryTests.cs`); Capture is now attached to the 046 re-baseline command (`src/Hub.Api/Features/Deliverables.cs`) |
+| AC-VER-11 | PARTIAL | Nonstandard issue saves, marks appear, clear removes; register/detail/filter/settings implemented; settings/issue browser scenario unproven |
+| AC-VER-12 | PASS (local) | Dark endpoint/default metadata/source checks (`VerifiableWorkflowTests.New_workflow_routes_are_dark_by_default`); combined run with flags off passed 1,491 backend tests (integration handoff) |
 
 ## Reviewed seams
 
@@ -43,7 +47,7 @@ Core local commit: `4f92c6ea6376b777d51ce7218bd3739f9132bff6`. PASS21/21 focused
 
 ## Recovery-time boundary rerun
 
-After the interrupted session, the local Docker daemon and PostgreSQL listener were unavailable. The latest two strengthened assertions (invalid hours and own-load suppression for a synthetic hidden-project assignment) compile but could not reach assertions: both test hosts fail with Connection refused at 127.0.0.1:55432. This is BLOCKED_ENVIRONMENT, not a new application failure or a passing result. `evidence/boundary-rerun.json` preserves actual runner outcomes and the reason. Re-run `FullyQualifiedName~Own_load_hint|FullyQualifiedName~Offer_leaves_task_fields` when the disposable test DB is restored. The earlier 57 core tests, 21 companion API checks and previous companion six-workflow Chromium run remain separately recorded passing evidence; the backend production source did not change after that companion API run, only these assertions were strengthened. No shared runtime was started or changed to bypass the missing environment.
+After the interrupted session, the local Docker daemon and PostgreSQL listener were unavailable. The latest two strengthened assertions (invalid hours and own-load suppression for a synthetic hidden-project assignment) compile but could not reach assertions: both test hosts fail with Connection refused at 127.0.0.1:55432. This is BLOCKED_ENVIRONMENT, not a new application failure or a passing result. `evidence/boundary-rerun.json` preserves actual runner outcomes and the reason. Re-run `FullyQualifiedName~Own_load_hint|FullyQualifiedName~Offer_leaves_task_fields` when the disposable test DB is restored. The earlier 57 core tests, 21 companion API checks and previous companion six-workflow Chromium run remain separately recorded passing evidence; the backend production source did not change after that companion API run, only these assertions were strengthened. No shared runtime was started or changed to bypass the missing environment. Later note: the combined 1,491-test backend run in the integration handoff runs the full suite, which contains both test classes.
 
 ## My Work flag regression correction
 

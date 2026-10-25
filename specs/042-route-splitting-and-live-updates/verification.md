@@ -1,26 +1,30 @@
 # Verification: Route Splitting and Live Updates
 
+**Status (2026-10-25, branch `codex/integrate-039-050`):** S01–S12 built locally with passing local checks; S13 flag cleanup waits on Jay turning both flags on. Hosted, tunnel and human checks not run. Not Accepted. Records check on 2026-10-25 re-ran `scripts/test_check_live_stream.py` and `scripts/test_verify_homedev_review.py` (OK); backend tests were not re-run because local Postgres would not start, so backend rows rely on the 566fe51 full run below. The planned `build-stamp.cjs`, `live-refresh.cjs` and `live-events.cjs` were built as one `web/tests/live-browser.cjs` (with `registrations-browser.cjs` and `route-splitting.cjs`, run by `test:browser-verification`).
+
+Review-fix run 2026-10-25 (local; `cf3ce8ee` plus the Code review and cleanup session's uncommitted fixes; fresh production build). `live.ts` now stops on 4xx refusals (the 429 cap keeps today's refresh), refreshes the open project once after each successful reopen, resets backoff after a stream that lived at least 60 s, and no longer reconnects on project navigation. Browser results: registrations.cjs PASS (new single-declaration guard), registrations-browser PASS (7 panels), route-splitting PASS (3 routes, 122 chunks, 0 failed), live-browser PASS including a new 429 case (one /events request, no retry over 4 s). Browsers ran on the installed headless Chromium build 1248 instead of the 1228 build Playwright 1.61.1 expects. Not committed yet.
+
 Runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72` passes **1,514/1,514 backend tests** (zero failures/skips). Rules branch coverage is **3,032/3,155 (96.1%)** and service line coverage **13,084/13,665 (95.7%)**. The 799-response shape gate passes from one full-run manifest. See the [acceptance follow-up](../../docs/handoffs/2026-10-19-039-050-acceptance-followup.md) and its hashed receipt for current browser, image and source boundaries. Earlier slice runs below are historical; their missing-schema/startup blockers are resolved by the combined run. Prior compatibility evidence retains source `1b649f5`; no schema changed afterward. No packet is Accepted; hosted, pilot and human gates remain separate.
 
 | AC | Where it is checked | Status |
 |---|---|---|
-| AC-LIVE-01 | `BuildStampTests` (S01) | PASS local: current 566fe51 image OCI revision/HUB_BUILD match; health build verified; hosted image activation remains unproven |
-| AC-LIVE-02 | `web/tests/build-stamp.cjs` (S02) | PASS local: stamped A→B→A browser notice, one per new build |
-| AC-LIVE-03 | `scripts/test_verify_homedev_review.py`, `tools/test_pilot_operations.py` (S03) | PASS local: Python activation/probe controls; hosted execution unproven |
-| AC-LIVE-04 | `web/tests/registrations.cjs` (S05, re-run in S07) | PASS local: all seven Task, Milestone, Deliverable, Decision, Action, Risk and Issue cold deep links render their own headings; Task comments/links also checked |
+| AC-LIVE-01 | `BuildStampTests` (S01) | PASS (local): current 566fe51 image OCI revision/HUB_BUILD match; health build verified; hosted image activation remains unproven |
+| AC-LIVE-02 | `web/tests/build-stamp.cjs` (S02) | PASS (local): stamped A→B→A browser notice, one per new build |
+| AC-LIVE-03 | `scripts/test_verify_homedev_review.py`, `tools/test_pilot_operations.py` (S03) | PASS (local): Python activation/probe controls; hosted execution unproven |
+| AC-LIVE-04 | `web/tests/registrations.cjs` (S05, re-run in S07) | PASS (local): all seven Task, Milestone, Deliverable, Decision, Action, Risk and Issue cold deep links render their own headings; Task comments/links also checked |
 | AC-LIVE-05 | `web/tests/registrations.cjs` (S05, re-run in S07) | PARTIAL: eager registration source guard passes; all plugin combinations not swept |
-| AC-LIVE-06 | `web/tests/registrations.cjs` self-test (S05) | PASS local: seeded registration guard controls |
-| AC-LIVE-07 | `web/tests/route-splitting.cjs`, existing suites, `tools/preview/sweep.cjs` (S06, S07) | PASS local: 59 representative real-API routes including all 24 project tabs, plus five legacy URL/mode checks; no failed API/chunk transport, error banners or serious/critical axe violations. This is route-pattern coverage, not every parameter/role/filter combination |
-| AC-LIVE-08 | `web/scripts/chunk-report.mjs` CI artifact (S07) | PASS local: raw entry closure 45.06% smaller; gzip 35.33% |
+| AC-LIVE-06 | `web/tests/registrations.cjs` self-test (S05) | PASS (local): seeded registration guard controls |
+| AC-LIVE-07 | `web/tests/route-splitting.cjs`, existing suites, `tools/preview/sweep.cjs` (S06, S07) | PASS (local): 59 representative real-API routes including all 24 project tabs, plus five legacy URL/mode checks; no failed API/chunk transport, error banners or serious/critical axe violations. This is route-pattern coverage, not every parameter/role/filter combination |
+| AC-LIVE-08 | `web/scripts/chunk-report.mjs` CI artifact (S07) | PASS (local): raw entry closure 45.06% smaller; gzip 35.33% |
 | AC-LIVE-09 | `StaticCacheTests` (S04) | PASS (local) |
-| AC-LIVE-10 | `web/tests/route-splitting.cjs` (S06) | PASS local: aborted route chunk reaches error boundary; storage-denied loop guard verified |
-| AC-LIVE-11 | `LiveStampTests`, `web/tests/live-refresh.cjs` (S08, S13) | PASS local: project pulse mocked browser and scoped API tests |
-| AC-LIVE-12 | `LiveStampTests` (S08) | PASS local: scoped project-stamp access checks |
-| AC-LIVE-13 | `web/tests/live-real.cjs` as a `nightly` line in `tools/ci_steps.txt` (S12) | PASS local: current 566fe51 real two-browser Risk/Task changes arrive within 2 seconds; no hosted activation |
-| AC-LIVE-14 | `LiveEventsTests` visibility sweep (S10) | PASS local: focused API visibility checks |
-| AC-LIVE-15 | `LiveEventsTests` (S10, S13), `web/tests/live-events.cjs` (S11) | PASS bounded local: scoped API/stream and real two-browser Risk/Task updates pass; full hosted lifecycle remains unproven |
+| AC-LIVE-10 | `web/tests/route-splitting.cjs` (S06) | PASS (local): aborted route chunk reaches error boundary; storage-denied loop guard verified |
+| AC-LIVE-11 | `LiveStampTests`, `web/tests/live-refresh.cjs` (S08, S13) | PASS (local): project pulse mocked browser and scoped API tests |
+| AC-LIVE-12 | `LiveStampTests` (S08) | PASS (local): scoped project-stamp access checks |
+| AC-LIVE-13 | `web/tests/live-real.cjs` as a `nightly` line in `tools/ci_steps.txt` (S12) | PASS (local): current 566fe51 real two-browser Risk/Task changes arrive within 2 seconds; no hosted activation |
+| AC-LIVE-14 | `LiveEventsTests` visibility sweep (S10) | PASS (local): focused API visibility checks |
+| AC-LIVE-15 | `LiveEventsTests` (S10, S13), `web/tests/live-events.cjs` (S11) | PASS (local), bounded: scoped API/stream and real two-browser Risk/Task updates pass; full hosted lifecycle remains unproven |
 | AC-LIVE-16 | `LiveEventsTests` (S10), `web/tests/live-events.cjs` (S11) | PARTIAL: heartbeat/retry controls pass; real silence/hidden timing unproven |
-| AC-LIVE-17 | `scripts/check-live-stream.py` on the review origin (after S12; needs an authorised activation) | UNPROVEN: hosted/tunnel activation not authorized or run |
+| AC-LIVE-17 | `scripts/check-live-stream.py` on the review origin (after S12; needs an authorised activation) | HUMAN: hosted/tunnel run needs an activation Jay authorises; not run |
 | AC-LIVE-18 | `web/tests/live-refresh.cjs` (S08), `web/tests/live-events.cjs` (S11, S13) | PARTIAL: unknown/reconnect invalidation tests and bounded real two-browser run pass; complete outage/hidden-tab lifecycle remains unproven |
 | AC-LIVE-19 | `LiveFeedTests` (S09) | PASS (local) |
 

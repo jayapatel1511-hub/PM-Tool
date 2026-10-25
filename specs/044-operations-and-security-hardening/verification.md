@@ -1,30 +1,32 @@
 # Verification: Operations and Security Hardening
 
+Status (25 October 2026): S01–S13 built and checked locally on `codex/integrate-039-050`; S14/S15 have only their local scripts and mocked tests. 18 ACs PASS (local); AC-OPS-03, AC-OPS-04 and AC-OPS-05 are HUMAN (homedev operator runs). Not hosted, not human-checked, not Accepted. Re-run 25 October: `python3 -m unittest tools.test_served_assets scripts.test_check_offhost_backup tools.test_social_activation tools.test_pilot_operations` 25 passed, `python3 tools/test_backup_helpers.py` 6 passed; .NET and browser checks not re-run (Docker daemon down), so their rows rest on the 18 October evidence below.
+
 Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
 
 | AC | Status |
 |---|---|
-| AC-OPS-01 | UNRUN |
-| AC-OPS-02 | UNRUN |
-| AC-OPS-03 | UNRUN |
-| AC-OPS-04 | UNRUN |
-| AC-OPS-05 | UNRUN |
+| AC-OPS-01 | PASS (local): `tools.test_served_assets`, `check_served_assets.py` on the built web root (final takeover evidence) |
+| AC-OPS-02 | PASS (local): `ServedFilesTests.Dot_prefixed_build_files_are_never_served`; `.vite/` skipped by `tools.test_served_assets` |
+| AC-OPS-03 | HUMAN: operator run on homedev pending; mocked freshness check `scripts.test_check_offhost_backup` PASS (local) |
+| AC-OPS-04 | HUMAN: operator drill on homedev pending; only the mocked drill wrapper (`OffhostDrillTests` in `tools/test_backup_helpers.py`) PASS (local) |
+| AC-OPS-05 | HUMAN: operator run pending; mocked refusals (`test_cross_stack_and_unapproved_pilot_fail_before_helper`, pilot-absent check) PASS (local) |
 | AC-OPS-06 | PASS (local) |
-| AC-OPS-07 | PARTIAL: backfill part PASS (local); retry and Operations list are S03 |
-| AC-OPS-08 | UNRUN |
-| AC-OPS-09 | UNRUN |
-| AC-OPS-10 | UNRUN |
-| AC-OPS-11 | UNRUN |
+| AC-OPS-07 | PASS (local): `Migration_marks_stranded_events_dead_lettered`, `OperationsHardeningTests.Admin_retry_returns_dead_letters_to_the_worker`, `test:operations` dead-letter part |
+| AC-OPS-08 | PASS (local): `test:operations` error page with reference and one matching report |
+| AC-OPS-09 | PASS (local): `test:operations` 5xx "ref" suffix, 409/422 unchanged |
+| AC-OPS-10 | PASS (local): `OperationsHardeningTests` client-error tests (204, 8 KB refusal, 429, 401, no row, controls removed) |
+| AC-OPS-11 | PASS (local): `test:operations` and `test:client-errors` reporter checks (quotes removed, 4xx ignored, cap of 5) |
 | AC-OPS-12 | PASS (local) |
 | AC-OPS-13 | PASS (local) |
 | AC-OPS-14 | PASS (local) |
 | AC-OPS-15 | PASS (local) |
 | AC-OPS-16 | PASS (local) |
 | AC-OPS-17 | PASS (local) |
-| AC-OPS-18 | UNRUN |
-| AC-OPS-19 | UNRUN |
+| AC-OPS-18 | PASS (local): `test:operations` 502/503/no-answer copy, read retries kept |
+| AC-OPS-19 | PASS (local): `test:operations` tab title zero/3/99+ |
 | AC-OPS-20 | PASS (local) |
-| AC-OPS-21 | UNRUN |
+| AC-OPS-21 | PASS (local): `OperationsHardeningTests.Density_choice_is_saved_to_the_account`, `test:operations` two-browser part |
 
 ## Build 044-S06
 

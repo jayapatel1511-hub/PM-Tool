@@ -36,6 +36,8 @@ STEPS = ROOT / "tools" / "ci_steps.txt"
 API_TESTS = ROOT / "tests" / "Hub.Tests" / "Api"
 SHARDS = 3
 TOP_CLASS = re.compile(r"^(?:public |internal )?(?:sealed |static |abstract |partial )*class (\w+)", re.M)
+# [Fact], [Theory] and custom fact attributes such as [ScaleMeasurementFact] each declare one test method.
+TEST_ATTRIBUTE = re.compile(r"\[(?:\w*Fact|Theory)\b")
 
 
 def parse_steps(text):
@@ -91,7 +93,7 @@ def api_classes(folder=API_TESTS):
         heads = list(TOP_CLASS.finditer(text))
         for i, m in enumerate(heads):
             body = text[m.end(): heads[i + 1].start() if i + 1 < len(heads) else len(text)]
-            tests = len(re.findall(r"\[(?:Fact|Theory)\b", body))
+            tests = len(TEST_ATTRIBUTE.findall(body))
             if tests:
                 found[m.group(1)] = tests
     return found

@@ -295,7 +295,7 @@ function UnfilledRoles({ roles, weeks, currentWeek }: { roles: UnfilledRole[]; w
             <tr key={r.id}>
               <th scope="row" className="sticky left-0 z-10 w-60 min-w-60 border-b border-r bg-card px-4 py-2 text-left align-top font-normal">
                 <div className="break-words font-semibold">{r.roleLabel}</div>
-                <Link className="text-xs/[18px] text-muted-foreground hover:underline" to={`/projects/${encodeURIComponent(r.projectNumber)}/allocations?view=roles`}>
+                <Link className="text-xs/[18px] text-muted-foreground hover:underline" to={`/projects/${encodeURIComponent(r.projectNumber)}/allocations?tab=roles`}>
                   <span className="whitespace-nowrap"><Key>{r.projectNumber}</Key></span> {r.projectName}{r.disciplineName && ` · ${r.disciplineName}`}
                 </Link>
               </th>

@@ -76,7 +76,7 @@ function mockPlatformApi(page, { build, buildIds = ['mock-build-a', 'mock-build-
     else if (p === 'me/notifications/pulse') { pulseRequests.push(url.toString()); data = { stamp: String(pulseRequests.length), projectStamp: String(pulseRequests.length) } }
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
     else if (p === 'me/sign-in' || p.startsWith('admin/settings/flag.')) data = {}
-    else if (p === 'events') { eventRequests.push(request); if (!events) status = 404; else { await route.fulfill({ status: 200, contentType: 'text/event-stream', headers: { 'cache-control': 'no-cache' }, body: ': heartbeat\n\ndata: {"topic":"project","projectId":"'+project.id+'","itemType":"Task","itemId":"'+taskId+'"}\n\n' }); return } }
+    else if (p === 'events') { eventRequests.push(request); if (events !== true) status = typeof events === 'number' ? events : 404; else { await route.fulfill({ status: 200, contentType: 'text/event-stream', headers: { 'cache-control': 'no-cache' }, body: ': heartbeat\n\ndata: {"topic":"project","projectId":"'+project.id+'","itemType":"Task","itemId":"'+taskId+'"}\n\n' }); return } }
     else if (request.method() !== 'GET') data = {}
     else { unknownGets.push(`${request.method()} ${p}`); status = 501; data = { error: `Unhandled mocked GET: ${p}` } }
     if (status >= 400) apiErrors.push(`${request.method()} ${p} ${status}`)

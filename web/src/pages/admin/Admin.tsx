@@ -18,6 +18,7 @@ import { fmtTime } from '@/lib/format'
 import { runtimeText, t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useFlag } from '@/lib/auth'
+import { ADMIN_EXTRA } from '@/app/extension-slots'
 import { toast } from 'sonner'
 export { StructureAdmin } from './Structure'
 
@@ -55,8 +56,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   )
 }
 
-/** Extra admin screens registered by later packets (reassign work, holidays, templates). */
-export const ADMIN_EXTRA: { to: string; label: string }[] = []
 
 export function AdminIndex() { return <Navigate to="/admin/reference/disciplines" replace /> }
 

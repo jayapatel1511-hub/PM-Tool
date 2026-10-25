@@ -1,7 +1,7 @@
 # Feature Specification: Record Recovery and Counts
 
 **Packet**: 045 | **Feature directory**: `specs/045-record-recovery-and-counts` | **Date**: 2026-10-14
-**Status**: Implemented locally; combined schema verification and human acceptance pending.
+**Status**: Implemented locally (S01 to S11) and checked, with gaps in S04, S07, S10 and S11 noted in verification; S12 flag cleanup, the live counts suite, and hosted and human acceptance pending. Line of record: `codex/integrate-039-050`, not pushed.
 **Input**: roadmap items 12, 13, 14 and 31 of the 14 October build-approach report (kept outside the repository), which Jay approved on 2026-10-14 with the direction to build all of it, additive only.
 **Source**: product specification §49 (§49.1 to §49.8) in `spec-parts/24-record-recovery-and-counts.md`. Builds on G-06, G-07, E-04, FR-TSK-11, AC-TSK-09 (soft delete and restore); §40.7 FR-CNT-01 to FR-CNT-07, AC-DASH-01, AC-DASH-02, FR-VIS-10 (counts); §12.14, FR-TPL-01, FR-TPL-02 and §28 item 11 (templates and working-day calendars); §13.1, §13.12, FR-DASH-01 and FR-PORT-01 (dashboards). Code paths and lines are at `48586029`.
 

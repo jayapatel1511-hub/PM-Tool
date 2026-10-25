@@ -1,7 +1,7 @@
 # Feature Specification: Task Pickup
 
 **Packet**: 049 | **Feature directory**: `specs/049-task-pickup` | **Date**: 2026-10-18
-**Status**: Specified, not started. Scope approved by Jay on 2026-10-18 with the listed defaults (049-D1).
+**Status**: Implemented locally behind its dark flag; the API checks pass and the interface is checked against a mocked API only; hosted and human acceptance pending. Scope approved by Jay on 2026-10-18 with the listed defaults (049-D1). Line of record: `codex/integrate-039-050`, not pushed.
 **Input**: Jay's 2026-10-18 request: "a ticketing system for overloaded personnel; they can have that task open for others to pick".
 **Source**: product specification §53 (§53.1 to §53.8) in `spec-parts/28-task-pickup.md`. Related contracts: §8.5 to §8.7 (permissions, ownership, visibility), §12.2 (team), §13.10 (My Work), §17 (notifications), §20.1 (log), §36.8 (time entries), §43 (flags, packet 039), §45.4 (load bands, packet 041).
 

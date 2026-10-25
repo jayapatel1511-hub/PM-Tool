@@ -6,13 +6,13 @@ Coordination, decisions, risks and issues, meeting actions, templates, a workspa
 Timeline, Files, Team), a team calendar, task hours, reports, notifications and an append-only activity history.
 
 The product specification is [`Engineering-Project-Coordination-Hub-Specification.md`](Engineering-Project-Coordination-Hub-Specification.md)
-(built from `spec-parts/`). It is written as 47 Spec Kit packets in [`specs/`](specs/README.md), each with its plan,
+(built from `spec-parts/`). It is written as 50 Spec Kit packets in [`specs/`](specs/README.md), each with its plan,
 tasks and verification. What is built and what still needs a real environment to prove is in
 [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md).
 
-## Current local deployment candidate — 2026-10-12
+## Current state — 2026-10-25
 
-`codex/deployment-ready` starts from integrated Tuesday baseline `68c56f28`. The remaining supervisor-capacity and digest-hold scope, shared partial-view correction and review fixes are implemented locally. Release tests pass 1,132/1,132, coverage gates pass, and a built container passed migrations, authentication, background jobs and signed-in browser checks. Changes remain uncommitted; no push or deployment occurred in this pass. See the [deployment handoff](docs/handoffs/2026-10-12-deployment-ready.md) for artifact identity, evidence, rollback conditions and outstanding hosted/company acceptance.
+The 12 October candidate (packets 025 to 038 and the review fixes) reached main through PR #37 (`e4ca1661`). Packets 039 to 042 and 044 to 050 are implemented locally on `codex/integrate-039-050`, which is not pushed or deployed; packet 043 has only a spike, measured KILL and not integrated. See the [19 October acceptance follow-up](docs/handoffs/2026-10-19-039-050-acceptance-followup.md), the [25 October review fixes](docs/handoffs/2026-10-25-review-fixes.md) and [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md). Hosted and human acceptance remain open for every packet from 025.
 
 ## Approved coordination expansion
 

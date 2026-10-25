@@ -391,7 +391,8 @@ public sealed class TaskPickupTests
                 {
                     "offer" => new[] { TestData.Marc, TestData.Sam, TestData.Pm },
                     "pickup" => new[] { TestData.Alex, TestData.Marc, TestData.Pm },
-                    "assign" => state == "muted" ? new[] { TestData.Alex, TestData.Jill, TestData.Marc } : new[] { TestData.Alex, TestData.Jill },
+                    // A muted offerer is not the person the task is assigned to, so the mute applies (§12.18).
+                    "assign" => new[] { TestData.Alex, TestData.Jill },
                     _ => Array.Empty<string>(),
                 };
                 await AssertPickupRecipients(f, d, id, eventType, expected);
@@ -434,6 +435,24 @@ public sealed class TaskPickupTests
             await f.DbAsync(db => db.SaveChangesAsync());
             await AssertPickupRecipients(f, d, id, NotificationEvents.TaskPickupClosed, recipientState == "normal" ? [TestData.Alex] : []);
             Assert.Equal(TaskPickupOffer.TaskClosed, await f.DbAsync(db => db.Set<TaskPickupOffer>().Where(o => o.TaskId == id).Select(o => o.CloseCause).SingleAsync()));
+        }
+    }
+
+    [Fact]
+    [Trait("flag-off", "task_pickup")]
+    public async Task Offers_from_an_enabled_period_are_left_alone_while_the_flag_is_off()
+    {
+        var (f, d) = await EnabledFactory(); using (f)
+        {
+            var p = await d.Project();
+            var task = await d.NewTask(p.Id, extra: new { assigneeId = d.User(TestData.Alex) });
+            var id = task.G("id");
+            await (await f.As(TestData.Alex).Post($"/api/v1/tasks/{id}/pickup-offer", new { reason = "Synthetic flag-off closure" })).Json(201);
+            (await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.task_pickup", new { value = false })).EnsureSuccessStatusCode();
+            await d.Move(TestData.Pm, task, TaskStatuses.Complete);
+            // FR-PKP-13: with the flag off, saves neither close offers nor send pickup notifications.
+            Assert.Null(await f.DbAsync(db => db.Set<TaskPickupOffer>().Where(o => o.TaskId == id).Select(o => o.ClosedAt).SingleAsync()));
+            await AssertPickupRecipients(f, d, id, NotificationEvents.TaskPickupClosed);
         }
     }
 

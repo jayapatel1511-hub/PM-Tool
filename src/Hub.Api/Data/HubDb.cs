@@ -1051,7 +1051,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             }
         }
         var now = clock.GetUtcNow();
-        await Hub.Api.Features.TaskPickupLifecycle.BeforeSave(this, now, new Notifier(this, audit, settings, clock, configuration), ct);
+        if (pickupOn) await Hub.Api.Features.TaskPickupLifecycle.BeforeSave(this, now, new Notifier(this, audit, settings, clock, configuration), ct); // FR-PKP-13
         ChangeTracker.DetectChanges();
         if (await FollowTasks(now, ct)) ChangeTracker.DetectChanges();
         var comments = ChangeTracker.Entries<Comment>()

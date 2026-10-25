@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useFlag } from '@/lib/auth-context'
-import { readEventStream } from '@/lib/api'
+import { ApiError, readEventStream } from '@/lib/api'
 import { invalidateChange, refreshProject } from '@/lib/keys'
 import { useProject } from '@/hooks/data'
 
@@ -20,10 +20,15 @@ export function useLiveEvents() {
   const project = useProject(number)
   const openProjectId = project.data?.id
   const queryClient = useRef(qc)
+  // Read through a ref so moving between projects does not close and reopen the stream.
+  const openProject = useRef(openProjectId)
 
   useEffect(() => {
     queryClient.current = qc
   }, [qc])
+  useEffect(() => {
+    openProject.current = openProjectId
+  }, [openProjectId])
 
   useEffect(() => {
     if (!enabled) return
@@ -71,31 +76,39 @@ export function useLiveEvents() {
     const connect = async () => {
       if (running || stopped || document.hidden) return
       running = true
+      let reopening = false
       try {
         while (!stopped && !document.hidden) {
           controller = new AbortController()
-          let lastData = Date.now()
+          const openedAt = Date.now()
+          let lastData = openedAt
+          let first = true
           const watchdog = setInterval(() => {
             if (Date.now() - lastData >= 60_000) controller?.abort()
           }, 1_000)
           try {
             for await (const event of readEventStream('/api/v1/events', controller.signal)) {
               lastData = Date.now()
+              // FR-LIVE-17: after every reopen, refresh the open project once to cover anything missed.
+              if (first && reopening) refreshProject(queryClient.current, openProject.current)
+              first = false
               if (event) queue(event as LiveEvent)
             }
             if (!stopped && !document.hidden) throw new Error('event stream closed')
-          } catch {
+          } catch (error) {
             if (stopped || document.hidden) break
+            // A refusal (429 over the per-user cap, 401, 403) is not a dead stream: stop, and this tab keeps today's refresh (FR-LIVE-17).
+            if (error instanceof ApiError && error.status >= 400 && error.status < 500) break
           } finally {
             clearInterval(watchdog)
             controller = null
           }
           if (!stopped && !document.hidden) {
+            // A stream that stayed up past a minute ended normally (the server's lifetime limit); only failures back off.
+            if (Date.now() - openedAt >= 60_000) retry = 0
             await wait(RETRIES[Math.min(retry, RETRIES.length - 1)])
-            // A reconnect can follow a missed event while the tab stayed visible; refresh the
-            // open project just as visibility restore does before opening the next stream.
-            refreshProject(queryClient.current, openProjectId)
             retry = Math.min(retry + 1, RETRIES.length - 1)
+            reopening = true
           }
         }
       } finally {
@@ -114,7 +127,7 @@ export function useLiveEvents() {
       }
       retry = 0
       void queryClient.current.invalidateQueries({ queryKey: PULSE })
-      refreshProject(queryClient.current, openProjectId)
+      refreshProject(queryClient.current, openProject.current)
       void connect()
     }
     document.addEventListener('visibilitychange', onVisibility)
@@ -128,5 +141,5 @@ export function useLiveEvents() {
       document.removeEventListener('visibilitychange', onVisibility)
       flush()
     }
-  }, [enabled, openProjectId])
+  }, [enabled])
 }

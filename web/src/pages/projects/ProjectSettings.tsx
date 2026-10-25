@@ -17,9 +17,8 @@ import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
 import { useFlag } from '@/lib/auth'
+import { SETTINGS_SECTIONS } from '@/app/extension-slots'
 
-/** Extra settings sections from later packets (health override, export at archive). */
-export const SETTINGS_SECTIONS: { id: string; render: (p: ProjectDetail) => React.ReactNode }[] = []
 
 /** Project Settings tab (§13.16): information, links, coordination day, visibility, status, danger zone. */
 export function ProjectSettingsTab() {

@@ -74,7 +74,8 @@ public sealed class TasksTests(HubFactory f, Xunit.Abstractions.ITestOutputHelpe
                 var dueAllowed = due["permissions"]!["dueDate"]!["ok"]!.GetValue<bool>();
                 var dueResponse = await Write(dueTask, new { dueDate = "2026-11-15", reason = $"Valid due-date change for {who} in {status}" });
                 foreach (var (decision, legacy, allowed, response) in new[] { ("assign", legacyAssign, assignAllowed, assignResponse), ("edit", legacyEditDue, editAllowed, editResponse), ("due", legacyEditDue, dueAllowed, dueResponse) })
-                    if (legacy != allowed) output.WriteLine($"{who} {status} decision11.{decision}: client {legacy}, flag {allowed}, HTTP {(int)response.StatusCode}");
+                    if (legacy != allowed) { var difference = $"{who} {status} decision11.{decision}: client {legacy}, flag {allowed}, HTTP {(int)response.StatusCode}"; output.WriteLine(difference);
+                        Assert.True((legacy) && !(allowed), "AC-FIG-08: a difference must be a control today's client offers and the endpoint refuses: " + difference); }
                 var dueBody = await dueResponse.Content.ReadAsStringAsync();
                 Assert.True(dueAllowed ? dueResponse.IsSuccessStatusCode : dueResponse.StatusCode == HttpStatusCode.Forbidden, $"{who} {status} due returned {(int)dueResponse.StatusCode}: {dueBody}");
             }

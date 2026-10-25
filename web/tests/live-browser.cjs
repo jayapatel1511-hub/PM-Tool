@@ -42,6 +42,14 @@ const { startPreview, newMockPage, project } = require('./platform-fixtures.cjs'
     assert.deepEqual(errors, [], `browser errors: ${errors.join('; ')}`)
     assert.deepEqual(mock.apiErrors, [])
     assert.deepEqual(mock.unknownGets, [], `unhandled mocked GETs: ${mock.unknownGets.join('; ')}`)
-    console.log(JSON.stringify({ result: 'PASS', notices: ['mock-build-a', 'mock-build-b'], liveStream: true, projectPulse: true, axe: 0 }))
+    const capped = await newMockPage(preview.base, { build: 'mock-build-a', events: 429 })
+    try {
+      await capped.page.goto(`${preview.base}/projects/${project.projectNumber}/tasks`, { waitUntil: 'domcontentloaded' })
+      await capped.page.getByRole('main').waitFor({ state: 'visible', timeout: 20000 })
+      await capped.page.waitForTimeout(4000) // longer than the first two backoff steps (1 s, 2 s)
+      assert.equal(capped.mock.eventRequests.length, 1, 'a refused stream (429) is not retried')
+      await capped.page.getByRole('main').waitFor({ state: 'visible' })
+    } finally { await capped.browser.close() }
+    console.log(JSON.stringify({ result: 'PASS', notices: ['mock-build-a', 'mock-build-b'], liveStream: true, projectPulse: true, refusedStreamNotRetried: true, axe: 0 }))
   } finally { await browser.close(); preview.child.kill() }
 })().catch(error => { console.error(error); process.exitCode = 1 })

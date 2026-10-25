@@ -25,6 +25,13 @@ for (const file of files) {
   for (const name of names) if (hasMutation(source, name)) offenders.push(path.relative(process.cwd(), file) + `: ${name}`)
 }
 if (offenders.length) throw new Error(`registry mutation outside registrations.tsx:\n${offenders.join('\n')}`)
+// A second declaration shadows the registry registrations.tsx fills, so its readers see an empty list.
+const declaration = (name) => new RegExp(`(?:export\\s+)?(?:const|let|var)\\s+${name}\\b`, 'g')
+for (const name of names) {
+  const owners = files.filter(file => (fs.readFileSync(file, 'utf8').match(declaration(name)) ?? []).length > 0)
+  if (owners.length !== 1) throw new Error(`${name} must be declared exactly once, found: ${owners.map(f => path.relative(process.cwd(), f)).join(', ') || 'none'}`)
+}
+if (('export const ADMIN_EXTRA = []\nexport const ADMIN_EXTRA = []'.match(declaration('ADMIN_EXTRA')) ?? []).length !== 2) throw new Error('declaration guard fixture failed')
 const source = fs.readFileSync(registry, 'utf8')
 const template = source.indexOf('CREATE_SOURCES.unshift(templateSource)')
 const copy = source.indexOf('CREATE_SOURCES.push(copySource)')

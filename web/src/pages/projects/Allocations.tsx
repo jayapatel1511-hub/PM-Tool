@@ -3,7 +3,7 @@ import { usePageMode } from '@/hooks/page-mode'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, CheckCircle2, Ellipsis, Lock, Monitor, Plus, X } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, PageHelp, Segmented, Spinner, TableRegion, selectCls, tdCls as td, thCls as th } from '@/components/hub/common'
@@ -76,10 +76,17 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   const pages = list.data ? Math.max(1, Math.ceil(list.data.totalCount / list.data.pageSize)) : 1
   const view = usePageMode('tab', ['roles'], 'allocations')
   const roles = useQuery({ queryKey: ['allocations', project.id, 'open-roles'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/open-roles', { params: { projectId: project.id } }) })
+  // A Workload Fill link (?fill=) opens the proposal once per link; closing it must not reopen it while the URL catches up.
+  const handledFill = useRef<string | null>(null)
   useEffect(() => {
-    const id = sp.get('fill'); const role = id && roles.data?.find(r => r.id === id && r.status === 'Open')
-    if (role && proposal.shown && filling?.openRoleId !== role.id) setFilling({ openRoleId: role.id, roleLabel: role.roleLabel, fromDate: role.fromDate, throughDate: role.throughDate, plannedHours: role.plannedHours })
-  }, [roles.data, proposal.shown, sp, filling?.openRoleId])
+    const id = sp.get('fill')
+    if (!id) { handledFill.current = null; return }
+    const role = handledFill.current === id ? undefined : roles.data?.find(r => r.id === id && r.status === 'Open')
+    if (role && proposal.shown) {
+      handledFill.current = id
+      setFilling({ openRoleId: role.id, roleLabel: role.roleLabel, fromDate: role.fromDate, throughDate: role.throughDate, plannedHours: role.plannedHours })
+    }
+  }, [roles.data, proposal.shown, sp])
   const openRoles = roles.data?.filter(r => r.status === 'Open').length ?? 0
   const complete = project.permissions.needsReason // P-05, FR-FIG-11: changes to a Complete project are corrections with a reason (A6)
   const propose = view === 'roles'
@@ -142,7 +149,8 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
     </nav>}
     </>}
     {adding && options.data && <Proposal projectId={project.id} base={base} options={options.data} complete={complete} close={() => setAdding(false)} done={id => { setAdding(false); refresh(); open(id) }} />}
-    {filling && options.data && <Proposal projectId={project.id} base={base} options={options.data} complete={complete} fill={filling} close={() => setFilling(null)} done={id => { setFilling(null); refresh(); open(id) }} />}
+    {filling && options.data && <Proposal projectId={project.id} base={base} options={options.data} complete={complete} fill={filling} close={() => { setFilling(null); if (sp.has('fill')) { const next = new URLSearchParams(sp); next.delete('fill'); setSp(next, { replace: true }) } }}
+      done={id => { setFilling(null); refresh(); const next = new URLSearchParams(sp); next.delete('fill'); next.set('allocation', id); setSp(next) }} />}
     {roleForm && <RoleDialog projectId={project.id} disciplines={project.disciplines} role={roleForm === 'new' ? undefined : roleForm} complete={complete}
       onClose={() => setRoleForm(null)} onDone={() => { setRoleForm(null); invalidateChange(qc, 'OpenRole', project.id) }} />}
     {cancelling && <ConfirmDialog open onOpenChange={o => !o && setCancelling(null)} title={t('openRole.cancelTitle', { role: cancelling.roleLabel })} destructive

@@ -18,6 +18,21 @@ public sealed class AuditChainApiTests
 
     [Fact]
     [Trait("flag-on", "verifiable_log")]
+    public async Task Nightly_and_weekly_jobs_verify_every_chain()
+    {
+        using var f = new HubFactory(); var d = new TestData(f); var project = await d.Project();
+        await Enable(f); await d.NewTask(project.Id);
+        foreach (var full in new[] { false, true })
+        {
+            using var scope = f.Services.CreateScope();
+            var result = JsonSerializer.SerializeToElement(await AuditChainJobs.Run(scope.ServiceProvider, full, default));
+            Assert.True(result.GetProperty("Chains").GetInt32() >= 2, result.ToString());
+            Assert.Equal(0, result.GetProperty("Failed").GetInt32());
+        }
+    }
+
+    [Fact]
+    [Trait("flag-on", "verifiable_log")]
     public async Task Legacy_ten_thousand_rows_are_sealed_once_and_saved_records_survive_append_then_detect_tampering()
     {
         using var f = new HubFactory(); var d = new TestData(f); var project = await d.Project();

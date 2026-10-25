@@ -1,7 +1,7 @@
 # Feature Specification: Capacity Figures and Server Values
 
 **Packet**: 041 | **Feature directory**: `specs/041-capacity-figures-and-server-values` | **Date**: 2026-10-14
-**Status**: Specified, not started.
+**Status**: Implemented locally (S01 to S12) and checked; S13 flag cleanup, Tier B review, and hosted and human acceptance pending. Line of record: `codex/integrate-039-050`, not pushed.
 **Input**: Jay's 2026-10-14 approval of the build-approach report (kept outside the repository): "We are building everything you suggested." This packet takes its server-computed values and its roadmap items 3, 4, 5 and 15. Current features are fixed and additive only.
 **Source**: product specification §45 (§45.1 to §45.10) in `spec-parts/20-capacity-figures-and-server-values.md`. It builds on §39 (PLN-09, PLN-15, FR-PLN-16, FR-PLN-18, FR-PLN-19, AC-PLN-11, AC-PLN-12), §40.6 (FR-PICK-01, FR-PICK-02), §42 (FR-SUP-01, FR-SUP-02, FR-SUP-03, AC-SUP-05), §37.6 (FR-CAP-04, FR-CAP-06, AC-CAP-04), §40.2 (FR-ROLE-01, FR-ROLE-02), §40.5 (FR-GRP-02), §12.15, §13.11, §10.4, §10.9, §8.10, P-05 and G-09. It amends AC-PLN-12, FR-ROLE-02, §12.15 step 3, §13.11 and §39.12 through the amendment requests returned with this packet.
 

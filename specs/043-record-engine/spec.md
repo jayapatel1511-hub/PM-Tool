@@ -1,7 +1,7 @@
 # Feature Specification: Record Engine
 
 **Packet**: 043 | **Feature directory**: `specs/043-record-engine` | **Date**: 2026-10-14
-**Status**: Specified, not started. Jay approved the constitution VII entry for the spike on 2026-10-14 (D1).
+**Status**: Spike measured KILL (2 of 10 parity pairs) outside this branch and not integrated; Jay's verdict (D3) is pending. Jay approved the constitution VII entry for the spike on 2026-10-14 (D1). Line of record: `codex/integrate-039-050`, not pushed.
 **Input**: Jay's 2026-10-14 instruction to build everything in the 2026-10-14 build-approach report (kept outside the repository): its option 2 (one registry driving generic lists and panels) as narrowed by its hybrid, item 5: generic RecordList and RecordPanel for list- and panel-shaped screens only, after a parity spike on Risks and open roles, with a shared table as the fallback.
 **Source**: product specification §47 (§47.1 to §47.9) in `spec-parts/22-record-engine.md`. Related contracts: §23.4 (shared data table, side panel, filter bar), §13.0 (global UI conventions), §13.13 (Risk Register), §18.4 (saved views, FR-VIEW-04), §40.2 (open roles, FR-ROLE-01 to FR-ROLE-05), §41 (calm layout rules), §44 (entity registry and typed contract, packet 040), §43 (flags, `specs/DECISIONS.md`, merge rules, packet 039) and §46 (build stamp and eager registrations, packet 042).
 

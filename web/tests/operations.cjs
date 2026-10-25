@@ -59,6 +59,8 @@ let server, browser;
   await page.goto(base + '/admin/operations');
   await page.getByRole('button', { name: 'Retry', exact: true }).waitFor({timeout: 8000}).catch(async e => { console.log(await page.locator('body').innerText()); throw e });
   assert.ok(await page.getByText('SyntheticException', { exact: false }).count());
+  // The admin tabs registrations.tsx adds must reach the Admin tab bar (FR-LIVE-05); a shadowed ADMIN_EXTRA once hid both.
+  for (const href of ['/admin/operations', '/admin/holidays']) assert.equal(await page.locator(`nav a[href="${href}"]`).count(), 1, `Admin tab bar links ${href}`);
   await page.waitForFunction(() => document.title === '(3) Tuesday');
   await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
   assert.deepEqual(await page.evaluate(async () => (await axe.run(document.querySelector('main'))).violations.map(v => v.id)), []);

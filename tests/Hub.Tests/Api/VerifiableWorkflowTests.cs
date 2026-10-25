@@ -2,6 +2,7 @@ using Hub.Api.Data;
 using Hub.Api.Features;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Hub.Tests.Api;
 
@@ -148,5 +149,22 @@ public sealed class VerifiableWorkflowTests
         await (await pm.Put($"/api/v1/projects/{p.Id}/revision-check", new RevisionCheckEndpoints.ConventionBody(d.Version(p.Id), null))).Json();
         var cleared = await (await pm.GetAsync($"/api/v1/projects/{p.Id}/revision-check")).Json();
         Assert.Null(cleared["convention"]); Assert.Empty(cleared["deliverables"]!.AsArray());
+    }
+
+    [Fact]
+    [Trait("flag-on", "revision_check")]
+    public async Task Deliverable_without_a_revision_or_issues_reads_without_marks()
+    {
+        using var f = new HubFactory(); var d = new TestData(f); var p = await d.Project(); var pm = f.As(TestData.Pm);
+        await (await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.revision_check", new { value = true })).Json();
+        var deliverable = await (await pm.Post($"/api/v1/projects/{p.Id}/deliverables", new { name = "Unrevised package", projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil"),
+            deliverableTypeId = await d.DeliverableType(), requiresReview = false })).Json(201);
+        await (await pm.Put($"/api/v1/projects/{p.Id}/revision-check", new RevisionCheckEndpoints.ConventionBody(d.Version(p.Id), "letters"))).Json();
+        var read = await (await pm.GetAsync($"/api/v1/projects/{p.Id}/revision-check")).Json();
+        var row = read["deliverables"]!.AsArray().Single(x => x!["id"]!.GetValue<Guid>() == deliverable.G("id"))!;
+        Assert.Empty(row["marks"]!.AsArray()); Assert.Empty(row["issues"]!.AsArray());
+        Assert.Equal(System.Net.HttpStatusCode.OK, (await pm.GetAsync($"/api/v1/projects/{p.Id}/deliverables?revisionWarning=true")).StatusCode);
+        using var scope = f.Services.CreateScope();
+        await new RevisionRecheckJob().Run(scope.ServiceProvider, default); // the per-minute recheck reads the same marks
     }
 }

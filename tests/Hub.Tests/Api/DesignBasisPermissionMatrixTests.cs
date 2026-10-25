@@ -46,11 +46,13 @@ public sealed class DesignBasisPermissionMatrixTests(HubFactory f, Xunit.Abstrac
                     new DesignBasisEndpoints.VersionInput("Scope", "Statement", 1m, "m", "Synthetic", Guid.NewGuid().ToString(), "https://example.test/basis", "A", new DateOnly(2026, 11, 15), null), "Permission matrix correction"));
                 var create = await Create(user);
                 Assert.True(createAllowed ? create.IsSuccessStatusCode : create.StatusCode == HttpStatusCode.Forbidden, $"{user} {status} create returned {(int)create.StatusCode}: {await create.Content.ReadAsStringAsync()}");
-                if (legacyCreate != createAllowed) output.WriteLine($"{user} {status} decision4.create: client {legacyCreate}, flag {createAllowed}, HTTP {(int)create.StatusCode}");
+                if (legacyCreate != createAllowed) { var difference = $"{user} {status} decision4.create: client {legacyCreate}, flag {createAllowed}, HTTP {(int)create.StatusCode}"; output.WriteLine(difference);
+                    Assert.True((legacyCreate) && !(createAllowed), "AC-FIG-08: a difference must be a control today's client offers and the endpoint refuses: " + difference); }
                 var assignAllowed = project["permissions"]!["assignBasisIn"]!.AsArray().Any(x => x!.GetValue<Guid>() == discipline);
                 var assign = await Create(user == TestData.Alex ? TestData.Pm : TestData.Alex);
                 Assert.True(assignAllowed ? assign.IsSuccessStatusCode : assign.StatusCode == HttpStatusCode.Forbidden, $"{user} {status} name another owner returned {(int)assign.StatusCode}: {await assign.Content.ReadAsStringAsync()}");
-                if (legacyAssign != assignAllowed) output.WriteLine($"{user} {status} decision4.assign: client {legacyAssign}, flag {assignAllowed}, HTTP {(int)assign.StatusCode}");
+                if (legacyAssign != assignAllowed) { var difference = $"{user} {status} decision4.assign: client {legacyAssign}, flag {assignAllowed}, HTTP {(int)assign.StatusCode}"; output.WriteLine(difference);
+                    Assert.True((legacyAssign) && !(assignAllowed), "AC-FIG-08: a difference must be a control today's client offers and the endpoint refuses: " + difference); }
             }
         }
     }

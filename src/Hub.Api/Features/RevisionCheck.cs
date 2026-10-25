@@ -49,7 +49,10 @@ public static class RevisionCheckEndpoints
             string? prior = null;
             var history = issues.Where(i => i.DeliverableId == d.Id).Select(i => { var mark = new IssueMarks(i.Id, i.Revision, convention.Marks(i.Revision, prior)); prior = i.Revision; return mark; }).ToArray();
             var current = history.LastOrDefault();
-            return new DeliverableMarks(d.Id, current?.Revision == d.Revision ? current.Marks : convention.Marks(d.Revision, prior), history);
+            var marks = current is not null && current.Revision == d.Revision ? current.Marks
+                : current is null && string.IsNullOrWhiteSpace(d.Revision) ? []
+                : convention.Marks(d.Revision, prior);
+            return new DeliverableMarks(d.Id, marks, history);
         }).ToArray();
     }
 }

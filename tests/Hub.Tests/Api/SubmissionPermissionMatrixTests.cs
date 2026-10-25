@@ -52,7 +52,8 @@ public sealed class SubmissionPermissionMatrixTests(HubFactory f, Xunit.Abstract
                     milestoneId, new DateOnly(2026, 11, 15), [new(revision.G("id"))], [], originalId, "Permission matrix correction"));
                 Assert.True(allowed ? response.IsSuccessStatusCode : response.StatusCode == HttpStatusCode.Forbidden,
                     $"{user} {status} supersede returned {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync()}; createSubmission={allowed}");
-                if (legacy != allowed) output.WriteLine($"{user} {status} decision10: client {legacy}, flag {allowed}, HTTP {(int)response.StatusCode}");
+                if (legacy != allowed) { var difference = $"{user} {status} decision10: client {legacy}, flag {allowed}, HTTP {(int)response.StatusCode}"; output.WriteLine(difference);
+                    Assert.True((legacy) && !(allowed), "AC-FIG-08: a difference must be a control today's client offers and the endpoint refuses: " + difference); }
             }
         }
     }

@@ -22,7 +22,7 @@ class ShardTests(unittest.TestCase):
         declared = set()
         for f in ci_tests.API_TESTS.glob("*.cs"):
             text = f.read_text()
-            if re.search(r"\[(?:Fact|Theory)\b", text):
+            if ci_tests.TEST_ATTRIBUTE.search(text):
                 declared |= {m for m in re.findall(r"^public sealed class (\w+Tests)\b", text, re.M)}
         self.assertTrue(declared <= set(classes), declared - set(classes))
         parts = ci_tests.shards(classes)
@@ -31,7 +31,7 @@ class ShardTests(unittest.TestCase):
         self.assertEqual(sorted(flat), sorted(classes))
         self.assertEqual(len(flat), len(set(flat)))
         self.assertTrue(all(parts), "no shard is empty")
-        self.assertEqual(sum(classes.values()), sum(len(re.findall(r"\[(?:Fact|Theory)\b", f.read_text())) for f in ci_tests.API_TESTS.glob("*.cs")))
+        self.assertEqual(sum(classes.values()), sum(len(ci_tests.TEST_ATTRIBUTE.findall(f.read_text())) for f in ci_tests.API_TESTS.glob("*.cs")))
 
     def test_filters_cover_each_class_once_and_match_whole_names(self):
         filters = [ci_tests.shard_filter(n) for n in (1, 2, 3)]
@@ -47,9 +47,11 @@ class ShardTests(unittest.TestCase):
         (folder / "BrandNewTests.cs").write_text(
             "namespace Hub.Tests.Api;\n[Collection(\"api\")]\npublic sealed class BrandNewTests(HubFactory f)\n{\n"
             "    [Fact] public void A() { }\n    [Theory, InlineData(1)] public void B(int x) { }\n}\n"
-            "public sealed class SecondNewTests\n{\n    [Fact] public void C() { }\n}\n")
+            "public sealed class SecondNewTests\n{\n    [Fact] public void C() { }\n}\n"
+            "public sealed class OnRequestTests\n{\n    [ScaleMeasurementFact, Trait(\"Category\", \"X\")] public void D() { }\n}\n")
         classes = ci_tests.api_classes(folder)
-        self.assertEqual((classes["BrandNewTests"], classes["SecondNewTests"]), (2, 1))
+        # A custom fact attribute still lands its class in a shard, so the count gate sees it run or skip.
+        self.assertEqual((classes["BrandNewTests"], classes["SecondNewTests"], classes["OnRequestTests"]), (2, 1, 1))
         hits = [n for n in (1, 2, 3) if "Hub.Tests.Api.BrandNewTests." in ci_tests.shard_filter(n, folder)]
         self.assertEqual(len(hits), 1)
 

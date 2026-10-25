@@ -55,12 +55,16 @@ public sealed class HubFactory : WebApplicationFactory<Program>
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        if (disposing) shapes.Write(Database);
-        NpgsqlConnection.ClearAllPools();
-        using var c = new NpgsqlConnection("Host=localhost;Port=55432;Database=hub;Username=hub");
-        c.Open();
-        using var cmd = new NpgsqlCommand($"DROP DATABASE IF EXISTS {Database} WITH (FORCE)", c);
-        cmd.ExecuteNonQuery();
+        try { if (disposing) shapes.Write(Database); }
+        finally
+        {
+            // Drop the per-factory database even when recording shapes fails, so failed runs leave nothing behind.
+            NpgsqlConnection.ClearAllPools();
+            using var c = new NpgsqlConnection("Host=localhost;Port=55432;Database=hub;Username=hub");
+            c.Open();
+            using var cmd = new NpgsqlCommand($"DROP DATABASE IF EXISTS {Database} WITH (FORCE)", c);
+            cmd.ExecuteNonQuery();
+        }
     }
 
     /// Runs the project's evaluation synchronously (the background worker is off in tests).

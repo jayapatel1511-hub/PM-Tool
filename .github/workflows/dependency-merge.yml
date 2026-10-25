@@ -17,8 +17,20 @@ jobs:
         id: metadata
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
+      # `gh pr merge --auto` merges at once when main requires nothing, so auto-merge is enabled only while main's
+      # protection requires every CI job (docs/runbooks/delivery.md); until then the update waits for Jay.
+      - name: Check that main requires the CI jobs
+        id: protection
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: |
+          required=" $(gh api "repos/$GITHUB_REPOSITORY/branches/main" --jq '[.protection.required_status_checks.contexts[]?] | join(" ")') "
+          for check in domain api-1 api-2 api-3 web checks gate tier; do
+            case "$required" in *" $check "*) ;; *) echo "::warning::main does not require '$check'; automatic merge is not enabled."; exit 0 ;; esac
+          done
+          echo "ok=true" >> "$GITHUB_OUTPUT"
       - name: Enable automatic squash merge for non-major updates
-        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        if: steps.protection.outputs.ok == 'true' && (steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor')
         env:
           GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           PR: "${{ github.event.pull_request.html_url }}"

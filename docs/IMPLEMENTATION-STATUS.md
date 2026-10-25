@@ -1,5 +1,9 @@
 # Implementation status
 
+## 2026-10-25 packets 039–050 (local)
+
+The 12 October candidate (packets 025 to 038 and its review fixes) reached main through PR #37 (`e4ca1661`). Packets 039 to 042 and 044 to 050 are implemented locally on `codex/integrate-039-050` (base `cf3ce8ee`); packet 043 has only a spike, measured KILL and not integrated. A whole-codebase review on 25 October found twelve problems to fix first; their fixes are uncommitted on that branch, and the backend suite then passed **1,516/1,517** with one on-request performance test skipped, which passes when run (`HUB_SCALE=1`). Nothing is pushed or deployed. See the [19 October acceptance follow-up](handoffs/2026-10-19-039-050-acceptance-followup.md), the [25 October review fixes](handoffs/2026-10-25-review-fixes.md) and each packet's verification record. Branch protection, Tier B review and merge, flag activation, and hosted and human acceptance remain open.
+
 ## 2026-10-12 local deployment candidate
 
 The integrated Tuesday runtime includes packets 025–037. Packet 038's supervisor capacity and digest hold are now locally implemented, along with the shared Partial view decision and the final audit, concurrency, notification and preference-race fixes. On branch `codex/deployment-ready` (base `68c56f28`), the final Release suite passed **1,132/1,132**, with **96.7%** rules-engine branch coverage and **94.6%** service line coverage. Frontend build/lint, six mocked browser suites, package audits, 61 safety regressions and the disposable PG17 backup/PITR rehearsal passed.

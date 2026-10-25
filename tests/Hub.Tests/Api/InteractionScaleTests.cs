@@ -7,9 +7,20 @@ using Xunit.Abstractions;
 
 namespace Hub.Tests.Api;
 
+/// §22 "Performance — API": list endpoints answer a page of 100 within 500 ms p95 at 100 concurrent users.
+/// A coverage-instrumented CI shard cannot measure that fairly, so this runs only on request (HUB_SCALE=1) and otherwise
+/// reports as skipped; when it runs, it fails if any phase misses the target instead of only printing the figure.
+public sealed class ScaleMeasurementFactAttribute : FactAttribute
+{
+    public ScaleMeasurementFactAttribute()
+    {
+        if (Environment.GetEnvironmentVariable("HUB_SCALE") != "1") Skip = "Set HUB_SCALE=1 to measure §22's API latency target outside coverage.";
+    }
+}
+
 public sealed class InteractionScaleTests(ITestOutputHelper output)
 {
-    [Fact, Trait("Spec", "AC-INT-21"), Trait("Category", "LocalScaleMeasurement")]
+    [ScaleMeasurementFact, Trait("Category", "LocalScaleMeasurement")]
     public async Task Measure_ranked_picker_and_task_actor_projection_with_500_tasks_and_100_concurrent_readers()
     {
         using var f = new HubFactory();
@@ -34,6 +45,7 @@ public sealed class InteractionScaleTests(ITestOutputHelper output)
         var paths = new[] { $"/api/v1/projects/{project.Id}/tasks?pageSize=100", $"/api/v1/users?projectId={project.Id}&q=Synthetic&limit=100" };
         // Matched OFF/ON and ON/OFF pairs control order without discarding slow observations.
         var order = new[] { false, true, true, false };
+        var misses = new List<string>();
         for (var phase = 0; phase < order.Length; phase++)
         {
             var enabled = order[phase];
@@ -67,7 +79,9 @@ public sealed class InteractionScaleTests(ITestOutputHelper output)
                 output.WriteLine(JsonSerializer.Serialize(new { scope = "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure", taskCount = 500,
                     concurrentUsers = 100, databasePoolLimit = 20, phase = phase + 1, pairOrder = phase < 2 ? "OFF-ON" : "ON-OFF", warmupBatches = 2, warmupRequests = 200, measuredBatches = 3, flagOn = enabled, request = path.Contains("/tasks?") ? "task-list-100-with-actor" : "project-ranked-picker-100",
                     samples = samples.Length, measuredSamplesMs = measured, p50Ms = samples[149], p95Ms = samples[284], maxMs = samples[^1], apiTargetMs = 500, meetsLocalApiTarget = samples[284] <= 500 }));
+                if (samples[284] > 500) misses.Add($"phase {phase + 1} flag {(enabled ? "on" : "off")} {path}: p95 {samples[284]:F1} ms");
             }
         }
+        Assert.True(misses.Count == 0, "§22 API target (500 ms p95) missed: " + string.Join("; ", misses));
     }
 }

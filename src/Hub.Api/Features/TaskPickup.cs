@@ -149,7 +149,8 @@ public static class TaskPickupEndpoints
             offer.ClosedAt = clock.GetUtcNow(); offer.CloseCause = TaskPickupOffer.AssignedByManager;
             db.Audit.Reason = offer.Reason;
             db.Audit.Note(task, action: "TaskAssignedFromPickup", reason: offer.Reason);
-            await notify.Send(NotificationEvents.TaskPickupAssigned, new Guid?[] { target.Id, old, offer.OfferedById }, TaskEndpoints.Item(project, task), Text.Get("notify.task_pickup_assigned", task.Key, task.Name));
+            await notify.Send(NotificationEvents.TaskPickupAssigned, new Guid?[] { target.Id, old, offer.OfferedById }, TaskEndpoints.Item(project, task), Text.Get("notify.task_pickup_assigned", task.Key, task.Name),
+                assignedTo: [target.Id]);
             return await db.SaveChangesAsync();
         });
         return TypedResults.Ok(new PickupResult(task.Id, task.AssigneeId, offer.CloseCause));

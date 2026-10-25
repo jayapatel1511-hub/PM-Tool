@@ -14,7 +14,9 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
 {
     static readonly HashSet<string> HeldInSetup = [NotificationEvents.TaskAssigned, NotificationEvents.ReviewerSet, NotificationEvents.DeliverableOwned];
 
-    public async Task Send(string eventType, IEnumerable<Guid?> recipients, NotifyItem item, string title, string? body = null, Guid? actorOverride = null)
+    /// <param name="assignedTo">For a direct-assignment event sent to several people, the ones the work is assigned to;
+    /// only they bypass a Muted follow (§12.18). Null keeps the bypass for every recipient.</param>
+    public async Task Send(string eventType, IEnumerable<Guid?> recipients, NotifyItem item, string title, string? body = null, Guid? actorOverride = null, IReadOnlyCollection<Guid>? assignedTo = null)
     {
         var actor = actorOverride ?? audit.ActorId;
         var ids = recipients.OfType<Guid>().Where(r => r != actor).Distinct().ToList();
@@ -48,7 +50,7 @@ public sealed class Notifier(HubDb db, AuditContext audit, SettingsStore store, 
                 && !db.ProjectMembers.Local.Any(m => m.ProjectId == projectId && m.UserId == u.Id && m.RemovedAt == null
                     && db.Entry(m).State == EntityState.Added)
                 && !await EmailProjectAccess.Allowed(db, u.Id, [projectId])) continue;
-            if (muted.Contains(u.Id) && !def.DirectAssignment) continue;
+            if (muted.Contains(u.Id) && !(def.DirectAssignment && (assignedTo is null || assignedTo.Contains(u.Id)))) continue;
             var pref = prefs.GetValueOrDefault(u.Id);
             var app = pref?.InApp ?? defaults.App;
             var mail = pref?.Email ?? defaults.Email;

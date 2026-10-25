@@ -125,15 +125,7 @@ public static class AuditChainJobs
     {
         var db = sp.GetRequiredService<HubDb>();
         var now = sp.GetRequiredService<TimeProvider>().GetUtcNow();
-        var projects = await db.ActivityLog.Select(a => a.ProjectId).Distinct().ToListAsync(ct);
-        // Initialisation also runs when switch-on is the only recent change; future writes use the same chain lock.
-        foreach (var project in projects)
-        {
-            var chain = project ?? Guid.Empty;
-            if (await db.Set<ActivityChainHead>().AnyAsync(h => h.ChainId == chain, ct)) continue;
-            db.LogEvent("AuditChain", chain, "Chain initialization requested", "admin", projectId: project);
-            await db.SaveChangesAsync(ct);
-        }
+        // Chains are sealed once at startup by AuditChainInitialization under the migration identity; this job only verifies.
         var heads = await db.Set<ActivityChainHead>().AsNoTracking().OrderBy(h => h.ChainId).ToListAsync(ct);
         var failed = 0;
         foreach (var head in heads)

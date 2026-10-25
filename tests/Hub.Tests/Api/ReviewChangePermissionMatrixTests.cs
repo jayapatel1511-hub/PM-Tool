@@ -62,7 +62,8 @@ public sealed class ReviewChangePermissionMatrixTests(HubFactory f, Xunit.Abstra
                         new WeeklyCommitmentsEndpoints.ProposeBody(Guid.NewGuid(), rowVersion, new DateOnly(2026, 10, 5), new DateOnly(2026, 10, 7), "Synthetic output", "Synthetic criteria", $"Valid commitment for {user} {status}"));
                     Assert.True(canCommit ? response.IsSuccessStatusCode : response.StatusCode == HttpStatusCode.Forbidden,
                         $"{user} {status} {type} commit returned {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
-                    if (legacy != canCommit) output.WriteLine($"{user} {status} decision7.{type}: client {legacy}, flag {canCommit}, HTTP {(int)response.StatusCode}");
+                    if (legacy != canCommit) { var difference = $"{user} {status} decision7.{type}: client {legacy}, flag {canCommit}, HTTP {(int)response.StatusCode}"; output.WriteLine(difference);
+                        Assert.True((legacy) && !(canCommit), "AC-FIG-08: a difference must be a control today's client offers and the endpoint refuses: " + difference); }
                 }
                 await AssertCommit("Task", taskId, task);
                 await AssertCommit("Deliverable", deliverableId, deliverableRow);
@@ -76,7 +77,8 @@ public sealed class ReviewChangePermissionMatrixTests(HubFactory f, Xunit.Abstra
                         new ReadinessEndpoints.ApplicabilityBody(Guid.NewGuid(), assessment.RowVersion, check.RowVersion, true, "Synthetic applicability", "https://example.test/applicability"));
                     Assert.True(canManage ? response.IsSuccessStatusCode : response.StatusCode == HttpStatusCode.Forbidden,
                         $"{user} {status} {type} applicability returned {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
-                    if ((canWrite && managed) != canManage) output.WriteLine($"{user} {status} decision8.{type}: client {canWrite && managed}, flag {canManage}, HTTP {(int)response.StatusCode}");
+                    if ((canWrite && managed) != canManage) { var difference = $"{user} {status} decision8.{type}: client {canWrite && managed}, flag {canManage}, HTTP {(int)response.StatusCode}"; output.WriteLine(difference);
+                        Assert.True(((canWrite && managed)) && !(canManage), "AC-FIG-08: a difference must be a control today's client offers and the endpoint refuses: " + difference); }
                 }
                 await AssertApplicability("Task", taskId, task);
                 await AssertApplicability("Deliverable", deliverableId, deliverableRow);
@@ -90,7 +92,8 @@ public sealed class ReviewChangePermissionMatrixTests(HubFactory f, Xunit.Abstra
                 var canCreateChange = options["canCreate"]!["changes"]!.GetValue<bool>();
                 Assert.True(canCreateChange ? sourceWrite.IsSuccessStatusCode : sourceWrite.StatusCode == HttpStatusCode.Forbidden,
                     $"{user} {status} source returned {(int)sourceWrite.StatusCode}: {await sourceWrite.Content.ReadAsStringAsync()}");
-                if (canWrite != canCreateChange) output.WriteLine($"{user} {status} decision13.changes: client {canWrite}, flag {canCreateChange}, HTTP {(int)sourceWrite.StatusCode}");
+                if (canWrite != canCreateChange) { var difference = $"{user} {status} decision13.changes: client {canWrite}, flag {canCreateChange}, HTTP {(int)sourceWrite.StatusCode}"; output.WriteLine(difference);
+                    Assert.True((canWrite) && !(canCreateChange), "AC-FIG-08: a difference must be a control today's client offers and the endpoint refuses: " + difference); }
                 var reviewBody = new ReviewEndpoints.CreateBody(Guid.NewGuid(), $"Review {user} {status}", "Permission matrix review", discipline, d.User(TestData.Marc),
                     [sourceIds[user]], [new ReviewEndpoints.Assignment(discipline, d.User(TestData.Pm), DateOnly.FromDateTime(f.Clock.Now.UtcDateTime).AddDays(7))], false, $"Valid review for {user} {status}");
                 var review = await f.As(user).Post($"/api/v1/projects/{project.Id}/reviews", reviewBody);
@@ -98,7 +101,8 @@ public sealed class ReviewChangePermissionMatrixTests(HubFactory f, Xunit.Abstra
                 Assert.True(canCreateReview ? review.IsSuccessStatusCode : review.StatusCode == HttpStatusCode.Forbidden,
                     $"{user} {status} review returned {(int)review.StatusCode}: {await review.Content.ReadAsStringAsync()}");
                 var legacyReview = canWrite && options["manageDisciplineIds"]!.AsArray().Count > 0;
-                if (legacyReview != canCreateReview) output.WriteLine($"{user} {status} decision13.reviews: client {legacyReview}, flag {canCreateReview}, HTTP {(int)review.StatusCode}");
+                if (legacyReview != canCreateReview) { var difference = $"{user} {status} decision13.reviews: client {legacyReview}, flag {canCreateReview}, HTTP {(int)review.StatusCode}"; output.WriteLine(difference);
+                    Assert.True((legacyReview) && !(canCreateReview), "AC-FIG-08: a difference must be a control today's client offers and the endpoint refuses: " + difference); }
             }
         }
     }
@@ -147,7 +151,8 @@ public sealed class ReviewChangePermissionMatrixTests(HubFactory f, Xunit.Abstra
                     null, null, null, null, d.User(TestData.Alex), d.User(TestData.Marc), null, null, null));
             Assert.True(canManage ? response.IsSuccessStatusCode : response.StatusCode == HttpStatusCode.Forbidden,
                 $"{user} {status} assessment assignment returned {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync()}; canManage={canManage}");
-            if (legacyManage != canManage) output.WriteLine($"{user} {status} decision12: client {legacyManage}, flag {canManage}, HTTP {(int)response.StatusCode}");
+            if (legacyManage != canManage) { var difference = $"{user} {status} decision12: client {legacyManage}, flag {canManage}, HTTP {(int)response.StatusCode}"; output.WriteLine(difference);
+                Assert.True((legacyManage) && !(canManage), "AC-FIG-08: a difference must be a control today's client offers and the endpoint refuses: " + difference); }
         }
     }
 }

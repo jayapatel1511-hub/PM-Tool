@@ -77,6 +77,7 @@ let server, browser;
     else if (p === `open-roles/${contractExample.id}` && route.request().method() === 'PATCH') { typedPatchHeaders = route.request().headers(); data = { ...contractExample, rowVersion: contractExample.rowVersion + 1 } }
     else if (p === `projects/${pid}/allocations`) data = { items: [allocation(proposed, 'Proposed'), allocation(confirmed, 'Confirmed')], page: 1, pageSize: 50, totalCount: 2 }
     else if (p === `projects/${pid}/allocations/${proposed}/confirmation-preview`) [status, data] = [403, { code: 'forbidden', detail: 'You cannot open the workload view.' }]
+    else if (p === `projects/${pid}/allocations/review-options`) data = [] // the proposal form's reviewer list (an array, as the server returns)
     else if (p.startsWith(`projects/${pid}/allocations/`)) {
       const aid = p.split('/').pop()
       data = { ...allocation(aid, aid === proposed ? 'Proposed' : 'Confirmed'), personEligible: true, links: [], days: [], overCapacityWarningRecorded: false,
@@ -206,6 +207,13 @@ let server, browser;
   await editRole.waitFor({ state: 'hidden' });
   assert.equal(typedPatchHeaders?.['if-match'], `"${contractExample.rowVersion}"`);
   assert.equal(typedPatchHeaders?.['x-hub-source'], 'UI');
+  // A Workload Fill link (?fill=) opens the proposal once; Cancel closes it and drops the parameter so it does not reopen.
+  await page.goto(`${base}/projects/P-DEMO/allocations?tab=roles&fill=${contractExample.id}`);
+  const fillDialog = page.getByRole('dialog'); await fillDialog.waitFor();
+  await fillDialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await fillDialog.waitFor({ state: 'hidden' }); await page.waitForTimeout(300);
+  assert.equal(await page.getByRole('dialog').count(), 0, 'a cancelled fill dialog stays closed');
+  assert.equal(new URL(page.url()).searchParams.get('fill'), null, 'Cancel removes the fill parameter');
   openRoles.length = 0;
 
   // FR-FIG-09 (D5): a control today's client offered the PM but the server refuses stays visible, disabled, with the server's reason.

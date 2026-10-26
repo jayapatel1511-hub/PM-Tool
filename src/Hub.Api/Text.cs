@@ -710,7 +710,8 @@ public static class Text
         ["planning.indicator.OverPlanned"] = "Over-planned",
         ["planning.indicator.UnderPlanned"] = "Under-planned",
         ["planning.indicator.StalePlan"] = "Stale plan",
-        ["col.role"] = "Role", ["col.from"] = "From", ["col.through"] = "Through",
+        ["col.role"] = "Role", ["col.from"] = "From", ["col.through"] = "Through", ["col.filledBy"] = "Filled by",
+        ["export.openRoles"] = "Open roles {0}",
         // open roles (packet 036)
         ["openRole.filled"] = "This open role is already filled. Decline or cancel its allocation first, or propose without the role.",
         ["openRole.range"] = "The allocation dates must fall within the open role's dates.",

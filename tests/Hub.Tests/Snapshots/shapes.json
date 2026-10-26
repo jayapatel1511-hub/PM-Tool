@@ -5692,6 +5692,9 @@
     "$.flags.project_status_note": [
       "boolean"
     ],
+    "$.flags.record_engine_additions": [
+      "boolean"
+    ],
     "$.flags.revision_check": [
       "boolean"
     ],

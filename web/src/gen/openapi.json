@@ -18470,6 +18470,44 @@
         ]
       }
     },
+    "/api/v1/lists/{code}/export": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "OpenRoleEndpoints"
+        ]
+      }
+    },
     "/api/v1/me": {
       "get": {
         "responses": {

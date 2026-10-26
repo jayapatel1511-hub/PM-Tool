@@ -18,7 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
-import { useMe } from '@/lib/auth'
+import { useFlag, useMe } from '@/lib/auth'
 import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
@@ -191,6 +191,7 @@ export function RisksTab() {
   const [sp] = useSearchParams()
   const panel = sp.get('panel')
   const [raising, setRaising] = useState(false)
+  const views = useFlag('record_engine_additions') // §47.5 FR-REC-12: saved views as the Issues register has
   const q = useQuery({ queryKey: ['p', p.id, 'risks', f.filters], queryFn: () => get<RiskRow[]>(`projects/${p.id}/risks${qs(f.filters)}`) })
   const table = useTable<RiskRow>('hub.riskColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (r) => r.key, className: 'whitespace-nowrap', cell: (r) => <Key>{r.key}</Key> },
@@ -210,6 +211,7 @@ export function RisksTab() {
     <Page title={t('ptab.risks')} subtitle={t('risk.subtitle')}
       actions={<>
         {table.menu}
+        {views && <ViewMenu listType="risks" projectId={p.id} extra={() => ({ cols: table.colsParam })} />}
         <ExportMenu path={`projects/${p.id}/risks/export`} params={f.filters} name={`${p.projectNumber}-risks`} />
         {can.ok && <Button onClick={() => setRaising(true)}><Plus className="size-4" />{t('risk.new')}</Button>}
       </>}>

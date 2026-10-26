@@ -36,6 +36,7 @@ public static class Flags
         new("my_work_follow_up", "047"),
         new("project_import", "047"),
         new("capacity_polish", "047"),
+        new("record_engine_additions", "043"), // §47.5 FR-REC-12: Risks saved views; open-role sorting, read-only panel and export
         new("live_project_stamp", "042"), // §46.5 project stamp in the notification pulse
         new("live_events", "042"), // §46.6 change-event stream
         new("admin_review", "051"), // §55.4: the Admin review page, its record, the digest line and the Portfolio strip

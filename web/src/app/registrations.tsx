@@ -16,6 +16,7 @@ PANELS.Decision = { component: lazyPanel(() => import('@/pages/projects/Decision
 PANELS.Action = { component: lazyPanel(() => import('@/pages/projects/Meetings').then(m => ({ default: m.ActionPanel }))) }
 PANELS.Risk = { component: lazyPanel(() => import('@/pages/projects/Registers').then(m => ({ default: m.RiskPanel }))) }
 PANELS.Issue = { component: lazyPanel(() => import('@/pages/projects/Registers').then(m => ({ default: m.IssuePanel }))) }
+PANELS.OpenRole = { component: lazyPanel(() => import('@/pages/projects/Allocations').then(m => ({ default: m.OpenRolePanel }))), flag: 'record_engine_additions' }
 ItemSlots.Comments = slot(() => import('@/components/hub/comments').then(m => ({ default: m.CommentsPanel })))
 ItemSlots.Links = slot(() => import('@/components/hub/links').then(m => ({ default: m.LinksPanel })))
 ItemSlots.Raise = slot(() => import('@/pages/projects/Registers').then(m => ({ default: m.RaiseMenu })))

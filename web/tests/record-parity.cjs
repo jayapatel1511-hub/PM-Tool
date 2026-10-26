@@ -10,6 +10,8 @@
 //   RECORD_PARITY_SELFCHECK=1  diff logic only; RECORD_PARITY_BROWSER_SELFCHECK=1  identical builds pass, a removed
 //                           header fails, a Columns button taken out of the Tab order fails, and a disabled Risk
 //                           panel field whose title becomes a permission reason fails
+//   After the matrix, when the API declares flag.record_engine_additions, the AC-REC-09 checks run on the candidate with the
+//   flag off and then on (the base build has no additions to compare); RECORD_PARITY_ADDITIONS_ONLY=1 runs only those.
 const assert = require('node:assert/strict')
 const fs = require('node:fs/promises')
 const path = require('node:path')
@@ -29,6 +31,7 @@ const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
 // Project Manager, Discipline Lead, Team Member, Read Only, and a user outside the Restricted project.
 const PERSONAS = { priya: 'Priya Nair', marc: 'Marc Dubois', alex: 'Alex Chen', rita: 'Rita Gomez', jill: 'Jill Martin' }
+const ADDITIONS = 'flag.record_engine_additions' // §47.5 FR-REC-12, kept on the restored screens after the KILL (FR-REC-14)
 const WIDTHS = [1600, 375]
 const launch = () => chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
 // Both builds read the same API-created records. Only the local origin is volatile;
@@ -104,7 +107,7 @@ async function fixtures() {
   const risk = await api(`projects/${project.id}/risks`, 'priya', { method: 'POST', body: JSON.stringify({
     title: 'Synthetic parity risk', description: 'Parity fixture', probability: 2, impact: 2, mitigation: 'Monitor', triggerIndicator: 'Review',
   }) })
-  await role(project, 'Synthetic parity role')
+  const openRole = await role(project, 'Synthetic parity role')
   const complete = await createProject(reference, 'C', 'Synthetic complete parity project')
   await role(complete, 'Synthetic complete role')
   const beforeComplete = await api(`projects/${complete.id}`, 'priya')
@@ -116,7 +119,20 @@ async function fixtures() {
   const restricted = await createProject(reference, 'R', 'Synthetic restricted parity project', false)
   const restrictedDraft = await api(`projects/${restricted.id}`, 'priya')
   await api(`projects/${restricted.id}`, 'priya', { method: 'PATCH', headers: { 'If-Match': `"${restrictedDraft.rowVersion}"` }, body: JSON.stringify({ visibility: 'Restricted', rowVersion: restrictedDraft.rowVersion }) })
-  return { project: project.projectNumber, projectId: project.id, risk: risk.id, complete: complete.projectNumber, empty: empty.projectNumber, restricted: restricted.projectNumber }
+  return { project: project.projectNumber, projectId: project.id, risk: risk.id, openRole: openRole.id, complete: complete.projectNumber, empty: empty.projectNumber,
+    restricted: restricted.projectNumber, restrictedId: restricted.id }
+}
+
+// An export download as rows: the CSV lines, or the first sheet's cells (ZIP metadata and file names are not record data).
+async function exportRows(file) {
+  const bytes = await fs.readFile(await file.path())
+  const format = path.extname(file.suggestedFilename()).toLowerCase()
+  const rows = format === '.xlsx' ? JSON.parse(execFileSync('python3', ['-c', `import io,json,sys,zipfile,xml.etree.ElementTree as E
+z=zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read()))
+n={'s':'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
+root=E.fromstring(z.read('xl/worksheets/sheet1.xml'))
+print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row in root.findall('.//s:sheetData/s:row',n)]))`], { input: bytes }).toString()) : bytes.toString('utf8').replace(/\r\n/g, '\n')
+  return { format, rows }
 }
 
 async function browserSnapshot(origin, who, width, ids, { removeHeader = false, untabColumns = false, retitle = false, shots = true } = {}) {
@@ -282,14 +298,7 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
         await menu.getByText(item, { exact: true }).first().click()
         const file = await download
         if (!file) { downloads.push({ item, rows: null }); continue }
-        const bytes = await fs.readFile(await file.path())
-        const format = path.extname(file.suggestedFilename()).toLowerCase()
-        const data = format === '.xlsx' ? JSON.parse(execFileSync('python3', ['-c', `import io,json,sys,zipfile,xml.etree.ElementTree as E
-z=zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read()))
-n={'s':'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
-root=E.fromstring(z.read('xl/worksheets/sheet1.xml'))
-print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row in root.findall('.//s:sheetData/s:row',n)]))`], { input: bytes }).toString()) : bytes.toString('utf8').replace(/\r\n/g, '\n')
-        downloads.push({ item, format, rows: data })
+        downloads.push({ item, ...await exportRows(file) })
       }
       return { items, downloads }
     }
@@ -369,6 +378,135 @@ print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row 
   }
 }
 
+// AC-REC-09 on the candidate. Off: Risks has no Views menu; open roles have no sort buttons, no panel link and no open-roles
+// export entries; ?panel=OpenRole:<id> opens nothing. On: a Risks saved view re-applies its filters, sort and columns; open-role
+// headers sort with aria-sort; the role label opens a panel whose History lists the role's activity entries; the Export menu's
+// open-roles entries download the roles with the list's columns; a viewer who cannot view the project gets none of them.
+async function additionsCheck(ids) {
+  const failures = [], check = (ok, message) => { if (!ok) failures.push(message) }
+  const browser = await launch()
+  const createdViews = []
+  let step = 'off' // names the check that stopped, if one throws
+  try {
+    const signIn = async who => {
+      const page = await (await browser.newContext({ viewport: { width: 1600, height: 1000 }, reducedMotion: 'reduce', acceptDownloads: true })).newPage()
+      page.on('pageerror', error => failures.push(`${who} browser error: ${error.message.slice(0, 180)}`))
+      await page.goto(`${candidate}/login`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+      await page.getByRole('button', { name: new RegExp(PERSONAS[who], 'i') }).click()
+      await page.waitForURL(u => !u.pathname.startsWith('/login'), { timeout: 30000 })
+      return page
+    }
+    const go = async (page, url, ready = 'main') => {
+      await page.goto(`${candidate}${url}`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+      await page.locator(ready).first().waitFor({ timeout: 30000 }); await page.waitForLoadState('networkidle').catch(() => {})
+    }
+    // A closing menu stays in the DOM while it animates out, so only the open one is read or clicked.
+    const openMenu = page => page.locator('[role=menu][data-state=open]')
+    const menuItems = async (page, trigger) => {
+      await trigger.click(); const menu = openMenu(page); await menu.waitFor()
+      const items = (await menu.locator('[role^=menuitem]').allTextContents()).map(x => x.trim()).filter(Boolean)
+      await page.keyboard.press('Escape'); return items
+    }
+    const viewsButton = page => page.locator('main button[aria-haspopup=menu]').filter({ hasText: /^Views$/ })
+    const exportButton = page => page.locator('main button').filter({ hasText: /^Export$/ }).first()
+    const risks = `/projects/${ids.project}/risks`, roles = `/projects/${ids.project}/allocations?tab=roles`
+    const roleLink = page => page.locator('main tbody button').filter({ hasText: /^Synthetic parity role$/ })
+    const listStatus = async (who, id) => (await fetch(`${apiBase}/api/v1/projects/${id}/open-roles`, { headers: auth(who) })).status
+    const exportStatus = async (who, id) => (await fetch(`${apiBase}/api/v1/lists/open-roles/export?projectId=${id}&format=csv`, { headers: auth(who) })).status
+
+    await setting(ADDITIONS, false)
+    let page = await signIn('priya')
+    await go(page, risks, 'main table')
+    check(await viewsButton(page).count() === 0, 'off: the Risks toolbar shows a Views menu')
+    await go(page, roles, 'main table')
+    check(await page.locator('main th button').count() === 0 && await page.locator('main th[aria-sort]').count() === 0, 'off: open-role headers sort')
+    check(await roleLink(page).count() === 0, 'off: the role label opens a panel')
+    check(!(await menuItems(page, exportButton(page))).some(x => x.startsWith('Open roles')), 'off: the Export menu offers open roles')
+    check(await exportStatus('priya', ids.projectId) === 404, 'off: the open-roles export answers')
+    await go(page, `${roles}&panel=OpenRole:${ids.openRole}`, 'main table')
+    check(await page.locator('[role=dialog]').count() === 0, 'off: ?panel=OpenRole opens a panel')
+
+    await setting(ADDITIONS, true)
+    step = 'on: Risks saved view'
+    page = await signIn('priya')
+    // A saved view keeps the filters, the sort and the columns, and applying it from the plain register restores them.
+    await go(page, `${risks}?status=Open,Monitoring&severity=Medium&sort=severity:desc&cols=severity,status`, 'main table')
+    await viewsButton(page).click()
+    await openMenu(page).getByText(/^Save current view/).click()
+    const name = `Parity additions ${runId.slice(0, 8)}`
+    await page.locator('[role=dialog] #view-name').fill(name)
+    const created = page.waitForResponse(r => r.request().method() === 'POST' && /\/api\/v1\/views$/.test(r.url()))
+    await page.locator('[role=dialog]').getByRole('button', { name: /^Save$/ }).click()
+    const saved = await created
+    if (saved.ok()) createdViews.push((await saved.json()).id); else failures.push(`on: saving a Risks view answered ${saved.status()}`)
+    await go(page, risks, 'main table')
+    await viewsButton(page).click()
+    await openMenu(page).getByText(name, { exact: true }).click()
+    await page.waitForFunction(() => new URL(location.href).searchParams.has('view'))
+    const applied = new URL(page.url()).searchParams
+    check(applied.get('status') === 'Open,Monitoring' && applied.get('severity') === 'Medium' && applied.get('sort') === 'severity:desc', `on: the view re-applied ${applied}`)
+    await page.locator('main th[aria-sort=descending]').waitFor({ timeout: 10000 }).catch(() => {}) // the filtered rows have loaded
+    const headers = (await page.locator('main th').allTextContents()).map(x => x.trim())
+    check(JSON.stringify(headers) === JSON.stringify(['Key', 'Title', 'Severity', 'Status']), `on: the view's columns are ${headers.join(', ')}`)
+    check(await page.locator('main th[aria-sort=descending]').textContent().then(x => x.trim(), () => null) === 'Severity', 'on: the view did not re-apply its sort')
+    check((await page.locator('main tbody').allInnerTexts()).join(' ').includes('Synthetic parity risk'), 'on: the view lost the matching risk')
+
+    // Open-role headers sort with aria-sort and keep it in the URL.
+    step = 'on: open-role sorting'
+    await go(page, roles, 'main table')
+    const role = page.locator('main th').filter({ hasText: /^Role$/ })
+    check(await role.getAttribute('aria-sort') === 'none', 'on: the Role header is not sortable')
+    await role.locator('button').click(); await page.waitForFunction(() => document.querySelector('main th[aria-sort=ascending]'))
+    check(await role.getAttribute('aria-sort') === 'ascending' && new URL(page.url()).searchParams.get('sort') === 'role', 'on: Role does not sort ascending')
+    await role.locator('button').click(); await page.waitForFunction(() => document.querySelector('main th[aria-sort=descending]'))
+    check(await role.getAttribute('aria-sort') === 'descending', 'on: Role does not sort descending')
+
+    // The role label opens the read-only panel; its History lists the role's activity entries.
+    step = 'on: open-role panel'
+    await go(page, roles, 'main table')
+    await roleLink(page).click()
+    const dialog = page.locator('[role=dialog]').filter({ visible: true })
+    await dialog.getByRole('heading', { name: 'Synthetic parity role' }).waitFor({ timeout: 10000 }).catch(() => failures.push('on: the role label opened no panel'))
+    check(new URL(page.url()).searchParams.get('panel') === `OpenRole:${ids.openRole}`, 'on: the panel is not in the URL')
+    check(await dialog.getByRole('tab', { name: 'History' }).getAttribute('aria-selected').catch(() => null) === 'true', 'on: the panel has no History tab')
+    check(await dialog.locator('input,textarea,select').count() === 0, 'on: the open-role panel is editable')
+    const activity = (await api(`items/OpenRole/${ids.openRole}/activity?pageSize=100`, 'priya')).items
+    await dialog.locator('ol > li').first().waitFor({ timeout: 10000 }).catch(() => {})
+    check(activity.length > 0 && await dialog.locator('ol > li').count() === activity.length, `on: History lists ${await dialog.locator('ol > li').count()} of ${activity.length} entries`)
+    await page.keyboard.press('Escape'); await dialog.waitFor({ state: 'detached' }).catch(() => {})
+
+    // The Export menu's open-roles entries come after the page's own and download the roles with the list's columns.
+    step = 'on: open-role export'
+    const items = await menuItems(page, exportButton(page))
+    check(JSON.stringify(items) === JSON.stringify(['Excel (.xlsx)', 'CSV (.csv)', 'Open roles · Excel (.xlsx)', 'Open roles · CSV (.csv)']), `on: the Export menu is ${items.join(' | ')}`)
+    for (const item of items.slice(2)) {
+      await exportButton(page).click()
+      const menu = openMenu(page); await menu.waitFor()
+      const download = page.waitForEvent('download', { timeout: 10000 }).catch(() => null)
+      await menu.getByText(item, { exact: true }).click()
+      const file = await download
+      if (!file) { failures.push(`on: ${item} downloaded nothing`); continue }
+      const { format, rows } = await exportRows(file)
+      const table = format === '.xlsx' ? rows : rows.trim().replace(/^\uFEFF/, '').split('\n').map(line => line.split(','))
+      check(table[0]?.join(',') === 'Role,Discipline,From,Through,Hours,Status,Filled by,Note', `on: ${item} header is ${table[0]}`)
+      check(table.length === 2 && table[1][0] === 'Synthetic parity role', `on: ${item} rows are ${JSON.stringify(table.slice(1))}`)
+    }
+
+    // FR-ROLE-05: a viewer who cannot view the project gets none of them, and the export answers as the list does.
+    step = 'on: outsider'
+    page = await signIn('jill')
+    await go(page, `/projects/${ids.restricted}/allocations?tab=roles`)
+    check(await page.locator('main table').count() === 0 && await exportButton(page).count() === 0, 'on: the outsider sees the restricted open roles')
+    check(await exportStatus('jill', ids.restrictedId) === await listStatus('jill', ids.restrictedId), 'on: the export and the list answer the outsider differently')
+    check((await fetch(`${apiBase}/api/v1/views?listType=risks&projectId=${ids.restrictedId}`, { headers: auth('jill') })).status === 404, 'on: the outsider reads restricted Risks views')
+  } catch (error) {
+    failures.push(`${step} stopped: ${error.message.split('\n')[0]}`)
+  } finally {
+    try { for (const id of createdViews) await api(`views/${id}`, 'priya', { method: 'DELETE' }) } finally { await browser.close() }
+  }
+  return failures
+}
+
 ;(async () => {
   selfCheck()
   if (process.env.RECORD_PARITY_SELFCHECK === '1') return
@@ -376,7 +514,8 @@ print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row 
   const config = await (await fetch(`${apiBase}/api/v1/config`)).json()
   assert.equal(config.authMode, 'Development', 'record parity requires Development authentication')
   const settings = await api('admin/settings')
-  const original = Object.fromEntries(['restricted_projects_enabled', ...FLAGS].map(key => [key, settings.find(x => x.key === key)?.value]))
+  const additions = settings.some(x => x.key === ADDITIONS)
+  const original = Object.fromEntries(['restricted_projects_enabled', ...FLAGS, ...(additions ? [ADDITIONS] : [])].map(key => [key, settings.find(x => x.key === key)?.value]))
   for (const [key, value] of Object.entries(original)) assert.equal(typeof value, 'boolean', `setting ${key} missing`)
   await fs.mkdir(path.dirname(output), { recursive: true })
   try {
@@ -406,7 +545,7 @@ print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row 
       return
     }
     const report = { candidate, base, apiBase, screens: SCREENS, flags: FLAGS, ids, runs: {}, at: new Date().toISOString() }
-    for (const flagged of FLAGS.length ? [false, true] : [false]) {
+    for (const flagged of process.env.RECORD_PARITY_ADDITIONS_ONLY === '1' ? [] : FLAGS.length ? [false, true] : [false]) {
       for (const key of FLAGS) await setting(key, flagged)
       for (const who of Object.keys(PERSONAS)) for (const width of WIDTHS) {
         const key = `${FLAGS.length ? `flags ${flagged ? 'on' : 'off'} ` : ''}${who}/${width}`
@@ -418,9 +557,13 @@ print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row 
         console.log(`${report.runs[key].pass ? 'PASS' : 'FAIL'} ${key}${report.runs[key].pass ? '' : ` (${[...problems, ...differences].slice(0, 4).join('; ')})`}`)
       }
     }
+    if (additions) {
+      report.additions = await additionsCheck(ids)
+      console.log(`${report.additions.length ? 'FAIL' : 'PASS'} AC-REC-09 ${ADDITIONS} off and on${report.additions.length ? ` (${report.additions.slice(0, 4).join('; ')})` : ''}`)
+    }
     await fs.writeFile(output, JSON.stringify(report, null, 2))
-    const failed = Object.values(report.runs).filter(x => !x.pass).length
-    console.log(JSON.stringify({ result: failed ? 'FAIL' : 'PASS', checked: Object.keys(report.runs).length, failed, screens: SCREENS, report: output }))
+    const failed = Object.values(report.runs).filter(x => !x.pass).length + (report.additions?.length ? 1 : 0)
+    console.log(JSON.stringify({ result: failed ? 'FAIL' : 'PASS', checked: Object.keys(report.runs).length + (additions ? 1 : 0), failed, screens: SCREENS, report: output }))
     if (failed) process.exitCode = 1
   } finally {
     for (const [key, value] of Object.entries(original)) await setting(key, value).catch(error => console.error(`could not restore ${key}: ${error.message}`))

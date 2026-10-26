@@ -25,6 +25,7 @@ public static class ViewEndpoints
             var settings = await store.Get(db);
             Check.OneOf(listType, [.. Lists.Keys], "listType");
             if (listType == "planner") { await PeopleScope.DemandWorkload(db, access.Actor); Check.That(projectId == null, "projectId", "view.personal_only"); }
+            if (listType == "risks") Http.RequireFlag(settings, "record_engine_additions"); // §47.5 FR-REC-12
             if (listType == "staff") { Http.RequireFlag(settings, "small_ux"); Access.Demand(Permissions.ViewStaff(access.Actor)); Check.That(projectId == null, "projectId", "view.personal_only"); }
             var ctx = projectId is { } pid ? (await access.Project(pid, track: false)).Ctx : null;
             var views = await db.SavedViews.AsNoTracking().Where(v => v.ListType == listType
@@ -51,6 +52,7 @@ public static class ViewEndpoints
             Check.OneOf(body.ListType, [.. Lists.Keys], "listType");
             var scope = body.Scope ?? Personal;
             if (body.ListType == "planner") { await PeopleScope.DemandWorkload(db, access.Actor); Check.That(scope == Personal && body.ProjectId == null, "scope", "view.personal_only"); }
+            if (body.ListType == "risks") Http.RequireFlag(settings, "record_engine_additions");
             if (body.ListType == "staff") { Http.RequireFlag(settings, "small_ux"); Access.Demand(Permissions.ViewStaff(access.Actor)); Check.That(scope == Personal && body.ProjectId == null, "scope", "view.personal_only"); }
             Check.OneOf(scope, [Personal, ProjectScope], "scope");
             if (body.ProjectId is { } pid)
@@ -112,6 +114,7 @@ public static class ViewEndpoints
     {
         var v = await db.SavedViews.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         if (v.ListType == "planner") await PeopleScope.DemandWorkload(db, access.Actor);
+        if (v.ListType == "risks") Http.RequireFlag(settings, "record_engine_additions");
         if (v.ListType == "staff") { Http.RequireFlag(settings, "small_ux"); Access.Demand(Permissions.ViewStaff(access.Actor)); }
         if (v.Scope == Personal) { if (v.OwnerId != me.Id) throw ApiException.NotFound(); return v; }
         var (_, ctx) = await access.Project(v.ProjectId!.Value, track: false);

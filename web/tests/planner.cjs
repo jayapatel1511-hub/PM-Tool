@@ -112,7 +112,11 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
     const ritaCell = page.getByRole('button', { name: /^Rita Readonly, 2026-10-05/ }).first()
     await page.getByRole('status').filter({ hasText: 'Some project records are outside your scope' }).waitFor()
     assert.doesNotMatch(await rowOf('Rita Readonly').innerText(), /Partial view|at most/); assert.doesNotMatch(await ritaCell.getAttribute('aria-label'), /at most/)
+    // AC-FIG-04: the Weekly Planner's basis line is the grid's description and reads the same with the flag off and on.
+    const plannerBasis = async () => region.evaluate((el) => document.getElementById(el.getAttribute('aria-describedby'))?.textContent)
+    const basisOff = await plannerBasis(); assert.equal(basisOff, 'Planned totals include Possible work. Remaining = capacity − Confirmed − Expected.')
     me.flags = { figure_names: true }; await page.reload(); await region.waitFor()
+    assert.equal(await plannerBasis(), basisOff, 'Planner basis line unchanged with flag.figure_names on')
     await page.getByRole('status').filter({ hasText: 'Some project records are outside your scope' }).waitFor() // the page notice stays
     const ritaText = await rowOf('Rita Readonly').innerText(); assert.match(ritaText, /Partial view/); assert.match(ritaText, /at most 40 h/)
     const rowLabel = rowOf('Rita Readonly').locator('[aria-describedby^="partial-"]'); assert.equal(await rowLabel.getAttribute('title'), 'Some project records are outside your scope, so spare capacity is not shown as available.')

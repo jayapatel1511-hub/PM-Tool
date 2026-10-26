@@ -149,6 +149,23 @@ let server, browser;
   unassignedOn = true; await page.reload(); await grid1.waitFor();
   const unassigned = page.getByRole('region', { name: 'Unassigned tasks' }); await unassigned.waitFor();
   assert.equal(await unassigned.getByRole('link', { name: 'Show all 51' }).getAttribute('href'), `/tasks?unassigned=true&projects=${pid}`);
+  // AC-FIG-04: the person picker's free figure. Flag off: today's figure with no tooltip or description; flag on: both are the
+  // remaining-capacity basis, and the open picker passes axe.
+  const pickerFigure = page.getByRole('option', { name: /Jill Partial/ }).locator('[data-capacity]');
+  const openPicker = async () => {
+    await unassigned.getByRole('button', { name: 'Assign P-DEMO-T0090' }).click(); await page.getByText('12 h free · 8 h away').waitFor();
+    // axe reads settled colours, so wait for the popover's entry animation.
+    await page.evaluate(() => Promise.all(document.getAnimations().filter(a => a.effect?.getTiming().iterations !== Infinity).map(a => a.finished.catch(() => undefined))));
+  };
+  await openPicker();
+  assert.equal(await pickerFigure.getAttribute('title'), null); assert.equal(await pickerFigure.getAttribute('aria-describedby'), null);
+  await page.keyboard.press('Escape');
+  figureNames = true; await page.reload(); await unassigned.waitFor(); await openPicker();
+  const freeBasis = 'Remaining capacity in the Weekly Planner: capacity − Confirmed − Expected';
+  assert.equal(await pickerFigure.getAttribute('title'), freeBasis);
+  assert.equal(await page.locator(`[id="${await pickerFigure.getAttribute('aria-describedby')}"]`).textContent(), freeBasis);
+  const pickerViolations = await axe();
+  await page.keyboard.press('Escape'); figureNames = false; await page.reload(); await unassigned.waitFor();
   await unassigned.getByRole('button', { name: 'Assign P-DEMO-T0090' }).click();
   await page.getByRole('option', { name: /Jill Partial/ }).waitFor();
   await page.getByText('12 h free · 8 h away').waitFor();
@@ -225,8 +242,8 @@ let server, browser;
   assert.equal(await refusedPropose.getAttribute('title'), 'This project is Archived and read-only.', 'Refused proposal carries the server reason');
 
 
-  const report = { scope: 'Chromium UI with mocked API; server rules are tested separately', errors, unmockedGets: [...new Set(unknown)], desktopViolations, namedViolations, panelViolations };
+  const report = { scope: 'Chromium UI with mocked API; server rules are tested separately', errors, unmockedGets: [...new Set(unknown)], desktopViolations, namedViolations, pickerViolations, panelViolations };
   console.log(JSON.stringify(report));
   assert.deepEqual(errors, []); assert.deepEqual(report.unmockedGets, [], 'Every API call is mocked');
-  assert.deepEqual(desktopViolations, [], 'Workload accessibility'); assert.deepEqual(namedViolations, [], 'Workload accessibility with flag.figure_names on'); assert.deepEqual(panelViolations, [], 'Allocation panel accessibility');
+  assert.deepEqual(desktopViolations, [], 'Workload accessibility'); assert.deepEqual(namedViolations, [], 'Workload accessibility with flag.figure_names on'); assert.deepEqual(pickerViolations, [], 'Person picker accessibility with flag.figure_names on'); assert.deepEqual(panelViolations, [], 'Allocation panel accessibility');
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(async () => { await browser?.close(); server?.kill() });

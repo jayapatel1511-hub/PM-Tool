@@ -12448,6 +12448,12 @@
       },
       "TaskPickupListRow": {
         "properties": {
+          "canAssign": {
+            "type": "boolean"
+          },
+          "canPickUp": {
+            "type": "boolean"
+          },
           "hoursRemaining": {
             "format": "double",
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
@@ -12505,7 +12511,9 @@
           "neededBy",
           "note",
           "openedAt",
-          "task"
+          "task",
+          "canPickUp",
+          "canAssign"
         ],
         "type": "object"
       },

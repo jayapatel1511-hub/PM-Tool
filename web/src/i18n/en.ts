@@ -69,7 +69,7 @@ export const en = {
   'pickup.pick': 'Pick up task',
   'pickup.loadUnavailable': 'Your workload is unavailable.',
   'pickup.ownLoad': 'Your workload for {week}: {band} · {hours} of {capacity} h',
-  'pickup.subtitle': 'Work offered by people in your team',
+  'pickup.subtitle': 'Work your team has offered for pickup, and offers you can assign',
   'pickup.pickedUp': 'Task picked up',
   'pickup.pickUp': 'Pick up',
   'pickup.neededDue': 'Needed by {needed} · Due {due}',

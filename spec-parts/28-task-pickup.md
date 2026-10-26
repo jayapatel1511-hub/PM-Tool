@@ -25,7 +25,7 @@ Where this section adds to §8.5 and §8.6 (permissions), §13.10 (My Work), §1
 
 ### 53.3 Open for pickup list
 
-- **FR-PKP-04.** A new **Open for pickup** list MUST show the open offers the viewer may pick up (FR-PKP-06) or assign (FR-PKP-07), on tasks the viewer can already see (§8.7). It is reachable from My Work and from each project's Work tab group as a filter, and lists task key and name, project, discipline, offerer, reason, hours remaining, needed-by date, due date and offer age. It filters by project, discipline and needed-by date and sorts by needed-by date, then due date. Offers outside the viewer's team are not listed. No new visibility is granted: a Restricted project's offers appear only to people who can view that project.
+- **FR-PKP-04.** A new **Open for pickup** list MUST show the open offers the viewer may pick up (FR-PKP-06) or assign (FR-PKP-07), on tasks the viewer can already see (§8.7). It is reachable from My Work and from each project's Work tab group as a filter, and lists task key and name, project, discipline, offerer, reason, hours remaining, needed-by date, due date and offer age. It filters by project, discipline and needed-by date and sorts by needed-by date, then due date. A viewer in the assignee's team (FR-PKP-06) sees the offer with **Pick up**; the assignee's direct manager, the project's PM and the Discipline Lead of the task's discipline see it with **Assign**, which opens the task with its assignment choice, even when they are outside the team. Each row says which actions the viewer has. Anyone else does not see the offer. No new visibility is granted: a Restricted project's offers appear only to people who can view that project.
 
 - **FR-PKP-05.** The viewer's own load band for the needed-by week (§45.4) MUST be shown beside the **Pick up** action as information only. It never hides, blocks or orders offers.
 
@@ -68,7 +68,7 @@ Where this section adds to §8.5 and §8.6 (permissions), §13.10 (My Work), §1
 
 - **AC-PKP-02.** Given Alex's open offer and Jill in Alex's team, when Jill picks it up, then the task is assigned to Jill at once with no approval, Alex becomes a watcher, the offer closes as picked up, and the activity log holds the offer and the pick-up with old and new assignee.
 
-- **AC-PKP-03.** Given Sam is not in Alex's team, then the offer is not in Sam's Open for pickup list, and calling the pick-up endpoint returns 403 and changes nothing.
+- **AC-PKP-03.** Given Diane is neither in Alex's team nor someone who may assign Alex's task, then the offer is not in Diane's Open for pickup list, and calling the pick-up endpoint returns 403 and changes nothing.
 
 - **AC-PKP-04.** Given Jill and Kim, both in Alex's team, pick up the same offer at the same moment, then exactly one of them gets the task and the other sees the existing conflict message.
 
@@ -78,11 +78,13 @@ Where this section adds to §8.5 and §8.6 (permissions), §13.10 (My Work), §1
 
 - **AC-PKP-07.** Given Alex's open offer, when Alex's direct manager assigns it to Kim in Alex's team, then the task is assigned to Kim and the offer closes as assigned by manager; when the manager tries to assign it to someone outside the team from the offer, then the server refuses.
 
+- **AC-PKP-09.** Given Alex's open offer and Sam, Alex's direct manager, who is outside Alex's team, then the offer is in Sam's Open for pickup list with Assign and without Pick up, and Sam's call to the pick-up endpoint returns 403.
+
 - **AC-PKP-08.** Given `flag.task_pickup` is off, then existing API tests and browser suites pass unchanged, and responses, reports, notifications and exports carry no new fields.
 
 ### 53.8 Decisions
 
-Each open decision below uses its default until Jay decides otherwise. The rows are also in `specs/DECISIONS.md` as 049-D1 to 049-D6.
+Each open decision below uses its default until Jay decides otherwise. The rows are also in `specs/DECISIONS.md` as 049-D1 to 049-D7.
 
 | # | Decision | Default used |
 |---|---|---|
@@ -92,3 +94,4 @@ Each open decision below uses its default until Jay decides otherwise. The rows 
 | D4 | Whole task or share of it? | Whole task only; adding a collaborator stays the existing way to share work |
 | D5 | Previous assignee after pickup | Becomes a watcher unless they opt out when offering |
 | D6 | Does an offer expire? | No automatic expiry; the offer closes only by FR-PKP-03 |
+| D7 | Who sees an offer in the Open for pickup list? | Decided by Jay 2026-10-25: the assignee's team with Pick up, and the direct manager, PM and Discipline Lead with Assign (FR-PKP-04) |

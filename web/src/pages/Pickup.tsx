@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Empty, ErrorBanner, Loading, Page } from '@/components/hub/common'
 import { Key } from '@/components/hub/pills'
@@ -13,11 +13,13 @@ import { weekOf } from '@/components/hub/people'
 import { ago, fmtDate, loadBandText, today } from '@/lib/format'
 import { errorText } from './projects/Tasks'
 import { useScopeProjects, useScope } from '@/components/hub/workspace'
+import { itemHref } from '@/components/hub/search'
 
 export interface PickupOffer {
   id: string; taskId: string; offeredById: string; offeredBy: string; reason: string; hoursRemaining?: number | null
   neededBy?: string | null; note?: string | null; openedAt: string
   task: { key: string; name: string; projectId: string; projectNumber?: string; projectDisciplineId: string; disciplineName?: string; dueDate?: string | null; rowVersion?: number }
+  canPickUp?: boolean; canAssign?: boolean
   rowVersion?: number
   allowed?: { pickUp: boolean; assign: boolean; withdraw?: boolean }
   candidates?: { id: string; displayName: string }[]
@@ -54,8 +56,9 @@ export function PickupPage() {
           <span className="text-sm text-muted-foreground">{o.reason}</span>
           <span className="text-xs text-muted-foreground">{o.task.projectNumber ?? projects.data?.find(p => p.id === o.task.projectId)?.projectNumber} · {o.task.disciplineName} · {o.offeredBy} · {ago(o.openedAt)} · {t('pickup.remaining', { h: o.hoursRemaining ?? '—' })}</span>
           <span className="text-xs text-muted-foreground">{t('pickup.neededDue', { needed: fmtDate(o.neededBy), due: fmtDate(o.task.dueDate) })}</span>
-          <OwnLoadHint date={o.neededBy ?? undefined} />
-          <Button size="sm" onClick={() => setSelected(o)}>{t('pickup.pickUp')}</Button>
+          {o.canPickUp && <OwnLoadHint date={o.neededBy ?? undefined} />}
+          {o.canPickUp && <Button size="sm" onClick={() => setSelected(o)}>{t('pickup.pickUp')}</Button>}
+          {o.canAssign && <Button size="sm" variant={o.canPickUp ? 'outline' : 'default'} asChild><Link to={itemHref('Task', o.task.projectNumber ?? '', o.taskId)}>{t('pickup.assign')}</Link></Button>}
         </li>)}
       </ul>
     </div> : <div className="rounded-lg border bg-card"><Empty>{t('pickup.empty')}</Empty></div>}

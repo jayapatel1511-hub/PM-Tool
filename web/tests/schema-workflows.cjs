@@ -21,7 +21,8 @@ let server, browser
 const levels = [{ id: levelId, name: 'Department', sortOrder: 1, rowVersion: 0 }]
 const units = [{ id: unitId, name: 'Design', parentId: null, levelId, leaderId: personId, disciplineId: null, officeId: null, headCount: 1, rowVersion: 0 }]
 const people = [{ id: personId, displayName: 'Alex Engineer', email: 'alex@hub.test', unitId, supervisorId: null }]
-const offer = { id: offerId, taskId, offeredById: id(2), offeredBy: 'Pat PM', reason: 'Needs a civil lead', hoursRemaining: 12, neededBy: '2026-10-15', note: 'Synthetic offer', openedAt: '2026-10-03T12:00:00Z', task: { key: 'T-101', name: 'Review drainage memo', projectId, projectDisciplineId: id(60), disciplineName: 'Civil', dueDate: '2026-10-20', rowVersion: 7 }, rowVersion: 7, allowed: { pickUp: true, assign: false } }
+const offer = { id: offerId, taskId, offeredById: id(2), offeredBy: 'Pat PM', reason: 'Needs a civil lead', hoursRemaining: 12, neededBy: '2026-10-15', note: 'Synthetic offer', openedAt: '2026-10-03T12:00:00Z', task: { key: 'T-101', name: 'Review drainage memo', projectId, projectDisciplineId: id(60), disciplineName: 'Civil', dueDate: '2026-10-20', rowVersion: 7 }, rowVersion: 7, canPickUp: true, canAssign: false, allowed: { pickUp: true, assign: false } }
+const assignOffer = { ...offer, id: id(171), taskId: id(172), task: { ...offer.task, key: 'T-102', name: 'Check culvert sizing', projectNumber: '100001' }, canPickUp: false, canAssign: true, allowed: { pickUp: false, assign: true } }
 const chain = { chainId, headSeq: 3, headHash: 'sha256-head', lastVerifiedAt: '2026-10-03T12:00:00Z', firstBrokenSeq: null }
 const confirmId = id(73)
 const reliability = { snapshots: [{ id: id(70), weekStart: '2026-09-28', reliability: { met: 78, committed: 100, percent: 78, band: 'Watch', withdrawn: 2, notYetRecorded: 20, awaiting: 1 } }], misses: [{ categoryId: id(71), category: 'Blocked by dependency', count: 2, commitments: [id(72)] }], awaiting: [{ id: confirmId, key: 'PROM-13', rowVersion: 4, canConfirm: true }] }
@@ -35,7 +36,7 @@ function responseFor(method, p, body, query) {
   if (p === 'reference') return { disciplines: [{ id: id(60), name: 'Civil' }], offices: [{ id: id(61), name: 'Halifax' }], clients: [], deliverableTypes: [], phases: [], projectTypes: [] }
   if (p === 'workspaces') return []
   if (p === `projects/${projectId}` || p === 'projects/P-DEMO') return project
-  if (p === 'pickup-offers') return [offer]
+  if (p === 'pickup-offers') return [offer, assignOffer]
   if (p === 'pickup-offers/my-load') return { week: query?.get('week') ?? '2026-09-28', band: 'Within', hours: 24, capacity: 40, partial: false }
   if (p === 'organisation') return { levels, units, people }
   if (p === 'admin/organisation/levels' && method === 'POST') { levels.push({ id: id(22), name: body?.name || 'Region', sortOrder: 2, rowVersion: 0 }); return levels.at(-1) }
@@ -102,6 +103,11 @@ async function waitForApi(page) { await page.waitForLoadState('networkidle'); aw
   featurePhase = 'on'; me.flags.task_pickup = true; calls.length = 0
   flagPairAssertions.push(await assertMyWork('/my-work?tab=overview', 'Overview', true)); flagPairAssertions.push(await assertMyWork('/my-work?tab=upcoming', 'Upcoming', true))
   await page.goto(`${base}/pickup`); await page.getByText('T-101', { exact: true }).waitFor(); await page.getByText(/Your workload for/).waitFor(); await axe(page, 'pickup'); await shot(page, 'pickup')
+  // FR-PKP-04: a row the viewer may only assign shows Assign (to the task panel) and no Pick up.
+  await page.getByText('T-102', { exact: true }).waitFor()
+  assert.equal(await page.getByRole('button', { name: 'Pick up', exact: true }).count(), 1, 'Pick up only on the same-team row')
+  const assignLink = page.getByRole('link', { name: 'Assign pickup', exact: true }); assert.equal(await assignLink.count(), 1)
+  assert.ok((await assignLink.getAttribute('href')).includes(`Task:${id(172)}`), 'Assign opens the task panel')
   await page.getByRole('button', { name: 'Pick up', exact: true }).click(); await page.getByRole('dialog').getByRole('button', { name: 'Pick up task', exact: true }).click(); await page.getByText('Task picked up').waitFor()
   const pickupPost = calls.find(c => c.method === 'POST' && c.path === `tasks/${taskId}/pickup`); assert.deepEqual(pickupPost.body, { rowVersion: 7 })
   await waitForApi(page)

@@ -185,6 +185,7 @@ One table of the open product and process decisions (FR-DLV-26): packets 036 to 
 | 049-D4 | 049 | Whole task or a share of it? | Whole task only; collaborators stay the way to share. | `flag.task_pickup` | default-active | 2026-10-18 | 049 spec.md |
 | 049-D5 | 049 | Previous assignee after pickup? | Becomes a watcher unless they opt out when offering. | `flag.task_pickup` | default-active | 2026-10-18 | 049 spec.md |
 | 049-D6 | 049 | Do offers expire? | No automatic expiry. | `flag.task_pickup` | default-active | 2026-10-18 | 049 spec.md |
+| 049-D7 | 049 | Who sees an offer in the Open for pickup list? | The assignee's team with Pick up; the direct manager, PM and Discipline Lead with Assign. Jay: decided 2026-10-25. | `flag.task_pickup` | confirmed | 2026-10-25 | 049 spec.md |
 | 050-D1 | 050 | Approve the §54 Company Structure scope? | Approve with the listed defaults (050-D2 to 050-D8 stay Open with their defaults). | `flag.org_structure` | confirmed | 2026-10-18 | 050 spec.md |
 | 050-D2 | 050 | Default level names? | Region, Business unit, Team; Admin renames. | `flag.org_structure` | default-active | 2026-10-18 | 050 spec.md |
 | 050-D3 | 050 | Do unit leaders get edit rights over their unit's people? | No; read and roll-up only. | `flag.org_structure` | default-active | 2026-10-18 | 050 spec.md |

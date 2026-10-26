@@ -29,11 +29,11 @@
 
 ## Acceptance
 
-AC-PKP-01, AC-PKP-02, AC-PKP-03, AC-PKP-04, AC-PKP-05, AC-PKP-06, AC-PKP-07 and AC-PKP-08 in §53.7 are this packet's acceptance criteria. [verification.md](verification.md) maps each one to its slice.
+AC-PKP-01, AC-PKP-02, AC-PKP-03, AC-PKP-04, AC-PKP-05, AC-PKP-06, AC-PKP-07, AC-PKP-08 and AC-PKP-09 in §53.7 are this packet's acceptance criteria. [verification.md](verification.md) maps each one to its slice.
 
 ## Decisions
 
-049-D1 to 049-D6 in [DECISIONS.md](../DECISIONS.md), mirrored in §53.8. D1 was approved on 2026-10-18; Jay decided D2 and D3 the same day; D4 to D6 use their defaults. A pending row blocks only the flag flip.
+049-D1 to 049-D7 in [DECISIONS.md](../DECISIONS.md), mirrored in §53.8. D1 was approved on 2026-10-18; Jay decided D2 and D3 the same day; D4 to D6 use their defaults; Jay decided D7 on 2026-10-25. A pending row blocks only the flag flip.
 
 ## Assumptions
 

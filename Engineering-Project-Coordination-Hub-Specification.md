@@ -5432,7 +5432,7 @@ Outside this amendment: any change to product behaviour; the typed contract and 
 
 - **FR-DLV-07.** Feature flags MUST be organisation settings declared in one static list, `src/Hub.Domain/Flags.cs`, each entry giving a name and its packet. `OrgSettings.Defs` generates `flag.<name>` as a Bool setting, default off, group `flags`, the same way it generates `rule_enabled.*` (`src/Hub.Domain/Settings.cs:88`). Startup seeding creates each row (`src/Hub.Api/Data/Seed.cs:38`). Admin switches flags on the existing settings page (`src/Hub.Api/Features/Admin.cs:71-94`), where the Flags group shows each flag's name and packet. Each change writes the existing setting audit entry (`src/Hub.Api/Infrastructure/Audit.cs:48`). Each environment's database holds its own state, so review and pilot are switched separately. No library or service is added.
 
-- **FR-DLV-08.** `GET /me` MUST return `flags`, a map from each declared flag name to on or off, beside its existing fields, which stay unchanged (`src/Hub.Api/Features/Me.cs:13-51`). The client reads it through one hook beside `useMe` (`web/src/lib/auth.tsx:38`) and treats a missing map or name as off. The server enforces every flag: while it is off, the addition's endpoints answer 404 through one shared guard and its fields are absent from existing responses. The client hides its routes and sections.
+- **FR-DLV-08.** `GET /me` MUST return `flags`, a map from each declared flag name to on or off, beside its existing fields, which stay unchanged (`src/Hub.Api/Features/Me.cs:13-51`). The client reads it through one hook beside `useMe` (`web/src/lib/auth.tsx:38`) and treats a missing map or name as off. The server enforces every flag: while it is off, the addition's endpoints answer 404 through one shared guard and its fields are absent from existing responses. On an Admin route the Admin check runs first: a non-Admin gets 403 whether the flag is on or off (FR-OPS-18), and only an Admin gets the 404. The client hides its routes and sections.
 
 - **FR-DLV-09.** A flag MUST gate only an addition that has never been on in pilot. No existing or already-released feature, screen, route, report, export, setting or rule is ever put behind a flag. This includes packet 038 and everything merged before this section. An addition that changes what pilot users see ships dark behind a flag, unless its packet lists it as an unflagged correction or fix, each with a decision row; a slice that ships such a change unflagged is Tier B (FR-DLV-28). A flag is a release toggle only: a control that must outlive the cleanup, such as an organisation's choice to collect something, is an ordinary organisation setting declared by its packet. The list starts empty. Lifecycle: Jay turns a flag on in review after looking at the addition, then on in pilot at promotion; a cleanup pull request then removes the entry and its checks and keeps the addition on. Every packet that declares a flag ends with that cleanup slice. The stored setting row is left unread.
 
@@ -5516,7 +5516,7 @@ Outside this amendment: any change to product behaviour; the typed contract and 
 
 - **AC-DLV-05.** Given no declared flags, `GET /me` returns an empty `flags` map with every other field unchanged, and the Admin settings list is unchanged.
 
-- **AC-DLV-06.** Given a flag that is off, the shared server guard answers 404 for the addition's endpoint; given it on, the endpoint answers. The client hook treats a missing map or name as off, so every existing mocked browser suite passes unchanged.
+- **AC-DLV-06.** Given a flag that is off, the shared server guard answers 404 for the addition's endpoint; given it on, the endpoint answers. Given a flagged Admin route with its flag off, a team member or Project Manager gets 403 and an Admin gets 404. The client hook treats a missing map or name as off, so every existing mocked browser suite passes unchanged.
 
 - **AC-DLV-07.** Given an entry whose packet's `acceptance.md` records pilot sign-off for that flag, the retirement test fails and names it; given no such sign-off, it passes.
 
@@ -6208,7 +6208,7 @@ Eight parts: served files (§48.2), off-host backup and a restore drill (§48.3)
 
 - **FR-OPS-17.** A test over the Production and Staging environments MUST pin today's start-up refusals (§21; FR-AUTH-01): the development sign-in header is ignored and `/api/dev/users` is not mapped in either, so it never answers 200 (401 without a sign-in, 404 with one); `Auth:Mode` LocalPassword refuses to start in Production (`src/Hub.Api/Infrastructure/Auth.cs:76-77`); `Seed:ReviewDemo` refuses to start in Production (`Program.cs:182-184`). A second test MUST check that both pilot services in `hosting/homedev-pilot.compose.yml` set `Seed__ReviewDemo` and `Seed__DevUsers` to `"false"`, which is how review data is kept off the pilot database today. These tests extend `FoundationsTests.Outside_development_only_Entra_tokens_sign_in` (`tests/Hub.Tests/Api/FoundationsTests.cs:188`) and change no runtime behaviour.
 
-- **FR-OPS-18.** A sweep test MUST list every endpoint whose route starts with `/api/v1/admin` from the application's endpoint data source, including `POST /api/v1/admin/evaluate/{projectId}`, which is mapped outside the Admin group and checks the permission inline (`src/Hub.Api/Features/Modules.cs:74-79`). It calls each one as a team member and as a Project Manager, with placeholder route values and an empty JSON body, and expects 403 with no new activity-log row. A route that cannot reach its permission check because binding fails first is named in the test with its reason; an Admin route added without an Admin check fails the test.
+- **FR-OPS-18.** A sweep test MUST list every endpoint whose route starts with `/api/v1/admin` from the application's endpoint data source, including `POST /api/v1/admin/evaluate/{projectId}`, which is mapped outside the Admin group and checks the permission inline (`src/Hub.Api/Features/Modules.cs:74-79`). It calls each one as a team member and as a Project Manager, with placeholder route values and an empty JSON body, and expects 403 with no new activity-log row, whatever the state of any flag the route ships behind (the Admin check runs before the FR-DLV-08 flag guard, so only an Admin sees that guard's 404). A route that cannot reach its permission check because binding fails first is named in the test with its reason; an Admin route added without an Admin check fails the test.
 
 ### 48.9 Honest copy
 
@@ -6254,7 +6254,7 @@ Eight parts: served files (§48.2), off-host backup and a restore drill (§48.3)
 
 - **AC-OPS-16.** Given the Production or the Staging environment, then the development sign-in header is ignored and `/api/dev/users` never answers 200; given Production with LocalPassword or with `Seed:ReviewDemo` true, the application refuses to start; and both pilot compose services set both seed flags to `"false"`.
 
-- **AC-OPS-17.** Given every route under `/api/v1/admin` and the inline-checked evaluate route, when each is called as a team member and as a Project Manager, then each answers 403 and the activity log gains no row; given a new Admin route without an Admin check, the sweep fails.
+- **AC-OPS-17.** Given every route under `/api/v1/admin` and the inline-checked evaluate route, when each is called as a team member and as a Project Manager, then each answers 403 and the activity log gains no row, including flagged Admin routes whose flag is off, which answer 404 only to an Admin; given a new Admin route without an Admin check, the sweep fails.
 
 - **AC-OPS-18.** Given a save answered 502 or 503, then the person sees "Tuesday is updating. This change was not saved. Try again in a moment." and never "HTTP 502"; given a read answered 503, the read message; given a save with no answer, the "may not have been saved" message; and a read with no answer is retried as many times as today.
 
@@ -6987,7 +6987,7 @@ Where this section adds to §8.5 and §8.6 (permissions), §13.10 (My Work), §1
 
 ### 53.3 Open for pickup list
 
-- **FR-PKP-04.** A new **Open for pickup** list MUST show the open offers the viewer may pick up (FR-PKP-06) or assign (FR-PKP-07), on tasks the viewer can already see (§8.7). It is reachable from My Work and from each project's Work tab group as a filter, and lists task key and name, project, discipline, offerer, reason, hours remaining, needed-by date, due date and offer age. It filters by project, discipline and needed-by date and sorts by needed-by date, then due date. Offers outside the viewer's team are not listed. No new visibility is granted: a Restricted project's offers appear only to people who can view that project.
+- **FR-PKP-04.** A new **Open for pickup** list MUST show the open offers the viewer may pick up (FR-PKP-06) or assign (FR-PKP-07), on tasks the viewer can already see (§8.7). It is reachable from My Work and from each project's Work tab group as a filter, and lists task key and name, project, discipline, offerer, reason, hours remaining, needed-by date, due date and offer age. It filters by project, discipline and needed-by date and sorts by needed-by date, then due date. A viewer in the assignee's team (FR-PKP-06) sees the offer with **Pick up**; the assignee's direct manager, the project's PM and the Discipline Lead of the task's discipline see it with **Assign**, which opens the task with its assignment choice, even when they are outside the team. Each row says which actions the viewer has. Anyone else does not see the offer. No new visibility is granted: a Restricted project's offers appear only to people who can view that project.
 
 - **FR-PKP-05.** The viewer's own load band for the needed-by week (§45.4) MUST be shown beside the **Pick up** action as information only. It never hides, blocks or orders offers.
 
@@ -7030,7 +7030,7 @@ Where this section adds to §8.5 and §8.6 (permissions), §13.10 (My Work), §1
 
 - **AC-PKP-02.** Given Alex's open offer and Jill in Alex's team, when Jill picks it up, then the task is assigned to Jill at once with no approval, Alex becomes a watcher, the offer closes as picked up, and the activity log holds the offer and the pick-up with old and new assignee.
 
-- **AC-PKP-03.** Given Sam is not in Alex's team, then the offer is not in Sam's Open for pickup list, and calling the pick-up endpoint returns 403 and changes nothing.
+- **AC-PKP-03.** Given Diane is neither in Alex's team nor someone who may assign Alex's task, then the offer is not in Diane's Open for pickup list, and calling the pick-up endpoint returns 403 and changes nothing.
 
 - **AC-PKP-04.** Given Jill and Kim, both in Alex's team, pick up the same offer at the same moment, then exactly one of them gets the task and the other sees the existing conflict message.
 
@@ -7040,11 +7040,13 @@ Where this section adds to §8.5 and §8.6 (permissions), §13.10 (My Work), §1
 
 - **AC-PKP-07.** Given Alex's open offer, when Alex's direct manager assigns it to Kim in Alex's team, then the task is assigned to Kim and the offer closes as assigned by manager; when the manager tries to assign it to someone outside the team from the offer, then the server refuses.
 
+- **AC-PKP-09.** Given Alex's open offer and Sam, Alex's direct manager, who is outside Alex's team, then the offer is in Sam's Open for pickup list with Assign and without Pick up, and Sam's call to the pick-up endpoint returns 403.
+
 - **AC-PKP-08.** Given `flag.task_pickup` is off, then existing API tests and browser suites pass unchanged, and responses, reports, notifications and exports carry no new fields.
 
 ### 53.8 Decisions
 
-Each open decision below uses its default until Jay decides otherwise. The rows are also in `specs/DECISIONS.md` as 049-D1 to 049-D6.
+Each open decision below uses its default until Jay decides otherwise. The rows are also in `specs/DECISIONS.md` as 049-D1 to 049-D7.
 
 | # | Decision | Default used |
 |---|---|---|
@@ -7054,6 +7056,7 @@ Each open decision below uses its default until Jay decides otherwise. The rows 
 | D4 | Whole task or share of it? | Whole task only; adding a collaborator stays the existing way to share work |
 | D5 | Previous assignee after pickup | Becomes a watcher unless they opt out when offering |
 | D6 | Does an offer expire? | No automatic expiry; the offer closes only by FR-PKP-03 |
+| D7 | Who sees an offer in the Open for pickup list? | Decided by Jay 2026-10-25: the assignee's team with Pick up, and the direct manager, PM and Discipline Lead with Assign (FR-PKP-04) |
 
 
 ## 54. Company Structure Amendment

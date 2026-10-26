@@ -16,7 +16,7 @@ public static class TaskPickupEndpoints
     public sealed record PickupResult(Guid Id, Guid? AssigneeId, string? CloseCause);
     public sealed record LoadResult(DateOnly Week, string? Band, decimal? Hours, decimal Capacity, bool Partial);
     public sealed record ListTask(string Key, string Name, Guid ProjectId, string ProjectNumber, Guid ProjectDisciplineId, string DisciplineName, DateOnly? DueDate, int RowVersion);
-    public sealed record ListRow(Guid Id, Guid TaskId, Guid OfferedById, string OfferedBy, string Reason, decimal? HoursRemaining, DateOnly? NeededBy, string? Note, DateTimeOffset OpenedAt, ListTask Task);
+    public sealed record ListRow(Guid Id, Guid TaskId, Guid OfferedById, string OfferedBy, string Reason, decimal? HoursRemaining, DateOnly? NeededBy, string? Note, DateTimeOffset OpenedAt, ListTask Task, bool CanPickUp, bool CanAssign);
     public sealed record DetailTask(string Key, string Name, Guid ProjectId, Guid ProjectDisciplineId, DateOnly? DueDate);
     public sealed record Allowed(bool PickUp, bool Assign, bool Withdraw);
     public sealed record Candidate(Guid Id, string? DisplayName);
@@ -176,14 +176,21 @@ public static class TaskPickupEndpoints
         }).ToListAsync();
         var assignees = await db.Users.AsNoTracking().Where(u => rows.Select(r => r.Task.AssigneeId).Contains(u.Id))
             .ToDictionaryAsync(u => u.Id, u => u);
-        var result = rows.Where(row => row.Task.AssigneeId is { } aid && assignees.TryGetValue(aid, out var assignee)
-            && TaskPickupRules.SameTeam(orgStructure, assignee.UnitId, viewer.UnitId, assignee.SupervisorId, viewer.SupervisorId, assignee.IsActive, viewer.IsActive)
-            && aid != viewer.Id).Select(row => new
-            {
-                row.Id, row.TaskId, row.OfferedById, row.OfferedBy, row.Reason, row.HoursRemaining, row.NeededBy, row.Note, row.OpenedAt,
-                Task = new { row.Task.Key, row.Task.Name, row.Task.ProjectId, row.Task.ProjectNumber, row.Task.ProjectDisciplineId, row.Task.DisciplineName, row.Task.DueDate, row.Task.RowVersion },
-            }).Select(row => new ListRow(row.Id, row.TaskId, row.OfferedById, row.OfferedBy, row.Reason, row.HoursRemaining, row.NeededBy, row.Note, row.OpenedAt,
-                new ListTask(row.Task.Key, row.Task.Name, row.Task.ProjectId, row.Task.ProjectNumber, row.Task.ProjectDisciplineId, row.Task.DisciplineName, row.Task.DueDate, row.Task.RowVersion))).ToList();
+        // FR-PKP-04: a row is listed for the assignee's team (Pick up) and for those who may assign it (Assign).
+        var contexts = new Dictionary<Guid, ProjectContext>();
+        foreach (var project in await db.Projects.AsNoTracking().Where(p => rows.Select(r => r.Task.ProjectId).Contains(p.Id)).ToListAsync())
+            contexts[project.Id] = await access.Context(project);
+        var result = new List<ListRow>();
+        foreach (var row in rows)
+        {
+            if (row.Task.AssigneeId is not { } aid || !assignees.TryGetValue(aid, out var assignee) || aid == viewer.Id) continue;
+            var canPickUp = TaskPickupRules.SameTeam(orgStructure, assignee.UnitId, viewer.UnitId, assignee.SupervisorId, viewer.SupervisorId, assignee.IsActive, viewer.IsActive);
+            var canAssign = TaskPickupRules.CanAssign(access.Actor, contexts[row.Task.ProjectId], row.Task.ProjectDisciplineId, assignee.SupervisorId);
+            if (!canPickUp && !canAssign) continue;
+            result.Add(new ListRow(row.Id, row.TaskId, row.OfferedById, row.OfferedBy, row.Reason, row.HoursRemaining, row.NeededBy, row.Note, row.OpenedAt,
+                new ListTask(row.Task.Key, row.Task.Name, row.Task.ProjectId, row.Task.ProjectNumber, row.Task.ProjectDisciplineId, row.Task.DisciplineName, row.Task.DueDate, row.Task.RowVersion),
+                canPickUp, canAssign));
+        }
         return TypedResults.Ok<IReadOnlyList<ListRow>>(result);
     }
 

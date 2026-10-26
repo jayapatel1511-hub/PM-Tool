@@ -121,7 +121,14 @@ public sealed class TaskPickupTests
             Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Sam).Post($"/api/v1/tasks/{id}/pickup-offer/assign", new { userId = d.User(TestData.Diane), rowVersion = version })).StatusCode);
             Assert.Equal(d.User(TestData.Alex), await f.DbAsync(db => db.Tasks.Where(t => t.Id == id).Select(t => t.AssigneeId).SingleAsync()));
             var offers = await (await f.As(TestData.Jill).GetAsync("/api/v1/pickup-offers")).Json();
-            Assert.Contains(offers.AsArray(), offer => offer!.G("taskId") == id);
+            var teamRow = offers.AsArray().Single(offer => offer!.G("taskId") == id)!;
+            Assert.True(teamRow["canPickUp"]!.GetValue<bool>());
+            // FR-PKP-04 / AC-PKP-09: the direct manager is outside the team but sees the offer to assign it, not to pick it up.
+            var managerRow = (await (await f.As(TestData.Sam).GetAsync("/api/v1/pickup-offers")).Json()).AsArray().Single(offer => offer!.G("taskId") == id)!;
+            Assert.False(managerRow["canPickUp"]!.GetValue<bool>());
+            Assert.True(managerRow["canAssign"]!.GetValue<bool>());
+            Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Sam).Post($"/api/v1/tasks/{id}/pickup", new { rowVersion = version })).StatusCode);
+            Assert.DoesNotContain((await (await f.As(TestData.Diane).GetAsync("/api/v1/pickup-offers")).Json()).AsArray(), offer => offer!.G("taskId") == id);
             var detail = await (await f.As(TestData.Sam).GetAsync($"/api/v1/tasks/{id}/pickup-offer")).Json();
             Assert.True(detail["allowed"]!["assign"]!.GetValue<bool>());
             Assert.Contains(detail["candidates"]!.AsArray(), candidate => candidate!.G("id") == d.User(TestData.Jill));

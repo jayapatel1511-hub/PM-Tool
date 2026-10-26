@@ -18931,6 +18931,8 @@ export interface components {
             id: string;
         };
         TaskPickupListRow: {
+            canAssign: boolean;
+            canPickUp: boolean;
             /** Format: double */
             hoursRemaining: null | number;
             /** Format: uuid */

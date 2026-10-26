@@ -22,7 +22,7 @@ Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13
 | AC-OPS-14 | PASS (local) |
 | AC-OPS-15 | PASS (local) |
 | AC-OPS-16 | PASS (local) |
-| AC-OPS-17 | PASS (local) |
+| AC-OPS-17 | PASS (local) — 2026-10-25 ruling (Jay): non-Admins get 403 from every Admin route whatever the flag; an Admin gets 404 from a flagged-off Admin route. `AdminSweepTests.Every_admin_route_refuses_team_members_and_project_managers` asserts both (75/75 targeted tests pass). |
 | AC-OPS-18 | PASS (local): `test:operations` 502/503/no-answer copy, read retries kept |
 | AC-OPS-19 | PASS (local): `test:operations` tab title zero/3/99+ |
 | AC-OPS-20 | PASS (local) |

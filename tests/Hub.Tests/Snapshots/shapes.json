@@ -5415,6 +5415,9 @@
     "$.flags.allocation_preview": [
       "boolean"
     ],
+    "$.flags.backlog": [
+      "boolean"
+    ],
     "$.flags.baseline_history": [
       "boolean"
     ],
@@ -29226,6 +29229,15 @@
     "$.components.schemas.TaskQueriesRowActivityRow.properties.assigneeName.type[]": [
       "string"
     ],
+    "$.components.schemas.TaskQueriesRowActivityRow.properties.backlog": [
+      "object"
+    ],
+    "$.components.schemas.TaskQueriesRowActivityRow.properties.backlog.type": [
+      "array"
+    ],
+    "$.components.schemas.TaskQueriesRowActivityRow.properties.backlog.type[]": [
+      "string"
+    ],
     "$.components.schemas.TaskQueriesRowActivityRow.properties.can": [
       "object"
     ],
@@ -29833,6 +29845,15 @@
       "array"
     ],
     "$.components.schemas.TaskQueriesRowBase.properties.assigneeName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskQueriesRowBase.properties.backlog": [
+      "object"
+    ],
+    "$.components.schemas.TaskQueriesRowBase.properties.backlog.type": [
+      "array"
+    ],
+    "$.components.schemas.TaskQueriesRowBase.properties.backlog.type[]": [
       "string"
     ],
     "$.components.schemas.TaskQueriesRowBase.properties.can": [
@@ -62620,6 +62641,18 @@
     "$.deliverables.upcoming.value": [
       "number"
     ],
+    "$.disciplineBacklog": [
+      "object"
+    ],
+    "$.disciplineBacklog.{id}": [
+      "object"
+    ],
+    "$.disciplineBacklog.{id}.link": [
+      "string"
+    ],
+    "$.disciplineBacklog.{id}.value": [
+      "number"
+    ],
     "$.disciplineDue14": [
       "object"
     ],
@@ -62770,6 +62803,9 @@
     ],
     "$.dueThisWeek.items[].assigneeName": [
       "string"
+    ],
+    "$.dueThisWeek.items[].backlog": [
+      "boolean"
     ],
     "$.dueThisWeek.items[].can": [
       "object"
@@ -63148,6 +63184,15 @@
     ],
     "$.tasks": [
       "object"
+    ],
+    "$.tasks.backlog": [
+      "object"
+    ],
+    "$.tasks.backlog.link": [
+      "string"
+    ],
+    "$.tasks.backlog.value": [
+      "number"
     ],
     "$.tasks.blocked": [
       "object"
@@ -64874,6 +64919,9 @@
     "$.items[].assigneeName": [
       "null",
       "string"
+    ],
+    "$.items[].backlog": [
+      "boolean"
     ],
     "$.items[].can": [
       "object"

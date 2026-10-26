@@ -38,6 +38,7 @@ public static class Flags
         new("capacity_polish", "047"),
         new("live_project_stamp", "042"), // §46.5 project stamp in the notification pulse
         new("live_events", "042"), // §46.6 change-event stream
+        new(TaskRules.BacklogFlag, "051"), // §55.3: the Backlog filter, row field, counts, export column and FR-BKL-05 exclusions
     ];
 
     /// `flag.<name>` as a Bool setting, default off, group `flags`, generated like `rule_enabled.*`.

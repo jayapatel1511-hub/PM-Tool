@@ -83,11 +83,16 @@ public static class DashboardEndpoints
         var due14 = new Dictionary<string, object>();
         var rollups = s.IsFlagOn(RollupsFlag);
         var status = new Dictionary<string, object>();
+        // FR-BKL-02 and FR-BKL-07: the Backlog count and each discipline's, counted by the list query their links open.
+        var backlogOn = s.IsFlagOn(TaskRules.BacklogFlag);
+        Task<object> Backlog(Scope x) => Count(x.Tasks(("backlog", "true")), x.Link(("backlog", "true")));
+        var backlog = new Dictionary<string, object>();
         foreach (var row in disciplines)
         {
             var dId = row.GetProperty("disciplineId").GetGuid();
             var ds = new Scope(db, id, dId, me.Id, today, s);
             due14[dId.ToString()] = await Due14(ds);
+            if (backlogOn) backlog[dId.ToString()] = await Backlog(ds);
             // FR-RCV-14: each segment is counted by the deliverable list query its link opens.
             if (rollups)
             {
@@ -141,10 +146,15 @@ public static class DashboardEndpoints
             Activity = await ActivityEndpoints.Render(db, recent),
             State = state is null ? null : new { state.EvaluatedAt },
         };
-        if (!rollups) return result;
-        // FR-DLV-08: the field exists only while `flag.status_rollups` is on, so the response is unchanged with it off.
+        if (!rollups && !backlogOn) return result;
+        // FR-DLV-08: each field exists only while its flag is on, so the response is unchanged with them off.
         var o = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
-        o["disciplineStatus"] = JsonSerializer.SerializeToNode(status, JsonOpts.Web);
+        if (rollups) o["disciplineStatus"] = JsonSerializer.SerializeToNode(status, JsonOpts.Web);
+        if (backlogOn)
+        {
+            o["tasks"]!["backlog"] = JsonSerializer.SerializeToNode(await Backlog(sc), JsonOpts.Web);
+            o["disciplineBacklog"] = JsonSerializer.SerializeToNode(backlog, JsonOpts.Web);
+        }
         return o;
     }
 

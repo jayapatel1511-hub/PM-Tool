@@ -21,7 +21,7 @@ export function OnboardingCard() {
   const card = q.data
   const hide = async () => { await typedRequest('post', '/api/v1/me/onboarding/hide', { body: {} }); await invalidateChange(qc, 'UserPreferences') }
   return (
-    <section aria-label={t('onboarding.title')} className="mb-5 rounded-lg border bg-card">
+    <section aria-label={t('onboarding.title')} className="rounded-lg border bg-card">
       <div className="flex min-h-12 items-center gap-3 px-4">
         <button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left text-sm font-medium" aria-expanded={open} onClick={() => setOpen(v => !v)}>
           <ChevronDown className={open ? 'size-4' : 'size-4 -rotate-90'} aria-hidden />

@@ -29746,6 +29746,18 @@
     "$.components.schemas.TaskPickupListRow.properties": [
       "object"
     ],
+    "$.components.schemas.TaskPickupListRow.properties.canAssign": [
+      "object"
+    ],
+    "$.components.schemas.TaskPickupListRow.properties.canAssign.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskPickupListRow.properties.canPickUp": [
+      "object"
+    ],
+    "$.components.schemas.TaskPickupListRow.properties.canPickUp.type": [
+      "string"
+    ],
     "$.components.schemas.TaskPickupListRow.properties.hoursRemaining": [
       "object"
     ],
@@ -57497,6 +57509,12 @@
     "$[]": [
       "object"
     ],
+    "$[].canAssign": [
+      "boolean"
+    ],
+    "$[].canPickUp": [
+      "boolean"
+    ],
     "$[].hoursRemaining": [
       "null",
       "number"
@@ -60697,6 +60715,9 @@
       "string"
     ],
     "$.items[].why.values.priority": [
+      "string"
+    ],
+    "$.items[].why.values.requiredBy": [
       "string"
     ],
     "$.snoozed": [

@@ -38,7 +38,7 @@ Each slice is one PR. Slices in Parts A, B and C merge dark behind `flag.data_en
 
 ## Part C, admin review
 
-- [ ] S08 Checks and record (M, Tier B: migration).
+- [x] S08 Checks and record (M, Tier B: migration).
   - Nine checks with counts and list URLs; `AdminReview` table; record endpoint; activity entry; `admin_review_interval_days`, `admin_review_idle_days`; flag entry; Admin-only guard (403).
   - Covers FR-ADR-01, FR-ADR-02, FR-ADR-03, FR-ADR-05, FR-ADR-07 (API), FR-ADR-08.
   - Tests: `tests/Hub.Tests/Api/AdminReviewTests.cs` (each check's count equals its list; record is immutable; non-Admin 403; "no home unit" check absent with `flag.org_structure` off). AC-ADR-01, AC-ADR-02, AC-ADR-04.

@@ -110,6 +110,9 @@ public static class Evaluator
         LinkState Link(DependencySnap e) { var p = tasks[e.PredecessorId]; return DependencyRules.State(e.Type, p.Status, p.StartedOn, p.CompletedOn, e.LagDays, after, today); }
         bool Satisfied(DependencySnap e) => Link(e) == LinkState.Satisfied;
         bool TaskOverdue(TaskSnap t) => active && t.DueDate is { } d && d < today && !TaskStatuses.IsTerminal(t.Status) && t.Status != TaskStatuses.OnHold; // G-01
+        // FR-BKL-05: with `flag.backlog` on, undated open work stays out of milestone status and health; date indicators skip it already.
+        var backlogOn = s.IsFlagOn(TaskRules.BacklogFlag);
+        bool Backlog(TaskSnap t) => backlogOn && TaskRules.IsBacklog(t.Status, t.StartDate, t.DueDate);
 
         // ---------- Tasks ----------
         var taskResults = new Dictionary<Guid, TaskResult>();
@@ -317,7 +320,7 @@ public static class Evaluator
                 var within = Until(m.Date.Value) <= s.MilestoneApproachingDays;
                 var odDel = targeted.Where(d => deliverableResults[d.Id].IsOverdue).ToList();
                 if (odDel.Count > 0) reasons.Add(new Reason($"{odDel.Count} targeted deliverables overdue: {string.Join(", ", odDel.Select(d => d.Key))}", "§16.2 a"));
-                var badTasks = mts.Where(t => taskResults[t.Id].IsOverdue || taskResults[t.Id].IsBlocked).ToList();
+                var badTasks = mts.Where(t => !Backlog(t) && (taskResults[t.Id].IsOverdue || taskResults[t.Id].IsBlocked)).ToList();
                 if (badTasks.Count > 0) reasons.Add(new Reason($"{badTasks.Count(t => taskResults[t.Id].IsOverdue)} tasks overdue and {badTasks.Count(t => taskResults[t.Id].IsBlocked)} blocked: {string.Join(", ", badTasks.Take(5).Select(t => t.Key))}", "§16.2 b"));
                 var notIssued = targeted.Where(d => d.Status is not (DeliverableStatus.Issued or DeliverableStatus.Accepted) && (deliverableResults[d.Id].ProgressPct ?? 0) < 100).ToList();
                 if (within && notIssued.Count > 0) reasons.Add(new Reason($"{targeted.Count - issued} of {targeted.Count} deliverables not issued with {daysRemaining} days remaining", "§16.2 c", Threshold: s.MilestoneApproachingDays));
@@ -343,7 +346,7 @@ public static class Evaluator
                 return new HealthResult(Domain.Health.Grey, reasons, inputs);
             }
             var tl = ts.ToList();
-            var openTasks = tl.Where(t => !TaskStatuses.IsTerminal(t.Status) && t.Status != TaskStatuses.OnHold).ToList();
+            var openTasks = tl.Where(t => !TaskStatuses.IsTerminal(t.Status) && t.Status != TaskStatuses.OnHold && !Backlog(t)).ToList();
             var liveMs = ms.Where(m => !m.IsComplete && !m.IsCancelled).ToList();
             if (openTasks.Count == 0 && liveMs.Count == 0)
             {

@@ -19110,6 +19110,7 @@ export interface components {
             /** Format: uuid */
             assigneeId?: null | string;
             assigneeName?: null | string;
+            backlog?: null | boolean;
             can?: null | components["schemas"]["Can"];
             collaboratorIds?: string[];
             /** Format: int32 */
@@ -19203,6 +19204,7 @@ export interface components {
             /** Format: uuid */
             assigneeId: null | string;
             assigneeName: null | string;
+            backlog?: null | boolean;
             can: null | components["schemas"]["Can"];
             collaboratorIds: string[];
             /** Format: int32 */

@@ -11,6 +11,8 @@ public sealed class ReadinessApiTests(HubFactory f)
 {
     readonly TestData data = new(f);
 
+    async Task Backlog(bool on) => (await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.backlog", new { value = on })).EnsureSuccessStatusCode();
+
     [Fact] // EvaluateCurrent without a supplied store falls back to this path: the application's one cached store
     public void Readiness_reaches_the_shared_settings_store_through_the_context() =>
         Assert.Same(f.Services.GetService(typeof(Hub.Api.Infrastructure.SettingsStore)),
@@ -312,7 +314,48 @@ public sealed class ReadinessApiTests(HubFactory f)
         Assert.Null(afterDeadline.Satisfied);
     }
 
-    [Fact]
+    [Fact, Trait("flag-off", "backlog"), Trait("flag-on", "backlog")]
+    [Trait("Spec", "FR-BKL-05")]
+    public async Task Production_capacity_leaves_out_backlog_tasks_only_with_the_flag_on()
+    {
+        var project = await data.Project();
+        var today = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime);
+        var owner = await IsolatedOwner(project);
+        var task = (await data.NewTask(project.Id, extra: new { assigneeId = owner, startDate = today, dueDate = today.AddDays(2), estimatedHours = 8m })).G("id");
+        await data.NewTask(project.Id, extra: new { assigneeId = owner, estimatedHours = 40m }); // Backlog elsewhere for the same owner
+
+        var deliverableOwner = await IsolatedOwner(project);
+        var disciplineId = data.ProjectDiscipline(project.Id, "Civil");
+        var deliverable = new Deliverable { ProjectId = project.Id, Key = "D" + Guid.NewGuid().ToString("N")[..8],
+            Name = "Backlog under deliverable", ProjectDisciplineId = disciplineId, DeliverableTypeId = await data.DeliverableType(),
+            OwnerId = deliverableOwner, DueDate = today.AddDays(2) };
+        WorkTask Under(int seq, string name, DateOnly? start, DateOnly? due) => new() { ProjectId = project.Id, Seq = seq, Key = "T" + Guid.NewGuid().ToString("N")[..8],
+            Name = name, ProjectDisciplineId = disciplineId, DeliverableId = deliverable.Id, AssigneeId = deliverableOwner,
+            StartDate = start, DueDate = due, EstimatedHours = 8m };
+        await f.DbAsync(async db =>
+        {
+            db.Deliverables.Add(deliverable);
+            db.Tasks.AddRange(Under(101, "Dated layout", today, today.AddDays(2)), Under(102, "Backlog layout", null, null));
+            await db.SaveChangesAsync(); return 0;
+        });
+        Task<ReadinessEndpoints.CapacityEvaluation> Capacity(string type, Guid id) =>
+            f.DbAsync(db => ReadinessEndpoints.ProductionCapacity(db, project, type, id, today, f.Clock.Now));
+
+        // Off: unchanged, the Backlog task is other active workload and undated required work.
+        Assert.Contains("other active workload", (await Capacity("Task", task)).Reason);
+        Assert.Contains("dated within the target window", (await Capacity("Deliverable", deliverable.Id)).Reason);
+        await Backlog(true);
+        try
+        {
+            var forTask = await Capacity("Task", task);
+            Assert.True(forTask.Satisfied == true, forTask.Reason);
+            var forDeliverable = await Capacity("Deliverable", deliverable.Id);
+            Assert.True(forDeliverable.Satisfied == true, forDeliverable.Reason);
+        }
+        finally { await Backlog(false); }
+    }
+
+    [Fact, Trait("flag-off", "backlog"), Trait("flag-on", "backlog")]
     public async Task Review_capacity_requires_confirmed_dated_links_and_rechecks_overload()
     {
         var project = await data.Project();
@@ -346,6 +389,13 @@ public sealed class ReadinessApiTests(HubFactory f)
 
         var fit = await f.DbAsync(db => ReadinessEndpoints.ReviewCapacity(db, project, "Deliverable", deliverable.Id, today));
         Assert.Equal(true, fit.Satisfied);
+        // FR-BKL-05: a reviewer's Backlog task is production workload only while `flag.backlog` is off.
+        var backlog = (await data.NewTask(project.Id, extra: new { assigneeId = reviewer })).G("id");
+        Assert.Null((await f.DbAsync(db => ReadinessEndpoints.ReviewCapacity(db, project, "Deliverable", deliverable.Id, today))).Satisfied);
+        await Backlog(true);
+        try { Assert.Equal(true, (await f.DbAsync(db => ReadinessEndpoints.ReviewCapacity(db, project, "Deliverable", deliverable.Id, today))).Satisfied); }
+        finally { await Backlog(false); }
+        await f.DbAsync(db => db.Tasks.Where(t => t.Id == backlog).ExecuteUpdateAsync(x => x.SetProperty(t => t.Status, TaskStatuses.Cancelled)));
         var otherProject = await data.Project();
         var outside = new ResourceAllocation { ProjectId = otherProject.Id, PersonId = reviewer, Purpose = AllocationPurpose.Review,
             FromDate = today, ThroughDate = today, PlannedHours = 1m, Status = AllocationStatus.Confirmed };

@@ -32,7 +32,7 @@ public sealed class TaskFilter
         bool? B(string k) => bool.TryParse(q[k], out var b) ? b : null;
         var f = new TaskFilter
         {
-            Status = L("status"), Priority = L("priority"), Indicators = [.. L("indicator"), .. new[] { "overdue", "blocked", "blocking", "waiting", "unassigned", "stale", "dueThisWeek", "readyForReview", "dateInconsistent", "noDueDate", "dueSoon", "heldPastDue", "open" }.Where(k => B(k) == true)],
+            Status = L("status"), Priority = L("priority"), Indicators = [.. L("indicator"), .. new[] { "overdue", "blocked", "blocking", "waiting", "unassigned", "stale", "dueThisWeek", "readyForReview", "dateInconsistent", "noDueDate", "dueSoon", "heldPastDue", "open", "backlog" }.Where(k => B(k) == true)],
             AssigneeIds = I("assigneeId"), ReviewerIds = I("reviewerId"), DisciplineIds = I("disciplineId"), DeliverableIds = I("deliverableId"),
             MilestoneIds = I("milestoneId"), ProjectIds = I("projectId"), CreatedBy = I("createdBy"), Ids = I("ids"),
             DueFrom = D("dueFrom"), DueTo = D("dueTo"), StartFrom = D("startFrom"), StartTo = D("startTo"), CompletedFrom = D("completedFrom"), CompletedTo = D("completedTo"), DoneSince = D("doneSince"),
@@ -114,6 +114,9 @@ public static class TaskQueries
         public virtual string? LastActivityActorName { get; init; }
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public bool? PickupOfferOpen { get; init; }
+        /// FR-BKL-01: present only while `flag.backlog` is on, so the row is unchanged with it off.
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public bool? Backlog { get; init; }
     }
     public sealed record ActivityRow : Row
     {
@@ -176,6 +179,8 @@ public static class TaskQueries
                 "readyForReview" => q.Where(t => t.Status == TaskStatuses.ReadyForReview || t.Status == TaskStatuses.InReview),
                 "dueThisWeek" => q.Where(t => t.DueDate >= today && t.DueDate <= weekEnd && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled),
                 "open" => q.Where(t => t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled),
+                // FR-BKL-01, the same rule as TaskRules.IsBacklog; ignored like any unknown key while `flag.backlog` is off (FR-BKL-09).
+                "backlog" when s.IsFlagOn(TaskRules.BacklogFlag) => q.Where(t => TaskRules.BacklogStatuses.Contains(t.Status) && t.StartDate == null && t.DueDate == null),
                 _ => q,
             };
         return q;
@@ -259,7 +264,9 @@ public static class TaskQueries
         }).ToList();
         var msIds = list.Select(t => t.MilestoneId ?? t.Deliverable?.MilestoneId).OfType<Guid>().Distinct().ToList();
         var ms = await db.Milestones.AsNoTracking().Where(m => msIds.Contains(m.Id)).Select(m => new { m.Id, m.Key, m.Name, m.Date }).ToDictionaryAsync(m => m.Id);
-        var pickupOn = (await db.CurrentSettings()).IsFlagOn("task_pickup");
+        var settings = await db.CurrentSettings();
+        var pickupOn = settings.IsFlagOn("task_pickup");
+        var backlogOn = settings.IsFlagOn(TaskRules.BacklogFlag);
         var offers = pickupOn ? (await db.Set<TaskPickupOffer>().AsNoTracking().Where(o => ids.Contains(o.TaskId) && o.ClosedAt == null).Select(o => o.TaskId).ToListAsync()).ToHashSet() : [];
         return list.Select(t =>
         {
@@ -295,6 +302,7 @@ public static class TaskQueries
                     t.State.IsReviewStalled, t.State.AffectedMilestoneIds, t.State.Notes, t.State.EvaluatedAt),
                 LastActivityActorName = includeActivityActor ? t.ActivityActorName : null,
                 PickupOfferOpen = pickupOn ? offers.Contains(t.Id) : null,
+                Backlog = backlogOn ? TaskRules.IsBacklog(t.Status, t.StartDate, t.DueDate) : null,
             };
             return includeActivityActor ? new ActivityRow(row, t.ActivityActorName) : row;
         }).ToList();

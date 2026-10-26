@@ -12801,6 +12801,12 @@
               "string"
             ]
           },
+          "backlog": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
           "can": {
             "oneOf": [
               {
@@ -13133,6 +13139,12 @@
             "type": [
               "null",
               "string"
+            ]
+          },
+          "backlog": {
+            "type": [
+              "null",
+              "boolean"
             ]
           },
           "can": {

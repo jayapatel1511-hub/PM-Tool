@@ -15,7 +15,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { useProjectRefresh } from '@/hooks/data'
+import { useProject, useProjectRefresh } from '@/hooks/data'
+import { useFlag } from '@/lib/auth'
 import { ApiError, download, get, post, qs, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
@@ -528,6 +529,8 @@ export function DecisionPanel({ id }: PanelProps) {
   const q = useDecision(id)
   const done = useDecisionRefresh()
   const parties = useParties(q.data?.project.id ?? '')
+  // The project says whether a change needs a reason; asked only while pause saves exist (flag.data_entry_safety).
+  const project = useProject(useFlag('data_entry_safety') ? q.data?.project.projectNumber : undefined)
   const [tab, setTab] = useState<'links' | 'comments' | 'history'>('links')
   const [step, setStep] = useState<string | null>(null)
   const [linking, setLinking] = useState(false)
@@ -535,6 +538,8 @@ export function DecisionPanel({ id }: PanelProps) {
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const { decision: d, permissions: perm } = q.data
   const can = perm.edit.ok
+  // Typed text saves on blur only until the project says no reason is needed (FR-SAV-01).
+  const needsReason = project.data?.permissions.needsReason !== false
   const isOpen = ['Pending', 'Under Review', 'Deferred'].includes(d.status)
   const save = (body: object) => typedRequest('patch', '/api/v1/decisions/{id}', { params: { id: d.id }, body, ifMatch: d.rowVersion }).then(() => { done(d.projectId, d.id); return true }).catch((e) => { toast.error(errorText(e)); return false })
   const quick = async (s: Step) => {
@@ -568,10 +573,10 @@ export function DecisionPanel({ id }: PanelProps) {
       {d.status === 'Deferred' && q.data.deferralReason && <p className="mx-4 mb-4 rounded-md bg-warn-bg px-4 py-3 text-sm">{t('decision.deferredNote', { reason: q.data.deferralReason })}</p>}
       {d.status === 'Cancelled' && q.data.cancelledReason && <p className="mx-4 mb-4 rounded-md bg-idle-bg px-4 py-3 text-sm">{t('decision.cancelledNote', { reason: q.data.cancelledReason })}</p>}
       <FieldGroup title={t('common.details')}>
-        <FieldRow label={t('decision.subject')}><InlineText value={d.subject} disabled={!can} title={perm.edit.reason ?? undefined} onSave={(v) => save({ subject: v })} /></FieldRow>
-        <FieldRow label={t('common.description')}><InlineText value={q.data.description} multiline disabled={!can} onSave={(v) => save({ description: v })} /></FieldRow>
+        <FieldRow label={t('decision.subject')}><InlineText value={d.subject} disabled={!can} needsReason={needsReason} title={perm.edit.reason ?? undefined} onSave={(v) => save({ subject: v })} /></FieldRow>
+        <FieldRow label={t('common.description')}><InlineText value={q.data.description} multiline disabled={!can} needsReason={needsReason} onSave={(v) => save({ description: v })} /></FieldRow>
         <FieldRow label={t('decision.impact')}><InlineSelect value={d.impactLevel} options={IMPACTS.map((x) => ({ value: x, label: tv(x) }))} disabled={!can} onSave={(v) => save({ impactLevel: v })} title={t('decision.impact')} /></FieldRow>
-        <FieldRow label={t('decision.impactDescription')}><InlineText value={d.impactDescription} disabled={!can} onSave={(v) => save({ impactDescription: v })} /></FieldRow>
+        <FieldRow label={t('decision.impactDescription')}><InlineText value={d.impactDescription} disabled={!can} needsReason={needsReason} onSave={(v) => save({ impactDescription: v })} /></FieldRow>
       </FieldGroup>
       <FieldGroup title={t('register.group.ownership')}>
         <FieldRow label={t('common.owner')}>

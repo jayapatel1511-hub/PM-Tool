@@ -116,7 +116,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
           {pickupEnabled && openOffer && <span className="rounded-md border border-warn/40 bg-warn-bg px-2 py-0.5 text-xs font-medium text-warn">{t('pickup.title')}</span>}
           <span className="inline-flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><AccentDot id={d.project.id} />{d.project.projectNumber}</span>
         </div>
-        <Heading aria-label={r.name} className="-mx-2 break-words text-2xl/8 font-semibold tracking-[-0.4px]"><InlineText value={r.name} disabled={!perms.edit.ok} title={perms.edit.ok ? t('common.name') : perms.edit.reason ?? undefined} onSave={(v) => save({ name: v })} /></Heading>
+        <Heading aria-label={r.name} className="-mx-2 break-words text-2xl/8 font-semibold tracking-[-0.4px]"><InlineText value={r.name} disabled={!perms.edit.ok} needsReason={perms.needsReason} title={perms.edit.ok ? t('common.name') : perms.edit.reason ?? undefined} onSave={(v) => save({ name: v })} /></Heading>
         <TaskIndicators r={r} all />
         {d.relatedDeliverables?.length ? <p className="text-sm">{t('interaction.relatedDeliverables')}: {d.relatedDeliverables.map(x=><button className="ml-2 underline underline-offset-2" key={x.id} onClick={()=>openPanel('Deliverable',x.id)}>{x.key} {x.name}</button>)}</p> : null}
         <div className="flex flex-wrap items-center gap-2">
@@ -201,7 +201,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
 
       <FieldGroup title={t('task.group.work')}>
         <FieldRow label={t('deliverable.progress')}><ProgressSlider value={r.progressPct} disabled={!perms.edit.ok || terminal} onCommit={(v) => actions.setProgress(r, v)} /></FieldRow>
-        <FieldRow label={t('task.estimateHours')}><InlineText value={r.estimatedHours == null ? '' : String(r.estimatedHours)} disabled={!perms.edit.ok}
+        <FieldRow label={t('task.estimateHours')}><InlineText value={r.estimatedHours == null ? '' : String(r.estimatedHours)} disabled={!perms.edit.ok} needsReason={perms.needsReason}
           onSave={(v) => save({ estimatedHours: v == null || v === '' ? null : Number(v) })} /></FieldRow>
         {TASK_SECTIONS.map((x) => <div key={x.id}>{x.render(d, reload)}</div>)}
       </FieldGroup>
@@ -209,7 +209,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
       <FieldGroup title={t('common.description')}>
         {/* The section title is the visible label; the field keeps its own name for the editor. */}
         <FieldRow label={<span className="sr-only">{t('common.description')}</span>} className="gap-y-0 py-0 sm:grid-cols-1">
-          <div className="-mx-2"><InlineText value={d.description} multiline disabled={!perms.edit.ok} placeholder={t('task.noDescription')}
+          <div className="-mx-2"><InlineText value={d.description} multiline disabled={!perms.edit.ok} needsReason={perms.needsReason} placeholder={t('task.noDescription')}
             render={(v) => <RichText text={v} className="whitespace-normal" />} onSave={(v) => save({ description: v })} /></div>
         </FieldRow>
       </FieldGroup>

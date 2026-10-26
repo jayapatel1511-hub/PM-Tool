@@ -92,4 +92,4 @@ async function newMockPage(base, opts) {
   const mock = mockPlatformApi(page, opts)
   return { browser, page, mock }
 }
-module.exports = { startPreview, newMockPage, mockPlatformApi, project, task, taskDetail, work, views, planningGrid, links, comments, panelIds, deliverableDetail }
+module.exports = { startPreview, newMockPage, mockPlatformApi, me, project, task, taskDetail, work, views, planningGrid, links, comments, panelIds, deliverableDetail }

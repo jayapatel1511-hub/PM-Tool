@@ -5652,6 +5652,9 @@
     "$.flags.commitment_reliability": [
       "boolean"
     ],
+    "$.flags.data_entry_safety": [
+      "boolean"
+    ],
     "$.flags.date_context": [
       "boolean"
     ],
@@ -5771,6 +5774,9 @@
     "$.settings.allowSelfReview": [
       "boolean"
     ],
+    "$.settings.autosaveDelayMs": [
+      "number"
+    ],
     "$.settings.chainDepthLimit": [
       "number"
     ],
@@ -5781,6 +5787,9 @@
       "string"
     ],
     "$.settings.defaultWeeklyCapacityHours": [
+      "number"
+    ],
+    "$.settings.draftKeepDays": [
       "number"
     ],
     "$.settings.idleTimeoutHours": [
@@ -14730,6 +14739,21 @@
     "$.components.schemas.CurrentSettings.properties.allowSelfReview.type": [
       "string"
     ],
+    "$.components.schemas.CurrentSettings.properties.autosaveDelayMs": [
+      "object"
+    ],
+    "$.components.schemas.CurrentSettings.properties.autosaveDelayMs.format": [
+      "string"
+    ],
+    "$.components.schemas.CurrentSettings.properties.autosaveDelayMs.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CurrentSettings.properties.autosaveDelayMs.type": [
+      "array"
+    ],
+    "$.components.schemas.CurrentSettings.properties.autosaveDelayMs.type[]": [
+      "string"
+    ],
     "$.components.schemas.CurrentSettings.properties.chainDepthLimit": [
       "object"
     ],
@@ -14773,6 +14797,21 @@
       "string"
     ],
     "$.components.schemas.CurrentSettings.properties.defaultWeeklyCapacityHours.type": [
+      "string"
+    ],
+    "$.components.schemas.CurrentSettings.properties.draftKeepDays": [
+      "object"
+    ],
+    "$.components.schemas.CurrentSettings.properties.draftKeepDays.format": [
+      "string"
+    ],
+    "$.components.schemas.CurrentSettings.properties.draftKeepDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CurrentSettings.properties.draftKeepDays.type": [
+      "array"
+    ],
+    "$.components.schemas.CurrentSettings.properties.draftKeepDays.type[]": [
       "string"
     ],
     "$.components.schemas.CurrentSettings.properties.idleTimeoutHours": [

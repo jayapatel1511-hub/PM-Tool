@@ -384,11 +384,11 @@ export function DeliverablePanel({ id }: PanelProps) {
       {d.canRebaseline && <div className="flex flex-wrap gap-2 px-4 pt-3"><Button size="sm" variant="outline" onClick={() => setBaseline('set')}>{t('baseline.rebaseline')}</Button>{(d.baselineStartDate || d.baselineDueDate) && <Button size="sm" variant="ghost" onClick={() => setBaseline('clear')}>{t('baseline.useOriginal')}</Button>}</div>}
       {err != null && <div className="px-4 pb-4"><ErrorBanner error={err} retry={() => { setErr(null); reload() }} /></div>}
       <FieldGroup title={t('common.details')}>
-        <FieldRow label={t('common.name')}><InlineText value={d.name} disabled={!can} onSave={(v) => save({ name: v })} /></FieldRow>
+        <FieldRow label={t('common.name')}><InlineText value={d.name} disabled={!can} needsReason={perms.needsReason} onSave={(v) => save({ name: v })} /></FieldRow>
         <FieldRow label={t('common.type')}><InlineSelect value={d.deliverableTypeId} disabled={!can} options={(ref.data?.deliverableTypes ?? []).filter((x) => x.isActive || x.id === d.deliverableTypeId).map((x) => ({ value: x.id, label: x.name }))} onSave={(v) => save({ deliverableTypeId: v })} title={t('common.type')} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={d.projectDisciplineId} disabled={!can} options={(project.data?.disciplines ?? []).filter((x) => x.isActive || x.id === d.projectDisciplineId).map((x) => ({ value: x.id, label: x.name }))} onSave={(v) => save({ projectDisciplineId: v })} title={t('common.discipline')} /></FieldRow>
         <FieldRow label={t('common.priority')}><InlineSelect value={d.priority} disabled={!can} options={['Low', 'Medium', 'High', 'Critical'].map((x) => ({ value: x, label: tv(x) }))} onSave={(v) => save({ priority: v })} title={t('common.priority')} /></FieldRow>
-        <FieldRow label={t('common.description')}><InlineText value={data.description} multiline disabled={!can} onSave={(v) => save({ description: v })} /></FieldRow>
+        <FieldRow label={t('common.description')}><InlineText value={data.description} multiline disabled={!can} needsReason={perms.needsReason} onSave={(v) => save({ description: v })} /></FieldRow>
       </FieldGroup>
       <FieldGroup title={t('register.group.ownership')}>
         <FieldRow label={t('common.owner')}><InlinePerson value={d.ownerId} name={d.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
@@ -408,7 +408,7 @@ export function DeliverablePanel({ id }: PanelProps) {
           if (ok) await q.refetch()
           return ok
         }} /></FieldRow>
-        <FieldRow label={t('field.Revision')}><InlineText value={d.revision} disabled={!can} onSave={(v) => save({ revision: v })} /></FieldRow>
+        <FieldRow label={t('field.Revision')}><InlineText value={d.revision} disabled={!can} needsReason={perms.needsReason} onSave={(v) => save({ revision: v })} /></FieldRow>
         {d.issuedDate && <FieldRow label={t('deliverable.issued')}><div className="px-2 py-1.5"><span className="tabular-nums">{fmtDate(d.issuedDate)}</span> · {d.revision} · {d.issuedTo}{data.transmittalUrl && <> · <a className="text-primary underline underline-offset-4" href={data.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a></>}</div></FieldRow>}
         {data.onHoldReason && d.status === 'On Hold' && <FieldRow label={t('field.OnHoldReason')}><div className="px-2 py-1.5">{data.onHoldReason}</div></FieldRow>}
       </FieldGroup>

@@ -719,6 +719,8 @@ export function RiskPanel({ id }: PanelProps) {
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const { risk: r, permissions: perm } = q.data
   const can = perm.edit.ok
+  // Typed text saves on blur only until the project says no reason is needed (FR-SAV-01).
+  const needsReason = project.data?.permissions.needsReason !== false
   const refresh = () => done(r.projectId, 'risk', r.id)
   const save = (body: object) => patch(`risks/${r.id}`, body, r.rowVersion).then(() => { refresh(); return true }).catch((e) => { toast.error(errorText(e)); return false })
   const go = (to: string, reason?: string) => post(`risks/${r.id}/transition`, { toStatus: to, reason }, r.rowVersion).then(refresh)
@@ -737,8 +739,8 @@ export function RiskPanel({ id }: PanelProps) {
         <Steps transitions={perm.transitions} label={(to) => runtimeText(to === 'Open' && r.status === 'Closed' ? 'risk.reopen' : STEP[to])} onStep={onStep} />
       </PanelHead>
       <FieldGroup title={t('common.details')}>
-        <FieldRow label={t('register.title')}><InlineText value={r.title} disabled={!can} title={perm.edit.reason ?? undefined} onSave={(v) => save({ title: v })} /></FieldRow>
-        <FieldRow label={t('common.description')}><InlineText value={q.data.description ?? ''} multiline disabled={!can} onSave={(v) => save({ description: v })} /></FieldRow>
+        <FieldRow label={t('register.title')}><InlineText value={r.title} disabled={!can} needsReason={needsReason} title={perm.edit.reason ?? undefined} onSave={(v) => save({ title: v })} /></FieldRow>
+        <FieldRow label={t('common.description')}><InlineText value={q.data.description ?? ''} multiline disabled={!can} needsReason={needsReason} onSave={(v) => save({ description: v })} /></FieldRow>
       </FieldGroup>
       <FieldGroup title={t('register.group.assessment')}>
         <FieldRow label={t('risk.probability')}><InlineSelect value={String(r.probability)} options={levelOptions('probability')} disabled={!can} onSave={(v) => save({ probability: Number(v) })} title={t('risk.probability')} /></FieldRow>
@@ -750,8 +752,8 @@ export function RiskPanel({ id }: PanelProps) {
         <FieldRow label={t('risk.reviewDate')}><InlineDate value={r.reviewDate} disabled={!can} onSave={(v) => save({ reviewDate: v })} /></FieldRow>
       </FieldGroup>
       <FieldGroup title={t('register.group.response')}>
-        <FieldRow label={t('risk.mitigation')}><InlineText value={r.mitigation ?? ''} multiline disabled={!can} onSave={(v) => save({ mitigation: v })} /></FieldRow>
-        <FieldRow label={t('risk.trigger')}><InlineText value={r.triggerIndicator ?? ''} disabled={!can} onSave={(v) => save({ triggerIndicator: v })} /></FieldRow>
+        <FieldRow label={t('risk.mitigation')}><InlineText value={r.mitigation ?? ''} multiline disabled={!can} needsReason={needsReason} onSave={(v) => save({ mitigation: v })} /></FieldRow>
+        <FieldRow label={t('risk.trigger')}><InlineText value={r.triggerIndicator ?? ''} disabled={!can} needsReason={needsReason} onSave={(v) => save({ triggerIndicator: v })} /></FieldRow>
       </FieldGroup>
       <TabBar tabs={[{ id: 'links' as const, label: t('decision.links'), count: q.data.links.length }, ...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
       {tab === 'links' && <Links links={q.data.links} canEdit={can} projectId={r.projectId} onChange={refresh} onAdd={(x) => post(`risks/${r.id}/links`, { targetType: x.targetType, targetId: x.targetId })} />}
@@ -775,6 +777,8 @@ export function IssuePanel({ id }: PanelProps) {
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const { issue: i, permissions: perm } = q.data
   const can = perm.edit.ok
+  // Typed text saves on blur only until the project says no reason is needed (FR-SAV-01).
+  const needsReason = project.data?.permissions.needsReason !== false
   const open = ['Open', 'In Progress'].includes(i.status)
   const refresh = () => done(i.projectId, 'issue', i.id)
   const save = (body: object) => patch(`issues/${i.id}`, body, i.rowVersion).then(() => { refresh(); return true }).catch((e) => { toast.error(errorText(e)); return false })
@@ -799,12 +803,12 @@ export function IssuePanel({ id }: PanelProps) {
       {i.status === 'Resolved' && (
         <div className="mx-4 mb-4 rounded-md border border-done/30 bg-done-bg px-4 py-3 text-sm">
           <div className="text-xs/[18px] text-muted-foreground">{t('issue.resolvedOn', { date: fmtDate(i.resolvedDate) })}</div>
-          <InlineText value={i.resolution ?? ''} multiline disabled={!can} title={t('field.Resolution')} onSave={(v) => save({ resolution: v })} />
+          <InlineText value={i.resolution ?? ''} multiline disabled={!can} needsReason={needsReason} title={t('field.Resolution')} onSave={(v) => save({ resolution: v })} />
         </div>
       )}
       <FieldGroup title={t('common.details')}>
-        <FieldRow label={t('register.title')}><InlineText value={i.title} disabled={!can} title={perm.edit.reason ?? undefined} onSave={(v) => save({ title: v })} /></FieldRow>
-        <FieldRow label={t('common.description')}><InlineText value={q.data.description ?? ''} multiline disabled={!can} onSave={(v) => save({ description: v })} /></FieldRow>
+        <FieldRow label={t('register.title')}><InlineText value={i.title} disabled={!can} needsReason={needsReason} title={perm.edit.reason ?? undefined} onSave={(v) => save({ title: v })} /></FieldRow>
+        <FieldRow label={t('common.description')}><InlineText value={q.data.description ?? ''} multiline disabled={!can} needsReason={needsReason} onSave={(v) => save({ description: v })} /></FieldRow>
         <FieldRow label={t('register.severity')}><InlineSelect value={i.severity} options={SEVERITIES.map((x) => ({ value: x, label: tv(x) }))} disabled={!can} onSave={(v) => save({ severity: v })} title={t('register.severity')} /></FieldRow>
         <FieldRow label={t('issue.type')}><InlineSelect value={i.issueType} options={ISSUE_TYPES.map((x) => ({ value: x, label: tv(x) }))} disabled={!perm.changeType?.ok}
           onSave={(v) => save({ issueType: v })} title={perm.changeType?.ok ? t('issue.type') : perm.changeType?.reason ?? t('issue.type')} /></FieldRow>

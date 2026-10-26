@@ -39,6 +39,7 @@ public static class Flags
         new("live_project_stamp", "042"), // §46.5 project stamp in the notification pulse
         new("live_events", "042"), // §46.6 change-event stream
         new("admin_review", "051"), // §55.4: the Admin review page, its record, the digest line and the Portfolio strip
+        new("data_entry_safety", "051"), // §55.2 Part A: text autosave after a pause, drafts, leave prompt, Retry control
     ];
 
     /// `flag.<name>` as a Bool setting, default off, group `flags`, generated like `rule_enabled.*`.

@@ -16837,12 +16837,16 @@ export interface components {
             activityBurstMinutes?: null | number;
             allowSelfReview: boolean;
             /** Format: int32 */
+            autosaveDelayMs?: null | number;
+            /** Format: int32 */
             chainDepthLimit: number;
             /** Format: int32 */
             coordinationLookaheadWeeks: number;
             dateFormat: null | string;
             /** Format: int32 */
             defaultWeeklyCapacityHours: number;
+            /** Format: int32 */
+            draftKeepDays?: null | number;
             /** Format: int32 */
             idleTimeoutHours: number;
             /** Format: int32 */

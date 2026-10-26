@@ -15,7 +15,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { useProjectRefresh, useReference } from '@/hooks/data'
+import { useProject, useProjectRefresh, useReference } from '@/hooks/data'
+import { useFlag } from '@/lib/auth'
 import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { daysBetween, fmtDate, relative, shortDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
@@ -462,6 +463,8 @@ function CancelDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Mileston
 
 export function MilestonePanel({ id }: PanelProps) {
   const q = useQuery({ queryKey: ['milestone', id], queryFn: () => get(`milestones/${id}`) })
+  // The project says whether a change needs a reason; asked only while pause saves exist (flag.data_entry_safety).
+  const project = useProject(useFlag('data_entry_safety') ? q.data?.project.projectNumber : undefined)
   const [tab, setTab] = useState<'deliverables' | 'comments' | 'history'>('deliverables')
   const [baseline, setBaseline] = useState<'set' | 'clear' | null>(null)
   const refresh = useProjectRefresh()
@@ -469,10 +472,12 @@ export function MilestonePanel({ id }: PanelProps) {
   if (q.error) return <div className="p-6"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const m: MilestoneRow = q.data.milestone
   const can = q.data.permissions.manage.ok
+  // Typed text saves on blur only until the project says no reason is needed (FR-SAV-01).
+  const needsReason = project.data?.permissions.needsReason !== false
   const save = (body: object) => patch(`milestones/${m.id}`, body, m.rowVersion).then(() => { refresh(m.projectId) })
   // Phones read the milestone; editing it is desktop/tablet only (§13.0).
   const text = (value: string | undefined, onSave: (v: string | null) => Promise<unknown>, multiline?: boolean) => (
-    <DesktopOnly notice={<InlineText value={value} multiline={multiline} disabled onSave={onSave} />}><InlineText value={value} multiline={multiline} disabled={!can} onSave={onSave} /></DesktopOnly>
+    <DesktopOnly notice={<InlineText value={value} multiline={multiline} disabled onSave={onSave} />}><InlineText value={value} multiline={multiline} disabled={!can} needsReason={needsReason} onSave={onSave} /></DesktopOnly>
   )
   return (
     <PickerProject.Provider value={m.projectId}><div>

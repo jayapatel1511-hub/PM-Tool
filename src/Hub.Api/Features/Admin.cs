@@ -74,7 +74,7 @@ public static class AdminEndpoints
         g.MapGet("/settings", async (HubDb db) =>
         {
             var rows = await db.Settings.AsNoTracking().ToDictionaryAsync(r => r.Key, r => r.Value);
-            return OrgSettings.Defs.Where(d => d.Key != "route_counter_enabled" || rows.GetValueOrDefault("flag.route_counter") == "true").Select(d =>
+            return OrgSettings.Defs.Where(d => !OrgSettings.ShownWithFlag.TryGetValue(d.Key, out var flag) || rows.GetValueOrDefault($"flag.{flag}") == "true").Select(d =>
             {
                 var value = rows.TryGetValue(d.Key, out var v) ? JsonDocument.Parse(v).RootElement.Clone() : JsonSerializer.SerializeToElement(d.Default, JsonOpts.Web);
                 // Flag rows also name their packet (§43.4 FR-DLV-07); every other row is unchanged.

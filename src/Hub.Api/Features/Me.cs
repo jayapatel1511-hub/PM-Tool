@@ -13,7 +13,9 @@ public static class MeEndpoints
     public sealed record CurrentSettings(string? DateFormat, string? OrgTimeZone, DateOnly Today, int IdleTimeoutHours, bool RestrictedProjectsEnabled, bool AllowSelfReview,
         int TaskDueSoonDays, int MilestoneApproachingDays, int ChainDepthLimit, int DefaultWeeklyCapacityHours, int CoordinationLookaheadWeeks, bool WorkingDaysEnabled,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? ActivityBurstMinutes = null,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? RouteCounterEnabled = null);
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? RouteCounterEnabled = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? AutosaveDelayMs = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? DraftKeepDays = null);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -53,7 +55,9 @@ public static class MeEndpoints
                 Settings = new CurrentSettings(s.DateFormat, s.OrgTimeZone, clock.Today(s), s.IdleTimeoutHours, s.RestrictedProjectsEnabled, s.AllowSelfReview,
                     s.TaskDueSoonDays, s.MilestoneApproachingDays, s.ChainDepthLimit, s.DefaultWeeklyCapacityHours, s.CoordinationLookaheadWeeks, s.WorkingDaysEnabled,
                     s.IsFlagOn("small_ux") ? s.ActivityBurstMinutes : null,
-                    s.IsFlagOn("route_counter") ? s.RouteCounterEnabled : null),
+                    s.IsFlagOn("route_counter") ? s.RouteCounterEnabled : null,
+                    s.IsFlagOn("data_entry_safety") ? s.AutosaveDelayMs : null,
+                    s.IsFlagOn("data_entry_safety") ? s.DraftKeepDays : null),
                 Preferences = new { pref.DigestEnabled, pref.DigestTimeLocal, pref.DenseRows, pref.WeeklySummaryEnabled },
                 Flags = s.Flags,
             };

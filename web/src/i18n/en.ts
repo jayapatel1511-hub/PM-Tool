@@ -1116,6 +1116,7 @@ export const en = {
   'admin.group.calendar': 'Dates and calendar',
   'admin.group.notifications': 'Notifications',
   'admin.group.security': 'Security',
+  'admin.group.data_entry': 'Data entry',
   'admin.group.rules': 'Attention rules',
   'admin.group.flags': 'Feature flags', 'admin.flagLabel': '{name} (packet {packet})',
   'admin.usersIntro': 'In local-password staging, add the account here and hand off credentials privately. Directory users are added when they first sign in; roles from directory groups follow the groups and roles added here stay until removed here.',
@@ -1168,6 +1169,8 @@ export const en = {
   'setting.idle_timeout_hours': 'Sign out after idle (hours)',
   'setting.admin_review_interval_days': 'Admin review due every (days)',
   'setting.admin_review_idle_days': 'Admin review: no sign-in for (days)',
+  'setting.autosave_delay_ms': 'Save typed text after a pause of (milliseconds)',
+  'setting.draft_keep_days': 'Keep unsent drafts on a device for (days)',
 
   'mywork.title': 'My Work',
   'mywork.empty': 'Nothing is assigned to you yet. Tasks, reviews and deliverables you own will appear here.',

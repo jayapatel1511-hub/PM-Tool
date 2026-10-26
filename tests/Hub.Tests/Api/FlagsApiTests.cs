@@ -28,7 +28,8 @@ public sealed class FlagsApiTests(HubFactory f)
             {
                 (await admin.Put("/api/v1/admin/settings/flag.route_counter", new { value = enabled })).EnsureSuccessStatusCode();
                 var rows = (await admin.GetAsync("/api/v1/admin/settings").Result.Json()).AsArray();
-                Assert.Equal(OrgSettings.Defs.Where(d => enabled || d.Key != "route_counter_enabled").Select(d => d.Key), rows.Select(r => r!.S("key")));
+                // Settings of other dark additions stay hidden while their flags are off (FR-DLV-09).
+                Assert.Equal(OrgSettings.Defs.Where(d => !OrgSettings.ShownWithFlag.TryGetValue(d.Key, out var flag) || (enabled && flag == "route_counter")).Select(d => d.Key), rows.Select(r => r!.S("key")));
                 Assert.Equal(enabled, rows.Any(r => r!.S("key") == "route_counter_enabled"));
                 Assert.All(rows.Where(r => r!.S("group") != "flags"), r => Assert.Equal(["key", "kind", "group", "default", "value"], r!.AsObject().Select(p => p.Key)));
                 Assert.Equal(Flags.All.Select(x => $"flag.{x.Name}"), rows.Where(r => r!.S("group") == "flags").Select(r => r!.S("key")));

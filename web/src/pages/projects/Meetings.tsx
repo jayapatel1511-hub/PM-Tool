@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
+import { useFlag } from '@/lib/auth'
 import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
@@ -418,6 +419,8 @@ const STEP: Record<string, string> = { Open: 'register.toOpen', 'In Progress': '
 
 export function ActionPanel({ id }: PanelProps) {
   const q = useQuery({ queryKey: ['action', id], queryFn: () => get<ActionDetail>(`actions/${id}`) })
+  // The project says whether a change needs a reason; asked only while pause saves exist (flag.data_entry_safety).
+  const project = useProject(useFlag('data_entry_safety') ? q.data?.action.projectNumber : undefined)
   const done = useActionRefresh()
   const openPanel = useItemPanel()
   const [tab, setTab] = useState<'comments' | 'history'>(ItemSlots.Comments ? 'comments' : 'history')
@@ -427,6 +430,8 @@ export function ActionPanel({ id }: PanelProps) {
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const { action: a, permissions: perm, meeting: m } = q.data
   const can = perm.edit.ok
+  // Typed text saves on blur only until the project says no reason is needed (FR-SAV-01).
+  const needsReason = project.data?.permissions.needsReason !== false
   const refresh = () => done(a.projectId, a.id)
   const save = (body: object) => patch(`actions/${a.id}`, body, a.rowVersion).then(() => { refresh(); return true }).catch((e) => { toast.error(errorText(e)); return false })
   const go = (to: string, reason?: string) => post(`actions/${a.id}/transition`, { toStatus: to, reason }, a.rowVersion).then(refresh)
@@ -451,7 +456,7 @@ export function ActionPanel({ id }: PanelProps) {
         </div>
       </PanelHead>
       <FieldGroup title={t('common.details')}>
-        <FieldRow label={t('action.text')}><InlineText value={a.text} multiline disabled={!can} title={perm.edit.reason ?? undefined} onSave={(v) => save({ text: v })} /></FieldRow>
+        <FieldRow label={t('action.text')}><InlineText value={a.text} multiline disabled={!can} needsReason={needsReason} title={perm.edit.reason ?? undefined} onSave={(v) => save({ text: v })} /></FieldRow>
         <FieldRow label={t('common.owner')}>
           {owner ? (
             <div className="grid gap-2 px-2 py-1">

@@ -37,12 +37,19 @@ const why = (e: unknown) => {
   return x?.code === 'concurrency_conflict' && x.body?.changedBy ? t('error.conflict', { who: x.body.changedBy, when: ago(x.body.changedAt) }) : x?.message
 }
 
-/** Save feedback for one field (design §8): "Saving…" while pending, "Saved" only when the save reports success (a value
- *  other than null, false or undefined), "Not saved" when it was refused or failed. A refused save that lands later (a
- *  reason dialog completed it) stops saying "Not saved" once the field shows the value. */
-function useSaveStatus(current?: unknown) {
+/** Per-field autosave (FR-SAV-01) and its feedback (design §8), shared by every inline field of the edit panels; the task panel's
+ *  commit is the reference. `track` reports a save already sent: "Saving…" while pending, "Saved" only when the save reports success
+ *  (a value other than null, false or undefined), "Not saved" when it was refused or failed. A refused save that lands later (a reason
+ *  dialog completed it) stops saying "Not saved" once the field shows the value. With `delayMs` (`autosave_delay_ms`, present only
+ *  while `flag.data_entry_safety` is on) `schedule` also saves typed text after that long without typing, and `commit` (blur, Enter)
+ *  does not send that value a second time. Without it, `commit` is the plain blur save it always was. */
+function useAutosaveField(current?: unknown, delayMs?: number) {
   const [state, setState] = useState<SaveState | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const pause = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const sent = useRef<{ value: unknown } | undefined>(undefined)
+  // Once the saved value is back from the server, the field's own comparison takes over from `sent`.
+  useEffect(() => { sent.current = undefined }, [current])
   const track = async (save: unknown, value?: unknown) => {
     clearTimeout(timer.current)
     setState({ status: 'saving', value })
@@ -53,8 +60,24 @@ function useSaveStatus(current?: unknown) {
       if (r != null && r !== false) timer.current = setTimeout(() => setState(null), 4000)
     } catch (e) { setState({ status: 'failed', value, message: why(e) }) }
   }
+  const already = (value: unknown) => sent.current !== undefined && blank(sent.current.value) === blank(value)
+  const commit = (save: () => Promise<unknown>, value: unknown) => {
+    clearTimeout(pause.current)
+    return already(value) && state?.status !== 'failed' ? Promise.resolve() : track(save(), value)
+  }
+  // ponytail: a pause that ends while the previous pause's save is still in flight sends the older row version; packet 051 S02
+  // (conflict choice and retry) handles the refusal.
+  const schedule = (save: () => Promise<unknown>, value: unknown) => {
+    if (delayMs == null) return
+    clearTimeout(pause.current)
+    pause.current = setTimeout(() => {
+      if (blank(value) === blank(current) || already(value)) return
+      sent.current = { value }
+      track(save(), value)
+    }, delayMs)
+  }
   const landed = state?.status === 'failed' && blank(state.value) === blank(current)
-  return { state: landed ? null : state, track, clear: () => { clearTimeout(timer.current); setState(null) } }
+  return { state: landed ? null : state, track, commit, schedule, clear: () => { clearTimeout(timer.current); clearTimeout(pause.current); setState(null) } }
 }
 
 /** The live save line under a field; empty (and silent) when there is nothing to report. */
@@ -71,7 +94,7 @@ function SaveNote({ state }: { state: SaveState | null }) {
 /** The same save feedback for a control that is not one of the inline fields (a checkbox, a slider): call `track` with the
  *  save's promise and the value being saved. */
 export function SaveStatus({ current, children }: { current?: unknown; children: (track: (save: unknown, value?: unknown) => Promise<void>) => ReactNode }) {
-  const save = useSaveStatus(current)
+  const save = useAutosaveField(current)
   return <>{children(save.track)}<SaveNote state={save.state} /></>
 }
 
@@ -90,16 +113,18 @@ export function InlineText({ value, onSave, multiline, disabled, placeholder, ti
   value?: string | null; onSave: (v: string | null) => Promise<unknown>; multiline?: boolean; disabled?: boolean; placeholder?: string; title?: string; render?: (v: string) => ReactNode; initiallyEditing?: boolean; onCancel?: () => void
 }) {
   const labelId = useContext(FieldLabelContext)
+  const delay = useMe().settings.autosaveDelayMs
   const [editing, setEditing] = useState(initiallyEditing)
   const [v, setV] = useState(value ?? '')
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
-  const save = useSaveStatus(value)
+  // A list row renamed in place (initiallyEditing) is not an edit panel field: it keeps saving on blur and Enter only.
+  const save = useAutosaveField(value, initiallyEditing ? undefined : delay)
   useEffect(() => { if (!editing && save.state?.status !== 'saving' && save.state?.status !== 'failed') setV(value ?? '') }, [value, editing, save.state?.status])
   useEffect(() => { if (editing) ref.current?.focus() }, [editing])
-  const commit = async () => { setEditing(false); if ((v || null) === (value || null)) { onCancel?.(); return } if ((v || null) !== (value || null)) await save.track(onSave(v.trim() || null), v.trim() || null) }
+  const commit = async () => { setEditing(false); if ((v || null) === (value || null)) { onCancel?.(); return } await save.commit(() => onSave(v.trim() || null), v.trim() || null) }
   const note = <SaveNote state={save.state} />
   if (!editing) return <><Display onEdit={() => setEditing(true)} disabled={disabled} title={title}>{value ? (render ? render(value) : value) : <span className="text-muted-foreground">{placeholder ?? t('common.dash')}</span>}</Display>{note}</>
-  const props = { ref, value: v, 'aria-labelledby': labelId, 'aria-label': labelId ? undefined : title, onChange: (e: any) => setV(e.target.value), onBlur: commit,
+  const props = { ref, value: v, 'aria-labelledby': labelId, 'aria-label': labelId ? undefined : title, onChange: (e: any) => { setV(e.target.value); save.schedule(() => onSave(e.target.value.trim() || null), e.target.value.trim() || null) }, onBlur: commit,
     onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Escape') { save.clear(); setV(value ?? ''); setEditing(false); onCancel?.() } if (e.key === 'Enter' && (!multiline || e.ctrlKey || e.metaKey)) { e.preventDefault(); commit() } } }
   return <>{!labelId && title && <span className="mb-1 block text-xs/[18px] font-normal text-muted-foreground">{title}</span>}{multiline ? <Textarea rows={4} {...props} /> : <Input className="min-h-(--control-row-h)" {...props} />}{note}</>
 }
@@ -108,7 +133,7 @@ export function InlineDate({ value, onSave, disabled, title, hint }: { value?: s
   const labelId = useContext(FieldLabelContext)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(value ?? null)
-  const save = useSaveStatus(value)
+  const save = useAutosaveField(value)
   const note = <SaveNote state={save.state} />
   if (!editing) return <><Display onEdit={() => { setDraft(value ?? null); setEditing(true) }} disabled={disabled} title={title}><span className="tabular-nums">{fmtDate(value)}</span></Display>{note}</>
   return <><Input type="date" aria-labelledby={labelId} title={title} className="min-h-(--control-row-h) w-44" autoFocus onChange={e=>setDraft(e.target.value || null)} defaultValue={save.state?.status === 'failed' ? String(save.state.value ?? '') : value ?? ''}
@@ -120,7 +145,7 @@ export function InlineSelect({ value, options, onSave, disabled, allowEmpty, tit
   value?: string | null; options: { value: string; label: string }[]; onSave: (v: string | null) => Promise<unknown>; disabled?: boolean; allowEmpty?: boolean; title?: string
 }) {
   const labelId = useContext(FieldLabelContext)
-  const save = useSaveStatus(value)
+  const save = useAutosaveField(value)
   const label = options.find((o) => o.value === value)?.label
   if (disabled) return <Display onEdit={() => {}} disabled title={title}>{label ?? t('common.dash')}</Display>
   return (
@@ -136,7 +161,7 @@ export function InlineSelect({ value, options, onSave, disabled, allowEmpty, tit
 }
 
 export function InlinePerson({ value, name, onSave, disabled, title, allowClear = true }: { value?: string | null; name?: string | null; onSave: (id: string | null) => Promise<unknown>; disabled?: boolean; title?: string; allowClear?: boolean }) {
-  const save = useSaveStatus(value)
+  const save = useAutosaveField(value)
   const [candidate, setCandidate] = useState<{ id: string; displayName: string } | undefined>()
   const retaining = save.state?.status === 'saving' || save.state?.status === 'failed'
   const displayId = retaining ? save.state?.value as string | null : value

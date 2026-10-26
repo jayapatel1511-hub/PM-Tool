@@ -19,6 +19,8 @@ export interface Me {
     dateFormat: string; orgTimeZone: string; today: string; idleTimeoutHours: number; restrictedProjectsEnabled: boolean
     allowSelfReview: boolean; taskDueSoonDays: number; milestoneApproachingDays: number; chainDepthLimit: number
     defaultWeeklyCapacityHours: number; coordinationLookaheadWeeks: number; workingDaysEnabled: boolean; routeCounterEnabled?: boolean; activityBurstMinutes?: number
+    /** Present only while flag.data_entry_safety is on (§55.2). */
+    autosaveDelayMs?: number; draftKeepDays?: number
   }
   preferences: { digestEnabled: boolean; digestTimeLocal?: string; denseRows: boolean; weeklySummaryEnabled: boolean }
   flags?: Record<string, boolean>

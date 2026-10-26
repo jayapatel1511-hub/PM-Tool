@@ -3786,6 +3786,14 @@
           "allowSelfReview": {
             "type": "boolean"
           },
+          "autosaveDelayMs": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
           "chainDepthLimit": {
             "format": "int32",
             "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -3806,6 +3814,14 @@
             "format": "int32",
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": "integer"
+          },
+          "draftKeepDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
           },
           "idleTimeoutHours": {
             "format": "int32",

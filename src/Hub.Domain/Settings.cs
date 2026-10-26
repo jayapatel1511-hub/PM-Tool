@@ -56,6 +56,8 @@ public sealed record OrgSettings
     public int IdleTimeoutHours { get; init; } = 8;
     public bool RouteCounterEnabled { get; init; }
     public bool WorkingDaysEnabled { get; init; }
+    public int AutosaveDelayMs { get; init; } = 800;
+    public int DraftKeepDays { get; init; } = 7;
     public IReadOnlyDictionary<string, bool> RuleEnabled { get; init; } = Rules.Ids.ToDictionary(r => r, _ => true);
     public IReadOnlyDictionary<string, Channels> NotificationDefaults { get; init; } =
         NotificationEvents.All.ToDictionary(e => e.Code, e => new Channels(e.App, e.Email));
@@ -112,12 +114,22 @@ public sealed record OrgSettings
         new("digest_send_time_local", SettingKind.Time, "07:00", "notifications"),
         new("weekend_digests", SettingKind.Bool, false, "notifications"),
         new("idle_timeout_hours", SettingKind.Int, 8, "security"),
+        new("autosave_delay_ms", SettingKind.Int, 800, "data_entry"),
+        new("draft_keep_days", SettingKind.Int, 7, "data_entry"),
         .. Rules.Ids.Select(r => new SettingDef($"rule_enabled.{r}", SettingKind.Bool, true, "rules")),
         .. NotificationEvents.All.Select(e => new SettingDef($"notify_default.{e.Code}", SettingKind.Channels, new Channels(e.App, e.Email), "notifications")),
         .. Hub.Domain.Flags.Defs(Hub.Domain.Flags.All),
     ];
 
     public static SettingDef? Def(string key) => Defs.FirstOrDefault(d => d.Key == key);
+
+    /// Settings that belong to a dark addition: listed for Admins only while their flag is on (FR-DLV-09).
+    public static readonly IReadOnlyDictionary<string, string> ShownWithFlag = new Dictionary<string, string>
+    {
+        ["route_counter_enabled"] = "route_counter",
+        ["autosave_delay_ms"] = "data_entry_safety",
+        ["draft_keep_days"] = "data_entry_safety",
+    };
 
     public static OrgSettings From(IReadOnlyDictionary<string, JsonElement> v)
     {
@@ -172,6 +184,8 @@ public sealed record OrgSettings
             DigestSendTimeLocal = S("digest_send_time_local", s.DigestSendTimeLocal),
             WeekendDigests = B("weekend_digests", s.WeekendDigests),
             IdleTimeoutHours = I("idle_timeout_hours", s.IdleTimeoutHours),
+            AutosaveDelayMs = I("autosave_delay_ms", s.AutosaveDelayMs),
+            DraftKeepDays = I("draft_keep_days", s.DraftKeepDays),
             RuleEnabled = Rules.Ids.ToDictionary(r => r, r => B($"rule_enabled.{r}", true)),
             NotificationDefaults = NotificationEvents.All.ToDictionary(e => e.Code, e =>
                 v.TryGetValue($"notify_default.{e.Code}", out var c) && c.ValueKind == JsonValueKind.Object
@@ -205,6 +219,8 @@ public sealed record OrgSettings
         "workload_amber_pct" => n is >= 0 and <= 300,
         "planning_stale_days" or "status_stale_days" => n is >= 1 and <= 365,
         "planning_max_hours_per_week" => n is >= 1 and <= 168,
+        "autosave_delay_ms" => n is >= 200 and <= 10000,
+        "draft_keep_days" => n is >= 1 and <= 365,
         _ => n is >= 0 and <= 3650,
     };
 

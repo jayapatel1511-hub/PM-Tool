@@ -196,6 +196,8 @@ public sealed class PlanningTests
     [InlineData("planning_stale_days", 1, 365)]
     [InlineData("planning_max_hours_per_week", 1, 168)]
     [InlineData("coordination_lookahead_weeks", 1, 12)]
+    [InlineData("autosave_delay_ms", 200, 10000)]
+    [InlineData("draft_keep_days", 1, 365)]
     public void Each_setting_uses_its_own_range(string key, int min, int max)
     {
         var def = OrgSettings.Defs.Single(x => x.Key == key);

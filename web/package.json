@@ -36,7 +36,8 @@
     "test:route-splitting": "node tests/route-splitting.cjs",
     "test:live-browser": "node tests/live-browser.cjs",
     "test:smoke-live": "node tests/smoke-live.cjs",
-    "test:live-real": "node tests/live-real.cjs"
+    "test:live-real": "node tests/live-real.cjs",
+    "test:live-lifecycle": "node tests/live-lifecycle-real.cjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.23.0",

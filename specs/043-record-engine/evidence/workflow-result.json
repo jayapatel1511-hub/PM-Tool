@@ -1,0 +1,26 @@
+{
+  "verdict": "PASS",
+  "result": {
+    "flagOff": true,
+    "flagOn": true,
+    "savedViewRoundTrip": true,
+    "roleSort": true,
+    "myWorkDeepLink": true,
+    "inlineSave": true,
+    "staleConflict": true,
+    "tabs": [
+      "Linked items",
+      "Comments",
+      "History"
+    ],
+    "roleHistory": true,
+    "openRoleLiveRefresh": true,
+    "exports": [
+      "CSV",
+      "Excel"
+    ],
+    "closeReasonHistory": true,
+    "reopen": true,
+    "realise": true
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "candidateCommit": "87e72b718f195903d94893da78b11f8292b62998",
+  "baseCommit": "e80fbe1e0358444e77d186ad1aba5f85045571ff",
+  "execution": "owned explicit-commit archive runner, one synthetic Development API/database, two production UI builds",
+  "runnerExitCode": 1,
+  "strictResult": "FAIL",
+  "checked": 10,
+  "passed": 2,
+  "failed": 8,
+  "onlyDifferences": "Risk panel permission-reason title attributes; no normalization excludes them",
+  "personas": {
+    "priya/desktop": {
+      "pass": true,
+      "differences": [],
+      "completeRoles": {
+        "rows": 1,
+        "canAdd": true,
+        "correctionReasonRequired": true
+      },
+      "emptyRoles": {
+        "rows": 0,
+        "canAdd": true
+      },
+      "axe": []
+    },
+    "priya/phone": {
+      "pass": true,
+      "differences": [],
+      "completeRoles": {
+        "rows": 0,
+        "canAdd": false,
+        "correctionReasonRequired": false
+      },
+      "emptyRoles": {
+        "rows": 0,
+        "canAdd": false
+      },
+      "axe": []
+    },
+    "marc/desktop": {
+      "pass": false,
+      "differences": [
+        "$.panel.titles: length 8 != 13",
+        "$.panel.titles[4].text: \"2 \u00b7 Possible\" != \"Parity fixture\"",
+        "$.panel.titles[4].title: \"Probability\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[5].text: \"2 \u00b7 Moderate\" != \"2 \u00b7 Possible\"",
+        "$.panel.titles[5].title: \"Impact\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[6].text: \"PN\" != \"2 \u00b7 Moderate\"",
+        "$.panel.titles[6].title: \"Priya Nair\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[7].text: \"\u2014\" != \"PNPriya Nair\"",
+        "$.panel.titles[7].title: \"Discipline\" != \"Only the owner or the Project Manager can do this.\""
+      ],
+      "completeRoles": {
+        "rows": 1,
+        "canAdd": false,
+        "correctionReasonRequired": false
+      },
+      "emptyRoles": {
+        "rows": 0,
+        "canAdd": true
+      },
+      "axe": []
+    },
+    "marc/phone": {
+      "pass": false,
+      "differences": [
+        "$.panel.titles: length 8 != 13",
+        "$.panel.titles[4].text: \"2 \u00b7 Possible\" != \"Parity fixture\"",
+        "$.panel.titles[4].title: \"Probability\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[5].text: \"2 \u00b7 Moderate\" != \"2 \u00b7 Possible\"",
+        "$.panel.titles[5].title: \"Impact\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[6].text: \"PN\" != \"2 \u00b7 Moderate\"",
+        "$.panel.titles[6].title: \"Priya Nair\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[7].text: \"\u2014\" != \"PNPriya Nair\"",
+        "$.panel.titles[7].title: \"Discipline\" != \"Only the owner or the Project Manager can do this.\""
+      ],
+      "completeRoles": {
+        "rows": 0,
+        "canAdd": false,
+        "correctionReasonRequired": false
+      },
+      "emptyRoles": {
+        "rows": 0,
+        "canAdd": false
+      },
+      "axe": []
+    },
+    "alex/desktop": {
+      "pass": false,
+      "differences": [
+        "$.panel.titles: length 8 != 13",
+        "$.panel.titles[4].text: \"2 \u00b7 Possible\" != \"Parity fixture\"",
+        "$.panel.titles[4].title: \"Probability\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[5].text: \"2 \u00b7 Moderate\" != \"2 \u00b7 Possible\"",
+        "$.panel.titles[5].title: \"Impact\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[6].text: \"PN\" != \"2 \u00b7 Moderate\"",
+        "$.panel.titles[6].title: \"Priya Nair\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[7].text: \"\u2014\" != \"PNPriya Nair\"",
+        "$.panel.titles[7].title: \"Discipline\" != \"Only the owner or the Project Manager can do this.\""
+      ],
+      "completeRoles": {
+        "rows": 1,
+        "canAdd": false,
+        "correctionReasonRequired": false
+      },
+      "emptyRoles": {
+        "rows": 0,
+        "canAdd": false
+      },
+      "axe": []
+    },
+    "alex/phone": {
+      "pass": false,
+      "differences": [
+        "$.panel.titles: length 8 != 13",
+        "$.panel.titles[4].text: \"2 \u00b7 Possible\" != \"Parity fixture\"",
+        "$.panel.titles[4].title: \"Probability\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[5].text: \"2 \u00b7 Moderate\" != \"2 \u00b7 Possible\"",
+        "$.panel.titles[5].title: \"Impact\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[6].text: \"PN\" != \"2 \u00b7 Moderate\"",
+        "$.panel.titles[6].title: \"Priya Nair\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[7].text: \"\u2014\" != \"PNPriya Nair\"",
+        "$.panel.titles[7].title: \"Discipline\" != \"Only the owner or the Project Manager can do this.\""
+      ],
+      "completeRoles": {
+        "rows": 0,
+        "canAdd": false,
+        "correctionReasonRequired": false
+      },
+      "emptyRoles": {
+        "rows": 0,
+        "canAdd": false
+      },
+      "axe": []
+    },
+    "rita/desktop": {
+      "pass": false,
+      "differences": [
+        "$.panel.titles: length 8 != 13",
+        "$.panel.titles[4].text: \"2 \u00b7 Possible\" != \"Parity fixture\"",
+        "$.panel.titles[4].title: \"Probability\" != \"Read Only accounts cannot make changes.\"",
+        "$.panel.titles[5].text: \"2 \u00b7 Moderate\" != \"2 \u00b7 Possible\"",
+        "$.panel.titles[5].title: \"Impact\" != \"Read Only accounts cannot make changes.\"",
+        "$.panel.titles[6].text: \"PN\" != \"2 \u00b7 Moderate\"",
+        "$.panel.titles[6].title: \"Priya Nair\" != \"Read Only accounts cannot make changes.\"",
+        "$.panel.titles[7].text: \"\u2014\" != \"PNPriya Nair\"",
+        "$.panel.titles[7].title: \"Discipline\" != \"Read Only accounts cannot make changes.\""
+      ],
+      "completeRoles": {
+        "rows": 1,
+        "canAdd": false,
+        "correctionReasonRequired": false
+      },
+      "emptyRoles": {
+        "rows": 0,
+        "canAdd": false
+      },
+      "axe": []
+    },
+    "rita/phone": {
+      "pass": false,
+      "differences": [
+        "$.panel.titles: length 8 != 13",
+        "$.panel.titles[4].text: \"2 \u00b7 Possible\" != \"Parity fixture\"",
+        "$.panel.titles[4].title: \"Probability\" != \"Read Only accounts cannot make changes.\"",
+        "$.panel.titles[5].text: \"2 \u00b7 Moderate\" != \"2 \u00b7 Possible\"",
+        "$.panel.titles[5].title: \"Impact\" != \"Read Only accounts cannot make changes.\"",
+        "$.panel.titles[6].text: \"PN\" != \"2 \u00b7 Moderate\"",
+        "$.panel.titles[6].title: \"Priya Nair\" != \"Read Only accounts cannot make changes.\"",
+        "$.panel.titles[7].text: \"\u2014\" != \"PNPriya Nair\"",
+        "$.panel.titles[7].title: \"Discipline\" != \"Read Only accounts cannot make changes.\""
+      ],
+      "completeRoles": {
+        "rows": 0,
+        "canAdd": false,
+        "correctionReasonRequired": false
+      },
+      "emptyRoles": {
+        "rows": 0,
+        "canAdd": false
+      },
+      "axe": []
+    },
+    "jill/desktop": {
+      "pass": false,
+      "differences": [
+        "$.panel.titles: length 8 != 13",
+        "$.panel.titles[4].text: \"2 \u00b7 Possible\" != \"Parity fixture\"",
+        "$.panel.titles[4].title: \"Probability\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[5].text: \"2 \u00b7 Moderate\" != \"2 \u00b7 Possible\"",
+        "$.panel.titles[5].title: \"Impact\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[6].text: \"PN\" != \"2 \u00b7 Moderate\"",
+        "$.panel.titles[6].title: \"Priya Nair\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[7].text: \"\u2014\" != \"PNPriya Nair\"",
+        "$.panel.titles[7].title: \"Discipline\" != \"Only the owner or the Project Manager can do this.\""
+      ],
+      "completeRoles": {
+        "rows": 1,
+        "canAdd": false,
+        "correctionReasonRequired": false
+      },
+      "emptyRoles": {
+        "rows": 0,
+        "canAdd": false
+      },
+      "axe": []
+    },
+    "jill/phone": {
+      "pass": false,
+      "differences": [
+        "$.panel.titles: length 8 != 13",
+        "$.panel.titles[4].text: \"2 \u00b7 Possible\" != \"Parity fixture\"",
+        "$.panel.titles[4].title: \"Probability\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[5].text: \"2 \u00b7 Moderate\" != \"2 \u00b7 Possible\"",
+        "$.panel.titles[5].title: \"Impact\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[6].text: \"PN\" != \"2 \u00b7 Moderate\"",
+        "$.panel.titles[6].title: \"Priya Nair\" != \"Only the owner or the Project Manager can do this.\"",
+        "$.panel.titles[7].text: \"\u2014\" != \"PNPriya Nair\"",
+        "$.panel.titles[7].title: \"Discipline\" != \"Only the owner or the Project Manager can do this.\""
+      ],
+      "completeRoles": {
+        "rows": 0,
+        "canAdd": false,
+        "correctionReasonRequired": false
+      },
+      "emptyRoles": {
+        "rows": 0,
+        "canAdd": false
+      },
+      "axe": []
+    }
+  },
+  "ownedPortsFreeAfterRunner": [
+    18502,
+    19502,
+    19503
+  ],
+  "metadataCacheControl": "metadata-cache-control.json",
+  "note": "This exact-commit run supersedes the earlier working-tree focus-race report. All Risk list, active/Complete/empty-role, keyboard, request and accessibility comparisons have no differences. Risk action workflow checks remain candidate-only, not a baseline mutation comparison. Human tooltip clarification and 043-D3 remain separate."
+}

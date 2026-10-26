@@ -1,0 +1,80 @@
+{
+  "base": "e80fbe1e0358444e77d186ad1aba5f85045571ff",
+  "risk": {
+    "deletedNonblank": 96,
+    "newDefinitionsSlotsAndGlueNonblank": 56,
+    "panelSlots": [
+      "Realise",
+      "Close",
+      "Links"
+    ],
+    "specificStylesheets": []
+  },
+  "openRoles": {
+    "files": 10,
+    "touchedNonblank": 273,
+    "detail": [
+      {
+        "path": "src/Hub.Api/Features/RecordEndpoints.cs",
+        "touchedNonblank": 75,
+        "method": "whole shared file conservatively charged"
+      },
+      {
+        "path": "src/Hub.Api/Records/OpenRole.cs",
+        "touchedNonblank": 17,
+        "method": "all nonblank added and deleted lines"
+      },
+      {
+        "path": "src/Hub.Api/Text.cs",
+        "touchedNonblank": 4,
+        "method": "all nonblank added and deleted lines"
+      },
+      {
+        "path": "src/Hub.Domain/Flags.cs",
+        "touchedNonblank": 1,
+        "method": "all nonblank added and deleted lines"
+      },
+      {
+        "path": "web/src/pages/projects/Allocations.tsx",
+        "touchedNonblank": 50,
+        "method": "all nonblank added and deleted lines"
+      },
+      {
+        "path": "web/src/components/hub/export.tsx",
+        "touchedNonblank": 6,
+        "method": "all nonblank added and deleted lines"
+      },
+      {
+        "path": "web/src/components/hub/records.tsx",
+        "touchedNonblank": 98,
+        "method": "whole shared file conservatively charged"
+      },
+      {
+        "path": "web/src/components/hub/record-panel.tsx",
+        "touchedNonblank": 8,
+        "method": "Risk panel engine excluded; cache/read-only/wrapper lines charged",
+        "lines": [
+          11,
+          28,
+          29,
+          30,
+          31,
+          48,
+          51,
+          82
+        ]
+      },
+      {
+        "path": "web/src/app/registrations.tsx",
+        "touchedNonblank": 3,
+        "method": "all nonblank added and deleted lines"
+      },
+      {
+        "path": "web/src/components/hub/panel-host.tsx",
+        "touchedNonblank": 11,
+        "method": "all nonblank added and deleted lines"
+      }
+    ]
+  },
+  "boundary": "S05/S06 source attribution; shared S02 definitions/contracts and S04 Risk-panel engine excluded, tests and generated outputs excluded. Entire RecordList and RecordEndpoints files are conservatively charged."
+}

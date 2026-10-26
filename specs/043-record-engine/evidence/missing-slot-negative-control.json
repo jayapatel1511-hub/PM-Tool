@@ -1,0 +1,22 @@
+{
+  "result": "PASS",
+  "command": "NODE_PATH=\"$PWD/web/node_modules\" node specs/043-record-engine/evidence/missing-slot-negative-control.cjs",
+  "candidate": "http://127.0.0.1:19502",
+  "api": "http://127.0.0.1:18502",
+  "sourceReport": "ci-artifacts/platform-recovery/parity-measured/report.json",
+  "projectNumber": "PCB583CB",
+  "injectedMetadataChange": {
+    "list": "risks",
+    "slot": "Cancel",
+    "responseOnlyClone": true
+  },
+  "observed": {
+    "missingSlotError": true,
+    "risksTableCount": 0,
+    "riskColumnButtonCount": 0,
+    "apiWrites": 0,
+    "flagsChanged": false,
+    "databaseWrites": false
+  },
+  "meaning": "The candidate's Risks definition fails closed when metadata names a slot with no registered implementation; the required columns do not render, so the parity column assertion would fail."
+}

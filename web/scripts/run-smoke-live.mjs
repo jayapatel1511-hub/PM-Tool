@@ -57,12 +57,12 @@ try {
   console.log(JSON.stringify({ health, database, api, ui }))
   const preview = start(process.execPath, ['web/node_modules/vite/bin/vite.js', 'preview', 'web', '--config', 'web/vite.config.ts', '--host', '127.0.0.1', '--port', String(uiPort), '--strictPort'], 'preview', { HUB_API_ORIGIN: api })
   await ready(ui, preview)
-  for (const [file, label] of [['smoke-live.cjs', 'browser'], ['live-real.cjs', 'live-browser'], ['saved-views-real.cjs', 'saved-views-browser']]) {
+  for (const [file, label] of [['smoke-live.cjs', 'browser'], ['live-real.cjs', 'live-browser'], ['saved-views-real.cjs', 'saved-views-browser'], ['interaction-real.cjs', 'interaction-browser']]) {
     const test = start(process.execPath, [`web/tests/${file}`], label, {
       TUESDAY_UI_BASE_URL: ui, TUESDAY_API_BASE_URL: api, TUESDAY_LIVE_UI_URL: ui, TUESDAY_LIVE_API_URL: api, TUESDAY_SYNTHETIC_API: '1',
     })
     const [code] = await once(test, 'exit')
     if (code !== 0) throw new Error(`real-API ${label} failed (${code}); see ${output}/${label}.log`)
   }
-  console.log(`PASS: owned synthetic real-API smoke, two-browser live flow and saved-view reopen; evidence ${output}`)
+  console.log(`PASS: owned synthetic real-API smoke, two-browser live flow, saved-view reopen and packet 046 interaction check; evidence ${output}`)
 } catch (error) { console.error(error.message); process.exitCode = 1 } finally { stop() }

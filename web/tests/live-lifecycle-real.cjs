@@ -1,8 +1,8 @@
 // AC-LIVE-05, AC-LIVE-16 and AC-LIVE-18 against the real API. Owns its stack on a fresh synthetic database: the API, a
 // pass-through proxy that can stall the event stream (a connection that stays open but carries no bytes), and a preview.
-// TUESDAY_LIVE_BEFORE_DIST (optional) is a build of the same SPA without this packet's live client (drop `useLiveEvents()`
-// from Shell.tsx and restore useUnread's plain `me/notifications/pulse` query), built with `vite build --outDir <dir>`; the
-// candidate's flag-off request log must then equal its log. Takes about five minutes: the silence and outage timings are real.
+// AC-LIVE-18's flags-off request log must equal that of the same SPA without this packet's live client, which
+// web/scripts/build-before-live.mjs builds first (TUESDAY_LIVE_BEFORE_DIST reuses such a build). The candidate is the
+// current src/Hub.Api/wwwroot. Takes about five minutes: the silence and outage timings are real.
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const http = require('node:http')
@@ -162,10 +162,15 @@ const signature = (log, phases) => log.filter(entry => phases.includes(entry.pha
   const errors = []
   try {
     const init = start('dotnet', ['run', '--project', 'src/Hub.Api', '-c', 'Release', '--no-launch-profile'], 'initialize', { Db__MigrateOnly: 'true', Db__InitializeAuditChains: 'true' })
+    const beforeDist = path.resolve(process.env.TUESDAY_LIVE_BEFORE_DIST ?? path.join(output, 'before-dist'))
+    const beforeBuild = process.env.TUESDAY_LIVE_BEFORE_DIST ? null : start(process.execPath, ['web/scripts/build-before-live.mjs', beforeDist], 'before-build')
     const [code] = await once(init, 'exit'); assert.equal(code, 0, `migration initializer failed; see ${output}/initialize.log`)
+    if (beforeBuild) { const [built] = beforeBuild.exitCode === null ? await once(beforeBuild, 'exit') : [beforeBuild.exitCode]; assert.equal(built, 0, `before build failed; see ${output}/before-build.log`) }
+    assert.ok(fs.existsSync(path.join(beforeDist, 'index.html')), `no before build in ${beforeDist}`)
+    evidence.beforeDist = beforeDist
     let backend = startApi(); await ready(`${apiBase}/health`, backend)
     proxyServer.listen(proxyPort, '127.0.0.1'); await once(proxyServer, 'listening')
-    let preview = startPreview(process.env.TUESDAY_LIVE_BEFORE_DIST); await ready(ui, preview)
+    let preview = startPreview(beforeDist); await ready(ui, preview)
     assert.equal((await api('config')).authMode, 'Development')
     const fixture = await seed()
     await flags(false)
@@ -175,7 +180,7 @@ const signature = (log, phases) => log.filter(entry => phases.includes(entry.pha
 
     // AC-LIVE-18 before: the SPA without this packet's live client, flags off.
     let beforeLog
-    if (process.env.TUESDAY_LIVE_BEFORE_DIST) {
+    {
       const context = await newContext(); const page = await context.newPage(); watch(page)
       await signIn(page, /Priya Nair/i)
       const rec = recorder(page, fixture)
@@ -213,11 +218,10 @@ const signature = (log, phases) => log.filter(entry => phases.includes(entry.pha
     evidence.flagsOff = checkSession(rec, offChange, 'flags off')
     assert.equal(rec.log.filter(isEvents).length, 0, 'flags off: no request to /api/v1/events')
     assert.ok(rec.log.filter(isPulse).every(entry => entry.path === 'me/notifications/pulse'), 'flags off: pulse unchanged')
-    if (beforeLog) {
-      const phases = ['my-work', 'tasks', 'change']
-      assert.deepEqual(signature(rec.log, phases), signature(beforeLog, phases), 'flags off: same requests as before this packet')
-      evidence.sameAsBefore = signature(rec.log, phases).length
-    }
+    const phases = ['my-work', 'tasks', 'change']
+    assert.deepEqual(signature(rec.log, phases), signature(beforeLog, phases), 'flags off: same requests as before this packet')
+    evidence.sameAsBefore = signature(rec.log, phases).length
+    assert.ok(evidence.sameAsBefore > 0, 'flags off: the compared session made requests')
 
     // AC-LIVE-18 flags on, AC-LIVE-16 silence: the Tasks-tab stream is stalled, so the follow-up and pulse stand alone.
     await flags(true)

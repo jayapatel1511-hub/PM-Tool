@@ -70,7 +70,9 @@ function census(extraData) {
   }
 }
 
-;(async () => {
+// Packet 047's real-API check reuses the census; run directly, this file is the census sweep.
+module.exports = { census, LIMIT }
+if (require.main === module) (async () => {
   assert.equal((await (await fetch(`${base}/api/v1/config`)).json()).authMode, 'Development')
   const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
   const failures = [], empty = []

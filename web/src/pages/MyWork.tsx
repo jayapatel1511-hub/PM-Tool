@@ -283,7 +283,6 @@ function Overview({ focus }: { focus: boolean }) {
   return (
     <Page title={ro ? t('mywork.of', { name: w.person.displayName }) : t('mywork.title')} subtitle={ro && t('mywork.readOnly')}
       actions={!ro && <>{pickupOn && <Button variant="outline" asChild><Link to="/pickup">{t('pickup.title')}</Link></Button>}<ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
-      {!userId && !ro && <OnboardingCard />}
       <div className="flex flex-wrap items-start gap-2">
         {!ro && <MyWorkViews sections={menu} />}
         <FilterBar className="flex-1" activeCount={tokens.length}
@@ -333,6 +332,8 @@ function Overview({ focus }: { focus: boolean }) {
             <div className="border-t">{s.body}</div>
           </details>
         : <Section key={s.id} id={`mw-${s.id}`} title={s.title} count={s.count} accent={s.accent}>{s.body}</Section>)}
+      {/* After the lists, so the card never pushes the first work row down (FR-PRO-01, AC-CALM-01). */}
+      {!userId && !ro && <OnboardingCard />}
       {creating && <NewTaskDialog onClose={() => { setCreating(false); reload() }} />}
       {actions.dialogs}
     </Page>

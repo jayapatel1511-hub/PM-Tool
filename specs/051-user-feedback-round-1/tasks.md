@@ -4,7 +4,7 @@ Each slice is one PR. Slices in Parts A, B and C merge dark behind `flag.data_en
 
 ## Part A, data-entry safety
 
-- [ ] S01 Autosave hook and settings (S).
+- [x] S01 Autosave hook and settings (S).
   - `useAutosaveField` from the task panel's commit; `autosave_delay_ms`, `draft_keep_days` settings; flag entry; every edit panel's `Field` adopts the hook.
   - Covers FR-SAV-01, FR-SAV-07, FR-SAV-08.
   - Tests: `web/tests/data-entry.cjs` (panel saves per field with one log entry each; task panel unchanged).

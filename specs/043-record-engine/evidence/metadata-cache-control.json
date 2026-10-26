@@ -1,0 +1,12 @@
+{
+  "result": "PASS",
+  "path": [
+    "Risks",
+    "My Work",
+    "Risks"
+  ],
+  "sameApplication": true,
+  "metaReads": 1,
+  "recordDataWrites": 0,
+  "excludedAuthPath": "/api/v1/me/sign-in"
+}

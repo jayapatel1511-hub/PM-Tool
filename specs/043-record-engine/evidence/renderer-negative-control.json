@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "positiveDiagnostics": 0,
+  "missingRenderer": "RoleStatus",
+  "negativeDiagnosticCodes": [
+    6133,
+    2741
+  ],
+  "maintainedFilesWritten": 0
+}

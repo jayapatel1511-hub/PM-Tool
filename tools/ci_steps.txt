@@ -88,6 +88,8 @@ web: cd web && npm run test:browser-verification
 # Nightly local-service gates use the preview/API fixtures supplied by the nightly workflow.
 web: node --test web/scripts/run-smoke-live.test.mjs
 web: node web/scripts/run-smoke-live.mjs
+# Record parity (§47.4, FR-REC-09): the PR's base and head builds against one owned synthetic API and database.
+web: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then cd web && TUESDAY_RECORD_BASE_REF=HEAD^1 npm run test:record-parity; fi
 nightly: TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 TUESDAY_API_BASE_URL=http://127.0.0.1:5080 node web/tests/smoke-live.cjs
 nightly: TUESDAY_SYNTHETIC_API=1 TUESDAY_LIVE_UI_URL=http://127.0.0.1:5173 TUESDAY_LIVE_API_URL=http://127.0.0.1:5080 node web/tests/live-real.cjs
 # Typed contract and registry (§44).

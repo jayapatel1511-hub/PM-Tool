@@ -2,13 +2,14 @@
 // Development API and database; records are created through the API and nothing is mocked. Ported from the
 // spike's harness (043-D3 KILL); `web/scripts/run-record-parity.mjs` builds and serves the two commits.
 //   TUESDAY_RECORD_BASE_UI_URL, TUESDAY_RECORD_CANDIDATE_UI_URL, TUESDAY_RECORD_API_URL  local origins
-//   TUESDAY_RECORD_SCREENS  space-separated routes, default the Risks register and the open-roles tab. {project},
-//                           {complete}, {empty} and {restricted} are synthetic project numbers, {risk} the synthetic
-//                           risk id, e.g. /projects/{project}/risks?panel=Risk:{risk} for a panel
+//   TUESDAY_RECORD_SCREENS  space-separated routes, default the Risks register, the Risk panel and the open-roles tab
+//                           of the Active, Complete and empty-role projects. {project}, {complete}, {empty} and
+//                           {restricted} are synthetic project numbers, {risk} the synthetic risk id
 //   TUESDAY_RECORD_FLAGS    flags already merged on those screens: the matrix runs with all off, then all on (§47.6)
 //   TUESDAY_RECORD_PARITY_OUT  report path; screenshots of both builds go beside it (evidence, not a pass condition)
 //   RECORD_PARITY_SELFCHECK=1  diff logic only; RECORD_PARITY_BROWSER_SELFCHECK=1  identical builds pass, a removed
-//                           header fails, and a Columns button taken out of the Tab order fails
+//                           header fails, a Columns button taken out of the Tab order fails, and a disabled Risk
+//                           panel field whose title becomes a permission reason fails
 const assert = require('node:assert/strict')
 const fs = require('node:fs/promises')
 const path = require('node:path')
@@ -21,7 +22,10 @@ const apiBase = process.env.TUESDAY_RECORD_API_URL ?? 'http://127.0.0.1:18502'
 for (const url of [candidate, base, apiBase]) assert.ok(['localhost', '127.0.0.1'].includes(new URL(url).hostname), `${url} must be local`)
 const output = process.env.TUESDAY_RECORD_PARITY_OUT ?? path.resolve(__dirname, '../../ci-artifacts/record-parity/report.json')
 const runId = process.env.TUESDAY_RECORD_PARITY_RUN ?? crypto.randomUUID()
-const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? '/projects/{project}/risks /projects/{project}/allocations?tab=roles').split(/\s+/).filter(Boolean)
+const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
+  '/projects/{project}/risks', '/projects/{project}/risks?panel=Risk:{risk}',
+  '/projects/{project}/allocations?tab=roles', '/projects/{complete}/allocations?tab=roles', '/projects/{empty}/allocations?tab=roles',
+].join(' ')).split(/\s+/).filter(Boolean)
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
 // Project Manager, Discipline Lead, Team Member, Read Only, and a user outside the Restricted project.
 const PERSONAS = { priya: 'Priya Nair', marc: 'Marc Dubois', alex: 'Alex Chen', rita: 'Rita Gomez', jill: 'Jill Martin' }
@@ -30,7 +34,7 @@ const launch = () => chromium.launch({ headless: true, ...(process.env.CHROME_EX
 // Both builds read the same API-created records. Only the local origin is volatile;
 // IDs and timestamps are evidence, not noise to erase from a parity report.
 const clean = (value) => JSON.parse(JSON.stringify(value, (_, v) => typeof v === 'string' ? v.replace(/^https?:\/\/[^/]+/, '') : v))
-const slug = route => route.replace(/\{\w+\}/g, '_').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
+const slug = route => route.replace(/\{(\w+)\}/g, '$1').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
 
 function diff(a, b, at = '$', out = []) {
   if (JSON.stringify(a) === JSON.stringify(b)) return out
@@ -115,7 +119,7 @@ async function fixtures() {
   return { project: project.projectNumber, projectId: project.id, risk: risk.id, complete: complete.projectNumber, empty: empty.projectNumber, restricted: restricted.projectNumber }
 }
 
-async function browserSnapshot(origin, who, width, ids, { removeHeader = false, untabColumns = false, shots = true } = {}) {
+async function browserSnapshot(origin, who, width, ids, { removeHeader = false, untabColumns = false, retitle = false, shots = true } = {}) {
   const browser = await launch()
   const createdViewIds = []
   try {
@@ -123,6 +127,10 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
     // Negative control: the Columns button stays clickable and focusable by script but leaves the Tab order.
     if (untabColumns) await context.addInitScript(() => new MutationObserver(() => {
       for (const b of document.querySelectorAll('main button')) if (b.textContent.trim() === 'Columns' && b.tabIndex !== -1) b.tabIndex = -1
+    }).observe(document, { childList: true, subtree: true }))
+    // Negative control: what the spike's KILL measured, a disabled field's label title replaced by a permission reason.
+    if (retitle) await context.addInitScript(() => new MutationObserver(() => {
+      for (const e of document.querySelectorAll('[role=dialog] div[title="Probability"]')) e.title = 'Only the owner or the Project Manager can do this.'
     }).observe(document, { childList: true, subtree: true }))
     const page = await context.newPage()
     const gets = [], errors = [], wrongPersona = [], pending = new Set()
@@ -148,17 +156,18 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
       await page.locator('main').first().waitFor({ timeout: 30000 }); await settle()
     }
     const tree = async () => (await dialogOpen() ? dialog() : page.locator('main').first()).ariaSnapshot()
-    // Headings, caption, column headers, link and button names, disabled states and their titles, aria-sort, aria-current.
+    // Headings, caption, column headers, link and button names, disabled states, every title (a disabled inline field is a
+    // titled div, which the aria tree leaves out), aria-sort, aria-current.
     const controls = () => page.evaluate(() => {
       const root = [...document.querySelectorAll('[role=dialog]')].filter(e => e.getClientRects().length).pop() ?? document.querySelector('main')
-      return [...root.querySelectorAll('h1,h2,h3,caption,th,a,button,[role=tab],[role=menuitem],[role=option],[role=alert]')].filter(e => e.getClientRects().length)
+      return [...root.querySelectorAll('h1,h2,h3,caption,th,a,button,[role=tab],[role=menuitem],[role=option],[role=alert],[title]')].filter(e => e.getClientRects().length)
         .map(e => ({ tag: e.tagName, text: (e.getAttribute('aria-label') || e.textContent || '').replace(/\s+/g, ' ').trim(), disabled: e.disabled || e.getAttribute('aria-disabled') === 'true', title: e.getAttribute('title'), sort: e.getAttribute('aria-sort'), current: e.getAttribute('aria-current'), selected: e.getAttribute('aria-selected') }))
     })
     // Each field's value, editability and the reason given for a disabled one.
     const fields = () => page.evaluate(() => {
       const root = [...document.querySelectorAll('[role=dialog]')].filter(e => e.getClientRects().length).pop() ?? document.querySelector('main')
       return [...root.querySelectorAll('input,textarea,select')].filter(e => e.getClientRects().length)
-        .map(e => ({ tag: e.tagName, type: e.getAttribute('type'), label: e.getAttribute('aria-label') || e.labels?.[0]?.textContent?.trim() || e.getAttribute('placeholder'), value: e.value, disabled: e.disabled, readOnly: !!e.readOnly, required: e.required, title: e.getAttribute('title') }))
+        .map(e => ({ tag: e.tagName, type: e.getAttribute('type'), label: e.getAttribute('aria-label') || e.labels?.[0]?.textContent?.trim() || e.getAttribute('placeholder'), value: e.value, disabled: e.disabled, readOnly: !!e.readOnly, required: e.required, minLength: e.minLength ?? null, title: e.getAttribute('title') }))
     })
     const rows = async () => { const body = page.locator('main tbody'); return (await body.count() ? body : page.locator('main')).allInnerTexts() }
     const scan = async () => {
@@ -284,6 +293,17 @@ print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row 
       }
       return { items, downloads }
     }
+    // The screen's create action (Raise risk, Add open role): the form it opens, such as the required correction reason
+    // on a Complete project, then Esc without saving.
+    const createEvidence = async () => {
+      const trigger = page.locator('main button:enabled').filter({ visible: true, hasText: /^(Add|Raise|New) / }).first()
+      if (!await visible(trigger)) return null
+      await trigger.click()
+      if (!await dialog().waitFor({ timeout: 5000 }).then(() => true, () => false)) return { opened: false }
+      const form = { opened: true, tree: await tree(), fields: await fields() }
+      await page.keyboard.press('Escape'); await settle()
+      return { ...form, closed: !await dialogOpen() }
+    }
     // The keyboard path: the screen's whole Tab order from the main landmark (the skip link's target) until focus
     // leaves it, so the toolbar and table controls are in it; then Enter on the first row control and Esc back.
     const keyboardEvidence = async url => {
@@ -332,7 +352,7 @@ print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row 
       const state = { url: here(), tree: await tree(), controls: await controls(), fields: await fields(), requests: [...new Set(gets.filter(x => !x.startsWith('meta')))].sort(), axe: await scan() }
       if (shots) await page.screenshot({ path: path.join(path.dirname(output), `${origin === base ? 'base' : 'candidate'}-${who}-${width}-${slug(route)}.png`), fullPage: true })
       if (await dialogOpen()) state.panel = await panelEvidence()
-      else Object.assign(state, { filters: await filterEvidence(url), sort: await sortEvidence(url), columns: await columnEvidence(), views: await viewEvidence(url), exports: await exportEvidence(), keyboard: await keyboardEvidence(url) })
+      else Object.assign(state, { filters: await filterEvidence(url), sort: await sortEvidence(url), columns: await columnEvidence(), views: await viewEvidence(url), exports: await exportEvidence(), create: await createEvidence(), keyboard: await keyboardEvidence(url) })
       if (state.axe.length) snapshot.problems.push(`${route}: serious/critical accessibility issues ${state.axe.join(', ')}`)
       if (who === 'jill' && route.includes('{project}')) {
         await go(expand(route, { ...ids, project: ids.restricted }))
@@ -376,8 +396,13 @@ print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row 
         assert.ok(diff(same, changed).some(x => x.includes('controls')), 'removed header must fail browser parity')
         const untabbed = await browserSnapshot(base, 'priya', width, ids, { untabColumns: true, shots: false })
         assert.ok(diff(same, untabbed).some(x => x.includes('keyboard.order')), 'a toolbar control out of the Tab order must fail browser parity')
+        // The Discipline Lead sees the Risk panel's fields disabled, as the spike's eight failing pairs did.
+        if (!SCREENS.some(x => x.includes('panel=Risk:'))) continue
+        const lead = await browserSnapshot(base, 'marc', width, ids, { shots: false })
+        const retitled = await browserSnapshot(base, 'marc', width, ids, { retitle: true, shots: false })
+        assert.ok(diff(lead, retitled).some(x => /panel=Risk:.*\.title: "Probability"/.test(x)), 'a changed disabled-field title must fail browser parity')
       }
-      console.log(`record parity browser selfcheck: PASS (identical builds pass at ${WIDTHS.join(' and ')} px; removed header and untabbed Columns fail) on ${SCREENS.join(' ')}`)
+      console.log(`record parity browser selfcheck: PASS (identical builds pass at ${WIDTHS.join(' and ')} px; removed header, untabbed Columns and a retitled disabled field fail) on ${SCREENS.join(' ')}`)
       return
     }
     const report = { candidate, base, apiBase, screens: SCREENS, flags: FLAGS, ids, runs: {}, at: new Date().toISOString() }

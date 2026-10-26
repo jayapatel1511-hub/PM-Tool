@@ -1866,6 +1866,101 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Overview"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RecordBody"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReviewRecord"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/review/checks/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CheckList"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/settings": {
         parameters: {
             query?: never;
@@ -16516,6 +16611,39 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        CheckCount: {
+            /** Format: int32 */
+            count: number;
+            key: string;
+            listUrl: string;
+            rule: string;
+            title: string;
+        };
+        CheckList: {
+            key: string;
+            rows: components["schemas"]["CheckRow"][];
+            rule: string;
+            title: string;
+        };
+        CheckNote: {
+            key: null | string;
+            note: null | string;
+        };
+        CheckRecord: {
+            /** Format: int32 */
+            count: number;
+            key: string;
+            note: null | string;
+        };
+        CheckRow: {
+            /** Format: date-time */
+            at: null | string;
+            detail: null | string;
+            /** Format: uuid */
+            id: null | string;
+            link: string;
+            name: string;
+        };
         Client: {
             auditKey?: null | string;
             auditName?: null | string;
@@ -18052,6 +18180,13 @@ export interface components {
             /** Format: int32 */
             rowVersion: null | number;
         };
+        Overview: {
+            checks: components["schemas"]["CheckCount"][];
+            /** Format: date */
+            dueOn: null | string;
+            last: null | components["schemas"]["ReviewRecord"];
+            overdue: boolean;
+        };
         PackBody: {
             /** Format: uuid */
             disciplineId: string;
@@ -18414,6 +18549,10 @@ export interface components {
             /** Format: uuid */
             personId: string;
         };
+        RecordBody: {
+            checks: null | components["schemas"]["CheckNote"][];
+            note: null | string;
+        };
         RegisterBody: {
             /** Format: date */
             assessmentDueDate: null | string;
@@ -18545,6 +18684,17 @@ export interface components {
             requestId: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        ReviewRecord: {
+            checks: components["schemas"]["CheckRecord"][];
+            /** Format: uuid */
+            id: string;
+            note: null | string;
+            /** Format: date-time */
+            reviewedAt: string;
+            reviewer: string;
+            /** Format: uuid */
+            reviewerId: string;
         };
         RevisionCheckReadResponse: {
             convention: null | components["schemas"]["RevisionConvention"];

@@ -190,6 +190,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.Entity<UserSetting>(e => { e.HasKey(x => x.UserId); e.Property(x => x.DigestSectionsOff).HasColumnType("jsonb"); e.Property(x => x.HoldDigestWhenAway).HasDefaultValue(true); });
         mb.Entity<NotificationPreference>().HasIndex(x => new { x.UserId, x.EventType }).IsUnique();
         Fk<Holiday, Office>(mb, x => x.OfficeId);
+        mb.Entity<AdminReview>(e => { e.HasIndex(x => x.ReviewedAt); e.Property(x => x.Note).HasMaxLength(4000); e.Property(x => x.Checks).HasColumnType("jsonb"); });
+        Fk<AdminReview, AppUser>(mb, x => x.ReviewerId);
         mb.Entity<IdempotencyRecord>(e => e.HasIndex(x => new { x.UserId, x.Key }).IsUnique());
 
         mb.Entity<Project>(e =>
@@ -1075,6 +1077,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             if (entry.State is EntityState.Modified or EntityState.Deleted
                 && entry.Entity is SourceRevision or HandoffRevision or HandoffReceiptEvent or HandoffCommand or CoordinationCommand or ReviewManifestItem or FindingEvent or InputAdoption)
                 throw new InvalidOperationException("Published coordination evidence is immutable.");
+            if (entry.State is EntityState.Modified or EntityState.Deleted && entry.Entity is AdminReview)
+                throw new InvalidOperationException("A recorded Admin review is never edited or deleted (FR-ADR-03).");
             if (entry.Entity is IVersioned versioned && entry.State == EntityState.Modified)
                 versioned.RowVersion++;
             if (entry.Entity is Audited a)

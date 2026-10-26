@@ -85,6 +85,7 @@ public static class HubModules
         TaskPickupEndpoints.Map(api);
         OrgStructureEndpoints.Map(api);
         RecoveryEndpoints.Map(api);
+        AdminReviewEndpoints.Map(api);
         // Support: an Admin can re-run a project's evaluation on demand.
         api.MapPost("/admin/evaluate/{projectId:guid}", async (Guid projectId, CurrentUser me, EvaluationService eval) =>
         {

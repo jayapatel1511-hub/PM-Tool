@@ -143,6 +143,16 @@ public class Holiday : Entity, IAuditable
     public string? AuditName => Name;
 }
 
+/// A recorded Admin review (§55.4 FR-ADR-03): who looked, when, and every check's count then with its note.
+/// Never edited or deleted (HubDb refuses both); a correction is a new review.
+public class AdminReview : Entity
+{
+    public DateTimeOffset ReviewedAt { get; set; }
+    public Guid ReviewerId { get; set; }
+    public string? Note { get; set; }
+    public string Checks { get; set; } = "[]"; // jsonb [{key, count, note}]
+}
+
 // ---------- Projects ----------
 
 public class Project : Audited, IAuditable

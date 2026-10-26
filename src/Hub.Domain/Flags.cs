@@ -38,6 +38,7 @@ public static class Flags
         new("capacity_polish", "047"),
         new("live_project_stamp", "042"), // §46.5 project stamp in the notification pulse
         new("live_events", "042"), // §46.6 change-event stream
+        new("admin_review", "051"), // §55.4: the Admin review page, its record, the digest line and the Portfolio strip
     ];
 
     /// `flag.<name>` as a Bool setting, default off, group `flags`, generated like `rule_enabled.*`.

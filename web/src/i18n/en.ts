@@ -1166,6 +1166,8 @@ export const en = {
   'setting.digest_send_time_local': 'Daily digest time',
   'setting.weekend_digests': 'Send digests on weekends',
   'setting.idle_timeout_hours': 'Sign out after idle (hours)',
+  'setting.admin_review_interval_days': 'Admin review due every (days)',
+  'setting.admin_review_idle_days': 'Admin review: no sign-in for (days)',
 
   'mywork.title': 'My Work',
   'mywork.empty': 'Nothing is assigned to you yet. Tasks, reviews and deliverables you own will appear here.',
@@ -1342,6 +1344,7 @@ export const en = {
   'action.MemberRemoved': 'Removed from team',
   'action.Reopened': 'Reopened',
   'action.Realised': 'Realised',
+  'action.Recorded': 'Recorded',
   'action.Resolved': 'Resolved',
   'action.Issued': 'Issued',
   'action.Reviewed': 'Coordination reviewed',
@@ -2585,6 +2588,7 @@ export const en = {
 
 
 
+'itemType.AdminReview': 'Admin review',
 'itemType.ApprovedLeave': 'Approved leave',
 'itemType.BasisAssumptionDisposition': 'Basis assumption disposition',
 'itemType.BasisConflict': 'Basis conflict',

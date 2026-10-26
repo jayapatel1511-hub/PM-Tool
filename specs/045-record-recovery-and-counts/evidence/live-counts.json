@@ -1,0 +1,83 @@
+{
+ "scope": "Real API and PostgreSQL on this Mac (throwaway hub_test_gap045 databases on 127.0.0.1:55432, Development sign-in), packet 036 section 8 fixtures loaded through the API by tools/preview/seed_resources.py, seed_modules.py, seed_planning.py and seed_staffing.py (zero refused steps), headless Chromium. No hosted, phone or screen-reader evidence.",
+ "date": "2026-10-26",
+ "runtimeBase": "codex/integrate-039-050 at 9b62ac19 plus build2/GAP-045",
+ "beforeAfter": {
+  "what": "AC-RCV-13: fixtures seeded through the API built from 0b4ab1d6 (the commit before 045-S01 merged), then the same database opened by the current API, which applied the later migrations (TemplateOffsetDayKind, DeliveryWorkflowRecords, AdminReview).",
+  "apiNumbers": {
+   "surfaces": "home, home?projects=all, portfolio, portfolio?mine=false, staff, staff?scope=all, time, and each visible SYN project dashboard and milestones, for jordan, priya, sam, marc, lena, alex and jill; {value, link} compared by value",
+   "before": 3547,
+   "equalAfter": 3547,
+   "changed": 0,
+   "newFieldsAfter": 142
+  },
+  "browserCounts": {
+   "before": "web/tests/counts.cjs at 0b4ab1d6 on the 0b4ab1d6 build: 288 counts, 0 mismatches, 0 missing",
+   "after": "web/tests/counts.cjs (this branch) on the current build, same database: 827 counts, 0 mismatches, 0 missing",
+   "shownInBoth": 288,
+   "shownValueChanged": 0
+  }
+ },
+ "flagsOff": {
+  "checked": 838,
+  "mismatches": 0,
+  "missing": 0,
+  "skipped": [
+   "priya: SYN-103 not visible (HTTP 404)",
+   "sam: SYN-103 not visible (HTTP 404)",
+   "omar: SYN-103 not visible (HTTP 404)",
+   "omar: Portfolio not permitted"
+  ],
+  "byPersona": {
+   "jordan": 257,
+   "priya": 205,
+   "sam": 199,
+   "omar": 177
+  },
+  "byKind": {
+   "Dashboard": 223,
+   "Dashboard, discipline scope": 299,
+   "Home": 150,
+   "Milestones figure": 76,
+   "Overdue decisions tile (sum of the rows it filters to)": 3,
+   "Portfolio": 15,
+   "Portfolio row count": 72
+  },
+  "command": "TUESDAY_UI_BASE_URL=http://localhost:7228 npm run test:counts",
+  "note": "SYN-101-M03 was given one overdue task and one task blocked by it (run-only, through the API as Priya) so the Milestones Overdue and Blocked figures appear"
+ },
+ "statusRollupsOn": {
+  "checked": 1432,
+  "mismatches": 0,
+  "missing": 0,
+  "skipped": [
+   "priya: SYN-103 not visible (HTTP 404)",
+   "sam: SYN-103 not visible (HTTP 404)",
+   "omar: SYN-103 not visible (HTTP 404)",
+   "omar: Portfolio not permitted"
+  ],
+  "byPersona": {
+   "jordan": 473,
+   "priya": 365,
+   "sam": 381,
+   "omar": 213
+  },
+  "byKind": {
+   "Dashboard": 223,
+   "Dashboard, discipline scope": 299,
+   "Home": 150,
+   "Milestones figure": 76,
+   "Overdue decisions tile (sum of the rows it filters to)": 12,
+   "Portfolio": 60,
+   "Portfolio row count": 336,
+   "group header link": 36,
+   "group subtotal (sum)": 84,
+   "n of m issued": 52,
+   "status segment": 104
+  },
+  "command": "flag.status_rollups set on through PUT /api/v1/admin/settings as Jordan, then the same npm run test:counts",
+  "defectFound": "Before the fix the Issued segment's accessible label and tooltip read \"{n} of {m} issued: n\" (the summary key reused without parameters); 26 MISSING \"<discipline> · Issued\" in the first flag-on run. Fixed with its own rcv.issued label; rcv.issuedOf carries the summary."
+ },
+ "mocked": "RECOVERY_TEST_PORT=7227 npm run test:recovery-counts: wizard note shown for Working days and absent with the flag off, preview body carries officeId; Issued segment label and tooltip; group column sums and the project-count link. Failed on the pre-fix build at \"Issued: 4\", passes after.",
+ "seeding": "The seed scripts verify the shared preview target (API 5080, pm-tuesday-preview-db on 55433). For this run a scratch wrapper replaced only that check, after confirming the listener on 7228/7229 was the Hub.Api started with Database=hub_test_gap045*, then ran each script unchanged. The wrapper is not committed."
+}

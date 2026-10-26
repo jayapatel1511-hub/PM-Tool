@@ -263,5 +263,5 @@ function DisciplineStatus({ segments, base }: { segments?: Record<'notStarted' |
   const total = keys.reduce((sum, key) => sum + (segments?.[key].value ?? 0), 0)
   if (!total || !segments) return <span className="text-xs text-muted-foreground">{t('rcv.noDeliverables')}</span>
   const colours = ['bg-idle', 'bg-primary', 'bg-ok', 'bg-warn']
-  return <div className="min-w-32 space-y-1"><div className="hidden h-3 overflow-hidden rounded sm:flex">{keys.map((key, index) => <Link key={key} to={`${base}/deliverables?${segments[key].link}`} aria-label={`${t(`rcv.${key}`)}: ${segments[key].value}`} title={`${t(`rcv.${key}`)}: ${segments[key].value}`} className={colours[index]} style={{ width: `${100 * segments[key].value / total}%` }} />)}</div><span className="text-xs tabular-nums">{t('rcv.issued', { n: segments.issued.value, m: total })}</span></div>
+  return <div className="min-w-32 space-y-1"><div className="hidden h-3 overflow-hidden rounded sm:flex">{keys.map((key, index) => <Link key={key} to={`${base}/deliverables?${segments[key].link}`} aria-label={`${t(`rcv.${key}`)}: ${segments[key].value}`} title={`${t(`rcv.${key}`)}: ${segments[key].value}`} className={colours[index]} style={{ width: `${100 * segments[key].value / total}%` }} />)}</div><span className="text-xs tabular-nums">{t('rcv.issuedOf', { n: segments.issued.value, m: total })}</span></div>
 }

@@ -133,6 +133,46 @@ public sealed class CountLinkTests(HubFactory f)
         Assert.Equal(row.I("taskBlocked"), await Tasks("&blocked=true"));
     }
 
+    [Fact]
+    [Trait("Spec", "AC-RCV-10")]
+    public async Task Portfolio_row_counts_equal_their_project_lists()
+    {
+        var p = await d.Project();
+        string In(int days) => Today.AddDays(days).ToString("yyyy-MM-dd");
+        var late = await d.NewTask(p.Id, TestData.Pm, new { name = "Late", assigneeId = U(TestData.Alex), dueDate = In(-4) });
+        await d.NewTask(p.Id, TestData.Pm, new { name = "Also late", assigneeId = U(TestData.Alex), dueDate = In(-2) });
+        await d.NewTask(p.Id, TestData.Pm, new { name = "Waits", assigneeId = U(TestData.Alex), dueDate = In(9), dependsOn = new[] { late.G("id") } });
+        await d.NewTask(p.Id, TestData.Pm, new { name = "On time", assigneeId = U(TestData.Alex), dueDate = In(10) });
+        var pm = f.As(TestData.Pm);
+        var party = await pm.Post($"/api/v1/projects/{p.Id}/external-parties", new { name = "City", isClient = true }).Result.Json(201);
+        foreach (var due in new[] { -5, 12 })
+            await pm.Post($"/api/v1/projects/{p.Id}/decisions", new { subject = $"Decide by {In(due)}", description = "Options", ownerExternalPartyId = party.G("id"),
+                requiredByDate = In(due), impactLevel = "Medium", impactDescription = "Drawings wait" }).Result.Json(201);
+        async Task<JsonNode> Issue(string severity) =>
+            await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/issues", new { title = "Issue " + severity, description = "What happened", severity }).Result.Json(201);
+        await Issue(Impact.High);
+        await Issue(Impact.High);
+        await Issue(Impact.Low);
+        var resolved = await Issue(Impact.High);
+        await f.DbAsync(db => db.Issues.Where(x => x.Id == resolved.G("id")).ExecuteUpdateAsync(x => x.SetProperty(y => y.Status, IssueStatus.Resolved)));
+        await f.Evaluate(p.Id);
+
+        // The links each Portfolio row builds (rowLinks in web/src/pages/Portfolio.tsx), as the people who see Portfolio.
+        foreach (var who in new[] { TestData.Pm, TestData.Marc, TestData.Lena })
+        {
+            var c = f.As(who);
+            var row = (await c.GetAsync($"/api/v1/portfolio?ids={p.Id}").Result.Json())["projects"]!.AsArray().Single()!;
+            async Task<int> Tasks(string q) => (await c.GetAsync($"/api/v1/projects/{p.Id}/tasks?{q}").Result.Json()).I("totalCount");
+            async Task<int> Rows(string list) => (await c.GetAsync($"/api/v1/projects/{p.Id}/{list}").Result.Json()).AsArray().Count;
+            async Task<int> Attention(string severity) => (await c.GetAsync($"/api/v1/projects/{p.Id}/attention?severity={severity}").Result.Json())["items"]!.AsArray().Count;
+            var shown = (row.I("overdueTasks"), row.I("blockedTasks"), row.I("overdueDecisions"), row.I("highIssues"), row.I("attentionCritical"), row.I("attentionWarning"));
+            Assert.Equal(shown, (await Tasks("overdue=true"), await Tasks("blocked=true"), await Rows("decisions?indicator=overdue"), await Rows("issues?indicator=open&severity=High"),
+                await Attention("Critical"), await Attention("Warning")));
+            Assert.Equal((2, 1, 1, 2), (shown.Item1, shown.Item2, shown.Item3, shown.Item4)); // 2 overdue, 1 blocked, 1 overdue decision, 2 open High issues
+            Assert.True(shown.Item5 + shown.Item6 > 0, $"{who}: the fixture raises attention");
+        }
+    }
+
     // ---------- Part D (§49.5, §49.6), behind `flag.status_rollups` ----------
 
     async Task Rollups(bool on) => await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.status_rollups", new { value = on }).Result.Json();

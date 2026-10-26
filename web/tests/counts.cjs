@@ -1,8 +1,11 @@
 // SC-002 count reconciliation (packet 036 verification.md section 7), read-only against the local Development preview
-// with the section 8 fixtures loaded. For Jordan, Priya and Sam (signed in through the development picker), every linked
-// count on Home, the SYN-101..103 Project Dashboards and Milestones views they can see and Portfolio is compared with the total of the list
-// request its destination page sends, as the same person. Fails on any difference, on a list that drops the link's
-// filters, and on a missing agreed tile.
+// with the section 8 fixtures loaded. For Jordan, Priya and Sam (signed in through the development picker), and Omar as a
+// Discipline Lead (packet 045 AC-RCV-08), every linked count on Home, the SYN-101..103 Project Dashboards (also scoped to each
+// discipline) and Milestones views they can see and Portfolio (each row's counts, AC-RCV-10) is compared with the total of the
+// list request its destination page sends, as the same person. With flag.status_rollups on, the discipline status segments
+// (AC-RCV-18), the Overdue deliverables column and Portfolio grouped by client, office and project type (AC-RCV-19) are
+// checked too; a summed figure (a group subtotal, "n of m issued") is compared with the sum of the figures it adds up.
+// Fails on any difference, on a list that drops the link's filters, and on a missing agreed tile.
 //   TUESDAY_UI_BASE_URL (default http://localhost:5173), COUNTS_REPORT (JSON report path).
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
@@ -12,7 +15,7 @@ const { chromium } = require('playwright')
 const base = process.env.TUESDAY_UI_BASE_URL ?? 'http://localhost:5173'
 assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'TUESDAY_UI_BASE_URL must be a local Development preview')
 const reportPath = process.env.COUNTS_REPORT ?? require('node:path').join(require('node:os').tmpdir(), 'tuesday-counts-report.json')
-const PERSONAS = [['jordan', 'Jordan Lee'], ['priya', 'Priya Nair'], ['sam', 'Sam Patel']]
+const PERSONAS = [['jordan', 'Jordan Lee'], ['priya', 'Priya Nair'], ['sam', 'Sam Patel'], ['omar', 'Omar Haddad']]
 const PROJECTS = ['SYN-101', 'SYN-102', 'SYN-103']
 // Agreed tile list (section 7). Lanes, project segments and discipline rows come from the page's own data.
 const AGREED = {
@@ -44,7 +47,7 @@ function extract() {
     const head = tile.tagName === 'DIV' && tile.firstElementChild?.tagName === 'A' ? tile.firstElementChild : null
     const [label, value] = (head ?? tile).children
     if (label?.tagName !== 'SPAN' || value?.tagName !== 'SPAN') continue
-    const title = own(label)
+    const title = own(label).replace(/Whole project$/, '') // a scoped dashboard marks the tiles that stay project-wide
     if (head) { const unit = own(value).replace(/[\d,]+/g, '').trim(); out.push({ name: unit ? `${title} · ${unit}` : title, shown: num(own(value)), href: head.getAttribute('href') }) }
     if (tile.tagName !== 'DIV') out.push({ name: title, shown: num(own(value)), href: tile.tagName === 'A' ? tile.getAttribute('href') : null })
     else tile.querySelectorAll('a[href]').forEach((a) => { if (a !== head) out.push(linked(a, title)) })
@@ -68,11 +71,48 @@ function extract() {
       const a = tr.querySelector(`a[href*="${flag}"]`)
       if (a) out.push({ name: `${discipline} · ${label}`, shown: num(own(a)), href: a.getAttribute('href') })
     }
+    // Packet 045 status bar: each segment names its group and count; "n of m issued" adds them up.
+    const segments = [...tr.querySelectorAll('a[aria-label][href*="/deliverables?"]')].map((a) => {
+      const [label, n] = a.getAttribute('aria-label').split(': ')
+      return { name: `${discipline} · ${label}`, shown: num(n), href: a.getAttribute('href') }
+    })
+    if (segments.length) {
+      const [issued, total] = (own(tr.querySelector('a[aria-label][href*="/deliverables?"]').closest('td').querySelector(':scope > div > span')).match(/\d+/g) ?? []).map(Number)
+      out.push(...segments, { name: `${discipline} · issued of`, shown: total, sum: segments.reduce((n, x) => n + x.shown, 0) },
+        { name: `${discipline} · issued`, shown: issued, sum: segments.at(2).shown })
+    }
   }
   // Milestones view (packet 045 FR-RCV-09): each figure is a link naming itself in data-count, in a row led by the milestone key.
   for (const a of main.querySelectorAll('table a[data-count]')) {
     const key = own(a.closest('tr').cells[1])
     out.push({ name: `${key} · ${a.dataset.count}`, shown: num(own(a)), href: a.getAttribute('href') })
+  }
+  // Portfolio (packet 045 FR-RCV-09, FR-RCV-15): every row count, then each group header's links and subtotals.
+  if (location.pathname === '/portfolio') {
+    const heads = [...main.querySelectorAll('table thead th')].map(own)
+    const groups = []
+    for (const tr of main.querySelectorAll('table tbody tr')) {
+      if (tr.dataset.portfolioGroup !== undefined) { groups.push({ tr, rows: [] }); continue }
+      const project = decodeURIComponent(tr.cells[0].querySelector('a[href$="/dashboard"]').getAttribute('href').split('/')[2])
+      const values = {}
+      ;[...tr.cells].forEach((td, i) => td.querySelectorAll('a[href]').forEach((a) => {
+        if (!/^\d+$/.test(own(a))) return
+        const label = [heads[i], a.querySelector('.sr-only')?.textContent.trim()].filter(Boolean).join(' · ')
+        values[label] = num(own(a))
+        out.push({ name: `${project} · ${label}`, shown: values[label], href: a.getAttribute('href') })
+      }))
+      groups.at(-1)?.rows.push(values)
+    }
+    for (const { tr, rows } of groups) {
+      const [th, ...cells] = tr.cells
+      const name = own(th).split(' · ')[0]
+      th.querySelectorAll('a[href]').forEach((a, i) => out.push({ name: `${name} · ${i ? own(a).replace(/[\d\s]+$/, '') : 'Projects'}`, shown: num(own(a)), href: a.getAttribute('href') }))
+      const sum = (label) => rows.reduce((n, r) => n + (r[label] ?? 0), 0)
+      cells.slice(0, 5).forEach((td, j) => out.push({ name: `${name} · ${heads[th.colSpan + j]} (sum)`, shown: num(own(td)), sum: sum(heads[th.colSpan + j]) }))
+      const [critical, warning] = (own(cells[5]).match(/\d+/g) ?? []).map(Number), attention = heads[th.colSpan + 5]
+      out.push({ name: `${name} · ${attention} Critical (sum)`, shown: critical, sum: sum(`${attention} · Critical`) },
+        { name: `${name} · ${attention} Warning (sum)`, shown: warning, sum: sum(`${attention} · Warning`) })
+    }
   }
   for (const section of main.querySelectorAll('section')) {
     const heading = section.querySelector('h2, h3')
@@ -89,7 +129,9 @@ function extract() {
  *  It navigates inside the app first (fewer requests); a cached list sends nothing, so it then reloads the page. */
 async function listTotal(page, href, attempt = 0) {
   const u = new URL(href, base)
-  const endpoint = new RegExp(`^${u.pathname.slice(1).replace(/^projects\/[^/]+\//, 'projects/[^/]+/')}$`)
+  // A Portfolio Attention figure opens the dashboard's attention panel at that severity; its list is the attention request.
+  const list = u.pathname.endsWith('/dashboard') && u.searchParams.has('severity') ? u.pathname.replace(/dashboard$/, 'attention') : u.pathname
+  const endpoint = new RegExp(`^${list.slice(1).replace(/^projects\/[^/]+\//, 'projects/[^/]+/')}$`)
   const want = [...u.searchParams].filter(([k]) => !VIEW.has(k))
   const seen = []
   const match = (r) => {
@@ -111,7 +153,7 @@ async function listTotal(page, href, attempt = 0) {
   }
   const body = r.status() === 200 ? await r.json().catch(() => null) : null
   if (!body) return { total: null, api: `HTTP ${r.status()} ${r.url().replace(base, '')}` }
-  return { total: Array.isArray(body) ? body.length : body.totalCount ?? (body.people ?? body.projects).length, api: r.url().replace(base, '') }
+  return { total: Array.isArray(body) ? body.length : body.totalCount ?? body.total ?? (body.people ?? body.projects).length, api: r.url().replace(base, '') }
 }
 
 /** Opens a source page and waits for its counts to render. */
@@ -142,13 +184,16 @@ async function open(page, source, ready, rendered = 'main [data-accent] span') {
       for (const number of PROJECTS) {
         const p = await api(who, `projects/${number}`)
         if (p.ok) {
-          const id = (await p.json()).id
+          const project = await p.json(), id = project.id
           sources.push([`Dashboard ${number}`, `/projects/${number}/dashboard`, `projects/${id}/dashboard`, 'dashboard'])
+          for (const d of project.disciplines.filter((x) => x.isActive))
+            sources.push([`Dashboard ${number} · ${d.name}`, `/projects/${number}/dashboard?discipline=${d.id}`, `projects/${id}/dashboard`, 'dashboard'])
           sources.push([`Milestones ${number}`, `/projects/${number}/milestones`, `projects/${id}/milestones`, 'milestones'])
         }
         else skipped.push(`${who}: ${number} not visible (HTTP ${p.status})`)
       }
-      if (me.capabilities.portfolio) sources.push(['Portfolio', '/portfolio', 'portfolio', 'portfolio'])
+      if (me.capabilities.portfolio) sources.push(['Portfolio', '/portfolio', 'portfolio', 'portfolio'],
+        ...(me.flags?.status_rollups ? ['client', 'office', 'projectType'].map((g) => [`Portfolio by ${g}`, `/portfolio?group=${g}`, 'portfolio', 'portfolio']) : []))
       else skipped.push(`${who}: Portfolio not permitted`)
       sources.push(['Home (all projects)', '/home?projects=all', 'home', 'home']) // last: the app remembers the chosen scope
       for (const [label, source, ready, kind] of sources) {
@@ -168,10 +213,17 @@ async function open(page, source, ready, rendered = 'main [data-accent] span') {
         }
         if (kind === 'dashboard') {
           required.push(...data.disciplines.flatMap((d) => ['Open', 'Overdue', 'Blocked', 'Due ≤ 14 d'].map((x) => `${d.name} · ${x}`)))
-          for (const card of tiles.filter((t) => t.card && !t.href)) card.href = `${source.replace('/dashboard', '')}/tasks?${data[card.name === 'Blocked' ? 'blocked' : 'dueThisWeek'].link}`
+          // Packet 045 status bar: four named segments wherever a discipline has a deliverable outside Cancelled.
+          required.push(...data.disciplines.filter((d) => Object.values(data.disciplineStatus?.[d.disciplineId] ?? {}).some((x) => x.value > 0))
+            .flatMap((d) => ['Not started', 'In progress', 'Issued', 'On hold'].map((x) => `${d.name} · ${x}`)))
+          for (const card of tiles.filter((t) => t.card && !t.href)) card.href = `${source.split('/dashboard')[0]}/tasks?${data[card.name === 'Blocked' ? 'blocked' : 'dueThisWeek'].link}`
         }
         if (kind === 'milestones') required.push(...data.flatMap((m) => ['Issued', 'Deliverables', 'Complete', 'Tasks',
           ...(m.taskOverdue > 0 ? ['Overdue'] : []), ...(m.taskBlocked > 0 ? ['Blocked'] : [])].map((x) => `${m.key} · ${x}`)))
+        if (kind === 'portfolio') for (const p of data.projects) { // each row: Overdue, Blocked, Decisions, High issues, Critical, Warning (+ Overdue deliverables)
+          const figures = tiles.filter((t) => t.href && t.name.startsWith(`${p.projectNumber} · `)).length
+          if (figures !== ('overdueDeliverables' in p ? 7 : 6)) missing.push(`${who} ${label}: ${p.projectNumber} row has ${figures} linked figures`)
+        }
         for (const name of required) if (!tiles.some((t) => t.name === name && (t.href || kind === 'portfolio'))) missing.push(`${who} ${label}: ${name}`)
         if (kind === 'portfolio') for (const tile of tiles.filter((t) => !t.href && AGREED.portfolio.includes(t.name))) {
           // A filter tile has no link of its own: clicking it sets the page's filters, and that URL is its list.
@@ -180,6 +232,19 @@ async function open(page, source, ready, rendered = 'main [data-accent] span') {
           tile.href = new URL(page.url()).pathname + new URL(page.url()).search
           await open(page, source, ready)
         }
+        const decisions = kind === 'portfolio' && tiles.find((t) => t.name === 'Overdue decisions')
+        if (decisions) { // AC-RCV-10: the tile filters to the projects with an overdue decision and keeps its value, the column's sum
+          const filtered = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/v1/portfolio' && new URL(r.url()).searchParams.get('overdueDecisions') === 'true')
+          await page.locator('main button[data-accent]', { hasText: decisions.name }).first().click()
+          const shown = (await (await filtered).json()).projects.length
+          await page.waitForFunction((n) => document.querySelectorAll('main table tbody tr:not([data-portfolio-group])').length === n, shown)
+          const column = (await page.evaluate(extract)).filter((t) => t.name.endsWith(' · Decisions overdue'))
+          if (column.some((t) => !(t.shown > 0))) missing.push(`${who} ${label}: Overdue decisions filter shows a project without one`)
+          decisions.sum = column.reduce((n, t) => n + t.shown, 0)
+          decisions.name += ' (sum of the rows it filters to)'
+        }
+        for (const tile of tiles.filter((t) => t.sum !== undefined))
+          rows.push({ persona: who, page: label, tile: tile.name, shown: tile.shown, total: tile.sum, ok: tile.shown != null && tile.shown === tile.sum, href: null, request: 'sum of the figures shown' })
         for (const tile of tiles.filter((t) => t.href)) {
           if (!totals.has(tile.href)) { await pace(); totals.set(tile.href, await listTotal(page, tile.href)) }
           const { total, api: request } = totals.get(tile.href)

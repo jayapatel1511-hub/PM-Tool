@@ -33,7 +33,7 @@ let server,browser;const errors=[],requests=[],unknown=[];
   else if(p==='me/notifications/unread-count')data={notifications:0,following:0};
   else if(p==='workspaces')data=[];
   else if(p==='views')data={views:[],canShare:false};
-  else if(p==='reference')data={disciplines:[{id:civil,name:'Civil',isActive:true}],clients:[{id:client,name:'Synthetic client'}],offices:[{id:office,name:'Synthetic office'}],deliverableTypes:[],phases:[],projectTypes:[],limits:{roleLabel:80}};
+  else if(p==='reference')data={disciplines:[{id:civil,name:'Civil',isActive:true}],clients:[{id:client,name:'Synthetic client',isActive:true}],offices:[{id:office,name:'Synthetic office',isActive:true}],deliverableTypes:[],phases:[],projectTypes:[],limits:{roleLabel:80}};
   else if(p==='projects')data={items:[{...row(1),id:pid,projectNumber:'SYN-RCV'}],totalCount:1};
   else if(p===`projects/${pid}`||p==='projects/SYN-RCV')data=project();
   else if(p.endsWith('/date-review'))data={window:null,tasks:[],deliverables:[]};
@@ -45,8 +45,9 @@ let server,browser;const errors=[],requests=[],unknown=[];
   else if(p===`projects/${pid}/dashboard`)data=dash();
   else if(p.endsWith('/attention'))data={items:[],total:0,snoozed:0};
   else if(p==='portfolio'){const rows=[row(1),row(2)];if(!flags.status_rollups)rows.forEach(r=>delete r.overdueDeliverables);data={ownOnly:false,tiles:{active:2,red:1,yellow:0,green:1,submissions14:0,overdueDecisions:3},projects:rows};}
+  else if(p==='templates')data={canEdit:false,templates:[{id:template,familyId:template,name:'Synthetic template',version:1,status:'Published',milestones:0,deliverables:0,tasks:0,roles:0,projects:0}]};
   else if(p===`templates/${template}`)data={id:template,familyId:template,name:'Synthetic template',status:templateDraft?'Draft':'Published',version:1,canEdit:templateDraft,rowVersion:1,family:[],disciplines:[],milestones:[],deliverables:[],tasks:[],dependencies:[],basisSuggestions:[],...(flags.template_working_days?{offsetDayKind:'WorkingDays'}:{})};
-  else if(p.endsWith('/preview'))data={milestones:[],counts:{milestones:0,deliverables:0,tasks:0,dependencies:0},undated:{milestones:0,deliverables:0,tasks:0}};
+  else if(p.endsWith('/preview')){requests.push({path:p,body:req.postDataJSON()});data={milestones:[],counts:{milestones:0,deliverables:0,tasks:0,dependencies:0},undated:{milestones:0,deliverables:0,tasks:0}};}
   else if(p==='staff')data={scope:'direct',canSeeAll:false,tiles:{staff:0,assignments:0,withOverdue:0,withBlocked:0,reviewsStalled:0},people:[]};
   else if(p==='time')data={entries:[{id:id(40),taskId:id(41),projectId:pid,projectNumber:'SYN-RCV',projectName:'Synthetic project',taskKey:'SYN-T1',taskName:'Synthetic work',person:'Synthetic PM',userId:person,workDate:'2026-10-13',hours:3,canEdit:false}],total:3,byDay:[],byProject:[{projectId:pid,projectNumber:'SYN-RCV',projectName:'Synthetic project',hours:3}],byTask:[{taskId:id(41),taskKey:'SYN-T1',taskName:'Synthetic work',hours:3}],canReview:false};
   else if(p==='users')data=[];
@@ -67,13 +68,21 @@ let server,browser;const errors=[],requests=[],unknown=[];
  assert.equal(await page.getByRole('checkbox',{name:'Show deleted'}).count(),0,'Board offers no Show deleted toggle');await page.keyboard.press('Escape');
  // AC-RCV-17: the setting is visible and read-only once published; flag-off parity.
  await page.goto(`${base}/templates/${template}`);await page.getByLabel('Offsets count',{exact:true}).waitFor();assert.equal(await page.getByLabel('Offsets count',{exact:true}).isDisabled(),true);
- flags.template_working_days=false;await page.reload();assert.equal(await page.getByLabel('Offsets count',{exact:true}).count(),0);
+ // The wizard previews with the chosen office and shows its one-line note only for a Working days template.
+ const note='Offsets skip weekends and office holidays.',wizard=async()=>{await page.goto(`${base}/projects`);await page.getByRole('button',{name:'Create project',exact:true}).first().click();await page.locator('#p-office').selectOption(office);
+  const previewed=page.waitForResponse(r=>r.url().endsWith(`templates/${template}/preview`));await page.locator('#p-template').selectOption(template);await previewed;await page.getByText(/^The template’s disciplines are ticked/).waitFor();await page.waitForTimeout(300);return page.getByText(note,{exact:true}).count()};
+ assert.equal(await wizard(),1,'wizard note for Working days');assert.equal(requests.at(-1).body.officeId,office,'preview carries the office');
+ flags.template_working_days=false;assert.equal(await wizard(),0,'no wizard note with the flag off');
+ await page.goto(`${base}/templates/${template}`);await page.getByRole('main').waitFor();assert.equal(await page.getByLabel('Offsets count',{exact:true}).count(),0);
  // AC-RCV-18: exact segment labels/links, 4 of 10 issued; no bar with flag off.
- await page.goto(`${base}/projects/SYN-RCV/dashboard`);await page.getByText('4 of 10 issued',{exact:true}).waitFor();assert.match(await page.getByRole('link',{name:'In progress: 3',exact:true}).getAttribute('href'),/status=In\+Progress/);const rollupAxe=await axe();
+ await page.goto(`${base}/projects/SYN-RCV/dashboard`);await page.getByText('4 of 10 issued',{exact:true}).waitFor();assert.match(await page.getByRole('link',{name:'In progress: 3',exact:true}).getAttribute('href'),/status=In\+Progress/);
+ for(const [name,status] of [['Not started: 2',/status=Not\+Started/],['Issued: 4',/status=Issued,Accepted/],['On hold: 1',/status=On\+Hold/]]){const link=page.getByRole('link',{name,exact:true});assert.equal(await link.getAttribute('title'),name);assert.match(await link.getAttribute('href'),status,name)}const rollupAxe=await axe();
  flags.status_rollups=false;await page.reload();assert.equal(await page.getByText('4 of 10 issued',{exact:true}).count(),0);
  // AC-RCV-10/19/20: row links, group sum, URL and overdue column flag pair.
  flags.status_rollups=true;await page.goto(`${base}/portfolio`);await page.getByLabel('Group',{exact:true}).selectOption('client');await page.waitForURL(/group=client/);await page.locator('[data-portfolio-group]').waitFor();
- const subtotal=await page.locator('[data-portfolio-group]').innerText();assert.match(subtotal,/2 Projects/);assert.match(subtotal,/Red 1/);assert.match(subtotal,/Green 1/);assert.match(await page.getByRole('row').filter({hasText:'Synthetic project 1'}).getByRole('link',{name:'1',exact:true}).first().getAttribute('href'),/overdue=true/);const portfolioAxe=await axe();
+ const subtotal=await page.locator('[data-portfolio-group]').innerText();assert.match(subtotal,/2 Projects/);assert.match(subtotal,/Red 1/);assert.match(subtotal,/Green 1/);
+ // Column sums equal the rows: overdue 1+2, blocked 1+2, decisions 1+2, high issues 0, overdue deliverables 2+3, Critical 1+2; the count opens that client.
+ assert.deepEqual((await page.locator('[data-portfolio-group] td').allInnerTexts()).map(x=>x.trim()).slice(0,6),['3','3','3','0','5','■ 3 · ▲ 0']);assert.match(await page.locator('[data-portfolio-group] th').getByRole('link',{name:'2 Projects'}).getAttribute('href'),new RegExp(`group=client.*clientId=${client}`));assert.match(await page.getByRole('row').filter({hasText:'Synthetic project 1'}).getByRole('link',{name:'1',exact:true}).first().getAttribute('href'),/overdue=true/);const portfolioAxe=await axe();
  flags.status_rollups=false;await page.reload();assert.equal(await page.getByLabel('Group',{exact:true}).count(),0);assert.equal(await page.getByRole('columnheader',{name:'Overdue deliverables',exact:true}).count(),0);
  // AC-RCV-11/12: definitions are available on keyboard-focusable tile actions, totals link to the entries.
  await page.goto(`${base}/staff`);await page.getByRole('button',{name:/Reviews waiting too long/}).waitFor();assert.ok(await page.getByRole('button',{name:/Reviews waiting too long/}).getAttribute('aria-describedby'));await page.getByRole('button',{name:/Reviews waiting too long/}).click();await page.waitForURL(/indicator=reviewsStalled/);

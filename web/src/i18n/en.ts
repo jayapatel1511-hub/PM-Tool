@@ -2554,7 +2554,7 @@ export const en = {
   // 045 deleted-items and dashboard labels
   'rcv.showDeleted': 'Show deleted', 'rcv.restore': 'Restore', 'rcv.restored': 'Item restored.', 'rcv.parent': 'Parent', 'rcv.deletedAt': 'Deleted at', 'rcv.deletedBy': 'Deleted by',
   'rcv.restoreTitle': 'Deleted items', 'rcv.none': 'No deleted items.', 'rcv.offsetsCount': 'Offsets count', 'rcv.calendarDays': 'Calendar days', 'rcv.workingDays': 'Working days',
-  'rcv.workingDaysNote': 'Offsets skip weekends and office holidays.', 'rcv.issued': '{n} of {m} issued', 'rcv.noDeliverables': 'No deliverables', 'rcv.notStarted': 'Not started',
+  'rcv.workingDaysNote': 'Offsets skip weekends and office holidays.', 'rcv.issued': 'Issued', 'rcv.issuedOf': '{n} of {m} issued', 'rcv.noDeliverables': 'No deliverables', 'rcv.notStarted': 'Not started',
   'rcv.inProgress': 'In progress', 'rcv.onHold': 'On hold', 'rcv.group': 'Group', 'rcv.groupNone': 'None', 'rcv.groupClient': 'Client', 'rcv.groupOffice': 'Office', 'rcv.groupProjectType': 'Project type',
   'rcv.notSet': 'Not set', 'rcv.overdueDeliverables': 'Overdue deliverables', 'rcv.overdueDecisionDefinition': 'Sum of overdue decisions across the projects shown.',
   'rcv.staffDefinition': 'People in the current filters.', 'rcv.assignmentsDefinition': 'Sum of assignments held by the people shown.', 'rcv.overdueDefinition': 'People with at least one overdue item.',

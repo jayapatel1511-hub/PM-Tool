@@ -1,6 +1,6 @@
 # Verification: Record Engine
 
-Status (2026-10-26, branch `build2/043-S01p`): KILL confirmed by Jay on 2026-10-25 (043-D3, see `acceptance.md`). S01, the parity run, is built here with passing local checks (see Build 043-S01). None of the spike's engine code is on this branch, so no screen is converted and the conversion ACs stay UNRUN. Remote CI not run. Not Accepted.
+Status (2026-10-26, branch `codex/integrate-039-050`): KILL confirmed by Jay on 2026-10-25 (043-D3, see `acceptance.md`). S01, the parity run, is merged here from `build2/043-S01p` (see Build 043-S01p) with passing local checks (see Build 043-S01). None of the spike's engine code is on this branch, so no screen is converted and the conversion ACs stay UNRUN. Remote CI not run. Not Accepted.
 
 The spike was measured separately in the platform worktree: runtime `87e72b718f195903d94893da78b11f8292b62998`, evidence `878c64150551ba07b35dcb990090b5811362b368`. Strict parity measured KILL (2/10 persona/width pairs pass; eight differ in disabled Risk permission titles). Jay confirmed the verdict on 2026-10-25. No 043 runtime code is integrated here; the table below records integration-local checks only. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) for the separate-source boundary.
 
@@ -36,3 +36,12 @@ The spike was measured separately in the platform worktree: runtime `87e72b718f1
   - `tools/test_ci_tests.py`, `tools/trace_spec.py --check`, `tools/test_trace_report.py`, `tools/test_decisions.py`: OK.
 - Not run: remote CI; a candidate that differs from its base (no conversion exists, so the browser negative controls stand in). The run does not perform the mutating steps of AC-REC-05 (inline edit with If-Match, stale conflict, Realise, Close, Reopen) and it does not open the open-role row menus (Edit, Cancel) of AC-REC-06. The spike checked those in its separate owned workflow. Browsers ran on headless Chromium build 1248 instead of the 1228 build that Playwright expects.
 - Assumptions: 043-D2 default (the spike screens are the parity run's default screens). 043-D8 default (the fallback starts with open roles, so the open-roles states are in the default run).
+
+## Build 043-S01p
+
+Merge of `build2/043-S01p` (S01, the parity run, plus the spike's verdict records and evidence; no engine code) into `codex/integrate-039-050`. The AC rows above are from the builder's report: AC-REC-04, 05, 06 and 11 stay UNRUN because no screen is converted; the harness that checks them is in place.
+
+- Checks on the merged tree (clean merge, no conflicts; `web/package.json` merged with the existing scripts): `dotnet build Hub.slnx` 0 errors; `npm run build`, `npm run lint` exit 0; `RECORD_PARITY_SELFCHECK=1 node web/tests/record-parity.cjs` PASS; `TUESDAY_RECORD_BASE_REF=HEAD^1 npm run test:record-parity` on the merge commit (base `f64e2cee`, the pre-merge integration head, so `web/` and `src/` are identical) PASS, 10 of 10 persona and width pairs on the five default screens; `tools/test_ci_tests.py` 34 OK; `tools/test_trace_report.py`, `tools/test_decisions.py` OK; `tools/ratchet.py` exit 0; `tools/trace_spec.py --check` 0 not cited; `tools/build_spec.py --check` up to date. The browser self-check (`RECORD_PARITY_BROWSER_SELFCHECK=1`) was not rerun here; the builder ran it on the slice branch.
+- S01 in `tasks.md` stays unticked: this port supplies the harness only, and no converted screen has been checked against it.
+- Assumptions: 043-D2 default (the spike screens are the parity run's default screens) and 043-D8 default (the fallback starts with open roles, so the open-roles states are in the default run). Test and CI code only, so no flag applies and runtime behaviour is unchanged.
+- Left for Jay: nothing is pushed and remote CI has not run. The pull-request CI parity step takes about 15 minutes locally.

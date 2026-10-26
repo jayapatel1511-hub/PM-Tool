@@ -7,7 +7,8 @@
 //                           risk id, e.g. /projects/{project}/risks?panel=Risk:{risk} for a panel
 //   TUESDAY_RECORD_FLAGS    flags already merged on those screens: the matrix runs with all off, then all on (§47.6)
 //   TUESDAY_RECORD_PARITY_OUT  report path; screenshots of both builds go beside it (evidence, not a pass condition)
-//   RECORD_PARITY_SELFCHECK=1  diff logic only; RECORD_PARITY_BROWSER_SELFCHECK=1  identical builds pass, a removed header fails
+//   RECORD_PARITY_SELFCHECK=1  diff logic only; RECORD_PARITY_BROWSER_SELFCHECK=1  identical builds pass, a removed
+//                           header fails, and a Columns button taken out of the Tab order fails
 const assert = require('node:assert/strict')
 const fs = require('node:fs/promises')
 const path = require('node:path')
@@ -114,11 +115,15 @@ async function fixtures() {
   return { project: project.projectNumber, projectId: project.id, risk: risk.id, complete: complete.projectNumber, empty: empty.projectNumber, restricted: restricted.projectNumber }
 }
 
-async function browserSnapshot(origin, who, width, ids, { removeHeader = false, shots = true } = {}) {
+async function browserSnapshot(origin, who, width, ids, { removeHeader = false, untabColumns = false, shots = true } = {}) {
   const browser = await launch()
   const createdViewIds = []
   try {
     const context = await browser.newContext({ viewport: { width, height: width < 500 ? 900 : 1000 }, reducedMotion: 'reduce', acceptDownloads: true })
+    // Negative control: the Columns button stays clickable and focusable by script but leaves the Tab order.
+    if (untabColumns) await context.addInitScript(() => new MutationObserver(() => {
+      for (const b of document.querySelectorAll('main button')) if (b.textContent.trim() === 'Columns' && b.tabIndex !== -1) b.tabIndex = -1
+    }).observe(document, { childList: true, subtree: true }))
     const page = await context.newPage()
     const gets = [], errors = [], wrongPersona = [], pending = new Set()
     let signedIn = false
@@ -279,11 +284,18 @@ print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row 
       }
       return { items, downloads }
     }
-    // The keyboard path: Tab order from the top of the page, then Enter on the first row control and Esc back.
+    // The keyboard path: the screen's whole Tab order from the main landmark (the skip link's target) until focus
+    // leaves it, so the toolbar and table controls are in it; then Enter on the first row control and Esc back.
     const keyboardEvidence = async url => {
       await go(url)
       const order = []
-      for (let i = 0; i < 15; i++) { await page.keyboard.press('Tab'); order.push(await focused()) }
+      await page.locator('main').first().focus()
+      // ponytail: 150 stops guards a focus trap; raise it if a parity screen ever has more tabbable controls.
+      for (let i = 0; i < 150; i++) {
+        await page.keyboard.press('Tab')
+        if (!await page.evaluate(() => !!document.activeElement?.closest('main'))) break
+        order.push(await focused())
+      }
       const row = page.locator('main tbody').locator('button,a').filter({ visible: true }).first()
       if (!await visible(row)) return { order, row: null }
       await row.focus(); await page.keyboard.press('Enter'); await settle()
@@ -362,8 +374,10 @@ print(json.dumps([[''.join(c.itertext()) for c in row.findall('s:c',n)] for row 
         if (width !== 1600) continue
         const changed = await browserSnapshot(base, 'priya', width, ids, { removeHeader: true, shots: false })
         assert.ok(diff(same, changed).some(x => x.includes('controls')), 'removed header must fail browser parity')
+        const untabbed = await browserSnapshot(base, 'priya', width, ids, { untabColumns: true, shots: false })
+        assert.ok(diff(same, untabbed).some(x => x.includes('keyboard.order')), 'a toolbar control out of the Tab order must fail browser parity')
       }
-      console.log(`record parity browser selfcheck: PASS (identical builds pass at ${WIDTHS.join(' and ')} px; removed header fails) on ${SCREENS.join(' ')}`)
+      console.log(`record parity browser selfcheck: PASS (identical builds pass at ${WIDTHS.join(' and ')} px; removed header and untabbed Columns fail) on ${SCREENS.join(' ')}`)
       return
     }
     const report = { candidate, base, apiBase, screens: SCREENS, flags: FLAGS, ids, runs: {}, at: new Date().toISOString() }

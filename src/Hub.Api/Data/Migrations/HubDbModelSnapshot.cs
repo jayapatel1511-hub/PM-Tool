@@ -190,6 +190,43 @@ namespace Hub.Api.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Hub.Api.Data.AdminReview", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Checks")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("checks");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("note");
+
+                    b.Property<DateTimeOffset>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reviewed_at");
+
+                    b.Property<Guid>("ReviewerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reviewer_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_admin_review");
+
+                    b.HasIndex("ReviewedAt")
+                        .HasDatabaseName("ix_admin_review_reviewed_at");
+
+                    b.HasIndex("ReviewerId")
+                        .HasDatabaseName("ix_admin_review_reviewer_id");
+
+                    b.ToTable("admin_review", "hub");
+                });
+
             modelBuilder.Entity("Hub.Api.Data.AllocationDayOverride", b =>
                 {
                     b.Property<Guid>("Id")
@@ -10163,6 +10200,16 @@ namespace Hub.Api.Data.Migrations
                         .HasDatabaseName("ix_workspace_project_workspace_id_project_id");
 
                     b.ToTable("workspace_project", "hub");
+                });
+
+            modelBuilder.Entity("Hub.Api.Data.AdminReview", b =>
+                {
+                    b.HasOne("Hub.Api.Data.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_admin_review_app_user_reviewer_id");
                 });
 
             modelBuilder.Entity("Hub.Api.Data.AllocationDayOverride", b =>

@@ -3066,6 +3066,144 @@
         ],
         "type": "object"
       },
+      "CheckCount": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "key": {
+            "type": "string"
+          },
+          "listUrl": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "rule",
+          "count",
+          "listUrl"
+        ],
+        "type": "object"
+      },
+      "CheckList": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CheckRow"
+            },
+            "type": "array"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "rule",
+          "rows"
+        ],
+        "type": "object"
+      },
+      "CheckNote": {
+        "properties": {
+          "key": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "note"
+        ],
+        "type": "object"
+      },
+      "CheckRecord": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "key": {
+            "type": "string"
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "count",
+          "note"
+        ],
+        "type": "object"
+      },
+      "CheckRow": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "link": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "detail",
+          "at",
+          "link"
+        ],
+        "type": "object"
+      },
       "Client": {
         "properties": {
           "auditKey": {
@@ -8918,6 +9056,43 @@
         ],
         "type": "object"
       },
+      "Overview": {
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckCount"
+            },
+            "type": "array"
+          },
+          "dueOn": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "last": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ReviewRecord"
+              }
+            ]
+          },
+          "overdue": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "checks",
+          "last",
+          "dueOn",
+          "overdue"
+        ],
+        "type": "object"
+      },
       "PackBody": {
         "properties": {
           "disciplineId": {
@@ -10305,6 +10480,30 @@
         ],
         "type": "object"
       },
+      "RecordBody": {
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckNote"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "note",
+          "checks"
+        ],
+        "type": "object"
+      },
       "RegisterBody": {
         "properties": {
           "assessmentDueDate": {
@@ -10828,6 +11027,46 @@
           "rowVersion",
           "ownerId",
           "reason"
+        ],
+        "type": "object"
+      },
+      "ReviewRecord": {
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckRecord"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reviewer": {
+            "type": "string"
+          },
+          "reviewerId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reviewedAt",
+          "reviewerId",
+          "reviewer",
+          "note",
+          "checks"
         ],
         "type": "object"
       },
@@ -15915,6 +16154,81 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AnonymousTypeOfint"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Hub.Api"
+        ]
+      }
+    },
+    "/api/v1/admin/review": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Overview"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Hub.Api"
+        ]
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewRecord"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "tags": [
+          "Hub.Api"
+        ]
+      }
+    },
+    "/api/v1/admin/review/checks/{key}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckList"
                 }
               }
             },

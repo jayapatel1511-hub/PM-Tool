@@ -54,6 +54,8 @@ public sealed record OrgSettings
     public bool RestrictedProjectsEnabled { get; init; }
     public bool ViewerCommentsDefault { get; init; } = true;
     public int IdleTimeoutHours { get; init; } = 8;
+    public int AdminReviewIntervalDays { get; init; } = 90;
+    public int AdminReviewIdleDays { get; init; } = 90;
     public bool RouteCounterEnabled { get; init; }
     public bool WorkingDaysEnabled { get; init; }
     public IReadOnlyDictionary<string, bool> RuleEnabled { get; init; } = Rules.Ids.ToDictionary(r => r, _ => true);
@@ -112,6 +114,8 @@ public sealed record OrgSettings
         new("digest_send_time_local", SettingKind.Time, "07:00", "notifications"),
         new("weekend_digests", SettingKind.Bool, false, "notifications"),
         new("idle_timeout_hours", SettingKind.Int, 8, "security"),
+        new("admin_review_interval_days", SettingKind.Int, 90, "security"),
+        new("admin_review_idle_days", SettingKind.Int, 90, "security"),
         .. Rules.Ids.Select(r => new SettingDef($"rule_enabled.{r}", SettingKind.Bool, true, "rules")),
         .. NotificationEvents.All.Select(e => new SettingDef($"notify_default.{e.Code}", SettingKind.Channels, new Channels(e.App, e.Email), "notifications")),
         .. Hub.Domain.Flags.Defs(Hub.Domain.Flags.All),
@@ -172,6 +176,8 @@ public sealed record OrgSettings
             DigestSendTimeLocal = S("digest_send_time_local", s.DigestSendTimeLocal),
             WeekendDigests = B("weekend_digests", s.WeekendDigests),
             IdleTimeoutHours = I("idle_timeout_hours", s.IdleTimeoutHours),
+            AdminReviewIntervalDays = I("admin_review_interval_days", s.AdminReviewIntervalDays),
+            AdminReviewIdleDays = I("admin_review_idle_days", s.AdminReviewIdleDays),
             RuleEnabled = Rules.Ids.ToDictionary(r => r, r => B($"rule_enabled.{r}", true)),
             NotificationDefaults = NotificationEvents.All.ToDictionary(e => e.Code, e =>
                 v.TryGetValue($"notify_default.{e.Code}", out var c) && c.ValueKind == JsonValueKind.Object

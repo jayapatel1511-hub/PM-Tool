@@ -26,7 +26,7 @@ import { PINNED_QUICK, PRIORITIES, QUICK, StatusMenu, TASK_STATUSES, TaskIndicat
 
 const PATHS = { tasks: '/tasks', board: '/boards' }
 /** URL parameters that are task filters (everything else is scope, view or layout). */
-const FILTERS = ['q', 'status', 'priority', 'assigneeId', 'projectId', 'createdBy', 'dueFrom', 'dueTo', 'open', ...QUICK] as const satisfies readonly (SavedViewKeys['workspace-tasks'] | 'page' | 'panel' | 'draftAccessReason')[]
+const FILTERS = ['q', 'status', 'priority', 'assigneeId', 'projectId', 'createdBy', 'dueFrom', 'dueTo', 'onHold', 'open', ...QUICK] as const satisfies readonly (SavedViewKeys['workspace-tasks'] | 'page' | 'panel' | 'draftAccessReason')[]
 
 function useFilters() {
   const [sp, setSp] = useSearchParams()
@@ -60,6 +60,7 @@ function TaskFilters({ rows, extra }: { rows: TaskRow[]; extra?: React.ReactNode
       ['createdBy', t('ws.createdBy'), rows.find((r) => r.createdBy === f.createdBy)?.createdByName],
       ['dueFrom', t('tfilter.dueFrom'), f.dueFrom && fmtDate(f.dueFrom)],
       ['dueTo', t('tfilter.dueTo'), f.dueTo && fmtDate(f.dueTo)],
+      ['onHold', t('tfilter.onHold'), f.onHold && t(f.onHold === 'true' ? 'common.yes' : 'common.no')],
     ] as const).filter(([k]) => f[k]).map(([key, label, value]) => ({ key, label, value: value || <Missing /> })),
     ...flags.map((k) => ({ key: k, label: k === 'open' ? t('tfilter.open') : t(`tquick.${k}`), value: t('common.yes') })),
   ]

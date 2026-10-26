@@ -19,7 +19,47 @@ public sealed class RegistryTests
     [Fact]
     public void Every_audited_type_has_one_valid_declaration() // AC-PLAT-01
     {
-        var actual = EntityRegistry.Entries;
+        AssertDeclarations(EntityRegistry.Entries);
+        Assert.Equal(ViewEndpoints.Lists.Keys.Order(), ScreenLists.All.Select(l => l.Code).Order());
+    }
+
+    [Fact]
+    public void Audit_fields_and_history_types_preserve_the_original_snapshots() // AC-PLAT-02, AC-PLAT-03
+    {
+        AssertSnapshots(EntityRegistry.Entries);
+        Assert.NotNull(EntityRegistry.History("OpenRole")?.Project);
+        Assert.Null(EntityRegistry.History("TimeEntry"));
+        Assert.Null(EntityRegistry.History("CalendarEvent"));
+    }
+
+    /// Seeded registry defects: each one must fail the check that guards it, while the real registry passes both.
+    [Fact]
+    public void Registry_checks_fail_on_seeded_defects() // AC-PLAT-01, AC-PLAT-02, AC-PLAT-03
+    {
+        var entries = EntityRegistry.Entries;
+        var role = EntityRegistry.For(typeof(OpenRole));
+        var unscoped = entries.First(e => e.Project is null);
+        IReadOnlyList<RegistryEntry> Replace(RegistryEntry from, RegistryEntry to) => [.. entries.Select(e => e == from ? to : e)];
+        foreach (var (defect, mutated) in new (string, IReadOnlyList<RegistryEntry>)[] {
+            ("entry deleted", [.. entries.Where(e => e != role)]),
+            ("second entry for the same type", [.. entries, role]),
+            ("neither project lookup nor reason", Replace(unscoped, unscoped with { NoProjectReason = null })),
+            ("field the type does not have", Replace(role, role with { Fields = [.. role.Fields, "NoSuchField"] })) })
+            Assert.True(Fails(() => AssertDeclarations(mutated)), defect);
+        foreach (var (defect, mutated) in new (string, IReadOnlyList<RegistryEntry>)[] {
+            ("PlannedHours removed from OpenRole", Replace(role, role with { Fields = [.. role.Fields.Where(f => f != "PlannedHours")] })),
+            ("OpenRole project lookup removed", Replace(role, role with { Project = null, HasProjectLookup = false, NoProjectReason = "Seeded defect" })) })
+            Assert.True(Fails(() => AssertSnapshots(mutated)), defect);
+    }
+
+    static bool Fails(Action check)
+    {
+        try { check(); return false; }
+        catch (Xunit.Sdk.XunitException) { return true; }
+    }
+
+    static void AssertDeclarations(IReadOnlyList<RegistryEntry> actual)
+    {
         var audited = typeof(HubDb).Assembly.GetTypes().Where(t => !t.IsAbstract && typeof(IAuditable).IsAssignableFrom(t)).ToHashSet();
         Assert.Equal(audited.OrderBy(t => t.FullName), actual.Select(e => e.ClrType).OrderBy(t => t.FullName));
         Assert.Equal(actual.Count, actual.Select(e => e.ClrType).Distinct().Count());
@@ -32,24 +72,23 @@ public sealed class RegistryTests
             // ItemLink writes its parent's stored type, never a new item-history surface.
             if (entity is not ItemLink) Assert.Equal(entity.AuditType, entry.ItemType);
         }
-        Assert.Equal(ViewEndpoints.Lists.Keys.Order(), ScreenLists.All.Select(l => l.Code).Order());
     }
 
-    [Fact]
-    public void Audit_fields_and_history_types_preserve_the_original_snapshots() // AC-PLAT-02, AC-PLAT-03
+    static void AssertSnapshots(IReadOnlyList<RegistryEntry> entries)
     {
         var original = JsonSerializer.Deserialize<Dictionary<string, string[]>>(File.ReadAllText(Snapshot("audit-fields")))!;
         foreach (var (type, fields) in original)
         {
-            var entry = Assert.Single(EntityRegistry.Entries, entry => entry.ClrType.Name == type);
+            var entry = Assert.Single(entries, entry => entry.ClrType.Name == type);
             Assert.Equal(fields, entry.Fields.Where(fields.Contains));
         }
         var history = JsonSerializer.Deserialize<string[]>(File.ReadAllText(Snapshot("item-history-types")))!;
-        Assert.Equal(history.Order(), EntityRegistry.Entries.Where(e => e.Project is not null).Select(e => e.ItemType).Order());
-        Assert.Contains("PlannedHours", EntityRegistry.For(typeof(OpenRole)).Fields);
-        Assert.NotNull(EntityRegistry.History("OpenRole")?.Project);
-        Assert.Null(EntityRegistry.History("TimeEntry"));
-        Assert.Null(EntityRegistry.History("CalendarEvent"));
+        var lookups = entries.Where(e => e.Project is not null).Select(e => e.ItemType).ToList();
+        Assert.Equal(history.Order(), lookups.Order());
+        Assert.Contains("PlannedHours", entries.Single(e => e.ClrType == typeof(OpenRole)).Fields);
+        Assert.Contains("OpenRole", lookups);
+        Assert.DoesNotContain("TimeEntry", lookups);
+        Assert.DoesNotContain("CalendarEvent", lookups);
     }
 
     [Fact]

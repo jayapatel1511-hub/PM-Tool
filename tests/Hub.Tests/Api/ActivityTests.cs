@@ -1,8 +1,10 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using Hub.Domain;
 using Hub.Api.Infrastructure;
 using Hub.Api.Features;
+using Hub.Api.Records;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Tests.Api;
@@ -176,6 +178,41 @@ public sealed class ActivityTests(HubFactory f)
         var project = await f.As(TestData.Pm).GetAsync($"/api/v1/items/Project/{p.Id}/activity").Result.Json();
         Assert.Contains(project["items"]!.AsArray(), x => x!.S("action") == "StatusChanged");
         Assert.DoesNotContain(project["items"]!.AsArray(), x => x!.S("itemType") == ItemType.Dependency); // the project number is in every key
+    }
+
+    [Fact]
+    public async Task Item_history_answers_only_the_fourteen_history_types() // AC-PLAT-03, FR-PLAT-05
+    {
+        var p = await d.Project();
+        var a = await d.NewTask(p.Id, TestData.Pm, new { assigneeId = d.User(TestData.Alex) });
+        await d.NewTask(p.Id, TestData.Pm, new { dependsOn = new[] { a.G("id") } });
+        await f.As(TestData.Alex).Post("/api/v1/time", new { taskId = a.G("id"), workDate = "2026-09-14", hours = 1m }).Result.Json(201);
+        await f.As(TestData.Alex).Post("/api/v1/calendar/events", new { projectId = p.Id, type = "Meeting", title = "Synthetic history sweep",
+            start = "2026-09-21T09:00", end = "2026-09-21T10:00" }).Result.Json(201);
+        var logged = await f.DbAsync(db => db.ActivityLog.Where(x => x.ProjectId == p.Id && x.ItemId != null).Select(x => new { x.ItemType, Id = x.ItemId!.Value }).Distinct().ToListAsync());
+        var history = JsonSerializer.Deserialize<string[]>(File.ReadAllText(Path.Combine(ContractTests.Root, "tests/Hub.Tests/Snapshots/registry/item-history-types.json")))!;
+        Assert.Equal(14, history.Length);
+        foreach (var type in new[] { ItemType.Task, ItemType.Project, ItemType.Dependency, ItemType.TimeEntry, ItemType.CalendarEvent, ItemType.Discipline, ItemType.Member })
+            Assert.Contains(logged, x => x.ItemType == type);
+        var pm = f.As(TestData.Pm); // the project's PM sees every row, so a 404 is the type rule and not privacy
+
+        // Every other stored type answers 404, even for a real audited id of that type or a visible project's id.
+        var others = EntityRegistry.Entries.Select(e => e.ItemType).Concat(logged.Select(x => x.ItemType)).Concat(["Unknown", "task", "OPENROLE"])
+            .Distinct().Where(t => !history.Contains(t)).ToList();
+        Assert.True(others.Count > 50, $"{others.Count} other types");
+        foreach (var type in others)
+            foreach (var id in logged.Where(x => x.ItemType == type).Select(x => x.Id).Append(p.Id).Append(Guid.NewGuid()))
+                Assert.True((await pm.GetAsync($"/api/v1/items/{type}/{id}/activity")).StatusCode == HttpStatusCode.NotFound, $"{type} {id}");
+
+        // A history type resolves its own items to their project, and nobody else's id.
+        foreach (var row in logged.Where(x => history.Contains(x.ItemType)))
+        {
+            var page = await pm.GetAsync($"/api/v1/items/{row.ItemType}/{row.Id}/activity").Result.Json();
+            Assert.NotEmpty(page["items"]!.AsArray());
+            Assert.All(page["items"]!.AsArray(), x => Assert.Equal(p.Id, x!.G("projectId")));
+        }
+        foreach (var type in history.Where(t => t is not (ItemType.Task or ItemType.Project)))
+            Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"/api/v1/items/{type}/{a.S("id")}/activity")).StatusCode);
     }
 
     [Fact]

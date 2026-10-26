@@ -5086,6 +5086,7 @@
     ],
     "$.items[].changes[].old": [
       "null",
+      "number",
       "string"
     ],
     "$.items[].changes[].oldLabel": [
@@ -60383,6 +60384,7 @@
     ],
     "$.items[].changes[].old": [
       "null",
+      "number",
       "string"
     ],
     "$.items[].changes[].oldLabel": [

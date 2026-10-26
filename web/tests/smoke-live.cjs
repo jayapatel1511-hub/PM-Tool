@@ -29,8 +29,10 @@ async function seed() {
   await api(`projects/${project.id}/transition`, 'priya', { method: 'POST', body: JSON.stringify({ toStatus: 'Active', rowVersion: draft.rowVersion }) })
   const detail = await api(`projects/${project.id}`, 'priya')
   const discipline = detail.disciplines?.[0]?.id ?? detail.projectDisciplines?.[0]?.id
+  // This week's Monday to Friday, so the role always falls inside Workload's default window.
+  const day = n => { const d = new Date(); d.setUTCDate(d.getUTCDate() - (d.getUTCDay() + 6) % 7 + n); return d.toISOString().slice(0, 10) }
   const role = await api(`projects/${project.id}/open-roles`, 'priya', { method: 'POST', body: JSON.stringify({
-    roleLabel: 'Synthetic 040 unfilled role', fromDate: '2026-10-19', throughDate: '2026-10-23', plannedHours: 20, projectDisciplineId: discipline,
+    roleLabel: 'Synthetic 040 unfilled role', fromDate: day(0), throughDate: day(4), plannedHours: 20, projectDisciplineId: discipline,
   }) })
   return { number: project.projectNumber, id: project.id, discipline, role: role.id, label: role.roleLabel }
 }

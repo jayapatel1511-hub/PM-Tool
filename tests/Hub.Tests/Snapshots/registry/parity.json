@@ -1,0 +1,2207 @@
+{
+  "activityRows": [
+    {
+      "itemType": "OpenRole",
+      "itemId": "{openRole}",
+      "projectId": "{project}",
+      "projectDisciplineId": "{civil}",
+      "action": "Created",
+      "actorType": "User",
+      "actorUserId": "{priya}",
+      "itemKey": null,
+      "itemName": "Parity technologist",
+      "categories": [
+        "creation"
+      ],
+      "changes": [
+        {
+          "new": "Parity technologist",
+          "old": null,
+          "field": "RoleLabel"
+        },
+        {
+          "new": "{civil}",
+          "old": null,
+          "field": "ProjectDisciplineId"
+        },
+        {
+          "new": "2026-10-05",
+          "old": null,
+          "field": "FromDate"
+        },
+        {
+          "new": "2026-10-09",
+          "old": null,
+          "field": "ThroughDate"
+        },
+        {
+          "new": 20,
+          "old": null,
+          "field": "PlannedHours"
+        },
+        {
+          "new": "Open",
+          "old": null,
+          "field": "Status"
+        }
+      ],
+      "reason": null,
+      "source": "API",
+      "snapshot": null
+    },
+    {
+      "itemType": "OpenRole",
+      "itemId": "{openRole}",
+      "projectId": "{project}",
+      "projectDisciplineId": "{civil}",
+      "action": "StatusChanged",
+      "actorType": "User",
+      "actorUserId": "{priya}",
+      "itemKey": null,
+      "itemName": "Parity technologist",
+      "categories": [
+        "status"
+      ],
+      "changes": [
+        {
+          "new": "Cancelled",
+          "old": "Open",
+          "field": "Status"
+        }
+      ],
+      "reason": "Scope dropped",
+      "source": "API",
+      "snapshot": null
+    },
+    {
+      "itemType": "Risk",
+      "itemId": "{risk}",
+      "projectId": "{project}",
+      "projectDisciplineId": null,
+      "action": "Assigned",
+      "actorType": "User",
+      "actorUserId": "{priya}",
+      "itemKey": "{P}-R01",
+      "itemName": "Parity permit risk",
+      "categories": [
+        "assignment",
+        "date"
+      ],
+      "changes": [
+        {
+          "new": "{marc}",
+          "old": "{alex}",
+          "field": "OwnerId"
+        },
+        {
+          "new": 1,
+          "old": 3,
+          "field": "Impact"
+        },
+        {
+          "new": "2026-10-05",
+          "old": "2026-09-28",
+          "field": "ReviewDate"
+        }
+      ],
+      "reason": null,
+      "source": "API",
+      "snapshot": null
+    },
+    {
+      "itemType": "Risk",
+      "itemId": "{risk}",
+      "projectId": "{project}",
+      "projectDisciplineId": null,
+      "action": "Created",
+      "actorType": "User",
+      "actorUserId": "{alex}",
+      "itemKey": "{P}-R01",
+      "itemName": "Parity permit risk",
+      "categories": [
+        "creation"
+      ],
+      "changes": [
+        {
+          "new": "Parity permit risk",
+          "old": null,
+          "field": "Title"
+        },
+        {
+          "new": "What could happen",
+          "old": null,
+          "field": "Description"
+        },
+        {
+          "new": "{alex}",
+          "old": null,
+          "field": "OwnerId"
+        },
+        {
+          "new": 2,
+          "old": null,
+          "field": "Probability"
+        },
+        {
+          "new": 3,
+          "old": null,
+          "field": "Impact"
+        },
+        {
+          "new": "Book the permit meeting early",
+          "old": null,
+          "field": "Mitigation"
+        },
+        {
+          "new": "No reply within two weeks",
+          "old": null,
+          "field": "TriggerIndicator"
+        },
+        {
+          "new": "2026-09-28",
+          "old": null,
+          "field": "ReviewDate"
+        },
+        {
+          "new": "Open",
+          "old": null,
+          "field": "Status"
+        }
+      ],
+      "reason": null,
+      "source": "API",
+      "snapshot": null
+    },
+    {
+      "itemType": "Task",
+      "itemId": "{task}",
+      "projectId": "{project}",
+      "projectDisciplineId": "{civil}",
+      "action": "Assigned",
+      "actorType": "User",
+      "actorUserId": "{marc}",
+      "itemKey": "{P}-T0001",
+      "itemName": "Parity grading task",
+      "categories": [
+        "assignment",
+        "date",
+        "structure"
+      ],
+      "changes": [
+        {
+          "new": "{deliverable}",
+          "old": null,
+          "field": "DeliverableId"
+        },
+        {
+          "new": "{alex}",
+          "old": null,
+          "field": "AssigneeId"
+        },
+        {
+          "new": "High",
+          "old": "Medium",
+          "field": "Priority"
+        },
+        {
+          "new": "2026-10-01",
+          "old": null,
+          "field": "DueDate"
+        },
+        {
+          "new": 12,
+          "old": null,
+          "field": "EstimatedHours"
+        }
+      ],
+      "reason": null,
+      "source": "API",
+      "snapshot": null
+    },
+    {
+      "itemType": "Task",
+      "itemId": "{task}",
+      "projectId": "{project}",
+      "projectDisciplineId": "{civil}",
+      "action": "Created",
+      "actorType": "User",
+      "actorUserId": "{marc}",
+      "itemKey": "{P}-T0001",
+      "itemName": "Parity grading task",
+      "categories": [
+        "creation"
+      ],
+      "changes": [
+        {
+          "new": "Parity grading task",
+          "old": null,
+          "field": "Name"
+        },
+        {
+          "new": "{civil}",
+          "old": null,
+          "field": "ProjectDisciplineId"
+        },
+        {
+          "new": "Medium",
+          "old": null,
+          "field": "Priority"
+        },
+        {
+          "new": "Not Started",
+          "old": null,
+          "field": "Status"
+        },
+        {
+          "new": 0,
+          "old": null,
+          "field": "ProgressPct"
+        },
+        {
+          "new": 0,
+          "old": null,
+          "field": "ReviewRound"
+        }
+      ],
+      "reason": null,
+      "source": "API",
+      "snapshot": null
+    }
+  ],
+  "projectHistory": {
+    "status": 200,
+    "totalCount": 17,
+    "items": [
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{alex}",
+        "actorName": "Alex Chen",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Risk",
+        "itemId": "{risk}",
+        "itemKey": "{P}-R01",
+        "itemName": "Parity permit risk",
+        "action": "Created",
+        "categories": [
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "Title",
+            "old": null,
+            "new": "Parity permit risk",
+            "oldLabel": null,
+            "newLabel": "Parity permit risk"
+          },
+          {
+            "field": "Description",
+            "old": null,
+            "new": "What could happen",
+            "oldLabel": null,
+            "newLabel": "What could happen"
+          },
+          {
+            "field": "OwnerId",
+            "old": null,
+            "new": "{alex}",
+            "oldLabel": null,
+            "newLabel": "Alex Chen"
+          },
+          {
+            "field": "Probability",
+            "old": null,
+            "new": 2,
+            "oldLabel": null,
+            "newLabel": "2"
+          },
+          {
+            "field": "Impact",
+            "old": null,
+            "new": 3,
+            "oldLabel": null,
+            "newLabel": "3"
+          },
+          {
+            "field": "Mitigation",
+            "old": null,
+            "new": "Book the permit meeting early",
+            "oldLabel": null,
+            "newLabel": "Book the permit meeting early"
+          },
+          {
+            "field": "TriggerIndicator",
+            "old": null,
+            "new": "No reply within two weeks",
+            "oldLabel": null,
+            "newLabel": "No reply within two weeks"
+          },
+          {
+            "field": "ReviewDate",
+            "old": null,
+            "new": "2026-09-28",
+            "oldLabel": null,
+            "newLabel": "2026-09-28"
+          },
+          {
+            "field": "Status",
+            "old": null,
+            "new": "Open",
+            "oldLabel": null,
+            "newLabel": "Open"
+          }
+        ],
+        "summary": "Title: — → Parity permit risk; Description: — → What could happen; Owner: — → Alex Chen; Probability: — → 2; Impact: — → 3; Mitigation: — → Book the permit meeting early; TriggerIndicator: — → No reply within two weeks; ReviewDate: — → 2026-09-28; Status: — → Open",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{alex}",
+        "actorName": "Alex Chen",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "TimeEntry",
+        "itemId": "{timeEntry}",
+        "itemKey": "{P}-T0001",
+        "itemName": null,
+        "action": "Created",
+        "categories": [
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "TaskId",
+            "old": null,
+            "new": "{task}",
+            "oldLabel": null,
+            "newLabel": "{P}-T0001 Parity grading task"
+          },
+          {
+            "field": "UserId",
+            "old": null,
+            "new": "{alex}",
+            "oldLabel": null,
+            "newLabel": "Alex Chen"
+          },
+          {
+            "field": "WorkDate",
+            "old": null,
+            "new": "2026-09-14",
+            "oldLabel": null,
+            "newLabel": "2026-09-14"
+          },
+          {
+            "field": "Hours",
+            "old": null,
+            "new": 1,
+            "oldLabel": null,
+            "newLabel": "1"
+          },
+          {
+            "field": "Note",
+            "old": null,
+            "new": "Parity private effort note",
+            "oldLabel": null,
+            "newLabel": "Parity private effort note"
+          }
+        ],
+        "summary": "Task: — → {P}-T0001 Parity grading task; User: — → Alex Chen; WorkDate: — → 2026-09-14; Hours: — → 1; Note: — → Parity private effort note",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{marc}",
+        "actorName": "Marc Dubois",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Deliverable",
+        "itemId": "{deliverable}",
+        "itemKey": "{P}-D001",
+        "itemName": "Parity drawing package",
+        "action": "Created",
+        "categories": [
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "Name",
+            "old": null,
+            "new": "Parity drawing package",
+            "oldLabel": null,
+            "newLabel": "Parity drawing package"
+          },
+          {
+            "field": "ProjectDisciplineId",
+            "old": null,
+            "new": "{civil}",
+            "oldLabel": null,
+            "newLabel": "Civil"
+          },
+          {
+            "field": "DeliverableTypeId",
+            "old": null,
+            "new": "{id}",
+            "oldLabel": null,
+            "newLabel": "Drawing Package"
+          },
+          {
+            "field": "OwnerId",
+            "old": null,
+            "new": "{marc}",
+            "oldLabel": null,
+            "newLabel": "Marc Dubois"
+          },
+          {
+            "field": "Priority",
+            "old": null,
+            "new": "Medium",
+            "oldLabel": null,
+            "newLabel": "Medium"
+          },
+          {
+            "field": "Status",
+            "old": null,
+            "new": "Not Started",
+            "oldLabel": null,
+            "newLabel": "Not Started"
+          },
+          {
+            "field": "RequiresReview",
+            "old": null,
+            "new": true,
+            "oldLabel": null,
+            "newLabel": "True"
+          }
+        ],
+        "summary": "Name: — → Parity drawing package; ProjectDiscipline: — → Civil; DeliverableType: — → Drawing Package; Owner: — → Marc Dubois; Priority: — → Medium; Status: — → Not Started; RequiresReview: — → True",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{marc}",
+        "actorName": "Marc Dubois",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Task",
+        "itemId": "{task}",
+        "itemKey": "{P}-T0001",
+        "itemName": "Parity grading task",
+        "action": "Assigned",
+        "categories": [
+          "assignment",
+          "date",
+          "structure"
+        ],
+        "changes": [
+          {
+            "field": "DeliverableId",
+            "old": null,
+            "new": "{deliverable}",
+            "oldLabel": null,
+            "newLabel": "{P}-D001 Parity drawing package"
+          },
+          {
+            "field": "AssigneeId",
+            "old": null,
+            "new": "{alex}",
+            "oldLabel": null,
+            "newLabel": "Alex Chen"
+          },
+          {
+            "field": "Priority",
+            "old": "Medium",
+            "new": "High",
+            "oldLabel": "Medium",
+            "newLabel": "High"
+          },
+          {
+            "field": "DueDate",
+            "old": null,
+            "new": "2026-10-01",
+            "oldLabel": null,
+            "newLabel": "2026-10-01"
+          },
+          {
+            "field": "EstimatedHours",
+            "old": null,
+            "new": 12,
+            "oldLabel": null,
+            "newLabel": "12"
+          }
+        ],
+        "summary": "Deliverable: — → {P}-D001 Parity drawing package; Assignee: — → Alex Chen; Priority: Medium → High; DueDate: — → 2026-10-01; EstimatedHours: — → 12",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{marc}",
+        "actorName": "Marc Dubois",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Task",
+        "itemId": "{task}",
+        "itemKey": "{P}-T0001",
+        "itemName": "Parity grading task",
+        "action": "Created",
+        "categories": [
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "Name",
+            "old": null,
+            "new": "Parity grading task",
+            "oldLabel": null,
+            "newLabel": "Parity grading task"
+          },
+          {
+            "field": "ProjectDisciplineId",
+            "old": null,
+            "new": "{civil}",
+            "oldLabel": null,
+            "newLabel": "Civil"
+          },
+          {
+            "field": "Priority",
+            "old": null,
+            "new": "Medium",
+            "oldLabel": null,
+            "newLabel": "Medium"
+          },
+          {
+            "field": "Status",
+            "old": null,
+            "new": "Not Started",
+            "oldLabel": null,
+            "newLabel": "Not Started"
+          },
+          {
+            "field": "ProgressPct",
+            "old": null,
+            "new": 0,
+            "oldLabel": null,
+            "newLabel": "0"
+          },
+          {
+            "field": "ReviewRound",
+            "old": null,
+            "new": 0,
+            "oldLabel": null,
+            "newLabel": "0"
+          }
+        ],
+        "summary": "Name: — → Parity grading task; ProjectDiscipline: — → Civil; Priority: — → Medium; Status: — → Not Started; ProgressPct: — → 0; ReviewRound: — → 0",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Discipline",
+        "itemId": "{civil}",
+        "itemKey": null,
+        "itemName": "Civil",
+        "action": "Created",
+        "categories": [
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "DisciplineId",
+            "old": null,
+            "new": "{id}",
+            "oldLabel": null,
+            "newLabel": "Civil"
+          },
+          {
+            "field": "LeadUserId",
+            "old": null,
+            "new": "{marc}",
+            "oldLabel": null,
+            "newLabel": "Marc Dubois"
+          },
+          {
+            "field": "IsActive",
+            "old": null,
+            "new": true,
+            "oldLabel": null,
+            "newLabel": "True"
+          },
+          {
+            "field": "SortOrder",
+            "old": null,
+            "new": 0,
+            "oldLabel": null,
+            "newLabel": "0"
+          }
+        ],
+        "summary": "Discipline: — → Civil; LeadUser: — → Marc Dubois; IsActive: — → True; SortOrder: — → 0",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Discipline",
+        "itemId": "{electrical}",
+        "itemKey": null,
+        "itemName": "Electrical",
+        "action": "Created",
+        "categories": [
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "DisciplineId",
+            "old": null,
+            "new": "{id}",
+            "oldLabel": null,
+            "newLabel": "Electrical"
+          },
+          {
+            "field": "LeadUserId",
+            "old": null,
+            "new": "{omar}",
+            "oldLabel": null,
+            "newLabel": "Omar Haddad"
+          },
+          {
+            "field": "IsActive",
+            "old": null,
+            "new": true,
+            "oldLabel": null,
+            "newLabel": "True"
+          },
+          {
+            "field": "SortOrder",
+            "old": null,
+            "new": 1,
+            "oldLabel": null,
+            "newLabel": "1"
+          }
+        ],
+        "summary": "Discipline: — → Electrical; LeadUser: — → Omar Haddad; IsActive: — → True; SortOrder: — → 1",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Member",
+        "itemId": "{id}",
+        "itemKey": "alex@hub.test",
+        "itemName": null,
+        "action": "MemberAdded",
+        "categories": [
+          "assignment",
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "UserId",
+            "old": null,
+            "new": "{alex}",
+            "oldLabel": null,
+            "newLabel": "Alex Chen"
+          },
+          {
+            "field": "Roles",
+            "old": null,
+            "new": [
+              "TeamMember"
+            ],
+            "oldLabel": null,
+            "newLabel": "[\"TeamMember\"]"
+          },
+          {
+            "field": "PrimaryDisciplineId",
+            "old": null,
+            "new": "{civil}",
+            "oldLabel": null,
+            "newLabel": "Civil"
+          }
+        ],
+        "summary": "User: — → Alex Chen; Roles: — → [\"TeamMember\"]; PrimaryDiscipline: — → Civil",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Member",
+        "itemId": "{id}",
+        "itemKey": "marc@hub.test",
+        "itemName": null,
+        "action": "MemberAdded",
+        "categories": [
+          "assignment",
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "UserId",
+            "old": null,
+            "new": "{marc}",
+            "oldLabel": null,
+            "newLabel": "Marc Dubois"
+          },
+          {
+            "field": "Roles",
+            "old": null,
+            "new": [
+              "TeamMember"
+            ],
+            "oldLabel": null,
+            "newLabel": "[\"TeamMember\"]"
+          },
+          {
+            "field": "PrimaryDisciplineId",
+            "old": null,
+            "new": "{civil}",
+            "oldLabel": null,
+            "newLabel": "Civil"
+          }
+        ],
+        "summary": "User: — → Marc Dubois; Roles: — → [\"TeamMember\"]; PrimaryDiscipline: — → Civil",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Member",
+        "itemId": "{id}",
+        "itemKey": "omar@hub.test",
+        "itemName": null,
+        "action": "MemberAdded",
+        "categories": [
+          "assignment",
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "UserId",
+            "old": null,
+            "new": "{omar}",
+            "oldLabel": null,
+            "newLabel": "Omar Haddad"
+          },
+          {
+            "field": "Roles",
+            "old": null,
+            "new": [
+              "TeamMember"
+            ],
+            "oldLabel": null,
+            "newLabel": "[\"TeamMember\"]"
+          },
+          {
+            "field": "PrimaryDisciplineId",
+            "old": null,
+            "new": "{electrical}",
+            "oldLabel": null,
+            "newLabel": "Electrical"
+          }
+        ],
+        "summary": "User: — → Omar Haddad; Roles: — → [\"TeamMember\"]; PrimaryDiscipline: — → Electrical",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Member",
+        "itemId": "{id}",
+        "itemKey": "priya@hub.test",
+        "itemName": null,
+        "action": "MemberAdded",
+        "categories": [
+          "assignment",
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "UserId",
+            "old": null,
+            "new": "{priya}",
+            "oldLabel": null,
+            "newLabel": "Priya Nair"
+          },
+          {
+            "field": "Roles",
+            "old": null,
+            "new": [
+              "PM"
+            ],
+            "oldLabel": null,
+            "newLabel": "[\"PM\"]"
+          }
+        ],
+        "summary": "User: — → Priya Nair; Roles: — → [\"PM\"]",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Milestone",
+        "itemId": "{milestone}",
+        "itemKey": "{P}-M01",
+        "itemName": "Parity submission",
+        "action": "Created",
+        "categories": [
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "Name",
+            "old": null,
+            "new": "Parity submission",
+            "oldLabel": null,
+            "newLabel": "Parity submission"
+          },
+          {
+            "field": "MilestoneType",
+            "old": null,
+            "new": "Design Submission",
+            "oldLabel": null,
+            "newLabel": "Design Submission"
+          },
+          {
+            "field": "Date",
+            "old": null,
+            "new": "2026-09-24",
+            "oldLabel": null,
+            "newLabel": "2026-09-24"
+          },
+          {
+            "field": "IsClientFacing",
+            "old": null,
+            "new": true,
+            "oldLabel": null,
+            "newLabel": "True"
+          }
+        ],
+        "summary": "Name: — → Parity submission; MilestoneType: — → Design Submission; Date: — → 2026-09-24; IsClientFacing: — → True",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "OpenRole",
+        "itemId": "{openRole}",
+        "itemKey": null,
+        "itemName": "Parity technologist",
+        "action": "Created",
+        "categories": [
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "RoleLabel",
+            "old": null,
+            "new": "Parity technologist",
+            "oldLabel": null,
+            "newLabel": "Parity technologist"
+          },
+          {
+            "field": "ProjectDisciplineId",
+            "old": null,
+            "new": "{civil}",
+            "oldLabel": null,
+            "newLabel": "Civil"
+          },
+          {
+            "field": "FromDate",
+            "old": null,
+            "new": "2026-10-05",
+            "oldLabel": null,
+            "newLabel": "2026-10-05"
+          },
+          {
+            "field": "ThroughDate",
+            "old": null,
+            "new": "2026-10-09",
+            "oldLabel": null,
+            "newLabel": "2026-10-09"
+          },
+          {
+            "field": "PlannedHours",
+            "old": null,
+            "new": 20,
+            "oldLabel": null,
+            "newLabel": "20"
+          },
+          {
+            "field": "Status",
+            "old": null,
+            "new": "Open",
+            "oldLabel": null,
+            "newLabel": "Open"
+          }
+        ],
+        "summary": "RoleLabel: — → Parity technologist; ProjectDiscipline: — → Civil; FromDate: — → 2026-10-05; ThroughDate: — → 2026-10-09; PlannedHours: — → 20; Status: — → Open",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "OpenRole",
+        "itemId": "{openRole}",
+        "itemKey": null,
+        "itemName": "Parity technologist",
+        "action": "StatusChanged",
+        "categories": [
+          "status"
+        ],
+        "changes": [
+          {
+            "field": "Status",
+            "old": "Open",
+            "new": "Cancelled",
+            "oldLabel": "Open",
+            "newLabel": "Cancelled"
+          }
+        ],
+        "summary": "Status: Open → Cancelled",
+        "reason": "Scope dropped",
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Project",
+        "itemId": "{project}",
+        "itemKey": "{P}",
+        "itemName": "Parity project",
+        "action": "Created",
+        "categories": [
+          "creation"
+        ],
+        "changes": [
+          {
+            "field": "ProjectNumber",
+            "old": null,
+            "new": "{P}",
+            "oldLabel": null,
+            "newLabel": "{P}"
+          },
+          {
+            "field": "Name",
+            "old": null,
+            "new": "Parity project",
+            "oldLabel": null,
+            "newLabel": "Parity project"
+          },
+          {
+            "field": "ClientId",
+            "old": null,
+            "new": "{id}",
+            "oldLabel": null,
+            "newLabel": "Internal / TBD"
+          },
+          {
+            "field": "ProjectManagerId",
+            "old": null,
+            "new": "{priya}",
+            "oldLabel": null,
+            "newLabel": "Priya Nair"
+          },
+          {
+            "field": "OfficeId",
+            "old": null,
+            "new": "{id}",
+            "oldLabel": null,
+            "newLabel": "Head Office"
+          },
+          {
+            "field": "Status",
+            "old": null,
+            "new": "Setup",
+            "oldLabel": null,
+            "newLabel": "Setup"
+          },
+          {
+            "field": "Priority",
+            "old": null,
+            "new": "Medium",
+            "oldLabel": null,
+            "newLabel": "Medium"
+          },
+          {
+            "field": "Visibility",
+            "old": null,
+            "new": "Open",
+            "oldLabel": null,
+            "newLabel": "Open"
+          },
+          {
+            "field": "AllowViewerComments",
+            "old": null,
+            "new": true,
+            "oldLabel": null,
+            "newLabel": "True"
+          }
+        ],
+        "summary": "ProjectNumber: — → {P}; Name: — → Parity project; Client: — → Internal / TBD; ProjectManager: — → Priya Nair; Office: — → Head Office; Status: — → Setup; Priority: — → Medium; Visibility: — → Open; AllowViewerComments: — → True",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Project",
+        "itemId": "{project}",
+        "itemKey": "{P}",
+        "itemName": "Parity project",
+        "action": "StatusChanged",
+        "categories": [
+          "status"
+        ],
+        "changes": [
+          {
+            "field": "Status",
+            "old": "Setup",
+            "new": "Active",
+            "oldLabel": "Setup",
+            "newLabel": "Active"
+          }
+        ],
+        "summary": "Status: Setup → Active",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      },
+      {
+        "id": "{id}",
+        "occurredAt": "{time}",
+        "actorId": "{priya}",
+        "actorName": "Priya Nair",
+        "actorType": "User",
+        "projectId": "{project}",
+        "itemType": "Risk",
+        "itemId": "{risk}",
+        "itemKey": "{P}-R01",
+        "itemName": "Parity permit risk",
+        "action": "Assigned",
+        "categories": [
+          "assignment",
+          "date"
+        ],
+        "changes": [
+          {
+            "field": "OwnerId",
+            "old": "{alex}",
+            "new": "{marc}",
+            "oldLabel": "Alex Chen",
+            "newLabel": "Marc Dubois"
+          },
+          {
+            "field": "Impact",
+            "old": 3,
+            "new": 1,
+            "oldLabel": "3",
+            "newLabel": "1"
+          },
+          {
+            "field": "ReviewDate",
+            "old": "2026-09-28",
+            "new": "2026-10-05",
+            "oldLabel": "2026-09-28",
+            "newLabel": "2026-10-05"
+          }
+        ],
+        "summary": "Owner: Alex Chen → Marc Dubois; Impact: 3 → 1; ReviewDate: 2026-09-28 → 2026-10-05",
+        "reason": null,
+        "source": "API",
+        "correlationId": "{id}",
+        "snapshot": null,
+        "snapshotLabels": null
+      }
+    ]
+  },
+  "itemHistory": {
+    "Task": {
+      "status": 200,
+      "totalCount": 3,
+      "items": [
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{alex}",
+          "actorName": "Alex Chen",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "TimeEntry",
+          "itemId": "{timeEntry}",
+          "itemKey": "{P}-T0001",
+          "itemName": null,
+          "action": "Created",
+          "categories": [
+            "creation"
+          ],
+          "changes": [
+            {
+              "field": "TaskId",
+              "old": null,
+              "new": "{task}",
+              "oldLabel": null,
+              "newLabel": "{P}-T0001 Parity grading task"
+            },
+            {
+              "field": "UserId",
+              "old": null,
+              "new": "{alex}",
+              "oldLabel": null,
+              "newLabel": "Alex Chen"
+            },
+            {
+              "field": "WorkDate",
+              "old": null,
+              "new": "2026-09-14",
+              "oldLabel": null,
+              "newLabel": "2026-09-14"
+            },
+            {
+              "field": "Hours",
+              "old": null,
+              "new": 1,
+              "oldLabel": null,
+              "newLabel": "1"
+            },
+            {
+              "field": "Note",
+              "old": null,
+              "new": "Parity private effort note",
+              "oldLabel": null,
+              "newLabel": "Parity private effort note"
+            }
+          ],
+          "summary": "Task: — → {P}-T0001 Parity grading task; User: — → Alex Chen; WorkDate: — → 2026-09-14; Hours: — → 1; Note: — → Parity private effort note",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        },
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{marc}",
+          "actorName": "Marc Dubois",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "Task",
+          "itemId": "{task}",
+          "itemKey": "{P}-T0001",
+          "itemName": "Parity grading task",
+          "action": "Assigned",
+          "categories": [
+            "assignment",
+            "date",
+            "structure"
+          ],
+          "changes": [
+            {
+              "field": "DeliverableId",
+              "old": null,
+              "new": "{deliverable}",
+              "oldLabel": null,
+              "newLabel": "{P}-D001 Parity drawing package"
+            },
+            {
+              "field": "AssigneeId",
+              "old": null,
+              "new": "{alex}",
+              "oldLabel": null,
+              "newLabel": "Alex Chen"
+            },
+            {
+              "field": "Priority",
+              "old": "Medium",
+              "new": "High",
+              "oldLabel": "Medium",
+              "newLabel": "High"
+            },
+            {
+              "field": "DueDate",
+              "old": null,
+              "new": "2026-10-01",
+              "oldLabel": null,
+              "newLabel": "2026-10-01"
+            },
+            {
+              "field": "EstimatedHours",
+              "old": null,
+              "new": 12,
+              "oldLabel": null,
+              "newLabel": "12"
+            }
+          ],
+          "summary": "Deliverable: — → {P}-D001 Parity drawing package; Assignee: — → Alex Chen; Priority: Medium → High; DueDate: — → 2026-10-01; EstimatedHours: — → 12",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        },
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{marc}",
+          "actorName": "Marc Dubois",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "Task",
+          "itemId": "{task}",
+          "itemKey": "{P}-T0001",
+          "itemName": "Parity grading task",
+          "action": "Created",
+          "categories": [
+            "creation"
+          ],
+          "changes": [
+            {
+              "field": "Name",
+              "old": null,
+              "new": "Parity grading task",
+              "oldLabel": null,
+              "newLabel": "Parity grading task"
+            },
+            {
+              "field": "ProjectDisciplineId",
+              "old": null,
+              "new": "{civil}",
+              "oldLabel": null,
+              "newLabel": "Civil"
+            },
+            {
+              "field": "Priority",
+              "old": null,
+              "new": "Medium",
+              "oldLabel": null,
+              "newLabel": "Medium"
+            },
+            {
+              "field": "Status",
+              "old": null,
+              "new": "Not Started",
+              "oldLabel": null,
+              "newLabel": "Not Started"
+            },
+            {
+              "field": "ProgressPct",
+              "old": null,
+              "new": 0,
+              "oldLabel": null,
+              "newLabel": "0"
+            },
+            {
+              "field": "ReviewRound",
+              "old": null,
+              "new": 0,
+              "oldLabel": null,
+              "newLabel": "0"
+            }
+          ],
+          "summary": "Name: — → Parity grading task; ProjectDiscipline: — → Civil; Priority: — → Medium; Status: — → Not Started; ProgressPct: — → 0; ReviewRound: — → 0",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        }
+      ]
+    },
+    "Risk": {
+      "status": 200,
+      "totalCount": 2,
+      "items": [
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{alex}",
+          "actorName": "Alex Chen",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "Risk",
+          "itemId": "{risk}",
+          "itemKey": "{P}-R01",
+          "itemName": "Parity permit risk",
+          "action": "Created",
+          "categories": [
+            "creation"
+          ],
+          "changes": [
+            {
+              "field": "Title",
+              "old": null,
+              "new": "Parity permit risk",
+              "oldLabel": null,
+              "newLabel": "Parity permit risk"
+            },
+            {
+              "field": "Description",
+              "old": null,
+              "new": "What could happen",
+              "oldLabel": null,
+              "newLabel": "What could happen"
+            },
+            {
+              "field": "OwnerId",
+              "old": null,
+              "new": "{alex}",
+              "oldLabel": null,
+              "newLabel": "Alex Chen"
+            },
+            {
+              "field": "Probability",
+              "old": null,
+              "new": 2,
+              "oldLabel": null,
+              "newLabel": "2"
+            },
+            {
+              "field": "Impact",
+              "old": null,
+              "new": 3,
+              "oldLabel": null,
+              "newLabel": "3"
+            },
+            {
+              "field": "Mitigation",
+              "old": null,
+              "new": "Book the permit meeting early",
+              "oldLabel": null,
+              "newLabel": "Book the permit meeting early"
+            },
+            {
+              "field": "TriggerIndicator",
+              "old": null,
+              "new": "No reply within two weeks",
+              "oldLabel": null,
+              "newLabel": "No reply within two weeks"
+            },
+            {
+              "field": "ReviewDate",
+              "old": null,
+              "new": "2026-09-28",
+              "oldLabel": null,
+              "newLabel": "2026-09-28"
+            },
+            {
+              "field": "Status",
+              "old": null,
+              "new": "Open",
+              "oldLabel": null,
+              "newLabel": "Open"
+            }
+          ],
+          "summary": "Title: — → Parity permit risk; Description: — → What could happen; Owner: — → Alex Chen; Probability: — → 2; Impact: — → 3; Mitigation: — → Book the permit meeting early; TriggerIndicator: — → No reply within two weeks; ReviewDate: — → 2026-09-28; Status: — → Open",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        },
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{priya}",
+          "actorName": "Priya Nair",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "Risk",
+          "itemId": "{risk}",
+          "itemKey": "{P}-R01",
+          "itemName": "Parity permit risk",
+          "action": "Assigned",
+          "categories": [
+            "assignment",
+            "date"
+          ],
+          "changes": [
+            {
+              "field": "OwnerId",
+              "old": "{alex}",
+              "new": "{marc}",
+              "oldLabel": "Alex Chen",
+              "newLabel": "Marc Dubois"
+            },
+            {
+              "field": "Impact",
+              "old": 3,
+              "new": 1,
+              "oldLabel": "3",
+              "newLabel": "1"
+            },
+            {
+              "field": "ReviewDate",
+              "old": "2026-09-28",
+              "new": "2026-10-05",
+              "oldLabel": "2026-09-28",
+              "newLabel": "2026-10-05"
+            }
+          ],
+          "summary": "Owner: Alex Chen → Marc Dubois; Impact: 3 → 1; ReviewDate: 2026-09-28 → 2026-10-05",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        }
+      ]
+    },
+    "OpenRole": {
+      "status": 200,
+      "totalCount": 2,
+      "items": [
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{priya}",
+          "actorName": "Priya Nair",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "OpenRole",
+          "itemId": "{openRole}",
+          "itemKey": null,
+          "itemName": "Parity technologist",
+          "action": "Created",
+          "categories": [
+            "creation"
+          ],
+          "changes": [
+            {
+              "field": "RoleLabel",
+              "old": null,
+              "new": "Parity technologist",
+              "oldLabel": null,
+              "newLabel": "Parity technologist"
+            },
+            {
+              "field": "ProjectDisciplineId",
+              "old": null,
+              "new": "{civil}",
+              "oldLabel": null,
+              "newLabel": "Civil"
+            },
+            {
+              "field": "FromDate",
+              "old": null,
+              "new": "2026-10-05",
+              "oldLabel": null,
+              "newLabel": "2026-10-05"
+            },
+            {
+              "field": "ThroughDate",
+              "old": null,
+              "new": "2026-10-09",
+              "oldLabel": null,
+              "newLabel": "2026-10-09"
+            },
+            {
+              "field": "PlannedHours",
+              "old": null,
+              "new": 20,
+              "oldLabel": null,
+              "newLabel": "20"
+            },
+            {
+              "field": "Status",
+              "old": null,
+              "new": "Open",
+              "oldLabel": null,
+              "newLabel": "Open"
+            }
+          ],
+          "summary": "RoleLabel: — → Parity technologist; ProjectDiscipline: — → Civil; FromDate: — → 2026-10-05; ThroughDate: — → 2026-10-09; PlannedHours: — → 20; Status: — → Open",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        },
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{priya}",
+          "actorName": "Priya Nair",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "OpenRole",
+          "itemId": "{openRole}",
+          "itemKey": null,
+          "itemName": "Parity technologist",
+          "action": "StatusChanged",
+          "categories": [
+            "status"
+          ],
+          "changes": [
+            {
+              "field": "Status",
+              "old": "Open",
+              "new": "Cancelled",
+              "oldLabel": "Open",
+              "newLabel": "Cancelled"
+            }
+          ],
+          "summary": "Status: Open → Cancelled",
+          "reason": "Scope dropped",
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        }
+      ]
+    },
+    "Deliverable": {
+      "status": 200,
+      "totalCount": 1,
+      "items": [
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{marc}",
+          "actorName": "Marc Dubois",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "Deliverable",
+          "itemId": "{deliverable}",
+          "itemKey": "{P}-D001",
+          "itemName": "Parity drawing package",
+          "action": "Created",
+          "categories": [
+            "creation"
+          ],
+          "changes": [
+            {
+              "field": "Name",
+              "old": null,
+              "new": "Parity drawing package",
+              "oldLabel": null,
+              "newLabel": "Parity drawing package"
+            },
+            {
+              "field": "ProjectDisciplineId",
+              "old": null,
+              "new": "{civil}",
+              "oldLabel": null,
+              "newLabel": "Civil"
+            },
+            {
+              "field": "DeliverableTypeId",
+              "old": null,
+              "new": "{id}",
+              "oldLabel": null,
+              "newLabel": "Drawing Package"
+            },
+            {
+              "field": "OwnerId",
+              "old": null,
+              "new": "{marc}",
+              "oldLabel": null,
+              "newLabel": "Marc Dubois"
+            },
+            {
+              "field": "Priority",
+              "old": null,
+              "new": "Medium",
+              "oldLabel": null,
+              "newLabel": "Medium"
+            },
+            {
+              "field": "Status",
+              "old": null,
+              "new": "Not Started",
+              "oldLabel": null,
+              "newLabel": "Not Started"
+            },
+            {
+              "field": "RequiresReview",
+              "old": null,
+              "new": true,
+              "oldLabel": null,
+              "newLabel": "True"
+            }
+          ],
+          "summary": "Name: — → Parity drawing package; ProjectDiscipline: — → Civil; DeliverableType: — → Drawing Package; Owner: — → Marc Dubois; Priority: — → Medium; Status: — → Not Started; RequiresReview: — → True",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        }
+      ]
+    },
+    "Milestone": {
+      "status": 200,
+      "totalCount": 1,
+      "items": [
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{priya}",
+          "actorName": "Priya Nair",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "Milestone",
+          "itemId": "{milestone}",
+          "itemKey": "{P}-M01",
+          "itemName": "Parity submission",
+          "action": "Created",
+          "categories": [
+            "creation"
+          ],
+          "changes": [
+            {
+              "field": "Name",
+              "old": null,
+              "new": "Parity submission",
+              "oldLabel": null,
+              "newLabel": "Parity submission"
+            },
+            {
+              "field": "MilestoneType",
+              "old": null,
+              "new": "Design Submission",
+              "oldLabel": null,
+              "newLabel": "Design Submission"
+            },
+            {
+              "field": "Date",
+              "old": null,
+              "new": "2026-09-24",
+              "oldLabel": null,
+              "newLabel": "2026-09-24"
+            },
+            {
+              "field": "IsClientFacing",
+              "old": null,
+              "new": true,
+              "oldLabel": null,
+              "newLabel": "True"
+            }
+          ],
+          "summary": "Name: — → Parity submission; MilestoneType: — → Design Submission; Date: — → 2026-09-24; IsClientFacing: — → True",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        }
+      ]
+    },
+    "Project": {
+      "status": 200,
+      "totalCount": 2,
+      "items": [
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{priya}",
+          "actorName": "Priya Nair",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "Project",
+          "itemId": "{project}",
+          "itemKey": "{P}",
+          "itemName": "Parity project",
+          "action": "Created",
+          "categories": [
+            "creation"
+          ],
+          "changes": [
+            {
+              "field": "ProjectNumber",
+              "old": null,
+              "new": "{P}",
+              "oldLabel": null,
+              "newLabel": "{P}"
+            },
+            {
+              "field": "Name",
+              "old": null,
+              "new": "Parity project",
+              "oldLabel": null,
+              "newLabel": "Parity project"
+            },
+            {
+              "field": "ClientId",
+              "old": null,
+              "new": "{id}",
+              "oldLabel": null,
+              "newLabel": "Internal / TBD"
+            },
+            {
+              "field": "ProjectManagerId",
+              "old": null,
+              "new": "{priya}",
+              "oldLabel": null,
+              "newLabel": "Priya Nair"
+            },
+            {
+              "field": "OfficeId",
+              "old": null,
+              "new": "{id}",
+              "oldLabel": null,
+              "newLabel": "Head Office"
+            },
+            {
+              "field": "Status",
+              "old": null,
+              "new": "Setup",
+              "oldLabel": null,
+              "newLabel": "Setup"
+            },
+            {
+              "field": "Priority",
+              "old": null,
+              "new": "Medium",
+              "oldLabel": null,
+              "newLabel": "Medium"
+            },
+            {
+              "field": "Visibility",
+              "old": null,
+              "new": "Open",
+              "oldLabel": null,
+              "newLabel": "Open"
+            },
+            {
+              "field": "AllowViewerComments",
+              "old": null,
+              "new": true,
+              "oldLabel": null,
+              "newLabel": "True"
+            }
+          ],
+          "summary": "ProjectNumber: — → {P}; Name: — → Parity project; Client: — → Internal / TBD; ProjectManager: — → Priya Nair; Office: — → Head Office; Status: — → Setup; Priority: — → Medium; Visibility: — → Open; AllowViewerComments: — → True",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        },
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{priya}",
+          "actorName": "Priya Nair",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "Project",
+          "itemId": "{project}",
+          "itemKey": "{P}",
+          "itemName": "Parity project",
+          "action": "StatusChanged",
+          "categories": [
+            "status"
+          ],
+          "changes": [
+            {
+              "field": "Status",
+              "old": "Setup",
+              "new": "Active",
+              "oldLabel": "Setup",
+              "newLabel": "Active"
+            }
+          ],
+          "summary": "Status: Setup → Active",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        }
+      ]
+    },
+    "TimeEntry": {
+      "status": 404
+    },
+    "CalendarEvent": {
+      "status": 404
+    }
+  },
+  "privacy": {
+    "dianeTask": {
+      "status": 200,
+      "totalCount": 2,
+      "items": [
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{marc}",
+          "actorName": "Marc Dubois",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "Task",
+          "itemId": "{task}",
+          "itemKey": "{P}-T0001",
+          "itemName": "Parity grading task",
+          "action": "Assigned",
+          "categories": [
+            "assignment",
+            "date",
+            "structure"
+          ],
+          "changes": [
+            {
+              "field": "DeliverableId",
+              "old": null,
+              "new": "{deliverable}",
+              "oldLabel": null,
+              "newLabel": "{P}-D001 Parity drawing package"
+            },
+            {
+              "field": "AssigneeId",
+              "old": null,
+              "new": "{alex}",
+              "oldLabel": null,
+              "newLabel": "Alex Chen"
+            },
+            {
+              "field": "Priority",
+              "old": "Medium",
+              "new": "High",
+              "oldLabel": "Medium",
+              "newLabel": "High"
+            },
+            {
+              "field": "DueDate",
+              "old": null,
+              "new": "2026-10-01",
+              "oldLabel": null,
+              "newLabel": "2026-10-01"
+            },
+            {
+              "field": "EstimatedHours",
+              "old": null,
+              "new": 12,
+              "oldLabel": null,
+              "newLabel": "12"
+            }
+          ],
+          "summary": "Deliverable: — → {P}-D001 Parity drawing package; Assignee: — → Alex Chen; Priority: Medium → High; DueDate: — → 2026-10-01; EstimatedHours: — → 12",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        },
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{marc}",
+          "actorName": "Marc Dubois",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "Task",
+          "itemId": "{task}",
+          "itemKey": "{P}-T0001",
+          "itemName": "Parity grading task",
+          "action": "Created",
+          "categories": [
+            "creation"
+          ],
+          "changes": [
+            {
+              "field": "Name",
+              "old": null,
+              "new": "Parity grading task",
+              "oldLabel": null,
+              "newLabel": "Parity grading task"
+            },
+            {
+              "field": "ProjectDisciplineId",
+              "old": null,
+              "new": "{civil}",
+              "oldLabel": null,
+              "newLabel": "Civil"
+            },
+            {
+              "field": "Priority",
+              "old": null,
+              "new": "Medium",
+              "oldLabel": null,
+              "newLabel": "Medium"
+            },
+            {
+              "field": "Status",
+              "old": null,
+              "new": "Not Started",
+              "oldLabel": null,
+              "newLabel": "Not Started"
+            },
+            {
+              "field": "ProgressPct",
+              "old": null,
+              "new": 0,
+              "oldLabel": null,
+              "newLabel": "0"
+            },
+            {
+              "field": "ReviewRound",
+              "old": null,
+              "new": 0,
+              "oldLabel": null,
+              "newLabel": "0"
+            }
+          ],
+          "summary": "Name: — → Parity grading task; ProjectDiscipline: — → Civil; Priority: — → Medium; Status: — → Not Started; ProgressPct: — → 0; ReviewRound: — → 0",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        }
+      ]
+    },
+    "dianePrivate": {
+      "status": 200,
+      "totalCount": 0,
+      "items": []
+    },
+    "alexPrivate": {
+      "status": 200,
+      "totalCount": 1,
+      "items": [
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{alex}",
+          "actorName": "Alex Chen",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "TimeEntry",
+          "itemId": "{timeEntry}",
+          "itemKey": "{P}-T0001",
+          "itemName": null,
+          "action": "Created",
+          "categories": [
+            "creation"
+          ],
+          "changes": [
+            {
+              "field": "TaskId",
+              "old": null,
+              "new": "{task}",
+              "oldLabel": null,
+              "newLabel": "{P}-T0001 Parity grading task"
+            },
+            {
+              "field": "UserId",
+              "old": null,
+              "new": "{alex}",
+              "oldLabel": null,
+              "newLabel": "Alex Chen"
+            },
+            {
+              "field": "WorkDate",
+              "old": null,
+              "new": "2026-09-14",
+              "oldLabel": null,
+              "newLabel": "2026-09-14"
+            },
+            {
+              "field": "Hours",
+              "old": null,
+              "new": 1,
+              "oldLabel": null,
+              "newLabel": "1"
+            },
+            {
+              "field": "Note",
+              "old": null,
+              "new": "Parity private effort note",
+              "oldLabel": null,
+              "newLabel": "Parity private effort note"
+            }
+          ],
+          "summary": "Task: — → {P}-T0001 Parity grading task; User: — → Alex Chen; WorkDate: — → 2026-09-14; Hours: — → 1; Note: — → Parity private effort note",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        }
+      ]
+    },
+    "pmPrivate": {
+      "status": 200,
+      "totalCount": 1,
+      "items": [
+        {
+          "id": "{id}",
+          "occurredAt": "{time}",
+          "actorId": "{alex}",
+          "actorName": "Alex Chen",
+          "actorType": "User",
+          "projectId": "{project}",
+          "itemType": "TimeEntry",
+          "itemId": "{timeEntry}",
+          "itemKey": "{P}-T0001",
+          "itemName": null,
+          "action": "Created",
+          "categories": [
+            "creation"
+          ],
+          "changes": [
+            {
+              "field": "TaskId",
+              "old": null,
+              "new": "{task}",
+              "oldLabel": null,
+              "newLabel": "{P}-T0001 Parity grading task"
+            },
+            {
+              "field": "UserId",
+              "old": null,
+              "new": "{alex}",
+              "oldLabel": null,
+              "newLabel": "Alex Chen"
+            },
+            {
+              "field": "WorkDate",
+              "old": null,
+              "new": "2026-09-14",
+              "oldLabel": null,
+              "newLabel": "2026-09-14"
+            },
+            {
+              "field": "Hours",
+              "old": null,
+              "new": 1,
+              "oldLabel": null,
+              "newLabel": "1"
+            },
+            {
+              "field": "Note",
+              "old": null,
+              "new": "Parity private effort note",
+              "oldLabel": null,
+              "newLabel": "Parity private effort note"
+            }
+          ],
+          "summary": "Task: — → {P}-T0001 Parity grading task; User: — → Alex Chen; WorkDate: — → 2026-09-14; Hours: — → 1; Note: — → Parity private effort note",
+          "reason": null,
+          "source": "API",
+          "correlationId": "{id}",
+          "snapshot": null,
+          "snapshotLabels": null
+        }
+      ]
+    },
+    "dianeExport": [
+      "\uFEFFTimestamp,Actor,Action,Item,Change,Reason,Source\n"
+    ]
+  },
+  "parameters": {
+    "alexTasks": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetData><row r=\"1\"><c r=\"A1\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Assignee</t></is></c><c r=\"B1\" t=\"inlineStr\"><is><t xml:space=\"preserve\">Alex Chen</t></is></c></row><row r=\"2\"><c r=\"A2\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Discipline</t></is></c><c r=\"B2\" t=\"inlineStr\"><is><t xml:space=\"preserve\">Civil</t></is></c></row><row r=\"3\"><c r=\"A3\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Deliverable</t></is></c><c r=\"B3\" t=\"inlineStr\"><is><t xml:space=\"preserve\">{P}-D001 Parity drawing package, {hiddenDeliverable}</t></is></c></row><row r=\"4\"><c r=\"A4\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Milestone</t></is></c><c r=\"B4\" t=\"inlineStr\"><is><t xml:space=\"preserve\">{P}-M01 Parity submission</t></is></c></row><row r=\"5\"><c r=\"A5\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Search</t></is></c><c r=\"B5\" t=\"inlineStr\"><is><t xml:space=\"preserve\">parity</t></is></c></row><row r=\"6\"><c r=\"A6\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Generated</t></is></c><c r=\"B6\" t=\"inlineStr\"><is><t xml:space=\"preserve\">2026-09-14 10:00 (America/Halifax)</t></is></c></row></sheetData></worksheet>",
+    "pmTasks": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetData><row r=\"1\"><c r=\"A1\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Assignee</t></is></c><c r=\"B1\" t=\"inlineStr\"><is><t xml:space=\"preserve\">Alex Chen</t></is></c></row><row r=\"2\"><c r=\"A2\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Discipline</t></is></c><c r=\"B2\" t=\"inlineStr\"><is><t xml:space=\"preserve\">Civil</t></is></c></row><row r=\"3\"><c r=\"A3\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Deliverable</t></is></c><c r=\"B3\" t=\"inlineStr\"><is><t xml:space=\"preserve\">{P}-D001 Parity drawing package, {Q}-D001 Confidential parity package</t></is></c></row><row r=\"4\"><c r=\"A4\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Milestone</t></is></c><c r=\"B4\" t=\"inlineStr\"><is><t xml:space=\"preserve\">{P}-M01 Parity submission</t></is></c></row><row r=\"5\"><c r=\"A5\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Search</t></is></c><c r=\"B5\" t=\"inlineStr\"><is><t xml:space=\"preserve\">parity</t></is></c></row><row r=\"6\"><c r=\"A6\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Generated</t></is></c><c r=\"B6\" t=\"inlineStr\"><is><t xml:space=\"preserve\">2026-09-14 10:00 (America/Halifax)</t></is></c></row></sheetData></worksheet>",
+    "alexProjects": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetData><row r=\"1\"><c r=\"A1\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Client</t></is></c><c r=\"B1\" t=\"inlineStr\"><is><t xml:space=\"preserve\">Internal / TBD</t></is></c></row><row r=\"2\"><c r=\"A2\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Office</t></is></c><c r=\"B2\" t=\"inlineStr\"><is><t xml:space=\"preserve\">Head Office</t></is></c></row><row r=\"3\"><c r=\"A3\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Project Manager</t></is></c><c r=\"B3\" t=\"inlineStr\"><is><t xml:space=\"preserve\">Priya Nair</t></is></c></row><row r=\"4\"><c r=\"A4\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Generated</t></is></c><c r=\"B4\" t=\"inlineStr\"><is><t xml:space=\"preserve\">2026-09-14 10:00 (America/Halifax)</t></is></c></row></sheetData></worksheet>",
+    "alexActivity": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetData><row r=\"1\"><c r=\"A1\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Actor</t></is></c><c r=\"B1\" t=\"inlineStr\"><is><t xml:space=\"preserve\">Marc Dubois</t></is></c></row><row r=\"2\"><c r=\"A2\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Discipline</t></is></c><c r=\"B2\" t=\"inlineStr\"><is><t xml:space=\"preserve\">Civil</t></is></c></row><row r=\"3\"><c r=\"A3\" t=\"inlineStr\" s=\"1\"><is><t xml:space=\"preserve\">Generated</t></is></c><c r=\"B3\" t=\"inlineStr\"><is><t xml:space=\"preserve\">2026-09-14 10:00 (America/Halifax)</t></is></c></row></sheetData></worksheet>"
+  }
+}

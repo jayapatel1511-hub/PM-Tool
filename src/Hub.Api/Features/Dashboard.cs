@@ -85,14 +85,13 @@ public static class DashboardEndpoints
         var status = new Dictionary<string, object>();
         // FR-BKL-02 and FR-BKL-07: the Backlog count and each discipline's, counted by the list query their links open.
         var backlogOn = s.IsFlagOn(TaskRules.BacklogFlag);
-        Task<object> Backlog(Scope x) => Count(x.Tasks(("backlog", "true")), x.Link(("backlog", "true")));
         var backlog = new Dictionary<string, object>();
         foreach (var row in disciplines)
         {
             var dId = row.GetProperty("disciplineId").GetGuid();
             var ds = new Scope(db, id, dId, me.Id, today, s);
             due14[dId.ToString()] = await Due14(ds);
-            if (backlogOn) backlog[dId.ToString()] = await Backlog(ds);
+            if (backlogOn) backlog[dId.ToString()] = await Count(ds.Tasks(("backlog", "true")), ds.Link(("backlog", "true")));
             // FR-RCV-14: each segment is counted by the deliverable list query its link opens.
             if (rollups)
             {
@@ -152,7 +151,7 @@ public static class DashboardEndpoints
         if (rollups) o["disciplineStatus"] = JsonSerializer.SerializeToNode(status, JsonOpts.Web);
         if (backlogOn)
         {
-            o["tasks"]!["backlog"] = JsonSerializer.SerializeToNode(await Backlog(sc), JsonOpts.Web);
+            o["tasks"]!["backlog"] = JsonSerializer.SerializeToNode(await Count(sc.Tasks(("backlog", "true")), sc.Link(("backlog", "true"))), JsonOpts.Web);
             o["disciplineBacklog"] = JsonSerializer.SerializeToNode(backlog, JsonOpts.Web);
         }
         return o;

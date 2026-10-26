@@ -350,8 +350,11 @@ public static class ReadinessEndpoints
         if (allReviewerAllocations.Any(a => a.ProjectId != project.Id))
             return new(true, null, "Review capacity is unknown while confirmed reviewer reservations are outside this readiness scope.");
         var nullableReviewers = reviewers.Select(id => (Guid?)id).ToArray();
+        // FR-BKL-05: with `flag.backlog` on, a reviewer's Backlog task is not production workload for readiness.
+        var backlogOn = settings.IsFlagOn(TaskRules.BacklogFlag);
         var activeTasks = await db.Tasks.AsNoTracking().AnyAsync(t => nullableReviewers.Contains(t.AssigneeId) && t.DeletedAt == null &&
-            t.ProgressPct < 100 && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold);
+            t.ProgressPct < 100 && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold &&
+            !(backlogOn && TaskRules.BacklogStatuses.Contains(t.Status) && t.StartDate == null && t.DueDate == null));
         if (activeTasks)
             return new(true, null, "Review capacity is unknown while reviewer production workload is not isolated.");
 
@@ -411,6 +414,8 @@ public static class ReadinessEndpoints
                 r => System.Text.Json.JsonDocument.Parse(r.Value).RootElement.Clone()))
             : await suppliedSettings.Get(db);
         var defaultWeekly = orgSettings.DefaultWeeklyCapacityHours;
+        // FR-BKL-05: with `flag.backlog` on, Backlog tasks are neither required production work nor other active workload.
+        var backlogOn = orgSettings.IsFlagOn(TaskRules.BacklogFlag);
         var ownerAndWindow = targetType == "Task"
             ? await db.Tasks.AsNoTracking().Where(t => t.Id == targetId && t.ProjectId == project.Id && t.DeletedAt == null)
                 .Select(t => new { OwnerId = t.AssigneeId, t.StartDate, t.DueDate, t.EstimatedHours, t.ProgressPct })
@@ -431,7 +436,8 @@ public static class ReadinessEndpoints
             ? await db.Tasks.AsNoTracking().Where(t => t.Id == targetId && t.ProjectId == project.Id && t.EstimatedHours != null)
                 .Select(t => new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate)).ToListAsync()
             : await db.Tasks.AsNoTracking().Where(t => t.DeliverableId == targetId && t.AssigneeId == owner &&
-                    t.DeletedAt == null && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
+                    t.DeletedAt == null && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold &&
+                    !(backlogOn && TaskRules.BacklogStatuses.Contains(t.Status) && t.StartDate == null && t.DueDate == null))
                 .Select(t => new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate)).ToListAsync();
         if (sourceTasks.Count == 0 && targetType == "Deliverable")
             return new(false, null, "Production capacity does not apply because this deliverable has no open production tasks.");
@@ -447,7 +453,8 @@ public static class ReadinessEndpoints
         var hasOtherDemand = await db.Tasks.AsNoTracking().AnyAsync(t => t.AssigneeId == owner && t.DeletedAt == null &&
             !sourceTaskIds.Contains(t.Id) && t.ProgressPct < 100 &&
             t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold &&
-            (t.DueDate == null || t.StartDate == null || t.StartDate <= through));
+            (t.DueDate == null || t.StartDate == null || t.StartDate <= through) &&
+            !(backlogOn && TaskRules.BacklogStatuses.Contains(t.Status) && t.StartDate == null && t.DueDate == null));
         if (hasOtherDemand)
             return new(true, null, "Production capacity is unknown until the owner's other active workload is in scope.");
 

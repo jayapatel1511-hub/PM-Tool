@@ -1,5 +1,4 @@
 using System.Text.Json.Nodes;
-using Hub.Api.Features;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -97,28 +96,5 @@ public sealed class TaskQueriesTests(HubFactory f)
             Assert.All(filtered, l => Assert.EndsWith(",Yes", l.TrimEnd('\r')));
         }
         finally { await Backlog(false); }
-    }
-
-    [Fact]
-    [Trait("Spec", "FR-BKL-05")]
-    public async Task Readiness_lists_a_backlog_task_only_once_it_is_scheduled()
-    {
-        var p = await d.Project();
-        var root = $"/api/v1/projects/{p.Id}";
-        var id = await Add(p.Id, new { assigneeId = d.User(TestData.Alex) });
-        var version = f.Db(db => db.Tasks.Single(t => t.Id == id).RowVersion);
-        var assessment = (await f.As(TestData.Alex).Post($"{root}/readiness/Task/{id}", new ReadinessEndpoints.CreateBody(Guid.NewGuid(), version, "Culvert sizing", "Sizing checked")).Result.Json()).G("id");
-        await f.DbAsync(async db =>
-        {
-            foreach (var check in await db.ReadinessChecks.Where(c => c.AssessmentId == assessment).ToListAsync())
-                check.Applies = check.Code == ReadinessCheckCode.ProductionOwner;
-            return await db.SaveChangesAsync();
-        });
-        var window = $"{root}/readiness/window?from={In(0)}&to={In(20)}";
-        async Task<List<Guid>> Ready() => (await f.As(TestData.Pm).GetAsync(window).Result.Json())["readyOutputs"]!.AsArray().Select(x => x!.G("targetId")).ToList();
-
-        Assert.DoesNotContain(id, await Ready());
-        (await f.As(TestData.Marc).Patch($"/api/v1/tasks/{id}", new { dueDate = In(6) }, f.Db(db => db.Tasks.Single(t => t.Id == id).RowVersion))).EnsureSuccessStatusCode();
-        Assert.Contains(id, await Ready());
     }
 }

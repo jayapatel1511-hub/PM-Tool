@@ -3,7 +3,7 @@ using Hub.Domain;
 namespace Hub.Tests.Domain;
 
 /// §55.3 Backlog (packet 051 S05): the derived rule (FR-BKL-01) and its exclusions from date indicators, the Workload
-/// forecast, milestone status and health (FR-BKL-05, AC-BKL-05). Readiness is covered in Api/TaskQueriesTests.
+/// forecast, milestone status and health (FR-BKL-05, AC-BKL-05). Readiness capacity is covered in Api/ReadinessApiTests.
 public sealed class BacklogTests
 {
     static OrgSettings Flag(bool on) => new OrgSettings() with { Flags = new Dictionary<string, bool> { [TaskRules.BacklogFlag] = on } };

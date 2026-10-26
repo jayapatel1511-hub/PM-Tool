@@ -37,7 +37,8 @@
     "test:live-browser": "node tests/live-browser.cjs",
     "test:smoke-live": "node tests/smoke-live.cjs",
     "test:live-real": "node tests/live-real.cjs",
-    "test:record-parity": "node scripts/run-record-parity.mjs"
+    "test:record-parity": "node scripts/run-record-parity.mjs",
+    "test:live-lifecycle": "node tests/live-lifecycle-real.cjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.23.0",

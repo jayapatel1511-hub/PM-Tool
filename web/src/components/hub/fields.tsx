@@ -42,14 +42,17 @@ const why = (e: unknown) => {
  *  (a value other than null, false or undefined), "Not saved" when it was refused or failed. A refused save that lands later (a reason
  *  dialog completed it) stops saying "Not saved" once the field shows the value. With `delayMs` (`autosave_delay_ms`, present only
  *  while `flag.data_entry_safety` is on) `schedule` also saves typed text after that long without typing, and `commit` (blur, Enter)
- *  does not send that value a second time. Without it, `commit` is the plain blur save it always was. */
-function useAutosaveField(current?: unknown, delayMs?: number) {
+ *  does not send that value a second time. Those saves go one at a time: one sent before the previous save is back would carry the
+ *  row version from before it and be refused as a conflict, so it waits and goes out from the render that brought the saved value
+ *  back. Without `delayMs`, `commit` is the plain blur save it always was. */
+function useAutosaveField(current?: unknown, delayMs?: number, onSave?: (v: string | null) => Promise<unknown>) {
   const [state, setState] = useState<SaveState | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const pause = useRef<ReturnType<typeof setTimeout>>(undefined)
   const sent = useRef<{ value: unknown } | undefined>(undefined)
-  // Once the saved value is back from the server, the field's own comparison takes over from `sent`.
-  useEffect(() => { sent.current = undefined }, [current])
+  const held = useRef<{ value: unknown } | undefined>(undefined)
+  const live = useRef({ current, onSave })
+  useEffect(() => { live.current = { current, onSave } })
   const track = async (save: unknown, value?: unknown) => {
     clearTimeout(timer.current)
     setState({ status: 'saving', value })
@@ -61,23 +64,35 @@ function useAutosaveField(current?: unknown, delayMs?: number) {
     } catch (e) { setState({ status: 'failed', value, message: why(e) }) }
   }
   const already = (value: unknown) => sent.current !== undefined && blank(sent.current.value) === blank(value)
-  const commit = (save: () => Promise<unknown>, value: unknown) => {
-    clearTimeout(pause.current)
-    return already(value) && state?.status !== 'failed' ? Promise.resolve() : track(save(), value)
+  // Reads `live` (the newest render, so the newest row version) because it also runs from the pause timer and the effect below.
+  const send = (value: unknown) => {
+    if (sent.current) { held.current = already(value) ? undefined : { value }; return Promise.resolve() }
+    if (blank(value) === blank(live.current.current)) return Promise.resolve()
+    sent.current = { value }
+    // A refused or failed save never comes back, so the next one goes straight out (the field shows why this one did not save).
+    // ponytail: a save that succeeds but whose refetch never brings the value back keeps the field's later saves held until the value
+    // next changes; packet 051 S02 (retry) is the place to add a way out if that shows up.
+    const settle = (ok: boolean) => { if (!ok) sent.current = held.current = undefined }
+    return track(live.current.onSave!(value as string | null).then(r => { settle(r !== null && r !== false); return r }, e => { settle(false); throw e }), value)
   }
-  // ponytail: a pause that ends while the previous pause's save is still in flight sends the older row version; packet 051 S02
-  // (conflict choice and retry) handles the refusal.
-  const schedule = (save: () => Promise<unknown>, value: unknown) => {
+  // Once the saved value is back from the server, the field's own comparison takes over from `sent`, and a save held behind it goes now.
+  useEffect(() => {
+    sent.current = undefined
+    const next = held.current
+    held.current = undefined
+    if (next) send(next.value)
+  }, [current])
+  const commit = (value: unknown) => {
+    clearTimeout(pause.current)
+    return delayMs == null ? track(onSave!(value as string | null), value) : send(value)
+  }
+  const schedule = (value: unknown) => {
     if (delayMs == null) return
     clearTimeout(pause.current)
-    pause.current = setTimeout(() => {
-      if (blank(value) === blank(current) || already(value)) return
-      sent.current = { value }
-      track(save(), value)
-    }, delayMs)
+    pause.current = setTimeout(() => send(value), delayMs)
   }
   const landed = state?.status === 'failed' && blank(state.value) === blank(current)
-  return { state: landed ? null : state, track, commit, schedule, clear: () => { clearTimeout(timer.current); clearTimeout(pause.current); setState(null) } }
+  return { state: landed ? null : state, track, commit, schedule, clear: () => { clearTimeout(timer.current); clearTimeout(pause.current); held.current = undefined; setState(null) } }
 }
 
 /** The live save line under a field; empty (and silent) when there is nothing to report. */
@@ -109,8 +124,10 @@ function Display({ children, onEdit, disabled, title }: { children: ReactNode; o
   )
 }
 
-export function InlineText({ value, onSave, multiline, disabled, placeholder, title, render, initiallyEditing = false, onCancel }: {
+export function InlineText({ value, onSave, multiline, disabled, placeholder, title, render, initiallyEditing = false, onCancel, needsReason }: {
   value?: string | null; onSave: (v: string | null) => Promise<unknown>; multiline?: boolean; disabled?: boolean; placeholder?: string; title?: string; render?: (v: string) => ReactNode; initiallyEditing?: boolean; onCancel?: () => void
+  /** The server asks a reason for this change (a Complete project): no save after a pause, so the reason is asked once, on blur (FR-SAV-01). */
+  needsReason?: boolean
 }) {
   const labelId = useContext(FieldLabelContext)
   const delay = useMe().settings.autosaveDelayMs
@@ -118,13 +135,13 @@ export function InlineText({ value, onSave, multiline, disabled, placeholder, ti
   const [v, setV] = useState(value ?? '')
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
   // A list row renamed in place (initiallyEditing) is not an edit panel field: it keeps saving on blur and Enter only.
-  const save = useAutosaveField(value, initiallyEditing ? undefined : delay)
+  const save = useAutosaveField(value, initiallyEditing || needsReason ? undefined : delay, onSave)
   useEffect(() => { if (!editing && save.state?.status !== 'saving' && save.state?.status !== 'failed') setV(value ?? '') }, [value, editing, save.state?.status])
   useEffect(() => { if (editing) ref.current?.focus() }, [editing])
-  const commit = async () => { setEditing(false); if ((v || null) === (value || null)) { onCancel?.(); return } await save.commit(() => onSave(v.trim() || null), v.trim() || null) }
+  const commit = async () => { setEditing(false); if ((v || null) === (value || null)) { onCancel?.(); return } await save.commit(v.trim() || null) }
   const note = <SaveNote state={save.state} />
   if (!editing) return <><Display onEdit={() => setEditing(true)} disabled={disabled} title={title}>{value ? (render ? render(value) : value) : <span className="text-muted-foreground">{placeholder ?? t('common.dash')}</span>}</Display>{note}</>
-  const props = { ref, value: v, 'aria-labelledby': labelId, 'aria-label': labelId ? undefined : title, onChange: (e: any) => { setV(e.target.value); save.schedule(() => onSave(e.target.value.trim() || null), e.target.value.trim() || null) }, onBlur: commit,
+  const props = { ref, value: v, 'aria-labelledby': labelId, 'aria-label': labelId ? undefined : title, onChange: (e: any) => { setV(e.target.value); save.schedule(e.target.value.trim() || null) }, onBlur: commit,
     onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Escape') { save.clear(); setV(value ?? ''); setEditing(false); onCancel?.() } if (e.key === 'Enter' && (!multiline || e.ctrlKey || e.metaKey)) { e.preventDefault(); commit() } } }
   return <>{!labelId && title && <span className="mb-1 block text-xs/[18px] font-normal text-muted-foreground">{title}</span>}{multiline ? <Textarea rows={4} {...props} /> : <Input className="min-h-(--control-row-h)" {...props} />}{note}</>
 }

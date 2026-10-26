@@ -23,7 +23,7 @@ Each slice is one PR. Slices in Parts A, B and C merge dark behind `flag.data_en
 
 ## Part B, backlog
 
-- [ ] S05 Backlog rule, filter and counts (S).
+- [x] S05 Backlog rule, filter and counts (S).
   - `IsBacklog`; `backlog` filter and row field; dashboard, discipline summary and export columns; flag entry.
   - Covers FR-BKL-01, FR-BKL-05, FR-BKL-07, FR-BKL-08, FR-BKL-09; AC-BKL-01 (API), AC-BKL-05.
   - Tests: `tests/Hub.Tests/Domain/BacklogTests.cs` (rule over every status and date combination; excluded from Overdue, Due Soon, Slipped, Date Inconsistent, Workload weeks, readiness, health); `tests/Hub.Tests/Api/TaskQueriesTests.cs` (filter, counts, export column).

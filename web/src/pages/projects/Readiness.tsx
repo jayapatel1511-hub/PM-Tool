@@ -75,7 +75,8 @@ export function ReadinessTab() {
   const constraintId = panel.startsWith('WorkConstraint:') ? panel.slice(15) : null
   const linked = useQuery({ queryKey: ['readiness-constraint', p.id, constraintId], enabled: !!constraintId,
     queryFn: () => get<{ targetType: string; targetId: string }>(`projects/${p.id}/readiness/constraints/${constraintId}`) })
-  const done = () => { setProposing(false); setSnapshotWeek(null); qc.invalidateQueries({ queryKey: ['p', p.id, 'readiness-window'] }); qc.invalidateQueries({ queryKey: ['weekly-promise', p.id] }) }
+  // The reliability panel reads the same records; with its flag off that query is disabled and refetches nothing.
+  const done = () => { setProposing(false); setSnapshotWeek(null); qc.invalidateQueries({ queryKey: ['p', p.id, 'readiness-window'] }); qc.invalidateQueries({ queryKey: ['weekly-promise', p.id] }); qc.invalidateQueries({ queryKey: ['commitment-reliability', p.id] }) }
   const weeks = useMemo(() => {
     const fromValue = dateValue(from)
     const toValue = dateValue(to)

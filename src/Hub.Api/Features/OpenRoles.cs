@@ -22,6 +22,7 @@ public static class OpenRoleEndpoints
         api.MapPost("/projects/{projectId:guid}/open-roles", Create);
         api.MapPatch("/open-roles/{id:guid}", Edit);
         api.MapPost("/open-roles/{id:guid}/cancel", Cancel);
+        api.MapGet("/lists/{code}/export", Export).RequireFlag("record_engine_additions"); // §47.5 FR-REC-04, FR-REC-12
     }
 
     /// The project office's working days, with holidays always skipped, as an allocation's person calendar does.
@@ -55,6 +56,23 @@ public static class OpenRoleEndpoints
             .Select(r => new { Role = r, DisciplineName = db.ProjectDisciplines.Where(d => d.Id == r.ProjectDisciplineId).Select(d => d.Discipline!.Name).FirstOrDefault() })
             .ToListAsync();
         return TypedResults.Ok(roles.Select(x => ToRow(x.Role, x.DisciplineName, Permissions.ManageOpenRole(access.Actor, ctx, x.Role.CreatedBy).Ok)).ToArray());
+    }
+
+    /// The open-roles list as CSV or Excel (AC-REC-09): the list's rows and access check, written by the existing writer under its row
+    /// cap. Filled by names the filling allocation's person only where the viewer can open that allocation, as the list's cell does.
+    static async Task<IResult> Export(string code, Guid projectId, string? format, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    {
+        if (code != "open-roles") throw ApiException.NotFound();
+        var (project, ctx) = await access.Project(projectId, false);
+        var rows = (await List(projectId, access, db)).Value!;
+        var managed = Permissions.IsPM(access.Actor, ctx) ? db.Projects.Where(p => p.Id == projectId).Select(p => p.Id) : db.Projects.Where(_ => false).Select(p => p.Id);
+        var filled = rows.Where(r => r.FilledAllocationId != null).Select(r => r.FilledAllocationId!.Value).ToList();
+        var names = await AllocationEndpoints.VisibleQuery(db, access.Actor, managed).Where(a => a.ProjectId == projectId && filled.Contains(a.Id))
+            .Select(a => new { a.Id, Name = db.Users.Where(u => u.Id == a.PersonId).Select(u => u.DisplayName).FirstOrDefault() }).ToDictionaryAsync(a => a.Id, a => a.Name);
+        var values = JsonSerializer.SerializeToNode(rows.Select(r => new { r.RoleLabel, r.DisciplineName, r.FromDate, r.ThroughDate, r.PlannedHours, r.Status,
+            FilledByName = r.FilledAllocationId is { } id ? names.GetValueOrDefault(id) : null, r.Note }), JsonOpts.Web)!.AsArray();
+        return await ExportFile.Send(db, store, format, Text.Get("export.openRoles", project.ProjectNumber), Hub.Api.Records.OpenRoleRecord.ExportColumns, values,
+            await ListExportEndpoints.Filters(db, http, access), project.Id, $"{project.ProjectNumber}-open-roles", clock);
     }
 
     static async Task Apply(HubDb db, Guid projectId, OpenRole r, Patch p, bool create)

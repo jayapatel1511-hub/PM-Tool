@@ -5589,6 +5589,29 @@
       "array"
     ]
   },
+  "GET /api/v1/lists/{code}/export 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/me 200": {
     "$": [
       "object"
@@ -5690,6 +5713,9 @@
       "boolean"
     ],
     "$.flags.project_status_note": [
+      "boolean"
+    ],
+    "$.flags.record_engine_additions": [
       "boolean"
     ],
     "$.flags.revision_check": [
@@ -39929,6 +39955,51 @@
       "array"
     ],
     "$.paths./api/v1/links/{id}.patch.tags[]": [
+      "string"
+    ],
+    "$.paths./api/v1/lists/{code}/export": [
+      "object"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get": [
+      "object"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.parameters": [
+      "array"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.parameters[]": [
+      "object"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.parameters[].in": [
+      "string"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.parameters[].name": [
+      "string"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.parameters[].required": [
+      "boolean"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.parameters[].schema": [
+      "object"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.parameters[].schema.format": [
+      "string"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.parameters[].schema.type": [
+      "string"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.responses": [
+      "object"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.responses.200": [
+      "object"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.responses.200.description": [
+      "string"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.tags": [
+      "array"
+    ],
+    "$.paths./api/v1/lists/{code}/export.get.tags[]": [
       "string"
     ],
     "$.paths./api/v1/me": [
@@ -77201,6 +77272,9 @@
     "$.views[].params.q": [
       "string"
     ],
+    "$.views[].params.severity": [
+      "string"
+    ],
     "$.views[].params.sort": [
       "string"
     ],
@@ -90038,6 +90112,29 @@
     ]
   },
   "POST /api/v1/views 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/views 404": {
     "$": [
       "object"
     ],

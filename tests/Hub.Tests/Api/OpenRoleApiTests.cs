@@ -313,4 +313,57 @@ public sealed class OpenRoleApiTests(HubFactory f)
         Assert.False(f.Db(db => db.Notifications.Any(n => n.Title.Contains(label) || (n.Body != null && n.Body.Contains(label)))));
         Assert.False(f.Db(db => db.Emails.Any(m => m.Subject.Contains(label) || m.BodyText.Contains(label))));
     }
+
+    Task Additions(bool on) => f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.record_engine_additions", new { value = on }).Result.Json();
+
+    [Fact, Trait("flag-off", "record_engine_additions"), Trait("Spec", "AC-REC-09")]
+    public async Task Open_role_export_and_risk_views_are_absent_while_the_additions_flag_is_off()
+    {
+        var project = await data.Project();
+        await Role(project.Id);
+        await (await f.As(TestData.Pm).GetAsync($"/api/v1/lists/open-roles/export?projectId={project.Id}&format=csv")).Json(404);
+        await (await f.As(TestData.Pm).GetAsync($"/api/v1/views?listType=risks&projectId={project.Id}")).Json(404);
+        await (await f.As(TestData.Pm).Post("/api/v1/views", new { name = "Synthetic risk view", listType = "risks", projectId = project.Id })).Json(404);
+        Assert.Single((await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{project.Id}/open-roles")).Json()).AsArray()); // the list itself is unchanged
+    }
+
+    [Fact, Trait("flag-on", "record_engine_additions"), Trait("Spec", "AC-REC-09")]
+    public async Task Open_role_export_writes_the_list_rows_and_columns_with_the_list_access()
+    {
+        var project = await data.Project();
+        var person = await Person(project.Id);
+        var filled = await Role(project.Id, label: "Synthetic filled role");
+        await Role(project.Id, label: "Synthetic open role", hours: 5);
+        var cancelled = await Role(project.Id, label: "Synthetic cancelled role");
+        await (await f.As(TestData.Pm).Post($"/api/v1/open-roles/{cancelled.S("id")}/cancel", new { rowVersion = cancelled.I("rowVersion") })).Json();
+        await (await f.As(TestData.Pm).Post($"/api/v1/projects/{project.Id}/allocations", Proposal(person, filled.G("id")))).Json();
+        var name = f.Db(db => db.Users.Single(u => u.Id == person.Id).DisplayName);
+        var path = $"/api/v1/lists/open-roles/export?projectId={project.Id}";
+        await Additions(true);
+        try
+        {
+            var csv = await (await f.As(TestData.Pm).GetAsync(path + "&format=csv")).Content.ReadAsStringAsync();
+            var lines = csv.TrimStart('\uFEFF').Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            Assert.Equal("Role,Discipline,From,Through,Hours,Status,Filled by,Note", lines[0]);
+            Assert.Equal(["Synthetic cancelled role", "Synthetic filled role", "Synthetic open role"], lines[1..].Select(l => l.Split(',')[0])); // the list's order
+            Assert.EndsWith(",Cancelled,,", lines[1]);
+            Assert.EndsWith($",Filled,{name},", lines[2]);
+            Assert.EndsWith(",Open,,", lines[3]);
+            // Filled by follows the list's cell: a viewer who cannot open the filling allocation sees no name.
+            var member = await (await f.As(TestData.Alex).GetAsync(path + "&format=csv")).Content.ReadAsStringAsync();
+            Assert.Contains("Synthetic filled role", member);
+            Assert.DoesNotContain(name, member);
+            using var xlsx = await f.As(TestData.Pm).GetAsync(path + "&format=xlsx");
+            xlsx.EnsureSuccessStatusCode();
+            Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", xlsx.Content.Headers.ContentType?.MediaType);
+            await (await f.As(TestData.Pm).GetAsync($"/api/v1/lists/unknown/export?projectId={project.Id}&format=csv")).Json(404);
+
+            // FR-ROLE-05: a viewer who cannot view the project gets the list endpoint's status code from the export.
+            await f.DbAsync(async db => { (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted; return await db.SaveChangesAsync(); });
+            foreach (var outsider in new[] { TestData.Sam, TestData.Rita })
+                Assert.Equal((await f.As(outsider).GetAsync($"/api/v1/projects/{project.Id}/open-roles")).StatusCode, (await f.As(outsider).GetAsync(path + "&format=csv")).StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Rita).GetAsync(path + "&format=csv")).StatusCode);
+        }
+        finally { await Additions(false); }
+    }
 }

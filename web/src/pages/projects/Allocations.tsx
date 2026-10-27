@@ -4,12 +4,16 @@ import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, CheckCircle2, Ellipsis, Lock, Monitor, Plus, X } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useMatch, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, PageHelp, Segmented, Spinner, TableRegion, selectCls, tdCls as td, thCls as th } from '@/components/hub/common'
+import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, PageHelp, Segmented, Spinner, TableRegion, selectCls, tdCls as td, thCls as th } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
+import { FieldRow, HistoryList, TabBar } from '@/components/hub/fields'
+import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Avatar } from '@/components/hub/people'
 import { Pill, type Tone } from '@/components/hub/pills'
+import { FieldGroup, PanelHead, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
+import { useTable, type Column } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -17,7 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
-import { useReference } from '@/hooks/data'
+import { useProject, useReference } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
 import { ApiError, get, post, qs, typedRequest } from '@/lib/api'
 import { useOffer, type Offer } from '@/lib/auth'
@@ -73,6 +77,8 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   const list = useQuery({ queryKey: ['allocations', project.id, filters, page], queryFn: () => get<AllocationPage>(`${base}${qs({ ...filters, page })}`) })
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
   const proposal = useOffer()(project.permissions.proposeAllocation, project.status) // FR-FIG-08 decision 1
+  // §47.5 FR-REC-12, behind flag.record_engine_additions: the open roles as CSV or Excel, after the page's own entries.
+  const roleExport = useFlag('record_engine_additions') ? [{ path: 'lists/open-roles/export', params: { projectId: project.id }, name: `${project.projectNumber}-open-roles`, label: t('openRole.tab') }] : undefined
   const [roleForm, setRoleForm] = useState<OpenRole | 'new' | null>(null), [filling, setFilling] = useState<Fill | null>(null), [cancelling, setCancelling] = useState<OpenRole | null>(null)
   const refresh = () => { qc.invalidateQueries({ queryKey: ['allocations', project.id] }); qc.invalidateQueries({ queryKey: ['workload'] }) }
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'allocation') next.delete('page'); setSp(next) }
@@ -105,7 +111,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
     ['from', t('allocation.from'), filters.from && fmtDate(filters.from)],
     ['to', t('allocation.through'), filters.to && fmtDate(filters.to)],
   ] as const).filter(([k]) => filters[k]).map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))
-  return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} />{proposal.shown && propose}</>}>
+  return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} extra={roleExport} />{proposal.shown && propose}</>}>
     <FilterBar activeCount={tokens.length}
       search={view === 'allocations' && <Field label={t('common.search')} htmlFor="allocation-search"><UrlSearchInput id="allocation-search" placeholder={t('allocation.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
       active={view === 'allocations' && <ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />}
@@ -366,28 +372,36 @@ function AllocationDetail({ projectId, base, id, projectNumber, options, close, 
   </Sheet>
 }
 
-/** The project's open roles (FR-ROLE-01..04): demand before a person is named. Fill proposes a normal allocation for it. */
+/** The project's open roles (FR-ROLE-01..04): demand before a person is named. Fill proposes a normal allocation for it.
+ *  Behind flag.record_engine_additions (§47.5 FR-REC-12) the headers sort and the role label opens the read-only panel. */
 function OpenRoles({ roles, base, proposal, canFill, onAdd, onEdit, onCancel, onFill, onOpenAllocation }: {
   roles: ReturnType<typeof useQuery<OpenRole[]>>; base: string; proposal: Offer; canFill: boolean
   onAdd: () => void; onEdit: (r: OpenRole) => void; onCancel: (r: OpenRole) => void; onFill: (r: OpenRole) => void; onOpenAllocation: (id: string) => void
 }) {
+  const additions = useFlag('record_engine_additions'), openPanel = useItemPanel(), [sp] = useSearchParams()
+  const current = (r: OpenRole) => additions && sp.get('panel') === `OpenRole:${r.id}`
+  const columns: Column<OpenRole>[] = [
+    { id: 'role', label: t('openRole.role'), fixed: true, sort: r => r.roleLabel.toLowerCase(), cell: r => <>
+      {additions ? <button type="button" className={cn(TITLE_LINK, 'block font-semibold')} aria-current={current(r) || undefined} onClick={() => openPanel('OpenRole', r.id)}>{r.roleLabel}</button>
+        : <div className="break-words font-semibold">{r.roleLabel}</div>}
+      {(r.disciplineName || r.note) && <div className="text-xs/[18px] text-muted-foreground">{[r.disciplineName, r.note].filter(Boolean).join(' · ')}</div>}</> },
+    { id: 'dates', label: t('allocation.dates'), fixed: true, sort: r => r.fromDate, className: 'whitespace-nowrap tabular-nums', cell: r => <>{fmtDate(r.fromDate)} – {fmtDate(r.throughDate)}</> },
+    { id: 'hours', label: t('allocation.plannedHours'), fixed: true, sort: r => r.plannedHours, className: 'text-right font-medium tabular-nums', cell: r => hours(r.plannedHours) },
+    { id: 'status', label: t('common.status'), fixed: true, sort: r => r.status, cell: r => <Pill tone={ROLE_TONE[r.status] ?? 'idle'}>{runtimeText(`openRole.status.${r.status}`)}</Pill> },
+    { id: 'filled', label: t('openRole.filledBy'), fixed: true, cell: r => r.filledAllocationId ? <FilledBy base={base} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span> },
+  ]
+  const table = useTable('hub.openRoleColumns', columns, roles.data ?? [], r => [r.fromDate, r.roleLabel])
   if (roles.isPending) return <div className="rounded-lg border bg-card"><Loading rows={3} /></div>
   if (roles.error) return <ErrorBanner error={roles.error} retry={() => roles.refetch()} />
   if (!roles.data.length) return <div className="rounded-lg border bg-card"><Empty title={t('openRole.empty')} action={proposal.shown && <Button variant="outline" {...proposal.props} onClick={onAdd}><Plus className="size-4" />{t('openRole.new')}</Button>}>{t('openRole.emptyHint')}</Empty></div>
   return <TableRegion><table className="w-full text-left text-sm">
     <caption className="sr-only">{t('openRole.tab')}</caption>
-    <thead className="bg-muted"><tr>
-      <th scope="col" className={th}>{t('openRole.role')}</th><th scope="col" className={th}>{t('allocation.dates')}</th>
-      <th scope="col" className={cn(th, 'text-right')}>{t('allocation.plannedHours')}</th><th scope="col" className={th}>{t('common.status')}</th>
-      <th scope="col" className={th}>{t('openRole.filledBy')}</th><th scope="col" className={th}><span className="sr-only">{t('common.actions')}</span></th>
+    <thead className="bg-muted text-muted-foreground"><tr>
+      {columns.map(c => additions ? table.header(c) : <th key={c.id} scope="col" className={cn(th, c.className?.includes('text-right') && 'text-right')}>{c.label}</th>)}
+      <th scope="col" className={th}><span className="sr-only">{t('common.actions')}</span></th>
     </tr></thead>
-    <tbody>{roles.data.map(r => <tr key={r.id} className={cn('border-t hover:bg-muted', r.status === 'Cancelled' && 'text-muted-foreground')}>
-      <td className={td}><div className="break-words font-semibold">{r.roleLabel}</div>
-        {(r.disciplineName || r.note) && <div className="text-xs/[18px] text-muted-foreground">{[r.disciplineName, r.note].filter(Boolean).join(' · ')}</div>}</td>
-      <td className={cn(td, 'whitespace-nowrap tabular-nums')}>{fmtDate(r.fromDate)} – {fmtDate(r.throughDate)}</td>
-      <td className={cn(td, 'text-right font-medium tabular-nums')}>{hours(r.plannedHours)}</td>
-      <td className={td}><Pill tone={ROLE_TONE[r.status] ?? 'idle'}>{runtimeText(`openRole.status.${r.status}`)}</Pill></td>
-      <td className={td}>{r.filledAllocationId ? <FilledBy base={base} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span>}</td>
+    <tbody>{(additions ? table.sorted : roles.data).map(r => <tr key={r.id} className={cn('border-t hover:bg-muted', r.status === 'Cancelled' && 'text-muted-foreground', current(r) && SELECTED_ROW)}>
+      {columns.map(c => <td key={c.id} className={cn(td, c.className)}>{c.cell(r)}</td>)}
       <td className={cn(td, 'py-1 text-right')}>{r.status === 'Open' && <div className="flex items-center justify-end gap-1">
         {canFill && <Button size="sm" variant="outline" {...proposal.props} onClick={() => onFill(r)} aria-label={t('openRole.fillLabel', { role: r.roleLabel })}>{t('openRole.fill')}</Button>}
         {r.canManage && <DropdownMenu>
@@ -400,6 +414,36 @@ function OpenRoles({ roles, base, proposal, canFill, onAdd, onEdit, onCancel, on
       </div>}</td>
     </tr>)}</tbody>
   </table></TableRegion>
+}
+
+/** The read-only open-role panel (§47.5 FR-REC-12, behind flag.record_engine_additions): the role's fields and its History.
+ *  Editing, filling and cancelling stay row actions with their dialogs. */
+export function OpenRolePanel({ id }: PanelProps) {
+  // ponytail: no open-role detail endpoint; the role comes from its project's list (the Allocations page's cached query), so the
+  // panel opens under /projects/<number>/ only. Add a detail read if links from other pages need it.
+  const number = useMatch('/projects/:number/*')?.params.number
+  const project = useProject(number)
+  const projectId = project.data?.id
+  const roles = useQuery({ queryKey: ['allocations', projectId, 'open-roles'], enabled: !!projectId,
+    queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/open-roles', { params: { projectId: projectId! } }) })
+  const error = project.error ?? roles.error
+  if (error) return <div className="p-4"><ErrorBanner error={error} retry={() => { void project.refetch(); void roles.refetch() }} /></div>
+  if (number && (project.isPending || roles.isPending)) return <Loading />
+  const r = roles.data?.find(x => x.id === id)
+  if (!r) return <div className="p-4"><Notice title={t('app.notFound')} /></div>
+  const value = (v: ReactNode) => <div className="break-words px-2 py-1.5">{v ?? <Missing />}</div>
+  return <div>
+    <PanelHead title={r.roleLabel} meta={<Pill tone={ROLE_TONE[r.status] ?? 'idle'}>{runtimeText(`openRole.status.${r.status}`)}</Pill>} />
+    <FieldGroup title={t('common.details')}>
+      <FieldRow label={t('common.discipline')}>{value(r.disciplineName)}</FieldRow>
+      <FieldRow label={t('allocation.from')}>{value(<span className="tabular-nums">{fmtDate(r.fromDate)}</span>)}</FieldRow>
+      <FieldRow label={t('allocation.through')}>{value(<span className="tabular-nums">{fmtDate(r.throughDate)}</span>)}</FieldRow>
+      <FieldRow label={t('allocation.plannedHours')}>{value(<span className="tabular-nums">{hours(r.plannedHours)}</span>)}</FieldRow>
+      <FieldRow label={t('common.notes')}>{value(r.note)}</FieldRow>
+    </FieldGroup>
+    <TabBar tabs={[{ id: 'history', label: t('common.history') }]} value="history" onChange={() => {}} />
+    <HistoryList type="OpenRole" id={id} />
+  </div>
 }
 
 /** Who fills a role: the filling allocation's person, opening that allocation. Shows a dash when the viewer cannot open it. */

@@ -3,14 +3,21 @@ import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 're
 import { useNavigate, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
+import { useMe } from '@/lib/auth-context'
 import { t , runtimeText } from '@/lib/i18n'
 import { lazyImport } from '@/lib/lazy'
 import { Loading } from '@/components/hub/common'
 
 export interface PanelProps { id: string; onClose: () => void }
 
-/** Detail panels by item type, registered by the packets that own each item (tasks, deliverables…). */
-export const PANELS: Record<string, { component: ComponentType<PanelProps> | LazyExoticComponent<ComponentType<PanelProps>>; fullPage?: (id: string) => string }> = {}
+/** Detail panels by item type, registered by the packets that own each item (tasks, deliverables…). An entry that names a
+ *  flag is absent while that flag is off (§47.5 FR-REC-12), so its `?panel=` links open nothing. */
+export const PANELS: Record<string, { component: ComponentType<PanelProps> | LazyExoticComponent<ComponentType<PanelProps>>; fullPage?: (id: string) => string; flag?: string }> = {}
+
+function usePanels() {
+  const flags = useMe().flags
+  return (type: string | null) => { const entry = type ? PANELS[type] : undefined; return entry && (!entry.flag || flags?.[entry.flag] === true) ? entry : undefined }
+}
 
 export function lazyPanel(load: () => Promise<{ default: ComponentType<PanelProps> }>) {
   return lazy(() => lazyImport(load))
@@ -18,9 +25,9 @@ export function lazyPanel(load: () => Promise<{ default: ComponentType<PanelProp
 
 /** Opens an item's side panel over the current view; the URL carries it so panels are deep-linkable (§13.0). */
 export function useItemPanel() {
-  const [sp, setSp] = useSearchParams()
+  const [sp, setSp] = useSearchParams(), panel = usePanels()
   return (type: string, id: string) => {
-    if (!PANELS[type]) return
+    if (!panel(type)) return
     const n = new URLSearchParams(sp)
     n.set('panel', `${type}:${id}`)
     setSp(n)
@@ -32,7 +39,7 @@ export function PanelHost() {
   const navigate = useNavigate()
   const raw = sp.get('panel')
   const [type, id] = raw ? [raw.slice(0, raw.indexOf(':')), raw.slice(raw.indexOf(':') + 1)] : [null, null]
-  const entry = type ? PANELS[type] : undefined
+  const entry = usePanels()(type)
   const close = () => { const n = new URLSearchParams(sp); n.delete('panel'); setSp(n) }
   if (!entry || !id) return null
   const Comp = entry.component

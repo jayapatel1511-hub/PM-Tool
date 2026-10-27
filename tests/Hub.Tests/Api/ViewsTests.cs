@@ -133,6 +133,30 @@ public sealed class ViewsTests(HubFactory f)
         await f.As(TestData.Rita).GetAsync($"/api/v1/views?listType={kind}&projectId={project.Id}").Result.Json(404);
     }
 
+    [Fact, Trait("flag-on", "record_engine_additions"), Trait("Spec", "AC-REC-09")]
+    public async Task Risk_views_keep_filters_sort_and_columns_and_follow_project_access() // §47.5 FR-REC-12
+    {
+        var admin = f.As(TestData.Admin);
+        var project = await d.Project(pm: TestData.Marc);
+        var civil = d.ProjectDiscipline(project.Id, "Civil");
+        await admin.Put("/api/v1/admin/settings/flag.record_engine_additions", new { value = true }).Result.Json();
+        try
+        {
+            var made = await f.As(TestData.Alex).Post("/api/v1/views", new { name = "Synthetic risk view", listType = "risks", projectId = project.Id, @params = new Dictionary<string, string>
+            {
+                ["status"] = "Open,Monitoring", ["severity"] = "High", ["disciplineId"] = civil.ToString(), ["indicator"] = "reviewOverdue", ["sort"] = "severity:desc",
+                ["cols"] = "status,owner,realised", ["panel"] = "Risk:transient", ["group"] = "owner",
+            } }).Result.Json(201);
+            var view = (await Views(TestData.Alex, project.Id, "risks"))["views"]!.AsArray().Single(v => v!.G("id") == made.G("id"))!;
+            Assert.Equal(new Dictionary<string, string?> { ["status"] = "Open,Monitoring", ["severity"] = "High", ["disciplineId"] = civil.ToString(), ["indicator"] = "reviewOverdue",
+                ["sort"] = "severity:desc", ["cols"] = "status,owner,realised" }, view["params"]!.AsObject().ToDictionary(p => p.Key, p => p.Value?.GetValue<string>()));
+            Assert.Empty(view["dropped"]!.AsArray());
+            await f.DbAsync(async db => { (await db.Projects.SingleAsync(p => p.Id == project.Id)).Visibility = Visibility.Restricted; return await db.SaveChangesAsync(); });
+            await f.As(TestData.Rita).GetAsync($"/api/v1/views?listType=risks&projectId={project.Id}").Result.Json(404); // FR-ROLE-05: no view of a project they cannot see
+        }
+        finally { await admin.Put("/api/v1/admin/settings/flag.record_engine_additions", new { value = false }).Result.Json(); }
+    }
+
     [Fact, Trait("Spec", "AC-INT-19")]
     public async Task Staff_views_are_personal_restore_filters_and_name_missing_references()
     {

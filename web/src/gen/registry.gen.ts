@@ -22,6 +22,7 @@ export interface SavedViewKeys {
   "projects": "clientId" | "computedHealth" | "disciplineId" | "draftAccessReason" | "health" | "ids" | "includeArchived" | "leadUnitId" | "mine" | "officeId" | "page" | "panel" | "phaseId" | "pmId" | "priority" | "projectTypeId" | "q" | "sort" | "starred" | "status" | "submissionWithinDays"
   "readiness": "draftAccessReason" | "from" | "page" | "panel" | "to"
   "reviews": "disciplineId" | "draftAccessReason" | "mine" | "ownerId" | "page" | "panel" | "q" | "status"
+  "risks": "cols" | "disciplineId" | "draftAccessReason" | "indicator" | "ownerId" | "page" | "panel" | "q" | "severity" | "sort" | "status"
   "staff": "discipline" | "draftAccessReason" | "inactive" | "indicator" | "office" | "page" | "panel" | "scope" | "unitId"
   "submissions": "coordinatorId" | "draftAccessReason" | "milestoneId" | "page" | "panel" | "q" | "status" | "targetFrom" | "targetTo"
   "tasks": "assigneeId" | "backlog" | "blocked" | "blocking" | "cols" | "dateInconsistent" | "deliverableId" | "disciplineId" | "draftAccessReason" | "dueFrom" | "dueSoon" | "dueThisWeek" | "dueTo" | "group" | "heldPastDue" | "ids" | "milestoneId" | "mine" | "noDueDate" | "onHold" | "open" | "overdue" | "page" | "panel" | "priority" | "q" | "readyForReview" | "sort" | "stale" | "status" | "unassigned" | "waiting"

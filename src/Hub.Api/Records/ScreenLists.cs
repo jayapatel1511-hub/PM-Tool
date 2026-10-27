@@ -25,6 +25,7 @@ public static class ScreenLists
         new("allocations", ["q", "personId", "purpose", "status", "from", "to", "tab"]),
         new("design-basis", ["kind", "status", "discipline", "scope", "overdue", "affectedWorkId"]),
         new("readiness", ["from", "to"]),
+        new("risks", ["q", "status", "severity", "ownerId", "disciplineId", "indicator", "sort", "cols"]),
         new("issues", ["q", "status", "severity", "ownerId", "disciplineId", "indicator", "location", "document", "revision", "verification", "alignment", "issueType", "stationFrom", "stationTo", "stationUnits", "group", "sort", "cols"]),
         new("board", ["q", "disciplineId", "deliverableId", "status", "priority", "mine", "overdue", "blocked", "blocking", "dueThisWeek", "unassigned", "readyForReview", "waiting", "open", "stale", "dueSoon", "noDueDate", "dateInconsistent", "heldPastDue", "dueFrom", "dueTo", "milestoneId", "assigneeId", "ids", "sort", "group", "cols", "swim", "side", "onHold"]),
         new("deliverables", ["q", "disciplineId", "status", "milestoneId", "ownerId", "typeId", "indicator", "dueFrom", "dueTo", "requiresReview", "group", "sort", "cols", "revisionWarning"]),

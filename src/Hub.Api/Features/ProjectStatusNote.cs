@@ -1,7 +1,4 @@
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using Hub.Api.Data;
-using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +6,15 @@ namespace Hub.Api.Features;
 
 public static class ProjectStatusNote
 {
-    public static async Task<JsonNode?> Read(Project project, HubDb db, TimeProvider clock)
+    public sealed record NextMilestone(string Name, DateOnly? Date);
+    public sealed record NoteHeader(string ComputedHealth, string? ReportedHealth, NextMilestone? NextMilestone, int OpenAttention);
+    /// The project's status note with the health header beside it, as the Projects and Portfolio responses carry it under statusNote.
+    public sealed record NoteView(string? Text, Guid? AuthorId, string? Author, DateTimeOffset? At, NoteHeader Header);
+
+    public static async Task<NoteView?> Read(Project project, HubDb db, TimeProvider clock)
         => (await ReadMany([project], db, clock)).GetValueOrDefault(project.Id);
 
-    public static async Task<Dictionary<Guid, JsonNode?>> ReadMany(IEnumerable<Project> projects, HubDb db, TimeProvider clock)
+    public static async Task<Dictionary<Guid, NoteView>> ReadMany(IEnumerable<Project> projects, HubDb db, TimeProvider clock)
     {
         var list = projects.Where(p => p.StatusNote != null).ToArray(); var ids = list.Select(p => p.Id).ToArray();
         var states = await db.ProjectStates.AsNoTracking().Where(s => ids.Contains(s.ProjectId)).ToDictionaryAsync(s => s.ProjectId, s => s.ComputedHealth);
@@ -24,10 +26,9 @@ public static class ProjectStatusNote
         return list.ToDictionary(p => p.Id, p => {
             var computed = p.Status == ProjectStatus.Active ? states.GetValueOrDefault(p.Id, Health.Grey) : Health.Grey;
             var next = milestones[p.Id].FirstOrDefault();
-            return JsonSerializer.SerializeToNode(new { Text = p.StatusNote, AuthorId = p.StatusNoteBy,
-                Author = p.StatusNoteBy is { } author ? authors.GetValueOrDefault(author) : null, At = p.StatusNoteAt,
-                Header = new { ComputedHealth = computed, ReportedHealth = p.Status == ProjectStatus.Active && p.HealthOverrideExpiresAt > clock.GetUtcNow() ? p.HealthOverride : null,
-                    NextMilestone = next == null ? null : new { next.Name, next.Date }, OpenAttention = attention.GetValueOrDefault(p.Id) } }, JsonOpts.Web);
+            return new NoteView(p.StatusNote, p.StatusNoteBy, p.StatusNoteBy is { } author ? authors.GetValueOrDefault(author) : null, p.StatusNoteAt,
+                new(computed, p.Status == ProjectStatus.Active && p.HealthOverrideExpiresAt > clock.GetUtcNow() ? p.HealthOverride : null,
+                    next == null ? null : new(next.Name, next.Date), attention.GetValueOrDefault(p.Id)));
         });
     }
 }

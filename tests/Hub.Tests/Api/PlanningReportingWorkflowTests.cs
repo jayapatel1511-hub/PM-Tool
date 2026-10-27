@@ -37,6 +37,28 @@ public sealed class PlanningReportingWorkflowTests(HubFactory f)
         } finally { await Flag("project_status_note", false); }
     }
 
+    [Fact, Trait("flag-on", "project_status_note")] // 040-S15.05: the typed status note keeps the JSON the Projects and Portfolio pages read
+    public async Task Status_note_json_keeps_its_property_names_order_and_nulls()
+    {
+        var project = await d.Project(); var pm = f.As(TestData.Pm); var path = $"/api/v1/projects/{project.Id}";
+        await Flag("project_status_note", true);
+        try {
+            var before = await (await pm.GetAsync(path)).Json();
+            Assert.True(before["statusNote"] is null); // no note yet: the key is present and null
+            await f.DbAsync(async db => { db.Milestones.Add(new Milestone { ProjectId = project.Id, Seq = 905, Key = "M0905", Name = "Note gate", Date = new DateOnly(2026, 11, 2) }); return await db.SaveChangesAsync(); });
+            (await pm.Patch(path, new { statusNote = "On track" }, before.I("rowVersion"))).EnsureSuccessStatusCode();
+            var note = (await (await pm.GetAsync(path)).Json())["statusNote"]!.AsObject();
+            Assert.Equal(["text", "authorId", "author", "at", "header"], note.Select(kv => kv.Key));
+            Assert.Equal("On track", note["text"]!.GetValue<string>());
+            var header = note["header"]!.AsObject();
+            Assert.Equal(["computedHealth", "reportedHealth", "nextMilestone", "openAttention"], header.Select(kv => kv.Key));
+            Assert.True(header["reportedHealth"] is null);
+            Assert.Equal("""{"name":"Note gate","date":"2026-11-02"}""", header["nextMilestone"]!.ToJsonString());
+            var row = (await (await f.As(TestData.Admin).GetAsync($"/api/v1/portfolio?projectId={project.Id}&mine=false")).Json())["projects"]!.AsArray().Single(p => p!["id"]!.GetValue<Guid>() == project.Id)!;
+            Assert.Equal(note.ToJsonString(), row["statusNote"]!.ToJsonString());
+        } finally { await Flag("project_status_note", false); }
+    }
+
     [Fact, Trait("flag-on", "capacity_polish")] // AC-PRO-21, AC-PRO-23
     public async Task Weekday_schedule_has_twenty_hours_and_rejects_leave_above_wednesday_hours()
     {

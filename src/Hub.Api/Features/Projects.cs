@@ -322,7 +322,7 @@ public static class ProjectEndpoints
         };
         if (!s.IsFlagOn("schedule_baseline") && !s.IsFlagOn("project_status_note")) return result;
         var json = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
-        if (s.IsFlagOn("project_status_note")) json["statusNote"] = await ProjectStatusNote.Read(p, db, clock);
+        if (s.IsFlagOn("project_status_note")) json["statusNote"] = JsonSerializer.SerializeToNode(await ProjectStatusNote.Read(p, db, clock), JsonOpts.Web);
         if (s.IsFlagOn("schedule_baseline"))
         {
             var latest = Evaluator.LatestPlanned(p.Status, p.TargetCompletionDate,

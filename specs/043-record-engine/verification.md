@@ -1,6 +1,6 @@
 # Verification: Record Engine
 
-Status (2026-10-26, branch `codex/integrate-039-050`): KILL confirmed by Jay on 2026-10-25 (043-D3, see `acceptance.md`). S01, the parity run, is merged here from `build2/043-S01p` (see Build 043-S01p) with passing local checks (see Build 043-S01). None of the spike's engine code is on this branch, so no screen is converted and the conversion ACs stay UNRUN. Remote CI not run. Not Accepted.
+Status (2026-10-26, branch `codex/integrate-039-050`): KILL confirmed by Jay on 2026-10-25 (043-D3, see `acceptance.md`). S01, the parity run, is merged here from `build2/043-S01p` (see Build 043-S01p) with passing local checks (see Build 043-S01). S27, the KILL path, is merged from `build2/043-S27` (see Build 043-S27): the FR-REC-12 additions sit on the existing Risk and open-role components behind `flag.record_engine_additions`. None of the spike's engine code is on this branch, so no screen is converted and the conversion ACs stay UNRUN. Remote CI not run. Not Accepted.
 
 The spike was measured separately in the platform worktree: runtime `87e72b718f195903d94893da78b11f8292b62998`, evidence `878c64150551ba07b35dcb990090b5811362b368`. Strict parity measured KILL (2/10 persona/width pairs pass; eight differ in disabled Risk permission titles). Jay confirmed the verdict on 2026-10-25. No 043 runtime code is integrated here; the table below records integration-local checks only. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) for the separate-source boundary.
 
@@ -14,14 +14,14 @@ The spike was measured separately in the platform worktree: runtime `87e72b718f1
 | AC-REC-06 | UNRUN (no conversion on this branch; the S01 parity run checks it, see Build 043-S01) |
 | AC-REC-07 | UNRUN (no 043 code on this branch) |
 | AC-REC-08 | UNRUN (no 043 code on this branch) |
-| AC-REC-09 | UNRUN (no 043 code on this branch) |
+| AC-REC-09 | PASS (local; Build 043-S27) |
 | AC-REC-10 | HUMAN (human-only; nothing to check here until the spike is integrated) |
 | AC-REC-11 | UNRUN (no conversion on this branch; the S01 parity run checks it, see Build 043-S01) |
 | AC-REC-12 | UNRUN (no 043 code on this branch) |
-| AC-REC-13 | UNRUN (no 043 code on this branch) |
+| AC-REC-13 | PASS (local; Build 043-S27: nothing was integrated to revert, the additions sit on the existing components; flag-off parity against the pre-slice build) |
 | AC-REC-14 | UNRUN (no 043 code on this branch) |
 | AC-REC-15 | UNRUN (no 043 code on this branch) |
-| AC-REC-16 | HUMAN (human-only; nothing to check here until the spike is integrated) |
+| AC-REC-16 | HUMAN (human-only). Local check for 043-S27: its diff touches no `package.json`, `csproj`, service or migration. |
 
 ## Build 043-S01
 
@@ -45,3 +45,21 @@ Merge of `build2/043-S01p` (S01, the parity run, plus the spike's verdict record
 - S01 in `tasks.md` stays unticked: this port supplies the harness only, and no converted screen has been checked against it.
 - Assumptions: 043-D2 default (the spike screens are the parity run's default screens) and 043-D8 default (the fallback starts with open roles, so the open-roles states are in the default run). Test and CI code only, so no flag applies and runtime behaviour is unchanged.
 - Left for Jay: nothing is pushed and remote CI has not run. The pull-request CI parity step takes about 15 minutes locally.
+
+## Build 043-S27
+
+Merge of `build2/043-S27` (KILL path) into `codex/integrate-039-050`. Nothing was integrated to revert, so S27 builds the FR-REC-12 additions directly on `RisksTab` and the open-roles table, behind `flag.record_engine_additions` (off by default, returned on `/me`). S07 is ticked with the note that Jay confirmed the KILL verdict on 2026-10-25.
+
+- Built: a `risks` saved-view list (refused with the flag off) and the Views menu in the Risks toolbar, carrying the column choice as `cols`; open-role column-header sorting through `useTable` (aria-sort, sort in the URL); a read-only `OpenRolePanel` with a History tab, opened from the role label, registered by one `PANELS.OpenRole` line that names the flag (a panel entry whose flag is off is absent, so `?panel=OpenRole:<id>` opens nothing); `GET /api/v1/lists/open-roles/export` (flag-gated, the list's project access and status codes, the existing `ExportFile.Send` writer and row cap) with CSV and Excel entries after the Allocations page's own Export entries. No `/api/v1/meta`, no `/api/v1/records/{type}/{id}`, no renderers.
+- Checks on the merged tree (2026-10-26, local; the merge was clean, no conflicts): `dotnet build Hub.slnx` 0 errors; backend tests OpenRoleApiTests, ViewsTests, ContractTests, Flag, Registry, Export, Shapes, TextTests, Records, ActivityTests and ItemHistory classes 194 passed; `npm run build` (gen files unchanged), `npm run lint` exit 0, `npm run typecheck:tests`, `node tests/registrations.cjs` PASS. Builder on the slice branch: 178 targeted and 817 wider backend tests passed, `resources.cjs` and `interaction.cjs` exit 0.
+- Integration fix: the merged tree raised two ratchet counters (`runtime_text_keys` 234 over 233, `anonymous_objects` 790 over 788). One shared `RoleStatus` pill now serves the table cell and the panel, and the export rows are typed records; both counters are back at their baselines. `tools/ratchet.py` still exits 1 because `direct_invalidate_queries` is 67 over its baseline of 66, which is identical on the pre-merge head `b4cd126c` and not from this slice.
+- Parity (`web/scripts/run-record-parity.mjs`, base `b4cd126c` against the candidate): PASS, 11 of 11 (5 personas at 1600 and 375 px over the Risks register, the Risk panel and the open-roles tab of an Active, a Complete and an empty project, flag off, plus the AC-REC-09 flag off and on check), run on the candidate after the ratchet fix (`96891ad2`) against the pre-merge head, on headless Chromium build 1248.
+- AC rows (all from the builder's report unless noted):
+  - AC-REC-09 flag off: no Risks Views menu, no open-role sort buttons, no panel link, no open-roles export entries, `?panel=OpenRole` opens nothing. PASS (local): harness additions check (off phase) and the OpenRoleApiTests flag-off test (export and risks views answer 404, list unchanged).
+  - AC-REC-09 flag on: Risks saved view saves and re-applies filters, sort and columns; open-role headers sort with aria-sort; the role label opens a panel whose History equals the role's activity entries (read-only, no inputs); the Export menu's open-roles entries download the list's columns as CSV and Excel (Role, Discipline, From, Through, Hours, Status, Filled by, Note). PASS (local): harness plus ViewsTests and OpenRoleApiTests.
+  - AC-REC-09 a viewer who cannot view the project gets none of these; export answers with the list's status. PASS (local): harness outsider check on a Restricted project; OpenRoleApiTests compares export and list status (404); ViewsTests risks views 404 for an outsider.
+  - AC-REC-13 / FR-REC-14: no `/api/v1/meta`, no `/api/v1/records/{type}/{id}`, no renderers; the open-roles export endpoint is kept. PASS (local).
+  - AC-REC-16: no runtime package, `csproj` change, service or migration in the diff. PASS (local); the row stays HUMAN.
+  - Full CI (sharded API suite, remaining browser suites, shapes full check, ratchet): PARTIAL. Related classes and suites ran green; the full sharded CI did not run.
+- Assumptions (spec defaults relied on): 043-D4 (the spike additions are Risks saved views, open-role sorting, a read-only panel with History and export entries, behind the flag, kept on the restored screens on KILL); 043-D3 (KILL confirmed 2026-10-25, so the engine is not integrated and nothing was reverted); 043-D7 (no generic create or update endpoints, the panel is read-only, edit, fill and cancel stay row actions); 043-D9 (the panel is registered by one explicit `PANELS.OpenRole` line, with a flag field on the entry and no automatic fallback); 043-D10 (Tier B spike-additions slice, left for Jay to merge). The export column set is the list's six columns with the role cell's discipline and note split out, "Filled by" shown only where the viewer can open the filling allocation; the panel resolves the role from its project's open-roles list, so it opens under `/projects/<number>/` only (marked `ponytail`); the parity base is the build immediately before this slice.
+- Left for Jay: turn `flag.record_engine_additions` on in review and pilot and check the Risks Views menu, open-role sorting, the panel and the export; then S26 removes the flag checks and the `Flags.cs` entry. Nothing is pushed and remote CI has not run. Scratch databases `hub_s27_dbg` and `hub_record_*` remain in the local Postgres.

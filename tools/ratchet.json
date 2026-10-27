@@ -6,7 +6,7 @@
     },
     "api_helpers_without_type": {
       "ratchet": true,
-      "value": 141
+      "value": 140
     },
     "client_permission_derivations": {
       "ratchet": false,
@@ -34,7 +34,7 @@
     },
     "task_object_handlers": {
       "ratchet": true,
-      "value": 77
+      "value": 76
     },
     "untyped_results": {
       "ratchet": true,

@@ -22,6 +22,7 @@ const taskDetail = { task, project: { id: pid, projectNumber: project.projectNum
 const timeline = { latestPlanned: { date: '2026-11-05', itemKey: 'SYN-046-D001', targetDate: '2026-10-30', rule: 'Working days' }, handoffs: [{ id: id(7), key: 'SYN-046-H001', title: 'Civil to Electrical', status: 'Submitted', sendingDisciplineId: discipline, receivingDisciplineId: discipline, neededBy: '2026-10-25', promisedBy: '2026-10-27', dateMismatch: true, isOverdue: true, daysOverdue: 3 }], permissions: { manageMilestones: false, needsReason: false }, tasks: [{ ...task, affectedMilestoneIds: [milestoneId], canEditDates: false, dueNeedsReason: false, isOverdue: false, slipShown: true }], dependencies: [], deliverableLinks: [], deliverables: [{ id: deliverableId, canEditDates: true, createdOn: '2026-10-18', slipShown: true, baselineStartDate: '2026-10-20', baselineDueDate: '2026-10-28', baselineSlipShown: true }] }
 
 const { activityPage } = require('./activity.fixture.cjs')
+const { startReadiness } = require('./task-start.fixture.cjs')
 const activity = activityPage(id, { actorId: person, itemId: taskId, itemKey: task.key, itemName: task.name })
 let server, browser
 ;(async () => {
@@ -54,7 +55,7 @@ let server, browser
     else if (p === `projects/${pid}/deliverables`) data = [deliverable]
     else if (p === `projects/${pid}/milestones`) data = [milestone]
     else if (p === `tasks/${taskId}` && method === 'GET') data = {...taskDetail,relatedDeliverables:related?[{id:deliverableId,key:deliverable.key,name:deliverable.name}]:[]}
-    else if (p === `tasks/${taskId}/start-readiness`) data = { readinessState: 'Needs Assessment', assessed: false, unknown: [], blocked: [], note: null, needsAuthorisation: true, canAuthorise: false, authorisation: null, unusableAuthorisation: null }
+    else if (p === `tasks/${taskId}/start-readiness`) data = startReadiness({ taskId, key: task.key })
     else if (p === `tasks/${taskId}/dependencies`) data = { dependsOn: [], blocks: [] }
     else if (p === `items/Task/${taskId}/links` || p === `items/Deliverable/${deliverableId}/links`) data = { links: [], inherited: [], canAdd: false }
     else if (p === `items/Task/${taskId}/comments` || p === `items/Deliverable/${deliverableId}/comments`) data = { items: [], canComment: false }

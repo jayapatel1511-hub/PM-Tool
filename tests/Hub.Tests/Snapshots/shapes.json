@@ -28500,6 +28500,63 @@
     "$.components.schemas.SnoozeBody.type": [
       "string"
     ],
+    "$.components.schemas.StartAuthorisationView": [
+      "object"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties": [
+      "object"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.authorisedBy": [
+      "object"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.authorisedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.authorisedBy.type": [
+      "string"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.authorisedByName": [
+      "object"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.authorisedByName.type": [
+      "array"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.authorisedByName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.StartAuthorisationView.properties.reason.type": [
+      "string"
+    ],
+    "$.components.schemas.StartAuthorisationView.required": [
+      "array"
+    ],
+    "$.components.schemas.StartAuthorisationView.required[]": [
+      "string"
+    ],
+    "$.components.schemas.StartAuthorisationView.type": [
+      "string"
+    ],
     "$.components.schemas.StartBody": [
       "object"
     ],
@@ -31633,6 +31690,129 @@
       "string"
     ],
     "$.components.schemas.TaskRelatedDeliverable.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.assessed": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.assessed.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.authorisation": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.authorisation.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.authorisation.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.authorisation.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.authorisation.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.blocked": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.blocked.items": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.blocked.items.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.blocked.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.canAuthorise": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.canAuthorise.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.needsAuthorisation": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.needsAuthorisation.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.note": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.note.type": [
+      "array"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.note.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.readinessState": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.readinessState.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.taskId": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.taskId.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.taskId.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.unknown": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.unknown.items": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.unknown.items.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.unknown.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.unusableAuthorisation": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.unusableAuthorisation.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.unusableAuthorisation.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.unusableAuthorisation.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.properties.unusableAuthorisation.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.required": [
+      "array"
+    ],
+    "$.components.schemas.TaskStartStatus.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskStartStatus.type": [
       "string"
     ],
     "$.components.schemas.TaskTransitionBody": [
@@ -55826,6 +56006,9 @@
     ],
     "$.paths./api/v1/tasks/{id}/start-readiness.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/tasks/{id}/start-readiness.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/tasks/{id}/start-readiness.get.responses.200.description": [
       "string"

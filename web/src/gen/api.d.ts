@@ -14618,7 +14618,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["TaskStartStatus"];
                     };
                 };
             };
@@ -19011,6 +19011,16 @@ export interface components {
             days: number;
             note: string;
         };
+        StartAuthorisationView: {
+            /** Format: uuid */
+            authorisedBy: string;
+            authorisedByName: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            id: string;
+            reason: string;
+        };
         StartBody: {
             reason: null | string;
             /** Format: uuid */
@@ -19467,6 +19477,21 @@ export interface components {
             key: string;
             name: string;
             status: string;
+        };
+        TaskStartStatus: {
+            assessed: boolean;
+            authorisation: null | components["schemas"]["StartAuthorisationView"];
+            blocked: string[];
+            canAuthorise: boolean;
+            key: string;
+            needsAuthorisation: boolean;
+            note: null | string;
+            readinessState: string;
+            status: string;
+            /** Format: uuid */
+            taskId: string;
+            unknown: string[];
+            unusableAuthorisation: null | components["schemas"]["StartAuthorisationView"];
         };
         TaskTransitionBody: {
             acknowledgeReadiness?: null | boolean;

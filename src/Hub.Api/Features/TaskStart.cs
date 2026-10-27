@@ -1,6 +1,7 @@
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -18,6 +19,12 @@ public static class TaskStartEndpoints
     {
         public bool NeedsAuthorisation => State is ReadinessState.NotReady or ReadinessState.NeedsAssessment;
     }
+
+    /// A recorded authorisation as the start dialog shows it.
+    public sealed record StartAuthorisationView(Guid Id, Guid AuthorisedBy, string? AuthorisedByName, string Reason, DateTimeOffset CreatedAt);
+    /// The start dialog's answer: the work's readiness now, whether it needs an authorisation, and the usable or no longer usable one.
+    public sealed record TaskStartStatus(Guid TaskId, string Key, string Status, string ReadinessState, bool Assessed, string[] Unknown, string[] Blocked,
+        string? Note, bool NeedsAuthorisation, bool CanAuthorise, StartAuthorisationView? Authorisation, StartAuthorisationView? UnusableAuthorisation);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -117,22 +124,18 @@ public static class TaskStartEndpoints
         return w.Length == 1 ? w[0] : $"{string.Join(", ", w[..^1])} and {w[^1]}";
     }
 
-    static async Task<object> Get(Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<TaskStartStatus>> Get(Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var t = await db.Tasks.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(t.ProjectId, false);
         var r = await Current(db, p, t.Id, await store.Get(db), store, clock);
         var notStarted = t.Status == TaskStatuses.NotStarted;
         var (usable, unusable) = notStarted && r.NeedsAuthorisation ? await Find(db, p, t.Id, t.ProjectDisciplineId, r) : (null, null);
-        async Task<object?> Show(TaskStartAuthorisation? a) => a is null ? null
-            : new { a.Id, a.AuthorisedBy, AuthorisedByName = await Name(db, a.AuthorisedBy), a.Reason, a.CreatedAt };
-        return new
-        {
-            TaskId = t.Id, t.Key, t.Status, ReadinessState = r.State, r.Assessed, r.Unknown, r.Blocked, r.Note,
-            NeedsAuthorisation = notStarted && r.NeedsAuthorisation,
-            CanAuthorise = notStarted && Permissions.ManageCoordination(access.Actor, ctx, t.ProjectDisciplineId).Ok,
-            Authorisation = await Show(usable), UnusableAuthorisation = await Show(unusable),
-        };
+        async Task<StartAuthorisationView?> Show(TaskStartAuthorisation? a) => a is null ? null
+            : new(a.Id, a.AuthorisedBy, await Name(db, a.AuthorisedBy), a.Reason, a.CreatedAt);
+        return TypedResults.Ok(new TaskStartStatus(t.Id, t.Key, t.Status, r.State, r.Assessed, r.Unknown, r.Blocked, r.Note,
+            notStarted && r.NeedsAuthorisation, notStarted && Permissions.ManageCoordination(access.Actor, ctx, t.ProjectDisciplineId).Ok,
+            await Show(usable), await Show(unusable)));
     }
 
     static async Task<Coordination.Result> Authorise(Guid id, AuthoriseBody body, Access access, HubDb db, SettingsStore store,

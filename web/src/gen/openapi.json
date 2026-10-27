@@ -11944,6 +11944,39 @@
         ],
         "type": "object"
       },
+      "StartAuthorisationView": {
+        "properties": {
+          "authorisedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "authorisedByName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "authorisedBy",
+          "authorisedByName",
+          "reason",
+          "createdAt"
+        ],
+        "type": "object"
+      },
       "StartBody": {
         "properties": {
           "reason": {
@@ -13836,6 +13869,85 @@
           "key",
           "name",
           "status"
+        ],
+        "type": "object"
+      },
+      "TaskStartStatus": {
+        "properties": {
+          "assessed": {
+            "type": "boolean"
+          },
+          "authorisation": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/StartAuthorisationView"
+              }
+            ]
+          },
+          "blocked": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "canAuthorise": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "needsAuthorisation": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "readinessState": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "unknown": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "unusableAuthorisation": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/StartAuthorisationView"
+              }
+            ]
+          }
+        },
+        "required": [
+          "taskId",
+          "key",
+          "status",
+          "readinessState",
+          "assessed",
+          "unknown",
+          "blocked",
+          "note",
+          "needsAuthorisation",
+          "canAuthorise",
+          "authorisation",
+          "unusableAuthorisation"
         ],
         "type": "object"
       },
@@ -31676,7 +31788,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/TaskStartStatus"
+                }
               }
             },
             "description": "OK"

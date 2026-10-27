@@ -278,7 +278,7 @@ export function StatusMenu({ r, onMove, disabled }: { r: TaskRow; onMove: (m: Mo
   const [pending, setPending] = useState<string | null>(null)
   const requestMove = async (m: MoveRequest) => { if (optimistic && (r.status !== 'Not Started' || readiness.data?.needsAuthorisation === false) && !m.needsReason && m.to !== 'Revision Required' && !m.needsReviewer) setPending(m.to); try { await onMove(m) } finally { setPending(null) } }
   const q = useQuery({ queryKey: ['task', r.id, r.rowVersion], queryFn: () => get(`tasks/${r.id}`), enabled: open })
-  const readiness = useQuery({ queryKey: ['task-start-readiness', r.id, r.rowVersion], enabled: optimistic && open && r.status === 'Not Started', queryFn: () => get<{needsAuthorisation:boolean}>(`tasks/${r.id}/start-readiness`) })
+  const readiness = useQuery({ queryKey: ['task-start-readiness', r.id, r.rowVersion], enabled: optimistic && open && r.status === 'Not Started', queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/start-readiness', { params: { id: r.id } }) })
   if (disabled) return <StatusPill status={r.status} />
   const list: Transition[] = q.data?.permissions.transitions ?? []
   return (

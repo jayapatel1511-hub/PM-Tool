@@ -3,6 +3,8 @@ import { ErrorBanner, Field, Spinner } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 import { ApiError, api } from '@/lib/api'
 import { t } from '@/lib/i18n'
 
@@ -13,16 +15,19 @@ export function TimeAwayDialog({ person, record, onClose, onChanged }: { person:
   const [fullDay, setFullDay] = useState(record?.hoursPerDay == null); const [hours, setHours] = useState(String(record?.hoursPerDay ?? 4)); const [status, setStatus] = useState(record?.status ?? 'Approved')
   const [busy, setBusy] = useState(false); const [error, setError] = useState<unknown>(null); const [stale, setStale] = useState(false)
   const receipt = useRef({ signature: '', key: '' })
+  const safe = useSafeForm(record || !person ? null : `timeaway.new.${person.id}`, { from, through, source, reference, fullDay, hours, status },
+    (d) => { setFrom(d.from); setThrough(d.through); setSource(d.source); setReference(d.reference); setFullDay(d.fullDay); setHours(d.hours); setStatus(d.status) }) // FR-SAV-03
   const submit = async () => {
     if (!person || stale || busy) return
     const body = { personId: person.id, sourceSystem: source.trim(), externalId: reference.trim(), fromDate: from, throughDate: through, hoursPerDay: fullDay ? null : Number(hours), status, rowVersion: record?.rowVersion ?? 0 }
     const signature = JSON.stringify(body); if (receipt.current.signature !== signature) receipt.current = { signature, key: crypto.randomUUID() }
     setBusy(true); setError(null)
-    try { await api('planning/leave/manual', { body, idempotencyKey: receipt.current.key }); onChanged(); onClose() }
+    try { await api('planning/leave/manual', { body, idempotencyKey: receipt.current.key }); safe.clear(); onChanged(); onClose() }
     catch (e) { setError(e); if (e instanceof ApiError && e.status === 409) setStale(true) }
     finally { setBusy(false) }
   }
-  return <Dialog open={!!person} onOpenChange={(open) => !open && !busy && onClose()}><DialogContent className="max-w-lg"><DialogHeader><DialogTitle>{t('availability.manualTitle', { person: person?.displayName ?? '' })}</DialogTitle><DialogDescription>{t('availability.manualHint')}</DialogDescription></DialogHeader>
+  return <Dialog open={!!person} onOpenChange={(open) => !open && !busy && safe.close(onClose)}><DialogContent className="max-w-lg"><DialogHeader><DialogTitle>{t('availability.manualTitle', { person: person?.displayName ?? '' })}</DialogTitle><DialogDescription>{t('availability.manualHint')}</DialogDescription></DialogHeader>
+    <DraftNotice form={safe} />
     {error != null && <ErrorBanner error={error} retry={stale ? () => { onChanged(); onClose() } : submit} retryLabel={stale ? t('error.reload') : undefined} />}
     <fieldset disabled={busy || stale} className="grid gap-3 sm:grid-cols-2">
       <Field label={t('availability.source')} htmlFor="away-source"><Input id="away-source" maxLength={120} value={source} disabled={!!record} onChange={(e) => setSource(e.target.value)} /></Field>
@@ -32,6 +37,6 @@ export function TimeAwayDialog({ person, record, onClose, onChanged }: { person:
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={fullDay} onChange={(e) => setFullDay(e.target.checked)} />{t('availability.fullDay')}</label>
       {!fullDay && <Field label={t('availability.absentHours')} htmlFor="away-hours"><Input id="away-hours" type="number" min="0.5" max="24" step="0.5" value={hours} onChange={(e) => setHours(e.target.value)} /></Field>}
       {record && <Field label={t('common.status')} htmlFor="away-status"><select id="away-status" className="h-(--control-h) rounded border px-3 text-sm" value={status} onChange={(e) => setStatus(e.target.value)}><option value="Approved">{t('availability.approved')}</option><option value="Cancelled">{t('availability.cancelled')}</option></select></Field>}
-    </fieldset><DialogFooter><Button variant="outline" onClick={onClose} disabled={busy}>{t('common.cancel')}</Button><Button onClick={submit} disabled={busy || stale || !source.trim() || !reference.trim() || !from || !through || through < from || !fullDay && (!(Number(hours) > 0) || Number(hours) > 24)}>{busy && <Spinner />}{t('common.save')}</Button></DialogFooter>
+    </fieldset><DialogFooter><Button variant="outline" onClick={() => safe.close(onClose)} disabled={busy}>{t('common.cancel')}</Button><Button onClick={submit} disabled={busy || stale || !source.trim() || !reference.trim() || !from || !through || through < from || !fullDay && (!(Number(hours) > 0) || Number(hours) > 24)}>{busy && <Spinner />}{t('common.save')}</Button></DialogFooter>
   </DialogContent></Dialog>
 }

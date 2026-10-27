@@ -1,6 +1,7 @@
 import type { paths } from '@/gen/api'
 import { toast } from 'sonner'
 import { t } from '@/lib/i18n'
+import { leave } from '@/lib/drafts'
 
 /** RFC 9457 problem returned by the API (§25.6). */
 export class ApiError extends Error {
@@ -45,7 +46,7 @@ function observeBuild(res: Response) {
   try {
     sessionStorage.setItem(BUILD_NOTICE_KEY, JSON.stringify([...observedBuilds]))
   } catch { /* storage can be unavailable in a restricted browser context */ }
-  toast.info(t('app.updated'), { duration: Infinity, action: { label: t('common.reload'), onClick: () => window.location.reload() } })
+  toast.info(t('app.updated'), { duration: Infinity, action: { label: t('common.reload'), onClick: (event) => { event.preventDefault(); leave(() => window.location.reload()) } } }) // FR-SAV-06: typed input is asked about or drafted first; Keep editing leaves the notice up
 }
 
 function requestHeaders(extra?: Record<string, string>) {

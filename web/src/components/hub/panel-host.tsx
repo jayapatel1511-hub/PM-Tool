@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { useMe } from '@/lib/auth-context'
+import { leave } from '@/lib/drafts'
 import { t , runtimeText } from '@/lib/i18n'
 import { lazyImport } from '@/lib/lazy'
 import { Loading } from '@/components/hub/common'
@@ -41,10 +42,11 @@ export function PanelHost() {
   const [type, id] = raw ? [raw.slice(0, raw.indexOf(':')), raw.slice(raw.indexOf(':') + 1)] : [null, null]
   const entry = usePanels()(type)
   const close = () => { const n = new URLSearchParams(sp); n.delete('panel'); setSp(n) }
+  const closePanel = () => leave(close) // FR-SAV-04: typed input in the panel that nothing has saved is asked about first
   if (!entry || !id) return null
   const Comp = entry.component
   return (
-    <Sheet open onOpenChange={(o) => !o && close()}>
+    <Sheet open onOpenChange={(o) => !o && closePanel()}>
       <SheetContent side="right" className="w-full gap-0 overflow-y-auto p-0 sm:max-w-none xl:max-w-[560px] [&>button:last-child]:hidden">
         <SheetDescription className="sr-only">{t('panel.description')}</SheetDescription>
         {/* Header bar (design §6 detail panel): the item type, then "open full page" and close; it stays put while the item scrolls. */}
@@ -52,7 +54,7 @@ export function PanelHost() {
           <SheetTitle className="text-sm font-semibold">{runtimeText(`itemType.${type}`)}</SheetTitle>
           <div className="flex items-center gap-1">
             {entry.fullPage && <Button variant="ghost" size="sm" onClick={() => navigate(entry.fullPage!(id))}><ExternalLink className="size-4" aria-hidden />{t('panel.fullPage')}</Button>}
-            <Button variant="ghost" size="icon" onClick={close} aria-label={t('common.close')}><X className="size-5" aria-hidden /></Button>
+            <Button variant="ghost" size="icon" onClick={closePanel} aria-label={t('common.close')}><X className="size-5" aria-hidden /></Button>
           </div>
         </div>
         {/* Keyed by item: a field's unsaved text, "Not saved" and timed retry belong to the record they were typed for (FR-SAV-02). */}

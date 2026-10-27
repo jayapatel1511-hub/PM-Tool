@@ -2570,6 +2570,12 @@ export const en = {
   'inline.someone': 'Someone',
   'inline.keepMine': 'Keep mine',
   'inline.takeTheirs': 'Take theirs',
+  'draft.restored': 'Draft restored from {time}',
+  'draft.discard': 'Discard',
+  'draft.leaveTitle': 'Keep editing or discard?',
+  'draft.leaveBody': 'What you typed here is not saved yet.',
+  'draft.keep': 'Keep editing',
+  'draft.leave': 'Discard',
 
   // Integrated en-workspace.ts
   'ws.createdBy': 'Created by',

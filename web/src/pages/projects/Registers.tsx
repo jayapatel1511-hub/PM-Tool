@@ -32,6 +32,8 @@ import { CommentsSlot, ItemSlots, type RaiseProps } from './slots-items'
 import { errorText } from './Tasks'
 import type { components } from '@/gen/api'
 import type { SavedViewKeys } from '@/gen/registry.gen'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 // Risk and Issue Registers (§12.10, §13.13, packet 014).
 
@@ -403,20 +405,22 @@ function RiskForm({ projectId, link, disciplineId, onClose }: { projectId: strin
   const [f, setF] = useState<Record<string, any>>({ projectDisciplineId: disciplineId ?? null })
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm(`risk.new.${projectId}`, f, setF) // FR-SAV-03
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
       const r = await post(`projects/${projectId}/risks`, { title: f.title, description: f.description, probability: f.probability, impact: f.impact, ownerId: f.ownerId || null,
         reviewDate: f.reviewDate || null, mitigation: f.mitigation, triggerIndicator: f.triggerIndicator, projectDisciplineId: f.projectDisciplineId || null,
         links: link ? [{ targetType: link.type, targetId: link.id }] : [] })
-      toast.success(t('risk.raised', { key: r.key })); done(projectId); onClose(); openPanel('Risk', r.id)
+      toast.success(t('risk.raised', { key: r.key })); done(projectId); safe.clear(); onClose(); openPanel('Risk', r.id)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   const fe = err?.fieldErrors ?? {}
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader><DialogTitle>{t('risk.new')}</DialogTitle><DialogDescription>{link ? t('register.linkedTo', { key: link.key, name: link.name }) : t('risk.newHint')}</DialogDescription></DialogHeader>
+        <DraftNotice form={safe} />
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
           <Field label={t('register.title')} htmlFor="r-title" error={fe.title} className="sm:col-span-2"><Input id="r-title" required autoFocus placeholder={t('risk.titlePlaceholder')} value={f.title ?? ''} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
           <Field label={t('common.description')} htmlFor="r-desc" error={fe.description} className="sm:col-span-2"><Textarea id="r-desc" rows={2} value={f.description ?? ''} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
@@ -430,7 +434,7 @@ function RiskForm({ projectId, link, disciplineId, onClose }: { projectId: strin
           <Field label={t('risk.trigger')} htmlFor="r-trig" error={fe.triggerIndicator} hint={t('risk.triggerHint')} className="sm:col-span-2"><Input id="r-trig" value={f.triggerIndicator ?? ''} onChange={(e) => setF({ ...f, triggerIndicator: e.target.value })} /></Field>
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
-            <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+            <Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={busy || !f.probability || !f.impact}>{busy && <Spinner />}{busy ? t('common.saving') : t('risk.raise')}</Button>
           </DialogFooter>
         </form>
@@ -511,23 +515,25 @@ function IssueForm({ projectId, link, disciplineId, onClose }: { projectId: stri
   const [f, setF] = useState<Record<string, any>>({ projectDisciplineId: disciplineId ?? null })
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm(`issue.new.${projectId}`, f, setF) // FR-SAV-03
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
       const r = await post(`projects/${projectId}/issues`, { ...issueBody(f), links: link ? [{ targetType: link.type, targetId: link.id }] : [] })
-      toast.success(t('issue.raised', { key: r.key })); done(projectId); onClose(); openPanel('Issue', r.id)
+      toast.success(t('issue.raised', { key: r.key })); done(projectId); safe.clear(); onClose(); openPanel('Issue', r.id)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   const fe = err?.fieldErrors ?? {}
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader><DialogTitle>{t('issue.new')}</DialogTitle><DialogDescription>{link ? t('register.linkedTo', { key: link.key, name: link.name }) : t('issue.newHint')}</DialogDescription></DialogHeader>
+        <DraftNotice form={safe} />
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
           <IssueFields projectId={projectId} f={f} setF={setF} fe={fe} prefix="i" />
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
-            <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+            <Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={busy || !f.severity}>{busy && <Spinner />}{busy ? t('common.saving') : t('issue.raise')}</Button>
           </DialogFooter>
         </form>

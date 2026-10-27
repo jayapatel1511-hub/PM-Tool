@@ -2,6 +2,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { t } from "@/lib/i18n"
+import { onToast } from "@/lib/drafts"
 import { XIcon } from "lucide-react"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
@@ -50,6 +51,7 @@ function SheetContent({
   showCloseButton = true,
   onOpenAutoFocus,
   onCloseAutoFocus,
+  onInteractOutside,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left"
@@ -75,6 +77,7 @@ function SheetContent({
           className
         )}
         {...props}
+        onInteractOutside={(event) => { onInteractOutside?.(event); if (onToast(event.target)) event.preventDefault() }}
         onOpenAutoFocus={(event) => {
           const active = document.activeElement
           opener.current = active instanceof HTMLElement && active !== document.body ? active : null

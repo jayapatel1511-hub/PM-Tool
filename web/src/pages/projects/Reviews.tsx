@@ -11,6 +11,7 @@ import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { CoordinationRegister, type RegisterContext } from './CoordinationRegister'
 import { CommandForm, CoordStatus, FieldsCommand, PersonLabel, SelectField, SourceLink, discName, personName, peopleChoices, disciplineChoices, type RecordVersion, type SourceRevision, type FormField } from './CoordinationForms'
+import { useSafeForm } from '@/hooks/drafts'
 
 type Package = RecordVersion & { title: string; key: string; purpose: string; projectDisciplineId: string; coordinatorId: string; status: string; currentRoundId: string; roundNumber: number; requiredForIssue: boolean }
 type Assignment = RecordVersion & { roundId: string; projectDisciplineId: string; reviewerId: string; dueDate: string; status: string; rationale?: string; decidedAt?: string }
@@ -27,9 +28,10 @@ function ReviewForm({ options: o, projectId, refresh, open, close, existing }: R
   const [required, setRequired] = useState(p?.requiredForIssue ?? true), [why, setWhy] = useState(''), [impact, setImpact] = useState('')
   const [sources, setSources] = useState<string[]>([])
   const [assignments, setAssignments] = useState((existing?.assignments.filter(a => a.roundId === p?.currentRoundId) ?? []).map(a => ({ projectDisciplineId: a.projectDisciplineId, reviewerId: a.reviewerId, dueDate: addDays(today(), 7) })))
+  const safe = useSafeForm(p ? null : `review.new.${projectId}`, { title, purpose, coordinator, discipline, required, why, impact, sources, assignments }, (d) => { setTitle(d.title); setPurpose(d.purpose); setCoordinator(d.coordinator); setDiscipline(d.discipline); setRequired(d.required); setWhy(d.why); setImpact(d.impact); setSources(d.sources); setAssignments(d.assignments) }) // FR-SAV-03
   const sourceRows = o.sources.filter(s => s.published && s.isCurrent && s.revision.deliverableId)
   const assign = (id: string, field: string, value: string) => setAssignments(v => v.map(a => a.projectDisciplineId === id ? { ...a, [field]: value } : a))
-  return <CommandForm title={t(p ? 'review.newRound' : 'reviews.new')} hint={t('review.formHint')} path={`projects/${projectId}/reviews${p ? `/${p.id}/rounds` : ''}`} payload={() => p ? { rowVersion: p.rowVersion, purpose, sourceRevisionIds: sources, assignments, reason: why, removalImpact: impact || null } : { title, purpose, projectDisciplineId: discipline, coordinatorId: coordinator, sourceRevisionIds: sources, assignments, requiredForIssue: required, reason: why || null }} onClose={close} onDone={id => { refresh(); close(); open(p?.id ?? id) }}>
+  return <CommandForm title={t(p ? 'review.newRound' : 'reviews.new')} hint={t('review.formHint')} safe={safe} path={`projects/${projectId}/reviews${p ? `/${p.id}/rounds` : ''}`} payload={() => p ? { rowVersion: p.rowVersion, purpose, sourceRevisionIds: sources, assignments, reason: why, removalImpact: impact || null } : { title, purpose, projectDisciplineId: discipline, coordinatorId: coordinator, sourceRevisionIds: sources, assignments, requiredForIssue: required, reason: why || null }} onClose={close} onDone={id => { refresh(); close(); open(p?.id ?? id) }}>
     {!p && <><Field label={t('coord.title')} htmlFor="review-title"><Input id="review-title" required value={title} onChange={e => setTitle(e.target.value)} /></Field>
       <div className="grid gap-3 sm:grid-cols-2"><SelectField label={t('coord.discipline')} value={discipline} onChange={setDiscipline} choices={disciplineChoices(o).filter(d => o.manageDisciplineIds.includes(d.value))} /><SelectField label={t('coord.coordinator')} value={coordinator} onChange={setCoordinator} choices={peopleChoices(o)} /></div></>}
     <Field label={t('review.purpose')} htmlFor="review-purpose"><Textarea id="review-purpose" required maxLength={2000} value={purpose} onChange={e => setPurpose(e.target.value)} /></Field>

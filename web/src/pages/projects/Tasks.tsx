@@ -35,6 +35,8 @@ import { NOTE_LABEL, OneSignal, type Signal } from '@/components/hub/indicators'
 import { ViewMenu } from '@/components/hub/views'
 import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/deleted'
 import { StartAuthorisationDialog, type StartRequest } from './TaskStart'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 // ---------- Shapes (GET /projects/{id}/tasks, /tasks/{id}) ----------
 
@@ -802,6 +804,7 @@ export function CreateTask({ p, deliverables, milestones, defaults, onClose }: {
   const [reviewer, setReviewer] = useState<string | null>(null)
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm(`task.new.${p.id}${defaults?.deliverableId ? `.${defaults.deliverableId}` : ''}`, { f, assignee, reviewer }, (d) => { setF(d.f); setAssignee(d.assignee); setReviewer(d.reviewer) }) // FR-SAV-03
   const up = (k: string, v: unknown) => setF((x) => ({ ...x, [k]: v }))
   const chooseDeliverable = (id: string) => {
     const d = deliverables.find((x) => x.id === id)
@@ -815,6 +818,7 @@ export function CreateTask({ p, deliverables, milestones, defaults, onClose }: {
         milestoneId: f.deliverableId ? null : f.milestoneId || null, assigneeId: assignee, reviewerId: reviewer, requiresReview: f.requiresReview,
         priority: f.priority, startDate: f.startDate || null, dueDate: f.dueDate || null, estimatedHours: f.estimatedHours === '' || f.estimatedHours == null ? null : Number(f.estimatedHours),
       })
+      safe.clear()
       toast.success(t('task.created', { key: r.key }))
       onClose(r.id)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
@@ -822,9 +826,10 @@ export function CreateTask({ p, deliverables, milestones, defaults, onClose }: {
   const fe = err?.fieldErrors ?? {}
   const dl = deliverables.find((d) => d.id === f.deliverableId)
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader><DialogTitle>{t('task.new')}</DialogTitle></DialogHeader>
+        <DraftNotice form={safe} />
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
           <Field label={t('task.name')} htmlFor="t-name" error={fe.name} className="sm:col-span-2"><Input id="t-name" required autoFocus value={f.name ?? ''} onChange={(e) => up('name', e.target.value)} /></Field>
           <Field label={t('common.discipline')} htmlFor="t-disc" error={fe.projectDisciplineId}>
@@ -856,7 +861,7 @@ export function CreateTask({ p, deliverables, milestones, defaults, onClose }: {
           <Field label={t('common.description')} htmlFor="t-desc" hint={t('task.descriptionHint')} className="sm:col-span-2" optional><Textarea id="t-desc" rows={3} value={f.description ?? ''} onChange={(e) => up('description', e.target.value)} /></Field>
           {err && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
-            <Button type="button" variant="outline" onClick={() => onClose()}>{t('common.cancel')}</Button>
+            <Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={busy || !f.name?.trim() || !f.projectDisciplineId}>{busy && <Spinner />}{busy ? t('common.saving') : t('task.create')}</Button>
           </DialogFooter>
         </form>

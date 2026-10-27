@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { get } from '@/lib/api'
+import { useSafeForm } from '@/hooks/drafts'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { Chip, Key } from '@/components/hub/pills'
@@ -205,10 +206,11 @@ function ProposePromise({ projectId, options, week, day, complete, close, done }
   complete: boolean; close: () => void; done: () => void }) {
   const [target, setTarget] = useState(''), [start, setStart] = useState(week), [targetDate, setTargetDate] = useState(week)
   const [output, setOutput] = useState(''), [criteria, setCriteria] = useState(''), [reason, setReason] = useState('')
+  const safe = useSafeForm(`promise.new.${projectId}`, { target, start, targetDate, output, criteria, reason }, (d) => { setTarget(d.target); setStart(d.start); setTargetDate(d.targetDate); setOutput(d.output); setCriteria(d.criteria); setReason(d.reason) }) // FR-SAV-03
   const [type, id] = target.split(':'), work = workRef(options, type, id)
   const eligible = { ...options, tasks: options.tasks.filter(w => w.canCommit), deliverables: options.deliverables.filter(w => w.canCommit) }
   return <CommandForm path={`projects/${projectId}/weekly-commitments/${type}/${id}`} title={t('readiness.propose')}
-    hint={t('readiness.proposeHint')} onClose={close} onDone={done} submitLabel={t('common.save')}
+    hint={t('readiness.proposeHint')} safe={safe} onClose={close} onDone={done} submitLabel={t('common.save')}
     payload={() => { if (!work) throw new Error(t('coord.unavailable')); return { targetRowVersion: work.rowVersion, weekStart: start, targetDate,
       intendedOutput: output, completionCriteria: criteria, reason: reason || null } }}>
     <SelectField label={t('readiness.work')} value={target} onChange={setTarget} choices={workChoices(eligible)} />

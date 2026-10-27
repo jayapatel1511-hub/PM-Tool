@@ -31,6 +31,8 @@ import { cn } from '@/lib/utils'
 import { invalidateChange } from '@/lib/keys'
 import { CommandForm, SelectField, type CoordOptions, WorkLink } from './CoordinationForms'
 import { useCurrentProject } from './ProjectLayout'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 type Allocation = { id: string; personId: string; personName: string | null; purpose: string; fromDate: string; throughDate: string; plannedHours: number; status: string; rowVersion: number; personState: 'Eligible' | 'Inactive' | 'Removed' | 'Missing' }
 type AllocationPage = { items: Allocation[]; page: number; pageSize: number; totalCount: number }
@@ -465,17 +467,19 @@ function RoleDialog({ projectId, disciplines, role, complete, onClose, onDone }:
   const [f, setF] = useState({ roleLabel: role?.roleLabel ?? '', projectDisciplineId: role?.projectDisciplineId ?? '', fromDate: role?.fromDate ?? today(), throughDate: role?.throughDate ?? today(),
     plannedHours: role ? String(role.plannedHours) : '', note: role?.note ?? '', reason: '' })
   const [err, setErr] = useState<ApiError | null>(null), [busy, setBusy] = useState(false)
+  const safe = useSafeForm(role ? null : `role.new.${projectId}`, f, setF) // FR-SAV-03
   const labelMax = useReference().data?.limits.roleLabel // FR-FIG-12: the server's one limit
   const up = (k: keyof typeof f) => (e: { target: { value: string } }) => setF(x => ({ ...x, [k]: e.target.value }))
   const fe = err?.fieldErrors ?? {}
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setErr(null); setBusy(true)
     const body = { roleLabel: f.roleLabel, projectDisciplineId: f.projectDisciplineId || null, fromDate: f.fromDate, throughDate: f.throughDate, plannedHours: Number(f.plannedHours), note: f.note || null, ...(complete ? { reason: f.reason } : {}) }
-    try { await (role ? typedRequest('patch', '/api/v1/open-roles/{id}', { params: { id: role.id }, body, ifMatch: role.rowVersion }) : typedRequest('post', '/api/v1/projects/{projectId}/open-roles', { params: { projectId }, body })); toast.success(t('common.saved')); onDone() }
+    try { await (role ? typedRequest('patch', '/api/v1/open-roles/{id}', { params: { id: role.id }, body, ifMatch: role.rowVersion }) : typedRequest('post', '/api/v1/projects/{projectId}/open-roles', { params: { projectId }, body })); safe.clear(); toast.success(t('common.saved')); onDone() }
     catch (x) { setErr(x as ApiError) } finally { setBusy(false) }
   }
-  return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
+  return <Dialog open onOpenChange={o => !o && !busy && safe.close(onClose)}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
     <DialogHeader><DialogTitle>{t(role ? 'openRole.edit' : 'openRole.new')}</DialogTitle><DialogDescription>{t('openRole.formHint')}</DialogDescription></DialogHeader>
+    <DraftNotice form={safe} />
     <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
       <Field label={t('openRole.label')} htmlFor="role-label" error={fe.roleLabel} className="sm:col-span-2"><Input id="role-label" required maxLength={labelMax} autoFocus value={f.roleLabel} onChange={up('roleLabel')} placeholder={t('openRole.labelPlaceholder')} /></Field>
       <Field label={t('common.discipline')} htmlFor="role-discipline" error={fe.projectDisciplineId} optional className="sm:col-span-2">
@@ -488,7 +492,7 @@ function RoleDialog({ projectId, disciplines, role, complete, onClose, onDone }:
       <Field label={t('common.notes')} htmlFor="role-note" error={fe.note} optional className="sm:col-span-2"><Textarea id="role-note" rows={2} maxLength={2000} value={f.note} onChange={up('note')} /></Field>
       {complete && <Field label={t('common.reason')} htmlFor="role-reason" error={fe.reason} hint={t('openRole.correctionHint')} className="sm:col-span-2"><Textarea id="role-reason" required minLength={5} value={f.reason} onChange={up('reason')} /></Field>}
       {err && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
-      <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" disabled={busy} onClick={onClose}>{t('common.cancel')}</Button>
+      <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" disabled={busy} onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button>
         <Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter>
     </form>
   </DialogContent></Dialog>

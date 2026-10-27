@@ -19,6 +19,7 @@ import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
 import { CommandForm, CoordStatus, Count, FieldsCommand, PersonLabel, RegisterPager, SelectField, discName, personName, peopleChoices, type CoordOptions, type RecordVersion } from './CoordinationForms'
+import { useSafeForm } from '@/hooks/drafts'
 
 type Package = RecordVersion & { key: string; title: string; purpose: string; recipientReference: string; coordinatorId: string; milestoneId: string; targetDate: string; status: string; manifestVersion: number; supersedesPackageId?: string }
 type Row = Pick<Package, 'id' | 'key' | 'title' | 'status' | 'coordinatorId' | 'targetDate' | 'manifestVersion' | 'rowVersion'> & { blockerCount: number }
@@ -95,12 +96,13 @@ function SubmissionForm({ projectId, options, milestones, onClose, onDone, exist
   const [sources, setSources] = useState<string[]>((existing ?? supersedes)?.manifest.map(m => m.sourceRevisionId) ?? [])
   const [optionals, setOptionals] = useState<{ id: string; label: string; ownerId: string }[]>(() => supersedes?.checks.filter(c => c.kind === 'Applicability').map(c => ({ id: crypto.randomUUID(), label: c.evidenceRule ?? '', ownerId: c.ownerId })) ?? [])
   const [reason, setReason] = useState('')
+  const safe = useSafeForm(existing || supersedes || mode !== 'create' ? null : `submission.new.${projectId}`, { title, purpose, recipient, coordinator, milestoneId, targetDate, sources, optionals, reason }, (d) => { setTitle(d.title); setPurpose(d.purpose); setRecipient(d.recipient); setCoordinator(d.coordinator); setMilestoneId(d.milestoneId); setTargetDate(d.targetDate); setSources(d.sources); setOptionals(d.optionals); setReason(d.reason) }) // FR-SAV-03
   const available = options.sources.filter(s => s.published && s.isCurrent && s.revision.deliverableId)
   const path = `projects/${projectId}/submissions${p ? `/${p.id}/${mode === 'manifest' ? 'manifest' : 'edit'}` : ''}`
   const payload = () => mode === 'manifest' ? { rowVersion: p!.rowVersion, manifest: sources.map(sourceRevisionId => ({ sourceRevisionId })), reason } : mode === 'edit' ?
     { rowVersion: p!.rowVersion, title, purpose, recipientReference: recipient, milestoneId, targetDate, reason } :
     { title, purpose, recipientReference: recipient, coordinatorId: coordinator, milestoneId, targetDate, manifest: sources.map(sourceRevisionId => ({ sourceRevisionId })), optionalChecks: optionals.filter(o => o.label.trim()).map(o => ({ label: o.label.trim(), ownerId: o.ownerId, projectDisciplineId: null })), supersedesPackageId: supersedes?.package.id ?? null, reason: supersedes ? reason : null }
-  return <CommandForm path={path} title={t(mode === 'manifest' ? 'submissions.replaceManifest' : mode === 'edit' ? 'submissions.edit' : 'submissions.new')} hint={t('submissions.formHint')} payload={payload} onClose={onClose} onDone={onDone}>
+  return <CommandForm path={path} title={t(mode === 'manifest' ? 'submissions.replaceManifest' : mode === 'edit' ? 'submissions.edit' : 'submissions.new')} hint={t('submissions.formHint')} payload={payload} onClose={onClose} onDone={onDone} safe={safe}>
     {mode !== 'manifest' && <><Field label={t('coord.title')} htmlFor="sub-title"><Input id="sub-title" required maxLength={200} value={title} onChange={e => setTitle(e.target.value)} /></Field>
       <Field label={t('submissions.purpose')} htmlFor="sub-purpose"><Textarea id="sub-purpose" required maxLength={2000} value={purpose} onChange={e => setPurpose(e.target.value)} /></Field>
       <Field label={t('submissions.recipient')} htmlFor="sub-recipient"><Input id="sub-recipient" required maxLength={1000} value={recipient} onChange={e => setRecipient(e.target.value)} /></Field>

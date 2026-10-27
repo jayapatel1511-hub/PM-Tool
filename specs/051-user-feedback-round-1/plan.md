@@ -50,6 +50,8 @@ Reuse first. New storage is one table (`AdminReview`) and three organisation set
 | S10 digest line and Portfolio strip | `src/Hub.Api/Infrastructure/Digest.cs`, `web/src/pages/Portfolio.tsx` |
 | S11 flag cleanup | removes the three flag entries and their checks once Jay has turned them on in pilot |
 
+S03 reach (`web/src/hooks/drafts.ts`, `useSafeForm`): every create dialog and long text editor keeps a keyed draft (FR-SAV-03), including the Readiness raise-constraint, create-assessment and propose-commitment forms, the project status note editor, the project and time-away CSV imports, the manual time-away dialog and the New template dialog. An edit form passes no key: it keeps no draft, but typed changes still ask "Keep editing or discard?" (FR-SAV-04). Deliberately not adopted, because each holds a short reason or a pick rather than typed work, or saves by field (S01 and S02): confirm and reason-only action dialogs (`ConfirmDialog`, task start, readiness prerequisite, constraint move, applicability and exception forms), the add-from-template and bulk-week pickers, the planner entry panel, the admin review note and the organisation structure forms. Any of these joins by passing `safe` or calling `useSafeForm`.
+
 ## Risks
 
 - **Draft keys and shared devices.** Drafts are keyed by user id, so a second person on the same browser profile does not see them, but a signed-out shared kiosk keeps them for `draft_keep_days`. D2 accepts this; the setting can be lowered.

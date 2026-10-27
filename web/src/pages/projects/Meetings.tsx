@@ -23,6 +23,8 @@ import { DateText, FieldGroup, PanelHead, Person, SELECTED_ROW, TITLE_LINK } fro
 import { useCurrentProject } from './ProjectLayout'
 import { CommentsSlot, ItemSlots } from './slots-items'
 import { errorText } from './Tasks'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 // Meetings & Actions (§12.11, §13.13, packet 015). Agendas, minutes and attendance are not built.
 
@@ -139,6 +141,7 @@ export function ActionForm({ projectId, meetingId, related, links, linkedActionI
   const [due, setDue] = useState(addDays(today(), 7))
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm(`action.new.${projectId}${meetingId ? `.${meetingId}` : ''}`, { meeting, text, owner, due }, (d) => { setMeeting(d.meeting); setText(d.text); setOwner(d.owner); setDue(d.due) }) // FR-SAV-03
   const picked = candidates.data?.find((a) => a.id === reuseId)
   const what = related?.label ?? ''
   const submit = async () => {
@@ -150,12 +153,12 @@ export function ActionForm({ projectId, meetingId, related, links, linkedActionI
         const signature = JSON.stringify([picked.id, body]) // a retry of the same choice replays; a changed one is a new request
         if (receipt.current?.signature !== signature) receipt.current = { signature, id: crypto.randomUUID() }
         await post(`projects/${projectId}/actions/${picked.id}/reuse`, { ...body, requestId: receipt.current.id })
-        toast.success(t('dcv.reuseDone', { key: picked.key, what })); done(projectId, picked.id); onClose({ id: picked.id, key: picked.key, text: picked.text, reused: true })
+        toast.success(t('dcv.reuseDone', { key: picked.key, what })); safe.clear(); done(projectId, picked.id); onClose({ id: picked.id, key: picked.key, text: picked.text, reused: true })
         return
       }
       const mid = meeting === CURRENT ? (await post<MeetingRow>(`projects/${projectId}/meetings/current`)).id : meeting
       const r = await post(`meetings/${mid}/actions`, { text, ...ownerBody(owner), dueDate: due || null, relatedTaskId: related?.taskId ?? null, relatedDecisionId: related?.decisionId ?? null, links })
-      toast.success(t('action.added', { key: r.key })); done(projectId); onClose({ id: r.id, key: r.key, text })
+      safe.clear(); toast.success(t('action.added', { key: r.key })); done(projectId); onClose({ id: r.id, key: r.key, text })
     } catch (e) {
       setErr(e as ApiError)
       if (reuse && (e as ApiError).status === 409) candidates.refetch() // show the current action before another try
@@ -165,9 +168,10 @@ export function ActionForm({ projectId, meetingId, related, links, linkedActionI
   const option = (a: ActionRow) => <option key={a.id} value={a.id}>{a.key} · {a.text} · {a.ownerName ?? t('ind.unassigned')} · {fmtDate(a.dueDate)} · {tv(a.status)}</option>
   const linked = (candidates.data ?? []).filter((a) => linkedActionIds?.includes(a.id)), others = (candidates.data ?? []).filter((a) => !linkedActionIds?.includes(a.id))
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader><DialogTitle>{canReuse ? t('dcv.captureAction') : t('action.new')}</DialogTitle><DialogDescription>{related ? t('action.relatedTo', { what: related.label }) : t('action.newHint')}</DialogDescription></DialogHeader>
+        <DraftNotice form={safe} />
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
           {canReuse && (
             <fieldset className="space-y-1.5 sm:col-span-2">
@@ -209,7 +213,7 @@ export function ActionForm({ projectId, meetingId, related, links, linkedActionI
           </>}
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
-            <Button type="button" variant="outline" onClick={() => onClose()}>{t('common.cancel')}</Button>
+            <Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={busy || (reuse ? !picked : !text.trim())}>{busy && <Spinner />}{busy ? t('common.saving') : reuse ? t('dcv.reuseSubmit') : t('action.add')}</Button>
           </DialogFooter>
         </form>
@@ -224,6 +228,7 @@ function MeetingForm({ projectId, meeting, onClose }: { projectId: string; meeti
   const [f, setF] = useState<Record<string, any>>(meeting ? { ...meeting } : { meetingDate: today(), meetingType: 'Client' })
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm(meeting ? null : `meeting.new.${projectId}`, f, setF) // FR-SAV-03
   const from = f.meetingDate ? addDays(f.meetingDate, -3) : today()
   const events = useQuery({ queryKey: ['calendar', projectId, 'meeting-link', from], enabled: !!f.meetingDate,
     queryFn: () => get<{ entries: { kind: string; id: string; title: string; start: string }[] }>(`calendar${qs({ from, to: addDays(from, 6), projectIds: projectId, types: 'Meeting' })}`) })
@@ -232,14 +237,15 @@ function MeetingForm({ projectId, meeting, onClose }: { projectId: string; meeti
     try {
       const body = { title: f.title, meetingDate: f.meetingDate, meetingType: f.meetingType, notesLink: f.notesLink || null, calendarEventId: f.calendarEventId || null }
       if (meeting) await patch(`meetings/${meeting.id}`, body, meeting.rowVersion); else await post(`projects/${projectId}/meetings`, body)
-      toast.success(t('common.saved')); done(projectId); onClose()
+      safe.clear(); toast.success(t('common.saved')); done(projectId); onClose()
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   const fe = err?.fieldErrors ?? {}
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader><DialogTitle>{meeting ? t('meeting.edit') : t('meeting.new')}</DialogTitle><DialogDescription>{t('meeting.hint')}</DialogDescription></DialogHeader>
+        <DraftNotice form={safe} />
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
           <Field label={t('register.title')} htmlFor="m-title" error={fe.title} className="sm:col-span-2"><Input id="m-title" required autoFocus placeholder={t('meeting.titlePlaceholder')} value={f.title ?? ''} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
           <Field label={t('meeting.date')} htmlFor="m-date" error={fe.meetingDate}><Input id="m-date" type="date" required value={f.meetingDate ?? ''} onChange={(e) => setF({ ...f, meetingDate: e.target.value })} /></Field>
@@ -255,7 +261,7 @@ function MeetingForm({ projectId, meeting, onClose }: { projectId: string; meeti
           </Field>
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
-            <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+            <Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button>
           </DialogFooter>
         </form>

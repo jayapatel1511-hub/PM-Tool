@@ -27,6 +27,8 @@ import { STATUSES as DELIVERABLE_STATUSES } from './Deliverables'
 import { useCurrentProject } from './ProjectLayout'
 import { ExportMenu } from '@/components/hub/export'
 import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/deleted'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 export interface MilestoneRow {
   id: string; projectId: string; key: string; name: string; milestoneType: string; date?: string; originalDate?: string; description?: string
@@ -333,18 +335,20 @@ function MilestoneForm({ p, m, phases, onClose, onDone }: { p: ProjectDetail; m?
     completesPhaseId: m.completesPhaseId ?? '', isClientFacing: m.isClientFacing, date: m.date ?? '' } : { milestoneType: 'Design Submission', isClientFacing: true })
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm(m ? null : `milestone.new.${p.id}`, f, setF) // FR-SAV-03: a new milestone keeps a draft
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
       const body: Record<string, any> = { ...f, projectDisciplineId: f.projectDisciplineId || null, completesPhaseId: f.completesPhaseId || null }
       if (m) { if (m.date) delete body.date; await patch(`milestones/${m.id}`, body, m.rowVersion) } else await post(`projects/${p.id}/milestones`, body)
-      toast.success(t('common.saved')); onDone()
+      safe.clear(); toast.success(t('common.saved')); onDone()
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader><DialogTitle>{m ? t('milestone.edit', { key: m.key }) : t('milestone.new')}</DialogTitle></DialogHeader>
+        <DraftNotice form={safe} />
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
           <Field label={t('common.name')} htmlFor="m-name" error={err?.fieldErrors.name} className="sm:col-span-2"><Input id="m-name" required value={f.name ?? ''} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
           <Field label={t('common.type')} htmlFor="m-type">
@@ -365,7 +369,7 @@ function MilestoneForm({ p, m, phases, onClose, onDone }: { p: ProjectDetail; m?
           <Field label={t('common.description')} htmlFor="m-desc" optional className="sm:col-span-2"><Textarea id="m-desc" rows={3} value={f.description ?? ''} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
           {err && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="sm:col-span-2">
-            <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+            <Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={busy}>{busy ? <><Spinner />{t('common.saving')}</> : t('common.save')}</Button>
           </DialogFooter>
         </form>

@@ -18,6 +18,8 @@ import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
 import { CoordStatus, RegisterPager, useCoordRefresh } from './CoordinationForms'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 const STATUSES = ['Draft', 'Submitted', 'Clarification Requested', 'Returned', 'Accepted', 'Incorporated', 'Cancelled']
 type Person = { id: string; displayName: string }
@@ -145,6 +147,7 @@ function HandoffForm({ projectId, options, existing, initialSource, initialTask,
     intendedUse: existing?.intendedUse ?? '', acceptanceCriteria: existing?.acceptanceCriteria ?? '', neededBy: existing?.neededBy ?? target?.dueDate ?? addDays(today(), 7), promisedBy: existing?.promisedBy ?? '', reason: '' })
   const update = (key: keyof typeof values, value: string) => set(v => ({ ...v, [key]: value }))
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm(existing ? null : `handoff.new.${projectId}`, values, set) // FR-SAV-03
   const [error, setError] = useState<ApiError | null>(null)
   const receipt = useRef<Receipt | null>(null)
   const fixed = !!existing?.currentRevisionId
@@ -156,12 +159,13 @@ function HandoffForm({ projectId, options, existing, initialSource, initialTask,
         targetTaskId: values.target.startsWith('Task:') ? values.target.slice(5) : null, targetDeliverableId: values.target.startsWith('Deliverable:') ? values.target.slice(12) : null,
         promisedBy: values.promisedBy || null, rowVersion: existing?.rowVersion }
       const result = await post<{ id: string }>(`projects/${projectId}/handoffs${existing ? `/${existing.id}/draft` : ''}`, { ...payload, requestId: requestId(receipt, payload) })
-      toast.success(t('handoff.saved')); onClose(result.id)
+      safe.clear(); toast.success(t('handoff.saved')); onClose(result.id)
     } catch (e) { setError(e as ApiError) } finally { setBusy(false) }
   }
   const workOptions = (kind: string, work: Work[]) => work.filter(w => w.projectDisciplineId === values.receivingDisciplineId).map(w => <option key={w.id} value={`${kind}:${w.id}`}>{w.key} · {w.name}</option>)
-  return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl">
+  return <Dialog open onOpenChange={o => !o && !busy && safe.close(onClose)}><DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl">
     <DialogHeader><DialogTitle>{t(existing ? 'handoff.edit' : 'handoff.new')}</DialogTitle><DialogDescription>{t('handoff.formHint')}</DialogDescription></DialogHeader>
+    <DraftNotice form={safe} />
     <form onSubmit={e => { e.preventDefault(); save() }} className="grid gap-4 sm:grid-cols-2">
       <Field label={t('handoff.item')} htmlFor="hf-title" className="sm:col-span-2"><Input id="hf-title" required maxLength={200} value={values.title} onChange={e => update('title', e.target.value)} /></Field>
       <Field label={t('handoff.source')} htmlFor="hf-source" className="sm:col-span-2"><select id="hf-source" className={selectCls} required disabled={!!existing} value={values.sourceDeliverableId} onChange={e => {
@@ -185,7 +189,7 @@ function HandoffForm({ projectId, options, existing, initialSource, initialTask,
       {values.promisedBy > values.neededBy && <p role="status" className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn sm:col-span-2"><span aria-hidden>▲</span><span>{t('handoff.dateMismatchHint')}</span></p>}
       {existing && <Field label={t('handoff.reason')} htmlFor="hf-reason" className="sm:col-span-2"><Textarea id="hf-reason" value={values.reason} onChange={e => update('reason', e.target.value)} /></Field>}
       {error && <div className="sm:col-span-2"><Refusal error={error} /></div>}
-      <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" disabled={busy} onClick={() => onClose()}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('handoff.saveDraft')}</Button></DialogFooter>
+      <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" disabled={busy} onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('handoff.saveDraft')}</Button></DialogFooter>
     </form>
   </DialogContent></Dialog>
 }

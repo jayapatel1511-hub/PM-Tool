@@ -24,10 +24,10 @@ const actionDetail = { action: { id: panelIds.action, projectId: project.id, pro
 const riskDetail = { risk: { id: panelIds.risk, projectId: project.id, key: 'R-001', title: 'Synthetic risk', status: 'Open', band: 'Medium', score: 4, probability: 2, impact: 2, ownerId: null, ownerName: 'Alex Chen', projectDisciplineId: project.projectDisciplines[0].id, reviewDate: '2026-10-20', isReviewOverdue: false, mitigation: 'Synthetic mitigation', triggerIndicator: 'Synthetic trigger', rowVersion: 1 }, description: 'Synthetic risk detail', project: { id: project.id, projectNumber: project.projectNumber, name: project.name }, permissions: { ...panelPermissions, transitions: [] }, links: [], realisedIssue: null }
 const issueDetail = { issue: { id: panelIds.issue, projectId: project.id, key: 'I-001', title: 'Synthetic issue', status: 'Open', issueType: 'General', raisedById: null, raisedByName: 'Alex Chen', ownerId: null, ownerName: 'Alex Chen', severity: 'Medium', dateRaised: '2026-10-01', targetResolutionDate: '2026-10-20', isOverdue: false, daysOverdue: 0, rowVersion: 1, affectedDisciplineIds: [] }, description: 'Synthetic issue detail', project: { id: project.id, projectNumber: project.projectNumber, name: project.name }, permissions: { ...panelPermissions, transitions: [], comment: true }, links: [], originRisk: null }
 
-async function startPreview(port = Number(process.env.TUESDAY_MOCK_PORT ?? 5189)) {
+async function startPreview(port = Number(process.env.TUESDAY_MOCK_PORT ?? 5189), { outDir } = {}) {
   port = Number(process.env.TUESDAY_MOCK_PORT ?? port)
   const cwd = path.resolve(__dirname, '..')
-  const child = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', String(port), '--strictPort'], { cwd, stdio: 'ignore' })
+  const child = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', String(port), '--strictPort', ...(outDir ? ['--outDir', outDir] : [])], { cwd, stdio: 'ignore' })
   let exited = false; child.once('exit', () => { exited = true })
   const base = `http://127.0.0.1:${port}`
   for (let i = 0; i < 100; i++) { if (exited) break; try { if ((await fetch(base)).ok) return { base, child } } catch {} await new Promise(resolve => setTimeout(resolve, 100)) }

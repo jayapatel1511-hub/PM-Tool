@@ -174,3 +174,6 @@
 
 /* Private entries keep a visible hatch as well as their label and lock. */
 .planner-draft { background-image: repeating-linear-gradient(135deg, transparent 0 5px, #59606c0d 5px 7px); }
+
+/* FR-SAV-06: while the draft guard is on, the build-update notice can be pressed over an open dialog or panel. */
+html[data-guard-toasts] [data-sonner-toast] { pointer-events: auto; }

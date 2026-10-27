@@ -8,14 +8,15 @@ import { Key, StatusPill } from '@/components/hub/pills'
 import { itemHref } from '@/components/hub/search'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { get, post } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { typedRequest } from '@/lib/api'
 import { fmtDate, today } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
+import { invalidateChange } from '@/lib/keys'
 import { accentOf } from '@/lib/utils'
 import { errorText } from './projects/Tasks'
 
-interface OpenItem { kind: string; id: string; key?: string | null; name: string; status?: string | null; dueDate?: string | null; projectId: string; projectNumber: string; projectName: string }
-interface OpenWork { person: { id: string; displayName: string; isActive: boolean; email: string }; items: OpenItem[] }
+type OpenItem = components['schemas']['OpenItem']
 
 const TYPE: Record<string, string> = { TaskAssignee: 'Task', TaskReviewer: 'Task', DeliverableOwner: 'Deliverable', DeliverableReviewer: 'Deliverable', DecisionOwner: 'Decision' }
 const id = (i: OpenItem) => `${i.kind}:${i.id}`
@@ -24,7 +25,7 @@ const id = (i: OpenItem) => `${i.kind}:${i.id}`
 export function ReassignWorkPage() {
   const { id: userId } = useParams()
   const qc = useQueryClient()
-  const q = useQuery({ queryKey: ['open-work', userId], queryFn: () => get<OpenWork>(`users/${userId}/open-work`) })
+  const q = useQuery({ queryKey: ['open-work', userId], queryFn: () => typedRequest('get', '/api/v1/users/{id}/open-work', { params: { id: userId! } }) })
   const [picked, setPicked] = useState<Set<string>>(new Set())
   const [to, setTo] = useState<{ id: string; name?: string } | null>(null)
   const [busy, setBusy] = useState(false)
@@ -43,11 +44,11 @@ export function ReassignWorkPage() {
     setBusy(true)
     try {
       const chosen = items.filter((i) => picked.has(id(i)))
-      const r = await post<{ reassigned: number; skipped: { key: string; reason: string }[] }>(`users/${userId}/reassign`, { items: chosen.map((i) => ({ kind: i.kind, id: i.id })), toUserId: to.id })
+      const r = await typedRequest('post', '/api/v1/users/{id}/reassign', { params: { id: userId! }, body: { items: chosen.map((i) => ({ kind: i.kind, id: i.id })), toUserId: to.id } })
       toast.success(t('reassign.done', { n: r.reassigned, name: to.name ?? '' }))
       r.skipped.forEach((s) => toast.warning(`${s.key}: ${s.reason}`))
       setPicked(new Set())
-      qc.invalidateQueries({ queryKey: ['open-work', userId] })
+      void invalidateChange(qc, 'Task')
     } catch (e) { toast.error(errorText(e)) } finally { setBusy(false) }
   }
   return (

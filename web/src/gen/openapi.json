@@ -542,27 +542,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem": {
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/OpenItem"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "person": {
-            "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndbooleanAndstring"
-          }
-        },
-        "required": [
-          "person",
-          "items"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean": {
         "properties": {
           "byDay": {
@@ -986,36 +965,6 @@
           "name",
           "isActive",
           "sortOrder"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndbooleanAndstring": {
-        "properties": {
-          "displayName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "email": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "id",
-          "displayName",
-          "isActive",
-          "email"
         ],
         "type": "object"
       },
@@ -8844,6 +8793,48 @@
         ],
         "type": "object"
       },
+      "OpenWorkPerson": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "isActive",
+          "email"
+        ],
+        "type": "object"
+      },
+      "OpenWorkView": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OpenItem"
+            },
+            "type": "array"
+          },
+          "person": {
+            "$ref": "#/components/schemas/OpenWorkPerson"
+          }
+        },
+        "required": [
+          "person",
+          "items"
+        ],
+        "type": "object"
+      },
       "OpsProblem": {
         "properties": {
           "detail": {
@@ -10684,6 +10675,41 @@
         "required": [
           "items",
           "toUserId"
+        ],
+        "type": "object"
+      },
+      "ReassignResult": {
+        "properties": {
+          "reassigned": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/ReassignSkip"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "reassigned",
+          "skipped"
+        ],
+        "type": "object"
+      },
+      "ReassignSkip": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "reason"
         ],
         "type": "object"
       },
@@ -32569,7 +32595,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem"
+                  "$ref": "#/components/schemas/OpenWorkView"
                 }
               }
             },
@@ -32606,6 +32632,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReassignResult"
+                }
+              }
+            },
             "description": "OK"
           }
         },

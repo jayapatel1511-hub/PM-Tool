@@ -6,7 +6,7 @@ import type { QueryClient } from '@tanstack/react-query'
 test('item changes keep the previous project and item-specific invalidations (AC-PLAT-19)', () => {
   const before: Record<string, string[]> = {
     OpenRole: ['allocations', 'open-roles', 'workload', 'planning-grid', 'my-week'],
-    ResourceAllocation: ['allocations', 'workload'], Task: ['task', 'mywork', 'p'],
+    ResourceAllocation: ['allocations', 'workload'], Task: ['task', 'mywork', 'p', 'open-work'],
     Decision: ['decision', 'coordination'], Action: ['action', 'coordination', 'mywork'],
     Risk: ['risk', 'coordination'], Issue: ['issue', 'coordination'], Milestone: ['milestone', 'p'],
     Deliverable: ['deliverable', 'p'], Handoff: ['handoffs', 'handoff-detail', 'handoff-options', 'search'],

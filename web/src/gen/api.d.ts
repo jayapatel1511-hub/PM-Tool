@@ -15429,7 +15429,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem"];
+                        "application/json": components["schemas"]["OpenWorkView"];
                     };
                 };
             };
@@ -15471,7 +15471,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ReassignResult"];
+                    };
                 };
             };
         };
@@ -16141,10 +16143,6 @@ export interface components {
             projectNumber: null | string;
             unread: boolean;
         };
-        AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem: {
-            items: null | components["schemas"]["OpenItem"][];
-            person: components["schemas"]["AnonymousTypeOfGuidAndstringAndbooleanAndstring"];
-        };
         AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean: {
             byDay: null | components["schemas"]["AnonymousTypeOfDateOnlyAnddecimal"][];
             byProject: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAnddecimal"][];
@@ -16246,13 +16244,6 @@ export interface components {
             name: null | string;
             /** Format: int32 */
             sortOrder: number;
-        };
-        AnonymousTypeOfGuidAndstringAndbooleanAndstring: {
-            displayName: null | string;
-            email: null | string;
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
         };
         AnonymousTypeOfGuidAndstringAndstring: {
             displayName: null | string;
@@ -18220,6 +18211,17 @@ export interface components {
             /** Format: date */
             throughDate: string;
         };
+        OpenWorkPerson: {
+            displayName: string;
+            email: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+        };
+        OpenWorkView: {
+            items: components["schemas"]["OpenItem"][];
+            person: components["schemas"]["OpenWorkPerson"];
+        };
         OpsProblem: {
             detail: string;
             kind: string;
@@ -18701,6 +18703,15 @@ export interface components {
             items: components["schemas"]["ItemRef"][];
             /** Format: uuid */
             toUserId: string;
+        };
+        ReassignResult: {
+            /** Format: int32 */
+            reassigned: number;
+            skipped: components["schemas"]["ReassignSkip"][];
+        };
+        ReassignSkip: {
+            key: string;
+            reason: string;
         };
         RebaselineBody: {
             clear: null | boolean;

@@ -280,9 +280,11 @@ public static class TaskPickupReporting
     public static IQueryable<TaskPickupOffer> Rows(HubDb db, IQueryable<Guid> visibleProjects) => db.Set<TaskPickupOffer>().AsNoTracking()
         .Where(o => visibleProjects.Contains(db.Tasks.IgnoreQueryFilters().Where(t => t.Id == o.TaskId).Select(t => t.ProjectId).FirstOrDefault()));
 
+    /// The team of the offer's assignee, not the task's current one: a pick-up or reassignment must not move an offer's history
+    /// away from the team that saw it in the list, or to a team that never could.
     public static IQueryable<TaskPickupOffer> Rows(HubDb db, IQueryable<Guid> visibleProjects, AppUser viewer, bool orgStructureOn)
-        => Rows(db, visibleProjects).Where(o => db.Tasks.IgnoreQueryFilters().Where(t => t.Id == o.TaskId).Select(t => t.AssigneeId).Any(aid => aid != null && aid != viewer.Id && db.Users.Any(u => u.Id == aid && u.IsActive && viewer.IsActive
-            && (orgStructureOn && u.UnitId != null ? u.UnitId == viewer.UnitId : u.SupervisorId != null && u.SupervisorId == viewer.SupervisorId))));
+        => Rows(db, visibleProjects).Where(o => o.AssigneeId != null && o.AssigneeId != viewer.Id && db.Users.Any(u => u.Id == o.AssigneeId && u.IsActive && viewer.IsActive
+            && (orgStructureOn && u.UnitId != null ? u.UnitId == viewer.UnitId : u.SupervisorId != null && u.SupervisorId == viewer.SupervisorId)));
 }
 
 /// Serialize offer state with task changes before handlers read either row; an offer never races a terminal save.

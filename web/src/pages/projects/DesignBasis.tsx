@@ -166,7 +166,7 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
   const [draft, setDraft] = useState<VersionDraft>(() => fromVersion(current))
   const [reason, setReason] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null)
   const [duplicateId, setDuplicateId] = useState(''), [inspected, setInspected] = useState(false)
-  const safe = useSafeForm(existing ? null : `basis.new.${number}`, { kind, title, ownerId, disciplineId, approverId, draft }, (d) => { setKind(d.kind); setTitle(d.title); setOwnerId(d.ownerId); setDisciplineId(d.disciplineId); setApproverId(d.approverId); setDraft(d.draft) }) // FR-SAV-03
+  const safe = useSafeForm(existing ? null : `basis.new.${number}`, { kind, title, ownerId, disciplineId, approverId, draft, reason }, (d) => { setKind(d.kind); setTitle(d.title); setOwnerId(d.ownerId); setDisciplineId(d.disciplineId); setApproverId(d.approverId); setDraft(d.draft); setReason(d.reason) }) // FR-SAV-03
   const projectId = base.match(/^projects\/([^/]+)\/design-basis$/)?.[1] ?? ''
   const decisions = useQuery({ queryKey: ['basis-decision-options', base], enabled: !!projectId,
     queryFn: () => typedRequest('get', '/api/v1/projects/{id}/decisions', { params: { id: projectId } }) })

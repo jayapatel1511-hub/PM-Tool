@@ -10,6 +10,7 @@ import { Key, Pill, type Tone } from '@/components/hub/pills'
 import { ApiError, get } from '@/lib/api'
 import { itemHref } from '@/components/hub/search'
 import { fmtDate, fmtTime, today } from '@/lib/format'
+import { useSafeForm } from '@/hooks/drafts'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { CommandForm, CoordStatus, PersonLabel, SelectField, personName, workChoices, workRef, type CoordOptions, type WorkRef } from './CoordinationForms'
 
@@ -195,9 +196,11 @@ function RemovePrerequisite({ path, row, close, done }: { path: string; row: Pre
 function RaiseConstraint({ path, projectId, work, options, close, done }: { path: string; projectId: string; work: WorkRef; options: CoordOptions; close: () => void; done: () => void }) {
   const [category, setCategory] = useState(''), [description, setDescription] = useState(''), [removalOwnerId, setOwner] = useState(''), [neededBy, setNeeded] = useState(today()), [sourceUrl, setSource] = useState('')
   const [linkedType, setLinkedType] = useState(''), [linkedId, setLinkedId] = useState('')
+  const safe = useSafeForm(`constraint.new.${path}`, { category, description, removalOwnerId, neededBy, sourceUrl, linkedType, linkedId },
+    (d) => { setCategory(d.category); setDescription(d.description); setOwner(d.removalOwnerId); setNeeded(d.neededBy); setSource(d.sourceUrl); setLinkedType(d.linkedType); setLinkedId(d.linkedId) }) // FR-SAV-03
   const records = useQuery({ queryKey: ['readiness-link-options', projectId, linkedType], enabled: !!linkedType,
     queryFn: () => get<LinkedRecord[]>(`projects/${projectId}/readiness/link-options?type=${linkedType}`) })
-  return <CommandForm path={path} title={t('readiness.raiseConstraint')} hint={t('readiness.constraintHint')} onClose={close} onDone={done}
+  return <CommandForm path={path} title={t('readiness.raiseConstraint')} hint={t('readiness.constraintHint')} safe={safe} onClose={close} onDone={done}
     payload={() => ({ targetRowVersion: work.rowVersion, category, description, removalOwnerId, neededBy, sourceUrl,
       linkedType: linkedType || null, linkedId: linkedType ? linkedId : null })}>
     <SelectField label={t('readiness.category')} value={category} onChange={setCategory} choices={['Handoff', 'Decision', 'Basis', 'Capacity', 'Review', 'Scope', 'Other'].map(v => ({ value: v, label: tv(v) }))} />
@@ -228,7 +231,8 @@ function MoveConstraint({ path, row, state, close, done }: { path: string; row: 
 
 function CreateAssessment({ path, rowVersion, assessmentVersion, close, done }: { path: string; rowVersion: number; assessmentVersion?: number; close: () => void; done: () => void }) {
   const [output, setOutput] = useState(''), [criteria, setCriteria] = useState(''), [reason, setReason] = useState('')
-  return <CommandForm path={path} title={t(assessmentVersion != null ? 'readiness.recoverAssessment' : 'readiness.createAssessment')} hint={t(assessmentVersion != null ? 'readiness.recoverHint' : 'readiness.createHint')} onClose={close} onDone={done}
+  const safe = useSafeForm(`assessment.${assessmentVersion != null ? 'recover' : 'new'}.${path}`, { output, criteria, reason }, (d) => { setOutput(d.output); setCriteria(d.criteria); setReason(d.reason) }) // FR-SAV-03
+  return <CommandForm path={path} title={t(assessmentVersion != null ? 'readiness.recoverAssessment' : 'readiness.createAssessment')} hint={t(assessmentVersion != null ? 'readiness.recoverHint' : 'readiness.createHint')} safe={safe} onClose={close} onDone={done}
     payload={() => ({ targetRowVersion: rowVersion, intendedOutput: output, completionCriteria: criteria, reason: reason || null, assessmentRowVersion: assessmentVersion })}>
     <Field label={t('readiness.output')} htmlFor="assessment-output"><Textarea id="assessment-output" required maxLength={2000} value={output} onChange={e => setOutput(e.target.value)} /></Field>
     <Field label={t('readiness.criteria')} htmlFor="assessment-criteria"><Textarea id="assessment-criteria" required maxLength={2000} value={criteria} onChange={e => setCriteria(e.target.value)} /></Field>

@@ -8,6 +8,7 @@
 // Packet 051 S03 (FR-SAV-03, FR-SAV-04, FR-SAV-06): a create dialog and a comment keep a local draft that Escape and reopening restore,
 // Discard and a successful submit drop, an empty form never writes and `draft_keep_days` prunes; without a draft (storage refusing
 // it) the leave prompt asks on close, on navigation and on tab close, and the build-update Reload goes through the same guard.
+// An edit form has no draft key but asks the same way once something is changed; the New template dialog keeps a draft.
 const assert = require('node:assert/strict')
 const { execFileSync } = require('node:child_process')
 const fs = require('node:fs')
@@ -463,6 +464,79 @@ async function runLeavePrompt(base) {
   } finally { await ui.browser.close() }
 }
 
+// FR-SAV-04 for forms that have no draft: an edit form (no key) and a create form open with the browser keeping nothing still ask
+// before typed input goes. Flag off: today's behaviour, nothing asks. The New template dialog is a create form outside the project pages.
+async function runEditPrompt(base, on) {
+  const ui = await draftPage(base, on)
+  const { page, drafts, prompt, start, wait } = ui
+  const unload = () => page.evaluate(() => { const e = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(e); return e.defaultPrevented })
+  const milestone = { id: panelIds.milestone, projectId: project.id, key: 'M-001', name: 'Issue for review', milestoneType: 'Design Submission', date: '2026-11-02', originalDate: '2026-11-02', isClientFacing: true,
+    isComplete: false, isCancelled: false, rowVersion: 1, isSubmission: false, status: 'Open', statusReasons: [], slipDays: 0, deliverableTotal: 0, deliverableIssued: 0, taskTotal: 0, taskComplete: 0, taskOpen: 0, taskOverdue: 0, taskBlocked: 0 }
+  await page.route(new RegExp(`/api/v1/projects/${project.id}/milestones(\\?.*)?$`), route => route.request().method() === 'GET' ? route.fulfill({ json: [milestone] }) : route.fallback())
+  await page.route(/\/api\/v1\/templates$/, route => route.request().method() === 'GET' ? route.fulfill({ json: { canEdit: true, templates: [] } }) : route.fallback())
+  try {
+    await start(`/projects/${project.projectNumber}/milestones`)
+    const edit = page.getByRole('dialog', { name: 'Edit M-001' })
+    const openEdit = async () => {
+      await page.getByRole('button', { name: 'Actions for M-001' }).click()
+      await page.getByRole('menuitem', { name: 'Edit', exact: true }).click()
+      await edit.locator('#m-name').waitFor({ state: 'visible' })
+    }
+    await openEdit()
+    await page.keyboard.press('Escape')
+    await edit.waitFor({ state: 'detached' })
+    assert.equal(await prompt.count(), 0, `flag ${on}: an edit form with no change closes without a question`)
+    await openEdit()
+    await edit.locator('#m-name').fill('Changed but not saved')
+    await wait(100)
+    assert.deepEqual(await drafts(), [], `flag ${on}: an edit form keeps no draft`)
+    assert.equal(await unload(), on, `flag ${on}: tab close and reload ${on ? 'use' : 'skip'} the browser prompt for a changed edit form`)
+    if (!on) {
+      await page.keyboard.press('Escape')
+      await edit.waitFor({ state: 'detached' })
+      assert.equal(await prompt.count(), 0, 'flag off: closing never asks')
+    } else {
+      for (const close of [() => page.keyboard.press('Escape'), () => edit.getByRole('button', { name: 'Cancel' }).click(), () => page.mouse.click(5, 5)]) {
+        await close()
+        await prompt.waitFor({ state: 'visible' })
+        await prompt.getByRole('button', { name: 'Keep editing' }).click()
+        await prompt.waitFor({ state: 'detached' })
+        assert.equal(await edit.locator('#m-name').inputValue(), 'Changed but not saved', 'Keep editing keeps the change')
+      }
+      await edit.getByRole('button', { name: 'Cancel' }).click()
+      await prompt.getByRole('button', { name: 'Discard', exact: true }).click()
+      await edit.waitFor({ state: 'detached' })
+      assert.equal(await unload(), false, 'nothing is left to protect')
+      await openEdit()
+      assert.equal(await edit.locator('#m-name').inputValue(), 'Issue for review', 'the record, not the abandoned change, opens again')
+      await page.keyboard.press('Escape')
+      await edit.waitFor({ state: 'detached' })
+    }
+    // A create dialog on a page of its own: the draft is kept and restored, and a form with a draft closes without a question.
+    await start('/templates')
+    const create = page.getByRole('dialog', { name: 'New template' })
+    const openCreate = async () => { await page.getByRole('button', { name: 'New template' }).first().click(); await create.locator('#tpl-name').waitFor({ state: 'visible' }) }
+    await openCreate()
+    await create.locator('#tpl-name').fill('Half-named template')
+    await wait(100)
+    await page.keyboard.press('Escape')
+    await create.waitFor({ state: 'detached' })
+    assert.equal(await prompt.count(), 0, 'a create form with a draft closes without a question')
+    if (!on) assert.deepEqual(await drafts(), [], 'flag off: nothing is written')
+    else {
+      assert.deepEqual(await drafts(), [`draft.${me.id}.template.new`])
+      await openCreate()
+      await create.getByText(/^Draft restored from/).waitFor({ state: 'visible' })
+      assert.equal(await create.locator('#tpl-name').inputValue(), 'Half-named template')
+      await create.getByRole('button', { name: 'Discard', exact: true }).click()
+      assert.deepEqual(await drafts(), [], 'Discard drops the draft')
+    }
+    ui.mock.unknownGets.length = 0
+    await ui.finish()
+    return { flag: on }
+  } finally { await ui.browser.close() }
+}
+
 // AC-SAV-05 (FR-SAV-06): the build-update notice stays a notice; its Reload goes through the leave guard. Needs a build that knows its
 // own id (VITE_HUB_BUILD), so this suite builds one into a scratch folder and serves it.
 async function runReload(on, blocked) {
@@ -519,7 +593,7 @@ async function runReload(on, blocked) {
   let results, drafts
   try {
     results = [await run(preview.base, false), await run(preview.base, true)]
-    drafts = [await runDrafts(preview.base, false), await runDrafts(preview.base, true), await runLeavePrompt(preview.base)]
+    drafts = [await runDrafts(preview.base, false), await runDrafts(preview.base, true), await runLeavePrompt(preview.base), await runEditPrompt(preview.base, false), await runEditPrompt(preview.base, true)]
   } finally { await new Promise(resolve => { preview.child.once('exit', resolve); preview.child.kill() }) }
   const reloads = [await runReload(false, false), await runReload(true, false), await runReload(true, true)]
   console.log(JSON.stringify({ result: 'PASS', results, drafts, reloads }))

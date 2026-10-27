@@ -6,8 +6,9 @@ import { clearDraft, draftStorageKey, leave, readDraft, registerForm, writeDraft
 const content = (v: unknown) => JSON.stringify(v, (_, x) => (x === '' || x === null ? undefined : x)) ?? ''
 
 /** FR-SAV-03: keeps what is typed in a create form or long text box as a draft in this browser, restores it when the same form opens
- *  again on this device and drops it on submit or Discard. `key` is `<form>.<context>` (`task.new.<projectId>`); null, or the flag
- *  off, does nothing. `value` is the whole form as plain data; a form with no change from its first render writes no draft. */
+ *  again on this device and drops it on submit or Discard. `key` is `<form>.<context>` (`task.new.<projectId>`); null (an edit form) keeps
+ *  no draft but still reports `unsaved()`, so leaving it asks (FR-SAV-04). The flag off does nothing. `value` is the whole form as
+ *  plain data; a form with no change from its first render writes no draft. */
 export function useDraft<T>(key: string | null | undefined, value: T, setValue: (v: T) => void) {
   const me = useMe()
   const on = useFlag('data_entry_safety')
@@ -55,8 +56,8 @@ export function useDraft<T>(key: string | null | undefined, value: T, setValue: 
     discard: () => { forget(); latest.current.set(initial.current) },
     /** After a successful submit: the draft is gone and what is on screen no longer counts as unsaved. */
     clear: () => { forget(); saved.current = latest.current.json },
-    /** Typed input that is neither a stored draft nor unchanged from the empty form. */
-    unsaved: () => !!storeKey && latest.current.json !== first.current && latest.current.json !== saved.current && !drafted.current,
+    /** Typed input that is neither a stored draft nor unchanged from the first render (an edit form has no draft, so it always asks). */
+    unsaved: () => on && latest.current.json !== first.current && latest.current.json !== saved.current && !drafted.current,
   }
 }
 

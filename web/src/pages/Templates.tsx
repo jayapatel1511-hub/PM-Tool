@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, Loading, Notice, Page, Section, Spinner, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { DraftNotice } from '@/components/hub/drafts'
 import { Pill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -11,6 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useReference } from '@/hooks/data'
+import { useSafeForm } from '@/hooks/drafts'
 import { ApiError, del, get, post, put } from '@/lib/api'
 import { useMe, useFlag } from '@/lib/auth'
 import { fmtDate, fmtTime } from '@/lib/format'
@@ -65,18 +67,8 @@ export function TemplatesPage() {
 }
 
 function Templates() {
-  const navigate = useNavigate()
   const q = useQuery({ queryKey: ['templates'], queryFn: () => get<{ canEdit: boolean; templates: TemplateRow[] }>('templates') })
   const [creating, setCreating] = useState(false)
-  const [name, setName] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState<unknown>(null)
-  const create = async () => {
-    if (busy) return
-    setErr(null); setBusy(true)
-    try { const r = await post<{ id: string }>('templates', { name: name.trim() }); navigate(`/templates/${r.id}`) }
-    catch (e) { setErr(e) } finally { setBusy(false) }
-  }
   const header = { title: t('nav.templates'), subtitle: t('tpl.subtitle') }
   if (q.isPending) return <Page {...header}><div className="rounded-lg border bg-card"><Loading rows={6} /></div></Page>
   if (q.error) return <Page {...header}><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
@@ -109,20 +101,37 @@ function Templates() {
           </table>
         </TableRegion>
       )}
-      {creating && (
-        <Dialog open onOpenChange={(o) => !o && !busy && setCreating(false)}>
-          <DialogContent className="max-w-sm">
-            <DialogHeader><DialogTitle>{t('tpl.new')}</DialogTitle></DialogHeader>
-            <Field label={t('common.name')} htmlFor="tpl-name"><Input id="tpl-name" disabled={busy} value={name} maxLength={200} onChange={(e) => setName(e.target.value)} /></Field>
-            {err != null && <ErrorBanner error={err} />}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setCreating(false)}>{t('common.cancel')}</Button>
-              <Button disabled={!name.trim() || busy} onClick={create}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.create')}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+      {creating && <NewTemplateDialog onClose={() => setCreating(false)} />}
     </Page>
+  )
+}
+
+/** FR-SAV-03: a half-typed template name survives a closed dialog and a refresh; FR-SAV-04 asks before the close throws it away. */
+function NewTemplateDialog({ onClose }: { onClose: () => void }) {
+  const navigate = useNavigate()
+  const [name, setName] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<unknown>(null)
+  const safe = useSafeForm('template.new', name, setName)
+  const create = async () => {
+    if (busy) return
+    setErr(null); setBusy(true)
+    try { const r = await post<{ id: string }>('templates', { name: name.trim() }); safe.clear(); navigate(`/templates/${r.id}`) }
+    catch (e) { setErr(e) } finally { setBusy(false) }
+  }
+  return (
+    <Dialog open onOpenChange={(o) => !o && !busy && safe.close(onClose)}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader><DialogTitle>{t('tpl.new')}</DialogTitle></DialogHeader>
+        <DraftNotice form={safe} />
+        <Field label={t('common.name')} htmlFor="tpl-name"><Input id="tpl-name" disabled={busy} value={name} maxLength={200} onChange={(e) => setName(e.target.value)} /></Field>
+        {err != null && <ErrorBanner error={err} />}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button>
+          <Button disabled={!name.trim() || busy} onClick={create}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.create')}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 

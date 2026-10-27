@@ -65,12 +65,13 @@ const ProjectTag = ({ id, number, name }: { id: string; number: string; name?: s
 export function MyWorkPage() {
   const [sp] = useSearchParams()
   const followUp = useFlag('my_work_follow_up')
+  const backlog = useFlag('backlog')
   const tab = sp.get('userId') ? 'overview' : sp.get('tab') ?? 'today'
   if (followUp && !sp.get('userId') && (tab === 'watching' || tab === 'requested')) return <MyWorkFollowUp view={tab} menu={<MyWorkViews />} />
   if (tab === 'coordination') return <><div className="px-4 pt-4 md:px-6 md:pt-6 xl:px-8 xl:pt-8"><MyWorkViews /></div><WorkspaceCoordination /></>
   if (tab === 'inbox') return <Inbox />
   // Today for Assigned to Me or Created by Me stays the due-today task view; My Tasks today is the focus list.
-  if (tab === 'upcoming' || tab === 'overdue' || tab === 'completed' || (tab === 'today' && WHO.slice(1).includes(sp.get('who') as never))) return <TaskView tab={tab} />
+  if (tab === 'upcoming' || tab === 'overdue' || tab === 'completed' || (backlog && tab === 'nodate') || (tab === 'today' && WHO.slice(1).includes(sp.get('who') as never))) return <TaskView tab={tab} />
   return <Overview focus={tab !== 'overview'} />
 }
 
@@ -80,9 +81,10 @@ function MyWorkViews({ sections }: { sections?: { id: string; title: string; cou
   const [sp] = useSearchParams()
   const navigate = useNavigate()
   const followUp = useFlag('my_work_follow_up') && !sp.get('userId')
-  const views = followUp ? [...VIEWS, 'watching', 'requested'] : VIEWS
+  const backlog = useFlag('backlog') && !sp.get('userId') // FR-BKL-06, FR-BKL-09: No date sits beside Today, Upcoming and Overdue
+  const views: readonly string[] = [...VIEWS.flatMap((x) => (backlog && x === 'overdue' ? [x, 'nodate'] : [x])), ...(followUp ? ['watching', 'requested'] : [])]
   const toSection = useRef(false)
-  const current = (views as readonly string[]).includes(sp.get('tab') ?? '') ? sp.get('tab')! : 'today'
+  const current = views.includes(sp.get('tab') ?? '') ? sp.get('tab')! : 'today'
   const link = (x: string, hash = '') => {
     const n = new URLSearchParams()
     for (const k of ['projects', 'ws', 'who']) if (sp.get(k)) n.set(k, sp.get(k)!)
@@ -169,7 +171,7 @@ function Overview({ focus }: { focus: boolean }) {
   const blocking = (w.tasks).filter((r) => r.state?.isBlocking)
   const buckets = BUCKETS.map((b) => [b, tasks.filter((r) => dueBucket(r, w.today) === b)] as const).filter(([, rows]) => rows.length > 0)
   const focusBuckets = [...buckets.filter(([b]) => FOCUS.includes(b)),
-    ['blocked', tasks.filter((r) => r.state?.isBlocked && !FOCUS.includes(dueBucket(r, w.today)))] as const].filter(([, rows]) => rows.length > 0)
+    ['blocked', tasks.filter((r) => r.state?.isBlocked && !r.backlog && !FOCUS.includes(dueBucket(r, w.today)))] as const].filter(([, rows]) => rows.length > 0)
   const projectOptions = [...new Map(w.tasks.map((r) => [r.projectId, r.projectNumber])).entries()]
   const disciplineOptions = [...new Set(w.tasks.map((r) => r.disciplineName))]
 
@@ -356,7 +358,7 @@ function TaskView({ tab }: { tab: string }) {
   const from = sp.get('from') ?? addDays(now, -14), to = sp.get('to') ?? now
   const whoParams = who === 'assigned' ? { assigneeId: me.id } : who === 'created' ? { createdBy: me.id } : { mine: true }
   const tabParams = tab === 'today' ? { dueFrom: now, dueTo: now, open: true } : tab === 'upcoming' ? { dueFrom: addDays(now, 1), open: true }
-    : tab === 'overdue' ? { overdue: true } : { status: 'Complete', completedFrom: from, completedTo: to, sort: 'completed:desc' }
+    : tab === 'overdue' ? { overdue: true } : tab === 'nodate' ? { backlog: true } : { status: 'Complete', completedFrom: from, completedTo: to, sort: 'completed:desc' }
   const params = { projects: scope.api, ...whoParams, ...tabParams, pageSize: 200 }
   const q = useQuery({ queryKey: ['mywork-tasks', params], enabled: scope.ready, queryFn: () => get<PageOf<TaskRow>>(`tasks${qs(params)}`) })
   const actions = useTaskActions(() => { q.refetch(); qc.invalidateQueries({ queryKey: ['mywork'] }) })
@@ -386,6 +388,7 @@ function TaskView({ tab }: { tab: string }) {
       </div>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       <Section title={runtimeText(`mywork.tab.${tab}`)} count={q.data?.totalCount} accent="blue">
+        {tab === 'nodate' && <p className="border-b px-5 py-2.5 text-sm text-muted-foreground">{t('mywork.rule.nodate')}</p>}
         {q.isPending ? <Loading rows={5} /> : rows.length === 0
           ? <Empty action={me.capabilities.createTask && <Button variant="outline" onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}>{runtimeText(`mywork.empty.${tab}`)}</Empty> : (
           <ul className="divide-y">
@@ -396,7 +399,7 @@ function TaskView({ tab }: { tab: string }) {
                 <button type="button" className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button>
                 <button type="button" className="min-w-[10rem] flex-1 break-words text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>
                 <ProjectTag id={r.projectId} number={r.projectNumber} name={r.projectName} />
-                <span className={cn('tabular-nums', r.state?.isOverdue && 'font-semibold text-bad')}>{tab === 'completed' ? fmtDate(r.completedAt?.slice(0, 10)) : fmtDate(r.dueDate)}</span>
+                {tab !== 'nodate' && <span className={cn('tabular-nums', r.state?.isOverdue && 'font-semibold text-bad')}>{tab === 'completed' ? fmtDate(r.completedAt?.slice(0, 10)) : fmtDate(r.dueDate)}</span>}
                 <PriorityBadge priority={r.priority} />
                 <StatusPill status={r.status} />
               </li>

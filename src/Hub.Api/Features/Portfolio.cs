@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -13,9 +14,14 @@ public static class PortfolioEndpoints
 {
     static readonly Col[] Cols = Hub.Api.Records.ScreenLists.PortfolioCols;
 
+    public sealed record PortfolioTiles(int Active, int Red, int Yellow, int Green, int Submissions14, int OverdueDecisions);
+    /// `Projects` is the project list's own row plus the Portfolio columns. It stays a JsonArray (typed `unknown[]` in the contract) because the row
+    /// is built from the list's rows (Projects.cs), which Reports and the export also read; it becomes a record when Projects.cs is converted.
+    public sealed record PortfolioView(bool OwnOnly, PortfolioTiles Tiles, JsonArray Projects);
+
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/portfolio", async ([AsParameters] ProjectEndpoints.ProjectQuery f, bool? overdueDecisions, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
+        api.MapGet("/portfolio", async Task<Ok<PortfolioView>> ([AsParameters] ProjectEndpoints.ProjectQuery f, bool? overdueDecisions, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (rows, ownOnly) = await Rows(f, access, db, me, store, clock, overdueDecisions);
             var today = clock.Today(await store.Get(db));
@@ -25,17 +31,12 @@ public static class PortfolioEndpoints
             var active = open.Where(r => r!["status"]!.GetValue<string>() == ProjectStatus.Active).ToList();
             var computed = Http.List(f.ComputedHealth);
             int Count(string health) => active.Count(r => r!["computedHealth"]?.GetValue<string>() == health);
-            return new
-            {
-                OwnOnly = ownOnly,
-                Tiles = new
-                {
-                    Active = active.Count(r => computed.Length == 0 || computed.Contains(r!["computedHealth"]?.GetValue<string>() ?? "")), Red = Count(Health.Red), Yellow = Count(Health.Yellow), Green = Count(Health.Green),
-                    Submissions14 = rows.Count(r => r!["nextSubmission"]?["date"]?.GetValue<string>() is { } d && DateOnly.Parse(d) >= today && DateOnly.Parse(d) <= today.AddDays(14)),
-                    OverdueDecisions = rows.Sum(r => r!["overdueDecisions"]?.GetValue<int>() ?? 0),
-                },
-                Projects = rows,
-            };
+            return TypedResults.Ok(new PortfolioView(ownOnly,
+                new PortfolioTiles(
+                    Active: active.Count(r => computed.Length == 0 || computed.Contains(r!["computedHealth"]?.GetValue<string>() ?? "")), Red: Count(Health.Red), Yellow: Count(Health.Yellow), Green: Count(Health.Green),
+                    Submissions14: rows.Count(r => r!["nextSubmission"]?["date"]?.GetValue<string>() is { } d && DateOnly.Parse(d) >= today && DateOnly.Parse(d) <= today.AddDays(14)),
+                    OverdueDecisions: rows.Sum(r => r!["overdueDecisions"]?.GetValue<int>() ?? 0)),
+                rows));
         });
         // FR-ADR-07, FR-ADR-08: the admin strip, for Executives (and Admins, who see the page itself); absent with the flag off.
         api.MapGet("/portfolio/admin-review", async (Access access, HubDb db, SettingsStore store) =>

@@ -14,7 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { useReference } from '@/hooks/data'
 import { useOrgPlacement } from '@/hooks/useOrgPlacement'
-import { get, qs } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate } from '@/lib/format'
 import { runtimeText, t, tv, type TextKey } from '@/lib/i18n'
@@ -24,8 +24,8 @@ import { ViewMenu } from '@/components/hub/views'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 
 interface Row extends ProjectRow { officeId?: string; projectTypeId?: string; projectType?: string; overdueDeliverables?: number; office?: string; phase?: string; overrideBy?: string | null; overrideActive: boolean; trend: { weekEnding: string; computed?: string | null; reported?: string | null }[] }
-type AdminStrip = components['schemas']['AdminReviewStrip']
-interface Portfolio { ownOnly: boolean; tiles: { active: number; red: number; yellow: number; green: number; submissions14: number; overdueDecisions: number }; projects: Row[] }
+// The envelope and tiles are generated; the rows stay hand-typed until the Projects list row (their source) is a record.
+type Portfolio = Omit<components['schemas']['PortfolioView'], 'projects'> & { projects: Row[] }
 
 const FILTERS = ['q', 'pmId', 'leadUnitId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'computedHealth', 'projectTypeId', 'submissionWithinDays', 'mine', 'overdueDecisions'] as const satisfies readonly (SavedViewKeys['portfolio'] | 'page' | 'panel' | 'draftAccessReason')[]
 const STATUSES = ['Setup', 'Active', 'On Hold', 'Complete']
@@ -71,7 +71,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const group = rollups ? sp.get('group') ?? 'none' : 'none'
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
-  const q = useQuery({ queryKey: ['portfolio', filters], queryFn: () => get<Portfolio>(`portfolio${qs(filters)}`) })
+  const q = useQuery({ queryKey: ['portfolio', filters], queryFn: async () => await typedRequest('get', '/api/v1/portfolio', { query: filters }) as Portfolio })
   const refSelect = (key: string, label: string, items: { id: string; name: string; isActive?: boolean }[] | undefined, any: string) => (
     <Field label={label} htmlFor={`pf-${key}`} className="w-full sm:w-44">
       <select id={`pf-${key}`} className={selectCls} value={filters[key] ?? ''} onChange={(e) => set(key, e.target.value)}>
@@ -226,7 +226,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
 
 /** FR-ADR-07: the last recorded Admin review's date and counts, nothing else; it never opens a list. */
 function AdminReviewStrip() {
-  const q = useQuery({ queryKey: ['portfolio', 'admin-review'], queryFn: () => get<AdminStrip>('portfolio/admin-review') })
+  const q = useQuery({ queryKey: ['portfolio', 'admin-review'], queryFn: () => typedRequest('get', '/api/v1/portfolio/admin-review', {}) })
   if (!q.data) return null
   return (
     <section aria-label={t('portfolio.adminReview')} data-admin-review-strip className="flex flex-wrap items-baseline gap-x-5 gap-y-1 rounded-lg border bg-card px-4 py-2.5 text-sm">

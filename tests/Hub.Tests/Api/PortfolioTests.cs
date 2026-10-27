@@ -140,6 +140,21 @@ public sealed class PortfolioTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Export_lists_the_rows_the_page_shows_in_the_same_order_with_the_list_columns() // the export is a file, so the shape recorder never sees it
+    {
+        var (red, yellow, green, held) = await Four();
+        var ids = Ids(red, yellow, green, held);
+        var page = (await f.As(TestData.Lena).GetAsync($"/api/v1/portfolio?ids={ids}").Result.Json())["projects"]!.AsArray();
+        var response = await f.As(TestData.Lena).GetAsync($"/api/v1/portfolio/export?format=csv&ids={ids}");
+        Assert.Equal("text/csv", response.Content.Headers.ContentType!.MediaType);
+        var lines = (await response.Content.ReadAsStringAsync()).TrimStart('\uFEFF').Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        Assert.StartsWith("Project,Name,Project Manager,Client,Office,Phase,Status,Computed health,Reported health,Why,Override note,Next milestone", lines[0]);
+        Assert.Equal(page.Count + 1, lines.Length);
+        Assert.Equal(page.Select(x => x!.S("projectNumber")), lines.Skip(1).Select(l => l.Split(',')[0]));
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).GetAsync($"/api/v1/portfolio/export?format=csv&ids={ids}")).StatusCode);
+    }
+
+    [Fact]
     [Trait("Spec", "AC-RCV-20")]
     public async Task Export_adds_overdue_deliverables_and_project_type_only_when_the_flag_is_on()
     {

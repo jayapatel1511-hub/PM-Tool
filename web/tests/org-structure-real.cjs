@@ -119,8 +119,10 @@ async function place(who, unitId) { const u = await userRow(who); await send(`ad
     const scope = sam.getByRole('group', { name: 'Scope' })
     const staffNames = async (page, expected) => {
       const links = page.locator('main table a.font-semibold[href^="/my-work?userId="]')
-      for (let i = 0; i < 100 && (await links.count()) !== expected; i++) await page.waitForTimeout(100)
-      return sorted(await links.allInnerTexts())
+      for (let i = 0; i < 300 && (await links.count()) !== expected; i++) await page.waitForTimeout(100) // generous: several builders share one Postgres
+      const found = sorted(await links.allInnerTexts())
+      if (found.length !== expected) console.error(`My Staff at ${page.url()} listed ${found.length}, expected ${expected}:\n${(await page.getByRole('main').first().innerText()).slice(0, 800)}`)
+      return found
     }
     const direct = sorted([name('alex'), name('jill'), name('marc')])
     await open(sam, '/staff')
@@ -185,7 +187,7 @@ async function place(who, unitId) { const u = await userRow(who); await send(`ad
       people: [...tb.querySelectorAll('th[scope=row] .break-words.font-semibold')].map(e => e.textContent) })), region)
     const settle = async (page, region, count) => {
       let groups = []
-      for (let i = 0; i < 150; i++) { groups = await readGroups(page, region); if (groups.flatMap(g => g.people).length === count && !groups.some(g => g.head.startsWith('Unknown placement'))) break; await page.waitForTimeout(100) }
+      for (let i = 0; i < 300; i++) { groups = await readGroups(page, region); if (groups.flatMap(g => g.people).length === count && !groups.some(g => g.head.startsWith('Unknown placement'))) break; await page.waitForTimeout(100) }
       return groups
     }
     const byHead = (groups) => Object.fromEntries(groups.map(g => [g.head.replace(/ · \d+$/, ''), sorted(g.people)]))
@@ -208,7 +210,7 @@ async function place(who, unitId) { const u = await userRow(who); await send(`ad
     assert.deepEqual(byHead(planner), expectedGroups, 'Planner: each person under their home unit')
     await open(viewer, `/vacation?unitId=${atlantic.id}&groupBy=unit`)
     const vacationHeads = async () => viewer.locator('main table tbody tr.bg-muted > th').allInnerTexts()
-    for (let i = 0; i < 150 && (await vacationHeads()).length !== 5; i++) await viewer.waitForTimeout(100)
+    for (let i = 0; i < 300 && (await vacationHeads()).length !== 5; i++) await viewer.waitForTimeout(100)
     assert.deepEqual(sorted(await vacationHeads()), sorted(Object.keys(expectedGroups)), 'Vacation: one heading per home unit')
     assert.deepEqual(viewer.errors, [])
     results['FR-UNT-13'] = { planner: byHead(planner), vacationHeads: sorted(await vacationHeads()) }

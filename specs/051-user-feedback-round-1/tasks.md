@@ -31,7 +31,7 @@ Each slice is one PR. Slices in Parts A, B and C merge dark behind `flag.data_en
   - Task List view, Board column with manual order, dashboard count link, quick add with visible defaults, scheduling by date cell, drag and bulk date.
   - Covers FR-BKL-02, FR-BKL-03, FR-BKL-04; AC-BKL-01 (UI), AC-BKL-02, AC-BKL-03.
   - Tests: `web/tests/backlog.cjs`.
-- [ ] S07 My Work No date (S). After S05.
+- [x] S07 My Work No date (S). After S05.
   - `nodate` view and saved view.
   - Covers FR-BKL-06; AC-BKL-04.
   - Tests: `MyWorkTests.cs` (membership across projects, Restricted projects excluded as today); `backlog.cjs`.

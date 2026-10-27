@@ -2503,6 +2503,52 @@
       "string"
     ]
   },
+  "GET /api/v1/admin/review/{id}/export 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "GET /api/v1/admin/review/{id}/export 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/admin/settings 200": {
     "$": [
       "array"
@@ -7347,6 +7393,9 @@
     ],
     "$.tasks[].assigneeName": [
       "string"
+    ],
+    "$.tasks[].backlog": [
+      "boolean"
     ],
     "$.tasks[].can": [
       "object"
@@ -58224,7 +58273,17 @@
       "number"
     ],
     "$.managerCycles": [
-      "array"
+      "array",
+      "null"
+    ],
+    "$.managerCycles[]": [
+      "object"
+    ],
+    "$.managerCycles[].displayName": [
+      "string"
+    ],
+    "$.managerCycles[].id": [
+      "string"
     ],
     "$.people": [
       "array"
@@ -58289,7 +58348,8 @@
       "null"
     ],
     "$.units[].parentId": [
-      "null"
+      "null",
+      "string"
     ]
   },
   "GET /api/v1/organisation 404": {
@@ -61528,15 +61588,18 @@
       "string"
     ],
     "$.items[].ownerName": [
+      "null",
       "string"
     ],
     "$.items[].ownerUserId": [
+      "null",
       "string"
     ],
     "$.items[].priority": [
       "string"
     ],
     "$.items[].projectDisciplineId": [
+      "null",
       "string"
     ],
     "$.items[].projectId": [
@@ -63946,6 +64009,7 @@
       "string"
     ],
     "$.activity[].itemId": [
+      "null",
       "string"
     ],
     "$.activity[].itemKey": [
@@ -73054,6 +73118,9 @@
     "$.rows[].categories[]": [
       "string"
     ],
+    "$.rows[].category": [
+      "string"
+    ],
     "$.rows[].changes": [
       "array"
     ],
@@ -73123,6 +73190,9 @@
     "$.rows[].correlationId": [
       "null",
       "string"
+    ],
+    "$.rows[].count": [
+      "number"
     ],
     "$.rows[].createdAt": [
       "string"
@@ -74754,6 +74824,38 @@
       "number"
     ]
   },
+  "GET /api/v1/staff 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.scope": [
+      "array"
+    ],
+    "$.errors.scope[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/staff 403": {
     "$": [
       "object"
@@ -74873,6 +74975,9 @@
     "$.items[].assigneeName": [
       "null",
       "string"
+    ],
+    "$.items[].backlog": [
+      "boolean"
     ],
     "$.items[].can": [
       "object"
@@ -78179,6 +78284,50 @@
       "string"
     ],
     "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/admin/commitmentMissCategories/{id} 200": {
+    "$": [
+      "object"
+    ],
+    "$.auditKey": [
+      "string"
+    ],
+    "$.auditName": [
+      "string"
+    ],
+    "$.auditProjectId": [
+      "null"
+    ],
+    "$.auditType": [
+      "string"
+    ],
+    "$.createdAt": [
+      "string"
+    ],
+    "$.createdBy": [
+      "null"
+    ],
+    "$.id": [
+      "string"
+    ],
+    "$.isActive": [
+      "boolean"
+    ],
+    "$.name": [
+      "string"
+    ],
+    "$.rowVersion": [
+      "number"
+    ],
+    "$.sortOrder": [
+      "number"
+    ],
+    "$.updatedAt": [
+      "string"
+    ],
+    "$.updatedBy": [
       "string"
     ]
   },
@@ -83144,7 +83293,8 @@
       "boolean"
     ],
     "$.disciplineName": [
-      "null"
+      "null",
+      "string"
     ],
     "$.filledAllocationId": [
       "null"
@@ -83163,7 +83313,8 @@
       "number"
     ],
     "$.projectDisciplineId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.projectId": [
       "string"
@@ -90524,7 +90675,8 @@
     ],
     "$.value": [
       "boolean",
-      "number"
+      "number",
+      "string"
     ]
   },
   "PUT /api/v1/admin/settings/{key} 400": {

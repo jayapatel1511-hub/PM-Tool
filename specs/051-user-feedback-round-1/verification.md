@@ -4,12 +4,12 @@ Slice builds in progress; see the build notes below. Scope approved by Jay on 20
 
 | AC ID | Area | Slice | Status |
 |---|---|---|---|
-| AC-SAV-01 | Draft restored after Escape | S03 | UNRUN |
+| AC-SAV-01 | Draft restored after Escape | S03 | PASS (local) |
 | AC-SAV-02 | Typed value kept and retried offline | S02 | PASS (local) |
 | AC-SAV-03 | Conflict shows both values, Keep mine | S02 | PASS (local) |
 | AC-SAV-04 | Comment survives sign-in expiry | S04 | UNRUN |
-| AC-SAV-05 | Reload notice protects input | S03 | UNRUN |
-| AC-SAV-06 | Flag off changes nothing (retry stays) | S01 to S04 | PARTIAL: S01 and S02 PASS (local); S03 and S04 UNRUN |
+| AC-SAV-05 | Reload notice protects input | S03 | PASS (local) |
+| AC-SAV-06 | Flag off changes nothing (retry stays) | S01 to S04 | PARTIAL: S01 to S03 PASS (local); S04 UNRUN |
 | AC-BKL-01 | Backlog count, list, column agree; indicators exclude | S05, S06 | PASS (local): S05 API level; S06 list, dashboard count link and Board column against the real API |
 | AC-BKL-02 | Quick add defaults and one log entry | S06 | PASS (local) |
 | AC-BKL-03 | Date in and out of the Backlog | S06 | PASS (local) |
@@ -43,6 +43,19 @@ Never-revert retry and conflict choice, unflagged (Tier B, 051-D4). `useAutosave
 - AC-SAV-06: PARTIAL. The S02 timed retry and conflict choice run with the flag off (they are unflagged; only the Retry link needs the flag) and the flag pair passes in `data-entry.cjs`; the keying change applies regardless of the flag. S03 and S04 UNRUN.
 - Assumptions: 051-D4 (the never-revert retry stays unflagged, the spec default); the keying fix is unflagged too, since it corrects the same data-loss path. A timed retry already scheduled when a field unmounts still fires and saves the typed text to the record it was typed for, using that record's last row version, so a stale version is refused as a conflict instead of overwriting anything; no unmount cleanup was added because it would silently drop the person's typed text (this matches the S01 pause-save after unmount). The `TaskPage` key has no test of its own, because the mock has no in-place route change to `/tasks/B`; it is the same one-line pattern as the panel key.
 - Left for Jay: nothing blocks this slice. Say if the full-page task should get its own test. `tools/ratchet.py` was already failing on the integration branch before this merge (`direct_invalidate_queries` 67 > 66); it needs its own fix or a decision on the baseline.
+
+## Build 051-S03
+
+Drafts and leave prompt behind `flag.data_entry_safety`. `useDraft` (`web/src/hooks/drafts.ts`, with `web/src/lib/drafts.ts` and `web/src/components/hub/drafts.tsx`) keeps a per-user, per-form draft in the browser only (051-D2), pruned after `draft_keep_days` (051-D3 default 7). `useSafeForm` and a `safe` prop put a form under one guard: Escape, Cancel, click-outside, in-app navigation and tab close or reload ask "Keep editing or discard?" when the form holds unsaved input and has no draft (FR-SAV-04); a form with a draft closes with no question and restores on reopen (FR-SAV-03). `unsaved()` reads `on && changed && !saved && !drafted`, so edit dialogs that pass `key=null` (milestone, meeting, calendar event, time entry, open role, external party, design basis, handoff, review round, submission edit) ask once something is changed and keep no draft. With the flag off the hook does nothing. Adopted by every create dialog, register form and comment box, the Readiness raise-constraint, create-assessment and propose-commitment forms, the project status note editor (own `StatusNoteForm`), the project and time-away CSV imports, the manual time-away dialog and the New template dialog (own `NewTemplateDialog`). The reason-only and confirm dialogs, the add-from-template and bulk-week pickers, the planner entry panel, the admin review note and the organisation structure forms are deliberately not adopted (listed in `plan.md`). Covers FR-SAV-03, FR-SAV-04, FR-SAV-06. Web only: no API, migration, `openapi.json` or `shapes.json` change.
+
+- Checks on the merged tree (clean merge, no conflicts; the slice touches web and `plan.md` only): `dotnet build Hub.slnx` 0 errors; `npx tsc -b` and `npx tsc -p tests/tsconfig.json` clean; `npm run build` and `npm run lint` exit 0 (existing warnings only); `node --test src/lib/drafts.test.ts src/lib/keys.test.ts src/lib/page-mode.test.ts` 10/10; `node tests/data-entry.cjs` PASS with the flag off and on (new `runEditPrompt` cases: milestone edit form keeps no draft and asks on Escape, Cancel and click-outside; Keep editing keeps the change; Discard reopens on the record; the tab-close prompt only with the flag on; New template draft keyed `draft.<user>.template.new`, restored, and Discard drops it); `planning-reporting.cjs`, `reviews-changes.cjs` and `interaction-workflows.cjs` PASS with axe clean. The suites that need a real API or Postgres (design basis, handoffs, planner, calm-acceptance) were not run. `tools/trace_spec.py --check` 0 gaps; `tools/build_spec.py --check` up to date; `tools/ratchet.py` exits 0 and the slice adds no permission derivation.
+- AC-SAV-01: PASS (local). New task and New template restore after Escape; a form with a draft closes with no question; the flag off writes nothing.
+- AC-SAV-05: PASS (local). `data-entry.cjs` reload runs (flag off, flag on, storage blocked) pass; the leave guard now also covers edit forms.
+- FR-SAV-04: PASS (local) for an edit form: it asks on Escape, Cancel and click-outside, Keep editing keeps the change, Discard closes. The test fails on the earlier hook. It checks the `beforeunload` event rather than clicking through a real tab close or a direct navigation away.
+- FR-SAV-03: PARTIAL. Browser tests cover the milestone edit form and New template; the Readiness forms, status note editor, both CSV imports and the time-away dialog are covered by typecheck and the existing mocked suites only.
+- AC-SAV-06: PARTIAL. S03 flag-off cases pass in `data-entry.cjs` (no storage writes, no prompts, no `beforeunload` prompt). S04 UNRUN.
+- Assumptions: 051-D2 (drafts stay local to the browser, never sent to the server) and 051-D3 (`draft_keep_days` = 7), both unchanged. An edit form has no FR-SAV-03 draft, so FR-SAV-04 requires the question; "changed" means different from the form's first render. The edit-only reason fields in the design basis and review-round forms count as unsaved input and are in the guarded value. In the time entry dialog, after the conflict "Reload entry" replaces the form with the server's values, closing it asks once with the flag on because those values differ from the first render; a harmless extra question, not data loss.
+- Left for Jay: say if any form left out (reason-only action dialogs, planner entry panel, admin review note, organisation structure forms) should also get drafts and the leave prompt; each takes one `safe` prop or one `useSafeForm` call. Say if the Readiness forms, status note editor, CSV imports and time-away dialog should get mocked-API browser cases.
 
 ## Build 051-S05
 

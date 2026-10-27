@@ -12,7 +12,7 @@ Each slice is one PR. Slices in Parts A, B and C merge dark behind `flag.data_en
   - Typed value kept on any error; retry at 2, 4, 8 s; "Not saved · Retry"; conflict shows both values with "Keep mine" and "Take theirs".
   - Covers FR-SAV-02; AC-SAV-02, AC-SAV-03.
   - Tests: `data-entry.cjs` with a blocked network and a seeded conflict.
-- [ ] S03 Drafts and leave prompt (M). After S01.
+- [x] S03 Drafts and leave prompt (M). After S01.
   - `useDraft`, `useUnsavedGuard`; adopted by every create dialog, register form, comment and rich-text editor; the Reload action of FR-LIVE-03 goes through the guard.
   - Covers FR-SAV-03, FR-SAV-04, FR-SAV-06; AC-SAV-01, AC-SAV-05.
   - Tests: `data-entry.cjs` (Escape then reopen restores; Discard clears; prompt on navigation without a draft; no draft for an empty form; pruned after `draft_keep_days`).

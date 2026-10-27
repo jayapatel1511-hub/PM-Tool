@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { NavLink, Navigate, useParams, Link } from 'react-router'
 import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Section, Spinner, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { ActivityTable } from '@/components/hub/activity'
+import { DataTable } from '@/components/hub/registers'
+import { useTable } from '@/components/hub/table'
 import { Avatar } from '@/components/hub/people'
 import { Chip, Pill } from '@/components/hub/pills'
 import { Badge } from '@/components/ui/badge'
@@ -88,57 +90,38 @@ export function ReferenceData() {
   const hasCode = kind === 'disciplines' || kind === 'offices'
   const title = runtimeText(`admin.${kind}`)
   const addLabel = t('admin.add', { kind: title.toLowerCase() })
+  // FR-REC-14: the shared DataTable; no column sorts and none is optional, so the list keeps the server's order.
+  const table = useTable<Ref>('hub.referenceColumns', [
+    { id: 'order', label: t('common.order'), fixed: true, className: 'py-0.5', cell: (r) => {
+      const i = rows.indexOf(r)
+      return <div className="flex gap-1">
+        <Button size="icon-sm" variant="ghost" disabled={i === 0} onClick={() => move(i, -1)} aria-label={t('admin.moveUp')}><ArrowUp className="size-4" /></Button>
+        <Button size="icon-sm" variant="ghost" disabled={i === rows.length - 1} onClick={() => move(i, 1)} aria-label={t('admin.moveDown')}><ArrowDown className="size-4" /></Button>
+      </div>
+    } },
+    { id: 'name', label: t('common.name'), fixed: true, className: 'font-medium', cell: (r) => r.name },
+    ...(hasCode ? [{ id: 'code', label: t('common.code'), fixed: true, cell: (r: Ref) => <span className="key">{r.code}</span> }] : []),
+    ...(kind === 'disciplines' ? [{ id: 'colour', label: t('admin.colour'), fixed: true, cell: (r: Ref) => <span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm border" style={{ background: disciplineColour(r.colour) }} aria-hidden />{r.colour}</span> }] : []),
+    ...(kind === 'offices' ? [{ id: 'timeZone', label: t('admin.timeZone'), fixed: true, cell: (r: Ref) => r.timeZone }] : []),
+    ...(kind === 'clients' ? [{ id: 'shortName', label: t('admin.shortName'), fixed: true, cell: (r: Ref) => r.shortName || <Missing /> }] : []),
+    { id: 'status', label: t('common.status'), fixed: true, cell: (r) => <Active on={r.isActive} /> },
+    { id: 'actions', label: t('common.actions'), srOnly: true, fixed: true, className: 'py-0.5', cell: (r) => (
+      <div className="flex justify-end gap-1">
+        <Button size="sm" variant="outline" onClick={() => setEditing(r)}>{t('common.edit')}</Button>
+        {r.isActive
+          ? <Button size="sm" variant="ghost" onClick={async () => setDeactivate({ row: r, projects: (await get(`admin/${kind}/${r.id}/usage`)).projects })}>{t('admin.deactivate')}</Button>
+          : <Button size="sm" variant="ghost" onClick={() => save.mutate({ id: r.id, rowVersion: r.rowVersion, isActive: true })}>{t('admin.activate')}</Button>}
+      </div>) },
+  ], rows, (r) => [r.sortOrder])
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className={h2}>{title}</h2>
         <Button onClick={() => setEditing({ name: '', isActive: true })}><Plus className="size-4" />{addLabel}</Button>
       </div>
-      {list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : list.isPending ? <div className={card}><Loading /></div>
-        : rows.length === 0 ? <div className={card}><Empty>{t('common.empty')}</Empty></div> : (
-        <TableRegion>
-          <table className="w-full text-sm">
-            <caption className="sr-only">{title}</caption>
-            <thead className="bg-muted">
-              <tr>
-                <th scope="col" className={thCls}>{t('common.order')}</th>
-                <th scope="col" className={thCls}>{t('common.name')}</th>
-                {hasCode && <th scope="col" className={thCls}>{t('common.code')}</th>}
-                {kind === 'disciplines' && <th scope="col" className={thCls}>{t('admin.colour')}</th>}
-                {kind === 'offices' && <th scope="col" className={thCls}>{t('admin.timeZone')}</th>}
-                {kind === 'clients' && <th scope="col" className={thCls}>{t('admin.shortName')}</th>}
-                <th scope="col" className={thCls}>{t('common.status')}</th>
-                <th scope="col" className={thCls}><span className="sr-only">{t('common.actions')}</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr key={r.id} className={cn('border-t hover:bg-muted', !r.isActive && 'text-muted-foreground')}>
-                  <td className={ctl}>
-                    <div className="flex gap-1">
-                      <Button size="icon-sm" variant="ghost" disabled={i === 0} onClick={() => move(i, -1)} aria-label={t('admin.moveUp')}><ArrowUp className="size-4" /></Button>
-                      <Button size="icon-sm" variant="ghost" disabled={i === rows.length - 1} onClick={() => move(i, 1)} aria-label={t('admin.moveDown')}><ArrowDown className="size-4" /></Button>
-                    </div>
-                  </td>
-                  <td className={cn(tdCls, 'font-medium')}>{r.name}</td>
-                  {hasCode && <td className={cn(tdCls, 'key')}>{r.code}</td>}
-                  {kind === 'disciplines' && <td className={tdCls}><span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm border" style={{ background: disciplineColour(r.colour) }} aria-hidden />{r.colour}</span></td>}
-                  {kind === 'offices' && <td className={tdCls}>{r.timeZone}</td>}
-                  {kind === 'clients' && <td className={tdCls}>{r.shortName || <Missing />}</td>}
-                  <td className={tdCls}><Active on={r.isActive} /></td>
-                  <td className={ctl}>
-                    <div className="flex justify-end gap-1">
-                      <Button size="sm" variant="outline" onClick={() => setEditing(r)}>{t('common.edit')}</Button>
-                      {r.isActive
-                        ? <Button size="sm" variant="ghost" onClick={async () => setDeactivate({ row: r, projects: (await get(`admin/${kind}/${r.id}/usage`)).projects })}>{t('admin.deactivate')}</Button>
-                        : <Button size="sm" variant="ghost" onClick={() => save.mutate({ id: r.id, rowVersion: r.rowVersion, isActive: true })}>{t('admin.activate')}</Button>}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </TableRegion>
+      {list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : (
+        <DataTable table={table} rows={table.sorted} loading={list.isPending} wide caption={title} current={() => false}
+          rowClass={(r) => !r.isActive && 'text-muted-foreground'} empty={<Empty>{t('common.empty')}</Empty>} />
       )}
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent>

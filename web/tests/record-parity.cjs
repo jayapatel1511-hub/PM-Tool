@@ -5,8 +5,10 @@
 //   TUESDAY_RECORD_SCREENS  space-separated routes, default the Risks register, the Risk panel, the Issues register (plain and
 //                           grouped, for the shared DataTable's group rows), the project Team tab, the open-roles tab of
 //                           the Active, Complete and empty-role projects, the Reviews and Changes registers, the workspace
-//                           Team page scoped to the Active project and the Portfolio (plain, and grouped by client, which
-//                           needs flag.status_rollups). {project}, {complete}, {empty} and
+//                           Team page scoped to the Active project, the Portfolio (plain, and grouped by client, which
+//                           needs flag.status_rollups) and four Administration reference lists (the column variants of the
+//                           one table; only the Administrator sees them, the other personas the same denial in both
+//                           builds). {project}, {complete}, {empty} and
 //                           {restricted} are synthetic project numbers, {projectId} the Active project's id,
 //                           {risk} the synthetic risk id
 //   TUESDAY_RECORD_FLAGS    flags already merged on those screens: the matrix runs with all off, then all on (§47.6)
@@ -33,10 +35,11 @@ const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
   '/projects/{project}/allocations?tab=roles', '/projects/{complete}/allocations?tab=roles', '/projects/{empty}/allocations?tab=roles',
   '/projects/{project}/reviews', '/projects/{project}/changes', '/team?projects={projectId}',
   '/portfolio', '/portfolio?group=client',
+  '/admin/reference/disciplines', '/admin/reference/clients', '/admin/reference/offices', '/admin/reference/deliverableTypes',
 ].join(' ')).split(/\s+/).filter(Boolean)
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
-// Project Manager, Discipline Lead, Team Member, Read Only, and a user outside the Restricted project.
-const PERSONAS = { priya: 'Priya Nair', marc: 'Marc Dubois', alex: 'Alex Chen', rita: 'Rita Gomez', jill: 'Jill Martin' }
+// Project Manager, Discipline Lead, Team Member, Read Only, a user outside the Restricted project, and the Administrator.
+const PERSONAS = { priya: 'Priya Nair', marc: 'Marc Dubois', alex: 'Alex Chen', rita: 'Rita Gomez', jill: 'Jill Martin', jordan: 'Jordan Lee' }
 const ADDITIONS = 'flag.record_engine_additions' // §47.5 FR-REC-12, kept on the restored screens after the KILL (FR-REC-14)
 const WIDTHS = [1600, 375]
 const launch = () => chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })

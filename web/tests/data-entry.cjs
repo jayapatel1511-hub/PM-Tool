@@ -4,8 +4,9 @@
 // field go one at a time, so a slow answer never sends an old row version; a field whose change needs a reason saves on blur only.
 // Packet 051 S02 (FR-SAV-02, unflagged): with either flag, a save with no answer keeps the typed value, says "Not saved" and goes
 // again on its own; a concurrency conflict shows both values and waits for "Keep mine" or "Take theirs". Retry shows with the flag.
+// A failed save stays with the record it was typed for: the open panel switching to another cached task never shows or writes it.
 const assert = require('node:assert/strict')
-const { startPreview, newMockPage, me, task, taskDetail, panelIds, deliverableDetail } = require('./platform-fixtures.cjs')
+const { startPreview, newMockPage, me, task, taskDetail, panelIds, deliverableDetail, links, comments } = require('./platform-fixtures.cjs')
 
 const delay = 300
 const port = Number(process.env.DATA_ENTRY_TEST_PORT ?? 7206)
@@ -180,6 +181,43 @@ async function run(base, on) {
     await wait(500)
     assert.equal(taskSaves().length, refused, `flag ${on}: Take theirs sends nothing`)
     name = 'Pat again'
+    // FR-SAV-02: a failed save belongs to the record it was typed for. Task A's save fails, the open panel moves on to task B (already
+    // cached, through the dependency link) and the network returns: B shows its own name with no "Not saved" and is never written to,
+    // while A's timed retry still lands on A.
+    const taskB = structuredClone(taskDetail)
+    Object.assign(taskB.task, { id: '00000000-0000-0000-0000-000000000042', key: 'T-002', name: 'Second task' })
+    const savedB = []
+    const edge = (to) => ({ dependencyId: `00000000-0000-0000-0000-0000000000d${to.key.slice(-1)}`, lagDays: 0, satisfied: false,
+      task: { id: to.id, key: to.key, name: to.name, status: 'Not Started', overdue: false, blocked: false, waiting: false } })
+    await page.route(new RegExp(`/api/v1/tasks/${taskB.task.id}$`), route => {
+      if (route.request().method() === 'PATCH') { savedB.push(route.request().postDataJSON()); return route.fulfill({ json: { ...taskB.task, warnings: [] } }) }
+      return route.fulfill({ json: structuredClone(taskB) })
+    })
+    await page.route(`**/api/v1/tasks/${taskB.task.id}/dependencies`, route => route.fulfill({ json: { dependsOn: [edge(task)], blocks: [] } }))
+    await page.route(`**/api/v1/tasks/${task.id}/dependencies`, route => route.fulfill({ json: { dependsOn: [edge(taskB.task)], blocks: [] } }))
+    await page.route(`**/api/v1/items/Task/${taskB.task.id}/links`, route => route.fulfill({ json: links }))
+    await page.route(`**/api/v1/items/Task/${taskB.task.id}/comments`, route => route.fulfill({ json: comments }))
+    const nameButton = (text) => dialog.getByRole('button', { name: text, exact: true }).first()
+    await page.goto(`${base}/my-work?panel=Task:${task.id}`, { waitUntil: 'domcontentloaded' })
+    await nameButton(name).waitFor({ state: 'visible', timeout: 20000 })
+    await dialog.getByRole('button', { name: /^T-002 / }).click()
+    await nameButton('Second task').waitFor({ state: 'visible' })
+    await dialog.getByRole('button', { name: /^T-001 / }).click()
+    await nameButton(name).click()
+    box = dialog.getByRole('textbox', { name: 'Name', exact: true })
+    offline = true
+    await box.fill('Typed for A')
+    await box.press('Tab')
+    await note.waitFor({ state: 'visible' })
+    await dialog.getByRole('button', { name: /^T-002 / }).click()
+    offline = false
+    await nameButton('Second task').waitFor({ state: 'visible', timeout: 2000 })
+    assert.equal(await note.count(), 0, `flag ${on}: the other task does not say "Not saved"`)
+    await until(() => state.Task.task.name === 'Typed for A', 15000, `flag ${on}: the retry saves the text on the task it was typed for`)
+    await wait(1000)
+    assert.deepEqual(savedB, [], `flag ${on}: nothing is written to the other task`)
+    assert.equal(await nameButton('Second task').count(), 1, `flag ${on}: the other task still shows its own name`)
+    name = 'Typed for A'
     // A Complete project needs a reason for the change (FR-SAV-01): no save after a pause, so the reason is asked once, on Tab.
     state.Task.permissions.needsReason = true
     const before = taskSaves().length

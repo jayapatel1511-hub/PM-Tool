@@ -48,7 +48,8 @@ export function PanelHost() {
             <Button variant="ghost" size="icon" onClick={close} aria-label={t('common.close')}><X className="size-5" aria-hidden /></Button>
           </div>
         </div>
-        <Suspense fallback={<Loading rows={8} />}><Comp id={id} onClose={close} /></Suspense>
+        {/* Keyed by item: a field's unsaved text, "Not saved" and timed retry belong to the record they were typed for (FR-SAV-02). */}
+        <Suspense fallback={<Loading rows={8} />}><Comp key={`${type}:${id}`} id={id} onClose={close} /></Suspense>
       </SheetContent>
     </Sheet>
   )

@@ -27,13 +27,16 @@ import { CreateTask, TaskIndicators, useProjectLists, type TaskRow } from './Tas
 interface Count { value: number; link: string }
 interface Dash {
   milestones: (Omit<MilestoneRow, 'isComplete' | 'isCancelled'> & { reasons?: unknown })[]
-  tasks: Record<'total' | 'complete' | 'inProgress' | 'review' | 'overdue' | 'blocked' | 'waiting' | 'unassigned', Count>
+  /** `backlog` only while flag.backlog is on (FR-BKL-02). */
+  tasks: Record<'total' | 'complete' | 'inProgress' | 'review' | 'overdue' | 'blocked' | 'waiting' | 'unassigned', Count> & { backlog?: Count }
   deliverables: Record<'upcoming' | 'atRisk' | 'issued' | 'total', Count>
   decisions: Record<'pending' | 'overdue', Count>
   issues: { open: number; high: number }; risks: { high: number }
   registers: Record<'issuesOpen' | 'issuesHigh' | 'risksHigh', Count>
   disciplineDue14: Record<string, Count>
   disciplineStatus?: Record<string, Record<'notStarted' | 'inProgress' | 'issued' | 'onHold', Count>>
+  /** Only while flag.backlog is on (FR-BKL-07). */
+  disciplineBacklog?: Record<string, Count>
   disciplines: { disciplineId: string; name: string; leadId?: string; health: string; reasons: { text: string }[]; open: number; overdue: number; blocked: number; waiting: number
     deliverablesDue14: number; nextDueKey?: string; nextDueName?: string; nextDueDate?: string; nextDueType?: string; nextDueId?: string }[]
   dueThisWeek: { items: TaskRow[]; total: number; link: string }
@@ -88,7 +91,7 @@ export function DashboardTab() {
                 <TableRegion className="rounded-none border-0" role="region" aria-label={t('dash.disciplines')}>
                   <table className="w-full text-sm">
                     <thead className="bg-muted">
-                      <tr>{([['common.discipline'], ['dash.lead'], ['common.status'], ...(q.data.disciplineStatus ? [['deliverable.progress']] as const : []), ['dash.open', true], ['ind.overdue', true], ['ind.blocked', true], ['dash.due14', true], ['dash.nextDue']] as const)
+                      <tr>{([['common.discipline'], ['dash.lead'], ['common.status'], ...(q.data.disciplineStatus ? [['deliverable.progress']] as const : []), ['dash.open', true], ['ind.overdue', true], ['ind.blocked', true], ...(q.data.disciplineBacklog ? [['backlog.title', true]] as const : []), ['dash.due14', true], ['dash.nextDue']] as const)
                         .map(([h, num]) => <th key={h} scope="col" className={cn(thCls, num && 'text-right')}>{t(h)}</th>)}</tr>
                     </thead>
                     <tbody>
@@ -96,6 +99,7 @@ export function DashboardTab() {
                         const name = lead(d.leadId)
                         const tasks = `${base}/tasks?disciplineId=${d.disciplineId}`
                         const due14 = q.data.disciplineDue14?.[d.disciplineId]
+                        const backlog = q.data.disciplineBacklog?.[d.disciplineId]
                         return (
                           <tr key={d.disciplineId} className="border-t hover:bg-muted">
                             <td className={tdCls}><Link className="font-semibold hover:underline" to={tasks}>{d.name}</Link></td>
@@ -107,6 +111,7 @@ export function DashboardTab() {
                             <td className={cn(tdCls, 'text-right tabular-nums')}><Link className="hover:underline" to={`${tasks}&open=true&onHold=false`}>{d.open}</Link></td>
                             <td className={cn(tdCls, 'text-right tabular-nums', d.overdue > 0 && 'font-semibold text-bad')}><Link className="hover:underline" to={`${tasks}&overdue=true`}>{d.overdue}</Link></td>
                             <td className={cn(tdCls, 'text-right tabular-nums', d.blocked > 0 && 'font-semibold text-bad')}><Link className="hover:underline" to={`${tasks}&blocked=true`}>{d.blocked}</Link></td>
+                            {q.data.disciplineBacklog && <td className={cn(tdCls, 'text-right tabular-nums')}>{backlog && <Link className="hover:underline" to={`${base}/tasks?${backlog.link}`}>{backlog.value}</Link>}</td>}
                             <td className={cn(tdCls, 'text-right tabular-nums')}>{due14
                               ? <Link className="hover:underline" to={`${base}/deliverables?${due14.link}`}>{due14.value}</Link> : d.deliverablesDue14}</td>
                             <td className={cn(tdCls, 'whitespace-nowrap')} title={d.nextDueName}>{d.nextDueKey ? <><Key>{d.nextDueKey}</Key> <span className="tabular-nums">{fmtDate(d.nextDueDate)}</span></> : <Missing />}</td>
@@ -194,7 +199,7 @@ const BAD = ['overdue', 'blocked', 'atRisk', 'issuesHigh', 'risksHigh'], WARN = 
 /** The counts row (§13.1 item 4) as summary tiles: every number opens the filtered list it was counted from, and each tile
  *  says what it counts (AC-CNT-06). Decisions, issues and risks are project-wide, so a discipline scope says so (AC-CNT-07). */
 function Counts({ d, base, scoped }: { d: Dash; base: string; scoped: boolean }) {
-  const tasks = (k: keyof Dash['tasks']): Entry => [k, d.tasks[k], `${base}/tasks?${d.tasks[k].link}`]
+  const tasks = (k: keyof Dash['tasks']): Entry => [k, d.tasks[k]!, `${base}/tasks?${d.tasks[k]!.link}`]
   const dels = (k: keyof Dash['deliverables']): Entry => [k, d.deliverables[k], `${base}/deliverables?${d.deliverables[k].link}`]
   const decs = (k: keyof Dash['decisions']): Entry => [`dec${k}`, d.decisions[k], `${base}/decisions?${d.decisions[k].link}`]
   const tile = (accent: Accent, title: string, hint: string, whole: boolean, [[key, c, to], ...rest]: Entry[]) => (
@@ -222,7 +227,7 @@ function Counts({ d, base, scoped }: { d: Dash; base: string; scoped: boolean })
   )
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {tile('blue', t('ptab.tasks'), t('sig.def.dashTasks'), false, [tasks('total'), tasks('complete'), tasks('inProgress'), tasks('review'), tasks('overdue'), tasks('blocked'), tasks('waiting'), tasks('unassigned')])}
+      {tile('blue', t('ptab.tasks'), t('sig.def.dashTasks'), false, [tasks('total'), tasks('complete'), tasks('inProgress'), tasks('review'), tasks('overdue'), tasks('blocked'), tasks('waiting'), tasks('unassigned'), ...(d.tasks.backlog ? [tasks('backlog')] : [])])}
       {tile('mint', t('ptab.deliverables'), t('sig.def.dashDeliverables'), false, [dels('total'), dels('upcoming'), dels('atRisk'), dels('issued')])}
       {tile('lavender', t('ptab.decisions'), t('sig.def.dashDecisions'), true, [decs('pending'), decs('overdue')])}
       {tile('peach', t('dash.registers'), t('sig.def.dashRegisters'), true, [

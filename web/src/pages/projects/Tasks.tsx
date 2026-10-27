@@ -2,7 +2,7 @@ import { disciplineColour } from '@/lib/discipline-colour'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { ArrowDown, ArrowUp, ChevronDown, Columns3, Ellipsis, KanbanSquare, List, Pencil, Plus, Rows3, type LucideIcon } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronDown, Columns3, Ellipsis, Inbox, KanbanSquare, List, Pencil, Plus, Rows3, type LucideIcon } from 'lucide-react'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
@@ -57,6 +57,8 @@ export interface TaskRow {
   manualBlockType?: string; manualBlockReason?: string; manualBlockSetAt?: string; commentCount: number; predecessorCount: number; successorCount: number
   collaboratorIds: string[]; can?: { assign: boolean; edit: boolean; changeDue: boolean; block: boolean } | null; state?: TaskStateView | null
   pickupOfferOpen?: boolean
+  /** FR-BKL-01, present only while flag.backlog is on: open, no due date and no start date. */
+  backlog?: boolean
 }
 export interface Transition { to: string; allowed: boolean; reason?: string | null; needsReason: boolean; via?: string | null }
 export interface MoveRequest { id: string; key: string; rowVersion: number; to: string; needsReason: boolean; needsReviewer?: boolean; via?: string | null }
@@ -513,11 +515,15 @@ function LiveTasksTab() {
   const [editingName, setEditingName] = useState<string | null>(null)
   const [block, setBlock] = useState<TaskRow | null>(null)
   const [visible, setVisible] = useState<string[] | null>(readCols)
-  const sort = sp.get('sort') ?? ''
-  const group = sp.get('group') ?? 'deliverable'
+  // FR-BKL-02: the Backlog view of this list, in the team's manual order (§36.3) and ungrouped unless chosen.
+  const backlogOn = useFlag('backlog')
+  const backlog = backlogOn && sp.get('backlog') === 'true'
+  const sort = sp.get('sort') ?? (backlog ? 'board' : '')
+  const defaultGroup = backlog ? 'none' : 'deliverable'
+  const group = sp.get('group') ?? defaultGroup
   const panel = sp.get('panel')
   const current = panel?.startsWith('Task:') ? panel.slice('Task:'.length) : null // the task open in the side panel
-  const params = { ...filters, sort: sort || undefined, pageSize: 200 }
+  const params = { ...filters, backlog: backlog || undefined, sort: sort || undefined, pageSize: 200 }
   const q = useInfiniteQuery({
     queryKey: ['p', p.id, 'tasks', params],
     queryFn: ({ pageParam }) => get<PageOf<TaskRow>>(`projects/${p.id}/tasks${qs({ ...params, page: pageParam })}`),
@@ -593,12 +599,14 @@ function LiveTasksTab() {
   const padBottom = items.length ? virtual.getTotalSize() - items[items.length - 1].end : 0
   const sortBy = (field: string) => set('sort', sort === field ? `${field}:desc` : sort === `${field}:desc` ? null : field)
   const boardSearch = (() => { const n = new URLSearchParams(sp); n.delete('panel'); return n.toString() })()
-  const exportAs = (format: 'csv' | 'xlsx') => download(`/api/v1/projects/${p.id}/tasks/export${qs({ ...filters, sort: sort || undefined, format })}`, `${p.projectNumber}-tasks.${format}`)
+  const backlogSearch = (() => { const n = new URLSearchParams(sp); n.delete('panel'); if (backlog) n.delete('backlog'); else n.set('backlog', 'true'); return n.toString() })()
+  const exportAs = (format: 'csv' | 'xlsx') => download(`/api/v1/projects/${p.id}/tasks/export${qs({ ...filters, backlog: backlog || undefined, sort: sort || undefined, format })}`, `${p.projectNumber}-tasks.${format}`)
     .catch((e) => toast.error(e instanceof ApiError ? e.message : t('app.error')))
 
   return (
-    <Page title={t('ptab.tasks')} subtitle={q.data ? plural(total, 'decision.task1', 'task.count') : undefined}
+    <Page title={backlog ? t('backlog.title') : t('ptab.tasks')} subtitle={q.data ? plural(total, 'decision.task1', 'task.count') + (backlog ? ` · ${t('backlog.rule')}` : '') : undefined}
       actions={<>
+        {backlogOn && <Button asChild variant="outline"><Link to={{ search: backlogSearch }}>{backlog ? <><List className="size-4" aria-hidden />{t('backlog.allTasks')}</> : <><Inbox className="size-4" aria-hidden />{t('backlog.title')}</>}</Link></Button>}
         {/* The Work group's second-level links also lead to the board; this link keeps the filters (FR-VIS-04). */}
         <Button asChild variant="outline"><Link to={{ pathname: '../board', search: boardSearch }} relative="path"><KanbanSquare className="size-4" aria-hidden />{t('ptab.board')}</Link></Button>
         <ViewMenu listType="tasks" projectId={p.id} extra={() => ({ cols: shown.map((c) => c.id).join(',') })} />
@@ -606,7 +614,7 @@ function LiveTasksTab() {
       </>}>
       {/* §41 R1: the quick filters sit in the Filters popover, Group is a menu, and Export and Columns share the overflow. */}
       <TaskFilterBar p={p} deliverables={deliverables} pinned={[]} showDeleted
-        lead={<MenuSelect label={t('common.groupBy')} value={group} onChange={(v) => set('group', v === 'deliverable' ? null : v)}
+        lead={<MenuSelect label={t('common.groupBy')} value={group} onChange={(v) => set('group', v === defaultGroup ? null : v)}
           options={GROUPS.map((g) => ({ value: g, label: runtimeText(GROUP_LABEL[g]) }))} />}
         actions={
         <DropdownMenu>
@@ -625,10 +633,11 @@ function LiveTasksTab() {
           </DropdownMenuContent>
         </DropdownMenu>
       } />
+      {backlog && canCreate && <BacklogQuickAdd p={p} onCreated={reload} />}
       {selected.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-accent px-4 py-3 text-sm" role="region" aria-label={t('bulk.actions')}>
           <span className="mr-2 font-semibold text-accent-foreground tabular-nums">{t('bulk.selected', { n: selected.size })}</span>
-          {BULK.map((op) => (
+          {BULK.filter((op) => !backlog || op !== 'shiftDueDates').map((op) => ( // undated work has no due date to shift
             <Button key={op} variant="outline" className={cn(op === 'cancel' && 'text-bad hover:text-bad')} onClick={() => setBulk(op)}>{runtimeText(`tbulk.${op}`)}</Button>
           ))}
           <Button variant="ghost" className="sm:ml-auto" onClick={() => setSelected(new Set())}>{t('common.clear')}</Button>
@@ -637,7 +646,7 @@ function LiveTasksTab() {
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : rows.length === 0 ? !q.error && (
         <div className="rounded-lg border bg-card">
-          {active
+          {backlog && !active ? <Empty title={t('backlog.empty')}>{t('backlog.rule')}</Empty> : active
             ? <Empty title={t('task.emptyFilteredTitle')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('task.emptyFilteredHint')}</Empty>
             : <Empty title={t('task.emptyTitle')} action={canCreate && <Button variant="outline" onClick={() => setCreating({})}><Plus className="size-4" />{t('task.new')}</Button>}>{t('task.emptyHint')}</Empty>}
         </div>
@@ -701,6 +710,49 @@ function LiveTasksTab() {
       {bulk && <TaskBulkDialog p={p} op={bulk} ids={[...selected]} deliverables={deliverables} onClose={(ok) => { setBulk(null); if (ok) { setSelected(new Set()); reload() } }} />}
       {actions.dialogs}
     </Page>
+  )
+}
+
+/** Quick add at the top of the Backlog (FR-BKL-03, 051-D6): a title and Enter make one ordinary task create. Every default is in
+ *  view and can be changed first: the creator's home discipline or the project's first, the creator as assignee, Medium priority
+ *  and no dates. */
+function BacklogQuickAdd({ p, onCreated }: { p: ProjectDetail; onCreated: () => void }) {
+  const me = useMe()
+  const allowed = p.disciplines.filter((d) => d.isActive && p.permissions.createTaskIn.includes(d.id))
+  const home = useQuery({ queryKey: ['people', 'home', me.id], queryFn: () => get<{ homeDisciplineId?: string | null }[]>(`users${qs({ ids: me.id })}`), staleTime: 60_000 })
+  const [name, setName] = useState('')
+  const [discipline, setDiscipline] = useState<string | null>(null)
+  const [assignee, setAssignee] = useState<{ id: string | null; name?: string | null }>({ id: me.id, name: me.displayName })
+  const [priority, setPriority] = useState('Medium')
+  const [busy, setBusy] = useState(false)
+  const disciplineId = discipline ?? allowed.find((d) => d.disciplineId === home.data?.[0]?.homeDisciplineId)?.id ?? allowed[0]?.id
+  const submit = async () => {
+    if (busy || !name.trim() || !disciplineId) return
+    setBusy(true)
+    try {
+      const r = await post<{ id: string; key: string }>(`projects/${p.id}/tasks`, { name: name.trim(), projectDisciplineId: disciplineId, assigneeId: assignee.id, priority })
+      toast.success(t('task.created', { key: r.key }))
+      setName('')
+      onCreated()
+    } catch (e) { toast.error(Object.values((e as ApiError).fieldErrors ?? {})[0]?.[0] ?? errorText(e)) } finally { setBusy(false) }
+  }
+  return (
+    <form className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-3" aria-label={t('backlog.quickAdd')} onSubmit={(e) => { e.preventDefault(); submit() }}>
+      <Field label={t('backlog.quickAdd')} htmlFor="bq-name" className="w-full min-w-56 sm:w-auto sm:flex-1">
+        <Input id="bq-name" value={name} placeholder={t('backlog.quickAddPlaceholder')} onChange={(e) => setName(e.target.value)} />
+      </Field>
+      <Field label={t('common.discipline')} htmlFor="bq-discipline" className="w-full sm:w-44">
+        <select id="bq-discipline" className={selectCls} value={disciplineId ?? ''} onChange={(e) => setDiscipline(e.target.value)}>{allowed.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
+      </Field>
+      <Field label={t('field.AssigneeId')} htmlFor="bq-assignee" className="w-full sm:w-56">
+        <PeoplePicker id="bq-assignee" value={assignee.id} valueName={assignee.name} placeholder={t('ind.unassigned')} onChange={(id, person) => setAssignee({ id, name: person?.displayName })} />
+      </Field>
+      <Field label={t('common.priority')} htmlFor="bq-priority" className="w-full sm:w-36">
+        <select id="bq-priority" className={selectCls} value={priority} onChange={(e) => setPriority(e.target.value)}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select>
+      </Field>
+      <span className="flex min-h-(--control-h) items-center text-sm text-muted-foreground">{t('backlog.noDates')}</span>
+      <Button type="submit" disabled={busy || !name.trim() || !disciplineId}>{busy ? <Spinner /> : <Plus className="size-4" aria-hidden />}{t('backlog.add')}</Button>
+    </form>
   )
 }
 

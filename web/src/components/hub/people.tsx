@@ -126,7 +126,7 @@ export function PeoplePicker({ value, valueName, onChange, placeholder, allowCle
         </PopoverContent>
       </Popover>
       {allowClear && value && !disabled && !compact && (
-        <Button variant="ghost" size="icon" className="size-8" onClick={() => onChange(null)} aria-label={t('common.clear')}><X className="size-3.5" /></Button>
+        <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => onChange(null)} aria-label={t('common.clear')}><X className="size-3.5" /></Button>
       )}
     </div>
   )

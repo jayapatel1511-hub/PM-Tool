@@ -97,4 +97,31 @@ public sealed class TaskQueriesTests(HubFactory f)
         }
         finally { await Backlog(false); }
     }
+    /// FR-BKL-04, AC-BKL-03: a date takes a task out of the Backlog, and clearing both dates returns it behind the cards arranged there;
+    /// with the flag off the arranged place is kept, as before.
+    [Fact, Trait("flag-off", "backlog"), Trait("flag-on", "backlog")]
+    [Trait("Spec", "AC-BKL-03")]
+    public async Task Clearing_a_date_returns_a_task_to_the_end_of_the_Backlog_order_only_with_the_flag_on()
+    {
+        var p = await d.Project();
+        var pm = f.As(TestData.Pm);
+        var root = $"/api/v1/projects/{p.Id}";
+        var ids = new List<Guid>();
+        for (var i = 0; i < 3; i++) ids.Add(await Add(p.Id));
+        async Task<List<Guid>> Order() => (await pm.GetAsync($"{root}/tasks?pageSize=200&sort=board").Result.Json())["items"]!.AsArray().Select(x => x!.G("id")).ToList();
+        async Task Set(Guid id, object body) => (await pm.Patch($"/api/v1/tasks/{id}", body, await f.DbAsync(db => db.Tasks.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync()))).EnsureSuccessStatusCode();
+        try
+        {
+            foreach (var on in new[] { false, true })
+            {
+                await Backlog(on);
+                (await pm.Put($"{root}/board-order", new { taskIds = ids })).EnsureSuccessStatusCode();
+                Assert.Equal(ids, await Order());
+                await Set(ids[0], new { dueDate = In(5) });
+                await Set(ids[0], new { dueDate = (string?)null });
+                Assert.Equal(on ? [ids[1], ids[2], ids[0]] : ids, await Order());
+            }
+        }
+        finally { await Backlog(false); }
+    }
 }

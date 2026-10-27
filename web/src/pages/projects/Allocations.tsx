@@ -387,7 +387,7 @@ function OpenRoles({ roles, base, proposal, canFill, onAdd, onEdit, onCancel, on
       {(r.disciplineName || r.note) && <div className="text-xs/[18px] text-muted-foreground">{[r.disciplineName, r.note].filter(Boolean).join(' · ')}</div>}</> },
     { id: 'dates', label: t('allocation.dates'), fixed: true, sort: r => r.fromDate, className: 'whitespace-nowrap tabular-nums', cell: r => <>{fmtDate(r.fromDate)} – {fmtDate(r.throughDate)}</> },
     { id: 'hours', label: t('allocation.plannedHours'), fixed: true, sort: r => r.plannedHours, className: 'text-right font-medium tabular-nums', cell: r => hours(r.plannedHours) },
-    { id: 'status', label: t('common.status'), fixed: true, sort: r => r.status, cell: r => <Pill tone={ROLE_TONE[r.status] ?? 'idle'}>{runtimeText(`openRole.status.${r.status}`)}</Pill> },
+    { id: 'status', label: t('common.status'), fixed: true, sort: r => r.status, cell: r => <RoleStatus status={r.status} /> },
     { id: 'filled', label: t('openRole.filledBy'), fixed: true, cell: r => r.filledAllocationId ? <FilledBy base={base} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span> },
   ]
   const table = useTable('hub.openRoleColumns', columns, roles.data ?? [], r => [r.fromDate, r.roleLabel])
@@ -416,6 +416,8 @@ function OpenRoles({ roles, base, proposal, canFill, onAdd, onEdit, onCancel, on
   </table></TableRegion>
 }
 
+function RoleStatus({ status }: { status: string }) { return <Pill tone={ROLE_TONE[status] ?? 'idle'}>{runtimeText(`openRole.status.${status}`)}</Pill> }
+
 /** The read-only open-role panel (§47.5 FR-REC-12, behind flag.record_engine_additions): the role's fields and its History.
  *  Editing, filling and cancelling stay row actions with their dialogs. */
 export function OpenRolePanel({ id }: PanelProps) {
@@ -433,7 +435,7 @@ export function OpenRolePanel({ id }: PanelProps) {
   if (!r) return <div className="p-4"><Notice title={t('app.notFound')} /></div>
   const value = (v: ReactNode) => <div className="break-words px-2 py-1.5">{v ?? <Missing />}</div>
   return <div>
-    <PanelHead title={r.roleLabel} meta={<Pill tone={ROLE_TONE[r.status] ?? 'idle'}>{runtimeText(`openRole.status.${r.status}`)}</Pill>} />
+    <PanelHead title={r.roleLabel} meta={<RoleStatus status={r.status} />} />
     <FieldGroup title={t('common.details')}>
       <FieldRow label={t('common.discipline')}>{value(r.disciplineName)}</FieldRow>
       <FieldRow label={t('allocation.from')}>{value(<span className="tabular-nums">{fmtDate(r.fromDate)}</span>)}</FieldRow>

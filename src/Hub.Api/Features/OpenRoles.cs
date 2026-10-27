@@ -58,6 +58,9 @@ public static class OpenRoleEndpoints
         return TypedResults.Ok(roles.Select(x => ToRow(x.Role, x.DisciplineName, Permissions.ManageOpenRole(access.Actor, ctx, x.Role.CreatedBy).Ok)).ToArray());
     }
 
+    sealed record FilledName(Guid Id, string? Name);
+    sealed record ExportRow(string RoleLabel, string? DisciplineName, DateOnly FromDate, DateOnly ThroughDate, decimal PlannedHours, string Status, string? FilledByName, string? Note);
+
     /// The open-roles list as CSV or Excel (AC-REC-09): the list's rows and access check, written by the existing writer under its row
     /// cap. Filled by names the filling allocation's person only where the viewer can open that allocation, as the list's cell does.
     static async Task<IResult> Export(string code, Guid projectId, string? format, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
@@ -68,9 +71,9 @@ public static class OpenRoleEndpoints
         var managed = Permissions.IsPM(access.Actor, ctx) ? db.Projects.Where(p => p.Id == projectId).Select(p => p.Id) : db.Projects.Where(_ => false).Select(p => p.Id);
         var filled = rows.Where(r => r.FilledAllocationId != null).Select(r => r.FilledAllocationId!.Value).ToList();
         var names = await AllocationEndpoints.VisibleQuery(db, access.Actor, managed).Where(a => a.ProjectId == projectId && filled.Contains(a.Id))
-            .Select(a => new { a.Id, Name = db.Users.Where(u => u.Id == a.PersonId).Select(u => u.DisplayName).FirstOrDefault() }).ToDictionaryAsync(a => a.Id, a => a.Name);
-        var values = JsonSerializer.SerializeToNode(rows.Select(r => new { r.RoleLabel, r.DisciplineName, r.FromDate, r.ThroughDate, r.PlannedHours, r.Status,
-            FilledByName = r.FilledAllocationId is { } id ? names.GetValueOrDefault(id) : null, r.Note }), JsonOpts.Web)!.AsArray();
+            .Select(a => new FilledName(a.Id, db.Users.Where(u => u.Id == a.PersonId).Select(u => u.DisplayName).FirstOrDefault())).ToDictionaryAsync(a => a.Id, a => a.Name);
+        var values = JsonSerializer.SerializeToNode(rows.Select(r => new ExportRow(r.RoleLabel, r.DisciplineName, r.FromDate, r.ThroughDate, r.PlannedHours, r.Status,
+            r.FilledAllocationId is { } id ? names.GetValueOrDefault(id) : null, r.Note)), JsonOpts.Web)!.AsArray();
         return await ExportFile.Send(db, store, format, Text.Get("export.openRoles", project.ProjectNumber), Hub.Api.Records.OpenRoleRecord.ExportColumns, values,
             await ListExportEndpoints.Filters(db, http, access), project.Id, $"{project.ProjectNumber}-open-roles", clock);
     }

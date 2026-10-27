@@ -3,15 +3,18 @@ import assert from 'node:assert/strict'
 
 // The browser pieces the module touches, kept in memory.
 const store = new Map<string, string>()
+const tab = new Map<string, string>()
 let full = false
 Object.assign(globalThis, {
+  sessionStorage: { getItem: (k: string) => tab.get(k) ?? null, removeItem: (k: string) => { tab.delete(k) }, setItem: (k: string, v: string) => { if (full) throw new Error('full'); tab.set(k, v) } },
+  location: { pathname: '/my-work', search: '?panel=Task:t1&view=all' },
   localStorage: {
     get length() { return store.size }, key: (i: number) => [...store.keys()][i] ?? null, getItem: (k: string) => store.get(k) ?? null,
     removeItem: (k: string) => { store.delete(k) }, setItem: (k: string, v: string) => { if (full) throw new Error('full'); store.set(k, v) },
   },
   window: { addEventListener: () => {} },
 })
-const { clearDraft, discardUnsaved, draftStorageKey, hasUnsaved, leave, leaveQuestion, pruneDrafts, readDraft, registerForm, writeDraft } = await import('./drafts.ts')
+const { clearDraft, discardUnsaved, draftStorageKey, dropPending, hasUnsaved, keepPending, leave, leaveQuestion, peekPending, pruneDrafts, readDraft, registerForm, writeDraft } = await import('./drafts.ts')
 
 const DAY = 86_400_000
 const ago = (days: number) => new Date(Date.now() - days * DAY).toISOString()
@@ -56,4 +59,32 @@ test('leaving asks only while something typed is neither saved nor drafted (FR-S
   assert.equal(discarded, 1)
   off()
   assert.equal(hasUnsaved(), false)
+})
+
+test('a save cut off by an expired sign-in waits for the same user, record and field, and is spent once (FR-SAV-05)', () => {
+  keepPending('u1', 'Description', 'typed')
+  keepPending('u1', 'Description', 'typed again') // the same field again replaces it
+  keepPending('u1', 'Name', null) // a cleared field is kept too
+  assert.deepEqual(peekPending('u1', 'Description', 7), { value: 'typed again' })
+  assert.deepEqual(peekPending('u1', 'Name', 7), { value: null })
+  assert.equal(peekPending('u2', 'Description', 7), null, 'another person who signs in does not get it')
+  assert.equal(peekPending('u1', 'Owner', 7), null, 'nor does another field')
+  Object.assign(globalThis.location, { search: '?view=all&panel=Task:t1' })
+  assert.deepEqual(peekPending('u1', 'Description', 7), { value: 'typed again' }, 'other query parameters changing do not matter')
+  Object.assign(globalThis.location, { search: '?panel=Task:t2' })
+  assert.equal(peekPending('u1', 'Description', 7), null, 'another record in the panel does not get it')
+  Object.assign(globalThis.location, { search: '?panel=Task:t1' })
+  dropPending('u1', 'Description')
+  assert.equal(peekPending('u1', 'Description', 7), null, 'one retry')
+  assert.deepEqual(peekPending('u1', 'Name', 7), { value: null }, 'the other field still waits')
+  dropPending('u1', 'Name')
+  assert.equal(tab.has('hub.pendingFields'), false, 'nothing is left behind')
+  keepPending('u1', 'Description', 'old')
+  const [kept] = JSON.parse(tab.get('hub.pendingFields')!)
+  tab.set('hub.pendingFields', JSON.stringify([{ ...kept, at: ago(8) }]))
+  assert.equal(peekPending('u1', 'Description', 7), null, 'older than draft_keep_days')
+  tab.clear()
+  full = true
+  assert.doesNotThrow(() => keepPending('u1', 'Description', 'x'), 'a browser that refuses the write loses nothing more')
+  full = false
 })

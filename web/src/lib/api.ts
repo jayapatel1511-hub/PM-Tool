@@ -66,7 +66,7 @@ export interface ApiOptions {
 
 /** FR-SAV-02: an autosave field watches the write its save makes, even when the panel's save catches the refusal itself, and can send
  *  that write on a newer row version (Keep mine). Only a write that starts synchronously inside `send` is watched. */
-export type WriteWatch = { error?: ApiError; ifMatch?: number }
+export type WriteWatch = { error?: ApiError; ifMatch?: number; /** FR-SAV-05: the write was refused because sign-in expired; runs before the sign-in flow does. */ signedOut?: () => void }
 let watching: WriteWatch | undefined
 export function watchWrite<T>(watch: WriteWatch, send: () => T): T {
   const outer = watching
@@ -91,7 +91,7 @@ export async function api<T = any>(path: string, o: ApiOptions = {}): Promise<T>
     signal: o.signal,
   }) } catch (e) { if (e instanceof DOMException && e.name === 'AbortError') throw e; throw fail(new ApiError(0, { code: 'network' }, method)) }
   observeBuild(res)
-  if (res.status === 401) { onUnauthorized(); throw fail(new ApiError(401, { detail: 'Signed out' })) }
+  if (res.status === 401) { watch?.signedOut?.(); onUnauthorized(); throw fail(new ApiError(401, { detail: 'Signed out' })) }
   if (!res.ok) {
     let body: any = {}
     try { body = await res.json() } catch { /* not JSON */ }

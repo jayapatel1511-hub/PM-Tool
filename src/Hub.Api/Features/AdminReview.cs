@@ -18,6 +18,7 @@ public static class AdminReviewEndpoints
     public sealed record CheckCount(string Key, string Title, string Rule, int Count, string ListUrl);
     public sealed record CheckList(string Key, string Title, string Rule, IReadOnlyList<CheckRow> Rows);
     public sealed record CheckRecord(string Key, int Count, string? Note);
+    sealed record ExportRow(string Check, string Rule, int Count, string? Note);
     public sealed record ReviewRecord(Guid Id, DateTimeOffset ReviewedAt, Guid ReviewerId, string Reviewer, string? Note, IReadOnlyList<CheckRecord> Checks);
     public sealed record Overview(IReadOnlyList<CheckCount> Checks, ReviewRecord? Last, DateOnly? DueOn, bool Overdue);
     public sealed record CheckNote(string? Key, string? Note);
@@ -163,7 +164,7 @@ public static class AdminReviewEndpoints
         var s = await store.Get(db);
         var rec = await Record(db, r);
         var rows = rec.Checks.Select(k => Defs.FirstOrDefault(d => d.Key == k.Key) is { } d
-            ? new { Check = Title(d, s), Rule = Rule(d, s), k.Count, k.Note } : new { Check = k.Key, Rule = "", k.Count, k.Note });
+            ? new ExportRow(Title(d, s), Rule(d, s), k.Count, k.Note) : new ExportRow(k.Key, "", k.Count, k.Note));
         (string, string)[] header = [(Text.Get("col.date"), Clock.Local(rec.ReviewedAt, s).ToString("yyyy-MM-dd HH:mm")), (Text.Get("col.reviewer"), rec.Reviewer), (Text.Get("col.note"), rec.Note ?? "")];
         return await ExportFile.Send(db, store, format, Text.Get("adminReview.title"), ExportCols, JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), [], null, "admin-review", clock, header);
     }

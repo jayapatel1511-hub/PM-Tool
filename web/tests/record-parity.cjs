@@ -3,7 +3,7 @@
 // spike's harness (043-D3 KILL); `web/scripts/run-record-parity.mjs` builds and serves the two commits.
 //   TUESDAY_RECORD_BASE_UI_URL, TUESDAY_RECORD_CANDIDATE_UI_URL, TUESDAY_RECORD_API_URL  local origins
 //   TUESDAY_RECORD_SCREENS  space-separated routes, default the Risks register, the Risk panel, the Issues register (plain and
-//                           grouped, for the shared DataTable's group rows), the project Team tab, the open-roles tab of
+//                           grouped, for the shared DataTable's group rows), the project Team tab, the Milestones list (a slipped milestone with a deliverable, for its expanded detail row), the open-roles tab of
 //                           the Active, Complete and empty-role projects, the Reviews and Changes registers, the workspace
 //                           Team page scoped to the Active project and the Portfolio (plain, and grouped by client, which
 //                           needs flag.status_rollups). {project}, {complete}, {empty} and
@@ -29,7 +29,7 @@ for (const url of [candidate, base, apiBase]) assert.ok(['localhost', '127.0.0.1
 const output = process.env.TUESDAY_RECORD_PARITY_OUT ?? path.resolve(__dirname, '../../ci-artifacts/record-parity/report.json')
 const runId = process.env.TUESDAY_RECORD_PARITY_RUN ?? crypto.randomUUID()
 const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
-  '/projects/{project}/risks', '/projects/{project}/risks?panel=Risk:{risk}', '/projects/{project}/issues', '/projects/{project}/issues?group=owner', '/projects/{project}/team',
+  '/projects/{project}/risks', '/projects/{project}/risks?panel=Risk:{risk}', '/projects/{project}/issues', '/projects/{project}/issues?group=owner', '/projects/{project}/team', '/projects/{project}/milestones',
   '/projects/{project}/allocations?tab=roles', '/projects/{complete}/allocations?tab=roles', '/projects/{empty}/allocations?tab=roles',
   '/projects/{project}/reviews', '/projects/{project}/changes', '/team?projects={projectId}',
   '/portfolio', '/portfolio?group=client',
@@ -142,6 +142,12 @@ async function fixtures() {
   const day = offset => new Date(Date.now() + offset * 864e5).toISOString().slice(0, 10)
   await api('planning/leave/manual', 'jordan', { method: 'POST', body: JSON.stringify({ personId: (await api('me', 'alex')).id, sourceSystem: 'Synthetic HR',
     externalId: `PARITY-${runId}`, fromDate: day(-7), throughDate: day(7), hoursPerDay: null, status: 'Approved', rowVersion: 0 }) })
+  const milestone = { milestoneType: 'Design Submission', isClientFacing: true }
+  await api(`projects/${project.id}/milestones`, 'priya', { method: 'POST', body: JSON.stringify({ ...milestone, name: 'Synthetic parity milestone', date: '2027-03-15' }) })
+  const slipped = await api(`projects/${project.id}/milestones`, 'priya', { method: 'POST', body: JSON.stringify({ ...milestone, name: 'Synthetic slipped milestone', date: '2027-03-01' }) })
+  await api(`milestones/${slipped.id}/change-date`, 'priya', { method: 'POST', body: JSON.stringify({ newDate: '2027-03-08', reason: 'Synthetic parity slip', rowVersion: slipped.rowVersion }) })
+  await api(`projects/${project.id}/deliverables`, 'priya', { method: 'POST', body: JSON.stringify({ name: 'Synthetic milestone deliverable', projectDisciplineId: project.discipline,
+    deliverableTypeId: reference.deliverableTypes[0].id, milestoneId: slipped.id, startDate: '2027-02-15', dueDate: '2027-03-05' }) })
   const openRole = await role(project, 'Synthetic parity role')
   await coordination(reference, project)
   const complete = await createProject(reference, 'C', 'Synthetic complete parity project')
@@ -363,12 +369,13 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
       }
       const row = page.locator('main tbody').locator('button,a').filter({ visible: true }).first()
       if (!await visible(row)) return { order, row: null }
+      const start = here()
       await row.focus(); await page.keyboard.press('Enter'); await settle()
       const opened = { url: here(), dialog: await dialogOpen(), tree: await dialogOpen() ? await tree() : null }
       if (opened.dialog) {
         await page.keyboard.press('Escape'); await settle()
         Object.assign(opened, { closed: !await dialogOpen(), focusReturned: await row.evaluate(e => document.activeElement === e).catch(() => false) })
-      }
+      } else if (here() === start) opened.after = await tree() // opened in place, no dialog (a milestone's deliverables): record what it showed
       await go(url)
       return { order, row: opened }
     }

@@ -4,10 +4,12 @@ import { ChevronDown, ChevronRight, Lock, Monitor, MoreHorizontal, Plus } from '
 import { Fragment, useState } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
-import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
+import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Spinner, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineText, TabBar } from '@/components/hub/fields'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Chip, Key, ProgressBar, StatusPill, toneOf } from '@/components/hub/pills'
+import { DataTable } from '@/components/hub/registers'
+import { useTable, type Column } from '@/components/hub/table'
 import { Why } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -101,6 +103,32 @@ function LiveMilestonesTab() {
   const rows = q.data ?? []
   const disc = (id?: string) => p.disciplines.find((d) => d.id === id)?.name
   const base = `/projects/${p.projectNumber}`
+  const toggle = (id: string) => { const n = new Set(open); if (n.has(id)) n.delete(id); else n.add(id); setOpen(n) }
+  // Every column is fixed and none sorts: the list keeps its columns, order and header text (FR-REC-14 adds no surface).
+  const table = useTable<MilestoneRow>('hub.milestoneColumns', ([
+    { id: 'details', label: t('common.details'), srOnly: true, className: 'w-12 px-2',
+      cell: (m) => <button type="button" aria-label={t('milestone.showDeliverables', { key: m.key })} aria-expanded={open.has(m.id)} className="grid size-(--control-row-h) place-items-center rounded-md hover:bg-secondary"
+        onClick={() => toggle(m.id)}>{open.has(m.id) ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</button> },
+    { id: 'key', label: t('milestone.key'), className: 'whitespace-nowrap', cell: (m) => <Key>{m.key}</Key> },
+    { id: 'name', label: t('common.name'), className: 'min-w-48',
+      cell: (m) => <button type="button" className="break-words text-left font-semibold hover:underline" onClick={() => openPanel('Milestone', m.id)}>{m.isSubmission && '◆ '}{m.name}</button> },
+    { id: 'type', label: t('common.type'), cell: (m) => runtimeText(`mtype.${m.milestoneType}`) },
+    { id: 'date', label: t('common.date'), className: 'whitespace-nowrap tabular-nums', cell: (m) => fmtDate(m.date) },
+    { id: 'original', label: t('milestone.original'), className: 'whitespace-nowrap tabular-nums text-muted-foreground', cell: (m) => fmtDate(m.originalDate) },
+    { id: 'slip', label: t('milestone.slip'), className: 'whitespace-nowrap text-right tabular-nums',
+      cell: (m) => <span className={cn(m.slipDays > 0 && 'font-semibold text-warn')}>{m.slipDays > 0 && <span aria-hidden className="mr-1 text-xs">▲</span>}{slip(m.slipDays)}</span> },
+    { id: 'status', label: t('common.status'), cell: (m) => <Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><StatusPill status={milestoneStatusLabel(m)} /></Why> },
+    { id: 'remaining', label: t('milestone.remaining'), className: 'whitespace-nowrap tabular-nums', cell: (m) => m.isComplete ? fmtDate(m.completedDate) : m.date ? relative(m.date) : t('common.dash') },
+    { id: 'deliverables', label: t('milestone.deliverables'), className: 'whitespace-nowrap', cell: (m) => <DeliverableCount m={m} base={base} /> },
+    { id: 'tasks', label: t('milestone.tasks'), cell: (m) => <>
+      <TaskCount m={m} base={base} />
+      {(m.taskOverdue > 0 || m.taskBlocked > 0) && <span className="mt-1 flex flex-wrap gap-1"><TaskChips m={m} base={base} /></span>}
+    </> },
+    { id: 'discipline', label: t('common.discipline'), cell: (m) => disc(m.projectDisciplineId) ?? t('common.dash') },
+    { id: 'clientFacing', label: t('milestone.clientFacing'), cell: (m) => m.isClientFacing ? t('common.yes') : t('common.no') },
+    { id: 'actions', label: t('common.actions'), srOnly: true, className: 'w-12 px-2 text-right',
+      cell: (m) => can && <DesktopOnly notice={null}><MilestoneMenu m={m} onPick={(kind) => setDialog({ kind, m })} /></DesktopOnly> },
+  ] as Column<MilestoneRow>[]).map((c) => ({ ...c, fixed: true, className: cn('align-top', c.className) })), rows, (m) => [m.date, m.key])
   const create = (variant?: 'outline') => <DesktopOnly notice={null}><Button variant={variant} onClick={() => setDialog({ kind: 'new' })}><Plus className="size-4" />{t('milestone.new')}</Button></DesktopOnly>
   return (
     <Page title={t('ptab.milestones')} actions={<>
@@ -122,9 +150,7 @@ function LiveMilestonesTab() {
         </div>
       </FilterBar>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      {q.isPending ? <div className="rounded-lg border bg-card"><Loading /></div> : rows.length === 0 ? (
-        <div className="rounded-lg border bg-card"><Empty action={can && create('outline')}>{t('milestone.empty')}</Empty></div>
-      ) : phone ? (
+      {phone && !q.isPending && rows.length > 0 ? (
         <ul className="space-y-3">{rows.map((m) => <li key={m.id} className="rounded-lg border bg-card p-4">
           <div className="mb-2 flex flex-wrap items-center gap-2"><Key>{m.key}</Key><StatusPill status={milestoneStatusLabel(m)} /></div>
           <button type="button" className="mb-3 break-words text-left text-base/6 font-semibold text-primary hover:underline" onClick={() => openPanel('Milestone', m.id)}>{m.isSubmission && '◆ '}{m.name}</button>
@@ -144,54 +170,13 @@ function LiveMilestonesTab() {
             <TaskChips m={m} base={base} />
             <Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><span className="text-sm text-primary underline">{t('common.why')}</span></Why>
           </div>
-          <Button className="mt-3 h-auto min-h-(--control-h) max-w-full whitespace-normal text-left" variant="outline" aria-expanded={open.has(m.id)} onClick={() => { const n = new Set(open); if (n.has(m.id)) n.delete(m.id); else n.add(m.id); setOpen(n) }}>{t('milestone.showDeliverables', { key: m.key })}</Button>
+          <Button className="mt-3 h-auto min-h-(--control-h) max-w-full whitespace-normal text-left" variant="outline" aria-expanded={open.has(m.id)} onClick={() => toggle(m.id)}>{t('milestone.showDeliverables', { key: m.key })}</Button>
           {open.has(m.id) && <div className="mt-3 border-t pt-3"><TargetedDeliverables milestoneId={m.id} /></div>}
         </li>)}</ul>
       ) : (
-        <TableRegion>
-          <table className="w-full text-sm">
-            <caption className="sr-only">{t('ptab.milestones')}</caption>
-            <thead className="bg-muted">
-              <tr>
-                <th scope="col" className="w-12 px-2"><span className="sr-only">{t('common.details')}</span></th>
-                {([['milestone.key'], ['common.name'], ['common.type'], ['common.date'], ['milestone.original'], ['milestone.slip', true], ['common.status'], ['milestone.remaining'],
-                  ['milestone.deliverables'], ['milestone.tasks'], ['common.discipline'], ['milestone.clientFacing']] as const)
-                  .map(([h, num]) => <th key={h} scope="col" className={cn(thCls, num && 'text-right')}>{t(h)}</th>)}
-                <th scope="col" className="w-12 px-2"><span className="sr-only">{t('common.actions')}</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((m) => (
-                <Fragment key={m.id}>
-                  <tr className="border-t hover:bg-muted">
-                    <td className="px-2 py-(--cell-py) align-top">
-                      <button type="button" aria-label={t('milestone.showDeliverables', { key: m.key })} aria-expanded={open.has(m.id)} className="grid size-(--control-row-h) place-items-center rounded-md hover:bg-secondary"
-                        onClick={() => { const n = new Set(open); if (n.has(m.id)) n.delete(m.id); else n.add(m.id); setOpen(n) }}>
-                        {open.has(m.id) ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</button>
-                    </td>
-                    <td className={cn(tdCls, 'whitespace-nowrap')}><Key>{m.key}</Key></td>
-                    <td className={cn(tdCls, 'min-w-48')}><button type="button" className="break-words text-left font-semibold hover:underline" onClick={() => openPanel('Milestone', m.id)}>{m.isSubmission && '◆ '}{m.name}</button></td>
-                    <td className={tdCls}>{runtimeText(`mtype.${m.milestoneType}`)}</td>
-                    <td className={cn(tdCls, 'whitespace-nowrap tabular-nums')}>{fmtDate(m.date)}</td>
-                    <td className={cn(tdCls, 'whitespace-nowrap tabular-nums text-muted-foreground')}>{fmtDate(m.originalDate)}</td>
-                    <td className={cn(tdCls, 'whitespace-nowrap text-right tabular-nums', m.slipDays > 0 && 'font-semibold text-warn')}>{m.slipDays > 0 && <span aria-hidden className="mr-1 text-xs">▲</span>}{slip(m.slipDays)}</td>
-                    <td className={tdCls}><Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><StatusPill status={milestoneStatusLabel(m)} /></Why></td>
-                    <td className={cn(tdCls, 'whitespace-nowrap tabular-nums')}>{m.isComplete ? fmtDate(m.completedDate) : m.date ? relative(m.date) : t('common.dash')}</td>
-                    <td className={cn(tdCls, 'whitespace-nowrap')}><DeliverableCount m={m} base={base} /></td>
-                    <td className={tdCls}>
-                      <TaskCount m={m} base={base} />
-                      {(m.taskOverdue > 0 || m.taskBlocked > 0) && <span className="mt-1 flex flex-wrap gap-1"><TaskChips m={m} base={base} /></span>}
-                    </td>
-                    <td className={tdCls}>{disc(m.projectDisciplineId) ?? t('common.dash')}</td>
-                    <td className={tdCls}>{m.isClientFacing ? t('common.yes') : t('common.no')}</td>
-                    <td className="px-2 py-(--cell-py) text-right align-top">{can && <DesktopOnly notice={null}><MilestoneMenu m={m} onPick={(kind) => setDialog({ kind, m })} /></DesktopOnly>}</td>
-                  </tr>
-                  {open.has(m.id) && <tr className="border-t bg-muted"><td colSpan={14} className="py-3 pl-14 pr-(--cell-px)"><TargetedDeliverables milestoneId={m.id} /></td></tr>}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
-        </TableRegion>
+        <DataTable table={table} rows={rows} loading={q.isPending} caption={t('ptab.milestones')} current={() => false} cards={false}
+          detail={(m) => open.has(m.id) ? <TargetedDeliverables milestoneId={m.id} /> : null}
+          empty={<Empty action={can && create('outline')}>{t('milestone.empty')}</Empty>} />
       )}
       {dialog && <MilestoneDialogs p={p} kind={dialog.kind} m={dialog.m} phases={ref.data?.phases ?? []} onClose={() => setDialog(null)} />}
     </Page>

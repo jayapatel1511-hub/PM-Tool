@@ -42,7 +42,7 @@ Each slice is one PR. Slices in Parts A, B and C merge dark behind `flag.data_en
   - Nine checks with counts and list URLs; `AdminReview` table; record endpoint; activity entry; `admin_review_interval_days`, `admin_review_idle_days`; flag entry; Admin-only guard (403).
   - Covers FR-ADR-01, FR-ADR-02, FR-ADR-03, FR-ADR-05, FR-ADR-07 (API), FR-ADR-08.
   - Tests: `tests/Hub.Tests/Api/AdminReviewTests.cs` (each check's count equals its list; record is immutable; non-Admin 403; "no home unit" check absent with `flag.org_structure` off). AC-ADR-01, AC-ADR-02, AC-ADR-04.
-- [ ] S09 Page and export (M). After S08.
+- [x] S09 Page and export (M). After S08.
   - Admin review page; record form; last-review comparison; CSV and XLSX export with no person rows.
   - Covers FR-ADR-04 (page), FR-ADR-06, FR-ADR-07 (navigation).
   - Tests: `web/tests/admin-review.cjs`; `ExportTests.cs` (header block, nine rows, reviewer only). AC-ADR-05.

@@ -17,6 +17,8 @@ import { addDays, fmtDate, today } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 interface Entry {
   id: string; projectId: string; projectNumber: string; projectName: string; taskId: string; taskKey: string; taskName: string; userId: string; person: string
@@ -201,6 +203,7 @@ function EntryDialog({ entry, onReload, onClose }: { entry?: Entry; onReload?: (
   const [reloaded, setReloaded] = useState(false)
   const [reloading, setReloading] = useState(false)
   const [hasConflict, setHasConflict] = useState(false)
+  const safe = useSafeForm(entry ? null : 'time.new', { task, f }, (d) => { setTask(d.task); setF(d.f) }) // FR-SAV-03
   const tasks = useQuery({ queryKey: ['time-tasks', term], enabled: !entry, queryFn: () => get<PageOf<{ id: string; key: string; name: string; projectNumber: string; status: string }>>(`tasks${qs({ q: term, pageSize: 20 })}`) })
   const fe = err?.fieldErrors ?? {}
   const reload = async () => {
@@ -227,7 +230,7 @@ function EntryDialog({ entry, onReload, onClose }: { entry?: Entry; onReload?: (
     try {
       if (currentEntry) await patch(`time/${currentEntry.id}`, { workDate: f.workDate, hours: Number(f.hours), note: f.note || null, reason: f.reason || undefined }, currentEntry.rowVersion)
       else await post('time', { taskId: task!.id, workDate: f.workDate, hours: Number(f.hours), note: f.note || null })
-      toast.success(t('common.saved')); onClose(true)
+      safe.clear(); toast.success(t('common.saved')); onClose(true)
     } catch (e) {
       const apiErr = e as ApiError
       if (apiErr.status === 409 || apiErr.code === 'concurrency_conflict') setHasConflict(true)
@@ -235,9 +238,10 @@ function EntryDialog({ entry, onReload, onClose }: { entry?: Entry; onReload?: (
     } finally { setBusy(false) }
   }
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose(false)}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(() => onClose(false))}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader><DialogTitle>{currentEntry ? t('time.editTitle') : t('time.add')}</DialogTitle><DialogDescription>{t('time.dialogHint')}</DialogDescription></DialogHeader>
+        <DraftNotice form={safe} />
         {hasConflict && <p role="status" className="rounded-md border border-warn/40 bg-warn-bg px-3 py-2 text-sm text-warn">{t('time.reloadHint')}</p>}
         {err && !Object.keys(fe).length && <ErrorBanner error={err} retry={hasConflict ? () => { if (!reloading) void reload() } : undefined} retryLabel={hasConflict ? t('error.reload') : undefined} />}
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); save() }}>
@@ -264,7 +268,7 @@ function EntryDialog({ entry, onReload, onClose }: { entry?: Entry; onReload?: (
           {currentEntry?.editNeedsReason && <Field label={t('common.reason')} htmlFor="te-reason" error={fe.reason} hint={t('time.reasonHint', { name: currentEntry.person })}><Textarea id="te-reason" rows={2} required value={f.reason} onChange={(e) => setF({ ...f, reason: e.target.value })} /></Field>}
           {err && Object.keys(fe).length > 0 && <ErrorBanner error={err} />}
           {reloaded && <p role="status" className="rounded-md border border-warn/40 bg-warn-bg px-3 py-2 text-sm text-warn">{currentEntry?.canEdit ? t('time.reloaded') : t('time.noLongerEditable')}</p>}
-          <DialogFooter><Button type="button" variant="outline" onClick={() => onClose(false)}>{t('common.cancel')}</Button>{currentEntry?.canEdit !== false && <Button type="submit" disabled={busy || reloading || hasConflict || (!currentEntry && !task) || !f.hours}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button>}</DialogFooter>
+          <DialogFooter><Button type="button" variant="outline" onClick={() => safe.close(() => onClose(false))}>{t('common.cancel')}</Button>{currentEntry?.canEdit !== false && <Button type="submit" disabled={busy || reloading || hasConflict || (!currentEntry && !task) || !f.hours}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button>}</DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

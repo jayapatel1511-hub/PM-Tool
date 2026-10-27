@@ -2,11 +2,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { ConfirmDialog, Empty, ErrorBanner, Loading, Spinner } from '@/components/hub/common'
+import { DraftNotice } from '@/components/hub/drafts'
 import { Avatar, type Person } from '@/components/hub/people'
 import { RichText } from '@/components/hub/richtext'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useSafeForm } from '@/hooks/drafts'
 import { get, qs, typedRequest } from '@/lib/api'
 import type { components } from '@/gen/api'
 import { invalidateChange } from '@/lib/keys'
@@ -55,7 +57,7 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
                     {c.body && <div className="mt-1 rounded-md border border-dashed p-2 not-italic" title={t('comments.adminOnly')}><RichText text={c.body} /></div>}
                   </div>
                 ) : editing === c.id ? (
-                  <Composer projectId={projectId} initial={c.body ?? ''} submitLabel={t('common.save')} onCancel={() => setEditing(null)}
+                  <Composer projectId={projectId} draftKey={`comment.edit.${c.id}`} initial={c.body ?? ''} submitLabel={t('common.save')} onCancel={() => setEditing(null)}
                     onSubmit={async (body) => { await typedRequest('patch', '/api/v1/comments/{id}', { params: { id: c.id }, body: { body } }); setEditing(null); reload() }} />
                 ) : <RichText text={c.body} className="text-sm" />}
               </div>
@@ -64,7 +66,7 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
         </ol>
       )}
       {q.data.canComment
-        ? <Composer projectId={projectId} submitLabel={t('comments.post')} onSubmit={async (body) => { await typedRequest('post', '/api/v1/items/{type}/{id}/comments', { params: { type, id }, body: { body } }); reload() }} />
+        ? <Composer projectId={projectId} draftKey={`comment.${type}.${id}`} submitLabel={t('comments.post')} onSubmit={async (body) => { await typedRequest('post', '/api/v1/items/{type}/{id}/comments', { params: { type, id }, body: { body } }); reload() }} />
         : <p className="text-sm text-muted-foreground">{q.data.commentReason ?? t('comments.readOnly')}</p>}
       {removing && (
         <ConfirmDialog open destructive title={t('comments.deleteTitle')} body={t('comments.deleteBody')} confirmLabel={t('common.delete')}
@@ -74,11 +76,12 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
   )
 }
 /** Comment box: Enter adds a line, Ctrl+Enter posts; "@" opens people, project members first (C-05). */
-function Composer({ projectId, initial = '', submitLabel, onSubmit, onCancel }: {
-  projectId: string; initial?: string; submitLabel: string; onSubmit: (body: string) => Promise<unknown>; onCancel?: () => void
+function Composer({ projectId, draftKey, initial = '', submitLabel, onSubmit, onCancel }: {
+  projectId: string; draftKey: string; initial?: string; submitLabel: string; onSubmit: (body: string) => Promise<unknown>; onCancel?: () => void
 }) {
   const fieldId = useId()
   const [text, setText] = useState(initial)
+  const draft = useSafeForm(draftKey, text, setText) // FR-SAV-03: a half-written comment survives a closed panel, a refresh and a dropped session
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<unknown>(null)
   const [mention, setMention] = useState<{ query: string; start: number } | null>(null)
@@ -111,7 +114,7 @@ function Composer({ projectId, initial = '', submitLabel, onSubmit, onCancel }: 
   const submit = async () => {
     if (!text.trim() || busy) return
     setBusy(true); setErr(null)
-    try { await onSubmit(text.trim()); setText('') } catch (e) { setErr(e) } finally { setBusy(false) }
+    try { await onSubmit(text.trim()); draft.clear(); setText('') } catch (e) { setErr(e) } finally { setBusy(false) }
   }
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (mention && options.length > 0) {
@@ -119,13 +122,14 @@ function Composer({ projectId, initial = '', submitLabel, onSubmit, onCancel }: 
       if (e.key === 'ArrowUp') { e.preventDefault(); setActive((a) => (a - 1 + options.length) % options.length); return }
       if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); choose(options[active]); return }
     }
-    if (e.key === 'Escape') { if (mention) setMention(null); else onCancel?.(); return }
+    if (e.key === 'Escape') { if (mention) setMention(null); else if (onCancel) draft.close(onCancel); return }
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit() }
   }
   const listId = `${fieldId}-mentions`
   return (
     <div className="space-y-2">
       <Label htmlFor={fieldId}>{t('comments.box')}</Label>
+      <DraftNotice form={draft} />
       <div className="relative">
         <Textarea id={fieldId} ref={area} rows={3} value={text} placeholder={t('comments.placeholder')} aria-describedby={`${fieldId}-hint`}
           aria-autocomplete="list" aria-controls={mention && options.length > 0 ? listId : undefined}
@@ -149,7 +153,7 @@ function Composer({ projectId, initial = '', submitLabel, onSubmit, onCancel }: 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span id={`${fieldId}-hint`} className="text-xs/[18px] text-muted-foreground">{t('comments.hint')}</span>
         <div className="flex gap-2">
-          {onCancel && <Button variant="ghost" onClick={onCancel}>{t('common.cancel')}</Button>}
+          {onCancel && <Button variant="ghost" onClick={() => draft.close(onCancel)}>{t('common.cancel')}</Button>}
           <Button disabled={!text.trim() || busy} onClick={submit}>{busy && <Spinner />}{busy ? t('common.saving') : submitLabel}</Button>
         </div>
       </div>

@@ -2,6 +2,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { t } from "@/lib/i18n"
+import { onToast } from "@/lib/drafts"
 import { XIcon } from "lucide-react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
@@ -53,6 +54,7 @@ function DialogContent({
   showCloseButton = true,
   onOpenAutoFocus,
   onCloseAutoFocus,
+  onInteractOutside,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
@@ -75,6 +77,7 @@ function DialogContent({
           header && "grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
         )}
         {...props}
+        onInteractOutside={(event) => { onInteractOutside?.(event); if (onToast(event.target)) event.preventDefault() }}
         onOpenAutoFocus={(event) => {
           const active = document.activeElement
           opener.current = active instanceof HTMLElement && active !== document.body ? active : null

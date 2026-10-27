@@ -17,6 +17,8 @@ import { t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { accentOf, cn } from '@/lib/utils'
 import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 interface Deadline { kind: 'deadline'; sourceType: 'Task' | 'Deliverable' | 'Milestone'; id: string; key: string; title: string; date: string; projectId: string; projectNumber: string; status?: string; overdue: boolean }
 interface CalEvent {
@@ -259,6 +261,7 @@ export function EventDialog({ event, anchor, onClose }: { event: CalEvent | null
   } : { type: 'Meeting', title: '', projectId: '', start: `${anchor}T09:00`, end: `${anchor}T10:00`, location: '', description: '', visibility: 'Project' })
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm(event ? null : 'event.new', f, setF) // FR-SAV-03
   const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
   const fe = err?.fieldErrors ?? {}
   const done = () => { qc.invalidateQueries({ queryKey: ['calendar'] }); onClose() }
@@ -267,7 +270,7 @@ export function EventDialog({ event, anchor, onClose }: { event: CalEvent | null
     const body = { ...f, projectId: f.projectId || null, location: f.location || null, description: f.description || null, visibility: f.projectId ? f.visibility : 'Private' }
     try {
       if (event) await patch(`calendar/events/${event.id}`, body, event.rowVersion); else await post('calendar/events', body)
-      toast.success(t('common.saved')); done()
+      safe.clear(); toast.success(t('common.saved')); done()
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   const cancel = async () => {
@@ -276,12 +279,13 @@ export function EventDialog({ event, anchor, onClose }: { event: CalEvent | null
   }
   const input = (k: string, props: Record<string, unknown> = {}) => ({ id: `ev-${k}`, value: f[k] ?? '', disabled: readOnly, onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value }), ...props })
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><CalendarClock className="size-5 shrink-0" aria-hidden />{event ? event.title : t('calendar.new')}</DialogTitle>
           <DialogDescription>{event && readOnly ? t('calendar.readOnly', { owner: event.owner ?? '' }) : t('calendar.zoneNote', { zone: event?.timeZone ?? t('calendar.orgZone') })}</DialogDescription>
         </DialogHeader>
+        <DraftNotice form={safe} />
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save() }}>
           <Field label={t('common.type')} htmlFor="ev-type"><select className={selectCls} {...input('type')}>{TYPES.slice(1).map((x) => <option key={x.id} value={x.id}>{t(x.label)}</option>)}</select></Field>
           <Field label={t('calendar.project')} htmlFor="ev-projectId" error={fe.projectId} hint={f.type === 'Internal Task' ? t('calendar.projectOptional') : undefined}>
@@ -303,7 +307,7 @@ export function EventDialog({ event, anchor, onClose }: { event: CalEvent | null
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="gap-2 sm:col-span-2">
             {event && !readOnly && <Button type="button" variant="ghost" className="text-bad hover:text-bad sm:mr-auto" onClick={cancel}>{t('calendar.cancelEvent')}</Button>}
-            <Button type="button" variant="outline" onClick={onClose}>{t('common.close')}</Button>
+            <Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.close')}</Button>
             {!readOnly && <Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button>}
           </DialogFooter>
         </form>

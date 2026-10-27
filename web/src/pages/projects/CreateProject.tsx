@@ -22,6 +22,8 @@ interface MemberPick { userId: string; name: string; roles: string[]; discipline
 /** What a source can see and change in the dialog: the first step's fields and the chosen disciplines. */
 export { CREATE_SOURCES } from '@/app/extension-slots'
 import { CREATE_SOURCES } from '@/app/extension-slots'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 export interface CreateContext { form: Record<string, string>; disciplines: DisciplinePick[]; setDisciplines: (d: DisciplinePick[]) => void }
 
 /** Two-step create dialog: identity, then team and disciplines (§12.1 UI behaviour, Workflow 1). Creating projects is
@@ -36,6 +38,7 @@ export function CreateProjectDialog({ onClose }: { onClose: () => void }) {
   const [source, setSource] = useState<Record<string, any>>({})
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm('project.new', { f, disciplines, members, source }, (d) => { setF(d.f); setDisciplines(d.disciplines); setMembers(d.members); setSource(d.source) }) // FR-SAV-03
   const fe = err?.fieldErrors ?? {}
   const ctx: CreateContext = { form: f, disciplines, setDisciplines }
   const v = (k: string) => f[k] ?? ''
@@ -52,6 +55,7 @@ export function CreateProjectDialog({ onClose }: { onClose: () => void }) {
         disciplines: disciplines.map((d) => ({ disciplineId: d.disciplineId, leadUserId: d.leadUserId })),
         members: members.map((m) => ({ userId: m.userId, roles: m.roles, disciplineId: m.disciplineId })), ...extra,
       })
+      safe.clear()
       toast.success(t('projects.created', { number: res.projectNumber }))
       onClose()
       navigate(`/projects/${encodeURIComponent(res.projectNumber)}`)
@@ -62,7 +66,7 @@ export function CreateProjectDialog({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[760px]">
         <DialogHeader>
           <DialogTitle>{t('projects.create')}</DialogTitle>
@@ -74,6 +78,7 @@ export function CreateProjectDialog({ onClose }: { onClose: () => void }) {
           <Notice icon={Monitor} title={t('app.phoneNotice')} />
           <DialogFooter><Button variant="outline" onClick={onClose}>{t('common.close')}</Button></DialogFooter>
         </>}>
+          <DraftNotice form={safe} />
           {step === 1 ? (
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={t('projects.col.number')} htmlFor="p-num" error={fe.projectNumber} hint={t('projects.numberHint')}>
@@ -174,7 +179,7 @@ export function CreateProjectDialog({ onClose }: { onClose: () => void }) {
           {err && <ErrorBanner error={err} />}
           <DialogFooter>
             {step === 2 && <Button variant="outline" onClick={() => setStep(1)}>{t('common.back')}</Button>}
-            <Button variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+            <Button variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button>
             {step === 1 ? <Button disabled={!valid1} onClick={() => setStep(2)}>{t('common.next')}</Button>
               : <Button disabled={busy} onClick={submit}>{busy ? <><Spinner />{t('common.saving')}</> : t('projects.createButton')}</Button>}
           </DialogFooter>

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate, useNavigation } from 'react-router'
 import { useDensity, type Density } from '@/components/hub/common'
+import { LeaveHost } from '@/components/hub/drafts'
 import { PanelHost } from '@/components/hub/panel-host'
 import { Loading } from '@/components/hub/common'
 import { Avatar } from '@/components/hub/people'
@@ -13,7 +14,8 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useProject } from '@/hooks/data'
 import { useLiveEvents } from '@/hooks/live'
-import { useAuth } from '@/lib/auth-context'
+import { useAuth, useFlag } from '@/lib/auth-context'
+import { GUARD_TOASTS, pruneDrafts } from '@/lib/drafts'
 import { get } from '@/lib/api'
 import { t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -27,6 +29,10 @@ import { useRouteCounter } from '@/lib/route-counter'
 export function Shell() {
   const { me, signOut } = useAuth()
   useLiveEvents()
+  const drafts = useFlag('data_entry_safety')
+  const keepDays = me.settings.draftKeepDays ?? 7
+  useEffect(() => { if (drafts) pruneDrafts(keepDays) }, [drafts, keepDays]) // FR-SAV-03: a draft is dropped after draft_keep_days
+  useEffect(() => { document.documentElement.toggleAttribute(GUARD_TOASTS, drafts) }, [drafts])
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('hub.rail') === 'collapsed' } catch { return false } })
   const [density, setDensity] = useDensity()
   const search = useRef<HTMLInputElement>(null)
@@ -136,6 +142,7 @@ export function Shell() {
           <Suspense fallback={<Loading rows={6} />}><div aria-busy={navigation.state !== 'idle' || undefined}><Outlet /></div></Suspense>
         </main>
         <PanelHost />
+        <LeaveHost />
       </div>
 
       <nav aria-label={t('nav.main')} className="no-print fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t bg-card pb-[env(safe-area-inset-bottom)] md:hidden">

@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import type { SafeForm } from '@/hooks/drafts'
 import { ApiError, post } from '@/lib/api'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
+import { DraftNotice } from '@/components/hub/drafts'
 
 export type RecordVersion = { id: string; rowVersion: number }
 export type WorkRef = RecordVersion & { key: string; name: string; ownerId?: string; projectDisciplineId: string; status: string; revision?: string; transmittalUrl?: string; canCommit?: boolean; canManage?: boolean }
@@ -64,7 +66,7 @@ export function useCoordRefresh(projectId: string) {
   const qc = useQueryClient()
   return () => { for (const key of ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'search']) qc.invalidateQueries({ queryKey: key === 'search' ? [key] : [key, projectId] }); qc.invalidateQueries({ queryKey: ['p', projectId] }); qc.invalidateQueries({ queryKey: ['deliverable'] }); qc.invalidateQueries({ queryKey: ['workspace-coordination'] }) }
 }
-export function CommandForm({ path, title, hint, payload, children, onClose, onDone, submitLabel }: { path: string; title: string; hint?: string; payload: () => object; children?: ReactNode; onClose: () => void; onDone: (id: string) => void; submitLabel?: string }) {
+export function CommandForm({ path, title, hint, payload, children, onClose, onDone, submitLabel, safe }: { path: string; title: string; hint?: string; payload: () => object; children?: ReactNode; onClose: () => void; onDone: (id: string) => void; submitLabel?: string; safe?: SafeForm }) {
   const [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null)
   const receipt = useRef<{ signature: string; id: string } | null>(null)
   async function submit(e: React.FormEvent) {
@@ -73,18 +75,19 @@ export function CommandForm({ path, title, hint, payload, children, onClose, onD
       const body = payload(), signature = JSON.stringify(body)
       if (!receipt.current || receipt.current.signature !== signature) receipt.current = { signature, id: crypto.randomUUID() }
       const result = await post<{ id: string }>(path, { ...body, requestId: receipt.current.id })
-      toast.success(t('coord.saved')); onDone(result.id)
+      safe?.clear(); toast.success(t('coord.saved')); onDone(result.id)
     } catch (e) { setError(e) } finally { setBusy(false) }
   }
   // A refusal names each blocker exactly as the server states it, beside the banner, so the user can fix the right record.
   const refusals = error instanceof ApiError ? Object.entries(error.fieldErrors).flatMap(([field, messages]) => messages.map((message, i) => ({ key: `${field}-${i}`, message }))) : []
-  return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl"><DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>{hint ?? t('coord.commandHint')}</DialogDescription></DialogHeader>
+  return <Dialog open onOpenChange={o => !o && !busy && (safe ? safe.close(onClose) : onClose())}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl"><DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>{hint ?? t('coord.commandHint')}</DialogDescription></DialogHeader>
+    {safe && <DraftNotice form={safe} />}
     <form onSubmit={submit} className="space-y-4"><fieldset disabled={busy} className="space-y-4">{children}</fieldset>{error != null && <ErrorBanner error={error} />}
       {refusals.length > 0 && <div className="rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad"><ul className="list-disc space-y-1 pl-5" aria-label={t('coord.refusalReasons')}>
         {refusals.map(r => <li key={r.key}>{r.message}</li>)}
       </ul></div>}
       {error instanceof ApiError && error.status === 409 && <p role="status" className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲</span><span>{t('coord.stale')}</span></p>}
-      <DialogFooter><Button type="button" variant="outline" disabled={busy} onClick={onClose}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : submitLabel ?? t('coord.confirm')}</Button></DialogFooter>
+      <DialogFooter><Button type="button" variant="outline" disabled={busy} onClick={() => safe ? safe.close(onClose) : onClose()}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : submitLabel ?? t('coord.confirm')}</Button></DialogFooter>
     </form></DialogContent></Dialog>
 }
 export type FormField = { name: string; label: string; type?: 'text' | 'textarea' | 'url' | 'date' | 'datetime-local' | 'number'; choices?: Choice[]; optional?: boolean; min?: number }

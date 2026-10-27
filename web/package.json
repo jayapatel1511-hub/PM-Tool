@@ -33,7 +33,7 @@
     "test:verifiable-records-real": "node tests/verifiable-records-real.cjs",
     "test:schema-workflows": "node tests/schema-workflows.cjs",
     "gen": "openapi-typescript src/gen/openapi.json -o src/gen/api.d.ts",
-    "test:keys": "node --test src/lib/keys.test.ts src/lib/page-mode.test.ts",
+    "test:keys": "node --test src/lib/keys.test.ts src/lib/page-mode.test.ts src/lib/drafts.test.ts",
     "typecheck:tests": "tsc -p tests/tsconfig.json",
     "test:registrations": "node tests/registrations.cjs",
     "test:browser-verification": "node tests/registrations-browser.cjs && node tests/route-splitting.cjs && node tests/live-browser.cjs",

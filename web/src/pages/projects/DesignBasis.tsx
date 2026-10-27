@@ -17,6 +17,8 @@ import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { CommandForm, CoordStatus, Count, PersonLabel, RegisterPager, SelectField, type CoordOptions, workChoices, workRef, WorkLink } from './CoordinationForms'
 import { useCurrentProject } from './ProjectLayout'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 type EntryRow = { id: string; key: string; title: string; kind: string; ownerId: string; projectDisciplineId: string;
   currentVersionId?: string; rowVersion: number; currentStatus?: string; currentScope?: string; latestStatus?: string;
@@ -164,6 +166,7 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
   const [draft, setDraft] = useState<VersionDraft>(() => fromVersion(current))
   const [reason, setReason] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null)
   const [duplicateId, setDuplicateId] = useState(''), [inspected, setInspected] = useState(false)
+  const safe = useSafeForm(existing ? null : `basis.new.${number}`, { kind, title, ownerId, disciplineId, approverId, draft }, (d) => { setKind(d.kind); setTitle(d.title); setOwnerId(d.ownerId); setDisciplineId(d.disciplineId); setApproverId(d.approverId); setDraft(d.draft) }) // FR-SAV-03
   const projectId = base.match(/^projects\/([^/]+)\/design-basis$/)?.[1] ?? ''
   const decisions = useQuery({ queryKey: ['basis-decision-options', base], enabled: !!projectId,
     queryFn: () => typedRequest('get', '/api/v1/projects/{id}/decisions', { params: { id: projectId } }) })
@@ -182,12 +185,13 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
     if (!receipt.current || receipt.current.signature !== signature) receipt.current = { signature, requestId: crypto.randomUUID() }
     try { const result = await post<{ id: string }>(existing ? editing ? `${base}/${existing.entry.id}/versions/${editing.id}/edit` : `${base}/${existing.entry.id}/propose` : base,
       { ...body, requestId: receipt.current.requestId })
-      toast.success(t('coord.saved')); onDone(existing?.entry.id ?? result.id)
+      safe.clear(); toast.success(t('coord.saved')); onDone(existing?.entry.id ?? result.id)
     } catch (e) { setError(e); if (e instanceof ApiError && e.code === 'basis_duplicate' && typeof e.body.existingId === 'string') {
       setDuplicateId(e.body.existingId); setInspected(false) } } finally { setBusy(false) }
   }
-  return <Dialog open onOpenChange={o => !o && !busy && onClose()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+  return <Dialog open onOpenChange={o => !o && !busy && safe.close(onClose)}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
     <DialogHeader><DialogTitle>{t(editing ? 'basis.editProposed' : existing ? 'basis.propose' : 'basis.new')}</DialogTitle><DialogDescription>{t('basis.subtitle')}</DialogDescription></DialogHeader>
+    <DraftNotice form={safe} />
     <form onSubmit={submit} className="space-y-4"><fieldset disabled={busy} className="space-y-4">
       {!existing && <><SelectField label={t('basis.kind')} value={kind} onChange={setKind} choices={[{ value: 'Criterion', label: t('basis.criterion') }, { value: 'Assumption', label: t('basis.assumption') }]} />
         <Field label={t('coord.title')} htmlFor="basis-title"><Input id="basis-title" required maxLength={200} value={title} onChange={e => setTitle(e.target.value)} /></Field>
@@ -204,7 +208,7 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
         <Link className="text-primary underline underline-offset-4" to={`/projects/${number}/design-basis?basis=${duplicateId}`} target="_blank" rel="noopener noreferrer">{t('basis.openExisting')}</Link>
         <label className="flex items-start gap-2"><input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-(--primary)" checked={inspected} onChange={e => setInspected(e.target.checked)} />{t('basis.inspected')}</label></div>}
     </fieldset>{error != null && <ErrorBanner error={error} />}
-      <DialogFooter><Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button><Button disabled={busy || !!duplicateId && !inspected}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter>
+      <DialogFooter><Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button><Button disabled={busy || !!duplicateId && !inspected}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter>
     </form></DialogContent></Dialog>
 }
 

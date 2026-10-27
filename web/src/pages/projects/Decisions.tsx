@@ -34,6 +34,8 @@ import { useTable } from '@/components/hub/table'
 import { DateText, FieldGroup, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
 import { ViewMenu } from '@/components/hub/views'
 import type { SavedViewKeys } from '@/gen/registry.gen'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 export type DecisionRow = components['schemas']['DecisionRow']
 export type Party = components['schemas']['ExternalPartyRow']
@@ -365,6 +367,7 @@ function DecisionForm({ p, onClose }: { p: ProjectDetail; onClose: () => void })
   const [links, setLinks] = useState<Pick[]>([])
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm(`decision.new.${p.id}`, { f, links }, (d) => { setF(d.f); setLinks(d.links) }) // FR-SAV-03
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
@@ -372,14 +375,15 @@ function DecisionForm({ p, onClose }: { p: ProjectDetail; onClose: () => void })
         impactLevel: f.impactLevel, impactDescription: f.impactDescription, ownerUserId: f.ownerUserId || null, ownerExternalPartyId: f.ownerExternalPartyId || null,
         requestedById: f.requestedById || null, links: links.map((l) => ({ targetType: l.targetType, targetId: l.targetId })) } })
       toast.success(t('decision.raised', { key: r.key }))
-      done(p.id); onClose(); openPanel('Decision', r.id)
+      done(p.id); safe.clear(); onClose(); openPanel('Decision', r.id)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   const fe = err?.fieldErrors ?? {}
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader><DialogTitle>{t('decision.new')}</DialogTitle><DialogDescription>{t('decision.newHint')}</DialogDescription></DialogHeader>
+        <DraftNotice form={safe} />
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
           <Field label={t('decision.subject')} htmlFor="d-subject" error={fe.subject} className="sm:col-span-2"><Input id="d-subject" required value={f.subject ?? ''} onChange={(e) => setF({ ...f, subject: e.target.value })} /></Field>
           <Field label={t('common.description')} htmlFor="d-desc" error={fe.description} hint={t('decision.descriptionHint')} className="sm:col-span-2">
@@ -409,7 +413,7 @@ function DecisionForm({ p, onClose }: { p: ProjectDetail; onClose: () => void })
             <ItemPicker projectId={p.id} exclude={links.map((l) => l.targetId)} onPick={(x) => setLinks([...links, x])} />
           </div>
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
-          <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('decision.raise')}</Button></DialogFooter>
+          <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('decision.raise')}</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
@@ -680,6 +684,7 @@ function PartyForm({ p, party, onClose }: { p: ProjectDetail; party?: Party; onC
   const qc = useQueryClient()
   const [f, setF] = useState<Record<string, any>>(party ? { ...party } : { isClient: false })
   const [err, setErr] = useState<ApiError | null>(null)
+  const safe = useSafeForm(party ? null : `party.new.${p.id}`, f, setF) // FR-SAV-03
   const submit = async () => {
     setErr(null)
     try {
@@ -688,13 +693,14 @@ function PartyForm({ p, party, onClose }: { p: ProjectDetail; party?: Party; onC
         ? await typedRequest('patch', '/api/v1/external-parties/{id}', { params: { id: party.id }, body, ifMatch: party.rowVersion })
         : await typedRequest('post', '/api/v1/projects/{id}/external-parties', { params: { id: p.id }, body })
       void invalidateChange(qc, 'ExternalParty', p.id)
-      toast.success(t('common.saved')); onClose(party ? undefined : r)
+      safe.clear(); toast.success(t('common.saved')); onClose(party ? undefined : r)
     } catch (e) { setErr(e as ApiError) }
   }
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent>
         <DialogHeader><DialogTitle>{party ? t('party.edit', { name: party.name }) : t('party.new')}</DialogTitle><DialogDescription>{t('party.hint')}</DialogDescription></DialogHeader>
+        <DraftNotice form={safe} />
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); submit() }}>
           <Field label={t('common.name')} htmlFor="ep-name" error={err?.fieldErrors.name}><Input id="ep-name" required value={f.name ?? ''} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
           <Field label={t('party.organisation')} htmlFor="ep-org"><Input id="ep-org" value={f.organisation ?? ''} onChange={(e) => setF({ ...f, organisation: e.target.value })} /></Field>
@@ -704,7 +710,7 @@ function PartyForm({ p, party, onClose }: { p: ProjectDetail; party?: Party; onC
           {party && <label className="flex items-center gap-2 text-sm"><Checkbox checked={!!f.isActive} onCheckedChange={(c) => setF({ ...f, isActive: !!c })} />{t('party.active')}</label>}
           <Field label={t('common.notes')} htmlFor="ep-notes" className="sm:col-span-2"><Textarea id="ep-notes" rows={2} value={f.notes ?? ''} onChange={(e) => setF({ ...f, notes: e.target.value })} /></Field>
           {err && !Object.keys(err.fieldErrors).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
-          <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" onClick={() => onClose()}>{t('common.cancel')}</Button><Button type="submit">{t('common.save')}</Button></DialogFooter>
+          <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button><Button type="submit">{t('common.save')}</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

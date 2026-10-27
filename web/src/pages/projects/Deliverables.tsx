@@ -36,6 +36,8 @@ import { ExportMenu } from '@/components/hub/export'
 import { useTable } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
 import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/deleted'
+import { DraftNotice } from '@/components/hub/drafts'
+import { useSafeForm } from '@/hooks/drafts'
 
 export interface DeliverableRow {
   requiredReviewPackageId?: string
@@ -264,6 +266,7 @@ export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: Pro
   const [reviewer, setReviewer] = useState<string | null>(null)
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
+  const safe = useSafeForm(`deliverable.new.${p.id}${fromTask ? `.${fromTask.id}` : ''}`, { f, owner, reviewer }, (d) => { setF(d.f); setOwner(d.owner); setReviewer(d.reviewer) }) // FR-SAV-03
   const lead = p.disciplines.find((d) => d.id === f.projectDisciplineId)
   const submit = async () => {
     if (busy) return
@@ -273,14 +276,15 @@ export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: Pro
         startDate: f.startDate || null, dueDate: f.dueDate || null })
       toast.success(t('deliverable.created', { key: r.key }))
       r.warnings?.forEach((w: string) => toast.warning(w))
-      refresh(p.id); onClose()
+      safe.clear(); refresh(p.id); onClose()
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   const fe = err?.fieldErrors ?? {}
   return (
-    <Dialog open onOpenChange={(o) => !o && !busy && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && !busy && safe.close(onClose)}>
       <DialogContent className="max-w-xl">
         <DialogHeader><DialogTitle>{t('deliverable.new')}</DialogTitle></DialogHeader>
+        <DraftNotice form={safe} />
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
           <Field label={t('deliverable.name')} htmlFor="d-name" error={fe.name} className="sm:col-span-2"><Input id="d-name" required placeholder={t('deliverable.namePlaceholder')} value={f.name ?? ''} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
           <Field label={t('common.discipline')} htmlFor="d-disc">
@@ -308,7 +312,7 @@ export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: Pro
           <label className="flex items-center gap-2 text-sm sm:col-span-2"><Checkbox checked={f.requiresReview} onCheckedChange={(c) => setF({ ...f, requiresReview: !!c })} />{t('field.RequiresReview')}</label>
           <Field label={t('common.description')} htmlFor="d-desc" className="sm:col-span-2"><Textarea id="d-desc" rows={2} value={f.description ?? ''} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
           {err && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
-          <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" disabled={busy} onClick={onClose}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter>
+          <DialogFooter className="sm:col-span-2"><Button type="button" variant="outline" disabled={busy} onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

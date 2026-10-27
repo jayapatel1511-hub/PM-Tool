@@ -1,12 +1,12 @@
 import { useFlag, useMe } from '@/lib/auth'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
-import { ActivityTable, type ActivityRow } from '@/components/hub/activity'
+import { ActivityTable } from '@/components/hub/activity'
 import { ActiveFilters, Empty, ErrorBanner, Field, FilterBar, Loading, Page, selectCls } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { get, qs, typedRequest } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import { useItemPanel } from '@/components/hub/panel-host'
@@ -28,10 +28,10 @@ export function ProjectActivityTab() {
   const [sp, setSp] = useSearchParams()
   const open = useItemPanel()
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); if (k !== 'page') n.delete('page'); setSp(n, { replace: true }) }
-  const params = { from: sp.get('from'), to: sp.get('to'), itemType: sp.get('itemType'), category: sp.get('category'), disciplineId: sp.get('disciplineId'),
-    importantOnly: sp.get('importantOnly') === 'true', actorId: sp.get('actorId') }
+  const params = { from: sp.get('from') ?? undefined, to: sp.get('to') ?? undefined, itemType: sp.get('itemType') ?? undefined, category: sp.get('category') ?? undefined,
+    disciplineId: sp.get('disciplineId') ?? undefined, importantOnly: sp.get('importantOnly') === 'true', actorId: sp.get('actorId') ?? undefined }
   const page = Number(sp.get('page') ?? 1)
-  const q = useQuery({ queryKey: ['p', p.id, 'activity', params, page], queryFn: () => get<{ items: ActivityRow[]; totalCount: number }>(`projects/${p.id}/activity${qs({ ...params, page, pageSize: 50 })}`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'activity', params, page], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/activity', { params: { id: p.id }, query: { ...params, page, pageSize: 50 } }) })
   // Every row of an actor-filtered page carries that person's name, so the picker and the token can show it.
   const actorName = params.actorId ? q.data?.items.find((r) => r.actorId === params.actorId)?.actorName : undefined
   const tokens = ([

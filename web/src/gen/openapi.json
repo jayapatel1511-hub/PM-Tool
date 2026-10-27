@@ -28,6 +28,138 @@
         ],
         "type": "object"
       },
+      "ActivityEntry": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actorId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "actorName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "actorType": {
+            "type": "string"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/ChangeLine"
+            },
+            "type": "array"
+          },
+          "correlationId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "itemKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "itemName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "itemType": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "snapshot": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "snapshotLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "source": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "occurredAt",
+          "actorId",
+          "actorName",
+          "actorType",
+          "projectId",
+          "itemType",
+          "itemId",
+          "itemKey",
+          "itemName",
+          "action",
+          "categories",
+          "changes",
+          "summary",
+          "reason",
+          "source",
+          "correlationId",
+          "snapshot",
+          "snapshotLabels"
+        ],
+        "type": "object"
+      },
       "AdoptBody": {
         "properties": {
           "expectedCurrentRevisionId": {
@@ -325,6 +457,45 @@
           "pickUp",
           "assign",
           "withdraw"
+        ],
+        "type": "object"
+      },
+      "AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "entry": {
+            "$ref": "#/components/schemas/ActivityEntry"
+          },
+          "notified": {
+            "type": "boolean"
+          },
+          "projectName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "unread": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "entry",
+          "count",
+          "projectNumber",
+          "projectName",
+          "notified",
+          "unread"
         ],
         "type": "object"
       },
@@ -1442,11 +1613,11 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfObjectAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint": {
+      "AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint": {
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfObjectAndintAndstringAndstringAndbooleanAndboolean"
+              "$ref": "#/components/schemas/AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean"
             },
             "type": [
               "null",
@@ -1708,43 +1879,6 @@
         "required": [
           "layout",
           "isDefault"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfObjectAndintAndstringAndstringAndbooleanAndboolean": {
-        "properties": {
-          "count": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "entry": {},
-          "notified": {
-            "type": "boolean"
-          },
-          "projectName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "projectNumber": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "unread": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "entry",
-          "count",
-          "projectNumber",
-          "projectName",
-          "notified",
-          "unread"
         ],
         "type": "object"
       },
@@ -2973,6 +3107,53 @@
           "includeTasks",
           "dryRun",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ChangeLine": {
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "new": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "newLabel": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "old": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "oldLabel": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "field",
+          "old",
+          "new",
+          "oldLabel",
+          "newLabel"
         ],
         "type": "object"
       },
@@ -9145,6 +9326,45 @@
           "disciplineId",
           "leadUserId",
           "mapping"
+        ],
+        "type": "object"
+      },
+      "PageOfActivityEntry": {
+        "properties": {
+          "filters": {},
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityEntry"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sort": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "totalCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
         ],
         "type": "object"
       },
@@ -18057,7 +18277,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfObject"
+                  "$ref": "#/components/schemas/PageOfActivityEntry"
                 }
               }
             },
@@ -18638,7 +18858,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfObjectAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint"
+                  "$ref": "#/components/schemas/AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint"
                 }
               }
             },
@@ -22055,7 +22275,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfObject"
+                  "$ref": "#/components/schemas/PageOfActivityEntry"
                 }
               }
             },

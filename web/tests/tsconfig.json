@@ -16,6 +16,7 @@
     "open-roles.fixture.cjs",
     "document-links.fixture.cjs",
     "decisions.fixture.cjs",
-    "comments.fixture.cjs"
+    "comments.fixture.cjs",
+    "activity.fixture.cjs"
   ]
 }

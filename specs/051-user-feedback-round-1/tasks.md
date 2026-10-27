@@ -8,7 +8,7 @@ Each slice is one PR. Slices in Parts A, B and C merge dark behind `flag.data_en
   - `useAutosaveField` from the task panel's commit; `autosave_delay_ms`, `draft_keep_days` settings; flag entry; every edit panel's `Field` adopts the hook.
   - Covers FR-SAV-01, FR-SAV-07, FR-SAV-08.
   - Tests: `web/tests/data-entry.cjs` (panel saves per field with one log entry each; task panel unchanged).
-- [ ] S02 Never-revert retry and conflict choice (S, Tier B, unflagged). After S01.
+- [x] S02 Never-revert retry and conflict choice (S, Tier B, unflagged). After S01.
   - Typed value kept on any error; retry at 2, 4, 8 s; "Not saved · Retry"; conflict shows both values with "Keep mine" and "Take theirs".
   - Covers FR-SAV-02; AC-SAV-02, AC-SAV-03.
   - Tests: `data-entry.cjs` with a blocked network and a seeded conflict.

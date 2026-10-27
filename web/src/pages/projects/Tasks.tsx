@@ -57,6 +57,8 @@ export interface TaskRow {
   manualBlockType?: string; manualBlockReason?: string; manualBlockSetAt?: string; commentCount: number; predecessorCount: number; successorCount: number
   collaboratorIds: string[]; can?: { assign: boolean; edit: boolean; changeDue: boolean; block: boolean } | null; state?: TaskStateView | null
   pickupOfferOpen?: boolean
+  /** FR-BKL-01, sent only while `flag.backlog` is on: open, no due date and no start date. */
+  backlog?: boolean | null
 }
 export interface Transition { to: string; allowed: boolean; reason?: string | null; needsReason: boolean; via?: string | null }
 export interface MoveRequest { id: string; key: string; rowVersion: number; to: string; needsReason: boolean; needsReviewer?: boolean; via?: string | null }

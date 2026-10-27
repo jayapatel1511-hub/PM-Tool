@@ -63,25 +63,38 @@ export interface ApiOptions {
   idempotencyKey?: string
 }
 
+/** FR-SAV-02: an autosave field watches the write its save makes, even when the panel's save catches the refusal itself, and can send
+ *  that write on a newer row version (Keep mine). Only a write that starts synchronously inside `send` is watched. */
+export type WriteWatch = { error?: ApiError; ifMatch?: number }
+let watching: WriteWatch | undefined
+export function watchWrite<T>(watch: WriteWatch, send: () => T): T {
+  const outer = watching
+  watching = watch
+  try { return send() } finally { watching = outer }
+}
+
 export async function api<T = any>(path: string, o: ApiOptions = {}): Promise<T> {
+  const method = o.method ?? (o.body !== undefined ? 'POST' : 'GET')
+  // Read before the first await, while the watching save is still on the stack.
+  const watch = method === 'GET' ? undefined : watching
+  const fail = (e: ApiError) => { if (watch) watch.error = e; return e }
   const headers: Record<string, string> = await requestHeaders()
   if (o.body !== undefined) headers['Content-Type'] = 'application/json'
   if (o.idempotencyKey) headers['Idempotency-Key'] = o.idempotencyKey
-  if (o.ifMatch != null) headers['If-Match'] = `"${o.ifMatch}"`
-  const method = o.method ?? (o.body !== undefined ? 'POST' : 'GET')
+  if (o.ifMatch != null) headers['If-Match'] = `"${watch?.ifMatch ?? o.ifMatch}"`
   let res: Response
   try { res = await fetch(path.startsWith('/') ? path : `/api/v1/${path}`, {
     method,
     headers,
     body: o.body !== undefined ? JSON.stringify(o.body) : undefined,
     signal: o.signal,
-  }) } catch (e) { if (e instanceof DOMException && e.name === 'AbortError') throw e; throw new ApiError(0, { code: 'network' }, method) }
+  }) } catch (e) { if (e instanceof DOMException && e.name === 'AbortError') throw e; throw fail(new ApiError(0, { code: 'network' }, method)) }
   observeBuild(res)
-  if (res.status === 401) { onUnauthorized(); throw new ApiError(401, { detail: 'Signed out' }) }
+  if (res.status === 401) { onUnauthorized(); throw fail(new ApiError(401, { detail: 'Signed out' })) }
   if (!res.ok) {
     let body: any = {}
     try { body = await res.json() } catch { /* not JSON */ }
-    throw new ApiError(res.status, body, method)
+    throw fail(new ApiError(res.status, body, method))
   }
   if (o.raw) return res as unknown as T
   if (res.status === 204) return undefined as T

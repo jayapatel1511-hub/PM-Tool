@@ -939,6 +939,7 @@ export const en = {
   'rel.justNow': 'just now',
   'rel.minutesAgo': '{n} min ago',
   'rel.hoursAgo': '{n} h ago',
+  'rel.secondsAgo': '{n} s ago',
   'app.loading': 'Loading…',
   'app.error': 'Something went wrong.',
   'app.retry': 'Retry',
@@ -2536,6 +2537,13 @@ export const en = {
   'board.emptyLane': 'No tasks in this lane.',
   'inline.notSaved': 'Not saved',
   'inline.notSavedBecause': 'Not saved: {reason}',
+  'inline.retry': 'Retry',
+  'inline.discard': 'Discard my change',
+  'inline.theirs': '{who}, {when}: {value}',
+  'inline.yours': 'Yours: {value}',
+  'inline.someone': 'Someone',
+  'inline.keepMine': 'Keep mine',
+  'inline.takeTheirs': 'Take theirs',
 
   // Integrated en-workspace.ts
   'ws.createdBy': 'Created by',

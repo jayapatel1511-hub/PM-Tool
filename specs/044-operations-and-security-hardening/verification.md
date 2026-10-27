@@ -6,17 +6,17 @@ Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13
 
 | AC | Status |
 |---|---|
-| AC-OPS-01 | PASS (local): `tools.test_served_assets`, `check_served_assets.py` on the built web root (final takeover evidence) |
+| AC-OPS-01 | PASS (local): `tools.test_served_assets`, `check_served_assets.py` on the built web root (final takeover evidence); `test_landing_assets_stay_served_and_the_metadata_moved_to_docs` (gap run): images, fonts and licence notices stay served and the three metadata files exist only under `docs/landing-assets/` |
 | AC-OPS-02 | PASS (local): `ServedFilesTests.Dot_prefixed_build_files_are_never_served`; `.vite/` skipped by `tools.test_served_assets` |
 | AC-OPS-03 | HUMAN: operator run on homedev pending; mocked freshness check `scripts.test_check_offhost_backup` PASS (local) |
-| AC-OPS-04 | HUMAN: operator drill on homedev pending; only the mocked drill wrapper (`OffhostDrillTests` in `tools/test_backup_helpers.py`) PASS (local) |
+| AC-OPS-04 | HUMAN: operator drill on homedev pending; only the mocked drill wrapper (`OffhostDrillTests` in `tools/test_backup_helpers.py`) PASS (local); `tools/local_restore_drill.py` (gap run) rehearses the application half on this Mac only; it is not the homedev drill, so the row stays HUMAN |
 | AC-OPS-05 | HUMAN: operator run pending; mocked refusals (`test_cross_stack_and_unapproved_pilot_fail_before_helper`, pilot-absent check) PASS (local) |
 | AC-OPS-06 | PASS (local) |
-| AC-OPS-07 | PASS (local): `Migration_marks_stranded_events_dead_lettered`, `OperationsHardeningTests.Admin_retry_returns_dead_letters_to_the_worker`, `test:operations` dead-letter part |
-| AC-OPS-08 | PASS (local): `test:operations` error page with reference and one matching report |
-| AC-OPS-09 | PASS (local): `test:operations` 5xx "ref" suffix, 409/422 unchanged |
-| AC-OPS-10 | PASS (local): `OperationsHardeningTests` client-error tests (204, 8 KB refusal, 429, 401, no row, controls removed) |
-| AC-OPS-11 | PASS (local): `test:operations` and `test:client-errors` reporter checks (quotes removed, 4xx ignored, cap of 5) |
+| AC-OPS-07 | PASS (local): `Migration_marks_stranded_events_dead_lettered`, `OperationsHardeningTests.Admin_retry_returns_dead_letters_to_the_worker`, `test:operations` dead-letter part; `web/tests/operations-real.cjs` (gap run, real API and PostgreSQL): real dead letters listed, Retry and Retry all, the worker processes them, a project manager gets 403 |
+| AC-OPS-08 | PASS (local): `test:operations` error page with reference and one matching report; `operations-real.cjs` (gap run): a real render failure's reference reaches the real client-errors endpoint (204, one log line carrying the reference, no activity row) |
+| AC-OPS-09 | PASS (local): `test:operations` 5xx "ref" suffix, 409/422 unchanged; `operations-real.cjs` (gap run): a real 500 ends "(ref <the response's own trace id>)" |
+| AC-OPS-10 | PASS (local): `OperationsHardeningTests` client-error tests (204, 8 KB refusal, 429, 401, no row, controls removed); `operations-real.cjs` (gap run): the real endpoint answers 204, writes one log line and no activity row |
+| AC-OPS-11 | PASS (local): `test:operations` and `test:client-errors` reporter checks (quotes removed, 4xx ignored, cap of 5); `operations-real.cjs` (gap run): uncaught error and rejection reach the real endpoint, quoted text is removed, the cap of 5 holds |
 | AC-OPS-12 | PASS (local) |
 | AC-OPS-13 | PASS (local) |
 | AC-OPS-14 | PASS (local) |
@@ -24,9 +24,24 @@ Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13
 | AC-OPS-16 | PASS (local) |
 | AC-OPS-17 | PASS (local) — 2026-10-25 ruling (Jay): non-Admins get 403 from every Admin route whatever the flag; an Admin gets 404 from a flagged-off Admin route. `AdminSweepTests.Every_admin_route_refuses_team_members_and_project_managers` asserts both (75/75 targeted tests pass). |
 | AC-OPS-18 | PASS (local): `test:operations` 502/503/no-answer copy, read retries kept |
-| AC-OPS-19 | PASS (local): `test:operations` tab title zero/3/99+ |
+| AC-OPS-19 | PASS (local): `test:operations` tab title zero/3/99+; `operations-real.cjs` (gap run): the tab title follows real unread counts (3, cleared, 99+) and keeps the landing title |
 | AC-OPS-20 | PASS (local) |
-| AC-OPS-21 | PASS (local): `OperationsHardeningTests.Density_choice_is_saved_to_the_account`, `test:operations` two-browser part |
+| AC-OPS-21 | PASS (local): `OperationsHardeningTests.Density_choice_is_saved_to_the_account`, `test:operations` two-browser part; `operations-real.cjs` (gap run): density is saved to the real account, a second browser follows it and a stored Compact wins |
+
+## 2026-10-25 gap run
+
+AC-OPS-07 to 11, 19 and 21 rested on server tests and the mocked-API browser suite (`test:operations`) only, with no real-API check, and AC-OPS-01 had no test that the images, fonts and notices stay served. `build2/GAP-044` (`cf24e32e`, review fix `badc2c7b`, base `51b70785`) adds that evidence and was merged into `codex/integrate-039-050` with one conflict, in `web/scripts/run-smoke-live.mjs` (both sides appended a suite; the list keeps `org-structure-real.cjs` and `operations-real.cjs`).
+
+- `web/tests/operations-real.cjs`, run by `run-smoke-live.mjs` as `operations-browser`, drives the real API and PostgreSQL: AC-OPS-08/10 (render failure reference reaches the client-errors endpoint: 204, one log line, no activity row), AC-OPS-11 (uncaught error, rejection, quoted text removed, cap of 5), AC-OPS-07 (real dead letters listed, Retry, Retry all, worker processes them, project manager gets 403), AC-OPS-09 (real 500 ends "(ref" plus the response's own trace id), AC-OPS-19 (3, cleared, 99+, landing title kept), AC-OPS-21 (density saved to the account, second browser follows, stored Compact wins). Dead letters are marked in the database and the 500 comes from a temporary trigger the file removes; synthetic records only.
+- Review fix: the file ran `psql` only through `docker exec pm-tool-db-1`, which does not exist in the CI web job. It now uses a host `psql -h 127.0.0.1 -p 55432 -U hub` when one is on PATH, else `docker exec` into `TUESDAY_PG_CONTAINER` (default `pm-tool-db-1`). Builder ran the harness on the docker path, with a psql shim, and with real libpq psql and a nonexistent container name. It has not run on a GitHub runner: UNRUN.
+- `tools/local_restore_drill.py` rehearses the application half of the AC-OPS-04 drill on this Mac (marker before and after a dump, two restores, Healthy, Operations, markers, search by key, export, source unchanged) and `docs/runbooks/restore.md` says a drill API with jobs off can show `DigestLate` and `NightlyMissed`. This is not the homedev drill: AC-OPS-04 stays HUMAN.
+- `tools.test_served_assets` gains the AC-OPS-01 landing-asset test. `FoundationsTests.Threshold_change_is_logged_with_old_and_new_values` now picks the newest row by id, because other tests move the shared test clock (test-only).
+
+Rerun on the merged tree (2026-10-26): `dotnet build Hub.slnx` 0 errors; `FoundationsTests` 18/18; `python3 -m unittest tools.test_served_assets` 4 passed; `node web/scripts/run-smoke-live.mjs` on spare ports PASS (smoke, two-browser live flow, saved-view reopen, planning-reporting, interaction, task-pickup, organisation and operations, with every AC-OPS result printed) using the chromium_headless_shell-1248 build; `node web/scripts/run-smoke-live.test.mjs` PASS; `npm run build` and `npm run lint` (existing warnings only); `python3 tools/local_restore_drill.py` on ports 18731 to 18733: drill A and drill B PASS, loss window 2.2 s, restore to Healthy 4.1 s, only `DigestLate` on the Operations page, source database unchanged (this Mac's timings, not a recovery-time claim); `python3 tools/trace_spec.py --check` and `python3 tools/build_spec.py --check` clean.
+
+Integration fix, not part of the slice: the real-API route sweep in `web/tests/smoke-live.cjs` already failed on `e5b14d14` with "route manifest missing admin/review", because 051-S09 added the `admin/review` route without listing it or enabling `flag.admin_review` for the sweep. Both were added (test-only, own commit).
+
+Open items: `python3 tools/ratchet.py` exits 1 on `direct_invalidate_queries` (67 against a baseline of 66), a `web/src` count that this merge does not touch and that fails the same way on `e5b14d14`; baselines were not changed. The GitHub web-job run is UNRUN (assumes the runner image has `psql` on PATH; if not, install `postgresql-client` in that job). The port 55432 is hardcoded in the helper, as in the harness's own connection strings. No 044 decision (D1 to D11) was relied on. AC-OPS-03, 04 and 05 stay HUMAN. Nothing is hosted-checked, human-checked or Accepted.
 
 ## Build 044-S06
 

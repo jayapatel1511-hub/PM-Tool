@@ -9105,42 +9105,6 @@
     "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.type": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.properties.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.properties.items.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.properties.items.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.properties.items.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.properties.items.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.properties.person": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.properties.person.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem.type": [
-      "string"
-    ],
     "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean": [
       "object"
     ],
@@ -9847,54 +9811,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndint.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.displayName": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.displayName.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.displayName.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.email": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.email.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.email.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.isActive": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.properties.isActive.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndbooleanAndstring.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstring": [
@@ -23175,6 +23091,81 @@
     "$.components.schemas.OpenRoleRow.type": [
       "string"
     ],
+    "$.components.schemas.OpenWorkPerson": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkPerson.properties": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkPerson.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkPerson.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkPerson.properties.email": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkPerson.properties.email.type": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkPerson.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkPerson.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkPerson.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkPerson.properties.isActive": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkPerson.properties.isActive.type": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkPerson.required": [
+      "array"
+    ],
+    "$.components.schemas.OpenWorkPerson.required[]": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkPerson.type": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkView": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkView.properties": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkView.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkView.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkView.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkView.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkView.properties.person": [
+      "object"
+    ],
+    "$.components.schemas.OpenWorkView.properties.person.$ref": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkView.required": [
+      "array"
+    ],
+    "$.components.schemas.OpenWorkView.required[]": [
+      "string"
+    ],
+    "$.components.schemas.OpenWorkView.type": [
+      "string"
+    ],
     "$.components.schemas.OpsProblem": [
       "object"
     ],
@@ -26353,6 +26344,72 @@
       "string"
     ],
     "$.components.schemas.ReassignReassignBody.type": [
+      "string"
+    ],
+    "$.components.schemas.ReassignResult": [
+      "object"
+    ],
+    "$.components.schemas.ReassignResult.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReassignResult.properties.reassigned": [
+      "object"
+    ],
+    "$.components.schemas.ReassignResult.properties.reassigned.format": [
+      "string"
+    ],
+    "$.components.schemas.ReassignResult.properties.reassigned.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReassignResult.properties.reassigned.type": [
+      "string"
+    ],
+    "$.components.schemas.ReassignResult.properties.skipped": [
+      "object"
+    ],
+    "$.components.schemas.ReassignResult.properties.skipped.items": [
+      "object"
+    ],
+    "$.components.schemas.ReassignResult.properties.skipped.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReassignResult.properties.skipped.type": [
+      "string"
+    ],
+    "$.components.schemas.ReassignResult.required": [
+      "array"
+    ],
+    "$.components.schemas.ReassignResult.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReassignResult.type": [
+      "string"
+    ],
+    "$.components.schemas.ReassignSkip": [
+      "object"
+    ],
+    "$.components.schemas.ReassignSkip.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReassignSkip.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ReassignSkip.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ReassignSkip.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.ReassignSkip.properties.reason.type": [
+      "string"
+    ],
+    "$.components.schemas.ReassignSkip.required": [
+      "array"
+    ],
+    "$.components.schemas.ReassignSkip.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReassignSkip.type": [
       "string"
     ],
     "$.components.schemas.RebaselineBody": [
@@ -36505,6 +36562,51 @@
       "array"
     ],
     "$.paths./api/v1/admin/review/checks/{key}.get.tags[]": [
+      "string"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export": [
+      "object"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get": [
+      "object"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.parameters": [
+      "array"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.parameters[]": [
+      "object"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.parameters[].in": [
+      "string"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.parameters[].name": [
+      "string"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.parameters[].required": [
+      "boolean"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.parameters[].schema": [
+      "object"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.parameters[].schema.format": [
+      "string"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.parameters[].schema.type": [
+      "string"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.responses": [
+      "object"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.responses.200": [
+      "object"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.responses.200.description": [
+      "string"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.tags": [
+      "array"
+    ],
+    "$.paths./api/v1/admin/review/{id}/export.get.tags[]": [
       "string"
     ],
     "$.paths./api/v1/admin/settings": [
@@ -57308,6 +57410,18 @@
     ],
     "$.paths./api/v1/users/{id}/reassign.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/users/{id}/reassign.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/users/{id}/reassign.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/users/{id}/reassign.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/users/{id}/reassign.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/users/{id}/reassign.post.responses.200.description": [
       "string"

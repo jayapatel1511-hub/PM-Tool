@@ -1,6 +1,7 @@
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -107,6 +108,12 @@ public static class ReassignEndpoints
     public sealed record ReassignBody(ItemRef[] Items, Guid ToUserId);
 
     public sealed record OpenItem(string Kind, Guid Id, string? Key, string Name, string? Status, DateOnly? DueDate, Guid ProjectId, string ProjectNumber, string ProjectName);
+    public sealed record OpenWorkPerson(Guid Id, string DisplayName, bool IsActive, string Email);
+    /// One person's open work as the Reassign work page lists it.
+    public sealed record OpenWorkView(OpenWorkPerson Person, List<OpenItem> Items);
+    /// A selected item left where it was, with the reason (for example R-02, no self-review).
+    public sealed record ReassignSkip(string Key, string Reason);
+    public sealed record ReassignResult(int Reassigned, List<ReassignSkip> Skipped);
 
     public const string TaskAssignee = "TaskAssignee", TaskReviewer = "TaskReviewer", DeliverableOwner = "DeliverableOwner",
         DeliverableReviewer = "DeliverableReviewer", DecisionOwner = "DecisionOwner", DisciplineLead = "DisciplineLead";
@@ -116,7 +123,7 @@ public static class ReassignEndpoints
         api.MapGet("/users/{id:guid}/open-work", async (Guid id, Access access, HubDb db) =>
         {
             var person = await Person(db, access, id);
-            return new { Person = new { person.Id, person.DisplayName, person.IsActive, person.Email }, Items = await OpenWork(db, access, id) };
+            return TypedResults.Ok(new OpenWorkView(new(person.Id, person.DisplayName, person.IsActive, person.Email), await OpenWork(db, access, id)));
         });
         api.MapPost("/users/{id:guid}/reassign", Reassign);
     }
@@ -160,7 +167,7 @@ public static class ReassignEndpoints
         ];
     }
 
-    static async Task<IResult> Reassign(Guid id, ReassignBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<ReassignResult>> Reassign(Guid id, ReassignBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, TimeProvider clock)
     {
         var person = await Person(db, access, id);
         Check.That(body.ToUserId != id, "toUserId", "reassign.same_person");
@@ -171,7 +178,7 @@ public static class ReassignEndpoints
         var chosen = open.Where(o => wanted.Contains((o.Kind, o.Id))).ToList();
         Check.That(chosen.Count == wanted.Count, "items", "reassign.not_open");
         var actor = await notify.ActorName();
-        var skipped = new List<object>();
+        var skipped = new List<ReassignSkip>();
         var perProject = new Dictionary<Guid, int>();
         var projects = new Dictionary<Guid, Project>();
         async Task<Project> P(Guid pid) => projects.TryGetValue(pid, out var p) ? p : projects[pid] = await db.Projects.FirstAsync(x => x.Id == pid);
@@ -187,7 +194,7 @@ public static class ReassignEndpoints
                     {
                         var t = await db.Tasks.FirstAsync(x => x.Id == itemId);
                         var other = kind == TaskAssignee ? t.ReviewerId : t.AssigneeId;
-                        if (other == to.Id && !s.AllowSelfReview) { skipped.Add(new { t.Key, Reason = Text.Get("task.self_review") }); continue; } // R-02
+                        if (other == to.Id && !s.AllowSelfReview) { skipped.Add(new(t.Key, Text.Get("task.self_review"))); continue; } // R-02
                         if (kind == TaskAssignee) t.AssigneeId = to.Id; else t.ReviewerId = to.Id;
                         await team.EnsureMember(p, to.Id, kind == TaskAssignee ? ProjectRole.TeamMember : ProjectRole.Reviewer);
                         await notify.Send(kind == TaskAssignee ? NotificationEvents.TaskAssigned : NotificationEvents.ReviewerSet, to.Id, TaskEndpoints.Item(p, t),
@@ -228,6 +235,6 @@ public static class ReassignEndpoints
             await db.SaveChangesAsync();
             return 0;
         });
-        return Results.Ok(new { Reassigned = chosen.Count - skipped.Count, Skipped = skipped });
+        return TypedResults.Ok(new ReassignResult(chosen.Count - skipped.Count, skipped));
     }
 }

@@ -17,8 +17,8 @@
       "value": 66
     },
     "html_tables": {
-      "ratchet": false,
-      "value": 51
+      "ratchet": true,
+      "value": 61
     },
     "load_percentage_literals": {
       "ratchet": true,

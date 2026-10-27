@@ -2,16 +2,16 @@ import { UrlSearchInput } from '@/components/hub/url-search'
 import { ViewMenu } from '@/components/hub/views'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListPlus, Lock, OctagonAlert, Plus, ShieldAlert, Trash2 } from 'lucide-react'
-import { useId, useState, type ReactElement, type ReactNode } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Section, Spinner, TableRegion, selectCls } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Section, Spinner, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
 import { Chip, Key, StatusPill } from '@/components/hub/pills'
-import { useTable, type Column } from '@/components/hub/table'
+import { useTable } from '@/components/hub/table'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -24,7 +24,7 @@ import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import type { ProjectDiscipline } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { DateText, FieldGroup, GroupRow, PanelHead, Person, RegisterCards, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
+import { DataTable, DateText, FieldGroup, PanelHead, Person, TITLE_LINK } from '@/components/hub/registers'
 import { ItemPicker, type Pick } from './Decisions'
 import { ActionForm } from './Meetings'
 import { useCurrentProject } from './ProjectLayout'
@@ -157,33 +157,6 @@ function owners(rows: { ownerId: string; ownerName?: string | null }[] | undefin
   return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]))
 }
 
-function RegisterTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption }: {
-  table: { visible: Column<T>[]; header: (c: Column<T>) => ReactElement; cell: (c: Column<T>, r: T) => ReactNode }; rows: T[]; loading: boolean; empty: ReactNode
-  current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string
-}) {
-  if (loading) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
-  if (!rows.length) return <div className="rounded-lg border bg-card">{empty}</div>
-  const groups: { label: string; items: T[] }[] = []
-  for (const row of rows) {
-    const label = groupBy?.(row) ?? ''
-    if (groups.at(-1)?.label !== label) groups.push({ label, items: [] })
-    groups.at(-1)!.items.push(row)
-  }
-  return (<>
-    <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} />
-    <TableRegion className="hidden md:block">
-      <table className="w-full text-sm">
-        <caption className="sr-only">{caption}</caption>
-        <thead className="bg-muted text-left text-muted-foreground"><tr>{table.visible.map((c) => table.header(c))}</tr></thead>
-        {groups.map((group, index) => <tbody key={`${index}-${group.label}`}>
-          {groupBy && <GroupRow span={table.visible.length} label={group.label} count={group.items.length} />}
-          {group.items.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted', current(r) && SELECTED_ROW)}>{table.visible.map((c) => table.cell(c, r))}</tr>)}
-        </tbody>)}
-      </table>
-    </TableRegion>
-  </>)
-}
-
 export function RisksTab() {
   const p = useCurrentProject()
   const f = useFilters()
@@ -218,7 +191,7 @@ export function RisksTab() {
       {!can.ok && can.reason && <Notice icon={Lock} title={can.reason} />}
       <RegisterFilters f={f} statuses={RISK_STATUSES} open="Open,Monitoring" indicator={['reviewOverdue', 'risk.reviewOverdue']} owners={owners(q.data)} disciplines={p.disciplines} />
       {q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : (
-        <RegisterTable table={table} rows={table.sorted} loading={q.isPending} caption={t('ptab.risks')} current={(r) => panel === `Risk:${r.id}`}
+        <DataTable table={table} rows={table.sorted} loading={q.isPending} caption={t('ptab.risks')} current={(r) => panel === `Risk:${r.id}`}
           empty={f.active
             ? <Empty title={t('register.noMatch')} action={<Button variant="outline" onClick={f.clear}>{t('filters.clear')}</Button>}>{t('register.noMatchHint')}</Empty>
             : <Empty title={t('risk.empty')} action={can.ok && <Button variant="outline" onClick={() => setRaising(true)}><Plus className="size-4" />{t('risk.new')}</Button>}>{t('risk.emptyHint')}</Empty>} />
@@ -371,7 +344,7 @@ export function IssuesTab() {
             </div>
           </div>} />
       {q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : (
-        <RegisterTable table={table} rows={displayRows} loading={q.isPending} groupBy={groupBy} caption={t('ptab.issues')} current={(r) => panel === `Issue:${r.id}`}
+        <DataTable table={table} rows={displayRows} loading={q.isPending} groupBy={groupBy} caption={t('ptab.issues')} current={(r) => panel === `Issue:${r.id}`}
           empty={f.active || sourceFilterActive
             ? <Empty title={t('register.noMatch')} action={<Button variant="outline" onClick={clearFilters}>{t('filters.clear')}</Button>}>{t('register.noMatchHint')}</Empty>
             : <Empty title={t('issue.empty')} action={can.ok && <Button variant="outline" onClick={() => setRaising(true)}><Plus className="size-4" />{t('issue.new')}</Button>}>{t('issue.emptyHint')}</Empty>} />

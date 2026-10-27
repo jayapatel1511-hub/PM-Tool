@@ -64,6 +64,23 @@ class SourceChecks(unittest.TestCase):
             code, _ = RatchetTests().run_main(baseline, {name: values[name] for name in baseline['counters']})
             self.assertEqual(1, code)
 
+    def test_raw_table_counter_fails_a_fixture_that_adds_a_table(self):
+        # FR-REC-15, AC-REC-15: the DataTable PR switches the counter to failing; the shared primitive stays exempt.
+        self.assertTrue(json.loads(ratchet.BASELINE.read_text())['counters']['html_tables']['ratchet'])
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            shared = root / 'web/src/components/ui/table.tsx'
+            page = root / 'web/src/pages/Demo.tsx'
+            shared.parent.mkdir(parents=True)
+            page.parent.mkdir(parents=True)
+            shared.write_text('<table className="w-full">')
+            with patch.object(ratchet, 'ROOT', root): self.assertEqual(0, ratchet.count_sources()['html_tables'])
+            page.write_text('<table className="w-full">')
+            with patch.object(ratchet, 'ROOT', root): added = ratchet.count_sources()['html_tables']
+        self.assertEqual(1, added)
+        self.assertEqual(1, RatchetTests().run_main({'counters': {'html_tables': {'value': 0, 'ratchet': True}}}, {'html_tables': added})[0])
+        self.assertEqual(0, RatchetTests().run_main({'counters': {'html_tables': {'value': 1, 'ratchet': True}}}, {'html_tables': added})[0])
+
 
 if __name__ == "__main__":
     unittest.main()

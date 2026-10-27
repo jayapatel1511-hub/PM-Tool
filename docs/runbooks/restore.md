@@ -108,6 +108,7 @@ operators can reach. Never restore production data into development (§21, FR-00
 
 For a local rehearsal of the same steps without Azure, `pg_dump`/`pg_restore` in the development container shows the
 application side (a restored database starts, migrates as a no-op and answers).
+`python3 tools/local_restore_drill.py` runs that rehearsal end to end on a Mac against the local PostgreSQL container (marker before and after a dump, two restores, Healthy, Operations, markers, search by key, export, source unchanged). It is not the homedev drill.
 
 ## Drill record
 
@@ -147,5 +148,5 @@ image on a **new isolated drill database**, loopback only, with `Seed__ReviewDem
 `Seed__DevUsers=false`, `Jobs__Enabled=false`, `Evaluation__Worker=false`, `Db__Migrate=false`; then run
 Healthy, Operations, marker inclusion/exclusion, known task key search and export checks. Never attach the
 live database volume to a drill API. Record the measured loss window and retrieval-to-Healthy duration in
-the drill table, remove only labelled drill resources, and retain the source snapshot. This application
+the drill table, remove only labelled drill resources, and retain the source snapshot. A drill API runs with jobs off, so its Operations page can show `DigestLate` (after 08:00 on a digest day) and `NightlyMissed` (a restored copy older than 26 hours); the local rehearsal showed `DigestLate`. Those two are expected there and do not fail the check; any other problem does. This application
 phase and host-loss recovery targets are UNPROVEN; daily dump frequency does not meet the 15-minute RPO.

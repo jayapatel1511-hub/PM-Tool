@@ -4,6 +4,10 @@ from pathlib import Path
 import unittest
 from tools.check_served_assets import violations
 
+ROOT = Path(__file__).resolve().parents[1]
+METADATA = ['capture.json', 'README.md', 'fonts/sources.json']
+KEPT = ['board.svg', 'tuesday-board.jpg', 'THIRD-PARTY-NOTICES.txt', 'fonts/dmsans-OFL.txt', 'fonts/dm-sans-normal-1.woff2']
+
 
 class ServedAssetsTests(unittest.TestCase):
     def test_clean_assets_pass_and_vite_manifest_is_skipped(self):
@@ -27,6 +31,17 @@ class ServedAssetsTests(unittest.TestCase):
 
     def test_missing_build_fails(self):
         self.assertIn('missing', violations('/nonexistent/tuesday-build')[0])
+
+    def test_landing_assets_stay_served_and_the_metadata_moved_to_docs(self):
+        """AC-OPS-01: images, fonts and licence notices stay in the source folder and in a built output when one exists; the three files do not."""
+        roots = [ROOT / 'web/public/landing'] + ([ROOT / 'src/Hub.Api/wwwroot/landing'] if (ROOT / 'src/Hub.Api/wwwroot/landing').is_dir() else [])
+        for root in roots:
+            for name in KEPT:
+                self.assertTrue((root / name).is_file(), f'{root}/{name} must stay served')
+            for name in METADATA:
+                self.assertFalse((root / name).exists(), f'{root}/{name} must not be served')
+        for name in METADATA:
+            self.assertTrue((ROOT / 'docs/landing-assets' / name).is_file(), f'docs/landing-assets/{name} missing')
 
 
 if __name__ == '__main__':

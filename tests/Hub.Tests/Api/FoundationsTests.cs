@@ -59,7 +59,7 @@ public sealed class FoundationsTests(HubFactory f)
     public async Task Threshold_change_is_logged_with_old_and_new_values() // US2 scenario 3
     {
         (await f.As(Admin).Put("/api/v1/admin/settings/review_stale_days", new { value = 6 })).EnsureSuccessStatusCode();
-        var row = await f.DbAsync(db => db.ActivityLog.Where(a => a.ItemKey == "review_stale_days").OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).FirstAsync());
+        var row = await f.DbAsync(db => db.ActivityLog.Where(a => a.ItemKey == "review_stale_days").OrderByDescending(a => a.Id).FirstAsync()); // ids are time-ordered; the shared test clock may have been moved by earlier tests
         Assert.Contains("\"old\": 5", row.Changes);
         Assert.Contains("\"new\": 6", row.Changes);
         Assert.Equal("Admin", row.ActorType);

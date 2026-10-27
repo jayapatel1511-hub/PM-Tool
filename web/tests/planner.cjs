@@ -2,6 +2,7 @@ const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
 const { spawn } = require('child_process')
 const path = require('path')
+const { weekPreview, weekApplied } = require('./week-planning.fixture.cjs')
 
 const port = process.env.PORT ?? '5194'
 const base = `http://127.0.0.1:${port}`
@@ -55,8 +56,8 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
       else if (p === 'planning/hr-identities') data = [{ id: alex, displayName: 'Alex Engineer', hrSourceSystem: 'Synthetic HR', hrPersonKey: 'employee-1', rowVersion: 1 }]
       else if (p === 'planning/leave/import-preview') data = { previewId: id(81), rows: [{ sourceSystem: 'Synthetic HR', externalId: 'leave-1', personId: alex, fromDate: '2026-10-12', throughDate: '2026-10-12', hoursPerDay: null, status: 'Approved' }], errors: [], canApply: true, creates: 1, updates: 0, cancellations: 0, unchanged: 0, manualMatches: 0, affectedWeeks: [{ personId: alex, fromWeek: '2026-10-12', throughWeek: '2026-10-12' }] }
       else if (p === 'planning/leave/import') data = { applied: 1, unchanged: 0 }
-      else if (p === 'planning/week-preview') data = { snapshot: 'synthetic-snapshot', entries: [{ id: entryId, rowVersion: 4, personName: 'Alex Engineer', label: 'Synthetic weekly allocation', hoursPerWeek: 8, confidence: 'Possible', warnings: ['ProvisionalCapacity'] }] }
-      else if (p === 'planning/week-apply') { if (bulkConflict) { bulkConflict = false; status = 409; data = { detail: 'Weekly snapshot changed', code: 'concurrency_conflict' } } else data = { count: 1 } }
+      else if (p === 'planning/week-preview') data = weekPreview({ operation: u.searchParams.get('operation') ?? 'Copy', week: u.searchParams.get('week') ?? weeks[0], entryId, personId: alex })
+      else if (p === 'planning/week-apply') { if (bulkConflict) { bulkConflict = false; status = 409; data = { detail: 'Weekly snapshot changed', code: 'concurrency_conflict' } } else data = weekApplied({ week: b.week ?? weeks[0], entryId, personId: alex }) }
       else if (p === 'calendar') data = { entries: [], timeZone: 'America/Halifax' }
       else if (p === 'me/calendar-subscription') { if (req.method() === 'POST') { subscriptionEnabled = true; data = { url: 'https://example.test/synthetic-calendar', rowVersion: 2 } } else if (req.method() === 'DELETE') { subscriptionEnabled = false; data = {} } else data = { enabled: subscriptionEnabled, rowVersion: subscriptionEnabled ? 2 : 0 } }
       else if (p.startsWith('planning/grid')) { if (denyGrid) { status = 403; data = { detail: 'You cannot open the workload view' } } else if (failGrid) { status = 500; data = { detail: 'Planner unavailable' } } else {

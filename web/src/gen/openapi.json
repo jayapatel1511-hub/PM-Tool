@@ -2483,6 +2483,29 @@
         ],
         "type": "object"
       },
+      "AppliedEntry": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "personId",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
       "AssessmentBody": {
         "properties": {
           "action": {
@@ -14714,6 +14737,58 @@
         ],
         "type": "object"
       },
+      "WeekApplied": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AppliedEntry"
+            },
+            "type": "array"
+          },
+          "week": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "count",
+          "items",
+          "week"
+        ],
+        "type": "object"
+      },
+      "WeekPreview": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/WeeklyPlanningCandidate"
+            },
+            "type": "array"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "snapshot": {
+            "type": "string"
+          },
+          "week": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation",
+          "week",
+          "snapshot",
+          "entries"
+        ],
+        "type": "object"
+      },
       "WeeklyCommitmentsMoveBody": {
         "properties": {
           "evidenceUrl": {
@@ -14820,6 +14895,58 @@
           "week",
           "snapshot",
           "entries"
+        ],
+        "type": "object"
+      },
+      "WeeklyPlanningCandidate": {
+        "properties": {
+          "confidence": {
+            "type": "string"
+          },
+          "hoursPerWeek": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "personName": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "visibility": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "personId",
+          "personName",
+          "label",
+          "hoursPerWeek",
+          "confidence",
+          "visibility",
+          "warnings"
         ],
         "type": "object"
       },
@@ -21397,6 +21524,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeekApplied"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -21430,7 +21564,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/WeekPreview"
+                }
               }
             },
             "description": "OK"

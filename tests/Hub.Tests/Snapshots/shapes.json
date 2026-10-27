@@ -12289,6 +12289,51 @@
     "$.components.schemas.ApplicabilityBody.type": [
       "string"
     ],
+    "$.components.schemas.AppliedEntry": [
+      "object"
+    ],
+    "$.components.schemas.AppliedEntry.properties": [
+      "object"
+    ],
+    "$.components.schemas.AppliedEntry.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.AppliedEntry.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.AppliedEntry.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.AppliedEntry.properties.personId": [
+      "object"
+    ],
+    "$.components.schemas.AppliedEntry.properties.personId.format": [
+      "string"
+    ],
+    "$.components.schemas.AppliedEntry.properties.personId.type": [
+      "string"
+    ],
+    "$.components.schemas.AppliedEntry.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.AppliedEntry.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.AppliedEntry.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AppliedEntry.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.AppliedEntry.required": [
+      "array"
+    ],
+    "$.components.schemas.AppliedEntry.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AppliedEntry.type": [
+      "string"
+    ],
     "$.components.schemas.AssessmentBody": [
       "object"
     ],
@@ -33163,6 +33208,102 @@
     "$.components.schemas.VisibilityBody.type": [
       "string"
     ],
+    "$.components.schemas.WeekApplied": [
+      "object"
+    ],
+    "$.components.schemas.WeekApplied.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeekApplied.properties.count": [
+      "object"
+    ],
+    "$.components.schemas.WeekApplied.properties.count.format": [
+      "string"
+    ],
+    "$.components.schemas.WeekApplied.properties.count.pattern": [
+      "string"
+    ],
+    "$.components.schemas.WeekApplied.properties.count.type": [
+      "string"
+    ],
+    "$.components.schemas.WeekApplied.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.WeekApplied.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.WeekApplied.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeekApplied.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.WeekApplied.properties.week": [
+      "object"
+    ],
+    "$.components.schemas.WeekApplied.properties.week.format": [
+      "string"
+    ],
+    "$.components.schemas.WeekApplied.properties.week.type": [
+      "string"
+    ],
+    "$.components.schemas.WeekApplied.required": [
+      "array"
+    ],
+    "$.components.schemas.WeekApplied.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeekApplied.type": [
+      "string"
+    ],
+    "$.components.schemas.WeekPreview": [
+      "object"
+    ],
+    "$.components.schemas.WeekPreview.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeekPreview.properties.entries": [
+      "object"
+    ],
+    "$.components.schemas.WeekPreview.properties.entries.items": [
+      "object"
+    ],
+    "$.components.schemas.WeekPreview.properties.entries.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeekPreview.properties.entries.type": [
+      "string"
+    ],
+    "$.components.schemas.WeekPreview.properties.operation": [
+      "object"
+    ],
+    "$.components.schemas.WeekPreview.properties.operation.type": [
+      "string"
+    ],
+    "$.components.schemas.WeekPreview.properties.snapshot": [
+      "object"
+    ],
+    "$.components.schemas.WeekPreview.properties.snapshot.type": [
+      "string"
+    ],
+    "$.components.schemas.WeekPreview.properties.week": [
+      "object"
+    ],
+    "$.components.schemas.WeekPreview.properties.week.format": [
+      "string"
+    ],
+    "$.components.schemas.WeekPreview.properties.week.type": [
+      "string"
+    ],
+    "$.components.schemas.WeekPreview.required": [
+      "array"
+    ],
+    "$.components.schemas.WeekPreview.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeekPreview.type": [
+      "string"
+    ],
     "$.components.schemas.WeeklyCommitmentsMoveBody": [
       "object"
     ],
@@ -33353,6 +33494,99 @@
       "string"
     ],
     "$.components.schemas.WeeklyPlanningBulkBody.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.confidence": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.confidence.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.hoursPerWeek": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.hoursPerWeek.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.hoursPerWeek.pattern": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.hoursPerWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.label": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.label.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.personId": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.personId.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.personId.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.personName": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.personName.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.visibility": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.visibility.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.warnings": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.warnings.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.warnings.items.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.properties.warnings.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyPlanningCandidate.type": [
       "string"
     ],
     "$.components.schemas.Widget": [
@@ -43444,6 +43678,18 @@
     "$.paths./api/v1/planning/week-apply.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/planning/week-apply.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/week-apply.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/week-apply.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/week-apply.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/planning/week-apply.post.responses.200.description": [
       "string"
     ],
@@ -43497,6 +43743,9 @@
     ],
     "$.paths./api/v1/planning/week-preview.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/planning/week-preview.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/planning/week-preview.get.responses.200.description": [
       "string"

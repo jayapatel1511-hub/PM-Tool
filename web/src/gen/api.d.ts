@@ -6685,7 +6685,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["WeekApplied"];
+                    };
                 };
             };
         };
@@ -6720,7 +6722,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["WeekPreview"];
                     };
                 };
             };
@@ -16563,6 +16565,14 @@ export interface components {
             /** Format: uuid */
             requestId: string;
         };
+        AppliedEntry: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            personId: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
         AssessmentBody: {
             action: string;
             /** Format: uuid */
@@ -19701,6 +19711,20 @@ export interface components {
             rowVersion: number;
             visibility: string;
         };
+        WeekApplied: {
+            /** Format: int32 */
+            count: number;
+            items: components["schemas"]["AppliedEntry"][];
+            /** Format: date */
+            week: string;
+        };
+        WeekPreview: {
+            entries: components["schemas"]["WeeklyPlanningCandidate"][];
+            operation: string;
+            snapshot: string;
+            /** Format: date */
+            week: string;
+        };
         WeeklyCommitmentsMoveBody: {
             evidenceUrl: null | string;
             /** Format: uuid */
@@ -19731,6 +19755,21 @@ export interface components {
             snapshot: string;
             /** Format: date */
             week: string;
+        };
+        WeeklyPlanningCandidate: {
+            confidence: string;
+            /** Format: double */
+            hoursPerWeek: number;
+            /** Format: uuid */
+            id: string;
+            label: string;
+            /** Format: uuid */
+            personId: string;
+            personName: string;
+            /** Format: int32 */
+            rowVersion: number;
+            visibility: string;
+            warnings: string[];
         };
         Widget: {
             hidden: boolean;

@@ -16,6 +16,7 @@ import { UrlSearchInput } from '@/components/hub/url-search'
 import { useFlag, useMe } from '@/lib/auth'
 import { addDays, fmtDate, shortDate, today } from '@/lib/format'
 import { ApiError, api, get, qs } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { runtimeText, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { ContributionList } from '@/components/planner/ContributionList'
@@ -62,7 +63,7 @@ function Planner() {
   const groupBy = (GROUP_BY as readonly string[]).includes(sp.get('groupBy') ?? '') || (org.enabled && sp.get('groupBy') === 'homeUnit') ? sp.get('groupBy')! : 'supervisor'
   const clear = () => { const n = new URLSearchParams(sp); activeTokens.forEach((x) => n.delete(x.key)); setSp(n, { replace: true }) }
   const changeWeek = (days: number) => set('from', addDays(data?.weeks[0] ?? today(), days))
-  const refresh = () => { qc.invalidateQueries({ queryKey: ['planning-grid'] }); qc.invalidateQueries({ queryKey: ['planning-entries'] }) }
+  const refresh = () => { void invalidateChange(qc, 'PlanningEntry') }
   const keepIds = (ids: (string | undefined)[]) => { if (keptOn && view !== 'list' && activeTokens.length > 0) setKeepState((k) => ({ key: filterKey, ids: [...new Set([...(k.key === filterKey ? k.ids : []), ...ids.filter((x): x is string => !!x)])].slice(-50) })) }
   const quickAdd = async (personId: string, week: string, text: string, idempotencyKey: string) => { try { const created = await api<{ id?: string }>('planning/entries/quick', { method: 'POST', idempotencyKey, body: { personId, week, text } }); keepIds([created?.id, personId]); toast.success(t('planner.quickAdded')); setAnnouncement(t('planner.quickAdded')); refresh() } catch (error) { setAnnouncement(t('planner.saveFailed')); throw error } }
   const openEntry = (e: PlannerEntry) => { setEntry(e); const n = new URLSearchParams(sp); n.set('entry', e.id); setSp(n, { replace: true }) }

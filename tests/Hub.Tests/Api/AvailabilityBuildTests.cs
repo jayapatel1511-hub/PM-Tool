@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Features;
@@ -154,6 +155,23 @@ public sealed class AvailabilityBuildTests(HubFactory f)
         await (await c.Post("/api/v1/planning/week-apply", body)).Json(); Assert.Equal("Published", f.Db(db => db.PlanningEntries.Single(e => e.Id == id).Visibility));
         Assert.Equal(1, f.Db(db => db.Notifications.Count(n => n.UserId == p.Id && n.ItemId == id)));
         Assert.Equal(HttpStatusCode.Conflict, (await c.Post("/api/v1/planning/week-apply", body)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Week_preview_and_apply_keep_their_property_names_order_and_types() // the typed records must serialise to the bytes the dialog already reads
+    {
+        var p = await Person(); var c = f.As(TestData.Sam);
+        var draft = await (await c.Post("/api/v1/planning/entries", new { personId = p.Id, hoursPerWeek = 8, startWeek = W, endWeek = W, label = "Synthetic names", sourceCategory = "Proposal", confidence = "Possible" })).Json(201);
+        var next = W.AddDays(7); var preview = await (await c.GetAsync($"/api/v1/planning/week-preview?operation=Copy&week={next:yyyy-MM-dd}")).Json();
+        Assert.Equal(["operation", "week", "snapshot", "entries"], preview.AsObject().Select(x => x.Key));
+        Assert.Equal("Copy", preview.S("operation")); Assert.Equal($"{next:yyyy-MM-dd}", preview.S("week"));
+        var candidate = preview["entries"]!.AsArray().Single(e => e!.G("id") == draft.G("id"))!;
+        Assert.Equal(["id", "rowVersion", "personId", "personName", "label", "hoursPerWeek", "confidence", "visibility", "warnings"], candidate.AsObject().Select(x => x.Key));
+        Assert.Equal(JsonValueKind.Array, candidate["warnings"]!.GetValueKind());
+        var applied = await (await c.Post("/api/v1/planning/week-apply", new { operation = "Copy", week = next, snapshot = preview["snapshot"], entries = new[] { new { id = candidate.G("id"), rowVersion = candidate.I("rowVersion") } } })).Json();
+        Assert.Equal(["count", "items", "week"], applied.AsObject().Select(x => x.Key));
+        Assert.Equal(1, applied["count"]!.GetValue<int>()); Assert.Equal($"{next:yyyy-MM-dd}", applied.S("week"));
+        Assert.Equal(["id", "personId", "rowVersion"], applied["items"]![0]!.AsObject().Select(x => x.Key));
     }
 
     [Fact]

@@ -3,14 +3,12 @@ import { useRef, useState } from 'react'
 import { ErrorBanner, Loading, Spinner } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { ApiError, api, get, qs } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { t, runtimeText } from '@/lib/i18n'
 import { confidenceLabel, hoursLabel } from './labels'
 
-type Candidate = { id: string; rowVersion: number; personName: string; label: string; hoursPerWeek: number; confidence: string; warnings: string[] }
-type Preview = { snapshot: string; entries: Candidate[] }
 export function BulkWeekDialog({ operation, week, onClose, onChanged }: { operation: 'Copy' | 'Publish'; week: string; onClose: () => void; onChanged: () => void }) {
-  const q = useQuery({ queryKey: ['week-preview', operation, week], queryFn: () => get<Preview>(`planning/week-preview${qs({ operation, week })}`) })
+  const q = useQuery({ queryKey: ['week-preview', operation, week], queryFn: () => typedRequest('get', '/api/v1/planning/week-preview', { query: { operation, week } }) })
   const [selected, setSelected] = useState<Set<string>>(new Set()); const [busy, setBusy] = useState(false); const [stale, setStale] = useState(false); const [error, setError] = useState<unknown>(null)
   const receipt = useRef({ signature: '', key: '' })
   const reload = async () => { const next = await q.refetch(); if (!next.error) { setStale(false); setError(null); setSelected(new Set()); receipt.current = { signature: '', key: '' } } }
@@ -19,7 +17,7 @@ export function BulkWeekDialog({ operation, week, onClose, onChanged }: { operat
     const body = { operation, week, snapshot: q.data.snapshot, entries: q.data.entries.filter((e) => selected.has(e.id)).map((e) => ({ id: e.id, rowVersion: e.rowVersion })) }
     const signature = JSON.stringify(body); if (receipt.current.signature !== signature) receipt.current = { signature, key: crypto.randomUUID() }
     setBusy(true); setError(null)
-    try { await api('planning/week-apply', { body, idempotencyKey: receipt.current.key }); onChanged(); onClose() }
+    try { await typedRequest('post', '/api/v1/planning/week-apply', { body, idempotencyKey: receipt.current.key }); onChanged(); onClose() }
     catch (e) { setError(e); if (e instanceof ApiError && e.status === 409) setStale(true) }
     finally { setBusy(false) }
   }

@@ -4,6 +4,7 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -13,7 +14,9 @@ public static class WeeklyPlanningEndpoints
     public sealed record Selection(Guid Id, int RowVersion);
     public sealed record BulkBody(string Operation, DateOnly Week, string Snapshot, Selection[] Entries);
     public sealed record Candidate(Guid Id, int RowVersion, Guid PersonId, string PersonName, string Label, decimal HoursPerWeek, string Confidence, string Visibility, string[] Warnings);
-    sealed record PreviewData(string Operation, DateOnly Week, string Snapshot, Candidate[] Entries);
+    public sealed record WeekPreview(string Operation, DateOnly Week, string Snapshot, Candidate[] Entries);
+    public sealed record AppliedEntry(Guid Id, Guid PersonId, int RowVersion);
+    public sealed record WeekApplied(int Count, AppliedEntry[] Items, DateOnly Week);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -27,7 +30,7 @@ public static class WeeklyPlanningEndpoints
         Check.That(week != default && week.DayOfWeek == DayOfWeek.Monday, "week", "planning.week");
     }
 
-    static async Task<PreviewData> Data(string operation, DateOnly week, Access access, HubDb db, SettingsStore store)
+    static async Task<WeekPreview> Data(string operation, DateOnly week, Access access, HubDb db, SettingsStore store)
     {
         Validate(operation, week);
         var source = operation == "Copy" ? week.AddDays(-7) : week;
@@ -57,9 +60,9 @@ public static class WeeklyPlanningEndpoints
     }
 
     internal static string Hash(string text) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text)));
-    static async Task<object> Preview(string operation, DateOnly week, Access access, HubDb db, SettingsStore store) => await Data(operation, week, access, db, store);
+    static async Task<Ok<WeekPreview>> Preview(string operation, DateOnly week, Access access, HubDb db, SettingsStore store) => TypedResults.Ok(await Data(operation, week, access, db, store));
 
-    static async Task<IResult> Apply(BulkBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify)
+    static async Task<Ok<WeekApplied>> Apply(BulkBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify)
     {
         Validate(body.Operation, body.Week);
         Check.That(body.Entries is { Length: > 0 and <= 500 } && body.Entries.Select(e => e.Id).Distinct().Count() == body.Entries.Length, "entries", "error.invalid");
@@ -92,7 +95,7 @@ public static class WeeklyPlanningEndpoints
                     await notify.Send(NotificationEvents.PlanningEntryChanged, [group.Key], new NotifyItem(null, "PlanningEntry", first.Id, null, $"/my-work?myWeek={body.Week:yyyy-MM-dd}", null), Text.Get("planning.week_published", body.Week.ToString("yyyy-MM-dd"), group.Count()));
                 }
             await db.SaveChangesAsync();
-            return Results.Ok(new { Count = changed.Count, Items = changed.Select(e => new { e.Id, e.PersonId, e.RowVersion }), body.Week });
+            return TypedResults.Ok(new WeekApplied(changed.Count, changed.Select(e => new AppliedEntry(e.Id, e.PersonId, e.RowVersion)).ToArray(), body.Week));
         });
     }
 }

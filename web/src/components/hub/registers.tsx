@@ -38,9 +38,11 @@ export function RegisterCards<T extends { id: string }>({ groups, columns, curre
 }
 
 /** The shared register list (§47.7, FR-REC-14): a table from `md` up, cards below it, optional group rows, one selected row. */
-export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption }: {
+export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption, cards = true }: {
   table: { visible: Column<T>[]; header: (c: Column<T>) => ReactElement; cell: (c: Column<T>, r: T) => ReactNode }; rows: T[]; loading: boolean; empty: ReactNode
   current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string
+  /** `false` keeps the table at every width, for a screen that never had phone cards. */
+  cards?: boolean
 }) {
   if (loading) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
   if (!rows.length) return <div className="rounded-lg border bg-card">{empty}</div>
@@ -51,8 +53,8 @@ export function DataTable<T extends { id: string }>({ table, rows, loading, empt
     groups.at(-1)!.items.push(row)
   }
   return (<>
-    <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} />
-    <TableRegion className="hidden md:block">
+    {cards && <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} />}
+    <TableRegion className={cards ? 'hidden md:block' : undefined}>
       <table className="w-full text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead className="bg-muted text-left text-muted-foreground"><tr>{table.visible.map((c) => table.header(c))}</tr></thead>

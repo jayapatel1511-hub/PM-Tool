@@ -3,9 +3,10 @@
 // spike's harness (043-D3 KILL); `web/scripts/run-record-parity.mjs` builds and serves the two commits.
 //   TUESDAY_RECORD_BASE_UI_URL, TUESDAY_RECORD_CANDIDATE_UI_URL, TUESDAY_RECORD_API_URL  local origins
 //   TUESDAY_RECORD_SCREENS  space-separated routes, default the Risks register, the Risk panel, the Issues register (plain and
-//                           grouped, for the shared DataTable's group rows) and the open-roles tab of the Active, Complete
-//                           and empty-role projects. {project}, {complete}, {empty} and
-//                           {restricted} are synthetic project numbers, {risk} the synthetic risk id
+//                           grouped, for the shared DataTable's group rows), the open-roles tab of the Active, Complete
+//                           and empty-role projects, and the workspace Team page scoped to the Active project. {project}, {complete},
+//                           {empty} and {restricted} are synthetic project numbers, {projectId} the Active project's id,
+//                           {risk} the synthetic risk id
 //   TUESDAY_RECORD_FLAGS    flags already merged on those screens: the matrix runs with all off, then all on (§47.6)
 //   TUESDAY_RECORD_PARITY_OUT  report path; screenshots of both builds go beside it (evidence, not a pass condition)
 //   RECORD_PARITY_SELFCHECK=1  diff logic only; RECORD_PARITY_BROWSER_SELFCHECK=1  identical builds pass, a removed
@@ -28,6 +29,7 @@ const runId = process.env.TUESDAY_RECORD_PARITY_RUN ?? crypto.randomUUID()
 const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
   '/projects/{project}/risks', '/projects/{project}/risks?panel=Risk:{risk}', '/projects/{project}/issues', '/projects/{project}/issues?group=owner',
   '/projects/{project}/allocations?tab=roles', '/projects/{complete}/allocations?tab=roles', '/projects/{empty}/allocations?tab=roles',
+  '/team?projects={projectId}',
 ].join(' ')).split(/\s+/).filter(Boolean)
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
 // Project Manager, Discipline Lead, Team Member, Read Only, and a user outside the Restricted project.

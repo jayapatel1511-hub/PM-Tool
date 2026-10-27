@@ -8194,6 +8194,84 @@
     "$.components.schemas.ActionMove.type": [
       "string"
     ],
+    "$.components.schemas.AdminReviewStrip": [
+      "object"
+    ],
+    "$.components.schemas.AdminReviewStrip.properties": [
+      "object"
+    ],
+    "$.components.schemas.AdminReviewStrip.properties.checks": [
+      "object"
+    ],
+    "$.components.schemas.AdminReviewStrip.properties.checks.items": [
+      "object"
+    ],
+    "$.components.schemas.AdminReviewStrip.properties.checks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStrip.properties.checks.type": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStrip.properties.reviewedAt": [
+      "object"
+    ],
+    "$.components.schemas.AdminReviewStrip.properties.reviewedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStrip.properties.reviewedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.AdminReviewStrip.properties.reviewedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStrip.required": [
+      "array"
+    ],
+    "$.components.schemas.AdminReviewStrip.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStrip.type": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStripCount": [
+      "object"
+    ],
+    "$.components.schemas.AdminReviewStripCount.properties": [
+      "object"
+    ],
+    "$.components.schemas.AdminReviewStripCount.properties.count": [
+      "object"
+    ],
+    "$.components.schemas.AdminReviewStripCount.properties.count.format": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStripCount.properties.count.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStripCount.properties.count.type": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStripCount.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.AdminReviewStripCount.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStripCount.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.AdminReviewStripCount.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStripCount.required": [
+      "array"
+    ],
+    "$.components.schemas.AdminReviewStripCount.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AdminReviewStripCount.type": [
+      "string"
+    ],
     "$.components.schemas.AdoptBody": [
       "object"
     ],
@@ -42736,6 +42814,39 @@
     "$.paths./api/v1/portfolio.get.tags[]": [
       "string"
     ],
+    "$.paths./api/v1/portfolio/admin-review": [
+      "object"
+    ],
+    "$.paths./api/v1/portfolio/admin-review.get": [
+      "object"
+    ],
+    "$.paths./api/v1/portfolio/admin-review.get.responses": [
+      "object"
+    ],
+    "$.paths./api/v1/portfolio/admin-review.get.responses.200": [
+      "object"
+    ],
+    "$.paths./api/v1/portfolio/admin-review.get.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/portfolio/admin-review.get.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/portfolio/admin-review.get.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/portfolio/admin-review.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/portfolio/admin-review.get.responses.200.description": [
+      "string"
+    ],
+    "$.paths./api/v1/portfolio/admin-review.get.tags": [
+      "array"
+    ],
+    "$.paths./api/v1/portfolio/admin-review.get.tags[]": [
+      "string"
+    ],
     "$.paths./api/v1/portfolio/export": [
       "object"
     ],
@@ -59382,6 +59493,76 @@
     ]
   },
   "GET /api/v1/portfolio 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "GET /api/v1/portfolio/admin-review 200": {
+    "$": [
+      "object"
+    ],
+    "$.checks": [
+      "array"
+    ],
+    "$.checks[]": [
+      "object"
+    ],
+    "$.checks[].count": [
+      "number"
+    ],
+    "$.checks[].key": [
+      "string"
+    ],
+    "$.checks[].title": [
+      "string"
+    ],
+    "$.reviewedAt": [
+      "null",
+      "string"
+    ]
+  },
+  "GET /api/v1/portfolio/admin-review 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "GET /api/v1/portfolio/admin-review 404": {
     "$": [
       "object"
     ],

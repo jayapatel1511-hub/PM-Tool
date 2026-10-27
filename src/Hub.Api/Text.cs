@@ -420,6 +420,7 @@ public static class Text
         ["error.date_range"] = "Use an end date on or after the start date, within the allowed range.",
         ["error.positive"] = "Must be a positive number.",
         ["perm.admin"] = "Only a System Administrator can do this.",
+        ["perm.admin_review_strip"] = "Only Executives and System Administrators can see the Admin review summary.",
         ["perm.read_only"] = "Read Only accounts cannot make changes.",
         ["perm.pm"] = "Only the Project Manager can do this.",
         ["perm.pm_or_dl"] = "Only the Project Manager or the Discipline Lead can do this.",
@@ -447,6 +448,9 @@ public static class Text
         ["admin.email_invalid"] = "Enter one email address, such as name@example.com.",
         // Admin review (§55.4 FR-ADR-01): each check's name and the rule it applies
         ["adminReview.title"] = "Admin review",
+        ["digest.adminReview"] = "Admin review due since {0}",
+        ["digest.adminReviewNone"] = "Admin review due: none has been recorded",
+        ["digest.subject_adminReview"] = "Admin review due",
         ["adminReview.inactiveOnTeams"] = "Inactive users still on teams",
         ["adminReview.inactiveOnTeams.rule"] = "Inactive users who are a team member, Discipline Lead, Project Manager or reviewer on a live project",
         ["adminReview.noManager"] = "Users without a manager",

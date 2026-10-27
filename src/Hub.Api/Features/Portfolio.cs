@@ -37,6 +37,15 @@ public static class PortfolioEndpoints
                 Projects = rows,
             };
         });
+        // FR-ADR-07, FR-ADR-08: the admin strip, for Executives (and Admins, who see the page itself); absent with the flag off.
+        api.MapGet("/portfolio/admin-review", async (Access access, HubDb db, SettingsStore store) =>
+        {
+            var a = access.Actor;
+            Access.Demand(a.Admin || a.Executive ? Allow.Yes : Allow.No("perm.admin_review_strip"));
+            var s = await store.Get(db);
+            Http.RequireFlag(s, AdminReviewEndpoints.Flag);
+            return TypedResults.Ok(await AdminReviewEndpoints.LastReview(db, s));
+        });
         api.MapGet("/portfolio/export", async (string? format, [AsParameters] ProjectEndpoints.ProjectQuery f, bool? overdueDecisions, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (rows, _) = await Rows(f, access, db, me, store, clock, overdueDecisions);

@@ -23,6 +23,11 @@ public static class AdminReviewEndpoints
     public sealed record CheckNote(string? Key, string? Note);
     public sealed record RecordBody(string? Note, IReadOnlyList<CheckNote>? Checks);
 
+    public sealed record AdminReviewStripCount(string Key, string Title, int Count);
+    public sealed record AdminReviewStrip(DateTimeOffset? ReviewedAt, IReadOnlyList<AdminReviewStripCount> Checks);
+
+    public const string Flag = "admin_review";
+
     sealed record Ctx(HubDb Db, OrgSettings Settings, DateTimeOffset Now, DateTimeOffset? LastReviewAt);
     sealed record Def(string Key, Func<Ctx, Task<List<CheckRow>>> Rows, string? Flag = null, Func<OrgSettings, int>? Days = null);
 
@@ -108,7 +113,7 @@ public static class AdminReviewEndpoints
         {
             Access.Demand(Permissions.Administer(ctx.HttpContext.RequestServices.GetRequiredService<CurrentUser>().Actor));
             return await next(ctx);
-        }).RequireFlag("admin_review");
+        }).RequireFlag(Flag);
 
         g.MapGet("", async (HubDb db, SettingsStore store, TimeProvider clock) =>
         {
@@ -117,9 +122,8 @@ public static class AdminReviewEndpoints
             foreach (var k in Shown(c.Settings))
                 checks.Add(new(k.Key, Title(k, c.Settings), Rule(k, c.Settings), (await k.Rows(c)).Count, $"/admin/review/checks/{k.Key}"));
             var last = await db.Set<AdminReview>().AsNoTracking().OrderByDescending(r => r.ReviewedAt).FirstOrDefaultAsync();
-            var due = last is null ? (DateOnly?)null : Clock.LocalDate(last.ReviewedAt, c.Settings).AddDays(c.Settings.AdminReviewIntervalDays);
-            // Due when never recorded, or once the interval has passed (FR-ADR-04).
-            return TypedResults.Ok(new Overview(checks, last is null ? null : await Record(db, last), due, due is null || due < clock.Today(c.Settings)));
+            var (due, overdue) = Due(last?.ReviewedAt, c.Settings, clock.Today(c.Settings));
+            return TypedResults.Ok(new Overview(checks, last is null ? null : await Record(db, last), due, overdue));
         });
 
         g.MapGet("/checks/{key}", async (string key, HubDb db, SettingsStore store, TimeProvider clock) =>
@@ -149,6 +153,22 @@ public static class AdminReviewEndpoints
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/v1/admin/review/{review.Id}", await Record(db, review));
         });
+    }
+
+    /// FR-ADR-04: the next review is due `admin_review_interval_days` after the last; due now when none was ever recorded.
+    /// Shared by the page, the daily digest line and the Portfolio strip so they always agree.
+    public static (DateOnly? DueOn, bool Overdue) Due(DateTimeOffset? lastReviewedAt, OrgSettings s, DateOnly today)
+    {
+        var due = lastReviewedAt is { } at ? Clock.LocalDate(at, s).AddDays(s.AdminReviewIntervalDays) : (DateOnly?)null;
+        return (due, due is null || due < today);
+    }
+
+    /// FR-ADR-07: what Executives see on the Portfolio strip: the last recorded review's date and counts, nothing else.
+    public static async Task<AdminReviewStrip> LastReview(HubDb db, OrgSettings s)
+    {
+        var last = await db.Set<AdminReview>().AsNoTracking().OrderByDescending(r => r.ReviewedAt).FirstOrDefaultAsync();
+        var recorded = last is null ? [] : JsonSerializer.Deserialize<List<CheckRecord>>(last.Checks, JsonOpts.Web) ?? [];
+        return new(last?.ReviewedAt, [.. Shown(s).Join(recorded, k => k.Key, r => r.Key, (k, r) => new AdminReviewStripCount(k.Key, Title(k, s), r.Count))]);
     }
 
     static async Task<ReviewRecord> Record(HubDb db, AdminReview r) => new(r.Id, r.ReviewedAt, r.ReviewerId,

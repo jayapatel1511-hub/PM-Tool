@@ -1,4 +1,5 @@
 import { ProjectStatusNote } from '@/components/hub/project-status-note'
+import type { components } from '@/gen/api'
 import { useQuery } from '@tanstack/react-query'
 import { Monitor } from 'lucide-react'
 import { Fragment, type ReactNode } from 'react'
@@ -23,6 +24,7 @@ import { ViewMenu } from '@/components/hub/views'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 
 interface Row extends ProjectRow { officeId?: string; projectTypeId?: string; projectType?: string; overdueDeliverables?: number; office?: string; phase?: string; overrideBy?: string | null; overrideActive: boolean; trend: { weekEnding: string; computed?: string | null; reported?: string | null }[] }
+type AdminStrip = components['schemas']['AdminReviewStrip']
 interface Portfolio { ownOnly: boolean; tiles: { active: number; red: number; yellow: number; green: number; submissions14: number; overdueDecisions: number }; projects: Row[] }
 
 const FILTERS = ['q', 'pmId', 'leadUnitId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'computedHealth', 'projectTypeId', 'submissionWithinDays', 'mine', 'overdueDecisions'] as const satisfies readonly (SavedViewKeys['portfolio'] | 'page' | 'panel' | 'draftAccessReason')[]
@@ -59,7 +61,10 @@ export function PortfolioPage() {
 function Dashboard(header: { title: string; subtitle: ReactNode }) {
   const rollups = useFlag('status_rollups')
   const small = useFlag('small_ux')
-  const planner = useMe().capabilities.workload
+  const me = useMe()
+  const planner = me.capabilities.workload
+  // FR-ADR-07: the Admin review strip is for Executives (and Admins), and only while flag.admin_review is on.
+  const adminStrip = useFlag('admin_review') && (me.capabilities.admin || me.systemRoles.includes('Executive'))
   const ref = useReference()
   const org = useOrgPlacement([])
   const [sp, setSp] = useSearchParams()
@@ -124,6 +129,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
           <SummaryTile label={t('portfolio.decisions')} value={tiles.overdueDecisions} accent="peach" hint={t('sig.def.pfDecisions')} onClick={() => set('overdueDecisions', 'true')} />
         </div>
       )}
+      {adminStrip && <AdminReviewStrip />}
       {rollups && <Field label={t('rcv.group')} htmlFor="pf-group" className="w-48"><select id="pf-group" className={selectCls} value={group} onChange={(e) => set('group', e.target.value === 'none' ? null : e.target.value)}>
         {GROUP_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{t(label)}</option>)}
       </select></Field>}
@@ -215,6 +221,21 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
         </TableRegion>
       )}
     </Page>
+  )
+}
+
+/** FR-ADR-07: the last recorded Admin review's date and counts, nothing else; it never opens a list. */
+function AdminReviewStrip() {
+  const q = useQuery({ queryKey: ['portfolio', 'admin-review'], queryFn: () => get<AdminStrip>('portfolio/admin-review') })
+  if (!q.data) return null
+  return (
+    <section aria-label={t('portfolio.adminReview')} data-admin-review-strip className="flex flex-wrap items-baseline gap-x-5 gap-y-1 rounded-lg border bg-card px-4 py-2.5 text-sm">
+      <h2 className="font-semibold">{t('portfolio.adminReview')}</h2>
+      {q.data.reviewedAt
+        ? <><span className="text-muted-foreground">{t('portfolio.adminReviewLast', { date: fmtDate(q.data.reviewedAt) })}</span>
+          {q.data.checks.map((c) => <span key={c.key}>{c.title} <span className="font-semibold tabular-nums">{c.count}</span></span>)}</>
+        : <span className="text-muted-foreground">{t('portfolio.adminReviewNone')}</span>}
+    </section>
   )
 }
 

@@ -6,7 +6,7 @@
 // Dead letters are marked in the database (the natural tenth failure is covered by OperationsTests); the render failure is made by
 // patching one real response; the 500 comes from a temporary database trigger that this file removes. Synthetic records only.
 const assert = require('node:assert/strict')
-const { execFileSync } = require('node:child_process')
+const { execFileSync, spawnSync } = require('node:child_process')
 const fs = require('node:fs')
 const { chromium } = require('playwright')
 
@@ -19,10 +19,15 @@ assert.equal(process.env.TUESDAY_SYNTHETIC_API, '1', 'this check creates records
 assert.match(database ?? '', /^hub_smoke_/, 'TUESDAY_SYNTHETIC_DB must name the harness-created database')
 assert.ok(apiLog && fs.existsSync(apiLog), 'TUESDAY_API_LOG must name the API log')
 
+// CI's PostgreSQL is a service container with a generated name on 55432 (trust auth), so a host psql is used when there is one;
+// the Mac has no host psql and reaches its container (TUESDAY_PG_CONTAINER, default pm-tool-db-1) instead.
+const [psqlBin, ...psqlArgs] = spawnSync('psql', ['--version']).status === 0
+  ? ['psql', '-h', '127.0.0.1', '-p', '55432']
+  : ['docker', 'exec', process.env.TUESDAY_PG_CONTAINER ?? 'pm-tool-db-1', 'psql']
 // The local PostgreSQL is shared with other runs and can be at max_connections for a moment, so a refused connection is retried.
 function psql(statement) {
   for (let attempt = 0; ; attempt++) {
-    try { return execFileSync('docker', ['exec', 'pm-tool-db-1', 'psql', '-U', 'hub', '-d', database, '-Atc', statement], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim() }
+    try { return execFileSync(psqlBin, [...psqlArgs, '-U', 'hub', '-d', database, '-Atc', statement], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim() }
     catch (e) { if (attempt >= 30 || !/too many clients/.test(String(e.stderr))) throw e; Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000) }
   }
 }

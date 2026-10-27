@@ -5,6 +5,7 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,12 +35,16 @@ public static class EventEndpoints
     static readonly string[] ActorOnly = [ItemType.TimeEntry, ItemType.CalendarEvent];
     static readonly JsonSerializerOptions Web = new(JsonSerializerDefaults.Web);
 
+    /// The two SSE `data:` payloads (§46.6); the stream has no JSON response body, so these are its only shapes.
+    public sealed record ProjectEvent(string Topic, Guid ProjectId, string ItemType);
+    public sealed record EvaluatedEvent(string Topic, Guid ProjectId);
+
     public static void Map(RouteGroupBuilder api) =>
-        api.MapGet("/events", async (HttpContext ctx, Access access, HubDb db, LiveFeed feed, LiveStreams streams, IConfiguration cfg,
+        api.MapGet("/events", async Task<Results<StatusCodeHttpResult, EmptyHttpResult>> (HttpContext ctx, Access access, HubDb db, LiveFeed feed, LiveStreams streams, IConfiguration cfg,
             IHostApplicationLifetime host, TimeProvider clock) =>
         {
             var me = access.Me.Id;
-            if (!streams.TryOpen(me, cfg.GetValue("Live:StreamsPerUser", 5))) return Results.StatusCode(StatusCodes.Status429TooManyRequests);
+            if (!streams.TryOpen(me, cfg.GetValue("Live:StreamsPerUser", 5))) return TypedResults.StatusCode(StatusCodes.Status429TooManyRequests);
             try
             {
                 var heartbeat = TimeSpan.FromSeconds(Math.Clamp(cfg.GetValue("Live:HeartbeatSeconds", 25.0), 0.1, 59));
@@ -77,7 +82,7 @@ public static class EventEndpoints
                                 // stops receiving at once rather than at the life limit (FR-LIVE-16).
                                 var u = await db.Users.AsNoTracking().Where(x => x.Id == me)
                                     .Select(x => new { x.IsActive, Roles = x.Roles.Select(r => r.Role).ToList() }).FirstOrDefaultAsync(ct);
-                                if (u is not { IsActive: true }) return Results.Empty; // deactivated: end the stream
+                                if (u is not { IsActive: true }) return TypedResults.Empty; // deactivated: end the stream
                                 access.Me.Roles = [.. u.Roles];
                                 visible = await access.VisibleProjectIdSet();
                             }
@@ -89,7 +94,7 @@ public static class EventEndpoints
                     }
                 }
                 catch (OperationCanceledException) { } // life limit, client gone or host stopping: end cleanly
-                return Results.Empty;
+                return TypedResults.Empty;
             }
             finally { streams.Close(me); }
         }).RequireFlag(Flag);
@@ -101,9 +106,9 @@ public static class EventEndpoints
         foreach (var (projectId, itemType) in batch.Rows
             .Where(r => visible.Contains(r.ProjectId) && (!ActorOnly.Contains(r.ItemType) || r.ActorUserId == viewer))
             .Select(r => (r.ProjectId, r.ItemType)).Distinct())
-            sb.Append("data: ").Append(JsonSerializer.Serialize(new { topic = "project", projectId, itemType }, Web)).Append("\n\n");
+            sb.Append("data: ").Append(JsonSerializer.Serialize(new ProjectEvent("project", projectId, itemType), Web)).Append("\n\n");
         foreach (var projectId in batch.Evaluated.Where(visible.Contains).Distinct())
-            sb.Append("data: ").Append(JsonSerializer.Serialize(new { topic = "evaluated", projectId }, Web)).Append("\n\n");
+            sb.Append("data: ").Append(JsonSerializer.Serialize(new EvaluatedEvent("evaluated", projectId), Web)).Append("\n\n");
         return sb.ToString();
     }
 

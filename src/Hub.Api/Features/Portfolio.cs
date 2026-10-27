@@ -82,7 +82,7 @@ public static class PortfolioEndpoints
         var notes = s.IsFlagOn("project_status_note") ? await ProjectStatusNote.ReadMany(await db.Projects.AsNoTracking().Where(p => ids.Contains(p.Id)).ToListAsync(), db, clock) : null;
         foreach (var r in rows)
         {
-            if (notes is not null) r!["statusNote"] = notes.GetValueOrDefault(Guid.Parse(r!["id"]!.GetValue<string>()))?.DeepClone();
+            if (notes is not null) r!["statusNote"] = JsonSerializer.SerializeToNode(notes.GetValueOrDefault(Guid.Parse(r!["id"]!.GetValue<string>())), JsonOpts.Web);
             var mine = snaps[Guid.Parse(r!["id"]!.GetValue<string>())].ToList();
             // FR-HLT-03: one point per week, the last snapshot of that week, oldest first.
             r["trend"] = new JsonArray([.. Enumerable.Range(0, 8).Select(i =>

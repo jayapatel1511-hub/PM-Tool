@@ -60208,7 +60208,14 @@
       "string"
     ],
     "$.projects[].statusNote.header.nextMilestone": [
-      "null"
+      "null",
+      "object"
+    ],
+    "$.projects[].statusNote.header.nextMilestone.date": [
+      "string"
+    ],
+    "$.projects[].statusNote.header.nextMilestone.name": [
+      "string"
     ],
     "$.projects[].statusNote.header.openAttention": [
       "number"
@@ -61135,6 +61142,7 @@
       "string"
     ],
     "$.statusNote": [
+      "null",
       "object"
     ],
     "$.statusNote.at": [
@@ -61153,7 +61161,14 @@
       "string"
     ],
     "$.statusNote.header.nextMilestone": [
-      "null"
+      "null",
+      "object"
+    ],
+    "$.statusNote.header.nextMilestone.date": [
+      "string"
+    ],
+    "$.statusNote.header.nextMilestone.name": [
+      "string"
     ],
     "$.statusNote.header.openAttention": [
       "number"

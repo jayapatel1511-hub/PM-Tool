@@ -46,7 +46,7 @@ Each slice is one PR. Slices in Parts A, B and C merge dark behind `flag.data_en
   - Admin review page; record form; last-review comparison; CSV and XLSX export with no person rows.
   - Covers FR-ADR-04 (page), FR-ADR-06, FR-ADR-07 (navigation).
   - Tests: `web/tests/admin-review.cjs`; `ExportTests.cs` (header block, nine rows, reviewer only). AC-ADR-05.
-- [ ] S10 Digest line and Portfolio strip (S). After S08.
+- [x] S10 Digest line and Portfolio strip (S). After S08.
   - Covers FR-ADR-04 (digest); AC-ADR-03.
   - Tests: `DigestTests.cs` (line present when overdue, absent after a review, Admins only).
 

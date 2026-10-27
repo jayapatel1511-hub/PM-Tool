@@ -48,7 +48,7 @@ Each slice below moves one hand-rolled table onto `DataTable`, passes the parity
 
 - [ ] S29 (S) Open roles, `web/src/pages/projects/Allocations.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `OpenRoleApiTests`, `resources.cjs`.
 - [ ] S30 (S) Allocations list, `web/src/pages/projects/Allocations.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `AllocationApiTests`.
-- [ ] S31 (S) Project Team, `web/src/pages/projects/Team.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `ProjectsTests`.
+- [x] S31 (S) Project Team, `web/src/pages/projects/Team.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `ProjectsTests`. Done (build 043-S31): the members table uses `DataTable` (with the new `label` and `cards` props); `html_tables` is 59 on the merged tree. See verification.md.
 - [ ] S32 (S) WorkspaceTeam, `web/src/pages/WorkspaceTeam.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `WorkspaceTests`.
 - [ ] S33 (S) Holidays, `web/src/pages/admin/Holidays.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `AvailabilityBuildTests`.
 - [ ] S34 (S) Reference data, `web/src/pages/admin/Admin.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `FoundationsTests`.

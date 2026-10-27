@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Empty, ErrorBanner, Loading, Page, Section } from '@/components/hub/common'
 import { Avatar } from '@/components/hub/people'
 import { get, typedRequest } from '@/lib/api'
-import { t } from '@/lib/i18n'
+import { plural, t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 type Reference = { disciplines?: { id: string; name: string }[]; offices?: { id: string; name: string }[] }
@@ -22,7 +22,7 @@ export function OrganisationPage() {
     const expanded = open.has(u.id)
     return <div key={u.id} className={cn('border-l pl-3', depth > 0 && 'ml-3')}>
       <button className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-muted" onClick={() => setOpen((s) => { const n = new Set(s); n.has(u.id) ? n.delete(u.id) : n.add(u.id); return n })} aria-expanded={expanded}>
-        {expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}<span className="font-semibold">{u.name}</span><span className="text-xs text-muted-foreground">{u.level ?? t('organisation.unit')} · {u.headCount} {t('organisation.peopleInSubtree')}</span>
+        {expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}<span className="font-semibold">{u.name}</span><span className="text-xs text-muted-foreground">{u.level ?? t('organisation.unit')} · {plural(u.headCount, 'organisation.subtreeOne', 'organisation.subtreeMany')}</span>
       </button>
       {expanded && <div className="ml-5 border-t py-2 text-sm"><div className="mb-2 grid gap-1 text-muted-foreground sm:grid-cols-2"><span>{t('organisation.leader')}: {u.leader ?? '—'}</span><span>{t('organisation.discipline')}: {ref.data?.disciplines?.find((x) => x.id === u.disciplineId)?.name ?? '—'}</span><span>{t('organisation.office')}: {ref.data?.offices?.find((x) => x.id === u.officeId)?.name ?? '—'}</span><span>{t('organisation.peopleInUnit')}: {people.length}</span></div>{people.length > 0 ? <ul className="space-y-1">{people.map((p) => <li key={p.id} className="flex items-center gap-2"><Avatar id={p.id} name={p.displayName} />{p.displayName}</li>)}</ul> : <span className="text-muted-foreground">{t('organisation.noPeople')}</span>}</div>}
       {branch(u.id, depth + 1)}

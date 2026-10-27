@@ -16,6 +16,16 @@ export function useOrgPlacement(ids: string[]) {
   return { enabled, units, placementMap, loading: org.isPending || placements.isPending, error: org.error ?? placements.error }
 }
 
+/** A unit's name, or its path when another unit shares the name: names are unique only under one parent, so groups and
+ *  filters keyed by a bare name would merge two units (FR-UNT-13). */
+export function unitLabel(units: OrgUnit[], id: string) {
+  const unit = units.find(u => u.id === id)
+  if (!unit || units.filter(u => u.name === unit.name).length < 2) return unit?.name
+  const path: OrgUnit[] = []
+  for (let u: OrgUnit | undefined = unit; u && !path.includes(u); u = units.find(x => x.id === u!.parentId)) path.unshift(u)
+  return path.map(u => u.name).join(' / ')
+}
+
 /** Descendants use a visited set so malformed hierarchy cycles cannot hang the UI. */
 export function descendantUnitIds(units: OrgUnit[], rootId: string) {
   const found = new Set<string>([rootId]);

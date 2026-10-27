@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, Pencil } from 'lucide-react'
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { ChangeList, actionLabel, groupActivity, type ActivityRow } from '@/components/hub/activity'
@@ -7,8 +7,9 @@ import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useFlag, useMe } from '@/lib/auth'
-import { get, type ApiError } from '@/lib/api'
+import { get, watchWrite, type ApiError, type WriteWatch } from '@/lib/api'
 import { ago, fmtDate, fmtTime } from '@/lib/format'
+import { invalidateChange } from '@/lib/keys'
 import { t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useSearchParams } from 'react-router'
@@ -30,11 +31,17 @@ export function FieldRow({ label, children, className }: { label: ReactNode; chi
   )
 }
 
-type SaveState = { status: 'saving' | 'saved' | 'failed'; value: unknown; message?: string }
+type SaveState = { status: 'saving' | 'saved' | 'failed' | 'conflict'; value: unknown; message?: string; who?: string; at?: string; version?: number }
 const blank = (v: unknown) => (v === '' || v === undefined ? null : v)
 const why = (e: unknown) => {
   const x = e as ApiError
   return x?.code === 'concurrency_conflict' && x.body?.changedBy ? t('error.conflict', { who: x.body.changedBy, when: ago(x.body.changedAt) }) : x?.message
+}
+// FR-SAV-02: a failed save goes again on its own after these waits, when it got no answer or found the server down or updating.
+const RETRY_MS = [2000, 4000, 8000]
+const since = (at?: string) => {
+  const s = at ? Math.round((Date.now() - Date.parse(at)) / 1000) : NaN
+  return s >= 0 && s < 60 ? t('rel.secondsAgo', { n: s }) : ago(at)
 }
 
 /** Per-field autosave (FR-SAV-01) and its feedback (design §8), shared by every inline field of the edit panels; the task panel's
@@ -44,36 +51,67 @@ const why = (e: unknown) => {
  *  while `flag.data_entry_safety` is on) `schedule` also saves typed text after that long without typing, and `commit` (blur, Enter)
  *  does not send that value a second time. Those saves go one at a time: one sent before the previous save is back would carry the
  *  row version from before it and be refused as a conflict, so it waits and goes out from the render that brought the saved value
- *  back. Without `delayMs`, `commit` is the plain blur save it always was. */
-function useAutosaveField(current?: unknown, delayMs?: number, onSave?: (v: string | null) => Promise<unknown>) {
+ *  back. Without `delayMs`, `commit` is the plain blur save it always was.
+ *  FR-SAV-02 (unflagged, 051-D4) for a field that saves through `onSave` (`keep`; not a list row renamed in place): a save that fails
+ *  never puts the server's copy back in the field. The field shows the value it sent (`kept`) with "Not saved", Retry (with the flag
+ *  on) and "Discard my change"; a save that got no answer or found the server down or updating goes again after 2, 4 and 8 s from the newest render. A
+ *  concurrency conflict brings the other value onto the screen beside this one and waits for "Keep mine" (sent on the row version the
+ *  refusal names) or "Take theirs". */
+function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Promise<unknown>, { delayMs, keep = !!onSave }: { delayMs?: number; keep?: boolean } = {}) {
+  const qc = useQueryClient()
   const [state, setState] = useState<SaveState | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const pause = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const again = useRef<ReturnType<typeof setTimeout>>(undefined)
   const sent = useRef<{ value: unknown } | undefined>(undefined)
   const held = useRef<{ value: unknown } | undefined>(undefined)
   const live = useRef({ current, onSave })
   useEffect(() => { live.current = { current, onSave } })
-  const track = async (save: unknown, value?: unknown) => {
+  const track = async (save: unknown, value?: unknown, watch?: WriteWatch, tries = 0) => {
     clearTimeout(timer.current)
+    clearTimeout(again.current)
     setState({ status: 'saving', value })
+    let error: unknown, thrown = false
     try {
       const r = await save
-      // undefined: the caller reports no outcome (it shows its own errors), so nothing is claimed.
-      setState(r === undefined ? null : { status: r === null || r === false ? 'failed' : 'saved', value })
-      if (r != null && r !== false) timer.current = setTimeout(() => setState(null), 4000)
-    } catch (e) { setState({ status: 'failed', value, message: why(e) }) }
+      if (r !== null && r !== false) {
+        // undefined: the caller reports no outcome (it shows its own errors), so nothing is claimed.
+        setState(r === undefined ? null : { status: 'saved', value })
+        if (r !== undefined) timer.current = setTimeout(() => setState(null), 4000)
+        return
+      }
+      error = watch?.error
+    } catch (e) { error = e; thrown = true }
+    // A refused or failed save never comes back, so the next one goes straight out; a value typed while it was out is the one kept.
+    // ponytail: a save that succeeds but whose refetch never brings the value back keeps the field's later saves held until the value
+    // next changes; add a way out if that shows up.
+    const kept = held.current ? held.current.value : value
+    sent.current = held.current = undefined
+    const x = error as ApiError | undefined
+    if (keep && x?.code === 'concurrency_conflict') {
+      setState({ status: 'conflict', value: kept, who: x.body?.changedBy, at: x.body?.changedAt, version: x.body?.currentRowVersion })
+      void invalidateChange(qc) // brings the other value into `current`, so the field can show both
+      return
+    }
+    setState({ status: 'failed', value: kept, message: thrown ? why(error) : undefined })
+    if (keep && tries < RETRY_MS.length && x != null && (x.status === 0 || x.status >= 500)) again.current = setTimeout(() => resend(kept, tries + 1), RETRY_MS[tries])
+  }
+  // Reads `live` (the newest render, so the newest row version) because it also runs from the timers and the effect below.
+  const attempt = (value: unknown, tries = 0, version?: number) => {
+    const watch: WriteWatch = { ifMatch: version }
+    return track(watchWrite(watch, () => live.current.onSave!(value as string | null)), value, watch, tries)
   }
   const already = (value: unknown) => sent.current !== undefined && blank(sent.current.value) === blank(value)
-  // Reads `live` (the newest render, so the newest row version) because it also runs from the pause timer and the effect below.
-  const send = (value: unknown) => {
+  const send = (value: unknown, tries = 0, version?: number) => {
     if (sent.current) { held.current = already(value) ? undefined : { value }; return Promise.resolve() }
     if (blank(value) === blank(live.current.current)) return Promise.resolve()
     sent.current = { value }
-    // A refused or failed save never comes back, so the next one goes straight out (the field shows why this one did not save).
-    // ponytail: a save that succeeds but whose refetch never brings the value back keeps the field's later saves held until the value
-    // next changes; packet 051 S02 (retry) is the place to add a way out if that shows up.
-    const settle = (ok: boolean) => { if (!ok) sent.current = held.current = undefined }
-    return track(live.current.onSave!(value as string | null).then(r => { settle(r !== null && r !== false); return r }, e => { settle(false); throw e }), value)
+    return attempt(value, tries, version)
+  }
+  // Retry, Keep mine and the timed retries: nothing goes out once the field's value is the saved one.
+  const resend = (value: unknown, tries = 0, version?: number) => {
+    if (blank(value) === blank(live.current.current)) { setState(null); return Promise.resolve() }
+    return delayMs == null ? attempt(value, tries, version) : send(value, tries, version)
   }
   // Once the saved value is back from the server, the field's own comparison takes over from `sent`, and a save held behind it goes now.
   useEffect(() => {
@@ -84,24 +122,51 @@ function useAutosaveField(current?: unknown, delayMs?: number, onSave?: (v: stri
   }, [current])
   const commit = (value: unknown) => {
     clearTimeout(pause.current)
-    return delayMs == null ? track(onSave!(value as string | null), value) : send(value)
+    clearTimeout(again.current)
+    return delayMs == null ? attempt(value) : send(value)
   }
   const schedule = (value: unknown) => {
+    clearTimeout(again.current) // typing on replaces a timed retry; leaving the field (or Escape) settles it
     if (delayMs == null) return
     clearTimeout(pause.current)
     pause.current = setTimeout(() => send(value), delayMs)
   }
-  const landed = state?.status === 'failed' && blank(state.value) === blank(current)
-  return { state: landed ? null : state, track, commit, schedule, clear: () => { clearTimeout(timer.current); clearTimeout(pause.current); held.current = undefined; setState(null) } }
+  const clear = () => { clearTimeout(timer.current); clearTimeout(pause.current); clearTimeout(again.current); held.current = undefined; setState(null) }
+  const landed = state != null && blank(state.value) === blank(current)
+  const shown = landed && (state.status === 'failed' || state.status === 'conflict') ? null : state
+  return {
+    state: shown, current, keep, track, commit, schedule, clear,
+    /** The value the field shows instead of the server's while its save is out, failed or in conflict, and once saved until the
+     *  refetch brings it back. */
+    kept: keep && shown && !(shown.status === 'saved' && landed) ? { value: shown.value } : undefined,
+    /** "Discard my change" and "Take theirs": the field goes back to the server's value. */
+    discard: () => { const pending = shown?.status === 'failed' || shown?.status === 'conflict'; if (pending) clear(); return pending },
+    retry: () => shown && resend(shown.value),
+    keepMine: () => shown && resend(shown.value, 0, shown.version),
+  }
+}
+type Autosave = ReturnType<typeof useAutosaveField>
+
+const asText = (v: unknown) => (v == null || v === '' ? t('common.dash') : String(v))
+function NoteAction({ onClick, children }: { onClick: () => unknown; children: ReactNode }) {
+  return <button type="button" className="min-h-6 font-medium text-primary underline underline-offset-4 hover:text-foreground" onClick={() => void onClick()}>{children}</button>
 }
 
-/** The live save line under a field; empty (and silent) when there is nothing to report. */
-function SaveNote({ state }: { state: SaveState | null }) {
+/** The live save line under a field; empty (and silent) when there is nothing to report. `show` writes a value the way the field
+ *  shows it, for the two values of a conflict. */
+function SaveNote({ save, show = asText }: { save: Autosave; show?: (v: unknown) => string }) {
+  const { state } = save
+  const retry = useFlag('data_entry_safety') // FR-SAV-08: the Retry control is a visible addition; the timed retries are not flagged
   return (
-    <span aria-live="polite" className={cn('block text-xs/[18px] font-normal', state && 'px-2 pt-0.5', state?.status === 'failed' ? 'text-bad' : 'text-muted-foreground')}>
+    <span aria-live="polite" className={cn('block text-xs/[18px] font-normal', state && 'px-2 pt-0.5', state?.status === 'failed' || state?.status === 'conflict' ? 'text-bad' : 'text-muted-foreground')}>
       {state?.status === 'saving' && <span className="inline-flex items-center gap-1.5"><Spinner className="size-3.5" />{t('common.saving')}</span>}
       {state?.status === 'saved' && <span className="inline-flex items-center gap-1.5 text-ok"><Check className="size-3.5" aria-hidden />{t('common.saved')}</span>}
-      {state?.status === 'failed' && <><span aria-hidden>■ </span>{state.message ? t('inline.notSavedBecause', { reason: state.message }) : t('inline.notSaved')}</>}
+      {state?.status === 'failed' && <><span aria-hidden>■ </span>{state.message ? t('inline.notSavedBecause', { reason: state.message }) : t('inline.notSaved')}
+        {save.keep && <>{retry && <> · <NoteAction onClick={save.retry}>{t('inline.retry')}</NoteAction></>} · <NoteAction onClick={save.discard}>{t('inline.discard')}</NoteAction></>}</>}
+      {state?.status === 'conflict' && <><span aria-hidden>■ </span>{t('inline.notSaved')}
+        <span className="block break-words text-foreground">{t('inline.theirs', { who: state.who ?? t('inline.someone'), when: since(state.at), value: show(save.current) })}</span>
+        <span className="block break-words text-foreground">{t('inline.yours', { value: show(state.value) })}</span>
+        <NoteAction onClick={save.keepMine}>{t('inline.keepMine')}</NoteAction> · <NoteAction onClick={save.discard}>{t('inline.takeTheirs')}</NoteAction></>}
     </span>
   )
 }
@@ -110,7 +175,7 @@ function SaveNote({ state }: { state: SaveState | null }) {
  *  save's promise and the value being saved. */
 export function SaveStatus({ current, children }: { current?: unknown; children: (track: (save: unknown, value?: unknown) => Promise<void>) => ReactNode }) {
   const save = useAutosaveField(current)
-  return <>{children(save.track)}<SaveNote state={save.state} /></>
+  return <>{children(save.track)}<SaveNote save={save} /></>
 }
 
 function Display({ children, onEdit, disabled, title }: { children: ReactNode; onEdit: () => void; disabled?: boolean; title?: string }) {
@@ -135,12 +200,15 @@ export function InlineText({ value, onSave, multiline, disabled, placeholder, ti
   const [v, setV] = useState(value ?? '')
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
   // A list row renamed in place (initiallyEditing) is not an edit panel field: it keeps saving on blur and Enter only.
-  const save = useAutosaveField(value, initiallyEditing || needsReason ? undefined : delay, onSave)
-  useEffect(() => { if (!editing && save.state?.status !== 'saving' && save.state?.status !== 'failed') setV(value ?? '') }, [value, editing, save.state?.status])
+  const save = useAutosaveField(value, onSave, { delayMs: initiallyEditing || needsReason ? undefined : delay, keep: !initiallyEditing })
+  const hold = !!save.kept || (save.state != null && save.state.status !== 'saved')
+  useEffect(() => { if (!editing && !hold) setV(value ?? '') }, [value, editing, hold])
   useEffect(() => { if (editing) ref.current?.focus() }, [editing])
-  const commit = async () => { setEditing(false); if ((v || null) === (value || null)) { onCancel?.(); return } await save.commit(v.trim() || null) }
-  const note = <SaveNote state={save.state} />
-  if (!editing) return <><Display onEdit={() => setEditing(true)} disabled={disabled} title={title}>{value ? (render ? render(value) : value) : <span className="text-muted-foreground">{placeholder ?? t('common.dash')}</span>}</Display>{note}</>
+  const commit = async () => { setEditing(false); if ((v || null) === (value || null)) { save.discard(); onCancel?.(); return } await save.commit(v.trim() || null) }
+  const note = <SaveNote save={save} />
+  // What was typed stays on screen while its save is out, failed or in conflict (FR-SAV-02), including text typed after that save went.
+  const shown = save.kept ? v.trim() || null : value
+  if (!editing) return <><Display onEdit={() => setEditing(true)} disabled={disabled} title={title}>{shown ? (render ? render(shown) : shown) : <span className="text-muted-foreground">{placeholder ?? t('common.dash')}</span>}</Display>{note}</>
   const props = { ref, value: v, 'aria-labelledby': labelId, 'aria-label': labelId ? undefined : title, onChange: (e: any) => { setV(e.target.value); save.schedule(e.target.value.trim() || null) }, onBlur: commit,
     onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Escape') { save.clear(); setV(value ?? ''); setEditing(false); onCancel?.() } if (e.key === 'Enter' && (!multiline || e.ctrlKey || e.metaKey)) { e.preventDefault(); commit() } } }
   return <>{!labelId && title && <span className="mb-1 block text-xs/[18px] font-normal text-muted-foreground">{title}</span>}{multiline ? <Textarea rows={4} {...props} /> : <Input className="min-h-(--control-row-h)" {...props} />}{note}</>
@@ -150,11 +218,12 @@ export function InlineDate({ value, onSave, disabled, title, hint }: { value?: s
   const labelId = useContext(FieldLabelContext)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(value ?? null)
-  const save = useAutosaveField(value)
-  const note = <SaveNote state={save.state} />
-  if (!editing) return <><Display onEdit={() => { setDraft(value ?? null); setEditing(true) }} disabled={disabled} title={title}><span className="tabular-nums">{fmtDate(value)}</span></Display>{note}</>
-  return <><Input type="date" aria-labelledby={labelId} title={title} className="min-h-(--control-row-h) w-44" autoFocus onChange={e=>setDraft(e.target.value || null)} defaultValue={save.state?.status === 'failed' ? String(save.state.value ?? '') : value ?? ''}
-    onBlur={async (e) => { setEditing(false); if ((e.target.value || null) !== (value ?? null)) await save.track(onSave(e.target.value || null), e.target.value || null) }}
+  const save = useAutosaveField(value, onSave)
+  const shown = save.kept ? save.kept.value as string | null : value
+  const note = <SaveNote save={save} show={(v) => fmtDate(v as string | null)} />
+  if (!editing) return <><Display onEdit={() => { setDraft(shown ?? null); setEditing(true) }} disabled={disabled} title={title}><span className="tabular-nums">{fmtDate(shown)}</span></Display>{note}</>
+  return <><Input type="date" aria-labelledby={labelId} title={title} className="min-h-(--control-row-h) w-44" autoFocus onChange={e=>setDraft(e.target.value || null)} defaultValue={shown ?? ''}
+    onBlur={async (e) => { setEditing(false); if ((e.target.value || null) !== (value ?? null)) await save.commit(e.target.value || null); else save.discard() }}
     onKeyDown={(e) => { if (e.key === 'Escape') { save.clear(); setEditing(false) } if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />{hint && <span className="mt-1 block text-xs text-muted-foreground">{typeof hint === 'function' ? hint(draft) : hint}</span>}{note}</>
 }
 
@@ -162,36 +231,35 @@ export function InlineSelect({ value, options, onSave, disabled, allowEmpty, tit
   value?: string | null; options: { value: string; label: string }[]; onSave: (v: string | null) => Promise<unknown>; disabled?: boolean; allowEmpty?: boolean; title?: string
 }) {
   const labelId = useContext(FieldLabelContext)
-  const save = useAutosaveField(value)
+  const save = useAutosaveField(value, onSave)
   const label = options.find((o) => o.value === value)?.label
   if (disabled) return <Display onEdit={() => {}} disabled title={title}>{label ?? t('common.dash')}</Display>
   return (
     <>
-      <select className="h-(--control-row-h) w-full rounded-md border border-transparent bg-transparent px-1.5 text-sm hover:border-input hover:bg-muted focus-visible:border-input" value={save.state?.status === 'failed' || save.state?.status === 'saving' ? String(save.state.value ?? '') : value ?? ''} title={title}
-        onChange={(e) => save.track(onSave(e.target.value || null), e.target.value || null)} aria-label={title} aria-labelledby={title ? undefined : labelId}>
+      <select className="h-(--control-row-h) w-full rounded-md border border-transparent bg-transparent px-1.5 text-sm hover:border-input hover:bg-muted focus-visible:border-input" value={String((save.kept ? save.kept.value : value) ?? '')} title={title}
+        onChange={(e) => { const v = e.target.value || null; if (v !== (value ?? null) || !save.discard()) save.commit(v) }} aria-label={title} aria-labelledby={title ? undefined : labelId}>
         {allowEmpty && <option value="">{t('common.none')}</option>}
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
-      <SaveNote state={save.state} />
+      <SaveNote save={save} show={(v) => options.find((o) => o.value === v)?.label ?? t('common.none')} />
     </>
   )
 }
 
 export function InlinePerson({ value, name, onSave, disabled, title, allowClear = true }: { value?: string | null; name?: string | null; onSave: (id: string | null) => Promise<unknown>; disabled?: boolean; title?: string; allowClear?: boolean }) {
-  const save = useAutosaveField(value)
+  const save = useAutosaveField(value, onSave)
   const [candidate, setCandidate] = useState<{ id: string; displayName: string } | undefined>()
-  const retaining = save.state?.status === 'saving' || save.state?.status === 'failed'
-  const displayId = retaining ? save.state?.value as string | null : value
-  const displayName = retaining && displayId !== value ? candidate?.displayName : name
+  const displayId = save.kept ? save.kept.value as string | null : value
+  const displayName = save.kept && displayId !== value ? candidate?.displayName : name
   const avatar = displayId && <Avatar id={displayId} name={displayName} />
   if (disabled) return <Display onEdit={() => {}} disabled title={title}><span className="flex items-center gap-2">{avatar}{displayName ?? t('common.dash')}</span></Display>
   return (
     <>
       <div className="flex items-center gap-2">
         {avatar}
-        <div className="min-w-0 flex-1"><PeoplePicker value={displayId} valueName={displayName} onChange={(id, person) => { setCandidate(person); save.track(onSave(id), id) }} allowClear={allowClear} placeholder={t('common.none')} /></div>
+        <div className="min-w-0 flex-1"><PeoplePicker value={displayId} valueName={displayName} onChange={(id, person) => { setCandidate(person); save.commit(id) }} allowClear={allowClear} placeholder={t('common.none')} /></div>
       </div>
-      <SaveNote state={save.state} />
+      <SaveNote save={save} show={(id) => (id === value ? name : id === candidate?.id ? candidate?.displayName : null) ?? t('common.dash')} />
     </>
   )
 }

@@ -503,5 +503,5 @@ export function TaskPanel({ id, onClose }: PanelProps) { return <TaskDetail id={
 /** Full-page task (§13.3.1 "open full page"). */
 export function TaskPage() {
   const { id } = useParams()
-  return <div className="mx-auto w-full max-w-3xl p-4 md:p-6 xl:p-8"><div className="overflow-hidden rounded-xl border bg-card"><TaskDetail id={id!} heading="h1" /></div></div>
+  return <div className="mx-auto w-full max-w-3xl p-4 md:p-6 xl:p-8"><div className="overflow-hidden rounded-xl border bg-card"><TaskDetail key={id} id={id!} heading="h1" /></div></div>
 }

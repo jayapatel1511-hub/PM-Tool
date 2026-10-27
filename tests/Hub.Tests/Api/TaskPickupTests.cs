@@ -295,6 +295,48 @@ public sealed class TaskPickupTests
 
     [Fact]
     [Trait("flag-on", "task_pickup")]
+    public async Task Pickup_report_range_uses_organisation_days()
+    {
+        var (f, d) = await EnabledFactory();
+        using (f)
+        {
+            (await f.As(TestData.Admin).Put("/api/v1/admin/settings/org_time_zone", new { value = "America/Halifax" })).EnsureSuccessStatusCode();
+            f.Clock.Now = new DateTimeOffset(2026, 9, 15, 2, 30, 0, TimeSpan.Zero); // 23:30 on 14 September in Halifax
+            var project = await d.Project(); await AddProjectPeople(f, d, project.Id);
+            var task = await d.NewTask(project.Id, extra: new { assigneeId = d.User(TestData.Alex) });
+            await (await f.As(TestData.Alex).Post($"/api/v1/tasks/{task.G("id")}/pickup-offer", new { reason = "Evening offer" })).Json(201);
+            async Task<int> Rows(string range) =>
+                (await (await f.As(TestData.Jill).GetAsync($"/api/v1/reports/pickup-offers?projectId={project.Id}{range}")).Json())["rows"]!.AsArray().Count;
+            Assert.Equal(1, await Rows("")); // the default range ends today, 14 September in Halifax
+            Assert.Equal(0, await Rows("&from=2026-09-15&to=2026-09-15"));
+        }
+    }
+
+    [Fact]
+    [Trait("flag-on", "task_pickup")]
+    public async Task Pickup_report_follows_the_offer_assignee_not_the_current_one()
+    {
+        var (f, d) = await EnabledFactory();
+        using (f)
+        {
+            var picked = await d.Project(); await AddProjectPeople(f, d, picked.Id);
+            var pickedTask = await d.NewTask(picked.Id, extra: new { assigneeId = d.User(TestData.Alex) });
+            await (await f.As(TestData.Alex).Post($"/api/v1/tasks/{pickedTask.G("id")}/pickup-offer", new { reason = "Needs cover" })).Json(201);
+            await (await f.As(TestData.Jill).Post($"/api/v1/tasks/{pickedTask.G("id")}/pickup", new { rowVersion = await d.TaskVersion(pickedTask) })).Json();
+            var moved = await d.Project(); await AddProjectPeople(f, d, moved.Id);
+            var movedTask = await d.NewTask(moved.Id, extra: new { assigneeId = d.User(TestData.Alex) });
+            await (await f.As(TestData.Alex).Post($"/api/v1/tasks/{movedTask.G("id")}/pickup-offer", new { reason = "Needs cover" })).Json(201);
+            (await f.As(TestData.Pm).Patch($"/api/v1/tasks/{movedTask.G("id")}", new { assigneeId = d.User(TestData.Diane) }, await d.TaskVersion(movedTask))).EnsureSuccessStatusCode();
+            async Task<int> Rows(string who, Guid projectId) =>
+                (await (await f.As(who).GetAsync($"/api/v1/reports/pickup-offers?projectId={projectId}")).Json())["rows"]!.AsArray().Count;
+            Assert.Equal(1, await Rows(TestData.Jill, picked.Id)); // the picker is in the offer's team
+            Assert.Equal(1, await Rows(TestData.Jill, moved.Id)); // the offer's team keeps it after a reassignment outside the team
+            Assert.Equal(0, await Rows(TestData.Omar, moved.Id)); // the new assignee's team never saw the offer
+        }
+    }
+
+    [Fact]
+    [Trait("flag-on", "task_pickup")]
     public async Task Own_load_hint_does_not_grant_workspace_workload_access()
     {
         var (f, d) = await EnabledFactory(); using (f)

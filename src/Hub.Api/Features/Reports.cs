@@ -628,7 +628,10 @@ public static partial class ReportEndpoints
         var offers = TaskPickupReporting.Rows(c.Db, c.Access.VisibleProjectIds(), await c.Db.Users.AsNoTracking().SingleAsync(u => u.Id == c.Me.Id), c.S.IsFlagOn("org_structure"));
         var from = c.Date("from") ?? c.Today.AddDays(-42); var to = c.Date("to") ?? c.Today;
         Check.That(to >= from, "to", "error.invalid");
-        var start = from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc); var end = to.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        // G-03: the range is organisation-time days, like the default "today", so an evening offer is in today's report.
+        var zone = Clock.Zone(c.S);
+        DateTimeOffset Utc(DateOnly d) { var t = d.ToDateTime(TimeOnly.MinValue); return new DateTimeOffset(t, zone.GetUtcOffset(t)).ToUniversalTime(); }
+        var (start, end) = (Utc(from), Utc(to.AddDays(1)));
         var rows = await offers.Where(o => o.OpenedAt >= start && o.OpenedAt < end)
             .Join(c.Db.Tasks.IgnoreQueryFilters(), o => o.TaskId, t => t.Id, (o, t) => new { o, t })
             .Where(r => c.ProjectIds().Contains(r.t.ProjectId) && (c.Id("disciplineId") == null || r.t.ProjectDisciplineId == c.Id("disciplineId")))

@@ -405,7 +405,7 @@ async function additionsCheck(ids) {
     const menuItems = async (page, trigger) => {
       await trigger.click(); const menu = openMenu(page); await menu.waitFor()
       const items = (await menu.locator('[role^=menuitem]').allTextContents()).map(x => x.trim()).filter(Boolean)
-      await page.keyboard.press('Escape'); return items
+      await page.keyboard.press('Escape'); await menu.waitFor({ state: 'detached' }); return items
     }
     const viewsButton = page => page.locator('main button[aria-haspopup=menu]').filter({ hasText: /^Views$/ })
     const exportButton = page => page.locator('main button').filter({ hasText: /^Export$/ }).first()
@@ -477,14 +477,17 @@ async function additionsCheck(ids) {
 
     // The Export menu's open-roles entries come after the page's own and download the roles with the list's columns.
     step = 'on: open-role export'
+    step = 'on: open-role export, reading the Export menu'
     const items = await menuItems(page, exportButton(page))
     check(JSON.stringify(items) === JSON.stringify(['Excel (.xlsx)', 'CSV (.csv)', 'Open roles · Excel (.xlsx)', 'Open roles · CSV (.csv)']), `on: the Export menu is ${items.join(' | ')}`)
     for (const item of items.slice(2)) {
+      step = `on: open-role export, opening the menu for ${item}`
       await exportButton(page).click()
       const menu = openMenu(page); await menu.waitFor()
       const download = page.waitForEvent('download', { timeout: 10000 }).catch(() => null)
       await menu.getByText(item, { exact: true }).click()
       const file = await download
+      await menu.waitFor({ state: 'detached' })
       if (!file) { failures.push(`on: ${item} downloaded nothing`); continue }
       const { format, rows } = await exportRows(file)
       const table = format === '.xlsx' ? rows : rows.trim().replace(/^\uFEFF/, '').split('\n').map(line => line.split(','))

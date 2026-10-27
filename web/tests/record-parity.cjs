@@ -5,8 +5,9 @@
 //   TUESDAY_RECORD_SCREENS  space-separated routes, default the Risks register, the Risk panel, the Issues register (plain and
 //                           grouped, for the shared DataTable's group rows), the project Team tab, the open-roles tab of
 //                           the Active, Complete and empty-role projects, the Reviews and Changes registers, the workspace
-//                           Team page scoped to the Active project and the Portfolio (plain, and grouped by client, which
-//                           needs flag.status_rollups). {project}, {complete}, {empty} and
+//                           Team page scoped to the Active project, the Portfolio (plain, and grouped by client, which
+//                           needs flag.status_rollups) and the Holidays admin list (compared as the administrator only: a
+//                           route under /admin/ runs for Jordan Lee and no other persona). {project}, {complete}, {empty} and
 //                           {restricted} are synthetic project numbers, {projectId} the Active project's id,
 //                           {risk} the synthetic risk id
 //   TUESDAY_RECORD_FLAGS    flags already merged on those screens: the matrix runs with all off, then all on (§47.6)
@@ -33,10 +34,12 @@ const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
   '/projects/{project}/allocations?tab=roles', '/projects/{complete}/allocations?tab=roles', '/projects/{empty}/allocations?tab=roles',
   '/projects/{project}/reviews', '/projects/{project}/changes', '/team?projects={projectId}',
   '/portfolio', '/portfolio?group=client',
+  '/admin/holidays',
 ].join(' ')).split(/\s+/).filter(Boolean)
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
-// Project Manager, Discipline Lead, Team Member, Read Only, and a user outside the Restricted project.
-const PERSONAS = { priya: 'Priya Nair', marc: 'Marc Dubois', alex: 'Alex Chen', rita: 'Rita Gomez', jill: 'Jill Martin' }
+// Project Manager, Discipline Lead, Team Member, Read Only, a user outside the Restricted project, and the administrator
+// (the only persona that runs the /admin/ screens).
+const PERSONAS = { priya: 'Priya Nair', marc: 'Marc Dubois', alex: 'Alex Chen', rita: 'Rita Gomez', jill: 'Jill Martin', jordan: 'Jordan Lee' }
 const ADDITIONS = 'flag.record_engine_additions' // §47.5 FR-REC-12, kept on the restored screens after the KILL (FR-REC-14)
 const WIDTHS = [1600, 375]
 const launch = () => chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
@@ -151,6 +154,11 @@ async function fixtures() {
     toStatus: 'Complete', reason: 'Synthetic parity closeout', closeout: { tasks: 'cancel' }, rowVersion: beforeComplete.rowVersion,
   }) })
   const empty = await createProject(reference, 'E', 'Synthetic empty-role parity project')
+  // One organisation holiday and one office holiday in the year the Holidays page opens on; a repeat run finds them already there.
+  const year = new Date().getFullYear()
+  for (const [officeId, date, name] of [[null, `${year}-07-01`, 'Synthetic parity holiday'], [reference.offices[0].id, `${year}-12-26`, 'Synthetic parity office holiday']]) {
+    await api('admin/holidays', 'jordan', { method: 'POST', body: JSON.stringify({ officeId, date, name }) }).catch(error => { if (!/HTTP 409/.test(error.message)) throw error })
+  }
   await setting('restricted_projects_enabled', true)
   const restricted = await createProject(reference, 'R', 'Synthetic restricted parity project', false)
   const restrictedDraft = await api(`projects/${restricted.id}`, 'priya')
@@ -361,7 +369,8 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
         if (!await page.evaluate(() => !!document.activeElement?.closest('main'))) break
         order.push(await focused())
       }
-      const row = page.locator('main tbody').locator('button,a').filter({ visible: true }).first()
+      // A Remove button deletes its record, so it is never the row control this run activates.
+      const row = page.locator('main tbody').locator('button:not([aria-label^="Remove"]),a').filter({ visible: true }).first()
       if (!await visible(row)) return { order, row: null }
       await row.focus(); await page.keyboard.press('Enter'); await settle()
       const opened = { url: here(), dialog: await dialogOpen(), tree: await dialogOpen() ? await tree() : null }
@@ -391,6 +400,7 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
     assert.equal(identity.email, `${who}@hub.test`, 'Development picker must select the requested persona')
     const snapshot = { identity: identity.email, screens: {}, problems: [] }
     for (const route of SCREENS) {
+      if (route.startsWith('/admin/') !== (who === 'jordan')) continue
       const url = expand(route, ids)
       await go(url)
       if (removeHeader) await page.locator('main th').first().evaluate(element => element.remove()).catch(() => {})

@@ -2,14 +2,15 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Empty, ErrorBanner, Field, Loading, Section, Spinner, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { Empty, ErrorBanner, Field, Section, Spinner, selectCls } from '@/components/hub/common'
+import { DataTable } from '@/components/hub/registers'
+import { useTable, type Column } from '@/components/hub/table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useReference } from '@/hooks/data'
 import { ApiError, del, get, post, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t } from '@/lib/i18n'
-import { cn } from '@/lib/utils'
 
 interface HolidayRow { id: string; officeId?: string | null; office?: string | null; date: string; name: string }
 
@@ -37,6 +38,16 @@ export function Holidays() {
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   const remove = async (h: HolidayRow) => { try { await del(`admin/holidays/${h.id}`); refresh() } catch (e) { toast.error((e as Error).message) } }
+  // Every column is fixed: the page has no Columns menu and no sort, so a `?cols=` link cannot hide one (§13.0).
+  const columns: Column<HolidayRow>[] = [
+    { id: 'date', label: t('holiday.date'), fixed: true, className: 'whitespace-nowrap tabular-nums', cell: (h) => fmtDate(h.date) },
+    { id: 'name', label: t('common.name'), fixed: true, className: 'font-medium', cell: (h) => h.name },
+    { id: 'calendar', label: t('holiday.calendar'), fixed: true, className: 'text-muted-foreground', cell: (h) => h.office ?? t('holiday.org') },
+    { id: 'actions', label: t('common.actions'), fixed: true, srOnly: true, className: 'py-0.5 text-right', cell: (h) => (
+      <Button variant="ghost" size="icon-sm" className="text-bad hover:text-bad" aria-label={t('holiday.remove', { name: h.name })} onClick={() => remove(h)}><Trash2 className="size-4" /></Button>
+    ) },
+  ]
+  const table = useTable('hub.holidays.columns', columns, rows, (h) => [h.date, h.name])
   return (
     <div className="space-y-6">
       <p className="max-w-3xl text-base/6 text-muted-foreground">{t('holiday.intro')}</p>
@@ -64,25 +75,8 @@ export function Holidays() {
             <Input id="h-year" type="number" className="tabular-nums" value={year} min={2000} max={2100} onChange={(e) => setYear(Number(e.target.value) || year)} />
           </Field>
         </div>
-        {q.error ? <div className="p-5"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div> : q.isPending ? <Loading rows={4} /> : rows.length === 0 ? <Empty>{t('holiday.empty', { year })}</Empty> : (
-          <div className="scroll-region overflow-x-auto">
-            <table className="w-full text-sm">
-              <caption className="sr-only">{t('holiday.list')}</caption>
-              <thead className="bg-muted">
-                <tr><th scope="col" className={thCls}>{t('holiday.date')}</th><th scope="col" className={thCls}>{t('common.name')}</th><th scope="col" className={thCls}>{t('holiday.calendar')}</th><th scope="col" className={thCls}><span className="sr-only">{t('common.actions')}</span></th></tr>
-              </thead>
-              <tbody>{rows.map((h) => (
-                <tr key={h.id} className="border-t hover:bg-muted">
-                  <td className={cn(tdCls, 'whitespace-nowrap tabular-nums')}>{fmtDate(h.date)}</td>
-                  <td className={cn(tdCls, 'font-medium')}>{h.name}</td>
-                  <td className={cn(tdCls, 'text-muted-foreground')}>{h.office ?? t('holiday.org')}</td>
-                  <td className={cn(tdCls, 'py-0.5 text-right')}>
-                    <Button variant="ghost" size="icon-sm" className="text-bad hover:text-bad" aria-label={t('holiday.remove', { name: h.name })} onClick={() => remove(h)}><Trash2 className="size-4" /></Button>
-                  </td>
-                </tr>))}
-              </tbody>
-            </table>
-          </div>
+        {q.error ? <div className="p-5"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div> : (
+          <DataTable flush table={table} rows={table.sorted} loading={q.isPending} empty={<Empty>{t('holiday.empty', { year })}</Empty>} current={() => false} caption={t('holiday.list')} />
         )}
       </Section>
     </div>

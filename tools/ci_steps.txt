@@ -94,6 +94,7 @@ web: node web/scripts/run-smoke-live.mjs
 # Risks register, the Risk panel, the Issues register (plain and grouped), the project Team tab and the open-roles tab of
 # Active, Complete and empty-role projects.
 # The Reviews and Changes registers are compared too (the project's source revisions, a started review and a draft change notice).
+# The Portfolio (plain and grouped by client) is compared too; its flagged additions run on and off with TUESDAY_RECORD_FLAGS.
 web: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then cd web && TUESDAY_RECORD_BASE_REF=HEAD^1 npm run test:record-parity; fi
 nightly: TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 TUESDAY_API_BASE_URL=http://127.0.0.1:5080 node web/tests/smoke-live.cjs
 nightly: TUESDAY_SYNTHETIC_API=1 TUESDAY_LIVE_UI_URL=http://127.0.0.1:5173 TUESDAY_LIVE_API_URL=http://127.0.0.1:5080 node web/tests/live-real.cjs

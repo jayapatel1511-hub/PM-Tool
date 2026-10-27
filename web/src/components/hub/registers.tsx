@@ -37,14 +37,17 @@ export function RegisterCards<T extends { id: string }>({ groups, columns, curre
   </div>
 }
 
-/** The shared register list (§47.7, FR-REC-14): a table from `md` up, cards below it, optional group rows, one selected row. */
-export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption, label, cards, wide }: {
+/** The shared register list (§47.7, FR-REC-14): a table from `md` up, cards below it, optional group rows, one selected row.
+ *  A list with its own phone cards (or none), group row or click-through row passes `cards`, `groupRow` or `onRowClick`;
+ *  `oneBody` keeps the groups in a single `<tbody>`. */
+export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption, label, cards, wide, groupRow, onRowClick, oneBody }: {
   table: { visible: Column<T>[]; header: (c: Column<T>) => ReactElement; cell: (c: Column<T>, r: T) => ReactNode }; rows: T[]; loading: boolean; empty: ReactNode
   current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string
   /** Names the scroll region (role region) when the screen's table had one. */ label?: string
   /** Below `md`: omitted draws one generic card per row, `false` draws none, a node replaces them for a screen whose rows carry their own phone controls. */
   cards?: ReactNode
   /** Keeps the table at every width with no cards, for a screen that never had phone cards. */ wide?: boolean
+  groupRow?: (label: string, count: number, span: number) => ReactElement; onRowClick?: (r: T) => void; oneBody?: boolean
 }) {
   if (loading) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
   if (!rows.length) return <div className="rounded-lg border bg-card">{empty}</div>
@@ -54,16 +57,17 @@ export function DataTable<T extends { id: string }>({ table, rows, loading, empt
     if (groups.at(-1)?.label !== label) groups.push({ label, items: [] })
     groups.at(-1)!.items.push(row)
   }
+  const body = groups.map((group, index) => <Fragment key={`${index}-${group.label}`}>
+    {groupBy && (groupRow?.(group.label, group.items.length, table.visible.length) ?? <GroupRow span={table.visible.length} label={group.label} count={group.items.length} />)}
+    {group.items.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted', onRowClick && 'cursor-pointer', current(r) && SELECTED_ROW)} onClick={onRowClick && (() => onRowClick(r))}>{table.visible.map((c) => table.cell(c, r))}</tr>)}
+  </Fragment>)
   return (<>
     {!wide && (cards === undefined ? <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} /> : cards)}
     <TableRegion className={wide ? undefined : 'hidden md:block'} {...(label && { role: 'region', 'aria-label': label })}>
       <table className="w-full text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead className="bg-muted text-left text-muted-foreground"><tr>{table.visible.map((c) => table.header(c))}</tr></thead>
-        {groups.map((group, index) => <tbody key={`${index}-${group.label}`}>
-          {groupBy && <GroupRow span={table.visible.length} label={group.label} count={group.items.length} />}
-          {group.items.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted', current(r) && SELECTED_ROW)}>{table.visible.map((c) => table.cell(c, r))}</tr>)}
-        </tbody>)}
+        {oneBody ? <tbody>{body}</tbody> : body.map((group, index) => <tbody key={index}>{group}</tbody>)}
       </table>
     </TableRegion>
   </>)

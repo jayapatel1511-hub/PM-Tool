@@ -2,12 +2,14 @@ import { ProjectStatusNote } from '@/components/hub/project-status-note'
 import type { components } from '@/gen/api'
 import { useQuery } from '@tanstack/react-query'
 import { Monitor } from 'lucide-react'
-import { Fragment, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { AccentDot, ActiveFilters, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, PageHelp, SummaryTile, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { AccentDot, ActiveFilters, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Missing, Notice, Page, PageHelp, SummaryTile, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { HealthPill, Key, StatusPill } from '@/components/hub/pills'
+import { DataTable } from '@/components/hub/registers'
+import type { Column } from '@/components/hub/table'
 import { Why } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -38,14 +40,11 @@ const GROUP_OPTIONS = [
   { value: 'office', label: 'rcv.groupOffice' },
   { value: 'projectType', label: 'rcv.groupProjectType' },
 ] as const
+/** Right-aligned figures. */
+const COUNT = 'text-right tabular-nums'
 const SWATCH: Record<string, string> = { Red: 'var(--bad)', Yellow: 'var(--warn)', Green: 'var(--ok)', Grey: 'var(--idle)' }
 /** Health keeps its status symbol and colour (§13.0); the tiles' pastel accent only groups the three health counts. */
 const HEALTH_MARK: Record<Exclude<Health, 'Grey'>, [string, string]> = { Red: ['■', 'text-bad'], Yellow: ['▲', 'text-warn'], Green: ['●', 'text-ok'] }
-// Table columns: label key and whether the column is numeric (right-aligned).
-const COLS: [TextKey | '', boolean][] = [['portfolio.project', false], ['portfolio.pm', false], ['portfolio.client', false], ['admin.office', false], ['field.PhaseId', false],
-  ['portfolio.health', false], ['portfolio.nextMilestone', false], ['portfolio.nextSubmission', false], ['portfolio.overdue', true], ['portfolio.blocked', true],
-  ['portfolio.decisionsOverdue', true], ['portfolio.highIssues', true], ['portfolio.attention', true], ['portfolio.trend', false], ['', false]]
-
 /** Portfolio Dashboard (§13.12, FR-PORT-01): which projects need help this week and why, computed and reported health side
  *  by side. Desktop and tablet only (§13.0). */
 export function PortfolioPage() {
@@ -116,7 +115,56 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
   const groups = new Map<string, Row[]>()
   for (const r of q.data?.projects ?? []) { const key = groupKey(r); groups.set(key, [...(groups.get(key) ?? []), r]) }
   const grouped = [...groups.entries()].sort(([a, ar], [b, br]) => !a ? 1 : !b ? -1 : groupName(ar[0]).localeCompare(groupName(br[0])))
+  const ordered = group === 'none' ? q.data?.projects ?? [] : grouped.flatMap(([, g]) => g)
   const groupLink = (key: string, health?: string) => `?${new URLSearchParams({ ...Object.fromEntries(sp), [group === 'client' ? 'clientId' : group === 'office' ? 'officeId' : 'projectTypeId']: key, ...(health ? { computedHealth: health } : {}) })}`
+  const attention = (r: Row) => <>
+    <Link to={rowLinks(r).critical} className={cn(r.attentionCritical > 0 && 'font-semibold text-bad')}><span aria-hidden>■</span><span className="sr-only">{tv('Critical')}</span> {r.attentionCritical}</Link>
+    <Link to={rowLinks(r).warning} className={cn('ml-3', r.attentionWarning > 0 && 'font-semibold text-warn')}><span aria-hidden>▲</span><span className="sr-only">{tv('Warning')}</span> {r.attentionWarning}</Link>
+  </>
+  // The columns, their order and header text are the list's own: every one is fixed and none sorts (FR-REC-14 adds no surface).
+  const columns: Column<Row>[] = [
+    { id: 'project', label: t('portfolio.project'), className: 'min-w-60', cell: (r) => <>
+      {r.statusNote && <details className="mb-2"><summary>{t('statusNote.title')}</summary><ProjectStatusNote note={r.statusNote} /></details>}
+      <div className="flex items-start gap-2">
+        <AccentDot id={r.id} className="mt-1.5" />
+        <div className="min-w-0">
+          <Link to={`/projects/${encodeURIComponent(r.projectNumber)}/dashboard`} className="hover:underline"><Key>{r.projectNumber}</Key> <span className="font-semibold">{r.name}</span></Link>
+          {r.status !== 'Active' && <div className="mt-1"><StatusPill status={r.status} /></div>}
+        </div>
+      </div>
+    </> },
+    { id: 'pm', label: t('portfolio.pm'), cell: (r) => <span className="flex items-center gap-2 whitespace-nowrap"><Avatar id={r.pm.id} name={r.pm.displayName} />{r.pm.displayName}</span> },
+    { id: 'client', label: t('portfolio.client'), cell: (r) => r.client.name },
+    { id: 'office', label: t('admin.office'), className: 'whitespace-nowrap', cell: (r) => r.office || <Missing /> },
+    { id: 'phase', label: t('field.PhaseId'), className: 'whitespace-nowrap', cell: (r) => r.phase || <Missing /> },
+    { id: 'health', label: t('portfolio.health'), className: 'min-w-44', cell: (r) => <Health r={r} /> },
+    { id: 'nextMilestone', label: t('portfolio.nextMilestone'), className: 'min-w-40', cell: (r) => r.nextMilestone ? <><div>{r.nextMilestone.name}</div>
+      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs/[18px] text-muted-foreground tabular-nums">{fmtDate(r.nextMilestone.date)} {r.nextMilestone.status && <StatusPill status={r.nextMilestone.status} />}</div></> : <Missing /> },
+    { id: 'nextSubmission', label: t('portfolio.nextSubmission'), className: 'min-w-36', cell: (r) => r.nextSubmission ? <><div>{r.nextSubmission.name}</div><div className="mt-0.5 text-xs/[18px] text-muted-foreground tabular-nums">{fmtDate(r.nextSubmission.date)}</div></> : <Missing /> },
+    { id: 'overdue', label: t('portfolio.overdue'), className: COUNT, cell: (r) => <Count n={r.overdueTasks} to={rowLinks(r).overdue} bad /> },
+    { id: 'blocked', label: t('portfolio.blocked'), className: COUNT, cell: (r) => <Count n={r.blockedTasks} to={rowLinks(r).blocked} bad /> },
+    { id: 'decisions', label: t('portfolio.decisionsOverdue'), className: COUNT, cell: (r) => <Count n={r.overdueDecisions} to={rowLinks(r).decisions} bad /> },
+    { id: 'issues', label: t('portfolio.highIssues'), className: COUNT, cell: (r) => <Count n={r.highIssues} to={rowLinks(r).issues} /> },
+    ...(rollups ? [{ id: 'deliverables', label: t('rcv.overdueDeliverables'), className: COUNT, cell: (r: Row) => <Count n={r.overdueDeliverables ?? 0} to={rowLinks(r).deliverables} bad /> }] : []),
+    { id: 'attention', label: t('portfolio.attention'), className: cn(COUNT, 'whitespace-nowrap'), cell: attention },
+    { id: 'trend', label: t('portfolio.trend'), cell: (r) => <Trend points={r.trend} /> },
+    { id: 'coordination', label: t('common.actions'), className: 'whitespace-nowrap',
+      cell: (r) => <Link className="text-primary underline underline-offset-4 hover:text-foreground" to={`/projects/${encodeURIComponent(r.projectNumber)}/coordination`}>{t('portfolio.coordination')}</Link> },
+  ]
+  const table = {
+    visible: columns,
+    header: (c: Column<Row>) => <th key={c.id} scope="col" className={cn(thCls, c.className?.includes('text-right') && 'text-right')}>{c.id === 'coordination' ? <span className="sr-only">{c.label}</span> : c.label}</th>,
+    cell: (c: Column<Row>, r: Row) => <td key={c.id} className={cn(tdCls, c.className)}>{c.cell(r)}</td>,
+  }
+  const subtotal = (rows: Row[], column: 'overdueTasks' | 'blockedTasks' | 'overdueDecisions' | 'highIssues' | 'overdueDeliverables') => rows.reduce((sum, r) => sum + (r[column] ?? 0), 0)
+  const groupRow = (key: string) => {
+    const rows = groups.get(key) ?? []
+    return <tr className="border-t bg-muted" data-portfolio-group={key}><th scope="rowgroup" colSpan={8} className={thCls}>
+      {groupName(rows[0])} · {key ? <Link to={groupLink(key)} className="underline underline-offset-2">{rows.length} {t('nav.projects')}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.length} {t('nav.projects')}</span>}
+      <span className="ml-3 inline-flex gap-3">{(['Red', 'Yellow', 'Green'] as const).map((health) => <span key={health}>{key ? <Link to={groupLink(key, health)}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</Link> : <span title={t('rcv.notSetDefinition')}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</span>}</span>)}</span>
+    </th>{(['overdueTasks', 'blockedTasks', 'overdueDecisions', 'highIssues', 'overdueDeliverables'] as const).map((column) => <td key={column} className={cn(tdCls, COUNT)}>{key ? <Link to={groupLink(key)} aria-label={`${subtotal(rows, column)} · ${t('rcv.subtotalDefinition')}`} title={t('rcv.subtotalDefinition')} className="underline underline-offset-2">{subtotal(rows, column)}</Link> : <span title={t('rcv.notSetDefinition')}>{subtotal(rows, column)}</span>}</td>)}
+    <td className={cn(tdCls, COUNT)}><span title={t('rcv.subtotalDefinition')}>■ {rows.reduce((sum,r)=>sum+r.attentionCritical,0)} · ▲ {rows.reduce((sum,r)=>sum+r.attentionWarning,0)}</span></td><td colSpan={2} /></tr>
+  }
   return (
     <Page {...header} actions={<>{small && planner && <Button asChild variant="outline"><Link to="/planner?groupBy=homeDiscipline">{t('interaction.capacityByDiscipline')}</Link></Button>}<ViewMenu listType="portfolio" /><ExportMenu path="portfolio/export" params={filters} name="portfolio" /></>}>
       {tiles && (
@@ -167,59 +215,9 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
         </div>
       </FilterBar>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : !q.data ? null : q.data.projects.length === 0 ? (
-        <div className="rounded-lg border bg-card"><Empty action={tokens.length > 0 && <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('portfolio.empty')}</Empty></div>
-      ) : (
-        <TableRegion>
-          <table className="w-full text-sm">
-            <caption className="sr-only">{t('nav.portfolio')}</caption>
-            <thead className="bg-muted">
-              <tr>{(rollups ? [...COLS.slice(0, 12), ['rcv.overdueDeliverables', true] as [TextKey, boolean], ...COLS.slice(12)] : COLS).map(([h, numeric], i) => <th key={i} scope="col" className={cn(thCls, numeric && 'text-right')}>{h ? t(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
-            </thead>
-            <tbody>
-              {(group === 'none' ? [['', q.data.projects] as [string, Row[]]] : grouped).map(([key, rows]) => <Fragment key={key}>
-                {group !== 'none' && <tr className="border-t bg-muted" data-portfolio-group={key}><th scope="rowgroup" colSpan={8} className={thCls}>
-                  {groupName(rows[0])} · {key ? <Link to={groupLink(key)} className="underline underline-offset-2">{rows.length} {t('nav.projects')}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.length} {t('nav.projects')}</span>}
-                  <span className="ml-3 inline-flex gap-3">{(['Red', 'Yellow', 'Green'] as const).map((health) => <span key={health}>{key ? <Link to={groupLink(key, health)}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</Link> : <span title={t('rcv.notSetDefinition')}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</span>}</span>)}</span>
-                </th>{(['overdueTasks', 'blockedTasks', 'overdueDecisions', 'highIssues', 'overdueDeliverables'] as const).map((column) => <td key={column} className={cn(tdCls, 'text-right tabular-nums')}>{key ? <Link to={groupLink(key)} aria-label={`${rows.reduce((sum,r)=>sum+(r[column]??0),0)} · ${t('rcv.subtotalDefinition')}`} title={t('rcv.subtotalDefinition')} className="underline underline-offset-2">{rows.reduce((sum,r)=>sum+(r[column]??0),0)}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.reduce((sum,r)=>sum+(r[column]??0),0)}</span>}</td>)}
-                <td className={cn(tdCls, 'text-right tabular-nums')}><span title={t('rcv.subtotalDefinition')}>■ {rows.reduce((sum,r)=>sum+r.attentionCritical,0)} · ▲ {rows.reduce((sum,r)=>sum+r.attentionWarning,0)}</span></td><td colSpan={2} /></tr>}
-              {rows.map((r) => (
-                <tr key={r.id} className="border-t hover:bg-muted">
-                  <td className={cn(tdCls, 'min-w-60')}>
-                    {r.statusNote && <details className="mb-2"><summary>{t('statusNote.title')}</summary><ProjectStatusNote note={r.statusNote} /></details>}
-                    <div className="flex items-start gap-2">
-                      <AccentDot id={r.id} className="mt-1.5" />
-                      <div className="min-w-0">
-                        <Link to={`/projects/${encodeURIComponent(r.projectNumber)}/dashboard`} className="hover:underline"><Key>{r.projectNumber}</Key> <span className="font-semibold">{r.name}</span></Link>
-                        {r.status !== 'Active' && <div className="mt-1"><StatusPill status={r.status} /></div>}
-                      </div>
-                    </div>
-                  </td>
-                  <td className={tdCls}><span className="flex items-center gap-2 whitespace-nowrap"><Avatar id={r.pm.id} name={r.pm.displayName} />{r.pm.displayName}</span></td>
-                  <td className={tdCls}>{r.client.name}</td>
-                  <td className={cn(tdCls, 'whitespace-nowrap')}>{r.office || <Missing />}</td>
-                  <td className={cn(tdCls, 'whitespace-nowrap')}>{r.phase || <Missing />}</td>
-                  <td className={cn(tdCls, 'min-w-44')}><Health r={r} /></td>
-                  <td className={cn(tdCls, 'min-w-40')}>{r.nextMilestone ? <><div>{r.nextMilestone.name}</div>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs/[18px] text-muted-foreground tabular-nums">{fmtDate(r.nextMilestone.date)} {r.nextMilestone.status && <StatusPill status={r.nextMilestone.status} />}</div></> : <Missing />}</td>
-                  <td className={cn(tdCls, 'min-w-36')}>{r.nextSubmission ? <><div>{r.nextSubmission.name}</div><div className="mt-0.5 text-xs/[18px] text-muted-foreground tabular-nums">{fmtDate(r.nextSubmission.date)}</div></> : <Missing />}</td>
-                  <Count n={r.overdueTasks} to={rowLinks(r).overdue} bad />
-                  <Count n={r.blockedTasks} to={rowLinks(r).blocked} bad />
-                  <Count n={r.overdueDecisions} to={rowLinks(r).decisions} bad />
-                  <Count n={r.highIssues} to={rowLinks(r).issues} />
-                  {rollups && <Count n={r.overdueDeliverables ?? 0} to={rowLinks(r).deliverables} bad />}
-                  <td className={cn(tdCls, 'whitespace-nowrap text-right tabular-nums')}>
-                    <Link to={rowLinks(r).critical} className={cn(r.attentionCritical > 0 && 'font-semibold text-bad')}><span aria-hidden>■</span><span className="sr-only">{tv('Critical')}</span> {r.attentionCritical}</Link>
-                    <Link to={rowLinks(r).warning} className={cn('ml-3', r.attentionWarning > 0 && 'font-semibold text-warn')}><span aria-hidden>▲</span><span className="sr-only">{tv('Warning')}</span> {r.attentionWarning}</Link>
-                  </td>
-                  <td className={tdCls}><Trend points={r.trend} /></td>
-                  <td className={cn(tdCls, 'whitespace-nowrap')}><Link className="text-primary underline underline-offset-4 hover:text-foreground" to={`/projects/${encodeURIComponent(r.projectNumber)}/coordination`}>{t('portfolio.coordination')}</Link></td>
-                </tr>
-              ))}</Fragment>)}
-            </tbody>
-          </table>
-        </TableRegion>
-      )}
+      {(q.isPending || q.data) && <DataTable table={table} rows={ordered} loading={q.isPending} caption={t('nav.portfolio')} current={() => false} cards={false} oneBody
+        groupBy={group === 'none' ? undefined : groupKey} groupRow={groupRow}
+        empty={<Empty action={tokens.length > 0 && <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('portfolio.empty')}</Empty>} />}
     </Page>
   )
 }
@@ -239,9 +237,9 @@ function AdminReviewStrip() {
   )
 }
 
-/** A count column: right-aligned figures; a non-zero overdue or blocked count is emphasised (its header names it). */
+/** A count column: the figure links to its list; a non-zero overdue or blocked count is emphasised (its header names it). */
 function Count({ n, bad, to }: { n: number; bad?: boolean; to: string }) {
-  return <td className={cn(tdCls, 'text-right tabular-nums', bad && n > 0 && 'font-semibold text-bad')}><Link to={to} className="hover:underline">{n}</Link></td>
+  return <Link to={to} className={cn('hover:underline', bad && n > 0 && 'font-semibold text-bad')}>{n}</Link>
 }
 
 /** §16.4: when they differ, both values are shown, with the PM's note and its age. */

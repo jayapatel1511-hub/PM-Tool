@@ -93,7 +93,7 @@ async function axe(page) {
     // Exercise every concrete route against the owned synthetic API, including flag-gated admin pages.
     assert.equal(process.env.TUESDAY_SYNTHETIC_API,'1','the route sweep requires an explicitly disposable database')
     const originalSettings=await api('admin/settings','jordan')
-    const routeFlags=['flag.task_pickup','flag.org_structure','flag.verifiable_log']
+    const routeFlags=['flag.task_pickup','flag.org_structure','flag.verifiable_log','flag.admin_review']
     const saved=originalSettings.filter(x=>routeFlags.includes(x.key))
     assert.equal(saved.length,routeFlags.length)
     const adminContext=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'})
@@ -110,7 +110,7 @@ async function axe(page) {
       const routes=['/pickup','/organisation','/admin/structure','/admin/audit-chains','/my-work','/home','/boards','/tasks','/timeline','/files','/team','/projects',
         ...projectTabs.map(tab=>`/projects/${ids.number}/${tab}`),`/tasks/${task.id}`,'/notifications','/search','/reports',`/reports/${reports[0].code}`,
         '/staff','/portfolio','/workload','/planner','/vacation','/calendar','/time',`/people/${alex.id}/reassign-work`,'/preferences','/templates',`/templates/${template.id}`,
-        '/admin','/admin/reference/disciplines','/admin/settings','/admin/users','/admin/activity','/admin/operations','/admin/holidays']
+        '/admin','/admin/reference/disciplines','/admin/settings','/admin/users','/admin/activity','/admin/operations','/admin/holidays','/admin/review']
       const routeSource=fs.readFileSync(path.resolve(__dirname,'../src/app/routes.tsx'),'utf8')
       const declared=[...routeSource.matchAll(/path: '([^']+)'/g)].map(x=>x[1]).filter(x=>x!=='*'&&x!=='projects/:number')
       const concrete=declared.map(x=>x.replace(':number',ids.number).replace(':code',reports[0].code).replace(':kind','disciplines').replace(':id',x.startsWith('templates/')?template.id:x.startsWith('people/')?alex.id:task.id))

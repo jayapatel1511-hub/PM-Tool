@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -12,6 +13,11 @@ namespace Hub.Api.Features;
 public static class DecisionExtraEndpoints
 {
     public sealed record BulkLinkBody(string TargetType, Guid[] TargetIds, string? Relation);
+    public sealed record LinkedItem(Guid Id, string Key);
+    public sealed record SkippedItem(Guid Id, string? Key, string Reason);
+    public sealed record BulkLinkResult(List<LinkedItem> Linked, List<SkippedItem> Skipped);
+    public sealed record DecisionLogEntry(Guid? DecisionId, string? ItemKey, string? Subject, string Kind, DateTimeOffset OccurredAt, string? RecordedBy, string? Owner,
+        string? CurrentStatus, string? Text, string? DecisionDate, string? NewRequiredBy);
 
     static readonly Col[] ClientCols = Hub.Api.Records.DecisionRecord.DecisionExtrasClientCols;
 
@@ -23,15 +29,15 @@ public static class DecisionExtraEndpoints
     }
 
     /// FR-002: every target the caller may change is linked in one save and logged; the rest are reported, not linked.
-    static async Task<object> BulkLink(Guid id, BulkLinkBody body, Access access, HubDb db)
+    static async Task<Ok<BulkLinkResult>> BulkLink(Guid id, BulkLinkBody body, Access access, HubDb db)
     {
         var (d, p, ctx) = await DecisionEndpoints.Load(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, DecisionEndpoints.Facts(d)));
         var ids = body.TargetIds.Distinct().ToList();
         Check.That(ids.Count is > 0 and <= 500, "targetIds", "error.required");
         var a = access.Actor;
-        var linked = new List<object>();
-        var skipped = new List<object>();
+        var linked = new List<LinkedItem>();
+        var skipped = new List<SkippedItem>();
         var existing = (await db.ItemLinks.Where(x => x.SourceId == d.Id && ids.Contains(x.TargetId)).Select(x => x.TargetId).ToListAsync()).ToHashSet();
         // Each target with its key and whether the caller may change it; items of other projects are not found.
         var targets = body.TargetType switch
@@ -43,16 +49,16 @@ public static class DecisionExtraEndpoints
                 .Select(x => (x.Id, x.Key, Permissions.ManageMilestones(a, ctx))).ToList(),
             _ => throw ApiException.Invalid("targetType", "error.one_of", string.Join(", ", ItemType.Task, ItemType.Deliverable, ItemType.Milestone)),
         };
-        foreach (var missing in ids.Except(targets.Select(x => x.Id))) skipped.Add(new { Id = missing, Key = (string?)null, Reason = Text.Get("decision.other_project") });
+        foreach (var missing in ids.Except(targets.Select(x => x.Id))) skipped.Add(new SkippedItem(missing, null, Text.Get("decision.other_project")));
         foreach (var (tid, key, allow) in targets)
         {
-            if (existing.Contains(tid)) { skipped.Add(new { Id = tid, Key = key, Reason = Text.Get("decision.link_exists") }); continue; }
-            if (!allow.Ok) { skipped.Add(new { Id = tid, Key = key, Reason = Text.Get(allow.Why ?? "perm.admin", allow.Arg ?? "") }); continue; }
+            if (existing.Contains(tid)) { skipped.Add(new SkippedItem(tid, key, Text.Get("decision.link_exists"))); continue; }
+            if (!allow.Ok) { skipped.Add(new SkippedItem(tid, key, Text.Get(allow.Why ?? "perm.admin", allow.Arg ?? ""))); continue; }
             await DecisionEndpoints.Link(db, access, p, d, new DecisionEndpoints.LinkInput(body.TargetType, tid, body.Relation));
-            linked.Add(new { Id = tid, Key = key });
+            linked.Add(new LinkedItem(tid, key));
         }
         await db.SaveChangesAsync();
-        return new { Linked = linked, Skipped = skipped };
+        return TypedResults.Ok(new BulkLinkResult(linked, skipped));
     }
 
     static async Task<List<(Guid Id, string Key, Allow Allow)>> Tasks(HubDb db, Guid projectId, List<Guid> ids, Actor a, ProjectContext ctx)
@@ -65,7 +71,7 @@ public static class DecisionExtraEndpoints
 
     /// FR-003: decided, deferred, cancelled and reopened decisions, newest first, from the activity history, so a decision
     /// deferred twice and then decided shows each step with its text or reason, its dates and who recorded it.
-    static async Task<object> Log(Guid id, Access access, HubDb db)
+    static async Task<Ok<List<DecisionLogEntry>>> Log(Guid id, Access access, HubDb db)
     {
         await access.Project(id, track: false);
         var rows = await db.ActivityLog.AsNoTracking()
@@ -80,7 +86,7 @@ public static class DecisionExtraEndpoints
             Owner = d.OwnerUserId != null ? db.Users.Where(u => u.Id == d.OwnerUserId).Select(u => u.DisplayName).FirstOrDefault()
                 : db.ExternalParties.Where(e => e.Id == d.OwnerExternalPartyId).Select(e => e.Name).FirstOrDefault(),
         }).ToDictionaryAsync(d => d.Id);
-        var entries = new List<object>();
+        var entries = new List<DecisionLogEntry>();
         foreach (var r in rows)
         {
             var changes = JsonNode.Parse(r.Changes)?.AsArray() ?? [];
@@ -93,14 +99,11 @@ public static class DecisionExtraEndpoints
             };
             if (kind is null) continue;
             var o = r.ItemId is { } did ? owners.GetValueOrDefault(did) : null;
-            entries.Add(new
-            {
-                DecisionId = r.ItemId, r.ItemKey, Subject = r.ItemName, Kind = kind, r.OccurredAt, RecordedBy = r.Actor, Owner = o?.Owner, CurrentStatus = o?.Status,
-                Text = kind == DecisionStatus.Decided ? New("DecisionText") : r.Reason, DecisionDate = kind == DecisionStatus.Decided ? New("DecisionDate") : null,
-                NewRequiredBy = kind == DecisionStatus.Deferred ? New("RequiredByDate") : null,
-            });
+            entries.Add(new DecisionLogEntry(r.ItemId, r.ItemKey, r.ItemName, kind, r.OccurredAt, r.Actor, o?.Owner, o?.Status,
+                kind == DecisionStatus.Decided ? New("DecisionText") : r.Reason, kind == DecisionStatus.Decided ? New("DecisionDate") : null,
+                kind == DecisionStatus.Deferred ? New("RequiredByDate") : null));
         }
-        return entries;
+        return TypedResults.Ok(entries);
     }
 
     /// FR-001: open decisions owned by the client (or one chosen external party) — subject, what must be decided, when it

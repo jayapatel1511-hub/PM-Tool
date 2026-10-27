@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -121,6 +122,36 @@ public sealed class RegisterEnhancementsTests(HubFactory f)
         Assert.Equal(("Night works", "Scope removed by the client"), (log[0]!.S("subject"), log[0]!.S("text")));
         Assert.Equal(("450 mm granular base", "2026-09-14", "City", "Priya Nair"), (log[1]!.S("text"), log[1]!.S("decisionDate"), log[1]!.S("owner"), log[1]!.S("recordedBy")));
         Assert.Equal(("Waiting for the traffic study", "2026-10-05"), (log[2]!.S("text"), log[2]!.S("newRequiredBy")));
+    }
+
+    [Fact]
+    public async Task Bulk_link_and_decision_log_keep_their_property_names_order_and_types() // the typed records must serialise to the bytes the Decisions page already reads
+    {
+        var p = await d.Project();
+        var dec = await Raise(p.Id, "Approve 90% package", "2026-10-15", owner: U(TestData.Marc));
+        var made = await d.NewTask(p.Id, TestData.Marc, new { name = "Civil sheet" }); var task = made.G("id");
+        var missing = Guid.NewGuid();
+        var r = await f.As(TestData.Marc).Post($"/api/v1/decisions/{dec.S("id")}/links/bulk", new { targetType = "Task", targetIds = new[] { task, missing } }).Result.Json();
+        Assert.Equal(["linked", "skipped"], r.AsObject().Select(x => x.Key));
+        Assert.Equal(["id", "key"], r["linked"]![0]!.AsObject().Select(x => x.Key));
+        var skipped = r["skipped"]![0]!.AsObject();
+        Assert.Equal(["id", "key", "reason"], skipped.Select(x => x.Key));
+        Assert.Equal(missing, skipped["id"]!.GetValue<Guid>()); Assert.Null(skipped["key"]); // not found: no key
+        var again = await f.As(TestData.Marc).Post($"/api/v1/decisions/{dec.S("id")}/links/bulk", new { targetType = "Task", targetIds = new[] { task } }).Result.Json();
+        Assert.Equal(made.S("key"), again["skipped"]![0]!.S("key")); // already linked: key is the task's
+
+        await Move(dec, new { toStatus = "Decided", decisionText = "Package approved", decisionDate = "2026-09-01" });
+        var other = await Raise(p.Id, "Night works", "2026-10-20", owner: U(TestData.Marc));
+        await Move(other, new { toStatus = "Deferred", newRequiredBy = "2026-11-01", reason = "Waiting on the contractor" });
+        var log = (await f.As(TestData.Alex).GetAsync($"/api/v1/projects/{p.Id}/decision-log").Result.Json()).AsArray();
+        Assert.Equal(2, log.Count);
+        foreach (var e in log)
+            Assert.Equal(["decisionId", "itemKey", "subject", "kind", "occurredAt", "recordedBy", "owner", "currentStatus", "text", "decisionDate", "newRequiredBy"], e!.AsObject().Select(x => x.Key));
+        var decided = log.Single(x => x!.S("kind") == "Decided")!;
+        Assert.Equal(dec.G("id"), decided.G("decisionId")); Assert.Equal(dec.S("key"), decided.S("itemKey")); Assert.Equal("Decided", decided.S("currentStatus"));
+        Assert.Equal(JsonValueKind.String, decided["occurredAt"]!.GetValueKind()); Assert.Null(decided["newRequiredBy"]);
+        var deferred = log.Single(x => x!.S("kind") == "Deferred")!;
+        Assert.Equal(("Waiting on the contractor", "2026-11-01"), (deferred.S("text"), deferred.S("newRequiredBy"))); Assert.Null(deferred["decisionDate"]);
     }
 
     [Fact]

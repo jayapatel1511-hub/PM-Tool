@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
-import { ApiError, download, get, post, qs, typedRequest } from '@/lib/api'
+import { ApiError, download, get, qs, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf, ProjectDetail } from '@/lib/types'
@@ -214,14 +214,11 @@ export function DecisionsTab() {
     </Page>
   )
 }
-interface LogEntry {
-  decisionId: string; itemKey: string; subject: string; kind: string; occurredAt: string; recordedBy?: string; owner?: string
-  text?: string; decisionDate?: string; newRequiredBy?: string
-}
+type LogEntry = components['schemas']['DecisionLogEntry']
 
 /** Decision log (FR-003): what was decided, deferred, cancelled or reopened, newest first, with the text or reason. */
 function DecisionLog({ projectId }: { projectId: string }) {
-  const q = useQuery({ queryKey: ['p', projectId, 'decision-log'], queryFn: () => get<LogEntry[]>(`projects/${projectId}/decision-log`) })
+  const q = useQuery({ queryKey: ['p', projectId, 'decision-log'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/decision-log', { params: { id: projectId } }) })
   const openPanel = useItemPanel()
   if (q.isPending) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
   if (q.error) return <ErrorBanner error={q.error} retry={() => q.refetch()} />
@@ -238,7 +235,7 @@ function DecisionLog({ projectId }: { projectId: string }) {
           <time dateTime={x.occurredAt} className="text-xs/[18px] text-muted-foreground tabular-nums sm:pt-0.5">{fmtTime(x.occurredAt)}</time>
           <div className="min-w-0 space-y-1.5">
             <div className="flex flex-wrap items-center gap-2"><StatusPill status={x.kind} /><Key>{x.itemKey}</Key>
-              <button className={TITLE_LINK} onClick={() => openPanel('Decision', x.decisionId)}>{x.subject}</button></div>
+              <button className={TITLE_LINK} onClick={() => x.decisionId && openPanel('Decision', x.decisionId)}>{x.subject}</button></div>
             {x.text && <p className="whitespace-pre-wrap">{x.text}</p>}
             <p className="text-xs/[18px] text-muted-foreground">{detail(x)}</p>
           </div>
@@ -632,7 +629,7 @@ function OwnerSwitch({ d, parties, onSave }: { d: DecisionRow; parties: { value:
   )
 }
 
-interface BulkResult { linked: { id: string; key: string }[]; skipped: { id: string; key?: string | null; reason: string }[] }
+type BulkResult = components['schemas']['BulkLinkResult']
 
 /** Pick many items and link them in one action (FR-002); items the user may not change are reported, not linked. */
 function AddLinkBox({ d, exclude, onDone }: { d: DecisionRow; exclude: string[]; onDone: () => void }) {
@@ -649,7 +646,7 @@ function AddLinkBox({ d, exclude, onDone }: { d: DecisionRow; exclude: string[];
       for (const type of ['Task', 'Deliverable', 'Milestone'] as const) {
         const ids = picked.filter((x) => x.targetType === type).map((x) => x.targetId)
         if (!ids.length) continue
-        const r = await post<BulkResult>(`decisions/${d.id}/links/bulk`, { targetType: type, targetIds: ids, relation: type === 'Task' && !related ? 'blocked_by_decision' : 'related' })
+        const r = await typedRequest('post', '/api/v1/decisions/{id}/links/bulk', { params: { id: d.id }, body: { targetType: type, targetIds: ids, relation: type === 'Task' && !related ? 'blocked_by_decision' : 'related' } })
         out.linked.push(...r.linked); out.skipped.push(...r.skipped)
       }
       done(d.projectId, d.id)

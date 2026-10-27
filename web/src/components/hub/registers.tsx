@@ -1,6 +1,6 @@
-import { Fragment, type ReactNode } from 'react'
+import { Fragment, type ReactElement, type ReactNode } from 'react'
 import { Avatar } from '@/components/hub/people'
-import { Missing } from '@/components/hub/common'
+import { Loading, Missing, TableRegion } from '@/components/hub/common'
 import type { Column } from '@/components/hub/table'
 import { fmtDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -35,6 +35,34 @@ export function RegisterCards<T extends { id: string }>({ groups, columns, curre
       </li>)}</ul>
     </div>)}
   </div>
+}
+
+/** The shared register list (§47.7, FR-REC-14): a table from `md` up, cards below it, optional group rows, one selected row. */
+export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption }: {
+  table: { visible: Column<T>[]; header: (c: Column<T>) => ReactElement; cell: (c: Column<T>, r: T) => ReactNode }; rows: T[]; loading: boolean; empty: ReactNode
+  current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string
+}) {
+  if (loading) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
+  if (!rows.length) return <div className="rounded-lg border bg-card">{empty}</div>
+  const groups: { label: string; items: T[] }[] = []
+  for (const row of rows) {
+    const label = groupBy?.(row) ?? ''
+    if (groups.at(-1)?.label !== label) groups.push({ label, items: [] })
+    groups.at(-1)!.items.push(row)
+  }
+  return (<>
+    <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} />
+    <TableRegion className="hidden md:block">
+      <table className="w-full text-sm">
+        <caption className="sr-only">{caption}</caption>
+        <thead className="bg-muted text-left text-muted-foreground"><tr>{table.visible.map((c) => table.header(c))}</tr></thead>
+        {groups.map((group, index) => <tbody key={`${index}-${group.label}`}>
+          {groupBy && <GroupRow span={table.visible.length} label={group.label} count={group.items.length} />}
+          {group.items.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted', current(r) && SELECTED_ROW)}>{table.visible.map((c) => table.cell(c, r))}</tr>)}
+        </tbody>)}
+      </table>
+    </TableRegion>
+  </>)
 }
 
 export function PanelHead({ meta, title, children }: { meta: ReactNode; title: ReactNode; children?: ReactNode }) {

@@ -3,8 +3,8 @@
 // spike's harness (043-D3 KILL); `web/scripts/run-record-parity.mjs` builds and serves the two commits.
 //   TUESDAY_RECORD_BASE_UI_URL, TUESDAY_RECORD_CANDIDATE_UI_URL, TUESDAY_RECORD_API_URL  local origins
 //   TUESDAY_RECORD_SCREENS  space-separated routes, default the Risks register, the Risk panel, the Issues register (plain and
-//                           grouped, for the shared DataTable's group rows) and the open-roles tab of the Active, Complete
-//                           and empty-role projects. {project}, {complete}, {empty} and
+//                           grouped, for the shared DataTable's group rows), the open-roles tab of the Active, Complete
+//                           and empty-role projects and the Reviews and Changes registers. {project}, {complete}, {empty} and
 //                           {restricted} are synthetic project numbers, {risk} the synthetic risk id
 //   TUESDAY_RECORD_FLAGS    flags already merged on those screens: the matrix runs with all off, then all on (§47.6)
 //   TUESDAY_RECORD_PARITY_OUT  report path; screenshots of both builds go beside it (evidence, not a pass condition)
@@ -28,6 +28,7 @@ const runId = process.env.TUESDAY_RECORD_PARITY_RUN ?? crypto.randomUUID()
 const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
   '/projects/{project}/risks', '/projects/{project}/risks?panel=Risk:{risk}', '/projects/{project}/issues', '/projects/{project}/issues?group=owner',
   '/projects/{project}/allocations?tab=roles', '/projects/{complete}/allocations?tab=roles', '/projects/{empty}/allocations?tab=roles',
+  '/projects/{project}/reviews', '/projects/{project}/changes',
 ].join(' ')).split(/\s+/).filter(Boolean)
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
 // Project Manager, Discipline Lead, Team Member, Read Only, and a user outside the Restricted project.
@@ -97,6 +98,28 @@ async function createProject(reference, prefix, name, members = true) {
   return { ...project, discipline }
 }
 
+// A deliverable's source with a started review package on revision A and a draft change notice for revision B, so the
+// Reviews and Changes registers each list a row.
+async function coordination(reference, project) {
+  const [alex, marc, priya] = await Promise.all(['alex', 'marc', 'priya'].map(who => api('me', who).then(x => x.id)))
+  const type = reference.deliverableTypes.find(x => x.name === 'Drawing Package')
+  assert.ok(type, 'Drawing Package deliverable type fixture missing')
+  const root = `projects/${project.id}`, post = (who, pathname, body) => api(`${root}/${pathname}`, who, { method: 'POST', body: JSON.stringify({ requestId: crypto.randomUUID(), ...body }) })
+  const deliverable = await post('marc', 'deliverables', { name: 'Synthetic parity survey', projectDisciplineId: project.discipline, deliverableTypeId: type.id, ownerId: alex, revision: 'A', requiresReview: false })
+  const register = async (revision, old) => {
+    const options = await api(`${root}/changes/options`, 'alex')
+    return post('alex', 'source-revisions', { deliverableId: deliverable.id, deliverableRowVersion: options.deliverables.find(x => x.id === deliverable.id).rowVersion, projectDisciplineId: project.discipline, ownerId: alex,
+      sourceSystem: 'Deliverable', externalIdentifier: 'survey', title: 'Synthetic parity survey', revision, url: `https://example.test/${revision}.pdf`, issuer: 'Survey team', scope: 'East corridor',
+      ...(old ? { supersedesId: old.id, headRowVersion: options.heads[0].rowVersion, description: 'Changed corridor alignment', effectiveDate: '2026-09-14', assessmentDueDate: '2026-09-18' } : {}) })
+  }
+  const first = await register('A')
+  const review = await post('marc', 'reviews', { title: 'Synthetic parity review', purpose: 'Parity fixture', projectDisciplineId: project.discipline, coordinatorId: marc, sourceRevisionIds: [first.id],
+    assignments: [{ projectDisciplineId: project.discipline, reviewerId: priya, dueDate: '2026-09-18' }], requiredForIssue: true })
+  const draft = await api(`${root}/reviews/${review.id}`, 'marc')
+  await post('marc', `reviews/${review.id}/action`, { rowVersion: draft.package.rowVersion, action: 'start', reason: 'Parity fixture' })
+  await register('B', first)
+}
+
 // An Active project with a risk and an open role, a Complete project whose open role needs a correction reason,
 // an Active project with no open roles, and a Restricted project the outsider cannot see.
 async function fixtures() {
@@ -112,6 +135,7 @@ async function fixtures() {
     title: 'Synthetic parity issue', description: 'Parity fixture', severity: 'Medium', issueType: 'General', locations: [], documents: [],
   }) })
   const openRole = await role(project, 'Synthetic parity role')
+  await coordination(reference, project)
   const complete = await createProject(reference, 'C', 'Synthetic complete parity project')
   await role(complete, 'Synthetic complete role')
   const beforeComplete = await api(`projects/${complete.id}`, 'priya')

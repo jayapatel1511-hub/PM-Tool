@@ -28,6 +28,7 @@
     "test:data-entry": "node tests/data-entry.cjs",
     "test:backlog-my-work": "node tests/backlog-my-work.cjs",
     "test:admin-review": "node tests/admin-review.cjs",
+    "test:portfolio-admin-strip": "node tests/portfolio-admin-strip.cjs",
     "test:verifiable-records": "node tests/verifiable-records.cjs",
     "test:verifiable-records-real": "node tests/verifiable-records-real.cjs",
     "test:schema-workflows": "node tests/schema-workflows.cjs",

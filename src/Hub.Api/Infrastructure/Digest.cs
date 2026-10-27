@@ -234,7 +234,15 @@ public static class Digest
         var sections = new List<Section> { overdue, dueSoon, blocked, reviews, decisionRows, handoffs, reviewPackages, changes,
             submissions, allocations, basisImpacts, constraints, commitments, issueVerifications, readinessExceptions, attentionRows, milestones, staff }.Where(x => x.Total > 0).ToList();
         if (planning.Total > 0) sections.Add(planning);
-        if (sections.Count == 0 && updates.Count == 0) return null; // AC-NOT-04: nothing to say, nothing sent
+        // FR-ADR-04: one line for every Admin while the Admin review is overdue (never recorded counts as overdue). It is a line,
+        // not a section, so it has no switch; with `flag.admin_review` off it is absent (FR-ADR-08). It is something to say.
+        string? reviewLine = null;
+        if (roles.Contains(SystemRole.Admin) && s.IsFlagOn(AdminReviewEndpoints.Flag))
+        {
+            var (dueOn, overdueReview) = AdminReviewEndpoints.Due(await db.Set<AdminReview>().MaxAsync(r => (DateTimeOffset?)r.ReviewedAt), s, today);
+            if (overdueReview) reviewLine = $"{(dueOn is { } d ? Text.Get("digest.adminReview", D(d)) : Text.Get("digest.adminReviewNone"))} {baseUrl}/admin/review";
+        }
+        if (sections.Count == 0 && updates.Count == 0 && reviewLine is null) return null; // AC-NOT-04: nothing to say, nothing sent
 
         var parts = new List<string>();
         if (overdue.Total > 0) parts.Add(Text.Get("digest.subject_overdue", overdue.Total));
@@ -243,10 +251,12 @@ public static class Digest
         if (parts.Count == 0 && sections.FirstOrDefault() is { } first) parts.Add(Text.Get($"digest.subject_{first.Code}", first.Total));
         var updateCount = updates.Sum(u => u.Count);
         var updatesText = updateCount == 0 ? null : Text.Get(updateCount == 1 ? "digest.subject_update" : "digest.subject_updates", updateCount);
+        if (parts.Count == 0 && updatesText is null && reviewLine is not null) parts.Add(Text.Get("digest.subject_adminReview"));
         var subject = Text.Get("digest.subject", parts.Count > 0 ? string.Join(", ", parts) + (updatesText is null ? "" : " · " + updatesText) : updatesText ?? "");
 
         var body = new StringBuilder();
         body.AppendLine(Text.Get("digest.greeting", firstName, today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))).AppendLine();
+        if (reviewLine is not null) body.AppendLine(reviewLine).AppendLine();
         foreach (var sec in sections)
         {
             body.AppendLine($"{Text.Get($"digest.section.{sec.Code}").ToUpperInvariant()} ({sec.Total})");

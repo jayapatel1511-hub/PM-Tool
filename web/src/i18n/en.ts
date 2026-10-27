@@ -2354,6 +2354,7 @@ export const en = {
   // Integrated en-org.ts
   'admin.phoneHint': 'Open Administration on a tablet or computer to manage users, reference data and settings. Your own work is in My Work.',
   'admin.noUsers': 'No users match the search or filters.',
+  'portfolio.adminReview': 'Admin review', 'portfolio.adminReviewLast': 'Last recorded {date}', 'portfolio.adminReviewNone': 'None recorded yet',
   'portfolio.phoneHint': 'Open the Portfolio on a tablet or computer to compare projects. Your own work is in My Work.',
   'portfolio.selectedPm': 'Selected project manager',
   'tpl.phoneHint': 'Open templates on a tablet or computer to see or change their structure. Your own work is in My Work.',

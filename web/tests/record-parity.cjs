@@ -5,8 +5,8 @@
 //   TUESDAY_RECORD_SCREENS  space-separated routes, default the Risks register, the Risk panel, the Issues register (plain and
 //                           grouped, for the shared DataTable's group rows), the project Team tab, the open-roles tab of
 //                           the Active, Complete and empty-role projects, the Reviews and Changes registers, the workspace
-//                           Team page scoped to the Active project and the Portfolio (plain, and grouped by client, which
-//                           needs flag.status_rollups). {project}, {complete}, {empty} and
+//                           Team page scoped to the Active project, the Portfolio (plain, and grouped by client, which
+//                           needs flag.status_rollups) and Vacation (its coverage concerns). {project}, {complete}, {empty} and
 //                           {restricted} are synthetic project numbers, {projectId} the Active project's id,
 //                           {risk} the synthetic risk id
 //   TUESDAY_RECORD_FLAGS    flags already merged on those screens: the matrix runs with all off, then all on (§47.6)
@@ -33,6 +33,7 @@ const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
   '/projects/{project}/allocations?tab=roles', '/projects/{complete}/allocations?tab=roles', '/projects/{empty}/allocations?tab=roles',
   '/projects/{project}/reviews', '/projects/{project}/changes', '/team?projects={projectId}',
   '/portfolio', '/portfolio?group=client',
+  '/vacation',
 ].join(' ')).split(/\s+/).filter(Boolean)
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
 // Project Manager, Discipline Lead, Team Member, Read Only, and a user outside the Restricted project.
@@ -140,8 +141,18 @@ async function fixtures() {
   }) })
   // Time away for the Team tab's away chip (flag.capacity_polish): leave that spans the current week whatever day the run is on.
   const day = offset => new Date(Date.now() + offset * 864e5).toISOString().slice(0, 10)
-  await api('planning/leave/manual', 'jordan', { method: 'POST', body: JSON.stringify({ personId: (await api('me', 'alex')).id, sourceSystem: 'Synthetic HR',
+  const alex = (await api('me', 'alex')).id
+  await api('planning/leave/manual', 'jordan', { method: 'POST', body: JSON.stringify({ personId: alex, sourceSystem: 'Synthetic HR',
     externalId: `PARITY-${runId}`, fromDate: day(-7), throughDate: day(7), hoursPerDay: null, status: 'Approved', rowVersion: 0 }) })
+  // Vacation coverage concerns: leave on the current month's first Wednesday (the page shows the month), a task due that day and an undated one.
+  const { today } = (await api('me', 'priya')).settings, leaveDay = new Date(`${today.slice(0, 8)}01T00:00:00Z`)
+  while (leaveDay.getUTCDay() !== 3) leaveDay.setUTCDate(leaveDay.getUTCDate() + 1)
+  const dueDate = leaveDay.toISOString().slice(0, 10)
+  await api('planning/leave/manual', 'jordan', { method: 'POST', body: JSON.stringify({ personId: alex, sourceSystem: 'Synthetic HR',
+    externalId: `PARITY-VACATION-${runId}`, fromDate: dueDate, throughDate: dueDate, hoursPerDay: null, status: 'Approved', rowVersion: 0 }) })
+  for (const [name, due] of [['Synthetic parity coverage task', dueDate], ['Synthetic parity undated task', null]]) await api(`projects/${project.id}/tasks`, 'priya', { method: 'POST', body: JSON.stringify({
+    name, projectDisciplineId: project.discipline, assigneeId: alex, ...(due ? { dueDate: due } : {}),
+  }) })
   const openRole = await role(project, 'Synthetic parity role')
   await coordination(reference, project)
   const complete = await createProject(reference, 'C', 'Synthetic complete parity project')

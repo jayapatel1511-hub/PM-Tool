@@ -42,7 +42,8 @@ export function RegisterCards<T extends { id: string }>({ groups, columns, curre
  *  `oneBody` keeps the groups in a single `<tbody>`. */
 export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption, label, cards, wide, groupRow, onRowClick, oneBody }: {
   table: { visible: Column<T>[]; header: (c: Column<T>) => ReactElement; cell: (c: Column<T>, r: T) => ReactNode }; rows: T[]; loading: boolean; empty: ReactNode
-  current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string
+  current: (r: T) => boolean; groupBy?: (r: T) => string
+  /** The table's screen-reader caption; omitted for a table that never had one, so its accessible name does not change. */ caption?: string
   /** Names the scroll region (role region) when the screen's table had one. */ label?: string
   /** Below `md`: omitted draws one generic card per row, `false` draws none, a node replaces them for a screen whose rows carry their own phone controls. */
   cards?: ReactNode
@@ -65,7 +66,7 @@ export function DataTable<T extends { id: string }>({ table, rows, loading, empt
     {!wide && (cards === undefined ? <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} /> : cards)}
     <TableRegion className={wide ? undefined : 'hidden md:block'} {...(label && { role: 'region', 'aria-label': label })}>
       <table className="w-full text-sm">
-        <caption className="sr-only">{caption}</caption>
+        {caption && <caption className="sr-only">{caption}</caption>}
         <thead className="bg-muted text-left text-muted-foreground"><tr>{table.visible.map((c) => table.header(c))}</tr></thead>
         {oneBody ? <tbody>{body}</tbody> : body.map((group, index) => <tbody key={index}>{group}</tbody>)}
       </table>

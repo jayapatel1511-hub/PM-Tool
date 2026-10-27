@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
-export interface Column<T> { id: string; label: string; cell: (r: T) => ReactNode; sort?: (r: T) => unknown; className?: string; fixed?: boolean; optional?: boolean }
+export interface Column<T> { id: string; label: string; cell: (r: T) => ReactNode; sort?: (r: T) => unknown; className?: string; fixed?: boolean; optional?: boolean; srOnly?: boolean }
 
 const cmp = (a: unknown, b: unknown) => (a == null && b == null ? 0 : a == null ? 1 : b == null ? -1 : a < b ? -1 : a > b ? 1 : 0)
 
@@ -35,7 +35,7 @@ export function useTable<T>(storageKey: string, columns: Column<T>[], rows: T[],
         <button type="button" className={cn('inline-flex items-center gap-1 hover:text-foreground', c.className?.includes('text-right') && 'justify-end')} onClick={() => setSort(c.id)}>
           {c.label}{field === c.id && (dir === 'desc' ? <ArrowDown className="size-3" aria-hidden /> : <ArrowUp className="size-3" aria-hidden />)}
         </button>
-      ) : c.label}
+      ) : c.srOnly ? <span className="sr-only">{c.label}</span> : c.label}
     </th>
   )
   const toggle = (id: string, on: boolean) => {

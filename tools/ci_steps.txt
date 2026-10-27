@@ -91,8 +91,8 @@ web: cd web && npm run test:browser-verification
 web: node --test web/scripts/run-smoke-live.test.mjs
 web: node web/scripts/run-smoke-live.mjs
 # Record parity (§47.4, FR-REC-09): the PR's base and head builds against one owned synthetic API and database, on the
-# Risks register, the Risk panel, the Issues register (plain and grouped) and the open-roles tab of Active, Complete and
-# empty-role projects.
+# Risks register, the Risk panel, the Issues register (plain and grouped), the project Team tab and the open-roles tab of
+# Active, Complete and empty-role projects.
 # The Reviews and Changes registers are compared too (the project's source revisions, a started review and a draft change notice).
 web: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then cd web && TUESDAY_RECORD_BASE_REF=HEAD^1 npm run test:record-parity; fi
 nightly: TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 TUESDAY_API_BASE_URL=http://127.0.0.1:5080 node web/tests/smoke-live.cjs

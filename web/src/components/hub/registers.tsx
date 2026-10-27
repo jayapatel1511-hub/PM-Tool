@@ -37,11 +37,13 @@ export function RegisterCards<T extends { id: string }>({ groups, columns, curre
   </div>
 }
 
-/** The shared register list (§47.7, FR-REC-14): a table from `md` up, cards below it, optional group rows, one selected row.
- *  `cards={false}` leaves out the generic cards for a screen that draws its own below `md`. */
-export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption, cards = true }: {
+/** The shared register list (§47.7, FR-REC-14): a table from `md` up, cards below it, optional group rows, one selected row. */
+export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption, label, cards }: {
   table: { visible: Column<T>[]; header: (c: Column<T>) => ReactElement; cell: (c: Column<T>, r: T) => ReactNode }; rows: T[]; loading: boolean; empty: ReactNode
-  current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string; cards?: boolean
+  current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string
+  /** Names the scroll region (role region) when the screen's table had one. */ label?: string
+  /** Below `md`: omitted draws one generic card per row, `false` draws none, a node replaces them for a screen whose rows carry their own phone controls. */
+  cards?: ReactNode
 }) {
   if (loading) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
   if (!rows.length) return <div className="rounded-lg border bg-card">{empty}</div>
@@ -52,8 +54,8 @@ export function DataTable<T extends { id: string }>({ table, rows, loading, empt
     groups.at(-1)!.items.push(row)
   }
   return (<>
-    {cards && <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} />}
-    <TableRegion className="hidden md:block">
+    {cards === undefined ? <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} /> : cards}
+    <TableRegion className="hidden md:block" {...(label && { role: 'region', 'aria-label': label })}>
       <table className="w-full text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead className="bg-muted text-left text-muted-foreground"><tr>{table.visible.map((c) => table.header(c))}</tr></thead>

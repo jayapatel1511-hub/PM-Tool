@@ -3,8 +3,8 @@
 // spike's harness (043-D3 KILL); `web/scripts/run-record-parity.mjs` builds and serves the two commits.
 //   TUESDAY_RECORD_BASE_UI_URL, TUESDAY_RECORD_CANDIDATE_UI_URL, TUESDAY_RECORD_API_URL  local origins
 //   TUESDAY_RECORD_SCREENS  space-separated routes, default the Risks register, the Risk panel, the Issues register (plain and
-//                           grouped, for the shared DataTable's group rows) and the open-roles tab of the Active, Complete
-//                           and empty-role projects. {project}, {complete}, {empty} and
+//                           grouped, for the shared DataTable's group rows), the project Team tab and the open-roles tab of
+//                           the Active, Complete and empty-role projects. {project}, {complete}, {empty} and
 //                           {restricted} are synthetic project numbers, {risk} the synthetic risk id
 //   TUESDAY_RECORD_FLAGS    flags already merged on those screens: the matrix runs with all off, then all on (§47.6)
 //   TUESDAY_RECORD_PARITY_OUT  report path; screenshots of both builds go beside it (evidence, not a pass condition)
@@ -26,7 +26,7 @@ for (const url of [candidate, base, apiBase]) assert.ok(['localhost', '127.0.0.1
 const output = process.env.TUESDAY_RECORD_PARITY_OUT ?? path.resolve(__dirname, '../../ci-artifacts/record-parity/report.json')
 const runId = process.env.TUESDAY_RECORD_PARITY_RUN ?? crypto.randomUUID()
 const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
-  '/projects/{project}/risks', '/projects/{project}/risks?panel=Risk:{risk}', '/projects/{project}/issues', '/projects/{project}/issues?group=owner',
+  '/projects/{project}/risks', '/projects/{project}/risks?panel=Risk:{risk}', '/projects/{project}/issues', '/projects/{project}/issues?group=owner', '/projects/{project}/team',
   '/projects/{project}/allocations?tab=roles', '/projects/{complete}/allocations?tab=roles', '/projects/{empty}/allocations?tab=roles',
 ].join(' ')).split(/\s+/).filter(Boolean)
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
@@ -111,6 +111,10 @@ async function fixtures() {
   await api(`projects/${project.id}/issues`, 'priya', { method: 'POST', body: JSON.stringify({
     title: 'Synthetic parity issue', description: 'Parity fixture', severity: 'Medium', issueType: 'General', locations: [], documents: [],
   }) })
+  // Time away for the Team tab's away chip (flag.capacity_polish): leave that spans the current week whatever day the run is on.
+  const day = offset => new Date(Date.now() + offset * 864e5).toISOString().slice(0, 10)
+  await api('planning/leave/manual', 'jordan', { method: 'POST', body: JSON.stringify({ personId: (await api('me', 'alex')).id, sourceSystem: 'Synthetic HR',
+    externalId: `PARITY-${runId}`, fromDate: day(-7), throughDate: day(7), hoursPerDay: null, status: 'Approved', rowVersion: 0 }) })
   const openRole = await role(project, 'Synthetic parity role')
   const complete = await createProject(reference, 'C', 'Synthetic complete parity project')
   await role(complete, 'Synthetic complete role')

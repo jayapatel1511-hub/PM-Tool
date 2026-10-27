@@ -1,11 +1,13 @@
 import { disciplineColour } from '@/lib/discipline-colour'
 import { useQuery } from '@tanstack/react-query'
 import { Crown, Lock, Plus } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { ConfirmDialog, ErrorBanner, Field, Loading, Notice, Page, Section, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
+import { ConfirmDialog, Empty, ErrorBanner, Field, Loading, Notice, Page, Section, selectCls } from '@/components/hub/common'
 import { Avatar, PeoplePicker, PersonName, usePeopleCapacity, weekOf } from '@/components/hub/people'
 import { Chip } from '@/components/hub/pills'
+import { DataTable } from '@/components/hub/registers'
+import { useTable, type Column } from '@/components/hub/table'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useProjectRefresh, useReference } from '@/hooks/data'
@@ -29,7 +31,6 @@ const ROLES = ['PM', 'TeamMember', 'Reviewer', 'Viewer']
 
 /** Team & Disciplines (§12.2, §13.16): discipline leads, members with roles and primary discipline. */
 export function TeamTab() {
-  const phone = useIsPhone()
   const p = useCurrentProject()
   const ref = useReference()
   const refresh = useProjectRefresh()
@@ -92,69 +93,60 @@ export function TeamTab() {
 
         <Section title={t('team.members')} count={d.members.length} accent="mint">
           <AddMember projectId={p.id} disciplines={d.disciplines} canManage={d.canManage} onDone={reload} />
-          {phone ? <ul className="divide-y">{d.members.map(m => <li key={m.id} className="space-y-3 p-4 text-sm">
-            <div className="flex items-start gap-2.5"><Avatar id={m.userId} name={m.displayName} /><div className="min-w-0"><h4 className="flex items-center gap-1 break-words font-semibold">{m.isPrimaryPm && <Crown className="size-4 shrink-0 text-warn" aria-label={t('team.primaryPm')} />}<PersonName name={m.displayName} active={m.isActive} />{away(m.userId)}</h4><p className="break-words text-xs/[18px] text-muted-foreground">{m.jobTitle}{m.leadOf.length > 0 && ` · ${t('role.DisciplineLead')}: ${m.leadOf.map(id => d.disciplines.find(x => x.id === id)?.name).join(', ')}`}</p></div></div>
-                    <fieldset className="flex flex-wrap gap-x-4 gap-y-2"><legend className="sr-only">{t('team.role')}</legend>{ROLES.map(r => <label key={r} className="flex min-h-10 items-center gap-2"><Checkbox aria-label={`${runtimeText(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')} onCheckedChange={c => { const roles = c ? [...m.roles, r] : m.roles.filter(x => x !== r); if (roles.length) run(() => patch(`projects/${p.id}/members/${m.id}`, { roles }, m.rowVersion)) }} />{runtimeText(`role.${r}`)}</label>)}</fieldset>
-            <Field label={t('field.PrimaryDisciplineId')} htmlFor={`member-disc-${m.id}`}><select id={`member-disc-${m.id}`} className={selectCls} value={m.primaryDisciplineId ?? ''} disabled={!d.canManage} onChange={e => run(() => patch(`projects/${p.id}/members/${m.id}`, { primaryDisciplineId: e.target.value || null }, m.rowVersion))}><option value="">{t('team.noPrimary')}</option>{d.disciplines.filter(x => x.isActive).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
-            <p className="text-xs/[18px] text-muted-foreground">{t('team.added')}: {fmtDate(m.addedAt)}</p>
-            {(d.canManage || m.canStaff) && !m.isPrimaryPm && <Button size="sm" variant="ghost" className="text-bad hover:text-bad" aria-label={t('team.removeNamed', { name: m.displayName })} onClick={() => setRemoving(m)}>{t('common.remove')}</Button>}
-          </li>)}</ul> :           <TableRegion role="region" aria-label={t('team.members')}>
-            <table className="w-full text-sm">
-              <caption className="sr-only">{t('team.members')}</caption>
-              <thead className="bg-muted">
-                <tr>
-                  <th scope="col" className={thCls}>{t('common.name')}</th>
-                  {ROLES.map((r) => <th key={r} scope="col" className={cn(thCls, 'text-center')}>{runtimeText(`role.${r}`)}</th>)}
-                  <th scope="col" className={thCls}>{t('field.PrimaryDisciplineId')}</th>
-                  <th scope="col" className={thCls}>{t('team.added')}</th>
-                  <th scope="col" className="w-24"><span className="sr-only">{t('common.actions')}</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {d.members.map((m) => (
-                  <tr key={m.id} className="border-t hover:bg-muted">
-                    <td className={cn(tdCls, 'min-w-52')}>
-                      <div className="flex items-start gap-2.5">
-                        <Avatar id={m.userId} name={m.displayName} />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1 font-semibold">
-                            {m.isPrimaryPm && <Crown role="img" className="size-4 shrink-0 text-warn" aria-label={t('team.primaryPm')} />}<PersonName name={m.displayName} active={m.isActive} />{away(m.userId)}
-                          </div>
-                          <div className="text-xs/[18px] text-muted-foreground">{m.jobTitle}{m.leadOf.length > 0 && ` · ${t('role.DisciplineLead')}: ${m.leadOf.map((id) => d.disciplines.find((x) => x.id === id)?.name).join(', ')}`}</div>
-                        </div>
-                      </div>
-                    </td>
-                    {ROLES.map((r) => (
-                      <td key={r} className={cn(tdCls, 'text-center')}>
-                        <Checkbox aria-label={`${runtimeText(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')}
-                          onCheckedChange={(c) => {
-                            const roles = c ? [...m.roles, r] : m.roles.filter((x) => x !== r)
-                            if (roles.length) run(() => patch(`projects/${p.id}/members/${m.id}`, { roles }, m.rowVersion))
-                          }} />
-                      </td>
-                    ))}
-                    <td className={tdCls}>
-                      <select className={cn(selectCls, 'h-(--control-row-h) w-auto min-w-44')} value={m.primaryDisciplineId ?? ''} disabled={!d.canManage} aria-label={t('field.PrimaryDisciplineId')}
-                        onChange={(e) => run(() => patch(`projects/${p.id}/members/${m.id}`, { primaryDisciplineId: e.target.value || null }, m.rowVersion))}>
-                        <option value="">{t('team.noPrimary')}</option>
-                        {d.disciplines.filter((x) => x.isActive).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-                      </select>
-                    </td>
-                    <td className={cn(tdCls, 'whitespace-nowrap text-xs/[18px] text-muted-foreground tabular-nums')}>{fmtDate(m.addedAt)}</td>
-                    <td className={cn(tdCls, 'text-right')}>
-                      {(d.canManage || m.canStaff) && !m.isPrimaryPm && <Button size="sm" variant="ghost" className="text-bad hover:text-bad" aria-label={t('team.removeNamed', { name: m.displayName })} onClick={() => setRemoving(m)}>{t('common.remove')}</Button>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </TableRegion>}
+          <MemberTable projectId={p.id} d={d} away={away} run={run} onRemove={setRemoving} />
         </Section>
       </div>
       {removing && <RemoveMember projectId={p.id} member={removing} onClose={() => { setRemoving(null); reload() }} />}
       {fromTemplate && <AddFromTemplateDialog projectId={p.id} onClose={(added) => { setFromTemplate(false); if (added) reload() }} />}
     </Page>
   )
+}
+
+type Member = TeamData['members'][number]
+
+/** The members list on the shared DataTable (§47.7, FR-REC-14): a table from `md` up and, below it, one card per member with the same controls. */
+function MemberTable({ projectId, d, away, run, onRemove }: { projectId: string; d: TeamData; away: (id: string) => ReactNode; run: (f: () => Promise<unknown>) => Promise<void>; onRemove: (m: Member) => void }) {
+  const edit = (m: Member, body: object) => run(() => patch(`projects/${projectId}/members/${m.id}`, body, m.rowVersion))
+  const leadOf = (m: Member) => m.leadOf.length > 0 && ` · ${t('role.DisciplineLead')}: ${m.leadOf.map((id) => d.disciplines.find((x) => x.id === id)?.name).join(', ')}`
+  const roleBox = (m: Member, r: string) => (
+    <Checkbox aria-label={`${runtimeText(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')}
+      onCheckedChange={(c) => {
+        const roles = c ? [...m.roles, r] : m.roles.filter((x) => x !== r)
+        if (roles.length) edit(m, { roles })
+      }} />
+  )
+  const removeButton = (m: Member) => (d.canManage || m.canStaff) && !m.isPrimaryPm
+    && <Button size="sm" variant="ghost" className="text-bad hover:text-bad" aria-label={t('team.removeNamed', { name: m.displayName })} onClick={() => onRemove(m)}>{t('common.remove')}</Button>
+  const columns: Column<Member>[] = [
+    { id: 'name', label: t('common.name'), fixed: true, className: 'min-w-52 align-top', cell: (m) => (
+      <div className="flex items-start gap-2.5">
+        <Avatar id={m.userId} name={m.displayName} />
+        <div className="min-w-0">
+          <div className="flex items-center gap-1 font-semibold">
+            {m.isPrimaryPm && <Crown role="img" className="size-4 shrink-0 text-warn" aria-label={t('team.primaryPm')} />}<PersonName name={m.displayName} active={m.isActive} />{away(m.userId)}
+          </div>
+          <div className="text-xs/[18px] text-muted-foreground">{m.jobTitle}{leadOf(m)}</div>
+        </div>
+      </div>) },
+    ...ROLES.map((r): Column<Member> => ({ id: r, label: runtimeText(`role.${r}`), fixed: true, className: 'text-center align-top', cell: (m) => roleBox(m, r) })),
+    { id: 'primary', label: t('field.PrimaryDisciplineId'), fixed: true, className: 'align-top', cell: (m) => (
+      <select className={cn(selectCls, 'h-(--control-row-h) w-auto min-w-44')} value={m.primaryDisciplineId ?? ''} disabled={!d.canManage} aria-label={t('field.PrimaryDisciplineId')}
+        onChange={(e) => edit(m, { primaryDisciplineId: e.target.value || null })}>
+        <option value="">{t('team.noPrimary')}</option>
+        {d.disciplines.filter((x) => x.isActive).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+      </select>) },
+    { id: 'added', label: t('team.added'), fixed: true, className: 'whitespace-nowrap align-top', cell: (m) => <span className="text-xs/[18px] text-muted-foreground tabular-nums">{fmtDate(m.addedAt)}</span> },
+    { id: 'actions', label: t('common.actions'), srOnly: true, fixed: true, className: 'w-24 align-top text-right', cell: removeButton },
+  ]
+  const table = useTable<Member>('hub.teamMemberColumns', columns, d.members, (m) => [m.displayName])
+  const cards = <ul className="divide-y md:hidden">{d.members.map((m) => <li key={m.id} className="space-y-3 p-4 text-sm">
+    <div className="flex items-start gap-2.5"><Avatar id={m.userId} name={m.displayName} /><div className="min-w-0"><h4 className="flex items-center gap-1 break-words font-semibold">{m.isPrimaryPm && <Crown className="size-4 shrink-0 text-warn" aria-label={t('team.primaryPm')} />}<PersonName name={m.displayName} active={m.isActive} />{away(m.userId)}</h4><p className="break-words text-xs/[18px] text-muted-foreground">{m.jobTitle}{leadOf(m)}</p></div></div>
+    <fieldset className="flex flex-wrap gap-x-4 gap-y-2"><legend className="sr-only">{t('team.role')}</legend>{ROLES.map((r) => <label key={r} className="flex min-h-10 items-center gap-2">{roleBox(m, r)}{runtimeText(`role.${r}`)}</label>)}</fieldset>
+    <Field label={t('field.PrimaryDisciplineId')} htmlFor={`member-disc-${m.id}`}><select id={`member-disc-${m.id}`} className={selectCls} value={m.primaryDisciplineId ?? ''} disabled={!d.canManage} onChange={(e) => edit(m, { primaryDisciplineId: e.target.value || null })}><option value="">{t('team.noPrimary')}</option>{d.disciplines.filter((x) => x.isActive).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
+    <p className="text-xs/[18px] text-muted-foreground">{t('team.added')}: {fmtDate(m.addedAt)}</p>
+    {removeButton(m)}
+  </li>)}</ul>
+  return <DataTable table={table} rows={table.sorted} loading={false} empty={<Empty title={t('common.empty')} />} current={() => false} caption={t('team.members')} label={t('team.members')} cards={cards} />
 }
 
 function AddMember({ projectId, disciplines, canManage, onDone }: { projectId: string; disciplines: TeamData['disciplines']; canManage: boolean; onDone: () => void }) {

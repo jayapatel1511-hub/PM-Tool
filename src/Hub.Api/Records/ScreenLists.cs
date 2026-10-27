@@ -17,7 +17,7 @@ public static class ScreenLists
 {
     public static readonly ScreenList[] All =
     [
-        new("tasks", ["q", "disciplineId", "deliverableId", "status", "priority", "mine", "overdue", "blocked", "blocking", "dueThisWeek", "unassigned", "readyForReview", "waiting", "open", "stale", "dueSoon", "noDueDate", "dateInconsistent", "heldPastDue", "dueFrom", "dueTo", "milestoneId", "assigneeId", "ids", "sort", "group", "cols", "onHold"]),
+        new("tasks", ["q", "disciplineId", "deliverableId", "status", "priority", "mine", "overdue", "blocked", "blocking", "dueThisWeek", "unassigned", "readyForReview", "waiting", "open", "stale", "dueSoon", "noDueDate", "dateInconsistent", "heldPastDue", "dueFrom", "dueTo", "milestoneId", "assigneeId", "ids", "sort", "group", "cols", "onHold", "backlog"]),
         new("reviews", ["q", "status", "ownerId", "disciplineId", "mine"]),
         new("changes", ["q", "status", "ownerId", "mine"]),
         new("handoffs", ["q", "status", "direction", "disciplineId", "overdue"]),

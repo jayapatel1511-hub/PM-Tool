@@ -1,10 +1,10 @@
 import { KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type Announcements } from '@dnd-kit/core'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useQuery } from '@tanstack/react-query'
-import { CalendarDays, GitBranch, MessageSquare, Plus } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { CalendarDays, ChevronLeft, ChevronRight, GitBranch, MessageSquare, Plus } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { AccentDot, ErrorBanner, Field, Page, selectCls } from '@/components/hub/common'
+import { AccentDot, ConfirmDialog, ErrorBanner, Field, Page, selectCls } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Avatar } from '@/components/hub/people'
 import { Chip, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
@@ -12,10 +12,12 @@ import { KanbanBoard, KanbanCard, KanbanCards, KanbanHeader, KanbanProvider } fr
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useProjectRefresh } from '@/hooks/data'
 import { ViewMenu } from '@/components/hub/views'
-import { get, put, qs } from '@/lib/api'
+import { ApiError, get, patch, put, qs } from '@/lib/api'
+import { useFlag } from '@/lib/auth'
 import { addDays, shortDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
@@ -31,6 +33,9 @@ const TARGETS: Record<string, string[]> = {
   'On Hold': ['On Hold'], Cancelled: ['Cancelled'],
 }
 export const MAX_CARDS = 500
+/** FR-BKL-02: the Backlog column, first on the project board while flag.backlog is on; its collapsed state is per viewer. */
+export const BACKLOG = 'Backlog'
+const BACKLOG_COLLAPSED = 'hub.boardBacklogCollapsed'
 const SWIMLANES = ['none', 'discipline', 'deliverable', 'assignee']
 
 type Card = { id: string; name: string; column: string; r: TaskRow }
@@ -62,11 +67,23 @@ export function BoardTab() {
   const actions = useTaskActions(reload)
   const { onDrop, dialog } = useLaneDrop(actions)
   const [creating, setCreating] = useState(false)
+  const backlogOn = useFlag('backlog')
+  const [collapsed, setCollapsedState] = useState(() => { try { return localStorage.getItem(BACKLOG_COLLAPSED) === '1' } catch { return false } })
+  const setCollapsed = (v: boolean) => { setCollapsedState(v); try { localStorage.setItem(BACKLOG_COLLAPSED, v ? '1' : '0') } catch { /* per-viewer convenience only */ } }
+  const [scheduling, setScheduling] = useState<{ r: TaskRow; lane: string; snapBack: () => void } | null>(null)
+  const showBacklog = backlogOn && !collapsed
   const lanes = side ? [...LANES, ...SIDE] : LANES
-  const columns = lanes.map((l) => ({ id: l, name: runtimeText(`lane.${l}`) }))
+  const columns = [...(showBacklog ? [{ id: BACKLOG, name: t('backlog.title') }] : []), ...lanes.map((l) => ({ id: l, name: runtimeText(`lane.${l}`) }))]
   const all = q.data?.items ?? []
-  const rows = all.filter((r) => lanes.includes(r.lane))
-  const hidden = all.length - rows.length
+  const inBacklog = (r: TaskRow) => backlogOn && r.backlog === true
+  const rows = all.filter((r) => (inBacklog(r) ? showBacklog : lanes.includes(r.lane)))
+  const hidden = all.filter((r) => !inBacklog(r) && !lanes.includes(r.lane)).length
+  /** FR-BKL-04: a card leaves the Backlog only with a due date, asked for first. Nothing is dropped into it: clearing the dates is the way back. */
+  const drop = (r: TaskRow, lane: string, snapBack: () => void) => {
+    if (lane === BACKLOG) { setTimeout(snapBack); toast.info(t('backlog.dropHint')); return } // after the provider's own data change for this drop
+    if (inBacklog(r)) { setScheduling({ r, lane, snapBack }); return }
+    onDrop(r, lane, snapBack)
+  }
 
   const groups = useMemo(() => {
     if (swim === 'none') return [{ id: 'all', label: '', rows }]
@@ -103,6 +120,7 @@ export function BoardTab() {
       </>} />
       {q.data && q.data.total > MAX_CARDS && <p role="status" className="rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲ </span>{t('board.tooMany', { n: q.data.total, max: MAX_CARDS })}</p>}
       {hidden > 0 && !side && <p className="text-sm text-muted-foreground">{plural(hidden, 'board.hiddenOnHoldOne', 'board.hiddenOnHold', { n: hidden })}</p>}
+      {backlogOn && collapsed && <div><Button variant="outline" onClick={() => setCollapsed(false)}><ChevronRight className="size-4" aria-hidden />{t('backlog.expand', { n: all.filter(inBacklog).length })}</Button></div>}
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <BoardSkeleton lanes={lanes.length} /> : (
         // Lanes keep their 248 px width and the board scrolls sideways inside its own region (design §5).
@@ -112,7 +130,8 @@ export function BoardTab() {
               <section key={g.id} aria-label={g.label || t('ptab.board')} className="space-y-2">
                 {g.label && <h3 className="sticky left-0 flex w-fit items-center gap-2 text-base/6 font-semibold">{g.label}
                   <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{g.rows.length}</span></h3>}
-                <Swimlane rows={g.rows} columns={columns} onDrop={onDrop} onReorder={onReorder} onAdd={p.permissions.createTaskIn.length > 0 ? () => setCreating(true) : undefined}
+                <Swimlane rows={g.rows} columns={columns} onDrop={drop} onReorder={onReorder} onAdd={p.permissions.createTaskIn.length > 0 ? () => setCreating(true) : undefined}
+                  onCollapse={() => setCollapsed(true)}
                   render={(r) => <CardBody r={r} open={() => openPanel('Task', r.id)} openDeliverable={(id) => openPanel('Deliverable', id)} />} />
               </section>
             ))}
@@ -120,10 +139,37 @@ export function BoardTab() {
         </div>
       )}
       {dialog}
+      {scheduling && <ScheduleDialog r={scheduling.r} lane={scheduling.lane} onClose={(saved) => {
+        const s = scheduling
+        setScheduling(null)
+        if (!saved) { s.snapBack(); return }
+        reload()
+        if (!(TARGETS[s.lane] ?? []).includes(s.r.status)) onDrop(s.r, s.lane, reload) // then the lane's own move, with its usual guards
+      }} />}
       {creating && <CreateTask p={p} deliverables={deliverables} milestones={milestones} defaults={{ deliverableId: filters.deliverableId, projectDisciplineId: filters.disciplineId }}
         onClose={(id) => { setCreating(false); if (id) { reload(); openPanel('Task', id) } }} />}
       {actions.dialogs}
     </Page>
+  )
+}
+
+/** FR-BKL-04: dragging a card out of the Backlog asks for its due date before anything is saved, as a Timeline drag confirms its
+ *  dates (§36.4); cancelling puts the card back. A reason is asked for only when the server needs one. */
+function ScheduleDialog({ r, lane, onClose }: { r: TaskRow; lane: string; onClose: (saved: boolean) => void }) {
+  const [due, setDue] = useState('')
+  const [asked, setAsked] = useState(false)
+  const saved = useRef(false)
+  const detail = useQuery({ queryKey: ['task', r.id, 'schedule'], queryFn: () => get<{ permissions: { dueNeedsReason: boolean } }>(`tasks/${r.id}`) })
+  const reason = asked || detail.data?.permissions.dueNeedsReason === true // T-16: asked for up front, not after a refusal
+  return (
+    <ConfirmDialog open title={t('backlog.scheduleTitle', { key: r.key, name: r.name })} body={t('backlog.scheduleBody', { lane: runtimeText(`lane.${lane}`) })}
+      confirmLabel={t('backlog.schedule')} busy={!due} reason={reason || undefined} onOpenChange={(o) => !o && onClose(saved.current)}
+      onConfirm={async (why) => {
+        try { await patch<{ rowVersion: number }>(`tasks/${r.id}`, { dueDate: due, reason: why || undefined }, r.rowVersion); saved.current = true }
+        catch (e) { if (e instanceof ApiError && e.fieldErrors?.reason) setAsked(true); throw e }
+      }}>
+      <Field label={t('field.DueDate')} htmlFor="schedule-due"><Input id="schedule-due" type="date" autoFocus value={due} onChange={(e) => setDue(e.target.value)} /></Field>
+    </ConfirmDialog>
   )
 }
 
@@ -176,11 +222,13 @@ export function useLaneDrop(actions: ReturnType<typeof useTaskActions>) {
   return { onDrop, dialog }
 }
 
-export function Swimlane({ rows, columns, onDrop, onReorder, onAdd, render }: {
+export function Swimlane({ rows, columns, onDrop, onReorder, onAdd, onCollapse, render }: {
   rows: TaskRow[]; columns: { id: string; name: string }[]; onDrop: (r: TaskRow, lane: string, snapBack: () => void) => void
-  onReorder: (ids: string[], snapBack: () => void) => void; onAdd?: () => void; render: (r: TaskRow) => React.ReactNode
+  onReorder: (ids: string[], snapBack: () => void) => void; onAdd?: () => void; onCollapse?: () => void; render: (r: TaskRow) => React.ReactNode
 }) {
-  const make = () => rows.map((r): Card => ({ id: r.id, name: r.name, column: r.lane, r }))
+  const hasBacklog = columns.some((c) => c.id === BACKLOG)
+  const home = (r: TaskRow) => (hasBacklog && r.backlog ? BACKLOG : r.lane)
+  const make = () => rows.map((r): Card => ({ id: r.id, name: r.name, column: home(r), r }))
   const [data, setData] = useState<Card[]>(make)
   useEffect(() => setData(make()), [rows]) // eslint-disable-line react-hooks/exhaustive-deps
   const sensors = useSensors(
@@ -201,7 +249,7 @@ export function Swimlane({ rows, columns, onDrop, onReorder, onAdd, render }: {
       onDragEnd={(e) => {
         const c = data.find((x) => x.id === e.active.id)
         if (!c) return
-        if (c.column !== c.r.lane) { onDrop(c.r, c.column, () => setData(make())); return }
+        if (c.column !== home(c.r)) { onDrop(c.r, c.column, () => setData(make())); return }
         const from = data.findIndex((x) => x.id === e.active.id), to = data.findIndex((x) => x.id === e.over?.id)
         if (from === to || (to < 0 && e.over?.id !== c.column)) return // dropped in place or outside the lane
         const next = to >= 0 ? arrayMove(data, from, to) : [...data.filter((x) => x.id !== c.id), c] // on the lane itself: to its end
@@ -214,7 +262,9 @@ export function Swimlane({ rows, columns, onDrop, onReorder, onAdd, render }: {
             <KanbanHeader>
               <span className="flex items-center gap-2">{col.name}<span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{count}</span></span>
               {col.id === 'To Do' && onAdd && <Button variant="ghost" size="icon-sm" aria-label={t('task.new')} onClick={onAdd}><Plus className="size-4" /></Button>}
+              {col.id === BACKLOG && onCollapse && <Button variant="ghost" size="icon-sm" aria-label={t('backlog.collapse')} title={t('backlog.collapse')} onClick={onCollapse}><ChevronLeft className="size-4" /></Button>}
             </KanbanHeader>
+            {col.id === BACKLOG && <p className="px-3 text-xs/[18px] text-muted-foreground">{t('backlog.rule')}</p>}
             <KanbanCards<Card> id={col.id} aria-label={col.name}>
               {(c) => <KanbanCard key={c.id} id={c.id} name={c.name} column={c.column} handleLabel={t('board.moveCard', { key: c.r.key, name: c.name })} className="select-none">{render(c.r)}</KanbanCard>}
             </KanbanCards>

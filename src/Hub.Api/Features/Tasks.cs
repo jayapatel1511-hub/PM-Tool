@@ -249,6 +249,7 @@ public static class TaskEndpoints
         var (t, p, ctx) = await Load(db, access, id);
         var patch = new Patch(body);
         await Http.CheckVersion(db, http, t, patch.RowVersion);
+        var wasBacklog = TaskRules.IsBacklog(t.Status, t.StartDate, t.DueDate);
         var facts = await Facts(db, t);
         var a = access.Actor;
         var dname = await DisciplineName(db, t.ProjectDisciplineId);
@@ -347,6 +348,10 @@ public static class TaskEndpoints
                 t.ProjectDisciplineId = pd.Id;
             }
         }
+        // AC-BKL-03: clearing a task's dates returns it to the Backlog after the cards arranged there, not at its old place (§36.3).
+        // ponytail: this edit path only; the bulk edits cannot clear a date today.
+        if (!wasBacklog && s.IsFlagOn(TaskRules.BacklogFlag) && TaskRules.IsBacklog(t.Status, t.StartDate, t.DueDate))
+            db.BoardOrders.RemoveRange(await db.BoardOrders.Where(b => b.ProjectId == t.ProjectId && b.TaskId == t.Id).ToListAsync());
         // An edit that changes nothing writes nothing: unchanged fields skip the checks above, so they must not move the version.
         if (db.ChangeTracker.HasChanges())
         {

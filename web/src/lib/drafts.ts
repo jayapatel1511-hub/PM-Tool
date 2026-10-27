@@ -43,6 +43,36 @@ export function pruneDrafts(keepDays: number) {
   } catch { /* storage unavailable */ }
 }
 
+// ---- A save the sign-in refusal cut off (FR-SAV-05) ----
+// A comment or create form is already safe: its draft is in local storage. An edit-panel field has no draft, so a save refused with a
+// 401 keeps its typed value here, in this tab only (sign-in returns to the same tab), and the same field takes it up again once, when
+// it is on screen again after sign-in. The record is the route's path and `panel`, the field its label; other users' entries are left.
+
+const PENDING = 'hub.pendingFields'
+type Pending = { user: string; route: string; field: string; value: unknown; at: string }
+// ponytail: two fields with the same label in one panel share an entry (the first to mount takes it); key by field id if a panel ever has that.
+const where = () => `${location.pathname}?${new URLSearchParams(location.search).get('panel') ?? ''}`
+const stored = (): Pending[] => { try { const found = JSON.parse(sessionStorage.getItem(PENDING) ?? '[]'); return Array.isArray(found) ? found : [] } catch { return [] } }
+const isThis = (p: Pending, user: string, field: string) => p.user === user && p.field === field && p.route === where()
+
+/** Called before the sign-in flow runs: the field's typed value waits for the person to come back. */
+export function keepPending(user: string, field: string, value: unknown) {
+  const rest = stored().filter((p) => !isThis(p, user, field))
+  try { sessionStorage.setItem(PENDING, JSON.stringify([...rest, { user, route: where(), field, value, at: new Date().toISOString() }])) } catch { /* storage unavailable: nothing to keep it in */ }
+}
+
+/** The value this field was saving when sign-in expired, if it is still within `keepDays`; reading does not remove it. */
+export function peekPending(user: string, field: string, keepDays: number): { value: unknown } | null {
+  const found = stored().find((p) => isThis(p, user, field))
+  return found && Date.now() - Date.parse(found.at) <= keepDays * DAY ? { value: found.value } : null
+}
+
+/** The field has taken its value up again (or it is stale): the one retry is spent. */
+export function dropPending(user: string, field: string) {
+  const rest = stored().filter((p) => !isThis(p, user, field))
+  try { if (rest.length) sessionStorage.setItem(PENDING, JSON.stringify(rest)); else sessionStorage.removeItem(PENDING) } catch { /* storage unavailable */ }
+}
+
 /** FR-SAV-06: with the flag on (the page frame sets this mark), the Reload of the build-update notice can be pressed while a dialog or
  *  panel is open: a click on a notice neither falls through to the overlay nor closes what is open under it. */
 export const GUARD_TOASTS = 'data-guard-toasts'

@@ -9,6 +9,8 @@
 // Discard and a successful submit drop, an empty form never writes and `draft_keep_days` prunes; without a draft (storage refusing
 // it) the leave prompt asks on close, on navigation and on tab close, and the build-update Reload goes through the same guard.
 // An edit form has no draft key but asks the same way once something is changed; the New template dialog keeps a draft.
+// Packet 051 S04 (FR-SAV-05, AC-SAV-04): when the sign-in session expires (401), a half-written comment is still in the editor on the
+// same item after sign-in, and an edit-panel field saves its typed value once on the fresh row version; the flag off keeps today's behaviour.
 const assert = require('node:assert/strict')
 const { execFileSync } = require('node:child_process')
 const fs = require('node:fs')
@@ -588,12 +590,110 @@ async function runReload(on, blocked) {
   } finally { await ui.browser.close(); preview.child.kill(); fs.rmSync(out, { recursive: true, force: true }) }
 }
 
+// ---- S04: sign-in expiry ----
+
+// FR-SAV-05: a write is refused with a 401 while the person is working. The sign-in flow runs (a real picker, a real reload to the same
+// route), and afterwards the input is where it was: a comment draft is in the editor, an edit-panel field saves its value once.
+async function runSignInExpiry(base, on) {
+  const ui = await draftPage(base, on)
+  const { page, drafts, wait, start } = ui
+  let expired = false
+  const deliverable = structuredClone({ ...deliverableDetail, permissions: { ...deliverableDetail.permissions, edit: { ok: true } } })
+  const saves = []
+  await page.route('**/api/dev/users', route => route.fulfill({ json: [{ email: me.email, displayName: me.displayName, jobTitle: 'Engineer', roles: [] }] }))
+  await page.route(`**/api/v1/items/Task/${task.id}/comments`, route => route.request().method() === 'POST' && expired ? route.fulfill({ status: 401, json: {} }) : route.fallback())
+  await page.route(new RegExp(`/api/v1/deliverables/${panelIds.deliverable}$`), route => {
+    const request = route.request()
+    if (request.method() === 'GET') return route.fulfill({ json: structuredClone(deliverable) })
+    if (request.method() !== 'PATCH') return route.fallback()
+    if (expired) return route.fulfill({ status: 401, json: {} })
+    const body = request.postDataJSON()
+    saves.push({ body, ifMatch: Number(request.headers()['if-match']?.replaceAll('"', '')) })
+    if ('description' in body) deliverable.description = body.description
+    deliverable.deliverable.rowVersion++
+    return route.fulfill({ json: { ...deliverable.deliverable, warnings: [] } })
+  })
+  const pending = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('hub.pendingFields') ?? 'null'))
+  const panel = page.getByRole('dialog')
+  // The sign-in picker comes up on the login route; choosing the person goes back to the route the work was on.
+  const signIn = async (back, whileSignedOut = async () => {}) => {
+    const person = page.getByRole('button', { name: new RegExp(me.displayName) })
+    await person.waitFor({ state: 'visible', timeout: 10000 })
+    assert.equal(new URL(page.url()).pathname, '/login', 'sign-in runs')
+    await whileSignedOut()
+    expired = false
+    await person.click()
+    await page.waitForURL(url => url.pathname + url.search === back, { timeout: 10000 })
+    await panel.waitFor({ state: 'visible', timeout: 20000 })
+  }
+  try {
+    // AC-SAV-04: a half-written comment and an expired session.
+    const item = `/my-work?panel=Task:${task.id}`
+    await start(item)
+    const box = panel.getByRole('textbox', { name: 'Comment', exact: true })
+    await box.fill('Half-written comment')
+    await wait(100)
+    expired = true
+    await panel.getByRole('button', { name: 'Post' }).click()
+    assert.deepEqual(ui.comments, [], 'the refused post reached nobody')
+    await signIn(item)
+    assert.equal(new URL(page.url()).search, `?panel=Task:${task.id}`, `flag ${on}: the same item is open`)
+    if (!on) {
+      assert.equal(await box.inputValue(), '', 'flag off: nothing is kept, as before')
+      assert.equal(await panel.getByText(/Draft restored/).count(), 0)
+      assert.deepEqual(await drafts(), [])
+    } else {
+      await panel.getByText(/^Draft restored from/).waitFor({ state: 'visible' })
+      assert.equal(await box.inputValue(), 'Half-written comment', 'the comment is still in the editor')
+      await panel.getByRole('button', { name: 'Post' }).click()
+      await until(() => ui.comments.length === 1, 3000, 'posting succeeds')
+      assert.deepEqual(ui.comments, [{ body: 'Half-written comment' }])
+      for (let i = 0; i < 60 && (await drafts()).length; i++) await wait(50)
+      assert.deepEqual(await drafts(), [], 'posting drops the draft')
+    }
+    assert.equal(await pending(), null, 'a comment is kept as a draft, not as a pending field')
+
+    // An edit-panel field: the save is refused, the typed value waits through sign-in and is saved once on the fresh row version.
+    const record = `/my-work?panel=Deliverable:${panelIds.deliverable}`
+    await start(record)
+    await panel.getByRole('button', { name: 'Synthetic deliverable detail', exact: true }).first().click()
+    const field = panel.getByRole('textbox', { name: 'Description', exact: true })
+    expired = true
+    await field.fill('Typed before the session expired')
+    await field.press('Tab')
+    await signIn(record, async () => {
+      const kept = await pending(), pendingKey = `/my-work?Deliverable:${panelIds.deliverable}`
+      if (!on) assert.equal(kept, null, 'flag off: nothing is stored')
+      else {
+        assert.equal(kept.length, 1)
+        assert.deepEqual({ ...kept[0], at: undefined }, { user: me.id, route: pendingKey, field: 'Description', value: 'Typed before the session expired', at: undefined }, 'the typed value waits, keyed by person, record and field')
+      }
+    })
+    if (!on) {
+      await panel.getByRole('button', { name: 'Synthetic deliverable detail', exact: true }).first().waitFor({ state: 'visible' })
+      await wait(1500)
+      assert.deepEqual(saves, [], 'flag off: nothing is saved after sign-in')
+    } else {
+      await panel.getByRole('button', { name: 'Typed before the session expired', exact: true }).first().waitFor({ state: 'visible' })
+      await panel.getByText('Saved', { exact: true }).first().waitFor({ state: 'visible' })
+      await wait(1500)
+      assert.deepEqual(saves, [{ body: { description: 'Typed before the session expired' }, ifMatch: 1 }], 'one retry, one save')
+      assert.equal(deliverable.description, 'Typed before the session expired')
+      assert.equal(await pending(), null, 'the retry is spent')
+      assert.equal(await panel.getByText(/Not saved/).count(), 0)
+    }
+    ui.mock.unknownGets.length = 0
+    await ui.finish()
+    return { flag: on, saves: saves.length }
+  } finally { await ui.browser.close() }
+}
+
 ;(async () => {
   const preview = await startPreview(port)
   let results, drafts
   try {
     results = [await run(preview.base, false), await run(preview.base, true)]
-    drafts = [await runDrafts(preview.base, false), await runDrafts(preview.base, true), await runLeavePrompt(preview.base), await runEditPrompt(preview.base, false), await runEditPrompt(preview.base, true)]
+    drafts = [await runDrafts(preview.base, false), await runDrafts(preview.base, true), await runLeavePrompt(preview.base), await runEditPrompt(preview.base, false), await runEditPrompt(preview.base, true), await runSignInExpiry(preview.base, false), await runSignInExpiry(preview.base, true)]
   } finally { await new Promise(resolve => { preview.child.once('exit', resolve); preview.child.kill() }) }
   const reloads = [await runReload(false, false), await runReload(true, false), await runReload(true, true)]
   console.log(JSON.stringify({ result: 'PASS', results, drafts, reloads }))

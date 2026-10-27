@@ -1,0 +1,56 @@
+{
+  "database": "hub_verifiable_25722_1793062197219",
+  "checks": [
+    {
+      "ac": "AC-VER-02",
+      "project": "VRPYXY4A",
+      "head": 9,
+      "brokenSeq": 7,
+      "admins": 1,
+      "alerts": 1,
+      "emails": 1
+    },
+    {
+      "ac": "AC-VER-07",
+      "project": "VRPYY1C9",
+      "commitment": "01a17ad6-13d2-775e-8675-83b1ad6c732a",
+      "category": "00480000-0000-0000-0000-000000000001",
+      "renamed": "Missing design input",
+      "blockedSubmits": 2
+    },
+    {
+      "ac": "AC-VER-09",
+      "project": "VRPYY3VT",
+      "allocation": "01a17ad6-1ed6-7ded-8fc7-9255077e9d4d",
+      "previews": 2,
+      "savedWeek": {
+        "capacity": 40,
+        "planned": 46,
+        "over": true
+      }
+    },
+    {
+      "ac": "AC-VER-11",
+      "project": "VRPYY6RG",
+      "deliverable": "01a17ad6-2d1f-7b0d-a056-40f3410a31e5",
+      "issues": [
+        [
+          "Rev 1",
+          [
+            "Non-standard revision: expected A, B, C …"
+          ]
+        ],
+        [
+          "C",
+          []
+        ],
+        [
+          "B",
+          [
+            "Out of sequence"
+          ]
+        ]
+      ]
+    }
+  ]
+}

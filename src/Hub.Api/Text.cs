@@ -487,6 +487,7 @@ public static class Text
         ["report.stale-work"] = "Stale Work", ["report.stale-work.about"] = "Open tasks with no activity for a number of days.",
         ["report.project-activity-log"] = "Project Activity Log", ["report.project-activity-log.about"] = "Every recorded change on one project.",
         ["report.staff-assignments"] = "Staff Assignments", ["report.staff-assignments.about"] = "Your staff's project assignments with their open and overdue work.",
+        ["report.commitment-misses"] = "Why commitments were missed", ["report.commitment-misses.about"] = "Not Met weekly commitments by miss category, project and discipline.",
         ["param.projectId"] = "Projects", ["param.disciplineId"] = "Discipline", ["param.assigneeId"] = "Assignee", ["param.week"] = "Week of",
         ["param.mine"] = "My tasks only", ["param.minDaysOverdue"] = "Minimum days overdue", ["param.blockerType"] = "Blocked by", ["param.daysAhead"] = "Days ahead",
         ["param.type"] = "Milestone type", ["param.ownerType"] = "Owner type", ["param.overdueOnly"] = "Overdue only", ["param.reviewerId"] = "Reviewer",

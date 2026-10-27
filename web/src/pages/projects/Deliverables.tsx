@@ -442,7 +442,7 @@ export function DeliverablePanel({ id }: PanelProps) {
           ))}
         </div>
       )}
-      {tab === 'issues' && <IssueHistory issues={data.issues} marks={revisionQ.data?.deliverables.find((x) => x.id === d.id)?.issues.flatMap((i) => i.marks) ?? []} />}
+      {tab === 'issues' && <IssueHistory issues={data.issues} marks={new Map(revisionQ.data?.deliverables.find((x) => x.id === d.id)?.issues.map((i) => [i.id, i.marks] as const))} />}
       {tab === 'baselines' && baselineEnabled && <BaselineHistory deliverableId={d.id} />}
       {tab === 'links' && <LinksSlot type="Deliverable" id={d.id} projectId={d.projectId} />}
       {tab === 'comments' && <CommentsSlot type="Deliverable" id={d.id} projectId={d.projectId} />}
@@ -573,8 +573,9 @@ function LinkDeliverable({ d, direction, exclude, onClose }: { d: DeliverableRow
 
 interface IssueRow { id: string; issuedDate: string; revision?: string; issuedTo?: string; transmittalUrl?: string; note?: string; issuedBy?: string }
 
-/** Every issue of the deliverable, newest first, so Rev A stays on record after Rev B goes out (FR-DEL-08, E-24). */
-function IssueHistory({ issues, marks = [] }: { issues: IssueRow[]; marks?: string[] }) {
+/** Every issue of the deliverable, newest first, so Rev A stays on record after Rev B goes out (FR-DEL-08, E-24).
+ *  Each issue shows its own revision marks as text (FR-VER-16); `marks` is keyed by issue ID. */
+function IssueHistory({ issues, marks }: { issues: IssueRow[]; marks?: Map<string, string[]> }) {
   if (!issues.length) return <div className="p-4"><Empty>{t('deliverable.noIssues')}</Empty></div>
   return (
     <div className="scroll-region overflow-x-auto p-4">
@@ -585,7 +586,7 @@ function IssueHistory({ issues, marks = [] }: { issues: IssueRow[]; marks?: stri
         <tbody>{issues.map((x) => (
           <tr key={x.id} className="border-t align-top">
             <td className="py-2 pr-3"><DateText date={x.issuedDate} /></td>
-            <td className="whitespace-nowrap py-2 pr-3 font-medium">{x.revision ?? <Missing />}{marks.length > 0 && <span className="ml-2 rounded bg-warn-bg px-1 text-xs text-warn">{marks.length}</span>}</td>
+            <td className="whitespace-nowrap py-2 pr-3 font-medium">{x.revision ?? <Missing />}{marks?.get(x.id)?.map((m) => <span key={m} className="mt-1 block w-fit whitespace-normal rounded bg-warn-bg px-1 text-xs font-normal text-warn">{m}</span>)}</td>
             <td className="py-2 pr-3">{x.issuedTo}</td>
             <td className="py-2 pr-3">{x.transmittalUrl && <a className="text-primary underline underline-offset-4" href={x.transmittalUrl} title={x.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a>}</td>
             <td className="whitespace-pre-wrap py-2 pr-3">{x.note}</td>

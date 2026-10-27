@@ -27,6 +27,7 @@
     "test:task-pickup": "node tests/task-pickup.cjs",
     "test:data-entry": "node tests/data-entry.cjs",
     "test:verifiable-records": "node tests/verifiable-records.cjs",
+    "test:verifiable-records-real": "node tests/verifiable-records-real.cjs",
     "test:schema-workflows": "node tests/schema-workflows.cjs",
     "gen": "openapi-typescript src/gen/openapi.json -o src/gen/api.d.ts",
     "test:keys": "node --test src/lib/keys.test.ts src/lib/page-mode.test.ts",

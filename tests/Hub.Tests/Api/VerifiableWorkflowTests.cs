@@ -43,6 +43,15 @@ public sealed class VerifiableWorkflowTests
             await (await f.As(TestData.Alex).Post(path, new WeeklyCommitmentsEndpoints.MoveBody(Guid.NewGuid(), currentVersion, CommitmentState.NotMet, "Dependency slipped", null, category.Id))).Json();
             Assert.Equal(CommitmentState.NotMet, await f.DbAsync(db => db.OutputCommitments.Where(x => x.Id == row.Id).Select(x => x.State).SingleAsync()));
             Assert.Equal(category.Id, await f.DbAsync(db => db.OutputCommitmentEvents.Where(e => e.CommitmentId == row.Id).Select(e => e.MissCategoryId).SingleAsync()));
+            // FR-VER-11's report has its own title, and renaming the category relabels the row without changing its count.
+            var report = $"/api/v1/reports/commitment-misses?projectId={project.Id}&from=2026-09-14&to=2026-09-14";
+            var before = await (await f.As(TestData.Pm).GetAsync(report)).Json();
+            Assert.Equal("Why commitments were missed", before.S("title"));
+            Assert.Equal(("Dependency", 1), (before["rows"]![0]!.S("category"), before["rows"]![0]!.I("count")));
+            var categoryVersion = await f.DbAsync(db => db.Set<CommitmentMissCategory>().Where(c => c.Id == category.Id).Select(c => c.RowVersion).SingleAsync());
+            await (await f.As(TestData.Admin).Patch($"/api/v1/admin/commitmentMissCategories/{category.Id}", new { name = "Waiting on a dependency" }, categoryVersion)).Json();
+            var after = (await (await f.As(TestData.Pm).GetAsync(report)).Json())["rows"]!.AsArray().Single()!;
+            Assert.Equal(("Waiting on a dependency", 1), (after.S("category"), after.I("count")));
         }
     }
 

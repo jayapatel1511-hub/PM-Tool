@@ -37,10 +37,11 @@ export function RegisterCards<T extends { id: string }>({ groups, columns, curre
   </div>
 }
 
-/** The shared register list (§47.7, FR-REC-14): a table from `md` up, cards below it, optional group rows, one selected row. */
-export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption }: {
+/** The shared register list (§47.7, FR-REC-14): a table from `md` up, cards below it, optional group rows, one selected row.
+ *  `cards={false}` leaves out the generic cards for a screen that draws its own below `md`. */
+export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption, cards = true }: {
   table: { visible: Column<T>[]; header: (c: Column<T>) => ReactElement; cell: (c: Column<T>, r: T) => ReactNode }; rows: T[]; loading: boolean; empty: ReactNode
-  current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string
+  current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string; cards?: boolean
 }) {
   if (loading) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
   if (!rows.length) return <div className="rounded-lg border bg-card">{empty}</div>
@@ -51,7 +52,7 @@ export function DataTable<T extends { id: string }>({ table, rows, loading, empt
     groups.at(-1)!.items.push(row)
   }
   return (<>
-    <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} />
+    {cards && <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} />}
     <TableRegion className="hidden md:block">
       <table className="w-full text-sm">
         <caption className="sr-only">{caption}</caption>
